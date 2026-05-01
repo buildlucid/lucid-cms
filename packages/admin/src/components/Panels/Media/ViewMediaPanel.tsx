@@ -1,11 +1,19 @@
 import classNames from "classnames";
-import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
-import SectionHeading from "@/components/Blocks/SectionHeading";
+import {
+	type Accessor,
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	For,
+	Show,
+} from "solid-js";
 import { Checkbox, Input, Select } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import DetailsList from "@/components/Partials/DetailsList";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import PanelTabs from "@/components/Partials/PanelTabs";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
@@ -22,6 +30,10 @@ interface ViewMediaPanelProps {
 }
 
 const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
+	// ------------------------------
+	// State
+	const [activeTab, setActiveTab] = createSignal<"details" | "meta">("details");
+
 	// ---------------------------------
 	// Queries
 	const media = api.media.useGetSingle({
@@ -66,6 +78,19 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 			isLoading: media.isLoading || foldersHierarchy.isLoading,
 			isError: media.isError || foldersHierarchy.isError,
 		};
+	});
+	const visibleTabs = createMemo<Array<"details" | "meta">>(() => {
+		const tabs: Array<"details" | "meta"> = ["details"];
+		if (props.id !== undefined) tabs.push("meta");
+		return tabs;
+	});
+
+	// ---------------------------------
+	// Effects
+	createEffect(() => {
+		if (!visibleTabs().includes(activeTab())) {
+			setActiveTab("details");
+		}
 	});
 
 	// ---------------------------------
@@ -117,75 +142,83 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 							)}
 						</Show>
 					</AspectRatio>
-					<SectionHeading title={T()("details")} />
-					<For each={locales()}>
-						{(locale) => (
-							<Show when={locale.code === lang?.contentLocale()}>
-								<Input
-									id={`name-${locale.code}`}
-									value={
-										helpers.getTranslation(
-											media.data?.data.title,
-											locale.code,
-										) || ""
-									}
-									onChange={() => {}}
-									name={`name-${locale.code}`}
-									type="text"
-									copy={{
-										label: T()("name"),
-									}}
-									errors={undefined}
-									autoComplete="off"
-									disabled={true}
-								/>
-								<Show when={showAltInput()}>
+					<PanelTabs
+						items={visibleTabs().map((tab) => ({
+							value: tab,
+							label: tab === "details" ? T()("details") : T()("meta"),
+						}))}
+						active={activeTab()}
+						onChange={setActiveTab}
+					/>
+					<Show when={activeTab() === "details"}>
+						<For each={locales()}>
+							{(locale) => (
+								<Show when={locale.code === lang?.contentLocale()}>
 									<Input
-										id={`alt-${locale.code}`}
+										id={`name-${locale.code}`}
 										value={
 											helpers.getTranslation(
-												media.data?.data.alt,
+												media.data?.data.title,
 												locale.code,
 											) || ""
 										}
 										onChange={() => {}}
-										name={`alt-${locale.code}`}
+										name={`name-${locale.code}`}
 										type="text"
 										copy={{
-											label: T()("alt"),
+											label: T()("name"),
 										}}
 										errors={undefined}
+										autoComplete="off"
 										disabled={true}
 									/>
+									<Show when={showAltInput()}>
+										<Input
+											id={`alt-${locale.code}`}
+											value={
+												helpers.getTranslation(
+													media.data?.data.alt,
+													locale.code,
+												) || ""
+											}
+											onChange={() => {}}
+											name={`alt-${locale.code}`}
+											type="text"
+											copy={{
+												label: T()("alt"),
+											}}
+											errors={undefined}
+											disabled={true}
+										/>
+									</Show>
 								</Show>
-							</Show>
-						)}
-					</For>
-					<Select
-						id="media-folder"
-						value={media.data?.data.folderId ?? undefined}
-						onChange={() => {}}
-						name="media-folder"
-						options={folderOptions()}
-						copy={{ label: T()("folder") }}
-						required={false}
-						errors={undefined}
-						noMargin={false}
-						noClear={true}
-						disabled={true}
-					/>
-					<Checkbox
-						id="public"
-						value={media.data?.data.public ?? true}
-						onChange={() => {}}
-						name="public"
-						copy={{
-							label: T()("publicly_available"),
-							tooltip: T()("media_public_description"),
-						}}
-					/>
-					<Show when={props.id !== undefined}>
-						<SectionHeading title={T()("meta")} />
+							)}
+						</For>
+						<Select
+							id="media-folder"
+							value={media.data?.data.folderId ?? undefined}
+							onChange={() => {}}
+							name="media-folder"
+							options={folderOptions()}
+							copy={{ label: T()("folder") }}
+							required={false}
+							errors={undefined}
+							noMargin={false}
+							noClear={true}
+							disabled={true}
+						/>
+						<Checkbox
+							id="public"
+							value={media.data?.data.public ?? true}
+							onChange={() => {}}
+							name="public"
+							copy={{
+								label: T()("publicly_available"),
+								tooltip: T()("media_public_description"),
+							}}
+						/>
+					</Show>
+					<Show when={activeTab() === "meta" && props.id !== undefined}>
 						<DetailsList
 							type="text"
 							items={[

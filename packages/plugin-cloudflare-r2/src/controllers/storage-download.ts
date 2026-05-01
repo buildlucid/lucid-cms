@@ -1,5 +1,6 @@
 import { Readable } from "node:stream";
 import {
+	createServiceContext,
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 	LucidAPIError,
@@ -19,7 +20,6 @@ import storageDownload from "../services/storage-download.js";
 import T from "../translations/index.js";
 import type { PluginOptions } from "../types.js";
 import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
-import getServiceContext from "../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -44,7 +44,7 @@ const storageDownloadController = (pluginOptions: PluginOptions) =>
 		validate("query", controllerSchemas.storageDownload.query.string),
 		async (c) => {
 			const query = c.req.valid("query");
-			const context = getServiceContext(c);
+			const context = createServiceContext(c);
 
 			const downloadMedia = await serviceWrapper(
 				storageDownload(pluginOptions),

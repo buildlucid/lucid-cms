@@ -11,7 +11,7 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import validate from "../../middleware/validate.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -28,7 +28,7 @@ const verifyResetPasswordController = factory.createHandlers(
 	validate("param", controllerSchemas.verifyResetPassword.params),
 	async (c) => {
 		const { token } = c.req.valid("param");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const tokenResult = await serviceWrapper(userTokenServices.getSingle, {
 			transaction: false,

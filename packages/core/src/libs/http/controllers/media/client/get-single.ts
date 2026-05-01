@@ -18,7 +18,7 @@ import clientAuthentication from "../../../middleware/client-authenticate.js";
 import clientScopes from "../../../middleware/client-scopes.js";
 import validate from "../../../middleware/validate.js";
 import formatAPIResponse from "../../../utils/build-response.js";
-import getServiceContext from "../../../utils/get-service-context.js";
+import createServiceContext from "../../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -49,7 +49,7 @@ const getSingleController = factory.createHandlers(
 	}),
 	async (c) => {
 		const { id } = c.req.valid("param");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const media = await serviceWrapper(mediaServices.client.getSingle, {
 			transaction: false,

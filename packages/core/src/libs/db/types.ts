@@ -374,6 +374,20 @@ export interface LucidEmails {
 	updated_at: TimestampMutateable;
 }
 
+export interface LucidEmailAttachments {
+	id: Generated<number>;
+	email_id: number;
+	type: "url";
+	url: string;
+	filename: string;
+	content_type: string | null;
+	disposition: "attachment" | "inline";
+	content_id: string | null;
+	order: number;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
 export interface LucidEmailTransactions {
 	id: Generated<number>;
 	email_id: number;
@@ -642,6 +656,7 @@ export interface LucidDB {
 	lucid_user_auth_providers: LucidUserAuthProviders;
 	lucid_security_audit_logs: LucidSecurityAuditLogs;
 	lucid_emails: LucidEmails;
+	lucid_email_attachments: LucidEmailAttachments;
 	lucid_email_transactions: LucidEmailTransactions;
 	lucid_alerts: LucidAlerts;
 	lucid_media_folders: LucidMediaFolders;

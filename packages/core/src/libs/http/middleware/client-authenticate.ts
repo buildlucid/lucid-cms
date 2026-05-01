@@ -10,7 +10,7 @@ import { decodeApiKey } from "../../../utils/client-integrations/encode-api-key.
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import cacheKeys from "../../kv/cache-keys.js";
-import getServiceContext from "../utils/get-service-context.js";
+import createServiceContext from "../utils/create-service-context.js";
 
 const clientAuthentication = createMiddleware(
 	async (c: LucidHonoContext, next) => {
@@ -19,7 +19,7 @@ const clientAuthentication = createMiddleware(
 		const connectionInfo = runtimeContext.getConnectionInfo(c);
 		const userAgent = c.req.header("user-agent") || null;
 
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		if (!apiKey) {
 			throw new LucidAPIError({

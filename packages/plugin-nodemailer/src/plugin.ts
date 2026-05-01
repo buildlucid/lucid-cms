@@ -8,6 +8,7 @@ import {
 import T from "./translations/index.js";
 import type { PluginOptions } from "./types/types.js";
 import isValidData from "./utils/is-valid-data.js";
+import { resolveNodemailerAttachments } from "./utils/remote-attachments.js";
 import verifyTransporter from "./utils/verify-transporter.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
@@ -15,6 +16,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
+			const simulate = draft.email.simulate;
+
 			draft.email.adapter = {
 				type: "email-adapter",
 				key: PLUGIN_IDENTIFIER,
@@ -28,7 +31,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				},
 				send: async (email) => {
 					try {
-						if (draft.email.simulate) {
+						if (simulate) {
 							return {
 								success: true,
 								deliveryStatus: "sent",
@@ -37,6 +40,19 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							};
 						}
 						await verifyTransporter(pluginOptions.transporter);
+
+						const attachmentsRes = await resolveNodemailerAttachments(
+							email.attachments,
+							pluginOptions.remoteAttachments,
+						);
+						if (attachmentsRes.error) {
+							return {
+								success: false,
+								deliveryStatus: "failed",
+								message:
+									attachmentsRes.error.message ?? T("email_failed_to_send"),
+							};
+						}
 
 						const data = await pluginOptions.transporter.sendMail({
 							from: `${email.from.name} <${email.from.email}>`,
@@ -50,6 +66,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 								...priorityHeaders[email.priority],
 								...(email.headers || {}),
 							},
+							attachments: attachmentsRes.data,
 							text: email.text,
 							html: email.html,
 						});

@@ -19,7 +19,7 @@ import clientScopes from "../../../middleware/client-scopes.js";
 import validate from "../../../middleware/validate.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../../utils/build-response.js";
-import getServiceContext from "../../../utils/get-service-context.js";
+import createServiceContext from "../../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -57,7 +57,7 @@ const getMultipleController = factory.createHandlers(
 	}),
 	async (c) => {
 		const { collectionKey, status } = c.req.valid("param");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
 			c,
 			controllerSchemas.client.getMultiple.query.formatted,

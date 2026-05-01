@@ -1,0 +1,13 @@
+<mjml>
+  <mj-body background-color="#111827">
+    <mj-section background-color="#111827">
+      <mj-column>
+        <mj-text color="#ffffff">Hello {{name}},</mj-text>
+        <mj-text color="#ffffff">This is a playground email for testing URL attachments.</mj-text>
+        <mj-text color="#ffffff">The attached file is {{attachmentName}}.</mj-text>
+        <mj-text color="#ffffff">The inline image below is loaded via CID.</mj-text>
+        <mj-image src="cid:playground-inline-logo" alt="Inline attachment logo" width="96px" />
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

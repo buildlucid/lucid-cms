@@ -22,9 +22,9 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 			case "high":
 				return "error-opaque";
 			case "low":
-				return "outline";
+				return "grey";
 			default:
-				return "primary-opaque";
+				return "outline";
 		}
 	};
 

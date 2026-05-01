@@ -18,7 +18,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import getMediaAdapter from "../../../media/get-adapter.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -53,7 +53,7 @@ const downloadMediaController = factory.createHandlers(
 		}
 
 		const query = c.req.valid("query");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const downloadMedia = await serviceWrapper(fsServices.downloadSingle, {
 			transaction: false,

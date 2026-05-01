@@ -60,6 +60,51 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createTable("lucid_email_attachments")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("email_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_emails.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("url", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("filename", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("content_type", adapter.getDataType("text"))
+				.addColumn("disposition", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("content_id", adapter.getDataType("text"))
+				.addColumn("order", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_email_attachments_email_id")
+				.on("lucid_email_attachments")
+				.column("email_id")
+				.execute();
+
+			await db.schema
 				.createTable("lucid_email_transactions")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),

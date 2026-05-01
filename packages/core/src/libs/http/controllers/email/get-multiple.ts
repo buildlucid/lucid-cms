@@ -16,7 +16,7 @@ import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -37,7 +37,7 @@ const getMultipleController = factory.createHandlers(
 	permissions([Permissions.EmailRead]),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
 			c,
 			controllerSchemas.getMultiple.query.formatted,

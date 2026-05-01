@@ -13,7 +13,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -43,7 +43,7 @@ const updateMeController = factory.createHandlers(
 			newPassword,
 			passwordConfirmation,
 		} = c.req.valid("json");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const updateMe = await serviceWrapper(accountServices.updateMe, {
 			transaction: true,

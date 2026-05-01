@@ -12,7 +12,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -37,7 +37,7 @@ const unlinkAuthProviderController = factory.createHandlers(
 	async (c) => {
 		const { providerId } = c.req.valid("param");
 		const auth = c.get("auth");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const unlinkAuthProvider = await serviceWrapper(
 			userServices.unlinkAuthProvider,

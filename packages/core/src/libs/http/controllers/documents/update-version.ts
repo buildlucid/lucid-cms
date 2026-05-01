@@ -17,7 +17,7 @@ import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -46,7 +46,7 @@ const updateVersionController = factory.createHandlers(
 	async (c) => {
 		const { bricks, fields } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const documentId = await serviceWrapper(
 			documentVersionServices.updateSingle,

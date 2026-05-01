@@ -15,7 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -44,7 +44,7 @@ const updateSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 		const body = c.req.valid("json");
 		const auth = c.get("auth");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const updateUser = await serviceWrapper(userServices.updateSingle, {
 			transaction: true,

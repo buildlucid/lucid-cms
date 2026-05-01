@@ -14,7 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -39,7 +39,7 @@ const deleteSingleController = factory.createHandlers(
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {
 		const { collectionKey, id } = c.req.valid("param");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const deleteSingle = await serviceWrapper(documentServices.deleteSingle, {
 			transaction: true,

@@ -15,7 +15,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -43,7 +43,7 @@ const loginController = factory.createHandlers(
 	validate("json", controllerSchemas.login.body),
 	async (c) => {
 		const { usernameOrEmail, password } = c.req.valid("json");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const userRes = await serviceWrapper(authServices.login, {
 			transaction: false,

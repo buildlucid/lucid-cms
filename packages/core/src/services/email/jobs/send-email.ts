@@ -1,3 +1,4 @@
+import { normalizeEmailAttachments } from "../../../libs/email/attachments.js";
 import getEmailAdapter from "../../../libs/email/get-adapter.js";
 import {
 	createStoredEmailData,
@@ -31,32 +32,8 @@ const sendEmail: ServiceFn<
 	);
 
 	const [emailRes, emailAdapter] = await Promise.all([
-		Emails.selectSingle({
-			select: [
-				"id",
-				"from_address",
-				"from_name",
-				"to_address",
-				"subject",
-				"cc",
-				"bcc",
-				"template",
-				"priority",
-				"headers",
-				"data",
-				"storage_strategy",
-				"type",
-				"attempt_count",
-				"created_at",
-				"updated_at",
-			],
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.emailId,
-				},
-			],
+		Emails.selectSingleById({
+			id: data.emailId,
 			validation: {
 				enabled: true,
 				defaultError: {
@@ -78,9 +55,25 @@ const sendEmail: ServiceFn<
 	const hasNeverStoreRes = hasNeverStoreEmailStorageRules(
 		emailRes.data.storage_strategy,
 	);
+	const attachmentsRes = normalizeEmailAttachments(
+		emailRes.data.attachments?.map((attachment) => ({
+			type: attachment.type,
+			url: attachment.url,
+			filename: attachment.filename,
+			contentType: attachment.content_type ?? undefined,
+			...(attachment.disposition === "inline"
+				? {
+						disposition: "inline" as const,
+						contentId: attachment.content_id ?? undefined,
+					}
+				: {
+						disposition: "attachment" as const,
+					}),
+		})),
+	);
 
 	let preSendError: LucidErrorData | undefined =
-		sendDataRes.error ?? hasNeverStoreRes.error;
+		sendDataRes.error ?? hasNeverStoreRes.error ?? attachmentsRes.error;
 	let sendData: Record<string, unknown> | null = null;
 	let hasNeverStore = false;
 	let htmlData: string | undefined;
@@ -150,6 +143,7 @@ const sendEmail: ServiceFn<
 					bcc: emailRes.data.bcc ?? undefined,
 					priority: emailRes.data.priority,
 					headers: emailRes.data.headers,
+					attachments: attachmentsRes.data,
 				},
 				{
 					data: sendData ?? {},

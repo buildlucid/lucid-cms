@@ -78,6 +78,37 @@ const emailResponseSchema = z.object({
 				verificationUrl: "https://example.com/verify/token123",
 			},
 		}),
+	attachments: z.array(
+		z.object({
+			type: z.literal("url").meta({
+				description: "The attachment source type",
+				example: "url",
+			}),
+			url: z.url().meta({
+				description: "The HTTP/S URL used as the attachment source",
+				example: "https://example.com/invoice.pdf",
+			}),
+			filename: z.string().meta({
+				description: "The filename shown for the attachment",
+				example: "invoice.pdf",
+			}),
+			contentType: z.string().nullable().meta({
+				description: "The MIME type of the attachment, if supplied",
+				example: "application/pdf",
+			}),
+			disposition: z
+				.union([z.literal("attachment"), z.literal("inline")])
+				.meta({
+					description:
+						"Whether the attachment is displayed inline or as an attachment",
+					example: "attachment",
+				}),
+			contentId: z.string().nullable().meta({
+				description: "The optional CID used for inline attachments",
+				example: "invoice-logo",
+			}),
+		}),
+	),
 	type: emailTypeSchema.meta({
 		description:
 			"Whether the email was triggered internally from Lucid, or externally via an endpoint",

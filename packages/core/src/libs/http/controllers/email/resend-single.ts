@@ -19,7 +19,7 @@ import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -50,7 +50,7 @@ const resendSingleController = factory.createHandlers(
 	validate("param", controllerSchemas.resendSingle.params),
 	async (c) => {
 		const { id } = c.req.valid("param");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const emailRes = await serviceWrapper(emailServices.resendSingle, {
 			transaction: true,

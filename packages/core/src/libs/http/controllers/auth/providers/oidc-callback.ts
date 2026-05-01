@@ -18,8 +18,8 @@ import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
+import createServiceContext from "../../../utils/create-service-context.js";
 import getRequestBaseUrl from "../../../utils/get-request-base-url.js";
-import getServiceContext from "../../../utils/get-service-context.js";
 
 const factory = createFactory();
 
@@ -45,7 +45,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 	async (c) => {
 		const { providerKey } = c.req.valid("param");
 		const { code, state } = c.req.valid("query");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 		const AuthStates = new AuthStatesRepository(
 			context.db.client,
 			context.config.db,

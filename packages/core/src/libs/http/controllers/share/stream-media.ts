@@ -14,7 +14,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 import {
 	applyRangeHeaders,
 	applyStreamingHeaders,
@@ -46,7 +46,7 @@ const streamMediaController = factory.createHandlers(
 	async (c) => {
 		const { token } = c.req.valid("param");
 		const query = c.req.valid("query");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 		const range = parseRangeHeader(c.req.header("range"));
 
 		const cookieName = createAuthCookieName(token);

@@ -1,5 +1,16 @@
 {
 	"email_successfully_sent": "The email was successfully sent.",
 	"email_transporter_not_ready": "The email transporter is not ready.",
-	"email_failed_to_send": "The email failed to send."
+	"email_failed_to_send": "The email failed to send.",
+	"email_attachment_error_name": "Email Attachment Error",
+	"email_attachment_url_resolve_failed": "Attachment URL could not be resolved.",
+	"email_attachment_url_blocked_address": "Attachment URL resolves to a blocked address.",
+	"email_attachment_url_invalid": "Attachment URL is invalid.",
+	"email_attachment_url_must_use_http": "Attachment URL must use HTTP or HTTPS.",
+	"email_attachment_url_too_many_redirects": "Attachment URL redirected too many times.",
+	"email_attachment_url_redirect_invalid": "Attachment URL redirect is invalid.",
+	"email_attachment_url_unsuccessful_response": "Attachment URL returned an unsuccessful response.",
+	"email_attachment_too_large": "Attachment is too large.",
+	"email_attachment_url_fetch_failed": "Attachment URL could not be fetched.",
+	"email_attachment_url_timeout": "Attachment URL request timed out."
 }

@@ -16,7 +16,7 @@ import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -42,7 +42,7 @@ const getShareAccessController = factory.createHandlers(
 	validate("param", controllerSchemas.getShareAccess.params),
 	async (c) => {
 		const { token } = c.req.valid("param");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 		const sessionCookie = getCookie(c, createAuthCookieName(token));
 
 		const accessRes = await serviceWrapper(

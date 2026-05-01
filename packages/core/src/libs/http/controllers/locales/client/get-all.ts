@@ -17,7 +17,7 @@ import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import clientScopes from "../../../middleware/client-scopes.js";
 import formatAPIResponse from "../../../utils/build-response.js";
-import getServiceContext from "../../../utils/get-service-context.js";
+import createServiceContext from "../../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -44,7 +44,7 @@ const getAllController = factory.createHandlers(
 		staticKey: cacheKeys.http.static.clientLocales,
 	}),
 	async (c) => {
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const locales = await serviceWrapper(localeServices.client.getAll, {
 			transaction: false,

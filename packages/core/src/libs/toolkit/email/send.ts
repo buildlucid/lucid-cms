@@ -5,7 +5,7 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import type { EmailStorageConfig } from "../../email/storage/types.js";
-import type { EmailPriority } from "../../email/types.js";
+import type { EmailAttachment, EmailPriority } from "../../email/types.js";
 import { runToolkitService } from "../utils.js";
 
 export type ToolkitEmailSendInput = {
@@ -16,6 +16,7 @@ export type ToolkitEmailSendInput = {
 	bcc?: string;
 	replyTo?: string;
 	priority?: EmailPriority;
+	attachments?: EmailAttachment[];
 	data: Record<string, unknown>;
 	storage?: EmailStorageConfig;
 	from?: {

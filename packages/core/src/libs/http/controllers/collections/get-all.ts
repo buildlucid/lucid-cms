@@ -9,7 +9,7 @@ import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -24,7 +24,7 @@ const getAllController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 		const collectionsRes = await serviceWrapper(collectionServices.getAll, {
 			transaction: false,
 			defaultError: {

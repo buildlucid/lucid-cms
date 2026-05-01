@@ -49,6 +49,7 @@
 		"@lucidcms/core": "^0.12.0-alpha.1"
 	},
 	"dependencies": {
+		"ipaddr.js": "^2.3.0",
 		"nodemailer": "^8.0.1"
 	},
 	"volta": {

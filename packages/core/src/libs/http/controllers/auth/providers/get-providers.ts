@@ -12,7 +12,7 @@ import { honoOpenAPIResponse } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import formatAPIResponse from "../../../utils/build-response.js";
-import getServiceContext from "../../../utils/get-service-context.js";
+import createServiceContext from "../../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -32,7 +32,7 @@ const getProvidersController = factory.createHandlers(
 		windowMs: minutesToMilliseconds(1),
 	}),
 	async (c: LucidHonoContext) => {
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 		const providersRes = await serviceWrapper(
 			authServices.providers.getProviders,
 			{

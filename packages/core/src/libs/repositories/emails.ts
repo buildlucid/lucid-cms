@@ -30,6 +30,19 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		last_attempted_at: z.union([z.string(), z.date()]).nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
+		attachments: z
+			.array(
+				z.object({
+					type: z.literal("url"),
+					url: z.string(),
+					filename: z.string(),
+					content_type: z.string().nullable(),
+					disposition: z.union([z.literal("attachment"), z.literal("inline")]),
+					content_id: z.string().nullable(),
+					order: z.number(),
+				}),
+			)
+			.optional(),
 		transactions: z
 			.array(
 				z.object({
@@ -116,6 +129,27 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"headers",
 				"data",
 				"storage_strategy",
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_email_attachments")
+							.select([
+								"lucid_email_attachments.type",
+								"lucid_email_attachments.url",
+								"lucid_email_attachments.filename",
+								"lucid_email_attachments.content_type",
+								"lucid_email_attachments.disposition",
+								"lucid_email_attachments.content_id",
+								"lucid_email_attachments.order",
+							])
+							.whereRef(
+								"lucid_email_attachments.email_id",
+								"=",
+								"lucid_emails.id",
+							)
+							.orderBy("lucid_email_attachments.order", "asc"),
+					)
+					.as("attachments"),
 				"type",
 				"current_status",
 				"attempt_count",
@@ -168,6 +202,7 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"headers",
 				"data",
 				"storage_strategy",
+				"attachments",
 				"type",
 				"current_status",
 				"attempt_count",

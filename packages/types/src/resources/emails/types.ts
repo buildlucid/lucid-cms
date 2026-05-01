@@ -11,6 +11,14 @@ export type EmailDeliveryStatus =
 
 export type EmailType = "external" | "internal";
 export type EmailPriority = "low" | "normal" | "high";
+export type EmailAttachment = {
+	type: "url";
+	url: string;
+	filename: string;
+	contentType: string | null;
+	disposition: "attachment" | "inline";
+	contentId: string | null;
+};
 
 export interface Email {
 	id: number;
@@ -27,6 +35,7 @@ export interface Email {
 		priority: EmailPriority;
 	};
 	data: Record<string, unknown> | null;
+	attachments: EmailAttachment[];
 	type: EmailType;
 	currentStatus: EmailDeliveryStatus;
 	attemptCount: number;

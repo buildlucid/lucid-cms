@@ -15,7 +15,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -38,7 +38,7 @@ const updateSystemAlertsController = factory.createHandlers(
 	validate("json", controllerSchemas.updateSystemAlerts.body),
 	async (c) => {
 		const body = c.req.valid("json");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const updateRes = await serviceWrapper(settingServices.updateSystemAlerts, {
 			transaction: true,

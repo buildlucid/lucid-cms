@@ -16,6 +16,57 @@ export type EmailType = z.infer<typeof emailTypeSchema>;
 export type EmailPriority = "low" | "normal" | "high";
 export type EmailHeaders = Record<string, string>;
 
+/**
+ * How the attachment should be presented:
+ * - `attachment` appears as a normal file attachment.
+ * - `inline` can be referenced in HTML with `cid:<contentId>`.
+ */
+export type EmailAttachmentDisposition = "attachment" | "inline";
+
+type EmailAttachmentUrlBase = {
+	/**
+	 * Attachment source type.
+	 */
+	type: "url";
+	/**
+	 * Public HTTP/S URL for the attachment source.
+	 */
+	url: string;
+	/**
+	 * Filename shown to recipients.
+	 */
+	filename: string;
+	/**
+	 * Optional MIME type, such as `application/pdf`.
+	 */
+	contentType?: string;
+};
+
+/**
+ * Attachment configuration for email sends.
+ */
+export type EmailAttachment =
+	| (EmailAttachmentUrlBase & {
+			/**
+			 * Sends as a normal attachment. Default when omitted.
+			 */
+			disposition?: "attachment";
+			/**
+			 * Only valid for inline attachments.
+			 */
+			contentId?: never;
+	  })
+	| (EmailAttachmentUrlBase & {
+			/**
+			 * Sends as an inline CID attachment.
+			 */
+			disposition: "inline";
+			/**
+			 * Unique CID used in HTML as `cid:<contentId>`.
+			 */
+			contentId: string;
+	  });
+
 export type EmailStrategyResponse = {
 	success: boolean;
 	deliveryStatus: EmailDeliveryStatus;
@@ -39,6 +90,7 @@ export type EmailAdapterServiceSend = (
 		replyTo?: string;
 		priority: EmailPriority;
 		headers?: EmailHeaders | null;
+		attachments?: EmailAttachment[];
 	},
 	meta: {
 		data: {

@@ -1,3 +1,4 @@
+import { normalizeEmailAttachments } from "../../libs/email/attachments.js";
 import getEmailAdapter from "../../libs/email/get-adapter.js";
 import {
 	createStoredEmailData,
@@ -5,9 +6,14 @@ import {
 	normalizeEmailStorageConfig,
 	resolveEmailData,
 } from "../../libs/email/storage/index.js";
-import type { EmailHeaders, EmailPriority } from "../../libs/email/types.js";
+import type {
+	EmailAttachment,
+	EmailHeaders,
+	EmailPriority,
+} from "../../libs/email/types.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
 import {
+	EmailAttachmentsRepository,
 	EmailsRepository,
 	EmailTransactionsRepository,
 } from "../../libs/repositories/index.js";
@@ -27,6 +33,7 @@ const sendEmail: ServiceFn<
 			replyTo?: string;
 			priority?: EmailPriority;
 			headers?: EmailHeaders;
+			attachments?: EmailAttachment[];
 			data: Record<string, unknown>;
 			storage?: EmailStorageConfig;
 			from?: {
@@ -45,10 +52,18 @@ const sendEmail: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const EmailAttachments = new EmailAttachmentsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const emailFrom = getEmailFrom(context.config, context.request.url);
 	const fromAddress = data.from?.email ?? emailFrom.email;
 	const fromName = data.from?.name ?? emailFrom.name;
+
+	const attachmentsRes = normalizeEmailAttachments(data.attachments);
+	if (attachmentsRes.error) return attachmentsRes;
+
 	const storageStrategyRes = normalizeEmailStorageConfig(data.storage);
 	if (storageStrategyRes.error) return storageStrategyRes;
 
@@ -89,6 +104,29 @@ const sendEmail: ServiceFn<
 		getEmailAdapter(context.config),
 	]);
 	if (newEmailRes.error) return newEmailRes;
+
+	if (attachmentsRes.data.length > 0) {
+		const attachmentsCreateRes = await EmailAttachments.createMultiple({
+			data: attachmentsRes.data.map((attachment, index) => ({
+				email_id: newEmailRes.data.id,
+				type: attachment.type,
+				url: attachment.url,
+				filename: attachment.filename,
+				content_type: attachment.contentType ?? null,
+				disposition: attachment.disposition ?? "attachment",
+				content_id: attachment.contentId ?? null,
+				order: index,
+			})),
+			returning: ["id"],
+			validation: {
+				enabled: true,
+				defaultError: {
+					status: 500,
+				},
+			},
+		});
+		if (attachmentsCreateRes.error) return attachmentsCreateRes;
+	}
 
 	const initialTransactionRes = await EmailTransactions.createSingle({
 		data: {
@@ -160,6 +198,7 @@ const sendEmail: ServiceFn<
 			email: emailsFormatter.formatSingle({
 				email: newEmailRes.data,
 				data: previewDataRes.data,
+				attachments: attachmentsRes.data,
 				html: undefined,
 				resendWindowDays: context.config.email.resendWindowDays,
 			}),

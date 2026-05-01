@@ -22,6 +22,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
+			const simulate = draft.email.simulate;
+
 			if (
 				pluginOptions.webhook?.enabled &&
 				draft.hono?.routes &&
@@ -35,7 +37,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				key: PLUGIN_IDENTIFIER,
 				send: async (email) => {
 					try {
-						if (draft.email.simulate) {
+						if (simulate) {
 							return {
 								success: true,
 								deliveryStatus: "sent",
@@ -57,6 +59,16 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 								...priorityHeaders[email.priority],
 								...(email.headers || {}),
 							},
+							attachments: email.attachments?.map((attachment) => ({
+								path: attachment.url,
+								filename: attachment.filename,
+								...(attachment.contentType && {
+									content_type: attachment.contentType,
+								}),
+								...(attachment.disposition === "inline" && {
+									content_id: attachment.contentId,
+								}),
+							})),
 						};
 
 						const response = await fetch("https://api.resend.com/emails", {

@@ -14,7 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -39,7 +39,7 @@ const deleteBatchController = factory.createHandlers(
 	validate("json", controllerSchemas.deleteBatch.body),
 	async (c) => {
 		const { folderIds, mediaIds, recursiveMedia } = c.req.valid("json");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const deleteBatch = await serviceWrapper(mediaServices.deleteBatch, {
 			transaction: true,

@@ -1,6 +1,7 @@
 import type { Email } from "../../types/response.js";
 import type {
 	BooleanInt,
+	EmailAttachment as EmailAttachmentInput,
 	EmailDeliveryStatus,
 	EmailPriority,
 	EmailStorageConfig,
@@ -27,6 +28,7 @@ interface EmailPropT {
 	updated_at: Date | string | null;
 	data?: Record<string, unknown> | null;
 	storage_strategy?: EmailStorageConfig | null;
+	attachments?: EmailAttachmentRowPropT[];
 	transactions?: {
 		delivery_status: EmailDeliveryStatus;
 		message: string | null;
@@ -38,6 +40,40 @@ interface EmailPropT {
 		updated_at: Date | string | null;
 	}[];
 }
+
+interface EmailAttachmentRowPropT {
+	type: "url";
+	url: string;
+	filename: string;
+	content_type: string | null;
+	disposition: "attachment" | "inline";
+	content_id: string | null;
+	order: number;
+}
+
+const formatAttachment = (
+	attachment: EmailAttachmentInput | EmailAttachmentRowPropT,
+) => {
+	if ("content_type" in attachment) {
+		return {
+			type: attachment.type,
+			url: attachment.url,
+			filename: attachment.filename,
+			contentType: attachment.content_type,
+			disposition: attachment.disposition,
+			contentId: attachment.content_id,
+		};
+	}
+
+	return {
+		type: attachment.type,
+		url: attachment.url,
+		filename: attachment.filename,
+		contentType: attachment.contentType ?? null,
+		disposition: attachment.disposition ?? "attachment",
+		contentId: attachment.contentId ?? null,
+	};
+};
 
 const formatMultiple = (props: {
 	emails: EmailPropT[];
@@ -54,6 +90,7 @@ const formatMultiple = (props: {
 const formatSingle = (props: {
 	email: EmailPropT;
 	data?: Record<string, unknown> | null;
+	attachments?: EmailAttachmentInput[];
 	html?: string;
 	resendWindowDays: number;
 }): Email => {
@@ -80,6 +117,9 @@ const formatSingle = (props: {
 			priority: props.email.priority,
 		},
 		data: props.data ?? props.email.data ?? null,
+		attachments: (props.attachments ?? props.email.attachments ?? []).map(
+			formatAttachment,
+		),
 		html: props.html ?? null,
 		resend: resend.data ?? {
 			enabled: false,

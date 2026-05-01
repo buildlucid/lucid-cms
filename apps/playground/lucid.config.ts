@@ -7,7 +7,9 @@ import MicrosoftAuth from "@lucidcms/auth-microsoft";
 import { configureLucid, z } from "@lucidcms/core";
 import { passthroughEmailAdapter } from "@lucidcms/core/email";
 import { fileSystemMediaAdapter } from "@lucidcms/core/media";
+import { createServiceContext } from "@lucidcms/core/plugin";
 import { passthroughQueueAdapter } from "@lucidcms/core/queue";
+import { createToolkit } from "@lucidcms/core/toolkit";
 // Plugins
 // Adapters
 import NodemailerPlugin from "@lucidcms/plugin-nodemailer";
@@ -138,6 +140,67 @@ export default configureLucid({
 		// 		},
 		// 	},
 		// ],
+		hono: {
+			routes: [
+				async (app) => {
+					app.post(
+						"/send-test-email",
+						describeRoute({
+							summary: "Send playground test email",
+							description:
+								"Sends the playground attachment test email via the Lucid toolkit.",
+							tags: ["Playground"],
+						}),
+						async (c) => {
+							const serviceContext = createServiceContext(c);
+							const toolkit = createToolkit(serviceContext);
+
+							const result = await toolkit.email.send({
+								to: "hello@williamyallop.com",
+								subject: "Lucid playground attachment test",
+								template: "attachment-test",
+								attachments: [
+									{
+										type: "url",
+										url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+										filename: "dummy.pdf",
+										contentType: "application/pdf",
+									},
+									{
+										type: "url",
+										url: "https://www.w3.org/assets/logos/w3c/w3c-no-bars.svg",
+										filename: "inline-logo.svg",
+										contentType: "image/svg+xml",
+										disposition: "inline",
+										contentId: "playground-inline-logo",
+									},
+								],
+								data: {
+									name: "William",
+									attachmentName: "dummy.pdf",
+								},
+							});
+
+							if (result.error) {
+								return c.json(
+									{
+										error: {
+											name: result.error.name,
+											message: result.error.message,
+										},
+									},
+									result.error.status === 400 ? 400 : 500,
+								);
+							}
+
+							return c.json({
+								data: result.data,
+							});
+						},
+					);
+				},
+			],
+		},
 		collections: [
 			PageCollection,
 			BlogCollection,
@@ -181,9 +244,9 @@ export default configureLucid({
 			// RedisPlugin({
 			// 	connection: env.REDIS_CONNECTION,
 			// }),
-			// NodemailerPlugin({
-			// 	transporter: transporter,
-			// }),
+			NodemailerPlugin({
+				transporter: transporter,
+			}),
 			// ResendPlugin({
 			// 	apiKey: env.LUCID_RESEND_API_KEY,
 			// 	webhook: {

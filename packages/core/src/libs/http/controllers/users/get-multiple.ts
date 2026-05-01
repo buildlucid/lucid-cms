@@ -14,7 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -38,7 +38,7 @@ const getMultipleController = factory.createHandlers(
 			c,
 			controllerSchemas.getMultiple.query.formatted,
 		);
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const users = await serviceWrapper(userServices.getMultiple, {
 			transaction: false,

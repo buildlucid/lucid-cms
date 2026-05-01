@@ -12,7 +12,7 @@ import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -34,7 +34,7 @@ const clearAllProcessedController = factory.createHandlers(
 	authenticate,
 	permissions([Permissions.MediaUpdate]),
 	async (c) => {
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const clearProcessed = await serviceWrapper(
 			processedImageServices.clearAll,

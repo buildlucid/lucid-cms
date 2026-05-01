@@ -14,7 +14,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -37,7 +37,7 @@ const revokeRefreshTokensController = factory.createHandlers(
 	validate("param", controllerSchemas.revokeRefreshTokens.params),
 	async (c) => {
 		const { id } = c.req.valid("param");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const revokeRes = await serviceWrapper(userServices.revokeRefreshTokens, {
 			transaction: false,

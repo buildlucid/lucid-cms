@@ -11,7 +11,7 @@ import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -28,7 +28,7 @@ const getScopesController = factory.createHandlers(
 	authenticate,
 	permissions([Permissions.IntegrationRead]),
 	async (c) => {
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 		const getScopesRes = await serviceWrapper(
 			clientIntegrationServices.getScopes,
 			{

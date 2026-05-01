@@ -1,6 +1,6 @@
 import constants from "../../constants/constants.js";
 import type { EmailStorageConfig } from "../../libs/email/storage/types.js";
-import type { EmailPriority } from "../../libs/email/types.js";
+import type { EmailAttachment, EmailPriority } from "../../libs/email/types.js";
 import T from "../../translations/index.js";
 import type { Email } from "../../types/response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
@@ -17,6 +17,7 @@ const sendExternal: ServiceFn<
 			bcc?: string;
 			replyTo?: string;
 			priority?: EmailPriority;
+			attachments?: EmailAttachment[];
 			data: {
 				[key: string]: unknown;
 			};
@@ -58,6 +59,7 @@ const sendExternal: ServiceFn<
 		bcc: data.bcc,
 		replyTo: data.replyTo,
 		priority: data.priority,
+		attachments: data.attachments,
 		data: data.data,
 		storage: data.storage,
 		from: data.from,

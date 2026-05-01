@@ -10,7 +10,7 @@ import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -25,7 +25,7 @@ const getMeController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c: LucidHonoContext) => {
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const user = await serviceWrapper(accountServices.getAuthenticatedUser, {
 			transaction: false,

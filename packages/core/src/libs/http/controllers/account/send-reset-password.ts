@@ -17,7 +17,7 @@ import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
-import getServiceContext from "../../utils/get-service-context.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -49,7 +49,7 @@ const sendResetPasswordController = factory.createHandlers(
 	validate("json", controllerSchemas.sendResetPassword.body),
 	async (c) => {
 		const { email } = c.req.valid("json");
-		const context = getServiceContext(c);
+		const context = createServiceContext(c);
 
 		const resetPassword = await serviceWrapper(
 			accountServices.sendResetPassword,

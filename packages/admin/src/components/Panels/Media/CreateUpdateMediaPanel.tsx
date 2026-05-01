@@ -1,5 +1,4 @@
 import type { ErrorResponse, Media } from "@types";
-import classNames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
 	FaSolidArrowUpFromBracket,
@@ -23,6 +22,7 @@ import { Panel } from "@/components/Groups/Panel";
 import FocalPointEditor from "@/components/Modals/Media/FocalPointEditor";
 import Button from "@/components/Partials/Button";
 import DetailsList from "@/components/Partials/DetailsList";
+import PanelTabs from "@/components/Partials/PanelTabs";
 import Pill from "@/components/Partials/Pill";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import { useCreateMedia, useUpdateMedia } from "@/hooks/actions";
@@ -686,30 +686,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			{(lang) => (
 				<>
 					<MediaFile.Render />
-					<div class="mt-6 border-b border-border mb-4">
-						<div class="flex flex-row flex-wrap items-center gap-4">
-							<For each={visibleTabs()}>
-								{(tab) => (
-									<button
-										type="button"
-										class={classNames(
-											"border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary-base transition-colors duration-200",
-											{
-												"border-primary-base text-title": activeTab() === tab,
-												"border-transparent text-body hover:border-primary-base":
-													activeTab() !== tab && !tabHasError(tab),
-												"border-error-base text-error-base":
-													activeTab() !== tab && tabHasError(tab),
-											},
-										)}
-										onClick={() => setActiveTab(tab)}
-									>
-										{tabLabel(tab)}
-									</button>
-								)}
-							</For>
-						</div>
-					</div>
+					<PanelTabs
+						items={visibleTabs().map((tab) => ({
+							value: tab,
+							label: tabLabel(tab),
+							hasError: tabHasError(tab),
+						}))}
+						active={activeTab()}
+						onChange={setActiveTab}
+					/>
 					<Show when={activeTab() === "details"}>
 						<Select
 							id="media-folder"

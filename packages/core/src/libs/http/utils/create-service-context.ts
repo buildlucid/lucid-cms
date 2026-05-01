@@ -4,7 +4,7 @@ import type { ServiceContext } from "../../../utils/services/types.js";
 /**
  * A helper to build the service context from a Hono context.
  */
-const getServiceContext = (c: LucidHonoContext): ServiceContext => {
+const createServiceContext = (c: LucidHonoContext): ServiceContext => {
 	const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
 
 	return {
@@ -20,4 +20,4 @@ const getServiceContext = (c: LucidHonoContext): ServiceContext => {
 	};
 };
 
-export default getServiceContext;
+export default createServiceContext;
