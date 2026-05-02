@@ -1,4 +1,5 @@
 import getMediaAdapter from "../../libs/media/get-adapter.js";
+import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
@@ -31,7 +32,7 @@ const completeUploadSession: ServiceFn<
 	);
 
 	const sessionRes = await MediaUploadSessions.selectSingle({
-		select: ["session_id", "key", "adapter_upload_id", "status"],
+		select: ["session_id", "key", "adapter_key", "adapter_upload_id", "status"],
 		where: [
 			{ key: "session_id", operator: "=", value: data.sessionId },
 			{ key: "status", operator: "=", value: "active" },
@@ -56,7 +57,17 @@ const completeUploadSession: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (!mediaAdapter.adapter.completeUploadSession) {
+	if (sessionRes.data.adapter_key !== mediaAdapter.adapter.key) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: T("media_upload_session_adapter_changed"),
+			},
+			data: undefined,
+		};
+	}
+	if (!hasResumableUploadSessions(mediaAdapter.adapter)) {
 		return {
 			error: {
 				type: "basic",

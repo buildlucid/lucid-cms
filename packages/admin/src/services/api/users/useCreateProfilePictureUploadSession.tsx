@@ -1,7 +1,6 @@
-import type { ResponseBody } from "@types";
+import type { ResponseBody, UploadSessionResponse } from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-import type { UploadSessionResponse } from "../media/useCreateUploadSession";
 
 interface Params {
 	userId: number;

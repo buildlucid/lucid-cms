@@ -1,12 +1,12 @@
-import type { ResponseBody } from "@types";
-import request from "@/utils/request";
 import type {
+	ResponseBody,
 	UploadSessionPart,
-	UploadSessionResponse,
-} from "./useCreateUploadSession";
+	UploadSessionStateResponse,
+} from "@types";
+import request from "@/utils/request";
 
 export const getUploadSessionReq = (sessionId: string) => {
-	return request<ResponseBody<UploadSessionResponse>>({
+	return request<ResponseBody<UploadSessionStateResponse>>({
 		url: `/lucid/api/v1/media/upload-session/${sessionId}`,
 		csrf: true,
 		config: {

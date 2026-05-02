@@ -1,28 +1,6 @@
-import type { ResponseBody } from "@types";
+import type { ResponseBody, UploadSessionResponse } from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
-
-export type UploadSessionPart = {
-	partNumber: number;
-	etag: string;
-	size?: number;
-};
-
-export type UploadSessionResponse =
-	| {
-			mode: "single";
-			key: string;
-			url: string;
-			headers?: Record<string, string>;
-	  }
-	| {
-			mode: "resumable";
-			key: string;
-			sessionId: string;
-			partSize: number;
-			expiresAt: string;
-			uploadedParts: UploadSessionPart[];
-	  };
 
 interface Params {
 	body: {

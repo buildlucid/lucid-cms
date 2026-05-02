@@ -1,3 +1,4 @@
+import type { UploadSessionResponse } from "@lucidcms/types";
 import { addMilliseconds } from "date-fns";
 import mime from "mime-types";
 import constants from "../../constants/constants.js";
@@ -11,26 +12,6 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import { generateKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkCanStoreMedia from "./checks/check-can-store-media.js";
-
-export type UploadSessionResponse =
-	| {
-			mode: "single";
-			key: string;
-			url: string;
-			headers?: Record<string, string>;
-	  }
-	| {
-			mode: "resumable";
-			key: string;
-			sessionId: string;
-			partSize: number;
-			expiresAt: string;
-			uploadedParts: Array<{
-				partNumber: number;
-				etag: string;
-				size?: number;
-			}>;
-	  };
 
 const createSessionId = () => {
 	return globalThis.crypto.randomUUID();

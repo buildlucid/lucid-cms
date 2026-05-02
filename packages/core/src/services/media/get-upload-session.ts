@@ -1,4 +1,6 @@
+import type { UploadSessionStateResponse } from "@lucidcms/types";
 import getMediaAdapter from "../../libs/media/get-adapter.js";
+import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -9,18 +11,7 @@ const getUploadSession: ServiceFn<
 			sessionId: string;
 		},
 	],
-	{
-		mode: "resumable";
-		key: string;
-		sessionId: string;
-		partSize: number;
-		expiresAt: string;
-		uploadedParts: Array<{
-			partNumber: number;
-			etag: string;
-			size?: number;
-		}>;
-	}
+	UploadSessionStateResponse
 > = async (context, data) => {
 	const MediaUploadSessions = new MediaUploadSessionsRepository(
 		context.db.client,
@@ -30,6 +21,7 @@ const getUploadSession: ServiceFn<
 		select: [
 			"session_id",
 			"key",
+			"adapter_key",
 			"adapter_upload_id",
 			"part_size",
 			"expires_at",
@@ -59,14 +51,24 @@ const getUploadSession: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (!mediaAdapter.adapter.listUploadParts) {
+	if (sessionRes.data.adapter_key !== mediaAdapter.adapter.key) {
 		return {
-			error: {
-				type: "basic",
-				status: 400,
-				message: T("media_upload_session_resumable_not_supported"),
+			error: undefined,
+			data: {
+				canResume: false,
+				sessionId: sessionRes.data.session_id,
+				reason: "adapter_changed",
 			},
-			data: undefined,
+		};
+	}
+	if (!hasResumableUploadSessions(mediaAdapter.adapter)) {
+		return {
+			error: undefined,
+			data: {
+				canResume: false,
+				sessionId: sessionRes.data.session_id,
+				reason: "adapter_not_resumable",
+			},
 		};
 	}
 	if (!sessionRes.data.adapter_upload_id) {
@@ -99,7 +101,7 @@ const getUploadSession: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			mode: "resumable",
+			canResume: true,
 			key: sessionRes.data.key,
 			sessionId: sessionRes.data.session_id,
 			partSize: sessionRes.data.part_size,

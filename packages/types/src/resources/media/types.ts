@@ -71,6 +71,43 @@ export interface MediaUrl {
 	url: string;
 }
 
+export type UploadSessionPart = {
+	partNumber: number;
+	etag: string;
+	size?: number;
+};
+
+export type UploadSessionResponse =
+	| {
+			mode: "single";
+			key: string;
+			url: string;
+			headers?: Record<string, string>;
+	  }
+	| {
+			mode: "resumable";
+			key: string;
+			sessionId: string;
+			partSize: number;
+			expiresAt: string;
+			uploadedParts: UploadSessionPart[];
+	  };
+
+export type UploadSessionStateResponse =
+	| {
+			canResume: true;
+			key: string;
+			sessionId: string;
+			partSize: number;
+			expiresAt: string;
+			uploadedParts: UploadSessionPart[];
+	  }
+	| {
+			canResume: false;
+			sessionId: string;
+			reason: "adapter_not_resumable" | "adapter_changed";
+	  };
+
 export interface MediaShareLink {
 	id: number;
 	token: string;

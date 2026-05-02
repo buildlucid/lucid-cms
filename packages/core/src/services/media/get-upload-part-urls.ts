@@ -1,4 +1,5 @@
 import getMediaAdapter from "../../libs/media/get-adapter.js";
+import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -23,7 +24,7 @@ const getUploadPartUrls: ServiceFn<
 		context.config.db,
 	);
 	const sessionRes = await MediaUploadSessions.selectSingle({
-		select: ["key", "adapter_upload_id", "expires_at", "status"],
+		select: ["key", "adapter_key", "adapter_upload_id", "expires_at", "status"],
 		where: [
 			{ key: "session_id", operator: "=", value: data.sessionId },
 			{ key: "status", operator: "=", value: "active" },
@@ -48,7 +49,17 @@ const getUploadPartUrls: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (!mediaAdapter.adapter.getUploadPartUrls) {
+	if (sessionRes.data.adapter_key !== mediaAdapter.adapter.key) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: T("media_upload_session_adapter_changed"),
+			},
+			data: undefined,
+		};
+	}
+	if (!hasResumableUploadSessions(mediaAdapter.adapter)) {
 		return {
 			error: {
 				type: "basic",

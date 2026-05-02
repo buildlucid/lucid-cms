@@ -1,13 +1,14 @@
-import type { ErrorResponse, ResponseBody } from "@types";
+import type {
+	ErrorResponse,
+	ResponseBody,
+	UploadSessionPart,
+	UploadSessionResponse,
+} from "@types";
 import {
 	completeUploadSessionReq,
 	getUploadPartUrlsReq,
 	getUploadSessionReq,
 } from "@/services/api/media/uploadSessionRequests";
-import type {
-	UploadSessionPart,
-	UploadSessionResponse,
-} from "@/services/api/media/useCreateUploadSession";
 import T from "@/translations";
 import { LucidError } from "@/utils/error-handling";
 
@@ -16,6 +17,10 @@ const RETRY_DELAYS = [0, 1000, 3000, 5000];
 const STORAGE_PREFIX = "lucid-upload-session";
 
 type StartUploadSession = () => Promise<ResponseBody<UploadSessionResponse>>;
+type ResumableUploadSession = Extract<
+	UploadSessionResponse,
+	{ mode: "resumable" }
+>;
 
 type UploadMediaFileProps = {
 	file: File;
@@ -199,12 +204,22 @@ const withRetries = async <T>(
 const getResumableSession = async (
 	storageKey: string,
 	start: StartUploadSession,
-) => {
+): Promise<UploadSessionResponse> => {
 	const stored = getStoredSession(storageKey);
 	if (stored) {
 		try {
 			const existing = await getUploadSessionReq(stored.sessionId);
-			if (existing.data.mode === "resumable") return existing.data;
+			if (existing.data.canResume) {
+				return {
+					mode: "resumable",
+					key: existing.data.key,
+					sessionId: existing.data.sessionId,
+					partSize: existing.data.partSize,
+					expiresAt: existing.data.expiresAt,
+					uploadedParts: existing.data.uploadedParts,
+				};
+			}
+			localStorage.removeItem(storageKey);
 		} catch {
 			localStorage.removeItem(storageKey);
 		}
@@ -217,6 +232,8 @@ const getResumableSession = async (
 			key: created.data.key,
 			expiresAt: created.data.expiresAt,
 		});
+	} else {
+		localStorage.removeItem(storageKey);
 	}
 	return created.data;
 };
@@ -227,7 +244,7 @@ const getResumableSession = async (
  */
 const uploadResumable = async (
 	file: File,
-	session: Extract<UploadSessionResponse, { mode: "resumable" }>,
+	session: ResumableUploadSession,
 	onProgress?: (_progress: number) => void,
 	signal?: AbortSignal,
 ): Promise<UploadResult<string>> => {
@@ -352,7 +369,7 @@ const uploadResumable = async (
 		Array.from(uploaded.values()).some((part) => part.etag.length === 0)
 	) {
 		const reconciled = await getUploadSessionReq(session.sessionId);
-		if (reconciled.data.mode !== "resumable") {
+		if (!reconciled.data.canResume) {
 			return {
 				error: uploadError(T()("upload_session_no_longer_resumable")),
 				data: undefined,

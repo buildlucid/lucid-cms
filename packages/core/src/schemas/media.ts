@@ -75,7 +75,7 @@ const uploadPartSchema = z.object({
 	size: z.number().nonnegative().optional(),
 });
 
-const uploadSessionResponseSchema = z.discriminatedUnion("mode", [
+const createUploadSessionResponseSchema = z.discriminatedUnion("mode", [
 	z.object({
 		mode: z.literal("single"),
 		key: z.string(),
@@ -89,6 +89,22 @@ const uploadSessionResponseSchema = z.discriminatedUnion("mode", [
 		partSize: z.number(),
 		expiresAt: z.string(),
 		uploadedParts: z.array(uploadPartSchema),
+	}),
+]);
+
+const getUploadSessionResponseSchema = z.discriminatedUnion("canResume", [
+	z.object({
+		canResume: z.literal(true),
+		key: z.string(),
+		sessionId: z.string(),
+		partSize: z.number(),
+		expiresAt: z.string(),
+		uploadedParts: z.array(uploadPartSchema),
+	}),
+	z.object({
+		canResume: z.literal(false),
+		sessionId: z.string(),
+		reason: z.enum(["adapter_not_resumable", "adapter_changed"]),
 	}),
 ]);
 
@@ -620,7 +636,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: uploadSessionResponseSchema,
+		response: createUploadSessionResponseSchema,
 	} satisfies ControllerSchema,
 	getUploadSession: {
 		body: undefined,
@@ -629,7 +645,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: uploadSessionParamsSchema,
-		response: uploadSessionResponseSchema,
+		response: getUploadSessionResponseSchema,
 	} satisfies ControllerSchema,
 	getUploadPartUrls: {
 		body: z.object({

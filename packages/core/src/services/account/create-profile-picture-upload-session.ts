@@ -1,8 +1,8 @@
+import type { UploadSessionResponse } from "@lucidcms/types";
 import T from "../../translations/index.js";
 import { getMediaType } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
-import type { UploadSessionResponse } from "../media/create-upload-session.js";
 
 const createProfilePictureUploadSession: ServiceFn<
 	[
