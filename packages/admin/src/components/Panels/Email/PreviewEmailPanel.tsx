@@ -17,7 +17,9 @@ import {
 	createSignal,
 	For,
 	Index,
+	lazy,
 	Show,
+	Suspense,
 } from "solid-js";
 import { Panel } from "@/components/Groups/Panel";
 import { Table } from "@/components/Groups/Table";
@@ -28,6 +30,8 @@ import EmailTransactionRow from "@/components/Tables/Rows/EmailTransactionRow";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
+
+const JSONPreview = lazy(() => import("@/components/Partials/JSONPreview"));
 
 const PREVIEW_DISABLE_LINKS_STYLE =
 	"<style>a,area{pointer-events:none!important;cursor:default!important;}</style>";
@@ -107,9 +111,6 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 	const attachments = createMemo(() => email.data?.data.attachments || []);
 	const hasInlineAttachments = createMemo(() =>
 		attachments().some((attachment) => attachment.disposition === "inline"),
-	);
-	const templateDataJson = createMemo(() =>
-		JSON.stringify(email.data?.data.data || {}, null, 2),
 	);
 
 	// ---------------------------------
@@ -269,9 +270,16 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 					</Show>
 					<Show when={activeTab() === "data"}>
 						<div>
-							<pre class="max-h-96 overflow-auto rounded-md border border-border bg-card-base p-4 text-sm text-card-contrast whitespace-pre-wrap break-words">
-								<code>{templateDataJson()}</code>
-							</pre>
+							<Suspense
+								fallback={
+									<div class="h-40 bg-card-base border border-border rounded-md animate-pulse" />
+								}
+							>
+								<JSONPreview
+									title={T()("template_data")}
+									json={email.data?.data.data || {}}
+								/>
+							</Suspense>
 						</div>
 					</Show>
 					<Show when={activeTab() === "transactions"}>
