@@ -1,5 +1,4 @@
 import { AlertDialog } from "@kobalte/core";
-import classNames from "classnames";
 import { FaSolidXmark } from "solid-icons/fa";
 import { type Component, type JSXElement, Show } from "solid-js";
 import Button from "@/components/Partials/Button";
@@ -25,9 +24,6 @@ export const Confirmation: Component<{
 	};
 	slots?: {
 		actionRow?: JSXElement;
-	};
-	options?: {
-		noContent?: boolean;
 	};
 	children?: JSXElement;
 }> = (props) => {
@@ -56,7 +52,7 @@ export const Confirmation: Component<{
 									</AlertDialog.Description>
 								</Show>
 							</div>
-							<AlertDialog.CloseButton class="text-body hover:text-title ring-error-base focus-visible:ring-1 focus:outline-hidden h-8 w-8 min-w-[32px] rounded-full flex justify-center items-center duration-200 transition-colors">
+							<AlertDialog.CloseButton class="text-body hover:text-title ring-error-base focus-visible:ring-1 focus:outline-hidden h-8 w-8 min-w-8 rounded-full flex justify-center items-center duration-200 transition-colors">
 								<FaSolidXmark class="fill-current" />
 							</AlertDialog.CloseButton>
 						</div>
@@ -64,23 +60,19 @@ export const Confirmation: Component<{
 							<div class="px-4 md:px-6">{props.children}</div>
 						</Show>
 						<div
-							class={classNames(
-								"mx-4 md:mx-6 py-4 md:py-6 flex flex-wrap items-center gap-2 justify-between",
-								{
-									"!pt-0": !props.children || props.options?.noContent,
-								},
-							)}
+							class={
+								"px-4 md:px-6 py-4 md:py-6 flex flex-wrap items-center gap-2 justify-between bg-card-base border-t border-border"
+							}
 						>
-							<div class="flex items-center gap-2">
-								<Button
-									theme={props.theme || "danger"}
-									size="medium"
-									type={"button"}
-									loading={props.state.isLoading}
-									onClick={props.callbacks.onConfirm}
-								>
-									{T()("confirm")}
-								</Button>
+							<div class="flex min-w-0 items-center gap-2">
+								<Show when={props.slots?.actionRow}>
+									{props.slots?.actionRow}
+								</Show>
+								<Show when={props.state.isError && props.copy.error}>
+									<ErrorMessage theme="basic" message={props.copy.error} />
+								</Show>
+							</div>
+							<div class="flex min-w-max items-center gap-2">
 								<Button
 									theme="border-outline"
 									size="medium"
@@ -90,13 +82,16 @@ export const Confirmation: Component<{
 								>
 									{T()("cancel")}
 								</Button>
-								<Show when={props.slots?.actionRow}>
-									{props.slots?.actionRow}
-								</Show>
+								<Button
+									theme={props.theme || "danger"}
+									size="medium"
+									type={"button"}
+									loading={props.state.isLoading}
+									onClick={props.callbacks.onConfirm}
+								>
+									{T()("confirm")}
+								</Button>
 							</div>
-							<Show when={props.state.isError && props.copy.error}>
-								<ErrorMessage theme="basic" message={props.copy.error} />
-							</Show>
 						</div>
 					</AlertDialog.Content>
 				</div>

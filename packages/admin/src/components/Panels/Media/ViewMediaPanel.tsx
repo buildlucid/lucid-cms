@@ -104,7 +104,6 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 			fetchState={panelFetchState()}
 			options={{
 				padding: "24",
-				hideFooter: true,
 			}}
 			callbacks={{
 				reset: () => {},

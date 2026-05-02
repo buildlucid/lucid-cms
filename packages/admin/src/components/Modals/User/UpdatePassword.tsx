@@ -1,6 +1,8 @@
 import { type Component, createMemo, createSignal } from "solid-js";
-import { Form, Input } from "@/components/Groups/Form";
-import { Modal } from "@/components/Groups/Modal";
+import { Input } from "@/components/Groups/Form";
+import { Modal, ModalFooter } from "@/components/Groups/Modal";
+import Button from "@/components/Partials/Button";
+import ErrorMessage from "@/components/Partials/ErrorMessage";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -49,21 +51,14 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 				open: props.state.open,
 				setOpen: props.state.setOpen,
 			}}
+			options={{
+				noPadding: true,
+			}}
 		>
-			<div class="mb-4">
-				<h2>{T()("update_password")}</h2>
-				<p class="mt-1">{T()("password_description")}</p>
-			</div>
-			<Form
-				state={{
-					isLoading: updateMe.action.isPending,
-					errors: updateMe.errors(),
-					isDisabled: submitDisabled(),
-				}}
-				content={{
-					submit: T()("update"),
-				}}
-				onSubmit={() => {
+			<form
+				class="w-full"
+				onSubmit={(e) => {
+					e.preventDefault();
 					updateMe.action.mutate({
 						currentPassword: currentPassword(),
 						newPassword: newPassword(),
@@ -71,47 +66,81 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 					});
 				}}
 			>
-				<Input
-					id="currentPassword"
-					name="currentPassword"
-					type="password"
-					value={currentPassword()}
-					onChange={setCurrentPassword}
-					copy={{
-						label: T()("current_password"),
-					}}
-					errors={getBodyError("currentPassword", updateMe.errors)}
-					hideOptionalText={true}
-				/>
-				<div class="grid grid-cols-2 gap-4">
+				<div class="p-4 md:p-6">
+					<div class="mb-4">
+						<h2>{T()("update_password")}</h2>
+						<p class="mt-1">{T()("password_description")}</p>
+					</div>
 					<Input
-						id="newPassword"
-						name="newPassword"
+						id="currentPassword"
+						name="currentPassword"
 						type="password"
-						value={newPassword()}
-						onChange={setNewPassword}
+						value={currentPassword()}
+						onChange={setCurrentPassword}
 						copy={{
-							label: T()("new_password"),
+							label: T()("current_password"),
 						}}
-						errors={getBodyError("newPassword", updateMe.errors)}
+						errors={getBodyError("currentPassword", updateMe.errors)}
 						hideOptionalText={true}
-						noMargin={true}
 					/>
-					<Input
-						id="passwordConfirmation"
-						name="passwordConfirmation"
-						type="password"
-						value={confirmPassword()}
-						onChange={setConfirmPassword}
-						copy={{
-							label: T()("confirm_password"),
-						}}
-						errors={getBodyError("passwordConfirmation", updateMe.errors)}
-						hideOptionalText={true}
-						noMargin={true}
+					<div class="grid grid-cols-2 gap-4">
+						<Input
+							id="newPassword"
+							name="newPassword"
+							type="password"
+							value={newPassword()}
+							onChange={setNewPassword}
+							copy={{
+								label: T()("new_password"),
+							}}
+							errors={getBodyError("newPassword", updateMe.errors)}
+							hideOptionalText={true}
+							noMargin={true}
+						/>
+						<Input
+							id="passwordConfirmation"
+							name="passwordConfirmation"
+							type="password"
+							value={confirmPassword()}
+							onChange={setConfirmPassword}
+							copy={{
+								label: T()("confirm_password"),
+							}}
+							errors={getBodyError("passwordConfirmation", updateMe.errors)}
+							hideOptionalText={true}
+							noMargin={true}
+						/>
+					</div>
+					<ErrorMessage
+						theme="basic"
+						message={updateMe.errors()?.message}
+						classes="mt-4"
 					/>
 				</div>
-			</Form>
+				<ModalFooter>
+					<div />
+					<div class="flex gap-2.5">
+						<Button
+							type="button"
+							theme="border-outline"
+							size="medium"
+							disabled={updateMe.action.isPending}
+							onClick={() => props.state.setOpen(false)}
+						>
+							{T()("cancel")}
+						</Button>
+						<Button
+							type="submit"
+							theme="primary"
+							size="medium"
+							loading={updateMe.action.isPending}
+							disabled={submitDisabled()}
+						>
+							{T()("update")}
+						</Button>
+					</div>
+				</ModalFooter>
+			</form>
 		</Modal>
 	);
 };

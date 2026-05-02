@@ -20,7 +20,7 @@ import {
 	Show,
 	untrack,
 } from "solid-js";
-import { Modal } from "@/components/Groups/Modal";
+import { Modal, ModalFooter } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import { createSingleReq } from "@/services/api/media/useCreateSingle";
@@ -381,10 +381,10 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 				>
 					<div class="flex items-start justify-between gap-4">
 						<div class="min-w-0">
-							<h2 class="text-lg font-semibold text-title">
+							<h2 class="text-base font-semibold text-title">
 								{T()("bulk_upload_media")}
 							</h2>
-							<p class="mt-1 text-sm text-body">
+							<p class="mt-1 text-base text-body">
 								{T()("bulk_upload_media_description")}
 							</p>
 						</div>
@@ -513,8 +513,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						</div>
 					</Show>
 				</div>
-
-				<div class="flex flex-wrap items-center justify-between gap-3 border-t border-border p-4 md:p-6">
+				<ModalFooter>
 					<p class="text-sm text-subtitle">
 						{T()("bulk_upload_summary", {
 							total: totalCount(),
@@ -526,7 +525,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						<Button
 							type="button"
 							theme="border-outline"
-							size="small"
+							size="medium"
 							onClick={closeModal}
 							disabled={isProcessing()}
 						>
@@ -537,7 +536,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 							theme={
 								errorCount() > 0 && queuedCount() === 0 ? "danger" : "primary"
 							}
-							size="small"
+							size="medium"
 							onClick={primaryAction}
 							loading={isProcessing()}
 							disabled={primaryDisabled()}
@@ -545,7 +544,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 							{primaryLabel()}
 						</Button>
 					</div>
-				</div>
+				</ModalFooter>
 			</div>
 		</Modal>
 	);

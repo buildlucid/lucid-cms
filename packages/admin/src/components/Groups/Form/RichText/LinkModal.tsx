@@ -1,6 +1,6 @@
 import { type Component, createEffect, createSignal } from "solid-js";
 import { Input, Switch } from "@/components/Groups/Form";
-import { Modal } from "@/components/Groups/Modal";
+import { Modal, ModalFooter } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
 import T from "@/translations";
 
@@ -54,55 +54,51 @@ const LinkModal: Component<{
 				open: props.state.open,
 				setOpen: closeModal,
 			}}
+			options={{
+				noPadding: true,
+			}}
 		>
-			<div class="flex flex-col gap-6">
-				<div class="flex flex-col gap-0">
-					<Input
-						id="rich_text_link_label"
-						value={label()}
-						onChange={(value) => setLabel(value)}
-						name="label"
-						type="text"
-						copy={{
-							label: T()("label"),
-						}}
-						required={false}
-					/>
-					<Input
-						id="rich_text_link_url"
-						value={url()}
-						onChange={(value) => setUrl(value)}
-						name="url"
-						type="text"
-						copy={{
-							label: T()("url"),
-						}}
-						required={false}
-					/>
-					<Switch
-						id="rich_text_open_in_new_tab"
-						value={openInNewTab()}
-						onChange={(value) => setOpenInNewTab(value)}
-						name="open_in_new_tab"
-						copy={{
-							label: T()("open_in_new_tab"),
-							true: T()("yes"),
-							false: T()("no"),
-						}}
-						required={false}
-						hideOptionalText
-						labelLeft
-					/>
-				</div>
-				<div class="w-full flex gap-2.5">
-					<Button
-						type="button"
-						theme="primary"
-						size="medium"
-						onClick={updateLink}
-					>
-						{T()("update")}
-					</Button>
+			<div class="flex flex-col gap-0 p-4 md:p-6">
+				<Input
+					id="rich_text_link_label"
+					value={label()}
+					onChange={(value) => setLabel(value)}
+					name="label"
+					type="text"
+					copy={{
+						label: T()("label"),
+					}}
+					required={false}
+				/>
+				<Input
+					id="rich_text_link_url"
+					value={url()}
+					onChange={(value) => setUrl(value)}
+					name="url"
+					type="text"
+					copy={{
+						label: T()("url"),
+					}}
+					required={false}
+				/>
+				<Switch
+					id="rich_text_open_in_new_tab"
+					value={openInNewTab()}
+					onChange={(value) => setOpenInNewTab(value)}
+					name="open_in_new_tab"
+					copy={{
+						label: T()("open_in_new_tab"),
+						true: T()("yes"),
+						false: T()("no"),
+					}}
+					required={false}
+					hideOptionalText
+					labelLeft
+				/>
+			</div>
+			<ModalFooter>
+				<div />
+				<div class="flex gap-2.5">
 					<Button
 						type="button"
 						theme="border-outline"
@@ -111,8 +107,16 @@ const LinkModal: Component<{
 					>
 						{T()("cancel")}
 					</Button>
+					<Button
+						type="button"
+						theme="primary"
+						size="medium"
+						onClick={updateLink}
+					>
+						{T()("update")}
+					</Button>
 				</div>
-			</div>
+			</ModalFooter>
 		</Modal>
 	);
 };

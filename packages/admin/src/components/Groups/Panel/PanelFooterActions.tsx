@@ -1,6 +1,7 @@
 import type { Component } from "solid-js";
 import Button from "@/components/Partials/Button";
 import T from "@/translations";
+import { PanelFooter } from "./PanelFooter";
 
 interface PanelFooterActionsProps {
 	selectedCount: number;
@@ -11,12 +12,7 @@ interface PanelFooterActionsProps {
 
 const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
 	return (
-		<div
-			class={
-				props.class ||
-				"sticky mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border bg-background-base py-4"
-			}
-		>
+		<PanelFooter padding="24" class={props.class}>
 			<p class="text-sm text-subtitle">
 				{props.selectedCount} {T()("selected").toLowerCase()}
 			</p>
@@ -24,7 +20,7 @@ const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
 				<Button
 					type="button"
 					theme="border-outline"
-					size="small"
+					size="medium"
 					onClick={props.onClose}
 				>
 					{T()("close")}
@@ -32,13 +28,13 @@ const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
 				<Button
 					type="button"
 					theme="primary"
-					size="small"
+					size="medium"
 					onClick={props.onConfirm}
 				>
 					{T()("confirm")}
 				</Button>
 			</div>
-		</div>
+		</PanelFooter>
 	);
 };
 

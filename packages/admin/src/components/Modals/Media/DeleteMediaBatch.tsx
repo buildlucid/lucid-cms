@@ -62,12 +62,9 @@ const DeleteMediaBatch: Component<DeleteMediaBatchProps> = (props) => {
 					deleteMediaBatch.reset();
 				},
 			}}
-			options={{
-				noContent: noFolderItemsSelected(),
-			}}
 		>
 			<Show when={!noFolderItemsSelected()}>
-				<div class="bg-card-base p-4 rounded-md border border-border">
+				<div class="bg-card-base p-4 rounded-md border border-border mb-4 md:mb-6">
 					<CheckboxInput
 						id="recursiveMedia"
 						value={recursiveMedia()}

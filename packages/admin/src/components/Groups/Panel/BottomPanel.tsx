@@ -20,6 +20,7 @@ import ErrorBlock from "@/components/Partials/ErrorBlock";
 import ErrorMessage from "@/components/Partials/ErrorMessage";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
+import { PanelFooter } from "./PanelFooter";
 
 export const BottomPanel: Component<{
 	state: {
@@ -219,42 +220,42 @@ export const BottomPanel: Component<{
 											{/* footer */}
 											<Show when={!props.options?.hideFooter}>
 												<div
-													class={classNames(
-														"flex justify-between items-center gap-4",
-														{
-															"mx-4 py-4": props.options?.padding === "16",
-															"mx-4 md:mx-6 py-4 md:py-6 ":
-																props.options?.padding === "24",
-														},
-													)}
+													class={classNames({
+														"px-4": props.options?.padding === "16",
+														"px-4 md:px-6": props.options?.padding === "24",
+													})}
 												>
-													<div class="flex min-w-max gap-2">
-														<Show when={props.copy?.submit}>
+													<PanelFooter padding={props.options?.padding}>
+														<div class="min-w-0">
+															<Show when={props.mutateState?.errors?.message}>
+																<ErrorMessage
+																	theme="basic"
+																	message={props.mutateState?.errors?.message}
+																/>
+															</Show>
+														</div>
+														<div class="flex min-w-max gap-2">
 															<Button
-																type="submit"
-																theme="primary"
 																size="medium"
-																loading={props.mutateState?.isLoading}
-																disabled={props.mutateState?.isDisabled}
+																theme="border-outline"
+																type="button"
+																onClick={() => props.state.setOpen(false)}
 															>
-																{props.copy?.submit}
+																{T()("close")}
 															</Button>
-														</Show>
-														<Button
-															size="medium"
-															theme="border-outline"
-															type="button"
-															onClick={() => props.state.setOpen(false)}
-														>
-															{T()("close")}
-														</Button>
-													</div>
-													<Show when={props.mutateState?.errors?.message}>
-														<ErrorMessage
-															theme="basic"
-															message={props.mutateState?.errors?.message}
-														/>
-													</Show>
+															<Show when={props.copy?.submit}>
+																<Button
+																	type="submit"
+																	theme="primary"
+																	size="medium"
+																	loading={props.mutateState?.isLoading}
+																	disabled={props.mutateState?.isDisabled}
+																>
+																	{props.copy?.submit}
+																</Button>
+															</Show>
+														</div>
+													</PanelFooter>
 												</div>
 											</Show>
 										</div>
@@ -284,42 +285,42 @@ export const BottomPanel: Component<{
 										{/* footer */}
 										<Show when={!props.options?.hideFooter}>
 											<div
-												class={classNames(
-													"flex justify-between items-center gap-4",
-													{
-														"mx-4 py-4": props.options?.padding === "16",
-														"mx-4 md:mx-6 py-4 md:py-6 ":
-															props.options?.padding === "24",
-													},
-												)}
+												class={classNames({
+													"px-4": props.options?.padding === "16",
+													"px-4 md:px-6": props.options?.padding === "24",
+												})}
 											>
-												<div class="flex min-w-max gap-2">
-													<Show when={props.copy?.submit}>
+												<PanelFooter padding={props.options?.padding}>
+													<div class="min-w-0">
+														<Show when={props.mutateState?.errors?.message}>
+															<ErrorMessage
+																theme="basic"
+																message={props.mutateState?.errors?.message}
+															/>
+														</Show>
+													</div>
+													<div class="flex min-w-max gap-2">
 														<Button
-															type="submit"
-															theme="primary"
 															size="medium"
-															loading={props.mutateState?.isLoading}
-															disabled={props.mutateState?.isDisabled}
+															theme="border-outline"
+															type="button"
+															onClick={() => props.state.setOpen(false)}
 														>
-															{props.copy?.submit}
+															{T()("close")}
 														</Button>
-													</Show>
-													<Button
-														size="medium"
-														theme="border-outline"
-														type="button"
-														onClick={() => props.state.setOpen(false)}
-													>
-														{T()("close")}
-													</Button>
-												</div>
-												<Show when={props.mutateState?.errors?.message}>
-													<ErrorMessage
-														theme="basic"
-														message={props.mutateState?.errors?.message}
-													/>
-												</Show>
+														<Show when={props.copy?.submit}>
+															<Button
+																type="submit"
+																theme="primary"
+																size="medium"
+																loading={props.mutateState?.isLoading}
+																disabled={props.mutateState?.isDisabled}
+															>
+																{props.copy?.submit}
+															</Button>
+														</Show>
+													</div>
+												</PanelFooter>
 											</div>
 										</Show>
 									</form>

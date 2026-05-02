@@ -49,6 +49,7 @@ const CopyShareLinkURL: Component<{
 			}}
 			copy={{
 				title: T()("copy_share_link_url_modal_title"),
+				description: T()("copy_share_link_url_modal_description"),
 			}}
 		>
 			<CopyInput value={url() || ""} />

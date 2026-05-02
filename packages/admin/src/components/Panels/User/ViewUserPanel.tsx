@@ -1,8 +1,15 @@
 import type { AuthProviders, User } from "@types";
-import { type Accessor, type Component, createMemo, Show } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	createSignal,
+	Show,
+} from "solid-js";
 import SectionHeading from "@/components/Blocks/SectionHeading";
 import { Panel } from "@/components/Groups/Panel";
 import DetailsList from "@/components/Partials/DetailsList";
+import PanelTabs from "@/components/Partials/PanelTabs";
 import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePreviewCard";
 import api from "@/services/api";
 import T from "@/translations";
@@ -50,7 +57,6 @@ const ViewUserPanel: Component<{
 			fetchState={panelFetchState()}
 			options={{
 				padding: "24",
-				hideFooter: true,
 			}}
 			copy={{
 				title: T()("view_user_panel_title"),
@@ -80,6 +86,10 @@ const ViewUserPanelContent: Component<{
 	};
 	providers: AuthProviders["providers"] | undefined;
 }> = (props) => {
+	// ---------------------------------
+	// State
+	const [activeTab, setActiveTab] = createSignal<"details" | "meta">("details");
+
 	// ---------------------------------
 	// Memos
 	const userRoles = createMemo(() => {
@@ -138,68 +148,78 @@ const ViewUserPanelContent: Component<{
 					profilePicture: props.state.user?.profilePicture,
 				}}
 			/>
-			<SectionHeading title={T()("details")} />
-			<DetailsList
-				type="text"
+			<PanelTabs
 				items={[
-					{
-						label: T()("username"),
-						value: props.state.user?.username || "-",
-					},
-					{
-						label: T()("email"),
-						value: props.state.user?.email || "-",
-					},
-					{
-						label: T()("first_name"),
-						value: props.state.user?.firstName || "-",
-					},
-					{
-						label: T()("last_name"),
-						value: props.state.user?.lastName || "-",
-					},
-					{
-						label: T()("user_type"),
-						value: props.state.user?.superAdmin
-							? T()("super_admin")
-							: T()("standard"),
-						show: props.state.user?.superAdmin !== undefined,
-					},
-					{
-						label: T()("roles"),
-						value: userRoles(),
-						show:
-							props.state.user?.roles !== undefined &&
-							props.state.user?.roles.length > 0,
-					},
-					{
-						label: T()("is_locked"),
-						value: props.state.user?.isLocked ? T()("yes") : T()("no"),
-						show: props.state.user?.isLocked !== undefined,
-					},
+					{ value: "details", label: T()("details") },
+					{ value: "meta", label: T()("meta") },
 				]}
+				active={activeTab()}
+				onChange={setActiveTab}
 			/>
-			<SectionHeading title={T()("meta")} />
-			<DetailsList
-				type="text"
-				items={[
-					{
-						label: T()("created_at"),
-						value: props.state.user?.createdAt
-							? dateHelpers.formatDate(props.state.user?.createdAt)
-							: "-",
-					},
-					{
-						label: T()("updated_at"),
-						value: props.state.user?.updatedAt
-							? dateHelpers.formatDate(props.state.user?.updatedAt)
-							: "-",
-					},
-				]}
-			/>
-			<Show when={authProviderItems().length > 0}>
-				<SectionHeading title={T()("auth_providers")} />
-				<DetailsList type="text" items={authProviderItems()} />
+			<Show when={activeTab() === "details"}>
+				<DetailsList
+					type="text"
+					items={[
+						{
+							label: T()("username"),
+							value: props.state.user?.username || "-",
+						},
+						{
+							label: T()("email"),
+							value: props.state.user?.email || "-",
+						},
+						{
+							label: T()("first_name"),
+							value: props.state.user?.firstName || "-",
+						},
+						{
+							label: T()("last_name"),
+							value: props.state.user?.lastName || "-",
+						},
+						{
+							label: T()("user_type"),
+							value: props.state.user?.superAdmin
+								? T()("super_admin")
+								: T()("standard"),
+							show: props.state.user?.superAdmin !== undefined,
+						},
+						{
+							label: T()("roles"),
+							value: userRoles(),
+							show:
+								props.state.user?.roles !== undefined &&
+								props.state.user?.roles.length > 0,
+						},
+						{
+							label: T()("is_locked"),
+							value: props.state.user?.isLocked ? T()("yes") : T()("no"),
+							show: props.state.user?.isLocked !== undefined,
+						},
+					]}
+				/>
+				<Show when={authProviderItems().length > 0}>
+					<SectionHeading title={T()("auth_providers")} />
+					<DetailsList type="text" items={authProviderItems()} />
+				</Show>
+			</Show>
+			<Show when={activeTab() === "meta"}>
+				<DetailsList
+					type="text"
+					items={[
+						{
+							label: T()("created_at"),
+							value: props.state.user?.createdAt
+								? dateHelpers.formatDate(props.state.user?.createdAt)
+								: "-",
+						},
+						{
+							label: T()("updated_at"),
+							value: props.state.user?.updatedAt
+								? dateHelpers.formatDate(props.state.user?.updatedAt)
+								: "-",
+						},
+					]}
+				/>
 			</Show>
 		</>
 	);

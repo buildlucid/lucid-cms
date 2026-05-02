@@ -58,7 +58,6 @@ const ViewShareLinksPanel: Component<ViewShareLinksPanelProps> = (props) => {
 			}}
 			options={{
 				padding: "24",
-				hideFooter: true,
 				growContent: true,
 			}}
 			copy={panelContent()}
@@ -149,7 +148,7 @@ const ViewShareLinksPanelContent: Component<{
 	// ---------------------------------
 	// Render
 	return (
-		<div class="flex flex-col h-full pb-4">
+		<div class="flex flex-col h-full">
 			<Show when={props.id !== undefined}>
 				<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 					<div class="flex gap-2.5">

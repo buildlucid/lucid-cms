@@ -6,7 +6,7 @@ import {
 	createSignal,
 	onCleanup,
 } from "solid-js";
-import { Modal } from "@/components/Groups/Modal";
+import { Modal, ModalFooter } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
 import T from "@/translations";
 
@@ -171,13 +171,16 @@ const FocalPointEditor: Component<{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
 			}}
+			options={{
+				noPadding: true,
+			}}
 		>
-			<div class="space-y-4">
+			<div class="space-y-4 p-4 md:p-6">
 				<div>
 					<h2 class="text-title text-base font-semibold">
 						{T()("focal_point")}
 					</h2>
-					<p class="text-body text-sm mt-0.5">
+					<p class="text-body text-base mt-1">
 						{T()("focal_point_description")}
 					</p>
 				</div>
@@ -229,39 +232,39 @@ const FocalPointEditor: Component<{
 						</div>
 					</div>
 				</div>
-				<div class="flex gap-2 items-center justify-between">
-					<div class="flex items-center justify-start gap-2">
-						<Button
-							type="button"
-							theme="primary"
-							size="medium"
-							onClick={() => {
-								props.onSave(draft());
-								props.state.setOpen(false);
-							}}
-						>
-							{T()("save")}
-						</Button>
-						<Button
-							type="button"
-							theme="border-outline"
-							size="medium"
-							onClick={() => props.state.setOpen(false)}
-						>
-							{T()("cancel")}
-						</Button>
-					</div>
+			</div>
+			<ModalFooter>
+				<Button
+					type="button"
+					theme="danger-subtle"
+					size="medium"
+					classes="self-start"
+					onClick={() => setDraft(CENTER_FOCAL_POINT)}
+				>
+					{T()("reset")}
+				</Button>
+				<div class="flex items-center justify-end gap-2">
 					<Button
 						type="button"
-						theme="danger-subtle"
+						theme="border-outline"
 						size="medium"
-						classes="self-start"
-						onClick={() => setDraft(CENTER_FOCAL_POINT)}
+						onClick={() => props.state.setOpen(false)}
 					>
-						{T()("reset")}
+						{T()("cancel")}
+					</Button>
+					<Button
+						type="button"
+						theme="primary"
+						size="medium"
+						onClick={() => {
+							props.onSave(draft());
+							props.state.setOpen(false);
+						}}
+					>
+						{T()("save")}
 					</Button>
 				</div>
-			</div>
+			</ModalFooter>
 		</Modal>
 	);
 };

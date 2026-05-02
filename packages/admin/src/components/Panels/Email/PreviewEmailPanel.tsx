@@ -127,7 +127,6 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 			}}
 			options={{
 				padding: "24",
-				hideFooter: true,
 			}}
 			copy={{
 				title: T()("preview_email_panel_title"),

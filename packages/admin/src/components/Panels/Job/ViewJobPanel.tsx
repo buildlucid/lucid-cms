@@ -42,7 +42,6 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 			}}
 			options={{
 				padding: "24",
-				hideFooter: true,
 			}}
 			copy={{
 				title: T()("view_job_panel_title"),

@@ -710,6 +710,7 @@
 	"create_share_link_panel_title": "Create Share Link",
 	"create_share_link_panel_description": "Generate a shareable URL for this file",
 	"copy_share_link_url_modal_title": "Copy Share Link URL",
+	"copy_share_link_url_modal_description": "Share this URL with anyone who needs access to the file.",
 	"create_share_link": "Create Share Link",
 	"view_share_links": "View Share Links",
 	"token": "Token",
