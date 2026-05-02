@@ -13,7 +13,7 @@ import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query";
 import BulkUploadMediaModal from "@/components/Modals/Media/BulkUploadMedia";
-import CreateMediaFolderPanel from "@/components/Panels/Media/CreateMediaFolderPanel";
+import CreateMediaFolderModal from "@/components/Modals/Media/CreateMediaFolder";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import { Permissions } from "@/constants/permissions";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
@@ -75,7 +75,7 @@ const MediaListRoute: Component = () => {
 	const params = useParams();
 	const [getOpenCreateMediaPanel, setOpenCreateMediaPanel] =
 		createSignal<boolean>(false);
-	const [getOpenCreateMediaFolderPanel, setOpenCreateMediaFolderPanel] =
+	const [getOpenCreateMediaFolderModal, setOpenCreateMediaFolderModal] =
 		createSignal<boolean>(false);
 	const [getOpenBulkUploadModal, setOpenBulkUploadModal] =
 		createSignal<boolean>(false);
@@ -223,8 +223,8 @@ const MediaListRoute: Component = () => {
 							actions={{
 								create: [
 									{
-										open: getOpenCreateMediaFolderPanel(),
-										setOpen: setOpenCreateMediaFolderPanel,
+										open: getOpenCreateMediaFolderModal(),
+										setOpen: setOpenCreateMediaFolderModal,
 										permission: canCreateMedia(),
 										label: T()("add_folder"),
 										secondary: true,
@@ -384,10 +384,10 @@ const MediaListRoute: Component = () => {
 						parentFolderId: folderIdFilter,
 					}}
 				/>
-				<CreateMediaFolderPanel
+				<CreateMediaFolderModal
 					state={{
-						open: getOpenCreateMediaFolderPanel(),
-						setOpen: setOpenCreateMediaFolderPanel,
+						open: getOpenCreateMediaFolderModal(),
+						setOpen: setOpenCreateMediaFolderModal,
 						parentFolderId: folderIdFilter,
 					}}
 				/>

@@ -68,8 +68,12 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 			>
 				<div class="p-4 md:p-6">
 					<div class="mb-4">
-						<h2>{T()("update_password")}</h2>
-						<p class="mt-1">{T()("password_description")}</p>
+						<h2 class="text-base font-semibold text-title">
+							{T()("update_password")}
+						</h2>
+						<p class="mt-1 text-base text-body">
+							{T()("password_description")}
+						</p>
 					</div>
 					<Input
 						id="currentPassword"

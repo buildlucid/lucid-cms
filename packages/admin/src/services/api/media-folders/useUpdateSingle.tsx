@@ -38,7 +38,7 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 				name: T()("folders"),
 			}),
 		}),
-		invalidates: ["mediaFolders.getMultiple"],
+		invalidates: ["mediaFolders.getMultiple", "mediaFolders.getHierarchy"],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

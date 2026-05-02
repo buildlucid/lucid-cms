@@ -26,9 +26,11 @@ export const Alert: Component<{
 					<AlertDialog.Content class="z-50 max-w-2xl w-full bg-background-base rounded-xl border-border border m-auto animate-animate-modal-hide data-expanded:animate-animate-modal-show">
 						<div class="flex justify-between mx-4 md:mx-6 py-4 md:py-6">
 							<div>
-								<AlertDialog.Title>{props.copy.title}</AlertDialog.Title>
+								<AlertDialog.Title class="text-base font-semibold text-title">
+									{props.copy.title}
+								</AlertDialog.Title>
 								<Show when={props.copy.description}>
-									<AlertDialog.Description class="mt-1">
+									<AlertDialog.Description class="mt-1 text-base text-body">
 										{props.copy.description}
 									</AlertDialog.Description>
 								</Show>

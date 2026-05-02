@@ -45,9 +45,11 @@ export const Confirmation: Component<{
 					<AlertDialog.Content class="z-50 bg-background-base rounded-xl border-border border max-w-2xl w-full m-auto animate-animate-modal-hide data-expanded:animate-animate-modal-show">
 						<div class="flex justify-between mx-4 md:mx-6 py-4 md:py-6">
 							<div class="flex flex-col gap-1">
-								<AlertDialog.Title>{props.copy.title}</AlertDialog.Title>
+								<AlertDialog.Title class="text-base font-semibold text-title">
+									{props.copy.title}
+								</AlertDialog.Title>
 								<Show when={props.copy.description}>
-									<AlertDialog.Description>
+									<AlertDialog.Description class="text-base text-body">
 										{props.copy.description}
 									</AlertDialog.Description>
 								</Show>

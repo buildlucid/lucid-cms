@@ -139,7 +139,6 @@ const ViewUserPanelContent: Component<{
 	// Render
 	return (
 		<>
-			<SectionHeading title={T()("profile_picture")} />
 			<ProfilePicturePreviewCard
 				user={{
 					username: props.state.user?.username,

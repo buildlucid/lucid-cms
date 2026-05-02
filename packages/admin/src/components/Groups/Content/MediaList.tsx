@@ -38,8 +38,8 @@ import MoveToFolder, {
 } from "@/components/Modals/Media/MoveToFolder";
 import RestoreMedia from "@/components/Modals/Media/RestoreMedia";
 import RestoreMediaBatch from "@/components/Modals/Media/RestoreMediaBatch";
+import UpdateMediaFolderModal from "@/components/Modals/Media/UpdateMediaFolder";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
-import UpdateMediaFolderPanel from "@/components/Panels/Media/UpdateMediaFolderPanel";
 import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel";
 import ViewMediaPanel from "@/components/Panels/Media/ViewMediaPanel";
 import ViewShareLinksPanel from "@/components/Panels/Media/ViewShareLinksPanel";
@@ -411,7 +411,7 @@ export const MediaList: Component<{
 					},
 				}}
 			/>
-			<UpdateMediaFolderPanel
+			<UpdateMediaFolderModal
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().updateFolder,

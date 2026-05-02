@@ -101,13 +101,10 @@ export const controllerSchemas = {
 					example: true,
 				})
 				.optional(),
-			scopes: z
-				.array(clientScopeSchema)
-				.min(1)
-				.meta({
-					description: "Scopes granted to this client integration.",
-					example: ["documents:read"],
-				}),
+			scopes: z.array(clientScopeSchema).meta({
+				description: "Scopes granted to this client integration.",
+				example: ["documents:read"],
+			}),
 		}),
 		query: {
 			string: undefined,

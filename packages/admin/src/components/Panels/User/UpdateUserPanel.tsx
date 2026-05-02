@@ -8,16 +8,18 @@ import {
 	For,
 	Show,
 } from "solid-js";
-import SectionHeading from "@/components/Blocks/SectionHeading";
 import { SelectMultiple, Switch } from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Panel } from "@/components/Groups/Panel";
 import CreateUpdateProfilePicturePanel from "@/components/Panels/Media/CreateUpdateProfilePicturePanel";
 import AuthProviderRow from "@/components/Partials/AuthProviderRow";
+import DetailsList from "@/components/Partials/DetailsList";
+import PanelTabs from "@/components/Partials/PanelTabs";
 import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePreviewCard";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 
@@ -39,6 +41,9 @@ const UpdateUserPanel: Component<{
 		createSignal<string>();
 	const [profilePicturePanelOpen, setProfilePicturePanelOpen] =
 		createSignal(false);
+	const [activeTab, setActiveTab] = createSignal<
+		"options" | "details" | "auth_providers" | "meta"
+	>("options");
 
 	// ---------------------------------
 	// Queries
@@ -109,6 +114,9 @@ const UpdateUserPanel: Component<{
 				isLocked: getIsLocked(),
 			},
 		);
+	});
+	const userRoles = createMemo(() => {
+		return user.data?.data.roles?.map((role) => role.name).join(", ") || "-";
 	});
 
 	// ---------------------------------
@@ -181,7 +189,6 @@ const UpdateUserPanel: Component<{
 			>
 				{() => (
 					<>
-						<SectionHeading title={T()("profile_picture")} />
 						<ProfilePicturePreviewCard
 							user={{
 								username: user.data?.data.username,
@@ -197,87 +204,164 @@ const UpdateUserPanel: Component<{
 							}
 							clearLoading={deleteProfilePicture.action.isPending}
 						/>
-						<SectionHeading title={T()("details")} />
-						<SelectMultiple
-							id="roles"
-							values={getSelectedRoles()}
-							onChange={setSelectedRoles}
-							name={"roles"}
-							copy={{
-								label: T()("roles"),
-							}}
-							options={
-								roles.data?.data.map((role) => {
-									return {
-										value: role.id,
-										label: role.name,
-									};
-								}) || []
-							}
-							errors={getBodyError("roleIds", updateUser.errors)}
+						<PanelTabs
+							items={[
+								{ value: "options", label: T()("options") },
+								{ value: "details", label: T()("details") },
+								{
+									value: "auth_providers",
+									label: T()("auth_providers"),
+									show: userStore.get.user?.superAdmin,
+								},
+								{ value: "meta", label: T()("meta") },
+							]}
+							active={activeTab()}
+							onChange={setActiveTab}
 						/>
-						<Show when={userStore.get.user?.superAdmin}>
-							<Switch
-								id="superAdmin"
-								value={getIsSuperAdmin()}
-								onChange={setIsSuperAdmin}
-								name={"superAdmin"}
-								theme="relaxed"
+						<Show when={activeTab() === "options"}>
+							<SelectMultiple
+								id="roles"
+								values={getSelectedRoles()}
+								onChange={setSelectedRoles}
+								name={"roles"}
 								copy={{
-									true: T()("yes"),
-									false: T()("no"),
-									label: T()("is_super_admin"),
+									label: T()("roles"),
 								}}
-								errors={getBodyError("superAdmin", updateUser.errors)}
-								hideOptionalText={true}
+								options={
+									roles.data?.data.map((role) => {
+										return {
+											value: role.id,
+											label: role.name,
+										};
+									}) || []
+								}
+								errors={getBodyError("roleIds", updateUser.errors)}
 							/>
-							<Switch
-								id="isLocked"
-								value={getIsLocked()}
-								onChange={setIsLocked}
-								name={"isLocked"}
-								theme="relaxed"
-								copy={{
-									true: T()("locked"),
-									false: T()("unlocked"),
-									label: T()("is_locked"),
-								}}
-								errors={getBodyError("isLocked", updateUser.errors)}
-								hideOptionalText={true}
+							<Show when={userStore.get.user?.superAdmin}>
+								<Switch
+									id="superAdmin"
+									value={getIsSuperAdmin()}
+									onChange={setIsSuperAdmin}
+									name={"superAdmin"}
+									theme="relaxed"
+									copy={{
+										true: T()("yes"),
+										false: T()("no"),
+										label: T()("is_super_admin"),
+									}}
+									errors={getBodyError("superAdmin", updateUser.errors)}
+									hideOptionalText={true}
+								/>
+								<Switch
+									id="isLocked"
+									value={getIsLocked()}
+									onChange={setIsLocked}
+									name={"isLocked"}
+									theme="relaxed"
+									copy={{
+										true: T()("locked"),
+										false: T()("unlocked"),
+										label: T()("is_locked"),
+									}}
+									errors={getBodyError("isLocked", updateUser.errors)}
+									hideOptionalText={true}
+								/>
+							</Show>
+						</Show>
+						<Show when={activeTab() === "details"}>
+							<DetailsList
+								type="text"
+								items={[
+									{
+										label: T()("username"),
+										value: user.data?.data.username || "-",
+									},
+									{
+										label: T()("email"),
+										value: user.data?.data.email || "-",
+									},
+									{
+										label: T()("first_name"),
+										value: user.data?.data.firstName || "-",
+									},
+									{
+										label: T()("last_name"),
+										value: user.data?.data.lastName || "-",
+									},
+									{
+										label: T()("user_type"),
+										value: user.data?.data.superAdmin
+											? T()("super_admin")
+											: T()("standard"),
+										show: user.data?.data.superAdmin !== undefined,
+									},
+									{
+										label: T()("roles"),
+										value: userRoles(),
+										show:
+											user.data?.data.roles !== undefined &&
+											user.data?.data.roles.length > 0,
+									},
+									{
+										label: T()("is_locked"),
+										value: user.data?.data.isLocked ? T()("yes") : T()("no"),
+										show: user.data?.data.isLocked !== undefined,
+									},
+								]}
 							/>
 						</Show>
-						<Show when={userStore.get.user?.superAdmin}>
-							<SectionHeading title={T()("auth_providers")} />
-							<Show
-								when={(providers.data?.data.providers?.length ?? 0) > 0}
-								fallback={
-									<span class="text-sm text-body">{T()("no_results")}</span>
-								}
-							>
-								<div class="flex flex-col gap-3">
-									<For each={providers.data?.data.providers || []}>
-										{(provider) => (
-											<AuthProviderRow
-												provider={provider}
-												linkedProvider={linkedProvidersByKey()[provider.key]}
-												isLoading={
-													unlinkAuthProvider.action.isPending &&
-													getUnlinkingProviderKey() === provider.key
-												}
-												onUnlink={() => {
-													const userId = props.id();
-													if (!userId) return;
+						<Show when={activeTab() === "auth_providers"}>
+							<Show when={userStore.get.user?.superAdmin}>
+								<Show
+									when={(providers.data?.data.providers?.length ?? 0) > 0}
+									fallback={
+										<span class="text-sm text-body">{T()("no_results")}</span>
+									}
+								>
+									<div class="flex flex-col gap-3">
+										<For each={providers.data?.data.providers || []}>
+											{(provider) => (
+												<AuthProviderRow
+													provider={provider}
+													linkedProvider={linkedProvidersByKey()[provider.key]}
+													isLoading={
+														unlinkAuthProvider.action.isPending &&
+														getUnlinkingProviderKey() === provider.key
+													}
+													onUnlink={() => {
+														const userId = props.id();
+														if (!userId) return;
 
-													unlinkAuthProvider.action.mutate({
-														userId,
-														providerKey: provider.key,
-													});
-												}}
-											/>
-										)}
-									</For>
-								</div>
+														unlinkAuthProvider.action.mutate({
+															userId,
+															providerKey: provider.key,
+														});
+													}}
+												/>
+											)}
+										</For>
+									</div>
+								</Show>
 							</Show>
+						</Show>
+						<Show when={activeTab() === "meta"}>
+							<DetailsList
+								type="text"
+								items={[
+									{
+										label: T()("created_at"),
+										value: user.data?.data.createdAt
+											? dateHelpers.formatDate(user.data?.data.createdAt)
+											: "-",
+									},
+									{
+										label: T()("updated_at"),
+										value: user.data?.data.updatedAt
+											? dateHelpers.formatDate(user.data?.data.updatedAt)
+											: "-",
+									},
+								]}
+							/>
 						</Show>
 					</>
 				)}

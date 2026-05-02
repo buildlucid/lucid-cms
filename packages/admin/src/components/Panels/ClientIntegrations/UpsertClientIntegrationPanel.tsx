@@ -128,7 +128,6 @@ const UpsertClientIntegrationPanel: Component<
 		);
 	});
 	const submitIsDisabled = createMemo(() => {
-		if (mode() === "create" && getScopes().length === 0) return true;
 		if (mode() === "create") return false;
 		return !updateData().changed;
 	});

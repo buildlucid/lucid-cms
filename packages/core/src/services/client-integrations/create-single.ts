@@ -74,14 +74,16 @@ const createSingle: ServiceFn<
 	});
 	if (newIntegrationRes.error) return newIntegrationRes;
 
-	const scopeInsertRes = await ClientIntegrationScopes.createMultiple({
-		data: data.scopes.map((scope) => ({
-			client_integration_id: newIntegrationRes.data.id,
-			scope,
-			core: true,
-		})),
-	});
-	if (scopeInsertRes.error) return scopeInsertRes;
+	if (data.scopes.length > 0) {
+		const scopeInsertRes = await ClientIntegrationScopes.createMultiple({
+			data: data.scopes.map((scope) => ({
+				client_integration_id: newIntegrationRes.data.id,
+				scope,
+				core: true,
+			})),
+		});
+		if (scopeInsertRes.error) return scopeInsertRes;
+	}
 
 	return {
 		error: undefined,

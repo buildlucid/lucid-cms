@@ -33,7 +33,7 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 			title: T()("media_folder_create_toast_title"),
 			message: T()("media_folder_create_toast_message"),
 		}),
-		invalidates: ["mediaFolders.getMultiple"],
+		invalidates: ["mediaFolders.getMultiple", "mediaFolders.getHierarchy"],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

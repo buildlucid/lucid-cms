@@ -177,10 +177,14 @@ export const Panel: Component<{
 									<div class="flex justify-between items-start gap-x-10">
 										<div>
 											<Show when={props.copy?.title}>
-												<h2>{props.copy?.title}</h2>
+												<h2 class="text-base font-semibold text-title">
+													{props.copy?.title}
+												</h2>
 											</Show>
 											<Show when={props.copy?.description}>
-												<p class="mt-1 text-sm">{props.copy?.description}</p>
+												<p class="mt-1 text-base text-body">
+													{props.copy?.description}
+												</p>
 											</Show>
 										</div>
 										<Dialog.CloseButton class="flex items-center text-body hover:text-title w-6 h-6 min-w-6 rounded-full focus:outline-hidden focus-visible:ring-1 ring-primary-base bg-background-base justify-center">

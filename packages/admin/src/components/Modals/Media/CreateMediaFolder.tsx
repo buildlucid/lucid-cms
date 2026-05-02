@@ -6,12 +6,14 @@ import {
 	createSignal,
 } from "solid-js";
 import { Input, Select } from "@/components/Groups/Form";
-import { Panel } from "@/components/Groups/Panel";
+import { Modal, ModalFooter } from "@/components/Groups/Modal";
+import Button from "@/components/Partials/Button";
+import ErrorMessage from "@/components/Partials/ErrorMessage";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
-const CreateMediaFolderPanel: Component<{
+const CreateMediaFolderModal: Component<{
 	state: {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
@@ -67,47 +69,41 @@ const CreateMediaFolderPanel: Component<{
 		if (props.state.open) {
 			setSelectedParentId(resolveParentFolderId());
 		}
+		if (!props.state.open) {
+			createFolder.reset();
+			setTitle("");
+			setSelectedParentId(undefined);
+		}
 	});
 
 	// -----------------------------
 	// Render
 	return (
-		<Panel
+		<Modal
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
 			}}
-			mutateState={{
-				isLoading: createFolder.action.isPending,
-				errors: createFolder.errors(),
+			options={{
+				noPadding: true,
 			}}
-			fetchState={{
-				isLoading: foldersHierarchy.isLoading,
-				isError: foldersHierarchy.isError,
-			}}
-			callbacks={{
-				onSubmit: () => {
+		>
+			<form
+				class="w-full"
+				onSubmit={(e) => {
+					e.preventDefault();
 					createFolder.action.mutate({
 						title: getTitle(),
 						parentFolderId: getSelectedParentId() ?? null,
 					});
-				},
-				reset: () => {
-					createFolder.reset();
-					setTitle("");
-					setSelectedParentId(undefined);
-				},
-			}}
-			copy={{
-				title: T()("create_media_folder_panel_title"),
-				submit: T()("create"),
-			}}
-			options={{
-				padding: "24",
-			}}
-		>
-			{() => (
-				<>
+				}}
+			>
+				<div class="p-4 md:p-6">
+					<div class="mb-4">
+						<h2 class="text-base font-semibold text-title">
+							{T()("create_media_folder_panel_title")}
+						</h2>
+					</div>
 					<Input
 						id="title"
 						value={getTitle()}
@@ -135,10 +131,44 @@ const CreateMediaFolderPanel: Component<{
 						copy={{ label: T()("folder") }}
 						noClear={true}
 					/>
-				</>
-			)}
-		</Panel>
+				</div>
+				<ModalFooter>
+					<div class="min-w-0">
+						<ErrorMessage
+							theme="basic"
+							message={createFolder.errors()?.message}
+						/>
+						<ErrorMessage
+							theme="basic"
+							message={
+								foldersHierarchy.isError ? T()("error_message") : undefined
+							}
+						/>
+					</div>
+					<div class="flex min-w-max gap-2">
+						<Button
+							type="button"
+							theme="border-outline"
+							size="medium"
+							onClick={() => props.state.setOpen(false)}
+							disabled={createFolder.action.isPending}
+						>
+							{T()("cancel")}
+						</Button>
+						<Button
+							type="submit"
+							theme="primary"
+							size="medium"
+							loading={createFolder.action.isPending}
+							disabled={foldersHierarchy.isLoading}
+						>
+							{T()("create")}
+						</Button>
+					</div>
+				</ModalFooter>
+			</form>
+		</Modal>
 	);
 };
 
-export default CreateMediaFolderPanel;
+export default CreateMediaFolderModal;

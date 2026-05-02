@@ -6,12 +6,14 @@ import {
 	createSignal,
 } from "solid-js";
 import { Input, Select } from "@/components/Groups/Form";
-import { Panel } from "@/components/Groups/Panel";
+import { Modal, ModalFooter } from "@/components/Groups/Modal";
+import Button from "@/components/Partials/Button";
+import ErrorMessage from "@/components/Partials/ErrorMessage";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
-const UpdateMediaFolderPanel: Component<{
+const UpdateMediaFolderModal: Component<{
 	id: Accessor<number | undefined>;
 	state: {
 		open: boolean;
@@ -68,26 +70,29 @@ const UpdateMediaFolderPanel: Component<{
 				setSelectedParentId(current.parentFolderId ?? null);
 			}
 		}
+		if (!props.state.open) {
+			updateFolder.reset();
+			setTitle("");
+			setSelectedParentId(undefined);
+		}
 	});
 
 	// -----------------------------
 	// Render
 	return (
-		<Panel
+		<Modal
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
 			}}
-			mutateState={{
-				isLoading: updateFolder.action.isPending,
-				errors: updateFolder.errors(),
+			options={{
+				noPadding: true,
 			}}
-			fetchState={{
-				isLoading: foldersHierarchy.isLoading,
-				isError: foldersHierarchy.isError,
-			}}
-			callbacks={{
-				onSubmit: () => {
+		>
+			<form
+				class="w-full"
+				onSubmit={(e) => {
+					e.preventDefault();
 					const id = props.id();
 					if (!id) return;
 					updateFolder.action.mutate({
@@ -97,23 +102,14 @@ const UpdateMediaFolderPanel: Component<{
 							parentFolderId: getSelectedParentId() ?? null,
 						},
 					});
-				},
-				reset: () => {
-					updateFolder.reset();
-					setTitle("");
-					setSelectedParentId(undefined);
-				},
-			}}
-			copy={{
-				title: T()("update_media_folder_panel_title"),
-				submit: T()("update"),
-			}}
-			options={{
-				padding: "24",
-			}}
-		>
-			{() => (
-				<>
+				}}
+			>
+				<div class="p-4 md:p-6">
+					<div class="mb-4">
+						<h2 class="text-base font-semibold text-title">
+							{T()("update_media_folder_panel_title")}
+						</h2>
+					</div>
 					<Input
 						id="title"
 						value={getTitle()}
@@ -142,10 +138,44 @@ const UpdateMediaFolderPanel: Component<{
 						noClear={true}
 						errors={getBodyError("parentFolderId", updateFolder.errors)}
 					/>
-				</>
-			)}
-		</Panel>
+				</div>
+				<ModalFooter>
+					<div class="min-w-0">
+						<ErrorMessage
+							theme="basic"
+							message={updateFolder.errors()?.message}
+						/>
+						<ErrorMessage
+							theme="basic"
+							message={
+								foldersHierarchy.isError ? T()("error_message") : undefined
+							}
+						/>
+					</div>
+					<div class="flex min-w-max gap-2">
+						<Button
+							type="button"
+							theme="border-outline"
+							size="medium"
+							onClick={() => props.state.setOpen(false)}
+							disabled={updateFolder.action.isPending}
+						>
+							{T()("cancel")}
+						</Button>
+						<Button
+							type="submit"
+							theme="primary"
+							size="medium"
+							loading={updateFolder.action.isPending}
+							disabled={foldersHierarchy.isLoading}
+						>
+							{T()("update")}
+						</Button>
+					</div>
+				</ModalFooter>
+			</form>
+		</Modal>
 	);
 };
 
-export default UpdateMediaFolderPanel;
+export default UpdateMediaFolderModal;
