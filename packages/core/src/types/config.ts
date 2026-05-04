@@ -114,7 +114,7 @@ export type AccessConfig = {
 	/**
 	 * Custom permission groups available in the admin role editor.
 	 */
-	permissionGroups?: AccessPermissionGroupDefinitions;
+	groups?: AccessPermissionGroupDefinitions;
 	/**
 	 * Custom permissions available for roles and collection permission mappings.
 	 */
@@ -606,7 +606,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| Promise<QueueAdapterInstance>;
 	};
 	access: {
-		permissionGroups: AccessPermissionGroupDefinitions;
+		groups: AccessPermissionGroupDefinitions;
 		permissions: AccessPermissionDefinitions;
 		roles: AccessRoleDefinition[];
 	};

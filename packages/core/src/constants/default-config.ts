@@ -62,7 +62,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 	collections: [],
 	plugins: [],
 	access: {
-		permissionGroups: {},
+		groups: {},
 		permissions: {},
 		roles: [],
 	},

@@ -74,7 +74,7 @@ const ensureValidTranslationLocales = (
  * Validates custom permission config and collection mappings before Lucid starts.
  */
 const checkAccess = (config: Config) => {
-	const customGroups = config.access.permissionGroups;
+	const customGroups = config.access.groups;
 	const customPermissions = config.access.permissions;
 	const customPermissionKeys = Object.keys(customPermissions);
 

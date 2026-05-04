@@ -102,7 +102,7 @@
 	"config_access_core_group_collision": "Custom permission group \"{{group}}\" cannot redefine a core Lucid permission group.",
 	"config_access_invalid_permission_key": "Custom permission \"{{permission}}\" must contain only lowercase letters, numbers, colons, underscores and hyphens.",
 	"config_access_core_permission_collision": "Custom permission \"{{permission}}\" cannot redefine a core Lucid permission.",
-	"config_access_unknown_permission_group_reference": "Custom permission \"{{permission}}\" references unknown permission group \"{{group}}\". Register it in access.permissionGroups or use a core Lucid permission group.",
+	"config_access_unknown_permission_group_reference": "Custom permission \"{{permission}}\" references unknown permission group \"{{group}}\". Register it in access.groups or use a core Lucid permission group.",
 	"config_access_managed_role_context": "Managed role \"{{role}}\"",
 	"config_access_managed_role_name_context": "Managed role \"{{role}}\" name",
 	"config_access_managed_role_description_context": "Managed role \"{{role}}\" description",

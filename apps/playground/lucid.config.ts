@@ -202,11 +202,11 @@ export default configureLucid({
 			],
 		},
 		access: {
-			permissionGroups: {
-				pagePermissions: {
+			groups: {
+				pages: {
 					name: "Page Permissions",
 				},
-				blogPermissions: {
+				blogs: {
 					name: "Blog Permissions",
 				},
 			},
@@ -214,43 +214,43 @@ export default configureLucid({
 				"page:full": {
 					name: "Full Page Access",
 					description: "Grants full access to pages.",
-					group: "pagePermissions",
+					group: "pages",
 				},
 				"page:read": {
 					name: "Read Pages",
-					group: "pagePermissions",
+					group: "pages",
 				},
 				"page:create": {
 					name: "Create Pages",
-					group: "pagePermissions",
+					group: "pages",
 				},
 				"page:update": {
 					name: "Update Pages",
-					group: "pagePermissions",
+					group: "pages",
 				},
 				"page:delete": {
 					name: "Delete Pages",
-					group: "pagePermissions",
+					group: "pages",
 				},
 				"page:restore": {
 					name: "Restore Pages",
-					group: "pagePermissions",
+					group: "pages",
 				},
 				"page:publish": {
 					name: "Publish Pages",
-					group: "pagePermissions",
+					group: "pages",
 				},
 				"page:publish:staging": {
 					name: "Publish Pages To Staging",
-					group: "pagePermissions",
+					group: "pages",
 				},
 				"page:publish:production": {
 					name: "Publish Pages To Production",
-					group: "pagePermissions",
+					group: "pages",
 				},
 				"blog:full": {
 					name: "Full Blog Access",
-					group: "blogPermissions",
+					group: "blogs",
 				},
 			},
 			roles: [

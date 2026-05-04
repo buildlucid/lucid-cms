@@ -48,9 +48,7 @@ export const getPermissionRegistry = (config?: Pick<Config, "access">) => {
 		}),
 	);
 
-	for (const [key, group] of Object.entries(
-		config?.access.permissionGroups ?? {},
-	)) {
+	for (const [key, group] of Object.entries(config?.access.groups ?? {})) {
 		groups.push({
 			key,
 			details: {

@@ -208,7 +208,7 @@ const ConfigSchema = z.object({
 		.optional(),
 	access: z
 		.object({
-			permissionGroups: z
+			groups: z
 				.record(
 					z.string(),
 					z.object({
