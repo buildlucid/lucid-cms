@@ -33,6 +33,11 @@ import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
+import {
+	getTranslation,
+	recordToTranslations,
+	updateTranslation,
+} from "@/utils/translation-helpers";
 
 interface CreateUpdateMediaPanelProps {
 	id?: Accessor<number | undefined>;
@@ -415,12 +420,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		if (errors) return errors[index];
 		return undefined;
 	}
-	function recordToTranslations(record?: Record<string, string>) {
-		return locales().map((locale) => ({
-			localeCode: locale.code,
-			value: record?.[locale.code] ?? null,
-		}));
-	}
 	function setFileError(message: string) {
 		setUploadErrors({
 			status: 400,
@@ -480,7 +479,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		PosterFile.setGetFile(null);
 		PosterFile.setGetRemovedCurrent(false);
 		PosterFile.setFocalPoint(media.data?.data.poster?.meta.focalPoint ?? null);
-		setPosterAlt(media.data?.data.poster?.alt ?? recordToTranslations());
+		setPosterAlt(
+			media.data?.data.poster?.alt ?? recordToTranslations(locales()),
+		);
 	}
 	async function createPoster() {
 		const file = PosterFile.getFile();
@@ -587,7 +588,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			updateMedia?.setFolderId(media.data?.data.folderId ?? null);
 			updateMedia?.setPublic(media.data?.data.public ?? true);
 			updateMedia?.setPosterId(media.data?.data.poster?.id ?? null);
-			setPosterAlt(media.data?.data.poster?.alt ?? recordToTranslations());
+			setPosterAlt(
+				media.data?.data.poster?.alt ?? recordToTranslations(locales()),
+			);
 			MediaFile.reset();
 			MediaFile.setCurrentFile({
 				name: media.data.data.key,
@@ -731,13 +734,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									<Input
 										id={`name-${locale.code}`}
 										value={
-											helpers.getTranslation(
-												targetState()?.title(),
-												locale.code,
-											) || ""
+											getTranslation(targetState()?.title(), locale.code) || ""
 										}
 										onChange={(val) => {
-											helpers.updateTranslation(targetAction()?.setTitle, {
+											updateTranslation(targetAction()?.setTitle, {
 												localeCode: locale.code,
 												value: val,
 											});
@@ -754,13 +754,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										<Input
 											id={`alt-${locale.code}`}
 											value={
-												helpers.getTranslation(
-													targetState()?.alt(),
-													locale.code,
-												) || ""
+												getTranslation(targetState()?.alt(), locale.code) || ""
 											}
 											onChange={(val) => {
-												helpers.updateTranslation(targetAction()?.setAlt, {
+												updateTranslation(targetAction()?.setAlt, {
 													localeCode: locale.code,
 													value: val,
 												});
@@ -777,19 +774,16 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										<Textarea
 											id={`description-${locale.code}`}
 											value={
-												helpers.getTranslation(
+												getTranslation(
 													targetState()?.description(),
 													locale.code,
 												) || ""
 											}
 											onChange={(val) => {
-												helpers.updateTranslation(
-													targetAction()?.setDescription,
-													{
-														localeCode: locale.code,
-														value: val,
-													},
-												);
+												updateTranslation(targetAction()?.setDescription, {
+													localeCode: locale.code,
+													value: val,
+												});
 											}}
 											name={`description-${locale.code}`}
 											copy={{
@@ -802,13 +796,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										<Textarea
 											id={`summary-${locale.code}`}
 											value={
-												helpers.getTranslation(
-													targetState()?.summary(),
-													locale.code,
-												) || ""
+												getTranslation(targetState()?.summary(), locale.code) ||
+												""
 											}
 											onChange={(val) => {
-												helpers.updateTranslation(targetAction()?.setSummary, {
+												updateTranslation(targetAction()?.setSummary, {
 													localeCode: locale.code,
 													value: val,
 												});
@@ -976,11 +968,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									<Show when={locale.code === lang?.contentLocale()}>
 										<Input
 											id={`poster-alt-${locale.code}`}
-											value={
-												helpers.getTranslation(posterAlt(), locale.code) || ""
-											}
+											value={getTranslation(posterAlt(), locale.code) || ""}
 											onChange={(val) => {
-												helpers.updateTranslation(setPosterAlt, {
+												updateTranslation(setPosterAlt, {
 													localeCode: locale.code,
 													value: val,
 												});

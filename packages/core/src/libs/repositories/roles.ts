@@ -13,8 +13,11 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 	}
 	tableSchema = z.object({
 		id: z.number(),
-		name: z.string(),
-		description: z.string().nullable(),
+		key: z.string().nullable(),
+		locked: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
 		permissions: z
 			.array(
 				z.object({
@@ -24,25 +27,34 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 				}),
 			)
 			.optional(),
+		translations: z
+			.array(
+				z.object({
+					name: z.string().nullable(),
+					description: z.string().nullable(),
+					locale_code: z.string(),
+				}),
+			)
+			.optional(),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
-		name: this.dbAdapter.getDataType("text"),
-		description: this.dbAdapter.getDataType("text"),
+		key: this.dbAdapter.getDataType("text"),
+		locked: this.dbAdapter.getDataType("boolean"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 	};
 	queryConfig = {
 		tableKeys: {
 			filters: {
-				name: "name",
-				roleIds: "id",
+				name: "translation.name",
+				roleIds: "lucid_roles.id",
 			},
 			sorts: {
-				name: "name",
-				createdAt: "created_at",
+				name: "translation.name",
+				createdAt: "lucid_roles.created_at",
 			},
 		},
 		operators: {
@@ -64,10 +76,26 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			.selectFrom("lucid_roles")
 			.select((eb) => [
 				"id",
-				"name",
+				"key",
+				"locked",
 				"created_at",
 				"updated_at",
-				"description",
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_role_translations")
+							.select([
+								"lucid_role_translations.name",
+								"lucid_role_translations.description",
+								"lucid_role_translations.locale_code",
+							])
+							.whereRef(
+								"lucid_role_translations.role_id",
+								"=",
+								"lucid_roles.id",
+							),
+					)
+					.as("translations"),
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -97,10 +125,11 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			mode: "single",
 			select: [
 				"id",
-				"name",
+				"key",
+				"locked",
 				"created_at",
 				"updated_at",
-				"description",
+				"translations",
 				"permissions",
 			],
 		});
@@ -117,7 +146,34 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			async () => {
 				const mainQuery = this.db
 					.selectFrom("lucid_roles")
-					.select(["id", "name", "created_at", "updated_at", "description"])
+					.leftJoin("lucid_role_translations as translation", (join) =>
+						join.onRef("translation.role_id", "=", "lucid_roles.id"),
+					)
+					.select([
+						"lucid_roles.id",
+						"lucid_roles.key",
+						"lucid_roles.locked",
+						"lucid_roles.created_at",
+						"lucid_roles.updated_at",
+					])
+					.select((eb) => [
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_role_translations")
+									.select([
+										"lucid_role_translations.name",
+										"lucid_role_translations.description",
+										"lucid_role_translations.locale_code",
+									])
+									.whereRef(
+										"lucid_role_translations.role_id",
+										"=",
+										"lucid_roles.id",
+									),
+							)
+							.as("translations"),
+					])
 					.$if(
 						props.queryParams.include?.includes("permissions") || false,
 						(qb) =>
@@ -139,11 +195,15 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 									)
 									.as("permissions"),
 							]),
-					);
+					)
+					.groupBy("lucid_roles.id");
 
 				const countQuery = this.db
 					.selectFrom("lucid_roles")
-					.select(sql`count(*)`.as("count"));
+					.select(sql`count(distinct lucid_roles.id)`.as("count"))
+					.leftJoin("lucid_role_translations as translation", (join) =>
+						join.onRef("translation.role_id", "=", "lucid_roles.id"),
+					);
 
 				const { main, count } = queryBuilder.main(
 					{
@@ -152,7 +212,16 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 					},
 					{
 						queryParams: props.queryParams,
-						meta: this.queryConfig,
+						meta: {
+							tableKeys: {
+								filters: {
+									...this.queryConfig.tableKeys.filters,
+									name: "translation.name",
+								},
+								sorts: this.queryConfig.tableKeys.sorts,
+							},
+							operators: this.queryConfig.operators,
+						},
 					},
 				);
 
@@ -174,10 +243,11 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			mode: "multiple-count",
 			select: [
 				"id",
-				"name",
+				"key",
+				"locked",
 				"created_at",
 				"updated_at",
-				"description",
+				"translations",
 				"permissions",
 			],
 		});

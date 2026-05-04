@@ -15,6 +15,16 @@ const CollectionConfigSchema = z.object({
 		singularName: stringTranslations,
 		summary: stringTranslations.optional(),
 	}),
+	permissions: z
+		.object({
+			read: z.string().optional(),
+			create: z.string().optional(),
+			update: z.string().optional(),
+			delete: z.string().optional(),
+			restore: z.string().optional(),
+			publish: z.string().optional(),
+		})
+		.optional(),
 	config: z
 		.object({
 			isLocked: z
@@ -54,6 +64,11 @@ const CollectionConfigSchema = z.object({
 								},
 							),
 						name: stringTranslations,
+						permissions: z
+							.object({
+								publish: z.string().optional(),
+							})
+							.optional(),
 					}),
 				)
 				.optional(),

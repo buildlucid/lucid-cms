@@ -1,7 +1,7 @@
 import constants from "../../../constants/constants.js";
 import type { BooleanInt } from "../../../libs/db/types.js";
 import formatter from "../../../libs/formatters/index.js";
-import { RolesRepository } from "../../../libs/repositories/index.js";
+import { RoleTranslationsRepository } from "../../../libs/repositories/index.js";
 import type {
 	SecurityAuditAction,
 	SecurityAuditRoleSnapshot,
@@ -103,14 +103,22 @@ const resolveNextRoleSnapshot = async (
 		};
 	}
 
-	const Roles = new RolesRepository(context.db.client, context.config.db);
-	const rolesRes = await Roles.selectMultiple({
-		select: ["id", "name"],
+	const RoleTranslations = new RoleTranslationsRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const rolesRes = await RoleTranslations.selectMultiple({
+		select: ["role_id", "name"],
 		where: [
 			{
-				key: "id",
+				key: "role_id",
 				operator: "in",
 				value: roleChange.nextRoleIds,
+			},
+			{
+				key: "locale_code",
+				operator: "=",
+				value: context.config.localization.defaultLocale,
 			},
 		],
 		validation: {
@@ -121,7 +129,12 @@ const resolveNextRoleSnapshot = async (
 
 	return {
 		error: undefined,
-		data: sortRoleSnapshot(rolesRes.data),
+		data: sortRoleSnapshot(
+			rolesRes.data.map((role) => ({
+				id: role.role_id,
+				name: role.name ?? "",
+			})),
+		),
 	};
 };
 

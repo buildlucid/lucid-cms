@@ -512,7 +512,18 @@ export interface Collection {
 		environments: {
 			key: string;
 			name: LocaleValue;
+			permissions: {
+				publish: string;
+			};
 		}[];
+	};
+	permissions: {
+		read: string;
+		create: string;
+		update: string;
+		delete: string;
+		restore: string;
+		publish: string;
 	};
 	migrationStatus?: MigrationStatus | null;
 	fixedBricks: Array<CollectionBrickConfig>;

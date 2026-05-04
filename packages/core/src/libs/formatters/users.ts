@@ -32,8 +32,11 @@ export interface UserPropT {
 	}[];
 	roles?: {
 		id: number;
-		description: string | null;
-		name: string;
+		name?: string | null;
+		translations?: {
+			name: string | null;
+			locale_code: string | null;
+		}[];
 		permissions?: {
 			permission: string;
 		}[];
@@ -45,6 +48,7 @@ const formatMultiple = (props: {
 	authUser?: LucidAuth;
 	host: string;
 	locales: string[];
+	defaultLocale: string;
 }) => {
 	return props.users.map((u) =>
 		formatSingle({
@@ -52,6 +56,7 @@ const formatMultiple = (props: {
 			authUser: props.authUser,
 			host: props.host,
 			locales: props.locales,
+			defaultLocale: props.defaultLocale,
 		}),
 	);
 };
@@ -61,6 +66,7 @@ const formatSingle = (props: {
 	authUser?: LucidAuth;
 	host: string;
 	locales: string[];
+	defaultLocale: string;
 	pendingEmailChange?: {
 		email: string;
 		requestedAt: Date | string | null;
@@ -69,6 +75,7 @@ const formatSingle = (props: {
 }): User => {
 	const { roles, permissions } = userPermissionsFormatter.formatMultiple({
 		roles: props.user.roles || [],
+		defaultLocale: props.defaultLocale,
 	});
 
 	const canViewDetails = hasAccess({

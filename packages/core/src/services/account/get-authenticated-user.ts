@@ -60,6 +60,7 @@ const getAuthenticatedUser: ServiceFn<
 			authUser: data.authUser,
 			host: getBaseUrl(context),
 			locales: context.config.localization.locales.map((locale) => locale.code),
+			defaultLocale: context.config.localization.defaultLocale,
 			pendingEmailChange: pendingEmailChangeRes.data
 				? {
 						email: pendingEmailChangeRes.data.new_email,

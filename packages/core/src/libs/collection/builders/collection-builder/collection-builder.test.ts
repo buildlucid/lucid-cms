@@ -97,6 +97,7 @@ test("collection config is correct along with field includes and filters", async
 			},
 			summary: "Pages are used to create static content on your website.",
 		},
+		permissions: {},
 		config: {
 			isLocked: false,
 			useRevisions: false,

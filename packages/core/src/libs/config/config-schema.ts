@@ -1,5 +1,6 @@
 import type { Hono } from "hono";
 import z from "zod";
+import { stringTranslations } from "../../schemas/locales.js";
 import type { Config } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
@@ -77,6 +78,10 @@ const ContentSecurityPolicySchema = z
 	.optional();
 
 const OverridableHeaderSchema = z.union([z.boolean(), z.string()]);
+const configuredLocaleTranslations = z.union([
+	z.string(),
+	z.record(z.string(), z.string()),
+]);
 
 const ConfigSchema = z.object({
 	db: z.unknown(),
@@ -199,6 +204,39 @@ const ConfigSchema = z.object({
 	queue: z
 		.object({
 			adapter: QueueAdapterSchema.optional(),
+		})
+		.optional(),
+	access: z
+		.object({
+			permissionGroups: z
+				.record(
+					z.string(),
+					z.object({
+						name: stringTranslations,
+						description: stringTranslations.nullable().optional(),
+					}),
+				)
+				.optional(),
+			permissions: z
+				.record(
+					z.string(),
+					z.object({
+						name: stringTranslations,
+						description: stringTranslations.nullable().optional(),
+						group: z.string(),
+					}),
+				)
+				.optional(),
+			roles: z
+				.array(
+					z.object({
+						key: z.string(),
+						name: configuredLocaleTranslations,
+						description: configuredLocaleTranslations.optional(),
+						permissions: z.array(z.string()),
+					}),
+				)
+				.optional(),
 		})
 		.optional(),
 	kv: z

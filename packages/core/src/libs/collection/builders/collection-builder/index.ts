@@ -151,11 +151,16 @@ class CollectionBuilder extends FieldBuilder {
 					this.config.config?.useAutoSave ??
 					constants.collectionBuilder.useAutoSave,
 				displayInListing: this.displayInListing,
-				environments: this.config.config?.environments ?? [],
+				environments:
+					this.config.config?.environments?.map((environment) => ({
+						...environment,
+						permissions: environment.permissions ?? {},
+					})) ?? [],
 				revisionRetentionDays:
 					this.config.config?.revisionRetentionDays ??
 					constants.collectionBuilder.revisionRetentionDays,
 			},
+			permissions: this.config.permissions ?? {},
 		};
 	}
 	get fixedBricks(): CollectionBrickConfig[] {

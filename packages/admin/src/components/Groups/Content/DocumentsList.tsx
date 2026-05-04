@@ -9,7 +9,6 @@ import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import DeleteDocumentPermanently from "@/components/Modals/Documents/DeleteDocumentPermanently";
 import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
-import { Permissions } from "@/constants/permissions";
 import useRowTarget from "@/hooks/useRowTarget";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -68,21 +67,33 @@ export const DocumentsList: Component<{
 			props.state.searchParams.getSettled() === true &&
 			props.state.collectionIsSuccess() === true,
 	);
+	const collectionPermissions = createMemo(
+		() => props.state.collection?.permissions,
+	);
 	const rowsAreSelectable = createMemo(() => {
+		const permissions = collectionPermissions();
+		if (!permissions) return false;
+
 		if (props.state.showingDeleted()) {
 			return userStore.get.hasPermission([
-				Permissions.DocumentsUpdate,
-				Permissions.DocumentsDelete,
+				permissions.restore,
+				permissions.delete,
 			]).some;
 		}
-		return userStore.get.hasPermission([Permissions.DocumentsDelete]).some;
+		return userStore.get.hasPermission([permissions.delete]).some;
 	});
-	const canRestoreDocuments = createMemo(
-		() => userStore.get.hasPermission([Permissions.DocumentsUpdate]).some,
-	);
-	const canDeleteDocuments = createMemo(
-		() => userStore.get.hasPermission([Permissions.DocumentsDelete]).some,
-	);
+	const canRestoreDocuments = createMemo(() => {
+		const permission = collectionPermissions()?.restore;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).some;
+	});
+	const canDeleteDocuments = createMemo(() => {
+		const permission = collectionPermissions()?.delete;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).some;
+	});
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
 			value: props.state.collection?.details.name,
@@ -179,7 +190,8 @@ export const DocumentsList: Component<{
 				noEntries: noEntriesCopy(),
 			}}
 			permissions={{
-				create: userStore.get.hasPermission([Permissions.DocumentsCreate]).some,
+				create: userStore.get.hasPermission([collectionPermissions()?.create])
+					.some,
 			}}
 			callback={{
 				createEntry: createEntryCallback(),
@@ -283,9 +295,11 @@ export const DocumentsList: Component<{
 												}),
 											);
 										},
-										permission: userStore.get.hasPermission([
-											Permissions.DocumentsUpdate,
-										]).some,
+										permission: collectionPermissions()?.update
+											? userStore.get.hasPermission([
+													collectionPermissions()?.update as string,
+												]).some
+											: false,
 										hide: props.state.showingDeleted(),
 									},
 									{
@@ -299,9 +313,11 @@ export const DocumentsList: Component<{
 												}),
 											);
 										},
-										permission: userStore.get.hasPermission([
-											Permissions.DocumentsRead,
-										]).some,
+										permission: collectionPermissions()?.read
+											? userStore.get.hasPermission([
+													collectionPermissions()?.read as string,
+												]).some
+											: false,
 										hide: props.state.showingDeleted() === false,
 									},
 									{
@@ -311,9 +327,11 @@ export const DocumentsList: Component<{
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("restore", true);
 										},
-										permission: userStore.get.hasPermission([
-											Permissions.DocumentsUpdate,
-										]).all,
+										permission: collectionPermissions()?.restore
+											? userStore.get.hasPermission([
+													collectionPermissions()?.restore as string,
+												]).all
+											: false,
 										hide: props.state.showingDeleted() === false,
 										theme: "primary",
 									},
@@ -324,9 +342,11 @@ export const DocumentsList: Component<{
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("delete", true);
 										},
-										permission: userStore.get.hasPermission([
-											Permissions.DocumentsDelete,
-										]).all,
+										permission: collectionPermissions()?.delete
+											? userStore.get.hasPermission([
+													collectionPermissions()?.delete as string,
+												]).all
+											: false,
 										actionExclude: true,
 										theme: "error",
 										hide: props.state.showingDeleted(),
@@ -338,9 +358,11 @@ export const DocumentsList: Component<{
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("deletePermanently", true);
 										},
-										permission: userStore.get.hasPermission([
-											Permissions.DocumentsDelete,
-										]).all,
+										permission: collectionPermissions()?.delete
+											? userStore.get.hasPermission([
+													collectionPermissions()?.delete as string,
+												]).all
+											: false,
 										hide: props.state.showingDeleted?.() === false,
 										theme: "error",
 									},

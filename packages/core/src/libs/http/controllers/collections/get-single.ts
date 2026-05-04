@@ -11,6 +11,7 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
+import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -31,6 +32,7 @@ const getSingleController = factory.createHandlers(
 	}),
 	authenticate,
 	validate("param", controllerSchemas.getSingle.params),
+	collectionPermissions("read"),
 	async (c) => {
 		const { key } = c.req.valid("param");
 		const context = createServiceContext(c);

@@ -22,6 +22,7 @@ export { default as OptionsRepository } from "./options.js";
 export { default as ProcessedImagesRepository } from "./processed-images.js";
 export { default as QueueJobsRepository } from "./queue-jobs.js";
 export { default as RolePermissionsRepository } from "./role-permissions.js";
+export { default as RoleTranslationsRepository } from "./role-translations.js";
 export { default as RolesRepository } from "./roles.js";
 export { default as SecurityAuditLogsRepository } from "./security-audit-logs.js";
 export { default as UserAuthProvidersRepository } from "./user-auth-providers.js";

@@ -7,6 +7,14 @@ const BlogCollection = new CollectionBuilder("blog", {
 		singularName: "Blog",
 		summary: "Manage your blogs.",
 	},
+	permissions: {
+		read: "blog:full",
+		create: "blog:full",
+		update: "blog:full",
+		delete: "blog:full",
+		restore: "blog:full",
+		publish: "blog:full",
+	},
 	config: {
 		useTranslations: true,
 		environments: [

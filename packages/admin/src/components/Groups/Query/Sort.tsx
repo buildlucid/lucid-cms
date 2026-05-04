@@ -124,7 +124,7 @@ export const Sort: Component<SortProps> = (props) => {
 		<DropdownMenu.Root getAnchorRect={getAnchorRect}>
 			<DropdownMenu.Trigger
 				class={
-					"dropdown-trigger px-2 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent rounded-md fill-secondary-contrast flex items-center"
+					"dropdown-trigger pl-2 pr-3 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent rounded-md fill-secondary-contrast flex items-center"
 				}
 			>
 				<DropdownMenu.Icon>

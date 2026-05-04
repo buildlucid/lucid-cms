@@ -113,8 +113,15 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			.array(
 				z.object({
 					id: z.number(),
-					description: z.string().nullable(),
-					name: z.string(),
+					name: z.string().nullable().optional(),
+					translations: z
+						.array(
+							z.object({
+								name: z.string().nullable(),
+								locale_code: z.string().nullable(),
+							}),
+						)
+						.optional(),
 					permissions: z
 						.array(
 							z.object({
@@ -205,8 +212,21 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						)
 						.select((eb) => [
 							"lucid_roles.id",
-							"lucid_roles.name",
-							"lucid_roles.description",
+							this.dbAdapter
+								.jsonArrayFrom(
+									eb
+										.selectFrom("lucid_role_translations")
+										.select([
+											"lucid_role_translations.name",
+											"lucid_role_translations.locale_code",
+										])
+										.whereRef(
+											"lucid_role_translations.role_id",
+											"=",
+											"lucid_roles.id",
+										),
+								)
+								.as("translations"),
 							this.dbAdapter
 								.jsonArrayFrom(
 									eb
@@ -239,6 +259,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				id: number;
+				defaultLocale: string;
 			}
 		>,
 	) {
@@ -256,11 +277,12 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 								"lucid_roles.id",
 								"lucid_user_roles.role_id",
 							)
-							.select([
-								"lucid_roles.id",
-								"lucid_roles.name",
-								"lucid_roles.description",
-							])
+							.leftJoin("lucid_role_translations as translation", (join) =>
+								join
+									.onRef("translation.role_id", "=", "lucid_roles.id")
+									.on("translation.locale_code", "=", props.defaultLocale),
+							)
+							.select(["lucid_roles.id", "translation.name"])
 							.whereRef("user_id", "=", "lucid_users.id")
 							.orderBy("lucid_roles.id", "asc"),
 					)
@@ -313,8 +335,21 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						)
 						.select((eb) => [
 							"lucid_roles.id",
-							"lucid_roles.name",
-							"lucid_roles.description",
+							this.dbAdapter
+								.jsonArrayFrom(
+									eb
+										.selectFrom("lucid_role_translations")
+										.select([
+											"lucid_role_translations.name",
+											"lucid_role_translations.locale_code",
+										])
+										.whereRef(
+											"lucid_role_translations.role_id",
+											"=",
+											"lucid_roles.id",
+										),
+								)
+								.as("translations"),
 							this.dbAdapter
 								.jsonArrayFrom(
 									eb
@@ -627,10 +662,23 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										"lucid_roles.id",
 										"lucid_user_roles.role_id",
 									)
-									.select([
+									.select((eb) => [
 										"lucid_roles.id",
-										"lucid_roles.name",
-										"lucid_roles.description",
+										this.dbAdapter
+											.jsonArrayFrom(
+												eb
+													.selectFrom("lucid_role_translations")
+													.select([
+														"lucid_role_translations.name",
+														"lucid_role_translations.locale_code",
+													])
+													.whereRef(
+														"lucid_role_translations.role_id",
+														"=",
+														"lucid_roles.id",
+													),
+											)
+											.as("translations"),
 									])
 									.whereRef("user_id", "=", "lucid_users.id"),
 							)

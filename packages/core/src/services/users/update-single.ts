@@ -172,7 +172,19 @@ const updateSingle: ServiceFn<
 		currentUser: {
 			email: userRes.data.email,
 			superAdmin: userRes.data.super_admin,
-			roles: userRes.data.roles ?? [],
+			roles:
+				userRes.data.roles?.map((role) => ({
+					id: role.id,
+					name:
+						role.translations?.find(
+							(translation) =>
+								translation.locale_code ===
+								context.config.localization.defaultLocale,
+						)?.name ??
+						role.translations?.find((translation) => translation.name !== null)
+							?.name ??
+						"",
+				})) ?? [],
 		},
 		normalizedEmail,
 		passwordChanged: hashedPassword !== undefined,

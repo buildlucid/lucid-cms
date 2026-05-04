@@ -435,6 +435,8 @@
 	"promote_to_draft_modal_description": "We notice drafts are enabled for this collection, but there is only a published version for this document. To continue editing, a draft version will be created from the published version.",
 	"update_role_panel_title": "Edit {{name}} Role",
 	"create_role_panel_title": "Create a New Role",
+	"view_role_panel_title": "View {{name}} Role",
+	"config_managed_role_description": "This role is defined in lucid.config and can only be changed there.",
 	"view_user_panel_title": "View User",
 	"view_user_logins_panel_title": "User Logins",
 	"view_user_logins_panel_description": "Login history, authentication methods, and IP addresses",

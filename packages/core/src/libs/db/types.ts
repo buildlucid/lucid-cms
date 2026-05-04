@@ -251,10 +251,18 @@ export interface LucidUserAuthProviders {
 
 export interface LucidRoles {
 	id: Generated<number>;
-	name: string;
-	description: string | null;
+	key: string | null;
+	locked: BooleanInt;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
+}
+
+export interface LucidRoleTranslations {
+	id: Generated<number>;
+	role_id: number;
+	locale_code: string;
+	name: string | null;
+	description: string | null;
 }
 
 export interface LucidRolePermissions {
@@ -648,6 +656,7 @@ export interface LucidDB {
 	lucid_options: LucidOptions;
 	lucid_users: LucidUsers;
 	lucid_roles: LucidRoles;
+	lucid_role_translations: LucidRoleTranslations;
 	lucid_role_permissions: LucidRolePermissions;
 	lucid_user_roles: LucidUserRoles;
 	lucid_user_tokens: LucidUserTokens;

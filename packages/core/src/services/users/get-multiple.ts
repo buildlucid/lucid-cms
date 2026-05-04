@@ -38,6 +38,7 @@ const getMultiple: ServiceFn<
 				locales: context.config.localization.locales.map(
 					(locale) => locale.code,
 				),
+				defaultLocale: context.config.localization.defaultLocale,
 			}),
 			count: formatter.parseCount(usersRes.data[1]?.count),
 		},

@@ -2,18 +2,36 @@ import z from "zod";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
+const roleTranslationSchema = z.object({
+	localeCode: z.string().trim().meta({
+		description: "The admin UI locale code for the translated role label",
+		example: "en",
+	}),
+	value: z.string().trim().nullable().meta({
+		description: "The translated value",
+		example: "Editors",
+	}),
+});
+
 const roleResponseSchema = z.object({
 	id: z.number().meta({
 		description: "The role ID",
 		example: 1,
 	}),
-	name: z.string().meta({
-		description: "The role's name",
-		example: "Editors",
+	key: z.string().nullable().meta({
+		description:
+			"The config-managed role key, if this role is managed by config",
+		example: "content-admin",
 	}),
-	description: z.string().nullable().meta({
-		description: "The role's description",
-		example: "Editor's can edit documents from any collection",
+	name: z.array(roleTranslationSchema).meta({
+		description: "Internal admin UI translations for the role name",
+	}),
+	description: z.array(roleTranslationSchema).meta({
+		description: "Internal admin UI translations for the role description",
+	}),
+	locked: z.boolean().meta({
+		description: "Whether this role is managed by config and cannot be edited",
+		example: false,
 	}),
 	permissions: z
 		.array(
@@ -32,7 +50,6 @@ const roleResponseSchema = z.object({
 			description: "A list of all of the roles permissions",
 		})
 		.optional(),
-
 	createdAt: z.string().meta({
 		description: "Creation timestamp",
 		example: "2022-01-01T00:00:00Z",
@@ -46,18 +63,12 @@ const roleResponseSchema = z.object({
 export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
-			name: z.string().trim().min(2).meta({
-				description: "The role's name",
-				example: "Editor",
+			name: z.array(roleTranslationSchema).meta({
+				description: "Internal admin UI translations for the role name",
 			}),
-			description: z
-				.string()
-				.trim()
-				.meta({
-					description: "A description for the role",
-					example: "Editor's can edit documents from any collection",
-				})
-				.optional(),
+			description: z.array(roleTranslationSchema).optional().meta({
+				description: "Internal admin UI translations for the role description",
+			}),
 			permissions: z.array(z.string().trim()).meta({
 				description: "A lit of permissions",
 				example: ["users:create", "users:update"],
@@ -73,20 +84,16 @@ export const controllerSchemas = {
 	updateSingle: {
 		body: z.object({
 			name: z
-				.string()
-				.trim()
-				.min(2)
+				.array(roleTranslationSchema)
 				.meta({
-					description: "The role's name",
-					example: "Editor",
+					description: "Internal admin UI translations for the role name",
 				})
 				.optional(),
 			description: z
-				.string()
-				.trim()
+				.array(roleTranslationSchema)
 				.meta({
-					description: "A description for the role",
-					example: "Editor's can edit documents from any collection",
+					description:
+						"Internal admin UI translations for the role description",
 				})
 				.optional(),
 			permissions: z

@@ -13,6 +13,14 @@ const PageCollection = new CollectionBuilder("page", {
 		},
 		summary: "Manage the pages and content on your website.",
 	},
+	permissions: {
+		read: "page:read",
+		create: "page:create",
+		update: "page:update",
+		delete: "page:delete",
+		restore: "page:restore",
+		publish: "page:publish",
+	},
 	config: {
 		useTranslations: true,
 		useRevisions: true,
@@ -23,11 +31,17 @@ const PageCollection = new CollectionBuilder("page", {
 				name: {
 					en: "Staging",
 				},
+				permissions: {
+					publish: "page:publish:staging",
+				},
 			},
 			{
 				key: "production",
 				name: {
 					en: "Production",
+				},
+				permissions: {
+					publish: "page:publish:production",
 				},
 			},
 		],

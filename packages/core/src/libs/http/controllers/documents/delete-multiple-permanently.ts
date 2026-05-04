@@ -10,9 +10,8 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
-import permissions from "../../middleware/permissions.js";
+import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -40,9 +39,9 @@ const deleteMultiplePermanentlyController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DocumentsDelete]),
 	validate("param", controllerSchemas.deleteMultiplePermanently.params),
 	validate("json", controllerSchemas.deleteMultiplePermanently.body),
+	collectionPermissions("delete"),
 	async (c) => {
 		const { collectionKey } = c.req.valid("param");
 		const { ids } = c.req.valid("json");

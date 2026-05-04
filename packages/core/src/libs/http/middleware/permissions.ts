@@ -7,12 +7,14 @@ import type { Permission } from "../../permission/types.js";
 
 export const permissionCheck = (
 	c: LucidHonoContext,
-	permissions: Permission[],
+	permissions: Permission | Permission[],
 ) => {
+	const requirements = Array.isArray(permissions) ? permissions : [permissions];
 	const access = hasAccess({
 		user: c.get("auth"),
-		requiredPermissions: permissions,
+		requiredPermissions: requirements,
 	});
+
 	if (!access) {
 		throw new LucidAPIError({
 			type: "basic",
@@ -23,7 +25,7 @@ export const permissionCheck = (
 	}
 };
 
-const permissions = (permissions: Permission[]) =>
+const permissions = (permissions: Permission | Permission[]) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
 		permissionCheck(c, permissions);
 		return await next();

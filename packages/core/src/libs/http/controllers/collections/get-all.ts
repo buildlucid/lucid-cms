@@ -7,6 +7,7 @@ import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import hasAccess from "../../../permission/has-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -40,7 +41,12 @@ const getAllController = factory.createHandlers(
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: collectionsRes.data,
+				data: collectionsRes.data.filter((collection) =>
+					hasAccess({
+						user: c.get("auth"),
+						requiredPermissions: [collection.permissions.read],
+					}),
+				),
 			}),
 		);
 	},

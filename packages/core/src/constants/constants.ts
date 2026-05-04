@@ -1,4 +1,3 @@
-import { PermissionGroups } from "../libs/permission/definitions.js";
 import T from "../translations/index.js";
 import emailConstants from "./emails.js";
 
@@ -21,32 +20,6 @@ export default Object.freeze({
 		r: 8,
 		p: 1,
 		dkLen: 32,
-	},
-	seedDefaults: {
-		roles: [
-			{
-				name: "Admin",
-				description: "The admin role has permissions to do everything.",
-				permissions: [
-					...PermissionGroups.users.permissions,
-					...PermissionGroups.roles.permissions,
-					...PermissionGroups.media.permissions,
-					...PermissionGroups.emails.permissions,
-					...PermissionGroups.jobs.permissions,
-					...PermissionGroups.content.permissions,
-					...PermissionGroups["client-integrations"].permissions,
-					...PermissionGroups.settings.permissions,
-				],
-			},
-			{
-				name: "Editor",
-				description: "The editor role has permissions to manage content.",
-				permissions: [
-					...PermissionGroups.media.permissions,
-					...PermissionGroups.content.permissions,
-				],
-			},
-		],
 	},
 	fieldBuiler: {
 		maxRepeaterDepth: 3,
@@ -113,6 +86,7 @@ export default Object.freeze({
 		modules: {
 			coreTypes: "@lucidcms/core/types",
 			clientTypes: "@lucidcms/client/types",
+			publicTypes: "@lucidcms/types",
 		} as const,
 	},
 	brickTypes: {

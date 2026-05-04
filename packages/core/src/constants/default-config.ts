@@ -61,6 +61,11 @@ export const defaultConfig: Partial<LucidConfig> = {
 	hooks: [],
 	collections: [],
 	plugins: [],
+	access: {
+		permissionGroups: {},
+		permissions: {},
+		roles: [],
+	},
 	build: {
 		paths: {
 			outDir: "dist",

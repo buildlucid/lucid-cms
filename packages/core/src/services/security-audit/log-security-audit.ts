@@ -27,6 +27,7 @@ const logSecurityAudit: ServiceFn<
 
 	const actorRes = await Users.selectAuditActorById({
 		id: data.performedBy,
+		defaultLocale: context.config.localization.defaultLocale,
 		validation: {
 			enabled: true,
 		},
@@ -38,7 +39,12 @@ const logSecurityAudit: ServiceFn<
 			user_id: data.userId,
 			action: data.action,
 			performed_by: data.performedBy,
-			performed_by_roles: sortRoleSnapshot(actorRes.data.roles ?? []),
+			performed_by_roles: sortRoleSnapshot(
+				actorRes.data.roles?.map((role) => ({
+					id: role.id,
+					name: role.name ?? "",
+				})) ?? [],
+			),
 			performed_by_super_admin: formatter.formatBoolean(
 				actorRes.data.super_admin,
 			),

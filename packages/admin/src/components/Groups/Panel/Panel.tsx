@@ -45,6 +45,7 @@ export const Panel: Component<{
 	copy?: {
 		title?: string;
 		description?: string;
+		descriptionIcon?: JSXElement;
 		fetchError?: string;
 		submit?: string;
 	};
@@ -182,8 +183,13 @@ export const Panel: Component<{
 												</h2>
 											</Show>
 											<Show when={props.copy?.description}>
-												<p class="mt-1 text-base text-body">
-													{props.copy?.description}
+												<p class="mt-1 flex items-start gap-2 text-base text-body">
+													<Show when={props.copy?.descriptionIcon}>
+														<span class="mt-1.5 text-warning-base">
+															{props.copy?.descriptionIcon}
+														</span>
+													</Show>
+													<span>{props.copy?.description}</span>
 												</p>
 											</Show>
 										</div>

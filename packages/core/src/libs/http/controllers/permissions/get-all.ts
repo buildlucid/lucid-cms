@@ -4,9 +4,10 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/permissions.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import { permissionsFormatter } from "../../../formatters/index.js";
-import { PermissionGroups } from "../../../permission/definitions.js";
+import { getPermissionRegistry } from "../../../permission/registry.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
+import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
@@ -21,11 +22,12 @@ const getAllController = factory.createHandlers(
 	}),
 	authenticate,
 	async (c) => {
+		const context = createServiceContext(c);
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
 				data: permissionsFormatter.formatMultiple({
-					permissions: PermissionGroups,
+					permissions: getPermissionRegistry(context.config),
 				}),
 			}),
 		);

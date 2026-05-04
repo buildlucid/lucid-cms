@@ -17,11 +17,16 @@ import DetailsList from "@/components/Partials/DetailsList";
 import PanelTabs from "@/components/Partials/PanelTabs";
 import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePreviewCard";
 import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
+import {
+	getDefaultTranslationLocale,
+	getTranslation,
+} from "@/utils/translation-helpers";
 
 const UpdateUserPanel: Component<{
 	id: Accessor<number | undefined>;
@@ -90,6 +95,20 @@ const UpdateUserPanel: Component<{
 	});
 	const isError = createMemo(() => {
 		return user.isError || roles.isError || providers.isError;
+	});
+	const defaultRoleLocale = createMemo(() => {
+		return getDefaultTranslationLocale(contentLocaleStore.get.locales);
+	});
+	const roleOptions = createMemo(() => {
+		return (
+			roles.data?.data.map((role) => ({
+				value: role.id,
+				label:
+					getTranslation(role.name, contentLocaleStore.get.contentLocale) ??
+					getTranslation(role.name, defaultRoleLocale()) ??
+					"-",
+			})) ?? []
+		);
 	});
 	const linkedProvidersByKey = createMemo(() => {
 		const authProviders = user.data?.data.authProviders ?? [];
@@ -227,14 +246,7 @@ const UpdateUserPanel: Component<{
 								copy={{
 									label: T()("roles"),
 								}}
-								options={
-									roles.data?.data.map((role) => {
-										return {
-											value: role.id,
-											label: role.name,
-										};
-									}) || []
-								}
+								options={roleOptions()}
 								errors={getBodyError("roleIds", updateUser.errors)}
 							/>
 							<Show when={userStore.get.user?.superAdmin}>

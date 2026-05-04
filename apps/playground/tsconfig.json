@@ -12,7 +12,8 @@
         "outDir": "dist"
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "lucid.config.ts"
     ],
     "exclude": [
         "node_modules"

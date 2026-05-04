@@ -11,6 +11,19 @@ import type BrickBuilder from "../brick-builder/index.js";
 import type CollectionConfigSchema from "./schema.js";
 
 export type DisplayInListing = boolean;
+export type CollectionPermissionAction =
+	| "read"
+	| "create"
+	| "update"
+	| "delete"
+	| "restore"
+	| "publish";
+export type CollectionPermissions = Partial<
+	Record<CollectionPermissionAction, string>
+>;
+export type CollectionEnvironmentPermissions = Partial<
+	Pick<Record<CollectionPermissionAction, string>, "publish">
+>;
 
 export interface CollectionConfigSchemaType
 	extends infer<typeof CollectionConfigSchema> {
@@ -38,9 +51,11 @@ export type CollectionData = {
 		environments: {
 			key: string;
 			name: LocaleValue;
+			permissions: CollectionEnvironmentPermissions;
 		}[];
 		revisionRetentionDays: number | false;
 	};
+	permissions: CollectionPermissions;
 };
 
 export type FieldFilters = Array<{

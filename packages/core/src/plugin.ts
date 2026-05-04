@@ -11,6 +11,7 @@ export { default as validateMiddleware } from "./libs/http/middleware/validate.j
 export { default as validateCSRFMiddleware } from "./libs/http/middleware/validate-csrf.js";
 export { default as formatAPIResponse } from "./libs/http/utils/build-response.js";
 export { default as createServiceContext } from "./libs/http/utils/create-service-context.js";
+export { PermissionSets, Permissions } from "./libs/permission/definitions.js";
 export { LucidAPIError } from "./utils/errors/index.js";
 export { default as honoOpenAPIParamaters } from "./utils/open-api/hono-openapi-paramaters.js";
 export { default as honoOpenAPIRequestBody } from "./utils/open-api/hono-openapi-request-body.js";

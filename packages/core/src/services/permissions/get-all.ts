@@ -1,16 +1,16 @@
 import { permissionsFormatter } from "../../libs/formatters/index.js";
-import { PermissionGroups } from "../../libs/permission/definitions.js";
-import type { Permission } from "../../types.js";
+import { getPermissionRegistry } from "../../libs/permission/registry.js";
+import type { PermissionGroup } from "../../libs/permission/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-const getAll: ServiceFn<[], Permission[]> = async () => {
+const getAll: ServiceFn<[], PermissionGroup[]> = async (context) => {
 	const formattedPermissions = permissionsFormatter.formatMultiple({
-		permissions: PermissionGroups,
+		permissions: getPermissionRegistry(context.config),
 	});
 
 	return {
 		error: undefined,
-		data: formattedPermissions.flatMap((group) => group.permissions),
+		data: formattedPermissions,
 	};
 };
 

@@ -5,17 +5,17 @@ import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
 import { configureLucid, z } from "@lucidcms/core";
-import { passthroughEmailAdapter } from "@lucidcms/core/email";
-import { fileSystemMediaAdapter } from "@lucidcms/core/media";
-import { createServiceContext } from "@lucidcms/core/plugin";
-import { passthroughQueueAdapter } from "@lucidcms/core/queue";
+// import { passthroughEmailAdapter } from "@lucidcms/core/email";
+// import { fileSystemMediaAdapter } from "@lucidcms/core/media";
+import { createServiceContext, PermissionSets } from "@lucidcms/core/plugin";
+// import { passthroughQueueAdapter } from "@lucidcms/core/queue";
 import { createToolkit } from "@lucidcms/core/toolkit";
 // Plugins
 // Adapters
 import NodemailerPlugin from "@lucidcms/plugin-nodemailer";
 import PagesPlugin from "@lucidcms/plugin-pages";
-import ResendPlugin from "@lucidcms/plugin-resend";
-import S3Plugin from "@lucidcms/plugin-s3";
+// import ResendPlugin from "@lucidcms/plugin-resend";
+// import S3Plugin from "@lucidcms/plugin-s3";
 import { describeRoute } from "hono-openapi";
 import BlogCollection from "./src/collections/blogs.js";
 import MainMenuCollection from "./src/collections/main-menu.js";
@@ -198,6 +198,88 @@ export default configureLucid({
 							});
 						},
 					);
+				},
+			],
+		},
+		access: {
+			permissionGroups: {
+				pagePermissions: {
+					name: "Page Permissions",
+				},
+				blogPermissions: {
+					name: "Blog Permissions",
+				},
+			},
+			permissions: {
+				"page:full": {
+					name: "Full Page Access",
+					description: "Grants full access to pages.",
+					group: "pagePermissions",
+				},
+				"page:read": {
+					name: "Read Pages",
+					group: "pagePermissions",
+				},
+				"page:create": {
+					name: "Create Pages",
+					group: "pagePermissions",
+				},
+				"page:update": {
+					name: "Update Pages",
+					group: "pagePermissions",
+				},
+				"page:delete": {
+					name: "Delete Pages",
+					group: "pagePermissions",
+				},
+				"page:restore": {
+					name: "Restore Pages",
+					group: "pagePermissions",
+				},
+				"page:publish": {
+					name: "Publish Pages",
+					group: "pagePermissions",
+				},
+				"page:publish:staging": {
+					name: "Publish Pages To Staging",
+					group: "pagePermissions",
+				},
+				"page:publish:production": {
+					name: "Publish Pages To Production",
+					group: "pagePermissions",
+				},
+				"blog:full": {
+					name: "Full Blog Access",
+					group: "blogPermissions",
+				},
+			},
+			roles: [
+				{
+					key: "admin",
+					name: "Admin",
+					description: {
+						en: "Full admin access for the playground.",
+					},
+					permissions: [
+						...PermissionSets.Users,
+						...PermissionSets.Roles,
+						...PermissionSets.Media,
+						...PermissionSets.Email,
+						...PermissionSets.Jobs,
+						...PermissionSets.Documents,
+						...PermissionSets.Integrations,
+						...PermissionSets.Settings,
+						"page:full",
+						"page:read",
+						"page:create",
+						"page:update",
+						"page:delete",
+						"page:restore",
+						"page:publish",
+						"page:publish:staging",
+						"page:publish:production",
+						"blog:full",
+					],
 				},
 			],
 		},

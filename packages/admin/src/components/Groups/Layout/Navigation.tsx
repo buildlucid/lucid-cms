@@ -31,9 +31,6 @@ export const NavigationChrome: Component = () => {
 	const logout = api.auth.useLogout();
 	const user = createMemo(() => userStore.get.user);
 	const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
-	const canReadDocuments = createMemo(
-		() => userStore.get.hasPermission([Permissions.DocumentsRead]).all,
-	);
 	const canReadMedia = createMemo(
 		() => userStore.get.hasPermission([Permissions.MediaRead]).all,
 	);
@@ -92,8 +89,23 @@ export const NavigationChrome: Component = () => {
 	const singleCollections = createMemo(() => {
 		return (
 			collections.data?.data.filter(
-				(collection) => collection.mode === "single",
+				(collection) =>
+					collection.mode === "single" &&
+					userStore.get.hasPermission([
+						collection.permissions.read,
+						collection.documentId
+							? collection.permissions.update
+							: collection.permissions.create,
+					]).all,
 			) || []
+		);
+	});
+	const showCollections = createMemo(() => {
+		return (
+			collectionsIsLoading() ||
+			collectionsIsError() ||
+			multiCollections().length > 0 ||
+			singleCollections().length > 0
 		);
 	});
 
@@ -209,7 +221,7 @@ export const NavigationChrome: Component = () => {
 						logoutPending={logout.action.isPending}
 						onLogout={() => logout.action.mutate({})}
 						user={user() || undefined}
-						canReadDocuments={canReadDocuments()}
+						canReadDocuments={showCollections()}
 						canReadMedia={canReadMedia()}
 						canReadEmails={canReadEmails()}
 						canReadUsers={canReadUsers()}
@@ -287,7 +299,7 @@ export const NavigationChrome: Component = () => {
 								showFooterActions={false}
 								onNavigate={() => setMobileMenuOpen(false)}
 								showLicenseAlert={showLicenseAlert()}
-								canReadDocuments={canReadDocuments()}
+								canReadDocuments={showCollections()}
 								canReadMedia={canReadMedia()}
 								canReadEmails={canReadEmails()}
 								canReadUsers={canReadUsers()}

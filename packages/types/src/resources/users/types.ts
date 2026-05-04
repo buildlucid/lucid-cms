@@ -1,6 +1,7 @@
+import type { LocaleValue } from "../locales/types.js";
 import type { ProfilePicture } from "../media/types.js";
 
-export type Permission =
+export type CorePermission =
 	| "users:read"
 	| "users:create"
 	| "users:update"
@@ -32,6 +33,26 @@ export type Permission =
 	| "settings:update"
 	| "license:update"
 	| "cache:clear";
+
+export type Permission = CorePermission | (string & {});
+
+export type PermissionDetails = {
+	name: LocaleValue;
+	description?: LocaleValue | null;
+};
+
+export type PermissionDefinition = {
+	key: Permission;
+	details: PermissionDetails;
+	core: boolean;
+};
+
+export type PermissionGroup = {
+	key: string;
+	details: PermissionDetails;
+	core: boolean;
+	permissions: PermissionDefinition[];
+};
 
 export type UserPermission = {
 	roles: Array<{
@@ -101,8 +122,16 @@ export type InitiateAuth = {
 
 export interface Role {
 	id: number;
-	name: string;
-	description: string | null;
+	key: string | null;
+	name: {
+		localeCode: string;
+		value: string | null;
+	}[];
+	description: {
+		localeCode: string;
+		value: string | null;
+	}[];
+	locked: boolean;
 	permissions?: {
 		id: number;
 		permission: Permission;

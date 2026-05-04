@@ -1,15 +1,17 @@
-import { FaSolidCalendar, FaSolidT } from "solid-icons/fa";
-import { type Component, Index } from "solid-js";
+import { FaSolidCalendar, FaSolidLock, FaSolidT } from "solid-icons/fa";
+import { type Component, createMemo, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Table } from "@/components/Groups/Table";
 import DeleteRole from "@/components/Modals/Role/DeleteRole";
 import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
+import ViewRolePanel from "@/components/Panels/Role/ViewRolePanel";
 import RoleRow from "@/components/Tables/Rows/RoleRow";
 import { Permissions } from "@/constants/permissions";
 import useRowTarget from "@/hooks/useRowTarget";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 
 export const RolesList: Component<{
@@ -22,10 +24,15 @@ export const RolesList: Component<{
 	// Hooks
 	const rowTarget = useRowTarget({
 		triggers: {
+			view: false,
 			update: false,
 			delete: false,
 		},
 	});
+
+	// ----------------------------------
+	// Memos
+	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 
 	// ----------------------------------
 	// Queries
@@ -87,6 +94,11 @@ export const RolesList: Component<{
 						sortable: true,
 					},
 					{
+						label: T()("status"),
+						key: "locked",
+						icon: <FaSolidLock />,
+					},
+					{
 						label: T()("created_at"),
 						key: "createdAt",
 						icon: <FaSolidCalendar />,
@@ -112,6 +124,7 @@ export const RolesList: Component<{
 							<RoleRow
 								index={i}
 								role={role()}
+								contentLocale={contentLocale()}
 								include={include}
 								selected={selected[i]}
 								rowTarget={rowTarget}
@@ -132,6 +145,15 @@ export const RolesList: Component<{
 					open: rowTarget.getTriggers().update,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("update", state);
+					},
+				}}
+			/>
+			<ViewRolePanel
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().view,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("view", state);
 					},
 				}}
 			/>

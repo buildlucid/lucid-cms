@@ -55,6 +55,7 @@ const RolesListRoute: Component = () => {
 									label: T()(Permissions.RolesCreate),
 								},
 							],
+							contentLocale: true,
 						}}
 						slots={{
 							bottom: (

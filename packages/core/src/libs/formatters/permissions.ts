@@ -1,9 +1,11 @@
 import type { PermissionGroup } from "../permission/types.js";
 
 const formatMultiple = (props: {
-	permissions: Record<string, PermissionGroup>;
+	permissions: PermissionGroup[] | Record<string, PermissionGroup>;
 }): PermissionGroup[] => {
-	return Object.values(props.permissions);
+	return Array.isArray(props.permissions)
+		? props.permissions
+		: Object.values(props.permissions);
 };
 
 export default {

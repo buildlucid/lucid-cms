@@ -21,7 +21,7 @@ const runSyncTasks = async (
 	const queue = passthroughQueueAdapter();
 
 	try {
-		const [localesResult, collectionsResult] = await Promise.all([
+		const [localesResult, collectionsResult, rolesResult] = await Promise.all([
 			syncServices.syncLocales({
 				db: { client: config.db.client },
 				config: config,
@@ -31,6 +31,14 @@ const runSyncTasks = async (
 				request: { url: config.baseUrl ?? "" },
 			}),
 			syncServices.syncCollections({
+				db: { client: config.db.client },
+				config: config,
+				queue: queue,
+				env: null,
+				kv: kv,
+				request: { url: config.baseUrl ?? "" },
+			}),
+			syncServices.syncRoles({
 				db: { client: config.db.client },
 				config: config,
 				queue: queue,
@@ -55,6 +63,17 @@ const runSyncTasks = async (
 			cliLogger.error(
 				"Sync failed during collections sync, with error:",
 				collectionsResult.error.message || "unknown",
+			);
+			if (mode === "process") {
+				if (shouldDestroyKV) await destroyKVAdapter(kv);
+				logger.setBuffering(false);
+				process.exit(1);
+			} else return false;
+		}
+		if (rolesResult.error) {
+			cliLogger.error(
+				"Sync failed during roles sync, with error:",
+				rolesResult.error.message || "unknown",
 			);
 			if (mode === "process") {
 				if (shouldDestroyKV) await destroyKVAdapter(kv);

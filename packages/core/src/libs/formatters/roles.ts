@@ -1,11 +1,17 @@
 import type { Role } from "../../types/response.js";
+import type { BooleanInt } from "../db/types.js";
 import type { Permission } from "../permission/types.js";
 import formatter from "./index.js";
 
 interface RolePropsT {
 	id: number;
-	name: string;
-	description: string | null;
+	key: string | null;
+	locked: BooleanInt;
+	translations?: Array<{
+		name: string | null;
+		description: string | null;
+		locale_code: string;
+	}>;
 	updated_at: Date | string | null;
 	created_at: Date | string | null;
 	permissions?: {
@@ -26,8 +32,18 @@ const formatMultiple = (props: { roles: RolePropsT[] }) => {
 const formatSingle = (props: { role: RolePropsT }): Role => {
 	return {
 		id: props.role.id,
-		name: props.role.name,
-		description: props.role.description,
+		key: props.role.key,
+		name:
+			props.role.translations?.map((translation) => ({
+				value: translation.name,
+				localeCode: translation.locale_code,
+			})) ?? [],
+		description:
+			props.role.translations?.map((translation) => ({
+				value: translation.description,
+				localeCode: translation.locale_code,
+			})) ?? [],
+		locked: formatter.formatBoolean(props.role.locked),
 		permissions: props.role.permissions?.map((p) => {
 			return {
 				id: p.id,

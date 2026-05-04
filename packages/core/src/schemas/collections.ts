@@ -82,8 +82,22 @@ const collectionResponseSchema = z.object({
 					description: "Display name for the environment",
 					example: { en: "Production" },
 				}),
+				permissions: z.object({
+					publish: z.string().meta({
+						description: "Permission required to publish to this environment",
+						example: "documents:publish",
+					}),
+				}),
 			}),
 		),
+	}),
+	permissions: z.object({
+		read: z.string(),
+		create: z.string(),
+		update: z.string(),
+		delete: z.string(),
+		restore: z.string(),
+		publish: z.string(),
 	}),
 	migrationStatus: migrationStatusSchema.nullable(),
 	get fixedBricks() {

@@ -1,6 +1,10 @@
 import type { Collection } from "../../types/response.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { MigrationStatus } from "../collection/get-collection-migration-status.js";
+import {
+	resolveCollectionPermission,
+	resolveCollectionPermissions,
+} from "../permission/collection-permissions.js";
 
 const formatMultiple = (props: {
 	collections: CollectionBuilder[];
@@ -38,6 +42,7 @@ const formatSingle = (props: {
 }): Collection => {
 	const collectionData = props.collection.getData;
 	const key = props.collection.key;
+	const resolvedPermissions = resolveCollectionPermissions(props.collection);
 
 	return {
 		key: key,
@@ -56,8 +61,18 @@ const formatSingle = (props: {
 			isLocked: collectionData.config.isLocked,
 			displayInListing: props.collection.displayInListing,
 			useAutoSave: collectionData.config.useAutoSave,
-			environments: collectionData.config.environments,
+			environments: collectionData.config.environments.map((environment) => ({
+				...environment,
+				permissions: {
+					publish: resolveCollectionPermission({
+						collection: props.collection,
+						action: "publish",
+						target: environment.key,
+					}),
+				},
+			})),
 		},
+		permissions: resolvedPermissions,
 		migrationStatus: props.migrationStatus ?? null,
 		fixedBricks: props.include?.bricks
 			? (props.collection.fixedBricks ?? [])

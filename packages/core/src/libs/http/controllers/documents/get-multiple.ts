@@ -11,6 +11,7 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
+import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -36,6 +37,7 @@ const getMultipleController = factory.createHandlers(
 	authenticate,
 	validate("param", controllerSchemas.getMultiple.params),
 	validate("query", controllerSchemas.getMultiple.query.string),
+	collectionPermissions("read"),
 	async (c) => {
 		const { collectionKey, status } = c.req.valid("param");
 		const context = createServiceContext(c);

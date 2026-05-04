@@ -6,7 +6,6 @@ import type {
 	InternalCollectionDocument,
 } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
-import { Permissions } from "@/constants/permissions";
 import type api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -137,8 +136,11 @@ export function useDocumentUIState(props: {
 		if (props.mode === "history") return false;
 		if (props.version() !== "latest") return false;
 		if (props.document()?.isDeleted) return false;
+		const permission = props.collection()?.permissions.update;
+		if (!permission) return false;
+
 		return (
-			userStore.get.hasPermission([Permissions.DocumentsUpdate]).all &&
+			userStore.get.hasPermission([permission]).all &&
 			useAutoSave() &&
 			autoSaveUserEnabled()
 		);
@@ -239,9 +241,16 @@ export function useDocumentUIState(props: {
 	 */
 	const hasSavePermission = createMemo(() => {
 		if (props.mode === "create") {
-			return userStore.get.hasPermission([Permissions.DocumentsCreate]).all;
+			const permission = props.collection()?.permissions.create;
+			if (!permission) return false;
+
+			return userStore.get.hasPermission([permission]).all;
 		}
-		return userStore.get.hasPermission([Permissions.DocumentsUpdate]).all;
+
+		const permission = props.collection()?.permissions.update;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).all;
 	});
 
 	/**
@@ -253,8 +262,11 @@ export function useDocumentUIState(props: {
 		if (props.version() !== "latest") return false;
 		if (props.document()?.isDeleted) return false;
 
+		const permission = props.collection()?.permissions.update;
+		if (!permission) return false;
+
 		return (
-			userStore.get.hasPermission([Permissions.DocumentsUpdate]).all &&
+			userStore.get.hasPermission([permission]).all &&
 			props.collection()?.config.useAutoSave
 		);
 	});
@@ -263,14 +275,30 @@ export function useDocumentUIState(props: {
 	 * Determines if the user has publish permission
 	 */
 	const hasPublishPermission = createMemo(() => {
-		return userStore.get.hasPermission([Permissions.DocumentsPublish]).all;
+		const target = getReleaseEnvironmentTarget();
+
+		const environmentPermission = props
+			.collection()
+			?.config.environments.find((environment) => environment.key === target)
+			?.permissions.publish;
+
+		const permission =
+			target !== null
+				? environmentPermission
+				: props.collection()?.permissions.publish;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).all;
 	});
 
 	/**
 	 * Determines if the user has delete permission
 	 */
 	const hasDeletePermission = createMemo(() => {
-		return userStore.get.hasPermission([Permissions.DocumentsDelete]).all;
+		const permission = props.collection()?.permissions.delete;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).all;
 	});
 
 	/**
@@ -289,7 +317,10 @@ export function useDocumentUIState(props: {
 	 * Determines if the user has permission to restore documents
 	 */
 	const hasRestorePermission = createMemo(() => {
-		return userStore.get.hasPermission([Permissions.DocumentsRestore]).all;
+		const permission = props.collection()?.permissions.restore;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).all;
 	});
 
 	// ------------------------------------------

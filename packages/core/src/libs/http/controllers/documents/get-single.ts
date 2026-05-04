@@ -12,6 +12,7 @@ import {
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import type { DocumentVersionType } from "../../../db/types.js";
 import authenticate from "../../middleware/authenticate.js";
+import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -35,6 +36,7 @@ const getSingleController = factory.createHandlers(
 	authenticate,
 	validate("param", controllerSchemas.getSingle.params),
 	validate("query", controllerSchemas.getSingle.query.string),
+	collectionPermissions("read"),
 	async (c) => {
 		const { collectionKey, id, statusOrId } = c.req.valid("param");
 		const context = createServiceContext(c);

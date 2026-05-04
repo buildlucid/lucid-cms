@@ -17,6 +17,11 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
+import {
+	getTranslation,
+	mergeTranslations,
+	updateTranslation,
+} from "@/utils/translation-helpers";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 interface CreateUpdateProfilePicturePanelProps {
@@ -145,13 +150,10 @@ const CreateUpdateProfilePicturePanel: Component<
 		return undefined;
 	}
 	function hydrateTranslations(translations?: Media["title"]) {
-		return locales().map((locale) => ({
-			localeCode: locale.code,
-			value:
-				translations?.find(
-					(translation) => translation.localeCode === locale.code,
-				)?.value ?? null,
-		}));
+		return mergeTranslations<Media["title"][number]>({
+			translations,
+			locales: locales(),
+		});
 	}
 	function toProfileTranslations(translations?: Media["title"]) {
 		return (translations || [])
@@ -355,13 +357,10 @@ const CreateUpdateProfilePicturePanel: Component<
 								<Input
 									id={`name-${locale.code}`}
 									value={
-										helpers.getTranslation(
-											createMedia.state.title(),
-											locale.code,
-										) || ""
+										getTranslation(createMedia.state.title(), locale.code) || ""
 									}
 									onChange={(val) => {
-										helpers.updateTranslation(createMedia.setTitle, {
+										updateTranslation(createMedia.setTitle, {
 											localeCode: locale.code,
 											value: val,
 										});
@@ -378,13 +377,10 @@ const CreateUpdateProfilePicturePanel: Component<
 									<Input
 										id={`alt-${locale.code}`}
 										value={
-											helpers.getTranslation(
-												createMedia.state.alt(),
-												locale.code,
-											) || ""
+											getTranslation(createMedia.state.alt(), locale.code) || ""
 										}
 										onChange={(val) => {
-											helpers.updateTranslation(createMedia.setAlt, {
+											updateTranslation(createMedia.setAlt, {
 												localeCode: locale.code,
 												value: val,
 											});

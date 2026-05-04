@@ -11,7 +11,6 @@ import { DocumentsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query";
-import { Permissions } from "@/constants/permissions";
 import useSearchParamsLocation, {
 	type FilterSchema,
 } from "@/hooks/useSearchParamsLocation";
@@ -149,7 +148,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 									collectionKey: collectionKey() || "",
 								}),
 								permission: userStore.get.hasPermission([
-									Permissions.DocumentsCreate,
+									collection.data?.data.permissions.create,
 								]).some,
 								show: collection.data?.data.config.isLocked !== true,
 								label: T()("create_dynamic", {

@@ -5,7 +5,7 @@ type UserStoreT = {
 	user: User | null;
 	reset: () => void;
 
-	hasPermission: (_perm: Permission[]) => {
+	hasPermission: (_perm: Array<Permission | undefined>) => {
 		all: boolean;
 		some: boolean;
 	};
@@ -19,14 +19,17 @@ const [get, set] = createStore<UserStoreT>({
 
 	// -----------------
 	// Permissions
-	hasPermission(perm: Permission[]) {
+	hasPermission(perm: Array<Permission | undefined>) {
+		const filteredPerm = perm.filter((p) => p !== undefined);
+		if (filteredPerm.length === 0) return { all: false, some: false };
+
 		if (this.user?.superAdmin) return { all: true, some: true };
 
 		const userPerms = this.user?.permissions;
 		if (!userPerms) return { all: false, some: false };
 
-		const all = perm.every((p) => userPerms.includes(p));
-		const some = perm.some((p) => userPerms.includes(p));
+		const all = filteredPerm.every((p) => userPerms.includes(p));
+		const some = filteredPerm.some((p) => userPerms.includes(p));
 
 		return { all, some };
 	},

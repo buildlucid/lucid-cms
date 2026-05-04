@@ -9,9 +9,8 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
-import permissions from "../../middleware/permissions.js";
+import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -35,8 +34,8 @@ const restoreRevisionController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.DocumentsRestore]),
 	validate("param", controllerSchemas.restoreRevision.params),
+	collectionPermissions("restore"),
 	async (c) => {
 		const { collectionKey, id, versionId } = c.req.valid("param");
 		const context = createServiceContext(c);

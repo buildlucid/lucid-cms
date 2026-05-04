@@ -32,4 +32,5 @@ export const Permissions = {
 	CacheClear: "cache:clear",
 } as const;
 
-export type Permission = (typeof Permissions)[keyof typeof Permissions];
+export type CorePermission = (typeof Permissions)[keyof typeof Permissions];
+export type Permission = CorePermission | string;

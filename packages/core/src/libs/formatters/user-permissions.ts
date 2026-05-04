@@ -3,8 +3,11 @@ import type { Permission } from "../../types.js";
 
 interface UserPermissionRolesPropsT {
 	id: number;
-	description: string | null;
-	name: string;
+	name?: string | null;
+	translations?: {
+		name: string | null;
+		locale_code: string | null;
+	}[];
 	permissions?: {
 		permission: string;
 	}[];
@@ -12,6 +15,7 @@ interface UserPermissionRolesPropsT {
 
 const formatMultiple = (props: {
 	roles: UserPermissionRolesPropsT[];
+	defaultLocale: string;
 }): UserPermission => {
 	if (!props.roles) {
 		return {
@@ -30,7 +34,16 @@ const formatMultiple = (props: {
 	}
 
 	return {
-		roles: props.roles.map(({ id, name }) => ({ id, name })),
+		roles: props.roles.map(({ id, name, translations }) => ({
+			id,
+			name:
+				name ??
+				translations?.find(
+					(translation) => translation.locale_code === props.defaultLocale,
+				)?.name ??
+				translations?.find((translation) => translation.name !== null)?.name ??
+				"",
+		})),
 		permissions: Array.from(permissionsSet),
 	};
 };

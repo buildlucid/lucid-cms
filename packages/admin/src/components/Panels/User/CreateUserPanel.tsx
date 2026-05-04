@@ -4,9 +4,14 @@ import { Checkbox, Input, SelectMultiple } from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
+import {
+	getDefaultTranslationLocale,
+	getTranslation,
+} from "@/utils/translation-helpers";
 
 interface CreateUserPanelProps {
 	state: {
@@ -57,6 +62,20 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 	});
 	const mutationIsPending = createMemo(() => {
 		return createUser.action.isPending;
+	});
+	const defaultRoleLocale = createMemo(() => {
+		return getDefaultTranslationLocale(contentLocaleStore.get.locales);
+	});
+	const roleOptions = createMemo(() => {
+		return (
+			roles.data?.data.map((role) => ({
+				value: role.id,
+				label:
+					getTranslation(role.name, contentLocaleStore.get.contentLocale) ??
+					getTranslation(role.name, defaultRoleLocale()) ??
+					"-",
+			})) ?? []
+		);
 	});
 
 	// ---------------------------------
@@ -172,14 +191,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 						copy={{
 							label: T()("roles"),
 						}}
-						options={
-							roles.data?.data.map((role) => {
-								return {
-									value: role.id,
-									label: role.name,
-								};
-							}) || []
-						}
+						options={roleOptions()}
 						errors={getBodyError("roleIds", createUser.errors)}
 					/>
 					<Show when={userStore.get.user?.superAdmin}>

@@ -23,6 +23,9 @@ const validatePermissions: ServiceFn<
 
 	const permissionsRes = await permissionServices.getAll(context);
 	if (permissionsRes.error) return permissionsRes;
+	const validPermissions = permissionsRes.data.flatMap((group) =>
+		group.permissions.map((permission) => permission.key),
+	);
 
 	const permErrors: Array<{
 		key: string;
@@ -35,7 +38,7 @@ const validatePermissions: ServiceFn<
 	for (let i = 0; i < data.permissions.length; i++) {
 		const permission = data.permissions[i] as Permission;
 
-		if (!permissionsRes.data.includes(permission)) {
+		if (!validPermissions.includes(permission)) {
 			const findError = permErrors.find((e) => e.key === permission);
 			if (!findError) {
 				permErrors.push({

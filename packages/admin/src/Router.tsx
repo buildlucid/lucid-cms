@@ -52,60 +52,37 @@ const AppRouter: Component = () => {
 				<Route path="/components" component={ComponentsRoute} />
 				<Route path="/account" component={AccountRoute} />
 				{/* Collections */}
-				<Route
-					path="/collections"
-					component={() => (
-						<PermissionGuard permission={Permissions.DocumentsRead}>
-							<CollectionsListRoute />
-						</PermissionGuard>
-					)}
-				/>
+				<Route path="/collections" component={() => <CollectionsListRoute />} />
 				<Route
 					path="/collections/:collectionKey"
-					component={() => (
-						<PermissionGuard permission={Permissions.DocumentsRead}>
-							<CollectionsDocumentsListRoute />
-						</PermissionGuard>
-					)}
+					component={() => <CollectionsDocumentsListRoute />}
 				/>
 				{/* Page builder */}
 				<Route
 					path="/collections/:collectionKey/latest/create"
 					component={() => (
-						<PermissionGuard permission={Permissions.DocumentsRead}>
-							<CollectionDocumentPageBuilderRoute
-								mode="create"
-								version="latest"
-							/>
-						</PermissionGuard>
+						<CollectionDocumentPageBuilderRoute
+							mode="create"
+							version="latest"
+						/>
 					)}
 				/>
 				<Route
 					path="/collections/:collectionKey/:versionType/:documentId"
-					component={() => (
-						<PermissionGuard permission={Permissions.DocumentsRead}>
-							<CollectionDocumentPageBuilderRoute mode="edit" />
-						</PermissionGuard>
-					)}
+					component={() => <CollectionDocumentPageBuilderRoute mode="edit" />}
 				/>
 				<Route
 					path="/collections/:collectionKey/revision/:documentId/:versionId"
 					component={() => (
-						<PermissionGuard permission={Permissions.DocumentsRead}>
-							<CollectionDocumentPageBuilderRoute
-								mode="edit"
-								version="revision"
-							/>
-						</PermissionGuard>
+						<CollectionDocumentPageBuilderRoute
+							mode="edit"
+							version="revision"
+						/>
 					)}
 				/>
 				<Route
 					path="/collections/:collectionKey/:documentId/history"
-					component={() => (
-						<PermissionGuard permission={Permissions.DocumentsRead}>
-							<CollectionsDocumentsHistoryRoute />
-						</PermissionGuard>
-					)}
+					component={() => <CollectionsDocumentsHistoryRoute />}
 				/>
 				{/* Media */}
 				<Route

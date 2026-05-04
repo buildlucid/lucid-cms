@@ -20,9 +20,11 @@ import type {
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../libs/queue/types.js";
+import type { CorePermission } from "../types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
 import type { AllHooks } from "./hooks.js";
+import type { SupportedLocales } from "./shared.js";
 
 export type CopyPublicEntry =
 	| string
@@ -48,6 +50,80 @@ export type ImageProcessor = (
 	stream: Readable,
 	options: ImageProcessorOptions,
 ) => ServiceResponse<ImageProcessorResult>;
+
+export type AccessPermissionDetails = {
+	/**
+	 * The permission or group label shown in the admin UI.
+	 */
+	name: string | Record<SupportedLocales, string>;
+	/**
+	 * Optional helper text for the permission or group shown in the admin UI.
+	 */
+	description?: string | Record<SupportedLocales, string> | null;
+};
+
+export type AccessPermissionDefinition = {
+	/**
+	 * The custom permission label shown in the admin UI.
+	 */
+	name: AccessPermissionDetails["name"];
+	/**
+	 * Optional helper text for the custom permission shown in the admin UI.
+	 */
+	description?: AccessPermissionDetails["description"];
+	/**
+	 * The custom permission group key, or an existing Lucid core permission group key.
+	 */
+	group: string;
+};
+
+export type AccessPermissionGroupDefinition = AccessPermissionDetails;
+
+export type ConfiguredLocaleValue = string | Record<string, string>;
+
+export type AccessRoleDefinition = {
+	/**
+	 * Stable key used to sync and lock this config-managed role.
+	 */
+	key: string;
+	/**
+	 * Role name, either as a plain string or keyed by configured locale codes.
+	 */
+	name: ConfiguredLocaleValue;
+	/**
+	 * Optional role description, either as a plain string or keyed by configured locale codes.
+	 */
+	description?: ConfiguredLocaleValue;
+	/**
+	 * Permission keys granted to this config-managed role.
+	 */
+	permissions: Array<CorePermission | (string & {})>;
+};
+
+export type AccessPermissionDefinitions = Record<
+	string,
+	AccessPermissionDefinition
+>;
+
+export type AccessPermissionGroupDefinitions = Record<
+	string,
+	AccessPermissionGroupDefinition
+>;
+
+export type AccessConfig = {
+	/**
+	 * Custom permission groups available in the admin role editor.
+	 */
+	permissionGroups?: AccessPermissionGroupDefinitions;
+	/**
+	 * Custom permissions available for roles and collection permission mappings.
+	 */
+	permissions?: AccessPermissionDefinitions;
+	/**
+	 * Config-managed roles that are synced into the database and locked in the admin UI.
+	 */
+	roles?: AccessRoleDefinition[];
+};
 
 export type SecurityContentSecurityPolicy = {
 	defaultSrc?: string[];
@@ -77,30 +153,48 @@ export type SecurityContentSecurityPolicy = {
 
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
-	/** KV storage settings. */
+	/**
+	 * KV storage settings.
+	 */
 	kv?: {
-		/** The KV adapter to use. If not provided, Lucid will use the default better-sqlite3 KV adapter. */
+		/**
+		 * The KV adapter to use. If not provided, Lucid will use the default better-sqlite3 KV adapter.
+		 */
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
-		/** Prefix keys with a non-empty namespace. Set to false to disable namespacing for the default KV adapter. */
+		/**
+		 * Prefix keys with a non-empty namespace. Set to false to disable namespacing for the default KV adapter.
+		 */
 		namespace?: string | false;
 	};
-	/** Security settings. */
+	/**
+	 * Security settings.
+	 */
 	security?: {
 		/**
 		 * Whether proxy-forwarded protocol headers should be trusted when
 		 * determining secure request context.
 		 */
 		trustProxyHeaders?: boolean;
-		/** The CORS configuration. */
+		/**
+		 * The CORS configuration.
+		 */
 		cors?: {
-			/** Allowed origins. */
+			/**
+			 * Allowed origins.
+			 */
 			origin?: string[];
-			/** Allowed headers. */
+			/**
+			 * Allowed headers.
+			 */
 			allowHeaders?: string[];
 		};
-		/** The secure headers configuration. */
+		/**
+		 * The secure headers configuration.
+		 */
 		headers?: {
-			/** Content-Security-Policy directives. */
+			/**
+			 * Content-Security-Policy directives.
+			 */
 			contentSecurityPolicy?: SecurityContentSecurityPolicy;
 			strictTransportSecurity?: boolean | string;
 			xFrameOptions?: boolean | string;
@@ -110,93 +204,161 @@ export interface LucidConfig {
 			crossOriginEmbedderPolicy?: boolean | string;
 		};
 	};
-	/** The base URL of the Lucid instance. If not provided, the request URL will be used. */
+	/**
+	 * The base URL of the Lucid instance. If not provided, the request URL will be used.
+	 */
 	baseUrl?: string;
-	/** `64 character` length secrets to encrypt and sign data. */
+	/**
+	 * `64 character` length secrets to encrypt and sign data.
+	 */
 	secrets: {
-		/** Used to encrypt user secrets and API keys. Must be `64 characters` long. */
+		/**
+		 * Used to encrypt user secrets and API keys. Must be `64 characters` long.
+		 */
 		encryption: string;
-		/** Used to sign cookies. Must be `64 characters` long. */
+		/**
+		 * Used to sign cookies. Must be `64 characters` long.
+		 */
 		cookie: string;
-		/** Used to sign the access token JWT. Must be `64 characters` long. */
+		/**
+		 * Used to sign the access token JWT. Must be `64 characters` long.
+		 */
 		accessToken: string;
-		/** Used to sign the refresh token JWT. Must be `64 characters` long. */
+		/**
+		 * Used to sign the refresh token JWT. Must be `64 characters` long.
+		 */
 		refreshToken: string;
 	};
-	/** The logger configuration */
+	/**
+	 * The logger configuration
+	 */
 	logger?: {
-		/** The log level to use. */
+		/**
+		 * The log level to use.
+		 */
 		level?: LogLevel;
-		/** Custom log transport. If not provided, logs will default to console output. */
+		/**
+		 * Custom log transport. If not provided, logs will default to console output.
+		 */
 		transport?: LogTransport;
 	};
-	/** The authentication configuration */
+	/**
+	 * The authentication configuration
+	 */
 	auth?: {
-		/** Password authentication configuration */
+		/**
+		 * Password authentication configuration
+		 */
 		password?: {
-			/** Whether password authentication is enabled. */
+			/**
+			 * Whether password authentication is enabled.
+			 */
 			enabled?: boolean;
 		};
-		/** The authentication providers to use. */
+		/**
+		 * The authentication providers to use.
+		 */
 		providers?: AuthProvider[];
 	};
 	openAPI?: {
-		/** Whether the OpenAPI documentation site is enabled. */
+		/**
+		 * Whether the OpenAPI documentation site is enabled.
+		 */
 		enabled?: boolean;
 	};
-	/** Localization settings. */
+	/**
+	 * Localization settings.
+	 */
 	localization?: {
-		/** A list of locales you want to write content in. */
+		/**
+		 * A list of locales you want to write content in.
+		 */
 		locales: {
-			/** The label of the locale. Eg. `English`, `French`, `German` etc. */
+			/**
+			 * The label of the locale. Eg. `English`, `French`, `German` etc.
+			 */
 			label: string;
-			/** The code of the locale. Eg. `en`, `fr`, `de` etc. */
+			/**
+			 * The code of the locale. Eg. `en`, `fr`, `de` etc.
+			 */
 			code: string;
 		}[];
-		/** The default locale code. Eg. `en`. */
+		/**
+		 * The default locale code. Eg. `en`.
+		 */
 		defaultLocale: string;
 	};
-	/** Email settings. */
+	/**
+	 * Email settings.
+	 */
 	email?: {
-		/** The email from settings. */
+		/**
+		 * The email from settings.
+		 */
 		from?: {
-			/** The email address to send emails from. */
+			/**
+			 * The email address to send emails from.
+			 */
 			email?: string;
-			/** The name to send emails from. */
+			/**
+			 * The name to send emails from.
+			 */
 			name?: string;
 		};
-		/** The email adapter to use. Determines how emails are sent. */
+		/**
+		 * The email adapter to use. Determines how emails are sent.
+		 */
 		adapter?:
 			| EmailAdapter
 			| EmailAdapterInstance
 			| Promise<EmailAdapterInstance>;
-		/** When set to true, the plugin will not send emails but will still return as a success */
+		/**
+		 * When set to true, the plugin will not send emails but will still return as a success
+		 */
 		simulate?: boolean;
-		/** Number of days an email can be resent for after it was created. */
+		/**
+		 * Number of days an email can be resent for after it was created.
+		 */
 		resendWindowDays?: number;
 	};
-	/** The pre-rendered MJML templates to use. */
+	/**
+	 * The pre-rendered MJML templates to use.
+	 */
 	preRenderedEmailTemplates?: Record<string, string>;
-	/** Media settings. */
+	/**
+	 * Media settings.
+	 */
 	media?: {
-		/** The media adapter to use. This determines how media is stored, retrieved and deleted. */
+		/**
+		 * The media adapter to use. This determines how media is stored, retrieved and deleted.
+		 */
 		adapter?:
 			| MediaAdapter
 			| MediaAdapterInstance
 			| Promise<MediaAdapterInstance>;
 		limits?: {
-			/** The storage limit in bytes. */
+			/**
+			 * The storage limit in bytes.
+			 */
 			storage?: number | false;
-			/** The maximum file size in bytes. */
+			/**
+			 * The maximum file size in bytes.
+			 */
 			fileSize?: number;
-			/** The processed image limit. */
+			/**
+			 * The processed image limit.
+			 */
 			processedImages?: number;
 		};
-		/** Image settings. */
+		/**
+		 * Image settings.
+		 */
 		images?: {
 			// /** The image processor to use. */
 			// processor?: ImageProcessor;
-			/** The image presets to use. These are used to generate the processed images. */
+			/**
+			 * The image presets to use. These are used to generate the processed images.
+			 */
 			presets?: Record<
 				string,
 				{
@@ -206,20 +368,32 @@ export interface LucidConfig {
 					quality?: number;
 				}
 			>;
-			/** If true, the processed images will be stored. */
+			/**
+			 * If true, the processed images will be stored.
+			 */
 			storeProcessed?: boolean;
-			/** If true, the format query parameter will be allowed on the CDN route. If enabled, there is a higher potential for abuse. */
+			/**
+			 * If true, the format query parameter will be allowed on the CDN route. If enabled, there is a higher potential for abuse.
+			 */
 			onDemandFormats?: boolean;
 		};
-		/** Fallback URLs to redirect to when media cannot be found. Only used when the `fallback` query param is set and the sec-fetch-dest header is set to `image` or `video`. */
+		/**
+		 * Fallback URLs to redirect to when media cannot be found. Only used when the `fallback` query param is set and the sec-fetch-dest header is set to `image` or `video`.
+		 */
 		fallback?: {
-			/** The fallback image URL to redirect to when an image cannot be found. */
+			/**
+			 * The fallback image URL to redirect to when an image cannot be found.
+			 */
 			image?: string;
-			/** The fallback video URL to redirect to when a video cannot be found. */
+			/**
+			 * The fallback video URL to redirect to when a video cannot be found.
+			 */
 			video?: string;
 		};
 	};
-	/** Hono middleware and routes to register. */
+	/**
+	 * Hono middleware and routes to register.
+	 */
 	hono?: {
 		/**
 		 * Runs before Lucid's core routes.
@@ -236,50 +410,90 @@ export interface LucidConfig {
 			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
 		>;
 	};
-	/** Queue configuration for background job processing. */
+	/**
+	 * Queue configuration for background job processing.
+	 */
 	queue?: {
-		/** The queue adapter to use. If not provided, defaults to the worker adapter, then falls back to a passthrough adapter. */
+		/**
+		 * The queue adapter to use. If not provided, defaults to the worker adapter, then falls back to a passthrough adapter.
+		 */
 		adapter?:
 			| QueueAdapter
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
 	};
-	/** Configure the soft-delete behavior for different data types */
+	/**
+	 * Access control policy for custom permissions and config-managed roles.
+	 */
+	access?: AccessConfig;
+	/**
+	 * Configure the soft-delete behavior for different data types
+	 */
 	softDelete?: {
-		/** The fallback number of days to retain deleted data. If left blank, this will fallback to 30 days. */
+		/**
+		 * The fallback number of days to retain deleted data. If left blank, this will fallback to 30 days.
+		 */
 		defaultRetentionDays?: number;
-		/** Define retention days for specific data types */
+		/**
+		 * Define retention days for specific data types
+		 */
 		retentionDays?: {
-			/** Days to retain locales that don't exist in your lucid.config */
+			/**
+			 * Days to retain locales that don't exist in your lucid.config
+			 */
 			locales?: number;
-			/** Days to retain users */
+			/**
+			 * Days to retain users
+			 */
 			users?: number;
-			/** Days to retain media */
+			/**
+			 * Days to retain media
+			 */
 			media?: number;
-			/** Days to retain collections that don't exist in your lucid.config */
+			/**
+			 * Days to retain collections that don't exist in your lucid.config
+			 */
 			collections?: number;
-			/** Days to retain documents */
+			/**
+			 * Days to retain documents
+			 */
 			documents?: number;
 		};
 	};
-	/** Hooks to register. Allows you to register custom hooks to run before or after certain events. */
+	/**
+	 * Hooks to register. Allows you to register custom hooks to run before or after certain events.
+	 */
 	hooks?: Array<AllHooks>;
-	/** A list of collections instances to register. These can be imported from `@lucidcms/core`. */
+	/**
+	 * A list of collections instances to register. These can be imported from `@lucidcms/core`.
+	 */
 	collections?: CollectionBuilder[];
-	/** A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config. */
+	/**
+	 * A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config.
+	 */
 	plugins?: LucidPluginResponse[];
-	/** Build options. */
+	/**
+	 * Build options.
+	 */
 	build?: {
 		paths?: {
-			/** The output directory. */
+			/**
+			 * The output directory.
+			 */
 			outDir?: string;
-			/** The path to the email templates directory. This can be used to override or extend the default templates. */
+			/**
+			 * The path to the email templates directory. This can be used to override or extend the default templates.
+			 */
 			emailTemplates?: string;
-			/** Additional files or directories to copy into the public output directory. */
+			/**
+			 * Additional files or directories to copy into the public output directory.
+			 */
 			copyPublic?: CopyPublicEntry[];
 		};
 		watch?: {
-			/** The files to ignore. */
+			/**
+			 * The files to ignore.
+			 */
 			ignore?: string[];
 		};
 	};
@@ -288,7 +502,9 @@ export interface LucidConfig {
 	 * These values are used in emails and, in future, the admin interface.
 	 */
 	brand?: {
-		/** The name of your application or organisation. */
+		/**
+		 * The name of your application or organisation.
+		 */
 		name?: string;
 	};
 }
@@ -297,7 +513,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
 	kv?: {
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
-		/** Prefix keys with a non-empty namespace. Set to false to disable namespacing for the default KV adapter. */
+		/**
+		 * Prefix keys with a non-empty namespace. Set to false to disable namespacing for the default KV adapter.
+		 */
 		namespace?: string | false;
 	};
 	auth: {
@@ -386,6 +604,11 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| QueueAdapter
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
+	};
+	access: {
+		permissionGroups: AccessPermissionGroupDefinitions;
+		permissions: AccessPermissionDefinitions;
+		roles: AccessRoleDefinition[];
 	};
 	softDelete: {
 		defaultRetentionDays: number;
