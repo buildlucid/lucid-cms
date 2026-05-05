@@ -21,6 +21,7 @@ export const Permissions = {
 	DocumentsDelete: "documents:delete",
 	DocumentsRestore: "documents:restore",
 	DocumentsPublish: "documents:publish",
+	DocumentsReview: "documents:review",
 	IntegrationsRead: "integrations:read",
 	IntegrationsCreate: "integrations:create",
 	IntegrationsUpdate: "integrations:update",

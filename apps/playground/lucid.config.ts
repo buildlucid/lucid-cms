@@ -240,12 +240,24 @@ export default configureLucid({
 					name: "Publish Pages",
 					group: "pages",
 				},
+				"page:review": {
+					name: "Review Page Publish Requests",
+					group: "pages",
+				},
 				"page:publish:staging": {
 					name: "Publish Pages To Staging",
 					group: "pages",
 				},
+				"page:review:staging": {
+					name: "Review Page Publish Requests To Staging",
+					group: "pages",
+				},
 				"page:publish:production": {
 					name: "Publish Pages To Production",
+					group: "pages",
+				},
+				"page:review:production": {
+					name: "Review Page Publish Requests To Production",
 					group: "pages",
 				},
 				"blog:full": {
@@ -276,8 +288,11 @@ export default configureLucid({
 						"page:delete",
 						"page:restore",
 						"page:publish",
+						"page:review",
 						"page:publish:staging",
+						"page:review:staging",
 						"page:publish:production",
+						"page:review:production",
 						"blog:full",
 					],
 				},

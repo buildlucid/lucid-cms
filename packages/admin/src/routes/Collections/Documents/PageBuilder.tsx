@@ -30,7 +30,7 @@ import T from "@/translations";
 
 const CollectionsDocumentsEditRoute: Component<{
 	mode: "create" | "edit";
-	version?: "latest" | "revision";
+	version?: "latest" | "revision" | "snapshot";
 }> = (props) => {
 	// ----------------------------------
 	// Hooks & State
@@ -73,7 +73,7 @@ const CollectionsDocumentsEditRoute: Component<{
 		createDocumentMutation: mutations.createDocumentMutation,
 		createSingleVersionMutation: mutations.createSingleVersionMutation,
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
-		promoteToPublishedMutation: mutations.promoteToPublishedMutation,
+		createPublishOperationMutation: mutations.createPublishOperationMutation,
 	});
 
 	const autoSave = useDocumentAutoSave({
@@ -101,7 +101,9 @@ const CollectionsDocumentsEditRoute: Component<{
 		const routeVersionKey =
 			versionType() === "revision"
 				? `revision:${versionId() ?? "unknown"}`
-				: `status:${versionType()}`;
+				: versionType() === "snapshot"
+					? `snapshot:${versionId() ?? "unknown"}`
+					: `status:${versionType()}`;
 
 		return `${docState.collectionKey()}:${routeDocumentId}:${routeVersionKey}`;
 	};

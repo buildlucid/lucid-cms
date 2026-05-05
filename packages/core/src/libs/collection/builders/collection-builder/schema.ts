@@ -23,6 +23,7 @@ const CollectionConfigSchema = z.object({
 			delete: z.string().optional(),
 			restore: z.string().optional(),
 			publish: z.string().optional(),
+			review: z.string().optional(),
 		})
 		.optional(),
 	config: z
@@ -42,6 +43,42 @@ const CollectionConfigSchema = z.object({
 			useAutoSave: z
 				.boolean()
 				.default(constants.collectionBuilder.useAutoSave)
+				.optional(),
+			publishRequests: z
+				.object({
+					enabled: z
+						.boolean()
+						.default(constants.collectionBuilder.publishRequests.enabled)
+						.optional(),
+					targets: z
+						.array(
+							z
+								.string()
+								.min(1)
+								.max(50)
+								.regex(/^[a-z0-9-_]+$/),
+						)
+						.optional(),
+					allowSelfApproval: z
+						.boolean()
+						.default(
+							constants.collectionBuilder.publishRequests.allowSelfApproval,
+						)
+						.optional(),
+					requireRequestComment: z
+						.boolean()
+						.default(
+							constants.collectionBuilder.publishRequests.requireRequestComment,
+						)
+						.optional(),
+					requireDecisionComment: z
+						.boolean()
+						.default(
+							constants.collectionBuilder.publishRequests
+								.requireDecisionComment,
+						)
+						.optional(),
+				})
 				.optional(),
 			environments: z
 				.array(
@@ -67,6 +104,7 @@ const CollectionConfigSchema = z.object({
 						permissions: z
 							.object({
 								publish: z.string().optional(),
+								review: z.string().optional(),
 							})
 							.optional(),
 					}),

@@ -67,6 +67,11 @@ const emailConstants = Object.freeze({
 			external: false,
 			storage: null,
 		},
+		publishRequest: {
+			key: "publish-request",
+			external: false,
+			storage: null,
+		},
 	},
 } as const);
 

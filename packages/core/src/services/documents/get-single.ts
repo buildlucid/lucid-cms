@@ -1,3 +1,4 @@
+import constants from "../../constants/constants.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
 import { documentsFormatter } from "../../libs/formatters/index.js";
@@ -24,6 +25,20 @@ const getSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+
+	if (
+		data.status ===
+		constants.collectionBuilder.publishRequests.snapshotVersionType
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: T("document_version_not_found_message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
 
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
@@ -72,11 +87,18 @@ const getSingle: ServiceFn<
 	}
 
 	if (data.query.include?.includes("bricks")) {
+		const relationVersionType =
+			versionType === "revision" ||
+			versionType ===
+				constants.collectionBuilder.publishRequests.snapshotVersionType
+				? "latest"
+				: versionType;
+
 		const bricksRes = await documentBrickServices.getMultiple(context, {
 			versionId: versionId,
 			collectionKey: documentRes.data.collection_key,
 			//* if fetching a revision, we always default to the latest version so any sub-documents this may query due to the document custom field is always recent info
-			versionType: versionType !== "revision" ? versionType : "latest",
+			versionType: relationVersionType,
 		});
 		if (bricksRes.error) return bricksRes;
 

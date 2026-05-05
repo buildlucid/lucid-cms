@@ -20,6 +20,7 @@ export type NavigationMenuContentProps = {
 	user?: Pick<User, "username" | "firstName" | "lastName" | "profilePicture">;
 	showLicenseAlert: boolean;
 	canReadDocuments: boolean;
+	canReadPublishRequests: boolean;
 	canReadMedia: boolean;
 	canReadEmails: boolean;
 	canReadUsers: boolean;
@@ -78,6 +79,13 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						icon="email"
 						title={T()("email_activity")}
 						permission={props.canReadEmails}
+					/>
+					<IconLinkFull
+						type="link"
+						href="/lucid/publish-requests"
+						icon="publish-requests"
+						title={T()("publish_requests")}
+						permission={props.canReadPublishRequests}
 					/>
 
 					{/* Collections */}

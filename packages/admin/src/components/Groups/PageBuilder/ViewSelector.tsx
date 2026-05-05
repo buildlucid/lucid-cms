@@ -29,6 +29,9 @@ export const ViewSelector: Component<{
 
 	// ----------------------------------
 	// Memos
+	const currentPath = createMemo(
+		() => `${location.pathname}${location.search}`,
+	);
 	const environments = createMemo(() =>
 		props
 			.options()
@@ -46,7 +49,11 @@ export const ViewSelector: Component<{
 	const currentOption = createMemo(() => {
 		return props
 			.options()
-			.find((option) => location.pathname.includes(option.location));
+			.find(
+				(option) =>
+					currentPath().includes(option.location) ||
+					location.pathname.includes(option.location),
+			);
 	});
 
 	// ----------------------------------

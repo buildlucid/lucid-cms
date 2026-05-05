@@ -16,6 +16,8 @@ export function useHistoryUIState(props: {
 		createSignal(false);
 	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
 		createSignal<Exclude<DocumentVersionType, "revision"> | null>(null);
+	const [getReleaseEnvironmentAction, setReleaseEnvironmentAction] =
+		createSignal<"publish" | "request" | null>(null);
 
 	/**
 	 * Checks if services requests are loading or not
@@ -42,9 +44,9 @@ export function useHistoryUIState(props: {
 	const isAutoSaving = createMemo(() => false);
 
 	/**
-	 * Checks if the promote to published mutation is currently running - always false for history
+	 * Checks if a publish operation mutation is currently running - always false for history
 	 */
-	const isPromotingToPublished = createMemo(() => false);
+	const isCreatingPublishOperation = createMemo(() => false);
 
 	/**
 	 * Checks for any translations errors - always false for history
@@ -158,6 +160,8 @@ export function useHistoryUIState(props: {
 		setReleaseEnvironmentOpen,
 		getReleaseEnvironmentTarget,
 		setReleaseEnvironmentTarget,
+		getReleaseEnvironmentAction,
+		setReleaseEnvironmentAction,
 		isLoading,
 		isSuccess,
 		isSaving,
@@ -177,7 +181,7 @@ export function useHistoryUIState(props: {
 		collectionNeedsMigrating,
 		useAutoSave,
 		hasAutoSavePermission,
-		isPromotingToPublished,
+		isCreatingPublishOperation,
 		isAutoSaveActive,
 		showRestoreRevisionButton,
 		hasRestorePermission,

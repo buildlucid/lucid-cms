@@ -29,8 +29,8 @@ export function useDocumentUIState(props: {
 	updateSingleVersionMutation?: ReturnType<
 		typeof api.documents.useUpdateSingleVersion
 	>;
-	promoteToPublishedMutation?: ReturnType<
-		typeof api.documents.usePromoteSingle
+	createPublishOperationMutation?: ReturnType<
+		typeof api.documents.useCreatePublishOperation
 	>;
 }) {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
@@ -43,6 +43,8 @@ export function useDocumentUIState(props: {
 		createSignal(false);
 	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
 		createSignal<Exclude<DocumentVersionType, "revision"> | null>(null);
+	const [getReleaseEnvironmentAction, setReleaseEnvironmentAction] =
+		createSignal<"publish" | "request" | null>(null);
 
 	/**
 	 * Checkss if services requests are loading or not
@@ -80,10 +82,10 @@ export function useDocumentUIState(props: {
 	});
 
 	/**
-	 * Checks if the promote to published mutation is currently running
+	 * Checks if a publish operation mutation is currently running
 	 */
-	const isPromotingToPublished = createMemo(() => {
-		return props.promoteToPublishedMutation?.action.isPending || false;
+	const isCreatingPublishOperation = createMemo(() => {
+		return props.createPublishOperationMutation?.action.isPending || false;
 	});
 
 	/**
@@ -336,6 +338,8 @@ export function useDocumentUIState(props: {
 		setReleaseEnvironmentOpen,
 		getReleaseEnvironmentTarget,
 		setReleaseEnvironmentTarget,
+		getReleaseEnvironmentAction,
+		setReleaseEnvironmentAction,
 		isLoading,
 		isSuccess,
 		isSaving,
@@ -355,7 +359,7 @@ export function useDocumentUIState(props: {
 		collectionNeedsMigrating,
 		useAutoSave,
 		hasAutoSavePermission,
-		isPromotingToPublished,
+		isCreatingPublishOperation,
 		isAutoSaveActive,
 		showRestoreRevisionButton,
 		hasRestorePermission,

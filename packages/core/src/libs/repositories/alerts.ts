@@ -9,7 +9,7 @@ export default class AlertsRepository extends StaticRepository<"lucid_alerts"> {
 	}
 	tableSchema = z.object({
 		id: z.number(),
-		type: z.enum(["storage"]),
+		type: z.enum(["storage", "publish-request"]),
 		level: z.enum(["info", "warning", "error", "critical"]),
 		dedupe_key: z.string(),
 		title: z.string(),

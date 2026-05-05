@@ -1,3 +1,4 @@
+import constants from "../../../constants/constants.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -38,6 +39,19 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	context: ServiceContext,
 	data: ClientDocumentsGetSingleInput<TCollectionKey>,
 ): ServiceResponse<CollectionDocument<TCollectionKey>> => {
+	if (
+		data.status ===
+		constants.collectionBuilder.publishRequests.snapshotVersionType
+	) {
+		return {
+			error: {
+				message: T("document_not_found_message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
+
 	const Documents = new DocumentsRepository(
 		context.db.client,
 		context.config.db,

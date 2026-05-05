@@ -68,6 +68,7 @@ const promoteVersionController = factory.createHandlers(
 			collectionKey,
 			toVersionType: versionType,
 			createRevision: bypassRevision === true ? false : undefined,
+			requirePublishOperationForEnvironmentTarget: true,
 		});
 		if (restoreRevisionRes.error)
 			throw new LucidAPIError(restoreRevisionRes.error);

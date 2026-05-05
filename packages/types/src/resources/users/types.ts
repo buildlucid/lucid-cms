@@ -24,6 +24,7 @@ export type CorePermission =
 	| "documents:delete"
 	| "documents:restore"
 	| "documents:publish"
+	| "documents:review"
 	| "integrations:read"
 	| "integrations:create"
 	| "integrations:update"

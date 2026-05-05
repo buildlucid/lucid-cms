@@ -1,3 +1,4 @@
+import constants from "../../constants/constants.js";
 import {
 	getBricksTableSchema,
 	getDocumentFieldsTableSchema,
@@ -7,6 +8,7 @@ import type { DocumentVersionType } from "../../libs/db/types.js";
 import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
+import T from "../../translations/index.js";
 import type { InternalCollectionDocument } from "../../types/response.js";
 import { getBaseUrl, groupDocumentFilters } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -27,6 +29,19 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
+	if (
+		data.status ===
+		constants.collectionBuilder.publishRequests.snapshotVersionType
+	) {
+		return {
+			error: {
+				message: T("document_version_not_found_message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
+
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
 	});

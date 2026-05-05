@@ -1,3 +1,4 @@
+import constants from "../../../constants/constants.js";
 import {
 	getBricksTableSchema,
 	getDocumentFieldsTableSchema,
@@ -8,6 +9,7 @@ import formatter, {
 } from "../../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetMultipleQueryParams } from "../../../schemas/documents.js";
+import T from "../../../translations/index.js";
 import type {
 	CollectionDocument,
 	CollectionDocumentStatus,
@@ -49,6 +51,19 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	context: ServiceContext,
 	data: ClientDocumentsGetMultipleInput<TCollectionKey>,
 ): ServiceResponse<ClientDocumentsGetMultipleResult<TCollectionKey>> => {
+	if (
+		data.status ===
+		constants.collectionBuilder.publishRequests.snapshotVersionType
+	) {
+		return {
+			error: {
+				message: T("document_not_found_message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
+
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: data.collectionKey,
 	});

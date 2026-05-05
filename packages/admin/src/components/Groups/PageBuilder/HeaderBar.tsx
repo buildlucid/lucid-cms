@@ -17,6 +17,7 @@ import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import userPreferencesStore from "@/store/userPreferencesStore";
+import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
@@ -94,6 +95,25 @@ export const HeaderBar: Component<{
 			});
 		}
 
+		if (
+			props.version?.() === "snapshot" &&
+			props.state.documentID() !== undefined &&
+			props.versionId?.() !== undefined
+		) {
+			options.push({
+				label: `${T()("snapshot")} #${props.versionId?.()}`,
+				disabled: false,
+				type: "link",
+				hideInDropdown: true,
+				location: getDocumentRoute("edit", {
+					collectionKey: props.state.collectionKey(),
+					documentId: props.state.documentID(),
+					status: "snapshot",
+					versionId: props.versionId?.(),
+				}),
+			});
+		}
+
 		for (const environment of props.state.collection()?.config.environments ??
 			[]) {
 			const isPublished = !!props.state.document()?.version[environment.key];
@@ -128,6 +148,22 @@ export const HeaderBar: Component<{
 			});
 		}
 
+		if (
+			props.state.collection()?.config.publishRequests?.enabled === true &&
+			(props.state.collection()?.config.publishRequests.targets?.length ?? 0) >
+				0
+		) {
+			options.push({
+				label: T()("publish_requests"),
+				disabled: props.state.documentID() === undefined,
+				type: "link",
+				location:
+					props.state.documentID() !== undefined
+						? `/lucid/collections/${props.state.collectionKey()}/${props.state.documentID()}/publish-requests`
+						: "#",
+			});
+		}
+
 		return options;
 	});
 	const releaseOptions = createMemo<ReleaseTriggerOption[]>(() => {
@@ -137,6 +173,7 @@ export const HeaderBar: Component<{
 		if (!collection || !document) return [];
 
 		const environments = collection.config.environments ?? [];
+		const publishRequests = collection.config.publishRequests;
 
 		return environments.map((environment) => {
 			const label =
@@ -146,9 +183,22 @@ export const HeaderBar: Component<{
 				props.state.document()?.version[environment.key]?.contentId ===
 				props.state.document()?.version.latest?.contentId;
 
+			const publishRequestTargetEnabled =
+				publishRequests?.enabled === true &&
+				publishRequests.targets?.includes(environment.key) === true;
+
+			const action: ReleaseTriggerOption["action"] = publishRequestTargetEnabled
+				? "request"
+				: "publish";
+			const permission = userStore.get.hasPermission([
+				environment.permissions.publish,
+			]).all;
+
 			return {
 				label,
 				value: environment.key as ReleaseTriggerOption["value"],
+				action,
+				permission,
 				route: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
 					documentId: props.state.documentID(),
@@ -170,9 +220,15 @@ export const HeaderBar: Component<{
 
 		return (
 			props.mode !== "create" &&
-			(collection.config.useRevisions || environments.length > 0)
+			(collection.config.useRevisions ||
+				environments.length > 0 ||
+				(collection.config.publishRequests?.enabled === true &&
+					(collection.config.publishRequests.targets?.length ?? 0) > 0))
 		);
 	});
+	const hasReleasePermission = createMemo(() =>
+		releaseOptions().some((option) => option.permission !== false),
+	);
 
 	// ----------------------------------
 	// Effects
@@ -223,6 +279,7 @@ export const HeaderBar: Component<{
 										collectionKey: props.state.collectionKey(),
 										documentId: props.state.documentID(),
 										status: props.version?.(),
+										versionId: props.versionId?.(),
 									}),
 									label:
 										props.mode === "create"
@@ -358,6 +415,9 @@ export const HeaderBar: Component<{
 									onSelect={async (option) => {
 										props.state.autoSave?.debouncedAutoSave.clear();
 										props.state.ui.setReleaseEnvironmentTarget(option.value);
+										props.state.ui.setReleaseEnvironmentAction(
+											option.action ?? "publish",
+										);
 										props.state.ui.setReleaseEnvironmentOpen(true);
 									}}
 									onSave={() => {
@@ -367,11 +427,11 @@ export const HeaderBar: Component<{
 									saveDisabled={props.state.ui.saveDisabled?.()}
 									savePermission={props.state.ui.hasSavePermission?.()}
 									disabled={!props.state.ui.canPublishDocument?.()}
-									permission={props.state.ui.hasPublishPermission?.()}
+									permission={hasReleasePermission()}
 									loading={
 										props.state.ui.isSaving?.() ||
 										props.state.ui.isAutoSaving?.() ||
-										props.state.ui.isPromotingToPublished?.()
+										props.state.ui.isCreatingPublishOperation?.()
 									}
 								/>
 							</Show>

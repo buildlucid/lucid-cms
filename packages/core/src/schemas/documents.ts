@@ -93,7 +93,7 @@ const documentResponseBaseSchema = z.object({
 	}),
 });
 
-const documentResponseSchema = documentResponseBaseSchema.extend({
+export const documentResponseSchema = documentResponseBaseSchema.extend({
 	bricks: z.array(brickResponseSchema).nullable().optional(),
 	fields: z.array(fieldResponseSchema).nullable().optional(),
 	refs: z.record(z.string(), z.array(z.any())).nullable().optional(),

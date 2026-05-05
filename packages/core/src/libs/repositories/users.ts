@@ -801,4 +801,64 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			],
 		});
 	}
+
+	async selectMultiplePublishReviewers<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				permission: string;
+			}
+		>,
+	) {
+		const exec = await this.executeQuery(
+			() => {
+				const superAdminValue = this.dbAdapter.getDefault("boolean", "true");
+				const deletedValue = this.dbAdapter.getDefault("boolean", "false");
+				const lockedValue = this.dbAdapter.getDefault("boolean", "false");
+
+				return this.db
+					.selectFrom("lucid_users")
+					.select([
+						"id",
+						"email",
+						"username",
+						"first_name as firstName",
+						"last_name as lastName",
+					])
+					.where("is_deleted", "=", deletedValue)
+					.where("is_locked", "=", lockedValue)
+					.where(({ or, eb, exists, selectFrom }) =>
+						or([
+							eb("super_admin", "=", superAdminValue),
+							exists(
+								selectFrom("lucid_user_roles")
+									.innerJoin(
+										"lucid_role_permissions",
+										"lucid_role_permissions.role_id",
+										"lucid_user_roles.role_id",
+									)
+									.select(sql.lit(1).as("one"))
+									.whereRef("lucid_user_roles.user_id", "=", "lucid_users.id")
+									.where(
+										"lucid_role_permissions.permission",
+										"=",
+										props.permission,
+									),
+							),
+						]),
+					)
+					.orderBy("email", "asc")
+					.execute();
+			},
+			{
+				method: "selectMultiplePublishReviewers",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+		});
+	}
 }

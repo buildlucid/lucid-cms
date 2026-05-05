@@ -1,3 +1,4 @@
+export { default as AlertRecipientsRepository } from "./alert-recipients.js";
 export { default as AlertsRepository } from "./alerts.js";
 export { default as AuthStatesRepository } from "./auth-states.js";
 export { default as ClientIntegrationScopesRepository } from "./client-integration-scopes.js";
@@ -5,6 +6,9 @@ export { default as ClientIntegrationsRepository } from "./client-integrations.j
 export { default as CollectionMigrationsRepository } from "./collection-migrations.js";
 export { default as CollectionsRepository } from "./collections.js";
 export { default as DocumentBricksRepository } from "./document-bricks.js";
+export { default as DocumentPublishOperationAssigneesRepository } from "./document-publish-operation-assignees.js";
+export { default as DocumentPublishOperationEventsRepository } from "./document-publish-operation-events.js";
+export { default as DocumentPublishOperationsRepository } from "./document-publish-operations.js";
 export { default as DocumentVersionsRepository } from "./document-versions.js";
 export { default as DocumentsRepository } from "./documents.js";
 export { default as EmailAttachmentsRepository } from "./email-attachments.js";

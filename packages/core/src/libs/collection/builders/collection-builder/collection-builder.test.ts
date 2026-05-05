@@ -114,6 +114,12 @@ test("collection config is correct along with field includes and filters", async
 				"media_test",
 			],
 			environments: [],
+			publishRequests: {
+				enabled: false,
+				allowSelfApproval: false,
+				requireRequestComment: true,
+				requireDecisionComment: false,
+			},
 			revisionRetentionDays: 30,
 		},
 	});

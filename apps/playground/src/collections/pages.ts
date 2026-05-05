@@ -20,11 +20,19 @@ const PageCollection = new CollectionBuilder("page", {
 		delete: "page:delete",
 		restore: "page:restore",
 		publish: "page:publish",
+		review: "page:review",
 	},
 	config: {
 		useTranslations: true,
 		useRevisions: true,
 		useAutoSave: true,
+		publishRequests: {
+			enabled: true,
+			targets: ["production"],
+			allowSelfApproval: true,
+			requireRequestComment: true,
+			requireDecisionComment: false,
+		},
 		environments: [
 			{
 				key: "staging",
@@ -33,6 +41,7 @@ const PageCollection = new CollectionBuilder("page", {
 				},
 				permissions: {
 					publish: "page:publish:staging",
+					review: "page:review:staging",
 				},
 			},
 			{
@@ -42,6 +51,7 @@ const PageCollection = new CollectionBuilder("page", {
 				},
 				permissions: {
 					publish: "page:publish:production",
+					review: "page:review:production",
 				},
 			},
 		],

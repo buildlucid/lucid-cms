@@ -413,7 +413,7 @@ export interface LucidEmailTransactions {
 	updated_at: TimestampMutateable;
 }
 
-export type AlertType = "storage";
+export type AlertType = "storage" | "publish-request";
 export type AlertLevel = "info" | "warning" | "error" | "critical";
 
 export interface LucidAlerts {
@@ -429,6 +429,72 @@ export interface LucidAlerts {
 		Record<string, unknown>
 	>;
 	email_id: number | null;
+	created_at: TimestampImmutable;
+}
+
+export interface LucidAlertRecipients {
+	id: Generated<number>;
+	alert_id: number;
+	user_id: number;
+	read_at: TimestampMutateable;
+	dismissed_at: TimestampMutateable;
+	created_at: TimestampImmutable;
+}
+
+export type DocumentPublishOperationStatus =
+	| "pending"
+	| "approved"
+	| "rejected"
+	| "cancelled"
+	| "superseded";
+
+export type DocumentPublishOperationType = "request" | "direct";
+
+export type DocumentPublishOperationEventType =
+	| "created"
+	| "superseded"
+	| "approved"
+	| "rejected"
+	| "cancelled";
+
+export interface LucidDocumentPublishOperations {
+	id: Generated<number>;
+	collection_key: string;
+	document_id: number;
+	target: string;
+	operation_type: DocumentPublishOperationType;
+	status: DocumentPublishOperationStatus;
+	source_version_id: number;
+	source_content_id: string;
+	snapshot_version_id: number;
+	requested_by: number | null;
+	request_comment: string | null;
+	decided_by: number | null;
+	decision_comment: string | null;
+	decided_at: TimestampMutateable;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
+export interface LucidDocumentPublishOperationAssignees {
+	id: Generated<number>;
+	operation_id: number;
+	user_id: number;
+	assigned_by: number | null;
+	assigned_at: TimestampImmutable;
+}
+
+export interface LucidDocumentPublishOperationEvents {
+	id: Generated<number>;
+	operation_id: number;
+	event_type: DocumentPublishOperationEventType;
+	user_id: number | null;
+	comment: string | null;
+	metadata: JSONColumnType<
+		Record<string, unknown>,
+		Record<string, unknown>,
+		Record<string, unknown>
+	>;
 	created_at: TimestampImmutable;
 }
 
@@ -668,6 +734,10 @@ export interface LucidDB {
 	lucid_email_attachments: LucidEmailAttachments;
 	lucid_email_transactions: LucidEmailTransactions;
 	lucid_alerts: LucidAlerts;
+	lucid_alert_recipients: LucidAlertRecipients;
+	lucid_document_publish_operations: LucidDocumentPublishOperations;
+	lucid_document_publish_operation_assignees: LucidDocumentPublishOperationAssignees;
+	lucid_document_publish_operation_events: LucidDocumentPublishOperationEvents;
 	lucid_media_folders: LucidMediaFolders;
 	lucid_media: LucidMedia;
 	lucid_media_translations: LucidMediaTranslations;

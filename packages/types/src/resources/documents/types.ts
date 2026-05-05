@@ -509,11 +509,19 @@ export interface Collection {
 		isLocked: boolean;
 		displayInListing: string[];
 		useAutoSave: boolean;
+		publishRequests: {
+			enabled: boolean;
+			targets?: string[];
+			allowSelfApproval: boolean;
+			requireRequestComment: boolean;
+			requireDecisionComment: boolean;
+		};
 		environments: {
 			key: string;
 			name: LocaleValue;
 			permissions: {
 				publish: string;
+				review: string;
 			};
 		}[];
 	};
@@ -524,6 +532,7 @@ export interface Collection {
 		delete: string;
 		restore: string;
 		publish: string;
+		review: string;
 	};
 	migrationStatus?: MigrationStatus | null;
 	fixedBricks: Array<CollectionBrickConfig>;
@@ -572,3 +581,69 @@ export interface InternalCollectionDocument {
 	fields?: Array<InternalDocumentField> | null;
 	refs?: Partial<Record<FieldType, DocumentFieldRef[]>> | null;
 }
+
+export type PublishOperationStatus =
+	| "pending"
+	| "approved"
+	| "rejected"
+	| "cancelled"
+	| "superseded";
+
+export type PublishOperationType = "request" | "direct";
+
+export type PublishOperationUser = {
+	id: number;
+	email: string | null;
+	username: string | null;
+	firstName: string | null;
+	lastName: string | null;
+} | null;
+
+export type PublishOperationAssignee = {
+	id: number;
+	user: NonNullable<PublishOperationUser>;
+	assignedBy: number | null;
+	assignedAt: string | null;
+};
+
+export type PublishOperationEvent = {
+	id: number;
+	type: string;
+	userId: number | null;
+	comment: string | null;
+	metadata: Record<string, unknown>;
+	createdAt: string | null;
+};
+
+export type PublishOperation = {
+	id: number;
+	collectionKey: string;
+	documentId: number;
+	target: string;
+	operationType: PublishOperationType;
+	status: PublishOperationStatus;
+	sourceVersionId: number;
+	sourceContentId: string;
+	snapshotVersionId: number;
+	isOutdated: boolean;
+	requestedBy: PublishOperationUser;
+	requestComment: string | null;
+	decidedBy: PublishOperationUser;
+	decisionComment: string | null;
+	decidedAt: string | null;
+	createdAt: string | null;
+	updatedAt: string | null;
+	permissions: {
+		review: boolean;
+	};
+	assignees: PublishOperationAssignee[];
+	events: PublishOperationEvent[];
+};
+
+export type PublishOperationReviewer = {
+	id: number;
+	email: string;
+	username: string;
+	firstName: string | null;
+	lastName: string | null;
+};

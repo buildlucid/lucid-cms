@@ -25,7 +25,7 @@ const sendEmail: ServiceFn<
 	[
 		{
 			type: "internal" | "external";
-			to: string;
+			to: string | string[];
 			subject: string;
 			template: string;
 			cc?: string;
@@ -60,6 +60,7 @@ const sendEmail: ServiceFn<
 	const emailFrom = getEmailFrom(context.config, context.request.url);
 	const fromAddress = data.from?.email ?? emailFrom.email;
 	const fromName = data.from?.name ?? emailFrom.name;
+	const toAddress = Array.isArray(data.to) ? data.to.join(",") : data.to;
 
 	const attachmentsRes = normalizeEmailAttachments(data.attachments);
 	if (attachmentsRes.error) return attachmentsRes;
@@ -79,7 +80,7 @@ const sendEmail: ServiceFn<
 			data: {
 				from_address: fromAddress,
 				from_name: fromName,
-				to_address: data.to,
+				to_address: toAddress,
 				subject: data.subject,
 				template: data.template,
 				priority: data.priority ?? "normal",

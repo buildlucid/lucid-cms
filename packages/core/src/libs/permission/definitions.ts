@@ -34,6 +34,7 @@ export const Permissions = {
 	DocumentsDelete: "documents:delete",
 	DocumentsRestore: "documents:restore",
 	DocumentsPublish: "documents:publish",
+	DocumentsReview: "documents:review",
 
 	// Client integration permissions
 	IntegrationRead: "integrations:read",
@@ -81,6 +82,7 @@ export const PermissionSets = {
 		Permissions.DocumentsDelete,
 		Permissions.DocumentsRestore,
 		Permissions.DocumentsPublish,
+		Permissions.DocumentsReview,
 	],
 	Integrations: [
 		Permissions.IntegrationRead,
@@ -258,6 +260,11 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.DocumentsPublish,
 				details: { name: "Publish Documents" },
+				core: true,
+			},
+			{
+				key: Permissions.DocumentsReview,
+				details: { name: "Review Document Publish Requests" },
 				core: true,
 			},
 		],

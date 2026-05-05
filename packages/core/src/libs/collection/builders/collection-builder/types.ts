@@ -17,13 +17,22 @@ export type CollectionPermissionAction =
 	| "update"
 	| "delete"
 	| "restore"
-	| "publish";
+	| "publish"
+	| "review";
 export type CollectionPermissions = Partial<
 	Record<CollectionPermissionAction, string>
 >;
 export type CollectionEnvironmentPermissions = Partial<
-	Pick<Record<CollectionPermissionAction, string>, "publish">
+	Pick<Record<CollectionPermissionAction, string>, "publish" | "review">
 >;
+
+export type PublishRequestsConfig = {
+	enabled: boolean;
+	targets?: string[];
+	allowSelfApproval: boolean;
+	requireRequestComment: boolean;
+	requireDecisionComment: boolean;
+};
 
 export interface CollectionConfigSchemaType
 	extends infer<typeof CollectionConfigSchema> {
@@ -47,6 +56,7 @@ export type CollectionData = {
 		useRevisions: boolean;
 		useTranslations: boolean;
 		useAutoSave: boolean;
+		publishRequests: PublishRequestsConfig;
 		displayInListing: string[];
 		environments: {
 			key: string;

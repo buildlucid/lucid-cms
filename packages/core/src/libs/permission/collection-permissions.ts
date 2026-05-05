@@ -18,6 +18,7 @@ export const documentActionPermissions = {
 	delete: Permissions.DocumentsDelete,
 	restore: Permissions.DocumentsRestore,
 	publish: Permissions.DocumentsPublish,
+	review: Permissions.DocumentsReview,
 } satisfies Record<CollectionPermissionAction, Permission>;
 
 /**
@@ -30,12 +31,15 @@ export const resolveCollectionPermission = (params: {
 }): Permission => {
 	const collectionData = params.collection.getData;
 
-	if (params.action === "publish" && params.target !== undefined) {
+	if (
+		(params.action === "publish" || params.action === "review") &&
+		params.target !== undefined
+	) {
 		const environment = collectionData.config.environments.find(
 			(env) => env.key === params.target,
 		);
-		if (environment?.permissions.publish)
-			return environment.permissions.publish;
+		const permission = environment?.permissions[params.action];
+		if (permission) return permission;
 	}
 
 	return (
@@ -57,5 +61,9 @@ export const resolveCollectionPermissions = (
 		delete: resolveCollectionPermission({ collection, action: "delete" }),
 		restore: resolveCollectionPermission({ collection, action: "restore" }),
 		publish: resolveCollectionPermission({ collection, action: "publish" }),
+		review: resolveCollectionPermission({
+			collection,
+			action: "review",
+		}),
 	};
 };

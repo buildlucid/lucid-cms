@@ -108,6 +108,15 @@ export const NavigationChrome: Component = () => {
 			singleCollections().length > 0
 		);
 	});
+	const showPublishRequests = createMemo(
+		() =>
+			userStore.get.hasPermission([Permissions.DocumentsReview]).all &&
+			(collections.data?.data ?? []).some(
+				(collection) =>
+					collection.config.publishRequests?.enabled === true &&
+					(collection.config.publishRequests.targets?.length ?? 0) > 0,
+			),
+	);
 
 	// ----------------------------------
 	// Effects
@@ -222,6 +231,7 @@ export const NavigationChrome: Component = () => {
 						onLogout={() => logout.action.mutate({})}
 						user={user() || undefined}
 						canReadDocuments={showCollections()}
+						canReadPublishRequests={showPublishRequests()}
 						canReadMedia={canReadMedia()}
 						canReadEmails={canReadEmails()}
 						canReadUsers={canReadUsers()}
@@ -300,6 +310,7 @@ export const NavigationChrome: Component = () => {
 								onNavigate={() => setMobileMenuOpen(false)}
 								showLicenseAlert={showLicenseAlert()}
 								canReadDocuments={showCollections()}
+								canReadPublishRequests={showPublishRequests()}
 								canReadMedia={canReadMedia()}
 								canReadEmails={canReadEmails()}
 								canReadUsers={canReadUsers()}

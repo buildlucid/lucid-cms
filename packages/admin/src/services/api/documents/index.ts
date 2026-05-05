@@ -1,3 +1,4 @@
+import useCreatePublishOperation from "./useCreatePublishOperation";
 import useCreateSingle from "./useCreateSingle";
 import useCreateSingleVersion from "./useCreateSingleVersion";
 import useDeleteMultiple from "./useDeleteMultiple";
@@ -20,6 +21,7 @@ const exportObject = {
 	useDeleteMultiplePermanently,
 	useCreateSingleVersion,
 	useCreateSingle,
+	useCreatePublishOperation,
 	useGetSingle,
 	usePromoteSingle,
 	useGetSingleVersion,

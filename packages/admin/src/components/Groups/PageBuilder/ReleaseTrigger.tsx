@@ -12,6 +12,8 @@ export interface ReleaseTriggerOption {
 	label: string;
 	value: Exclude<DocumentVersionType, "revision">;
 	route: string;
+	action?: "publish" | "request";
+	permission?: boolean;
 	disabled?: boolean;
 	status?: {
 		isReleased?: boolean;
@@ -50,6 +52,8 @@ export const ReleaseTrigger: Component<{
 			event.stopPropagation();
 		}
 	};
+	const getOptionLabel = (option: ReleaseTriggerOption) =>
+		option.action === "request" ? T()("request_publish") : T()("release_to");
 	const handleSaveClick = (event: MouseEvent) => {
 		if (props.savePermission === false) {
 			spawnToast({
@@ -130,6 +134,14 @@ export const ReleaseTrigger: Component<{
 											disabled={option.disabled === true || isDisabled()}
 											onSelect={() => {
 												if (option.disabled === true || isDisabled()) return;
+												if (option.permission === false) {
+													spawnToast({
+														title: T()("no_permission_toast_title"),
+														message: T()("no_permission_toast_message"),
+														status: "warning",
+													});
+													return;
+												}
 												props.onSelect(option);
 											}}
 										>
@@ -139,7 +151,7 @@ export const ReleaseTrigger: Component<{
 														option.disabled === true || isDisabled(),
 												})}
 											>
-												{T()("release_to")} {option.label}
+												{getOptionLabel(option)} {option.label}
 											</span>
 											<span
 												class={classNames("w-2.5 h-2.5 rounded-full border", {

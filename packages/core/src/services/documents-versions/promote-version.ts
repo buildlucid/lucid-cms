@@ -29,6 +29,7 @@ const promoteVersion: ServiceFn<
 			skipRevisionCheck?: boolean;
 			/** If set to false, a revision will not be created even if the collection supports revisions. */
 			createRevision?: boolean;
+			requirePublishOperationForEnvironmentTarget?: boolean;
 		},
 	],
 	undefined
@@ -52,6 +53,25 @@ const promoteVersion: ServiceFn<
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
+
+	if (data.requirePublishOperationForEnvironmentTarget === true) {
+		const isEnvironmentTarget =
+			collectionRes.data.getData.config.environments.some(
+				(environment) => environment.key === data.toVersionType,
+			);
+
+		if (isEnvironmentTarget) {
+			return {
+				error: {
+					type: "basic",
+					name: T("collection_permission_error_name"),
+					message: T("publish_operation_required_for_environment_target"),
+					status: 403,
+				},
+				data: undefined,
+			};
+		}
+	}
 
 	//* check the schema status and if a migration is required
 	const migrationStatusRes = await migrationStatus(context, {

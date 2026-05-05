@@ -3,7 +3,10 @@ import { DocumentsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
 import executeHooks from "../../utils/hooks/execute-hooks.js";
-import { documentServices } from "../index.js";
+import {
+	documentPublishOperationServices,
+	documentServices,
+} from "../index.js";
 import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
 
 const deleteMultiplePermanently: ServiceFn<
@@ -133,6 +136,14 @@ const deleteMultiplePermanently: ServiceFn<
 
 	const nullifyError = nullifyResults.find((result) => result.error);
 	if (nullifyError) return nullifyError;
+
+	const cancelRequestsRes =
+		await documentPublishOperationServices.cancelForDocuments(context, {
+			collectionKey: data.collectionKey,
+			documentIds: data.ids,
+			comment: T("document_permanently_deleted_publish_request_comment"),
+		});
+	if (cancelRequestsRes.error) return cancelRequestsRes;
 
 	const hookAfterRes = await executeHooks(
 		{

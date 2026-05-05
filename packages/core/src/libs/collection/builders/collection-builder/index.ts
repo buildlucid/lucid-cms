@@ -150,6 +150,21 @@ class CollectionBuilder extends FieldBuilder {
 				useAutoSave:
 					this.config.config?.useAutoSave ??
 					constants.collectionBuilder.useAutoSave,
+				publishRequests: {
+					enabled:
+						this.config.config?.publishRequests?.enabled ??
+						constants.collectionBuilder.publishRequests.enabled,
+					targets: this.config.config?.publishRequests?.targets,
+					allowSelfApproval:
+						this.config.config?.publishRequests?.allowSelfApproval ??
+						constants.collectionBuilder.publishRequests.allowSelfApproval,
+					requireRequestComment:
+						this.config.config?.publishRequests?.requireRequestComment ??
+						constants.collectionBuilder.publishRequests.requireRequestComment,
+					requireDecisionComment:
+						this.config.config?.publishRequests?.requireDecisionComment ??
+						constants.collectionBuilder.publishRequests.requireDecisionComment,
+				},
 				displayInListing: this.displayInListing,
 				environments:
 					this.config.config?.environments?.map((environment) => ({

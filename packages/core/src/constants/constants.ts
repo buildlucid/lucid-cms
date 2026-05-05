@@ -29,8 +29,15 @@ export default Object.freeze({
 		useRevisions: false,
 		useTranslations: false,
 		useAutoSave: false,
-		protectedEnvironments: ["latest", "revision"],
+		protectedEnvironments: ["latest", "revision", "snapshot"],
 		revisionRetentionDays: 30,
+		publishRequests: {
+			enabled: false,
+			allowSelfApproval: false,
+			requireRequestComment: true,
+			requireDecisionComment: false,
+			snapshotVersionType: "snapshot" as const,
+		},
 	},
 	customFields: {
 		link: {
@@ -50,6 +57,9 @@ export default Object.freeze({
 				{ percent: 90, level: "warning", cooldownDays: 3 },
 				{ percent: 100, level: "critical", cooldownDays: 1 },
 			] as const,
+		},
+		publishRequest: {
+			type: "publish-request" as const,
 		},
 	},
 	errors: {

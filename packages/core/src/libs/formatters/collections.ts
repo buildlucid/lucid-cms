@@ -61,12 +61,18 @@ const formatSingle = (props: {
 			isLocked: collectionData.config.isLocked,
 			displayInListing: props.collection.displayInListing,
 			useAutoSave: collectionData.config.useAutoSave,
+			publishRequests: collectionData.config.publishRequests,
 			environments: collectionData.config.environments.map((environment) => ({
 				...environment,
 				permissions: {
 					publish: resolveCollectionPermission({
 						collection: props.collection,
 						action: "publish",
+						target: environment.key,
+					}),
+					review: resolveCollectionPermission({
+						collection: props.collection,
+						action: "review",
 						target: environment.key,
 					}),
 				},

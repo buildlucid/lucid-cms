@@ -2,6 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import type { Collection } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
+import CreatePublishRequest from "@/components/Modals/Documents/CreatePublishRequest";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import ReleaseEnvironment from "@/components/Modals/Documents/ReleaseEnvironment";
 import RestoreRevision from "@/components/Modals/Documents/RestoreRevision";
@@ -43,6 +44,21 @@ export const Modals: Component<{
 		const env = environments.find((e) => e.key === target);
 		return helpers.getLocaleValue({ value: env?.name }) || target;
 	});
+	const releaseEnvironmentIsOpen = createMemo(
+		() =>
+			props.hooks.uiState.getReleaseEnvironmentOpen() &&
+			props.hooks.uiState.getReleaseEnvironmentAction() === "publish",
+	);
+	const publishRequestIsOpen = createMemo(
+		() =>
+			props.hooks.uiState.getReleaseEnvironmentOpen() &&
+			props.hooks.uiState.getReleaseEnvironmentAction() === "request",
+	);
+	const resetReleaseState = () => {
+		props.hooks.uiState.setReleaseEnvironmentOpen(false);
+		props.hooks.uiState.setReleaseEnvironmentTarget(null);
+		props.hooks.uiState.setReleaseEnvironmentAction(null);
+	};
 
 	// ----------------------------------
 	// Modal State Helpers
@@ -173,14 +189,14 @@ export const Modals: Component<{
 				target={props.hooks.uiState.getReleaseEnvironmentTarget}
 				environmentLabel={environmentLabel}
 				state={{
-					open: props.hooks.uiState.getReleaseEnvironmentOpen(),
+					open: releaseEnvironmentIsOpen(),
 					setOpen: props.hooks.uiState.setReleaseEnvironmentOpen,
 				}}
 				loading={
-					props.hooks.mutations.promoteToPublishedMutation.action.isPending
+					props.hooks.mutations.createPublishOperationMutation.action.isPending
 				}
 				error={
-					props.hooks.mutations.promoteToPublishedMutation.errors()?.message
+					props.hooks.mutations.createPublishOperationMutation.errors()?.message
 				}
 				callbacks={{
 					onConfirm: async (target) => {
@@ -192,13 +208,51 @@ export const Modals: Component<{
 								status: target,
 							}),
 						);
-						props.hooks.uiState.setReleaseEnvironmentOpen(false);
-						props.hooks.uiState.setReleaseEnvironmentTarget(null);
+						resetReleaseState();
 					},
 					onCancel: () => {
-						props.hooks.uiState.setReleaseEnvironmentOpen(false);
-						props.hooks.uiState.setReleaseEnvironmentTarget(null);
-						props.hooks.mutations.promoteToPublishedMutation.reset();
+						resetReleaseState();
+						props.hooks.mutations.createPublishOperationMutation.reset();
+					},
+				}}
+			/>
+			<CreatePublishRequest
+				target={props.hooks.uiState.getReleaseEnvironmentTarget}
+				environmentLabel={environmentLabel}
+				collection={props.hooks.state.collection}
+				collectionKey={props.hooks.state.collectionKey}
+				state={{
+					open: publishRequestIsOpen(),
+					setOpen: props.hooks.uiState.setReleaseEnvironmentOpen,
+				}}
+				loading={
+					props.hooks.mutations.createPublishOperationMutation.action.isPending
+				}
+				error={
+					props.hooks.mutations.createPublishOperationMutation.errors()?.message
+				}
+				callbacks={{
+					onConfirm: async (target, comment, assigneeIds, autoAccept) => {
+						await props.hooks.mutations.createPublishOperationAction(
+							target,
+							comment,
+							assigneeIds,
+							autoAccept,
+						);
+						if (autoAccept) {
+							navigate(
+								getDocumentRoute("edit", {
+									collectionKey: props.hooks.state.collectionKey(),
+									documentId: props.hooks.state.documentId(),
+									status: target,
+								}),
+							);
+						}
+						resetReleaseState();
+					},
+					onCancel: () => {
+						resetReleaseState();
+						props.hooks.mutations.createPublishOperationMutation.reset();
 					},
 				}}
 			/>

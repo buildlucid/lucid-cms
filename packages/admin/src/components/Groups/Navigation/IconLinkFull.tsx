@@ -11,6 +11,7 @@ import {
 	FaSolidMoneyCheck,
 	FaSolidPhotoFilm,
 	FaSolidRightFromBracket,
+	FaSolidSquareArrowUpRight,
 	FaSolidUserLock,
 	FaSolidUsers,
 } from "solid-icons/fa";
@@ -32,7 +33,8 @@ interface IconLinkFullProps {
 		| "logout"
 		| "queue"
 		| "client-integrations"
-		| "license";
+		| "license"
+		| "publish-requests";
 	active?: boolean;
 	permission?: boolean;
 	onClick?: () => void;
@@ -82,6 +84,9 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 				</Match>
 				<Match when={props.icon === "license"}>
 					<FaSolidKey class={iconClasses} />
+				</Match>
+				<Match when={props.icon === "publish-requests"}>
+					<FaSolidSquareArrowUpRight class={iconClasses} />
 				</Match>
 			</Switch>
 		);

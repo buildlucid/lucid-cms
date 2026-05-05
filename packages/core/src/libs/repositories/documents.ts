@@ -1,6 +1,7 @@
 import type { ComparisonOperatorExpression } from "kysely";
 import { type SelectQueryBuilder, sql } from "kysely";
 import z from "zod";
+import constants from "../../constants/constants.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 import type {
 	ClientGetSingleQueryParams,
@@ -281,6 +282,15 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								.where((eb) =>
 									// @ts-expect-error
 									eb(`${props.tables.versions}.type`, "!=", "revision"),
+								)
+								.where((eb) =>
+									eb(
+										// @ts-expect-error
+										`${props.tables.versions}.type`,
+										"!=",
+										constants.collectionBuilder.publishRequests
+											.snapshotVersionType,
+									),
 								),
 						)
 						.as("versions"),
@@ -440,6 +450,15 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									.where((eb) =>
 										// @ts-expect-error
 										eb(`${props.tables.versions}.type`, "!=", "revision"),
+									)
+									.where((eb) =>
+										eb(
+											// @ts-expect-error
+											`${props.tables.versions}.type`,
+											"!=",
+											constants.collectionBuilder.publishRequests
+												.snapshotVersionType,
+										),
 									),
 							)
 							.as("versions"),
@@ -614,6 +633,15 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									.where((eb) =>
 										// @ts-expect-error
 										eb(`${props.tables.versions}.type`, "!=", "revision"),
+									)
+									.where((eb) =>
+										eb(
+											// @ts-expect-error
+											`${props.tables.versions}.type`,
+											"!=",
+											constants.collectionBuilder.publishRequests
+												.snapshotVersionType,
+										),
 									),
 							)
 							.as("versions"),

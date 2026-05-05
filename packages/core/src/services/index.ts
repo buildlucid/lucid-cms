@@ -4,6 +4,7 @@ export * as cdnServices from "./cdn/index.js";
 export * as clientIntegrationServices from "./client-integrations/index.js";
 export * as collectionServices from "./collections/index.js";
 export * as cronServices from "./crons/index.js";
+export * as documentPublishOperationServices from "./document-publish-operations/index.js";
 export * as documentServices from "./documents/index.js";
 export * as documentBrickServices from "./documents-bricks/index.js";
 export * as documentVersionServices from "./documents-versions/index.js";

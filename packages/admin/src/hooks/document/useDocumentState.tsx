@@ -29,7 +29,9 @@ export function useDocumentState(props: {
 		return contentLocale() !== undefined && documentId() !== undefined;
 	});
 	const versionUrlParam = createMemo(() => {
-		if (props.version() === "revision") return props.versionId();
+		if (props.version() === "revision" || props.version() === "snapshot") {
+			return props.versionId();
+		}
 		return props.version();
 	});
 
