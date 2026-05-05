@@ -288,8 +288,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 										// @ts-expect-error
 										`${props.tables.versions}.type`,
 										"!=",
-										constants.collectionBuilder.publishRequests
-											.snapshotVersionType,
+										constants.collectionBuilder.publishing.snapshotVersionType,
 									),
 								),
 						)
@@ -456,7 +455,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 											// @ts-expect-error
 											`${props.tables.versions}.type`,
 											"!=",
-											constants.collectionBuilder.publishRequests
+											constants.collectionBuilder.publishing
 												.snapshotVersionType,
 										),
 									),
@@ -639,7 +638,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 											// @ts-expect-error
 											`${props.tables.versions}.type`,
 											"!=",
-											constants.collectionBuilder.publishRequests
+											constants.collectionBuilder.publishing
 												.snapshotVersionType,
 										),
 									),

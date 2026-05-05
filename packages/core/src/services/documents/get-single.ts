@@ -27,8 +27,7 @@ const getSingle: ServiceFn<
 	);
 
 	if (
-		data.status ===
-		constants.collectionBuilder.publishRequests.snapshotVersionType
+		data.status === constants.collectionBuilder.publishing.snapshotVersionType
 	) {
 		return {
 			error: {
@@ -89,8 +88,7 @@ const getSingle: ServiceFn<
 	if (data.query.include?.includes("bricks")) {
 		const relationVersionType =
 			versionType === "revision" ||
-			versionType ===
-				constants.collectionBuilder.publishRequests.snapshotVersionType
+			versionType === constants.collectionBuilder.publishing.snapshotVersionType
 				? "latest"
 				: versionType;
 

@@ -149,9 +149,8 @@ export const HeaderBar: Component<{
 		}
 
 		if (
-			props.state.collection()?.config.publishRequests?.enabled === true &&
-			(props.state.collection()?.config.publishRequests.targets?.length ?? 0) >
-				0
+			(props.state.collection()?.config.publishing.review.targets?.length ??
+				0) > 0
 		) {
 			options.push({
 				label: T()("publish_requests"),
@@ -173,7 +172,7 @@ export const HeaderBar: Component<{
 		if (!collection || !document) return [];
 
 		const environments = collection.config.environments ?? [];
-		const publishRequests = collection.config.publishRequests;
+		const publishReview = collection.config.publishing.review;
 
 		return environments.map((environment) => {
 			const label =
@@ -184,8 +183,7 @@ export const HeaderBar: Component<{
 				props.state.document()?.version.latest?.contentId;
 
 			const publishRequestTargetEnabled =
-				publishRequests?.enabled === true &&
-				publishRequests.targets?.includes(environment.key) === true;
+				publishReview.targets?.includes(environment.key) === true;
 
 			const action: ReleaseTriggerOption["action"] = publishRequestTargetEnabled
 				? "request"
@@ -222,8 +220,7 @@ export const HeaderBar: Component<{
 			props.mode !== "create" &&
 			(collection.config.useRevisions ||
 				environments.length > 0 ||
-				(collection.config.publishRequests?.enabled === true &&
-					(collection.config.publishRequests.targets?.length ?? 0) > 0))
+				(collection.config.publishing.review.targets?.length ?? 0) > 0)
 		);
 	});
 	const hasReleasePermission = createMemo(() =>

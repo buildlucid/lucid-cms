@@ -102,7 +102,7 @@ const approve: ServiceFn<
 
 	if (
 		!bypassReviewChecks &&
-		collectionRes.data.getData.config.publishRequests.allowSelfApproval ===
+		collectionRes.data.getData.config.publishing.review.allowSelfApproval ===
 			false &&
 		operationRes.data.requested_by === data.user.id
 	) {
@@ -119,7 +119,8 @@ const approve: ServiceFn<
 	const comment = data.comment?.trim() || null;
 	if (
 		!bypassReviewChecks &&
-		collectionRes.data.getData.config.publishRequests.requireDecisionComment &&
+		collectionRes.data.getData.config.publishing.review.comments.decision ===
+			"required" &&
 		!comment
 	) {
 		return {

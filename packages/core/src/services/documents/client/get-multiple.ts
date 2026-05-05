@@ -52,8 +52,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	data: ClientDocumentsGetMultipleInput<TCollectionKey>,
 ): ServiceResponse<ClientDocumentsGetMultipleResult<TCollectionKey>> => {
 	if (
-		data.status ===
-		constants.collectionBuilder.publishRequests.snapshotVersionType
+		data.status === constants.collectionBuilder.publishing.snapshotVersionType
 	) {
 		return {
 			error: {

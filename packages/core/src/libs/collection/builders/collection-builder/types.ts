@@ -26,12 +26,17 @@ export type CollectionEnvironmentPermissions = Partial<
 	Pick<Record<CollectionPermissionAction, string>, "publish" | "review">
 >;
 
-export type PublishRequestsConfig = {
-	enabled: boolean;
+export type PublishingReviewCommentRequirement = "required" | "optional";
+export type PublishingReviewConfig = {
 	targets?: string[];
 	allowSelfApproval: boolean;
-	requireRequestComment: boolean;
-	requireDecisionComment: boolean;
+	comments: {
+		request: PublishingReviewCommentRequirement;
+		decision: PublishingReviewCommentRequirement;
+	};
+};
+export type PublishingConfig = {
+	review: PublishingReviewConfig;
 };
 
 export interface CollectionConfigSchemaType
@@ -56,7 +61,7 @@ export type CollectionData = {
 		useRevisions: boolean;
 		useTranslations: boolean;
 		useAutoSave: boolean;
-		publishRequests: PublishRequestsConfig;
+		publishing: PublishingConfig;
 		displayInListing: string[];
 		environments: {
 			key: string;

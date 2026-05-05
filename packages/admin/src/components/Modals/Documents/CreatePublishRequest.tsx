@@ -63,13 +63,13 @@ const CreatePublishRequest: Component<{
 	);
 	const requireComment = createMemo(
 		() =>
-			props.collection()?.config.publishRequests?.requireRequestComment !==
-			false,
+			props.collection()?.config.publishing.review.comments.request ===
+			"required",
 	);
 	const requireDecisionComment = createMemo(
 		() =>
-			props.collection()?.config.publishRequests?.requireDecisionComment ===
-			true,
+			props.collection()?.config.publishing.review.comments.decision ===
+			"required",
 	);
 	const targetEnvironment = createMemo(() =>
 		props
@@ -80,8 +80,8 @@ const CreatePublishRequest: Component<{
 	);
 	const canAutoAccept = createMemo(() => {
 		const environment = targetEnvironment();
-		const publishRequests = props.collection()?.config.publishRequests;
-		if (!environment || publishRequests?.allowSelfApproval !== true) {
+		const publishReview = props.collection()?.config.publishing.review;
+		if (!environment || publishReview?.allowSelfApproval !== true) {
 			return false;
 		}
 

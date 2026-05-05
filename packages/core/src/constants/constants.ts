@@ -31,11 +31,12 @@ export default Object.freeze({
 		useAutoSave: false,
 		protectedEnvironments: ["latest", "revision", "snapshot"],
 		revisionRetentionDays: 30,
-		publishRequests: {
-			enabled: false,
+		publishing: {
 			allowSelfApproval: false,
-			requireRequestComment: true,
-			requireDecisionComment: false,
+			comments: {
+				request: "required" as const,
+				decision: "optional" as const,
+			},
 			snapshotVersionType: "snapshot" as const,
 		},
 	},

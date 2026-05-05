@@ -40,7 +40,7 @@ const createSingle: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	const collection = collectionRes.data;
-	const publishRequests = collection.getData.config.publishRequests;
+	const publishReview = collection.getData.config.publishing.review;
 	const targetIsEnvironment = collection.getData.config.environments.some(
 		(environment) => environment.key === data.target,
 	);
@@ -87,7 +87,11 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	if (requiresApproval && publishRequests.requireRequestComment && !comment) {
+	if (
+		requiresApproval &&
+		publishReview.comments.request === "required" &&
+		!comment
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -98,7 +102,7 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	if (autoAccept && publishRequests.allowSelfApproval !== true) {
+	if (autoAccept && publishReview.allowSelfApproval !== true) {
 		return {
 			error: {
 				type: "basic",
@@ -136,7 +140,7 @@ const createSingle: ServiceFn<
 	if (
 		requiresApproval &&
 		autoAccept &&
-		publishRequests.requireDecisionComment &&
+		publishReview.comments.decision === "required" &&
 		!comment
 	) {
 		return {

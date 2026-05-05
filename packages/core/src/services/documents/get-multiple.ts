@@ -30,8 +30,7 @@ const getMultiple: ServiceFn<
 	}
 > = async (context, data) => {
 	if (
-		data.status ===
-		constants.collectionBuilder.publishRequests.snapshotVersionType
+		data.status === constants.collectionBuilder.publishing.snapshotVersionType
 	) {
 		return {
 			error: {

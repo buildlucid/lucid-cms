@@ -44,39 +44,42 @@ const CollectionConfigSchema = z.object({
 				.boolean()
 				.default(constants.collectionBuilder.useAutoSave)
 				.optional(),
-			publishRequests: z
+			publishing: z
 				.object({
-					enabled: z
-						.boolean()
-						.default(constants.collectionBuilder.publishRequests.enabled)
-						.optional(),
-					targets: z
-						.array(
-							z
-								.string()
-								.min(1)
-								.max(50)
-								.regex(/^[a-z0-9-_]+$/),
-						)
-						.optional(),
-					allowSelfApproval: z
-						.boolean()
-						.default(
-							constants.collectionBuilder.publishRequests.allowSelfApproval,
-						)
-						.optional(),
-					requireRequestComment: z
-						.boolean()
-						.default(
-							constants.collectionBuilder.publishRequests.requireRequestComment,
-						)
-						.optional(),
-					requireDecisionComment: z
-						.boolean()
-						.default(
-							constants.collectionBuilder.publishRequests
-								.requireDecisionComment,
-						)
+					review: z
+						.object({
+							targets: z
+								.array(
+									z
+										.string()
+										.min(1)
+										.max(50)
+										.regex(/^[a-z0-9-_]+$/),
+								)
+								.optional(),
+							allowSelfApproval: z
+								.boolean()
+								.default(
+									constants.collectionBuilder.publishing.allowSelfApproval,
+								)
+								.optional(),
+							comments: z
+								.object({
+									request: z
+										.enum(["required", "optional"])
+										.default(
+											constants.collectionBuilder.publishing.comments.request,
+										)
+										.optional(),
+									decision: z
+										.enum(["required", "optional"])
+										.default(
+											constants.collectionBuilder.publishing.comments.decision,
+										)
+										.optional(),
+								})
+								.optional(),
+						})
 						.optional(),
 				})
 				.optional(),

@@ -40,8 +40,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	data: ClientDocumentsGetSingleInput<TCollectionKey>,
 ): ServiceResponse<CollectionDocument<TCollectionKey>> => {
 	if (
-		data.status ===
-		constants.collectionBuilder.publishRequests.snapshotVersionType
+		data.status === constants.collectionBuilder.publishing.snapshotVersionType
 	) {
 		return {
 			error: {

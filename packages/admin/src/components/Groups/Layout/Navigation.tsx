@@ -113,8 +113,7 @@ export const NavigationChrome: Component = () => {
 			userStore.get.hasPermission([Permissions.DocumentsReview]).all &&
 			(collections.data?.data ?? []).some(
 				(collection) =>
-					collection.config.publishRequests?.enabled === true &&
-					(collection.config.publishRequests.targets?.length ?? 0) > 0,
+					(collection.config.publishing.review.targets?.length ?? 0) > 0,
 			),
 	);
 

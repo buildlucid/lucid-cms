@@ -133,8 +133,8 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 	const data = createMemo(() => request.data?.data);
 	const requireDecisionComment = createMemo(
 		() =>
-			state.collection()?.config.publishRequests?.requireDecisionComment ===
-				true && decisionAction() !== "cancel",
+			state.collection()?.config.publishing.review.comments.decision ===
+				"required" && decisionAction() !== "cancel",
 	);
 	const error = createMemo(
 		() => validationError() || decision.errors()?.message,

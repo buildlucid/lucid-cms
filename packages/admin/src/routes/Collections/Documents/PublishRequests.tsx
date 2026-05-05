@@ -120,24 +120,22 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 			perPage: 50,
 		},
 		enabled: () =>
-			state.collection()?.config.publishRequests?.enabled === true &&
-			(state.collection()?.config.publishRequests.targets?.length ?? 0) > 0 &&
+			(state.collection()?.config.publishing.review.targets?.length ?? 0) > 0 &&
 			state.documentId() !== undefined,
 	});
 
 	// ----------------------------------
 	// Memos
-	const publishRequestsEnabled = createMemo(
+	const publishReviewEnabled = createMemo(
 		() =>
-			state.collection()?.config.publishRequests?.enabled === true &&
-			(state.collection()?.config.publishRequests.targets?.length ?? 0) > 0,
+			(state.collection()?.config.publishing.review.targets?.length ?? 0) > 0,
 	);
 	const targetOptions = createMemo(() => {
 		const collection = state.collection();
-		const publishRequests = collection?.config.publishRequests;
-		if (!collection || !publishRequests?.enabled) return [];
+		if (!collection) return [];
 
-		const enabledTargets = publishRequests.targets ?? [];
+		const publishReview = collection.config.publishing.review;
+		const enabledTargets = publishReview.targets ?? [];
 
 		return collection.config.environments
 			.filter((environment) => enabledTargets.includes(environment.key))
@@ -245,7 +243,7 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 							/>
 						</div>
 						<Switch>
-							<Match when={!publishRequestsEnabled()}>
+							<Match when={!publishReviewEnabled()}>
 								<div class="rounded-md border border-border bg-card-base p-6 text-center">
 									<h2 class="text-base text-title font-medium">
 										{T()("no_publish_requests")}

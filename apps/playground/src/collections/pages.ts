@@ -26,12 +26,15 @@ const PageCollection = new CollectionBuilder("page", {
 		useTranslations: true,
 		useRevisions: true,
 		useAutoSave: true,
-		publishRequests: {
-			enabled: true,
-			targets: ["production"],
-			allowSelfApproval: true,
-			requireRequestComment: true,
-			requireDecisionComment: false,
+		publishing: {
+			review: {
+				targets: ["production"],
+				allowSelfApproval: true,
+				comments: {
+					request: "required",
+					decision: "optional",
+				},
+			},
 		},
 		environments: [
 			{

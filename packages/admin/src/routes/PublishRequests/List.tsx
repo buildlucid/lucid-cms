@@ -112,8 +112,7 @@ const PublishRequestsListRoute: Component = () => {
 		(collections.data?.data ?? [])
 			.filter(
 				(collection) =>
-					collection.config.publishRequests?.enabled &&
-					(collection.config.publishRequests.targets?.length ?? 0) > 0,
+					(collection.config.publishing.review.targets?.length ?? 0) > 0,
 			)
 			.map((collection) => ({
 				value: collection.key,
@@ -125,9 +124,8 @@ const PublishRequestsListRoute: Component = () => {
 	const targetOptions = createMemo(() => {
 		const keys = new Set<string>();
 		for (const collection of collections.data?.data ?? []) {
-			if (!collection.config.publishRequests?.enabled) continue;
 			if (collectionKey() && collection.key !== collectionKey()) continue;
-			for (const target of collection.config.publishRequests.targets ?? [])
+			for (const target of collection.config.publishing.review.targets ?? [])
 				keys.add(target);
 		}
 		return Array.from(keys).map((key) => ({

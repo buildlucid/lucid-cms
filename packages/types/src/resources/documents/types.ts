@@ -509,12 +509,15 @@ export interface Collection {
 		isLocked: boolean;
 		displayInListing: string[];
 		useAutoSave: boolean;
-		publishRequests: {
-			enabled: boolean;
-			targets?: string[];
-			allowSelfApproval: boolean;
-			requireRequestComment: boolean;
-			requireDecisionComment: boolean;
+		publishing: {
+			review: {
+				targets?: string[];
+				allowSelfApproval: boolean;
+				comments: {
+					request: "required" | "optional";
+					decision: "required" | "optional";
+				};
+			};
 		};
 		environments: {
 			key: string;

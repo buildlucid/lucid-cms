@@ -6,18 +6,16 @@ import type { LucidAuth } from "../../../types/hono.js";
 
 export const activePublishOperationStatuses = ["pending"] as const;
 export const snapshotVersionType =
-	constants.collectionBuilder.publishRequests.snapshotVersionType;
+	constants.collectionBuilder.publishing.snapshotVersionType;
 
 export const getPublishOperationTargets = (collection: CollectionBuilder) => {
-	const config = collection.getData.config.publishRequests;
-	if (!config.enabled) return [];
-
-	if (config.targets === undefined) return [];
+	const targets = collection.getData.config.publishing.review.targets;
+	if (targets === undefined) return [];
 
 	const environmentKeys = collection.getData.config.environments.map(
 		(environment) => environment.key,
 	);
-	return config.targets.filter((target) => environmentKeys.includes(target));
+	return targets.filter((target) => environmentKeys.includes(target));
 };
 
 export const canUsePublishOperationsForTarget = (params: {
