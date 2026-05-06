@@ -59,6 +59,29 @@ const documentResponseVersionSchema = z.object({
 	}),
 });
 
+const documentWorkflowUserSchema = z.object({
+	id: z.number(),
+	email: z.string().nullable(),
+	username: z.string().nullable(),
+	firstName: z.string().nullable(),
+	lastName: z.string().nullable(),
+});
+
+const documentWorkflowSchema = z.object({
+	stage: z.string(),
+	assignees: z.array(
+		z.object({
+			id: z.number(),
+			user: documentWorkflowUserSchema,
+			assignedBy: z.number().nullable(),
+			assignedAt: z.string().nullable(),
+		}),
+	),
+	createdAt: z.string().nullable(),
+	updatedAt: z.string().nullable(),
+	updatedBy: z.number().nullable(),
+});
+
 const documentResponseBaseSchema = z.object({
 	id: z.number().meta({
 		description: "The document ID",
@@ -97,6 +120,7 @@ export const documentResponseSchema = documentResponseBaseSchema.extend({
 	bricks: z.array(brickResponseSchema).nullable().optional(),
 	fields: z.array(fieldResponseSchema).nullable().optional(),
 	refs: z.record(z.string(), z.array(z.any())).nullable().optional(),
+	workflow: documentWorkflowSchema.nullable().optional(),
 });
 const documentClientResponseSchema = documentResponseBaseSchema.extend({
 	bricks: z.array(brickClientResponseSchema).nullable().optional(),
@@ -306,6 +330,41 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	updateWorkflow: {
+		body: z.object({
+			stage: z.string().trim().min(1).optional(),
+			assigneeIds: z.array(z.number()).optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().trim().meta({
+				description: "The document ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	getWorkflowAssignees: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+		}),
+		response: z.array(documentWorkflowUserSchema),
+	} satisfies ControllerSchema,
 	getMultipleRevisions: {
 		body: undefined,
 		query: {
@@ -379,6 +438,12 @@ export const controllerSchemas = {
 					"filter[deletedBy]": queryString.schema.filter(true, {
 						example: "1",
 					}),
+					"filter[workflowStage]": queryString.schema.filter(false, {
+						example: "done",
+					}),
+					"filter[workflowAssignee]": queryString.schema.filter(true, {
+						example: "1,2",
+					}),
 					"filter[_customFieldKey]": queryString.schema.filter(true, {
 						description:
 							"Prefix custom field keys with an underscore to filter by them",
@@ -430,6 +495,8 @@ export const controllerSchemas = {
 							updatedAt: queryFormatted.schema.filters.single.optional(),
 							isDeleted: queryFormatted.schema.filters.single.optional(),
 							deletedBy: queryFormatted.schema.filters.union.optional(),
+							workflowStage: queryFormatted.schema.filters.single.optional(),
+							workflowAssignee: queryFormatted.schema.filters.union.optional(),
 						}),
 					])
 					.optional(),

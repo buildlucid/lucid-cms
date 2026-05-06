@@ -23,7 +23,7 @@ interface FilterItemProps {
 		type: "text" | "select" | "boolean" | "multi-select";
 		options?: Array<{
 			label: string;
-			value: string;
+			value: string | number;
 		}>;
 		trueLabel?: string;
 		falseLabel?: string;
@@ -84,15 +84,20 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 
 	// ----------------------------------
 	// Functions
-	const setFilterParam = () => {
+	const setFilterParam = (
+		nextValue?: string | boolean | Array<string | number>,
+	) => {
 		if (props.filter.type === "text" || props.filter.type === "select") {
 			props.searchParams.setParams({
 				filters: {
-					[props.filter.key]: value(),
+					[props.filter.key]:
+						typeof nextValue === "string" ? nextValue : value(),
 				},
 			});
 		} else if (props.filter.type === "multi-select") {
-			const values = multiValue().map((v) => v.value);
+			const values = Array.isArray(nextValue)
+				? nextValue
+				: multiValue().map((v) => v.value);
 			props.searchParams.setParams({
 				filters: {
 					[props.filter.key]: values,
@@ -101,7 +106,8 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 		} else if (props.filter.type === "boolean") {
 			props.searchParams.setParams({
 				filters: {
-					[props.filter.key]: boolValue(),
+					[props.filter.key]:
+						typeof nextValue === "boolean" ? nextValue : boolValue(),
 				},
 			});
 		}
@@ -179,9 +185,9 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 						id={`${props.filter.key}-${props.filter.type}`}
 						value={value()}
 						onChange={(value) => {
-							if (!value) setValue("");
-							else setValue(value.toString());
-							setFilterParam();
+							const nextValue = value === undefined ? "" : value.toString();
+							setValue(nextValue);
+							setFilterParam(nextValue);
 						}}
 						name={`${props.filter.key}-${props.filter.type}`}
 						options={props.filter.options || []}
@@ -196,12 +202,14 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 							type="button"
 							active={boolValue()}
 							onClick={() => {
+								let nextValue: boolean | undefined;
 								if (boolValue() === true) {
-									setBoolValue(undefined);
+									nextValue = undefined;
 								} else {
-									setBoolValue(true);
+									nextValue = true;
 								}
-								setFilterParam();
+								setBoolValue(nextValue);
+								setFilterParam(nextValue);
 							}}
 						>
 							{props.filter.trueLabel ? props.filter.trueLabel : T()("active")}
@@ -212,12 +220,14 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 							type="button"
 							active={boolValue() === false}
 							onClick={() => {
+								let nextValue: boolean | undefined;
 								if (boolValue() === false) {
-									setBoolValue(undefined);
+									nextValue = undefined;
 								} else {
-									setBoolValue(false);
+									nextValue = false;
 								}
-								setFilterParam();
+								setBoolValue(nextValue);
+								setFilterParam(nextValue);
 							}}
 						>
 							{props.filter.falseLabel
@@ -232,7 +242,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 						values={multiValue()}
 						onChange={(values) => {
 							setMultiValue(values);
-							setFilterParam();
+							setFilterParam(values.map((v) => v.value));
 						}}
 						name={`${props.filter.key}-${props.filter.type}`}
 						options={props.filter.options || []}

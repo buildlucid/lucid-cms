@@ -165,6 +165,27 @@ class CollectionBuilder extends FieldBuilder {
 								constants.collectionBuilder.publishing.comments.decision,
 						},
 					},
+					...(this.config.config?.publishing?.workflow
+						? {
+								workflow: {
+									initial:
+										this.config.config.publishing.workflow.initial ??
+										this.config.config.publishing.workflow.stages[0]?.key ??
+										"",
+									stages: this.config.config.publishing.workflow.stages.map(
+										(stage) => ({
+											key: stage.key,
+											name: stage.name,
+											color:
+												stage.color ??
+												constants.collectionBuilder.publishing.workflow.color,
+											canPublish: stage.canPublish ?? [],
+											permissions: stage.permissions ?? {},
+										}),
+									),
+								},
+							}
+						: {}),
 				},
 				displayInListing: this.displayInListing,
 				environments:

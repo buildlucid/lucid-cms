@@ -35,8 +35,33 @@ export type PublishingReviewConfig = {
 		decision: PublishingReviewCommentRequirement;
 	};
 };
+export type PublishingWorkflowStageColor =
+	| "grey"
+	| "red"
+	| "yellow"
+	| "green"
+	| "blue"
+	| "purple";
+
+export type PublishingWorkflowStageConfig = {
+	key: string;
+	name: LocaleValue;
+	color: PublishingWorkflowStageColor;
+	canPublish: string[];
+	permissions: {
+		enter?: string;
+		leave?: string;
+	};
+};
+
+export type PublishingWorkflowConfig = {
+	initial: string;
+	stages: PublishingWorkflowStageConfig[];
+};
+
 export type PublishingConfig = {
 	review: PublishingReviewConfig;
+	workflow?: PublishingWorkflowConfig;
 };
 
 export interface CollectionConfigSchemaType

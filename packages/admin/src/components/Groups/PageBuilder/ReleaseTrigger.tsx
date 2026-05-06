@@ -15,6 +15,12 @@ export interface ReleaseTriggerOption {
 	action?: "publish" | "request";
 	permission?: boolean;
 	disabled?: boolean;
+	disabledToast?: {
+		title: string;
+		message?: string;
+		status?: "success" | "error" | "warning" | "info";
+		duration?: number;
+	};
 	status?: {
 		isReleased?: boolean;
 		upToDate?: boolean;
@@ -54,6 +60,14 @@ export const ReleaseTrigger: Component<{
 	};
 	const getOptionLabel = (option: ReleaseTriggerOption) =>
 		option.action === "request" ? T()("request_publish") : T()("release_to");
+	const spawnDisabledToast = (option: ReleaseTriggerOption) => {
+		if (!option.disabledToast) return;
+
+		spawnToast({
+			...option.disabledToast,
+			status: option.disabledToast.status ?? "warning",
+		});
+	};
 	const handleSaveClick = (event: MouseEvent) => {
 		if (props.savePermission === false) {
 			spawnToast({
@@ -73,7 +87,7 @@ export const ReleaseTrigger: Component<{
 	return (
 		<div class="flex items-center relative">
 			<Show when={props.loading}>
-				<span class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center rounded-md cursor-wait">
+				<span class="absolute inset-0 bg-black/50 z-50 flex items-center justify-center rounded-md cursor-wait pointer-events-none">
 					<Spinner size="sm" />
 				</span>
 			</Show>
@@ -127,13 +141,18 @@ export const ReleaseTrigger: Component<{
 											class={classNames(
 												"flex items-center gap-3 justify-between px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors text-left hover:bg-dropdown-hover hover:text-dropdown-contrast",
 												{
+													"cursor-not-allowed": option.disabled === true,
 													"hover:bg-dropdown-base! hover:text-body!":
 														option.disabled === true || isDisabled(),
 												},
 											)}
-											disabled={option.disabled === true || isDisabled()}
+											disabled={isDisabled()}
 											onSelect={() => {
-												if (option.disabled === true || isDisabled()) return;
+												if (option.disabled === true) {
+													spawnDisabledToast(option);
+													return;
+												}
+												if (isDisabled()) return;
 												if (option.permission === false) {
 													spawnToast({
 														title: T()("no_permission_toast_title"),

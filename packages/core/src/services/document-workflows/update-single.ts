@@ -1,0 +1,260 @@
+import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
+import {
+	DocumentsRepository,
+	DocumentWorkflowAssigneesRepository,
+	DocumentWorkflowsRepository,
+	UsersRepository,
+} from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
+import type { LucidAuth } from "../../types/hono.js";
+import { sameNumericSet } from "../../utils/helpers/index.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import getCollectionInstance from "../collections/get-single-instance.js";
+import {
+	canMoveWorkflowStage,
+	getWorkflowConfig,
+	resolveEffectiveWorkflowStage,
+} from "./helpers/index.js";
+
+const updateSingle: ServiceFn<
+	[
+		{
+			collectionKey: string;
+			documentId: number;
+			stage?: string;
+			assigneeIds?: number[];
+			user: LucidAuth;
+		},
+	],
+	undefined
+> = async (context, data) => {
+	const collectionRes = getCollectionInstance(context, {
+		key: data.collectionKey,
+	});
+	if (collectionRes.error) return collectionRes;
+
+	const workflow = getWorkflowConfig(collectionRes.data);
+	if (!workflow) {
+		return {
+			error: {
+				type: "basic",
+				message: T("document_workflow_not_enabled"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
+	// Stage changes are optional, but provided stage keys must exist in config.
+	const targetStage = data.stage
+		? workflow.stages.find((stage) => stage.key === data.stage)
+		: undefined;
+	if (data.stage !== undefined && !targetStage) {
+		return {
+			error: {
+				type: "basic",
+				message: T("document_workflow_stage_not_found"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
+	const tableNamesRes = await getTableNames(context, data.collectionKey);
+	if (tableNamesRes.error) return tableNamesRes;
+
+	// Confirm the document exists before mutating workflow rows.
+	const Documents = new DocumentsRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const documentRes = await Documents.selectSingle(
+		{
+			select: ["id"],
+			where: [
+				{ key: "id", operator: "=", value: data.documentId },
+				{ key: "collection_key", operator: "=", value: data.collectionKey },
+			],
+			validation: {
+				enabled: true,
+				defaultError: {
+					message: T("document_not_found_message"),
+					status: 404,
+				},
+			},
+		},
+		{
+			tableName: tableNamesRes.data.document,
+		},
+	);
+	if (documentRes.error) return documentRes;
+
+	const Workflows = new DocumentWorkflowsRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const Assignees = new DocumentWorkflowAssigneesRepository(
+		context.db.client,
+		context.config.db,
+	);
+
+	const workflowRes = await Workflows.selectSingleDetailed({
+		collectionKey: data.collectionKey,
+		documentId: data.documentId,
+	});
+	if (workflowRes.error) return workflowRes;
+
+	// Missing workflow rows behave as the configured initial stage until updated.
+	const currentStage = resolveEffectiveWorkflowStage({
+		collection: collectionRes.data,
+		stageKey: workflowRes.data?.stage_key,
+	});
+	if (!currentStage) {
+		return {
+			error: {
+				type: "basic",
+				message: T("document_workflow_stage_not_found"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
+	const nextStage = targetStage ?? currentStage;
+	const stageChanged =
+		data.stage !== undefined && nextStage.key !== currentStage.key;
+
+	// Optional stage permissions constrain the transition direction.
+	if (
+		stageChanged &&
+		!canMoveWorkflowStage({
+			user: data.user,
+			fromStage: currentStage,
+			toStage: nextStage,
+		})
+	) {
+		return {
+			error: {
+				type: "basic",
+				name: T("collection_permission_error_name"),
+				message: T("collection_permission_error_message", {
+					collection: data.collectionKey,
+					action: "update",
+				}),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
+	const currentAssigneeIds =
+		workflowRes.data?.assignees.map((assignee) => assignee.user_id) ?? [];
+	const nextAssigneeIds =
+		data.assigneeIds !== undefined
+			? Array.from(new Set(data.assigneeIds))
+			: currentAssigneeIds;
+	const assigneesChanged =
+		data.assigneeIds !== undefined &&
+		!sameNumericSet(currentAssigneeIds, nextAssigneeIds);
+
+	// The endpoint is explicit: callers must request a real stage or assignee change.
+	if (!stageChanged && !assigneesChanged) {
+		return {
+			error: {
+				type: "basic",
+				message: T("document_workflow_no_changes"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
+	// Assignees must be users who can update documents in this collection.
+	if (data.assigneeIds !== undefined && nextAssigneeIds.length > 0) {
+		const permission = resolveCollectionPermission({
+			collection: collectionRes.data,
+			action: "update",
+		});
+		const Users = new UsersRepository(context.db.client, context.config.db);
+		const assignableUsersRes = await Users.selectMultipleWithPermission({
+			permission,
+		});
+		if (assignableUsersRes.error) return assignableUsersRes;
+
+		const assignableUserIds = new Set(
+			(assignableUsersRes.data ?? []).map((user) => user.id),
+		);
+		const invalidAssignee = nextAssigneeIds.find(
+			(userId) => !assignableUserIds.has(userId),
+		);
+		if (invalidAssignee !== undefined) {
+			return {
+				error: {
+					type: "basic",
+					message: T("document_workflow_assignee_invalid"),
+					status: 400,
+				},
+				data: undefined,
+			};
+		}
+	}
+
+	const now = new Date().toISOString();
+	let workflowId = workflowRes.data?.id;
+
+	// Create the workflow row lazily, otherwise update the existing row in place.
+	if (!workflowId) {
+		const createRes = await Workflows.createSingle({
+			data: {
+				collection_key: data.collectionKey,
+				document_id: data.documentId,
+				stage_key: nextStage.key,
+				created_by: data.user.id,
+				updated_by: data.user.id,
+			},
+			returning: ["id"],
+			validation: {
+				enabled: true,
+			},
+		});
+		if (createRes.error) return createRes;
+		workflowId = createRes.data.id;
+	} else {
+		const updateRes = await Workflows.updateSingle({
+			where: [{ key: "id", operator: "=", value: workflowId }],
+			data: {
+				stage_key: nextStage.key,
+				updated_by: data.user.id,
+				updated_at: now,
+			},
+		});
+		if (updateRes.error) return updateRes;
+	}
+
+	// Assignee updates are replacement-based and only run when assigneeIds is provided.
+	if (data.assigneeIds !== undefined) {
+		const deleteAssigneesRes = await Assignees.deleteMultiple({
+			where: [{ key: "workflow_id", operator: "=", value: workflowId }],
+		});
+		if (deleteAssigneesRes.error) return deleteAssigneesRes;
+
+		if (nextAssigneeIds.length > 0) {
+			const createAssigneesRes = await Assignees.createMultiple({
+				data: nextAssigneeIds.map((userId) => ({
+					workflow_id: workflowId,
+					user_id: userId,
+					assigned_by: data.user.id,
+				})),
+			});
+			if (createAssigneesRes.error) return createAssigneesRes;
+		}
+	}
+
+	return {
+		error: undefined,
+		data: undefined,
+	};
+};
+
+export default updateSingle;

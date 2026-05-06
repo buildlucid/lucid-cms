@@ -7,6 +7,10 @@ export interface PillProps {
 		| "primary-opaque"
 		| "grey"
 		| "red"
+		| "yellow"
+		| "green"
+		| "blue"
+		| "purple"
 		| "error-opaque"
 		| "warning"
 		| "warning-opaque"
@@ -31,6 +35,14 @@ const Pill: Component<PillProps> = (props) => {
 						props.theme === "primary-opaque",
 					"bg-input-base text-title": props.theme === "grey",
 					"bg-error-base text-error-contrast": props.theme === "red",
+					"bg-workflow-yellow-bg border border-workflow-yellow-border text-workflow-yellow-text":
+						props.theme === "yellow",
+					"bg-workflow-green-bg border border-workflow-green-border text-workflow-green-text":
+						props.theme === "green",
+					"bg-workflow-blue-bg border border-workflow-blue-border text-workflow-blue-text":
+						props.theme === "blue",
+					"bg-workflow-purple-bg border border-workflow-purple-border text-workflow-purple-text":
+						props.theme === "purple",
 					"bg-error-base/10 border border-error-base/20 text-error-base":
 						props.theme === "error-opaque",
 					"bg-warning-base text-warning-contrast": props.theme === "warning",

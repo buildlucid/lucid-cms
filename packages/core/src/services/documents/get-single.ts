@@ -7,7 +7,11 @@ import type { GetSingleQueryParams } from "../../schemas/documents.js";
 import T from "../../translations/index.js";
 import type { InternalCollectionDocument } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices, documentBrickServices } from "../index.js";
+import {
+	collectionServices,
+	documentBrickServices,
+	documentWorkflowServices,
+} from "../index.js";
 
 const getSingle: ServiceFn<
 	[
@@ -47,27 +51,34 @@ const getSingle: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const documentRes = await Document.selectSingleById(
-		{
-			id: data.id,
-			tables: {
-				versions: tableNamesRes.data.version,
-			},
-			status: data.status,
-			versionId: data.versionId,
-			validation: {
-				enabled: true,
-				defaultError: {
-					message: T("document_version_not_found_message"),
-					status: 404,
+	const [documentRes, workflowRes] = await Promise.all([
+		Document.selectSingleById(
+			{
+				id: data.id,
+				tables: {
+					versions: tableNamesRes.data.version,
+				},
+				status: data.status,
+				versionId: data.versionId,
+				validation: {
+					enabled: true,
+					defaultError: {
+						message: T("document_version_not_found_message"),
+						status: 404,
+					},
 				},
 			},
-		},
-		{
-			tableName: tableNamesRes.data.document,
-		},
-	);
+			{
+				tableName: tableNamesRes.data.document,
+			},
+		),
+		documentWorkflowServices.getSingle(context, {
+			collectionKey: data.collectionKey,
+			documentId: data.id,
+		}),
+	]);
 	if (documentRes.error) return documentRes;
+	if (workflowRes.error) return workflowRes;
 
 	const versionId =
 		data.status !== undefined ? documentRes.data.version_id : data.versionId;
@@ -109,6 +120,7 @@ const getSingle: ServiceFn<
 				fields: bricksRes.data.fields,
 				config: context.config,
 				refs: bricksRes.data.refs,
+				workflow: workflowRes.data,
 			}),
 		};
 	}
@@ -121,6 +133,7 @@ const getSingle: ServiceFn<
 			bricks: [],
 			fields: [],
 			config: context.config,
+			workflow: workflowRes.data,
 		}),
 	};
 };

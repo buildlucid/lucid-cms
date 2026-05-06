@@ -369,6 +369,9 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 	for (const filterKey of collectionDocumentFilterKeys) {
 		addFilterPath(filterTree, [filterKey]);
 	}
+	if (collection.getData.config.publishing.workflow) {
+		addFilterPath(filterTree, ["workflowStage"]);
+	}
 
 	for (const [key, value] of collectFilterTree(collection.persistedFieldTree, {
 		kind: "collection",

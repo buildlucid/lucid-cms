@@ -59,6 +59,7 @@
 	"cannot_find_formatter": "Cannot find the formatter for the {{name}}.",
 	"config_error_name": "Configuration Error",
 	"cannot_promote_to_same_version_message": "You cannot promote to the same version type.",
+	"cannot_restore_revision_for_deleted_document": "You cannot restore a revision for a deleted document. Restore the document first.",
 	"email_not_configured_message": "Email functionality is disabled because the email configuration is missing. Please provide the necessary email settings in the 'lucid.config.ts/js' file to enable email features.",
 	"email_storage_invalid_selector": "Invalid email storage selector \"{{selector}}\".",
 	"email_storage_rule_must_be_object": "Email storage rule \"{{selector}}\" must be an object.",
@@ -481,5 +482,14 @@
 	"publish_request_cancelled_message": "The publish request for {{collection}} #{{documentId}} was cancelled.",
 	"publish_request_cancelled_for_target_message": "The publish request for {{collection}} #{{documentId}} to {{target}} was cancelled. {{comment}}",
 	"publish_request_replaced_message": "The publish request for {{collection}} #{{documentId}} to {{target}} was replaced with newer content.",
-	"publish_request_created_message": "{{user}} requested review for {{collection}} #{{documentId}} to {{target}}."
+	"publish_request_created_message": "{{user}} requested review for {{collection}} #{{documentId}} to {{target}}.",
+	"document_workflow_not_enabled": "Document workflows are not enabled for this collection.",
+	"document_workflow_stage_not_found": "Workflow stage not found.",
+	"document_workflow_no_changes": "Change the workflow stage or assignees before updating.",
+	"document_workflow_assignee_invalid": "One or more assignees cannot update documents in this collection.",
+	"document_workflow_publish_not_allowed": "The document's workflow stage does not allow publishing to this target.",
+	"route_document_workflow_update_error_name": "Document Workflow Update Error",
+	"route_document_workflow_update_error_message": "An error occurred while updating the document workflow.",
+	"route_document_workflow_assignees_error_name": "Document Workflow Assignees Error",
+	"route_document_workflow_assignees_error_message": "An error occurred while fetching document workflow assignees."
 }

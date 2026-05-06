@@ -498,6 +498,25 @@ export interface LucidDocumentPublishOperationEvents {
 	created_at: TimestampImmutable;
 }
 
+export interface LucidDocumentWorkflows {
+	id: Generated<number>;
+	collection_key: string;
+	document_id: number;
+	stage_key: string;
+	created_by: number | null;
+	updated_by: number | null;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
+export interface LucidDocumentWorkflowAssignees {
+	id: Generated<number>;
+	workflow_id: number;
+	user_id: number;
+	assigned_by: number | null;
+	assigned_at: TimestampImmutable;
+}
+
 export interface LucidMediaFolders {
 	id: Generated<number>;
 	title: string;
@@ -738,6 +757,8 @@ export interface LucidDB {
 	lucid_document_publish_operations: LucidDocumentPublishOperations;
 	lucid_document_publish_operation_assignees: LucidDocumentPublishOperationAssignees;
 	lucid_document_publish_operation_events: LucidDocumentPublishOperationEvents;
+	lucid_document_workflows: LucidDocumentWorkflows;
+	lucid_document_workflow_assignees: LucidDocumentWorkflowAssignees;
 	lucid_media_folders: LucidMediaFolders;
 	lucid_media: LucidMedia;
 	lucid_media_translations: LucidMediaTranslations;

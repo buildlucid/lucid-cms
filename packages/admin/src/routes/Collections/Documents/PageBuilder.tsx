@@ -8,6 +8,7 @@ import {
 	Match,
 	on,
 	onCleanup,
+	Show,
 	Switch,
 } from "solid-js";
 import Alert from "@/components/Blocks/Alert";
@@ -17,6 +18,7 @@ import {
 	FixedBricks,
 	HeaderBar,
 	Modals,
+	Sidebar,
 } from "@/components/Groups/PageBuilder";
 import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
@@ -86,6 +88,22 @@ const CollectionsDocumentsEditRoute: Component<{
 
 	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
 	const { captureFocusSnapshot, restoreFocusSnapshot } = useFocusSnapshot();
+	const showSidebar = createMemo(
+		() =>
+			props.mode === "edit" &&
+			versionType() === "latest" &&
+			(!!docState.collection()?.config.publishing.workflow ||
+				(docState.collection()?.config.publishing.review.targets?.length ?? 0) >
+					0) &&
+			!!docState.document(),
+	);
+	const disableFromEdit = createMemo(
+		() =>
+			brickStore.getDocumentMutated() ||
+			uiState.isSaving() ||
+			uiState.isAutoSaving() ||
+			uiState.isBuilderLocked(),
+	);
 
 	// ------------------------------------------
 	// Setup document state
@@ -260,8 +278,8 @@ const CollectionsDocumentsEditRoute: Component<{
 							},
 						]}
 					/>
-					<div class="w-full flex grow h-full">
-						<div class="w-full flex flex-col">
+					<div class="w-full flex flex-col xl:flex-row grow h-full">
+						<div class="w-full min-w-0 flex flex-col">
 							<CollectionPseudoBrick
 								fields={docState.collection()?.fields || []}
 								collectionMigrationStatus={
@@ -287,6 +305,16 @@ const CollectionsDocumentsEditRoute: Component<{
 								documentId={docState.documentId()}
 							/>
 						</div>
+						<Show when={showSidebar()}>
+							<Sidebar
+								collection={docState.collection}
+								collectionKey={docState.collectionKey}
+								document={docState.document}
+								documentId={docState.documentId}
+								disabled={disableFromEdit}
+								mutations={mutations}
+							/>
+						</Show>
 					</div>
 				</div>
 				<Modals

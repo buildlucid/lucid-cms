@@ -2,137 +2,229 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { stringTranslations } from "../../../../schemas/locales.js";
 
-const CollectionConfigSchema = z.object({
-	key: z
-		.string()
-		.max(constants.db.maxBuilderKeyLength)
-		.refine((val) => !val.includes(constants.db.nameSeparator), {
-			message: `Collection key cannot contain '${constants.db.nameSeparator}'`,
+const CollectionConfigSchema = z
+	.object({
+		key: z
+			.string()
+			.max(constants.db.maxBuilderKeyLength)
+			.refine((val) => !val.includes(constants.db.nameSeparator), {
+				message: `Collection key cannot contain '${constants.db.nameSeparator}'`,
+			}),
+		mode: z.enum(["single", "multiple"]),
+		details: z.object({
+			name: stringTranslations,
+			singularName: stringTranslations,
+			summary: stringTranslations.optional(),
 		}),
-	mode: z.enum(["single", "multiple"]),
-	details: z.object({
-		name: stringTranslations,
-		singularName: stringTranslations,
-		summary: stringTranslations.optional(),
-	}),
-	permissions: z
-		.object({
-			read: z.string().optional(),
-			create: z.string().optional(),
-			update: z.string().optional(),
-			delete: z.string().optional(),
-			restore: z.string().optional(),
-			publish: z.string().optional(),
-			review: z.string().optional(),
-		})
-		.optional(),
-	config: z
-		.object({
-			isLocked: z
-				.boolean()
-				.default(constants.collectionBuilder.isLocked)
-				.optional(),
-			useTranslations: z
-				.boolean()
-				.default(constants.collectionBuilder.useTranslations)
-				.optional(),
-			useRevisions: z
-				.boolean()
-				.default(constants.collectionBuilder.useRevisions)
-				.optional(),
-			useAutoSave: z
-				.boolean()
-				.default(constants.collectionBuilder.useAutoSave)
-				.optional(),
-			publishing: z
-				.object({
-					review: z
-						.object({
-							targets: z
-								.array(
-									z
-										.string()
-										.min(1)
-										.max(50)
-										.regex(/^[a-z0-9-_]+$/),
-								)
-								.optional(),
-							allowSelfApproval: z
-								.boolean()
-								.default(
-									constants.collectionBuilder.publishing.allowSelfApproval,
-								)
-								.optional(),
-							comments: z
-								.object({
-									request: z
-										.enum(["required", "optional"])
-										.default(
-											constants.collectionBuilder.publishing.comments.request,
-										)
-										.optional(),
-									decision: z
-										.enum(["required", "optional"])
-										.default(
-											constants.collectionBuilder.publishing.comments.decision,
-										)
-										.optional(),
-								})
-								.optional(),
-						})
-						.optional(),
-				})
-				.optional(),
-			environments: z
-				.array(
-					z.object({
-						key: z
-							.string()
-							.min(1)
-							.max(50)
-							.regex(/^[a-z0-9-_]+$/, {
-								message:
-									"Environment key must contain only lowercase letters, numbers, hyphens and underscores",
-							})
-							.refine(
-								(val) =>
-									!constants.collectionBuilder.protectedEnvironments.includes(
-										val,
-									),
-								{
-									message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
-								},
-							),
-						name: stringTranslations,
-						permissions: z
+		permissions: z
+			.object({
+				read: z.string().optional(),
+				create: z.string().optional(),
+				update: z.string().optional(),
+				delete: z.string().optional(),
+				restore: z.string().optional(),
+				publish: z.string().optional(),
+				review: z.string().optional(),
+			})
+			.optional(),
+		config: z
+			.object({
+				isLocked: z
+					.boolean()
+					.default(constants.collectionBuilder.isLocked)
+					.optional(),
+				useTranslations: z
+					.boolean()
+					.default(constants.collectionBuilder.useTranslations)
+					.optional(),
+				useRevisions: z
+					.boolean()
+					.default(constants.collectionBuilder.useRevisions)
+					.optional(),
+				useAutoSave: z
+					.boolean()
+					.default(constants.collectionBuilder.useAutoSave)
+					.optional(),
+				publishing: z
+					.object({
+						review: z
 							.object({
-								publish: z.string().optional(),
-								review: z.string().optional(),
+								targets: z
+									.array(
+										z
+											.string()
+											.min(1)
+											.max(50)
+											.regex(/^[a-z0-9-_]+$/),
+									)
+									.optional(),
+								allowSelfApproval: z
+									.boolean()
+									.default(
+										constants.collectionBuilder.publishing.allowSelfApproval,
+									)
+									.optional(),
+								comments: z
+									.object({
+										request: z
+											.enum(["required", "optional"])
+											.default(
+												constants.collectionBuilder.publishing.comments.request,
+											)
+											.optional(),
+										decision: z
+											.enum(["required", "optional"])
+											.default(
+												constants.collectionBuilder.publishing.comments
+													.decision,
+											)
+											.optional(),
+									})
+									.optional(),
 							})
 							.optional(),
-					}),
-				)
-				.optional(),
-			revisionRetentionDays: z
-				.union([z.number().int().positive(), z.literal(false)])
-				.default(constants.collectionBuilder.revisionRetentionDays)
-				.optional(),
-		})
-		.optional(),
-	hooks: z
-		.array(
-			z.object({
-				event: z.string(),
-				handler: z.unknown(),
-			}),
-		)
-		.optional(),
-	bricks: z
-		.object({
-			fixed: z.array(z.unknown()).optional(),
-			builder: z.array(z.unknown()).optional(),
-		})
-		.optional(),
-});
+						workflow: z
+							.object({
+								initial: z
+									.string()
+									.min(1)
+									.max(50)
+									.regex(/^[a-z0-9-_]+$/)
+									.optional(),
+								stages: z
+									.array(
+										z.object({
+											key: z
+												.string()
+												.min(1)
+												.max(50)
+												.regex(/^[a-z0-9-_]+$/),
+											name: stringTranslations,
+											color: z
+												.enum(
+													constants.collectionBuilder.publishing.workflow
+														.stageColors,
+												)
+												.optional(),
+											canPublish: z
+												.array(
+													z
+														.string()
+														.min(1)
+														.max(50)
+														.regex(/^[a-z0-9-_]+$/),
+												)
+												.optional(),
+											permissions: z
+												.object({
+													enter: z.string().optional(),
+													leave: z.string().optional(),
+												})
+												.optional(),
+										}),
+									)
+									.min(1),
+							})
+							.optional(),
+					})
+					.optional(),
+				environments: z
+					.array(
+						z.object({
+							key: z
+								.string()
+								.min(1)
+								.max(50)
+								.regex(/^[a-z0-9-_]+$/, {
+									message:
+										"Environment key must contain only lowercase letters, numbers, hyphens and underscores",
+								})
+								.refine(
+									(val) =>
+										!constants.collectionBuilder.protectedEnvironments.includes(
+											val,
+										),
+									{
+										message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
+									},
+								),
+							name: stringTranslations,
+							permissions: z
+								.object({
+									publish: z.string().optional(),
+									review: z.string().optional(),
+								})
+								.optional(),
+						}),
+					)
+					.optional(),
+				revisionRetentionDays: z
+					.union([z.number().int().positive(), z.literal(false)])
+					.default(constants.collectionBuilder.revisionRetentionDays)
+					.optional(),
+			})
+			.optional(),
+		hooks: z
+			.array(
+				z.object({
+					event: z.string(),
+					handler: z.unknown(),
+				}),
+			)
+			.optional(),
+		bricks: z
+			.object({
+				fixed: z.array(z.unknown()).optional(),
+				builder: z.array(z.unknown()).optional(),
+			})
+			.optional(),
+	})
+	.superRefine((data, ctx) => {
+		const workflow = data.config?.publishing?.workflow;
+		if (!workflow) return;
+
+		const stageKeys = workflow.stages.map((stage) => stage.key);
+		const duplicateStageKeys = stageKeys.filter(
+			(key, index) => stageKeys.indexOf(key) !== index,
+		);
+		if (duplicateStageKeys.length > 0) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["config", "publishing", "workflow", "stages"],
+				message: `Workflow stage keys must be unique: ${Array.from(new Set(duplicateStageKeys)).join(", ")}`,
+			});
+		}
+
+		if (workflow.initial && !stageKeys.includes(workflow.initial)) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["config", "publishing", "workflow", "initial"],
+				message:
+					"Workflow initial stage must reference one of the configured stages",
+			});
+		}
+
+		const environmentKeys = new Set(
+			data.config?.environments?.map((environment) => environment.key) ?? [],
+		);
+		for (const [stageIndex, stage] of workflow.stages.entries()) {
+			for (const [targetIndex, target] of (stage.canPublish ?? []).entries()) {
+				if (environmentKeys.has(target)) continue;
+				ctx.addIssue({
+					code: "custom",
+					path: [
+						"config",
+						"publishing",
+						"workflow",
+						"stages",
+						stageIndex,
+						"canPublish",
+						targetIndex,
+					],
+					message: `Workflow canPublish target "${target}" must reference a configured environment`,
+				});
+			}
+		}
+	});
 
 export default CollectionConfigSchema;

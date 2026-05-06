@@ -6,6 +6,7 @@ import executeHooks from "../../utils/hooks/execute-hooks.js";
 import {
 	documentPublishOperationServices,
 	documentServices,
+	documentWorkflowServices,
 } from "../index.js";
 import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
 
@@ -111,7 +112,12 @@ const deleteMultiplePermanently: ServiceFn<
 		}),
 	);
 
-	const [deleteDocumentsRes, ...nullifyResults] = await Promise.all([
+	const [
+		deleteDocumentsRes,
+		cancelRequestsRes,
+		workflowDeleteRes,
+		...nullifyResults
+	] = await Promise.all([
 		Documents.deleteMultiple(
 			{
 				where: [
@@ -130,20 +136,22 @@ const deleteMultiplePermanently: ServiceFn<
 				tableName: tableNamesRes.data.document,
 			},
 		),
-		...nullifyPromises,
-	]);
-	if (deleteDocumentsRes.error) return deleteDocumentsRes;
-
-	const nullifyError = nullifyResults.find((result) => result.error);
-	if (nullifyError) return nullifyError;
-
-	const cancelRequestsRes =
-		await documentPublishOperationServices.cancelForDocuments(context, {
+		documentPublishOperationServices.cancelForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: data.ids,
 			comment: T("document_permanently_deleted_publish_request_comment"),
-		});
+		}),
+		documentWorkflowServices.deleteForDocuments(context, {
+			collectionKey: data.collectionKey,
+			documentIds: data.ids,
+		}),
+		...nullifyPromises,
+	]);
+	if (deleteDocumentsRes.error) return deleteDocumentsRes;
 	if (cancelRequestsRes.error) return cancelRequestsRes;
+	if (workflowDeleteRes.error) return workflowDeleteRes;
+	const nullifyError = nullifyResults.find((result) => result.error);
+	if (nullifyError) return nullifyError;
 
 	const hookAfterRes = await executeHooks(
 		{

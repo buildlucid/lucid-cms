@@ -299,6 +299,14 @@ export type MigrationStatus = {
 	missingColumns: Record<string, string[]>;
 };
 
+export type WorkflowStageColor =
+	| "grey"
+	| "red"
+	| "yellow"
+	| "green"
+	| "blue"
+	| "purple";
+
 export interface CollectionBrickConfig {
 	key: string;
 	details: {
@@ -518,6 +526,19 @@ export interface Collection {
 					decision: "required" | "optional";
 				};
 			};
+			workflow?: {
+				initial: string;
+				stages: Array<{
+					key: string;
+					name: LocaleValue;
+					color: WorkflowStageColor;
+					canPublish: string[];
+					permissions: {
+						enter?: string;
+						leave?: string;
+					};
+				}>;
+			};
 		};
 		environments: {
 			key: string;
@@ -542,6 +563,29 @@ export interface Collection {
 	builderBricks: Array<CollectionBrickConfig>;
 	fields: CollectionFieldConfig[];
 }
+
+export type WorkflowUser = {
+	id: number;
+	email: string | null;
+	username: string | null;
+	firstName: string | null;
+	lastName: string | null;
+};
+
+export type DocumentWorkflowAssignee = {
+	id: number;
+	user: WorkflowUser;
+	assignedBy: number | null;
+	assignedAt: string | null;
+};
+
+export type DocumentWorkflow = {
+	stage: string;
+	assignees: DocumentWorkflowAssignee[];
+	createdAt: string | null;
+	updatedAt: string | null;
+	updatedBy: number | null;
+};
 
 export interface InternalDocumentBrick {
 	ref: string;
@@ -583,6 +627,7 @@ export interface InternalCollectionDocument {
 	bricks?: Array<InternalDocumentBrick> | null;
 	fields?: Array<InternalDocumentField> | null;
 	refs?: Partial<Record<FieldType, DocumentFieldRef[]>> | null;
+	workflow?: DocumentWorkflow | null;
 }
 
 export type PublishOperationStatus =

@@ -73,6 +73,9 @@ const matchesStorageMode = (
 const groupDocumentFilters = (
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
 	filters?: QueryParamFilters,
+	options?: {
+		includeWorkflow?: boolean;
+	},
 ): {
 	documentFilters: QueryParamFilters;
 	brickFilters: BrickFilters[];
@@ -88,6 +91,9 @@ const groupDocumentFilters = (
 		"isDeleted",
 		"deletedBy",
 	];
+	if (options?.includeWorkflow === true) {
+		validDocFilters.push("workflowStage", "workflowAssignee");
+	}
 
 	const documentFilters: QueryParamFilters = {};
 	const brickFiltersMap = new Map<LucidBrickTableName, BrickFieldFilters[]>();

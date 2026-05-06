@@ -1,3 +1,12 @@
+/**
+ * Compares numeric arrays as sets so reordered assignee IDs do not count as changes.
+ */
+export const sameNumericSet = (left: number[], right: number[]) => {
+	if (left.length !== right.length) return false;
+	const rightSet = new Set(right);
+	return left.every((value) => rightSet.has(value));
+};
+
 export const moveArrayItem = <T>(
 	items: T[],
 	fromIndex: number,

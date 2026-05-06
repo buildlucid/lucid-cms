@@ -6,6 +6,7 @@ export { default as documentBricksFormatter } from "./document-bricks.js";
 export { default as documentFieldsFormatter } from "./document-fields.js";
 export { default as documentPublishOperationsFormatter } from "./document-publish-operations.js";
 export { default as documentVersionsFormatter } from "./document-versions.js";
+export { default as documentWorkflowsFormatter } from "./document-workflows.js";
 export { default as documentsFormatter } from "./documents.js";
 export { default as emailsFormatter } from "./emails.js";
 export { default as jobsFormatter } from "./jobs.js";

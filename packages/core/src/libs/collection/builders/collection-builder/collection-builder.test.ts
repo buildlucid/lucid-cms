@@ -127,3 +127,62 @@ test("collection config is correct along with field includes and filters", async
 		},
 	});
 });
+
+test("collection workflow config normalizes defaults", async () => {
+	const collection = new CollectionBuilder("pages", {
+		mode: "multiple",
+		details: {
+			name: "Pages",
+			singularName: "Page",
+		},
+		config: {
+			environments: [
+				{
+					key: "production",
+					name: "Production",
+				},
+			],
+			publishing: {
+				workflow: {
+					stages: [
+						{
+							key: "todo",
+							name: "To do",
+						},
+						{
+							key: "done",
+							name: "Done",
+							color: "green",
+							canPublish: ["production"],
+							permissions: {
+								enter: "page:workflow:done",
+							},
+						},
+					],
+				},
+			},
+		},
+	});
+
+	expect(collection.getData.config.publishing.workflow).toEqual({
+		initial: "todo",
+		stages: [
+			{
+				key: "todo",
+				name: "To do",
+				color: "grey",
+				canPublish: [],
+				permissions: {},
+			},
+			{
+				key: "done",
+				name: "Done",
+				color: "green",
+				canPublish: ["production"],
+				permissions: {
+					enter: "page:workflow:done",
+				},
+			},
+		],
+	});
+});

@@ -15,6 +15,8 @@ export type {
 	DocumentFieldMap,
 	DocumentRelationValue,
 	DocumentVersion,
+	DocumentWorkflow,
+	DocumentWorkflowAssignee,
 	Email,
 	ErrorResponse,
 	GroupDocumentField,
@@ -60,4 +62,6 @@ export type {
 	UserPermission,
 	ValidateInvitation,
 	ValueDocumentField,
+	WorkflowStageColor,
+	WorkflowUser,
 } from "@lucidcms/types";

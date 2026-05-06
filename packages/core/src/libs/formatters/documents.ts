@@ -3,6 +3,7 @@ import type {
 	CollectionDocument,
 	Config,
 	DocumentBrick,
+	DocumentWorkflow,
 	FieldRef,
 	FieldRefParams,
 	FieldTypes,
@@ -16,10 +17,12 @@ import registeredFields, {
 	registeredFieldTypes,
 } from "../collection/custom-fields/registered-fields.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
+import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import formatter, {
 	documentBricksFormatter,
 	documentFieldsFormatter,
+	documentWorkflowsFormatter,
 } from "./index.js";
 
 const formatMultiple = (props: {
@@ -31,7 +34,15 @@ const formatMultiple = (props: {
 	hasBricks: boolean;
 	refData?: FieldRefResponse;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
+	workflows?: DocumentWorkflowDetailedQueryResponse[];
 }) => {
+	const workflowMap =
+		props.workflows !== undefined
+			? new Map(
+					props.workflows.map((workflow) => [workflow.document_id, workflow]),
+				)
+			: undefined;
+
 	return props.documents.map((d) => {
 		let fields: InternalDocumentField[] | null = null;
 		let bricks: InternalDocumentBrick[] | null = null;
@@ -71,6 +82,13 @@ const formatMultiple = (props: {
 			fields: fields,
 			bricks: bricks || undefined,
 			refs: refs,
+			workflow:
+				workflowMap !== undefined
+					? documentWorkflowsFormatter.formatSingle({
+							collection: props.collection,
+							workflow: workflowMap.get(d.id),
+						})
+					: undefined,
 		});
 	});
 };
@@ -81,8 +99,27 @@ const formatSingle = (props: {
 	bricks?: InternalDocumentBrick[];
 	fields?: InternalDocumentField[] | null;
 	refs?: InternalCollectionDocument["refs"];
+	workflow?: DocumentWorkflow | null;
 	config: Config;
 }): InternalCollectionDocument => {
+	const inlineWorkflow =
+		props.document.workflow_assignees !== undefined
+			? documentWorkflowsFormatter.formatSingle({
+					collection: props.collection,
+					workflow: {
+						id: props.document.workflow_id,
+						collection_key: props.document.collection_key,
+						document_id: props.document.id,
+						stage_key: props.document.workflow_stage_key,
+						created_by: props.document.workflow_created_by,
+						created_at: props.document.workflow_created_at,
+						updated_by: props.document.workflow_updated_by,
+						updated_at: props.document.workflow_updated_at,
+						assignees: props.document.workflow_assignees,
+					},
+				})
+			: undefined;
+
 	return {
 		id: props.document.id,
 		collectionKey: props.document.collection_key,
@@ -95,6 +132,14 @@ const formatSingle = (props: {
 		bricks: props.bricks ?? null,
 		fields: props.fields ?? null,
 		refs: props.refs ?? null,
+		workflow:
+			props.workflow !== undefined
+				? props.workflow
+				: (inlineWorkflow ??
+					documentWorkflowsFormatter.formatSummary({
+						collection: props.collection,
+						stageKey: props.document.workflow_stage_key,
+					})),
 		isDeleted: formatter.formatBoolean(props.document.is_deleted),
 		createdBy: props.document.cb_user_id
 			? {
@@ -225,19 +270,20 @@ const formatClientSingle = <TCollectionKey extends string = string>(props: {
 		config: props.config,
 		refs: props.refs,
 	});
+	const { workflow: _workflow, ...clientRes } = res;
 
 	return {
-		...res,
-		bricks: res.bricks
-			? res.bricks.map((b) => {
+		...clientRes,
+		bricks: clientRes.bricks
+			? clientRes.bricks.map((b) => {
 					return {
 						...b,
 						fields: documentFieldsFormatter.objectifyFields(b.fields),
 					} satisfies DocumentBrick;
 				})
 			: null,
-		fields: documentFieldsFormatter.objectifyFields(res.fields ?? []),
-		refs: res.refs ?? null,
+		fields: documentFieldsFormatter.objectifyFields(clientRes.fields ?? []),
+		refs: clientRes.refs ?? null,
 	} as unknown as CollectionDocument<TCollectionKey>;
 };
 

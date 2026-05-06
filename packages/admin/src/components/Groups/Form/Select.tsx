@@ -76,8 +76,9 @@ export const Select: Component<SelectProps> = (props) => {
 	});
 
 	createEffect(() => {
-		if (props.value === undefined) {
+		if (props.value === undefined || props.value === "") {
 			setSelectedLabel(T()("nothing_selected"));
+			return;
 		}
 
 		const selectedOption = props.options.find(
@@ -85,7 +86,10 @@ export const Select: Component<SelectProps> = (props) => {
 		);
 		if (selectedOption) {
 			setSelectedLabel(selectedOption.label);
+			return;
 		}
+
+		setSelectedLabel(T()("nothing_selected"));
 	});
 
 	// ----------------------------------------
@@ -154,19 +158,25 @@ export const Select: Component<SelectProps> = (props) => {
 								<FaSolidKeyboard size={12} aria-hidden="true" />
 							</span>
 						</Show>
-						<Show when={props.noClear !== true}>
+						<Show
+							when={
+								props.noClear !== true &&
+								props.value !== undefined &&
+								props.value !== ""
+							}
+						>
 							<button
 								type="button"
-								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
+								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-primary-contrast hover:bg-error-base hover:text-error-contrast duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
 								onClick={(e) => {
 									e.stopPropagation();
 									props.onChange(undefined);
 								}}
 							>
-								<FaSolidXmark size={16} class="text-subtitle" />
+								<FaSolidXmark size={14} class="text-current" />
 							</button>
 						</Show>
-						<FaSolidSort size={16} class="text-subtitle ml-1" />
+						<FaSolidSort size={14} class="text-subtitle ml-1" />
 					</div>
 				</DropdownMenu.Trigger>
 				<DropdownContent

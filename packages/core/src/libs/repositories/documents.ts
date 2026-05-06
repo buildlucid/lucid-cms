@@ -28,6 +28,7 @@ import type {
 	LucidVersionTableName,
 	Select,
 } from "../db/types.js";
+import type { DocumentWorkflowDetailedQueryResponse } from "./document-workflows.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
 
@@ -50,6 +51,13 @@ export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	version_promoted_from?: number | null;
 	version_created_at?: Date | string | null;
 	version_created_by?: number | null;
+	workflow_id?: number | null;
+	workflow_stage_key?: string | null;
+	workflow_created_by?: number | null;
+	workflow_created_at?: Date | string | null;
+	workflow_updated_by?: number | null;
+	workflow_updated_at?: Date | string | null;
+	workflow_assignees?: DocumentWorkflowDetailedQueryResponse["assignees"];
 	versions: Select<LucidVersionTable>[];
 	[key: LucidBrickTableName]: Select<LucidBricksTable>[];
 }
@@ -398,6 +406,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				| CollectionSchemaTable<LucidBrickTableName>
 				| undefined;
 			config: Config;
+			includeWorkflow: boolean;
+			workflowAssigneeFilterValues?: Array<string | number>;
 			tables: {
 				versions: LucidVersionTableName;
 				documentFields: LucidBrickTableName;
@@ -490,6 +500,63 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${props.tables.versions}.id as version_id`,
 					`${props.tables.versions}.type as version_type`,
 				])
+				.$if(props.includeWorkflow, (qb) =>
+					qb
+						.leftJoin("lucid_document_workflows", (join) =>
+							join
+								.on(
+									"lucid_document_workflows.collection_key",
+									"=",
+									props.collection.getData.key,
+								)
+								.onRef(
+									"lucid_document_workflows.document_id",
+									"=",
+									`${dynamicConfig.tableName}.id`,
+								),
+						)
+						.select([
+							"lucid_document_workflows.id as workflow_id",
+							"lucid_document_workflows.stage_key as workflow_stage_key",
+							"lucid_document_workflows.created_by as workflow_created_by",
+							"lucid_document_workflows.created_at as workflow_created_at",
+							"lucid_document_workflows.updated_by as workflow_updated_by",
+							"lucid_document_workflows.updated_at as workflow_updated_at",
+						])
+						.select((eb) => [
+							this.dbAdapter
+								.jsonArrayFrom(
+									eb
+										.selectFrom("lucid_document_workflow_assignees")
+										.leftJoin(
+											"lucid_users",
+											"lucid_users.id",
+											"lucid_document_workflow_assignees.user_id",
+										)
+										.select([
+											"lucid_document_workflow_assignees.id",
+											"lucid_document_workflow_assignees.workflow_id",
+											"lucid_document_workflow_assignees.user_id",
+											"lucid_document_workflow_assignees.assigned_by",
+											"lucid_document_workflow_assignees.assigned_at",
+											"lucid_users.email",
+											"lucid_users.username",
+											"lucid_users.first_name",
+											"lucid_users.last_name",
+										])
+										.whereRef(
+											"lucid_document_workflow_assignees.workflow_id",
+											"=",
+											"lucid_document_workflows.id",
+										)
+										.orderBy(
+											"lucid_document_workflow_assignees.assigned_at",
+											"asc",
+										),
+								)
+								.as("workflow_assignees"),
+						]),
+				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);
 
@@ -506,8 +573,40 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						"count",
 					),
 				)
+				.$if(props.includeWorkflow, (qb) =>
+					qb.leftJoin("lucid_document_workflows", (join) =>
+						join
+							.on(
+								"lucid_document_workflows.collection_key",
+								"=",
+								props.collection.getData.key,
+							)
+							.onRef(
+								"lucid_document_workflows.document_id",
+								"=",
+								`${dynamicConfig.tableName}.id`,
+							),
+					),
+				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);
+
+			if (
+				props.includeWorkflow &&
+				props.workflowAssigneeFilterValues !== undefined
+			) {
+				const assigneeFilter =
+					props.workflowAssigneeFilterValues.length > 0
+						? sql<boolean>`exists (
+								select 1
+								from lucid_document_workflow_assignees
+								where lucid_document_workflow_assignees.workflow_id = lucid_document_workflows.id
+								and lucid_document_workflow_assignees.user_id in (${sql.join(props.workflowAssigneeFilterValues.map((id) => sql`${id}`))})
+							)`
+						: sql<boolean>`1 = 0`;
+				query = query.where(assigneeFilter);
+				queryCount = queryCount.where(assigneeFilter);
+			}
 
 			query = this.applyBrickFiltersToQuery(
 				query,
@@ -543,6 +642,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								updatedAt: `${dynamicConfig.tableName}.updated_at`,
 								isDeleted: `${dynamicConfig.tableName}.is_deleted`,
 								deletedBy: `${dynamicConfig.tableName}.deleted_by`,
+								...(props.includeWorkflow
+									? {
+											workflowStage: sql.ref(
+												"lucid_document_workflows.stage_key",
+											),
+										}
+									: {}),
 							},
 							sorts: {
 								createdAt: `${dynamicConfig.tableName}.created_at`,

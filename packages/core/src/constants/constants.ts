@@ -38,6 +38,17 @@ export default Object.freeze({
 				decision: "optional" as const,
 			},
 			snapshotVersionType: "snapshot" as const,
+			workflow: {
+				stageColors: [
+					"grey",
+					"red",
+					"yellow",
+					"green",
+					"blue",
+					"purple",
+				] as const,
+				color: "grey" as const,
+			},
 		},
 	},
 	customFields: {

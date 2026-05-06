@@ -1,6 +1,10 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import type { CFConfig, Collection, FieldTypes } from "@types";
-import { FaSolidCalendar } from "solid-icons/fa";
+import {
+	FaSolidBarsProgress,
+	FaSolidCalendar,
+	FaSolidUserCheck,
+} from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
@@ -61,6 +65,22 @@ export const DocumentsList: Component<{
 	);
 	const getTableHeadColumns = createMemo(() =>
 		tableHeadColumns(props.state.displayInListing()),
+	);
+	const workflowHeadColumn = createMemo(() =>
+		props.state.collection?.config.publishing.workflow
+			? [
+					{
+						label: T()("workflow_stage"),
+						key: "workflowStage",
+						icon: <FaSolidBarsProgress />,
+					},
+					{
+						label: T()("workflow_assigned_to"),
+						key: "workflowAssignee",
+						icon: <FaSolidUserCheck />,
+					},
+				]
+			: [],
 	);
 	const documentQueryEnabled = createMemo(
 		() =>
@@ -203,6 +223,7 @@ export const DocumentsList: Component<{
 				searchParams={props.state.searchParams}
 				head={[
 					...getTableHeadColumns(),
+					...workflowHeadColumn(),
 					{
 						label: T()("updated_at"),
 						key: "updatedAt",

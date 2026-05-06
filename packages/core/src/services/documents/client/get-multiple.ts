@@ -114,6 +114,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 				documentFields: tableNameRes.data.documentFields,
 			},
 			documentFieldsTableSchema: documentFieldsTableSchemaRes.data,
+			includeWorkflow: false,
 		},
 		{
 			tableName: tableNameRes.data.document,

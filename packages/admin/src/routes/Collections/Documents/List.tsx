@@ -60,6 +60,17 @@ const CollectionsDocumentsListRoute: Component = () => {
 		refetchOnWindowFocus: false,
 		enabled: () => !!collectionKey(),
 	});
+	const workflowAssignees = api.documents.useGetWorkflowAssignees({
+		queryParams: {
+			location: {
+				collectionKey: collectionKey,
+			},
+		},
+		enabled: () =>
+			Boolean(
+				collectionKey() && collection.data?.data.config.publishing.workflow,
+			),
+	});
 
 	// ----------------------------------
 	// Memos
@@ -69,6 +80,43 @@ const CollectionsDocumentsListRoute: Component = () => {
 	const getCollectionFieldFilters = createMemo(() =>
 		collectionFieldFilters(collection.data?.data),
 	);
+	const getWorkflowFilters = createMemo(() => {
+		const workflow = collection.data?.data.config.publishing.workflow;
+		if (!workflow) return [];
+
+		return [
+			{
+				label: T()("workflow_stage"),
+				key: "workflowStage",
+				type: "select" as const,
+				options: workflow.stages.map((stage) => ({
+					value: stage.key,
+					label:
+						helpers.getLocaleValue({
+							value: stage.name,
+							fallback: stage.key,
+						}) || stage.key,
+				})),
+			},
+			{
+				label: T()("workflow_assigned_to"),
+				key: "workflowAssignee",
+				type: "multi-select" as const,
+				options:
+					workflowAssignees.data?.data.map((user) => ({
+						value: user.id,
+						label: helpers.formatUserName(
+							{
+								username: user.username ?? user.email ?? T()("unknown"),
+								firstName: user.firstName,
+								lastName: user.lastName,
+							},
+							"username",
+						),
+					})) ?? [],
+			},
+		];
+	});
 	const collectionIsSuccess = createMemo(() => collection.isSuccess);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
@@ -112,6 +160,16 @@ const CollectionsDocumentsListRoute: Component = () => {
 						break;
 					}
 				}
+			}
+			if (collection.data.data.config.publishing.workflow) {
+				filterConfig.workflowStage = {
+					type: "text",
+					value: "",
+				};
+				filterConfig.workflowAssignee = {
+					type: "array",
+					value: [],
+				};
 			}
 			searchParams.setFilterSchema(filterConfig);
 		}
@@ -167,53 +225,56 @@ const CollectionsDocumentsListRoute: Component = () => {
 											queryKey: ["documents.getMultiple"],
 										});
 									}}
-									filters={getCollectionFieldFilters().map((field) => {
-										const fieldKey = formatFieldFilters({
-											fieldKey: field.key,
-										});
+									filters={[
+										...getCollectionFieldFilters().map((field) => {
+											const fieldKey = formatFieldFilters({
+												fieldKey: field.key,
+											});
 
-										switch (field.type) {
-											case "checkbox": {
-												return {
-													label: helpers.getLocaleValue({
-														value: field.details.label,
-														fallback: field.key,
-													}),
-													key: fieldKey,
-													type: "boolean",
-												};
-											}
-											case "select": {
-												return {
-													label: helpers.getLocaleValue({
-														value: field.details.label,
-														fallback: field.key,
-													}),
-													key: fieldKey,
-													type: "select",
-													options: field.options?.map((option, i) => ({
-														value: option.value,
+											switch (field.type) {
+												case "checkbox": {
+													return {
 														label: helpers.getLocaleValue({
-															value: option.label,
-															fallback: T()("option_label", {
-																count: i,
-															}),
+															value: field.details.label,
+															fallback: field.key,
 														}),
-													})),
-												};
+														key: fieldKey,
+														type: "boolean" as const,
+													};
+												}
+												case "select": {
+													return {
+														label: helpers.getLocaleValue({
+															value: field.details.label,
+															fallback: field.key,
+														}),
+														key: fieldKey,
+														type: "select" as const,
+														options: field.options?.map((option, i) => ({
+															value: option.value,
+															label: helpers.getLocaleValue({
+																value: option.label,
+																fallback: T()("option_label", {
+																	count: i,
+																}),
+															}),
+														})),
+													};
+												}
+												default: {
+													return {
+														label: helpers.getLocaleValue({
+															value: field.details.label,
+															fallback: field.key,
+														}),
+														key: fieldKey,
+														type: "text" as const,
+													};
+												}
 											}
-											default: {
-												return {
-													label: helpers.getLocaleValue({
-														value: field.details.label,
-														fallback: field.key,
-													}),
-													key: fieldKey,
-													type: "text",
-												};
-											}
-										}
-									})}
+										}),
+										...getWorkflowFilters(),
+									]}
 									sorts={[
 										{
 											label: T()("updated_at"),

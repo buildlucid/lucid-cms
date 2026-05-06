@@ -10,6 +10,8 @@ export { default as DocumentPublishOperationAssigneesRepository } from "./docume
 export { default as DocumentPublishOperationEventsRepository } from "./document-publish-operation-events.js";
 export { default as DocumentPublishOperationsRepository } from "./document-publish-operations.js";
 export { default as DocumentVersionsRepository } from "./document-versions.js";
+export { default as DocumentWorkflowAssigneesRepository } from "./document-workflow-assignees.js";
+export { default as DocumentWorkflowsRepository } from "./document-workflows.js";
 export { default as DocumentsRepository } from "./documents.js";
 export { default as EmailAttachmentsRepository } from "./email-attachments.js";
 export { default as EmailChangeRequestsRepository } from "./email-change-requests.js";

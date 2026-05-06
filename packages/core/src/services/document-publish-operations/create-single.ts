@@ -8,7 +8,11 @@ import {
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices, documentVersionServices } from "../index.js";
+import {
+	collectionServices,
+	documentVersionServices,
+	documentWorkflowServices,
+} from "../index.js";
 import approve from "./approve.js";
 import getReviewers from "./get-reviewers.js";
 import {
@@ -152,6 +156,16 @@ const createSingle: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const workflowPublishRes = await documentWorkflowServices.canPublishTarget(
+		context,
+		{
+			collectionKey: data.collectionKey,
+			documentId: data.documentId,
+			target: data.target,
+		},
+	);
+	if (workflowPublishRes.error) return workflowPublishRes;
 
 	// Validate reviewer assignments only when this target requires approval.
 	const reviewersRes = requiresApproval

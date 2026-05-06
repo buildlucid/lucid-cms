@@ -173,6 +173,10 @@ export const HeaderBar: Component<{
 
 		const environments = collection.config.environments ?? [];
 		const publishReview = collection.config.publishing.review;
+		const workflow = collection.config.publishing.workflow;
+		const workflowStage = workflow?.stages.find(
+			(stage) => stage.key === document.workflow?.stage,
+		);
 
 		return environments.map((environment) => {
 			const label =
@@ -188,21 +192,92 @@ export const HeaderBar: Component<{
 			const action: ReleaseTriggerOption["action"] = publishRequestTargetEnabled
 				? "request"
 				: "publish";
+
 			const permission = userStore.get.hasPermission([
 				environment.permissions.publish,
 			]).all;
+
+			const workflowAllowsTarget =
+				!workflow ||
+				workflowStage?.canPublish.includes(environment.key) === true;
+
+			const workflowStageLabel =
+				helpers.getLocaleValue({
+					value: workflowStage?.name,
+					fallback: document.workflow?.stage,
+				}) ||
+				document.workflow?.stage ||
+				T()("workflow_no_stage");
+
+			const workflowDisabled = !workflowAllowsTarget;
+
+			let disabledToast: ReleaseTriggerOption["disabledToast"];
+			if (isPromoted) {
+				disabledToast = {
+					title: T()("release_current_disabled_toast_title"),
+					message: T()("release_current_disabled_toast_message", {
+						environment: label,
+					}),
+				};
+			} else if (!permission) {
+				disabledToast = {
+					title: T()("release_permission_disabled_toast_title"),
+					message: T()("release_permission_disabled_toast_message", {
+						environment: label,
+					}),
+				};
+			} else if (workflowDisabled) {
+				disabledToast = {
+					title: T()("workflow_release_disabled_toast_title"),
+					message: T()("workflow_release_disabled_toast_message", {
+						stage: workflowStageLabel,
+						environment: label.toLowerCase(),
+					}),
+				};
+			} else if (
+				props.state.ui.isSaving?.() ||
+				props.state.ui.isAutoSaving?.()
+			) {
+				disabledToast = {
+					title: T()("release_saving_disabled_toast_title"),
+					message: T()("release_saving_disabled_toast_message", {
+						environment: label,
+					}),
+				};
+			} else if (props.state.ui.isCreatingPublishOperation?.()) {
+				disabledToast = {
+					title: T()("release_requesting_disabled_toast_title"),
+					message: T()("release_requesting_disabled_toast_message", {
+						environment: label,
+					}),
+				};
+			} else if (props.state.isDocumentMutated?.()) {
+				disabledToast = {
+					title: T()("release_unsaved_disabled_toast_title"),
+					message: T()("release_unsaved_disabled_toast_message", {
+						environment: label,
+					}),
+				};
+			} else if (props.state.ui.canPublishDocument?.() === false) {
+				disabledToast = {
+					title: T()("release_error_disabled_toast_title"),
+					message: T()("release_error_disabled_toast_message", {
+						environment: label,
+					}),
+				};
+			}
 
 			return {
 				label,
 				value: environment.key as ReleaseTriggerOption["value"],
 				action,
-				permission,
 				route: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
 					documentId: props.state.documentID(),
 					status: environment.key,
 				}),
-				disabled: isPromoted,
+				disabled: disabledToast !== undefined,
+				...(disabledToast ? { disabledToast } : {}),
 				status: {
 					isReleased: !!document.version?.[environment.key],
 					upToDate: isPromoted,
@@ -223,10 +298,6 @@ export const HeaderBar: Component<{
 				(collection.config.publishing.review.targets?.length ?? 0) > 0)
 		);
 	});
-	const hasReleasePermission = createMemo(() =>
-		releaseOptions().some((option) => option.permission !== false),
-	);
-
 	// ----------------------------------
 	// Effects
 	onMount(() => {
@@ -423,8 +494,6 @@ export const HeaderBar: Component<{
 									}}
 									saveDisabled={props.state.ui.saveDisabled?.()}
 									savePermission={props.state.ui.hasSavePermission?.()}
-									disabled={!props.state.ui.canPublishDocument?.()}
-									permission={hasReleasePermission()}
 									loading={
 										props.state.ui.isSaving?.() ||
 										props.state.ui.isAutoSaving?.() ||

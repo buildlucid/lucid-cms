@@ -10,7 +10,11 @@ import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
 import T from "../../translations/index.js";
 import type { InternalCollectionDocument } from "../../types/response.js";
-import { getBaseUrl, groupDocumentFilters } from "../../utils/helpers/index.js";
+import {
+	getBaseUrl,
+	getFilterValues,
+	groupDocumentFilters,
+} from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
 import fetchRefData from "../documents-bricks/helpers/fetch-ref-data.js";
@@ -63,9 +67,19 @@ const getMultiple: ServiceFn<
 	);
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
 
+	const includeWorkflow = Boolean(
+		collectionRes.data.getData.config.publishing.workflow,
+	);
+
 	const { documentFilters, brickFilters } = groupDocumentFilters(
 		bricksTableSchemaRes.data,
 		data.query.filter,
+		{
+			includeWorkflow,
+		},
+	);
+	const workflowAssigneeFilterValues = getFilterValues(
+		documentFilters.workflowAssignee,
 	);
 
 	const tableNameRes = await getTableNames(context, data.collectionKey);
@@ -85,6 +99,8 @@ const getMultiple: ServiceFn<
 				documentFields: tableNameRes.data.documentFields,
 			},
 			documentFieldsTableSchema: documentFieldsTableSchemaRes.data,
+			includeWorkflow,
+			workflowAssigneeFilterValues,
 		},
 		{
 			tableName: tableNameRes.data.document,

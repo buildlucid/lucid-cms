@@ -6,7 +6,11 @@ import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { documentServices, documentVersionServices } from "../index.js";
+import {
+	documentServices,
+	documentVersionServices,
+	documentWorkflowServices,
+} from "../index.js";
 import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
 
 const upsertSingle: ServiceFn<
@@ -144,14 +148,24 @@ const upsertSingle: ServiceFn<
 
 	// ----------------------------------------------
 	// Create and manage document versions
-	const createVersionRes = await documentVersionServices.createSingle(context, {
-		documentId: upsertDocRes.data.id,
-		userId: data.userId,
-		bricks: data.bricks,
-		fields: data.fields,
-		collection: collectionRes.data,
-	});
+	const [createVersionRes, workflowRes] = await Promise.all([
+		documentVersionServices.createSingle(context, {
+			documentId: upsertDocRes.data.id,
+			userId: data.userId,
+			bricks: data.bricks,
+			fields: data.fields,
+			collection: collectionRes.data,
+		}),
+		data.documentId === undefined
+			? documentWorkflowServices.createInitial(context, {
+					collectionKey: data.collectionKey,
+					documentId: upsertDocRes.data.id,
+					userId: data.userId,
+				})
+			: undefined,
+	]);
 	if (createVersionRes.error) return createVersionRes;
+	if (workflowRes?.error) return workflowRes;
 
 	await invalidateClientDocumentCache(context, data.collectionKey);
 

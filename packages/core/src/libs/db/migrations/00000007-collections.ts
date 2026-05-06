@@ -191,6 +191,84 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.on("lucid_document_publish_operation_events")
 				.columns(["operation_id", "created_at"])
 				.execute();
+
+			await db.schema
+				.createTable("lucid_document_workflows")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
+					col.notNull().references("lucid_collections.key").onDelete("cascade"),
+				)
+				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("stage_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("updated_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
+				.createTable("lucid_document_workflow_assignees")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("workflow_id", adapter.getDataType("integer"), (col) =>
+					col
+						.notNull()
+						.references("lucid_document_workflows.id")
+						.onDelete("cascade"),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_users.id").onDelete("cascade"),
+				)
+				.addColumn("assigned_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("assigned_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_document_workflows_document")
+				.on("lucid_document_workflows")
+				.columns(["collection_key", "document_id"])
+				.unique()
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_document_workflow_assignees_user")
+				.on("lucid_document_workflow_assignees")
+				.columns(["user_id", "workflow_id"])
+				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},
 	};

@@ -6,6 +6,7 @@ import executeHooks from "../../utils/hooks/execute-hooks.js";
 import {
 	documentPublishOperationServices,
 	documentServices,
+	documentWorkflowServices,
 } from "../index.js";
 import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
 
@@ -85,7 +86,12 @@ const deleteSinglePermanently: ServiceFn<
 	);
 	if (hookBeforeRes.error) return hookBeforeRes;
 
-	const [deleteDocumentRes, deleteRelationsRes] = await Promise.all([
+	const [
+		deleteDocumentRes,
+		deleteRelationsRes,
+		cancelRequestsRes,
+		workflowDeleteRes,
+	] = await Promise.all([
 		Documents.deleteSingle(
 			{
 				where: [
@@ -108,17 +114,20 @@ const deleteSinglePermanently: ServiceFn<
 			collectionKey: collectionRes.data.key,
 			documentId: data.id,
 		}),
-	]);
-	if (deleteDocumentRes.error) return deleteDocumentRes;
-	if (deleteRelationsRes.error) return deleteRelationsRes;
-
-	const cancelRequestsRes =
-		await documentPublishOperationServices.cancelForDocuments(context, {
+		documentPublishOperationServices.cancelForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.id],
 			comment: T("document_permanently_deleted_publish_request_comment"),
-		});
+		}),
+		documentWorkflowServices.deleteForDocuments(context, {
+			collectionKey: data.collectionKey,
+			documentIds: [data.id],
+		}),
+	]);
+	if (deleteDocumentRes.error) return deleteDocumentRes;
+	if (deleteRelationsRes.error) return deleteRelationsRes;
 	if (cancelRequestsRes.error) return cancelRequestsRes;
+	if (workflowDeleteRes.error) return workflowDeleteRes;
 
 	const hookAfterRes = await executeHooks(
 		{

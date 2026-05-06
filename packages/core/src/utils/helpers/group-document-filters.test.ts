@@ -204,6 +204,24 @@ describe("groupDocumentFilters", () => {
 		expect(result.brickFilters).toHaveLength(0);
 	});
 
+	it("should only handle workflow filters when enabled", () => {
+		const filters: QueryParamFilters = {
+			workflowStage: { value: "done" },
+			workflowAssignee: { value: ["1", "2"] },
+		};
+
+		expect(groupDocumentFilters(sampleSchema, filters)).toEqual({
+			documentFilters: {},
+			brickFilters: [],
+		});
+
+		expect(
+			groupDocumentFilters(sampleSchema, filters, {
+				includeWorkflow: true,
+			}).documentFilters,
+		).toEqual(filters);
+	});
+
 	it("should handle document custom fields with _ prefix", () => {
 		const filters: QueryParamFilters = {
 			_simpleHeading: { value: "Test Heading" },

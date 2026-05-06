@@ -5,7 +5,11 @@ import {
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices, documentVersionServices } from "../index.js";
+import {
+	collectionServices,
+	documentVersionServices,
+	documentWorkflowServices,
+} from "../index.js";
 import {
 	canUsePublishOperationsForTarget,
 	hasCollectionTargetPermission,
@@ -132,6 +136,16 @@ const approve: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const workflowPublishRes = await documentWorkflowServices.canPublishTarget(
+		context,
+		{
+			collectionKey: operationRes.data.collection_key,
+			documentId: operationRes.data.document_id,
+			target: operationRes.data.target,
+		},
+	);
+	if (workflowPublishRes.error) return workflowPublishRes;
 
 	const promoteRes = await documentVersionServices.promoteVersion(context, {
 		fromVersionId: operationRes.data.snapshot_version_id,

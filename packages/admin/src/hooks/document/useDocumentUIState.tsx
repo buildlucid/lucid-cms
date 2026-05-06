@@ -310,6 +310,7 @@ export function useDocumentUIState(props: {
 		if (props.mode === "create") return false;
 		if (props.mode === "history") return false;
 		if (props.version() !== "revision") return false;
+		if (props.document()?.isDeleted) return false;
 		if (props.collection()?.config.useRevisions === false) return false;
 		if (props.versionId() === undefined) return false;
 		return true;

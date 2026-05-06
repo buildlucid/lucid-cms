@@ -233,11 +233,6 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 					`${props.tables.document}.updated_by as document_updated_by`,
 					`${props.tables.document}.updated_at as document_updated_at`,
 				])
-				.where(
-					`${props.tables.document}.is_deleted`,
-					"=",
-					this.dbAdapter.getDefault("boolean", "false"),
-				)
 				// @ts-expect-error
 				.where(`${dynamicConfig.tableName}.document_id`, "=", props.documentId)
 				// @ts-expect-error
@@ -279,11 +274,6 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 					sql`count(distinct ${sql.ref(`${dynamicConfig.tableName}.id`)})`.as(
 						"count",
 					),
-				)
-				.where(
-					`${props.tables.document}.is_deleted`,
-					"=",
-					this.dbAdapter.getDefault("boolean", "false"),
 				)
 				// @ts-expect-error
 				.where(`${dynamicConfig.tableName}.document_id`, "=", props.documentId)

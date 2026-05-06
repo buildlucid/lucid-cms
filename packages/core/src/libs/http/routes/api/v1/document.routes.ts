@@ -10,10 +10,12 @@ import deleteSinglePermanently from "../../../controllers/documents/delete-singl
 import getMultiple from "../../../controllers/documents/get-multiple.js";
 import getMultipleRevisions from "../../../controllers/documents/get-multiple-revisions.js";
 import getSingle from "../../../controllers/documents/get-single.js";
+import getWorkflowAssignees from "../../../controllers/documents/get-workflow-assignees.js";
 import promoteVersion from "../../../controllers/documents/promote-version.js";
 import restoreMultiple from "../../../controllers/documents/restore-multiple.js";
 import restoreRevision from "../../../controllers/documents/restore-revision.js";
 import updateVersion from "../../../controllers/documents/update-version.js";
+import updateWorkflow from "../../../controllers/documents/update-workflow.js";
 
 const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey", ...createSingle)
@@ -24,6 +26,8 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.delete("/:collectionKey/permanent", ...deleteMultiplePermanently)
 	.delete("/:collectionKey/:id/permanent", ...deleteSinglePermanently)
 	.delete("/:collectionKey/:id", ...deleteSingle)
+	.get("/:collectionKey/workflow/assignees", ...getWorkflowAssignees)
+	.patch("/:collectionKey/:id/workflow", ...updateWorkflow)
 	.get("/:collectionKey/:status", ...getMultiple)
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)
 	.get("/:collectionKey/:id/:statusOrId", ...getSingle)

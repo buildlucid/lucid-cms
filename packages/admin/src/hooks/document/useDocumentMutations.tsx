@@ -129,17 +129,7 @@ export function useDocumentMutations(props: {
 			},
 		});
 
-	const autoSaveDocument = async (versionId: number) => {
-		updateSingleVersionMutation.action.mutate({
-			collectionKey: props.collectionKey(),
-			documentId: props.documentId() as number,
-			versionId: versionId,
-			body: {
-				bricks: brickHelpers.getUpsertBricks(),
-				fields: brickHelpers.getCollectionPseudoBrickFields(),
-			},
-		});
-	};
+	const updateWorkflowMutation = api.documents.useUpdateWorkflow();
 
 	const restoreRevision = api.documents.useRestoreRevision({
 		onSuccess: () => {
@@ -159,6 +149,18 @@ export function useDocumentMutations(props: {
 		},
 		getCollectionName: props.collectionSingularName,
 	});
+
+	const autoSaveDocument = async (versionId: number) => {
+		updateSingleVersionMutation.action.mutate({
+			collectionKey: props.collectionKey(),
+			documentId: props.documentId() as number,
+			versionId: versionId,
+			body: {
+				bricks: brickHelpers.getUpsertBricks(),
+				fields: brickHelpers.getCollectionPseudoBrickFields(),
+			},
+		});
+	};
 
 	const upsertDocumentAction = async () => {
 		if (props.mode === "create") {
@@ -235,17 +237,35 @@ export function useDocumentMutations(props: {
 		});
 	};
 
+	const updateWorkflowAction = async (body: {
+		stage?: string;
+		assigneeIds?: number[];
+	}) => {
+		if (props.documentId() === undefined) {
+			console.error("No document ID found.");
+			return;
+		}
+
+		return await updateWorkflowMutation.action.mutateAsync({
+			collectionKey: props.collectionKey(),
+			id: props.documentId() as number,
+			body,
+		});
+	};
+
 	return {
 		createDocumentMutation,
 		createSingleVersionMutation,
 		updateSingleVersionMutation,
 		createPublishOperationMutation,
+		updateWorkflowMutation,
 		upsertDocumentAction,
 		publishDocumentAction,
 		createPublishOperationAction,
 		autoSaveDocument,
 		restoreRevision,
 		restoreRevisionAction,
+		updateWorkflowAction,
 	};
 }
 

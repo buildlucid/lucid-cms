@@ -9,10 +9,12 @@ import useGetMultiple from "./useGetMultiple";
 import useGetMultipleRevisions from "./useGetMultipleRevisions";
 import useGetSingle from "./useGetSingle";
 import useGetSingleVersion from "./useGetSingleVersion";
+import useGetWorkflowAssignees from "./useGetWorkflowAssignees";
 import usePromoteSingle from "./usePromoteSingle";
 import useRestore from "./useRestore";
 import useRestoreRevision from "./useRestoreRevision";
 import useUpdateSingleVersion from "./useUpdateSingleVersion";
+import useUpdateWorkflow from "./useUpdateWorkflow";
 
 const exportObject = {
 	useGetMultiple,
@@ -28,8 +30,10 @@ const exportObject = {
 	useGetMultipleRevisions,
 	useRestoreRevision,
 	useUpdateSingleVersion,
+	useUpdateWorkflow,
 	useRestore,
 	useDeleteSinglePermanently,
+	useGetWorkflowAssignees,
 };
 
 export default exportObject;

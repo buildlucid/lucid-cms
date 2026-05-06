@@ -62,3 +62,125 @@ test("collection builder config passes schema validation", async () => {
 	const res = await CollectionConfigSchema.safeParseAsync(collection.config);
 	expect(res.success).toBe(true);
 });
+
+test("collection workflow config validates stages, targets and palette", async () => {
+	const validConfig = {
+		key: "pages",
+		mode: "multiple",
+		details: {
+			name: "Pages",
+			singularName: "Page",
+		},
+		config: {
+			publishing: {
+				workflow: {
+					initial: "todo",
+					stages: [
+						{
+							key: "todo",
+							name: "To do",
+						},
+						{
+							key: "done",
+							name: { en: "Done" },
+							color: "green",
+							canPublish: ["production"],
+						},
+					],
+				},
+			},
+			environments: [
+				{
+					key: "production",
+					name: "Production",
+				},
+			],
+		},
+	};
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync(validConfig),
+	).resolves.toMatchObject({
+		success: true,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			config: {
+				...validConfig.config,
+				publishing: {
+					workflow: {
+						initial: "missing",
+						stages: validConfig.config.publishing.workflow.stages,
+					},
+				},
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			config: {
+				...validConfig.config,
+				publishing: {
+					workflow: {
+						stages: [
+							{ key: "todo", name: "To do" },
+							{ key: "todo", name: "Duplicate" },
+						],
+					},
+				},
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			config: {
+				...validConfig.config,
+				publishing: {
+					workflow: {
+						stages: [
+							{
+								key: "todo",
+								name: "To do",
+								color: "orange",
+							},
+						],
+					},
+				},
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			config: {
+				...validConfig.config,
+				publishing: {
+					workflow: {
+						stages: [
+							{
+								key: "done",
+								name: "Done",
+								canPublish: ["missing"],
+							},
+						],
+					},
+				},
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+});

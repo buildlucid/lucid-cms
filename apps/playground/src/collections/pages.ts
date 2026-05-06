@@ -35,6 +35,27 @@ const PageCollection = new CollectionBuilder("page", {
 					decision: "optional",
 				},
 			},
+			workflow: {
+				stages: [
+					{
+						key: "todo",
+						name: "To do",
+						color: "yellow",
+					},
+					{
+						key: "in-progress",
+						name: "In progress",
+						canPublish: ["staging"],
+						color: "blue",
+					},
+					{
+						key: "done",
+						name: "Done",
+						canPublish: ["production", "staging"],
+						color: "green",
+					},
+				],
+			},
 		},
 		environments: [
 			{
