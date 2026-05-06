@@ -9,7 +9,7 @@ export const snapshotVersionType =
 	constants.collectionBuilder.publishing.snapshotVersionType;
 
 export const getPublishOperationTargets = (collection: CollectionBuilder) => {
-	const targets = collection.getData.config.publishing.review.targets;
+	const targets = collection.getData.config.review?.requiredFor;
 	if (targets === undefined) return [];
 
 	const environmentKeys = collection.getData.config.environments.map(

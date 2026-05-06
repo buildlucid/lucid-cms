@@ -67,9 +67,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 			},
 		},
 		enabled: () =>
-			Boolean(
-				collectionKey() && collection.data?.data.config.publishing.workflow,
-			),
+			Boolean(collectionKey() && collection.data?.data.config.workflow),
 	});
 
 	// ----------------------------------
@@ -81,7 +79,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 		collectionFieldFilters(collection.data?.data),
 	);
 	const getWorkflowFilters = createMemo(() => {
-		const workflow = collection.data?.data.config.publishing.workflow;
+		const workflow = collection.data?.data.config.workflow;
 		if (!workflow) return [];
 
 		return [
@@ -161,7 +159,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 					}
 				}
 			}
-			if (collection.data.data.config.publishing.workflow) {
+			if (collection.data.data.config.workflow) {
 				filterConfig.workflowStage = {
 					type: "text",
 					value: "",
@@ -187,7 +185,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 							{
 								type: "warning",
 								message: T()("locked_collection_message"),
-								show: collection.data?.data.config.isLocked === true,
+								show: collection.data?.data.config.locked === true,
 							},
 						]}
 					/>
@@ -199,8 +197,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 							description: collectionSummary(),
 						}}
 						actions={{
-							contentLocale:
-								collection.data?.data.config.useTranslations ?? false,
+							contentLocale: collection.data?.data.config.translations ?? false,
 							createLink: {
 								link: getDocumentRoute("create", {
 									collectionKey: collectionKey() || "",
@@ -208,7 +205,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 								permission: userStore.get.hasPermission([
 									collection.data?.data.permissions.create,
 								]).some,
-								show: collection.data?.data.config.isLocked !== true,
+								show: collection.data?.data.config.locked !== true,
 								label: T()("create_dynamic", {
 									name: collectionSingularName() || "",
 								}),

@@ -28,7 +28,7 @@ export type CollectionEnvironmentPermissions = Partial<
 
 export type PublishingReviewCommentRequirement = "required" | "optional";
 export type PublishingReviewConfig = {
-	targets?: string[];
+	requiredFor: string[];
 	allowSelfApproval: boolean;
 	comments: {
 		request: PublishingReviewCommentRequirement;
@@ -47,21 +47,16 @@ export type PublishingWorkflowStageConfig = {
 	key: string;
 	name: LocaleValue;
 	color: PublishingWorkflowStageColor;
-	canPublish: string[];
+	publishTargets: string[];
 	permissions: {
-		enter?: string;
-		leave?: string;
+		moveTo?: string;
+		moveFrom?: string;
 	};
 };
 
 export type PublishingWorkflowConfig = {
 	initial: string;
 	stages: PublishingWorkflowStageConfig[];
-};
-
-export type PublishingConfig = {
-	review: PublishingReviewConfig;
-	workflow?: PublishingWorkflowConfig;
 };
 
 export interface CollectionConfigSchemaType
@@ -82,11 +77,12 @@ export type CollectionData = {
 		summary: LocaleValue | null;
 	};
 	config: {
-		isLocked: boolean;
-		useRevisions: boolean;
-		useTranslations: boolean;
-		useAutoSave: boolean;
-		publishing: PublishingConfig;
+		locked: boolean;
+		revisions: boolean;
+		translations: boolean;
+		autoSave: boolean;
+		review?: PublishingReviewConfig;
+		workflow?: PublishingWorkflowConfig;
 		displayInListing: string[];
 		environments: {
 			key: string;

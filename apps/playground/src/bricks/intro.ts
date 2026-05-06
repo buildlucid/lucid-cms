@@ -12,7 +12,7 @@ const IntroBrick = new BrickBuilder("intro", {
 	})
 	.addText("title", {
 		config: {
-			useTranslations: true,
+			translations: true,
 		},
 	})
 	.addRichText("intro")

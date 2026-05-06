@@ -359,7 +359,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 	);
 	const collectionFields = renderFieldMap(collection.persistedFieldTree, {
 		builder: collection,
-		collectionUsesTranslations: collection.getData.config.useTranslations,
+		collectionUsesTranslations: collection.getData.config.translations,
 		withinGroup: false,
 	});
 	const collectionDeclarations = [...collectionFields.declarations];
@@ -369,7 +369,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 	for (const filterKey of collectionDocumentFilterKeys) {
 		addFilterPath(filterTree, [filterKey]);
 	}
-	if (collection.getData.config.publishing.workflow) {
+	if (collection.getData.config.workflow) {
 		addFilterPath(filterTree, ["workflowStage"]);
 	}
 
@@ -392,7 +392,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 		});
 		const brickFields = renderFieldMap(brick.persistedFieldTree, {
 			builder: brick,
-			collectionUsesTranslations: collection.getData.config.useTranslations,
+			collectionUsesTranslations: collection.getData.config.translations,
 			withinGroup: false,
 		});
 

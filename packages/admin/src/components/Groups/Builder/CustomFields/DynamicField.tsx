@@ -80,7 +80,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		if (
 			props.state.fieldConfig.type === "repeater" ||
 			// @ts-expect-error
-			fieldConfig()?.config?.useTranslations !== true ||
+			fieldConfig()?.config?.translations !== true ||
 			brickStore.get.collectionTranslations !== true
 		) {
 			return props.state.fieldErrors.filter(
@@ -99,7 +99,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		return (
 			hasMultipleLocales() &&
 			// @ts-expect-error
-			props.state.fieldConfig?.config?.useTranslations &&
+			props.state.fieldConfig?.config?.translations &&
 			brickStore.get.collectionTranslations
 		);
 	});
@@ -137,7 +137,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 				"invisible h-0 opacity-0 mb-0!":
 					fieldConfig().type !== "tab"
 						? // @ts-expect-error
-							fieldConfig()?.config?.isHidden === true
+							fieldConfig()?.config?.hidden === true
 						: false,
 			})}
 		>
@@ -268,7 +268,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "datetime"}>
 						<InputField
 							type={
-								(fieldConfig() as CFConfig<"datetime">).config.useTime === false
+								(fieldConfig() as CFConfig<"datetime">).config.time === false
 									? "date"
 									: "datetime-local"
 							}

@@ -28,7 +28,7 @@ export const formatStageName = (props: {
 	collection?: Collection;
 	stageKey?: string | null;
 }) => {
-	const stage = props.collection?.config.publishing.workflow?.stages.find(
+	const stage = props.collection?.config.workflow?.stages.find(
 		(stage) => stage.key === props.stageKey,
 	);
 
@@ -50,7 +50,7 @@ export const getStageColor = (props: {
 	stageKey?: string | null;
 }): WorkflowStageColor => {
 	return (
-		props.collection?.config.publishing.workflow?.stages.find(
+		props.collection?.config.workflow?.stages.find(
 			(stage) => stage.key === props.stageKey,
 		)?.color ?? "grey"
 	);

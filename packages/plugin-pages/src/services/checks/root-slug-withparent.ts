@@ -21,7 +21,7 @@ const checkRootSlugWithParent = (data: {
 }): Awaited<ServiceResponse<undefined>> => {
 	const parentPageId = getParentPageId(data.fields.parentPage);
 
-	if (data.collection.useTranslations && data.fields.slug.translations) {
+	if (data.collection.translations && data.fields.slug.translations) {
 		const fieldErrors: FieldError[] = [];
 		for (const [key, value] of Object.entries(data.fields.slug.translations)) {
 			if (value === "/" && parentPageId !== null) {

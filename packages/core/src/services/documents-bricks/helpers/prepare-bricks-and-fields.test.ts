@@ -199,7 +199,7 @@ describe("testing prepareBricksAndFields", () => {
 				singularName: "Trim Test",
 			},
 			config: {
-				useTranslations: true,
+				translations: true,
 			},
 		})
 			.addText("title")

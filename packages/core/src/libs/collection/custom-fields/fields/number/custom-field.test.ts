@@ -15,7 +15,7 @@ const NumberCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addNumber("standard_number")
@@ -46,7 +46,7 @@ test("successfully validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			translations: NumberCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -67,7 +67,7 @@ test("successfully validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			translations: NumberCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -88,7 +88,7 @@ test("successfully validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			translations: NumberCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -111,7 +111,7 @@ test("fail to validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			translations: NumberCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -138,7 +138,7 @@ test("fail to validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			translations: NumberCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -165,7 +165,7 @@ test("fail to validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: NumberCollection.getData.config.useTranslations,
+			translations: NumberCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -194,10 +194,10 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			default: 10,
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

@@ -9,9 +9,9 @@ export interface UserFieldConfig extends SharedFieldConfig {
 	};
 	config: {
 		default?: number[];
-		useTranslations?: boolean;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		translations?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 		multiple?: boolean;
 	};
 	validation?: {

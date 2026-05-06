@@ -10,10 +10,10 @@ export interface DatetimeFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 	config: {
-		useTranslations?: boolean;
-		useTime?: boolean;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		translations?: boolean;
+		time?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 		default?: string;
 	};
 	validation?: {

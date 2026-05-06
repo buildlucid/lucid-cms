@@ -15,7 +15,7 @@ const DateTimeCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addDateTime("standard_datetime")
@@ -41,7 +41,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DateTimeCollection.getData.config.useTranslations,
+			translations: DateTimeCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -62,7 +62,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DateTimeCollection.getData.config.useTranslations,
+			translations: DateTimeCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -83,7 +83,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DateTimeCollection.getData.config.useTranslations,
+			translations: DateTimeCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -104,7 +104,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DateTimeCollection.getData.config.useTranslations,
+			translations: DateTimeCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -125,7 +125,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DateTimeCollection.getData.config.useTranslations,
+			translations: DateTimeCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -148,7 +148,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DateTimeCollection.getData.config.useTranslations,
+			translations: DateTimeCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -175,7 +175,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DateTimeCollection.getData.config.useTranslations,
+			translations: DateTimeCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -202,7 +202,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DateTimeCollection.getData.config.useTranslations,
+			translations: DateTimeCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -229,7 +229,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DateTimeCollection.getData.config.useTranslations,
+			translations: DateTimeCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -258,11 +258,11 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
-			useTime: false,
+			translations: true,
+			time: false,
 			default: "2024-06-15T14:14:21.704Z",
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,
@@ -276,5 +276,5 @@ test("custom field config passes schema validation", async () => {
 
 test("datetime config defaults to date-only mode", () => {
 	const field = new DatetimeCustomField("field");
-	expect(field.config.config.useTime).toBe(false);
+	expect(field.config.config.time).toBe(false);
 });

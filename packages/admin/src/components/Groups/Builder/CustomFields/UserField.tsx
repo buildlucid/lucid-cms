@@ -56,8 +56,8 @@ export const UserField: Component<UserFieldProps> = (props) => {
 	const isMultiple = createMemo(
 		() => props.state.fieldConfig.config.multiple === true,
 	);
-	const isDisabled = createMemo(
-		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
+	const disabled = createMemo(
+		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -116,7 +116,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			disabled={isDisabled()}
+			disabled={disabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			hideOptionalText
 		/>

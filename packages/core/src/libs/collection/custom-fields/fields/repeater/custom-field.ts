@@ -35,7 +35,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 				summary: this.props?.details?.summary,
 			},
 			config: {
-				isDisabled: this.props?.config?.isDisabled,
+				disabled: this.props?.config?.disabled,
 			},
 			fields: [],
 			validation: this.props?.validation,

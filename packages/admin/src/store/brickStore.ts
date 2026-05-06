@@ -276,7 +276,7 @@ const [get, set] = createStore<{
 				if (!field) return;
 
 				if (
-					params.fieldConfig.config.useTranslations === true &&
+					params.fieldConfig.config.translations === true &&
 					get.collectionTranslations === true
 				) {
 					const previousValue = field.translations?.[params.contentLocale];
@@ -297,7 +297,7 @@ const [get, set] = createStore<{
 		if (fieldChanged) {
 			const brick = get.bricks[params.brickIndex];
 			const localeCode =
-				params.fieldConfig.config.useTranslations === true &&
+				params.fieldConfig.config.translations === true &&
 				get.collectionTranslations === true
 					? params.contentLocale
 					: null;
@@ -350,7 +350,7 @@ const [get, set] = createStore<{
 
 		if (params.fieldConfig.type !== "repeater") {
 			if (
-				params.fieldConfig.config.useTranslations === true &&
+				params.fieldConfig.config.translations === true &&
 				get.collectionTranslations === true
 			) {
 				newField.translations = {};
@@ -430,7 +430,7 @@ const [get, set] = createStore<{
 
 					if (field.type !== "repeater") {
 						if (
-							field.config.useTranslations === true &&
+							field.config.translations === true &&
 							get.collectionTranslations === true
 						) {
 							newField.translations = {};

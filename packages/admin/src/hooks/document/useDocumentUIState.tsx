@@ -119,8 +119,8 @@ export function useDocumentUIState(props: {
 	/**
 	 * Determines if the auto save is enabled on the collection
 	 */
-	const useAutoSave = createMemo(() => {
-		return props.collection()?.config.useAutoSave;
+	const autoSave = createMemo(() => {
+		return props.collection()?.config.autoSave;
 	});
 
 	/**
@@ -143,7 +143,7 @@ export function useDocumentUIState(props: {
 
 		return (
 			userStore.get.hasPermission([permission]).all &&
-			useAutoSave() &&
+			autoSave() &&
 			autoSaveUserEnabled()
 		);
 	});
@@ -173,7 +173,7 @@ export function useDocumentUIState(props: {
 		if (props.mode === "history") return true;
 
 		// lock builder if collection is locked
-		if (props.collection()?.config.isLocked === true) {
+		if (props.collection()?.config.locked === true) {
 			return true;
 		}
 
@@ -206,7 +206,7 @@ export function useDocumentUIState(props: {
 	 */
 	const showRevisionNavigation = createMemo(() => {
 		// if (props.mode === "create") return false;
-		return props.collection()?.config.useRevisions ?? false;
+		return props.collection()?.config.revisions ?? false;
 	});
 
 	/**
@@ -269,7 +269,7 @@ export function useDocumentUIState(props: {
 
 		return (
 			userStore.get.hasPermission([permission]).all &&
-			props.collection()?.config.useAutoSave
+			props.collection()?.config.autoSave
 		);
 	});
 
@@ -311,7 +311,7 @@ export function useDocumentUIState(props: {
 		if (props.mode === "history") return false;
 		if (props.version() !== "revision") return false;
 		if (props.document()?.isDeleted) return false;
-		if (props.collection()?.config.useRevisions === false) return false;
+		if (props.collection()?.config.revisions === false) return false;
 		if (props.versionId() === undefined) return false;
 		return true;
 	});
@@ -358,7 +358,7 @@ export function useDocumentUIState(props: {
 		showDeleteButton,
 		hasDeletePermission,
 		collectionNeedsMigrating,
-		useAutoSave,
+		autoSave,
 		hasAutoSavePermission,
 		isCreatingPublishOperation,
 		isAutoSaveActive,

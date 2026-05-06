@@ -8,9 +8,9 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 		summary?: string | Record<string, string>;
 	};
 	config: {
-		useTranslations?: boolean;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		translations?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 		multiple?: boolean;
 		default?: number[];
 	};

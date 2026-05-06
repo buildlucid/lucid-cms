@@ -34,15 +34,14 @@ export const PublishRequests: Component<{
 			perPage: 5,
 		},
 		enabled: () =>
-			(props.collection()?.config.publishing.review.targets?.length ?? 0) > 0 &&
+			(props.collection()?.config.review?.requiredFor?.length ?? 0) > 0 &&
 			props.documentId() !== undefined,
 	});
 
 	// ----------------------------------
 	// Memos
 	const reviewEnabled = createMemo(
-		() =>
-			(props.collection()?.config.publishing.review.targets?.length ?? 0) > 0,
+		() => (props.collection()?.config.review?.requiredFor?.length ?? 0) > 0,
 	);
 	const rows = createMemo(() => requests.data?.data ?? []);
 

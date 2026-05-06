@@ -36,7 +36,7 @@ export default defineConfig((env) => ({
         LucidPages({
             collections: [{
                 collectionKey: "page",
-                useTranslations: true,
+                translations: true,
                 displayFullSlug: true,
                 prefix: {
                     en: "en",
@@ -55,11 +55,11 @@ This plugin offers several configuration options to control its behavior. Aside 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `collectionKey` | `string` | - | The key of the collection that you wish to enable the plugin on |
-| `useTranslations` | `boolean` | `false` | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields |
+| `translations` | `boolean` | `false` | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields |
 | `displayFullSlug` | `boolean` | `false` | If set to `true`, the plugin will make the `fullSlug` field visible in the documents page builder |
 | `prefix` | `string \| Record<string, string>` | - | Optional prefix prepended to the start of the computed `fullSlug` for the collection |
 
-### useTranslations
+### translations
 
 If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields. This means that in the documents page builder, the `slug` and `fullSlug` fields will require translations for each locale that you have registered in your Lucid CMS config file.
 

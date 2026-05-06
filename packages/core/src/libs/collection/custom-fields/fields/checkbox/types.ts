@@ -10,9 +10,9 @@ export interface CheckboxFieldConfig extends SharedFieldConfig {
 		false?: LocaleValue;
 	};
 	config: {
-		useTranslations?: boolean;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		translations?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 		default?: boolean;
 	};
 	validation?: {

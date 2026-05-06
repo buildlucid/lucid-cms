@@ -8,8 +8,8 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		summary: "The main menu for your website.",
 	},
 	config: {
-		useRevisions: true,
-		useTranslations: true,
+		revisions: true,
+		translations: true,
 	},
 })
 	.addRepeater("items", {

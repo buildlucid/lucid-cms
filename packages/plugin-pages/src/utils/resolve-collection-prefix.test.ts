@@ -6,7 +6,7 @@ test("should resolve a shared string prefix", async () => {
 	const prefix = resolveCollectionPrefix({
 		collection: {
 			collectionKey: "pages",
-			useTranslations: true,
+			translations: true,
 			displayFullSlug: false,
 			prefix: "Blog",
 		} satisfies CollectionConfig,
@@ -20,7 +20,7 @@ test("should resolve a locale specific prefix", async () => {
 	const prefix = resolveCollectionPrefix({
 		collection: {
 			collectionKey: "pages",
-			useTranslations: true,
+			translations: true,
 			displayFullSlug: false,
 			prefix: {
 				en: "News",

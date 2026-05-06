@@ -58,7 +58,7 @@ const versionPromoteHandler =
 			fields: {
 				slug: fieldResToSchema(
 					constants.fields.slug.key,
-					targetCollectionRes.data.useTranslations,
+					targetCollectionRes.data.translations,
 					context.config.localization.defaultLocale,
 					docVersionFieldRes.data || [],
 				),
@@ -71,7 +71,7 @@ const versionPromoteHandler =
 				),
 				fullSlug: fieldResToSchema(
 					constants.fields.fullSlug.key,
-					targetCollectionRes.data.useTranslations,
+					targetCollectionRes.data.translations,
 					context.config.localization.defaultLocale,
 					docVersionFieldRes.data || [],
 				),

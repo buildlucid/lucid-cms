@@ -30,13 +30,13 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				placeholder: this.props?.details?.placeholder,
 			},
 			config: {
-				useTranslations: this.props?.config?.useTranslations ?? true,
+				translations: this.props?.config?.translations ?? true,
 				default: this.props?.config?.default ?? {
 					type: "doc",
 					content: [{ type: "paragraph" }],
 				},
-				isHidden: this.props?.config?.isHidden,
-				isDisabled: this.props?.config?.isDisabled,
+				hidden: this.props?.config?.hidden,
+				disabled: this.props?.config?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"rich-text">;

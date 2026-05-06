@@ -33,8 +33,8 @@ export const ColorField: Component<ColorFieldProps> = (props) => {
 			contentLocale: props.state.contentLocale,
 		});
 	});
-	const isDisabled = createMemo(
-		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
+	const disabled = createMemo(
+		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -71,7 +71,7 @@ export const ColorField: Component<ColorFieldProps> = (props) => {
 				altLocaleError={props.state.altLocaleError}
 				localised={props.state.localised}
 				presets={props.state.fieldConfig.presets}
-				disabled={isDisabled()}
+				disabled={disabled()}
 				errors={props.state.fieldError}
 				required={props.state.fieldConfig.validation?.required || false}
 				fieldColumnIsMissing={props.state.fieldColumnIsMissing}

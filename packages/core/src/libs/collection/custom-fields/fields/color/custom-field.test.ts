@@ -14,7 +14,7 @@ const ColorCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addColor("standard_color")
@@ -40,7 +40,7 @@ test("successfully validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: ColorCollection.getData.config.useTranslations,
+			translations: ColorCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -61,7 +61,7 @@ test("successfully validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: ColorCollection.getData.config.useTranslations,
+			translations: ColorCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -84,7 +84,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: ColorCollection.getData.config.useTranslations,
+			translations: ColorCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -111,7 +111,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: ColorCollection.getData.config.useTranslations,
+			translations: ColorCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -138,7 +138,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: ColorCollection.getData.config.useTranslations,
+			translations: ColorCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -165,7 +165,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: ColorCollection.getData.config.useTranslations,
+			translations: ColorCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -191,10 +191,10 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			default: "2024-06-15T14:14:21.704Z",
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

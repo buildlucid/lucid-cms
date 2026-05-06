@@ -90,7 +90,7 @@ export const fieldConfigSchema = z.object({
 	}),
 	config: z
 		.object({
-			useTranslations: z
+			translations: z
 				.boolean()
 				.meta({
 					description: "Whether the field supports translations",
@@ -98,7 +98,7 @@ export const fieldConfigSchema = z.object({
 				})
 				.nullable()
 				.optional(),
-			useTime: z
+			time: z
 				.boolean()
 				.meta({
 					description: "Whether datetime fields include time selection",
@@ -115,7 +115,7 @@ export const fieldConfigSchema = z.object({
 				})
 				.nullable()
 				.optional(),
-			isHidden: z
+			hidden: z
 				.boolean()
 				.meta({
 					description: "Whether the field is hidden in the UI",
@@ -123,7 +123,7 @@ export const fieldConfigSchema = z.object({
 				})
 				.nullable()
 				.optional(),
-			isDisabled: z
+			disabled: z
 				.boolean()
 				.meta({
 					description: "Whether the field is disabled for editing",

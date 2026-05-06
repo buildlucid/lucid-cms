@@ -40,7 +40,7 @@ const createSingle: ServiceFn<
 
 	const versionType = "latest";
 
-	if (data.collection.getData.config.useRevisions) {
+	if (data.collection.getData.config.revisions) {
 		//* make the current latest version a revision
 		const updateRes = await DocumentVersions.updateSingle(
 			{

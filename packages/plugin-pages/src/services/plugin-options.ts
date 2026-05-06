@@ -4,7 +4,7 @@ const pluginOptions = (given: PluginOptions): PluginOptionsInternal => {
 	return {
 		collections: given.collections.map((c) => ({
 			collectionKey: c.collectionKey,
-			useTranslations: c?.useTranslations ?? false,
+			translations: c?.translations ?? false,
 			displayFullSlug: c?.displayFullSlug ?? false,
 			prefix: c?.prefix,
 			// fallbackSlugSource: c?.fallbackSlugSource ?? undefined,

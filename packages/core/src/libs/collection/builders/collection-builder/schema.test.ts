@@ -11,7 +11,7 @@ test("collection builder config passes schema validation", async () => {
 			summary: "Pages are used to create static content on your website.",
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 		},
 		hooks: [
 			{
@@ -72,22 +72,20 @@ test("collection workflow config validates stages, targets and palette", async (
 			singularName: "Page",
 		},
 		config: {
-			publishing: {
-				workflow: {
-					initial: "todo",
-					stages: [
-						{
-							key: "todo",
-							name: "To do",
-						},
-						{
-							key: "done",
-							name: { en: "Done" },
-							color: "green",
-							canPublish: ["production"],
-						},
-					],
-				},
+			workflow: {
+				initial: "todo",
+				stages: [
+					{
+						key: "todo",
+						name: "To do",
+					},
+					{
+						key: "done",
+						name: { en: "Done" },
+						color: "green",
+						publishTargets: ["production"],
+					},
+				],
 			},
 			environments: [
 				{
@@ -109,11 +107,9 @@ test("collection workflow config validates stages, targets and palette", async (
 			...validConfig,
 			config: {
 				...validConfig.config,
-				publishing: {
-					workflow: {
-						initial: "missing",
-						stages: validConfig.config.publishing.workflow.stages,
-					},
+				workflow: {
+					initial: "missing",
+					stages: validConfig.config.workflow.stages,
 				},
 			},
 		}),
@@ -126,13 +122,11 @@ test("collection workflow config validates stages, targets and palette", async (
 			...validConfig,
 			config: {
 				...validConfig.config,
-				publishing: {
-					workflow: {
-						stages: [
-							{ key: "todo", name: "To do" },
-							{ key: "todo", name: "Duplicate" },
-						],
-					},
+				workflow: {
+					stages: [
+						{ key: "todo", name: "To do" },
+						{ key: "todo", name: "Duplicate" },
+					],
 				},
 			},
 		}),
@@ -145,16 +139,14 @@ test("collection workflow config validates stages, targets and palette", async (
 			...validConfig,
 			config: {
 				...validConfig.config,
-				publishing: {
-					workflow: {
-						stages: [
-							{
-								key: "todo",
-								name: "To do",
-								color: "orange",
-							},
-						],
-					},
+				workflow: {
+					stages: [
+						{
+							key: "todo",
+							name: "To do",
+							color: "orange",
+						},
+					],
 				},
 			},
 		}),
@@ -167,16 +159,14 @@ test("collection workflow config validates stages, targets and palette", async (
 			...validConfig,
 			config: {
 				...validConfig.config,
-				publishing: {
-					workflow: {
-						stages: [
-							{
-								key: "done",
-								name: "Done",
-								canPublish: ["missing"],
-							},
-						],
-					},
+				workflow: {
+					stages: [
+						{
+							key: "done",
+							name: "Done",
+							publishTargets: ["missing"],
+						},
+					],
 				},
 			},
 		}),

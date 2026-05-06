@@ -35,11 +35,11 @@ const CustomFieldSchema = z.object({
 					z.null(),
 				])
 				.optional(),
-			useTranslations: z.boolean().optional(),
-			useTime: z.boolean().optional(),
+			translations: z.boolean().optional(),
+			time: z.boolean().optional(),
 			multiple: z.boolean().optional(),
-			isHidden: z.boolean().optional(),
-			isDisabled: z.boolean().optional(),
+			hidden: z.boolean().optional(),
+			disabled: z.boolean().optional(),
 		})
 		.optional(),
 	options: z

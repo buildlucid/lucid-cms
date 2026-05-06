@@ -10,10 +10,10 @@ export interface TextFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 	config: {
-		useTranslations?: boolean;
+		translations?: boolean;
 		default?: string;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 	};
 	validation?: {
 		required?: boolean;

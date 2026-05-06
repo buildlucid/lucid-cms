@@ -44,7 +44,7 @@ const createSingle: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	const collection = collectionRes.data;
-	const publishReview = collection.getData.config.publishing.review;
+	const publishReview = collection.getData.config.review;
 	const targetIsEnvironment = collection.getData.config.environments.some(
 		(environment) => environment.key === data.target,
 	);
@@ -93,7 +93,7 @@ const createSingle: ServiceFn<
 
 	if (
 		requiresApproval &&
-		publishReview.comments.request === "required" &&
+		publishReview?.comments.request === "required" &&
 		!comment
 	) {
 		return {
@@ -106,7 +106,11 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	if (autoAccept && publishReview.allowSelfApproval !== true) {
+	if (
+		requiresApproval &&
+		autoAccept &&
+		publishReview?.allowSelfApproval !== true
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -144,7 +148,7 @@ const createSingle: ServiceFn<
 	if (
 		requiresApproval &&
 		autoAccept &&
-		publishReview.comments.decision === "required" &&
+		publishReview?.comments.decision === "required" &&
 		!comment
 	) {
 		return {

@@ -34,8 +34,8 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 			contentLocale: props.state.contentLocale,
 		});
 	});
-	const isDisabled = createMemo(
-		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
+	const disabled = createMemo(
+		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -75,7 +75,7 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			disabled={isDisabled()}
+			disabled={disabled()}
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
 			hideOptionalText

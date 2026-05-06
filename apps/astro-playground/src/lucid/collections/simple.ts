@@ -9,8 +9,8 @@ const SimpleCollection = new CollectionBuilder("simple", {
 		singularName: "Simple",
 	},
 	config: {
-		useTranslations: true,
-		useRevisions: true,
+		translations: true,
+		revisions: true,
 	},
 	bricks: {
 		builder: [SimpleBrick, SimpleFixedBrick],

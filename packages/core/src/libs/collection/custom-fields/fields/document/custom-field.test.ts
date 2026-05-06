@@ -14,7 +14,7 @@ const DocumentCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addDocument("standard_doc", {
@@ -64,7 +64,7 @@ test("successfully validate field - document", async () => {
 			],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			translations: DocumentCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -90,7 +90,7 @@ test("successfully validate field - document", async () => {
 			],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			translations: DocumentCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -113,7 +113,7 @@ test("fail to validate field - document", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			translations: DocumentCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -141,7 +141,7 @@ test("fail to validate field - document", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			translations: DocumentCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -173,7 +173,7 @@ test("fail to validate field - document", async () => {
 			],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			translations: DocumentCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -202,7 +202,7 @@ test("document field validates multiple item counts and indexed errors", async (
 			document: [{ id: 1, collection_key: "page" }],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			translations: DocumentCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -230,7 +230,7 @@ test("document field validates multiple item counts and indexed errors", async (
 			],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			translations: DocumentCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -252,7 +252,7 @@ test("document field validates multiple item counts and indexed errors", async (
 			document: [{ id: 1, collection_key: "page" }],
 		},
 		meta: {
-			useTranslations: DocumentCollection.getData.config.useTranslations,
+			translations: DocumentCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -305,9 +305,9 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
-			isHidden: false,
-			isDisabled: false,
+			translations: true,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

@@ -179,15 +179,27 @@ const checkAccess = (config: Config) => {
 		}
 
 		for (const environment of collection.getData.config.environments) {
-			if (environment.permissions.publish === undefined) continue;
-			ensureValidReference(
-				validPermissions,
-				environment.permissions.publish,
-				T("config_access_collection_environment_publish_context", {
-					collection: collection.key,
-					environment: environment.key,
-				}),
-			);
+			if (environment.permissions.publish !== undefined) {
+				ensureValidReference(
+					validPermissions,
+					environment.permissions.publish,
+					T("config_access_collection_environment_publish_context", {
+						collection: collection.key,
+						environment: environment.key,
+					}),
+				);
+			}
+
+			if (environment.permissions.review !== undefined) {
+				ensureValidReference(
+					validPermissions,
+					environment.permissions.review,
+					T("config_access_collection_environment_review_context", {
+						collection: collection.key,
+						environment: environment.key,
+					}),
+				);
+			}
 		}
 	}
 };

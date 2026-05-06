@@ -14,7 +14,7 @@ const CheckboxCollection = new CollectionBuilder("collection", {
 		singularName: "Page",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addCheckbox("standard_checkbox")
@@ -40,7 +40,7 @@ test("successfully validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: CheckboxCollection.getData.config.useTranslations,
+			translations: CheckboxCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -61,7 +61,7 @@ test("successfully validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: CheckboxCollection.getData.config.useTranslations,
+			translations: CheckboxCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -84,7 +84,7 @@ test("fail to validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: CheckboxCollection.getData.config.useTranslations,
+			translations: CheckboxCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -111,7 +111,7 @@ test("fail to validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: CheckboxCollection.getData.config.useTranslations,
+			translations: CheckboxCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -137,10 +137,10 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			default: true,
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

@@ -10,9 +10,9 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 	config: {
-		useTranslations?: boolean;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		translations?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 		default?: Record<string, unknown>;
 	};
 	validation?: {

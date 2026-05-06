@@ -333,9 +333,9 @@ type RelationFieldDetails = {
 };
 
 type FieldConfigOptions<TDefault = unknown> = {
-	useTranslations?: boolean;
-	isHidden?: boolean;
-	isDisabled?: boolean;
+	translations?: boolean;
+	hidden?: boolean;
+	disabled?: boolean;
 	default?: TDefault;
 };
 
@@ -373,7 +373,7 @@ export interface ColorFieldConfig extends SharedCollectionFieldConfig<"color"> {
 export interface DatetimeFieldConfig
 	extends SharedCollectionFieldConfig<"datetime"> {
 	config: FieldConfigOptions<string> & {
-		useTime?: boolean;
+		time?: boolean;
 	};
 	validation?: ZodValidation;
 }
@@ -432,7 +432,7 @@ export interface RepeaterFieldConfig
 	extends SharedCollectionFieldConfig<"repeater"> {
 	fields: CollectionNonTabFieldConfig[];
 	config: {
-		isDisabled?: boolean;
+		disabled?: boolean;
 	};
 	validation?: {
 		maxGroups?: number;
@@ -512,33 +512,31 @@ export interface Collection {
 		summary: LocaleValue | null;
 	};
 	config: {
-		useTranslations: boolean;
-		useRevisions: boolean;
-		isLocked: boolean;
+		translations: boolean;
+		revisions: boolean;
+		locked: boolean;
 		displayInListing: string[];
-		useAutoSave: boolean;
-		publishing: {
-			review: {
-				targets?: string[];
-				allowSelfApproval: boolean;
-				comments: {
-					request: "required" | "optional";
-					decision: "required" | "optional";
+		autoSave: boolean;
+		review?: {
+			requiredFor: string[];
+			allowSelfApproval: boolean;
+			comments: {
+				request: "required" | "optional";
+				decision: "required" | "optional";
+			};
+		};
+		workflow?: {
+			initial: string;
+			stages: Array<{
+				key: string;
+				name: LocaleValue;
+				color: WorkflowStageColor;
+				publishTargets: string[];
+				permissions: {
+					moveTo?: string;
+					moveFrom?: string;
 				};
-			};
-			workflow?: {
-				initial: string;
-				stages: Array<{
-					key: string;
-					name: LocaleValue;
-					color: WorkflowStageColor;
-					canPublish: string[];
-					permissions: {
-						enter?: string;
-						leave?: string;
-					};
-				}>;
-			};
+			}>;
 		};
 		environments: {
 			key: string;

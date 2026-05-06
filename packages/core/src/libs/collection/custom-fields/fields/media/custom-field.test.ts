@@ -14,7 +14,7 @@ const MediaCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addMedia("standard_media")
@@ -95,7 +95,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -124,7 +124,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -153,7 +153,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -182,7 +182,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -211,7 +211,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -240,7 +240,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -269,7 +269,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -298,7 +298,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -321,7 +321,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -349,7 +349,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -384,7 +384,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -422,7 +422,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -460,7 +460,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -498,7 +498,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -536,7 +536,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -574,7 +574,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -613,7 +613,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -660,7 +660,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -686,7 +686,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			document: [],
 		},
 		meta: {
-			useTranslations: MediaCollection.getData.config.useTranslations,
+			translations: MediaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -738,9 +738,9 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
-			isHidden: false,
-			isDisabled: false,
+			translations: true,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

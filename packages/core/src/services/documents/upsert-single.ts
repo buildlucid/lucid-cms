@@ -44,7 +44,7 @@ const upsertSingle: ServiceFn<
 	if (tableNamesRes.error) return tableNamesRes;
 
 	//* check collection is locked
-	if (collectionRes.data.getData.config.isLocked) {
+	if (collectionRes.data.getData.config.locked) {
 		return {
 			error: {
 				type: "basic",

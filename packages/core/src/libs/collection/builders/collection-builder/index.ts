@@ -139,54 +139,53 @@ class CollectionBuilder extends FieldBuilder {
 				summary: this.config.details.summary ?? null,
 			},
 			config: {
-				isLocked:
-					this.config.config?.isLocked ?? constants.collectionBuilder.isLocked,
-				useRevisions:
-					this.config.config?.useRevisions ??
-					constants.collectionBuilder.useRevisions,
-				useTranslations:
-					this.config.config?.useTranslations ??
-					constants.collectionBuilder.useTranslations,
-				useAutoSave:
-					this.config.config?.useAutoSave ??
-					constants.collectionBuilder.useAutoSave,
-				publishing: {
-					review: {
-						targets: this.config.config?.publishing?.review?.targets,
-						allowSelfApproval:
-							this.config.config?.publishing?.review?.allowSelfApproval ??
-							constants.collectionBuilder.publishing.allowSelfApproval,
-						comments: {
-							request:
-								this.config.config?.publishing?.review?.comments?.request ??
-								constants.collectionBuilder.publishing.comments.request,
-							decision:
-								this.config.config?.publishing?.review?.comments?.decision ??
-								constants.collectionBuilder.publishing.comments.decision,
-						},
-					},
-					...(this.config.config?.publishing?.workflow
-						? {
-								workflow: {
-									initial:
-										this.config.config.publishing.workflow.initial ??
-										this.config.config.publishing.workflow.stages[0]?.key ??
-										"",
-									stages: this.config.config.publishing.workflow.stages.map(
-										(stage) => ({
-											key: stage.key,
-											name: stage.name,
-											color:
-												stage.color ??
-												constants.collectionBuilder.publishing.workflow.color,
-											canPublish: stage.canPublish ?? [],
-											permissions: stage.permissions ?? {},
-										}),
-									),
+				locked:
+					this.config.config?.locked ?? constants.collectionBuilder.locked,
+				revisions:
+					this.config.config?.revisions ??
+					constants.collectionBuilder.revisions,
+				translations:
+					this.config.config?.translations ??
+					constants.collectionBuilder.translations,
+				autoSave:
+					this.config.config?.autoSave ?? constants.collectionBuilder.autoSave,
+				...(this.config.config?.review
+					? {
+							review: {
+								requiredFor: this.config.config.review?.requiredFor ?? [],
+								allowSelfApproval:
+									this.config.config.review?.allowSelfApproval ??
+									constants.collectionBuilder.publishing.allowSelfApproval,
+								comments: {
+									request:
+										this.config.config.review?.comments?.request ??
+										constants.collectionBuilder.publishing.comments.request,
+									decision:
+										this.config.config.review?.comments?.decision ??
+										constants.collectionBuilder.publishing.comments.decision,
 								},
-							}
-						: {}),
-				},
+							},
+						}
+					: {}),
+				...(this.config.config?.workflow
+					? {
+							workflow: {
+								initial:
+									this.config.config.workflow.initial ??
+									this.config.config.workflow.stages[0]?.key ??
+									"",
+								stages: this.config.config.workflow.stages.map((stage) => ({
+									key: stage.key,
+									name: stage.name,
+									color:
+										stage.color ??
+										constants.collectionBuilder.publishing.workflow.color,
+									publishTargets: stage.publishTargets ?? [],
+									permissions: stage.permissions ?? {},
+								})),
+							},
+						}
+					: {}),
 				displayInListing: this.displayInListing,
 				environments:
 					this.config.config?.environments?.map((environment) => ({

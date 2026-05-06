@@ -109,7 +109,7 @@ const getFieldValue = <T>(props: {
 		props.collectionTranslations ?? brickStore.get.collectionTranslations;
 
 	if (
-		props.fieldConfig.config.useTranslations === true &&
+		props.fieldConfig.config.translations === true &&
 		collectionTranslations === true
 	) {
 		return props.fieldData.translations?.[props.contentLocale] as T;

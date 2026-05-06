@@ -35,9 +35,7 @@ export const Workflow: Component<{
 
 	// ----------------------------------
 	// Memos
-	const workflowConfig = createMemo(
-		() => props.collection()?.config.publishing.workflow,
-	);
+	const workflowConfig = createMemo(() => props.collection()?.config.workflow);
 	const workflow = createMemo(() => props.document()?.workflow);
 	const workflowKey = createMemo(() =>
 		[

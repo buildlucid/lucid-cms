@@ -15,9 +15,9 @@ const registerFields = (
 				label: T("full_slug"),
 			},
 			config: {
-				useTranslations: config.useTranslations,
-				isHidden: !config.displayFullSlug,
-				isDisabled: true,
+				translations: config.translations,
+				hidden: !config.displayFullSlug,
+				disabled: true,
 			},
 			displayInListing: config.displayFullSlug,
 		})
@@ -26,9 +26,9 @@ const registerFields = (
 				label: T("slug"),
 			},
 			config: {
-				useTranslations: config.useTranslations,
-				isHidden: false,
-				isDisabled: false,
+				translations: config.translations,
+				hidden: false,
+				disabled: false,
 			},
 			validation: {
 				required: true,
@@ -50,8 +50,8 @@ const registerFields = (
 				label: T("parent_page"),
 			},
 			config: {
-				isHidden: false,
-				isDisabled: false,
+				hidden: false,
+				disabled: false,
 				multiple: false,
 			},
 		});

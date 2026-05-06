@@ -56,56 +56,49 @@ const collectionResponseSchema = z.object({
 		}),
 	}),
 	config: z.object({
-		useTranslations: z.boolean().meta({
+		translations: z.boolean().meta({
 			description: "Whether the collection supports translations",
 			example: true,
 		}),
-		useRevisions: z.boolean().meta({
+		revisions: z.boolean().meta({
 			description: "Whether the collection supports document revisions",
 			example: true,
 		}),
-		useAutoSave: z.boolean().meta({
+		autoSave: z.boolean().meta({
 			description: "Whether the collection supports auto-save",
 			example: true,
 		}),
-		isLocked: z.boolean().meta({
+		locked: z.boolean().meta({
 			description: "Whether the collection structure is locked from editing",
 			example: false,
 		}),
-		publishing: z.object({
-			review: z.object({
-				targets: z.array(z.string()).optional(),
+		review: z
+			.object({
+				requiredFor: z.array(z.string()),
 				allowSelfApproval: z.boolean(),
 				comments: z.object({
 					request: z.enum(["required", "optional"]),
 					decision: z.enum(["required", "optional"]),
 				}),
-			}),
-			workflow: z
-				.object({
-					initial: z.string(),
-					stages: z.array(
-						z.object({
-							key: z.string(),
-							name: z.any(),
-							color: z.enum([
-								"grey",
-								"red",
-								"yellow",
-								"green",
-								"blue",
-								"purple",
-							]),
-							canPublish: z.array(z.string()),
-							permissions: z.object({
-								enter: z.string().optional(),
-								leave: z.string().optional(),
-							}),
+			})
+			.optional(),
+		workflow: z
+			.object({
+				initial: z.string(),
+				stages: z.array(
+					z.object({
+						key: z.string(),
+						name: z.any(),
+						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
+						publishTargets: z.array(z.string()),
+						permissions: z.object({
+							moveTo: z.string().optional(),
+							moveFrom: z.string().optional(),
 						}),
-					),
-				})
-				.optional(),
-		}),
+					}),
+				),
+			})
+			.optional(),
 		displayInListing: z.array(z.string()).meta({
 			description: "Field keys to display in the document listing columns",
 			example: ["pageTitle", "author", "fullSlug", "slug"],

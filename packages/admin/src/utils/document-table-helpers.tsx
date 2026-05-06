@@ -82,15 +82,15 @@ export interface DocumentListingPreviewField {
 
 export const formatDateTimeListValue = (
 	value: string | number,
-	useTime: boolean,
+	time: boolean,
 ) => {
 	const raw = String(value).trim();
 	if (!raw) return null;
 
 	return (
 		dateHelpers.formatDate(raw, {
-			includeTime: useTime,
-			localDateOnly: useTime === false,
+			includeTime: time,
+			localDateOnly: time === false,
 		}) || raw
 	);
 };
@@ -115,7 +115,7 @@ export const getDocumentListingPreviewFields = (props: {
 				fieldConfig: field,
 				fieldData: documentField,
 				contentLocale: props.contentLocale,
-				collectionTranslations: collection.config.useTranslations,
+				collectionTranslations: collection.config.translations,
 			});
 
 			if (!value) return null;
@@ -162,7 +162,7 @@ const getDocumentFieldValue = (props: {
 
 	if (
 		props.collectionTranslations &&
-		props.fieldConfig.config.useTranslations === true
+		props.fieldConfig.config.translations === true
 	) {
 		return (
 			props.fieldData.translations?.[props.contentLocale] ??
@@ -235,7 +235,7 @@ const formatDocumentPreviewValue = (props: {
 			return typeof rawValue === "string" || typeof rawValue === "number"
 				? formatDateTimeListValue(
 						rawValue,
-						props.fieldConfig.config.useTime !== false,
+						props.fieldConfig.config.time !== false,
 					)
 				: null;
 

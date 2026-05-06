@@ -63,8 +63,8 @@ export function useHistoryUIState(props: {
 	/**
 	 * Determines if the auto save is enabled on the collection
 	 */
-	const useAutoSave = createMemo(() => {
-		return props.collection()?.config.useAutoSave;
+	const autoSave = createMemo(() => {
+		return props.collection()?.config.autoSave;
 	});
 
 	/**
@@ -179,7 +179,7 @@ export function useHistoryUIState(props: {
 		showDeleteButton,
 		hasDeletePermission,
 		collectionNeedsMigrating,
-		useAutoSave,
+		autoSave,
 		hasAutoSavePermission,
 		isCreatingPublishOperation,
 		isAutoSaveActive,

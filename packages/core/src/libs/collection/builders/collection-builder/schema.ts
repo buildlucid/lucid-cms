@@ -29,103 +29,96 @@ const CollectionConfigSchema = z
 			.optional(),
 		config: z
 			.object({
-				isLocked: z
+				locked: z
 					.boolean()
-					.default(constants.collectionBuilder.isLocked)
+					.default(constants.collectionBuilder.locked)
 					.optional(),
-				useTranslations: z
+				translations: z
 					.boolean()
-					.default(constants.collectionBuilder.useTranslations)
+					.default(constants.collectionBuilder.translations)
 					.optional(),
-				useRevisions: z
+				revisions: z
 					.boolean()
-					.default(constants.collectionBuilder.useRevisions)
+					.default(constants.collectionBuilder.revisions)
 					.optional(),
-				useAutoSave: z
+				autoSave: z
 					.boolean()
-					.default(constants.collectionBuilder.useAutoSave)
+					.default(constants.collectionBuilder.autoSave)
 					.optional(),
-				publishing: z
+				review: z
 					.object({
-						review: z
-							.object({
-								targets: z
-									.array(
-										z
-											.string()
-											.min(1)
-											.max(50)
-											.regex(/^[a-z0-9-_]+$/),
-									)
-									.optional(),
-								allowSelfApproval: z
-									.boolean()
-									.default(
-										constants.collectionBuilder.publishing.allowSelfApproval,
-									)
-									.optional(),
-								comments: z
-									.object({
-										request: z
-											.enum(["required", "optional"])
-											.default(
-												constants.collectionBuilder.publishing.comments.request,
-											)
-											.optional(),
-										decision: z
-											.enum(["required", "optional"])
-											.default(
-												constants.collectionBuilder.publishing.comments
-													.decision,
-											)
-											.optional(),
-									})
-									.optional(),
-							})
-							.optional(),
-						workflow: z
-							.object({
-								initial: z
+						requiredFor: z
+							.array(
+								z
 									.string()
 									.min(1)
 									.max(50)
-									.regex(/^[a-z0-9-_]+$/)
+									.regex(/^[a-z0-9-_]+$/),
+							)
+							.optional(),
+						allowSelfApproval: z
+							.boolean()
+							.default(constants.collectionBuilder.publishing.allowSelfApproval)
+							.optional(),
+						comments: z
+							.object({
+								request: z
+									.enum(["required", "optional"])
+									.default(
+										constants.collectionBuilder.publishing.comments.request,
+									)
 									.optional(),
-								stages: z
-									.array(
-										z.object({
-											key: z
+								decision: z
+									.enum(["required", "optional"])
+									.default(
+										constants.collectionBuilder.publishing.comments.decision,
+									)
+									.optional(),
+							})
+							.optional(),
+					})
+					.optional(),
+				workflow: z
+					.object({
+						initial: z
+							.string()
+							.min(1)
+							.max(50)
+							.regex(/^[a-z0-9-_]+$/)
+							.optional(),
+						stages: z
+							.array(
+								z.object({
+									key: z
+										.string()
+										.min(1)
+										.max(50)
+										.regex(/^[a-z0-9-_]+$/),
+									name: stringTranslations,
+									color: z
+										.enum(
+											constants.collectionBuilder.publishing.workflow
+												.stageColors,
+										)
+										.optional(),
+									publishTargets: z
+										.array(
+											z
 												.string()
 												.min(1)
 												.max(50)
 												.regex(/^[a-z0-9-_]+$/),
-											name: stringTranslations,
-											color: z
-												.enum(
-													constants.collectionBuilder.publishing.workflow
-														.stageColors,
-												)
-												.optional(),
-											canPublish: z
-												.array(
-													z
-														.string()
-														.min(1)
-														.max(50)
-														.regex(/^[a-z0-9-_]+$/),
-												)
-												.optional(),
-											permissions: z
-												.object({
-													enter: z.string().optional(),
-													leave: z.string().optional(),
-												})
-												.optional(),
-										}),
-									)
-									.min(1),
-							})
-							.optional(),
+										)
+										.optional(),
+									permissions: z
+										.object({
+											moveTo: z.string().optional(),
+											moveFrom: z.string().optional(),
+										})
+										.optional(),
+								}),
+							)
+							.min(1),
 					})
 					.optional(),
 				environments: z
@@ -180,7 +173,21 @@ const CollectionConfigSchema = z
 			.optional(),
 	})
 	.superRefine((data, ctx) => {
-		const workflow = data.config?.publishing?.workflow;
+		const environmentKeys = new Set(
+			data.config?.environments?.map((environment) => environment.key) ?? [],
+		);
+
+		const review = data.config?.review;
+		for (const [targetIndex, target] of (review?.requiredFor ?? []).entries()) {
+			if (environmentKeys.has(target)) continue;
+			ctx.addIssue({
+				code: "custom",
+				path: ["config", "review", "requiredFor", targetIndex],
+				message: `Review requiredFor target "${target}" must reference a configured environment`,
+			});
+		}
+
+		const workflow = data.config?.workflow;
 		if (!workflow) return;
 
 		const stageKeys = workflow.stages.map((stage) => stage.key);
@@ -190,7 +197,7 @@ const CollectionConfigSchema = z
 		if (duplicateStageKeys.length > 0) {
 			ctx.addIssue({
 				code: "custom",
-				path: ["config", "publishing", "workflow", "stages"],
+				path: ["config", "workflow", "stages"],
 				message: `Workflow stage keys must be unique: ${Array.from(new Set(duplicateStageKeys)).join(", ")}`,
 			});
 		}
@@ -198,30 +205,28 @@ const CollectionConfigSchema = z
 		if (workflow.initial && !stageKeys.includes(workflow.initial)) {
 			ctx.addIssue({
 				code: "custom",
-				path: ["config", "publishing", "workflow", "initial"],
+				path: ["config", "workflow", "initial"],
 				message:
 					"Workflow initial stage must reference one of the configured stages",
 			});
 		}
 
-		const environmentKeys = new Set(
-			data.config?.environments?.map((environment) => environment.key) ?? [],
-		);
 		for (const [stageIndex, stage] of workflow.stages.entries()) {
-			for (const [targetIndex, target] of (stage.canPublish ?? []).entries()) {
+			for (const [targetIndex, target] of (
+				stage.publishTargets ?? []
+			).entries()) {
 				if (environmentKeys.has(target)) continue;
 				ctx.addIssue({
 					code: "custom",
 					path: [
 						"config",
-						"publishing",
 						"workflow",
 						"stages",
 						stageIndex,
-						"canPublish",
+						"publishTargets",
 						targetIndex,
 					],
-					message: `Workflow canPublish target "${target}" must reference a configured environment`,
+					message: `Workflow publishTargets target "${target}" must reference a configured environment`,
 				});
 			}
 		}

@@ -55,7 +55,7 @@ const processFields = (props: {
 
 			// if collection uses translations and the field supports translations
 			if (
-				props.collection.getData.config.useTranslations &&
+				props.collection.getData.config.translations &&
 				cfInstance?.translationsEnabled
 			) {
 				// if processField.value is given only and no translations key - add the value to the translations object with the locale object key being the default locale

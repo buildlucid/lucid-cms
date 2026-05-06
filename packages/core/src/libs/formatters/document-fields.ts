@@ -233,7 +233,7 @@ const buildField = (
 		!isTreeTableFieldType(meta.fieldConfig.type) &&
 		meta.fieldConfig.type !== "tab" &&
 		cfInstance.translationsEnabled === true &&
-		meta.collection.getData.config.useTranslations === true
+		meta.collection.getData.config.translations === true
 	) {
 		const fieldTranslations: Record<string, FieldValue> = {};
 

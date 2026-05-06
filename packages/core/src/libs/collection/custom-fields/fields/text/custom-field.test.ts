@@ -15,7 +15,7 @@ const TextCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addText("standard_text")
@@ -46,7 +46,7 @@ test("successfully validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			translations: TextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -67,7 +67,7 @@ test("successfully validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			translations: TextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -88,7 +88,7 @@ test("successfully validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			translations: TextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -111,7 +111,7 @@ test("fail to validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			translations: TextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -139,7 +139,7 @@ test("fail to validate field - text", async () => {
 				document: [],
 			},
 			meta: {
-				useTranslations: TextCollection.getData.config.useTranslations,
+				translations: TextCollection.getData.config.translations,
 				defaultLocale: "en",
 			},
 		}),
@@ -157,7 +157,7 @@ test("fail to validate field - text", async () => {
 				document: [],
 			},
 			meta: {
-				useTranslations: TextCollection.getData.config.useTranslations,
+				translations: TextCollection.getData.config.translations,
 				defaultLocale: "en",
 			},
 		}),
@@ -175,7 +175,7 @@ test("fail to validate field - text", async () => {
 				document: [],
 			},
 			meta: {
-				useTranslations: TextCollection.getData.config.useTranslations,
+				translations: TextCollection.getData.config.translations,
 				defaultLocale: "en",
 			},
 		}),
@@ -219,7 +219,7 @@ test("fail to validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextCollection.getData.config.useTranslations,
+			translations: TextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -248,10 +248,10 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			default: "",
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

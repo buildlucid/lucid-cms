@@ -8,7 +8,7 @@ const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
 	const collectionsWithRevisions = context.config.collections.filter(
 		(collection) => {
 			const config = collection.getData.config;
-			return config.useRevisions && config.revisionRetentionDays !== false;
+			return config.revisions && config.revisionRetentionDays !== false;
 		},
 	);
 

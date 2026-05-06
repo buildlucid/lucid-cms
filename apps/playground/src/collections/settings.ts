@@ -9,7 +9,7 @@ const SettingsCollection = new CollectionBuilder("settings", {
 		summary: "Set shared settings for your website.",
 	},
 	config: {
-		useRevisions: true,
+		revisions: true,
 	},
 	bricks: {
 		fixed: [SEOBrick],

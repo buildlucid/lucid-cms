@@ -9,9 +9,9 @@ export interface ColorFieldConfig extends SharedFieldConfig {
 	};
 	presets: string[];
 	config: {
-		useTranslations?: boolean;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		translations?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 		default?: string;
 	};
 	validation?: {

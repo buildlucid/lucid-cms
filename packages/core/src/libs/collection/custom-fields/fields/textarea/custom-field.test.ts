@@ -15,7 +15,7 @@ const TextareaCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addTextarea("standard_textarea")
@@ -46,7 +46,7 @@ test("successfully validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			translations: TextareaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -67,7 +67,7 @@ test("successfully validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			translations: TextareaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -88,7 +88,7 @@ test("successfully validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			translations: TextareaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -111,7 +111,7 @@ test("fail to validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			translations: TextareaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -138,7 +138,7 @@ test("fail to validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			translations: TextareaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -165,7 +165,7 @@ test("fail to validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: TextareaCollection.getData.config.useTranslations,
+			translations: TextareaCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -194,10 +194,10 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			default: "",
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

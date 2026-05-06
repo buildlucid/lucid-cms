@@ -67,7 +67,7 @@ export const DocumentsList: Component<{
 		tableHeadColumns(props.state.displayInListing()),
 	);
 	const workflowHeadColumn = createMemo(() =>
-		props.state.collection?.config.publishing.workflow
+		props.state.collection?.config.workflow
 			? [
 					{
 						label: T()("workflow_stage"),

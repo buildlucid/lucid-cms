@@ -112,7 +112,7 @@ const PublishRequestsListRoute: Component = () => {
 		(collections.data?.data ?? [])
 			.filter(
 				(collection) =>
-					(collection.config.publishing.review.targets?.length ?? 0) > 0,
+					(collection.config.review?.requiredFor?.length ?? 0) > 0,
 			)
 			.map((collection) => ({
 				value: collection.key,
@@ -125,7 +125,7 @@ const PublishRequestsListRoute: Component = () => {
 		const keys = new Set<string>();
 		for (const collection of collections.data?.data ?? []) {
 			if (collectionKey() && collection.key !== collectionKey()) continue;
-			for (const target of collection.config.publishing.review.targets ?? [])
+			for (const target of collection.config.review?.requiredFor ?? [])
 				keys.add(target);
 		}
 		return Array.from(keys).map((key) => ({

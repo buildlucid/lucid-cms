@@ -14,7 +14,7 @@ export interface RepeaterFieldConfig extends SharedFieldConfig {
 		summary?: LocaleValue;
 	};
 	config: {
-		isDisabled?: boolean;
+		disabled?: boolean;
 	};
 	validation?: {
 		maxGroups?: number;

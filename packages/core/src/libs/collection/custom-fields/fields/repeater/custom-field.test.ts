@@ -15,7 +15,7 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			isDisabled: false,
+			disabled: false,
 		},
 		validation: {
 			maxGroups: 3,

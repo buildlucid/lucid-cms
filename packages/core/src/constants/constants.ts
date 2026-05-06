@@ -25,10 +25,10 @@ export default Object.freeze({
 		maxRepeaterDepth: 3,
 	},
 	collectionBuilder: {
-		isLocked: false,
-		useRevisions: false,
-		useTranslations: false,
-		useAutoSave: false,
+		locked: false,
+		revisions: false,
+		translations: false,
+		autoSave: false,
 		protectedEnvironments: ["latest", "revision", "snapshot"],
 		revisionRetentionDays: 30,
 		publishing: {

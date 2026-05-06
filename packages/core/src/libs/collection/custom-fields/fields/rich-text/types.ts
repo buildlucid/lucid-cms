@@ -10,10 +10,10 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 	config: {
-		useTranslations?: boolean;
+		translations?: boolean;
 		default?: Record<string, unknown>;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 	};
 	validation?: {
 		required?: boolean;

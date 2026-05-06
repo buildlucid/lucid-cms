@@ -63,8 +63,8 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 	const isMultiple = createMemo(
 		() => props.state.fieldConfig.config.multiple === true,
 	);
-	const isDisabled = createMemo(
-		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
+	const disabled = createMemo(
+		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -127,7 +127,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			errors={isMultiple() ? props.state.fieldErrors : props.state.fieldError}
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
-			disabled={isDisabled()}
+			disabled={disabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			hideOptionalText

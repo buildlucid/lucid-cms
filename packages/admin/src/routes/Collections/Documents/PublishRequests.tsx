@@ -120,22 +120,21 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 			perPage: 50,
 		},
 		enabled: () =>
-			(state.collection()?.config.publishing.review.targets?.length ?? 0) > 0 &&
+			(state.collection()?.config.review?.requiredFor?.length ?? 0) > 0 &&
 			state.documentId() !== undefined,
 	});
 
 	// ----------------------------------
 	// Memos
 	const publishReviewEnabled = createMemo(
-		() =>
-			(state.collection()?.config.publishing.review.targets?.length ?? 0) > 0,
+		() => (state.collection()?.config.review?.requiredFor?.length ?? 0) > 0,
 	);
 	const targetOptions = createMemo(() => {
 		const collection = state.collection();
 		if (!collection) return [];
 
-		const publishReview = collection.config.publishing.review;
-		const enabledTargets = publishReview.targets ?? [];
+		const publishReview = collection.config.review;
+		const enabledTargets = publishReview?.requiredFor ?? [];
 
 		return collection.config.environments
 			.filter((environment) => enabledTargets.includes(environment.key))

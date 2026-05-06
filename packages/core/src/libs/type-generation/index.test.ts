@@ -17,13 +17,13 @@ test("generates collection-aware client document types that lean on the public L
 		.addTab("content_tab")
 		.addText("title", {
 			config: {
-				useTranslations: true,
+				translations: true,
 			},
 		})
 		.addRepeater("call_to_actions")
 		.addText("label", {
 			config: {
-				useTranslations: false,
+				translations: false,
 			},
 		})
 		.endRepeater();
@@ -35,7 +35,7 @@ test("generates collection-aware client document types that lean on the public L
 			singularName: "Page",
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			environments: [
 				{
 					key: "published",
@@ -49,19 +49,19 @@ test("generates collection-aware client document types that lean on the public L
 	})
 		.addText("page_title", {
 			config: {
-				useTranslations: true,
+				translations: true,
 			},
 		})
 		.addDocument("related_page", {
 			collection: "page",
 			config: {
-				useTranslations: false,
+				translations: false,
 			},
 		})
 		.addRepeater("sections")
 		.addText("section_title", {
 			config: {
-				useTranslations: false,
+				translations: false,
 			},
 		})
 		.endRepeater();

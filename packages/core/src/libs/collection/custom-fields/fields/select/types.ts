@@ -10,9 +10,9 @@ export interface SelectFieldConfig extends SharedFieldConfig {
 	};
 	options: Array<{ label: LocaleValue; value: string }>;
 	config: {
-		useTranslations?: boolean;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		translations?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 		default?: string;
 	};
 	validation?: {

@@ -3,7 +3,7 @@ export type CollectionPrefix = string | Record<string, string>;
 export interface PluginOptions {
 	collections: Array<{
 		collectionKey: string;
-		useTranslations?: boolean;
+		translations?: boolean;
 		displayFullSlug?: boolean;
 		prefix?: CollectionPrefix;
 		// fallbackSlugSource?: string;
@@ -16,7 +16,7 @@ export interface PluginOptionsInternal extends PluginOptions {
 
 export interface CollectionConfig {
 	collectionKey: string;
-	useTranslations: boolean;
+	translations: boolean;
 	displayFullSlug: boolean;
 	prefix?: CollectionPrefix;
 	// fallbackSlugSource: string | undefined;

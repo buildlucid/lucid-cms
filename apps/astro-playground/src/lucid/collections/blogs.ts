@@ -8,7 +8,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 		summary: "Manage your blogs.",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 		environments: [
 			{
 				key: "staging",
@@ -19,8 +19,8 @@ const BlogCollection = new CollectionBuilder("blog", {
 })
 	.addText("page_title", {
 		config: {
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		displayInListing: true,
 	})

@@ -106,9 +106,9 @@ const DocumentDynamicColumns: Component<{
 					{(field) => (
 						<DateCol
 							date={datetimeValue()}
-							includeTime={field().config.useTime !== false}
-							localDateOnly={field().config.useTime === false}
-							fullWithTime={field().config.useTime !== false}
+							includeTime={field().config.time !== false}
+							localDateOnly={field().config.time === false}
+							fullWithTime={field().config.time !== false}
 							options={{ include: props.include[props.index] }}
 						/>
 					)}

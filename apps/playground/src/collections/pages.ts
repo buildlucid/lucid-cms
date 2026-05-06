@@ -23,39 +23,41 @@ const PageCollection = new CollectionBuilder("page", {
 		review: "page:review",
 	},
 	config: {
-		useTranslations: true,
-		useRevisions: true,
-		useAutoSave: true,
-		publishing: {
-			review: {
-				targets: ["production"],
-				allowSelfApproval: true,
-				comments: {
-					request: "required",
-					decision: "optional",
+		translations: true,
+		revisions: true,
+		autoSave: true,
+		review: {
+			requiredFor: ["production"],
+			allowSelfApproval: true,
+			comments: {
+				request: "required",
+				decision: "optional",
+			},
+		},
+		workflow: {
+			stages: [
+				{
+					key: "todo",
+					name: "To do",
+					color: "yellow",
 				},
-			},
-			workflow: {
-				stages: [
-					{
-						key: "todo",
-						name: "To do",
-						color: "yellow",
+				{
+					key: "in-progress",
+					name: "In progress",
+					publishTargets: ["staging"],
+					color: "blue",
+				},
+				{
+					key: "done",
+					name: "Done",
+					publishTargets: ["production", "staging"],
+					color: "green",
+					permissions: {
+						moveTo: "page:workflow:done",
+						moveFrom: "page:workflow:todo",
 					},
-					{
-						key: "in-progress",
-						name: "In progress",
-						canPublish: ["staging"],
-						color: "blue",
-					},
-					{
-						key: "done",
-						name: "Done",
-						canPublish: ["production", "staging"],
-						color: "green",
-					},
-				],
-			},
+				},
+			],
 		},
 		environments: [
 			{
@@ -135,8 +137,8 @@ const PageCollection = new CollectionBuilder("page", {
 			summary: "The title of the page.",
 		},
 		config: {
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

@@ -92,9 +92,8 @@ const CollectionsDocumentsEditRoute: Component<{
 		() =>
 			props.mode === "edit" &&
 			versionType() === "latest" &&
-			(!!docState.collection()?.config.publishing.workflow ||
-				(docState.collection()?.config.publishing.review.targets?.length ?? 0) >
-					0) &&
+			(!!docState.collection()?.config.workflow ||
+				(docState.collection()?.config.review?.requiredFor?.length ?? 0) > 0) &&
 			!!docState.document(),
 	);
 	const disableFromEdit = createMemo(
@@ -158,7 +157,7 @@ const CollectionsDocumentsEditRoute: Component<{
 
 			brickStore.set(
 				"collectionTranslations",
-				collection.config.useTranslations || false,
+				collection.config.translations || false,
 			);
 
 			//* preserve local unsaved edits during same-view background query updates

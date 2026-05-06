@@ -8,7 +8,7 @@ export const hasRuntimeConfig = (
 	config: CFConfig<FieldTypes>,
 ): config is CFConfig<FieldTypes> & {
 	config: {
-		useTranslations?: boolean;
+		translations?: boolean;
 		default?: unknown;
 	};
 } => {

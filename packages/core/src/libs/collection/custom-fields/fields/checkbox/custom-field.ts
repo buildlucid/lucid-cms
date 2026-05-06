@@ -35,10 +35,10 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 				false: this.props?.details?.false,
 			},
 			config: {
-				useTranslations: this.props?.config?.useTranslations ?? false,
+				translations: this.props?.config?.translations ?? false,
 				default: this.props?.config?.default ?? false,
-				isHidden: this.props?.config?.isHidden,
-				isDisabled: this.props?.config?.isDisabled,
+				hidden: this.props?.config?.hidden,
+				disabled: this.props?.config?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"checkbox">;

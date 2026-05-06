@@ -14,7 +14,7 @@ const UserCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addUser("standard_user")
@@ -57,7 +57,7 @@ test("successfully validate field - user", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: UserCollection.getData.config.useTranslations,
+			translations: UserCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -86,7 +86,7 @@ test("successfully validate field - user", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: UserCollection.getData.config.useTranslations,
+			translations: UserCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -110,7 +110,7 @@ test("fail to validate field - user", async () => {
 				document: [],
 			},
 			meta: {
-				useTranslations: UserCollection.getData.config.useTranslations,
+				translations: UserCollection.getData.config.translations,
 				defaultLocale: "en",
 			},
 		}),
@@ -128,7 +128,7 @@ test("fail to validate field - user", async () => {
 				document: [],
 			},
 			meta: {
-				useTranslations: UserCollection.getData.config.useTranslations,
+				translations: UserCollection.getData.config.translations,
 				defaultLocale: "en",
 			},
 		}),
@@ -167,7 +167,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			useTranslations: UserCollection.getData.config.useTranslations,
+			translations: UserCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -185,7 +185,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			useTranslations: UserCollection.getData.config.useTranslations,
+			translations: UserCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -203,7 +203,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			useTranslations: UserCollection.getData.config.useTranslations,
+			translations: UserCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -255,9 +255,9 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
-			isHidden: false,
-			isDisabled: false,
+			translations: true,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

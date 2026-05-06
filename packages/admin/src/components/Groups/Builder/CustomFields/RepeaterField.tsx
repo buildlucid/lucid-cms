@@ -45,11 +45,9 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 			props.state.groupRef || ""
 		}`;
 	});
-	const isDisabled = createMemo(
+	const disabled = createMemo(
 		() =>
-			!canAddGroup() ||
-			fieldConfig().config.isDisabled ||
-			brickStore.get.locked,
+			!canAddGroup() || fieldConfig().config.disabled || brickStore.get.locked,
 	);
 	const groupErrors = createMemo(() => {
 		return props.state.fieldError?.groupErrors || [];
@@ -143,11 +141,11 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 											"w-full bg-input-base hover:border-transparent hover:bg-secondary-hover transition-colors duration-200 px-3 py-3 flex items-center justify-center text-sm text-body hover:text-secondary-contrast ring-inset",
 											{
 												"cursor-not-allowed opacity-50 hover:bg-card-base":
-													isDisabled(),
+													disabled(),
 											},
 										)}
 										onClick={addGroup}
-										disabled={isDisabled()}
+										disabled={disabled()}
 									>
 										<FaSolidPlus size={14} />
 										<span class="sr-only">{T()("add_entry")}</span>
@@ -162,13 +160,13 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 							class={classNames(
 								"w-full dotted-background border border-dashed border-border p-4 md:p-6 min-h-32 rounded-md flex items-center justify-center text-center transition-colors duration-200",
 								{
-									group: !isDisabled(),
-									"cursor-not-allowed opacity-50": isDisabled(),
-									"hover:bg-card-hover/50": !isDisabled(),
+									group: !disabled(),
+									"cursor-not-allowed opacity-50": disabled(),
+									"hover:bg-card-hover/50": !disabled(),
 								},
 							)}
 							onClick={addGroup}
-							disabled={isDisabled()}
+							disabled={disabled()}
 						>
 							<span class="text-sm text-unfocused group-hover:hidden">
 								{T()("no_entries")}

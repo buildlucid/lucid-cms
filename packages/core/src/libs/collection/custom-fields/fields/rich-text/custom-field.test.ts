@@ -15,7 +15,7 @@ const RichTextCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addRichText("standard_rich_text")
@@ -51,7 +51,7 @@ test("successfully validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: RichTextCollection.getData.config.useTranslations,
+			translations: RichTextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -75,7 +75,7 @@ test("successfully validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: RichTextCollection.getData.config.useTranslations,
+			translations: RichTextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -99,7 +99,7 @@ test("successfully validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: RichTextCollection.getData.config.useTranslations,
+			translations: RichTextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -122,7 +122,7 @@ test("fail to validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: RichTextCollection.getData.config.useTranslations,
+			translations: RichTextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -150,7 +150,7 @@ test("fail to validate field - rich text", async () => {
 				document: [],
 			},
 			meta: {
-				useTranslations: RichTextCollection.getData.config.useTranslations,
+				translations: RichTextCollection.getData.config.translations,
 				defaultLocale: "en",
 			},
 		}),
@@ -168,7 +168,7 @@ test("fail to validate field - rich text", async () => {
 				document: [],
 			},
 			meta: {
-				useTranslations: RichTextCollection.getData.config.useTranslations,
+				translations: RichTextCollection.getData.config.translations,
 				defaultLocale: "en",
 			},
 		}),
@@ -208,7 +208,7 @@ test("fail to validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: RichTextCollection.getData.config.useTranslations,
+			translations: RichTextCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -237,13 +237,13 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			default: {
 				type: "doc",
 				content: [{ type: "paragraph" }],
 			},
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

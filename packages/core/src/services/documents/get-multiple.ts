@@ -67,9 +67,7 @@ const getMultiple: ServiceFn<
 	);
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
 
-	const includeWorkflow = Boolean(
-		collectionRes.data.getData.config.publishing.workflow,
-	);
+	const includeWorkflow = Boolean(collectionRes.data.getData.config.workflow);
 
 	const { documentFilters, brickFilters } = groupDocumentFilters(
 		bricksTableSchemaRes.data,

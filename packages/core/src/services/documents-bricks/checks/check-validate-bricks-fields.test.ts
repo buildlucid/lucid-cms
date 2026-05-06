@@ -9,13 +9,13 @@ const TranslatedCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addText("translatable_field")
 	.addText("non_translatable_field", {
 		config: {
-			useTranslations: false,
+			translations: false,
 		},
 	});
 
@@ -26,7 +26,7 @@ const NonTranslatedCollection = new CollectionBuilder("non_translated", {
 		singularName: "Non-Translated",
 	},
 	config: {
-		useTranslations: false,
+		translations: false,
 	},
 }).addText("text_field");
 
@@ -54,7 +54,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			useTranslations: TranslatedCollection.getData.config.useTranslations,
+			translations: TranslatedCollection.getData.config.translations,
 			defaultLocale,
 		},
 	});
@@ -77,7 +77,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			useTranslations: TranslatedCollection.getData.config.useTranslations,
+			translations: TranslatedCollection.getData.config.translations,
 			defaultLocale,
 		},
 	});
@@ -100,7 +100,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			useTranslations: TranslatedCollection.getData.config.useTranslations,
+			translations: TranslatedCollection.getData.config.translations,
 			defaultLocale: frenchDefaultLocale,
 		},
 	});
@@ -123,7 +123,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: NonTranslatedCollection.fields.get("text_field")!,
 		validationData,
 		meta: {
-			useTranslations: NonTranslatedCollection.getData.config.useTranslations,
+			translations: NonTranslatedCollection.getData.config.translations,
 			defaultLocale,
 		},
 	});
@@ -146,7 +146,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("non_translatable_field")!,
 		validationData,
 		meta: {
-			useTranslations: TranslatedCollection.getData.config.useTranslations,
+			translations: TranslatedCollection.getData.config.translations,
 			defaultLocale,
 		},
 	});

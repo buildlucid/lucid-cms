@@ -10,9 +10,9 @@ const TestCollection = new CollectionBuilder("test", {
 			"A test collection for the revisions and draft/published functionality.",
 	},
 	config: {
-		useTranslations: false,
-		useRevisions: true,
-		isLocked: false,
+		translations: false,
+		revisions: true,
+		locked: false,
 	},
 	hooks: [],
 	bricks: {
@@ -25,8 +25,8 @@ const TestCollection = new CollectionBuilder("test", {
 		},
 	},
 	config: {
-		isHidden: false,
-		isDisabled: false,
+		hidden: false,
+		disabled: false,
 	},
 	validation: {
 		required: true,

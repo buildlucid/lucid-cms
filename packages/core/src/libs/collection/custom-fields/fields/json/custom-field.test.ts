@@ -15,7 +15,7 @@ const JSONCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addJSON("standard_json")
@@ -51,7 +51,7 @@ test("successfully validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: JSONCollection.getData.config.useTranslations,
+			translations: JSONCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -74,7 +74,7 @@ test("successfully validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: JSONCollection.getData.config.useTranslations,
+			translations: JSONCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -98,7 +98,7 @@ test("successfully validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: JSONCollection.getData.config.useTranslations,
+			translations: JSONCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -121,7 +121,7 @@ test("fail to validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: JSONCollection.getData.config.useTranslations,
+			translations: JSONCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -148,7 +148,7 @@ test("fail to validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: JSONCollection.getData.config.useTranslations,
+			translations: JSONCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -178,7 +178,7 @@ test("fail to validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: JSONCollection.getData.config.useTranslations,
+			translations: JSONCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -207,12 +207,12 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			default: {
 				hello: "world",
 			},
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

@@ -20,7 +20,7 @@ const TEST_CONFIG = {
 describe("brick table construction", () => {
 	test("should correctly generate tables for two level nested repeaters", () => {
 		const simpleBrick = new BrickBuilder("simple")
-			.addText("heading", { config: { useTranslations: false } })
+			.addText("heading", { config: { translations: false } })
 			.addRepeater("items")
 			.addText("itemTitle")
 			.addRepeater("nestedItems")
@@ -35,8 +35,8 @@ describe("brick table construction", () => {
 				singularName: "Simple",
 			},
 			config: {
-				useTranslations: true,
-				useRevisions: true,
+				translations: true,
+				revisions: true,
 			},
 			bricks: {
 				builder: [simpleBrick],
@@ -314,8 +314,8 @@ describe("brick table construction", () => {
 				singularName: "Deep",
 			},
 			config: {
-				useTranslations: true,
-				useRevisions: true,
+				translations: true,
+				revisions: true,
 			},
 			bricks: {
 				builder: [deepBrick],
@@ -471,8 +471,8 @@ describe("brick table construction", () => {
 				singularName: "Gallery",
 			},
 			config: {
-				useTranslations: true,
-				useRevisions: true,
+				translations: true,
+				revisions: true,
 			},
 			bricks: {
 				builder: [galleryBrick],
@@ -666,8 +666,8 @@ describe("brick table construction", () => {
 				singularName: "Article",
 			},
 			config: {
-				useTranslations: true,
-				useRevisions: true,
+				translations: true,
+				revisions: true,
 			},
 		})
 			.addUser("author", {

@@ -97,7 +97,7 @@ export default configureLucid({
 				collections: [
 					{
 						collectionKey: PageCollection.key,
-						useTranslations: true,
+						translations: true,
 						displayFullSlug: true,
 						prefix: {
 							en: "en",
@@ -106,7 +106,7 @@ export default configureLucid({
 					},
 					{
 						collectionKey: TestCollection.key,
-						useTranslations: true,
+						translations: true,
 						displayFullSlug: true,
 					},
 				],

@@ -15,7 +15,7 @@ const LinkCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addLink("standard_link")
@@ -45,7 +45,7 @@ test("successfully validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: LinkCollection.getData.config.useTranslations,
+			translations: LinkCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -70,7 +70,7 @@ test("successfully validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: LinkCollection.getData.config.useTranslations,
+			translations: LinkCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -97,7 +97,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: LinkCollection.getData.config.useTranslations,
+			translations: LinkCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -128,7 +128,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: LinkCollection.getData.config.useTranslations,
+			translations: LinkCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -161,7 +161,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: LinkCollection.getData.config.useTranslations,
+			translations: LinkCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -188,7 +188,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: LinkCollection.getData.config.useTranslations,
+			translations: LinkCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -217,14 +217,14 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			default: {
 				url: "https://example.com",
 				label: "Link 1",
 				target: "_blank",
 			},
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

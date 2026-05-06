@@ -3,7 +3,7 @@ import { BrickBuilder } from "@lucidcms/core";
 const SimpleBrick = new BrickBuilder("simple")
 	.addText("heading", {
 		config: {
-			useTranslations: false,
+			translations: false,
 		},
 	})
 	.addMedia("image")

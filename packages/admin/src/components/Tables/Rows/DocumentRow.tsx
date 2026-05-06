@@ -70,12 +70,12 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 							document={props.document}
 							include={props.include}
 							index={i()}
-							collectionTranslations={props.collection.config.useTranslations}
+							collectionTranslations={props.collection.config.translations}
 						/>
 					);
 				}}
 			</For>
-			<Show when={props.collection.config.publishing.workflow}>
+			<Show when={props.collection.config.workflow}>
 				<WorkflowStageCol
 					document={props.document}
 					collection={props.collection}
@@ -94,7 +94,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 					include:
 						props?.include[
 							props.fieldInclude.length +
-								(props.collection.config.publishing.workflow ? 2 : 0)
+								(props.collection.config.workflow ? 2 : 0)
 						],
 				}}
 			/>

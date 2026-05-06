@@ -30,7 +30,7 @@ const constructParentFullSlug = (data: {
 		);
 
 	// if translations are enabled/set
-	if (data.collection.useTranslations && data.fields.slug.translations) {
+	if (data.collection.translations && data.fields.slug.translations) {
 		for (let i = 0; i < data.localization.locales.length; i++) {
 			const locale = data.localization.locales[i];
 			if (!locale) continue;

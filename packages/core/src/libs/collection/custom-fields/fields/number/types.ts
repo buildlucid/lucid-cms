@@ -10,9 +10,9 @@ export interface NumberFieldConfig extends SharedFieldConfig {
 		placeholder?: LocaleValue;
 	};
 	config: {
-		useTranslations?: boolean;
-		isHidden?: boolean;
-		isDisabled?: boolean;
+		translations?: boolean;
+		hidden?: boolean;
+		disabled?: boolean;
 		default?: number | null;
 	};
 	validation?: {

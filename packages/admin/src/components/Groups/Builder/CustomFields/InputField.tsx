@@ -52,8 +52,8 @@ export const InputField: Component<InputFieldProps> = (props) => {
 
 		return value;
 	});
-	const isDisabled = createMemo(
-		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
+	const disabled = createMemo(
+		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -94,7 +94,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 			errors={props.state.fieldError}
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
-			disabled={isDisabled()}
+			disabled={disabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			hideOptionalText

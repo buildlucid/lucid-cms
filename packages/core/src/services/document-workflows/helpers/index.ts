@@ -11,8 +11,7 @@ import type { LucidAuth } from "../../../types/hono.js";
  */
 export const getWorkflowConfig = (
 	collection: CollectionBuilder,
-): PublishingWorkflowConfig | undefined =>
-	collection.getData.config.publishing.workflow;
+): PublishingWorkflowConfig | undefined => collection.getData.config.workflow;
 
 /**
  * Finds a configured workflow stage by key without applying initial-stage fallback.
@@ -59,7 +58,7 @@ export const workflowStageAllowsTarget = (props: {
 	});
 	if (!stage) return true;
 
-	return stage.canPublish.includes(props.target);
+	return stage.publishTargets.includes(props.target);
 };
 
 /**
@@ -71,8 +70,8 @@ export const canMoveWorkflowStage = (props: {
 	toStage?: PublishingWorkflowStageConfig;
 }): boolean => {
 	const permissions = [
-		props.fromStage?.permissions.leave,
-		props.toStage?.permissions.enter,
+		props.fromStage?.permissions.moveFrom,
+		props.toStage?.permissions.moveTo,
 	].filter((permission): permission is string => Boolean(permission));
 
 	if (permissions.length === 0) return true;

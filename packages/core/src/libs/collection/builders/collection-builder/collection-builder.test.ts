@@ -12,7 +12,7 @@ test("collection config is correct along with field includes and filters", async
 			summary: "Pages are used to create static content on your website.",
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 		},
 		hooks: [
 			{
@@ -99,10 +99,10 @@ test("collection config is correct along with field includes and filters", async
 		},
 		permissions: {},
 		config: {
-			isLocked: false,
-			useRevisions: false,
-			useTranslations: true,
-			useAutoSave: false,
+			locked: false,
+			revisions: false,
+			translations: true,
+			autoSave: false,
 			displayInListing: [
 				"text_test",
 				"textarea_test",
@@ -114,15 +114,6 @@ test("collection config is correct along with field includes and filters", async
 				"media_test",
 			],
 			environments: [],
-			publishing: {
-				review: {
-					allowSelfApproval: false,
-					comments: {
-						request: "required",
-						decision: "optional",
-					},
-				},
-			},
 			revisionRetentionDays: 30,
 		},
 	});
@@ -142,45 +133,43 @@ test("collection workflow config normalizes defaults", async () => {
 					name: "Production",
 				},
 			],
-			publishing: {
-				workflow: {
-					stages: [
-						{
-							key: "todo",
-							name: "To do",
+			workflow: {
+				stages: [
+					{
+						key: "todo",
+						name: "To do",
+					},
+					{
+						key: "done",
+						name: "Done",
+						color: "green",
+						publishTargets: ["production"],
+						permissions: {
+							moveTo: "page:workflow:done",
 						},
-						{
-							key: "done",
-							name: "Done",
-							color: "green",
-							canPublish: ["production"],
-							permissions: {
-								enter: "page:workflow:done",
-							},
-						},
-					],
-				},
+					},
+				],
 			},
 		},
 	});
 
-	expect(collection.getData.config.publishing.workflow).toEqual({
+	expect(collection.getData.config.workflow).toEqual({
 		initial: "todo",
 		stages: [
 			{
 				key: "todo",
 				name: "To do",
 				color: "grey",
-				canPublish: [],
+				publishTargets: [],
 				permissions: {},
 			},
 			{
 				key: "done",
 				name: "Done",
 				color: "green",
-				canPublish: ["production"],
+				publishTargets: ["production"],
 				permissions: {
-					enter: "page:workflow:done",
+					moveTo: "page:workflow:done",
 				},
 			},
 		],

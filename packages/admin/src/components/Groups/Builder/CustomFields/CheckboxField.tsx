@@ -33,8 +33,8 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 			contentLocale: props.state.contentLocale,
 		});
 	});
-	const isDisabled = createMemo(
-		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
+	const disabled = createMemo(
+		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -75,7 +75,7 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 			}}
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
-			disabled={isDisabled()}
+			disabled={disabled()}
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}

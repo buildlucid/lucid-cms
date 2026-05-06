@@ -149,8 +149,7 @@ export const HeaderBar: Component<{
 		}
 
 		if (
-			(props.state.collection()?.config.publishing.review.targets?.length ??
-				0) > 0
+			(props.state.collection()?.config.review?.requiredFor?.length ?? 0) > 0
 		) {
 			options.push({
 				label: T()("publish_requests"),
@@ -172,8 +171,8 @@ export const HeaderBar: Component<{
 		if (!collection || !document) return [];
 
 		const environments = collection.config.environments ?? [];
-		const publishReview = collection.config.publishing.review;
-		const workflow = collection.config.publishing.workflow;
+		const publishReview = collection.config.review;
+		const workflow = collection.config.workflow;
 		const workflowStage = workflow?.stages.find(
 			(stage) => stage.key === document.workflow?.stage,
 		);
@@ -187,7 +186,7 @@ export const HeaderBar: Component<{
 				props.state.document()?.version.latest?.contentId;
 
 			const publishRequestTargetEnabled =
-				publishReview.targets?.includes(environment.key) === true;
+				publishReview?.requiredFor.includes(environment.key) === true;
 
 			const action: ReleaseTriggerOption["action"] = publishRequestTargetEnabled
 				? "request"
@@ -199,7 +198,7 @@ export const HeaderBar: Component<{
 
 			const workflowAllowsTarget =
 				!workflow ||
-				workflowStage?.canPublish.includes(environment.key) === true;
+				workflowStage?.publishTargets.includes(environment.key) === true;
 
 			const workflowStageLabel =
 				helpers.getLocaleValue({
@@ -293,9 +292,9 @@ export const HeaderBar: Component<{
 
 		return (
 			props.mode !== "create" &&
-			(collection.config.useRevisions ||
+			(collection.config.revisions ||
 				environments.length > 0 ||
-				(collection.config.publishing.review.targets?.length ?? 0) > 0)
+				(collection.config.review?.requiredFor?.length ?? 0) > 0)
 		);
 	});
 	// ----------------------------------
@@ -448,7 +447,7 @@ export const HeaderBar: Component<{
 							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
 								<Show
 									when={
-										props.state.collection()?.config.useTranslations &&
+										props.state.collection()?.config.translations &&
 										hasMultipleLocales()
 									}
 								>
@@ -461,8 +460,7 @@ export const HeaderBar: Component<{
 								</Show>
 								<Show
 									when={
-										(props.state.collection()?.config.useTranslations !==
-											true ||
+										(props.state.collection()?.config.translations !== true ||
 											!hasMultipleLocales()) &&
 										displayLocale()
 									}

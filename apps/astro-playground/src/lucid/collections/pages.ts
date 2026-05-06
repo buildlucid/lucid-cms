@@ -14,9 +14,9 @@ const PageCollection = new CollectionBuilder("page", {
 		summary: "Manage the pages and content on your website.",
 	},
 	config: {
-		useTranslations: true,
-		useRevisions: true,
-		useAutoSave: true,
+		translations: true,
+		revisions: true,
+		autoSave: true,
 		environments: [
 			{
 				key: "staging",
@@ -87,8 +87,8 @@ const PageCollection = new CollectionBuilder("page", {
 			summary: "The title of the page.",
 		},
 		config: {
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		validation: {
 			required: true,

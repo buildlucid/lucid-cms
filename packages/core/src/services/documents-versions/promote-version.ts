@@ -178,7 +178,7 @@ const promoteVersion: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (collectionRes.data.getData.config.isLocked === true) {
+	if (collectionRes.data.getData.config.locked === true) {
 		return {
 			error: {
 				type: "basic",
@@ -199,7 +199,7 @@ const promoteVersion: ServiceFn<
 	//-------------------------------------------------------------------------------
 	// Mutate/create revisions and update the document
 	const shouldCreateRevision =
-		collectionRes.data.getData.config.useRevisions &&
+		collectionRes.data.getData.config.revisions &&
 		data.createRevision !== false;
 
 	const [, upsertDocumentRes, createVersionRes] = await Promise.all([

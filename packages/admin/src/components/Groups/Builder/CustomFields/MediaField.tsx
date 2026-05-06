@@ -54,8 +54,8 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 	const isMultiple = createMemo(
 		() => props.state.fieldConfig.config.multiple === true,
 	);
-	const isDisabled = createMemo(
-		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
+	const disabled = createMemo(
+		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
 
 	// -------------------------------
@@ -112,7 +112,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 			}}
 			altLocaleError={props.state.altLocaleError}
 			localised={props.state.localised}
-			disabled={isDisabled()}
+			disabled={disabled()}
 			extensions={props.state.fieldConfig.validation?.extensions}
 			type={props.state.fieldConfig.validation?.type}
 			errors={isMultiple() ? props.state.fieldErrors : props.state.fieldError}

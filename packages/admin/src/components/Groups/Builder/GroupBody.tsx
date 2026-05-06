@@ -57,8 +57,8 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
-	const isDisabled = createMemo(
-		() => props.state.fieldConfig.config.isDisabled || brickStore.get.locked,
+	const disabled = createMemo(
+		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
 	const groupError = createMemo(() => {
 		return props.state.groupErrors.find((g) => {
@@ -177,8 +177,8 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						}
 						onDragOver={(e) => props.state.dragDrop.onDragOver(e)}
 						aria-label={T()("change_order")}
-						draggable={isDisabled() === false}
-						disabled={isDisabled()}
+						draggable={disabled() === false}
+						disabled={disabled()}
 					>
 						<FaSolidGripLines size={14} />
 					</button>
@@ -207,7 +207,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 								parentRepeaterKey: parentRepeaterKey(),
 							});
 						}}
-						disabled={isDisabled()}
+						disabled={disabled()}
 					/>
 					<Button
 						type="button"

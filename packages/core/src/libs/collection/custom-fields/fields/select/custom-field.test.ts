@@ -31,7 +31,7 @@ const SelectCollection = new CollectionBuilder("collection", {
 		singularName: "Test",
 	},
 	config: {
-		useTranslations: true,
+		translations: true,
 	},
 })
 	.addSelect("standard_select", {
@@ -60,7 +60,7 @@ test("successfully validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: SelectCollection.getData.config.useTranslations,
+			translations: SelectCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -81,7 +81,7 @@ test("successfully validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: SelectCollection.getData.config.useTranslations,
+			translations: SelectCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -102,7 +102,7 @@ test("successfully validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: SelectCollection.getData.config.useTranslations,
+			translations: SelectCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -126,7 +126,7 @@ test("fail to validate field - select", async () => {
 				document: [],
 			},
 			meta: {
-				useTranslations: SelectCollection.getData.config.useTranslations,
+				translations: SelectCollection.getData.config.translations,
 				defaultLocale: "en",
 			},
 		}),
@@ -144,7 +144,7 @@ test("fail to validate field - select", async () => {
 				document: [],
 			},
 			meta: {
-				useTranslations: SelectCollection.getData.config.useTranslations,
+				translations: SelectCollection.getData.config.translations,
 				defaultLocale: "en",
 			},
 		}),
@@ -181,7 +181,7 @@ test("fail to validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			useTranslations: SelectCollection.getData.config.useTranslations,
+			translations: SelectCollection.getData.config.translations,
 			defaultLocale: "en",
 		},
 	});
@@ -210,10 +210,10 @@ test("custom field config passes schema validation", async () => {
 			},
 		},
 		config: {
-			useTranslations: true,
+			translations: true,
 			default: "",
-			isHidden: false,
-			isDisabled: false,
+			hidden: false,
+			disabled: false,
 		},
 		options: CONSTANTS.selectOptions,
 		validation: {

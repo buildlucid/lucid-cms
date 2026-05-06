@@ -56,12 +56,13 @@ const formatSingle = (props: {
 			summary: collectionData.details.summary,
 		},
 		config: {
-			useTranslations: collectionData.config.useTranslations,
-			useRevisions: collectionData.config.useRevisions,
-			isLocked: collectionData.config.isLocked,
+			translations: collectionData.config.translations,
+			revisions: collectionData.config.revisions,
+			locked: collectionData.config.locked,
 			displayInListing: props.collection.displayInListing,
-			useAutoSave: collectionData.config.useAutoSave,
-			publishing: collectionData.config.publishing,
+			autoSave: collectionData.config.autoSave,
+			review: collectionData.config.review,
+			workflow: collectionData.config.workflow,
 			environments: collectionData.config.environments.map((environment) => ({
 				...environment,
 				permissions: {

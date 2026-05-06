@@ -52,7 +52,7 @@ abstract class CustomField<T extends FieldTypes> {
 	/** Whether this field should be processed with localization translations. */
 	get translationsEnabled(): boolean {
 		if (!hasRuntimeConfig(this.config)) return false;
-		return this.config.config.useTranslations ?? false;
+		return this.config.config.translations ?? false;
 	}
 	/** Default fallback value used while normalizing missing field input. */
 	get defaultValue(): unknown {

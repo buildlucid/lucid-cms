@@ -55,7 +55,7 @@ const checkValidateBricksFields: ServiceFn<
 		instance: data.collection,
 		validationData: refDataRes.data,
 		meta: {
-			useTranslations: data.collection.getData.config.useTranslations,
+			translations: data.collection.getData.config.translations,
 			defaultLocale: context.config.localization.defaultLocale,
 		},
 	});
@@ -126,7 +126,7 @@ const validateBricks = (props: {
 			instance: instance,
 			validationData: props.validationData,
 			meta: {
-				useTranslations: props.collection.getData.config.useTranslations,
+				translations: props.collection.getData.config.translations,
 				defaultLocale: props.defaultLocale,
 			},
 		});
@@ -152,7 +152,7 @@ const recursiveFieldValidate = (props: {
 	validationData: ValidationData;
 	parentTreeFieldKey?: string;
 	meta: {
-		useTranslations: boolean;
+		translations: boolean;
 		defaultLocale: string;
 	};
 }) => {
@@ -272,7 +272,7 @@ export const validateField = (props: {
 	instance: CustomField<FieldTypes>;
 	validationData: ValidationData;
 	meta: {
-		useTranslations: boolean;
+		translations: boolean;
 		defaultLocale: string;
 	};
 }): FieldError[] => {
@@ -336,7 +336,7 @@ export const validateField = (props: {
 		if (!validationResult.valid) {
 			errors.push(
 				...buildFieldErrors(
-					props.meta.useTranslations && props.instance.translationsEnabled
+					props.meta.translations && props.instance.translationsEnabled
 						? props.meta.defaultLocale
 						: null,
 					validationResult,

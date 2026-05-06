@@ -32,11 +32,11 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 				placeholder: this.props?.details?.placeholder,
 			},
 			config: {
-				useTranslations: this.props?.config?.useTranslations ?? false,
-				useTime: this.props?.config?.useTime ?? false,
+				translations: this.props?.config?.translations ?? false,
+				time: this.props?.config?.time ?? false,
 				default: this.props?.config?.default ?? "",
-				isHidden: this.props?.config?.isHidden,
-				isDisabled: this.props?.config?.isDisabled,
+				hidden: this.props?.config?.hidden,
+				disabled: this.props?.config?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"datetime">;
