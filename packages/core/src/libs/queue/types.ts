@@ -21,14 +21,39 @@ export type QueueEvent<T extends string = string> =
 	| "users:delete"
 	| "documents:delete"
 	| "document-versions:delete-expired"
+	| "document-publish-operation:execute"
 	| T;
 
-export type QueueJobStatus = "pending" | "processing" | "completed" | "failed";
+export type QueueJobStatus =
+	| "pending"
+	| "processing"
+	| "completed"
+	| "failed"
+	| "cancelled";
 
 // biome-ignore lint/suspicious/noExplicitAny: explanation
 export type QueueJobHandlerFn<D = any, R = any> = ServiceFn<[D], R>;
 
-export type QueueJobHandlers = Record<QueueEvent, QueueJobHandlerFn>;
+// biome-ignore lint/suspicious/noExplicitAny: explanation
+export type QueueJobPermanentFailureHandlerFn<D = any> = (
+	context: ServiceContext,
+	data: {
+		jobId: string;
+		event: QueueEvent;
+		payload: D;
+		errorMessage: string;
+	},
+) => Promise<void> | void;
+
+// biome-ignore lint/suspicious/noExplicitAny: explanation
+export type QueueJobHandler<D = any, R = any> =
+	| QueueJobHandlerFn<D, R>
+	| {
+			handler: QueueJobHandlerFn<D, R>;
+			onPermanentFailure?: QueueJobPermanentFailureHandlerFn<D>;
+	  };
+
+export type QueueJobHandlers = Record<QueueEvent, QueueJobHandler>;
 
 export type QueueJobResponse = {
 	jobId: string;
@@ -59,6 +84,11 @@ export type QueueAdapterInstance = {
 	type: "queue-adapter";
 	/** A unique identifier key for the adapter of this type */
 	key: "worker" | "passthrough" | string;
+	/** Adapter capability flags */
+	support: {
+		/** Whether this adapter honours QueueJobOptions.scheduledFor */
+		scheduling: boolean;
+	};
 	/**  Lifecycle methods */
 	lifecycle?: {
 		/** Initialize the adapter */

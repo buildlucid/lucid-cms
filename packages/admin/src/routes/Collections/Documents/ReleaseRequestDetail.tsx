@@ -1,7 +1,7 @@
 import { A, useParams } from "@solidjs/router";
-import type { PublishOperationStatus, PublishOperationUser } from "@types";
 import {
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
 	For,
@@ -13,62 +13,27 @@ import {
 import { Textarea } from "@/components/Groups/Form";
 import { Confirmation } from "@/components/Groups/Modal";
 import { HeaderBar } from "@/components/Groups/PageBuilder";
+import ReleaseScheduleFields from "@/components/Modals/Documents/ReleaseScheduleFields";
 import Button from "@/components/Partials/Button";
 import DateText from "@/components/Partials/DateText";
 import Link from "@/components/Partials/Link";
-import Pill, { type PillProps } from "@/components/Partials/Pill";
+import Pill from "@/components/Partials/Pill";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import api from "@/services/api";
-import userStore from "@/store/userStore";
 import T from "@/translations";
-import helpers from "@/utils/helpers";
+import {
+	formatPublishOperationUser,
+	getPublishOperationExecutionStatusLabel,
+	getPublishOperationExecutionStatusTheme,
+	getPublishOperationStatusLabel,
+	getPublishOperationStatusTheme,
+} from "@/utils/publish-operations";
+import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import PublishRequestPreviewPlaceholder from "../../PublishRequests/PreviewPlaceholder";
+import ReleaseRequestPreviewPlaceholder from "../../ReleaseRequests/PreviewPlaceholder";
 
 type DecisionAction = "approve" | "reject" | "cancel";
-
-const formatUser = (user: PublishOperationUser) => {
-	const username = user?.username ?? user?.email;
-	if (!username) return "-";
-	return helpers.formatUserName(
-		{
-			username,
-			firstName: user?.firstName,
-			lastName: user?.lastName,
-		},
-		"username",
-	);
-};
-
-const statusTheme = (status: PublishOperationStatus): PillProps["theme"] => {
-	switch (status) {
-		case "pending":
-			return "warning-opaque";
-		case "approved":
-			return "primary-opaque";
-		case "rejected":
-		case "cancelled":
-			return "error-opaque";
-		case "superseded":
-			return "outline";
-	}
-};
-
-const statusLabel = (status: PublishOperationStatus) => {
-	switch (status) {
-		case "pending":
-			return T()("pending");
-		case "approved":
-			return T()("approved");
-		case "rejected":
-			return T()("rejected");
-		case "cancelled":
-			return T()("cancelled");
-		case "superseded":
-			return T()("superseded");
-	}
-};
 
 const getDecisionTitle = (action?: DecisionAction) => {
 	switch (action) {
@@ -83,18 +48,25 @@ const getDecisionTitle = (action?: DecisionAction) => {
 	}
 };
 
-const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
+const CollectionsDocumentsReleaseRequestDetailRoute: Component = () => {
 	// ----------------------------------
 	// State / Hooks
 	const params = useParams();
 	const versionType = createMemo((): "latest" => "latest");
 	const versionId = createMemo(() => undefined);
 	const requestId = createMemo(() =>
-		Number.parseInt(params.publishRequestId ?? "", 10),
+		Number.parseInt(params.releaseRequestId ?? "", 10),
 	);
 	const [decisionOpen, setDecisionOpen] = createSignal(false);
 	const [decisionAction, setDecisionAction] = createSignal<DecisionAction>();
 	const [decisionComment, setDecisionComment] = createSignal("");
+	const [rescheduleOpen, setRescheduleOpen] = createSignal(false);
+	const [scheduleEnabled, setScheduleEnabled] = createSignal(false);
+	const [scheduleDate, setScheduleDate] = createSignal("");
+	const [scheduleTime, setScheduleTime] = createSignal("");
+	const [scheduleTimezone, setScheduleTimezone] = createSignal(
+		getDefaultTimezone(),
+	);
 	const [validationError, setValidationError] = createSignal<string>();
 
 	const state = useDocumentState({
@@ -111,7 +83,7 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 		version: versionType,
 		versionId,
 	});
-	const request = api.publishRequests.useGetSingle({
+	const request = api.publishOperations.useGetSingle({
 		queryParams: {
 			location: {
 				id: () => requestId(),
@@ -119,36 +91,80 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 		},
 		enabled: () => Number.isFinite(requestId()),
 	});
-	const decision = api.publishRequests.useDecision({
+	const decision = api.publishOperations.useDecision({
 		onSuccess: () => {
 			setDecisionOpen(false);
 			setDecisionAction(undefined);
 			setDecisionComment("");
+			setScheduleEnabled(false);
+			setScheduleDate("");
+			setScheduleTime("");
+			setScheduleTimezone(getDefaultTimezone());
 			setValidationError(undefined);
 		},
 	});
+	const reschedule = api.publishOperations.useReschedule({
+		onSuccess: () => {
+			setRescheduleOpen(false);
+			resetSchedule();
+			setValidationError(undefined);
+		},
+	});
+	const retry = api.publishOperations.useRetry();
 
 	// ----------------------------------
 	// Memos
 	const data = createMemo(() => request.data?.data);
+	const schedulingSupported = createMemo(
+		() => state.collection()?.capabilities.scheduling === true,
+	);
 	const requireDecisionComment = createMemo(
 		() =>
 			state.collection()?.config.review?.comments.decision === "required" &&
 			decisionAction() !== "cancel",
 	);
 	const error = createMemo(
-		() => validationError() || decision.errors()?.message,
+		() =>
+			validationError() ||
+			decision.errors()?.message ||
+			reschedule.errors()?.message ||
+			retry.errors()?.message,
 	);
 	const canReviewRequest = createMemo(
 		() => data()?.permissions.review === true,
 	);
-	const canCancelRequest = createMemo(() => {
+	const canCancelRequest = createMemo(
+		() => data()?.permissions.cancel === true,
+	);
+
+	// ----------------------------------
+	// Effects
+	createEffect(() => {
 		const publishRequest = data();
-		if (!publishRequest) return false;
-		return (
-			canReviewRequest() ||
-			publishRequest.requestedBy?.id === userStore.get.user?.id
-		);
+		if (
+			!decisionOpen() ||
+			decisionAction() !== "approve" ||
+			!publishRequest ||
+			!schedulingSupported()
+		) {
+			return;
+		}
+
+		if (publishRequest.scheduledAt) {
+			const scheduledAt = new Date(publishRequest.scheduledAt);
+			setScheduleEnabled(true);
+			setScheduleDate(scheduledAt.toISOString().slice(0, 10));
+			setScheduleTime(scheduledAt.toISOString().slice(11, 16));
+			setScheduleTimezone(
+				publishRequest.scheduledTimezone ?? getDefaultTimezone(),
+			);
+			return;
+		}
+
+		setScheduleEnabled(false);
+		setScheduleDate("");
+		setScheduleTime("");
+		setScheduleTimezone(getDefaultTimezone());
 	});
 
 	// ----------------------------------
@@ -157,11 +173,39 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 		setDecisionAction(action);
 		setDecisionComment("");
 		setValidationError(undefined);
+		prefillSchedule();
 		setDecisionOpen(true);
+	};
+	const resetSchedule = () => {
+		setScheduleEnabled(false);
+		setScheduleDate("");
+		setScheduleTime("");
+		setScheduleTimezone(getDefaultTimezone());
+	};
+	const prefillSchedule = () => {
+		const publishRequest = data();
+		if (publishRequest?.scheduledAt) {
+			const scheduledAt = new Date(publishRequest.scheduledAt);
+			setScheduleEnabled(true);
+			setScheduleDate(scheduledAt.toISOString().slice(0, 10));
+			setScheduleTime(scheduledAt.toISOString().slice(11, 16));
+			setScheduleTimezone(
+				publishRequest.scheduledTimezone ?? getDefaultTimezone(),
+			);
+			return;
+		}
+
+		resetSchedule();
+	};
+	const openReschedule = () => {
+		prefillSchedule();
+		setValidationError(undefined);
+		reschedule.reset();
+		setRescheduleOpen(true);
 	};
 	const listRoute = createMemo(
 		() =>
-			`/lucid/collections/${state.collectionKey()}/${state.documentId()}/publish-requests`,
+			`/lucid/collections/${state.collectionKey()}/${state.documentId()}/release-requests`,
 	);
 	const snapshotRoute = createMemo(() => {
 		const publishRequest = data();
@@ -240,8 +284,14 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 												<h2 class="text-base font-semibold text-title">
 													{T()("preview")}
 												</h2>
-												<Pill theme={statusTheme(publishRequest().status)}>
-													{statusLabel(publishRequest().status)}
+												<Pill
+													theme={getPublishOperationStatusTheme(
+														publishRequest().status,
+													)}
+												>
+													{getPublishOperationStatusLabel(
+														publishRequest().status,
+													)}
 												</Pill>
 												<Show when={publishRequest().isOutdated}>
 													<Pill theme="warning-opaque">
@@ -262,7 +312,7 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 													? T()("snapshot_outdated")
 													: T()("snapshot_current")}
 											</p>
-											<PublishRequestPreviewPlaceholder />
+											<ReleaseRequestPreviewPlaceholder />
 										</div>
 									</section>
 									<aside class="border border-border rounded-md bg-card-base h-max">
@@ -273,22 +323,70 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 										</div>
 										<div class="p-4 flex flex-col gap-3 text-sm">
 											<DetailRow label={T()("status")}>
-												<Pill theme={statusTheme(publishRequest().status)}>
-													{statusLabel(publishRequest().status)}
+												<Pill
+													theme={getPublishOperationStatusTheme(
+														publishRequest().status,
+													)}
+												>
+													{getPublishOperationStatusLabel(
+														publishRequest().status,
+													)}
+												</Pill>
+											</DetailRow>
+											<DetailRow label={T()("execution_status")}>
+												<Pill
+													theme={getPublishOperationExecutionStatusTheme(
+														publishRequest().executionStatus,
+													)}
+												>
+													{getPublishOperationExecutionStatusLabel(
+														publishRequest().executionStatus,
+													)}
 												</Pill>
 											</DetailRow>
 											<DetailRow label={T()("target")}>
 												{publishRequest().target}
 											</DetailRow>
+											<Show when={publishRequest().scheduledAt}>
+												<DetailRow label={T()("scheduled_for")}>
+													<DateText date={publishRequest().scheduledAt} />
+												</DetailRow>
+											</Show>
+											<Show when={publishRequest().scheduledTimezone}>
+												<DetailRow label={T()("scheduled_timezone")}>
+													{publishRequest().scheduledTimezone}
+												</DetailRow>
+											</Show>
+											<Show when={publishRequest().executedAt}>
+												<DetailRow label={T()("executed_at")}>
+													<DateText date={publishRequest().executedAt} />
+												</DetailRow>
+											</Show>
+											<Show when={publishRequest().failedAt}>
+												<DetailRow label={T()("failed_at")}>
+													<DateText date={publishRequest().failedAt} />
+												</DetailRow>
+											</Show>
+											<Show when={publishRequest().executionErrorMessage}>
+												<DetailRow label={T()("execution_error")}>
+													<span class="whitespace-pre-wrap">
+														{publishRequest().executionErrorMessage}
+													</span>
+												</DetailRow>
+											</Show>
 											<DetailRow label={T()("requested_by")}>
-												{formatUser(publishRequest().requestedBy)}
+												{formatPublishOperationUser(
+													publishRequest().requestedBy,
+												)}
 											</DetailRow>
 											<DetailRow label={T()("requested_at")}>
 												<DateText date={publishRequest().createdAt} />
 											</DetailRow>
 											<Show when={publishRequest().decidedBy}>
 												<DetailRow label={T()("decided_by")}>
-													{formatUser(publishRequest().decidedBy)}
+													{formatPublishOperationUser(
+														publishRequest().decidedBy,
+													)}
 												</DetailRow>
 											</Show>
 											<Show when={publishRequest().decidedAt}>
@@ -316,7 +414,7 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 														<For each={publishRequest().assignees}>
 															{(assignee) => (
 																<Pill theme="outline">
-																	{formatUser(assignee.user)}
+																	{formatPublishOperationUser(assignee.user)}
 																</Pill>
 															)}
 														</For>
@@ -326,12 +424,19 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 										</div>
 										<Show
 											when={
-												publishRequest().status === "pending" &&
-												(canReviewRequest() || canCancelRequest())
+												canReviewRequest() ||
+												canCancelRequest() ||
+												publishRequest().permissions.reschedule ||
+												publishRequest().permissions.retry
 											}
 										>
 											<div class="p-4 border-t border-border flex flex-wrap gap-2">
-												<Show when={canReviewRequest()}>
+												<Show
+													when={
+														publishRequest().status === "pending" &&
+														canReviewRequest()
+													}
+												>
 													<Button
 														type="button"
 														theme="primary"
@@ -357,6 +462,31 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 														onClick={() => openDecision("cancel")}
 													>
 														{T()("cancel")}
+													</Button>
+												</Show>
+												<Show when={publishRequest().permissions.reschedule}>
+													<Button
+														type="button"
+														theme="border-outline"
+														size="small"
+														onClick={openReschedule}
+													>
+														{T()("reschedule_release")}
+													</Button>
+												</Show>
+												<Show when={publishRequest().permissions.retry}>
+													<Button
+														type="button"
+														theme="primary"
+														size="small"
+														loading={retry.action.isPending}
+														onClick={() =>
+															retry.action.mutateAsync({
+																id: publishRequest().id,
+															})
+														}
+													>
+														{T()("retry_release")}
 													</Button>
 												</Show>
 											</div>
@@ -393,11 +523,31 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 							setValidationError(T()("publish_request_comment_required"));
 							return;
 						}
+						const scheduledAt =
+							action === "approve" && scheduleEnabled()
+								? getScheduledAt({
+										date: scheduleDate(),
+										time: scheduleTime(),
+										timezone: scheduleTimezone(),
+									})
+								: null;
+						if (action === "approve" && scheduleEnabled() && !scheduledAt) {
+							setValidationError(T()("schedule_release_required"));
+							return;
+						}
 						await decision.action.mutateAsync({
 							id: publishRequest.id,
 							action,
 							body: {
 								comment: decisionComment().trim() || undefined,
+								...(action === "approve" && schedulingSupported()
+									? {
+											scheduledAt,
+											scheduledTimezone: scheduledAt
+												? scheduleTimezone()
+												: null,
+										}
+									: {}),
 							},
 						});
 					},
@@ -405,6 +555,10 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 						setDecisionOpen(false);
 						setDecisionAction(undefined);
 						setDecisionComment("");
+						setScheduleEnabled(false);
+						setScheduleDate("");
+						setScheduleTime("");
+						setScheduleTimezone(getDefaultTimezone());
 						setValidationError(undefined);
 						decision.reset();
 					},
@@ -425,6 +579,79 @@ const CollectionsDocumentsPublishRequestDetailRoute: Component = () => {
 						placeholder: T()("decision_comment_placeholder"),
 					}}
 				/>
+				<Show when={decisionAction() === "approve" && schedulingSupported()}>
+					<div class="pb-4">
+						<ReleaseScheduleFields
+							enabled={scheduleEnabled()}
+							setEnabled={setScheduleEnabled}
+							date={scheduleDate()}
+							setDate={setScheduleDate}
+							time={scheduleTime()}
+							setTime={setScheduleTime}
+							timezone={scheduleTimezone()}
+							setTimezone={setScheduleTimezone}
+							onChange={() => setValidationError(undefined)}
+						/>
+					</div>
+				</Show>
+			</Confirmation>
+			<Confirmation
+				theme="primary"
+				state={{
+					open: rescheduleOpen(),
+					setOpen: setRescheduleOpen,
+					isLoading: reschedule.action.isPending,
+					isError: !!error(),
+				}}
+				copy={{
+					title: T()("reschedule_release"),
+					confirm: T()("update_schedule"),
+					error: error(),
+				}}
+				callbacks={{
+					onConfirm: async () => {
+						const publishRequest = data();
+						if (!publishRequest) return;
+						const scheduledAt = scheduleEnabled()
+							? getScheduledAt({
+									date: scheduleDate(),
+									time: scheduleTime(),
+									timezone: scheduleTimezone(),
+								})
+							: null;
+						if (scheduleEnabled() && !scheduledAt) {
+							setValidationError(T()("schedule_release_required"));
+							return;
+						}
+						await reschedule.action.mutateAsync({
+							id: publishRequest.id,
+							body: {
+								scheduledAt,
+								scheduledTimezone: scheduledAt ? scheduleTimezone() : null,
+							},
+						});
+					},
+					onCancel: () => {
+						setRescheduleOpen(false);
+						resetSchedule();
+						setValidationError(undefined);
+						reschedule.reset();
+					},
+				}}
+			>
+				<div class="pb-4">
+					<ReleaseScheduleFields
+						enabled={scheduleEnabled()}
+						setEnabled={setScheduleEnabled}
+						date={scheduleDate()}
+						setDate={setScheduleDate}
+						time={scheduleTime()}
+						setTime={setScheduleTime}
+						timezone={scheduleTimezone()}
+						setTimezone={setScheduleTimezone}
+						onChange={() => setValidationError(undefined)}
+					/>
+				</div>
 			</Confirmation>
 		</>
 	);
@@ -440,4 +667,4 @@ const DetailRow: Component<{
 	</div>
 );
 
-export default CollectionsDocumentsPublishRequestDetailRoute;
+export default CollectionsDocumentsReleaseRequestDetailRoute;

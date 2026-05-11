@@ -264,7 +264,7 @@ export const PermissionGroups = Object.freeze({
 			},
 			{
 				key: Permissions.DocumentsReview,
-				details: { name: "Review Document Publish Requests" },
+				details: { name: "Review Document Releases" },
 				core: true,
 			},
 		],

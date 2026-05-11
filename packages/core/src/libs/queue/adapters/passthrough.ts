@@ -1,4 +1,5 @@
 import constants from "../../../constants/constants.js";
+import T from "../../../translations/index.js";
 import logger from "../../logger/index.js";
 import executeSingleJob from "../execute-single-job.js";
 import { insertJobs } from "../insert-job.js";
@@ -23,6 +24,9 @@ function passthroughQueueAdapter(
 	return {
 		type: "queue-adapter",
 		key: ADAPTER_KEY,
+		support: {
+			scheduling: false,
+		},
 		lifecycle: {
 			init: async () => {
 				logger.debug({
@@ -39,6 +43,15 @@ function passthroughQueueAdapter(
 		},
 		add: async (event, params) => {
 			try {
+				if (params.options?.scheduledFor) {
+					return {
+						error: {
+							message: T("queue_adapter_scheduled_jobs_not_supported"),
+						},
+						data: undefined,
+					};
+				}
+
 				logger.info({
 					message: "Adding job to the passthrough queue",
 					scope: constants.logScopes.queueAdapter,
@@ -124,6 +137,15 @@ function passthroughQueueAdapter(
 		},
 		addBatch: async (event, params) => {
 			try {
+				if (params.options?.scheduledFor) {
+					return {
+						error: {
+							message: T("queue_adapter_scheduled_jobs_not_supported"),
+						},
+						data: undefined,
+					};
+				}
+
 				logger.info({
 					message: "Adding batch jobs to the passthrough queue",
 					scope: constants.logScopes.queueAdapter,

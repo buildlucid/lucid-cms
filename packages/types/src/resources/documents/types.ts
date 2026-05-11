@@ -517,6 +517,7 @@ export interface Collection {
 		locked: boolean;
 		displayInListing: string[];
 		autoSave: boolean;
+		scheduling: boolean;
 		review?: {
 			requiredFor: string[];
 			allowSelfApproval: boolean;
@@ -546,6 +547,9 @@ export interface Collection {
 				review: string;
 			};
 		}[];
+	};
+	capabilities: {
+		scheduling: boolean;
 	};
 	permissions: {
 		read: string;
@@ -635,6 +639,14 @@ export type PublishOperationStatus =
 	| "cancelled"
 	| "superseded";
 
+export type PublishOperationExecutionStatus =
+	| "awaiting_approval"
+	| "scheduled"
+	| "executing"
+	| "executed"
+	| "failed"
+	| "cancelled";
+
 export type PublishOperationType = "request" | "direct";
 
 export type PublishOperationUser = {
@@ -668,6 +680,7 @@ export type PublishOperation = {
 	target: string;
 	operationType: PublishOperationType;
 	status: PublishOperationStatus;
+	executionStatus: PublishOperationExecutionStatus;
 	sourceVersionId: number;
 	sourceContentId: string;
 	snapshotVersionId: number;
@@ -677,10 +690,20 @@ export type PublishOperation = {
 	decidedBy: PublishOperationUser;
 	decisionComment: string | null;
 	decidedAt: string | null;
+	scheduledAt: string | null;
+	scheduledTimezone: string | null;
+	executedAt: string | null;
+	failedAt: string | null;
+	executionErrorMessage: string | null;
+	executionErrorData: Record<string, unknown> | null;
+	scheduledJobId: string | null;
 	createdAt: string | null;
 	updatedAt: string | null;
 	permissions: {
 		review: boolean;
+		cancel: boolean;
+		reschedule: boolean;
+		retry: boolean;
 	};
 	assignees: PublishOperationAssignee[];
 	events: PublishOperationEvent[];

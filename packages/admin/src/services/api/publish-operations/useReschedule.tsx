@@ -5,15 +5,15 @@ import serviceHelpers from "@/utils/service-helpers";
 
 export interface Params {
 	id: number;
-	action: "approve" | "reject" | "cancel";
 	body: {
-		comment?: string;
+		scheduledAt: string | null;
+		scheduledTimezone: string | null;
 	};
 }
 
-export const decisionReq = (params: Params) => {
+export const rescheduleReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/publish-requests/${params.id}/${params.action}`,
+		url: `/lucid/api/v1/publish-operations/${params.id}/reschedule`,
 		csrf: true,
 		config: {
 			method: "POST",
@@ -22,14 +22,14 @@ export const decisionReq = (params: Params) => {
 	});
 };
 
-interface UseDecisionProps {
+interface UseRescheduleProps {
 	onSuccess?: () => void;
 	onError?: (_errors: ErrorResponse | undefined) => void;
 }
 
-const useDecision = (props?: UseDecisionProps) => {
+const useReschedule = (props?: UseRescheduleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
-		mutationFn: decisionReq,
+		mutationFn: rescheduleReq,
 		getSuccessToast: () => ({
 			title: T()("update_toast_title", {
 				name: T()("publish_request_toast_name"),
@@ -39,12 +39,12 @@ const useDecision = (props?: UseDecisionProps) => {
 		invalidates: [
 			"documents.getMultiple",
 			"documents.getSingle",
-			"publishRequests.getMultiple",
-			"publishRequests.getSingle",
+			"publishOperations.getMultiple",
+			"publishOperations.getSingle",
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});
 };
 
-export default useDecision;
+export default useReschedule;

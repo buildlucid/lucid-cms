@@ -45,6 +45,10 @@ const CollectionConfigSchema = z
 					.boolean()
 					.default(constants.collectionBuilder.autoSave)
 					.optional(),
+				scheduling: z
+					.boolean()
+					.default(constants.collectionBuilder.scheduling)
+					.optional(),
 				review: z
 					.object({
 						requiredFor: z

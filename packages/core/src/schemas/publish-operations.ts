@@ -8,6 +8,8 @@ export const controllerSchemas = {
 			comment: z.string().trim().optional(),
 			assigneeIds: z.array(z.number()).optional(),
 			autoAccept: z.boolean().optional(),
+			scheduledAt: z.string().trim().nullable().optional(),
+			scheduledTimezone: z.string().trim().nullable().optional(),
 		}),
 		query: {
 			string: undefined,

@@ -7,6 +7,7 @@ export const queueJobStatusSchema = z.union([
 	z.literal("processing"),
 	z.literal("completed"),
 	z.literal("failed"),
+	z.literal("cancelled"),
 ]);
 
 const jobResponseSchema = z.object({

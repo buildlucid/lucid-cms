@@ -1,8 +1,4 @@
-import type {
-	PublishOperation,
-	PublishOperationStatus,
-	PublishOperationUser,
-} from "@types";
+import type { PublishOperation } from "@types";
 import {
 	type Component,
 	createMemo,
@@ -17,80 +13,27 @@ import { HeaderBar } from "@/components/Groups/PageBuilder";
 import Button from "@/components/Partials/Button";
 import DateText from "@/components/Partials/DateText";
 import Link from "@/components/Partials/Link";
-import Pill, { type PillProps } from "@/components/Partials/Pill";
+import Pill from "@/components/Partials/Pill";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import {
+	formatPublishOperationUser,
+	getPublishOperationStatusLabel,
+	getPublishOperationStatusTheme,
+} from "@/utils/publish-operations";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 type Scope = "assigned" | "requested" | "all";
-const publishRequestStatuses = [
-	"pending",
-	"approved",
-	"rejected",
-	"cancelled",
-	"superseded",
-] as const;
 
-const formatUser = (user: PublishOperationUser) => {
-	const username = user?.username ?? user?.email;
-	if (!username) return "-";
-	return helpers.formatUserName(
-		{
-			username,
-			firstName: user?.firstName,
-			lastName: user?.lastName,
-		},
-		"username",
-	);
-};
-
-const isPublishOperationStatus = (
-	value: string | number | undefined,
-): value is PublishOperationStatus =>
-	typeof value === "string" &&
-	publishRequestStatuses.some((status) => status === value);
-
-const statusTheme = (status: PublishOperationStatus): PillProps["theme"] => {
-	switch (status) {
-		case "pending":
-			return "warning-opaque";
-		case "approved":
-			return "primary-opaque";
-		case "rejected":
-		case "cancelled":
-			return "error-opaque";
-		case "superseded":
-			return "outline";
-	}
-};
-
-const statusLabel = (status: PublishOperationStatus) => {
-	switch (status) {
-		case "pending":
-			return T()("pending");
-		case "approved":
-			return T()("approved");
-		case "rejected":
-			return T()("rejected");
-		case "cancelled":
-			return T()("cancelled");
-		case "superseded":
-			return T()("superseded");
-	}
-};
-
-const CollectionsDocumentsPublishRequestsRoute: Component = () => {
+const CollectionsDocumentsReleaseRequestsRoute: Component = () => {
 	// ----------------------------------
 	// State / Hooks
 	const versionType = createMemo((): "latest" => "latest");
 	const versionId = createMemo(() => undefined);
 	const [scope, setScope] = createSignal<Scope>("all");
-	const [status, setStatus] = createSignal<
-		PublishOperationStatus | undefined
-	>();
 	const [target, setTarget] = createSignal<string | undefined>();
 
 	const state = useDocumentState({
@@ -107,10 +50,11 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 		version: versionType,
 		versionId,
 	});
-	const requests = api.publishRequests.useGetMultiple({
+	const requests = api.publishOperations.useGetMultiple({
 		queryParams: {
 			filters: {
-				status,
+				status: () => "pending",
+				operationType: () => "request",
 				collectionKey: state.collectionKey,
 				documentId: state.documentId,
 				target,
@@ -145,13 +89,6 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 					environment.key,
 			}));
 	});
-	const statusOptions = createMemo(() => [
-		{ value: "pending", label: T()("pending") },
-		{ value: "approved", label: T()("approved") },
-		{ value: "rejected", label: T()("rejected") },
-		{ value: "cancelled", label: T()("cancelled") },
-		{ value: "superseded", label: T()("superseded") },
-	]);
 	const rows = createMemo(() => requests.data?.data ?? []);
 
 	// ----------------------------------
@@ -219,17 +156,6 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 						</div>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 							<Select
-								id="document-publish-request-status"
-								name="document-publish-request-status"
-								value={status()}
-								onChange={(value) =>
-									setStatus(isPublishOperationStatus(value) ? value : undefined)
-								}
-								options={statusOptions()}
-								copy={{ label: T()("status") }}
-								noMargin={true}
-							/>
-							<Select
 								id="document-publish-request-target"
 								name="document-publish-request-target"
 								value={target()}
@@ -279,8 +205,12 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 														<h2 class="text-sm font-semibold text-title">
 															#{request.id}
 														</h2>
-														<Pill theme={statusTheme(request.status)}>
-															{statusLabel(request.status)}
+														<Pill
+															theme={getPublishOperationStatusTheme(
+																request.status,
+															)}
+														>
+															{getPublishOperationStatusLabel(request.status)}
 														</Pill>
 														<Show when={request.isOutdated}>
 															<Pill theme="warning-opaque">
@@ -294,11 +224,33 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 													<p class="text-sm text-body mt-1">
 														{T()("target")}: {request.target}
 													</p>
+													<Show when={request.scheduledAt}>
+														<p class="text-sm text-body mt-1">
+															{T()("scheduled_for")}:{" "}
+															<DateText date={request.scheduledAt} />
+															<Show when={request.scheduledTimezone}>
+																{" "}
+																({request.scheduledTimezone})
+															</Show>
+														</p>
+													</Show>
+													<Show when={request.executedAt}>
+														<p class="text-sm text-body mt-1">
+															{T()("executed_at")}:{" "}
+															<DateText date={request.executedAt} />
+														</p>
+													</Show>
+													<Show when={request.failedAt}>
+														<p class="text-sm text-body mt-1">
+															{T()("failed_at")}:{" "}
+															<DateText date={request.failedAt} />
+														</p>
+													</Show>
 												</div>
 												<div class="flex flex-col lg:items-end gap-2 text-xs text-body">
 													<span>
 														{T()("requested_by")}:{" "}
-														{formatUser(request.requestedBy)}
+														{formatPublishOperationUser(request.requestedBy)}
 													</span>
 													<span>
 														{T()("requested_at")}:{" "}
@@ -306,7 +258,7 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 													</span>
 													<div class="flex flex-wrap gap-2">
 														<Link
-															href={`/lucid/collections/${request.collectionKey}/${request.documentId}/publish-requests/${request.id}`}
+															href={`/lucid/collections/${request.collectionKey}/${request.documentId}/release-requests/${request.id}`}
 															theme="border-outline"
 															size="small"
 														>
@@ -339,4 +291,4 @@ const CollectionsDocumentsPublishRequestsRoute: Component = () => {
 	);
 };
 
-export default CollectionsDocumentsPublishRequestsRoute;
+export default CollectionsDocumentsReleaseRequestsRoute;

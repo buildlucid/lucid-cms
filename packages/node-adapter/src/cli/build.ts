@@ -125,15 +125,17 @@ const startServer = async () => {
 			hostname,
 		});
 
-		if (cronJobSetup.schedule) {
-			cron.schedule(cronJobSetup.schedule, async () => {
+		for (const schedule of cronJobSetup.schedules) {
+			cron.schedule(schedule, async () => {
 				await cronJobSetup.register({
 					config: resolved,
 					db: { client: resolved.db.client },
 					queue: queue,
 					env: env,
 					kv: kv,
-					requestUrl: "http://localhost:" + port,
+					request: { url: "http://localhost:" + port },
+				}, {
+					schedule,
 				});
 			}, {
 				noOverlap: true,

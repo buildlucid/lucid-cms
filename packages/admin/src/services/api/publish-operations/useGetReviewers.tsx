@@ -23,10 +23,10 @@ const useGetReviewers = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["publishRequests.getReviewers", queryKey(), params.key?.()],
+		queryKey: ["publishOperations.getReviewers", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<PublishOperationReviewer[]>>({
-				url: "/lucid/api/v1/publish-requests/reviewers",
+				url: "/lucid/api/v1/publish-operations/reviewers",
 				query: queryParams(),
 				config: {
 					method: "GET",

@@ -448,6 +448,14 @@ export type DocumentPublishOperationStatus =
 	| "cancelled"
 	| "superseded";
 
+export type DocumentPublishOperationExecutionStatus =
+	| "awaiting_approval"
+	| "scheduled"
+	| "executing"
+	| "executed"
+	| "failed"
+	| "cancelled";
+
 export type DocumentPublishOperationType = "request" | "direct";
 
 export type DocumentPublishOperationEventType =
@@ -455,7 +463,13 @@ export type DocumentPublishOperationEventType =
 	| "superseded"
 	| "approved"
 	| "rejected"
-	| "cancelled";
+	| "cancelled"
+	| "scheduled"
+	| "executing"
+	| "executed"
+	| "failed"
+	| "rescheduled"
+	| "retried";
 
 export interface LucidDocumentPublishOperations {
 	id: Generated<number>;
@@ -472,6 +486,18 @@ export interface LucidDocumentPublishOperations {
 	decided_by: number | null;
 	decision_comment: string | null;
 	decided_at: TimestampMutateable;
+	scheduled_at: TimestampMutateable;
+	scheduled_timezone: string | null;
+	execution_status: DocumentPublishOperationExecutionStatus;
+	executed_at: TimestampMutateable;
+	failed_at: TimestampMutateable;
+	execution_error_message: string | null;
+	execution_error_data: JSONColumnType<
+		Record<string, unknown> | null,
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
+	>;
+	scheduled_job_id: string | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
 }

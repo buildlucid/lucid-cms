@@ -42,6 +42,7 @@ export type {
 	PublishOperation,
 	PublishOperationAssignee,
 	PublishOperationEvent,
+	PublishOperationExecutionStatus,
 	PublishOperationReviewer,
 	PublishOperationStatus,
 	PublishOperationType,

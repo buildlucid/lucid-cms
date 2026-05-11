@@ -88,25 +88,9 @@ const CollectionsDocumentsEditRoute: Component<{
 
 	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
 	const { captureFocusSnapshot, restoreFocusSnapshot } = useFocusSnapshot();
-	const showSidebar = createMemo(
-		() =>
-			props.mode === "edit" &&
-			versionType() === "latest" &&
-			(!!docState.collection()?.config.workflow ||
-				(docState.collection()?.config.review?.requiredFor?.length ?? 0) > 0) &&
-			!!docState.document(),
-	);
-	const disableFromEdit = createMemo(
-		() =>
-			brickStore.getDocumentMutated() ||
-			uiState.isSaving() ||
-			uiState.isAutoSaving() ||
-			uiState.isBuilderLocked(),
-	);
 
 	// ------------------------------------------
 	// Setup document state
-
 	const getViewKey = (): string | null => {
 		if (props.mode === "create") {
 			return `create:${docState.collectionKey()}`;
@@ -199,6 +183,8 @@ const CollectionsDocumentsEditRoute: Component<{
 		restoreFocusSnapshot(focusSnapshot);
 	};
 
+	// ---------------------------------
+	// Effects
 	createEffect(
 		on(
 			() => [
@@ -221,6 +207,31 @@ const CollectionsDocumentsEditRoute: Component<{
 		brickStore.get.reset();
 		pageBuilderModalsStore.reset();
 	});
+
+	// ---------------------------------
+	// Memos
+	const showSidebar = createMemo(() => {
+		const collection = docState.collection();
+
+		if (props.mode !== "edit") return false;
+		if (versionType() !== "latest") return false;
+		if (!docState.document()) return false;
+		if (!collection) return false;
+
+		const hasWorkflow = collection.config.workflow !== undefined;
+		const hasReview = (collection.config.review?.requiredFor?.length ?? 0) > 0;
+		const hasScheduling = collection.capabilities.scheduling === true;
+
+		return hasWorkflow || hasReview || hasScheduling;
+	});
+
+	const disableFromEdit = createMemo(
+		() =>
+			brickStore.getDocumentMutated() ||
+			uiState.isSaving() ||
+			uiState.isAutoSaving() ||
+			uiState.isBuilderLocked(),
+	);
 
 	// ----------------------------------
 	// Render

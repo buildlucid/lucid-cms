@@ -1,6 +1,7 @@
 import {
 	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
+	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -31,13 +32,22 @@ const cancelForDocuments: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const QueueJobs = new QueueJobsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const activeRes = await Operations.selectMultiple({
-		select: ["id"],
+		select: ["id", "scheduled_job_id"],
 		where: [
 			{ key: "collection_key", operator: "=", value: data.collectionKey },
 			{ key: "document_id", operator: "in", value: data.documentIds },
-			{ key: "status", operator: "=", value: "pending" },
+			{ key: "status", operator: "in", value: ["pending", "approved"] },
+			{
+				key: "execution_status",
+				operator: "in",
+				value: ["awaiting_approval", "scheduled", "executing", "failed"],
+			},
 		],
 	});
 	if (activeRes.error) return activeRes;
@@ -50,6 +60,9 @@ const cancelForDocuments: ServiceFn<
 	}
 
 	const ids = activeOperations.map((operation) => operation.id);
+	const scheduledJobIds = activeOperations
+		.map((operation) => operation.scheduled_job_id)
+		.filter((jobId) => jobId !== null);
 	const detailedOperations = [];
 	for (const id of ids) {
 		const detailedRes = await Operations.selectSingleDetailed({
@@ -66,10 +79,23 @@ const cancelForDocuments: ServiceFn<
 	}
 
 	const now = new Date().toISOString();
+	if (scheduledJobIds.length > 0) {
+		const cancelJobsRes = await QueueJobs.updateSingle({
+			where: [{ key: "job_id", operator: "in", value: scheduledJobIds }],
+			data: {
+				status: "cancelled",
+				updated_at: now,
+			},
+		});
+		if (cancelJobsRes.error) return cancelJobsRes;
+	}
+
 	const updateRes = await Operations.updateSingle({
 		where: [{ key: "id", operator: "in", value: ids }],
 		data: {
 			status: "cancelled",
+			execution_status: "cancelled",
+			scheduled_job_id: null,
 			decision_comment: data.comment,
 			decided_at: now,
 			updated_at: now,

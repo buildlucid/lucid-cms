@@ -16,6 +16,8 @@ import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";
+import ReleaseScheduleFields from "./ReleaseScheduleFields";
 
 const CreatePublishRequest: Component<{
 	target: Accessor<Exclude<DocumentVersionType, "revision"> | null>;
@@ -34,6 +36,8 @@ const CreatePublishRequest: Component<{
 			comment?: string,
 			assigneeIds?: number[],
 			autoAccept?: boolean,
+			scheduledAt?: string,
+			scheduledTimezone?: string,
 		) => void | Promise<void>;
 		onCancel: () => void;
 	};
@@ -43,9 +47,15 @@ const CreatePublishRequest: Component<{
 	const [comment, setComment] = createSignal("");
 	const [assignees, setAssignees] = createSignal<SelectMultipleValueT[]>([]);
 	const [autoAccept, setAutoAccept] = createSignal(false);
+	const [scheduleEnabled, setScheduleEnabled] = createSignal(false);
+	const [scheduleDate, setScheduleDate] = createSignal("");
+	const [scheduleTime, setScheduleTime] = createSignal("");
+	const [scheduleTimezone, setScheduleTimezone] = createSignal(
+		getDefaultTimezone(),
+	);
 	const [validationError, setValidationError] = createSignal<string>();
 
-	const reviewers = api.publishRequests.useGetReviewers({
+	const reviewers = api.publishOperations.useGetReviewers({
 		queryParams: {
 			collectionKey: props.collectionKey,
 			target: () => props.target() ?? undefined,
@@ -83,6 +93,9 @@ const CreatePublishRequest: Component<{
 
 		return userStore.get.hasPermission([environment.permissions.review]).all;
 	});
+	const canSchedule = createMemo(
+		() => props.collection()?.capabilities.scheduling === true,
+	);
 	const error = createMemo(
 		() => validationError() || reviewers.error?.message || props.error,
 	);
@@ -95,6 +108,10 @@ const CreatePublishRequest: Component<{
 		setComment("");
 		setAssignees([]);
 		setAutoAccept(false);
+		setScheduleEnabled(false);
+		setScheduleDate("");
+		setScheduleTime("");
+		setScheduleTimezone(getDefaultTimezone());
 		setValidationError(undefined);
 	});
 
@@ -122,6 +139,10 @@ const CreatePublishRequest: Component<{
 					environment: props.environmentLabel() ?? "",
 				}),
 				error: error(),
+				confirm:
+					scheduleEnabled() && canSchedule()
+						? T()("publish_request_schedule_confirm")
+						: T()("publish_request_publish_confirm"),
 			}}
 			callbacks={{
 				onConfirm: async () => {
@@ -140,6 +161,26 @@ const CreatePublishRequest: Component<{
 						comment().trim().length === 0
 					) {
 						setValidationError(T()("publish_request_comment_required"));
+						return;
+					}
+					if (scheduleEnabled() && canSchedule()) {
+						const scheduledAt = getScheduledAt({
+							date: scheduleDate(),
+							time: scheduleTime(),
+							timezone: scheduleTimezone(),
+						});
+						if (!scheduledAt) {
+							setValidationError(T()("schedule_release_required"));
+							return;
+						}
+						await props.callbacks.onConfirm(
+							target,
+							comment().trim() || undefined,
+							assignees().map((assignee) => Number(assignee.value)),
+							autoAccept(),
+							scheduledAt,
+							scheduleTimezone(),
+						);
 						return;
 					}
 					await props.callbacks.onConfirm(
@@ -211,6 +252,19 @@ const CreatePublishRequest: Component<{
 				<p class="text-xs text-body">
 					{T()("publish_request_replacement_warning")}
 				</p>
+				<Show when={canSchedule()}>
+					<ReleaseScheduleFields
+						enabled={scheduleEnabled()}
+						setEnabled={setScheduleEnabled}
+						date={scheduleDate()}
+						setDate={setScheduleDate}
+						time={scheduleTime()}
+						setTime={setScheduleTime}
+						timezone={scheduleTimezone()}
+						setTimezone={setScheduleTimezone}
+						onChange={() => setValidationError(undefined)}
+					/>
+				</Show>
 			</div>
 		</Confirmation>
 	);

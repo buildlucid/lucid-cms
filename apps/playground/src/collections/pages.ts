@@ -26,6 +26,7 @@ const PageCollection = new CollectionBuilder("page", {
 		translations: true,
 		revisions: true,
 		autoSave: true,
+		scheduling: true,
 		review: {
 			requiredFor: ["production"],
 			allowSelfApproval: true,

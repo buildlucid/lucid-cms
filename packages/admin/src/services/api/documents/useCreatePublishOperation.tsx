@@ -11,6 +11,8 @@ export interface Params {
 		comment?: string;
 		assigneeIds?: number[];
 		autoAccept?: boolean;
+		scheduledAt?: string;
+		scheduledTimezone?: string;
 	};
 }
 
@@ -42,7 +44,7 @@ const useCreatePublishOperation = (props?: UseCreatePublishOperationProps) => {
 		invalidates: [
 			"documents.getMultiple",
 			"documents.getSingle",
-			"publishRequests.getMultiple",
+			"publishOperations.getMultiple",
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

@@ -103,6 +103,7 @@ test("collection config is correct along with field includes and filters", async
 			revisions: false,
 			translations: true,
 			autoSave: false,
+			scheduling: false,
 			displayInListing: [
 				"text_test",
 				"textarea_test",

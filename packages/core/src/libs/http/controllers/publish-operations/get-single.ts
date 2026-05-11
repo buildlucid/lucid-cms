@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import { controllerSchemas } from "../../../../schemas/publish-requests.js";
+import { controllerSchemas } from "../../../../schemas/publish-operation-management.js";
 import { documentPublishOperationServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -13,58 +13,49 @@ import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
-import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const getMultipleController = factory.createHandlers(
+const getSingleController = factory.createHandlers(
 	describeRoute({
-		description: "Get publish requests.",
-		tags: ["publish-requests"],
-		summary: "Get Publish Requests",
+		description: "Get a publish operation.",
+		tags: ["publish-operations"],
+		summary: "Get Publish Operation",
 		responses: honoOpenAPIResponse({
-			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
-			paginated: true,
+			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
 		}),
 		parameters: honoOpenAPIParamaters({
-			query: controllerSchemas.getMultiple.query.string,
+			params: controllerSchemas.getSingle.params,
+			query: controllerSchemas.getSingle.query.string,
 		}),
 	}),
 	authenticate,
 	permissions([Permissions.DocumentsReview]),
-	validate("query", controllerSchemas.getMultiple.query.string),
+	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {
+		const { id } = c.req.valid("param");
 		const context = createServiceContext(c);
-		const formattedQuery = await buildFormattedQuery(
-			c,
-			controllerSchemas.getMultiple.query.formatted,
-		);
 
-		const requests = await serviceWrapper(
-			documentPublishOperationServices.getMultiple,
+		const request = await serviceWrapper(
+			documentPublishOperationServices.getSingle,
 			{
 				transaction: false,
 			},
 		)(context, {
+			id: Number.parseInt(id, 10),
 			user: c.get("auth"),
-			query: formattedQuery,
 		});
-		if (requests.error) throw new LucidAPIError(requests.error);
+		if (request.error) throw new LucidAPIError(request.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: requests.data.data,
-				pagination: {
-					count: requests.data.count,
-					page: formattedQuery.page,
-					perPage: formattedQuery.perPage,
-				},
+				data: request.data,
 			}),
 		);
 	},
 );
 
-export default getMultipleController;
+export default getSingleController;

@@ -5,16 +5,15 @@ import {
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import {
-	collectionServices,
-	documentVersionServices,
-	documentWorkflowServices,
-} from "../index.js";
+import { collectionServices } from "../index.js";
 import {
 	canUsePublishOperationsForTarget,
+	collectionTargetSupportsScheduling,
 	hasCollectionTargetPermission,
+	parseScheduleInput,
 } from "./helpers/index.js";
 import notifyPublishOperationUsers from "./notifications.js";
+import scheduleApproved from "./schedule-approved.js";
 
 const approve: ServiceFn<
 	[
@@ -24,6 +23,8 @@ const approve: ServiceFn<
 			user: LucidAuth;
 			bypassReviewChecks?: boolean;
 			suppressRequesterNotification?: boolean;
+			scheduledAt?: string | null;
+			scheduledTimezone?: string | null;
 		},
 	],
 	undefined
@@ -62,6 +63,18 @@ const approve: ServiceFn<
 		key: operationRes.data.collection_key,
 	});
 	if (collectionRes.error) return collectionRes;
+
+	const scheduleInput = parseScheduleInput({
+		scheduledAt: data.scheduledAt,
+		scheduledTimezone: data.scheduledTimezone,
+	});
+	if (scheduleInput.error) {
+		return {
+			error: scheduleInput.error,
+			data: undefined,
+		};
+	}
+	const schedule = scheduleInput.data;
 
 	const bypassReviewChecks = data.bypassReviewChecks === true;
 	if (
@@ -136,27 +149,32 @@ const approve: ServiceFn<
 		};
 	}
 
-	const workflowPublishRes = await documentWorkflowServices.canPublishTarget(
-		context,
-		{
-			collectionKey: operationRes.data.collection_key,
-			documentId: operationRes.data.document_id,
+	if (
+		schedule?.scheduledAt &&
+		!collectionTargetSupportsScheduling({
+			collection: collectionRes.data,
 			target: operationRes.data.target,
-		},
-	);
-	if (workflowPublishRes.error) return workflowPublishRes;
-
-	const promoteRes = await documentVersionServices.promoteVersion(context, {
-		fromVersionId: operationRes.data.snapshot_version_id,
-		toVersionType: operationRes.data.target,
-		collectionKey: operationRes.data.collection_key,
-		documentId: operationRes.data.document_id,
-		userId: data.user.id,
-		createRevision: false,
-	});
-	if (promoteRes.error) return promoteRes;
+			queueSupportsScheduling: context.queue.support.scheduling,
+		})
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: T("publish_operation_schedule_not_supported"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
 
 	const now = new Date().toISOString();
+	const scheduleUpdate =
+		schedule?.provided === true
+			? {
+					scheduled_at: schedule.scheduledAt,
+					scheduled_timezone: schedule.scheduledTimezone,
+				}
+			: {};
 	const updateRes = await Operations.updateSingle({
 		where: [{ key: "id", operator: "=", value: operationRes.data.id }],
 		data: {
@@ -164,6 +182,7 @@ const approve: ServiceFn<
 			decided_by: data.user.id,
 			decision_comment: comment,
 			decided_at: now,
+			...scheduleUpdate,
 			updated_at: now,
 		},
 	});
@@ -181,6 +200,13 @@ const approve: ServiceFn<
 		},
 	});
 	if (eventRes.error) return eventRes;
+
+	const scheduleRes = await scheduleApproved(context, {
+		id: operationRes.data.id,
+		userId: data.user.id,
+		eventType: "scheduled",
+	});
+	if (scheduleRes.error) return scheduleRes;
 
 	const requester =
 		data.suppressRequesterNotification !== true &&

@@ -52,6 +52,9 @@ binding = "ASSETS"
 [[triggers.crons]]
 cron = "0 0 * * *"
 
+[[triggers.crons]]
+cron = "0 */4 * * *"
+
 [build]
 watch_dir = "./src"
 command = "lucidcms build --cache-spa --silent"

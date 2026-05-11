@@ -4,6 +4,7 @@ import {
 	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
 	DocumentVersionsRepository,
+	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
@@ -18,8 +19,11 @@ import getReviewers from "./get-reviewers.js";
 import {
 	activePublishOperationStatuses,
 	canUsePublishOperationsForTarget,
+	collectionTargetSupportsScheduling,
 	hasCollectionTargetPermission,
+	parseScheduleInput,
 	snapshotVersionType,
+	unresolvedPublishOperationExecutionStatuses,
 } from "./helpers/index.js";
 import notifyPublishOperationUsers from "./notifications.js";
 
@@ -32,6 +36,8 @@ const createSingle: ServiceFn<
 			comment?: string;
 			assigneeIds?: number[];
 			autoAccept?: boolean;
+			scheduledAt?: string | null;
+			scheduledTimezone?: string | null;
 			user: LucidAuth;
 		},
 	],
@@ -56,6 +62,17 @@ const createSingle: ServiceFn<
 	const comment = data.comment?.trim() || null;
 	const autoAccept = data.autoAccept === true;
 	const approveImmediately = !requiresApproval || autoAccept;
+	const scheduleInput = parseScheduleInput({
+		scheduledAt: data.scheduledAt,
+		scheduledTimezone: data.scheduledTimezone,
+	});
+	if (scheduleInput.error) {
+		return {
+			error: scheduleInput.error,
+			data: undefined,
+		};
+	}
+	const schedule = scheduleInput.data;
 
 	// Validate target, permissions, and comments before touching document data.
 	if (!targetIsEnvironment) {
@@ -86,6 +103,24 @@ const createSingle: ServiceFn<
 					action: "publish",
 				}),
 				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
+	if (
+		schedule?.scheduledAt &&
+		!collectionTargetSupportsScheduling({
+			collection,
+			target: data.target,
+			queueSupportsScheduling: context.queue.support.scheduling,
+		})
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: T("publish_operation_schedule_not_supported"),
+				status: 400,
 			},
 			data: undefined,
 		};
@@ -215,6 +250,10 @@ const createSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const QueueJobs = new QueueJobsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
@@ -241,15 +280,20 @@ const createSingle: ServiceFn<
 			},
 		),
 		Operations.selectSingle({
-			select: ["id", "source_content_id"],
+			select: ["id", "source_content_id", "scheduled_job_id"],
 			where: [
 				{ key: "collection_key", operator: "=", value: data.collectionKey },
 				{ key: "document_id", operator: "=", value: data.documentId },
 				{ key: "target", operator: "=", value: data.target },
 				{
 					key: "status",
-					operator: "=",
-					value: activePublishOperationStatuses[0],
+					operator: "in",
+					value: activePublishOperationStatuses,
+				},
+				{
+					key: "execution_status",
+					operator: "in",
+					value: unresolvedPublishOperationExecutionStatuses,
 				},
 			],
 		}),
@@ -257,30 +301,26 @@ const createSingle: ServiceFn<
 	if (latestVersionRes.error) return latestVersionRes;
 	if (activeRes.error) return activeRes;
 
-	const activeOperationMatchesLatest =
-		activeRes.data?.source_content_id === latestVersionRes.data.content_id;
-
-	if (requiresApproval && activeRes.data && activeOperationMatchesLatest) {
-		if (approveImmediately) {
-			const approveRes = await approve(context, {
-				id: activeRes.data.id,
-				comment: comment ?? undefined,
-				user: data.user,
-				bypassReviewChecks: !requiresApproval,
-				suppressRequesterNotification: !requiresApproval,
-			});
-			return approveRes;
-		}
-
-		return {
-			error: undefined,
-			data: undefined,
-		};
-	}
-
-	// If latest changed since the active request, retire the old request first.
+	// Retire any unresolved operation for this document and target before creating the new release.
 	if (activeRes.data) {
 		const now = new Date().toISOString();
+
+		if (activeRes.data.scheduled_job_id) {
+			const cancelJobRes = await QueueJobs.updateSingle({
+				where: [
+					{
+						key: "job_id",
+						operator: "=",
+						value: activeRes.data.scheduled_job_id,
+					},
+				],
+				data: {
+					status: "cancelled",
+					updated_at: now,
+				},
+			});
+			if (cancelJobRes.error) return cancelJobRes;
+		}
 
 		const [activeDetailedRes, supersedeRes, eventRes] = await Promise.all([
 			Operations.selectSingleDetailed({
@@ -296,6 +336,8 @@ const createSingle: ServiceFn<
 				where: [{ key: "id", operator: "=", value: activeRes.data.id }],
 				data: {
 					status: "superseded",
+					execution_status: "cancelled",
+					scheduled_job_id: null,
 					updated_at: now,
 				},
 			}),
@@ -383,6 +425,9 @@ const createSingle: ServiceFn<
 			snapshot_version_id: snapshotRes.data.versionId,
 			requested_by: data.user.id,
 			request_comment: comment,
+			scheduled_at: schedule?.scheduledAt ?? undefined,
+			scheduled_timezone: schedule?.scheduledTimezone ?? null,
+			execution_status: "awaiting_approval",
 		},
 		returning: ["id"],
 		validation: {

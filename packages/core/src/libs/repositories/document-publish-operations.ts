@@ -1,6 +1,6 @@
 import { sql } from "kysely";
 import z from "zod";
-import type { GetMultipleQueryParams } from "../../schemas/publish-requests.js";
+import type { GetMultipleQueryParams } from "../../schemas/publish-operation-management.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
@@ -61,6 +61,21 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 		decided_by: z.number().nullable(),
 		decision_comment: z.string().nullable(),
 		decided_at: z.union([z.string(), z.date()]).nullable(),
+		scheduled_at: z.union([z.string(), z.date()]).nullable(),
+		scheduled_timezone: z.string().nullable(),
+		execution_status: z.enum([
+			"awaiting_approval",
+			"scheduled",
+			"executing",
+			"executed",
+			"failed",
+			"cancelled",
+		]),
+		executed_at: z.union([z.string(), z.date()]).nullable(),
+		failed_at: z.union([z.string(), z.date()]).nullable(),
+		execution_error_message: z.string().nullable(),
+		execution_error_data: z.record(z.string(), z.unknown()).nullable(),
+		scheduled_job_id: z.string().nullable(),
 		created_at: z.union([z.string(), z.date()]),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
@@ -79,6 +94,14 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 		decided_by: this.dbAdapter.getDataType("integer"),
 		decision_comment: this.dbAdapter.getDataType("text"),
 		decided_at: this.dbAdapter.getDataType("timestamp"),
+		scheduled_at: this.dbAdapter.getDataType("timestamp"),
+		scheduled_timezone: this.dbAdapter.getDataType("text"),
+		execution_status: this.dbAdapter.getDataType("text"),
+		executed_at: this.dbAdapter.getDataType("timestamp"),
+		failed_at: this.dbAdapter.getDataType("timestamp"),
+		execution_error_message: this.dbAdapter.getDataType("text"),
+		execution_error_data: this.dbAdapter.getDataType("json"),
+		scheduled_job_id: this.dbAdapter.getDataType("text"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};
@@ -86,6 +109,8 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 		tableKeys: {
 			filters: {
 				status: "lucid_document_publish_operations.status",
+				executionStatus: "lucid_document_publish_operations.execution_status",
+				operationType: "lucid_document_publish_operations.operation_type",
 				collectionKey: "lucid_document_publish_operations.collection_key",
 				documentId: "lucid_document_publish_operations.document_id",
 				target: "lucid_document_publish_operations.target",
@@ -93,6 +118,9 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 			sorts: {
 				createdAt: "lucid_document_publish_operations.created_at",
 				updatedAt: "lucid_document_publish_operations.updated_at",
+				scheduledAt: "lucid_document_publish_operations.scheduled_at",
+				executedAt: "lucid_document_publish_operations.executed_at",
+				failedAt: "lucid_document_publish_operations.failed_at",
 			},
 		},
 	} as const;

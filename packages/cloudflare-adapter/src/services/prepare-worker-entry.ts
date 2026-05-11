@@ -141,8 +141,14 @@ return app.fetch(request, env, ctx);`,
     const kv = await getInitializedKVAdapter(resolved);
 
     try {
+        const runtimeContext = getRuntimeContext({
+            server: "cloudflare",
+            compiled: true,
+        });
         const cronJobSetup = await setupCronJobs({
             createQueue: true,
+            runtimeContext,
+            env,
         });
         await cronJobSetup.register({
             config: resolved,
@@ -150,7 +156,9 @@ return app.fetch(request, env, ctx);`,
             queue: cronJobSetup.queue,
             env: env,
             kv: kv,
-            requestUrl: "",
+            request: { url: resolved.baseUrl || "http://localhost" },
+        }, {
+            schedule: controller.cron,
         });
     } finally {
         await Promise.allSettled([

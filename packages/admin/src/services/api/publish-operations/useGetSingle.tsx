@@ -17,10 +17,10 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["publishRequests.getSingle", queryKey(), params.key?.()],
+		queryKey: ["publishOperations.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<PublishOperation>>({
-				url: `/lucid/api/v1/publish-requests/${queryParams().location?.id}`,
+				url: `/lucid/api/v1/publish-operations/${queryParams().location?.id}`,
 				config: {
 					method: "GET",
 				},

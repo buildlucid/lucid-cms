@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import { controllerSchemas } from "../../../../schemas/publish-requests.js";
+import { controllerSchemas } from "../../../../schemas/publish-operation-management.js";
 import { documentPublishOperationServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -16,11 +16,11 @@ import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const decisionApproveController = factory.createHandlers(
+const decisionRejectController = factory.createHandlers(
 	describeRoute({
-		description: "Approve a publish request.",
-		tags: ["publish-requests"],
-		summary: "Approve Publish Request",
+		description: "Reject a publish operation.",
+		tags: ["publish-operations"],
+		summary: "Reject Publish Operation",
 		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
@@ -42,7 +42,7 @@ const decisionApproveController = factory.createHandlers(
 		const context = createServiceContext(c);
 
 		const request = await serviceWrapper(
-			documentPublishOperationServices.approve,
+			documentPublishOperationServices.reject,
 			{
 				transaction: true,
 			},
@@ -58,4 +58,4 @@ const decisionApproveController = factory.createHandlers(
 	},
 );
 
-export default decisionApproveController;
+export default decisionRejectController;

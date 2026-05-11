@@ -1,6 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import { controllerSchemas } from "../../../../schemas/publish-requests.js";
+import { controllerSchemas } from "../../../../schemas/publish-operation-management.js";
 import { documentPublishOperationServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -16,17 +16,17 @@ import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const decisionCancelController = factory.createHandlers(
+const rescheduleController = factory.createHandlers(
 	describeRoute({
-		description: "Cancel a publish request.",
-		tags: ["publish-requests"],
-		summary: "Cancel Publish Request",
+		description: "Reschedule a publish operation.",
+		tags: ["publish-operations"],
+		summary: "Reschedule Publish Operation",
 		responses: honoOpenAPIResponse({
 			noProperties: true,
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.decision.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.reschedule.body),
 		parameters: honoOpenAPIParamaters({
-			params: controllerSchemas.decision.params,
+			params: controllerSchemas.reschedule.params,
 			headers: {
 				csrf: true,
 			},
@@ -34,28 +34,29 @@ const decisionCancelController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	validate("json", controllerSchemas.decision.body),
-	validate("param", controllerSchemas.decision.params),
+	validate("json", controllerSchemas.reschedule.body),
+	validate("param", controllerSchemas.reschedule.params),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const body = c.req.valid("json");
 		const context = createServiceContext(c);
 
-		const request = await serviceWrapper(
-			documentPublishOperationServices.cancel,
+		const reschedule = await serviceWrapper(
+			documentPublishOperationServices.reschedule,
 			{
 				transaction: true,
 			},
 		)(context, {
 			id: Number.parseInt(id, 10),
-			comment: body.comment,
+			scheduledAt: body.scheduledAt,
+			scheduledTimezone: body.scheduledTimezone,
 			user: c.get("auth"),
 		});
-		if (request.error) throw new LucidAPIError(request.error);
+		if (reschedule.error) throw new LucidAPIError(reschedule.error);
 
 		c.status(204);
 		return c.body(null);
 	},
 );
 
-export default decisionCancelController;
+export default rescheduleController;

@@ -4,9 +4,33 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import { QueueJobsRepository } from "../repositories/index.js";
 import getJobHandler from "./job-handlers.js";
-import type { QueueEvent } from "./types.js";
+import type { QueueEvent, QueueJobHandler } from "./types.js";
 
 const BACKOFF_MULTIPLIER = 2;
+
+const getHandlerFn = (handler: QueueJobHandler) => {
+	if (typeof handler === "function") return handler;
+	return handler.handler;
+};
+
+const runPermanentFailureHook = async (params: {
+	handler: QueueJobHandler;
+	context: ServiceContext;
+	jobId: string;
+	event: QueueEvent;
+	payload: Record<string, unknown>;
+	errorMessage: string;
+}) => {
+	if (typeof params.handler === "function") return;
+	if (!params.handler.onPermanentFailure) return;
+
+	await params.handler.onPermanentFailure(params.context, {
+		jobId: params.jobId,
+		event: params.event,
+		payload: params.payload,
+		errorMessage: params.errorMessage,
+	});
+};
 
 /**
  * Handles the retry logic for a failed job
@@ -116,6 +140,43 @@ const executeSingleJob: (
 	);
 	const setNextRetryAt = data.setNextRetryAt ?? true;
 
+	const jobRes = await QueueJobs.selectSingle({
+		select: ["status"],
+		where: [{ key: "job_id", operator: "=", value: data.jobId }],
+		validation: {
+			enabled: true,
+			defaultError: {
+				message: `Queue job not found: ${data.jobId}`,
+				status: 404,
+			},
+		},
+	});
+	if (jobRes.error) {
+		return {
+			success: false,
+			shouldRetry: false,
+			message: jobRes.error.message ?? "Queue job not found",
+		};
+	}
+
+	if (jobRes.data.status !== "pending") {
+		logger.debug({
+			message: "Skipping non-pending queue job",
+			scope: constants.logScopes.queueAdapter,
+			data: {
+				jobId: data.jobId,
+				eventType: data.event,
+				status: jobRes.data.status,
+			},
+		});
+
+		return {
+			success: true,
+			shouldRetry: false,
+			message: "Queue job is no longer pending",
+		};
+	}
+
 	if (!handler) {
 		const errorMessage = `No job handler found for job type: ${data.event}`;
 
@@ -159,7 +220,7 @@ const executeSingleJob: (
 			where: [{ key: "job_id", operator: "=", value: data.jobId }],
 		});
 
-		const handlerResult = await serviceWrapper(handler, {
+		const handlerResult = await serviceWrapper(getHandlerFn(handler), {
 			transaction: false, //* jobs should handle cleanup themselves
 		})(context, data.payload);
 
@@ -174,6 +235,16 @@ const executeSingleJob: (
 				setNextRetryAt,
 				QueueJobs,
 			});
+			if (!shouldRetry) {
+				await runPermanentFailureHook({
+					handler,
+					context,
+					event: data.event,
+					jobId: data.jobId,
+					payload: data.payload,
+					errorMessage,
+				});
+			}
 
 			return {
 				success: false,
@@ -215,6 +286,16 @@ const executeSingleJob: (
 			setNextRetryAt,
 			QueueJobs,
 		});
+		if (!shouldRetry) {
+			await runPermanentFailureHook({
+				handler,
+				context,
+				event: data.event,
+				jobId: data.jobId,
+				payload: data.payload,
+				errorMessage,
+			});
+		}
 
 		return {
 			success: false,

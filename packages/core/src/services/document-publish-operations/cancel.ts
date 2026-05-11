@@ -1,12 +1,16 @@
 import {
 	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
+	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
-import { hasCollectionTargetPermission } from "./helpers/index.js";
+import {
+	hasCollectionTargetPermission,
+	unresolvedPublishOperationExecutionStatuses,
+} from "./helpers/index.js";
 import notifyPublishOperationUsers from "./notifications.js";
 
 const cancel: ServiceFn<
@@ -28,6 +32,10 @@ const cancel: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const QueueJobs = new QueueJobsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const operationRes = await Operations.selectSingleDetailed({
 		where: [
@@ -39,7 +47,13 @@ const cancel: ServiceFn<
 		],
 	});
 	if (operationRes.error) return operationRes;
-	if (!operationRes.data || operationRes.data.status !== "pending") {
+	if (
+		!operationRes.data ||
+		!["pending", "approved"].includes(operationRes.data.status) ||
+		!unresolvedPublishOperationExecutionStatuses.some(
+			(status) => status === operationRes.data?.execution_status,
+		)
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -56,20 +70,25 @@ const cancel: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	const isRequester = operationRes.data.requested_by === data.user.id;
-	const canReview = hasCollectionTargetPermission({
+	const requiredAction =
+		operationRes.data.status === "approved" &&
+		operationRes.data.operation_type === "direct"
+			? "publish"
+			: "review";
+	const canAct = hasCollectionTargetPermission({
 		user: data.user,
 		collection: collectionRes.data,
-		action: "review",
+		action: requiredAction,
 		target: operationRes.data.target,
 	});
-	if (!data.system && !isRequester && !canReview) {
+	if (!data.system && !isRequester && !canAct) {
 		return {
 			error: {
 				type: "basic",
 				name: T("collection_permission_error_name"),
 				message: T("collection_permission_error_message", {
 					collection: operationRes.data.collection_key,
-					action: "review",
+					action: requiredAction,
 				}),
 				status: 403,
 			},
@@ -79,10 +98,29 @@ const cancel: ServiceFn<
 
 	const comment = data.comment?.trim() || null;
 	const now = new Date().toISOString();
+	if (operationRes.data.scheduled_job_id) {
+		const cancelJobRes = await QueueJobs.updateSingle({
+			where: [
+				{
+					key: "job_id",
+					operator: "=",
+					value: operationRes.data.scheduled_job_id,
+				},
+			],
+			data: {
+				status: "cancelled",
+				updated_at: now,
+			},
+		});
+		if (cancelJobRes.error) return cancelJobRes;
+	}
+
 	const updateRes = await Operations.updateSingle({
 		where: [{ key: "id", operator: "=", value: operationRes.data.id }],
 		data: {
 			status: "cancelled",
+			execution_status: "cancelled",
+			scheduled_job_id: null,
 			decided_by: data.system ? null : data.user.id,
 			decision_comment: comment,
 			decided_at: now,

@@ -97,6 +97,7 @@ const reject: ServiceFn<
 		where: [{ key: "id", operator: "=", value: operationRes.data.id }],
 		data: {
 			status: "rejected",
+			execution_status: "cancelled",
 			decided_by: data.user.id,
 			decision_comment: comment,
 			decided_at: now,

@@ -2,6 +2,8 @@ import { logger } from "@lucidcms/core";
 import { executeSingleJob, insertJobs, logScope } from "@lucidcms/core/queue";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
 import { ADAPTER_KEY, CONCURRENT_LIMIT } from "./constants.js";
+import { getDelaySeconds } from "./helper.js";
+import T from "./translations/index.js";
 import type { PluginOptions } from "./types.js";
 
 const cloudflareQueuesAdapter = (
@@ -12,6 +14,11 @@ const cloudflareQueuesAdapter = (
 	return {
 		type: "queue-adapter",
 		key: ADAPTER_KEY,
+		support: {
+			get scheduling() {
+				return consumerSupported;
+			},
+		},
 		lifecycle: {
 			init: async (params) => {
 				consumerSupported = params.runtimeContext.compiled;
@@ -30,6 +37,15 @@ const cloudflareQueuesAdapter = (
 		},
 		add: async (event, params) => {
 			try {
+				if (params.options?.scheduledFor && !consumerSupported) {
+					return {
+						error: {
+							message: T("queue_scheduling_production_only"),
+						},
+						data: undefined,
+					};
+				}
+
 				logger.info({
 					message: "Adding job to Cloudflare queue",
 					scope: logScope,
@@ -55,11 +71,18 @@ const cloudflareQueuesAdapter = (
 				}
 
 				if (consumerSupported) {
-					await options.binding.send({
-						jobId: jobData.jobId,
-						event,
-						payload: params.payload,
-					});
+					await options.binding.send(
+						{
+							jobId: jobData.jobId,
+							event,
+							payload: params.payload,
+						},
+						params.options?.scheduledFor
+							? {
+									delaySeconds: getDelaySeconds(params.options.scheduledFor),
+								}
+							: undefined,
+					);
 				} else {
 					const executeResult = await executeSingleJob(params.context, {
 						jobId: jobData.jobId,
@@ -111,6 +134,15 @@ const cloudflareQueuesAdapter = (
 		},
 		addBatch: async (event, params) => {
 			try {
+				if (params.options?.scheduledFor && !consumerSupported) {
+					return {
+						error: {
+							message: T("queue_scheduling_production_only"),
+						},
+						data: undefined,
+					};
+				}
+
 				logger.info({
 					message: "Adding batch jobs to Cloudflare queue",
 					scope: logScope,
@@ -133,6 +165,11 @@ const cloudflareQueuesAdapter = (
 								event,
 								payload: job.payload,
 							},
+							...(params.options?.scheduledFor
+								? {
+										delaySeconds: getDelaySeconds(params.options.scheduledFor),
+									}
+								: {}),
 						})),
 					);
 				} else {

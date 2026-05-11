@@ -81,6 +81,7 @@ export type CollectionData = {
 		revisions: boolean;
 		translations: boolean;
 		autoSave: boolean;
+		scheduling: boolean;
 		review?: PublishingReviewConfig;
 		workflow?: PublishingWorkflowConfig;
 		displayInListing: string[];

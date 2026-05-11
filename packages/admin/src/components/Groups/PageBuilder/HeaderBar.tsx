@@ -157,7 +157,7 @@ export const HeaderBar: Component<{
 				type: "link",
 				location:
 					props.state.documentID() !== undefined
-						? `/lucid/collections/${props.state.collectionKey()}/${props.state.documentID()}/publish-requests`
+						? `/lucid/collections/${props.state.collectionKey()}/${props.state.documentID()}/release-requests`
 						: "#",
 			});
 		}

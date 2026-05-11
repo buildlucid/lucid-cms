@@ -1,8 +1,4 @@
-import type {
-	PublishOperation,
-	PublishOperationStatus,
-	PublishOperationUser,
-} from "@types";
+import type { PublishOperation } from "@types";
 import {
 	type Component,
 	createMemo,
@@ -18,85 +14,34 @@ import { Wrapper } from "@/components/Groups/Layout";
 import Button from "@/components/Partials/Button";
 import DateText from "@/components/Partials/DateText";
 import Link from "@/components/Partials/Link";
-import Pill, { type PillProps } from "@/components/Partials/Pill";
+import Pill from "@/components/Partials/Pill";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import {
+	formatPublishOperationUser,
+	getPublishOperationStatusLabel,
+	getPublishOperationStatusTheme,
+} from "@/utils/publish-operations";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 type Scope = "assigned" | "requested" | "all";
-const publishRequestStatuses = [
-	"pending",
-	"approved",
-	"rejected",
-	"cancelled",
-	"superseded",
-] as const;
 
-const formatUser = (user: PublishOperationUser) => {
-	const username = user?.username ?? user?.email;
-	if (!username) return "-";
-	return helpers.formatUserName(
-		{
-			username,
-			firstName: user?.firstName,
-			lastName: user?.lastName,
-		},
-		"username",
-	);
-};
-
-const isPublishOperationStatus = (
-	value: string | number | undefined,
-): value is PublishOperationStatus =>
-	typeof value === "string" &&
-	publishRequestStatuses.some((status) => status === value);
-
-const statusTheme = (status: PublishOperationStatus): PillProps["theme"] => {
-	switch (status) {
-		case "pending":
-			return "warning-opaque";
-		case "approved":
-			return "primary-opaque";
-		case "rejected":
-		case "cancelled":
-			return "error-opaque";
-		case "superseded":
-			return "outline";
-	}
-};
-const statusLabel = (status: PublishOperationStatus) => {
-	switch (status) {
-		case "pending":
-			return T()("pending");
-		case "approved":
-			return T()("approved");
-		case "rejected":
-			return T()("rejected");
-		case "cancelled":
-			return T()("cancelled");
-		case "superseded":
-			return T()("superseded");
-	}
-};
-
-const PublishRequestsListRoute: Component = () => {
+const ReleaseRequestsListRoute: Component = () => {
 	// ----------------------------------
 	// State / Hooks
 	const [scope, setScope] = createSignal<Scope>("all");
-	const [status, setStatus] = createSignal<
-		PublishOperationStatus | undefined
-	>();
 	const [collectionKey, setCollectionKey] = createSignal<string | undefined>();
 	const [target, setTarget] = createSignal<string | undefined>();
 
 	const collections = api.collections.useGetAll({
 		queryParams: {},
 	});
-	const requests = api.publishRequests.useGetMultiple({
+	const requests = api.publishOperations.useGetMultiple({
 		queryParams: {
 			filters: {
-				status,
+				status: () => "pending",
+				operationType: () => "request",
 				collectionKey,
 				target,
 				assignedToMe: () => (scope() === "assigned" ? "true" : undefined),
@@ -108,12 +53,20 @@ const PublishRequestsListRoute: Component = () => {
 
 	// ----------------------------------
 	// Memos
+	const reviewCollectionKeys = createMemo(
+		() =>
+			new Set(
+				(collections.data?.data ?? [])
+					.filter(
+						(collection) =>
+							(collection.config.review?.requiredFor?.length ?? 0) > 0,
+					)
+					.map((collection) => collection.key),
+			),
+	);
 	const collectionOptions = createMemo(() =>
 		(collections.data?.data ?? [])
-			.filter(
-				(collection) =>
-					(collection.config.review?.requiredFor?.length ?? 0) > 0,
-			)
+			.filter((collection) => reviewCollectionKeys().has(collection.key))
 			.map((collection) => ({
 				value: collection.key,
 				label:
@@ -133,14 +86,11 @@ const PublishRequestsListRoute: Component = () => {
 			label: key,
 		}));
 	});
-	const statusOptions = createMemo(() => [
-		{ value: "pending", label: T()("pending") },
-		{ value: "approved", label: T()("approved") },
-		{ value: "rejected", label: T()("rejected") },
-		{ value: "cancelled", label: T()("cancelled") },
-		{ value: "superseded", label: T()("superseded") },
-	]);
-	const rows = createMemo(() => requests.data?.data ?? []);
+	const rows = createMemo(() =>
+		(requests.data?.data ?? []).filter((request) =>
+			reviewCollectionKeys().has(request.collectionKey),
+		),
+	);
 
 	// ----------------------------------
 	// Render
@@ -187,18 +137,7 @@ const PublishRequestsListRoute: Component = () => {
 						{T()("all")}
 					</Button>
 				</div>
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-					<Select
-						id="publish-request-status"
-						name="publish-request-status"
-						value={status()}
-						onChange={(value) =>
-							setStatus(isPublishOperationStatus(value) ? value : undefined)
-						}
-						options={statusOptions()}
-						copy={{ label: T()("status") }}
-						noMargin={true}
-					/>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 					<Select
 						id="publish-request-collection"
 						name="publish-request-collection"
@@ -250,8 +189,10 @@ const PublishRequestsListRoute: Component = () => {
 												<h2 class="text-sm font-semibold text-title">
 													{request.collectionKey} #{request.documentId}
 												</h2>
-												<Pill theme={statusTheme(request.status)}>
-													{statusLabel(request.status)}
+												<Pill
+													theme={getPublishOperationStatusTheme(request.status)}
+												>
+													{getPublishOperationStatusLabel(request.status)}
 												</Pill>
 												<Show when={request.isOutdated}>
 													<Pill theme="warning-opaque">
@@ -265,10 +206,33 @@ const PublishRequestsListRoute: Component = () => {
 											<p class="text-sm text-body mt-1">
 												{T()("target")}: {request.target}
 											</p>
+											<Show when={request.scheduledAt}>
+												<p class="text-sm text-body mt-1">
+													{T()("scheduled_for")}:{" "}
+													<DateText date={request.scheduledAt} />
+													<Show when={request.scheduledTimezone}>
+														{" "}
+														({request.scheduledTimezone})
+													</Show>
+												</p>
+											</Show>
+											<Show when={request.executedAt}>
+												<p class="text-sm text-body mt-1">
+													{T()("executed_at")}:{" "}
+													<DateText date={request.executedAt} />
+												</p>
+											</Show>
+											<Show when={request.failedAt}>
+												<p class="text-sm text-body mt-1">
+													{T()("failed_at")}:{" "}
+													<DateText date={request.failedAt} />
+												</p>
+											</Show>
 										</div>
 										<div class="flex flex-col lg:items-end gap-2 text-xs text-body">
 											<span>
-												{T()("requested_by")}: {formatUser(request.requestedBy)}
+												{T()("requested_by")}:{" "}
+												{formatPublishOperationUser(request.requestedBy)}
 											</span>
 											<span>
 												{T()("requested_at")}:{" "}
@@ -276,7 +240,7 @@ const PublishRequestsListRoute: Component = () => {
 											</span>
 											<div class="flex flex-wrap gap-2">
 												<Link
-													href={`/lucid/collections/${request.collectionKey}/${request.documentId}/publish-requests/${request.id}`}
+													href={`/lucid/collections/${request.collectionKey}/${request.documentId}/release-requests/${request.id}`}
 													theme="border-outline"
 													size="small"
 												>
@@ -307,4 +271,4 @@ const PublishRequestsListRoute: Component = () => {
 	);
 };
 
-export default PublishRequestsListRoute;
+export default ReleaseRequestsListRoute;

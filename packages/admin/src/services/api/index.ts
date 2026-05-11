@@ -11,7 +11,7 @@ import media from "./media";
 import mediaFolders from "./media-folders";
 import mediaShareLinks from "./media-share-links";
 import permissions from "./permissions";
-import publishRequests from "./publish-requests";
+import publishOperations from "./publish-operations";
 import roles from "./roles";
 import settings from "./settings";
 import share from "./share";
@@ -25,7 +25,7 @@ const exportObject = {
 	userLogins,
 	roles,
 	permissions,
-	publishRequests,
+	publishOperations,
 	share,
 	media,
 	mediaFolders,

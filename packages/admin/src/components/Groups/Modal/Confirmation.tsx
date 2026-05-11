@@ -17,6 +17,7 @@ export const Confirmation: Component<{
 		title: string;
 		description?: string;
 		error?: string;
+		confirm?: string;
 	};
 	callbacks: {
 		onConfirm: () => void;
@@ -91,7 +92,7 @@ export const Confirmation: Component<{
 									loading={props.state.isLoading}
 									onClick={props.callbacks.onConfirm}
 								>
-									{T()("confirm")}
+									{props.copy.confirm ?? T()("confirm")}
 								</Button>
 							</div>
 						</div>

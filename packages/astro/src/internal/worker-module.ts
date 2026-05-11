@@ -137,6 +137,10 @@ export const buildCloudflareMainWorkerSource = (props: {
 			exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 		},
 		{
+			path: "@lucidcms/cloudflare-adapter/runtime",
+			exports: ["getRuntimeContext"],
+		},
+		{
 			path: `./${astroConstants.files.emailTemplatesJson}`,
 			default: "emailTemplates",
 		},
@@ -180,8 +184,14 @@ return astroWorker.fetch(request, env, ctx);`,
 		const kv = await getInitializedKVAdapter(resolvedConfig);
 
 		try {
+			const runtimeContext = getRuntimeContext({
+				server: "cloudflare",
+				compiled: true,
+			});
 			const cronJobSetup = await setupCronJobs({
 				createQueue: true,
+				runtimeContext,
+				env,
 			});
 			await cronJobSetup.register({
 				config: resolvedConfig,
@@ -189,7 +199,9 @@ return astroWorker.fetch(request, env, ctx);`,
 				queue: cronJobSetup.queue,
 				env,
 				kv,
-				requestUrl: "",
+				request: { url: resolvedConfig.baseUrl || "http://localhost" },
+			}, {
+				schedule: controller.cron,
 			});
 		} finally {
 			await Promise.allSettled([

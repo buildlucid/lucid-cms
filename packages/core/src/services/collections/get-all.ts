@@ -51,6 +51,7 @@ const getAll: ServiceFn<
 			error: undefined,
 			data: collectionsFormatter.formatMultiple({
 				collections: collections,
+				queueSupportsScheduling: context.queue.support.scheduling,
 				include: {
 					bricks: false,
 					fields: false,
@@ -65,6 +66,7 @@ const getAll: ServiceFn<
 		error: undefined,
 		data: collectionsFormatter.formatMultiple({
 			collections: collections,
+			queueSupportsScheduling: context.queue.support.scheduling,
 			include: {
 				bricks: false,
 				fields: false,

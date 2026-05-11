@@ -9,7 +9,10 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { PublishOperation } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
-import { hasCollectionTargetPermission } from "./helpers/index.js";
+import {
+	hasCollectionTargetPermission,
+	unresolvedPublishOperationExecutionStatuses,
+} from "./helpers/index.js";
 
 const getSingle: ServiceFn<
 	[
@@ -44,16 +47,6 @@ const getSingle: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (operationRes.data.operation_type !== "request") {
-		return {
-			error: {
-				message: T("publish_request_not_found"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
-
 	const collectionRes = collectionServices.getSingleInstance(context, {
 		key: operationRes.data.collection_key,
 	});
@@ -65,6 +58,18 @@ const getSingle: ServiceFn<
 		action: "review",
 		target: operationRes.data.target,
 	});
+	const canPublish = hasCollectionTargetPermission({
+		user: data.user,
+		collection: collectionRes.data,
+		action: "publish",
+		target: operationRes.data.target,
+	});
+	const isRequester = operationRes.data.requested_by === data.user.id;
+	const unresolved = unresolvedPublishOperationExecutionStatuses.some(
+		(status) => status === operationRes.data?.execution_status,
+	);
+	const approvedActionAllowed =
+		operationRes.data.operation_type === "direct" ? canPublish : canReview;
 
 	const tableNamesRes = await getTableNames(
 		context,
@@ -106,6 +111,22 @@ const getSingle: ServiceFn<
 			latestContentId: latestRes.data?.content_id ?? null,
 			permissions: {
 				review: canReview,
+				cancel:
+					operationRes.data.status === "pending"
+						? isRequester || canReview
+						: operationRes.data.status === "approved" &&
+							unresolved &&
+							approvedActionAllowed,
+				reschedule:
+					operationRes.data.status === "pending"
+						? isRequester || canReview
+						: operationRes.data.status === "approved" &&
+							unresolved &&
+							approvedActionAllowed,
+				retry:
+					operationRes.data.status === "approved" &&
+					operationRes.data.execution_status === "failed" &&
+					approvedActionAllowed,
 			},
 		}),
 	};

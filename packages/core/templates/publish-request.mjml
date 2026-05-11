@@ -44,7 +44,7 @@
         </mj-button>
         <mj-divider border-color="rgba(255, 255, 255, 0.1)" border-width="1px" padding="0 0 24px 0" />
         <mj-text font-size="13px" color="#6b6b6b" align="center">
-          You received this because you are linked to this publish request.
+          You received this because you are linked to this release.
         </mj-text>
       </mj-column>
     </mj-section>

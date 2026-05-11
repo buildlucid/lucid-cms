@@ -68,6 +68,10 @@ const collectionResponseSchema = z.object({
 			description: "Whether the collection supports auto-save",
 			example: true,
 		}),
+		scheduling: z.boolean().meta({
+			description: "Whether the collection has release scheduling enabled",
+			example: false,
+		}),
 		locked: z.boolean().meta({
 			description: "Whether the collection structure is locked from editing",
 			example: false,
@@ -120,12 +124,19 @@ const collectionResponseSchema = z.object({
 					}),
 					review: z.string().optional().meta({
 						description:
-							"Permission required to review publish requests for this environment",
+							"Permission required to review releases for this environment",
 						example: "documents:review",
 					}),
 				}),
 			}),
 		),
+	}),
+	capabilities: z.object({
+		scheduling: z.boolean().meta({
+			description:
+				"Whether this collection can create scheduled releases in the current runtime",
+			example: false,
+		}),
 	}),
 	permissions: z.object({
 		read: z.string(),

@@ -185,6 +185,8 @@ export function useDocumentMutations(props: {
 
 	const publishDocumentAction = async (
 		targetVersionType: DocumentVersionType,
+		scheduledAt?: string,
+		scheduledTimezone?: string,
 	) => {
 		if (props.documentId() === undefined) {
 			console.error("No document ID found.");
@@ -196,6 +198,8 @@ export function useDocumentMutations(props: {
 			id: props.documentId() as number,
 			body: {
 				target: targetVersionType,
+				scheduledAt,
+				scheduledTimezone,
 			},
 		});
 	};
@@ -205,6 +209,8 @@ export function useDocumentMutations(props: {
 		comment?: string,
 		assigneeIds?: number[],
 		autoAccept?: boolean,
+		scheduledAt?: string,
+		scheduledTimezone?: string,
 	) => {
 		if (props.documentId() === undefined) {
 			console.error("No document ID found.");
@@ -219,6 +225,8 @@ export function useDocumentMutations(props: {
 				comment,
 				assigneeIds,
 				autoAccept,
+				scheduledAt,
+				scheduledTimezone,
 			},
 		});
 	};

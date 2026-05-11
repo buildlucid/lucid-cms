@@ -53,6 +53,8 @@ const createPublishOperationController = factory.createHandlers(
 			comment: body.comment,
 			assigneeIds: body.assigneeIds,
 			autoAccept: body.autoAccept,
+			scheduledAt: body.scheduledAt,
+			scheduledTimezone: body.scheduledTimezone,
 			user: c.get("auth"),
 		});
 		if (operationRes.error) throw new LucidAPIError(operationRes.error);

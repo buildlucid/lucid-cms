@@ -29,6 +29,7 @@ export default Object.freeze({
 		revisions: false,
 		translations: false,
 		autoSave: false,
+		scheduling: false,
 		protectedEnvironments: ["latest", "revision", "snapshot"],
 		revisionRetentionDays: 30,
 		publishing: {
@@ -144,7 +145,10 @@ export default Object.freeze({
 		oidcAuth: "oidc-auth",
 	} as const,
 	retention: 30,
-	cronSchedule: "0 0 * * *",
+	cronSchedules: {
+		maintenance: "0 0 * * *",
+		scheduledPublishing: "0 */4 * * *",
+	},
 	csrfExpiration: 604800, // 7 days in seconds
 	refreshTokenExpiration: 604800, // 7 days in seconds
 	accessTokenExpiration: 300, // 5 minutes in seconds

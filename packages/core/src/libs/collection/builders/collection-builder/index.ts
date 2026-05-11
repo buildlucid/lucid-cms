@@ -149,6 +149,9 @@ class CollectionBuilder extends FieldBuilder {
 					constants.collectionBuilder.translations,
 				autoSave:
 					this.config.config?.autoSave ?? constants.collectionBuilder.autoSave,
+				scheduling:
+					this.config.config?.scheduling ??
+					constants.collectionBuilder.scheduling,
 				...(this.config.config?.review
 					? {
 							review: {

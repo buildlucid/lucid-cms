@@ -4,8 +4,10 @@ import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import passthroughQueueAdapter from "../queue/adapters/passthrough.js";
+import getQueueAdapter from "../queue/get-adapter.js";
 import type { QueueAdapterInstance } from "../queue/types.js";
 import getCronJobs, { type CronJobDefinition } from "./cron-jobs.js";
+import type { AdapterRuntimeContext, EnvironmentVariables } from "./types.js";
 
 const MAX_RETRIES = 3;
 
@@ -60,7 +62,11 @@ const executeCronJob = async (
  * Creates the environment for running cron jobs
  * - creates a passthrough queue adapter so runtime adapters can build the ServiceContext. This allows crons to insert jobs into the queue.
  */
-const setupCronJobs = async (config: { createQueue: boolean }) => {
+const setupCronJobs = async (config: {
+	createQueue: boolean;
+	runtimeContext?: AdapterRuntimeContext;
+	env?: EnvironmentVariables;
+}) => {
 	let queueInstance: QueueAdapterInstance | undefined;
 
 	//* depending on the runtime adapter, they may already be able to access the main queue adapter instance via the createApp function.
@@ -73,19 +79,49 @@ const setupCronJobs = async (config: { createQueue: boolean }) => {
 		});
 	}
 
+	const schedules = Object.values(constants.cronSchedules);
+
 	return {
-		schedule: constants.cronSchedule,
-		register: async (context: ServiceContext) => {
+		schedules,
+		register: async (
+			context: ServiceContext,
+			options?: {
+				schedule?: string;
+			},
+		) => {
+			let cronQueue = context.queue ?? queueInstance;
+			let createdQueue: QueueAdapterInstance | undefined;
 			try {
+				if (config.createQueue && config.runtimeContext) {
+					createdQueue = await getQueueAdapter(
+						context.config,
+						config.runtimeContext,
+					);
+					await createdQueue.lifecycle?.init?.({
+						config: context.config,
+						runtimeContext: config.runtimeContext,
+						env: config.env ?? context.env ?? undefined,
+					});
+					cronQueue = createdQueue;
+				}
+
+				const cronContext: ServiceContext = {
+					...context,
+					queue: cronQueue,
+				};
+
 				logger.info({
 					message: T("running_cron_jobs"),
 					scope: constants.logScopes.cron,
 				});
 
+				const jobs = Object.entries(getCronJobs()).filter(([, job]) => {
+					if (!options?.schedule) return true;
+					return constants.cronSchedules[job.schedule] === options.schedule;
+				});
+
 				const results = await Promise.allSettled(
-					Object.entries(getCronJobs()).map(([key, job]) =>
-						executeCronJob(key, job, context),
-					),
+					jobs.map(([key, job]) => executeCronJob(key, job, cronContext)),
 				);
 
 				const failures = results.filter(
@@ -105,6 +141,8 @@ const setupCronJobs = async (config: { createQueue: boolean }) => {
 					message: T("cron_job_error_message"),
 					scope: constants.logScopes.cron,
 				});
+			} finally {
+				await createdQueue?.lifecycle?.destroy?.();
 			}
 		},
 		queue: queueInstance,

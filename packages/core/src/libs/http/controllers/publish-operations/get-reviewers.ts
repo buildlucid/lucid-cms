@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import { controllerSchemas } from "../../../../schemas/publish-requests.js";
+import { controllerSchemas } from "../../../../schemas/publish-operation-management.js";
 import { documentPublishOperationServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
@@ -18,9 +18,9 @@ const factory = createFactory();
 
 const getReviewersController = factory.createHandlers(
 	describeRoute({
-		description: "Get users who can review a publish request target.",
-		tags: ["publish-requests"],
-		summary: "Get Publish Request Reviewers",
+		description: "Get users who can review a publish operation target.",
+		tags: ["publish-operations"],
+		summary: "Get Publish Operation Reviewers",
 		responses: honoOpenAPIResponse({
 			schema: z.toJSONSchema(controllerSchemas.getReviewers.response),
 		}),

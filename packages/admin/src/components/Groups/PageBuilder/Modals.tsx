@@ -188,6 +188,9 @@ export const Modals: Component<{
 			<ReleaseEnvironment
 				target={props.hooks.uiState.getReleaseEnvironmentTarget}
 				environmentLabel={environmentLabel}
+				scheduling={() =>
+					props.hooks.state.collection()?.capabilities.scheduling === true
+				}
 				state={{
 					open: releaseEnvironmentIsOpen(),
 					setOpen: props.hooks.uiState.setReleaseEnvironmentOpen,
@@ -199,15 +202,21 @@ export const Modals: Component<{
 					props.hooks.mutations.createPublishOperationMutation.errors()?.message
 				}
 				callbacks={{
-					onConfirm: async (target) => {
-						await props.hooks.mutations.publishDocumentAction(target);
-						navigate(
-							getDocumentRoute("edit", {
-								collectionKey: props.hooks.state.collectionKey(),
-								documentId: props.hooks.state.documentId(),
-								status: target,
-							}),
+					onConfirm: async (target, scheduledAt, scheduledTimezone) => {
+						await props.hooks.mutations.publishDocumentAction(
+							target,
+							scheduledAt,
+							scheduledTimezone,
 						);
+						if (!scheduledAt) {
+							navigate(
+								getDocumentRoute("edit", {
+									collectionKey: props.hooks.state.collectionKey(),
+									documentId: props.hooks.state.documentId(),
+									status: target,
+								}),
+							);
+						}
 						resetReleaseState();
 					},
 					onCancel: () => {
@@ -232,14 +241,23 @@ export const Modals: Component<{
 					props.hooks.mutations.createPublishOperationMutation.errors()?.message
 				}
 				callbacks={{
-					onConfirm: async (target, comment, assigneeIds, autoAccept) => {
+					onConfirm: async (
+						target,
+						comment,
+						assigneeIds,
+						autoAccept,
+						scheduledAt,
+						scheduledTimezone,
+					) => {
 						await props.hooks.mutations.createPublishOperationAction(
 							target,
 							comment,
 							assigneeIds,
 							autoAccept,
+							scheduledAt,
+							scheduledTimezone,
 						);
-						if (autoAccept) {
+						if (autoAccept && !scheduledAt) {
 							navigate(
 								getDocumentRoute("edit", {
 									collectionKey: props.hooks.state.collectionKey(),

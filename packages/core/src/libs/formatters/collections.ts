@@ -8,6 +8,7 @@ import {
 
 const formatMultiple = (props: {
 	collections: CollectionBuilder[];
+	queueSupportsScheduling?: boolean;
 	include?: {
 		bricks?: boolean;
 		fields?: boolean;
@@ -21,6 +22,7 @@ const formatMultiple = (props: {
 	return props.collections.map((c) =>
 		formatSingle({
 			collection: c,
+			queueSupportsScheduling: props.queueSupportsScheduling,
 			include: props.include,
 			documents: props.documents,
 		}),
@@ -29,6 +31,7 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: {
 	collection: CollectionBuilder;
+	queueSupportsScheduling?: boolean;
 	migrationStatus?: MigrationStatus;
 	include?: {
 		bricks?: boolean;
@@ -61,6 +64,7 @@ const formatSingle = (props: {
 			locked: collectionData.config.locked,
 			displayInListing: props.collection.displayInListing,
 			autoSave: collectionData.config.autoSave,
+			scheduling: collectionData.config.scheduling,
 			review: collectionData.config.review,
 			workflow: collectionData.config.workflow,
 			environments: collectionData.config.environments.map((environment) => ({
@@ -78,6 +82,11 @@ const formatSingle = (props: {
 					}),
 				},
 			})),
+		},
+		capabilities: {
+			scheduling:
+				collectionData.config.scheduling === true &&
+				props.queueSupportsScheduling === true,
 		},
 		permissions: resolvedPermissions,
 		migrationStatus: props.migrationStatus ?? null,

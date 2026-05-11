@@ -1,4 +1,7 @@
 import deleteCollectionJob from "../../services/collections/jobs/delete-single.js";
+import executePublishOperationJob, {
+	markPublishOperationJobFailed,
+} from "../../services/document-publish-operations/jobs/execute.js";
 import deleteDocumentJob from "../../services/documents/jobs/delete-single.js";
 import deleteExpiredRevisionsJob from "../../services/documents-versions/jobs/delete-expired-revisions.js";
 import sendEmailJob from "../../services/email/jobs/send-email.js";
@@ -9,13 +12,9 @@ import hardDeleteSingleMediaJob from "../../services/media/jobs/hard-delete-sing
 import updateMediaStorageJob from "../../services/media/jobs/update-storage.js";
 import deleteUserJob from "../../services/users/jobs/delete-single.js";
 import executeAlert from "../alerts/execute-alert.js";
-import type {
-	QueueEvent,
-	QueueJobHandlerFn,
-	QueueJobHandlers,
-} from "./types.js";
+import type { QueueEvent, QueueJobHandler, QueueJobHandlers } from "./types.js";
 
-const jobHandlersMap: Record<QueueEvent, QueueJobHandlerFn> = {
+const jobHandlersMap: Record<QueueEvent, QueueJobHandler> = {
 	"alert:execute": executeAlert,
 	"email:send": sendEmailJob,
 	"media:delete": hardDeleteSingleMediaJob,
@@ -27,12 +26,16 @@ const jobHandlersMap: Record<QueueEvent, QueueJobHandlerFn> = {
 	"users:delete": deleteUserJob,
 	"documents:delete": deleteDocumentJob,
 	"document-versions:delete-expired": deleteExpiredRevisionsJob,
+	"document-publish-operation:execute": {
+		handler: executePublishOperationJob,
+		onPermanentFailure: markPublishOperationJobFailed,
+	},
 };
 
 const getJobHandler = (
 	event: QueueEvent,
 	additionalHandlers?: QueueJobHandlers,
-): QueueJobHandlerFn | undefined => {
+): QueueJobHandler | undefined => {
 	const handler = additionalHandlers?.[event] ?? jobHandlersMap[event];
 	return handler;
 };

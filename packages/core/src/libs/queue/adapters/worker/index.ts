@@ -51,6 +51,9 @@ function workerQueueAdapter(
 	return {
 		type: "queue-adapter",
 		key: ADAPTER_KEY,
+		support: {
+			scheduling: true,
+		},
 		lifecycle: {
 			init: async (params) => {
 				logger.debug({

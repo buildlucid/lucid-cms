@@ -1,0 +1,83 @@
+import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
+import T from "../../translations/index.js";
+import type { LucidAuth } from "../../types/hono.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import { collectionServices } from "../index.js";
+import { hasCollectionTargetPermission } from "./helpers/index.js";
+import scheduleApproved from "./schedule-approved.js";
+
+const retry: ServiceFn<
+	[
+		{
+			id: number;
+			user: LucidAuth;
+		},
+	],
+	undefined
+> = async (context, data) => {
+	const Operations = new DocumentPublishOperationsRepository(
+		context.db.client,
+		context.config.db,
+	);
+
+	const operationRes = await Operations.selectSingleDetailed({
+		where: [
+			{
+				key: "lucid_document_publish_operations.id",
+				operator: "=",
+				value: data.id,
+			},
+		],
+	});
+	if (operationRes.error) return operationRes;
+	if (
+		!operationRes.data ||
+		operationRes.data.status !== "approved" ||
+		operationRes.data.execution_status !== "failed"
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: T("publish_operation_not_retryable"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
+	const collectionRes = collectionServices.getSingleInstance(context, {
+		key: operationRes.data.collection_key,
+	});
+	if (collectionRes.error) return collectionRes;
+
+	const requiredAction =
+		operationRes.data.operation_type === "direct" ? "publish" : "review";
+	const canAct = hasCollectionTargetPermission({
+		user: data.user,
+		collection: collectionRes.data,
+		action: requiredAction,
+		target: operationRes.data.target,
+	});
+	if (!canAct) {
+		return {
+			error: {
+				type: "basic",
+				name: T("collection_permission_error_name"),
+				message: T("collection_permission_error_message", {
+					collection: operationRes.data.collection_key,
+					action: requiredAction,
+				}),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
+	return scheduleApproved(context, {
+		id: operationRes.data.id,
+		userId: data.user.id,
+		eventType: "retried",
+	});
+};
+
+export default retry;

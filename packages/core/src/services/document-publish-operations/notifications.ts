@@ -78,7 +78,7 @@ const notifyPublishOperationUsers: ServiceFn<
 		recipient.email ? [recipient.email] : [],
 	);
 	if (emailRecipients.length > 0) {
-		const actionUrl = `${getBaseUrl(context)}/lucid/collections/${data.collectionKey}/${data.documentId}/publish-requests/${data.operationId}`;
+		const actionUrl = `${getBaseUrl(context)}/lucid/collections/${data.collectionKey}/${data.documentId}/publish-operations/${data.operationId}`;
 		const emailRes = await sendEmail(context, {
 			type: "internal",
 			to: emailRecipients,

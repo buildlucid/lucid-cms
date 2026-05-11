@@ -98,6 +98,16 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("decision_comment", adapter.getDataType("text"))
 				.addColumn("decided_at", adapter.getDataType("timestamp"))
+				.addColumn("scheduled_at", adapter.getDataType("timestamp"))
+				.addColumn("scheduled_timezone", adapter.getDataType("text"))
+				.addColumn("execution_status", adapter.getDataType("text"), (col) =>
+					col.notNull().defaultTo("awaiting_approval"),
+				)
+				.addColumn("executed_at", adapter.getDataType("timestamp"))
+				.addColumn("failed_at", adapter.getDataType("timestamp"))
+				.addColumn("execution_error_message", adapter.getDataType("text"))
+				.addColumn("execution_error_data", adapter.getDataType("json"))
+				.addColumn("scheduled_job_id", adapter.getDataType("text"))
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
@@ -178,6 +188,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_publish_operations_target")
 				.on("lucid_document_publish_operations")
 				.columns(["collection_key", "document_id", "target", "status"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_publish_operations_execution")
+				.on("lucid_document_publish_operations")
+				.columns(["status", "execution_status", "scheduled_at"])
 				.execute();
 
 			await db.schema

@@ -13,7 +13,13 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 		job_id: z.string(),
 		event_type: z.string(),
 		event_data: z.record(z.string(), z.unknown()).nullable(),
-		status: z.enum(["pending", "processing", "completed", "failed"]),
+		status: z.enum([
+			"pending",
+			"processing",
+			"completed",
+			"failed",
+			"cancelled",
+		]),
 		queue_adapter_key: z.string(),
 		priority: z.number().nullable(),
 		attempts: z.number(),
@@ -106,12 +112,15 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 			.selectFrom("lucid_queue_jobs")
 			.selectAll()
 			.where((eb) =>
-				eb.or([
+				eb.and([
 					eb("status", "=", "pending"),
-					eb.and([
-						eb("status", "=", "failed"),
-						eb("attempts", "<", eb.ref("max_attempts")),
+					eb.or([
+						eb("next_retry_at", "is", null),
 						eb("next_retry_at", "<=", props.data.currentTime.toISOString()),
+					]),
+					eb.or([
+						eb("scheduled_for", "is", null),
+						eb("scheduled_for", "<=", props.data.currentTime.toISOString()),
 					]),
 				]),
 			)

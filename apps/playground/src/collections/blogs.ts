@@ -17,6 +17,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 	},
 	config: {
 		translations: true,
+		scheduling: true,
 		environments: [
 			{
 				key: "staging",

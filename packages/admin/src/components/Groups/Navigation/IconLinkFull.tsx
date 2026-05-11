@@ -34,7 +34,7 @@ interface IconLinkFullProps {
 		| "queue"
 		| "client-integrations"
 		| "license"
-		| "publish-requests";
+		| "release-requests";
 	active?: boolean;
 	permission?: boolean;
 	onClick?: () => void;
@@ -85,7 +85,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 				<Match when={props.icon === "license"}>
 					<FaSolidKey class={iconClasses} />
 				</Match>
-				<Match when={props.icon === "publish-requests"}>
+				<Match when={props.icon === "release-requests"}>
 					<FaSolidSquareArrowUpRight class={iconClasses} />
 				</Match>
 			</Switch>

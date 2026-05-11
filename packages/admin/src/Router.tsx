@@ -31,8 +31,8 @@ const SystemQueueObservabilityRoute = lazy(
 	() => import("@/routes/System/QueueObservability/View"),
 );
 const EmailListRoute = lazy(() => import("@/routes/Emails/List"));
-const PublishRequestsListRoute = lazy(
-	() => import("@/routes/PublishRequests/List"),
+const ReleaseRequestsListRoute = lazy(
+	() => import("@/routes/ReleaseRequests/List"),
 );
 const AccountRoute = lazy(() => import("@/routes/Account"));
 const CollectionsListRoute = lazy(() => import("@/routes/Collections/List"));
@@ -45,11 +45,11 @@ const CollectionDocumentPageBuilderRoute = lazy(
 const CollectionsDocumentsHistoryRoute = lazy(
 	() => import("./routes/Collections/Documents/History"),
 );
-const CollectionsDocumentsPublishRequestsRoute = lazy(
-	() => import("./routes/Collections/Documents/PublishRequests"),
+const CollectionsDocumentsReleaseRequestsRoute = lazy(
+	() => import("./routes/Collections/Documents/ReleaseRequests"),
 );
-const CollectionsDocumentsPublishRequestDetailRoute = lazy(
-	() => import("./routes/Collections/Documents/PublishRequestDetail"),
+const CollectionsDocumentsReleaseRequestDetailRoute = lazy(
+	() => import("./routes/Collections/Documents/ReleaseRequestDetail"),
 );
 
 const AppRouter: Component = () => {
@@ -103,18 +103,18 @@ const AppRouter: Component = () => {
 					component={() => <CollectionsDocumentsHistoryRoute />}
 				/>
 				<Route
-					path="/collections/:collectionKey/:documentId/publish-requests"
+					path="/collections/:collectionKey/:documentId/release-requests"
 					component={() => (
 						<PermissionGuard permission={Permissions.DocumentsReview}>
-							<CollectionsDocumentsPublishRequestsRoute />
+							<CollectionsDocumentsReleaseRequestsRoute />
 						</PermissionGuard>
 					)}
 				/>
 				<Route
-					path="/collections/:collectionKey/:documentId/publish-requests/:publishRequestId"
+					path="/collections/:collectionKey/:documentId/release-requests/:releaseRequestId"
 					component={() => (
 						<PermissionGuard permission={Permissions.DocumentsReview}>
-							<CollectionsDocumentsPublishRequestDetailRoute />
+							<CollectionsDocumentsReleaseRequestDetailRoute />
 						</PermissionGuard>
 					)}
 				/>
@@ -163,10 +163,10 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				<Route
-					path="/publish-requests"
+					path="/release-requests"
 					component={() => (
 						<PermissionGuard permission={Permissions.DocumentsReview}>
-							<PublishRequestsListRoute />
+							<ReleaseRequestsListRoute />
 						</PermissionGuard>
 					)}
 				/>

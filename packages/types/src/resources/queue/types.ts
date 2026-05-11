@@ -9,9 +9,15 @@ export type QueueEvent<T extends string = string> =
 	| "users:delete"
 	| "documents:delete"
 	| "document-versions:delete-expired"
+	| "document-publish-operation:execute"
 	| T;
 
-export type QueueJobStatus = "pending" | "processing" | "completed" | "failed";
+export type QueueJobStatus =
+	| "pending"
+	| "processing"
+	| "completed"
+	| "failed"
+	| "cancelled";
 
 export interface Job {
 	id: number;

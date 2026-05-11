@@ -115,7 +115,7 @@ try {
                     env: env || null,
                     queue: internalQueueAdapter,
                     kv: kvInstance,
-                    requestUrl: "",
+                    request: { url: resolved.baseUrl || "http://localhost" },
                 },
                 {
                     jobId,

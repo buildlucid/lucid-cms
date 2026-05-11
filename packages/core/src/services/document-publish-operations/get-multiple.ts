@@ -7,12 +7,15 @@ import {
 	DocumentPublishOperationsRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
-import type { GetMultipleQueryParams } from "../../schemas/publish-requests.js";
+import type { GetMultipleQueryParams } from "../../schemas/publish-operation-management.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { PublishOperation } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
-import { hasCollectionTargetPermission } from "./helpers/index.js";
+import {
+	hasCollectionTargetPermission,
+	unresolvedPublishOperationExecutionStatuses,
+} from "./helpers/index.js";
 
 const getMultiple: ServiceFn<
 	[
@@ -33,9 +36,7 @@ const getMultiple: ServiceFn<
 	const requestedByMe = data.query.filter?.requestedByMe?.value === "true";
 	const assignedToMe = data.query.filter?.assignedToMe?.value === "true";
 
-	const where: QueryBuilderWhere<"lucid_document_publish_operations"> = [
-		{ key: "operation_type", operator: "=", value: "request" },
-	];
+	const where: QueryBuilderWhere<"lucid_document_publish_operations"> = [];
 
 	if (requestedByMe) {
 		where.push({ key: "requested_by", operator: "=", value: data.user.id });
@@ -101,12 +102,42 @@ const getMultiple: ServiceFn<
 			action: "review",
 			target: operation.target,
 		});
+		const canPublishTarget = hasCollectionTargetPermission({
+			user: data.user,
+			collection: collectionRes.data,
+			action: "publish",
+			target: operation.target,
+		});
+		const isRequester = operation.requested_by === data.user.id;
+		const unresolved = unresolvedPublishOperationExecutionStatuses.some(
+			(status) => status === operation.execution_status,
+		);
+		const approvedActionAllowed =
+			operation.operation_type === "direct"
+				? canPublishTarget
+				: canReviewTarget;
 
 		formatData.push({
 			operation,
 			latestContentId: latestRes.data?.content_id ?? null,
 			permissions: {
 				review: canReviewTarget,
+				cancel:
+					operation.status === "pending"
+						? isRequester || canReviewTarget
+						: operation.status === "approved" &&
+							unresolved &&
+							approvedActionAllowed,
+				reschedule:
+					operation.status === "pending"
+						? isRequester || canReviewTarget
+						: operation.status === "approved" &&
+							unresolved &&
+							approvedActionAllowed,
+				retry:
+					operation.status === "approved" &&
+					operation.execution_status === "failed" &&
+					approvedActionAllowed,
 			},
 		});
 	}

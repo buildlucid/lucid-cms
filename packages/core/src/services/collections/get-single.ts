@@ -67,6 +67,7 @@ const getSingle: ServiceFn<
 			error: undefined,
 			data: collectionsFormatter.formatSingle({
 				collection: collection,
+				queueSupportsScheduling: context.queue.support.scheduling,
 				include: {
 					bricks: true,
 					fields: true,
@@ -88,6 +89,7 @@ const getSingle: ServiceFn<
 		error: undefined,
 		data: collectionsFormatter.formatSingle({
 			collection: collection,
+			queueSupportsScheduling: context.queue.support.scheduling,
 			migrationStatus: migrationStatus.data,
 			include: {
 				bricks: true,

@@ -82,8 +82,8 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					/>
 					<IconLinkFull
 						type="link"
-						href="/lucid/publish-requests"
-						icon="publish-requests"
+						href="/lucid/release-requests"
+						icon="release-requests"
 						title={T()("publish_requests")}
 						permission={props.canReadPublishRequests}
 					/>
