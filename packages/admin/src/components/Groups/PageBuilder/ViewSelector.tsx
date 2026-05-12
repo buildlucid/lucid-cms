@@ -2,7 +2,7 @@ import { DropdownMenu } from "@kobalte/core";
 import { useLocation, useNavigate } from "@solidjs/router";
 import classNames from "classnames";
 import { FaSolidLink } from "solid-icons/fa";
-import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
+import { type Accessor, type Component, createMemo, For } from "solid-js";
 import DropdownContent from "@/components/Partials/DropdownContent";
 import T from "@/translations";
 
@@ -20,6 +20,7 @@ export interface ViewSelectorOption {
 
 export const ViewSelector: Component<{
 	options: Accessor<ViewSelectorOption[]>;
+	collectionSingularName: Accessor<string>;
 	isDocumentMutated?: Accessor<boolean>;
 }> = (props) => {
 	// ----------------------------------
@@ -55,6 +56,42 @@ export const ViewSelector: Component<{
 					location.pathname.includes(option.location),
 			);
 	});
+	const collectionLabel = createMemo(() => props.collectionSingularName());
+
+	const currentOptionLabel = createMemo(() => {
+		const option = currentOption();
+		if (!option) return undefined;
+		if (option.type === "link") return optionLabel(option);
+
+		const action = option.type === "latest" ? T()("edit") : T()("view");
+		return `${action} ${optionLabel(option)}`;
+	});
+
+	const optionLabel = (option: ViewSelectorOption) => {
+		if (option.type === "latest" || option.type === "environment") {
+			return T()("view_selector_document_version", {
+				version: option.label.toLowerCase(),
+				collection: collectionLabel(),
+			});
+		}
+
+		if (option.label === T()("revision_history")) {
+			return T()("view_selector_revision_history", {
+				collection: collectionLabel(),
+			});
+		}
+
+		if (option.label === T()("publish_requests")) {
+			return T()("view_selector_publish_requests", {
+				collection: collectionLabel(),
+			});
+		}
+
+		return T()("view_selector_document_link", {
+			label: option.label.toLowerCase(),
+			collection: collectionLabel(),
+		});
+	};
 
 	// ----------------------------------
 	// Render
@@ -77,13 +114,8 @@ export const ViewSelector: Component<{
 							currentOption()?.type === "link",
 					})}
 				/>
-				<span class="group-hover:text-body transition-colors duration-200 inline-block">
-					<Show when={currentOption()?.type === "latest"}>{T()("edit")} </Show>
-					<Show when={currentOption()?.type === "environment"}>
-						{T()("view")}{" "}
-					</Show>
-					<Show when={currentOption()?.type === "link"}>{T()("view")} </Show>
-					{currentOption()?.label}
+				<span class="group-hover:text-body transition-colors duration-200 inline-block capitalize">
+					{currentOptionLabel()}
 				</span>
 			</DropdownMenu.Trigger>
 			<DropdownContent
@@ -114,11 +146,11 @@ export const ViewSelector: Component<{
 									}}
 								>
 									<span
-										class={classNames("line-clamp-1 mr-2", {
+										class={classNames("line-clamp-1 mr-2 capitalize", {
 											"opacity-50": item.disabled,
 										})}
 									>
-										{item.label}
+										{optionLabel(item)}
 									</span>
 									<span
 										class={classNames("w-2.5 h-2.5 rounded-full border", {
@@ -179,8 +211,8 @@ export const ViewSelector: Component<{
 										}
 									}}
 								>
-									<span class="line-clamp-1 flex items-center gap-2">
-										{item.label}
+									<span class="line-clamp-1 flex items-center gap-2 capitalize">
+										{optionLabel(item)}
 									</span>
 									<FaSolidLink size={14} />
 								</DropdownMenu.Item>

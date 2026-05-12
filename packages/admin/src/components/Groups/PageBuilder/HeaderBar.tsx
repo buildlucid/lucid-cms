@@ -413,7 +413,7 @@ export const HeaderBar: Component<{
 									})}
 								</h2>
 							</Show>
-							<Show when={props.mode !== "create"}>
+							<Show when={props.mode !== "create" && !showViewSelector()}>
 								<h2 class="text-base font-medium text-title">
 									{props.state.collectionName()}
 								</h2>
@@ -421,6 +421,7 @@ export const HeaderBar: Component<{
 							<Show when={showViewSelector()}>
 								<ViewSelector
 									options={viewOptions}
+									collectionSingularName={props.state.collectionSingularName}
 									isDocumentMutated={props.state.isDocumentMutated}
 								/>
 							</Show>
