@@ -9,6 +9,7 @@ const getAll: ServiceFn<
 	[
 		{
 			includeDocumentId?: boolean;
+			includeFields?: boolean;
 		},
 	],
 	Collection[]
@@ -54,7 +55,7 @@ const getAll: ServiceFn<
 				queueSupportsScheduling: context.queue.support.scheduling,
 				include: {
 					bricks: false,
-					fields: false,
+					fields: data.includeFields === true,
 					documentId: true,
 				},
 				documents: documentsRes.data,
@@ -69,7 +70,7 @@ const getAll: ServiceFn<
 			queueSupportsScheduling: context.queue.support.scheduling,
 			include: {
 				bricks: false,
-				fields: false,
+				fields: data.includeFields === true,
 				documentId: false,
 			},
 		}),

@@ -41,6 +41,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_document__collection-key__ver");
 	}
+	private readonly documentFieldsUnionAlias = "document_fields";
 	tableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),
@@ -145,7 +146,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 											),
 										),
 								)
-								.as(tables.documentFields),
+								.as(this.documentFieldsUnionAlias),
 						])
 						// @ts-expect-error
 						.where(`${tables.version}.type`, "=", props.versionType)
@@ -182,6 +183,30 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 			},
 		);
 		if (exec.response.error) return exec.response;
+
+		if (exec.response.data) {
+			const unionByCollectionKey = new Map(
+				props.unions.map((union) => [union.collectionKey, union]),
+			);
+
+			// UNION results keep one column name for every branch, so select
+			// document fields under a neutral alias and remap them per collection.
+			exec.response.data = exec.response.data.map((row) => {
+				const union = unionByCollectionKey.get(row.collection_key);
+				const targetFieldsTable = union?.tables.documentFields;
+				if (!targetFieldsTable || row[targetFieldsTable] !== undefined) {
+					return row;
+				}
+
+				const { [this.documentFieldsUnionAlias]: documentFields, ...rest } =
+					row as BrickQueryResponse & Record<string, unknown>;
+
+				return {
+					...rest,
+					[targetFieldsTable]: documentFields,
+				} as BrickQueryResponse;
+			});
+		}
 
 		return this.validateResponse(exec, {
 			...props.validation,

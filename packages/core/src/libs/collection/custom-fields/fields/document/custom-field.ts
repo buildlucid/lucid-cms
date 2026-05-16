@@ -42,7 +42,7 @@ class DocumentCustomField extends CustomField<"document"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
-			collection: this.props.collection,
+			collection: normalizeDocumentCollections(this.props.collection),
 			details: {
 				label: this.props?.details?.label ?? keyToTitle(this.key),
 				summary: this.props?.details?.summary,
@@ -85,32 +85,10 @@ class DocumentCustomField extends CustomField<"document"> {
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>> {
-		const [targetCollectionKey] = normalizeDocumentCollections(
-			this.config.collection,
-		);
-		const tableNameRes = targetCollectionKey
-			? buildTableName(
-					"document",
-					{
-						collection: targetCollectionKey,
-					},
-					props.db.config.tableNameByteLimit,
-				)
-			: null;
-		const targetDocumentForeignKey =
-			tableNameRes && !tableNameRes.error
-				? {
-						table: tableNameRes.data.name,
-						column: "id" as const,
-						onDelete: "cascade" as const,
-					}
-				: undefined;
-
 		return {
 			data: {
 				columns: [
 					{
-						//* we dont use a foreign key here because down the line we're going to support selecting documents across multiple collections
 						name: "collection_key",
 						type: props.db.getDataType("text"),
 						nullable: false,
@@ -119,7 +97,6 @@ class DocumentCustomField extends CustomField<"document"> {
 						name: "document_id",
 						type: props.db.getDataType("integer"),
 						nullable: false,
-						foreignKey: targetDocumentForeignKey ?? undefined,
 					},
 				],
 			},

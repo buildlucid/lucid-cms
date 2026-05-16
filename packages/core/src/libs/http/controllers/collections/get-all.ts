@@ -35,6 +35,7 @@ const getAllController = factory.createHandlers(
 			},
 		})(context, {
 			includeDocumentId: true,
+			includeFields: c.req.query("include")?.split(",").includes("fields"),
 		});
 		if (collectionsRes.error) throw new LucidAPIError(collectionsRes.error);
 

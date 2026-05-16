@@ -57,8 +57,10 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			fieldValue: fieldValue(),
 		});
 	});
-	const primaryCollectionKey = createMemo(
-		() => props.state.fieldConfig.collection,
+	const allowedCollectionKeys = createMemo(() =>
+		Array.isArray(props.state.fieldConfig.collection)
+			? props.state.fieldConfig.collection
+			: [props.state.fieldConfig.collection],
 	);
 	const isMultiple = createMemo(
 		() => props.state.fieldConfig.config.multiple === true,
@@ -82,7 +84,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 				brickIndex: props.state.brickIndex,
 				groupRef: props.state.groupRef,
 			})}
-			collection={primaryCollectionKey()}
+			collectionKeys={allowedCollectionKeys()}
 			value={getValue()}
 			refs={fieldRef}
 			multiple={isMultiple()}

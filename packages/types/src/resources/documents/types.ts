@@ -380,7 +380,7 @@ export interface DatetimeFieldConfig
 
 export interface DocumentFieldConfig
 	extends SharedCollectionFieldConfig<"document"> {
-	collection: string;
+	collection: string | string[];
 	details: RelationFieldDetails;
 	config: FieldConfigOptions<DocumentRelationValue[]> & {
 		multiple?: boolean;

@@ -36,7 +36,7 @@ type ModalRegistry = {
 	};
 	documentSelect: {
 		data: {
-			collectionKey: string;
+			collectionKeys: string[];
 			multiple?: boolean;
 			selected?: DocumentFieldValue[];
 			selectedRefs?: Array<DocumentRef>;

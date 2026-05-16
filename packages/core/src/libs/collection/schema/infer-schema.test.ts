@@ -147,6 +147,10 @@ describe("Schema inference", async () => {
 		expect(
 			documentTable?.columns.some((column) => column.name === "parent_id_ref"),
 		).toBe(false);
+		expect(
+			documentTable?.columns.find((column) => column.name === "_document_id")
+				?.foreignKey,
+		).toBeUndefined();
 	});
 
 	test("keeps relation tables top-level when fields are nested in repeater groups", () => {

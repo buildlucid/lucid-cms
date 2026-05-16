@@ -11,8 +11,10 @@ import {
 	createMemo,
 	createSignal,
 	Index,
+	Show,
 } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
+import { Select } from "@/components/Groups/Form";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
 import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
@@ -37,7 +39,7 @@ interface DocumentSelectPanelProps {
 	state: {
 		open: boolean;
 		setOpen: (state: boolean) => void;
-		collectionKey: string | undefined;
+		collectionKeys: string[] | undefined;
 		multiple?: boolean;
 		selected?: DocumentFieldValue[];
 		selectedRefs?: DocumentRef[];
@@ -73,7 +75,7 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 		>
 			{() => (
 				<DocumentSelectContent
-					collectionKey={props.state.collectionKey}
+					collectionKeys={props.state.collectionKeys}
 					multiple={props.state.multiple}
 					selected={props.state.selected}
 					selectedRefs={props.state.selectedRefs}
@@ -89,7 +91,7 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 };
 
 interface DocumentSelectContentProps {
-	collectionKey: string | undefined;
+	collectionKeys: string[] | undefined;
 	multiple?: boolean;
 	selected?: DocumentFieldValue[];
 	selectedRefs?: DocumentRef[];
@@ -103,9 +105,11 @@ interface DocumentSelectContentProps {
 const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	props,
 ) => {
+	let filterSchemaCollectionKey: string | undefined;
 	const [selectedDocuments, setSelectedDocuments] = createSignal<DocumentRef[]>(
 		[],
 	);
+	const [activeCollectionKey, setActiveCollectionKey] = createSignal<string>();
 	const searchParams = useSearchParamsState({
 		filters: {},
 		sorts: {},
@@ -114,7 +118,8 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		},
 	});
 
-	const collectionKey = createMemo(() => props.collectionKey);
+	const allowedCollectionKeys = createMemo(() => props.collectionKeys ?? []);
+	const collectionKey = createMemo(() => activeCollectionKey());
 	const isMultiple = createMemo(() => props.multiple === true);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
@@ -133,6 +138,10 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			},
 		},
 		enabled: () => !!collectionKey(),
+	});
+	const collections = api.collections.useGetAll({
+		queryParams: {},
+		enabled: () => allowedCollectionKeys().length > 1,
 	});
 	const documents = api.documents.useGetMultiple({
 		queryParams: {
@@ -175,9 +184,43 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		() => documents.isSuccess || collection.isSuccess,
 	);
 	const isError = createMemo(() => documents.isError || collection.isError);
+	const collectionOptions = createMemo(() =>
+		allowedCollectionKeys().map((collectionKey) => {
+			const collection = collections.data?.data.find(
+				(collection) => collection.key === collectionKey,
+			);
+			return {
+				value: collectionKey,
+				label:
+					helpers.getLocaleValue({
+						value: collection?.details.name,
+						fallback: collectionKey,
+					}) || collectionKey,
+			};
+		}),
+	);
 
 	createEffect(() => {
-		if (collection.isSuccess) {
+		const allowed = allowedCollectionKeys();
+		const active = activeCollectionKey();
+
+		if (allowed.length === 0) {
+			setActiveCollectionKey(undefined);
+			return;
+		}
+
+		if (!active || !allowed.includes(active)) {
+			setActiveCollectionKey(allowed[0]);
+		}
+	});
+	createEffect(() => {
+		const active = collectionKey();
+		if (
+			collection.isSuccess &&
+			active &&
+			filterSchemaCollectionKey !== active
+		) {
+			filterSchemaCollectionKey = active;
 			const filterConfig: FilterSchema = {};
 			for (const field of getCollectionFieldFilters()) {
 				const fieldKey = formatFieldFilters({
@@ -189,6 +232,24 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				};
 			}
 			searchParams.setFilterSchema(filterConfig);
+			searchParams.setParams({
+				filters: Object.fromEntries(
+					Array.from(searchParams.getFilters().keys()).map((key) => [
+						key,
+						undefined,
+					]),
+				),
+				sorts: Object.fromEntries(
+					Array.from(searchParams.getSorts().keys()).map((key) => [
+						key,
+						undefined,
+					]),
+				),
+				pagination: {
+					page: 1,
+					perPage: searchParams.getPagination().perPage,
+				},
+			});
 		}
 	});
 	createEffect(() => {
@@ -279,6 +340,24 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						})}
 						searchParams={searchParams}
 					/>
+					<Show when={allowedCollectionKeys().length > 1}>
+						<div class="w-56 max-w-full">
+							<Select
+								id="document-select-collection"
+								name="document-select-collection"
+								value={collectionKey()}
+								onChange={(value) => {
+									if (typeof value === "string") {
+										setActiveCollectionKey(value);
+									}
+								}}
+								options={collectionOptions()}
+								noMargin={true}
+								noClear={true}
+								small={true}
+							/>
+						</div>
+					</Show>
 				</div>
 				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 			</div>

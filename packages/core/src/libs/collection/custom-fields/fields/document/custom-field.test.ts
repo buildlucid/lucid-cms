@@ -41,6 +41,12 @@ const DocumentCollection = new CollectionBuilder("collection", {
 			minItems: 2,
 			maxItems: 3,
 		},
+	})
+	.addDocument("multi_collection_doc", {
+		collection: ["page", "blog"],
+		config: {
+			multiple: true,
+		},
 	});
 
 test("successfully validate field - document", async () => {
@@ -291,6 +297,61 @@ test("document field validates multiple item counts and indexed errors", async (
 	]);
 });
 
+test("document field validates multiple target collections", async () => {
+	const allowedValidate = validateField({
+		field: {
+			key: "multi_collection_doc",
+			type: "document",
+			value: [
+				{ id: 1, collectionKey: "page" },
+				{ id: 2, collectionKey: "blog" },
+			],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: DocumentCollection.fields.get("multi_collection_doc")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [
+				{ id: 1, collection_key: "page" },
+				{ id: 2, collection_key: "blog" },
+			],
+		},
+		meta: {
+			translations: DocumentCollection.getData.config.translations,
+			defaultLocale: "en",
+		},
+	});
+	const disallowedValidate = validateField({
+		field: {
+			key: "multi_collection_doc",
+			type: "document",
+			value: [{ id: 1, collectionKey: "author" }],
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: DocumentCollection.fields.get("multi_collection_doc")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [{ id: 1, collection_key: "author" }],
+		},
+		meta: {
+			translations: DocumentCollection.getData.config.translations,
+			defaultLocale: "en",
+		},
+	});
+
+	expect(allowedValidate).toEqual([]);
+	expect(disallowedValidate).toEqual([
+		{
+			key: "multi_collection_doc",
+			localeCode: null,
+			message: T("field_document_not_found"),
+			itemIndex: 0,
+		},
+	]);
+});
+
 // -----------------------------------------------
 // Custom field config
 test("custom field config passes schema validation", async () => {
@@ -315,6 +376,32 @@ test("custom field config passes schema validation", async () => {
 	});
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
+});
+
+test("custom field config supports multiple target collections", async () => {
+	const field = new DocumentCustomField("field", {
+		collection: ["page", "blog"],
+		config: {
+			default: [
+				{
+					id: 1,
+					collectionKey: "page",
+				},
+				{
+					id: 2,
+					collectionKey: "blog",
+				},
+			],
+			multiple: true,
+		},
+	});
+	const res = await CustomFieldSchema.safeParseAsync(field.config);
+
+	expect(res.success).toBe(true);
+	expect(field.defaultValue).toEqual([
+		{ id: 1, collectionKey: "page" },
+		{ id: 2, collectionKey: "blog" },
+	]);
 });
 
 test("document field controls its grouped validation input", () => {

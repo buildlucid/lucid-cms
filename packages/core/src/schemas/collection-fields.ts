@@ -49,11 +49,11 @@ export const fieldConfigSchema = z.object({
 		example: "text",
 	}),
 	collection: z
-		.string()
+		.union([z.string(), z.array(z.string())])
 		.nullable()
 		.meta({
 			description: "Collection key for document reference fields",
-			example: "page",
+			example: ["page", "blog"],
 		})
 		.optional(),
 	details: z.object({

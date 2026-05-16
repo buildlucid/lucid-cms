@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { Collection, ResponseBody } from "@types";
-import { createMemo } from "solid-js";
+import { type Accessor, createMemo } from "solid-js";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
-// biome-ignore lint/suspicious/noEmptyInterface: explanation
-interface QueryParams {}
+interface QueryParams {
+	queryString?: Accessor<string> | string;
+	include?: {
+		fields?: Accessor<boolean | undefined> | boolean;
+	};
+}
 
 const useGetAll = (params: QueryHook<QueryParams>) => {
 	const queryParams = createMemo(() =>

@@ -32,7 +32,7 @@ import helpers from "@/utils/helpers";
 
 interface DocumentSelectProps {
 	id: string;
-	collection: string;
+	collectionKeys: string[];
 	value: DocumentFieldValue[] | undefined;
 	refs: Accessor<DocumentRef[] | undefined>;
 	onChange: (value: DocumentFieldValue[], refs: DocumentRef[]) => void;
@@ -67,7 +67,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 
 		pageBuilderModalsStore.open("documentSelect", {
 			data: {
-				collectionKey: props.collection,
+				collectionKeys: props.collectionKeys,
 				multiple: isMultiple(),
 				selected: props.value,
 				selectedRefs: selectedDocuments(),
@@ -143,13 +143,21 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const canAddMore = createMemo(() => !hasReachedMaxItems());
 	const fieldErrors = createMemo(() => normalizeFieldErrors(props.errors));
 
-	const collection = api.collections.useGetSingle({
+	const collections = api.collections.useGetAll({
 		queryParams: {
-			location: {
-				collectionKey: props.collection,
+			include: {
+				fields: true,
 			},
 		},
 		enabled: () => selectedDocuments().length > 0,
+	});
+	const collectionsByKey = createMemo(() => {
+		return new Map(
+			(collections.data?.data ?? []).map((collection) => [
+				collection.key,
+				collection,
+			]),
+		);
 	});
 
 	const getItemErrors = (itemIndex: number) => {
@@ -157,9 +165,16 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	};
 	const hasItemError = (itemIndex: number) =>
 		getItemErrors(itemIndex).length > 0;
+	const getDocumentCollection = (documentRef?: DocumentRef) =>
+		documentRef ? collectionsByKey().get(documentRef.collectionKey) : undefined;
+	const getSingularName = (documentRef?: DocumentRef) =>
+		helpers.getLocaleValue({
+			value: getDocumentCollection(documentRef)?.details.singularName,
+			fallback: T()("document"),
+		});
 	const previewFields = (documentRef?: DocumentRef) =>
 		getDocumentListingPreviewFields({
-			collection: collection.data?.data,
+			collection: getDocumentCollection(documentRef),
 			documentRef,
 			contentLocale: contentLocale(),
 		}).slice(0, 3);
@@ -202,11 +217,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 															<DocumentSortableItem
 																document={document()}
 																dragId={documentKey}
-																singularName={helpers.getLocaleValue({
-																	value:
-																		collection.data?.data.details.singularName,
-																	fallback: T()("document"),
-																})}
+																singularName={getSingularName(document())}
 																previewFields={previewFields(document())}
 																hasError={hasItemError(index())}
 																removeSelectedDocument={removeSelectedDocument}
@@ -262,7 +273,8 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										</Pill>
 										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-subtitle">
 											{helpers.getLocaleValue({
-												value: collection.data?.data.details.singularName,
+												value: getDocumentCollection(selectedDocuments()[0])
+													?.details.singularName,
 												fallback: T()("document"),
 											})}
 										</span>

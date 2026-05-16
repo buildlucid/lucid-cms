@@ -13,7 +13,7 @@ const CustomFieldSchema = z.object({
 		.refine((val) => !val.startsWith(constants.db.generatedColumnPrefix), {
 			message: `Field key cannot start with a '${constants.db.generatedColumnPrefix}' prefix`,
 		}),
-	collection: z.string().optional(),
+	collection: z.union([z.string(), z.array(z.string())]).optional(),
 	details: z
 		.object({
 			label: stringTranslations.optional(),

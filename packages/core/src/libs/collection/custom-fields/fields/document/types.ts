@@ -8,7 +8,7 @@ export type DocumentFieldValue = {
 
 export interface DocumentFieldConfig extends SharedFieldConfig {
 	type: "document";
-	collection: string;
+	collection: string | string[];
 	details: {
 		label?: string | Record<string, string>;
 		summary?: string | Record<string, string>;
@@ -30,7 +30,7 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 export type DocumentFieldProps = Partial<
 	Omit<DocumentFieldConfig, "type" | "collection">
 > & {
-	collection: string;
+	collection: string | string[];
 };
 
 export type DocumentResValue = DocumentFieldValue[];

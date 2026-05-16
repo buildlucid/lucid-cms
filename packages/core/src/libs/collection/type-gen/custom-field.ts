@@ -1,4 +1,5 @@
 import type { ClientFieldTypeGenerator } from "../custom-fields/types.js";
+import { stringLiteral } from "./helpers.js";
 
 /**
  * Creates a static client field type generator for leaf field values.
@@ -17,5 +18,17 @@ export const createValueFieldTypeGenerator =
 export const createDocumentValueFieldTypeGenerator =
 	(): ClientFieldTypeGenerator<"document"> =>
 	({ field }) => ({
-		valueType: `Array<DocumentRelationValue<${JSON.stringify(field.collection)}>>`,
+		valueType: `Array<DocumentRelationValue<${renderDocumentCollectionKeys(
+			field.collection,
+		)}>>`,
 	});
+
+const renderDocumentCollectionKeys = (
+	collection: string | string[],
+): string => {
+	const collectionKeys = Array.isArray(collection) ? collection : [collection];
+	const uniqueKeys = Array.from(new Set(collectionKeys));
+
+	if (uniqueKeys.length === 0) return "never";
+	return uniqueKeys.map((key) => stringLiteral(key)).join(" | ");
+};

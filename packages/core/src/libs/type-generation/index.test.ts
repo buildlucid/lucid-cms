@@ -58,6 +58,13 @@ test("generates collection-aware client document types that lean on the public L
 				translations: false,
 			},
 		})
+		.addDocument("related_content", {
+			collection: ["page", "blog"],
+			config: {
+				translations: false,
+				multiple: true,
+			},
+		})
 		.addRepeater("sections")
 		.addText("section_title", {
 			config: {
@@ -114,6 +121,7 @@ test("generates collection-aware client document types that lean on the public L
 			`export type PageCollectionDocumentFields = {
 	"page_title": TranslatedDocumentField<"page_title", "text", string | null>;
 	"related_page": ValueDocumentField<"related_page", "document", Array<DocumentRelationValue<"page">>>;
+	"related_content": ValueDocumentField<"related_content", "document", Array<DocumentRelationValue<"page" | "blog">>>;
 	"sections": GroupDocumentField<"sections", "repeater", {
 		"section_title": ValueDocumentField<"section_title", "text", string | null, true>;
 	}>;
@@ -130,6 +138,7 @@ test("generates collection-aware client document types that lean on the public L
 	"deletedBy"?: FilterObject;
 	"_page_title"?: FilterObject;
 	"_related_page"?: FilterObject;
+	"_related_content"?: FilterObject;
 	"fields"?: {
 		"sections"?: {
 			"_section_title"?: FilterObject;

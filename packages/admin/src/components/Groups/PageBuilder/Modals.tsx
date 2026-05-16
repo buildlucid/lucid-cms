@@ -104,7 +104,7 @@ export const Modals: Component<{
 				state={{
 					open: documentSelectModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close(),
-					collectionKey: documentSelectModal()?.data.collectionKey,
+					collectionKeys: documentSelectModal()?.data.collectionKeys,
 					multiple: documentSelectModal()?.data.multiple,
 					selected: documentSelectModal()?.data.selected,
 					selectedRefs: documentSelectModal()?.data.selectedRefs,
