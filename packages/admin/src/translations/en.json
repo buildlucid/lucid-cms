@@ -875,6 +875,7 @@
 	"no_pending_publish_requests": "No pending releases.",
 	"workflow": "Workflow",
 	"workflow_stage": "Workflow Stage",
+	"stage": "Stage",
 	"workflow_assignees": "Assignees",
 	"workflow_assigned_to": "Assigned To",
 	"workflow_update": "Update Workflow",

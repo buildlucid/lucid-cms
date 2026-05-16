@@ -12,6 +12,7 @@ import {
 } from "./collection-fields.js";
 import { documentVersionResponseSchema } from "./document-versions.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
+import { mediaEmbedResponseSchema } from "./media.js";
 
 const documentResponseUserSchema = z.object({
 	id: z.number().meta({
@@ -65,6 +66,7 @@ const documentWorkflowUserSchema = z.object({
 	username: z.string().nullable(),
 	firstName: z.string().nullable(),
 	lastName: z.string().nullable(),
+	profilePicture: mediaEmbedResponseSchema.nullable(),
 });
 
 const documentWorkflowSchema = z.object({

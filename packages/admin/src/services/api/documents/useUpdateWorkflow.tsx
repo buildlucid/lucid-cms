@@ -26,15 +26,18 @@ export const updateWorkflowReq = (params: Params) => {
 interface UseUpdateWorkflowProps {
 	onSuccess?: () => void;
 	onError?: (_errors: ErrorResponse | undefined) => void;
+	silent?: boolean;
 }
 
 const useUpdateWorkflow = (props?: UseUpdateWorkflowProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: updateWorkflowReq,
-		getSuccessToast: () => ({
-			title: T()("workflow_updated_toast_title"),
-			message: T()("workflow_updated_toast_message"),
-		}),
+		getSuccessToast: props?.silent
+			? undefined
+			: () => ({
+					title: T()("workflow_updated_toast_title"),
+					message: T()("workflow_updated_toast_message"),
+				}),
 		invalidates: ["documents.getMultiple", "documents.getSingle"],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

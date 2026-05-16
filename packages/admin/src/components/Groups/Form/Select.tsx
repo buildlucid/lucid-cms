@@ -13,6 +13,7 @@ import {
 	createEffect,
 	createSignal,
 	For,
+	type JSXElement,
 	Match,
 	Show,
 	Switch,
@@ -23,12 +24,13 @@ import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
 
 export type ValueT = string | number | undefined;
+export type SelectOptionT = { value: ValueT; label: string };
 
 export interface SelectProps {
 	id: string;
 	value: ValueT;
 	onChange: (_value: ValueT) => void;
-	options: { value: ValueT; label: string }[];
+	options: SelectOptionT[];
 	name: string;
 	search?: {
 		value: string;
@@ -55,6 +57,11 @@ export interface SelectProps {
 	shortcutDisplay?: "full" | "compact";
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
+	renderValue?: (_props: { option: SelectOptionT }) => JSXElement;
+	renderOption?: (_props: {
+		option: SelectOptionT;
+		selected: boolean;
+	}) => JSXElement;
 }
 
 export const Select: Component<SelectProps> = (props) => {
@@ -62,6 +69,7 @@ export const Select: Component<SelectProps> = (props) => {
 	const [inputFocus, setInputFocus] = createSignal(false);
 	const [debouncedValue, setDebouncedValue] = createSignal("");
 	const [selectedLabel, setSelectedLabel] = createSignal("");
+	const [selectedOption, setSelectedOption] = createSignal<SelectOptionT>();
 
 	// ----------------------------------------
 	// Functions
@@ -77,6 +85,7 @@ export const Select: Component<SelectProps> = (props) => {
 
 	createEffect(() => {
 		if (props.value === undefined || props.value === "") {
+			setSelectedOption(undefined);
 			setSelectedLabel(T()("nothing_selected"));
 			return;
 		}
@@ -85,10 +94,12 @@ export const Select: Component<SelectProps> = (props) => {
 			(option) => option.value === props.value,
 		);
 		if (selectedOption) {
+			setSelectedOption(selectedOption);
 			setSelectedLabel(selectedOption.label);
 			return;
 		}
 
+		setSelectedOption(undefined);
 		setSelectedLabel(T()("nothing_selected"));
 	});
 
@@ -143,7 +154,11 @@ export const Select: Component<SelectProps> = (props) => {
 								{props.shortcut}
 							</span>
 						</Show>
-						{selectedLabel() ? (
+						{selectedOption() && props.renderValue ? (
+							props.renderValue({
+								option: selectedOption() as SelectOptionT,
+							})
+						) : selectedLabel() ? (
 							<span class="truncate">{selectedLabel()}</span>
 						) : (
 							<span class="text-body">{T()("nothing_selected")}</span>
@@ -262,7 +277,14 @@ export const Select: Component<SelectProps> = (props) => {
 												}
 											}}
 										>
-											<span>{option.label}</span>
+											{props.renderOption ? (
+												props.renderOption({
+													option,
+													selected: props.value === option.value,
+												})
+											) : (
+												<span>{option.label}</span>
+											)}
 											<Show when={props.value === option.value}>
 												<FaSolidCheck size={14} class="text-current mr-2" />
 											</Show>

@@ -3,6 +3,7 @@ import { documentWorkflowsFormatter } from "../../libs/formatters/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getCollectionInstance from "../collections/get-single-instance.js";
 import { getWorkflowConfig } from "./helpers/index.js";
@@ -46,6 +47,7 @@ const getAssignees: ServiceFn<
 		error: undefined,
 		data: documentWorkflowsFormatter.formatAssigneeUsers({
 			users: usersRes.data ?? [],
+			host: getBaseUrl(context),
 		}),
 	};
 };

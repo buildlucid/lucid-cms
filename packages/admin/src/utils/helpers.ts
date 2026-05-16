@@ -144,8 +144,16 @@ const formatUserName = (
 		firstName?: User["firstName"];
 		lastName?: User["lastName"];
 	},
-	pref?: "username",
+	pref?: "username" | "simple",
 ): string => {
+	if (pref === "simple") {
+		if (user.firstName && user.lastName) {
+			return `${user.firstName} ${user.lastName}`;
+		}
+
+		return user.firstName || user.username;
+	}
+
 	// username (firstname lastname)
 	if (pref === "username") {
 		if (user.firstName && user.lastName) {

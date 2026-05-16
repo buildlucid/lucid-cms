@@ -11,7 +11,7 @@ interface UserDisplayProps {
 		profilePicture?: ProfilePicture | null;
 	};
 	mode: "short" | "long" | "icon";
-	size?: "small" | "medium" | "large";
+	size?: "x-small" | "small" | "medium" | "large";
 }
 
 const UserDisplay: Component<UserDisplayProps> = (props) => {
@@ -40,8 +40,11 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 							props.mode === "icon" && props.size === "large",
 						"h-10 w-10 min-w-10 text-[10px]":
 							props.mode === "icon" &&
+							props.size !== "x-small" &&
 							props.size !== "small" &&
 							props.size !== "large",
+						"h-5 w-5 min-w-5 text-[7px]":
+							props.mode === "icon" && props.size === "x-small",
 						"h-7 w-7 min-w-7 text-[8px]":
 							(props.mode === "icon" && props.size === "small") ||
 							props.mode === "long",

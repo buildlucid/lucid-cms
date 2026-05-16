@@ -4,7 +4,8 @@ import type {
 } from "@lucidcms/types";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
-import formatter from "./index.js";
+import formatter, { mediaFormatter } from "./index.js";
+import type { MediaPosterPropsT } from "./media.js";
 
 type DocumentWorkflowFormatInput = {
 	id?: number | null;
@@ -38,6 +39,7 @@ const getEffectiveStage = (props: {
 const formatSingle = (props: {
 	workflow?: DocumentWorkflowFormatInput | null;
 	collection: CollectionBuilder;
+	host: string;
 }): DocumentWorkflow | null => {
 	const stage = getEffectiveStage({
 		collection: props.collection,
@@ -56,6 +58,10 @@ const formatSingle = (props: {
 					username: assignee.username ?? null,
 					firstName: assignee.first_name ?? null,
 					lastName: assignee.last_name ?? null,
+					profilePicture: mediaFormatter.formatEmbed({
+						poster: assignee.profile_picture?.[0],
+						host: props.host,
+					}),
 				},
 				assignedBy: assignee.assigned_by,
 				assignedAt: formatter.formatDate(assignee.assigned_at),
@@ -92,7 +98,9 @@ const formatAssigneeUsers = (props: {
 		username: string | null;
 		firstName: string | null;
 		lastName: string | null;
+		profile_picture?: MediaPosterPropsT[];
 	}>;
+	host: string;
 }): Array<DocumentWorkflowAssignee["user"]> =>
 	props.users.map((user) => ({
 		id: user.id,
@@ -100,6 +108,10 @@ const formatAssigneeUsers = (props: {
 		username: user.username,
 		firstName: user.firstName,
 		lastName: user.lastName,
+		profilePicture: mediaFormatter.formatEmbed({
+			poster: user.profile_picture?.[0],
+			host: props.host,
+		}),
 	}));
 
 export default {

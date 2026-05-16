@@ -1,4 +1,5 @@
 import type { Collection, PublishOperation } from "@types";
+import { FaSolidPaperPlane } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
@@ -134,9 +135,10 @@ export const PublishRequests: Component<{
 	// Render
 	return (
 		<Show when={sectionEnabled()}>
-			<section class="mt-6 pt-5 border-t border-border">
-				<div class="flex items-center justify-between gap-3 mb-3">
-					<h3 class="text-sm font-semibold text-title">
+			<section>
+				<div class="flex items-center gap-2 mb-3">
+					<FaSolidPaperPlane class="text-body" size={14} />
+					<h3 class="text-base font-medium text-title">
 						{T()("pending_publish_requests")}
 					</h3>
 				</div>

@@ -1,22 +1,36 @@
-import type { Collection, InternalCollectionDocument } from "@types";
+import { debounce } from "@solid-primitives/scheduled";
+import type {
+	Collection,
+	DocumentWorkflowAssignee,
+	InternalCollectionDocument,
+} from "@types";
+import { FaSolidChartDiagram } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
+	onCleanup,
 	Show,
 } from "solid-js";
 import { Select, SelectMultiple } from "@/components/Groups/Form";
-import Button from "@/components/Partials/Button";
-import Pill from "@/components/Partials/Pill";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import { sameNumericSet } from "@/utils/array-helpers";
 import helpers from "@/utils/helpers";
-import { formatStageName, getStageColor } from "./helpers";
+import WorkflowAssigneeOption from "../../../Partials/WorkflowAssigneeOption";
+import WorkflowStageOption from "../../../Partials/WorkflowStageOption";
+import { getStageColor } from "./helpers";
+
+type AssigneeOption = {
+	value: number;
+	label: string;
+	user: DocumentWorkflowAssignee["user"];
+};
+type WorkflowUpdateBody = { stage?: string; assigneeIds?: number[] };
 
 export const Workflow: Component<{
 	collection: Accessor<Collection | undefined>;
@@ -29,9 +43,7 @@ export const Workflow: Component<{
 	// ----------------------------------
 	// State
 	const [stage, setStage] = createSignal<string | undefined>();
-	const [assignees, setAssignees] = createSignal<
-		Array<{ value: string | number; label: string }>
-	>([]);
+	const [assignees, setAssignees] = createSignal<Array<AssigneeOption>>([]);
 
 	// ----------------------------------
 	// Memos
@@ -50,9 +62,6 @@ export const Workflow: Component<{
 	);
 	const currentAssigneeIds = createMemo(
 		() => workflow()?.assignees.map((assignee) => assignee.user.id) ?? [],
-	);
-	const selectedAssigneeIds = createMemo(() =>
-		assignees().map((assignee) => Number(assignee.value)),
 	);
 	const hasUpdatePermission = createMemo(() => {
 		const permission = props.collection()?.permissions.update;
@@ -88,30 +97,21 @@ export const Workflow: Component<{
 						firstName: user.firstName,
 						lastName: user.lastName,
 					},
-					"username",
+					"simple",
 				),
+				user,
 			})) ?? [],
 	);
-	const stageChanged = createMemo(
-		() => stage() !== undefined && stage() !== workflow()?.stage,
+	const updatePending = createMemo(
+		() => props.mutations.updateWorkflowMutation.action.isPending,
 	);
-	const assigneesChanged = createMemo(
-		() => !sameNumericSet(currentAssigneeIds(), selectedAssigneeIds()),
-	);
-	const hasChanges = createMemo(() => stageChanged() || assigneesChanged());
-	const updateDisabled = createMemo(
-		() =>
-			props.disabled() ||
-			!hasUpdatePermission() ||
-			!hasChanges() ||
-			props.mutations.updateWorkflowMutation.action.isPending ||
-			assigneeQuery.isFetching,
+	const fieldsDisabled = createMemo(
+		() => props.disabled() || !hasUpdatePermission() || updatePending(),
 	);
 
 	// ----------------------------------
-	// Effects
-	createEffect(() => {
-		workflowKey();
+	// Functions
+	const syncWorkflowState = () => {
 		setStage(workflow()?.stage ?? workflowConfig()?.initial);
 		setAssignees(
 			workflow()?.assignees.map((assignee) => ({
@@ -123,79 +123,150 @@ export const Workflow: Component<{
 						firstName: assignee.user.firstName,
 						lastName: assignee.user.lastName,
 					},
-					"username",
+					"simple",
 				),
+				user: assignee.user,
 			})) ?? [],
 		);
-	});
+	};
+	const getWorkflowStageColor = (stageKey?: string | number) =>
+		getStageColor({
+			collection: props.collection(),
+			stageKey: stageKey?.toString(),
+		});
+	let pendingWorkflowUpdate: WorkflowUpdateBody = {};
+	const hasPendingWorkflowUpdate = () =>
+		pendingWorkflowUpdate.stage !== undefined ||
+		pendingWorkflowUpdate.assigneeIds !== undefined;
+	const clearPendingWorkflowUpdate = (key: keyof WorkflowUpdateBody) => {
+		delete pendingWorkflowUpdate[key];
+		if (!hasPendingWorkflowUpdate()) debouncedUpdateWorkflow.clear();
+	};
+	const debouncedUpdateWorkflow = debounce(() => {
+		const body = pendingWorkflowUpdate;
+		pendingWorkflowUpdate = {};
+
+		if (body.stage === undefined && body.assigneeIds === undefined) return;
+		if (updatePending()) {
+			pendingWorkflowUpdate = {
+				...body,
+				...pendingWorkflowUpdate,
+			};
+			debouncedUpdateWorkflow();
+			return;
+		}
+
+		void props.mutations.updateWorkflowAction(body).catch(() => {
+			syncWorkflowState();
+		});
+	}, 500);
+	const queueWorkflowUpdate = (body: WorkflowUpdateBody) => {
+		pendingWorkflowUpdate = {
+			...pendingWorkflowUpdate,
+			...body,
+		};
+		debouncedUpdateWorkflow();
+	};
+	const handleStageChange = (value: string | number | undefined) => {
+		const nextStage = value?.toString();
+		setStage(nextStage);
+
+		if (nextStage === undefined || nextStage === workflow()?.stage) {
+			clearPendingWorkflowUpdate("stage");
+			return;
+		}
+
+		queueWorkflowUpdate({ stage: nextStage });
+	};
+	const handleAssigneesChange = (nextAssignees: Array<AssigneeOption>) => {
+		setAssignees(nextAssignees);
+
+		const nextAssigneeIds = nextAssignees.map((assignee) =>
+			Number(assignee.value),
+		);
+		if (sameNumericSet(currentAssigneeIds(), nextAssigneeIds)) {
+			clearPendingWorkflowUpdate("assigneeIds");
+			return;
+		}
+
+		queueWorkflowUpdate({ assigneeIds: nextAssigneeIds });
+	};
 
 	// ----------------------------------
-	// Functions
-	const updateWorkflow = async () => {
-		if (!hasChanges()) return;
+	// Effects
+	createEffect(() => {
+		workflowKey();
+		pendingWorkflowUpdate = {};
+		debouncedUpdateWorkflow.clear();
+		syncWorkflowState();
+	});
 
-		await props.mutations.updateWorkflowAction({
-			stage: stageChanged() ? stage() : undefined,
-			assigneeIds: assigneesChanged() ? selectedAssigneeIds() : undefined,
-		});
-	};
+	onCleanup(() => {
+		debouncedUpdateWorkflow.clear();
+	});
 
 	// ----------------------------------
 	// Render
 	return (
 		<Show when={workflowConfig()}>
 			<section>
-				<div class="flex items-center justify-between gap-3 mb-4">
-					<h3 class="text-sm font-semibold text-title">{T()("workflow")}</h3>
-					<Show when={workflow()?.stage}>
-						<Pill
-							theme={getStageColor({
-								collection: props.collection(),
-								stageKey: workflow()?.stage,
-							})}
-						>
-							{formatStageName({
-								collection: props.collection(),
-								stageKey: workflow()?.stage,
-							})}
-						</Pill>
-					</Show>
+				<div class="flex items-center gap-2 mb-3">
+					<FaSolidChartDiagram class="text-body" size={14} />
+					<h3 class="text-base font-medium text-title">{T()("workflow")}</h3>
 				</div>
-				<div class="space-y-3">
+				<div class="relative space-y-3">
+					<Show when={updatePending()}>
+						<div class="absolute inset-0 z-10 rounded-md bg-card-base/60 animate-pulse" />
+					</Show>
 					<Select
 						id="document-workflow-stage"
 						name="document-workflow-stage"
 						value={stage()}
-						onChange={(value) => setStage(value?.toString())}
+						onChange={handleStageChange}
 						options={stageOptions()}
-						copy={{ label: T()("workflow_stage") }}
+						copy={{ label: T()("stage") }}
 						noClear={true}
-						disabled={props.disabled() || !hasUpdatePermission()}
+						disabled={fieldsDisabled()}
+						hideOptionalText={true}
+						renderValue={(props) => (
+							<WorkflowStageOption
+								label={props.option.label}
+								color={getWorkflowStageColor(props.option.value)}
+							/>
+						)}
+						renderOption={(props) => (
+							<WorkflowStageOption
+								label={props.option.label}
+								color={getWorkflowStageColor(props.option.value)}
+							/>
+						)}
 					/>
 					<SelectMultiple
 						id="document-workflow-assignees"
 						name="document-workflow-assignees"
 						values={assignees()}
-						onChange={setAssignees}
+						onChange={handleAssigneesChange}
 						options={assigneeOptions()}
 						copy={{ label: T()("workflow_assignees") }}
-						disabled={props.disabled() || !hasUpdatePermission()}
+						disabled={fieldsDisabled()}
+						hideOptionalText={true}
+						triggerClasses="items-start gap-2 p-2"
+						selectedValuesContainerClasses="gap-0"
+						selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-background-base hover:bg-card-hover text-title px-2 py-1.5"
+						renderValue={(props) => (
+							<WorkflowAssigneeOption
+								user={props.value.user}
+								label={props.value.label}
+								removeValue={props.removeValue}
+							/>
+						)}
+						renderOption={(props) => (
+							<WorkflowAssigneeOption
+								user={props.option.user}
+								label={props.option.label}
+							/>
+						)}
 					/>
-					<Show when={props.disabled()}>
-						<p class="text-xs text-body">{T()("workflow_unsaved_disabled")}</p>
-					</Show>
-					<Button
-						type="button"
-						theme="secondary"
-						size="small"
-						onClick={updateWorkflow}
-						disabled={updateDisabled()}
-						loading={props.mutations.updateWorkflowMutation.action.isPending}
-						permission={hasUpdatePermission()}
-						classes="w-full"
-					>
-						{T()("workflow_update")}
-					</Button>
 				</div>
 			</section>
 		</Show>

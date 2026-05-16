@@ -13,6 +13,7 @@ import type {
 } from "../../../types.js";
 import {
 	applyDefaultQueryFilters,
+	getBaseUrl,
 	groupDocumentFilters,
 } from "../../../utils/helpers/index.js";
 import type {
@@ -128,6 +129,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 			fields: bricksRes.data.fields,
 			config: context.config,
 			refs: bricksRes.data.refs,
+			host: getBaseUrl(context),
 		}),
 	};
 };

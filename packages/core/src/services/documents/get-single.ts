@@ -6,6 +6,7 @@ import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";
 import T from "../../translations/index.js";
 import type { InternalCollectionDocument } from "../../types.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
 	collectionServices,
@@ -119,6 +120,7 @@ const getSingle: ServiceFn<
 				bricks: bricksRes.data.bricks,
 				fields: bricksRes.data.fields,
 				config: context.config,
+				host: getBaseUrl(context),
 				refs: bricksRes.data.refs,
 				workflow: workflowRes.data,
 			}),
@@ -133,6 +135,7 @@ const getSingle: ServiceFn<
 			bricks: [],
 			fields: [],
 			config: context.config,
+			host: getBaseUrl(context),
 			workflow: workflowRes.data,
 		}),
 	};

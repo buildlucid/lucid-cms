@@ -87,8 +87,10 @@ const formatMultiple = (props: {
 					? documentWorkflowsFormatter.formatSingle({
 							collection: props.collection,
 							workflow: workflowMap.get(d.id),
+							host: props.host,
 						})
 					: undefined,
+			host: props.host,
 		});
 	});
 };
@@ -101,6 +103,7 @@ const formatSingle = (props: {
 	refs?: InternalCollectionDocument["refs"];
 	workflow?: DocumentWorkflow | null;
 	config: Config;
+	host: string;
 }): InternalCollectionDocument => {
 	const inlineWorkflow =
 		props.document.workflow_assignees !== undefined
@@ -117,6 +120,7 @@ const formatSingle = (props: {
 						updated_at: props.document.workflow_updated_at,
 						assignees: props.document.workflow_assignees,
 					},
+					host: props.host,
 				})
 			: undefined;
 
@@ -246,6 +250,7 @@ const formatClientMultiple = <TCollectionKey extends string = string>(props: {
 			fields: fields,
 			bricks: bricks || undefined,
 			refs: refs,
+			host: props.host,
 		});
 	});
 };
@@ -261,6 +266,7 @@ const formatClientSingle = <TCollectionKey extends string = string>(props: {
 	fields?: InternalDocumentField[] | null;
 	refs?: InternalCollectionDocument["refs"];
 	config: Config;
+	host: string;
 }): CollectionDocument<TCollectionKey> => {
 	const res = formatSingle({
 		document: props.document,
@@ -269,6 +275,7 @@ const formatClientSingle = <TCollectionKey extends string = string>(props: {
 		fields: props.fields,
 		config: props.config,
 		refs: props.refs,
+		host: props.host,
 	});
 	const { workflow: _workflow, ...clientRes } = res;
 

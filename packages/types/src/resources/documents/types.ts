@@ -1,5 +1,5 @@
 import type { LocaleValue } from "../locales/types.js";
-import type { MediaRef } from "../media/types.js";
+import type { MediaRef, ProfilePicture } from "../media/types.js";
 import type { UserRef } from "../users/types.js";
 
 export type DocumentVersionType = "latest" | "revision" | string;
@@ -572,6 +572,7 @@ export type WorkflowUser = {
 	username: string | null;
 	firstName: string | null;
 	lastName: string | null;
+	profilePicture: ProfilePicture | null;
 };
 
 export type DocumentWorkflowAssignee = {

@@ -225,13 +225,7 @@ const CollectionsDocumentsEditRoute: Component<{
 		return hasWorkflow || hasReview || hasScheduling;
 	});
 
-	const disableFromEdit = createMemo(
-		() =>
-			brickStore.getDocumentMutated() ||
-			uiState.isSaving() ||
-			uiState.isAutoSaving() ||
-			uiState.isBuilderLocked(),
-	);
+	const disableWorkflow = createMemo(() => uiState.isBuilderLocked());
 
 	// ----------------------------------
 	// Render
@@ -272,24 +266,24 @@ const CollectionsDocumentsEditRoute: Component<{
 						restoreRevisionAction: mutations.restoreRevisionAction,
 					}}
 				/>
-				<div class="mt-2 bg-background-base rounded-t-xl border border-border grow overflow-hidden">
-					<Alert
-						style="pill"
-						alerts={[
-							{
-								type: "warning",
-								message: T()("locked_document_message"),
-								show: uiState.isBuilderLocked(),
-							},
-							{
-								type: "warning",
-								message: T()("collection_needs_migrating_message"),
-								show: uiState.collectionNeedsMigrating(),
-							},
-						]}
-					/>
-					<div class="w-full flex flex-col xl:flex-row grow h-full">
-						<div class="w-full min-w-0 flex flex-col">
+				<Alert
+					style="pill"
+					alerts={[
+						{
+							type: "warning",
+							message: T()("locked_document_message"),
+							show: uiState.isBuilderLocked(),
+						},
+						{
+							type: "warning",
+							message: T()("collection_needs_migrating_message"),
+							show: uiState.collectionNeedsMigrating(),
+						},
+					]}
+				/>
+				<div class="mt-2 grow overflow-hidden">
+					<div class="w-full flex flex-col xl:flex-row grow h-full  bg-background-base rounded-t-xl border border-border">
+						<div class={"w-full min-w-0 flex flex-col"}>
 							<CollectionPseudoBrick
 								fields={docState.collection()?.fields || []}
 								collectionMigrationStatus={
@@ -321,7 +315,7 @@ const CollectionsDocumentsEditRoute: Component<{
 								collectionKey={docState.collectionKey}
 								document={docState.document}
 								documentId={docState.documentId}
-								disabled={disableFromEdit}
+								disabled={disableWorkflow}
 								mutations={mutations}
 							/>
 						</Show>

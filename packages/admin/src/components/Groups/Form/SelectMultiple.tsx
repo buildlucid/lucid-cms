@@ -3,9 +3,9 @@ import type { ErrorResult } from "@types";
 import classnames from "classnames";
 import { FaSolidCheck, FaSolidSort } from "solid-icons/fa";
 import {
-	type Component,
 	createSignal,
 	For,
+	type JSXElement,
 	Match,
 	Show,
 	Switch,
@@ -19,11 +19,11 @@ export type SelectMultipleValueT = {
 	label: string;
 };
 
-interface SelectMultipleProps {
+interface SelectMultipleProps<Value extends SelectMultipleValueT> {
 	id: string;
-	values: SelectMultipleValueT[];
-	onChange: (_value: SelectMultipleValueT[]) => void;
-	options: SelectMultipleValueT[];
+	values: Value[];
+	onChange: (_value: Value[]) => void;
+	options: Value[];
 	name: string;
 	copy?: {
 		label?: string;
@@ -36,23 +36,37 @@ interface SelectMultipleProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
+	hideOptionalText?: boolean;
+	triggerClasses?: string;
+	selectedValuesContainerClasses?: string;
+	selectedValueClasses?: string;
+	renderValue?: (_props: {
+		value: Value;
+		removeValue: () => void;
+	}) => JSXElement;
+	renderOption?: (_props: { option: Value; selected: boolean }) => JSXElement;
 }
 
-export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
+export function SelectMultiple<
+	Value extends SelectMultipleValueT = SelectMultipleValueT,
+>(props: SelectMultipleProps<Value>) {
 	const [open, setOpen] = createSignal(false);
 	const [inputFocus, setInputFocus] = createSignal(false);
 
 	// ----------------------------------------
 	// Functions
-	const setValues = (value: SelectMultipleValueT[]) => {
+	const setValues = (value: Value[]) => {
 		props.onChange(value);
 	};
-	const toggleValue = (value: SelectMultipleValueT) => {
+	const removeValue = (value: Value) => {
+		setValues(props.values.filter((v) => v.value !== value.value));
+	};
+	const toggleValue = (value: Value) => {
 		const exists = props.values.find((v) => v.value === value.value);
 		if (!exists) {
 			setValues([...props.values, value]);
 		} else {
-			setValues(props.values.filter((v) => v.value !== value.value));
+			removeValue(value);
 		}
 	};
 
@@ -80,28 +94,46 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 					theme={"basic"}
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
+					hideOptionalText={props.hideOptionalText}
 				/>
 				<DropdownMenu.Trigger
 					class={classnames(
 						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center min-h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
+						props.triggerClasses,
 					)}
 					onFocus={() => setInputFocus(true)}
 					onBlur={() => setInputFocus(false)}
 					disabled={props.disabled}
 				>
 					{/* Selected Items */}
-					<div class="flex flex-wrap gap-1 text-left">
+					<div
+						class={classnames(
+							"flex min-w-0 flex-1 flex-wrap text-left",
+							props.selectedValuesContainerClasses ?? "gap-1",
+						)}
+					>
 						<For each={props.values}>
 							{(value) => (
-								<span class="bg-secondary-base hover:bg-secondary-hover duration-200 transition-colors rounded-md text-secondary-contrast px-2 py-0.5 flex items-center text-sm focus:outline-hidden">
-									{value.label}
+								<span
+									class={classnames(
+										"duration-200 transition-colors rounded-md px-2 py-0.5 flex min-w-0 max-w-full items-center text-sm focus:outline-hidden",
+										props.selectedValueClasses ??
+											"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast",
+									)}
+								>
+									{props.renderValue
+										? props.renderValue({
+												value,
+												removeValue: () => removeValue(value),
+											})
+										: value.label}
 								</span>
 							)}
 						</For>
 					</div>
 					{/* Icons */}
-					<div class="flex items-center ml-2 shrink-0">
-						<FaSolidSort size={16} class="text-subtitle ml-1" />
+					<div class="ml-2 flex shrink-0 self-center items-center">
+						<FaSolidSort size={14} class="text-subtitle ml-1" />
 					</div>
 				</DropdownMenu.Trigger>
 				<DropdownContent
@@ -116,24 +148,32 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 						<Match when={props.options.length > 0}>
 							<ul class="flex flex-col">
 								<For each={props.options}>
-									{(option) => (
-										<DropdownMenu.Item
-											class="flex items-center justify-between text-sm text-body hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
-											onSelect={() => {
-												toggleValue(option);
-											}}
-											closeOnSelect={false}
-										>
-											<span>{option.label}</span>
-											<Show
-												when={props.values.find(
-													(v) => v.value === option.value,
-												)}
+									{(option) => {
+										const selected = () =>
+											props.values.some((v) => v.value === option.value);
+
+										return (
+											<DropdownMenu.Item
+												class="flex items-center justify-between text-sm text-subtitle hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
+												onSelect={() => {
+													toggleValue(option);
+												}}
+												closeOnSelect={false}
 											>
-												<FaSolidCheck size={14} class="fill-current mr-2" />
-											</Show>
-										</DropdownMenu.Item>
-									)}
+												{props.renderOption ? (
+													props.renderOption({
+														option,
+														selected: selected(),
+													})
+												) : (
+													<span>{option.label}</span>
+												)}
+												<Show when={selected()}>
+													<FaSolidCheck size={14} class="fill-current mr-2" />
+												</Show>
+											</DropdownMenu.Item>
+										);
+									}}
 								</For>
 							</ul>
 						</Match>
@@ -150,4 +190,4 @@ export const SelectMultiple: Component<SelectMultipleProps> = (props) => {
 			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
-};
+}

@@ -1,6 +1,7 @@
 import type { DocumentWorkflow } from "@lucidcms/types";
 import { documentWorkflowsFormatter } from "../../libs/formatters/index.js";
 import { DocumentWorkflowsRepository } from "../../libs/repositories/index.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getCollectionInstance from "../collections/get-single-instance.js";
 import { getWorkflowConfig } from "./helpers/index.js";
@@ -42,6 +43,7 @@ const getSingle: ServiceFn<
 		data: documentWorkflowsFormatter.formatSingle({
 			collection: collectionRes.data,
 			workflow: workflowRes.data,
+			host: getBaseUrl(context),
 		}),
 	};
 };

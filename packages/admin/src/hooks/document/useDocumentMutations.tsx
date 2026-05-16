@@ -129,7 +129,9 @@ export function useDocumentMutations(props: {
 			},
 		});
 
-	const updateWorkflowMutation = api.documents.useUpdateWorkflow();
+	const updateWorkflowMutation = api.documents.useUpdateWorkflow({
+		silent: true,
+	});
 
 	const restoreRevision = api.documents.useRestoreRevision({
 		onSuccess: () => {

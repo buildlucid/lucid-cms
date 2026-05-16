@@ -818,12 +818,64 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 
 				return this.db
 					.selectFrom("lucid_users")
-					.select([
+					.select((eb) => [
 						"id",
 						"email",
 						"username",
 						"first_name as firstName",
 						"last_name as lastName",
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_media")
+									.select((mediaEb) => [
+										"lucid_media.id",
+										"lucid_media.key",
+										"lucid_media.type",
+										"lucid_media.mime_type",
+										"lucid_media.file_extension",
+										"lucid_media.file_name",
+										"lucid_media.file_size",
+										"lucid_media.width",
+										"lucid_media.height",
+										"lucid_media.focal_x",
+										"lucid_media.focal_y",
+										"lucid_media.blur_hash",
+										"lucid_media.average_color",
+										"lucid_media.base64",
+										"lucid_media.is_dark",
+										"lucid_media.is_light",
+										this.dbAdapter
+											.jsonArrayFrom(
+												mediaEb
+													.selectFrom("lucid_media_translations")
+													.select([
+														"lucid_media_translations.title",
+														"lucid_media_translations.alt",
+														"lucid_media_translations.description",
+														"lucid_media_translations.summary",
+														"lucid_media_translations.locale_code",
+													])
+													.whereRef(
+														"lucid_media_translations.media_id",
+														"=",
+														"lucid_media.id",
+													),
+											)
+											.as("translations"),
+									])
+									.whereRef(
+										"lucid_media.id",
+										"=",
+										"lucid_users.profile_picture_media_id",
+									)
+									.where(
+										"lucid_media.is_deleted",
+										"=",
+										this.dbAdapter.getDefault("boolean", "false"),
+									),
+							)
+							.as("profile_picture"),
 					])
 					.where("is_deleted", "=", deletedValue)
 					.where("is_locked", "=", lockedValue)
@@ -878,12 +930,64 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 
 				return this.db
 					.selectFrom("lucid_users")
-					.select([
+					.select((eb) => [
 						"id",
 						"email",
 						"username",
 						"first_name as firstName",
 						"last_name as lastName",
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_media")
+									.select((mediaEb) => [
+										"lucid_media.id",
+										"lucid_media.key",
+										"lucid_media.type",
+										"lucid_media.mime_type",
+										"lucid_media.file_extension",
+										"lucid_media.file_name",
+										"lucid_media.file_size",
+										"lucid_media.width",
+										"lucid_media.height",
+										"lucid_media.focal_x",
+										"lucid_media.focal_y",
+										"lucid_media.blur_hash",
+										"lucid_media.average_color",
+										"lucid_media.base64",
+										"lucid_media.is_dark",
+										"lucid_media.is_light",
+										this.dbAdapter
+											.jsonArrayFrom(
+												mediaEb
+													.selectFrom("lucid_media_translations")
+													.select([
+														"lucid_media_translations.title",
+														"lucid_media_translations.alt",
+														"lucid_media_translations.description",
+														"lucid_media_translations.summary",
+														"lucid_media_translations.locale_code",
+													])
+													.whereRef(
+														"lucid_media_translations.media_id",
+														"=",
+														"lucid_media.id",
+													),
+											)
+											.as("translations"),
+									])
+									.whereRef(
+										"lucid_media.id",
+										"=",
+										"lucid_users.profile_picture_media_id",
+									)
+									.where(
+										"lucid_media.is_deleted",
+										"=",
+										this.dbAdapter.getDefault("boolean", "false"),
+									),
+							)
+							.as("profile_picture"),
 					])
 					.where("is_deleted", "=", deletedValue)
 					.where("is_locked", "=", lockedValue)
