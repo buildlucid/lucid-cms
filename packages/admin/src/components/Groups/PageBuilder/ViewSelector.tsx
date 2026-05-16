@@ -58,15 +58,6 @@ export const ViewSelector: Component<{
 	});
 	const collectionLabel = createMemo(() => props.collectionSingularName());
 
-	const currentOptionLabel = createMemo(() => {
-		const option = currentOption();
-		if (!option) return undefined;
-		if (option.type === "link") return optionLabel(option);
-
-		const action = option.type === "latest" ? T()("edit") : T()("view");
-		return `${action} ${optionLabel(option)}`;
-	});
-
 	const optionLabel = (option: ViewSelectorOption) => {
 		if (option.type === "latest" || option.type === "environment") {
 			return T()("view_selector_document_version", {
@@ -92,6 +83,15 @@ export const ViewSelector: Component<{
 			collection: collectionLabel(),
 		});
 	};
+
+	const currentOptionLabel = createMemo(() => {
+		const option = currentOption();
+		if (!option) return undefined;
+		if (option.type === "link") return optionLabel(option);
+
+		const action = option.type === "latest" ? T()("edit") : T()("view");
+		return `${action} ${optionLabel(option)}`;
+	});
 
 	// ----------------------------------
 	// Render
