@@ -7,9 +7,14 @@ import {
 	createSignal,
 	Show,
 } from "solid-js";
+import { Select } from "@/components/Groups/Form";
 import { Confirmation } from "@/components/Groups/Modal";
 import T from "@/translations";
-import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";
+import {
+	getDefaultTimezone,
+	getScheduledAt,
+	type ReleaseTiming,
+} from "@/utils/release-schedule";
 import ReleaseScheduleFields from "./ReleaseScheduleFields";
 
 const ReleaseEnvironment: Component<{
@@ -33,7 +38,7 @@ const ReleaseEnvironment: Component<{
 }> = (props) => {
 	// ---------------------------------
 	// State & Hooks
-	const [scheduleEnabled, setScheduleEnabled] = createSignal(false);
+	const [releaseTiming, setReleaseTiming] = createSignal<ReleaseTiming>("now");
 	const [scheduleDate, setScheduleDate] = createSignal("");
 	const [scheduleTime, setScheduleTime] = createSignal("");
 	const [scheduleTimezone, setScheduleTimezone] = createSignal(
@@ -44,12 +49,32 @@ const ReleaseEnvironment: Component<{
 	// ---------------------------------
 	// Memos
 	const error = createMemo(() => validationError() || props.error);
+	const scheduleSelected = createMemo(
+		() => props.scheduling() && releaseTiming() === "scheduled",
+	);
+	const releaseTimingOptions = createMemo(() => [
+		{
+			value: "now",
+			label: T()("release_environment_publish_confirm"),
+		},
+		{
+			value: "scheduled",
+			label: T()("schedule_release"),
+		},
+	]);
+
+	// ---------------------------------
+	// Functions
+	const updateReleaseTiming = (value: ReleaseTiming) => {
+		setReleaseTiming(value);
+		setValidationError(undefined);
+	};
 
 	// ---------------------------------
 	// Effects
 	createEffect(() => {
 		if (!props.state.open) return;
-		setScheduleEnabled(false);
+		setReleaseTiming("now");
 		setScheduleDate("");
 		setScheduleTime("");
 		setScheduleTimezone(getDefaultTimezone());
@@ -75,16 +100,15 @@ const ReleaseEnvironment: Component<{
 					environment: props.environmentLabel() ?? "",
 				}),
 				error: error(),
-				confirm:
-					scheduleEnabled() && props.scheduling()
-						? T()("release_environment_schedule_confirm")
-						: T()("release_environment_publish_confirm"),
+				confirm: scheduleSelected()
+					? T()("release_environment_schedule_confirm")
+					: T()("release_environment_publish_confirm"),
 			}}
 			callbacks={{
 				onConfirm: async () => {
 					const target = props.target();
 					if (!target) return console.error("No release target provided");
-					if (scheduleEnabled() && props.scheduling()) {
+					if (scheduleSelected()) {
 						const scheduledAt = getScheduledAt({
 							date: scheduleDate(),
 							time: scheduleTime(),
@@ -107,18 +131,37 @@ const ReleaseEnvironment: Component<{
 			}}
 		>
 			<Show when={props.scheduling()}>
-				<div class="pb-4">
-					<ReleaseScheduleFields
-						enabled={scheduleEnabled()}
-						setEnabled={setScheduleEnabled}
-						date={scheduleDate()}
-						setDate={setScheduleDate}
-						time={scheduleTime()}
-						setTime={setScheduleTime}
-						timezone={scheduleTimezone()}
-						setTimezone={setScheduleTimezone}
-						onChange={() => setValidationError(undefined)}
+				<div class="grid gap-3 pb-4 md:pb-6">
+					<Select
+						id="release-environment-timing"
+						name="release-environment-timing"
+						value={releaseTiming()}
+						onChange={(value) => {
+							if (value === "now" || value === "scheduled") {
+								updateReleaseTiming(value);
+							}
+						}}
+						options={releaseTimingOptions()}
+						copy={{
+							label: T()("release_timing"),
+						}}
+						noClear={true}
+						hideOptionalText={true}
+						noMargin={true}
 					/>
+					<Show when={scheduleSelected()}>
+						<div class="mt-1">
+							<ReleaseScheduleFields
+								date={scheduleDate()}
+								setDate={setScheduleDate}
+								time={scheduleTime()}
+								setTime={setScheduleTime}
+								timezone={scheduleTimezone()}
+								setTimezone={setScheduleTimezone}
+								onChange={() => setValidationError(undefined)}
+							/>
+						</div>
+					</Show>
 				</div>
 			</Show>
 		</Confirmation>

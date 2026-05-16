@@ -10,7 +10,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { Textarea } from "@/components/Groups/Form";
+import { Select, Textarea } from "@/components/Groups/Form";
 import { Confirmation } from "@/components/Groups/Modal";
 import { HeaderBar } from "@/components/Groups/PageBuilder";
 import ReleaseScheduleFields from "@/components/Modals/Documents/ReleaseScheduleFields";
@@ -29,7 +29,11 @@ import {
 	getPublishOperationStatusLabel,
 	getPublishOperationStatusTheme,
 } from "@/utils/publish-operations";
-import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";
+import {
+	getDefaultTimezone,
+	getScheduledAt,
+	type ReleaseTiming,
+} from "@/utils/release-schedule";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import ReleaseRequestPreviewPlaceholder from "../../ReleaseRequests/PreviewPlaceholder";
 
@@ -38,13 +42,26 @@ type DecisionAction = "approve" | "reject" | "cancel";
 const getDecisionTitle = (action?: DecisionAction) => {
 	switch (action) {
 		case "approve":
-			return T()("approve");
+			return T()("approve_release_request");
 		case "reject":
-			return T()("reject");
+			return T()("reject_release_request");
 		case "cancel":
-			return T()("cancel_request");
+			return T()("cancel_release_request");
 		default:
 			return T()("confirm");
+	}
+};
+
+const getDecisionDescription = (action?: DecisionAction) => {
+	switch (action) {
+		case "approve":
+			return T()("approve_release_request_description");
+		case "reject":
+			return T()("reject_release_request_description");
+		case "cancel":
+			return T()("cancel_release_request_description");
+		default:
+			return T()("decision_comment_placeholder");
 	}
 };
 
@@ -136,6 +153,19 @@ const CollectionsDocumentsReleaseRequestDetailRoute: Component = () => {
 	const canCancelRequest = createMemo(
 		() => data()?.permissions.cancel === true,
 	);
+	const publishRequestHasSchedule = createMemo(() =>
+		Boolean(data()?.scheduledAt),
+	);
+	const releaseTimingOptions = createMemo(() => [
+		{
+			value: "now",
+			label: T()("release_environment_publish_confirm"),
+		},
+		{
+			value: "scheduled",
+			label: T()("schedule_release"),
+		},
+	]);
 
 	// ----------------------------------
 	// Effects
@@ -182,6 +212,13 @@ const CollectionsDocumentsReleaseRequestDetailRoute: Component = () => {
 		setScheduleTime("");
 		setScheduleTimezone(getDefaultTimezone());
 	};
+	const updateScheduleEnabled = (enabled: boolean) => {
+		setScheduleEnabled(enabled);
+		setValidationError(undefined);
+	};
+	const updateReleaseTiming = (value: ReleaseTiming) => {
+		updateScheduleEnabled(value === "scheduled");
+	};
 	const prefillSchedule = () => {
 		const publishRequest = data();
 		if (publishRequest?.scheduledAt) {
@@ -198,10 +235,49 @@ const CollectionsDocumentsReleaseRequestDetailRoute: Component = () => {
 		resetSchedule();
 	};
 	const openReschedule = () => {
-		prefillSchedule();
+		const publishRequest = data();
+		if (publishRequest?.scheduledAt) {
+			prefillSchedule();
+		} else {
+			resetSchedule();
+		}
 		setValidationError(undefined);
 		reschedule.reset();
 		setRescheduleOpen(true);
+	};
+	const saveReschedule = async () => {
+		const publishRequest = data();
+		if (!publishRequest) return;
+
+		const scheduledAt = getScheduledAt({
+			date: scheduleDate(),
+			time: scheduleTime(),
+			timezone: scheduleTimezone(),
+		});
+		if (!scheduledAt) {
+			setValidationError(T()("schedule_release_required"));
+			return;
+		}
+
+		await reschedule.action.mutateAsync({
+			id: publishRequest.id,
+			body: {
+				scheduledAt,
+				scheduledTimezone: scheduleTimezone(),
+			},
+		});
+	};
+	const removeSchedule = async () => {
+		const publishRequest = data();
+		if (!publishRequest) return;
+
+		await reschedule.action.mutateAsync({
+			id: publishRequest.id,
+			body: {
+				scheduledAt: null,
+				scheduledTimezone: null,
+			},
+		});
 	};
 	const listRoute = createMemo(
 		() =>
@@ -508,7 +584,7 @@ const CollectionsDocumentsReleaseRequestDetailRoute: Component = () => {
 				}}
 				copy={{
 					title: getDecisionTitle(decisionAction()),
-					description: T()("decision_comment_placeholder"),
+					description: getDecisionDescription(decisionAction()),
 					error: error(),
 				}}
 				callbacks={{
@@ -564,36 +640,58 @@ const CollectionsDocumentsReleaseRequestDetailRoute: Component = () => {
 					},
 				}}
 			>
-				<Textarea
-					id="document-publish-request-decision-comment"
-					name="document-publish-request-decision-comment"
-					value={decisionComment()}
-					onChange={(value) => {
-						setDecisionComment(value);
-						setValidationError(undefined);
-					}}
-					required={requireDecisionComment()}
-					rows={4}
-					copy={{
-						label: T()("comment"),
-						placeholder: T()("decision_comment_placeholder"),
-					}}
-				/>
-				<Show when={decisionAction() === "approve" && schedulingSupported()}>
-					<div class="pb-4">
-						<ReleaseScheduleFields
-							enabled={scheduleEnabled()}
-							setEnabled={setScheduleEnabled}
-							date={scheduleDate()}
-							setDate={setScheduleDate}
-							time={scheduleTime()}
-							setTime={setScheduleTime}
-							timezone={scheduleTimezone()}
-							setTimezone={setScheduleTimezone}
-							onChange={() => setValidationError(undefined)}
-						/>
-					</div>
-				</Show>
+				<div class="grid gap-4 pb-4 md:pb-6">
+					<Textarea
+						id="document-publish-request-decision-comment"
+						name="document-publish-request-decision-comment"
+						value={decisionComment()}
+						onChange={(value) => {
+							setDecisionComment(value);
+							setValidationError(undefined);
+						}}
+						required={requireDecisionComment()}
+						rows={4}
+						copy={{
+							label: T()("comment"),
+							placeholder: T()("decision_comment_placeholder"),
+						}}
+						noMargin={true}
+					/>
+					<Show when={decisionAction() === "approve" && schedulingSupported()}>
+						<div class="grid gap-3">
+							<Select
+								id="release-request-decision-timing"
+								name="release-request-decision-timing"
+								value={scheduleEnabled() ? "scheduled" : "now"}
+								onChange={(value) => {
+									if (value === "now" || value === "scheduled") {
+										updateReleaseTiming(value);
+									}
+								}}
+								options={releaseTimingOptions()}
+								copy={{
+									label: T()("release_timing"),
+								}}
+								noClear={true}
+								hideOptionalText={true}
+								noMargin={true}
+							/>
+							<Show when={scheduleEnabled()}>
+								<div class="mt-1">
+									<ReleaseScheduleFields
+										date={scheduleDate()}
+										setDate={setScheduleDate}
+										time={scheduleTime()}
+										setTime={setScheduleTime}
+										timezone={scheduleTimezone()}
+										setTimezone={setScheduleTimezone}
+										onChange={() => setValidationError(undefined)}
+									/>
+								</div>
+							</Show>
+						</div>
+					</Show>
+				</div>
 			</Confirmation>
 			<Confirmation
 				theme="primary"
@@ -604,33 +702,15 @@ const CollectionsDocumentsReleaseRequestDetailRoute: Component = () => {
 					isError: !!error(),
 				}}
 				copy={{
-					title: T()("reschedule_release"),
+					title: publishRequestHasSchedule()
+						? T()("reschedule_release")
+						: T()("schedule_release"),
+					description: T()("schedule_release_modal_description"),
 					confirm: T()("update_schedule"),
 					error: error(),
 				}}
 				callbacks={{
-					onConfirm: async () => {
-						const publishRequest = data();
-						if (!publishRequest) return;
-						const scheduledAt = scheduleEnabled()
-							? getScheduledAt({
-									date: scheduleDate(),
-									time: scheduleTime(),
-									timezone: scheduleTimezone(),
-								})
-							: null;
-						if (scheduleEnabled() && !scheduledAt) {
-							setValidationError(T()("schedule_release_required"));
-							return;
-						}
-						await reschedule.action.mutateAsync({
-							id: publishRequest.id,
-							body: {
-								scheduledAt,
-								scheduledTimezone: scheduledAt ? scheduleTimezone() : null,
-							},
-						});
-					},
+					onConfirm: saveReschedule,
 					onCancel: () => {
 						setRescheduleOpen(false);
 						resetSchedule();
@@ -638,11 +718,51 @@ const CollectionsDocumentsReleaseRequestDetailRoute: Component = () => {
 						reschedule.reset();
 					},
 				}}
+				slots={{
+					actions: (
+						<>
+							<Button
+								theme="border-outline"
+								size="medium"
+								type="button"
+								disabled={reschedule.action.isPending}
+								onClick={() => {
+									setRescheduleOpen(false);
+									resetSchedule();
+									setValidationError(undefined);
+									reschedule.reset();
+								}}
+							>
+								{T()("cancel")}
+							</Button>
+							<Show when={publishRequestHasSchedule()}>
+								<Button
+									theme="danger-outline"
+									size="medium"
+									type="button"
+									loading={reschedule.action.isPending}
+									onClick={removeSchedule}
+								>
+									{T()("remove_schedule")}
+								</Button>
+							</Show>
+							<Button
+								theme="primary"
+								size="medium"
+								type="button"
+								loading={reschedule.action.isPending}
+								onClick={saveReschedule}
+							>
+								{publishRequestHasSchedule()
+									? T()("update_schedule")
+									: T()("schedule_release")}
+							</Button>
+						</>
+					),
+				}}
 			>
-				<div class="pb-4">
+				<div class="grid gap-3 pb-4 md:pb-6">
 					<ReleaseScheduleFields
-						enabled={scheduleEnabled()}
-						setEnabled={setScheduleEnabled}
 						date={scheduleDate()}
 						setDate={setScheduleDate}
 						time={scheduleTime()}

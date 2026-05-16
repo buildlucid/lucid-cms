@@ -1,7 +1,9 @@
+import { mediaFormatter } from "../../libs/formatters/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import {
@@ -23,6 +25,7 @@ const getReviewers: ServiceFn<
 		username: string;
 		firstName: string | null;
 		lastName: string | null;
+		profilePicture: ReturnType<typeof mediaFormatter.formatEmbed>;
 	}>
 > = async (context, data) => {
 	const collectionRes = collectionServices.getSingleInstance(context, {
@@ -92,6 +95,10 @@ const getReviewers: ServiceFn<
 			username: reviewer.username,
 			firstName: reviewer.firstName,
 			lastName: reviewer.lastName,
+			profilePicture: mediaFormatter.formatEmbed({
+				poster: reviewer.profile_picture?.[0],
+				host: getBaseUrl(context),
+			}),
 		})),
 	};
 };

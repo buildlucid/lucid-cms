@@ -1,23 +1,41 @@
-import type { Collection, DocumentVersionType } from "@types";
+import type {
+	Collection,
+	DocumentVersionType,
+	PublishOperationReviewer,
+} from "@types";
 import {
 	type Accessor,
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
-	For,
 	Show,
 } from "solid-js";
-import { Checkbox, SelectMultiple, Textarea } from "@/components/Groups/Form";
+import {
+	CheckboxButton,
+	Label,
+	Select,
+	SelectMultiple,
+	Textarea,
+} from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Confirmation } from "@/components/Groups/Modal";
-import Pill from "@/components/Partials/Pill";
+import Button from "@/components/Partials/Button";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";
+import {
+	getDefaultTimezone,
+	getScheduledAt,
+	type ReleaseTiming,
+} from "@/utils/release-schedule";
+import PublishRequestReviewerOption from "./PublishRequestReviewerOption";
 import ReleaseScheduleFields from "./ReleaseScheduleFields";
+
+type ReviewerOption = SelectMultipleValueT & {
+	user: PublishOperationReviewer;
+};
 
 const CreatePublishRequest: Component<{
 	target: Accessor<Exclude<DocumentVersionType, "revision"> | null>;
@@ -45,9 +63,9 @@ const CreatePublishRequest: Component<{
 	// ----------------------------------
 	// State / Hooks
 	const [comment, setComment] = createSignal("");
-	const [assignees, setAssignees] = createSignal<SelectMultipleValueT[]>([]);
+	const [assignees, setAssignees] = createSignal<ReviewerOption[]>([]);
 	const [autoAccept, setAutoAccept] = createSignal(false);
-	const [scheduleEnabled, setScheduleEnabled] = createSignal(false);
+	const [releaseTiming, setReleaseTiming] = createSignal<ReleaseTiming>("now");
 	const [scheduleDate, setScheduleDate] = createSignal("");
 	const [scheduleTime, setScheduleTime] = createSignal("");
 	const [scheduleTimezone, setScheduleTimezone] = createSignal(
@@ -65,12 +83,23 @@ const CreatePublishRequest: Component<{
 
 	// ----------------------------------
 	// Memos
-	const reviewerOptions = createMemo<SelectMultipleValueT[]>(() =>
+	const reviewerOptions = createMemo<ReviewerOption[]>(() =>
 		(reviewers.data?.data ?? []).map((reviewer) => ({
 			value: reviewer.id,
-			label: helpers.formatUserName(reviewer, "username"),
+			label: helpers.formatUserName(reviewer, "username") || T()("unknown"),
+			user: reviewer,
 		})),
 	);
+	const releaseTimingOptions = createMemo(() => [
+		{
+			value: "now",
+			label: T()("request_now"),
+		},
+		{
+			value: "scheduled",
+			label: T()("schedule_request"),
+		},
+	]);
 	const requireComment = createMemo(
 		() => props.collection()?.config.review?.comments.request === "required",
 	);
@@ -96,9 +125,64 @@ const CreatePublishRequest: Component<{
 	const canSchedule = createMemo(
 		() => props.collection()?.capabilities.scheduling === true,
 	);
+	const scheduleSelected = createMemo(
+		() => canSchedule() && releaseTiming() === "scheduled",
+	);
 	const error = createMemo(
 		() => validationError() || reviewers.error?.message || props.error,
 	);
+
+	// ----------------------------------
+	// Functions
+	const updateReleaseTiming = (value: ReleaseTiming) => {
+		setReleaseTiming(value);
+		setValidationError(undefined);
+	};
+	const submitRequest = async (autoAccept: boolean) => {
+		const target = props.target();
+		if (!target) {
+			setValidationError(T()("publish_request_missing_target"));
+			return;
+		}
+		if (requireComment() && comment().trim().length === 0) {
+			setValidationError(T()("publish_request_comment_required"));
+			return;
+		}
+		if (
+			autoAccept &&
+			requireDecisionComment() &&
+			comment().trim().length === 0
+		) {
+			setValidationError(T()("publish_request_comment_required"));
+			return;
+		}
+
+		const scheduledAt = scheduleSelected()
+			? getScheduledAt({
+					date: scheduleDate(),
+					time: scheduleTime(),
+					timezone: scheduleTimezone(),
+				})
+			: undefined;
+		if (scheduleSelected() && !scheduledAt) {
+			setValidationError(T()("schedule_release_required"));
+			return;
+		}
+
+		await props.callbacks.onConfirm(
+			target,
+			comment().trim() || undefined,
+			autoAccept ? [] : assignees().map((assignee) => Number(assignee.value)),
+			autoAccept,
+			scheduledAt ?? undefined,
+			scheduledAt ? scheduleTimezone() : undefined,
+		);
+	};
+	const updateAutoAccept = (value: boolean) => {
+		setAutoAccept(value);
+		setValidationError(undefined);
+		if (value) setAssignees([]);
+	};
 
 	// ----------------------------------
 	// Effects
@@ -108,7 +192,7 @@ const CreatePublishRequest: Component<{
 		setComment("");
 		setAssignees([]);
 		setAutoAccept(false);
-		setScheduleEnabled(false);
+		setReleaseTiming("now");
 		setScheduleDate("");
 		setScheduleTime("");
 		setScheduleTimezone(getDefaultTimezone());
@@ -135,65 +219,48 @@ const CreatePublishRequest: Component<{
 				title: T()("publish_request_modal_title", {
 					environment: props.environmentLabel() ?? "",
 				}),
-				description: T()("publish_request_modal_description", {
+				description: `${T()("publish_request_modal_description", {
 					environment: props.environmentLabel() ?? "",
-				}),
+				})} ${T()("publish_request_replacement_warning")}`,
 				error: error(),
-				confirm:
-					scheduleEnabled() && canSchedule()
-						? T()("publish_request_schedule_confirm")
-						: T()("publish_request_publish_confirm"),
+				confirm: T()("publish_request_publish_confirm"),
 			}}
 			callbacks={{
-				onConfirm: async () => {
-					const target = props.target();
-					if (!target) {
-						setValidationError(T()("publish_request_missing_target"));
-						return;
-					}
-					if (requireComment() && comment().trim().length === 0) {
-						setValidationError(T()("publish_request_comment_required"));
-						return;
-					}
-					if (
-						autoAccept() &&
-						requireDecisionComment() &&
-						comment().trim().length === 0
-					) {
-						setValidationError(T()("publish_request_comment_required"));
-						return;
-					}
-					if (scheduleEnabled() && canSchedule()) {
-						const scheduledAt = getScheduledAt({
-							date: scheduleDate(),
-							time: scheduleTime(),
-							timezone: scheduleTimezone(),
-						});
-						if (!scheduledAt) {
-							setValidationError(T()("schedule_release_required"));
-							return;
-						}
-						await props.callbacks.onConfirm(
-							target,
-							comment().trim() || undefined,
-							assignees().map((assignee) => Number(assignee.value)),
-							autoAccept(),
-							scheduledAt,
-							scheduleTimezone(),
-						);
-						return;
-					}
-					await props.callbacks.onConfirm(
-						target,
-						comment().trim() || undefined,
-						assignees().map((assignee) => Number(assignee.value)),
-						autoAccept(),
-					);
-				},
+				onConfirm: () => submitRequest(autoAccept()),
 				onCancel: props.callbacks.onCancel,
 			}}
+			slots={{
+				actions: (
+					<>
+						<Button
+							theme="border-outline"
+							size="medium"
+							type="button"
+							disabled={props.loading}
+							onClick={props.callbacks.onCancel}
+						>
+							{T()("cancel")}
+						</Button>
+						<Button
+							theme="primary"
+							size="medium"
+							type="button"
+							loading={props.loading}
+							onClick={() => submitRequest(autoAccept())}
+						>
+							{autoAccept()
+								? scheduleSelected()
+									? T()("approve_and_schedule")
+									: T()("approve_and_release")
+								: scheduleSelected()
+									? T()("publish_request_schedule_confirm")
+									: T()("publish_request_publish_confirm")}
+						</Button>
+					</>
+				),
+			}}
 		>
-			<div class="flex flex-col gap-4 pb-2">
+			<div class="flex flex-col gap-5 pb-4 md:pb-6">
 				<Textarea
 					id="publish-request-comment"
 					name="publish-request-comment"
@@ -212,58 +279,91 @@ const CreatePublishRequest: Component<{
 					}}
 					noMargin={true}
 				/>
-				<SelectMultiple
-					id="publish-request-reviewers"
-					name="publish-request-reviewers"
-					values={assignees()}
-					onChange={setAssignees}
-					options={reviewerOptions()}
-					disabled={reviewers.isFetching || autoAccept()}
-					copy={{
-						label: T()("reviewers"),
-						placeholder: T()("select_reviewers"),
-					}}
-					noMargin={true}
-				/>
-				<Show when={canAutoAccept()}>
-					<Checkbox
-						id="publish-request-auto-accept"
-						name="publish-request-auto-accept"
-						value={autoAccept()}
-						onChange={(value) => {
-							setAutoAccept(value);
-							setValidationError(undefined);
-							if (value) setAssignees([]);
-						}}
+				<Show when={!autoAccept()}>
+					<SelectMultiple
+						id="publish-request-reviewers"
+						name="publish-request-reviewers"
+						values={assignees()}
+						onChange={setAssignees}
+						options={reviewerOptions()}
+						disabled={reviewers.isFetching}
 						copy={{
-							label: T()("publish_request_auto_accept_label"),
-							describedBy: T()("publish_request_auto_accept_description"),
+							label: T()("reviewers"),
+							placeholder: T()("select_reviewers"),
 						}}
+						triggerClasses="items-start gap-2 p-2"
+						selectedValuesContainerClasses="gap-0"
+						selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
+						renderValue={(props) => (
+							<PublishRequestReviewerOption
+								user={props.value.user}
+								label={props.value.label}
+								removeValue={props.removeValue}
+							/>
+						)}
+						renderOption={(props) => (
+							<PublishRequestReviewerOption
+								user={props.option.user}
+								label={props.option.label}
+							/>
+						)}
 						noMargin={true}
 					/>
 				</Show>
-				<Show when={assignees().length > 0}>
-					<div class="flex flex-wrap gap-1.5">
-						<For each={assignees()}>
-							{(assignee) => <Pill theme="outline">{assignee.label}</Pill>}
-						</For>
+				<Show when={canSchedule()}>
+					<div class="grid gap-3">
+						<Select
+							id="publish-request-release-timing"
+							name="publish-request-release-timing"
+							value={releaseTiming()}
+							onChange={(value) => {
+								if (value === "now" || value === "scheduled") {
+									updateReleaseTiming(value);
+								}
+							}}
+							options={releaseTimingOptions()}
+							copy={{
+								label: T()("release_timing"),
+							}}
+							noClear={true}
+							hideOptionalText={true}
+							noMargin={true}
+						/>
+						<Show when={scheduleSelected()}>
+							<div class="mt-1">
+								<ReleaseScheduleFields
+									date={scheduleDate()}
+									setDate={setScheduleDate}
+									time={scheduleTime()}
+									setTime={setScheduleTime}
+									timezone={scheduleTimezone()}
+									setTimezone={setScheduleTimezone}
+									onChange={() => setValidationError(undefined)}
+								/>
+							</div>
+						</Show>
 					</div>
 				</Show>
-				<p class="text-xs text-body">
-					{T()("publish_request_replacement_warning")}
-				</p>
-				<Show when={canSchedule()}>
-					<ReleaseScheduleFields
-						enabled={scheduleEnabled()}
-						setEnabled={setScheduleEnabled}
-						date={scheduleDate()}
-						setDate={setScheduleDate}
-						time={scheduleTime()}
-						setTime={setScheduleTime}
-						timezone={scheduleTimezone()}
-						setTimezone={setScheduleTimezone}
-						onChange={() => setValidationError(undefined)}
-					/>
+				<Show when={canAutoAccept()}>
+					<div>
+						<Label
+							id="publish-request-auto-accept"
+							label={T()("approval")}
+							theme="basic"
+							hideOptionalText={true}
+						/>
+						<CheckboxButton
+							id="publish-request-auto-accept"
+							name="publish-request-auto-accept"
+							value={autoAccept()}
+							onChange={updateAutoAccept}
+							copy={{
+								label: T()("publish_request_auto_accept_label"),
+								describedBy: T()("publish_request_auto_accept_description"),
+							}}
+							theme="secondary"
+						/>
+					</div>
 				</Show>
 			</div>
 		</Confirmation>

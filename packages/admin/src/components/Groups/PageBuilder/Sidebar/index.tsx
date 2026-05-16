@@ -30,7 +30,7 @@ export const Sidebar: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<aside class="w-full xl:w-80 shrink-0 sticky bg-card-base p-4 md:p-5 flex-col flex gap-5 rounded-tr-xl border-l border-border">
+		<aside class="w-full xl:w-80 shrink-0 sticky bg-card-base p-4 md:p-5 flex-col flex gap-5 rounded-t-xl xl:rounded-tl-none border-t xl:border-t-0 xl:border-l border-border">
 			<Workflow
 				collection={props.collection}
 				collectionKey={props.collectionKey}

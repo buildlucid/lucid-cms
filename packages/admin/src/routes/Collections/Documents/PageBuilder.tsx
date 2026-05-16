@@ -209,7 +209,11 @@ const CollectionsDocumentsEditRoute: Component<{
 
 	// ---------------------------------
 	// Memos
-	const disableWorkflow = createMemo(() => uiState.isBuilderLocked());
+	const disableWorkflow = createMemo(
+		() =>
+			docState.collection()?.config.locked === true ||
+			docState.document()?.isDeleted === true,
+	);
 
 	// ----------------------------------
 	// Render

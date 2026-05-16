@@ -716,4 +716,5 @@ export type PublishOperationReviewer = {
 	username: string;
 	firstName: string | null;
 	lastName: string | null;
+	profilePicture: ProfilePicture | null;
 };

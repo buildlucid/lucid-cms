@@ -2,6 +2,7 @@ import { HoverCard } from "@kobalte/core";
 import classnames from "classnames";
 import { FaSolidCheck } from "solid-icons/fa";
 import { type Component, Show } from "solid-js";
+import { DescribedBy } from "./DescribedBy";
 
 interface CheckboxButtonProps {
 	id: string;
@@ -10,6 +11,7 @@ interface CheckboxButtonProps {
 	name?: string;
 	copy: {
 		label?: string;
+		describedBy?: string;
 		tooltip?: string;
 	};
 	disabled?: boolean;
@@ -76,6 +78,9 @@ export const CheckboxButton: Component<CheckboxButtonProps> = (props) => {
 				}}
 				class="hidden"
 				disabled={props.disabled}
+				aria-describedby={
+					props.copy.describedBy ? `${props.id}-description` : undefined
+				}
 			/>
 			<Show
 				when={props.copy.tooltip}
@@ -86,6 +91,9 @@ export const CheckboxButton: Component<CheckboxButtonProps> = (props) => {
 						onClick={onButtonClick}
 						aria-pressed={props.value}
 						aria-disabled={props.disabled}
+						aria-describedby={
+							props.copy.describedBy ? `${props.id}-description` : undefined
+						}
 					>
 						<ButtonContent />
 					</button>
@@ -100,6 +108,9 @@ export const CheckboxButton: Component<CheckboxButtonProps> = (props) => {
 							onClick={onButtonClick}
 							aria-pressed={props.value}
 							aria-disabled={props.disabled}
+							aria-describedby={
+								props.copy.describedBy ? `${props.id}-description` : undefined
+							}
 						>
 							<ButtonContent />
 						</HoverCard.Trigger>
@@ -111,6 +122,7 @@ export const CheckboxButton: Component<CheckboxButtonProps> = (props) => {
 					</HoverCard.Root>
 				)}
 			</Show>
+			<DescribedBy id={props.id} describedBy={props.copy.describedBy} />
 		</>
 	);
 };

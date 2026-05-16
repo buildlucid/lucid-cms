@@ -25,6 +25,7 @@ export const Confirmation: Component<{
 	};
 	slots?: {
 		actionRow?: JSXElement;
+		actions?: JSXElement;
 	};
 	children?: JSXElement;
 }> = (props) => {
@@ -76,24 +77,33 @@ export const Confirmation: Component<{
 								</Show>
 							</div>
 							<div class="flex min-w-max items-center gap-2">
-								<Button
-									theme="border-outline"
-									size="medium"
-									type={"button"}
-									disabled={props.state.isLoading}
-									onClick={props.callbacks.onCancel}
+								<Show
+									when={props.slots?.actions}
+									fallback={
+										<>
+											<Button
+												theme="border-outline"
+												size="medium"
+												type={"button"}
+												disabled={props.state.isLoading}
+												onClick={props.callbacks.onCancel}
+											>
+												{T()("cancel")}
+											</Button>
+											<Button
+												theme={props.theme || "danger"}
+												size="medium"
+												type={"button"}
+												loading={props.state.isLoading}
+												onClick={props.callbacks.onConfirm}
+											>
+												{props.copy.confirm ?? T()("confirm")}
+											</Button>
+										</>
+									}
 								>
-									{T()("cancel")}
-								</Button>
-								<Button
-									theme={props.theme || "danger"}
-									size="medium"
-									type={"button"}
-									loading={props.state.isLoading}
-									onClick={props.callbacks.onConfirm}
-								>
-									{props.copy.confirm ?? T()("confirm")}
-								</Button>
+									{props.slots?.actions}
+								</Show>
 							</div>
 						</div>
 					</AlertDialog.Content>

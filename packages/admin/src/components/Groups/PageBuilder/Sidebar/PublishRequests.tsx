@@ -9,6 +9,7 @@ import {
 } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
 import ReleaseScheduleFields from "@/components/Modals/Documents/ReleaseScheduleFields";
+import Button from "@/components/Partials/Button";
 import api from "@/services/api";
 import T from "@/translations";
 import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";
@@ -23,7 +24,6 @@ export const PublishRequests: Component<{
 	// State
 	const [selectedOperation, setSelectedOperation] =
 		createSignal<PublishOperation>();
-	const [scheduleEnabled, setScheduleEnabled] = createSignal(false);
 	const [scheduleDate, setScheduleDate] = createSignal("");
 	const [scheduleTime, setScheduleTime] = createSignal("");
 	const [scheduleTimezone, setScheduleTimezone] = createSignal(
@@ -101,11 +101,13 @@ export const PublishRequests: Component<{
 	const error = createMemo(
 		() => validationError() || reschedule.errors()?.message,
 	);
+	const selectedOperationHasSchedule = createMemo(() =>
+		Boolean(selectedOperation()?.scheduledAt),
+	);
 
 	// ----------------------------------
 	// Functions
 	const resetSchedule = () => {
-		setScheduleEnabled(false);
 		setScheduleDate("");
 		setScheduleTime("");
 		setScheduleTimezone(getDefaultTimezone());
@@ -117,7 +119,6 @@ export const PublishRequests: Component<{
 
 		if (operation.scheduledAt) {
 			const scheduledAt = new Date(operation.scheduledAt);
-			setScheduleEnabled(true);
 			setScheduleDate(scheduledAt.toISOString().slice(0, 10));
 			setScheduleTime(scheduledAt.toISOString().slice(11, 16));
 			setScheduleTimezone(operation.scheduledTimezone ?? getDefaultTimezone());
@@ -125,6 +126,40 @@ export const PublishRequests: Component<{
 		}
 
 		resetSchedule();
+	};
+	const saveSchedule = async () => {
+		const operation = selectedOperation();
+		if (!operation) return;
+
+		const scheduledAt = getScheduledAt({
+			date: scheduleDate(),
+			time: scheduleTime(),
+			timezone: scheduleTimezone(),
+		});
+		if (!scheduledAt) {
+			setValidationError(T()("schedule_release_required"));
+			return;
+		}
+
+		await reschedule.action.mutateAsync({
+			id: operation.id,
+			body: {
+				scheduledAt,
+				scheduledTimezone: scheduleTimezone(),
+			},
+		});
+	};
+	const removeSchedule = async () => {
+		const operation = selectedOperation();
+		if (!operation) return;
+
+		await reschedule.action.mutateAsync({
+			id: operation.id,
+			body: {
+				scheduledAt: null,
+				scheduledTimezone: null,
+			},
+		});
 	};
 
 	// ----------------------------------
@@ -166,35 +201,15 @@ export const PublishRequests: Component<{
 					isError: !!error(),
 				}}
 				copy={{
-					title: T()("reschedule_release"),
+					title: selectedOperationHasSchedule()
+						? T()("reschedule_release")
+						: T()("schedule_release"),
+					description: T()("schedule_release_modal_description"),
 					confirm: T()("update_schedule"),
 					error: error(),
 				}}
 				callbacks={{
-					onConfirm: async () => {
-						const operation = selectedOperation();
-						if (!operation) return;
-
-						const scheduledAt = scheduleEnabled()
-							? getScheduledAt({
-									date: scheduleDate(),
-									time: scheduleTime(),
-									timezone: scheduleTimezone(),
-								})
-							: null;
-						if (scheduleEnabled() && !scheduledAt) {
-							setValidationError(T()("schedule_release_required"));
-							return;
-						}
-
-						await reschedule.action.mutateAsync({
-							id: operation.id,
-							body: {
-								scheduledAt,
-								scheduledTimezone: scheduledAt ? scheduleTimezone() : null,
-							},
-						});
-					},
+					onConfirm: saveSchedule,
 					onCancel: () => {
 						setSelectedOperation(undefined);
 						resetSchedule();
@@ -202,11 +217,51 @@ export const PublishRequests: Component<{
 						reschedule.reset();
 					},
 				}}
+				slots={{
+					actions: (
+						<>
+							<Button
+								theme="border-outline"
+								size="medium"
+								type="button"
+								disabled={reschedule.action.isPending}
+								onClick={() => {
+									setSelectedOperation(undefined);
+									resetSchedule();
+									setValidationError(undefined);
+									reschedule.reset();
+								}}
+							>
+								{T()("cancel")}
+							</Button>
+							<Show when={selectedOperationHasSchedule()}>
+								<Button
+									theme="danger-outline"
+									size="medium"
+									type="button"
+									loading={reschedule.action.isPending}
+									onClick={removeSchedule}
+								>
+									{T()("remove_schedule")}
+								</Button>
+							</Show>
+							<Button
+								theme="primary"
+								size="medium"
+								type="button"
+								loading={reschedule.action.isPending}
+								onClick={saveSchedule}
+							>
+								{selectedOperationHasSchedule()
+									? T()("update_schedule")
+									: T()("schedule_release")}
+							</Button>
+						</>
+					),
+				}}
 			>
-				<div class="pb-4">
+				<div class="grid gap-3 pb-4 md:pb-6">
 					<ReleaseScheduleFields
-						enabled={scheduleEnabled()}
-						setEnabled={setScheduleEnabled}
 						date={scheduleDate()}
 						setDate={setScheduleDate}
 						time={scheduleTime()}

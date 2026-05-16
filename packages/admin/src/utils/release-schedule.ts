@@ -1,3 +1,5 @@
+export type ReleaseTiming = "now" | "scheduled";
+
 export const getDefaultTimezone = () =>
 	Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
