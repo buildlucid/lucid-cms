@@ -96,7 +96,7 @@ export const controllerSchemas = {
 					"filter[status]": queryString.schema.filter(false, {
 						example: "pending",
 					}),
-					"filter[executionStatus]": queryString.schema.filter(false, {
+					"filter[executionStatus]": queryString.schema.filter(true, {
 						example: "scheduled",
 					}),
 					"filter[operationType]": queryString.schema.filter(false, {
@@ -128,7 +128,7 @@ export const controllerSchemas = {
 				filter: z
 					.object({
 						status: queryFormatted.schema.filters.single.optional(),
-						executionStatus: queryFormatted.schema.filters.single.optional(),
+						executionStatus: queryFormatted.schema.filters.union.optional(),
 						operationType: queryFormatted.schema.filters.single.optional(),
 						collectionKey: queryFormatted.schema.filters.single.optional(),
 						documentId: queryFormatted.schema.filters.single.optional(),

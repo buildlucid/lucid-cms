@@ -8,17 +8,7 @@ import T from "@/translations";
 import helpers from "@/utils/helpers";
 
 export const formatPublishOperationUser = (user: PublishOperationUser) => {
-	const username = user?.username ?? user?.email;
-	if (!username) return "-";
-
-	return helpers.formatUserName(
-		{
-			username,
-			firstName: user?.firstName,
-			lastName: user?.lastName,
-		},
-		"username",
-	);
+	return helpers.formatUserName(user, "username") || "-";
 };
 
 export const getPublishOperationStatusTheme = (

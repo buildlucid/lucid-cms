@@ -139,43 +139,52 @@ const formatFileNameTitle = (fileName?: string | null): string => {
 // ---------------------------------------------
 // Format user name
 const formatUserName = (
-	user: {
-		username: User["username"];
-		firstName?: User["firstName"];
-		lastName?: User["lastName"];
-	},
+	user:
+		| {
+				username?: User["username"] | null;
+				email?: User["email"] | null;
+				firstName?: User["firstName"];
+				lastName?: User["lastName"];
+		  }
+		| null
+		| undefined,
 	pref?: "username" | "simple",
 ): string => {
+	if (!user) return "";
+
+	const username = user.username ?? user.email ?? "";
+	if (!username) return "";
+
 	if (pref === "simple") {
 		if (user.firstName && user.lastName) {
 			return `${user.firstName} ${user.lastName}`;
 		}
 
-		return user.firstName || user.username;
+		return user.firstName || username;
 	}
 
 	// username (firstname lastname)
 	if (pref === "username") {
 		if (user.firstName && user.lastName) {
-			return `${user.username} (${user.firstName} ${user.lastName})`;
+			return `${username} (${user.firstName} ${user.lastName})`;
 		}
 
 		if (user.firstName) {
-			return `${user.username} (${user.firstName})`;
+			return `${username} (${user.firstName})`;
 		}
 
-		return user.username;
+		return username;
 	}
 
 	// firstname lastname - (username)
 	if (user.firstName && user.lastName) {
-		return `${user.firstName} ${user.lastName} - (${user.username})`;
+		return `${user.firstName} ${user.lastName} - (${username})`;
 	}
 	if (user.firstName) {
-		return `${user.firstName} - (${user.username})`;
+		return `${user.firstName} - (${username})`;
 	}
 
-	return user.username;
+	return username;
 };
 
 // ---------------------------------------------

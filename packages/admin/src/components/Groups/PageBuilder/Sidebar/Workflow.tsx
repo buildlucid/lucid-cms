@@ -21,9 +21,10 @@ import userStore from "@/store/userStore";
 import T from "@/translations";
 import { sameNumericSet } from "@/utils/array-helpers";
 import helpers from "@/utils/helpers";
-import WorkflowAssigneeOption from "../../../Partials/WorkflowAssigneeOption";
-import WorkflowStageOption from "../../../Partials/WorkflowStageOption";
 import { getStageColor } from "./helpers";
+import SidebarSection from "./Partials/SidebarSection";
+import WorkflowAssigneeOption from "./Partials/WorkflowAssigneeOption";
+import WorkflowStageOption from "./Partials/WorkflowStageOption";
 
 type AssigneeOption = {
 	value: number;
@@ -91,14 +92,7 @@ export const Workflow: Component<{
 		() =>
 			assigneeQuery.data?.data.map((user) => ({
 				value: user.id,
-				label: helpers.formatUserName(
-					{
-						username: user.username ?? user.email ?? T()("unknown"),
-						firstName: user.firstName,
-						lastName: user.lastName,
-					},
-					"simple",
-				),
+				label: helpers.formatUserName(user, "simple") || T()("unknown"),
 				user,
 			})) ?? [],
 	);
@@ -116,15 +110,8 @@ export const Workflow: Component<{
 		setAssignees(
 			workflow()?.assignees.map((assignee) => ({
 				value: assignee.user.id,
-				label: helpers.formatUserName(
-					{
-						username:
-							assignee.user.username ?? assignee.user.email ?? T()("unknown"),
-						firstName: assignee.user.firstName,
-						lastName: assignee.user.lastName,
-					},
-					"simple",
-				),
+				label:
+					helpers.formatUserName(assignee.user, "simple") || T()("unknown"),
 				user: assignee.user,
 			})) ?? [],
 		);
@@ -208,12 +195,18 @@ export const Workflow: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<Show when={workflowConfig()}>
-			<section>
-				<div class="flex items-center gap-2 mb-3">
-					<FaSolidChartDiagram class="text-body" size={14} />
-					<h3 class="text-base font-medium text-title">{T()("workflow")}</h3>
-				</div>
+		<Show
+			when={
+				workflowConfig() &&
+				props.documentId() !== undefined &&
+				props.document() !== undefined
+			}
+		>
+			<SidebarSection
+				title={T()("workflow")}
+				icon={<FaSolidChartDiagram size={14} />}
+				storageKey="lucid:page-builder-sidebar:workflow-open"
+			>
 				<div class="relative space-y-3">
 					<Show when={updatePending()}>
 						<div class="absolute inset-0 z-10 rounded-md bg-card-base/60 animate-pulse" />
@@ -252,7 +245,7 @@ export const Workflow: Component<{
 						hideOptionalText={true}
 						triggerClasses="items-start gap-2 p-2"
 						selectedValuesContainerClasses="gap-0"
-						selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-background-base hover:bg-card-hover text-title px-2 py-1.5"
+						selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
 						renderValue={(props) => (
 							<WorkflowAssigneeOption
 								user={props.value.user}
@@ -268,7 +261,7 @@ export const Workflow: Component<{
 						)}
 					/>
 				</div>
-			</section>
+			</SidebarSection>
 		</Show>
 	);
 };

@@ -8,7 +8,6 @@ import {
 	Match,
 	on,
 	onCleanup,
-	Show,
 	Switch,
 } from "solid-js";
 import Alert from "@/components/Blocks/Alert";
@@ -210,21 +209,6 @@ const CollectionsDocumentsEditRoute: Component<{
 
 	// ---------------------------------
 	// Memos
-	const showSidebar = createMemo(() => {
-		const collection = docState.collection();
-
-		if (props.mode !== "edit") return false;
-		if (versionType() !== "latest") return false;
-		if (!docState.document()) return false;
-		if (!collection) return false;
-
-		const hasWorkflow = collection.config.workflow !== undefined;
-		const hasReview = (collection.config.review?.requiredFor?.length ?? 0) > 0;
-		const hasScheduling = collection.capabilities.scheduling === true;
-
-		return hasWorkflow || hasReview || hasScheduling;
-	});
-
 	const disableWorkflow = createMemo(() => uiState.isBuilderLocked());
 
 	// ----------------------------------
@@ -309,16 +293,14 @@ const CollectionsDocumentsEditRoute: Component<{
 								documentId={docState.documentId()}
 							/>
 						</div>
-						<Show when={showSidebar()}>
-							<Sidebar
-								collection={docState.collection}
-								collectionKey={docState.collectionKey}
-								document={docState.document}
-								documentId={docState.documentId}
-								disabled={disableWorkflow}
-								mutations={mutations}
-							/>
-						</Show>
+						<Sidebar
+							collection={docState.collection}
+							collectionKey={docState.collectionKey}
+							document={docState.document}
+							documentId={docState.documentId}
+							disabled={disableWorkflow}
+							mutations={mutations}
+						/>
 					</div>
 				</div>
 				<Modals

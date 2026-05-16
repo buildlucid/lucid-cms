@@ -14,7 +14,11 @@ interface QueryParams {
 	queryString?: Accessor<string>;
 	filters?: {
 		status?: Accessor<PublishOperationStatus | undefined>;
-		executionStatus?: Accessor<PublishOperationExecutionStatus | undefined>;
+		executionStatus?: Accessor<
+			| PublishOperationExecutionStatus
+			| PublishOperationExecutionStatus[]
+			| undefined
+		>;
 		operationType?: Accessor<PublishOperationType | undefined>;
 		collectionKey?: Accessor<string | undefined>;
 		documentId?: Accessor<number | undefined>;
@@ -22,7 +26,7 @@ interface QueryParams {
 		assignedToMe?: Accessor<string | undefined>;
 		requestedByMe?: Accessor<string | undefined>;
 	};
-	perPage?: number;
+	perPage?: Accessor<number> | number;
 }
 
 const useGetMultiple = (params: QueryHook<QueryParams>) => {
