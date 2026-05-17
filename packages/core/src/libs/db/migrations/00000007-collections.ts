@@ -197,9 +197,44 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createIndex("idx_lucid_publish_operations_schedule_dispatch")
+				.on("lucid_document_publish_operations")
+				.columns([
+					"status",
+					"execution_status",
+					"scheduled_job_id",
+					"scheduled_at",
+				])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_publish_operations_requested_by")
+				.on("lucid_document_publish_operations")
+				.columns(["requested_by", "created_at"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_publish_operations_document_created")
+				.on("lucid_document_publish_operations")
+				.columns(["collection_key", "document_id", "created_at"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_publish_operations_status_created")
+				.on("lucid_document_publish_operations")
+				.columns(["status", "created_at"])
+				.execute();
+
+			await db.schema
 				.createIndex("idx_lucid_publish_operation_assignees_user")
 				.on("lucid_document_publish_operation_assignees")
 				.columns(["user_id", "operation_id"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_publish_operation_assignees_operation_user")
+				.on("lucid_document_publish_operation_assignees")
+				.columns(["operation_id", "user_id"])
 				.execute();
 
 			await db.schema
@@ -281,9 +316,27 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createIndex("idx_lucid_document_workflows_stage")
+				.on("lucid_document_workflows")
+				.columns(["collection_key", "stage_key", "document_id"])
+				.execute();
+
+			await db.schema
 				.createIndex("idx_lucid_document_workflow_assignees_user")
 				.on("lucid_document_workflow_assignees")
 				.columns(["user_id", "workflow_id"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_document_workflow_assignees_workflow_assigned")
+				.on("lucid_document_workflow_assignees")
+				.columns(["workflow_id", "assigned_at"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_document_workflow_assignees_workflow_user")
+				.on("lucid_document_workflow_assignees")
+				.columns(["workflow_id", "user_id"])
 				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},

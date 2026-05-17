@@ -40,6 +40,7 @@ class LinkCustomField extends CustomField<"link"> {
 				},
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
+				index: this.props?.config?.index,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"link">;

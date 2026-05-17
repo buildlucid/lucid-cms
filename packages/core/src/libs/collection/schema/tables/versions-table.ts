@@ -1,6 +1,7 @@
 import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
 import type { ServiceResponse } from "../../../../types.js";
+import buildSchemaIndex from "../../helpers/build-schema-index.js";
 import buildTableName from "../../helpers/build-table-name.js";
 import type { CollectionSchemaTable } from "../types.js";
 
@@ -32,11 +33,12 @@ const createVersionsTable = (props: {
 
 	if (tableNameRes.error) return tableNameRes;
 	if (documentTableRes.error) return documentTableRes;
+	const tableName = tableNameRes.data.name;
 
 	return {
 		data: {
 			schema: {
-				name: tableNameRes.data.name,
+				name: tableName,
 				rawName: tableNameRes.data.rawName,
 				type: "versions",
 				key: {
@@ -143,6 +145,20 @@ const createVersionsTable = (props: {
 						nullable: true,
 						default: props.db.getDefault("timestamp", "now"),
 					},
+				],
+				indexes: [
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["document_id", "type"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["document_id", "type", "created_at"],
+						source: "core",
+					}),
 				],
 			},
 		},

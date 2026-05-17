@@ -53,6 +53,16 @@ describe("toSafeTableName", () => {
 		expect(res.rawName).toBe(raw);
 	});
 
+	test("truncates generated index names when stable sections exceed the limit", () => {
+		const raw = `lucid_idx__lucid_document__${"a".repeat(60)}__fld___title`;
+		const res = toSafeTableName(raw, 63);
+
+		expect(res.name).not.toBe(raw);
+		expect(res.name).toMatch(/^lucid_idx__lucid_document__a+_[0-9a-f]{8}$/);
+		expect(Buffer.byteLength(res.name, "utf8")).toBeLessThanOrEqual(63);
+		expect(res.rawName).toBe(raw);
+	});
+
 	test("floors provided limit to minimum supported table-name limit", () => {
 		const raw =
 			"lucid_document__page__banner__rep__items__nested_items__deep_nested__deeply_nested_items";

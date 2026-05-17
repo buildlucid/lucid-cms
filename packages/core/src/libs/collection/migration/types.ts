@@ -1,6 +1,7 @@
 import type { ColumnDataType } from "kysely";
 import type {
 	CollectionSchemaColumn,
+	CollectionSchemaIndex,
 	TableType,
 } from "../../../libs/collection/schema/types.js";
 
@@ -46,6 +47,18 @@ export type ColumnOperation =
 	| ModifyColumnOperation
 	| RemoveColumnOperation;
 
+export type AddIndexOperation = {
+	type: "add";
+	index: CollectionSchemaIndex;
+};
+
+export type RemoveIndexOperation = {
+	type: "remove";
+	indexName: string;
+};
+
+export type IndexOperation = AddIndexOperation | RemoveIndexOperation;
+
 export type TableMigration = {
 	type: "create" | "modify" | "remove";
 	priority: number;
@@ -57,6 +70,7 @@ export type TableMigration = {
 		fieldPath?: Array<string>;
 	};
 	columnOperations: ColumnOperation[];
+	indexOperations: IndexOperation[];
 };
 
 export type MigrationPlan = {

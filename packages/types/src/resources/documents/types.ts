@@ -336,6 +336,7 @@ type FieldConfigOptions<TDefault = unknown> = {
 	translations?: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
+	index?: true;
 	default?: TDefault;
 };
 

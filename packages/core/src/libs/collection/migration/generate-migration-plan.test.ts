@@ -116,4 +116,137 @@ describe("Generate migration plan", () => {
 			columnName: "created_by",
 		});
 	});
+
+	test("adds generated indexes that are missing from the database", () => {
+		const existing: InferredTable[] = [
+			{
+				name: "lucid_document__pages__fld",
+				columns: [
+					{ name: "id", type: "integer", nullable: false, default: null },
+					{ name: "_title", type: "text", nullable: true, default: null },
+				],
+			},
+		];
+
+		const current: CollectionSchema = {
+			key: "pages",
+			tables: [
+				{
+					name: "lucid_document__pages__fld",
+					rawName: "lucid_document__pages__fld",
+					type: "document-fields",
+					key: { collection: "pages" },
+					columns: [
+						{ name: "id", source: "core", type: "integer", nullable: false },
+						{ name: "_title", source: "field", type: "text", nullable: true },
+					],
+					indexes: [
+						{
+							name: "lucid_idx__lucid_document__pages__fld___title",
+							columns: ["_title"],
+							source: "field",
+						},
+					],
+				},
+			],
+		};
+
+		const res = generateMigrationPlan({
+			schemas: { existing, current },
+			db,
+		});
+
+		expect(res.error).toBeUndefined();
+		expect(res.data?.tables[0]?.indexOperations).toContainEqual({
+			type: "add",
+			index: current.tables[0]?.indexes?.[0],
+		});
+	});
+
+	test("removes stale generated indexes", () => {
+		const existing: InferredTable[] = [
+			{
+				name: "lucid_document__pages__fld",
+				columns: [
+					{ name: "id", type: "integer", nullable: false, default: null },
+					{ name: "_title", type: "text", nullable: true, default: null },
+				],
+				indexes: [
+					{
+						name: "lucid_idx__lucid_document__pages__fld___title",
+						columns: ["_title"],
+					},
+				],
+			},
+		];
+
+		const current: CollectionSchema = {
+			key: "pages",
+			tables: [
+				{
+					name: "lucid_document__pages__fld",
+					rawName: "lucid_document__pages__fld",
+					type: "document-fields",
+					key: { collection: "pages" },
+					columns: [
+						{ name: "id", source: "core", type: "integer", nullable: false },
+						{ name: "_title", source: "field", type: "text", nullable: true },
+					],
+				},
+			],
+		};
+
+		const res = generateMigrationPlan({
+			schemas: { existing, current },
+			db,
+		});
+
+		expect(res.error).toBeUndefined();
+		expect(res.data?.tables[0]?.indexOperations).toContainEqual({
+			type: "remove",
+			indexName: "lucid_idx__lucid_document__pages__fld___title",
+		});
+	});
+
+	test("does not remove manual indexes", () => {
+		const existing: InferredTable[] = [
+			{
+				name: "lucid_document__pages__fld",
+				columns: [
+					{ name: "id", type: "integer", nullable: false, default: null },
+					{ name: "_title", type: "text", nullable: true, default: null },
+				],
+				indexes: [
+					{
+						name: "manual_title_index",
+						columns: ["_title"],
+					},
+				],
+			},
+		];
+
+		const current: CollectionSchema = {
+			key: "pages",
+			tables: [
+				{
+					name: "lucid_document__pages__fld",
+					rawName: "lucid_document__pages__fld",
+					type: "document-fields",
+					key: { collection: "pages" },
+					columns: [
+						{ name: "id", source: "core", type: "integer", nullable: false },
+						{ name: "_title", source: "field", type: "text", nullable: true },
+					],
+				},
+			],
+		};
+
+		const res = generateMigrationPlan({
+			schemas: { existing, current },
+			db,
+		});
+
+		expect(res.error).toBeUndefined();
+		expect(res.data?.tables).toHaveLength(0);
+	});
 });

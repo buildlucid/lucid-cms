@@ -140,10 +140,16 @@ export interface InferredColumn {
 		onUpdate?: OnUpdate;
 	};
 }
+export interface InferredIndex {
+	name: string;
+	columns: string[];
+	unique?: boolean;
+}
 
 export interface InferredTable {
 	name: string;
 	columns: InferredColumn[];
+	indexes?: InferredIndex[];
 }
 
 // ------------------------------------------------------------------------------

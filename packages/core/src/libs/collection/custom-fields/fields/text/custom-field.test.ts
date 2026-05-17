@@ -252,6 +252,7 @@ test("custom field config passes schema validation", async () => {
 			default: "",
 			hidden: false,
 			disabled: false,
+			index: true,
 		},
 		validation: {
 			required: true,
@@ -261,4 +262,16 @@ test("custom field config passes schema validation", async () => {
 
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
+});
+
+test("custom field config rejects index false", async () => {
+	const res = await CustomFieldSchema.safeParseAsync({
+		type: "text",
+		key: "field",
+		config: {
+			index: false,
+		},
+	});
+
+	expect(res.success).toBe(false);
 });

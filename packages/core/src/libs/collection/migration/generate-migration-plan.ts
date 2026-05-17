@@ -9,12 +9,78 @@ import normaliseColumn from "../helpers/normalise-column.js";
 import determineColumnMods from "./determine-column-mods.js";
 import type {
 	ColumnOperation,
+	IndexOperation,
 	MigrationPlan,
 	TableMigration,
 } from "./types.js";
 
 const DISABLE_REMOVE_TABLES = true;
 const PROTECT_NON_REMOVABLE_COLUMNS = true;
+
+const indexesMatch = (
+	current: { columns: string[]; unique?: boolean },
+	existing: { columns: string[]; unique?: boolean },
+) => {
+	return (
+		current.columns.length === existing.columns.length &&
+		current.columns.every(
+			(column, index) => existing.columns[index] === column,
+		) &&
+		(current.unique ?? false) === (existing.unique ?? false)
+	);
+};
+
+/**
+ * Diffs configured schema indexes against DB-inferred indexes, only removing
+ * Lucid-generated names so manual database indexes are left alone.
+ */
+const createIndexOperations = (
+	currentIndexes: CollectionSchema["tables"][number]["indexes"],
+	existingIndexes: InferredTable["indexes"],
+): IndexOperation[] => {
+	const operations: IndexOperation[] = [];
+	const targetIndexes = existingIndexes ?? [];
+	const expectedIndexes = currentIndexes ?? [];
+
+	for (const index of expectedIndexes) {
+		const targetIndex = targetIndexes.find((item) => item.name === index.name);
+		if (!targetIndex) {
+			operations.push({
+				type: "add",
+				index,
+			});
+			continue;
+		}
+
+		if (!indexesMatch(index, targetIndex)) {
+			if (targetIndex.name.startsWith(constants.db.generatedIndexPrefix)) {
+				operations.push({
+					type: "remove",
+					indexName: targetIndex.name,
+				});
+			}
+			operations.push({
+				type: "add",
+				index,
+			});
+		}
+	}
+
+	for (const index of targetIndexes) {
+		const indexStillExists = expectedIndexes.some(
+			(item) => item.name === index.name,
+		);
+		if (indexStillExists) continue;
+		if (!index.name.startsWith(constants.db.generatedIndexPrefix)) continue;
+
+		operations.push({
+			type: "remove",
+			indexName: index.name,
+		});
+	}
+
+	return operations;
+};
 
 /**
  * Generates a migration plan for a collection
@@ -47,6 +113,10 @@ const generateMigrationPlan = (props: {
 					columnOperations: table.columns.map((column) => ({
 						type: "add",
 						column: normaliseColumn(column, column.source),
+					})),
+					indexOperations: (table.indexes ?? []).map((index) => ({
+						type: "add",
+						index,
 					})),
 				} satisfies TableMigration;
 			})
@@ -82,11 +152,19 @@ const generateMigrationPlan = (props: {
 					type: "add",
 					column: normaliseColumn(column, column.source),
 				})),
+				indexOperations: (table.indexes ?? []).map((index) => ({
+					type: "add",
+					index,
+				})),
 			});
 			continue;
 		}
 
 		const columnOperations: ColumnOperation[] = [];
+		const indexOperations = createIndexOperations(
+			table.indexes,
+			targetTable.indexes,
+		);
 
 		for (const column of table.columns) {
 			const targetColumn = targetTable.columns.find(
@@ -141,7 +219,7 @@ const generateMigrationPlan = (props: {
 			});
 		}
 
-		if (columnOperations.length) {
+		if (columnOperations.length || indexOperations.length) {
 			const tablePrioRes = getTablePriority("collection-inferred", table);
 			if (tablePrioRes.error) return tablePrioRes;
 
@@ -152,6 +230,7 @@ const generateMigrationPlan = (props: {
 				tableType: table.type,
 				key: table.key,
 				columnOperations,
+				indexOperations,
 			});
 		}
 	}
@@ -172,6 +251,7 @@ const generateMigrationPlan = (props: {
 					// tableType: table.type,
 					// key: table.key,
 					columnOperations: [],
+					indexOperations: [],
 				});
 			}
 		}

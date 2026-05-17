@@ -3,6 +3,7 @@ import type { CollectionSchema } from "../types.js";
 export type SchemaAdditionsDiff = {
 	missingTableNames: Set<string>;
 	missingColumnsByTable: Map<string, Set<string>>;
+	missingIndexesByTable: Map<string, Set<string>>;
 };
 
 /**
@@ -15,6 +16,7 @@ const diffSnapshotVsConfigAdditions = (
 ): SchemaAdditionsDiff => {
 	const missingTableNames = new Set<string>();
 	const missingColumnsByTable = new Map<string, Set<string>>();
+	const missingIndexesByTable = new Map<string, Set<string>>();
 
 	for (const configTable of configSchema.tables) {
 		const snapshotTable = snapshotSchema.tables.find(
@@ -27,6 +29,12 @@ const diffSnapshotVsConfigAdditions = (
 				configTable.name,
 				new Set(configTable.columns.map((column) => column.name)),
 			);
+			const missingIndexes = (configTable.indexes ?? []).map(
+				(index) => index.name,
+			);
+			if (missingIndexes.length > 0) {
+				missingIndexesByTable.set(configTable.name, new Set(missingIndexes));
+			}
 			continue;
 		}
 
@@ -41,11 +49,24 @@ const diffSnapshotVsConfigAdditions = (
 		if (missingColumns.length > 0) {
 			missingColumnsByTable.set(configTable.name, new Set(missingColumns));
 		}
+
+		const snapshotIndexNames = new Set(
+			(snapshotTable.indexes ?? []).map((index) => index.name),
+		);
+
+		const missingIndexes = (configTable.indexes ?? [])
+			.filter((index) => !snapshotIndexNames.has(index.name))
+			.map((index) => index.name);
+
+		if (missingIndexes.length > 0) {
+			missingIndexesByTable.set(configTable.name, new Set(missingIndexes));
+		}
 	}
 
 	return {
 		missingTableNames,
 		missingColumnsByTable,
+		missingIndexesByTable,
 	};
 };
 

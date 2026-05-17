@@ -86,7 +86,9 @@ const getMigrationStatus: ServiceFn<
 	}
 
 	const requiresMigration =
-		diff.missingTableNames.size > 0 || diff.missingColumnsByTable.size > 0;
+		diff.missingTableNames.size > 0 ||
+		diff.missingColumnsByTable.size > 0 ||
+		diff.missingIndexesByTable.size > 0;
 
 	return {
 		data: {

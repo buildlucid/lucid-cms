@@ -72,6 +72,7 @@ describe("diffSnapshotVsConfigAdditions", () => {
 		expect(diff.missingTableNames).toEqual(
 			new Set(["lucid_document__pages__hero"]),
 		);
+		expect(diff.missingIndexesByTable.size).toBe(0);
 	});
 
 	test("ignores tables/columns present in migrated schema but removed locally", () => {
@@ -120,6 +121,7 @@ describe("diffSnapshotVsConfigAdditions", () => {
 
 		expect(diff.missingTableNames.size).toBe(0);
 		expect(diff.missingColumnsByTable.size).toBe(0);
+		expect(diff.missingIndexesByTable.size).toBe(0);
 	});
 
 	test("ignores non-additive changes when column names are unchanged", () => {
@@ -169,5 +171,53 @@ describe("diffSnapshotVsConfigAdditions", () => {
 
 		expect(diff.missingTableNames.size).toBe(0);
 		expect(diff.missingColumnsByTable.size).toBe(0);
+		expect(diff.missingIndexesByTable.size).toBe(0);
+	});
+
+	test("returns missing indexes that exist in local schema only", () => {
+		const migrated: CollectionSchema = {
+			key: "pages",
+			tables: [
+				{
+					name: "lucid_document__pages__fld",
+					rawName: "lucid_document__pages__fld",
+					type: "document-fields",
+					key: { collection: "pages" },
+					columns: [
+						...baseTableColumns,
+						{ name: "_title", source: "field", type: "text", nullable: true },
+					],
+				},
+			],
+		};
+
+		const local: CollectionSchema = {
+			key: "pages",
+			tables: [
+				{
+					name: "lucid_document__pages__fld",
+					rawName: "lucid_document__pages__fld",
+					type: "document-fields",
+					key: { collection: "pages" },
+					columns: [
+						...baseTableColumns,
+						{ name: "_title", source: "field", type: "text", nullable: true },
+					],
+					indexes: [
+						{
+							name: "lucid_idx__lucid_document__pages__fld___title",
+							columns: ["_title"],
+							source: "field",
+						},
+					],
+				},
+			],
+		};
+
+		const diff = diffSnapshotVsConfigAdditions(migrated, local);
+
+		expect(
+			diff.missingIndexesByTable.get("lucid_document__pages__fld"),
+		).toEqual(new Set(["lucid_idx__lucid_document__pages__fld___title"]));
 	});
 });

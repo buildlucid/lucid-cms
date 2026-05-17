@@ -13,6 +13,7 @@ export interface NumberFieldConfig extends SharedFieldConfig {
 		translations?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
+		index?: true;
 		default?: number | null;
 	};
 	validation?: {

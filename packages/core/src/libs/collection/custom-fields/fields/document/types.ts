@@ -17,6 +17,7 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 		translations?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
+		index?: true;
 		multiple?: boolean;
 		default?: DocumentFieldValue[];
 	};

@@ -13,6 +13,7 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 		translations?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
+		index?: true;
 		default?: Record<string, unknown>;
 	};
 	validation?: {

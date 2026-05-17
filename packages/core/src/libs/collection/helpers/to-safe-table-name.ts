@@ -44,8 +44,23 @@ const toSafeTableName = (name: string, limit: number | null) => {
 		}
 	}
 
+	if (!name.startsWith(constants.db.generatedIndexPrefix)) {
+		return {
+			name,
+			rawName: name,
+		};
+	}
+
+	const maxPrefixBytes = effectiveLimit - byteLength(suffix);
+	let truncated = "";
+	for (const char of name) {
+		const candidate = `${truncated}${char}`;
+		if (byteLength(candidate) > maxPrefixBytes) break;
+		truncated = candidate;
+	}
+
 	return {
-		name,
+		name: `${truncated}${suffix}`,
 		rawName: name,
 	};
 };

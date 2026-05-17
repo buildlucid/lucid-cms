@@ -253,4 +253,134 @@ describe("Schema inference", async () => {
 		expect(generatedFieldColumn?.name.startsWith("_")).toBe(true);
 		expect(generatedFieldColumn?.canAutoRemove).toBe(false);
 	});
+
+	test("creates column field indexes from explicit config", () => {
+		pagesCollection.addText("title", {
+			config: {
+				index: true,
+			},
+		});
+
+		const res = inferSchema(pagesCollection, db);
+		const fieldsTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__fld",
+		);
+
+		expect(fieldsTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["_title"],
+				source: "field",
+			}),
+		);
+		expect(fieldsTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["_title", "document_id"],
+				source: "field",
+			}),
+		);
+	});
+
+	test("creates column field indexes from displayInListing", () => {
+		pagesCollection.addText("title", {
+			displayInListing: true,
+		});
+
+		const res = inferSchema(pagesCollection, db);
+		const fieldsTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__fld",
+		);
+
+		expect(fieldsTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["_title"],
+				source: "field",
+			}),
+		);
+		expect(fieldsTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["_title", "document_id"],
+				source: "field",
+			}),
+		);
+	});
+
+	test("does not create column field indexes by default", () => {
+		pagesCollection.addText("title");
+
+		const res = inferSchema(pagesCollection, db);
+		const fieldsTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__fld",
+		);
+
+		expect(
+			fieldsTable?.indexes?.filter((index) => index.source === "field") ?? [],
+		).toEqual([]);
+	});
+
+	test("creates composite relation lookup index for document fields", () => {
+		pagesCollection.addDocument("related_page", {
+			collection: ["pages", "blog"],
+		});
+
+		const res = inferSchema(pagesCollection, db);
+		const documentTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__fld__doc__related_page",
+		);
+
+		expect(documentTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["_collection_key", "_document_id"],
+				source: "field",
+			}),
+		);
+	});
+
+	test("creates core lookup indexes for generated collection tables", () => {
+		pagesCollection.addRepeater("links").addText("label").endRepeater();
+
+		const res = inferSchema(pagesCollection, db);
+		const documentTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages",
+		);
+		const versionsTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__ver",
+		);
+		const fieldsTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__fld",
+		);
+		const repeaterTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__fld__rep__links",
+		);
+
+		expect(documentTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["is_deleted", "updated_at"],
+				source: "core",
+			}),
+		);
+		expect(versionsTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["document_id", "type"],
+				source: "core",
+			}),
+		);
+		expect(fieldsTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["document_version_id"],
+				source: "core",
+			}),
+		);
+		expect(fieldsTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["document_id", "document_version_id"],
+				source: "core",
+			}),
+		);
+		expect(repeaterTable?.indexes).toContainEqual(
+			expect.objectContaining({
+				columns: ["parent_id"],
+				source: "core",
+			}),
+		);
+	});
 });

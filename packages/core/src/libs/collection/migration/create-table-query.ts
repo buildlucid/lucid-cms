@@ -2,6 +2,7 @@ import constants from "../../../constants/constants.js";
 import logger from "../../../libs/logger/index.js";
 import type { ServiceFn } from "../../../types.js";
 import { addColumn } from "./column-builder.js";
+import { addIndex } from "./index-builder.js";
 import type { TableMigration } from "./types.js";
 
 const createTableQuery: ServiceFn<
@@ -26,6 +27,12 @@ const createTableQuery: ServiceFn<
 		}
 
 		await query.execute();
+
+		await Promise.all(
+			data.migration.indexOperations
+				.filter((op) => op.type === "add")
+				.map((op) => addIndex(context, data.migration.tableName, op.index)),
+		);
 
 		return {
 			data: undefined,

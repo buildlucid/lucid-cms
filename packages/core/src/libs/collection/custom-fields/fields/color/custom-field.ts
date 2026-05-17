@@ -34,6 +34,7 @@ class ColorCustomField extends CustomField<"color"> {
 				default: this.props?.config?.default ?? "",
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
+				index: this.props?.config?.index,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"color">;

@@ -17,19 +17,28 @@ const buildRuntimeSchema = (
 		}
 
 		const missingColumns = diff.missingColumnsByTable.get(table.name);
-		if (!missingColumns || missingColumns.size === 0) {
+		const missingIndexes = diff.missingIndexesByTable.get(table.name);
+		if (
+			(!missingColumns || missingColumns.size === 0) &&
+			(!missingIndexes || missingIndexes.size === 0)
+		) {
 			filteredTables.push(table);
 			continue;
 		}
 
-		const filteredColumns = table.columns.filter(
-			(column) => !missingColumns.has(column.name),
-		);
+		const filteredColumns = missingColumns
+			? table.columns.filter((column) => !missingColumns.has(column.name))
+			: table.columns;
 		if (filteredColumns.length === 0) continue;
+
+		const filteredIndexes = missingIndexes
+			? (table.indexes ?? []).filter((index) => !missingIndexes.has(index.name))
+			: table.indexes;
 
 		filteredTables.push({
 			...table,
 			columns: filteredColumns,
+			indexes: filteredIndexes,
 		});
 	}
 

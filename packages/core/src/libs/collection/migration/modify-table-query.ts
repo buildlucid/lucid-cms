@@ -3,6 +3,7 @@ import constants from "../../../constants/constants.js";
 import logger from "../../../libs/logger/index.js";
 import type { ServiceFn } from "../../../types.js";
 import { addColumn, dropColumn, modifyColumn } from "./column-builder.js";
+import { addIndex, dropIndex } from "./index-builder.js";
 import type { TableMigration } from "./types.js";
 
 /**
@@ -20,6 +21,14 @@ const modifyTableQuery: ServiceFn<
 		const supportsMultipleAlter =
 			context.config.db.supports("multipleAlterTables") ?? false;
 		let altered = false;
+
+		await Promise.all(
+			data.migration.indexOperations
+				.filter((operation) => operation.type === "remove")
+				.map((operation) =>
+					dropIndex(context, data.migration.tableName, operation.indexName),
+				),
+		);
 
 		//* for db that support multiple ALTER TABLE operations (postgres)
 		if (supportsMultipleAlter) {
@@ -59,6 +68,14 @@ const modifyTableQuery: ServiceFn<
 			if (altered) {
 				await query.execute();
 			}
+
+			await Promise.all(
+				data.migration.indexOperations
+					.filter((operation) => operation.type === "add")
+					.map((operation) =>
+						addIndex(context, data.migration.tableName, operation.index),
+					),
+			);
 
 			return {
 				data: undefined,
@@ -106,6 +123,14 @@ const modifyTableQuery: ServiceFn<
 		}
 
 		await Promise.all(queries);
+
+		await Promise.all(
+			data.migration.indexOperations
+				.filter((operation) => operation.type === "add")
+				.map((operation) =>
+					addIndex(context, data.migration.tableName, operation.index),
+				),
+		);
 
 		return {
 			data: undefined,

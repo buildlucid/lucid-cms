@@ -5,6 +5,7 @@ import type {
 	Select,
 	ServiceResponse,
 } from "../../../../../types.js";
+import buildSchemaIndex from "../../../helpers/build-schema-index.js";
 import buildTableName from "../../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
@@ -16,7 +17,9 @@ import type {
 	CustomFieldValidationError,
 	FieldRelationRefTarget,
 	FieldRelationValidationInput,
+	GetIndexDefinitionProps,
 	GetSchemaDefinitionProps,
+	IndexDefinition,
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
@@ -52,6 +55,7 @@ class DocumentCustomField extends CustomField<"document"> {
 				default: this.props?.config?.default ?? [],
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
+				index: this.props?.config?.index,
 				multiple: this.props?.config?.multiple,
 			},
 			validation: this.props?.validation,
@@ -102,6 +106,23 @@ class DocumentCustomField extends CustomField<"document"> {
 			},
 			error: undefined,
 		};
+	}
+	override getIndexDefinitions(
+		props: GetIndexDefinitionProps,
+	): IndexDefinition[] {
+		const columns = [
+			prefixGeneratedColName("collection_key"),
+			prefixGeneratedColName("document_id"),
+		];
+
+		return [
+			buildSchemaIndex({
+				db: props.db,
+				tableName: props.table.name,
+				columns,
+				source: "field",
+			}),
+		];
 	}
 	formatResponseValue(value: unknown) {
 		return normalizeStoredDocumentFieldValues(

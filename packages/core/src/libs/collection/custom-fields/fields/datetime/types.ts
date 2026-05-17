@@ -14,6 +14,7 @@ export interface DatetimeFieldConfig extends SharedFieldConfig {
 		time?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
+		index?: true;
 		default?: string;
 	};
 	validation?: {

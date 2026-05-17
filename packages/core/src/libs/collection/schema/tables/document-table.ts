@@ -1,6 +1,7 @@
 import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
 import type { ServiceResponse } from "../../../../types.js";
+import buildSchemaIndex from "../../helpers/build-schema-index.js";
 import buildTableName from "../../helpers/build-table-name.js";
 import type { CollectionSchemaTable } from "../types.js";
 
@@ -23,11 +24,12 @@ const createDocumentTable = (props: {
 		props.db.config.tableNameByteLimit,
 	);
 	if (tableNameRes.error) return tableNameRes;
+	const tableName = tableNameRes.data.name;
 
 	return {
 		data: {
 			schema: {
-				name: tableNameRes.data.name,
+				name: tableName,
 				rawName: tableNameRes.data.rawName,
 				type: "document",
 				key: {
@@ -123,6 +125,38 @@ const createDocumentTable = (props: {
 						nullable: true,
 						default: props.db.getDefault("timestamp", "now"),
 					},
+				],
+				indexes: [
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["is_deleted", "updated_at"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["is_deleted", "created_at"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["created_by"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["updated_by"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["deleted_by"],
+						source: "core",
+					}),
 				],
 			},
 		},

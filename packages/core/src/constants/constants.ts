@@ -120,6 +120,7 @@ export default Object.freeze({
 		prefix: "lucid_",
 		nameSeparator: "__",
 		generatedColumnPrefix: "_" as const,
+		generatedIndexPrefix: "lucid_idx__" as const,
 		customFieldTablePrefix: "cf_" as const,
 		//* postgres max table name length is 63 bytes
 		minTableNameByteLimit: 63,

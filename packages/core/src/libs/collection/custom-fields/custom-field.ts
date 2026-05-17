@@ -4,6 +4,7 @@ import type {
 	Select,
 	ServiceResponse,
 } from "../../../types.js";
+import buildSchemaIndex from "../helpers/build-schema-index.js";
 import prefixGeneratedColName from "../helpers/prefix-generated-column-name.js";
 import type {
 	CFConfig,
@@ -14,7 +15,9 @@ import type {
 	FieldRelationRefTarget,
 	FieldRelationValidationInput,
 	FieldTypes,
+	GetIndexDefinitionProps,
 	GetSchemaDefinitionProps,
+	IndexDefinition,
 	SchemaDefinition,
 } from "./types.js";
 import {
@@ -96,6 +99,40 @@ abstract class CustomField<T extends FieldTypes> {
 	abstract getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
 	): Awaited<ServiceResponse<SchemaDefinition>>;
+	/** Defines generated indexes for this field's schema fragments. */
+	public getIndexDefinitions(
+		props: GetIndexDefinitionProps,
+	): IndexDefinition[] {
+		if (!props.shouldIndex) return [];
+
+		const columns = props.columns
+			.filter((column) => column.source === "field")
+			.map((column) => column.name);
+		if (columns.length === 0) return [];
+
+		const hasDocumentIdColumn = props.columns.some(
+			(column) => column.name === "document_id",
+		);
+
+		return columns.flatMap((column) => [
+			buildSchemaIndex({
+				db: props.db,
+				tableName: props.table.name,
+				columns: [column],
+				source: "field",
+			}),
+			...(hasDocumentIdColumn
+				? [
+						buildSchemaIndex({
+							db: props.db,
+							tableName: props.table.name,
+							columns: [column, "document_id"],
+							source: "field",
+						}),
+					]
+				: []),
+		]);
+	}
 	/** Formats raw DB values into API response values for this field. */
 	abstract formatResponseValue(value: unknown): CFResponse<T>["value"];
 	/** Serializes field values into relation-table row payloads when needed. */

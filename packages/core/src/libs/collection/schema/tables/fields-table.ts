@@ -16,13 +16,80 @@ import {
 } from "../../custom-fields/storage/index.js";
 import { relationTableMode } from "../../custom-fields/storage/relation-table.js";
 import { treeTableMode } from "../../custom-fields/storage/tree-table.js";
+import buildSchemaIndex from "../../helpers/build-schema-index.js";
 import buildTableName from "../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../helpers/prefix-generated-column-name.js";
 import type {
 	CollectionSchemaColumn,
+	CollectionSchemaIndex,
 	CollectionSchemaTable,
 	TableType,
 } from "../types.js";
+
+const shouldIndexField = (
+	collection: CollectionBuilder,
+	field: CFConfig<FieldTypes>,
+) => {
+	const config = "config" in field ? field.config : undefined;
+	const hasConfiguredIndex =
+		(config as { index?: true } | undefined)?.index === true;
+	const isDisplayedInListing = collection.displayInListing.includes(field.key);
+
+	return hasConfiguredIndex || isDisplayedInListing;
+};
+
+const hasCoreColumn = (columns: CollectionSchemaColumn[], name: string) =>
+	columns.some((column) => column.name === name && column.source === "core");
+
+/**
+ * Adds indexes for common collection table joins and nested-field lookups,
+ * based on the core columns each generated table actually has.
+ */
+const createCoreIndexes = (props: {
+	db: DatabaseAdapter;
+	tableName: string;
+	columns: CollectionSchemaColumn[];
+}): CollectionSchemaIndex[] => {
+	const indexes: CollectionSchemaIndex[] = [];
+
+	if (hasCoreColumn(props.columns, "document_version_id")) {
+		indexes.push(
+			buildSchemaIndex({
+				db: props.db,
+				tableName: props.tableName,
+				columns: ["document_version_id"],
+				source: "core",
+			}),
+		);
+	}
+
+	if (
+		hasCoreColumn(props.columns, "document_id") &&
+		hasCoreColumn(props.columns, "document_version_id")
+	) {
+		indexes.push(
+			buildSchemaIndex({
+				db: props.db,
+				tableName: props.tableName,
+				columns: ["document_id", "document_version_id"],
+				source: "core",
+			}),
+		);
+	}
+
+	if (hasCoreColumn(props.columns, "parent_id")) {
+		indexes.push(
+			buildSchemaIndex({
+				db: props.db,
+				tableName: props.tableName,
+				columns: ["parent_id"],
+				source: "core",
+			}),
+		);
+	}
+
+	return indexes;
+};
 
 /**
  * Creates table schemas for fields
@@ -65,6 +132,7 @@ const createFieldTables = (props: {
 	}
 
 	const childTables: CollectionSchemaTable[] = [];
+	const indexes: CollectionSchemaIndex[] = [];
 	const columns: CollectionSchemaColumn[] = [
 		{
 			name: "id",
@@ -260,22 +328,35 @@ const createFieldTables = (props: {
 				});
 				if (fieldSchemaRes.error) return fieldSchemaRes;
 
-				for (const column of fieldSchemaRes.data.columns) {
-					columns.push({
-						name: prefixGeneratedColName(column.name),
-						source: "field",
-						canAutoRemove: false,
-						type: column.type,
-						nullable: column.nullable,
-						foreignKey: column.foreignKey,
-						customField: {
-							type: field.type,
+				const fieldColumns = fieldSchemaRes.data.columns.map((column) => ({
+					name: prefixGeneratedColName(column.name),
+					source: "field",
+					canAutoRemove: false,
+					type: column.type,
+					nullable: column.nullable,
+					foreignKey: column.foreignKey,
+					customField: {
+						type: field.type,
+					},
+					//* holding off on default value contraint on custom field columns due to sqlite/libsql adapters not supporting the alter column operation and instead having to drop+add the column again resulting in data loss.
+					//* CF default values are a lot more likely to be edited than the others and in a way where a user wouldnt expect data loss - so until we have a solution here, no default contraints for CF exist
+					default: props.db.supports("alterColumn") ? column.default : null,
+				})) satisfies CollectionSchemaColumn[];
+
+				columns.push(...fieldColumns);
+				indexes.push(
+					...fieldInstance.getIndexDefinitions({
+						db: props.db,
+						table: {
+							name: tableNameRes.data.name,
 						},
-						//* holding off on default value contraint on custom field columns due to sqlite/libsql adapters not supporting the alter column operation and instead having to drop+add the column again resulting in data loss.
-						//* CF default values are a lot more likely to be edited than the others and in a way where a user wouldnt expect data loss - so until we have a solution here, no default contraints for CF exist
-						default: props.db.supports("alterColumn") ? column.default : null,
-					});
-				}
+						columns: [
+							...columns.filter((column) => column.name === "document_id"),
+							...fieldColumns,
+						],
+						shouldIndex: shouldIndexField(props.collection, field),
+					}),
+				);
 				break;
 			}
 			case "relation-table": {
@@ -364,6 +445,22 @@ const createFieldTables = (props: {
 				) satisfies CollectionSchemaColumn[];
 
 				relationTableRes.data.schema.columns.push(...relationFieldColumns);
+				relationTableRes.data.schema.indexes = [
+					...(relationTableRes.data.schema.indexes ?? []),
+					...fieldInstance.getIndexDefinitions({
+						db: props.db,
+						table: {
+							name: relationTableRes.data.schema.name,
+						},
+						columns: [
+							...relationTableRes.data.schema.columns.filter(
+								(column) => column.name === "document_id",
+							),
+							...relationFieldColumns,
+						],
+						shouldIndex: shouldIndexField(props.collection, field),
+					}),
+				];
 
 				childTables.push(relationTableRes.data.schema);
 				childTables.push(...relationTableRes.data.childTables);
@@ -371,6 +468,13 @@ const createFieldTables = (props: {
 			}
 		}
 	}
+
+	const coreIndexes = createCoreIndexes({
+		db: props.db,
+		tableName: tableNameRes.data.name,
+		columns,
+	});
+	const tableIndexes = [...coreIndexes, ...indexes];
 
 	return {
 		data: {
@@ -384,6 +488,7 @@ const createFieldTables = (props: {
 					fieldPath: props.fieldPath,
 				},
 				columns: columns,
+				indexes: tableIndexes.length > 0 ? tableIndexes : undefined,
 			},
 			childTables: childTables,
 		},

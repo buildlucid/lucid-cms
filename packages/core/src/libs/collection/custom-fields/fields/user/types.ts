@@ -12,6 +12,7 @@ export interface UserFieldConfig extends SharedFieldConfig {
 		translations?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
+		index?: true;
 		multiple?: boolean;
 	};
 	validation?: {

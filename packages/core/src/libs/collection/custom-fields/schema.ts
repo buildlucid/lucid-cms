@@ -40,6 +40,7 @@ const CustomFieldSchema = z.object({
 			multiple: z.boolean().optional(),
 			hidden: z.boolean().optional(),
 			disabled: z.boolean().optional(),
+			index: z.literal(true).optional(),
 		})
 		.optional(),
 	options: z

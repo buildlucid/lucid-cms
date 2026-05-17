@@ -37,6 +37,17 @@ export type CollectionSchemaColumn = {
 	unique?: boolean;
 	primary?: boolean;
 };
+export type CollectionSchemaIndex = {
+	name: string;
+	columns: string[];
+	source: "core" | "field";
+	/**
+	 * Controls whether this index can be auto-removed by collection migrations when no longer present in the inferred schema.
+	 * Defaults to true.
+	 */
+	canAutoRemove?: boolean;
+	unique?: boolean;
+};
 export type CollectionSchemaTable<TableName = string> = {
 	name: TableName;
 	rawName: TableName;
@@ -47,6 +58,7 @@ export type CollectionSchemaTable<TableName = string> = {
 		fieldPath?: Array<string>;
 	};
 	columns: Array<CollectionSchemaColumn>;
+	indexes?: Array<CollectionSchemaIndex>;
 };
 export type CollectionSchema = {
 	key: string;

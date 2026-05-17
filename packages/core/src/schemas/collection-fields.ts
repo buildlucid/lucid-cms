@@ -131,6 +131,14 @@ export const fieldConfigSchema = z.object({
 				})
 				.nullable()
 				.optional(),
+			index: z
+				.literal(true)
+				.meta({
+					description: "Whether Lucid generates an index for the field",
+					example: true,
+				})
+				.nullable()
+				.optional(),
 			default: z
 				.any()
 				.meta({

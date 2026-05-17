@@ -13,6 +13,7 @@ export interface SelectFieldConfig extends SharedFieldConfig {
 		translations?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
+		index?: true;
 		default?: string;
 	};
 	validation?: {

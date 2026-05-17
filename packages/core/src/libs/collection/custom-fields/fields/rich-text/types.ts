@@ -14,6 +14,7 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 		default?: Record<string, unknown>;
 		hidden?: boolean;
 		disabled?: boolean;
+		index?: true;
 	};
 	validation?: {
 		required?: boolean;

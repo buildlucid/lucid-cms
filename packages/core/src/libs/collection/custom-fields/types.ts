@@ -9,7 +9,11 @@ import type {
 	OnUpdate,
 } from "../../db/types.js";
 import type { CollectionBuilder } from "../builders/index.js";
-import type { CollectionSchemaTable } from "../schema/types.js";
+import type {
+	CollectionSchemaColumn,
+	CollectionSchemaIndex,
+	CollectionSchemaTable,
+} from "../schema/types.js";
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import type { CheckboxCustomFieldMapItem } from "./fields/checkbox/types.js";
 import { colorFieldConfig } from "./fields/color/config.js";
@@ -245,6 +249,17 @@ export type ColumnDefinition = {
 export type SchemaDefinition = {
 	columns: ColumnDefinition[];
 };
+
+export type GetIndexDefinitionProps = {
+	db: DatabaseAdapter;
+	table: {
+		name: string;
+	};
+	columns: CollectionSchemaColumn[];
+	shouldIndex: boolean;
+};
+
+export type IndexDefinition = CollectionSchemaIndex;
 
 export type FieldRefParams = {
 	collection: CollectionBuilder;

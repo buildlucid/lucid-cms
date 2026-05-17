@@ -2,6 +2,7 @@ import { DatabaseAdapter } from "@lucidcms/core/db";
 import type {
 	DatabaseConfig,
 	InferredColumn,
+	InferredIndex,
 	InferredTable,
 	KyselyDB,
 	OnDelete,
@@ -66,70 +67,106 @@ class LibSQLAdapter extends DatabaseAdapter {
 	}
 	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {
 		const client = db ?? this.client;
-		const res = await sql<{
-			table_name: string;
-			name: string;
-			type: ColumnDataType;
-			notnull: number;
-			dflt_value: string | null;
-			pk: number;
-			fk_table?: string;
-			fk_column?: string;
-			fk_on_update?: OnUpdate;
-			fk_on_delete?: OnDelete;
-			is_unique: boolean;
-		}>`
-                WITH RECURSIVE
-                tables AS (
-                    SELECT name as table_name
-                    FROM sqlite_master
-                    WHERE type='table'
-                        AND name NOT LIKE 'sqlite_%'
-                ),
-                table_info AS (
-                    SELECT
-                        tables.table_name,
-                        p.*
-                    FROM tables
-                    CROSS JOIN pragma_table_info(tables.table_name) as p
-                ),
-                foreign_keys AS (
-                    SELECT
-                        tables.table_name,
-                        fk.'from' as column_name,
-                        fk.'table' as referenced_table,
-                        fk.'to' as referenced_column,
-                        fk.'on_update' as on_update,
-                        fk.'on_delete' as on_delete
-                    FROM tables
-                    CROSS JOIN pragma_foreign_key_list(tables.table_name) as fk
-                ),
-                unique_constraints AS (
-                    SELECT
-                        tables.table_name,
-                        idx.name as index_name,
-                        idx.'unique' as is_unique,
-                        info.name as column_name
-                    FROM tables
-                    CROSS JOIN pragma_index_list(tables.table_name) as idx
-                    CROSS JOIN pragma_index_info(idx.name) as info
-                    WHERE idx.'unique' = 1
-                )
-                SELECT
-                    t.*,
-                    fk.referenced_table as fk_table,
-                    fk.referenced_column as fk_column,
-                    fk.on_update as fk_on_update,
-                    fk.on_delete as fk_on_delete,
-                    CASE WHEN uc.column_name IS NOT NULL THEN 1 ELSE 0 END as is_unique
-                FROM table_info t
-                LEFT JOIN foreign_keys fk ON
-                    t.table_name = fk.table_name AND
-                    t.name = fk.column_name
-                LEFT JOIN unique_constraints uc ON
-                    t.table_name = uc.table_name AND
-                    t.name = uc.column_name
-            `.execute(client);
+		const [res, indexRes] = await Promise.all([
+			sql<{
+				table_name: string;
+				name: string;
+				type: ColumnDataType;
+				notnull: number;
+				dflt_value: string | null;
+				pk: number;
+				fk_table?: string;
+				fk_column?: string;
+				fk_on_update?: OnUpdate;
+				fk_on_delete?: OnDelete;
+				is_unique: boolean;
+			}>`
+	                WITH RECURSIVE
+	                tables AS (
+	                    SELECT name as table_name
+	                    FROM sqlite_master
+	                    WHERE type='table'
+	                        AND name NOT LIKE 'sqlite_%'
+	                ),
+	                table_info AS (
+	                    SELECT
+	                        tables.table_name,
+	                        p.*
+	                    FROM tables
+	                    CROSS JOIN pragma_table_info(tables.table_name) as p
+	                ),
+	                foreign_keys AS (
+	                    SELECT
+	                        tables.table_name,
+	                        fk.'from' as column_name,
+	                        fk.'table' as referenced_table,
+	                        fk.'to' as referenced_column,
+	                        fk.'on_update' as on_update,
+	                        fk.'on_delete' as on_delete
+	                    FROM tables
+	                    CROSS JOIN pragma_foreign_key_list(tables.table_name) as fk
+	                ),
+	                unique_constraints AS (
+	                    SELECT
+	                        tables.table_name,
+	                        idx.name as index_name,
+	                        idx.'unique' as is_unique,
+	                        info.name as column_name
+	                    FROM tables
+	                    CROSS JOIN pragma_index_list(tables.table_name) as idx
+	                    CROSS JOIN pragma_index_info(idx.name) as info
+	                    WHERE idx.'unique' = 1
+	                )
+	                SELECT
+	                    t.*,
+	                    fk.referenced_table as fk_table,
+	                    fk.referenced_column as fk_column,
+	                    fk.on_update as fk_on_update,
+	                    fk.on_delete as fk_on_delete,
+	                    CASE WHEN uc.column_name IS NOT NULL THEN 1 ELSE 0 END as is_unique
+	                FROM table_info t
+	                LEFT JOIN foreign_keys fk ON
+	                    t.table_name = fk.table_name AND
+	                    t.name = fk.column_name
+	                LEFT JOIN unique_constraints uc ON
+	                    t.table_name = uc.table_name AND
+	                    t.name = uc.column_name
+	            `.execute(client),
+			sql<{
+				table_name: string;
+				index_name: string;
+				is_unique: number;
+				seqno: number;
+				column_name: string;
+			}>`
+	                WITH RECURSIVE
+	                tables AS (
+	                    SELECT name as table_name
+	                    FROM sqlite_master
+	                    WHERE type='table'
+	                        AND name NOT LIKE 'sqlite_%'
+	                ),
+	                indexes AS (
+	                    SELECT
+	                        tables.table_name,
+	                        idx.name as index_name,
+	                        idx.'unique' as is_unique
+	                    FROM tables
+	                    CROSS JOIN pragma_index_list(tables.table_name) as idx
+	                    WHERE idx.origin = 'c'
+	                        AND idx.name NOT LIKE 'sqlite_%'
+	                )
+	                SELECT
+	                    indexes.table_name,
+	                    indexes.index_name,
+	                    indexes.is_unique,
+	                    info.seqno,
+	                    info.name as column_name
+	                FROM indexes
+	                CROSS JOIN pragma_index_info(indexes.index_name) as info
+	                ORDER BY indexes.table_name, indexes.index_name, info.seqno
+	            `.execute(client),
+		]);
 
 		const tableMap = new Map<string, InferredTable>();
 
@@ -160,6 +197,26 @@ class LibSQLAdapter extends DatabaseAdapter {
 							}
 						: undefined,
 			} satisfies InferredColumn);
+		}
+
+		const indexMap = new Map<string, InferredIndex>();
+		for (const row of indexRes.rows) {
+			const table = tableMap.get(row.table_name);
+			if (!table) continue;
+
+			const key = `${row.table_name}.${row.index_name}`;
+			let index = indexMap.get(key);
+			if (!index) {
+				index = {
+					name: row.index_name,
+					columns: [],
+					unique: Boolean(row.is_unique),
+				};
+				indexMap.set(key, index);
+				table.indexes = [...(table.indexes ?? []), index];
+			}
+
+			index.columns[row.seqno] = row.column_name;
 		}
 
 		return Array.from(tableMap.values());

@@ -14,6 +14,7 @@ export interface TextFieldConfig extends SharedFieldConfig {
 		default?: string;
 		hidden?: boolean;
 		disabled?: boolean;
+		index?: true;
 	};
 	validation?: {
 		required?: boolean;

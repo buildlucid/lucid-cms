@@ -37,6 +37,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				},
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
+				index: this.props?.config?.index,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"rich-text">;

@@ -32,6 +32,18 @@ describe("buildRuntimeSchema", () => {
 							nullable: true,
 						},
 					],
+					indexes: [
+						{
+							name: "lucid_idx__lucid_document__pages__fld___title",
+							columns: ["_title"],
+							source: "field",
+						},
+						{
+							name: "lucid_idx__lucid_document__pages__fld___summary",
+							columns: ["_summary"],
+							source: "field",
+						},
+					],
 				},
 				{
 					name: "lucid_document__pages__hero",
@@ -55,6 +67,12 @@ describe("buildRuntimeSchema", () => {
 			missingColumnsByTable: new Map([
 				["lucid_document__pages__fld", new Set(["_summary"])],
 			]),
+			missingIndexesByTable: new Map([
+				[
+					"lucid_document__pages__fld",
+					new Set(["lucid_idx__lucid_document__pages__fld___summary"]),
+				],
+			]),
 		});
 
 		expect(filtered.tables).toHaveLength(1);
@@ -62,6 +80,9 @@ describe("buildRuntimeSchema", () => {
 		expect(filtered.tables[0]?.columns.map((column) => column.name)).toEqual([
 			"id",
 			"_title",
+		]);
+		expect(filtered.tables[0]?.indexes?.map((index) => index.name)).toEqual([
+			"lucid_idx__lucid_document__pages__fld___title",
 		]);
 	});
 });

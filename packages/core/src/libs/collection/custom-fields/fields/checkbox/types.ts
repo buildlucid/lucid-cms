@@ -13,6 +13,7 @@ export interface CheckboxFieldConfig extends SharedFieldConfig {
 		translations?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
+		index?: true;
 		default?: boolean;
 	};
 	validation?: {
