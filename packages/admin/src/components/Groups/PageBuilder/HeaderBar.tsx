@@ -37,6 +37,7 @@ export const HeaderBar: Component<{
 	version?: Accessor<"latest" | string>;
 	versionId?: Accessor<number | undefined>;
 	trailingBreadcrumbs?: Accessor<Array<HeaderBreadcrumb> | undefined>;
+	currentViewLabel?: Accessor<string | undefined>;
 	state: {
 		collection: Accessor<Collection | undefined>;
 		collectionKey: Accessor<string>;
@@ -184,21 +185,6 @@ export const HeaderBar: Component<{
 				location:
 					props.state.documentID() !== undefined
 						? `/lucid/collections/${props.state.collectionKey()}/${props.state.documentID()}/history`
-						: "#",
-			});
-		}
-
-		if (
-			(props.state.collection()?.config.review?.requiredFor?.length ?? 0) > 0
-		) {
-			options.push({
-				label: T()("publish_requests"),
-				disabled: props.state.documentID() === undefined,
-				type: "link",
-				icon: "publish-requests",
-				location:
-					props.state.documentID() !== undefined
-						? `/lucid/collections/${props.state.collectionKey()}/${props.state.documentID()}/release-requests`
 						: "#",
 			});
 		}
@@ -443,6 +429,7 @@ export const HeaderBar: Component<{
 									options={viewOptions}
 									collectionSingularName={props.state.collectionSingularName}
 									isDocumentMutated={props.state.isDocumentMutated}
+									currentViewLabel={props.currentViewLabel}
 								/>
 							</Show>
 						</div>

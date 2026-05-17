@@ -45,9 +45,6 @@ const CollectionDocumentPageBuilderRoute = lazy(
 const CollectionsDocumentsHistoryRoute = lazy(
 	() => import("./routes/Collections/Documents/History"),
 );
-const CollectionsDocumentsReleaseRequestsRoute = lazy(
-	() => import("./routes/Collections/Documents/ReleaseRequests"),
-);
 const CollectionsDocumentsReleaseRequestDetailRoute = lazy(
 	() => import("./routes/Collections/Documents/ReleaseRequestDetail"),
 );
@@ -101,14 +98,6 @@ const AppRouter: Component = () => {
 				<Route
 					path="/collections/:collectionKey/:documentId/history"
 					component={() => <CollectionsDocumentsHistoryRoute />}
-				/>
-				<Route
-					path="/collections/:collectionKey/:documentId/release-requests"
-					component={() => (
-						<PermissionGuard permission={Permissions.DocumentsReview}>
-							<CollectionsDocumentsReleaseRequestsRoute />
-						</PermissionGuard>
-					)}
 				/>
 				<Route
 					path="/collections/:collectionKey/:documentId/release-requests/:releaseRequestId"

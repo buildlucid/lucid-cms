@@ -1,11 +1,5 @@
-import { A } from "@solidjs/router";
-import type {
-	Collection,
-	InternalCollectionDocument,
-	PublishOperation,
-} from "@types";
+import type { Collection, PublishOperation } from "@types";
 import {
-	FaSolidArrowLeft,
 	FaSolidCircleInfo,
 	FaSolidClock,
 	FaSolidPaperPlane,
@@ -87,8 +81,6 @@ const getDecisionConfirm = (action?: DecisionAction) => {
 
 export const ReleaseRequestSidebar: Component<{
 	collection: Accessor<Collection | undefined>;
-	document: Accessor<InternalCollectionDocument | undefined>;
-	documentId: Accessor<number | undefined>;
 	releaseRequest: Accessor<PublishOperation | undefined>;
 }> = (props) => {
 	// ----------------------------------
@@ -178,10 +170,6 @@ export const ReleaseRequestSidebar: Component<{
 			label: T()("schedule_release"),
 		},
 	]);
-	const listRoute = createMemo(
-		() =>
-			`/lucid/collections/${request()?.collectionKey ?? props.document()?.collectionKey}/${request()?.documentId ?? props.documentId()}/release-requests`,
-	);
 	const error = createMemo(
 		() =>
 			validationError() ||
@@ -349,14 +337,6 @@ export const ReleaseRequestSidebar: Component<{
 		<>
 			<aside class="w-full xl:w-80 shrink-0 sticky bg-card-base p-4 md:p-5 flex-col flex gap-5 rounded-t-xl xl:rounded-tl-none border-t xl:border-t-0 xl:border-l border-border">
 				<div class="flex flex-col gap-3">
-					<A
-						href={listRoute()}
-						class="inline-flex w-max items-center gap-1.5 text-sm text-body transition-colors hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
-					>
-						<FaSolidArrowLeft size={11} />
-						{T()("publish_requests")}
-					</A>
-
 					<div class="flex items-start justify-between gap-3">
 						<h2 class="min-w-0 text-base font-semibold text-title">
 							{request()

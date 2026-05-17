@@ -226,13 +226,17 @@ const CollectionsDocumentsEditRoute: Component<{
 
 		return [
 			{
-				link: `/lucid/collections/${releaseRequest.collectionKey}/${releaseRequest.documentId}/release-requests`,
-				label: T()("requests"),
-			},
-			{
 				label: `#${releaseRequest.id}`,
 			},
 		];
+	});
+	const currentViewLabel = createMemo(() => {
+		const releaseRequest = props.releaseRequest?.();
+		if (!releaseRequest) return undefined;
+
+		return T()("publish_request_detail_route_title", {
+			id: releaseRequest.id,
+		});
 	});
 
 	// ----------------------------------
@@ -256,6 +260,7 @@ const CollectionsDocumentsEditRoute: Component<{
 					version={versionType}
 					versionId={versionId}
 					trailingBreadcrumbs={trailingBreadcrumbs}
+					currentViewLabel={currentViewLabel}
 					state={{
 						collection: docState.collection,
 						collectionKey: docState.collectionKey,
@@ -322,8 +327,6 @@ const CollectionsDocumentsEditRoute: Component<{
 						{props.releaseRequest ? (
 							<ReleaseRequestSidebar
 								collection={docState.collection}
-								document={docState.document}
-								documentId={docState.documentId}
 								releaseRequest={props.releaseRequest}
 							/>
 						) : (
