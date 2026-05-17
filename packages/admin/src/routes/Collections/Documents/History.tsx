@@ -34,6 +34,11 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 			<Match when={state.isSuccess()}>
 				<HeaderBar
 					mode={undefined}
+					trailingBreadcrumbs={() => [
+						{
+							label: T()("history"),
+						},
+					]}
 					state={{
 						collection: state.collection,
 						collectionKey: state.collectionKey,

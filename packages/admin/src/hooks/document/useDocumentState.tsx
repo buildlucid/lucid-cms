@@ -26,7 +26,13 @@ export function useDocumentState(props: {
 	);
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const canFetchDocument = createMemo(() => {
-		return contentLocale() !== undefined && documentId() !== undefined;
+		if (contentLocale() === undefined || documentId() === undefined) {
+			return false;
+		}
+		if (props.version() === "revision" || props.version() === "snapshot") {
+			return props.versionId() !== undefined;
+		}
+		return true;
 	});
 	const versionUrlParam = createMemo(() => {
 		if (props.version() === "revision" || props.version() === "snapshot") {

@@ -111,6 +111,11 @@ const CollectionsDocumentsReleaseRequestsRoute: Component = () => {
 					mode={undefined}
 					version={versionType}
 					versionId={versionId}
+					trailingBreadcrumbs={() => [
+						{
+							label: T()("requests"),
+						},
+					]}
 					state={{
 						collection: state.collection,
 						collectionKey: state.collectionKey,

@@ -1,7 +1,11 @@
 import { DropdownMenu } from "@kobalte/core";
 import { useLocation, useNavigate } from "@solidjs/router";
 import classNames from "classnames";
-import { FaSolidLink } from "solid-icons/fa";
+import {
+	FaSolidClockRotateLeft,
+	FaSolidLink,
+	FaSolidPaperPlane,
+} from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, For } from "solid-js";
 import DropdownContent from "@/components/Partials/DropdownContent";
 import T from "@/translations";
@@ -12,6 +16,7 @@ export interface ViewSelectorOption {
 	type: "latest" | "environment" | "link";
 	location: string;
 	hideInDropdown?: boolean;
+	icon?: "history" | "publish-requests";
 	status?: {
 		isPublished?: boolean;
 		upToDate?: boolean;
@@ -92,6 +97,15 @@ export const ViewSelector: Component<{
 		const action = option.type === "latest" ? T()("edit") : T()("view");
 		return `${action} ${optionLabel(option)}`;
 	});
+
+	const optionIcon = (option: ViewSelectorOption) => {
+		if (option.icon === "history") return <FaSolidClockRotateLeft size={14} />;
+		if (option.icon === "publish-requests") {
+			return <FaSolidPaperPlane size={14} />;
+		}
+
+		return <FaSolidLink size={14} />;
+	};
 
 	// ----------------------------------
 	// Render
@@ -214,7 +228,7 @@ export const ViewSelector: Component<{
 									<span class="line-clamp-1 flex items-center gap-2 capitalize">
 										{optionLabel(item)}
 									</span>
-									<FaSolidLink size={14} />
+									{optionIcon(item)}
 								</DropdownMenu.Item>
 							</li>
 						)}

@@ -26,10 +26,17 @@ import { DocumentActions } from "./DocumentActions";
 import { ReleaseTrigger, type ReleaseTriggerOption } from "./ReleaseTrigger";
 import { ViewSelector, type ViewSelectorOption } from "./ViewSelector";
 
+type HeaderBreadcrumb = {
+	link?: string;
+	label: string;
+	include?: boolean;
+};
+
 export const HeaderBar: Component<{
 	mode: "create" | "edit" | undefined;
 	version?: Accessor<"latest" | string>;
 	versionId?: Accessor<number | undefined>;
+	trailingBreadcrumbs?: Accessor<Array<HeaderBreadcrumb> | undefined>;
 	state: {
 		collection: Accessor<Collection | undefined>;
 		collectionKey: Accessor<string>;
@@ -63,6 +70,38 @@ export const HeaderBar: Component<{
 	});
 	const hasMultipleLocales = createMemo(() => {
 		return contentLocaleStore.get.locales.length > 1;
+	});
+	const breadcrumbs = createMemo(() => {
+		const documentRoute = getDocumentRoute("edit", {
+			collectionKey: props.state.collectionKey(),
+			documentId: props.state.documentID(),
+		});
+		const currentDocumentRoute = getDocumentRoute("edit", {
+			collectionKey: props.state.collectionKey(),
+			documentId: props.state.documentID(),
+			status: props.version?.(),
+			versionId: props.versionId?.(),
+		});
+		const trailing = props.trailingBreadcrumbs?.() ?? [];
+
+		return [
+			{
+				link: "/lucid/collections",
+				label: T()("collections"),
+			},
+			{
+				link: `/lucid/collections/${props.state.collectionKey()}`,
+				label: props.state.collectionName(),
+			},
+			{
+				link: trailing.length > 0 ? documentRoute : currentDocumentRoute,
+				label:
+					props.mode === "create"
+						? T()("create")
+						: `${T()("document")} #${props.state.documentID()}`,
+			},
+			...trailing,
+		];
 	});
 	const viewOptions = createMemo(() => {
 		const options: ViewSelectorOption[] = [
@@ -141,6 +180,7 @@ export const HeaderBar: Component<{
 				label: T()("revision_history"),
 				disabled: props.state.documentID() === undefined,
 				type: "link",
+				icon: "history",
 				location:
 					props.state.documentID() !== undefined
 						? `/lucid/collections/${props.state.collectionKey()}/${props.state.documentID()}/history`
@@ -155,6 +195,7 @@ export const HeaderBar: Component<{
 				label: T()("publish_requests"),
 				disabled: props.state.documentID() === undefined,
 				type: "link",
+				icon: "publish-requests",
 				location:
 					props.state.documentID() !== undefined
 						? `/lucid/collections/${props.state.collectionKey()}/${props.state.documentID()}/release-requests`
@@ -332,28 +373,7 @@ export const HeaderBar: Component<{
 				<div class="flex md:items-center md:justify-between gap-3 w-full text-sm">
 					<div class="flex-1 min-w-0">
 						<LayoutBreadcrumbs
-							breadcrumbs={[
-								{
-									link: "/lucid/collections",
-									label: T()("collections"),
-								},
-								{
-									link: `/lucid/collections/${props.state.collectionKey()}`,
-									label: props.state.collectionName(),
-								},
-								{
-									link: getDocumentRoute("edit", {
-										collectionKey: props.state.collectionKey(),
-										documentId: props.state.documentID(),
-										status: props.version?.(),
-										versionId: props.versionId?.(),
-									}),
-									label:
-										props.mode === "create"
-											? T()("create")
-											: `${T()("document")} #${props.state.documentID()}`,
-								},
-							]}
+							breadcrumbs={breadcrumbs()}
 							options={{
 								noBorder: true,
 								noPadding: true,

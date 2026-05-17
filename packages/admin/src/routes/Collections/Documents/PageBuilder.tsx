@@ -1,4 +1,6 @@
 import { useParams } from "@solidjs/router";
+import type { PublishOperation } from "@types";
+import type { Accessor } from "solid-js";
 import {
 	batch,
 	type Component,
@@ -19,6 +21,7 @@ import {
 	Modals,
 	Sidebar,
 } from "@/components/Groups/PageBuilder";
+import { ReleaseRequestSidebar } from "@/components/Groups/PageBuilder/Sidebar/ReleaseRequestSidebar";
 import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
@@ -32,6 +35,8 @@ import T from "@/translations";
 const CollectionsDocumentsEditRoute: Component<{
 	mode: "create" | "edit";
 	version?: "latest" | "revision" | "snapshot";
+	versionId?: Accessor<number | undefined>;
+	releaseRequest?: Accessor<PublishOperation | undefined>;
 }> = (props) => {
 	// ----------------------------------
 	// Hooks & State
@@ -40,9 +45,10 @@ const CollectionsDocumentsEditRoute: Component<{
 	const versionType = createMemo(
 		() => props.version || params.versionType || "latest",
 	);
-	const versionId = createMemo(() =>
+	const routeVersionId = createMemo(() =>
 		params.versionId ? Number.parseInt(params.versionId, 10) : undefined,
 	);
+	const versionId = createMemo(() => props.versionId?.() ?? routeVersionId());
 	let snapshotTimeout: ReturnType<typeof setTimeout> | undefined;
 	let hydratedViewKey: string | null = null;
 
@@ -214,6 +220,20 @@ const CollectionsDocumentsEditRoute: Component<{
 			docState.collection()?.config.locked === true ||
 			docState.document()?.isDeleted === true,
 	);
+	const trailingBreadcrumbs = createMemo(() => {
+		const releaseRequest = props.releaseRequest?.();
+		if (!releaseRequest) return undefined;
+
+		return [
+			{
+				link: `/lucid/collections/${releaseRequest.collectionKey}/${releaseRequest.documentId}/release-requests`,
+				label: T()("requests"),
+			},
+			{
+				label: `#${releaseRequest.id}`,
+			},
+		];
+	});
 
 	// ----------------------------------
 	// Render
@@ -235,6 +255,7 @@ const CollectionsDocumentsEditRoute: Component<{
 					mode={props.mode}
 					version={versionType}
 					versionId={versionId}
+					trailingBreadcrumbs={trailingBreadcrumbs}
 					state={{
 						collection: docState.collection,
 						collectionKey: docState.collectionKey,
@@ -256,6 +277,7 @@ const CollectionsDocumentsEditRoute: Component<{
 				/>
 				<Alert
 					style="pill"
+					class="xl:right-80"
 					alerts={[
 						{
 							type: "warning",
@@ -297,14 +319,23 @@ const CollectionsDocumentsEditRoute: Component<{
 								documentId={docState.documentId()}
 							/>
 						</div>
-						<Sidebar
-							collection={docState.collection}
-							collectionKey={docState.collectionKey}
-							document={docState.document}
-							documentId={docState.documentId}
-							disabled={disableWorkflow}
-							mutations={mutations}
-						/>
+						{props.releaseRequest ? (
+							<ReleaseRequestSidebar
+								collection={docState.collection}
+								document={docState.document}
+								documentId={docState.documentId}
+								releaseRequest={props.releaseRequest}
+							/>
+						) : (
+							<Sidebar
+								collection={docState.collection}
+								collectionKey={docState.collectionKey}
+								document={docState.document}
+								documentId={docState.documentId}
+								disabled={disableWorkflow}
+								mutations={mutations}
+							/>
+						)}
 					</div>
 				</div>
 				<Modals

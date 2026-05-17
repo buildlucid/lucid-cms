@@ -102,13 +102,7 @@ const PublishRequestRow: Component<{
 				</Show>
 			</dl>
 
-			<div
-				class={`relative mt-3 grid divide-x divide-border overflow-hidden rounded-full bg-input-base/60 after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:ring-1 after:ring-inset after:ring-border after:content-[''] ${
-					props.request.operationType === "request"
-						? "grid-cols-3"
-						: "grid-cols-2"
-				}`}
-			>
+			<div class="relative mt-3 grid grid-cols-2 divide-x divide-border overflow-hidden rounded-full bg-input-base/60 after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:ring-1 after:ring-inset after:ring-border after:content-['']">
 				<Show
 					when={props.request.permissions.reschedule}
 					fallback={
@@ -146,19 +140,21 @@ const PublishRequestRow: Component<{
 						<span class="truncate leading-none">{T()("request")}</span>
 					</A>
 				</Show>
-				<A
-					href={getDocumentRoute("edit", {
-						collectionKey: props.request.collectionKey,
-						documentId: props.request.documentId,
-						status: "snapshot",
-						versionId: props.request.snapshotVersionId,
-					})}
-					title={T()("view_snapshot")}
-					class={iconActionClasses}
-				>
-					<FaSolidEye size={11} />
-					<span class="truncate leading-none">{T()("view")}</span>
-				</A>
+				<Show when={props.request.operationType !== "request"}>
+					<A
+						href={getDocumentRoute("edit", {
+							collectionKey: props.request.collectionKey,
+							documentId: props.request.documentId,
+							status: "snapshot",
+							versionId: props.request.snapshotVersionId,
+						})}
+						title={T()("view_snapshot")}
+						class={iconActionClasses}
+					>
+						<FaSolidEye size={11} />
+						<span class="truncate leading-none">{T()("view")}</span>
+					</A>
+				</Show>
 			</div>
 		</article>
 	);
