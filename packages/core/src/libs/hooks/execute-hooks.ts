@@ -70,6 +70,7 @@ const getMatchingHooks = <
 	for (let i = 0; i < options.collectionInstance.config.hooks.length; i++) {
 		const hook = options.collectionInstance.config.hooks[i];
 		if (hook === undefined) continue;
+		if (hook.service !== options.service) continue;
 		if (hook.event !== options.event) continue;
 
 		hooks.push({

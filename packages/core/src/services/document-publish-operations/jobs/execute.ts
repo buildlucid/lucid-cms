@@ -5,6 +5,7 @@ import {
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import execute from "../execute.js";
+import createEvent from "../helpers/create-event.js";
 
 export const markPublishOperationJobFailed: QueueJobPermanentFailureHandlerFn<
 	Record<string, unknown>
@@ -43,11 +44,30 @@ export const markPublishOperationJobFailed: QueueJobPermanentFailureHandlerFn<
 		},
 	});
 
-	await Events.createSingle({
-		data: {
-			operation_id: operationId,
-			event_type: "failed",
-			user_id: null,
+	const operationRes = await Operations.selectSingle({
+		select: ["id", "collection_key", "document_id", "target"],
+		where: [{ key: "id", operator: "=", value: operationId }],
+	});
+	if (operationRes.error || !operationRes.data) {
+		await Events.createSingle({
+			data: {
+				operation_id: operationId,
+				event_type: "failed",
+				user_id: null,
+				comment: data.errorMessage,
+				metadata: {
+					source: "queue",
+				},
+			},
+		});
+		return;
+	}
+
+	await createEvent(context, {
+		operation: operationRes.data,
+		event: {
+			type: "failed",
+			userId: null,
 			comment: data.errorMessage,
 			metadata: {
 				source: "queue",

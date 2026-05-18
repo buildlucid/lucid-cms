@@ -16,6 +16,7 @@ test("collection config is correct along with field includes and filters", async
 		},
 		hooks: [
 			{
+				service: "documents",
 				event: "beforeUpsert",
 				handler: async () => {
 					return {
@@ -25,6 +26,7 @@ test("collection config is correct along with field includes and filters", async
 				},
 			},
 			{
+				service: "documents",
 				event: "beforeDelete",
 				handler: async () => {
 					return {
@@ -34,6 +36,7 @@ test("collection config is correct along with field includes and filters", async
 				},
 			},
 			{
+				service: "documents",
 				event: "afterDelete",
 				handler: async () => {
 					return {
@@ -43,6 +46,7 @@ test("collection config is correct along with field includes and filters", async
 				},
 			},
 			{
+				service: "documents",
 				event: "afterUpsert",
 				handler: async () => {
 					return {

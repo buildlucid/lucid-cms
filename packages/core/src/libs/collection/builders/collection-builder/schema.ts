@@ -176,6 +176,7 @@ const CollectionConfigSchema = z
 		hooks: z
 			.array(
 				z.object({
+					service: z.string(),
 					event: z.string(),
 					priority: z.number().optional(),
 					handler: z.unknown(),

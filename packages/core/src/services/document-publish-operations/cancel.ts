@@ -1,5 +1,4 @@
 import {
-	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
@@ -7,6 +6,7 @@ import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
+import createEvent from "./helpers/create-event.js";
 import {
 	hasCollectionTargetPermission,
 	unresolvedPublishOperationExecutionStatuses,
@@ -25,10 +25,6 @@ const cancel: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Events = new DocumentPublishOperationEventsRepository(
 		context.db.client,
 		context.config.db,
 	);
@@ -129,11 +125,12 @@ const cancel: ServiceFn<
 	});
 	if (updateRes.error) return updateRes;
 
-	const eventRes = await Events.createSingle({
-		data: {
-			operation_id: operationRes.data.id,
-			event_type: "cancelled",
-			user_id: data.system ? null : data.user.id,
+	const eventRes = await createEvent(context, {
+		operation: operationRes.data,
+		collectionInstance: collectionRes.data,
+		event: {
+			type: "cancelled",
+			userId: data.system ? null : data.user.id,
 			comment,
 			metadata: {
 				system: data.system === true,

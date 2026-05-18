@@ -1,3 +1,4 @@
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import {
@@ -76,12 +77,14 @@ const deleteBatch: ServiceFn<
 			: []),
 	];
 	const clearCachePromises = [];
+	const deletedMediaIds = new Set<number>();
 	if (updates.length > 0) {
 		const res = await Promise.all(updates);
 		for (const r of res) {
 			if (r.error) return { error: r.error, data: undefined };
 			if (r.data && r.data.length > 0) {
 				for (const item of r.data) {
+					deletedMediaIds.add(item.id);
 					clearCachePromises.push(
 						context.kv.delete(
 							cacheKeys.http.static.clientMediaSingle(item.id),
@@ -106,6 +109,26 @@ const deleteBatch: ServiceFn<
 		...clearCachePromises,
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);
+
+	if (deletedMediaIds.size > 0) {
+		const hookRes = await executeHooks(
+			context,
+			{
+				service: "media",
+				event: "afterDelete",
+				config: context.config,
+			},
+			{
+				meta: {},
+				data: {
+					ids: Array.from(deletedMediaIds),
+					userId: data.userId,
+					hardDelete: false,
+				},
+			},
+		);
+		if (hookRes.error) return hookRes;
+	}
 
 	return { error: undefined, data: undefined };
 };

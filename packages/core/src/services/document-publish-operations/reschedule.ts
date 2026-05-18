@@ -1,11 +1,9 @@
-import {
-	DocumentPublishOperationEventsRepository,
-	DocumentPublishOperationsRepository,
-} from "../../libs/repositories/index.js";
+import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
+import createEvent from "./helpers/create-event.js";
 import {
 	collectionTargetSupportsScheduling,
 	hasCollectionTargetPermission,
@@ -29,11 +27,6 @@ const reschedule: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const Events = new DocumentPublishOperationEventsRepository(
-		context.db.client,
-		context.config.db,
-	);
-
 	const scheduleInput = parseScheduleInput({
 		scheduledAt: data.scheduledAt,
 		scheduledTimezone: data.scheduledTimezone,
@@ -159,11 +152,12 @@ const reschedule: ServiceFn<
 		});
 	}
 
-	const eventRes = await Events.createSingle({
-		data: {
-			operation_id: operationRes.data.id,
-			event_type: "rescheduled",
-			user_id: data.user.id,
+	const eventRes = await createEvent(context, {
+		operation: operationRes.data,
+		collectionInstance: collectionRes.data,
+		event: {
+			type: "rescheduled",
+			userId: data.user.id,
 			comment: null,
 			metadata: {
 				scheduledAt: schedule?.scheduledAt ?? null,

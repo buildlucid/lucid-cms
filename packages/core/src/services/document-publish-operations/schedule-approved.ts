@@ -1,11 +1,11 @@
 import {
-	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import execute from "./execute.js";
+import createEvent from "./helpers/create-event.js";
 import {
 	isInSchedulingDispatchWindow,
 	publishOperationExecuteEvent,
@@ -25,10 +25,6 @@ const scheduleApproved: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const Events = new DocumentPublishOperationEventsRepository(
-		context.db.client,
-		context.config.db,
-	);
 	const QueueJobs = new QueueJobsRepository(
 		context.db.client,
 		context.config.db,
@@ -37,6 +33,9 @@ const scheduleApproved: ServiceFn<
 	const operationRes = await Operations.selectSingle({
 		select: [
 			"id",
+			"collection_key",
+			"document_id",
+			"target",
 			"status",
 			"scheduled_at",
 			"scheduled_timezone",
@@ -130,11 +129,11 @@ const scheduleApproved: ServiceFn<
 		});
 		if (updateRes.error) return updateRes;
 
-		const eventRes = await Events.createSingle({
-			data: {
-				operation_id: operationRes.data.id,
-				event_type: data.eventType ?? "scheduled",
-				user_id: actorUserId,
+		const eventRes = await createEvent(context, {
+			operation: operationRes.data,
+			event: {
+				type: data.eventType ?? "scheduled",
+				userId: actorUserId,
 				comment: null,
 				metadata: {
 					scheduledAt: scheduledAt.toISOString(),

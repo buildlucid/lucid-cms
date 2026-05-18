@@ -1,10 +1,11 @@
 import {
-	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { collectionServices } from "../index.js";
+import createEvent from "./helpers/create-event.js";
 import notifyPublishOperationUsers from "./notifications.js";
 
 const cancelForDocuments: ServiceFn<
@@ -25,10 +26,6 @@ const cancelForDocuments: ServiceFn<
 	}
 
 	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Events = new DocumentPublishOperationEventsRepository(
 		context.db.client,
 		context.config.db,
 	);
@@ -103,18 +100,26 @@ const cancelForDocuments: ServiceFn<
 	});
 	if (updateRes.error) return updateRes;
 
-	const eventsRes = await Events.createMultiple({
-		data: ids.map((id) => ({
-			operation_id: id,
-			event_type: "cancelled",
-			user_id: null,
-			comment: data.comment,
-			metadata: {
-				system: true,
-			},
-		})),
+	const collectionRes = collectionServices.getSingleInstance(context, {
+		key: data.collectionKey,
 	});
-	if (eventsRes.error) return eventsRes;
+	if (collectionRes.error) return collectionRes;
+
+	for (const operation of detailedOperations) {
+		const eventRes = await createEvent(context, {
+			operation,
+			collectionInstance: collectionRes.data,
+			event: {
+				type: "cancelled",
+				userId: null,
+				comment: data.comment,
+				metadata: {
+					system: true,
+				},
+			},
+		});
+		if (eventRes.error) return eventRes;
+	}
 
 	for (const operation of detailedOperations) {
 		const recipients = [

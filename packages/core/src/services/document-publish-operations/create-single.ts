@@ -1,7 +1,6 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import {
 	DocumentPublishOperationAssigneesRepository,
-	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
 	DocumentVersionsRepository,
 	QueueJobsRepository,
@@ -16,6 +15,7 @@ import {
 } from "../index.js";
 import approve from "./approve.js";
 import getReviewers from "./get-reviewers.js";
+import createEvent from "./helpers/create-event.js";
 import {
 	activePublishOperationStatuses,
 	canUsePublishOperationsForTarget,
@@ -246,10 +246,6 @@ const createSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const Events = new DocumentPublishOperationEventsRepository(
-		context.db.client,
-		context.config.db,
-	);
 	const QueueJobs = new QueueJobsRepository(
 		context.db.client,
 		context.config.db,
@@ -280,7 +276,14 @@ const createSingle: ServiceFn<
 			},
 		),
 		Operations.selectSingle({
-			select: ["id", "source_content_id", "scheduled_job_id"],
+			select: [
+				"id",
+				"collection_key",
+				"document_id",
+				"target",
+				"source_content_id",
+				"scheduled_job_id",
+			],
 			where: [
 				{ key: "collection_key", operator: "=", value: data.collectionKey },
 				{ key: "document_id", operator: "=", value: data.documentId },
@@ -322,7 +325,7 @@ const createSingle: ServiceFn<
 			if (cancelJobRes.error) return cancelJobRes;
 		}
 
-		const [activeDetailedRes, supersedeRes, eventRes] = await Promise.all([
+		const [activeDetailedRes, supersedeRes] = await Promise.all([
 			Operations.selectSingleDetailed({
 				where: [
 					{
@@ -341,20 +344,22 @@ const createSingle: ServiceFn<
 					updated_at: now,
 				},
 			}),
-			Events.createSingle({
-				data: {
-					operation_id: activeRes.data.id,
-					event_type: "superseded",
-					user_id: data.user.id,
-					comment,
-					metadata: {
-						sourceContentId: latestVersionRes.data.content_id,
-					},
-				},
-			}),
 		]);
 		if (activeDetailedRes.error) return activeDetailedRes;
 		if (supersedeRes.error) return supersedeRes;
+
+		const eventRes = await createEvent(context, {
+			operation: activeDetailedRes.data ?? activeRes.data,
+			collectionInstance: collection,
+			event: {
+				type: "superseded",
+				userId: data.user.id,
+				comment,
+				metadata: {
+					sourceContentId: latestVersionRes.data.content_id,
+				},
+			},
+		});
 		if (eventRes.error) return eventRes;
 
 		if (activeDetailedRes.data) {
@@ -447,11 +452,17 @@ const createSingle: ServiceFn<
 		if (assigneeRes.error) return assigneeRes;
 	}
 
-	const eventRes = await Events.createSingle({
-		data: {
-			operation_id: operationRes.data.id,
-			event_type: "created",
-			user_id: data.user.id,
+	const eventRes = await createEvent(context, {
+		operation: {
+			id: operationRes.data.id,
+			collection_key: data.collectionKey,
+			document_id: data.documentId,
+			target: data.target,
+		},
+		collectionInstance: collection,
+		event: {
+			type: "created",
+			userId: data.user.id,
 			comment,
 			metadata: {},
 		},

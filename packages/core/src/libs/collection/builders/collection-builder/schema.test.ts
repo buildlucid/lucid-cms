@@ -15,6 +15,7 @@ test("collection builder config passes schema validation", async () => {
 		},
 		hooks: [
 			{
+				service: "documents",
 				event: "beforeUpsert",
 				handler: async () => {
 					return {
@@ -24,6 +25,7 @@ test("collection builder config passes schema validation", async () => {
 				},
 			},
 			{
+				service: "documents",
 				event: "beforeDelete",
 				handler: async () => {
 					return {
@@ -33,6 +35,7 @@ test("collection builder config passes schema validation", async () => {
 				},
 			},
 			{
+				service: "documents",
 				event: "afterDelete",
 				handler: async () => {
 					return {
@@ -42,6 +45,7 @@ test("collection builder config passes schema validation", async () => {
 				},
 			},
 			{
+				service: "documents",
 				event: "afterUpsert",
 				handler: async () => {
 					return {

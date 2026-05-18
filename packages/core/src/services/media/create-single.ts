@@ -1,5 +1,6 @@
 import constants from "../../constants/constants.js";
 import { mediaFormatter } from "../../libs/formatters/index.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import getMediaAdapter from "../../libs/media/get-adapter.js";
@@ -239,12 +240,32 @@ const createSingle: ServiceFn<
 	});
 	if (mediaFetchRes.error) return mediaFetchRes;
 
+	const media = mediaFormatter.formatSingle({
+		media: mediaFetchRes.data,
+		host: getBaseUrl(context),
+	});
+
+	const hookRes = await executeHooks(
+		context,
+		{
+			service: "media",
+			event: "afterCreate",
+			config: context.config,
+		},
+		{
+			meta: {},
+			data: {
+				id: mediaFetchRes.data.id,
+				userId: data.userId,
+				media,
+			},
+		},
+	);
+	if (hookRes.error) return hookRes;
+
 	return {
 		error: undefined,
-		data: mediaFormatter.formatSingle({
-			media: mediaFetchRes.data,
-			host: getBaseUrl(context),
-		}),
+		data: media,
 	};
 };
 

@@ -5,7 +5,7 @@ import type {
 	LucidDocumentTableName,
 	LucidVersionTableName,
 } from "../../../../types.js";
-import type { DocumentBuilderHooks } from "../../../hooks/types.js";
+import type { CollectionBuilderHooks } from "../../../hooks/types.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 import type CollectionConfigSchema from "./schema.js";
@@ -62,7 +62,7 @@ export type PublishingWorkflowConfig = {
 
 export interface CollectionConfigSchemaType
 	extends infer<typeof CollectionConfigSchema> {
-	hooks?: DocumentBuilderHooks[];
+	hooks?: CollectionBuilderHooks[];
 	bricks?: {
 		fixed?: Array<BrickBuilder>;
 		builder?: Array<BrickBuilder>;

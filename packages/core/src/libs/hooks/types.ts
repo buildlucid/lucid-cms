@@ -5,10 +5,14 @@ import type { Config } from "../../types/config.js";
 import type {
 	CollectionTableNames,
 	InternalCollectionDocument,
+	Media,
 } from "../../types.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import type { DocumentVersionType } from "../db/types.js";
+import type {
+	DocumentPublishOperationEventType,
+	DocumentVersionType,
+} from "../db/types.js";
 
 // --------------------------------------------------
 // types
@@ -24,15 +28,29 @@ export type HookExecutionKindMap = {
 		afterDelete: "effect";
 		versionPromote: "effect";
 	};
+	documentWorkflows: {
+		afterUpdate: "effect";
+	};
+	publishOperations: {
+		afterEvent: "effect";
+	};
+	media: {
+		afterCreate: "effect";
+		afterUpdate: "effect";
+		afterDelete: "effect";
+	};
 };
 
 export type ArgumentsType<T> = T extends (...args: infer U) => unknown
 	? U
 	: never;
 
-type DocumentHookMeta = {
+type CollectionHookMeta = {
 	collection: CollectionBuilder;
 	collectionKey: string;
+};
+
+type DocumentHookMeta = CollectionHookMeta & {
 	collectionTableNames: CollectionTableNames;
 };
 
@@ -74,6 +92,50 @@ export type DocumentVersionPromoteHookData = {
 	documentId: number;
 	versionId: number;
 	versionType: Exclude<DocumentVersionType, "revision">;
+};
+
+export type DocumentWorkflowAfterUpdateHookData = {
+	collectionKey: string;
+	documentId: number;
+	userId: number;
+	previousStage: string;
+	nextStage: string;
+	previousAssigneeIds: number[];
+	nextAssigneeIds: number[];
+	stageChanged: boolean;
+	assigneesChanged: boolean;
+};
+
+export type PublishOperationAfterEventHookData = {
+	operationId: number;
+	collectionKey: string;
+	documentId: number;
+	target: string;
+	event: {
+		id: number;
+		type: DocumentPublishOperationEventType;
+		userId: number | null;
+		comment: string | null;
+		metadata: Record<string, unknown>;
+		createdAt: string | Date;
+	};
+};
+
+export type MediaAfterCreateHookData = {
+	id: number;
+	userId: number;
+	media: Media;
+};
+
+export type MediaAfterUpdateHookData = {
+	id: number;
+	userId: number;
+};
+
+export type MediaAfterDeleteHookData = {
+	ids: number[];
+	userId: number;
+	hardDelete: boolean;
 };
 
 export type TransformHookPayload<TMeta, TData> = {
@@ -134,10 +196,7 @@ export type LucidHook<
 
 export type LucidHookDocuments<
 	E extends keyof HookServiceHandlers["documents"],
-> = {
-	event: E;
-	handler: HookServiceHandlers["documents"][E];
-} & TransformHookPriority<"documents", E>;
+> = LucidHook<"documents", E>;
 
 // --------------------------------------------------
 // service handlers
@@ -174,6 +233,42 @@ export type HookServiceHandlers = {
 			undefined
 		>;
 	};
+	documentWorkflows: {
+		afterUpdate: ServiceFn<
+			[
+				EffectHookPayload<
+					DocumentUserHookMeta,
+					DocumentWorkflowAfterUpdateHookData
+				>,
+			],
+			undefined
+		>;
+	};
+	publishOperations: {
+		afterEvent: ServiceFn<
+			[
+				EffectHookPayload<
+					CollectionHookMeta,
+					PublishOperationAfterEventHookData
+				>,
+			],
+			undefined
+		>;
+	};
+	media: {
+		afterCreate: ServiceFn<
+			[EffectHookPayload<Record<string, never>, MediaAfterCreateHookData>],
+			undefined
+		>;
+		afterUpdate: ServiceFn<
+			[EffectHookPayload<Record<string, never>, MediaAfterUpdateHookData>],
+			undefined
+		>;
+		afterDelete: ServiceFn<
+			[EffectHookPayload<Record<string, never>, MediaAfterDeleteHookData>],
+			undefined
+		>;
+	};
 };
 
 export type HookOptions<
@@ -203,12 +298,14 @@ export type HookResponse<
 // service config
 
 // used for collection builder hook config
-export type DocumentBuilderHooks =
+export type CollectionBuilderHooks =
 	| LucidHookDocuments<"beforeUpsert">
 	| LucidHookDocuments<"afterUpsert">
 	| LucidHookDocuments<"afterFetch">
 	| LucidHookDocuments<"beforeDelete">
-	| LucidHookDocuments<"afterDelete">;
+	| LucidHookDocuments<"afterDelete">
+	| LucidHook<"documentWorkflows", "afterUpdate">
+	| LucidHook<"publishOperations", "afterEvent">;
 
 export type DocumentHooks =
 	| LucidHook<"documents", "beforeUpsert">
@@ -218,5 +315,24 @@ export type DocumentHooks =
 	| LucidHook<"documents", "afterDelete">
 	| LucidHook<"documents", "versionPromote">;
 
+export type DocumentWorkflowHooks = LucidHook<
+	"documentWorkflows",
+	"afterUpdate"
+>;
+
+export type PublishOperationHooks = LucidHook<
+	"publishOperations",
+	"afterEvent"
+>;
+
+export type MediaHooks =
+	| LucidHook<"media", "afterCreate">
+	| LucidHook<"media", "afterUpdate">
+	| LucidHook<"media", "afterDelete">;
+
 // add all hooks to this type
-export type AllHooks = DocumentHooks;
+export type AllHooks =
+	| DocumentHooks
+	| DocumentWorkflowHooks
+	| PublishOperationHooks
+	| MediaHooks;

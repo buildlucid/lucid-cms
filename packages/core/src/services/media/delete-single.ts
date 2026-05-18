@@ -1,3 +1,4 @@
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
@@ -31,6 +32,7 @@ const deleteSingle: ServiceFn<
 			is_deleted_at: new Date().toISOString(),
 			deleted_by: data.userId,
 		},
+		returning: ["id"],
 		validation: {
 			enabled: false,
 		},
@@ -43,6 +45,26 @@ const deleteSingle: ServiceFn<
 		}),
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);
+
+	if (deleteMediaRes.data) {
+		const hookRes = await executeHooks(
+			context,
+			{
+				service: "media",
+				event: "afterDelete",
+				config: context.config,
+			},
+			{
+				meta: {},
+				data: {
+					ids: [deleteMediaRes.data.id],
+					userId: data.userId,
+					hardDelete: false,
+				},
+			},
+		);
+		if (hookRes.error) return hookRes;
+	}
 
 	return {
 		error: undefined,

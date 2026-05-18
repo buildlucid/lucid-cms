@@ -1,6 +1,5 @@
 import {
 	DocumentPublishOperationAssigneesRepository,
-	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
@@ -8,6 +7,7 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import getReviewers from "./get-reviewers.js";
+import createEvent from "./helpers/create-event.js";
 import { hasCollectionTargetPermission } from "./helpers/index.js";
 
 const updateReviewers: ServiceFn<
@@ -28,11 +28,6 @@ const updateReviewers: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const Events = new DocumentPublishOperationEventsRepository(
-		context.db.client,
-		context.config.db,
-	);
-
 	const operationRes = await Operations.selectSingleDetailed({
 		where: [
 			{
@@ -132,11 +127,12 @@ const updateReviewers: ServiceFn<
 	});
 	if (updateRes.error) return updateRes;
 
-	const eventRes = await Events.createSingle({
-		data: {
-			operation_id: operation.id,
-			event_type: "reviewers_updated",
-			user_id: data.user.id,
+	const eventRes = await createEvent(context, {
+		operation,
+		collectionInstance: collectionRes.data,
+		event: {
+			type: "reviewers_updated",
+			userId: data.user.id,
 			comment: null,
 			metadata: {
 				assigneeIds,

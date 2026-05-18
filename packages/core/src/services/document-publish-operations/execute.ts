@@ -1,7 +1,4 @@
-import {
-	DocumentPublishOperationEventsRepository,
-	DocumentPublishOperationsRepository,
-} from "../../libs/repositories/index.js";
+import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
@@ -9,6 +6,7 @@ import {
 	documentVersionServices,
 	documentWorkflowServices,
 } from "../index.js";
+import createEvent from "./helpers/create-event.js";
 
 const terminalExecutionStatuses = ["executed", "cancelled"] as const;
 
@@ -26,11 +24,6 @@ const execute: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const Events = new DocumentPublishOperationEventsRepository(
-		context.db.client,
-		context.config.db,
-	);
-
 	const operationRes = await Operations.selectSingleDetailed({
 		where: [
 			{
@@ -98,11 +91,11 @@ const execute: ServiceFn<
 	});
 	if (markExecutingRes.error) return markExecutingRes;
 
-	const executingEventRes = await Events.createSingle({
-		data: {
-			operation_id: operation.id,
-			event_type: "executing",
-			user_id: actorUserId,
+	const executingEventRes = await createEvent(context, {
+		operation,
+		event: {
+			type: "executing",
+			userId: actorUserId,
 			comment: null,
 			metadata: {},
 		},
@@ -198,11 +191,12 @@ const execute: ServiceFn<
 	});
 	if (updateRes.error) return updateRes;
 
-	const eventRes = await Events.createSingle({
-		data: {
-			operation_id: operation.id,
-			event_type: "executed",
-			user_id: actorUserId,
+	const eventRes = await createEvent(context, {
+		operation,
+		collectionInstance: collectionRes.data,
+		event: {
+			type: "executed",
+			userId: actorUserId,
 			comment: null,
 			metadata: {
 				target: operation.target,

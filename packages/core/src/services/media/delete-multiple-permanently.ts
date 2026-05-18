@@ -1,7 +1,8 @@
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 
 const deleteMultiplePermanently: ServiceFn<
 	[
@@ -55,12 +56,30 @@ const deleteMultiplePermanently: ServiceFn<
 	}
 
 	for (const id of data.ids) {
-		const deleteRes = await mediaServices.deleteSinglePermanently(context, {
+		const deleteRes = await permanentlyDeleteMedia(context, {
 			id,
-			userId: data.userId,
+			deletePoster: true,
 		});
 		if (deleteRes.error) return deleteRes;
 	}
+
+	const hookRes = await executeHooks(
+		context,
+		{
+			service: "media",
+			event: "afterDelete",
+			config: context.config,
+		},
+		{
+			meta: {},
+			data: {
+				ids: data.ids,
+				userId: data.userId,
+				hardDelete: true,
+			},
+		},
+	);
+	if (hookRes.error) return hookRes;
 
 	return {
 		error: undefined,

@@ -18,6 +18,17 @@ export const hookExecutionKinds = {
 		afterDelete: "effect",
 		versionPromote: "effect",
 	},
+	documentWorkflows: {
+		afterUpdate: "effect",
+	},
+	publishOperations: {
+		afterEvent: "effect",
+	},
+	media: {
+		afterCreate: "effect",
+		afterUpdate: "effect",
+		afterDelete: "effect",
+	},
 } satisfies {
 	[S in keyof HookServiceHandlers]: {
 		[E in keyof HookServiceHandlers[S]]: HookExecutionKind;

@@ -1,5 +1,6 @@
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import {
@@ -368,6 +369,23 @@ const updateSingle: ServiceFn<
 		}),
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);
+
+	const hookRes = await executeHooks(
+		context,
+		{
+			service: "media",
+			event: "afterUpdate",
+			config: context.config,
+		},
+		{
+			meta: {},
+			data: {
+				id: mediaUpdateRes.data.id,
+				userId: data.userId,
+			},
+		},
+	);
+	if (hookRes.error) return hookRes;
 
 	return {
 		error: undefined,

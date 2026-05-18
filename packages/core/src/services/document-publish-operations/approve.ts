@@ -1,11 +1,9 @@
-import {
-	DocumentPublishOperationEventsRepository,
-	DocumentPublishOperationsRepository,
-} from "../../libs/repositories/index.js";
+import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
+import createEvent from "./helpers/create-event.js";
 import {
 	canUsePublishOperationsForTarget,
 	collectionTargetSupportsScheduling,
@@ -33,11 +31,6 @@ const approve: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const Events = new DocumentPublishOperationEventsRepository(
-		context.db.client,
-		context.config.db,
-	);
-
 	const operationRes = await Operations.selectSingleDetailed({
 		where: [
 			{
@@ -188,11 +181,12 @@ const approve: ServiceFn<
 	});
 	if (updateRes.error) return updateRes;
 
-	const eventRes = await Events.createSingle({
-		data: {
-			operation_id: operationRes.data.id,
-			event_type: "approved",
-			user_id: data.user.id,
+	const eventRes = await createEvent(context, {
+		operation: operationRes.data,
+		collectionInstance: collectionRes.data,
+		event: {
+			type: "approved",
+			userId: data.user.id,
 			comment,
 			metadata: {
 				target: operationRes.data.target,

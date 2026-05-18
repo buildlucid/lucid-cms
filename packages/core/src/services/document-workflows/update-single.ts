@@ -1,4 +1,5 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import {
 	DocumentsRepository,
@@ -250,6 +251,36 @@ const updateSingle: ServiceFn<
 			if (createAssigneesRes.error) return createAssigneesRes;
 		}
 	}
+
+	const hookRes = await executeHooks(
+		context,
+		{
+			service: "documentWorkflows",
+			event: "afterUpdate",
+			config: context.config,
+			collectionInstance: collectionRes.data,
+		},
+		{
+			meta: {
+				collection: collectionRes.data,
+				collectionKey: data.collectionKey,
+				userId: data.user.id,
+				collectionTableNames: tableNamesRes.data,
+			},
+			data: {
+				collectionKey: data.collectionKey,
+				documentId: data.documentId,
+				userId: data.user.id,
+				previousStage: currentStage.key,
+				nextStage: nextStage.key,
+				previousAssigneeIds: currentAssigneeIds,
+				nextAssigneeIds,
+				stageChanged,
+				assigneesChanged,
+			},
+		},
+	);
+	if (hookRes.error) return hookRes;
 
 	return {
 		error: undefined,

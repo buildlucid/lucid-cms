@@ -1,3 +1,4 @@
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 
@@ -15,6 +16,24 @@ const deleteSinglePermanently: ServiceFn<
 		deletePoster: true,
 	});
 	if (deleteRes.error) return deleteRes;
+
+	const hookRes = await executeHooks(
+		context,
+		{
+			service: "media",
+			event: "afterDelete",
+			config: context.config,
+		},
+		{
+			meta: {},
+			data: {
+				ids: [data.id],
+				userId: data.userId,
+				hardDelete: true,
+			},
+		},
+	);
+	if (hookRes.error) return hookRes;
 
 	return {
 		error: undefined,
