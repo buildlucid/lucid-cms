@@ -180,7 +180,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 						profilePicture: props.user.profilePicture,
 					}}
 					mode="short"
-					size="small"
+					size="x-small"
 				/>
 			</Td>
 			<TextCol
