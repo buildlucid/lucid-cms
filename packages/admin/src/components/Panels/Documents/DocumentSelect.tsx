@@ -159,6 +159,14 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		},
 		enabled: () => searchParams.getSettled() && collection.isSuccess,
 	});
+	const users = api.users.useGetMultiple({
+		queryParams: {
+			filters: {
+				isDeleted: 0,
+			},
+			perPage: -1,
+		},
+	});
 
 	const getCollectionFieldIncludes = createMemo(() =>
 		collectionFieldIncludes(collection.data?.data),
@@ -199,6 +207,13 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			};
 		}),
 	);
+	const userOptions = createMemo(() =>
+		(users.data?.data ?? []).map((user) => ({
+			value: user.id,
+			label: helpers.formatUserName(user, "simple") || T()("unknown"),
+			user,
+		})),
+	);
 
 	createEffect(() => {
 		const allowed = allowedCollectionKeys();
@@ -226,6 +241,14 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				const fieldKey = formatFieldFilters({
 					fieldKey: field.key,
 				});
+				if (field.type === "user") {
+					filterConfig[fieldKey] = {
+						type: "array",
+						value: [],
+					};
+					continue;
+				}
+
 				filterConfig[fieldKey] = {
 					type: "text",
 					value: "",
@@ -324,6 +347,18 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 												}),
 											}),
 										})),
+									};
+								}
+								case "user": {
+									return {
+										label: helpers.getLocaleValue({
+											value: field.details.label,
+											fallback: field.key,
+										}),
+										key: fieldKey,
+										type: "multi-select",
+										options: userOptions(),
+										optionType: "user" as const,
 									};
 								}
 								default: {

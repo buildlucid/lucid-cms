@@ -69,6 +69,14 @@ const CollectionsDocumentsListRoute: Component = () => {
 		enabled: () =>
 			Boolean(collectionKey() && collection.data?.data.config.workflow),
 	});
+	const users = api.users.useGetMultiple({
+		queryParams: {
+			filters: {
+				isDeleted: 0,
+			},
+			perPage: -1,
+		},
+	});
 
 	// ----------------------------------
 	// Memos
@@ -109,12 +117,21 @@ const CollectionsDocumentsListRoute: Component = () => {
 								firstName: user.firstName,
 								lastName: user.lastName,
 							},
-							"username",
+							"simple",
 						),
+						user,
 					})) ?? [],
+				optionType: "user" as const,
 			},
 		];
 	});
+	const userOptions = createMemo(() =>
+		(users.data?.data ?? []).map((user) => ({
+			value: user.id,
+			label: helpers.formatUserName(user, "simple") || T()("unknown"),
+			user,
+		})),
+	);
 	const collectionIsSuccess = createMemo(() => collection.isSuccess);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
@@ -146,6 +163,17 @@ const CollectionsDocumentsListRoute: Component = () => {
 			const filterConfig: FilterSchema = {};
 			for (const field of getCollectionFieldFilters()) {
 				switch (field.type) {
+					case "user": {
+						filterConfig[
+							formatFieldFilters({
+								fieldKey: field.key,
+							})
+						] = {
+							type: "array",
+							value: [],
+						};
+						break;
+					}
 					default: {
 						filterConfig[
 							formatFieldFilters({
@@ -256,6 +284,18 @@ const CollectionsDocumentsListRoute: Component = () => {
 																}),
 															}),
 														})),
+													};
+												}
+												case "user": {
+													return {
+														label: helpers.getLocaleValue({
+															value: field.details.label,
+															fallback: field.key,
+														}),
+														key: fieldKey,
+														type: "multi-select" as const,
+														options: userOptions(),
+														optionType: "user" as const,
 													};
 												}
 												default: {

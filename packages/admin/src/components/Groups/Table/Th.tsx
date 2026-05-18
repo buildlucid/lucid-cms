@@ -20,6 +20,7 @@ interface ThProps {
 	options?: {
 		include?: boolean;
 		width?: number;
+		minWidth?: number;
 		sortable?: boolean;
 		padding?: "16" | "24";
 	};
@@ -67,6 +68,9 @@ export const Th: Component<ThProps> = (props) => {
 			)}
 			style={{
 				width: props.options?.width ? `${props.options.width}px` : undefined,
+				"min-width": props.options?.minWidth
+					? `${props.options.minWidth}px`
+					: undefined,
 			}}
 			aria-sort={sortFull()}
 		>

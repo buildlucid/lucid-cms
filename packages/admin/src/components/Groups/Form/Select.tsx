@@ -9,7 +9,6 @@ import {
 	FaSolidXmark,
 } from "solid-icons/fa";
 import {
-	type Component,
 	createEffect,
 	createSignal,
 	For,
@@ -26,11 +25,11 @@ import T from "@/translations";
 export type ValueT = string | number | undefined;
 export type SelectOptionT = { value: ValueT; label: string };
 
-export interface SelectProps {
+export interface SelectProps<Option extends SelectOptionT = SelectOptionT> {
 	id: string;
 	value: ValueT;
 	onChange: (_value: ValueT) => void;
-	options: SelectOptionT[];
+	options: Option[];
 	name: string;
 	search?: {
 		value: string;
@@ -57,25 +56,41 @@ export interface SelectProps {
 	shortcutDisplay?: "full" | "compact";
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
-	renderValue?: (_props: { option: SelectOptionT }) => JSXElement;
-	renderOption?: (_props: {
-		option: SelectOptionT;
-		selected: boolean;
-	}) => JSXElement;
+	hidePlaceholder?: boolean;
+	renderValue?: (_props: { option: Option }) => JSXElement;
+	renderOption?: (_props: { option: Option; selected: boolean }) => JSXElement;
 }
 
-export const Select: Component<SelectProps> = (props) => {
+export function Select<Option extends SelectOptionT = SelectOptionT>(
+	props: SelectProps<Option>,
+) {
 	const [open, setOpen] = createSignal(false);
 	const [inputFocus, setInputFocus] = createSignal(false);
 	const [debouncedValue, setDebouncedValue] = createSignal("");
 	const [selectedLabel, setSelectedLabel] = createSignal("");
-	const [selectedOption, setSelectedOption] = createSignal<SelectOptionT>();
+	const [selectedOption, setSelectedOption] = createSignal<Option>();
 
 	// ----------------------------------------
 	// Functions
 	const setSearchQuery = debounce((value: string) => {
 		setDebouncedValue(value);
 	}, 500);
+	const renderSelectedValue = () => {
+		const option = selectedOption();
+		if (option && props.renderValue) {
+			return props.renderValue({
+				option,
+			});
+		}
+		if (selectedLabel()) {
+			return <span class="truncate">{selectedLabel()}</span>;
+		}
+		if (props.hidePlaceholder) {
+			return <span class="truncate">&nbsp;</span>;
+		}
+
+		return <span class="text-body">{T()("nothing_selected")}</span>;
+	};
 
 	// ----------------------------------------
 	// Effects
@@ -86,7 +101,7 @@ export const Select: Component<SelectProps> = (props) => {
 	createEffect(() => {
 		if (props.value === undefined || props.value === "") {
 			setSelectedOption(undefined);
-			setSelectedLabel(T()("nothing_selected"));
+			setSelectedLabel(props.hidePlaceholder ? "" : T()("nothing_selected"));
 			return;
 		}
 
@@ -94,13 +109,13 @@ export const Select: Component<SelectProps> = (props) => {
 			(option) => option.value === props.value,
 		);
 		if (selectedOption) {
-			setSelectedOption(selectedOption);
+			setSelectedOption(() => selectedOption);
 			setSelectedLabel(selectedOption.label);
 			return;
 		}
 
 		setSelectedOption(undefined);
-		setSelectedLabel(T()("nothing_selected"));
+		setSelectedLabel(props.hidePlaceholder ? "" : T()("nothing_selected"));
 	});
 
 	// ----------------------------------------
@@ -154,15 +169,7 @@ export const Select: Component<SelectProps> = (props) => {
 								{props.shortcut}
 							</span>
 						</Show>
-						{selectedOption() && props.renderValue ? (
-							props.renderValue({
-								option: selectedOption() as SelectOptionT,
-							})
-						) : selectedLabel() ? (
-							<span class="truncate">{selectedLabel()}</span>
-						) : (
-							<span class="text-body">{T()("nothing_selected")}</span>
-						)}
+						{renderSelectedValue()}
 					</div>
 					<div class="flex items-center gap-1">
 						<Show when={props.shortcut && props.shortcutDisplay === "compact"}>
@@ -310,4 +317,4 @@ export const Select: Component<SelectProps> = (props) => {
 			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);
-};
+}

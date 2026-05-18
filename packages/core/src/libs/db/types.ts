@@ -475,7 +475,8 @@ export type DocumentPublishOperationEventType =
 	| "executed"
 	| "failed"
 	| "rescheduled"
-	| "retried";
+	| "retried"
+	| "reviewers_updated";
 
 export interface LucidDocumentPublishOperations {
 	id: Generated<number>;

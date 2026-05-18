@@ -52,22 +52,30 @@ const getReviewers: ServiceFn<
 		};
 	}
 
-	if (
-		data.user !== undefined &&
-		!hasCollectionTargetPermission({
+	const canPublish =
+		data.user === undefined ||
+		hasCollectionTargetPermission({
 			user: data.user,
 			collection: collectionRes.data,
 			action: "publish",
 			target: data.target,
-		})
-	) {
+		});
+	const canReview =
+		data.user === undefined ||
+		hasCollectionTargetPermission({
+			user: data.user,
+			collection: collectionRes.data,
+			action: "review",
+			target: data.target,
+		});
+	if (data.user !== undefined && !canPublish && !canReview) {
 		return {
 			error: {
 				type: "basic",
 				name: T("collection_permission_error_name"),
 				message: T("collection_permission_error_message", {
 					collection: data.collectionKey,
-					action: "publish",
+					action: "review",
 				}),
 				status: 403,
 			},

@@ -139,6 +139,44 @@ const reject: ServiceFn<
 			documentId: operationRes.data.document_id,
 		}),
 		dedupeAction: "rejected",
+		comment: {
+			label: T("publish_request_email_decision_comment"),
+			value: comment,
+		},
+		details: [
+			{
+				label: T("publish_request_email_detail_release"),
+				value: `#${operationRes.data.id}`,
+			},
+			{
+				label: T("publish_request_email_detail_collection"),
+				value: operationRes.data.collection_key,
+			},
+			{
+				label: T("publish_request_email_detail_document"),
+				value: `#${operationRes.data.document_id}`,
+			},
+			{
+				label: T("publish_request_email_detail_target"),
+				value: operationRes.data.target,
+			},
+			{
+				label: T("publish_request_email_detail_requested_by"),
+				value: operationRes.data.requested_by_email,
+			},
+			{
+				label: T("publish_request_email_detail_rejected_by"),
+				value: data.user.email,
+			},
+			{
+				label: T("publish_request_email_detail_scheduled_for"),
+				value: operationRes.data.scheduled_at,
+			},
+			{
+				label: T("publish_request_email_detail_scheduled_timezone"),
+				value: operationRes.data.scheduled_timezone,
+			},
+		],
 	});
 	if (notifyRes.error) return notifyRes;
 

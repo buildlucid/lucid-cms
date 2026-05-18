@@ -12,6 +12,7 @@ import type {
 	LucidDocumentPublishOperations,
 	Select,
 } from "../db/types.js";
+import type { MediaPosterPropsT } from "../formatters/media.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
@@ -21,20 +22,34 @@ export interface PublishOperationDetailedQueryResponse
 	requested_by_username?: string | null;
 	requested_by_first_name?: string | null;
 	requested_by_last_name?: string | null;
+	requested_by_profile_picture?: MediaPosterPropsT[];
 	decided_by_email?: string | null;
 	decided_by_username?: string | null;
 	decided_by_first_name?: string | null;
 	decided_by_last_name?: string | null;
+	decided_by_profile_picture?: MediaPosterPropsT[];
 	assignees: Array<
 		Select<LucidDocumentPublishOperationAssignees> & {
 			email?: string | null;
 			username?: string | null;
 			first_name?: string | null;
 			last_name?: string | null;
+			profile_picture?: MediaPosterPropsT[];
 		}
 	>;
 	events: Array<Select<LucidDocumentPublishOperationEvents>>;
 }
+
+export type PublishOperationOverviewQueryResponse = {
+	total?: string | number;
+	pending?: string | number;
+	assignedToMe?: string | number;
+	requestedByMe?: string | number;
+	scheduled?: string | number;
+	approved?: string | number;
+	rejected?: string | number;
+	failed?: string | number;
+};
 
 export default class DocumentPublishOperationsRepository extends StaticRepository<"lucid_document_publish_operations"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -114,6 +129,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 				collectionKey: "lucid_document_publish_operations.collection_key",
 				documentId: "lucid_document_publish_operations.document_id",
 				target: "lucid_document_publish_operations.target",
+				requestedBy: "lucid_document_publish_operations.requested_by",
 			},
 			sorts: {
 				createdAt: "lucid_document_publish_operations.created_at",
@@ -162,13 +178,81 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
+							.selectFrom("lucid_media")
+							.select([
+								"lucid_media.id",
+								"lucid_media.key",
+								"lucid_media.type",
+								"lucid_media.mime_type",
+								"lucid_media.file_extension",
+								"lucid_media.file_name",
+								"lucid_media.file_size",
+								"lucid_media.width",
+								"lucid_media.height",
+								"lucid_media.focal_x",
+								"lucid_media.focal_y",
+								"lucid_media.blur_hash",
+								"lucid_media.average_color",
+								"lucid_media.base64",
+								"lucid_media.is_dark",
+								"lucid_media.is_light",
+							])
+							.whereRef(
+								"lucid_media.id",
+								"=",
+								"requester.profile_picture_media_id",
+							)
+							.where(
+								"lucid_media.is_deleted",
+								"=",
+								this.dbAdapter.getDefault("boolean", "false"),
+							),
+					)
+					.as("requested_by_profile_picture"),
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_media")
+							.select([
+								"lucid_media.id",
+								"lucid_media.key",
+								"lucid_media.type",
+								"lucid_media.mime_type",
+								"lucid_media.file_extension",
+								"lucid_media.file_name",
+								"lucid_media.file_size",
+								"lucid_media.width",
+								"lucid_media.height",
+								"lucid_media.focal_x",
+								"lucid_media.focal_y",
+								"lucid_media.blur_hash",
+								"lucid_media.average_color",
+								"lucid_media.base64",
+								"lucid_media.is_dark",
+								"lucid_media.is_light",
+							])
+							.whereRef(
+								"lucid_media.id",
+								"=",
+								"decider.profile_picture_media_id",
+							)
+							.where(
+								"lucid_media.is_deleted",
+								"=",
+								this.dbAdapter.getDefault("boolean", "false"),
+							),
+					)
+					.as("decided_by_profile_picture"),
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
 							.selectFrom("lucid_document_publish_operation_assignees")
 							.leftJoin(
 								"lucid_users",
 								"lucid_users.id",
 								"lucid_document_publish_operation_assignees.user_id",
 							)
-							.select([
+							.select((userEb) => [
 								"lucid_document_publish_operation_assignees.id",
 								"lucid_document_publish_operation_assignees.operation_id",
 								"lucid_document_publish_operation_assignees.user_id",
@@ -178,6 +262,40 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 								"lucid_users.username",
 								"lucid_users.first_name",
 								"lucid_users.last_name",
+								this.dbAdapter
+									.jsonArrayFrom(
+										userEb
+											.selectFrom("lucid_media")
+											.select([
+												"lucid_media.id",
+												"lucid_media.key",
+												"lucid_media.type",
+												"lucid_media.mime_type",
+												"lucid_media.file_extension",
+												"lucid_media.file_name",
+												"lucid_media.file_size",
+												"lucid_media.width",
+												"lucid_media.height",
+												"lucid_media.focal_x",
+												"lucid_media.focal_y",
+												"lucid_media.blur_hash",
+												"lucid_media.average_color",
+												"lucid_media.base64",
+												"lucid_media.is_dark",
+												"lucid_media.is_light",
+											])
+											.whereRef(
+												"lucid_media.id",
+												"=",
+												"lucid_users.profile_picture_media_id",
+											)
+											.where(
+												"lucid_media.is_deleted",
+												"=",
+												this.dbAdapter.getDefault("boolean", "false"),
+											),
+									)
+									.as("profile_picture"),
 							])
 							.whereRef(
 								"lucid_document_publish_operation_assignees.operation_id",
@@ -236,6 +354,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 				where?: QueryBuilderWhere<"lucid_document_publish_operations">;
 				queryParams: GetMultipleQueryParams;
 				assignedTo?: number;
+				reviewerIds?: number[];
 			}
 		>,
 	) {
@@ -286,6 +405,40 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 						),
 					);
 				}
+				if (props.reviewerIds !== undefined) {
+					baseQuery = baseQuery.where(({ exists, selectFrom }) =>
+						exists(
+							selectFrom("lucid_document_publish_operation_assignees")
+								.select(sql.lit(1).as("one"))
+								.whereRef(
+									"lucid_document_publish_operation_assignees.operation_id",
+									"=",
+									"lucid_document_publish_operations.id",
+								)
+								.where(
+									"lucid_document_publish_operation_assignees.user_id",
+									"in",
+									props.reviewerIds ?? [],
+								),
+						),
+					);
+					countQuery = countQuery.where(({ exists, selectFrom }) =>
+						exists(
+							selectFrom("lucid_document_publish_operation_assignees")
+								.select(sql.lit(1).as("one"))
+								.whereRef(
+									"lucid_document_publish_operation_assignees.operation_id",
+									"=",
+									"lucid_document_publish_operations.id",
+								)
+								.where(
+									"lucid_document_publish_operation_assignees.user_id",
+									"in",
+									props.reviewerIds ?? [],
+								),
+						),
+					);
+				}
 
 				const queryBuilderRes = queryBuilder.main(
 					{
@@ -323,13 +476,81 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 						this.dbAdapter
 							.jsonArrayFrom(
 								eb
+									.selectFrom("lucid_media")
+									.select([
+										"lucid_media.id",
+										"lucid_media.key",
+										"lucid_media.type",
+										"lucid_media.mime_type",
+										"lucid_media.file_extension",
+										"lucid_media.file_name",
+										"lucid_media.file_size",
+										"lucid_media.width",
+										"lucid_media.height",
+										"lucid_media.focal_x",
+										"lucid_media.focal_y",
+										"lucid_media.blur_hash",
+										"lucid_media.average_color",
+										"lucid_media.base64",
+										"lucid_media.is_dark",
+										"lucid_media.is_light",
+									])
+									.whereRef(
+										"lucid_media.id",
+										"=",
+										"requester.profile_picture_media_id",
+									)
+									.where(
+										"lucid_media.is_deleted",
+										"=",
+										this.dbAdapter.getDefault("boolean", "false"),
+									),
+							)
+							.as("requested_by_profile_picture"),
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_media")
+									.select([
+										"lucid_media.id",
+										"lucid_media.key",
+										"lucid_media.type",
+										"lucid_media.mime_type",
+										"lucid_media.file_extension",
+										"lucid_media.file_name",
+										"lucid_media.file_size",
+										"lucid_media.width",
+										"lucid_media.height",
+										"lucid_media.focal_x",
+										"lucid_media.focal_y",
+										"lucid_media.blur_hash",
+										"lucid_media.average_color",
+										"lucid_media.base64",
+										"lucid_media.is_dark",
+										"lucid_media.is_light",
+									])
+									.whereRef(
+										"lucid_media.id",
+										"=",
+										"decider.profile_picture_media_id",
+									)
+									.where(
+										"lucid_media.is_deleted",
+										"=",
+										this.dbAdapter.getDefault("boolean", "false"),
+									),
+							)
+							.as("decided_by_profile_picture"),
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
 									.selectFrom("lucid_document_publish_operation_assignees")
 									.leftJoin(
 										"lucid_users",
 										"lucid_users.id",
 										"lucid_document_publish_operation_assignees.user_id",
 									)
-									.select([
+									.select((userEb) => [
 										"lucid_document_publish_operation_assignees.id",
 										"lucid_document_publish_operation_assignees.operation_id",
 										"lucid_document_publish_operation_assignees.user_id",
@@ -339,6 +560,40 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 										"lucid_users.username",
 										"lucid_users.first_name",
 										"lucid_users.last_name",
+										this.dbAdapter
+											.jsonArrayFrom(
+												userEb
+													.selectFrom("lucid_media")
+													.select([
+														"lucid_media.id",
+														"lucid_media.key",
+														"lucid_media.type",
+														"lucid_media.mime_type",
+														"lucid_media.file_extension",
+														"lucid_media.file_name",
+														"lucid_media.file_size",
+														"lucid_media.width",
+														"lucid_media.height",
+														"lucid_media.focal_x",
+														"lucid_media.focal_y",
+														"lucid_media.blur_hash",
+														"lucid_media.average_color",
+														"lucid_media.base64",
+														"lucid_media.is_dark",
+														"lucid_media.is_light",
+													])
+													.whereRef(
+														"lucid_media.id",
+														"=",
+														"lucid_users.profile_picture_media_id",
+													)
+													.where(
+														"lucid_media.is_deleted",
+														"=",
+														this.dbAdapter.getDefault("boolean", "false"),
+													),
+											)
+											.as("profile_picture"),
 									])
 									.whereRef(
 										"lucid_document_publish_operation_assignees.operation_id",
@@ -401,5 +656,142 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 			...props.validation,
 			mode: "multiple-count",
 		});
+	}
+
+	async selectOverview(props: {
+		userId: number;
+		collectionKey?: string;
+		target?: string;
+	}) {
+		const getBaseQuery = () => {
+			let query = this.db
+				.selectFrom("lucid_document_publish_operations")
+				.where(
+					"lucid_document_publish_operations.operation_type",
+					"=",
+					"request",
+				)
+				.where("lucid_document_publish_operations.status", "!=", "superseded");
+
+			if (props.collectionKey) {
+				query = query.where(
+					"lucid_document_publish_operations.collection_key",
+					"=",
+					props.collectionKey,
+				);
+			}
+			if (props.target) {
+				query = query.where(
+					"lucid_document_publish_operations.target",
+					"=",
+					props.target,
+				);
+			}
+
+			return query;
+		};
+
+		const count = async (
+			query: ReturnType<typeof getBaseQuery>,
+		): Promise<string | number | undefined> => {
+			const row = await query
+				.select(sql`count(*)`.as("count"))
+				.executeTakeFirst();
+
+			return row?.count as string | number | undefined;
+		};
+
+		const exec = await this.executeQuery(
+			async (): Promise<PublishOperationOverviewQueryResponse> => {
+				const [
+					total,
+					pending,
+					assignedToMe,
+					requestedByMe,
+					scheduled,
+					approved,
+					rejected,
+					failed,
+				] = await Promise.all([
+					count(getBaseQuery()),
+					count(
+						getBaseQuery().where(
+							"lucid_document_publish_operations.status",
+							"=",
+							"pending",
+						),
+					),
+					count(
+						getBaseQuery().where(({ exists, selectFrom }) =>
+							exists(
+								selectFrom("lucid_document_publish_operation_assignees")
+									.select(sql.lit(1).as("one"))
+									.whereRef(
+										"lucid_document_publish_operation_assignees.operation_id",
+										"=",
+										"lucid_document_publish_operations.id",
+									)
+									.where(
+										"lucid_document_publish_operation_assignees.user_id",
+										"=",
+										props.userId,
+									),
+							),
+						),
+					),
+					count(
+						getBaseQuery().where(
+							"lucid_document_publish_operations.requested_by",
+							"=",
+							props.userId,
+						),
+					),
+					count(
+						getBaseQuery().where(
+							"lucid_document_publish_operations.execution_status",
+							"=",
+							"scheduled",
+						),
+					),
+					count(
+						getBaseQuery().where(
+							"lucid_document_publish_operations.status",
+							"=",
+							"approved",
+						),
+					),
+					count(
+						getBaseQuery().where(
+							"lucid_document_publish_operations.status",
+							"=",
+							"rejected",
+						),
+					),
+					count(
+						getBaseQuery().where(
+							"lucid_document_publish_operations.execution_status",
+							"=",
+							"failed",
+						),
+					),
+				]);
+
+				return {
+					total,
+					pending,
+					assignedToMe,
+					requestedByMe,
+					scheduled,
+					approved,
+					rejected,
+					failed,
+				};
+			},
+			{
+				method: "selectOverview",
+			},
+		);
+
+		return exec.response;
 	}
 }

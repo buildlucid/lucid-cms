@@ -1,5 +1,9 @@
 import constants from "../../constants/constants.js";
 import {
+	getFieldDatabaseConfig,
+	isStorageMode,
+} from "../../libs/collection/custom-fields/storage/index.js";
+import {
 	getBricksTableSchema,
 	getDocumentFieldsTableSchema,
 	getTableNames,
@@ -68,6 +72,20 @@ const getMultiple: ServiceFn<
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
 
 	const includeWorkflow = Boolean(collectionRes.data.getData.config.workflow);
+	const documentFieldRelationTableSchemas = bricksTableSchemaRes.data.filter(
+		(schema) => {
+			const databaseConfig = getFieldDatabaseConfig(schema.type);
+			const fieldKey = schema.key.fieldPath?.[schema.key.fieldPath.length - 1];
+
+			return (
+				databaseConfig !== null &&
+				isStorageMode(databaseConfig, "relation-table") &&
+				schema.key.brick === undefined &&
+				fieldKey !== undefined &&
+				collectionRes.data.displayInListing.includes(fieldKey)
+			);
+		},
+	);
 
 	const { documentFilters, brickFilters } = groupDocumentFilters(
 		bricksTableSchemaRes.data,
@@ -97,6 +115,7 @@ const getMultiple: ServiceFn<
 				documentFields: tableNameRes.data.documentFields,
 			},
 			documentFieldsTableSchema: documentFieldsTableSchemaRes.data,
+			documentFieldRelationTableSchemas,
 			includeWorkflow,
 			workflowAssigneeFilterValues,
 		},

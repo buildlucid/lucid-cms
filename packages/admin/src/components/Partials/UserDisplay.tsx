@@ -48,7 +48,14 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 						"h-7 w-7 min-w-7 text-[8px]":
 							(props.mode === "icon" && props.size === "small") ||
 							props.mode === "long",
-						"h-8 w-8 min-w-8 mr-2.5 text-[10px]": props.mode === "short",
+						"h-5 w-5 min-w-5 mr-2 text-[7px]":
+							props.mode === "short" && props.size === "x-small",
+						"h-7 w-7 min-w-7 mr-2 text-[8px]":
+							props.mode === "short" && props.size === "small",
+						"h-8 w-8 min-w-8 mr-2.5 text-[10px]":
+							props.mode === "short" &&
+							props.size !== "x-small" &&
+							props.size !== "small",
 					},
 				)}
 			>

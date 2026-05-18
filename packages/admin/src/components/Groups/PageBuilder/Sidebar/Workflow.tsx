@@ -15,6 +15,7 @@ import {
 	Show,
 } from "solid-js";
 import { Select, SelectMultiple } from "@/components/Groups/Form";
+import UserSelectOption from "@/components/Partials/UserSelectOption";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
@@ -23,7 +24,6 @@ import { sameNumericSet } from "@/utils/array-helpers";
 import helpers from "@/utils/helpers";
 import { getStageColor } from "./helpers";
 import SidebarSection from "./Partials/SidebarSection";
-import WorkflowAssigneeOption from "./Partials/WorkflowAssigneeOption";
 import WorkflowStageOption from "./Partials/WorkflowStageOption";
 
 type AssigneeOption = {
@@ -247,14 +247,14 @@ export const Workflow: Component<{
 						selectedValuesContainerClasses="gap-0"
 						selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
 						renderValue={(props) => (
-							<WorkflowAssigneeOption
+							<UserSelectOption
 								user={props.value.user}
 								label={props.value.label}
 								removeValue={props.removeValue}
 							/>
 						)}
 						renderOption={(props) => (
-							<WorkflowAssigneeOption
+							<UserSelectOption
 								user={props.option.user}
 								label={props.option.label}
 							/>

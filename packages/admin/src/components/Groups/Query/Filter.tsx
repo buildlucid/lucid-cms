@@ -13,18 +13,25 @@ import {
 import { Input, Select, SelectMultiple } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import DropdownContent from "@/components/Partials/DropdownContent";
+import UserSelectOption, {
+	type UserSelectOptionUser,
+} from "@/components/Partials/UserSelectOption";
 import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
 import T from "@/translations";
+
+type FilterOption = {
+	label: string;
+	value: string | number;
+	user?: UserSelectOptionUser;
+};
 
 interface FilterItemProps {
 	filter: {
 		label: string;
 		key: string;
 		type: "text" | "select" | "boolean" | "multi-select";
-		options?: Array<{
-			label: string;
-			value: string | number;
-		}>;
+		options?: FilterOption[];
+		optionType?: "user";
 		trueLabel?: string;
 		falseLabel?: string;
 	};
@@ -42,12 +49,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 	// State
 	const [value, setValue] = createSignal<string>("");
 	const [boolValue, setBoolValue] = createSignal<boolean>();
-	const [multiValue, setMultiValue] = createSignal<
-		{
-			value: string | number;
-			label: string;
-		}[]
-	>([]);
+	const [multiValue, setMultiValue] = createSignal<FilterOption[]>([]);
 
 	// ----------------------------------
 	// Effects
@@ -66,11 +68,15 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 		} else if (Array.isArray(filter)) {
 			setMultiValue(
 				filter.map((v) => {
-					const label = props.filter.options?.find((o) => o.value === v)?.label;
-					return {
-						value: v,
-						label: label || v.toString(),
-					};
+					const option = props.filter.options?.find(
+						(o) => o.value === v || o.value.toString() === v.toString(),
+					);
+					return (
+						option ?? {
+							value: v,
+							label: v.toString(),
+						}
+					);
 				}),
 			);
 		} else if (typeof filter === "boolean") {
@@ -127,6 +133,12 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 		}
 		return false;
 	});
+	const userSelectOption = (option: FilterOption) => (
+		<UserSelectOption
+			user={option.user ?? { username: option.label }}
+			label={option.label}
+		/>
+	);
 
 	// ----------------------------------
 	// Render
@@ -191,7 +203,18 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 						}}
 						name={`${props.filter.key}-${props.filter.type}`}
 						options={props.filter.options || []}
+						hidePlaceholder={true}
 						noMargin={true}
+						renderValue={
+							props.filter.optionType === "user"
+								? (props) => userSelectOption(props.option)
+								: undefined
+						}
+						renderOption={
+							props.filter.optionType === "user"
+								? (props) => userSelectOption(props.option)
+								: undefined
+						}
 					/>
 				</Match>
 				<Match when={props.filter.type === "boolean"}>
@@ -247,6 +270,35 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 						name={`${props.filter.key}-${props.filter.type}`}
 						options={props.filter.options || []}
 						noMargin={true}
+						triggerClasses={
+							props.filter.optionType === "user"
+								? "items-start gap-2 p-2"
+								: undefined
+						}
+						selectedValuesContainerClasses={
+							props.filter.optionType === "user" ? "gap-0" : undefined
+						}
+						selectedValueClasses={
+							props.filter.optionType === "user"
+								? "group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
+								: undefined
+						}
+						renderValue={
+							props.filter.optionType === "user"
+								? (props) => (
+										<UserSelectOption
+											user={props.value.user ?? { username: props.value.label }}
+											label={props.value.label}
+											removeValue={props.removeValue}
+										/>
+									)
+								: undefined
+						}
+						renderOption={
+							props.filter.optionType === "user"
+								? (props) => userSelectOption(props.option)
+								: undefined
+						}
 					/>
 				</Match>
 			</Switch>

@@ -4,14 +4,18 @@ import formatter, {
 	documentPublishOperationsFormatter,
 } from "../../libs/formatters/index.js";
 import {
+	DocumentBricksRepository,
 	DocumentPublishOperationsRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/publish-operation-management.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { PublishOperation } from "../../types/response.js";
+import type { CollectionTableNames } from "../../types.js";
+import { getBaseUrl, getFilterValues } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
+import getDocumentLabel from "./helpers/get-document-label.js";
 import {
 	hasCollectionTargetPermission,
 	unresolvedPublishOperationExecutionStatuses,
@@ -35,6 +39,13 @@ const getMultiple: ServiceFn<
 	);
 	const requestedByMe = data.query.filter?.requestedByMe?.value === "true";
 	const assignedToMe = data.query.filter?.assignedToMe?.value === "true";
+	const reviewerFilterValues = getFilterValues(data.query.filter?.reviewers);
+	const reviewerIds =
+		reviewerFilterValues === undefined
+			? undefined
+			: (reviewerFilterValues
+					.map((value) => Number(value))
+					.filter(Number.isFinite) as number[]);
 
 	const where: QueryBuilderWhere<"lucid_document_publish_operations"> = [];
 
@@ -46,6 +57,12 @@ const getMultiple: ServiceFn<
 		where,
 		queryParams: data.query,
 		assignedTo: assignedToMe ? data.user.id : undefined,
+		reviewerIds:
+			reviewerIds === undefined
+				? undefined
+				: reviewerIds.length > 0
+					? reviewerIds
+					: [-1],
 	});
 	if (operationsRes.error) return operationsRes;
 
@@ -54,7 +71,11 @@ const getMultiple: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const versionTables = new Map<string, `lucid_document__${string}__ver`>();
+	const Bricks = new DocumentBricksRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const tablesByCollection = new Map<string, CollectionTableNames>();
 	const formatData = [];
 
 	for (const operation of rows) {
@@ -63,16 +84,16 @@ const getMultiple: ServiceFn<
 		});
 		if (collectionRes.error) continue;
 
-		let versionTable = versionTables.get(operation.collection_key);
-		if (versionTable === undefined) {
+		let tableNames = tablesByCollection.get(operation.collection_key);
+		if (tableNames === undefined) {
 			const tableNamesRes = await getTableNames(
 				context,
 				operation.collection_key,
 			);
 			if (tableNamesRes.error) return tableNamesRes;
 
-			versionTable = tableNamesRes.data.version;
-			versionTables.set(operation.collection_key, versionTable);
+			tableNames = tableNamesRes.data;
+			tablesByCollection.set(operation.collection_key, tableNames);
 		}
 
 		const latestRes = await Versions.selectSingle(
@@ -89,12 +110,20 @@ const getMultiple: ServiceFn<
 				],
 			},
 			{
-				tableName: versionTable,
+				tableName: tableNames.version,
 			},
 		);
 		if (latestRes.error) {
 			return latestRes;
 		}
+		const documentLabelRes = await getDocumentLabel({
+			context,
+			bricks: Bricks,
+			collection: collectionRes.data,
+			tables: tableNames,
+			operation,
+		});
+		if (documentLabelRes.error) return documentLabelRes;
 
 		const canReviewTarget = hasCollectionTargetPermission({
 			user: data.user,
@@ -119,7 +148,9 @@ const getMultiple: ServiceFn<
 
 		formatData.push({
 			operation,
+			documentLabel: documentLabelRes.data,
 			latestContentId: latestRes.data?.content_id ?? null,
+			host: getBaseUrl(context),
 			permissions: {
 				review: canReviewTarget,
 				cancel:
@@ -138,6 +169,10 @@ const getMultiple: ServiceFn<
 					operation.status === "approved" &&
 					operation.execution_status === "failed" &&
 					approvedActionAllowed,
+				updateReviewers:
+					operation.operation_type === "request" &&
+					operation.status === "pending" &&
+					(isRequester || canReviewTarget || data.user.superAdmin),
 			},
 		});
 	}

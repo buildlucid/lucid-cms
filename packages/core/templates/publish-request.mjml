@@ -15,6 +15,26 @@
       .footer-link:hover {
         color: #C1FE77 !important;
       }
+
+      .detail-label {
+        color: #737373;
+        font-size: 13px;
+        line-height: 20px;
+        padding: 8px 12px 8px 0;
+        white-space: nowrap;
+      }
+
+      .detail-value {
+        color: #F1F1F1;
+        font-size: 13px;
+        line-height: 20px;
+        padding: 8px 0 8px 12px;
+        text-align: right;
+      }
+
+      .detail-row td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
     </mj-style>
   </mj-head>
   <mj-body background-color="#0A0A0A">
@@ -39,6 +59,28 @@
         <mj-text padding-bottom="32px">
           {{message}}
         </mj-text>
+        <mj-raw>{{#hasDetails}}</mj-raw>
+        <mj-table padding="0 0 24px 0">
+          {{#details}}
+          <tr class="detail-row">
+            <td class="detail-label">{{label}}</td>
+            <td class="detail-value">{{value}}</td>
+          </tr>
+          {{/details}}
+        </mj-table>
+        <mj-raw>{{/hasDetails}}</mj-raw>
+        <mj-raw>{{#comment}}</mj-raw>
+        <mj-text color="#737373" font-size="13px" line-height="20px" align="left" padding-bottom="8px">
+          {{commentLabel}}
+        </mj-text>
+        <mj-table padding="0 0 24px 0">
+          <tr>
+            <td style="background-color: #171717; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #F1F1F1; font-size: 14px; line-height: 22px; padding: 14px 16px; text-align: left;">
+              {{comment}}
+            </td>
+          </tr>
+        </mj-table>
+        <mj-raw>{{/comment}}</mj-raw>
         <mj-button href="{{actionUrl}}" background-color="#E5E5E5" color="#171717" font-size="14px" font-weight="500" border-radius="8px" padding="0 0 32px 0" inner-padding="12px 24px">
           View request
         </mj-button>

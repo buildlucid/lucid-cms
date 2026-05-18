@@ -52,9 +52,8 @@ export const getPublishOperationExecutionStatusTheme = (
 		case "scheduled":
 			return "warning-opaque";
 		case "executing":
-			return "primary-opaque";
 		case "executed":
-			return "green";
+			return "primary-opaque";
 		case "failed":
 		case "cancelled":
 			return "error-opaque";

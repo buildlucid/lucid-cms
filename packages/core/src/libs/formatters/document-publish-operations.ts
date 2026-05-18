@@ -1,6 +1,7 @@
 import type { PublishOperation } from "../../types/response.js";
 import type { PublishOperationDetailedQueryResponse } from "../repositories/document-publish-operations.js";
-import formatter from "./index.js";
+import formatter, { mediaFormatter } from "./index.js";
+import type { MediaPosterPropsT } from "./media.js";
 
 const formatUser = (params: {
 	id: number | null | undefined;
@@ -8,6 +9,8 @@ const formatUser = (params: {
 	username?: string | null;
 	firstName?: string | null;
 	lastName?: string | null;
+	profilePicture?: MediaPosterPropsT[];
+	host: string;
 }): PublishOperation["requestedBy"] => {
 	if (!params.id) return null;
 	return {
@@ -16,19 +19,26 @@ const formatUser = (params: {
 		username: params.username ?? null,
 		firstName: params.firstName ?? null,
 		lastName: params.lastName ?? null,
+		profilePicture: mediaFormatter.formatEmbed({
+			poster: params.profilePicture?.[0],
+			host: params.host,
+		}),
 	};
 };
 
 type FormatSingleProps = {
 	operation: PublishOperationDetailedQueryResponse;
+	documentLabel?: string | null;
 	latestContentId?: string | null;
 	permissions?: PublishOperation["permissions"];
+	host: string;
 };
 
 const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 	id: props.operation.id,
 	collectionKey: props.operation.collection_key,
 	documentId: props.operation.document_id,
+	documentLabel: props.documentLabel ?? null,
 	target: props.operation.target,
 	operationType: props.operation.operation_type,
 	status: props.operation.status,
@@ -46,6 +56,8 @@ const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 		username: props.operation.requested_by_username,
 		firstName: props.operation.requested_by_first_name,
 		lastName: props.operation.requested_by_last_name,
+		profilePicture: props.operation.requested_by_profile_picture,
+		host: props.host,
 	}),
 	requestComment: props.operation.request_comment,
 	decidedBy: formatUser({
@@ -54,6 +66,8 @@ const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 		username: props.operation.decided_by_username,
 		firstName: props.operation.decided_by_first_name,
 		lastName: props.operation.decided_by_last_name,
+		profilePicture: props.operation.decided_by_profile_picture,
+		host: props.host,
 	}),
 	decisionComment: props.operation.decision_comment,
 	decidedAt: formatter.formatDate(props.operation.decided_at),
@@ -71,6 +85,7 @@ const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 		cancel: false,
 		reschedule: false,
 		retry: false,
+		updateReviewers: false,
 	},
 	assignees: (props.operation.assignees ?? []).map((assignee) => ({
 		id: assignee.id,
@@ -80,6 +95,10 @@ const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 			username: assignee.username ?? null,
 			firstName: assignee.first_name ?? null,
 			lastName: assignee.last_name ?? null,
+			profilePicture: mediaFormatter.formatEmbed({
+				poster: assignee.profile_picture?.[0],
+				host: props.host,
+			}),
 		},
 		assignedBy: assignee.assigned_by,
 		assignedAt: formatter.formatDate(assignee.assigned_at),

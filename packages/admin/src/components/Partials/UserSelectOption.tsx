@@ -1,12 +1,20 @@
-import type { PublishOperationReviewer } from "@types";
+import type { ProfilePicture } from "@types";
 import { FaSolidXmark } from "solid-icons/fa";
 import type { Component } from "solid-js";
 import { Show } from "solid-js";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import T from "@/translations";
 
-const PublishRequestReviewerOption: Component<{
-	user: PublishOperationReviewer;
+export type UserSelectOptionUser = {
+	username?: string | null;
+	email?: string | null;
+	firstName?: string | null;
+	lastName?: string | null;
+	profilePicture?: ProfilePicture | null;
+};
+
+const UserSelectOption: Component<{
+	user: UserSelectOptionUser;
 	label: string;
 	removeValue?: () => void;
 }> = (props) => {
@@ -17,7 +25,11 @@ const PublishRequestReviewerOption: Component<{
 			<span class="flex min-w-0 items-center gap-2">
 				<UserDisplay
 					user={{
-						username: props.user.username ?? props.user.email ?? T()("unknown"),
+						username:
+							props.user.username ??
+							props.user.email ??
+							props.label ??
+							T()("unknown"),
 						firstName: props.user.firstName,
 						lastName: props.user.lastName,
 						profilePicture: props.user.profilePicture,
@@ -51,4 +63,4 @@ const PublishRequestReviewerOption: Component<{
 	);
 };
 
-export default PublishRequestReviewerOption;
+export default UserSelectOption;

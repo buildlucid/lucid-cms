@@ -5,17 +5,14 @@ import serviceHelpers from "@/utils/service-helpers";
 
 export interface Params {
 	id: number;
-	action: "approve" | "reject" | "cancel";
 	body: {
-		comment?: string;
-		scheduledAt?: string | null;
-		scheduledTimezone?: string | null;
+		assigneeIds?: number[];
 	};
 }
 
-export const decisionReq = (params: Params) => {
+export const updateReviewersReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/publish-operations/${params.id}/${params.action}`,
+		url: `/lucid/api/v1/publish-operations/${params.id}/reviewers`,
 		csrf: true,
 		config: {
 			method: "POST",
@@ -24,17 +21,17 @@ export const decisionReq = (params: Params) => {
 	});
 };
 
-interface UseDecisionProps {
+interface UseUpdateReviewersProps {
 	onSuccess?: () => void;
 	onError?: (_errors: ErrorResponse | undefined) => void;
 }
 
-const useDecision = (props?: UseDecisionProps) => {
+const useUpdateReviewers = (props?: UseUpdateReviewersProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
-		mutationFn: decisionReq,
+		mutationFn: updateReviewersReq,
 		getSuccessToast: () => ({
 			title: T()("update_toast_title", {
-				name: T()("publish_request_toast_name"),
+				name: T()("reviewers"),
 			}),
 			message: T()("publish_request_updated_toast_message"),
 		}),
@@ -50,4 +47,4 @@ const useDecision = (props?: UseDecisionProps) => {
 	});
 };
 
-export default useDecision;
+export default useUpdateReviewers;

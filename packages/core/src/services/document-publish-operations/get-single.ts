@@ -1,14 +1,17 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentPublishOperationsFormatter } from "../../libs/formatters/index.js";
 import {
+	DocumentBricksRepository,
 	DocumentPublishOperationsRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { PublishOperation } from "../../types/response.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
+import getDocumentLabel from "./helpers/get-document-label.js";
 import {
 	hasCollectionTargetPermission,
 	unresolvedPublishOperationExecutionStatuses,
@@ -81,6 +84,10 @@ const getSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const Bricks = new DocumentBricksRepository(
+		context.db.client,
+		context.config.db,
+	);
 	const latestRes = await Versions.selectSingle(
 		{
 			select: ["content_id"],
@@ -104,11 +111,22 @@ const getSingle: ServiceFn<
 	);
 	if (latestRes.error) return latestRes;
 
+	const documentLabelRes = await getDocumentLabel({
+		context,
+		bricks: Bricks,
+		collection: collectionRes.data,
+		tables: tableNamesRes.data,
+		operation: operationRes.data,
+	});
+	if (documentLabelRes.error) return documentLabelRes;
+
 	return {
 		error: undefined,
 		data: documentPublishOperationsFormatter.formatSingle({
 			operation: operationRes.data,
+			documentLabel: documentLabelRes.data,
 			latestContentId: latestRes.data?.content_id ?? null,
+			host: getBaseUrl(context),
 			permissions: {
 				review: canReview,
 				cancel:
@@ -127,6 +145,10 @@ const getSingle: ServiceFn<
 					operationRes.data.status === "approved" &&
 					operationRes.data.execution_status === "failed" &&
 					approvedActionAllowed,
+				updateReviewers:
+					operationRes.data.operation_type === "request" &&
+					operationRes.data.status === "pending" &&
+					(isRequester || canReview || data.user.superAdmin),
 			},
 		}),
 	};

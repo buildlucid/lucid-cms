@@ -21,6 +21,7 @@ import {
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Confirmation } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
+import UserSelectOption from "@/components/Partials/UserSelectOption";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -30,7 +31,6 @@ import {
 	getScheduledAt,
 	type ReleaseTiming,
 } from "@/utils/release-schedule";
-import PublishRequestReviewerOption from "./PublishRequestReviewerOption";
 import ReleaseScheduleFields from "./ReleaseScheduleFields";
 
 type ReviewerOption = SelectMultipleValueT & {
@@ -86,7 +86,7 @@ const CreatePublishRequest: Component<{
 	const reviewerOptions = createMemo<ReviewerOption[]>(() =>
 		(reviewers.data?.data ?? []).map((reviewer) => ({
 			value: reviewer.id,
-			label: helpers.formatUserName(reviewer, "username") || T()("unknown"),
+			label: helpers.formatUserName(reviewer, "simple") || T()("unknown"),
 			user: reviewer,
 		})),
 	);
@@ -295,14 +295,14 @@ const CreatePublishRequest: Component<{
 						selectedValuesContainerClasses="gap-0"
 						selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
 						renderValue={(props) => (
-							<PublishRequestReviewerOption
+							<UserSelectOption
 								user={props.value.user}
 								label={props.value.label}
 								removeValue={props.removeValue}
 							/>
 						)}
 						renderOption={(props) => (
-							<PublishRequestReviewerOption
+							<UserSelectOption
 								user={props.option.user}
 								label={props.option.label}
 							/>

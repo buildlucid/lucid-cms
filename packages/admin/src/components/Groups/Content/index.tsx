@@ -7,5 +7,6 @@ export { EmailsList } from "./EmailsList";
 export { JobsList } from "./JobsList";
 export { License } from "./License";
 export { MediaList } from "./MediaList";
+export { ReleaseRequestsList } from "./ReleaseRequestsList";
 export { RolesList } from "./RolesList";
 export { UserList } from "./UserList";

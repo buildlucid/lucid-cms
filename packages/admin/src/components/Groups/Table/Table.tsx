@@ -26,6 +26,7 @@ interface TableRootProps {
 		key: string;
 		icon?: JSXElement;
 		sortable?: boolean;
+		minWidth?: number;
 	}[];
 	state: {
 		isLoading: boolean;
@@ -61,6 +62,8 @@ interface TableRootProps {
 	}) => JSXElement;
 }
 
+const tableScrollPositions = new Map<string, number>();
+
 export const Table: Component<TableRootProps> = (props) => {
 	let overflowRef: HTMLDivElement | undefined;
 
@@ -88,6 +91,24 @@ export const Table: Component<TableRootProps> = (props) => {
 			const newSelected = [...prev];
 			newSelected[index] = !newSelected[index];
 			return newSelected;
+		});
+	};
+	const setOverflowState = () => {
+		if (overflowRef && overflowRef.scrollWidth > overflowRef.clientWidth) {
+			overflowRef.setAttribute("data-overflowing", "true");
+		} else {
+			overflowRef?.setAttribute("data-overflowing", "false");
+		}
+	};
+	const restoreScrollPosition = () => {
+		const scrollLeft = tableScrollPositions.get(props.key);
+		if (scrollLeft === undefined) return;
+
+		requestAnimationFrame(() => {
+			if (!overflowRef) return;
+
+			overflowRef.scrollLeft = scrollLeft;
+			setOverflowState();
 		});
 	};
 
@@ -147,11 +168,7 @@ export const Table: Component<TableRootProps> = (props) => {
 	// Effects
 	createEffect(() => {
 		const handleResize = () => {
-			if (overflowRef && overflowRef.scrollWidth > overflowRef.clientWidth) {
-				overflowRef.setAttribute("data-overflowing", "true");
-			} else {
-				overflowRef?.setAttribute("data-overflowing", "false");
-			}
+			setOverflowState();
 		};
 
 		handleResize();
@@ -168,13 +185,28 @@ export const Table: Component<TableRootProps> = (props) => {
 			window.removeEventListener("resize", handleResize);
 		};
 	});
+	createEffect(() => {
+		props.key;
+		props.rows;
+		props.state.isLoading;
+		props.state.isSuccess;
+
+		restoreScrollPosition();
+	});
 
 	// ----------------------------------------
 	// Render
 	return (
 		<>
 			{/* Table */}
-			<div class="w-full overflow-x-auto scrollbar" ref={overflowRef}>
+			<div
+				class="w-full overflow-x-auto scrollbar"
+				ref={overflowRef}
+				onScroll={() => {
+					if (!overflowRef) return;
+					tableScrollPositions.set(props.key, overflowRef.scrollLeft);
+				}}
+			>
 				<table class="w-full table h-auto border-collapse">
 					<Show when={props?.caption}>
 						<div class="caption-bottom border-t-primary-base border-t-2 border-b border-b-border bg-input-base text-title py-2 text-sm">
@@ -202,6 +234,7 @@ export const Table: Component<TableRootProps> = (props) => {
 										searchParams={props.searchParams}
 										options={{
 											include: include()[index],
+											minWidth: head().minWidth,
 											sortable: head().sortable,
 											padding: props.options?.padding,
 										}}

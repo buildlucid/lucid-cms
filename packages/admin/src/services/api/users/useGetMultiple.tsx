@@ -14,6 +14,7 @@ interface QueryParams {
 		id?: Accessor<number | number[]>;
 		isDeleted?: Accessor<1 | 0> | 1 | 0;
 	};
+	perPage?: Accessor<number> | number;
 }
 
 const useGetMultiple = (params: QueryHook<QueryParams>) => {

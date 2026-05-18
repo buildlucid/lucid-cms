@@ -12,6 +12,18 @@ export type PublishOperationNotificationRecipient = {
 	email: string | null;
 };
 
+type PublishOperationNotificationDetail = {
+	label: string;
+	value: string | number | Date | null | undefined;
+};
+
+const formatNotificationDetailValue = (
+	value: PublishOperationNotificationDetail["value"],
+) => {
+	if (value instanceof Date) return value.toISOString();
+	return String(value);
+};
+
 const notifyPublishOperationUsers: ServiceFn<
 	[
 		{
@@ -22,6 +34,11 @@ const notifyPublishOperationUsers: ServiceFn<
 			title: string;
 			message: string;
 			dedupeAction: string;
+			comment?: {
+				label: string;
+				value: string | null | undefined;
+			};
+			details?: PublishOperationNotificationDetail[];
 		},
 	],
 	undefined
@@ -43,6 +60,13 @@ const notifyPublishOperationUsers: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const details = (data.details ?? [])
+		.filter((detail) => detail.value !== null && detail.value !== undefined)
+		.map((detail) => ({
+			label: detail.label,
+			value: formatNotificationDetailValue(detail.value),
+		}));
+	const comment = data.comment?.value?.trim() || null;
 
 	const alertRes = await Alerts.createSingle({
 		data: {
@@ -56,6 +80,8 @@ const notifyPublishOperationUsers: ServiceFn<
 				collectionKey: data.collectionKey,
 				documentId: data.documentId,
 				action: data.dedupeAction,
+				comment,
+				details,
 			},
 			email_id: null,
 		},
@@ -90,6 +116,10 @@ const notifyPublishOperationUsers: ServiceFn<
 				title: data.title,
 				message: data.message,
 				actionUrl,
+				details,
+				hasDetails: details.length > 0,
+				comment,
+				commentLabel: data.comment?.label,
 			},
 			storage: constants.email.templates.publishRequest.storage ?? undefined,
 		});

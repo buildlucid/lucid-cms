@@ -1,53 +1,83 @@
-import type { PublishOperation } from "@types";
-import {
-	type Component,
-	createMemo,
-	createSignal,
-	For,
-	Match,
-	Show,
-	Switch,
-} from "solid-js";
-import { Select } from "@/components/Groups/Form";
+import { useQueryClient } from "@tanstack/solid-query";
+import type {
+	PublishOperationExecutionStatus,
+	PublishOperationStatus,
+} from "@types";
+import { type Component, createEffect, createMemo } from "solid-js";
+import { ReleaseRequestsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
-import Button from "@/components/Partials/Button";
-import DateText from "@/components/Partials/DateText";
-import Link from "@/components/Partials/Link";
-import Pill from "@/components/Partials/Pill";
+import { QueryRow } from "@/components/Groups/Query";
+import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import {
-	formatPublishOperationUser,
-	getPublishOperationStatusLabel,
-	getPublishOperationStatusTheme,
-} from "@/utils/publish-operations";
-import { getDocumentRoute } from "@/utils/route-helpers";
-
-type Scope = "assigned" | "requested" | "all";
 
 const ReleaseRequestsListRoute: Component = () => {
 	// ----------------------------------
 	// State / Hooks
-	const [scope, setScope] = createSignal<Scope>("all");
-	const [collectionKey, setCollectionKey] = createSignal<string | undefined>();
-	const [target, setTarget] = createSignal<string | undefined>();
+	const queryClient = useQueryClient();
+	const searchParams = useSearchParamsLocation(
+		{
+			filters: {
+				collectionKey: {
+					value: "",
+					type: "text",
+				},
+				target: {
+					value: "",
+					type: "text",
+				},
+				status: {
+					value: "",
+					type: "array",
+				},
+				executionStatus: {
+					value: "",
+					type: "array",
+				},
+				requestedBy: {
+					value: "",
+					type: "array",
+				},
+				reviewers: {
+					value: "",
+					type: "array",
+				},
+				assignedToMe: {
+					value: "",
+					type: "text",
+				},
+				requestedByMe: {
+					value: "",
+					type: "text",
+				},
+			},
+			sorts: {
+				createdAt: "desc",
+				scheduledAt: undefined,
+				updatedAt: undefined,
+			},
+			pagination: {
+				perPage: 20,
+			},
+		},
+		{
+			singleSort: true,
+		},
+	);
 
+	// ----------------------------------
+	// Queries
 	const collections = api.collections.useGetAll({
 		queryParams: {},
 	});
-	const requests = api.publishOperations.useGetMultiple({
+	const users = api.users.useGetMultiple({
 		queryParams: {
 			filters: {
-				status: () => "pending",
-				operationType: () => "request",
-				collectionKey,
-				target,
-				assignedToMe: () => (scope() === "assigned" ? "true" : undefined),
-				requestedByMe: () => (scope() === "requested" ? "true" : undefined),
+				isDeleted: 0,
 			},
-			perPage: 50,
+			perPage: -1,
 		},
 	});
 
@@ -74,10 +104,31 @@ const ReleaseRequestsListRoute: Component = () => {
 					collection.key,
 			})),
 	);
+	const collectionLabels = createMemo(
+		() =>
+			new Map(
+				(collections.data?.data ?? []).map((collection) => [
+					collection.key,
+					helpers.getLocaleValue({
+						value: collection.details.singularName,
+						fallback: collection.key,
+					}) || collection.key,
+				]),
+			),
+	);
 	const targetOptions = createMemo(() => {
 		const keys = new Set<string>();
+		const selectedCollectionKey = searchParams
+			.getFilters()
+			.get("collectionKey");
 		for (const collection of collections.data?.data ?? []) {
-			if (collectionKey() && collection.key !== collectionKey()) continue;
+			if (
+				typeof selectedCollectionKey === "string" &&
+				selectedCollectionKey &&
+				collection.key !== selectedCollectionKey
+			) {
+				continue;
+			}
 			for (const target of collection.config.review?.requiredFor ?? [])
 				keys.add(target);
 		}
@@ -86,11 +137,28 @@ const ReleaseRequestsListRoute: Component = () => {
 			label: key,
 		}));
 	});
-	const rows = createMemo(() =>
-		(requests.data?.data ?? []).filter((request) =>
-			reviewCollectionKeys().has(request.collectionKey),
-		),
+	const userOptions = createMemo(() =>
+		(users.data?.data ?? []).map((user) => ({
+			value: user.id,
+			label: helpers.formatUserName(user, "simple") || T()("unknown"),
+			user,
+		})),
 	);
+
+	// ----------------------------------
+	// Effects
+	createEffect(() => {
+		const selectedTarget = searchParams.getFilters().get("target");
+		if (typeof selectedTarget !== "string" || selectedTarget === "") return;
+		if (targetOptions().some((option) => option.value === selectedTarget))
+			return;
+
+		searchParams.setParams({
+			filters: {
+				target: undefined,
+			},
+		});
+	});
 
 	// ----------------------------------
 	// Render
@@ -103,170 +171,145 @@ const ReleaseRequestsListRoute: Component = () => {
 							title: T()("publish_requests_route_title"),
 							description: T()("publish_requests_route_description"),
 						}}
+						slots={{
+							bottom: (
+								<QueryRow
+									searchParams={searchParams}
+									onRefresh={() => {
+										queryClient.invalidateQueries({
+											queryKey: ["publishOperations.getMultiple"],
+										});
+										queryClient.invalidateQueries({
+											queryKey: ["publishOperations.getOverview"],
+										});
+									}}
+									filters={[
+										{
+											label: T()("collection"),
+											key: "collectionKey",
+											type: "select",
+											options: collectionOptions(),
+										},
+										{
+											label: T()("target"),
+											key: "target",
+											type: "select",
+											options: targetOptions(),
+										},
+										{
+											label: T()("status"),
+											key: "status",
+											type: "multi-select",
+											options: [
+												{
+													label: T()("pending"),
+													value: "pending" satisfies PublishOperationStatus,
+												},
+												{
+													label: T()("approved"),
+													value: "approved" satisfies PublishOperationStatus,
+												},
+												{
+													label: T()("rejected"),
+													value: "rejected" satisfies PublishOperationStatus,
+												},
+												{
+													label: T()("cancelled"),
+													value: "cancelled" satisfies PublishOperationStatus,
+												},
+											],
+										},
+										{
+											label: T()("execution_status"),
+											key: "executionStatus",
+											type: "multi-select",
+											options: [
+												{
+													label: T()("awaiting_approval"),
+													value:
+														"awaiting_approval" satisfies PublishOperationExecutionStatus,
+												},
+												{
+													label: T()("scheduled"),
+													value:
+														"scheduled" satisfies PublishOperationExecutionStatus,
+												},
+												{
+													label: T()("executing"),
+													value:
+														"executing" satisfies PublishOperationExecutionStatus,
+												},
+												{
+													label: T()("executed"),
+													value:
+														"executed" satisfies PublishOperationExecutionStatus,
+												},
+												{
+													label: T()("failed"),
+													value:
+														"failed" satisfies PublishOperationExecutionStatus,
+												},
+												{
+													label: T()("cancelled"),
+													value:
+														"cancelled" satisfies PublishOperationExecutionStatus,
+												},
+											],
+										},
+										{
+											label: T()("requested_by"),
+											key: "requestedBy",
+											type: "multi-select",
+											options: userOptions(),
+											optionType: "user",
+										},
+										{
+											label: T()("reviewers"),
+											key: "reviewers",
+											type: "multi-select",
+											options: userOptions(),
+											optionType: "user",
+										},
+									]}
+									sorts={[
+										{
+											label: T()("requested_at"),
+											key: "createdAt",
+										},
+										{
+											label: T()("scheduled_for"),
+											key: "scheduledAt",
+										},
+										{
+											label: T()("updated_at"),
+											key: "updatedAt",
+										},
+									]}
+									perPage={[10, 20, 40]}
+								/>
+							),
+						}}
 					/>
 				),
 			}}
 		>
-			<div class="p-4 md:p-6 flex flex-col gap-4">
-				<div class="flex flex-wrap gap-2">
-					<Button
-						type="button"
-						theme="secondary-toggle"
-						size="small"
-						active={scope() === "assigned"}
-						onClick={() => setScope("assigned")}
-					>
-						{T()("assigned_to_me")}
-					</Button>
-					<Button
-						type="button"
-						theme="secondary-toggle"
-						size="small"
-						active={scope() === "requested"}
-						onClick={() => setScope("requested")}
-					>
-						{T()("created_by_me")}
-					</Button>
-					<Button
-						type="button"
-						theme="secondary-toggle"
-						size="small"
-						active={scope() === "all"}
-						onClick={() => setScope("all")}
-					>
-						{T()("all")}
-					</Button>
-				</div>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-					<Select
-						id="publish-request-collection"
-						name="publish-request-collection"
-						value={collectionKey()}
-						onChange={(value) =>
-							setCollectionKey(typeof value === "string" ? value : undefined)
-						}
-						options={collectionOptions()}
-						copy={{ label: T()("collection") }}
-						noMargin={true}
-					/>
-					<Select
-						id="publish-request-target"
-						name="publish-request-target"
-						value={target()}
-						onChange={(value) =>
-							setTarget(typeof value === "string" ? value : undefined)
-						}
-						options={targetOptions()}
-						copy={{ label: T()("target") }}
-						noMargin={true}
-					/>
-				</div>
-				<Switch>
-					<Match when={requests.isLoading || collections.isLoading}>
-						<div class="flex flex-col gap-2">
-							<span class="skeleton h-18 rounded-md" />
-							<span class="skeleton h-18 rounded-md" />
-							<span class="skeleton h-18 rounded-md" />
-						</div>
-					</Match>
-					<Match when={rows().length === 0}>
-						<div class="rounded-md border border-border bg-card-base p-6 text-center">
-							<h2 class="text-base text-title font-medium">
-								{T()("no_publish_requests")}
-							</h2>
-							<p class="text-sm text-body mt-1">
-								{T()("no_publish_requests_description")}
-							</p>
-						</div>
-					</Match>
-					<Match when={true}>
-						<div class="flex flex-col border border-border rounded-md overflow-hidden">
-							<For each={rows()}>
-								{(request: PublishOperation) => (
-									<div class="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-3 p-4 border-b border-border last:border-b-0 bg-card-base">
-										<div class="min-w-0">
-											<div class="flex flex-wrap items-center gap-2">
-												<h2 class="text-sm font-semibold text-title">
-													{request.collectionKey} #{request.documentId}
-												</h2>
-												<Pill
-													theme={getPublishOperationStatusTheme(request.status)}
-												>
-													{getPublishOperationStatusLabel(request.status)}
-												</Pill>
-												<Show when={request.isOutdated}>
-													<Pill theme="warning-opaque">
-														{T()("out_of_sync")}
-													</Pill>
-												</Show>
-												<Show when={!request.permissions.review}>
-													<Pill theme="outline">{T()("locked")}</Pill>
-												</Show>
-											</div>
-											<p class="text-sm text-body mt-1">
-												{T()("target")}: {request.target}
-											</p>
-											<Show when={request.scheduledAt}>
-												<p class="text-sm text-body mt-1">
-													{T()("scheduled_for")}:{" "}
-													<DateText date={request.scheduledAt} />
-													<Show when={request.scheduledTimezone}>
-														{" "}
-														({request.scheduledTimezone})
-													</Show>
-												</p>
-											</Show>
-											<Show when={request.executedAt}>
-												<p class="text-sm text-body mt-1">
-													{T()("executed_at")}:{" "}
-													<DateText date={request.executedAt} />
-												</p>
-											</Show>
-											<Show when={request.failedAt}>
-												<p class="text-sm text-body mt-1">
-													{T()("failed_at")}:{" "}
-													<DateText date={request.failedAt} />
-												</p>
-											</Show>
-										</div>
-										<div class="flex flex-col lg:items-end gap-2 text-xs text-body">
-											<span>
-												{T()("requested_by")}:{" "}
-												{formatPublishOperationUser(request.requestedBy)}
-											</span>
-											<span>
-												{T()("requested_at")}:{" "}
-												<DateText date={request.createdAt} />
-											</span>
-											<div class="flex flex-wrap gap-2">
-												<Link
-													href={`/lucid/collections/${request.collectionKey}/${request.documentId}/release-requests/${request.id}`}
-													theme="border-outline"
-													size="small"
-												>
-													{T()("details")}
-												</Link>
-												<Link
-													href={getDocumentRoute("edit", {
-														collectionKey: request.collectionKey,
-														documentId: request.documentId,
-														status: "snapshot",
-														versionId: request.snapshotVersionId,
-													})}
-													theme="primary"
-													size="small"
-												>
-													{T()("view_snapshot")}
-												</Link>
-											</div>
-										</div>
-									</div>
-								)}
-							</For>
-						</div>
-					</Match>
-				</Switch>
-			</div>
+			<ReleaseRequestsList
+				state={{
+					searchParams,
+				}}
+				data={{
+					collections: collections.data?.data ?? [],
+					collectionLabels: collectionLabels(),
+					reviewCollectionKeys: reviewCollectionKeys(),
+				}}
+				status={{
+					collections: {
+						isError: collections.isError,
+						isSuccess: collections.isSuccess,
+						isLoading: collections.isLoading,
+					},
+				}}
+			/>
 		</Wrapper>
 	);
 };

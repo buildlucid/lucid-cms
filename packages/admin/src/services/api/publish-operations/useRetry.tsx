@@ -36,6 +36,7 @@ const useRetry = (props?: UseRetryProps) => {
 			"documents.getMultiple",
 			"documents.getSingle",
 			"publishOperations.getMultiple",
+			"publishOperations.getOverview",
 			"publishOperations.getSingle",
 		],
 		onSuccess: props?.onSuccess,

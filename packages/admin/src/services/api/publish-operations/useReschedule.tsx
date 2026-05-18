@@ -40,6 +40,7 @@ const useReschedule = (props?: UseRescheduleProps) => {
 			"documents.getMultiple",
 			"documents.getSingle",
 			"publishOperations.getMultiple",
+			"publishOperations.getOverview",
 			"publishOperations.getSingle",
 		],
 		onSuccess: props?.onSuccess,

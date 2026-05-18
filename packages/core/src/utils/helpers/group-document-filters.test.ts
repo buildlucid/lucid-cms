@@ -156,6 +156,143 @@ describe("groupDocumentFilters", () => {
 			],
 		},
 		{
+			name: "lucid_document__simple__fld__author",
+			rawName: "lucid_document__simple__fld__author",
+			type: `${constants.db.customFieldTablePrefix}user`,
+			key: { collection: "simple", brick: undefined, fieldPath: ["author"] },
+			columns: [
+				{
+					name: "id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+					primary: true,
+				},
+				{
+					name: "document_id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+				},
+				{
+					name: "document_version_id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+				},
+				{
+					name: "_user_id",
+					source: "field",
+					type: "integer",
+					nullable: false,
+					customField: { type: "user" },
+				},
+			],
+		},
+		{
+			name: "lucid_document__simple__fld__heroImage",
+			rawName: "lucid_document__simple__fld__heroImage",
+			type: `${constants.db.customFieldTablePrefix}media`,
+			key: {
+				collection: "simple",
+				brick: undefined,
+				fieldPath: ["heroImage"],
+			},
+			columns: [
+				{
+					name: "id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+					primary: true,
+				},
+				{
+					name: "document_id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+				},
+				{
+					name: "_media_id",
+					source: "field",
+					type: "integer",
+					nullable: false,
+					customField: { type: "media" },
+				},
+			],
+		},
+		{
+			name: "lucid_document__simple__fld__relatedDocument",
+			rawName: "lucid_document__simple__fld__relatedDocument",
+			type: `${constants.db.customFieldTablePrefix}document`,
+			key: {
+				collection: "simple",
+				brick: undefined,
+				fieldPath: ["relatedDocument"],
+			},
+			columns: [
+				{
+					name: "id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+					primary: true,
+				},
+				{
+					name: "document_id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+				},
+				{
+					name: "_collection_key",
+					source: "field",
+					type: "text",
+					nullable: false,
+					customField: { type: "document" },
+				},
+				{
+					name: "_document_id",
+					source: "field",
+					type: "integer",
+					nullable: false,
+					customField: { type: "document" },
+				},
+			],
+		},
+		{
+			name: "lucid_document__simple__simple__reviewer",
+			rawName: "lucid_document__simple__simple__reviewer",
+			type: `${constants.db.customFieldTablePrefix}user`,
+			key: {
+				collection: "simple",
+				brick: "simple",
+				fieldPath: ["reviewer"],
+			},
+			columns: [
+				{
+					name: "id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+					primary: true,
+				},
+				{
+					name: "document_id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+				},
+				{
+					name: "_user_id",
+					source: "field",
+					type: "integer",
+					nullable: false,
+					customField: { type: "user" },
+				},
+			],
+		},
+		{
 			name: "lucid_document__simple__fld__people",
 			rawName: "lucid_document__simple__fld__people",
 			type: `${constants.db.customFieldTablePrefix}repeater`,
@@ -262,6 +399,53 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
+	it("should handle document custom fields stored in generated relation tables", () => {
+		const filters: QueryParamFilters = {
+			_author: { value: [1, 2] },
+			_heroImage: { value: 10 },
+			_relatedDocument: { value: 5 },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters);
+
+		expect(result.documentFilters).toEqual({});
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld__author",
+				filters: [
+					{
+						key: "author",
+						value: [1, 2],
+						operator: "in",
+						column: "_user_id",
+					},
+				],
+			},
+			{
+				table: "lucid_document__simple__fld__heroImage",
+				filters: [
+					{
+						key: "heroImage",
+						value: 10,
+						operator: "=",
+						column: "_media_id",
+					},
+				],
+			},
+			{
+				table: "lucid_document__simple__fld__relatedDocument",
+				filters: [
+					{
+						key: "relatedDocument",
+						value: 5,
+						operator: "=",
+						column: "_document_id",
+					},
+				],
+			},
+		]);
+	});
+
 	it('should handle brick fields with "brickKey._fieldKey" syntax', () => {
 		const filters: QueryParamFilters = {
 			"simple._heading": { value: "Brick Heading" },
@@ -285,6 +469,29 @@ describe("groupDocumentFilters", () => {
 				value: 5,
 				operator: "!=",
 				column: "_image",
+			},
+		]);
+	});
+
+	it("should handle brick custom fields stored in generated relation tables", () => {
+		const filters: QueryParamFilters = {
+			"simple._reviewer": { value: 3 },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters);
+
+		expect(result.documentFilters).toEqual({});
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__simple__reviewer",
+				filters: [
+					{
+						key: "reviewer",
+						value: 3,
+						operator: "=",
+						column: "_user_id",
+					},
+				],
 			},
 		]);
 	});

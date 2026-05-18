@@ -13,7 +13,9 @@ import serviceHelpers from "@/utils/service-helpers";
 interface QueryParams {
 	queryString?: Accessor<string>;
 	filters?: {
-		status?: Accessor<PublishOperationStatus | undefined>;
+		status?: Accessor<
+			PublishOperationStatus | PublishOperationStatus[] | undefined
+		>;
 		executionStatus?: Accessor<
 			| PublishOperationExecutionStatus
 			| PublishOperationExecutionStatus[]
@@ -23,6 +25,8 @@ interface QueryParams {
 		collectionKey?: Accessor<string | undefined>;
 		documentId?: Accessor<number | undefined>;
 		target?: Accessor<string | undefined>;
+		requestedBy?: Accessor<number[] | undefined>;
+		reviewers?: Accessor<number[] | undefined>;
 		assignedToMe?: Accessor<string | undefined>;
 		requestedByMe?: Accessor<string | undefined>;
 	};

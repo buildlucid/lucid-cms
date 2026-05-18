@@ -657,6 +657,7 @@ export type PublishOperationUser = {
 	username: string | null;
 	firstName: string | null;
 	lastName: string | null;
+	profilePicture: ProfilePicture | null;
 } | null;
 
 export type PublishOperationAssignee = {
@@ -679,6 +680,7 @@ export type PublishOperation = {
 	id: number;
 	collectionKey: string;
 	documentId: number;
+	documentLabel: string | null;
 	target: string;
 	operationType: PublishOperationType;
 	status: PublishOperationStatus;
@@ -706,9 +708,21 @@ export type PublishOperation = {
 		cancel: boolean;
 		reschedule: boolean;
 		retry: boolean;
+		updateReviewers: boolean;
 	};
 	assignees: PublishOperationAssignee[];
 	events: PublishOperationEvent[];
+};
+
+export type PublishOperationOverview = {
+	total: number;
+	pending: number;
+	assignedToMe: number;
+	requestedByMe: number;
+	scheduled: number;
+	approved: number;
+	rejected: number;
+	failed: number;
 };
 
 export type PublishOperationReviewer = {

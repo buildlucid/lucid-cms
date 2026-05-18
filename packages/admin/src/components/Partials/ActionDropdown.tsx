@@ -34,6 +34,7 @@ export interface ActionDropdownProps {
 		isLoading?: boolean;
 		actionExclude?: boolean;
 		theme?: "error" | "primary";
+		sortOrder?: number;
 	}>;
 	options?: {
 		border?: boolean;
@@ -60,6 +61,8 @@ const getActionTheme = (action: ActionItem): ActionItem["theme"] => {
 };
 
 const getActionSortWeight = (action: ActionItem): number => {
+	if (action.sortOrder !== undefined) return action.sortOrder;
+
 	if (EDIT_ACTION_LABEL_MATCHER.test(action.label)) return 0;
 
 	const theme = getActionTheme(action);

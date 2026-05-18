@@ -492,6 +492,37 @@ const createSingle: ServiceFn<
 			target: data.target,
 		}),
 		dedupeAction: "created",
+		comment: {
+			label: T("publish_request_email_request_comment"),
+			value: comment,
+		},
+		details: [
+			{
+				label: T("publish_request_email_detail_release"),
+				value: `#${operationRes.data.id}`,
+			},
+			{
+				label: T("publish_request_email_detail_collection"),
+				value: data.collectionKey,
+			},
+			{
+				label: T("publish_request_email_detail_document"),
+				value: `#${data.documentId}`,
+			},
+			{ label: T("publish_request_email_detail_target"), value: data.target },
+			{
+				label: T("publish_request_email_detail_requested_by"),
+				value: data.user.email,
+			},
+			{
+				label: T("publish_request_email_detail_scheduled_for"),
+				value: schedule?.scheduledAt,
+			},
+			{
+				label: T("publish_request_email_detail_scheduled_timezone"),
+				value: schedule?.scheduledTimezone,
+			},
+		],
 	});
 	if (notifyRes.error) return notifyRes;
 

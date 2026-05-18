@@ -78,6 +78,7 @@ export const DocumentsList: Component<{
 						label: T()("workflow_assigned_to"),
 						key: "workflowAssignee",
 						icon: <FaSolidUserCheck />,
+						minWidth: 200,
 					},
 				]
 			: [],

@@ -17,12 +17,15 @@ import {
 } from "solid-js";
 import { Select, Textarea } from "@/components/Groups/Form";
 import { Confirmation } from "@/components/Groups/Modal";
+import PublishOperationReviewers from "@/components/Modals/Documents/PublishOperationReviewers";
 import ReleaseScheduleFields from "@/components/Modals/Documents/ReleaseScheduleFields";
 import Button from "@/components/Partials/Button";
 import DateText from "@/components/Partials/DateText";
 import Pill from "@/components/Partials/Pill";
+import UserDisplay from "@/components/Partials/UserDisplay";
 import api from "@/services/api";
 import T from "@/translations";
+import helpers from "@/utils/helpers";
 import {
 	formatPublishOperationUser,
 	getPublishOperationExecutionStatusLabel,
@@ -89,6 +92,7 @@ export const ReleaseRequestSidebar: Component<{
 	const [decisionAction, setDecisionAction] = createSignal<DecisionAction>();
 	const [decisionComment, setDecisionComment] = createSignal("");
 	const [rescheduleOpen, setRescheduleOpen] = createSignal(false);
+	const [reviewersOpen, setReviewersOpen] = createSignal(false);
 	const [scheduleEnabled, setScheduleEnabled] = createSignal(false);
 	const [scheduleDate, setScheduleDate] = createSignal("");
 	const [scheduleTime, setScheduleTime] = createSignal("");
@@ -131,6 +135,11 @@ export const ReleaseRequestSidebar: Component<{
 	);
 	const canCancelRequest = createMemo(
 		() => request()?.permissions.cancel === true,
+	);
+	const canUpdateReviewers = createMemo(
+		() =>
+			request()?.status === "pending" &&
+			request()?.permissions.updateReviewers === true,
 	);
 	const requestHasSchedule = createMemo(() => Boolean(request()?.scheduledAt));
 	const targetLabel = createMemo(() => {
@@ -531,21 +540,58 @@ export const ReleaseRequestSidebar: Component<{
 					</SidebarSection>
 				</Show>
 
-				<Show when={(request()?.assignees.length ?? 0) > 0}>
+				<Show
+					when={(request()?.assignees.length ?? 0) > 0 || canUpdateReviewers()}
+				>
 					<SidebarSection
 						title={T()("reviewers")}
 						icon={<FaSolidUserCheck size={14} />}
 						storageKey="lucid:release-request-sidebar:reviewers-open"
 						meta={request()?.assignees.length}
 					>
-						<div class="overflow-hidden rounded-md border border-border bg-card-base">
-							<For each={request()?.assignees ?? []}>
-								{(assignee) => (
-									<div class="border-b border-border px-3 py-2 text-sm text-title last:border-b-0">
-										{formatPublishOperationUser(assignee.user)}
-									</div>
-								)}
-							</For>
+						<div class="grid gap-2">
+							<div class="overflow-hidden rounded-md border border-border bg-card-base">
+								<Show
+									when={(request()?.assignees.length ?? 0) > 0}
+									fallback={
+										<div class="px-3 py-2 text-sm text-body">{T()("none")}</div>
+									}
+								>
+									<For each={request()?.assignees ?? []}>
+										{(assignee) => (
+											<div class="flex min-w-0 items-center gap-2 border-b border-border px-3 py-2 text-sm text-title last:border-b-0">
+												<UserDisplay
+													user={{
+														username:
+															assignee.user.username ??
+															assignee.user.email ??
+															T()("unknown"),
+														firstName: assignee.user.firstName,
+														lastName: assignee.user.lastName,
+														profilePicture: assignee.user.profilePicture,
+													}}
+													mode="icon"
+													size="x-small"
+												/>
+												<span class="min-w-0 truncate">
+													{helpers.formatUserName(assignee.user, "simple") ||
+														formatPublishOperationUser(assignee.user)}
+												</span>
+											</div>
+										)}
+									</For>
+								</Show>
+							</div>
+							<Show when={canUpdateReviewers()}>
+								<Button
+									type="button"
+									theme="border-outline"
+									size="small"
+									onClick={() => setReviewersOpen(true)}
+								>
+									{T()("update_reviewers")}
+								</Button>
+							</Show>
 						</div>
 					</SidebarSection>
 				</Show>
@@ -730,6 +776,13 @@ export const ReleaseRequestSidebar: Component<{
 					/>
 				</div>
 			</Confirmation>
+			<PublishOperationReviewers
+				operation={request}
+				state={{
+					open: reviewersOpen(),
+					setOpen: setReviewersOpen,
+				}}
+			/>
 		</>
 	);
 };

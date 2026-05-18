@@ -27,6 +27,7 @@ const publishOperationUserSchema = z
 		username: z.string().nullable(),
 		firstName: z.string().nullable(),
 		lastName: z.string().nullable(),
+		profilePicture: mediaEmbedResponseSchema.nullable(),
 	})
 	.nullable();
 
@@ -34,6 +35,7 @@ export const publishOperationResponseSchema = z.object({
 	id: z.number(),
 	collectionKey: z.string(),
 	documentId: z.number(),
+	documentLabel: z.string().nullable(),
 	target: z.string(),
 	operationType: z.enum(["request", "direct"]),
 	status: publishOperationStatusSchema,
@@ -61,6 +63,7 @@ export const publishOperationResponseSchema = z.object({
 		cancel: z.boolean(),
 		reschedule: z.boolean(),
 		retry: z.boolean(),
+		updateReviewers: z.boolean(),
 	}),
 	assignees: z.array(
 		z.object({
@@ -71,6 +74,7 @@ export const publishOperationResponseSchema = z.object({
 				username: z.string().nullable(),
 				firstName: z.string().nullable(),
 				lastName: z.string().nullable(),
+				profilePicture: mediaEmbedResponseSchema.nullable(),
 			}),
 			assignedBy: z.number().nullable(),
 			assignedAt: z.string().nullable(),
@@ -88,13 +92,24 @@ export const publishOperationResponseSchema = z.object({
 	),
 });
 
+const publishOperationOverviewResponseSchema = z.object({
+	total: z.number(),
+	pending: z.number(),
+	assignedToMe: z.number(),
+	requestedByMe: z.number(),
+	scheduled: z.number(),
+	approved: z.number(),
+	rejected: z.number(),
+	failed: z.number(),
+});
+
 export const controllerSchemas = {
 	getMultiple: {
 		body: undefined,
 		query: {
 			string: z
 				.object({
-					"filter[status]": queryString.schema.filter(false, {
+					"filter[status]": queryString.schema.filter(true, {
 						example: "pending",
 					}),
 					"filter[executionStatus]": queryString.schema.filter(true, {
@@ -112,6 +127,12 @@ export const controllerSchemas = {
 					"filter[target]": queryString.schema.filter(false, {
 						example: "production",
 					}),
+					"filter[requestedBy]": queryString.schema.filter(true, {
+						example: "1,2",
+					}),
+					"filter[reviewers]": queryString.schema.filter(true, {
+						example: "1,2",
+					}),
 					"filter[assignedToMe]": queryString.schema.filter(false, {
 						example: "true",
 					}),
@@ -128,12 +149,14 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
-						status: queryFormatted.schema.filters.single.optional(),
+						status: queryFormatted.schema.filters.union.optional(),
 						executionStatus: queryFormatted.schema.filters.union.optional(),
 						operationType: queryFormatted.schema.filters.single.optional(),
 						collectionKey: queryFormatted.schema.filters.single.optional(),
 						documentId: queryFormatted.schema.filters.single.optional(),
 						target: queryFormatted.schema.filters.single.optional(),
+						requestedBy: queryFormatted.schema.filters.union.optional(),
+						reviewers: queryFormatted.schema.filters.union.optional(),
 						assignedToMe: queryFormatted.schema.filters.single.optional(),
 						requestedByMe: queryFormatted.schema.filters.single.optional(),
 					})
@@ -158,6 +181,31 @@ export const controllerSchemas = {
 		},
 		params: z.object({}),
 		response: z.array(publishOperationResponseSchema),
+	} satisfies ControllerSchema,
+	getOverview: {
+		body: undefined,
+		query: {
+			string: z
+				.object({
+					"filter[collectionKey]": queryString.schema.filter(false, {
+						example: "page",
+					}),
+					"filter[target]": queryString.schema.filter(false, {
+						example: "production",
+					}),
+				})
+				.meta(queryString.meta),
+			formatted: z.object({
+				filter: z
+					.object({
+						collectionKey: queryFormatted.schema.filters.single.optional(),
+						target: queryFormatted.schema.filters.single.optional(),
+					})
+					.optional(),
+			}),
+		},
+		params: z.object({}),
+		response: publishOperationOverviewResponseSchema,
 	} satisfies ControllerSchema,
 	getSingle: {
 		body: undefined,
@@ -210,6 +258,19 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	updateReviewers: {
+		body: z.object({
+			assigneeIds: z.array(z.number()).optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().trim(),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	getReviewers: {
 		body: undefined,
 		query: {
@@ -235,4 +296,8 @@ export const controllerSchemas = {
 
 export type GetMultipleQueryParams = z.infer<
 	typeof controllerSchemas.getMultiple.query.formatted
+>;
+
+export type GetOverviewQueryParams = z.infer<
+	typeof controllerSchemas.getOverview.query.formatted
 >;

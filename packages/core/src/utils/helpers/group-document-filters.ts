@@ -12,6 +12,7 @@ const CUSTOMFIELD_FILTER_PREFIX = "_";
 const DOCUMENT_FIELDS_KEY = "fields";
 const BRICK_SEPERATOR = ".";
 const TREE_TABLE_FILTER_MODE: FieldDatabaseMode = "tree-table";
+const RELATION_TABLE_FILTER_MODE: FieldDatabaseMode = "relation-table";
 
 export type BrickFieldFilters = {
 	key: string;
@@ -35,19 +36,70 @@ const hasFieldColumn = (
 	);
 };
 
+const isPrefixedFieldColumn = (column: string): column is `_${string}` => {
+	return column.startsWith(CUSTOMFIELD_FILTER_PREFIX);
+};
+
+const getRelationFilterColumn = (
+	schema: CollectionSchemaTable<LucidBrickTableName>,
+): `_${string}` | null => {
+	const fieldColumns = schema.columns
+		.filter((column) => column.source === "field")
+		.map((column) => column.name)
+		.filter(isPrefixedFieldColumn);
+
+	return (
+		fieldColumns.find(
+			(column) => column === prefixGeneratedColName("document_id"),
+		) ??
+		fieldColumns[0] ??
+		null
+	);
+};
+
+const getRelationTableFilterColumn = (params: {
+	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[];
+	brickKey?: string;
+	fieldKey: string;
+}): {
+	table: LucidBrickTableName;
+	column: `_${string}`;
+} | null => {
+	const relationTable = params.bricksTableSchema.find((schema) => {
+		const fieldPath = schema.key.fieldPath;
+
+		return (
+			matchesStorageMode(schema, RELATION_TABLE_FILTER_MODE) &&
+			schema.key.brick === params.brickKey &&
+			fieldPath !== undefined &&
+			fieldPath[fieldPath.length - 1] === params.fieldKey
+		);
+	});
+	if (!relationTable) return null;
+
+	const column = getRelationFilterColumn(relationTable);
+	if (!column) return null;
+
+	return {
+		table: relationTable.name,
+		column,
+	};
+};
+
 const pushBrickFilter = (params: {
 	brickFiltersMap: Map<LucidBrickTableName, BrickFieldFilters[]>;
 	table: LucidBrickTableName;
 	fieldKey: string;
 	value: FilterValue;
 	operator?: FilterOperator;
+	column?: `_${string}`;
 }): void => {
 	const filters = params.brickFiltersMap.get(params.table) || [];
 	filters.push({
 		key: params.fieldKey,
 		value: params.value,
-		operator: params.operator || "=",
-		column: prefixGeneratedColName(params.fieldKey),
+		operator: params.operator || (Array.isArray(params.value) ? "in" : "="),
+		column: params.column ?? prefixGeneratedColName(params.fieldKey),
 	});
 	params.brickFiltersMap.set(params.table, filters);
 };
@@ -119,6 +171,23 @@ const groupDocumentFilters = (
 					value: value.value,
 					operator: value.operator,
 				});
+				continue;
+			}
+
+			const relationTableFilter = getRelationTableFilterColumn({
+				bricksTableSchema,
+				brickKey: undefined,
+				fieldKey,
+			});
+			if (relationTableFilter) {
+				pushBrickFilter({
+					brickFiltersMap,
+					table: relationTableFilter.table,
+					fieldKey,
+					value: value.value,
+					operator: value.operator,
+					column: relationTableFilter.column,
+				});
 			}
 			continue;
 		}
@@ -181,19 +250,33 @@ const groupDocumentFilters = (
 				}
 			}
 
-			if (
-				tableName &&
-				fieldKey &&
-				schemaTable &&
-				hasFieldColumn(schemaTable, fieldKey)
-			) {
-				pushBrickFilter({
-					brickFiltersMap,
-					table: tableName,
+			if (fieldKey && schemaTable) {
+				if (tableName && hasFieldColumn(schemaTable, fieldKey)) {
+					pushBrickFilter({
+						brickFiltersMap,
+						table: tableName,
+						fieldKey,
+						value: value.value,
+						operator: value.operator,
+					});
+					continue;
+				}
+
+				const relationTableFilter = getRelationTableFilterColumn({
+					bricksTableSchema,
+					brickKey: brickKey === DOCUMENT_FIELDS_KEY ? undefined : brickKey,
 					fieldKey,
-					value: value.value,
-					operator: value.operator,
 				});
+				if (relationTableFilter) {
+					pushBrickFilter({
+						brickFiltersMap,
+						table: relationTableFilter.table,
+						fieldKey,
+						value: value.value,
+						operator: value.operator,
+						column: relationTableFilter.column,
+					});
+				}
 			}
 		}
 	}

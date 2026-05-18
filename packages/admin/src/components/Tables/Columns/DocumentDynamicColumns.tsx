@@ -8,10 +8,10 @@ import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import brickHelpers from "@/utils/brick-helpers";
-import AuthorCol from "./AuthorCol";
 import DateCol from "./DateCol";
 import PillCol from "./PillCol";
 import TextCol from "./TextCol";
+import UserStackCol from "./UserStackCol";
 
 const DocumentDynamicColumns: Component<{
 	field: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
@@ -47,31 +47,46 @@ const DocumentDynamicColumns: Component<{
 			? (String(fieldValue()) as string)
 			: null,
 	);
-	const fieldRef = createMemo(() => {
+	const userFieldRefs = createMemo(() => {
 		if (props.field.type !== "user") return null;
 
 		const relationValues = fieldValue();
-		const value = Array.isArray(relationValues)
-			? brickHelpers.getFirstRelationValue(relationValues)
-			: undefined;
-		if (value === undefined) return null;
+		const values = Array.isArray(relationValues)
+			? relationValues.filter(
+					(value): value is number => typeof value === "number",
+				)
+			: typeof relationValues === "number"
+				? [relationValues]
+				: [];
+		if (values.length === 0) return [];
 
 		const refs = props.document.refs?.user;
-		if (!refs) return null;
+		if (!refs) return [];
 
-		return (
-			refs.find(
-				(ref): ref is UserRef =>
+		return values
+			.map((value) =>
+				refs.find(
+					(ref): ref is NonNullable<UserRef> =>
+						ref !== null &&
+						ref !== undefined &&
+						"username" in ref &&
+						"email" in ref &&
+						"firstName" in ref &&
+						"lastName" in ref &&
+						"profilePicture" in ref &&
+						ref.id === value,
+				),
+			)
+			.filter(
+				(ref): ref is NonNullable<UserRef> =>
 					ref !== null &&
 					ref !== undefined &&
 					"username" in ref &&
 					"email" in ref &&
 					"firstName" in ref &&
 					"lastName" in ref &&
-					"profilePicture" in ref &&
-					ref.id === value,
-			) ?? null
-		);
+					"profilePicture" in ref,
+			);
 	});
 
 	// ----------------------------------
@@ -122,9 +137,9 @@ const DocumentDynamicColumns: Component<{
 				/>
 			</Match>
 			<Match when={fieldData()?.type === "user"}>
-				<AuthorCol
-					user={fieldRef()}
-					options={{ include: props.include[props.index] }}
+				<UserStackCol
+					users={userFieldRefs() ?? []}
+					options={{ include: props.include[props.index], minWidth: 200 }}
 				/>
 			</Match>
 		</Switch>

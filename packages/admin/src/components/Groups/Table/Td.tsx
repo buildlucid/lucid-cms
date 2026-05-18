@@ -6,6 +6,7 @@ interface TdProps {
 	options?: {
 		include?: boolean;
 		width?: number;
+		minWidth?: number;
 		noMinWidth?: boolean;
 		padding?: "16" | "24";
 	};
@@ -31,14 +32,22 @@ export const Td: Component<TdProps> = (props) => {
 			)}
 			style={{
 				width: props.options?.width ? `${props.options.width}px` : undefined,
+				"min-width": props.options?.minWidth
+					? `${props.options.minWidth}px`
+					: undefined,
 			}}
 		>
 			<div
 				class={classNames(
 					"min-h-[56.5px] py-2 text-base text-subtitle flex items-center",
 					{
+						"w-full":
+							props.options?.minWidth !== undefined ||
+							props.options?.width !== undefined,
 						"w-full min-w-[150px]":
-							props.options?.width === undefined && !props.options?.noMinWidth,
+							props.options?.width === undefined &&
+							props.options?.minWidth === undefined &&
+							!props.options?.noMinWidth,
 					},
 				)}
 			>
