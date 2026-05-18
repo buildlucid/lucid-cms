@@ -1,11 +1,11 @@
 import type { infer } from "zod";
-import type { DocumentBuilderHooks } from "../../../../types/hooks.js";
 import type { LocaleValue } from "../../../../types/shared.js";
 import type {
 	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTableName,
 } from "../../../../types.js";
+import type { DocumentBuilderHooks } from "../../../hooks/types.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 import type CollectionConfigSchema from "./schema.js";

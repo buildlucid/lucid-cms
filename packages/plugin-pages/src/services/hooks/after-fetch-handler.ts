@@ -175,9 +175,11 @@ const afterFetchHandler =
 			);
 		}
 
+		data.data.documents = documents;
+
 		return {
 			error: undefined,
-			data: documents,
+			data: undefined,
 		};
 	};
 

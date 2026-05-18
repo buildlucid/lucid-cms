@@ -1,8 +1,8 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
 import {
 	documentPublishOperationServices,
 	documentServices,
@@ -98,13 +98,13 @@ const deleteMultiple: ServiceFn<
 	}
 
 	const hookBeforeRes = await executeHooks(
+		context,
 		{
 			service: "documents",
 			event: "beforeDelete",
 			config: context.config,
 			collectionInstance: collectionRes.data,
 		},
-		context,
 		{
 			meta: {
 				collection: collectionRes.data,
@@ -168,13 +168,13 @@ const deleteMultiple: ServiceFn<
 	if (cancelRequestsRes.error) return cancelRequestsRes;
 
 	const hookAfterRes = await executeHooks(
+		context,
 		{
 			service: "documents",
 			event: "afterDelete",
 			config: context.config,
 			collectionInstance: collectionRes.data,
 		},
-		context,
 		{
 			meta: {
 				collection: collectionRes.data,

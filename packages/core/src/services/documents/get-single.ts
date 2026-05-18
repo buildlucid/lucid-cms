@@ -2,12 +2,12 @@ import constants from "../../constants/constants.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
 import { documentsFormatter } from "../../libs/formatters/index.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";
 import T from "../../translations/index.js";
 import type { InternalCollectionDocument } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
 	collectionServices,
@@ -141,6 +141,7 @@ const getSingle: ServiceFn<
 	}
 
 	const afterFetchRes = await executeHooks(
+		context,
 		{
 			service: "documents",
 			event: "afterFetch",
@@ -148,29 +149,23 @@ const getSingle: ServiceFn<
 			collectionInstance: collectionRes.data,
 		},
 		{
-			initialData: [document],
-			buildArgs: (currentDocuments) => [
-				context,
-				{
-					meta: {
-						collection: collectionRes.data,
-						collectionKey: documentRes.data.collection_key,
-						collectionTableNames: tableNamesRes.data,
-					},
-					data: {
-						versionType,
-						relationVersionType: relationVersionTypeRes.data.versionType,
-						documents: currentDocuments,
-					},
-				},
-			],
+			meta: {
+				collection: collectionRes.data,
+				collectionKey: documentRes.data.collection_key,
+				collectionTableNames: tableNamesRes.data,
+			},
+			data: {
+				versionType,
+				relationVersionType: relationVersionTypeRes.data.versionType,
+				documents: [document],
+			},
 		},
 	);
 	if (afterFetchRes.error) return afterFetchRes;
 
 	return {
 		error: undefined,
-		data: afterFetchRes.data[0] ?? document,
+		data: afterFetchRes.data.documents[0] ?? document,
 	};
 };
 

@@ -5,6 +5,7 @@ import {
 	getTableNames,
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentBricksFormatter } from "../../libs/formatters/index.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import {
 	DocumentBricksRepository,
 	DocumentsRepository,
@@ -12,7 +13,6 @@ import {
 } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import invalidateClientDocumentCache from "../documents/helpers/invalidate-client-cache.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
@@ -338,13 +338,13 @@ const promoteVersion: ServiceFn<
 	// -------------------------------------------------------------------------------
 	// Execute hook
 	const hookResponse = await executeHooks(
+		context,
 		{
 			service: "documents",
 			event: "versionPromote",
 			config: context.config,
 			collectionInstance: collectionRes.data,
 		},
-		context,
 		{
 			meta: {
 				collection: collectionRes.data,

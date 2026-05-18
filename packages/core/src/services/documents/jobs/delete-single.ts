@@ -1,7 +1,7 @@
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import T from "../../../translations/index.js";
-import executeHooks from "../../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { documentServices } from "../../index.js";
 import invalidateClientDocumentCache from "../helpers/invalidate-client-cache.js";
@@ -63,13 +63,13 @@ const deleteDocument: ServiceFn<
 	if (getDocumentRes.error) return getDocumentRes;
 
 	const hookBeforeRes = await executeHooks(
+		context,
 		{
 			service: "documents",
 			event: "beforeDelete",
 			config: context.config,
 			collectionInstance: collectionRes.data,
 		},
-		context,
 		{
 			meta: {
 				collection: collectionRes.data,
@@ -113,13 +113,13 @@ const deleteDocument: ServiceFn<
 	if (deleteRelationsRes.error) return deleteRelationsRes;
 
 	const hookAfterRes = await executeHooks(
+		context,
 		{
 			service: "documents",
 			event: "afterDelete",
 			config: context.config,
 			collectionInstance: collectionRes.data,
 		},
-		context,
 		{
 			meta: {
 				collection: collectionRes.data,

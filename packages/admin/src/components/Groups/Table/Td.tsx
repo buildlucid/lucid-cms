@@ -44,7 +44,7 @@ export const Td: Component<TdProps> = (props) => {
 						"w-full":
 							props.options?.minWidth !== undefined ||
 							props.options?.width !== undefined,
-						"w-full min-w-[150px]":
+						"w-full min-w-37.5":
 							props.options?.width === undefined &&
 							props.options?.minWidth === undefined &&
 							!props.options?.noMinWidth,

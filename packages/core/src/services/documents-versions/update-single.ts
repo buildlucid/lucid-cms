@@ -1,13 +1,12 @@
 import { randomUUID } from "node:crypto";
-import merge from "lodash.merge";
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import T from "../../translations/index.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import invalidateClientDocumentCache from "../documents/helpers/invalidate-client-cache.js";
 import { documentBrickServices, documentServices } from "../index.js";
@@ -140,15 +139,15 @@ const updateSingle: ServiceFn<
 
 	//* create new bricks based on the given data
 
-	// Fire beforeUpsert hook and merge result with data
+	// Fire beforeUpsert transform hooks
 	const hookResponse = await executeHooks(
+		context,
 		{
 			service: "documents",
 			event: "beforeUpsert",
 			config: context.config,
 			collectionInstance: collectionRes.data,
 		},
-		context,
 		{
 			meta: {
 				collection: collectionRes.data,
@@ -167,16 +166,14 @@ const updateSingle: ServiceFn<
 	);
 	if (hookResponse.error) return hookResponse;
 
-	const bodyData = merge(data, hookResponse.data);
-
 	// Save bricks for the new version
 	const createMultipleBricks = await documentBrickServices.createMultiple(
 		context,
 		{
 			versionId: data.versionId,
 			documentId: data.documentId,
-			bricks: bodyData.bricks,
-			fields: bodyData.fields,
+			bricks: hookResponse.data.bricks,
+			fields: hookResponse.data.fields,
 			collection: collectionRes.data,
 		},
 	);
@@ -184,13 +181,13 @@ const updateSingle: ServiceFn<
 
 	// Fire afterUpsert hook
 	const hookAfterRes = await executeHooks(
+		context,
 		{
 			service: "documents",
 			event: "afterUpsert",
 			config: context.config,
 			collectionInstance: collectionRes.data,
 		},
-		context,
 		{
 			meta: {
 				collection: collectionRes.data,
@@ -202,8 +199,8 @@ const updateSingle: ServiceFn<
 				documentId: data.documentId,
 				versionId: data.versionId,
 				versionType: versionExistsRes.data.type,
-				bricks: bodyData.bricks || [],
-				fields: bodyData.fields || [],
+				bricks: hookResponse.data.bricks || [],
+				fields: hookResponse.data.fields || [],
 			},
 		},
 	);

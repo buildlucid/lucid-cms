@@ -9,6 +9,7 @@ import type {
 	EmailAdapter,
 	EmailAdapterInstance,
 } from "../libs/email/types.js";
+import type { AllHooks } from "../libs/hooks/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../libs/kv/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
 import type {
@@ -23,7 +24,6 @@ import type {
 import type { CorePermission } from "../types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
-import type { AllHooks } from "./hooks.js";
 import type { SupportedLocales } from "./shared.js";
 
 export type CopyPublicEntry =

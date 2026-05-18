@@ -33,7 +33,7 @@ const beforeUpsertHandler =
 		if (targetCollectionRes.error) {
 			return {
 				error: undefined,
-				data: data.data,
+				data: undefined,
 			};
 		}
 
@@ -91,8 +91,6 @@ const beforeUpsertHandler =
 		);
 		if (checkDuplicateSlugParentsRes.error) return checkDuplicateSlugParentsRes;
 
-		// throw new Error("test error for transaction rollback");
-
 		// ----------------------------------------------------------------
 		// Build and set fullSlug
 
@@ -149,7 +147,7 @@ const beforeUpsertHandler =
 
 		return {
 			error: undefined,
-			data: data.data,
+			data: undefined,
 		};
 	};
 

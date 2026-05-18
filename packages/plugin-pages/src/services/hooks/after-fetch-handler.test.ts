@@ -100,27 +100,26 @@ describe("pages afterFetch hook", () => {
 				data: [],
 			});
 
-		const response = await afterFetchHandler(options)(
-			context,
-			createHookPayload([
-				createDocument({
-					id: 2,
-					slug: "Y",
-					parentId: 1,
-					fullSlug: "/x/y",
-				}),
-				createDocument({
-					id: 3,
-					slug: "Z",
-					parentId: 4,
-					fullSlug: "/missing/z",
-				}),
-			]),
-		);
+		const payload = createHookPayload([
+			createDocument({
+				id: 2,
+				slug: "Y",
+				parentId: 1,
+				fullSlug: "/x/y",
+			}),
+			createDocument({
+				id: 3,
+				slug: "Z",
+				parentId: 4,
+				fullSlug: "/missing/z",
+			}),
+		]);
+		const response = await afterFetchHandler(options)(context, payload);
 
 		expect(response.error).toBeUndefined();
-		expect(response.data?.[0]?.fields?.[2]?.value).toBe("/x/y");
-		expect(response.data?.[1]?.fields?.[2]?.value).toBe("/z");
+		expect(response.data).toBeUndefined();
+		expect(payload.data.documents[0]?.fields?.[2]?.value).toBe("/x/y");
+		expect(payload.data.documents[1]?.fields?.[2]?.value).toBe("/z");
 		expect(mocks.getParentFields).toHaveBeenNthCalledWith(
 			1,
 			context,

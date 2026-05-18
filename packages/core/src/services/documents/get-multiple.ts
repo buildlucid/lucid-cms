@@ -10,6 +10,7 @@ import {
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
 import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
 import T from "../../translations/index.js";
@@ -19,7 +20,6 @@ import {
 	getFilterValues,
 	groupDocumentFilters,
 } from "../../utils/helpers/index.js";
-import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
 import fetchRefData from "../documents-bricks/helpers/fetch-ref-data.js";
@@ -162,6 +162,7 @@ const getMultiple: ServiceFn<
 	});
 
 	const afterFetchRes = await executeHooks(
+		context,
 		{
 			service: "documents",
 			event: "afterFetch",
@@ -169,22 +170,16 @@ const getMultiple: ServiceFn<
 			collectionInstance: collectionRes.data,
 		},
 		{
-			initialData: documents,
-			buildArgs: (currentDocuments) => [
-				context,
-				{
-					meta: {
-						collection: collectionRes.data,
-						collectionKey: data.collectionKey,
-						collectionTableNames: tableNameRes.data,
-					},
-					data: {
-						versionType: data.status,
-						relationVersionType,
-						documents: currentDocuments,
-					},
-				},
-			],
+			meta: {
+				collection: collectionRes.data,
+				collectionKey: data.collectionKey,
+				collectionTableNames: tableNameRes.data,
+			},
+			data: {
+				versionType: data.status,
+				relationVersionType,
+				documents,
+			},
 		},
 	);
 	if (afterFetchRes.error) return afterFetchRes;
@@ -192,7 +187,7 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: afterFetchRes.data,
+			data: afterFetchRes.data.documents,
 			count: formatter.parseCount(documentsRes.data?.[1]?.count),
 		},
 	};

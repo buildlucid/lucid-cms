@@ -194,6 +194,7 @@ const ConfigSchema = z.object({
 		z.object({
 			service: z.string(),
 			event: z.string(),
+			priority: z.number().optional(),
 			handler: z.unknown(),
 		}),
 	),

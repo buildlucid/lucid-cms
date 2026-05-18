@@ -177,6 +177,7 @@ const CollectionConfigSchema = z
 			.array(
 				z.object({
 					event: z.string(),
+					priority: z.number().optional(),
 					handler: z.unknown(),
 				}),
 			)
