@@ -1,7 +1,28 @@
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type {
+	DocumentPublishOperationEventType,
+	KyselyDB,
+} from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
+
+export const documentPublishOperationEventTypes = [
+	"created",
+	"superseded",
+	"approved",
+	"rejected",
+	"cancelled",
+	"scheduled",
+	"executing",
+	"executed",
+	"failed",
+	"rescheduled",
+	"retried",
+	"reviewers_updated",
+] as const satisfies readonly [
+	DocumentPublishOperationEventType,
+	...DocumentPublishOperationEventType[],
+];
 
 export default class DocumentPublishOperationEventsRepository extends StaticRepository<"lucid_document_publish_operation_events"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -10,13 +31,7 @@ export default class DocumentPublishOperationEventsRepository extends StaticRepo
 	tableSchema = z.object({
 		id: z.number(),
 		operation_id: z.number(),
-		event_type: z.enum([
-			"created",
-			"superseded",
-			"approved",
-			"rejected",
-			"cancelled",
-		]),
+		event_type: z.enum(documentPublishOperationEventTypes),
 		user_id: z.number().nullable(),
 		comment: z.string().nullable(),
 		metadata: z.record(z.string(), z.unknown()),

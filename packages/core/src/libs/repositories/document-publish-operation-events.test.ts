@@ -1,6 +1,8 @@
 import SQLiteAdapter from "@lucidcms/sqlite-adapter";
 import { afterAll, describe, expect, test } from "vitest";
-import DocumentPublishOperationEventsRepository from "./document-publish-operation-events";
+import DocumentPublishOperationEventsRepository, {
+	documentPublishOperationEventTypes,
+} from "./document-publish-operation-events";
 
 describe("Tests for the document publish operation events repository", async () => {
 	const db = new SQLiteAdapter({
@@ -27,6 +29,22 @@ describe("Tests for the document publish operation events repository", async () 
 			expect(DocumentPublishOperationEvents.columnFormats[column.name]).toEqual(
 				column.dataType.toLowerCase(),
 			);
+		}
+	});
+
+	test("validates all supported publish operation event types", () => {
+		for (const eventType of documentPublishOperationEventTypes) {
+			const res = DocumentPublishOperationEvents.tableSchema.safeParse({
+				id: 1,
+				operation_id: 1,
+				event_type: eventType,
+				user_id: null,
+				comment: null,
+				metadata: {},
+				created_at: new Date().toISOString(),
+			});
+
+			expect(res.success).toBe(true);
 		}
 	});
 });
