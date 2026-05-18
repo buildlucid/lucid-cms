@@ -68,7 +68,8 @@ const formatSingle = (props: {
 			review: collectionData.config.review,
 			workflow: collectionData.config.workflow,
 			environments: collectionData.config.environments.map((environment) => ({
-				...environment,
+				key: environment.key,
+				name: environment.name,
 				permissions: {
 					publish: resolveCollectionPermission({
 						collection: props.collection,

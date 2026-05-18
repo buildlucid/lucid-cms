@@ -35,6 +35,7 @@ interface GroupBodyProps {
 		parentRef: string | undefined;
 		groupErrors: GroupError[];
 		missingFieldColumns: string[];
+		relationVersionType?: string;
 	};
 }
 
@@ -249,6 +250,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 									repeaterDepth: nextRepeaterDepth(),
 									fieldErrors: fieldErrors() || [],
 									missingFieldColumns: missingFieldColumns(),
+									relationVersionType: props.state.relationVersionType,
 								}}
 							/>
 						)}

@@ -176,3 +176,45 @@ test("collection workflow config normalizes defaults", async () => {
 		],
 	});
 });
+
+test("collection environment relation config normalizes defaults", async () => {
+	const collection = new CollectionBuilder("pages", {
+		mode: "multiple",
+		details: {
+			name: "Pages",
+			singularName: "Page",
+		},
+		config: {
+			environments: [
+				{
+					key: "staging",
+					name: "Staging",
+					relations: {
+						blog: "signed-off",
+					},
+				},
+				{
+					key: "production",
+					name: "Production",
+				},
+			],
+		},
+	});
+
+	expect(collection.getData.config.environments).toEqual([
+		{
+			key: "staging",
+			name: "Staging",
+			permissions: {},
+			relations: {
+				blog: "signed-off",
+			},
+		},
+		{
+			key: "production",
+			name: "Production",
+			permissions: {},
+			relations: {},
+		},
+	]);
+});

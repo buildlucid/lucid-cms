@@ -26,6 +26,7 @@ import type {
 import extractRelatedEntityIds from "../../documents-bricks/helpers/extract-related-entity-ids.js";
 import fetchRefData from "../../documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../../index.js";
+import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 
 type ClientDocumentsGetMultipleInput<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
@@ -97,8 +98,17 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 		query.filter,
 	);
 
-	const tableNameRes = await getTableNames(context, data.collectionKey);
+	const [tableNameRes, relationVersionTypeRes] = await Promise.all([
+		getTableNames(context, data.collectionKey),
+		resolveRelationVersionType(context, {
+			collectionKey: data.collectionKey,
+			versionType: data.status,
+		}),
+	]);
 	if (tableNameRes.error) return tableNameRes;
+	if (relationVersionTypeRes.error) return relationVersionTypeRes;
+
+	const relationVersionType = relationVersionTypeRes.data.versionType;
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
@@ -108,7 +118,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 			brickFilters: brickFilters,
 			collection: collectionRes.data,
 			config: context.config,
-			relationVersionType: data.status,
+			relationVersionType,
 			tables: {
 				versions: tableNameRes.data.version,
 				documentFields: tableNameRes.data.documentFields,
@@ -131,7 +141,8 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 
 	const refDataRes = await fetchRefData(context, {
 		values: relationIdRes.data,
-		versionType: data.status,
+		versionType: relationVersionType,
+		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 	});
 	if (refDataRes.error) return refDataRes;
 

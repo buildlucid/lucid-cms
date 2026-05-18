@@ -1,3 +1,4 @@
+import checkCollectionEnvironmentRelations from "./check-collection-environment-relations.js";
 import checkDuplicateBuilderKeys from "./check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./check-duplicate-field-keys.js";
 import checkField from "./check-field.js";
@@ -8,6 +9,7 @@ import checkRepeaterDepth from "./check-repeater-depth.js";
 export default {
 	checkDuplicateBuilderKeys,
 	checkDuplicateFieldKeys,
+	checkCollectionEnvironmentRelations,
 	checkRepeaterDepth,
 	checkPluginVersion,
 	checkLocales,

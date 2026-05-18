@@ -21,6 +21,7 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import { collectionServices, documentBrickServices } from "../../index.js";
+import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 
 type ClientDocumentsGetSingleInput<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
@@ -68,8 +69,15 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	);
 	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
 
-	const tableNameRes = await getTableNames(context, data.collectionKey);
+	const [tableNameRes, relationVersionTypeRes] = await Promise.all([
+		getTableNames(context, data.collectionKey),
+		resolveRelationVersionType(context, {
+			collectionKey: data.collectionKey,
+			versionType: data.status,
+		}),
+	]);
 	if (tableNameRes.error) return tableNameRes;
+	if (relationVersionTypeRes.error) return relationVersionTypeRes;
 
 	const query: ClientGetSingleQueryParams = {
 		...data.query,
@@ -91,7 +99,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 			brickFilters: brickFilters,
 			collection: collectionRes.data,
 			config: context.config,
-			relationVersionType: data.status,
+			relationVersionType: relationVersionTypeRes.data.versionType,
 			tables: {
 				versions: tableNameRes.data.version,
 			},
@@ -115,7 +123,8 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	const bricksRes = await documentBrickServices.getMultiple(context, {
 		versionId: documentRes.data.version_id,
 		collectionKey: collectionRes.data.key,
-		versionType: data.status,
+		versionType: relationVersionTypeRes.data.versionType,
+		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 		documentFieldsOnly: !query.include?.includes("bricks"),
 	});
 	if (bricksRes.error) return bricksRes;

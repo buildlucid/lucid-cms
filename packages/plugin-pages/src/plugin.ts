@@ -2,6 +2,7 @@ import { logger } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import {
+	afterFetchHandler,
 	afterUpsertHandler,
 	beforeDeleteHandler,
 	beforeUpsertHandler,
@@ -49,6 +50,11 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 					service: "documents",
 					event: "afterUpsert",
 					handler: afterUpsertHandler(options),
+				});
+				draft.hooks.push({
+					service: "documents",
+					event: "afterFetch",
+					handler: afterFetchHandler(options),
 				});
 				draft.hooks.push({
 					service: "documents",

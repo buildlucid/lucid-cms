@@ -31,6 +31,7 @@ const getParentFields: ServiceFn<
 				parentPage: FieldInputSchema;
 			};
 			tables: CollectionTableNames;
+			missingParentIsEmpty?: boolean;
 		},
 	],
 	Array<ParentPageQueryResponse>
@@ -83,6 +84,13 @@ const getParentFields: ServiceFn<
 			.execute();
 
 		if (!parentFields || parentFields.length === 0) {
+			if (data.missingParentIsEmpty) {
+				return {
+					error: undefined,
+					data: [],
+				};
+			}
+
 			return {
 				error: {
 					type: "basic",

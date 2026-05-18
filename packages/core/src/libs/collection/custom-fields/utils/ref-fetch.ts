@@ -14,9 +14,16 @@ export type FieldRefRelation = {
 	values: Set<unknown>;
 };
 
+export type FieldRefVersionTypeResolver = (input: {
+	fieldType: FieldTypes;
+	table: string;
+	collectionKey?: string;
+}) => Exclude<DocumentVersionType, "revision">;
+
 export type FieldRefFetchInput = {
 	relations: FieldRefRelation[];
 	versionType: Exclude<DocumentVersionType, "revision">;
+	resolveVersionType?: FieldRefVersionTypeResolver;
 };
 
 export type FieldRefFetchOutput = {
@@ -40,6 +47,7 @@ export type FieldRefFetchPlanInput<T extends FieldTypes = FieldTypes> = {
 	fieldType: T;
 	relations: FieldRefRelation[];
 	versionType: Exclude<DocumentVersionType, "revision">;
+	resolveVersionType?: FieldRefVersionTypeResolver;
 	fetchRefs: ServiceFn<[FieldRefFetchInput], FieldRefFetchOutput>;
 };
 
@@ -54,6 +62,7 @@ export const createFieldRefFetchPlan = <T extends FieldTypes>(
 			input.fetchRefs(context, {
 				relations: input.relations,
 				versionType: input.versionType,
+				resolveVersionType: input.resolveVersionType,
 			}),
 	};
 };

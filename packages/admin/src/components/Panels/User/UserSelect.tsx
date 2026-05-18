@@ -297,6 +297,7 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 												profilePicture: user().profilePicture,
 											}}
 											mode="short"
+											size="small"
 										/>
 									</Td>
 									<TextCol

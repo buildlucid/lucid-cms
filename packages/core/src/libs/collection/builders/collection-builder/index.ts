@@ -194,6 +194,7 @@ class CollectionBuilder extends FieldBuilder {
 					this.config.config?.environments?.map((environment) => ({
 						...environment,
 						permissions: environment.permissions ?? {},
+						relations: environment.relations ?? {},
 					})) ?? [],
 				revisionRetentionDays:
 					this.config.config?.revisionRetentionDays ??

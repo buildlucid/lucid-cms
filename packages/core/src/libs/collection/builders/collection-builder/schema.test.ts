@@ -174,3 +174,30 @@ test("collection workflow config validates stages, targets and palette", async (
 		success: false,
 	});
 });
+
+test("collection environment relation config passes schema validation", async () => {
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			key: "pages",
+			mode: "multiple",
+			details: {
+				name: "Pages",
+				singularName: "Page",
+			},
+			config: {
+				environments: [
+					{
+						key: "staging",
+						name: "Staging",
+						relations: {
+							blog: "signed-off",
+							settings: "latest",
+						},
+					},
+				],
+			},
+		}),
+	).resolves.toMatchObject({
+		success: true,
+	});
+});

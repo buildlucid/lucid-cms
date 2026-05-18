@@ -86,6 +86,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 					};
 					documentFieldSchema: CollectionSchemaTable<LucidBrickTableName>;
 					ids: number[];
+					versionType?: Exclude<DocumentVersionType, "revision">;
 				}>;
 				/** The status used to determine which version of the document custom field relations to fetch */
 				versionType: Exclude<DocumentVersionType, "revision">;
@@ -100,8 +101,9 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 		}
 
 		const unionQueries = props.unions.map(
-			({ tables, ids, documentFieldSchema }) => {
+			({ tables, ids, documentFieldSchema, versionType }) => {
 				const { table, ref } = this.db.dynamic;
+				const targetVersionType = versionType ?? props.versionType;
 
 				return (
 					this.db
@@ -149,7 +151,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 								.as(this.documentFieldsUnionAlias),
 						])
 						// @ts-expect-error
-						.where(`${tables.version}.type`, "=", props.versionType)
+						.where(`${tables.version}.type`, "=", targetVersionType)
 						// @ts-expect-error
 						.where(`${tables.version}.document_id`, "in", ids)
 						.where(

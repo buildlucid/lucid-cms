@@ -44,6 +44,7 @@ interface DynamicFieldProps {
 		groupPath?: string;
 		repeaterKey?: string;
 		repeaterDepth?: number;
+		relationVersionType?: string;
 	};
 }
 
@@ -172,6 +173,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 											groupPath: props.state.groupPath,
 											repeaterKey: props.state.repeaterKey,
 											repeaterDepth: props.state.repeaterDepth,
+											relationVersionType: props.state.relationVersionType,
 											fieldErrors: props.state.fieldErrors,
 											missingFieldColumns: props.state.missingFieldColumns,
 										}}
@@ -192,6 +194,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								repeaterDepth: props.state.repeaterDepth ?? 0,
 								fieldError: fieldError(),
 								missingFieldColumns: props.state.missingFieldColumns,
+								relationVersionType: props.state.relationVersionType,
 							}}
 						/>
 					</Match>
@@ -244,6 +247,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
 								fieldColumnIsMissing: fieldColumnIsMissing(),
+								relationVersionType: props.state.relationVersionType,
 							}}
 						/>
 					</Match>

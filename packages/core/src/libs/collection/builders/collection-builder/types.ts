@@ -25,6 +25,7 @@ export type CollectionPermissions = Partial<
 export type CollectionEnvironmentPermissions = Partial<
 	Pick<Record<CollectionPermissionAction, string>, "publish" | "review">
 >;
+export type CollectionEnvironmentRelations = Record<string, string>;
 
 export type PublishingReviewCommentRequirement = "required" | "optional";
 export type PublishingReviewConfig = {
@@ -89,6 +90,7 @@ export type CollectionData = {
 			key: string;
 			name: LocaleValue;
 			permissions: CollectionEnvironmentPermissions;
+			relations: CollectionEnvironmentRelations;
 		}[];
 		revisionRetentionDays: number | false;
 	};

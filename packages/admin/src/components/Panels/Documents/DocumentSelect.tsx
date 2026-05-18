@@ -4,7 +4,11 @@ import type {
 	DocumentRef,
 	InternalCollectionDocument,
 } from "@types";
-import { FaSolidCalendar } from "solid-icons/fa";
+import {
+	FaSolidBarsProgress,
+	FaSolidCalendar,
+	FaSolidUserCheck,
+} from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -176,6 +180,23 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	);
 	const getTableHeadColumns = createMemo(() =>
 		tableHeadColumns(getCollectionFieldIncludes()),
+	);
+	const workflowHeadColumn = createMemo(() =>
+		collection.data?.data.config.workflow
+			? [
+					{
+						label: T()("workflow_stage"),
+						key: "workflowStage",
+						icon: <FaSolidBarsProgress />,
+					},
+					{
+						label: T()("workflow_assigned_to"),
+						key: "workflowAssignee",
+						icon: <FaSolidUserCheck />,
+						minWidth: 200,
+					},
+				]
+			: [],
 	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
@@ -445,6 +466,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 							key: "select",
 						},
 						...getTableHeadColumns(),
+						...workflowHeadColumn(),
 						{
 							label: T()("updated_at"),
 							key: "updated_at",

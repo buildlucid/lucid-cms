@@ -7,12 +7,14 @@ import type { GetSingleQueryParams } from "../../schemas/documents.js";
 import T from "../../translations/index.js";
 import type { InternalCollectionDocument } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
+import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
 	collectionServices,
 	documentBrickServices,
 	documentWorkflowServices,
 } from "../index.js";
+import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
 
 const getSingle: ServiceFn<
 	[
@@ -97,39 +99,37 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	if (data.query.include?.includes("bricks")) {
-		const relationVersionType =
-			versionType === "revision" ||
-			versionType === constants.collectionBuilder.publishing.snapshotVersionType
-				? "latest"
-				: versionType;
+	const relationVersionTypeRes = await resolveRelationVersionType(context, {
+		collectionKey: documentRes.data.collection_key,
+		documentId: data.id,
+		versionId,
+		versionType,
+	});
+	if (relationVersionTypeRes.error) return relationVersionTypeRes;
 
+	let document: InternalCollectionDocument;
+
+	if (data.query.include?.includes("bricks")) {
 		const bricksRes = await documentBrickServices.getMultiple(context, {
 			versionId: versionId,
 			collectionKey: documentRes.data.collection_key,
-			//* if fetching a revision, we always default to the latest version so any sub-documents this may query due to the document custom field is always recent info
-			versionType: relationVersionType,
+			versionType: relationVersionTypeRes.data.versionType,
+			resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 		});
 		if (bricksRes.error) return bricksRes;
 
-		return {
-			error: undefined,
-			data: documentsFormatter.formatSingle({
-				document: documentRes.data,
-				collection: collectionRes.data,
-				bricks: bricksRes.data.bricks,
-				fields: bricksRes.data.fields,
-				config: context.config,
-				host: getBaseUrl(context),
-				refs: bricksRes.data.refs,
-				workflow: workflowRes.data,
-			}),
-		};
-	}
-
-	return {
-		error: undefined,
-		data: documentsFormatter.formatSingle({
+		document = documentsFormatter.formatSingle({
+			document: documentRes.data,
+			collection: collectionRes.data,
+			bricks: bricksRes.data.bricks,
+			fields: bricksRes.data.fields,
+			config: context.config,
+			host: getBaseUrl(context),
+			refs: bricksRes.data.refs,
+			workflow: workflowRes.data,
+		});
+	} else {
+		document = documentsFormatter.formatSingle({
 			document: documentRes.data,
 			collection: collectionRes.data,
 			bricks: [],
@@ -137,7 +137,40 @@ const getSingle: ServiceFn<
 			config: context.config,
 			host: getBaseUrl(context),
 			workflow: workflowRes.data,
-		}),
+		});
+	}
+
+	const afterFetchRes = await executeHooks(
+		{
+			service: "documents",
+			event: "afterFetch",
+			config: context.config,
+			collectionInstance: collectionRes.data,
+		},
+		{
+			initialData: [document],
+			buildArgs: (currentDocuments) => [
+				context,
+				{
+					meta: {
+						collection: collectionRes.data,
+						collectionKey: documentRes.data.collection_key,
+						collectionTableNames: tableNamesRes.data,
+					},
+					data: {
+						versionType,
+						relationVersionType: relationVersionTypeRes.data.versionType,
+						documents: currentDocuments,
+					},
+				},
+			],
+		},
+	);
+	if (afterFetchRes.error) return afterFetchRes;
+
+	return {
+		error: undefined,
+		data: afterFetchRes.data[0] ?? document,
 	};
 };
 

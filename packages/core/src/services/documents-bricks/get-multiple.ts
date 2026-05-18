@@ -1,3 +1,4 @@
+import type { FieldRefVersionTypeResolver } from "../../libs/collection/custom-fields/utils/ref-fetch.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -30,6 +31,7 @@ const getMultiple: ServiceFn<
 			collectionKey: string;
 			/** The version type to use for any custom field document references  */
 			versionType: Exclude<DocumentVersionType, "revision">;
+			resolveVersionType?: FieldRefVersionTypeResolver;
 			/** When enabled, only fetches from the `document-fields` table */
 			documentFieldsOnly?: boolean;
 		},
@@ -93,6 +95,7 @@ const getMultiple: ServiceFn<
 	const refDataRes = await fetchRefData(context, {
 		values: relationIdRes.data,
 		versionType: data.versionType,
+		resolveVersionType: data.resolveVersionType,
 	});
 	if (refDataRes.error) return refDataRes;
 

@@ -31,6 +31,7 @@ interface DocumentFieldProps {
 		altLocaleError: boolean;
 		localised: boolean;
 		fieldColumnIsMissing: boolean;
+		relationVersionType?: string;
 	};
 }
 
@@ -132,6 +133,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			disabled={disabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+			relationVersionType={props.state.relationVersionType}
 			hideOptionalText
 		/>
 	);

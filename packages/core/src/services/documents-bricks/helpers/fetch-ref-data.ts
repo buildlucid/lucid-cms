@@ -7,6 +7,7 @@ import {
 	type FieldRefFetchOutput,
 	type FieldRefFetchPlan,
 	type FieldRefRelation,
+	type FieldRefVersionTypeResolver,
 } from "../../../libs/collection/custom-fields/utils/ref-fetch.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
 import type { MediaPropsT } from "../../../libs/formatters/media.js";
@@ -75,18 +76,21 @@ const buildFieldRefFetchPlan = (props: {
 	fieldDefinition: FetchableFieldDefinition;
 	relations: FieldRefRelation[];
 	versionType: FieldRefFetchInput["versionType"];
+	resolveVersionType?: FieldRefVersionTypeResolver;
 }): FieldRefFetchPlan | null => {
 	return (
 		props.fieldDefinition.planFetchRefs?.({
 			fieldType: props.fieldType,
 			relations: props.relations,
 			versionType: props.versionType,
+			resolveVersionType: props.resolveVersionType,
 			fetchRefs: props.fieldDefinition.fetchRefs,
 		}) ??
 		createFieldRefFetchPlan({
 			fieldType: props.fieldType,
 			relations: props.relations,
 			versionType: props.versionType,
+			resolveVersionType: props.resolveVersionType,
 			fetchRefs: props.fieldDefinition.fetchRefs,
 		})
 	);
@@ -100,6 +104,7 @@ const fetchRefData: ServiceFn<
 		{
 			values: FieldRelationValues;
 			versionType: Exclude<DocumentVersionType, "revision">;
+			resolveVersionType?: FieldRefVersionTypeResolver;
 		},
 	],
 	FieldRefResponse
@@ -120,6 +125,7 @@ const fetchRefData: ServiceFn<
 				fieldDefinition,
 				relations: relationValues,
 				versionType: data.versionType,
+				resolveVersionType: data.resolveVersionType,
 			});
 			return plan ? [plan] : [];
 		},

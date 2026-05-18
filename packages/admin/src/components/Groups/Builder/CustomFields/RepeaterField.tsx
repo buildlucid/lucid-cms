@@ -21,6 +21,7 @@ interface RepeaterFieldProps {
 		repeaterDepth: number;
 		fieldError: FieldError | undefined;
 		missingFieldColumns: string[];
+		relationVersionType?: string;
 	};
 }
 
@@ -131,6 +132,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 													parentRef: props.state.groupRef,
 													groupErrors: groupErrors(),
 													missingFieldColumns: missingFieldColumns(),
+													relationVersionType: props.state.relationVersionType,
 												}}
 											/>
 										)}

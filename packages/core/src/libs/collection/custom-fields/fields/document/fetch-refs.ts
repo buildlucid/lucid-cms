@@ -1,5 +1,6 @@
 import { collectionServices } from "../../../../../services/index.js";
 import type {
+	DocumentVersionType,
 	LucidBrickTableName,
 	LucidDocumentTableName,
 } from "../../../../../types.js";
@@ -18,6 +19,13 @@ import type {
 	FieldRefFetchOutput,
 } from "../../utils/ref-fetch.js";
 
+type DocumentRefFetchTarget = {
+	table: LucidDocumentTableName;
+	collectionKey: string;
+	ids: number[];
+	versionType: Exclude<DocumentVersionType, "revision">;
+};
+
 const fetchDocumentRefs: ServiceFn<
 	[FieldRefFetchInput],
 	FieldRefFetchOutput
@@ -27,19 +35,42 @@ const fetchDocumentRefs: ServiceFn<
 		context.config.db,
 	);
 
-	const values = data.relations.flatMap((relation) => {
-		if (!relation.table.startsWith("lucid_document__")) return [];
+	const targetsByVersion = new Map<string, DocumentRefFetchTarget>();
+	for (const relation of data.relations) {
+		if (!relation.table.startsWith("lucid_document__")) continue;
+
+		const table = relation.table as LucidDocumentTableName;
+		const collectionKey = extractCollectionKey(table);
+		if (!collectionKey) continue;
 
 		const ids = Array.from(relation.values).filter(
 			(value): value is number => typeof value === "number",
 		);
-		return [
-			{
-				table: relation.table as LucidDocumentTableName,
-				ids,
-			},
-		];
-	});
+		if (ids.length === 0) continue;
+
+		const versionType =
+			data.resolveVersionType?.({
+				fieldType: "document",
+				table: relation.table,
+				collectionKey,
+			}) ?? data.versionType;
+		const mapKey = `${table}:${versionType}`;
+		const existing = targetsByVersion.get(mapKey);
+
+		if (existing) {
+			existing.ids = Array.from(new Set([...existing.ids, ...ids]));
+			continue;
+		}
+
+		targetsByVersion.set(mapKey, {
+			table,
+			collectionKey,
+			ids: Array.from(new Set(ids)),
+			versionType,
+		});
+	}
+
+	const values = Array.from(targetsByVersion.values());
 
 	if (values.length === 0) {
 		return {
@@ -56,8 +87,8 @@ const fetchDocumentRefs: ServiceFn<
 	}
 
 	const collectionKeys = values
-		.map((v) => extractCollectionKey(v.table))
-		.filter((c) => c !== undefined);
+		.map((v) => v.collectionKey)
+		.filter((c, i, self) => self.indexOf(c) === i);
 
 	const cacheSchemaRes = await primeRuntimeSchemas(context, {
 		collectionKeys: collectionKeys,
@@ -65,24 +96,21 @@ const fetchDocumentRefs: ServiceFn<
 	if (cacheSchemaRes.error) return cacheSchemaRes;
 
 	const unionData = values.map(async (v) => {
-		const collectionKey = extractCollectionKey(v.table);
-		if (!collectionKey) return null;
-
 		const collectionRes = collectionServices.getSingleInstance(context, {
-			key: collectionKey,
+			key: v.collectionKey,
 		});
 		if (collectionRes.error) return null;
 
 		const [versionTableRes, documentFieldsTableRes] = await Promise.all([
-			getDocumentVersionTableSchema(context, collectionKey),
-			getDocumentFieldsTableSchema(context, collectionKey),
+			getDocumentVersionTableSchema(context, v.collectionKey),
+			getDocumentFieldsTableSchema(context, v.collectionKey),
 		]);
 		if (versionTableRes.error || !versionTableRes.data) return null;
 		if (documentFieldsTableRes.error || !documentFieldsTableRes.data)
 			return null;
 
 		return {
-			collectionKey: collectionKey,
+			collectionKey: v.collectionKey,
 			tables: {
 				document: v.table,
 				version: versionTableRes.data.name,
@@ -90,6 +118,7 @@ const fetchDocumentRefs: ServiceFn<
 			},
 			documentFieldSchema: documentFieldsTableRes.data,
 			ids: v.ids,
+			versionType: v.versionType,
 		};
 	});
 	const unionDataRes = await Promise.all(unionData).then((u) =>

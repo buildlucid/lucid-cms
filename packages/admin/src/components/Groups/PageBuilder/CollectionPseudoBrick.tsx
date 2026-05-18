@@ -8,6 +8,7 @@ interface CollectionPseudoBrickProps {
 	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
+	relationVersionType?: string;
 }
 
 export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
@@ -54,6 +55,7 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 						missingFieldColumns: missingFieldColumns(),
 						collectionKey: props.collectionKey,
 						documentId: props.documentId,
+						relationVersionType: props.relationVersionType,
 					}}
 					options={{}}
 				/>

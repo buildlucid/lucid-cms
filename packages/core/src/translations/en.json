@@ -111,6 +111,8 @@
 	"config_access_collection_permission_context": "Collection \"{{collection}}\" {{action}} permission",
 	"config_access_collection_environment_publish_context": "Collection \"{{collection}}\" environment \"{{environment}}\" publish permission",
 	"config_access_collection_environment_review_context": "Collection \"{{collection}}\" environment \"{{environment}}\" review permission",
+	"config_collection_environment_relation_collection_not_found": "Collection \"{{collection}}\" environment \"{{environment}}\" relation mapping references unknown collection \"{{targetCollection}}\".",
+	"config_collection_environment_relation_version_not_found": "Collection \"{{collection}}\" environment \"{{environment}}\" relation mapping for collection \"{{targetCollection}}\" references unknown environment \"{{targetVersion}}\". Use \"latest\" or an environment configured on the target collection.",
 	"error_cant_update_yourself": "You can't update yourself.",
 	"error_cant_delete_yourself": "You can't delete yourself.",
 	"error_cant_delete_last_user": "You can't delete the last remaining user.",

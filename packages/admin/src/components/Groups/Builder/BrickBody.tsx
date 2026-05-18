@@ -27,6 +27,7 @@ interface BrickProps {
 		missingFieldColumns: string[];
 		collectionKey?: string;
 		documentId?: number;
+		relationVersionType?: string;
 	};
 	options: {
 		padding?: "16" | "24";
@@ -138,6 +139,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 								activeTab: getActiveTab(),
 								fieldErrors: props.state.fieldErrors,
 								missingFieldColumns: props.state.missingFieldColumns,
+								relationVersionType: props.state.relationVersionType,
 							}}
 						/>
 					)}

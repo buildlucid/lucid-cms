@@ -5,7 +5,11 @@ import type {
 	FieldError,
 } from "@types";
 import classNames from "classnames";
-import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
+import {
+	FaSolidPen,
+	FaSolidTriangleExclamation,
+	FaSolidXmark,
+} from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
@@ -50,17 +54,27 @@ interface DocumentSelectProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
+	relationVersionType?: string;
 	hideOptionalText?: boolean;
 }
 
 const DOCUMENT_SELECT_DRAG_DROP_KEY = "document-select-zone";
+
+type SelectedDocumentItem = {
+	key: string;
+	value: DocumentFieldValue;
+	document?: DocumentRef;
+};
+
+const getDocumentKey = (document: DocumentFieldValue) =>
+	`${document.collectionKey}:${document.id}`;
 
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const canOpenSelectModal = () =>
 		props.disabled !== true &&
 		(props.multiple !== true ||
 			typeof props.maxItems !== "number" ||
-			(props.refs()?.length ?? 0) < props.maxItems);
+			(props.value?.length ?? 0) < props.maxItems);
 
 	const openDocuSelectModal = () => {
 		if (!canOpenSelectModal()) return;
@@ -97,23 +111,20 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const reorderSelectedDocuments = (ref: string, targetRef: string) => {
 		if (props.disabled) return;
 
-		const documents = selectedDocuments();
-		const fromIndex = documents.findIndex(
-			(document) => `${document.collectionKey}:${document.id}` === ref,
-		);
+		const documents = selectedDocumentItems();
+		const fromIndex = documents.findIndex((document) => document.key === ref);
 		const toIndex = documents.findIndex(
-			(document) => `${document.collectionKey}:${document.id}` === targetRef,
+			(document) => document.key === targetRef,
 		);
 		const nextDocuments = moveArrayItem(documents, fromIndex, toIndex);
 
 		if (nextDocuments === documents) return;
 
 		props.onChange(
-			nextDocuments.map((document) => ({
-				id: document.id,
-				collectionKey: document.collectionKey,
-			})),
-			nextDocuments,
+			nextDocuments.map((document) => document.value),
+			nextDocuments.flatMap((document) =>
+				document.document ? [document.document] : [],
+			),
 		);
 	};
 
@@ -122,23 +133,30 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	);
 	const isMultiple = createMemo(() => props.multiple === true);
 	const selectedDocumentValue = createMemo(() => props.value?.[0]);
-	const selectedDocumentKeys = createMemo(() =>
-		(props.value ?? []).map(
-			(document) => `${document.collectionKey}:${document.id}`,
-		),
-	);
 	const selectedDocuments = createMemo(() => props.refs() ?? []);
 	const selectedDocumentsByKey = createMemo(() => {
 		return new Map(
 			selectedDocuments().map((document) => [
-				`${document.collectionKey}:${document.id}`,
+				getDocumentKey(document),
 				document,
 			]),
 		);
 	});
+	const selectedDocumentItems = createMemo<SelectedDocumentItem[]>(() =>
+		(props.value ?? []).map((value) => {
+			const key = getDocumentKey(value);
+			return {
+				key,
+				value,
+				document: selectedDocumentsByKey().get(key),
+			};
+		}),
+	);
+	const selectedDocumentItem = createMemo(() => selectedDocumentItems()[0]);
 	const hasMaxItems = createMemo(() => typeof props.maxItems === "number");
 	const hasReachedMaxItems = createMemo(
-		() => hasMaxItems() && selectedDocuments().length >= (props.maxItems || 0),
+		() =>
+			hasMaxItems() && selectedDocumentItems().length >= (props.maxItems || 0),
 	);
 	const canAddMore = createMemo(() => !hasReachedMaxItems());
 	const fieldErrors = createMemo(() => normalizeFieldErrors(props.errors));
@@ -149,7 +167,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				fields: true,
 			},
 		},
-		enabled: () => selectedDocuments().length > 0,
+		enabled: () => selectedDocumentItems().length > 0,
 	});
 	const collectionsByKey = createMemo(() => {
 		return new Map(
@@ -165,11 +183,14 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	};
 	const hasItemError = (itemIndex: number) =>
 		getItemErrors(itemIndex).length > 0;
-	const getDocumentCollection = (documentRef?: DocumentRef) =>
-		documentRef ? collectionsByKey().get(documentRef.collectionKey) : undefined;
-	const getSingularName = (documentRef?: DocumentRef) =>
+	const getDocumentCollection = (
+		document?: Pick<DocumentFieldValue, "collectionKey">,
+	) => (document ? collectionsByKey().get(document.collectionKey) : undefined);
+	const getSingularName = (
+		document?: Pick<DocumentFieldValue, "collectionKey">,
+	) =>
 		helpers.getLocaleValue({
-			value: getDocumentCollection(documentRef)?.details.singularName,
+			value: getDocumentCollection(document)?.details.singularName,
 			fallback: T()("document"),
 		});
 	const previewFields = (documentRef?: DocumentRef) =>
@@ -178,6 +199,12 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 			documentRef,
 			contentLocale: contentLocale(),
 		}).slice(0, 3);
+	const relationVersionLabel = createMemo(() => {
+		if (!props.relationVersionType) return undefined;
+		if (props.relationVersionType === "latest") return T()("latest");
+		if (props.relationVersionType === "revision") return T()("revision");
+		return props.relationVersionType;
+	});
 
 	return (
 		<div
@@ -207,27 +234,22 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							>
 								{({ dragDrop }) => (
 									<div class="flex flex-col gap-2">
-										<For each={selectedDocumentKeys()}>
-											{(documentKey, index) => {
-												return (
-													<Show
-														when={selectedDocumentsByKey().get(documentKey)}
-													>
-														{(document) => (
-															<DocumentSortableItem
-																document={document()}
-																dragId={documentKey}
-																singularName={getSingularName(document())}
-																previewFields={previewFields(document())}
-																hasError={hasItemError(index())}
-																removeSelectedDocument={removeSelectedDocument}
-																disabled={props.disabled}
-																dragDrop={dragDrop}
-															/>
-														)}
-													</Show>
-												);
-											}}
+										<For each={selectedDocumentItems()}>
+											{(document, index) => (
+												<DocumentSortableItem
+													document={document}
+													dragId={document.key}
+													singularName={getSingularName(
+														document.document ?? document.value,
+													)}
+													versionLabel={relationVersionLabel()}
+													previewFields={previewFields(document.document)}
+													hasError={hasItemError(index())}
+													removeSelectedDocument={removeSelectedDocument}
+													disabled={props.disabled}
+													dragDrop={dragDrop}
+												/>
+											)}
 										</For>
 									</div>
 								)}
@@ -243,10 +265,10 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 								>
 									{T()("select_document")}
 								</Button>
-								<Show when={selectedDocuments().length > 0}>
+								<Show when={selectedDocumentItems().length > 0}>
 									<p class="text-sm text-unfocused">
 										<RelationCount
-											count={selectedDocuments().length}
+											count={selectedDocumentItems().length}
 											min={props.minItems}
 											max={props.maxItems}
 										/>
@@ -272,11 +294,10 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 											#{selectedDocumentValue()?.id}
 										</Pill>
 										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-subtitle">
-											{helpers.getLocaleValue({
-												value: getDocumentCollection(selectedDocuments()[0])
-													?.details.singularName,
-												fallback: T()("document"),
-											})}
+											{getSingularName(
+												selectedDocumentItem()?.document ??
+													selectedDocumentItem()?.value,
+											)}
 										</span>
 									</div>
 								</div>
@@ -304,26 +325,43 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 								</div>
 							</div>
 
-							<Show when={selectedDocuments()[0]}>
-								<div class="py-2">
-									<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-										<For each={previewFields(selectedDocuments()[0])}>
-											{(preview) => (
-												<div
-													class="min-w-0 rounded-md border border-border px-2 py-1.5 bg-card-base"
-													title={`${preview.label}: ${preview.value}`}
-												>
-													<p class="text-[10px] uppercase tracking-wide text-unfocused truncate">
-														{preview.label}
-													</p>
-													<p class="text-xs text-subtitle truncate mt-0.5">
-														{preview.value}
-													</p>
-												</div>
+							<Show
+								when={selectedDocumentItem()?.document}
+								fallback={
+									<div class="py-2">
+										<MissingDocumentRefNotice
+											document={selectedDocumentItem()?.value}
+											singularName={getSingularName(
+												selectedDocumentItem()?.value,
 											)}
-										</For>
+											versionLabel={relationVersionLabel()}
+										/>
 									</div>
-								</div>
+								}
+							>
+								{(document) => (
+									<Show when={previewFields(document()).length > 0}>
+										<div class="py-2">
+											<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+												<For each={previewFields(document())}>
+													{(preview) => (
+														<div
+															class="min-w-0 rounded-md border border-border px-2 py-1.5 bg-card-base"
+															title={`${preview.label}: ${preview.value}`}
+														>
+															<p class="text-[10px] uppercase tracking-wide text-unfocused truncate">
+																{preview.label}
+															</p>
+															<p class="text-xs text-subtitle truncate mt-0.5">
+																{preview.value}
+															</p>
+														</div>
+													)}
+												</For>
+											</div>
+										</div>
+									</Show>
+								)}
 							</Show>
 						</div>
 					</Match>
@@ -347,10 +385,57 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	);
 };
 
+const MissingDocumentRefNotice: Component<{
+	document?: DocumentFieldValue;
+	singularName?: string;
+	versionLabel?: string;
+}> = (props) => {
+	const documentLabel = createMemo(() => props.singularName ?? T()("document"));
+
+	return (
+		<div class="rounded-md border border-warning-base/30 bg-warning-base/10 px-3 py-2.5">
+			<div class="flex items-start gap-2.5">
+				<div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-warning-base/15 text-warning-base">
+					<FaSolidTriangleExclamation size={9} />
+				</div>
+				<div class="min-w-0 flex-1">
+					<p class="text-xs font-semibold leading-5 text-title">
+						<Show
+							when={props.document}
+							fallback={T()("document_relation_unavailable")}
+						>
+							{(document) =>
+								props.versionLabel
+									? T()("document_relation_unavailable_title_with_version", {
+											document: documentLabel(),
+											id: document().id,
+											version: props.versionLabel,
+										})
+									: T()("document_relation_unavailable_title", {
+											document: documentLabel(),
+											id: document().id,
+										})
+							}
+						</Show>
+					</p>
+					<p class="mt-1 text-xs leading-5 text-body">
+						{props.versionLabel
+							? T()("document_relation_unavailable_description_with_version", {
+									version: props.versionLabel,
+								})
+							: T()("document_relation_unavailable_description")}
+					</p>
+				</div>
+			</div>
+		</div>
+	);
+};
+
 const DocumentSortableItem: Component<{
-	document: DocumentRef;
+	document: SelectedDocumentItem;
 	dragId: string;
 	singularName: string;
+	versionLabel?: string;
 	previewFields: { label: string; value: string }[];
 	hasError: boolean;
 	removeSelectedDocument: (documentValue: DocumentFieldValue) => void;
@@ -363,7 +448,7 @@ const DocumentSortableItem: Component<{
 			data-dragkey={DOCUMENT_SELECT_DRAG_DROP_KEY}
 			data-dragref={props.dragId}
 			style={{
-				"view-transition-name": `document-select-item-${props.document.collectionKey}-${props.document.id}`,
+				"view-transition-name": `document-select-item-${props.document.value.collectionKey}-${props.document.value.id}`,
 			}}
 			class={classNames(
 				"group rounded-md border bg-input-base px-3 py-2 ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
@@ -402,30 +487,43 @@ const DocumentSortableItem: Component<{
 				<div class="min-w-0 flex-1">
 					<div class="flex flex-wrap items-center gap-2">
 						<Pill theme="outline" class="text-[10px]">
-							#{props.document.id}
+							#{props.document.value.id}
 						</Pill>
 						<p class="truncate text-sm font-medium text-subtitle">
 							{props.singularName}
 						</p>
 					</div>
-					<Show when={props.previewFields.length > 0}>
-						<div class="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
-							<For each={props.previewFields}>
-								{(preview) => (
-									<div
-										class="min-w-0 rounded-md border border-border bg-card-base px-2 py-1.5"
-										title={`${preview.label}: ${preview.value}`}
-									>
-										<p class="truncate text-[10px] uppercase tracking-wide text-unfocused">
-											{preview.label}
-										</p>
-										<p class="mt-0.5 truncate text-xs text-subtitle">
-											{preview.value}
-										</p>
-									</div>
-								)}
-							</For>
-						</div>
+					<Show
+						when={props.document.document}
+						fallback={
+							<div class="mt-2">
+								<MissingDocumentRefNotice
+									document={props.document.value}
+									singularName={props.singularName}
+									versionLabel={props.versionLabel}
+								/>
+							</div>
+						}
+					>
+						<Show when={props.previewFields.length > 0}>
+							<div class="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
+								<For each={props.previewFields}>
+									{(preview) => (
+										<div
+											class="min-w-0 rounded-md border border-border bg-card-base px-2 py-1.5"
+											title={`${preview.label}: ${preview.value}`}
+										>
+											<p class="truncate text-[10px] uppercase tracking-wide text-unfocused">
+												{preview.label}
+											</p>
+											<p class="mt-0.5 truncate text-xs text-subtitle">
+												{preview.value}
+											</p>
+										</div>
+									)}
+								</For>
+							</div>
+						</Show>
 					</Show>
 				</div>
 				<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -435,8 +533,8 @@ const DocumentSortableItem: Component<{
 						size="icon-subtle"
 						onClick={() =>
 							props.removeSelectedDocument({
-								id: props.document.id,
-								collectionKey: props.document.collectionKey,
+								id: props.document.value.id,
+								collectionKey: props.document.value.collectionKey,
 							})
 						}
 						disabled={props.disabled}

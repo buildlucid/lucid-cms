@@ -2,6 +2,23 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { stringTranslations } from "../../../../schemas/locales.js";
 
+const environmentKeySchema = z
+	.string()
+	.min(1)
+	.max(50)
+	.regex(/^[a-z0-9-_]+$/, {
+		message:
+			"Environment key must contain only lowercase letters, numbers, hyphens and underscores",
+	});
+
+const relationCollectionKeySchema = z
+	.string()
+	.min(1)
+	.max(constants.db.maxBuilderKeyLength)
+	.refine((val) => !val.includes(constants.db.nameSeparator), {
+		message: `Collection key cannot contain '${constants.db.nameSeparator}'`,
+	});
+
 const CollectionConfigSchema = z
 	.object({
 		key: z
@@ -128,29 +145,24 @@ const CollectionConfigSchema = z
 				environments: z
 					.array(
 						z.object({
-							key: z
-								.string()
-								.min(1)
-								.max(50)
-								.regex(/^[a-z0-9-_]+$/, {
-									message:
-										"Environment key must contain only lowercase letters, numbers, hyphens and underscores",
-								})
-								.refine(
-									(val) =>
-										!constants.collectionBuilder.protectedEnvironments.includes(
-											val,
-										),
-									{
-										message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
-									},
-								),
+							key: environmentKeySchema.refine(
+								(val) =>
+									!constants.collectionBuilder.protectedEnvironments.includes(
+										val,
+									),
+								{
+									message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
+								},
+							),
 							name: stringTranslations,
 							permissions: z
 								.object({
 									publish: z.string().optional(),
 									review: z.string().optional(),
 								})
+								.optional(),
+							relations: z
+								.record(relationCollectionKeySchema, environmentKeySchema)
 								.optional(),
 						}),
 					)

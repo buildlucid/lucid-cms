@@ -238,6 +238,13 @@ const CollectionsDocumentsEditRoute: Component<{
 			id: releaseRequest.id,
 		});
 	});
+	const relationVersionType = createMemo(() => {
+		if (versionType() === "revision") return "latest";
+		if (versionType() === "snapshot") {
+			return props.releaseRequest?.()?.target ?? versionType();
+		}
+		return versionType();
+	});
 
 	// ----------------------------------
 	// Render
@@ -306,6 +313,7 @@ const CollectionsDocumentsEditRoute: Component<{
 								}
 								collectionKey={docState.collectionKey()}
 								documentId={docState.documentId()}
+								relationVersionType={relationVersionType()}
 							/>
 							<FixedBricks
 								brickConfig={docState.collection()?.fixedBricks || []}
@@ -314,6 +322,7 @@ const CollectionsDocumentsEditRoute: Component<{
 								}
 								collectionKey={docState.collectionKey()}
 								documentId={docState.documentId()}
+								relationVersionType={relationVersionType()}
 							/>
 							<BuilderBricks
 								brickConfig={docState.collection()?.builderBricks || []}
@@ -322,6 +331,7 @@ const CollectionsDocumentsEditRoute: Component<{
 								}
 								collectionKey={docState.collectionKey()}
 								documentId={docState.documentId()}
+								relationVersionType={relationVersionType()}
 							/>
 						</div>
 						{props.releaseRequest ? (

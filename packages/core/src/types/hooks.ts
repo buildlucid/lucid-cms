@@ -2,7 +2,10 @@ import type CollectionBuilder from "../libs/collection/builders/collection-build
 import type { DocumentVersionType } from "../libs/db/types.js";
 import type { BrickInputSchema } from "../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../schemas/collection-fields.js";
-import type { CollectionTableNames } from "../types.js";
+import type {
+	CollectionTableNames,
+	InternalCollectionDocument,
+} from "../types.js";
 import type { ServiceFn } from "../utils/services/types.js";
 
 // --------------------------------------------------
@@ -80,6 +83,23 @@ export type HookServiceHandlers = {
 			],
 			undefined
 		>;
+		afterFetch: ServiceFn<
+			[
+				{
+					meta: {
+						collection: CollectionBuilder;
+						collectionKey: string;
+						collectionTableNames: CollectionTableNames;
+					};
+					data: {
+						versionType: DocumentVersionType;
+						relationVersionType: Exclude<DocumentVersionType, "revision">;
+						documents: InternalCollectionDocument[];
+					};
+				},
+			],
+			InternalCollectionDocument[] | undefined
+		>;
 		beforeDelete: ServiceFn<
 			[
 				{
@@ -142,12 +162,14 @@ export type HookServiceHandlers = {
 export type DocumentBuilderHooks =
 	| LucidHookDocuments<"beforeUpsert">
 	| LucidHookDocuments<"afterUpsert">
+	| LucidHookDocuments<"afterFetch">
 	| LucidHookDocuments<"beforeDelete">
 	| LucidHookDocuments<"afterDelete">;
 
 export type DocumentHooks =
 	| LucidHook<"documents", "beforeUpsert">
 	| LucidHook<"documents", "afterUpsert">
+	| LucidHook<"documents", "afterFetch">
 	| LucidHook<"documents", "beforeDelete">
 	| LucidHook<"documents", "afterDelete">
 	| LucidHook<"documents", "versionPromote">;

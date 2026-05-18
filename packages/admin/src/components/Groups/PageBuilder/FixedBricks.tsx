@@ -10,6 +10,7 @@ interface FixedBricksProps {
 	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
+	relationVersionType?: string;
 }
 
 export const FixedBricks: Component<FixedBricksProps> = (props) => {
@@ -44,6 +45,7 @@ export const FixedBricks: Component<FixedBricksProps> = (props) => {
 						collectionMigrationStatus={props.collectionMigrationStatus}
 						collectionKey={props.collectionKey}
 						documentId={props.documentId}
+						relationVersionType={props.relationVersionType}
 					/>
 				)}
 			</For>
@@ -58,6 +60,7 @@ interface FixedBrickRowProps {
 	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
+	relationVersionType?: string;
 }
 
 const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
@@ -113,6 +116,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					missingFieldColumns: missingFieldColumns(),
 					collectionKey: props.collectionKey,
 					documentId: props.documentId,
+					relationVersionType: props.relationVersionType,
 				}}
 				options={{
 					padding: "24",

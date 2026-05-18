@@ -19,10 +19,12 @@ import {
 	getFilterValues,
 	groupDocumentFilters,
 } from "../../utils/helpers/index.js";
+import executeHooks from "../../utils/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
 import fetchRefData from "../documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../index.js";
+import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
 
 const getMultiple: ServiceFn<
 	[
@@ -98,8 +100,17 @@ const getMultiple: ServiceFn<
 		documentFilters.workflowAssignee,
 	);
 
-	const tableNameRes = await getTableNames(context, data.collectionKey);
+	const [relationVersionTypeRes, tableNameRes] = await Promise.all([
+		resolveRelationVersionType(context, {
+			collectionKey: data.collectionKey,
+			versionType: data.status,
+		}),
+		getTableNames(context, data.collectionKey),
+	]);
+	if (relationVersionTypeRes.error) return relationVersionTypeRes;
 	if (tableNameRes.error) return tableNameRes;
+
+	const relationVersionType = relationVersionTypeRes.data.versionType;
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
@@ -109,7 +120,7 @@ const getMultiple: ServiceFn<
 			brickFilters: brickFilters,
 			collection: collectionRes.data,
 			config: context.config,
-			relationVersionType: data.status !== "revision" ? data.status : "latest",
+			relationVersionType,
 			tables: {
 				versions: tableNameRes.data.version,
 				documentFields: tableNameRes.data.documentFields,
@@ -134,23 +145,54 @@ const getMultiple: ServiceFn<
 
 	const refDataRes = await fetchRefData(context, {
 		values: relationIdRes.data,
-		versionType: data.status !== "revision" ? data.status : "latest",
+		versionType: relationVersionType,
+		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 	});
 	if (refDataRes.error) return refDataRes;
+
+	const documents = documentsFormatter.formatMultiple({
+		documents: documentsRes.data?.[0] || [],
+		collection: collectionRes.data,
+		config: context.config,
+		host: getBaseUrl(context),
+		refData: refDataRes.data,
+		hasFields: true,
+		hasBricks: false,
+		bricksTableSchema: bricksTableSchemaRes.data,
+	});
+
+	const afterFetchRes = await executeHooks(
+		{
+			service: "documents",
+			event: "afterFetch",
+			config: context.config,
+			collectionInstance: collectionRes.data,
+		},
+		{
+			initialData: documents,
+			buildArgs: (currentDocuments) => [
+				context,
+				{
+					meta: {
+						collection: collectionRes.data,
+						collectionKey: data.collectionKey,
+						collectionTableNames: tableNameRes.data,
+					},
+					data: {
+						versionType: data.status,
+						relationVersionType,
+						documents: currentDocuments,
+					},
+				},
+			],
+		},
+	);
+	if (afterFetchRes.error) return afterFetchRes;
 
 	return {
 		error: undefined,
 		data: {
-			data: documentsFormatter.formatMultiple({
-				documents: documentsRes.data?.[0] || [],
-				collection: collectionRes.data,
-				config: context.config,
-				host: getBaseUrl(context),
-				refData: refDataRes.data,
-				hasFields: true,
-				hasBricks: false,
-				bricksTableSchema: bricksTableSchemaRes.data,
-			}),
+			data: afterFetchRes.data,
 			count: formatter.parseCount(documentsRes.data?.[1]?.count),
 		},
 	};
