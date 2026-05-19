@@ -79,12 +79,6 @@ const getRetentionTheme = (
 
 type DocumentAuthor = NonNullable<InternalCollectionDocument["createdBy"]>;
 
-const getAuthorDisplayName = (user: DocumentAuthor) => {
-	if (user.firstName && user.lastName)
-		return `${user.firstName} ${user.lastName}`;
-	return user.firstName || user.username || user.email;
-};
-
 const TimelineDetails: Component<{
 	item: TimelineItem;
 	revisionName: string;
@@ -676,7 +670,7 @@ const AuthorDisplay: Component<{
 		{(user) => (
 			<UserDisplay
 				user={{
-					username: getAuthorDisplayName(user()),
+					username: helpers.formatUserName(user(), "simple") || T()("unknown"),
 					firstName: user().firstName,
 					lastName: user().lastName,
 					profilePicture: user().profilePicture,
