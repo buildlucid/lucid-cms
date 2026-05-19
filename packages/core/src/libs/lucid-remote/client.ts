@@ -27,16 +27,21 @@ type LucidRemoteClient = {
 const clients = new Map<string, LucidRemoteClient>();
 
 /**
- * Builds absolute Lucid remote URLs from the configured remote API domain.
+ * Allows internal tests to point Lucid remote requests at a local service.
+ * Production requests use the default remote domain.
  */
-const getLucidRemoteApiDomain = () =>
-	(
-		process.env.LUCID_REMOTE_API_URL?.trim() ||
-		constants.endpoints.lucidRemoteApiDomain
-	).replace(/\/+$/, "");
+const getLucidRemoteApiDomain = (context: ServiceContext) => {
+	const override = context.env?.LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE;
 
-export const getLucidRemoteUrl = (path: string) =>
-	new URL(path, getLucidRemoteApiDomain()).toString();
+	return (
+		typeof override === "string" && override.trim()
+			? override.trim()
+			: constants.endpoints.lucidRemoteApiDomain
+	).replace(/\/+$/, "");
+};
+
+export const getLucidRemoteUrl = (context: ServiceContext, path: string) =>
+	new URL(path, getLucidRemoteApiDomain(context)).toString();
 
 const getErrorMessage = (error: unknown) =>
 	error instanceof Error ? error.message : "Lucid remote request failed.";
@@ -177,7 +182,7 @@ const createLucidRemoteClient = (props: {
  * and conversion of remote Lucid errors into core service errors.
  */
 export const getLucidRemoteClient = (context: ServiceContext) => {
-	const apiDomain = getLucidRemoteApiDomain();
+	const apiDomain = getLucidRemoteApiDomain(context);
 	const origin = getBaseUrl(context);
 	const cacheKey = `${apiDomain}:${origin}`;
 	const cachedClient = clients.get(cacheKey);
