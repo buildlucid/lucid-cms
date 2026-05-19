@@ -3,6 +3,7 @@ import type { CFConfig, Collection, FieldTypes } from "@types";
 import {
 	FaSolidBarsProgress,
 	FaSolidCalendar,
+	FaSolidUser,
 	FaSolidUserCheck,
 } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, Index } from "solid-js";
@@ -225,6 +226,18 @@ export const DocumentsList: Component<{
 				head={[
 					...getTableHeadColumns(),
 					...workflowHeadColumn(),
+					{
+						label: T()("created_by"),
+						key: "createdBy",
+						icon: <FaSolidUser />,
+						minWidth: 180,
+					},
+					{
+						label: T()("updated_by"),
+						key: "updatedBy",
+						icon: <FaSolidUser />,
+						minWidth: 180,
+					},
 					{
 						label: T()("updated_at"),
 						key: "updatedAt",

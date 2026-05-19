@@ -2,6 +2,7 @@ import { type Component, For, Match, Show, Switch } from "solid-js";
 import { HeaderBar } from "@/components/Groups/PageBuilder";
 import TimelineCardWrapper from "@/components/Groups/PageBuilder/History/TimelineCard";
 import TimelineDetails from "@/components/Groups/PageBuilder/History/TimelineDetails";
+import RestoreRevision from "@/components/Modals/Documents/RestoreRevision";
 import Button from "@/components/Partials/Button";
 import { useHistoryState } from "@/hooks/document/useHistoryState";
 import { useHistoryUIState } from "@/hooks/document/useHistoryUIState";
@@ -100,14 +101,42 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 									revisionName={state.revisionName()}
 									onRevisionNameChange={state.setRevisionName}
 									onRestore={state.handleRestoreRevision}
-									onPromote={state.handlePromoteToEnvironment}
+									restore={{
+										loading: state.restoreRevision.action.isPending,
+										permission: state.canRestoreSelectedItem(),
+									}}
 									collection={state.collection}
 									document={state.document}
+									selectedVersionDocument={state.selectedVersionDocument}
+									selectedVersionDocumentLoading={() =>
+										state.selectedVersionDocumentQuery.isLoading
+									}
+									createdByUser={state.selectedCreatedByUser}
+									retention={state.selectedRetention}
+									releaseOperations={() =>
+										state.releaseOperationsQuery.data?.data ?? []
+									}
+									releaseOperationsLoading={() =>
+										state.releaseOperationsQuery.isLoading
+									}
 								/>
 							)}
 						</Show>
 					</div>
 				</div>
+				<RestoreRevision
+					versionId={() => state.selectedItem()?.id ?? null}
+					state={{
+						open: state.restoreRevisionOpen(),
+						setOpen: state.setRestoreRevisionOpen,
+					}}
+					loading={state.restoreRevision.action.isPending}
+					error={state.restoreRevision.errors()?.message}
+					callbacks={{
+						onConfirm: state.confirmRestoreRevision,
+						onCancel: state.cancelRestoreRevision,
+					}}
+				/>
 			</Match>
 		</Switch>
 	);

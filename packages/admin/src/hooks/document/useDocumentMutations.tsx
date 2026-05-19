@@ -235,16 +235,31 @@ export function useDocumentMutations(props: {
 
 	const restoreRevisionAction = async (versionIdOverride?: number) => {
 		const versionId = versionIdOverride ?? props.versionId();
+		const documentId = props.documentId();
 		if (versionId === undefined) {
 			console.error("No version ID found.");
 			return;
 		}
+		if (documentId === undefined) {
+			console.error("No document ID found.");
+			return;
+		}
 
-		return await restoreRevision.action.mutateAsync({
+		const res = await restoreRevision.action.mutateAsync({
 			collectionKey: props.collectionKey(),
-			id: props.documentId() as number,
+			id: documentId,
 			versionId: versionId,
 		});
+
+		navigate(
+			getDocumentRoute("edit", {
+				collectionKey: props.collectionKey(),
+				documentId,
+				status: "latest",
+			}),
+		);
+
+		return res;
 	};
 
 	const updateWorkflowAction = async (body: {

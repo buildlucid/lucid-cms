@@ -35,6 +35,7 @@ const documentResponseUserSchema = z.object({
 		description: "The username of the user",
 		example: "admin",
 	}),
+	profilePicture: mediaEmbedResponseSchema.nullable(),
 });
 
 const documentResponseVersionSchema = z.object({

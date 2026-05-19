@@ -28,6 +28,7 @@ import type {
 	LucidVersionTableName,
 	Select,
 } from "../db/types.js";
+import type { MediaPosterPropsT } from "../formatters/media.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "./document-workflows.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
@@ -39,12 +40,14 @@ export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	cb_user_first_name?: string | null;
 	cb_user_last_name?: string | null;
 	cb_user_username?: string | null;
+	cb_user_profile_picture?: MediaPosterPropsT[];
 	// Updated by user join
 	ub_user_id?: number | null;
 	ub_user_email?: string | null;
 	ub_user_first_name?: string | null;
 	ub_user_last_name?: string | null;
 	ub_user_username?: string | null;
+	ub_user_profile_picture?: MediaPosterPropsT[];
 	// Target Version
 	version_id?: number | null;
 	version_type?: DocumentVersionType | null;
@@ -96,11 +99,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		cb_user_first_name: z.string().nullable(),
 		cb_user_last_name: z.string().nullable(),
 		cb_user_username: z.string().nullable(),
+		cb_user_profile_picture: z.array(z.any()).optional(),
 		ub_user_id: z.number().nullable(),
 		ub_user_email: z.email().nullable(),
 		ub_user_first_name: z.string().nullable(),
 		ub_user_last_name: z.string().nullable(),
 		ub_user_username: z.string().nullable(),
+		ub_user_profile_picture: z.array(z.any()).optional(),
 	});
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
@@ -375,6 +380,76 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				"ub_user.last_name as ub_user_last_name",
 				"ub_user.username as ub_user_username",
 			])
+			.select((eb) => [
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_media")
+							.select([
+								"lucid_media.id",
+								"lucid_media.key",
+								"lucid_media.type",
+								"lucid_media.mime_type",
+								"lucid_media.file_extension",
+								"lucid_media.file_name",
+								"lucid_media.file_size",
+								"lucid_media.width",
+								"lucid_media.height",
+								"lucid_media.focal_x",
+								"lucid_media.focal_y",
+								"lucid_media.blur_hash",
+								"lucid_media.average_color",
+								"lucid_media.base64",
+								"lucid_media.is_dark",
+								"lucid_media.is_light",
+							])
+							.whereRef(
+								"lucid_media.id",
+								"=",
+								"cb_user.profile_picture_media_id",
+							)
+							.where(
+								"lucid_media.is_deleted",
+								"=",
+								this.dbAdapter.getDefault("boolean", "false"),
+							),
+					)
+					.as("cb_user_profile_picture"),
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_media")
+							.select([
+								"lucid_media.id",
+								"lucid_media.key",
+								"lucid_media.type",
+								"lucid_media.mime_type",
+								"lucid_media.file_extension",
+								"lucid_media.file_name",
+								"lucid_media.file_size",
+								"lucid_media.width",
+								"lucid_media.height",
+								"lucid_media.focal_x",
+								"lucid_media.focal_y",
+								"lucid_media.blur_hash",
+								"lucid_media.average_color",
+								"lucid_media.base64",
+								"lucid_media.is_dark",
+								"lucid_media.is_light",
+							])
+							.whereRef(
+								"lucid_media.id",
+								"=",
+								"ub_user.profile_picture_media_id",
+							)
+							.where(
+								"lucid_media.is_deleted",
+								"=",
+								this.dbAdapter.getDefault("boolean", "false"),
+							),
+					)
+					.as("ub_user_profile_picture"),
+			])
 			.where(`${dynamicConfig.tableName}.id`, "=", props.id);
 
 		const exec = await this.executeQuery(
@@ -633,6 +708,98 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								.as("workflow_assignees"),
 						]),
 				)
+				.leftJoin(
+					"lucid_users as cb_user",
+					"cb_user.id",
+					`${dynamicConfig.tableName}.created_by`,
+				)
+				.leftJoin(
+					"lucid_users as ub_user",
+					"ub_user.id",
+					`${dynamicConfig.tableName}.updated_by`,
+				)
+				.select([
+					"cb_user.id as cb_user_id",
+					"cb_user.email as cb_user_email",
+					"cb_user.first_name as cb_user_first_name",
+					"cb_user.last_name as cb_user_last_name",
+					"cb_user.username as cb_user_username",
+					"ub_user.id as ub_user_id",
+					"ub_user.email as ub_user_email",
+					"ub_user.first_name as ub_user_first_name",
+					"ub_user.last_name as ub_user_last_name",
+					"ub_user.username as ub_user_username",
+				])
+				.select((eb) => [
+					this.dbAdapter
+						.jsonArrayFrom(
+							eb
+								.selectFrom("lucid_media")
+								.select([
+									"lucid_media.id",
+									"lucid_media.key",
+									"lucid_media.type",
+									"lucid_media.mime_type",
+									"lucid_media.file_extension",
+									"lucid_media.file_name",
+									"lucid_media.file_size",
+									"lucid_media.width",
+									"lucid_media.height",
+									"lucid_media.focal_x",
+									"lucid_media.focal_y",
+									"lucid_media.blur_hash",
+									"lucid_media.average_color",
+									"lucid_media.base64",
+									"lucid_media.is_dark",
+									"lucid_media.is_light",
+								])
+								.whereRef(
+									"lucid_media.id",
+									"=",
+									"cb_user.profile_picture_media_id",
+								)
+								.where(
+									"lucid_media.is_deleted",
+									"=",
+									this.dbAdapter.getDefault("boolean", "false"),
+								),
+						)
+						.as("cb_user_profile_picture"),
+					this.dbAdapter
+						.jsonArrayFrom(
+							eb
+								.selectFrom("lucid_media")
+								.select([
+									"lucid_media.id",
+									"lucid_media.key",
+									"lucid_media.type",
+									"lucid_media.mime_type",
+									"lucid_media.file_extension",
+									"lucid_media.file_name",
+									"lucid_media.file_size",
+									"lucid_media.width",
+									"lucid_media.height",
+									"lucid_media.focal_x",
+									"lucid_media.focal_y",
+									"lucid_media.blur_hash",
+									"lucid_media.average_color",
+									"lucid_media.base64",
+									"lucid_media.is_dark",
+									"lucid_media.is_light",
+								])
+								.whereRef(
+									"lucid_media.id",
+									"=",
+									"ub_user.profile_picture_media_id",
+								)
+								.where(
+									"lucid_media.is_deleted",
+									"=",
+									this.dbAdapter.getDefault("boolean", "false"),
+								),
+						)
+						.as("ub_user_profile_picture"),
+				])
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);
 
@@ -643,6 +810,16 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					// @ts-expect-error
 					`${props.tables.versions}.document_id`,
 					`${dynamicConfig.tableName}.id`,
+				)
+				.leftJoin(
+					"lucid_users as cb_user",
+					"cb_user.id",
+					`${dynamicConfig.tableName}.created_by`,
+				)
+				.leftJoin(
+					"lucid_users as ub_user",
+					"ub_user.id",
+					`${dynamicConfig.tableName}.updated_by`,
 				)
 				.select(() =>
 					sql`count(distinct ${sql.ref(`${dynamicConfig.tableName}.id`)})`.as(
@@ -833,6 +1010,98 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				.select([
 					`${props.tables.versions}.id as version_id`,
 					`${props.tables.versions}.type as version_type`,
+				])
+				.leftJoin(
+					"lucid_users as cb_user",
+					"cb_user.id",
+					`${dynamicConfig.tableName}.created_by`,
+				)
+				.leftJoin(
+					"lucid_users as ub_user",
+					"ub_user.id",
+					`${dynamicConfig.tableName}.updated_by`,
+				)
+				.select([
+					"cb_user.id as cb_user_id",
+					"cb_user.email as cb_user_email",
+					"cb_user.first_name as cb_user_first_name",
+					"cb_user.last_name as cb_user_last_name",
+					"cb_user.username as cb_user_username",
+					"ub_user.id as ub_user_id",
+					"ub_user.email as ub_user_email",
+					"ub_user.first_name as ub_user_first_name",
+					"ub_user.last_name as ub_user_last_name",
+					"ub_user.username as ub_user_username",
+				])
+				.select((eb) => [
+					this.dbAdapter
+						.jsonArrayFrom(
+							eb
+								.selectFrom("lucid_media")
+								.select([
+									"lucid_media.id",
+									"lucid_media.key",
+									"lucid_media.type",
+									"lucid_media.mime_type",
+									"lucid_media.file_extension",
+									"lucid_media.file_name",
+									"lucid_media.file_size",
+									"lucid_media.width",
+									"lucid_media.height",
+									"lucid_media.focal_x",
+									"lucid_media.focal_y",
+									"lucid_media.blur_hash",
+									"lucid_media.average_color",
+									"lucid_media.base64",
+									"lucid_media.is_dark",
+									"lucid_media.is_light",
+								])
+								.whereRef(
+									"lucid_media.id",
+									"=",
+									"cb_user.profile_picture_media_id",
+								)
+								.where(
+									"lucid_media.is_deleted",
+									"=",
+									this.dbAdapter.getDefault("boolean", "false"),
+								),
+						)
+						.as("cb_user_profile_picture"),
+					this.dbAdapter
+						.jsonArrayFrom(
+							eb
+								.selectFrom("lucid_media")
+								.select([
+									"lucid_media.id",
+									"lucid_media.key",
+									"lucid_media.type",
+									"lucid_media.mime_type",
+									"lucid_media.file_extension",
+									"lucid_media.file_name",
+									"lucid_media.file_size",
+									"lucid_media.width",
+									"lucid_media.height",
+									"lucid_media.focal_x",
+									"lucid_media.focal_y",
+									"lucid_media.blur_hash",
+									"lucid_media.average_color",
+									"lucid_media.base64",
+									"lucid_media.is_dark",
+									"lucid_media.is_light",
+								])
+								.whereRef(
+									"lucid_media.id",
+									"=",
+									"ub_user.profile_picture_media_id",
+								)
+								.where(
+									"lucid_media.is_deleted",
+									"=",
+									this.dbAdapter.getDefault("boolean", "false"),
+								),
+						)
+						.as("ub_user_profile_picture"),
 				])
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.status);

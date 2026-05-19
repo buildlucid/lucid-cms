@@ -41,6 +41,7 @@ import ReleaseRequestCommentBlock from "./Partials/ReleaseRequestCommentBlock";
 import ReleaseRequestDetailRow from "./Partials/ReleaseRequestDetailRow";
 import SidebarSection from "./Partials/SidebarSection";
 
+type PublishOperationUser = PublishOperation["requestedBy"];
 type DecisionAction = "approve" | "reject" | "cancel";
 
 const getDecisionTitle = (action?: DecisionAction) => {
@@ -81,6 +82,25 @@ const getDecisionConfirm = (action?: DecisionAction) => {
 			return T()("confirm");
 	}
 };
+
+const PublishOperationUserDetailValue: Component<{
+	user: PublishOperationUser;
+}> = (props) => (
+	<Show when={props.user} fallback="-">
+		{(user) => (
+			<UserDisplay
+				user={{
+					username: helpers.formatUserName(user(), "simple") || T()("unknown"),
+					firstName: user().firstName,
+					lastName: user().lastName,
+					profilePicture: user().profilePicture,
+				}}
+				mode="short"
+				size="x-small"
+			/>
+		)}
+	</Show>
+);
 
 export const ReleaseRequestSidebar: Component<{
 	collection: Accessor<Collection | undefined>;
@@ -471,7 +491,9 @@ export const ReleaseRequestSidebar: Component<{
 					<div class="rounded-md border border-border bg-card-base p-3">
 						<dl class="grid gap-2 text-xs">
 							<ReleaseRequestDetailRow label={T()("requested_by")}>
-								{formatPublishOperationUser(request()?.requestedBy ?? null)}
+								<PublishOperationUserDetailValue
+									user={request()?.requestedBy ?? null}
+								/>
 							</ReleaseRequestDetailRow>
 							<Show when={request()?.createdAt}>
 								<ReleaseRequestDetailRow label={T()("requested_at")}>
@@ -480,7 +502,9 @@ export const ReleaseRequestSidebar: Component<{
 							</Show>
 							<Show when={request()?.decidedBy}>
 								<ReleaseRequestDetailRow label={T()("decided_by")}>
-									{formatPublishOperationUser(request()?.decidedBy ?? null)}
+									<PublishOperationUserDetailValue
+										user={request()?.decidedBy ?? null}
+									/>
 								</ReleaseRequestDetailRow>
 							</Show>
 							<Show when={request()?.decidedAt}>

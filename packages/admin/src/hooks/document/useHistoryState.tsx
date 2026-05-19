@@ -1,10 +1,13 @@
-import { useParams } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
 import type { DocumentVersion, InternalCollectionDocument } from "@types";
 import { createEffect, createMemo, createSignal } from "solid-js";
+import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { getDocumentRoute } from "@/utils/route-helpers";
 import useSearchParamsState from "../useSearchParamsState";
 
 const PER_PAGE = 20;
@@ -46,6 +49,7 @@ const getDateGroupKey = (dateStr: string | null): string => {
 
 export function useHistoryState() {
 	const params = useParams();
+	const navigate = useNavigate();
 	const searchParams = useSearchParamsState(
 		{
 			sorts: {
@@ -67,6 +71,7 @@ export function useHistoryState() {
 	const [selectedItem, setSelectedItem] = createSignal<TimelineItem | null>(
 		null,
 	);
+	const [restoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 
 	// ------------------------------------------
 	// Memos
@@ -82,6 +87,21 @@ export function useHistoryState() {
 			searchParams.getSettled()
 		);
 	});
+	const selectedVersion = createMemo(() => {
+		const item = selectedItem();
+		if (!item) return undefined;
+		if (item.type === "latest") return "latest";
+		if (item.type === "revision") return item.id;
+		if (item.type === "environment") return item.version;
+		return undefined;
+	});
+	const selectedReleaseTarget = createMemo(() => {
+		const item = selectedItem();
+		return item?.type === "environment" ? item.version : undefined;
+	});
+	const canReadPublishOperations = createMemo(
+		() => userStore.get.hasPermission([Permissions.DocumentsReview]).all,
+	);
 
 	// ------------------------------------------
 	// Queries
@@ -118,6 +138,36 @@ export function useHistoryState() {
 		},
 		enabled: () => canFetchRevisions(),
 		refetchOnWindowFocus: false,
+	});
+	const selectedVersionDocumentQuery = api.documents.useGetSingle({
+		queryParams: {
+			location: {
+				collectionKey: collectionKey,
+				id: documentId,
+				version: selectedVersion,
+			},
+			include: {
+				bricks: true,
+			},
+		},
+		enabled: () => canFetchRevisions() && selectedVersion() !== undefined,
+		refetchOnWindowFocus: false,
+	});
+	const releaseOperationsQuery = api.publishOperations.useGetMultiple({
+		queryParams: {
+			filters: {
+				collectionKey: collectionKey,
+				documentId: documentId,
+				target: selectedReleaseTarget,
+				status: () => ["pending", "approved"],
+				executionStatus: () => ["awaiting_approval", "scheduled", "executing"],
+			},
+			perPage: 6,
+		},
+		enabled: () =>
+			canFetchRevisions() &&
+			selectedReleaseTarget() !== undefined &&
+			canReadPublishOperations(),
 	});
 
 	// ------------------------------------------
@@ -351,6 +401,111 @@ export function useHistoryState() {
 			items,
 		}));
 	});
+	const selectedCreatedByUser = createMemo(() => {
+		return selectedVersionDocumentQuery.data?.data.createdBy ?? undefined;
+	});
+	const selectedRetention = createMemo((): RetentionInfo => {
+		const item = selectedItem();
+		const retentionDays = collection()?.config.revisionRetentionDays;
+
+		if (!item || item.type !== "revision") {
+			return {
+				state: "protected",
+				label: T()("revision_retention_current_version"),
+				description: T()("revision_retention_current_version_description"),
+			};
+		}
+
+		const referencedBy = Object.entries(document()?.version ?? {})
+			.filter(
+				([key, version]) =>
+					key !== "revision" && version?.promotedFrom === item.id,
+			)
+			.map(([key]) => key);
+
+		if (referencedBy.length > 0) {
+			return {
+				state: "protected",
+				label: T()("revision_retention_protected"),
+				description: T()("revision_retention_protected_description", {
+					versions: referencedBy.join(", "),
+				}),
+			};
+		}
+
+		if (retentionDays === false) {
+			return {
+				state: "retained",
+				label: T()("revision_retention_indefinite"),
+				description: T()("revision_retention_indefinite_description"),
+			};
+		}
+
+		if (retentionDays === undefined || !item.createdAt) {
+			return {
+				state: "unknown",
+				label: T()("revision_retention_unknown"),
+				description: T()("revision_retention_unknown_description"),
+			};
+		}
+
+		const expiresAt = new Date(item.createdAt);
+		expiresAt.setDate(expiresAt.getDate() + retentionDays);
+
+		const millisecondsRemaining = expiresAt.getTime() - Date.now();
+		const daysRemaining = Math.ceil(
+			millisecondsRemaining / (1000 * 60 * 60 * 24),
+		);
+
+		if (daysRemaining <= 0) {
+			return {
+				state: "expired",
+				label: T()("revision_retention_cleanup_eligible"),
+				description: T()("revision_retention_cleanup_eligible_description"),
+				expiresAt: expiresAt.toISOString(),
+				daysRemaining,
+			};
+		}
+
+		if (daysRemaining <= 7) {
+			return {
+				state: "expiring",
+				label: T()("revision_retention_expiring"),
+				description: T()("revision_retention_expiring_description", {
+					count: daysRemaining,
+				}),
+				expiresAt: expiresAt.toISOString(),
+				daysRemaining,
+			};
+		}
+
+		return {
+			state: "retained",
+			label: T()("revision_retention_retained"),
+			description: T()("revision_retention_retained_description", {
+				count: daysRemaining,
+			}),
+			expiresAt: expiresAt.toISOString(),
+			daysRemaining,
+		};
+	});
+	const canRestoreSelectedItem = createMemo(() => {
+		const permission = collection()?.permissions.restore;
+		const item = selectedItem();
+		if (!permission || !item) return false;
+		if (item.type !== "revision") return false;
+		if (document()?.isDeleted) return false;
+		return userStore.get.hasPermission([permission]).all;
+	});
+	const restoreRevision = api.documents.useRestoreRevision({
+		getCollectionName: collectionSingularName,
+		onSuccess: () => {
+			setRestoreRevisionOpen(false);
+			setSelectedItem(null);
+			void documentQuery.refetch();
+			void revisionsQuery.refetch();
+		},
+	});
 
 	const isItemSelected = (item: TimelineItem): boolean => {
 		const selected = selectedItem();
@@ -402,12 +557,29 @@ export function useHistoryState() {
 		setRevisionName("");
 	};
 	const handleRestoreRevision = () => {
-		// TODO: Implement restore revision functionality
-		console.log("Restore revision:", selectedItem());
+		if (!canRestoreSelectedItem()) return;
+		setRestoreRevisionOpen(true);
 	};
-	const handlePromoteToEnvironment = () => {
-		// TODO: Implement promote to environment functionality
-		console.log("Promote to environment:", selectedItem());
+	const confirmRestoreRevision = async (versionId: number) => {
+		const id = documentId();
+		if (!id) return;
+
+		await restoreRevision.action.mutateAsync({
+			collectionKey: collectionKey(),
+			id,
+			versionId,
+		});
+		navigate(
+			getDocumentRoute("edit", {
+				collectionKey: collectionKey(),
+				documentId: id,
+				status: "latest",
+			}),
+		);
+	};
+	const cancelRestoreRevision = () => {
+		setRestoreRevisionOpen(false);
+		restoreRevision.reset();
 	};
 
 	// ------------------------------------------
@@ -415,9 +587,12 @@ export function useHistoryState() {
 	return {
 		collectionQuery,
 		revisionsQuery,
+		selectedVersionDocumentQuery,
+		releaseOperationsQuery,
 		collection,
 		document,
 		documentQuery,
+		selectedVersionDocument: () => selectedVersionDocumentQuery.data?.data,
 		collectionKey,
 		documentId,
 		searchParams,
@@ -434,9 +609,16 @@ export function useHistoryState() {
 		meta,
 		revisionName,
 		selectedItem,
+		selectedCreatedByUser,
+		selectedRetention,
+		canRestoreSelectedItem,
 		handleSelectItem,
 		handleRestoreRevision,
-		handlePromoteToEnvironment,
+		confirmRestoreRevision,
+		cancelRestoreRevision,
+		restoreRevisionOpen,
+		setRestoreRevisionOpen,
+		restoreRevision,
 		isItemSelected,
 		timelineData,
 		setRevisionName,
@@ -465,4 +647,12 @@ export type TimelineItem = {
 export type TimelineGroup = {
 	dateLabel: string;
 	items: TimelineItem[];
+};
+
+export type RetentionInfo = {
+	state: "protected" | "retained" | "expiring" | "expired" | "unknown";
+	label: string;
+	description: string;
+	expiresAt?: string;
+	daysRemaining?: number;
 };

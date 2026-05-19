@@ -9,6 +9,7 @@ import {
 	Show,
 } from "solid-js";
 import DateText from "@/components/Partials/DateText";
+import UserDisplay from "@/components/Partials/UserDisplay";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import SidebarSection from "./Partials/SidebarSection";
@@ -24,6 +25,25 @@ const DetailRow: Component<{
 			{props.children ?? props.value}
 		</dd>
 	</div>
+);
+
+const UserDetailValue: Component<{
+	user: InternalCollectionDocument["createdBy"];
+}> = (props) => (
+	<Show when={props.user} fallback="-">
+		{(user) => (
+			<UserDisplay
+				user={{
+					username: helpers.formatUserName(user(), "simple") || T()("unknown"),
+					firstName: user().firstName,
+					lastName: user().lastName,
+					profilePicture: user().profilePicture,
+				}}
+				mode="short"
+				size="x-small"
+			/>
+		)}
+	</Show>
 );
 
 export const DocumentDetails: Component<{
@@ -63,17 +83,7 @@ export const DocumentDetails: Component<{
 					: (document?.status ?? T()("unsaved")),
 				show: true,
 			},
-			{
-				label: T()("created_by"),
-				value: helpers.formatUserName(document?.createdBy, "simple") || "-",
-				show: document !== undefined,
-			},
-			{
-				label: T()("updated_by"),
-				value: helpers.formatUserName(document?.updatedBy, "simple") || "-",
-				show: document !== undefined,
-			},
-		];
+		].filter((detail) => detail.show);
 	});
 
 	// ----------------------------------
@@ -96,11 +106,19 @@ export const DocumentDetails: Component<{
 							<DateText date={props.document()?.updatedAt} class="text-xs" />
 						</DetailRow>
 					</Show>
-					<For each={details().filter((detail) => detail.show)}>
+					<For each={details()}>
 						{(detail) => (
 							<DetailRow label={detail.label} value={detail.value} />
 						)}
 					</For>
+					<Show when={props.document() !== undefined}>
+						<DetailRow label={T()("created_by")}>
+							<UserDetailValue user={props.document()?.createdBy ?? null} />
+						</DetailRow>
+						<DetailRow label={T()("updated_by")}>
+							<UserDetailValue user={props.document()?.updatedBy ?? null} />
+						</DetailRow>
+					</Show>
 				</dl>
 			</div>
 		</SidebarSection>

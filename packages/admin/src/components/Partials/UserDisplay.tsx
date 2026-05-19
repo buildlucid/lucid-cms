@@ -33,9 +33,9 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 		>
 			<span
 				class={classNames(
-					"rounded-full flex bg-primary-muted-bg text-primary-base justify-center items-center font-bold overflow-hidden",
+					"rounded-full flex bg-input-base text-title justify-center items-center font-bold overflow-hidden",
 					{
-						"border border-primary-muted-border": !hasProfilePicture(),
+						"border border-border": !hasProfilePicture(),
 						"h-16 w-16 min-w-16 text-sm":
 							props.mode === "icon" && props.size === "large",
 						"h-10 w-10 min-w-10 text-[10px]":

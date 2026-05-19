@@ -62,6 +62,7 @@ type DocumentAuthor = {
 	firstName: string | null;
 	lastName: string | null;
 	username: string | null;
+	profilePicture: ProfilePicture | null;
 } | null;
 
 type DocumentVersionSummary = {
@@ -519,6 +520,7 @@ export interface Collection {
 		displayInListing: string[];
 		autoSave: boolean;
 		scheduling: boolean;
+		revisionRetentionDays: number | false;
 		review?: {
 			requiredFor: string[];
 			allowSelfApproval: boolean;

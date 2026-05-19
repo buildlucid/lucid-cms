@@ -65,6 +65,7 @@ const formatSingle = (props: {
 			displayInListing: props.collection.displayInListing,
 			autoSave: collectionData.config.autoSave,
 			scheduling: collectionData.config.scheduling,
+			revisionRetentionDays: collectionData.config.revisionRetentionDays,
 			review: collectionData.config.review,
 			workflow: collectionData.config.workflow,
 			environments: collectionData.config.environments.map((environment) => ({

@@ -7,6 +7,7 @@ import type {
 import {
 	FaSolidBarsProgress,
 	FaSolidCalendar,
+	FaSolidUser,
 	FaSolidUserCheck,
 } from "solid-icons/fa";
 import {
@@ -467,6 +468,18 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						},
 						...getTableHeadColumns(),
 						...workflowHeadColumn(),
+						{
+							label: T()("created_by"),
+							key: "createdBy",
+							icon: <FaSolidUser />,
+							minWidth: 180,
+						},
+						{
+							label: T()("updated_by"),
+							key: "updatedBy",
+							icon: <FaSolidUser />,
+							minWidth: 180,
+						},
 						{
 							label: T()("updated_at"),
 							key: "updated_at",

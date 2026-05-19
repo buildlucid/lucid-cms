@@ -72,6 +72,11 @@ const collectionResponseSchema = z.object({
 			description: "Whether the collection has release scheduling enabled",
 			example: false,
 		}),
+		revisionRetentionDays: z.union([z.number(), z.literal(false)]).meta({
+			description:
+				"Number of days to retain unprotected revisions, or false to retain indefinitely",
+			example: 30,
+		}),
 		locked: z.boolean().meta({
 			description: "Whether the collection structure is locked from editing",
 			example: false,

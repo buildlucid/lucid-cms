@@ -10,6 +10,7 @@ export interface PillProps {
 		| "yellow"
 		| "green"
 		| "blue"
+		| "info-opaque"
 		| "purple"
 		| "error-opaque"
 		| "warning"
@@ -27,7 +28,7 @@ const Pill: Component<PillProps> = (props) => {
 	return (
 		<span
 			class={classNames(
-				"rounded-full px-2.5 py-0.5 text-xs font-medium inline-flex whitespace-nowrap",
+				"inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium leading-4 whitespace-nowrap",
 				props.class,
 				{
 					"bg-primary-base text-primary-contrast": props.theme === "primary",
@@ -41,6 +42,8 @@ const Pill: Component<PillProps> = (props) => {
 						props.theme === "green",
 					"bg-workflow-blue-bg border border-workflow-blue-border text-workflow-blue-text":
 						props.theme === "blue",
+					"bg-info-base/10 border border-info-base/20 text-info-base":
+						props.theme === "info-opaque",
 					"bg-workflow-purple-bg border border-workflow-purple-border text-workflow-purple-text":
 						props.theme === "purple",
 					"bg-error-base/10 border border-error-base/20 text-error-base":

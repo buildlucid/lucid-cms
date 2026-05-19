@@ -23,7 +23,9 @@ import formatter, {
 	documentBricksFormatter,
 	documentFieldsFormatter,
 	documentWorkflowsFormatter,
+	mediaFormatter,
 } from "./index.js";
+import type { MediaPosterPropsT } from "./media.js";
 
 const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];
@@ -95,6 +97,30 @@ const formatMultiple = (props: {
 	});
 };
 
+const formatDocumentAuthor = (props: {
+	id?: number | null;
+	email?: string | null;
+	firstName?: string | null;
+	lastName?: string | null;
+	username?: string | null;
+	profilePicture?: MediaPosterPropsT[];
+	host: string;
+}): InternalCollectionDocument["createdBy"] => {
+	if (!props.id) return null;
+
+	return {
+		id: props.id,
+		email: props.email ?? null,
+		firstName: props.firstName ?? null,
+		lastName: props.lastName ?? null,
+		username: props.username ?? null,
+		profilePicture: mediaFormatter.formatEmbed({
+			poster: props.profilePicture?.[0],
+			host: props.host,
+		}),
+	};
+};
+
 const formatSingle = (props: {
 	document: DocumentQueryResponse;
 	collection: CollectionBuilder;
@@ -145,24 +171,24 @@ const formatSingle = (props: {
 						stageKey: props.document.workflow_stage_key,
 					})),
 		isDeleted: formatter.formatBoolean(props.document.is_deleted),
-		createdBy: props.document.cb_user_id
-			? {
-					id: props.document.cb_user_id,
-					email: props.document.cb_user_email ?? null,
-					firstName: props.document.cb_user_first_name ?? null,
-					lastName: props.document.cb_user_last_name ?? null,
-					username: props.document.cb_user_username ?? null,
-				}
-			: null,
-		updatedBy: props.document.ub_user_id
-			? {
-					id: props.document.ub_user_id,
-					email: props.document.ub_user_email ?? null,
-					firstName: props.document.ub_user_first_name ?? null,
-					lastName: props.document.ub_user_last_name ?? null,
-					username: props.document.ub_user_username ?? null,
-				}
-			: null,
+		createdBy: formatDocumentAuthor({
+			id: props.document.cb_user_id,
+			email: props.document.cb_user_email,
+			firstName: props.document.cb_user_first_name,
+			lastName: props.document.cb_user_last_name,
+			username: props.document.cb_user_username,
+			profilePicture: props.document.cb_user_profile_picture,
+			host: props.host,
+		}),
+		updatedBy: formatDocumentAuthor({
+			id: props.document.ub_user_id,
+			email: props.document.ub_user_email,
+			firstName: props.document.ub_user_first_name,
+			lastName: props.document.ub_user_last_name,
+			username: props.document.ub_user_username,
+			profilePicture: props.document.ub_user_profile_picture,
+			host: props.host,
+		}),
 		createdAt: formatter.formatDate(props.document.created_at),
 		updatedAt: formatter.formatDate(props.document.updated_at),
 	} satisfies InternalCollectionDocument;

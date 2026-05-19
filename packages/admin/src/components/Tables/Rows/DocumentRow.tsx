@@ -9,6 +9,7 @@ import { Tr } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
 import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import DateCol from "@/components/Tables/Columns/DateCol";
+import DocumentAuthorCol from "@/components/Tables/Columns/DocumentAuthorCol";
 import DocumentDynamicColumns from "@/components/Tables/Columns/DocumentDynamicColumns";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import WorkflowAssigneeCol from "@/components/Tables/Columns/WorkflowAssigneeCol";
@@ -35,6 +36,13 @@ interface DocumentRowProps extends TableRowProps {
 }
 
 const DocumentRow: Component<DocumentRowProps> = (props) => {
+	// ----------------------------------
+	// Memos
+	const includeOffset = () => (props.selection ? 1 : 0);
+	const workflowOffset = () => (props.collection.config.workflow ? 2 : 0);
+	const authorStartIndex = () =>
+		includeOffset() + props.fieldInclude.length + workflowOffset();
+
 	// ----------------------------------
 	// Render
 	return (
@@ -69,7 +77,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 							field={field}
 							document={props.document}
 							include={props.include}
-							index={i()}
+							index={includeOffset() + i()}
 							collectionTranslations={props.collection.config.translations}
 						/>
 					);
@@ -80,22 +88,35 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 					document={props.document}
 					collection={props.collection}
 					include={props.include}
-					index={props.fieldInclude.length}
+					index={includeOffset() + props.fieldInclude.length}
 				/>
 				<WorkflowAssigneeCol
 					document={props.document}
 					include={props.include}
-					index={props.fieldInclude.length + 1}
+					index={includeOffset() + props.fieldInclude.length + 1}
 				/>
 			</Show>
+			<DocumentAuthorCol
+				user={props.document.createdBy}
+				options={{
+					include: props.include[authorStartIndex()],
+					padding: props.options?.padding,
+					minWidth: 180,
+				}}
+			/>
+			<DocumentAuthorCol
+				user={props.document.updatedBy}
+				options={{
+					include: props.include[authorStartIndex() + 1],
+					padding: props.options?.padding,
+					minWidth: 180,
+				}}
+			/>
 			<DateCol
 				date={props.document.updatedAt}
 				options={{
-					include:
-						props?.include[
-							props.fieldInclude.length +
-								(props.collection.config.workflow ? 2 : 0)
-						],
+					include: props?.include[authorStartIndex() + 2],
+					padding: props.options?.padding,
 				}}
 			/>
 		</Tr>
