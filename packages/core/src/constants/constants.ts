@@ -177,7 +177,7 @@ export default Object.freeze({
 		statusRecheckIntervalSeconds: 21600, //  6 hours
 	},
 	endpoints: {
-		licenseVerify: "https://api.lucidjs.build/v1/cms-license/verify",
+		lucidRemoteApiDomain: "https://api.lucidcms.io",
 	},
 	config: {
 		filename: "lucid.config",

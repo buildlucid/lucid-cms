@@ -1,36 +1,10 @@
-import packageJson from "../../../package.json" with { type: "json" };
-import constants from "../../constants/constants.js";
 import formatter, { licenseFormatter } from "../../libs/formatters/index.js";
+import { verifyCmsLicense } from "../../libs/lucid-remote/services/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import T from "../../translations/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
-import { getBaseUrl } from "../../utils/helpers/index.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-
-type VerifyAPIError = {
-	status: number;
-	code:
-		| "VALIDATION_ERROR"
-		| "INTERNAL_SERVER_ERROR"
-		| "UNAUTHORIZED"
-		| "FORBIDDEN"
-		| "NOT_FOUND"
-		| "CONFLICT"
-		| "BAD_REQUEST";
-	message: string;
-	details?: Record<string, unknown>;
-};
-
-type VerifyAPISuccess = {
-	data: {
-		valid: boolean;
-		message?: string;
-		ai?: {
-			enabled?: boolean;
-		};
-	};
-};
 
 type LicenseSnapshot = {
 	valid: boolean;
@@ -178,49 +152,31 @@ const verifyLicense: ServiceFn<
 
 	let snapshot: LicenseSnapshot;
 
-	try {
-		const baseUrl = getBaseUrl(context);
-		const res = await fetch(constants.endpoints.licenseVerify, {
-			method: "POST",
-			headers: {
-				"User-Agent": `LucidCMS/${packageJson.version}`,
-				"Content-Type": "application/json",
-				Origin: baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`,
-			},
-			body: JSON.stringify({
-				licenseKey: key,
-			}),
-		});
-		const json = (await res.json()) as VerifyAPISuccess | VerifyAPIError;
+	const verifyRes = await verifyCmsLicense(context, {
+		licenseKey: key,
+	});
 
-		if (!res.ok || (json as VerifyAPIError).code) {
-			const err = json as VerifyAPIError;
-			snapshot =
-				res.status >= 500
-					? {
-							...existingSnapshot,
-							errorMessage: err.message || T("license_verification_failed"),
-						}
-					: {
-							valid: false,
-							aiEnabled: false,
-							errorMessage: err.message || T("license_verification_failed"),
-						};
-		} else {
-			const ok = json as VerifyAPISuccess;
-			const valid = !!ok.data?.valid;
-			snapshot = {
-				valid,
-				aiEnabled: valid ? !!ok.data.ai?.enabled : false,
-				errorMessage:
-					ok.data.message || (valid ? null : T("license_is_invalid")),
-			};
-		}
-	} catch (e) {
+	if (verifyRes.error) {
+		snapshot =
+			(verifyRes.error.status ?? 500) >= 500
+				? {
+						...existingSnapshot,
+						errorMessage:
+							verifyRes.error.message || T("license_verification_failed"),
+					}
+				: {
+						valid: false,
+						aiEnabled: false,
+						errorMessage:
+							verifyRes.error.message || T("license_verification_failed"),
+					};
+	} else {
+		const ok = verifyRes.data.json.data;
+		const valid = !!ok.valid;
 		snapshot = {
-			...existingSnapshot,
-			errorMessage:
-				e instanceof Error ? e.message : T("unknown_verification_error"),
+			valid,
+			aiEnabled: valid ? !!ok.ai?.enabled : false,
+			errorMessage: ok.message || (valid ? null : T("license_is_invalid")),
 		};
 	}
 
