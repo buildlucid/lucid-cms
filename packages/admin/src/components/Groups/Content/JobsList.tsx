@@ -2,7 +2,7 @@ import { FaSolidCalendar, FaSolidListOl, FaSolidT } from "solid-icons/fa";
 import { type Component, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
-import { Table } from "@/components/Groups/Table";
+import { Table } from "@/components/Groups/Table/Table";
 import ViewJobPanel from "@/components/Panels/Job/ViewJobPanel";
 import JobRow from "@/components/Tables/Rows/JobRow";
 import useRowTarget from "@/hooks/useRowTarget";

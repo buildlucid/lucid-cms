@@ -9,7 +9,7 @@ import {
 import { type Accessor, type Component, createMemo, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
-import { Table } from "@/components/Groups/Table";
+import { Table } from "@/components/Groups/Table/Table";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import DeleteDocumentPermanently from "@/components/Modals/Documents/DeleteDocumentPermanently";
 import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";

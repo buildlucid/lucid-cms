@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import type { Component } from "solid-js";
-import { Td } from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table/Td";
 
 interface TextColProps {
 	text?: string | number | null;

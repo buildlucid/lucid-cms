@@ -1,7 +1,13 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
-import { type Component, createMemo, createSignal, Show } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	type JSXElement,
+	Show,
+} from "solid-js";
 import {
 	DescribedBy,
 	ErrorMessage,
@@ -27,6 +33,8 @@ export const Input: Component<{
 	onKeyUp?: (_e: KeyboardEvent) => void;
 	autoComplete?: string;
 	required?: boolean;
+	minLength?: number;
+	maxLength?: number;
 	disabled?: boolean;
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
@@ -34,6 +42,7 @@ export const Input: Component<{
 	noMargin?: boolean;
 	hideOptionalText?: boolean;
 	fieldColumnIsMissing?: boolean;
+	rightAction?: JSXElement;
 }> = (props) => {
 	const [inputFocus, setInputFocus] = createSignal(false);
 	const [passwordVisible, setPasswordVisible] = createSignal(false);
@@ -49,7 +58,7 @@ export const Input: Component<{
 	// Render
 	return (
 		<div
-			class={classnames("w-full relative", {
+			class={classnames("group w-full relative", {
 				"mb-3 last:mb-0": props.noMargin !== true,
 			})}
 		>
@@ -64,57 +73,61 @@ export const Input: Component<{
 				hideOptionalText={props.hideOptionalText}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 			/>
-			<input
-				class={classnames(
-					"w-full focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
-					{
-						"pr-[32px]": props.type === "password",
-					},
-				)}
-				onKeyDown={(e) => {
-					e.stopPropagation();
-				}}
-				id={props.id}
-				data-focus-key={props.focusKey}
-				name={props.name}
-				type={inputType()}
-				value={props.value}
-				onInput={(e) => props.onChange(e.currentTarget.value)}
-				placeholder={props.copy?.placeholder}
-				aria-describedby={
-					props.copy?.describedBy ? `${props.id}-description` : undefined
-				}
-				autocomplete={props.autoComplete}
-				autofocus={props.autoFoucs}
-				required={props.required}
-				disabled={props.disabled}
-				onFocus={() => setInputFocus(true)}
-				onKeyUp={(e) => props.onKeyUp?.(e)}
-				onBlur={() => {
-					setInputFocus(false);
-					props.onBlur?.();
-				}}
-			/>
-			{/* Show Password */}
-			<Show when={props.type === "password"}>
-				<button
-					type="button"
-					class={
-						"absolute right-2.5 bottom-2.5 text-primary-hover hover:text-primary-base duration-200 transition-colors"
-					}
-					onClick={() => {
-						setPasswordVisible(!passwordVisible());
+			<div class="relative">
+				<input
+					class={classnames(
+						"w-full focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
+						{
+							"pr-8": props.type === "password" || props.rightAction,
+						},
+					)}
+					onKeyDown={(e) => {
+						e.stopPropagation();
 					}}
-					tabIndex={-1}
-				>
-					<Show when={passwordVisible()}>
-						<FaSolidEyeSlash size={18} class="text-unfocused" />
-					</Show>
-					<Show when={!passwordVisible()}>
-						<FaSolidEye size={18} class="text-unfocused" />
-					</Show>
-				</button>
-			</Show>
+					id={props.id}
+					data-focus-key={props.focusKey}
+					name={props.name}
+					type={inputType()}
+					value={props.value}
+					onInput={(e) => props.onChange(e.currentTarget.value)}
+					placeholder={props.copy?.placeholder}
+					aria-describedby={
+						props.copy?.describedBy ? `${props.id}-description` : undefined
+					}
+					autocomplete={props.autoComplete}
+					autofocus={props.autoFoucs}
+					required={props.required}
+					minlength={props.minLength}
+					maxlength={props.maxLength}
+					disabled={props.disabled}
+					onFocus={() => setInputFocus(true)}
+					onKeyUp={(e) => props.onKeyUp?.(e)}
+					onBlur={() => {
+						setInputFocus(false);
+						props.onBlur?.();
+					}}
+				/>
+				<Show when={props.rightAction}>{props.rightAction}</Show>
+				<Show when={props.type === "password"}>
+					<button
+						type="button"
+						class={
+							"absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary-base duration-200 transition-colors"
+						}
+						onClick={() => {
+							setPasswordVisible(!passwordVisible());
+						}}
+						tabIndex={-1}
+					>
+						<Show when={passwordVisible()}>
+							<FaSolidEyeSlash size={18} class="text-unfocused" />
+						</Show>
+						<Show when={!passwordVisible()}>
+							<FaSolidEye size={18} class="text-unfocused" />
+						</Show>
+					</button>
+				</Show>
+			</div>
 			<Tooltip copy={props.copy?.tooltip} theme={"basic"} />
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />

@@ -1,6 +1,6 @@
 import type { Job } from "@types";
 import type { Component } from "solid-js";
-import { Tr } from "@/components/Groups/Table";
+import { Tr } from "@/components/Groups/Table/Tr";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
 import TextCol from "@/components/Tables/Columns/TextCol";

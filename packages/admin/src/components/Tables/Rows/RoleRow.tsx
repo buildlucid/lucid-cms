@@ -1,6 +1,6 @@
 import type { Role } from "@types";
 import { type Component, createMemo } from "solid-js";
-import { Tr } from "@/components/Groups/Table";
+import { Tr } from "@/components/Groups/Table/Tr";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";

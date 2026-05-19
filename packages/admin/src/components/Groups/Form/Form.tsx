@@ -28,8 +28,9 @@ export const Form: Component<{
 	};
 	options?: {
 		buttonFullWidth?: boolean;
-		buttonSize?: "large";
+		buttonSize?: "small" | "medium" | "large";
 		disableErrorMessage?: boolean;
+		errorPlacement?: "above" | "inline";
 		hideSubmitWhenDisabled?: boolean;
 	};
 	permission?: boolean;
@@ -42,6 +43,13 @@ export const Form: Component<{
 	const showSubmitButton = createMemo(() => {
 		if (props.options?.hideSubmitWhenDisabled !== true) return true;
 		return !props.state.isDisabled;
+	});
+	const errorMessage = createMemo(() => {
+		if (props.options?.disableErrorMessage === true) return undefined;
+		return props.state.errors?.message;
+	});
+	const showInlineError = createMemo(() => {
+		return props.options?.errorPlacement === "inline";
 	});
 
 	// ----------------------------------------
@@ -66,23 +74,12 @@ export const Form: Component<{
 					}}
 				>
 					{props.children}
-					<Show
-						when={
-							showSubmitButton() ||
-							props.submitRow ||
-							props.state.errors?.message
-						}
-					>
+					<Show when={showSubmitButton() || props.submitRow || errorMessage()}>
 						<div class="mt-4 w-full">
-							<Show
-								when={
-									props.state.errors?.message &&
-									props.options?.disableErrorMessage !== true
-								}
-							>
+							<Show when={errorMessage() && !showInlineError()}>
 								<ErrorMessage
 									theme="basic"
-									message={props.state.errors?.message}
+									message={errorMessage()}
 									classes="mb-4"
 								/>
 							</Show>
@@ -102,6 +99,13 @@ export const Form: Component<{
 									>
 										{props.content.submit}
 									</Button>
+								</Show>
+								<Show when={errorMessage() && showInlineError()}>
+									<ErrorMessage
+										theme="inline"
+										message={errorMessage()}
+										classes="min-w-0 flex-1"
+									/>
 								</Show>
 								<Show when={props.submitRow}>{props.submitRow}</Show>
 							</div>

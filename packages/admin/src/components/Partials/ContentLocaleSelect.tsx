@@ -1,5 +1,5 @@
 import { type Component, createMemo, Match, Switch } from "solid-js";
-import { Select } from "@/components/Groups/Form";
+import { Select } from "@/components/Groups/Form/Select";
 import useKeyboardShortcuts, {
 	inModal,
 	shortcutText,

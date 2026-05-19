@@ -99,6 +99,13 @@ const cronJobsMap = () =>
 			transaction: false,
 			schedule: "scheduledPublishing",
 		},
+		"verify-license": {
+			fn: cronServices.verifyLicense,
+			label: "Verify license",
+			error: T("license_verification_failed"),
+			transaction: true,
+			schedule: "maintenance",
+		},
 	}) as const satisfies Record<string, CronJobDefinition>;
 
 export type CronJobKey = keyof ReturnType<typeof cronJobsMap>;

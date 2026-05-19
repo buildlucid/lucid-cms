@@ -1,5 +1,5 @@
 import { type Component, Match, Switch } from "solid-js";
-import { Td } from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table/Td";
 import ActionDropdown, {
 	type ActionDropdownProps,
 } from "@/components/Partials/ActionDropdown";

@@ -1,14 +1,14 @@
 import type { Config } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
+import { createLicenseKeyDisplay } from "../../utils/helpers/license-key-display.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
-import { licenseFormatter } from "./index.js";
 
 interface SettingsPropsT {
 	mediaStorageUsed: number;
 	processedImageCount: number;
-	licenseKeyLast4: string | null;
+	licenseKey: string | null;
 	mediaAdapterEnabled: boolean;
 	mediaAdapterKey: string | null;
 	emailAdapterKey: string;
@@ -66,9 +66,7 @@ const formatSingle = (props: {
 
 	if (includeSet.has("license")) {
 		response.license = {
-			key: licenseFormatter.createLicenseKeyFromLast4(
-				props.settings.licenseKeyLast4,
-			),
+			key: createLicenseKeyDisplay(props.settings.licenseKey),
 		};
 	}
 

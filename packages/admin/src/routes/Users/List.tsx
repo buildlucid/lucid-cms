@@ -3,7 +3,7 @@ import { type Component, createSignal } from "solid-js";
 import { UserList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
-import { QueryRow } from "@/components/Groups/Query";
+import { QueryRow } from "@/components/Groups/Query/Row";
 import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
 import { Permissions } from "@/constants/permissions";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";

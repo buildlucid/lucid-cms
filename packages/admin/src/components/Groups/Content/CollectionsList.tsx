@@ -53,7 +53,7 @@ export const CollectionsList: Component<{
 				}}
 			>
 				<For each={collections.data?.data}>
-					{(item) => CollectionCard({ collection: item })}
+					{(item) => <CollectionCard collection={item} />}
 				</For>
 			</Grid>
 		</DynamicContent>

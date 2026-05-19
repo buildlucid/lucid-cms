@@ -6,6 +6,7 @@ import {
 	FaSolidBoxesStacked,
 	FaSolidDesktop,
 	FaSolidEnvelope,
+	FaSolidGear,
 	FaSolidHouse,
 	FaSolidKey,
 	FaSolidMoneyCheck,
@@ -34,6 +35,7 @@ interface IconLinkFullProps {
 		| "queue"
 		| "client-integrations"
 		| "license"
+		| "settings"
 		| "release-requests";
 	active?: boolean;
 	permission?: boolean;
@@ -85,6 +87,9 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 				<Match when={props.icon === "license"}>
 					<FaSolidKey class={iconClasses} />
 				</Match>
+				<Match when={props.icon === "settings"}>
+					<FaSolidGear class={iconClasses} />
+				</Match>
 				<Match when={props.icon === "release-requests"}>
 					<FaSolidSquareArrowUpRight class={iconClasses} />
 				</Match>
@@ -105,7 +110,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 							class={classNames(
 								"h-8 w-full text-title flex items-center px-2 rounded-md bg-sidebar-base fill-title hover:bg-card-hover transition-colors duration-200 ease-in-out",
 								{
-									"bg-secondary-base text-secondary-contrast fill-secondary-base-contrast":
+									"bg-secondary-base! text-secondary-contrast! fill-secondary-base-contrast!":
 										props.active,
 									"animate-pulse pointer-events-none": props.loading,
 								},

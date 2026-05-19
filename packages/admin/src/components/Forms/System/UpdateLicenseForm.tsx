@@ -1,6 +1,6 @@
-import { type Component, createMemo, createSignal } from "solid-js";
+import { FaSolidXmark } from "solid-icons/fa";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 import { Form, Input } from "@/components/Groups/Form";
-import Button from "@/components/Partials/Button";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
@@ -42,8 +42,8 @@ const UpdateLicenseForm: Component<{
 	const submitIsDisabled = createMemo(() => {
 		return !updateData().changed && licenseKey().length === 0;
 	});
-	const clearIsDisabled = createMemo(() => {
-		return props.licenseKey.length === 0;
+	const showClearAction = createMemo(() => {
+		return props.licenseKey.length > 0 || licenseKey().length > 0;
 	});
 
 	// ----------------------------------------
@@ -58,25 +58,15 @@ const UpdateLicenseForm: Component<{
 			content={{
 				submit: T()("save"),
 			}}
+			options={{
+				buttonSize: "medium",
+				errorPlacement: "inline",
+				hideSubmitWhenDisabled: true,
+			}}
 			permission={hasPermission()}
 			onSubmit={() => {
 				updateLicense.action.mutate({ licenseKey: licenseKey() || null });
 			}}
-			submitRow={
-				<Button
-					type="button"
-					theme="danger-outline"
-					size="medium"
-					onClick={() => {
-						setLicenseKey("");
-						updateLicense.action.mutate({ licenseKey: null });
-					}}
-					permission={hasPermission()}
-					disabled={clearIsDisabled()}
-				>
-					{T()("clear")}
-				</Button>
-			}
 		>
 			<Input
 				id="licenseKey"
@@ -91,7 +81,29 @@ const UpdateLicenseForm: Component<{
 				errors={getBodyError("licenseKey", updateLicense.errors)}
 				hideOptionalText={true}
 				noMargin={true}
-				disabled={!clearIsDisabled()}
+				minLength={8}
+				maxLength={256}
+				rightAction={
+					<Show when={showClearAction()}>
+						<button
+							type="button"
+							class="absolute right-2.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-icon-fade opacity-0 transition-[opacity,color,background-color] duration-200 hover:bg-error-base/10 hover:text-error-base focus:opacity-100 focus-visible:ring-1 focus-visible:ring-primary-base group-hover:opacity-100"
+							aria-label={T()("clear")}
+							title={T()("clear")}
+							onClick={() => {
+								if (licenseKey().length > 0) {
+									setLicenseKey("");
+									return;
+								}
+
+								updateLicense.action.mutate({ licenseKey: null });
+							}}
+							disabled={updateLicense.action.isPending}
+						>
+							<FaSolidXmark class="size-3" />
+						</button>
+					</Show>
+				}
 			/>
 		</Form>
 	);

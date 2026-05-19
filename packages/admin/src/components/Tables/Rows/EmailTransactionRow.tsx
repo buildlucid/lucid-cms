@@ -1,7 +1,7 @@
 import type { Email, EmailDeliveryStatus } from "@types";
 import type { Component } from "solid-js";
-import { Tr } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
+import { Tr } from "@/components/Groups/Table/Tr";
 import type { PillProps } from "@/components/Partials/Pill";
 import PillCol from "@/components/Tables/Columns/PillCol";
 import TextCol from "@/components/Tables/Columns/TextCol";

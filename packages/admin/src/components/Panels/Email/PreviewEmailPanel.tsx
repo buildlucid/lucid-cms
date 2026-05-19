@@ -22,7 +22,7 @@ import {
 	Suspense,
 } from "solid-js";
 import { Panel } from "@/components/Groups/Panel";
-import { Table } from "@/components/Groups/Table";
+import { Table } from "@/components/Groups/Table/Table";
 import DetailsList from "@/components/Partials/DetailsList";
 import PanelTabs from "@/components/Partials/PanelTabs";
 import Pill from "@/components/Partials/Pill";

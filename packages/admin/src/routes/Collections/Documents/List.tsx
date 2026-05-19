@@ -10,7 +10,7 @@ import Alert from "@/components/Blocks/Alert";
 import { DocumentsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
-import { QueryRow } from "@/components/Groups/Query";
+import { QueryRow } from "@/components/Groups/Query/Row";
 import useSearchParamsLocation, {
 	type FilterSchema,
 } from "@/hooks/useSearchParamsLocation";

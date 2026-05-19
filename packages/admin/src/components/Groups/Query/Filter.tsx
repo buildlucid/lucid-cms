@@ -10,7 +10,9 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { Input, Select, SelectMultiple } from "@/components/Groups/Form";
+import { Input } from "@/components/Groups/Form/Input";
+import { Select } from "@/components/Groups/Form/Select";
+import { SelectMultiple } from "@/components/Groups/Form/SelectMultiple";
 import Button from "@/components/Partials/Button";
 import DropdownContent from "@/components/Partials/DropdownContent";
 import UserSelectOption, {

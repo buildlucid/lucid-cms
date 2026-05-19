@@ -1,3 +1,4 @@
+import { licenseFormatter } from "../../libs/formatters/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import { encrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -14,12 +15,12 @@ const updateLicense: ServiceFn<
 	const Options = new OptionsRepository(context.db.client, context.config.db);
 
 	const plain = data.licenseKey?.trim() || null;
-	const last4 = plain ? plain.slice(-4) : null;
+	const display = licenseFormatter.createLicenseKeyDisplay(plain);
 	const encrypted = plain
 		? encrypt(plain, context.config.secrets.encryption)
 		: null;
 
-	const [keyRes, last4Res] = await Promise.all([
+	const [keyRes, displayRes] = await Promise.all([
 		Options.upsertSingle({
 			data: {
 				name: "license_key",
@@ -28,13 +29,13 @@ const updateLicense: ServiceFn<
 		}),
 		Options.upsertSingle({
 			data: {
-				name: "license_key_last4",
-				value_text: last4,
+				name: "license_key_display",
+				value_text: display,
 			},
 		}),
 	]);
 	if (keyRes.error) return keyRes;
-	if (last4Res.error) return last4Res;
+	if (displayRes.error) return displayRes;
 
 	const verifyRes = await licenseServices.verifyLicense(context);
 	if (verifyRes.error) return verifyRes;

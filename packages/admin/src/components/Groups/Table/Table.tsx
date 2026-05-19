@@ -9,10 +9,12 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { ColumnToggle, SelectAction, Th } from "@/components/Groups/Table";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import LoadingRow from "@/components/Tables/Rows/LoadingRow";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import { ColumnToggle } from "./ColumnToggle";
+import { SelectAction } from "./SelectAction";
+import { Th } from "./Th";
 
 export type TableTheme = "primary" | "secondary";
 

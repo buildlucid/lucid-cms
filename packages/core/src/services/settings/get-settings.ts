@@ -27,7 +27,11 @@ const getSettings: ServiceFn<
 		image,
 	] = await Promise.all([
 		optionServices.getMultiple(context, {
-			names: ["media_storage_used", "license_key_last4", "system_alert_email"],
+			names: [
+				"media_storage_used",
+				"license_key_display",
+				"system_alert_email",
+			],
 		}),
 		processedImageServices.getCount(context),
 		getMediaAdapter(context.config),
@@ -40,8 +44,8 @@ const getSettings: ServiceFn<
 	const mediaStorageUsedRes = optionsRes.data.find(
 		(o) => o.name === "media_storage_used",
 	);
-	const licenseKeyLast4Res = optionsRes.data.find(
-		(o) => o.name === "license_key_last4",
+	const licenseKeyDisplayRes = optionsRes.data.find(
+		(o) => o.name === "license_key_display",
 	);
 	const systemAlertEmailRes = optionsRes.data.find(
 		(o) => o.name === "system_alert_email",
@@ -65,7 +69,7 @@ const getSettings: ServiceFn<
 			settings: {
 				mediaStorageUsed: mediaStorageUsedRes?.valueInt || 0,
 				processedImageCount: processedImageCountRes.data,
-				licenseKeyLast4: licenseKeyLast4Res?.valueText ?? null,
+				licenseKey: licenseKeyDisplayRes?.valueText ?? null,
 				mediaAdapterEnabled: mediaAdapter.enabled,
 				mediaAdapterKey: mediaAdapter.enabled ? mediaAdapter.adapter.key : null,
 				emailAdapterKey: emailAdapter.adapter.key,

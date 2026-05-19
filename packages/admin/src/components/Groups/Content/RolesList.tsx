@@ -2,7 +2,7 @@ import { FaSolidCalendar, FaSolidLock, FaSolidT } from "solid-icons/fa";
 import { type Component, createMemo, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
-import { Table } from "@/components/Groups/Table";
+import { Table } from "@/components/Groups/Table/Table";
 import DeleteRole from "@/components/Modals/Role/DeleteRole";
 import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
 import ViewRolePanel from "@/components/Panels/Role/ViewRolePanel";

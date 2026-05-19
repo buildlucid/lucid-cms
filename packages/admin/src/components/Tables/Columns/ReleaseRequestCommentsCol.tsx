@@ -1,7 +1,7 @@
 import type { PublishOperation } from "@types";
 import { FaSolidCircleCheck, FaSolidComment } from "solid-icons/fa";
 import { type Component, Show } from "solid-js";
-import { Td } from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table/Td";
 import T from "@/translations";
 
 const ReleaseRequestCommentsCol: Component<{

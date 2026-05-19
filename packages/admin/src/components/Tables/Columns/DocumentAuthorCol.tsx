@@ -1,6 +1,6 @@
 import type { InternalCollectionDocument } from "@types";
 import type { Component } from "solid-js";
-import { Td } from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table/Td";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import T from "@/translations";
 import helpers from "@/utils/helpers";

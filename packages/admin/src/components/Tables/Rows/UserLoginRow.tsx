@@ -1,7 +1,7 @@
 import type { UserLogin } from "@types";
 import type { Component } from "solid-js";
-import { Tr } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
+import { Tr } from "@/components/Groups/Table/Tr";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import type { TableRowProps } from "@/types/components";
 import DateCol from "../Columns/DateCol";

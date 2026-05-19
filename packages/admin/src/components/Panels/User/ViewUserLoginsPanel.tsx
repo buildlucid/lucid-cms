@@ -14,8 +14,10 @@ import {
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
-import { Filter, PerPage, Sort } from "@/components/Groups/Query";
-import { Table } from "@/components/Groups/Table";
+import { Filter } from "@/components/Groups/Query/Filter";
+import { PerPage } from "@/components/Groups/Query/PerPage";
+import { Sort } from "@/components/Groups/Query/Sort";
+import { Table } from "@/components/Groups/Table/Table";
 import UserLoginRow from "@/components/Tables/Rows/UserLoginRow";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";

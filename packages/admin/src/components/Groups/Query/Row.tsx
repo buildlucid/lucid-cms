@@ -8,13 +8,15 @@ import {
 	type JSX,
 	Show,
 } from "solid-js";
-import { CheckboxButton } from "@/components/Groups/Form";
-import { Filter, PerPage, Sort } from "@/components/Groups/Query";
+import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
 import type { FilterProps } from "@/components/Groups/Query/Filter";
 import type { SortProps } from "@/components/Groups/Query/Sort";
 import Button from "@/components/Partials/Button";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import T from "@/translations";
+import { Filter } from "./Filter";
+import { PerPage } from "./PerPage";
+import { Sort } from "./Sort";
 
 interface QueryRowProps {
 	filters?: FilterProps["filters"];

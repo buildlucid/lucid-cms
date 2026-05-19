@@ -42,8 +42,9 @@ const InfoRowContent: Component<InfoRowProps> = (props) => {
 			class={classNames("p-4 rounded-md border last:mb-0", {
 				"mb-2": props.reducedMargin,
 				"mb-4": props.reducedMargin !== true,
+				"bg-card-base border-border border-l-4 border-l-error-base rounded-l-none":
+					props.theme === "danger",
 				"bg-card-base border-border": props.theme !== "danger",
-				"bg-error-base/10 border-error-base/20": props.theme === "danger",
 			})}
 		>
 			<Show when={props.title || props.description || props.actions}>

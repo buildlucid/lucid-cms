@@ -1,6 +1,6 @@
 import type { ProfilePicture } from "@types";
 import { type Component, For, Show } from "solid-js";
-import { Td } from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table/Td";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import T from "@/translations";
 import helpers from "@/utils/helpers";

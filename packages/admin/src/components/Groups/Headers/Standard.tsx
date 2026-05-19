@@ -184,10 +184,10 @@ export const Standard: Component<{
 				<div class="w-full flex items-start justify-between gap-4">
 					<div class="min-w-0">
 						<Show when={props.copy?.title}>
-							<h1>{props.copy?.title}</h1>
+							<h1 class="text-base">{props.copy?.title}</h1>
 						</Show>
 						<Show when={props.copy?.description}>
-							<p class="mt-1">{props.copy?.description}</p>
+							<p class="mt-1 text-sm">{props.copy?.description}</p>
 						</Show>
 					</div>
 					<Show

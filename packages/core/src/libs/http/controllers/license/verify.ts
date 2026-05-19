@@ -8,7 +8,9 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
+import permissions from "../../middleware/permissions.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -26,6 +28,7 @@ const verifyLicenseController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	permissions([Permissions.LicenseUpdate]),
 	async (c) => {
 		const context = createServiceContext(c);
 		const res = await serviceWrapper(licenseServices.verifyLicense, {

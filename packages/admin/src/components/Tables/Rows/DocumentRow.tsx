@@ -5,8 +5,8 @@ import type {
 	InternalCollectionDocument,
 } from "@types";
 import { type Component, For, Show } from "solid-js";
-import { Tr } from "@/components/Groups/Table";
 import type { TableTheme } from "@/components/Groups/Table/Table";
+import { Tr } from "@/components/Groups/Table/Tr";
 import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import DocumentAuthorCol from "@/components/Tables/Columns/DocumentAuthorCol";

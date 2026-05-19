@@ -1,6 +1,7 @@
 import type { User } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
-import { Td, Tr } from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table/Td";
+import { Tr } from "@/components/Groups/Table/Tr";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import { Permissions } from "@/constants/permissions";

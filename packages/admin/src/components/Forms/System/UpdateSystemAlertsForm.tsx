@@ -60,6 +60,7 @@ const UpdateSystemAlertsForm: Component<{
 				submit: T()("save"),
 			}}
 			options={{
+				errorPlacement: "inline",
 				hideSubmitWhenDisabled: true,
 			}}
 			permission={hasPermission()}

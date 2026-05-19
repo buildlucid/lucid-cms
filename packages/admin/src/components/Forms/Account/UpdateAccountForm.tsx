@@ -68,6 +68,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				submit: T()("update"),
 			}}
 			options={{
+				errorPlacement: "inline",
 				hideSubmitWhenDisabled: true,
 			}}
 			onSubmit={() => {

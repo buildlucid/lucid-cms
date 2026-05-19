@@ -22,7 +22,11 @@ const DashboardRoute = lazy(() => import("@/routes/Dashboard"));
 const MediaListRoute = lazy(() => import("@/routes/Media/List"));
 const UsersListRoute = lazy(() => import("@/routes/Users/List"));
 const RolesListRoute = lazy(() => import("@/routes/Roles/List"));
+const SystemIndexRoute = lazy(() => import("@/routes/System/Index"));
 const SystemOverviewRoute = lazy(() => import("@/routes/System/Overview/View"));
+const SystemOperationsRoute = lazy(
+	() => import("@/routes/System/Operations/View"),
+);
 const SystemClientIntegrationsRoute = lazy(
 	() => import("@/routes/System/ClientIntegrations/View"),
 );
@@ -160,11 +164,20 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				{/* System */}
+				<Route path="/system" component={() => <SystemIndexRoute />} />
 				<Route
 					path="/system/overview"
 					component={() => (
 						<PermissionGuard permission={Permissions.SettingsRead}>
 							<SystemOverviewRoute />
+						</PermissionGuard>
+					)}
+				/>
+				<Route
+					path="/system/operations"
+					component={() => (
+						<PermissionGuard permission={Permissions.SettingsRead}>
+							<SystemOperationsRoute />
 						</PermissionGuard>
 					)}
 				/>

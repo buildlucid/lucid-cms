@@ -1,29 +1,29 @@
 import type { License } from "../../types/response.js";
 import type { BooleanInt } from "../../types.js";
+import { createLicenseKeyDisplay } from "../../utils/helpers/license-key-display.js";
 import formatter from "./index.js";
 
 interface LicensePropsT {
-	last4: string | null;
+	key: string | null;
 	valid: BooleanInt;
 	lastChecked: number | null;
 	errorMessage: string | null;
+	aiEnabled: BooleanInt;
 }
 
 const formatSingle = (props: { license: LicensePropsT }): License => {
 	return {
-		key: createLicenseKeyFromLast4(props.license.last4),
+		key: createLicenseKeyDisplay(props.license.key),
 		valid: formatter.formatBoolean(props.license.valid),
 		lastChecked: props.license.lastChecked,
 		errorMessage: props.license.errorMessage,
+		ai: {
+			enabled: formatter.formatBoolean(props.license.aiEnabled),
+		},
 	};
-};
-
-const createLicenseKeyFromLast4 = (key: string | null | undefined) => {
-	if (!key) return null;
-	return `******-************-***************-****************-****${key}`;
 };
 
 export default {
 	formatSingle,
-	createLicenseKeyFromLast4,
+	createLicenseKeyDisplay,
 };

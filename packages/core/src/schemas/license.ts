@@ -5,10 +5,9 @@ export const controllerSchemas = {
 	update: {
 		body: z
 			.object({
-				licenseKey: z.string().trim().min(1).nullable().meta({
+				licenseKey: z.string().trim().min(8).max(256).nullable().meta({
 					description: "The license key to save",
-					example:
-						"******-************-***************-****************-********",
+					example: "lucid_live_***************************************1A2B",
 				}),
 			})
 			.strict(),
@@ -29,9 +28,8 @@ export const controllerSchemas = {
 		response: z
 			.object({
 				key: z.string().nullable().meta({
-					description: "The obfuscated license key (last 4 visible)",
-					example:
-						"******-************-***************-****************-****1A2B",
+					description: "The stored display version of the license key",
+					example: "************************************************1A2B",
 				}),
 				valid: z.boolean().meta({
 					description: "Whether the license is currently valid",
@@ -45,6 +43,14 @@ export const controllerSchemas = {
 					description: "Error message from last verification (if any)",
 					example: "License is invalid",
 				}),
+				ai: z
+					.object({
+						enabled: z.boolean().meta({
+							description: "Whether AI features are enabled for this license",
+							example: true,
+						}),
+					})
+					.strict(),
 			})
 			.strict(),
 	} satisfies ControllerSchema,

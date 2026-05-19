@@ -10,3 +10,4 @@ export { default as deleteExpiredRevisions } from "./delete-expired-revisions.js
 export { default as deleteExpiredUnsyncedMedia } from "./delete-expired-unsynced-media.js";
 export { default as dispatchScheduledPublishOperations } from "./dispatch-scheduled-publish-operations.js";
 export { default as updateMediaStorage } from "./update-media-storage.js";
+export { default as verifyLicense } from "./verify-license.js";

@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
-import { Table } from "@/components/Groups/Table";
+import { Table } from "@/components/Groups/Table/Table";
 import CopyAPIKey from "@/components/Modals/ClientIntegrations/CopyAPIKey";
 import DeleteClientIntegration from "@/components/Modals/ClientIntegrations/DeleteClientIntegration";
 import RegenerateAPIKey from "@/components/Modals/ClientIntegrations/RegenerateAPIKey";

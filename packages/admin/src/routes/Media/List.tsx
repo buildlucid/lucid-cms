@@ -11,7 +11,7 @@ import Alert from "@/components/Blocks/Alert";
 import { MediaList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
-import { QueryRow } from "@/components/Groups/Query";
+import { QueryRow } from "@/components/Groups/Query/Row";
 import BulkUploadMediaModal from "@/components/Modals/Media/BulkUploadMedia";
 import CreateMediaFolderModal from "@/components/Modals/Media/CreateMediaFolder";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";

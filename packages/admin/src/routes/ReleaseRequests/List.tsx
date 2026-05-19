@@ -7,7 +7,7 @@ import { type Component, createEffect, createMemo } from "solid-js";
 import { ReleaseRequestsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
-import { QueryRow } from "@/components/Groups/Query";
+import { QueryRow } from "@/components/Groups/Query/Row";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import T from "@/translations";

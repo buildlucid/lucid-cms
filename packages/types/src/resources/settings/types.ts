@@ -41,10 +41,11 @@ export type OptionsName =
 	| "media_storage_used"
 	| "system_alert_email"
 	| "license_key"
-	| "license_key_last4"
+	| "license_key_display"
 	| "license_valid"
 	| "license_last_checked"
-	| "license_error_message";
+	| "license_error_message"
+	| "license_ai_enabled";
 
 export interface Option {
 	name: OptionsName;
@@ -58,4 +59,7 @@ export interface License {
 	valid: boolean;
 	lastChecked: number | null;
 	errorMessage: string | null;
+	ai: {
+		enabled: boolean;
+	};
 }

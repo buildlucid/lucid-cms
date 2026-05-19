@@ -8,7 +8,7 @@ import {
 import { type Component, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
-import { Table } from "@/components/Groups/Table";
+import { Table } from "@/components/Groups/Table/Table";
 import DeleteEmail from "@/components/Modals/Email/DeleteEmail";
 import ResendEmail from "@/components/Modals/Email/ResendEmail";
 import PreviewEmailPanel from "@/components/Panels/Email/PreviewEmailPanel";

@@ -1,5 +1,5 @@
 import { type Component, Match, Switch } from "solid-js";
-import { Td } from "@/components/Groups/Table";
+import { Td } from "@/components/Groups/Table/Td";
 import Pill, { type PillProps } from "@/components/Partials/Pill";
 
 interface PillColProps {
