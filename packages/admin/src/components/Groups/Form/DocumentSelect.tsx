@@ -24,6 +24,7 @@ import Button from "@/components/Partials/Button";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import Pill from "@/components/Partials/Pill";
 import RelationCount from "@/components/Partials/RelationCount";
+import { usePageBuilderState } from "@/hooks/document/usePageBuilderState";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -54,7 +55,6 @@ interface DocumentSelectProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
-	relationVersionType?: string;
 	hideOptionalText?: boolean;
 }
 
@@ -70,6 +70,7 @@ const getDocumentKey = (document: DocumentFieldValue) =>
 	`${document.collectionKey}:${document.id}`;
 
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
+	const pageBuilderState = usePageBuilderState();
 	const canOpenSelectModal = () =>
 		props.disabled !== true &&
 		(props.multiple !== true ||
@@ -167,7 +168,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				fields: true,
 			},
 		},
-		enabled: () => selectedDocumentItems().length > 0,
+		enabled: () => selectedDocuments().length > 0,
 	});
 	const collectionsByKey = createMemo(() => {
 		return new Map(
@@ -200,10 +201,12 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 			contentLocale: contentLocale(),
 		}).slice(0, 3);
 	const relationVersionLabel = createMemo(() => {
-		if (!props.relationVersionType) return undefined;
-		if (props.relationVersionType === "latest") return T()("latest");
-		if (props.relationVersionType === "revision") return T()("revision");
-		return props.relationVersionType;
+		const relationVersionType = pageBuilderState.relationVersionType?.();
+
+		if (!relationVersionType) return undefined;
+		if (relationVersionType === "latest") return T()("latest");
+		if (relationVersionType === "revision") return T()("revision");
+		return relationVersionType;
 	});
 
 	return (
@@ -239,9 +242,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 												<DocumentSortableItem
 													document={document}
 													dragId={document.key}
-													singularName={getSingularName(
-														document.document ?? document.value,
-													)}
+													singularName={getSingularName(document.document)}
 													versionLabel={relationVersionLabel()}
 													previewFields={previewFields(document.document)}
 													hasError={hasItemError(index())}
@@ -294,10 +295,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 											#{selectedDocumentValue()?.id}
 										</Pill>
 										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-subtitle">
-											{getSingularName(
-												selectedDocumentItem()?.document ??
-													selectedDocumentItem()?.value,
-											)}
+											{getSingularName(selectedDocumentItem()?.document)}
 										</span>
 									</div>
 								</div>
@@ -331,9 +329,6 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 									<div class="py-2">
 										<MissingDocumentRefNotice
 											document={selectedDocumentItem()?.value}
-											singularName={getSingularName(
-												selectedDocumentItem()?.value,
-											)}
 											versionLabel={relationVersionLabel()}
 										/>
 									</div>

@@ -1,6 +1,7 @@
 import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { Input } from "@/components/Groups/Form";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -8,13 +9,11 @@ import helpers from "@/utils/helpers";
 interface InputFieldProps {
 	type: "number" | "text" | "date" | "datetime-local";
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<"text" | "number" | "datetime">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		focusKey: string;
-		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
@@ -24,6 +23,10 @@ interface InputFieldProps {
 
 export const InputField: Component<InputFieldProps> = (props) => {
 	// -------------------------------
+	// State & Hooks
+	const fieldRenderState = useFieldRenderState();
+
+	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
 		return props.state.fieldData;
@@ -32,7 +35,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 		const value = brickHelpers.getFieldValue<string | number>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
+			contentLocale: fieldRenderState.contentLocale(),
 		});
 
 		if (typeof value === "number") {
@@ -62,20 +65,20 @@ export const InputField: Component<InputFieldProps> = (props) => {
 		<Input
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
-				brickIndex: props.state.brickIndex,
+				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,
 			})}
 			focusKey={props.state.focusKey}
 			value={fieldValue()}
 			onChange={(value) => {
 				brickStore.get.setFieldValue({
-					brickIndex: props.state.brickIndex,
+					brickIndex: fieldRenderState.brickIndex(),
 					fieldConfig: props.state.fieldConfig,
 					key: props.state.fieldConfig.key,
 					ref: props.state.groupRef,
 					repeaterKey: props.state.repeaterKey,
 					value: props.type === "number" ? Number(value) : value,
-					contentLocale: props.state.contentLocale,
+					contentLocale: fieldRenderState.contentLocale(),
 				});
 			}}
 			name={props.state.fieldConfig.key}

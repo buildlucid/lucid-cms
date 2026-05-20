@@ -5,14 +5,13 @@ import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { GroupBody } from "@/components/Groups/Builder";
 import DragDrop from "@/components/Partials/DragDrop";
 import RelationCount from "@/components/Partials/RelationCount";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations/index";
 import helpers from "@/utils/helpers";
 
 interface RepeaterFieldProps {
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<"repeater">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
@@ -20,19 +19,17 @@ interface RepeaterFieldProps {
 		parentRepeaterKey?: string;
 		repeaterDepth: number;
 		fieldError: FieldError | undefined;
-		missingFieldColumns: string[];
-		relationVersionType?: string;
 	};
 }
 
 export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	// -------------------------------
+	// State & Hooks
+	const fieldRenderState = useFieldRenderState();
+
+	// -------------------------------
 	// Memos
-	const contentLocales = createMemo(
-		() => contentLocaleStore.get.locales.map((locale) => locale.code) || [],
-	);
 	const fieldConfig = createMemo(() => props.state.fieldConfig);
-	const brickIndex = createMemo(() => props.state.brickIndex);
 	const groups = createMemo(() => props.state.fieldData?.groups || []);
 	const groupRefs = createMemo(() => groups().map((group) => group.ref));
 	const minGroups = createMemo(() => fieldConfig().validation?.minGroups);
@@ -53,7 +50,6 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	const groupErrors = createMemo(() => {
 		return props.state.fieldError?.groupErrors || [];
 	});
-	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
 	const groupsByRef = createMemo(() => {
 		return new Map(groups().map((group) => [group.ref, group]));
 	});
@@ -67,12 +63,12 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	const addGroup = () => {
 		if (!fieldConfig().fields) return;
 		brickStore.get.addRepeaterGroup({
-			brickIndex: brickIndex(),
+			brickIndex: fieldRenderState.brickIndex(),
 			fieldConfig: fieldConfig().fields || [],
 			key: fieldConfig().key,
 			ref: props.state.groupRef,
 			parentRepeaterKey: props.state.parentRepeaterKey,
-			locales: contentLocales(),
+			locales: fieldRenderState.contentLocales(),
 		});
 	};
 
@@ -102,7 +98,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 						<DragDrop
 							sortOrder={(ref, targetRef) => {
 								brickStore.get.swapGroupOrder({
-									brickIndex: props.state.brickIndex,
+									brickIndex: fieldRenderState.brickIndex(),
 									repeaterKey: fieldConfig().key,
 									selectedRef: ref,
 									targetRef: targetRef,
@@ -118,7 +114,6 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 										{(groupRef, i) => (
 											<GroupBody
 												state={{
-													brickIndex: brickIndex(),
 													fieldConfig: fieldConfig(),
 													dragDropKey: dragDropKey(),
 													groupRef: groupRef,
@@ -131,8 +126,6 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 													parentRepeaterKey: props.state.parentRepeaterKey,
 													parentRef: props.state.groupRef,
 													groupErrors: groupErrors(),
-													missingFieldColumns: missingFieldColumns(),
-													relationVersionType: props.state.relationVersionType,
 												}}
 											/>
 										)}

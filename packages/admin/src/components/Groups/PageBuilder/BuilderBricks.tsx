@@ -30,7 +30,6 @@ interface BuilderBricksProps {
 	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
-	relationVersionType?: string;
 }
 
 export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
@@ -126,7 +125,6 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 												dragDrop={dragDrop}
 												collectionKey={props.collectionKey}
 												documentId={props.documentId}
-												relationVersionType={props.relationVersionType}
 											/>
 										)}
 									</For>
@@ -158,7 +156,6 @@ interface BuilderBrickRowProps {
 	dragDrop: DragDropCBT;
 	collectionKey?: string;
 	documentId?: number;
-	relationVersionType?: string;
 }
 
 const DRAG_DROP_KEY = "builder-bricks-zone";
@@ -313,7 +310,6 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					missingFieldColumns: missingFieldColumns(),
 					collectionKey: props.collectionKey,
 					documentId: props.documentId,
-					relationVersionType: props.relationVersionType,
 				}}
 				options={{
 					padding: "16",

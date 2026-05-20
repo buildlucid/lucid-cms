@@ -1,19 +1,18 @@
 import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { Textarea } from "@/components/Groups/Form";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
 interface TextareaFieldProps {
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<"textarea">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
 		focusKey: string;
-		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
@@ -23,6 +22,10 @@ interface TextareaFieldProps {
 
 export const TextareaField: Component<TextareaFieldProps> = (props) => {
 	// -------------------------------
+	// State & Hooks
+	const fieldRenderState = useFieldRenderState();
+
+	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
 		return props.state.fieldData;
@@ -31,7 +34,7 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 		return brickHelpers.getFieldValue<string>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
+			contentLocale: fieldRenderState.contentLocale(),
 		});
 	});
 	const disabled = createMemo(
@@ -44,20 +47,20 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 		<Textarea
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
-				brickIndex: props.state.brickIndex,
+				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,
 			})}
 			focusKey={props.state.focusKey}
 			value={fieldValue() ?? ""}
 			onChange={(value) => {
 				brickStore.get.setFieldValue({
-					brickIndex: props.state.brickIndex,
+					brickIndex: fieldRenderState.brickIndex(),
 					fieldConfig: props.state.fieldConfig,
 					key: props.state.fieldConfig.key,
 					ref: props.state.groupRef,
 					repeaterKey: props.state.repeaterKey,
 					value: value,
-					contentLocale: props.state.contentLocale,
+					contentLocale: fieldRenderState.contentLocale(),
 				});
 			}}
 			name={props.state.fieldConfig.key}

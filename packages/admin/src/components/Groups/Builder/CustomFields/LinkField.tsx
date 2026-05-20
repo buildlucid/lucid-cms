@@ -12,18 +12,17 @@ import {
 	createSignal,
 } from "solid-js";
 import { LinkSelect } from "@/components/Groups/Form";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
 interface LinkFieldProps {
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<"link">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
-		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
@@ -33,7 +32,8 @@ interface LinkFieldProps {
 
 export const LinkField: Component<LinkFieldProps> = (props) => {
 	// -------------------------------
-	// State
+	// State & Hooks
+	const fieldRenderState = useFieldRenderState();
 	const [getValue, setValue] = createSignal<
 		NonNullable<LinkResValue> | undefined | null
 	>();
@@ -47,7 +47,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 		return brickHelpers.getFieldValue<NonNullable<LinkResValue> | null>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
+			contentLocale: fieldRenderState.contentLocale(),
 		});
 	});
 	const disabled = createMemo(
@@ -66,20 +66,20 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 		<LinkSelect
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
-				brickIndex: props.state.brickIndex,
+				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,
 			})}
 			value={getValue()}
 			onChange={(value) => {
 				batch(() => {
 					brickStore.get.setFieldValue({
-						brickIndex: props.state.brickIndex,
+						brickIndex: fieldRenderState.brickIndex(),
 						fieldConfig: props.state.fieldConfig,
 						key: props.state.fieldConfig.key,
 						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
 						value: value,
-						contentLocale: props.state.contentLocale,
+						contentLocale: fieldRenderState.contentLocale(),
 					});
 					setValue(value);
 				});

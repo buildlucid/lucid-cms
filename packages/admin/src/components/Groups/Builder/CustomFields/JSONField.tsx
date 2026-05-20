@@ -8,6 +8,7 @@ import {
 	Suspense,
 	untrack,
 } from "solid-js";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -20,12 +21,10 @@ const JSONTextarea = lazy(() =>
 
 interface JSONFieldProps {
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<"json">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
-		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
@@ -35,8 +34,9 @@ interface JSONFieldProps {
 
 export const JSONField: Component<JSONFieldProps> = (props) => {
 	// -------------------------------
-	// State
+	// State & Hooks
 	const [getValue, setValue] = createSignal("");
+	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
 	// Memos
@@ -47,7 +47,7 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 		return brickHelpers.getFieldValue<string>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
+			contentLocale: fieldRenderState.contentLocale(),
 		});
 	});
 	const disabled = createMemo(
@@ -83,7 +83,7 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 			<JSONTextarea
 				id={brickHelpers.customFieldId({
 					key: props.state.fieldConfig.key,
-					brickIndex: props.state.brickIndex,
+					brickIndex: fieldRenderState.brickIndex(),
 					groupRef: props.state.groupRef,
 				})}
 				value={getValue()}
@@ -91,13 +91,13 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 					setValue(value);
 					try {
 						brickStore.get.setFieldValue({
-							brickIndex: props.state.brickIndex,
+							brickIndex: fieldRenderState.brickIndex(),
 							fieldConfig: props.state.fieldConfig,
 							key: props.state.fieldConfig.key,
 							ref: props.state.groupRef,
 							repeaterKey: props.state.repeaterKey,
 							value: JSON.parse(value),
-							contentLocale: props.state.contentLocale,
+							contentLocale: fieldRenderState.contentLocale(),
 						});
 					} catch {
 						// store retains last valid JSON

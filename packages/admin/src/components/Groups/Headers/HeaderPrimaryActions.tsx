@@ -78,8 +78,6 @@ const HeaderPrimaryActions: Component<{
 		);
 	};
 
-	if (visibleActions().length === 0) return null;
-
 	return (
 		<Switch>
 			<Match when={visibleActions().length === 1}>{renderSingleAction()}</Match>

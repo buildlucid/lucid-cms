@@ -28,35 +28,34 @@ import {
 	UserField,
 } from "@/components/Groups/Builder/CustomFields";
 import FieldTypeIcon from "@/components/Partials/FieldTypeIcon";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
-import contentLocaleStore from "@/store/contentLocaleStore";
 
 interface DynamicFieldProps {
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<FieldTypes>;
 		fields: InternalDocumentField[];
 		fieldErrors: FieldError[];
 		activeTab?: string;
-		missingFieldColumns: string[];
 
 		groupRef?: string;
 		groupPath?: string;
 		repeaterKey?: string;
 		repeaterDepth?: number;
-		relationVersionType?: string;
 	};
 }
 
 export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	// -------------------------------
+	// State & Hooks
+	const fieldRenderState = useFieldRenderState();
+
+	// -------------------------------
 	// Memos
-	const contentLocale = createMemo(
-		() => contentLocaleStore.get.contentLocale ?? "",
-	);
 	const fieldConfig = createMemo(() => props.state.fieldConfig);
-	const locales = createMemo(() => contentLocaleStore.get.locales);
-	const hasMultipleLocales = createMemo(() => locales().length > 1);
+	const hasMultipleLocales = createMemo(
+		() => fieldRenderState.contentLocales().length > 1,
+	);
 	const fieldData = createMemo(() => {
 		if (props.state.fieldConfig.type === "tab") return;
 
@@ -66,11 +65,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 
 		if (!field) {
 			return brickStore.get.addField({
-				brickIndex: props.state.brickIndex,
+				brickIndex: fieldRenderState.brickIndex(),
 				fieldConfig: props.state.fieldConfig,
 				ref: props.state.groupRef,
 				repeaterKey: props.state.repeaterKey,
-				locales: locales().map((l) => l.code),
+				locales: fieldRenderState.contentLocales(),
 			});
 		}
 		return field;
@@ -92,7 +91,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		return props.state.fieldErrors.filter(
 			(f) =>
 				f.key === props.state.fieldConfig.key &&
-				f.localeCode === contentLocale(),
+				f.localeCode === fieldRenderState.contentLocale(),
 		);
 	});
 	const fieldError = createMemo(() => fieldErrors()[0]);
@@ -109,7 +108,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			(f) =>
 				f.key === props.state.fieldConfig.key &&
 				f.localeCode &&
-				f.localeCode !== contentLocale(),
+				f.localeCode !== fieldRenderState.contentLocale(),
 		);
 	});
 	const activeTab = createMemo(() => {
@@ -120,10 +119,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		);
 	});
 	const fieldColumnIsMissing = createMemo(() => {
-		return props.state.missingFieldColumns.includes(fieldConfig().key);
+		return fieldRenderState.missingFieldColumns().includes(fieldConfig().key);
 	});
 	const focusKey = createMemo(() => {
-		const parts = [`brick:${props.state.brickIndex}`];
+		const parts = [`brick:${fieldRenderState.brickIndex()}`];
 		if (props.state.groupPath) parts.push(`group:${props.state.groupPath}`);
 		parts.push(`field:${fieldConfig().key}`);
 		return parts.join("|");
@@ -165,7 +164,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								{(config) => (
 									<DynamicField
 										state={{
-											brickIndex: props.state.brickIndex,
 											fieldConfig: config(),
 											fields: props.state.fields,
 											activeTab: props.state.activeTab,
@@ -173,9 +171,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 											groupPath: props.state.groupPath,
 											repeaterKey: props.state.repeaterKey,
 											repeaterDepth: props.state.repeaterDepth,
-											relationVersionType: props.state.relationVersionType,
 											fieldErrors: props.state.fieldErrors,
-											missingFieldColumns: props.state.missingFieldColumns,
 										}}
 									/>
 								)}
@@ -185,7 +181,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "repeater"}>
 						<RepeaterField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"repeater">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
@@ -193,8 +188,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								parentRepeaterKey: props.state.repeaterKey,
 								repeaterDepth: props.state.repeaterDepth ?? 0,
 								fieldError: fieldError(),
-								missingFieldColumns: props.state.missingFieldColumns,
-								relationVersionType: props.state.relationVersionType,
 							}}
 						/>
 					</Match>
@@ -202,13 +195,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						<InputField
 							type="text"
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"text">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								focusKey: focusKey(),
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -219,12 +210,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "user"}>
 						<UserField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"user">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								fieldErrors: fieldErrors(),
 								altLocaleError: altLocaleError(),
@@ -236,18 +225,15 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "document"}>
 						<DocumentField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"document">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								fieldErrors: fieldErrors(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
 								fieldColumnIsMissing: fieldColumnIsMissing(),
-								relationVersionType: props.state.relationVersionType,
 							}}
 						/>
 					</Match>
@@ -255,13 +241,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						<InputField
 							type="number"
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"number">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								focusKey: focusKey(),
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -277,13 +261,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									: "datetime-local"
 							}
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"datetime">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								focusKey: focusKey(),
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -294,12 +276,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "checkbox"}>
 						<CheckboxField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"checkbox">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -310,12 +290,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "color"}>
 						<ColorField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"color">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -326,12 +304,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "json"}>
 						<JSONField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"json">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -342,12 +318,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "link"}>
 						<LinkField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"link">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -358,12 +332,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "media"}>
 						<MediaField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"media">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								fieldErrors: fieldErrors(),
 								altLocaleError: altLocaleError(),
@@ -375,12 +347,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "select"}>
 						<SelectField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"select">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -391,13 +361,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "textarea"}>
 						<TextareaField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"textarea">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								focusKey: focusKey(),
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -408,13 +376,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "rich-text"}>
 						<RichTextField
 							state={{
-								brickIndex: props.state.brickIndex,
 								fieldConfig: fieldConfig() as CFConfig<"rich-text">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
 								focusKey: focusKey(),
-								contentLocale: contentLocale(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),

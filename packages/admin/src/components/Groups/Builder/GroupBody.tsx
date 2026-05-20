@@ -13,15 +13,14 @@ import Button from "@/components/Partials/Button";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
 import Pill from "@/components/Partials/Pill";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations/index";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
 interface GroupBodyProps {
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<"repeater">;
 		groupRef: string;
 		groupPath: string;
@@ -34,18 +33,19 @@ interface GroupBodyProps {
 		parentRepeaterKey: string | undefined;
 		parentRef: string | undefined;
 		groupErrors: GroupError[];
-		missingFieldColumns: string[];
-		relationVersionType?: string;
 	};
 }
 
 export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// -------------------------------
+	// State & Hooks
+	const fieldRenderState = useFieldRenderState();
+
+	// -------------------------------
 	// Memos
 	const group = createMemo(() => props.state.group());
 	const ref = createMemo(() => props.state.groupRef);
 	const groupPath = createMemo(() => props.state.groupPath);
-	const brickIndex = createMemo(() => props.state.brickIndex);
 	const parentRef = createMemo(() => props.state.parentRef);
 	const parentRepeaterKey = createMemo(() => props.state.parentRepeaterKey);
 	const repeaterKey = createMemo(() => props.state.repeaterKey);
@@ -55,9 +55,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		return group()?.fields || [];
 	});
 	const groupOpen = createMemo(() => group()?.open === true);
-	const contentLocale = createMemo(
-		() => contentLocaleStore.get.contentLocale ?? "",
-	);
 	const disabled = createMemo(
 		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
@@ -69,7 +66,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const fieldErrors = createMemo(() => {
 		return groupError()?.fields;
 	});
-	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
 	const titlePreview = createMemo(() => {
 		const configs = configChildrenFields() || [];
 		const firstTextConfig = configs.find(
@@ -86,7 +82,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			fieldData: data,
 			// biome-ignore lint/suspicious/noExplicitAny: shared helper expects a compatible fieldConfig
 			fieldConfig: firstTextConfig as any,
-			contentLocale: contentLocale(),
+			contentLocale: fieldRenderState.contentLocale(),
 		});
 
 		if (typeof value !== "string") return "";
@@ -102,7 +98,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// Functions
 	const toggleDropdown = () => {
 		brickStore.get.toggleGroupOpen({
-			brickIndex: brickIndex(),
+			brickIndex: fieldRenderState.brickIndex(),
 			repeaterKey: repeaterKey(),
 			ref: ref(),
 			parentRef: parentRef(),
@@ -201,7 +197,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					<DeleteDebounceButton
 						callback={() => {
 							brickStore.get.removeRepeaterGroup({
-								brickIndex: brickIndex(),
+								brickIndex: fieldRenderState.brickIndex(),
 								repeaterKey: repeaterKey(),
 								targetRef: ref(),
 								ref: parentRef(),
@@ -241,7 +237,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						{(config) => (
 							<DynamicField
 								state={{
-									brickIndex: brickIndex(),
 									fieldConfig: config(),
 									fields: groupFields(),
 									groupRef: ref(),
@@ -249,8 +244,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 									repeaterKey: repeaterKey(),
 									repeaterDepth: nextRepeaterDepth(),
 									fieldErrors: fieldErrors() || [],
-									missingFieldColumns: missingFieldColumns(),
-									relationVersionType: props.state.relationVersionType,
 								}}
 							/>
 						)}

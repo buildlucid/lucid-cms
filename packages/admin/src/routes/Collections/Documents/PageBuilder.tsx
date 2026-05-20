@@ -27,6 +27,7 @@ import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
+import { PageBuilderStateProvider } from "@/hooks/document/usePageBuilderState";
 import { useFocusSnapshot } from "@/hooks/useFocusSnapshot";
 import brickStore from "@/store/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
@@ -262,103 +263,114 @@ const CollectionsDocumentsEditRoute: Component<{
 				</div>
 			</Match>
 			<Match when={uiState.isSuccess()}>
-				<HeaderBar
+				<PageBuilderStateProvider
 					mode={props.mode}
 					version={versionType}
 					versionId={versionId}
-					trailingBreadcrumbs={trailingBreadcrumbs}
-					currentViewLabel={currentViewLabel}
-					state={{
-						collection: docState.collection,
-						collectionKey: docState.collectionKey,
-						collectionName: docState.collectionName,
-						collectionSingularName: docState.collectionSingularName,
-						documentID: docState.documentId,
-						document: docState.document,
-						ui: uiState,
-						autoSave: autoSave,
-						autoSaveUserEnabled: uiState.autoSaveUserEnabled,
-						showRevisionNavigation: uiState.showRevisionNavigation,
-						isDocumentMutated: docState.isDocumentMutated,
-					}}
-					actions={{
-						upsertDocumentAction: mutations.upsertDocumentAction,
-						publishDocumentAction: mutations.publishDocumentAction,
-						restoreRevisionAction: mutations.restoreRevisionAction,
-					}}
-				/>
-				<Alert
-					style="pill"
-					class="xl:right-80"
-					alerts={[
-						{
-							type: "warning",
-							message: T()("locked_document_message"),
-							show: uiState.isBuilderLocked(),
-						},
-						{
-							type: "warning",
-							message: T()("collection_needs_migrating_message"),
-							show: uiState.collectionNeedsMigrating(),
-						},
-					]}
-				/>
-				<div class="mt-2 grow overflow-hidden">
-					<div class="w-full flex flex-col xl:flex-row grow h-full  bg-background-base rounded-t-xl border border-border">
-						<div class={"w-full min-w-0 flex flex-col"}>
-							<CollectionPseudoBrick
-								fields={docState.collection()?.fields || []}
-								collectionMigrationStatus={
-									docState.collection()?.migrationStatus
-								}
-								collectionKey={docState.collectionKey()}
-								documentId={docState.documentId()}
-								relationVersionType={relationVersionType()}
-							/>
-							<FixedBricks
-								brickConfig={docState.collection()?.fixedBricks || []}
-								collectionMigrationStatus={
-									docState.collection()?.migrationStatus
-								}
-								collectionKey={docState.collectionKey()}
-								documentId={docState.documentId()}
-								relationVersionType={relationVersionType()}
-							/>
-							<BuilderBricks
-								brickConfig={docState.collection()?.builderBricks || []}
-								collectionMigrationStatus={
-									docState.collection()?.migrationStatus
-								}
-								collectionKey={docState.collectionKey()}
-								documentId={docState.documentId()}
-								relationVersionType={relationVersionType()}
-							/>
+					relationVersionType={relationVersionType}
+					releaseRequest={props.releaseRequest}
+					disableWorkflow={disableWorkflow}
+					documentState={docState}
+					mutations={mutations}
+					uiState={uiState}
+					autoSave={autoSave}
+					navigationGuard={navigationGuard}
+				>
+					<HeaderBar
+						mode={props.mode}
+						version={versionType}
+						versionId={versionId}
+						trailingBreadcrumbs={trailingBreadcrumbs}
+						currentViewLabel={currentViewLabel}
+						state={{
+							collection: docState.collection,
+							collectionKey: docState.collectionKey,
+							collectionName: docState.collectionName,
+							collectionSingularName: docState.collectionSingularName,
+							documentID: docState.documentId,
+							document: docState.document,
+							ui: uiState,
+							autoSave: autoSave,
+							autoSaveUserEnabled: uiState.autoSaveUserEnabled,
+							showRevisionNavigation: uiState.showRevisionNavigation,
+							isDocumentMutated: docState.isDocumentMutated,
+						}}
+						actions={{
+							upsertDocumentAction: mutations.upsertDocumentAction,
+							publishDocumentAction: mutations.publishDocumentAction,
+							restoreRevisionAction: mutations.restoreRevisionAction,
+						}}
+					/>
+					<Alert
+						style="pill"
+						class="xl:right-80"
+						alerts={[
+							{
+								type: "warning",
+								message: T()("locked_document_message"),
+								show: uiState.isBuilderLocked(),
+							},
+							{
+								type: "warning",
+								message: T()("collection_needs_migrating_message"),
+								show: uiState.collectionNeedsMigrating(),
+							},
+						]}
+					/>
+					<div class="mt-2 grow overflow-hidden">
+						<div class="w-full flex flex-col xl:flex-row grow h-full  bg-background-base rounded-t-xl border border-border">
+							<div class={"w-full min-w-0 flex flex-col"}>
+								<CollectionPseudoBrick
+									fields={docState.collection()?.fields || []}
+									collectionMigrationStatus={
+										docState.collection()?.migrationStatus
+									}
+									collectionKey={docState.collectionKey()}
+									documentId={docState.documentId()}
+								/>
+								<FixedBricks
+									brickConfig={docState.collection()?.fixedBricks || []}
+									collectionMigrationStatus={
+										docState.collection()?.migrationStatus
+									}
+									collectionKey={docState.collectionKey()}
+									documentId={docState.documentId()}
+								/>
+								<BuilderBricks
+									brickConfig={docState.collection()?.builderBricks || []}
+									collectionMigrationStatus={
+										docState.collection()?.migrationStatus
+									}
+									collectionKey={docState.collectionKey()}
+									documentId={docState.documentId()}
+								/>
+							</div>
+							{props.releaseRequest ? (
+								<ReleaseRequestSidebar
+									collection={docState.collection}
+									releaseRequest={props.releaseRequest}
+								/>
+							) : (
+								<Sidebar
+									collection={docState.collection}
+									collectionKey={docState.collectionKey}
+									document={docState.document}
+									documentId={docState.documentId}
+									disabled={disableWorkflow}
+									mutations={mutations}
+								/>
+							)}
 						</div>
-						{props.releaseRequest ? (
-							<ReleaseRequestSidebar
-								collection={docState.collection}
-								releaseRequest={props.releaseRequest}
-							/>
-						) : (
-							<Sidebar
-								collection={docState.collection}
-								collectionKey={docState.collectionKey}
-								document={docState.document}
-								documentId={docState.documentId}
-								disabled={disableWorkflow}
-								mutations={mutations}
-							/>
-						)}
 					</div>
-				</div>
-				<Modals
-					hooks={{
-						mutations: mutations,
-						state: docState,
-						uiState: uiState,
-						navigationGuard: navigationGuard,
-					}}
-				/>
+					<Modals
+						hooks={{
+							mutations: mutations,
+							state: docState,
+							uiState: uiState,
+							navigationGuard: navigationGuard,
+						}}
+					/>
+				</PageBuilderStateProvider>
 			</Match>
 		</Switch>
 	);

@@ -7,6 +7,7 @@ import {
 	createSignal,
 } from "solid-js";
 import { MediaSelect } from "@/components/Groups/Form";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
@@ -14,12 +15,10 @@ import helpers from "@/utils/helpers";
 
 interface MediaFieldProps {
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<"media">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
-		contentLocale: string;
 		fieldError: FieldError | undefined;
 		fieldErrors: FieldError[];
 		altLocaleError: boolean;
@@ -30,8 +29,9 @@ interface MediaFieldProps {
 
 export const MediaField: Component<MediaFieldProps> = (props) => {
 	// -------------------------------
-	// State
+	// State & Hooks
 	const [getValue, setValue] = createSignal<number[] | undefined>();
+	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
 	// Memos
@@ -42,7 +42,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 		return brickHelpers.getFieldValue<number[]>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
+			contentLocale: fieldRenderState.contentLocale(),
 		});
 	});
 	const fieldRef = createMemo(() => {
@@ -70,7 +70,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 		<MediaSelect
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
-				brickIndex: props.state.brickIndex,
+				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,
 			})}
 			value={getValue()}
@@ -90,13 +90,13 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 				batch(() => {
 					if (refs.length) brickStore.get.addRef("media", refs);
 					brickStore.get.setFieldValue({
-						brickIndex: props.state.brickIndex,
+						brickIndex: fieldRenderState.brickIndex(),
 						fieldConfig: props.state.fieldConfig,
 						key: props.state.fieldConfig.key,
 						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
 						value: value,
-						contentLocale: props.state.contentLocale,
+						contentLocale: fieldRenderState.contentLocale(),
 						clearFromItemIndex,
 					});
 					setValue(value);

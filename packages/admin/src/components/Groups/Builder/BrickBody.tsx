@@ -13,7 +13,9 @@ import {
 	DynamicField,
 	TabField,
 } from "@/components/Groups/Builder/CustomFields";
+import { FieldRenderStateProvider } from "@/hooks/document/useFieldRenderState";
 import type { BrickData } from "@/store/brickStore";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import { tabStateHelpers } from "@/utils/tab-state-helpers";
 
 interface BrickProps {
@@ -27,7 +29,6 @@ interface BrickProps {
 		missingFieldColumns: string[];
 		collectionKey?: string;
 		documentId?: number;
-		relationVersionType?: string;
 	};
 	options: {
 		padding?: "16" | "24";
@@ -46,6 +47,14 @@ export const BrickBody: Component<BrickProps> = (props) => {
 		() =>
 			props.state.configFields?.filter((field) => field.type === "tab") || [],
 	);
+	const contentLocale = createMemo(
+		() => contentLocaleStore.get.contentLocale ?? "",
+	);
+	const contentLocales = createMemo(
+		() => contentLocaleStore.get.locales.map((locale) => locale.code) || [],
+	);
+	const brickIndex = createMemo(() => props.state.brickIndex);
+	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
 
 	// ----------------------------------
 	// Effects
@@ -113,37 +122,41 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					"flex flex-col gap-4": allTabs().length === 0,
 				})}
 			>
-				{/* Tabs */}
-				<Show when={allTabs().length > 0}>
-					<div class="border-b border-border mb-6 flex flex-wrap">
-						<Index each={allTabs()}>
-							{(tab) => (
-								<TabField
-									tab={tab()}
-									setActiveTab={setActiveTab}
-									getActiveTab={getActiveTab}
-									fieldErrors={props.state.fieldErrors}
-								/>
-							)}
-						</Index>
-					</div>
-				</Show>
-				{/* Body */}
-				<Index each={props.state.configFields}>
-					{(config) => (
-						<DynamicField
-							state={{
-								fields: props.state.brick.fields,
-								brickIndex: props.state.brickIndex,
-								fieldConfig: config(),
-								activeTab: getActiveTab(),
-								fieldErrors: props.state.fieldErrors,
-								missingFieldColumns: props.state.missingFieldColumns,
-								relationVersionType: props.state.relationVersionType,
-							}}
-						/>
-					)}
-				</Index>
+				<FieldRenderStateProvider
+					brickIndex={brickIndex}
+					contentLocale={contentLocale}
+					contentLocales={contentLocales}
+					missingFieldColumns={missingFieldColumns}
+				>
+					{/* Tabs */}
+					<Show when={allTabs().length > 0}>
+						<div class="border-b border-border mb-6 flex flex-wrap">
+							<Index each={allTabs()}>
+								{(tab) => (
+									<TabField
+										tab={tab()}
+										setActiveTab={setActiveTab}
+										getActiveTab={getActiveTab}
+										fieldErrors={props.state.fieldErrors}
+									/>
+								)}
+							</Index>
+						</div>
+					</Show>
+					{/* Body */}
+					<Index each={props.state.configFields}>
+						{(config) => (
+							<DynamicField
+								state={{
+									fields: props.state.brick.fields,
+									fieldConfig: config(),
+									activeTab: getActiveTab(),
+									fieldErrors: props.state.fieldErrors,
+								}}
+							/>
+						)}
+					</Index>
+				</FieldRenderStateProvider>
 			</div>
 		</div>
 	);

@@ -1,6 +1,7 @@
 import type { CFConfig, FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { Select } from "@/components/Groups/Form";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import T from "@/translations";
 import brickHelpers from "@/utils/brick-helpers";
@@ -8,12 +9,10 @@ import helpers from "@/utils/helpers";
 
 interface SelectFieldProps {
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<"select">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
-		contentLocale: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
@@ -23,6 +22,10 @@ interface SelectFieldProps {
 
 export const SelectField: Component<SelectFieldProps> = (props) => {
 	// -------------------------------
+	// State & Hooks
+	const fieldRenderState = useFieldRenderState();
+
+	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
 		return props.state.fieldData;
@@ -31,7 +34,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 		return brickHelpers.getFieldValue<string>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
+			contentLocale: fieldRenderState.contentLocale(),
 		});
 	});
 	const disabled = createMemo(
@@ -44,7 +47,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 		<Select
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
-				brickIndex: props.state.brickIndex,
+				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,
 			})}
 			value={fieldValue() ?? undefined}
@@ -63,14 +66,14 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 			}
 			onChange={(value) => {
 				brickStore.get.setFieldValue({
-					brickIndex: props.state.brickIndex,
+					brickIndex: fieldRenderState.brickIndex(),
 					fieldConfig: props.state.fieldConfig,
 					key: props.state.fieldConfig.key,
 					ref: props.state.groupRef,
 					repeaterKey: props.state.repeaterKey,
 					// store uses null, Select uses undefined for "clear"
 					value: value === undefined ? null : value,
-					contentLocale: props.state.contentLocale,
+					contentLocale: fieldRenderState.contentLocale(),
 				});
 			}}
 			name={props.state.fieldConfig.key}

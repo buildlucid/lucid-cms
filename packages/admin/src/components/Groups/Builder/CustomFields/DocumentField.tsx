@@ -13,6 +13,7 @@ import {
 	createSignal,
 } from "solid-js";
 import { DocumentSelect } from "@/components/Groups/Form";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
@@ -20,22 +21,23 @@ import helpers from "@/utils/helpers";
 
 interface DocumentFieldProps {
 	state: {
-		brickIndex: number;
 		fieldConfig: CFConfig<"document">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
-		contentLocale: string;
 		fieldError: FieldError | undefined;
 		fieldErrors: FieldError[];
 		altLocaleError: boolean;
 		localised: boolean;
 		fieldColumnIsMissing: boolean;
-		relationVersionType?: string;
 	};
 }
 
 export const DocumentField: Component<DocumentFieldProps> = (props) => {
+	// -------------------------------
+	// State & Hooks
+	const fieldRenderState = useFieldRenderState();
+
 	// -------------------------------
 	// State
 	const [getValue, setValue] = createSignal<DocumentFieldValue[] | undefined>();
@@ -49,7 +51,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 		return brickHelpers.getFieldValue<DocumentFieldValue[]>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
-			contentLocale: props.state.contentLocale,
+			contentLocale: fieldRenderState.contentLocale(),
 		});
 	});
 	const fieldRef = createMemo(() => {
@@ -82,7 +84,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 		<DocumentSelect
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
-				brickIndex: props.state.brickIndex,
+				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,
 			})}
 			collectionKeys={allowedCollectionKeys()}
@@ -107,13 +109,13 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 						brickStore.get.addRef("document", refs as DocumentRef[]);
 					}
 					brickStore.get.setFieldValue({
-						brickIndex: props.state.brickIndex,
+						brickIndex: fieldRenderState.brickIndex(),
 						fieldConfig: props.state.fieldConfig,
 						key: props.state.fieldConfig.key,
 						ref: props.state.groupRef,
 						repeaterKey: props.state.repeaterKey,
 						value: value,
-						contentLocale: props.state.contentLocale,
+						contentLocale: fieldRenderState.contentLocale(),
 						clearFromItemIndex,
 					});
 					setValue(value);
@@ -133,7 +135,6 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 			disabled={disabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			relationVersionType={props.state.relationVersionType}
 			hideOptionalText
 		/>
 	);
