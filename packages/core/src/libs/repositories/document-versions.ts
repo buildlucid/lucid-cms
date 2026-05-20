@@ -1,5 +1,6 @@
 import { sql } from "kysely";
 import z from "zod";
+import constants from "../../constants/constants.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
 import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
@@ -216,7 +217,10 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 		});
 	}
 	/**
-	 * Selects all of the revisions for a given document ID and returns basic info for each brick table for meta data
+	 * Selects document history entries for a document ID and returns basic info
+	 * for each brick table for meta data. This includes normal revisions and
+	 * publish-operation snapshots that current environment versions were promoted
+	 * from, so the admin history timeline can attach environments to their source.
 	 */
 	async selectMultipleRevisions(
 		props: {
@@ -262,8 +266,42 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 				])
 				// @ts-expect-error
 				.where(`${dynamicConfig.tableName}.document_id`, "=", props.documentId)
-				// @ts-expect-error
-				.where(`${dynamicConfig.tableName}.type`, "=", "revision");
+				.where(({ and, eb, exists, or }) =>
+					or([
+						// @ts-expect-error
+						eb(`${dynamicConfig.tableName}.type`, "=", "revision"),
+						and([
+							eb(
+								// @ts-expect-error
+								`${dynamicConfig.tableName}.type`,
+								"=",
+								constants.collectionBuilder.publishing.snapshotVersionType,
+							),
+							exists(
+								this.db
+									.selectFrom(
+										table(dynamicConfig.tableName).as("environment_version"),
+									)
+									.select(sql.lit(1).as("one"))
+									.whereRef(
+										"environment_version.promoted_from",
+										"=",
+										`${dynamicConfig.tableName}.id`,
+									)
+									.whereRef(
+										"environment_version.document_id",
+										"=",
+										`${dynamicConfig.tableName}.document_id`,
+									)
+									.where("environment_version.type", "not in", [
+										"latest",
+										"revision",
+										constants.collectionBuilder.publishing.snapshotVersionType,
+									]),
+							),
+						]),
+					]),
+				);
 
 			for (const brick of props.bricksSchema) {
 				query = query.select(() =>
@@ -304,8 +342,42 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 				)
 				// @ts-expect-error
 				.where(`${dynamicConfig.tableName}.document_id`, "=", props.documentId)
-				// @ts-expect-error
-				.where(`${dynamicConfig.tableName}.type`, "=", "revision");
+				.where(({ and, eb, exists, or }) =>
+					or([
+						// @ts-expect-error
+						eb(`${dynamicConfig.tableName}.type`, "=", "revision"),
+						and([
+							eb(
+								// @ts-expect-error
+								`${dynamicConfig.tableName}.type`,
+								"=",
+								constants.collectionBuilder.publishing.snapshotVersionType,
+							),
+							exists(
+								this.db
+									.selectFrom(
+										table(dynamicConfig.tableName).as("environment_version"),
+									)
+									.select(sql.lit(1).as("one"))
+									.whereRef(
+										"environment_version.promoted_from",
+										"=",
+										`${dynamicConfig.tableName}.id`,
+									)
+									.whereRef(
+										"environment_version.document_id",
+										"=",
+										`${dynamicConfig.tableName}.document_id`,
+									)
+									.where("environment_version.type", "not in", [
+										"latest",
+										"revision",
+										constants.collectionBuilder.publishing.snapshotVersionType,
+									]),
+							),
+						]),
+					]),
+				);
 
 			const { main, count } = queryBuilder.main(
 				{

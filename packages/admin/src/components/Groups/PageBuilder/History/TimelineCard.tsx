@@ -44,6 +44,14 @@ const TimelineCardWrapper: Component<{
 						onClick={() => props.state.handleSelectItem(props.item)}
 					/>
 				</Match>
+				<Match when={props.item.type === "snapshot"}>
+					<TimelineCard
+						item={props.item}
+						parentType={props.parentType}
+						isSelected={isSelected()}
+						onClick={() => props.state.handleSelectItem(props.item)}
+					/>
+				</Match>
 				<Match when={props.item.type === "environment"}>
 					<TimelineCard
 						item={props.item}
@@ -180,6 +188,9 @@ const TimelineCard: Component<{
 										</Match>
 										<Match when={props.item.type === "revision"}>
 											{T()("revision")} #{props.item.id}
+										</Match>
+										<Match when={props.item.type === "snapshot"}>
+											{T()("snapshot")} #{props.item.id}
 										</Match>
 									</Switch>
 								</h3>

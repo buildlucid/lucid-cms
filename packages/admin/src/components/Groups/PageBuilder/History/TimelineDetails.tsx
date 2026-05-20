@@ -145,14 +145,17 @@ const TimelineDetails: Component<{
 		if (props.item.type === "revision") {
 			return `${T()("revision")} #${props.item.id}`;
 		}
+		if (props.item.type === "snapshot") {
+			return `${T()("snapshot")} #${props.item.id}`;
+		}
 
 		return formatTargetName(props.item.version);
 	});
 	const eyebrow = createMemo(() => {
 		if (props.item.type === "environment") return T()("environment");
-		return props.item.type === "latest"
-			? T()("current_version")
-			: T()("saved_revision");
+		if (props.item.type === "latest") return T()("current_version");
+		if (props.item.type === "snapshot") return T()("snapshot");
+		return T()("saved_revision");
 	});
 	const viewHref = createMemo(() =>
 		getDocumentRoute("edit", {
@@ -689,6 +692,7 @@ const VersionType: Component<{
 		<Match when={props.item.type === "latest"}>{T()("latest")}</Match>
 		<Match when={props.item.type === "environment"}>{T()("environment")}</Match>
 		<Match when={props.item.type === "revision"}>{T()("revision")}</Match>
+		<Match when={props.item.type === "snapshot"}>{T()("snapshot")}</Match>
 	</Switch>
 );
 
@@ -702,6 +706,9 @@ const VersionStatusPills: Component<{
 			</Match>
 			<Match when={props.item.type === "revision"}>
 				<Pill theme="info-opaque">{T()("saved_revision")}</Pill>
+			</Match>
+			<Match when={props.item.type === "snapshot"}>
+				<Pill theme="info-opaque">{T()("snapshot")}</Pill>
 			</Match>
 			<Match when={props.item.type === "environment" && props.item.isReleased}>
 				<Pill theme="secondary">{T()("released")}</Pill>

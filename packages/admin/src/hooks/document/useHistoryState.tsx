@@ -92,6 +92,7 @@ export function useHistoryState() {
 		if (!item) return undefined;
 		if (item.type === "latest") return "latest";
 		if (item.type === "revision") return item.id;
+		if (item.type === "snapshot") return item.id;
 		if (item.type === "environment") return item.version;
 		return undefined;
 	});
@@ -265,11 +266,14 @@ export function useHistoryState() {
 			allItems.push(latestItem);
 		}
 
-		//* add revisions
+		//* add revisions and visible snapshots
 		for (const revision of revisions) {
+			const versionType =
+				revision.versionType === "snapshot" ? "snapshot" : "revision";
+
 			allItems.push({
-				type: "revision",
-				version: "revision",
+				type: versionType,
+				version: versionType,
 				id: revision.id,
 				createdAt: revision.createdAt,
 				createdBy: revision.createdBy,
@@ -380,8 +384,10 @@ export function useHistoryState() {
 			item.environmentVersions = decorated.map((d) => d.v);
 		}
 
-		//* sort all items by date
+		//* sort all items, keeping latest pinned as the current version anchor
 		allItems.sort((a, b) => {
+			if (a.type === "latest") return -1;
+			if (b.type === "latest") return 1;
 			if (!a.createdAt) return 1;
 			if (!b.createdAt) return -1;
 			return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -627,7 +633,11 @@ export function useHistoryState() {
 
 export type UseHistoryState = ReturnType<typeof useHistoryState>;
 
-export type TimelineCardType = "latest" | "revision" | "environment";
+export type TimelineCardType =
+	| "latest"
+	| "revision"
+	| "snapshot"
+	| "environment";
 
 export type TimelineItem = {
 	type: TimelineCardType;
