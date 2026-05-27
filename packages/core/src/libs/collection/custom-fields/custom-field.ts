@@ -67,6 +67,7 @@ abstract class CustomField<T extends FieldTypes> {
 		return {
 			enabled,
 			instructions: aiConfig?.instructions,
+			guidance: aiConfig?.guidance,
 			context: aiConfig?.context,
 		};
 	}

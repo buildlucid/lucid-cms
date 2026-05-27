@@ -6,8 +6,6 @@ import type { LucidRemoteRequestData } from "../types.js";
 export type CmsAiGenerateRequestInputText<TRole extends string = string> = {
 	type: "text";
 	role: TRole;
-	key?: string;
-	label?: string;
 	value: string;
 };
 
@@ -72,7 +70,6 @@ export type CustomFieldInputV1Request = CmsAiGenerateBaseRequest<
 			key: string;
 			type: string;
 			details?: unknown;
-			value?: unknown;
 			translations?: Record<string, unknown>;
 			valueSchema: unknown;
 		};

@@ -65,6 +65,8 @@ const customFieldInputController = factory.createHandlers(
 			},
 		})(context, {
 			instruction: body.instruction,
+			guidance: body.guidance,
+			currentValue: body.currentValue,
 			target: body.target,
 			locale: body.locale,
 		});

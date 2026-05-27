@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import { coreAiGuidance } from "../../constants/default-config.js";
 import { logger } from "../../index.js";
 import type {
 	CmsAiGenerateData,
@@ -9,11 +10,14 @@ import T from "../../translations/index.js";
 import type { CustomFieldAiContextItem } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
+import normalizeCurrentValueTranslations from "./helpers/normalize-current-value-translations.js";
 
 const customFieldInput: ServiceFn<
 	[
 		{
 			instruction: string;
+			guidance?: string;
+			currentValue?: unknown;
 			target: {
 				collectionKey: string;
 				brickKey?: string;
@@ -100,6 +104,31 @@ const customFieldInput: ServiceFn<
 			value: targetField.aiConfig.instructions,
 		});
 	}
+	if (props.guidance) {
+		const allowedGuidanceKeys =
+			targetField.aiConfig.guidance ?? coreAiGuidance.map((item) => item.key);
+		const guidance = context.config.ai.guidance.find((item) => {
+			if (item.key !== props.guidance) return false;
+
+			return allowedGuidanceKeys.includes(item.key);
+		});
+		if (!guidance) {
+			return {
+				error: {
+					type: "basic",
+					status: 400,
+					message: T("ai_custom_field_input_guidance_not_found"),
+				},
+				data: undefined,
+			};
+		}
+
+		input.push({
+			type: "text",
+			role: "guidance",
+			value: guidance.instructions,
+		});
+	}
 
 	let contextItems: CustomFieldAiContextItem[] = [];
 	if (targetField.aiConfig.context) {
@@ -118,6 +147,28 @@ const customFieldInput: ServiceFn<
 		}
 	}
 
+	const targetLocale = props.locale.target.at(0);
+	if (!targetLocale) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: T("route_ai_generate_error_message"),
+			},
+			data: undefined,
+		};
+	}
+
+	const currentValueTranslations = normalizeCurrentValueTranslations({
+		currentValue: props.currentValue,
+		localeCodes: [
+			...context.config.localization.locales.map((locale) => locale.code),
+			...(props.locale.source ? [props.locale.source] : []),
+			...props.locale.target,
+		],
+		targetLocale,
+	});
+
 	const request: CustomFieldInputV1Request = {
 		feature: {
 			key: "custom-field-input",
@@ -133,7 +184,7 @@ const customFieldInput: ServiceFn<
 				key: targetField.key,
 				type: targetField.type,
 				details: targetField.details,
-				value: undefined,
+				translations: currentValueTranslations,
 				valueSchema: targetField.jsonSchema,
 			},
 			items: contextItems,

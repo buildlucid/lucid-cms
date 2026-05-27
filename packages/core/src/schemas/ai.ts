@@ -38,6 +38,8 @@ export const controllerSchemas = {
 		body: z
 			.object({
 				instruction: z.string().trim().min(1).max(8_000),
+				guidance: z.string().trim().min(1).optional(),
+				currentValue: z.unknown().optional(),
 				target: z
 					.object({
 						collectionKey: z.string().trim().min(1),

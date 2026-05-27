@@ -1,7 +1,7 @@
 import T from "../../../translations/index.js";
 
 const checkDuplicateBuilderKeys = (
-	builder: "bricks" | "collections",
+	builder: "ai guidance" | "bricks" | "collections",
 	keys?: string[],
 ) => {
 	if (keys === undefined) return;

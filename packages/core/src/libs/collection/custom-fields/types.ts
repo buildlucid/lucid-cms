@@ -142,6 +142,7 @@ export type FieldStaticConfig<T extends string = string> = {
 export type CustomFieldAiConfig<T extends FieldTypes = FieldTypes> = {
 	enabled: boolean;
 	instructions?: string;
+	guidance?: string[];
 	context?: CustomFieldAiContextCallback<T>;
 };
 
@@ -174,6 +175,7 @@ export type CustomFieldAiContextCallback<T extends FieldTypes = FieldTypes> = (
 export type CustomFieldUserAiConfig<T extends FieldTypes = FieldTypes> = {
 	enabled?: boolean;
 	instructions?: string;
+	guidance?: string[];
 	context?: CustomFieldAiContextCallback<T>;
 };
 

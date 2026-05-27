@@ -6,7 +6,12 @@ const mergeConfig = (
 	defaultConfig: Partial<LucidConfig>,
 ) => {
 	const clonedDefaults = structuredClone(defaultConfig);
-	return merge(clonedDefaults, config) as Config;
+	const defaultGuidance = clonedDefaults.ai?.guidance ?? [];
+	const merged = merge(clonedDefaults, config) as Config;
+
+	merged.ai.guidance = [...defaultGuidance, ...(config.ai?.guidance ?? [])];
+
+	return merged;
 };
 
 export default mergeConfig;

@@ -125,6 +125,28 @@ export type AccessConfig = {
 	roles?: AccessRoleDefinition[];
 };
 
+export type AiGuidanceConfig = {
+	/**
+	 * Stable key used by fields and AI requests to select this guidance preset.
+	 */
+	key: string;
+	/**
+	 * User-facing label for this guidance preset.
+	 */
+	label: ConfiguredLocaleValue;
+	/**
+	 * Instructions passed to the AI feature when this guidance preset is selected.
+	 */
+	instructions: string;
+};
+
+export type AiConfig = {
+	/**
+	 * Shared selectable instruction presets for AI features.
+	 */
+	guidance?: AiGuidanceConfig[];
+};
+
 export type SecurityContentSecurityPolicy = {
 	defaultSrc?: string[];
 	baseUri?: string[];
@@ -427,6 +449,10 @@ export interface LucidConfig {
 	 */
 	access?: AccessConfig;
 	/**
+	 * AI feature configuration.
+	 */
+	ai?: AiConfig;
+	/**
 	 * Configure the soft-delete behavior for different data types
 	 */
 	softDelete?: {
@@ -609,6 +635,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		groups: AccessPermissionGroupDefinitions;
 		permissions: AccessPermissionDefinitions;
 		roles: AccessRoleDefinition[];
+	};
+	ai: {
+		guidance: AiGuidanceConfig[];
 	};
 	softDelete: {
 		defaultRetentionDays: number;

@@ -240,6 +240,21 @@ const ConfigSchema = z.object({
 				.optional(),
 		})
 		.optional(),
+	ai: z
+		.object({
+			guidance: z
+				.array(
+					z
+						.object({
+							key: z.string().trim().min(1),
+							label: configuredLocaleTranslations,
+							instructions: z.string().trim().min(1),
+						})
+						.strict(),
+				)
+				.optional(),
+		})
+		.optional(),
 	kv: z
 		.object({
 			adapter: KVAdapterSchema.optional(),

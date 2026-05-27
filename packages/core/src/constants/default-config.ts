@@ -1,6 +1,27 @@
 import type { Config, LucidConfig } from "../types/config.js";
 import constants from "./constants.js";
 
+export const coreAiGuidance = [
+	{
+		key: "improve",
+		label: "Improve",
+		instructions:
+			"Improve the writing while preserving the original meaning and important details.",
+	},
+	{
+		key: "expand",
+		label: "Expand",
+		instructions:
+			"Expand the writing with useful detail while staying relevant and accurate.",
+	},
+	{
+		key: "shorten",
+		label: "Shorten",
+		instructions:
+			"Make the writing shorter while preserving the important details and meaning.",
+	},
+] satisfies NonNullable<LucidConfig["ai"]>["guidance"];
+
 export const defaultConfig: Partial<LucidConfig> = {
 	logger: {
 		level: "info",
@@ -65,6 +86,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 		groups: {},
 		permissions: {},
 		roles: [],
+	},
+	ai: {
+		guidance: coreAiGuidance,
 	},
 	build: {
 		paths: {

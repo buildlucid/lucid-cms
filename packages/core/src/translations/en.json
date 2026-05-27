@@ -204,6 +204,7 @@
 	"route_ai_generate_error_message": "An error occurred while generating AI content.",
 	"ai_custom_field_input_no_supported_field": "No supported AI custom field was found for this collection.",
 	"ai_custom_field_input_target_not_found": "The AI target you are trying to use does not exist.",
+	"ai_custom_field_input_guidance_not_found": "The selected AI guidance does not exist for this field.",
 	"route_verify_email_change_confirm_error_name": "Email Change Confirmation Error",
 	"route_verify_email_change_confirm_error_message": "An error occurred while verifying the email change confirmation token.",
 	"route_confirm_email_change_error_name": "Email Change Confirmation Error",
