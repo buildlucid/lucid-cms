@@ -22,6 +22,13 @@ const CustomFieldSchema = z.object({
 			false: stringTranslations.optional(),
 		})
 		.optional(),
+	ai: z
+		.object({
+			enabled: z.boolean().optional(),
+			instructions: z.string().optional(),
+			context: z.function().optional(),
+		})
+		.optional(),
 	config: z
 		.object({
 			default: z

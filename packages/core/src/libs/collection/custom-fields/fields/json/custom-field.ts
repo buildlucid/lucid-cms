@@ -8,6 +8,7 @@ import type {
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
+import { zodToJsonSchema } from "../../utils/helpers.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { jsonFieldConfig } from "./config.js";
@@ -29,6 +30,7 @@ class JsonCustomField extends CustomField<"json"> {
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,
 			},
+			ai: this.props?.ai,
 			config: {
 				translations: this.props?.config?.translations ?? false,
 				default: this.props?.config?.default || {},
@@ -38,6 +40,14 @@ class JsonCustomField extends CustomField<"json"> {
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"json">;
+	}
+	protected override get supportsAi() {
+		return true;
+	}
+	override get jsonSchema() {
+		return zodToJsonSchema(this.config.validation?.zod, {
+			type: "object",
+		});
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,

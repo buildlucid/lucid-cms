@@ -1,0 +1,155 @@
+import constants from "../../constants/constants.js";
+import { logger } from "../../index.js";
+import type {
+	CmsAiGenerateData,
+	CustomFieldInputV1Request,
+} from "../../libs/lucid-remote/services/generate-cms-ai.js";
+import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
+import T from "../../translations/index.js";
+import type { CustomFieldAiContextItem } from "../../types.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import getLicenseKey from "../options/get-license-key.js";
+
+const customFieldInput: ServiceFn<
+	[
+		{
+			instruction: string;
+			target: {
+				collectionKey: string;
+				brickKey?: string;
+				fieldKey: string;
+			};
+			locale: {
+				source?: string;
+				target: string[];
+			};
+		},
+	],
+	CmsAiGenerateData
+> = async (context, props) => {
+	const licenseKeyRes = await getLicenseKey(context);
+	if (licenseKeyRes.error) return licenseKeyRes;
+
+	const collection = context.config.collections.find(
+		(item) => item.key === props.target.collectionKey,
+	);
+	if (!collection) {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				message: T("collection_not_found_message"),
+			},
+			data: undefined,
+		};
+	}
+
+	const targetBrick = props.target.brickKey
+		? collection.brickInstances.find(
+				(brick) => brick.key === props.target.brickKey,
+			)
+		: undefined;
+	const fieldSource = targetBrick ?? collection;
+
+	if (props.target.brickKey && !targetBrick) {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				message: T("ai_custom_field_input_target_not_found"),
+			},
+			data: undefined,
+		};
+	}
+
+	const targetField = fieldSource.fields.get(props.target.fieldKey);
+
+	if (!targetField) {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				message: T("ai_custom_field_input_target_not_found"),
+			},
+			data: undefined,
+		};
+	}
+
+	if (!targetField.aiConfig.enabled) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: T("ai_custom_field_input_no_supported_field"),
+			},
+			data: undefined,
+		};
+	}
+
+	const input: CustomFieldInputV1Request["input"] = [
+		{
+			type: "text",
+			role: "user-instruction",
+			value: props.instruction,
+		},
+	];
+	if (targetField.aiConfig.instructions?.trim()) {
+		input.push({
+			type: "text",
+			role: "field-instructions",
+			value: targetField.aiConfig.instructions,
+		});
+	}
+
+	let contextItems: CustomFieldAiContextItem[] = [];
+	if (targetField.aiConfig.context) {
+		try {
+			contextItems = await targetField.aiConfig.context({
+				collection,
+				brick: targetBrick,
+				field: targetField,
+				locale: props.locale,
+			});
+		} catch (err) {
+			logger.error({
+				scope: constants.logScopes.ai,
+				message: err instanceof Error ? err.message : String(err),
+			});
+		}
+	}
+
+	const request: CustomFieldInputV1Request = {
+		feature: {
+			key: "custom-field-input",
+			version: "v1",
+		},
+		input,
+		context: {
+			locale: props.locale,
+			collection: {
+				key: props.target.collectionKey,
+			},
+			field: {
+				key: targetField.key,
+				type: targetField.type,
+				details: targetField.details,
+				value: undefined,
+				valueSchema: targetField.jsonSchema,
+			},
+			items: contextItems,
+		},
+	};
+
+	const generateRes = await generateCmsAi(context, {
+		licenseKey: licenseKeyRes.data,
+		request,
+	});
+	if (generateRes.error) return generateRes;
+
+	return {
+		error: undefined,
+		data: generateRes.data.json.data,
+	};
+};
+
+export default customFieldInput;

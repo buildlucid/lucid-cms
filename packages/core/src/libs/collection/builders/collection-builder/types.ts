@@ -18,7 +18,8 @@ export type CollectionPermissionAction =
 	| "delete"
 	| "restore"
 	| "publish"
-	| "review";
+	| "review"
+	| "ai";
 export type CollectionPermissions = Partial<
 	Record<CollectionPermissionAction, string>
 >;

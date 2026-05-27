@@ -42,6 +42,7 @@ const CollectionConfigSchema = z
 				restore: z.string().optional(),
 				publish: z.string().optional(),
 				review: z.string().optional(),
+				ai: z.string().optional(),
 			})
 			.optional(),
 		config: z

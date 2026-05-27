@@ -10,7 +10,9 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
+	CustomFieldAiConfig,
 	CustomFieldErrorItem,
+	CustomFieldUserAiConfig,
 	CustomFieldValidateResponse,
 	FieldRelationRefTarget,
 	FieldRelationValidationInput,
@@ -47,6 +49,34 @@ abstract class CustomField<T extends FieldTypes> {
 			skipRequiredValidation: false,
 			skipZodValidation: false,
 		};
+	}
+	/** Whether this field type supports Lucid AI features. */
+	protected get supportsAi() {
+		return false;
+	}
+	/** Normalized field metadata used by Lucid AI features. */
+	get aiConfig(): CustomFieldAiConfig {
+		const aiConfig = (
+			this.config as CFConfig<T> & {
+				ai?: CustomFieldUserAiConfig;
+			}
+		).ai;
+		const enabled =
+			this.supportsAi === true ? (aiConfig?.enabled ?? true) : false;
+
+		return {
+			enabled,
+			instructions: aiConfig?.instructions,
+			context: aiConfig?.context,
+		};
+	}
+	/** JSON schema for AI generated values, when a field supports generation. */
+	get jsonSchema(): Record<string, unknown> | null {
+		return null;
+	}
+	/** Public field display metadata. */
+	get details(): CFConfig<T>["details"] {
+		return this.config.details;
 	}
 	/** Normalizes input values before validation and persistence. */
 	public normalizeInputValue(value: unknown): unknown {

@@ -1,10 +1,18 @@
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { getLucidRemoteClient } from "../client.js";
 import { lucidRemotePaths } from "../constants.js";
-import type { LucidRemoteRequestData, VerifyCmsLicenseData } from "../types.js";
+import type { LucidRemoteRequestData } from "../types.js";
 
 type VerifyCmsLicenseProps = {
 	licenseKey: string;
+};
+
+export type VerifyCmsLicenseData = {
+	valid: boolean;
+	message?: string;
+	ai?: {
+		enabled?: boolean;
+	};
 };
 
 /**

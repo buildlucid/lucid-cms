@@ -1,6 +1,9 @@
 import type { ZodType } from "zod";
 import type { LocaleValue } from "../../../../../types/shared.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type {
+	CustomFieldUserAiConfig,
+	SharedFieldConfig,
+} from "../../types.js";
 
 export interface TextareaFieldConfig extends SharedFieldConfig {
 	type: "textarea";
@@ -9,6 +12,7 @@ export interface TextareaFieldConfig extends SharedFieldConfig {
 		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
+	ai?: CustomFieldUserAiConfig<"textarea">;
 	config: {
 		translations?: boolean;
 		hidden?: boolean;

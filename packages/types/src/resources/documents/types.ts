@@ -562,6 +562,7 @@ export interface Collection {
 		restore: string;
 		publish: string;
 		review: string;
+		ai: string;
 	};
 	migrationStatus?: MigrationStatus | null;
 	fixedBricks: Array<CollectionBrickConfig>;

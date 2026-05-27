@@ -1,4 +1,4 @@
-import type { ZodType } from "zod";
+import z, { type ZodType } from "zod";
 import type { CFConfig, FieldTypes } from "../types.js";
 
 /**
@@ -48,4 +48,20 @@ export const hasZodValidation = (
 	return (
 		typeof validation === "object" && validation !== null && "zod" in validation
 	);
+};
+
+/**
+ * Converts zod validation into JSON schema, falling back when conversion is not possible.
+ */
+export const zodToJsonSchema = (
+	schema: ZodType<unknown> | undefined,
+	fallback: Record<string, unknown>,
+) => {
+	if (schema === undefined) return fallback;
+
+	try {
+		return z.toJSONSchema(schema) as Record<string, unknown>;
+	} catch {
+		return fallback;
+	}
 };

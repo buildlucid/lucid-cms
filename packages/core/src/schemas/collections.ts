@@ -151,6 +151,7 @@ const collectionResponseSchema = z.object({
 		restore: z.string(),
 		publish: z.string(),
 		review: z.string(),
+		ai: z.string(),
 	}),
 	migrationStatus: migrationStatusSchema.nullable(),
 	get fixedBricks() {

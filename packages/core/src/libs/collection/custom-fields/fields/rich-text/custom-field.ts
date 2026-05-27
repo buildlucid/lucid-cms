@@ -29,6 +29,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,
 			},
+			ai: this.props?.ai,
 			config: {
 				translations: this.props?.config?.translations ?? true,
 				default: this.props?.config?.default ?? {
@@ -41,6 +42,67 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"rich-text">;
+	}
+	protected override get supportsAi() {
+		return true;
+	}
+	override get jsonSchema() {
+		return {
+			type: "object",
+			additionalProperties: false,
+			required: ["type", "content"],
+			properties: {
+				type: {
+					const: "doc",
+				},
+				content: {
+					type: "array",
+					items: {
+						$ref: "#/$defs/node",
+					},
+				},
+			},
+			$defs: {
+				node: {
+					type: "object",
+					additionalProperties: true,
+					required: ["type"],
+					properties: {
+						type: {
+							type: "string",
+						},
+						attrs: {
+							type: "object",
+						},
+						content: {
+							type: "array",
+							items: {
+								$ref: "#/$defs/node",
+							},
+						},
+						text: {
+							type: "string",
+						},
+						marks: {
+							type: "array",
+							items: {
+								type: "object",
+								additionalProperties: true,
+								required: ["type"],
+								properties: {
+									type: {
+										type: "string",
+									},
+									attrs: {
+										type: "object",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		};
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,

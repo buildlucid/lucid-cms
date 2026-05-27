@@ -1,12 +1,17 @@
 import type { ResponseBody } from "../../types/response.js";
 
-export type VerifyCmsLicenseData = {
-	valid: boolean;
-	message?: string;
-	ai?: {
-		enabled?: boolean;
-	};
-};
+export type {
+	CmsAiGenerateData,
+	CmsAiGenerateRequest,
+	CmsAiGenerateRequestFeature,
+	CmsAiGenerateRequestInput,
+	CmsAiGenerateRequestInputImage,
+	CmsAiGenerateRequestInputText,
+	CmsAiGenerateRequestItem,
+	CustomFieldInputV1Request,
+	MediaAltGenerateV1Request,
+} from "./services/generate-cms-ai.js";
+export type { VerifyCmsLicenseData } from "./services/verify-cms-license.js";
 
 export type LucidRemoteRequestData<T> = {
 	response: Response;

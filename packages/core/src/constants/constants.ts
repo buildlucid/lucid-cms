@@ -144,6 +144,7 @@ export default Object.freeze({
 		mediaAdapter: "media-adapter",
 		emailAdapter: "email-adapter",
 		oidcAuth: "oidc-auth",
+		ai: "ai",
 	} as const,
 	retention: 30,
 	cronSchedules: {

@@ -1,4 +1,5 @@
 export * as accountServices from "./account/index.js";
+export * as aiServices from "./ai/index.js";
 export * as authServices from "./auth/index.js";
 export * as cdnServices from "./cdn/index.js";
 export * as clientIntegrationServices from "./client-integrations/index.js";

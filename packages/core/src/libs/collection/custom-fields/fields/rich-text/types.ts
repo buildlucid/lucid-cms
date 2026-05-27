@@ -1,6 +1,9 @@
 import type { ZodType } from "zod";
 import type { LocaleValue } from "../../../../../types/shared.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type {
+	CustomFieldUserAiConfig,
+	SharedFieldConfig,
+} from "../../types.js";
 
 export interface RichTextFieldConfig extends SharedFieldConfig {
 	type: "rich-text";
@@ -9,6 +12,7 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 		summary?: LocaleValue;
 		placeholder?: LocaleValue;
 	};
+	ai?: CustomFieldUserAiConfig<"rich-text">;
 	config: {
 		translations?: boolean;
 		default?: Record<string, unknown>;

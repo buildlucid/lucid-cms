@@ -29,6 +29,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,
 			},
+			ai: this.props?.ai,
 			config: {
 				translations: this.props?.config?.translations ?? true,
 				default: this.props?.config?.default ?? "",
@@ -38,6 +39,14 @@ class TextareaCustomField extends CustomField<"textarea"> {
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"textarea">;
+	}
+	protected override get supportsAi() {
+		return true;
+	}
+	override get jsonSchema() {
+		return {
+			type: "string",
+		};
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,

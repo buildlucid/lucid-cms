@@ -8,12 +8,13 @@ import type {
 	OnDelete,
 	OnUpdate,
 } from "../../db/types.js";
-import type { CollectionBuilder } from "../builders/index.js";
+import type { BrickBuilder, CollectionBuilder } from "../builders/index.js";
 import type {
 	CollectionSchemaColumn,
 	CollectionSchemaIndex,
 	CollectionSchemaTable,
 } from "../schema/types.js";
+import type CustomField from "./custom-field.js";
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import type { CheckboxCustomFieldMapItem } from "./fields/checkbox/types.js";
 import { colorFieldConfig } from "./fields/color/config.js";
@@ -136,6 +137,44 @@ export type FieldDatabaseConfig<T extends string = string> =
 export type FieldStaticConfig<T extends string = string> = {
 	type: T;
 	database: FieldDatabaseConfig<T>;
+};
+
+export type CustomFieldAiConfig<T extends FieldTypes = FieldTypes> = {
+	enabled: boolean;
+	instructions?: string;
+	context?: CustomFieldAiContextCallback<T>;
+};
+
+export type CustomFieldAiContextItem =
+	| {
+			type: "text";
+			label: string;
+			value: string;
+	  }
+	| {
+			type: "json";
+			label: string;
+			value: unknown;
+	  };
+
+export type CustomFieldAiContext<T extends FieldTypes = FieldTypes> = {
+	collection: CollectionBuilder;
+	brick?: BrickBuilder;
+	field: CustomField<T>;
+	locale: {
+		source?: string;
+		target: string[];
+	};
+};
+
+export type CustomFieldAiContextCallback<T extends FieldTypes = FieldTypes> = (
+	context: CustomFieldAiContext<T>,
+) => CustomFieldAiContextItem[] | Promise<CustomFieldAiContextItem[]>;
+
+export type CustomFieldUserAiConfig<T extends FieldTypes = FieldTypes> = {
+	enabled?: boolean;
+	instructions?: string;
+	context?: CustomFieldAiContextCallback<T>;
 };
 
 // -----------------------------------------------

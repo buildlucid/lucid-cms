@@ -255,6 +255,11 @@ const createApp = async (props: {
 								"License endpoints for managing the license key and verifying its validity.",
 						},
 						{
+							name: "ai",
+							description:
+								"AI endpoints for generating CMS content with Lucid AI features.",
+						},
+						{
 							name: "client-integrations",
 							description:
 								"Endpoints for managing client integration credentials used to authenticate external applications accessing CMS content via client endpoints.",

@@ -13,11 +13,15 @@ import hasAccess from "../../permission/has-access.js";
 const collectionPermissions = (
 	action: CollectionPermissionAction,
 	options?: {
+		getCollectionKey?: (c: LucidHonoContext) => string | undefined;
 		getTarget?: (c: LucidHonoContext) => string | undefined;
 	},
 ) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
-		const collectionKey = c.req.param("collectionKey") || c.req.param("key");
+		const collectionKey =
+			options?.getCollectionKey?.(c) ||
+			c.req.param("collectionKey") ||
+			c.req.param("key");
 		const collection = c
 			.get("config")
 			.collections.find((item) => item.key === collectionKey);
