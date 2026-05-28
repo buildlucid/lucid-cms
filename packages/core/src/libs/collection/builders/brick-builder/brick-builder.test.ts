@@ -1,4 +1,5 @@
 import { expect, test } from "vitest";
+import { adminText } from "../../../i18n/admin-text.js";
 import FieldBuilder from "../field-builder/index.js";
 import BrickBuilder from "./index.js";
 
@@ -62,8 +63,10 @@ test("tab fields are added and nesting is correct", async () => {
 test("brick config is correct", async () => {
 	const brick = new BrickBuilder("brick", {
 		details: {
-			name: "Brick",
-			summary: "Brick Summary",
+			name: adminText("tests.bricks.brick.name", { fallback: "Brick" }),
+			summary: adminText("tests.bricks.brick.summary", {
+				fallback: "Brick Summary",
+			}),
 		},
 		preview: {
 			image: "https://placehold.co/600x400",
@@ -73,8 +76,10 @@ test("brick config is correct", async () => {
 	expect(brick.config).toEqual({
 		key: "brick",
 		details: {
-			name: "Brick",
-			summary: "Brick Summary",
+			name: adminText("tests.bricks.brick.name", { fallback: "Brick" }),
+			summary: adminText("tests.bricks.brick.summary", {
+				fallback: "Brick Summary",
+			}),
 		},
 		preview: { image: "https://placehold.co/600x400" },
 	});

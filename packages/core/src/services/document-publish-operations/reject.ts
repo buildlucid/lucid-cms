@@ -1,5 +1,5 @@
+import { serverText } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
@@ -35,7 +35,7 @@ const reject: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_not_pending"),
+				message: serverText("core.publish.requests.not.pending"),
 				status: 400,
 			},
 			data: undefined,
@@ -58,10 +58,12 @@ const reject: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_permission_error_message", {
-					collection: operationRes.data.collection_key,
-					action: "review",
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: operationRes.data.collection_key,
+						action: "review",
+					},
 				}),
 				status: 403,
 			},
@@ -78,7 +80,7 @@ const reject: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_decision_comment_required"),
+				message: serverText("core.publish.requests.decision.comment.required"),
 				status: 400,
 			},
 			data: undefined,
@@ -126,48 +128,52 @@ const reject: ServiceFn<
 		collectionKey: operationRes.data.collection_key,
 		documentId: operationRes.data.document_id,
 		recipients: requester,
-		title: T("publish_request_rejected_title"),
-		message: T("publish_request_rejected_message", {
-			user: data.user.email,
-			collection: operationRes.data.collection_key,
-			documentId: operationRes.data.document_id,
+		title: serverText("core.publish.requests.rejected.title"),
+		message: serverText("core.publish.requests.rejected.message", {
+			data: {
+				user: data.user.email,
+				collection: operationRes.data.collection_key,
+				documentId: operationRes.data.document_id,
+			},
 		}),
 		dedupeAction: "rejected",
 		comment: {
-			label: T("publish_request_email_decision_comment"),
+			label: serverText("core.publish.requests.email.decision.comment"),
 			value: comment,
 		},
 		details: [
 			{
-				label: T("publish_request_email_detail_release"),
+				label: serverText("core.publish.requests.email.detail.release"),
 				value: `#${operationRes.data.id}`,
 			},
 			{
-				label: T("publish_request_email_detail_collection"),
+				label: serverText("core.publish.requests.email.detail.collection"),
 				value: operationRes.data.collection_key,
 			},
 			{
-				label: T("publish_request_email_detail_document"),
+				label: serverText("core.publish.requests.email.detail.document"),
 				value: `#${operationRes.data.document_id}`,
 			},
 			{
-				label: T("publish_request_email_detail_target"),
+				label: serverText("core.publish.requests.email.detail.target"),
 				value: operationRes.data.target,
 			},
 			{
-				label: T("publish_request_email_detail_requested_by"),
+				label: serverText("core.publish.requests.email.detail.requested.by"),
 				value: operationRes.data.requested_by_email,
 			},
 			{
-				label: T("publish_request_email_detail_rejected_by"),
+				label: serverText("core.publish.requests.email.detail.rejected.by"),
 				value: data.user.email,
 			},
 			{
-				label: T("publish_request_email_detail_scheduled_for"),
+				label: serverText("core.publish.requests.email.detail.scheduled.for"),
 				value: operationRes.data.scheduled_at,
 			},
 			{
-				label: T("publish_request_email_detail_scheduled_timezone"),
+				label: serverText(
+					"core.publish.requests.email.detail.scheduled.timezone",
+				),
 				value: operationRes.data.scheduled_timezone,
 			},
 		],

@@ -1,5 +1,5 @@
 import type { ZodType } from "zod";
-import type { LocaleValue } from "../../../../../types/shared.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
 	SharedFieldConfig,
@@ -8,13 +8,13 @@ import type {
 export interface JsonFieldConfig extends SharedFieldConfig {
 	type: "json";
 	details: {
-		label?: LocaleValue;
-		summary?: LocaleValue;
-		placeholder?: LocaleValue;
+		label?: AdminText;
+		summary?: AdminText;
+		placeholder?: AdminText;
 	};
 	ai?: CustomFieldUserAiConfig<"json">;
 	config: {
-		translations?: boolean;
+		localized?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
 		index?: true;

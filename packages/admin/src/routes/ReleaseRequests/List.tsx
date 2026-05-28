@@ -140,7 +140,8 @@ const ReleaseRequestsListRoute: Component = () => {
 	const userOptions = createMemo(() =>
 		(users.data?.data ?? []).map((user) => ({
 			value: user.id,
-			label: helpers.formatUserName(user, "simple") || T()("unknown"),
+			label:
+				helpers.formatUserName(user, "simple") || T()("media.types.unknown"),
 			user,
 		})),
 	);
@@ -168,8 +169,8 @@ const ReleaseRequestsListRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("publish_requests_route_title"),
-							description: T()("publish_requests_route_description"),
+							title: T()("routes.publish.requests.title"),
+							description: T()("routes.publish.requests.description"),
 						}}
 						slots={{
 							bottom: (
@@ -185,86 +186,86 @@ const ReleaseRequestsListRoute: Component = () => {
 									}}
 									filters={[
 										{
-											label: T()("collection"),
+											label: T()("common.collection"),
 											key: "collectionKey",
 											type: "select",
 											options: collectionOptions(),
 										},
 										{
-											label: T()("target"),
+											label: T()("common.target"),
 											key: "target",
 											type: "select",
 											options: targetOptions(),
 										},
 										{
-											label: T()("status"),
+											label: T()("common.status"),
 											key: "status",
 											type: "multi-select",
 											options: [
 												{
-													label: T()("pending"),
+													label: T()("common.status.pending"),
 													value: "pending" satisfies PublishOperationStatus,
 												},
 												{
-													label: T()("approved"),
+													label: T()("common.status.approved"),
 													value: "approved" satisfies PublishOperationStatus,
 												},
 												{
-													label: T()("rejected"),
+													label: T()("common.status.rejected"),
 													value: "rejected" satisfies PublishOperationStatus,
 												},
 												{
-													label: T()("cancelled"),
+													label: T()("common.status.cancelled"),
 													value: "cancelled" satisfies PublishOperationStatus,
 												},
 											],
 										},
 										{
-											label: T()("execution_status"),
+											label: T()("common.execution.status"),
 											key: "executionStatus",
 											type: "multi-select",
 											options: [
 												{
-													label: T()("awaiting_approval"),
+													label: T()("common.status.awaiting.approval"),
 													value:
 														"awaiting_approval" satisfies PublishOperationExecutionStatus,
 												},
 												{
-													label: T()("scheduled"),
+													label: T()("common.status.scheduled"),
 													value:
 														"scheduled" satisfies PublishOperationExecutionStatus,
 												},
 												{
-													label: T()("executing"),
+													label: T()("common.status.executing"),
 													value:
 														"executing" satisfies PublishOperationExecutionStatus,
 												},
 												{
-													label: T()("executed"),
+													label: T()("common.status.executed"),
 													value:
 														"executed" satisfies PublishOperationExecutionStatus,
 												},
 												{
-													label: T()("failed"),
+													label: T()("common.status.failed"),
 													value:
 														"failed" satisfies PublishOperationExecutionStatus,
 												},
 												{
-													label: T()("cancelled"),
+													label: T()("common.status.cancelled"),
 													value:
 														"cancelled" satisfies PublishOperationExecutionStatus,
 												},
 											],
 										},
 										{
-											label: T()("requested_by"),
+											label: T()("common.requested.by"),
 											key: "requestedBy",
 											type: "multi-select",
 											options: userOptions(),
 											optionType: "user",
 										},
 										{
-											label: T()("reviewers"),
+											label: T()("common.reviewers"),
 											key: "reviewers",
 											type: "multi-select",
 											options: userOptions(),
@@ -273,15 +274,15 @@ const ReleaseRequestsListRoute: Component = () => {
 									]}
 									sorts={[
 										{
-											label: T()("requested_at"),
+											label: T()("common.requested.at"),
 											key: "createdAt",
 										},
 										{
-											label: T()("scheduled_for"),
+											label: T()("common.scheduled.for"),
 											key: "scheduledAt",
 										},
 										{
-											label: T()("updated_at"),
+											label: T()("common.updated.at"),
 											key: "updatedAt",
 										},
 									]}

@@ -48,8 +48,8 @@ const CopyShareLinkURL: Component<{
 				setOpen: props.state.setOpen,
 			}}
 			copy={{
-				title: T()("copy_share_link_url_modal_title"),
-				description: T()("copy_share_link_url_modal_description"),
+				title: T()("modals.common.copy.share.link.url.title"),
+				description: T()("modals.common.copy.share.link.url.description"),
 			}}
 		>
 			<CopyInput value={url() || ""} />

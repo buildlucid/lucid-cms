@@ -110,7 +110,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 								disabled={props.disabled}
 							>
 								<FaSolidPen size={12} />
-								<span class="sr-only">{T()("edit")}</span>
+								<span class="sr-only">{T()("common.edit")}</span>
 							</Button>
 							<Button
 								type="button"
@@ -120,7 +120,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 								disabled={props.disabled}
 							>
 								<FaSolidXmark size={14} />
-								<span class="sr-only">{T()("clear")}</span>
+								<span class="sr-only">{T()("common.clear")}</span>
 							</Button>
 						</div>
 					</div>
@@ -134,7 +134,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 						onClick={openLinkModal}
 						disabled={props.disabled}
 					>
-						{T()("select_link")}
+						{T()("selectors.link")}
 					</Button>
 				</Show>
 			</div>

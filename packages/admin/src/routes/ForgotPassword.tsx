@@ -52,8 +52,8 @@ const ForgotPasswordRoute: Component = () => {
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
-						title: T()("error_title"),
-						description: T()("error_message"),
+						title: T()("errors.generic.title"),
+						description: T()("errors.generic.message"),
 					}}
 				/>
 			</Match>
@@ -61,9 +61,11 @@ const ForgotPasswordRoute: Component = () => {
 				when={isSuccess() && providers.data?.data.disablePassword === false}
 			>
 				<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
-				<h1 class="mb-1 text-center">{T()("forgot_password_route_title")}</h1>
+				<h1 class="mb-1 text-center">
+					{T()("routes.auth.forgot.password.title")}
+				</h1>
 				<p class="text-center max-w-sm mx-auto">
-					{T()("forgot_password_route_description")}
+					{T()("routes.auth.forgot.password.description")}
 				</p>
 				<div class="my-10">
 					<ForgotPasswordForm showBackToLogin={true} />

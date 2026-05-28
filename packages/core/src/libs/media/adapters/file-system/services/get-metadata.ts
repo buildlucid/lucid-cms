@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { constants } from "node:fs";
 import { access, stat } from "node:fs/promises";
-import T from "../../../../../translations/index.js";
+import { serverText } from "../../../../i18n/index.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceGetMeta,
@@ -18,7 +18,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			} catch {
 				return {
 					error: {
-						message: T("file_not_found"),
+						message: serverText("core.files.not.found"),
 						status: 404,
 					},
 					data: undefined,
@@ -52,7 +52,9 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			const error = e as Error;
 			return {
 				error: {
-					message: error.message,
+					message: serverText("core.errors.default.message", {
+						fallback: error.message,
+					}),
 					status: 500,
 				},
 				data: undefined,

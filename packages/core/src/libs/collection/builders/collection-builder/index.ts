@@ -144,9 +144,9 @@ class CollectionBuilder extends FieldBuilder {
 				revisions:
 					this.config.config?.revisions ??
 					constants.collectionBuilder.revisions,
-				translations:
-					this.config.config?.translations ??
-					constants.collectionBuilder.translations,
+				localized:
+					this.config.config?.localized ??
+					constants.collectionBuilder.localized,
 				autoSave:
 					this.config.config?.autoSave ?? constants.collectionBuilder.autoSave,
 				scheduling:

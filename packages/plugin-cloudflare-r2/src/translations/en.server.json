@@ -1,0 +1,23 @@
+{
+	"plugin.cloudflare.r2.objects.not.found": "The requested R2 object could not be found.",
+	"plugin.cloudflare.r2.objects.body.missing": "The R2 object body is undefined.",
+	"plugin.cloudflare.r2.objects.copy.source.missing": "The source object could not be found before rename.",
+	"plugin.cloudflare.r2.objects.copy.failed": "The object could not be verified after being copied.",
+	"plugin.cloudflare.r2.errors.unknown": "An unknown error occurred",
+	"plugin.cloudflare.r2.signed.urls.invalid.or.expired": "The signed media URL is invalid or has expired.",
+	"plugin.cloudflare.r2.upload.body.missing": "The upload body is missing.",
+	"plugin.cloudflare.r2.upload.headers.content.length.missing": "A Content-Length header is required for Cloudflare R2 binding uploads.",
+	"plugin.cloudflare.r2.upload.file.too.large": "The file exceeds the maximum allowed size of {{size}} bytes.",
+	"plugin.cloudflare.r2.routes.storage.upload.error.name": "Cloudflare R2 Upload Error",
+	"plugin.cloudflare.r2.routes.storage.upload.error.message": "There was an error uploading a file through the Cloudflare R2 binding.",
+	"plugin.cloudflare.r2.routes.storage.download.error.name": "Cloudflare R2 Download Error",
+	"plugin.cloudflare.r2.routes.storage.download.error.message": "There was an error downloading a file through the Cloudflare R2 binding.",
+	"plugin.cloudflare.r2.http.fallback.not.configured": "HTTP fallback is not configured.",
+	"plugin.cloudflare.r2.http.client.not.configured": "HTTP client is not configured.",
+	"plugin.cloudflare.r2.download.urls.generate.failed": "Failed to generate a download URL.",
+	"plugin.cloudflare.r2.upload.sessions.create.failed": "Upload session failed with status {{status}} and message {{statusText}}.",
+	"plugin.cloudflare.r2.upload.sessions.upload.id.missing": "The storage provider did not return an upload ID.",
+	"plugin.cloudflare.r2.upload.sessions.parts.list.failed": "List parts failed with status {{status}} and message {{statusText}}.",
+	"plugin.cloudflare.r2.upload.sessions.complete.failed": "Complete upload failed with status {{status}} and message {{statusText}}.",
+	"plugin.cloudflare.r2.upload.sessions.abort.failed": "Abort upload failed with status {{status}} and message {{statusText}}."
+}

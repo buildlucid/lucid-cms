@@ -1,12 +1,18 @@
-import { CollectionBuilder, z } from "@lucidcms/core";
+import { adminText, CollectionBuilder, z } from "@lucidcms/core";
 import SEOBrick from "../bricks/seo.js";
 
 const SettingsCollection = new CollectionBuilder("settings", {
 	mode: "single",
 	details: {
-		name: "Settings",
-		singularName: "Setting",
-		summary: "Set shared settings for your website.",
+		name: adminText("collections.settings.name", {
+			fallback: "Settings",
+		}),
+		singularName: adminText("collections.settings.singularName", {
+			fallback: "Setting",
+		}),
+		summary: adminText("collections.settings.summary", {
+			fallback: "Set shared settings for your website.",
+		}),
 	},
 	config: {
 		revisions: true,
@@ -17,22 +23,30 @@ const SettingsCollection = new CollectionBuilder("settings", {
 })
 	.addText("site_title", {
 		details: {
-			label: "Site Title",
+			label: adminText("collections.settings.fields.site_title.label", {
+				fallback: "Site Title",
+			}),
 		},
 	})
 	.addMedia("site_logo", {
 		details: {
-			label: "Site Logo",
+			label: adminText("collections.settings.fields.site_logo.label", {
+				fallback: "Site Logo",
+			}),
 		},
 	})
 	.addRepeater("social_links", {
 		details: {
-			label: "Social Links",
+			label: adminText("collections.settings.fields.social_links.label", {
+				fallback: "Social Links",
+			}),
 		},
 	})
 	.addText("social_name", {
 		details: {
-			label: "Name",
+			label: adminText("collections.settings.fields.social_name.label", {
+				fallback: "Name",
+			}),
 		},
 		validation: {
 			zod: z.string(),
@@ -41,7 +55,9 @@ const SettingsCollection = new CollectionBuilder("settings", {
 	})
 	.addText("social_url", {
 		details: {
-			label: "URL",
+			label: adminText("collections.settings.fields.social_url.label", {
+				fallback: "URL",
+			}),
 		},
 		validation: {
 			zod: z.string().url(),

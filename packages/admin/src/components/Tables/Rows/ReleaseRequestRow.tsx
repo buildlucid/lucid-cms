@@ -48,14 +48,14 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 			callbacks={props.callbacks}
 			actions={[
 				{
-					label: T()("open_request"),
+					label: T()("common.open.request"),
 					type: "link",
 					href: requestHref(),
 					sortOrder: 0,
 				},
 				{
 					type: "button",
-					label: T()("approve"),
+					label: T()("common.approve"),
 					onClick: () => props.callbacks.openDecision(props.request, "approve"),
 					hide:
 						props.request.status !== "pending" ||
@@ -65,7 +65,7 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 				},
 				{
 					type: "button",
-					label: T()("reject"),
+					label: T()("common.reject"),
 					onClick: () => props.callbacks.openDecision(props.request, "reject"),
 					hide:
 						props.request.status !== "pending" ||
@@ -76,22 +76,22 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 				{
 					type: "button",
 					label: props.request.scheduledAt
-						? T()("reschedule_release")
-						: T()("schedule"),
+						? T()("common.reschedule.release")
+						: T()("common.schedule"),
 					onClick: () => props.callbacks.openSchedule(props.request),
 					hide: props.request.permissions.reschedule !== true,
 					sortOrder: 30,
 				},
 				{
 					type: "button",
-					label: T()("update_reviewers"),
+					label: T()("actions.update.reviewers"),
 					onClick: () => props.callbacks.openReviewers(props.request),
 					hide: props.request.permissions.updateReviewers !== true,
 					sortOrder: 40,
 				},
 				{
 					type: "button",
-					label: T()("retry_release"),
+					label: T()("common.retry.release"),
 					onClick: () => props.callbacks.retry(props.request),
 					hide: props.request.permissions.retry !== true,
 					theme: "primary",
@@ -99,7 +99,7 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 				},
 				{
 					type: "button",
-					label: T()("cancel"),
+					label: T()("common.cancel"),
 					onClick: () => props.callbacks.openDecision(props.request, "cancel"),
 					hide: props.request.permissions.cancel !== true,
 					theme: "error",

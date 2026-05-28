@@ -61,11 +61,11 @@ const EmailChangeConfirmRoute: Component = () => {
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
-						title: T()("invalid_email_change_token"),
-						description: T()("invalid_email_change_token_description"),
+						title: T()("auth.email.change.token.invalid.title"),
+						description: T()("auth.email.change.token.invalid.description"),
 					}}
 					link={{
-						text: T()("back_to_login"),
+						text: T()("common.back.to.login"),
 						href: "/lucid/login",
 					}}
 				/>
@@ -73,23 +73,25 @@ const EmailChangeConfirmRoute: Component = () => {
 			<Match when={completed()}>
 				<div class="text-center max-w-sm mx-auto">
 					<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
-					<h1 class="mb-1">{T()("email_change_confirmed_route_title")}</h1>
-					<p>{T()("email_change_confirmed_route_description")}</p>
+					<h1 class="mb-1">
+						{T()("routes.auth.email.change.confirmed.title")}
+					</h1>
+					<p>{T()("routes.auth.email.change.confirmed.description")}</p>
 					<Link
 						theme="primary"
 						size="medium"
 						href="/lucid/login"
 						classes="mt-8"
 					>
-						{T()("back_to_login")}
+						{T()("common.back.to.login")}
 					</Link>
 				</div>
 			</Match>
 			<Match when={checkToken.isSuccess}>
 				<div class="text-center max-w-sm mx-auto">
 					<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
-					<h1 class="mb-1">{T()("email_change_confirm_route_title")}</h1>
-					<p>{T()("email_change_confirm_route_description")}</p>
+					<h1 class="mb-1">{T()("routes.auth.email.change.confirm.title")}</h1>
+					<p>{T()("routes.auth.email.change.confirm.description")}</p>
 					<div class="mt-8 flex justify-center">
 						<Button
 							theme="primary"
@@ -104,7 +106,7 @@ const EmailChangeConfirmRoute: Component = () => {
 								});
 							}}
 						>
-							{T()("confirm_email_change")}
+							{T()("auth.email.change.confirm.action")}
 						</Button>
 					</div>
 				</div>

@@ -1,6 +1,6 @@
+import { serverText } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import generateKeys from "../../utils/client-integrations/generate-keys.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -32,7 +32,7 @@ const regenerateKeys: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("client_integration_not_found_message"),
+				message: serverText("core.client.integrations.not.found.message"),
 				status: 404,
 			},
 		},

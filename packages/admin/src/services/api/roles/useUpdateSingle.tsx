@@ -43,9 +43,9 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 		invalidates: ["roles.getMultiple", "roles.getSingle", "users.getSingle"],
 		onSuccess: () => {
 			spawnToast({
-				title: T()("role_update_toast_title"),
-				message: T()("role_update_toast_message", {
-					name: T()("role"),
+				title: T()("toasts.roles.update.title"),
+				message: T()("toasts.roles.update.message", {
+					name: T()("common.role"),
 				}),
 				status: "success",
 			});

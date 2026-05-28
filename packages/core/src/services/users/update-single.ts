@@ -1,10 +1,10 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
+import { serverText, translateServer } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
@@ -50,7 +50,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("error_cant_update_yourself"),
+				message: serverText("core.users.self.update.denied"),
 				status: 400,
 			},
 			data: undefined,
@@ -73,7 +73,7 @@ const updateSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("user_not_found_message"),
+				message: serverText("core.user.not.found.message"),
 				status: 404,
 			},
 		},
@@ -132,7 +132,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					email: {
 						code: "invalid",
-						message: T("this_email_is_already_in_use"),
+						message: serverText("core.users.email.duplicate"),
 					},
 				},
 			},
@@ -147,7 +147,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					username: {
 						code: "invalid",
-						message: T("this_username_is_already_in_use"),
+						message: serverText("core.users.username.duplicate"),
 					},
 				},
 			},
@@ -179,7 +179,7 @@ const updateSingle: ServiceFn<
 						role.translations?.find(
 							(translation) =>
 								translation.locale_code ===
-								context.config.localization.defaultLocale,
+								context.config.i18n.content.defaultLocale,
 						)?.name ??
 						role.translations?.find((translation) => translation.name !== null)
 							?.name ??
@@ -249,7 +249,9 @@ const updateSingle: ServiceFn<
 			type: "internal",
 			to: auditLogsRes.data.emailChange.newValue,
 			subject: formatEmailSubject(
-				T("email_update_success_subject"),
+				translateServer("core.email.update.success.subject", undefined, {
+					config: context.config,
+				}),
 				context.config.brand?.name,
 			),
 			data: {

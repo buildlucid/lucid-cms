@@ -33,7 +33,16 @@ const getMultiple = async (
 			mediaServices.client.getMultiple(context, {
 				query: normalizePaginatedQuery(input.query),
 			}),
-		"Lucid toolkit could not fetch multiple media items.",
+		{
+			name: {
+				key: "core.toolkit.media.get.multiple.error.name",
+				fallback: "Media Toolkit Error",
+			},
+			message: {
+				key: "core.toolkit.media.get.multiple.error.message",
+				fallback: "Lucid toolkit could not fetch multiple media items.",
+			},
+		},
 	);
 
 export default getMultiple;

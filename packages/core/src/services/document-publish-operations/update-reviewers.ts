@@ -1,8 +1,8 @@
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationAssigneesRepository,
 	DocumentPublishOperationsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
@@ -46,7 +46,7 @@ const updateReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_not_pending"),
+				message: serverText("core.publish.requests.not.pending"),
 				status: 400,
 			},
 			data: undefined,
@@ -70,10 +70,12 @@ const updateReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_permission_error_message", {
-					collection: operation.collection_key,
-					action: "review",
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: operation.collection_key,
+						action: "review",
+					},
 				}),
 				status: 403,
 			},
@@ -94,7 +96,7 @@ const updateReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_invalid_assignees"),
+				message: serverText("core.publish.requests.invalid.assignees"),
 				status: 400,
 			},
 			data: undefined,

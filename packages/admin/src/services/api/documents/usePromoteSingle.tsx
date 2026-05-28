@@ -38,10 +38,10 @@ const usePromoteSingle = (props: UsePromoteSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: promoteSingleReq,
 		getSuccessToast: () => ({
-			title: T()("promote_version_toast_title", {
+			title: T()("toasts.common.promote.version.title", {
 				name: props.getCollectionName(),
 			}),
-			message: T()("promote_version_toast_message", {
+			message: T()("toasts.common.promote.version.message", {
 				name: props.getCollectionName().toLowerCase(),
 				versionType: props.getVersionType(),
 			}),

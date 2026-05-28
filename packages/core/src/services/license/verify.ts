@@ -1,7 +1,7 @@
 import formatter, { licenseFormatter } from "../../libs/formatters/index.js";
+import { translateServer } from "../../libs/i18n/index.js";
 import { verifyCmsLicense } from "../../libs/lucid-remote/services/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -91,7 +91,6 @@ const verifyLicense: ServiceFn<
 			data: undefined,
 		};
 	};
-
 	const licenseKeyRes = await Options.selectSingle({
 		select: ["name", "value_text"],
 		where: [
@@ -108,7 +107,7 @@ const verifyLicense: ServiceFn<
 		const persistRes = await persistSnapshot({
 			valid: false,
 			aiEnabled: false,
-			errorMessage: T("license_is_not_set"),
+			errorMessage: translateServer("core.license.is.not.set"),
 		});
 		if (persistRes.error) return persistRes;
 
@@ -118,7 +117,7 @@ const verifyLicense: ServiceFn<
 				key: null,
 				valid: false,
 				lastChecked: now,
-				errorMessage: T("license_is_not_set"),
+				errorMessage: translateServer("core.license.is.not.set"),
 				aiEnabled: false,
 			},
 		};
@@ -134,7 +133,7 @@ const verifyLicense: ServiceFn<
 		const persistRes = await persistSnapshot({
 			valid: false,
 			aiEnabled: false,
-			errorMessage: T("license_is_not_set"),
+			errorMessage: translateServer("core.license.is.not.set"),
 		});
 		if (persistRes.error) return persistRes;
 
@@ -144,7 +143,7 @@ const verifyLicense: ServiceFn<
 				key: null,
 				valid: false,
 				lastChecked: now,
-				errorMessage: T("license_is_not_set"),
+				errorMessage: translateServer("core.license.is.not.set"),
 				aiEnabled: false,
 			},
 		};
@@ -157,18 +156,19 @@ const verifyLicense: ServiceFn<
 	});
 
 	if (verifyRes.error) {
+		const errorMessage =
+			verifyRes.error.message?.default ||
+			translateServer("core.license.verification.failed");
 		snapshot =
 			(verifyRes.error.status ?? 500) >= 500
 				? {
 						...existingSnapshot,
-						errorMessage:
-							verifyRes.error.message || T("license_verification_failed"),
+						errorMessage,
 					}
 				: {
 						valid: false,
 						aiEnabled: false,
-						errorMessage:
-							verifyRes.error.message || T("license_verification_failed"),
+						errorMessage,
 					};
 	} else {
 		const ok = verifyRes.data.json.data;
@@ -176,7 +176,9 @@ const verifyLicense: ServiceFn<
 		snapshot = {
 			valid,
 			aiEnabled: valid ? !!ok.ai?.enabled : false,
-			errorMessage: ok.message || (valid ? null : T("license_is_invalid")),
+			errorMessage:
+				ok.message ||
+				(valid ? null : translateServer("core.license.is.invalid")),
 		};
 	}
 

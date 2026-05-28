@@ -141,21 +141,21 @@ const TimelineDetails: Component<{
 	// ----------------------------------
 	// Memos
 	const title = createMemo(() => {
-		if (props.item.type === "latest") return T()("latest");
+		if (props.item.type === "latest") return T()("common.status.latest");
 		if (props.item.type === "revision") {
-			return `${T()("revision")} #${props.item.id}`;
+			return `${T()("common.revision")} #${props.item.id}`;
 		}
 		if (props.item.type === "snapshot") {
-			return `${T()("snapshot")} #${props.item.id}`;
+			return `${T()("common.snapshot")} #${props.item.id}`;
 		}
 
 		return formatTargetName(props.item.version);
 	});
 	const eyebrow = createMemo(() => {
-		if (props.item.type === "environment") return T()("environment");
-		if (props.item.type === "latest") return T()("current_version");
-		if (props.item.type === "snapshot") return T()("snapshot");
-		return T()("saved_revision");
+		if (props.item.type === "environment") return T()("common.environment");
+		if (props.item.type === "latest") return T()("common.current.version");
+		if (props.item.type === "snapshot") return T()("common.snapshot");
+		return T()("common.saved.revision");
 	});
 	const viewHref = createMemo(() =>
 		getDocumentRoute("edit", {
@@ -233,7 +233,7 @@ const TimelineDetails: Component<{
 			timezone: scheduleTimezone(),
 		});
 		if (!scheduledAt) {
-			setValidationError(T()("schedule_release_required"));
+			setValidationError(T()("documents.release.schedule.validation.required"));
 			return;
 		}
 
@@ -291,7 +291,9 @@ const TimelineDetails: Component<{
 							href={viewHref()}
 							classes="w-full"
 						>
-							{props.item.type === "latest" ? T()("edit") : T()("view")}
+							{props.item.type === "latest"
+								? T()("common.edit")
+								: T()("common.view")}
 						</Link>
 						<Show when={props.item.type === "revision"}>
 							<Button
@@ -303,29 +305,29 @@ const TimelineDetails: Component<{
 								permission={props.restore.permission}
 								onClick={props.onRestore}
 							>
-								{T()("restore_to_latest")}
+								{T()("documents.revisions.restore.to.latest.action")}
 							</Button>
 						</Show>
 					</div>
 				</section>
 
 				<InspectorSection
-					title={T()("version_details")}
+					title={T()("common.version.details")}
 					icon={<FaSolidCircleInfo size={14} />}
 					storageKey="lucid:history-inspector:version-details-open"
 				>
 					<div class="grid gap-3">
 						<div class="grid gap-2 text-sm">
 							<DetailRow
-								label={T()("type")}
+								label={T()("common.type")}
 								value={<VersionType item={props.item} />}
 							/>
 							<DetailRow
-								label={T()("created_at")}
+								label={T()("common.created.at")}
 								value={<DateText date={props.item.createdAt} />}
 							/>
 							<DetailRow
-								label={T()("created_by")}
+								label={T()("common.created.by")}
 								value={
 									<AuthorDisplay
 										user={props.createdByUser()}
@@ -334,12 +336,12 @@ const TimelineDetails: Component<{
 								}
 							/>
 							<DetailRow
-								label={T()("promoted_from")}
+								label={T()("common.promoted.from")}
 								value={`#${props.item.promotedFrom}`}
 								show={props.item.promotedFrom !== null}
 							/>
 							<DetailRow
-								label={T()("content_id")}
+								label={T()("common.content.id")}
 								value={
 									<Show
 										when={props.item.contentId}
@@ -362,7 +364,7 @@ const TimelineDetails: Component<{
 				</InspectorSection>
 
 				<InspectorSection
-					title={T()("content_summary")}
+					title={T()("common.content.summary")}
 					icon={<FaSolidLayerGroup size={14} />}
 					storageKey="lucid:history-inspector:content-summary-open"
 				>
@@ -376,9 +378,15 @@ const TimelineDetails: Component<{
 						</Match>
 						<Match when={true}>
 							<div class="grid grid-cols-3 gap-2">
-								<Metric label={T()("bricks")} value={builderBrickCount()} />
-								<Metric label={T()("fixed_bricks")} value={fixedBrickCount()} />
-								<Metric label={T()("fields")} value={fieldCount()} />
+								<Metric
+									label={T()("common.bricks")}
+									value={builderBrickCount()}
+								/>
+								<Metric
+									label={T()("builder.bricks.fixed")}
+									value={fixedBrickCount()}
+								/>
+								<Metric label={T()("common.fields")} value={fieldCount()} />
 							</div>
 						</Match>
 					</Switch>
@@ -386,7 +394,7 @@ const TimelineDetails: Component<{
 
 				<Show when={props.item.type === "revision"}>
 					<InspectorSection
-						title={T()("revision_retention")}
+						title={T()("documents.revisions.retention.title")}
 						icon={<FaSolidClockRotateLeft size={14} />}
 						storageKey="lucid:history-inspector:revision-retention-open"
 					>
@@ -398,7 +406,7 @@ const TimelineDetails: Component<{
 								<Show when={props.retention().expiresAt}>
 									{(expiresAt) => (
 										<span class="text-xs text-body">
-											{T()("cleanup_after")}{" "}
+											{T()("documents.revisions.retention.cleanup.after")}{" "}
 											<DateText date={expiresAt()} class="text-xs" />
 										</span>
 									)}
@@ -413,19 +421,22 @@ const TimelineDetails: Component<{
 
 				<Show when={props.item.type === "environment"}>
 					<InspectorSection
-						title={T()("release_activity")}
+						title={T()("documents.release.activity")}
 						icon={<FaSolidPaperPlane size={14} />}
 						meta={releaseOperations().length}
 						storageKey="lucid:history-inspector:release-activity-open"
 					>
 						<div class="mb-3 grid grid-cols-3 gap-2">
-							<Metric label={T()("pending")} value={pendingReleaseCount()} />
 							<Metric
-								label={T()("scheduled")}
+								label={T()("common.status.pending")}
+								value={pendingReleaseCount()}
+							/>
+							<Metric
+								label={T()("common.status.scheduled")}
 								value={scheduledReleaseCount()}
 							/>
 							<Metric
-								label={T()("executing")}
+								label={T()("common.status.executing")}
 								value={executingReleaseCount()}
 							/>
 						</div>
@@ -438,7 +449,9 @@ const TimelineDetails: Component<{
 							</Match>
 							<Match when={releaseOperations().length === 0}>
 								<div class="rounded-md border border-border bg-input-base/50 p-3">
-									<p class="text-sm text-body">{T()("no_release_activity")}</p>
+									<p class="text-sm text-body">
+										{T()("empty.states.release.activity")}
+									</p>
 								</div>
 							</Match>
 							<Match when={true}>
@@ -459,7 +472,7 @@ const TimelineDetails: Component<{
 				</Show>
 
 				<InspectorSection
-					title={T()("document_payload")}
+					title={T()("common.document.payload")}
 					icon={<FaSolidFileLines size={14} />}
 					storageKey="lucid:history-inspector:document-payload-open"
 				>
@@ -473,7 +486,7 @@ const TimelineDetails: Component<{
 									fallback={<span class="block h-56 rounded-md skeleton" />}
 								>
 									<JSONPreview
-										title={T()("document_payload")}
+										title={T()("common.document.payload")}
 										json={document() as unknown as Record<string, unknown>}
 									/>
 								</Suspense>
@@ -495,10 +508,10 @@ const TimelineDetails: Component<{
 				}}
 				copy={{
 					title: selectedOperationHasSchedule()
-						? T()("reschedule_release")
-						: T()("schedule_release"),
-					description: T()("schedule_release_modal_description"),
-					confirm: T()("update_schedule"),
+						? T()("common.reschedule.release")
+						: T()("documents.release.schedule.action"),
+					description: T()("modals.common.schedule.release.description"),
+					confirm: T()("actions.update.schedule"),
 					error: scheduleError(),
 				}}
 				callbacks={{
@@ -525,7 +538,7 @@ const TimelineDetails: Component<{
 									reschedule.reset();
 								}}
 							>
-								{T()("cancel")}
+								{T()("common.cancel")}
 							</Button>
 							<Show when={selectedOperationHasSchedule()}>
 								<Button
@@ -535,7 +548,7 @@ const TimelineDetails: Component<{
 									loading={reschedule.action.isPending}
 									onClick={removeSchedule}
 								>
-									{T()("remove_schedule")}
+									{T()("documents.release.schedule.remove")}
 								</Button>
 							</Show>
 							<Button
@@ -546,8 +559,8 @@ const TimelineDetails: Component<{
 								onClick={saveSchedule}
 							>
 								{selectedOperationHasSchedule()
-									? T()("update_schedule")
-									: T()("schedule_release")}
+									? T()("actions.update.schedule")
+									: T()("documents.release.schedule.action")}
 							</Button>
 						</>
 					),
@@ -673,7 +686,9 @@ const AuthorDisplay: Component<{
 		{(user) => (
 			<UserDisplay
 				user={{
-					username: helpers.formatUserName(user(), "simple") || T()("unknown"),
+					username:
+						helpers.formatUserName(user(), "simple") ||
+						T()("media.types.unknown"),
 					firstName: user().firstName,
 					lastName: user().lastName,
 					profilePicture: user().profilePicture,
@@ -689,10 +704,18 @@ const VersionType: Component<{
 	item: TimelineItem;
 }> = (props) => (
 	<Switch>
-		<Match when={props.item.type === "latest"}>{T()("latest")}</Match>
-		<Match when={props.item.type === "environment"}>{T()("environment")}</Match>
-		<Match when={props.item.type === "revision"}>{T()("revision")}</Match>
-		<Match when={props.item.type === "snapshot"}>{T()("snapshot")}</Match>
+		<Match when={props.item.type === "latest"}>
+			{T()("common.status.latest")}
+		</Match>
+		<Match when={props.item.type === "environment"}>
+			{T()("common.environment")}
+		</Match>
+		<Match when={props.item.type === "revision"}>
+			{T()("common.revision")}
+		</Match>
+		<Match when={props.item.type === "snapshot"}>
+			{T()("common.snapshot")}
+		</Match>
 	</Switch>
 );
 
@@ -702,30 +725,32 @@ const VersionStatusPills: Component<{
 	<>
 		<Switch>
 			<Match when={props.item.type === "latest"}>
-				<Pill theme="primary-opaque">{T()("current_version")}</Pill>
+				<Pill theme="primary-opaque">{T()("common.current.version")}</Pill>
 			</Match>
 			<Match when={props.item.type === "revision"}>
-				<Pill theme="info-opaque">{T()("saved_revision")}</Pill>
+				<Pill theme="info-opaque">{T()("common.saved.revision")}</Pill>
 			</Match>
 			<Match when={props.item.type === "snapshot"}>
-				<Pill theme="info-opaque">{T()("snapshot")}</Pill>
+				<Pill theme="info-opaque">{T()("common.snapshot")}</Pill>
 			</Match>
 			<Match when={props.item.type === "environment" && props.item.isReleased}>
-				<Pill theme="secondary">{T()("released")}</Pill>
+				<Pill theme="secondary">{T()("common.status.released")}</Pill>
 			</Match>
 		</Switch>
 		<Show when={props.item.type === "environment"}>
 			<Show
 				when={props.item.inSyncWithPromotedFrom}
-				fallback={<Pill theme="warning-opaque">{T()("out_of_sync")}</Pill>}
+				fallback={
+					<Pill theme="warning-opaque">{T()("common.status.out.of.sync")}</Pill>
+				}
 			>
-				<Pill theme="primary-opaque">{T()("in_sync")}</Pill>
+				<Pill theme="primary-opaque">{T()("common.status.in.sync")}</Pill>
 			</Show>
 		</Show>
 		<Show
 			when={props.item.type === "environment" && props.item.promotedFromLatest}
 		>
-			<Pill theme="outline">{T()("from_latest")}</Pill>
+			<Pill theme="outline">{T()("common.from.latest")}</Pill>
 		</Show>
 		<Show
 			when={
@@ -736,7 +761,7 @@ const VersionStatusPills: Component<{
 		>
 			<Pill theme="warning-opaque">
 				<FaSolidTriangleExclamation size={10} class="mr-1.5" />
-				{T()("not_latest")}
+				{T()("common.status.not.latest")}
 			</Pill>
 		</Show>
 	</>

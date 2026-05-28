@@ -1,3 +1,4 @@
+import { adminText } from "../i18n/admin-text.js";
 import type { PermissionGroup } from "./types.js";
 
 export const Permissions = {
@@ -105,28 +106,46 @@ export const PermissionGroups = Object.freeze({
 	users: {
 		key: "users_permissions",
 		details: {
-			name: "User Permissions",
+			name: adminText("core.permissions.user.permissions", {
+				fallback: "User Permissions",
+			}),
 		},
 		core: true,
 		permissions: [
 			{
 				key: Permissions.UsersRead,
-				details: { name: "Read Users" },
+				details: {
+					name: adminText("core.permissions.read.users", {
+						fallback: "Read Users",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.UsersCreate,
-				details: { name: "Create Users" },
+				details: {
+					name: adminText("core.permissions.create.users", {
+						fallback: "Create Users",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.UsersUpdate,
-				details: { name: "Update Users" },
+				details: {
+					name: adminText("core.permissions.update.users", {
+						fallback: "Update Users",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.UsersDelete,
-				details: { name: "Delete Users" },
+				details: {
+					name: adminText("core.permissions.delete.users", {
+						fallback: "Delete Users",
+					}),
+				},
 				core: true,
 			},
 		],
@@ -134,28 +153,46 @@ export const PermissionGroups = Object.freeze({
 	roles: {
 		key: "roles_permissions",
 		details: {
-			name: "Role Permissions",
+			name: adminText("core.permissions.role.permissions", {
+				fallback: "Role Permissions",
+			}),
 		},
 		core: true,
 		permissions: [
 			{
 				key: Permissions.RolesRead,
-				details: { name: "Read Roles" },
+				details: {
+					name: adminText("core.permissions.read.roles", {
+						fallback: "Read Roles",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.RolesCreate,
-				details: { name: "Create Roles" },
+				details: {
+					name: adminText("core.permissions.create.roles", {
+						fallback: "Create Roles",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.RolesUpdate,
-				details: { name: "Update Roles" },
+				details: {
+					name: adminText("core.permissions.update.roles", {
+						fallback: "Update Roles",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.RolesDelete,
-				details: { name: "Delete Roles" },
+				details: {
+					name: adminText("core.permissions.delete.roles", {
+						fallback: "Delete Roles",
+					}),
+				},
 				core: true,
 			},
 		],
@@ -163,28 +200,46 @@ export const PermissionGroups = Object.freeze({
 	media: {
 		key: "media_permissions",
 		details: {
-			name: "Media Permissions",
+			name: adminText("core.permissions.media.permissions", {
+				fallback: "Media Permissions",
+			}),
 		},
 		core: true,
 		permissions: [
 			{
 				key: Permissions.MediaRead,
-				details: { name: "Read Media" },
+				details: {
+					name: adminText("core.permissions.read.media", {
+						fallback: "Read Media",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.MediaCreate,
-				details: { name: "Create Media" },
+				details: {
+					name: adminText("core.permissions.create.media", {
+						fallback: "Create Media",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.MediaUpdate,
-				details: { name: "Update Media" },
+				details: {
+					name: adminText("core.permissions.update.media", {
+						fallback: "Update Media",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.MediaDelete,
-				details: { name: "Delete Media" },
+				details: {
+					name: adminText("core.permissions.delete.media", {
+						fallback: "Delete Media",
+					}),
+				},
 				core: true,
 			},
 		],
@@ -192,23 +247,37 @@ export const PermissionGroups = Object.freeze({
 	emails: {
 		key: "emails_permissions",
 		details: {
-			name: "Email Permissions",
+			name: adminText("core.permissions.email.permissions", {
+				fallback: "Email Permissions",
+			}),
 		},
 		core: true,
 		permissions: [
 			{
 				key: Permissions.EmailRead,
-				details: { name: "Read Emails" },
+				details: {
+					name: adminText("core.permissions.read.emails", {
+						fallback: "Read Emails",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.EmailDelete,
-				details: { name: "Delete Emails" },
+				details: {
+					name: adminText("core.permissions.delete.emails", {
+						fallback: "Delete Emails",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.EmailSend,
-				details: { name: "Send Emails" },
+				details: {
+					name: adminText("core.permissions.send.emails", {
+						fallback: "Send Emails",
+					}),
+				},
 				core: true,
 			},
 		],
@@ -216,13 +285,19 @@ export const PermissionGroups = Object.freeze({
 	jobs: {
 		key: "jobs_permissions",
 		details: {
-			name: "Jobs Permissions",
+			name: adminText("core.permissions.jobs.permissions", {
+				fallback: "Jobs Permissions",
+			}),
 		},
 		core: true,
 		permissions: [
 			{
 				key: Permissions.JobsRead,
-				details: { name: "Read Jobs" },
+				details: {
+					name: adminText("core.permissions.read.jobs", {
+						fallback: "Read Jobs",
+					}),
+				},
 				core: true,
 			},
 		],
@@ -230,48 +305,82 @@ export const PermissionGroups = Object.freeze({
 	content: {
 		key: "content_permissions",
 		details: {
-			name: "Content Permissions",
+			name: adminText("core.permissions.content.permissions", {
+				fallback: "Content Permissions",
+			}),
 		},
 		core: true,
 		permissions: [
 			{
 				key: Permissions.DocumentsRead,
-				details: { name: "Read Documents" },
+				details: {
+					name: adminText("core.permissions.read.documents", {
+						fallback: "Read Documents",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.DocumentsCreate,
-				details: { name: "Create Documents" },
+				details: {
+					name: adminText("core.permissions.create.documents", {
+						fallback: "Create Documents",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.DocumentsUpdate,
-				details: { name: "Update Documents" },
+				details: {
+					name: adminText("core.permissions.update.documents", {
+						fallback: "Update Documents",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.DocumentsDelete,
-				details: { name: "Delete Documents" },
+				details: {
+					name: adminText("core.permissions.delete.documents", {
+						fallback: "Delete Documents",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.DocumentsRestore,
-				details: { name: "Restore Revisions" },
+				details: {
+					name: adminText("core.permissions.restore.revisions", {
+						fallback: "Restore Revisions",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.DocumentsPublish,
-				details: { name: "Publish Documents" },
+				details: {
+					name: adminText("core.permissions.publish.documents", {
+						fallback: "Publish Documents",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.DocumentsReview,
-				details: { name: "Review Document Releases" },
+				details: {
+					name: adminText("core.permissions.review.document.releases", {
+						fallback: "Review Document Releases",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.DocumentsAi,
-				details: { name: "Use Document AI" },
+				details: {
+					name: adminText("core.permissions.use.document.ai", {
+						fallback: "Use Document AI",
+					}),
+				},
 				core: true,
 			},
 		],
@@ -279,33 +388,55 @@ export const PermissionGroups = Object.freeze({
 	"client-integrations": {
 		key: "client_integrations_permissions",
 		details: {
-			name: "Integrations Permissions",
+			name: adminText("core.permissions.integrations.permissions", {
+				fallback: "Integrations Permissions",
+			}),
 		},
 		core: true,
 		permissions: [
 			{
 				key: Permissions.IntegrationRead,
-				details: { name: "Read Integrations" },
+				details: {
+					name: adminText("core.permissions.read.integrations", {
+						fallback: "Read Integrations",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.IntegrationCreate,
-				details: { name: "Create Integrations" },
+				details: {
+					name: adminText("core.permissions.create.integrations", {
+						fallback: "Create Integrations",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.IntegrationUpdate,
-				details: { name: "Update Integrations" },
+				details: {
+					name: adminText("core.permissions.update.integrations", {
+						fallback: "Update Integrations",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.IntegrationDelete,
-				details: { name: "Delete Integrations" },
+				details: {
+					name: adminText("core.permissions.delete.integrations", {
+						fallback: "Delete Integrations",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.IntegrationRegenerate,
-				details: { name: "Regenerate API Keys" },
+				details: {
+					name: adminText("core.permissions.regenerate.api.keys", {
+						fallback: "Regenerate API Keys",
+					}),
+				},
 				core: true,
 			},
 		],
@@ -313,28 +444,46 @@ export const PermissionGroups = Object.freeze({
 	settings: {
 		key: "settings_permissions",
 		details: {
-			name: "Setting Permissions",
+			name: adminText("core.permissions.setting.permissions", {
+				fallback: "Setting Permissions",
+			}),
 		},
 		core: true,
 		permissions: [
 			{
 				key: Permissions.SettingsRead,
-				details: { name: "Read Settings" },
+				details: {
+					name: adminText("core.permissions.read.settings", {
+						fallback: "Read Settings",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.SettingsUpdate,
-				details: { name: "Update Settings" },
+				details: {
+					name: adminText("core.permissions.update.settings", {
+						fallback: "Update Settings",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.LicenseUpdate,
-				details: { name: "Update License" },
+				details: {
+					name: adminText("core.permissions.update.license", {
+						fallback: "Update License",
+					}),
+				},
 				core: true,
 			},
 			{
 				key: Permissions.CacheClear,
-				details: { name: "Clear Cache" },
+				details: {
+					name: adminText("core.permissions.clear.cache", {
+						fallback: "Clear Cache",
+					}),
+				},
 				core: true,
 			},
 		],

@@ -19,7 +19,7 @@ const CopyInput: Component<CopyInputProps> = (props) => {
 	const copyToClipboard = () => {
 		navigator.clipboard.writeText(props.value);
 		spawnToast({
-			title: T()("copy_to_clipboard_toast_title"),
+			title: T()("toasts.common.copy.to.clipboard.title"),
 			status: "success",
 		});
 		setIsCopied(true);
@@ -48,7 +48,7 @@ const CopyInput: Component<CopyInputProps> = (props) => {
 						"text-primary-base hover:text-primary-hover!": isCopied(),
 					},
 				)}
-				aria-label={T()("copy_to_clipboard")}
+				aria-label={T()("actions.copy.to.clipboard")}
 			>
 				<FaSolidCopy class="fill-current" />
 			</button>

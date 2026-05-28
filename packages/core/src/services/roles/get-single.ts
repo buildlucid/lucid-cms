@@ -1,6 +1,6 @@
 import { rolesFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { RolesRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { Role } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -19,7 +19,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("role_not_found_message"),
+				message: serverText("core.roles.not.found.message"),
 				status: 404,
 			},
 		},

@@ -28,8 +28,8 @@ const useDeleteSingle = (props: UseDeleteProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Email>>({
 		mutationFn: deleteSingleReq,
 		getSuccessToast: () => ({
-			title: T()("email_deleted_toast_title"),
-			message: T()("email_deleted_toast_message"),
+			title: T()("toasts.email.deleted.title"),
+			message: T()("toasts.email.deleted.message"),
 		}),
 		invalidates: ["email.getMultiple"],
 		onSuccess: props.onSuccess,

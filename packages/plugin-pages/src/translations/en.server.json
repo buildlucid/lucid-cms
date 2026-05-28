@@ -1,0 +1,21 @@
+{
+	"plugin.pages.collections.not.found": "Cannot find the collection of {{collection}}.",
+	"plugin.pages.fields.required.missing": "Cannot find required fields for the pages plugin.",
+	"plugin.pages.parents.self.denied": "A page cannot be its own parent, please select a different parent page.",
+	"plugin.pages.slug.root.with.parent.denied": "The slug cannot be / when a parent page is set.",
+	"plugin.pages.slug.duplicate": "Please ensure the slug field is unique within the collection.",
+	"plugin.pages.slug.parent.duplicate": "Another document in this collection has the same slug and parent page selected. Please ensure the slug field is unique within the collection.",
+	"plugin.pages.slug.duplicate.check.failed": "An error occurred while checking for duplicate slugs.",
+	"plugin.pages.parents.circular.check.failed": "An error occurred while checking for circular parents.",
+	"plugin.pages.parents.circular": "The selected page is either a child/grandchild of this one. Please select a different parent page.",
+	"plugin.pages.parents.published.version.not.found": "The parent page document of the same environment was not found, or doesnt have a slug.",
+	"plugin.pages.parents.fields.fetch.failed": "An error occurred while getting the parent page fields.",
+	"plugin.pages.descendants.fields.fetch.failed": "An error occurred while getting the descendant page fields.",
+	"plugin.pages.full.slug.children.update.failed": "An error occurred while updating the fullSlug children fields.",
+	"plugin.pages.slug.validation.format": "The slug field may only contain letters, numbers, underscores, and hyphens.",
+	"plugin.pages.documents.version.fields.fetch.failed": "An error occurred while getting the document version fields.",
+	"plugin.pages.fields.full.slug.name": "Full Slug",
+	"plugin.pages.fields.slug.name": "Slug",
+	"plugin.pages.fields.parent.page.name": "Parent Page",
+	"plugin.pages.fields.validation.required": "This field is required."
+}

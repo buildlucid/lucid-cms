@@ -36,7 +36,7 @@ export default defineConfig((env) => ({
         LucidPages({
             collections: [{
                 collectionKey: "page",
-                translations: true,
+                localized: true,
                 displayFullSlug: true,
                 prefix: {
                     en: "en",

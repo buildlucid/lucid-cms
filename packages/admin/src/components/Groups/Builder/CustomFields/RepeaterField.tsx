@@ -143,7 +143,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 										disabled={disabled()}
 									>
 										<FaSolidPlus size={14} />
-										<span class="sr-only">{T()("add_entry")}</span>
+										<span class="sr-only">{T()("actions.add.entry")}</span>
 									</button>
 								</div>
 							)}
@@ -164,11 +164,11 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 							disabled={disabled()}
 						>
 							<span class="text-sm text-unfocused group-hover:hidden">
-								{T()("no_entries")}
+								{T()("empty.states.entries.inline")}
 							</span>
 							<span class="hidden text-sm text-body group-hover:inline-flex items-center gap-2">
 								<FaSolidPlus size={14} />
-								<span class="sr-only">{T()("add_entry")}</span>
+								<span class="sr-only">{T()("actions.add.entry")}</span>
 							</span>
 						</button>
 					</Match>

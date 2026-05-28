@@ -1,8 +1,8 @@
 import type { DocumentWorkflowAssignee } from "@lucidcms/types";
 import { documentWorkflowsFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getCollectionInstance from "../collections/get-single-instance.js";
@@ -25,7 +25,7 @@ const getAssignees: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("document_workflow_not_enabled"),
+				message: serverText("core.documents.workflows.not.enabled"),
 				status: 400,
 			},
 			data: undefined,

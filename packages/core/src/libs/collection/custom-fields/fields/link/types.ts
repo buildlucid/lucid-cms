@@ -1,4 +1,4 @@
-import type { LocaleValue } from "../../../../../types/shared.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export type LinkResValue = {
@@ -10,12 +10,12 @@ export type LinkResValue = {
 export interface LinkFieldConfig extends SharedFieldConfig {
 	type: "link";
 	details: {
-		label?: LocaleValue;
-		summary?: LocaleValue;
-		placeholder?: LocaleValue;
+		label?: AdminText;
+		summary?: AdminText;
+		placeholder?: AdminText;
 	};
 	config: {
-		translations?: boolean;
+		localized?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
 		index?: true;

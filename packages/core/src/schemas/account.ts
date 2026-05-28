@@ -1,5 +1,5 @@
 import z from "zod";
-import T from "../translations/index.js";
+import { translateServer } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { userResponseSchema } from "./users.js";
 
@@ -44,7 +44,7 @@ export const controllerSchemas = {
 				}),
 			})
 			.refine((data) => data.password === data.passwordConfirmation, {
-				message: T("please_ensure_passwords_match"),
+				message: translateServer("core.input.ensure.passwords.match"),
 				path: ["passwordConfirmation"],
 			}),
 		query: {
@@ -75,7 +75,7 @@ export const controllerSchemas = {
 		response: z.object({
 			message: z.string().meta({
 				description: "A status message",
-				example: T("if_account_exists_with_email_not_found"),
+				example: translateServer("core.auth.password.reset.request.accepted"),
 			}),
 		}),
 	} satisfies ControllerSchema,
@@ -340,7 +340,9 @@ export const controllerSchemas = {
 			.refine(
 				(data) => (data.key === undefined) === (data.fileName === undefined),
 				{
-					message: T("profile_picture_file_name_key_required"),
+					message: translateServer(
+						"core.profile.picture.file.name.key.required",
+					),
 					path: ["fileName"],
 				},
 			),

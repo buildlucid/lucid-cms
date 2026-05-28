@@ -8,13 +8,13 @@ import {
 	authServices,
 	userLoginServices,
 } from "../../../../../services/index.js";
-import T from "../../../../../translations/index.js";
 import urlAddPath from "../../../../../utils/helpers/url-add-path.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
@@ -78,8 +78,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: T("route_callback_auth_error_name"),
-					message: T("route_callback_auth_error_message"),
+					name: serverText("core.routes.callback.auth.error.name"),
+					message: serverText("core.routes.callback.auth.error.message"),
 				},
 			},
 		)(context, {
@@ -103,8 +103,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_callback_auth_error_name"),
-					message: T("route_callback_auth_error_message"),
+					name: serverText("core.routes.callback.auth.error.name"),
+					message: serverText("core.routes.callback.auth.error.message"),
 				},
 			},
 		)(context, {
@@ -149,8 +149,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 					transaction: false,
 					defaultError: {
 						type: "basic",
-						name: T("route_login_error_name"),
-						message: T("route_login_error_message"),
+						name: serverText("core.routes.login.error.name"),
+						message: serverText("core.routes.login.error.message"),
 					},
 				},
 			)(context, {

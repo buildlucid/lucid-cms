@@ -3,6 +3,7 @@ import {
 	AlertRecipientsRepository,
 	AlertsRepository,
 } from "../../libs/repositories/index.js";
+import type { ErrorText } from "../../types/errors.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendEmail from "../email/send-email.js";
@@ -13,7 +14,7 @@ export type PublishOperationNotificationRecipient = {
 };
 
 type PublishOperationNotificationDetail = {
-	label: string;
+	label: ErrorText;
 	value: string | number | Date | null | undefined;
 };
 
@@ -31,11 +32,11 @@ const notifyPublishOperationUsers: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			recipients: PublishOperationNotificationRecipient[];
-			title: string;
-			message: string;
+			title: ErrorText;
+			message: ErrorText;
 			dedupeAction: string;
 			comment?: {
-				label: string;
+				label: ErrorText;
 				value: string | null | undefined;
 			};
 			details?: PublishOperationNotificationDetail[];
@@ -60,21 +61,24 @@ const notifyPublishOperationUsers: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const title = data.title.default;
+	const message = data.message.default;
 	const details = (data.details ?? [])
 		.filter((detail) => detail.value !== null && detail.value !== undefined)
 		.map((detail) => ({
-			label: detail.label,
+			label: detail.label.default,
 			value: formatNotificationDetailValue(detail.value),
 		}));
 	const comment = data.comment?.value?.trim() || null;
+	const commentLabel = data.comment ? data.comment.label.default : undefined;
 
 	const alertRes = await Alerts.createSingle({
 		data: {
 			type: constants.alerts.publishRequest.type,
 			level: "info",
 			dedupe_key: `publish-request:${data.operationId}:${data.dedupeAction}`,
-			title: data.title,
-			message: data.message,
+			title,
+			message,
 			metadata: {
 				operationId: data.operationId,
 				collectionKey: data.collectionKey,
@@ -108,18 +112,18 @@ const notifyPublishOperationUsers: ServiceFn<
 		const emailRes = await sendEmail(context, {
 			type: "internal",
 			to: emailRecipients,
-			subject: data.title,
+			subject: title,
 			template: constants.email.templates.publishRequest.key,
 			data: {
 				brand: context.config.brand,
 				logoUrl: constants.email.assets.logo,
-				title: data.title,
-				message: data.message,
+				title,
+				message,
 				actionUrl,
 				details,
 				hasDetails: details.length > 0,
 				comment,
-				commentLabel: data.comment?.label,
+				commentLabel,
 			},
 			storage: constants.email.templates.publishRequest.storage ?? undefined,
 		});

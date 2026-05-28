@@ -66,7 +66,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 				<div class="flex justify-between mb-4">
 					<div class="flex items-center">
 						<FaSolidLayerGroup class="text-white text-xl mr-2.5" />
-						<h2>{T()("builder_area")}</h2>
+						<h2>{T()("builder.area.label")}</h2>
 					</div>
 					<Button
 						type="button"
@@ -77,15 +77,15 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 						}}
 						disabled={isDisabled()}
 					>
-						{T()("add_brick")}
+						{T()("builder.bricks.add")}
 					</Button>
 				</div>
 				<Switch>
 					<Match when={builderBricks().length === 0}>
 						<div class="p-4 md:p-6 border border-dashed border-border rounded-md min-h-80 grow h-[calc(100%-52px)] flex items-center justify-center dotted-background">
 							<div class="max-w-sm text-center mx-auto">
-								<h3 class="mb-1">{T()("builder_area_title")}</h3>
-								<p class="text-sm">{T()("builder_area_empty")}</p>
+								<h3 class="mb-1">{T()("builder.area.title")}</h3>
+								<p class="text-sm">{T()("builder.area.empty")}</p>
 							</div>
 						</div>
 					</Match>
@@ -263,7 +263,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						}
 						onDragOver={(e) => props.dragDrop.onDragOver(e)}
 						draggable={isDisabled() === false}
-						aria-label={T()("change_order")}
+						aria-label={T()("common.change.order")}
 						disabled={isDisabled()}
 					>
 						<FaSolidGripLines size={14} />

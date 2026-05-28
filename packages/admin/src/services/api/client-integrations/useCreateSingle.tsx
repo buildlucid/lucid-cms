@@ -39,8 +39,8 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 	>({
 		mutationFn: createSingleReq,
 		getSuccessToast: () => ({
-			title: T()("integration_created_toast_title"),
-			message: T()("integration_created_toast_message"),
+			title: T()("toasts.common.integration.created.title"),
+			message: T()("toasts.common.integration.created.message"),
 		}),
 		invalidates: ["clientIntegrations.getAll"],
 		onSuccess: props?.onSuccess,

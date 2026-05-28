@@ -66,7 +66,7 @@ const LinkModal: Component<{
 					name="label"
 					type="text"
 					copy={{
-						label: T()("label"),
+						label: T()("common.label"),
 					}}
 					required={false}
 				/>
@@ -77,7 +77,7 @@ const LinkModal: Component<{
 					name="url"
 					type="text"
 					copy={{
-						label: T()("url"),
+						label: T()("common.url"),
 					}}
 					required={false}
 				/>
@@ -87,9 +87,9 @@ const LinkModal: Component<{
 					onChange={(value) => setOpenInNewTab(value)}
 					name="open_in_new_tab"
 					copy={{
-						label: T()("open_in_new_tab"),
-						true: T()("yes"),
-						false: T()("no"),
+						label: T()("common.open.in.new.tab"),
+						true: T()("common.yes"),
+						false: T()("common.no"),
 					}}
 					required={false}
 					hideOptionalText
@@ -105,7 +105,7 @@ const LinkModal: Component<{
 						size="medium"
 						onClick={closeModal}
 					>
-						{T()("cancel")}
+						{T()("common.cancel")}
 					</Button>
 					<Button
 						type="button"
@@ -113,7 +113,7 @@ const LinkModal: Component<{
 						size="medium"
 						onClick={updateLink}
 					>
-						{T()("update")}
+						{T()("common.update")}
 					</Button>
 				</div>
 			</ModalFooter>

@@ -1,5 +1,5 @@
+import { serverText, translateServer } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
-import T from "../../translations/index.js";
 import type {
 	ServiceContext,
 	ServiceFn,
@@ -71,7 +71,7 @@ const serviceWrapper =
 					message:
 						error instanceof Error
 							? error?.message
-							: T("an_unknown_error_occurred"),
+							: translateServer("core.errors.unknown"),
 				});
 			}
 
@@ -86,7 +86,9 @@ const serviceWrapper =
 				return {
 					error: mergeServiceError(
 						{
-							message: error.message,
+							message: serverText("core.errors.default.message", {
+								priority: error.message,
+							}),
 						},
 						wrapperConfig.defaultError,
 					),
@@ -97,7 +99,12 @@ const serviceWrapper =
 			return {
 				error: mergeServiceError(
 					{
-						message: error instanceof Error ? error?.message : undefined,
+						message:
+							error instanceof Error
+								? serverText("core.errors.default.message", {
+										priority: error.message,
+									})
+								: undefined,
 					},
 					wrapperConfig.defaultError,
 				),

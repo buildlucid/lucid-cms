@@ -1,5 +1,5 @@
-import T from "../../../../translations/index.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
+import { serverText } from "../../../i18n/index.js";
 import { CollectionMigrationsRepository } from "../../../repositories/index.js";
 import inferSchema from "../infer-schema.js";
 import buildRuntimeSchema from "./build-runtime-schema.js";
@@ -64,7 +64,7 @@ const primeRuntimeSchemas: ServiceFn<
 			return {
 				data: undefined,
 				error: {
-					message: T("collection_not_found_message"),
+					message: serverText("core.collections.not.found.message"),
 				},
 			};
 		}
@@ -78,8 +78,8 @@ const primeRuntimeSchemas: ServiceFn<
 				data: undefined,
 				error: {
 					type: "basic",
-					name: T("error_schema_migration_required_name"),
-					message: T("error_schema_migration_required_message"),
+					name: serverText("core.error.schema.migration.required.name"),
+					message: serverText("core.error.schema.migration.required.message"),
 					status: 400,
 				},
 			};
@@ -98,10 +98,12 @@ const primeRuntimeSchemas: ServiceFn<
 			return {
 				data: undefined,
 				error: {
-					message:
-						error instanceof Error
-							? error.message
-							: T("an_unknown_error_occurred"),
+					message: serverText("core.errors.unknown", {
+						fallback:
+							error instanceof Error
+								? error.message
+								: "An unknown error occurred",
+					}),
 				},
 			};
 		}

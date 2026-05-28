@@ -49,8 +49,9 @@ const CollectionsDocumentsReleaseRequestDetailRoute: Component = () => {
 			<Match when={request.isError}>
 				<ErrorBlock
 					content={{
-						title: T()("error_title"),
-						description: request.error?.message ?? T()("error_message"),
+						title: T()("errors.generic.title"),
+						description:
+							request.error?.message ?? T()("errors.generic.message"),
 					}}
 				/>
 			</Match>

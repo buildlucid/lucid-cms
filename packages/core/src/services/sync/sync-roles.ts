@@ -62,14 +62,14 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 	}
 
 	for (const managedRole of managedRoles) {
-		const defaultRoleLocale = context.config.localization.defaultLocale;
+		const defaultRoleLocale = context.config.i18n.interface.defaultLocale;
 		const nameTranslations = normalizeTranslationArray(
 			managedRole.name,
-			defaultRoleLocale,
+			context.config,
 		);
 		const descriptionTranslations = normalizeTranslationArray(
 			managedRole.description,
-			defaultRoleLocale,
+			context.config,
 		);
 		const defaultName =
 			getTranslationValue(nameTranslations, defaultRoleLocale) ??

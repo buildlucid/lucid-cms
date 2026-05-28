@@ -54,7 +54,7 @@ const ReleaseScheduleFields: Component<{
 				}}
 				required={true}
 				copy={{
-					label: T()("date"),
+					label: T()("common.date"),
 				}}
 				noMargin={true}
 			/>
@@ -69,7 +69,7 @@ const ReleaseScheduleFields: Component<{
 				}}
 				required={true}
 				copy={{
-					label: T()("time"),
+					label: T()("common.time"),
 				}}
 				noMargin={true}
 			/>
@@ -89,8 +89,8 @@ const ReleaseScheduleFields: Component<{
 				}}
 				required={true}
 				copy={{
-					label: T()("timezone"),
-					searchPlaceholder: T()("search"),
+					label: T()("common.timezone"),
+					searchPlaceholder: T()("common.search"),
 				}}
 				noClear={true}
 				noMargin={true}

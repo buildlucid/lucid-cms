@@ -27,7 +27,7 @@ const JobRow: Component<JobRowProps> = (props) => {
 			callbacks={props.callbacks}
 			actions={[
 				{
-					label: T()("preview"),
+					label: T()("common.preview"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.job.id);

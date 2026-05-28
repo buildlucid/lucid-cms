@@ -92,7 +92,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 
 		return [
 			{
-				label: T()("workflow_stage"),
+				label: T()("documents.workflow.stage"),
 				key: "workflowStage",
 				type: "select" as const,
 				options: workflow.stages.map((stage) => ({
@@ -105,7 +105,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 				})),
 			},
 			{
-				label: T()("workflow_assigned_to"),
+				label: T()("documents.workflow.assigned.to"),
 				key: "workflowAssignee",
 				type: "multi-select" as const,
 				options:
@@ -113,7 +113,8 @@ const CollectionsDocumentsListRoute: Component = () => {
 						value: user.id,
 						label: helpers.formatUserName(
 							{
-								username: user.username ?? user.email ?? T()("unknown"),
+								username:
+									user.username ?? user.email ?? T()("media.types.unknown"),
 								firstName: user.firstName,
 								lastName: user.lastName,
 							},
@@ -128,7 +129,8 @@ const CollectionsDocumentsListRoute: Component = () => {
 	const userOptions = createMemo(() =>
 		(users.data?.data ?? []).map((user) => ({
 			value: user.id,
-			label: helpers.formatUserName(user, "simple") || T()("unknown"),
+			label:
+				helpers.formatUserName(user, "simple") || T()("media.types.unknown"),
 			user,
 		})),
 	);
@@ -212,7 +214,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 						alerts={[
 							{
 								type: "warning",
-								message: T()("locked_collection_message"),
+								message: T()("collections.locked.message"),
 								show: collection.data?.data.config.locked === true,
 							},
 						]}
@@ -225,7 +227,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 							description: collectionSummary(),
 						}}
 						actions={{
-							contentLocale: collection.data?.data.config.translations ?? false,
+							contentLocale: collection.data?.data.config.localized ?? false,
 							createLink: {
 								link: getDocumentRoute("create", {
 									collectionKey: collectionKey() || "",
@@ -234,7 +236,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 									collection.data?.data.permissions.create,
 								]).some,
 								show: collection.data?.data.config.locked !== true,
-								label: T()("create_dynamic", {
+								label: T()("actions.create.dynamic", {
 									name: collectionSingularName() || "",
 								}),
 							},
@@ -279,7 +281,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 															value: option.value,
 															label: helpers.getLocaleValue({
 																value: option.label,
-																fallback: T()("option_label", {
+																fallback: T()("fields.options.label", {
 																	count: i,
 																}),
 															}),
@@ -314,11 +316,11 @@ const CollectionsDocumentsListRoute: Component = () => {
 									]}
 									sorts={[
 										{
-											label: T()("updated_at"),
+											label: T()("common.updated.at"),
 											key: "updatedAt",
 										},
 										{
-											label: T()("created_at"),
+											label: T()("common.created.at"),
 											key: "createdAt",
 										},
 									]}

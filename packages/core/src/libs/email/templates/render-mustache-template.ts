@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import Mustache from "mustache";
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import { serverText } from "../../i18n/index.js";
 import type { RenderedTemplates } from "../types.js";
 
 /**
@@ -25,7 +25,7 @@ const renderMustacheTemplate: ServiceFn<
 		if (preRenderedTemplate === undefined) {
 			return {
 				error: {
-					message: T("template_not_found_message"),
+					message: serverText("core.email.templates.not.found.message"),
 					status: 404,
 				},
 				data: undefined,
@@ -54,7 +54,7 @@ const renderMustacheTemplate: ServiceFn<
 		if (!templateData) {
 			return {
 				error: {
-					message: T("template_not_found_message"),
+					message: serverText("core.email.templates.not.found.message"),
 					status: 404,
 				},
 				data: undefined,
@@ -70,10 +70,10 @@ const renderMustacheTemplate: ServiceFn<
 	} catch (error) {
 		return {
 			error: {
-				message:
-					error instanceof Error
-						? error.message
-						: T("template_not_found_message"),
+				message: serverText(
+					"core.email.templates.not.found.message",
+					error instanceof Error ? { fallback: error.message } : undefined,
+				),
 				status: 404,
 			},
 			data: undefined,

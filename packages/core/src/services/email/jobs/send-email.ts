@@ -8,11 +8,11 @@ import {
 } from "../../../libs/email/storage/index.js";
 import renderMustacheTemplate from "../../../libs/email/templates/render-mustache-template.js";
 import type { EmailStrategyResponse } from "../../../libs/email/types.js";
+import { serverText, translateServer } from "../../../libs/i18n/index.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
 } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -37,7 +37,7 @@ const sendEmail: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: T("email_not_found_message"),
+					message: serverText("core.email.not.found.message"),
 					status: 404,
 				},
 			},
@@ -56,6 +56,7 @@ const sendEmail: ServiceFn<
 		emailRes.data.storage_strategy,
 	);
 	const attachmentsRes = normalizeEmailAttachments(
+		context,
 		emailRes.data.attachments?.map((attachment) => ({
 			type: attachment.type,
 			url: attachment.url,
@@ -108,7 +109,7 @@ const sendEmail: ServiceFn<
 				where: [{ key: "id", operator: "=", value: data.transactionId }],
 				data: {
 					delivery_status: "failed",
-					message: preSendError.message,
+					message: preSendError.message?.default,
 					updated_at: new Date().toISOString(),
 				},
 			}),
@@ -120,12 +121,14 @@ const sendEmail: ServiceFn<
 		};
 	}
 
-	let result: EmailStrategyResponse | undefined;
+	let result: EmailStrategyResponse;
 	if (emailAdapter.simulated) {
 		result = {
 			success: true,
 			deliveryStatus: "sent",
-			message: T("email_successfully_sent"),
+			message: translateServer("core.email.successfully.sent", undefined, {
+				config: context.config,
+			}),
 			data: null,
 		};
 	} else {
@@ -155,7 +158,11 @@ const sendEmail: ServiceFn<
 				success: false,
 				deliveryStatus: "failed",
 				message:
-					error instanceof Error ? error.message : T("email_failed_to_send"),
+					error instanceof Error
+						? error.message
+						: translateServer("core.email.failed.to.send", undefined, {
+								config: context.config,
+							}),
 				externalMessageId: null,
 			};
 		}

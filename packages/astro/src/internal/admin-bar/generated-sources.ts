@@ -190,6 +190,7 @@ import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
 import { maybeInjectLucidAdminBar } from "@lucidcms/astro/runtime";
 import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
+import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
 
 const adminBarOptions = ${JSON.stringify(adminBarOptions, null, 2)};
 
@@ -247,6 +248,7 @@ const ensureApp = async () => {
 \t\tappPromise = (async () => {
 \t\t\tconst wrappedDefinition = configureLucid(lucidConfigModule.default, {
 \t\t\t\temailTemplates,
+\t\t\t\ti18nTranslations,
 \t\t\t});
 \t\t\tconst adapterFactory = await getAdapterFactory();
 \t\t\tconst adapter = await adapterFactory(wrappedDefinition.adapter.options);
@@ -353,6 +355,7 @@ const loadRuntimeModules = async () => {
 \t\t\timport(${JSON.stringify(astroConstants.integration.configureLucidModuleId)}),
 \t\t\timport("@lucidcms/cloudflare-adapter/runtime"),
 \t\t\timport("./${astroConstants.files.emailTemplatesModule}"),
+			import("./${astroConstants.files.i18nTranslationsModule}"),
 \t\t]).then(
 \t\t\t([
 \t\t\t\tlucidConfigModule,
@@ -361,6 +364,7 @@ const loadRuntimeModules = async () => {
 \t\t\t\tconfigureLucidModule,
 \t\t\t\truntimeContextModule,
 \t\t\t\temailTemplatesModule,
+				i18nTranslationsModule,
 \t\t\t]) => ({
 \t\t\t\tdefinition: lucidConfigModule.default,
 \t\t\t\tenvSchema: lucidConfigModule.env,
@@ -372,6 +376,7 @@ const loadRuntimeModules = async () => {
 \t\t\t\tconfigureLucid: configureLucidModule.default,
 \t\t\t\tgetRuntimeContext: runtimeContextModule.getRuntimeContext,
 \t\t\t\temailTemplates: emailTemplatesModule.default,
+				i18nTranslations: i18nTranslationsModule.default,
 \t\t\t}),
 \t\t);
 \t}
@@ -393,6 +398,7 @@ const ensureApp = async () => {
 \t\t\t\tconfigureLucid,
 \t\t\t\tgetRuntimeContext,
 \t\t\t\temailTemplates,
+\t\t\t\ti18nTranslations,
 \t\t\t} = await loadRuntimeModules();
 
 \t\t\tif (envSchema) {
@@ -401,6 +407,7 @@ const ensureApp = async () => {
 
 \t\t\tconst wrappedDefinition = configureLucid(definition, {
 \t\t\t\temailTemplates,
+\t\t\t\ti18nTranslations,
 \t\t\t});
 \t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
 \t\t\t\tDatabaseAdapterClass,

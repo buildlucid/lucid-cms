@@ -103,12 +103,12 @@ const UpsertClientIntegrationPanel: Component<
 
 	const panelTitle = createMemo(() => {
 		if (mode() === "create")
-			return T()("create_client_integration_panel_title");
-		return T()("update_client_integration_panel_title");
+			return T()("panels.client.integrations.create.title");
+		return T()("panels.client.integrations.update.title");
 	});
 	const panelSubmit = createMemo(() => {
-		if (mode() === "create") return T()("create");
-		return T()("update");
+		if (mode() === "create") return T()("common.create");
+		return T()("common.update");
 	});
 
 	const updateData = createMemo(() => {
@@ -202,7 +202,7 @@ const UpsertClientIntegrationPanel: Component<
 							value={getName()}
 							onChange={setName}
 							copy={{
-								label: T()("name"),
+								label: T()("common.name"),
 							}}
 							required={true}
 							errors={getBodyError("name", errors)}
@@ -215,7 +215,7 @@ const UpsertClientIntegrationPanel: Component<
 						value={getDescription()}
 						onChange={setDescription}
 						copy={{
-							label: T()("description"),
+							label: T()("common.description"),
 						}}
 						rows={3}
 						errors={getBodyError("description", errors)}
@@ -226,14 +226,14 @@ const UpsertClientIntegrationPanel: Component<
 						value={getEnabled()}
 						onChange={(value) => setEnabled(value)}
 						copy={{
-							label: T()("enabled"),
+							label: T()("common.status.enabled"),
 						}}
 						errors={getBodyError("enabled", errors)}
 						hideOptionalText={true}
 					/>
 					<div class="w-full mb-5 last:mb-0">
 						<div class="mb-1.5">
-							<h3 class="text-sm text-body">{T()("scopes")}</h3>
+							<h3 class="text-sm text-body">{T()("common.scopes")}</h3>
 						</div>
 						<div class="w-full">
 							<For each={availableScopes.data?.data}>
@@ -268,8 +268,8 @@ const UpsertClientIntegrationPanel: Component<
 												{group.scopes.every((scope) =>
 													getScopes().includes(scope),
 												)
-													? T()("clear")
-													: T()("select_all")}
+													? T()("common.clear")
+													: T()("selectors.all")}
 											</button>
 										</div>
 										<div class="mt-2 flex flex-wrap gap-2">

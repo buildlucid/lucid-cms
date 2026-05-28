@@ -20,6 +20,7 @@ import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
 import { createLucidSpaResponse, shouldServeLucidSpaShell } from "@lucidcms/astro/runtime";
 import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
+import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
 import spaHtml from "./${astroConstants.files.spaHtmlModule}";
 
 export const prerender = false;
@@ -79,6 +80,7 @@ const ensureApp = async () => {
 \t\tappPromise = (async () => {
 \t\t\tconst wrappedDefinition = configureLucid(lucidConfigModule.default, {
 \t\t\t\temailTemplates,
+\t\t\t\ti18nTranslations,
 \t\t\t});
 \t\t\tconst adapterFactory = await getAdapterFactory();
 \t\t\tconst adapter = await adapterFactory(wrappedDefinition.adapter.options);
@@ -165,6 +167,7 @@ import { createConfiguredDatabaseAdapter, processConfig } from "@lucidcms/core/r
 import { createToolkit, createToolkitServiceContext } from "@lucidcms/core/toolkit";
 import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
+import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
 
 let toolkitPromise;
 let runtimeAdapterModulePromise;
@@ -210,6 +213,7 @@ const ensureToolkit = async () => {
 \t\ttoolkitPromise = (async () => {
 \t\t\tconst wrappedDefinition = configureLucid(lucidConfigModule.default, {
 \t\t\t\temailTemplates,
+\t\t\t\ti18nTranslations,
 \t\t\t});
 \t\t\tconst adapterFactory = await getAdapterFactory();
 \t\t\tconst adapter = await adapterFactory(wrappedDefinition.adapter.options);
@@ -291,6 +295,7 @@ const loadRuntimeModules = async () => {
 \t\t\timport("@lucidcms/cloudflare-adapter/runtime"),
 \t\t\timport("@lucidcms/astro/runtime"),
 \t\t\timport("./${astroConstants.files.emailTemplatesModule}"),
+			import("./${astroConstants.files.i18nTranslationsModule}"),
 \t\t\timport("./${astroConstants.files.spaHtmlModule}"),
 \t\t]).then(
 \t\t\t([
@@ -301,6 +306,7 @@ const loadRuntimeModules = async () => {
 \t\t\t\truntimeContextModule,
 \t\t\t\tastroRuntimeModule,
 \t\t\t\temailTemplatesModule,
+				i18nTranslationsModule,
 \t\t\t\tspaHtmlModule,
 \t\t\t]) => ({
 \t\t\t\tdefinition: lucidConfigModule.default,
@@ -316,6 +322,7 @@ const loadRuntimeModules = async () => {
 \t\t\t\tshouldServeLucidSpaShell:
 \t\t\t\t\tastroRuntimeModule.shouldServeLucidSpaShell,
 \t\t\t\temailTemplates: emailTemplatesModule.default,
+				i18nTranslations: i18nTranslationsModule.default,
 \t\t\t\tspaHtml: spaHtmlModule.default,
 \t\t\t}),
 \t\t);
@@ -338,6 +345,7 @@ const ensureApp = async () => {
 \t\t\t\tconfigureLucid,
 \t\t\t\tgetRuntimeContext,
 \t\t\t\temailTemplates,
+\t\t\t\ti18nTranslations,
 \t\t\t} = await loadRuntimeModules();
 
 \t\t\tif (envSchema) {
@@ -346,6 +354,7 @@ const ensureApp = async () => {
 
 \t\t\tconst wrappedDefinition = configureLucid(definition, {
 \t\t\t\temailTemplates,
+\t\t\t\ti18nTranslations,
 \t\t\t});
 \t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
 \t\t\t\tDatabaseAdapterClass,
@@ -474,6 +483,7 @@ const loadRuntimeModules = async () => {
 \t\t\timport("@lucidcms/core/toolkit"),
 \t\t\timport(${JSON.stringify(astroConstants.integration.configureLucidModuleId)}),
 \t\t\timport("./${astroConstants.files.emailTemplatesModule}"),
+			import("./${astroConstants.files.i18nTranslationsModule}"),
 \t\t]).then(
 \t\t\t([
 \t\t\t\tlucidConfigModule,
@@ -482,6 +492,7 @@ const loadRuntimeModules = async () => {
 \t\t\t\ttoolkitModule,
 \t\t\t\tconfigureLucidModule,
 \t\t\t\temailTemplatesModule,
+				i18nTranslationsModule,
 \t\t\t]) => ({
 \t\t\t\tdefinition: lucidConfigModule.default,
 \t\t\t\tenvSchema: lucidConfigModule.env,
@@ -494,6 +505,7 @@ const loadRuntimeModules = async () => {
 \t\t\t\t\ttoolkitModule.createToolkitServiceContext,
 \t\t\t\tconfigureLucid: configureLucidModule.default,
 \t\t\t\temailTemplates: emailTemplatesModule.default,
+				i18nTranslations: i18nTranslationsModule.default,
 \t\t\t}),
 \t\t);
 \t}
@@ -516,6 +528,7 @@ const ensureToolkit = async () => {
 \t\t\t\tprocessConfig,
 \t\t\t\tconfigureLucid,
 \t\t\t\temailTemplates,
+\t\t\t\ti18nTranslations,
 \t\t\t} = await loadRuntimeModules();
 \t\t\tconst prerenderContext = !cloudflareEnv ? getPrerenderContext() : null;
 
@@ -530,6 +543,7 @@ const ensureToolkit = async () => {
 
 \t\t\tconst wrappedDefinition = configureLucid(definition, {
 \t\t\t\temailTemplates,
+\t\t\t\ti18nTranslations,
 \t\t\t});
 \t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
 \t\t\t\tDatabaseAdapterClass,

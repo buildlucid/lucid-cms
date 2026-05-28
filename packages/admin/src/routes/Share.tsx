@@ -80,9 +80,10 @@ const ShareRoute: Component = () => {
 	});
 	const formattedExpiresAt = createMemo(() => {
 		const expiresAt = grantedAccess()?.expiresAt;
-		if (!expiresAt) return T()("share_route_no_expiry");
+		if (!expiresAt) return T()("media.share.route.expiry.none");
 		return (
-			dateHelpers.formatFullDate(expiresAt) || T()("share_route_no_expiry")
+			dateHelpers.formatFullDate(expiresAt) ||
+			T()("media.share.route.expiry.none")
 		);
 	});
 
@@ -114,8 +115,8 @@ const ShareRoute: Component = () => {
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
-						title: T()("share_link_expired_title"),
-						description: T()("share_link_expired_message"),
+						title: T()("media.share.links.expired.title"),
+						description: T()("media.share.links.expired.message"),
 					}}
 				/>
 			</Match>
@@ -123,8 +124,8 @@ const ShareRoute: Component = () => {
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
-						title: T()("share_route_error_title"),
-						description: T()("share_route_error_description"),
+						title: T()("media.share.route.error.title"),
+						description: T()("media.share.route.error.description"),
 					}}
 				/>
 			</Match>
@@ -178,7 +179,7 @@ const ShareRoute: Component = () => {
 																/>
 																<button
 																	type="button"
-																	aria-label={T()("play_video")}
+																	aria-label={T()("media.player.video.play")}
 																	onClick={() => {
 																		setShowVideoPreview(true);
 																	}}
@@ -237,7 +238,7 @@ const ShareRoute: Component = () => {
 															</Match>
 														</Switch>
 														<p class="text-sm text-body">
-															{T()("share_route_preview_not_available")}
+															{T()("media.share.route.preview.unavailable")}
 														</p>
 													</div>
 												</Match>
@@ -248,7 +249,7 @@ const ShareRoute: Component = () => {
 								<div class="rounded-md border border-border bg-card-base p-4 space-y-4">
 									<div>
 										<h2 class="text-base truncate">
-											{grantedAccess()?.name || T()("untitled")}
+											{grantedAccess()?.name || T()("common.untitled")}
 										</h2>
 										<Show when={grantedAccess()?.description}>
 											<p class="text-sm text-body mt-1">
@@ -260,13 +261,13 @@ const ShareRoute: Component = () => {
 									{/* Media metadata */}
 									<div class="space-y-2 text-sm">
 										<div class="flex justify-between gap-4">
-											<span class="text-body">{T()("file_size")}</span>
+											<span class="text-body">{T()("common.file.size")}</span>
 											<span>
 												{helpers.bytesToSize(grantedAccess()?.media.fileSize)}
 											</span>
 										</div>
 										<div class="flex justify-between gap-4">
-											<span class="text-body">{T()("type")}</span>
+											<span class="text-body">{T()("common.type")}</span>
 											<span class="truncate">
 												{grantedAccess()?.media.mimeType}
 											</span>
@@ -278,7 +279,7 @@ const ShareRoute: Component = () => {
 										<div class="flex justify-between gap-4 items-start">
 											<span class="text-body flex items-center gap-1.5">
 												<FaSolidCalendar class="shrink-0 mt-0.5" />
-												{T()("expires_at")}
+												{T()("common.expires.at")}
 											</span>
 											<span class="text-right">{formattedExpiresAt()}</span>
 										</div>
@@ -296,7 +297,7 @@ const ShareRoute: Component = () => {
 								>
 									<span class="flex items-center justify-center gap-2">
 										<FaSolidDownload />
-										<span>{T()("share_route_download")}</span>
+										<span>{T()("media.share.route.download")}</span>
 									</span>
 								</Button>
 							</div>
@@ -304,10 +305,10 @@ const ShareRoute: Component = () => {
 					>
 						<div class="max-w-md mx-auto">
 							<h2 class="mb-1 text-center">
-								{T()("share_route_password_title")}
+								{T()("media.share.route.password.title")}
 							</h2>
 							<p class="text-sm text-body text-center mb-5">
-								{T()("share_route_password_description")}
+								{T()("media.share.route.password.description")}
 							</p>
 						</div>
 						<div class="max-w-md mx-auto mt-4">
@@ -317,7 +318,7 @@ const ShareRoute: Component = () => {
 									errors: authorizeShare.errors(),
 								}}
 								content={{
-									submit: T()("share_route_password_button"),
+									submit: T()("media.share.route.password.button"),
 								}}
 								options={{
 									buttonFullWidth: true,
@@ -346,7 +347,7 @@ const ShareRoute: Component = () => {
 									value={password()}
 									onChange={setPassword}
 									copy={{
-										label: T()("password"),
+										label: T()("common.password"),
 									}}
 									required={true}
 									autoFoucs={true}

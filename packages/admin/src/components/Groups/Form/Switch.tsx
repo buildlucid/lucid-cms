@@ -110,7 +110,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 					props.value && "text-subtitle",
 				)}
 			>
-				{props.copy?.false || T()("false")}
+				{props.copy?.false || T()("common.false")}
 			</span>
 			<span
 				ref={trueSpanRef}
@@ -120,7 +120,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 					!props.value && "text-subtitle",
 				)}
 			>
-				{props.copy?.true || T()("true")}
+				{props.copy?.true || T()("common.true")}
 			</span>
 			<span
 				ref={overlayRef}

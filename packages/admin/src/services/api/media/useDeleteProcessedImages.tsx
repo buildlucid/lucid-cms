@@ -28,8 +28,8 @@ const useDeleteProcessedImages = (props: UseDeleteProcessedImagesProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: deleteProcessedImagesReq,
 		getSuccessToast: () => ({
-			title: T()("delete_processed_images_toast_title"),
-			message: T()("delete_processed_images_toast_message"),
+			title: T()("toasts.common.delete.processed.images.title"),
+			message: T()("toasts.common.delete.processed.images.message"),
 		}),
 		invalidates: ["settings.getSettings"],
 		onSuccess: props.onSuccess,

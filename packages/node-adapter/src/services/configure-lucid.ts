@@ -13,7 +13,7 @@ const configureLucid: RuntimeConfigureLucid = <
 	DatabaseModule extends string,
 >(
 	definition: WrappedLucidConfigDefinition<AdapterModule, DatabaseModule>,
-	_meta?: LucidConfigDefinitionMeta,
+	meta?: LucidConfigDefinitionMeta,
 ) => {
 	return {
 		...definition,

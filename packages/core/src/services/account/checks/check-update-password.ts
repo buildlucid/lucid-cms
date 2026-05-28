@@ -1,6 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import generateSecret from "../../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -37,12 +37,12 @@ const checkUpdatePassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("please_provide_current_password"),
+				message: serverText("core.input.provide.current.password"),
 				status: 400,
 				errors: {
 					currentPassword: {
 						code: "required",
-						message: T("please_provide_current_password"),
+						message: serverText("core.input.provide.current.password"),
 					},
 				},
 			},
@@ -58,12 +58,12 @@ const checkUpdatePassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("please_provide_new_password"),
+				message: serverText("core.input.provide.new.password"),
 				status: 400,
 				errors: {
 					newPassword: {
 						code: "required",
-						message: T("please_provide_new_password"),
+						message: serverText("core.input.provide.new.password"),
 					},
 				},
 			},
@@ -87,12 +87,12 @@ const checkUpdatePassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("please_ensure_passwords_match"),
+				message: serverText("core.input.ensure.passwords.match"),
 				status: 400,
 				errors: {
 					passwordConfirmation: {
 						code: "invalid",
-						message: T("please_ensure_passwords_match"),
+						message: serverText("core.input.ensure.passwords.match"),
 					},
 				},
 			},
@@ -111,12 +111,12 @@ const checkUpdatePassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("please_ensure_password_is_correct"),
+				message: serverText("core.input.ensure.password.is.correct"),
 				status: 400,
 				errors: {
 					currentPassword: {
 						code: "invalid",
-						message: T("please_ensure_password_is_correct"),
+						message: serverText("core.input.ensure.password.is.correct"),
 					},
 				},
 			},

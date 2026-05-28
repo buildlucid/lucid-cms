@@ -11,7 +11,7 @@ import {
 import { NavigationChrome, Wrapper } from "@/components/Groups/Layout";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
 import api from "@/services/api";
-import T from "@/translations";
+import T, { initAdminTranslations } from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
 const MainLayout: Component<{
@@ -50,13 +50,17 @@ const MainLayout: Component<{
 	// ------------------------------------------------------
 	// Effects
 	createEffect(() => {
+		if (authenticatedUser.isSuccess) {
+			void initAdminTranslations();
+		}
+
 		if (
 			authenticatedUser.data?.data.triggerPasswordReset === true &&
 			location.pathname !== "/lucid/account"
 		) {
 			spawnToast({
-				title: T()("password_reset_required"),
-				message: T()("please_reset_password_message"),
+				title: T()("auth.password.reset.required.title"),
+				message: T()("auth.password.reset.required.message"),
 				status: "error",
 			});
 

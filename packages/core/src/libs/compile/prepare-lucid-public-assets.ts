@@ -4,6 +4,7 @@ import constants from "../../constants/constants.js";
 import type { Config, ServiceResponse } from "../../types.js";
 import { getDirName } from "../../utils/helpers/index.js";
 import cliLogger from "../cli/logger.js";
+import { serverText } from "../i18n/index.js";
 
 const currentDir = getDirName(import.meta.url);
 
@@ -145,10 +146,12 @@ const prepareLucidPublicAssets = async (props: {
 	} catch (error) {
 		return {
 			error: {
-				message:
-					error instanceof Error
-						? error.message
-						: "An error occurred while copying public assets",
+				message: serverText("core.build.public.assets.copy.failed", {
+					fallback:
+						error instanceof Error
+							? error.message
+							: "An error occurred while copying public assets",
+				}),
 			},
 			data: undefined,
 		};

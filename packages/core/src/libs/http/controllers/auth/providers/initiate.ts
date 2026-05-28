@@ -5,7 +5,6 @@ import { z } from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
-import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
@@ -13,6 +12,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import softAuthenticate from "../../../middleware/soft-authenticate.js";
 import validate from "../../../middleware/validate.js";
@@ -62,8 +62,8 @@ const providerInitiateController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_initiate_auth_error_name"),
-					message: T("route_initiate_auth_error_message"),
+					name: serverText("core.routes.initiate.auth.error.name"),
+					message: serverText("core.routes.initiate.auth.error.message"),
 				},
 			},
 		)(context, {

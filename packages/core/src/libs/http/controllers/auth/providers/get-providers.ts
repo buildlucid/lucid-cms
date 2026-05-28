@@ -5,11 +5,11 @@ import { z } from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
-import T from "../../../../../translations/index.js";
 import type { LucidHonoContext } from "../../../../../types/hono.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";
@@ -39,8 +39,8 @@ const getProvidersController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: T("route_providers_error_name"),
-					message: T("route_providers_error_message"),
+					name: serverText("core.routes.providers.error.name"),
+					message: serverText("core.routes.providers.error.message"),
 				},
 			},
 		)(context);

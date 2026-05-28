@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
+import { serverText } from "../../i18n/index.js";
 import { isRecord } from "./paths.js";
 import type {
 	EmailStorageConfig,
@@ -24,7 +24,9 @@ export const parseEmailStorageSelector = (
 				error: {
 					type: "validation",
 					status: 400,
-					message: T("email_storage_invalid_selector", { selector }),
+					message: serverText("core.email.storage.invalid.selector", {
+						data: { selector },
+					}),
 				},
 				data: undefined,
 			};
@@ -41,7 +43,9 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: T("email_storage_invalid_selector", { selector }),
+						message: serverText("core.email.storage.invalid.selector", {
+							data: { selector },
+						}),
 					},
 					data: undefined,
 				};
@@ -64,7 +68,9 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: T("email_storage_invalid_selector", { selector }),
+						message: serverText("core.email.storage.invalid.selector", {
+							data: { selector },
+						}),
 					},
 					data: undefined,
 				};
@@ -83,7 +89,9 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: T("email_storage_invalid_selector", { selector }),
+						message: serverText("core.email.storage.invalid.selector", {
+							data: { selector },
+						}),
 					},
 					data: undefined,
 				};
@@ -98,7 +106,9 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: T("email_storage_invalid_selector", { selector }),
+						message: serverText("core.email.storage.invalid.selector", {
+							data: { selector },
+						}),
 					},
 					data: undefined,
 				};
@@ -109,7 +119,9 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: T("email_storage_invalid_selector", { selector }),
+						message: serverText("core.email.storage.invalid.selector", {
+							data: { selector },
+						}),
 					},
 					data: undefined,
 				};
@@ -122,7 +134,9 @@ export const parseEmailStorageSelector = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: T("email_storage_invalid_selector", { selector }),
+				message: serverText("core.email.storage.invalid.selector", {
+					data: { selector },
+				}),
 			},
 			data: undefined,
 		};
@@ -143,7 +157,9 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: T("email_storage_rule_must_be_object", { selector }),
+				message: serverText("core.email.storage.rule.must.be.object", {
+					data: { selector },
+				}),
 			},
 			data: undefined,
 		};
@@ -158,9 +174,8 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: T("email_storage_rule_flag_true", {
-					selector,
-					flag: "encrypt",
+				message: serverText("core.email.storage.rule.flag.true", {
+					data: { selector, flag: "encrypt" },
 				}),
 			},
 			data: undefined,
@@ -172,9 +187,8 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: T("email_storage_rule_flag_true", {
-					selector,
-					flag: "redact",
+				message: serverText("core.email.storage.rule.flag.true", {
+					data: { selector, flag: "redact" },
 				}),
 			},
 			data: undefined,
@@ -186,9 +200,8 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: T("email_storage_rule_flag_true", {
-					selector,
-					flag: "neverStore",
+				message: serverText("core.email.storage.rule.flag.true", {
+					data: { selector, flag: "neverStore" },
 				}),
 			},
 			data: undefined,
@@ -204,7 +217,9 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: T("email_storage_rule_requires_flag", { selector }),
+				message: serverText("core.email.storage.rule.requires.flag", {
+					data: { selector },
+				}),
 			},
 			data: undefined,
 		};
@@ -215,7 +230,9 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: T("email_storage_rule_never_store_exclusive", { selector }),
+				message: serverText("core.email.storage.rule.never.store.exclusive", {
+					data: { selector },
+				}),
 			},
 			data: undefined,
 		};

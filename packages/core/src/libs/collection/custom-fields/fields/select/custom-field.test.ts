@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import SelectCustomField from "./custom-field.js";
@@ -8,15 +8,21 @@ import SelectCustomField from "./custom-field.js";
 const CONSTANTS = {
 	selectOptions: [
 		{
-			label: "Option 1",
+			label: adminText("core.tests.fields.select.options.option.1", {
+				fallback: "Option 1",
+			}),
 			value: "option-1",
 		},
 		{
-			label: "Option 2",
+			label: adminText("core.tests.fields.select.options.option.2", {
+				fallback: "Option 2",
+			}),
 			value: "option-2",
 		},
 		{
-			label: "Option 3",
+			label: adminText("core.tests.fields.select.options.option.3", {
+				fallback: "Option 3",
+			}),
 			value: "option-3",
 		},
 	],
@@ -27,11 +33,13 @@ const CONSTANTS = {
 const SelectCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addSelect("standard_select", {
@@ -60,7 +68,7 @@ test("successfully validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			translations: SelectCollection.getData.config.translations,
+			localized: SelectCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -81,7 +89,7 @@ test("successfully validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			translations: SelectCollection.getData.config.translations,
+			localized: SelectCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -102,7 +110,7 @@ test("successfully validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			translations: SelectCollection.getData.config.translations,
+			localized: SelectCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -126,7 +134,7 @@ test("fail to validate field - select", async () => {
 				document: [],
 			},
 			meta: {
-				translations: SelectCollection.getData.config.translations,
+				localized: SelectCollection.getData.config.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -144,7 +152,7 @@ test("fail to validate field - select", async () => {
 				document: [],
 			},
 			meta: {
-				translations: SelectCollection.getData.config.translations,
+				localized: SelectCollection.getData.config.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -154,14 +162,17 @@ test("fail to validate field - select", async () => {
 			{
 				key: "standard_select",
 				localeCode: null,
-				message: T("please_ensure_a_valid_option_is_selected"),
+				message: serverText("core.fields.select.validation.option.invalid"),
 			},
 		],
 		number: [
 			{
 				key: "standard_select",
 				localeCode: null,
-				message: "Invalid input: expected string, received number", // zod error message
+				message: serverText("core.fields.validation.errors.unknown", {
+					fallback: "Invalid input: expected string, received number",
+					priority: "Invalid input: expected string, received number",
+				}),
 			},
 		],
 	});
@@ -181,7 +192,7 @@ test("fail to validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			translations: SelectCollection.getData.config.translations,
+			localized: SelectCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -189,7 +200,7 @@ test("fail to validate field - select", async () => {
 		{
 			key: "required_select",
 			localeCode: null,
-			message: T("select_field_required"),
+			message: serverText("core.fields.select.validation.required"),
 		},
 	]);
 });
@@ -199,18 +210,18 @@ test("fail to validate field - select", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new SelectCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
-			placeholder: {
-				en: "placeholder",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
+			placeholder: adminText("tests.fields.field.placeholder", {
+				fallback: "placeholder",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			default: "",
 			hidden: false,
 			disabled: false,

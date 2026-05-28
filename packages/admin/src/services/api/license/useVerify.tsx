@@ -19,8 +19,8 @@ const useVerify = () => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: verifyReq,
 		getSuccessToast: () => ({
-			title: T()("license_refresh_toast_title"),
-			message: T()("license_refresh_toast_message"),
+			title: T()("toasts.common.license.refresh.title"),
+			message: T()("toasts.common.license.refresh.message"),
 		}),
 		invalidates: ["license.getStatus"],
 	});

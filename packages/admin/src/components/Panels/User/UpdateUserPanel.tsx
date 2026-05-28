@@ -199,8 +199,8 @@ const UpdateUserPanel: Component<{
 					reset: handleReset,
 				}}
 				copy={{
-					title: T()("update_user_panel_title"),
-					submit: T()("update"),
+					title: T()("panels.users.update.title"),
+					submit: T()("common.update"),
 				}}
 				options={{
 					padding: "24",
@@ -225,14 +225,14 @@ const UpdateUserPanel: Component<{
 						/>
 						<PanelTabs
 							items={[
-								{ value: "options", label: T()("options") },
-								{ value: "details", label: T()("details") },
+								{ value: "options", label: T()("common.options") },
+								{ value: "details", label: T()("common.details") },
 								{
 									value: "auth_providers",
-									label: T()("auth_providers"),
+									label: T()("account.auth.providers.title"),
 									show: userStore.get.user?.superAdmin,
 								},
-								{ value: "meta", label: T()("meta") },
+								{ value: "meta", label: T()("common.meta") },
 							]}
 							active={activeTab()}
 							onChange={setActiveTab}
@@ -244,7 +244,7 @@ const UpdateUserPanel: Component<{
 								onChange={setSelectedRoles}
 								name={"roles"}
 								copy={{
-									label: T()("roles"),
+									label: T()("common.roles"),
 								}}
 								options={roleOptions()}
 								errors={getBodyError("roleIds", updateUser.errors)}
@@ -257,9 +257,9 @@ const UpdateUserPanel: Component<{
 									name={"superAdmin"}
 									theme="relaxed"
 									copy={{
-										true: T()("yes"),
-										false: T()("no"),
-										label: T()("is_super_admin"),
+										true: T()("common.yes"),
+										false: T()("common.no"),
+										label: T()("users.super.admin.label"),
 									}}
 									errors={getBodyError("superAdmin", updateUser.errors)}
 									hideOptionalText={true}
@@ -271,9 +271,9 @@ const UpdateUserPanel: Component<{
 									name={"isLocked"}
 									theme="relaxed"
 									copy={{
-										true: T()("locked"),
-										false: T()("unlocked"),
-										label: T()("is_locked"),
+										true: T()("common.status.locked"),
+										false: T()("common.status.unlocked"),
+										label: T()("users.status.locked.label"),
 									}}
 									errors={getBodyError("isLocked", updateUser.errors)}
 									hideOptionalText={true}
@@ -285,38 +285,40 @@ const UpdateUserPanel: Component<{
 								type="text"
 								items={[
 									{
-										label: T()("username"),
+										label: T()("common.username"),
 										value: user.data?.data.username || "-",
 									},
 									{
-										label: T()("email"),
+										label: T()("common.email"),
 										value: user.data?.data.email || "-",
 									},
 									{
-										label: T()("first_name"),
+										label: T()("common.first.name"),
 										value: user.data?.data.firstName || "-",
 									},
 									{
-										label: T()("last_name"),
+										label: T()("common.last.name"),
 										value: user.data?.data.lastName || "-",
 									},
 									{
-										label: T()("user_type"),
+										label: T()("users.type"),
 										value: user.data?.data.superAdmin
-											? T()("super_admin")
-											: T()("standard"),
+											? T()("users.super.admin.title")
+											: T()("common.standard"),
 										show: user.data?.data.superAdmin !== undefined,
 									},
 									{
-										label: T()("roles"),
+										label: T()("common.roles"),
 										value: userRoles(),
 										show:
 											user.data?.data.roles !== undefined &&
 											user.data?.data.roles.length > 0,
 									},
 									{
-										label: T()("is_locked"),
-										value: user.data?.data.isLocked ? T()("yes") : T()("no"),
+										label: T()("users.status.locked.label"),
+										value: user.data?.data.isLocked
+											? T()("common.yes")
+											: T()("common.no"),
 										show: user.data?.data.isLocked !== undefined,
 									},
 								]}
@@ -327,7 +329,9 @@ const UpdateUserPanel: Component<{
 								<Show
 									when={(providers.data?.data.providers?.length ?? 0) > 0}
 									fallback={
-										<span class="text-sm text-body">{T()("no_results")}</span>
+										<span class="text-sm text-body">
+											{T()("empty.states.results.title")}
+										</span>
 									}
 								>
 									<div class="flex flex-col gap-3">
@@ -361,13 +365,13 @@ const UpdateUserPanel: Component<{
 								type="text"
 								items={[
 									{
-										label: T()("created_at"),
+										label: T()("common.created.at"),
 										value: user.data?.data.createdAt
 											? dateHelpers.formatDate(user.data?.data.createdAt)
 											: "-",
 									},
 									{
-										label: T()("updated_at"),
+										label: T()("common.updated.at"),
 										value: user.data?.data.updatedAt
 											? dateHelpers.formatDate(user.data?.data.updatedAt)
 											: "-",

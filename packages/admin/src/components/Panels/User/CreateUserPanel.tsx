@@ -120,9 +120,9 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 				},
 			}}
 			copy={{
-				title: T()("create_user_panel_title"),
-				description: T()("create_user_panel_description"),
-				submit: T()("create"),
+				title: T()("panels.users.create.title"),
+				description: T()("panels.users.create.description"),
+				submit: T()("common.create"),
 			}}
 			options={{
 				padding: "24",
@@ -137,7 +137,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 						name={"username"}
 						type="text"
 						copy={{
-							label: T()("username"),
+							label: T()("common.username"),
 						}}
 						required={true}
 						errors={getBodyError("username", createUser.errors)}
@@ -150,7 +150,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							name={"firstName"}
 							type="text"
 							copy={{
-								label: T()("first_name"),
+								label: T()("common.first.name"),
 							}}
 							noMargin={true}
 							errors={getBodyError("firstName", createUser.errors)}
@@ -162,7 +162,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							name={"lastName"}
 							type="text"
 							copy={{
-								label: T()("last_name"),
+								label: T()("common.last.name"),
 							}}
 							noMargin={true}
 							errors={getBodyError("lastName", createUser.errors)}
@@ -176,7 +176,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							name={"email"}
 							type="text"
 							copy={{
-								label: T()("email"),
+								label: T()("common.email"),
 							}}
 							noMargin={true}
 							required={true}
@@ -189,7 +189,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 						onChange={setSelectedRoles}
 						name={"roleIds"}
 						copy={{
-							label: T()("roles"),
+							label: T()("common.roles"),
 						}}
 						options={roleOptions()}
 						errors={getBodyError("roleIds", createUser.errors)}
@@ -201,7 +201,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							onChange={(value) => setIsSuperAdmin(value)}
 							name={"superAdmin"}
 							copy={{
-								label: T()("is_super_admin"),
+								label: T()("users.super.admin.label"),
 							}}
 							errors={getBodyError("superAdmin", createUser.errors)}
 						/>

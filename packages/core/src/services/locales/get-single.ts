@@ -1,6 +1,6 @@
 import { localesFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { LocalesRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { Locale } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -14,7 +14,7 @@ const getSingle: ServiceFn<
 > = async (context, data) => {
 	const Locales = new LocalesRepository(context.db.client, context.config.db);
 
-	const configLocale = context.config.localization.locales.find(
+	const configLocale = context.config.i18n.content.locales.find(
 		(locale) => locale.code === data.code,
 	);
 
@@ -22,7 +22,7 @@ const getSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("locale_not_found_message"),
+				message: serverText("core.locale.not.found.message"),
 				status: 404,
 			},
 			data: undefined,
@@ -46,7 +46,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("locale_not_found_message"),
+				message: serverText("core.locale.not.found.message"),
 				status: 404,
 			},
 		},
@@ -58,7 +58,7 @@ const getSingle: ServiceFn<
 		data: localesFormatter.formatSingle({
 			locale: localeRes.data,
 			configLocale: configLocale,
-			defaultLocale: context.config.localization.defaultLocale,
+			defaultLocale: context.config.i18n.content.defaultLocale,
 		}),
 	};
 };

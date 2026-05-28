@@ -1,6 +1,6 @@
+import { serverText } from "../../../libs/i18n/index.js";
 import getMediaAdapter from "../../../libs/media/get-adapter.js";
 import type { MediaAdapterInstance } from "../../../libs/media/types.js";
-import T from "../../../translations/index.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -15,8 +15,8 @@ const checkHasMediaStrategy = async (
 		return {
 			error: {
 				type: "basic",
-				name: T("config_error_name"),
-				message: T("media_strategy_not_configured_message"),
+				name: serverText("core.config.error.name"),
+				message: serverText("core.media.strategy.not.configured.message"),
 				status: 500,
 			},
 			data: undefined,

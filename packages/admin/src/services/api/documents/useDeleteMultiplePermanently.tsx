@@ -33,10 +33,10 @@ const useDeleteMultiplePermanently = (
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: deleteMultiplePermanentlyReq,
 		getSuccessToast: () => ({
-			title: T()("deleted_toast_title", {
+			title: T()("toasts.common.deleted.title", {
 				name: props.getCollectionName(),
 			}),
-			message: T()("deleted_toast_message", {
+			message: T()("toasts.common.deleted.message", {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),

@@ -33,6 +33,7 @@
 		"./.turbo",
 		"./scripts",
 		"./vitest.config.ts",
+		"./vitest.setup.ts",
 		"**/*.test.ts",
 		"**/mock-config/**",
 		"./src/utils/test-helpers/config/**"

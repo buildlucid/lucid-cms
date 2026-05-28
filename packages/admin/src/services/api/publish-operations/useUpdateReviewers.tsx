@@ -30,10 +30,10 @@ const useUpdateReviewers = (props?: UseUpdateReviewersProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: updateReviewersReq,
 		getSuccessToast: () => ({
-			title: T()("update_toast_title", {
-				name: T()("reviewers"),
+			title: T()("toasts.common.update.title", {
+				name: T()("common.reviewers"),
 			}),
-			message: T()("publish_request_updated_toast_message"),
+			message: T()("publish.requests.notifications.request.updated"),
 		}),
 		invalidates: [
 			"documents.getMultiple",

@@ -3,7 +3,6 @@ import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/users.js";
 import { accountServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
@@ -11,6 +10,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -56,8 +56,12 @@ const createProfilePictureUploadSessionController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: T("route_user_profile_picture_upload_session_error_name"),
-					message: T("route_user_profile_picture_upload_session_error_message"),
+					name: serverText(
+						"core.routes.user.profile.picture.upload.session.error.message",
+					),
+					message: serverText(
+						"core.routes.user.profile.picture.upload.session.error.message",
+					),
 				},
 			},
 		)(context, {

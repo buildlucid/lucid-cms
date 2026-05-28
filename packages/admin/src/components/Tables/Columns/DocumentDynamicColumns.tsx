@@ -18,7 +18,7 @@ const DocumentDynamicColumns: Component<{
 	document: InternalCollectionDocument;
 	include: boolean[];
 	index: number;
-	collectionTranslations: boolean;
+	collectionLocalized: boolean;
 }> = (props) => {
 	// ----------------------------------
 	// Memos
@@ -33,7 +33,7 @@ const DocumentDynamicColumns: Component<{
 			fieldData: fieldData(),
 			fieldConfig: props.field,
 			contentLocale: contentLocale(),
-			collectionTranslations: props.collectionTranslations,
+			collectionLocalized: props.collectionLocalized,
 		});
 	});
 	const datetimeField = createMemo(() =>
@@ -131,7 +131,7 @@ const DocumentDynamicColumns: Component<{
 			</Match>
 			<Match when={fieldData()?.type === "checkbox"}>
 				<PillCol
-					text={fieldValue() === true ? T()("yes") : T()("no")}
+					text={fieldValue() === true ? T()("common.yes") : T()("common.no")}
 					theme="primary-opaque"
 					options={{ include: props.include[props.index] }}
 				/>

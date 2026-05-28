@@ -1,11 +1,11 @@
-import { BrickBuilder } from "@lucidcms/core";
+import { adminText, BrickBuilder } from "@lucidcms/core";
 
 const BannerBrick = new BrickBuilder("banner", {
 	details: {
-		name: {
-			en: "Banner",
-		},
-		summary: "A banner with a title and intro text",
+		name: adminText("bricks.banner.name", { fallback: "Banner" }),
+		summary: adminText("bricks.banner.summary", {
+			fallback: "A banner with a title and intro text",
+		}),
 	},
 	preview: {
 		image: "https://headless-dev.up.railway.app/public/banner-brick.png",
@@ -13,12 +13,16 @@ const BannerBrick = new BrickBuilder("banner", {
 })
 	.addTab("content_tab", {
 		details: {
-			label: "Content",
+			label: adminText("bricks.banner.tabs.content_tab.label", {
+				fallback: "Content",
+			}),
 		},
 	})
 	.addText("title", {
 		details: {
-			summary: "The title of the banner. This is displayed as an H1 tag.",
+			summary: adminText("bricks.banner.fields.title.summary", {
+				fallback: "The title of the banner. This is displayed as an H1 tag.",
+			}),
 		},
 		config: {
 			default: "Welcome to our website",
@@ -30,7 +34,9 @@ const BannerBrick = new BrickBuilder("banner", {
 	.addRichText("intro")
 	.addRepeater("call_to_actions", {
 		details: {
-			label: "Call to Actions",
+			label: adminText("bricks.banner.fields.call_to_actions.label", {
+				fallback: "Call to Actions",
+			}),
 		},
 		validation: {
 			maxGroups: 3,
@@ -38,12 +44,16 @@ const BannerBrick = new BrickBuilder("banner", {
 	})
 	.addText("call_to_action_title", {
 		details: {
-			label: "Link Text",
+			label: adminText("bricks.banner.fields.call_to_action_title.label", {
+				fallback: "Link Text",
+			}),
 		},
 	})
 	.addLink("link", {
 		details: {
-			label: "Link",
+			label: adminText("bricks.banner.fields.link.label", {
+				fallback: "Link",
+			}),
 		},
 	})
 	.addRepeater("nested_repeater")
@@ -52,12 +62,16 @@ const BannerBrick = new BrickBuilder("banner", {
 	.endRepeater()
 	.addTab("config_tab", {
 		details: {
-			label: "Config",
+			label: adminText("bricks.banner.tabs.config_tab.label", {
+				fallback: "Config",
+			}),
 		},
 	})
 	.addCheckbox("full_width", {
 		details: {
-			summary: "Make the banner fullwidth",
+			summary: adminText("bricks.banner.fields.full_width.summary", {
+				fallback: "Make the banner fullwidth",
+			}),
 		},
 	});
 

@@ -1,3 +1,7 @@
+import {
+	mergeTranslationBundles,
+	translateServer,
+} from "@lucidcms/core/plugin";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
 	LUCID_VERSION,
@@ -7,7 +11,9 @@ import {
 	WEBHOOK_ENABLED,
 } from "./constants.js";
 import routes from "./routes/index.js";
-import T from "./translations/index.js";
+import serverTranslations from "./translations/en.server.json" with {
+	type: "json",
+};
 import type { PluginOptions } from "./types/types.js";
 import isValidData from "./utils/is-valid-data.js";
 
@@ -22,7 +28,16 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
+			draft.i18n.translations = mergeTranslationBundles(
+				draft.i18n.translations,
+				{ en: { server: serverTranslations } },
+			);
+
 			const simulate = draft.email.simulate;
+			const translate = (
+				key: string,
+				data?: Record<string, string | number | undefined>,
+			) => translateServer(key, data, { config: draft });
 
 			if (
 				pluginOptions.webhook?.enabled &&
@@ -41,7 +56,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							return {
 								success: true,
 								deliveryStatus: "sent",
-								message: T("email_successfully_sent"),
+								message: translate("plugin.resend.email.send.success"),
 								data: null,
 							};
 						}
@@ -86,14 +101,14 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							return {
 								success: false,
 								deliveryStatus: "failed",
-								message: T("email_failed_to_send"),
+								message: translate("plugin.resend.email.send.failed"),
 							};
 						}
 
 						return {
 							success: true,
 							deliveryStatus: webhookEnabled ? "sent" : "delivered",
-							message: T("email_successfully_sent"),
+							message: translate("plugin.resend.email.send.success"),
 							data: isValidData(data) ? data : null,
 							externalMessageId: data.id,
 						};
@@ -104,7 +119,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							message:
 								error instanceof Error
 									? error.message
-									: T("email_failed_to_send"),
+									: translate("plugin.resend.email.send.failed"),
 						};
 					}
 				},

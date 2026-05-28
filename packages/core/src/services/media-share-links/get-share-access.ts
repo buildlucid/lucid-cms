@@ -2,8 +2,8 @@ import { isPast } from "date-fns";
 import formatter, {
 	mediaShareLinksFormatter,
 } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ShareLinkAccess } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import { createShareStreamUrl } from "../../utils/media/index.js";
@@ -30,9 +30,9 @@ const getShareAccess: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("share_link_not_found_title"),
+				name: serverText("core.share.links.not.found.title"),
 				status: 404,
-				message: T("share_link_not_found_message"),
+				message: serverText("core.share.links.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -42,9 +42,9 @@ const getShareAccess: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("share_link_expired_title"),
+				name: serverText("core.share.links.expired.title"),
 				status: 410,
-				message: T("share_link_expired_message"),
+				message: serverText("core.share.links.expired.message"),
 			},
 			data: undefined,
 		};
@@ -55,9 +55,9 @@ const getShareAccess: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("share_link_media_deleted_title"),
+				name: serverText("core.share.links.media.deleted.title"),
 				status: 410,
-				message: T("share_link_media_deleted_message"),
+				message: serverText("core.share.links.media.deleted.message"),
 			},
 			data: undefined,
 		};

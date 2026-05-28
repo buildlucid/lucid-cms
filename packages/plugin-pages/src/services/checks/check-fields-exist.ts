@@ -1,9 +1,9 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type {
 	FieldError,
 	FieldInputSchema,
 	ServiceResponse,
 } from "@lucidcms/core/types";
-import T from "../../translations/index.js";
 
 /**
  *  Returns an error if the required fields do not exist
@@ -27,21 +27,21 @@ const checkFieldsExist = (data: {
 		fieldErrors.push({
 			key: "slug",
 			localeCode: null,
-			message: T("field_required"),
+			message: serverText("plugin.pages.fields.validation.required"),
 		});
 	}
 	if (data.fields.parentPage === undefined) {
 		fieldErrors.push({
 			key: "parentPage",
 			localeCode: null,
-			message: T("field_required"),
+			message: serverText("plugin.pages.fields.validation.required"),
 		});
 	}
 	if (data.fields.fullSlug === undefined) {
 		fieldErrors.push({
 			key: "fullSlug",
 			localeCode: null,
-			message: T("field_required"),
+			message: serverText("plugin.pages.fields.validation.required"),
 		});
 	}
 
@@ -49,7 +49,7 @@ const checkFieldsExist = (data: {
 		return {
 			error: {
 				type: "basic",
-				message: T("cannot_find_required_field_message"),
+				message: serverText("plugin.pages.fields.required.missing"),
 				status: 400,
 				errors: {
 					fields: fieldErrors,

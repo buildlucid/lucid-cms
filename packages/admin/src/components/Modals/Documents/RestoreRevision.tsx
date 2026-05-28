@@ -25,8 +25,8 @@ const RestoreRevision: Component<{
 				isError: !!props.error,
 			}}
 			copy={{
-				title: T()("restore_revision_modal_title"),
-				description: T()("restore_revision_modal_description", {
+				title: T()("modals.common.restore.revision.title"),
+				description: T()("modals.common.restore.revision.description", {
 					id: props.versionId() ?? "",
 				}),
 				error: props.error,

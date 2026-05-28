@@ -1,7 +1,7 @@
 import type { DescribeRouteOptions } from "hono-openapi";
 import type { OpenAPIV3 } from "openapi-types";
 import z, { type ZodType } from "zod";
-import T from "../../translations/index.js";
+import { translateServer } from "../../libs/i18n/index.js";
 
 /**
  * Used to construct paramaters JSON schema for OpenAPI
@@ -22,7 +22,7 @@ const honoOpenAPIParamaters = (props: {
 			in: "header",
 			name: "X-CSRF-Token",
 			required: props.headers.csrf,
-			description: T("open_api_csrf_header_description"),
+			description: translateServer("core.openapi.csrf.header.description"),
 			schema: {
 				type: "string",
 			},
@@ -33,7 +33,9 @@ const honoOpenAPIParamaters = (props: {
 			in: "header",
 			name: "Authorization",
 			required: props.headers.authorization,
-			description: T("open_api_authorization_header_description"),
+			description: translateServer(
+				"core.openapi.authorization.header.description",
+			),
 			schema: {
 				type: "string",
 			},

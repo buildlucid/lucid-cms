@@ -26,7 +26,7 @@ const DeleteDocumentPermanently: Component<DeleteDocumentPermanentlyProps> = (
 		() =>
 			helpers.getLocaleValue({
 				value: props.collection?.details.singularName,
-			}) || T()("collection"),
+			}) || T()("common.collection"),
 	);
 
 	// ----------------------------------------
@@ -50,8 +50,10 @@ const DeleteDocumentPermanently: Component<DeleteDocumentPermanentlyProps> = (
 				isError: permaDelete.action.isError,
 			}}
 			copy={{
-				title: T()("delete_document_permanently_modal_title"),
-				description: T()("delete_document_permanently_modal_description"),
+				title: T()("modals.common.delete.document.permanently.title"),
+				description: T()(
+					"modals.common.delete.document.permanently.description",
+				),
 				error: permaDelete.errors()?.message,
 			}}
 			callbacks={{

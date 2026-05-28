@@ -1,6 +1,9 @@
 import { createSignal } from "solid-js";
 import { csrfReq } from "@/services/api/auth/useCsrf";
-import T from "@/translations";
+import T, {
+	getRequestInterfaceLocale,
+	interfaceLocaleHeader,
+} from "@/translations";
 import { LucidError } from "@/utils/error-handling";
 import request, { getFetchURL, type RequestParams } from "@/utils/request";
 
@@ -26,10 +29,10 @@ const useRefreshToken = async <Response, Data = unknown>(
 	setRefreshTokenPromise(null);
 
 	if (!successful) {
-		throw new LucidError(T()("error_fetching_refresh_token"), {
+		throw new LucidError(T()("errors.auth.refresh.token.fetch.failed"), {
 			status: 401,
-			name: T()("unauthorised"),
-			message: T()("error_fetching_refresh_token"),
+			name: T()("errors.auth.unauthorized"),
+			message: T()("errors.auth.refresh.token.fetch.failed"),
 		});
 	}
 
@@ -39,12 +42,14 @@ const useRefreshToken = async <Response, Data = unknown>(
 export const refreshTokenReq = async (): Promise<boolean> => {
 	const fetchURL = getFetchURL("/lucid/api/v1/auth/token");
 	const csrfToken = await csrfReq();
+	const interfaceLocale = getRequestInterfaceLocale();
 
 	const refreshRes = await fetch(fetchURL, {
 		method: "POST",
 		credentials: "include",
 		headers: {
 			"X-CSRF-Token": csrfToken || "",
+			...(interfaceLocale ? { [interfaceLocaleHeader]: interfaceLocale } : {}),
 		},
 	});
 

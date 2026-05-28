@@ -31,8 +31,8 @@ const useDeleteMultiplePermanently = (
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: deleteMultiplePermanentlyReq,
 		getSuccessToast: () => ({
-			title: T()("media_deleted_toast_title"),
-			message: T()("media_deleted_toast_message"),
+			title: T()("toasts.media.deleted.title"),
+			message: T()("toasts.media.deleted.message"),
 		}),
 		invalidates: [
 			"media.getMultiple",

@@ -44,65 +44,65 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 				padding: "24",
 			}}
 			copy={{
-				title: T()("view_job_panel_title"),
+				title: T()("panels.jobs.view.title"),
 			}}
 		>
 			{() => (
 				<>
-					<SectionHeading title={T()("details")} />
+					<SectionHeading title={T()("common.details")} />
 					<DetailsList
 						type="text"
 						items={[
 							{
-								label: T()("job_id"),
+								label: T()("jobs.id"),
 								value: job.data?.data.jobId ?? undefined,
 							},
 							{
-								label: T()("event_type"),
+								label: T()("common.event.type"),
 								value: job.data?.data.eventType ?? undefined,
 							},
 							{
-								label: T()("status"),
+								label: T()("common.status"),
 								value: job.data?.data.status ?? undefined,
 							},
 							{
-								label: T()("queue_adapter"),
+								label: T()("queue.adapter"),
 								value: job.data?.data.queueAdapterKey ?? undefined,
 							},
 							{
-								label: T()("priority"),
+								label: T()("common.priority"),
 								value: job.data?.data.priority ?? "-",
 							},
 							{
-								label: T()("attempts"),
+								label: T()("common.attempts"),
 								value: job.data?.data.attempts ?? 0,
 							},
 							{
-								label: T()("max_attempts"),
+								label: T()("common.max.attempts"),
 								value: job.data?.data.maxAttempts ?? 0,
 							},
 							{
-								label: T()("created_at"),
+								label: T()("common.created.at"),
 								value: dateHelpers.formatDate(job.data?.data.createdAt),
 							},
 							{
-								label: T()("scheduled_for"),
+								label: T()("common.scheduled.for"),
 								value: dateHelpers.formatDate(job.data?.data.scheduledFor),
 							},
 							{
-								label: T()("started_at"),
+								label: T()("common.started.at"),
 								value: dateHelpers.formatDate(job.data?.data.startedAt),
 							},
 							{
-								label: T()("completed_at"),
+								label: T()("common.completed.at"),
 								value: dateHelpers.formatDate(job.data?.data.completedAt),
 							},
 							{
-								label: T()("failed_at"),
+								label: T()("common.failed.at"),
 								value: dateHelpers.formatDate(job.data?.data.failedAt),
 							},
 							{
-								label: T()("next_retry_at"),
+								label: T()("common.next.retry.at"),
 								value: dateHelpers.formatDate(job.data?.data.nextRetryAt),
 							},
 						]}
@@ -114,13 +114,13 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 					>
 						<div class="mb-4 p-4 bg-error-base/10 border border-error-base/20 rounded-md -mt-2.5">
 							<h3 class="text-sm font-medium text-title mb-1">
-								{T()("failed_with_message")}
+								{T()("common.failed.with.message")}
 							</h3>
 							<p class="text-sm text-body">{job.data?.data.errorMessage}</p>
 						</div>
 					</Show>
 					<Show when={job.data?.data.eventData}>
-						<SectionHeading title={T()("job_payload")} />
+						<SectionHeading title={T()("jobs.payload")} />
 						<div class="mb-4">
 							<Suspense
 								fallback={
@@ -128,7 +128,7 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 								}
 							>
 								<JSONPreview
-									title={T()("job_payload")}
+									title={T()("jobs.payload")}
 									json={job.data?.data.eventData || {}}
 								/>
 							</Suspense>

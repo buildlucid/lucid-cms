@@ -189,7 +189,7 @@ export const BottomPanel: Component<{
 										</div>
 										<Dialog.CloseButton class="flex items-center text-body hover:text-title w-6 h-6 min-w-6 rounded-full focus:outline-hidden focus-visible:ring-1 ring-primary-base bg-background-base justify-center">
 											<FaSolidXmark class="text-current" />
-											<span class="sr-only">{T()("back")}</span>
+											<span class="sr-only">{T()("common.back")}</span>
 										</Dialog.CloseButton>
 									</div>
 									<Show when={showContentLocaleSelect()}>
@@ -245,7 +245,7 @@ export const BottomPanel: Component<{
 																type="button"
 																onClick={() => props.state.setOpen(false)}
 															>
-																{T()("close")}
+																{T()("common.close")}
 															</Button>
 															<Show when={props.copy?.submit}>
 																<Button
@@ -310,7 +310,7 @@ export const BottomPanel: Component<{
 															type="button"
 															onClick={() => props.state.setOpen(false)}
 														>
-															{T()("close")}
+															{T()("common.close")}
 														</Button>
 														<Show when={props.copy?.submit}>
 															<Button

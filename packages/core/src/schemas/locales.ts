@@ -1,11 +1,5 @@
 import z from "zod";
-import constants from "../constants/constants.js";
 import type { ControllerSchema } from "../types.js";
-
-export const stringTranslations = z.union([
-	z.string(),
-	z.record(z.enum(constants.locales), z.string()),
-]);
 
 const localeResponseSchema = z.object({
 	code: z.string().meta({
@@ -15,6 +9,10 @@ const localeResponseSchema = z.object({
 	name: z.string().meta({
 		description: "The locale's name",
 		example: "English",
+	}),
+	direction: z.enum(["ltr", "rtl"]).meta({
+		description: "The text direction for content written in this locale",
+		example: "ltr",
 	}),
 	isDefault: z.boolean().meta({
 		description:

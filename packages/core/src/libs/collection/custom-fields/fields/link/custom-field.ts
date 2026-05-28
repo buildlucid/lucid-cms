@@ -1,7 +1,8 @@
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
-import T from "../../../../../translations/index.js";
 import type { LinkResValue, ServiceResponse } from "../../../../../types.js";
+import { adminText } from "../../../../i18n/admin-text.js";
+import { serverText } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -27,12 +28,16 @@ class LinkCustomField extends CustomField<"link"> {
 			key: this.key,
 			type: this.type,
 			details: {
-				label: this.props?.details?.label ?? keyToTitle(this.key),
+				label:
+					this.props?.details?.label ??
+					adminText(`fields.${this.type}.${this.key}.label`, {
+						fallback: keyToTitle(this.key),
+					}),
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,
 			},
 			config: {
-				translations: this.props?.config?.translations ?? false,
+				localized: this.props?.config?.localized ?? false,
 				default: this.props?.config?.default ?? {
 					url: null,
 					label: null,
@@ -100,9 +105,14 @@ class LinkCustomField extends CustomField<"link"> {
 		) {
 			return {
 				valid: false,
-				message: T("field_link_target_error_message", {
-					valid: constants.customFields.link.targets.join(", "),
-				}),
+				message: serverText(
+					"core.fields.link.validation.target.error.message",
+					{
+						data: {
+							valid: constants.customFields.link.targets.join(", "),
+						},
+					},
+				),
 			};
 		}
 

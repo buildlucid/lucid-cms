@@ -32,8 +32,8 @@ const useDeleteBatch = (props: UseDeleteBatchProps) => {
 	return serviceHelpers.useMutationWrapper<Params, undefined>({
 		mutationFn: deleteBatchReq,
 		getSuccessToast: () => ({
-			title: T()("media_batch_deleted_toast_title"),
-			message: T()("media_batch_deleted_toast_message"),
+			title: T()("toasts.media.batch.deleted.title"),
+			message: T()("toasts.media.batch.deleted.message"),
 		}),
 		invalidates: [
 			"media.getMultiple",

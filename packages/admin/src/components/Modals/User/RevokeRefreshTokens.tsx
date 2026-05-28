@@ -32,8 +32,8 @@ const RevokeRefreshTokens: Component<RevokeRefreshTokensProps> = (props) => {
 				isError: revokeRefreshTokens.action.isError,
 			}}
 			copy={{
-				title: T()("user_revoke_sessions_modal_title"),
-				description: T()("user_revoke_sessions_modal_description"),
+				title: T()("modals.users.revoke.sessions.title"),
+				description: T()("modals.users.revoke.sessions.description"),
 				error: revokeRefreshTokens.errors()?.message,
 			}}
 			callbacks={{

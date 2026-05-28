@@ -1,8 +1,8 @@
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	ClientIntegrationScopesRepository,
 	ClientIntegrationsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import generateKeys from "../../utils/client-integrations/generate-keys.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -49,7 +49,7 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("client_integration_key_already_exists"),
+				message: serverText("core.client.integrations.key.already.exists"),
 				status: 400,
 			},
 			data: undefined,

@@ -31,7 +31,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 				errors: forgotPassword.errors(),
 			}}
 			content={{
-				submit: T()("send_password_reset"),
+				submit: T()("users.password.reset.send.action"),
 			}}
 			options={{
 				buttonFullWidth: true,
@@ -49,7 +49,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 				value={email()}
 				onChange={setEmail}
 				copy={{
-					label: T()("email"),
+					label: T()("common.email"),
 				}}
 				required={true}
 				autoFoucs={true}
@@ -61,7 +61,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 					type="button"
 					href="/lucid/login"
 				>
-					{T()("back_to_login")}
+					{T()("common.back.to.login")}
 				</A>
 			</Show>
 		</Form>

@@ -19,9 +19,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"exec": [
-											""
-										],
+										"exec": [""],
 										"type": "text/javascript",
 										"packages": {},
 										"requests": {}
@@ -45,9 +43,7 @@
 								},
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/auth/invitation/validate/:token",
-									"host": [
-										"{{BASE_URL}}"
-									],
+									"host": ["{{BASE_URL}}"],
 									"path": [
 										"api",
 										"v1",
@@ -72,9 +68,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"exec": [
-											""
-										],
+										"exec": [""],
 										"type": "text/javascript",
 										"packages": {},
 										"requests": {}
@@ -101,9 +95,7 @@
 								},
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/auth/invitation/accept/:token",
-									"host": [
-										"{{BASE_URL}}"
-									],
+									"host": ["{{BASE_URL}}"],
 									"path": [
 										"api",
 										"v1",
@@ -133,9 +125,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"exec": [
-											""
-										],
+										"exec": [""],
 										"type": "text/javascript",
 										"packages": {},
 										"requests": {}
@@ -159,15 +149,8 @@
 								},
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/auth/providers",
-									"host": [
-										"{{BASE_URL}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"providers"
-									]
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "v1", "auth", "providers"]
 								}
 							},
 							"response": []
@@ -178,9 +161,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"exec": [
-											""
-										],
+										"exec": [""],
 										"type": "text/javascript",
 										"packages": {},
 										"requests": {}
@@ -207,9 +188,7 @@
 								},
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/auth/providers/github/initiate",
-									"host": [
-										"{{BASE_URL}}"
-									],
+									"host": ["{{BASE_URL}}"],
 									"path": [
 										"api",
 										"v1",
@@ -258,15 +237,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/auth/csrf",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"csrf"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "auth", "csrf"]
 						}
 					},
 					"response": []
@@ -277,9 +249,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									""
-								],
+								"exec": [""],
 								"type": "text/javascript",
 								"packages": {},
 								"requests": {}
@@ -303,15 +273,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/auth/setup-required",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"setup-required"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "auth", "setup-required"]
 						}
 					},
 					"response": []
@@ -338,15 +301,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/auth/setup",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"setup"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "auth", "setup"]
 						}
 					},
 					"response": []
@@ -373,15 +329,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/auth/login",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"login"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "auth", "login"]
 						}
 					},
 					"response": []
@@ -407,15 +356,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/auth/token",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"token"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "auth", "token"]
 						}
 					},
 					"response": []
@@ -442,15 +384,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/auth/logout",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"auth",
-								"logout"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "auth", "logout"]
 						}
 					},
 					"response": []
@@ -467,14 +402,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/permissions",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"permissions"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "permissions"]
 						}
 					},
 					"response": []
@@ -506,14 +435,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/roles",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"roles"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "roles"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -526,15 +449,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/roles/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"roles",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "roles", "1"]
 						}
 					},
 					"response": []
@@ -546,14 +462,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/roles",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"roles"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "roles"],
 							"query": [
 								{
 									"key": "include",
@@ -612,15 +522,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/roles/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"roles",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "roles", "1"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -648,15 +551,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/roles/5",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"roles",
-								"5"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "roles", "5"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -677,16 +573,8 @@
 								"header": [],
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/users/logins/1",
-									"host": [
-										"{{BASE_URL}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"users",
-										"logins",
-										"1"
-									],
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "v1", "users", "logins", "1"],
 									"query": [
 										{
 											"key": "filter[authMethod]",
@@ -741,14 +629,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/users",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "users"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -775,16 +657,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/users/1/resend-invitation",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"1",
-								"resend-invitation"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "users", "1", "resend-invitation"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -811,15 +685,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/users/2",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"2"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "users", "2"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -832,15 +699,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/users/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "users", "1"]
 						}
 					},
 					"response": []
@@ -852,14 +712,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/users",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "users"],
 							"query": [
 								{
 									"key": "filter[firstName:like]",
@@ -937,15 +791,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/users/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "users", "1"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -973,16 +820,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/users/1/permanent",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"1",
-								"permanent"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "users", "1", "permanent"]
 						}
 					},
 					"response": []
@@ -1008,17 +847,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/users/1/auth-providers/github",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"1",
-								"auth-providers",
-								"github"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "users", "1", "auth-providers", "github"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -1046,15 +876,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/users/restore",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"users",
-								"restore"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "users", "restore"]
 						}
 					},
 					"response": []
@@ -1083,15 +906,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/collections/page",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"collections",
-								"page"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "collections", "page"]
 						}
 					},
 					"response": []
@@ -1103,14 +919,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/collections",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"collections"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "collections"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -1142,15 +952,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/simple",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"simple"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "simple"]
 						}
 					},
 					"response": []
@@ -1176,9 +979,7 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/simple/13/36/restore-revision",
-							"host": [
-								"{{BASE_URL}}"
-							],
+							"host": ["{{BASE_URL}}"],
 							"path": [
 								"api",
 								"v1",
@@ -1213,9 +1014,7 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/simple/1/3/promote-version",
-							"host": [
-								"{{BASE_URL}}"
-							],
+							"host": ["{{BASE_URL}}"],
 							"path": [
 								"api",
 								"v1",
@@ -1250,16 +1049,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/test/3",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"test",
-								"3"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "test", "3"]
 						}
 					},
 					"response": []
@@ -1285,17 +1076,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/test/3/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"test",
-								"3",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "test", "3", "1"]
 						}
 					},
 					"response": []
@@ -1322,16 +1104,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/test/2",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"test",
-								"2"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "test", "2"]
 						}
 					},
 					"response": []
@@ -1358,15 +1132,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/simple",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"simple"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "simple"]
 						}
 					},
 					"response": []
@@ -1393,17 +1160,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/page/1/permanent",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"page",
-								"1",
-								"permanent"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "page", "1", "permanent"]
 						}
 					},
 					"response": []
@@ -1415,17 +1173,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/page/1/draft?include=bricks",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"page",
-								"1",
-								"draft"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "page", "1", "draft"],
 							"query": [
 								{
 									"key": "include",
@@ -1443,16 +1192,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/simple/draft",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"simple",
-								"draft"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "simple", "draft"],
 							"query": [
 								{
 									"key": "sort",
@@ -1511,17 +1252,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/simple/13/revisions",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"simple",
-								"13",
-								"revisions"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "simple", "13", "revisions"],
 							"query": [
 								{
 									"key": "sort",
@@ -1570,16 +1302,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/documents/test/restore",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"documents",
-								"test",
-								"restore"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "documents", "test", "restore"]
 						}
 					},
 					"response": []
@@ -1596,14 +1320,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/account",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"account"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "account"],
 							"query": [
 								{
 									"key": null,
@@ -1636,14 +1354,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/account",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"account"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "account"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -1671,15 +1383,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/account/reset-password",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"account",
-								"reset-password"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "account", "reset-password"]
 						}
 					},
 					"response": []
@@ -1706,9 +1411,7 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/account/reset-password/7eed42d48689a73b3d5c63f573670f86e2f05f6a7cac032add8fbb0ca5f6fa43",
-							"host": [
-								"{{BASE_URL}}"
-							],
+							"host": ["{{BASE_URL}}"],
 							"path": [
 								"api",
 								"v1",
@@ -1745,9 +1448,7 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/account/reset-password/f32511d8d8bc9be1fc28e0236d1f3f26872dcb902d78a4fe75e1a0ad69bd598c",
-							"host": [
-								"{{BASE_URL}}"
-							],
+							"host": ["{{BASE_URL}}"],
 							"path": [
 								"api",
 								"v1",
@@ -1780,16 +1481,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/account/auth-providers/github",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"account",
-								"auth-providers",
-								"github"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "account", "auth-providers", "github"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -1807,14 +1500,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/locales",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"locales"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "locales"]
 						}
 					},
 					"response": []
@@ -1826,15 +1513,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/locales/en",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"locales",
-								"en"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "locales", "en"]
 						}
 					},
 					"response": []
@@ -1863,14 +1543,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/emails",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"emails"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "emails"],
 							"query": [
 								{
 									"key": "filter[toAddress]",
@@ -1931,15 +1605,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/emails/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"emails",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "emails", "1"]
 						}
 					},
 					"response": []
@@ -1966,15 +1633,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/emails/2",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"emails",
-								"2"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "emails", "2"]
 						}
 					},
 					"response": []
@@ -2001,16 +1661,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/emails/2/resend",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"emails",
-								"2",
-								"resend"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "emails", "2", "resend"]
 						}
 					},
 					"response": []
@@ -2022,12 +1674,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/send-email",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"send-email"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["send-email"]
 						}
 					},
 					"response": []
@@ -2130,16 +1778,9 @@
 								"url": {
 									"raw": "http://[::1]:8080/api/v1/localstorage/upload?key=2025/06/q6ko0u-pension-chats-screenshot-2.png&token=db702155abfec1625d0acd2527c27b4aa36e7ef3872a26968709839de324a7cb&timestamp=1749802676569",
 									"protocol": "http",
-									"host": [
-										"[::1]"
-									],
+									"host": ["[::1]"],
 									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"localstorage",
-										"upload"
-									],
+									"path": ["api", "v1", "localstorage", "upload"],
 									"query": [
 										{
 											"key": "key",
@@ -2181,15 +1822,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/presigned-url",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"presigned-url"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "presigned-url"]
 						}
 					},
 					"response": []
@@ -2215,14 +1849,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media"]
 						}
 					},
 					"response": []
@@ -2248,15 +1876,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "1"]
 						}
 					},
 					"response": []
@@ -2282,16 +1903,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/2/move",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"2",
-								"move"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "2", "move"]
 						}
 					},
 					"response": []
@@ -2315,15 +1928,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "1"]
 						}
 					},
 					"response": []
@@ -2350,15 +1956,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/4",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"4"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "4"]
 						}
 					},
 					"response": []
@@ -2387,14 +1986,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media"],
 							"query": [
 								{
 									"key": "filter[key]",
@@ -2463,16 +2056,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/4/permanent",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"4",
-								"permanent"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "4", "permanent"]
 						}
 					},
 					"response": []
@@ -2499,15 +2084,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/batch",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"batch"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "batch"]
 						}
 					},
 					"response": []
@@ -2534,16 +2112,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/1/processed",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"1",
-								"processed"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "1", "processed"]
 						}
 					},
 					"response": []
@@ -2570,15 +2140,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/processed",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"processed"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "processed"]
 						}
 					},
 					"response": []
@@ -2605,15 +2168,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/restore",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"restore"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "restore"]
 						}
 					},
 					"response": []
@@ -2645,16 +2201,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/folders/4",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"folders",
-								"4"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "folders", "4"]
 						}
 					},
 					"response": []
@@ -2683,15 +2231,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/folders?filter[parentFolderId]=1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"folders"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "folders"],
 							"query": [
 								{
 									"key": "filter[title]",
@@ -2746,16 +2287,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/folders/hierarchy",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"folders",
-								"hierarchy"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "folders", "hierarchy"]
 						}
 					},
 					"response": []
@@ -2781,15 +2314,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/folders",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"folders"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "folders"]
 						}
 					},
 					"response": []
@@ -2815,16 +2341,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/folders/2",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"folders",
-								"2"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "folders", "2"]
 						}
 					},
 					"response": []
@@ -2856,17 +2374,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/1/share-links/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"1",
-								"share-links",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "1", "share-links", "1"]
 						}
 					},
 					"response": []
@@ -2893,15 +2402,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/share-links",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"share-links"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "share-links"]
 						}
 					},
 					"response": []
@@ -2928,16 +2430,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/1/share-links",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"1",
-								"share-links"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "1", "share-links"]
 						}
 					},
 					"response": []
@@ -2966,15 +2460,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/share-links",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"share-links"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "share-links"],
 							"query": [
 								{
 									"key": "filter[token]",
@@ -3037,16 +2524,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/1/share-links",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"1",
-								"share-links"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "1", "share-links"]
 						}
 					},
 					"response": []
@@ -3072,16 +2551,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/media/1/share-links",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"media",
-								"1",
-								"share-links"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "media", "1", "share-links"]
 						}
 					},
 					"response": []
@@ -3105,14 +2576,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/settings",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"settings"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "settings"]
 						}
 					},
 					"response": []
@@ -3134,15 +2599,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/settings/kv",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"settings",
-								"kv"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "settings", "kv"]
 						}
 					},
 					"response": []
@@ -3174,14 +2632,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/client-integrations",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"client-integrations"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "client-integrations"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -3209,15 +2661,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/client-integrations/1",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"client-integrations",
-								"1"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "client-integrations", "1"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -3236,15 +2681,8 @@
 						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/client-integrations/2",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"client-integrations",
-								"2"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "client-integrations", "2"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -3270,14 +2708,8 @@
 						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/client-integrations",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"client-integrations"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "client-integrations"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -3290,15 +2722,8 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/client-integrations/2",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"client-integrations",
-								"2"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "client-integrations", "2"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -3320,9 +2745,7 @@
 						],
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/client-integrations/1/regenerate-keys",
-							"host": [
-								"{{BASE_URL}}"
-							],
+							"host": ["{{BASE_URL}}"],
 							"path": [
 								"api",
 								"v1",
@@ -3356,17 +2779,8 @@
 								],
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/client/document/page/draft",
-									"host": [
-										"{{BASE_URL}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"client",
-										"document",
-										"page",
-										"draft"
-									],
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "v1", "client", "document", "page", "draft"],
 									"query": [
 										{
 											"key": "include",
@@ -3421,9 +2835,7 @@
 								],
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/client/documents/page/published",
-									"host": [
-										"{{BASE_URL}}"
-									],
+									"host": ["{{BASE_URL}}"],
 									"path": [
 										"api",
 										"v1",
@@ -3486,15 +2898,8 @@
 								],
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/client/locales",
-									"host": [
-										"{{BASE_URL}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"client",
-										"locales"
-									]
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "v1", "client", "locales"]
 								}
 							},
 							"response": []
@@ -3526,17 +2931,8 @@
 								},
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/client/media/process/key",
-									"host": [
-										"{{BASE_URL}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"client",
-										"media",
-										"process",
-										"key"
-									]
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "v1", "client", "media", "process", "key"]
 								}
 							},
 							"response": []
@@ -3566,16 +2962,8 @@
 								},
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/client/media/1",
-									"host": [
-										"{{BASE_URL}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"client",
-										"media",
-										"1"
-									]
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "v1", "client", "media", "1"]
 								}
 							},
 							"response": []
@@ -3609,15 +2997,8 @@
 								},
 								"url": {
 									"raw": "{{BASE_URL}}/api/v1/client/media?filter[mimeType]=image/jpeg,image/png",
-									"host": [
-										"{{BASE_URL}}"
-									],
-									"path": [
-										"api",
-										"v1",
-										"client",
-										"media"
-									],
+									"host": ["{{BASE_URL}}"],
+									"path": ["api", "v1", "client", "media"],
 									"query": [
 										{
 											"key": "filter[key]",
@@ -3704,14 +3085,8 @@
 						],
 						"url": {
 							"raw": "{{BASE_URL}}/cdn/private/5v6syi-img5867.jpg",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"cdn",
-								"private",
-								"5v6syi-img5867.jpg"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["cdn", "private", "5v6syi-img5867.jpg"],
 							"query": [
 								{
 									"key": "format",
@@ -3737,13 +3112,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/cdn/en-name-169895d6298714?fallback=true",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"cdn",
-								"en-name-169895d6298714"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["cdn", "en-name-169895d6298714"],
 							"query": [
 								{
 									"key": "fallback",
@@ -3760,9 +3130,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									""
-								],
+								"exec": [""],
 								"type": "text/javascript",
 								"packages": {},
 								"requests": {}
@@ -3774,9 +3142,7 @@
 						"header": [],
 						"url": {
 							"raw": "{{BASE_URL}}/cdn/public/ki0ezi-screenshot-2025-05-01-at-19.png?preset=thumbnail",
-							"host": [
-								"{{BASE_URL}}"
-							],
+							"host": ["{{BASE_URL}}"],
 							"path": [
 								"cdn",
 								"public",
@@ -3813,12 +3179,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/send-email",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"send-email"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["send-email"]
 						}
 					},
 					"response": []
@@ -3837,12 +3199,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/get-documents",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"get-documents"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["get-documents"]
 						}
 					},
 					"response": []
@@ -3861,12 +3219,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/get-document",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"get-document"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["get-document"]
 						}
 					},
 					"response": []
@@ -3885,12 +3239,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/get-locales",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"get-locales"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["get-locales"]
 						}
 					},
 					"response": []
@@ -3909,12 +3259,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/config-test",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"config-test"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["config-test"]
 						}
 					},
 					"response": []
@@ -3935,12 +3281,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/add-event",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"add-event"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["add-event"]
 						}
 					},
 					"response": []
@@ -3959,12 +3301,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/test-lucid-creation",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"test-lucid-creation"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["test-lucid-creation"]
 						}
 					},
 					"response": []
@@ -3995,14 +3333,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/license",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"license"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "license"]
 						}
 					},
 					"response": []
@@ -4028,15 +3360,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/license/verify",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"license",
-								"verify"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "license", "verify"]
 						}
 					},
 					"response": []
@@ -4065,15 +3390,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/license/status",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"license",
-								"status"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "license", "status"]
 						}
 					},
 					"response": []
@@ -4102,14 +3420,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/jobs",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"jobs"
-							],
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "jobs"],
 							"query": [
 								{
 									"key": "filter[jobId]",
@@ -4165,15 +3477,8 @@
 						},
 						"url": {
 							"raw": "{{BASE_URL}}/api/v1/jobs/12",
-							"host": [
-								"{{BASE_URL}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"jobs",
-								"12"
-							]
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "jobs", "12"]
 						}
 					},
 					"response": []
@@ -4194,12 +3499,8 @@
 				},
 				"url": {
 					"raw": "{{BASE_URL}}/test.txt",
-					"host": [
-						"{{BASE_URL}}"
-					],
-					"path": [
-						"test.txt"
-					]
+					"host": ["{{BASE_URL}}"],
+					"path": ["test.txt"]
 				}
 			},
 			"response": []

@@ -51,7 +51,9 @@ const PublishOperationReviewers: Component<{
 	const reviewerOptions = createMemo<ReviewerOption[]>(() =>
 		(reviewers.data?.data ?? []).map((reviewer) => ({
 			value: reviewer.id,
-			label: helpers.formatUserName(reviewer, "simple") || T()("unknown"),
+			label:
+				helpers.formatUserName(reviewer, "simple") ||
+				T()("media.types.unknown"),
 			user: reviewer,
 		})),
 	);
@@ -98,7 +100,8 @@ const PublishOperationReviewers: Component<{
 			operation.assignees.map((assignee) => ({
 				value: assignee.user.id,
 				label:
-					helpers.formatUserName(assignee.user, "simple") || T()("unknown"),
+					helpers.formatUserName(assignee.user, "simple") ||
+					T()("media.types.unknown"),
 				user: {
 					id: assignee.user.id,
 					email: assignee.user.email ?? "",
@@ -123,9 +126,9 @@ const PublishOperationReviewers: Component<{
 				isError: !!error(),
 			}}
 			copy={{
-				title: T()("update_reviewers"),
-				description: T()("update_reviewers_description"),
-				confirm: T()("update_reviewers"),
+				title: T()("actions.update.reviewers"),
+				description: T()("actions.update.reviewers.description"),
+				confirm: T()("actions.update.reviewers"),
 				error: error(),
 			}}
 			callbacks={{
@@ -145,8 +148,8 @@ const PublishOperationReviewers: Component<{
 					options={reviewerOptions()}
 					disabled={reviewers.isFetching || updateReviewers.action.isPending}
 					copy={{
-						label: T()("reviewers"),
-						placeholder: T()("select_reviewers"),
+						label: T()("common.reviewers"),
+						placeholder: T()("selectors.reviewers"),
 					}}
 					triggerClasses="items-start gap-2 p-2"
 					selectedValuesContainerClasses="gap-0"

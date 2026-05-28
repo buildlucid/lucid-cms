@@ -1,10 +1,10 @@
+import { serverText } from "../../libs/i18n/index.js";
 import { isCorePermission } from "../../libs/permission/registry.js";
 import {
 	RolePermissionsRepository,
 	RolesRepository,
 	RoleTranslationsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { roleServices } from "../index.js";
 import {
@@ -29,9 +29,9 @@ const updateSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const defaultRoleLocale = context.config.localization.defaultLocale;
+	const defaultRoleLocale = context.config.i18n.content.defaultLocale;
 	const roleLocaleCodes = new Set(
-		context.config.localization.locales.map((locale) => locale.code),
+		context.config.i18n.content.locales.map((locale) => locale.code),
 	);
 
 	const defaultName = getTranslationValue(data.name, defaultRoleLocale);
@@ -83,7 +83,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("you_do_not_have_permission_to_perform_this_action"),
+				message: serverText("core.permissions.denied"),
 				status: 403,
 			},
 			data: undefined,
@@ -94,12 +94,12 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("validation_error_message"),
+				message: serverText("core.errors.validation.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: T("generic_field_required"),
+						message: serverText("core.fields.validation.required"),
 					},
 				},
 			},
@@ -111,12 +111,12 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("not_unique_error_message"),
+				message: serverText("core.validation.unique.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: T("not_unique_error_message"),
+						message: serverText("core.validation.unique.message"),
 					},
 				},
 			},

@@ -29,8 +29,8 @@ const useUpdate = (props?: UseUpdateProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: updateReq,
 		getSuccessToast: () => ({
-			title: T()("update_toast_title", { name: T()("license") }),
-			message: T()("license_update_toast_message"),
+			title: T()("toasts.common.update.title", { name: T()("common.license") }),
+			message: T()("toasts.common.license.update.message"),
 		}),
 		invalidates: ["license.getStatus"],
 		onSuccess: props?.onSuccess,

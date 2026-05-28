@@ -25,7 +25,7 @@ const PublishDocument: Component<PublishDocumentProps> = (props) => {
 		() =>
 			helpers.getLocaleValue({
 				value: props.collection?.details.singularName,
-			}) || T()("collection"),
+			}) || T()("common.collection"),
 	);
 
 	// ----------------------------------------
@@ -50,10 +50,10 @@ const PublishDocument: Component<PublishDocumentProps> = (props) => {
 				isError: publishDocument.action.isError,
 			}}
 			copy={{
-				title: T()("publish_document_modal_title", {
+				title: T()("modals.publish.requests.document.title", {
 					name: collectionSingularName(),
 				}),
-				description: T()("publish_document_modal_description", {
+				description: T()("modals.publish.requests.document.description", {
 					name: collectionSingularName().toLowerCase(),
 				}),
 				error: publishDocument.errors()?.message,

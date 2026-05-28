@@ -20,6 +20,8 @@ export type ServiceContext = {
 		url: string;
 		/** The connecting client IP address when the service runs in an HTTP request context. */
 		ipAddress?: string | null;
+		/** The resolved CMS interface locale for server-side display messages. */
+		locale: string;
 	};
 };
 export type ServiceProps<T> = {

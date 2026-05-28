@@ -65,7 +65,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				isDisabled: submitIsDisabled(),
 			}}
 			content={{
-				submit: T()("update"),
+				submit: T()("common.update"),
 			}}
 			options={{
 				errorPlacement: "inline",
@@ -83,7 +83,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					value={firstName() ?? ""}
 					onChange={setFirstName}
 					copy={{
-						label: T()("first_name"),
+						label: T()("common.first.name"),
 					}}
 					errors={getBodyError("firstName", updateMe.errors)}
 				/>
@@ -94,7 +94,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 					value={lastName() ?? ""}
 					onChange={setLastName}
 					copy={{
-						label: T()("last_name"),
+						label: T()("common.last.name"),
 					}}
 					errors={getBodyError("lastName", updateMe.errors)}
 				/>
@@ -106,7 +106,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				value={username()}
 				onChange={setUsername}
 				copy={{
-					label: T()("username"),
+					label: T()("common.username"),
 				}}
 				required={true}
 				errors={getBodyError("username", updateMe.errors)}
@@ -118,7 +118,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 				value={email()}
 				onChange={setEmail}
 				copy={{
-					label: T()("email"),
+					label: T()("common.email"),
 				}}
 				required={true}
 				errors={getBodyError("email", updateMe.errors)}
@@ -126,7 +126,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 			<Show when={props.pendingEmailChange}>
 				{(pendingEmailChange) => (
 					<p class="mt-2 text-sm text-body">
-						{T()("pending_email_change_description", {
+						{T()("account.email.change.pending.description", {
 							email: pendingEmailChange().email,
 						})}{" "}
 						<button
@@ -135,7 +135,7 @@ const UpdateAccountForm: Component<UpdateAccountFormProps> = (props) => {
 							disabled={cancelEmailChange.action.isPending}
 							onClick={() => cancelEmailChange.action.mutate({})}
 						>
-							{T()("cancel")}
+							{T()("common.cancel")}
 						</button>
 					</p>
 				)}

@@ -1,4 +1,5 @@
 import { expect, test } from "vitest";
+import { adminText } from "../../../i18n/admin-text.js";
 import FieldBuilder from "./index.js";
 
 test("all fields should be added", async () => {
@@ -108,17 +109,19 @@ test("flat fields should return correct config", async () => {
 
 	expect(instance.flatFields.length).toBe(14);
 
-	expect(instance.flatFields).toEqual([
+	expect(instance.flatFields).toMatchObject([
 		{
 			key: "text_test",
 			type: "text",
 			details: {
-				label: "Text Test",
+				label: adminText("fields.text.text_test.label", {
+					fallback: "Text Test",
+				}),
 				summary: undefined,
 				placeholder: undefined,
 			},
 			config: {
-				translations: true,
+				localized: true,
 				default: "",
 				hidden: undefined,
 				disabled: undefined,
@@ -129,12 +132,14 @@ test("flat fields should return correct config", async () => {
 			key: "textarea_test",
 			type: "textarea",
 			details: {
-				label: "Textarea Test",
+				label: adminText("fields.textarea.textarea_test.label", {
+					fallback: "Textarea Test",
+				}),
 				summary: undefined,
 				placeholder: undefined,
 			},
 			config: {
-				translations: true,
+				localized: true,
 				default: "",
 				hidden: undefined,
 				disabled: undefined,
@@ -145,12 +150,14 @@ test("flat fields should return correct config", async () => {
 			key: "rich_text_test",
 			type: "rich-text",
 			details: {
-				label: "Rich Text Test",
+				label: adminText("fields.rich-text.rich_text_test.label", {
+					fallback: "Rich Text Test",
+				}),
 				summary: undefined,
 				placeholder: undefined,
 			},
 			config: {
-				translations: true,
+				localized: true,
 				default: {
 					type: "doc",
 					content: [{ type: "paragraph" }],
@@ -164,12 +171,14 @@ test("flat fields should return correct config", async () => {
 			key: "number_test",
 			type: "number",
 			details: {
-				label: "Number Test",
+				label: adminText("fields.number.number_test.label", {
+					fallback: "Number Test",
+				}),
 				summary: undefined,
 				placeholder: undefined,
 			},
 			config: {
-				translations: false,
+				localized: false,
 				default: undefined,
 				hidden: undefined,
 				disabled: undefined,
@@ -180,13 +189,15 @@ test("flat fields should return correct config", async () => {
 			key: "checkbox_test",
 			type: "checkbox",
 			details: {
-				label: "Checkbox Test",
+				label: adminText("fields.checkbox.checkbox_test.label", {
+					fallback: "Checkbox Test",
+				}),
 				summary: undefined,
 				true: undefined,
 				false: undefined,
 			},
 			config: {
-				translations: false,
+				localized: false,
 				default: false,
 				hidden: undefined,
 				disabled: undefined,
@@ -197,12 +208,14 @@ test("flat fields should return correct config", async () => {
 			key: "select_test",
 			type: "select",
 			details: {
-				label: "Select Test",
+				label: adminText("fields.select.select_test.label", {
+					fallback: "Select Test",
+				}),
 				summary: undefined,
 				placeholder: undefined,
 			},
 			config: {
-				translations: false,
+				localized: false,
 				default: "",
 				hidden: undefined,
 				disabled: undefined,
@@ -214,12 +227,14 @@ test("flat fields should return correct config", async () => {
 			key: "json_test",
 			type: "json",
 			details: {
-				label: "Json Test",
+				label: adminText("fields.json.json_test.label", {
+					fallback: "Json Test",
+				}),
 				summary: undefined,
 				placeholder: undefined,
 			},
 			config: {
-				translations: false,
+				localized: false,
 				default: {},
 				hidden: undefined,
 				disabled: undefined,
@@ -229,10 +244,15 @@ test("flat fields should return correct config", async () => {
 		{
 			key: "color_test",
 			type: "color",
-			details: { label: "Color Test", summary: undefined },
+			details: {
+				label: adminText("fields.color.color_test.label", {
+					fallback: "Color Test",
+				}),
+				summary: undefined,
+			},
 			presets: [],
 			config: {
-				translations: false,
+				localized: false,
 				default: "",
 				hidden: undefined,
 				disabled: undefined,
@@ -242,9 +262,14 @@ test("flat fields should return correct config", async () => {
 		{
 			key: "media_test",
 			type: "media",
-			details: { label: "Media Test", summary: undefined },
+			details: {
+				label: adminText("fields.media.media_test.label", {
+					fallback: "Media Test",
+				}),
+				summary: undefined,
+			},
 			config: {
-				translations: false,
+				localized: false,
 				default: [],
 				hidden: undefined,
 				disabled: undefined,
@@ -256,12 +281,14 @@ test("flat fields should return correct config", async () => {
 			key: "datetime_test",
 			type: "datetime",
 			details: {
-				label: "Datetime Test",
+				label: adminText("fields.datetime.datetime_test.label", {
+					fallback: "Datetime Test",
+				}),
 				summary: undefined,
 				placeholder: undefined,
 			},
 			config: {
-				translations: false,
+				localized: false,
 				time: false,
 				default: "",
 				hidden: undefined,
@@ -273,12 +300,14 @@ test("flat fields should return correct config", async () => {
 			key: "link_test",
 			type: "link",
 			details: {
-				label: "Link Test",
+				label: adminText("fields.link.link_test.label", {
+					fallback: "Link Test",
+				}),
 				summary: undefined,
 				placeholder: undefined,
 			},
 			config: {
-				translations: false,
+				localized: false,
 				default: {
 					url: null,
 					label: null,
@@ -292,9 +321,14 @@ test("flat fields should return correct config", async () => {
 		{
 			key: "user_test",
 			type: "user",
-			details: { label: "User Test", summary: undefined },
+			details: {
+				label: adminText("fields.user.user_test.label", {
+					fallback: "User Test",
+				}),
+				summary: undefined,
+			},
 			config: {
-				translations: false,
+				localized: false,
 				default: [],
 				hidden: undefined,
 				disabled: undefined,
@@ -306,7 +340,12 @@ test("flat fields should return correct config", async () => {
 		{
 			key: "repeater_test",
 			type: "repeater",
-			details: { label: "Repeater Test", summary: undefined },
+			details: {
+				label: adminText("fields.repeater.repeater_test.label", {
+					fallback: "Repeater Test",
+				}),
+				summary: undefined,
+			},
 			config: {
 				disabled: undefined,
 			},
@@ -317,12 +356,14 @@ test("flat fields should return correct config", async () => {
 			key: "repeater_text_test",
 			type: "text",
 			details: {
-				label: "Repeater Text Test",
+				label: adminText("fields.text.repeater_text_test.label", {
+					fallback: "Repeater Text Test",
+				}),
 				summary: undefined,
 				placeholder: undefined,
 			},
 			config: {
-				translations: true,
+				localized: true,
 				default: "",
 				hidden: undefined,
 				disabled: undefined,

@@ -1,18 +1,21 @@
 import { expect, test } from "vitest";
+import { adminText } from "../../../i18n/admin-text.js";
 import CollectionBuilder from "./index.js";
 
 test("collection config is correct along with field includes and filters", async () => {
 	const pagesCollection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: {
-				en: "Page",
-			},
-			summary: "Pages are used to create static content on your website.",
+			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+			singularName: adminText("tests.collections.pages.singularName", {
+				fallback: "Page",
+			}),
+			summary: adminText("tests.collections.pages.summary", {
+				fallback: "Pages are used to create static content on your website.",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 		},
 		hooks: [
 			{
@@ -95,17 +98,19 @@ test("collection config is correct along with field includes and filters", async
 		key: "pages",
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: {
-				en: "Page",
-			},
-			summary: "Pages are used to create static content on your website.",
+			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+			singularName: adminText("tests.collections.pages.singularName", {
+				fallback: "Page",
+			}),
+			summary: adminText("tests.collections.pages.summary", {
+				fallback: "Pages are used to create static content on your website.",
+			}),
 		},
 		permissions: {},
 		config: {
 			locked: false,
 			revisions: false,
-			translations: true,
+			localized: true,
 			autoSave: false,
 			scheduling: false,
 			displayInListing: [
@@ -128,25 +133,29 @@ test("collection workflow config normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+			singularName: adminText("tests.collections.pages.singularName", {
+				fallback: "Page",
+			}),
 		},
 		config: {
 			environments: [
 				{
 					key: "production",
-					name: "Production",
+					name: adminText("tests.environments.production.name", {
+						fallback: "Production",
+					}),
 				},
 			],
 			workflow: {
 				stages: [
 					{
 						key: "todo",
-						name: "To do",
+						name: adminText("tests.workflow.todo.name", { fallback: "To do" }),
 					},
 					{
 						key: "done",
-						name: "Done",
+						name: adminText("tests.workflow.done.name", { fallback: "Done" }),
 						color: "green",
 						publishTargets: ["production"],
 						permissions: {
@@ -163,14 +172,14 @@ test("collection workflow config normalizes defaults", async () => {
 		stages: [
 			{
 				key: "todo",
-				name: "To do",
+				name: adminText("tests.workflow.todo.name", { fallback: "To do" }),
 				color: "grey",
 				publishTargets: [],
 				permissions: {},
 			},
 			{
 				key: "done",
-				name: "Done",
+				name: adminText("tests.workflow.done.name", { fallback: "Done" }),
 				color: "green",
 				publishTargets: ["production"],
 				permissions: {
@@ -185,21 +194,27 @@ test("collection environment relation config normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+			singularName: adminText("tests.collections.pages.singularName", {
+				fallback: "Page",
+			}),
 		},
 		config: {
 			environments: [
 				{
 					key: "staging",
-					name: "Staging",
+					name: adminText("tests.environments.staging.name", {
+						fallback: "Staging",
+					}),
 					relations: {
 						blog: "signed-off",
 					},
 				},
 				{
 					key: "production",
-					name: "Production",
+					name: adminText("tests.environments.production.name", {
+						fallback: "Production",
+					}),
 				},
 			],
 		},
@@ -208,7 +223,9 @@ test("collection environment relation config normalizes defaults", async () => {
 	expect(collection.getData.config.environments).toEqual([
 		{
 			key: "staging",
-			name: "Staging",
+			name: adminText("tests.environments.staging.name", {
+				fallback: "Staging",
+			}),
 			permissions: {},
 			relations: {
 				blog: "signed-off",
@@ -216,7 +233,9 @@ test("collection environment relation config normalizes defaults", async () => {
 		},
 		{
 			key: "production",
-			name: "Production",
+			name: adminText("tests.environments.production.name", {
+				fallback: "Production",
+			}),
 			permissions: {},
 			relations: {},
 		},

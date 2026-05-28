@@ -46,12 +46,12 @@ export const License: Component = () => {
 		>
 			<Show when={!status.isLoading} fallback={<LicenseSkeleton />}>
 				<InfoRow.Root
-					title={T()("manage_license")}
-					description={T()("manage_license_description")}
+					title={T()("license.manage.title")}
+					description={T()("license.manage.description")}
 				>
 					<InfoRow.Content
-						title={T()("purchase_license")}
-						description={T()("purchase_license_description")}
+						title={T()("license.purchase.title")}
+						description={T()("license.purchase.description")}
 						actionAlignment="center"
 						actions={
 							<Button
@@ -62,19 +62,19 @@ export const License: Component = () => {
 									window.open(constants.cmsMarketingPage, "_blank");
 								}}
 							>
-								{T()("purchase_license_button")}
+								{T()("license.purchase.action")}
 							</Button>
 						}
 					></InfoRow.Content>
 					<InfoRow.Content
 						title={T()(Permissions.LicenseUpdate)}
-						description={T()("license_host_blurb")}
+						description={T()("license.host.blurb")}
 					>
 						<UpdateLicenseForm licenseKey={license()?.key || ""} />
 					</InfoRow.Content>
 					<InfoRow.Content
-						title={T()("license_status")}
-						description={T()("license_status_description")}
+						title={T()("license.status.label")}
+						description={T()("license.status.description")}
 					>
 						<div class="flex flex-col gap-4">
 							<DetailsList
@@ -82,23 +82,23 @@ export const License: Component = () => {
 								theme="contained"
 								items={[
 									{
-										label: T()("license_status"),
+										label: T()("license.status.label"),
 										value: (
 											<Pill
 												theme={license()?.valid ? "primary-opaque" : "outline"}
 											>
 												{license()?.valid
-													? T()("license_verified")
-													: T()("license_unverified")}
+													? T()("license.status.verified")
+													: T()("license.status.unverified")}
 											</Pill>
 										),
 									},
 									{
-										label: T()("saved_license_key"),
-										value: license()?.key ?? T()("not_set"),
+										label: T()("license.key.saved"),
+										value: license()?.key ?? T()("common.not.set"),
 									},
 									{
-										label: T()("last_checked"),
+										label: T()("license.last.checked"),
 										value: (
 											<span class="flex flex-wrap items-center justify-end gap-2">
 												<span>
@@ -108,7 +108,7 @@ export const License: Component = () => {
 															includeTime={true}
 														/>
 													) : (
-														T()("not_checked")
+														T()("common.not.checked")
 													)}
 												</span>
 												<Button
@@ -118,8 +118,8 @@ export const License: Component = () => {
 													onClick={() => verify.action.mutate({})}
 													loading={verify.action.isPending}
 													permission={hasPermission()}
-													aria-label={T()("verify_now")}
-													title={T()("verify_now")}
+													aria-label={T()("license.status.verify.action")}
+													title={T()("license.status.verify.action")}
 												>
 													<FaSolidArrowsRotate
 														size={11}
@@ -132,7 +132,7 @@ export const License: Component = () => {
 										),
 									},
 									{
-										label: T()("ai_features"),
+										label: T()("common.ai.features"),
 										value: (
 											<Pill
 												theme={
@@ -140,15 +140,16 @@ export const License: Component = () => {
 												}
 											>
 												{license()?.ai.enabled
-													? T()("enabled")
-													: T()("disabled")}
+													? T()("common.status.enabled")
+													: T()("common.status.disabled")}
 											</Pill>
 										),
 									},
 									{
-										label: T()("message"),
+										label: T()("common.message"),
 										value:
-											license()?.errorMessage || T()("license_invalid_message"),
+											license()?.errorMessage ||
+											T()("license.status.invalid.message"),
 										show: license()?.valid === false,
 										stacked: true,
 									},
@@ -165,8 +166,8 @@ export const License: Component = () => {
 const LicenseSkeleton: Component = () => {
 	return (
 		<InfoRow.Root
-			title={T()("manage_license")}
-			description={T()("manage_license_description")}
+			title={T()("license.manage.title")}
+			description={T()("license.manage.description")}
 		>
 			<InfoRow.Content>
 				<div class="flex items-center justify-between gap-6">

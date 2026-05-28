@@ -1,4 +1,4 @@
-import T from "../../translations/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import type { ErrorResult } from "../../types/errors.js";
 import type { Permission } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -46,8 +46,10 @@ const validatePermissions: ServiceFn<
 					error: {
 						key: permission,
 						code: "invalid",
-						message: T("the_permission_is_invalid_against_mesage", {
-							permission: permission,
+						message: serverText("core.permissions.invalid", {
+							data: {
+								permission: permission,
+							},
 						}),
 					},
 				});

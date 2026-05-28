@@ -184,8 +184,8 @@ export const NavigationChrome: Component = () => {
 							class="h-9 rounded-lg text-icon-base hover:text-icon-hover flex items-center justify-center transition-colors"
 							onClick={() => logout.action.mutate({})}
 							disabled={logout.action.isPending}
-							aria-label={T()("logout")}
-							title={T()("logout")}
+							aria-label={T()("common.logout")}
+							title={T()("common.logout")}
 						>
 							<span class="h-4 flex items-center justify-center">
 								<FaSolidRightFromBracket class="size-3" />
@@ -195,8 +195,8 @@ export const NavigationChrome: Component = () => {
 							type="button"
 							class="h-9 rounded-lg text-icon-base hover:text-icon-hover flex items-center justify-center transition-colors"
 							onClick={() => setMobileMenuOpen((open) => !open)}
-							aria-label={mobileMenuOpen() ? T()("close") : "Open menu"}
-							title={mobileMenuOpen() ? T()("close") : "Open menu"}
+							aria-label={mobileMenuOpen() ? T()("common.close") : "Open menu"}
+							title={mobileMenuOpen() ? T()("common.close") : "Open menu"}
 						>
 							<Show
 								when={mobileMenuOpen()}
@@ -270,7 +270,7 @@ export const NavigationChrome: Component = () => {
 								"opacity-0": !mobileMenuOpen(),
 							},
 						)}
-						aria-label={T()("close")}
+						aria-label={T()("common.close")}
 						onClick={() => setMobileMenuOpen(false)}
 					/>
 
@@ -297,7 +297,7 @@ export const NavigationChrome: Component = () => {
 								<button
 									type="button"
 									class="h-9 w-9 rounded-lg text-title/80 hover:text-title flex items-center justify-center transition-colors"
-									aria-label={T()("close")}
+									aria-label={T()("common.close")}
 									onClick={() => setMobileMenuOpen(false)}
 								>
 									<FaSolidXmark class="size-3.5" />

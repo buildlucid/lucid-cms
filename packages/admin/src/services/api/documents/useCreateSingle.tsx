@@ -53,10 +53,10 @@ const useCreateSingle = (props: UseCreateSingleProps) => {
 		mutationFn: createSingleReq,
 		getSuccessToast: () => {
 			return {
-				title: T()("create_toast_title", {
+				title: T()("toasts.common.create.title", {
 					name: props.getCollectionName(),
 				}),
-				message: T()("create_toast_message", {
+				message: T()("toasts.common.create.message", {
 					name: props.getCollectionName().toLowerCase(),
 				}),
 			};

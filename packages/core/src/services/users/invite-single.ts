@@ -1,11 +1,11 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
+import { serverText, translateServer } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UserRolesRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
@@ -63,14 +63,14 @@ const inviteSingle: ServiceFn<
 						reservedEmailRes.data !== undefined
 							? {
 									code: "invalid",
-									message: T("duplicate_entry_error_message"),
+									message: serverText("core.database.duplicates.entry"),
 								}
 							: undefined,
 					username:
 						userExistsRes.data?.username === data.username
 							? {
 									code: "invalid",
-									message: T("duplicate_entry_error_message"),
+									message: serverText("core.database.duplicates.entry"),
 								}
 							: undefined,
 				},
@@ -121,7 +121,9 @@ const inviteSingle: ServiceFn<
 		type: "internal",
 		to: email,
 		subject: formatEmailSubject(
-			T("user_invite_email_subject"),
+			translateServer("core.email.invitations.email.subject", undefined, {
+				config: context.config,
+			}),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.userInvite.key,

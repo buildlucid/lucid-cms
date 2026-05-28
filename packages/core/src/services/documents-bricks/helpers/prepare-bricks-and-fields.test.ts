@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { adminText } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../types.js";
 import prepareBricksAndFields from "./prepare-bricks-and-fields.js";
@@ -33,15 +34,19 @@ describe("testing prepareBricksAndFields", () => {
 	const simpleCollection = new CollectionBuilder("simple", {
 		mode: "multiple",
 		details: {
-			name: "Simple",
-			singularName: "Simple",
+			name: adminText("tests.collections.simple.name", { fallback: "Simple" }),
+			singularName: adminText("tests.collections.simple.singularName", {
+				fallback: "Simple",
+			}),
 		},
 		bricks: {
 			builder: [simpleBrick],
 		},
 	}).addText("simpleHeading", {
 		details: {
-			label: "Heading Default",
+			label: adminText("tests.fields.simpleHeading.label", {
+				fallback: "Heading Default",
+			}),
 		},
 	});
 
@@ -195,18 +200,32 @@ describe("testing prepareBricksAndFields", () => {
 		const collection = new CollectionBuilder("trim-test", {
 			mode: "single",
 			details: {
-				name: "Trim Test",
-				singularName: "Trim Test",
+				name: adminText("tests.collections.trim-test.name", {
+					fallback: "Trim Test",
+				}),
+				singularName: adminText("tests.collections.trim-test.singularName", {
+					fallback: "Trim Test",
+				}),
 			},
 			config: {
-				translations: true,
+				localized: true,
 			},
 		})
 			.addText("title")
 			.addSelect("status", {
 				options: [
-					{ label: "Draft", value: "draft" },
-					{ label: "Live", value: "live" },
+					{
+						label: adminText("tests.fields.status.options.draft", {
+							fallback: "Draft",
+						}),
+						value: "draft",
+					},
+					{
+						label: adminText("tests.fields.status.options.live", {
+							fallback: "Live",
+						}),
+						value: "live",
+					},
 				],
 			})
 			.addLink("cta");

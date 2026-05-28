@@ -40,8 +40,8 @@ const useResendSingle = (props: UseResendSingleProps) => {
 		invalidates: ["email.getMultiple", "email.getSingle"],
 		onSuccess: () => {
 			spawnToast({
-				title: T()("email_resent_toast_title"),
-				message: T()("email_resent_toast_message"),
+				title: T()("toasts.email.resent.title"),
+				message: T()("toasts.email.resent.message"),
 				status: "success",
 			});
 			props.onSuccess?.();

@@ -4,9 +4,9 @@ import {
 	getTableNames,
 } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentsFormatter } from "../../../libs/formatters/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetSingleQueryParams } from "../../../schemas/documents.js";
-import T from "../../../translations/index.js";
 import type {
 	CollectionDocument,
 	CollectionDocumentStatus,
@@ -46,7 +46,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	) {
 		return {
 			error: {
-				message: T("document_not_found_message"),
+				message: serverText("core.documents.not.found.message"),
 				status: 404,
 			},
 			data: undefined,
@@ -113,7 +113,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	if (documentRes.data === undefined || !documentRes.data.version_id) {
 		return {
 			error: {
-				message: T("document_not_found_message"),
+				message: serverText("core.documents.not.found.message"),
 				status: 404,
 			},
 			data: undefined,

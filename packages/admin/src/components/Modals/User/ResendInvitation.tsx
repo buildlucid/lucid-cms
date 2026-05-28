@@ -26,8 +26,8 @@ const ResendInvitation: Component<{
 				isError: resendInvitation.action.isError,
 			}}
 			copy={{
-				title: T()("user_resend_invitation_modal_title"),
-				description: T()("user_resend_invitation_modal_description"),
+				title: T()("modals.users.resend.invitation.title"),
+				description: T()("modals.users.resend.invitation.description"),
 				error: resendInvitation.errors()?.message,
 			}}
 			callbacks={{

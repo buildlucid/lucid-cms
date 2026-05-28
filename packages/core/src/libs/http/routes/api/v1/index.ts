@@ -9,6 +9,7 @@ import collectionRoutes from "./collections.routes.js";
 import documentRoutes from "./document.routes.js";
 import emailRoutes from "./email.routes.js";
 import fsRoutes from "./fs.routes.js";
+import i18nRoutes from "./i18n.routes.js";
 import jobsRoutes from "./jobs.routes.js";
 import licenseRoutes from "./license.routes.js";
 import localeRoutes from "./locales.routes.js";
@@ -28,6 +29,7 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/collections", collectionRoutes)
 	.route("/documents", documentRoutes)
 	.route("/emails", emailRoutes)
+	.route("/i18n", i18nRoutes)
 	.route("/jobs", jobsRoutes)
 	.route("/locales", localeRoutes)
 	.route("/permissions", permissionRoutes)

@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceUploadSingle } from "@lucidcms/core/types";
-import T from "../translations/index.js";
 import type { PluginOptions } from "../types.js";
 
 type UploadSingleProps = Parameters<MediaAdapterServiceUploadSingle>[0];
@@ -53,10 +53,9 @@ const uploadSingle = (
 			return {
 				error: {
 					type: "plugin",
-					message:
-						error instanceof Error
-							? error.message
-							: T("an_unknown_error_occurred"),
+					message: serverText("plugin.cloudflare.r2.errors.unknown", {
+						fallback: error instanceof Error ? error.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

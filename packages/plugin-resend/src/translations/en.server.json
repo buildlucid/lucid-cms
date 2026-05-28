@@ -1,0 +1,12 @@
+{
+	"plugin.resend.email.send.success": "The email was successfully sent.",
+	"plugin.resend.email.send.failed": "The email failed to send.",
+	"plugin.resend.routes.webhook.error.name": "Resend Webhook Error",
+	"plugin.resend.routes.webhook.error.message": "An error occurred while processing the Resend webhook.",
+	"plugin.resend.webhooks.signature.invalid": "Invalid webhook signature.",
+	"plugin.resend.webhooks.body.invalid": "Invalid webhook body.",
+	"plugin.resend.transactions.not.found": "Transaction not found.",
+	"plugin.resend.webhooks.event.type.invalid": "Invalid event type.",
+	"plugin.resend.webhooks.secret.not.configured": "Webhook secret not configured.",
+	"plugin.resend.webhooks.not.enabled": "Webhook not enabled."
+}

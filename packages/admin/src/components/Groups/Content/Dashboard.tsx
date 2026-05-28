@@ -23,27 +23,27 @@ export const Dashboard: Component = () => {
 	// Local
 	const docsLinks: Array<{ label: string; href: string }> = [
 		{
-			label: T()("configuring_lucid_cms"),
+			label: T()("help.configuring.lucid.cms.title"),
 			href: `${constants.documentationUrl}/configuration/configuring-lucid-cms/`,
 		},
 		{
-			label: T()("collection_builder"),
+			label: T()("builder.collections.title"),
 			href: `${constants.documentationUrl}/configuration/collection-builder/`,
 		},
 		{
-			label: T()("brick_builder"),
+			label: T()("builder.bricks.title"),
 			href: `${constants.documentationUrl}/configuration/brick-builder/`,
 		},
 		{
-			label: T()("fetching_data"),
+			label: T()("common.fetching.data"),
 			href: `${constants.documentationUrl}/fetching-data/rest-api/`,
 		},
 		{
-			label: T()("hooks"),
+			label: T()("common.hooks"),
 			href: `${constants.documentationUrl}/extending-lucid/hooks/`,
 		},
 		{
-			label: T()("plugins"),
+			label: T()("common.plugins"),
 			href: `${constants.documentationUrl}/extending-lucid/plugins/`,
 		},
 	];
@@ -79,7 +79,7 @@ export const Dashboard: Component = () => {
 				alerts={[
 					{
 						type: "warning",
-						message: T()("media_support_config_stategy_error"),
+						message: T()("media.storage.strategy.missing.message"),
 						show: settings.data?.data?.media?.enabled === false,
 					},
 				]}
@@ -89,43 +89,49 @@ export const Dashboard: Component = () => {
 					<StartingPoints
 						links={[
 							{
-								title: T()("starting_point_collections"),
-								description: T()("starting_point_collections_description"),
+								title: T()("dashboard.starting.points.collections.title"),
+								description: T()(
+									"dashboard.starting.points.collections.description",
+								),
 								href: "/lucid/collections",
 								icon: "collection",
 								permission: canReadCollections(),
 							},
 							{
-								title: T()("starting_point_media"),
-								description: T()("starting_point_media_description"),
+								title: T()("dashboard.starting.points.media.title"),
+								description: T()("dashboard.starting.points.media.description"),
 								href: "/lucid/media",
 								icon: "media",
 								permission: canReadMedia(),
 							},
 							{
-								title: T()("starting_point_emails"),
-								description: T()("starting_point_emails_description"),
+								title: T()("dashboard.starting.points.emails.title"),
+								description: T()(
+									"dashboard.starting.points.emails.description",
+								),
 								href: "/lucid/emails",
 								icon: "email",
 								permission: canReadEmails(),
 							},
 							{
-								title: T()("starting_point_users"),
-								description: T()("starting_point_users_description"),
+								title: T()("dashboard.starting.points.users.title"),
+								description: T()("dashboard.starting.points.users.description"),
 								href: "/lucid/users",
 								icon: "users",
 								permission: canReadUsers(),
 							},
 							{
-								title: T()("starting_point_roles"),
-								description: T()("starting_point_roles_description"),
+								title: T()("dashboard.starting.points.roles.title"),
+								description: T()("dashboard.starting.points.roles.description"),
 								href: "/lucid/roles",
 								icon: "roles",
 								permission: canReadRoles(),
 							},
 							{
-								title: T()("starting_point_settings"),
-								description: T()("starting_point_settings_description"),
+								title: T()("dashboard.starting.points.settings.title"),
+								description: T()(
+									"dashboard.starting.points.settings.description",
+								),
 								href: "/lucid/system",
 								icon: "settings",
 								permission: canReadSystemOverview(),
@@ -134,7 +140,7 @@ export const Dashboard: Component = () => {
 					/>
 				</div>
 				<aside class="w-full lg:max-w-[260px] lg:sticky lg:top-4 self-start">
-					<h2 class="mb-4">{T()("documentation")}</h2>
+					<h2 class="mb-4">{T()("common.documentation")}</h2>
 					<ul>
 						<For each={docsLinks}>
 							{(link) => (

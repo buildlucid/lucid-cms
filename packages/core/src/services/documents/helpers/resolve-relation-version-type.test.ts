@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import constants from "../../../constants/constants.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { adminText } from "../../../libs/i18n/index.js";
 
 const mocks = vi.hoisted(() => ({
 	selectSingle: vi.fn(),
@@ -34,8 +35,10 @@ const createCollection = (
 	new CollectionBuilder(key, {
 		mode: "multiple",
 		details: {
-			name: key,
-			singularName: key,
+			name: adminText(`tests.collections.${key}.name`, { fallback: key }),
+			singularName: adminText(`tests.collections.${key}.singularName`, {
+				fallback: key,
+			}),
 		},
 		config: {
 			environments,
@@ -91,7 +94,9 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: "Staging",
+				name: adminText("tests.environments.staging.name", {
+					fallback: "Staging",
+				}),
 				relations: {
 					blog: "signed-off",
 				},
@@ -100,7 +105,9 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: "Signed off",
+				name: adminText("tests.environments.signed-off.name", {
+					fallback: "Signed off",
+				}),
 			},
 		]);
 
@@ -128,13 +135,17 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: "Staging",
+				name: adminText("tests.environments.staging.name", {
+					fallback: "Staging",
+				}),
 			},
 		]);
 		const blog = createCollection("blog", [
 			{
 				key: "staging",
-				name: "Staging",
+				name: adminText("tests.environments.staging.name", {
+					fallback: "Staging",
+				}),
 			},
 		]);
 
@@ -160,13 +171,17 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: "Staging",
+				name: adminText("tests.environments.staging.name", {
+					fallback: "Staging",
+				}),
 			},
 		]);
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: "Signed off",
+				name: adminText("tests.environments.signed-off.name", {
+					fallback: "Signed off",
+				}),
 			},
 		]);
 
@@ -232,7 +247,9 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: "Staging",
+				name: adminText("tests.environments.staging.name", {
+					fallback: "Staging",
+				}),
 				relations: {
 					blog: "signed-off",
 				},
@@ -241,7 +258,9 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: "Signed off",
+				name: adminText("tests.environments.signed-off.name", {
+					fallback: "Signed off",
+				}),
 			},
 		]);
 

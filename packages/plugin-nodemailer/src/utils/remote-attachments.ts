@@ -2,9 +2,9 @@ import { lookup } from "node:dns/promises";
 import http from "node:http";
 import https from "node:https";
 import type { LookupFunction } from "node:net";
+import { serverText } from "@lucidcms/core/plugin";
 import type { EmailAttachment, ServiceResponse } from "@lucidcms/core/types";
 import ipaddr from "ipaddr.js";
-import T from "../translations/index.js";
 
 const DEFAULT_MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
@@ -88,8 +88,8 @@ const resolvePublicAddress = async (
 		return {
 			error: {
 				type: "plugin",
-				name: T("email_attachment_error_name"),
-				message: T("email_attachment_url_resolve_failed"),
+				name: serverText("plugin.nodemailer.attachments.error.name"),
+				message: serverText("plugin.nodemailer.attachments.url.resolve.failed"),
 				status: 400,
 			},
 			data: undefined,
@@ -101,8 +101,10 @@ const resolvePublicAddress = async (
 			return {
 				error: {
 					type: "plugin",
-					name: T("email_attachment_error_name"),
-					message: T("email_attachment_url_blocked_address"),
+					name: serverText("plugin.nodemailer.attachments.error.name"),
+					message: serverText(
+						"plugin.nodemailer.attachments.url.blocked.address",
+					),
 					status: 400,
 				},
 				data: undefined,
@@ -126,8 +128,8 @@ const parseAttachmentUrl = (url: string): Awaited<ServiceResponse<URL>> => {
 		return {
 			error: {
 				type: "plugin",
-				name: T("email_attachment_error_name"),
-				message: T("email_attachment_url_invalid"),
+				name: serverText("plugin.nodemailer.attachments.error.name"),
+				message: serverText("plugin.nodemailer.attachments.url.invalid"),
 				status: 400,
 			},
 			data: undefined,
@@ -152,8 +154,10 @@ const fetchRemoteAttachment = async (
 		return {
 			error: {
 				type: "plugin",
-				name: T("email_attachment_error_name"),
-				message: T("email_attachment_url_must_use_http"),
+				name: serverText("plugin.nodemailer.attachments.error.name"),
+				message: serverText(
+					"plugin.nodemailer.attachments.url.protocol.invalid",
+				),
 				status: 400,
 			},
 			data: undefined,
@@ -164,8 +168,10 @@ const fetchRemoteAttachment = async (
 		return {
 			error: {
 				type: "plugin",
-				name: T("email_attachment_error_name"),
-				message: T("email_attachment_url_too_many_redirects"),
+				name: serverText("plugin.nodemailer.attachments.error.name"),
+				message: serverText(
+					"plugin.nodemailer.attachments.url.redirects.too.many",
+				),
 				status: 400,
 			},
 			data: undefined,
@@ -220,8 +226,12 @@ const fetchRemoteAttachment = async (
 								resolve({
 									error: {
 										type: "plugin",
-										name: T("email_attachment_error_name"),
-										message: T("email_attachment_url_redirect_invalid"),
+										name: serverText(
+											"plugin.nodemailer.attachments.error.name",
+										),
+										message: serverText(
+											"plugin.nodemailer.attachments.url.redirect.invalid",
+										),
 										status: 400,
 									},
 									data: undefined,
@@ -265,8 +275,10 @@ const fetchRemoteAttachment = async (
 							resolve({
 								error: {
 									type: "plugin",
-									name: T("email_attachment_error_name"),
-									message: T("email_attachment_url_unsuccessful_response"),
+									name: serverText("plugin.nodemailer.attachments.error.name"),
+									message: serverText(
+										"plugin.nodemailer.attachments.url.response.unsuccessful",
+									),
 									status: 400,
 								},
 								data: undefined,
@@ -282,8 +294,10 @@ const fetchRemoteAttachment = async (
 							resolve({
 								error: {
 									type: "plugin",
-									name: T("email_attachment_error_name"),
-									message: T("email_attachment_too_large"),
+									name: serverText("plugin.nodemailer.attachments.error.name"),
+									message: serverText(
+										"plugin.nodemailer.attachments.size.too.large",
+									),
 									status: 400,
 								},
 								data: undefined,
@@ -303,8 +317,12 @@ const fetchRemoteAttachment = async (
 								resolve({
 									error: {
 										type: "plugin",
-										name: T("email_attachment_error_name"),
-										message: T("email_attachment_too_large"),
+										name: serverText(
+											"plugin.nodemailer.attachments.error.name",
+										),
+										message: serverText(
+											"plugin.nodemailer.attachments.size.too.large",
+										),
 										status: 400,
 									},
 									data: undefined,
@@ -333,8 +351,10 @@ const fetchRemoteAttachment = async (
 							resolve({
 								error: {
 									type: "plugin",
-									name: T("email_attachment_error_name"),
-									message: T("email_attachment_url_fetch_failed"),
+									name: serverText("plugin.nodemailer.attachments.error.name"),
+									message: serverText(
+										"plugin.nodemailer.attachments.url.fetch.failed",
+									),
 									status: 400,
 								},
 								data: undefined,
@@ -349,8 +369,8 @@ const fetchRemoteAttachment = async (
 					resolve({
 						error: {
 							type: "plugin",
-							name: T("email_attachment_error_name"),
-							message: T("email_attachment_url_timeout"),
+							name: serverText("plugin.nodemailer.attachments.error.name"),
+							message: serverText("plugin.nodemailer.attachments.url.timeout"),
 							status: 400,
 						},
 						data: undefined,
@@ -363,8 +383,10 @@ const fetchRemoteAttachment = async (
 					resolve({
 						error: {
 							type: "plugin",
-							name: T("email_attachment_error_name"),
-							message: T("email_attachment_url_fetch_failed"),
+							name: serverText("plugin.nodemailer.attachments.error.name"),
+							message: serverText(
+								"plugin.nodemailer.attachments.url.fetch.failed",
+							),
 							status: 400,
 						},
 						data: undefined,
@@ -377,8 +399,10 @@ const fetchRemoteAttachment = async (
 				resolve({
 					error: {
 						type: "plugin",
-						name: T("email_attachment_error_name"),
-						message: T("email_attachment_url_fetch_failed"),
+						name: serverText("plugin.nodemailer.attachments.error.name"),
+						message: serverText(
+							"plugin.nodemailer.attachments.url.fetch.failed",
+						),
 						status: 500,
 					},
 					data: undefined,

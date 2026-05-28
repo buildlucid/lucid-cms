@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import DatetimeCustomField from "./custom-field.js";
@@ -11,11 +11,13 @@ import DatetimeCustomField from "./custom-field.js";
 const DateTimeCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addDateTime("standard_datetime")
@@ -41,7 +43,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DateTimeCollection.getData.config.translations,
+			localized: DateTimeCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -62,7 +64,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DateTimeCollection.getData.config.translations,
+			localized: DateTimeCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -83,7 +85,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DateTimeCollection.getData.config.translations,
+			localized: DateTimeCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -104,7 +106,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DateTimeCollection.getData.config.translations,
+			localized: DateTimeCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -125,7 +127,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DateTimeCollection.getData.config.translations,
+			localized: DateTimeCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -148,7 +150,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DateTimeCollection.getData.config.translations,
+			localized: DateTimeCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -156,7 +158,10 @@ test("fail to validate field - datetime", async () => {
 		{
 			key: "standard_datetime",
 			localeCode: null,
-			message: "Invalid input",
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Invalid input",
+				priority: "Invalid input",
+			}),
 		},
 	]);
 
@@ -175,7 +180,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DateTimeCollection.getData.config.translations,
+			localized: DateTimeCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -183,7 +188,7 @@ test("fail to validate field - datetime", async () => {
 		{
 			key: "standard_datetime",
 			localeCode: null,
-			message: T("field_date_invalid"),
+			message: serverText("core.fields.date.validation.invalid"),
 		},
 	]);
 
@@ -202,7 +207,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DateTimeCollection.getData.config.translations,
+			localized: DateTimeCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -210,7 +215,7 @@ test("fail to validate field - datetime", async () => {
 		{
 			key: "standard_datetime",
 			localeCode: null,
-			message: T("field_date_invalid"),
+			message: serverText("core.fields.date.validation.invalid"),
 		},
 	]);
 
@@ -229,7 +234,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DateTimeCollection.getData.config.translations,
+			localized: DateTimeCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -237,7 +242,7 @@ test("fail to validate field - datetime", async () => {
 		{
 			key: "required_datetime",
 			localeCode: null,
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 });
@@ -247,18 +252,18 @@ test("fail to validate field - datetime", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new DatetimeCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
-			placeholder: {
-				en: "placeholder",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
+			placeholder: adminText("tests.fields.field.placeholder", {
+				fallback: "placeholder",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			time: false,
 			default: "2024-06-15T14:14:21.704Z",
 			hidden: false,

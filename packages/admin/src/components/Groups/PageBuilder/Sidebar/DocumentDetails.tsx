@@ -34,7 +34,9 @@ const UserDetailValue: Component<{
 		{(user) => (
 			<UserDisplay
 				user={{
-					username: helpers.formatUserName(user(), "simple") || T()("unknown"),
+					username:
+						helpers.formatUserName(user(), "simple") ||
+						T()("media.types.unknown"),
 					firstName: user().firstName,
 					lastName: user().lastName,
 					profilePicture: user().profilePicture,
@@ -67,20 +69,20 @@ export const DocumentDetails: Component<{
 
 		return [
 			{
-				label: T()("document_id"),
+				label: T()("common.document.id"),
 				value: props.documentId() ?? "-",
 				show: props.documentId() !== undefined,
 			},
 			{
-				label: T()("collection"),
+				label: T()("common.collection"),
 				value: collectionName(),
 				show: true,
 			},
 			{
-				label: T()("status"),
+				label: T()("common.status"),
 				value: document?.isDeleted
-					? T()("deleted")
-					: (document?.status ?? T()("unsaved")),
+					? T()("common.status.deleted")
+					: (document?.status ?? T()("common.unsaved")),
 				show: true,
 			},
 		].filter((detail) => detail.show);
@@ -90,19 +92,19 @@ export const DocumentDetails: Component<{
 	// Render
 	return (
 		<SidebarSection
-			title={T()("document_details")}
+			title={T()("common.document.details")}
 			icon={<FaSolidInfo size={14} />}
 			storageKey="lucid:page-builder-sidebar:document-details-open"
 		>
 			<div class="rounded-md border border-border bg-card-base p-3">
 				<dl class="grid gap-2 text-xs">
 					<Show when={props.document()?.createdAt}>
-						<DetailRow label={T()("created_at")}>
+						<DetailRow label={T()("common.created.at")}>
 							<DateText date={props.document()?.createdAt} class="text-xs" />
 						</DetailRow>
 					</Show>
 					<Show when={props.document()?.updatedAt}>
-						<DetailRow label={T()("updated_at")}>
+						<DetailRow label={T()("common.updated.at")}>
 							<DateText date={props.document()?.updatedAt} class="text-xs" />
 						</DetailRow>
 					</Show>
@@ -112,10 +114,10 @@ export const DocumentDetails: Component<{
 						)}
 					</For>
 					<Show when={props.document() !== undefined}>
-						<DetailRow label={T()("created_by")}>
+						<DetailRow label={T()("common.created.by")}>
 							<UserDetailValue user={props.document()?.createdBy ?? null} />
 						</DetailRow>
-						<DetailRow label={T()("updated_by")}>
+						<DetailRow label={T()("common.updated.by")}>
 							<UserDetailValue user={props.document()?.updatedBy ?? null} />
 						</DetailRow>
 					</Show>

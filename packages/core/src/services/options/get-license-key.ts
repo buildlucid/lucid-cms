@@ -1,5 +1,5 @@
+import { serverText } from "../../libs/i18n/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -28,7 +28,7 @@ const getLicenseKey: ServiceFn<[], string> = async (context) => {
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("license_is_not_set"),
+				message: serverText("core.license.is.not.set"),
 			},
 			data: undefined,
 		};

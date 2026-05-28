@@ -47,8 +47,8 @@ const ViewUserLoginsPanel: Component<{
 				growContent: true,
 			}}
 			copy={{
-				title: T()("view_user_logins_panel_title"),
-				description: T()("view_user_logins_panel_description"),
+				title: T()("panels.users.logins.title"),
+				description: T()("panels.users.logins.description"),
 			}}
 		>
 			{() => (
@@ -129,12 +129,12 @@ const ViewUserLoginsPanelContent: Component<{
 						<Filter
 							filters={[
 								{
-									label: T()("auth_method"),
+									label: T()("common.auth.method"),
 									key: "authMethod",
 									type: "text",
 								},
 								{
-									label: T()("ip_address"),
+									label: T()("common.ip.address"),
 									key: "ipAddress",
 									type: "text",
 								},
@@ -144,7 +144,7 @@ const ViewUserLoginsPanelContent: Component<{
 						<Sort
 							sorts={[
 								{
-									label: T()("created_at"),
+									label: T()("common.created.at"),
 									key: "createdAt",
 								},
 							]}
@@ -176,8 +176,8 @@ const ViewUserLoginsPanelContent: Component<{
 					}}
 					copy={{
 						noEntries: {
-							title: T()("no_user_logins"),
-							description: T()("no_user_logins_description"),
+							title: T()("empty.states.user.logins.title"),
+							description: T()("empty.states.user.logins.description"),
 						},
 					}}
 				>
@@ -187,22 +187,22 @@ const ViewUserLoginsPanelContent: Component<{
 						searchParams={loginsSearchParams}
 						head={[
 							{
-								label: T()("auth_method"),
+								label: T()("common.auth.method"),
 								key: "authMethod",
 								icon: <FaSolidShield />,
 							},
 							{
-								label: T()("ip_address"),
+								label: T()("common.ip.address"),
 								key: "ipAddress",
 								icon: <FaSolidGlobe />,
 							},
 							{
-								label: T()("user_agent"),
+								label: T()("users.agent"),
 								key: "userAgent",
 								icon: <FaSolidT />,
 							},
 							{
-								label: T()("created_at"),
+								label: T()("common.created.at"),
 								key: "createdAt",
 								icon: <FaSolidCalendar />,
 								sortable: true,

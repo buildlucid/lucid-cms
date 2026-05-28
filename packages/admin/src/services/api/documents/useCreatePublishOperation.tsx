@@ -36,10 +36,10 @@ const useCreatePublishOperation = (props?: UseCreatePublishOperationProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: createPublishOperationReq,
 		getSuccessToast: () => ({
-			title: T()("create_toast_title", {
-				name: T()("publish_operation_toast_name"),
+			title: T()("toasts.common.create.title", {
+				name: T()("publish.requests.notifications.operation.name"),
 			}),
-			message: T()("publish_operation_created_toast_message"),
+			message: T()("publish.requests.notifications.operation.created"),
 		}),
 		invalidates: [
 			"documents.getMultiple",

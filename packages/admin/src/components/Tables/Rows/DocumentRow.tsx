@@ -78,7 +78,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 							document={props.document}
 							include={props.include}
 							index={includeOffset() + i()}
-							collectionTranslations={props.collection.config.translations}
+							collectionLocalized={props.collection.config.localized}
 						/>
 					);
 				}}

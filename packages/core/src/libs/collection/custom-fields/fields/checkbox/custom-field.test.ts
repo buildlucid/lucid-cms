@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import CheckboxCustomField from "./custom-field.js";
@@ -10,11 +10,13 @@ import CheckboxCustomField from "./custom-field.js";
 const CheckboxCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Pages",
-		singularName: "Page",
+		name: adminText("tests.collections.collection.name", { fallback: "Pages" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Page",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addCheckbox("standard_checkbox")
@@ -40,7 +42,7 @@ test("successfully validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			translations: CheckboxCollection.getData.config.translations,
+			localized: CheckboxCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -61,7 +63,7 @@ test("successfully validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			translations: CheckboxCollection.getData.config.translations,
+			localized: CheckboxCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -84,7 +86,7 @@ test("fail to validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			translations: CheckboxCollection.getData.config.translations,
+			localized: CheckboxCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -92,7 +94,10 @@ test("fail to validate field - checkbox", async () => {
 		{
 			key: "standard_checkbox",
 			localeCode: null,
-			message: "Invalid input",
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Invalid input",
+				priority: "Invalid input",
+			}),
 		},
 	]);
 
@@ -111,7 +116,7 @@ test("fail to validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			translations: CheckboxCollection.getData.config.translations,
+			localized: CheckboxCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -119,7 +124,7 @@ test("fail to validate field - checkbox", async () => {
 		{
 			key: "required_chekbox",
 			localeCode: null,
-			message: T("checkbox_field_required"),
+			message: serverText("core.fields.checkbox.validation.required"),
 		},
 	]);
 });
@@ -129,15 +134,15 @@ test("fail to validate field - checkbox", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new CheckboxCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			default: true,
 			hidden: false,
 			disabled: false,

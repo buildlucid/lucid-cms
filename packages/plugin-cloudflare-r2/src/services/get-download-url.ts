@@ -1,7 +1,7 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceGetDownloadUrl } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY, STORAGE_DOWNLOAD_PATH } from "../constants.js";
-import T from "../translations/index.js";
 import type { PluginOptions } from "../types.js";
 import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 import { createSignedMediaUrl } from "../utils/signed-media-url.js";
@@ -38,7 +38,9 @@ export default (
 				return {
 					error: {
 						type: "plugin",
-						message: T("http_client_not_configured"),
+						message: serverText(
+							"plugin.cloudflare.r2.http.client.not.configured",
+						),
 					},
 					data: undefined,
 				};
@@ -76,10 +78,12 @@ export default (
 			return {
 				error: {
 					type: "plugin",
-					message:
-						error instanceof Error
-							? error.message
-							: T("failed_to_generate_download_url"),
+					message: serverText(
+						"plugin.cloudflare.r2.download.urls.generate.failed",
+						{
+							fallback: error instanceof Error ? error.message : undefined,
+						},
+					),
 				},
 				data: undefined,
 			};

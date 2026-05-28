@@ -1,13 +1,13 @@
 import z from "zod";
+import { adminTextSchema } from "../libs/i18n/admin-text.js";
 import type { ControllerSchema } from "../types.js";
-import { stringTranslations } from "./locales.js";
 
 const permissionDetailsResponseSchema = z.object({
-	name: stringTranslations.meta({
+	name: adminTextSchema.meta({
 		description: "The display name for the permission or group",
 		example: "User Permissions",
 	}),
-	description: stringTranslations.nullable().optional().meta({
+	description: adminTextSchema.nullable().optional().meta({
 		description: "Optional display description",
 		example: "Controls access to user management",
 	}),

@@ -1,6 +1,6 @@
 import z from "zod";
 import constants from "../../../constants/constants.js";
-import { stringTranslations } from "../../../schemas/locales.js";
+import { adminTextSchema } from "../../i18n/admin-text.js";
 
 // TODO: test this through lucid.config.* - have a feeling it isnt being used properly
 const CustomFieldSchema = z.object({
@@ -16,10 +16,10 @@ const CustomFieldSchema = z.object({
 	collection: z.union([z.string(), z.array(z.string())]).optional(),
 	details: z
 		.object({
-			label: stringTranslations.optional(),
-			summary: stringTranslations.optional(),
-			true: stringTranslations.optional(),
-			false: stringTranslations.optional(),
+			label: adminTextSchema.optional(),
+			summary: adminTextSchema.optional(),
+			true: adminTextSchema.optional(),
+			false: adminTextSchema.optional(),
 		})
 		.optional(),
 	ai: z
@@ -43,7 +43,7 @@ const CustomFieldSchema = z.object({
 					z.null(),
 				])
 				.optional(),
-			translations: z.boolean().optional(),
+			localized: z.boolean().optional(),
 			time: z.boolean().optional(),
 			multiple: z.boolean().optional(),
 			hidden: z.boolean().optional(),
@@ -54,7 +54,7 @@ const CustomFieldSchema = z.object({
 	options: z
 		.array(
 			z.object({
-				label: stringTranslations,
+				label: adminTextSchema,
 				value: z.string(),
 			}),
 		)

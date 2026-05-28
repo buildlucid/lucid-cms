@@ -3,13 +3,13 @@ import { describeRoute } from "hono-openapi";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { userTokenServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import validate from "../../middleware/validate.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -34,8 +34,8 @@ const verifyResetPasswordController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: T("route_verify_password_reset_error_name"),
-				message: T("route_verify_password_reset_error_message"),
+				name: serverText("core.routes.verify.password.reset.error.name"),
+				message: serverText("core.routes.verify.password.reset.error.message"),
 			},
 		})(context, {
 			tokenType: constants.userTokens.passwordReset,

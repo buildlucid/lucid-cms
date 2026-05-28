@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
+import { adminText } from "../../../../i18n/admin-text.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -25,12 +26,16 @@ class NumberCustomField extends CustomField<"number"> {
 			key: this.key,
 			type: this.type,
 			details: {
-				label: this.props?.details?.label ?? keyToTitle(this.key),
+				label:
+					this.props?.details?.label ??
+					adminText(`fields.${this.type}.${this.key}.label`, {
+						fallback: keyToTitle(this.key),
+					}),
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,
 			},
 			config: {
-				translations: this.props?.config?.translations ?? false,
+				localized: this.props?.config?.localized ?? false,
 				default: this.props?.config?.default,
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,

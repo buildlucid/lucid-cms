@@ -67,11 +67,11 @@ export const SelectedActionPill: Component<{
 						<span class="font-bold">
 							{hasSelected()
 								? props.options?.showingDeleted
-									? `${props.state.selectedMedia.length} ${T()("media")}`
-									: `${props.state.selectedFolders.length} ${T()("folders")}, ${props.state.selectedMedia.length} ${T()("media")}`
-								: T()("nothing_selected")}
+									? `${props.state.selectedMedia.length} ${T()("common.media")}`
+									: `${props.state.selectedFolders.length} ${T()("common.folders")}, ${props.state.selectedMedia.length} ${T()("common.media")}`
+								: T()("common.nothing.selected")}
 						</span>{" "}
-						{T()("selected")}
+						{T()("common.selected")}
 					</p>
 					<div class="ml-2 flex gap-2">
 						<Button
@@ -82,7 +82,7 @@ export const SelectedActionPill: Component<{
 								props.actions.resetSelectedMedia();
 							}}
 						>
-							{T()("reset")}
+							{T()("common.reset")}
 						</Button>
 						<Show when={showRestoreAction()}>
 							<Button
@@ -92,7 +92,7 @@ export const SelectedActionPill: Component<{
 									props.actions.restoreAction?.();
 								}}
 							>
-								{T()("restore")}
+								{T()("common.restore")}
 							</Button>
 						</Show>
 						<Show when={showDeleteAction()}>
@@ -103,7 +103,7 @@ export const SelectedActionPill: Component<{
 									props.actions.deleteAction?.();
 								}}
 							>
-								{T()("delete")}
+								{T()("common.delete")}
 							</Button>
 						</Show>
 						<Show when={showDeletePermanentlyAction()}>
@@ -114,7 +114,7 @@ export const SelectedActionPill: Component<{
 									props.actions.deletePermanentlyAction?.();
 								}}
 							>
-								{T()("delete")}
+								{T()("common.delete")}
 							</Button>
 						</Show>
 					</div>

@@ -39,7 +39,7 @@ const ReleaseRequestOverview: Component<{
 	const presets = createMemo<ReleaseRequestPreset[]>(() => [
 		{
 			key: "total",
-			label: T()("all_requests"),
+			label: T()("common.all.requests"),
 			value: props.overview?.total,
 			icon: <FaSolidLayerGroup size={14} />,
 			tone: "grey",
@@ -47,7 +47,7 @@ const ReleaseRequestOverview: Component<{
 		},
 		{
 			key: "pending",
-			label: T()("pending_review"),
+			label: T()("common.pending.review"),
 			value: props.overview?.pending,
 			icon: <FaSolidClock size={14} />,
 			tone: "yellow",
@@ -57,7 +57,7 @@ const ReleaseRequestOverview: Component<{
 		},
 		{
 			key: "assigned",
-			label: T()("assigned_to_me"),
+			label: T()("common.assigned.to.me"),
 			value: props.overview?.assignedToMe,
 			icon: <FaSolidUserCheck size={14} />,
 			tone: "blue",
@@ -67,7 +67,7 @@ const ReleaseRequestOverview: Component<{
 		},
 		{
 			key: "approved",
-			label: T()("approved"),
+			label: T()("common.status.approved"),
 			value: props.overview?.approved,
 			icon: <FaSolidCheck size={14} />,
 			tone: "green",
@@ -77,7 +77,7 @@ const ReleaseRequestOverview: Component<{
 		},
 		{
 			key: "rejected",
-			label: T()("rejected"),
+			label: T()("common.status.rejected"),
 			value: props.overview?.rejected,
 			icon: <FaSolidXmark size={14} />,
 			tone: "red",

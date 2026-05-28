@@ -14,7 +14,7 @@ const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
 	return (
 		<PanelFooter padding="24" class={props.class}>
 			<p class="text-sm text-subtitle">
-				{props.selectedCount} {T()("selected").toLowerCase()}
+				{props.selectedCount} {T()("common.selected").toLowerCase()}
 			</p>
 			<div class="flex flex-wrap items-center gap-2">
 				<Button
@@ -23,7 +23,7 @@ const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
 					size="medium"
 					onClick={props.onClose}
 				>
-					{T()("close")}
+					{T()("common.close")}
 				</Button>
 				<Button
 					type="button"
@@ -31,7 +31,7 @@ const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
 					size="medium"
 					onClick={props.onConfirm}
 				>
-					{T()("confirm")}
+					{T()("common.confirm")}
 				</Button>
 			</div>
 		</PanelFooter>

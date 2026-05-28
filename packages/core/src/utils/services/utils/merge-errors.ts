@@ -1,4 +1,4 @@
-import T from "../../../translations/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import errorTypeDefaults from "../../errors/error-type-defaults.js";
 
@@ -13,11 +13,14 @@ const mergeServiceError = (
 
 	return {
 		type: error.type ?? defaultError?.type ?? "basic",
-		name: error.name ?? defaultError?.name ?? T("unknown_service_error"),
+		name:
+			error.name ??
+			defaultError?.name ??
+			serverText("core.services.errors.unknown.name"),
 		message:
 			error.message ??
 			defaultError?.message ??
-			T("unknown_service_error_message"),
+			serverText("core.services.errors.unknown.message"),
 		status: error.status ?? defaultError?.status ?? 500,
 		code: error.code ?? defaultError?.code ?? undefined,
 		zod: error.zod ?? undefined,

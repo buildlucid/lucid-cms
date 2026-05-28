@@ -57,7 +57,7 @@ const UpdateSystemAlertsForm: Component<{
 				isDisabled: submitIsDisabled(),
 			}}
 			content={{
-				submit: T()("save"),
+				submit: T()("common.save"),
 			}}
 			options={{
 				errorPlacement: "inline",
@@ -73,7 +73,7 @@ const UpdateSystemAlertsForm: Component<{
 				value={alertEmail()}
 				onChange={setAlertEmail}
 				copy={{
-					label: T()("alert_email"),
+					label: T()("common.alert.email"),
 					placeholder: "alerts@example.com",
 				}}
 				errors={getBodyError("alertEmail", updateSystemAlerts.errors)}

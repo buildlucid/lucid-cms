@@ -4,6 +4,7 @@ import constants from "../../../constants/constants.js";
 import loadBuildProject from "../../compile/load-build-project.js";
 import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
 import prerenderMjmlTemplates from "../../email/templates/prerender-mjml-templates.js";
+import prerenderTranslations from "../../i18n/prerender-translations.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import vite from "../../vite/index.js";
@@ -73,19 +74,35 @@ const buildCommand = async (options?: {
 			".js",
 		);
 
-		const [mjmlTemplatesRes, publicAssetsRes] = await Promise.all([
-			prerenderMjmlTemplates({
-				config: configRes.config,
-				silent,
-			}),
-			copyPublicAssets({
-				config: configRes.config,
-				silent,
-			}),
-		]);
+		const [mjmlTemplatesRes, translationsRes, publicAssetsRes] =
+			await Promise.all([
+				prerenderMjmlTemplates({
+					config: configRes.config,
+					silent,
+				}),
+				prerenderTranslations({
+					config: configRes.config,
+				}),
+				copyPublicAssets({
+					config: configRes.config,
+					silent,
+				}),
+			]);
 		if (mjmlTemplatesRes.error) {
 			cliLogger.error(
-				mjmlTemplatesRes.error.message ?? "Failed to pre-render MJML templates",
+				mjmlTemplatesRes.error.message?.default ??
+					"Failed to pre-render MJML templates",
+				{
+					silent,
+				},
+			);
+			logger.setBuffering(false);
+			process.exit(1);
+		}
+		if (translationsRes.error) {
+			cliLogger.error(
+				translationsRes.error.message?.default ??
+					"Failed to pre-render translations",
 				{
 					silent,
 				},
@@ -95,7 +112,8 @@ const buildCommand = async (options?: {
 		}
 		if (publicAssetsRes.error) {
 			cliLogger.error(
-				publicAssetsRes.error.message ?? "Failed to copy public assets",
+				publicAssetsRes.error.message?.default ??
+					"Failed to copy public assets",
 				{
 					silent,
 				},
@@ -130,7 +148,7 @@ const buildCommand = async (options?: {
 		]);
 		if (viteBuildRes.error) {
 			cliLogger.error(
-				viteBuildRes.error.message ??
+				viteBuildRes.error.message?.default ??
 					"There was an error while building the SPA or component plugins",
 				{
 					silent,

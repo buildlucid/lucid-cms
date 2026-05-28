@@ -1,5 +1,5 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import T from "../../../translations/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkCollection: ServiceFn<
@@ -18,7 +18,7 @@ const checkCollection: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("collection_not_found_message"),
+				message: serverText("core.collections.not.found.message"),
 				status: 404,
 			},
 			data: undefined,

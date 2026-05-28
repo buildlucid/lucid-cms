@@ -1,27 +1,31 @@
-import T from "../../../translations/index.js";
 import type { Config } from "../../../types.js";
+import { translateServer } from "../../i18n/index.js";
 
-const checkLocales = (localization: Config["localization"]) => {
-	if (localization.locales.length === 0) {
-		throw new Error(T("config_locales_empty"));
+const checkLocales = (
+	localesConfig: Config["i18n"]["content"] | Config["i18n"]["interface"],
+) => {
+	if (localesConfig.locales.length === 0) {
+		throw new Error(translateServer("core.config.locales.empty"));
 	}
-	if (localization.defaultLocale === undefined) {
-		throw new Error(T("config_default_locale_undefined"));
+	if (localesConfig.defaultLocale === undefined) {
+		throw new Error(translateServer("core.config.default.locale.undefined"));
 	}
 
-	const defaultLocale = localization.locales.find(
-		(l) => l.code === localization.defaultLocale,
+	const defaultLocale = localesConfig.locales.find(
+		(l) => l.code === localesConfig.defaultLocale,
 	);
 	if (defaultLocale === undefined) {
-		throw new Error(T("config_default_locale_not_found"));
+		throw new Error(translateServer("core.config.default.locale.not.found"));
 	}
 
-	const localeCodes = localization.locales.map((l) => l.code);
+	const localeCodes = localesConfig.locales.map((l) => l.code);
 	const duplicate = localeCodes.find(
 		(code, index) => localeCodes.indexOf(code) !== index,
 	);
 	if (duplicate !== undefined) {
-		throw new Error(T("config_duplicate_locale", { code: duplicate }));
+		throw new Error(
+			translateServer("core.config.duplicate.locale", { code: duplicate }),
+		);
 	}
 };
 

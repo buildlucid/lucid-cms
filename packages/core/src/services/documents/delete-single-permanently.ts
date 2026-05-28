@@ -1,7 +1,7 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
+import { serverText, translateServer } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
 import {
 	documentPublishOperationServices,
@@ -52,7 +52,7 @@ const deleteSinglePermanently: ServiceFn<
 				enabled: true,
 				defaultError: {
 					type: "basic",
-					message: T("document_not_found_message"),
+					message: serverText("core.documents.not.found.message"),
 					status: 404,
 				},
 			},
@@ -117,7 +117,13 @@ const deleteSinglePermanently: ServiceFn<
 		documentPublishOperationServices.cancelForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.id],
-			comment: T("document_permanently_deleted_publish_request_comment"),
+			comment: translateServer(
+				"core.documents.permanently.deleted.publish.request.comment",
+				undefined,
+				{
+					config: context.config,
+				},
+			),
 		}),
 		documentWorkflowServices.deleteForDocuments(context, {
 			collectionKey: data.collectionKey,

@@ -137,7 +137,7 @@ export const PublishRequests: Component<{
 			timezone: scheduleTimezone(),
 		});
 		if (!scheduledAt) {
-			setValidationError(T()("schedule_release_required"));
+			setValidationError(T()("documents.release.schedule.validation.required"));
 			return;
 		}
 
@@ -168,10 +168,10 @@ export const PublishRequests: Component<{
 		<Show when={sectionEnabled()}>
 			<Show when={reviewEnabled()}>
 				<PublishOperationSection
-					title={T()("publish_requests")}
+					title={T()("publish.requests.list.title")}
 					icon={<FaSolidPaperPlane size={14} />}
 					storageKey="lucid:page-builder-sidebar:release-requests-open"
-					emptyCopy={T()("no_pending_publish_requests")}
+					emptyCopy={T()("empty.states.pending.publish.requests")}
 					collection={props.collection}
 					rows={releaseRequestRows()}
 					isLoading={pendingRequests.isLoading}
@@ -180,10 +180,10 @@ export const PublishRequests: Component<{
 			</Show>
 			<Show when={schedulingEnabled()}>
 				<PublishOperationSection
-					title={T()("scheduled_releases")}
+					title={T()("common.scheduled.releases")}
 					icon={<FaSolidCalendar size={14} />}
 					storageKey="lucid:page-builder-sidebar:scheduled-releases-open"
-					emptyCopy={T()("no_scheduled_releases")}
+					emptyCopy={T()("empty.states.scheduled.releases")}
 					collection={props.collection}
 					rows={scheduledReleaseRows()}
 					isLoading={scheduledRequests.isLoading}
@@ -202,10 +202,10 @@ export const PublishRequests: Component<{
 				}}
 				copy={{
 					title: selectedOperationHasSchedule()
-						? T()("reschedule_release")
-						: T()("schedule_release"),
-					description: T()("schedule_release_modal_description"),
-					confirm: T()("update_schedule"),
+						? T()("common.reschedule.release")
+						: T()("documents.release.schedule.action"),
+					description: T()("modals.common.schedule.release.description"),
+					confirm: T()("actions.update.schedule"),
 					error: error(),
 				}}
 				callbacks={{
@@ -232,7 +232,7 @@ export const PublishRequests: Component<{
 									reschedule.reset();
 								}}
 							>
-								{T()("cancel")}
+								{T()("common.cancel")}
 							</Button>
 							<Show when={selectedOperationHasSchedule()}>
 								<Button
@@ -242,7 +242,7 @@ export const PublishRequests: Component<{
 									loading={reschedule.action.isPending}
 									onClick={removeSchedule}
 								>
-									{T()("remove_schedule")}
+									{T()("documents.release.schedule.remove")}
 								</Button>
 							</Show>
 							<Button
@@ -253,8 +253,8 @@ export const PublishRequests: Component<{
 								onClick={saveSchedule}
 							>
 								{selectedOperationHasSchedule()
-									? T()("update_schedule")
-									: T()("schedule_release")}
+									? T()("actions.update.schedule")
+									: T()("documents.release.schedule.action")}
 							</Button>
 						</>
 					),

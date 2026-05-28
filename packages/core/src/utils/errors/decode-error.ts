@@ -1,24 +1,25 @@
 import constants from "../../constants/constants.js";
-import T from "../../translations/index.js";
-import type { LucidErrorData } from "../../types.js";
+import { translateServer } from "../../libs/i18n/index.js";
+import type { PublicErrorData } from "../../types.js";
 import { LucidAPIError } from "./index.js";
+import translateErrorData from "./translate-error-data.js";
 
-const decodeError = (error: Error): Exclude<LucidErrorData, "zod"> => {
+const decodeError = (error: Error): PublicErrorData => {
 	if (error instanceof LucidAPIError) {
-		return {
+		return translateErrorData({
 			name: error.error.name,
 			message: error.error.message,
 			status: error.error.status,
 			errors: error.error.errors,
 			code: error.error.code,
-		};
+		});
 	}
 
 	// @ts-expect-error
 	if (error?.statusCode === 429) {
 		return {
 			code: "rate_limit",
-			name: T("rate_limit_error_name"),
+			name: translateServer("core.rate.limit.error.name"),
 			message: error.message || constants.errors.message,
 			status: 429,
 		};

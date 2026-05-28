@@ -1,5 +1,5 @@
-import T from "../../../translations/index.js";
 import type { Config } from "../../../types.js";
+import { translateServer } from "../../i18n/index.js";
 
 const latestVersionType = "latest";
 
@@ -21,11 +21,14 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 
 				if (!targetCollection) {
 					throw new Error(
-						T("config_collection_environment_relation_collection_not_found", {
-							collection: collection.key,
-							environment: environment.key,
-							targetCollection: targetCollectionKey,
-						}),
+						translateServer(
+							"core.config.collection.environment.relation.collection.not.found",
+							{
+								collection: collection.key,
+								environment: environment.key,
+								targetCollection: targetCollectionKey,
+							},
+						),
 					);
 				}
 
@@ -38,12 +41,15 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 
 				if (!targetEnvironmentExists) {
 					throw new Error(
-						T("config_collection_environment_relation_version_not_found", {
-							collection: collection.key,
-							environment: environment.key,
-							targetCollection: targetCollectionKey,
-							targetVersion: targetVersionType,
-						}),
+						translateServer(
+							"core.config.collection.environment.relation.version.not.found",
+							{
+								collection: collection.key,
+								environment: environment.key,
+								targetCollection: targetCollectionKey,
+								targetVersion: targetVersionType,
+							},
+						),
 					);
 				}
 			}

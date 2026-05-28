@@ -1,8 +1,8 @@
 import { createMiddleware } from "hono/factory";
-import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import type { CollectionPermissionAction } from "../../collection/builders/collection-builder/types.js";
+import { serverText } from "../../i18n/index.js";
 import { resolveCollectionPermission } from "../../permission/collection-permissions.js";
 import hasAccess from "../../permission/has-access.js";
 
@@ -29,8 +29,8 @@ const collectionPermissions = (
 		if (!collection) {
 			throw new LucidAPIError({
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_not_found_message"),
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.not.found.message"),
 				status: 404,
 			});
 		}
@@ -48,10 +48,12 @@ const collectionPermissions = (
 		if (!access) {
 			throw new LucidAPIError({
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_permission_error_message", {
-					collection: collection.key,
-					action,
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: collection.key,
+						action,
+					},
 				}),
 				status: 403,
 			});

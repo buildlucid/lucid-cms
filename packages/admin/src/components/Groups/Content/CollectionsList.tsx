@@ -34,8 +34,8 @@ export const CollectionsList: Component<{
 			}}
 			copy={{
 				noEntries: {
-					title: T()("no_collections"),
-					description: T()("no_collections_description"),
+					title: T()("empty.states.collections.title"),
+					description: T()("empty.states.collections.description"),
 				},
 			}}
 			options={{

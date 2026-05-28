@@ -1,12 +1,12 @@
 import constants from "../../constants/constants.js";
 import { coreAiGuidance } from "../../constants/default-config.js";
-import { logger } from "../../index.js";
+import { serverText } from "../../libs/i18n/index.js";
+import logger from "../../libs/logger/index.js";
 import type {
 	CmsAiGenerateData,
 	CustomFieldInputV1Request,
 } from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
-import T from "../../translations/index.js";
 import type { CustomFieldAiContextItem } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
@@ -42,7 +42,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: T("collection_not_found_message"),
+				message: serverText("core.collections.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -60,7 +60,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: T("ai_custom_field_input_target_not_found"),
+				message: serverText("core.ai.custom.field.input.target.not.found"),
 			},
 			data: undefined,
 		};
@@ -73,7 +73,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: T("ai_custom_field_input_target_not_found"),
+				message: serverText("core.ai.custom.field.input.target.not.found"),
 			},
 			data: undefined,
 		};
@@ -84,7 +84,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("ai_custom_field_input_no_supported_field"),
+				message: serverText("core.ai.custom.field.input.no.supported.field"),
 			},
 			data: undefined,
 		};
@@ -117,7 +117,7 @@ const customFieldInput: ServiceFn<
 				error: {
 					type: "basic",
 					status: 400,
-					message: T("ai_custom_field_input_guidance_not_found"),
+					message: serverText("core.ai.custom.field.input.guidance.not.found"),
 				},
 				data: undefined,
 			};
@@ -153,7 +153,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("route_ai_generate_error_message"),
+				message: serverText("core.routes.ai.generate.error.message"),
 			},
 			data: undefined,
 		};
@@ -162,7 +162,7 @@ const customFieldInput: ServiceFn<
 	const currentValueTranslations = normalizeCurrentValueTranslations({
 		currentValue: props.currentValue,
 		localeCodes: [
-			...context.config.localization.locales.map((locale) => locale.code),
+			...context.config.i18n.content.locales.map((locale) => locale.code),
 			...(props.locale.source ? [props.locale.source] : []),
 			...props.locale.target,
 		],

@@ -1,6 +1,6 @@
 import constants from "../../constants/constants.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { authServices } from "../index.js";
 
@@ -26,7 +26,7 @@ const revokeRefreshTokens: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("user_not_found_message"),
+				message: serverText("core.user.not.found.message"),
 				status: 404,
 			},
 		},

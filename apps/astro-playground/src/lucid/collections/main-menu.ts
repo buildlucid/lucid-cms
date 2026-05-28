@@ -1,20 +1,28 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { adminText, CollectionBuilder } from "@lucidcms/core";
 
 const MainMenuCollection = new CollectionBuilder("main-menu", {
 	mode: "single",
 	details: {
-		name: "Main Menu",
-		singularName: "Main Menu",
-		summary: "The main menu for your website.",
+		name: adminText("collections.main-menu.name", {
+			fallback: "Main Menu",
+		}),
+		singularName: adminText("collections.main-menu.singularName", {
+			fallback: "Main Menu",
+		}),
+		summary: adminText("collections.main-menu.summary", {
+			fallback: "The main menu for your website.",
+		}),
 	},
 	config: {
 		revisions: true,
-		translations: true,
+		localized: true,
 	},
 })
 	.addRepeater("items", {
 		details: {
-			label: "Items",
+			label: adminText("collections.main-menu.fields.items.label", {
+				fallback: "Items",
+			}),
 		},
 		validation: {
 			maxGroups: 5,

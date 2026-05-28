@@ -1,4 +1,4 @@
-import type { LocaleValue } from "../../types/shared.js";
+import type { AdminText } from "../i18n/types.js";
 import type { PermissionGroups, Permissions } from "./definitions.js";
 
 export type CorePermission = (typeof Permissions)[keyof typeof Permissions];
@@ -8,8 +8,8 @@ export type Permission = CorePermission | (string & {});
 export type PermissionGroupKey = keyof typeof PermissionGroups;
 
 export type PermissionDetails = {
-	name: LocaleValue;
-	description?: LocaleValue | null;
+	name: AdminText;
+	description?: AdminText | null;
 };
 
 export type PermissionDefinition = {

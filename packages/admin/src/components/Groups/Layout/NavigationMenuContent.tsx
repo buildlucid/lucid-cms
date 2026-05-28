@@ -87,34 +87,34 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						type="link"
 						href="/lucid"
 						icon="dashboard"
-						title={T()("dashboard")}
+						title={T()("common.dashboard")}
 					/>
 					<IconLinkFull
 						type="link"
 						href="/lucid/media"
 						icon="media"
-						title={T()("media_library")}
+						title={T()("media.library.title")}
 						permission={props.canReadMedia}
 					/>
 					<IconLinkFull
 						type="link"
 						href="/lucid/emails"
 						icon="email"
-						title={T()("email_activity")}
+						title={T()("email.activity")}
 						permission={props.canReadEmails}
 					/>
 					<IconLinkFull
 						type="link"
 						href="/lucid/release-requests"
 						icon="release-requests"
-						title={T()("publish_requests")}
+						title={T()("publish.requests.list.title")}
 						permission={props.canReadPublishRequests}
 					/>
 
 					{/* Collections */}
 					<Show when={props.canReadDocuments}>
 						<div class="w-full mt-4 mb-2">
-							<span class="text-xs">{T()("collections")}</span>
+							<span class="text-xs">{T()("common.collections")}</span>
 						</div>
 						<Switch>
 							<Match when={props.collectionsIsLoading}>
@@ -125,7 +125,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 							<Match when={props.collectionsIsError}>
 								<div class="bg-background-base rounded-md p-2">
 									<p class="text-xs text-center">
-										{T()("error_loading_collections")}
+										{T()("errors.collections.load.failed")}
 									</p>
 								</div>
 							</Match>
@@ -170,35 +170,37 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					{/* Access & Permissions */}
 					<Show when={props.showAccessAndPermissions}>
 						<div class="w-full mt-4 mb-2">
-							<span class="text-xs">{T()("access_and_permissions")}</span>
+							<span class="text-xs">
+								{T()("permissions.groups.access.and")}
+							</span>
 						</div>
 					</Show>
 					<IconLinkFull
 						type="link"
 						href="/lucid/users"
 						icon="users"
-						title={T()("user_accounts")}
+						title={T()("users.accounts")}
 						permission={props.canReadUsers}
 					/>
 					<IconLinkFull
 						type="link"
 						href="/lucid/roles"
 						icon="roles"
-						title={T()("role_management")}
+						title={T()("roles.management")}
 						permission={props.canReadRoles}
 					/>
 
 					{/* System */}
 					<Show when={showSystemSection()}>
 						<div class="w-full mt-4 mb-2">
-							<span class="text-xs">{T()("system")}</span>
+							<span class="text-xs">{T()("common.system")}</span>
 						</div>
 					</Show>
 					<IconLinkFull
 						type="link"
 						href={systemSettingsHref()}
 						icon="settings"
-						title={T()("system_settings")}
+						title={T()("system.settings.title")}
 						permission={showSystemSettings()}
 						active={systemSettingsIsActive()}
 					/>
@@ -206,14 +208,14 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						type="link"
 						href="/lucid/system/integrations"
 						icon="client-integrations"
-						title={T()("client_integrations")}
+						title={T()("client.integrations.list.title")}
 						permission={props.canReadClientIntegrations}
 					/>
 					<IconLinkFull
 						type="link"
 						href="/lucid/system/queue-observability"
 						icon="queue"
-						title={T()("queue_observability")}
+						title={T()("queue.observability")}
 						permission={props.canReadJobs}
 					/>
 				</ul>
@@ -226,7 +228,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 							icon="logout"
 							loading={props.logoutPending}
 							onClick={props.onLogout}
-							title={T()("logout")}
+							title={T()("common.logout")}
 						/>
 						<Show when={props.user?.username}>
 							<li>
@@ -256,7 +258,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 				>
 					<Show when={props.showLicenseAlert}>
 						<div class="bg-warning-base/10 border border-warning-base/20 rounded-md px-2 py-2 text-center">
-							<p class="text-xs">{T()("license_invalid_message")}</p>
+							<p class="text-xs">{T()("license.status.invalid.message")}</p>
 						</div>
 					</Show>
 					<small class="text-xs leading-none bg-background-base rounded-md px-2 py-2 block text-center">

@@ -1,4 +1,4 @@
-import type { LocaleValue } from "../locales/types.js";
+import type { AdminText } from "../locales/types.js";
 import type { ProfilePicture } from "../media/types.js";
 
 export type CorePermission =
@@ -38,8 +38,8 @@ export type CorePermission =
 export type Permission = CorePermission | (string & {});
 
 export type PermissionDetails = {
-	name: LocaleValue;
-	description?: LocaleValue | null;
+	name: AdminText;
+	description?: AdminText | null;
 };
 
 export type PermissionDefinition = {

@@ -1,11 +1,17 @@
-import { CollectionBuilder } from "@lucidcms/core";
+import { adminText, CollectionBuilder } from "@lucidcms/core";
 
 const BlogCollection = new CollectionBuilder("blog", {
 	mode: "multiple",
 	details: {
-		name: "Blogs",
-		singularName: "Blog",
-		summary: "Manage your blogs.",
+		name: adminText("collections.blog.name", {
+			fallback: "Blogs",
+		}),
+		singularName: adminText("collections.blog.singularName", {
+			fallback: "Blog",
+		}),
+		summary: adminText("collections.blog.summary", {
+			fallback: "Manage your blogs.",
+		}),
 	},
 	permissions: {
 		read: "blog:full",
@@ -16,12 +22,14 @@ const BlogCollection = new CollectionBuilder("blog", {
 		publish: "blog:full",
 	},
 	config: {
-		translations: true,
+		localized: true,
 		scheduling: true,
 		environments: [
 			{
 				key: "staging",
-				name: "Staging",
+				name: adminText("collections.blog.environments.staging.name", {
+					fallback: "Staging",
+				}),
 			},
 		],
 	},

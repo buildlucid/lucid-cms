@@ -5,11 +5,11 @@ import {
 	getTableNames,
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentBricksFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	DocumentBricksRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
@@ -54,8 +54,8 @@ const cloneVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("error_schema_migration_required_name"),
-				message: T("error_schema_migration_required_message"),
+				name: serverText("core.error.schema.migration.required.name"),
+				message: serverText("core.error.schema.migration.required.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -83,7 +83,7 @@ const cloneVersion: ServiceFn<
 				validation: {
 					enabled: true,
 					defaultError: {
-						message: T("document_version_not_found_message"),
+						message: serverText("core.documents.version.not.found.message"),
 						status: 404,
 					},
 				},
@@ -112,7 +112,7 @@ const cloneVersion: ServiceFn<
 		return {
 			error: {
 				status: 404,
-				message: T("document_version_not_found_message"),
+				message: serverText("core.documents.version.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -122,7 +122,7 @@ const cloneVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("document_version_doesnt_belong_to_document"),
+				message: serverText("core.documents.version.document.mismatch"),
 				status: 404,
 			},
 			data: undefined,
@@ -146,7 +146,7 @@ const cloneVersion: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 400,
-					message: T("failed_to_create_document_or_version"),
+					message: serverText("core.documents.create.failed"),
 				},
 			},
 		},
@@ -161,7 +161,7 @@ const cloneVersion: ServiceFn<
 		collection: collectionRes.data,
 		documentId: data.documentId,
 		versionId: newVersionRes.data.id,
-		localization: context.config.localization,
+		localization: context.config.i18n.content,
 		bricks: documentBricksFormatter.formatMultiple({
 			bricksQuery: bricksQueryRes.data,
 			bricksSchema: bricksTableSchemaRes.data,

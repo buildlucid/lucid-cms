@@ -62,7 +62,7 @@ const ToolbarControls: Component<{
 				isActive={props.isBold}
 				onClick={props.onToggleBold}
 				disabled={props.disabled}
-				title={T()("rich_text_bold")}
+				title={T()("editor.rich.text.marks.bold")}
 			>
 				<FaSolidBold size={12} />
 			</ToolbarButton>
@@ -71,7 +71,7 @@ const ToolbarControls: Component<{
 				isActive={props.isItalic}
 				onClick={props.onToggleItalic}
 				disabled={props.disabled}
-				title={T()("rich_text_italic")}
+				title={T()("editor.rich.text.marks.italic")}
 			>
 				<FaSolidItalic size={12} />
 			</ToolbarButton>
@@ -80,7 +80,7 @@ const ToolbarControls: Component<{
 				isActive={props.isUnderline}
 				onClick={props.onToggleUnderline}
 				disabled={props.disabled}
-				title={T()("rich_text_underline")}
+				title={T()("editor.rich.text.marks.underline")}
 			>
 				<FaSolidUnderline size={12} />
 			</ToolbarButton>
@@ -89,7 +89,7 @@ const ToolbarControls: Component<{
 				isActive={props.isStrike}
 				onClick={props.onToggleStrike}
 				disabled={props.disabled}
-				title={T()("rich_text_strikethrough")}
+				title={T()("editor.rich.text.marks.strikethrough")}
 			>
 				<FaSolidStrikethrough size={12} />
 			</ToolbarButton>
@@ -101,7 +101,7 @@ const ToolbarControls: Component<{
 				isActive={props.isOrderedList}
 				onClick={props.onToggleOrderedList}
 				disabled={props.disabled}
-				title={T()("rich_text_ordered_list")}
+				title={T()("editor.rich.text.lists.ordered")}
 			>
 				<FaSolidListOl size={12} />
 			</ToolbarButton>
@@ -110,7 +110,7 @@ const ToolbarControls: Component<{
 				isActive={props.isBulletList}
 				onClick={props.onToggleBulletList}
 				disabled={props.disabled}
-				title={T()("rich_text_bullet_list")}
+				title={T()("editor.rich.text.lists.bullet")}
 			>
 				<FaSolidListUl size={12} />
 			</ToolbarButton>
@@ -123,7 +123,9 @@ const ToolbarControls: Component<{
 				onClick={props.onOpenLinkModal}
 				disabled={props.disabled}
 				title={
-					props.isLink ? T()("rich_text_edit_link") : T()("rich_text_add_link")
+					props.isLink
+						? T()("editor.rich.text.link.edit")
+						: T()("editor.rich.text.link.add")
 				}
 			>
 				<FaSolidLink size={12} />
@@ -136,7 +138,7 @@ const ToolbarControls: Component<{
 				isActive={false}
 				onClick={props.onClearFormatting}
 				disabled={props.disabled}
-				title={T()("rich_text_clear_formatting")}
+				title={T()("editor.rich.text.formatting.clear")}
 			>
 				<FaSolidEraser size={12} />
 			</ToolbarButton>

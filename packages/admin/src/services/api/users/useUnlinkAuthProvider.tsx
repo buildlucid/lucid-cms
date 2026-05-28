@@ -32,8 +32,8 @@ const useUnlinkAuthProvider = (props?: UseUnlinkAuthProviderProps) => {
 		onError: props?.onError,
 		onMutate: props?.onMutate,
 		getSuccessToast: () => ({
-			title: T()("auth_provider_unlinked_toast_title"),
-			message: T()("auth_provider_unlinked_toast_message"),
+			title: T()("toasts.common.auth.provider.unlinked.title"),
+			message: T()("toasts.common.auth.provider.unlinked.message"),
 		}),
 	});
 };

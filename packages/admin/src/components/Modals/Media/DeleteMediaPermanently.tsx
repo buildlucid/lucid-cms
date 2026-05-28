@@ -33,8 +33,8 @@ const DeleteMediaPermanently: Component<DeleteMediaPermanentlyProps> = (
 				isError: deleteMediaPermanently.action.isError,
 			}}
 			copy={{
-				title: T()("delete_media_permanently_modal_title"),
-				description: T()("delete_media_permanently_modal_description"),
+				title: T()("modals.common.delete.media.permanently.title"),
+				description: T()("modals.common.delete.media.permanently.description"),
 				error: deleteMediaPermanently.errors()?.message,
 			}}
 			callbacks={{

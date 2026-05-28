@@ -26,7 +26,7 @@ const prepareBuildArtifacts = async (props: {
 
 	if (pluginBuildArtifactsRes.error || !pluginBuildArtifactsRes.data) {
 		throw new Error(
-			pluginBuildArtifactsRes.error?.message ??
+			pluginBuildArtifactsRes.error.message?.default ??
 				"Lucid build failed while preparing plugin artifacts.",
 		);
 	}

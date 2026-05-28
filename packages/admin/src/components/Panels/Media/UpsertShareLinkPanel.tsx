@@ -93,15 +93,17 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 		return shareLink.isError;
 	});
 	const panelTitle = createMemo(() => {
-		if (mode() === "create") return T()("create_share_link_panel_title");
-		return T()("update_share_link_panel_title");
+		if (mode() === "create")
+			return T()("panels.media.share.links.create.title");
+		return T()("panels.media.share.links.update.title");
 	});
 	const panelDescription = createMemo(() => {
-		if (mode() === "create") return T()("create_share_link_panel_description");
+		if (mode() === "create")
+			return T()("panels.media.share.links.create.description");
 	});
 	const panelSubmit = createMemo(() => {
-		if (mode() === "create") return T()("create");
-		return T()("update");
+		if (mode() === "create") return T()("common.create");
+		return T()("common.update");
 	});
 	const updateData = createMemo(() => {
 		return helpers.updateData(
@@ -215,8 +217,8 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 						name="name"
 						type="text"
 						copy={{
-							label: T()("name"),
-							placeholder: T()("optional"),
+							label: T()("common.name"),
+							placeholder: T()("common.optional"),
 						}}
 						errors={getBodyError("name", errors)}
 					/>
@@ -226,8 +228,8 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 						onChange={setDescription}
 						name="description"
 						copy={{
-							label: T()("description"),
-							placeholder: T()("optional"),
+							label: T()("common.description"),
+							placeholder: T()("common.optional"),
 						}}
 						errors={getBodyError("description", errors)}
 					/>
@@ -247,8 +249,8 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 								if (value) setPassword("");
 							}}
 							copy={{
-								label: T()("remove_password"),
-								describedBy: T()("share_link_remove_the_password"),
+								label: T()("media.share.links.password.remove.action"),
+								describedBy: T()("media.share.links.password.remove.help"),
 							}}
 						/>
 					</Show>
@@ -266,10 +268,10 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 							name="password"
 							type="password"
 							copy={{
-								label: T()("password"),
+								label: T()("common.password"),
 								describedBy:
 									mode() === "update" && shareLink.data?.data.hasPassword
-										? T()("share_link_leave_blank_to_keep_existing")
+										? T()("media.share.links.password.keep.existing.help")
 										: undefined,
 							}}
 							errors={getBodyError("password", errors)}
@@ -282,10 +284,10 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 						name="expiresAt"
 						type="date"
 						copy={{
-							label: T()("expires_at"),
-							placeholder: T()("optional"),
+							label: T()("common.expires.at"),
+							placeholder: T()("common.optional"),
 							describedBy: shareLink.data?.data.hasExpired
-								? T()("share_link_expired_description")
+								? T()("media.share.links.expired.description")
 								: undefined,
 						}}
 						errors={getBodyError("expiresAt", errors)}

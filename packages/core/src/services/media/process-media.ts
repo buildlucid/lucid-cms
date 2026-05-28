@@ -1,6 +1,6 @@
 import type { MediaProcessOptions } from "@lucidcms/types";
+import { serverText } from "../../libs/i18n/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { MediaUrl } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import {
@@ -29,8 +29,8 @@ const processMedia: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				name: T("media_not_found_name"),
-				message: T("media_not_found_message"),
+				name: serverText("core.media.not.found.name"),
+				message: serverText("core.media.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -59,7 +59,7 @@ const processMedia: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: T("media_not_found_message"),
+				message: serverText("core.media.not.found.message"),
 			},
 			data: undefined,
 		};

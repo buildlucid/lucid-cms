@@ -1,8 +1,8 @@
 import { createMiddleware } from "hono/factory";
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
+import { serverText } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
 import { supportsKVIncrement } from "../../kv/utils.js";
 
@@ -70,7 +70,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 						throw new LucidAPIError({
 							type: "authorisation",
 							code: "authorisation",
-							message: T("rate_limit_authentication_required"),
+							message: serverText("core.rate.limit.authentication.required"),
 							status: 401,
 						});
 					}
@@ -82,7 +82,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 					if (!clientIntegration) {
 						throw new LucidAPIError({
 							type: "authorisation",
-							message: T("rate_limit_authentication_required"),
+							message: serverText("core.rate.limit.authentication.required"),
 							status: 401,
 						});
 					}
@@ -95,7 +95,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 					if (!connectionInfo.address) {
 						throw new LucidAPIError({
 							type: "authorisation",
-							message: T("rate_limit_ip_address_required"),
+							message: serverText("core.rate.limit.ip.address.required"),
 							status: 401,
 						});
 					}
@@ -156,7 +156,11 @@ const rateLimiter = (options: RateLimitOptions) =>
 			throw new LucidAPIError({
 				type: "rate_limit",
 				code: "rate_limit",
-				message: T("rate_limit_exceeded_message", { resetSeconds }),
+				message: serverText("core.rate.limit.exceeded.message", {
+					data: {
+						resetSeconds,
+					},
+				}),
 				status: 429,
 			});
 		}

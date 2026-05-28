@@ -4,13 +4,13 @@ import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/documents.js";
 import { documentServices } from "../../../../../services/index.js";
-import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
 import { ClientScopes } from "../../../../permission/client-scopes.js";
 import cache from "../../../middleware/cache.js";
@@ -69,8 +69,8 @@ const getMultipleController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: T("route_document_fetch_error_name"),
-					message: T("route_document_fetch_error_message"),
+					name: serverText("core.routes.document.fetch.error.name"),
+					message: serverText("core.routes.document.fetch.error.message"),
 				},
 			},
 		)(context, {

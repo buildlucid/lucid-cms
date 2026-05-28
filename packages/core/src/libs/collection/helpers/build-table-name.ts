@@ -1,7 +1,7 @@
 import constants from "../../../constants/constants.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
-import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
+import { serverText } from "../../i18n/index.js";
 import {
 	getFieldDatabaseConfig,
 	isCustomFieldTableType,
@@ -44,8 +44,8 @@ const buildTableName = <R extends string>(
 				return {
 					data: undefined,
 					error: {
-						message: T(
-							"collection_migrator_table_name_brick_key_missing_message",
+						message: serverText(
+							"core.collections.migration.table.name.brick.key.missing.message",
 						),
 					},
 				};
@@ -64,8 +64,8 @@ const buildTableName = <R extends string>(
 			return {
 				data: undefined,
 				error: {
-					message: T(
-						"collection_migrator_table_name_repeater_keys_missing_message",
+					message: serverText(
+						"core.collections.migration.table.name.repeater.keys.missing.message",
 					),
 				},
 			};
@@ -76,7 +76,9 @@ const buildTableName = <R extends string>(
 			return {
 				data: undefined,
 				error: {
-					message: T("invalid_table_name_format_insufficient_parts"),
+					message: serverText(
+						"core.collections.schema.table.name.format.insufficient.parts",
+					),
 				},
 			};
 		}
@@ -88,7 +90,9 @@ const buildTableName = <R extends string>(
 			return {
 				data: undefined,
 				error: {
-					message: T("invalid_table_name_format_insufficient_parts"),
+					message: serverText(
+						"core.collections.schema.table.name.format.insufficient.parts",
+					),
 				},
 			};
 		}

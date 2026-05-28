@@ -23,8 +23,8 @@ const useDeleteAllSystem = (props?: UseDeleteAllSystemProps) => {
 	return serviceHelpers.useMutationWrapper<undefined, undefined>({
 		mutationFn: deleteAllSystemReq,
 		getSuccessToast: () => ({
-			title: T()("media_share_links_delete_all_system_toast_title"),
-			message: T()("media_share_links_delete_all_system_toast_message"),
+			title: T()("toasts.media.share.links.delete.all.system.title"),
+			message: T()("toasts.media.share.links.delete.all.system.message"),
 		}),
 		invalidates: ["mediaShareLinks.getMultiple"],
 		onSuccess: props?.onSuccess,

@@ -34,6 +34,10 @@ export const writeGeneratedRouteFiles = async (props: {
 		props.codegenDir,
 		astroConstants.files.emailTemplatesModule,
 	);
+	const i18nTranslationsModulePath = path.join(
+		props.codegenDir,
+		astroConstants.files.i18nTranslationsModule,
+	);
 	const spaHtmlModulePath = path.join(
 		props.codegenDir,
 		astroConstants.files.spaHtmlModule,
@@ -112,6 +116,12 @@ export default emailTemplates;
 `,
 		),
 		fs.writeFile(
+			i18nTranslationsModulePath,
+			`const i18nTranslations = ${JSON.stringify(props.project.loaded.config.i18n.translations, null, 2)};
+export default i18nTranslations;
+`,
+		),
+		fs.writeFile(
 			spaHtmlModulePath,
 			`const spaHtml = ${JSON.stringify(spaHtml)};
 export default spaHtml;
@@ -165,6 +175,10 @@ export const writeCloudflareWorkerFiles = async (
 		fs.writeFile(
 			path.join(workerDir, astroConstants.files.emailTemplatesJson),
 			JSON.stringify(project.emailTemplates, null, 2),
+		),
+		fs.writeFile(
+			path.join(workerDir, astroConstants.files.i18nTranslationsJson),
+			JSON.stringify(project.loaded.config.i18n.translations, null, 2),
 		),
 		fs.writeFile(
 			path.join(workerDir, astroConstants.files.worker),

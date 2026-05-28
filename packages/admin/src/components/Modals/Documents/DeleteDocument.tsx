@@ -24,7 +24,7 @@ const DeleteDocument: Component<DeleteDocumentProps> = (props) => {
 		() =>
 			helpers.getLocaleValue({
 				value: props.collection?.details.singularName,
-			}) || T()("collection"),
+			}) || T()("common.collection"),
 	);
 
 	// ----------------------------------------
@@ -49,10 +49,10 @@ const DeleteDocument: Component<DeleteDocumentProps> = (props) => {
 				isError: deleteDocument.action.isError,
 			}}
 			copy={{
-				title: T()("delete_document_modal_title", {
+				title: T()("modals.common.delete.document.title", {
 					name: collectionSingularName(),
 				}),
-				description: T()("delete_document_modal_description", {
+				description: T()("modals.common.delete.document.description", {
 					name: collectionSingularName().toLowerCase(),
 				}),
 				error: deleteDocument.errors()?.message,

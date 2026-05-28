@@ -1,5 +1,6 @@
-import T from "../../../../../translations/index.js";
 import type { ServiceResponse } from "../../../../../types.js";
+import { adminText } from "../../../../i18n/admin-text.js";
+import { serverText } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -31,7 +32,11 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			key: this.key,
 			type: this.type,
 			details: {
-				label: this.props?.details?.label ?? keyToTitle(this.key),
+				label:
+					this.props?.details?.label ??
+					adminText(`fields.${this.type}.${this.key}.label`, {
+						fallback: keyToTitle(this.key),
+					}),
 				summary: this.props?.details?.summary,
 			},
 			config: {
@@ -62,9 +67,14 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			if (value.length > this.config.validation?.maxGroups) {
 				return {
 					valid: false,
-					message: T("repeater_max_groups_exceeded", {
-						groups: this.config.validation.maxGroups,
-					}),
+					message: serverText(
+						"core.fields.repeater.validation.max.groups.exceeded",
+						{
+							data: {
+								groups: this.config.validation.maxGroups,
+							},
+						},
+					),
 				};
 			}
 		}
@@ -76,9 +86,14 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			if (this.config.validation?.minGroups > value.length) {
 				return {
 					valid: false,
-					message: T("repeater_groups_exceeded_min", {
-						groups: this.config.validation.minGroups,
-					}),
+					message: serverText(
+						"core.fields.repeater.validation.groups.exceeded.min",
+						{
+							data: {
+								groups: this.config.validation.minGroups,
+							},
+						},
+					),
 				};
 			}
 		}

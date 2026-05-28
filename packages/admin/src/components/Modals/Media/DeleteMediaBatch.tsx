@@ -43,8 +43,8 @@ const DeleteMediaBatch: Component<DeleteMediaBatchProps> = (props) => {
 				isError: deleteMediaBatch.action.isError,
 			}}
 			copy={{
-				title: T()("delete_media_batch_modal_title"),
-				description: T()("delete_media_batch_modal_description"),
+				title: T()("modals.common.delete.media.batch.title"),
+				description: T()("modals.common.delete.media.batch.description"),
 				error: deleteMediaBatch.errors()?.message,
 			}}
 			callbacks={{
@@ -73,8 +73,8 @@ const DeleteMediaBatch: Component<DeleteMediaBatchProps> = (props) => {
 						}}
 						name="recursiveMedia"
 						copy={{
-							label: T()("recursive_media_deletion"),
-							describedBy: T()("recursive_media_deletion_description"),
+							label: T()("media.folders.delete.recursive.label"),
+							describedBy: T()("media.folders.delete.recursive.description"),
 						}}
 						noMargin={true}
 					/>

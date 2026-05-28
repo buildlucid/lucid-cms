@@ -31,7 +31,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 			callbacks={props.callbacks}
 			actions={[
 				{
-					label: T()("update"),
+					label: T()("common.update"),
 					type: "button",
 					permission: props.permissions.update,
 					onClick: () => {
@@ -40,7 +40,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 					},
 				},
 				{
-					label: T()("delete"),
+					label: T()("common.delete"),
 					type: "button",
 					permission: props.permissions.delete,
 					onClick: () => {
@@ -63,7 +63,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 				options={{ include: props?.include[1] }}
 			/>
 			<PillCol
-				text={props.link.hasPassword ? T()("yes") : T()("no")}
+				text={props.link.hasPassword ? T()("common.yes") : T()("common.no")}
 				theme={props.link.hasPassword ? "primary-opaque" : "outline"}
 				options={{ include: props?.include[2] }}
 			/>
@@ -72,7 +72,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 				options={{ include: props?.include[3] }}
 			/>
 			<PillCol
-				text={props.link.hasExpired ? T()("yes") : T()("no")}
+				text={props.link.hasExpired ? T()("common.yes") : T()("common.no")}
 				theme={props.link.hasExpired ? "error-opaque" : "outline"}
 				options={{ include: props?.include[3] }}
 			/>

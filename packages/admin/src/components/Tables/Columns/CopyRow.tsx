@@ -22,7 +22,7 @@ const TextCol: Component<TextColProps> = (props) => {
 
 		navigator.clipboard.writeText(props.value);
 		spawnToast({
-			title: T()("copy_to_clipboard_toast_title"),
+			title: T()("toasts.common.copy.to.clipboard.title"),
 			status: "success",
 		});
 	};

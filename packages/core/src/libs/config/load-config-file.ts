@@ -52,6 +52,7 @@ export const loadConfigFile = async (props?: {
 		},
 		processConfigOptions: {
 			bypassCache: true,
+			projectRoot: path.dirname(path.resolve(configPath)),
 			...(props?.processConfigOptions ?? {}),
 		},
 	});

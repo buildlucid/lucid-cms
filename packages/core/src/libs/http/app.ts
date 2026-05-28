@@ -1,3 +1,4 @@
+import type { PublicErrorData } from "@lucidcms/types";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -6,15 +7,11 @@ import type { StatusCode } from "hono/utils/http-status";
 import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
-import T from "../../translations/index.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
-import type {
-	Config,
-	EnvironmentVariables,
-	LucidErrorData,
-} from "../../types.js";
-import { LucidAPIError } from "../../utils/errors/index.js";
+import type { Config, EnvironmentVariables } from "../../types.js";
+import { LucidAPIError, translateErrorData } from "../../utils/errors/index.js";
 import getEmailAdapter from "../email/get-adapter.js";
+import { resolveInterfaceLocale, translateServer } from "../i18n/index.js";
 import { getInitializedKVAdapter } from "../kv/lifecycle.js";
 import getMediaAdapter from "../media/get-adapter.js";
 import getQueueAdapter from "../queue/get-adapter.js";
@@ -106,14 +103,23 @@ const createApp = async (props: {
 		.route("/", routes)
 		.onError(async (err, c) => {
 			if (err instanceof LucidAPIError) {
-				c.status(err.error.status as StatusCode);
+				const error = translateErrorData(err.error, {
+					config: props.config,
+					locale: resolveInterfaceLocale({
+						config: props.config,
+						locale: c.req.header(constants.headers.interfaceLocale),
+						acceptLanguage: c.req.header("Accept-Language"),
+					}),
+				});
+
+				c.status(error.status as StatusCode);
 				return c.json({
-					name: err.error.name,
-					message: err.error.message,
-					status: err.error.status,
-					errors: err.error.errors,
-					code: err.error.code,
-				} satisfies LucidErrorData);
+					name: error.name,
+					message: error.message,
+					status: error.status,
+					errors: error.errors,
+					code: error.code,
+				} satisfies PublicErrorData);
 			}
 
 			// @ts-expect-error
@@ -121,10 +127,17 @@ const createApp = async (props: {
 				c.status(429);
 				return c.json({
 					code: "rate_limit",
-					name: T("rate_limit_error_name"),
+					name: translateServer("core.rate.limit.error.name", undefined, {
+						config: props.config,
+						locale: resolveInterfaceLocale({
+							config: props.config,
+							locale: c.req.header(constants.headers.interfaceLocale),
+							acceptLanguage: c.req.header("Accept-Language"),
+						}),
+					}),
 					message: err.message || constants.errors.message,
 					status: 429,
-				} satisfies LucidErrorData);
+				} satisfies PublicErrorData);
 			}
 
 			c.status(500);
@@ -134,19 +147,42 @@ const createApp = async (props: {
 				status: constants.errors.status,
 				errors: constants.errors.errors,
 				code: constants.errors.code,
-			} satisfies LucidErrorData);
+			} satisfies PublicErrorData);
 		})
 		.notFound((c) => {
 			if (c.req.url.includes(`/${constants.directories.base}/api`)) {
 				return c.json({
 					status: 404,
 					code: "not_found",
-					name: T("route_not_found"),
-					message: T("route_not_found_message"),
-				} satisfies LucidErrorData);
+					name: translateServer("core.routes.not.found", undefined, {
+						config: props.config,
+						locale: resolveInterfaceLocale({
+							config: props.config,
+							locale: c.req.header(constants.headers.interfaceLocale),
+							acceptLanguage: c.req.header("Accept-Language"),
+						}),
+					}),
+					message: translateServer("core.routes.not.found.message", undefined, {
+						config: props.config,
+						locale: resolveInterfaceLocale({
+							config: props.config,
+							locale: c.req.header(constants.headers.interfaceLocale),
+							acceptLanguage: c.req.header("Accept-Language"),
+						}),
+					}),
+				} satisfies PublicErrorData);
 			}
 			c.status(404);
-			return c.text(T("page_not_found"));
+			return c.text(
+				translateServer("core.pages.not.found", undefined, {
+					config: props.config,
+					locale: resolveInterfaceLocale({
+						config: props.config,
+						locale: c.req.header(constants.headers.interfaceLocale),
+						acceptLanguage: c.req.header("Accept-Language"),
+					}),
+				}),
+			);
 		});
 
 	//* Hono Extensions

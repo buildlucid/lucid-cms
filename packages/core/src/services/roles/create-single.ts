@@ -1,10 +1,10 @@
+import { serverText } from "../../libs/i18n/index.js";
 import { isCorePermission } from "../../libs/permission/registry.js";
 import {
 	RolePermissionsRepository,
 	RolesRepository,
 	RoleTranslationsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { roleServices } from "../index.js";
 import {
@@ -28,7 +28,7 @@ const createSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const defaultRoleLocale = context.config.localization.defaultLocale;
+	const defaultRoleLocale = context.config.i18n.content.defaultLocale;
 
 	const defaultName = getTranslationValue(data.name, defaultRoleLocale);
 	const defaultDescription = getTranslationValue(
@@ -40,12 +40,12 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("validation_error_message"),
+				message: serverText("core.errors.validation.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: T("generic_field_required"),
+						message: serverText("core.fields.validation.required"),
 					},
 				},
 			},
@@ -80,12 +80,12 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("not_unique_error_message"),
+				message: serverText("core.validation.unique.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: T("not_unique_error_message"),
+						message: serverText("core.validation.unique.message"),
 					},
 				},
 			},

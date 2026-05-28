@@ -99,7 +99,7 @@ const generateTypes = async (props: {
 	adapterModule?: string;
 	databaseModule?: string;
 	collections: CollectionBuilder[];
-	localization: Config["localization"];
+	localization: Config["i18n"]["content"];
 }) => {
 	const lucidDir = await ensureLucidDirectoryExists();
 	const configRelativePath = relative(lucidDir, props.configPath);

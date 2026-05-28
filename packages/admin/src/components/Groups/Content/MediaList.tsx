@@ -168,14 +168,14 @@ export const MediaList: Component<{
 	const noEntriesCopy = createMemo(() => {
 		if (props.state.showingDeleted()) {
 			return {
-				title: T()("no_deleted_media"),
-				description: T()("no_deleted_media_description"),
+				title: T()("empty.states.media.deleted.title"),
+				description: T()("empty.states.media.deleted.description"),
 			};
 		}
 		return {
-			title: T()("no_media"),
-			description: T()("no_media_description"),
-			button: T()("upload_media"),
+			title: T()("empty.states.media.title"),
+			description: T()("empty.states.media.description"),
+			button: T()("media.upload.action"),
 		};
 	});
 	const createEntryCallback = createMemo(() => {
@@ -192,15 +192,15 @@ export const MediaList: Component<{
 	const mediaGridNoEntriesCopy = createMemo(() => {
 		if (isTopLevel()) {
 			return {
-				title: T()("no_media"),
-				description: T()("no_media_description"),
-				button: T()("upload_media"),
+				title: T()("empty.states.media.title"),
+				description: T()("empty.states.media.description"),
+				button: T()("media.upload.action"),
 			};
 		}
 		return {
-			title: T()("no_media_in_folder"),
-			description: T()("no_media_in_folder_description"),
-			button: T()("upload_media"),
+			title: T()("empty.states.media.folder.title"),
+			description: T()("empty.states.media.folder.description"),
+			button: T()("media.upload.action"),
 		};
 	});
 	const canRestoreMedia = createMemo(

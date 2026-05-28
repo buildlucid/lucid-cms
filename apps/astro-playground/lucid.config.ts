@@ -51,18 +51,37 @@ export default configureLucid({
 		openAPI: {
 			enabled: true,
 		},
-		localization: {
-			locales: [
-				{
-					label: "English",
-					code: "en",
-				},
-				{
-					label: "French",
-					code: "fr",
-				},
-			],
-			defaultLocale: "en",
+		i18n: {
+			content: {
+				locales: [
+					{
+						label: "English",
+						code: "en",
+						direction: "ltr",
+					},
+					{
+						label: "French",
+						code: "fr",
+						direction: "ltr",
+					},
+				],
+				defaultLocale: "en",
+			},
+			interface: {
+				locales: [
+					{
+						label: "English",
+						code: "en",
+						direction: "ltr",
+					},
+					{
+						label: "French",
+						code: "fr",
+						direction: "ltr",
+					},
+				],
+				defaultLocale: "en",
+			},
 		},
 		media: {
 			limits: {
@@ -97,7 +116,7 @@ export default configureLucid({
 				collections: [
 					{
 						collectionKey: PageCollection.key,
-						translations: true,
+						localized: true,
 						displayFullSlug: true,
 						prefix: {
 							en: "en",
@@ -106,7 +125,7 @@ export default configureLucid({
 					},
 					{
 						collectionKey: TestCollection.key,
-						translations: true,
+						localized: true,
 						displayFullSlug: true,
 					},
 				],

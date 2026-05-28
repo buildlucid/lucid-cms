@@ -14,7 +14,7 @@ import type { ParentPageQueryResponse } from "./get-parent-fields.js";
 const constructParentFullSlug = (data: {
 	collection: CollectionConfig;
 	parentFields: Array<ParentPageQueryResponse>;
-	localization: Config["localization"];
+	localization: Config["i18n"]["content"];
 	fields: {
 		slug: FieldInputSchema;
 	};
@@ -30,7 +30,7 @@ const constructParentFullSlug = (data: {
 		);
 
 	// if translations are enabled/set
-	if (data.collection.translations && data.fields.slug.translations) {
+	if (data.collection.localized && data.fields.slug.translations) {
 		for (let i = 0; i < data.localization.locales.length; i++) {
 			const locale = data.localization.locales[i];
 			if (!locale) continue;

@@ -5,13 +5,13 @@ import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
-import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -49,8 +49,8 @@ const validateInvitationController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: T("default_error_name"),
-					message: T("default_error_message"),
+					name: serverText("core.errors.default.name"),
+					message: serverText("core.errors.default.message"),
 				},
 			},
 		)(context, {

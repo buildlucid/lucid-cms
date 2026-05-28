@@ -13,9 +13,11 @@ import afterFetchHandler from "./after-fetch-handler.js";
 
 const context = {
 	config: {
-		localization: {
-			defaultLocale: "en",
-			locales: [{ code: "en" }],
+		i18n: {
+			content: {
+				defaultLocale: "en",
+				locales: [{ code: "en" }],
+			},
 		},
 	},
 } as never;
@@ -24,7 +26,7 @@ const options = {
 	collections: [
 		{
 			collectionKey: "pages",
-			translations: false,
+			localized: false,
 			displayFullSlug: true,
 		},
 	],

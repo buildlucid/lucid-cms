@@ -59,7 +59,7 @@ const serveCommand = async () => {
 			adapterModule: configRes.definition.adapter.module,
 			databaseModule: configRes.definition.database.module,
 			collections: configRes.config.collections,
-			localization: configRes.config.localization,
+			localization: configRes.config.i18n.content,
 		});
 
 		if (!envValid) {
@@ -81,7 +81,9 @@ const serveCommand = async () => {
 
 		const viteBuildRes = await vite.buildApp(configRes.config);
 		if (viteBuildRes.error) {
-			cliLogger.error(viteBuildRes.error.message ?? "Failed to build app");
+			cliLogger.error(
+				viteBuildRes.error.message?.default ?? "Failed to build app",
+			);
 			process.exit(1);
 		}
 
@@ -97,13 +99,15 @@ const serveCommand = async () => {
 		]);
 		if (mjmlTemplatesRes.error) {
 			cliLogger.error(
-				mjmlTemplatesRes.error.message ?? "Failed to pre-render MJML templates",
+				mjmlTemplatesRes.error.message?.default ??
+					"Failed to pre-render MJML templates",
 			);
 			process.exit(1);
 		}
 		if (publicAssetsRes.error) {
 			cliLogger.error(
-				publicAssetsRes.error.message ?? "Failed to copy public assets",
+				publicAssetsRes.error.message?.default ??
+					"Failed to copy public assets",
 			);
 			process.exit(1);
 		}

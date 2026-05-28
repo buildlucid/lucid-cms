@@ -97,13 +97,13 @@ const Toolbar: Component<{
 		to: number;
 	} | null>(null);
 	const headingOptions = createMemo<HeadingOption[]>(() => [
-		{ value: 0, label: T()("rich_text_normal") },
-		{ value: 1, label: T()("rich_text_heading_1") },
-		{ value: 2, label: T()("rich_text_heading_2") },
-		{ value: 3, label: T()("rich_text_heading_3") },
-		{ value: 4, label: T()("rich_text_heading_4") },
-		{ value: 5, label: T()("rich_text_heading_5") },
-		{ value: 6, label: T()("rich_text_heading_6") },
+		{ value: 0, label: T()("editor.rich.text.blocks.normal") },
+		{ value: 1, label: T()("editor.rich.text.headings.1") },
+		{ value: 2, label: T()("editor.rich.text.headings.2") },
+		{ value: 3, label: T()("editor.rich.text.headings.3") },
+		{ value: 4, label: T()("editor.rich.text.headings.4") },
+		{ value: 5, label: T()("editor.rich.text.headings.5") },
+		{ value: 6, label: T()("editor.rich.text.headings.6") },
 	]);
 
 	let pillRef: HTMLDivElement | undefined;

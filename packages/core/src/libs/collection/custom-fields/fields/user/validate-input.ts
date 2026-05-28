@@ -1,6 +1,6 @@
 import constants from "../../../../../constants/constants.js";
-import T from "../../../../../translations/index.js";
 import type { ServiceContext } from "../../../../../types.js";
+import { translateServer } from "../../../../i18n/index.js";
 import logger from "../../../../logger/index.js";
 import { UsersRepository } from "../../../../repositories/index.js";
 import type { FieldRelationValidationInput } from "../../types.js";
@@ -37,7 +37,7 @@ const validateUserInputData = async (
 	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
-			message: T("error_fetching_users_for_validation"),
+			message: translateServer("core.users.validation.fetch.failed"),
 		});
 		return [];
 	}

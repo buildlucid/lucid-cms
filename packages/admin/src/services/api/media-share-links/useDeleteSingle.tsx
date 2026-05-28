@@ -28,8 +28,8 @@ const useDeleteSingle = (props?: UseDeleteSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, undefined>({
 		mutationFn: deleteSingleReq,
 		getSuccessToast: () => ({
-			title: T()("media_share_link_delete_toast_title"),
-			message: T()("media_share_link_delete_toast_message"),
+			title: T()("toasts.media.share.link.delete.title"),
+			message: T()("toasts.media.share.link.delete.message"),
 		}),
 		invalidates: ["mediaShareLinks.getMultiple"],
 		onSuccess: props?.onSuccess,

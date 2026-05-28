@@ -169,7 +169,7 @@ describe("groupDocumentFilters", () => {
 					primary: true,
 				},
 				{
-					name: "document_id",
+					name: "_document_id",
 					source: "core",
 					type: "integer",
 					nullable: false,
@@ -207,7 +207,7 @@ describe("groupDocumentFilters", () => {
 					primary: true,
 				},
 				{
-					name: "document_id",
+					name: "_document_id",
 					source: "core",
 					type: "integer",
 					nullable: false,
@@ -239,7 +239,7 @@ describe("groupDocumentFilters", () => {
 					primary: true,
 				},
 				{
-					name: "document_id",
+					name: "_document_id",
 					source: "core",
 					type: "integer",
 					nullable: false,
@@ -278,7 +278,7 @@ describe("groupDocumentFilters", () => {
 					primary: true,
 				},
 				{
-					name: "document_id",
+					name: "_document_id",
 					source: "core",
 					type: "integer",
 					nullable: false,

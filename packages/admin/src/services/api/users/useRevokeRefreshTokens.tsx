@@ -29,8 +29,8 @@ const useRevokeRefreshTokens = (props?: UseRevokeRefreshTokensProps) => {
 	>({
 		mutationFn: revokeRefreshTokensReq,
 		getSuccessToast: () => ({
-			title: T()("user_revoke_sessions_toast_title"),
-			message: T()("user_revoke_sessions_toast_message"),
+			title: T()("toasts.users.revoke.sessions.title"),
+			message: T()("toasts.users.revoke.sessions.message"),
 		}),
 		invalidates: [
 			"users.getMultiple",

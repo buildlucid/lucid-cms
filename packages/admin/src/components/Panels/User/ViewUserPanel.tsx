@@ -59,7 +59,7 @@ const ViewUserPanel: Component<{
 				padding: "24",
 			}}
 			copy={{
-				title: T()("view_user_panel_title"),
+				title: T()("panels.users.view.title"),
 			}}
 		>
 			{() => (
@@ -129,8 +129,8 @@ const ViewUserPanelContent: Component<{
 			return {
 				label: provider.name,
 				value: formattedDate
-					? T()("linked_on", { date: formattedDate })
-					: T()("linked"),
+					? T()("common.linked.on", { date: formattedDate })
+					: T()("common.status.linked"),
 			};
 		});
 	});
@@ -149,8 +149,8 @@ const ViewUserPanelContent: Component<{
 			/>
 			<PanelTabs
 				items={[
-					{ value: "details", label: T()("details") },
-					{ value: "meta", label: T()("meta") },
+					{ value: "details", label: T()("common.details") },
+					{ value: "meta", label: T()("common.meta") },
 				]}
 				active={activeTab()}
 				onChange={setActiveTab}
@@ -160,44 +160,46 @@ const ViewUserPanelContent: Component<{
 					type="text"
 					items={[
 						{
-							label: T()("username"),
+							label: T()("common.username"),
 							value: props.state.user?.username || "-",
 						},
 						{
-							label: T()("email"),
+							label: T()("common.email"),
 							value: props.state.user?.email || "-",
 						},
 						{
-							label: T()("first_name"),
+							label: T()("common.first.name"),
 							value: props.state.user?.firstName || "-",
 						},
 						{
-							label: T()("last_name"),
+							label: T()("common.last.name"),
 							value: props.state.user?.lastName || "-",
 						},
 						{
-							label: T()("user_type"),
+							label: T()("users.type"),
 							value: props.state.user?.superAdmin
-								? T()("super_admin")
-								: T()("standard"),
+								? T()("users.super.admin.title")
+								: T()("common.standard"),
 							show: props.state.user?.superAdmin !== undefined,
 						},
 						{
-							label: T()("roles"),
+							label: T()("common.roles"),
 							value: userRoles(),
 							show:
 								props.state.user?.roles !== undefined &&
 								props.state.user?.roles.length > 0,
 						},
 						{
-							label: T()("is_locked"),
-							value: props.state.user?.isLocked ? T()("yes") : T()("no"),
+							label: T()("users.status.locked.label"),
+							value: props.state.user?.isLocked
+								? T()("common.yes")
+								: T()("common.no"),
 							show: props.state.user?.isLocked !== undefined,
 						},
 					]}
 				/>
 				<Show when={authProviderItems().length > 0}>
-					<SectionHeading title={T()("auth_providers")} />
+					<SectionHeading title={T()("account.auth.providers.title")} />
 					<DetailsList type="text" items={authProviderItems()} />
 				</Show>
 			</Show>
@@ -206,13 +208,13 @@ const ViewUserPanelContent: Component<{
 					type="text"
 					items={[
 						{
-							label: T()("created_at"),
+							label: T()("common.created.at"),
 							value: props.state.user?.createdAt
 								? dateHelpers.formatDate(props.state.user?.createdAt)
 								: "-",
 						},
 						{
-							label: T()("updated_at"),
+							label: T()("common.updated.at"),
 							value: props.state.user?.updatedAt
 								? dateHelpers.formatDate(props.state.user?.updatedAt)
 								: "-",

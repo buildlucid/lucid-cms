@@ -41,7 +41,7 @@ const generateToken = async (
 
 		const { permissions } = userPermissionsFormatter.formatMultiple({
 			roles: userRes.data.roles || [],
-			defaultLocale: config.localization.defaultLocale,
+			defaultLocale: config.i18n.content.defaultLocale,
 		});
 
 		const token = await sign(

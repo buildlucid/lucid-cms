@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
-import type { Component } from "solid-js";
+import { type Component, onMount } from "solid-js";
 import { Toaster } from "solid-toast";
 import Router from "@/Router";
+import { initAdminTranslations } from "@/translations";
 import { LucidError } from "./utils/error-handling";
 import "solid-devtools";
 
@@ -26,6 +27,14 @@ const App: Component = () => {
 		},
 	});
 
+	// ---------------------------------
+	// Effects
+	onMount(() => {
+		void initAdminTranslations();
+	});
+
+	// ---------------------------------
+	// Render
 	return (
 		<QueryClientProvider client={queryClient}>
 			<Toaster

@@ -1,5 +1,5 @@
-import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import { serverText } from "../../i18n/index.js";
 import { CollectionMigrationsRepository } from "../../repositories/index.js";
 
 const getCurrentCollectionMigrationId: ServiceFn<[string], number> = async (
@@ -21,8 +21,8 @@ const getCurrentCollectionMigrationId: ServiceFn<[string], number> = async (
 			data: undefined,
 			error: {
 				type: "basic",
-				name: T("error_schema_migration_required_name"),
-				message: T("error_schema_migration_required_message"),
+				name: serverText("core.error.schema.migration.required.name"),
+				message: serverText("core.error.schema.migration.required.message"),
 				status: 400,
 			},
 		};

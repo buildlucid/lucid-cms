@@ -18,8 +18,8 @@ const CollectionsListRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("collection_route_title"),
-							description: T()("collection_route_description"),
+							title: T()("routes.collections.detail.title"),
+							description: T()("routes.collections.detail.description"),
 						}}
 					/>
 				),

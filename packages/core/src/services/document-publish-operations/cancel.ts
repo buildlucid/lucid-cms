@@ -1,8 +1,8 @@
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
@@ -53,7 +53,7 @@ const cancel: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_not_pending"),
+				message: serverText("core.publish.requests.not.pending"),
 				status: 400,
 			},
 			data: undefined,
@@ -81,10 +81,12 @@ const cancel: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_permission_error_message", {
-					collection: operationRes.data.collection_key,
-					action: requiredAction,
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: operationRes.data.collection_key,
+						action: requiredAction,
+					},
 				}),
 				status: 403,
 			},
@@ -157,10 +159,12 @@ const cancel: ServiceFn<
 		collectionKey: operationRes.data.collection_key,
 		documentId: operationRes.data.document_id,
 		recipients,
-		title: T("publish_request_cancelled_title"),
-		message: T("publish_request_cancelled_message", {
-			collection: operationRes.data.collection_key,
-			documentId: operationRes.data.document_id,
+		title: serverText("core.publish.requests.cancelled.title"),
+		message: serverText("core.publish.requests.cancelled.message", {
+			data: {
+				collection: operationRes.data.collection_key,
+				documentId: operationRes.data.document_id,
+			},
 		}),
 		dedupeAction: "cancelled",
 	});

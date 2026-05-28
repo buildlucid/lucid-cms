@@ -1,6 +1,6 @@
 import { getCookie } from "hono/cookie";
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
@@ -15,7 +15,7 @@ const verifyToken = (
 			error: {
 				type: "forbidden",
 				code: "csrf",
-				message: T("failed_to_validate_csrf_token"),
+				message: serverText("core.security.csrf.validation.failed"),
 			},
 			data: undefined,
 		};
@@ -25,7 +25,7 @@ const verifyToken = (
 			error: {
 				type: "forbidden",
 				code: "csrf",
-				message: T("failed_to_validate_csrf_token"),
+				message: serverText("core.security.csrf.validation.failed"),
 			},
 			data: undefined,
 		};

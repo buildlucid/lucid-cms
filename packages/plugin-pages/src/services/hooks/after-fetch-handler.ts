@@ -142,7 +142,7 @@ const afterFetchHandler =
 
 			if (parentPageId !== null) {
 				const parentFieldsRes = await getParentFields(context, {
-					defaultLocale: context.config.localization.defaultLocale,
+					defaultLocale: context.config.i18n.content.defaultLocale,
 					versionType: data.data.relationVersionType,
 					collectionKey: targetCollectionRes.data.collectionKey,
 					fields: {
@@ -158,7 +158,7 @@ const afterFetchHandler =
 
 			const fullSlugRes = constructParentFullSlug({
 				parentFields: parentFieldsData,
-				localization: context.config.localization,
+				localization: context.config.i18n.content,
 				collection: targetCollectionRes.data,
 				fields: {
 					slug,
@@ -170,7 +170,7 @@ const afterFetchHandler =
 				updateFullSlugField({
 					document,
 					fullSlug: fullSlugRes.data,
-					defaultLocale: context.config.localization.defaultLocale,
+					defaultLocale: context.config.i18n.content.defaultLocale,
 				}),
 			);
 		}

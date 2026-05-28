@@ -1,9 +1,9 @@
 import { usersFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { User } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
@@ -41,7 +41,7 @@ const getAuthenticatedUser: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: T("user_not_found_message"),
+					message: serverText("core.user.not.found.message"),
 					status: 404,
 				},
 			},
@@ -59,8 +59,8 @@ const getAuthenticatedUser: ServiceFn<
 			user: userRes.data,
 			authUser: data.authUser,
 			host: getBaseUrl(context),
-			locales: context.config.localization.locales.map((locale) => locale.code),
-			defaultLocale: context.config.localization.defaultLocale,
+			locales: context.config.i18n.content.locales.map((locale) => locale.code),
+			defaultLocale: context.config.i18n.content.defaultLocale,
 			pendingEmailChange: pendingEmailChangeRes.data
 				? {
 						email: pendingEmailChangeRes.data.new_email,

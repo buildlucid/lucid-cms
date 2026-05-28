@@ -83,7 +83,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 						}}
 						name={"isDeleted"}
 						copy={{
-							label: T()("show_deleted"),
+							label: T()("media.deleted.show"),
 						}}
 						theme="error"
 					/>
@@ -107,7 +107,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 						}}
 					>
 						<FaSolidXmark class="text-error-base group-hover:text-error-hover" />
-						<span>{T()("reset_filters")}</span>
+						<span>{T()("actions.reset.filters")}</span>
 					</button>
 				</Show>
 			</div>
@@ -119,7 +119,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 						type="button"
 						onClick={handleRefresh}
 						disabled={isRefreshing()}
-						aria-label={T()("refresh")}
+						aria-label={T()("common.refresh")}
 					>
 						<FaSolidArrowsRotate
 							size={12}

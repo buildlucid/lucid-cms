@@ -41,8 +41,8 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 		invalidates: ["clientIntegrations.getAll", "clientIntegrations.getSingle"],
 		onSuccess: () => {
 			spawnToast({
-				title: T()("client_integration_update_toast_title"),
-				message: T()("client_integration_update_toast_message"),
+				title: T()("toasts.client.integrations.update.title"),
+				message: T()("toasts.client.integrations.update.message"),
 				status: "success",
 			});
 			props?.onSuccess?.();

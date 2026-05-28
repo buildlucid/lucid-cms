@@ -146,8 +146,8 @@ const CollectionsDocumentsEditRoute: Component<{
 			}
 
 			brickStore.set(
-				"collectionTranslations",
-				collection.config.translations || false,
+				"collectionLocalized",
+				collection.config.localized || false,
 			);
 
 			//* preserve local unsaved edits during same-view background query updates
@@ -235,7 +235,7 @@ const CollectionsDocumentsEditRoute: Component<{
 		const releaseRequest = props.releaseRequest?.();
 		if (!releaseRequest) return undefined;
 
-		return T()("publish_request_detail_route_title", {
+		return T()("routes.publish.requests.detail.title", {
 			id: releaseRequest.id,
 		});
 	});
@@ -307,12 +307,12 @@ const CollectionsDocumentsEditRoute: Component<{
 						alerts={[
 							{
 								type: "warning",
-								message: T()("locked_document_message"),
+								message: T()("documents.locked.message"),
 								show: uiState.isBuilderLocked(),
 							},
 							{
 								type: "warning",
-								message: T()("collection_needs_migrating_message"),
+								message: T()("collections.migrations.required.message"),
 								show: uiState.collectionNeedsMigrating(),
 							},
 						]}

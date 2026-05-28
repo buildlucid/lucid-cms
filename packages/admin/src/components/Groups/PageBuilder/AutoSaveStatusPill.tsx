@@ -43,9 +43,9 @@ export const AutoSaveStatusPill: Component<{
 		);
 	});
 	const autoSaveStatusLabel = createMemo(() => {
-		if (showAutoSaveSavingState()) return T()("saving");
-		if (showAutoSaveSavedState()) return T()("saved");
-		return T()("auto_save");
+		if (showAutoSaveSavingState()) return T()("common.status.saving");
+		if (showAutoSaveSavedState()) return T()("common.status.saved");
+		return T()("builder.auto.save.label");
 	});
 	const isAutoSaveDebouncePending = createMemo(() => {
 		return props.autoSave?.isDebouncePending?.() || false;

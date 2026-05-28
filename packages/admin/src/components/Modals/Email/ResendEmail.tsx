@@ -32,8 +32,8 @@ const ResendEmail: Component<ResendEmailProps> = (props) => {
 				isError: resendEmail.action.isError,
 			}}
 			copy={{
-				title: T()("resend_email_modal_title"),
-				description: T()("resend_email_modal_description"),
+				title: T()("modals.common.resend.email.title"),
+				description: T()("modals.common.resend.email.description"),
 				error: resendEmail.errors()?.message,
 			}}
 			callbacks={{

@@ -64,7 +64,7 @@ const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 				growContent: true,
 			}}
 			copy={{
-				title: T()("select_media_title"),
+				title: T()("media.select.title"),
 			}}
 		>
 			{() => (
@@ -221,53 +221,53 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 					<Filter
 						filters={[
 							{
-								label: T()("title"),
+								label: T()("common.title"),
 								key: "title",
 								type: "text",
 							},
 							{
-								label: T()("mime_type"),
+								label: T()("common.mime.type"),
 								key: "mimeType",
 								type: "text",
 							},
 							{
-								label: T()("key"),
+								label: T()("common.key"),
 								key: "key",
 								type: "text",
 							},
 							{
-								label: T()("type"),
+								label: T()("common.type"),
 								key: "type",
 								type: "multi-select",
 								options: [
 									{
-										label: T()("image"),
+										label: T()("media.types.image"),
 										value: "image",
 									},
 									{
-										label: T()("video"),
+										label: T()("media.types.video"),
 										value: "video",
 									},
 									{
-										label: T()("audio"),
+										label: T()("media.types.audio"),
 										value: "audio",
 									},
 									{
-										label: T()("document"),
+										label: T()("media.types.document"),
 										value: "document",
 									},
 									{
-										label: T()("archive"),
+										label: T()("media.types.archive"),
 										value: "archive",
 									},
 									{
-										label: T()("unknown"),
+										label: T()("media.types.unknown"),
 										value: "unknown",
 									},
 								],
 							},
 							{
-								label: T()("file_extension"),
+								label: T()("common.file.extension"),
 								key: "extension",
 								type: "text",
 							},
@@ -277,35 +277,35 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 					<Sort
 						sorts={[
 							{
-								label: T()("title"),
+								label: T()("common.title"),
 								key: "title",
 							},
 							{
-								label: T()("file_size"),
+								label: T()("common.file.size"),
 								key: "fileSize",
 							},
 							{
-								label: T()("mime_type"),
+								label: T()("common.mime.type"),
 								key: "mimeType",
 							},
 							{
-								label: T()("file_extension"),
+								label: T()("common.file.extension"),
 								key: "extension",
 							},
 							{
-								label: T()("width"),
+								label: T()("common.width"),
 								key: "width",
 							},
 							{
-								label: T()("height"),
+								label: T()("common.height"),
 								key: "height",
 							},
 							{
-								label: T()("created_at"),
+								label: T()("common.created.at"),
 								key: "createdAt",
 							},
 							{
-								label: T()("updated_at"),
+								label: T()("common.updated.at"),
 								key: "updatedAt",
 							},
 						]}
@@ -320,7 +320,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						name={"isDeleted"}
 						theme="secondary"
 						copy={{
-							label: T()("show_deleted"),
+							label: T()("media.deleted.show"),
 						}}
 					/>
 				</div>
@@ -350,8 +350,8 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 				}}
 				copy={{
 					noEntries: {
-						title: T()("no_media"),
-						description: T()("no_media_description"),
+						title: T()("empty.states.media.title"),
+						description: T()("empty.states.media.description"),
 					},
 				}}
 			>

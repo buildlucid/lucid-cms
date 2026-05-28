@@ -49,7 +49,9 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 				revertConfigDelete();
 			}}
 			aria-label={
-				getConfirmRemove() === 1 ? T()("confirm_delete") : T()("delete")
+				getConfirmRemove() === 1
+					? T()("common.confirmations.delete")
+					: T()("common.delete")
 			}
 			disabled={props.disabled}
 		>

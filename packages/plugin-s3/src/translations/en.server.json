@@ -1,0 +1,13 @@
+{
+	"plugin.s3.objects.body.missing": "The object get request Body is undefined.",
+	"plugin.s3.objects.metadata.missing": "An error occurred while fetching the object metadata.",
+	"plugin.s3.objects.metadata.fetch.failed": "Get metadata failed with status {{status}} and message {{statusText}}.",
+	"plugin.s3.errors.unknown": "An unknown error occurred",
+	"plugin.s3.objects.delete.multiple.failed": "Delete multiple failed with status {{status}} and message {{statusText}}.",
+	"plugin.s3.objects.delete.single.failed": "Delete single failed with status {{status}} and message {{statusText}}.",
+	"plugin.s3.objects.stream.failed": "Stream failed with status {{status}} and message {{statusText}}.",
+	"plugin.s3.objects.upload.failed": "Upload failed with status {{status}} and message {{statusText}}.",
+	"plugin.s3.upload.sessions.upload.id.missing": "The storage provider did not return an upload ID.",
+	"plugin.s3.objects.copy.failed": "Copy failed with status {{status}} and message {{statusText}}.",
+	"plugin.s3.objects.delete.failed": "Delete failed with status {{status}} and message {{statusText}}."
+}

@@ -48,9 +48,11 @@ export const SimplifiedPagination: Component<{
 		<div class="flex flex-col items-start gap-4">
 			<span class="text-sm text-body md:mb-0">
 				<Switch>
-					<Match when={textData().total === 0}>{T()("pagination_empty")}</Match>
+					<Match when={textData().total === 0}>
+						{T()("empty.states.pagination")}
+					</Match>
 					<Match when={textData().total > 0}>
-						{T()("pagination_text", {
+						{T()("pagination.summary", {
 							page: textData().page,
 							lastPage: textData().lastPage,
 							total: textData().total,
@@ -66,7 +68,7 @@ export const SimplifiedPagination: Component<{
 						disabled={page() === 1}
 						type="button"
 					>
-						<span class="sr-only">{T()("pagination_previous")}</span>
+						<span class="sr-only">{T()("pagination.previous")}</span>
 						<FaSolidChevronLeft />
 					</button>
 					<button
@@ -75,7 +77,7 @@ export const SimplifiedPagination: Component<{
 						disabled={page() === lastPage()}
 						type="button"
 					>
-						<span class="sr-only">{T()("pagination_next")}</span>
+						<span class="sr-only">{T()("pagination.next")}</span>
 						<FaSolidChevronRight />
 					</button>
 				</div>

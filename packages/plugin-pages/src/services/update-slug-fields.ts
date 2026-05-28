@@ -1,4 +1,4 @@
-import { prefixGeneratedColName } from "@lucidcms/core/plugin";
+import { prefixGeneratedColName, serverText } from "@lucidcms/core/plugin";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
@@ -6,7 +6,6 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
-import T from "../translations/index.js";
 import normalizePathValue from "../utils/normalize-path-value.js";
 
 /**
@@ -69,7 +68,7 @@ const updateSlugFields: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: T("an_unknown_error_occurred_updating_fullslug_fields"),
+				message: serverText("plugin.pages.full.slug.children.update.failed"),
 			},
 			data: undefined,
 		};

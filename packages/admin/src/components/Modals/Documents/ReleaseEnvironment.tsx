@@ -55,11 +55,11 @@ const ReleaseEnvironment: Component<{
 	const releaseTimingOptions = createMemo(() => [
 		{
 			value: "now",
-			label: T()("release_environment_publish_confirm"),
+			label: T()("documents.release.environment.publish.confirm"),
 		},
 		{
 			value: "scheduled",
-			label: T()("schedule_release"),
+			label: T()("documents.release.schedule.action"),
 		},
 	]);
 
@@ -93,16 +93,16 @@ const ReleaseEnvironment: Component<{
 				isError: !!error(),
 			}}
 			copy={{
-				title: T()("release_environment_modal_title", {
+				title: T()("modals.release.environment.title", {
 					environment: props.environmentLabel() ?? "",
 				}),
-				description: T()("release_environment_modal_description", {
+				description: T()("modals.release.environment.description", {
 					environment: props.environmentLabel() ?? "",
 				}),
 				error: error(),
 				confirm: scheduleSelected()
-					? T()("release_environment_schedule_confirm")
-					: T()("release_environment_publish_confirm"),
+					? T()("documents.release.environment.schedule.confirm")
+					: T()("documents.release.environment.publish.confirm"),
 			}}
 			callbacks={{
 				onConfirm: async () => {
@@ -115,7 +115,9 @@ const ReleaseEnvironment: Component<{
 							timezone: scheduleTimezone(),
 						});
 						if (!scheduledAt) {
-							setValidationError(T()("schedule_release_required"));
+							setValidationError(
+								T()("documents.release.schedule.validation.required"),
+							);
 							return;
 						}
 						await props.callbacks.onConfirm(
@@ -143,7 +145,7 @@ const ReleaseEnvironment: Component<{
 						}}
 						options={releaseTimingOptions()}
 						copy={{
-							label: T()("release_timing"),
+							label: T()("documents.release.timing"),
 						}}
 						noClear={true}
 						hideOptionalText={true}

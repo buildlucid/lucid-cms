@@ -56,7 +56,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 					return {
 						label: helpers.getLocaleValue({
 							value: o.label,
-							fallback: T()("option_label", {
+							fallback: T()("fields.options.label", {
 								count: i,
 							}),
 						}),

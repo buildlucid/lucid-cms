@@ -32,8 +32,8 @@ const ReleaseRequestTitleCol: Component<{
 						})}
 						title={
 							props.request.isOutdated
-								? T()("snapshot_outdated")
-								: T()("in_sync")
+								? T()("publish.requests.snapshot.outdated")
+								: T()("common.status.in.sync")
 						}
 					/>
 					<span class="truncate text-sm font-normal text-title">
@@ -51,7 +51,7 @@ const ReleaseRequestTitleCol: Component<{
 						<span class="text-border">/</span>
 					</Show>
 					<span class="truncate text-xs text-body">
-						{T()("release_request")} #{props.request.id}
+						{T()("documents.release.request")} #{props.request.id}
 					</span>
 					<span class="text-border">/</span>
 					<span class="rounded border border-border bg-input-base px-1.5 py-0.5 text-[11px] leading-none text-body">

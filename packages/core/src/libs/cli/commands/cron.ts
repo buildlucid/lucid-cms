@@ -1,8 +1,8 @@
 import { select } from "@inquirer/prompts";
-import T from "../../../translations/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import { serverText } from "../../i18n/index.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
@@ -86,7 +86,7 @@ const cronCommand = async (jobName?: string) => {
 				logError: true,
 				defaultError: {
 					type: "cron",
-					name: T("cron_job_error_name"),
+					name: serverText("core.cron.job.error.name"),
 					message: job.error,
 				},
 			})({
@@ -95,7 +95,10 @@ const cronCommand = async (jobName?: string) => {
 				env: configRes.env ?? null,
 				queue: queue,
 				kv: kvInstance,
-				request: { url: configRes.config.baseUrl ?? "" },
+				request: {
+					url: configRes.config.baseUrl ?? "",
+					locale: configRes.config.i18n.interface.defaultLocale,
+				},
 			});
 
 			if (!result.error) {
@@ -103,7 +106,7 @@ const cronCommand = async (jobName?: string) => {
 				break;
 			}
 
-			lastError = result.error.message ?? "Unknown error";
+			lastError = result.error.message?.default ?? "Unknown error";
 
 			if (attempt < maxRetries) {
 				cliLogger.warn(

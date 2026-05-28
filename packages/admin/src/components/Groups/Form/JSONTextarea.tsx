@@ -52,7 +52,11 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 			return {
 				key: props.name,
 				localeCode: null,
-				message: `${local}. ${T()("json_invalid_save_warning")}.`,
+				message: {
+					type: "server-text",
+					key: "admin.fields.json.invalid",
+					default: `${local}. ${T()("fields.json.invalid.save.warning")}.`,
+				},
 			} satisfies FieldError;
 		}
 		return props.errors;

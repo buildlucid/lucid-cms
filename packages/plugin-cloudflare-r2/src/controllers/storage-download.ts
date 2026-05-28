@@ -5,6 +5,7 @@ import {
 	honoOpenAPIResponse,
 	LucidAPIError,
 	rateLimiterMiddleware as rateLimiter,
+	serverText,
 	serviceWrapper,
 	validateMiddleware as validate,
 } from "@lucidcms/core/plugin";
@@ -17,7 +18,6 @@ import {
 } from "../constants.js";
 import { controllerSchemas } from "../schema/storage.js";
 import storageDownload from "../services/storage-download.js";
-import T from "../translations/index.js";
 import type { PluginOptions } from "../types.js";
 import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 
@@ -52,8 +52,12 @@ const storageDownloadController = (pluginOptions: PluginOptions) =>
 					transaction: false,
 					defaultError: {
 						type: "basic",
-						name: T("route_storage_download_error_name"),
-						message: T("route_storage_download_error_message"),
+						name: serverText(
+							"plugin.cloudflare.r2.routes.storage.download.error.name",
+						),
+						message: serverText(
+							"plugin.cloudflare.r2.routes.storage.download.error.message",
+						),
 					},
 				},
 			)(context, {
@@ -68,7 +72,9 @@ const storageDownloadController = (pluginOptions: PluginOptions) =>
 				throw new LucidAPIError({
 					type: "basic",
 					status: 500,
-					message: T("route_storage_download_error_message"),
+					message: serverText(
+						"plugin.cloudflare.r2.routes.storage.download.error.message",
+					),
 				});
 			}
 

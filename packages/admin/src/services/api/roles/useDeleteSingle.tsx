@@ -28,8 +28,8 @@ const useDeleteSingle = (props: UseDeleteProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Role>>({
 		mutationFn: deleteSingleReq,
 		getSuccessToast: () => ({
-			title: T()("role_deleted_toast_title"),
-			message: T()("role_deleted_toast_message"),
+			title: T()("toasts.roles.deleted.title"),
+			message: T()("toasts.roles.deleted.message"),
 		}),
 		invalidates: ["roles.getMultiple", "roles.getSingle"],
 		onSuccess: props.onSuccess,

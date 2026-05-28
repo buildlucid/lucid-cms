@@ -129,18 +129,18 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 
 	const panelTitle = createMemo(() => {
 		if (props.viewOnly) {
-			return T()("view_role_panel_title", {
+			return T()("panels.roles.view.title", {
 				name: roleDisplayName(),
 			});
 		}
-		if (props.id === undefined) return T()("create_role_panel_title");
-		return T()("update_role_panel_title", {
+		if (props.id === undefined) return T()("panels.roles.create.title");
+		return T()("panels.roles.update.title", {
 			name: roleDisplayName(),
 		});
 	});
 	const panelSubmit = createMemo(() => {
-		if (props.id === undefined) return T()("create");
-		return T()("update");
+		if (props.id === undefined) return T()("common.create");
+		return T()("common.update");
 	});
 	const isLocked = createMemo(() => role.data?.data.locked === true);
 	const isReadOnly = createMemo(() => props.viewOnly === true || isLocked());
@@ -235,7 +235,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 			copy={{
 				title: panelTitle(),
 				description: isLocked()
-					? T()("config_managed_role_description")
+					? T()("roles.config.managed.description")
 					: undefined,
 				descriptionIcon: isLocked() ? (
 					<FaSolidTriangleExclamation size="14" />
@@ -270,7 +270,7 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 								}}
 								disabled={isReadOnly()}
 								copy={{
-									label: T()("name"),
+									label: T()("common.name"),
 								}}
 								required={true}
 								errors={getBodyError("name", errors)}
@@ -291,14 +291,14 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 							}}
 							disabled={isReadOnly()}
 							copy={{
-								label: T()("description"),
+								label: T()("common.description"),
 							}}
 							errors={getBodyError("description", errors)}
 							rows={4}
 						/>
 						<div class="w-full mb-5 last:mb-0">
 							<div class="mb-1.5">
-								<h3 class="text-sm text-body">{T()("permissions")}</h3>
+								<h3 class="text-sm text-body">{T()("common.permissions")}</h3>
 							</div>
 							<div class="w-full">
 								<For each={permissions?.data?.data}>
@@ -349,8 +349,8 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 														{option.permissions.every((permission) =>
 															selectedPermissions().includes(permission.key),
 														)
-															? T()("clear")
-															: T()("select_all")}
+															? T()("common.clear")
+															: T()("selectors.all")}
 													</button>
 												</Show>
 											</div>

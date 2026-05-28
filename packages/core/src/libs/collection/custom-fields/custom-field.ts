@@ -1,9 +1,9 @@
-import T from "../../../translations/index.js";
 import type {
 	LucidBricksTable,
 	Select,
 	ServiceResponse,
 } from "../../../types.js";
+import { serverText } from "../../i18n/index.js";
 import buildSchemaIndex from "../helpers/build-schema-index.js";
 import prefixGeneratedColName from "../helpers/prefix-generated-column-name.js";
 import type {
@@ -84,9 +84,9 @@ abstract class CustomField<T extends FieldTypes> {
 		return value;
 	}
 	/** Whether this field should be processed with localization translations. */
-	get translationsEnabled(): boolean {
+	get localizedEnabled(): boolean {
 		if (!hasRuntimeConfig(this.config)) return false;
-		return this.config.config.translations ?? false;
+		return this.config.config.localized ?? false;
 	}
 	/** Default fallback value used while normalizing missing field input. */
 	get defaultValue(): unknown {
@@ -106,18 +106,20 @@ abstract class CustomField<T extends FieldTypes> {
 		return {
 			fieldType: {
 				condition: (value: unknown) => value !== this.type,
-				message: T("field_type_mismatch", {
-					received: "unknown",
-					expected: this.config.type,
+				message: serverText("core.fields.validation.type.mismatch", {
+					data: {
+						received: "unknown",
+						expected: this.config.type,
+					},
 				}),
 			},
 			required: {
 				condition: (value: unknown) =>
 					value === undefined || value === null || value === "",
-				message: T("generic_field_required"),
+				message: serverText("core.fields.validation.required"),
 			},
 			zod: {
-				message: T("generic_field_invalid"),
+				message: serverText("core.fields.validation.invalid"),
 			},
 		};
 	}
@@ -214,10 +216,7 @@ abstract class CustomField<T extends FieldTypes> {
 	abstract uniqueValidation(
 		value: unknown,
 		refData?: unknown,
-	): {
-		valid: boolean;
-		message?: string;
-	};
+	): CustomFieldValidateResponse;
 	/** Runs shared validation and then delegates to `uniqueValidation`. */
 	public validate(props: {
 		type: FieldTypes;
@@ -252,9 +251,11 @@ abstract class CustomField<T extends FieldTypes> {
 		if (this.errors.fieldType.condition?.(type)) {
 			return {
 				valid: false,
-				message: T("field_type_mismatch", {
-					received: type,
-					expected: this.config.type,
+				message: serverText("core.fields.validation.type.mismatch", {
+					data: {
+						received: type,
+						expected: this.config.type,
+					},
 				}),
 			};
 		}

@@ -92,8 +92,8 @@ export const DynamicContent: Component<{
 							<Show when={props.state?.searchParams?.hasFiltersApplied()}>
 								<ErrorBlock
 									content={{
-										title: T()("no_results"),
-										description: T()("no_results_message"),
+										title: T()("empty.states.results.title"),
+										description: T()("empty.states.results.description"),
 									}}
 								>
 									<Button
@@ -104,7 +104,7 @@ export const DynamicContent: Component<{
 											props.state?.searchParams?.resetFilters();
 										}}
 									>
-										{T()("reset_filters")}
+										{T()("actions.reset.filters")}
 									</Button>
 								</ErrorBlock>
 							</Show>
@@ -119,8 +119,8 @@ export const DynamicContent: Component<{
 						<ErrorBlock
 							content={{
 								image: noPermission,
-								title: T()("no_permission"),
-								description: T()("no_permission_description"),
+								title: T()("permissions.denied.title"),
+								description: T()("permissions.denied.description"),
 							}}
 						/>
 					</Match>

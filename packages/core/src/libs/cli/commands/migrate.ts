@@ -69,7 +69,10 @@ const migrateCommand = (props?: {
 					queue: queue,
 					env: null,
 					kv: passthroughKVAdapter(),
-					request: { url: config.baseUrl ?? "" },
+					request: {
+						url: config.baseUrl ?? "",
+						locale: config.i18n.interface.defaultLocale,
+					},
 				},
 				{
 					dryRun: true,
@@ -207,12 +210,15 @@ const migrateCommand = (props?: {
 					queue: queue,
 					env: null,
 					kv: kvInstance,
-					request: { url: config.baseUrl ?? "" },
+					request: {
+						url: config.baseUrl ?? "",
+						locale: config.i18n.interface.defaultLocale,
+					},
 				});
 				if (preCollectionSyncResult.error) {
 					cliLogger.error(
 						"Sync failed during pre-migration collection sync, with error:",
-						preCollectionSyncResult.error.message || "unknown",
+						preCollectionSyncResult.error.message?.default || "unknown",
 					);
 					if (mode === "process") {
 						await cleanupKV();
@@ -236,7 +242,10 @@ const migrateCommand = (props?: {
 							queue: queue,
 							env: null,
 							kv: kvInstance,
-							request: { url: config.baseUrl ?? "" },
+							request: {
+								url: config.baseUrl ?? "",
+								locale: config.i18n.interface.defaultLocale,
+							},
 						},
 						{ dryRun: false },
 					);
@@ -244,8 +253,8 @@ const migrateCommand = (props?: {
 					if (result.error) {
 						cliLogger.error(
 							"Migration failed on step collection migrations",
-							result.error.message ? "with error:" : "",
-							result.error.message || "",
+							result.error.message?.default ? "with error:" : "",
+							result.error.message?.default || "",
 						);
 						if (mode === "process") {
 							await cleanupKV();

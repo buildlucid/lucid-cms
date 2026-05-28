@@ -1,4 +1,4 @@
-import { CollectionBuilder, z } from "@lucidcms/core";
+import { adminText, CollectionBuilder, z } from "@lucidcms/core";
 import BannerBrick from "../bricks/banner.js";
 import IntroBrick from "../bricks/intro.js";
 import SEOBrick from "../bricks/seo.js";
@@ -7,28 +7,30 @@ import TestingBrick from "../bricks/testing.js";
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: "Pages",
-		singularName: {
-			en: "Page",
-		},
-		summary: "Manage the pages and content on your website.",
+		name: adminText("collections.page.name", { fallback: "Pages" }),
+		singularName: adminText("collections.page.singularName", {
+			fallback: "Page",
+		}),
+		summary: adminText("collections.page.summary", {
+			fallback: "Manage the pages and content on your website.",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 		revisions: true,
 		autoSave: true,
 		environments: [
 			{
 				key: "staging",
-				name: {
-					en: "Staging",
-				},
+				name: adminText("collections.page.environments.staging.name", {
+					fallback: "Staging",
+				}),
 			},
 			{
 				key: "production",
-				name: {
-					en: "Production",
-				},
+				name: adminText("collections.page.environments.production.name", {
+					fallback: "Production",
+				}),
 			},
 		],
 	},
@@ -85,10 +87,12 @@ const PageCollection = new CollectionBuilder("page", {
 })
 	.addText("page_title", {
 		details: {
-			label: {
-				en: "Page title",
-			},
-			summary: "The title of the page.",
+			label: adminText("collections.page.fields.page_title.label", {
+				fallback: "Page title",
+			}),
+			summary: adminText("collections.page.fields.page_title.summary", {
+				fallback: "The title of the page.",
+			}),
 		},
 		config: {
 			hidden: false,

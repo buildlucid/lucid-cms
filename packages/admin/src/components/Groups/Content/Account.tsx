@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import type { SupportedLocales, User } from "@types";
+import type { User } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -129,8 +129,8 @@ export const Account: Component = () => {
 			return;
 		}
 
-		const title = errorName ?? T()("error_title");
-		const message = errorMessage ?? T()("error_message");
+		const title = errorName ?? T()("errors.generic.title");
+		const message = errorMessage ?? T()("errors.generic.message");
 
 		spawnToast({
 			title,
@@ -158,8 +158,8 @@ export const Account: Component = () => {
 		>
 			{/* Profile Picture */}
 			<InfoRow.Root
-				title={T()("profile_picture")}
-				description={T()("profile_picture_description")}
+				title={T()("account.profile.picture.title")}
+				description={T()("account.profile.picture.description")}
 			>
 				<ProfilePicturePreviewCard
 					user={{
@@ -177,8 +177,8 @@ export const Account: Component = () => {
 			</InfoRow.Root>
 			{/* Account Details */}
 			<InfoRow.Root
-				title={T()("account_details")}
-				description={T()("account_details_description")}
+				title={T()("account.details.title")}
+				description={T()("account.details.description")}
 			>
 				<InfoRow.Content>
 					<UpdateAccountForm
@@ -192,13 +192,13 @@ export const Account: Component = () => {
 			</InfoRow.Root>
 			{/* Security */}
 			<InfoRow.Root
-				title={T()("security")}
-				description={T()("account_security_description")}
+				title={T()("common.security")}
+				description={T()("account.security.description")}
 			>
 				<Show when={passwordAuthEnabled() && userHasPassword()}>
 					<InfoRow.Content
-						title={T()("password")}
-						description={T()("account_password_description")}
+						title={T()("common.password")}
+						description={T()("account.password.description")}
 						actions={
 							<Button
 								theme="border-outline"
@@ -206,7 +206,7 @@ export const Account: Component = () => {
 								type="button"
 								onClick={() => setPasswordModalOpen(true)}
 							>
-								{T()("reset_password")}
+								{T()("actions.reset.password")}
 							</Button>
 						}
 						actionAlignment="center"
@@ -214,8 +214,8 @@ export const Account: Component = () => {
 				</Show>
 				<Show when={passwordAuthEnabled() && !userHasPassword()}>
 					<InfoRow.Content
-						title={T()("password")}
-						description={T()("account_set_password_description")}
+						title={T()("common.password")}
+						description={T()("account.password.set.description")}
 						actions={
 							<Button
 								theme="border-outline"
@@ -227,8 +227,8 @@ export const Account: Component = () => {
 									const email = user()?.email;
 									if (!email) {
 										spawnToast({
-											title: T()("error_title"),
-											message: T()("error_message"),
+											title: T()("errors.generic.title"),
+											message: T()("errors.generic.message"),
 											status: "error",
 										});
 										return;
@@ -236,7 +236,7 @@ export const Account: Component = () => {
 									forgotPassword.action.mutate({ email });
 								}}
 							>
-								{T()("send_password_reset_and_logout")}
+								{T()("account.password.reset.send.and.logout")}
 							</Button>
 						}
 						actionAlignment="center"
@@ -244,8 +244,8 @@ export const Account: Component = () => {
 				</Show>
 				<Show when={providersList().length > 0}>
 					<InfoRow.Content
-						title={T()("auth_providers")}
-						description={T()("account_auth_providers_description")}
+						title={T()("account.auth.providers.title")}
+						description={T()("account.auth.providers.description")}
 					>
 						<div class="flex flex-col gap-3">
 							<For each={providersList()}>
@@ -273,10 +273,10 @@ export const Account: Component = () => {
 																if (!passwordAuthEnabled()) {
 																	spawnToast({
 																		title: T()(
-																			"auth_provider_last_unlink_blocked_toast_title",
+																			"toasts.common.auth.provider.last.unlink.blocked.title",
 																		),
 																		message: T()(
-																			"auth_provider_last_unlink_password_disabled_toast_message",
+																			"toasts.common.auth.provider.last.unlink.password.disabled.message",
 																		),
 																		status: "error",
 																	});
@@ -285,10 +285,10 @@ export const Account: Component = () => {
 																if (!userHasPassword()) {
 																	spawnToast({
 																		title: T()(
-																			"auth_provider_last_unlink_blocked_toast_title",
+																			"toasts.common.auth.provider.last.unlink.blocked.title",
 																		),
 																		message: T()(
-																			"auth_provider_last_unlink_no_password_toast_message",
+																			"toasts.common.auth.provider.last.unlink.no.password.message",
 																		),
 																		status: "error",
 																	});
@@ -327,8 +327,8 @@ export const Account: Component = () => {
 					</InfoRow.Content>
 				</Show>
 				<InfoRow.Content
-					title={T()("account_sessions")}
-					description={T()("account_sessions_description")}
+					title={T()("account.sessions.title")}
+					description={T()("account.sessions.description")}
 					theme="danger"
 					actions={
 						<Button
@@ -339,7 +339,7 @@ export const Account: Component = () => {
 								setRevokeSessionsModalOpen(true);
 							}}
 						>
-							{T()("logout_everywhere")}
+							{T()("common.logout.everywhere")}
 						</Button>
 					}
 					actionAlignment="center"
@@ -347,12 +347,12 @@ export const Account: Component = () => {
 			</InfoRow.Root>
 			{/* Configuration */}
 			<InfoRow.Root
-				title={T()("account_preferences")}
-				description={T()("account_preferences_description")}
+				title={T()("account.preferences.title")}
+				description={T()("account.preferences.description")}
 			>
 				<InfoRow.Content
-					title={T()("cms_locale")}
-					description={T()("cms_locale_description")}
+					title={T()("settings.interface.cms.locale.title")}
+					description={T()("settings.interface.cms.locale.description")}
 				>
 					<Select
 						id={"cms-locale"}
@@ -362,7 +362,7 @@ export const Account: Component = () => {
 							value: locale.code,
 						}))}
 						onChange={(value) => {
-							setLocale(value as SupportedLocales);
+							if (typeof value === "string") setLocale(value);
 						}}
 						name={"cms-locale"}
 						noClear={true}
@@ -388,8 +388,8 @@ export const Account: Component = () => {
 					isError: revokeRefreshTokens.action.isError,
 				}}
 				copy={{
-					title: T()("account_revoke_sessions_modal_title"),
-					description: T()("account_revoke_sessions_modal_description"),
+					title: T()("modals.account.revoke.sessions.title"),
+					description: T()("modals.account.revoke.sessions.description"),
 					error: revokeRefreshTokens.errors()?.message,
 				}}
 				callbacks={{

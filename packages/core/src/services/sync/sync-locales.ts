@@ -12,7 +12,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	context: ServiceContext,
 ) => {
 	const Locales = new LocalesRepository(context.db.client, context.config.db);
-	const localeCodes = context.config.localization.locales.map(
+	const localeCodes = context.config.i18n.content.locales.map(
 		(locale) => locale.code,
 	);
 

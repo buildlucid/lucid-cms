@@ -1,11 +1,11 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
+import { serverText, translateServer } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -60,7 +60,7 @@ const requestEmailChange: ServiceFn<
 				errors: {
 					email: {
 						code: "invalid",
-						message: T("this_email_is_already_in_use"),
+						message: serverText("core.users.email.duplicate"),
 					},
 				},
 			},
@@ -187,7 +187,9 @@ const requestEmailChange: ServiceFn<
 		type: "internal",
 		to: data.newEmail,
 		subject: formatEmailSubject(
-			T("email_change_confirm_subject"),
+			translateServer("core.email.change.confirm.subject", undefined, {
+				config: context.config,
+			}),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.emailChangeConfirm.key,
@@ -203,7 +205,9 @@ const requestEmailChange: ServiceFn<
 		type: "internal",
 		to: data.oldEmail,
 		subject: formatEmailSubject(
-			T("email_change_revert_subject"),
+			translateServer("core.email.change.revert.subject", undefined, {
+				config: context.config,
+			}),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.emailChangeRevert.key,

@@ -1,6 +1,6 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
 import { documentServices } from "../index.js";
 import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
@@ -30,8 +30,8 @@ const restoreMultiple: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("error_locked_collection_name"),
-				message: T("error_locked_collection_message_delete"),
+				name: serverText("core.error.locked.collection.name"),
+				message: serverText("core.error.locked.collection.message.delete"),
 				status: 400,
 			},
 			data: undefined,
@@ -63,11 +63,13 @@ const restoreMultiple: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("document_not_found_message"),
+				message: serverText("core.documents.not.found.message"),
 				errors: {
 					ids: {
-						message: T("only_found_ids_error_message", {
-							ids: docsExistRes.data.map((d) => d.id).join(", "),
+						message: serverText("core.documents.ids.not.found.partial", {
+							data: {
+								ids: docsExistRes.data.map((d) => d.id).join(", "),
+							},
 						}),
 					},
 				},

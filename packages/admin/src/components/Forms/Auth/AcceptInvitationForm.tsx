@@ -27,7 +27,7 @@ const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 				errors: acceptInvitation.errors(),
 			}}
 			content={{
-				submit: T()("accept_invitation"),
+				submit: T()("auth.invitations.accept.action"),
 			}}
 			options={{
 				buttonFullWidth: true,
@@ -51,7 +51,7 @@ const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 				value={password()}
 				onChange={setPassword}
 				copy={{
-					label: T()("password"),
+					label: T()("common.password"),
 				}}
 				required={true}
 				autoFoucs={true}
@@ -65,7 +65,7 @@ const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 				value={passwordConfirmation()}
 				onChange={setPasswordConfirmation}
 				copy={{
-					label: T()("confirm_password"),
+					label: T()("common.confirm.password"),
 				}}
 				required={true}
 				autoComplete="new-password"

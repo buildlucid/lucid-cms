@@ -29,8 +29,10 @@ const useUpdateSystemAlerts = (props?: UseUpdateSystemAlertsProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: updateSystemAlertsReq,
 		getSuccessToast: () => ({
-			title: T()("update_toast_title", { name: T()("system_alerts") }),
-			message: T()("system_alerts_update_toast_message"),
+			title: T()("toasts.common.update.title", {
+				name: T()("system.alerts.title"),
+			}),
+			message: T()("system.alerts.notifications.updated"),
 		}),
 		invalidates: ["settings.getSettings"],
 		onSuccess: props?.onSuccess,

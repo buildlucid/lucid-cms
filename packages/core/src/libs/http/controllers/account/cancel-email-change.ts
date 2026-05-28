@@ -1,13 +1,13 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { accountServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -37,8 +37,8 @@ const cancelEmailChangeController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_cancel_email_change_error_name"),
-					message: T("route_cancel_email_change_error_message"),
+					name: serverText("core.routes.cancel.email.change.error.name"),
+					message: serverText("core.routes.cancel.email.change.error.message"),
 				},
 			},
 		)(context, {

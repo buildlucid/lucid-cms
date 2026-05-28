@@ -1,9 +1,9 @@
 import { createDraft, finishDraft } from "immer";
-import T from "../../translations/index.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
+import { serverText } from "../i18n/index.js";
 import { hookExecutionKinds } from "./hook-map.js";
 import type {
 	ArgumentsType,
@@ -140,10 +140,12 @@ const executeTransformHooks = async <
 		return {
 			error: {
 				type: "basic",
-				name: T("hook_execution_error_name"),
-				message: T("hook_transform_payload_error_message", {
-					service: String(options.service),
-					event: String(options.event),
+				name: serverText("core.hooks.execution.error.name"),
+				message: serverText("core.hooks.transform.payload.error.message", {
+					data: {
+						service: String(options.service),
+						event: String(options.event),
+					},
 				}),
 				status: 500,
 			},

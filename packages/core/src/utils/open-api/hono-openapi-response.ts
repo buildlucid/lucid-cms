@@ -1,6 +1,6 @@
 import type { OpenAPIV3 } from "openapi-types";
 import constants from "../../constants/constants.js";
-import T from "../../translations/index.js";
+import { translateServer } from "../../libs/i18n/index.js";
 
 const metaObject: OpenAPIV3.SchemaObject = {
 	type: "object",
@@ -61,7 +61,7 @@ const linksObject: OpenAPIV3.SchemaObject = {
 
 export const defaultErrorResponse = {
 	type: "object",
-	description: T("open_api_response_default"),
+	description: translateServer("core.openapi.response.default"),
 	properties: {
 		status: {
 			type: "number",
@@ -104,7 +104,7 @@ const honoOpenAPIResponse = (config?: {
 
 	if (config?.schema) {
 		response[200] = {
-			description: T("open_api_response_200"),
+			description: translateServer("core.openapi.response.200"),
 			content: {
 				"application/json": {
 					schema:
@@ -123,7 +123,7 @@ const honoOpenAPIResponse = (config?: {
 		};
 	} else {
 		response[204] = {
-			description: T("open_api_response_204"),
+			description: translateServer("core.openapi.response.204"),
 			content: {
 				"application/json": {
 					schema: {
@@ -136,7 +136,7 @@ const honoOpenAPIResponse = (config?: {
 	}
 
 	response.default = {
-		description: T("open_api_response_default"),
+		description: translateServer("core.openapi.response.default"),
 		content: {
 			"application/json": {
 				schema: defaultErrorResponse,

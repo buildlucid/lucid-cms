@@ -41,8 +41,8 @@ const RolesListRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("roles_route_title"),
-							description: T()("roles_route_description"),
+							title: T()("routes.roles.title"),
+							description: T()("routes.roles.description"),
 						}}
 						actions={{
 							create: [
@@ -68,18 +68,18 @@ const RolesListRoute: Component = () => {
 									}}
 									filters={[
 										{
-											label: T()("name"),
+											label: T()("common.name"),
 											key: "name",
 											type: "text",
 										},
 									]}
 									sorts={[
 										{
-											label: T()("name"),
+											label: T()("common.name"),
 											key: "name",
 										},
 										{
-											label: T()("created_at"),
+											label: T()("common.created.at"),
 											key: "createdAt",
 										},
 									]}

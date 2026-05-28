@@ -1,6 +1,6 @@
 import { clientIntegrationsFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ClientIntegration } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -22,7 +22,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("client_integration_not_found_message"),
+				message: serverText("core.client.integrations.not.found.message"),
 				status: 404,
 			},
 		},

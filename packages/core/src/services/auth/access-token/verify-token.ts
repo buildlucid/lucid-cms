@@ -1,7 +1,7 @@
 import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import type { LucidAuth, LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
@@ -15,7 +15,7 @@ const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
 				error: {
 					type: "authorisation",
 					code: "authorisation",
-					message: T("not_authorized_to_perform_action"),
+					message: serverText("core.permissions.unauthorized"),
 				},
 				data: undefined,
 			};
@@ -36,7 +36,7 @@ const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
 			error: {
 				type: "authorisation",
 				code: "authorisation",
-				message: T("not_authorized_to_perform_action"),
+				message: serverText("core.permissions.unauthorized"),
 			},
 			data: undefined,
 		};

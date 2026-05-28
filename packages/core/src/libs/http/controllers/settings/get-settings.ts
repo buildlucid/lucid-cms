@@ -3,13 +3,13 @@ import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/settings.js";
 import { settingServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
@@ -43,8 +43,8 @@ const getSettingsController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: T("route_settings_fetch_error_name"),
-				message: T("route_settings_fetch_error_message"),
+				name: serverText("core.routes.settings.fetch.error.name"),
+				message: serverText("core.routes.settings.fetch.error.message"),
 			},
 		})(context, {
 			includes: formattedQuery.include,

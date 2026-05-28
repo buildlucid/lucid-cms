@@ -15,7 +15,7 @@ const processFields = (props: {
 	collection: CollectionBuilder;
 	fields: Array<FieldInputSchema>;
 	customFields: Map<string, CustomField<FieldTypes>>;
-	localization: Config["localization"];
+	localization: Config["i18n"]["content"];
 }): Array<FieldInputSchema> => {
 	return props.fields
 		.filter((field) => props.customFields.has(field.key))
@@ -55,8 +55,8 @@ const processFields = (props: {
 
 			// if collection uses translations and the field supports translations
 			if (
-				props.collection.getData.config.translations &&
-				cfInstance?.translationsEnabled
+				props.collection.getData.config.localized &&
+				cfInstance?.localizedEnabled
 			) {
 				// if processField.value is given only and no translations key - add the value to the translations object with the locale object key being the default locale
 				if (
@@ -103,7 +103,7 @@ const prepareBricksAndFields = (props: {
 	collection: CollectionBuilder;
 	bricks?: Array<BrickInputSchema>;
 	fields?: Array<FieldInputSchema>;
-	localization: Config["localization"];
+	localization: Config["i18n"]["content"];
 }) => {
 	// Process collection fields
 	const preparedFields = props.fields

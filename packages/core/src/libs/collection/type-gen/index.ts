@@ -166,7 +166,7 @@ const renderField = (
 	const fieldInstance = context.builder.fields.get(field.key);
 	const fieldMode =
 		context.collectionUsesTranslations &&
-		fieldInstance?.translationsEnabled === true
+		fieldInstance?.localizedEnabled === true
 			? "translations"
 			: "value";
 	const fieldTypeGen: ClientFieldTypeGenerationResult =
@@ -261,7 +261,9 @@ const collectFieldFilterPaths = (
 		);
 	}
 
-	const fieldSegment = `_${field.key}`;
+	const fieldSegment = field.key.startsWith(constants.db.generatedColumnPrefix)
+		? field.key
+		: `${constants.db.generatedColumnPrefix}${field.key}`;
 
 	if (scope.kind === "collection") {
 		if (path.length === 0) {
@@ -359,7 +361,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 	);
 	const collectionFields = renderFieldMap(collection.persistedFieldTree, {
 		builder: collection,
-		collectionUsesTranslations: collection.getData.config.translations,
+		collectionUsesTranslations: collection.getData.config.localized,
 		withinGroup: false,
 	});
 	const collectionDeclarations = [...collectionFields.declarations];
@@ -392,7 +394,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 		});
 		const brickFields = renderFieldMap(brick.persistedFieldTree, {
 			builder: brick,
-			collectionUsesTranslations: collection.getData.config.translations,
+			collectionUsesTranslations: collection.getData.config.localized,
 			withinGroup: false,
 		});
 

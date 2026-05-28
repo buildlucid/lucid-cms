@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
+import { serverText } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import executeSingleJob from "../execute-single-job.js";
 import { insertJobs } from "../insert-job.js";
@@ -46,7 +46,9 @@ function passthroughQueueAdapter(
 				if (params.options?.scheduledFor) {
 					return {
 						error: {
-							message: T("queue_adapter_scheduled_jobs_not_supported"),
+							message: serverText(
+								"core.queue.adapters.scheduled.jobs.not.supported",
+							),
 						},
 						data: undefined,
 					};
@@ -70,7 +72,9 @@ function passthroughQueueAdapter(
 				if (!jobData) {
 					return {
 						error: {
-							message: "Failed to create job",
+							message: serverText("core.queue.jobs.create.failed", {
+								fallback: "Failed to create job",
+							}),
 						},
 						data: undefined,
 					};
@@ -103,7 +107,9 @@ function passthroughQueueAdapter(
 				) {
 					return {
 						error: {
-							message: executeResult.message,
+							message: serverText("core.queue.jobs.execute.failed", {
+								fallback: executeResult.message,
+							}),
 						},
 						data: undefined,
 					};
@@ -130,7 +136,11 @@ function passthroughQueueAdapter(
 				});
 
 				return {
-					error: { message: "Error adding event to the queue" },
+					error: {
+						message: serverText("core.queue.jobs.add.failed", {
+							fallback: "Error adding event to the queue",
+						}),
+					},
 					data: undefined,
 				};
 			}
@@ -140,7 +150,9 @@ function passthroughQueueAdapter(
 				if (params.options?.scheduledFor) {
 					return {
 						error: {
-							message: T("queue_adapter_scheduled_jobs_not_supported"),
+							message: serverText(
+								"core.queue.adapters.scheduled.jobs.not.supported",
+							),
 						},
 						data: undefined,
 					};
@@ -236,7 +248,9 @@ function passthroughQueueAdapter(
 
 					return {
 						error: {
-							message: `${failedJobs.length} of ${allResults.length} jobs failed. First error: ${errorMessage}`,
+							message: serverText("core.queue.jobs.batch.execute.failed", {
+								fallback: `${failedJobs.length} of ${allResults.length} jobs failed. First error: ${errorMessage}`,
+							}),
 						},
 						data: undefined,
 					};
@@ -270,7 +284,11 @@ function passthroughQueueAdapter(
 				});
 
 				return {
-					error: { message: "Error adding batch events to the queue" },
+					error: {
+						message: serverText("core.queue.jobs.add.batch.failed", {
+							fallback: "Error adding batch events to the queue",
+						}),
+					},
 					data: undefined,
 				};
 			}

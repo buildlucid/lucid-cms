@@ -58,8 +58,8 @@ const EmailListRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("email_route_title"),
-							description: T()("email_route_description"),
+							title: T()("routes.email.title"),
+							description: T()("routes.email.description"),
 						}}
 						slots={{
 							bottom: (
@@ -72,80 +72,80 @@ const EmailListRoute: Component = () => {
 									}}
 									filters={[
 										{
-											label: T()("to"),
+											label: T()("common.to"),
 											key: "toAddress",
 											type: "text",
 										},
 										{
-											label: T()("subject"),
+											label: T()("common.subject"),
 											key: "subject",
 											type: "text",
 										},
 										{
-											label: T()("template"),
+											label: T()("email.templates.singular"),
 											key: "template",
 											type: "text",
 										},
 										{
-											label: T()("status"),
+											label: T()("common.status"),
 											key: "currentStatus",
 											type: "multi-select",
 											options: [
 												{
-													label: T()("sent"),
+													label: T()("common.status.sent"),
 													value: "sent",
 												},
 												{
-													label: T()("delivered"),
+													label: T()("common.status.delivered"),
 													value: "delivered",
 												},
 												{
-													label: T()("failed"),
+													label: T()("common.status.failed"),
 													value: "failed",
 												},
 												{
-													label: T()("delayed"),
+													label: T()("common.status.delayed"),
 													value: "delayed",
 												},
 												{
-													label: T()("complained"),
+													label: T()("common.status.complained"),
 													value: "complained",
 												},
 												{
-													label: T()("bounced"),
+													label: T()("common.status.bounced"),
 													value: "bounced",
 												},
 												{
-													label: T()("clicked"),
+													label: T()("common.status.clicked"),
 													value: "clicked",
 												},
 												{
-													label: T()("opened"),
+													label: T()("common.status.opened"),
 													value: "opened",
 												},
 												{
-													label: T()("scheduled"),
+													label: T()("common.status.scheduled"),
 													value: "scheduled",
 												},
 											],
 										},
 										{
-											label: T()("type"),
+											label: T()("common.type"),
 											key: "type",
 											type: "multi-select",
 											options: [
 												{
-													label: T()("internal"),
+													label: T()("common.internal"),
 													value: "internal",
 												},
 												{
-													label: T()("external"),
+													label: T()("common.external"),
 													value: "external",
 												},
 											],
 										},
 										{
-											label: T()("priority"),
+											label: T()("common.priority"),
 											key: "priority",
 											type: "multi-select",
 											options: [
@@ -166,15 +166,15 @@ const EmailListRoute: Component = () => {
 									]}
 									sorts={[
 										{
-											label: T()("attempt_count"),
+											label: T()("common.attempt.count"),
 											key: "attemptCount",
 										},
 										{
-											label: T()("last_attempt_at"),
+											label: T()("common.last.attempt.at"),
 											key: "lastAttemptedAt",
 										},
 										{
-											label: T()("created_at"),
+											label: T()("common.created.at"),
 											key: "createdAt",
 										},
 									]}

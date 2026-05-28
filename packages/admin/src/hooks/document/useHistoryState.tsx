@@ -207,13 +207,13 @@ export function useHistoryState() {
 		() =>
 			helpers.getLocaleValue({
 				value: collection()?.details.name,
-			}) || T()("collection"),
+			}) || T()("common.collection"),
 	);
 	const collectionSingularName = createMemo(
 		() =>
 			helpers.getLocaleValue({
 				value: collection()?.details.singularName,
-			}) || T()("collection"),
+			}) || T()("common.collection"),
 	);
 	const groupedRevisions = createMemo(() => {
 		const revisions = accumulatedRevisions();
@@ -417,8 +417,10 @@ export function useHistoryState() {
 		if (!item || item.type !== "revision") {
 			return {
 				state: "protected",
-				label: T()("revision_retention_current_version"),
-				description: T()("revision_retention_current_version_description"),
+				label: T()("documents.revisions.retention.current.version.title"),
+				description: T()(
+					"documents.revisions.retention.current.version.description",
+				),
 			};
 		}
 
@@ -432,26 +434,31 @@ export function useHistoryState() {
 		if (referencedBy.length > 0) {
 			return {
 				state: "protected",
-				label: T()("revision_retention_protected"),
-				description: T()("revision_retention_protected_description", {
-					versions: referencedBy.join(", "),
-				}),
+				label: T()("documents.revisions.retention.protected.title"),
+				description: T()(
+					"documents.revisions.retention.protected.description",
+					{
+						versions: referencedBy.join(", "),
+					},
+				),
 			};
 		}
 
 		if (retentionDays === false) {
 			return {
 				state: "retained",
-				label: T()("revision_retention_indefinite"),
-				description: T()("revision_retention_indefinite_description"),
+				label: T()("documents.revisions.retention.indefinite.title"),
+				description: T()(
+					"documents.revisions.retention.indefinite.description",
+				),
 			};
 		}
 
 		if (retentionDays === undefined || !item.createdAt) {
 			return {
 				state: "unknown",
-				label: T()("revision_retention_unknown"),
-				description: T()("revision_retention_unknown_description"),
+				label: T()("documents.revisions.retention.unknown.title"),
+				description: T()("documents.revisions.retention.unknown.description"),
 			};
 		}
 
@@ -466,8 +473,10 @@ export function useHistoryState() {
 		if (daysRemaining <= 0) {
 			return {
 				state: "expired",
-				label: T()("revision_retention_cleanup_eligible"),
-				description: T()("revision_retention_cleanup_eligible_description"),
+				label: T()("documents.revisions.retention.cleanup.eligible.title"),
+				description: T()(
+					"documents.revisions.retention.cleanup.eligible.description",
+				),
 				expiresAt: expiresAt.toISOString(),
 				daysRemaining,
 			};
@@ -476,8 +485,8 @@ export function useHistoryState() {
 		if (daysRemaining <= 7) {
 			return {
 				state: "expiring",
-				label: T()("revision_retention_expiring"),
-				description: T()("revision_retention_expiring_description", {
+				label: T()("documents.revisions.retention.expiring.title"),
+				description: T()("documents.revisions.retention.expiring.description", {
 					count: daysRemaining,
 				}),
 				expiresAt: expiresAt.toISOString(),
@@ -487,8 +496,8 @@ export function useHistoryState() {
 
 		return {
 			state: "retained",
-			label: T()("revision_retention_retained"),
-			description: T()("revision_retention_retained_description", {
+			label: T()("documents.revisions.retention.retained.title"),
+			description: T()("documents.revisions.retention.retained.description", {
 				count: daysRemaining,
 			}),
 			expiresAt: expiresAt.toISOString(),

@@ -1,8 +1,8 @@
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import execute from "./execute.js";
 import createEvent from "./helpers/create-event.js";
@@ -47,7 +47,7 @@ const scheduleApproved: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("publish_operation_not_found"),
+				message: serverText("core.publish.operations.not.found"),
 				status: 404,
 			},
 		},
@@ -95,7 +95,9 @@ const scheduleApproved: ServiceFn<
 				return {
 					error: {
 						type: "basic",
-						message: T("publish_operation_schedule_not_supported"),
+						message: serverText(
+							"core.publish.operations.schedule.not.supported",
+						),
 						status: 400,
 					},
 					data: undefined,

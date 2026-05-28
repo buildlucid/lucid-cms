@@ -1,5 +1,5 @@
+import { serverText } from "../../../libs/i18n/index.js";
 import { validateSignedMediaUrl } from "../../../libs/media/signed-url.js";
-import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const validatePresignedToken: ServiceFn<
@@ -29,7 +29,7 @@ const validatePresignedToken: ServiceFn<
 			error: {
 				status: 403,
 				type: "basic",
-				message: T("invalid_or_expired_token"),
+				message: serverText("core.tokens.invalid.or.expired"),
 			},
 			data: undefined,
 		};

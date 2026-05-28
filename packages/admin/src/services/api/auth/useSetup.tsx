@@ -36,8 +36,8 @@ const useSetup = (props?: UseSetupProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: setupReq,
 		getSuccessToast: () => ({
-			title: T()("setup_success_toast_title"),
-			message: T()("setup_success_toast_message"),
+			title: T()("toasts.common.setup.success.title"),
+			message: T()("toasts.common.setup.success.message"),
 		}),
 		invalidates: ["auth.setupRequired"],
 		onSuccess: () => {

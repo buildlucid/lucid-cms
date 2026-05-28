@@ -1,0 +1,3 @@
+{
+	"plugin.cloudflare.queues.scheduling.production.only": "Cloudflare queue scheduling is only supported in production mode."
+}

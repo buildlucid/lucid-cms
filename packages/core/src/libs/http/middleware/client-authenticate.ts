@@ -1,7 +1,6 @@
 import { minutesToSeconds } from "date-fns";
 import { createMiddleware } from "hono/factory";
 import { clientIntegrationServices } from "../../../services/index.js";
-import T from "../../../translations/index.js";
 import type {
 	LucidClientIntegrationAuth,
 	LucidHonoContext,
@@ -9,6 +8,7 @@ import type {
 import { decodeApiKey } from "../../../utils/client-integrations/encode-api-key.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
+import { serverText } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
 import createServiceContext from "../utils/create-service-context.js";
 
@@ -24,7 +24,7 @@ const clientAuthentication = createMiddleware(
 		if (!apiKey) {
 			throw new LucidAPIError({
 				type: "authorisation",
-				message: T("client_integration_api_key_missing"),
+				message: serverText("core.client.integrations.api.key.missing"),
 				status: 401,
 			});
 		}
@@ -32,7 +32,7 @@ const clientAuthentication = createMiddleware(
 		const { key: decodedKey } = decodeApiKey(apiKey);
 		if (!decodedKey) {
 			throw new LucidAPIError({
-				message: T("client_integration_key_missing"),
+				message: serverText("core.client.integrations.key.missing"),
 			});
 		}
 
@@ -62,7 +62,7 @@ const clientAuthentication = createMiddleware(
 				transaction: false,
 				defaultError: {
 					type: "authorisation",
-					message: T("client_integration_error"),
+					message: serverText("core.client.integrations.error"),
 					status: 401,
 				},
 			},

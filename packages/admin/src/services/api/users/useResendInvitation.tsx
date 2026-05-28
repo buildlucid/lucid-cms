@@ -26,8 +26,8 @@ const useResendInvitation = (props?: UseResendInvitationProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody>({
 		mutationFn: resendInvitationReq,
 		getSuccessToast: () => ({
-			title: T()("user_resend_invitation_toast_title"),
-			message: T()("user_resend_invitation_toast_message"),
+			title: T()("toasts.users.resend.invitation.title"),
+			message: T()("toasts.users.resend.invitation.message"),
 		}),
 		invalidates: ["users.getMultiple"],
 		onSuccess: props?.onSuccess,

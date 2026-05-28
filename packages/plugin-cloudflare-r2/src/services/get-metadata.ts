@@ -1,5 +1,5 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceGetMeta } from "@lucidcms/core/types";
-import T from "../translations/index.js";
 import type { PluginOptions } from "../types.js";
 
 const getMetadata = (
@@ -13,7 +13,7 @@ const getMetadata = (
 				return {
 					error: {
 						type: "plugin",
-						message: T("object_not_found"),
+						message: serverText("plugin.cloudflare.r2.objects.not.found"),
 					},
 					data: undefined,
 				};
@@ -31,10 +31,9 @@ const getMetadata = (
 			return {
 				error: {
 					type: "plugin",
-					message:
-						error instanceof Error
-							? error.message
-							: T("an_unknown_error_occurred"),
+					message: serverText("plugin.cloudflare.r2.errors.unknown", {
+						fallback: error instanceof Error ? error.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

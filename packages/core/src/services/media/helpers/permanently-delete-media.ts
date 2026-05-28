@@ -1,10 +1,10 @@
+import { serverText } from "../../../libs/i18n/index.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../../libs/kv/http-cache.js";
 import {
 	MediaRepository,
 	ProcessedImagesRepository,
 } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
 
@@ -39,7 +39,7 @@ const permanentlyDeleteMedia: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("media_not_found_message"),
+				message: serverText("core.media.not.found.message"),
 				status: 404,
 			},
 		},

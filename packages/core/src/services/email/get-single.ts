@@ -1,8 +1,8 @@
 import { resolveEmailData } from "../../libs/email/storage/index.js";
 import renderMustacheTemplate from "../../libs/email/templates/render-mustache-template.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { Email } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -22,7 +22,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("email_not_found_message"),
+				message: serverText("core.email.not.found.message"),
 				status: 404,
 			},
 		},

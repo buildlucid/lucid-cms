@@ -15,7 +15,7 @@ export const Breadcrumbs: Component<{
 	return (
 		<ul
 			class="flex flex-wrap items-center gap-1"
-			aria-label={T()("breadcrumbs")}
+			aria-label={T()("common.breadcrumbs")}
 		>
 			<li>
 				<A href={"/lucid"} class="hover:text-title text-sm">
@@ -33,12 +33,12 @@ export const Breadcrumbs: Component<{
 							class="hover:text-title text-sm"
 							noScroll={true}
 						>
-							<span>{T()("media_library")}</span>
+							<span>{T()("media.library.title")}</span>
 						</A>
 					</Match>
 					<Match when={props.state.parentFolderId() === ""}>
 						<span class="font-medium text-body text-sm">
-							{T()("media_library")}
+							{T()("media.library.title")}
 						</span>
 					</Match>
 				</Switch>

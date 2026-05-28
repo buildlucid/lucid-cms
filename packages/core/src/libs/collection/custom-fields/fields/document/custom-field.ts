@@ -1,10 +1,11 @@
 import z from "zod";
-import T from "../../../../../translations/index.js";
 import type {
 	LucidBricksTable,
 	Select,
 	ServiceResponse,
 } from "../../../../../types.js";
+import { adminText } from "../../../../i18n/admin-text.js";
+import { serverText } from "../../../../i18n/index.js";
 import buildSchemaIndex from "../../../helpers/build-schema-index.js";
 import buildTableName from "../../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
@@ -47,11 +48,15 @@ class DocumentCustomField extends CustomField<"document"> {
 			type: this.type,
 			collection: normalizeDocumentCollections(this.props.collection),
 			details: {
-				label: this.props?.details?.label ?? keyToTitle(this.key),
+				label:
+					this.props?.details?.label ??
+					adminText(`fields.${this.type}.${this.key}.label`, {
+						fallback: keyToTitle(this.key),
+					}),
 				summary: this.props?.details?.summary,
 			},
 			config: {
-				translations: this.props?.config?.translations ?? false,
+				localized: this.props?.config?.localized ?? false,
 				default: this.props?.config?.default ?? [],
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
@@ -82,7 +87,7 @@ class DocumentCustomField extends CustomField<"document"> {
 					value === undefined ||
 					value === null ||
 					(Array.isArray(value) && value.length === 0),
-				message: T("generic_field_required"),
+				message: serverText("core.fields.validation.required"),
 			},
 		};
 	}
@@ -225,7 +230,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			if (!allowedCollections.includes(documentValue.collectionKey)) {
 				errors.push({
 					itemIndex,
-					message: T("field_document_not_found"),
+					message: serverText("core.fields.document.validation.not.found"),
 				});
 				continue;
 			}
@@ -239,7 +244,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			if (findDocument === undefined) {
 				errors.push({
 					itemIndex,
-					message: T("field_document_not_found"),
+					message: serverText("core.fields.document.validation.not.found"),
 				});
 			}
 		}

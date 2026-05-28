@@ -10,6 +10,12 @@ import type {
 	EmailAdapterInstance,
 } from "../libs/email/types.js";
 import type { AllHooks } from "../libs/hooks/types.js";
+import type {
+	AdminText,
+	InterfaceDirection,
+	LocaleDirection,
+	TranslationBundles,
+} from "../libs/i18n/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../libs/kv/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
 import type {
@@ -24,7 +30,6 @@ import type {
 import type { CorePermission } from "../types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
 import type { LucidHonoGeneric } from "./hono.js";
-import type { SupportedLocales } from "./shared.js";
 
 export type CopyPublicEntry =
 	| string
@@ -55,11 +60,11 @@ export type AccessPermissionDetails = {
 	/**
 	 * The permission or group label shown in the admin UI.
 	 */
-	name: string | Record<SupportedLocales, string>;
+	name: AdminText;
 	/**
 	 * Optional helper text for the permission or group shown in the admin UI.
 	 */
-	description?: string | Record<SupportedLocales, string> | null;
+	description?: AdminText | null;
 };
 
 export type AccessPermissionDefinition = {
@@ -79,7 +84,7 @@ export type AccessPermissionDefinition = {
 
 export type AccessPermissionGroupDefinition = AccessPermissionDetails;
 
-export type ConfiguredLocaleValue = string | Record<string, string>;
+export type ConfiguredLocaleValue = AdminText;
 
 export type AccessRoleDefinition = {
 	/**
@@ -87,11 +92,11 @@ export type AccessRoleDefinition = {
 	 */
 	key: string;
 	/**
-	 * Role name, either as a plain string or keyed by configured locale codes.
+	 * Role name shown in the admin UI.
 	 */
 	name: ConfiguredLocaleValue;
 	/**
-	 * Optional role description, either as a plain string or keyed by configured locale codes.
+	 * Optional role description shown in the admin UI.
 	 */
 	description?: ConfiguredLocaleValue;
 	/**
@@ -125,6 +130,54 @@ export type AccessConfig = {
 	roles?: AccessRoleDefinition[];
 };
 
+export type ContentI18nConfig = {
+	/**
+	 * A list of locales you want to write content in.
+	 */
+	locales: {
+		/**
+		 * The label of the locale. Eg. `English`, `French`, `German` etc.
+		 */
+		label: string;
+		/**
+		 * The code of the locale. Eg. `en`, `fr`, `de` etc.
+		 */
+		code: string;
+		/**
+		 * The text direction for content written in this locale.
+		 */
+		direction?: LocaleDirection;
+	}[];
+	/**
+	 * The default content locale code. Eg. `en`.
+	 */
+	defaultLocale: string;
+};
+
+export type InterfaceI18nConfig = {
+	/**
+	 * A list of locales supported by the Lucid CMS interface.
+	 */
+	locales: {
+		/**
+		 * The label of the locale. Eg. `English`, `French`, `German` etc.
+		 */
+		label: string;
+		/**
+		 * The code of the locale. Eg. `en`, `fr`, `de` etc.
+		 */
+		code: string;
+		/**
+		 * The text direction for the locale.
+		 */
+		direction?: InterfaceDirection;
+	}[];
+	/**
+	 * The default CMS interface locale code. Eg. `en`.
+	 */
+	defaultLocale: string;
+};
+
 export type AiGuidanceConfig = {
 	/**
 	 * Stable key used by fields and AI requests to select this guidance preset.
@@ -138,6 +191,10 @@ export type AiGuidanceConfig = {
 	 * Instructions passed to the AI feature when this guidance preset is selected.
 	 */
 	instructions: string;
+	/**
+	 * Whether this preset is available globally or must be explicitly selected by a field.
+	 */
+	availability: "global" | "explicit";
 };
 
 export type AiConfig = {
@@ -289,26 +346,12 @@ export interface LucidConfig {
 		enabled?: boolean;
 	};
 	/**
-	 * Localization settings.
+	 * Internationalisation settings for content and the CMS interface.
 	 */
-	localization?: {
-		/**
-		 * A list of locales you want to write content in.
-		 */
-		locales: {
-			/**
-			 * The label of the locale. Eg. `English`, `French`, `German` etc.
-			 */
-			label: string;
-			/**
-			 * The code of the locale. Eg. `en`, `fr`, `de` etc.
-			 */
-			code: string;
-		}[];
-		/**
-		 * The default locale code. Eg. `en`.
-		 */
-		defaultLocale: string;
+	i18n?: {
+		content?: ContentI18nConfig;
+		interface?: InterfaceI18nConfig;
+		translations?: TranslationBundles;
 	};
 	/**
 	 * Email settings.
@@ -565,12 +608,10 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	openAPI: {
 		enabled: boolean;
 	};
-	localization: {
-		locales: {
-			label: string;
-			code: string;
-		}[];
-		defaultLocale: string;
+	i18n: {
+		content: ContentI18nConfig;
+		interface: Required<InterfaceI18nConfig>;
+		translations: TranslationBundles;
 	};
 	media: {
 		adapter?:

@@ -1,6 +1,6 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceUploadSingle } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
-import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
 import { applyMetadataHeaders } from "./metadata-headers.js";
 
@@ -28,9 +28,11 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				return {
 					error: {
 						type: "plugin",
-						message: T("upload_failed", {
-							status: result.status,
-							statusText: result.statusText,
+						message: serverText("plugin.s3.objects.upload.failed", {
+							data: {
+								status: result.status,
+								statusText: result.statusText,
+							},
 						}),
 					},
 					data: undefined,
@@ -49,8 +51,9 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			return {
 				error: {
 					type: "plugin",
-					message:
-						e instanceof Error ? e.message : T("an_unknown_error_occurred"),
+					message: serverText("plugin.s3.errors.unknown", {
+						fallback: e instanceof Error ? e.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

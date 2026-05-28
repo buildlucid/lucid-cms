@@ -1,5 +1,5 @@
-import T from "../../../translations/index.js";
-import type { Config, ConfiguredLocaleValue } from "../../../types/config.js";
+import type { Config } from "../../../types/config.js";
+import { translateServer } from "../../i18n/index.js";
 import { PermissionGroups } from "../../permission/definitions.js";
 import {
 	corePermissionKeys,
@@ -21,7 +21,7 @@ const ensureNoDuplicates = (label: string, values: string[]) => {
 	const duplicates = [...new Set(findDuplicates(values))];
 	if (duplicates.length > 0) {
 		throw new Error(
-			T("config_access_duplicate_keys", {
+			translateServer("core.config.access.duplicate.keys", {
 				label,
 				keys: duplicates.join(", "),
 			}),
@@ -39,35 +39,12 @@ const ensureValidReference = (
 ) => {
 	if (!validPermissions.has(permission)) {
 		throw new Error(
-			T("config_access_unknown_permission_reference", {
+			translateServer("core.config.access.unknown.permission.reference", {
 				context,
 				permission,
 			}),
 		);
 	}
-};
-
-/**
- * Ensures managed role translations only use configured content locale codes.
- */
-const ensureValidTranslationLocales = (
-	validLocales: Set<string>,
-	value: ConfiguredLocaleValue | undefined,
-	context: string,
-) => {
-	if (value === undefined || typeof value === "string") return;
-
-	const invalidLocales = Object.keys(value).filter(
-		(locale) => !validLocales.has(locale),
-	);
-	if (invalidLocales.length === 0) return;
-
-	throw new Error(
-		T("config_access_unknown_role_translation_locale", {
-			context,
-			locales: invalidLocales.join(", "),
-		}),
-	);
 };
 
 /**
@@ -91,7 +68,7 @@ const checkAccess = (config: Config) => {
 	for (const groupKey of Object.keys(customGroups)) {
 		if (coreGroupReferences.has(groupKey)) {
 			throw new Error(
-				T("config_access_core_group_collision", {
+				translateServer("core.config.access.core.group.collision", {
 					group: groupKey,
 				}),
 			);
@@ -101,14 +78,14 @@ const checkAccess = (config: Config) => {
 	for (const permission of customPermissionKeys) {
 		if (!permissionKeyRegex.test(permission)) {
 			throw new Error(
-				T("config_access_invalid_permission_key", {
+				translateServer("core.config.access.invalid.permission.key", {
 					permission,
 				}),
 			);
 		}
 		if (isCorePermission(permission)) {
 			throw new Error(
-				T("config_access_core_permission_collision", {
+				translateServer("core.config.access.core.permission.collision", {
 					permission,
 				}),
 			);
@@ -120,10 +97,13 @@ const checkAccess = (config: Config) => {
 			(!coreGroupReferences.has(group) && !customGroups[group])
 		) {
 			throw new Error(
-				T("config_access_unknown_permission_group_reference", {
-					permission,
-					group: group ?? "",
-				}),
+				translateServer(
+					"core.config.access.unknown.permission.group.reference",
+					{
+						permission,
+						group: group ?? "",
+					},
+				),
 			);
 		}
 	}
@@ -132,31 +112,13 @@ const checkAccess = (config: Config) => {
 		...corePermissionKeys,
 		...customPermissionKeys,
 	]);
-	const validLocales = new Set(
-		config.localization.locales.map((locale) => locale.code),
-	);
 
 	for (const role of config.access.roles) {
-		ensureValidTranslationLocales(
-			validLocales,
-			role.name,
-			T("config_access_managed_role_name_context", {
-				role: role.key,
-			}),
-		);
-		ensureValidTranslationLocales(
-			validLocales,
-			role.description,
-			T("config_access_managed_role_description_context", {
-				role: role.key,
-			}),
-		);
-
 		for (const permission of role.permissions) {
 			ensureValidReference(
 				validPermissions,
 				permission,
-				T("config_access_managed_role_context", {
+				translateServer("core.config.access.managed.role.context", {
 					role: role.key,
 				}),
 			);
@@ -171,7 +133,7 @@ const checkAccess = (config: Config) => {
 			ensureValidReference(
 				validPermissions,
 				permission,
-				T("config_access_collection_permission_context", {
+				translateServer("core.config.access.collection.permission.context", {
 					collection: collection.key,
 					action,
 				}),
@@ -183,10 +145,13 @@ const checkAccess = (config: Config) => {
 				ensureValidReference(
 					validPermissions,
 					environment.permissions.publish,
-					T("config_access_collection_environment_publish_context", {
-						collection: collection.key,
-						environment: environment.key,
-					}),
+					translateServer(
+						"core.config.access.collection.environment.publish.context",
+						{
+							collection: collection.key,
+							environment: environment.key,
+						},
+					),
 				);
 			}
 
@@ -194,10 +159,13 @@ const checkAccess = (config: Config) => {
 				ensureValidReference(
 					validPermissions,
 					environment.permissions.review,
-					T("config_access_collection_environment_review_context", {
-						collection: collection.key,
-						environment: environment.key,
-					}),
+					translateServer(
+						"core.config.access.collection.environment.review.context",
+						{
+							collection: collection.key,
+							environment: environment.key,
+						},
+					),
 				);
 			}
 		}

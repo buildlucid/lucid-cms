@@ -34,8 +34,8 @@ const DeleteMediaBatchPermanently: Component<
 				isError: deleteMediaPermanently.action.isError,
 			}}
 			copy={{
-				title: T()("delete_items_permanently_modal_title"),
-				description: T()("delete_items_permanently_modal_description"),
+				title: T()("modals.common.delete.items.permanently.title"),
+				description: T()("modals.common.delete.items.permanently.description"),
 				error: deleteMediaPermanently.errors()?.message,
 			}}
 			callbacks={{

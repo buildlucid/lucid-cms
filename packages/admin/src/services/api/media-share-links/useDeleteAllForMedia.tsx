@@ -27,8 +27,8 @@ const useDeleteAllForMedia = (props?: UseDeleteAllForMediaProps) => {
 	return serviceHelpers.useMutationWrapper<Params, undefined>({
 		mutationFn: deleteAllForMediaReq,
 		getSuccessToast: () => ({
-			title: T()("media_share_links_delete_all_toast_title"),
-			message: T()("media_share_links_delete_all_toast_message"),
+			title: T()("toasts.media.share.links.delete.all.title"),
+			message: T()("toasts.media.share.links.delete.all.message"),
 		}),
 		invalidates: ["mediaShareLinks.getMultiple"],
 		onSuccess: props?.onSuccess,

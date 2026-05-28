@@ -1,10 +1,10 @@
 import type { Hono } from "hono";
 import z from "zod";
-import { stringTranslations } from "../../schemas/locales.js";
 import type { Config } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
+import { adminTextSchema } from "../i18n/admin-text.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
@@ -78,10 +78,10 @@ const ContentSecurityPolicySchema = z
 	.optional();
 
 const OverridableHeaderSchema = z.union([z.boolean(), z.string()]);
-const configuredLocaleTranslations = z.union([
-	z.string(),
-	z.record(z.string(), z.string()),
-]);
+const TranslationBundleSchema = z.object({
+	admin: z.record(z.string(), z.string()).optional(),
+	server: z.record(z.string(), z.string()).optional(),
+});
 
 const ConfigSchema = z.object({
 	db: z.unknown(),
@@ -129,15 +129,33 @@ const ConfigSchema = z.object({
 	openAPI: z.object({
 		enabled: z.boolean(),
 	}),
-	localization: z
+	i18n: z
 		.object({
-			locales: z.array(
-				z.object({
-					label: z.string(),
-					code: z.string(),
-				}),
-			),
-			defaultLocale: z.string(),
+			content: z
+				.object({
+					locales: z.array(
+						z.object({
+							label: z.string(),
+							code: z.string(),
+							direction: z.enum(["ltr", "rtl"]).default("ltr").optional(),
+						}),
+					),
+					defaultLocale: z.string(),
+				})
+				.optional(),
+			interface: z
+				.object({
+					locales: z.array(
+						z.object({
+							label: z.string(),
+							code: z.string(),
+							direction: z.enum(["ltr", "rtl"]).default("ltr").optional(),
+						}),
+					),
+					defaultLocale: z.string(),
+				})
+				.optional(),
+			translations: z.record(z.string(), TranslationBundleSchema).optional(),
 		})
 		.optional(),
 	email: z
@@ -213,8 +231,8 @@ const ConfigSchema = z.object({
 				.record(
 					z.string(),
 					z.object({
-						name: stringTranslations,
-						description: stringTranslations.nullable().optional(),
+						name: adminTextSchema,
+						description: adminTextSchema.nullable().optional(),
 					}),
 				)
 				.optional(),
@@ -222,8 +240,8 @@ const ConfigSchema = z.object({
 				.record(
 					z.string(),
 					z.object({
-						name: stringTranslations,
-						description: stringTranslations.nullable().optional(),
+						name: adminTextSchema,
+						description: adminTextSchema.nullable().optional(),
 						group: z.string(),
 					}),
 				)
@@ -232,8 +250,8 @@ const ConfigSchema = z.object({
 				.array(
 					z.object({
 						key: z.string(),
-						name: configuredLocaleTranslations,
-						description: configuredLocaleTranslations.optional(),
+						name: adminTextSchema,
+						description: adminTextSchema.optional(),
 						permissions: z.array(z.string()),
 					}),
 				)
@@ -247,8 +265,12 @@ const ConfigSchema = z.object({
 					z
 						.object({
 							key: z.string().trim().min(1),
-							label: configuredLocaleTranslations,
+							label: adminTextSchema,
 							instructions: z.string().trim().min(1),
+							availability: z.union([
+								z.literal("global"),
+								z.literal("explicit"),
+							]),
 						})
 						.strict(),
 				)

@@ -1,9 +1,9 @@
 import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
@@ -15,6 +15,8 @@ const verifyToken = async (
 ): ServiceResponse<{
 	user_id: number;
 }> => {
+	const config = c.get("config");
+
 	try {
 		const _refresh = getCookie(c, constants.cookies.refreshToken);
 
@@ -22,14 +24,12 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: T("refresh_token_error_name"),
-					message: T("no_refresh_token_found"),
+					name: serverText("core.auth.refresh.token.error.name"),
+					message: serverText("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
 		}
-
-		const config = c.get("config");
 
 		const UserTokens = new UserTokensRepository(config.db.client, config.db);
 
@@ -69,8 +69,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: T("refresh_token_error_name"),
-					message: T("no_refresh_token_found"),
+					name: serverText("core.auth.refresh.token.error.name"),
+					message: serverText("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -90,6 +90,9 @@ const verifyToken = async (
 						request: {
 							url: c.req.url,
 							ipAddress: connectionInfo.address ?? null,
+							locale:
+								c.req.header(constants.headers.interfaceLocale) ??
+								config.i18n.interface.defaultLocale,
 						},
 					},
 					{
@@ -110,8 +113,8 @@ const verifyToken = async (
 				return {
 					error: {
 						type: "authorisation",
-						name: T("refresh_token_error_name"),
-						message: T("refresh_token_error_message"),
+						name: serverText("core.auth.refresh.token.error.name"),
+						message: serverText("core.auth.refresh.token.error.message"),
 					},
 					data: undefined,
 				};
@@ -120,8 +123,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: T("refresh_token_error_name"),
-					message: T("no_refresh_token_found"),
+					name: serverText("core.auth.refresh.token.error.name"),
+					message: serverText("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -131,8 +134,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: T("refresh_token_error_name"),
-					message: T("no_refresh_token_found"),
+					name: serverText("core.auth.refresh.token.error.name"),
+					message: serverText("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -143,8 +146,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: T("refresh_token_error_name"),
-					message: T("no_refresh_token_found"),
+					name: serverText("core.auth.refresh.token.error.name"),
+					message: serverText("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -186,8 +189,8 @@ const verifyToken = async (
 		return {
 			error: {
 				type: "authorisation",
-				name: T("refresh_token_error_name"),
-				message: T("refresh_token_error_message"),
+				name: serverText("core.auth.refresh.token.error.name"),
+				message: serverText("core.auth.refresh.token.error.message"),
 			},
 			data: undefined,
 		};

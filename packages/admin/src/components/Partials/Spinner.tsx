@@ -30,8 +30,8 @@ const Spinner: Component<SpinnerProps> = (props) => {
 				/>
 			</svg>
 			<span class="sr-only">
-				{T()("loading")}
-				{T()("ellipsis")}
+				{T()("common.loading")}
+				{T()("common.ellipsis")}
 			</span>
 		</div>
 	);

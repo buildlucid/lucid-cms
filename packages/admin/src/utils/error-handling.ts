@@ -19,8 +19,8 @@ export const validateSetError = (error: unknown) => {
 	}
 	return {
 		status: 500,
-		name: T()("error"),
-		message: T()("unknown_error_message"),
+		name: T()("common.error"),
+		message: T()("errors.unknown.message"),
 		errors: {},
 	};
 };
@@ -35,8 +35,8 @@ export const handleSiteErrors = (error: ErrorResponse) => {
 
 export const emptyBodyError = () => {
 	spawnToast({
-		title: T()("error"),
-		message: T()("empty_body_error_message"),
+		title: T()("common.error"),
+		message: T()("errors.empty.body.message"),
 		status: "error",
 	});
 };

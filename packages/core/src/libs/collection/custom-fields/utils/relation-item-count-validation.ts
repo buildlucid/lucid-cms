@@ -1,4 +1,4 @@
-import T from "../../../../translations/index.js";
+import { serverText } from "../../../i18n/index.js";
 import type { CustomFieldValidateResponse } from "../types.js";
 
 /**
@@ -25,8 +25,10 @@ export const validateRelationItemCount = (props: {
 	) {
 		return {
 			valid: false,
-			message: T("field_relation_min_items", {
-				min: props.validation.minItems,
+			message: serverText("core.fields.relation.validation.min.items", {
+				data: {
+					min: props.validation.minItems,
+				},
 			}),
 		};
 	}
@@ -37,8 +39,10 @@ export const validateRelationItemCount = (props: {
 	) {
 		return {
 			valid: false,
-			message: T("field_relation_max_items", {
-				max: props.validation.maxItems,
+			message: serverText("core.fields.relation.validation.max.items", {
+				data: {
+					max: props.validation.maxItems,
+				},
 			}),
 		};
 	}

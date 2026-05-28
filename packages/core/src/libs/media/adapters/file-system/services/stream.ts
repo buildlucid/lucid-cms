@@ -1,10 +1,10 @@
 import { constants, createReadStream } from "node:fs";
 import { access, stat } from "node:fs/promises";
-import T from "../../../../../translations/index.js";
 import {
 	createBufferETag,
 	matchesETag,
 } from "../../../../../utils/http/etag.js";
+import { serverText } from "../../../../i18n/index.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceStream,
@@ -31,7 +31,7 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 			} catch {
 				return {
 					error: {
-						message: T("file_not_found"),
+						message: serverText("core.files.not.found"),
 						status: 404,
 					},
 					data: undefined,
@@ -75,7 +75,7 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 				if (start >= totalSize || end >= totalSize || start > end) {
 					return {
 						error: {
-							message: "Invalid range",
+							message: serverText("core.media.stream.range.invalid"),
 							status: 416,
 						},
 						data: undefined,
@@ -113,7 +113,9 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 			const error = e as Error;
 			return {
 				error: {
-					message: error.message,
+					message: serverText("core.errors.default.message", {
+						fallback: error.message,
+					}),
 					status: 500,
 				},
 				data: undefined,

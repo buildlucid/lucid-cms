@@ -6,6 +6,7 @@ import type {
 import decodeError from "../../utils/errors/decode-error.js";
 import flattenDocumentFilters from "../../utils/helpers/flatten-document-filters.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
+import { serverText } from "../i18n/index.js";
 
 type PaginatedQuery = {
 	page?: number;
@@ -17,6 +18,16 @@ type DocumentQuery = {
 };
 
 type ResolvedServiceResponse<T> = Awaited<ServiceResponse<T>>;
+
+type ToolkitServiceErrorText = {
+	key: string;
+	fallback: string;
+};
+
+type ToolkitServiceErrorConfig = {
+	name?: ToolkitServiceErrorText;
+	message: ToolkitServiceErrorText;
+};
 
 /** Applies Lucid's default pagination when toolkit callers omit it. */
 export const normalizePaginatedQuery = <T extends PaginatedQuery>(
@@ -70,7 +81,7 @@ export const normalizeQuery = <T extends object>(query?: T): T =>
 /** Converts unexpected exceptions into standard Lucid service error values. */
 export const runToolkitService = async <T>(
 	callback: () => ServiceResponse<T>,
-	messageFallback: string,
+	errorConfig: ToolkitServiceErrorConfig,
 ): ServiceResponse<T> => {
 	try {
 		const response = await callback();
@@ -82,7 +93,14 @@ export const runToolkitService = async <T>(
 		return {
 			error: {
 				type: "basic",
-				message: messageFallback,
+				name: errorConfig.name
+					? serverText(errorConfig.name.key, {
+							fallback: errorConfig.name.fallback,
+						})
+					: undefined,
+				message: serverText(errorConfig.message.key, {
+					fallback: errorConfig.message.fallback,
+				}),
 				status: 500,
 			},
 			data: undefined,
@@ -94,11 +112,21 @@ export const runToolkitService = async <T>(
 			return {
 				error: {
 					type: "basic",
-					name: decodedError.name,
-					message: decodedError.message ?? messageFallback,
+					name: errorConfig.name
+						? serverText(errorConfig.name.key, {
+								fallback: errorConfig.name.fallback,
+								priority: decodedError.name,
+							})
+						: serverText("core.errors.default.name", {
+								priority: decodedError.name,
+							}),
+					message: serverText(errorConfig.message.key, {
+						fallback: errorConfig.message.fallback,
+						priority: decodedError.message ?? errorConfig.message.fallback,
+					}),
 					status: decodedError.status,
 					code: decodedError.code,
-					errors: decodedError.errors,
+					errors: undefined,
 				},
 				data: undefined,
 			} satisfies ResolvedServiceResponse<T>;
@@ -107,8 +135,16 @@ export const runToolkitService = async <T>(
 		return {
 			error: {
 				type: "basic",
-				name: constants.errors.name,
-				message: messageFallback,
+				name: errorConfig.name
+					? serverText(errorConfig.name.key, {
+							fallback: errorConfig.name.fallback,
+						})
+					: serverText("core.errors.default.name", {
+							priority: constants.errors.name,
+						}),
+				message: serverText(errorConfig.message.key, {
+					fallback: errorConfig.message.fallback,
+				}),
 				status: constants.errors.status,
 			},
 			data: undefined,

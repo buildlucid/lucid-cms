@@ -141,7 +141,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 					},
 				)}
 			>
-				<span class="sr-only">{T()("show_options")}</span>
+				<span class="sr-only">{T()("common.actions.options.show")}</span>
 				<DropdownMenu.Icon>
 					<FaSolidEllipsisVertical class="text-subtitle pointer-events-none" />
 				</DropdownMenu.Icon>
@@ -175,8 +175,10 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 													e.stopPropagation();
 													if (action.permission === false) {
 														spawnToast({
-															title: T()("no_permission_toast_title"),
-															message: T()("no_permission_toast_message"),
+															title: T()("toasts.common.no.permission.title"),
+															message: T()(
+																"toasts.common.no.permission.message",
+															),
 															status: "warning",
 														});
 														e.preventDefault();
@@ -199,8 +201,10 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 													e.stopPropagation();
 													if (action.permission === false) {
 														spawnToast({
-															title: T()("no_permission_toast_title"),
-															message: T()("no_permission_toast_message"),
+															title: T()("toasts.common.no.permission.title"),
+															message: T()(
+																"toasts.common.no.permission.message",
+															),
 															status: "warning",
 														});
 														return;

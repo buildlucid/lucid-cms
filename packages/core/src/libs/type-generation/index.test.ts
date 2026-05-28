@@ -4,6 +4,7 @@ import path from "node:path";
 import { expect, test } from "vitest";
 import BrickBuilder from "../collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import { adminText } from "../i18n/index.js";
 import generateTypes from "./index.js";
 
 test("generates collection-aware client document types that lean on the public Lucid contracts", async () => {
@@ -17,13 +18,13 @@ test("generates collection-aware client document types that lean on the public L
 		.addTab("content_tab")
 		.addText("title", {
 			config: {
-				translations: true,
+				localized: true,
 			},
 		})
 		.addRepeater("call_to_actions")
 		.addText("label", {
 			config: {
-				translations: false,
+				localized: false,
 			},
 		})
 		.endRepeater();
@@ -31,15 +32,19 @@ test("generates collection-aware client document types that lean on the public L
 	const PageCollection = new CollectionBuilder("page", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			name: adminText("tests.collections.page.name", { fallback: "Pages" }),
+			singularName: adminText("tests.collections.page.singularName", {
+				fallback: "Page",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			environments: [
 				{
 					key: "published",
-					name: "Published",
+					name: adminText("tests.environments.published.name", {
+						fallback: "Published",
+					}),
 				},
 			],
 		},
@@ -47,28 +52,28 @@ test("generates collection-aware client document types that lean on the public L
 			builder: [BannerBrick],
 		},
 	})
-		.addText("page_title", {
+		.addText("_page_title", {
 			config: {
-				translations: true,
+				localized: true,
 			},
 		})
-		.addDocument("related_page", {
+		.addDocument("_related_page", {
 			collection: "page",
 			config: {
-				translations: false,
+				localized: false,
 			},
 		})
-		.addDocument("related_content", {
+		.addDocument("_related_content", {
 			collection: ["page", "blog"],
 			config: {
-				translations: false,
+				localized: false,
 				multiple: true,
 			},
 		})
 		.addRepeater("sections")
-		.addText("section_title", {
+		.addText("_section_title", {
 			config: {
-				translations: false,
+				localized: false,
 			},
 		})
 		.endRepeater();
@@ -119,11 +124,11 @@ test("generates collection-aware client document types that lean on the public L
 		);
 		expect(clientContent).toContain(
 			`export type PageCollectionDocumentFields = {
-	"page_title": TranslatedDocumentField<"page_title", "text", string | null>;
-	"related_page": ValueDocumentField<"related_page", "document", Array<DocumentRelationValue<"page">>>;
-	"related_content": ValueDocumentField<"related_content", "document", Array<DocumentRelationValue<"page" | "blog">>>;
+	"_page_title": TranslatedDocumentField<"_page_title", "text", string | null>;
+	"_related_page": ValueDocumentField<"_related_page", "document", Array<DocumentRelationValue<"page">>>;
+	"_related_content": ValueDocumentField<"_related_content", "document", Array<DocumentRelationValue<"page" | "blog">>>;
 	"sections": GroupDocumentField<"sections", "repeater", {
-		"section_title": ValueDocumentField<"section_title", "text", string | null, true>;
+		"_section_title": ValueDocumentField<"_section_title", "text", string | null, true>;
 	}>;
 }`,
 		);

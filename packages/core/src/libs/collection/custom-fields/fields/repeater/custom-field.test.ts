@@ -1,4 +1,5 @@
 import { expect, test } from "vitest";
+import { adminText } from "../../../../i18n/index.js";
 import CustomFieldSchema from "../../schema.js";
 import RepeaterCustomField from "./custom-field.js";
 
@@ -7,12 +8,12 @@ import RepeaterCustomField from "./custom-field.js";
 test("custom field config passes schema validation", async () => {
 	const field = new RepeaterCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
 		},
 		config: {
 			disabled: false,

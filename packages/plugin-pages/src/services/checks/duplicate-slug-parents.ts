@@ -1,4 +1,4 @@
-import { prefixGeneratedColName } from "@lucidcms/core/plugin";
+import { prefixGeneratedColName, serverText } from "@lucidcms/core/plugin";
 import type {
 	CollectionTableNames,
 	DocumentVersionType,
@@ -8,7 +8,6 @@ import type {
 } from "@lucidcms/core/types";
 import { sql } from "kysely";
 import constants from "../../constants.js";
-import T from "../../translations/index.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../../utils/get-parent-page-relation-table.js";
 import normalizePathValue from "../../utils/normalize-path-value.js";
@@ -51,7 +50,7 @@ const checkDuplicateSlugParents: ServiceFn<
 
 		if (data.fields.slug.value) {
 			slugConditions.push({
-				localeCode: context.config.localization.defaultLocale,
+				localeCode: context.config.i18n.content.defaultLocale,
 				slug: normalizePathValue(data.fields.slug.value) || "/",
 			});
 		}
@@ -139,15 +138,15 @@ const checkDuplicateSlugParents: ServiceFn<
 					localeCode: duplicate.locale || undefined,
 					message:
 						duplicate[parentPageColumn] === null
-							? T("duplicate_slug_field_found_message")
-							: T("duplicate_slug_and_parent_page_field_found_message"),
+							? serverText("plugin.pages.slug.duplicate")
+							: serverText("plugin.pages.slug.parent.duplicate"),
 				});
 			}
 			return {
 				error: {
 					type: "basic",
 					status: 400,
-					message: T("duplicate_slug_field_found_message"),
+					message: serverText("plugin.pages.slug.duplicate"),
 					errors: {
 						fields: fieldErrors,
 					},
@@ -164,7 +163,7 @@ const checkDuplicateSlugParents: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: T("an_unknown_error_occurred_checking_for_duplicate_slugs"),
+				message: serverText("plugin.pages.slug.duplicate.check.failed"),
 			},
 			data: undefined,
 		};

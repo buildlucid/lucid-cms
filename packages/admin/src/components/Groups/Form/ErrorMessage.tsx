@@ -11,6 +11,8 @@ interface ErrorMessageProps {
 
 export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 	const fieldErrors = () => normalizeFieldErrors(props.errors);
+	const renderErrorMessage = (message: FieldError["message"]) =>
+		typeof message === "string" ? message : message.default;
 	const genericMessage = () => {
 		if (!props.errors || Array.isArray(props.errors)) return undefined;
 		return typeof props.errors.message === "string"
@@ -31,9 +33,9 @@ export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 								/>
 								<span>
 									<Show when={typeof error.itemIndex === "number"}>
-										{`${T()("item")} ${Number(error.itemIndex) + 1}: `}
+										{`${T()("common.item")} ${Number(error.itemIndex) + 1}: `}
 									</Show>
-									{error.message}
+									{renderErrorMessage(error.message)}
 								</span>
 							</a>
 						)}

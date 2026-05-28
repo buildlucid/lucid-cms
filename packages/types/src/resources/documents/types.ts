@@ -1,4 +1,4 @@
-import type { LocaleValue } from "../locales/types.js";
+import type { AdminText } from "../locales/types.js";
 import type { MediaRef, ProfilePicture } from "../media/types.js";
 import type { UserRef } from "../users/types.js";
 
@@ -311,8 +311,8 @@ export type WorkflowStageColor =
 export interface CollectionBrickConfig {
 	key: string;
 	details: {
-		name: LocaleValue;
-		summary?: LocaleValue;
+		name: AdminText;
+		summary?: AdminText;
 	};
 	preview:
 		| {
@@ -323,18 +323,18 @@ export interface CollectionBrickConfig {
 }
 
 type FieldDetails = {
-	label?: LocaleValue;
-	summary?: LocaleValue;
-	placeholder?: LocaleValue;
+	label?: AdminText;
+	summary?: AdminText;
+	placeholder?: AdminText;
 };
 
 type RelationFieldDetails = {
-	label?: string | Record<string, string>;
-	summary?: string | Record<string, string>;
+	label?: AdminText;
+	summary?: AdminText;
 };
 
 type FieldConfigOptions<TDefault = unknown> = {
-	translations?: boolean;
+	localized?: boolean;
 	hidden?: boolean;
 	disabled?: boolean;
 	index?: true;
@@ -359,8 +359,8 @@ type SharedCollectionFieldConfig<TType extends FieldType> = {
 export interface CheckboxFieldConfig
 	extends SharedCollectionFieldConfig<"checkbox"> {
 	details: FieldDetails & {
-		true?: LocaleValue;
-		false?: LocaleValue;
+		true?: AdminText;
+		false?: AdminText;
 	};
 	config: FieldConfigOptions<boolean>;
 	validation?: RequiredValidation;
@@ -450,7 +450,7 @@ export interface RichTextFieldConfig
 
 export interface SelectFieldConfig
 	extends SharedCollectionFieldConfig<"select"> {
-	options: Array<{ label: LocaleValue; value: string }>;
+	options: Array<{ label: AdminText; value: string }>;
 	config: FieldConfigOptions<string>;
 	validation?: RequiredValidation;
 }
@@ -509,12 +509,12 @@ export interface Collection {
 	documentId?: number | null;
 	mode: CollectionMode;
 	details: {
-		name: LocaleValue;
-		singularName: LocaleValue;
-		summary: LocaleValue | null;
+		name: AdminText;
+		singularName: AdminText;
+		summary: AdminText | null;
 	};
 	config: {
-		translations: boolean;
+		localized: boolean;
 		revisions: boolean;
 		locked: boolean;
 		displayInListing: string[];
@@ -533,7 +533,7 @@ export interface Collection {
 			initial: string;
 			stages: Array<{
 				key: string;
-				name: LocaleValue;
+				name: AdminText;
 				color: WorkflowStageColor;
 				publishTargets: string[];
 				permissions: {
@@ -544,7 +544,7 @@ export interface Collection {
 		};
 		environments: {
 			key: string;
-			name: LocaleValue;
+			name: AdminText;
 			permissions: {
 				publish: string;
 				review: string;

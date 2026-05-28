@@ -30,8 +30,8 @@ const ClearCache: Component<ClearCacheProps> = (props) => {
 				isError: clearCache.action.isError,
 			}}
 			copy={{
-				title: T()("clear_cache_modal_title"),
-				description: T()("clear_cache_modal_description"),
+				title: T()("modals.system.cache.title"),
+				description: T()("modals.system.cache.description"),
 				error: clearCache.errors()?.message,
 			}}
 			callbacks={{

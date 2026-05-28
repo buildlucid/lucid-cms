@@ -32,8 +32,8 @@ const RestoreMedia: Component<RestoreMediaProps> = (props) => {
 				isError: restoreMedia.action.isError,
 			}}
 			copy={{
-				title: T()("restore_media_modal_title"),
-				description: T()("restore_media_modal_description"),
+				title: T()("modals.common.restore.media.title"),
+				description: T()("modals.common.restore.media.description"),
 				error: restoreMedia.errors()?.message,
 			}}
 			callbacks={{

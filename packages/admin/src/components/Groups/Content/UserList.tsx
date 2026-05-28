@@ -64,13 +64,13 @@ export const UserList: Component<{
 	const noEntriesCopy = createMemo(() => {
 		if (props.state.showingDeleted()) {
 			return {
-				title: T()("no_deleted_users"),
-				description: T()("no_deleted_users_description"),
+				title: T()("empty.states.users.deleted.title"),
+				description: T()("empty.states.users.deleted.description"),
 			};
 		}
 		return {
-			title: T()("no_users"),
-			description: T()("no_users_description"),
+			title: T()("empty.states.users.title"),
+			description: T()("empty.states.users.description"),
 			button: T()(Permissions.UsersCreate),
 		};
 	});
@@ -158,48 +158,48 @@ export const UserList: Component<{
 				searchParams={props.state.searchParams}
 				head={[
 					{
-						label: T()("username"),
+						label: T()("common.username"),
 						key: "username",
 						icon: <FaSolidIdCard />,
 					},
 					{
-						label: T()("first_name"),
+						label: T()("common.first.name"),
 						key: "firstName",
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("last_name"),
+						label: T()("common.last.name"),
 						key: "lastName",
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("email"),
+						label: T()("common.email"),
 						key: "email",
 						icon: <FaSolidEnvelope />,
 					},
 					{
-						label: T()("user_type"),
+						label: T()("users.type"),
 						key: "superAdmin",
 						icon: <FaSolidUserTie />,
 					},
 					{
-						label: T()("is_locked"),
+						label: T()("users.status.locked.label"),
 						key: "isLocked",
 						icon: <FaSolidLock />,
 						sortable: true,
 					},
 					{
-						label: T()("invitation_status"),
+						label: T()("users.invitations.status.label"),
 						key: "invitationAccepted",
 						icon: <FaSolidEnvelope />,
 					},
 					{
-						label: T()("password_reset_status"),
+						label: T()("users.password.reset.status.label"),
 						key: "triggerPasswordReset",
 						icon: <FaSolidLock />,
 					},
 					{
-						label: T()("created_at"),
+						label: T()("common.created.at"),
 						key: "createdAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,

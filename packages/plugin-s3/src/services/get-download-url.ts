@@ -1,7 +1,7 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceGetDownloadUrl } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../constants.js";
-import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
 import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 
@@ -43,8 +43,9 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			return {
 				error: {
 					type: "plugin",
-					message:
-						e instanceof Error ? e.message : T("an_unknown_error_occurred"),
+					message: serverText("plugin.s3.errors.unknown", {
+						fallback: e instanceof Error ? e.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

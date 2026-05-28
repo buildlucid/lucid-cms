@@ -33,8 +33,8 @@ const RestoreMediaBatch: Component<RestoreMediaBatchProps> = (props) => {
 				isError: restoreMedia.action.isError,
 			}}
 			copy={{
-				title: T()("restore_items_modal_title"),
-				description: T()("restore_items_modal_description"),
+				title: T()("modals.common.restore.items.title"),
+				description: T()("modals.common.restore.items.description"),
 				error: restoreMedia.errors()?.message,
 			}}
 			callbacks={{

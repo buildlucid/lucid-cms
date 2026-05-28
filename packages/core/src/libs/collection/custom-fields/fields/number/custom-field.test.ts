@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import NumberCustomField from "./custom-field.js";
@@ -11,11 +11,13 @@ import NumberCustomField from "./custom-field.js";
 const NumberCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addNumber("standard_number")
@@ -46,7 +48,7 @@ test("successfully validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			translations: NumberCollection.getData.config.translations,
+			localized: NumberCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -67,7 +69,7 @@ test("successfully validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			translations: NumberCollection.getData.config.translations,
+			localized: NumberCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -88,7 +90,7 @@ test("successfully validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			translations: NumberCollection.getData.config.translations,
+			localized: NumberCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -111,7 +113,7 @@ test("fail to validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			translations: NumberCollection.getData.config.translations,
+			localized: NumberCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -119,7 +121,10 @@ test("fail to validate field - number", async () => {
 		{
 			key: "standard_number",
 			localeCode: null,
-			message: "Invalid input: expected number, received string", // zod error message
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Invalid input: expected number, received string",
+				priority: "Invalid input: expected number, received string",
+			}),
 		},
 	]);
 
@@ -138,7 +143,7 @@ test("fail to validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			translations: NumberCollection.getData.config.translations,
+			localized: NumberCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -146,7 +151,7 @@ test("fail to validate field - number", async () => {
 		{
 			key: "required_number",
 			localeCode: null,
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 
@@ -165,7 +170,7 @@ test("fail to validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			translations: NumberCollection.getData.config.translations,
+			localized: NumberCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -173,7 +178,10 @@ test("fail to validate field - number", async () => {
 		{
 			key: "min_number",
 			localeCode: null,
-			message: "Too small: expected number to be >=5",
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Too small: expected number to be >=5",
+				priority: "Too small: expected number to be >=5",
+			}),
 		},
 	]);
 });
@@ -183,18 +191,18 @@ test("fail to validate field - number", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new NumberCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
-			placeholder: {
-				en: "placeholder",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
+			placeholder: adminText("tests.fields.field.placeholder", {
+				fallback: "placeholder",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			default: 10,
 			hidden: false,
 			disabled: false,

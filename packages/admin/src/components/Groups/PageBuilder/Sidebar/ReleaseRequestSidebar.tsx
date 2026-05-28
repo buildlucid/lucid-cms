@@ -47,39 +47,39 @@ type DecisionAction = "approve" | "reject" | "cancel";
 const getDecisionTitle = (action?: DecisionAction) => {
 	switch (action) {
 		case "approve":
-			return T()("approve_release_request");
+			return T()("publish.requests.review.approve.title");
 		case "reject":
-			return T()("reject_release_request");
+			return T()("publish.requests.review.reject.title");
 		case "cancel":
-			return T()("cancel_release_request");
+			return T()("publish.requests.review.cancel.title");
 		default:
-			return T()("confirm");
+			return T()("common.confirm");
 	}
 };
 
 const getDecisionDescription = (action?: DecisionAction) => {
 	switch (action) {
 		case "approve":
-			return T()("approve_release_request_description");
+			return T()("publish.requests.review.approve.description");
 		case "reject":
-			return T()("reject_release_request_description");
+			return T()("publish.requests.review.reject.description");
 		case "cancel":
-			return T()("cancel_release_request_description");
+			return T()("publish.requests.review.cancel.description");
 		default:
-			return T()("decision_comment_placeholder");
+			return T()("publish.requests.decision.comment.placeholder");
 	}
 };
 
 const getDecisionConfirm = (action?: DecisionAction) => {
 	switch (action) {
 		case "approve":
-			return T()("approve");
+			return T()("common.approve");
 		case "reject":
-			return T()("reject");
+			return T()("common.reject");
 		case "cancel":
-			return T()("cancel");
+			return T()("common.cancel");
 		default:
-			return T()("confirm");
+			return T()("common.confirm");
 	}
 };
 
@@ -90,7 +90,9 @@ const PublishOperationUserDetailValue: Component<{
 		{(user) => (
 			<UserDisplay
 				user={{
-					username: helpers.formatUserName(user(), "simple") || T()("unknown"),
+					username:
+						helpers.formatUserName(user(), "simple") ||
+						T()("media.types.unknown"),
 					firstName: user().firstName,
 					lastName: user().lastName,
 					profilePicture: user().profilePicture,
@@ -173,9 +175,10 @@ export const ReleaseRequestSidebar: Component<{
 	});
 	const statusLabel = createMemo(() => {
 		const publishRequest = request();
-		if (!publishRequest) return T()("loading");
+		if (!publishRequest) return T()("common.loading");
 
-		if (publishRequest.status === "pending") return T()("awaiting_approval");
+		if (publishRequest.status === "pending")
+			return T()("common.status.awaiting.approval");
 		return getPublishOperationStatusLabel(publishRequest.status);
 	});
 	const executionStatusLabel = createMemo(() => {
@@ -192,11 +195,11 @@ export const ReleaseRequestSidebar: Component<{
 	const releaseTimingOptions = createMemo(() => [
 		{
 			value: "now",
-			label: T()("release_environment_publish_confirm"),
+			label: T()("documents.release.environment.publish.confirm"),
 		},
 		{
 			value: "scheduled",
-			label: T()("schedule_release"),
+			label: T()("documents.release.schedule.action"),
 		},
 	]);
 	const error = createMemo(
@@ -294,7 +297,7 @@ export const ReleaseRequestSidebar: Component<{
 		const publishRequest = request();
 		if (!action || !publishRequest) return;
 		if (requireDecisionComment() && decisionComment().trim().length === 0) {
-			setValidationError(T()("publish_request_comment_required"));
+			setValidationError(T()("publish.requests.validation.comment.required"));
 			return;
 		}
 
@@ -307,7 +310,7 @@ export const ReleaseRequestSidebar: Component<{
 					})
 				: null;
 		if (action === "approve" && scheduleEnabled() && !scheduledAt) {
-			setValidationError(T()("schedule_release_required"));
+			setValidationError(T()("documents.release.schedule.validation.required"));
 			return;
 		}
 
@@ -335,7 +338,7 @@ export const ReleaseRequestSidebar: Component<{
 			timezone: scheduleTimezone(),
 		});
 		if (!scheduledAt) {
-			setValidationError(T()("schedule_release_required"));
+			setValidationError(T()("documents.release.schedule.validation.required"));
 			return;
 		}
 
@@ -369,32 +372,34 @@ export const ReleaseRequestSidebar: Component<{
 					<div class="flex items-start justify-between gap-3">
 						<h2 class="min-w-0 text-base font-semibold text-title">
 							{request()
-								? T()("publish_request_detail_route_title", {
+								? T()("routes.publish.requests.detail.title", {
 										id: request()?.id,
 									})
-								: T()("request_details")}
+								: T()("publish.requests.detail.request.details")}
 						</h2>
 						<Show when={request()?.isOutdated}>
 							<Pill
 								theme="warning-opaque"
-								tooltip={T()("snapshot_outdated")}
+								tooltip={T()("publish.requests.snapshot.outdated")}
 								class="shrink-0 items-center gap-1.5"
 							>
 								<FaSolidTriangleExclamation size={10} />
-								{T()("out_of_sync")}
+								{T()("common.status.out.of.sync")}
 							</Pill>
 						</Show>
 					</div>
 
 					<div class="grid gap-1.5 text-sm">
 						<div class="flex items-center justify-between gap-3">
-							<span class="text-body">{T()("status")}</span>
+							<span class="text-body">{T()("common.status")}</span>
 							<span class="text-title">{statusLabel()}</span>
 						</div>
 						<Show when={executionStatusLabel()}>
 							{(label) => (
 								<div class="flex items-center justify-between gap-3">
-									<span class="text-body">{T()("execution_status")}</span>
+									<span class="text-body">
+										{T()("common.execution.status")}
+									</span>
 									<span class="text-title">{label()}</span>
 								</div>
 							)}
@@ -403,13 +408,13 @@ export const ReleaseRequestSidebar: Component<{
 
 					<dl class="grid grid-cols-2 gap-3 border-y border-border py-3 text-xs">
 						<div class="min-w-0">
-							<dt class="text-body">{T()("target")}</dt>
+							<dt class="text-body">{T()("common.target")}</dt>
 							<dd class="mt-1 truncate font-medium text-title">
 								{targetLabel()}
 							</dd>
 						</div>
 						<div class="min-w-0">
-							<dt class="text-body">{T()("snapshot")}</dt>
+							<dt class="text-body">{T()("common.snapshot")}</dt>
 							<dd class="mt-1 truncate font-medium text-title">
 								#{request()?.snapshotVersionId ?? "-"}
 							</dd>
@@ -427,7 +432,7 @@ export const ReleaseRequestSidebar: Component<{
 									size="small"
 									onClick={() => openDecision("approve")}
 								>
-									{T()("approve")}
+									{T()("common.approve")}
 								</Button>
 								<Button
 									type="button"
@@ -435,7 +440,7 @@ export const ReleaseRequestSidebar: Component<{
 									size="small"
 									onClick={() => openDecision("reject")}
 								>
-									{T()("reject")}
+									{T()("common.reject")}
 								</Button>
 							</div>
 						</Show>
@@ -447,7 +452,7 @@ export const ReleaseRequestSidebar: Component<{
 									size="small"
 									onClick={() => openDecision("cancel")}
 								>
-									{T()("cancel")}
+									{T()("common.cancel")}
 								</Button>
 							</Show>
 							<Show when={request()?.permissions.reschedule}>
@@ -458,8 +463,8 @@ export const ReleaseRequestSidebar: Component<{
 									onClick={openReschedule}
 								>
 									{requestHasSchedule()
-										? T()("reschedule_release")
-										: T()("schedule")}
+										? T()("common.reschedule.release")
+										: T()("common.schedule")}
 								</Button>
 							</Show>
 							<Show when={request()?.permissions.retry}>
@@ -476,7 +481,7 @@ export const ReleaseRequestSidebar: Component<{
 										});
 									}}
 								>
-									{T()("retry_release")}
+									{T()("common.retry.release")}
 								</Button>
 							</Show>
 						</div>
@@ -484,31 +489,31 @@ export const ReleaseRequestSidebar: Component<{
 				</Show>
 
 				<SidebarSection
-					title={T()("request_details")}
+					title={T()("publish.requests.detail.request.details")}
 					icon={<FaSolidCircleInfo size={14} />}
 					storageKey="lucid:release-request-sidebar:details-open"
 				>
 					<div class="rounded-md border border-border bg-card-base p-3">
 						<dl class="grid gap-2 text-xs">
-							<ReleaseRequestDetailRow label={T()("requested_by")}>
+							<ReleaseRequestDetailRow label={T()("common.requested.by")}>
 								<PublishOperationUserDetailValue
 									user={request()?.requestedBy ?? null}
 								/>
 							</ReleaseRequestDetailRow>
 							<Show when={request()?.createdAt}>
-								<ReleaseRequestDetailRow label={T()("requested_at")}>
+								<ReleaseRequestDetailRow label={T()("common.requested.at")}>
 									<DateText date={request()?.createdAt} class="text-xs" />
 								</ReleaseRequestDetailRow>
 							</Show>
 							<Show when={request()?.decidedBy}>
-								<ReleaseRequestDetailRow label={T()("decided_by")}>
+								<ReleaseRequestDetailRow label={T()("common.decided.by")}>
 									<PublishOperationUserDetailValue
 										user={request()?.decidedBy ?? null}
 									/>
 								</ReleaseRequestDetailRow>
 							</Show>
 							<Show when={request()?.decidedAt}>
-								<ReleaseRequestDetailRow label={T()("updated_at")}>
+								<ReleaseRequestDetailRow label={T()("common.updated.at")}>
 									<DateText date={request()?.decidedAt} class="text-xs" />
 								</ReleaseRequestDetailRow>
 							</Show>
@@ -525,35 +530,37 @@ export const ReleaseRequestSidebar: Component<{
 					}
 				>
 					<SidebarSection
-						title={T()("execution_status")}
+						title={T()("common.execution.status")}
 						icon={<FaSolidClock size={14} />}
 						storageKey="lucid:release-request-sidebar:execution-open"
 					>
 						<div class="rounded-md border border-border bg-card-base p-3">
 							<dl class="grid gap-2 text-xs">
 								<Show when={request()?.scheduledAt}>
-									<ReleaseRequestDetailRow label={T()("scheduled_for")}>
+									<ReleaseRequestDetailRow label={T()("common.scheduled.for")}>
 										<DateText date={request()?.scheduledAt} class="text-xs" />
 									</ReleaseRequestDetailRow>
 								</Show>
 								<Show when={request()?.scheduledTimezone}>
 									<ReleaseRequestDetailRow
-										label={T()("scheduled_timezone")}
+										label={T()("common.scheduled.timezone")}
 										value={request()?.scheduledTimezone}
 									/>
 								</Show>
 								<Show when={request()?.executedAt}>
-									<ReleaseRequestDetailRow label={T()("executed_at")}>
+									<ReleaseRequestDetailRow label={T()("common.executed.at")}>
 										<DateText date={request()?.executedAt} class="text-xs" />
 									</ReleaseRequestDetailRow>
 								</Show>
 								<Show when={request()?.failedAt}>
-									<ReleaseRequestDetailRow label={T()("failed_at")}>
+									<ReleaseRequestDetailRow label={T()("common.failed.at")}>
 										<DateText date={request()?.failedAt} class="text-xs" />
 									</ReleaseRequestDetailRow>
 								</Show>
 								<Show when={request()?.executionErrorMessage}>
-									<ReleaseRequestDetailRow label={T()("execution_error")}>
+									<ReleaseRequestDetailRow
+										label={T()("common.execution.error")}
+									>
 										<span class="whitespace-pre-wrap">
 											{request()?.executionErrorMessage}
 										</span>
@@ -568,7 +575,7 @@ export const ReleaseRequestSidebar: Component<{
 					when={(request()?.assignees.length ?? 0) > 0 || canUpdateReviewers()}
 				>
 					<SidebarSection
-						title={T()("reviewers")}
+						title={T()("common.reviewers")}
 						icon={<FaSolidUserCheck size={14} />}
 						storageKey="lucid:release-request-sidebar:reviewers-open"
 						meta={request()?.assignees.length}
@@ -578,7 +585,9 @@ export const ReleaseRequestSidebar: Component<{
 								<Show
 									when={(request()?.assignees.length ?? 0) > 0}
 									fallback={
-										<div class="px-3 py-2 text-sm text-body">{T()("none")}</div>
+										<div class="px-3 py-2 text-sm text-body">
+											{T()("common.none")}
+										</div>
 									}
 								>
 									<For each={request()?.assignees ?? []}>
@@ -589,7 +598,7 @@ export const ReleaseRequestSidebar: Component<{
 														username:
 															assignee.user.username ??
 															assignee.user.email ??
-															T()("unknown"),
+															T()("media.types.unknown"),
 														firstName: assignee.user.firstName,
 														lastName: assignee.user.lastName,
 														profilePicture: assignee.user.profilePicture,
@@ -613,7 +622,7 @@ export const ReleaseRequestSidebar: Component<{
 									size="small"
 									onClick={() => setReviewersOpen(true)}
 								>
-									{T()("update_reviewers")}
+									{T()("actions.update.reviewers")}
 								</Button>
 							</Show>
 						</div>
@@ -622,17 +631,17 @@ export const ReleaseRequestSidebar: Component<{
 
 				<Show when={request()?.requestComment || request()?.decisionComment}>
 					<SidebarSection
-						title={T()("comment")}
+						title={T()("common.comment")}
 						icon={<FaSolidPaperPlane size={14} />}
 						storageKey="lucid:release-request-sidebar:comments-open"
 					>
 						<div class="grid gap-2">
 							<ReleaseRequestCommentBlock
-								label={T()("comment")}
+								label={T()("common.comment")}
 								value={request()?.requestComment ?? null}
 							/>
 							<ReleaseRequestCommentBlock
-								label={T()("decision_comment")}
+								label={T()("common.decision.comment")}
 								value={request()?.decisionComment ?? null}
 							/>
 						</div>
@@ -678,8 +687,8 @@ export const ReleaseRequestSidebar: Component<{
 						required={requireDecisionComment()}
 						rows={4}
 						copy={{
-							label: T()("comment"),
-							placeholder: T()("decision_comment_placeholder"),
+							label: T()("common.comment"),
+							placeholder: T()("publish.requests.decision.comment.placeholder"),
 						}}
 						noMargin={true}
 					/>
@@ -696,7 +705,7 @@ export const ReleaseRequestSidebar: Component<{
 								}}
 								options={releaseTimingOptions()}
 								copy={{
-									label: T()("release_timing"),
+									label: T()("documents.release.timing"),
 								}}
 								noClear={true}
 								hideOptionalText={true}
@@ -730,10 +739,10 @@ export const ReleaseRequestSidebar: Component<{
 				}}
 				copy={{
 					title: requestHasSchedule()
-						? T()("reschedule_release")
-						: T()("schedule_release"),
-					description: T()("schedule_release_modal_description"),
-					confirm: T()("update_schedule"),
+						? T()("common.reschedule.release")
+						: T()("documents.release.schedule.action"),
+					description: T()("modals.common.schedule.release.description"),
+					confirm: T()("actions.update.schedule"),
 					error: error(),
 				}}
 				callbacks={{
@@ -760,7 +769,7 @@ export const ReleaseRequestSidebar: Component<{
 									reschedule.reset();
 								}}
 							>
-								{T()("cancel")}
+								{T()("common.cancel")}
 							</Button>
 							<Show when={requestHasSchedule()}>
 								<Button
@@ -770,7 +779,7 @@ export const ReleaseRequestSidebar: Component<{
 									loading={reschedule.action.isPending}
 									onClick={removeSchedule}
 								>
-									{T()("remove_schedule")}
+									{T()("documents.release.schedule.remove")}
 								</Button>
 							</Show>
 							<Button
@@ -781,8 +790,8 @@ export const ReleaseRequestSidebar: Component<{
 								onClick={saveReschedule}
 							>
 								{requestHasSchedule()
-									? T()("update_schedule")
-									: T()("schedule_release")}
+									? T()("actions.update.schedule")
+									: T()("documents.release.schedule.action")}
 							</Button>
 						</>
 					),

@@ -3,10 +3,10 @@ import getMigrationStatus from "../../libs/collection/get-collection-migration-s
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import invalidateClientDocumentCache from "../documents/helpers/invalidate-client-cache.js";
 import { documentBrickServices, documentServices } from "../index.js";
@@ -47,8 +47,8 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("error_locked_collection_name"),
-				message: T("error_locked_collection_message"),
+				name: serverText("core.error.locked.collection.name"),
+				message: serverText("core.error.locked.collection.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -65,8 +65,8 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("error_schema_migration_required_name"),
-				message: T("error_schema_migration_required_message"),
+				name: serverText("core.error.schema.migration.required.name"),
+				message: serverText("core.error.schema.migration.required.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -103,7 +103,7 @@ const updateSingle: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: T("version_not_found_message"),
+					message: serverText("core.documents.versions.not.found.message"),
 					status: 404,
 				},
 			},
@@ -118,8 +118,8 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("error_update_revision_version_name"),
-				message: T("error_update_revision_version_message"),
+				name: serverText("core.error.update.revision.version.name"),
+				message: serverText("core.error.update.revision.version.message"),
 				status: 400,
 			},
 			data: undefined,

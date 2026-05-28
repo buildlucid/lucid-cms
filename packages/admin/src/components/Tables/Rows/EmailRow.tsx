@@ -38,7 +38,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 			callbacks={props.callbacks}
 			actions={[
 				{
-					label: T()("preview"),
+					label: T()("common.preview"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.email.id);
@@ -47,7 +47,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 					permission: userStore.get.hasPermission([Permissions.EmailRead]).all,
 				},
 				{
-					label: T()("resend"),
+					label: T()("email.resend.action"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.email.id);
@@ -56,14 +56,14 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 					permission: userStore.get.hasPermission([Permissions.EmailSend]).all,
 					disabled: props.email.resend.enabled !== true,
 					disabledToast: {
-						title: T()("resend_email_unavailable_toast_title"),
-						message: T()("resend_email_unavailable_toast_message"),
+						title: T()("toasts.common.resend.email.unavailable.title"),
+						message: T()("toasts.common.resend.email.unavailable.message"),
 						status: "warning",
 					},
 					actionExclude: true,
 				},
 				{
-					label: T()("delete"),
+					label: T()("common.delete"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.email.id);

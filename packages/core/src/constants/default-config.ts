@@ -1,24 +1,34 @@
+import { adminText } from "../libs/i18n/admin-text.js";
 import type { Config, LucidConfig } from "../types/config.js";
 import constants from "./constants.js";
 
 export const coreAiGuidance = [
 	{
 		key: "improve",
-		label: "Improve",
+		label: adminText("core.ai.guidance.improve.label", {
+			fallback: "Improve",
+		}),
 		instructions:
 			"Improve the writing while preserving the original meaning and important details.",
+		availability: "global",
 	},
 	{
 		key: "expand",
-		label: "Expand",
+		label: adminText("core.ai.guidance.expand.label", {
+			fallback: "Expand",
+		}),
 		instructions:
 			"Expand the writing with useful detail while staying relevant and accurate.",
+		availability: "global",
 	},
 	{
 		key: "shorten",
-		label: "Shorten",
+		label: adminText("core.ai.guidance.shorten.label", {
+			fallback: "Shorten",
+		}),
 		instructions:
 			"Make the writing shorter while preserving the important details and meaning.",
+		availability: "global",
 	},
 ] satisfies NonNullable<LucidConfig["ai"]>["guidance"];
 
@@ -47,14 +57,28 @@ export const defaultConfig: Partial<LucidConfig> = {
 	openAPI: {
 		enabled: false,
 	},
-	localization: {
-		locales: [
-			{
-				label: "English",
-				code: "en",
-			},
-		],
-		defaultLocale: "en",
+	i18n: {
+		content: {
+			locales: [
+				{
+					label: "English",
+					code: "en",
+					direction: "ltr",
+				},
+			],
+			defaultLocale: "en",
+		},
+		interface: {
+			locales: [
+				{
+					label: "English",
+					code: "en",
+					direction: "ltr",
+				},
+			],
+			defaultLocale: "en",
+		},
+		translations: {},
 	},
 	media: {
 		limits: {

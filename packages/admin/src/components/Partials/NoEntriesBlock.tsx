@@ -35,9 +35,11 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 			)}
 		>
 			<div class="text-center flex flex-col items-center">
-				<h2 class="mb-2">{props.copy?.title || T()("no_entries_title")}</h2>
+				<h2 class="mb-2">
+					{props.copy?.title || T()("empty.states.entries.title")}
+				</h2>
 				<p class="max-w-96 text-sm">
-					{props.copy?.description || T()("no_entries_description")}
+					{props.copy?.description || T()("empty.states.entries.description")}
 				</p>
 				<Show when={props.callbacks?.action !== undefined}>
 					<Button
@@ -47,7 +49,7 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 						onClick={props.callbacks?.action}
 						permission={props.permissions?.create}
 					>
-						{props.copy?.button || T()("create_entry")}
+						{props.copy?.button || T()("actions.create.entry")}
 					</Button>
 				</Show>
 			</div>

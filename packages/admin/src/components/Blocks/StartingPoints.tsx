@@ -31,7 +31,7 @@ const StartingPoints: Component<StartingPointsProps> = (props) => {
 	// Render
 	return (
 		<section>
-			<h2 class="mb-4">{T()("quick_links")}</h2>
+			<h2 class="mb-4">{T()("common.quick.links")}</h2>
 			<ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4 pb-4 last:mb-0 last:pb-0">
 				<For each={props.links}>
 					{(link) => (
@@ -75,8 +75,8 @@ const StartingPoints: Component<StartingPointsProps> = (props) => {
 										onClick={(e) => {
 											if (link.permission === false) {
 												spawnToast({
-													title: T()("no_permission_toast_title"),
-													message: T()("no_permission_toast_message"),
+													title: T()("toasts.common.no.permission.title"),
+													message: T()("toasts.common.no.permission.message"),
 													status: "warning",
 												});
 												e.preventDefault();

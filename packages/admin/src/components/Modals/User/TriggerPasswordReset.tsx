@@ -32,8 +32,8 @@ const TriggerPasswordReset: Component<TriggerPasswordResetProps> = (props) => {
 				isError: updateUser.action.isError,
 			}}
 			copy={{
-				title: T()("user_password_reset_modal_title"),
-				description: T()("user_password_reset_modal_description"),
+				title: T()("modals.users.password.reset.title"),
+				description: T()("modals.users.password.reset.description"),
 				error: updateUser.errors()?.message,
 			}}
 			callbacks={{

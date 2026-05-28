@@ -68,7 +68,7 @@ export const Standard: Component<{
 			if (action.permission === false) continue;
 			actions.push({
 				type: "button",
-				label: action.label ?? T()("create"),
+				label: action.label ?? T()("common.create"),
 				secondary: action.secondary,
 				onClick: () => {
 					action.setOpen(true);
@@ -84,7 +84,7 @@ export const Standard: Component<{
 		) {
 			actions.push({
 				type: "link",
-				label: createLink.label ?? T()("create"),
+				label: createLink.label ?? T()("common.create"),
 				href: createLink.link,
 			});
 		}
@@ -173,7 +173,7 @@ export const Standard: Component<{
 								type="button"
 								onClick={() => props.actions?.delete?.setOpen(true)}
 							>
-								<span class="sr-only">{T()("delete")}</span>
+								<span class="sr-only">{T()("common.delete")}</span>
 								<FaSolidTrash />
 							</Button>
 						</Show>
@@ -213,7 +213,7 @@ export const Standard: Component<{
 									type="button"
 									onClick={() => props.actions?.delete?.setOpen(true)}
 								>
-									<span class="sr-only">{T()("delete")}</span>
+									<span class="sr-only">{T()("common.delete")}</span>
 									<FaSolidTrash />
 								</Button>
 							</Show>
@@ -246,7 +246,7 @@ export const Standard: Component<{
 								type="button"
 								onClick={() => props.actions?.delete?.setOpen(true)}
 							>
-								<span class="sr-only">{T()("delete")}</span>
+								<span class="sr-only">{T()("common.delete")}</span>
 								<FaSolidTrash />
 							</Button>
 						</Show>

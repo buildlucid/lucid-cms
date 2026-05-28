@@ -2,13 +2,13 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/media.js";
 import { processedImageServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -48,8 +48,10 @@ const clearSingleProcessedController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_media_clear_processed_error_name"),
-					message: T("route_media_clear_processed_error_message"),
+					name: serverText("core.routes.media.clear.processed.error.name"),
+					message: serverText(
+						"core.routes.media.clear.processed.error.message",
+					),
 				},
 			},
 		)(context, {

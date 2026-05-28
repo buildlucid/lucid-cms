@@ -1,6 +1,6 @@
+import { serverText } from "../../libs/i18n/index.js";
 import { FILE_SYSTEM_UPLOAD_PATH } from "../../libs/media/adapters/file-system/helpers.js";
 import type { FileSystemMediaAdapterOptions } from "../../libs/media/types.js";
-import T from "../../translations/index.js";
 import { getFileMetadata } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
@@ -38,7 +38,7 @@ const uploadSingle: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("invalid_file"),
+				message: serverText("core.files.invalid"),
 			},
 		};
 	}

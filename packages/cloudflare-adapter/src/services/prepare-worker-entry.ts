@@ -44,6 +44,14 @@ const prepareMainWorkerEntry = (
 			default: "emailTemplates",
 		},
 		{
+			path: "./i18n-translations.json",
+			default: "i18nTranslations",
+		},
+		{
+			path: "@lucidcms/core/plugin",
+			exports: ["translateServer"],
+		},
+		{
 			path: "@lucidcms/cloudflare-adapter",
 			exports: ["configureLucid"],
 		},
@@ -60,6 +68,7 @@ const prepareMainWorkerEntry = (
 			params: ["request", "env", "ctx"],
 			content: /** ts */ `const wrappedDefinition = configureLucid(config, {
     emailTemplates: emailTemplates,
+    i18nTranslations: i18nTranslations,
 });
 const databaseAdapter = createConfiguredDatabaseAdapter(
     ConfiguredDatabaseAdapter,
@@ -124,6 +133,7 @@ return app.fetch(request, env, ctx);`,
 			content: /** ts */ `const runCronService = async () => {
     const wrappedDefinition = configureLucid(config, {
         emailTemplates: emailTemplates,
+        i18nTranslations: i18nTranslations,
     });
     const databaseAdapter = createConfiguredDatabaseAdapter(
         ConfiguredDatabaseAdapter,
@@ -156,7 +166,11 @@ return app.fetch(request, env, ctx);`,
             queue: cronJobSetup.queue,
             env: env,
             kv: kv,
-            request: { url: resolved.baseUrl || "http://localhost" },
+            request: {
+                url: resolved.baseUrl || "http://localhost",
+                locale: resolved.i18n.interface.defaultLocale,
+            },
+            translate: (key, data) => translateServer(key, data),
         }, {
             schedule: controller.cron,
         });

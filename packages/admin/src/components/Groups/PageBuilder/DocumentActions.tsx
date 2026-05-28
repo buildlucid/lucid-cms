@@ -22,8 +22,8 @@ export const DocumentActions: Component<{
 	const handleDeleteClick = () => {
 		if (props.deletePermission === false) {
 			spawnToast({
-				title: T()("no_permission_toast_title"),
-				message: T()("no_permission_toast_message"),
+				title: T()("toasts.common.no.permission.title"),
+				message: T()("toasts.common.no.permission.message"),
 				status: "warning",
 			});
 			return;
@@ -71,7 +71,7 @@ export const DocumentActions: Component<{
 							disabled={props.deletePermission === false || isDisabled()}
 							onSelect={handleDeleteClick}
 						>
-							<span class="line-clamp-1">{T()("delete_document")}</span>
+							<span class="line-clamp-1">{T()("actions.delete.document")}</span>
 						</DropdownMenu.Item>
 					</li>
 				</ul>

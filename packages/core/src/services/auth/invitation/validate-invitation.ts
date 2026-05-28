@@ -1,11 +1,11 @@
 import constants from "../../../constants/constants.js";
 import formatter from "../../../libs/formatters/index.js";
+import { translateServer } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import {
 	UsersRepository,
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import type { ValidateInvitation } from "../../../types.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -92,7 +92,7 @@ const validateInvitation: ServiceFn<
 	});
 	if (userRes.error) {
 		logger.error({
-			message: T("user_not_found_message"),
+			message: translateServer("core.user.not.found.message"),
 		});
 		return {
 			error: undefined,
@@ -104,7 +104,9 @@ const validateInvitation: ServiceFn<
 
 	if (formatter.formatBoolean(userRes.data?.invitation_accepted)) {
 		logger.error({
-			message: T("user_invitation_already_accepted_message"),
+			message: translateServer(
+				"core.auth.invitations.user.already.accepted.message",
+			),
 		});
 		return {
 			error: undefined,

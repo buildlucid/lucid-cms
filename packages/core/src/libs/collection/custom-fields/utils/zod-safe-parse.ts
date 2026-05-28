@@ -1,6 +1,6 @@
 import type z from "zod";
-import T from "../../../../translations/index.js";
 import tidyZodError from "../../../../utils/errors/tidy-zod-errors.js";
+import { serverText } from "../../../i18n/index.js";
 import type { CustomFieldValidateResponse } from "../types.js";
 
 /**
@@ -24,11 +24,14 @@ const zodSafeParse = (
 		};
 	}
 
+	const message = modifyMessage(tidyZodError(response.error));
+
 	return {
 		valid: false,
-		message:
-			modifyMessage(tidyZodError(response.error)) ??
-			T("an_unknown_error_occurred_validating_the_field"),
+		message: serverText("core.fields.validation.errors.unknown", {
+			fallback: message,
+			priority: message,
+		}),
 	};
 };
 

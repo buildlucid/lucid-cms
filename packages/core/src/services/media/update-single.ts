@@ -1,6 +1,7 @@
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
+import { serverText } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import {
@@ -8,7 +9,6 @@ import {
 	MediaRepository,
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { MediaType } from "../../types/response.js";
 import changeKeyVisibility from "../../utils/media/change-key-visibility.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
@@ -92,7 +92,7 @@ const updateSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("media_not_found_message"),
+				message: serverText("core.media.not.found.message"),
 				status: 404,
 			},
 		},
@@ -107,7 +107,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					focalPoint: {
 						code: "media_error",
-						message: T("media_error_focal_point_image_only"),
+						message: serverText("core.media.errors.focal.point.image.only"),
 					},
 				},
 			},
@@ -139,7 +139,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					file: {
 						code: "media_error",
-						message: T("media_error_missing_file_name"),
+						message: serverText("core.media.errors.missing.file.name"),
 					},
 				},
 			},
@@ -193,7 +193,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					focalPoint: {
 						code: "media_error",
-						message: T("media_error_focal_point_image_only"),
+						message: serverText("core.media.errors.focal.point.image.only"),
 					},
 				},
 			},

@@ -173,7 +173,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 							})
 						}
 						onDragOver={(e) => props.state.dragDrop.onDragOver(e)}
-						aria-label={T()("change_order")}
+						aria-label={T()("common.change.order")}
 						draggable={disabled() === false}
 						disabled={disabled()}
 					>

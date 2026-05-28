@@ -1,9 +1,10 @@
 import merge from "lodash.merge";
 import z from "zod";
-import T from "../../../../../translations/index.js";
 import type { ServiceResponse } from "../../../../../types.js";
 import type { BooleanInt } from "../../../../db/types.js";
 import formatter from "../../../../formatters/index.js";
+import { adminText } from "../../../../i18n/admin-text.js";
+import { serverText } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -29,13 +30,17 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			key: this.key,
 			type: this.type,
 			details: {
-				label: this.props?.details?.label ?? keyToTitle(this.key),
+				label:
+					this.props?.details?.label ??
+					adminText(`fields.${this.type}.${this.key}.label`, {
+						fallback: keyToTitle(this.key),
+					}),
 				summary: this.props?.details?.summary,
 				true: this.props?.details?.true,
 				false: this.props?.details?.false,
 			},
 			config: {
-				translations: this.props?.config?.translations ?? false,
+				localized: this.props?.config?.localized ?? false,
 				default: this.props?.config?.default ?? false,
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
@@ -49,7 +54,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			required: {
 				condition: (value: unknown) =>
 					value === undefined || value === null || value === 0,
-				message: T("checkbox_field_required"),
+				message: serverText("core.fields.checkbox.validation.required"),
 			},
 		});
 	}

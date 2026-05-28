@@ -1,7 +1,7 @@
 import mime from "mime-types";
+import { serverText } from "../../libs/i18n/index.js";
 import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
 import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
-import T from "../../translations/index.js";
 import {
 	generateProcessKey,
 	isProcessedImageKey,
@@ -54,8 +54,8 @@ const streamMedia: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				name: T("media_not_found_name"),
-				message: T("media_not_found_message"),
+				name: serverText("core.media.not.found.name"),
+				message: serverText("core.media.not.found.message"),
 			},
 			data: undefined,
 		};

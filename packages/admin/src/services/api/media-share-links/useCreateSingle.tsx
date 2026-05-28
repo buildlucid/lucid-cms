@@ -39,8 +39,8 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Response>>({
 		mutationFn: createSingleReq,
 		getSuccessToast: () => ({
-			title: T()("media_share_link_create_toast_title"),
-			message: T()("media_share_link_create_toast_message"),
+			title: T()("toasts.media.share.link.create.title"),
+			message: T()("toasts.media.share.link.create.message"),
 		}),
 		invalidates: ["mediaShareLinks.getMultiple"],
 		onSuccess: props?.onSuccess,

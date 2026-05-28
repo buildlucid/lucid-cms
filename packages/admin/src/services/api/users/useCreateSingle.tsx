@@ -36,8 +36,8 @@ const useCreateSingle = (props?: UseUpdateSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody>({
 		mutationFn: createSingleReq,
 		getSuccessToast: () => ({
-			title: T()("user_create_toast_title"),
-			message: T()("user_create_toast_message"),
+			title: T()("toasts.users.create.title"),
+			message: T()("toasts.users.create.message"),
 		}),
 		invalidates: ["users.getMultiple"],
 		onSuccess: props?.onSuccess,

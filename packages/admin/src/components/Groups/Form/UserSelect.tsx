@@ -186,7 +186,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 									disabled={props.disabled || !canAddMore()}
 									classes="capitalize"
 								>
-									{T()("select_user")}
+									{T()("users.select.action")}
 								</Button>
 								<Show when={selectedUsers().length > 0}>
 									<p class="text-sm text-unfocused">
@@ -197,7 +197,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										/>
 										{typeof props.minItems !== "number" &&
 										typeof props.maxItems !== "number"
-											? ` ${T()("selected").toLowerCase()}`
+											? ` ${T()("common.selected").toLowerCase()}`
 											: ""}
 									</p>
 								</Show>
@@ -231,7 +231,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										disabled={props.disabled}
 									>
 										<FaSolidPen size={12} />
-										<span class="sr-only">{T()("edit")}</span>
+										<span class="sr-only">{T()("common.edit")}</span>
 									</Button>
 									<Button
 										type="button"
@@ -241,7 +241,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										disabled={props.disabled}
 									>
 										<FaSolidXmark size={14} />
-										<span class="sr-only">{T()("clear")}</span>
+										<span class="sr-only">{T()("common.clear")}</span>
 									</Button>
 								</div>
 							</div>
@@ -256,7 +256,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 							disabled={props.disabled || !canAddMore()}
 							classes="capitalize"
 						>
-							{T()("select_user")}
+							{T()("users.select.action")}
 						</Button>
 					</Match>
 				</Switch>
@@ -334,7 +334,7 @@ const UserSortableItem: Component<{
 					size="icon-subtle"
 					onClick={() => props.removeSelectedUser(props.user.id)}
 					disabled={props.disabled}
-					aria-label={T()("remove")}
+					aria-label={T()("common.remove")}
 				>
 					<FaSolidXmark size={14} />
 				</Button>

@@ -76,12 +76,12 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	});
 	const fieldErrors = createMemo(() => {
 		//* repeaters dont incldue a localeCode
-		//* if the field or collection doesnt support translations
+		//* if the field or collection doesnt support localization
 		if (
 			props.state.fieldConfig.type === "repeater" ||
 			// @ts-expect-error
-			fieldConfig()?.config?.translations !== true ||
-			brickStore.get.collectionTranslations !== true
+			fieldConfig()?.config?.localized !== true ||
+			brickStore.get.collectionLocalized !== true
 		) {
 			return props.state.fieldErrors.filter(
 				(f) => f.key === props.state.fieldConfig.key,
@@ -99,8 +99,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		return (
 			hasMultipleLocales() &&
 			// @ts-expect-error
-			props.state.fieldConfig?.config?.translations &&
-			brickStore.get.collectionTranslations
+			props.state.fieldConfig?.config?.localized &&
+			brickStore.get.collectionLocalized
 		);
 	});
 	const altLocaleError = createMemo(() => {

@@ -12,7 +12,7 @@ import buildFullSlug from "../utils/build-fullslug-from-slugs.js";
  */
 const constructChildFullSlug = (data: {
 	descendants: DescendantFieldsResponse[];
-	localization: Config["localization"];
+	localization: Config["i18n"]["content"];
 	parentFullSlugField?: FieldInputSchema;
 	collection: CollectionConfig;
 }): Awaited<
@@ -33,7 +33,7 @@ const constructChildFullSlug = (data: {
 	for (const descendant of data.descendants) {
 		const fullSlug: Record<string, string | null> = {};
 
-		if (data.collection.translations) {
+		if (data.collection.localized) {
 			if (
 				data.parentFullSlugField !== undefined &&
 				!data.parentFullSlugField.translations

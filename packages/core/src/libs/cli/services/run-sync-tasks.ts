@@ -28,7 +28,10 @@ const runSyncTasks = async (
 				queue: queue,
 				env: null,
 				kv: kv,
-				request: { url: config.baseUrl ?? "" },
+				request: {
+					url: config.baseUrl ?? "",
+					locale: config.i18n.interface.defaultLocale,
+				},
 			}),
 			syncServices.syncCollections({
 				db: { client: config.db.client },
@@ -36,7 +39,10 @@ const runSyncTasks = async (
 				queue: queue,
 				env: null,
 				kv: kv,
-				request: { url: config.baseUrl ?? "" },
+				request: {
+					url: config.baseUrl ?? "",
+					locale: config.i18n.interface.defaultLocale,
+				},
 			}),
 			syncServices.syncRoles({
 				db: { client: config.db.client },
@@ -44,14 +50,17 @@ const runSyncTasks = async (
 				queue: queue,
 				env: null,
 				kv: kv,
-				request: { url: config.baseUrl ?? "" },
+				request: {
+					url: config.baseUrl ?? "",
+					locale: config.i18n.interface.defaultLocale,
+				},
 			}),
 		]);
 
 		if (localesResult.error) {
 			cliLogger.error(
 				"Sync failed during locale sync, with error:",
-				localesResult.error.message || "unknown",
+				localesResult.error.message?.default || "unknown",
 			);
 			if (mode === "process") {
 				if (shouldDestroyKV) await destroyKVAdapter(kv);
@@ -62,7 +71,7 @@ const runSyncTasks = async (
 		if (collectionsResult.error) {
 			cliLogger.error(
 				"Sync failed during collections sync, with error:",
-				collectionsResult.error.message || "unknown",
+				collectionsResult.error.message?.default || "unknown",
 			);
 			if (mode === "process") {
 				if (shouldDestroyKV) await destroyKVAdapter(kv);
@@ -73,7 +82,7 @@ const runSyncTasks = async (
 		if (rolesResult.error) {
 			cliLogger.error(
 				"Sync failed during roles sync, with error:",
-				rolesResult.error.message || "unknown",
+				rolesResult.error.message?.default || "unknown",
 			);
 			if (mode === "process") {
 				if (shouldDestroyKV) await destroyKVAdapter(kv);

@@ -88,7 +88,7 @@ export const Confirmation: Component<{
 												disabled={props.state.isLoading}
 												onClick={props.callbacks.onCancel}
 											>
-												{T()("cancel")}
+												{T()("common.cancel")}
 											</Button>
 											<Button
 												theme={props.theme || "danger"}
@@ -97,7 +97,7 @@ export const Confirmation: Component<{
 												loading={props.state.isLoading}
 												onClick={props.callbacks.onConfirm}
 											>
-												{props.copy.confirm ?? T()("confirm")}
+												{props.copy.confirm ?? T()("common.confirm")}
 											</Button>
 										</>
 									}

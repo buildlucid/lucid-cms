@@ -17,39 +17,39 @@ export type PublishOperationDecisionAction = "approve" | "reject" | "cancel";
 const getDecisionTitle = (action?: PublishOperationDecisionAction) => {
 	switch (action) {
 		case "approve":
-			return T()("approve_release_request");
+			return T()("publish.requests.review.approve.title");
 		case "reject":
-			return T()("reject_release_request");
+			return T()("publish.requests.review.reject.title");
 		case "cancel":
-			return T()("cancel_release_request");
+			return T()("publish.requests.review.cancel.title");
 		default:
-			return T()("confirm");
+			return T()("common.confirm");
 	}
 };
 
 const getDecisionDescription = (action?: PublishOperationDecisionAction) => {
 	switch (action) {
 		case "approve":
-			return T()("approve_release_request_description");
+			return T()("publish.requests.review.approve.description");
 		case "reject":
-			return T()("reject_release_request_description");
+			return T()("publish.requests.review.reject.description");
 		case "cancel":
-			return T()("cancel_release_request_description");
+			return T()("publish.requests.review.cancel.description");
 		default:
-			return T()("decision_comment_placeholder");
+			return T()("publish.requests.decision.comment.placeholder");
 	}
 };
 
 const getDecisionConfirm = (action?: PublishOperationDecisionAction) => {
 	switch (action) {
 		case "approve":
-			return T()("approve");
+			return T()("common.approve");
 		case "reject":
-			return T()("reject");
+			return T()("common.reject");
 		case "cancel":
-			return T()("cancel");
+			return T()("common.cancel");
 		default:
-			return T()("confirm");
+			return T()("common.confirm");
 	}
 };
 
@@ -100,11 +100,11 @@ const PublishOperationDecision: Component<{
 	const releaseTimingOptions = createMemo(() => [
 		{
 			value: "now",
-			label: T()("release_environment_publish_confirm"),
+			label: T()("documents.release.environment.publish.confirm"),
 		},
 		{
 			value: "scheduled",
-			label: T()("schedule_release"),
+			label: T()("documents.release.schedule.action"),
 		},
 	]);
 	const error = createMemo(
@@ -152,7 +152,7 @@ const PublishOperationDecision: Component<{
 		const operation = props.operation();
 		if (!action || !operation) return;
 		if (requireDecisionComment() && decisionComment().trim().length === 0) {
-			setValidationError(T()("publish_request_comment_required"));
+			setValidationError(T()("publish.requests.validation.comment.required"));
 			return;
 		}
 
@@ -165,7 +165,7 @@ const PublishOperationDecision: Component<{
 					})
 				: null;
 		if (action === "approve" && scheduleEnabled() && !scheduledAt) {
-			setValidationError(T()("schedule_release_required"));
+			setValidationError(T()("documents.release.schedule.validation.required"));
 			return;
 		}
 
@@ -227,8 +227,8 @@ const PublishOperationDecision: Component<{
 					required={requireDecisionComment()}
 					rows={4}
 					copy={{
-						label: T()("comment"),
-						placeholder: T()("decision_comment_placeholder"),
+						label: T()("common.comment"),
+						placeholder: T()("publish.requests.decision.comment.placeholder"),
 					}}
 					noMargin={true}
 				/>
@@ -245,7 +245,7 @@ const PublishOperationDecision: Component<{
 							}}
 							options={releaseTimingOptions()}
 							copy={{
-								label: T()("release_timing"),
+								label: T()("documents.release.timing"),
 							}}
 							noClear={true}
 							hideOptionalText={true}

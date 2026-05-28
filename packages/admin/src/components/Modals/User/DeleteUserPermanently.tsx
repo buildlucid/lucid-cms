@@ -33,8 +33,8 @@ const DeleteUserPermanently: Component<DeleteUserPermanentlyProps> = (
 				isError: permaDelete.action.isError,
 			}}
 			copy={{
-				title: T()("delete_user_permanently_modal_title"),
-				description: T()("delete_user_permanently_modal_description"),
+				title: T()("modals.common.delete.user.permanently.title"),
+				description: T()("modals.common.delete.user.permanently.description"),
 				error: permaDelete.errors()?.message,
 			}}
 			callbacks={{

@@ -56,7 +56,7 @@ const UpdateLicenseForm: Component<{
 				isDisabled: submitIsDisabled(),
 			}}
 			content={{
-				submit: T()("save"),
+				submit: T()("common.save"),
 			}}
 			options={{
 				buttonSize: "medium",
@@ -75,7 +75,7 @@ const UpdateLicenseForm: Component<{
 				value={licenseKey()}
 				onChange={setLicenseKey}
 				copy={{
-					label: T()("license"),
+					label: T()("common.license"),
 					placeholder: placeholder(),
 				}}
 				errors={getBodyError("licenseKey", updateLicense.errors)}
@@ -88,8 +88,8 @@ const UpdateLicenseForm: Component<{
 						<button
 							type="button"
 							class="absolute right-2.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-icon-fade opacity-0 transition-[opacity,color,background-color] duration-200 hover:bg-error-base/10 hover:text-error-base focus:opacity-100 focus-visible:ring-1 focus-visible:ring-primary-base group-hover:opacity-100"
-							aria-label={T()("clear")}
-							title={T()("clear")}
+							aria-label={T()("common.clear")}
+							title={T()("common.clear")}
 							onClick={() => {
 								if (licenseKey().length > 0) {
 									setLicenseKey("");

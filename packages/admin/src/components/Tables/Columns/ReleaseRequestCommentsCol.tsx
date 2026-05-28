@@ -33,7 +33,7 @@ const ReleaseRequestCommentsCol: Component<{
 								<FaSolidComment
 									size={11}
 									class="text-icon-base"
-									title={T()("request_comment")}
+									title={T()("publish.requests.detail.request.comment")}
 								/>
 							</span>
 							<span class="truncate">{comment()}</span>
@@ -50,7 +50,7 @@ const ReleaseRequestCommentsCol: Component<{
 								<FaSolidCircleCheck
 									size={11}
 									class="text-icon-base"
-									title={T()("decision_comment")}
+									title={T()("common.decision.comment")}
 								/>
 							</span>
 							<span class="truncate">{comment()}</span>

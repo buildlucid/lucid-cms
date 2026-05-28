@@ -55,7 +55,7 @@ const UpdateMediaFolderModal: Component<{
 				return { value: f.id, label: label };
 			});
 
-		return [{ value: undefined, label: T()("no_folder") }, ...sorted];
+		return [{ value: undefined, label: T()("media.folders.none") }, ...sorted];
 	});
 
 	// ----------------------------------------
@@ -107,7 +107,7 @@ const UpdateMediaFolderModal: Component<{
 				<div class="p-4 md:p-6">
 					<div class="mb-4">
 						<h2 class="text-base font-semibold text-title">
-							{T()("update_media_folder_panel_title")}
+							{T()("panels.media.folders.update.title")}
 						</h2>
 					</div>
 					<Input
@@ -118,7 +118,7 @@ const UpdateMediaFolderModal: Component<{
 						type="text"
 						required={true}
 						copy={{
-							label: T()("title"),
+							label: T()("common.title"),
 						}}
 						errors={getBodyError("title", updateFolder.errors)}
 					/>
@@ -134,7 +134,7 @@ const UpdateMediaFolderModal: Component<{
 						}}
 						name={"parent-folder"}
 						options={folderOptions()}
-						copy={{ label: T()("folder") }}
+						copy={{ label: T()("common.folder") }}
 						noClear={true}
 						errors={getBodyError("parentFolderId", updateFolder.errors)}
 					/>
@@ -148,7 +148,9 @@ const UpdateMediaFolderModal: Component<{
 						<ErrorMessage
 							theme="basic"
 							message={
-								foldersHierarchy.isError ? T()("error_message") : undefined
+								foldersHierarchy.isError
+									? T()("errors.generic.message")
+									: undefined
 							}
 						/>
 					</div>
@@ -160,7 +162,7 @@ const UpdateMediaFolderModal: Component<{
 							onClick={() => props.state.setOpen(false)}
 							disabled={updateFolder.action.isPending}
 						>
-							{T()("cancel")}
+							{T()("common.cancel")}
 						</Button>
 						<Button
 							type="submit"
@@ -169,7 +171,7 @@ const UpdateMediaFolderModal: Component<{
 							loading={updateFolder.action.isPending}
 							disabled={foldersHierarchy.isLoading}
 						>
-							{T()("update")}
+							{T()("common.update")}
 						</Button>
 					</div>
 				</ModalFooter>

@@ -3,6 +3,7 @@ import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { adminText } from "../../../libs/i18n/index.js";
 import inferSchema from "./infer-schema.js";
 
 // -----------------------------------------------
@@ -18,8 +19,10 @@ describe("Schema inference", async () => {
 		pagesCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+				singularName: adminText("tests.collections.pages.singularName", {
+					fallback: "Page",
+				}),
 			},
 			bricks: {
 				fixed: [
@@ -179,8 +182,10 @@ describe("Schema inference", async () => {
 		const brickScopedCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+				singularName: adminText("tests.collections.pages.singularName", {
+					fallback: "Page",
+				}),
 			},
 			bricks: {
 				fixed: [
@@ -218,8 +223,10 @@ describe("Schema inference", async () => {
 		const brickScopedCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+				singularName: adminText("tests.collections.pages.singularName", {
+					fallback: "Page",
+				}),
 			},
 			bricks: {
 				fixed: [new BrickBuilder("content").addTab("meta").addText("title")],

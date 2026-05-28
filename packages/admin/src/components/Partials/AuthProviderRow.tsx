@@ -72,13 +72,15 @@ const AuthProviderRow: Component<{
 					<Show
 						when={linked()}
 						fallback={
-							<span class="text-xs text-body">{T()("not_linked")}</span>
+							<span class="text-xs text-body">
+								{T()("common.status.not.linked")}
+							</span>
 						}
 					>
 						<span class="text-xs text-body">
 							{formattedLinkedDate()
-								? T()("linked_on", { date: formattedLinkedDate() })
-								: T()("linked")}
+								? T()("common.linked.on", { date: formattedLinkedDate() })
+								: T()("common.status.linked")}
 						</span>
 					</Show>
 				</div>
@@ -91,7 +93,9 @@ const AuthProviderRow: Component<{
 					type="button"
 					loading={props.isLoading}
 				>
-					{awaitingConfirmation() ? T()("click_to_confirm") : T()("unlink")}
+					{awaitingConfirmation()
+						? T()("common.confirmations.click.to.confirm")
+						: T()("common.unlink")}
 				</Button>
 			</Show>
 			<Show when={!linked() && props.onLink}>
@@ -102,7 +106,7 @@ const AuthProviderRow: Component<{
 					type="button"
 					loading={props.isLoading}
 				>
-					{T()("link")}
+					{T()("common.link")}
 				</Button>
 			</Show>
 		</div>

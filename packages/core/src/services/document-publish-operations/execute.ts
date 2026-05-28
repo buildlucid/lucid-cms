@@ -1,5 +1,5 @@
+import { serverText } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
 	collectionServices,
@@ -38,7 +38,7 @@ const execute: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_operation_not_found"),
+				message: serverText("core.publish.operations.not.found"),
 				status: 404,
 			},
 			data: undefined,
@@ -71,7 +71,7 @@ const execute: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_operation_execution_user_missing"),
+				message: serverText("core.publish.operations.execution.user.missing"),
 				status: 400,
 			},
 			data: undefined,
@@ -115,7 +115,7 @@ const execute: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_target_not_enabled"),
+				message: serverText("core.publish.requests.target.not.enabled"),
 				status: 400,
 			},
 			data: undefined,
@@ -137,7 +137,7 @@ const execute: ServiceFn<
 				data: {
 					execution_status: "failed",
 					failed_at: new Date().toISOString(),
-					execution_error_message: workflowPublishRes.error.message,
+					execution_error_message: workflowPublishRes.error.message?.default,
 					execution_error_data: {
 						source: "execution",
 					},
@@ -164,7 +164,7 @@ const execute: ServiceFn<
 				data: {
 					execution_status: "failed",
 					failed_at: new Date().toISOString(),
-					execution_error_message: promoteRes.error.message,
+					execution_error_message: promoteRes.error.message?.default,
 					execution_error_data: {
 						source: "execution",
 					},

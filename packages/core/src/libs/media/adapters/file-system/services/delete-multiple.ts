@@ -1,5 +1,6 @@
 import { constants } from "node:fs";
 import { access, unlink } from "node:fs/promises";
+import { serverText } from "../../../../i18n/index.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceDeleteMultiple,
@@ -26,7 +27,9 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			const error = e as Error;
 			return {
 				error: {
-					message: error.message,
+					message: serverText("core.errors.default.message", {
+						fallback: error.message,
+					}),
 				},
 				data: undefined,
 			};

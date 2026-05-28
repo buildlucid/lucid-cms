@@ -33,7 +33,7 @@ import errorTypeDefaults from "./error-type-defaults.js";
 class LucidAPIError extends Error {
 	error: LucidErrorData;
 	constructor(error: LucidErrorData) {
-		super(error.message);
+		super(error.message?.default ?? constants.errors.message);
 		this.error = error;
 
 		if (error.zod !== undefined) {
@@ -45,8 +45,10 @@ class LucidAPIError extends Error {
 		const errorTypeRes = errorTypeDefaults(error);
 
 		this.error.status = errorTypeRes.status;
-		this.name = errorTypeRes.name ?? constants.errors.name;
-		this.message = errorTypeRes.message ?? constants.errors.message;
+		this.error.name = errorTypeRes.name;
+		this.error.message = errorTypeRes.message;
+		this.name = this.error.name?.default ?? constants.errors.message;
+		this.message = this.error.message?.default ?? constants.errors.message;
 	}
 	// static
 	static formatZodErrors(error: z.core.$ZodIssue[]) {

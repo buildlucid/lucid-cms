@@ -31,8 +31,8 @@ const DeleteUser: Component<DeleteUserProps> = (props) => {
 				isError: deleteUser.action.isError,
 			}}
 			copy={{
-				title: T()("delete_user_modal_title"),
-				description: T()("delete_user_modal_description"),
+				title: T()("modals.common.delete.user.title"),
+				description: T()("modals.common.delete.user.description"),
 				error: deleteUser.errors()?.message,
 			}}
 			callbacks={{

@@ -62,19 +62,19 @@ export const ViewSelector: Component<{
 
 	const optionLabel = (option: ViewSelectorOption) => {
 		if (option.type === "latest" || option.type === "environment") {
-			return T()("view_selector_document_version", {
+			return T()("actions.view.selector.document.version", {
 				version: option.label.toLowerCase(),
 				collection: collectionLabel(),
 			});
 		}
 
-		if (option.label === T()("revision_history")) {
-			return T()("view_selector_revision_history", {
+		if (option.label === T()("common.revision.history")) {
+			return T()("actions.view.selector.revision.history", {
 				collection: collectionLabel(),
 			});
 		}
 
-		return T()("view_selector_document_link", {
+		return T()("actions.view.selector.document.link", {
 			label: option.label.toLowerCase(),
 			collection: collectionLabel(),
 		});
@@ -85,7 +85,8 @@ export const ViewSelector: Component<{
 		if (!option) return props.currentViewLabel?.();
 		if (option.type === "link") return optionLabel(option);
 
-		const action = option.type === "latest" ? T()("edit") : T()("view");
+		const action =
+			option.type === "latest" ? T()("common.edit") : T()("common.view");
 		return `${action} ${optionLabel(option)}`;
 	});
 
@@ -177,14 +178,14 @@ export const ViewSelector: Component<{
 										title={
 											item.type === "latest"
 												? props.isDocumentMutated?.()
-													? T()("unsaved")
+													? T()("common.unsaved")
 													: undefined
 												: item.type === "environment"
 													? item.status?.isPublished === false
-														? T()("unreleased")
+														? T()("common.status.unreleased")
 														: item.status?.upToDate
-															? T()("released_up_to_date")
-															: T()("released_out_of_date")
+															? T()("documents.release.status.up.to.date")
+															: T()("documents.release.status.out.of.date")
 													: undefined
 										}
 									/>

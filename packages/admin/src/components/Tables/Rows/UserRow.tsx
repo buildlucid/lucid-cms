@@ -65,7 +65,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 			selected={props.selected}
 			actions={[
 				{
-					label: T()("edit"),
+					label: T()("common.edit"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -75,7 +75,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					hide: props.showingDeleted?.() || currentUser(),
 				},
 				{
-					label: T()("details"),
+					label: T()("common.details"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -84,7 +84,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					permission: true,
 				},
 				{
-					label: T()("logins"),
+					label: T()("common.logins"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -94,7 +94,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					hide: props.showingDeleted?.(),
 				},
 				{
-					label: T()("restore"),
+					label: T()("common.restore"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -105,7 +105,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					theme: "primary",
 				},
 				{
-					label: T()("reset_password"),
+					label: T()("actions.reset.password"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -120,7 +120,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					theme: "primary",
 				},
 				{
-					label: T()("resend_invitation"),
+					label: T()("users.invitations.resend.action"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -133,7 +133,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					theme: "primary",
 				},
 				{
-					label: T()("revoke_sessions"),
+					label: T()("users.sessions.revoke.action"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -145,7 +145,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					theme: "error",
 				},
 				{
-					label: T()("delete"),
+					label: T()("common.delete"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -157,7 +157,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 					theme: "error",
 				},
 				{
-					label: T()("delete_permanently"),
+					label: T()("actions.delete.permanently"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
@@ -197,11 +197,19 @@ const UserRow: Component<UserRowProps> = (props) => {
 				options={{ include: props?.include[3] }}
 			/>
 			<TextCol
-				text={props.user.superAdmin ? T()("super_admin") : T()("standard")}
+				text={
+					props.user.superAdmin
+						? T()("users.super.admin.title")
+						: T()("common.standard")
+				}
 				options={{ include: props?.include[4] }}
 			/>
 			<TextCol
-				text={props.user.isLocked ? T()("locked") : T()("unlocked")}
+				text={
+					props.user.isLocked
+						? T()("common.status.locked")
+						: T()("common.status.unlocked")
+				}
 				options={{ include: props?.include[5] }}
 			/>
 			<PillCol
@@ -209,8 +217,8 @@ const UserRow: Component<UserRowProps> = (props) => {
 					props.user.invitationAccepted == null
 						? undefined
 						: props.user.invitationAccepted
-							? T()("invitation_accepted")
-							: T()("pending")
+							? T()("users.invitations.status.accepted")
+							: T()("common.status.pending")
 				}
 				theme={props.user.invitationAccepted ? "outline" : "warning-opaque"}
 				options={{ include: props?.include[6] }}
@@ -221,8 +229,8 @@ const UserRow: Component<UserRowProps> = (props) => {
 					props.user.triggerPasswordReset == null
 						? undefined
 						: props.user.triggerPasswordReset
-							? T()("password_reset_required")
-							: T()("password_reset_not_required")
+							? T()("auth.password.reset.required.title")
+							: T()("users.password.reset.status.not.required")
 				}
 				theme={"outline"}
 			/>

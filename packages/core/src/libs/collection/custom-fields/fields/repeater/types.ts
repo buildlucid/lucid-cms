@@ -1,4 +1,4 @@
-import type { LocaleValue } from "../../../../../types/shared.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type {
 	CFConfig,
 	FieldTypes,
@@ -10,8 +10,8 @@ export interface RepeaterFieldConfig extends SharedFieldConfig {
 	type: "repeater";
 	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
 	details: {
-		label?: LocaleValue;
-		summary?: LocaleValue;
+		label?: AdminText;
+		summary?: AdminText;
 	};
 	config: {
 		disabled?: boolean;

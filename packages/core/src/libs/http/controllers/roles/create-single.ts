@@ -3,7 +3,6 @@ import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/roles.js";
 import { roleServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
@@ -11,6 +10,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -50,8 +50,8 @@ const createSingleController = factory.createHandlers(
 			transaction: true,
 			defaultError: {
 				type: "basic",
-				name: T("route_roles_create_error_name"),
-				message: T("route_roles_create_error_message"),
+				name: serverText("core.routes.roles.create.error.name"),
+				message: serverText("core.routes.roles.create.error.message"),
 			},
 		})(context, {
 			name: body.name,
@@ -64,8 +64,8 @@ const createSingleController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: T("route_roles_fetch_error_name"),
-				message: T("route_roles_fetch_error_message"),
+				name: serverText("core.routes.roles.fetch.error.name"),
+				message: serverText("core.routes.roles.fetch.error.message"),
 			},
 		})(context, {
 			id: roleId.data,

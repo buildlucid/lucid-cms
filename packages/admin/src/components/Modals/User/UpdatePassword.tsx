@@ -69,10 +69,10 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 				<div class="p-4 md:p-6">
 					<div class="mb-4">
 						<h2 class="text-base font-semibold text-title">
-							{T()("update_password")}
+							{T()("actions.update.password")}
 						</h2>
 						<p class="mt-1 text-base text-body">
-							{T()("password_description")}
+							{T()("auth.password.description")}
 						</p>
 					</div>
 					<Input
@@ -82,7 +82,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 						value={currentPassword()}
 						onChange={setCurrentPassword}
 						copy={{
-							label: T()("current_password"),
+							label: T()("common.current.password"),
 						}}
 						errors={getBodyError("currentPassword", updateMe.errors)}
 						hideOptionalText={true}
@@ -95,7 +95,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 							value={newPassword()}
 							onChange={setNewPassword}
 							copy={{
-								label: T()("new_password"),
+								label: T()("common.new.password"),
 							}}
 							errors={getBodyError("newPassword", updateMe.errors)}
 							hideOptionalText={true}
@@ -108,7 +108,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 							value={confirmPassword()}
 							onChange={setConfirmPassword}
 							copy={{
-								label: T()("confirm_password"),
+								label: T()("common.confirm.password"),
 							}}
 							errors={getBodyError("passwordConfirmation", updateMe.errors)}
 							hideOptionalText={true}
@@ -131,7 +131,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 							disabled={updateMe.action.isPending}
 							onClick={() => props.state.setOpen(false)}
 						>
-							{T()("cancel")}
+							{T()("common.cancel")}
 						</Button>
 						<Button
 							type="submit"
@@ -140,7 +140,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 							loading={updateMe.action.isPending}
 							disabled={submitDisabled()}
 						>
-							{T()("update")}
+							{T()("common.update")}
 						</Button>
 					</div>
 				</ModalFooter>

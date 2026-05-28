@@ -159,7 +159,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			media.data?.data.poster != null
 		) {
 			return {
-				name: T()("poster"),
+				name: T()("media.poster.label"),
 				url: `${media.data?.data.poster?.url}?preset=thumbnail&format=webp`,
 				focalPointUrl: media.data?.data.poster?.url,
 				isNew: false,
@@ -210,9 +210,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 	const posterEmptyDescription = createMemo(() => {
 		if (PosterFile.getRemovedCurrent() && media.data?.data.poster) {
-			return T()("poster_removed_pending");
+			return T()("media.poster.pending.removed");
 		}
-		return T()("poster_empty_description");
+		return T()("media.poster.empty.description");
 	});
 	const fileSizeMeta = createMemo(() => {
 		const values = [
@@ -242,7 +242,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				return { value: f.id, label: label };
 			});
 
-		return [{ value: undefined, label: T()("no_folder") }, ...sorted];
+		return [{ value: undefined, label: T()("media.folders.none") }, ...sorted];
 	});
 
 	const resolvedDefaultFolderId = createMemo(() => {
@@ -391,13 +391,13 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	const panelContent = createMemo(() => {
 		if (panelMode() === "create") {
 			return {
-				title: T()("create_media_panel_title"),
-				submit: T()("upload"),
+				title: T()("panels.media.create.title"),
+				submit: T()("common.upload"),
 			};
 		}
 		return {
-			title: T()("update_media_panel_title"),
-			submit: T()("update"),
+			title: T()("panels.media.update.title"),
+			submit: T()("common.update"),
 		};
 	});
 	const panelFetchState = createMemo(() => {
@@ -423,7 +423,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	function setFileError(message: string) {
 		setUploadErrors({
 			status: 400,
-			name: T()("media_upload_error"),
+			name: T()("media.upload.error.title"),
 			message,
 			errors: {
 				body: {
@@ -450,9 +450,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		return undefined;
 	}
 	function tabLabel(tab: "details" | "poster" | "meta") {
-		if (tab === "details") return T()("details");
-		if (tab === "poster") return T()("poster");
-		return T()("meta");
+		if (tab === "details") return T()("common.details");
+		if (tab === "poster") return T()("media.poster.label");
+		return T()("common.meta");
 	}
 	function tabHasError(tab: "details" | "poster" | "meta") {
 		if (tab === "details") return hasDetailsErrors();
@@ -488,7 +488,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		if (!file) return undefined;
 
 		if (!file.type.startsWith("image/")) {
-			setFileError(T()("poster_image_only"));
+			setFileError(T()("media.poster.image.only"));
 			return null;
 		}
 
@@ -608,7 +608,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			PosterFile.reset();
 			if (media.data?.data.poster) {
 				PosterFile.setCurrentFile({
-					name: T()("poster"),
+					name: T()("media.poster.label"),
 					url: `${media.data.data.poster.url}?preset=thumbnail&format=webp`,
 					focalPointUrl: media.data.data.poster.url,
 					type: "image",
@@ -709,7 +709,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							}}
 							name="media-folder"
 							options={folderOptions()}
-							copy={{ label: T()("folder") }}
+							copy={{ label: T()("common.folder") }}
 							required={false}
 							errors={getBodyError("folderId", mutateErrors())}
 							noMargin={false}
@@ -723,8 +723,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							}}
 							name="public"
 							copy={{
-								label: T()("publicly_available"),
-								tooltip: T()("media_public_description"),
+								label: T()("common.publicly.available"),
+								tooltip: T()("media.visibility.public.description"),
 							}}
 							errors={getBodyError("featured", mutateErrors())}
 						/>
@@ -745,7 +745,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										name={`name-${locale.code}`}
 										type="text"
 										copy={{
-											label: T()("name"),
+											label: T()("common.name"),
 										}}
 										errors={getErrorObject(inputError(index())?.name)}
 										autoComplete="off"
@@ -765,7 +765,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											name={`alt-${locale.code}`}
 											type="text"
 											copy={{
-												label: T()("alt"),
+												label: T()("common.alt"),
 											}}
 											errors={getErrorObject(inputError(index())?.alt)}
 										/>
@@ -787,7 +787,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											}}
 											name={`description-${locale.code}`}
 											copy={{
-												label: T()("description"),
+												label: T()("common.description"),
 											}}
 											errors={getErrorObject(descriptionError(index()))}
 										/>
@@ -807,7 +807,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											}}
 											name={`summary-${locale.code}`}
 											copy={{
-												label: T()("summary"),
+												label: T()("common.summary"),
 											}}
 											errors={getErrorObject(summaryError(index()))}
 										/>
@@ -850,7 +850,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 								</div>
 								<div class="min-w-0">
 									<p class="text-sm font-medium text-subtitle truncate">
-										{posterPreview()?.name ?? T()("no_poster_selected")}
+										{posterPreview()?.name ?? T()("media.poster.none.selected")}
 									</p>
 									<Show
 										when={posterMetaPills().length > 0}
@@ -870,7 +870,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											</For>
 											<Show when={posterPreview()?.isNew}>
 												<Pill theme="primary-opaque" class="text-[10px]">
-													{T()("poster_pending_upload")}
+													{T()("media.poster.pending.upload")}
 												</Pill>
 											</Show>
 										</div>
@@ -883,7 +883,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											theme="secondary-subtle"
 											size="icon-subtle"
 											onClick={previewPosterFile}
-											aria-label={T()("preview")}
+											aria-label={T()("common.preview")}
 										>
 											<FaSolidMagnifyingGlass size={14} />
 										</Button>
@@ -892,7 +892,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											theme="secondary-subtle"
 											size="icon-subtle"
 											onClick={() => setPosterFocalEditorOpen(true)}
-											aria-label={T()("edit_focal_point")}
+											aria-label={T()("media.focal.point.edit")}
 										>
 											<FaSolidBullseye size={14} />
 										</Button>
@@ -902,7 +902,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										theme="secondary-subtle"
 										size="icon-subtle"
 										onClick={openPosterFileBrowser}
-										aria-label={T()("upload")}
+										aria-label={T()("common.upload")}
 									>
 										<FaSolidArrowUpFromBracket size={14} />
 									</Button>
@@ -912,7 +912,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											theme="danger-subtle"
 											size="icon-subtle"
 											onClick={clearPosterFile}
-											aria-label={T()("remove")}
+											aria-label={T()("common.remove")}
 										>
 											<FaSolidXmark size={14} />
 										</Button>
@@ -927,7 +927,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											theme="secondary-subtle"
 											size="icon-subtle"
 											onClick={undoPosterFile}
-											aria-label={T()("back_to_current_file")}
+											aria-label={T()("media.file.back.to.current")}
 										>
 											<FaSolidArrowRotateLeft size={14} />
 										</Button>
@@ -978,7 +978,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											name={`poster-alt-${locale.code}`}
 											type="text"
 											copy={{
-												label: T()("poster_alt"),
+												label: T()("media.poster.alt"),
 											}}
 											errors={getErrorObject(posterAltError(index()))}
 										/>
@@ -992,28 +992,28 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							type="text"
 							items={[
 								{
-									label: T()("file_size"),
+									label: T()("common.file.size"),
 									value: fileSizeMeta(),
 								},
 								{
-									label: T()("dimensions"),
+									label: T()("common.dimensions"),
 									value: `${media.data?.data.meta.width} x ${media.data?.data.meta.height}`,
 									show: media.data?.data.type === "image",
 								},
 								{
-									label: T()("extension"),
+									label: T()("common.extension"),
 									value: extensionMeta(),
 								},
 								{
-									label: T()("mime_type"),
+									label: T()("common.mime.type"),
 									value: media.data?.data.meta.mimeType,
 								},
 								{
-									label: T()("created_at"),
+									label: T()("common.created.at"),
 									value: dateHelpers.formatDate(media.data?.data.createdAt),
 								},
 								{
-									label: T()("updated_at"),
+									label: T()("common.updated.at"),
 									value: dateHelpers.formatDate(media.data?.data.updatedAt),
 								},
 							]}

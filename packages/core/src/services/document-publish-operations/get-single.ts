@@ -1,11 +1,11 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentPublishOperationsFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	DocumentBricksRepository,
 	DocumentPublishOperationsRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { PublishOperation } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
@@ -44,7 +44,7 @@ const getSingle: ServiceFn<
 	if (!operationRes.data) {
 		return {
 			error: {
-				message: T("publish_request_not_found"),
+				message: serverText("core.publish.requests.not.found"),
 				status: 404,
 			},
 			data: undefined,

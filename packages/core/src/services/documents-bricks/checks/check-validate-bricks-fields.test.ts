@@ -1,32 +1,42 @@
 import { expect, test } from "vitest";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { adminText, serverText } from "../../../libs/i18n/index.js";
 import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 
 const TranslatedCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addText("translatable_field")
 	.addText("non_translatable_field", {
 		config: {
-			translations: false,
+			localized: false,
 		},
 	});
 
 const NonTranslatedCollection = new CollectionBuilder("non_translated", {
 	mode: "multiple",
 	details: {
-		name: "Non-Translated",
-		singularName: "Non-Translated",
+		name: adminText("core.tests.collections.non.translated.name", {
+			fallback: "Non-Translated",
+		}),
+		singularName: adminText(
+			"core.tests.collections.non.translated.singularName",
+			{
+				fallback: "Non-Translated",
+			},
+		),
 	},
 	config: {
-		translations: false,
+		localized: false,
 	},
 }).addText("text_field");
 
@@ -54,7 +64,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			translations: TranslatedCollection.getData.config.translations,
+			localized: TranslatedCollection.getData.config.localized,
 			defaultLocale,
 		},
 	});
@@ -62,7 +72,10 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withTranslationsObject[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: "en",
-		message: "Invalid input: expected string, received number", // zod error message
+		message: serverText("core.fields.validation.errors.unknown", {
+			fallback: "Invalid input: expected string, received number",
+			priority: "Invalid input: expected string, received number",
+		}),
 	});
 
 	// ---------------
@@ -77,7 +90,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			translations: TranslatedCollection.getData.config.translations,
+			localized: TranslatedCollection.getData.config.localized,
 			defaultLocale,
 		},
 	});
@@ -85,7 +98,10 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValue[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: defaultLocale,
-		message: "Invalid input: expected string, received number", // zod error message
+		message: serverText("core.fields.validation.errors.unknown", {
+			fallback: "Invalid input: expected string, received number",
+			priority: "Invalid input: expected string, received number",
+		}),
 	});
 
 	// ---------------
@@ -100,7 +116,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			translations: TranslatedCollection.getData.config.translations,
+			localized: TranslatedCollection.getData.config.localized,
 			defaultLocale: frenchDefaultLocale,
 		},
 	});
@@ -108,7 +124,10 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValueFrench[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: frenchDefaultLocale,
-		message: "Invalid input: expected string, received number", // zod error message
+		message: serverText("core.fields.validation.errors.unknown", {
+			fallback: "Invalid input: expected string, received number",
+			priority: "Invalid input: expected string, received number",
+		}),
 	});
 
 	// ---------------
@@ -123,7 +142,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: NonTranslatedCollection.fields.get("text_field")!,
 		validationData,
 		meta: {
-			translations: NonTranslatedCollection.getData.config.translations,
+			localized: NonTranslatedCollection.getData.config.localized,
 			defaultLocale,
 		},
 	});
@@ -131,7 +150,10 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatedCollection[0]).toMatchObject({
 		key: "text_field",
 		localeCode: null,
-		message: "Invalid input: expected string, received number", // zod error message
+		message: serverText("core.fields.validation.errors.unknown", {
+			fallback: "Invalid input: expected string, received number",
+			priority: "Invalid input: expected string, received number",
+		}),
 	});
 
 	// ---------------
@@ -146,7 +168,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("non_translatable_field")!,
 		validationData,
 		meta: {
-			translations: TranslatedCollection.getData.config.translations,
+			localized: TranslatedCollection.getData.config.localized,
 			defaultLocale,
 		},
 	});
@@ -154,6 +176,9 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatableField[0]).toMatchObject({
 		key: "non_translatable_field",
 		localeCode: null,
-		message: "Invalid input: expected string, received number", // zod error message
+		message: serverText("core.fields.validation.errors.unknown", {
+			fallback: "Invalid input: expected string, received number",
+			priority: "Invalid input: expected string, received number",
+		}),
 	});
 });

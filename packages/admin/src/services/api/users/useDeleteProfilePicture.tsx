@@ -26,8 +26,8 @@ const useDeleteProfilePicture = (props?: UseDeleteProfilePictureProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: deleteProfilePictureReq,
 		getSuccessToast: () => ({
-			title: T()("profile_picture_delete_toast_title"),
-			message: T()("profile_picture_delete_toast_message"),
+			title: T()("toasts.common.profile.picture.delete.title"),
+			message: T()("toasts.common.profile.picture.delete.message"),
 		}),
 		invalidates: [
 			"users.getMultiple",

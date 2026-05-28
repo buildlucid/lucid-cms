@@ -1,10 +1,10 @@
 import getEmailAdapter from "../../libs/email/get-adapter.js";
 import { getEmailResendState } from "../../libs/email/storage/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const resendSingle: ServiceFn<
@@ -36,7 +36,7 @@ const resendSingle: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: T("email_not_found_message"),
+					message: serverText("core.email.not.found.message"),
 					status: 404,
 				},
 			},
@@ -55,7 +55,7 @@ const resendSingle: ServiceFn<
 	if (!resend.data.enabled) {
 		return {
 			error: {
-				message: T("email_resend_not_available"),
+				message: serverText("core.email.resend.not.available"),
 				status: 400,
 			},
 			data: undefined,
@@ -127,7 +127,7 @@ const resendSingle: ServiceFn<
 				],
 				data: {
 					delivery_status: "failed",
-					message: queueRes.error.message,
+					message: queueRes.error.message?.default,
 					updated_at: new Date().toISOString(),
 				},
 			}),

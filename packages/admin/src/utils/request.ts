@@ -1,6 +1,10 @@
 import type { ErrorResponse } from "@types";
 import { clearCsrfSession, csrfReq } from "@/services/api/auth/useCsrf";
 import useRefreshToken from "@/services/api/auth/useRefreshToken";
+import {
+	getRequestInterfaceLocale,
+	interfaceLocaleHeader,
+} from "@/translations";
 import { handleSiteErrors, LucidError } from "@/utils/error-handling";
 import queryBuilder, { type QueryBuilderProps } from "@/utils/query-builder";
 
@@ -41,6 +45,8 @@ const prepareHeaders = async (
 	body?: string | FormData | undefined,
 ): Promise<Record<string, string>> => {
 	const updatedHeaders = { ...headers };
+	const interfaceLocale = getRequestInterfaceLocale();
+	if (interfaceLocale) updatedHeaders[interfaceLocaleHeader] = interfaceLocale;
 	if (csrf) {
 		const csrfToken = await csrfReq();
 		if (csrfToken) updatedHeaders["X-CSRF-Token"] = csrfToken;

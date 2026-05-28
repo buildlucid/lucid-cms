@@ -1,5 +1,5 @@
+import { serverText } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
@@ -45,7 +45,7 @@ const approve: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_not_pending"),
+				message: serverText("core.publish.requests.not.pending"),
 				status: 400,
 			},
 			data: undefined,
@@ -80,7 +80,7 @@ const approve: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_target_not_enabled"),
+				message: serverText("core.publish.requests.target.not.enabled"),
 				status: 400,
 			},
 			data: undefined,
@@ -99,10 +99,12 @@ const approve: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_permission_error_message", {
-					collection: operationRes.data.collection_key,
-					action: "review",
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: operationRes.data.collection_key,
+						action: "review",
+					},
 				}),
 				status: 403,
 			},
@@ -118,7 +120,7 @@ const approve: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_self_approval_not_allowed"),
+				message: serverText("core.publish.requests.self.approval.not.allowed"),
 				status: 403,
 			},
 			data: undefined,
@@ -135,7 +137,7 @@ const approve: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_decision_comment_required"),
+				message: serverText("core.publish.requests.decision.comment.required"),
 				status: 400,
 			},
 			data: undefined,
@@ -153,7 +155,7 @@ const approve: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_operation_schedule_not_supported"),
+				message: serverText("core.publish.operations.schedule.not.supported"),
 				status: 400,
 			},
 			data: undefined,
@@ -218,11 +220,13 @@ const approve: ServiceFn<
 		collectionKey: operationRes.data.collection_key,
 		documentId: operationRes.data.document_id,
 		recipients: requester,
-		title: T("publish_request_approved_title"),
-		message: T("publish_request_approved_message", {
-			user: data.user.email,
-			collection: operationRes.data.collection_key,
-			documentId: operationRes.data.document_id,
+		title: serverText("core.publish.requests.approved.title"),
+		message: serverText("core.publish.requests.approved.message", {
+			data: {
+				user: data.user.email,
+				collection: operationRes.data.collection_key,
+				documentId: operationRes.data.document_id,
+			},
 		}),
 		dedupeAction: "approved",
 	});

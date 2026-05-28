@@ -1,7 +1,7 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
+import { serverText, translateServer } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../types.js";
 import {
 	documentPublishOperationServices,
@@ -28,8 +28,8 @@ const deleteSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("error_locked_collection_name"),
-				message: T("error_locked_collection_message_delete"),
+				name: serverText("core.error.locked.collection.name"),
+				message: serverText("core.error.locked.collection.message.delete"),
 				status: 400,
 			},
 			data: undefined,
@@ -68,7 +68,7 @@ const deleteSingle: ServiceFn<
 				enabled: true,
 				defaultError: {
 					type: "basic",
-					message: T("document_not_found_message"),
+					message: serverText("core.documents.not.found.message"),
 					status: 404,
 				},
 			},
@@ -138,7 +138,13 @@ const deleteSingle: ServiceFn<
 		await documentPublishOperationServices.cancelForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.id],
-			comment: T("document_deleted_publish_request_comment"),
+			comment: translateServer(
+				"core.documents.deleted.publish.request.comment",
+				undefined,
+				{
+					config: context.config,
+				},
+			),
 		});
 	if (cancelRequestsRes.error) return cancelRequestsRes;
 

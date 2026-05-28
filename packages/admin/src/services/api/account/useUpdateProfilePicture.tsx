@@ -44,8 +44,8 @@ const useUpdateProfilePicture = (props?: UseUpdateProfilePictureProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: updateProfilePictureReq,
 		getSuccessToast: () => ({
-			title: T()("profile_picture_update_toast_title"),
-			message: T()("profile_picture_update_toast_message"),
+			title: T()("toasts.common.profile.picture.update.title"),
+			message: T()("toasts.common.profile.picture.update.message"),
 		}),
 		invalidates: [
 			"users.getMultiple",

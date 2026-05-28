@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import constants from "../../constants/constants.js";
-import T from "../../translations/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import type { ServiceResponse } from "../services/types.js";
 
 /**
@@ -17,8 +17,8 @@ const generateKey = (props: {
 		return {
 			error: {
 				type: "basic",
-				name: T("media_name_invalid"),
-				message: T("media_name_invalid"),
+				name: serverText("core.media.name.invalid"),
+				message: serverText("core.media.name.invalid"),
 				status: 400,
 			},
 			data: undefined,

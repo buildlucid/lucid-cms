@@ -1,7 +1,7 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import formatter from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices, documentVersionServices } from "../index.js";
 
@@ -30,8 +30,8 @@ const restoreRevision: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("revisions_not_enabled_error_name"),
-				message: T("revisions_not_enabled_message"),
+				name: serverText("core.documents.revisions.not.enabled.error.name"),
+				message: serverText("core.documents.revisions.not.enabled.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -54,7 +54,7 @@ const restoreRevision: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: T("document_not_found_message"),
+					message: serverText("core.documents.not.found.message"),
 					status: 404,
 				},
 			},
@@ -69,7 +69,9 @@ const restoreRevision: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("cannot_restore_revision_for_deleted_document"),
+				message: serverText(
+					"core.documents.revisions.restore.deleted.document",
+				),
 				status: 400,
 			},
 			data: undefined,

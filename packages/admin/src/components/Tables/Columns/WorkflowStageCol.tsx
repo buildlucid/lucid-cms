@@ -25,8 +25,9 @@ const WorkflowStageCol: Component<{
 		() =>
 			helpers.getLocaleValue({
 				value: stage()?.name,
-				fallback: props.document.workflow?.stage ?? T()("workflow_no_stage"),
-			}) || T()("workflow_no_stage"),
+				fallback:
+					props.document.workflow?.stage ?? T()("documents.workflow.no.stage"),
+			}) || T()("documents.workflow.no.stage"),
 	);
 	const color = createMemo<WorkflowStageColor>(() => stage()?.color ?? "grey");
 

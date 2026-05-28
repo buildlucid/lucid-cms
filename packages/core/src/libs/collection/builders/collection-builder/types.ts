@@ -1,14 +1,12 @@
-import type { infer } from "zod";
-import type { LocaleValue } from "../../../../types/shared.js";
 import type {
 	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTableName,
 } from "../../../../types.js";
 import type { CollectionBuilderHooks } from "../../../hooks/types.js";
+import type { AdminText } from "../../../i18n/types.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
-import type CollectionConfigSchema from "./schema.js";
 
 export type DisplayInListing = boolean;
 export type CollectionPermissionAction =
@@ -47,7 +45,7 @@ export type PublishingWorkflowStageColor =
 
 export type PublishingWorkflowStageConfig = {
 	key: string;
-	name: LocaleValue;
+	name: AdminText;
 	color: PublishingWorkflowStageColor;
 	publishTargets: string[];
 	permissions: {
@@ -61,27 +59,69 @@ export type PublishingWorkflowConfig = {
 	stages: PublishingWorkflowStageConfig[];
 };
 
-export interface CollectionConfigSchemaType
-	extends infer<typeof CollectionConfigSchema> {
+export type CollectionConfigSchemaType = {
+	key: string;
+	mode: "single" | "multiple";
+	details: {
+		name: AdminText;
+		singularName: AdminText;
+		summary?: AdminText;
+	};
+	permissions?: CollectionPermissions;
+	config?: {
+		locked?: boolean;
+		localized?: boolean;
+		revisions?: boolean;
+		autoSave?: boolean;
+		scheduling?: boolean;
+		review?: {
+			requiredFor?: string[];
+			allowSelfApproval?: boolean;
+			comments?: {
+				request?: PublishingReviewCommentRequirement;
+				decision?: PublishingReviewCommentRequirement;
+			};
+		};
+		workflow?: {
+			initial?: string;
+			stages: Array<{
+				key: string;
+				name: AdminText;
+				color?: PublishingWorkflowStageColor;
+				publishTargets?: string[];
+				permissions?: {
+					moveTo?: string;
+					moveFrom?: string;
+				};
+			}>;
+		};
+		environments?: Array<{
+			key: string;
+			name: AdminText;
+			permissions?: CollectionEnvironmentPermissions;
+			relations?: CollectionEnvironmentRelations;
+		}>;
+		revisionRetentionDays?: number | false;
+	};
 	hooks?: CollectionBuilderHooks[];
 	bricks?: {
 		fixed?: Array<BrickBuilder>;
 		builder?: Array<BrickBuilder>;
 	};
-}
+};
 
 export type CollectionData = {
 	key: string;
 	mode: CollectionConfigSchemaType["mode"];
 	details: {
-		name: LocaleValue;
-		singularName: LocaleValue;
-		summary: LocaleValue | null;
+		name: AdminText;
+		singularName: AdminText;
+		summary: AdminText | null;
 	};
 	config: {
 		locked: boolean;
 		revisions: boolean;
-		translations: boolean;
+		localized: boolean;
 		autoSave: boolean;
 		scheduling: boolean;
 		review?: PublishingReviewConfig;
@@ -89,7 +129,7 @@ export type CollectionData = {
 		displayInListing: string[];
 		environments: {
 			key: string;
-			name: LocaleValue;
+			name: AdminText;
 			permissions: CollectionEnvironmentPermissions;
 			relations: CollectionEnvironmentRelations;
 		}[];

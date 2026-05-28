@@ -1,11 +1,11 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	OptionsRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -33,7 +33,7 @@ const createInitialAdmin: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("setup_already_completed"),
+				message: serverText("core.setup.already.completed"),
 				status: 400,
 			},
 			data: undefined,

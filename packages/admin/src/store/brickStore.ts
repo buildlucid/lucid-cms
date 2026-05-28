@@ -44,7 +44,7 @@ const [get, set] = createStore<{
 	relationFieldDragCount: number;
 	locked: boolean;
 	refs: Partial<Record<FieldTypes, FieldRef[]>>;
-	collectionTranslations: boolean;
+	collectionLocalized: boolean;
 	reset: () => void;
 	setBricks: (
 		document?: InternalCollectionDocument,
@@ -122,7 +122,7 @@ const [get, set] = createStore<{
 	autoSaveCounter: 0,
 	skipAutoSave: true,
 	relationFieldDragCount: 0,
-	collectionTranslations: false,
+	collectionLocalized: false,
 	refs: {},
 	reset() {
 		batch(() => {
@@ -133,7 +133,7 @@ const [get, set] = createStore<{
 			set("autoSaveCounter", 0);
 			set("skipAutoSave", true);
 			set("relationFieldDragCount", 0);
-			set("collectionTranslations", false);
+			set("collectionLocalized", false);
 			set("refs", {});
 		});
 	},
@@ -276,8 +276,8 @@ const [get, set] = createStore<{
 				if (!field) return;
 
 				if (
-					params.fieldConfig.config.translations === true &&
-					get.collectionTranslations === true
+					params.fieldConfig.config.localized === true &&
+					get.collectionLocalized === true
 				) {
 					const previousValue = field.translations?.[params.contentLocale];
 					if (safeDeepEqual(previousValue, params.value)) return;
@@ -297,8 +297,8 @@ const [get, set] = createStore<{
 		if (fieldChanged) {
 			const brick = get.bricks[params.brickIndex];
 			const localeCode =
-				params.fieldConfig.config.translations === true &&
-				get.collectionTranslations === true
+				params.fieldConfig.config.localized === true &&
+				get.collectionLocalized === true
 					? params.contentLocale
 					: null;
 			const errorTarget = {
@@ -350,8 +350,8 @@ const [get, set] = createStore<{
 
 		if (params.fieldConfig.type !== "repeater") {
 			if (
-				params.fieldConfig.config.translations === true &&
-				get.collectionTranslations === true
+				params.fieldConfig.config.localized === true &&
+				get.collectionLocalized === true
 			) {
 				newField.translations = {};
 
@@ -430,8 +430,8 @@ const [get, set] = createStore<{
 
 					if (field.type !== "repeater") {
 						if (
-							field.config.translations === true &&
-							get.collectionTranslations === true
+							field.config.localized === true &&
+							get.collectionLocalized === true
 						) {
 							newField.translations = {};
 

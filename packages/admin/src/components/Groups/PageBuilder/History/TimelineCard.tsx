@@ -181,16 +181,16 @@ const TimelineCard: Component<{
 								<h3 class="text-sm font-semibold text-title truncate capitalize">
 									<Switch>
 										<Match when={props.item.type === "latest"}>
-											{T()("latest")}
+											{T()("common.status.latest")}
 										</Match>
 										<Match when={props.item.type === "environment"}>
 											{props.item.version}
 										</Match>
 										<Match when={props.item.type === "revision"}>
-											{T()("revision")} #{props.item.id}
+											{T()("common.revision")} #{props.item.id}
 										</Match>
 										<Match when={props.item.type === "snapshot"}>
-											{T()("snapshot")} #{props.item.id}
+											{T()("common.snapshot")} #{props.item.id}
 										</Match>
 									</Switch>
 								</h3>

@@ -32,8 +32,8 @@ const useRestore = (props?: UseRestoreProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody>({
 		mutationFn: restoreReq,
 		getSuccessToast: () => ({
-			title: T()("document_restore_toast_title"),
-			message: T()("document_restore_toast_message"),
+			title: T()("toasts.documents.restore.title"),
+			message: T()("toasts.documents.restore.message"),
 		}),
 		invalidates: ["documents.getMultiple"],
 		onSuccess: props?.onSuccess,

@@ -18,7 +18,7 @@ describe("email storage config", () => {
 				secret: {
 					encrypt: false,
 				},
-			} as unknown as EmailStorageConfig).error?.message,
+			} as unknown as EmailStorageConfig).error?.message?.default,
 		).toContain("can only set encrypt to true");
 
 		expect(
@@ -27,13 +27,13 @@ describe("email storage config", () => {
 					neverStore: true,
 					encrypt: true,
 				},
-			} as unknown as EmailStorageConfig).error?.message,
+			} as unknown as EmailStorageConfig).error?.message?.default,
 		).toContain("cannot combine neverStore");
 
 		expect(
 			normalizeEmailStorageConfig({
 				secret: {},
-			} as unknown as EmailStorageConfig).error?.message,
+			} as unknown as EmailStorageConfig).error?.message?.default,
 		).toContain("must set encrypt, redact, or neverStore");
 	});
 
@@ -58,14 +58,14 @@ describe("email storage config", () => {
 			{ type: "wildcard" },
 			{ type: "key", key: "token" },
 		]);
-		expect(parseEmailStorageSelector("payload[").error?.message).toContain(
-			"Invalid email storage selector",
-		);
-		expect(parseEmailStorageSelector("payload[]").error?.message).toContain(
-			"Invalid email storage selector",
-		);
-		expect(parseEmailStorageSelector("payload..ssn").error?.message).toContain(
-			"Invalid email storage selector",
-		);
+		expect(
+			parseEmailStorageSelector("payload[").error?.message?.default,
+		).toContain("Invalid email storage selector");
+		expect(
+			parseEmailStorageSelector("payload[]").error?.message?.default,
+		).toContain("Invalid email storage selector");
+		expect(
+			parseEmailStorageSelector("payload..ssn").error?.message?.default,
+		).toContain("Invalid email storage selector");
 	});
 });

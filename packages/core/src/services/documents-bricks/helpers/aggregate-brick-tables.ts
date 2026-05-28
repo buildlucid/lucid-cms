@@ -20,7 +20,7 @@ const aggregateBrickTables = (params: {
 	bricks?: Array<BrickInputSchema> | Array<InternalDocumentBrick>;
 	fields?: Array<FieldInputSchema> | Array<InternalDocumentField>;
 	collection: CollectionBuilder;
-	localization: Config["localization"];
+	localization: Config["i18n"]["content"];
 	tableNameByteLimit: number | null;
 }) => {
 	const brickTables: Array<InsertBrickTables> = [];

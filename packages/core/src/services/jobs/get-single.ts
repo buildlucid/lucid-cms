@@ -1,6 +1,6 @@
 import { jobsFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { QueueJobsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { Job } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -45,7 +45,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("job_not_found_message"),
+				message: serverText("core.job.not.found.message"),
 				status: 404,
 			},
 		},

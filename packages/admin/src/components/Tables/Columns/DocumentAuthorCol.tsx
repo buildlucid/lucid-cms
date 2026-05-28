@@ -27,7 +27,8 @@ const DocumentAuthorCol: Component<{
 				<UserDisplay
 					user={{
 						username:
-							helpers.formatUserName(props.user, "simple") || T()("unknown"),
+							helpers.formatUserName(props.user, "simple") ||
+							T()("media.types.unknown"),
 						firstName: props.user.firstName,
 						lastName: props.user.lastName,
 						profilePicture: props.user.profilePicture,
@@ -36,7 +37,7 @@ const DocumentAuthorCol: Component<{
 					size="x-small"
 				/>
 			) : (
-				<span class="text-sm text-body">{T()("none")}</span>
+				<span class="text-sm text-body">{T()("common.none")}</span>
 			)}
 		</Td>
 	);

@@ -22,8 +22,8 @@ const useClearKV = (props: UseClearKVProps) => {
 	return serviceHelpers.useMutationWrapper<unknown, ResponseBody<null>>({
 		mutationFn: clearKVReq,
 		getSuccessToast: () => ({
-			title: T()("clear_cache_toast_title"),
-			message: T()("clear_cache_toast_message"),
+			title: T()("toasts.system.cache.title"),
+			message: T()("toasts.system.cache.message"),
 		}),
 		invalidates: [],
 		onSuccess: props.onSuccess,

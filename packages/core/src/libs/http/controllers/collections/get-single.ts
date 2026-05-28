@@ -3,13 +3,13 @@ import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/collections.js";
 import { collectionServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
@@ -41,8 +41,8 @@ const getSingleController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: T("route_collection_fetch_error_name"),
-				message: T("route_collection_fetch_error_message"),
+				name: serverText("core.routes.collection.fetch.error.name"),
+				message: serverText("core.routes.collection.fetch.error.message"),
 			},
 		})(context, {
 			key,

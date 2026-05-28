@@ -144,6 +144,14 @@ export const buildCloudflareMainWorkerSource = (props: {
 			path: `./${astroConstants.files.emailTemplatesJson}`,
 			default: "emailTemplates",
 		},
+		{
+			path: `./${astroConstants.files.i18nTranslationsJson}`,
+			default: "i18nTranslations",
+		},
+		{
+			path: "@lucidcms/core/plugin",
+			exports: ["translateServer"],
+		},
 	];
 	const exports: CloudflareWorkerExport[] = [
 		{
@@ -169,6 +177,7 @@ return astroWorker.fetch(request, env, ctx);`,
 
 	const wrappedDefinition = astroConfigureLucid(configDefinition, {
 		emailTemplates,
+		i18nTranslations,
 	});
 	const databaseAdapter = createConfiguredDatabaseAdapter(
 		ConfiguredDatabaseAdapter,
@@ -199,7 +208,11 @@ return astroWorker.fetch(request, env, ctx);`,
 				queue: cronJobSetup.queue,
 				env,
 				kv,
-				request: { url: resolvedConfig.baseUrl || "http://localhost" },
+				request: {
+					url: resolvedConfig.baseUrl || "http://localhost",
+					locale: resolvedConfig.i18n.interface.defaultLocale,
+				},
+				translate: (key, data) => translateServer(key, data),
 			}, {
 				schedule: controller.cron,
 			});

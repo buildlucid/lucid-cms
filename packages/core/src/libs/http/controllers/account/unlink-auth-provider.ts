@@ -2,13 +2,13 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { userServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
@@ -45,8 +45,12 @@ const unlinkAuthProviderController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_account_auth_provider_unlink_error_name"),
-					message: T("route_account_auth_provider_unlink_error_message"),
+					name: serverText(
+						"core.routes.account.auth.provider.unlink.error.message",
+					),
+					message: serverText(
+						"core.routes.account.auth.provider.unlink.error.message",
+					),
 				},
 			},
 		)(context, {

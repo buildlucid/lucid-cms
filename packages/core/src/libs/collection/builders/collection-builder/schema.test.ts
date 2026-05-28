@@ -1,4 +1,5 @@
 import { expect, test } from "vitest";
+import { adminText } from "../../../i18n/admin-text.js";
 import CollectionBuilder from "./index.js";
 import CollectionConfigSchema from "./schema.js";
 
@@ -6,12 +7,16 @@ test("collection builder config passes schema validation", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
-			summary: "Pages are used to create static content on your website.",
+			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+			singularName: adminText("tests.collections.pages.singularName", {
+				fallback: "Page",
+			}),
+			summary: adminText("tests.collections.pages.summary", {
+				fallback: "Pages are used to create static content on your website.",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 		},
 		hooks: [
 			{
@@ -72,8 +77,10 @@ test("collection workflow config validates stages, targets and palette", async (
 		key: "pages",
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+			singularName: adminText("tests.collections.pages.singularName", {
+				fallback: "Page",
+			}),
 		},
 		config: {
 			workflow: {
@@ -81,11 +88,11 @@ test("collection workflow config validates stages, targets and palette", async (
 				stages: [
 					{
 						key: "todo",
-						name: "To do",
+						name: adminText("tests.workflow.todo.name", { fallback: "To do" }),
 					},
 					{
 						key: "done",
-						name: { en: "Done" },
+						name: adminText("tests.workflow.done.name", { fallback: "Done" }),
 						color: "green",
 						publishTargets: ["production"],
 					},
@@ -94,7 +101,9 @@ test("collection workflow config validates stages, targets and palette", async (
 			environments: [
 				{
 					key: "production",
-					name: "Production",
+					name: adminText("tests.environments.production.name", {
+						fallback: "Production",
+					}),
 				},
 			],
 		},
@@ -128,8 +137,18 @@ test("collection workflow config validates stages, targets and palette", async (
 				...validConfig.config,
 				workflow: {
 					stages: [
-						{ key: "todo", name: "To do" },
-						{ key: "todo", name: "Duplicate" },
+						{
+							key: "todo",
+							name: adminText("tests.workflow.todo.name", {
+								fallback: "To do",
+							}),
+						},
+						{
+							key: "todo",
+							name: adminText("tests.workflow.duplicate.name", {
+								fallback: "Duplicate",
+							}),
+						},
 					],
 				},
 			},
@@ -147,7 +166,9 @@ test("collection workflow config validates stages, targets and palette", async (
 					stages: [
 						{
 							key: "todo",
-							name: "To do",
+							name: adminText("tests.workflow.todo.name", {
+								fallback: "To do",
+							}),
 							color: "orange",
 						},
 					],
@@ -167,7 +188,7 @@ test("collection workflow config validates stages, targets and palette", async (
 					stages: [
 						{
 							key: "done",
-							name: "Done",
+							name: adminText("tests.workflow.done.name", { fallback: "Done" }),
 							publishTargets: ["missing"],
 						},
 					],
@@ -185,14 +206,18 @@ test("collection environment relation config passes schema validation", async ()
 			key: "pages",
 			mode: "multiple",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+				singularName: adminText("tests.collections.pages.singularName", {
+					fallback: "Page",
+				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "staging",
-						name: "Staging",
+						name: adminText("tests.environments.staging.name", {
+							fallback: "Staging",
+						}),
 						relations: {
 							blog: "signed-off",
 							settings: "latest",

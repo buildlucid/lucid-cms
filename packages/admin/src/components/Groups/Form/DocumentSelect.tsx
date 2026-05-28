@@ -192,7 +192,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	) =>
 		helpers.getLocaleValue({
 			value: getDocumentCollection(document)?.details.singularName,
-			fallback: T()("document"),
+			fallback: T()("media.types.document"),
 		});
 	const previewFields = (documentRef?: DocumentRef) =>
 		getDocumentListingPreviewFields({
@@ -204,8 +204,8 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 		const relationVersionType = pageBuilderState.relationVersionType?.();
 
 		if (!relationVersionType) return undefined;
-		if (relationVersionType === "latest") return T()("latest");
-		if (relationVersionType === "revision") return T()("revision");
+		if (relationVersionType === "latest") return T()("common.status.latest");
+		if (relationVersionType === "revision") return T()("common.revision");
 		return relationVersionType;
 	});
 
@@ -264,7 +264,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 									disabled={props.disabled || !canAddMore()}
 									classes="capitalize"
 								>
-									{T()("select_document")}
+									{T()("documents.select.action")}
 								</Button>
 								<Show when={selectedDocumentItems().length > 0}>
 									<p class="text-sm text-unfocused">
@@ -275,7 +275,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										/>
 										{typeof props.minItems !== "number" &&
 										typeof props.maxItems !== "number"
-											? ` ${T()("selected").toLowerCase()}`
+											? ` ${T()("common.selected").toLowerCase()}`
 											: ""}
 									</p>
 								</Show>
@@ -308,7 +308,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										disabled={props.disabled}
 									>
 										<FaSolidPen size={12} />
-										<span class="sr-only">{T()("edit")}</span>
+										<span class="sr-only">{T()("common.edit")}</span>
 									</Button>
 									<Button
 										type="button"
@@ -318,7 +318,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										disabled={props.disabled}
 									>
 										<FaSolidXmark size={14} />
-										<span class="sr-only">{T()("clear")}</span>
+										<span class="sr-only">{T()("common.clear")}</span>
 									</Button>
 								</div>
 							</div>
@@ -369,7 +369,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							disabled={props.disabled || !canAddMore()}
 							classes="capitalize"
 						>
-							{T()("select_document")}
+							{T()("documents.select.action")}
 						</Button>
 					</Match>
 				</Switch>
@@ -385,7 +385,9 @@ const MissingDocumentRefNotice: Component<{
 	singularName?: string;
 	versionLabel?: string;
 }> = (props) => {
-	const documentLabel = createMemo(() => props.singularName ?? T()("document"));
+	const documentLabel = createMemo(
+		() => props.singularName ?? T()("media.types.document"),
+	);
 
 	return (
 		<div class="rounded-md border border-warning-base/30 bg-warning-base/10 px-3 py-2.5">
@@ -397,16 +399,16 @@ const MissingDocumentRefNotice: Component<{
 					<p class="text-xs font-semibold leading-5 text-title">
 						<Show
 							when={props.document}
-							fallback={T()("document_relation_unavailable")}
+							fallback={T()("documents.relations.unavailable.label")}
 						>
 							{(document) =>
 								props.versionLabel
-									? T()("document_relation_unavailable_title_with_version", {
+									? T()("documents.relations.unavailable.version.title", {
 											document: documentLabel(),
 											id: document().id,
 											version: props.versionLabel,
 										})
-									: T()("document_relation_unavailable_title", {
+									: T()("documents.relations.unavailable.title", {
 											document: documentLabel(),
 											id: document().id,
 										})
@@ -415,10 +417,10 @@ const MissingDocumentRefNotice: Component<{
 					</p>
 					<p class="mt-1 text-xs leading-5 text-body">
 						{props.versionLabel
-							? T()("document_relation_unavailable_description_with_version", {
+							? T()("documents.relations.unavailable.version.description", {
 									version: props.versionLabel,
 								})
-							: T()("document_relation_unavailable_description")}
+							: T()("documents.relations.unavailable.description")}
 					</p>
 				</div>
 			</div>
@@ -533,7 +535,7 @@ const DocumentSortableItem: Component<{
 							})
 						}
 						disabled={props.disabled}
-						aria-label={T()("remove")}
+						aria-label={T()("common.remove")}
 					>
 						<FaSolidXmark size={14} />
 					</Button>

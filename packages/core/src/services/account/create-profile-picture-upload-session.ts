@@ -1,5 +1,5 @@
 import type { UploadSessionResponse } from "@lucidcms/types";
-import T from "../../translations/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { getMediaType } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
@@ -23,8 +23,10 @@ const createProfilePictureUploadSession: ServiceFn<
 				errors: {
 					mimeType: {
 						code: "media_error",
-						message: T("media_error_invalid_type", {
-							type: "image",
+						message: serverText("core.media.errors.invalid.type", {
+							data: {
+								type: "image",
+							},
 						}),
 					},
 				},

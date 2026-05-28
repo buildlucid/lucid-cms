@@ -7,7 +7,6 @@ import constants from "../../../../constants/constants.js";
 import { logger } from "../../../../index.js";
 import { controllerSchemas } from "../../../../schemas/fs.js";
 import { fsServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { buildDownloadContentDisposition } from "../../../../utils/media/index.js";
 import {
@@ -15,6 +14,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import getMediaAdapter from "../../../media/get-adapter.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
@@ -40,6 +40,7 @@ const downloadMediaController = factory.createHandlers(
 	}),
 	validate("query", controllerSchemas.download.query.string),
 	async (c) => {
+		const context = createServiceContext(c);
 		const mediaAdapter = await getMediaAdapter(c.get("config"));
 		if (!mediaAdapter.enabled || mediaAdapter.adapter.key !== "file-system") {
 			logger.error({
@@ -47,20 +48,19 @@ const downloadMediaController = factory.createHandlers(
 			});
 			throw new LucidAPIError({
 				type: "basic",
-				name: T("route_fs_download_error_name"),
-				message: T("route_fs_download_error_message"),
+				name: serverText("core.routes.fs.download.error.name"),
+				message: serverText("core.routes.fs.download.error.message"),
 			});
 		}
 
 		const query = c.req.valid("query");
-		const context = createServiceContext(c);
 
 		const downloadMedia = await serviceWrapper(fsServices.downloadSingle, {
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: T("route_fs_download_error_name"),
-				message: T("route_fs_download_error_message"),
+				name: serverText("core.routes.fs.download.error.name"),
+				message: serverText("core.routes.fs.download.error.message"),
 			},
 		})(context, {
 			key: query.key,

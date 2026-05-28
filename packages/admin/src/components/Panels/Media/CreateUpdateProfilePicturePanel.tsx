@@ -136,9 +136,10 @@ const CreateUpdateProfilePicturePanel: Component<
 		return {
 			title:
 				panelMode() === "create"
-					? T()("set_profile_picture")
-					: T()("update_profile_picture"),
-			submit: panelMode() === "create" ? T()("set") : T()("update"),
+					? T()("account.profile.picture.set")
+					: T()("account.profile.picture.update"),
+			submit:
+				panelMode() === "create" ? T()("common.set") : T()("common.update"),
 		};
 	});
 
@@ -166,7 +167,7 @@ const CreateUpdateProfilePicturePanel: Component<
 	function setFileError(message: string) {
 		setUploadErrors({
 			status: 400,
-			name: T()("media_upload_error"),
+			name: T()("media.upload.error.title"),
 			message,
 			errors: {
 				body: {
@@ -179,7 +180,7 @@ const CreateUpdateProfilePicturePanel: Component<
 	}
 	async function uploadProfilePictureFile(file: File) {
 		if (!file.type.startsWith("image/")) {
-			setFileError(T()("profile_picture_image_only"));
+			setFileError(T()("account.profile.picture.image.only"));
 			return null;
 		}
 
@@ -217,11 +218,11 @@ const CreateUpdateProfilePicturePanel: Component<
 		} catch (error) {
 			setUploadErrors({
 				status: 500,
-				name: T()("media_upload_error"),
+				name: T()("media.upload.error.title"),
 				message:
 					error instanceof Error
 						? error.message
-						: T()("media_upload_error_description"),
+						: T()("media.upload.error.description"),
 			});
 			return null;
 		} finally {
@@ -347,7 +348,7 @@ const CreateUpdateProfilePicturePanel: Component<
 								type="button"
 								class="border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary-base transition-colors duration-200 border-primary-base text-title"
 							>
-								{T()("details")}
+								{T()("common.details")}
 							</button>
 						</div>
 					</div>
@@ -368,7 +369,7 @@ const CreateUpdateProfilePicturePanel: Component<
 									name={`name-${locale.code}`}
 									type="text"
 									copy={{
-										label: T()("name"),
+										label: T()("common.name"),
 									}}
 									errors={getErrorObject(inputError(index())?.name)}
 									autoComplete="off"
@@ -388,7 +389,7 @@ const CreateUpdateProfilePicturePanel: Component<
 										name={`alt-${locale.code}`}
 										type="text"
 										copy={{
-											label: T()("alt"),
+											label: T()("common.alt"),
 										}}
 										errors={getErrorObject(inputError(index())?.alt)}
 									/>

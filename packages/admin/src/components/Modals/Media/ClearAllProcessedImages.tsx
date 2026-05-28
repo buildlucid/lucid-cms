@@ -32,8 +32,10 @@ const ClearAllProcessedImages: Component<ClearAllProcessedImagesProps> = (
 				isError: clearAllProcessedImages.action.isError,
 			}}
 			copy={{
-				title: T()("clear_all_processed_images_modal_title"),
-				description: T()("clear_all_processed_images_modal_description"),
+				title: T()("modals.common.clear.all.processed.images.title"),
+				description: T()(
+					"modals.common.clear.all.processed.images.description",
+				),
 				error: clearAllProcessedImages.errors()?.message,
 			}}
 			callbacks={{

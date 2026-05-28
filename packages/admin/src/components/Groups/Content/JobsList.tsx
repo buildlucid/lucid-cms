@@ -57,8 +57,8 @@ export const JobsList: Component<{
 			}}
 			copy={{
 				noEntries: {
-					title: T()("no_jobs"),
-					description: T()("no_jobs_description"),
+					title: T()("empty.states.jobs.title"),
+					description: T()("empty.states.jobs.description"),
 				},
 			}}
 		>
@@ -68,49 +68,49 @@ export const JobsList: Component<{
 				searchParams={props.state.searchParams}
 				head={[
 					{
-						label: T()("status"),
+						label: T()("common.status"),
 						key: "status",
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("event_type"),
+						label: T()("common.event.type"),
 						key: "eventType",
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("queue_adapter"),
+						label: T()("queue.adapter"),
 						key: "queueAdapterKey",
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("attempts"),
+						label: T()("common.attempts"),
 						key: "attempts",
 						icon: <FaSolidListOl />,
 					},
 					{
-						label: T()("max_attempts"),
+						label: T()("common.max.attempts"),
 						key: "maxAttempts",
 						icon: <FaSolidListOl />,
 					},
 					{
-						label: T()("priority"),
+						label: T()("common.priority"),
 						key: "priority",
 						icon: <FaSolidListOl />,
 					},
 					{
-						label: T()("created_at"),
+						label: T()("common.created.at"),
 						key: "createdAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,
 					},
 					{
-						label: T()("scheduled_for"),
+						label: T()("common.scheduled.for"),
 						key: "scheduledFor",
 						icon: <FaSolidCalendar />,
 						sortable: true,
 					},
 					{
-						label: T()("completed_at"),
+						label: T()("common.completed.at"),
 						key: "completedAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,

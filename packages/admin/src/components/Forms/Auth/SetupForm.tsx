@@ -27,7 +27,7 @@ const SetupForm: Component = () => {
 				errors: setup.errors(),
 			}}
 			content={{
-				submit: T()("create_initial_admin"),
+				submit: T()("actions.create.initial.admin"),
 			}}
 			options={{
 				buttonFullWidth: true,
@@ -52,7 +52,7 @@ const SetupForm: Component = () => {
 					value={firstName()}
 					onChange={setFirstName}
 					copy={{
-						label: T()("first_name"),
+						label: T()("common.first.name"),
 					}}
 					autoFoucs={true}
 					errors={getBodyError("firstName", setup.errors)}
@@ -64,7 +64,7 @@ const SetupForm: Component = () => {
 					value={lastName()}
 					onChange={setLastName}
 					copy={{
-						label: T()("last_name"),
+						label: T()("common.last.name"),
 					}}
 					errors={getBodyError("lastName", setup.errors)}
 				/>
@@ -76,7 +76,7 @@ const SetupForm: Component = () => {
 				value={username()}
 				onChange={setUsername}
 				copy={{
-					label: T()("username"),
+					label: T()("common.username"),
 				}}
 				required={true}
 				errors={getBodyError("username", setup.errors)}
@@ -88,7 +88,7 @@ const SetupForm: Component = () => {
 				value={email()}
 				onChange={setEmail}
 				copy={{
-					label: T()("email"),
+					label: T()("common.email"),
 				}}
 				required={true}
 				autoComplete="email"
@@ -101,7 +101,7 @@ const SetupForm: Component = () => {
 				value={password()}
 				onChange={setPassword}
 				copy={{
-					label: T()("password"),
+					label: T()("common.password"),
 				}}
 				required={true}
 				autoComplete="new-password"
@@ -114,7 +114,7 @@ const SetupForm: Component = () => {
 				value={passwordConfirmation()}
 				onChange={setPasswordConfirmation}
 				copy={{
-					label: T()("confirm_password"),
+					label: T()("common.confirm.password"),
 				}}
 				required={true}
 				autoComplete="new-password"

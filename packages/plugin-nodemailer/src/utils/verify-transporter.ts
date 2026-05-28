@@ -1,9 +1,11 @@
 import { logger } from "@lucidcms/core";
 import type { Transporter } from "nodemailer";
 import { PLUGIN_KEY } from "../constants.js";
-import T from "../translations/index.js";
 
-const verifyTransporter = async (transporter: Transporter) => {
+const verifyTransporter = async (
+	transporter: Transporter,
+	translate: (key: string) => string = (key) => key,
+) => {
 	try {
 		await transporter.verify();
 	} catch (error) {
@@ -16,7 +18,7 @@ const verifyTransporter = async (transporter: Transporter) => {
 		}
 
 		logger.warn({
-			message: T("email_transporter_not_ready"),
+			message: translate("plugin.nodemailer.transporter.not.ready"),
 			scope: PLUGIN_KEY,
 		});
 	}

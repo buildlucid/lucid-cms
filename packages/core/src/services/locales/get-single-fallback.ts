@@ -10,7 +10,7 @@ const getSingleFallback: ServiceFn<
 		code: string;
 	}
 > = async (context, data) => {
-	const configLocale = context.config.localization.locales.find(
+	const configLocale = context.config.i18n.content.locales.find(
 		(locale) => locale.code === data.code,
 	);
 
@@ -18,7 +18,7 @@ const getSingleFallback: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				code: context.config.localization.defaultLocale,
+				code: context.config.i18n.content.defaultLocale,
 			},
 		};
 	}
@@ -26,7 +26,7 @@ const getSingleFallback: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			code: data.code || context.config.localization.defaultLocale,
+			code: data.code || context.config.i18n.content.defaultLocale,
 		},
 	};
 };

@@ -40,11 +40,11 @@ const SetupRoute: Component = () => {
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
-						title: T()("error_title"),
-						description: T()("error_message"),
+						title: T()("errors.generic.title"),
+						description: T()("errors.generic.message"),
 					}}
 					link={{
-						text: T()("back_to_login"),
+						text: T()("common.back.to.login"),
 						href: "/lucid/login",
 					}}
 				/>
@@ -54,8 +54,8 @@ const SetupRoute: Component = () => {
 			>
 				<div class="mb-10 text-center">
 					<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
-					<h1 class="mb-1">{T()("setup_route_title")}</h1>
-					<p class="max-w-sm mx-auto">{T()("setup_route_description")}</p>
+					<h1 class="mb-1">{T()("routes.auth.setup.title")}</h1>
+					<p class="max-w-sm mx-auto">{T()("routes.auth.setup.description")}</p>
 				</div>
 				<SetupForm />
 			</Match>

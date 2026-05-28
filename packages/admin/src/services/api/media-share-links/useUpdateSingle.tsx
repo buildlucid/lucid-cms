@@ -35,8 +35,8 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, undefined>({
 		mutationFn: updateSingleReq,
 		getSuccessToast: () => ({
-			title: T()("media_share_link_update_toast_title"),
-			message: T()("media_share_link_update_toast_message"),
+			title: T()("toasts.media.share.link.update.title"),
+			message: T()("toasts.media.share.link.update.message"),
 		}),
 		invalidates: ["mediaShareLinks.getMultiple"],
 		onSuccess: props?.onSuccess,

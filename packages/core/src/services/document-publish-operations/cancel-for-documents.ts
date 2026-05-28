@@ -1,8 +1,8 @@
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import createEvent from "./helpers/create-event.js";
@@ -141,13 +141,18 @@ const cancelForDocuments: ServiceFn<
 			collectionKey: operation.collection_key,
 			documentId: operation.document_id,
 			recipients,
-			title: T("publish_request_cancelled_title"),
-			message: T("publish_request_cancelled_for_target_message", {
-				collection: operation.collection_key,
-				documentId: operation.document_id,
-				target: operation.target,
-				comment: data.comment,
-			}),
+			title: serverText("core.publish.requests.cancelled.title"),
+			message: serverText(
+				"core.publish.requests.cancelled.for.target.message",
+				{
+					data: {
+						collection: operation.collection_key,
+						documentId: operation.document_id,
+						target: operation.target,
+						comment: data.comment,
+					},
+				},
+			),
 			dedupeAction: "cancelled",
 		});
 		if (notifyRes.error) return notifyRes;

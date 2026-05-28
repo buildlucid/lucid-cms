@@ -1,4 +1,4 @@
-import { prefixGeneratedColName } from "@lucidcms/core/plugin";
+import { prefixGeneratedColName, serverText } from "@lucidcms/core/plugin";
 import type {
 	CollectionTableNames,
 	DocumentVersionType,
@@ -6,7 +6,6 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../../constants.js";
-import T from "../../translations/index.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../../utils/get-parent-page-relation-table.js";
 
@@ -94,13 +93,13 @@ const checkCircularParents: ServiceFn<
 				error: {
 					type: "basic",
 					status: 400,
-					message: T("circular_parents_error_message"),
+					message: serverText("plugin.pages.parents.circular"),
 					errors: {
 						fields: [
 							{
 								key: constants.fields.parentPage.key,
 								localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
-								message: T("circular_parents_error_message"),
+								message: serverText("plugin.pages.parents.circular"),
 							},
 						],
 					},
@@ -118,7 +117,7 @@ const checkCircularParents: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: T("an_unknown_error_occurred_checking_for_circular_parents"),
+				message: serverText("plugin.pages.parents.circular.check.failed"),
 			},
 			data: undefined,
 		};

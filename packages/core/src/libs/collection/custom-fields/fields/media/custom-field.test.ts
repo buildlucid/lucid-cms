@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import MediaCustomField from "./custom-field.js";
@@ -10,11 +10,13 @@ import MediaCustomField from "./custom-field.js";
 const MediaCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addMedia("standard_media")
@@ -95,7 +97,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -124,7 +126,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -153,7 +155,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -182,7 +184,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -211,7 +213,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -240,7 +242,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -269,7 +271,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -298,7 +300,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -321,7 +323,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -329,7 +331,7 @@ test("fail to validate field - media", async () => {
 		{
 			key: "required_media",
 			localeCode: null,
-			message: T("field_media_not_found"),
+			message: serverText("core.fields.media.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
@@ -349,7 +351,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -357,7 +359,7 @@ test("fail to validate field - media", async () => {
 		{
 			key: "required_media",
 			localeCode: null,
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 
@@ -384,7 +386,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -392,8 +394,10 @@ test("fail to validate field - media", async () => {
 		{
 			key: "min_width_media",
 			localeCode: null,
-			message: T("field_media_min_width", {
-				min: 100,
+			message: serverText("core.fields.media.validation.width.min", {
+				data: {
+					min: 100,
+				},
 			}),
 			itemIndex: 0,
 		},
@@ -422,7 +426,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -430,8 +434,10 @@ test("fail to validate field - media", async () => {
 		{
 			key: "max_width_media",
 			localeCode: null,
-			message: T("field_media_max_width", {
-				max: 200,
+			message: serverText("core.fields.media.validation.width.max", {
+				data: {
+					max: 200,
+				},
 			}),
 			itemIndex: 0,
 		},
@@ -460,7 +466,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -468,8 +474,10 @@ test("fail to validate field - media", async () => {
 		{
 			key: "min_height_media",
 			localeCode: null,
-			message: T("field_media_min_height", {
-				min: 100,
+			message: serverText("core.fields.media.validation.height.min", {
+				data: {
+					min: 100,
+				},
 			}),
 			itemIndex: 0,
 		},
@@ -498,7 +506,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -506,8 +514,10 @@ test("fail to validate field - media", async () => {
 		{
 			key: "max_height_media",
 			localeCode: null,
-			message: T("field_media_max_height", {
-				max: 200,
+			message: serverText("core.fields.media.validation.height.max", {
+				data: {
+					max: 200,
+				},
 			}),
 			itemIndex: 0,
 		},
@@ -536,7 +546,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -544,8 +554,10 @@ test("fail to validate field - media", async () => {
 		{
 			key: "type_media",
 			localeCode: null,
-			message: T("field_media_type", {
-				type: "image",
+			message: serverText("core.fields.media.validation.type.invalid", {
+				data: {
+					type: "image",
+				},
 			}),
 			itemIndex: 0,
 		},
@@ -574,7 +586,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -582,8 +594,10 @@ test("fail to validate field - media", async () => {
 		{
 			key: "extension_media",
 			localeCode: null,
-			message: T("field_media_extension", {
-				extensions: "png",
+			message: serverText("core.fields.media.validation.extension.invalid", {
+				data: {
+					extensions: "png",
+				},
 			}),
 			itemIndex: 0,
 		},
@@ -613,7 +627,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -660,7 +674,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -686,7 +700,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			document: [],
 		},
 		meta: {
-			translations: MediaCollection.getData.config.translations,
+			localized: MediaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -695,8 +709,10 @@ test("media field validates multiple item counts and indexed errors", async () =
 		{
 			key: "multi_media",
 			localeCode: null,
-			message: T("field_relation_min_items", {
-				min: 2,
+			message: serverText("core.fields.relation.validation.min.items", {
+				data: {
+					min: 2,
+				},
 			}),
 		},
 	]);
@@ -704,8 +720,10 @@ test("media field validates multiple item counts and indexed errors", async () =
 		{
 			key: "multi_media",
 			localeCode: null,
-			message: T("field_relation_max_items", {
-				max: 3,
+			message: serverText("core.fields.relation.validation.max.items", {
+				data: {
+					max: 3,
+				},
 			}),
 		},
 	]);
@@ -713,13 +731,13 @@ test("media field validates multiple item counts and indexed errors", async () =
 		{
 			key: "multi_media",
 			localeCode: null,
-			message: T("field_media_not_found"),
+			message: serverText("core.fields.media.validation.not.found"),
 			itemIndex: 1,
 		},
 		{
 			key: "multi_media",
 			localeCode: null,
-			message: T("field_media_not_found"),
+			message: serverText("core.fields.media.validation.not.found"),
 			itemIndex: 2,
 		},
 	]);
@@ -730,15 +748,15 @@ test("media field validates multiple item counts and indexed errors", async () =
 test("custom field config passes schema validation", async () => {
 	const field = new MediaCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			hidden: false,
 			disabled: false,
 		},

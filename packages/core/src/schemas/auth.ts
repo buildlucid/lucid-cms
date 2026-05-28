@@ -1,6 +1,6 @@
 import z from "zod";
 import { AuthProviderSchema } from "../libs/auth-providers/schema.js";
-import T from "../translations/index.js";
+import { translateServer } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 
 export const controllerSchemas = {
@@ -189,7 +189,7 @@ export const controllerSchemas = {
 				}),
 			})
 			.refine((data) => data.password === data.passwordConfirmation, {
-				message: T("please_ensure_passwords_match"),
+				message: translateServer("core.input.ensure.passwords.match"),
 				path: ["passwordConfirmation"],
 			}),
 		query: {

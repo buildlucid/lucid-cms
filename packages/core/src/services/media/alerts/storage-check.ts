@@ -1,10 +1,10 @@
 import constants from "../../../constants/constants.js";
 import type { AlertExecutionPayload } from "../../../libs/alerts/types.js";
+import { translateServer } from "../../../libs/i18n/index.js";
 import {
 	AlertsRepository,
 	OptionsRepository,
 } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import sendEmail from "../../email/send-email.js";
@@ -100,7 +100,7 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 		storageLimit,
 		storageRemaining,
 	};
-	const title = T("storage_alert_triggered_title", {
+	const title = translateServer("core.alerts.storage.triggered.title", {
 		percent: threshold.percent,
 	});
 	let emailId: number | null = null;
@@ -108,7 +108,7 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 		const sendEmailRes = await sendEmail(context, {
 			type: "internal",
 			to: alertEmail,
-			subject: T("storage_alert_email_subject", {
+			subject: translateServer("core.alerts.storage.email.subject", {
 				percent: threshold.percent,
 			}),
 			template: constants.email.templates.storageAlert.key,
@@ -138,7 +138,7 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 			level: threshold.level,
 			dedupe_key: dedupeKey,
 			title,
-			message: T("storage_alert_triggered_message", {
+			message: translateServer("core.alerts.storage.triggered.message", {
 				percent: threshold.percent,
 			}),
 			metadata,

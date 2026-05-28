@@ -67,8 +67,8 @@ export const EmailsList: Component<{
 			}}
 			copy={{
 				noEntries: {
-					title: T()("no_emails"),
-					description: T()("no_emails_description"),
+					title: T()("empty.states.emails.title"),
+					description: T()("empty.states.emails.description"),
 				},
 			}}
 		>
@@ -78,54 +78,54 @@ export const EmailsList: Component<{
 				searchParams={props.state.searchParams}
 				head={[
 					{
-						label: T()("status"),
+						label: T()("common.status"),
 						key: "status",
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("priority"),
+						label: T()("common.priority"),
 						key: "priority",
 						icon: <FaSolidFlag />,
 					},
 					{
-						label: T()("subject"),
+						label: T()("common.subject"),
 						key: "subject",
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("template"),
+						label: T()("email.templates.singular"),
 						key: "template",
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("to"),
+						label: T()("common.to"),
 						key: "to",
 						icon: <FaSolidEnvelope />,
 					},
 					{
-						label: T()("from"),
+						label: T()("common.from"),
 						key: "from",
 						icon: <FaSolidEnvelope />,
 					},
 					{
-						label: T()("attempt_count"),
+						label: T()("common.attempt.count"),
 						key: "attemptCount",
 						icon: <FaSolidPaperPlane />,
 						sortable: true,
 					},
 					{
-						label: T()("type"),
+						label: T()("common.type"),
 						key: "type",
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("first_attempt"),
+						label: T()("common.first.attempt"),
 						key: "createdAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,
 					},
 					{
-						label: T()("last_attempt"),
+						label: T()("common.last.attempt"),
 						key: "lastAttemptedAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,

@@ -3,10 +3,10 @@ import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/locales.js";
 import { localeServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -31,8 +31,8 @@ const getAllController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: T("route_locale_fetch_error_name"),
-				message: T("route_locale_fetch_error_message"),
+				name: serverText("core.routes.locale.fetch.error.name"),
+				message: serverText("core.routes.locale.fetch.error.message"),
 			},
 		})(context);
 		if (locales.error) throw new LucidAPIError(locales.error);

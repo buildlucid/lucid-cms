@@ -1,7 +1,8 @@
 import merge from "lodash.merge";
 import z from "zod";
-import T from "../../../../../translations/index.js";
 import type { ServiceResponse } from "../../../../../types.js";
+import { adminText } from "../../../../i18n/admin-text.js";
+import { serverText } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -27,13 +28,17 @@ class SelectCustomField extends CustomField<"select"> {
 			key: this.key,
 			type: this.type,
 			details: {
-				label: this.props?.details?.label ?? keyToTitle(this.key),
+				label:
+					this.props?.details?.label ??
+					adminText(`fields.${this.type}.${this.key}.label`, {
+						fallback: keyToTitle(this.key),
+					}),
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,
 			},
 			options: this.props?.options ?? [],
 			config: {
-				translations: this.props?.config?.translations ?? false,
+				localized: this.props?.config?.localized ?? false,
 				default: this.props?.config?.default ?? "",
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
@@ -45,7 +50,7 @@ class SelectCustomField extends CustomField<"select"> {
 	get errors() {
 		return merge(super.errors, {
 			required: {
-				message: T("select_field_required"),
+				message: serverText("core.fields.select.validation.required"),
 			},
 		});
 	}
@@ -84,7 +89,7 @@ class SelectCustomField extends CustomField<"select"> {
 			if (!optionValues.includes(value as string)) {
 				return {
 					valid: false,
-					message: T("please_ensure_a_valid_option_is_selected"),
+					message: serverText("core.fields.select.validation.option.invalid"),
 				};
 			}
 		}

@@ -25,7 +25,8 @@ const PublishOperationUserCol: Component<{
 				<UserDisplay
 					user={{
 						username:
-							helpers.formatUserName(props.user, "simple") || T()("unknown"),
+							helpers.formatUserName(props.user, "simple") ||
+							T()("media.types.unknown"),
 						firstName: props.user.firstName,
 						lastName: props.user.lastName,
 						profilePicture: props.user.profilePicture,

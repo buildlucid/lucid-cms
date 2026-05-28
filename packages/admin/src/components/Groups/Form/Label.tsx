@@ -33,7 +33,7 @@ export const Label: Component<LabelProps> = (props) => {
 					<Show when={props.fieldColumnIsMissing}>
 						<span
 							class="text-error-base mr-1 inline"
-							title={T()("this_field_is_missing_from_the_database")}
+							title={T()("fields.database.missing")}
 						>
 							<FaSolidDatabase size={12} />
 						</span>
@@ -45,8 +45,8 @@ export const Label: Component<LabelProps> = (props) => {
 							})}
 							title={
 								props.altLocaleError
-									? T()("this_filed_has_errors_in_other_locales")
-									: T()("this_field_supports_translations")
+									? T()("fields.validation.other.locales.errors")
+									: T()("fields.localized.supported")
 							}
 						>
 							<FaSolidGlobe size={12} />
@@ -59,7 +59,7 @@ export const Label: Component<LabelProps> = (props) => {
 				</span>
 
 				<Show when={!props.required && !props.hideOptionalText}>
-					<span class="text-unfocused text-xs">{T()("optional")}</span>
+					<span class="text-unfocused text-xs">{T()("common.optional")}</span>
 				</Show>
 			</label>
 		</Show>

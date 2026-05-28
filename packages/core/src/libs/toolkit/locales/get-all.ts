@@ -7,9 +7,15 @@ import type {
 import { runToolkitService } from "../utils.js";
 
 const getAll = async (context: ServiceContext): ServiceResponse<Locale[]> =>
-	runToolkitService(
-		() => localeServices.client.getAll(context),
-		"Lucid toolkit could not fetch locales.",
-	);
+	runToolkitService(() => localeServices.client.getAll(context), {
+		name: {
+			key: "core.toolkit.locales.get.all.error.name",
+			fallback: "Locales Toolkit Error",
+		},
+		message: {
+			key: "core.toolkit.locales.get.all.error.message",
+			fallback: "Lucid toolkit could not fetch locales.",
+		},
+	});
 
 export default getAll;

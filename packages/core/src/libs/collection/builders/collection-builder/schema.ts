@@ -1,6 +1,6 @@
 import z from "zod";
 import constants from "../../../../constants/constants.js";
-import { stringTranslations } from "../../../../schemas/locales.js";
+import { adminTextSchema } from "../../../i18n/admin-text.js";
 
 const environmentKeySchema = z
 	.string()
@@ -29,9 +29,9 @@ const CollectionConfigSchema = z
 			}),
 		mode: z.enum(["single", "multiple"]),
 		details: z.object({
-			name: stringTranslations,
-			singularName: stringTranslations,
-			summary: stringTranslations.optional(),
+			name: adminTextSchema,
+			singularName: adminTextSchema,
+			summary: adminTextSchema.optional(),
 		}),
 		permissions: z
 			.object({
@@ -51,9 +51,9 @@ const CollectionConfigSchema = z
 					.boolean()
 					.default(constants.collectionBuilder.locked)
 					.optional(),
-				translations: z
+				localized: z
 					.boolean()
-					.default(constants.collectionBuilder.translations)
+					.default(constants.collectionBuilder.localized)
 					.optional(),
 				revisions: z
 					.boolean()
@@ -116,7 +116,7 @@ const CollectionConfigSchema = z
 										.min(1)
 										.max(50)
 										.regex(/^[a-z0-9-_]+$/),
-									name: stringTranslations,
+									name: adminTextSchema,
 									color: z
 										.enum(
 											constants.collectionBuilder.publishing.workflow
@@ -155,7 +155,7 @@ const CollectionConfigSchema = z
 									message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
 								},
 							),
-							name: stringTranslations,
+							name: adminTextSchema,
 							permissions: z
 								.object({
 									publish: z.string().optional(),

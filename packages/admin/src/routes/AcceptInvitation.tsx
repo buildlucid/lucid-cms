@@ -81,7 +81,7 @@ const AcceptInvitationRoute: Component = () => {
 
 		if (errorName || errorMessage) {
 			spawnToast({
-				title: errorName ?? T()("error_title"),
+				title: errorName ?? T()("errors.generic.title"),
 				message: errorMessage ?? undefined,
 				status: "error",
 			});
@@ -116,20 +116,22 @@ const AcceptInvitationRoute: Component = () => {
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
-						title: T()("invalid_invitation_token"),
-						description: T()("invalid_invitation_token_description"),
+						title: T()("auth.invitations.token.invalid.title"),
+						description: T()("auth.invitations.token.invalid.description"),
 					}}
 					link={{
-						text: T()("back_to_login"),
+						text: T()("common.back.to.login"),
 						href: "/lucid/login",
 					}}
 				/>
 			</Match>
 			<Match when={isReady()}>
 				<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
-				<h1 class="mb-1 text-center">{T()("accept_invitation_route_title")}</h1>
+				<h1 class="mb-1 text-center">
+					{T()("routes.auth.accept.invitation.title")}
+				</h1>
 				<p class="text-center max-w-sm mx-auto">
-					{T()("accept_invitation_route_description")}
+					{T()("routes.auth.accept.invitation.description")}
 				</p>
 
 				<Show when={providers.data?.data.disablePassword === false}>
@@ -148,7 +150,7 @@ const AcceptInvitationRoute: Component = () => {
 						<Show when={providers.data?.data.disablePassword === false}>
 							<span class="text-center mx-auto flex items-center justify-center gap-2 my-8">
 								<span class="w-20 h-px bg-border" />
-								<span class="text-body text-sm mx-2.5">{T()("or")}</span>
+								<span class="text-body text-sm mx-2.5">{T()("common.or")}</span>
 								<span class="w-20 h-px bg-border" />
 							</span>
 						</Show>

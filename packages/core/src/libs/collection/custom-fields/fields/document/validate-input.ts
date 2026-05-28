@@ -1,9 +1,9 @@
 import constants from "../../../../../constants/constants.js";
-import T from "../../../../../translations/index.js";
 import type {
 	LucidDocumentTableName,
 	ServiceContext,
 } from "../../../../../types.js";
+import { translateServer } from "../../../../i18n/index.js";
 import logger from "../../../../logger/index.js";
 import DocumentsRepository from "../../../../repositories/documents.js";
 import buildTableName from "../../../helpers/build-table-name.js";
@@ -33,7 +33,7 @@ const validateDocumentInputData = async (
 	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
-			message: T("error_fetching_documents_for_validation"),
+			message: translateServer("core.documents.validation.fetch.failed"),
 		});
 		return [];
 	}
@@ -60,7 +60,7 @@ const fetchDocumentsFromCollection = async (
 		if (tableNameRes.error) {
 			logger.error({
 				scope: constants.logScopes.validation,
-				message: T("error_fetching_documents_from_collection", {
+				message: translateServer("core.documents.collection.fetch.failed", {
 					collection: collectionKey,
 				}),
 			});
@@ -93,7 +93,7 @@ const fetchDocumentsFromCollection = async (
 		if (documentIdRes.error) {
 			logger.error({
 				scope: constants.logScopes.validation,
-				message: T("error_fetching_documents_from_collection", {
+				message: translateServer("core.documents.collection.fetch.failed", {
 					collection: collectionKey,
 				}),
 			});
@@ -107,7 +107,7 @@ const fetchDocumentsFromCollection = async (
 	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
-			message: T("error_fetching_documents_from_collection", {
+			message: translateServer("core.documents.collection.fetch.failed", {
 				collection: collectionKey,
 			}),
 		});

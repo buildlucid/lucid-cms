@@ -4,7 +4,7 @@
 import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
-import { configureLucid, z } from "@lucidcms/core";
+import { adminText, configureLucid, z } from "@lucidcms/core";
 // import { passthroughEmailAdapter } from "@lucidcms/core/email";
 // import { fileSystemMediaAdapter } from "@lucidcms/core/media";
 import { createServiceContext, PermissionSets } from "@lucidcms/core/plugin";
@@ -88,18 +88,37 @@ export default configureLucid({
 			refreshToken: env.LUCID_REFRESH_TOKEN_SECRET,
 			accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 		},
-		localization: {
-			locales: [
-				{
-					label: "English",
-					code: "en",
-				},
-				{
-					label: "French",
-					code: "fr",
-				},
-			],
-			defaultLocale: "en",
+		i18n: {
+			content: {
+				locales: [
+					{
+						label: "English",
+						code: "en",
+						direction: "ltr",
+					},
+					{
+						label: "French",
+						code: "fr",
+						direction: "ltr",
+					},
+				],
+				defaultLocale: "en",
+			},
+			interface: {
+				locales: [
+					{
+						label: "English",
+						code: "en",
+						direction: "ltr",
+					},
+					{
+						label: "French",
+						code: "fr",
+						direction: "ltr",
+					},
+				],
+				defaultLocale: "en",
+			},
 		},
 		openAPI: {
 			enabled: true,
@@ -204,74 +223,108 @@ export default configureLucid({
 		access: {
 			groups: {
 				pages: {
-					name: "Page Permissions",
+					name: adminText("access.groups.pages.name", {
+						fallback: "Page Permissions",
+					}),
 				},
 				blogs: {
-					name: "Blog Permissions",
+					name: adminText("access.groups.blogs.name", {
+						fallback: "Blog Permissions",
+					}),
 				},
 			},
 			permissions: {
 				"page:full": {
-					name: "Full Page Access",
-					description: "Grants full access to pages.",
+					name: adminText("access.permissions.page-full.name", {
+						fallback: "Full Page Access",
+					}),
+					description: adminText("access.permissions.page-full.description", {
+						fallback: "Grants full access to pages.",
+					}),
 					group: "pages",
 				},
 				"page:read": {
-					name: "Read Pages",
+					name: adminText("access.permissions.page-read.name", {
+						fallback: "Read Pages",
+					}),
 					group: "pages",
 				},
 				"page:create": {
-					name: "Create Pages",
+					name: adminText("access.permissions.page-create.name", {
+						fallback: "Create Pages",
+					}),
 					group: "pages",
 				},
 				"page:update": {
-					name: "Update Pages",
+					name: adminText("access.permissions.page-update.name", {
+						fallback: "Update Pages",
+					}),
 					group: "pages",
 				},
 				"page:delete": {
-					name: "Delete Pages",
+					name: adminText("access.permissions.page-delete.name", {
+						fallback: "Delete Pages",
+					}),
 					group: "pages",
 				},
 				"page:restore": {
-					name: "Restore Pages",
+					name: adminText("access.permissions.page-restore.name", {
+						fallback: "Restore Pages",
+					}),
 					group: "pages",
 				},
 				"page:publish": {
-					name: "Publish Pages",
+					name: adminText("access.permissions.page-publish.name", {
+						fallback: "Publish Pages",
+					}),
 					group: "pages",
 				},
 				"page:review": {
-					name: "Review Page Publish Requests",
+					name: adminText("access.permissions.page-review.name", {
+						fallback: "Review Page Publish Requests",
+					}),
 					group: "pages",
 				},
 				"page:publish:staging": {
-					name: "Publish Pages To Staging",
+					name: adminText("access.permissions.page-publish-staging.name", {
+						fallback: "Publish Pages To Staging",
+					}),
 					group: "pages",
 				},
 				"page:review:staging": {
-					name: "Review Page Publish Requests To Staging",
+					name: adminText("access.permissions.page-review-staging.name", {
+						fallback: "Review Page Publish Requests To Staging",
+					}),
 					group: "pages",
 				},
 				"page:publish:production": {
-					name: "Publish Pages To Production",
+					name: adminText("access.permissions.page-publish-production.name", {
+						fallback: "Publish Pages To Production",
+					}),
 					group: "pages",
 				},
 				"page:review:production": {
-					name: "Review Page Publish Requests To Production",
+					name: adminText("access.permissions.page-review-production.name", {
+						fallback: "Review Page Publish Requests To Production",
+					}),
 					group: "pages",
 				},
 				"blog:full": {
-					name: "Full Blog Access",
+					name: adminText("access.permissions.blog-full.name", {
+						fallback: "Full Blog Access",
+					}),
 					group: "blogs",
 				},
 			},
 			roles: [
 				{
 					key: "admin",
-					name: "Admin",
-					description: {
-						en: "Full admin access for the playground.",
-					},
+					name: adminText("access.roles.admin.name", {
+						fallback: "Admin",
+					}),
+					description: adminText("access.roles.admin.description", {
+						fallback: "Full admin access for the playground.",
+					}),
 					permissions: [
 						...PermissionSets.Users,
 						...PermissionSets.Roles,
@@ -324,7 +377,7 @@ export default configureLucid({
 				collections: [
 					{
 						collectionKey: "page",
-						translations: true,
+						localized: true,
 						displayFullSlug: true,
 						prefix: {
 							en: "en",
@@ -333,7 +386,7 @@ export default configureLucid({
 					},
 					{
 						collectionKey: "test",
-						translations: true,
+						localized: true,
 						displayFullSlug: true,
 					},
 				],

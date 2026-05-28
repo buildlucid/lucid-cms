@@ -1,16 +1,16 @@
 import type { ZodType } from "zod";
-import type { LocaleValue } from "../../../../../types/shared.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface DatetimeFieldConfig extends SharedFieldConfig {
 	type: "datetime";
 	details: {
-		label?: LocaleValue;
-		summary?: LocaleValue;
-		placeholder?: LocaleValue;
+		label?: AdminText;
+		summary?: AdminText;
+		placeholder?: AdminText;
 	};
 	config: {
-		translations?: boolean;
+		localized?: boolean;
 		time?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;

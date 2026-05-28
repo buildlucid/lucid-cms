@@ -46,9 +46,11 @@ export const Pagination: Component<{
 		<div class="flex md:flex-row flex-col justify-between md:items-center gap-2">
 			<span class="text-sm text-body md:mb-0">
 				<Switch>
-					<Match when={textData().total === 0}>{T()("pagination_empty")}</Match>
+					<Match when={textData().total === 0}>
+						{T()("empty.states.pagination")}
+					</Match>
 					<Match when={textData().total > 0}>
-						{T()("pagination_text", {
+						{T()("pagination.summary", {
 							page: textData().page,
 							lastPage: textData().lastPage,
 							total: textData().total,

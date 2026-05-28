@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import TextareaCustomField from "./custom-field.js";
@@ -11,11 +11,13 @@ import TextareaCustomField from "./custom-field.js";
 const TextareaCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addTextarea("standard_textarea")
@@ -46,7 +48,7 @@ test("successfully validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			translations: TextareaCollection.getData.config.translations,
+			localized: TextareaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -67,7 +69,7 @@ test("successfully validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			translations: TextareaCollection.getData.config.translations,
+			localized: TextareaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -88,7 +90,7 @@ test("successfully validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			translations: TextareaCollection.getData.config.translations,
+			localized: TextareaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -111,7 +113,7 @@ test("fail to validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			translations: TextareaCollection.getData.config.translations,
+			localized: TextareaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -119,7 +121,10 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "standard_textarea",
 			localeCode: "en",
-			message: "Invalid input: expected string, received number", // zod error message
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Invalid input: expected string, received number",
+				priority: "Invalid input: expected string, received number",
+			}),
 		},
 	]);
 
@@ -138,7 +143,7 @@ test("fail to validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			translations: TextareaCollection.getData.config.translations,
+			localized: TextareaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -146,7 +151,7 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "required_textarea",
 			localeCode: "en",
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 
@@ -165,7 +170,7 @@ test("fail to validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			translations: TextareaCollection.getData.config.translations,
+			localized: TextareaCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -173,7 +178,10 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "min_length_textarea",
 			localeCode: "en",
-			message: "Too small: expected string to have >=5 characters", // zod error message
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Too small: expected string to have >=5 characters",
+				priority: "Too small: expected string to have >=5 characters",
+			}),
 		},
 	]);
 });
@@ -183,18 +191,18 @@ test("fail to validate field - textarea", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new TextareaCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
-			placeholder: {
-				en: "placeholder",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
+			placeholder: adminText("tests.fields.field.placeholder", {
+				fallback: "placeholder",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			default: "",
 			hidden: false,
 			disabled: false,

@@ -54,7 +54,7 @@ const UserSelectPanel: Component<UserSelectPanelProps> = (props) => {
 				growContent: true,
 			}}
 			copy={{
-				title: T()("select_user_title"),
+				title: T()("users.select.title"),
 			}}
 		>
 			{() => (
@@ -169,22 +169,22 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 					<Filter
 						filters={[
 							{
-								label: T()("username"),
+								label: T()("common.username"),
 								key: "username",
 								type: "text",
 							},
 							{
-								label: T()("first_name"),
+								label: T()("common.first.name"),
 								key: "firstName",
 								type: "text",
 							},
 							{
-								label: T()("last_name"),
+								label: T()("common.last.name"),
 								key: "lastName",
 								type: "text",
 							},
 							{
-								label: T()("email"),
+								label: T()("common.email"),
 								key: "email",
 								type: "text",
 							},
@@ -218,8 +218,8 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 				}}
 				copy={{
 					noEntries: {
-						title: T()("no_users"),
-						description: T()("no_users_description"),
+						title: T()("empty.states.users.title"),
+						description: T()("empty.states.users.description"),
 					},
 				}}
 			>
@@ -233,22 +233,22 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 							key: "select",
 						},
 						{
-							label: T()("username"),
+							label: T()("common.username"),
 							key: "username",
 							icon: <FaSolidIdCard />,
 						},
 						{
-							label: T()("first_name"),
+							label: T()("common.first.name"),
 							key: "firstName",
 							icon: <FaSolidT />,
 						},
 						{
-							label: T()("last_name"),
+							label: T()("common.last.name"),
 							key: "lastName",
 							icon: <FaSolidT />,
 						},
 						{
-							label: T()("email"),
+							label: T()("common.email"),
 							key: "email",
 							icon: <FaSolidEnvelope />,
 						},

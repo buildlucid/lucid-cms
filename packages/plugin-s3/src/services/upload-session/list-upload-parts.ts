@@ -1,6 +1,6 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceListUploadParts } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
-import T from "../../translations/index.js";
 import type { PluginOptions } from "../../types/types.js";
 import { objectUrl, parseParts } from "./helpers.js";
 
@@ -29,9 +29,11 @@ export const listUploadParts = (
 				return {
 					error: {
 						type: "plugin",
-						message: T("get_metadata_failed", {
-							status: response.status,
-							statusText: response.statusText,
+						message: serverText("plugin.s3.objects.metadata.fetch.failed", {
+							data: {
+								status: response.status,
+								statusText: response.statusText,
+							},
 						}),
 					},
 					data: undefined,
@@ -48,10 +50,9 @@ export const listUploadParts = (
 			return {
 				error: {
 					type: "plugin",
-					message:
-						error instanceof Error
-							? error.message
-							: T("an_unknown_error_occurred"),
+					message: serverText("plugin.s3.errors.unknown", {
+						fallback: error instanceof Error ? error.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

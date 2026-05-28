@@ -1,21 +1,31 @@
+import constants from "../../../constants/constants.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import { resolveInterfaceLocale } from "../../i18n/translate.js";
 
 /**
  * A helper to build the service context from a Hono context.
  */
 const createServiceContext = (c: LucidHonoContext): ServiceContext => {
 	const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
+	const config = c.get("config");
+
+	const locale = resolveInterfaceLocale({
+		config,
+		locale: c.req.header(constants.headers.interfaceLocale),
+		acceptLanguage: c.req.header("Accept-Language"),
+	});
 
 	return {
-		db: { client: c.get("config").db.client },
-		config: c.get("config"),
+		db: { client: config.db.client },
+		config,
 		queue: c.get("queue"),
 		env: c.get("env"),
 		kv: c.get("kv"),
 		request: {
 			url: c.req.url,
 			ipAddress: connectionInfo.address ?? null,
+			locale,
 		},
 	};
 };

@@ -1,7 +1,7 @@
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
 import { decrypt, encrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
+import { serverText } from "../../i18n/index.js";
 import { isRecord } from "./paths.js";
 import type { EmailStorageEncryptedValue } from "./types.js";
 
@@ -31,7 +31,7 @@ export const encryptEmailStorageValue = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: T("email_storage_encrypt_failed"),
+				message: serverText("core.email.storage.encrypt.failed"),
 			},
 			data: undefined,
 		};
@@ -60,7 +60,7 @@ export const decryptEmailStorageValue = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: T("email_storage_decrypt_failed"),
+				message: serverText("core.email.storage.decrypt.failed"),
 			},
 			data: undefined,
 		};

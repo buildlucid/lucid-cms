@@ -14,7 +14,7 @@ const DashboardRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("dashboard_route_title", {
+							title: T()("routes.dashboard.title", {
 								name: userStore.get.user?.firstName
 									? `, ${userStore.get.user?.firstName}`
 									: "",

@@ -1,7 +1,7 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceCreateUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { DEFAULT_PART_SIZE, PRESIGNED_URL_EXPIRY } from "../../constants.js";
-import T from "../../translations/index.js";
 import type { PluginOptions } from "../../types.js";
 import {
 	createBindingSingleSession,
@@ -33,7 +33,9 @@ export const createUploadSession = (
 					return {
 						error: {
 							type: "plugin",
-							message: T("http_client_not_configured"),
+							message: serverText(
+								"plugin.cloudflare.r2.http.client.not.configured",
+							),
 						},
 						data: undefined,
 					};
@@ -47,7 +49,9 @@ export const createUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: T("http_client_not_configured"),
+						message: serverText(
+							"plugin.cloudflare.r2.http.client.not.configured",
+						),
 					},
 					data: undefined,
 				};
@@ -67,10 +71,15 @@ export const createUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: T("upload_session_failed", {
-							status: response.status,
-							statusText: response.statusText,
-						}),
+						message: serverText(
+							"plugin.cloudflare.r2.upload.sessions.create.failed",
+							{
+								data: {
+									status: response.status,
+									statusText: response.statusText,
+								},
+							},
+						),
 					},
 					data: undefined,
 				};
@@ -81,7 +90,9 @@ export const createUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: T("upload_id_missing"),
+						message: serverText(
+							"plugin.cloudflare.r2.upload.sessions.upload.id.missing",
+						),
 					},
 					data: undefined,
 				};
@@ -104,10 +115,9 @@ export const createUploadSession = (
 			return {
 				error: {
 					type: "plugin",
-					message:
-						error instanceof Error
-							? error.message
-							: T("an_unknown_error_occurred"),
+					message: serverText("plugin.cloudflare.r2.errors.unknown", {
+						fallback: error instanceof Error ? error.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

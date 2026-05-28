@@ -27,7 +27,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				errors: resetPassword.errors(),
 			}}
 			content={{
-				submit: T()("reset_password"),
+				submit: T()("actions.reset.password"),
 			}}
 			options={{
 				buttonFullWidth: true,
@@ -49,7 +49,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				value={password()}
 				onChange={setPassword}
 				copy={{
-					label: T()("password"),
+					label: T()("common.password"),
 				}}
 				required={true}
 				autoFoucs={true}
@@ -62,7 +62,7 @@ const ResetPasswordForm: Component<ResetPasswordFormProps> = (props) => {
 				value={passwordConfirmation()}
 				onChange={setPasswordConfirmation}
 				copy={{
-					label: T()("confirm_password"),
+					label: T()("common.confirm.password"),
 				}}
 				required={true}
 				errors={getBodyError("passwordConfirmation", resetPassword.errors)}

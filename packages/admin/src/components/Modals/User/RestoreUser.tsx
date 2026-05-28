@@ -32,8 +32,8 @@ const RestoreUser: Component<RestoreUserProps> = (props) => {
 				isError: restoreUsers.action.isError,
 			}}
 			copy={{
-				title: T()("restore_users_modal_title"),
-				description: T()("restore_users_modal_description"),
+				title: T()("modals.common.restore.users.title"),
+				description: T()("modals.common.restore.users.description"),
 				error: restoreUsers.errors()?.message,
 			}}
 			callbacks={{

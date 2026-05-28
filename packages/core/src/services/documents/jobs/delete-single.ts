@@ -1,7 +1,7 @@
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { documentServices } from "../../index.js";
 import invalidateClientDocumentCache from "../helpers/invalidate-client-cache.js";
@@ -51,7 +51,7 @@ const deleteDocument: ServiceFn<
 				enabled: true,
 				defaultError: {
 					type: "basic",
-					message: T("document_not_found_message"),
+					message: serverText("core.documents.not.found.message"),
 					status: 404,
 				},
 			},

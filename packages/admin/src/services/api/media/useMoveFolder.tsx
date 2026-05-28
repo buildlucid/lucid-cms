@@ -30,8 +30,8 @@ const useMoveFolder = (props?: UseMoveFolderProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: moveFolderReq,
 		getSuccessToast: () => ({
-			title: T()("update_toast_title", { name: T()("media") }),
-			message: T()("media_update_toast_message"),
+			title: T()("toasts.common.update.title", { name: T()("common.media") }),
+			message: T()("toasts.media.update.message"),
 		}),
 		invalidates: [
 			"media.getMultiple",

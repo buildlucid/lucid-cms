@@ -115,7 +115,7 @@ export const getDocumentListingPreviewFields = (props: {
 				fieldConfig: field,
 				fieldData: documentField,
 				contentLocale: props.contentLocale,
-				collectionTranslations: collection.config.translations,
+				collectionLocalized: collection.config.localized,
 			});
 
 			if (!value) return null;
@@ -156,13 +156,13 @@ const getDocumentFieldValue = (props: {
 	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
 	fieldData?: DocumentField;
 	contentLocale: string;
-	collectionTranslations: boolean;
+	collectionLocalized: boolean;
 }) => {
 	if (!props.fieldData) return undefined;
 
 	if (
-		props.collectionTranslations &&
-		props.fieldConfig.config.translations === true
+		props.collectionLocalized &&
+		props.fieldConfig.config.localized === true
 	) {
 		return (
 			props.fieldData.translations?.[props.contentLocale] ??
@@ -177,14 +177,14 @@ const formatDocumentPreviewValue = (props: {
 	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
 	fieldData?: DocumentField;
 	contentLocale: string;
-	collectionTranslations: boolean;
+	collectionLocalized: boolean;
 }) => {
 	const rawValue = getDocumentFieldValue(props);
 	if (rawValue === null || rawValue === undefined) return null;
 
 	switch (props.fieldConfig.type) {
 		case "checkbox":
-			return rawValue ? T()("yes") : T()("no");
+			return rawValue ? T()("common.yes") : T()("common.no");
 
 		case "select": {
 			const values = Array.isArray(rawValue) ? rawValue : [rawValue];

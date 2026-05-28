@@ -22,7 +22,7 @@ const AccountRoute: Component = () => {
 						alerts={[
 							{
 								type: "error",
-								message: T()("please_reset_password_message"),
+								message: T()("auth.password.reset.required.message"),
 								show: user()?.triggerPasswordReset === true,
 							},
 						]}
@@ -31,8 +31,8 @@ const AccountRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("account_route_title"),
-							description: T()("account_route_description"),
+							title: T()("routes.account.title"),
+							description: T()("routes.account.description"),
 						}}
 					/>
 				),

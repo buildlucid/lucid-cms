@@ -1,6 +1,6 @@
 import formatter from "../../../libs/formatters/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import { MediaRepository } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const resolvePoster: ServiceFn<
@@ -22,7 +22,7 @@ const resolvePoster: ServiceFn<
 				errors: {
 					posterId: {
 						code: "media_error",
-						message: T("media_poster_cannot_reference_self"),
+						message: serverText("core.media.poster.cannot.reference.self"),
 					},
 				},
 			},
@@ -38,7 +38,7 @@ const resolvePoster: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("media_poster_not_found"),
+				message: serverText("core.media.poster.not.found"),
 				status: 404,
 			},
 		},
@@ -53,7 +53,7 @@ const resolvePoster: ServiceFn<
 				errors: {
 					posterId: {
 						code: "media_error",
-						message: T("media_poster_must_be_image"),
+						message: serverText("core.media.poster.must.be.image"),
 					},
 				},
 			},
@@ -69,7 +69,7 @@ const resolvePoster: ServiceFn<
 				errors: {
 					posterId: {
 						code: "media_error",
-						message: T("media_poster_not_found"),
+						message: serverText("core.media.poster.not.found"),
 					},
 				},
 			},

@@ -24,8 +24,8 @@ const CopyAPIKey: Component<CopyAPIKeyProps> = (props) => {
 				setOpen: props.state.setOpen,
 			}}
 			copy={{
-				title: T()("copy_api_key_modal_title"),
-				description: T()("copy_api_key_modal_description"),
+				title: T()("modals.common.copy.api.key.title"),
+				description: T()("modals.common.copy.api.key.description"),
 			}}
 		>
 			<CopyInput value={props.apiKey || ""} />

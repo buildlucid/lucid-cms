@@ -59,7 +59,7 @@ const formatSingle = (props: {
 			summary: collectionData.details.summary,
 		},
 		config: {
-			translations: collectionData.config.translations,
+			localized: collectionData.config.localized,
 			revisions: collectionData.config.revisions,
 			locked: collectionData.config.locked,
 			displayInListing: props.collection.displayInListing,

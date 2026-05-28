@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
-import T from "../../translations/index.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
+import { serverText, translateServer } from "../i18n/index.js";
 import logger from "../logger/index.js";
 import passthroughQueueAdapter from "../queue/adapters/passthrough.js";
 import getQueueAdapter from "../queue/get-adapter.js";
@@ -26,7 +26,7 @@ const executeCronJob = async (
 			logError: true,
 			defaultError: {
 				type: "cron",
-				name: T("cron_job_error_name"),
+				name: serverText("core.cron.job.error.name"),
 				message: job.error,
 			},
 		})(context);
@@ -39,18 +39,18 @@ const executeCronJob = async (
 			logger.warn({
 				message: `Cron job "${job.label}" failed (attempt ${attempt}/${MAX_RETRIES}), retrying...`,
 				scope: constants.logScopes.cron,
-				data: { error: result.error.message },
+				data: { error: result.error.message?.default },
 			});
 		} else {
 			logger.error({
 				message: `Cron job "${job.label}" failed after ${MAX_RETRIES} attempts`,
 				scope: constants.logScopes.cron,
-				data: { error: result.error.message },
+				data: { error: result.error.message?.default },
 			});
 			return {
 				key,
 				success: false,
-				error: result.error.message,
+				error: result.error.message?.default,
 			};
 		}
 	}
@@ -111,7 +111,7 @@ const setupCronJobs = async (config: {
 				};
 
 				logger.info({
-					message: T("running_cron_jobs"),
+					message: translateServer("core.runtime.running.cron.jobs"),
 					scope: constants.logScopes.cron,
 				});
 
@@ -138,7 +138,7 @@ const setupCronJobs = async (config: {
 				}
 			} catch (_) {
 				logger.error({
-					message: T("cron_job_error_message"),
+					message: translateServer("core.cron.job.error.message"),
 					scope: constants.logScopes.cron,
 				});
 			} finally {

@@ -1,9 +1,21 @@
 import { describe, expect, test } from "vitest";
+import type { ServiceContext } from "../../types.js";
 import { normalizeEmailAttachments } from "./attachments";
+
+const context = {
+	config: {
+		i18n: {
+			translations: {},
+			interface: {
+				defaultLocale: "en",
+			},
+		},
+	},
+} as ServiceContext;
 
 describe("normalizeEmailAttachments", () => {
 	test("accepts valid URL attachments", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "https://example.com/invoice.pdf",
@@ -25,7 +37,7 @@ describe("normalizeEmailAttachments", () => {
 	});
 
 	test("accepts valid inline CID attachments", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "https://example.com/logo.png",
@@ -42,7 +54,7 @@ describe("normalizeEmailAttachments", () => {
 	});
 
 	test("rejects non HTTP/S URLs", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "ftp://example.com/file.pdf",
@@ -54,7 +66,7 @@ describe("normalizeEmailAttachments", () => {
 	});
 
 	test("rejects missing filenames", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "https://example.com/file.pdf",
@@ -66,7 +78,7 @@ describe("normalizeEmailAttachments", () => {
 	});
 
 	test("rejects unsafe filenames", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "https://example.com/file.pdf",
@@ -78,7 +90,7 @@ describe("normalizeEmailAttachments", () => {
 	});
 
 	test("rejects invalid content types", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "https://example.com/file.pdf",
@@ -91,7 +103,7 @@ describe("normalizeEmailAttachments", () => {
 	});
 
 	test("rejects inline attachments without content IDs", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "https://example.com/file.pdf",
@@ -104,7 +116,7 @@ describe("normalizeEmailAttachments", () => {
 	});
 
 	test("rejects attachment dispositions with content IDs", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "https://example.com/file.pdf",
@@ -118,7 +130,7 @@ describe("normalizeEmailAttachments", () => {
 	});
 
 	test("rejects invalid content IDs", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "https://example.com/file.pdf",
@@ -132,7 +144,7 @@ describe("normalizeEmailAttachments", () => {
 	});
 
 	test("rejects duplicate content IDs", () => {
-		const res = normalizeEmailAttachments([
+		const res = normalizeEmailAttachments(context, [
 			{
 				type: "url",
 				url: "https://example.com/one.png",
@@ -154,6 +166,7 @@ describe("normalizeEmailAttachments", () => {
 
 	test("rejects more than 10 attachments", () => {
 		const res = normalizeEmailAttachments(
+			context,
 			Array.from({ length: 11 }, (_, index) => ({
 				type: "url" as const,
 				url: `https://example.com/${index}.pdf`,

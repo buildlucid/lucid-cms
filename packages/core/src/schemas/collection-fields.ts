@@ -1,5 +1,5 @@
 import z from "zod";
-import { stringTranslations } from "./locales.js";
+import { adminTextSchema } from "../libs/i18n/admin-text.js";
 
 export const fieldInputSchema = z.object({
 	key: z.string(),
@@ -57,43 +57,63 @@ export const fieldConfigSchema = z.object({
 		})
 		.optional(),
 	details: z.object({
-		label: stringTranslations
+		label: adminTextSchema
 			.meta({
 				description: "Display label for the field",
-				example: { en: "Page title" },
+				example: {
+					type: "admin-text",
+					key: "collections.page.fields.pageTitle.label",
+					fallback: "Page title",
+				},
 			})
 			.optional(),
-		summary: stringTranslations
+		summary: adminTextSchema
 			.meta({
 				description: "Description text for the field",
-				example: "The title of the page.",
+				example: {
+					type: "admin-text",
+					key: "collections.page.fields.pageTitle.summary",
+					fallback: "The title of the page.",
+				},
 			})
 			.optional(),
-		placeholder: stringTranslations
+		placeholder: adminTextSchema
 			.meta({
 				description: "Placeholder text for input fields",
-				example: "Enter page title...",
+				example: {
+					type: "admin-text",
+					key: "collections.page.fields.pageTitle.placeholder",
+					fallback: "Enter page title...",
+				},
 			})
 			.optional(),
-		true: stringTranslations
+		true: adminTextSchema
 			.meta({
 				description: "Label for true value in boolean fields",
-				example: "Yes",
+				example: {
+					type: "admin-text",
+					key: "collections.page.fields.featured.trueLabel",
+					fallback: "Yes",
+				},
 			})
 			.optional(),
-		false: stringTranslations
+		false: adminTextSchema
 			.meta({
 				description: "Label for false value in boolean fields",
-				example: "No",
+				example: {
+					type: "admin-text",
+					key: "collections.page.fields.featured.falseLabel",
+					fallback: "No",
+				},
 			})
 			.optional(),
 	}),
 	config: z
 		.object({
-			translations: z
+			localized: z
 				.boolean()
 				.meta({
-					description: "Whether the field supports translations",
+					description: "Whether the field supports localized content",
 					example: true,
 				})
 				.nullable()
@@ -237,9 +257,13 @@ export const fieldConfigSchema = z.object({
 	options: z
 		.array(
 			z.object({
-				label: stringTranslations.meta({
+				label: adminTextSchema.meta({
 					description: "Display label for the option",
-					example: { en: "Option A" },
+					example: {
+						type: "admin-text",
+						key: "collections.page.fields.status.options.draft.label",
+						fallback: "Draft",
+					},
 				}),
 				value: z.string().meta({
 					description: "Value of the option when selected",

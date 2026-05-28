@@ -81,14 +81,14 @@ const putStoredSession = (key: string, session: StoredUploadSession) => {
 /** Normalizes upload failures into the admin error shape used by form flows. */
 const uploadError = (message: string, status = 500): ErrorResponse => ({
 	status,
-	name: T()("media_upload_error"),
+	name: T()("media.upload.error.title"),
 	message,
 });
 
 const toUploadError = (error: unknown): ErrorResponse => {
 	if (error instanceof LucidError) return error.errorRes;
 	if (error instanceof Error) return uploadError(error.message);
-	return uploadError(T()("media_upload_error_description"));
+	return uploadError(T()("media.upload.error.description"));
 };
 
 /**
@@ -105,7 +105,7 @@ const uploadWithXhr = (props: {
 	return new Promise((resolve) => {
 		if (props.signal?.aborted) {
 			resolve({
-				error: uploadError(T()("upload_aborted")),
+				error: uploadError(T()("media.upload.aborted")),
 				data: undefined,
 			});
 			return;
@@ -119,7 +119,7 @@ const uploadWithXhr = (props: {
 			xhr.abort();
 			cleanup();
 			resolve({
-				error: uploadError(T()("upload_aborted")),
+				error: uploadError(T()("media.upload.aborted")),
 				data: undefined,
 			});
 		};
@@ -143,7 +143,7 @@ const uploadWithXhr = (props: {
 			}
 			resolve({
 				error: uploadError(
-					xhr.responseText || xhr.statusText || T()("media_upload_failed"),
+					xhr.responseText || xhr.statusText || T()("media.upload.failed"),
 				),
 				data: undefined,
 			});
@@ -151,14 +151,14 @@ const uploadWithXhr = (props: {
 		xhr.onerror = () => {
 			cleanup();
 			resolve({
-				error: uploadError(xhr.statusText || T()("media_upload_failed")),
+				error: uploadError(xhr.statusText || T()("media.upload.failed")),
 				data: undefined,
 			});
 		};
 		xhr.onabort = () => {
 			cleanup();
 			resolve({
-				error: uploadError(T()("upload_aborted")),
+				error: uploadError(T()("media.upload.aborted")),
 				data: undefined,
 			});
 		};
@@ -192,7 +192,7 @@ const withRetries = async <T>(
 		lastError = result.error;
 	}
 	return {
-		error: lastError ?? uploadError(T()("media_upload_failed")),
+		error: lastError ?? uploadError(T()("media.upload.failed")),
 		data: undefined,
 	};
 };
@@ -297,7 +297,7 @@ const uploadResumable = async (
 		while (nextIndex < missingPartNumbers.length) {
 			if (signal?.aborted) {
 				return {
-					error: uploadError(T()("upload_aborted")),
+					error: uploadError(T()("media.upload.aborted")),
 					data: undefined,
 				} satisfies UploadResult<undefined>;
 			}
@@ -311,7 +311,7 @@ const uploadResumable = async (
 			const partUrl = urlByPart.get(partNumber);
 			if (!partUrl) {
 				return {
-					error: uploadError(T()("missing_upload_part_url")),
+					error: uploadError(T()("media.upload.parts.url.missing")),
 					data: undefined,
 				} satisfies UploadResult<undefined>;
 			}
@@ -371,7 +371,7 @@ const uploadResumable = async (
 		const reconciled = await getUploadSessionReq(session.sessionId);
 		if (!reconciled.data.canResume) {
 			return {
-				error: uploadError(T()("upload_session_no_longer_resumable")),
+				error: uploadError(T()("media.upload.session.not.resumable")),
 				data: undefined,
 			};
 		}
@@ -388,7 +388,7 @@ const uploadResumable = async (
 		completedParts.some((part) => part.etag.length === 0)
 	) {
 		return {
-			error: uploadError(T()("uploaded_parts_not_reconciled")),
+			error: uploadError(T()("media.upload.parts.not.reconciled")),
 			data: undefined,
 		};
 	}

@@ -37,7 +37,7 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 					mode={undefined}
 					trailingBreadcrumbs={() => [
 						{
-							label: T()("history"),
+							label: T()("common.history"),
 						},
 					]}
 					state={{
@@ -85,7 +85,7 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 									loading={state.isLoading()}
 									classes="w-full"
 								>
-									{T()("load_more")}
+									{T()("common.load.more")}
 								</Button>
 							</div>
 						</Show>

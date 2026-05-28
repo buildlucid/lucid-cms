@@ -38,7 +38,7 @@ export const formatStageName = (props: {
 			fallback: props.stageKey ?? "",
 		}) ||
 		props.stageKey ||
-		T()("workflow_no_stage")
+		T()("documents.workflow.no.stage")
 	);
 };
 

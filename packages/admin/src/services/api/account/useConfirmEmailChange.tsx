@@ -26,8 +26,8 @@ const useConfirmEmailChange = (props?: UseConfirmEmailChangeProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: confirmEmailChangeReq,
 		getSuccessToast: () => ({
-			title: T()("email_change_confirm_success_toast_title"),
-			message: T()("email_change_confirm_success_toast_message"),
+			title: T()("toasts.email.change.confirm.success.title"),
+			message: T()("toasts.email.change.confirm.success.message"),
 		}),
 		invalidates: ["users.getSingle"],
 		onSuccess: props?.onSuccess,

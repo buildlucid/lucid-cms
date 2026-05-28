@@ -1,5 +1,5 @@
+import { serverText } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { userServices } from "../index.js";
 
@@ -18,7 +18,7 @@ const deleteSinglePermanently: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("error_cant_delete_yourself"),
+				message: serverText("core.users.self.delete.denied"),
 				status: 400,
 			},
 			data: undefined,
@@ -39,7 +39,7 @@ const deleteSinglePermanently: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("user_not_found_message"),
+				message: serverText("core.user.not.found.message"),
 				status: 404,
 			},
 		},

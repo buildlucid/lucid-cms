@@ -31,10 +31,10 @@ const useRestoreRevision = (props: UsePromoteSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: restoreRevisionReq,
 		getSuccessToast: () => ({
-			title: T()("restore_revision_toast_title", {
+			title: T()("toasts.common.restore.revision.title", {
 				name: props.getCollectionName(),
 			}),
-			message: T()("restore_revision_toast_message", {
+			message: T()("toasts.common.restore.revision.message", {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),

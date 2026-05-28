@@ -1,3 +1,4 @@
+import { serverText } from "../../../../i18n/index.js";
 import { createSignedMediaUrl } from "../../../signed-url.js";
 import type {
 	FileSystemMediaAdapterOptions,
@@ -29,8 +30,10 @@ export default (options: FileSystemMediaAdapterOptions) => {
 		} catch (e) {
 			return {
 				error: {
-					message:
-						e instanceof Error ? e.message : "Failed to sign download URL",
+					message: serverText("core.media.download.url.sign.failed", {
+						fallback:
+							e instanceof Error ? e.message : "Failed to sign download URL",
+					}),
 					status: 500,
 				},
 				data: undefined,

@@ -1,6 +1,7 @@
 import z from "zod";
-import T from "../../../../../translations/index.js";
 import type { ServiceResponse } from "../../../../../types.js";
+import { adminText } from "../../../../i18n/admin-text.js";
+import { serverText } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
@@ -35,11 +36,15 @@ class MediaCustomField extends CustomField<"media"> {
 			key: this.key,
 			type: this.type,
 			details: {
-				label: this.props?.details?.label ?? keyToTitle(this.key),
+				label:
+					this.props?.details?.label ??
+					adminText(`fields.${this.type}.${this.key}.label`, {
+						fallback: keyToTitle(this.key),
+					}),
 				summary: this.props?.details?.summary,
 			},
 			config: {
-				translations: this.props?.config?.translations ?? false,
+				localized: this.props?.config?.localized ?? false,
 				default: this.props?.config?.default ?? [],
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
@@ -70,7 +75,7 @@ class MediaCustomField extends CustomField<"media"> {
 					value === undefined ||
 					value === null ||
 					(Array.isArray(value) && value.length === 0),
-				message: T("generic_field_required"),
+				message: serverText("core.fields.validation.required"),
 			},
 		};
 	}
@@ -141,7 +146,7 @@ class MediaCustomField extends CustomField<"media"> {
 			if (findMedia === undefined) {
 				errors.push({
 					itemIndex,
-					message: T("field_media_not_found"),
+					message: serverText("core.fields.media.validation.not.found"),
 				});
 				continue;
 			}
@@ -152,9 +157,14 @@ class MediaCustomField extends CustomField<"media"> {
 				if (!this.config.validation.extensions.includes(extension)) {
 					errors.push({
 						itemIndex,
-						message: T("field_media_extension", {
-							extensions: this.config.validation.extensions.join(", "),
-						}),
+						message: serverText(
+							"core.fields.media.validation.extension.invalid",
+							{
+								data: {
+									extensions: this.config.validation.extensions.join(", "),
+								},
+							},
+						),
 					});
 				}
 			}
@@ -165,7 +175,7 @@ class MediaCustomField extends CustomField<"media"> {
 				if (!type) {
 					errors.push({
 						itemIndex,
-						message: T("field_media_doesnt_have_type"),
+						message: serverText("core.fields.media.validation.type.missing"),
 					});
 					continue;
 				}
@@ -173,8 +183,10 @@ class MediaCustomField extends CustomField<"media"> {
 				if (this.config.validation.type !== type) {
 					errors.push({
 						itemIndex,
-						message: T("field_media_type", {
-							type: this.config.validation.type,
+						message: serverText("core.fields.media.validation.type.invalid", {
+							data: {
+								type: this.config.validation.type,
+							},
 						}),
 					});
 				}
@@ -186,7 +198,7 @@ class MediaCustomField extends CustomField<"media"> {
 				if (!width) {
 					errors.push({
 						itemIndex,
-						message: T("field_media_doesnt_have_width"),
+						message: serverText("core.fields.media.validation.width.missing"),
 					});
 					continue;
 				}
@@ -197,8 +209,10 @@ class MediaCustomField extends CustomField<"media"> {
 				) {
 					errors.push({
 						itemIndex,
-						message: T("field_media_min_width", {
-							min: this.config.validation.width.min,
+						message: serverText("core.fields.media.validation.width.min", {
+							data: {
+								min: this.config.validation.width.min,
+							},
 						}),
 					});
 				}
@@ -208,8 +222,10 @@ class MediaCustomField extends CustomField<"media"> {
 				) {
 					errors.push({
 						itemIndex,
-						message: T("field_media_max_width", {
-							max: this.config.validation.width.max,
+						message: serverText("core.fields.media.validation.width.max", {
+							data: {
+								max: this.config.validation.width.max,
+							},
 						}),
 					});
 				}
@@ -221,7 +237,7 @@ class MediaCustomField extends CustomField<"media"> {
 				if (!height) {
 					errors.push({
 						itemIndex,
-						message: T("field_media_doesnt_have_height"),
+						message: serverText("core.fields.media.validation.height.missing"),
 					});
 					continue;
 				}
@@ -232,8 +248,10 @@ class MediaCustomField extends CustomField<"media"> {
 				) {
 					errors.push({
 						itemIndex,
-						message: T("field_media_min_height", {
-							min: this.config.validation.height.min,
+						message: serverText("core.fields.media.validation.height.min", {
+							data: {
+								min: this.config.validation.height.min,
+							},
 						}),
 					});
 				}
@@ -243,8 +261,10 @@ class MediaCustomField extends CustomField<"media"> {
 				) {
 					errors.push({
 						itemIndex,
-						message: T("field_media_max_height", {
-							max: this.config.validation.height.max,
+						message: serverText("core.fields.media.validation.height.max", {
+							data: {
+								max: this.config.validation.height.max,
+							},
 						}),
 					});
 				}

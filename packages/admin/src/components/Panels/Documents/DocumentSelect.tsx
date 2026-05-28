@@ -75,8 +75,8 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 				growContent: true,
 			}}
 			copy={{
-				title: T()("select_document_title"),
-				description: T()("select_document_description"),
+				title: T()("documents.select.title"),
+				description: T()("documents.select.description"),
 			}}
 		>
 			{() => (
@@ -187,12 +187,12 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		collection.data?.data.config.workflow
 			? [
 					{
-						label: T()("workflow_stage"),
+						label: T()("documents.workflow.stage"),
 						key: "workflowStage",
 						icon: <FaSolidBarsProgress />,
 					},
 					{
-						label: T()("workflow_assigned_to"),
+						label: T()("documents.workflow.assigned.to"),
 						key: "workflowAssignee",
 						icon: <FaSolidUserCheck />,
 						minWidth: 200,
@@ -209,7 +209,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		() =>
 			helpers.getLocaleValue({
 				value: collection.data?.data.details.singularName,
-			}) || T()("collection"),
+			}) || T()("common.collection"),
 	);
 	const isSuccess = createMemo(
 		() => documents.isSuccess || collection.isSuccess,
@@ -233,7 +233,8 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	const userOptions = createMemo(() =>
 		(users.data?.data ?? []).map((user) => ({
 			value: user.id,
-			label: helpers.formatUserName(user, "simple") || T()("unknown"),
+			label:
+				helpers.formatUserName(user, "simple") || T()("media.types.unknown"),
 			user,
 		})),
 	);
@@ -365,7 +366,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 											value: option.value,
 											label: helpers.getLocaleValue({
 												value: option.label,
-												fallback: T()("option_label", {
+												fallback: T()("fields.options.label", {
 													count: i,
 												}),
 											}),
@@ -445,14 +446,14 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				}}
 				copy={{
 					noEntries: {
-						title: T()("no_documents", {
+						title: T()("empty.states.documents.title", {
 							collectionMultiple: collectionName(),
 						}),
-						description: T()("no_documents_description_doc_select", {
+						description: T()("empty.states.documents.select.description", {
 							collectionMultiple: collectionName().toLowerCase(),
 							collectionSingle: collectionSingularName().toLowerCase(),
 						}),
-						button: T()("create_document", {
+						button: T()("actions.create.document", {
 							collectionSingle: collectionSingularName(),
 						}),
 					},
@@ -470,19 +471,19 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						...getTableHeadColumns(),
 						...workflowHeadColumn(),
 						{
-							label: T()("created_by"),
+							label: T()("common.created.by"),
 							key: "createdBy",
 							icon: <FaSolidUser />,
 							minWidth: 180,
 						},
 						{
-							label: T()("updated_by"),
+							label: T()("common.updated.by"),
 							key: "updatedBy",
 							icon: <FaSolidUser />,
 							minWidth: 180,
 						},
 						{
-							label: T()("updated_at"),
+							label: T()("common.updated.at"),
 							key: "updated_at",
 							icon: <FaSolidCalendar />,
 						},

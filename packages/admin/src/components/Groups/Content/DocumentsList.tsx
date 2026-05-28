@@ -71,12 +71,12 @@ export const DocumentsList: Component<{
 		props.state.collection?.config.workflow
 			? [
 					{
-						label: T()("workflow_stage"),
+						label: T()("documents.workflow.stage"),
 						key: "workflowStage",
 						icon: <FaSolidBarsProgress />,
 					},
 					{
-						label: T()("workflow_assigned_to"),
+						label: T()("documents.workflow.assigned.to"),
 						key: "workflowAssignee",
 						icon: <FaSolidUserCheck />,
 						minWidth: 200,
@@ -125,7 +125,7 @@ export const DocumentsList: Component<{
 		() =>
 			helpers.getLocaleValue({
 				value: props.state.collection?.details.singularName,
-			}) || T()("collection"),
+			}) || T()("common.collection"),
 	);
 	const isDeletedFilter = createMemo(() =>
 		props.state.showingDeleted() ? 1 : 0,
@@ -133,21 +133,21 @@ export const DocumentsList: Component<{
 	const noEntriesCopy = createMemo(() => {
 		if (props.state.showingDeleted()) {
 			return {
-				title: T()("no_deleted_documents", {
+				title: T()("empty.states.documents.deleted.title", {
 					collectionMultiple: collectionName(),
 				}),
-				description: T()("no_deleted_documents_description"),
+				description: T()("empty.states.documents.deleted.description"),
 			};
 		}
 		return {
-			title: T()("no_documents", {
+			title: T()("empty.states.documents.title", {
 				collectionMultiple: collectionName(),
 			}),
-			description: T()("no_documents_description", {
+			description: T()("empty.states.documents.description", {
 				collectionMultiple: collectionName().toLowerCase(),
 				collectionSingle: collectionSingularName().toLowerCase(),
 			}),
-			button: T()("create_document", {
+			button: T()("actions.create.document", {
 				collectionSingle: collectionSingularName(),
 			}),
 		};
@@ -227,19 +227,19 @@ export const DocumentsList: Component<{
 					...getTableHeadColumns(),
 					...workflowHeadColumn(),
 					{
-						label: T()("created_by"),
+						label: T()("common.created.by"),
 						key: "createdBy",
 						icon: <FaSolidUser />,
 						minWidth: 180,
 					},
 					{
-						label: T()("updated_by"),
+						label: T()("common.updated.by"),
 						key: "updatedBy",
 						icon: <FaSolidUser />,
 						minWidth: 180,
 					},
 					{
-						label: T()("updated_at"),
+						label: T()("common.updated.at"),
 						key: "updatedAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,
@@ -320,7 +320,7 @@ export const DocumentsList: Component<{
 								}}
 								actions={[
 									{
-										label: T()("edit"),
+										label: T()("common.edit"),
 										type: "button",
 										onClick: () => {
 											navigate(
@@ -338,7 +338,7 @@ export const DocumentsList: Component<{
 										hide: props.state.showingDeleted(),
 									},
 									{
-										label: T()("preview"),
+										label: T()("common.preview"),
 										type: "button",
 										onClick: () => {
 											navigate(
@@ -356,7 +356,7 @@ export const DocumentsList: Component<{
 										hide: props.state.showingDeleted() === false,
 									},
 									{
-										label: T()("restore"),
+										label: T()("common.restore"),
 										type: "button",
 										onClick: () => {
 											rowTarget.setTargetId(doc().id);
@@ -371,7 +371,7 @@ export const DocumentsList: Component<{
 										theme: "primary",
 									},
 									{
-										label: T()("delete"),
+										label: T()("common.delete"),
 										type: "button",
 										onClick: () => {
 											rowTarget.setTargetId(doc().id);
@@ -387,7 +387,7 @@ export const DocumentsList: Component<{
 										hide: props.state.showingDeleted(),
 									},
 									{
-										label: T()("delete_permanently"),
+										label: T()("actions.delete.permanently"),
 										type: "button",
 										onClick: () => {
 											rowTarget.setTargetId(doc().id);

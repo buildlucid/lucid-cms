@@ -30,8 +30,8 @@ const DeleteShareLink: Component<{
 				isError: deleteShareLink.action.isError,
 			}}
 			copy={{
-				title: T()("delete_share_link_modal_title"),
-				description: T()("delete_share_link_modal_description"),
+				title: T()("modals.common.delete.share.link.title"),
+				description: T()("modals.common.delete.share.link.description"),
 				error: deleteShareLink.errors()?.message,
 			}}
 			callbacks={{

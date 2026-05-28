@@ -65,12 +65,12 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 				return { value: f.id, label: label };
 			});
 
-		return [{ value: undefined, label: T()("no_folder") }, ...sorted];
+		return [{ value: undefined, label: T()("media.folders.none") }, ...sorted];
 	});
 	const hasTranslationErrors = createMemo(() => false);
 	const panelContent = createMemo(() => {
 		return {
-			title: T()("view_media_panel_title"),
+			title: T()("panels.media.view.title"),
 		};
 	});
 	const panelFetchState = createMemo(() => {
@@ -144,7 +144,8 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 					<PanelTabs
 						items={visibleTabs().map((tab) => ({
 							value: tab,
-							label: tab === "details" ? T()("details") : T()("meta"),
+							label:
+								tab === "details" ? T()("common.details") : T()("common.meta"),
 						}))}
 						active={activeTab()}
 						onChange={setActiveTab}
@@ -165,7 +166,7 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 										name={`name-${locale.code}`}
 										type="text"
 										copy={{
-											label: T()("name"),
+											label: T()("common.name"),
 										}}
 										errors={undefined}
 										autoComplete="off"
@@ -184,7 +185,7 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 											name={`alt-${locale.code}`}
 											type="text"
 											copy={{
-												label: T()("alt"),
+												label: T()("common.alt"),
 											}}
 											errors={undefined}
 											disabled={true}
@@ -199,7 +200,7 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 							onChange={() => {}}
 							name="media-folder"
 							options={folderOptions()}
-							copy={{ label: T()("folder") }}
+							copy={{ label: T()("common.folder") }}
 							required={false}
 							errors={undefined}
 							noMargin={false}
@@ -212,8 +213,8 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 							onChange={() => {}}
 							name="public"
 							copy={{
-								label: T()("publicly_available"),
-								tooltip: T()("media_public_description"),
+								label: T()("common.publicly.available"),
+								tooltip: T()("media.visibility.public.description"),
 							}}
 						/>
 					</Show>
@@ -222,30 +223,30 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 							type="text"
 							items={[
 								{
-									label: T()("file_size"),
+									label: T()("common.file.size"),
 									value: helpers.bytesToSize(
 										media.data?.data.meta.fileSize ?? 0,
 									),
 								},
 								{
-									label: T()("dimensions"),
+									label: T()("common.dimensions"),
 									value: `${media.data?.data.meta.width} x ${media.data?.data.meta.height}`,
 									show: media.data?.data.type === "image",
 								},
 								{
-									label: T()("extension"),
+									label: T()("common.extension"),
 									value: media.data?.data.meta.extension,
 								},
 								{
-									label: T()("mime_type"),
+									label: T()("common.mime.type"),
 									value: media.data?.data.meta.mimeType,
 								},
 								{
-									label: T()("created_at"),
+									label: T()("common.created.at"),
 									value: dateHelpers.formatDate(media.data?.data.createdAt),
 								},
 								{
-									label: T()("updated_at"),
+									label: T()("common.updated.at"),
 									value: dateHelpers.formatDate(media.data?.data.updatedAt),
 								},
 							]}

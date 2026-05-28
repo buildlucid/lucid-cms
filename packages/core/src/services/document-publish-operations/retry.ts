@@ -1,5 +1,5 @@
+import { serverText } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
@@ -38,7 +38,7 @@ const retry: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_operation_not_retryable"),
+				message: serverText("core.publish.operations.not.retryable"),
 				status: 400,
 			},
 			data: undefined,
@@ -62,10 +62,12 @@ const retry: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_permission_error_message", {
-					collection: operationRes.data.collection_key,
-					action: requiredAction,
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: operationRes.data.collection_key,
+						action: requiredAction,
+					},
 				}),
 				status: 403,
 			},

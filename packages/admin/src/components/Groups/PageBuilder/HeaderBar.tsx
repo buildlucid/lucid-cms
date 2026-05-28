@@ -88,7 +88,7 @@ export const HeaderBar: Component<{
 		return [
 			{
 				link: "/lucid/collections",
-				label: T()("collections"),
+				label: T()("common.collections"),
 			},
 			{
 				link: `/lucid/collections/${props.state.collectionKey()}`,
@@ -98,8 +98,8 @@ export const HeaderBar: Component<{
 				link: trailing.length > 0 ? documentRoute : currentDocumentRoute,
 				label:
 					props.mode === "create"
-						? T()("create")
-						: `${T()("document")} #${props.state.documentID()}`,
+						? T()("common.create")
+						: `${T()("media.types.document")} #${props.state.documentID()}`,
 			},
 			...trailing,
 		];
@@ -107,7 +107,7 @@ export const HeaderBar: Component<{
 	const viewOptions = createMemo(() => {
 		const options: ViewSelectorOption[] = [
 			{
-				label: T()("latest"),
+				label: T()("common.status.latest"),
 				disabled: false,
 				type: "latest",
 				location: getDocumentRoute("edit", {
@@ -122,7 +122,7 @@ export const HeaderBar: Component<{
 			props.state.documentID() !== undefined
 		) {
 			options.push({
-				label: `${T()("revision")} #${props.versionId?.()}`,
+				label: `${T()("common.revision")} #${props.versionId?.()}`,
 				disabled: false,
 				type: "link",
 				hideInDropdown: true,
@@ -141,7 +141,7 @@ export const HeaderBar: Component<{
 			props.versionId?.() !== undefined
 		) {
 			options.push({
-				label: `${T()("snapshot")} #${props.versionId?.()}`,
+				label: `${T()("common.snapshot")} #${props.versionId?.()}`,
 				disabled: false,
 				type: "link",
 				hideInDropdown: true,
@@ -178,7 +178,7 @@ export const HeaderBar: Component<{
 
 		if (props.state.showRevisionNavigation()) {
 			options.push({
-				label: T()("revision_history"),
+				label: T()("common.revision.history"),
 				disabled: props.state.documentID() === undefined,
 				type: "link",
 				icon: "history",
@@ -233,29 +233,29 @@ export const HeaderBar: Component<{
 					fallback: document.workflow?.stage,
 				}) ||
 				document.workflow?.stage ||
-				T()("workflow_no_stage");
+				T()("documents.workflow.no.stage");
 
 			const workflowDisabled = !workflowAllowsTarget;
 
 			let disabledToast: ReleaseTriggerOption["disabledToast"];
 			if (isPromoted) {
 				disabledToast = {
-					title: T()("release_current_disabled_toast_title"),
-					message: T()("release_current_disabled_toast_message", {
+					title: T()("toasts.release.current.disabled.title"),
+					message: T()("toasts.release.current.disabled.message", {
 						environment: label,
 					}),
 				};
 			} else if (!permission) {
 				disabledToast = {
-					title: T()("release_permission_disabled_toast_title"),
-					message: T()("release_permission_disabled_toast_message", {
+					title: T()("toasts.release.permission.disabled.title"),
+					message: T()("toasts.release.permission.disabled.message", {
 						environment: label,
 					}),
 				};
 			} else if (workflowDisabled) {
 				disabledToast = {
-					title: T()("workflow_release_disabled_toast_title"),
-					message: T()("workflow_release_disabled_toast_message", {
+					title: T()("toasts.common.workflow.release.disabled.title"),
+					message: T()("toasts.common.workflow.release.disabled.message", {
 						stage: workflowStageLabel,
 						environment: label.toLowerCase(),
 					}),
@@ -265,29 +265,29 @@ export const HeaderBar: Component<{
 				props.state.ui.isAutoSaving?.()
 			) {
 				disabledToast = {
-					title: T()("release_saving_disabled_toast_title"),
-					message: T()("release_saving_disabled_toast_message", {
+					title: T()("toasts.release.saving.disabled.title"),
+					message: T()("toasts.release.saving.disabled.message", {
 						environment: label,
 					}),
 				};
 			} else if (props.state.ui.isCreatingPublishOperation?.()) {
 				disabledToast = {
-					title: T()("release_requesting_disabled_toast_title"),
-					message: T()("release_requesting_disabled_toast_message", {
+					title: T()("toasts.release.requesting.disabled.title"),
+					message: T()("toasts.release.requesting.disabled.message", {
 						environment: label,
 					}),
 				};
 			} else if (props.state.isDocumentMutated?.()) {
 				disabledToast = {
-					title: T()("release_unsaved_disabled_toast_title"),
-					message: T()("release_unsaved_disabled_toast_message", {
+					title: T()("toasts.release.unsaved.disabled.title"),
+					message: T()("toasts.release.unsaved.disabled.message", {
 						environment: label,
 					}),
 				};
 			} else if (props.state.ui.canPublishDocument?.() === false) {
 				disabledToast = {
-					title: T()("release_error_disabled_toast_title"),
-					message: T()("release_error_disabled_toast_message", {
+					title: T()("toasts.release.error.disabled.title"),
+					message: T()("toasts.release.error.disabled.message", {
 						environment: label,
 					}),
 				};
@@ -393,8 +393,8 @@ export const HeaderBar: Component<{
 									)}
 									title={
 										props.state.autoSaveUserEnabled?.()
-											? `${T()("auto_save")} - ${T()("enabled")}`
-											: `${T()("auto_save")} - ${T()("disabled")}`
+											? `${T()("builder.auto.save.label")} - ${T()("common.status.enabled")}`
+											: `${T()("builder.auto.save.label")} - ${T()("common.status.disabled")}`
 									}
 								>
 									<FaSolidRotate size={12} />
@@ -414,7 +414,7 @@ export const HeaderBar: Component<{
 						<div class="flex flex-wrap items-center gap-2">
 							<Show when={props.mode === "create"}>
 								<h2 class="text-base font-medium text-title">
-									{T()("create_document", {
+									{T()("actions.create.document", {
 										collectionSingle: props.state.collectionSingularName(),
 									})}
 								</h2>
@@ -455,7 +455,7 @@ export const HeaderBar: Component<{
 							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
 								<Show
 									when={
-										props.state.collection()?.config.translations &&
+										props.state.collection()?.config.localized &&
 										hasMultipleLocales()
 									}
 								>
@@ -468,7 +468,7 @@ export const HeaderBar: Component<{
 								</Show>
 								<Show
 									when={
-										(props.state.collection()?.config.translations !== true ||
+										(props.state.collection()?.config.localized !== true ||
 											!hasMultipleLocales()) &&
 										displayLocale()
 									}
@@ -520,7 +520,7 @@ export const HeaderBar: Component<{
 									}}
 									permission={props.state.ui.hasRestorePermission?.()}
 								>
-									{T()("restore_revision")}
+									{T()("documents.revisions.restore.action")}
 								</Button>
 							</Show>
 							<Show when={props.state.ui.showDeleteButton?.()}>

@@ -29,14 +29,16 @@ const ErrorBlock: Component<{
 					/>
 				</Show>
 
-				<h2 class="mb-2">{props.content.title ?? T()("error_title")}</h2>
+				<h2 class="mb-2">
+					{props.content.title ?? T()("errors.generic.title")}
+				</h2>
 				<p
 					class={classNames("text-sm", {
 						"max-w-96": props.options?.contentMaxWidth === undefined,
 						"max-w-lg": props.options?.contentMaxWidth === "md",
 					})}
 				>
-					{props.content.description ?? T()("error_message")}
+					{props.content.description ?? T()("errors.generic.message")}
 				</p>
 				<Show when={props.link !== undefined}>
 					<Link

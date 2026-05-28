@@ -2,8 +2,8 @@ import { scrypt } from "@noble/hashes/scrypt.js";
 import { isPast } from "date-fns";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -36,9 +36,9 @@ const authorizeShare: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("share_link_not_found_title"),
+				name: serverText("core.share.links.not.found.title"),
 				status: 404,
-				message: T("share_link_not_found_message"),
+				message: serverText("core.share.links.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -49,9 +49,9 @@ const authorizeShare: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("share_link_expired_title"),
+				name: serverText("core.share.links.expired.title"),
 				status: 410,
-				message: T("share_link_expired_message"),
+				message: serverText("core.share.links.expired.message"),
 			},
 			data: undefined,
 		};
@@ -63,9 +63,9 @@ const authorizeShare: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("share_link_media_deleted_title"),
+				name: serverText("core.share.links.media.deleted.title"),
 				status: 410,
-				message: T("share_link_media_deleted_message"),
+				message: serverText("core.share.links.media.deleted.message"),
 			},
 			data: undefined,
 		};
@@ -78,9 +78,9 @@ const authorizeShare: ServiceFn<
 				return {
 					error: {
 						type: "authorisation",
-						name: T("share_stream_password_required_title"),
+						name: serverText("core.share.stream.password.required.title"),
 						status: 401,
-						message: T("share_stream_password_required_message"),
+						message: serverText("core.share.stream.password.required.message"),
 					},
 					data: undefined,
 				};
@@ -108,9 +108,9 @@ const authorizeShare: ServiceFn<
 			return {
 				error: {
 					type: "authorisation",
-					name: T("share_link_access_denied_title"),
+					name: serverText("core.share.links.access.denied.title"),
 					status: 401,
-					message: T("share_link_incorrect_password_message"),
+					message: serverText("core.share.links.incorrect.password.message"),
 				},
 				data: undefined,
 			};

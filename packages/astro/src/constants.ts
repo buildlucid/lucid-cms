@@ -33,6 +33,7 @@ const astroConstants = {
 	files: {
 		indexHtml: "index.html",
 		emailTemplatesModule: "lucid-email-templates.generated.ts",
+		i18nTranslationsModule: "lucid-i18n-translations.generated.ts",
 		spaHtmlModule: "lucid-spa-html.generated.ts",
 		toolkitModule: "lucid-toolkit.generated.ts",
 		middlewareModule: "lucid-admin-bar.middleware.ts",
@@ -40,6 +41,7 @@ const astroConstants = {
 		nodeRoute: "lucid-node.route.ts",
 		cloudflareRoute: "lucid-cloudflare.route.ts",
 		emailTemplatesJson: "email-templates.json",
+		i18nTranslationsJson: "i18n-translations.json",
 		worker: "worker.ts",
 		typescriptExtension: ".ts",
 	},

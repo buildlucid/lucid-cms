@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import logger from "../../../libs/logger/index.js";
 import type { ServiceFn } from "../../../types.js";
+import { serverText } from "../../i18n/index.js";
 import type { TableMigration } from "./types.js";
 
 const removeTableQuery: ServiceFn<
@@ -30,10 +31,12 @@ const removeTableQuery: ServiceFn<
 		return {
 			data: undefined,
 			error: {
-				message:
-					err instanceof Error
-						? err.message
-						: "An error occurred while removing a collection table",
+				message: serverText("core.errors.default.message", {
+					fallback:
+						err instanceof Error
+							? err.message
+							: "An error occurred while removing a collection table",
+				}),
 			},
 		};
 	}

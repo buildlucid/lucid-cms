@@ -31,11 +31,11 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: updateSingleReq,
 		getSuccessToast: () => ({
-			title: T()("update_toast_title", {
-				name: T()("folders"),
+			title: T()("toasts.common.update.title", {
+				name: T()("common.folders"),
 			}),
-			message: T()("update_toast_message", {
-				name: T()("folders"),
+			message: T()("toasts.common.update.message", {
+				name: T()("common.folders"),
 			}),
 		}),
 		invalidates: ["mediaFolders.getMultiple", "mediaFolders.getHierarchy"],

@@ -1,4 +1,8 @@
 import { logger } from "@lucidcms/core";
+import {
+	mergeTranslationBundles,
+	translateServer,
+} from "@lucidcms/core/plugin";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import {
@@ -9,7 +13,10 @@ import {
 	versionPromoteHandler,
 } from "./services/hooks/index.js";
 import { pluginOptions, registerFields } from "./services/index.js";
-import T from "./translations/index.js";
+import adminTexts from "./translations/en.admin.json" with { type: "json" };
+import serverTranslations from "./translations/en.server.json" with {
+	type: "json",
+};
 import type { PluginOptions } from "./types/types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (plugin) => {
@@ -19,13 +26,23 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
+			draft.i18n.translations = mergeTranslationBundles(
+				draft.i18n.translations,
+				{
+					en: {
+						admin: adminTexts,
+						server: serverTranslations,
+					},
+				},
+			);
+
 			for (const collectionConfig of options.collections) {
 				const collectionInstance = draft.collections.find(
 					(c) => c.key === collectionConfig.collectionKey,
 				);
 				if (!collectionInstance) {
 					logger.warn({
-						message: T("cannot_find_collection", {
+						message: translateServer("plugin.pages.collections.not.found", {
 							collection: collectionConfig.collectionKey,
 						}),
 						scope: PLUGIN_KEY,

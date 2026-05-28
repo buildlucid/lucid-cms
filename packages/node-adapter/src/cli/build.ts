@@ -88,8 +88,10 @@ const buildCommand: BuildHandler = async ({
 
 		const entry = /* ts */ `
 import * as lucidConfigModule from "./${constants.CONFIG_FILE}.js";
+import i18nTranslations from "./i18n-translations.json" with { type: "json" };
 import { resolveConfigDefinition } from "@lucidcms/core/build";
 import { createApp, setupCronJobs } from "@lucidcms/core/runtime";
+import { translateServer } from "@lucidcms/core/plugin";
 import { serve } from "@hono/node-server";
 import cron from "node-cron";
 import { getRuntimeContext } from "@lucidcms/node-adapter";
@@ -99,6 +101,9 @@ const startServer = async () => {
 		const { config: resolved, env } = await resolveConfigDefinition({
 			definition: lucidConfigModule.default,
 			envSchema: lucidConfigModule.env,
+			meta: {
+				i18nTranslations,
+			},
 			processConfigOptions: {
 				skipValidation: true,
 			},
@@ -133,7 +138,11 @@ const startServer = async () => {
 					queue: queue,
 					env: env,
 					kv: kv,
-					request: { url: "http://localhost:" + port },
+					request: {
+						url: "http://localhost:" + port,
+						locale: resolved.i18n.interface.defaultLocale,
+					},
+					translate: (key, data) => translateServer(key, data),
 				}, {
 					schedule,
 				});

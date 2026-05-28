@@ -58,21 +58,21 @@ const versionPromoteHandler =
 			fields: {
 				slug: fieldResToSchema(
 					constants.fields.slug.key,
-					targetCollectionRes.data.translations,
-					context.config.localization.defaultLocale,
+					targetCollectionRes.data.localized,
+					context.config.i18n.content.defaultLocale,
 					docVersionFieldRes.data || [],
 				),
 				parentPage: fieldResToSchema(
 					constants.fields.parentPage.key,
 					false,
-					context.config.localization.defaultLocale,
+					context.config.i18n.content.defaultLocale,
 					docVersionFieldRes.data || [],
 					targetCollectionRes.data.collectionKey,
 				),
 				fullSlug: fieldResToSchema(
 					constants.fields.fullSlug.key,
-					targetCollectionRes.data.translations,
-					context.config.localization.defaultLocale,
+					targetCollectionRes.data.localized,
+					context.config.i18n.content.defaultLocale,
 					docVersionFieldRes.data || [],
 				),
 			},
@@ -109,7 +109,7 @@ const versionPromoteHandler =
 				const circularParentsRes = await checkCircularParents(context, {
 					documentId: data.data.documentId,
 					versionType: data.data.versionType,
-					defaultLocale: context.config.localization.defaultLocale,
+					defaultLocale: context.config.i18n.content.defaultLocale,
 					collectionKey: targetCollectionRes.data.collectionKey,
 					fields: {
 						parentPage: parentPage,
@@ -119,7 +119,7 @@ const versionPromoteHandler =
 				if (circularParentsRes.error) return circularParentsRes;
 
 				const parentFieldsRes = await getParentFields(context, {
-					defaultLocale: context.config.localization.defaultLocale,
+					defaultLocale: context.config.i18n.content.defaultLocale,
 					versionType: data.data.versionType,
 					collectionKey: targetCollectionRes.data.collectionKey,
 					fields: {
@@ -135,7 +135,7 @@ const versionPromoteHandler =
 			// fullSlug construction
 			const fullSlugRes = constructParentFullSlug({
 				parentFields: parentFieldsData,
-				localization: context.config.localization,
+				localization: context.config.i18n.content,
 				collection: targetCollectionRes.data,
 				fields: {
 					slug: slug,
@@ -145,7 +145,7 @@ const versionPromoteHandler =
 
 			setFullSlug({
 				fullSlug: fullSlugRes.data,
-				defaultLocale: context.config.localization.defaultLocale,
+				defaultLocale: context.config.i18n.content.defaultLocale,
 				collection: targetCollectionRes.data,
 				fields: {
 					fullSlug: fullSlug,
@@ -158,7 +158,7 @@ const versionPromoteHandler =
 						documentId: data.data.documentId,
 						versionId: data.data.versionId,
 						slugs: slug.translations || {
-							[context.config.localization.defaultLocale]: slug.value || null,
+							[context.config.i18n.content.defaultLocale]: slug.value || null,
 						},
 					},
 				],

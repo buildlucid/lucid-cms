@@ -1,11 +1,11 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationAssigneesRepository,
 	DocumentPublishOperationsRepository,
 	DocumentVersionsRepository,
 	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
@@ -79,7 +79,7 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_target_not_enabled"),
+				message: serverText("core.publish.requests.target.not.enabled"),
 				status: 400,
 			},
 			data: undefined,
@@ -97,10 +97,12 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_permission_error_message", {
-					collection: data.collectionKey,
-					action: "publish",
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: data.collectionKey,
+						action: "publish",
+					},
 				}),
 				status: 403,
 			},
@@ -119,7 +121,7 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_operation_schedule_not_supported"),
+				message: serverText("core.publish.operations.schedule.not.supported"),
 				status: 400,
 			},
 			data: undefined,
@@ -134,7 +136,7 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_request_comment_required"),
+				message: serverText("core.publish.requests.request.comment.required"),
 				status: 400,
 			},
 			data: undefined,
@@ -149,7 +151,7 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_auto_accept_not_allowed"),
+				message: serverText("core.publish.requests.auto.accept.not.allowed"),
 				status: 403,
 			},
 			data: undefined,
@@ -169,10 +171,12 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_permission_error_message", {
-					collection: data.collectionKey,
-					action: "review",
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: data.collectionKey,
+						action: "review",
+					},
 				}),
 				status: 403,
 			},
@@ -189,7 +193,7 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_decision_comment_required"),
+				message: serverText("core.publish.requests.decision.comment.required"),
 				status: 400,
 			},
 			data: undefined,
@@ -226,7 +230,7 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_invalid_assignees"),
+				message: serverText("core.publish.requests.invalid.assignees"),
 				status: 400,
 			},
 			data: undefined,
@@ -266,7 +270,7 @@ const createSingle: ServiceFn<
 				validation: {
 					enabled: true,
 					defaultError: {
-						message: T("document_version_not_found_message"),
+						message: serverText("core.documents.version.not.found.message"),
 						status: 404,
 					},
 				},
@@ -385,11 +389,13 @@ const createSingle: ServiceFn<
 				collectionKey: activeDetailedRes.data.collection_key,
 				documentId: activeDetailedRes.data.document_id,
 				recipients: supersedeRecipients,
-				title: T("publish_request_replaced_title"),
-				message: T("publish_request_replaced_message", {
-					collection: data.collectionKey,
-					documentId: data.documentId,
-					target: data.target,
+				title: serverText("core.publish.requests.replaced.title"),
+				message: serverText("core.publish.requests.replaced.message", {
+					data: {
+						collection: data.collectionKey,
+						documentId: data.documentId,
+						target: data.target,
+					},
 				}),
 				dedupeAction: "superseded",
 			});
@@ -411,7 +417,7 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("publish_request_snapshot_latest_only"),
+				message: serverText("core.publish.requests.snapshot.latest.only"),
 				status: 400,
 			},
 			data: undefined,
@@ -495,42 +501,49 @@ const createSingle: ServiceFn<
 		collectionKey: data.collectionKey,
 		documentId: data.documentId,
 		recipients,
-		title: T("publish_request_created_title"),
-		message: T("publish_request_created_message", {
-			user: data.user.email,
-			collection: data.collectionKey,
-			documentId: data.documentId,
-			target: data.target,
+		title: serverText("core.publish.requests.created.title"),
+		message: serverText("core.publish.requests.created.message", {
+			data: {
+				user: data.user.email,
+				collection: data.collectionKey,
+				documentId: data.documentId,
+				target: data.target,
+			},
 		}),
 		dedupeAction: "created",
 		comment: {
-			label: T("publish_request_email_request_comment"),
+			label: serverText("core.publish.requests.email.request.comment"),
 			value: comment,
 		},
 		details: [
 			{
-				label: T("publish_request_email_detail_release"),
+				label: serverText("core.publish.requests.email.detail.release"),
 				value: `#${operationRes.data.id}`,
 			},
 			{
-				label: T("publish_request_email_detail_collection"),
+				label: serverText("core.publish.requests.email.detail.collection"),
 				value: data.collectionKey,
 			},
 			{
-				label: T("publish_request_email_detail_document"),
+				label: serverText("core.publish.requests.email.detail.document"),
 				value: `#${data.documentId}`,
 			},
-			{ label: T("publish_request_email_detail_target"), value: data.target },
 			{
-				label: T("publish_request_email_detail_requested_by"),
+				label: serverText("core.publish.requests.email.detail.target"),
+				value: data.target,
+			},
+			{
+				label: serverText("core.publish.requests.email.detail.requested.by"),
 				value: data.user.email,
 			},
 			{
-				label: T("publish_request_email_detail_scheduled_for"),
+				label: serverText("core.publish.requests.email.detail.scheduled.for"),
 				value: schedule?.scheduledAt,
 			},
 			{
-				label: T("publish_request_email_detail_scheduled_timezone"),
+				label: serverText(
+					"core.publish.requests.email.detail.scheduled.timezone",
+				),
 				value: schedule?.scheduledTimezone,
 			},
 		],

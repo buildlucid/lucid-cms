@@ -1,4 +1,4 @@
-import T from "../../../translations/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -77,16 +77,23 @@ const syncMedia: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("file_exceeds_storage_limit_max_limit_is", {
-					size: formatBytes(storageLimit),
+				message: serverText("core.files.validation.storage.limit.exceeded", {
+					data: {
+						size: formatBytes(storageLimit),
+					},
 				}),
 				status: 500,
 				errors: {
 					file: {
 						code: "storage",
-						message: T("file_exceeds_storage_limit_max_limit_is", {
-							size: formatBytes(storageLimit),
-						}),
+						message: serverText(
+							"core.files.validation.storage.limit.exceeded",
+							{
+								data: {
+									size: formatBytes(storageLimit),
+								},
+							},
+						),
 					},
 				},
 			},

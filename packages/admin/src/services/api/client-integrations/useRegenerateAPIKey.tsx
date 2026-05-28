@@ -34,8 +34,8 @@ const useRegenerateAPIKey = (props: UseGenerateAPIKeyProps) => {
 	>({
 		mutationFn: regenerateKeyReq,
 		getSuccessToast: () => ({
-			title: T()("regenerate_api_key_toast_title"),
-			message: T()("regenerate_api_key_toast_message"),
+			title: T()("toasts.client.integrations.api.keys.regenerate.title"),
+			message: T()("toasts.client.integrations.api.keys.regenerate.message"),
 		}),
 		invalidates: ["clientIntegrations.getAll"],
 		onSuccess: props.onSuccess,

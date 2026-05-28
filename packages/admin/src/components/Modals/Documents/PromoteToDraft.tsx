@@ -23,7 +23,7 @@ const PromoteToDraft: Component<{
 		() =>
 			helpers.getLocaleValue({
 				value: props.collection?.details.singularName,
-			}) || T()("collection"),
+			}) || T()("common.collection"),
 	);
 
 	// ----------------------------------------
@@ -49,8 +49,8 @@ const PromoteToDraft: Component<{
 				isError: promoteToDraft.action.isError,
 			}}
 			copy={{
-				title: T()("promote_to_draft_modal_title"),
-				description: T()("promote_to_draft_modal_description"),
+				title: T()("modals.common.promote.to.draft.title"),
+				description: T()("modals.common.promote.to.draft.description"),
 				error: promoteToDraft.errors()?.message,
 			}}
 			callbacks={{

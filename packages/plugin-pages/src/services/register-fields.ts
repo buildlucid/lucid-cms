@@ -1,8 +1,7 @@
-import type { CollectionBuilder } from "@lucidcms/core";
-import { z } from "@lucidcms/core";
+import { adminText, type CollectionBuilder, z } from "@lucidcms/core";
+import { serverText } from "@lucidcms/core/plugin";
 import type { WritableDraft } from "immer";
 import constants from "../constants.js";
-import T from "../translations/index.js";
 import type { CollectionConfig } from "../types/types.js";
 
 const registerFields = (
@@ -12,10 +11,12 @@ const registerFields = (
 	collection
 		.addText(constants.fields.fullSlug.key, {
 			details: {
-				label: T("full_slug"),
+				label: adminText("plugin.pages.fields.full.slug.label", {
+					fallback: "Full slug",
+				}),
 			},
 			config: {
-				translations: config.translations,
+				localized: config.localized,
 				hidden: !config.displayFullSlug,
 				disabled: true,
 			},
@@ -23,10 +24,12 @@ const registerFields = (
 		})
 		.addText(constants.fields.slug.key, {
 			details: {
-				label: T("slug"),
+				label: adminText("plugin.pages.fields.slug.label", {
+					fallback: "Slug",
+				}),
 			},
 			config: {
-				translations: config.translations,
+				localized: config.localized,
 				hidden: false,
 				disabled: false,
 			},
@@ -38,7 +41,7 @@ const registerFields = (
 						.string()
 						.regex(
 							/^[a-zA-Z0-9_-]+$/,
-							T("slug_field_validation_error_message"),
+							serverText("plugin.pages.slug.validation.format").default,
 						),
 				]),
 			},
@@ -47,7 +50,9 @@ const registerFields = (
 		.addDocument(constants.fields.parentPage.key, {
 			collection: collection.key,
 			details: {
-				label: T("parent_page"),
+				label: adminText("plugin.pages.fields.parent.page.label", {
+					fallback: "Parent page",
+				}),
 			},
 			config: {
 				hidden: false,

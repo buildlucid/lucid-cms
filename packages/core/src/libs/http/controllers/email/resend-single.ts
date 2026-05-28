@@ -5,13 +5,13 @@ import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/email.js";
 import { emailServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -56,8 +56,8 @@ const resendSingleController = factory.createHandlers(
 			transaction: true,
 			defaultError: {
 				type: "basic",
-				name: T("route_email_resend_error_name"),
-				message: T("route_email_resend_error_message"),
+				name: serverText("core.routes.email.resend.error.name"),
+				message: serverText("core.routes.email.resend.error.message"),
 			},
 		})(context, {
 			id: Number.parseInt(id, 10),

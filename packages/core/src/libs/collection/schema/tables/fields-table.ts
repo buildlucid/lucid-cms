@@ -1,12 +1,12 @@
 import type BrickBuilder from "../../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
-import T from "../../../../translations/index.js";
 import type {
 	CFConfig,
 	FieldTypes,
 	ServiceResponse,
 } from "../../../../types.js";
+import { serverText } from "../../../i18n/index.js";
 import registeredFields from "../../custom-fields/registered-fields.js";
 import {
 	getFieldDatabaseConfig,
@@ -247,7 +247,9 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: T("invalid_table_name_format_insufficient_parts"),
+							message: serverText(
+								"core.collections.schema.table.name.format.insufficient.parts",
+							),
 						},
 					};
 				}
@@ -257,7 +259,9 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: T("invalid_table_name_format_insufficient_parts"),
+							message: serverText(
+								"core.collections.schema.table.name.format.insufficient.parts",
+							),
 						},
 					};
 				}
@@ -310,11 +314,18 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: T("cannot_find_field_with_key_in_collection_brick", {
-								key: field.key,
-								type: props.brick ? "brick" : "collection",
-								typeKey: props.brick ? props.brick.key : props.collection.key,
-							}),
+							message: serverText(
+								"core.fields.lookup.not.found.with.key.in.collection.brick",
+								{
+									data: {
+										key: field.key,
+										type: props.brick ? "brick" : "collection",
+										typeKey: props.brick
+											? props.brick.key
+											: props.collection.key,
+									},
+								},
+							),
 						},
 					};
 				}
@@ -364,7 +375,9 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: T("invalid_table_name_format_insufficient_parts"),
+							message: serverText(
+								"core.collections.schema.table.name.format.insufficient.parts",
+							),
 						},
 					};
 				}
@@ -377,11 +390,18 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: T("cannot_find_field_with_key_in_collection_brick", {
-								key: field.key,
-								type: props.brick ? "brick" : "collection",
-								typeKey: props.brick ? props.brick.key : props.collection.key,
-							}),
+							message: serverText(
+								"core.fields.lookup.not.found.with.key.in.collection.brick",
+								{
+									data: {
+										key: field.key,
+										type: props.brick ? "brick" : "collection",
+										typeKey: props.brick
+											? props.brick.key
+											: props.collection.key,
+									},
+								},
+							),
 						},
 					};
 				}

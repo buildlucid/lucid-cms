@@ -1,6 +1,5 @@
 import z, { type ZodType } from "zod";
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import type {
 	FilterOperator,
@@ -8,6 +7,7 @@ import type {
 	QueryParamFilters,
 } from "../../../types/query-params.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
+import { serverText } from "../../i18n/index.js";
 
 const buildSort = (query: unknown) => {
 	const queryObject = query as Record<string, string>;
@@ -124,7 +124,7 @@ const buildFormattedQuery = async <T extends ZodType>(
 	if (!validateResult.success) {
 		throw new LucidAPIError({
 			type: "validation",
-			message: T("validation_query_error_message"),
+			message: serverText("core.requests.query.validation.message"),
 			zod: validateResult.error,
 		});
 	}

@@ -1,4 +1,3 @@
-import T from "../translations/index.js";
 import emailConstants from "./emails.js";
 
 export default Object.freeze({
@@ -6,6 +5,7 @@ export default Object.freeze({
 	openAPIDocsRoute: "/lucid/documentation",
 	headers: {
 		csrf: "X-CSRF-Token",
+		interfaceLocale: "Lucid-Interface-Locale",
 	},
 	cookies: {
 		csrf: "_csrf",
@@ -27,7 +27,7 @@ export default Object.freeze({
 	collectionBuilder: {
 		locked: false,
 		revisions: false,
-		translations: false,
+		localized: false,
 		autoSave: false,
 		scheduling: false,
 		protectedEnvironments: ["latest", "revision", "snapshot"],
@@ -62,6 +62,9 @@ export default Object.freeze({
 		perPage: 10,
 	},
 	email: emailConstants,
+	i18n: {
+		renderedOutput: "i18n-translations.json",
+	},
 	alerts: {
 		storage: {
 			type: "storage" as const,
@@ -76,8 +79,8 @@ export default Object.freeze({
 		},
 	},
 	errors: {
-		name: T("default_error_name"),
-		message: T("default_error_message"),
+		name: "Error",
+		message: "An error occurred",
 		status: 500,
 		code: undefined,
 		errors: undefined,

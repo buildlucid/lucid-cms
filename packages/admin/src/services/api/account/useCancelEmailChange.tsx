@@ -24,8 +24,8 @@ const useCancelEmailChange = (props?: UseCancelEmailChangeProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: cancelEmailChangeReq,
 		getSuccessToast: () => ({
-			title: T()("email_change_cancel_success_toast_title"),
-			message: T()("email_change_cancel_success_toast_message"),
+			title: T()("toasts.email.change.cancel.success.title"),
+			message: T()("toasts.email.change.cancel.success.message"),
 		}),
 		invalidates: ["users.getSingle"],
 		onSuccess: props?.onSuccess,

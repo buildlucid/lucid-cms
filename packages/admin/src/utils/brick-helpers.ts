@@ -101,16 +101,16 @@ const getFieldValue = <T>(props: {
 	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
 	fieldData?: InternalDocumentField;
 	contentLocale: string;
-	collectionTranslations?: boolean;
+	collectionLocalized?: boolean;
 }) => {
 	if (!props.fieldData) return undefined;
 
-	const collectionTranslations =
-		props.collectionTranslations ?? brickStore.get.collectionTranslations;
+	const collectionLocalized =
+		props.collectionLocalized ?? brickStore.get.collectionLocalized;
 
 	if (
-		props.fieldConfig.config.translations === true &&
-		collectionTranslations === true
+		props.fieldConfig.config.localized === true &&
+		collectionLocalized === true
 	) {
 		return props.fieldData.translations?.[props.contentLocale] as T;
 	}

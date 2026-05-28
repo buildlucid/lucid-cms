@@ -86,18 +86,20 @@ const CreatePublishRequest: Component<{
 	const reviewerOptions = createMemo<ReviewerOption[]>(() =>
 		(reviewers.data?.data ?? []).map((reviewer) => ({
 			value: reviewer.id,
-			label: helpers.formatUserName(reviewer, "simple") || T()("unknown"),
+			label:
+				helpers.formatUserName(reviewer, "simple") ||
+				T()("media.types.unknown"),
 			user: reviewer,
 		})),
 	);
 	const releaseTimingOptions = createMemo(() => [
 		{
 			value: "now",
-			label: T()("request_now"),
+			label: T()("common.request.now"),
 		},
 		{
 			value: "scheduled",
-			label: T()("schedule_request"),
+			label: T()("common.schedule.request"),
 		},
 	]);
 	const requireComment = createMemo(
@@ -141,11 +143,11 @@ const CreatePublishRequest: Component<{
 	const submitRequest = async (autoAccept: boolean) => {
 		const target = props.target();
 		if (!target) {
-			setValidationError(T()("publish_request_missing_target"));
+			setValidationError(T()("publish.requests.validation.target.required"));
 			return;
 		}
 		if (requireComment() && comment().trim().length === 0) {
-			setValidationError(T()("publish_request_comment_required"));
+			setValidationError(T()("publish.requests.validation.comment.required"));
 			return;
 		}
 		if (
@@ -153,7 +155,7 @@ const CreatePublishRequest: Component<{
 			requireDecisionComment() &&
 			comment().trim().length === 0
 		) {
-			setValidationError(T()("publish_request_comment_required"));
+			setValidationError(T()("publish.requests.validation.comment.required"));
 			return;
 		}
 
@@ -165,7 +167,7 @@ const CreatePublishRequest: Component<{
 				})
 			: undefined;
 		if (scheduleSelected() && !scheduledAt) {
-			setValidationError(T()("schedule_release_required"));
+			setValidationError(T()("documents.release.schedule.validation.required"));
 			return;
 		}
 
@@ -216,14 +218,14 @@ const CreatePublishRequest: Component<{
 				isError: !!error(),
 			}}
 			copy={{
-				title: T()("publish_request_modal_title", {
+				title: T()("modals.publish.requests.request.title", {
 					environment: props.environmentLabel() ?? "",
 				}),
-				description: `${T()("publish_request_modal_description", {
+				description: `${T()("modals.publish.requests.request.description", {
 					environment: props.environmentLabel() ?? "",
-				})} ${T()("publish_request_replacement_warning")}`,
+				})} ${T()("publish.requests.replacement.warning")}`,
 				error: error(),
-				confirm: T()("publish_request_publish_confirm"),
+				confirm: T()("publish.requests.publish.confirm"),
 			}}
 			callbacks={{
 				onConfirm: () => submitRequest(autoAccept()),
@@ -239,7 +241,7 @@ const CreatePublishRequest: Component<{
 							disabled={props.loading}
 							onClick={props.callbacks.onCancel}
 						>
-							{T()("cancel")}
+							{T()("common.cancel")}
 						</Button>
 						<Button
 							theme="primary"
@@ -250,11 +252,11 @@ const CreatePublishRequest: Component<{
 						>
 							{autoAccept()
 								? scheduleSelected()
-									? T()("approve_and_schedule")
-									: T()("approve_and_release")
+									? T()("common.approve.and.schedule")
+									: T()("common.approve.and.release")
 								: scheduleSelected()
-									? T()("publish_request_schedule_confirm")
-									: T()("publish_request_publish_confirm")}
+									? T()("publish.requests.schedule.confirm")
+									: T()("publish.requests.publish.confirm")}
 						</Button>
 					</>
 				),
@@ -274,8 +276,8 @@ const CreatePublishRequest: Component<{
 					}
 					rows={4}
 					copy={{
-						label: T()("comment"),
-						placeholder: T()("publish_request_comment_placeholder"),
+						label: T()("common.comment"),
+						placeholder: T()("publish.requests.comment.placeholder"),
 					}}
 					noMargin={true}
 				/>
@@ -288,8 +290,8 @@ const CreatePublishRequest: Component<{
 						options={reviewerOptions()}
 						disabled={reviewers.isFetching}
 						copy={{
-							label: T()("reviewers"),
-							placeholder: T()("select_reviewers"),
+							label: T()("common.reviewers"),
+							placeholder: T()("selectors.reviewers"),
 						}}
 						triggerClasses="items-start gap-2 p-2"
 						selectedValuesContainerClasses="gap-0"
@@ -323,7 +325,7 @@ const CreatePublishRequest: Component<{
 							}}
 							options={releaseTimingOptions()}
 							copy={{
-								label: T()("release_timing"),
+								label: T()("documents.release.timing"),
 							}}
 							noClear={true}
 							hideOptionalText={true}
@@ -348,7 +350,7 @@ const CreatePublishRequest: Component<{
 					<div>
 						<Label
 							id="publish-request-auto-accept"
-							label={T()("approval")}
+							label={T()("common.approval")}
 							theme="basic"
 							hideOptionalText={true}
 						/>
@@ -358,8 +360,8 @@ const CreatePublishRequest: Component<{
 							value={autoAccept()}
 							onChange={updateAutoAccept}
 							copy={{
-								label: T()("publish_request_auto_accept_label"),
-								describedBy: T()("publish_request_auto_accept_description"),
+								label: T()("publish.requests.auto.accept.label"),
+								describedBy: T()("publish.requests.auto.accept.description"),
 							}}
 							theme="secondary"
 						/>

@@ -78,8 +78,8 @@ const formatMultiple = (props: {
 						builder: brickBuilder,
 						collection: props.collection,
 						localization: {
-							locales: props.config.localization.locales.map((l) => l.code),
-							default: props.config.localization.defaultLocale,
+							locales: props.config.i18n.content.locales.map((l) => l.code),
+							default: props.config.i18n.content.defaultLocale,
 						},
 						brickKey: brickKey,
 						config: props.config,
@@ -127,8 +127,8 @@ const formatDocumentFields = (props: {
 			builder: props.collection,
 			collection: props.collection,
 			localization: {
-				locales: props.config.localization.locales.map((l) => l.code),
-				default: props.config.localization.defaultLocale,
+				locales: props.config.i18n.content.locales.map((l) => l.code),
+				default: props.config.i18n.content.defaultLocale,
 			},
 			brickKey: undefined,
 			config: props.config,

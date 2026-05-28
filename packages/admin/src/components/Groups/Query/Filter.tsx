@@ -237,7 +237,9 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 								setFilterParam(nextValue);
 							}}
 						>
-							{props.filter.trueLabel ? props.filter.trueLabel : T()("active")}
+							{props.filter.trueLabel
+								? props.filter.trueLabel
+								: T()("common.status.active")}
 						</Button>
 						<Button
 							theme="secondary-toggle"
@@ -257,7 +259,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 						>
 							{props.filter.falseLabel
 								? props.filter.falseLabel
-								: T()("inactive")}
+								: T()("common.status.inactive")}
 						</Button>
 					</div>
 				</Match>
@@ -349,7 +351,7 @@ export const Filter: Component<FilterProps> = (props) => {
 				<DropdownMenu.Icon>
 					<FaSolidFilter />
 				</DropdownMenu.Icon>
-				<span class="ml-2">{T()("filter")}</span>
+				<span class="ml-2">{T()("common.filter")}</span>
 			</DropdownMenu.Trigger>
 			<DropdownContent
 				options={{

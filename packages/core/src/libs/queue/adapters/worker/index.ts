@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { Worker } from "node:worker_threads";
 import constants from "../../../../constants/constants.js";
+import { serverText } from "../../../i18n/index.js";
 import logger from "../../../logger/index.js";
 import { insertJobs } from "../../insert-job.js";
 import type { QueueAdapterInstance } from "../../types.js";
@@ -94,7 +95,11 @@ function workerQueueAdapter(
 		add: async (event, params) => {
 			if (!worker) {
 				return {
-					error: { message: "Worker queue is not started" },
+					error: {
+						message: serverText("core.queue.worker.not.started", {
+							fallback: "Worker queue is not started",
+						}),
+					},
 					data: undefined,
 				};
 			}
@@ -117,7 +122,9 @@ function workerQueueAdapter(
 			if (!jobData) {
 				return {
 					error: {
-						message: "Failed to create job",
+						message: serverText("core.queue.jobs.create.failed", {
+							fallback: "Failed to create job",
+						}),
 					},
 					data: undefined,
 				};
@@ -135,7 +142,11 @@ function workerQueueAdapter(
 		addBatch: async (event, params) => {
 			if (!worker) {
 				return {
-					error: { message: "Worker queue is not started" },
+					error: {
+						message: serverText("core.queue.worker.not.started", {
+							fallback: "Worker queue is not started",
+						}),
+					},
 					data: undefined,
 				};
 			}

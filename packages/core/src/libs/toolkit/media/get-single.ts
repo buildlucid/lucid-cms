@@ -14,9 +14,15 @@ const getSingle = async (
 	context: ServiceContext,
 	input: ToolkitMediaGetSingleInput,
 ): ServiceResponse<Media> =>
-	runToolkitService(
-		() => mediaServices.client.getSingle(context, input),
-		"Lucid toolkit could not fetch a media item.",
-	);
+	runToolkitService(() => mediaServices.client.getSingle(context, input), {
+		name: {
+			key: "core.toolkit.media.get.single.error.name",
+			fallback: "Media Toolkit Error",
+		},
+		message: {
+			key: "core.toolkit.media.get.single.error.message",
+			fallback: "Lucid toolkit could not fetch a media item.",
+		},
+	});
 
 export default getSingle;

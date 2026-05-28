@@ -79,7 +79,7 @@ export function useDocumentState(props: {
 		() =>
 			helpers.getLocaleValue({
 				value: collection()?.details.singularName,
-			}) || T()("collection"),
+			}) || T()("common.collection"),
 	);
 	const document = createMemo(() => documentQuery.data?.data, undefined, {
 		equals: (prev, next) => {

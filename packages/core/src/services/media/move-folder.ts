@@ -1,7 +1,7 @@
+import { serverText } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const moveFolder: ServiceFn<
@@ -28,7 +28,7 @@ const moveFolder: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("media_not_found_message"),
+				message: serverText("core.media.not.found.message"),
 				status: 404,
 			},
 		},
@@ -39,7 +39,7 @@ const moveFolder: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("you_cannot_move_a_deleted_media"),
+				message: serverText("core.media.move.deleted.denied"),
 				status: 400,
 			},
 		};

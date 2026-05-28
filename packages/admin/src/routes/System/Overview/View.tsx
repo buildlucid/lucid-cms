@@ -50,8 +50,8 @@ const SystemOverviewRoute: Component = () => {
 		return Math.max(0, Math.min(100, Math.floor(rawPercent)));
 	});
 	const storageTitle = createMemo(() => {
-		if (isUnlimitedStorage()) return T()("storage_unlimited_title");
-		return T()("storage_remaining_title", {
+		if (isUnlimitedStorage()) return T()("media.storage.unlimited.title");
+		return T()("media.storage.remaining.title", {
 			storage: helpers.bytesToSize(clampedRemainingStorage()),
 		});
 	});
@@ -59,7 +59,7 @@ const SystemOverviewRoute: Component = () => {
 		if (isUnlimitedStorage()) {
 			return {
 				start: helpers.bytesToSize(storageInfo()?.used),
-				end: T()("unlimited"),
+				end: T()("common.unlimited"),
 			};
 		}
 		return {
@@ -94,25 +94,25 @@ const SystemOverviewRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("system_settings_route_title"),
-							description: T()("system_settings_route_description"),
+							title: T()("routes.system.settings.title"),
+							description: T()("routes.system.settings.description"),
 						}}
 						slots={{
 							bottom: (
 								<NavigationTabs
 									tabs={[
 										{
-											label: T()("overview"),
+											label: T()("common.overview"),
 											href: "/lucid/system/overview",
 											permission: canReadSystemOverview(),
 										},
 										{
-											label: T()("operations"),
+											label: T()("common.operations"),
 											href: "/lucid/system/operations",
 											permission: canReadSystemOperations(),
 										},
 										{
-											label: T()("license"),
+											label: T()("common.license"),
 											href: "/lucid/system/license",
 											permission: canManageLicense(),
 										},
@@ -135,8 +135,8 @@ const SystemOverviewRoute: Component = () => {
 				}}
 			>
 				<InfoRow.Root
-					title={T()("media_info_title")}
-					description={T()("media_info_description")}
+					title={T()("media.info.title")}
+					description={T()("media.info.description")}
 				>
 					<InfoRow.Content title={storageTitle()} reducedMargin={true}>
 						<ProgressBar
@@ -146,8 +146,8 @@ const SystemOverviewRoute: Component = () => {
 						/>
 					</InfoRow.Content>
 					<InfoRow.Content
-						title={T()("processed_images")}
-						description={T()("processed_images_setting_message", {
+						title={T()("media.processed.title")}
+						description={T()("media.processed.settings.message", {
 							limit: settingsData.data?.data?.media?.processed.imageLimit || 0,
 						})}
 						reducedMargin={true}
@@ -157,18 +157,18 @@ const SystemOverviewRoute: Component = () => {
 							theme="contained"
 							items={[
 								{
-									label: T()("stored"),
+									label: T()("common.stored"),
 									value: settingsData.data?.data?.media?.processed.stored
-										? T()("yes")
-										: T()("no"),
+										? T()("common.yes")
+										: T()("common.no"),
 								},
 								{
-									label: T()("limit"),
+									label: T()("common.limit"),
 									value:
 										settingsData.data?.data?.media?.processed.imageLimit ?? 0,
 								},
 								{
-									label: T()("total"),
+									label: T()("common.total"),
 									value: settingsData.data?.data?.media?.processed.total ?? 0,
 								},
 							]}
@@ -177,11 +177,11 @@ const SystemOverviewRoute: Component = () => {
 				</InfoRow.Root>
 
 				<InfoRow.Root
-					title={T()("email_info_title")}
-					description={T()("email_info_description")}
+					title={T()("system.email.info.title")}
+					description={T()("system.email.info.description")}
 				>
 					<InfoRow.Content
-						title={T()("email_delivery_title")}
+						title={T()("system.email.delivery.title")}
 						reducedMargin={true}
 					>
 						<DetailsList
@@ -189,25 +189,29 @@ const SystemOverviewRoute: Component = () => {
 							theme="contained"
 							items={[
 								{
-									label: T()("simulated"),
+									label: T()("common.simulated"),
 									value:
-										emailInfo()?.simulated === true ? T()("yes") : T()("no"),
+										emailInfo()?.simulated === true
+											? T()("common.yes")
+											: T()("common.no"),
 								},
 								{
-									label: T()("from"),
+									label: T()("common.from"),
 									value: emailFromValue(),
 								},
 							]}
 						/>
 					</InfoRow.Content>
 					<InfoRow.Content
-						title={T()("available_templates")}
+						title={T()("common.available.templates")}
 						reducedMargin={true}
 					>
 						<Show
 							when={emailTemplates().length > 0}
 							fallback={
-								<p class="text-sm text-unfocused">{T()("no_templates")}</p>
+								<p class="text-sm text-unfocused">
+									{T()("empty.states.templates")}
+								</p>
 							}
 						>
 							<div class="flex flex-wrap gap-2">
@@ -219,12 +223,12 @@ const SystemOverviewRoute: Component = () => {
 					</InfoRow.Content>
 				</InfoRow.Root>
 				<InfoRow.Root
-					title={T()("system_info_title")}
-					description={T()("system_info_description")}
+					title={T()("system.info.title")}
+					description={T()("system.info.description")}
 				>
 					<InfoRow.Content
-						title={T()("adapters_title")}
-						description={T()("adapters_description")}
+						title={T()("system.adapters.title")}
+						description={T()("system.adapters.description")}
 						reducedMargin={true}
 					>
 						<DetailsList
@@ -232,39 +236,39 @@ const SystemOverviewRoute: Component = () => {
 							theme="contained"
 							items={[
 								{
-									label: T()("runtime"),
+									label: T()("common.runtime"),
 									value: systemInfo()?.runtime ?? "-",
 								},
 								{
-									label: T()("database"),
+									label: T()("common.database"),
 									value: systemInfo()?.database ?? "-",
 								},
 								{
-									label: T()("kv"),
+									label: T()("common.kv"),
 									value: systemInfo()?.kv ?? "-",
 								},
 								{
-									label: T()("queue"),
+									label: T()("common.queue"),
 									value: systemInfo()?.queue ?? "-",
 								},
 								{
-									label: T()("media"),
+									label: T()("common.media"),
 									value: systemInfo()?.media ?? "-",
 								},
 								{
-									label: T()("email"),
+									label: T()("common.email"),
 									value: systemInfo()?.email ?? "-",
 								},
 								{
-									label: T()("image_processor"),
+									label: T()("common.image.processor"),
 									value: systemInfo()?.imageProcessor ?? "-",
 								},
 							]}
 						/>
 					</InfoRow.Content>
 					<InfoRow.Content
-						title={T()("content_locales")}
-						description={T()("content_locales_description")}
+						title={T()("settings.interface.content.locales.title")}
+						description={T()("settings.interface.content.locales.description")}
 						reducedMargin={true}
 					>
 						<DetailsList
@@ -274,7 +278,7 @@ const SystemOverviewRoute: Component = () => {
 								contentLocales().map((locale) => ({
 									label: locale.name || locale.code,
 									value: `${locale.code} ${
-										locale.isDefault ? `(${T()("default")})` : ""
+										locale.isDefault ? `(${T()("common.default")})` : ""
 									} `,
 								})) || []
 							}

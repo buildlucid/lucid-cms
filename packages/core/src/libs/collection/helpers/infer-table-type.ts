@@ -3,8 +3,8 @@ import registeredFields, {
 	registeredFieldTypes,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
-import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../types.js";
+import { serverText } from "../../i18n/index.js";
 import { collectionTableParts } from "./table-parts.js";
 
 const HASHED_TABLE_SUFFIX_REGEX = /_[0-9a-f]{8}$/;
@@ -38,9 +38,14 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 		return {
 			data: undefined,
 			error: {
-				message: T("invalid_table_name_format_start_with", {
-					prefix: prefix,
-				}),
+				message: serverText(
+					"core.collections.schema.table.name.format.start.with",
+					{
+						data: {
+							prefix: prefix,
+						},
+					},
+				),
 			},
 		};
 	}
@@ -51,7 +56,11 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 		if (parts.length === 1) {
 			return {
 				data: undefined,
-				error: { message: T("invalid_table_name_format_insufficient_parts") },
+				error: {
+					message: serverText(
+						"core.collections.schema.table.name.format.insufficient.parts",
+					),
+				},
 			};
 		}
 
@@ -73,7 +82,9 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 				return {
 					data: undefined,
 					error: {
-						message: T("invalid_table_name_format_insufficient_parts"),
+						message: serverText(
+							"core.collections.schema.table.name.format.insufficient.parts",
+						),
 					},
 				};
 			}
@@ -82,7 +93,11 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 		} else {
 			return {
 				data: undefined,
-				error: { message: T("invalid_table_name_format_insufficient_parts") },
+				error: {
+					message: serverText(
+						"core.collections.schema.table.name.format.insufficient.parts",
+					),
+				},
 			};
 		}
 
@@ -94,8 +109,10 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 		return {
 			data: undefined,
 			error: {
-				message:
-					e instanceof Error ? e.message : T("failed_to_infer_table_parts"),
+				message: serverText(
+					"core.collections.schema.table.parts.infer.failed",
+					e instanceof Error ? { fallback: e.message } : undefined,
+				),
 			},
 		};
 	}

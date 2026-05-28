@@ -1,5 +1,5 @@
 import path from "node:path";
-import T from "../../../../translations/index.js";
+import { translateServer } from "../../../i18n/index.js";
 
 export const FILE_SYSTEM_UPLOAD_PATH = "fs/upload";
 export const FILE_SYSTEM_DOWNLOAD_PATH = "fs/download";
@@ -9,7 +9,7 @@ export const keyPaths = (key: string, uploadDir: string) => {
 	const keyPath = key.split("/").slice(0, -1).join("/");
 	const filename = key.split("/").pop();
 
-	if (!filename) throw new Error(T("invalid_key"));
+	if (!filename) throw new Error(translateServer("core.keys.invalid"));
 
 	const targetDir = path.join(uploadDir, keyPath);
 	const targetPath = path.join(targetDir, filename);

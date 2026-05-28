@@ -1,7 +1,7 @@
 import type { QueryBuilderWhere } from "../../libs/db/query-builder/index.js";
 import { usersFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { User } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
@@ -40,7 +40,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: T("user_not_found_message"),
+				message: serverText("core.user.not.found.message"),
 				status: 404,
 			},
 		},
@@ -53,8 +53,8 @@ const getSingle: ServiceFn<
 			user: userRes.data,
 			authUser: data.authUser,
 			host: getBaseUrl(context),
-			locales: context.config.localization.locales.map((locale) => locale.code),
-			defaultLocale: context.config.localization.defaultLocale,
+			locales: context.config.i18n.content.locales.map((locale) => locale.code),
+			defaultLocale: context.config.i18n.content.defaultLocale,
 		}),
 	};
 };

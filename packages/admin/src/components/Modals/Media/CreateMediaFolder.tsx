@@ -60,7 +60,7 @@ const CreateMediaFolderModal: Component<{
 				return { value: f.id, label: label };
 			});
 
-		return [{ value: undefined, label: T()("no_folder") }, ...sorted];
+		return [{ value: undefined, label: T()("media.folders.none") }, ...sorted];
 	});
 
 	// ----------------------------------------
@@ -101,7 +101,7 @@ const CreateMediaFolderModal: Component<{
 				<div class="p-4 md:p-6">
 					<div class="mb-4">
 						<h2 class="text-base font-semibold text-title">
-							{T()("create_media_folder_panel_title")}
+							{T()("panels.media.folders.create.title")}
 						</h2>
 					</div>
 					<Input
@@ -112,7 +112,7 @@ const CreateMediaFolderModal: Component<{
 						type="text"
 						required={true}
 						copy={{
-							label: T()("title"),
+							label: T()("common.title"),
 						}}
 						errors={getBodyError("title", createFolder.errors)}
 					/>
@@ -128,7 +128,7 @@ const CreateMediaFolderModal: Component<{
 						}}
 						name={"parent-folder"}
 						options={folderOptions()}
-						copy={{ label: T()("folder") }}
+						copy={{ label: T()("common.folder") }}
 						noClear={true}
 					/>
 				</div>
@@ -141,7 +141,9 @@ const CreateMediaFolderModal: Component<{
 						<ErrorMessage
 							theme="basic"
 							message={
-								foldersHierarchy.isError ? T()("error_message") : undefined
+								foldersHierarchy.isError
+									? T()("errors.generic.message")
+									: undefined
 							}
 						/>
 					</div>
@@ -153,7 +155,7 @@ const CreateMediaFolderModal: Component<{
 							onClick={() => props.state.setOpen(false)}
 							disabled={createFolder.action.isPending}
 						>
-							{T()("cancel")}
+							{T()("common.cancel")}
 						</Button>
 						<Button
 							type="submit"
@@ -162,7 +164,7 @@ const CreateMediaFolderModal: Component<{
 							loading={createFolder.action.isPending}
 							disabled={foldersHierarchy.isLoading}
 						>
-							{T()("create")}
+							{T()("common.create")}
 						</Button>
 					</div>
 				</ModalFooter>

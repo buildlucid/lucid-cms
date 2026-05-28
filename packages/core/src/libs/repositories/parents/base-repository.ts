@@ -6,11 +6,11 @@ import type {
 } from "kysely";
 import z, { type ZodObject, type ZodType } from "zod";
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
 import type { LucidErrorData } from "../../../types.js";
 import { tidyZodError } from "../../../utils/errors/index.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import type { Insert, KyselyDB, LucidDB, Update } from "../../db/types.js";
+import { serverText, translateServer } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import type {
 	ExecuteMeta,
@@ -185,7 +185,9 @@ abstract class BaseRepository<
 				data: undefined,
 				error: {
 					...config?.defaultError,
-					message: config?.defaultError?.message ?? T("validation_error"),
+					message:
+						config?.defaultError?.message ??
+						serverText("core.errors.validation.name"),
 					type: config?.defaultError?.type ?? "validation",
 					status: config?.defaultError?.status ?? 400,
 				},
@@ -260,7 +262,7 @@ abstract class BaseRepository<
 					errorMessage:
 						error instanceof Error
 							? error.message
-							: T("an_unknown_error_occurred"),
+							: translateServer("core.errors.unknown"),
 				},
 			});
 
@@ -268,10 +270,12 @@ abstract class BaseRepository<
 				response: {
 					data: undefined,
 					error: {
-						message:
-							error instanceof Error
-								? error.message
-								: T("an_unknown_error_occurred"),
+						message: serverText("core.errors.unknown", {
+							fallback:
+								error instanceof Error
+									? error.message
+									: translateServer("core.errors.unknown"),
+						}),
 						status: 500,
 					},
 				},

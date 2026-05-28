@@ -5,11 +5,24 @@ import { DEFAULT_MAX_UPLOAD_SIZE } from "./constants.js";
 import plugin from "./plugin.js";
 
 type PluginDraft = {
+	i18n: {
+		translations: Record<string, unknown>;
+	};
 	media: Record<string, unknown>;
 	hono: {
 		routes: unknown[];
 	};
 };
+
+const buildDraft = (): PluginDraft => ({
+	i18n: {
+		translations: {},
+	},
+	media: {},
+	hono: {
+		routes: [],
+	},
+});
 
 const buildConfig = (fileSize: number) =>
 	({
@@ -58,8 +71,14 @@ describe("Cloudflare R2 plugin", () => {
 		const adapter = cloudflareR2Plugin.recipe
 			? (() => {
 					const draft = {
+						i18n: {
+							translations: {},
+						},
 						media: {},
 					} as {
+						i18n: {
+							translations: Record<string, unknown>;
+						};
 						media: {
 							adapter?: {
 								createUploadSession: (
@@ -110,12 +129,7 @@ describe("Cloudflare R2 plugin", () => {
 		const cloudflareR2Plugin = plugin({
 			binding: {} as R2Bucket,
 		});
-		const draft: PluginDraft = {
-			media: {},
-			hono: {
-				routes: [],
-			},
-		};
+		const draft = buildDraft();
 
 		cloudflareR2Plugin.recipe(draft as never);
 
@@ -134,12 +148,7 @@ describe("Cloudflare R2 plugin", () => {
 				},
 			},
 		});
-		const draft: PluginDraft = {
-			media: {},
-			hono: {
-				routes: [],
-			},
-		};
+		const draft = buildDraft();
 
 		cloudflareR2Plugin.recipe(draft as never);
 

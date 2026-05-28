@@ -46,8 +46,8 @@ const useResetPassword = (props?: UseResetPasswordProps) => {
 	>({
 		mutationFn: resetPasswordReq,
 		getSuccessToast: () => ({
-			title: T()("password_reset_success_toast_title"),
-			message: T()("password_reset_success_toast_message"),
+			title: T()("toasts.common.password.reset.success.title"),
+			message: T()("toasts.common.password.reset.success.message"),
 		}),
 		invalidates: ["roles.getMultiple", "roles.getSingle"],
 		onSuccess: () => {

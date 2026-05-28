@@ -1,6 +1,7 @@
 import z from "zod";
-import T from "../../../../../translations/index.js";
 import type { ServiceResponse } from "../../../../../types.js";
+import { adminText } from "../../../../i18n/admin-text.js";
+import { serverText } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
@@ -35,11 +36,15 @@ class UserCustomField extends CustomField<"user"> {
 			key: this.key,
 			type: this.type,
 			details: {
-				label: this.props?.details?.label ?? keyToTitle(this.key),
+				label:
+					this.props?.details?.label ??
+					adminText(`fields.${this.type}.${this.key}.label`, {
+						fallback: keyToTitle(this.key),
+					}),
 				summary: this.props?.details?.summary,
 			},
 			config: {
-				translations: this.props?.config?.translations ?? false,
+				localized: this.props?.config?.localized ?? false,
 				default: this.props?.config?.default ?? [],
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
@@ -70,7 +75,7 @@ class UserCustomField extends CustomField<"user"> {
 					value === undefined ||
 					value === null ||
 					(Array.isArray(value) && value.length === 0),
-				message: T("generic_field_required"),
+				message: serverText("core.fields.validation.required"),
 			},
 		};
 	}
@@ -142,7 +147,7 @@ class UserCustomField extends CustomField<"user"> {
 			if (findUser === undefined) {
 				errors.push({
 					itemIndex,
-					message: T("field_user_not_found"),
+					message: serverText("core.fields.user.validation.not.found"),
 				});
 			}
 		}

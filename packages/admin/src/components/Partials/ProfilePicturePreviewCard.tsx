@@ -52,7 +52,9 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 		});
 	});
 	const editLabel = createMemo(() =>
-		media() ? T()("update_profile_picture") : T()("set_profile_picture"),
+		media()
+			? T()("account.profile.picture.update")
+			: T()("account.profile.picture.set"),
 	);
 	const mediaDimensions = createMemo(() => {
 		const profilePicture = media();
@@ -73,7 +75,8 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 	});
 	const title = createMemo(() => {
 		const profilePicture = media();
-		if (!profilePicture) return props.user.username ?? T()("profile_picture");
+		if (!profilePicture)
+			return props.user.username ?? T()("account.profile.picture.title");
 
 		return (
 			helpers.getTranslation(
@@ -192,7 +195,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 									when={initials()}
 									fallback={
 										<span class="px-3 text-center text-sm font-medium text-unfocused">
-											{T()("no_profile_picture")}
+											{T()("account.profile.picture.none")}
 										</span>
 									}
 								>
@@ -225,7 +228,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 							when={media()}
 							fallback={
 								<p class="mt-1 text-xs text-unfocused">
-									{T()("no_profile_picture")}
+									{T()("account.profile.picture.none")}
 								</p>
 							}
 						>
@@ -262,7 +265,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 								size="icon-subtle"
 								onClick={() => setClearConfirmationOpen(true)}
 								loading={props.clearLoading}
-								aria-label={T()("clear")}
+								aria-label={T()("common.clear")}
 							>
 								<FaSolidXmark size={14} />
 							</Button>
@@ -278,8 +281,8 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 					isLoading: props.clearLoading,
 				}}
 				copy={{
-					title: T()("profile_picture_clear_confirm_title"),
-					description: T()("profile_picture_clear_confirm_description"),
+					title: T()("account.profile.picture.clear.confirm.title"),
+					description: T()("account.profile.picture.clear.confirm.description"),
 				}}
 				callbacks={{
 					onConfirm: handleClearConfirm,

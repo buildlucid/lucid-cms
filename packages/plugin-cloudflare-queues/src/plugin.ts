@@ -4,6 +4,7 @@ import type {
 	CloudflareWorkerImport,
 } from "@lucidcms/cloudflare-adapter/types";
 import { LucidError } from "@lucidcms/core";
+import { mergeTranslationBundles } from "@lucidcms/core/plugin";
 import type {
 	LucidPlugin,
 	RuntimeBuildArtifactCustom,
@@ -16,6 +17,9 @@ import {
 	PLUGIN_KEY,
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
+import serverTranslations from "./translations/en.server.json" with {
+	type: "json",
+};
 import type { PluginOptions } from "./types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
@@ -43,6 +47,10 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						exports: ["createConfiguredDatabaseAdapter", "processConfig"],
 					},
 					{
+						path: "@lucidcms/core/plugin",
+						exports: ["mergeTranslationBundles"],
+					},
+					{
 						path: props.definition.database.module,
 						default: "ConfiguredDatabaseAdapter",
 					},
@@ -56,6 +64,10 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					{
 						path: "./email-templates.json",
 						default: "emailTemplates",
+					},
+					{
+						path: "./i18n-translations.json",
+						default: "i18nTranslations",
 					},
 				];
 				const exports: CloudflareWorkerExport[] = [
@@ -75,6 +87,13 @@ const lucidConfig = wrappedDefinition.config(env);
 lucidConfig.preRenderedEmailTemplates = Object.fromEntries(
     Object.entries(emailTemplates).map(([key, value]) => [key, value.html]),
 );
+lucidConfig.i18n = {
+    ...lucidConfig.i18n,
+    translations: mergeTranslationBundles(
+        lucidConfig.i18n?.translations,
+        i18nTranslations,
+    ),
+};
 const databaseAdapter = createConfiguredDatabaseAdapter(
     ConfiguredDatabaseAdapter,
     wrappedDefinition.database,
@@ -115,7 +134,10 @@ try {
                     env: env || null,
                     queue: internalQueueAdapter,
                     kv: kvInstance,
-                    request: { url: resolved.baseUrl || "http://localhost" },
+                    request: {
+                        url: resolved.baseUrl || "http://localhost",
+                        locale: resolved.i18n.interface.defaultLocale,
+                    },
                 },
                 {
                     jobId,
@@ -197,6 +219,11 @@ try {
 			}
 		},
 		recipe: (draft) => {
+			draft.i18n.translations = mergeTranslationBundles(
+				draft.i18n.translations,
+				{ en: { server: serverTranslations } },
+			);
+
 			if (draft.queue?.adapter) {
 				draft.queue.adapter = cloudflareQueuesAdapter(pluginOptions);
 			} else {

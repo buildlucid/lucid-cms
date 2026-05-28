@@ -188,8 +188,8 @@ export const ReleaseRequestsList: Component<{
 				}}
 				copy={{
 					noEntries: {
-						title: T()("no_publish_requests"),
-						description: T()("no_publish_requests_description"),
+						title: T()("empty.states.publish.requests.title"),
+						description: T()("empty.states.publish.requests.description"),
 					},
 				}}
 			>
@@ -199,45 +199,45 @@ export const ReleaseRequestsList: Component<{
 					searchParams={props.state.searchParams}
 					head={[
 						{
-							label: T()("release_request"),
+							label: T()("documents.release.request"),
 							key: "request",
 							icon: <FaSolidT />,
 							minWidth: 320,
 						},
 						{
-							label: T()("status"),
+							label: T()("common.status"),
 							key: "status",
 							icon: <FaSolidCircleCheck />,
 						},
 						{
-							label: T()("execution_status"),
+							label: T()("common.execution.status"),
 							key: "executionStatus",
 							icon: <FaSolidClock />,
 						},
 						{
-							label: T()("requested_by"),
+							label: T()("common.requested.by"),
 							key: "requestedBy",
 							icon: <FaSolidUser />,
 						},
 						{
-							label: T()("reviewers"),
+							label: T()("common.reviewers"),
 							key: "reviewers",
 							icon: <FaSolidUsers />,
 						},
 						{
-							label: T()("comments"),
+							label: T()("common.comments"),
 							key: "comments",
 							icon: <FaSolidComment />,
 							minWidth: 280,
 						},
 						{
-							label: T()("requested_at"),
+							label: T()("common.requested.at"),
 							key: "createdAt",
 							icon: <FaSolidCalendar />,
 							sortable: true,
 						},
 						{
-							label: T()("scheduled_for"),
+							label: T()("common.scheduled.for"),
 							key: "scheduledAt",
 							icon: <FaSolidCalendar />,
 							sortable: true,

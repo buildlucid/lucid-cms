@@ -55,8 +55,8 @@ const SystemClientIntegrationsRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("system_client_integrations_route_title"),
-							description: T()("system_client_integrations_route_description"),
+							title: T()("routes.system.client.integrations.title"),
+							description: T()("routes.system.client.integrations.description"),
 						}}
 						actions={{
 							create: [
@@ -64,7 +64,7 @@ const SystemClientIntegrationsRoute: Component = () => {
 									open: openCreateClientIntegrationPanel(),
 									setOpen: setOpenCreateClientIntegrationPanel,
 									permission: hasCreatePermission(),
-									label: T()("create_integration"),
+									label: T()("client.integrations.create.action"),
 								},
 							],
 						}}
@@ -79,33 +79,33 @@ const SystemClientIntegrationsRoute: Component = () => {
 									}}
 									filters={[
 										{
-											label: T()("name"),
+											label: T()("common.name"),
 											key: "name",
 											type: "text",
 										},
 										{
-											label: T()("active"),
+											label: T()("common.status.active"),
 											key: "enabled",
 											type: "boolean",
-											trueLabel: T()("active"),
-											falseLabel: T()("inactive"),
+											trueLabel: T()("common.status.active"),
+											falseLabel: T()("common.status.inactive"),
 										},
 									]}
 									sorts={[
 										{
-											label: T()("name"),
+											label: T()("common.name"),
 											key: "name",
 										},
 										{
-											label: T()("description"),
+											label: T()("common.description"),
 											key: "description",
 										},
 										{
-											label: T()("active"),
+											label: T()("common.status.active"),
 											key: "enabled",
 										},
 										{
-											label: T()("created_at"),
+											label: T()("common.created.at"),
 											key: "createdAt",
 										},
 									]}

@@ -1,5 +1,5 @@
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { serverText } from "../i18n/index.js";
 import { getAlertConfig } from "./alert-map.js";
 import type { AlertExecutionPayload } from "./types.js";
 
@@ -15,8 +15,10 @@ const executeAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 		return {
 			error: {
 				type: "basic",
-				message: T("unknown_alert_key_message", {
-					key: data.key,
+				message: serverText("core.alerts.unknown.key.message", {
+					data: {
+						key: data.key,
+					},
 				}),
 				status: 400,
 			},

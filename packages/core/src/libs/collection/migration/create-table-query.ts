@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import logger from "../../../libs/logger/index.js";
 import type { ServiceFn } from "../../../types.js";
+import { serverText } from "../../i18n/index.js";
 import { addColumn } from "./column-builder.js";
 import { addIndex } from "./index-builder.js";
 import type { TableMigration } from "./types.js";
@@ -42,10 +43,12 @@ const createTableQuery: ServiceFn<
 		return {
 			data: undefined,
 			error: {
-				message:
-					err instanceof Error
-						? err.message
-						: "An error occurred while creating a collection table",
+				message: serverText("core.errors.default.message", {
+					fallback:
+						err instanceof Error
+							? err.message
+							: "An error occurred while creating a collection table",
+				}),
 			},
 		};
 	}

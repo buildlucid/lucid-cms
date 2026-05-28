@@ -32,8 +32,10 @@ const DeleteAllShareLinksSystem: Component<DeleteAllShareLinksSystemProps> = (
 				isError: deleteAllShareLinksSystem.action.isError,
 			}}
 			copy={{
-				title: T()("delete_all_share_links_system_modal_title"),
-				description: T()("delete_all_share_links_system_modal_description"),
+				title: T()("modals.common.delete.all.share.links.system.title"),
+				description: T()(
+					"modals.common.delete.all.share.links.system.description",
+				),
 				error: deleteAllShareLinksSystem.errors()?.message,
 			}}
 			callbacks={{

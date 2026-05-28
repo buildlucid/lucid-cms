@@ -1,5 +1,5 @@
 import { inspect } from "node:util";
-import { prefixGeneratedColName } from "@lucidcms/core/plugin";
+import { prefixGeneratedColName, serverText } from "@lucidcms/core/plugin";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
@@ -7,7 +7,6 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
-import T from "../translations/index.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 
 export type DescendantFieldsResponse = {
@@ -158,7 +157,7 @@ const getDescendantFields: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: T("an_unknown_error_occurred_getting_descendant_fields"),
+				message: serverText("plugin.pages.descendants.fields.fetch.failed"),
 			},
 			data: undefined,
 		};

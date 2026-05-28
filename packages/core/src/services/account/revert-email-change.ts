@@ -1,10 +1,10 @@
 import constants from "../../constants/constants.js";
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
 	authServices,
@@ -43,7 +43,7 @@ const revertEmailChange: ServiceFn<
 			defaultError: {
 				type: "basic",
 				status: 404,
-				message: T("token_not_found_message"),
+				message: serverText("core.tokens.not.found.message"),
 			},
 		},
 	});
@@ -57,7 +57,7 @@ const revertEmailChange: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: T("token_not_found_message"),
+				message: serverText("core.tokens.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -87,7 +87,7 @@ const revertEmailChange: ServiceFn<
 				defaultError: {
 					type: "basic",
 					status: 404,
-					message: T("token_not_found_message"),
+					message: serverText("core.tokens.not.found.message"),
 				},
 			},
 		});
@@ -117,7 +117,7 @@ const revertEmailChange: ServiceFn<
 					defaultError: {
 						type: "basic",
 						status: 404,
-						message: T("token_not_found_message"),
+						message: serverText("core.tokens.not.found.message"),
 					},
 				},
 			}),
@@ -154,7 +154,7 @@ const revertEmailChange: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 404,
-				message: T("user_not_found_message"),
+				message: serverText("core.user.not.found.message"),
 			},
 		},
 	});
@@ -165,7 +165,7 @@ const revertEmailChange: ServiceFn<
 			error: {
 				type: "basic",
 				status: 409,
-				message: T("email_change_request_stale_message"),
+				message: serverText("core.email.change.request.stale.message"),
 			},
 			data: undefined,
 		};
@@ -194,7 +194,7 @@ const revertEmailChange: ServiceFn<
 			error: {
 				type: "basic",
 				status: 409,
-				message: T("email_change_email_unavailable_message"),
+				message: serverText("core.email.change.email.unavailable.message"),
 			},
 			data: undefined,
 		};
@@ -221,7 +221,7 @@ const revertEmailChange: ServiceFn<
 			defaultError: {
 				type: "basic",
 				status: 404,
-				message: T("token_not_found_message"),
+				message: serverText("core.tokens.not.found.message"),
 			},
 		},
 	});
@@ -266,7 +266,7 @@ const revertEmailChange: ServiceFn<
 					defaultError: {
 						type: "basic",
 						status: 404,
-						message: T("token_not_found_message"),
+						message: serverText("core.tokens.not.found.message"),
 					},
 				},
 			}),

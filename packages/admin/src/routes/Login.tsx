@@ -69,7 +69,7 @@ const LoginRoute: Component = () => {
 
 		if (errorName || errorMessage) {
 			spawnToast({
-				title: errorName ?? T()("error_title"),
+				title: errorName ?? T()("errors.generic.title"),
 				message: errorMessage ?? undefined,
 				status: "error",
 			});
@@ -104,16 +104,16 @@ const LoginRoute: Component = () => {
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
-						title: T()("error_title"),
-						description: T()("error_message"),
+						title: T()("errors.generic.title"),
+						description: T()("errors.generic.message"),
 					}}
 				/>
 			</Match>
 			<Match when={isSuccess()}>
 				<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
-				<h1 class="mb-1 text-center">{T()("login_route_title")}</h1>
+				<h1 class="mb-1 text-center">{T()("routes.auth.login.title")}</h1>
 				<p class="text-center max-w-sm mx-auto">
-					{T()("login_route_description")}
+					{T()("routes.auth.login.description")}
 				</p>
 				<div class="my-10">
 					<Show when={providers.data?.data.disablePassword === false}>
@@ -131,7 +131,7 @@ const LoginRoute: Component = () => {
 						<Show when={providers.data?.data.disablePassword === false}>
 							<span class="text-center mx-auto flex items-center justify-center gap-2 my-8">
 								<span class="w-20 h-px bg-border" />
-								<span class="text-body text-sm mx-2.5">{T()("or")}</span>
+								<span class="text-body text-sm mx-2.5">{T()("common.or")}</span>
 								<span class="w-20 h-px bg-border" />
 							</span>
 						</Show>

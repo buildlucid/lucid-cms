@@ -33,7 +33,7 @@ export const Search: Component<SearchProps> = (props) => {
 			<input
 				type="text"
 				class="bg-input-base px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-10 focus:outline-hidden focus:border-primary-base"
-				placeholder={T()("search")}
+				placeholder={T()("common.search")}
 				value={props.value}
 				onKeyDown={(e) => {
 					e.stopPropagation();

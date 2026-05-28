@@ -1,6 +1,6 @@
 import path from "node:path";
 import { expect, test } from "vitest";
-import T from "../../../translations/index.js";
+import { translateServer } from "../../i18n/index.js";
 import loadConfigFile from "../load-config-file.js";
 
 test("should throw duplicate collection key error", async () => {
@@ -9,7 +9,7 @@ test("should throw duplicate collection key error", async () => {
 			path: path.resolve(__dirname, "./duplicate-collections.ts"),
 		}),
 	).rejects.toThrow(
-		T("config_duplicate_keys", {
+		translateServer("core.config.duplicate.keys", {
 			builder: "collections",
 		}),
 	);

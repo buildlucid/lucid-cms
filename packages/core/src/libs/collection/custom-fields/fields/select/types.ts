@@ -1,16 +1,16 @@
-import type { LocaleValue } from "../../../../../types/shared.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface SelectFieldConfig extends SharedFieldConfig {
 	type: "select";
 	details: {
-		label?: LocaleValue;
-		summary?: LocaleValue;
-		placeholder?: LocaleValue;
+		label?: AdminText;
+		summary?: AdminText;
+		placeholder?: AdminText;
 	};
-	options: Array<{ label: LocaleValue; value: string }>;
+	options: Array<{ label: AdminText; value: string }>;
 	config: {
-		translations?: boolean;
+		localized?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
 		index?: true;

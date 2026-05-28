@@ -12,21 +12,26 @@ const toolkitFallbackRequestUrl = "http://localhost:6543";
  */
 export const createToolkitServiceContext = (
 	options: CreateToolkitServiceContextOptions,
-): ServiceContext => ({
-	db: {
-		client: options.config.db.client,
-	},
-	config: options.config,
-	env: options.env ?? null,
-	queue: options.queue ?? passthroughQueueAdapter(),
-	kv: options.kv ?? passthroughKVAdapter(),
-	request: {
-		url:
-			options.request?.url ??
-			options.config.baseUrl ??
-			toolkitFallbackRequestUrl,
-		ipAddress: options.request?.ipAddress ?? null,
-	},
-});
+): ServiceContext => {
+	const locale = options.config.i18n.interface.defaultLocale;
+
+	return {
+		db: {
+			client: options.config.db.client,
+		},
+		config: options.config,
+		env: options.env ?? null,
+		queue: options.queue ?? passthroughQueueAdapter(),
+		kv: options.kv ?? passthroughKVAdapter(),
+		request: {
+			url:
+				options.request?.url ??
+				options.config.baseUrl ??
+				toolkitFallbackRequestUrl,
+			ipAddress: options.request?.ipAddress ?? null,
+			locale,
+		},
+	};
+};
 
 export type { Config, EnvironmentVariables };

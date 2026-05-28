@@ -37,8 +37,8 @@ const DeleteClientIntegration: Component<DeleteClientIntegrationProps> = (
 				isError: deleteIntegration.action.isError,
 			}}
 			copy={{
-				title: T()("delete_client_integration_modal_title"),
-				description: T()("delete_client_integration_modal_description"),
+				title: T()("modals.common.delete.client.integration.title"),
+				description: T()("modals.common.delete.client.integration.description"),
 				error: deleteIntegration.errors()?.message,
 			}}
 			callbacks={{

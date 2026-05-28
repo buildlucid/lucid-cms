@@ -80,17 +80,17 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 		() => totalCount() > 0 && successCount() === totalCount(),
 	);
 	const primaryLabel = createMemo(() => {
-		if (isProcessing()) return T()("uploading");
-		if (queuedCount() > 0) return T()("upload");
-		if (errorCount() > 0) return T()("retry_failed");
-		if (allSuccessful()) return T()("done");
-		return T()("upload");
+		if (isProcessing()) return T()("common.uploading");
+		if (queuedCount() > 0) return T()("common.upload");
+		if (errorCount() > 0) return T()("media.upload.retry.failed");
+		if (allSuccessful()) return T()("common.done");
+		return T()("common.upload");
 	});
 	const secondaryLabel = createMemo(() => {
 		if (!isProcessing() && (errorCount() > 0 || allSuccessful())) {
-			return T()("done");
+			return T()("common.done");
 		}
-		return T()("close");
+		return T()("common.close");
 	});
 	const primaryDisabled = createMemo(() => {
 		if (isProcessing()) return true;
@@ -300,11 +300,11 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 		resetInput();
 	};
 	const rowStatusLabel = (status: UploadStatus) => {
-		if (status === "queued") return T()("queued");
-		if (status === "uploading") return T()("uploading");
-		if (status === "creating") return T()("creating_media");
-		if (status === "success") return T()("completed");
-		return T()("failed");
+		if (status === "queued") return T()("common.status.queued");
+		if (status === "uploading") return T()("common.uploading");
+		if (status === "creating") return T()("common.status.creating.media");
+		if (status === "success") return T()("common.status.completed");
+		return T()("common.status.failed");
 	};
 	const rowStatusClasses = (status: UploadStatus) =>
 		classNames("text-xs font-medium", {
@@ -382,10 +382,10 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 					<div class="flex items-start justify-between gap-4">
 						<div class="min-w-0">
 							<h2 class="text-base font-semibold text-title">
-								{T()("bulk_upload_media")}
+								{T()("media.upload.bulk.title")}
 							</h2>
 							<p class="mt-1 text-base text-body">
-								{T()("bulk_upload_media_description")}
+								{T()("media.upload.bulk.description")}
 							</p>
 						</div>
 						<Button
@@ -394,7 +394,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 							size="icon-subtle"
 							onClick={closeModal}
 							disabled={isProcessing()}
-							aria-label={T()("close")}
+							aria-label={T()("common.close")}
 						>
 							<FaSolidXmark size={14} />
 						</Button>
@@ -405,17 +405,17 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 							<div class="mt-4 flex min-h-72 flex-col items-center justify-center rounded-md border-2 border-dashed border-border p-6 text-center">
 								<FaSolidArrowUpFromBracket class="mb-5 h-7 w-7 text-unfocused" />
 								<p class="text-base font-medium text-subtitle">
-									{T()("bulk_upload_drop_files")}{" "}
+									{T()("media.upload.bulk.drop.title")}{" "}
 									<button
 										type="button"
 										class="font-medium text-primary-base"
 										onClick={openFileBrowser}
 									>
-										{T()("upload_here")}
+										{T()("media.upload.drop.here")}
 									</button>
 								</p>
 								<p class="mt-2 text-sm text-body">
-									{T()("bulk_upload_drop_files_description")}
+									{T()("media.upload.bulk.drop.description")}
 								</p>
 							</div>
 						}
@@ -458,7 +458,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 														{helpers.bytesToSize(row.file.size)}
 													</span>
 													<span class="text-xs text-body">
-														{row.file.type || T()("unknown")}
+														{row.file.type || T()("media.types.unknown")}
 													</span>
 													<span class={rowStatusClasses(row.status)}>
 														{rowStatusLabel(row.status)}
@@ -479,7 +479,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 													size="icon-subtle"
 													onClick={() => removeRow(row.id)}
 													disabled={isProcessing()}
-													aria-label={T()("remove")}
+													aria-label={T()("common.remove")}
 												>
 													<FaSolidXmark size={14} />
 												</Button>
@@ -508,14 +508,14 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 								disabled={isProcessing()}
 							>
 								<FaSolidArrowUpFromBracket class="mr-2" size={14} />
-								{T()("add_more_files")}
+								{T()("media.upload.add.more.files")}
 							</button>
 						</div>
 					</Show>
 				</div>
 				<ModalFooter>
 					<p class="text-sm text-subtitle">
-						{T()("bulk_upload_summary", {
+						{T()("media.upload.bulk.summary", {
 							total: totalCount(),
 							completed: successCount(),
 							failed: errorCount(),

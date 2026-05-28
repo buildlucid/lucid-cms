@@ -1,4 +1,4 @@
-import T from "../../../translations/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { optionServices } from "../../index.js";
 
@@ -34,7 +34,7 @@ const checkCanStore: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("processed_images_size_limit_exceeded"),
+				message: serverText("core.processed.images.size.limit.exceeded"),
 			},
 			data: undefined,
 		};

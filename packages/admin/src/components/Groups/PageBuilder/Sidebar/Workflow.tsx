@@ -92,7 +92,8 @@ export const Workflow: Component<{
 		() =>
 			assigneeQuery.data?.data.map((user) => ({
 				value: user.id,
-				label: helpers.formatUserName(user, "simple") || T()("unknown"),
+				label:
+					helpers.formatUserName(user, "simple") || T()("media.types.unknown"),
 				user,
 			})) ?? [],
 	);
@@ -111,7 +112,8 @@ export const Workflow: Component<{
 			workflow()?.assignees.map((assignee) => ({
 				value: assignee.user.id,
 				label:
-					helpers.formatUserName(assignee.user, "simple") || T()("unknown"),
+					helpers.formatUserName(assignee.user, "simple") ||
+					T()("media.types.unknown"),
 				user: assignee.user,
 			})) ?? [],
 		);
@@ -203,7 +205,7 @@ export const Workflow: Component<{
 			}
 		>
 			<SidebarSection
-				title={T()("workflow")}
+				title={T()("common.workflow")}
 				icon={<FaSolidChartDiagram size={14} />}
 				storageKey="lucid:page-builder-sidebar:workflow-open"
 			>
@@ -217,7 +219,7 @@ export const Workflow: Component<{
 						value={stage()}
 						onChange={handleStageChange}
 						options={stageOptions()}
-						copy={{ label: T()("stage") }}
+						copy={{ label: T()("common.stage") }}
 						noClear={true}
 						disabled={fieldsDisabled()}
 						hideOptionalText={true}
@@ -240,7 +242,7 @@ export const Workflow: Component<{
 						values={assignees()}
 						onChange={handleAssigneesChange}
 						options={assigneeOptions()}
-						copy={{ label: T()("workflow_assignees") }}
+						copy={{ label: T()("documents.workflow.assignees") }}
 						disabled={fieldsDisabled()}
 						hideOptionalText={true}
 						triggerClasses="items-start gap-2 p-2"

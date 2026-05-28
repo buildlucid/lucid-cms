@@ -31,8 +31,8 @@ const DeleteRole: Component<DeleteRoleProps> = (props) => {
 				isError: deleteRole.action.isError,
 			}}
 			copy={{
-				title: T()("delete_role_modal_title"),
-				description: T()("delete_role_modal_description"),
+				title: T()("modals.common.delete.role.title"),
+				description: T()("modals.common.delete.role.description"),
 				error: deleteRole.errors()?.message,
 			}}
 			callbacks={{

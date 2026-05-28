@@ -35,8 +35,8 @@ const useUpdateWorkflow = (props?: UseUpdateWorkflowProps) => {
 		getSuccessToast: props?.silent
 			? undefined
 			: () => ({
-					title: T()("workflow_updated_toast_title"),
-					message: T()("workflow_updated_toast_message"),
+					title: T()("toasts.common.workflow.updated.title"),
+					message: T()("toasts.common.workflow.updated.message"),
 				}),
 		invalidates: ["documents.getMultiple", "documents.getSingle"],
 		onSuccess: props?.onSuccess,

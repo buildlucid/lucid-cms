@@ -1,4 +1,4 @@
-import { prefixGeneratedColName } from "@lucidcms/core/plugin";
+import { prefixGeneratedColName, serverText } from "@lucidcms/core/plugin";
 import type {
 	CollectionTableNames,
 	DocumentVersionType,
@@ -6,7 +6,6 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
-import T from "../translations/index.js";
 import getParentPageId from "../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 
@@ -95,16 +94,16 @@ const getParentFields: ServiceFn<
 				error: {
 					type: "basic",
 					status: 404,
-					message: T(
-						"parent_page_not_found_or_doesnt_have_a_published_version",
+					message: serverText(
+						"plugin.pages.parents.published.version.not.found",
 					),
 					errors: {
 						fields: [
 							{
 								key: constants.fields.parentPage.key,
 								localeCode: data.defaultLocale,
-								message: T(
-									"parent_page_not_found_or_doesnt_have_a_published_version",
+								message: serverText(
+									"plugin.pages.parents.published.version.not.found",
 								),
 							},
 						],
@@ -123,7 +122,7 @@ const getParentFields: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: T("an_unknown_error_occurred_getting_parent_fields"),
+				message: serverText("plugin.pages.parents.fields.fetch.failed"),
 			},
 			data: undefined,
 		};

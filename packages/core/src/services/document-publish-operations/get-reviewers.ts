@@ -1,7 +1,7 @@
 import { mediaFormatter } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -42,9 +42,11 @@ const getReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("collection_permission_error_message", {
-					collection: data.collectionKey,
-					action: "review",
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: data.collectionKey,
+						action: "review",
+					},
 				}),
 				status: 400,
 			},
@@ -72,10 +74,12 @@ const getReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: T("collection_permission_error_name"),
-				message: T("collection_permission_error_message", {
-					collection: data.collectionKey,
-					action: "review",
+				name: serverText("core.collections.permission.error.name"),
+				message: serverText("core.collections.permission.error.message", {
+					data: {
+						collection: data.collectionKey,
+						action: "review",
+					},
 				}),
 				status: 403,
 			},

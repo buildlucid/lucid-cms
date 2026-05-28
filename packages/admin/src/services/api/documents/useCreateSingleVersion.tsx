@@ -54,10 +54,10 @@ const useCreateSingleVersion = (props: UseCreateSingleVersionProps) => {
 		mutationFn: createSingleVersionReq,
 		getSuccessToast: () => {
 			return {
-				title: T()("update_toast_title", {
+				title: T()("toasts.common.update.title", {
 					name: props.getCollectionName(),
 				}),
-				message: T()("update_toast_message", {
+				message: T()("toasts.common.update.message", {
 					name: props.getCollectionName().toLowerCase(),
 				}),
 			};

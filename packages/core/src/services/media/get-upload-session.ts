@@ -1,8 +1,8 @@
 import type { UploadSessionStateResponse } from "@lucidcms/types";
+import { serverText } from "../../libs/i18n/index.js";
 import getMediaAdapter from "../../libs/media/get-adapter.js";
 import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getUploadSession: ServiceFn<
@@ -46,7 +46,7 @@ const getUploadSession: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("media_adapter_not_enabled"),
+				message: serverText("core.media.adapters.not.enabled"),
 			},
 			data: undefined,
 		};
@@ -76,7 +76,9 @@ const getUploadSession: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("media_upload_session_missing_adapter_upload_id"),
+				message: serverText(
+					"core.media.upload.sessions.missing.adapter.upload.id",
+				),
 			},
 			data: undefined,
 		};
@@ -86,7 +88,7 @@ const getUploadSession: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("media_upload_session_missing_part_size"),
+				message: serverText("core.media.upload.sessions.missing.part.size"),
 			},
 			data: undefined,
 		};

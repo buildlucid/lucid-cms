@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import DocumentCustomField from "./custom-field.js";
@@ -10,11 +10,13 @@ import DocumentCustomField from "./custom-field.js";
 const DocumentCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addDocument("standard_doc", {
@@ -70,7 +72,7 @@ test("successfully validate field - document", async () => {
 			],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -96,7 +98,7 @@ test("successfully validate field - document", async () => {
 			],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -119,7 +121,7 @@ test("fail to validate field - document", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -127,7 +129,7 @@ test("fail to validate field - document", async () => {
 		{
 			key: "required_doc",
 			localeCode: null,
-			message: T("field_document_not_found"),
+			message: serverText("core.fields.document.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
@@ -147,7 +149,7 @@ test("fail to validate field - document", async () => {
 			document: [],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -155,7 +157,7 @@ test("fail to validate field - document", async () => {
 		{
 			key: "required_doc",
 			localeCode: null,
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 
@@ -179,7 +181,7 @@ test("fail to validate field - document", async () => {
 			],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -187,7 +189,7 @@ test("fail to validate field - document", async () => {
 		{
 			key: "wrong_collection",
 			localeCode: null,
-			message: T("field_document_not_found"),
+			message: serverText("core.fields.document.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
@@ -208,7 +210,7 @@ test("document field validates multiple item counts and indexed errors", async (
 			document: [{ id: 1, collection_key: "page" }],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -236,7 +238,7 @@ test("document field validates multiple item counts and indexed errors", async (
 			],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -258,7 +260,7 @@ test("document field validates multiple item counts and indexed errors", async (
 			document: [{ id: 1, collection_key: "page" }],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -267,8 +269,10 @@ test("document field validates multiple item counts and indexed errors", async (
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: T("field_relation_min_items", {
-				min: 2,
+			message: serverText("core.fields.relation.validation.min.items", {
+				data: {
+					min: 2,
+				},
 			}),
 		},
 	]);
@@ -276,8 +280,10 @@ test("document field validates multiple item counts and indexed errors", async (
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: T("field_relation_max_items", {
-				max: 3,
+			message: serverText("core.fields.relation.validation.max.items", {
+				data: {
+					max: 3,
+				},
 			}),
 		},
 	]);
@@ -285,13 +291,13 @@ test("document field validates multiple item counts and indexed errors", async (
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: T("field_document_not_found"),
+			message: serverText("core.fields.document.validation.not.found"),
 			itemIndex: 1,
 		},
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: T("field_document_not_found"),
+			message: serverText("core.fields.document.validation.not.found"),
 			itemIndex: 2,
 		},
 	]);
@@ -318,7 +324,7 @@ test("document field validates multiple target collections", async () => {
 			],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -336,7 +342,7 @@ test("document field validates multiple target collections", async () => {
 			document: [{ id: 1, collection_key: "author" }],
 		},
 		meta: {
-			translations: DocumentCollection.getData.config.translations,
+			localized: DocumentCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -346,7 +352,7 @@ test("document field validates multiple target collections", async () => {
 		{
 			key: "multi_collection_doc",
 			localeCode: null,
-			message: T("field_document_not_found"),
+			message: serverText("core.fields.document.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
@@ -358,15 +364,15 @@ test("custom field config passes schema validation", async () => {
 	const field = new DocumentCustomField("field", {
 		collection: "page",
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			hidden: false,
 			disabled: false,
 		},

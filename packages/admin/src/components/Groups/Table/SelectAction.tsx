@@ -134,10 +134,10 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 						<p class="text-sm">
 							<span class="font-bold">
 								{props.selectedCount() > 1
-									? `${props.selectedCount()} ${T()("items")}`
-									: `1 ${T()("item")}`}
+									? `${props.selectedCount()} ${T()("common.items")}`
+									: `1 ${T()("common.item")}`}
 							</span>{" "}
-							{T()("selected")}
+							{T()("common.selected")}
 						</p>
 						<div class="ml-2 flex gap-2">
 							<Button
@@ -145,7 +145,7 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 								size="small"
 								onClick={resetHandler}
 							>
-								{T()("reset")}
+								{T()("common.reset")}
 							</Button>
 							<Show when={showRestoreAction()}>
 								<Button
@@ -153,7 +153,7 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 									size="small"
 									onClick={() => setRestoreModalOpen(true)}
 								>
-									{T()("restore")}
+									{T()("common.restore")}
 								</Button>
 							</Show>
 							<Show when={showDeleteAction()}>
@@ -162,7 +162,7 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 									size="small"
 									onClick={() => setDeleteModalOpen(true)}
 								>
-									{T()("delete")}
+									{T()("common.delete")}
 								</Button>
 							</Show>
 							<Show when={showDeletePermanentlyAction()}>
@@ -171,7 +171,7 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 									size="small"
 									onClick={() => setDeletePermanentlyModalOpen(true)}
 								>
-									{T()("delete")}
+									{T()("common.delete")}
 								</Button>
 							</Show>
 						</div>
@@ -188,10 +188,11 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 					}}
 					copy={{
 						title:
-							props.copy?.deleteModalTitle || T()("delete_items_modal_title"),
+							props.copy?.deleteModalTitle ||
+							T()("modals.common.delete.items.title"),
 						description:
 							props.copy?.deleteModalDescription ||
-							T()("delete_items_modal_description"),
+							T()("modals.common.delete.items.description"),
 					}}
 					callbacks={{
 						onConfirm: deleteHandler,
@@ -212,10 +213,10 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 					copy={{
 						title:
 							props.copy?.deletePermanentlyModalTitle ||
-							T()("delete_items_permanently_modal_title"),
+							T()("modals.common.delete.items.permanently.title"),
 						description:
 							props.copy?.deletePermanentlyModalDescription ||
-							T()("delete_items_permanently_modal_description"),
+							T()("modals.common.delete.items.permanently.description"),
 					}}
 					callbacks={{
 						onConfirm: deletePermanentlyHandler,
@@ -236,10 +237,11 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 					}}
 					copy={{
 						title:
-							props.copy?.restoreModalTitle || T()("restore_items_modal_title"),
+							props.copy?.restoreModalTitle ||
+							T()("modals.common.restore.items.title"),
 						description:
 							props.copy?.restoreModalDescription ||
-							T()("restore_items_modal_description"),
+							T()("modals.common.restore.items.description"),
 					}}
 					callbacks={{
 						onConfirm: restoreHandler,

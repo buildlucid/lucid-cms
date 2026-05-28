@@ -66,25 +66,25 @@ const SystemOperationsRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("system_settings_route_title"),
-							description: T()("system_settings_route_description"),
+							title: T()("routes.system.settings.title"),
+							description: T()("routes.system.settings.description"),
 						}}
 						slots={{
 							bottom: (
 								<NavigationTabs
 									tabs={[
 										{
-											label: T()("overview"),
+											label: T()("common.overview"),
 											href: "/lucid/system/overview",
 											permission: canReadSystemOverview(),
 										},
 										{
-											label: T()("operations"),
+											label: T()("common.operations"),
 											href: "/lucid/system/operations",
 											permission: canReadSystemOperations(),
 										},
 										{
-											label: T()("license"),
+											label: T()("common.license"),
 											href: "/lucid/system/license",
 											permission: canManageLicense(),
 										},
@@ -107,12 +107,12 @@ const SystemOperationsRoute: Component = () => {
 				}}
 			>
 				<InfoRow.Root
-					title={T()("system_alerts")}
-					description={T()("system_alerts_description")}
+					title={T()("system.alerts.title")}
+					description={T()("system.alerts.description")}
 				>
 					<InfoRow.Content
 						title={T()(Permissions.SettingsUpdate)}
-						description={T()("system_alert_email_description")}
+						description={T()("system.alerts.email.description")}
 						reducedMargin={true}
 					>
 						<UpdateSystemAlertsForm
@@ -122,12 +122,12 @@ const SystemOperationsRoute: Component = () => {
 				</InfoRow.Root>
 
 				<InfoRow.Root
-					title={T()("maintenance_info_title")}
-					description={T()("maintenance_info_description")}
+					title={T()("system.maintenance.title")}
+					description={T()("system.maintenance.description")}
 				>
 					<InfoRow.Content
-						title={T()("clear_all")}
-						description={T()("clear_all_processed_images_setting_message")}
+						title={T()("common.actions.clear.all")}
+						description={T()("media.processed.clear.all.settings.message")}
 						reducedMargin={true}
 						theme="danger"
 						actions={
@@ -140,7 +140,7 @@ const SystemOperationsRoute: Component = () => {
 								}}
 								permission={canClearAllProcessedImages()}
 							>
-								{T()("clear_all_processed_images_button", {
+								{T()("media.processed.clear.all.action", {
 									count: settingsData.data?.data?.media?.processed.total || 0,
 								})}
 							</Button>
@@ -148,8 +148,10 @@ const SystemOperationsRoute: Component = () => {
 						actionAlignment="center"
 					/>
 					<InfoRow.Content
-						title={T()("delete_all_share_links_system")}
-						description={T()("delete_all_share_links_system_setting_message")}
+						title={T()("media.share.links.system.delete.all.title")}
+						description={T()(
+							"media.share.links.system.delete.all.settings.message",
+						)}
 						reducedMargin={true}
 						theme="danger"
 						actions={
@@ -162,14 +164,14 @@ const SystemOperationsRoute: Component = () => {
 								}}
 								permission={canDeleteAllShareLinks()}
 							>
-								{T()("delete_all_share_links_system_button")}
+								{T()("media.share.links.system.delete.all.action")}
 							</Button>
 						}
 						actionAlignment="center"
 					/>
 					<InfoRow.Content
-						title={T()("clear_cache")}
-						description={T()("clear_cache_setting_message")}
+						title={T()("system.cache.clear.title")}
+						description={T()("system.cache.setting.message")}
 						reducedMargin={true}
 						theme="danger"
 						actions={
@@ -182,7 +184,7 @@ const SystemOperationsRoute: Component = () => {
 								}}
 								permission={canClearCache()}
 							>
-								{T()("clear_cache_button")}
+								{T()("system.cache.button")}
 							</Button>
 						}
 						actionAlignment="center"

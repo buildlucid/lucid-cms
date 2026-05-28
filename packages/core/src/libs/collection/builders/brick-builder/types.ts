@@ -1,10 +1,10 @@
 import type constants from "../../../../constants/constants.js";
-import type { LocaleValue } from "../../../../types/shared.js";
+import type { AdminText } from "../../../i18n/types.js";
 
 export interface BrickConfigProps {
 	details?: {
-		name?: LocaleValue;
-		summary?: LocaleValue;
+		name?: AdminText;
+		summary?: AdminText;
 	};
 	preview?: {
 		image?: string;
@@ -13,8 +13,8 @@ export interface BrickConfigProps {
 export interface BrickConfig {
 	key: string;
 	details: {
-		name: LocaleValue;
-		summary?: LocaleValue;
+		name: AdminText;
+		summary?: AdminText;
 	};
 	preview?: {
 		image?: string;

@@ -1,5 +1,5 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { ServiceResponse } from "@lucidcms/core/types";
-import T from "../translations/index.js";
 import type {
 	CollectionConfig,
 	PluginOptionsInternal,
@@ -21,8 +21,10 @@ const getTargetCollection = (data: {
 			error: {
 				type: "basic",
 				status: 500,
-				message: T("cannot_find_collection", {
-					collection: data.collectionKey,
+				message: serverText("plugin.pages.collections.not.found", {
+					data: {
+						collection: data.collectionKey,
+					},
 				}),
 			},
 			data: undefined,

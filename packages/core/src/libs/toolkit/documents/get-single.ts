@@ -37,7 +37,16 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 				status,
 				query: normalizeDocumentQuery(input.query),
 			}),
-		"Lucid toolkit could not fetch a document.",
+		{
+			name: {
+				key: "core.toolkit.documents.get.single.error.name",
+				fallback: "Documents Toolkit Error",
+			},
+			message: {
+				key: "core.toolkit.documents.get.single.error.message",
+				fallback: "Lucid toolkit could not fetch a document.",
+			},
+		},
 	);
 };
 

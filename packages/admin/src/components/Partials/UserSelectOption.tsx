@@ -29,7 +29,7 @@ const UserSelectOption: Component<{
 							props.user.username ??
 							props.user.email ??
 							props.label ??
-							T()("unknown"),
+							T()("media.types.unknown"),
 						firstName: props.user.firstName,
 						lastName: props.user.lastName,
 						profilePicture: props.user.profilePicture,
@@ -43,7 +43,7 @@ const UserSelectOption: Component<{
 				{(removeValue) => (
 					<button
 						type="button"
-						aria-label={T()("remove")}
+						aria-label={T()("common.remove")}
 						class="ml-auto flex size-5 shrink-0 items-center justify-center rounded text-body opacity-0 transition-all group-hover:opacity-100 hover:bg-error-base hover:text-error-contrast focus:opacity-100 focus:outline-hidden focus-visible:ring-1 ring-error-base"
 						onPointerDown={(event) => {
 							event.preventDefault();

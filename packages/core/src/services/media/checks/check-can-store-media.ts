@@ -1,4 +1,4 @@
-import T from "../../../translations/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -16,15 +16,19 @@ const checkCanStoreMedia: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("file_too_large_max_size_is", {
-					size: formatBytes(maxFileSize),
+				message: serverText("core.files.validation.size.limit.exceeded", {
+					data: {
+						size: formatBytes(maxFileSize),
+					},
 				}),
 				status: 500,
 				errors: {
 					file: {
 						code: "storage",
-						message: T("file_too_large_max_size_is", {
-							size: formatBytes(maxFileSize),
+						message: serverText("core.files.validation.size.limit.exceeded", {
+							data: {
+								size: formatBytes(maxFileSize),
+							},
 						}),
 					},
 				},

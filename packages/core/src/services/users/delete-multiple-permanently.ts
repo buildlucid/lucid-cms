@@ -1,6 +1,6 @@
 import formatter from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const deleteMultiplePermanently: ServiceFn<
@@ -23,7 +23,7 @@ const deleteMultiplePermanently: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("error_cant_delete_yourself"),
+				message: serverText("core.users.self.delete.denied"),
 				status: 400,
 			},
 			data: undefined,
@@ -53,11 +53,13 @@ const deleteMultiplePermanently: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("user_not_found_message"),
+				message: serverText("core.user.not.found.message"),
 				errors: {
 					ids: {
-						message: T("only_found_ids_error_message", {
-							ids: usersRes.data.map((user) => user.id).join(", "),
+						message: serverText("core.documents.ids.not.found.partial", {
+							data: {
+								ids: usersRes.data.map((user) => user.id).join(", "),
+							},
 						}),
 					},
 				},
@@ -87,7 +89,7 @@ const deleteMultiplePermanently: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("error_cant_delete_last_user"),
+				message: serverText("core.users.last.user.delete.denied"),
 				status: 400,
 			},
 			data: undefined,

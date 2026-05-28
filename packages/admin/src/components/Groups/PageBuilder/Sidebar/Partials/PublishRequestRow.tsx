@@ -29,7 +29,7 @@ const PublishRequestRow: Component<{
 	// Memos
 	const statusLabel = () =>
 		props.request.status === "pending"
-			? T()("pending")
+			? T()("common.status.pending")
 			: getPublishOperationExecutionStatusLabel(props.request.executionStatus);
 
 	// ----------------------------------
@@ -49,11 +49,11 @@ const PublishRequestRow: Component<{
 				<div class="flex shrink-0 flex-col items-end gap-1">
 					<Show when={props.request.isOutdated}>
 						<span
-							title={T()("snapshot_outdated")}
+							title={T()("publish.requests.snapshot.outdated")}
 							class="inline-flex items-center gap-1 rounded-full bg-warning-base/10 px-2 py-0.5 text-xs font-medium text-warning-base"
 						>
 							<FaSolidTriangleExclamation size={10} />
-							{T()("out_of_sync")}
+							{T()("common.status.out.of.sync")}
 						</span>
 					</Show>
 					<Show
@@ -64,7 +64,7 @@ const PublishRequestRow: Component<{
 					>
 						<span class="inline-flex items-center gap-1 rounded-full bg-input-base px-2 py-0.5 text-xs font-medium text-body">
 							<FaSolidLock size={10} />
-							{T()("locked")}
+							{T()("common.status.locked")}
 						</span>
 					</Show>
 				</div>
@@ -74,19 +74,19 @@ const PublishRequestRow: Component<{
 				<div class="flex items-center justify-between gap-2">
 					<dt class="text-body">{statusLabel()}</dt>
 					<dd class="min-w-0 truncate text-right text-title">
-						{T()("requested_by")}{" "}
+						{T()("common.requested.by")}{" "}
 						{helpers.formatUserName(props.request.requestedBy, "simple") || "-"}
 					</dd>
 				</div>
 				<div class="flex items-center justify-between gap-2">
-					<dt class="text-body">{T()("requested_at")}</dt>
+					<dt class="text-body">{T()("common.requested.at")}</dt>
 					<dd class="min-w-0 text-right text-title">
 						<DateText date={props.request.createdAt} class="text-xs" />
 					</dd>
 				</div>
 				<Show when={props.request.scheduledAt}>
 					<div class="flex items-center justify-between gap-2">
-						<dt class="text-body">{T()("scheduled_for")}</dt>
+						<dt class="text-body">{T()("common.scheduled.for")}</dt>
 						<dd class="min-w-0 text-right text-title">
 							<DateText date={props.request.scheduledAt} class="text-xs" />
 						</dd>
@@ -94,7 +94,7 @@ const PublishRequestRow: Component<{
 				</Show>
 				<Show when={props.request.scheduledTimezone}>
 					<div class="flex items-center justify-between gap-2">
-						<dt class="text-body">{T()("scheduled_timezone")}</dt>
+						<dt class="text-body">{T()("common.scheduled.timezone")}</dt>
 						<dd class="min-w-0 truncate text-right text-title">
 							{props.request.scheduledTimezone}
 						</dd>
@@ -107,12 +107,14 @@ const PublishRequestRow: Component<{
 					when={props.request.permissions.reschedule}
 					fallback={
 						<span
-							title={T()("schedule_unavailable")}
+							title={T()("documents.release.schedule.unavailable")}
 							aria-disabled="true"
 							class={disabledActionClasses}
 						>
 							<FaSolidCalendar size={11} />
-							<span class="truncate leading-none">{T()("schedule")}</span>
+							<span class="truncate leading-none">
+								{T()("common.schedule")}
+							</span>
 						</span>
 					}
 				>
@@ -120,24 +122,24 @@ const PublishRequestRow: Component<{
 						type="button"
 						title={
 							props.request.scheduledAt
-								? T()("reschedule_release")
-								: T()("schedule_release")
+								? T()("common.reschedule.release")
+								: T()("documents.release.schedule.action")
 						}
 						class={iconActionClasses}
 						onClick={() => props.onSchedule(props.request)}
 					>
 						<FaSolidCalendar size={11} />
-						<span class="truncate leading-none">{T()("schedule")}</span>
+						<span class="truncate leading-none">{T()("common.schedule")}</span>
 					</button>
 				</Show>
 				<Show when={props.request.operationType === "request"}>
 					<A
 						href={`/lucid/collections/${props.request.collectionKey}/${props.request.documentId}/release-requests/${props.request.id}`}
-						title={T()("open_request")}
+						title={T()("common.open.request")}
 						class={iconActionClasses}
 					>
 						<FaSolidArrowUpRightFromSquare size={10} />
-						<span class="truncate leading-none">{T()("request")}</span>
+						<span class="truncate leading-none">{T()("common.request")}</span>
 					</A>
 				</Show>
 				<Show when={props.request.operationType !== "request"}>
@@ -148,11 +150,11 @@ const PublishRequestRow: Component<{
 							status: "snapshot",
 							versionId: props.request.snapshotVersionId,
 						})}
-						title={T()("view_snapshot")}
+						title={T()("actions.view.snapshot")}
 						class={iconActionClasses}
 					>
 						<FaSolidEye size={11} />
-						<span class="truncate leading-none">{T()("view")}</span>
+						<span class="truncate leading-none">{T()("common.view")}</span>
 					</A>
 				</Show>
 			</div>

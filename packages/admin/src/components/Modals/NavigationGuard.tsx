@@ -19,8 +19,8 @@ const NavigationGuard: Component<NavigationGuardProps> = (props) => {
 				},
 			}}
 			copy={{
-				title: T()("navigation_guard_modal_title"),
-				description: T()("navigation_guard_modal_description"),
+				title: T()("modals.navigation.guard.title"),
+				description: T()("modals.navigation.guard.description"),
 			}}
 			callbacks={{
 				onConfirm: () => {

@@ -1,5 +1,5 @@
+import { serverText } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import T from "../../../translations/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
 const checkDuplicateOrder = (
@@ -17,9 +17,11 @@ const checkDuplicateOrder = (
 		return {
 			error: {
 				type: "basic",
-				name: T("error_saving_bricks"),
-				message: T("error_saving_page_duplicate_order", {
-					order: builderOrderDuplicates.join(", "),
+				name: serverText("core.error.saving.bricks"),
+				message: serverText("core.error.saving.page.duplicate.order", {
+					data: {
+						order: builderOrderDuplicates.join(", "),
+					},
 				}),
 				status: 400,
 			},

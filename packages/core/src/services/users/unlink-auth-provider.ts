@@ -1,10 +1,10 @@
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import {
 	UserAuthProvidersRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { securityAuditServices } from "../index.js";
@@ -48,7 +48,7 @@ const unlinkAuthProvider: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 404,
-					message: T("user_not_found_message"),
+					message: serverText("core.user.not.found.message"),
 				},
 			},
 		}),
@@ -70,8 +70,8 @@ const unlinkAuthProvider: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 404,
-					name: T("auth_provider_link_not_found_name"),
-					message: T("auth_provider_link_not_found_message"),
+					name: serverText("core.auth.providers.link.not.found.name"),
+					message: serverText("core.auth.providers.link.not.found.message"),
 				},
 			},
 		}),
@@ -98,9 +98,9 @@ const unlinkAuthProvider: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				name: T("auth_provider_cannot_remove_last_link_name"),
-				message: T(
-					"auth_provider_cannot_remove_last_link_password_disabled_message",
+				name: serverText("core.auth.providers.cannot.remove.last.link.name"),
+				message: serverText(
+					"core.auth.providers.cannot.remove.last.link.password.disabled.message",
 				),
 			},
 			data: undefined,
@@ -112,8 +112,10 @@ const unlinkAuthProvider: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				name: T("auth_provider_cannot_remove_last_link_name"),
-				message: T("auth_provider_cannot_remove_last_link_no_password_message"),
+				name: serverText("core.auth.providers.cannot.remove.last.link.name"),
+				message: serverText(
+					"core.auth.providers.cannot.remove.last.link.no.password.message",
+				),
 			},
 			data: undefined,
 		};
@@ -138,8 +140,8 @@ const unlinkAuthProvider: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 404,
-					name: T("auth_provider_link_not_found_name"),
-					message: T("auth_provider_link_not_found_message"),
+					name: serverText("core.auth.providers.link.not.found.name"),
+					message: serverText("core.auth.providers.link.not.found.message"),
 				},
 			},
 		}),

@@ -57,7 +57,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 				adapterModule: configResult.definition.adapter.module,
 				databaseModule: configResult.definition.database.module,
 				collections: configResult.config.collections,
-				localization: configResult.config.localization,
+				localization: configResult.config.i18n.content,
 			});
 
 			if (!envValid) {
@@ -80,7 +80,9 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			const viteBuildRes = await vite.buildApp(configResult.config);
 			if (viteBuildRes.error) {
-				cliLogger.error(viteBuildRes.error.message ?? "Failed to build app");
+				cliLogger.error(
+					viteBuildRes.error.message?.default ?? "Failed to build app",
+				);
 				logger.setBuffering(false);
 				rebuilding = false;
 				return;
@@ -98,7 +100,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			]);
 			if (mjmlTemplatesRes.error) {
 				cliLogger.error(
-					mjmlTemplatesRes.error.message ??
+					mjmlTemplatesRes.error.message?.default ??
 						"Failed to pre-render MJML templates",
 				);
 				logger.setBuffering(false);
@@ -107,7 +109,8 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			}
 			if (publicAssetsRes.error) {
 				cliLogger.error(
-					publicAssetsRes.error.message ?? "Failed to copy public assets",
+					publicAssetsRes.error.message?.default ??
+						"Failed to copy public assets",
 				);
 				logger.setBuffering(false);
 				rebuilding = false;

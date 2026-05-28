@@ -34,8 +34,8 @@ const RestoreDocument: Component<RestoreDocumentProps> = (props) => {
 				isError: restoreDocuments.action.isError,
 			}}
 			copy={{
-				title: T()("restore_document_modal_title"),
-				description: T()("restore_document_modal_description"),
+				title: T()("modals.common.restore.document.title"),
+				description: T()("modals.common.restore.document.description"),
 				error: restoreDocuments.errors()?.message,
 			}}
 			callbacks={{

@@ -179,7 +179,7 @@ export function SelectMultiple<
 						</Match>
 						<Match when={props.options.length === 0}>
 							<span class="text-body w-full block px-2 py-1 text-sm">
-								{T()("no_options_available")}
+								{T()("empty.states.options")}
 							</span>
 						</Match>
 					</Switch>

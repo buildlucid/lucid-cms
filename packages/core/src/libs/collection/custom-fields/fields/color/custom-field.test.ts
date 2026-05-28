@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import ColorCustomField from "./custom-field.js";
@@ -10,11 +10,13 @@ import ColorCustomField from "./custom-field.js";
 const ColorCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addColor("standard_color")
@@ -40,7 +42,7 @@ test("successfully validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			translations: ColorCollection.getData.config.translations,
+			localized: ColorCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -61,7 +63,7 @@ test("successfully validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			translations: ColorCollection.getData.config.translations,
+			localized: ColorCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -84,7 +86,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			translations: ColorCollection.getData.config.translations,
+			localized: ColorCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -92,7 +94,10 @@ test("fail to validate field - color", async () => {
 		{
 			key: "standard_color",
 			localeCode: null,
-			message: "Invalid input: expected string, received number", // zod error message
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Invalid input: expected string, received number",
+				priority: "Invalid input: expected string, received number",
+			}),
 		},
 	]);
 
@@ -111,7 +116,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			translations: ColorCollection.getData.config.translations,
+			localized: ColorCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -119,7 +124,7 @@ test("fail to validate field - color", async () => {
 		{
 			key: "required_color",
 			localeCode: null,
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 
@@ -138,7 +143,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			translations: ColorCollection.getData.config.translations,
+			localized: ColorCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -146,7 +151,7 @@ test("fail to validate field - color", async () => {
 		{
 			key: "required_color",
 			localeCode: null,
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 
@@ -165,7 +170,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			translations: ColorCollection.getData.config.translations,
+			localized: ColorCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -173,7 +178,7 @@ test("fail to validate field - color", async () => {
 		{
 			key: "required_color",
 			localeCode: null,
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 });
@@ -183,15 +188,15 @@ test("fail to validate field - color", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new ColorCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			default: "2024-06-15T14:14:21.704Z",
 			hidden: false,
 			disabled: false,

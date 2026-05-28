@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import UserCustomField from "./custom-field.js";
@@ -10,11 +10,13 @@ import UserCustomField from "./custom-field.js";
 const UserCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addUser("standard_user")
@@ -49,15 +51,15 @@ test("successfully validate field - user", async () => {
 				{
 					id: 1,
 					// email: "test@test.com",
-					// first_name: "Test",
-					// last_name: "User",
-					// username: "test-user",
+					// first_name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+					// last_name: adminText("tests.collections.collection.name", { fallback: "User" }),
+					// username: adminText("tests.collections.collection.name", { fallback: "test-user" }),
 				},
 			],
 			document: [],
 		},
 		meta: {
-			translations: UserCollection.getData.config.translations,
+			localized: UserCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -78,15 +80,15 @@ test("successfully validate field - user", async () => {
 				{
 					id: 1,
 					// email: "test@test.com",
-					// first_name: "Test",
-					// last_name: "User",
-					// username: "test-user",
+					// first_name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+					// last_name: adminText("tests.collections.collection.name", { fallback: "User" }),
+					// username: adminText("tests.collections.collection.name", { fallback: "test-user" }),
 				},
 			],
 			document: [],
 		},
 		meta: {
-			translations: UserCollection.getData.config.translations,
+			localized: UserCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -110,7 +112,7 @@ test("fail to validate field - user", async () => {
 				document: [],
 			},
 			meta: {
-				translations: UserCollection.getData.config.translations,
+				localized: UserCollection.getData.config.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -128,7 +130,7 @@ test("fail to validate field - user", async () => {
 				document: [],
 			},
 			meta: {
-				translations: UserCollection.getData.config.translations,
+				localized: UserCollection.getData.config.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -138,7 +140,7 @@ test("fail to validate field - user", async () => {
 			{
 				key: "required_user",
 				localeCode: null,
-				message: T("field_user_not_found"),
+				message: serverText("core.fields.user.validation.not.found"),
 				itemIndex: 0,
 			},
 		],
@@ -146,7 +148,7 @@ test("fail to validate field - user", async () => {
 			{
 				key: "required_user",
 				localeCode: null,
-				message: T("generic_field_required"),
+				message: serverText("core.fields.validation.required"),
 			},
 		],
 	});
@@ -167,7 +169,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			translations: UserCollection.getData.config.translations,
+			localized: UserCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -185,7 +187,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			translations: UserCollection.getData.config.translations,
+			localized: UserCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -203,7 +205,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			translations: UserCollection.getData.config.translations,
+			localized: UserCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -212,8 +214,10 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: T("field_relation_min_items", {
-				min: 2,
+			message: serverText("core.fields.relation.validation.min.items", {
+				data: {
+					min: 2,
+				},
 			}),
 		},
 	]);
@@ -221,8 +225,10 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: T("field_relation_max_items", {
-				max: 3,
+			message: serverText("core.fields.relation.validation.max.items", {
+				data: {
+					max: 3,
+				},
 			}),
 		},
 	]);
@@ -230,13 +236,13 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: T("field_user_not_found"),
+			message: serverText("core.fields.user.validation.not.found"),
 			itemIndex: 1,
 		},
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: T("field_user_not_found"),
+			message: serverText("core.fields.user.validation.not.found"),
 			itemIndex: 2,
 		},
 	]);
@@ -247,15 +253,15 @@ test("user field validates multiple item counts and indexed errors", async () =>
 test("custom field config passes schema validation", async () => {
 	const field = new UserCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			hidden: false,
 			disabled: false,
 		},

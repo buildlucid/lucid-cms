@@ -4,7 +4,6 @@ import { describeRoute } from "hono-openapi";
 import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
-import T from "../../../../../translations/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
@@ -12,6 +11,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
@@ -56,8 +56,8 @@ const acceptInvitationController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_accept_invitation_error_name"),
-					message: T("route_accept_invitation_error_message"),
+					name: serverText("core.routes.accept.invitation.error.name"),
+					message: serverText("core.routes.accept.invitation.error.message"),
 				},
 			},
 		)(context, {

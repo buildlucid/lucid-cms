@@ -1,7 +1,7 @@
 import constants from "../../../constants/constants.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import { AuthStatesRepository } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import urlAddPath from "../../../utils/helpers/url-add-path.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -53,7 +53,7 @@ const authRedirectUrl: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 400,
-				message: T("invalid_or_expired_state_message"),
+				message: serverText("core.invalid.or.expired.state.message"),
 			},
 		},
 	});

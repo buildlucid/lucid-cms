@@ -42,7 +42,7 @@ const ViewShareLinksPanel: Component<ViewShareLinksPanelProps> = (props) => {
 	// Memos
 	const panelContent = createMemo(() => {
 		return {
-			title: T()("view_share_links_panel_title"),
+			title: T()("panels.media.share.links.view.title"),
 		};
 	});
 
@@ -157,12 +157,12 @@ const ViewShareLinksPanelContent: Component<{
 						<Filter
 							filters={[
 								{
-									label: T()("name"),
+									label: T()("common.name"),
 									key: "name",
 									type: "text",
 								},
 								{
-									label: T()("token"),
+									label: T()("common.token"),
 									key: "token",
 									type: "text",
 								},
@@ -172,15 +172,15 @@ const ViewShareLinksPanelContent: Component<{
 						<Sort
 							sorts={[
 								{
-									label: T()("name"),
+									label: T()("common.name"),
 									key: "name",
 								},
 								{
-									label: T()("expires_at"),
+									label: T()("common.expires.at"),
 									key: "expiresAt",
 								},
 								{
-									label: T()("created_at"),
+									label: T()("common.created.at"),
 									key: "createdAt",
 								},
 							]}
@@ -215,8 +215,8 @@ const ViewShareLinksPanelContent: Component<{
 					}}
 					copy={{
 						noEntries: {
-							title: T()("no_share_links"),
-							description: T()("no_share_links_description"),
+							title: T()("empty.states.media.share.links.title"),
+							description: T()("empty.states.media.share.links.description"),
 						},
 					}}
 				>
@@ -226,34 +226,34 @@ const ViewShareLinksPanelContent: Component<{
 						searchParams={shareLinksSearchParams}
 						head={[
 							{
-								label: T()("url"),
+								label: T()("common.url"),
 								key: "url",
 								icon: <FaSolidLink />,
 							},
 							{
-								label: T()("name"),
+								label: T()("common.name"),
 								key: "name",
 								icon: <FaSolidT />,
 								sortable: true,
 							},
 							{
-								label: T()("has_password"),
+								label: T()("common.has.password"),
 								key: "hasPassword",
 								icon: <FaSolidLock />,
 							},
 							{
-								label: T()("expires_at"),
+								label: T()("common.expires.at"),
 								key: "expiresAt",
 								icon: <FaSolidCalendar />,
 								sortable: true,
 							},
 							{
-								label: T()("has_expired"),
+								label: T()("common.has.expired"),
 								key: "hasExpired",
 								icon: <FaSolidClock />,
 							},
 							{
-								label: T()("created_at"),
+								label: T()("common.created.at"),
 								key: "createdAt",
 								icon: <FaSolidCalendar />,
 								sortable: true,

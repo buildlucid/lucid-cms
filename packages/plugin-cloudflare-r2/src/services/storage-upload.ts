@@ -1,6 +1,6 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { DEFAULT_MAX_UPLOAD_SIZE, STORAGE_UPLOAD_PATH } from "../constants.js";
-import T from "../translations/index.js";
 import type { PluginOptions } from "../types.js";
 import { createFixedLengthStream } from "../utils/create-fixed-length-stream.js";
 import { validateSignedMediaUrl } from "../utils/signed-media-url.js";
@@ -10,8 +10,10 @@ const buildFileTooLargeError = (maxUploadSize: number) => ({
 	error: {
 		type: "basic" as const,
 		status: 413,
-		message: T("file_too_large_max_size_is", {
-			size: String(maxUploadSize),
+		message: serverText("plugin.cloudflare.r2.upload.file.too.large", {
+			data: {
+				size: String(maxUploadSize),
+			},
 		}),
 	},
 	data: undefined,
@@ -21,7 +23,9 @@ const buildMissingContentLengthError = () => ({
 	error: {
 		type: "basic" as const,
 		status: 411,
-		message: T("missing_content_length_header"),
+		message: serverText(
+			"plugin.cloudflare.r2.upload.headers.content.length.missing",
+		),
 	},
 	data: undefined,
 });
@@ -60,7 +64,9 @@ const storageUpload =
 				error: {
 					type: "basic",
 					status: 403,
-					message: T("invalid_or_expired_signed_url"),
+					message: serverText(
+						"plugin.cloudflare.r2.signed.urls.invalid.or.expired",
+					),
 				},
 				data: undefined,
 			};
@@ -71,7 +77,7 @@ const storageUpload =
 				error: {
 					type: "basic",
 					status: 400,
-					message: T("missing_upload_body"),
+					message: serverText("plugin.cloudflare.r2.upload.body.missing"),
 				},
 				data: undefined,
 			};
@@ -124,10 +130,10 @@ const storageUpload =
 			return {
 				error: {
 					type: "plugin",
-					message:
-						streamError instanceof Error
-							? streamError.message
-							: T("an_unknown_error_occurred"),
+					message: serverText("plugin.cloudflare.r2.errors.unknown", {
+						fallback:
+							streamError instanceof Error ? streamError.message : undefined,
+					}),
 				},
 				data: undefined,
 			};
@@ -137,10 +143,10 @@ const storageUpload =
 			return {
 				error: {
 					type: "plugin",
-					message:
-						uploadError instanceof Error
-							? uploadError.message
-							: T("an_unknown_error_occurred"),
+					message: serverText("plugin.cloudflare.r2.errors.unknown", {
+						fallback:
+							uploadError instanceof Error ? uploadError.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

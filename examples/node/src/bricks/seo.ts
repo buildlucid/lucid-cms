@@ -1,18 +1,24 @@
-import { BrickBuilder } from "@lucidcms/core";
+import { adminText, BrickBuilder } from "@lucidcms/core";
 
 const SeoBrick = new BrickBuilder("seo", {
 	details: {
-		name: "SEO",
+		name: adminText("bricks.seo.name", {
+			fallback: "SEO",
+		}),
 	},
 })
 	.addText("metaTitle", {
 		details: {
-			label: "Meta Title",
+			label: adminText("bricks.seo.fields.metaTitle.label", {
+				fallback: "Meta Title",
+			}),
 		},
 	})
 	.addTextarea("metaDescription", {
 		details: {
-			label: "Meta Description",
+			label: adminText("bricks.seo.fields.metaDescription.label", {
+				fallback: "Meta Description",
+			}),
 		},
 	});
 

@@ -211,20 +211,20 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 						<div class="w-full h-full flex justify-center items-center flex-col p-4 md:p-6">
 							<FaSolidArrowUpFromBracket class="w-7 h-7 mx-auto text-unfocused mb-5" />
 							<p class="text-center text-base font-medium text-subtitle">
-								{T()("drag_and_drop_file_or")}{" "}
+								{T()("media.upload.drop.or")}{" "}
 								<button
 									type="button"
 									onClick={openFileBrowser}
 									class="text-primary-base font-medium"
 								>
-									{T()("upload_here")}
+									{T()("media.upload.drop.here")}
 								</button>
 							</p>
 							<Show when={props.currentFile !== undefined}>
 								<div class="mt-5 text-center flex flex-col items-center">
 									<Show when={props.disableRemoveCurrent !== true}>
 										<p class="text-sm">
-											{T()("if_left_blank_file_will_be_removed")}
+											{T()("media.file.blank.removes.file.help")}
 										</p>
 									</Show>
 
@@ -236,7 +236,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 										<FaSolidArrowRotateLeft class="mr-2 text-sm" />
 										<Switch fallback={"keep current file"}>
 											<Match when={props.disableRemoveCurrent === true}>
-												{T()("back_to_current_file")}
+												{T()("media.file.back.to.current")}
 											</Match>
 										</Switch>
 									</button>
@@ -431,7 +431,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 						}}
 					>
 						<FaSolidMagnifyingGlass class="block md:mr-2 text-current" />
-						<span class="hidden md:inline">{T()("preview")}</span>
+						<span class="hidden md:inline">{T()("common.preview")}</span>
 					</button>
 				</Show>
 				<Show when={showFocalPoint()}>
@@ -441,7 +441,9 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 						onClick={() => setFocalEditorOpen(true)}
 					>
 						<FaSolidBullseye class="block md:mr-2 text-current" />
-						<span class="hidden md:inline">{T()("focal_point")}</span>
+						<span class="hidden md:inline">
+							{T()("media.focal.point.label")}
+						</span>
 					</button>
 				</Show>
 				<button
@@ -452,7 +454,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					}}
 				>
 					<FaSolidArrowUpFromBracket class="block md:mr-2 text-current" />
-					<span class="hidden md:inline">{T()("choose_file")}</span>
+					<span class="hidden md:inline">{T()("media.file.choose")}</span>
 				</button>
 				<Show when={props.actions.clearFile !== undefined}>
 					<button
@@ -464,7 +466,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 						}}
 					>
 						<FaSolidXmark class="block md:mr-2 text-current" />
-						<span class="hidden md:inline">{T()("remove")}</span>
+						<span class="hidden md:inline">{T()("common.remove")}</span>
 					</button>
 				</Show>
 			</div>

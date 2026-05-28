@@ -1,10 +1,10 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type {
 	FieldError,
 	FieldInputSchema,
 	ServiceResponse,
 } from "@lucidcms/core/types";
 import constants from "../../constants.js";
-import T from "../../translations/index.js";
 import type { CollectionConfig } from "../../types/types.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 
@@ -21,14 +21,14 @@ const checkRootSlugWithParent = (data: {
 }): Awaited<ServiceResponse<undefined>> => {
 	const parentPageId = getParentPageId(data.fields.parentPage);
 
-	if (data.collection.translations && data.fields.slug.translations) {
+	if (data.collection.localized && data.fields.slug.translations) {
 		const fieldErrors: FieldError[] = [];
 		for (const [key, value] of Object.entries(data.fields.slug.translations)) {
 			if (value === "/" && parentPageId !== null) {
 				fieldErrors.push({
 					key: constants.fields.slug.key,
 					localeCode: key,
-					message: T("slug_cannot_be_slash_and_parent_page_set_message"),
+					message: serverText("plugin.pages.slug.root.with.parent.denied"),
 				});
 			}
 		}
@@ -37,7 +37,7 @@ const checkRootSlugWithParent = (data: {
 				error: {
 					type: "basic",
 					status: 400,
-					message: T("slug_cannot_be_slash_and_parent_page_set_message"),
+					message: serverText("plugin.pages.slug.root.with.parent.denied"),
 					errors: {
 						fields: fieldErrors,
 					},
@@ -50,12 +50,12 @@ const checkRootSlugWithParent = (data: {
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("slug_cannot_be_slash_and_parent_page_set_message"),
+				message: serverText("plugin.pages.slug.root.with.parent.denied"),
 				errors: {
 					fields: [
 						{
 							key: constants.fields.parentPage.key,
-							message: T("slug_cannot_be_slash_and_parent_page_set_message"),
+							message: serverText("plugin.pages.slug.root.with.parent.denied"),
 						},
 					],
 				},

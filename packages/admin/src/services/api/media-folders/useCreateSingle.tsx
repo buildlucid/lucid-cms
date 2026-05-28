@@ -30,8 +30,8 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: createSingleReq,
 		getSuccessToast: () => ({
-			title: T()("media_folder_create_toast_title"),
-			message: T()("media_folder_create_toast_message"),
+			title: T()("toasts.media.folder.create.title"),
+			message: T()("toasts.media.folder.create.message"),
 		}),
 		invalidates: ["mediaFolders.getMultiple", "mediaFolders.getHierarchy"],
 		onSuccess: props?.onSuccess,

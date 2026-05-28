@@ -77,7 +77,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 					<ActionDropdown
 						actions={[
 							{
-								label: T()("restore"),
+								label: T()("common.restore"),
 								type: "button",
 								onClick: () => {
 									props.rowTarget?.setTargetId(props.media.id);
@@ -88,7 +88,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 								theme: "primary",
 							},
 							{
-								label: T()("clear_processed"),
+								label: T()("media.processed.clear.action"),
 								type: "button",
 								onClick: () => {
 									props.rowTarget?.setTargetId(props.media.id);
@@ -136,7 +136,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 						/>
 					</Show>
 					<h3 class="line-clamp-1 text-sm flex-1">
-						{displayTitle() || T()("no_translation")}
+						{displayTitle() || T()("empty.states.translation")}
 					</h3>
 				</div>
 			</div>

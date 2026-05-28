@@ -93,7 +93,7 @@ export const MediaFolderCard: Component<{
 				<ActionDropdown
 					actions={[
 						{
-							label: T()("edit"),
+							label: T()("common.edit"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.folder.id);
@@ -133,8 +133,8 @@ export const MediaFolderCard: Component<{
 					</p>
 				</div>
 				<p class="text-sm text-body">
-					{props.folder.folderCount} {T()("folders")}, {props.folder.mediaCount}{" "}
-					{T()("media")}
+					{props.folder.folderCount} {T()("common.folders")},{" "}
+					{props.folder.mediaCount} {T()("common.media")}
 				</p>
 			</div>
 		</li>

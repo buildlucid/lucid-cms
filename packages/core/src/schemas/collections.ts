@@ -1,4 +1,5 @@
 import z from "zod";
+import { adminTextSchema } from "../libs/i18n/admin-text.js";
 import type { ControllerSchema } from "../types.js";
 import { brickConfigSchema } from "./collection-bricks.js";
 import { fieldConfigSchema } from "./collection-fields.js";
@@ -42,22 +43,34 @@ const collectionResponseSchema = z.object({
 		})
 		.optional(),
 	details: z.object({
-		name: z.any().meta({
+		name: adminTextSchema.meta({
 			description: "Display name for the collection",
-			example: "Pages",
+			example: {
+				type: "admin-text",
+				key: "collections.page.name",
+				fallback: "Pages",
+			},
 		}),
-		singularName: z.any().meta({
+		singularName: adminTextSchema.meta({
 			description: "Singular display name for items in the collection",
-			example: { en: "Page" },
+			example: {
+				type: "admin-text",
+				key: "collections.page.singularName",
+				fallback: "Page",
+			},
 		}),
-		summary: z.any().nullable().meta({
+		summary: adminTextSchema.nullable().meta({
 			description: "Description text for the collection",
-			example: "Manage the pages and content on your website.",
+			example: {
+				type: "admin-text",
+				key: "collections.page.summary",
+				fallback: "Manage the pages and content on your website.",
+			},
 		}),
 	}),
 	config: z.object({
-		translations: z.boolean().meta({
-			description: "Whether the collection supports translations",
+		localized: z.boolean().meta({
+			description: "Whether the collection supports localized content",
 			example: true,
 		}),
 		revisions: z.boolean().meta({
@@ -97,7 +110,7 @@ const collectionResponseSchema = z.object({
 				stages: z.array(
 					z.object({
 						key: z.string(),
-						name: z.any(),
+						name: adminTextSchema,
 						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
 						publishTargets: z.array(z.string()),
 						permissions: z.object({
@@ -118,9 +131,13 @@ const collectionResponseSchema = z.object({
 					description: "The environment key",
 					example: "production",
 				}),
-				name: z.any().meta({
+				name: adminTextSchema.meta({
 					description: "Display name for the environment",
-					example: { en: "Production" },
+					example: {
+						type: "admin-text",
+						key: "collections.page.environments.production.name",
+						fallback: "Production",
+					},
 				}),
 				permissions: z.object({
 					publish: z.string().meta({

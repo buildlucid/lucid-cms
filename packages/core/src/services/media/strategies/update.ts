@@ -1,5 +1,5 @@
-import T from "../../../translations/index.js";
-import type { LucidErrorData } from "../../../types/errors.js";
+import { serverText } from "../../../libs/i18n/index.js";
+import type { ErrorText, LucidErrorData } from "../../../types/errors.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -104,16 +104,23 @@ const update: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: T("file_exceeds_storage_limit_max_limit_is", {
-					size: formatBytes(storageLimit),
+				message: serverText("core.files.validation.storage.limit.exceeded", {
+					data: {
+						size: formatBytes(storageLimit),
+					},
 				}),
 				status: 500,
 				errors: {
 					file: {
 						code: "storage",
-						message: T("file_exceeds_storage_limit_max_limit_is", {
-							size: formatBytes(storageLimit),
-						}),
+						message: serverText(
+							"core.files.validation.storage.limit.exceeded",
+							{
+								data: {
+									size: formatBytes(storageLimit),
+								},
+							},
+						),
 					},
 				},
 			},
@@ -145,7 +152,7 @@ const update: ServiceFn<
 	};
 
 	const failUpdate = async (
-		message: string,
+		message: ErrorText,
 	): Promise<{ error: LucidErrorData; data: undefined }> => {
 		await revertStorageDelta(delta);
 
@@ -172,7 +179,7 @@ const update: ServiceFn<
 		if (updatedStreamRes.error) {
 			await cleanupUpdatedKey();
 			return await failUpdate(
-				updatedStreamRes.error.message ?? T("an_unknown_error_occurred"),
+				updatedStreamRes.error.message ?? serverText("core.errors.unknown"),
 			);
 		}
 
@@ -201,7 +208,7 @@ const update: ServiceFn<
 			await cleanupUpdatedKey();
 
 			return await failUpdate(
-				uploadRes.error?.message ?? T("an_unknown_error_occurred"),
+				uploadRes.error?.message ?? serverText("core.errors.unknown"),
 			);
 		}
 
@@ -235,7 +242,7 @@ const update: ServiceFn<
 		const targetVerified = await getVerifiedTargetMeta();
 		if (!targetVerified) {
 			return await failUpdate(
-				promoteRes.error.message ?? T("an_unknown_error_occurred"),
+				promoteRes.error.message ?? serverText("core.errors.unknown"),
 			);
 		}
 
@@ -283,7 +290,7 @@ const update: ServiceFn<
 
 	const targetMeta = await getVerifiedTargetMeta();
 	if (!targetMeta) {
-		return await failUpdate(T("an_unknown_error_occurred"));
+		return await failUpdate(serverText("core.errors.unknown"));
 	}
 
 	if (data.targetKey !== data.previousKey) {

@@ -1,6 +1,6 @@
 import formatter from "../../../libs/formatters/index.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkNotLastUser: ServiceFn<[], undefined> = async (context) => {
@@ -22,7 +22,7 @@ const checkNotLastUser: ServiceFn<[], undefined> = async (context) => {
 		return {
 			error: {
 				type: "basic",
-				message: T("error_cant_delete_last_user"),
+				message: serverText("core.users.last.user.delete.denied"),
 				status: 400,
 			},
 			data: undefined,

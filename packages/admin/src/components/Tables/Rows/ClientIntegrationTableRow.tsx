@@ -31,7 +31,7 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 			callbacks={props.callbacks}
 			actions={[
 				{
-					label: T()("update"),
+					label: T()("common.update"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.clientIntegration.id);
@@ -42,7 +42,7 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 					]).all,
 				},
 				{
-					label: T()("regenerate_api_key"),
+					label: T()("client.integrations.api.keys.regenerate.action"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.clientIntegration.id);
@@ -55,7 +55,7 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 					actionExclude: true,
 				},
 				{
-					label: T()("delete"),
+					label: T()("common.delete"),
 					type: "button",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.clientIntegration.id);
@@ -70,7 +70,11 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 			]}
 		>
 			<PillCol
-				text={props.clientIntegration.enabled ? T()("active") : T()("inactive")}
+				text={
+					props.clientIntegration.enabled
+						? T()("common.status.active")
+						: T()("common.status.inactive")
+				}
 				theme={
 					props.clientIntegration.enabled ? "primary-opaque" : "error-opaque"
 				}

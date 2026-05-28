@@ -1,6 +1,6 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceListUploadParts } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
-import T from "../../translations/index.js";
 import type { PluginOptions } from "../../types.js";
 import { objectUrl, parseParts } from "./helpers.js";
 
@@ -18,7 +18,9 @@ export const listUploadParts = (
 				return {
 					error: {
 						type: "plugin",
-						message: T("http_fallback_not_configured"),
+						message: serverText(
+							"plugin.cloudflare.r2.http.fallback.not.configured",
+						),
 					},
 					data: undefined,
 				};
@@ -28,7 +30,9 @@ export const listUploadParts = (
 				return {
 					error: {
 						type: "plugin",
-						message: T("http_client_not_configured"),
+						message: serverText(
+							"plugin.cloudflare.r2.http.client.not.configured",
+						),
 					},
 					data: undefined,
 				};
@@ -48,10 +52,15 @@ export const listUploadParts = (
 				return {
 					error: {
 						type: "plugin",
-						message: T("list_parts_failed", {
-							status: response.status,
-							statusText: response.statusText,
-						}),
+						message: serverText(
+							"plugin.cloudflare.r2.upload.sessions.parts.list.failed",
+							{
+								data: {
+									status: response.status,
+									statusText: response.statusText,
+								},
+							},
+						),
 					},
 					data: undefined,
 				};
@@ -64,10 +73,9 @@ export const listUploadParts = (
 			return {
 				error: {
 					type: "plugin",
-					message:
-						error instanceof Error
-							? error.message
-							: T("an_unknown_error_occurred"),
+					message: serverText("plugin.cloudflare.r2.errors.unknown", {
+						fallback: error instanceof Error ? error.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

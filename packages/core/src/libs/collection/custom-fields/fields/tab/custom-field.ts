@@ -1,4 +1,5 @@
 import type { ServiceResponse } from "../../../../../types.js";
+import { adminText } from "../../../../i18n/admin-text.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -29,7 +30,11 @@ class TabCustomField extends CustomField<"tab"> {
 			key: this.key,
 			type: this.type,
 			details: {
-				label: this.props?.details?.label ?? keyToTitle(this.key),
+				label:
+					this.props?.details?.label ??
+					adminText(`fields.${this.type}.${this.key}.label`, {
+						fallback: keyToTitle(this.key),
+					}),
 				summary: this.props?.details?.summary,
 			},
 			fields: [],

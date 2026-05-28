@@ -70,11 +70,11 @@ const ResetPasswordRoute: Component = () => {
 				<ErrorBlock
 					content={{
 						image: notifyIllustration,
-						title: T()("token_provided_invalid"),
-						description: T()("token_provided_invalid_description"),
+						title: T()("auth.tokens.invalid.title"),
+						description: T()("auth.tokens.invalid.description"),
 					}}
 					link={{
-						text: T()("back_to_login"),
+						text: T()("common.back.to.login"),
 						href: "/lucid/login",
 					}}
 				/>
@@ -87,9 +87,11 @@ const ResetPasswordRoute: Component = () => {
 				}
 			>
 				<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
-				<h1 class="mb-1 text-center">{T()("reset_password_route_title")}</h1>
+				<h1 class="mb-1 text-center">
+					{T()("routes.auth.reset.password.title")}
+				</h1>
 				<p class="text-center max-w-sm mx-auto">
-					{T()("reset_password_route_description")}
+					{T()("routes.auth.reset.password.description")}
 				</p>
 				<div class="my-10">
 					<ResetPasswordForm token={token as string} />

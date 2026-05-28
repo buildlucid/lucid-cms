@@ -1,16 +1,16 @@
 import type { ZodType } from "zod";
-import type { LocaleValue } from "../../../../../types/shared.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface NumberFieldConfig extends SharedFieldConfig {
 	type: "number";
 	details: {
-		label?: LocaleValue;
-		summary?: LocaleValue;
-		placeholder?: LocaleValue;
+		label?: AdminText;
+		summary?: AdminText;
+		placeholder?: AdminText;
 	};
 	config: {
-		translations?: boolean;
+		localized?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
 		index?: true;

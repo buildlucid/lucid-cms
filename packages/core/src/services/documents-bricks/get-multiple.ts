@@ -8,8 +8,8 @@ import {
 	documentBricksFormatter,
 	documentsFormatter,
 } from "../../libs/formatters/index.js";
+import { serverText } from "../../libs/i18n/index.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type {
 	InternalCollectionDocument,
 	InternalDocumentBrick,
@@ -79,7 +79,7 @@ const getMultiple: ServiceFn<
 		return {
 			error: {
 				status: 404,
-				message: T("document_version_not_found_message"),
+				message: serverText("core.documents.version.not.found.message"),
 			},
 			data: undefined,
 		};

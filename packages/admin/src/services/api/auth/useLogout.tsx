@@ -38,8 +38,8 @@ const useLogout = (props?: UseLogoutProps) => {
 	>({
 		mutationFn: logoutReq,
 		getSuccessToast: () => ({
-			title: T()("logout_success_toast_title"),
-			message: T()("logout_success_toast_message"),
+			title: T()("toasts.common.logout.success.title"),
+			message: T()("toasts.common.logout.success.message"),
 		}),
 		invalidates: ["roles.getMultiple", "roles.getSingle"],
 		onSuccess: () => {

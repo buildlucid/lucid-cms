@@ -76,11 +76,11 @@ const MoveToFolder: Component<{
 			}}
 			copy={{
 				title: isMedia()
-					? T()("move_media_modal_title")
-					: T()("move_folder_modal_title"),
+					? T()("modals.common.move.media.title")
+					: T()("modals.common.move.folder.title"),
 				description: isMedia()
-					? T()("move_media_modal_description")
-					: T()("move_folder_modal_description"),
+					? T()("modals.common.move.media.description")
+					: T()("modals.common.move.folder.description"),
 				error: errorMessage(),
 			}}
 			callbacks={{

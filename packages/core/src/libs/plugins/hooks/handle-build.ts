@@ -5,6 +5,7 @@ import type {
 import type { Config } from "../../../types/config.js";
 import type { ServiceResponse } from "../../../types.js";
 import cliLogger from "../../cli/logger.js";
+import { serverText } from "../../i18n/index.js";
 
 /**
  * Responsible for running the plugin build hooks and collecting artifacts
@@ -36,7 +37,7 @@ const handlePluginBuildHooks = async (props: {
 				});
 				if (res.error) {
 					cliLogger.error(
-						res.error.message ??
+						res.error.message?.default ??
 							`An unknown error occurred while building the ${plugin.key} plugin`,
 						{
 							silent,
@@ -56,10 +57,12 @@ const handlePluginBuildHooks = async (props: {
 	} catch (error) {
 		return {
 			error: {
-				message:
-					error instanceof Error
-						? error.message
-						: "An unknown error occurred while building the plugins",
+				message: serverText("core.plugins.build.failed", {
+					fallback:
+						error instanceof Error
+							? error.message
+							: "An unknown error occurred while building the plugins",
+				}),
 				status: 500,
 			},
 			data: undefined,

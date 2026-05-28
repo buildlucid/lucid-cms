@@ -64,11 +64,11 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		} catch (error) {
 			setUploadErrors({
 				status: 500,
-				name: T()("media_upload_error"),
+				name: T()("media.upload.error.title"),
 				message:
 					error instanceof Error
 						? error.message
-						: T()("media_upload_error_description"),
+						: T()("media.upload.error.description"),
 			});
 			return null;
 		} finally {

@@ -1,6 +1,6 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceAbortUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
-import T from "../../translations/index.js";
 import type { PluginOptions } from "../../types/types.js";
 import { objectUrl } from "./helpers.js";
 
@@ -29,9 +29,11 @@ export const abortUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: T("delete_failed", {
-							status: response.status,
-							statusText: response.statusText,
+						message: serverText("plugin.s3.objects.delete.failed", {
+							data: {
+								status: response.status,
+								statusText: response.statusText,
+							},
 						}),
 					},
 					data: undefined,
@@ -46,10 +48,9 @@ export const abortUploadSession = (
 			return {
 				error: {
 					type: "plugin",
-					message:
-						error instanceof Error
-							? error.message
-							: T("an_unknown_error_occurred"),
+					message: serverText("plugin.s3.errors.unknown", {
+						fallback: error instanceof Error ? error.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

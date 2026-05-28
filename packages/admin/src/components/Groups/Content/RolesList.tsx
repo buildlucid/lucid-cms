@@ -71,8 +71,8 @@ export const RolesList: Component<{
 			}}
 			copy={{
 				noEntries: {
-					title: T()("no_roles"),
-					description: T()("no_roles_description"),
+					title: T()("empty.states.roles.title"),
+					description: T()("empty.states.roles.description"),
 					button: T()(Permissions.RolesCreate),
 				},
 			}}
@@ -88,24 +88,24 @@ export const RolesList: Component<{
 				searchParams={props.state.searchParams}
 				head={[
 					{
-						label: T()("name"),
+						label: T()("common.name"),
 						key: "name",
 						icon: <FaSolidT />,
 						sortable: true,
 					},
 					{
-						label: T()("status"),
+						label: T()("common.status"),
 						key: "locked",
 						icon: <FaSolidLock />,
 					},
 					{
-						label: T()("created_at"),
+						label: T()("common.created.at"),
 						key: "createdAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,
 					},
 					{
-						label: T()("updated_at"),
+						label: T()("common.updated.at"),
 						key: "updatedAt",
 						icon: <FaSolidCalendar />,
 					},

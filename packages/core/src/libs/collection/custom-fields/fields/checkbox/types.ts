@@ -1,16 +1,16 @@
-import type { LocaleValue } from "../../../../../types/shared.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface CheckboxFieldConfig extends SharedFieldConfig {
 	type: "checkbox";
 	details: {
-		label?: LocaleValue;
-		summary?: LocaleValue;
-		true?: LocaleValue;
-		false?: LocaleValue;
+		label?: AdminText;
+		summary?: AdminText;
+		true?: AdminText;
+		false?: AdminText;
 	};
 	config: {
-		translations?: boolean;
+		localized?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
 		index?: true;

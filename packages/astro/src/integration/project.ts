@@ -151,7 +151,7 @@ export const prepareAssetSourceTree = async (
 	if (publicResult.error) {
 		throw new LucidError({
 			message:
-				publicResult.error.message ??
+				publicResult.error.message?.default ??
 				"Lucid Astro integration could not prepare the Lucid public assets.",
 		});
 	}
@@ -166,7 +166,7 @@ export const prepareAssetSourceTree = async (
 	if (spaResult.error) {
 		throw new LucidError({
 			message:
-				spaResult.error.message ??
+				spaResult.error.message?.default ??
 				"Lucid Astro integration could not prepare the Lucid SPA assets.",
 		});
 	}

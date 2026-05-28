@@ -3,7 +3,7 @@ import type { VersionFieldsQueryResponse } from "../services/get-document-versio
 
 const fieldResToSchema = (
 	key: string,
-	translations: boolean,
+	localized: boolean,
 	defaultLocale: string,
 	items: VersionFieldsQueryResponse[],
 	relationCollectionKey?: string,
@@ -20,7 +20,7 @@ const fieldResToSchema = (
 		type: fieldType,
 	};
 
-	if (translations) {
+	if (localized) {
 		result.translations = {};
 
 		for (const item of items) {

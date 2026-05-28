@@ -1,5 +1,5 @@
-import T from "../../translations/index.js";
 import type { ServiceResponse } from "../../types.js";
+import { serverText } from "../i18n/index.js";
 import createOIDCAdapter from "./adapters/oidc-adapter.js";
 import type { AuthAdapter, AuthProvider, OIDCAuthConfig } from "./types.js";
 
@@ -20,8 +20,8 @@ export const getAuthProviderAdapter = (
 				error: {
 					type: "basic",
 					status: 500,
-					name: T("provider_not_found_name"),
-					message: T("provider_not_found_message"),
+					name: serverText("core.auth.providers.not.found.name"),
+					message: serverText("core.auth.providers.not.found.message"),
 				},
 				data: undefined,
 			};

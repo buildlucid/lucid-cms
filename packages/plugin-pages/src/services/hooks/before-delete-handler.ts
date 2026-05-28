@@ -54,7 +54,7 @@ const beforeDeleteHandler =
 
 			const docFullSlugsRes = constructChildFullSlug({
 				descendants: descendantsRes.data,
-				localization: context.config.localization,
+				localization: context.config.i18n.content,
 				collection: targetCollectionRes.data,
 			});
 			if (docFullSlugsRes.error) return docFullSlugsRes;

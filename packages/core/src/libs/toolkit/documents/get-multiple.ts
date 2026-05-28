@@ -53,7 +53,16 @@ const getMultiple = async <TCollectionKey extends CollectionDocumentKey>(
 				status,
 				query: normalizePaginatedDocumentQuery(input.query),
 			}),
-		"Lucid toolkit could not fetch multiple documents.",
+		{
+			name: {
+				key: "core.toolkit.documents.get.multiple.error.name",
+				fallback: "Documents Toolkit Error",
+			},
+			message: {
+				key: "core.toolkit.documents.get.multiple.error.message",
+				fallback: "Lucid toolkit could not fetch multiple documents.",
+			},
+		},
 	);
 };
 

@@ -220,7 +220,9 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					<Match when={selectedMediaIds().length === 0}>
 						<Show when={isMultiple()}>
 							<div class="min-h-42 flex items-center justify-center dotted-background border-dashed border-border rounded-md border">
-								<p class="text-sm text-unfocused">{T()("nothing_selected")}</p>
+								<p class="text-sm text-unfocused">
+									{T()("common.nothing.selected")}
+								</p>
 							</div>
 						</Show>
 						<div
@@ -236,7 +238,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								disabled={props.disabled || !canAddMore()}
 								classes="capitalize"
 							>
-								{T()("select_media", {
+								{T()("media.select.action", {
 									type: props.type || "media",
 								})}
 							</Button>
@@ -248,7 +250,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								disabled={props.disabled || !canAddMore()}
 								classes="capitalize"
 							>
-								{T()("upload_media")}
+								{T()("media.upload.action")}
 							</Button>
 						</div>
 					</Match>
@@ -270,13 +272,19 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									>
 										<div class="flex flex-wrap items-center gap-2">
 											<Show when={primarySelectedMedia()?.isDeleted}>
-												<Pill theme="red" tooltip={T()("deleted_pill_tooltip")}>
-													{T()("deleted")}
+												<Pill
+													theme="red"
+													tooltip={T()("common.status.deleted.tooltip")}
+												>
+													{T()("common.status.deleted")}
 												</Pill>
 											</Show>
 											<Show when={!primarySelectedMedia()?.public}>
-												<Pill theme="red" tooltip={T()("private_pill_tooltip")}>
-													{T()("private")}
+												<Pill
+													theme="red"
+													tooltip={T()("media.visibility.private.tooltip")}
+												>
+													{T()("common.private")}
 												</Pill>
 											</Show>
 										</div>
@@ -321,7 +329,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								<div class="flex items-start gap-2 min-w-0">
 									<div class="min-w-0">
 										<p class="text-sm text-subtitle font-medium line-clamp-1">
-											{mediaTitle() || T()("no_translation")}
+											{mediaTitle() || T()("empty.states.translation")}
 										</p>
 										<div class=" border-t-0flex items-center gap-2 min-w-0">
 											<ClickToCopy
@@ -340,7 +348,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										size="icon-subtle"
 										onClick={openMediaSelectModal}
 										disabled={props.disabled}
-										aria-label={T()("select_new_media", {
+										aria-label={T()("media.select.new", {
 											type: props.type || "media",
 										})}
 									>
@@ -352,7 +360,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										size="icon-subtle"
 										onClick={clearSelection}
 										disabled={props.disabled}
-										aria-label={T()("remove_media", {
+										aria-label={T()("media.remove.action", {
 											type: props.type || "media",
 										})}
 									>
@@ -381,7 +389,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 																media={media()}
 																title={
 																	getMediaTitle(media()) ||
-																	T()("no_translation")
+																	T()("empty.states.translation")
 																}
 																alt={getMediaAlt(media()) || ""}
 																dimensions={getMediaDimensions(media())}
@@ -408,7 +416,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 													)}
 													onClick={openMediaSelectModal}
 													disabled={props.disabled || !canAddMore()}
-													aria-label={T()("select_media", {
+													aria-label={T()("media.select.action", {
 														type: props.type || "media",
 													})}
 												>
@@ -432,7 +440,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									disabled={props.disabled || !canAddMore()}
 									classes="capitalize"
 								>
-									{T()("select_media", {
+									{T()("media.select.action", {
 										type: props.type || "media",
 									})}
 								</Button>
@@ -444,7 +452,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									disabled={props.disabled || !canAddMore()}
 									classes="capitalize"
 								>
-									{T()("upload_media")}
+									{T()("media.upload.action")}
 								</Button>
 							</div>
 							<Show when={selectedMediaIds().length > 0}>
@@ -456,7 +464,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									/>
 									{typeof props.minItems !== "number" &&
 									typeof props.maxItems !== "number"
-										? ` ${T()("selected").toLowerCase()}`
+										? ` ${T()("common.selected").toLowerCase()}`
 										: ""}
 								</p>
 							</Show>
@@ -531,7 +539,7 @@ const MediaSortableItem: Component<{
 				<div class="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 bg-linear-to-b from-card-base via-card-base/80 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 					<div class="flex flex-wrap gap-1.5">
 						<Show when={props.media.isDeleted}>
-							<Pill theme="red">{T()("deleted")}</Pill>
+							<Pill theme="red">{T()("common.status.deleted")}</Pill>
 						</Show>
 						<Show when={props.dimensions}>
 							<Pill theme="outline">{props.dimensions}</Pill>
@@ -581,7 +589,7 @@ const MediaSortableItem: Component<{
 						size="icon-subtle"
 						onClick={() => props.removeSelectedMedia(props.media.id)}
 						disabled={props.disabled}
-						aria-label={T()("remove")}
+						aria-label={T()("common.remove")}
 					>
 						<FaSolidXmark size={14} />
 					</Button>

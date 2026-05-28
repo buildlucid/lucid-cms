@@ -1,7 +1,7 @@
+import { serverText } from "../../libs/i18n/index.js";
 import getMediaAdapter from "../../libs/media/get-adapter.js";
 import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getUploadPartUrls: ServiceFn<
@@ -44,7 +44,7 @@ const getUploadPartUrls: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("media_adapter_not_enabled"),
+				message: serverText("core.media.adapters.not.enabled"),
 			},
 			data: undefined,
 		};
@@ -54,7 +54,7 @@ const getUploadPartUrls: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("media_upload_session_adapter_changed"),
+				message: serverText("core.media.upload.sessions.adapter.changed"),
 			},
 			data: undefined,
 		};
@@ -64,7 +64,9 @@ const getUploadPartUrls: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("media_upload_session_resumable_not_supported"),
+				message: serverText(
+					"core.media.upload.sessions.resumable.not.supported",
+				),
 			},
 			data: undefined,
 		};
@@ -74,7 +76,9 @@ const getUploadPartUrls: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("media_upload_session_missing_adapter_upload_id"),
+				message: serverText(
+					"core.media.upload.sessions.missing.adapter.upload.id",
+				),
 			},
 			data: undefined,
 		};

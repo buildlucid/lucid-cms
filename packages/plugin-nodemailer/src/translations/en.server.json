@@ -1,0 +1,16 @@
+{
+	"plugin.nodemailer.email.send.success": "The email was successfully sent.",
+	"plugin.nodemailer.transporter.not.ready": "The email transporter is not ready.",
+	"plugin.nodemailer.email.send.failed": "The email failed to send.",
+	"plugin.nodemailer.attachments.error.name": "Email Attachment Error",
+	"plugin.nodemailer.attachments.url.resolve.failed": "Attachment URL could not be resolved.",
+	"plugin.nodemailer.attachments.url.blocked.address": "Attachment URL resolves to a blocked address.",
+	"plugin.nodemailer.attachments.url.invalid": "Attachment URL is invalid.",
+	"plugin.nodemailer.attachments.url.protocol.invalid": "Attachment URL must use HTTP or HTTPS.",
+	"plugin.nodemailer.attachments.url.redirects.too.many": "Attachment URL redirected too many times.",
+	"plugin.nodemailer.attachments.url.redirect.invalid": "Attachment URL redirect is invalid.",
+	"plugin.nodemailer.attachments.url.response.unsuccessful": "Attachment URL returned an unsuccessful response.",
+	"plugin.nodemailer.attachments.size.too.large": "Attachment is too large.",
+	"plugin.nodemailer.attachments.url.fetch.failed": "Attachment URL could not be fetched.",
+	"plugin.nodemailer.attachments.url.timeout": "Attachment URL request timed out."
+}

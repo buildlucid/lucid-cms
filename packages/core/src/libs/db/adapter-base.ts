@@ -9,8 +9,8 @@ import {
 } from "kysely";
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
 import constants from "../../constants/constants.js";
-import T from "../../translations/index.js";
 import { LucidError } from "../../utils/errors/index.js";
+import { translateServer } from "../i18n/index.js";
 import logger from "../logger/index.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
@@ -201,7 +201,9 @@ export default abstract class DatabaseAdapter {
 		if (error) {
 			throw new LucidError({
 				message:
-					error instanceof Error ? error?.message : T("db_migration_failed"),
+					error instanceof Error
+						? error?.message
+						: translateServer("core.database.migrations.failed"),
 				// @ts-expect-error
 				data: error.errors,
 			});
@@ -236,7 +238,7 @@ export default abstract class DatabaseAdapter {
 	get client() {
 		if (!this.db) {
 			throw new LucidError({
-				message: T("db_connection_error"),
+				message: translateServer("core.database.connection.error"),
 			});
 		}
 		return this.db;

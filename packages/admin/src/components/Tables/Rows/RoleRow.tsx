@@ -43,7 +43,7 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 				props.role.locked
 					? [
 							{
-								label: T()("details"),
+								label: T()("common.details"),
 								type: "button",
 								onClick: () => {
 									props.rowTarget.setTargetId(props.role.id);
@@ -54,7 +54,7 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 						]
 					: [
 							{
-								label: T()("edit"),
+								label: T()("common.edit"),
 								type: "button",
 								onClick: () => {
 									props.rowTarget.setTargetId(props.role.id);
@@ -69,7 +69,11 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 		>
 			<TextCol text={name()} options={{ include: props?.include[0] }} />
 			<PillCol
-				text={props.role.locked ? T()("locked") : T()("unlocked")}
+				text={
+					props.role.locked
+						? T()("common.status.locked")
+						: T()("common.status.unlocked")
+				}
 				theme={props.role.locked ? "warning-opaque" : "outline"}
 				options={{ include: props?.include[1] }}
 			/>

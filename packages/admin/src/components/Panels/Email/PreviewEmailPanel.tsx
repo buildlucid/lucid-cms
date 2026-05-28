@@ -129,7 +129,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 				padding: "24",
 			}}
 			copy={{
-				title: T()("preview_email_panel_title"),
+				title: T()("panels.email.preview.title"),
 			}}
 		>
 			{() => (
@@ -159,7 +159,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 								>
 									<FaSolidTriangleExclamation size={10} />
 									<span class="truncate">
-										{T()("email_preview_inline_attachments_warning")}
+										{T()("email.preview.inline.attachments.warning")}
 									</span>
 								</Pill>
 							</div>
@@ -215,9 +215,9 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 					</Show>
 					<PanelTabs
 						items={[
-							{ value: "details", label: T()("details") },
-							{ value: "data", label: T()("data") },
-							{ value: "transactions", label: T()("transactions") },
+							{ value: "details", label: T()("common.details") },
+							{ value: "data", label: T()("common.data") },
+							{ value: "transactions", label: T()("common.transactions") },
 						]}
 						active={activeTab()}
 						onChange={setActiveTab}
@@ -227,39 +227,39 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 							type="text"
 							items={[
 								{
-									label: T()("subject"),
+									label: T()("common.subject"),
 									value: email.data?.data.mailDetails.subject ?? undefined,
 								},
 								{
-									label: T()("template"),
+									label: T()("email.templates.singular"),
 									value: email.data?.data.mailDetails.template ?? undefined,
 								},
 								{
-									label: T()("priority"),
+									label: T()("common.priority"),
 									value: email.data?.data.mailDetails.priority ?? undefined,
 								},
 								{
-									label: T()("to"),
+									label: T()("common.to"),
 									value: email.data?.data.mailDetails.to ?? undefined,
 								},
 								{
-									label: T()("from"),
+									label: T()("common.from"),
 									value: email.data?.data.mailDetails.from.address ?? undefined,
 								},
 								{
-									label: T()("status"),
+									label: T()("common.status"),
 									value: email.data?.data.currentStatus ?? undefined,
 								},
 								{
-									label: T()("type"),
+									label: T()("common.type"),
 									value: email.data?.data.type ?? undefined,
 								},
 								{
-									label: T()("attempt_count"),
+									label: T()("common.attempt.count"),
 									value: email.data?.data.attemptCount ?? 0,
 								},
 								{
-									label: T()("last_attempt_at"),
+									label: T()("common.last.attempt.at"),
 									value: dateHelpers.formatDate(
 										email.data?.data.lastAttemptedAt,
 									),
@@ -275,7 +275,7 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 								}
 							>
 								<JSONPreview
-									title={T()("template_data")}
+									title={T()("email.templates.data")}
 									json={email.data?.data.data || {}}
 								/>
 							</Suspense>
@@ -288,27 +288,27 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 								rows={email.data?.data.transactions?.length || 0}
 								head={[
 									{
-										label: T()("status"),
+										label: T()("common.status"),
 										key: "status",
 										icon: <FaSolidEnvelope />,
 									},
 									{
-										label: T()("identifier"),
+										label: T()("common.identifier"),
 										key: "identifier",
 										icon: <FaSolidTag />,
 									},
 									{
-										label: T()("message"),
+										label: T()("common.message"),
 										key: "message",
 										icon: <FaSolidCommentDots />,
 									},
 									{
-										label: T()("created_at"),
+										label: T()("common.created.at"),
 										key: "createdAt",
 										icon: <FaSolidCalendar />,
 									},
 									{
-										label: T()("updated_at"),
+										label: T()("common.updated.at"),
 										key: "updatedAt",
 										icon: <FaSolidCalendar />,
 									},

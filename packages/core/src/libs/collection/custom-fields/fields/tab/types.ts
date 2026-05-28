@@ -1,11 +1,11 @@
-import type { LocaleValue } from "../../../../../types/shared.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type { CFConfig, FieldTypes, SharedFieldConfig } from "../../types.js";
 
 export interface TabFieldConfig extends SharedFieldConfig {
 	type: "tab";
 	details: {
-		label?: LocaleValue;
-		summary?: LocaleValue;
+		label?: AdminText;
+		summary?: AdminText;
 	};
 	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
 }

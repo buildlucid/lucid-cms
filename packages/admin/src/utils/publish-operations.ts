@@ -32,15 +32,15 @@ export const getPublishOperationStatusLabel = (
 ) => {
 	switch (status) {
 		case "pending":
-			return T()("pending");
+			return T()("common.status.pending");
 		case "approved":
-			return T()("approved");
+			return T()("common.status.approved");
 		case "rejected":
-			return T()("rejected");
+			return T()("common.status.rejected");
 		case "cancelled":
-			return T()("cancelled");
+			return T()("common.status.cancelled");
 		case "superseded":
-			return T()("superseded");
+			return T()("common.status.superseded");
 	}
 };
 
@@ -65,16 +65,16 @@ export const getPublishOperationExecutionStatusLabel = (
 ) => {
 	switch (status) {
 		case "awaiting_approval":
-			return T()("awaiting_approval");
+			return T()("common.status.awaiting.approval");
 		case "scheduled":
-			return T()("scheduled");
+			return T()("common.status.scheduled");
 		case "executing":
-			return T()("executing");
+			return T()("common.status.executing");
 		case "executed":
-			return T()("executed");
+			return T()("common.status.executed");
 		case "failed":
-			return T()("failed");
+			return T()("common.status.failed");
 		case "cancelled":
-			return T()("cancelled");
+			return T()("common.status.cancelled");
 	}
 };

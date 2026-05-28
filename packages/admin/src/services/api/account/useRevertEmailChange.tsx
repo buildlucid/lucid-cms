@@ -26,8 +26,8 @@ const useRevertEmailChange = (props?: UseRevertEmailChangeProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: revertEmailChangeReq,
 		getSuccessToast: () => ({
-			title: T()("email_change_revert_success_toast_title"),
-			message: T()("email_change_revert_success_toast_message"),
+			title: T()("toasts.email.change.revert.success.title"),
+			message: T()("toasts.email.change.revert.success.message"),
 		}),
 		invalidates: ["users.getSingle"],
 		onSuccess: props?.onSuccess,

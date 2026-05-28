@@ -22,7 +22,7 @@ export const ColumnToggle: Component<ColumnToggleProps> = (props) => {
 	return (
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger class="dropdown-trigger w-7 h-7 bg-background-base outline-none ring-0 focus-visible:ring-1 focus:ring-primary-base rounded-md flex justify-center items-center hover:bg-background-hover">
-				<span class="sr-only">{T()("toggle_col_visibility")}</span>
+				<span class="sr-only">{T()("tables.columns.visibility.toggle")}</span>
 				<DropdownMenu.Icon>
 					<FaSolidTable class="text-body" size={14} />
 				</DropdownMenu.Icon>

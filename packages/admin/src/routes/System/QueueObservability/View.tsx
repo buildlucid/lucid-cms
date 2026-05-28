@@ -54,8 +54,8 @@ const SystemQueueObservabilityRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("system_queue_observability_route_title"),
-							description: T()("system_queue_observability_route_description"),
+							title: T()("routes.system.queue.observability.title"),
+							description: T()("routes.system.queue.observability.description"),
 						}}
 						slots={{
 							bottom: (
@@ -68,75 +68,75 @@ const SystemQueueObservabilityRoute: Component = () => {
 									}}
 									filters={[
 										{
-											label: T()("job_id"),
+											label: T()("jobs.id"),
 											key: "jobId",
 											type: "text",
 										},
 										{
-											label: T()("event_type"),
+											label: T()("common.event.type"),
 											key: "eventType",
 											type: "text",
 										},
 										{
-											label: T()("status"),
+											label: T()("common.status"),
 											key: "status",
 											type: "multi-select",
 											options: [
 												{
-													label: T()("pending"),
+													label: T()("common.status.pending"),
 													value: "pending",
 												},
 												{
-													label: T()("processing"),
+													label: T()("common.status.processing"),
 													value: "processing",
 												},
 												{
-													label: T()("completed"),
+													label: T()("common.status.completed"),
 													value: "completed",
 												},
 												{
-													label: T()("failed"),
+													label: T()("common.status.failed"),
 													value: "failed",
 												},
 												{
-													label: T()("cancelled"),
+													label: T()("common.status.cancelled"),
 													value: "cancelled",
 												},
 											],
 										},
 										{
-											label: T()("queue_adapter"),
+											label: T()("queue.adapter"),
 											key: "queueAdapterKey",
 											type: "text",
 										},
 									]}
 									sorts={[
 										{
-											label: T()("created_at"),
+											label: T()("common.created.at"),
 											key: "createdAt",
 										},
 										{
-											label: T()("scheduled_for"),
+											label: T()("common.scheduled.for"),
 											key: "scheduledFor",
 										},
 										{
-											label: T()("started_at"),
+											label: T()("common.started.at"),
 											key: "startedAt",
 										},
 										{
-											label: T()("completed_at"),
+											label: T()("common.completed.at"),
 											key: "completedAt",
 										},
 										{
-											label: T()("failed_at"),
+											label: T()("common.failed.at"),
 											key: "failedAt",
 										},
 										{
-											label: T()("priority"),
+											label: T()("common.priority"),
 											key: "priority",
 										},
 										{
-											label: T()("attempts"),
+											label: T()("common.attempts"),
 											key: "attempts",
 										},
 									]}

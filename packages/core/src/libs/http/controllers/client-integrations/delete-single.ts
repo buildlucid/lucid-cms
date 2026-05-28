@@ -2,13 +2,13 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { clientIntegrationServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import {
 	honoOpenAPIParamaters,
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { serverText } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -47,8 +47,12 @@ const deleteSingleController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_client_integrations_delete_error_name"),
-					message: T("route_client_integrations_delete_error_message"),
+					name: serverText(
+						"core.routes.client.integrations.delete.error.message",
+					),
+					message: serverText(
+						"core.routes.client.integrations.delete.error.message",
+					),
 				},
 			},
 		)(context, {

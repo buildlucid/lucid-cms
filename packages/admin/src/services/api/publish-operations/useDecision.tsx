@@ -33,10 +33,10 @@ const useDecision = (props?: UseDecisionProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<undefined>>({
 		mutationFn: decisionReq,
 		getSuccessToast: () => ({
-			title: T()("update_toast_title", {
-				name: T()("publish_request_toast_name"),
+			title: T()("toasts.common.update.title", {
+				name: T()("publish.requests.notifications.request.name"),
 			}),
-			message: T()("publish_request_updated_toast_message"),
+			message: T()("publish.requests.notifications.request.updated"),
 		}),
 		invalidates: [
 			"documents.getMultiple",

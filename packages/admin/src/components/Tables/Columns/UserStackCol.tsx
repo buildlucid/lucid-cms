@@ -26,7 +26,7 @@ const UserStackCol: Component<{
 	// ----------------------------------
 	// Functions
 	const displayName = (user: UserStackColUser) => {
-		return helpers.formatUserName(user, "simple") || T()("unknown");
+		return helpers.formatUserName(user, "simple") || T()("media.types.unknown");
 	};
 
 	// ----------------------------------
@@ -41,7 +41,7 @@ const UserStackCol: Component<{
 		>
 			<Show
 				when={props.users.length > 0}
-				fallback={<span class="text-sm text-body">{T()("none")}</span>}
+				fallback={<span class="text-sm text-body">{T()("common.none")}</span>}
 			>
 				<div class="flex min-w-45 items-center gap-3">
 					<div class="flex shrink-0 -space-x-2">

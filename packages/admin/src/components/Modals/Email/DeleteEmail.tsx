@@ -31,8 +31,8 @@ const DeleteEmail: Component<DeleteEmailProps> = (props) => {
 				isError: deleteEmail.action.isError,
 			}}
 			copy={{
-				title: T()("delete_email_modal_title"),
-				description: T()("delete_email_modal_description"),
+				title: T()("modals.common.delete.email.title"),
+				description: T()("modals.common.delete.email.description"),
 				error: deleteEmail.errors()?.message,
 			}}
 			callbacks={{

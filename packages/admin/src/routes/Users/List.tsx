@@ -58,8 +58,8 @@ const UsersListRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("users_route_title"),
-							description: T()("users_route_description"),
+							title: T()("routes.users.title"),
+							description: T()("routes.users.description"),
 						}}
 						actions={{
 							create: [
@@ -69,7 +69,7 @@ const UsersListRoute: Component = () => {
 									permission: userStore.get.hasPermission([
 										Permissions.UsersCreate,
 									]).all,
-									label: T()("add_user"),
+									label: T()("users.add"),
 								},
 							],
 						}}
@@ -86,40 +86,40 @@ const UsersListRoute: Component = () => {
 									}}
 									filters={[
 										{
-											label: T()("first_name"),
+											label: T()("common.first.name"),
 											key: "firstName",
 											type: "text",
 										},
 										{
-											label: T()("last_name"),
+											label: T()("common.last.name"),
 											key: "lastName",
 											type: "text",
 										},
 										{
-											label: T()("email"),
+											label: T()("common.email"),
 											key: "email",
 											type: "text",
 										},
 										{
-											label: T()("username"),
+											label: T()("common.username"),
 											key: "username",
 											type: "text",
 										},
 										{
-											label: T()("is_locked"),
+											label: T()("users.status.locked.label"),
 											key: "isLocked",
 											type: "boolean",
-											trueLabel: T()("locked"),
-											falseLabel: T()("unlocked"),
+											trueLabel: T()("common.status.locked"),
+											falseLabel: T()("common.status.unlocked"),
 										},
 									]}
 									sorts={[
 										{
-											label: T()("created_at"),
+											label: T()("common.created.at"),
 											key: "createdAt",
 										},
 										{
-											label: T()("is_locked"),
+											label: T()("users.status.locked.label"),
 											key: "isLocked",
 										},
 									]}

@@ -178,10 +178,10 @@ const FocalPointEditor: Component<{
 			<div class="space-y-4 p-4 md:p-6">
 				<div>
 					<h2 class="text-title text-base font-semibold">
-						{T()("focal_point")}
+						{T()("media.focal.point.label")}
 					</h2>
 					<p class="text-body text-base mt-1">
-						{T()("focal_point_description")}
+						{T()("media.focal.point.description")}
 					</p>
 				</div>
 				<div
@@ -241,7 +241,7 @@ const FocalPointEditor: Component<{
 					classes="self-start"
 					onClick={() => setDraft(CENTER_FOCAL_POINT)}
 				>
-					{T()("reset")}
+					{T()("common.reset")}
 				</Button>
 				<div class="flex items-center justify-end gap-2">
 					<Button
@@ -250,7 +250,7 @@ const FocalPointEditor: Component<{
 						size="medium"
 						onClick={() => props.state.setOpen(false)}
 					>
-						{T()("cancel")}
+						{T()("common.cancel")}
 					</Button>
 					<Button
 						type="button"
@@ -261,7 +261,7 @@ const FocalPointEditor: Component<{
 							props.state.setOpen(false);
 						}}
 					>
-						{T()("save")}
+						{T()("common.save")}
 					</Button>
 				</div>
 			</ModalFooter>

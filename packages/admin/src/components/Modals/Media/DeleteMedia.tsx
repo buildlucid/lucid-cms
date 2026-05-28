@@ -31,8 +31,8 @@ const DeleteMedia: Component<DeleteMediaProps> = (props) => {
 				isError: deleteMedia.action.isError,
 			}}
 			copy={{
-				title: T()("delete_media_modal_title"),
-				description: T()("delete_media_modal_description"),
+				title: T()("modals.common.delete.media.title"),
+				description: T()("modals.common.delete.media.description"),
 				error: deleteMedia.errors()?.message,
 			}}
 			callbacks={{

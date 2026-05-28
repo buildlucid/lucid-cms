@@ -1,6 +1,6 @@
+import { serverText } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceRenameKey } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
-import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
@@ -30,9 +30,11 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				return {
 					error: {
 						type: "plugin",
-						message: T("copy_failed", {
-							status: copyRes.status,
-							statusText: copyRes.statusText,
+						message: serverText("plugin.s3.objects.copy.failed", {
+							data: {
+								status: copyRes.status,
+								statusText: copyRes.statusText,
+							},
 						}),
 					},
 					data: undefined,
@@ -50,9 +52,11 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				return {
 					error: {
 						type: "plugin",
-						message: T("copy_failed", {
-							status: headRes.status,
-							statusText: headRes.statusText,
+						message: serverText("plugin.s3.objects.copy.failed", {
+							data: {
+								status: headRes.status,
+								statusText: headRes.statusText,
+							},
 						}),
 					},
 					data: undefined,
@@ -72,9 +76,11 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				return {
 					error: {
 						type: "plugin",
-						message: T("delete_failed", {
-							status: deleteRes.status,
-							statusText: deleteRes.statusText,
+						message: serverText("plugin.s3.objects.delete.failed", {
+							data: {
+								status: deleteRes.status,
+								statusText: deleteRes.statusText,
+							},
 						}),
 					},
 					data: undefined,
@@ -89,8 +95,9 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			return {
 				error: {
 					type: "plugin",
-					message:
-						e instanceof Error ? e.message : T("an_unknown_error_occurred"),
+					message: serverText("plugin.s3.errors.unknown", {
+						fallback: e instanceof Error ? e.message : undefined,
+					}),
 				},
 				data: undefined,
 			};

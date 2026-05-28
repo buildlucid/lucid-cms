@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
-import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
+import { serverText } from "../../i18n/index.js";
 
 const clientScopes = (requiredScopes: string[]) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
@@ -16,10 +16,12 @@ const clientScopes = (requiredScopes: string[]) =>
 		if (!hasAllRequired) {
 			throw new LucidAPIError({
 				type: "authorisation",
-				name: T("client_scope_error_name"),
-				message: T("client_scope_missing_message", {
-					requiredScopes: requiredScopes.join(", "),
-					missingScopes: missingScopes.join(", "),
+				name: serverText("core.client.integrations.scopes.error.name"),
+				message: serverText("core.client.integrations.scopes.missing.message", {
+					data: {
+						requiredScopes: requiredScopes.join(", "),
+						missingScopes: missingScopes.join(", "),
+					},
 				}),
 				status: 403,
 			});

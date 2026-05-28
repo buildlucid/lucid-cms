@@ -37,8 +37,10 @@ const RegenerateAPIKey: Component<RegenerateAPIKeyProps> = (props) => {
 				isError: regenerateAPIKey.action.isError,
 			}}
 			copy={{
-				title: T()("regenerate_api_key_modal_title"),
-				description: T()("regenerate_api_key_modal_description"),
+				title: T()("modals.client.integrations.api.keys.regenerate.title"),
+				description: T()(
+					"modals.client.integrations.api.keys.regenerate.description",
+				),
 				error: regenerateAPIKey.errors()?.message,
 			}}
 			callbacks={{

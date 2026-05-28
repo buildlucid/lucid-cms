@@ -1,7 +1,9 @@
 import {
+	createServiceContext,
 	honoOpenAPIRequestBody,
 	honoOpenAPIResponse,
 	LucidAPIError,
+	serverText,
 	serviceWrapper,
 } from "@lucidcms/core/plugin";
 import type { LucidHonoContext } from "@lucidcms/core/types";
@@ -9,7 +11,6 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../schema/webhook.js";
 import webhook from "../services/webhook.js";
-import T from "../translations/index.js";
 import type { PluginOptions } from "../types/types.js";
 
 const factory = createFactory();
@@ -28,33 +29,20 @@ const webhookController = (pluginOptions: PluginOptions) =>
 		// validate("json", controllerSchemas.webhook.body),
 		async (c: LucidHonoContext) => {
 			const rawBody = await c.req.text();
-			const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
+			const context = createServiceContext(c);
 
 			const webhookRes = await serviceWrapper(webhook, {
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: T("route_resend_webhook_error_name"),
-					message: T("route_resend_webhook_error_message"),
+					name: serverText("plugin.resend.routes.webhook.error.name"),
+					message: serverText("plugin.resend.routes.webhook.error.message"),
 				},
-			})(
-				{
-					db: { client: c.get("config").db.client },
-					config: c.get("config"),
-					queue: c.get("queue"),
-					env: c.get("env"),
-					kv: c.get("kv"),
-					request: {
-						url: c.req.url,
-						ipAddress: connectionInfo.address ?? null,
-					},
-				},
-				{
-					rawBody: rawBody,
-					headers: c.req.header(),
-					pluginOptions: pluginOptions,
-				},
-			);
+			})(context, {
+				rawBody: rawBody,
+				headers: c.req.header(),
+				pluginOptions: pluginOptions,
+			});
 			if (webhookRes.error) throw new LucidAPIError(webhookRes.error);
 
 			c.status(200);

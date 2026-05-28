@@ -28,11 +28,11 @@ const useDeleteSingle = (props: UseDeleteProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<null>>({
 		mutationFn: deleteSingleReq,
 		getSuccessToast: () => ({
-			title: T()("deleted_toast_title", {
-				name: T()("client_integration"),
+			title: T()("toasts.common.deleted.title", {
+				name: T()("client.integrations.singular"),
 			}),
-			message: T()("deleted_toast_message", {
-				name: T()("client_integration").toLowerCase(),
+			message: T()("toasts.common.deleted.message", {
+				name: T()("client.integrations.singular").toLowerCase(),
 			}),
 		}),
 		invalidates: ["clientIntegrations.getAll"],

@@ -1,8 +1,8 @@
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
+import { serverText } from "../../../libs/i18n/index.js";
 import { AuthStatesRepository } from "../../../libs/repositories/index.js";
-import T from "../../../translations/index.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import processProviderAuth from "./helpers/process-provider-auth.js";
@@ -42,8 +42,8 @@ const oidcCallback: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				name: T("provider_not_found_name"),
-				message: T("provider_not_found_message"),
+				name: serverText("core.auth.providers.not.found.name"),
+				message: serverText("core.auth.providers.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -80,7 +80,7 @@ const oidcCallback: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 400,
-				message: T("invalid_or_expired_state_message"),
+				message: serverText("core.invalid.or.expired.state.message"),
 			},
 		},
 	});

@@ -1,17 +1,20 @@
 import { describe, expect, test } from "vitest";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { adminText } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../types.js";
 import aggregateBrickTables from "./aggregate-brick-tables.js";
 
 const TEST_CONFIG = {
-	localization: {
-		locales: [
-			{ label: "English", code: "en" },
-			{ label: "French", code: "fr" },
-		],
-		defaultLocale: "en",
+	i18n: {
+		content: {
+			locales: [
+				{ label: "English", code: "en" },
+				{ label: "French", code: "fr" },
+			],
+			defaultLocale: "en",
+		},
 	},
 	documentId: 39,
 	versionId: 39,
@@ -20,7 +23,7 @@ const TEST_CONFIG = {
 describe("brick table construction", () => {
 	test("should correctly generate tables for two level nested repeaters", () => {
 		const simpleBrick = new BrickBuilder("simple")
-			.addText("heading", { config: { translations: false } })
+			.addText("heading", { config: { localized: false } })
 			.addRepeater("items")
 			.addText("itemTitle")
 			.addRepeater("nestedItems")
@@ -31,11 +34,15 @@ describe("brick table construction", () => {
 		const simpleCollection = new CollectionBuilder("simple", {
 			mode: "multiple",
 			details: {
-				name: "Simple",
-				singularName: "Simple",
+				name: adminText("tests.collections.simple.name", {
+					fallback: "Simple",
+				}),
+				singularName: adminText("tests.collections.simple.singularName", {
+					fallback: "Simple",
+				}),
 			},
 			config: {
-				translations: true,
+				localized: true,
 				revisions: true,
 			},
 			bricks: {
@@ -43,7 +50,9 @@ describe("brick table construction", () => {
 			},
 		}).addText("simpleHeading", {
 			details: {
-				label: { en: "Heading Default" },
+				label: adminText("tests.fields.simpleHeading.label", {
+					fallback: "Heading Default",
+				}),
 			},
 			validation: { required: true },
 			displayInListing: true,
@@ -175,7 +184,7 @@ describe("brick table construction", () => {
 			collection: simpleCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localization: TEST_CONFIG.localization,
+			localization: TEST_CONFIG.i18n.content,
 			bricks: simpleInputData.bricks,
 			fields: simpleInputData.fields,
 			tableNameByteLimit: null,
@@ -310,11 +319,13 @@ describe("brick table construction", () => {
 		const deepCollection = new CollectionBuilder("deep", {
 			mode: "multiple",
 			details: {
-				name: "Deep",
-				singularName: "Deep",
+				name: adminText("tests.collections.deep.name", { fallback: "Deep" }),
+				singularName: adminText("tests.collections.deep.singularName", {
+					fallback: "Deep",
+				}),
 			},
 			config: {
-				translations: true,
+				localized: true,
 				revisions: true,
 			},
 			bricks: {
@@ -396,7 +407,7 @@ describe("brick table construction", () => {
 			collection: deepCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localization: TEST_CONFIG.localization,
+			localization: TEST_CONFIG.i18n.content,
 			bricks: deepInputData.bricks,
 			fields: [],
 			tableNameByteLimit: null,
@@ -467,11 +478,15 @@ describe("brick table construction", () => {
 		const galleryCollection = new CollectionBuilder("gallery", {
 			mode: "multiple",
 			details: {
-				name: "Gallery",
-				singularName: "Gallery",
+				name: adminText("tests.collections.gallery.name", {
+					fallback: "Gallery",
+				}),
+				singularName: adminText("tests.collections.gallery.singularName", {
+					fallback: "Gallery",
+				}),
 			},
 			config: {
-				translations: true,
+				localized: true,
 				revisions: true,
 			},
 			bricks: {
@@ -488,7 +503,7 @@ describe("brick table construction", () => {
 			collection: galleryCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localization: TEST_CONFIG.localization,
+			localization: TEST_CONFIG.i18n.content,
 			fields: [
 				{
 					key: "relatedPage",
@@ -662,11 +677,15 @@ describe("brick table construction", () => {
 		const articleCollection = new CollectionBuilder("articles", {
 			mode: "multiple",
 			details: {
-				name: "Articles",
-				singularName: "Article",
+				name: adminText("tests.collections.articles.name", {
+					fallback: "Articles",
+				}),
+				singularName: adminText("tests.collections.articles.singularName", {
+					fallback: "Article",
+				}),
 			},
 			config: {
-				translations: true,
+				localized: true,
 				revisions: true,
 			},
 		})
@@ -686,7 +705,7 @@ describe("brick table construction", () => {
 			collection: articleCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localization: TEST_CONFIG.localization,
+			localization: TEST_CONFIG.i18n.content,
 			fields: [
 				{
 					key: "author",

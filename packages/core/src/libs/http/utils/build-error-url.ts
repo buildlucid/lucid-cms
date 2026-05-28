@@ -7,8 +7,12 @@ const buildErrorURL = (baseUrl: string, err: LucidErrorData): string => {
 	try {
 		const url = new URL(baseUrl);
 
-		if (err.name) url.searchParams.set("errorName", err.name);
-		if (err.message) url.searchParams.set("errorMessage", err.message);
+		if (err.name) {
+			url.searchParams.set("errorName", err.name.default);
+		}
+		if (err.message) {
+			url.searchParams.set("errorMessage", err.message.default);
+		}
 
 		return url.toString();
 	} catch (_e) {

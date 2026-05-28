@@ -1,5 +1,5 @@
+import { serverText } from "../../../libs/i18n/index.js";
 import type { MediaAdapterServiceStream } from "../../../libs/media/types.js";
-import T from "../../../translations/index.js";
 import type { MediaType } from "../../../types/response.js";
 import type { FileMetadata } from "../../../utils/media/index.js";
 import { getFileMetadata } from "../../../utils/media/index.js";
@@ -46,7 +46,7 @@ const validateUploadedMedia = async (props: {
 				errors: {
 					file: {
 						code: "media_error",
-						message: T("media_error_detected_type_mismatch"),
+						message: serverText("core.media.errors.detected.type.mismatch"),
 					},
 				},
 			},
@@ -67,8 +67,10 @@ const validateUploadedMedia = async (props: {
 				errors: {
 					file: {
 						code: "media_error",
-						message: T("media_error_invalid_type", {
-							type: props.allowedType,
+						message: serverText("core.media.errors.invalid.type", {
+							data: {
+								type: props.allowedType,
+							},
 						}),
 					},
 				},
@@ -88,7 +90,7 @@ const validateUploadedMedia = async (props: {
 				errors: {
 					file: {
 						code: "media_error",
-						message: T("media_error_type_change_not_allowed"),
+						message: serverText("core.media.errors.type.change.not.allowed"),
 					},
 				},
 			},

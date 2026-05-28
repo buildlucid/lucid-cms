@@ -31,7 +31,7 @@ const ProviderButton: Component<{
 			) : (
 				<FaSolidCircleUser class="size-4 mr-3" />
 			)}
-			{T()("continue_with")} {props.provider.name}
+			{T()("auth.providers.continue.with")} {props.provider.name}
 		</button>
 	);
 };

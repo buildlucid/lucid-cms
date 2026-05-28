@@ -50,8 +50,8 @@ export const ReleaseTrigger: Component<{
 	const handleTriggerClick = (event: MouseEvent) => {
 		if (props.permission === false) {
 			spawnToast({
-				title: T()("no_permission_toast_title"),
-				message: T()("no_permission_toast_message"),
+				title: T()("toasts.common.no.permission.title"),
+				message: T()("toasts.common.no.permission.message"),
 				status: "warning",
 			});
 			event.preventDefault();
@@ -59,7 +59,9 @@ export const ReleaseTrigger: Component<{
 		}
 	};
 	const getOptionLabel = (option: ReleaseTriggerOption) =>
-		option.action === "request" ? T()("request_publish") : T()("release_to");
+		option.action === "request"
+			? T()("documents.release.request.publish.to")
+			: T()("documents.release.to");
 	const spawnDisabledToast = (option: ReleaseTriggerOption) => {
 		if (!option.disabledToast) return;
 
@@ -71,8 +73,8 @@ export const ReleaseTrigger: Component<{
 	const handleSaveClick = (event: MouseEvent) => {
 		if (props.savePermission === false) {
 			spawnToast({
-				title: T()("no_permission_toast_title"),
-				message: T()("no_permission_toast_message"),
+				title: T()("toasts.common.no.permission.title"),
+				message: T()("toasts.common.no.permission.message"),
 				status: "warning",
 			});
 			event.preventDefault();
@@ -107,7 +109,7 @@ export const ReleaseTrigger: Component<{
 					},
 				)}
 			>
-				{T()("save")}
+				{T()("common.save")}
 			</button>
 			<Show when={hasOptions()}>
 				<DropdownMenu.Root>
@@ -155,8 +157,8 @@ export const ReleaseTrigger: Component<{
 												if (isDisabled()) return;
 												if (option.permission === false) {
 													spawnToast({
-														title: T()("no_permission_toast_title"),
-														message: T()("no_permission_toast_message"),
+														title: T()("toasts.common.no.permission.title"),
+														message: T()("toasts.common.no.permission.message"),
 														status: "warning",
 													});
 													return;
@@ -186,11 +188,11 @@ export const ReleaseTrigger: Component<{
 												title={
 													option.status?.isReleased === true &&
 													option.status?.upToDate === true
-														? T()("released_up_to_date")
+														? T()("documents.release.status.up.to.date")
 														: option.status?.isReleased === true &&
 																option.status?.upToDate === false
-															? T()("released_out_of_date")
-															: T()("unreleased")
+															? T()("documents.release.status.out.of.date")
+															: T()("common.status.unreleased")
 												}
 											/>
 										</DropdownMenu.Item>

@@ -181,7 +181,7 @@ const MediaListRoute: Component = () => {
 	// Render
 	return (
 		<section
-			aria-label={T()("media_route_title")}
+			aria-label={T()("routes.media.title")}
 			class="relative"
 			onDragEnter={onDragEnter}
 			onDragOver={onDragOver}
@@ -192,10 +192,10 @@ const MediaListRoute: Component = () => {
 				<div class="pointer-events-none fixed inset-0 z-60 flex items-center justify-center bg-background-base/80 p-6 backdrop-blur-xs">
 					<div class="flex min-h-72 w-full max-w-xl flex-col items-center justify-center rounded-md border-2 border-dashed border-primary-base bg-card-base p-8 text-center shadow-lg">
 						<p class="text-base font-semibold text-title">
-							{T()("drop_media_to_upload")}
+							{T()("media.upload.drop.title")}
 						</p>
 						<p class="mt-0.5 max-w-xs text-sm text-body">
-							{T()("drop_media_to_upload_description")}
+							{T()("media.upload.drop.description")}
 						</p>
 					</div>
 				</div>
@@ -208,7 +208,7 @@ const MediaListRoute: Component = () => {
 							alerts={[
 								{
 									type: "warning",
-									message: T()("media_support_config_stategy_error"),
+									message: T()("media.storage.strategy.missing.message"),
 									show: settings.data?.data?.media?.enabled === false,
 								},
 							]}
@@ -217,8 +217,8 @@ const MediaListRoute: Component = () => {
 					header: (
 						<Standard
 							copy={{
-								title: T()("media_route_title"),
-								description: T()("media_route_description"),
+								title: T()("routes.media.title"),
+								description: T()("routes.media.description"),
 							}}
 							actions={{
 								create: [
@@ -226,20 +226,20 @@ const MediaListRoute: Component = () => {
 										open: getOpenCreateMediaFolderModal(),
 										setOpen: setOpenCreateMediaFolderModal,
 										permission: canCreateMedia(),
-										label: T()("add_folder"),
+										label: T()("media.folders.add"),
 										secondary: true,
 									},
 									{
 										open: getOpenCreateMediaPanel(),
 										setOpen: setCreateMediaPanelOpen,
 										permission: canCreateMedia(),
-										label: T()("upload_media"),
+										label: T()("media.upload.action"),
 									},
 									{
 										open: getOpenBulkUploadModal(),
 										setOpen: setBulkUploadModalOpen,
 										permission: canCreateMedia(),
-										label: T()("bulk_upload"),
+										label: T()("media.upload.bulk.action"),
 									},
 								],
 								contentLocale: true,
@@ -260,95 +260,95 @@ const MediaListRoute: Component = () => {
 										}}
 										filters={[
 											{
-												label: T()("title"),
+												label: T()("common.title"),
 												key: "title",
 												type: "text",
 											},
 											{
-												label: T()("visibility"),
+												label: T()("common.visibility"),
 												key: "public",
 												type: "boolean",
-												trueLabel: T()("public"),
-												falseLabel: T()("private"),
+												trueLabel: T()("common.public"),
+												falseLabel: T()("common.private"),
 											},
 											{
-												label: T()("mime_type"),
+												label: T()("common.mime.type"),
 												key: "mimeType",
 												type: "text",
 											},
 											{
-												label: T()("key"),
+												label: T()("common.key"),
 												key: "key",
 												type: "text",
 											},
 											{
-												label: T()("type"),
+												label: T()("common.type"),
 												key: "type",
 												type: "multi-select",
 												options: [
 													{
-														label: T()("image"),
+														label: T()("media.types.image"),
 														value: "image",
 													},
 													{
-														label: T()("video"),
+														label: T()("media.types.video"),
 														value: "video",
 													},
 													{
-														label: T()("audio"),
+														label: T()("media.types.audio"),
 														value: "audio",
 													},
 													{
-														label: T()("document"),
+														label: T()("media.types.document"),
 														value: "document",
 													},
 													{
-														label: T()("archive"),
+														label: T()("media.types.archive"),
 														value: "archive",
 													},
 													{
-														label: T()("unknown"),
+														label: T()("media.types.unknown"),
 														value: "unknown",
 													},
 												],
 											},
 											{
-												label: T()("file_extension"),
+												label: T()("common.file.extension"),
 												key: "extension",
 												type: "text",
 											},
 										]}
 										sorts={[
 											{
-												label: T()("title"),
+												label: T()("common.title"),
 												key: "title",
 											},
 											{
-												label: T()("file_size"),
+												label: T()("common.file.size"),
 												key: "fileSize",
 											},
 											{
-												label: T()("mime_type"),
+												label: T()("common.mime.type"),
 												key: "mimeType",
 											},
 											{
-												label: T()("file_extension"),
+												label: T()("common.file.extension"),
 												key: "extension",
 											},
 											{
-												label: T()("width"),
+												label: T()("common.width"),
 												key: "width",
 											},
 											{
-												label: T()("height"),
+												label: T()("common.height"),
 												key: "height",
 											},
 											{
-												label: T()("created_at"),
+												label: T()("common.created.at"),
 												key: "createdAt",
 											},
 											{
-												label: T()("updated_at"),
+												label: T()("common.updated.at"),
 												key: "updatedAt",
 											},
 										]}

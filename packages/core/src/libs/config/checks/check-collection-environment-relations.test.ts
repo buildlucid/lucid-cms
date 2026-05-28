@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import T from "../../../translations/index.js";
 import CollectionBuilder from "../../collection/builders/collection-builder/index.js";
+import { adminText, translateServer } from "../../i18n/index.js";
 import checkCollectionEnvironmentRelations from "./check-collection-environment-relations.js";
 
 const buildConfig = (collections: CollectionBuilder[]) =>
@@ -13,14 +13,18 @@ describe("collection environment relation config checks", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+				singularName: adminText("tests.collections.pages.singularName", {
+					fallback: "Page",
+				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "staging",
-						name: "Staging",
+						name: adminText("tests.environments.staging.name", {
+							fallback: "Staging",
+						}),
 						relations: {
 							blog: "signed-off",
 							settings: "latest",
@@ -32,14 +36,18 @@ describe("collection environment relation config checks", () => {
 		const blog = new CollectionBuilder("blog", {
 			mode: "multiple",
 			details: {
-				name: "Blog",
-				singularName: "Post",
+				name: adminText("tests.collections.blog.name", { fallback: "Blog" }),
+				singularName: adminText("tests.collections.blog.singularName", {
+					fallback: "Post",
+				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "signed-off",
-						name: "Signed off",
+						name: adminText("tests.environments.signed-off.name", {
+							fallback: "Signed off",
+						}),
 					},
 				],
 			},
@@ -47,8 +55,12 @@ describe("collection environment relation config checks", () => {
 		const settings = new CollectionBuilder("settings", {
 			mode: "single",
 			details: {
-				name: "Settings",
-				singularName: "Settings",
+				name: adminText("tests.collections.settings.name", {
+					fallback: "Settings",
+				}),
+				singularName: adminText("tests.collections.settings.singularName", {
+					fallback: "Settings",
+				}),
 			},
 		});
 
@@ -61,14 +73,18 @@ describe("collection environment relation config checks", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+				singularName: adminText("tests.collections.pages.singularName", {
+					fallback: "Page",
+				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "staging",
-						name: "Staging",
+						name: adminText("tests.environments.staging.name", {
+							fallback: "Staging",
+						}),
 						relations: {
 							missing: "latest",
 						},
@@ -80,11 +96,14 @@ describe("collection environment relation config checks", () => {
 		expect(() =>
 			checkCollectionEnvironmentRelations(buildConfig([pages])),
 		).toThrow(
-			T("config_collection_environment_relation_collection_not_found", {
-				collection: "pages",
-				environment: "staging",
-				targetCollection: "missing",
-			}),
+			translateServer(
+				"core.config.collection.environment.relation.collection.not.found",
+				{
+					collection: "pages",
+					environment: "staging",
+					targetCollection: "missing",
+				},
+			),
 		);
 	});
 
@@ -92,14 +111,18 @@ describe("collection environment relation config checks", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
+				singularName: adminText("tests.collections.pages.singularName", {
+					fallback: "Page",
+				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "staging",
-						name: "Staging",
+						name: adminText("tests.environments.staging.name", {
+							fallback: "Staging",
+						}),
 						relations: {
 							blog: "signed-off",
 						},
@@ -110,14 +133,18 @@ describe("collection environment relation config checks", () => {
 		const blog = new CollectionBuilder("blog", {
 			mode: "multiple",
 			details: {
-				name: "Blog",
-				singularName: "Post",
+				name: adminText("tests.collections.blog.name", { fallback: "Blog" }),
+				singularName: adminText("tests.collections.blog.singularName", {
+					fallback: "Post",
+				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "production",
-						name: "Production",
+						name: adminText("tests.environments.production.name", {
+							fallback: "Production",
+						}),
 					},
 				],
 			},
@@ -126,12 +153,15 @@ describe("collection environment relation config checks", () => {
 		expect(() =>
 			checkCollectionEnvironmentRelations(buildConfig([pages, blog])),
 		).toThrow(
-			T("config_collection_environment_relation_version_not_found", {
-				collection: "pages",
-				environment: "staging",
-				targetCollection: "blog",
-				targetVersion: "signed-off",
-			}),
+			translateServer(
+				"core.config.collection.environment.relation.version.not.found",
+				{
+					collection: "pages",
+					environment: "staging",
+					targetCollection: "blog",
+					targetVersion: "signed-off",
+				},
+			),
 		);
 	});
 });

@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import constants from "../../../../../constants/constants.js";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import LinkCustomField from "./custom-field.js";
@@ -11,11 +11,13 @@ import LinkCustomField from "./custom-field.js";
 const LinkCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addLink("standard_link")
@@ -45,7 +47,7 @@ test("successfully validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			translations: LinkCollection.getData.config.translations,
+			localized: LinkCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -70,7 +72,7 @@ test("successfully validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			translations: LinkCollection.getData.config.translations,
+			localized: LinkCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -97,7 +99,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			translations: LinkCollection.getData.config.translations,
+			localized: LinkCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -105,7 +107,10 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: "Invalid input: expected string, received boolean → at url",
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Invalid input: expected string, received boolean → at url",
+				priority: "Invalid input: expected string, received boolean → at url",
+			}),
 		},
 	]);
 
@@ -128,7 +133,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			translations: LinkCollection.getData.config.translations,
+			localized: LinkCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -136,8 +141,10 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: T("field_link_target_error_message", {
-				valid: constants.customFields.link.targets.join(", "),
+			message: serverText("core.fields.link.validation.target.error.message", {
+				data: {
+					valid: constants.customFields.link.targets.join(", "),
+				},
 			}),
 		},
 	]);
@@ -161,7 +168,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			translations: LinkCollection.getData.config.translations,
+			localized: LinkCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -169,7 +176,10 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: "Invalid input: expected string, received boolean → at label", // zod error message
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Invalid input: expected string, received boolean → at label",
+				priority: "Invalid input: expected string, received boolean → at label",
+			}),
 		},
 	]);
 
@@ -188,7 +198,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			translations: LinkCollection.getData.config.translations,
+			localized: LinkCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -196,7 +206,7 @@ test("fail to validate field - link", async () => {
 		{
 			key: "required_link",
 			localeCode: null,
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 });
@@ -206,18 +216,18 @@ test("fail to validate field - link", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new LinkCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
-			placeholder: {
-				en: "placeholder",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
+			placeholder: adminText("tests.fields.field.placeholder", {
+				fallback: "placeholder",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			default: {
 				url: "https://example.com",
 				label: "Link 1",

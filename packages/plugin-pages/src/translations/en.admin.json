@@ -1,0 +1,5 @@
+{
+	"plugin.pages.fields.full.slug.label": "Full slug",
+	"plugin.pages.fields.slug.label": "Slug",
+	"plugin.pages.fields.parent.page.label": "Parent page"
+}

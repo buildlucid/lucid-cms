@@ -81,9 +81,9 @@ export const ClientIntegrationsList: Component<{
 				}}
 				copy={{
 					noEntries: {
-						title: T()("no_client_integrations_found_title"),
-						description: T()("no_client_integrations_found_descriptions"),
-						button: T()("create_integration"),
+						title: T()("empty.states.client.integrations.title"),
+						description: T()("empty.states.client.integrations.description"),
+						button: T()("client.integrations.create.action"),
 					},
 				}}
 				callback={{
@@ -101,51 +101,51 @@ export const ClientIntegrationsList: Component<{
 					searchParams={props.state.searchParams}
 					head={[
 						{
-							label: T()("status"),
+							label: T()("common.status"),
 							key: "enabled",
 							icon: <FaSolidT />,
 							sortable: true,
 						},
 						{
-							label: T()("name"),
+							label: T()("common.name"),
 							key: "name",
 							icon: <FaSolidT />,
 							sortable: true,
 						},
 						{
-							label: T()("key"),
+							label: T()("common.key"),
 							key: "key",
 							icon: <FaSolidIdCard />,
 						},
 						{
-							label: T()("description"),
+							label: T()("common.description"),
 							key: "description",
 							icon: <FaSolidT />,
 							sortable: true,
 						},
 						{
-							label: T()("last_used_at"),
+							label: T()("common.last.used.at"),
 							key: "lastUsedAt",
 							icon: <FaSolidCalendar />,
 						},
 						{
-							label: T()("ip_address"),
+							label: T()("common.ip.address"),
 							key: "lastUsedIp",
 							icon: <FaSolidIdCard />,
 						},
 						{
-							label: T()("user_agent"),
+							label: T()("users.agent"),
 							key: "lastUsedUserAgent",
 							icon: <FaSolidT />,
 						},
 						{
-							label: T()("created_at"),
+							label: T()("common.created.at"),
 							key: "createdAt",
 							icon: <FaSolidCalendar />,
 							sortable: true,
 						},
 						{
-							label: T()("updated_at"),
+							label: T()("common.updated.at"),
 							key: "updatedAt",
 							icon: <FaSolidCalendar />,
 						},

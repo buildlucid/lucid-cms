@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import T from "../../../../../translations/index.js";
+import { adminText, serverText } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import JsonCustomField from "./custom-field.js";
@@ -11,11 +11,13 @@ import JsonCustomField from "./custom-field.js";
 const JSONCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: "Test",
-		singularName: "Test",
+		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
+		singularName: adminText("tests.collections.collection.singularName", {
+			fallback: "Test",
+		}),
 	},
 	config: {
-		translations: true,
+		localized: true,
 	},
 })
 	.addJSON("standard_json")
@@ -51,7 +53,7 @@ test("successfully validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			translations: JSONCollection.getData.config.translations,
+			localized: JSONCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -74,7 +76,7 @@ test("successfully validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			translations: JSONCollection.getData.config.translations,
+			localized: JSONCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -98,7 +100,7 @@ test("successfully validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			translations: JSONCollection.getData.config.translations,
+			localized: JSONCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -121,7 +123,7 @@ test("fail to validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			translations: JSONCollection.getData.config.translations,
+			localized: JSONCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -129,7 +131,10 @@ test("fail to validate field - json", async () => {
 		{
 			key: "standard_json",
 			localeCode: null,
-			message: "Invalid input: expected record, received string",
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Invalid input: expected record, received string",
+				priority: "Invalid input: expected record, received string",
+			}),
 		},
 	]);
 
@@ -148,7 +153,7 @@ test("fail to validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			translations: JSONCollection.getData.config.translations,
+			localized: JSONCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -156,7 +161,7 @@ test("fail to validate field - json", async () => {
 		{
 			key: "required_json",
 			localeCode: null,
-			message: T("generic_field_required"),
+			message: serverText("core.fields.validation.required"),
 		},
 	]);
 
@@ -178,7 +183,7 @@ test("fail to validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			translations: JSONCollection.getData.config.translations,
+			localized: JSONCollection.getData.config.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -186,7 +191,10 @@ test("fail to validate field - json", async () => {
 		{
 			key: "zod_json",
 			localeCode: null,
-			message: "Invalid input: expected string, received boolean → at value",
+			message: serverText("core.fields.validation.errors.unknown", {
+				fallback: "Invalid input: expected string, received boolean → at value",
+				priority: "Invalid input: expected string, received boolean → at value",
+			}),
 		},
 	]);
 });
@@ -196,18 +204,18 @@ test("fail to validate field - json", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new JsonCustomField("field", {
 		details: {
-			label: {
-				en: "title",
-			},
-			summary: {
-				en: "description",
-			},
-			placeholder: {
-				en: "placeholder",
-			},
+			label: adminText("tests.fields.field.label", {
+				fallback: "title",
+			}),
+			summary: adminText("tests.fields.field.summary", {
+				fallback: "description",
+			}),
+			placeholder: adminText("tests.fields.field.placeholder", {
+				fallback: "placeholder",
+			}),
 		},
 		config: {
-			translations: true,
+			localized: true,
 			default: {
 				hello: "world",
 			},

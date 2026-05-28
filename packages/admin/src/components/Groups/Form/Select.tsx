@@ -89,7 +89,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 			return <span class="truncate">&nbsp;</span>;
 		}
 
-		return <span class="text-body">{T()("nothing_selected")}</span>;
+		return <span class="text-body">{T()("common.nothing.selected")}</span>;
 	};
 
 	// ----------------------------------------
@@ -101,7 +101,9 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 	createEffect(() => {
 		if (props.value === undefined || props.value === "") {
 			setSelectedOption(undefined);
-			setSelectedLabel(props.hidePlaceholder ? "" : T()("nothing_selected"));
+			setSelectedLabel(
+				props.hidePlaceholder ? "" : T()("common.nothing.selected"),
+			);
 			return;
 		}
 
@@ -115,7 +117,9 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 		}
 
 		setSelectedOption(undefined);
-		setSelectedLabel(props.hidePlaceholder ? "" : T()("nothing_selected"));
+		setSelectedLabel(
+			props.hidePlaceholder ? "" : T()("common.nothing.selected"),
+		);
 	});
 
 	// ----------------------------------------
@@ -222,7 +226,9 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 								<input
 									type="text"
 									class="bg-input-base px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-10 focus:outline-hidden focus:border-primary-base"
-									placeholder={props.copy?.searchPlaceholder || T()("search")}
+									placeholder={
+										props.copy?.searchPlaceholder || T()("common.search")
+									}
 									value={props.search?.value || ""}
 									onKeyDown={(e) => {
 										e.stopPropagation();
@@ -256,7 +262,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 												}}
 											>
 												<FaSolidXmark size={14} />
-												<span class="sr-only">{T()("clear")}</span>
+												<span class="sr-only">{T()("common.clear")}</span>
 											</button>
 										</div>
 									</Match>
@@ -302,12 +308,12 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 						</Match>
 						<Match when={props.options.length === 0 && props.search?.value}>
 							<span class="text-body w-full block px-2 py-1 text-sm">
-								{T()("no_results_found")}
+								{T()("empty.states.search.no.results")}
 							</span>
 						</Match>
 						<Match when={props.options.length === 0}>
 							<span class="text-body w-full block px-2 py-1 text-sm">
-								{T()("no_options_available")}
+								{T()("empty.states.options")}
 							</span>
 						</Match>
 					</Switch>

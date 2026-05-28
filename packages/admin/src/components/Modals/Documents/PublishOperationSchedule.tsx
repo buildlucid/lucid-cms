@@ -86,7 +86,7 @@ const PublishOperationSchedule: Component<{
 			timezone: scheduleTimezone(),
 		});
 		if (!scheduledAt) {
-			setValidationError(T()("schedule_release_required"));
+			setValidationError(T()("documents.release.schedule.validation.required"));
 			return;
 		}
 
@@ -132,10 +132,10 @@ const PublishOperationSchedule: Component<{
 			}}
 			copy={{
 				title: operationHasSchedule()
-					? T()("reschedule_release")
-					: T()("schedule_release"),
-				description: T()("schedule_release_modal_description"),
-				confirm: T()("update_schedule"),
+					? T()("common.reschedule.release")
+					: T()("documents.release.schedule.action"),
+				description: T()("modals.common.schedule.release.description"),
+				confirm: T()("actions.update.schedule"),
 				error: error(),
 			}}
 			callbacks={{
@@ -152,7 +152,7 @@ const PublishOperationSchedule: Component<{
 							disabled={reschedule.action.isPending}
 							onClick={close}
 						>
-							{T()("cancel")}
+							{T()("common.cancel")}
 						</Button>
 						<Show when={operationHasSchedule()}>
 							<Button
@@ -162,7 +162,7 @@ const PublishOperationSchedule: Component<{
 								loading={reschedule.action.isPending}
 								onClick={removeSchedule}
 							>
-								{T()("remove_schedule")}
+								{T()("documents.release.schedule.remove")}
 							</Button>
 						</Show>
 						<Button
@@ -173,8 +173,8 @@ const PublishOperationSchedule: Component<{
 							onClick={saveSchedule}
 						>
 							{operationHasSchedule()
-								? T()("update_schedule")
-								: T()("schedule_release")}
+								? T()("actions.update.schedule")
+								: T()("documents.release.schedule.action")}
 						</Button>
 					</>
 				),

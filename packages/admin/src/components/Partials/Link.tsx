@@ -61,8 +61,8 @@ const Link: Component<LinkProps> = (props) => {
 			onClick={(e) => {
 				if (props.permission === false) {
 					spawnToast({
-						title: T()("no_permission_toast_title"),
-						message: T()("no_permission_toast_message"),
+						title: T()("toasts.common.no.permission.title"),
+						message: T()("toasts.common.no.permission.message"),
 						status: "warning",
 					});
 					e.preventDefault();

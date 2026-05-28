@@ -18,10 +18,10 @@ const PublishRequestPreviewPlaceholder: Component<{
 					class="mb-6 h-32 w-32 object-contain opacity-80"
 				/>
 				<h2 class="text-base font-semibold text-title">
-					{T()("publish_request_preview_unavailable")}
+					{T()("publish.requests.preview.unavailable.title")}
 				</h2>
 				<p class="mt-1 text-sm text-body">
-					{T()("publish_request_preview_unavailable_description")}
+					{T()("publish.requests.preview.unavailable.description")}
 				</p>
 			</div>
 		</div>

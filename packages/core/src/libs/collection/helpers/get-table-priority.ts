@@ -3,8 +3,8 @@ import type {
 	CoreTableType,
 	TableType,
 } from "../../../libs/collection/schema/types.js";
-import T from "../../../translations/index.js";
 import type { InferredTable, ServiceResponse } from "../../../types.js";
+import { serverText } from "../../i18n/index.js";
 import {
 	getFieldDatabaseConfig,
 	getStorageModeBasePriority,
@@ -44,7 +44,9 @@ const getTablePriority = (
 			return {
 				data: undefined,
 				error: {
-					message: T("invalid_table_name_format_insufficient_parts"),
+					message: serverText(
+						"core.collections.schema.table.name.format.insufficient.parts",
+					),
 				},
 			};
 		}

@@ -126,7 +126,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 				<ActionDropdown
 					actions={[
 						{
-							label: T()("preview"),
+							label: T()("common.preview"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);
@@ -136,7 +136,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							hide: !props.showingDeleted?.(),
 						},
 						{
-							label: T()("edit"),
+							label: T()("common.edit"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);
@@ -146,7 +146,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							hide: props.showingDeleted?.(),
 						},
 						{
-							label: T()("restore"),
+							label: T()("common.restore"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);
@@ -157,7 +157,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							theme: "primary",
 						},
 						{
-							label: T()("create_share_link"),
+							label: T()("media.share.links.create.action"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);
@@ -167,7 +167,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							hide: props.showingDeleted?.(),
 						},
 						{
-							label: T()("view_share_links"),
+							label: T()("media.share.links.view.action"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);
@@ -177,7 +177,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							hide: props.showingDeleted?.(),
 						},
 						{
-							label: T()("delete_share_links"),
+							label: T()("media.share.links.delete.action"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);
@@ -188,7 +188,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							theme: "error",
 						},
 						{
-							label: T()("clear_processed"),
+							label: T()("media.processed.clear.action"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);
@@ -199,7 +199,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							theme: "error",
 						},
 						{
-							label: T()("delete"),
+							label: T()("common.delete"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);
@@ -211,7 +211,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 						},
 
 						{
-							label: T()("delete_permanently"),
+							label: T()("actions.delete.permanently"),
 							type: "button",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.media.id);

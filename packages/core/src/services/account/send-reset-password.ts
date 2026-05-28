@@ -1,7 +1,8 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
+import { serverText, translateServer } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import T from "../../translations/index.js";
+import type { ErrorText } from "../../types/errors.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -14,7 +15,7 @@ const sendResetPassword: ServiceFn<
 		},
 	],
 	{
-		message: string;
+		message: ErrorText;
 	}
 > = async (context, data) => {
 	if (context.config.auth.password.enabled === false) {
@@ -22,7 +23,9 @@ const sendResetPassword: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: T("password_authentication_disabled_message"),
+				message: serverText(
+					"core.auth.password.authentication.disabled.message",
+				),
 			},
 			data: undefined,
 		};
@@ -46,7 +49,7 @@ const sendResetPassword: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				message: T("if_account_exists_with_email_not_found"),
+				message: serverText("core.auth.password.reset.request.accepted"),
 			},
 		};
 	}
@@ -68,7 +71,9 @@ const sendResetPassword: ServiceFn<
 		type: "internal",
 		to: userExistsRes.data.email,
 		subject: formatEmailSubject(
-			T("reset_password_email_subject"),
+			translateServer("core.email.password.reset.email.subject", undefined, {
+				config: context.config,
+			}),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.resetPassword.key,
@@ -89,7 +94,7 @@ const sendResetPassword: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			message: T("if_account_exists_with_email_not_found"),
+			message: serverText("core.auth.password.reset.request.accepted"),
 		},
 	};
 };

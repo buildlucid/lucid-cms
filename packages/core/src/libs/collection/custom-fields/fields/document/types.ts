@@ -1,4 +1,5 @@
 import type { DocumentField } from "../../../../../types/response.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export type DocumentFieldValue = {
@@ -10,11 +11,11 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 	type: "document";
 	collection: string | string[];
 	details: {
-		label?: string | Record<string, string>;
-		summary?: string | Record<string, string>;
+		label?: AdminText;
+		summary?: AdminText;
 	};
 	config: {
-		translations?: boolean;
+		localized?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
 		index?: true;

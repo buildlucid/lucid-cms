@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
-import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
+import { serverText } from "../../i18n/index.js";
 import hasAccess from "../../permission/has-access.js";
 import type { Permission } from "../../permission/types.js";
 
@@ -18,8 +18,8 @@ export const permissionCheck = (
 	if (!access) {
 		throw new LucidAPIError({
 			type: "basic",
-			name: T("permission_error_name"),
-			message: T("you_do_not_have_permission_to_perform_this_action"),
+			name: serverText("core.permissions.error.name"),
+			message: serverText("core.permissions.denied"),
 			status: 403,
 		});
 	}

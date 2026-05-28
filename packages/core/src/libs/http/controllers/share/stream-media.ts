@@ -7,11 +7,11 @@ import { describeRoute } from "hono-openapi";
 import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
-import T from "../../../../translations/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
+import { serverText } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -72,8 +72,8 @@ const streamMediaController = factory.createHandlers(
 			throw new LucidAPIError({
 				type: "authorisation",
 				status: 401,
-				name: T("share_stream_password_required_title"),
-				message: T("share_stream_password_required_message"),
+				name: serverText("core.share.stream.password.required.title"),
+				message: serverText("core.share.stream.password.required.message"),
 			});
 		}
 
@@ -82,8 +82,8 @@ const streamMediaController = factory.createHandlers(
 			throw new LucidAPIError({
 				type: "basic",
 				status: 415,
-				name: T("share_stream_unsupported_media_type_name"),
-				message: T("share_stream_unsupported_media_type_message"),
+				name: serverText("core.share.stream.unsupported.media.type.name"),
+				message: serverText("core.share.stream.unsupported.media.type.message"),
 			});
 		}
 

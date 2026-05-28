@@ -1,15 +1,16 @@
 import type { ProfilePicture } from "../../../../../types/response.js";
+import type { AdminText } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface UserFieldConfig extends SharedFieldConfig {
 	type: "user";
 	details: {
-		label?: string | Record<string, string>;
-		summary?: string | Record<string, string>;
+		label?: AdminText;
+		summary?: AdminText;
 	};
 	config: {
 		default?: number[];
-		translations?: boolean;
+		localized?: boolean;
 		hidden?: boolean;
 		disabled?: boolean;
 		index?: true;

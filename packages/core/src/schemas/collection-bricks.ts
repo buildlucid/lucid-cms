@@ -1,11 +1,11 @@
 import z from "zod";
+import { adminTextSchema } from "../libs/i18n/admin-text.js";
 import {
 	fieldClientResponseSchema,
 	fieldConfigSchema,
 	fieldInputSchema,
 	fieldResponseSchema,
 } from "./collection-fields.js";
-import { stringTranslations } from "./locales.js";
 
 export const brickInputSchema = z.object({
 	id: z.number().nullable().optional(),
@@ -24,15 +24,23 @@ export const brickConfigSchema = z.object({
 		example: "banner",
 	}),
 	details: z.object({
-		name: stringTranslations.meta({
+		name: adminTextSchema.meta({
 			description: "Display name for the brick",
-			example: { en: "Banner" },
+			example: {
+				type: "admin-text",
+				key: "bricks.banner.name",
+				fallback: "Banner",
+			},
 		}),
-		summary: stringTranslations
+		summary: adminTextSchema
 			.nullable()
 			.meta({
 				description: "Description text for the brick",
-				example: "A banner with a title and intro text",
+				example: {
+					type: "admin-text",
+					key: "bricks.banner.summary",
+					fallback: "A banner with a title and intro text",
+				},
 			})
 			.optional(),
 	}),

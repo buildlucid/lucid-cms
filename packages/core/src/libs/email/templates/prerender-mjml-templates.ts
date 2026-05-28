@@ -1,9 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
 import type { Config } from "../../../types.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
+import { serverText } from "../../i18n/index.js";
 import renderMjmlTemplates from "./render-mjml-templates.js";
 
 /**
@@ -31,10 +31,10 @@ const prerenderMjmlTemplates = async (props: {
 	} catch (error) {
 		return {
 			error: {
-				message:
-					error instanceof Error
-						? error.message
-						: T("failed_to_prerender_mjml_templates"),
+				message: serverText(
+					"core.email.templates.prerender.failed",
+					error instanceof Error ? { fallback: error.message } : undefined,
+				),
 				status: 500,
 			},
 			data: undefined,

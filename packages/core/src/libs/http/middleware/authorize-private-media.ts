@@ -1,9 +1,9 @@
 import { createMiddleware } from "hono/factory";
 import constants from "../../../constants/constants.js";
-import T from "../../../translations/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import getKeyVisibility from "../../../utils/media/get-key-visibility.js";
+import { serverText } from "../../i18n/index.js";
 import { authenticationCheck } from "./authenticate.js";
 
 /**
@@ -19,7 +19,7 @@ const authorizePrivateMedia = createMiddleware(
 		if (!key) {
 			throw new LucidAPIError({
 				type: "validation",
-				message: T("validation_error_message"),
+				message: serverText("core.errors.validation.message"),
 			});
 		}
 

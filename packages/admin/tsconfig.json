@@ -1,31 +1,23 @@
 {
-    "compilerOptions": {
-        "strict": true,
-        "target": "ESNext",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "jsx": "preserve",
-        "jsxImportSource": "solid-js",
-        "types": [
-            "vite/client"
-        ],
-        "noEmit": true,
-        "isolatedModules": true,
-        "baseUrl": ".",
-        "resolveJsonModule": true,
-        "skipLibCheck": true,
-        "paths": {
-            "@/*": [
-                "src/*"
-            ],
-            "@types": [
-                "../core/src/types.ts"
-            ],
-            "@assets/*": [
-                "src/assets/*"
-            ]
-        }
-    }
+	"compilerOptions": {
+		"strict": true,
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
+		"types": ["vite/client"],
+		"noEmit": true,
+		"isolatedModules": true,
+		"baseUrl": ".",
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"paths": {
+			"@/*": ["src/*"],
+			"@types": ["../core/src/types.ts"],
+			"@assets/*": ["src/assets/*"]
+		}
+	}
 }

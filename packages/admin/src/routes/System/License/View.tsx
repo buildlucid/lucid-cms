@@ -27,25 +27,25 @@ const SystemLicenseRoute: Component = () => {
 				header: (
 					<Standard
 						copy={{
-							title: T()("system_settings_route_title"),
-							description: T()("system_settings_route_description"),
+							title: T()("routes.system.settings.title"),
+							description: T()("routes.system.settings.description"),
 						}}
 						slots={{
 							bottom: (
 								<NavigationTabs
 									tabs={[
 										{
-											label: T()("overview"),
+											label: T()("common.overview"),
 											href: "/lucid/system/overview",
 											permission: canReadSystemOverview(),
 										},
 										{
-											label: T()("operations"),
+											label: T()("common.operations"),
 											href: "/lucid/system/operations",
 											permission: canReadSystemOperations(),
 										},
 										{
-											label: T()("license"),
+											label: T()("common.license"),
 											href: "/lucid/system/license",
 											permission: canManageLicense(),
 										},

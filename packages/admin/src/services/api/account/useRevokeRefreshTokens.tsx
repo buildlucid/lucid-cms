@@ -30,8 +30,8 @@ const useRevokeRefreshTokens = (props?: UseRevokeRefreshTokensProps) => {
 	>({
 		mutationFn: revokeRefreshTokensReq,
 		getSuccessToast: () => ({
-			title: T()("account_revoke_sessions_toast_title"),
-			message: T()("account_revoke_sessions_toast_message"),
+			title: T()("toasts.account.revoke.sessions.title"),
+			message: T()("toasts.account.revoke.sessions.message"),
 		}),
 		onSuccess: () => {
 			userStore.get.reset();
