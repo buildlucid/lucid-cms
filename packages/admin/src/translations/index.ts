@@ -78,6 +78,7 @@ const [getHasResolvedLocale, setHasResolvedLocale] = createSignal(
 );
 const [getReady, setReady] = createSignal(false);
 const [getLoading, setLoading] = createSignal(false);
+const [getTranslationVersion, setTranslationVersion] = createSignal(0);
 const [localesConfig, setLocalesConfig] = createStore<InterfaceLocaleConfig[]>([
 	fallbackLocaleConfig,
 ]);
@@ -138,6 +139,7 @@ const syncTranslations = (
 	setHasResolvedLocale(true);
 	syncDocumentLocale(payload.locale, payload.direction);
 	i18next.changeLanguage(payload.locale);
+	setTranslationVersion((version) => version + 1);
 
 	if (options?.persist) {
 		persistLocale(payload.locale);
@@ -213,6 +215,7 @@ export const translateAdminCopy = (
 };
 
 const T = createMemo(() => {
+	getTranslationVersion();
 	i18next.changeLanguage(getLocale());
 	const direction =
 		localesConfig.find((locale) => locale.code === getLocale())?.direction ??
