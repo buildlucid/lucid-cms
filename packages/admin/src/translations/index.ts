@@ -82,6 +82,12 @@ const [getTranslationVersion, setTranslationVersion] = createSignal(0);
 const [localesConfig, setLocalesConfig] = createStore<InterfaceLocaleConfig[]>([
 	fallbackLocaleConfig,
 ]);
+const getDirection = createMemo<InterfaceDirection>(() => {
+	return (
+		localesConfig.find((locale) => locale.code === getLocale())?.direction ??
+		"ltr"
+	);
+});
 
 i18next.init({
 	lng: getLocale(),
@@ -217,10 +223,7 @@ export const translateAdminCopy = (
 const T = createMemo(() => {
 	getTranslationVersion();
 	i18next.changeLanguage(getLocale());
-	const direction =
-		localesConfig.find((locale) => locale.code === getLocale())?.direction ??
-		"ltr";
-	syncDocumentLocale(getLocale(), direction);
+	syncDocumentLocale(getLocale(), getDirection());
 
 	return i18next.t.bind(i18next) as (
 		key: TranslationKeys,
@@ -228,5 +231,5 @@ const T = createMemo(() => {
 	) => string;
 });
 
-export { getLoading, getLocale, getReady, localesConfig };
+export { getDirection, getLoading, getLocale, getReady, localesConfig };
 export default T;

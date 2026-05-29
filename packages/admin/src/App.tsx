@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
-import { type Component, onMount } from "solid-js";
+import { type Component, createEffect, on, onMount } from "solid-js";
 import { Toaster } from "solid-toast";
 import Router from "@/Router";
-import { initAdminTranslations } from "@/translations";
+import { getLocale, getReady, initAdminTranslations } from "@/translations";
 import { LucidError } from "./utils/error-handling";
 import "solid-devtools";
 
@@ -32,6 +32,17 @@ const App: Component = () => {
 	onMount(() => {
 		void initAdminTranslations();
 	});
+
+	createEffect(
+		on(
+			getLocale,
+			() => {
+				if (!getReady()) return;
+				void queryClient.invalidateQueries();
+			},
+			{ defer: true },
+		),
+	);
 
 	// ---------------------------------
 	// Render

@@ -17,6 +17,7 @@ import {
 import { NavigationMenuContent } from "@/components/Groups/Layout/NavigationMenuContent";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import { Permissions } from "@/constants/permissions";
+import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -25,6 +26,7 @@ export const NavigationChrome: Component = () => {
 	// ----------------------------------------
 	// Hooks
 	const location = useLocation();
+	const interfaceDirection = useInterfaceDirection();
 
 	// ----------------------------------------
 	// Mutations
@@ -277,10 +279,16 @@ export const NavigationChrome: Component = () => {
 					{/* Mobile Navigation Content */}
 					<div
 						class={classNames(
-							"relative h-full w-full max-w-[320px] border-r border-border bg-sidebar-base shadow-[0_20px_70px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out",
+							"relative h-full w-full max-w-[320px] border-border bg-sidebar-base shadow-[0_20px_70px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out",
 							{
 								"translate-x-0": mobileMenuOpen(),
-								"-translate-x-full": !mobileMenuOpen(),
+								"border-r -translate-x-full":
+									interfaceDirection.isLTR() && !mobileMenuOpen(),
+								"border-r": interfaceDirection.isLTR() && mobileMenuOpen(),
+								"border-l translate-x-full":
+									interfaceDirection.isRTL() && !mobileMenuOpen(),
+								"border-l": interfaceDirection.isRTL() && mobileMenuOpen(),
+								"ml-auto": interfaceDirection.isRTL(),
 							},
 						)}
 					>

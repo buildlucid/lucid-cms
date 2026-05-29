@@ -115,6 +115,11 @@ export default configureLucid({
 					code: "fr",
 					direction: "ltr",
 				},
+				{
+					label: "Arabic",
+					code: "ar",
+					direction: "rtl",
+				},
 			],
 			defaultLocale: "en",
 		},

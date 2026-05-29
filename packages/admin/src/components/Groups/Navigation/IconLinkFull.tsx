@@ -108,7 +108,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 							title={props.title}
 							href={props.href || "/"}
 							class={classNames(
-								"h-8 w-full text-title flex items-center px-2 rounded-md bg-sidebar-base fill-title hover:bg-card-hover transition-colors duration-200 ease-in-out",
+								"h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar-base fill-title hover:bg-card-hover transition-colors duration-200 ease-in-out",
 								{
 									"bg-secondary-base! text-secondary-contrast! fill-secondary-base-contrast!":
 										props.active,
@@ -121,7 +121,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 							end={props.href === "/lucid"}
 						>
 							<Icons />
-							<span class="ml-2 block text-sm font-medium">{props.title}</span>
+							<span class="block text-sm font-medium">{props.title}</span>
 						</A>
 					</Match>
 					<Match when={props.type === "button"}>
@@ -129,7 +129,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 							type="button"
 							tabIndex={0}
 							class={classNames(
-								"h-8 w-full text-title flex items-center px-2 rounded-md bg-sidebar-base fill-title hover:bg-card-hover transition-colors duration-200 ease-in-out",
+								"h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar-base fill-title hover:bg-card-hover transition-colors duration-200 ease-in-out",
 								{
 									"bg-secondary-base text-secondary-contrast fill-secondary-base-contrast":
 										props.active,
@@ -140,7 +140,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 							disabled={props.loading}
 						>
 							<Icons />
-							<span class="ml-2 block text-sm font-medium">{props.title}</span>
+							<span class="block text-sm font-medium">{props.title}</span>
 						</button>
 					</Match>
 				</Switch>

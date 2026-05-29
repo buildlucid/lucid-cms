@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
+import classNames from "classnames";
 import {
 	type Component,
 	createEffect,
@@ -10,6 +11,7 @@ import {
 } from "solid-js";
 import { NavigationChrome, Wrapper } from "@/components/Groups/Layout";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
+import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import api from "@/services/api";
 import T, { initAdminTranslations } from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
@@ -21,6 +23,7 @@ const MainLayout: Component<{
 	// Hooks
 	const navigate = useNavigate();
 	const location = useLocation();
+	const interfaceDirection = useInterfaceDirection();
 
 	// ----------------------------------
 	// Mutations & Queries
@@ -73,7 +76,15 @@ const MainLayout: Component<{
 	return (
 		<div class="grid grid-cols-1 md:grid-cols-main-layout min-h-full relative">
 			<NavigationChrome />
-			<main class="flex flex-col md:mt-4 px-4 md:px-0 md:pr-4 w-full min-w-0 md:min-w-[calc(100vw-236px)]">
+			<main
+				class={classNames(
+					"flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0 md:min-w-[calc(100vw-236px)]",
+					{
+						"md:pr-4": interfaceDirection.isLTR(),
+						"md:pl-4": interfaceDirection.isRTL(),
+					},
+				)}
+			>
 				<Switch>
 					<Match when={isSuccess()}>
 						<Suspense fallback={<Wrapper />}>{props.children}</Suspense>
