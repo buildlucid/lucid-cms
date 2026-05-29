@@ -1,13 +1,13 @@
-import { adminText, CollectionBuilder, z } from "@lucidcms/core";
+import { CollectionBuilder, text, z } from "@lucidcms/core";
 import SimpleBrick from "../bricks/simple.js";
 import SimpleFixedBrick from "../bricks/simple-fixed.js";
 
 const SimpleCollection = new CollectionBuilder("simple", {
 	mode: "multiple",
 	details: {
-		name: adminText("collections.simple.name", { fallback: "Simple" }),
-		singularName: adminText("collections.simple.singularName", {
-			fallback: "Simple",
+		name: text.admin("collections.simple.name", { defaultMessage: "Simple" }),
+		singularName: text.admin("collections.simple.singularName", {
+			defaultMessage: "Simple",
 		}),
 	},
 	config: {
@@ -21,8 +21,8 @@ const SimpleCollection = new CollectionBuilder("simple", {
 })
 	.addText("simpleHeading", {
 		details: {
-			label: adminText("collections.simple.fields.simpleHeading.label", {
-				fallback: "Heading Default",
+			label: text.admin("collections.simple.fields.simpleHeading.label", {
+				defaultMessage: "Heading Default",
 			}),
 		},
 		validation: {

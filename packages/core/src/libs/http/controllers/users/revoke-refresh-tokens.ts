@@ -8,7 +8,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -43,8 +43,8 @@ const revokeRefreshTokensController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: serverText("core.routes.user.update.error.name"),
-				message: serverText("core.routes.user.update.error.message"),
+				name: text.server("core.routes.user.update.error.name"),
+				message: text.server("core.routes.user.update.error.message"),
 			},
 		})(context, {
 			userId: Number.parseInt(id, 10),

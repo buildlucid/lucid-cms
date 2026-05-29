@@ -3,7 +3,7 @@ import { getTableNames } from "../../libs/collection/schema/runtime/runtime-sche
 import type { DocumentVersionType } from "../../libs/db/types.js";
 import { documentsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";
 import type { InternalCollectionDocument } from "../../types.js";
@@ -39,7 +39,7 @@ const getSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.version.not.found.message"),
+				message: text.server("core.documents.version.not.found.message"),
 				status: 404,
 			},
 			data: undefined,
@@ -66,7 +66,7 @@ const getSingle: ServiceFn<
 				validation: {
 					enabled: true,
 					defaultError: {
-						message: serverText("core.documents.version.not.found.message"),
+						message: text.server("core.documents.version.not.found.message"),
 						status: 404,
 					},
 				},
@@ -92,7 +92,7 @@ const getSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.version.not.found.message"),
+				message: text.server("core.documents.version.not.found.message"),
 				status: 404,
 			},
 			data: undefined,

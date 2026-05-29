@@ -8,7 +8,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -40,8 +40,8 @@ const revokeRefreshTokensController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: serverText("core.routes.user.me.update.error.name"),
-					message: serverText("core.routes.user.me.update.error.message"),
+					name: text.server("core.routes.user.me.update.error.name"),
+					message: text.server("core.routes.user.me.update.error.message"),
 				},
 			},
 		)(context, {

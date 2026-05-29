@@ -1,7 +1,4 @@
-import {
-	mergeTranslationBundles,
-	translateServer,
-} from "@lucidcms/core/plugin";
+import { mergeTranslationBundles, text } from "@lucidcms/core/plugin";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
 	LUCID_VERSION,
@@ -34,10 +31,6 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			);
 
 			const simulate = draft.email.simulate;
-			const translate = (
-				key: string,
-				data?: Record<string, string | number | undefined>,
-			) => translateServer(key, data, { config: draft });
 
 			if (
 				pluginOptions.webhook?.enabled &&
@@ -56,7 +49,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							return {
 								success: true,
 								deliveryStatus: "sent",
-								message: translate("plugin.resend.email.send.success"),
+								message: text.server("plugin.resend.email.send.success"),
 								data: null,
 							};
 						}
@@ -101,14 +94,14 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							return {
 								success: false,
 								deliveryStatus: "failed",
-								message: translate("plugin.resend.email.send.failed"),
+								message: text.server("plugin.resend.email.send.failed"),
 							};
 						}
 
 						return {
 							success: true,
 							deliveryStatus: webhookEnabled ? "sent" : "delivered",
-							message: translate("plugin.resend.email.send.success"),
+							message: text.server("plugin.resend.email.send.success"),
 							data: isValidData(data) ? data : null,
 							externalMessageId: data.id,
 						};
@@ -118,8 +111,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							deliveryStatus: "failed",
 							message:
 								error instanceof Error
-									? error.message
-									: translate("plugin.resend.email.send.failed"),
+									? text.literal(error.message)
+									: text.server("plugin.resend.email.send.failed"),
 						};
 					}
 				},

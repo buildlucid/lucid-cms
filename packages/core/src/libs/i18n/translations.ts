@@ -7,7 +7,7 @@ import coreEnServer from "../../translations/en.server.json" with {
 import type {
 	TranslationBundle,
 	TranslationBundles,
-	TranslationData,
+	TranslationValues,
 } from "./types.js";
 
 const emptyBundle = (): TranslationBundle => ({
@@ -65,12 +65,12 @@ export const mergeTranslationBundles = (
 
 export const formatTranslation = (
 	translation: string,
-	data?: TranslationData,
+	values?: TranslationValues,
 ) => {
-	if (!data) return translation;
+	if (!values) return translation;
 
 	return translation.replace(
 		/\{\{(\w+)\}\}/g,
-		(_, key) => data[key as keyof TranslationData]?.toString() ?? "",
+		(_, key) => values[key as keyof TranslationValues]?.toString() ?? "",
 	);
 };

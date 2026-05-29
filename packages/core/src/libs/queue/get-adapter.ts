@@ -30,10 +30,10 @@ const getQueueAdapter = async (
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.queueAdapter,
-			message:
-				error instanceof Error
-					? error.message
-					: "Failed to initialize queue adapter",
+			message: "Failed to initialize queue adapter",
+			data: {
+				errorMessage: error instanceof Error ? error.message : String(error),
+			},
 		});
 		return passthroughQueueAdapter();
 	}

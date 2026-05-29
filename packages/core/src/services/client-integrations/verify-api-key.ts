@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import type { LucidClientIntegrationAuth } from "../../types/hono.js";
 import { decodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
@@ -26,7 +26,7 @@ const verifyApiKey: ServiceFn<
 	if (!decodedApiKey) {
 		return {
 			error: {
-				message: serverText("core.client.integrations.api.key.missing"),
+				message: text.server("core.client.integrations.api.key.missing"),
 			},
 			data: undefined,
 		};
@@ -34,7 +34,7 @@ const verifyApiKey: ServiceFn<
 	if (!decodedKey) {
 		return {
 			error: {
-				message: serverText("core.client.integrations.key.missing"),
+				message: text.server("core.client.integrations.key.missing"),
 			},
 			data: undefined,
 		};
@@ -46,7 +46,7 @@ const verifyApiKey: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: serverText("core.client.integrations.not.found"),
+					message: text.server("core.client.integrations.not.found"),
 				},
 			},
 		});
@@ -55,7 +55,7 @@ const verifyApiKey: ServiceFn<
 	if (!formatter.formatBoolean(clientIntegrationRes.data.enabled)) {
 		return {
 			error: {
-				message: serverText("core.client.integrations.disabled"),
+				message: text.server("core.client.integrations.disabled"),
 			},
 			data: undefined,
 		};
@@ -82,7 +82,7 @@ const verifyApiKey: ServiceFn<
 	if (verifyApiKey === false) {
 		return {
 			error: {
-				message: serverText("core.client.integrations.api.key.invalid"),
+				message: text.server("core.client.integrations.api.key.invalid"),
 			},
 			data: undefined,
 		};

@@ -1,6 +1,6 @@
 import z from "zod";
 import constants from "../../../../constants/constants.js";
-import { adminTextSchema } from "../../../i18n/admin-text.js";
+import { adminTextDescriptorSchema } from "../../../i18n/index.js";
 
 const environmentKeySchema = z
 	.string()
@@ -29,9 +29,9 @@ const CollectionConfigSchema = z
 			}),
 		mode: z.enum(["single", "multiple"]),
 		details: z.object({
-			name: adminTextSchema,
-			singularName: adminTextSchema,
-			summary: adminTextSchema.optional(),
+			name: adminTextDescriptorSchema,
+			singularName: adminTextDescriptorSchema,
+			summary: adminTextDescriptorSchema.optional(),
 		}),
 		permissions: z
 			.object({
@@ -116,7 +116,7 @@ const CollectionConfigSchema = z
 										.min(1)
 										.max(50)
 										.regex(/^[a-z0-9-_]+$/),
-									name: adminTextSchema,
+									name: adminTextDescriptorSchema,
 									color: z
 										.enum(
 											constants.collectionBuilder.publishing.workflow
@@ -155,7 +155,7 @@ const CollectionConfigSchema = z
 									message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
 								},
 							),
-							name: adminTextSchema,
+							name: adminTextDescriptorSchema,
 							permissions: z
 								.object({
 									publish: z.string().optional(),

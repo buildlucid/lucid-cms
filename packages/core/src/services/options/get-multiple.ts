@@ -1,5 +1,5 @@
 import { optionsFormatter } from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import type { OptionsName } from "../../schemas/options.js";
 import type { Option } from "../../types/response.js";
@@ -27,7 +27,7 @@ const getMultiple: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.options.not.found.message"),
+				message: text.server("core.options.not.found.message"),
 				status: 404,
 			},
 		},

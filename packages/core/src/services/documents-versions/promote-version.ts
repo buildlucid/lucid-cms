@@ -6,7 +6,7 @@ import {
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	DocumentBricksRepository,
 	DocumentsRepository,
@@ -64,8 +64,8 @@ const promoteVersion: ServiceFn<
 			return {
 				error: {
 					type: "basic",
-					name: serverText("core.collections.permission.error.name"),
-					message: serverText(
+					name: text.server("core.collections.permission.error.name"),
+					message: text.server(
 						"core.publish.operations.required.for.environment.target",
 					),
 					status: 403,
@@ -85,8 +85,8 @@ const promoteVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.error.schema.migration.required.name"),
-				message: serverText("core.error.schema.migration.required.message"),
+				name: text.server("core.error.schema.migration.required.name"),
+				message: text.server("core.error.schema.migration.required.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -116,7 +116,7 @@ const promoteVersion: ServiceFn<
 				validation: {
 					enabled: true,
 					defaultError: {
-						message: serverText("core.documents.version.not.found.message"),
+						message: text.server("core.documents.version.not.found.message"),
 						status: 404,
 					},
 				},
@@ -143,7 +143,7 @@ const promoteVersion: ServiceFn<
 		return {
 			error: {
 				status: 404,
-				message: serverText("core.documents.version.not.found.message"),
+				message: text.server("core.documents.version.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -154,7 +154,7 @@ const promoteVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.version.document.mismatch"),
+				message: text.server("core.documents.version.document.mismatch"),
 				status: 404,
 			},
 			data: undefined,
@@ -165,7 +165,7 @@ const promoteVersion: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("core.documents.versions.promote.same.version"),
+				message: text.server("core.documents.versions.promote.same.version"),
 			},
 			data: undefined,
 		};
@@ -175,7 +175,7 @@ const promoteVersion: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("core.documents.revisions.promote.denied"),
+				message: text.server("core.documents.revisions.promote.denied"),
 			},
 			data: undefined,
 		};
@@ -184,8 +184,8 @@ const promoteVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.error.locked.collection.name"),
-				message: serverText("core.error.locked.collection.message"),
+				name: text.server("core.error.locked.collection.name"),
+				message: text.server("core.error.locked.collection.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -266,7 +266,7 @@ const promoteVersion: ServiceFn<
 					enabled: true,
 					defaultError: {
 						status: 400,
-						message: serverText("core.documents.create.failed"),
+						message: text.server("core.documents.create.failed"),
 					},
 				},
 			},
@@ -291,7 +291,7 @@ const promoteVersion: ServiceFn<
 					enabled: true,
 					defaultError: {
 						status: 400,
-						message: serverText("core.documents.create.failed"),
+						message: text.server("core.documents.create.failed"),
 					},
 				},
 			},

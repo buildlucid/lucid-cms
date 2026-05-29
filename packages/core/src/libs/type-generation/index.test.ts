@@ -4,7 +4,7 @@ import path from "node:path";
 import { expect, test } from "vitest";
 import BrickBuilder from "../collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { adminText } from "../i18n/index.js";
+import { text } from "../i18n/index.js";
 import generateTypes from "./index.js";
 
 test("generates collection-aware client document types that lean on the public Lucid contracts", async () => {
@@ -32,9 +32,11 @@ test("generates collection-aware client document types that lean on the public L
 	const PageCollection = new CollectionBuilder("page", {
 		mode: "multiple",
 		details: {
-			name: adminText("tests.collections.page.name", { fallback: "Pages" }),
-			singularName: adminText("tests.collections.page.singularName", {
-				fallback: "Page",
+			name: text.admin("tests.collections.page.name", {
+				defaultMessage: "Pages",
+			}),
+			singularName: text.admin("tests.collections.page.singularName", {
+				defaultMessage: "Page",
 			}),
 		},
 		config: {
@@ -42,8 +44,8 @@ test("generates collection-aware client document types that lean on the public L
 			environments: [
 				{
 					key: "published",
-					name: adminText("tests.environments.published.name", {
-						fallback: "Published",
+					name: text.admin("tests.environments.published.name", {
+						defaultMessage: "Published",
 					}),
 				},
 			],

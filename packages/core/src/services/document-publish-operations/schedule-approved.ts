@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
@@ -47,7 +47,7 @@ const scheduleApproved: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.publish.operations.not.found"),
+				message: text.server("core.publish.operations.not.found"),
 				status: 404,
 			},
 		},
@@ -95,7 +95,7 @@ const scheduleApproved: ServiceFn<
 				return {
 					error: {
 						type: "basic",
-						message: serverText(
+						message: text.server(
 							"core.publish.operations.schedule.not.supported",
 						),
 						status: 400,

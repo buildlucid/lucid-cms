@@ -1,5 +1,5 @@
 import { localesFormatter } from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { LocalesRepository } from "../../libs/repositories/index.js";
 import type { Locale } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -22,7 +22,7 @@ const getSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.locale.not.found.message"),
+				message: text.server("core.locale.not.found.message"),
 				status: 404,
 			},
 			data: undefined,
@@ -46,7 +46,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.locale.not.found.message"),
+				message: text.server("core.locale.not.found.message"),
 				status: 404,
 			},
 		},

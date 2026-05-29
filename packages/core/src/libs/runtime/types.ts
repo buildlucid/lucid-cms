@@ -6,7 +6,7 @@ import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import type { RenderedTemplates } from "../email/types.js";
-import type { TranslationBundles } from "../i18n/types.js";
+import type { TranslationBundles, Translator } from "../i18n/types.js";
 import type RuntimeAdapterSchema from "./schema.js";
 
 export type RuntimeBuildArtifactFile = {
@@ -114,6 +114,13 @@ export type AdapterRuntimeContext = {
 };
 
 export interface EnvironmentVariables extends Record<string, unknown> {}
+
+export type AdapterLifecycleContext = {
+	config: Config;
+	env?: EnvironmentVariables;
+	runtimeContext?: AdapterRuntimeContext;
+	translate: Translator;
+};
 
 export type GetEnvVarsLogger = {
 	instance: CLILogger;

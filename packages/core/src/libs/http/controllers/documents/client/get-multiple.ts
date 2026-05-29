@@ -10,7 +10,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
 import { ClientScopes } from "../../../../permission/client-scopes.js";
 import cache from "../../../middleware/cache.js";
@@ -69,8 +69,8 @@ const getMultipleController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: serverText("core.routes.document.fetch.error.name"),
-					message: serverText("core.routes.document.fetch.error.message"),
+					name: text.server("core.routes.document.fetch.error.name"),
+					message: text.server("core.routes.document.fetch.error.message"),
 				},
 			},
 		)(context, {

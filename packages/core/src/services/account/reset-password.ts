@@ -1,6 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
-import { serverText, translateServer } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	UsersRepository,
 	UserTokensRepository,
@@ -31,7 +31,7 @@ const resetPassword: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText(
+				message: text.server(
 					"core.auth.password.authentication.disabled.message",
 				),
 			},
@@ -55,7 +55,7 @@ const resetPassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.tokens.not.found.message"),
+				message: text.server("core.tokens.not.found.message"),
 				status: 404,
 			},
 			data: undefined,
@@ -75,7 +75,7 @@ const resetPassword: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 404,
-				message: serverText("core.user.not.found.message"),
+				message: text.server("core.user.not.found.message"),
 			},
 		},
 	});
@@ -123,7 +123,7 @@ const resetPassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.tokens.not.found.message"),
+				message: text.server("core.tokens.not.found.message"),
 				status: 404,
 			},
 			data: undefined,
@@ -178,9 +178,7 @@ const resetPassword: ServiceFn<
 		type: "internal",
 		to: updatedUserRes.data.email,
 		subject: formatEmailSubject(
-			translateServer("core.auth.password.reset.success.subject", undefined, {
-				config: context.config,
-			}),
+			context.translate.server("core.auth.password.reset.success.subject"),
 			context.config.brand?.name,
 		),
 		data: {

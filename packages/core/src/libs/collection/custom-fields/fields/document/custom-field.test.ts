@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { adminText, serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import DocumentCustomField from "./custom-field.js";
@@ -10,9 +10,11 @@ import DocumentCustomField from "./custom-field.js";
 const DocumentCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
-		singularName: adminText("tests.collections.collection.singularName", {
-			fallback: "Test",
+		name: text.admin("tests.collections.collection.name", {
+			defaultMessage: "Test",
+		}),
+		singularName: text.admin("tests.collections.collection.singularName", {
+			defaultMessage: "Test",
 		}),
 	},
 	config: {
@@ -129,7 +131,7 @@ test("fail to validate field - document", async () => {
 		{
 			key: "required_doc",
 			localeCode: null,
-			message: serverText("core.fields.document.validation.not.found"),
+			message: text.server("core.fields.document.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
@@ -157,7 +159,7 @@ test("fail to validate field - document", async () => {
 		{
 			key: "required_doc",
 			localeCode: null,
-			message: serverText("core.fields.validation.required"),
+			message: text.server("core.fields.validation.required"),
 		},
 	]);
 
@@ -189,7 +191,7 @@ test("fail to validate field - document", async () => {
 		{
 			key: "wrong_collection",
 			localeCode: null,
-			message: serverText("core.fields.document.validation.not.found"),
+			message: text.server("core.fields.document.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
@@ -269,7 +271,7 @@ test("document field validates multiple item counts and indexed errors", async (
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: serverText("core.fields.relation.validation.min.items", {
+			message: text.server("core.fields.relation.validation.min.items", {
 				data: {
 					min: 2,
 				},
@@ -280,7 +282,7 @@ test("document field validates multiple item counts and indexed errors", async (
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: serverText("core.fields.relation.validation.max.items", {
+			message: text.server("core.fields.relation.validation.max.items", {
 				data: {
 					max: 3,
 				},
@@ -291,13 +293,13 @@ test("document field validates multiple item counts and indexed errors", async (
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: serverText("core.fields.document.validation.not.found"),
+			message: text.server("core.fields.document.validation.not.found"),
 			itemIndex: 1,
 		},
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: serverText("core.fields.document.validation.not.found"),
+			message: text.server("core.fields.document.validation.not.found"),
 			itemIndex: 2,
 		},
 	]);
@@ -352,7 +354,7 @@ test("document field validates multiple target collections", async () => {
 		{
 			key: "multi_collection_doc",
 			localeCode: null,
-			message: serverText("core.fields.document.validation.not.found"),
+			message: text.server("core.fields.document.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
@@ -364,11 +366,11 @@ test("custom field config passes schema validation", async () => {
 	const field = new DocumentCustomField("field", {
 		collection: "page",
 		details: {
-			label: adminText("tests.fields.field.label", {
-				fallback: "title",
+			label: text.admin("tests.fields.field.label", {
+				defaultMessage: "title",
 			}),
-			summary: adminText("tests.fields.field.summary", {
-				fallback: "description",
+			summary: text.admin("tests.fields.field.summary", {
+				defaultMessage: "description",
 			}),
 		},
 		config: {

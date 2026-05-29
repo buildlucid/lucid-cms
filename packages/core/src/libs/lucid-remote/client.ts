@@ -7,7 +7,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
-import { serverText } from "../i18n/index.js";
+import { text } from "../i18n/index.js";
 import type { LucidRemoteRequestData } from "./types.js";
 
 type LucidRemoteRequestProps = {
@@ -51,8 +51,8 @@ const createRequestError = (error: unknown, status = 500) => ({
 	error: {
 		type: "basic" as const,
 		status,
-		message: serverText("core.lucid.remote.request.failed", {
-			fallback: getErrorMessage(error),
+		message: text.server("core.lucid.remote.request.failed", {
+			defaultMessage: getErrorMessage(error),
 		}),
 	},
 	data: undefined,
@@ -81,11 +81,11 @@ const createRemoteError = (
 			error: {
 				type: "basic",
 				status: json.status || response.status,
-				name: serverText("core.lucid.remote.request.failed.name", {
-					fallback: json.name,
+				name: text.server("core.lucid.remote.request.failed.name", {
+					defaultMessage: json.name,
 				}),
-				message: serverText("core.lucid.remote.request.failed", {
-					fallback: json.message,
+				message: text.server("core.lucid.remote.request.failed", {
+					defaultMessage: json.message,
 				}),
 				errors: json.errors as LucidErrorData["errors"],
 			},
@@ -97,8 +97,8 @@ const createRemoteError = (
 		error: {
 			type: "basic",
 			status: response.status,
-			message: serverText("core.lucid.remote.request.failed", {
-				fallback: response.statusText || "Lucid remote request failed.",
+			message: text.server("core.lucid.remote.request.failed", {
+				defaultMessage: response.statusText || "Lucid remote request failed.",
 			}),
 		},
 		data: undefined,

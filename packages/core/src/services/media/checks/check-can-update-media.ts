@@ -1,4 +1,4 @@
-import { serverText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -16,7 +16,7 @@ const checkCanUpdateMedia: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.files.validation.size.limit.exceeded", {
+				message: text.server("core.files.validation.size.limit.exceeded", {
 					data: {
 						size: formatBytes(maxFileSize),
 					},
@@ -25,7 +25,7 @@ const checkCanUpdateMedia: ServiceFn<
 				errors: {
 					file: {
 						code: "storage",
-						message: serverText("core.files.validation.size.limit.exceeded", {
+						message: text.server("core.files.validation.size.limit.exceeded", {
 							data: {
 								size: formatBytes(maxFileSize),
 							},

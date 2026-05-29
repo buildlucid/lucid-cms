@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import {
@@ -92,7 +92,7 @@ const updateSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.media.not.found.message"),
+				message: text.server("core.media.not.found.message"),
 				status: 404,
 			},
 		},
@@ -107,7 +107,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					focalPoint: {
 						code: "media_error",
-						message: serverText("core.media.errors.focal.point.image.only"),
+						message: text.server("core.media.errors.focal.point.image.only"),
 					},
 				},
 			},
@@ -139,7 +139,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					file: {
 						code: "media_error",
-						message: serverText("core.media.errors.missing.file.name"),
+						message: text.server("core.media.errors.missing.file.name"),
 					},
 				},
 			},
@@ -193,7 +193,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					focalPoint: {
 						code: "media_error",
-						message: serverText("core.media.errors.focal.point.image.only"),
+						message: text.server("core.media.errors.focal.point.image.only"),
 					},
 				},
 			},

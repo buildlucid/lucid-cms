@@ -1,6 +1,5 @@
 {
 	"plugin.nodemailer.email.send.success": "The email was successfully sent.",
-	"plugin.nodemailer.transporter.not.ready": "The email transporter is not ready.",
 	"plugin.nodemailer.email.send.failed": "The email failed to send.",
 	"plugin.nodemailer.attachments.error.name": "Email Attachment Error",
 	"plugin.nodemailer.attachments.url.resolve.failed": "Attachment URL could not be resolved.",

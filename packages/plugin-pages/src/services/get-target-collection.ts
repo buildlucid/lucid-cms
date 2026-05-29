@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type { ServiceResponse } from "@lucidcms/core/types";
 import type {
 	CollectionConfig,
@@ -21,7 +21,7 @@ const getTargetCollection = (data: {
 			error: {
 				type: "basic",
 				status: 500,
-				message: serverText("plugin.pages.collections.not.found", {
+				message: text.server("plugin.pages.collections.not.found", {
 					data: {
 						collection: data.collectionKey,
 					},

@@ -3,15 +3,15 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
-import { serverText, translateServer } from "../i18n/index.js";
-import type { TranslationData } from "../i18n/types.js";
+import { text } from "../i18n/index.js";
+import type { TranslationValues } from "../i18n/types.js";
 import type { EmailAttachment } from "./types.js";
 
 const MAX_ATTACHMENTS = 10;
 const MAX_FILENAME_LENGTH = 255;
 const CONTENT_TYPE_REGEX = /^[A-Za-z0-9!#$&^_.+-]+\/[A-Za-z0-9!#$&^_.+-]+$/;
 
-type AttachmentTranslator = (key: string, data?: TranslationData) => string;
+type AttachmentTranslator = (key: string, data?: TranslationValues) => string;
 
 /**
  * Keeps attachment sources on remote HTTP/S URLs only.
@@ -148,9 +148,6 @@ export const normalizeEmailAttachments = (
 	context: ServiceContext,
 	attachments?: unknown[] | null,
 ): Awaited<ServiceResponse<EmailAttachment[]>> => {
-	const translate: AttachmentTranslator = (key, data) =>
-		translateServer(key, data, { config: context.config });
-
 	if (!attachments || attachments.length === 0) {
 		return {
 			error: undefined,
@@ -158,13 +155,15 @@ export const normalizeEmailAttachments = (
 		};
 	}
 
-	const result = createEmailAttachmentsSchema(translate).safeParse(attachments);
+	const result = createEmailAttachmentsSchema(
+		context.translate.server,
+	).safeParse(attachments);
 	if (!result.success) {
 		return {
 			error: {
 				type: "validation",
-				name: serverText("core.errors.validation.name"),
-				message: serverText("core.errors.validation.message"),
+				name: text.server("core.errors.validation.name"),
+				message: text.server("core.errors.validation.message"),
 				status: 400,
 				zod: result.error,
 			},

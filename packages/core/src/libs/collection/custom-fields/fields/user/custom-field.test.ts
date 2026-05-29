@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { adminText, serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import UserCustomField from "./custom-field.js";
@@ -10,9 +10,11 @@ import UserCustomField from "./custom-field.js";
 const UserCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
-		singularName: adminText("tests.collections.collection.singularName", {
-			fallback: "Test",
+		name: text.admin("tests.collections.collection.name", {
+			defaultMessage: "Test",
+		}),
+		singularName: text.admin("tests.collections.collection.singularName", {
+			defaultMessage: "Test",
 		}),
 	},
 	config: {
@@ -51,9 +53,9 @@ test("successfully validate field - user", async () => {
 				{
 					id: 1,
 					// email: "test@test.com",
-					// first_name: adminText("tests.collections.collection.name", { fallback: "Test" }),
-					// last_name: adminText("tests.collections.collection.name", { fallback: "User" }),
-					// username: adminText("tests.collections.collection.name", { fallback: "test-user" }),
+					// first_name: text.admin("tests.collections.collection.name", { defaultMessage: "Test" }),
+					// last_name: text.admin("tests.collections.collection.name", { defaultMessage: "User" }),
+					// username: text.admin("tests.collections.collection.name", { defaultMessage: "test-user" }),
 				},
 			],
 			document: [],
@@ -80,9 +82,9 @@ test("successfully validate field - user", async () => {
 				{
 					id: 1,
 					// email: "test@test.com",
-					// first_name: adminText("tests.collections.collection.name", { fallback: "Test" }),
-					// last_name: adminText("tests.collections.collection.name", { fallback: "User" }),
-					// username: adminText("tests.collections.collection.name", { fallback: "test-user" }),
+					// first_name: text.admin("tests.collections.collection.name", { defaultMessage: "Test" }),
+					// last_name: text.admin("tests.collections.collection.name", { defaultMessage: "User" }),
+					// username: text.admin("tests.collections.collection.name", { defaultMessage: "test-user" }),
 				},
 			],
 			document: [],
@@ -140,7 +142,7 @@ test("fail to validate field - user", async () => {
 			{
 				key: "required_user",
 				localeCode: null,
-				message: serverText("core.fields.user.validation.not.found"),
+				message: text.server("core.fields.user.validation.not.found"),
 				itemIndex: 0,
 			},
 		],
@@ -148,7 +150,7 @@ test("fail to validate field - user", async () => {
 			{
 				key: "required_user",
 				localeCode: null,
-				message: serverText("core.fields.validation.required"),
+				message: text.server("core.fields.validation.required"),
 			},
 		],
 	});
@@ -214,7 +216,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: serverText("core.fields.relation.validation.min.items", {
+			message: text.server("core.fields.relation.validation.min.items", {
 				data: {
 					min: 2,
 				},
@@ -225,7 +227,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: serverText("core.fields.relation.validation.max.items", {
+			message: text.server("core.fields.relation.validation.max.items", {
 				data: {
 					max: 3,
 				},
@@ -236,13 +238,13 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: serverText("core.fields.user.validation.not.found"),
+			message: text.server("core.fields.user.validation.not.found"),
 			itemIndex: 1,
 		},
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: serverText("core.fields.user.validation.not.found"),
+			message: text.server("core.fields.user.validation.not.found"),
 			itemIndex: 2,
 		},
 	]);
@@ -253,11 +255,11 @@ test("user field validates multiple item counts and indexed errors", async () =>
 test("custom field config passes schema validation", async () => {
 	const field = new UserCustomField("field", {
 		details: {
-			label: adminText("tests.fields.field.label", {
-				fallback: "title",
+			label: text.admin("tests.fields.field.label", {
+				defaultMessage: "title",
 			}),
-			summary: adminText("tests.fields.field.summary", {
-				fallback: "description",
+			summary: text.admin("tests.fields.field.summary", {
+				defaultMessage: "description",
 			}),
 		},
 		config: {

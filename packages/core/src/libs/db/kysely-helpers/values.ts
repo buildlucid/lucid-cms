@@ -1,6 +1,6 @@
 import { sql } from "kysely";
 import { LucidError } from "../../../utils/errors/index.js";
-import { translateServer } from "../../i18n/index.js";
+import { translate } from "../../i18n/index.js";
 
 // https://old.kyse.link/?p=s&i=C0yoagEodj9vv4AxE3TH
 const values = <R extends Record<string, unknown>, A extends string>(
@@ -12,7 +12,7 @@ const values = <R extends Record<string, unknown>, A extends string>(
 	const firstRecord = records[0];
 	if (!firstRecord) {
 		throw new LucidError({
-			message: translateServer("core.no.records.provided"),
+			message: translate.server("core.no.records.provided"),
 		});
 	}
 	const keys = Object.keys(firstRecord);

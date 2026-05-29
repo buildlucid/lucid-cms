@@ -1,6 +1,6 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
-import { serverText, translateServer } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UserRolesRepository,
@@ -63,14 +63,14 @@ const inviteSingle: ServiceFn<
 						reservedEmailRes.data !== undefined
 							? {
 									code: "invalid",
-									message: serverText("core.database.duplicates.entry"),
+									message: text.server("core.database.duplicates.entry"),
 								}
 							: undefined,
 					username:
 						userExistsRes.data?.username === data.username
 							? {
 									code: "invalid",
-									message: serverText("core.database.duplicates.entry"),
+									message: text.server("core.database.duplicates.entry"),
 								}
 							: undefined,
 				},
@@ -121,9 +121,7 @@ const inviteSingle: ServiceFn<
 		type: "internal",
 		to: email,
 		subject: formatEmailSubject(
-			translateServer("core.email.invitations.email.subject", undefined, {
-				config: context.config,
-			}),
+			context.translate.server("core.email.invitations.email.subject"),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.userInvite.key,

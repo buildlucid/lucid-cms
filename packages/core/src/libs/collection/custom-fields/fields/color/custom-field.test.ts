@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { adminText, serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import ColorCustomField from "./custom-field.js";
@@ -10,9 +10,11 @@ import ColorCustomField from "./custom-field.js";
 const ColorCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
-		singularName: adminText("tests.collections.collection.singularName", {
-			fallback: "Test",
+		name: text.admin("tests.collections.collection.name", {
+			defaultMessage: "Test",
+		}),
+		singularName: text.admin("tests.collections.collection.singularName", {
+			defaultMessage: "Test",
 		}),
 	},
 	config: {
@@ -94,9 +96,8 @@ test("fail to validate field - color", async () => {
 		{
 			key: "standard_color",
 			localeCode: null,
-			message: serverText("core.fields.validation.errors.unknown", {
-				fallback: "Invalid input: expected string, received number",
-				priority: "Invalid input: expected string, received number",
+			message: text.server("core.fields.validation.errors.unknown", {
+				defaultMessage: "Invalid input: expected string, received number",
 			}),
 		},
 	]);
@@ -124,7 +125,7 @@ test("fail to validate field - color", async () => {
 		{
 			key: "required_color",
 			localeCode: null,
-			message: serverText("core.fields.validation.required"),
+			message: text.server("core.fields.validation.required"),
 		},
 	]);
 
@@ -151,7 +152,7 @@ test("fail to validate field - color", async () => {
 		{
 			key: "required_color",
 			localeCode: null,
-			message: serverText("core.fields.validation.required"),
+			message: text.server("core.fields.validation.required"),
 		},
 	]);
 
@@ -178,7 +179,7 @@ test("fail to validate field - color", async () => {
 		{
 			key: "required_color",
 			localeCode: null,
-			message: serverText("core.fields.validation.required"),
+			message: text.server("core.fields.validation.required"),
 		},
 	]);
 });
@@ -188,11 +189,11 @@ test("fail to validate field - color", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new ColorCustomField("field", {
 		details: {
-			label: adminText("tests.fields.field.label", {
-				fallback: "title",
+			label: text.admin("tests.fields.field.label", {
+				defaultMessage: "title",
 			}),
-			summary: adminText("tests.fields.field.summary", {
-				fallback: "description",
+			summary: text.admin("tests.fields.field.summary", {
+				defaultMessage: "description",
 			}),
 		},
 		config: {

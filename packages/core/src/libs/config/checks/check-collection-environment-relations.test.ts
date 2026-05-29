@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import CollectionBuilder from "../../collection/builders/collection-builder/index.js";
-import { adminText, translateServer } from "../../i18n/index.js";
+import { text, translate } from "../../i18n/index.js";
 import checkCollectionEnvironmentRelations from "./check-collection-environment-relations.js";
 
 const buildConfig = (collections: CollectionBuilder[]) =>
@@ -13,17 +13,19 @@ describe("collection environment relation config checks", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-				singularName: adminText("tests.collections.pages.singularName", {
-					fallback: "Page",
+				name: text.admin("tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+				singularName: text.admin("tests.collections.pages.singularName", {
+					defaultMessage: "Page",
 				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "staging",
-						name: adminText("tests.environments.staging.name", {
-							fallback: "Staging",
+						name: text.admin("tests.environments.staging.name", {
+							defaultMessage: "Staging",
 						}),
 						relations: {
 							blog: "signed-off",
@@ -36,17 +38,19 @@ describe("collection environment relation config checks", () => {
 		const blog = new CollectionBuilder("blog", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.blog.name", { fallback: "Blog" }),
-				singularName: adminText("tests.collections.blog.singularName", {
-					fallback: "Post",
+				name: text.admin("tests.collections.blog.name", {
+					defaultMessage: "Blog",
+				}),
+				singularName: text.admin("tests.collections.blog.singularName", {
+					defaultMessage: "Post",
 				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "signed-off",
-						name: adminText("tests.environments.signed-off.name", {
-							fallback: "Signed off",
+						name: text.admin("tests.environments.signed-off.name", {
+							defaultMessage: "Signed off",
 						}),
 					},
 				],
@@ -55,11 +59,11 @@ describe("collection environment relation config checks", () => {
 		const settings = new CollectionBuilder("settings", {
 			mode: "single",
 			details: {
-				name: adminText("tests.collections.settings.name", {
-					fallback: "Settings",
+				name: text.admin("tests.collections.settings.name", {
+					defaultMessage: "Settings",
 				}),
-				singularName: adminText("tests.collections.settings.singularName", {
-					fallback: "Settings",
+				singularName: text.admin("tests.collections.settings.singularName", {
+					defaultMessage: "Settings",
 				}),
 			},
 		});
@@ -73,17 +77,19 @@ describe("collection environment relation config checks", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-				singularName: adminText("tests.collections.pages.singularName", {
-					fallback: "Page",
+				name: text.admin("tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+				singularName: text.admin("tests.collections.pages.singularName", {
+					defaultMessage: "Page",
 				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "staging",
-						name: adminText("tests.environments.staging.name", {
-							fallback: "Staging",
+						name: text.admin("tests.environments.staging.name", {
+							defaultMessage: "Staging",
 						}),
 						relations: {
 							missing: "latest",
@@ -96,7 +102,7 @@ describe("collection environment relation config checks", () => {
 		expect(() =>
 			checkCollectionEnvironmentRelations(buildConfig([pages])),
 		).toThrow(
-			translateServer(
+			translate.server(
 				"core.config.collection.environment.relation.collection.not.found",
 				{
 					collection: "pages",
@@ -111,17 +117,19 @@ describe("collection environment relation config checks", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-				singularName: adminText("tests.collections.pages.singularName", {
-					fallback: "Page",
+				name: text.admin("tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+				singularName: text.admin("tests.collections.pages.singularName", {
+					defaultMessage: "Page",
 				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "staging",
-						name: adminText("tests.environments.staging.name", {
-							fallback: "Staging",
+						name: text.admin("tests.environments.staging.name", {
+							defaultMessage: "Staging",
 						}),
 						relations: {
 							blog: "signed-off",
@@ -133,17 +141,19 @@ describe("collection environment relation config checks", () => {
 		const blog = new CollectionBuilder("blog", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.blog.name", { fallback: "Blog" }),
-				singularName: adminText("tests.collections.blog.singularName", {
-					fallback: "Post",
+				name: text.admin("tests.collections.blog.name", {
+					defaultMessage: "Blog",
+				}),
+				singularName: text.admin("tests.collections.blog.singularName", {
+					defaultMessage: "Post",
 				}),
 			},
 			config: {
 				environments: [
 					{
 						key: "production",
-						name: adminText("tests.environments.production.name", {
-							fallback: "Production",
+						name: text.admin("tests.environments.production.name", {
+							defaultMessage: "Production",
 						}),
 					},
 				],
@@ -153,7 +163,7 @@ describe("collection environment relation config checks", () => {
 		expect(() =>
 			checkCollectionEnvironmentRelations(buildConfig([pages, blog])),
 		).toThrow(
-			translateServer(
+			translate.server(
 				"core.config.collection.environment.relation.version.not.found",
 				{
 					collection: "pages",

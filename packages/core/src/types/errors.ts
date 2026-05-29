@@ -5,11 +5,11 @@ import type {
 	GroupError as PublicGroupError,
 } from "@lucidcms/types";
 import type z from "zod";
-import type { ServerText } from "../libs/i18n/types.js";
+import type { LiteralText, ServerTextDescriptor } from "../libs/i18n/types.js";
 
 export type { PublicErrorData };
 
-export type ErrorText = ServerText;
+export type ErrorText = ServerTextDescriptor | LiteralText;
 
 export type ErrorResultValue =
 	| ErrorResultObj
@@ -50,4 +50,5 @@ export interface LucidErrorData
 	message?: ErrorText;
 	errors?: ErrorResult;
 	zod?: z.ZodError;
+	cause?: unknown;
 }

@@ -10,7 +10,7 @@ import {
 	coreTranslations,
 	loadProjectTranslations,
 	mergeTranslationBundles,
-	translateServer,
+	translate,
 } from "../i18n/index.js";
 import type { TranslationBundles } from "../i18n/types.js";
 import { initializeLogger } from "../logger/index.js";
@@ -99,8 +99,8 @@ const processConfig = async (
 					throw new LucidError({
 						scope: pluginDef.key,
 						message:
-							res.error.message?.default ??
-							translateServer("core.plugins.init.failed", {
+							translate.text(res.error.message) ??
+							translate.server("core.plugins.init.failed", {
 								key: pluginDef.key,
 							}),
 					});

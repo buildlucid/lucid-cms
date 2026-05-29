@@ -1,6 +1,6 @@
 import constants from "../../constants/constants.js";
 import { coreAiGuidance } from "../../constants/default-config.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
 import type {
 	CmsAiGenerateData,
@@ -42,7 +42,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: serverText("core.collections.not.found.message"),
+				message: text.server("core.collections.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -60,7 +60,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: serverText("core.ai.custom.field.input.target.not.found"),
+				message: text.server("core.ai.custom.field.input.target.not.found"),
 			},
 			data: undefined,
 		};
@@ -73,7 +73,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: serverText("core.ai.custom.field.input.target.not.found"),
+				message: text.server("core.ai.custom.field.input.target.not.found"),
 			},
 			data: undefined,
 		};
@@ -84,7 +84,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("core.ai.custom.field.input.no.supported.field"),
+				message: text.server("core.ai.custom.field.input.no.supported.field"),
 			},
 			data: undefined,
 		};
@@ -117,7 +117,7 @@ const customFieldInput: ServiceFn<
 				error: {
 					type: "basic",
 					status: 400,
-					message: serverText("core.ai.custom.field.input.guidance.not.found"),
+					message: text.server("core.ai.custom.field.input.guidance.not.found"),
 				},
 				data: undefined,
 			};
@@ -142,7 +142,10 @@ const customFieldInput: ServiceFn<
 		} catch (err) {
 			logger.error({
 				scope: constants.logScopes.ai,
-				message: err instanceof Error ? err.message : String(err),
+				message: "Failed to resolve AI field context",
+				data: {
+					errorMessage: err instanceof Error ? err.message : String(err),
+				},
 			});
 		}
 	}
@@ -153,7 +156,7 @@ const customFieldInput: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("core.routes.ai.generate.error.message"),
+				message: text.server("core.routes.ai.generate.error.message"),
 			},
 			data: undefined,
 		};

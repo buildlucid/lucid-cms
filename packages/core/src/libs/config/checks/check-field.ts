@@ -4,7 +4,7 @@ import type {
 	CFConfig,
 	FieldTypes,
 } from "../../collection/custom-fields/types.js";
-import { translateServer } from "../../i18n/index.js";
+import { translate } from "../../i18n/index.js";
 
 // TODO: Handle this within the custom field class
 
@@ -23,7 +23,7 @@ const checkField = (field: CFConfig<FieldTypes>, config: Config) => {
 				}
 
 				throw new Error(
-					translateServer(
+					translate.server(
 						"core.fields.document.validation.collection.not.found",
 						{
 							collection: collectionKey,

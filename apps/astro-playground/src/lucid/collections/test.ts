@@ -1,15 +1,15 @@
-import { adminText, CollectionBuilder, z } from "@lucidcms/core";
+import { CollectionBuilder, text, z } from "@lucidcms/core";
 import IntroBrick from "../bricks/intro.js";
 
 const TestCollection = new CollectionBuilder("test", {
 	mode: "multiple",
 	details: {
-		name: adminText("collections.test.name", { fallback: "Test" }),
-		singularName: adminText("collections.test.singularName", {
-			fallback: "Test",
+		name: text.admin("collections.test.name", { defaultMessage: "Test" }),
+		singularName: text.admin("collections.test.singularName", {
+			defaultMessage: "Test",
 		}),
-		summary: adminText("collections.test.summary", {
-			fallback:
+		summary: text.admin("collections.test.summary", {
+			defaultMessage:
 				"A test collection for the revisions and draft/published functionality.",
 		}),
 	},
@@ -24,8 +24,8 @@ const TestCollection = new CollectionBuilder("test", {
 	},
 }).addText("title", {
 	details: {
-		label: adminText("collections.test.fields.title.label", {
-			fallback: "Title",
+		label: text.admin("collections.test.fields.title.label", {
+			defaultMessage: "Title",
 		}),
 	},
 	config: {

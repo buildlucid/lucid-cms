@@ -1,7 +1,7 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../../constants/constants.js";
 import formatter from "../../../libs/formatters/index.js";
-import { serverText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import {
 	UsersRepository,
 	UserTokensRepository,
@@ -27,7 +27,7 @@ const acceptInvitation: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText(
+				message: text.server(
 					"core.auth.password.authentication.disabled.message",
 				),
 			},
@@ -74,7 +74,7 @@ const acceptInvitation: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.tokens.not.found.message"),
+				message: text.server("core.tokens.not.found.message"),
 				status: 404,
 			},
 		},
@@ -94,7 +94,7 @@ const acceptInvitation: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 404,
-				message: serverText("core.user.not.found.message"),
+				message: text.server("core.user.not.found.message"),
 			},
 		},
 	});
@@ -105,8 +105,8 @@ const acceptInvitation: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				name: serverText("core.auth.invitations.user.already.accepted.name"),
-				message: serverText(
+				name: text.server("core.auth.invitations.user.already.accepted.name"),
+				message: text.server(
 					"core.auth.invitations.user.already.accepted.message",
 				),
 			},
@@ -156,7 +156,7 @@ const acceptInvitation: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.tokens.not.found.message"),
+				message: text.server("core.tokens.not.found.message"),
 				status: 404,
 			},
 			data: undefined,

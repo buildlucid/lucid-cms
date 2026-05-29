@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
@@ -53,7 +53,7 @@ const cancel: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.publish.requests.not.pending"),
+				message: text.server("core.publish.requests.not.pending"),
 				status: 400,
 			},
 			data: undefined,
@@ -81,8 +81,8 @@ const cancel: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.collections.permission.error.name"),
-				message: serverText("core.collections.permission.error.message", {
+				name: text.server("core.collections.permission.error.name"),
+				message: text.server("core.collections.permission.error.message", {
 					data: {
 						collection: operationRes.data.collection_key,
 						action: requiredAction,
@@ -159,8 +159,8 @@ const cancel: ServiceFn<
 		collectionKey: operationRes.data.collection_key,
 		documentId: operationRes.data.document_id,
 		recipients,
-		title: serverText("core.publish.requests.cancelled.title"),
-		message: serverText("core.publish.requests.cancelled.message", {
+		title: text.server("core.publish.requests.cancelled.title"),
+		message: text.server("core.publish.requests.cancelled.message", {
 			data: {
 				collection: operationRes.data.collection_key,
 				documentId: operationRes.data.document_id,

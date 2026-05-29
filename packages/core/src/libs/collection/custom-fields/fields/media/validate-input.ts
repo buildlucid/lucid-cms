@@ -1,6 +1,5 @@
 import constants from "../../../../../constants/constants.js";
 import type { ServiceContext } from "../../../../../types.js";
-import { translateServer } from "../../../../i18n/index.js";
 import logger from "../../../../logger/index.js";
 import { MediaRepository } from "../../../../repositories/index.js";
 import type { FieldRelationValidationInput } from "../../types.js";
@@ -37,7 +36,7 @@ const validateMediaInputData = async (
 	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
-			message: translateServer("core.media.validation.fetch.failed"),
+			message: "Failed to fetch media for field validation",
 		});
 		return [];
 	}

@@ -3,7 +3,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
-import { serverText } from "../i18n/index.js";
+import { text } from "../i18n/index.js";
 import { hookExecutionKinds } from "./hook-map.js";
 import type {
 	ArgumentsType,
@@ -140,8 +140,8 @@ const executeTransformHooks = async <
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.hooks.execution.error.name"),
-				message: serverText("core.hooks.transform.payload.error.message", {
+				name: text.server("core.hooks.execution.error.name"),
+				message: text.server("core.hooks.transform.payload.error.message", {
 					data: {
 						service: String(options.service),
 						event: String(options.event),

@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { translateServer } from "../../libs/i18n/index.js";
+import { translate } from "../../libs/i18n/index.js";
 import LucidError from "../errors/lucid-error.js";
 
 const encryptionKeyToHex = (encryptionKey: string) =>
@@ -22,7 +22,7 @@ export const decrypt = (encryptedSecret: string, encryptionKey: string) => {
 	const [iv, encrypted] = encryptedSecret.split(":");
 	if (!iv || !encrypted) {
 		throw new LucidError({
-			message: translateServer("core.security.secrets.encrypted.invalid"),
+			message: translate.server("core.security.secrets.encrypted.invalid"),
 		});
 	}
 	const key = encryptionKeyToHex(encryptionKey);

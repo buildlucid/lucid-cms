@@ -4,7 +4,7 @@ import type {
 	LucidVersionTableName,
 } from "../../../../types.js";
 import type { CollectionBuilderHooks } from "../../../hooks/types.js";
-import type { AdminText } from "../../../i18n/types.js";
+import type { AdminTextDescriptor } from "../../../i18n/types.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 
@@ -45,7 +45,7 @@ export type PublishingWorkflowStageColor =
 
 export type PublishingWorkflowStageConfig = {
 	key: string;
-	name: AdminText;
+	name: AdminTextDescriptor;
 	color: PublishingWorkflowStageColor;
 	publishTargets: string[];
 	permissions: {
@@ -63,9 +63,9 @@ export type CollectionConfigSchemaType = {
 	key: string;
 	mode: "single" | "multiple";
 	details: {
-		name: AdminText;
-		singularName: AdminText;
-		summary?: AdminText;
+		name: AdminTextDescriptor;
+		singularName: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
 	};
 	permissions?: CollectionPermissions;
 	config?: {
@@ -86,7 +86,7 @@ export type CollectionConfigSchemaType = {
 			initial?: string;
 			stages: Array<{
 				key: string;
-				name: AdminText;
+				name: AdminTextDescriptor;
 				color?: PublishingWorkflowStageColor;
 				publishTargets?: string[];
 				permissions?: {
@@ -97,7 +97,7 @@ export type CollectionConfigSchemaType = {
 		};
 		environments?: Array<{
 			key: string;
-			name: AdminText;
+			name: AdminTextDescriptor;
 			permissions?: CollectionEnvironmentPermissions;
 			relations?: CollectionEnvironmentRelations;
 		}>;
@@ -114,9 +114,9 @@ export type CollectionData = {
 	key: string;
 	mode: CollectionConfigSchemaType["mode"];
 	details: {
-		name: AdminText;
-		singularName: AdminText;
-		summary: AdminText | null;
+		name: AdminTextDescriptor;
+		singularName: AdminTextDescriptor;
+		summary: AdminTextDescriptor | null;
 	};
 	config: {
 		locked: boolean;
@@ -129,7 +129,7 @@ export type CollectionData = {
 		displayInListing: string[];
 		environments: {
 			key: string;
-			name: AdminText;
+			name: AdminTextDescriptor;
 			permissions: CollectionEnvironmentPermissions;
 			relations: CollectionEnvironmentRelations;
 		}[];

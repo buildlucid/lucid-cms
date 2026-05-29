@@ -1,6 +1,6 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
-import { serverText, translateServer } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
@@ -60,7 +60,7 @@ const requestEmailChange: ServiceFn<
 				errors: {
 					email: {
 						code: "invalid",
-						message: serverText("core.users.email.duplicate"),
+						message: text.server("core.users.email.duplicate"),
 					},
 				},
 			},
@@ -187,9 +187,7 @@ const requestEmailChange: ServiceFn<
 		type: "internal",
 		to: data.newEmail,
 		subject: formatEmailSubject(
-			translateServer("core.email.change.confirm.subject", undefined, {
-				config: context.config,
-			}),
+			context.translate.server("core.email.change.confirm.subject"),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.emailChangeConfirm.key,
@@ -205,9 +203,7 @@ const requestEmailChange: ServiceFn<
 		type: "internal",
 		to: data.oldEmail,
 		subject: formatEmailSubject(
-			translateServer("core.email.change.revert.subject", undefined, {
-				config: context.config,
-			}),
+			context.translate.server("core.email.change.revert.subject"),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.emailChangeRevert.key,

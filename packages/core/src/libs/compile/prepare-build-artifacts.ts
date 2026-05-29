@@ -1,5 +1,6 @@
 import type { Config } from "../../types/config.js";
 import processBuildArtifacts from "../cli/services/process-build-artifacts.js";
+import { createTranslator } from "../i18n/index.js";
 import handlePluginBuildHooks from "../plugins/hooks/handle-build.js";
 import type {
 	LucidConfigDefinition,
@@ -15,6 +16,7 @@ const prepareBuildArtifacts = async (props: {
 	outputRelativeConfigPath: string;
 	customArtifactTypes?: string[];
 }): Promise<RuntimeBuildArtifacts> => {
+	const translate = createTranslator({ config: props.config, locale: "en" });
 	const pluginBuildArtifactsRes = await handlePluginBuildHooks({
 		config: props.config,
 		definition: props.definition,
@@ -26,7 +28,7 @@ const prepareBuildArtifacts = async (props: {
 
 	if (pluginBuildArtifactsRes.error || !pluginBuildArtifactsRes.data) {
 		throw new Error(
-			pluginBuildArtifactsRes.error.message?.default ??
+			translate.english.text(pluginBuildArtifactsRes.error.message) ??
 				"Lucid build failed while preparing plugin artifacts.",
 		);
 	}

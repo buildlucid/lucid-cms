@@ -3,7 +3,6 @@ import type {
 	LucidDocumentTableName,
 	ServiceContext,
 } from "../../../../../types.js";
-import { translateServer } from "../../../../i18n/index.js";
 import logger from "../../../../logger/index.js";
 import DocumentsRepository from "../../../../repositories/documents.js";
 import buildTableName from "../../../helpers/build-table-name.js";
@@ -33,7 +32,7 @@ const validateDocumentInputData = async (
 	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
-			message: translateServer("core.documents.validation.fetch.failed"),
+			message: "Failed to fetch documents for field validation",
 		});
 		return [];
 	}
@@ -60,9 +59,10 @@ const fetchDocumentsFromCollection = async (
 		if (tableNameRes.error) {
 			logger.error({
 				scope: constants.logScopes.validation,
-				message: translateServer("core.documents.collection.fetch.failed", {
+				message: "Failed to fetch collection documents for field validation",
+				data: {
 					collection: collectionKey,
-				}),
+				},
 			});
 			return [];
 		}
@@ -93,9 +93,10 @@ const fetchDocumentsFromCollection = async (
 		if (documentIdRes.error) {
 			logger.error({
 				scope: constants.logScopes.validation,
-				message: translateServer("core.documents.collection.fetch.failed", {
+				message: "Failed to fetch collection documents for field validation",
+				data: {
 					collection: collectionKey,
-				}),
+				},
 			});
 			return [];
 		}
@@ -107,9 +108,10 @@ const fetchDocumentsFromCollection = async (
 	} catch (_err) {
 		logger.error({
 			scope: constants.logScopes.validation,
-			message: translateServer("core.documents.collection.fetch.failed", {
+			message: "Failed to fetch collection documents for field validation",
+			data: {
 				collection: collectionKey,
-			}),
+			},
 		});
 		return [];
 	}

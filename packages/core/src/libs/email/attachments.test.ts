@@ -1,16 +1,20 @@
 import { describe, expect, test } from "vitest";
 import type { ServiceContext } from "../../types.js";
+import { createTranslator } from "../i18n/index.js";
 import { normalizeEmailAttachments } from "./attachments";
 
-const context = {
-	config: {
-		i18n: {
-			translations: {},
-			interface: {
-				defaultLocale: "en",
-			},
+const config = {
+	i18n: {
+		translations: {},
+		interface: {
+			defaultLocale: "en",
 		},
 	},
+};
+
+const context = {
+	config,
+	translate: createTranslator({ config, locale: "en" }),
 } as ServiceContext;
 
 describe("normalizeEmailAttachments", () => {

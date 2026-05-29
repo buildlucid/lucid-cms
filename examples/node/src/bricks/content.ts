@@ -1,23 +1,23 @@
-import { adminText, BrickBuilder } from "@lucidcms/core";
+import { BrickBuilder, text } from "@lucidcms/core";
 
 const ContentBrick = new BrickBuilder("content", {
 	details: {
-		name: adminText("bricks.content.name", {
-			fallback: "Content",
+		name: text.admin("bricks.content.name", {
+			defaultMessage: "Content",
 		}),
 	},
 })
 	.addText("heading", {
 		details: {
-			label: adminText("bricks.content.fields.heading.label", {
-				fallback: "Heading",
+			label: text.admin("bricks.content.fields.heading.label", {
+				defaultMessage: "Heading",
 			}),
 		},
 	})
 	.addTextarea("body", {
 		details: {
-			label: adminText("bricks.content.fields.body.label", {
-				fallback: "Body",
+			label: text.admin("bricks.content.fields.body.label", {
+				defaultMessage: "Body",
 			}),
 		},
 	});

@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
@@ -20,13 +20,13 @@ const checkParentIsPageOfSelf = (data: {
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("plugin.pages.parents.self.denied"),
+				message: text.server("plugin.pages.parents.self.denied"),
 				errors: {
 					fields: [
 						{
 							key: constants.fields.parentPage.key,
 							localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
-							message: serverText("plugin.pages.parents.self.denied"),
+							message: text.server("plugin.pages.parents.self.denied"),
 						},
 					],
 				},

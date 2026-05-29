@@ -1,19 +1,18 @@
-export {
-	adminText,
-	adminTextSchema,
-	isAdminText,
-} from "./admin-text.js";
 export { loadProjectTranslations } from "./load-project-translations.js";
 export {
-	isServerText,
-	serverText,
-	serverTextSchema,
-} from "./server-text.js";
+	adminTextDescriptorSchema,
+	isTextDescriptor,
+	isTranslatableText,
+	literalTextSchema,
+	serverTextDescriptorSchema,
+	text,
+	textDescriptorSchema,
+	translatableTextSchema,
+} from "./text.js";
 export {
+	createTranslator,
 	resolveInterfaceLocale,
-	translateAdmin,
-	translateServer,
-	translateServerText,
+	translate,
 } from "./translate.js";
 export {
 	coreTranslations,
@@ -23,15 +22,23 @@ export {
 	normalizeTranslationBundles,
 } from "./translations.js";
 export type {
-	AdminText,
+	AdminTextDescriptor,
+	BoundTranslateTextOptions,
 	InterfaceDirection,
+	LiteralText,
 	LocaleDirection,
-	ServerText,
-	TranslateServer,
-	TranslateServerOptions,
+	ServerTextDescriptor,
+	TextDescriptor,
+	TranslatableText,
+	TranslateKey,
+	TranslateOptions,
+	TranslateText,
+	TranslateTextOptions,
 	TranslationBundle,
 	TranslationBundles,
-	TranslationData,
 	TranslationScope,
+	TranslationValues,
 	Translator,
+	TranslatorConfig,
 } from "./types.js";
+export { getZodIssueText, zodTextIssue } from "./zod.js";

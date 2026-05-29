@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { RolesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -31,7 +31,7 @@ const deleteSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.permissions.denied"),
+				message: text.server("core.permissions.denied"),
 				status: 403,
 			},
 			data: undefined,

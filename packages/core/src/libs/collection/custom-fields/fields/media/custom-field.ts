@@ -1,7 +1,6 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
-import { adminText } from "../../../../i18n/admin-text.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
@@ -38,8 +37,8 @@ class MediaCustomField extends CustomField<"media"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					adminText(`fields.${this.type}.${this.key}.label`, {
-						fallback: keyToTitle(this.key),
+					text.admin(`fields.${this.type}.${this.key}.label`, {
+						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
 			},
@@ -75,7 +74,7 @@ class MediaCustomField extends CustomField<"media"> {
 					value === undefined ||
 					value === null ||
 					(Array.isArray(value) && value.length === 0),
-				message: serverText("core.fields.validation.required"),
+				message: text.server("core.fields.validation.required"),
 			},
 		};
 	}
@@ -146,7 +145,7 @@ class MediaCustomField extends CustomField<"media"> {
 			if (findMedia === undefined) {
 				errors.push({
 					itemIndex,
-					message: serverText("core.fields.media.validation.not.found"),
+					message: text.server("core.fields.media.validation.not.found"),
 				});
 				continue;
 			}
@@ -157,7 +156,7 @@ class MediaCustomField extends CustomField<"media"> {
 				if (!this.config.validation.extensions.includes(extension)) {
 					errors.push({
 						itemIndex,
-						message: serverText(
+						message: text.server(
 							"core.fields.media.validation.extension.invalid",
 							{
 								data: {
@@ -175,7 +174,7 @@ class MediaCustomField extends CustomField<"media"> {
 				if (!type) {
 					errors.push({
 						itemIndex,
-						message: serverText("core.fields.media.validation.type.missing"),
+						message: text.server("core.fields.media.validation.type.missing"),
 					});
 					continue;
 				}
@@ -183,7 +182,7 @@ class MediaCustomField extends CustomField<"media"> {
 				if (this.config.validation.type !== type) {
 					errors.push({
 						itemIndex,
-						message: serverText("core.fields.media.validation.type.invalid", {
+						message: text.server("core.fields.media.validation.type.invalid", {
 							data: {
 								type: this.config.validation.type,
 							},
@@ -198,7 +197,7 @@ class MediaCustomField extends CustomField<"media"> {
 				if (!width) {
 					errors.push({
 						itemIndex,
-						message: serverText("core.fields.media.validation.width.missing"),
+						message: text.server("core.fields.media.validation.width.missing"),
 					});
 					continue;
 				}
@@ -209,7 +208,7 @@ class MediaCustomField extends CustomField<"media"> {
 				) {
 					errors.push({
 						itemIndex,
-						message: serverText("core.fields.media.validation.width.min", {
+						message: text.server("core.fields.media.validation.width.min", {
 							data: {
 								min: this.config.validation.width.min,
 							},
@@ -222,7 +221,7 @@ class MediaCustomField extends CustomField<"media"> {
 				) {
 					errors.push({
 						itemIndex,
-						message: serverText("core.fields.media.validation.width.max", {
+						message: text.server("core.fields.media.validation.width.max", {
 							data: {
 								max: this.config.validation.width.max,
 							},
@@ -237,7 +236,7 @@ class MediaCustomField extends CustomField<"media"> {
 				if (!height) {
 					errors.push({
 						itemIndex,
-						message: serverText("core.fields.media.validation.height.missing"),
+						message: text.server("core.fields.media.validation.height.missing"),
 					});
 					continue;
 				}
@@ -248,7 +247,7 @@ class MediaCustomField extends CustomField<"media"> {
 				) {
 					errors.push({
 						itemIndex,
-						message: serverText("core.fields.media.validation.height.min", {
+						message: text.server("core.fields.media.validation.height.min", {
 							data: {
 								min: this.config.validation.height.min,
 							},
@@ -261,7 +260,7 @@ class MediaCustomField extends CustomField<"media"> {
 				) {
 					errors.push({
 						itemIndex,
-						message: serverText("core.fields.media.validation.height.max", {
+						message: text.server("core.fields.media.validation.height.max", {
 							data: {
 								max: this.config.validation.height.max,
 							},

@@ -1,4 +1,4 @@
-import { serverText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import errorTypeDefaults from "../../errors/error-type-defaults.js";
 
@@ -16,15 +16,16 @@ const mergeServiceError = (
 		name:
 			error.name ??
 			defaultError?.name ??
-			serverText("core.services.errors.unknown.name"),
+			text.server("core.services.errors.unknown.name"),
 		message:
 			error.message ??
 			defaultError?.message ??
-			serverText("core.services.errors.unknown.message"),
+			text.server("core.services.errors.unknown.message"),
 		status: error.status ?? defaultError?.status ?? 500,
 		code: error.code ?? defaultError?.code ?? undefined,
 		zod: error.zod ?? undefined,
 		errors: error.errors ?? undefined,
+		cause: error.cause ?? defaultError?.cause ?? undefined,
 	};
 };
 

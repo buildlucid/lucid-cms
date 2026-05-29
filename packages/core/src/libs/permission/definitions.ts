@@ -1,4 +1,4 @@
-import { adminText } from "../i18n/admin-text.js";
+import { text } from "../i18n/index.js";
 import type { PermissionGroup } from "./types.js";
 
 export const Permissions = {
@@ -106,8 +106,8 @@ export const PermissionGroups = Object.freeze({
 	users: {
 		key: "users_permissions",
 		details: {
-			name: adminText("core.permissions.user.permissions", {
-				fallback: "User Permissions",
+			name: text.admin("core.permissions.user.permissions", {
+				defaultMessage: "User Permissions",
 			}),
 		},
 		core: true,
@@ -115,8 +115,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.UsersRead,
 				details: {
-					name: adminText("core.permissions.read.users", {
-						fallback: "Read Users",
+					name: text.admin("core.permissions.read.users", {
+						defaultMessage: "Read Users",
 					}),
 				},
 				core: true,
@@ -124,8 +124,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.UsersCreate,
 				details: {
-					name: adminText("core.permissions.create.users", {
-						fallback: "Create Users",
+					name: text.admin("core.permissions.create.users", {
+						defaultMessage: "Create Users",
 					}),
 				},
 				core: true,
@@ -133,8 +133,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.UsersUpdate,
 				details: {
-					name: adminText("core.permissions.update.users", {
-						fallback: "Update Users",
+					name: text.admin("core.permissions.update.users", {
+						defaultMessage: "Update Users",
 					}),
 				},
 				core: true,
@@ -142,8 +142,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.UsersDelete,
 				details: {
-					name: adminText("core.permissions.delete.users", {
-						fallback: "Delete Users",
+					name: text.admin("core.permissions.delete.users", {
+						defaultMessage: "Delete Users",
 					}),
 				},
 				core: true,
@@ -153,8 +153,8 @@ export const PermissionGroups = Object.freeze({
 	roles: {
 		key: "roles_permissions",
 		details: {
-			name: adminText("core.permissions.role.permissions", {
-				fallback: "Role Permissions",
+			name: text.admin("core.permissions.role.permissions", {
+				defaultMessage: "Role Permissions",
 			}),
 		},
 		core: true,
@@ -162,8 +162,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.RolesRead,
 				details: {
-					name: adminText("core.permissions.read.roles", {
-						fallback: "Read Roles",
+					name: text.admin("core.permissions.read.roles", {
+						defaultMessage: "Read Roles",
 					}),
 				},
 				core: true,
@@ -171,8 +171,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.RolesCreate,
 				details: {
-					name: adminText("core.permissions.create.roles", {
-						fallback: "Create Roles",
+					name: text.admin("core.permissions.create.roles", {
+						defaultMessage: "Create Roles",
 					}),
 				},
 				core: true,
@@ -180,8 +180,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.RolesUpdate,
 				details: {
-					name: adminText("core.permissions.update.roles", {
-						fallback: "Update Roles",
+					name: text.admin("core.permissions.update.roles", {
+						defaultMessage: "Update Roles",
 					}),
 				},
 				core: true,
@@ -189,8 +189,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.RolesDelete,
 				details: {
-					name: adminText("core.permissions.delete.roles", {
-						fallback: "Delete Roles",
+					name: text.admin("core.permissions.delete.roles", {
+						defaultMessage: "Delete Roles",
 					}),
 				},
 				core: true,
@@ -200,8 +200,8 @@ export const PermissionGroups = Object.freeze({
 	media: {
 		key: "media_permissions",
 		details: {
-			name: adminText("core.permissions.media.permissions", {
-				fallback: "Media Permissions",
+			name: text.admin("core.permissions.media.permissions", {
+				defaultMessage: "Media Permissions",
 			}),
 		},
 		core: true,
@@ -209,8 +209,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.MediaRead,
 				details: {
-					name: adminText("core.permissions.read.media", {
-						fallback: "Read Media",
+					name: text.admin("core.permissions.read.media", {
+						defaultMessage: "Read Media",
 					}),
 				},
 				core: true,
@@ -218,8 +218,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.MediaCreate,
 				details: {
-					name: adminText("core.permissions.create.media", {
-						fallback: "Create Media",
+					name: text.admin("core.permissions.create.media", {
+						defaultMessage: "Create Media",
 					}),
 				},
 				core: true,
@@ -227,8 +227,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.MediaUpdate,
 				details: {
-					name: adminText("core.permissions.update.media", {
-						fallback: "Update Media",
+					name: text.admin("core.permissions.update.media", {
+						defaultMessage: "Update Media",
 					}),
 				},
 				core: true,
@@ -236,8 +236,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.MediaDelete,
 				details: {
-					name: adminText("core.permissions.delete.media", {
-						fallback: "Delete Media",
+					name: text.admin("core.permissions.delete.media", {
+						defaultMessage: "Delete Media",
 					}),
 				},
 				core: true,
@@ -247,8 +247,8 @@ export const PermissionGroups = Object.freeze({
 	emails: {
 		key: "emails_permissions",
 		details: {
-			name: adminText("core.permissions.email.permissions", {
-				fallback: "Email Permissions",
+			name: text.admin("core.permissions.email.permissions", {
+				defaultMessage: "Email Permissions",
 			}),
 		},
 		core: true,
@@ -256,8 +256,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.EmailRead,
 				details: {
-					name: adminText("core.permissions.read.emails", {
-						fallback: "Read Emails",
+					name: text.admin("core.permissions.read.emails", {
+						defaultMessage: "Read Emails",
 					}),
 				},
 				core: true,
@@ -265,8 +265,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.EmailDelete,
 				details: {
-					name: adminText("core.permissions.delete.emails", {
-						fallback: "Delete Emails",
+					name: text.admin("core.permissions.delete.emails", {
+						defaultMessage: "Delete Emails",
 					}),
 				},
 				core: true,
@@ -274,8 +274,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.EmailSend,
 				details: {
-					name: adminText("core.permissions.send.emails", {
-						fallback: "Send Emails",
+					name: text.admin("core.permissions.send.emails", {
+						defaultMessage: "Send Emails",
 					}),
 				},
 				core: true,
@@ -285,8 +285,8 @@ export const PermissionGroups = Object.freeze({
 	jobs: {
 		key: "jobs_permissions",
 		details: {
-			name: adminText("core.permissions.jobs.permissions", {
-				fallback: "Jobs Permissions",
+			name: text.admin("core.permissions.jobs.permissions", {
+				defaultMessage: "Jobs Permissions",
 			}),
 		},
 		core: true,
@@ -294,8 +294,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.JobsRead,
 				details: {
-					name: adminText("core.permissions.read.jobs", {
-						fallback: "Read Jobs",
+					name: text.admin("core.permissions.read.jobs", {
+						defaultMessage: "Read Jobs",
 					}),
 				},
 				core: true,
@@ -305,8 +305,8 @@ export const PermissionGroups = Object.freeze({
 	content: {
 		key: "content_permissions",
 		details: {
-			name: adminText("core.permissions.content.permissions", {
-				fallback: "Content Permissions",
+			name: text.admin("core.permissions.content.permissions", {
+				defaultMessage: "Content Permissions",
 			}),
 		},
 		core: true,
@@ -314,8 +314,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.DocumentsRead,
 				details: {
-					name: adminText("core.permissions.read.documents", {
-						fallback: "Read Documents",
+					name: text.admin("core.permissions.read.documents", {
+						defaultMessage: "Read Documents",
 					}),
 				},
 				core: true,
@@ -323,8 +323,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.DocumentsCreate,
 				details: {
-					name: adminText("core.permissions.create.documents", {
-						fallback: "Create Documents",
+					name: text.admin("core.permissions.create.documents", {
+						defaultMessage: "Create Documents",
 					}),
 				},
 				core: true,
@@ -332,8 +332,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.DocumentsUpdate,
 				details: {
-					name: adminText("core.permissions.update.documents", {
-						fallback: "Update Documents",
+					name: text.admin("core.permissions.update.documents", {
+						defaultMessage: "Update Documents",
 					}),
 				},
 				core: true,
@@ -341,8 +341,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.DocumentsDelete,
 				details: {
-					name: adminText("core.permissions.delete.documents", {
-						fallback: "Delete Documents",
+					name: text.admin("core.permissions.delete.documents", {
+						defaultMessage: "Delete Documents",
 					}),
 				},
 				core: true,
@@ -350,8 +350,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.DocumentsRestore,
 				details: {
-					name: adminText("core.permissions.restore.revisions", {
-						fallback: "Restore Revisions",
+					name: text.admin("core.permissions.restore.revisions", {
+						defaultMessage: "Restore Revisions",
 					}),
 				},
 				core: true,
@@ -359,8 +359,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.DocumentsPublish,
 				details: {
-					name: adminText("core.permissions.publish.documents", {
-						fallback: "Publish Documents",
+					name: text.admin("core.permissions.publish.documents", {
+						defaultMessage: "Publish Documents",
 					}),
 				},
 				core: true,
@@ -368,8 +368,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.DocumentsReview,
 				details: {
-					name: adminText("core.permissions.review.document.releases", {
-						fallback: "Review Document Releases",
+					name: text.admin("core.permissions.review.document.releases", {
+						defaultMessage: "Review Document Releases",
 					}),
 				},
 				core: true,
@@ -377,8 +377,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.DocumentsAi,
 				details: {
-					name: adminText("core.permissions.use.document.ai", {
-						fallback: "Use Document AI",
+					name: text.admin("core.permissions.use.document.ai", {
+						defaultMessage: "Use Document AI",
 					}),
 				},
 				core: true,
@@ -388,8 +388,8 @@ export const PermissionGroups = Object.freeze({
 	"client-integrations": {
 		key: "client_integrations_permissions",
 		details: {
-			name: adminText("core.permissions.integrations.permissions", {
-				fallback: "Integrations Permissions",
+			name: text.admin("core.permissions.integrations.permissions", {
+				defaultMessage: "Integrations Permissions",
 			}),
 		},
 		core: true,
@@ -397,8 +397,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.IntegrationRead,
 				details: {
-					name: adminText("core.permissions.read.integrations", {
-						fallback: "Read Integrations",
+					name: text.admin("core.permissions.read.integrations", {
+						defaultMessage: "Read Integrations",
 					}),
 				},
 				core: true,
@@ -406,8 +406,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.IntegrationCreate,
 				details: {
-					name: adminText("core.permissions.create.integrations", {
-						fallback: "Create Integrations",
+					name: text.admin("core.permissions.create.integrations", {
+						defaultMessage: "Create Integrations",
 					}),
 				},
 				core: true,
@@ -415,8 +415,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.IntegrationUpdate,
 				details: {
-					name: adminText("core.permissions.update.integrations", {
-						fallback: "Update Integrations",
+					name: text.admin("core.permissions.update.integrations", {
+						defaultMessage: "Update Integrations",
 					}),
 				},
 				core: true,
@@ -424,8 +424,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.IntegrationDelete,
 				details: {
-					name: adminText("core.permissions.delete.integrations", {
-						fallback: "Delete Integrations",
+					name: text.admin("core.permissions.delete.integrations", {
+						defaultMessage: "Delete Integrations",
 					}),
 				},
 				core: true,
@@ -433,8 +433,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.IntegrationRegenerate,
 				details: {
-					name: adminText("core.permissions.regenerate.api.keys", {
-						fallback: "Regenerate API Keys",
+					name: text.admin("core.permissions.regenerate.api.keys", {
+						defaultMessage: "Regenerate API Keys",
 					}),
 				},
 				core: true,
@@ -444,8 +444,8 @@ export const PermissionGroups = Object.freeze({
 	settings: {
 		key: "settings_permissions",
 		details: {
-			name: adminText("core.permissions.setting.permissions", {
-				fallback: "Setting Permissions",
+			name: text.admin("core.permissions.setting.permissions", {
+				defaultMessage: "Setting Permissions",
 			}),
 		},
 		core: true,
@@ -453,8 +453,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.SettingsRead,
 				details: {
-					name: adminText("core.permissions.read.settings", {
-						fallback: "Read Settings",
+					name: text.admin("core.permissions.read.settings", {
+						defaultMessage: "Read Settings",
 					}),
 				},
 				core: true,
@@ -462,8 +462,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.SettingsUpdate,
 				details: {
-					name: adminText("core.permissions.update.settings", {
-						fallback: "Update Settings",
+					name: text.admin("core.permissions.update.settings", {
+						defaultMessage: "Update Settings",
 					}),
 				},
 				core: true,
@@ -471,8 +471,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.LicenseUpdate,
 				details: {
-					name: adminText("core.permissions.update.license", {
-						fallback: "Update License",
+					name: text.admin("core.permissions.update.license", {
+						defaultMessage: "Update License",
 					}),
 				},
 				core: true,
@@ -480,8 +480,8 @@ export const PermissionGroups = Object.freeze({
 			{
 				key: Permissions.CacheClear,
 				details: {
-					name: adminText("core.permissions.clear.cache", {
-						fallback: "Clear Cache",
+					name: text.admin("core.permissions.clear.cache", {
+						defaultMessage: "Clear Cache",
 					}),
 				},
 				core: true,

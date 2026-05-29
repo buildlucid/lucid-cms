@@ -53,9 +53,8 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 				key: props.name,
 				localeCode: null,
 				message: {
-					type: "server-text",
-					key: "admin.fields.json.invalid",
-					default: `${local}. ${T()("fields.json.invalid.save.warning")}.`,
+					type: "lucid.literal",
+					value: `${local}. ${T()("fields.json.invalid.save.warning")}.`,
 				},
 			} satisfies FieldError;
 		}

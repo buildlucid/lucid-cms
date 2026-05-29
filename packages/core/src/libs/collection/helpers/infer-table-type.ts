@@ -4,7 +4,7 @@ import registeredFields, {
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import type { ServiceResponse } from "../../../types.js";
-import { serverText } from "../../i18n/index.js";
+import { text } from "../../i18n/index.js";
 import { collectionTableParts } from "./table-parts.js";
 
 const HASHED_TABLE_SUFFIX_REGEX = /_[0-9a-f]{8}$/;
@@ -38,7 +38,7 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 		return {
 			data: undefined,
 			error: {
-				message: serverText(
+				message: text.server(
 					"core.collections.schema.table.name.format.start.with",
 					{
 						data: {
@@ -57,7 +57,7 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 			return {
 				data: undefined,
 				error: {
-					message: serverText(
+					message: text.server(
 						"core.collections.schema.table.name.format.insufficient.parts",
 					),
 				},
@@ -82,7 +82,7 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 				return {
 					data: undefined,
 					error: {
-						message: serverText(
+						message: text.server(
 							"core.collections.schema.table.name.format.insufficient.parts",
 						),
 					},
@@ -94,7 +94,7 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 			return {
 				data: undefined,
 				error: {
-					message: serverText(
+					message: text.server(
 						"core.collections.schema.table.name.format.insufficient.parts",
 					),
 				},
@@ -109,9 +109,9 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 		return {
 			data: undefined,
 			error: {
-				message: serverText(
+				message: text.server(
 					"core.collections.schema.table.parts.infer.failed",
-					e instanceof Error ? { fallback: e.message } : undefined,
+					e instanceof Error ? { defaultMessage: e.message } : undefined,
 				),
 			},
 		};

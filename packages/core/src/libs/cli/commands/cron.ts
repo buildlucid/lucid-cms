@@ -1,8 +1,9 @@
 import { select } from "@inquirer/prompts";
+import type { Config } from "../../../types.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
-import { serverText } from "../../i18n/index.js";
+import { createTranslator, text } from "../../i18n/index.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
@@ -11,11 +12,14 @@ import type { KVAdapterInstance } from "../../kv/types.js";
 import logger from "../../logger/index.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import getCronJobs, { type CronJobKey } from "../../runtime/cron-jobs.js";
+import type { EnvironmentVariables } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
 const cronCommand = async (jobName?: string) => {
 	let kv: KVAdapterInstance | undefined;
+	let config: Config | undefined;
+	let env: EnvironmentVariables | undefined;
 	try {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
@@ -59,6 +63,12 @@ const cronCommand = async (jobName?: string) => {
 		//* load config
 		const configPath = getConfigPath(process.cwd());
 		const configRes = await loadConfigFile({ path: configPath });
+		config = configRes.config;
+		env = configRes.env;
+		const translate = createTranslator({
+			config: configRes.config,
+			locale: "en",
+		});
 
 		const envValid = await validateEnvVars({
 			envSchema: configRes.envSchema,
@@ -72,7 +82,9 @@ const cronCommand = async (jobName?: string) => {
 		//* create a passthrough queue adapter with immediate execution enabled so
 		//* any jobs pushed to the queue by the cron are executed straight away
 		const queue = passthroughQueueAdapter();
-		kv = await getInitializedKVAdapter(configRes.config);
+		kv = await getInitializedKVAdapter(configRes.config, {
+			env: configRes.env,
+		});
 		const kvInstance = kv;
 
 		//* run the selected cron job with retry support
@@ -86,7 +98,7 @@ const cronCommand = async (jobName?: string) => {
 				logError: true,
 				defaultError: {
 					type: "cron",
-					name: serverText("core.cron.job.error.name"),
+					name: text.server("core.cron.job.error.name"),
 					message: job.error,
 				},
 			})({
@@ -95,9 +107,10 @@ const cronCommand = async (jobName?: string) => {
 				env: configRes.env ?? null,
 				queue: queue,
 				kv: kvInstance,
+				translate,
 				request: {
 					url: configRes.config.baseUrl ?? "",
-					locale: configRes.config.i18n.interface.defaultLocale,
+					locale: "en",
 				},
 			});
 
@@ -106,7 +119,8 @@ const cronCommand = async (jobName?: string) => {
 				break;
 			}
 
-			lastError = result.error.message?.default ?? "Unknown error";
+			lastError =
+				translate.english.text(result.error.message) ?? "Unknown error";
 
 			if (attempt < maxRetries) {
 				cliLogger.warn(
@@ -120,7 +134,7 @@ const cronCommand = async (jobName?: string) => {
 				`Cron job "${job.label}" failed after ${maxRetries} attempts:`,
 				lastError ?? "Unknown error",
 			);
-			await destroyKVAdapter(kv);
+			if (config) await destroyKVAdapter(kv, { config, env });
 			kv = undefined;
 			logger.setBuffering(false);
 			process.exit(1);
@@ -139,12 +153,12 @@ const cronCommand = async (jobName?: string) => {
 			},
 		);
 
-		await destroyKVAdapter(kv);
+		if (config) await destroyKVAdapter(kv, { config, env });
 		kv = undefined;
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
-		await destroyKVAdapter(kv);
+		if (config) await destroyKVAdapter(kv, { config, env });
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error);
 		}

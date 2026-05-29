@@ -2,7 +2,7 @@ import { scrypt } from "@noble/hashes/scrypt.js";
 import { isPast } from "date-fns";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -36,9 +36,9 @@ const authorizeShare: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.share.links.not.found.title"),
+				name: text.server("core.share.links.not.found.title"),
 				status: 404,
-				message: serverText("core.share.links.not.found.message"),
+				message: text.server("core.share.links.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -49,9 +49,9 @@ const authorizeShare: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.share.links.expired.title"),
+				name: text.server("core.share.links.expired.title"),
 				status: 410,
-				message: serverText("core.share.links.expired.message"),
+				message: text.server("core.share.links.expired.message"),
 			},
 			data: undefined,
 		};
@@ -63,9 +63,9 @@ const authorizeShare: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.share.links.media.deleted.title"),
+				name: text.server("core.share.links.media.deleted.title"),
 				status: 410,
-				message: serverText("core.share.links.media.deleted.message"),
+				message: text.server("core.share.links.media.deleted.message"),
 			},
 			data: undefined,
 		};
@@ -78,9 +78,9 @@ const authorizeShare: ServiceFn<
 				return {
 					error: {
 						type: "authorisation",
-						name: serverText("core.share.stream.password.required.title"),
+						name: text.server("core.share.stream.password.required.title"),
 						status: 401,
-						message: serverText("core.share.stream.password.required.message"),
+						message: text.server("core.share.stream.password.required.message"),
 					},
 					data: undefined,
 				};
@@ -108,9 +108,9 @@ const authorizeShare: ServiceFn<
 			return {
 				error: {
 					type: "authorisation",
-					name: serverText("core.share.links.access.denied.title"),
+					name: text.server("core.share.links.access.denied.title"),
 					status: 401,
-					message: serverText("core.share.links.incorrect.password.message"),
+					message: text.server("core.share.links.incorrect.password.message"),
 				},
 				data: undefined,
 			};

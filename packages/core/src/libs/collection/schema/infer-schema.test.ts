@@ -3,7 +3,7 @@ import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { adminText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import inferSchema from "./infer-schema.js";
 
 // -----------------------------------------------
@@ -19,9 +19,11 @@ describe("Schema inference", async () => {
 		pagesCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-				singularName: adminText("tests.collections.pages.singularName", {
-					fallback: "Page",
+				name: text.admin("tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+				singularName: text.admin("tests.collections.pages.singularName", {
+					defaultMessage: "Page",
 				}),
 			},
 			bricks: {
@@ -182,9 +184,11 @@ describe("Schema inference", async () => {
 		const brickScopedCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-				singularName: adminText("tests.collections.pages.singularName", {
-					fallback: "Page",
+				name: text.admin("tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+				singularName: text.admin("tests.collections.pages.singularName", {
+					defaultMessage: "Page",
 				}),
 			},
 			bricks: {
@@ -223,9 +227,11 @@ describe("Schema inference", async () => {
 		const brickScopedCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-				singularName: adminText("tests.collections.pages.singularName", {
-					fallback: "Page",
+				name: text.admin("tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+				singularName: text.admin("tests.collections.pages.singularName", {
+					defaultMessage: "Page",
 				}),
 			},
 			bricks: {

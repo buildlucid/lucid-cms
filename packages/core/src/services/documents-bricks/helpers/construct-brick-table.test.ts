@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { adminText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../types.js";
 import aggregateBrickTables from "./aggregate-brick-tables.js";
@@ -34,11 +34,11 @@ describe("brick table construction", () => {
 		const simpleCollection = new CollectionBuilder("simple", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.simple.name", {
-					fallback: "Simple",
+				name: text.admin("tests.collections.simple.name", {
+					defaultMessage: "Simple",
 				}),
-				singularName: adminText("tests.collections.simple.singularName", {
-					fallback: "Simple",
+				singularName: text.admin("tests.collections.simple.singularName", {
+					defaultMessage: "Simple",
 				}),
 			},
 			config: {
@@ -50,8 +50,8 @@ describe("brick table construction", () => {
 			},
 		}).addText("simpleHeading", {
 			details: {
-				label: adminText("tests.fields.simpleHeading.label", {
-					fallback: "Heading Default",
+				label: text.admin("tests.fields.simpleHeading.label", {
+					defaultMessage: "Heading Default",
 				}),
 			},
 			validation: { required: true },
@@ -319,9 +319,11 @@ describe("brick table construction", () => {
 		const deepCollection = new CollectionBuilder("deep", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.deep.name", { fallback: "Deep" }),
-				singularName: adminText("tests.collections.deep.singularName", {
-					fallback: "Deep",
+				name: text.admin("tests.collections.deep.name", {
+					defaultMessage: "Deep",
+				}),
+				singularName: text.admin("tests.collections.deep.singularName", {
+					defaultMessage: "Deep",
 				}),
 			},
 			config: {
@@ -478,11 +480,11 @@ describe("brick table construction", () => {
 		const galleryCollection = new CollectionBuilder("gallery", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.gallery.name", {
-					fallback: "Gallery",
+				name: text.admin("tests.collections.gallery.name", {
+					defaultMessage: "Gallery",
 				}),
-				singularName: adminText("tests.collections.gallery.singularName", {
-					fallback: "Gallery",
+				singularName: text.admin("tests.collections.gallery.singularName", {
+					defaultMessage: "Gallery",
 				}),
 			},
 			config: {
@@ -677,11 +679,11 @@ describe("brick table construction", () => {
 		const articleCollection = new CollectionBuilder("articles", {
 			mode: "multiple",
 			details: {
-				name: adminText("tests.collections.articles.name", {
-					fallback: "Articles",
+				name: text.admin("tests.collections.articles.name", {
+					defaultMessage: "Articles",
 				}),
-				singularName: adminText("tests.collections.articles.singularName", {
-					fallback: "Article",
+				singularName: text.admin("tests.collections.articles.singularName", {
+					defaultMessage: "Article",
 				}),
 			},
 			config: {

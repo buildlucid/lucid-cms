@@ -3,7 +3,7 @@ import path from "node:path";
 import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
-import { serverText } from "./server-text.js";
+import { text } from "./index.js";
 
 /**
  * Writes the resolved translation bundle into the build output.
@@ -28,9 +28,11 @@ const prerenderTranslations = async (props: {
 	} catch (error) {
 		return {
 			error: {
-				message: serverText(
+				message: text.server(
 					"core.i18n.prerender.failed",
-					error instanceof Error ? { fallback: error.message } : undefined,
+					error instanceof Error
+						? { defaultMessage: error.message }
+						: undefined,
 				),
 				status: 500,
 			},

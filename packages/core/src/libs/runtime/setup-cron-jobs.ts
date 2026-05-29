@@ -1,13 +1,18 @@
 import constants from "../../constants/constants.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
-import { serverText, translateServer } from "../i18n/index.js";
+import { createTranslator, text } from "../i18n/index.js";
 import logger from "../logger/index.js";
 import passthroughQueueAdapter from "../queue/adapters/passthrough.js";
 import getQueueAdapter from "../queue/get-adapter.js";
 import type { QueueAdapterInstance } from "../queue/types.js";
+import { createAdapterLifecycleContext } from "./adapter-lifecycle.js";
 import getCronJobs, { type CronJobDefinition } from "./cron-jobs.js";
-import type { AdapterRuntimeContext, EnvironmentVariables } from "./types.js";
+import type {
+	AdapterLifecycleContext,
+	AdapterRuntimeContext,
+	EnvironmentVariables,
+} from "./types.js";
 
 const MAX_RETRIES = 3;
 
@@ -26,7 +31,7 @@ const executeCronJob = async (
 			logError: true,
 			defaultError: {
 				type: "cron",
-				name: serverText("core.cron.job.error.name"),
+				name: text.server("core.cron.job.error.name"),
 				message: job.error,
 			},
 		})(context);
@@ -39,18 +44,18 @@ const executeCronJob = async (
 			logger.warn({
 				message: `Cron job "${job.label}" failed (attempt ${attempt}/${MAX_RETRIES}), retrying...`,
 				scope: constants.logScopes.cron,
-				data: { error: result.error.message?.default },
+				data: { error: result.error.message },
 			});
 		} else {
 			logger.error({
 				message: `Cron job "${job.label}" failed after ${MAX_RETRIES} attempts`,
 				scope: constants.logScopes.cron,
-				data: { error: result.error.message?.default },
+				data: { error: result.error.message },
 			});
 			return {
 				key,
 				success: false,
-				error: result.error.message?.default,
+				error: context.translate.english.text(result.error.message),
 			};
 		}
 	}
@@ -91,27 +96,34 @@ const setupCronJobs = async (config: {
 		) => {
 			let cronQueue = context.queue ?? queueInstance;
 			let createdQueue: QueueAdapterInstance | undefined;
+			let createdQueueLifecycleContext: AdapterLifecycleContext | undefined;
 			try {
 				if (config.createQueue && config.runtimeContext) {
 					createdQueue = await getQueueAdapter(
 						context.config,
 						config.runtimeContext,
 					);
-					await createdQueue.lifecycle?.init?.({
+					createdQueueLifecycleContext = createAdapterLifecycleContext({
 						config: context.config,
 						runtimeContext: config.runtimeContext,
 						env: config.env ?? context.env ?? undefined,
 					});
+					await createdQueue.lifecycle?.init?.(createdQueueLifecycleContext);
 					cronQueue = createdQueue;
 				}
 
 				const cronContext: ServiceContext = {
 					...context,
 					queue: cronQueue,
+					translate: createTranslator({ config: context.config, locale: "en" }),
+					request: {
+						...context.request,
+						locale: "en",
+					},
 				};
 
 				logger.info({
-					message: translateServer("core.runtime.running.cron.jobs"),
+					message: "Running cron jobs",
 					scope: constants.logScopes.cron,
 				});
 
@@ -138,11 +150,14 @@ const setupCronJobs = async (config: {
 				}
 			} catch (_) {
 				logger.error({
-					message: translateServer("core.cron.job.error.message"),
+					message: "Error running or registering cron jobs",
 					scope: constants.logScopes.cron,
 				});
 			} finally {
-				await createdQueue?.lifecycle?.destroy?.();
+				if (createdQueueLifecycleContext)
+					await createdQueue?.lifecycle?.destroy?.(
+						createdQueueLifecycleContext,
+					);
 			}
 		},
 		queue: queueInstance,

@@ -1,12 +1,12 @@
-import { adminText } from "../libs/i18n/admin-text.js";
+import { text } from "../libs/i18n/index.js";
 import type { Config, LucidConfig } from "../types/config.js";
 import constants from "./constants.js";
 
 export const coreAiGuidance = [
 	{
 		key: "improve",
-		label: adminText("core.ai.guidance.improve.label", {
-			fallback: "Improve",
+		label: text.admin("core.ai.guidance.improve.label", {
+			defaultMessage: "Improve",
 		}),
 		instructions:
 			"Improve the writing while preserving the original meaning and important details.",
@@ -14,8 +14,8 @@ export const coreAiGuidance = [
 	},
 	{
 		key: "expand",
-		label: adminText("core.ai.guidance.expand.label", {
-			fallback: "Expand",
+		label: text.admin("core.ai.guidance.expand.label", {
+			defaultMessage: "Expand",
 		}),
 		instructions:
 			"Expand the writing with useful detail while staying relevant and accurate.",
@@ -23,8 +23,8 @@ export const coreAiGuidance = [
 	},
 	{
 		key: "shorten",
-		label: adminText("core.ai.guidance.shorten.label", {
-			fallback: "Shorten",
+		label: text.admin("core.ai.guidance.shorten.label", {
+			defaultMessage: "Shorten",
 		}),
 		instructions:
 			"Make the writing shorter while preserving the important details and meaning.",

@@ -1,5 +1,5 @@
 import type { ZodType } from "zod";
-import type { AdminText } from "../../../../i18n/types.js";
+import type { AdminTextDescriptor } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
 	SharedFieldConfig,
@@ -8,9 +8,9 @@ import type {
 export interface RichTextFieldConfig extends SharedFieldConfig {
 	type: "rich-text";
 	details: {
-		label?: AdminText;
-		summary?: AdminText;
-		placeholder?: AdminText;
+		label?: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
+		placeholder?: AdminTextDescriptor;
 	};
 	ai?: CustomFieldUserAiConfig<"rich-text">;
 	config: {

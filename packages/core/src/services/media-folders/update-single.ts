@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -21,13 +21,13 @@ const updateSingle: ServiceFn<
 	if (data.parentFolderId === data.id) {
 		return {
 			error: {
-				message: serverText("core.media.folders.parents.circular"),
+				message: text.server("core.media.folders.parents.circular"),
 				status: 400,
 				errors: {
 					fields: [
 						{
 							key: "parentFolderId",
-							message: serverText("core.media.folders.parents.circular"),
+							message: text.server("core.media.folders.parents.circular"),
 						},
 					],
 				},
@@ -46,13 +46,13 @@ const updateSingle: ServiceFn<
 		if (circularParentsRes.data) {
 			return {
 				error: {
-					message: serverText("core.media.folders.parents.circular"),
+					message: text.server("core.media.folders.parents.circular"),
 					status: 400,
 					errors: {
 						fields: [
 							{
 								key: "parentFolderId",
-								message: serverText("core.media.folders.parents.circular"),
+								message: text.server("core.media.folders.parents.circular"),
 							},
 						],
 					},

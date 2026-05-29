@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -124,7 +124,7 @@ describe("remote attachments", () => {
 		]);
 
 		expect(result.error?.message).toEqual(
-			serverText("plugin.nodemailer.attachments.url.blocked.address"),
+			text.server("plugin.nodemailer.attachments.url.blocked.address"),
 		);
 		expect(result.data).toBeUndefined();
 	});
@@ -228,7 +228,7 @@ describe("remote attachments", () => {
 		);
 
 		expect(result.error?.message).toEqual(
-			serverText("plugin.nodemailer.attachments.size.too.large"),
+			text.server("plugin.nodemailer.attachments.size.too.large"),
 		);
 		expect(mocks.httpsRequest).toHaveBeenCalledWith(
 			expect.any(URL),

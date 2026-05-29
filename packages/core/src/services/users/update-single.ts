@@ -1,6 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
-import { serverText, translateServer } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
@@ -50,7 +50,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.users.self.update.denied"),
+				message: text.server("core.users.self.update.denied"),
 				status: 400,
 			},
 			data: undefined,
@@ -73,7 +73,7 @@ const updateSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.user.not.found.message"),
+				message: text.server("core.user.not.found.message"),
 				status: 404,
 			},
 		},
@@ -132,7 +132,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					email: {
 						code: "invalid",
-						message: serverText("core.users.email.duplicate"),
+						message: text.server("core.users.email.duplicate"),
 					},
 				},
 			},
@@ -147,7 +147,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					username: {
 						code: "invalid",
-						message: serverText("core.users.username.duplicate"),
+						message: text.server("core.users.username.duplicate"),
 					},
 				},
 			},
@@ -249,9 +249,7 @@ const updateSingle: ServiceFn<
 			type: "internal",
 			to: auditLogsRes.data.emailChange.newValue,
 			subject: formatEmailSubject(
-				translateServer("core.email.update.success.subject", undefined, {
-					config: context.config,
-				}),
+				context.translate.server("core.email.update.success.subject"),
 				context.config.brand?.name,
 			),
 			data: {

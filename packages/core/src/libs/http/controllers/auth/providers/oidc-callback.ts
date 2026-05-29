@@ -14,7 +14,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
@@ -78,8 +78,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: serverText("core.routes.callback.auth.error.name"),
-					message: serverText("core.routes.callback.auth.error.message"),
+					name: text.server("core.routes.callback.auth.error.name"),
+					message: text.server("core.routes.callback.auth.error.message"),
 				},
 			},
 		)(context, {
@@ -93,7 +93,11 @@ const providerOIDCCallbackController = factory.createHandlers(
 			);
 			await scrubInvitationToken();
 			return c.redirect(
-				buildErrorURL(baseRedirectUrl, errorRedirectURLRes.error),
+				buildErrorURL(
+					baseRedirectUrl,
+					errorRedirectURLRes.error,
+					context.translate,
+				),
 			);
 		}
 
@@ -103,8 +107,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: serverText("core.routes.callback.auth.error.name"),
-					message: serverText("core.routes.callback.auth.error.message"),
+					name: text.server("core.routes.callback.auth.error.name"),
+					message: text.server("core.routes.callback.auth.error.message"),
 				},
 			},
 		)(context, {
@@ -118,6 +122,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 				buildErrorURL(
 					errorRedirectURLRes.data.redirectUrl,
 					callbackAuthRes.error,
+					context.translate,
 				),
 			);
 		}
@@ -130,13 +135,21 @@ const providerOIDCCallbackController = factory.createHandlers(
 			if (refreshRes.error) {
 				await scrubInvitationToken();
 				return c.redirect(
-					buildErrorURL(errorRedirectURLRes.data.redirectUrl, refreshRes.error),
+					buildErrorURL(
+						errorRedirectURLRes.data.redirectUrl,
+						refreshRes.error,
+						context.translate,
+					),
 				);
 			}
 			if (accessRes.error) {
 				await scrubInvitationToken();
 				return c.redirect(
-					buildErrorURL(errorRedirectURLRes.data.redirectUrl, accessRes.error),
+					buildErrorURL(
+						errorRedirectURLRes.data.redirectUrl,
+						accessRes.error,
+						context.translate,
+					),
 				);
 			}
 
@@ -149,8 +162,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 					transaction: false,
 					defaultError: {
 						type: "basic",
-						name: serverText("core.routes.login.error.name"),
-						message: serverText("core.routes.login.error.message"),
+						name: text.server("core.routes.login.error.name"),
+						message: text.server("core.routes.login.error.message"),
 					},
 				},
 			)(context, {
@@ -166,6 +179,7 @@ const providerOIDCCallbackController = factory.createHandlers(
 					buildErrorURL(
 						errorRedirectURLRes.data.redirectUrl,
 						userLoginTrackRes.error,
+						context.translate,
 					),
 				);
 			}

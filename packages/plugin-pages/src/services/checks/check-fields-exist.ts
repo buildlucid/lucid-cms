@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type {
 	FieldError,
 	FieldInputSchema,
@@ -27,21 +27,21 @@ const checkFieldsExist = (data: {
 		fieldErrors.push({
 			key: "slug",
 			localeCode: null,
-			message: serverText("plugin.pages.fields.validation.required"),
+			message: text.server("plugin.pages.fields.validation.required"),
 		});
 	}
 	if (data.fields.parentPage === undefined) {
 		fieldErrors.push({
 			key: "parentPage",
 			localeCode: null,
-			message: serverText("plugin.pages.fields.validation.required"),
+			message: text.server("plugin.pages.fields.validation.required"),
 		});
 	}
 	if (data.fields.fullSlug === undefined) {
 		fieldErrors.push({
 			key: "fullSlug",
 			localeCode: null,
-			message: serverText("plugin.pages.fields.validation.required"),
+			message: text.server("plugin.pages.fields.validation.required"),
 		});
 	}
 
@@ -49,7 +49,7 @@ const checkFieldsExist = (data: {
 		return {
 			error: {
 				type: "basic",
-				message: serverText("plugin.pages.fields.required.missing"),
+				message: text.server("plugin.pages.fields.required.missing"),
 				status: 400,
 				errors: {
 					fields: fieldErrors,

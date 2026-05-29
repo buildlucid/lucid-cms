@@ -1,5 +1,5 @@
 import type { Config } from "../../../types.js";
-import { translateServer } from "../../i18n/index.js";
+import { translate } from "../../i18n/index.js";
 
 const latestVersionType = "latest";
 
@@ -21,7 +21,7 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 
 				if (!targetCollection) {
 					throw new Error(
-						translateServer(
+						translate.server(
 							"core.config.collection.environment.relation.collection.not.found",
 							{
 								collection: collection.key,
@@ -41,7 +41,7 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 
 				if (!targetEnvironmentExists) {
 					throw new Error(
-						translateServer(
+						translate.server(
 							"core.config.collection.environment.relation.version.not.found",
 							{
 								collection: collection.key,

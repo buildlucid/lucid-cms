@@ -1,5 +1,5 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import { documentServices } from "../index.js";
@@ -30,8 +30,8 @@ const restoreMultiple: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.error.locked.collection.name"),
-				message: serverText("core.error.locked.collection.message.delete"),
+				name: text.server("core.error.locked.collection.name"),
+				message: text.server("core.error.locked.collection.message.delete"),
 				status: 400,
 			},
 			data: undefined,
@@ -63,10 +63,10 @@ const restoreMultiple: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.not.found.message"),
+				message: text.server("core.documents.not.found.message"),
 				errors: {
 					ids: {
-						message: serverText("core.documents.ids.not.found.partial", {
+						message: text.server("core.documents.ids.not.found.partial", {
 							data: {
 								ids: docsExistRes.data.map((d) => d.id).join(", "),
 							},

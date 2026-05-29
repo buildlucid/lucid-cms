@@ -1,4 +1,4 @@
-import { translateServer } from "../../i18n/index.js";
+import { translate } from "../../i18n/index.js";
 
 const checkDuplicateBuilderKeys = (
 	builder: "ai guidance" | "bricks" | "collections",
@@ -12,7 +12,7 @@ const checkDuplicateBuilderKeys = (
 
 	if (hasDuplicates) {
 		throw new Error(
-			translateServer("core.config.duplicate.keys", { builder: builder }),
+			translate.server("core.config.duplicate.keys", { builder: builder }),
 		);
 	}
 };

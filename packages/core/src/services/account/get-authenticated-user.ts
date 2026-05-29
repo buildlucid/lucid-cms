@@ -1,5 +1,5 @@
 import { usersFormatter } from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
@@ -41,7 +41,7 @@ const getAuthenticatedUser: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: serverText("core.user.not.found.message"),
+					message: text.server("core.user.not.found.message"),
 					status: 404,
 				},
 			},

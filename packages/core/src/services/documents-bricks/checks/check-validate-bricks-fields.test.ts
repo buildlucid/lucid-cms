@@ -1,14 +1,16 @@
 import { expect, test } from "vitest";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { adminText, serverText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 
 const TranslatedCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
-		singularName: adminText("tests.collections.collection.singularName", {
-			fallback: "Test",
+		name: text.admin("tests.collections.collection.name", {
+			defaultMessage: "Test",
+		}),
+		singularName: text.admin("tests.collections.collection.singularName", {
+			defaultMessage: "Test",
 		}),
 	},
 	config: {
@@ -25,14 +27,12 @@ const TranslatedCollection = new CollectionBuilder("collection", {
 const NonTranslatedCollection = new CollectionBuilder("non_translated", {
 	mode: "multiple",
 	details: {
-		name: adminText("core.tests.collections.non.translated.name", {
-			fallback: "Non-Translated",
+		name: text.admin("core.tests.collections.non.translated.name", {
+			defaultMessage: "Non-Translated",
 		}),
-		singularName: adminText(
+		singularName: text.admin(
 			"core.tests.collections.non.translated.singularName",
-			{
-				fallback: "Non-Translated",
-			},
+			{ defaultMessage: "Non-Translated" },
 		),
 	},
 	config: {
@@ -72,9 +72,8 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withTranslationsObject[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: "en",
-		message: serverText("core.fields.validation.errors.unknown", {
-			fallback: "Invalid input: expected string, received number",
-			priority: "Invalid input: expected string, received number",
+		message: text.server("core.fields.validation.errors.unknown", {
+			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});
 
@@ -98,9 +97,8 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValue[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: defaultLocale,
-		message: serverText("core.fields.validation.errors.unknown", {
-			fallback: "Invalid input: expected string, received number",
-			priority: "Invalid input: expected string, received number",
+		message: text.server("core.fields.validation.errors.unknown", {
+			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});
 
@@ -124,9 +122,8 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValueFrench[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: frenchDefaultLocale,
-		message: serverText("core.fields.validation.errors.unknown", {
-			fallback: "Invalid input: expected string, received number",
-			priority: "Invalid input: expected string, received number",
+		message: text.server("core.fields.validation.errors.unknown", {
+			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});
 
@@ -150,9 +147,8 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatedCollection[0]).toMatchObject({
 		key: "text_field",
 		localeCode: null,
-		message: serverText("core.fields.validation.errors.unknown", {
-			fallback: "Invalid input: expected string, received number",
-			priority: "Invalid input: expected string, received number",
+		message: text.server("core.fields.validation.errors.unknown", {
+			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});
 
@@ -176,9 +172,8 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatableField[0]).toMatchObject({
 		key: "non_translatable_field",
 		localeCode: null,
-		message: serverText("core.fields.validation.errors.unknown", {
-			fallback: "Invalid input: expected string, received number",
-			priority: "Invalid input: expected string, received number",
+		message: text.server("core.fields.validation.errors.unknown", {
+			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});
 });

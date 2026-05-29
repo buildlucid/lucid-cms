@@ -1,10 +1,10 @@
 import type constants from "../../../../constants/constants.js";
-import type { AdminText } from "../../../i18n/types.js";
+import type { AdminTextDescriptor } from "../../../i18n/types.js";
 
 export interface BrickConfigProps {
 	details?: {
-		name?: AdminText;
-		summary?: AdminText;
+		name?: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
 	};
 	preview?: {
 		image?: string;
@@ -13,8 +13,8 @@ export interface BrickConfigProps {
 export interface BrickConfig {
 	key: string;
 	details: {
-		name: AdminText;
-		summary?: AdminText;
+		name: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
 	};
 	preview?: {
 		image?: string;

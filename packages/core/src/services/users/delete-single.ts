@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { userServices } from "../index.js";
@@ -18,7 +18,7 @@ const deleteSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.users.self.delete.denied"),
+				message: text.server("core.users.self.delete.denied"),
 				status: 400,
 			},
 			data: undefined,

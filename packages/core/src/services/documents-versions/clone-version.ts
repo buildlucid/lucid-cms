@@ -5,7 +5,7 @@ import {
 	getTableNames,
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentBricksFormatter } from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	DocumentBricksRepository,
 	DocumentVersionsRepository,
@@ -54,8 +54,8 @@ const cloneVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.error.schema.migration.required.name"),
-				message: serverText("core.error.schema.migration.required.message"),
+				name: text.server("core.error.schema.migration.required.name"),
+				message: text.server("core.error.schema.migration.required.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -83,7 +83,7 @@ const cloneVersion: ServiceFn<
 				validation: {
 					enabled: true,
 					defaultError: {
-						message: serverText("core.documents.version.not.found.message"),
+						message: text.server("core.documents.version.not.found.message"),
 						status: 404,
 					},
 				},
@@ -112,7 +112,7 @@ const cloneVersion: ServiceFn<
 		return {
 			error: {
 				status: 404,
-				message: serverText("core.documents.version.not.found.message"),
+				message: text.server("core.documents.version.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -122,7 +122,7 @@ const cloneVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.version.document.mismatch"),
+				message: text.server("core.documents.version.document.mismatch"),
 				status: 404,
 			},
 			data: undefined,
@@ -146,7 +146,7 @@ const cloneVersion: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 400,
-					message: serverText("core.documents.create.failed"),
+					message: text.server("core.documents.create.failed"),
 				},
 			},
 		},

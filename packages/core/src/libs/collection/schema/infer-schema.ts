@@ -1,7 +1,7 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type { ServiceResponse } from "../../../types.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
-import { serverText } from "../../i18n/index.js";
+import { text } from "../../i18n/index.js";
 import createDocumentTable from "./tables/document-table.js";
 import createFieldTables from "./tables/fields-table.js";
 import createVersionsTable from "./tables/versions-table.js";
@@ -81,9 +81,9 @@ const inferSchema = (
 		return {
 			data: undefined,
 			error: {
-				message: serverText(
+				message: text.server(
 					"core.collections.schema.infer.failed",
-					err instanceof Error ? { fallback: err.message } : undefined,
+					err instanceof Error ? { defaultMessage: err.message } : undefined,
 				),
 			},
 		};

@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceCompleteUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types/types.js";
@@ -42,7 +42,7 @@ export const completeUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: serverText("plugin.s3.objects.upload.failed", {
+						message: text.server("plugin.s3.objects.upload.failed", {
 							data: {
 								status: response.status,
 								statusText: response.statusText,
@@ -65,9 +65,10 @@ export const completeUploadSession = (
 			return {
 				error: {
 					type: "plugin",
-					message: serverText("plugin.s3.errors.unknown", {
-						fallback: error instanceof Error ? error.message : undefined,
-					}),
+					message:
+						error instanceof Error
+							? text.literal(error.message)
+							: text.server("plugin.s3.errors.unknown"),
 				},
 				data: undefined,
 			};

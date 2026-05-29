@@ -1,4 +1,4 @@
-import { adminText, BrickBuilder } from "@lucidcms/core";
+import { BrickBuilder, text } from "@lucidcms/core";
 
 const TestingBrick = new BrickBuilder("testing", {
 	preview: {
@@ -8,21 +8,21 @@ const TestingBrick = new BrickBuilder("testing", {
 })
 	.addTab("content_tab", {
 		details: {
-			label: adminText("bricks.testing.tabs.content_tab.label", {
-				fallback: "Content",
+			label: text.admin("bricks.testing.tabs.content_tab.label", {
+				defaultMessage: "Content",
 			}),
 		},
 	})
 	.addText("text-key", {
 		details: {
-			label: adminText("bricks.testing.fields.text-key.label", {
-				fallback: "Text",
+			label: text.admin("bricks.testing.fields.text-key.label", {
+				defaultMessage: "Text",
 			}),
-			summary: adminText("bricks.testing.fields.text-key.summary", {
-				fallback: "Testing title",
+			summary: text.admin("bricks.testing.fields.text-key.summary", {
+				defaultMessage: "Testing title",
 			}),
-			placeholder: adminText("bricks.testing.fields.text-key.placeholder", {
-				fallback: "Testing title",
+			placeholder: text.admin("bricks.testing.fields.text-key.placeholder", {
+				defaultMessage: "Testing title",
 			}),
 		},
 	})
@@ -42,37 +42,37 @@ const TestingBrick = new BrickBuilder("testing", {
 	.addNumber("number-key")
 	.addCheckbox("checkbox-key", {
 		details: {
-			label: adminText("bricks.testing.fields.checkbox-key.label", {
-				fallback: "Checkbox",
+			label: text.admin("bricks.testing.fields.checkbox-key.label", {
+				defaultMessage: "Checkbox",
 			}),
-			true: adminText("bricks.testing.fields.checkbox-key.trueLabel", {
-				fallback: "Show",
+			true: text.admin("bricks.testing.fields.checkbox-key.trueLabel", {
+				defaultMessage: "Show",
 			}),
-			false: adminText("bricks.testing.fields.checkbox-key.falseLabel", {
-				fallback: "Hide",
+			false: text.admin("bricks.testing.fields.checkbox-key.falseLabel", {
+				defaultMessage: "Hide",
 			}),
 		},
 	})
 	.addSelect("select-key", {
 		options: [
 			{
-				label: adminText(
+				label: text.admin(
 					"bricks.testing.fields.select-key.options.option-1.label",
-					{ fallback: "Option 1" },
+					{ defaultMessage: "Option 1" },
 				),
 				value: "option-1",
 			},
 			{
-				label: adminText(
+				label: text.admin(
 					"bricks.testing.fields.select-key.options.option-2.label",
-					{ fallback: "Option 2" },
+					{ defaultMessage: "Option 2" },
 				),
 				value: "option-2",
 			},
 			{
-				label: adminText(
+				label: text.admin(
 					"bricks.testing.fields.select-key.options.option-3.label",
-					{ fallback: "Option 3" },
+					{ defaultMessage: "Option 3" },
 				),
 				value: "option-3",
 			},
@@ -83,21 +83,22 @@ const TestingBrick = new BrickBuilder("testing", {
 	})
 	.addTextarea("textarea-key", {
 		details: {
-			label: adminText("bricks.testing.fields.textarea-key.label", {
-				fallback: "Textarea",
+			label: text.admin("bricks.testing.fields.textarea-key.label", {
+				defaultMessage: "Textarea",
 			}),
-			placeholder: adminText("bricks.testing.fields.textarea-key.placeholder", {
-				fallback: "Testing textarea",
-			}),
-			summary: adminText("bricks.testing.fields.textarea-key.summary", {
-				fallback: "Testing textarea",
+			placeholder: text.admin(
+				"bricks.testing.fields.textarea-key.placeholder",
+				{ defaultMessage: "Testing textarea" },
+			),
+			summary: text.admin("bricks.testing.fields.textarea-key.summary", {
+				defaultMessage: "Testing textarea",
 			}),
 		},
 	})
 	.addTab("advanced_tab", {
 		details: {
-			label: adminText("bricks.testing.tabs.advanced_tab.label", {
-				fallback: "Advanced",
+			label: text.admin("bricks.testing.tabs.advanced_tab.label", {
+				defaultMessage: "Advanced",
 			}),
 		},
 	})

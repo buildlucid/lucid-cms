@@ -1,7 +1,7 @@
 import constants from "../../../constants/constants.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import type { ServiceResponse } from "../../../types.js";
-import { serverText } from "../../i18n/index.js";
+import { text } from "../../i18n/index.js";
 import {
 	getFieldDatabaseConfig,
 	isCustomFieldTableType,
@@ -44,7 +44,7 @@ const buildTableName = <R extends string>(
 				return {
 					data: undefined,
 					error: {
-						message: serverText(
+						message: text.server(
 							"core.collections.migration.table.name.brick.key.missing.message",
 						),
 					},
@@ -64,7 +64,7 @@ const buildTableName = <R extends string>(
 			return {
 				data: undefined,
 				error: {
-					message: serverText(
+					message: text.server(
 						"core.collections.migration.table.name.repeater.keys.missing.message",
 					),
 				},
@@ -76,7 +76,7 @@ const buildTableName = <R extends string>(
 			return {
 				data: undefined,
 				error: {
-					message: serverText(
+					message: text.server(
 						"core.collections.schema.table.name.format.insufficient.parts",
 					),
 				},
@@ -90,7 +90,7 @@ const buildTableName = <R extends string>(
 			return {
 				data: undefined,
 				error: {
-					message: serverText(
+					message: text.server(
 						"core.collections.schema.table.name.format.insufficient.parts",
 					),
 				},

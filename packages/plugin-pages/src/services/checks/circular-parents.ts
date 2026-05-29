@@ -1,4 +1,4 @@
-import { prefixGeneratedColName, serverText } from "@lucidcms/core/plugin";
+import { prefixGeneratedColName, text } from "@lucidcms/core/plugin";
 import type {
 	CollectionTableNames,
 	DocumentVersionType,
@@ -93,13 +93,13 @@ const checkCircularParents: ServiceFn<
 				error: {
 					type: "basic",
 					status: 400,
-					message: serverText("plugin.pages.parents.circular"),
+					message: text.server("plugin.pages.parents.circular"),
 					errors: {
 						fields: [
 							{
 								key: constants.fields.parentPage.key,
 								localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
-								message: serverText("plugin.pages.parents.circular"),
+								message: text.server("plugin.pages.parents.circular"),
 							},
 						],
 					},
@@ -117,7 +117,7 @@ const checkCircularParents: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: serverText("plugin.pages.parents.circular.check.failed"),
+				message: text.server("plugin.pages.parents.circular.check.failed"),
 			},
 			data: undefined,
 		};

@@ -5,8 +5,8 @@ import {
 	honoOpenAPIResponse,
 	LucidAPIError,
 	rateLimiterMiddleware as rateLimiter,
-	serverText,
 	serviceWrapper,
+	text,
 	validateMiddleware as validate,
 } from "@lucidcms/core/plugin";
 import { createFactory } from "hono/factory";
@@ -52,10 +52,10 @@ const storageDownloadController = (pluginOptions: PluginOptions) =>
 					transaction: false,
 					defaultError: {
 						type: "basic",
-						name: serverText(
+						name: text.server(
 							"plugin.cloudflare.r2.routes.storage.download.error.name",
 						),
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.r2.routes.storage.download.error.message",
 						),
 					},
@@ -72,7 +72,7 @@ const storageDownloadController = (pluginOptions: PluginOptions) =>
 				throw new LucidAPIError({
 					type: "basic",
 					status: 500,
-					message: serverText(
+					message: text.server(
 						"plugin.cloudflare.r2.routes.storage.download.error.message",
 					),
 				});

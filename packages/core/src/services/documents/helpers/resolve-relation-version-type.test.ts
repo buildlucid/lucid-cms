@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import constants from "../../../constants/constants.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { adminText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 
 const mocks = vi.hoisted(() => ({
 	selectSingle: vi.fn(),
@@ -35,9 +35,11 @@ const createCollection = (
 	new CollectionBuilder(key, {
 		mode: "multiple",
 		details: {
-			name: adminText(`tests.collections.${key}.name`, { fallback: key }),
-			singularName: adminText(`tests.collections.${key}.singularName`, {
-				fallback: key,
+			name: text.admin(`tests.collections.${key}.name`, {
+				defaultMessage: key,
+			}),
+			singularName: text.admin(`tests.collections.${key}.singularName`, {
+				defaultMessage: key,
 			}),
 		},
 		config: {
@@ -94,8 +96,8 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: adminText("tests.environments.staging.name", {
-					fallback: "Staging",
+				name: text.admin("tests.environments.staging.name", {
+					defaultMessage: "Staging",
 				}),
 				relations: {
 					blog: "signed-off",
@@ -105,8 +107,8 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: adminText("tests.environments.signed-off.name", {
-					fallback: "Signed off",
+				name: text.admin("tests.environments.signed-off.name", {
+					defaultMessage: "Signed off",
 				}),
 			},
 		]);
@@ -135,16 +137,16 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: adminText("tests.environments.staging.name", {
-					fallback: "Staging",
+				name: text.admin("tests.environments.staging.name", {
+					defaultMessage: "Staging",
 				}),
 			},
 		]);
 		const blog = createCollection("blog", [
 			{
 				key: "staging",
-				name: adminText("tests.environments.staging.name", {
-					fallback: "Staging",
+				name: text.admin("tests.environments.staging.name", {
+					defaultMessage: "Staging",
 				}),
 			},
 		]);
@@ -171,16 +173,16 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: adminText("tests.environments.staging.name", {
-					fallback: "Staging",
+				name: text.admin("tests.environments.staging.name", {
+					defaultMessage: "Staging",
 				}),
 			},
 		]);
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: adminText("tests.environments.signed-off.name", {
-					fallback: "Signed off",
+				name: text.admin("tests.environments.signed-off.name", {
+					defaultMessage: "Signed off",
 				}),
 			},
 		]);
@@ -247,8 +249,8 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: adminText("tests.environments.staging.name", {
-					fallback: "Staging",
+				name: text.admin("tests.environments.staging.name", {
+					defaultMessage: "Staging",
 				}),
 				relations: {
 					blog: "signed-off",
@@ -258,8 +260,8 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: adminText("tests.environments.signed-off.name", {
-					fallback: "Signed off",
+				name: text.admin("tests.environments.signed-off.name", {
+					defaultMessage: "Signed off",
 				}),
 			},
 		]);

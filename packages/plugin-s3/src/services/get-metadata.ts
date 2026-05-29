@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceGetMeta } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
@@ -22,7 +22,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				return {
 					error: {
 						type: "plugin",
-						message: serverText("plugin.s3.objects.metadata.fetch.failed", {
+						message: text.server("plugin.s3.objects.metadata.fetch.failed", {
 							data: {
 								status: result.status,
 								statusText: result.statusText,
@@ -40,7 +40,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			if (contentLength === null) {
 				return {
 					error: {
-						message: serverText("plugin.s3.objects.metadata.missing"),
+						message: text.server("plugin.s3.objects.metadata.missing"),
 					},
 					data: undefined,
 				};
@@ -61,9 +61,10 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			return {
 				error: {
 					type: "plugin",
-					message: serverText("plugin.s3.errors.unknown", {
-						fallback: e instanceof Error ? e.message : undefined,
-					}),
+					message:
+						e instanceof Error
+							? text.literal(e.message)
+							: text.server("plugin.s3.errors.unknown"),
 				},
 				data: undefined,
 			};

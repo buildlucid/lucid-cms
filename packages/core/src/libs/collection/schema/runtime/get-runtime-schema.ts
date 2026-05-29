@@ -1,5 +1,5 @@
 import type { ServiceFn } from "../../../../utils/services/types.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import { CollectionMigrationsRepository } from "../../../repositories/index.js";
 import inferSchema from "../infer-schema.js";
 import type { CollectionSchema } from "../types.js";
@@ -32,7 +32,7 @@ const getRuntimeSchema: ServiceFn<
 			return {
 				data: undefined,
 				error: {
-					message: serverText("core.collections.not.found.message"),
+					message: text.server("core.collections.not.found.message"),
 				},
 			};
 		}
@@ -49,8 +49,8 @@ const getRuntimeSchema: ServiceFn<
 				data: undefined,
 				error: {
 					type: "basic",
-					name: serverText("core.error.schema.migration.required.name"),
-					message: serverText("core.error.schema.migration.required.message"),
+					name: text.server("core.error.schema.migration.required.name"),
+					message: text.server("core.error.schema.migration.required.message"),
 					status: 400,
 				},
 			};

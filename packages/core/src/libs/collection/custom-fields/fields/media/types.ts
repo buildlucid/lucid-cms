@@ -1,12 +1,12 @@
 import type { Media, MediaType } from "../../../../../types/response.js";
-import type { AdminText } from "../../../../i18n/types.js";
+import type { AdminTextDescriptor } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface MediaFieldConfig extends SharedFieldConfig {
 	type: "media";
 	details: {
-		label?: AdminText;
-		summary?: AdminText;
+		label?: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
 	};
 	config: {
 		localized?: boolean;

@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { Worker } from "node:worker_threads";
 import constants from "../../../../constants/constants.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import logger from "../../../logger/index.js";
 import { insertJobs } from "../../insert-job.js";
 import type { QueueAdapterInstance } from "../../types.js";
@@ -61,7 +61,7 @@ function workerQueueAdapter(
 					message: "The worker queue has started",
 					scope: constants.logScopes.queueAdapter,
 				});
-				if (!params.runtimeContext.configEntryPoint) {
+				if (!params.runtimeContext?.configEntryPoint) {
 					throw new Error(
 						"configEntryPoint is required. Your runtime likely does not support this queue adapter.",
 					);
@@ -96,8 +96,8 @@ function workerQueueAdapter(
 			if (!worker) {
 				return {
 					error: {
-						message: serverText("core.queue.worker.not.started", {
-							fallback: "Worker queue is not started",
+						message: text.server("core.queue.worker.not.started", {
+							defaultMessage: "Worker queue is not started",
 						}),
 					},
 					data: undefined,
@@ -122,8 +122,8 @@ function workerQueueAdapter(
 			if (!jobData) {
 				return {
 					error: {
-						message: serverText("core.queue.jobs.create.failed", {
-							fallback: "Failed to create job",
+						message: text.server("core.queue.jobs.create.failed", {
+							defaultMessage: "Failed to create job",
 						}),
 					},
 					data: undefined,
@@ -143,8 +143,8 @@ function workerQueueAdapter(
 			if (!worker) {
 				return {
 					error: {
-						message: serverText("core.queue.worker.not.started", {
-							fallback: "Worker queue is not started",
+						message: text.server("core.queue.worker.not.started", {
+							defaultMessage: "Worker queue is not started",
 						}),
 					},
 					data: undefined,

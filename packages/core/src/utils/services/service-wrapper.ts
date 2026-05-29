@@ -1,4 +1,4 @@
-import { serverText, translateServer } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
 import type {
 	ServiceContext,
@@ -68,10 +68,13 @@ const serviceWrapper =
 		} catch (error) {
 			if (wrapperConfig.logError) {
 				logger.error({
-					message:
-						error instanceof Error
-							? error?.message
-							: translateServer("core.errors.unknown"),
+					message: "Service execution failed",
+					data: {
+						errorMessage:
+							error instanceof Error
+								? error.message
+								: "An unknown error occurred",
+					},
 				});
 			}
 
@@ -86,9 +89,8 @@ const serviceWrapper =
 				return {
 					error: mergeServiceError(
 						{
-							message: serverText("core.errors.default.message", {
-								priority: error.message,
-							}),
+							message: text.server("core.errors.default.message"),
+							cause: error,
 						},
 						wrapperConfig.defaultError,
 					),
@@ -99,12 +101,8 @@ const serviceWrapper =
 			return {
 				error: mergeServiceError(
 					{
-						message:
-							error instanceof Error
-								? serverText("core.errors.default.message", {
-										priority: error.message,
-									})
-								: undefined,
+						message: text.server("core.errors.default.message"),
+						cause: error,
 					},
 					wrapperConfig.defaultError,
 				),

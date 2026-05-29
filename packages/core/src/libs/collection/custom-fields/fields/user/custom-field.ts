@@ -1,7 +1,6 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
-import { adminText } from "../../../../i18n/admin-text.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
@@ -38,8 +37,8 @@ class UserCustomField extends CustomField<"user"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					adminText(`fields.${this.type}.${this.key}.label`, {
-						fallback: keyToTitle(this.key),
+					text.admin(`fields.${this.type}.${this.key}.label`, {
+						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
 			},
@@ -75,7 +74,7 @@ class UserCustomField extends CustomField<"user"> {
 					value === undefined ||
 					value === null ||
 					(Array.isArray(value) && value.length === 0),
-				message: serverText("core.fields.validation.required"),
+				message: text.server("core.fields.validation.required"),
 			},
 		};
 	}
@@ -147,7 +146,7 @@ class UserCustomField extends CustomField<"user"> {
 			if (findUser === undefined) {
 				errors.push({
 					itemIndex,
-					message: serverText("core.fields.user.validation.not.found"),
+					message: text.server("core.fields.user.validation.not.found"),
 				});
 			}
 		}

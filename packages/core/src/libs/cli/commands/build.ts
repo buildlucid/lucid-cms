@@ -4,6 +4,7 @@ import constants from "../../../constants/constants.js";
 import loadBuildProject from "../../compile/load-build-project.js";
 import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
 import prerenderMjmlTemplates from "../../email/templates/prerender-mjml-templates.js";
+import { createTranslator } from "../../i18n/index.js";
 import prerenderTranslations from "../../i18n/prerender-translations.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
@@ -29,6 +30,10 @@ const buildCommand = async (options?: {
 			renderEmailTemplates: false,
 		});
 		const { configPath, loaded: configRes } = buildProject;
+		const translate = createTranslator({
+			config: configRes.config,
+			locale: "en",
+		});
 
 		if (options?.cacheSpa) {
 			await partialBuildDirClear(configRes.config.build.paths.outDir);
@@ -90,7 +95,7 @@ const buildCommand = async (options?: {
 			]);
 		if (mjmlTemplatesRes.error) {
 			cliLogger.error(
-				mjmlTemplatesRes.error.message?.default ??
+				translate.english.text(mjmlTemplatesRes.error.message) ??
 					"Failed to pre-render MJML templates",
 				{
 					silent,
@@ -101,7 +106,7 @@ const buildCommand = async (options?: {
 		}
 		if (translationsRes.error) {
 			cliLogger.error(
-				translationsRes.error.message?.default ??
+				translate.english.text(translationsRes.error.message) ??
 					"Failed to pre-render translations",
 				{
 					silent,
@@ -112,7 +117,7 @@ const buildCommand = async (options?: {
 		}
 		if (publicAssetsRes.error) {
 			cliLogger.error(
-				publicAssetsRes.error.message?.default ??
+				translate.english.text(publicAssetsRes.error.message) ??
 					"Failed to copy public assets",
 				{
 					silent,
@@ -148,7 +153,7 @@ const buildCommand = async (options?: {
 		]);
 		if (viteBuildRes.error) {
 			cliLogger.error(
-				viteBuildRes.error.message?.default ??
+				translate.english.text(viteBuildRes.error.message) ??
 					"There was an error while building the SPA or component plugins",
 				{
 					silent,

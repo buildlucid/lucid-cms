@@ -61,16 +61,18 @@ const notifyPublishOperationUsers: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const title = data.title.default;
-	const message = data.message.default;
+	const title = context.translate.text(data.title) ?? "";
+	const message = context.translate.text(data.message);
 	const details = (data.details ?? [])
 		.filter((detail) => detail.value !== null && detail.value !== undefined)
 		.map((detail) => ({
-			label: detail.label.default,
+			label: context.translate.text(detail.label) ?? "",
 			value: formatNotificationDetailValue(detail.value),
 		}));
 	const comment = data.comment?.value?.trim() || null;
-	const commentLabel = data.comment ? data.comment.label.default : undefined;
+	const commentLabel = data.comment
+		? context.translate.text(data.comment.label)
+		: undefined;
 
 	const alertRes = await Alerts.createSingle({
 		data: {

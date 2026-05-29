@@ -1,3 +1,8 @@
 {
-	"plugin.cloudflare.queues.scheduling.production.only": "Cloudflare queue scheduling is only supported in production mode."
+	"plugin.cloudflare.queues.scheduling.production.only": "Cloudflare queue scheduling is only supported in production mode.",
+	"plugin.cloudflare.queues.jobs.create.failed": "Failed to create job.",
+	"plugin.cloudflare.queues.jobs.execute.failed": "Failed to execute job.",
+	"plugin.cloudflare.queues.jobs.add.failed": "Error adding job to Cloudflare queue.",
+	"plugin.cloudflare.queues.jobs.batch.execute.failed": "One or more batch jobs failed.",
+	"plugin.cloudflare.queues.jobs.add.batch.failed": "Error adding batch jobs to Cloudflare queue."
 }

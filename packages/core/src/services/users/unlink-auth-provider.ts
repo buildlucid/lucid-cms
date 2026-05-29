@@ -1,6 +1,6 @@
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	UserAuthProvidersRepository,
 	UsersRepository,
@@ -48,7 +48,7 @@ const unlinkAuthProvider: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 404,
-					message: serverText("core.user.not.found.message"),
+					message: text.server("core.user.not.found.message"),
 				},
 			},
 		}),
@@ -70,8 +70,8 @@ const unlinkAuthProvider: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 404,
-					name: serverText("core.auth.providers.link.not.found.name"),
-					message: serverText("core.auth.providers.link.not.found.message"),
+					name: text.server("core.auth.providers.link.not.found.name"),
+					message: text.server("core.auth.providers.link.not.found.message"),
 				},
 			},
 		}),
@@ -98,8 +98,8 @@ const unlinkAuthProvider: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				name: serverText("core.auth.providers.cannot.remove.last.link.name"),
-				message: serverText(
+				name: text.server("core.auth.providers.cannot.remove.last.link.name"),
+				message: text.server(
 					"core.auth.providers.cannot.remove.last.link.password.disabled.message",
 				),
 			},
@@ -112,8 +112,8 @@ const unlinkAuthProvider: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				name: serverText("core.auth.providers.cannot.remove.last.link.name"),
-				message: serverText(
+				name: text.server("core.auth.providers.cannot.remove.last.link.name"),
+				message: text.server(
 					"core.auth.providers.cannot.remove.last.link.no.password.message",
 				),
 			},
@@ -140,8 +140,8 @@ const unlinkAuthProvider: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 404,
-					name: serverText("core.auth.providers.link.not.found.name"),
-					message: serverText("core.auth.providers.link.not.found.message"),
+					name: text.server("core.auth.providers.link.not.found.name"),
+					message: text.server("core.auth.providers.link.not.found.message"),
 				},
 			},
 		}),

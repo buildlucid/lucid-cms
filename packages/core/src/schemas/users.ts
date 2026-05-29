@@ -1,5 +1,5 @@
 import z from "zod";
-import { translateServer } from "../libs/i18n/index.js";
+import { translate } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaEmbedResponseSchema } from "./media.js";
@@ -120,7 +120,7 @@ const updateProfilePictureBodySchema = z
 	.refine(
 		(data) => (data.key === undefined) === (data.fileName === undefined),
 		{
-			message: translateServer("core.profile.picture.file.name.key.required"),
+			message: translate.server("core.profile.picture.file.name.key.required"),
 			path: ["fileName"],
 		},
 	);

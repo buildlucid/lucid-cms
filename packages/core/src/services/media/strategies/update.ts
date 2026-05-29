@@ -1,4 +1,4 @@
-import { serverText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import type { ErrorText, LucidErrorData } from "../../../types/errors.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
@@ -104,7 +104,7 @@ const update: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.files.validation.storage.limit.exceeded", {
+				message: text.server("core.files.validation.storage.limit.exceeded", {
 					data: {
 						size: formatBytes(storageLimit),
 					},
@@ -113,7 +113,7 @@ const update: ServiceFn<
 				errors: {
 					file: {
 						code: "storage",
-						message: serverText(
+						message: text.server(
 							"core.files.validation.storage.limit.exceeded",
 							{
 								data: {
@@ -179,7 +179,7 @@ const update: ServiceFn<
 		if (updatedStreamRes.error) {
 			await cleanupUpdatedKey();
 			return await failUpdate(
-				updatedStreamRes.error.message ?? serverText("core.errors.unknown"),
+				updatedStreamRes.error.message ?? text.server("core.errors.unknown"),
 			);
 		}
 
@@ -208,7 +208,7 @@ const update: ServiceFn<
 			await cleanupUpdatedKey();
 
 			return await failUpdate(
-				uploadRes.error?.message ?? serverText("core.errors.unknown"),
+				uploadRes.error?.message ?? text.server("core.errors.unknown"),
 			);
 		}
 
@@ -242,7 +242,7 @@ const update: ServiceFn<
 		const targetVerified = await getVerifiedTargetMeta();
 		if (!targetVerified) {
 			return await failUpdate(
-				promoteRes.error.message ?? serverText("core.errors.unknown"),
+				promoteRes.error.message ?? text.server("core.errors.unknown"),
 			);
 		}
 
@@ -290,7 +290,7 @@ const update: ServiceFn<
 
 	const targetMeta = await getVerifiedTargetMeta();
 	if (!targetMeta) {
-		return await failUpdate(serverText("core.errors.unknown"));
+		return await failUpdate(text.server("core.errors.unknown"));
 	}
 
 	if (data.targetKey !== data.previousKey) {

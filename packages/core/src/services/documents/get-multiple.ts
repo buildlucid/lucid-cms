@@ -11,7 +11,7 @@ import {
 import type { DocumentVersionType } from "../../libs/db/types.js";
 import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
 import type { InternalCollectionDocument } from "../../types/response.js";
@@ -44,7 +44,7 @@ const getMultiple: ServiceFn<
 	) {
 		return {
 			error: {
-				message: serverText("core.documents.version.not.found.message"),
+				message: text.server("core.documents.version.not.found.message"),
 				status: 404,
 			},
 			data: undefined,

@@ -91,7 +91,7 @@ import * as lucidConfigModule from "./${constants.CONFIG_FILE}.js";
 import i18nTranslations from "./i18n-translations.json" with { type: "json" };
 import { resolveConfigDefinition } from "@lucidcms/core/build";
 import { createApp, setupCronJobs } from "@lucidcms/core/runtime";
-import { translateServer } from "@lucidcms/core/plugin";
+import { createTranslator } from "@lucidcms/core/plugin";
 import { serve } from "@hono/node-server";
 import cron from "node-cron";
 import { getRuntimeContext } from "@lucidcms/node-adapter";
@@ -108,6 +108,7 @@ const startServer = async () => {
 				skipValidation: true,
 			},
 		});
+		const translate = createTranslator({ config: resolved, locale: "en" });
 
 		const { app, destroy, queue, kv } = await createApp({
 			config: resolved,
@@ -142,7 +143,7 @@ const startServer = async () => {
 						url: "http://localhost:" + port,
 						locale: resolved.i18n.interface.defaultLocale,
 					},
-					translate: (key, data) => translateServer(key, data),
+					translate,
 				}, {
 					schedule,
 				});

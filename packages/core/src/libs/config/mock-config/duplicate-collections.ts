@@ -1,4 +1,4 @@
-import { adminText, CollectionBuilder, configureLucid } from "@lucidcms/core";
+import { CollectionBuilder, configureLucid, text } from "@lucidcms/core";
 import testingConstants from "../../../constants/testing-constants.js";
 
 export default configureLucid({
@@ -25,22 +25,22 @@ export default configureLucid({
 			new CollectionBuilder("page", {
 				mode: "multiple",
 				details: {
-					name: adminText("tests.collections.pages.name", {
-						fallback: "Pages",
+					name: text.admin("tests.collections.pages.name", {
+						defaultMessage: "Pages",
 					}),
-					singularName: adminText("tests.collections.pages.singularName", {
-						fallback: "Page",
+					singularName: text.admin("tests.collections.pages.singularName", {
+						defaultMessage: "Page",
 					}),
 				},
 			}),
 			new CollectionBuilder("page", {
 				mode: "multiple",
 				details: {
-					name: adminText("tests.collections.pages.name", {
-						fallback: "Pages",
+					name: text.admin("tests.collections.pages.name", {
+						defaultMessage: "Pages",
 					}),
-					singularName: adminText("tests.collections.pages.singularName", {
-						fallback: "Page",
+					singularName: text.admin("tests.collections.pages.singularName", {
+						defaultMessage: "Page",
 					}),
 				},
 			}),

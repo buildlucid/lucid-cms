@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceGetUploadPartUrls } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../../constants.js";
@@ -19,7 +19,7 @@ export const getUploadPartUrls = (
 				return {
 					error: {
 						type: "plugin",
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.r2.http.fallback.not.configured",
 						),
 					},
@@ -31,7 +31,7 @@ export const getUploadPartUrls = (
 				return {
 					error: {
 						type: "plugin",
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.r2.http.client.not.configured",
 						),
 					},
@@ -66,9 +66,10 @@ export const getUploadPartUrls = (
 			return {
 				error: {
 					type: "plugin",
-					message: serverText("plugin.cloudflare.r2.errors.unknown", {
-						fallback: error instanceof Error ? error.message : undefined,
-					}),
+					message:
+						error instanceof Error
+							? text.literal(error.message)
+							: text.server("plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,
 			};

@@ -176,7 +176,9 @@ const sendEmail: ServiceFn<
 				],
 				data: {
 					delivery_status: "failed",
-					message: queueRes.error.message?.default || "Failed to queue email",
+					message:
+						context.translate.english.text(queueRes.error.message) ||
+						"Failed to queue email",
 					updated_at: new Date().toISOString(),
 				},
 			}),

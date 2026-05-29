@@ -1,5 +1,5 @@
 import type { ZodType } from "zod";
-import type { AdminText } from "../../../../i18n/types.js";
+import type { AdminTextDescriptor } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
 	SharedFieldConfig,
@@ -8,9 +8,9 @@ import type {
 export interface TextareaFieldConfig extends SharedFieldConfig {
 	type: "textarea";
 	details: {
-		label?: AdminText;
-		summary?: AdminText;
-		placeholder?: AdminText;
+		label?: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
+		placeholder?: AdminTextDescriptor;
 	};
 	ai?: CustomFieldUserAiConfig<"textarea">;
 	config: {

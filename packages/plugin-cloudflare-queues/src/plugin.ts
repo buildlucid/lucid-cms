@@ -48,7 +48,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					},
 					{
 						path: "@lucidcms/core/plugin",
-						exports: ["mergeTranslationBundles"],
+						exports: ["createTranslator", "mergeTranslationBundles"],
 					},
 					{
 						path: props.definition.database.module,
@@ -106,7 +106,8 @@ const resolved = await processConfig(
         skipValidation: true,
     },
 );
-const kvInstance = await getInitializedKVAdapter(resolved);
+const translate = createTranslator({ config: resolved, locale: "en" });
+const kvInstance = await getInitializedKVAdapter(resolved, { env });
 
 const internalQueueAdapter = passthroughQueueAdapter({
     bypassImmediateExecution: true,
@@ -134,6 +135,7 @@ try {
                     env: env || null,
                     queue: internalQueueAdapter,
                     kv: kvInstance,
+                    translate,
                     request: {
                         url: resolved.baseUrl || "http://localhost",
                         locale: resolved.i18n.interface.defaultLocale,
@@ -187,7 +189,7 @@ try {
     }
 } finally {
     await Promise.allSettled([
-        destroyKVAdapter(kvInstance),
+        destroyKVAdapter(kvInstance, { config: resolved, env }),
         resolved.db.client.destroy(),
     ]);
 }`,

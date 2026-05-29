@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
@@ -141,8 +141,8 @@ const cancelForDocuments: ServiceFn<
 			collectionKey: operation.collection_key,
 			documentId: operation.document_id,
 			recipients,
-			title: serverText("core.publish.requests.cancelled.title"),
-			message: serverText(
+			title: text.server("core.publish.requests.cancelled.title"),
+			message: text.server(
 				"core.publish.requests.cancelled.for.target.message",
 				{
 					data: {

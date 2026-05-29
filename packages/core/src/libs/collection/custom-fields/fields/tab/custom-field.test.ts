@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { adminText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import CustomFieldSchema from "../../schema.js";
 import TabCustomField from "./custom-field.js";
 
@@ -8,11 +8,11 @@ import TabCustomField from "./custom-field.js";
 test("custom field config passes schema validation", async () => {
 	const field = new TabCustomField("field", {
 		details: {
-			label: adminText("tests.fields.field.label", {
-				fallback: "title",
+			label: text.admin("tests.fields.field.label", {
+				defaultMessage: "title",
 			}),
-			summary: adminText("tests.fields.field.summary", {
-				fallback: "description",
+			summary: text.admin("tests.fields.field.summary", {
+				defaultMessage: "description",
 			}),
 		},
 	});

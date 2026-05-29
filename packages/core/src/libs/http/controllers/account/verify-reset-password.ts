@@ -9,7 +9,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import validate from "../../middleware/validate.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -34,8 +34,8 @@ const verifyResetPasswordController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: serverText("core.routes.verify.password.reset.error.name"),
-				message: serverText("core.routes.verify.password.reset.error.message"),
+				name: text.server("core.routes.verify.password.reset.error.name"),
+				message: text.server("core.routes.verify.password.reset.error.message"),
 			},
 		})(context, {
 			tokenType: constants.userTokens.passwordReset,

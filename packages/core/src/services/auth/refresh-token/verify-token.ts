@@ -1,7 +1,11 @@
 import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
-import { serverText } from "../../../libs/i18n/index.js";
+import {
+	createTranslator,
+	resolveInterfaceLocale,
+	text,
+} from "../../../libs/i18n/index.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
@@ -24,8 +28,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: serverText("core.auth.refresh.token.error.name"),
-					message: serverText("core.auth.refresh.token.missing"),
+					name: text.server("core.auth.refresh.token.error.name"),
+					message: text.server("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -69,8 +73,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: serverText("core.auth.refresh.token.error.name"),
-					message: serverText("core.auth.refresh.token.missing"),
+					name: text.server("core.auth.refresh.token.error.name"),
+					message: text.server("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -79,6 +83,11 @@ const verifyToken = async (
 		if (tokenRes.data.revoked_at !== null) {
 			if (tokenRes.data.replaced_by_token_id !== null) {
 				const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
+				const locale = resolveInterfaceLocale({
+					config,
+					locale: c.req.header(constants.headers.interfaceLocale),
+					acceptLanguage: c.req.header("Accept-Language"),
+				});
 
 				await revokeUserTokens(
 					{
@@ -87,12 +96,11 @@ const verifyToken = async (
 						queue: c.get("queue"),
 						env: c.get("env"),
 						kv: c.get("kv"),
+						translate: createTranslator({ config, locale }),
 						request: {
 							url: c.req.url,
 							ipAddress: connectionInfo.address ?? null,
-							locale:
-								c.req.header(constants.headers.interfaceLocale) ??
-								config.i18n.interface.defaultLocale,
+							locale,
 						},
 					},
 					{
@@ -113,8 +121,8 @@ const verifyToken = async (
 				return {
 					error: {
 						type: "authorisation",
-						name: serverText("core.auth.refresh.token.error.name"),
-						message: serverText("core.auth.refresh.token.error.message"),
+						name: text.server("core.auth.refresh.token.error.name"),
+						message: text.server("core.auth.refresh.token.error.message"),
 					},
 					data: undefined,
 				};
@@ -123,8 +131,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: serverText("core.auth.refresh.token.error.name"),
-					message: serverText("core.auth.refresh.token.missing"),
+					name: text.server("core.auth.refresh.token.error.name"),
+					message: text.server("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -134,8 +142,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: serverText("core.auth.refresh.token.error.name"),
-					message: serverText("core.auth.refresh.token.missing"),
+					name: text.server("core.auth.refresh.token.error.name"),
+					message: text.server("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -146,8 +154,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: serverText("core.auth.refresh.token.error.name"),
-					message: serverText("core.auth.refresh.token.missing"),
+					name: text.server("core.auth.refresh.token.error.name"),
+					message: text.server("core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -189,8 +197,8 @@ const verifyToken = async (
 		return {
 			error: {
 				type: "authorisation",
-				name: serverText("core.auth.refresh.token.error.name"),
-				message: serverText("core.auth.refresh.token.error.message"),
+				name: text.server("core.auth.refresh.token.error.name"),
+				message: text.server("core.auth.refresh.token.error.message"),
 			},
 			data: undefined,
 		};

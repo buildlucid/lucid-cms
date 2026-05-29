@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { ServiceResponse } from "../../../utils/services/types.js";
+import { translate } from "../../i18n/index.js";
 import {
 	normalizeEmailStorageConfig,
 	parseEmailStorageSelector,
@@ -14,26 +15,32 @@ const unwrap = <T>(response: Awaited<ServiceResponse<T>>) => {
 describe("email storage config", () => {
 	test("rejects invalid rule flags as error values", () => {
 		expect(
-			normalizeEmailStorageConfig({
-				secret: {
-					encrypt: false,
-				},
-			} as unknown as EmailStorageConfig).error?.message?.default,
+			translate.text(
+				normalizeEmailStorageConfig({
+					secret: {
+						encrypt: false,
+					},
+				} as unknown as EmailStorageConfig).error?.message,
+			),
 		).toContain("can only set encrypt to true");
 
 		expect(
-			normalizeEmailStorageConfig({
-				secret: {
-					neverStore: true,
-					encrypt: true,
-				},
-			} as unknown as EmailStorageConfig).error?.message?.default,
+			translate.text(
+				normalizeEmailStorageConfig({
+					secret: {
+						neverStore: true,
+						encrypt: true,
+					},
+				} as unknown as EmailStorageConfig).error?.message,
+			),
 		).toContain("cannot combine neverStore");
 
 		expect(
-			normalizeEmailStorageConfig({
-				secret: {},
-			} as unknown as EmailStorageConfig).error?.message?.default,
+			translate.text(
+				normalizeEmailStorageConfig({
+					secret: {},
+				} as unknown as EmailStorageConfig).error?.message,
+			),
 		).toContain("must set encrypt, redact, or neverStore");
 	});
 
@@ -59,13 +66,13 @@ describe("email storage config", () => {
 			{ type: "key", key: "token" },
 		]);
 		expect(
-			parseEmailStorageSelector("payload[").error?.message?.default,
+			translate.text(parseEmailStorageSelector("payload[").error?.message),
 		).toContain("Invalid email storage selector");
 		expect(
-			parseEmailStorageSelector("payload[]").error?.message?.default,
+			translate.text(parseEmailStorageSelector("payload[]").error?.message),
 		).toContain("Invalid email storage selector");
 		expect(
-			parseEmailStorageSelector("payload..ssn").error?.message?.default,
+			translate.text(parseEmailStorageSelector("payload..ssn").error?.message),
 		).toContain("Invalid email storage selector");
 	});
 });

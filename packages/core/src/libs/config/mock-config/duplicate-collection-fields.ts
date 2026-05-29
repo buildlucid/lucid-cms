@@ -1,14 +1,14 @@
-import { adminText, CollectionBuilder, configureLucid } from "@lucidcms/core";
+import { CollectionBuilder, configureLucid, text } from "@lucidcms/core";
 import testingConstants from "../../../constants/testing-constants.js";
 
 const collection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: adminText("tests.collections.pages.name", {
-			fallback: "Pages",
+		name: text.admin("tests.collections.pages.name", {
+			defaultMessage: "Pages",
 		}),
-		singularName: adminText("tests.collections.pages.singularName", {
-			fallback: "Page",
+		singularName: text.admin("tests.collections.pages.singularName", {
+			defaultMessage: "Page",
 		}),
 	},
 })

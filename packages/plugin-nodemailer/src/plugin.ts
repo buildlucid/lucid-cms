@@ -1,7 +1,4 @@
-import {
-	mergeTranslationBundles,
-	translateServer,
-} from "@lucidcms/core/plugin";
+import { mergeTranslationBundles, text } from "@lucidcms/core/plugin";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
 	LUCID_VERSION,
@@ -28,17 +25,13 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			);
 
 			const simulate = draft.email.simulate;
-			const translate = (
-				key: string,
-				data?: Record<string, string | number | undefined>,
-			) => translateServer(key, data, { config: draft });
 
 			draft.email.adapter = {
 				type: "email-adapter",
 				key: PLUGIN_IDENTIFIER,
 				lifecycle: {
 					init: async () => {
-						await verifyTransporter(pluginOptions.transporter, translate);
+						await verifyTransporter(pluginOptions.transporter);
 					},
 					destroy: async () => {
 						pluginOptions.transporter.close();
@@ -50,11 +43,11 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							return {
 								success: true,
 								deliveryStatus: "sent",
-								message: translate("plugin.nodemailer.email.send.success"),
+								message: text.server("plugin.nodemailer.email.send.success"),
 								data: null,
 							};
 						}
-						await verifyTransporter(pluginOptions.transporter, translate);
+						await verifyTransporter(pluginOptions.transporter);
 
 						const attachmentsRes = await resolveNodemailerAttachments(
 							email.attachments,
@@ -65,8 +58,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 								success: false,
 								deliveryStatus: "failed",
 								message:
-									attachmentsRes.error.message?.default ??
-									translate("plugin.nodemailer.email.send.failed"),
+									attachmentsRes.error.message ??
+									text.server("plugin.nodemailer.email.send.failed"),
 							};
 						}
 
@@ -89,7 +82,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						return {
 							success: true,
 							deliveryStatus: "sent",
-							message: translate("plugin.nodemailer.email.send.success"),
+							message: text.server("plugin.nodemailer.email.send.success"),
 							data: isValidData(data) ? data : null,
 						};
 					} catch (error) {
@@ -98,8 +91,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							deliveryStatus: "failed",
 							message:
 								error instanceof Error
-									? error.message
-									: translate("plugin.nodemailer.email.send.failed"),
+									? text.literal(error.message)
+									: text.server("plugin.nodemailer.email.send.failed"),
 						};
 					}
 				},

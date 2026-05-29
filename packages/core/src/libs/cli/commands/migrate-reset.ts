@@ -16,13 +16,13 @@ const migrateResetCommand = (props?: {
 }) => {
 	return async (options?: { force?: boolean }) => {
 		let kvInstance: KVAdapterInstance | undefined;
+		let config: Config | undefined;
 		try {
 			logger.setBuffering(true);
 			const startTime = cliLogger.startTimer();
 			const mode = props?.mode ?? "process";
 			const force = options?.force ?? false;
 
-			let config: Config;
 			if (props?.config) {
 				config = props.config;
 			} else {
@@ -94,7 +94,7 @@ const migrateResetCommand = (props?: {
 			cliLogger.info("Clearing KV cache...");
 			kvInstance = await getInitializedKVAdapter(config);
 			await kvInstance.clear();
-			await destroyKVAdapter(kvInstance);
+			await destroyKVAdapter(kvInstance, { config });
 			kvInstance = undefined;
 
 			const endTime = startTime();
@@ -122,7 +122,7 @@ const migrateResetCommand = (props?: {
 				return true;
 			}
 		} catch (error) {
-			await destroyKVAdapter(kvInstance);
+			if (config) await destroyKVAdapter(kvInstance, { config });
 			cliLogger.error(
 				"Database reset failed",
 				error instanceof Error ? error.message : "Unknown error",

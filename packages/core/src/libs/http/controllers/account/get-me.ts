@@ -7,7 +7,7 @@ import type { LucidHonoContext } from "../../../../types/hono.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -31,8 +31,8 @@ const getMeController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: serverText("core.routes.user.fetch.error.name"),
-				message: serverText("core.routes.user.fetch.error.message"),
+				name: text.server("core.routes.user.fetch.error.name"),
+				message: text.server("core.routes.user.fetch.error.message"),
 			},
 		})(context, {
 			userId: c.get("auth").id,

@@ -1,5 +1,6 @@
 import type { Readable } from "node:stream";
 import type { MediaType, ServiceResponse } from "../../types.js";
+import type { AdapterLifecycleContext } from "../runtime/types.js";
 
 export type MediaAdapterStreamBody =
 	| Readable
@@ -161,11 +162,11 @@ export type MediaAdapterInstance<T = any> = {
 		/**
 		 * Initialize the adapter
 		 */
-		init?: () => Promise<void>;
+		init?: (context: AdapterLifecycleContext) => Promise<void>;
 		/**
 		 * Destroy the adapter
 		 */
-		destroy?: () => Promise<void>;
+		destroy?: (context: AdapterLifecycleContext) => Promise<void>;
 	};
 	/**
 	 * The media adapter services

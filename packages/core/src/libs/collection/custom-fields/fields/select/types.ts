@@ -1,14 +1,14 @@
-import type { AdminText } from "../../../../i18n/types.js";
+import type { AdminTextDescriptor } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface SelectFieldConfig extends SharedFieldConfig {
 	type: "select";
 	details: {
-		label?: AdminText;
-		summary?: AdminText;
-		placeholder?: AdminText;
+		label?: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
+		placeholder?: AdminTextDescriptor;
 	};
-	options: Array<{ label: AdminText; value: string }>;
+	options: Array<{ label: AdminTextDescriptor; value: string }>;
 	config: {
 		localized?: boolean;
 		hidden?: boolean;

@@ -6,7 +6,7 @@ import type {
 	ServiceResponse,
 } from "../../../../types.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import type { CollectionSchemaTable } from "../types.js";
 import getRuntimeSchema from "./get-runtime-schema.js";
 
@@ -119,7 +119,7 @@ export const getTableNames = async (
 	) {
 		return {
 			error: {
-				message: serverText("core.collections.names.fetch.failed"),
+				message: text.server("core.collections.names.fetch.failed"),
 				status: 500,
 			},
 			data: undefined,

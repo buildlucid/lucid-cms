@@ -1,3 +1,4 @@
+import { text } from "../../i18n/index.js";
 import type { EmailAdapter } from "../types.js";
 
 const passthroughEmailAdapter: EmailAdapter = async () => {
@@ -8,7 +9,7 @@ const passthroughEmailAdapter: EmailAdapter = async () => {
 			return {
 				success: true,
 				deliveryStatus: "sent",
-				message: "Email sending simulated (passthrough adapter)",
+				message: text.server("core.email.successfully.sent"),
 				data: null,
 				externalMessageId: null,
 			};

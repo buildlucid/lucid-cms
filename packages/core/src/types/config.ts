@@ -11,7 +11,7 @@ import type {
 } from "../libs/email/types.js";
 import type { AllHooks } from "../libs/hooks/types.js";
 import type {
-	AdminText,
+	AdminTextDescriptor,
 	InterfaceDirection,
 	LocaleDirection,
 	TranslationBundles,
@@ -60,11 +60,11 @@ export type AccessPermissionDetails = {
 	/**
 	 * The permission or group label shown in the admin UI.
 	 */
-	name: AdminText;
+	name: AdminTextDescriptor;
 	/**
 	 * Optional helper text for the permission or group shown in the admin UI.
 	 */
-	description?: AdminText | null;
+	description?: AdminTextDescriptor | null;
 };
 
 export type AccessPermissionDefinition = {
@@ -84,7 +84,7 @@ export type AccessPermissionDefinition = {
 
 export type AccessPermissionGroupDefinition = AccessPermissionDetails;
 
-export type ConfiguredLocaleValue = AdminText;
+export type ConfiguredLocaleValue = AdminTextDescriptor;
 
 export type AccessRoleDefinition = {
 	/**

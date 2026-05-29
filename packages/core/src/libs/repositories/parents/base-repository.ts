@@ -10,7 +10,7 @@ import type { LucidErrorData } from "../../../types.js";
 import { tidyZodError } from "../../../utils/errors/index.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import type { Insert, KyselyDB, LucidDB, Update } from "../../db/types.js";
-import { serverText, translateServer } from "../../i18n/index.js";
+import { text } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import type {
 	ExecuteMeta,
@@ -173,12 +173,13 @@ abstract class BaseRepository<
 		if (!validationResult.success) {
 			const validationError = tidyZodError(validationResult.error);
 			logger.error({
-				message: validationError,
+				message: "Query response validation failed",
 				scope: constants.logScopes.query,
 				data: {
 					table: executeResponse.meta.tableName,
 					method: executeResponse.meta.method,
 					executionTime: executeResponse.meta.executionTime,
+					validationError,
 				},
 			});
 			return {
@@ -187,7 +188,7 @@ abstract class BaseRepository<
 					...config?.defaultError,
 					message:
 						config?.defaultError?.message ??
-						serverText("core.errors.validation.name"),
+						text.server("core.errors.validation.name"),
 					type: config?.defaultError?.type ?? "validation",
 					status: config?.defaultError?.status ?? 400,
 				},
@@ -262,7 +263,7 @@ abstract class BaseRepository<
 					errorMessage:
 						error instanceof Error
 							? error.message
-							: translateServer("core.errors.unknown"),
+							: "An unknown error occurred",
 				},
 			});
 
@@ -270,12 +271,12 @@ abstract class BaseRepository<
 				response: {
 					data: undefined,
 					error: {
-						message: serverText("core.errors.unknown", {
-							fallback:
-								error instanceof Error
-									? error.message
-									: translateServer("core.errors.unknown"),
-						}),
+						message: text.server(
+							"core.errors.unknown",
+							error instanceof Error
+								? { defaultMessage: error.message }
+								: undefined,
+						),
 						status: 500,
 					},
 				},

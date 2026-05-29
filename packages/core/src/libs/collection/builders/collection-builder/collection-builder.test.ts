@@ -1,17 +1,20 @@
 import { expect, test } from "vitest";
-import { adminText } from "../../../i18n/admin-text.js";
+import { text } from "../../../i18n/index.js";
 import CollectionBuilder from "./index.js";
 
 test("collection config is correct along with field includes and filters", async () => {
 	const pagesCollection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-			singularName: adminText("tests.collections.pages.singularName", {
-				fallback: "Page",
+			name: text.admin("tests.collections.pages.name", {
+				defaultMessage: "Pages",
 			}),
-			summary: adminText("tests.collections.pages.summary", {
-				fallback: "Pages are used to create static content on your website.",
+			singularName: text.admin("tests.collections.pages.singularName", {
+				defaultMessage: "Page",
+			}),
+			summary: text.admin("tests.collections.pages.summary", {
+				defaultMessage:
+					"Pages are used to create static content on your website.",
 			}),
 		},
 		config: {
@@ -98,12 +101,15 @@ test("collection config is correct along with field includes and filters", async
 		key: "pages",
 		mode: "multiple",
 		details: {
-			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-			singularName: adminText("tests.collections.pages.singularName", {
-				fallback: "Page",
+			name: text.admin("tests.collections.pages.name", {
+				defaultMessage: "Pages",
 			}),
-			summary: adminText("tests.collections.pages.summary", {
-				fallback: "Pages are used to create static content on your website.",
+			singularName: text.admin("tests.collections.pages.singularName", {
+				defaultMessage: "Page",
+			}),
+			summary: text.admin("tests.collections.pages.summary", {
+				defaultMessage:
+					"Pages are used to create static content on your website.",
 			}),
 		},
 		permissions: {},
@@ -133,17 +139,19 @@ test("collection workflow config normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-			singularName: adminText("tests.collections.pages.singularName", {
-				fallback: "Page",
+			name: text.admin("tests.collections.pages.name", {
+				defaultMessage: "Pages",
+			}),
+			singularName: text.admin("tests.collections.pages.singularName", {
+				defaultMessage: "Page",
 			}),
 		},
 		config: {
 			environments: [
 				{
 					key: "production",
-					name: adminText("tests.environments.production.name", {
-						fallback: "Production",
+					name: text.admin("tests.environments.production.name", {
+						defaultMessage: "Production",
 					}),
 				},
 			],
@@ -151,11 +159,15 @@ test("collection workflow config normalizes defaults", async () => {
 				stages: [
 					{
 						key: "todo",
-						name: adminText("tests.workflow.todo.name", { fallback: "To do" }),
+						name: text.admin("tests.workflow.todo.name", {
+							defaultMessage: "To do",
+						}),
 					},
 					{
 						key: "done",
-						name: adminText("tests.workflow.done.name", { fallback: "Done" }),
+						name: text.admin("tests.workflow.done.name", {
+							defaultMessage: "Done",
+						}),
 						color: "green",
 						publishTargets: ["production"],
 						permissions: {
@@ -172,14 +184,18 @@ test("collection workflow config normalizes defaults", async () => {
 		stages: [
 			{
 				key: "todo",
-				name: adminText("tests.workflow.todo.name", { fallback: "To do" }),
+				name: text.admin("tests.workflow.todo.name", {
+					defaultMessage: "To do",
+				}),
 				color: "grey",
 				publishTargets: [],
 				permissions: {},
 			},
 			{
 				key: "done",
-				name: adminText("tests.workflow.done.name", { fallback: "Done" }),
+				name: text.admin("tests.workflow.done.name", {
+					defaultMessage: "Done",
+				}),
 				color: "green",
 				publishTargets: ["production"],
 				permissions: {
@@ -194,17 +210,19 @@ test("collection environment relation config normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: adminText("tests.collections.pages.name", { fallback: "Pages" }),
-			singularName: adminText("tests.collections.pages.singularName", {
-				fallback: "Page",
+			name: text.admin("tests.collections.pages.name", {
+				defaultMessage: "Pages",
+			}),
+			singularName: text.admin("tests.collections.pages.singularName", {
+				defaultMessage: "Page",
 			}),
 		},
 		config: {
 			environments: [
 				{
 					key: "staging",
-					name: adminText("tests.environments.staging.name", {
-						fallback: "Staging",
+					name: text.admin("tests.environments.staging.name", {
+						defaultMessage: "Staging",
 					}),
 					relations: {
 						blog: "signed-off",
@@ -212,8 +230,8 @@ test("collection environment relation config normalizes defaults", async () => {
 				},
 				{
 					key: "production",
-					name: adminText("tests.environments.production.name", {
-						fallback: "Production",
+					name: text.admin("tests.environments.production.name", {
+						defaultMessage: "Production",
 					}),
 				},
 			],
@@ -223,8 +241,8 @@ test("collection environment relation config normalizes defaults", async () => {
 	expect(collection.getData.config.environments).toEqual([
 		{
 			key: "staging",
-			name: adminText("tests.environments.staging.name", {
-				fallback: "Staging",
+			name: text.admin("tests.environments.staging.name", {
+				defaultMessage: "Staging",
 			}),
 			permissions: {},
 			relations: {
@@ -233,8 +251,8 @@ test("collection environment relation config normalizes defaults", async () => {
 		},
 		{
 			key: "production",
-			name: adminText("tests.environments.production.name", {
-				fallback: "Production",
+			name: text.admin("tests.environments.production.name", {
+				defaultMessage: "Production",
 			}),
 			permissions: {},
 			relations: {},

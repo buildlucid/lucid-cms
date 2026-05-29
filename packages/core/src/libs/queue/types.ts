@@ -1,8 +1,4 @@
-import type {
-	AdapterRuntimeContext,
-	Config,
-	EnvironmentVariables,
-} from "../../types.js";
+import type { AdapterLifecycleContext } from "../../types.js";
 import type {
 	ServiceContext,
 	ServiceFn,
@@ -92,13 +88,9 @@ export type QueueAdapterInstance = {
 	/**  Lifecycle methods */
 	lifecycle?: {
 		/** Initialize the adapter */
-		init?: (params: {
-			config: Config;
-			runtimeContext: AdapterRuntimeContext;
-			env: EnvironmentVariables | undefined;
-		}) => Promise<void>;
+		init?: (context: AdapterLifecycleContext) => Promise<void>;
 		/** Destroy the adapter */
-		destroy?: () => Promise<void>;
+		destroy?: (context: AdapterLifecycleContext) => Promise<void>;
 	};
 	/** Push a job to the queue */
 	add: (

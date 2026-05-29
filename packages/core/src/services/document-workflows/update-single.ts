@@ -1,6 +1,6 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import {
 	DocumentsRepository,
@@ -40,7 +40,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.workflows.not.enabled"),
+				message: text.server("core.documents.workflows.not.enabled"),
 				status: 400,
 			},
 			data: undefined,
@@ -55,7 +55,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.workflows.stage.not.found"),
+				message: text.server("core.documents.workflows.stage.not.found"),
 				status: 400,
 			},
 			data: undefined,
@@ -80,7 +80,7 @@ const updateSingle: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: serverText("core.documents.not.found.message"),
+					message: text.server("core.documents.not.found.message"),
 					status: 404,
 				},
 			},
@@ -115,7 +115,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.workflows.stage.not.found"),
+				message: text.server("core.documents.workflows.stage.not.found"),
 				status: 400,
 			},
 			data: undefined,
@@ -138,8 +138,8 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.collections.permission.error.name"),
-				message: serverText("core.collections.permission.error.message", {
+				name: text.server("core.collections.permission.error.name"),
+				message: text.server("core.collections.permission.error.message", {
 					data: {
 						collection: data.collectionKey,
 						action: "update",
@@ -166,7 +166,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.workflows.no.changes"),
+				message: text.server("core.documents.workflows.no.changes"),
 				status: 400,
 			},
 			data: undefined,
@@ -195,7 +195,7 @@ const updateSingle: ServiceFn<
 			return {
 				error: {
 					type: "basic",
-					message: serverText("core.documents.workflows.assignee.invalid"),
+					message: text.server("core.documents.workflows.assignee.invalid"),
 					status: 400,
 				},
 				data: undefined,

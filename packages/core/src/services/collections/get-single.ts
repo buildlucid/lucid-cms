@@ -1,7 +1,7 @@
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { collectionsFormatter } from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { Collection } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -25,7 +25,7 @@ const getSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.collections.not.found.message"),
+				message: text.server("core.collections.not.found.message"),
 				status: 404,
 			},
 			data: undefined,

@@ -8,7 +8,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -40,8 +40,8 @@ const revertEmailChangeController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: serverText("core.routes.revert.email.change.error.name"),
-					message: serverText("core.routes.revert.email.change.error.message"),
+					name: text.server("core.routes.revert.email.change.error.name"),
+					message: text.server("core.routes.revert.email.change.error.message"),
 				},
 			},
 		)(context, {

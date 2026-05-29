@@ -1,5 +1,5 @@
 import z from "zod";
-import { adminTextSchema } from "../libs/i18n/admin-text.js";
+import { adminTextDescriptorSchema } from "../libs/i18n/index.js";
 
 export const fieldInputSchema = z.object({
 	key: z.string(),
@@ -57,53 +57,58 @@ export const fieldConfigSchema = z.object({
 		})
 		.optional(),
 	details: z.object({
-		label: adminTextSchema
+		label: adminTextDescriptorSchema
 			.meta({
 				description: "Display label for the field",
 				example: {
-					type: "admin-text",
+					type: "lucid.text",
+					scope: "admin",
 					key: "collections.page.fields.pageTitle.label",
-					fallback: "Page title",
+					defaultMessage: "Page title",
 				},
 			})
 			.optional(),
-		summary: adminTextSchema
+		summary: adminTextDescriptorSchema
 			.meta({
 				description: "Description text for the field",
 				example: {
-					type: "admin-text",
+					type: "lucid.text",
+					scope: "admin",
 					key: "collections.page.fields.pageTitle.summary",
-					fallback: "The title of the page.",
+					defaultMessage: "The title of the page.",
 				},
 			})
 			.optional(),
-		placeholder: adminTextSchema
+		placeholder: adminTextDescriptorSchema
 			.meta({
 				description: "Placeholder text for input fields",
 				example: {
-					type: "admin-text",
+					type: "lucid.text",
+					scope: "admin",
 					key: "collections.page.fields.pageTitle.placeholder",
-					fallback: "Enter page title...",
+					defaultMessage: "Enter page title...",
 				},
 			})
 			.optional(),
-		true: adminTextSchema
+		true: adminTextDescriptorSchema
 			.meta({
 				description: "Label for true value in boolean fields",
 				example: {
-					type: "admin-text",
+					type: "lucid.text",
+					scope: "admin",
 					key: "collections.page.fields.featured.trueLabel",
-					fallback: "Yes",
+					defaultMessage: "Yes",
 				},
 			})
 			.optional(),
-		false: adminTextSchema
+		false: adminTextDescriptorSchema
 			.meta({
 				description: "Label for false value in boolean fields",
 				example: {
-					type: "admin-text",
+					type: "lucid.text",
+					scope: "admin",
 					key: "collections.page.fields.featured.falseLabel",
-					fallback: "No",
+					defaultMessage: "No",
 				},
 			})
 			.optional(),
@@ -257,12 +262,13 @@ export const fieldConfigSchema = z.object({
 	options: z
 		.array(
 			z.object({
-				label: adminTextSchema.meta({
+				label: adminTextDescriptorSchema.meta({
 					description: "Display label for the option",
 					example: {
-						type: "admin-text",
+						type: "lucid.text",
+						scope: "admin",
 						key: "collections.page.fields.status.options.draft.label",
-						fallback: "Draft",
+						defaultMessage: "Draft",
 					},
 				}),
 				value: z.string().meta({

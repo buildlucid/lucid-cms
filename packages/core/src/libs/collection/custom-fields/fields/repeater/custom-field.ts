@@ -1,6 +1,5 @@
 import type { ServiceResponse } from "../../../../../types.js";
-import { adminText } from "../../../../i18n/admin-text.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -34,8 +33,8 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					adminText(`fields.${this.type}.${this.key}.label`, {
-						fallback: keyToTitle(this.key),
+					text.admin(`fields.${this.type}.${this.key}.label`, {
+						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
 			},
@@ -67,7 +66,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			if (value.length > this.config.validation?.maxGroups) {
 				return {
 					valid: false,
-					message: serverText(
+					message: text.server(
 						"core.fields.repeater.validation.max.groups.exceeded",
 						{
 							data: {
@@ -86,7 +85,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			if (this.config.validation?.minGroups > value.length) {
 				return {
 					valid: false,
-					message: serverText(
+					message: text.server(
 						"core.fields.repeater.validation.groups.exceeded.min",
 						{
 							data: {

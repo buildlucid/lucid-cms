@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import type { EmailStorageConfig } from "../../libs/email/storage/types.js";
 import type { EmailAttachment, EmailPriority } from "../../libs/email/types.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import type { Email } from "../../types/response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -42,7 +42,7 @@ const sendExternal: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("core.email.templates.internal.only"),
+				message: text.server("core.email.templates.internal.only"),
 			},
 			data: undefined,
 		};

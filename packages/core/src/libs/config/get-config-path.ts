@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import constants from "../../constants/constants.js";
-import { translateServer } from "../i18n/index.js";
+import { translate } from "../i18n/index.js";
 
 const getConfigPath = (cwd: string, filename?: string): string => {
 	let configPath: string | undefined;
@@ -31,7 +31,7 @@ const getConfigPath = (cwd: string, filename?: string): string => {
 	search(cwd);
 
 	if (!configPath) {
-		throw new Error(translateServer("core.config.file.not.found"));
+		throw new Error(translate.server("core.config.file.not.found"));
 	}
 
 	return configPath;

@@ -1,12 +1,10 @@
-import { adminText, BrickBuilder } from "@lucidcms/core";
+import { BrickBuilder, text } from "@lucidcms/core";
 
 const BannerBrick = new BrickBuilder("banner", {
 	details: {
-		name: adminText("bricks.banner.name", {
-			fallback: "Banner",
-		}),
-		summary: adminText("bricks.banner.summary", {
-			fallback: "A banner with a title and intro text",
+		name: text.admin("bricks.banner.name", { defaultMessage: "Banner" }),
+		summary: text.admin("bricks.banner.summary", {
+			defaultMessage: "A banner with a title and intro text",
 		}),
 	},
 	preview: {
@@ -15,15 +13,16 @@ const BannerBrick = new BrickBuilder("banner", {
 })
 	.addTab("content_tab", {
 		details: {
-			label: adminText("bricks.banner.tabs.content_tab.label", {
-				fallback: "Content",
+			label: text.admin("bricks.banner.tabs.content_tab.label", {
+				defaultMessage: "Content",
 			}),
 		},
 	})
 	.addText("title", {
 		details: {
-			summary: adminText("bricks.banner.fields.title.summary", {
-				fallback: "The title of the banner. This is displayed as an H1 tag.",
+			summary: text.admin("bricks.banner.fields.title.summary", {
+				defaultMessage:
+					"The title of the banner. This is displayed as an H1 tag.",
 			}),
 		},
 		config: {
@@ -36,8 +35,8 @@ const BannerBrick = new BrickBuilder("banner", {
 	.addRichText("intro")
 	.addRepeater("call_to_actions", {
 		details: {
-			label: adminText("bricks.banner.fields.call_to_actions.label", {
-				fallback: "Call to Actions",
+			label: text.admin("bricks.banner.fields.call_to_actions.label", {
+				defaultMessage: "Call to Actions",
 			}),
 		},
 		validation: {
@@ -46,15 +45,15 @@ const BannerBrick = new BrickBuilder("banner", {
 	})
 	.addText("call_to_action_title", {
 		details: {
-			label: adminText("bricks.banner.fields.call_to_action_title.label", {
-				fallback: "Link Text",
+			label: text.admin("bricks.banner.fields.call_to_action_title.label", {
+				defaultMessage: "Link Text",
 			}),
 		},
 	})
 	.addLink("link", {
 		details: {
-			label: adminText("bricks.banner.fields.link.label", {
-				fallback: "Link",
+			label: text.admin("bricks.banner.fields.link.label", {
+				defaultMessage: "Link",
 			}),
 		},
 	})
@@ -64,15 +63,15 @@ const BannerBrick = new BrickBuilder("banner", {
 	.endRepeater()
 	.addTab("config_tab", {
 		details: {
-			label: adminText("bricks.banner.tabs.config_tab.label", {
-				fallback: "Config",
+			label: text.admin("bricks.banner.tabs.config_tab.label", {
+				defaultMessage: "Config",
 			}),
 		},
 	})
 	.addCheckbox("full_width", {
 		details: {
-			summary: adminText("bricks.banner.fields.full_width.summary", {
-				fallback: "Make the banner fullwidth",
+			summary: text.admin("bricks.banner.fields.full_width.summary", {
+				defaultMessage: "Make the banner fullwidth",
 			}),
 		},
 	});

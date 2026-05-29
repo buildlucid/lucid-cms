@@ -8,6 +8,7 @@ import {
 	prepareLucidPublicAssets,
 	prepareLucidSPA,
 } from "@lucidcms/core/build";
+import { createTranslator } from "@lucidcms/core/plugin";
 import type { AdapterRuntimeContext } from "@lucidcms/core/types";
 import astroConstants from "../constants.js";
 import { detectLucidRuntime } from "../internal/compatibility.js";
@@ -137,6 +138,11 @@ export const prepareAssetSourceTree = async (
 	project: ResolvedLucidProject,
 	assetRoot: string,
 ) => {
+	const translate = createTranslator({
+		config: project.loaded.config,
+		locale: "en",
+	});
+
 	await fs.rm(assetRoot, { recursive: true, force: true });
 	await ensureDirectory(assetRoot);
 
@@ -151,7 +157,7 @@ export const prepareAssetSourceTree = async (
 	if (publicResult.error) {
 		throw new LucidError({
 			message:
-				publicResult.error.message?.default ??
+				translate.english.text(publicResult.error.message) ??
 				"Lucid Astro integration could not prepare the Lucid public assets.",
 		});
 	}
@@ -166,7 +172,7 @@ export const prepareAssetSourceTree = async (
 	if (spaResult.error) {
 		throw new LucidError({
 			message:
-				spaResult.error.message?.default ??
+				translate.english.text(spaResult.error.message) ??
 				"Lucid Astro integration could not prepare the Lucid SPA assets.",
 		});
 	}

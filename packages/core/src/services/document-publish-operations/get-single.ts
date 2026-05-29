@@ -1,6 +1,6 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentPublishOperationsFormatter } from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	DocumentBricksRepository,
 	DocumentPublishOperationsRepository,
@@ -44,7 +44,7 @@ const getSingle: ServiceFn<
 	if (!operationRes.data) {
 		return {
 			error: {
-				message: serverText("core.publish.requests.not.found"),
+				message: text.server("core.publish.requests.not.found"),
 				status: 404,
 			},
 			data: undefined,

@@ -1,8 +1,5 @@
 import { logger } from "@lucidcms/core";
-import {
-	mergeTranslationBundles,
-	translateServer,
-} from "@lucidcms/core/plugin";
+import { mergeTranslationBundles } from "@lucidcms/core/plugin";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import {
@@ -42,10 +39,11 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				);
 				if (!collectionInstance) {
 					logger.warn({
-						message: translateServer("plugin.pages.collections.not.found", {
-							collection: collectionConfig.collectionKey,
-						}),
+						message: "Pages collection was not found",
 						scope: PLUGIN_KEY,
+						data: {
+							collection: collectionConfig.collectionKey,
+						},
 					});
 					continue;
 				}

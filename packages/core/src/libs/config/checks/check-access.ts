@@ -1,5 +1,5 @@
 import type { Config } from "../../../types/config.js";
-import { translateServer } from "../../i18n/index.js";
+import { translate } from "../../i18n/index.js";
 import { PermissionGroups } from "../../permission/definitions.js";
 import {
 	corePermissionKeys,
@@ -21,7 +21,7 @@ const ensureNoDuplicates = (label: string, values: string[]) => {
 	const duplicates = [...new Set(findDuplicates(values))];
 	if (duplicates.length > 0) {
 		throw new Error(
-			translateServer("core.config.access.duplicate.keys", {
+			translate.server("core.config.access.duplicate.keys", {
 				label,
 				keys: duplicates.join(", "),
 			}),
@@ -39,7 +39,7 @@ const ensureValidReference = (
 ) => {
 	if (!validPermissions.has(permission)) {
 		throw new Error(
-			translateServer("core.config.access.unknown.permission.reference", {
+			translate.server("core.config.access.unknown.permission.reference", {
 				context,
 				permission,
 			}),
@@ -68,7 +68,7 @@ const checkAccess = (config: Config) => {
 	for (const groupKey of Object.keys(customGroups)) {
 		if (coreGroupReferences.has(groupKey)) {
 			throw new Error(
-				translateServer("core.config.access.core.group.collision", {
+				translate.server("core.config.access.core.group.collision", {
 					group: groupKey,
 				}),
 			);
@@ -78,14 +78,14 @@ const checkAccess = (config: Config) => {
 	for (const permission of customPermissionKeys) {
 		if (!permissionKeyRegex.test(permission)) {
 			throw new Error(
-				translateServer("core.config.access.invalid.permission.key", {
+				translate.server("core.config.access.invalid.permission.key", {
 					permission,
 				}),
 			);
 		}
 		if (isCorePermission(permission)) {
 			throw new Error(
-				translateServer("core.config.access.core.permission.collision", {
+				translate.server("core.config.access.core.permission.collision", {
 					permission,
 				}),
 			);
@@ -97,7 +97,7 @@ const checkAccess = (config: Config) => {
 			(!coreGroupReferences.has(group) && !customGroups[group])
 		) {
 			throw new Error(
-				translateServer(
+				translate.server(
 					"core.config.access.unknown.permission.group.reference",
 					{
 						permission,
@@ -118,7 +118,7 @@ const checkAccess = (config: Config) => {
 			ensureValidReference(
 				validPermissions,
 				permission,
-				translateServer("core.config.access.managed.role.context", {
+				translate.server("core.config.access.managed.role.context", {
 					role: role.key,
 				}),
 			);
@@ -133,7 +133,7 @@ const checkAccess = (config: Config) => {
 			ensureValidReference(
 				validPermissions,
 				permission,
-				translateServer("core.config.access.collection.permission.context", {
+				translate.server("core.config.access.collection.permission.context", {
 					collection: collection.key,
 					action,
 				}),
@@ -145,7 +145,7 @@ const checkAccess = (config: Config) => {
 				ensureValidReference(
 					validPermissions,
 					environment.permissions.publish,
-					translateServer(
+					translate.server(
 						"core.config.access.collection.environment.publish.context",
 						{
 							collection: collection.key,
@@ -159,7 +159,7 @@ const checkAccess = (config: Config) => {
 				ensureValidReference(
 					validPermissions,
 					environment.permissions.review,
-					translateServer(
+					translate.server(
 						"core.config.access.collection.environment.review.context",
 						{
 							collection: collection.key,

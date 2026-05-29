@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	ClientIntegrationScopesRepository,
 	ClientIntegrationsRepository,
@@ -49,7 +49,7 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.client.integrations.key.already.exists"),
+				message: text.server("core.client.integrations.key.already.exists"),
 				status: 400,
 			},
 			data: undefined,

@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationAssigneesRepository,
 	DocumentPublishOperationsRepository,
@@ -46,7 +46,7 @@ const updateReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.publish.requests.not.pending"),
+				message: text.server("core.publish.requests.not.pending"),
 				status: 400,
 			},
 			data: undefined,
@@ -70,8 +70,8 @@ const updateReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.collections.permission.error.name"),
-				message: serverText("core.collections.permission.error.message", {
+				name: text.server("core.collections.permission.error.name"),
+				message: text.server("core.collections.permission.error.message", {
 					data: {
 						collection: operation.collection_key,
 						action: "review",
@@ -96,7 +96,7 @@ const updateReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.publish.requests.invalid.assignees"),
+				message: text.server("core.publish.requests.invalid.assignees"),
 				status: 400,
 			},
 			data: undefined,

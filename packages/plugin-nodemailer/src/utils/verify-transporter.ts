@@ -2,23 +2,23 @@ import { logger } from "@lucidcms/core";
 import type { Transporter } from "nodemailer";
 import { PLUGIN_KEY } from "../constants.js";
 
-const verifyTransporter = async (
-	transporter: Transporter,
-	translate: (key: string) => string = (key) => key,
-) => {
+const verifyTransporter = async (transporter: Transporter) => {
 	try {
 		await transporter.verify();
 	} catch (error) {
 		if (error instanceof Error) {
 			logger.warn({
-				message: error.message,
+				message: "Nodemailer transporter is not ready",
 				scope: PLUGIN_KEY,
+				data: {
+					errorMessage: error.message,
+				},
 			});
 			return;
 		}
 
 		logger.warn({
-			message: translate("plugin.nodemailer.transporter.not.ready"),
+			message: "Nodemailer transporter is not ready",
 			scope: PLUGIN_KEY,
 		});
 	}

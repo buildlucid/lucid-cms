@@ -17,6 +17,7 @@ const migrateRollbackCommand = async (options?: {
 	steps?: number;
 }) => {
 	let kvInstance: KVAdapterInstance | undefined;
+	let config: Config | undefined;
 	try {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
@@ -24,7 +25,7 @@ const migrateRollbackCommand = async (options?: {
 		const force = options?.force ?? false;
 
 		const res = await loadConfigFile();
-		const config: Config = res.config;
+		config = res.config;
 
 		const envValid = await validateEnvVars({
 			envSchema: res.envSchema,
@@ -42,7 +43,7 @@ const migrateRollbackCommand = async (options?: {
 			db: config.db.client,
 			provider: {
 				async getMigrations() {
-					return config.db.migrations;
+					return res.config.db.migrations;
 				},
 			},
 		});
@@ -166,7 +167,7 @@ const migrateRollbackCommand = async (options?: {
 		cliLogger.info("Clearing KV cache...");
 		kvInstance = await getInitializedKVAdapter(config);
 		await kvInstance.clear();
-		await destroyKVAdapter(kvInstance);
+		await destroyKVAdapter(kvInstance, { config });
 		kvInstance = undefined;
 
 		const endTime = startTime();
@@ -185,7 +186,7 @@ const migrateRollbackCommand = async (options?: {
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
-		await destroyKVAdapter(kvInstance);
+		if (config) await destroyKVAdapter(kvInstance, { config });
 		cliLogger.error(
 			"Rollback failed",
 			error instanceof Error ? error.message : "Unknown error",

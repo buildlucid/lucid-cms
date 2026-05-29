@@ -2,7 +2,7 @@ import type { UploadSessionResponse } from "@lucidcms/types";
 import { addMilliseconds } from "date-fns";
 import mime from "mime-types";
 import constants from "../../constants/constants.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import getMediaAdapter from "../../libs/media/get-adapter.js";
 import {
 	MediaAwaitingSyncRepository,
@@ -36,7 +36,7 @@ const createUploadSession: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("core.media.adapters.not.enabled"),
+				message: text.server("core.media.adapters.not.enabled"),
 			},
 			data: undefined,
 		};

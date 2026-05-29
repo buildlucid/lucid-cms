@@ -1,5 +1,5 @@
 import { mediaFormatter } from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
@@ -42,7 +42,7 @@ const getReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.collections.permission.error.message", {
+				message: text.server("core.collections.permission.error.message", {
 					data: {
 						collection: data.collectionKey,
 						action: "review",
@@ -74,8 +74,8 @@ const getReviewers: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.collections.permission.error.name"),
-				message: serverText("core.collections.permission.error.message", {
+				name: text.server("core.collections.permission.error.name"),
+				message: text.server("core.collections.permission.error.message", {
 					data: {
 						collection: data.collectionKey,
 						action: "review",

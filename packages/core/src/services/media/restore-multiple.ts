@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
@@ -38,10 +38,10 @@ const restoreMultiple: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.media.not.found.message"),
+				message: text.server("core.media.not.found.message"),
 				errors: {
 					ids: {
-						message: serverText("core.documents.ids.not.found.partial", {
+						message: text.server("core.documents.ids.not.found.partial", {
 							data: {
 								ids: existRes.data.map((m) => m.id).join(", "),
 							},

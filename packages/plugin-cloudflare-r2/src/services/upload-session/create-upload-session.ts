@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceCreateUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { DEFAULT_PART_SIZE, PRESIGNED_URL_EXPIRY } from "../../constants.js";
@@ -33,7 +33,7 @@ export const createUploadSession = (
 					return {
 						error: {
 							type: "plugin",
-							message: serverText(
+							message: text.server(
 								"plugin.cloudflare.r2.http.client.not.configured",
 							),
 						},
@@ -49,7 +49,7 @@ export const createUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.r2.http.client.not.configured",
 						),
 					},
@@ -71,7 +71,7 @@ export const createUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.r2.upload.sessions.create.failed",
 							{
 								data: {
@@ -90,7 +90,7 @@ export const createUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.r2.upload.sessions.upload.id.missing",
 						),
 					},
@@ -115,9 +115,10 @@ export const createUploadSession = (
 			return {
 				error: {
 					type: "plugin",
-					message: serverText("plugin.cloudflare.r2.errors.unknown", {
-						fallback: error instanceof Error ? error.message : undefined,
-					}),
+					message:
+						error instanceof Error
+							? text.literal(error.message)
+							: text.server("plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,
 			};

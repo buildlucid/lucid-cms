@@ -11,13 +11,27 @@ interface ErrorMessageProps {
 
 export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 	const fieldErrors = () => normalizeFieldErrors(props.errors);
-	const renderErrorMessage = (message: FieldError["message"]) =>
-		typeof message === "string" ? message : message.default;
+	const isErrorText = (message: unknown): message is FieldError["message"] => {
+		return (
+			typeof message === "object" &&
+			message !== null &&
+			"type" in message &&
+			((message as { type?: string }).type === "lucid.text" ||
+				(message as { type?: string }).type === "lucid.literal")
+		);
+	};
+	const renderErrorMessage = (message: FieldError["message"] | string) =>
+		typeof message === "string"
+			? message
+			: message.type === "lucid.literal"
+				? message.value
+				: (message.defaultMessage ?? message.key);
 	const genericMessage = () => {
 		if (!props.errors || Array.isArray(props.errors)) return undefined;
-		return typeof props.errors.message === "string"
-			? props.errors.message
-			: undefined;
+		const message = props.errors.message;
+		if (typeof message === "string") return message;
+		if (isErrorText(message)) return renderErrorMessage(message);
+		return undefined;
 	};
 
 	return (

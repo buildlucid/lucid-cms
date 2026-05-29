@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type { EmailDeliveryStatus, ServiceFn } from "@lucidcms/core/types";
 import { Webhook } from "svix";
 import { controllerSchemas } from "../schema/webhook.js";
@@ -19,7 +19,7 @@ const webhook: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: serverText("plugin.resend.webhooks.not.enabled"),
+				message: text.server("plugin.resend.webhooks.not.enabled"),
 			},
 			data: undefined,
 		};
@@ -30,7 +30,7 @@ const webhook: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: serverText("plugin.resend.webhooks.secret.not.configured"),
+				message: text.server("plugin.resend.webhooks.secret.not.configured"),
 			},
 			data: undefined,
 		};
@@ -45,7 +45,7 @@ const webhook: ServiceFn<
 			error: {
 				type: "authorisation",
 				status: 401,
-				message: serverText("plugin.resend.webhooks.signature.invalid"),
+				message: text.server("plugin.resend.webhooks.signature.invalid"),
 			},
 			data: undefined,
 		};
@@ -59,7 +59,7 @@ const webhook: ServiceFn<
 			error: {
 				type: "validation",
 				status: 400,
-				message: serverText("plugin.resend.webhooks.body.invalid"),
+				message: text.server("plugin.resend.webhooks.body.invalid"),
 			},
 			data: undefined,
 		};
@@ -81,7 +81,7 @@ const webhook: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("plugin.resend.webhooks.event.type.invalid"),
+				message: text.server("plugin.resend.webhooks.event.type.invalid"),
 			},
 			data: undefined,
 		};
@@ -97,7 +97,7 @@ const webhook: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: serverText("plugin.resend.transactions.not.found"),
+				message: text.server("plugin.resend.transactions.not.found"),
 			},
 		};
 	}

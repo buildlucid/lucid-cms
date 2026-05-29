@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { adminText, serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import TextareaCustomField from "./custom-field.js";
@@ -11,9 +11,11 @@ import TextareaCustomField from "./custom-field.js";
 const TextareaCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
-		singularName: adminText("tests.collections.collection.singularName", {
-			fallback: "Test",
+		name: text.admin("tests.collections.collection.name", {
+			defaultMessage: "Test",
+		}),
+		singularName: text.admin("tests.collections.collection.singularName", {
+			defaultMessage: "Test",
 		}),
 	},
 	config: {
@@ -121,9 +123,8 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "standard_textarea",
 			localeCode: "en",
-			message: serverText("core.fields.validation.errors.unknown", {
-				fallback: "Invalid input: expected string, received number",
-				priority: "Invalid input: expected string, received number",
+			message: text.server("core.fields.validation.errors.unknown", {
+				defaultMessage: "Invalid input: expected string, received number",
 			}),
 		},
 	]);
@@ -151,7 +152,7 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "required_textarea",
 			localeCode: "en",
-			message: serverText("core.fields.validation.required"),
+			message: text.server("core.fields.validation.required"),
 		},
 	]);
 
@@ -178,9 +179,8 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "min_length_textarea",
 			localeCode: "en",
-			message: serverText("core.fields.validation.errors.unknown", {
-				fallback: "Too small: expected string to have >=5 characters",
-				priority: "Too small: expected string to have >=5 characters",
+			message: text.server("core.fields.validation.errors.unknown", {
+				defaultMessage: "Too small: expected string to have >=5 characters",
 			}),
 		},
 	]);
@@ -191,14 +191,14 @@ test("fail to validate field - textarea", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new TextareaCustomField("field", {
 		details: {
-			label: adminText("tests.fields.field.label", {
-				fallback: "title",
+			label: text.admin("tests.fields.field.label", {
+				defaultMessage: "title",
 			}),
-			summary: adminText("tests.fields.field.summary", {
-				fallback: "description",
+			summary: text.admin("tests.fields.field.summary", {
+				defaultMessage: "description",
 			}),
-			placeholder: adminText("tests.fields.field.placeholder", {
-				fallback: "placeholder",
+			placeholder: text.admin("tests.fields.field.placeholder", {
+				defaultMessage: "placeholder",
 			}),
 		},
 		config: {

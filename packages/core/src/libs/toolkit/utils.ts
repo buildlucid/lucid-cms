@@ -6,7 +6,7 @@ import type {
 import decodeError from "../../utils/errors/decode-error.js";
 import flattenDocumentFilters from "../../utils/helpers/flatten-document-filters.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
-import { serverText } from "../i18n/index.js";
+import { text } from "../i18n/index.js";
 
 type PaginatedQuery = {
 	page?: number;
@@ -94,12 +94,12 @@ export const runToolkitService = async <T>(
 			error: {
 				type: "basic",
 				name: errorConfig.name
-					? serverText(errorConfig.name.key, {
-							fallback: errorConfig.name.fallback,
+					? text.server(errorConfig.name.key, {
+							defaultMessage: errorConfig.name.fallback,
 						})
 					: undefined,
-				message: serverText(errorConfig.message.key, {
-					fallback: errorConfig.message.fallback,
+				message: text.server(errorConfig.message.key, {
+					defaultMessage: errorConfig.message.fallback,
 				}),
 				status: 500,
 			},
@@ -113,16 +113,14 @@ export const runToolkitService = async <T>(
 				error: {
 					type: "basic",
 					name: errorConfig.name
-						? serverText(errorConfig.name.key, {
-								fallback: errorConfig.name.fallback,
-								priority: decodedError.name,
+						? text.server(errorConfig.name.key, {
+								defaultMessage: errorConfig.name.fallback,
 							})
-						: serverText("core.errors.default.name", {
-								priority: decodedError.name,
+						: text.server("core.errors.default.name", {
+								defaultMessage: decodedError.name,
 							}),
-					message: serverText(errorConfig.message.key, {
-						fallback: errorConfig.message.fallback,
-						priority: decodedError.message ?? errorConfig.message.fallback,
+					message: text.server(errorConfig.message.key, {
+						defaultMessage: errorConfig.message.fallback,
 					}),
 					status: decodedError.status,
 					code: decodedError.code,
@@ -136,14 +134,14 @@ export const runToolkitService = async <T>(
 			error: {
 				type: "basic",
 				name: errorConfig.name
-					? serverText(errorConfig.name.key, {
-							fallback: errorConfig.name.fallback,
+					? text.server(errorConfig.name.key, {
+							defaultMessage: errorConfig.name.fallback,
 						})
-					: serverText("core.errors.default.name", {
-							priority: constants.errors.name,
+					: text.server("core.errors.default.name", {
+							defaultMessage: constants.errors.name,
 						}),
-				message: serverText(errorConfig.message.key, {
-					fallback: errorConfig.message.fallback,
+				message: text.server(errorConfig.message.key, {
+					defaultMessage: errorConfig.message.fallback,
 				}),
 				status: constants.errors.status,
 			},

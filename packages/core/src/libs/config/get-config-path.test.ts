@@ -1,6 +1,6 @@
 import path from "node:path";
 import { expect, test } from "vitest";
-import { translateServer } from "../i18n/index.js";
+import { translate } from "../i18n/index.js";
 import getConfigPath from "./get-config-path.js";
 
 test("finds lucid.config.ts file", async () => {
@@ -10,6 +10,6 @@ test("finds lucid.config.ts file", async () => {
 
 test("throws on missing file", async () => {
 	expect(() => getConfigPath(process.cwd(), "test.cfdonfig")).toThrowError(
-		translateServer("core.config.file.not.found"),
+		translate.server("core.config.file.not.found"),
 	);
 });

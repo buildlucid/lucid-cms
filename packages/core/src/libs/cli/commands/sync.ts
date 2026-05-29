@@ -1,3 +1,4 @@
+import type { Config } from "../../../types.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import {
 	destroyKVAdapter,
@@ -11,12 +12,13 @@ import validateEnvVars from "../services/validate-env-vars.js";
 
 const syncCommand = async (options?: { skipEnvValidation?: boolean }) => {
 	let kvInstance: KVAdapterInstance | undefined;
+	let config: Config | undefined;
 	try {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
 
 		const res = await loadConfigFile();
-		const config = res.config;
+		config = res.config;
 
 		if (options?.skipEnvValidation !== true) {
 			const envValid = await validateEnvVars({
@@ -34,14 +36,14 @@ const syncCommand = async (options?: { skipEnvValidation?: boolean }) => {
 
 		const syncResult = await runSyncTasks(config, "process", kvInstance);
 		if (!syncResult) {
-			await destroyKVAdapter(kvInstance);
+			await destroyKVAdapter(kvInstance, { config });
 			logger.setBuffering(false);
 			process.exit(1);
 		}
 
 		cliLogger.info("Clearing KV cache...");
 		await kvInstance.clear();
-		await destroyKVAdapter(kvInstance);
+		await destroyKVAdapter(kvInstance, { config });
 		kvInstance = undefined;
 
 		const endTime = startTime();
@@ -60,7 +62,7 @@ const syncCommand = async (options?: { skipEnvValidation?: boolean }) => {
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
-		await destroyKVAdapter(kvInstance);
+		if (config) await destroyKVAdapter(kvInstance, { config });
 		cliLogger.error(
 			"Sync failed",
 			error instanceof Error ? error.message : "Unknown error",

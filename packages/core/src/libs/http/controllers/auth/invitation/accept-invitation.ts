@@ -11,7 +11,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
@@ -56,8 +56,8 @@ const acceptInvitationController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: serverText("core.routes.accept.invitation.error.name"),
-					message: serverText("core.routes.accept.invitation.error.message"),
+					name: text.server("core.routes.accept.invitation.error.name"),
+					message: text.server("core.routes.accept.invitation.error.message"),
 				},
 			},
 		)(context, {

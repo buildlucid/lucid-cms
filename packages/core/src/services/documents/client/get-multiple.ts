@@ -7,7 +7,7 @@ import {
 import formatter, {
 	documentsFormatter,
 } from "../../../libs/formatters/index.js";
-import { serverText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetMultipleQueryParams } from "../../../schemas/documents.js";
 import type {
@@ -57,7 +57,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	) {
 		return {
 			error: {
-				message: serverText("core.documents.not.found.message"),
+				message: text.server("core.documents.not.found.message"),
 				status: 404,
 			},
 			data: undefined,

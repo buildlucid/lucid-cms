@@ -1,5 +1,5 @@
 import { logger } from "@lucidcms/core";
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import { executeSingleJob, insertJobs, logScope } from "@lucidcms/core/queue";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
 import { ADAPTER_KEY, CONCURRENT_LIMIT } from "./constants.js";
@@ -21,7 +21,7 @@ const cloudflareQueuesAdapter = (
 		},
 		lifecycle: {
 			init: async (params) => {
-				consumerSupported = params.runtimeContext.compiled;
+				consumerSupported = params.runtimeContext?.compiled ?? false;
 
 				logger.debug({
 					message: `Cloudflare queue adapter initialised in ${consumerSupported ? "production" : "development"} mode`,
@@ -40,7 +40,7 @@ const cloudflareQueuesAdapter = (
 				if (params.options?.scheduledFor && !consumerSupported) {
 					return {
 						error: {
-							message: serverText(
+							message: text.server(
 								"plugin.cloudflare.queues.scheduling.production.only",
 							),
 						},
@@ -66,10 +66,10 @@ const cloudflareQueuesAdapter = (
 				if (!jobData) {
 					return {
 						error: {
-							message: serverText(
+							message: text.server(
 								"plugin.cloudflare.queues.jobs.create.failed",
 								{
-									fallback: "Failed to create job",
+									defaultMessage: "Failed to create job",
 								},
 							),
 						},
@@ -106,10 +106,10 @@ const cloudflareQueuesAdapter = (
 					) {
 						return {
 							error: {
-								message: serverText(
+								message: text.server(
 									"plugin.cloudflare.queues.jobs.execute.failed",
 									{
-										fallback: executeResult.message,
+										defaultMessage: executeResult.message,
 									},
 								),
 							},
@@ -140,8 +140,8 @@ const cloudflareQueuesAdapter = (
 
 				return {
 					error: {
-						message: serverText("plugin.cloudflare.queues.jobs.add.failed", {
-							fallback: "Error adding job to Cloudflare queue",
+						message: text.server("plugin.cloudflare.queues.jobs.add.failed", {
+							defaultMessage: "Error adding job to Cloudflare queue",
 						}),
 					},
 					data: undefined,
@@ -153,7 +153,7 @@ const cloudflareQueuesAdapter = (
 				if (params.options?.scheduledFor && !consumerSupported) {
 					return {
 						error: {
-							message: serverText(
+							message: text.server(
 								"plugin.cloudflare.queues.scheduling.production.only",
 							),
 						},
@@ -251,10 +251,10 @@ const cloudflareQueuesAdapter = (
 
 						return {
 							error: {
-								message: serverText(
+								message: text.server(
 									"plugin.cloudflare.queues.jobs.batch.execute.failed",
 									{
-										fallback: `${failedJobs.length} of ${allResults.length} jobs failed. First error: ${errorMessage}`,
+										defaultMessage: `${failedJobs.length} of ${allResults.length} jobs failed. First error: ${errorMessage}`,
 									},
 								),
 							},
@@ -292,10 +292,10 @@ const cloudflareQueuesAdapter = (
 
 				return {
 					error: {
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.queues.jobs.add.batch.failed",
 							{
-								fallback: "Error adding batch jobs to Cloudflare queue",
+								defaultMessage: "Error adding batch jobs to Cloudflare queue",
 							},
 						),
 					},

@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { isCorePermission } from "../../libs/permission/registry.js";
 import {
 	RolePermissionsRepository,
@@ -83,7 +83,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.permissions.denied"),
+				message: text.server("core.permissions.denied"),
 				status: 403,
 			},
 			data: undefined,
@@ -94,12 +94,12 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.errors.validation.message"),
+				message: text.server("core.errors.validation.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: serverText("core.fields.validation.required"),
+						message: text.server("core.fields.validation.required"),
 					},
 				},
 			},
@@ -111,12 +111,12 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.validation.unique.message"),
+				message: text.server("core.validation.unique.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: serverText("core.validation.unique.message"),
+						message: text.server("core.validation.unique.message"),
 					},
 				},
 			},

@@ -1,6 +1,6 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
-import { adminText } from "../../../../i18n/admin-text.js";
+import { text } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -28,8 +28,8 @@ class TextareaCustomField extends CustomField<"textarea"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					adminText(`fields.${this.type}.${this.key}.label`, {
-						fallback: keyToTitle(this.key),
+					text.admin(`fields.${this.type}.${this.key}.label`, {
+						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,

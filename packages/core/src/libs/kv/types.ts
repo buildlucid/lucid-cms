@@ -1,3 +1,5 @@
+import type { AdapterLifecycleContext } from "../runtime/types.js";
+
 export type KVAdapter<T = undefined> = T extends undefined
 	? () => KVAdapterInstance | Promise<KVAdapterInstance>
 	: (options: T) => KVAdapterInstance | Promise<KVAdapterInstance>;
@@ -70,9 +72,9 @@ export type KVAdapterInstance = {
 	 */
 	lifecycle?: {
 		/** Initialize the adapter */
-		init?: () => Promise<void>;
+		init?: (context: AdapterLifecycleContext) => Promise<void>;
 		/** Destroy the adapter */
-		destroy?: () => Promise<void>;
+		destroy?: (context: AdapterLifecycleContext) => Promise<void>;
 	};
 	/** Read a single key, returning null when the key is missing or expired. */
 	get: <R>(key: string, options?: KVKeyOptions) => Promise<R | null>;

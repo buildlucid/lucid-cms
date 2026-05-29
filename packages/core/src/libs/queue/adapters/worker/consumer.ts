@@ -6,6 +6,7 @@ import type { Config } from "../../../../types.js";
 import getConfigPath from "../../../config/get-config-path.js";
 import loadConfigFile from "../../../config/load-config-file.js";
 import { resolveConfigDefinition } from "../../../config/resolve-config-definition.js";
+import { createTranslator } from "../../../i18n/index.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
@@ -77,10 +78,15 @@ const getConfig = async (): Promise<{
 
 const startConsumer = async () => {
 	let kvInstance: KVAdapterInstance | undefined;
+	let kvLifecycleContext:
+		| { config: Config; env?: EnvironmentVariables }
+		| undefined;
 	try {
 		const { config, env } = await getConfig();
+		const translate = createTranslator({ config, locale: "en" });
+		kvLifecycleContext = { config, env };
 
-		kvInstance = await getInitializedKVAdapter(config);
+		kvInstance = await getInitializedKVAdapter(config, { env });
 		const kv = kvInstance;
 
 		const internalQueueAdapter = passthroughQueueAdapter({
@@ -99,7 +105,8 @@ const startConsumer = async () => {
 			if (shuttingDown) return;
 			shuttingDown = true;
 			if (pollTimeout) clearTimeout(pollTimeout);
-			await destroyKVAdapter(kvInstance);
+			if (kvLifecycleContext)
+				await destroyKVAdapter(kvInstance, kvLifecycleContext);
 			await config.db.client.destroy();
 			process.exit(exitCode);
 		};
@@ -168,9 +175,10 @@ const startConsumer = async () => {
 										//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter
 										queue: internalQueueAdapter,
 										kv,
+										translate,
 										request: {
 											url: config.baseUrl ?? "",
-											locale: config.i18n.interface.defaultLocale,
+											locale: "en",
 										},
 									},
 									{
@@ -208,7 +216,8 @@ const startConsumer = async () => {
 		});
 		poll();
 	} catch (error) {
-		await destroyKVAdapter(kvInstance);
+		if (kvLifecycleContext)
+			await destroyKVAdapter(kvInstance, kvLifecycleContext);
 		logger.error({
 			message: "Consumer startup error",
 			scope: constants.logScopes.queueAdapter,

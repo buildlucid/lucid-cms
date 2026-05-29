@@ -3,8 +3,7 @@ import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
 import type { BooleanInt } from "../../../../db/types.js";
 import formatter from "../../../../formatters/index.js";
-import { adminText } from "../../../../i18n/admin-text.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -32,8 +31,8 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					adminText(`fields.${this.type}.${this.key}.label`, {
-						fallback: keyToTitle(this.key),
+					text.admin(`fields.${this.type}.${this.key}.label`, {
+						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
 				true: this.props?.details?.true,
@@ -54,7 +53,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			required: {
 				condition: (value: unknown) =>
 					value === undefined || value === null || value === 0,
-				message: serverText("core.fields.checkbox.validation.required"),
+				message: text.server("core.fields.checkbox.validation.required"),
 			},
 		});
 	}

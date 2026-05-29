@@ -1,29 +1,29 @@
 import type { PublicErrorData } from "@lucidcms/types";
-import { isServerText, translateServerText } from "../../libs/i18n/index.js";
-import type { TranslateServerOptions } from "../../libs/i18n/types.js";
+import { isTranslatableText } from "../../libs/i18n/index.js";
+import type { Translator } from "../../libs/i18n/types.js";
 import type { ErrorText, LucidErrorData } from "../../types/errors.js";
 
 const translateErrorText = (
 	text: ErrorText | undefined,
-	options?: TranslateServerOptions,
+	translator: Translator,
 ) => {
 	if (!text) return text;
-	return translateServerText(text, options);
+	return translator.text(text);
 };
 
 const translateNestedErrorText = (
 	value: unknown,
-	options?: TranslateServerOptions,
+	translator: Translator,
 ): unknown => {
-	if (isServerText(value)) return translateServerText(value, options);
+	if (isTranslatableText(value)) return translator.text(value);
 	if (Array.isArray(value)) {
-		return value.map((item) => translateNestedErrorText(item, options));
+		return value.map((item) => translateNestedErrorText(item, translator));
 	}
 	if (value && typeof value === "object") {
 		return Object.fromEntries(
 			Object.entries(value).map(([key, nested]) => [
 				key,
-				translateNestedErrorText(nested, options),
+				translateNestedErrorText(nested, translator),
 			]),
 		);
 	}
@@ -35,14 +35,14 @@ const translateNestedErrorText = (
  */
 const translateErrorData = (
 	error: LucidErrorData,
-	options?: TranslateServerOptions,
+	translator: Translator,
 ): PublicErrorData => ({
 	...error,
-	name: translateErrorText(error.name, options),
-	message: translateErrorText(error.message, options),
+	name: translateErrorText(error.name, translator),
+	message: translateErrorText(error.message, translator),
 	errors: translateNestedErrorText(
 		error.errors,
-		options,
+		translator,
 	) as PublicErrorData["errors"],
 });
 

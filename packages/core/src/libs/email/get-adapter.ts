@@ -33,10 +33,10 @@ const getEmailAdapter = async (
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.emailAdapter,
-			message:
-				error instanceof Error
-					? error.message
-					: "Failed to initialize email adapter",
+			message: "Failed to initialize email adapter",
+			data: {
+				errorMessage: error instanceof Error ? error.message : String(error),
+			},
 		});
 
 		return {

@@ -1,4 +1,4 @@
-import { serverText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { LucidDocumentTableName } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -60,12 +60,12 @@ const checkSingleCollectionDocumentCount: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.collections.single.document.exists"),
+				message: text.server("core.collections.single.document.exists"),
 				status: 400,
 				errors: {
 					collectionKey: {
 						code: "invalid",
-						message: serverText("core.collections.single.document.exists"),
+						message: text.server("core.collections.single.document.exists"),
 					},
 				},
 			},

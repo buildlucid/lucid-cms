@@ -11,7 +11,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
@@ -50,8 +50,8 @@ const loginController = factory.createHandlers(
 			defaultError: {
 				type: "basic",
 				code: "login",
-				name: serverText("core.routes.login.error.name"),
-				message: serverText("core.routes.login.error.message"),
+				name: text.server("core.routes.login.error.name"),
+				message: text.server("core.routes.login.error.message"),
 			},
 		})(context, {
 			usernameOrEmail: usernameOrEmail,
@@ -75,8 +75,8 @@ const loginController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: serverText("core.routes.login.error.name"),
-					message: serverText("core.routes.login.error.message"),
+					name: text.server("core.routes.login.error.name"),
+					message: text.server("core.routes.login.error.message"),
 				},
 			},
 		)(context, {

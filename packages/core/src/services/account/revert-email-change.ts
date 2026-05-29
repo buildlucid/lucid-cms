@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
@@ -43,7 +43,7 @@ const revertEmailChange: ServiceFn<
 			defaultError: {
 				type: "basic",
 				status: 404,
-				message: serverText("core.tokens.not.found.message"),
+				message: text.server("core.tokens.not.found.message"),
 			},
 		},
 	});
@@ -57,7 +57,7 @@ const revertEmailChange: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: serverText("core.tokens.not.found.message"),
+				message: text.server("core.tokens.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -87,7 +87,7 @@ const revertEmailChange: ServiceFn<
 				defaultError: {
 					type: "basic",
 					status: 404,
-					message: serverText("core.tokens.not.found.message"),
+					message: text.server("core.tokens.not.found.message"),
 				},
 			},
 		});
@@ -117,7 +117,7 @@ const revertEmailChange: ServiceFn<
 					defaultError: {
 						type: "basic",
 						status: 404,
-						message: serverText("core.tokens.not.found.message"),
+						message: text.server("core.tokens.not.found.message"),
 					},
 				},
 			}),
@@ -154,7 +154,7 @@ const revertEmailChange: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 404,
-				message: serverText("core.user.not.found.message"),
+				message: text.server("core.user.not.found.message"),
 			},
 		},
 	});
@@ -165,7 +165,7 @@ const revertEmailChange: ServiceFn<
 			error: {
 				type: "basic",
 				status: 409,
-				message: serverText("core.email.change.request.stale.message"),
+				message: text.server("core.email.change.request.stale.message"),
 			},
 			data: undefined,
 		};
@@ -194,7 +194,7 @@ const revertEmailChange: ServiceFn<
 			error: {
 				type: "basic",
 				status: 409,
-				message: serverText("core.email.change.email.unavailable.message"),
+				message: text.server("core.email.change.email.unavailable.message"),
 			},
 			data: undefined,
 		};
@@ -221,7 +221,7 @@ const revertEmailChange: ServiceFn<
 			defaultError: {
 				type: "basic",
 				status: 404,
-				message: serverText("core.tokens.not.found.message"),
+				message: text.server("core.tokens.not.found.message"),
 			},
 		},
 	});
@@ -266,7 +266,7 @@ const revertEmailChange: ServiceFn<
 					defaultError: {
 						type: "basic",
 						status: 404,
-						message: serverText("core.tokens.not.found.message"),
+						message: text.server("core.tokens.not.found.message"),
 					},
 				},
 			}),

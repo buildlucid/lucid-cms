@@ -1,13 +1,13 @@
-import type { AdminText } from "../../../../i18n/types.js";
+import type { AdminTextDescriptor } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface CheckboxFieldConfig extends SharedFieldConfig {
 	type: "checkbox";
 	details: {
-		label?: AdminText;
-		summary?: AdminText;
-		true?: AdminText;
-		false?: AdminText;
+		label?: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
+		true?: AdminTextDescriptor;
+		false?: AdminTextDescriptor;
 	};
 	config: {
 		localized?: boolean;

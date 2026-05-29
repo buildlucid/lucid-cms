@@ -150,7 +150,7 @@ export const buildCloudflareMainWorkerSource = (props: {
 		},
 		{
 			path: "@lucidcms/core/plugin",
-			exports: ["translateServer"],
+			exports: ["createTranslator"],
 		},
 	];
 	const exports: CloudflareWorkerExport[] = [
@@ -190,13 +190,17 @@ return astroWorker.fetch(request, env, ctx);`,
 		resolvedDb: databaseAdapter,
 		skipValidation: true,
 	});
-		const kv = await getInitializedKVAdapter(resolvedConfig);
+		const runtimeContext = getRuntimeContext({
+			server: "cloudflare",
+			compiled: true,
+		});
+		const translate = createTranslator({ config: resolvedConfig, locale: "en" });
+		const kv = await getInitializedKVAdapter(resolvedConfig, {
+			env,
+			runtimeContext,
+		});
 
 		try {
-			const runtimeContext = getRuntimeContext({
-				server: "cloudflare",
-				compiled: true,
-			});
 			const cronJobSetup = await setupCronJobs({
 				createQueue: true,
 				runtimeContext,
@@ -212,13 +216,13 @@ return astroWorker.fetch(request, env, ctx);`,
 					url: resolvedConfig.baseUrl || "http://localhost",
 					locale: resolvedConfig.i18n.interface.defaultLocale,
 				},
-				translate: (key, data) => translateServer(key, data),
+				translate,
 			}, {
 				schedule: controller.cron,
 			});
 		} finally {
 			await Promise.allSettled([
-				destroyKVAdapter(kv),
+				destroyKVAdapter(kv, { config: resolvedConfig, env, runtimeContext }),
 				resolvedConfig.db.client.destroy(),
 			]);
 		}

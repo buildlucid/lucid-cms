@@ -3,6 +3,8 @@ import type {
 	emailDeliveryStatusSchema,
 	emailTypeSchema,
 } from "../../schemas/email.js";
+import type { TranslatableText } from "../i18n/types.js";
+import type { AdapterLifecycleContext } from "../runtime/types.js";
 
 export type RenderedTemplates = {
 	[templateName: string]: {
@@ -70,7 +72,7 @@ export type EmailAttachment =
 export type EmailStrategyResponse = {
 	success: boolean;
 	deliveryStatus: EmailDeliveryStatus;
-	message: string;
+	message: TranslatableText;
 	externalMessageId?: string | null;
 	data?: Record<string, unknown> | null;
 };
@@ -114,9 +116,9 @@ export type EmailAdapterInstance = {
 	 */
 	lifecycle?: {
 		/** Initialize the adapter */
-		init?: () => Promise<void>;
+		init?: (context: AdapterLifecycleContext) => Promise<void>;
 		/** Destroy the adapter */
-		destroy?: () => Promise<void>;
+		destroy?: (context: AdapterLifecycleContext) => Promise<void>;
 	};
 	/** Send an email */
 	send: EmailAdapterServiceSend;

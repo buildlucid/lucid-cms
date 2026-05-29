@@ -29,9 +29,12 @@ class LucidError extends Error {
 		this.kill = data.kill;
 
 		logger.error({
-			message: this.message,
+			message: "Lucid error thrown",
 			scope: this.scope,
-			data: data.data ?? undefined,
+			data: {
+				...(data.data ?? {}),
+				errorMessage: this.message,
+			},
 		});
 
 		if (this.kill) process.exit(1);

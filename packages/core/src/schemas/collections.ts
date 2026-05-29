@@ -1,5 +1,5 @@
 import z from "zod";
-import { adminTextSchema } from "../libs/i18n/admin-text.js";
+import { adminTextDescriptorSchema } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { brickConfigSchema } from "./collection-bricks.js";
 import { fieldConfigSchema } from "./collection-fields.js";
@@ -43,28 +43,31 @@ const collectionResponseSchema = z.object({
 		})
 		.optional(),
 	details: z.object({
-		name: adminTextSchema.meta({
+		name: adminTextDescriptorSchema.meta({
 			description: "Display name for the collection",
 			example: {
-				type: "admin-text",
+				type: "lucid.text",
+				scope: "admin",
 				key: "collections.page.name",
-				fallback: "Pages",
+				defaultMessage: "Pages",
 			},
 		}),
-		singularName: adminTextSchema.meta({
+		singularName: adminTextDescriptorSchema.meta({
 			description: "Singular display name for items in the collection",
 			example: {
-				type: "admin-text",
+				type: "lucid.text",
+				scope: "admin",
 				key: "collections.page.singularName",
-				fallback: "Page",
+				defaultMessage: "Page",
 			},
 		}),
-		summary: adminTextSchema.nullable().meta({
+		summary: adminTextDescriptorSchema.nullable().meta({
 			description: "Description text for the collection",
 			example: {
-				type: "admin-text",
+				type: "lucid.text",
+				scope: "admin",
 				key: "collections.page.summary",
-				fallback: "Manage the pages and content on your website.",
+				defaultMessage: "Manage the pages and content on your website.",
 			},
 		}),
 	}),
@@ -110,7 +113,7 @@ const collectionResponseSchema = z.object({
 				stages: z.array(
 					z.object({
 						key: z.string(),
-						name: adminTextSchema,
+						name: adminTextDescriptorSchema,
 						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
 						publishTargets: z.array(z.string()),
 						permissions: z.object({
@@ -131,12 +134,13 @@ const collectionResponseSchema = z.object({
 					description: "The environment key",
 					example: "production",
 				}),
-				name: adminTextSchema.meta({
+				name: adminTextDescriptorSchema.meta({
 					description: "Display name for the environment",
 					example: {
-						type: "admin-text",
+						type: "lucid.text",
+						scope: "admin",
 						key: "collections.page.environments.production.name",
-						fallback: "Production",
+						defaultMessage: "Production",
 					},
 				}),
 				permissions: z.object({

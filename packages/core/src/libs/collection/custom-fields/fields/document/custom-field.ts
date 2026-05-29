@@ -4,8 +4,7 @@ import type {
 	Select,
 	ServiceResponse,
 } from "../../../../../types.js";
-import { adminText } from "../../../../i18n/admin-text.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import buildSchemaIndex from "../../../helpers/build-schema-index.js";
 import buildTableName from "../../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
@@ -50,8 +49,8 @@ class DocumentCustomField extends CustomField<"document"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					adminText(`fields.${this.type}.${this.key}.label`, {
-						fallback: keyToTitle(this.key),
+					text.admin(`fields.${this.type}.${this.key}.label`, {
+						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
 			},
@@ -87,7 +86,7 @@ class DocumentCustomField extends CustomField<"document"> {
 					value === undefined ||
 					value === null ||
 					(Array.isArray(value) && value.length === 0),
-				message: serverText("core.fields.validation.required"),
+				message: text.server("core.fields.validation.required"),
 			},
 		};
 	}
@@ -230,7 +229,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			if (!allowedCollections.includes(documentValue.collectionKey)) {
 				errors.push({
 					itemIndex,
-					message: serverText("core.fields.document.validation.not.found"),
+					message: text.server("core.fields.document.validation.not.found"),
 				});
 				continue;
 			}
@@ -244,7 +243,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			if (findDocument === undefined) {
 				errors.push({
 					itemIndex,
-					message: serverText("core.fields.document.validation.not.found"),
+					message: text.server("core.fields.document.validation.not.found"),
 				});
 			}
 		}

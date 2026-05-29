@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { DEFAULT_MAX_UPLOAD_SIZE, STORAGE_UPLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";
@@ -10,7 +10,7 @@ const buildFileTooLargeError = (maxUploadSize: number) => ({
 	error: {
 		type: "basic" as const,
 		status: 413,
-		message: serverText("plugin.cloudflare.r2.upload.file.too.large", {
+		message: text.server("plugin.cloudflare.r2.upload.file.too.large", {
 			data: {
 				size: String(maxUploadSize),
 			},
@@ -23,7 +23,7 @@ const buildMissingContentLengthError = () => ({
 	error: {
 		type: "basic" as const,
 		status: 411,
-		message: serverText(
+		message: text.server(
 			"plugin.cloudflare.r2.upload.headers.content.length.missing",
 		),
 	},
@@ -64,7 +64,7 @@ const storageUpload =
 				error: {
 					type: "basic",
 					status: 403,
-					message: serverText(
+					message: text.server(
 						"plugin.cloudflare.r2.signed.urls.invalid.or.expired",
 					),
 				},
@@ -77,7 +77,7 @@ const storageUpload =
 				error: {
 					type: "basic",
 					status: 400,
-					message: serverText("plugin.cloudflare.r2.upload.body.missing"),
+					message: text.server("plugin.cloudflare.r2.upload.body.missing"),
 				},
 				data: undefined,
 			};
@@ -130,10 +130,10 @@ const storageUpload =
 			return {
 				error: {
 					type: "plugin",
-					message: serverText("plugin.cloudflare.r2.errors.unknown", {
-						fallback:
-							streamError instanceof Error ? streamError.message : undefined,
-					}),
+					message:
+						streamError instanceof Error
+							? text.literal(streamError.message)
+							: text.server("plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,
 			};
@@ -143,10 +143,10 @@ const storageUpload =
 			return {
 				error: {
 					type: "plugin",
-					message: serverText("plugin.cloudflare.r2.errors.unknown", {
-						fallback:
-							uploadError instanceof Error ? uploadError.message : undefined,
-					}),
+					message:
+						uploadError instanceof Error
+							? text.literal(uploadError.message)
+							: text.server("plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,
 			};

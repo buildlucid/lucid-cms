@@ -4,7 +4,7 @@ import {
 	createBufferETag,
 	matchesETag,
 } from "../../../../../utils/http/etag.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceStream,
@@ -31,7 +31,7 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 			} catch {
 				return {
 					error: {
-						message: serverText("core.files.not.found"),
+						message: text.server("core.files.not.found"),
 						status: 404,
 					},
 					data: undefined,
@@ -75,7 +75,7 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 				if (start >= totalSize || end >= totalSize || start > end) {
 					return {
 						error: {
-							message: serverText("core.media.stream.range.invalid"),
+							message: text.server("core.media.stream.range.invalid"),
 							status: 416,
 						},
 						data: undefined,
@@ -113,8 +113,8 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 			const error = e as Error;
 			return {
 				error: {
-					message: serverText("core.errors.default.message", {
-						fallback: error.message,
+					message: text.server("core.errors.default.message", {
+						defaultMessage: error.message,
 					}),
 					status: 500,
 				},

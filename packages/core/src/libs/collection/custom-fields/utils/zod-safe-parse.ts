@@ -1,6 +1,6 @@
 import type z from "zod";
 import tidyZodError from "../../../../utils/errors/tidy-zod-errors.js";
-import { serverText } from "../../../i18n/index.js";
+import { getZodIssueText, text } from "../../../i18n/index.js";
 import type { CustomFieldValidateResponse } from "../types.js";
 
 /**
@@ -24,13 +24,22 @@ const zodSafeParse = (
 		};
 	}
 
+	const translatableIssueText = response.error.issues
+		.map(getZodIssueText)
+		.find((message) => message !== undefined);
+	if (translatableIssueText) {
+		return {
+			valid: false,
+			message: translatableIssueText,
+		};
+	}
+
 	const message = modifyMessage(tidyZodError(response.error));
 
 	return {
 		valid: false,
-		message: serverText("core.fields.validation.errors.unknown", {
-			fallback: message,
-			priority: message,
+		message: text.server("core.fields.validation.errors.unknown", {
+			defaultMessage: message,
 		}),
 	};
 };

@@ -1,6 +1,6 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { serverText, translateServer } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import {
@@ -35,8 +35,8 @@ const deleteMultiple: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.error.locked.collection.name"),
-				message: serverText("core.error.locked.collection.message.delete"),
+				name: text.server("core.error.locked.collection.name"),
+				message: text.server("core.error.locked.collection.message.delete"),
 				status: 400,
 			},
 			data: undefined,
@@ -80,17 +80,17 @@ const deleteMultiple: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.documents.not.found.message"),
+				message: text.server("core.documents.not.found.message"),
 				errors: {
 					ids: {
 						message:
 							documentsRes.data.length > 0
-								? serverText("core.documents.ids.not.found.partial", {
+								? text.server("core.documents.ids.not.found.partial", {
 										data: {
 											ids: documentsRes.data.map((doc) => doc.id).join(", "),
 										},
 									})
-								: serverText("core.documents.ids.not.found.none"),
+								: text.server("core.documents.ids.not.found.none"),
 					},
 				},
 				status: 404,
@@ -165,12 +165,8 @@ const deleteMultiple: ServiceFn<
 		await documentPublishOperationServices.cancelForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: data.ids,
-			comment: translateServer(
+			comment: context.translate.server(
 				"core.documents.deleted.publish.request.comment",
-				undefined,
-				{
-					config: context.config,
-				},
 			),
 		});
 	if (cancelRequestsRes.error) return cancelRequestsRes;

@@ -1,4 +1,4 @@
-import { adminText, CollectionBuilder, z } from "@lucidcms/core";
+import { CollectionBuilder, text, z } from "@lucidcms/core";
 import BannerBrick from "../bricks/banner.js";
 import IntroBrick from "../bricks/intro.js";
 import SEOBrick from "../bricks/seo.js";
@@ -7,14 +7,12 @@ import TestingBrick from "../bricks/testing.js";
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: adminText("collections.page.name", {
-			fallback: "Pages",
+		name: text.admin("collections.page.name", { defaultMessage: "Pages" }),
+		singularName: text.admin("collections.page.singularName", {
+			defaultMessage: "Page",
 		}),
-		singularName: adminText("collections.page.singularName", {
-			fallback: "Page",
-		}),
-		summary: adminText("collections.page.summary", {
-			fallback: "Manage the pages and content on your website.",
+		summary: text.admin("collections.page.summary", {
+			defaultMessage: "Manage the pages and content on your website.",
 		}),
 	},
 	permissions: {
@@ -43,23 +41,23 @@ const PageCollection = new CollectionBuilder("page", {
 			stages: [
 				{
 					key: "todo",
-					name: adminText("collections.page.workflow.todo.name", {
-						fallback: "To do",
+					name: text.admin("collections.page.workflow.todo.name", {
+						defaultMessage: "To do",
 					}),
 					color: "yellow",
 				},
 				{
 					key: "in-progress",
-					name: adminText("collections.page.workflow.in-progress.name", {
-						fallback: "In progress",
+					name: text.admin("collections.page.workflow.in-progress.name", {
+						defaultMessage: "In progress",
 					}),
 					publishTargets: ["staging"],
 					color: "blue",
 				},
 				{
 					key: "done",
-					name: adminText("collections.page.workflow.done.name", {
-						fallback: "Done",
+					name: text.admin("collections.page.workflow.done.name", {
+						defaultMessage: "Done",
 					}),
 					publishTargets: ["production", "staging"],
 					color: "green",
@@ -73,8 +71,8 @@ const PageCollection = new CollectionBuilder("page", {
 		environments: [
 			{
 				key: "staging",
-				name: adminText("collections.page.environments.staging.name", {
-					fallback: "Staging",
+				name: text.admin("collections.page.environments.staging.name", {
+					defaultMessage: "Staging",
 				}),
 				permissions: {
 					publish: "page:publish:staging",
@@ -83,8 +81,8 @@ const PageCollection = new CollectionBuilder("page", {
 			},
 			{
 				key: "production",
-				name: adminText("collections.page.environments.production.name", {
-					fallback: "Production",
+				name: text.admin("collections.page.environments.production.name", {
+					defaultMessage: "Production",
 				}),
 				permissions: {
 					publish: "page:publish:production",
@@ -146,11 +144,11 @@ const PageCollection = new CollectionBuilder("page", {
 })
 	.addText("page_title", {
 		details: {
-			label: adminText("collections.page.fields.page_title.label", {
-				fallback: "Page title",
+			label: text.admin("collections.page.fields.page_title.label", {
+				defaultMessage: "Page title",
 			}),
-			summary: adminText("collections.page.fields.page_title.summary", {
-				fallback: "The title of the page.",
+			summary: text.admin("collections.page.fields.page_title.summary", {
+				defaultMessage: "The title of the page.",
 			}),
 		},
 		config: {

@@ -4,8 +4,8 @@ import {
 	honoOpenAPIResponse,
 	LucidAPIError,
 	rateLimiterMiddleware as rateLimiter,
-	serverText,
 	serviceWrapper,
+	text,
 	validateMiddleware as validate,
 } from "@lucidcms/core/plugin";
 import { createFactory } from "hono/factory";
@@ -49,10 +49,10 @@ const storageUploadController = (pluginOptions: PluginOptions) =>
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: serverText(
+					name: text.server(
 						"plugin.cloudflare.r2.routes.storage.upload.error.name",
 					),
-					message: serverText(
+					message: text.server(
 						"plugin.cloudflare.r2.routes.storage.upload.error.message",
 					),
 				},

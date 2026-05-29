@@ -1,6 +1,6 @@
 import type { QueryBuilderWhere } from "../../libs/db/query-builder/index.js";
 import { usersFormatter } from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { User } from "../../types/response.js";
@@ -40,7 +40,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.user.not.found.message"),
+				message: text.server("core.user.not.found.message"),
 				status: 404,
 			},
 		},

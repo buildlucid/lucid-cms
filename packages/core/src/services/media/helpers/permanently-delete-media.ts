@@ -1,4 +1,4 @@
-import { serverText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../../libs/kv/http-cache.js";
 import {
@@ -39,7 +39,7 @@ const permanentlyDeleteMedia: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.media.not.found.message"),
+				message: text.server("core.media.not.found.message"),
 				status: 404,
 			},
 		},

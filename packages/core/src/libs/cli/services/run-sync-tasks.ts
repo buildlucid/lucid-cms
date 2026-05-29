@@ -1,5 +1,6 @@
 import { syncServices } from "../../../services/index.js";
 import type { Config } from "../../../types.js";
+import { createTranslator } from "../../i18n/index.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
@@ -19,6 +20,7 @@ const runSyncTasks = async (
 	const kv = kvInstance ?? (await getInitializedKVAdapter(config));
 	const shouldDestroyKV = kvInstance === undefined;
 	const queue = passthroughQueueAdapter();
+	const translate = createTranslator({ config, locale: "en" });
 
 	try {
 		const [localesResult, collectionsResult, rolesResult] = await Promise.all([
@@ -28,9 +30,10 @@ const runSyncTasks = async (
 				queue: queue,
 				env: null,
 				kv: kv,
+				translate,
 				request: {
 					url: config.baseUrl ?? "",
-					locale: config.i18n.interface.defaultLocale,
+					locale: "en",
 				},
 			}),
 			syncServices.syncCollections({
@@ -39,9 +42,10 @@ const runSyncTasks = async (
 				queue: queue,
 				env: null,
 				kv: kv,
+				translate,
 				request: {
 					url: config.baseUrl ?? "",
-					locale: config.i18n.interface.defaultLocale,
+					locale: "en",
 				},
 			}),
 			syncServices.syncRoles({
@@ -50,9 +54,10 @@ const runSyncTasks = async (
 				queue: queue,
 				env: null,
 				kv: kv,
+				translate,
 				request: {
 					url: config.baseUrl ?? "",
-					locale: config.i18n.interface.defaultLocale,
+					locale: "en",
 				},
 			}),
 		]);
@@ -60,10 +65,10 @@ const runSyncTasks = async (
 		if (localesResult.error) {
 			cliLogger.error(
 				"Sync failed during locale sync, with error:",
-				localesResult.error.message?.default || "unknown",
+				translate.english.text(localesResult.error.message) || "unknown",
 			);
 			if (mode === "process") {
-				if (shouldDestroyKV) await destroyKVAdapter(kv);
+				if (shouldDestroyKV) await destroyKVAdapter(kv, { config });
 				logger.setBuffering(false);
 				process.exit(1);
 			} else return false;
@@ -71,10 +76,10 @@ const runSyncTasks = async (
 		if (collectionsResult.error) {
 			cliLogger.error(
 				"Sync failed during collections sync, with error:",
-				collectionsResult.error.message?.default || "unknown",
+				translate.english.text(collectionsResult.error.message) || "unknown",
 			);
 			if (mode === "process") {
-				if (shouldDestroyKV) await destroyKVAdapter(kv);
+				if (shouldDestroyKV) await destroyKVAdapter(kv, { config });
 				logger.setBuffering(false);
 				process.exit(1);
 			} else return false;
@@ -82,10 +87,10 @@ const runSyncTasks = async (
 		if (rolesResult.error) {
 			cliLogger.error(
 				"Sync failed during roles sync, with error:",
-				rolesResult.error.message?.default || "unknown",
+				translate.english.text(rolesResult.error.message) || "unknown",
 			);
 			if (mode === "process") {
-				if (shouldDestroyKV) await destroyKVAdapter(kv);
+				if (shouldDestroyKV) await destroyKVAdapter(kv, { config });
 				logger.setBuffering(false);
 				process.exit(1);
 			} else return false;
@@ -97,7 +102,7 @@ const runSyncTasks = async (
 		);
 		return true;
 	} finally {
-		if (shouldDestroyKV) await destroyKVAdapter(kv);
+		if (shouldDestroyKV) await destroyKVAdapter(kv, { config });
 	}
 };
 

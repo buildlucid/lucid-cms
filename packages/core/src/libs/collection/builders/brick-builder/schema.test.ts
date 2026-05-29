@@ -1,14 +1,16 @@
 import { expect, test } from "vitest";
-import { adminText } from "../../../i18n/admin-text.js";
+import { text } from "../../../i18n/index.js";
 import BrickBuilder from "./index.js";
 import BrickConfigSchema from "./schema.js";
 
 test("brick builder config passes schema validation", async () => {
 	const brick = new BrickBuilder("block", {
 		details: {
-			name: adminText("tests.bricks.block.name", { fallback: "Block" }),
-			summary: adminText("tests.bricks.block.summary", {
-				fallback: "This is an example block",
+			name: text.admin("tests.bricks.block.name", {
+				defaultMessage: "Block",
+			}),
+			summary: text.admin("tests.bricks.block.summary", {
+				defaultMessage: "This is an example block",
 			}),
 		},
 		preview: {

@@ -4,7 +4,7 @@ import type {
 	TableType,
 } from "../../../libs/collection/schema/types.js";
 import type { InferredTable, ServiceResponse } from "../../../types.js";
-import { serverText } from "../../i18n/index.js";
+import { text } from "../../i18n/index.js";
 import {
 	getFieldDatabaseConfig,
 	getStorageModeBasePriority,
@@ -44,7 +44,7 @@ const getTablePriority = (
 			return {
 				data: undefined,
 				error: {
-					message: serverText(
+					message: text.server(
 						"core.collections.schema.table.name.format.insufficient.parts",
 					),
 				},

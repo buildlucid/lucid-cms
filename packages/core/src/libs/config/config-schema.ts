@@ -4,7 +4,7 @@ import type { Config } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
-import { adminTextSchema } from "../i18n/admin-text.js";
+import { adminTextDescriptorSchema } from "../i18n/index.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
@@ -231,8 +231,8 @@ const ConfigSchema = z.object({
 				.record(
 					z.string(),
 					z.object({
-						name: adminTextSchema,
-						description: adminTextSchema.nullable().optional(),
+						name: adminTextDescriptorSchema,
+						description: adminTextDescriptorSchema.nullable().optional(),
 					}),
 				)
 				.optional(),
@@ -240,8 +240,8 @@ const ConfigSchema = z.object({
 				.record(
 					z.string(),
 					z.object({
-						name: adminTextSchema,
-						description: adminTextSchema.nullable().optional(),
+						name: adminTextDescriptorSchema,
+						description: adminTextDescriptorSchema.nullable().optional(),
 						group: z.string(),
 					}),
 				)
@@ -250,8 +250,8 @@ const ConfigSchema = z.object({
 				.array(
 					z.object({
 						key: z.string(),
-						name: adminTextSchema,
-						description: adminTextSchema.optional(),
+						name: adminTextDescriptorSchema,
+						description: adminTextDescriptorSchema.optional(),
 						permissions: z.array(z.string()),
 					}),
 				)
@@ -265,7 +265,7 @@ const ConfigSchema = z.object({
 					z
 						.object({
 							key: z.string().trim().min(1),
-							label: adminTextSchema,
+							label: adminTextDescriptorSchema,
 							instructions: z.string().trim().min(1),
 							availability: z.union([
 								z.literal("global"),

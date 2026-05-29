@@ -1,4 +1,4 @@
-import { adminText } from "../../../i18n/admin-text.js";
+import { text } from "../../../i18n/index.js";
 import TabCustomField from "../../custom-fields/fields/tab/custom-field.js";
 import type { CFProps } from "../../custom-fields/types.js";
 import FieldBuilder from "../field-builder/index.js";
@@ -15,7 +15,9 @@ class BrickBuilder extends FieldBuilder {
 			details: {
 				name:
 					config?.details?.name ||
-					adminText(`bricks.${this.key}.name`, { fallback: key }),
+					text.admin(`bricks.${this.key}.name`, {
+						defaultMessage: key,
+					}),
 				summary: config?.details?.summary,
 			},
 			preview: config?.preview || {},

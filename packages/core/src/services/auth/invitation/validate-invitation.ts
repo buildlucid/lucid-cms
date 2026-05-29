@@ -1,6 +1,5 @@
 import constants from "../../../constants/constants.js";
 import formatter from "../../../libs/formatters/index.js";
-import { translateServer } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import {
 	UsersRepository,
@@ -92,7 +91,7 @@ const validateInvitation: ServiceFn<
 	});
 	if (userRes.error) {
 		logger.error({
-			message: translateServer("core.user.not.found.message"),
+			message: "Invitation user was not found",
 		});
 		return {
 			error: undefined,
@@ -104,9 +103,7 @@ const validateInvitation: ServiceFn<
 
 	if (formatter.formatBoolean(userRes.data?.invitation_accepted)) {
 		logger.error({
-			message: translateServer(
-				"core.auth.invitations.user.already.accepted.message",
-			),
+			message: "Invitation has already been accepted",
 		});
 		return {
 			error: undefined,

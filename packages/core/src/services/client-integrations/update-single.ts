@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import {
 	ClientIntegrationScopesRepository,
@@ -39,7 +39,7 @@ const updateSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.client.integrations.not.found.message"),
+				message: text.server("core.client.integrations.not.found.message"),
 				status: 404,
 			},
 		},

@@ -1,4 +1,4 @@
-import { translateServer } from "../../i18n/index.js";
+import { translate } from "../../i18n/index.js";
 
 const checkDuplicateFieldKeys = (
 	type: "brick" | "collection",
@@ -11,7 +11,7 @@ const checkDuplicateFieldKeys = (
 
 	if (duplicateKeys.length > 0) {
 		throw new Error(
-			translateServer("core.collections.fields.duplicates", {
+			translate.server("core.collections.fields.duplicates", {
 				type: type,
 				keys: duplicateKeys.join(", "),
 				typeKey: typeKey,

@@ -1,6 +1,5 @@
 import constants from "../../../constants/constants.js";
 import type { AlertExecutionPayload } from "../../../libs/alerts/types.js";
-import { translateServer } from "../../../libs/i18n/index.js";
 import {
 	AlertsRepository,
 	OptionsRepository,
@@ -100,15 +99,18 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 		storageLimit,
 		storageRemaining,
 	};
-	const title = translateServer("core.alerts.storage.triggered.title", {
-		percent: threshold.percent,
-	});
+	const title = context.translate.server(
+		"core.alerts.storage.triggered.title",
+		{
+			percent: threshold.percent,
+		},
+	);
 	let emailId: number | null = null;
 	if (alertEmail) {
 		const sendEmailRes = await sendEmail(context, {
 			type: "internal",
 			to: alertEmail,
-			subject: translateServer("core.alerts.storage.email.subject", {
+			subject: context.translate.server("core.alerts.storage.email.subject", {
 				percent: threshold.percent,
 			}),
 			template: constants.email.templates.storageAlert.key,
@@ -138,9 +140,12 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 			level: threshold.level,
 			dedupe_key: dedupeKey,
 			title,
-			message: translateServer("core.alerts.storage.triggered.message", {
-				percent: threshold.percent,
-			}),
+			message: context.translate.server(
+				"core.alerts.storage.triggered.message",
+				{
+					percent: threshold.percent,
+				},
+			),
 			metadata,
 			email_id: emailId,
 		},

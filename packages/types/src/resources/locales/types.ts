@@ -1,7 +1,11 @@
-export type AdminText = {
-	type: "admin-text";
+export type TranslationValues = Record<string, string | number | undefined>;
+
+export type AdminTextDescriptor = {
+	type: "lucid.text";
+	scope: "admin";
 	key: string;
-	fallback?: string;
+	values?: TranslationValues;
+	defaultMessage?: string;
 };
 
 export interface Locale {

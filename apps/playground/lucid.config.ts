@@ -4,7 +4,7 @@
 import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
-import { adminText, configureLucid, z } from "@lucidcms/core";
+import { configureLucid, text, z } from "@lucidcms/core";
 // import { passthroughEmailAdapter } from "@lucidcms/core/email";
 // import { fileSystemMediaAdapter } from "@lucidcms/core/media";
 import { createServiceContext, PermissionSets } from "@lucidcms/core/plugin";
@@ -223,95 +223,95 @@ export default configureLucid({
 		access: {
 			groups: {
 				pages: {
-					name: adminText("access.groups.pages.name", {
-						fallback: "Page Permissions",
+					name: text.admin("access.groups.pages.name", {
+						defaultMessage: "Page Permissions",
 					}),
 				},
 				blogs: {
-					name: adminText("access.groups.blogs.name", {
-						fallback: "Blog Permissions",
+					name: text.admin("access.groups.blogs.name", {
+						defaultMessage: "Blog Permissions",
 					}),
 				},
 			},
 			permissions: {
 				"page:full": {
-					name: adminText("access.permissions.page-full.name", {
-						fallback: "Full Page Access",
+					name: text.admin("access.permissions.page-full.name", {
+						defaultMessage: "Full Page Access",
 					}),
-					description: adminText("access.permissions.page-full.description", {
-						fallback: "Grants full access to pages.",
+					description: text.admin("access.permissions.page-full.description", {
+						defaultMessage: "Grants full access to pages.",
 					}),
 					group: "pages",
 				},
 				"page:read": {
-					name: adminText("access.permissions.page-read.name", {
-						fallback: "Read Pages",
+					name: text.admin("access.permissions.page-read.name", {
+						defaultMessage: "Read Pages",
 					}),
 					group: "pages",
 				},
 				"page:create": {
-					name: adminText("access.permissions.page-create.name", {
-						fallback: "Create Pages",
+					name: text.admin("access.permissions.page-create.name", {
+						defaultMessage: "Create Pages",
 					}),
 					group: "pages",
 				},
 				"page:update": {
-					name: adminText("access.permissions.page-update.name", {
-						fallback: "Update Pages",
+					name: text.admin("access.permissions.page-update.name", {
+						defaultMessage: "Update Pages",
 					}),
 					group: "pages",
 				},
 				"page:delete": {
-					name: adminText("access.permissions.page-delete.name", {
-						fallback: "Delete Pages",
+					name: text.admin("access.permissions.page-delete.name", {
+						defaultMessage: "Delete Pages",
 					}),
 					group: "pages",
 				},
 				"page:restore": {
-					name: adminText("access.permissions.page-restore.name", {
-						fallback: "Restore Pages",
+					name: text.admin("access.permissions.page-restore.name", {
+						defaultMessage: "Restore Pages",
 					}),
 					group: "pages",
 				},
 				"page:publish": {
-					name: adminText("access.permissions.page-publish.name", {
-						fallback: "Publish Pages",
+					name: text.admin("access.permissions.page-publish.name", {
+						defaultMessage: "Publish Pages",
 					}),
 					group: "pages",
 				},
 				"page:review": {
-					name: adminText("access.permissions.page-review.name", {
-						fallback: "Review Page Publish Requests",
+					name: text.admin("access.permissions.page-review.name", {
+						defaultMessage: "Review Page Publish Requests",
 					}),
 					group: "pages",
 				},
 				"page:publish:staging": {
-					name: adminText("access.permissions.page-publish-staging.name", {
-						fallback: "Publish Pages To Staging",
+					name: text.admin("access.permissions.page-publish-staging.name", {
+						defaultMessage: "Publish Pages To Staging",
 					}),
 					group: "pages",
 				},
 				"page:review:staging": {
-					name: adminText("access.permissions.page-review-staging.name", {
-						fallback: "Review Page Publish Requests To Staging",
+					name: text.admin("access.permissions.page-review-staging.name", {
+						defaultMessage: "Review Page Publish Requests To Staging",
 					}),
 					group: "pages",
 				},
 				"page:publish:production": {
-					name: adminText("access.permissions.page-publish-production.name", {
-						fallback: "Publish Pages To Production",
+					name: text.admin("access.permissions.page-publish-production.name", {
+						defaultMessage: "Publish Pages To Production",
 					}),
 					group: "pages",
 				},
 				"page:review:production": {
-					name: adminText("access.permissions.page-review-production.name", {
-						fallback: "Review Page Publish Requests To Production",
+					name: text.admin("access.permissions.page-review-production.name", {
+						defaultMessage: "Review Page Publish Requests To Production",
 					}),
 					group: "pages",
 				},
 				"blog:full": {
-					name: adminText("access.permissions.blog-full.name", {
-						fallback: "Full Blog Access",
+					name: text.admin("access.permissions.blog-full.name", {
+						defaultMessage: "Full Blog Access",
 					}),
 					group: "blogs",
 				},
@@ -319,11 +319,11 @@ export default configureLucid({
 			roles: [
 				{
 					key: "admin",
-					name: adminText("access.roles.admin.name", {
-						fallback: "Admin",
+					name: text.admin("access.roles.admin.name", {
+						defaultMessage: "Admin",
 					}),
-					description: adminText("access.roles.admin.description", {
-						fallback: "Full admin access for the playground.",
+					description: text.admin("access.roles.admin.description", {
+						defaultMessage: "Full admin access for the playground.",
 					}),
 					permissions: [
 						...PermissionSets.Users,

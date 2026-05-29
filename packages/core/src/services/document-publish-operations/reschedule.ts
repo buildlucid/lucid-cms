@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -59,7 +59,7 @@ const reschedule: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.publish.operations.not.reschedulable"),
+				message: text.server("core.publish.operations.not.reschedulable"),
 				status: 400,
 			},
 			data: undefined,
@@ -87,8 +87,8 @@ const reschedule: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.collections.permission.error.name"),
-				message: serverText("core.collections.permission.error.message", {
+				name: text.server("core.collections.permission.error.name"),
+				message: text.server("core.collections.permission.error.message", {
 					data: {
 						collection: operationRes.data.collection_key,
 						action: "review",
@@ -103,8 +103,8 @@ const reschedule: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: serverText("core.collections.permission.error.name"),
-				message: serverText("core.collections.permission.error.message", {
+				name: text.server("core.collections.permission.error.name"),
+				message: text.server("core.collections.permission.error.message", {
 					data: {
 						collection: operationRes.data.collection_key,
 						action: requiredAction,
@@ -127,7 +127,7 @@ const reschedule: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.publish.operations.schedule.not.supported"),
+				message: text.server("core.publish.operations.schedule.not.supported"),
 				status: 400,
 			},
 			data: undefined,

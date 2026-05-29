@@ -1,5 +1,5 @@
 import type { Insert, LucidRoleTranslations } from "../../../libs/db/types.js";
-import { translateAdmin } from "../../../libs/i18n/index.js";
+import { createTranslator } from "../../../libs/i18n/index.js";
 import type { Config, ConfiguredLocaleValue } from "../../../types/config.js";
 import type { TranslationsObj } from "../../../types/shared.js";
 
@@ -26,13 +26,14 @@ export const normalizeTranslationArray = (
 ): RoleTranslationInput => {
 	if (value === undefined) return [];
 
-	return config.i18n.interface.locales.map((locale) => ({
-		localeCode: locale.code,
-		value: translateAdmin(value, {
-			config,
-			locale: locale.code,
-		}),
-	}));
+	return config.i18n.interface.locales.map((locale) => {
+		const translator = createTranslator({ config, locale: locale.code });
+
+		return {
+			localeCode: locale.code,
+			value: translator.text(value) ?? null,
+		};
+	});
 };
 
 /**

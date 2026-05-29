@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants.js";
-import { translateServer } from "../../i18n/index.js";
+import { translate } from "../../i18n/index.js";
 
 const checkRepeaterDepth = (
 	type: "brick" | "collection",
@@ -9,7 +9,7 @@ const checkRepeaterDepth = (
 	for (const [repeaterKey, depth] of Object.entries(repeaterDepth)) {
 		if (depth > constants.fieldBuiler.maxRepeaterDepth) {
 			throw new Error(
-				translateServer("core.fields.repeater.validation.depth.message", {
+				translate.server("core.fields.repeater.validation.depth.message", {
 					type: type,
 					typeKey: typeKey,
 					repeaterKey: repeaterKey,

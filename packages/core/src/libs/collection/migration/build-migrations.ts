@@ -1,5 +1,5 @@
 import type { ServiceFn } from "../../../types.js";
-import { serverText } from "../../i18n/index.js";
+import { text } from "../../i18n/index.js";
 import createTableQuery from "./create-table-query.js";
 import modifyTableQuery from "./modify-table-query.js";
 import removeTableQuery from "./remove-table-query.js";
@@ -68,8 +68,9 @@ const buildMigrations: ServiceFn<
 		return {
 			data: undefined,
 			error: {
-				message: serverText("core.errors.default.message", {
-					fallback: err instanceof Error ? err.message : "An error occurred",
+				message: text.server("core.errors.default.message", {
+					defaultMessage:
+						err instanceof Error ? err.message : "An error occurred",
 				}),
 			},
 		};

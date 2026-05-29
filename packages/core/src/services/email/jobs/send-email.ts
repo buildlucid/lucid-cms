@@ -8,7 +8,7 @@ import {
 } from "../../../libs/email/storage/index.js";
 import renderMustacheTemplate from "../../../libs/email/templates/render-mustache-template.js";
 import type { EmailStrategyResponse } from "../../../libs/email/types.js";
-import { serverText, translateServer } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
@@ -37,7 +37,7 @@ const sendEmail: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: serverText("core.email.not.found.message"),
+					message: text.server("core.email.not.found.message"),
 					status: 404,
 				},
 			},
@@ -109,7 +109,7 @@ const sendEmail: ServiceFn<
 				where: [{ key: "id", operator: "=", value: data.transactionId }],
 				data: {
 					delivery_status: "failed",
-					message: preSendError.message?.default,
+					message: context.translate.english.text(preSendError.message) ?? null,
 					updated_at: new Date().toISOString(),
 				},
 			}),
@@ -126,9 +126,7 @@ const sendEmail: ServiceFn<
 		result = {
 			success: true,
 			deliveryStatus: "sent",
-			message: translateServer("core.email.successfully.sent", undefined, {
-				config: context.config,
-			}),
+			message: text.server("core.email.successfully.sent"),
 			data: null,
 		};
 	} else {
@@ -159,10 +157,8 @@ const sendEmail: ServiceFn<
 				deliveryStatus: "failed",
 				message:
 					error instanceof Error
-						? error.message
-						: translateServer("core.email.failed.to.send", undefined, {
-								config: context.config,
-							}),
+						? text.literal(error.message)
+						: text.server("core.email.failed.to.send"),
 				externalMessageId: null,
 			};
 		}
@@ -219,7 +215,9 @@ const sendEmail: ServiceFn<
 			],
 			data: {
 				delivery_status: result.deliveryStatus,
-				message: result.success ? null : result.message,
+				message: result.success
+					? null
+					: (context.translate.english.text(result.message) ?? null),
 				strategy_data: result.data,
 				external_message_id: result.externalMessageId,
 				updated_at: new Date().toISOString(),

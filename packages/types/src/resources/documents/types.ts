@@ -1,4 +1,4 @@
-import type { AdminText } from "../locales/types.js";
+import type { AdminTextDescriptor } from "../locales/types.js";
 import type { MediaRef, ProfilePicture } from "../media/types.js";
 import type { UserRef } from "../users/types.js";
 
@@ -311,8 +311,8 @@ export type WorkflowStageColor =
 export interface CollectionBrickConfig {
 	key: string;
 	details: {
-		name: AdminText;
-		summary?: AdminText;
+		name: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
 	};
 	preview:
 		| {
@@ -323,14 +323,14 @@ export interface CollectionBrickConfig {
 }
 
 type FieldDetails = {
-	label?: AdminText;
-	summary?: AdminText;
-	placeholder?: AdminText;
+	label?: AdminTextDescriptor;
+	summary?: AdminTextDescriptor;
+	placeholder?: AdminTextDescriptor;
 };
 
 type RelationFieldDetails = {
-	label?: AdminText;
-	summary?: AdminText;
+	label?: AdminTextDescriptor;
+	summary?: AdminTextDescriptor;
 };
 
 type FieldConfigOptions<TDefault = unknown> = {
@@ -359,8 +359,8 @@ type SharedCollectionFieldConfig<TType extends FieldType> = {
 export interface CheckboxFieldConfig
 	extends SharedCollectionFieldConfig<"checkbox"> {
 	details: FieldDetails & {
-		true?: AdminText;
-		false?: AdminText;
+		true?: AdminTextDescriptor;
+		false?: AdminTextDescriptor;
 	};
 	config: FieldConfigOptions<boolean>;
 	validation?: RequiredValidation;
@@ -450,7 +450,7 @@ export interface RichTextFieldConfig
 
 export interface SelectFieldConfig
 	extends SharedCollectionFieldConfig<"select"> {
-	options: Array<{ label: AdminText; value: string }>;
+	options: Array<{ label: AdminTextDescriptor; value: string }>;
 	config: FieldConfigOptions<string>;
 	validation?: RequiredValidation;
 }
@@ -509,9 +509,9 @@ export interface Collection {
 	documentId?: number | null;
 	mode: CollectionMode;
 	details: {
-		name: AdminText;
-		singularName: AdminText;
-		summary: AdminText | null;
+		name: AdminTextDescriptor;
+		singularName: AdminTextDescriptor;
+		summary: AdminTextDescriptor | null;
 	};
 	config: {
 		localized: boolean;
@@ -533,7 +533,7 @@ export interface Collection {
 			initial: string;
 			stages: Array<{
 				key: string;
-				name: AdminText;
+				name: AdminTextDescriptor;
 				color: WorkflowStageColor;
 				publishTargets: string[];
 				permissions: {
@@ -544,7 +544,7 @@ export interface Collection {
 		};
 		environments: {
 			key: string;
-			name: AdminText;
+			name: AdminTextDescriptor;
 			permissions: {
 				publish: string;
 				review: string;

@@ -5,10 +5,14 @@ import {
 	mergeTranslationBundles,
 } from "./translations.js";
 import type {
-	AdminText,
-	ServerText,
-	TranslateServerOptions,
-	TranslationData,
+	TranslatableText,
+	TranslateOptions,
+	TranslateTextOptions,
+	TranslationBundles,
+	TranslationScope,
+	TranslationValues,
+	Translator,
+	TranslatorConfig,
 } from "./types.js";
 
 /**
@@ -39,93 +43,144 @@ export const resolveInterfaceLocale = (props: {
 	return props.config.i18n.interface.defaultLocale;
 };
 
-/**
- * Translates server/API copy from the server translation bundle.
- * Pass the resolved config so project and plugin translations can override core copy.
- *
- * ```ts
- * translateServer("core.share.links.media.deleted.message", { count: 3 }, { config, locale: "en" })
- * ```
- */
-export function translateServer(
-	key: string,
-	data?: TranslationData,
-	options?: TranslateServerOptions,
-): string;
-export function translateServer(
-	key: string,
-	data: TranslationData | undefined,
-	options?: TranslateServerOptions,
-) {
-	const bundles = mergeTranslationBundles(
-		coreTranslations,
-		options?.config?.i18n.translations,
-	);
-	const defaultLocale = options?.config?.i18n.interface.defaultLocale ?? "en";
-	const targetLocale = options?.locale ?? defaultLocale;
+const resolveTranslation = (props: {
+	bundles: TranslationBundles;
+	defaultLocale: string;
+	scope: TranslationScope;
+	key: string;
+	values?: TranslationValues;
+	options?: TranslateOptions;
+}) => {
+	const targetLocale = props.options?.locale ?? props.defaultLocale;
 	const translation =
-		bundles[targetLocale]?.server[key] ??
-		bundles[defaultLocale]?.server[key] ??
-		bundles.en?.server[key] ??
-		key;
+		props.bundles[targetLocale]?.[props.scope][props.key] ??
+		props.bundles[props.defaultLocale]?.[props.scope][props.key] ??
+		props.bundles.en?.[props.scope][props.key] ??
+		props.options?.defaultMessage ??
+		props.key;
 
-	return formatTranslation(translation, data);
-}
-
-/**
- * Translates a `serverText(...)` value.
- */
-export const translateServerText = (
-	text: ServerText,
-	options?: TranslateServerOptions,
-) => {
-	if (text.priority) {
-		return formatTranslation(text.priority, text.data);
-	}
-
-	const translated = translateServer(text.key, text.data, options);
-
-	if (translated === text.key && text.fallback) {
-		return formatTranslation(text.fallback, text.data);
-	}
-
-	if (translated === text.key) {
-		return text.default;
-	}
-
-	return translated;
+	return formatTranslation(translation, props.values);
 };
 
-/**
- * Translates an `adminText(...)` value.
- *
- * ```ts
- * translateAdmin(collection.config.name, { config, locale: "en" })
- * ```
- */
-export const translateAdmin = (
-	text: AdminText,
-	options: {
-		config?: Pick<Config, "i18n">;
-		locale?: string;
-		data?: TranslationData;
+const translateText = (
+	value: TranslatableText | undefined,
+	props: {
+		bundles: TranslationBundles;
+		defaultLocale: string;
+		options?: TranslateTextOptions;
 	},
 ) => {
+	if (!value) return value;
+	if (value.type === "lucid.literal") {
+		return formatTranslation(value.value, {
+			...(value.values ?? {}),
+			...(props.options?.values ?? {}),
+		});
+	}
+
+	return resolveTranslation({
+		bundles: props.bundles,
+		defaultLocale: props.defaultLocale,
+		scope: value.scope,
+		key: value.key,
+		values: {
+			...(value.values ?? {}),
+			...(props.options?.values ?? {}),
+		},
+		options: {
+			...props.options,
+			defaultMessage: props.options?.defaultMessage ?? value.defaultMessage,
+		},
+	});
+};
+
+const resolveCoreTranslation = (
+	scope: TranslationScope,
+	key: string,
+	values?: TranslationValues,
+	options?: TranslateOptions,
+) => {
+	return resolveTranslation({
+		bundles: coreTranslations,
+		defaultLocale: "en",
+		scope,
+		key,
+		values,
+		options,
+	});
+};
+
+export const translate = {
+	server: (
+		key: string,
+		values?: TranslationValues,
+		options?: TranslateOptions,
+	) => resolveCoreTranslation("server", key, values, options),
+	admin: (
+		key: string,
+		values?: TranslationValues,
+		options?: TranslateOptions,
+	) => resolveCoreTranslation("admin", key, values, options),
+	text: (
+		value: TranslatableText | undefined,
+		options?: TranslateTextOptions,
+	) => {
+		return translateText(value, {
+			bundles: coreTranslations,
+			defaultLocale: "en",
+			options,
+		});
+	},
+};
+
+export const createTranslator = (props: {
+	config: TranslatorConfig;
+	locale: string;
+}): Translator => {
 	const bundles = mergeTranslationBundles(
 		coreTranslations,
-		options.config?.i18n.translations,
+		props.config.i18n.translations,
 	);
-	const defaultLocale = options.config?.i18n.interface.defaultLocale ?? "en";
-	const targetLocale = options?.locale ?? defaultLocale;
+	const defaultLocale = props.config.i18n.interface.defaultLocale;
+	const translateKey = (
+		scope: TranslationScope,
+		locale: string,
+		key: string,
+		values?: TranslationValues,
+		options?: { defaultMessage?: string },
+	) =>
+		resolveTranslation({
+			bundles,
+			defaultLocale,
+			scope,
+			key,
+			values,
+			options: { ...options, locale },
+		});
+	const translateBoundText = (
+		locale: string,
+		value: TranslatableText | undefined,
+		options?: TranslateTextOptions,
+	) =>
+		translateText(value, {
+			bundles,
+			defaultLocale,
+			options: { ...options, locale },
+		});
 
-	const translation =
-		bundles[targetLocale]?.admin[text.key] ??
-		bundles[defaultLocale]?.admin[text.key] ??
-		bundles.en?.admin[text.key] ??
-		text.fallback ??
-		text.key;
-
-	return formatTranslation(translation, options?.data);
+	return {
+		locale: props.locale,
+		server: (key, values, options) =>
+			translateKey("server", props.locale, key, values, options),
+		admin: (key, values, options) =>
+			translateKey("admin", props.locale, key, values, options),
+		text: (value, options) => translateBoundText(props.locale, value, options),
+		english: {
+			server: (key, values, options) =>
+				translateKey("server", "en", key, values, options),
+			text: (value, options) => translateBoundText("en", value, options),
+		},
+	};
 };
 
 /**

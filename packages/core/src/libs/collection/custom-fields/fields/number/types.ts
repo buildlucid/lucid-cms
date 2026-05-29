@@ -1,13 +1,13 @@
 import type { ZodType } from "zod";
-import type { AdminText } from "../../../../i18n/types.js";
+import type { AdminTextDescriptor } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface NumberFieldConfig extends SharedFieldConfig {
 	type: "number";
 	details: {
-		label?: AdminText;
-		summary?: AdminText;
-		placeholder?: AdminText;
+		label?: AdminTextDescriptor;
+		summary?: AdminTextDescriptor;
+		placeholder?: AdminTextDescriptor;
 	};
 	config: {
 		localized?: boolean;

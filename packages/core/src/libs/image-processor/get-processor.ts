@@ -18,10 +18,10 @@ const getImageProcessor = async (_config: Config): Promise<ImageProcessor> => {
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.imageProcessor,
-			message:
-				error instanceof Error
-					? error.message
-					: "Failed to initialize image processor",
+			message: "Failed to initialize image processor",
+			data: {
+				errorMessage: error instanceof Error ? error.message : String(error),
+			},
 		});
 		return passthroughProcessor;
 	}

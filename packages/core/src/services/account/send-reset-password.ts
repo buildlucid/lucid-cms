@@ -1,6 +1,6 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
-import { serverText, translateServer } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ErrorText } from "../../types/errors.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
@@ -23,7 +23,7 @@ const sendResetPassword: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText(
+				message: text.server(
 					"core.auth.password.authentication.disabled.message",
 				),
 			},
@@ -49,7 +49,7 @@ const sendResetPassword: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				message: serverText("core.auth.password.reset.request.accepted"),
+				message: text.server("core.auth.password.reset.request.accepted"),
 			},
 		};
 	}
@@ -71,9 +71,7 @@ const sendResetPassword: ServiceFn<
 		type: "internal",
 		to: userExistsRes.data.email,
 		subject: formatEmailSubject(
-			translateServer("core.email.password.reset.email.subject", undefined, {
-				config: context.config,
-			}),
+			context.translate.server("core.email.password.reset.email.subject"),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.resetPassword.key,
@@ -94,7 +92,7 @@ const sendResetPassword: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			message: serverText("core.auth.password.reset.request.accepted"),
+			message: text.server("core.auth.password.reset.request.accepted"),
 		},
 	};
 };

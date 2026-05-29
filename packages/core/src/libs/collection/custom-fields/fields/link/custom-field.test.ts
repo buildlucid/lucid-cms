@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import constants from "../../../../../constants/constants.js";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { adminText, serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import LinkCustomField from "./custom-field.js";
@@ -11,9 +11,11 @@ import LinkCustomField from "./custom-field.js";
 const LinkCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: adminText("tests.collections.collection.name", { fallback: "Test" }),
-		singularName: adminText("tests.collections.collection.singularName", {
-			fallback: "Test",
+		name: text.admin("tests.collections.collection.name", {
+			defaultMessage: "Test",
+		}),
+		singularName: text.admin("tests.collections.collection.singularName", {
+			defaultMessage: "Test",
 		}),
 	},
 	config: {
@@ -107,9 +109,9 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: serverText("core.fields.validation.errors.unknown", {
-				fallback: "Invalid input: expected string, received boolean → at url",
-				priority: "Invalid input: expected string, received boolean → at url",
+			message: text.server("core.fields.validation.errors.unknown", {
+				defaultMessage:
+					"Invalid input: expected string, received boolean → at url",
 			}),
 		},
 	]);
@@ -141,7 +143,7 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: serverText("core.fields.link.validation.target.error.message", {
+			message: text.server("core.fields.link.validation.target.error.message", {
 				data: {
 					valid: constants.customFields.link.targets.join(", "),
 				},
@@ -176,9 +178,9 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: serverText("core.fields.validation.errors.unknown", {
-				fallback: "Invalid input: expected string, received boolean → at label",
-				priority: "Invalid input: expected string, received boolean → at label",
+			message: text.server("core.fields.validation.errors.unknown", {
+				defaultMessage:
+					"Invalid input: expected string, received boolean → at label",
 			}),
 		},
 	]);
@@ -206,7 +208,7 @@ test("fail to validate field - link", async () => {
 		{
 			key: "required_link",
 			localeCode: null,
-			message: serverText("core.fields.validation.required"),
+			message: text.server("core.fields.validation.required"),
 		},
 	]);
 });
@@ -216,14 +218,14 @@ test("fail to validate field - link", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new LinkCustomField("field", {
 		details: {
-			label: adminText("tests.fields.field.label", {
-				fallback: "title",
+			label: text.admin("tests.fields.field.label", {
+				defaultMessage: "title",
 			}),
-			summary: adminText("tests.fields.field.summary", {
-				fallback: "description",
+			summary: text.admin("tests.fields.field.summary", {
+				defaultMessage: "description",
 			}),
-			placeholder: adminText("tests.fields.field.placeholder", {
-				fallback: "placeholder",
+			placeholder: text.admin("tests.fields.field.placeholder", {
+				defaultMessage: "placeholder",
 			}),
 		},
 		config: {

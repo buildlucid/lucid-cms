@@ -30,7 +30,11 @@ export const getErrorObject = (
 	if (error === undefined) return undefined;
 	if (typeof error === "string") return undefined;
 	if (Array.isArray(error)) return undefined;
-	if ("type" in error && (error as { type?: string }).type === "server-text") {
+	if (
+		"type" in error &&
+		((error as { type?: string }).type === "lucid.text" ||
+			(error as { type?: string }).type === "lucid.literal")
+	) {
 		return undefined;
 	}
 

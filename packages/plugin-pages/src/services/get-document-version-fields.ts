@@ -1,4 +1,4 @@
-import { prefixGeneratedColName, serverText } from "@lucidcms/core/plugin";
+import { prefixGeneratedColName, text } from "@lucidcms/core/plugin";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
@@ -91,7 +91,7 @@ const getDocumentVersionFields: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: serverText(
+				message: text.server(
 					"plugin.pages.documents.version.fields.fetch.failed",
 				),
 			},

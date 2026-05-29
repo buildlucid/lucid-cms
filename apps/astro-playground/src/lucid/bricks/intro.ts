@@ -1,14 +1,14 @@
-import { adminText, BrickBuilder } from "@lucidcms/core";
+import { BrickBuilder, text } from "@lucidcms/core";
 
 const IntroBrick = new BrickBuilder("intro", {
 	details: {
-		name: adminText("bricks.intro.name", { fallback: "Intro" }),
+		name: text.admin("bricks.intro.name", { defaultMessage: "Intro" }),
 	},
 })
 	.addTab("content_tab", {
 		details: {
-			label: adminText("bricks.intro.tabs.content_tab.label", {
-				fallback: "Content",
+			label: text.admin("bricks.intro.tabs.content_tab.label", {
+				defaultMessage: "Content",
 			}),
 		},
 	})
@@ -20,15 +20,15 @@ const IntroBrick = new BrickBuilder("intro", {
 	.addRichText("intro")
 	.addTab("advanced_tab", {
 		details: {
-			label: adminText("bricks.intro.tabs.advanced_tab.label", {
-				fallback: "Advanced",
+			label: text.admin("bricks.intro.tabs.advanced_tab.label", {
+				defaultMessage: "Advanced",
 			}),
 		},
 	})
 	.addJSON("json", {
 		details: {
-			label: adminText("bricks.intro.fields.json.label", {
-				fallback: "JSON",
+			label: text.admin("bricks.intro.fields.json.label", {
+				defaultMessage: "JSON",
 			}),
 		},
 		validation: {

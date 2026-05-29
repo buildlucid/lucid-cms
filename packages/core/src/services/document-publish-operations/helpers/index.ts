@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { serverText } from "../../../libs/i18n/index.js";
+import { text } from "../../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
 import type { QueueEvent } from "../../../libs/queue/types.js";
@@ -120,7 +120,7 @@ export const parseScheduleInput = (params: {
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.publish.operations.schedule.incomplete"),
+				message: text.server("core.publish.operations.schedule.incomplete"),
 				status: 400,
 			},
 		};
@@ -131,7 +131,7 @@ export const parseScheduleInput = (params: {
 		return {
 			error: {
 				type: "basic",
-				message: serverText("core.publish.operations.schedule.invalid"),
+				message: text.server("core.publish.operations.schedule.invalid"),
 				status: 400,
 			},
 		};
@@ -144,7 +144,7 @@ export const parseScheduleInput = (params: {
 		return {
 			error: {
 				type: "basic",
-				message: serverText(
+				message: text.server(
 					"core.publish.operations.schedule.minute.precision",
 				),
 				status: 400,
@@ -160,7 +160,7 @@ export const parseScheduleInput = (params: {
 		return {
 			error: {
 				type: "basic",
-				message: serverText(
+				message: text.server(
 					"core.publish.operations.schedule.timezone.invalid",
 				),
 				status: 400,

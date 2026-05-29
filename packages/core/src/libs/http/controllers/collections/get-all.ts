@@ -6,7 +6,7 @@ import { collectionServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import hasAccess from "../../../permission/has-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -30,8 +30,8 @@ const getAllController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: serverText("core.routes.collection.fetch.error.name"),
-				message: serverText("core.routes.collection.fetch.error.message"),
+				name: text.server("core.routes.collection.fetch.error.name"),
+				message: text.server("core.routes.collection.fetch.error.message"),
 			},
 		})(context, {
 			includeDocumentId: true,

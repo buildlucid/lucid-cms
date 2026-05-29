@@ -1,5 +1,6 @@
 import type { ZodType } from "zod";
 import type { KyselyDB } from "../../libs/db/types.js";
+import type { Translator } from "../../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../../libs/kv/types.js";
 import type { QueueAdapterInstance } from "../../libs/queue/types.js";
 import type { EnvironmentVariables } from "../../libs/runtime/types.js";
@@ -15,6 +16,7 @@ export type ServiceContext = {
 	env: EnvironmentVariables | null;
 	queue: QueueAdapterInstance;
 	kv: KVAdapterInstance;
+	translate: Translator;
 	request: {
 		/** The request URL. Used to derive the base URL if config.baseUrl is not set. */
 		url: string;

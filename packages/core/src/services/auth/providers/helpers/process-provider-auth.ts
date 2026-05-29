@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants.js";
 import formatter from "../../../../libs/formatters/index.js";
-import { serverText } from "../../../../libs/i18n/index.js";
+import { text } from "../../../../libs/i18n/index.js";
 import {
 	UserAuthProvidersRepository,
 	UsersRepository,
@@ -62,7 +62,7 @@ const processProviderAuth: ServiceFn<
 					enabled: true,
 					defaultError: {
 						status: 404,
-						message: serverText(
+						message: text.server(
 							"core.auth.invitations.token.not.found.message",
 						),
 					},
@@ -92,8 +92,8 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 400,
-					name: serverText("core.auth.providers.user.is.deleted.name"),
-					message: serverText("core.auth.providers.user.is.deleted.message"),
+					name: text.server("core.auth.providers.user.is.deleted.name"),
+					message: text.server("core.auth.providers.user.is.deleted.message"),
 				},
 			};
 		}
@@ -103,8 +103,8 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 401,
-					name: serverText("core.auth.providers.user.is.locked.name"),
-					message: serverText("core.auth.providers.user.is.locked.message"),
+					name: text.server("core.auth.providers.user.is.locked.name"),
+					message: text.server("core.auth.providers.user.is.locked.message"),
 				},
 			};
 		}
@@ -116,10 +116,10 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 400,
-					name: serverText(
+					name: text.server(
 						"core.auth.providers.user.invitation.accepted.message",
 					),
-					message: serverText(
+					message: text.server(
 						"core.auth.providers.user.invitation.accepted.message",
 					),
 				},
@@ -134,8 +134,8 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 400,
-					name: serverText("core.auth.providers.user.id.mismatch.name"),
-					message: serverText("core.auth.providers.user.id.mismatch.message"),
+					name: text.server("core.auth.providers.user.id.mismatch.name"),
+					message: text.server("core.auth.providers.user.id.mismatch.message"),
 				},
 			};
 		}
@@ -183,7 +183,7 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 404,
-					message: serverText("core.auth.invitations.token.not.found.message"),
+					message: text.server("core.auth.invitations.token.not.found.message"),
 				},
 				data: undefined,
 			};
@@ -239,10 +239,10 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 401,
-					name: serverText(
+					name: text.server(
 						"core.auth.providers.link.user.not.authenticated.message",
 					),
-					message: serverText(
+					message: text.server(
 						"core.auth.providers.link.user.not.authenticated.message",
 					),
 				},
@@ -264,8 +264,8 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 404,
-					name: serverText("core.auth.providers.user.is.deleted.name"),
-					message: serverText("core.auth.providers.user.is.deleted.message"),
+					name: text.server("core.auth.providers.user.is.deleted.name"),
+					message: text.server("core.auth.providers.user.is.deleted.message"),
 				},
 				data: undefined,
 			};
@@ -279,8 +279,8 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 401,
-					name: serverText("core.auth.providers.user.is.locked.name"),
-					message: serverText("core.auth.providers.user.is.locked.message"),
+					name: text.server("core.auth.providers.user.is.locked.name"),
+					message: text.server("core.auth.providers.user.is.locked.message"),
 				},
 				data: undefined,
 			};
@@ -294,8 +294,8 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 400,
-					name: serverText("core.auth.providers.user.id.mismatch.name"),
-					message: serverText("core.auth.providers.user.id.mismatch.message"),
+					name: text.server("core.auth.providers.user.id.mismatch.name"),
+					message: text.server("core.auth.providers.user.id.mismatch.message"),
 				},
 				data: undefined,
 			};
@@ -309,8 +309,8 @@ const processProviderAuth: ServiceFn<
 			return {
 				error: {
 					status: 400,
-					name: serverText("core.auth.providers.already.linked.name"),
-					message: serverText("core.auth.providers.already.linked.message"),
+					name: text.server("core.auth.providers.already.linked.name"),
+					message: text.server("core.auth.providers.already.linked.message"),
 				},
 				data: undefined,
 			};
@@ -357,8 +357,8 @@ const processProviderAuth: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 404,
-				name: serverText("core.auth.providers.user.not.found.name"),
-				message: serverText("core.auth.providers.user.not.found.message"),
+				name: text.server("core.auth.providers.user.not.found.name"),
+				message: text.server("core.auth.providers.user.not.found.message"),
 			},
 		},
 	});
@@ -368,8 +368,8 @@ const processProviderAuth: ServiceFn<
 		return {
 			error: {
 				status: 404,
-				name: serverText("core.auth.providers.user.is.deleted.name"),
-				message: serverText("core.auth.providers.user.is.deleted.message"),
+				name: text.server("core.auth.providers.user.is.deleted.name"),
+				message: text.server("core.auth.providers.user.is.deleted.message"),
 			},
 			data: undefined,
 		};
@@ -379,8 +379,8 @@ const processProviderAuth: ServiceFn<
 		return {
 			error: {
 				status: 401,
-				name: serverText("core.auth.providers.user.is.locked.name"),
-				message: serverText("core.auth.providers.user.is.locked.message"),
+				name: text.server("core.auth.providers.user.is.locked.name"),
+				message: text.server("core.auth.providers.user.is.locked.message"),
 			},
 			data: undefined,
 		};

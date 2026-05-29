@@ -1,4 +1,4 @@
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import getMediaAdapter from "../../libs/media/get-adapter.js";
 import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import {
@@ -52,7 +52,7 @@ const completeUploadSession: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("core.media.adapters.not.enabled"),
+				message: text.server("core.media.adapters.not.enabled"),
 			},
 			data: undefined,
 		};
@@ -62,7 +62,7 @@ const completeUploadSession: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText("core.media.upload.sessions.adapter.changed"),
+				message: text.server("core.media.upload.sessions.adapter.changed"),
 			},
 			data: undefined,
 		};
@@ -72,7 +72,7 @@ const completeUploadSession: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText(
+				message: text.server(
 					"core.media.upload.sessions.resumable.not.supported",
 				),
 			},
@@ -84,7 +84,7 @@ const completeUploadSession: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: serverText(
+				message: text.server(
 					"core.media.upload.sessions.missing.adapter.upload.id",
 				),
 			},

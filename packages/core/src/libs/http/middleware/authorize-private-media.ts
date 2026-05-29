@@ -3,7 +3,7 @@ import constants from "../../../constants/constants.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import getKeyVisibility from "../../../utils/media/get-key-visibility.js";
-import { serverText } from "../../i18n/index.js";
+import { text } from "../../i18n/index.js";
 import { authenticationCheck } from "./authenticate.js";
 
 /**
@@ -19,7 +19,7 @@ const authorizePrivateMedia = createMiddleware(
 		if (!key) {
 			throw new LucidAPIError({
 				type: "validation",
-				message: serverText("core.errors.validation.message"),
+				message: text.server("core.errors.validation.message"),
 			});
 		}
 

@@ -1,4 +1,4 @@
-import type { AdminText } from "@types";
+import type { AdminTextDescriptor } from "@types";
 import i18next from "i18next";
 import { createMemo, createSignal } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
@@ -198,16 +198,17 @@ export const setLocale = (locale: SupportedLocales) => {
 export const getRequestInterfaceLocale = () =>
 	getHasResolvedLocale() ? getLocale() : undefined;
 
-export const translateAdmin = (
-	text: AdminText,
+export const translateAdminText = (
+	text: AdminTextDescriptor,
 	options?: {
-		fallback?: string;
-		data?: Record<string, string | number | undefined>;
+		defaultMessage?: string;
+		values?: Record<string, string | number | undefined>;
 	},
 ) => {
 	return i18next.t(text.key, {
-		...(options?.data ?? {}),
-		defaultValue: text.fallback ?? options?.fallback ?? text.key,
+		...(text.values ?? {}),
+		...(options?.values ?? {}),
+		defaultValue: text.defaultMessage ?? options?.defaultMessage ?? text.key,
 	});
 };
 

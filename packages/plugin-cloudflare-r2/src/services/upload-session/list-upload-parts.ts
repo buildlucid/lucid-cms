@@ -1,4 +1,4 @@
-import { serverText } from "@lucidcms/core/plugin";
+import { text } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceListUploadParts } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types.js";
@@ -18,7 +18,7 @@ export const listUploadParts = (
 				return {
 					error: {
 						type: "plugin",
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.r2.http.fallback.not.configured",
 						),
 					},
@@ -30,7 +30,7 @@ export const listUploadParts = (
 				return {
 					error: {
 						type: "plugin",
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.r2.http.client.not.configured",
 						),
 					},
@@ -52,7 +52,7 @@ export const listUploadParts = (
 				return {
 					error: {
 						type: "plugin",
-						message: serverText(
+						message: text.server(
 							"plugin.cloudflare.r2.upload.sessions.parts.list.failed",
 							{
 								data: {
@@ -73,9 +73,10 @@ export const listUploadParts = (
 			return {
 				error: {
 					type: "plugin",
-					message: serverText("plugin.cloudflare.r2.errors.unknown", {
-						fallback: error instanceof Error ? error.message : undefined,
-					}),
+					message:
+						error instanceof Error
+							? text.literal(error.message)
+							: text.server("plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,
 			};

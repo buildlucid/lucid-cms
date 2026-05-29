@@ -10,7 +10,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
-import { serverText } from "../../../../i18n/index.js";
+import { text } from "../../../../i18n/index.js";
 import { ClientScopes } from "../../../../permission/client-scopes.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import clientScopes from "../../../middleware/client-scopes.js";
@@ -50,8 +50,8 @@ const processMediaController = factory.createHandlers(
 			transaction: true,
 			defaultError: {
 				type: "basic",
-				name: serverText("core.routes.media.fetch.error.name"),
-				message: serverText("core.routes.media.fetch.error.message"),
+				name: text.server("core.routes.media.fetch.error.name"),
+				message: text.server("core.routes.media.fetch.error.message"),
 			},
 		})(context, {
 			key: c.req.valid("param").key,

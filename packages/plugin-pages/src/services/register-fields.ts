@@ -1,8 +1,12 @@
-import { adminText, type CollectionBuilder, z } from "@lucidcms/core";
-import { serverText } from "@lucidcms/core/plugin";
+import { type CollectionBuilder, text, z, zodTextIssue } from "@lucidcms/core";
 import type { WritableDraft } from "immer";
 import constants from "../constants.js";
 import type { CollectionConfig } from "../types/types.js";
+
+const slugFormatMessage = text.server("plugin.pages.slug.validation.format", {
+	defaultMessage:
+		"The slug field may only contain letters, numbers, underscores, and hyphens.",
+});
 
 const registerFields = (
 	collection: WritableDraft<CollectionBuilder>,
@@ -11,8 +15,8 @@ const registerFields = (
 	collection
 		.addText(constants.fields.fullSlug.key, {
 			details: {
-				label: adminText("plugin.pages.fields.full.slug.label", {
-					fallback: "Full slug",
+				label: text.admin("plugin.pages.fields.full.slug.label", {
+					defaultMessage: "Full slug",
 				}),
 			},
 			config: {
@@ -24,8 +28,8 @@ const registerFields = (
 		})
 		.addText(constants.fields.slug.key, {
 			details: {
-				label: adminText("plugin.pages.fields.slug.label", {
-					fallback: "Slug",
+				label: text.admin("plugin.pages.fields.slug.label", {
+					defaultMessage: "Slug",
 				}),
 			},
 			config: {
@@ -37,12 +41,13 @@ const registerFields = (
 				required: true,
 				zod: z.union([
 					z.literal("/"),
-					z
-						.string()
-						.regex(
-							/^[a-zA-Z0-9_-]+$/,
-							serverText("plugin.pages.slug.validation.format").default,
-						),
+					z.string().superRefine((value, ctx) => {
+						if (/^[a-zA-Z0-9_-]+$/.test(value)) return;
+						ctx.addIssue({
+							code: "custom",
+							...zodTextIssue(slugFormatMessage),
+						});
+					}),
 				]),
 			},
 			displayInListing: true,
@@ -50,8 +55,8 @@ const registerFields = (
 		.addDocument(constants.fields.parentPage.key, {
 			collection: collection.key,
 			details: {
-				label: adminText("plugin.pages.fields.parent.page.label", {
-					fallback: "Parent page",
+				label: text.admin("plugin.pages.fields.parent.page.label", {
+					defaultMessage: "Parent page",
 				}),
 			},
 			config: {

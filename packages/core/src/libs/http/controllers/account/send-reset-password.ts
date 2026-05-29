@@ -12,7 +12,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { serverText, translateServerText } from "../../../i18n/index.js";
+import { text } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
@@ -57,8 +57,8 @@ const sendResetPasswordController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: serverText("core.routes.send.password.reset.error.name"),
-					message: serverText("core.routes.send.password.reset.error.message"),
+					name: text.server("core.routes.send.password.reset.error.name"),
+					message: text.server("core.routes.send.password.reset.error.message"),
 				},
 			},
 		)(context, {
@@ -71,9 +71,7 @@ const sendResetPasswordController = factory.createHandlers(
 		return c.json(
 			formatAPIResponse(c, {
 				data: {
-					message: translateServerText(resetPassword.data.message, {
-						config: context.config,
-					}),
+					message: context.translate.text(resetPassword.data.message),
 				},
 			}),
 		);

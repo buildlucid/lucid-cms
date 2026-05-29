@@ -2,7 +2,7 @@ import type { AlterTableColumnAlteringBuilder } from "kysely";
 import constants from "../../../constants/constants.js";
 import logger from "../../../libs/logger/index.js";
 import type { ServiceFn } from "../../../types.js";
-import { serverText } from "../../i18n/index.js";
+import { text } from "../../i18n/index.js";
 import { addColumn, dropColumn, modifyColumn } from "./column-builder.js";
 import { addIndex, dropIndex } from "./index-builder.js";
 import type { TableMigration } from "./types.js";
@@ -141,8 +141,8 @@ const modifyTableQuery: ServiceFn<
 		return {
 			data: undefined,
 			error: {
-				message: serverText("core.errors.default.message", {
-					fallback:
+				message: text.server("core.errors.default.message", {
+					defaultMessage:
 						err instanceof Error
 							? err.message
 							: "An error occurred while modifying a collection table",

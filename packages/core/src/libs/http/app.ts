@@ -11,10 +11,11 @@ import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { Config, EnvironmentVariables } from "../../types.js";
 import { LucidAPIError, translateErrorData } from "../../utils/errors/index.js";
 import getEmailAdapter from "../email/get-adapter.js";
-import { resolveInterfaceLocale, translateServer } from "../i18n/index.js";
+import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import { getInitializedKVAdapter } from "../kv/lifecycle.js";
 import getMediaAdapter from "../media/get-adapter.js";
 import getQueueAdapter from "../queue/get-adapter.js";
+import { createAdapterLifecycleContext } from "../runtime/adapter-lifecycle.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/index.js";
@@ -38,24 +39,28 @@ const createApp = async (props: {
 	};
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
+	const adapterLifecycleContext = createAdapterLifecycleContext({
+		config: props.config,
+		env: props.env,
+		runtimeContext: props.runtimeContext,
+	});
 
-	const kvInstance = await getInitializedKVAdapter(props.config);
+	const kvInstance = await getInitializedKVAdapter(props.config, {
+		env: props.env,
+		runtimeContext: props.runtimeContext,
+	});
 
 	const [queueInstance, mediaInstance, emailInstance] = await Promise.all([
 		getQueueAdapter(props.config, props.runtimeContext).then(async (a) => {
-			await a.lifecycle?.init?.({
-				config: props.config,
-				runtimeContext: props.runtimeContext,
-				env: props.env,
-			});
+			await a.lifecycle?.init?.(adapterLifecycleContext);
 			return a;
 		}),
 		getMediaAdapter(props.config).then(async (a) => {
-			await a.adapter?.lifecycle?.init?.();
+			await a.adapter?.lifecycle?.init?.(adapterLifecycleContext);
 			return a.adapter;
 		}),
 		getEmailAdapter(props.config).then(async (a) => {
-			await a.adapter?.lifecycle?.init?.();
+			await a.adapter?.lifecycle?.init?.(adapterLifecycleContext);
 			return a.adapter;
 		}),
 		...(props.config.hono?.middleware || []).map((m) => m(app, props.config)),
@@ -102,15 +107,15 @@ const createApp = async (props: {
 		})
 		.route("/", routes)
 		.onError(async (err, c) => {
+			const locale = resolveInterfaceLocale({
+				config: props.config,
+				locale: c.req.header(constants.headers.interfaceLocale),
+				acceptLanguage: c.req.header("Accept-Language"),
+			});
+			const translate = createTranslator({ config: props.config, locale });
+
 			if (err instanceof LucidAPIError) {
-				const error = translateErrorData(err.error, {
-					config: props.config,
-					locale: resolveInterfaceLocale({
-						config: props.config,
-						locale: c.req.header(constants.headers.interfaceLocale),
-						acceptLanguage: c.req.header("Accept-Language"),
-					}),
-				});
+				const error = translateErrorData(err.error, translate);
 
 				c.status(error.status as StatusCode);
 				return c.json({
@@ -124,65 +129,49 @@ const createApp = async (props: {
 
 			// @ts-expect-error
 			if (err?.statusCode === 429) {
+				const resetSeconds = c.res.headers.get("Retry-After") ?? 0;
 				c.status(429);
 				return c.json({
 					code: "rate_limit",
-					name: translateServer("core.rate.limit.error.name", undefined, {
-						config: props.config,
-						locale: resolveInterfaceLocale({
-							config: props.config,
-							locale: c.req.header(constants.headers.interfaceLocale),
-							acceptLanguage: c.req.header("Accept-Language"),
-						}),
+					name: translate.server("core.rate.limit.error.name"),
+					message: translate.server("core.rate.limit.exceeded.message", {
+						resetSeconds,
 					}),
-					message: err.message || constants.errors.message,
 					status: 429,
 				} satisfies PublicErrorData);
 			}
 
 			c.status(500);
 			return c.json({
-				name: constants.errors.name,
-				message: err.message || constants.errors.message,
+				name: translate.server("core.errors.default.name", undefined, {
+					defaultMessage: constants.errors.name,
+				}),
+				message: translate.server("core.errors.default.message", undefined, {
+					defaultMessage: constants.errors.message,
+				}),
 				status: constants.errors.status,
 				errors: constants.errors.errors,
 				code: constants.errors.code,
 			} satisfies PublicErrorData);
 		})
 		.notFound((c) => {
+			const locale = resolveInterfaceLocale({
+				config: props.config,
+				locale: c.req.header(constants.headers.interfaceLocale),
+				acceptLanguage: c.req.header("Accept-Language"),
+			});
+			const translate = createTranslator({ config: props.config, locale });
+
 			if (c.req.url.includes(`/${constants.directories.base}/api`)) {
 				return c.json({
 					status: 404,
 					code: "not_found",
-					name: translateServer("core.routes.not.found", undefined, {
-						config: props.config,
-						locale: resolveInterfaceLocale({
-							config: props.config,
-							locale: c.req.header(constants.headers.interfaceLocale),
-							acceptLanguage: c.req.header("Accept-Language"),
-						}),
-					}),
-					message: translateServer("core.routes.not.found.message", undefined, {
-						config: props.config,
-						locale: resolveInterfaceLocale({
-							config: props.config,
-							locale: c.req.header(constants.headers.interfaceLocale),
-							acceptLanguage: c.req.header("Accept-Language"),
-						}),
-					}),
+					name: translate.server("core.routes.not.found"),
+					message: translate.server("core.routes.not.found.message"),
 				} satisfies PublicErrorData);
 			}
 			c.status(404);
-			return c.text(
-				translateServer("core.pages.not.found", undefined, {
-					config: props.config,
-					locale: resolveInterfaceLocale({
-						config: props.config,
-						locale: c.req.header(constants.headers.interfaceLocale),
-						acceptLanguage: c.req.header("Accept-Language"),
-					}),
-				}),
-			);
+			return c.text(translate.server("core.pages.not.found"));
 		});
 
 	//* Hono Extensions
@@ -355,10 +344,10 @@ const createApp = async (props: {
 		issues: supportChecksRes.issues,
 		destroy: async () => {
 			await Promise.allSettled([
-				queueInstance.lifecycle?.destroy?.(),
-				kvInstance.lifecycle?.destroy?.(),
-				mediaInstance?.lifecycle?.destroy?.(),
-				emailInstance?.lifecycle?.destroy?.(),
+				queueInstance.lifecycle?.destroy?.(adapterLifecycleContext),
+				kvInstance.lifecycle?.destroy?.(adapterLifecycleContext),
+				mediaInstance?.lifecycle?.destroy?.(adapterLifecycleContext),
+				emailInstance?.lifecycle?.destroy?.(adapterLifecycleContext),
 				props.config.db.client.destroy(),
 			]);
 		},

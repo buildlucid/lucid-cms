@@ -1,22 +1,28 @@
 export type LocaleDirection = "ltr" | "rtl";
 export type InterfaceDirection = LocaleDirection;
 
-export type AdminText = {
-	type: "admin-text";
-	key: string;
-	fallback?: string;
-};
-
-export type ServerText = {
-	type: "server-text";
-	key: string;
-	default: string;
-	priority?: string;
-	fallback?: string;
-	data?: TranslationData;
-};
-
 export type TranslationScope = "admin" | "server";
+
+export type TranslationValues = Record<string, string | number | undefined>;
+
+export type TextDescriptor<TScope extends TranslationScope = TranslationScope> =
+	{
+		type: "lucid.text";
+		scope: TScope;
+		key: string;
+		values?: TranslationValues;
+		defaultMessage?: string;
+	};
+
+export type LiteralText = {
+	type: "lucid.literal";
+	value: string;
+	values?: TranslationValues;
+};
+
+export type AdminTextDescriptor = TextDescriptor<"admin">;
+export type ServerTextDescriptor = TextDescriptor<"server">;
+export type TranslatableText = TextDescriptor | LiteralText;
 
 export type TranslationBundle = Record<
 	TranslationScope,
@@ -25,28 +31,49 @@ export type TranslationBundle = Record<
 
 export type TranslationBundles = Record<string, TranslationBundle>;
 
-export type TranslationData = Record<string, string | number | undefined>;
-
-export type TranslateServerOptions = {
-	config?: {
-		i18n: {
-			translations: TranslationBundles;
-			interface: {
-				defaultLocale: string;
-			};
-		};
-	};
+export type TranslateOptions = {
 	locale?: string;
+	defaultMessage?: string;
 };
 
-export type TranslateServer = (
+export type TranslateTextOptions = TranslateOptions & {
+	values?: TranslationValues;
+};
+
+export type TranslateKey = (
 	key: string,
-	data: TranslationData | undefined,
-	options?: TranslateServerOptions,
+	values?: TranslationValues,
+	options?: {
+		defaultMessage?: string;
+	},
 ) => string;
 
-export type Translator = (
-	key: string,
-	data?: TranslationData,
-	locale?: string,
-) => ServerText;
+export type BoundTranslateTextOptions = {
+	values?: TranslationValues;
+	defaultMessage?: string;
+};
+
+export type TranslateText = (
+	value: TranslatableText | undefined,
+	options?: BoundTranslateTextOptions,
+) => string | undefined;
+
+export type TranslatorConfig = {
+	i18n: {
+		translations: TranslationBundles;
+		interface: {
+			defaultLocale: string;
+		};
+	};
+};
+
+export type Translator = {
+	locale: string;
+	server: TranslateKey;
+	admin: TranslateKey;
+	text: TranslateText;
+	english: {
+		server: TranslateKey;
+		text: TranslateText;
+	};
+};

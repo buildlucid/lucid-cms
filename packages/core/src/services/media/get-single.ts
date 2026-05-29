@@ -1,5 +1,5 @@
 import { mediaFormatter } from "../../libs/formatters/index.js";
-import { serverText } from "../../libs/i18n/index.js";
+import { text } from "../../libs/i18n/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { Media } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
@@ -20,7 +20,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: serverText("core.media.not.found.message"),
+				message: text.server("core.media.not.found.message"),
 				status: 404,
 			},
 		},

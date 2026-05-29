@@ -1,15 +1,15 @@
-import { adminText, CollectionBuilder, z } from "@lucidcms/core";
+import { CollectionBuilder, text, z } from "@lucidcms/core";
 import ContentBrick from "../bricks/content.js";
 import SeoBrick from "../bricks/seo.js";
 
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: adminText("collections.page.name", {
-			fallback: "Pages",
+		name: text.admin("collections.page.name", {
+			defaultMessage: "Pages",
 		}),
-		singularName: adminText("collections.page.singularName", {
-			fallback: "Page",
+		singularName: text.admin("collections.page.singularName", {
+			defaultMessage: "Page",
 		}),
 	},
 	bricks: {
@@ -19,8 +19,8 @@ const PageCollection = new CollectionBuilder("page", {
 })
 	.addText("title", {
 		details: {
-			label: adminText("collections.page.fields.title.label", {
-				fallback: "Title",
+			label: text.admin("collections.page.fields.title.label", {
+				defaultMessage: "Title",
 			}),
 		},
 		validation: {
@@ -31,8 +31,8 @@ const PageCollection = new CollectionBuilder("page", {
 	})
 	.addTextarea("summary", {
 		details: {
-			label: adminText("collections.page.fields.summary.label", {
-				fallback: "Summary",
+			label: text.admin("collections.page.fields.summary.label", {
+				defaultMessage: "Summary",
 			}),
 		},
 	});

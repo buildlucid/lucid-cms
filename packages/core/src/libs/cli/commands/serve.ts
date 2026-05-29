@@ -2,6 +2,7 @@ import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email/templates/prerender-mjml-templates.js";
+import { createTranslator } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import generateTypes from "../../type-generation/index.js";
@@ -37,6 +38,10 @@ const serveCommand = async () => {
 	try {
 		const configRes = await loadConfigFile({
 			path: configPath,
+		});
+		const translate = createTranslator({
+			config: configRes.config,
+			locale: "en",
 		});
 		const adapterCLI = configRes.adapter.cli;
 
@@ -82,7 +87,8 @@ const serveCommand = async () => {
 		const viteBuildRes = await vite.buildApp(configRes.config);
 		if (viteBuildRes.error) {
 			cliLogger.error(
-				viteBuildRes.error.message?.default ?? "Failed to build app",
+				translate.english.text(viteBuildRes.error.message) ??
+					"Failed to build app",
 			);
 			process.exit(1);
 		}
@@ -99,14 +105,14 @@ const serveCommand = async () => {
 		]);
 		if (mjmlTemplatesRes.error) {
 			cliLogger.error(
-				mjmlTemplatesRes.error.message?.default ??
+				translate.english.text(mjmlTemplatesRes.error.message) ??
 					"Failed to pre-render MJML templates",
 			);
 			process.exit(1);
 		}
 		if (publicAssetsRes.error) {
 			cliLogger.error(
-				publicAssetsRes.error.message?.default ??
+				translate.english.text(publicAssetsRes.error.message) ??
 					"Failed to copy public assets",
 			);
 			process.exit(1);
