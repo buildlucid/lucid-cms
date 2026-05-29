@@ -4,7 +4,7 @@
 import GitHubAuth from "@lucidcms/auth-github";
 import GoogleAuth from "@lucidcms/auth-google";
 import MicrosoftAuth from "@lucidcms/auth-microsoft";
-import { configureLucid, text, z } from "@lucidcms/core";
+import { configureLucid, copy, z } from "@lucidcms/core";
 // import { passthroughEmailAdapter } from "@lucidcms/core/email";
 // import { fileSystemMediaAdapter } from "@lucidcms/core/media";
 import { createServiceContext, PermissionSets } from "@lucidcms/core/plugin";
@@ -88,37 +88,35 @@ export default configureLucid({
 			refreshToken: env.LUCID_REFRESH_TOKEN_SECRET,
 			accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 		},
+		localization: {
+			locales: [
+				{
+					label: "English",
+					code: "en",
+					direction: "ltr",
+				},
+				{
+					label: "French",
+					code: "fr",
+					direction: "ltr",
+				},
+			],
+			defaultLocale: "en",
+		},
 		i18n: {
-			content: {
-				locales: [
-					{
-						label: "English",
-						code: "en",
-						direction: "ltr",
-					},
-					{
-						label: "French",
-						code: "fr",
-						direction: "ltr",
-					},
-				],
-				defaultLocale: "en",
-			},
-			interface: {
-				locales: [
-					{
-						label: "English",
-						code: "en",
-						direction: "ltr",
-					},
-					{
-						label: "French",
-						code: "fr",
-						direction: "ltr",
-					},
-				],
-				defaultLocale: "en",
-			},
+			locales: [
+				{
+					label: "English",
+					code: "en",
+					direction: "ltr",
+				},
+				{
+					label: "French",
+					code: "fr",
+					direction: "ltr",
+				},
+			],
+			defaultLocale: "en",
 		},
 		openAPI: {
 			enabled: true,
@@ -223,94 +221,94 @@ export default configureLucid({
 		access: {
 			groups: {
 				pages: {
-					name: text.admin("access.groups.pages.name", {
+					name: copy("admin:access.groups.pages.name", {
 						defaultMessage: "Page Permissions",
 					}),
 				},
 				blogs: {
-					name: text.admin("access.groups.blogs.name", {
+					name: copy("admin:access.groups.blogs.name", {
 						defaultMessage: "Blog Permissions",
 					}),
 				},
 			},
 			permissions: {
 				"page:full": {
-					name: text.admin("access.permissions.page-full.name", {
+					name: copy("admin:access.permissions.page-full.name", {
 						defaultMessage: "Full Page Access",
 					}),
-					description: text.admin("access.permissions.page-full.description", {
+					description: copy("admin:access.permissions.page-full.description", {
 						defaultMessage: "Grants full access to pages.",
 					}),
 					group: "pages",
 				},
 				"page:read": {
-					name: text.admin("access.permissions.page-read.name", {
+					name: copy("admin:access.permissions.page-read.name", {
 						defaultMessage: "Read Pages",
 					}),
 					group: "pages",
 				},
 				"page:create": {
-					name: text.admin("access.permissions.page-create.name", {
+					name: copy("admin:access.permissions.page-create.name", {
 						defaultMessage: "Create Pages",
 					}),
 					group: "pages",
 				},
 				"page:update": {
-					name: text.admin("access.permissions.page-update.name", {
+					name: copy("admin:access.permissions.page-update.name", {
 						defaultMessage: "Update Pages",
 					}),
 					group: "pages",
 				},
 				"page:delete": {
-					name: text.admin("access.permissions.page-delete.name", {
+					name: copy("admin:access.permissions.page-delete.name", {
 						defaultMessage: "Delete Pages",
 					}),
 					group: "pages",
 				},
 				"page:restore": {
-					name: text.admin("access.permissions.page-restore.name", {
+					name: copy("admin:access.permissions.page-restore.name", {
 						defaultMessage: "Restore Pages",
 					}),
 					group: "pages",
 				},
 				"page:publish": {
-					name: text.admin("access.permissions.page-publish.name", {
+					name: copy("admin:access.permissions.page-publish.name", {
 						defaultMessage: "Publish Pages",
 					}),
 					group: "pages",
 				},
 				"page:review": {
-					name: text.admin("access.permissions.page-review.name", {
+					name: copy("admin:access.permissions.page-review.name", {
 						defaultMessage: "Review Page Publish Requests",
 					}),
 					group: "pages",
 				},
 				"page:publish:staging": {
-					name: text.admin("access.permissions.page-publish-staging.name", {
+					name: copy("admin:access.permissions.page-publish-staging.name", {
 						defaultMessage: "Publish Pages To Staging",
 					}),
 					group: "pages",
 				},
 				"page:review:staging": {
-					name: text.admin("access.permissions.page-review-staging.name", {
+					name: copy("admin:access.permissions.page-review-staging.name", {
 						defaultMessage: "Review Page Publish Requests To Staging",
 					}),
 					group: "pages",
 				},
 				"page:publish:production": {
-					name: text.admin("access.permissions.page-publish-production.name", {
+					name: copy("admin:access.permissions.page-publish-production.name", {
 						defaultMessage: "Publish Pages To Production",
 					}),
 					group: "pages",
 				},
 				"page:review:production": {
-					name: text.admin("access.permissions.page-review-production.name", {
+					name: copy("admin:access.permissions.page-review-production.name", {
 						defaultMessage: "Review Page Publish Requests To Production",
 					}),
 					group: "pages",
 				},
 				"blog:full": {
-					name: text.admin("access.permissions.blog-full.name", {
+					name: copy("admin:access.permissions.blog-full.name", {
 						defaultMessage: "Full Blog Access",
 					}),
 					group: "blogs",
@@ -319,10 +317,10 @@ export default configureLucid({
 			roles: [
 				{
 					key: "admin",
-					name: text.admin("access.roles.admin.name", {
+					name: copy("admin:access.roles.admin.name", {
 						defaultMessage: "Admin",
 					}),
-					description: text.admin("access.roles.admin.description", {
+					description: copy("admin:access.roles.admin.description", {
 						defaultMessage: "Full admin access for the playground.",
 					}),
 					permissions: [

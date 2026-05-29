@@ -4,7 +4,7 @@ import type { Config } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
-import { adminTextDescriptorSchema } from "../i18n/index.js";
+import { adminCopyDescriptorSchema } from "../i18n/index.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
@@ -78,10 +78,6 @@ const ContentSecurityPolicySchema = z
 	.optional();
 
 const OverridableHeaderSchema = z.union([z.boolean(), z.string()]);
-const TranslationBundleSchema = z.object({
-	admin: z.record(z.string(), z.string()).optional(),
-	server: z.record(z.string(), z.string()).optional(),
-});
 
 const ConfigSchema = z.object({
 	db: z.unknown(),
@@ -129,33 +125,29 @@ const ConfigSchema = z.object({
 	openAPI: z.object({
 		enabled: z.boolean(),
 	}),
+	localization: z
+		.object({
+			locales: z.array(
+				z.object({
+					label: z.string(),
+					code: z.string(),
+					direction: z.enum(["ltr", "rtl"]).default("ltr").optional(),
+				}),
+			),
+			defaultLocale: z.string(),
+		})
+		.optional(),
 	i18n: z
 		.object({
-			content: z
-				.object({
-					locales: z.array(
-						z.object({
-							label: z.string(),
-							code: z.string(),
-							direction: z.enum(["ltr", "rtl"]).default("ltr").optional(),
-						}),
-					),
-					defaultLocale: z.string(),
-				})
-				.optional(),
-			interface: z
-				.object({
-					locales: z.array(
-						z.object({
-							label: z.string(),
-							code: z.string(),
-							direction: z.enum(["ltr", "rtl"]).default("ltr").optional(),
-						}),
-					),
-					defaultLocale: z.string(),
-				})
-				.optional(),
-			translations: z.record(z.string(), TranslationBundleSchema).optional(),
+			locales: z.array(
+				z.object({
+					label: z.string(),
+					code: z.string(),
+					direction: z.enum(["ltr", "rtl"]).default("ltr").optional(),
+				}),
+			),
+			defaultLocale: z.string(),
+			sources: z.array(z.union([z.string(), z.instanceof(URL)])).optional(),
 		})
 		.optional(),
 	email: z
@@ -231,8 +223,8 @@ const ConfigSchema = z.object({
 				.record(
 					z.string(),
 					z.object({
-						name: adminTextDescriptorSchema,
-						description: adminTextDescriptorSchema.nullable().optional(),
+						name: adminCopyDescriptorSchema,
+						description: adminCopyDescriptorSchema.nullable().optional(),
 					}),
 				)
 				.optional(),
@@ -240,8 +232,8 @@ const ConfigSchema = z.object({
 				.record(
 					z.string(),
 					z.object({
-						name: adminTextDescriptorSchema,
-						description: adminTextDescriptorSchema.nullable().optional(),
+						name: adminCopyDescriptorSchema,
+						description: adminCopyDescriptorSchema.nullable().optional(),
 						group: z.string(),
 					}),
 				)
@@ -250,8 +242,8 @@ const ConfigSchema = z.object({
 				.array(
 					z.object({
 						key: z.string(),
-						name: adminTextDescriptorSchema,
-						description: adminTextDescriptorSchema.optional(),
+						name: adminCopyDescriptorSchema,
+						description: adminCopyDescriptorSchema.optional(),
 						permissions: z.array(z.string()),
 					}),
 				)
@@ -265,7 +257,7 @@ const ConfigSchema = z.object({
 					z
 						.object({
 							key: z.string().trim().min(1),
-							label: adminTextDescriptorSchema,
+							label: adminCopyDescriptorSchema,
 							instructions: z.string().trim().min(1),
 							availability: z.union([
 								z.literal("global"),

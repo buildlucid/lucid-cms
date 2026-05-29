@@ -11,12 +11,12 @@ interface ErrorMessageProps {
 
 export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 	const fieldErrors = () => normalizeFieldErrors(props.errors);
-	const isErrorText = (message: unknown): message is FieldError["message"] => {
+	const isErrorCopy = (message: unknown): message is FieldError["message"] => {
 		return (
 			typeof message === "object" &&
 			message !== null &&
 			"type" in message &&
-			((message as { type?: string }).type === "lucid.text" ||
+			((message as { type?: string }).type === "lucid.copy" ||
 				(message as { type?: string }).type === "lucid.literal")
 		);
 	};
@@ -30,7 +30,7 @@ export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 		if (!props.errors || Array.isArray(props.errors)) return undefined;
 		const message = props.errors.message;
 		if (typeof message === "string") return message;
-		if (isErrorText(message)) return renderErrorMessage(message);
+		if (isErrorCopy(message)) return renderErrorMessage(message);
 		return undefined;
 	};
 

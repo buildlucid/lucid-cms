@@ -13,10 +13,10 @@ const buildErrorURL = (
 		const url = new URL(baseUrl);
 
 		if (err.name) {
-			url.searchParams.set("errorName", translator.text(err.name) ?? "");
+			url.searchParams.set("errorName", translator(err.name) ?? "");
 		}
 		if (err.message) {
-			url.searchParams.set("errorMessage", translator.text(err.message) ?? "");
+			url.searchParams.set("errorMessage", translator(err.message) ?? "");
 		}
 
 		return url.toString();

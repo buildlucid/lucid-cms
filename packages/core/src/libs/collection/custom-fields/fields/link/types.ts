@@ -1,4 +1,4 @@
-import type { AdminTextDescriptor } from "../../../../i18n/types.js";
+import type { AdminCopyDescriptor } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export type LinkResValue = {
@@ -10,9 +10,9 @@ export type LinkResValue = {
 export interface LinkFieldConfig extends SharedFieldConfig {
 	type: "link";
 	details: {
-		label?: AdminTextDescriptor;
-		summary?: AdminTextDescriptor;
-		placeholder?: AdminTextDescriptor;
+		label?: AdminCopyDescriptor;
+		summary?: AdminCopyDescriptor;
+		placeholder?: AdminCopyDescriptor;
 	};
 	config: {
 		localized?: boolean;

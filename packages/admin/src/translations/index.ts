@@ -1,4 +1,4 @@
-import type { AdminTextDescriptor } from "@types";
+import type { AdminCopyDescriptor } from "@types";
 import i18next from "i18next";
 import { createMemo, createSignal } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
@@ -198,17 +198,17 @@ export const setLocale = (locale: SupportedLocales) => {
 export const getRequestInterfaceLocale = () =>
 	getHasResolvedLocale() ? getLocale() : undefined;
 
-export const translateAdminText = (
-	text: AdminTextDescriptor,
+export const translateAdminCopy = (
+	copy: AdminCopyDescriptor,
 	options?: {
 		defaultMessage?: string;
 		values?: Record<string, string | number | undefined>;
 	},
 ) => {
-	return i18next.t(text.key, {
-		...(text.values ?? {}),
+	return i18next.t(copy.key, {
+		...(copy.values ?? {}),
 		...(options?.values ?? {}),
-		defaultValue: text.defaultMessage ?? options?.defaultMessage ?? text.key,
+		defaultValue: copy.defaultMessage ?? options?.defaultMessage ?? copy.key,
 	});
 };
 

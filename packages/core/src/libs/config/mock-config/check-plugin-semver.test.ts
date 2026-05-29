@@ -13,9 +13,11 @@ test("should throw lucid version support error", async () => {
 			path: path.resolve(__dirname, "./check-plugin-semver.ts"),
 		}),
 	).rejects.toThrow(
-		translate.server("core.plugins.version.not.supported", {
-			version: version as string,
-			supportedVersions: "100.0.0",
+		translate("server:core.plugins.version.not.supported", {
+			data: {
+				version: version as string,
+				supportedVersions: "100.0.0",
+			},
 		}),
 	);
 });

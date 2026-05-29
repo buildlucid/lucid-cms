@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import TextareaCustomField from "./custom-field.js";
@@ -11,10 +11,10 @@ import TextareaCustomField from "./custom-field.js";
 const TextareaCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: text.admin("tests.collections.collection.name", {
+		name: copy("admin:tests.collections.collection.name", {
 			defaultMessage: "Test",
 		}),
-		singularName: text.admin("tests.collections.collection.singularName", {
+		singularName: copy("admin:tests.collections.collection.singularName", {
 			defaultMessage: "Test",
 		}),
 	},
@@ -123,7 +123,7 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "standard_textarea",
 			localeCode: "en",
-			message: text.server("core.fields.validation.errors.unknown", {
+			message: copy("server:core.fields.validation.errors.unknown", {
 				defaultMessage: "Invalid input: expected string, received number",
 			}),
 		},
@@ -152,7 +152,7 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "required_textarea",
 			localeCode: "en",
-			message: text.server("core.fields.validation.required"),
+			message: copy("server:core.fields.validation.required"),
 		},
 	]);
 
@@ -179,7 +179,7 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "min_length_textarea",
 			localeCode: "en",
-			message: text.server("core.fields.validation.errors.unknown", {
+			message: copy("server:core.fields.validation.errors.unknown", {
 				defaultMessage: "Too small: expected string to have >=5 characters",
 			}),
 		},
@@ -191,13 +191,13 @@ test("fail to validate field - textarea", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new TextareaCustomField("field", {
 		details: {
-			label: text.admin("tests.fields.field.label", {
+			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: text.admin("tests.fields.field.summary", {
+			summary: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
-			placeholder: text.admin("tests.fields.field.placeholder", {
+			placeholder: copy("admin:tests.fields.field.placeholder", {
 				defaultMessage: "placeholder",
 			}),
 		},

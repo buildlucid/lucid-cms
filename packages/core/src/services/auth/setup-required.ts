@@ -1,5 +1,5 @@
 import formatter from "../../libs/formatters/index.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 import { seedServices, syncServices } from "../index.js";
@@ -38,7 +38,7 @@ const setupRequired: ServiceFn<[], { setupRequired: boolean }> = async (
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.services.errors.unknown.message"),
+				message: copy("server:core.services.errors.unknown.message"),
 			},
 			data: undefined,
 		};

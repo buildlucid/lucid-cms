@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { isCorePermission } from "../../libs/permission/registry.js";
 import {
 	RolePermissionsRepository,
@@ -29,9 +29,9 @@ const updateSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const defaultRoleLocale = context.config.i18n.content.defaultLocale;
+	const defaultRoleLocale = context.config.i18n.defaultLocale;
 	const roleLocaleCodes = new Set(
-		context.config.i18n.content.locales.map((locale) => locale.code),
+		context.config.i18n.locales.map((locale) => locale.code),
 	);
 
 	const defaultName = getTranslationValue(data.name, defaultRoleLocale);
@@ -83,7 +83,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.permissions.denied"),
+				message: copy("server:core.permissions.denied"),
 				status: 403,
 			},
 			data: undefined,
@@ -94,12 +94,12 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.errors.validation.message"),
+				message: copy("server:core.errors.validation.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: text.server("core.fields.validation.required"),
+						message: copy("server:core.fields.validation.required"),
 					},
 				},
 			},
@@ -111,12 +111,12 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.validation.unique.message"),
+				message: copy("server:core.validation.unique.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: text.server("core.validation.unique.message"),
+						message: copy("server:core.validation.unique.message"),
 					},
 				},
 			},

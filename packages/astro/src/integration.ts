@@ -86,6 +86,7 @@ const lucidCMS = (
 						astroConstants.cloudflare.prerenderContextGlobal
 					] = {
 						config: project.loaded.config,
+						translationStore: project.loaded.translationStore,
 						env: project.loaded.env,
 					};
 				}

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import CheckboxCustomField from "./custom-field.js";
@@ -10,10 +10,10 @@ import CheckboxCustomField from "./custom-field.js";
 const CheckboxCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: text.admin("tests.collections.collection.name", {
+		name: copy("admin:tests.collections.collection.name", {
 			defaultMessage: "Pages",
 		}),
-		singularName: text.admin("tests.collections.collection.singularName", {
+		singularName: copy("admin:tests.collections.collection.singularName", {
 			defaultMessage: "Page",
 		}),
 	},
@@ -96,7 +96,7 @@ test("fail to validate field - checkbox", async () => {
 		{
 			key: "standard_checkbox",
 			localeCode: null,
-			message: text.server("core.fields.validation.errors.unknown", {
+			message: copy("server:core.fields.validation.errors.unknown", {
 				defaultMessage: "Invalid input",
 			}),
 		},
@@ -125,7 +125,7 @@ test("fail to validate field - checkbox", async () => {
 		{
 			key: "required_chekbox",
 			localeCode: null,
-			message: text.server("core.fields.checkbox.validation.required"),
+			message: copy("server:core.fields.checkbox.validation.required"),
 		},
 	]);
 });
@@ -135,10 +135,10 @@ test("fail to validate field - checkbox", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new CheckboxCustomField("field", {
 		details: {
-			label: text.admin("tests.fields.field.label", {
+			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: text.admin("tests.fields.field.summary", {
+			summary: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 		},

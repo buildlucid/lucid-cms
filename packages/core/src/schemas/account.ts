@@ -44,7 +44,7 @@ export const controllerSchemas = {
 				}),
 			})
 			.refine((data) => data.password === data.passwordConfirmation, {
-				message: translate.server("core.input.ensure.passwords.match"),
+				message: translate("server:core.input.ensure.passwords.match"),
 				path: ["passwordConfirmation"],
 			}),
 		query: {
@@ -75,7 +75,7 @@ export const controllerSchemas = {
 		response: z.object({
 			message: z.string().meta({
 				description: "A status message",
-				example: translate.server("core.auth.password.reset.request.accepted"),
+				example: translate("server:core.auth.password.reset.request.accepted"),
 			}),
 		}),
 	} satisfies ControllerSchema,
@@ -340,8 +340,8 @@ export const controllerSchemas = {
 			.refine(
 				(data) => (data.key === undefined) === (data.fileName === undefined),
 				{
-					message: translate.server(
-						"core.profile.picture.file.name.key.required",
+					message: translate(
+						"server:core.profile.picture.file.name.key.required",
 					),
 					path: ["fileName"],
 				},

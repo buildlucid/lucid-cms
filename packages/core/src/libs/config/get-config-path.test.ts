@@ -10,6 +10,6 @@ test("finds lucid.config.ts file", async () => {
 
 test("throws on missing file", async () => {
 	expect(() => getConfigPath(process.cwd(), "test.cfdonfig")).toThrowError(
-		translate.server("core.config.file.not.found"),
+		translate("server:core.config.file.not.found"),
 	);
 });

@@ -3,7 +3,9 @@ import type { Config } from "../../../types.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
-import { createTranslator, text } from "../../i18n/index.js";
+import { copy, createTranslator } from "../../i18n/index.js";
+import prepareTranslations from "../../i18n/prepare-translations.js";
+import type { TranslationStore } from "../../i18n/types.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
@@ -19,6 +21,7 @@ import validateEnvVars from "../services/validate-env-vars.js";
 const cronCommand = async (jobName?: string) => {
 	let kv: KVAdapterInstance | undefined;
 	let config: Config | undefined;
+	let translationStore: TranslationStore | undefined;
 	let env: EnvironmentVariables | undefined;
 	try {
 		logger.setBuffering(true);
@@ -64,9 +67,15 @@ const cronCommand = async (jobName?: string) => {
 		const configPath = getConfigPath(process.cwd());
 		const configRes = await loadConfigFile({ path: configPath });
 		config = configRes.config;
+		translationStore = (
+			await prepareTranslations({
+				config,
+				projectRoot: configRes.projectRoot,
+			})
+		).translationStore;
 		env = configRes.env;
 		const translate = createTranslator({
-			config: configRes.config,
+			store: translationStore,
 			locale: "en",
 		});
 
@@ -98,7 +107,7 @@ const cronCommand = async (jobName?: string) => {
 				logError: true,
 				defaultError: {
 					type: "cron",
-					name: text.server("core.cron.job.error.name"),
+					name: copy("server:core.cron.job.error.name"),
 					message: job.error,
 				},
 			})({
@@ -119,8 +128,7 @@ const cronCommand = async (jobName?: string) => {
 				break;
 			}
 
-			lastError =
-				translate.english.text(result.error.message) ?? "Unknown error";
+			lastError = translate.english(result.error.message) ?? "Unknown error";
 
 			if (attempt < maxRetries) {
 				cliLogger.warn(
@@ -134,7 +142,9 @@ const cronCommand = async (jobName?: string) => {
 				`Cron job "${job.label}" failed after ${maxRetries} attempts:`,
 				lastError ?? "Unknown error",
 			);
-			if (config) await destroyKVAdapter(kv, { config, env });
+			if (config && translationStore) {
+				await destroyKVAdapter(kv, { config, env });
+			}
 			kv = undefined;
 			logger.setBuffering(false);
 			process.exit(1);
@@ -153,12 +163,16 @@ const cronCommand = async (jobName?: string) => {
 			},
 		);
 
-		if (config) await destroyKVAdapter(kv, { config, env });
+		if (config && translationStore) {
+			await destroyKVAdapter(kv, { config, env });
+		}
 		kv = undefined;
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
-		if (config) await destroyKVAdapter(kv, { config, env });
+		if (config && translationStore) {
+			await destroyKVAdapter(kv, { config, env });
+		}
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error);
 		}

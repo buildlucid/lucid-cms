@@ -1,4 +1,4 @@
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceDeleteSingle } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
@@ -21,7 +21,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 				return {
 					error: {
 						type: "plugin",
-						message: text.server("plugin.s3.objects.delete.single.failed", {
+						message: copy("server:plugin.s3.objects.delete.single.failed", {
 							data: {
 								status: result.status,
 								statusText: result.statusText,
@@ -42,8 +42,8 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 					type: "plugin",
 					message:
 						e instanceof Error
-							? text.literal(e.message)
-							: text.server("plugin.s3.errors.unknown"),
+							? copy.literal(e.message)
+							: copy("server:plugin.s3.errors.unknown"),
 				},
 				data: undefined,
 			};

@@ -1,5 +1,5 @@
 import type { UserTokenType } from "../../libs/db/types.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { UserTokensRepository } from "../../libs/repositories/index.js";
 import hashUserToken from "../../utils/helpers/hash-user-token.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -54,7 +54,7 @@ const getSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: text.server("core.tokens.not.found.message"),
+				message: copy("server:core.tokens.not.found.message"),
 				status: 404,
 			},
 		},

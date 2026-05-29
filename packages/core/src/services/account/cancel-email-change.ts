@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UserTokensRepository,
@@ -29,7 +29,7 @@ const cancelEmailChange: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 404,
-				message: text.server("core.pending.email.change.not.found.message"),
+				message: copy("server:core.pending.email.change.not.found.message"),
 			},
 		},
 	});
@@ -56,7 +56,7 @@ const cancelEmailChange: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 404,
-					message: text.server("core.pending.email.change.not.found.message"),
+					message: copy("server:core.pending.email.change.not.found.message"),
 				},
 			},
 		}),

@@ -1,4 +1,4 @@
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceGetUploadPartUrls } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../../constants.js";
@@ -49,8 +49,8 @@ export const getUploadPartUrls = (
 					type: "plugin",
 					message:
 						error instanceof Error
-							? text.literal(error.message)
-							: text.server("plugin.s3.errors.unknown"),
+							? copy.literal(error.message)
+							: copy("server:plugin.s3.errors.unknown"),
 				},
 				data: undefined,
 			};

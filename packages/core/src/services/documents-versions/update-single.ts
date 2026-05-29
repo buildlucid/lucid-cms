@@ -3,7 +3,7 @@ import getMigrationStatus from "../../libs/collection/get-collection-migration-s
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
@@ -47,8 +47,8 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.locked.collection.name"),
-				message: text.server("core.error.locked.collection.message"),
+				name: copy("server:core.error.locked.collection.name"),
+				message: copy("server:core.error.locked.collection.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -65,8 +65,8 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.schema.migration.required.name"),
-				message: text.server("core.error.schema.migration.required.message"),
+				name: copy("server:core.error.schema.migration.required.name"),
+				message: copy("server:core.error.schema.migration.required.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -103,7 +103,7 @@ const updateSingle: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: text.server("core.documents.versions.not.found.message"),
+					message: copy("server:core.documents.versions.not.found.message"),
 					status: 404,
 				},
 			},
@@ -118,8 +118,8 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.update.revision.version.name"),
-				message: text.server("core.error.update.revision.version.message"),
+				name: copy("server:core.error.update.revision.version.name"),
+				message: copy("server:core.error.update.revision.version.message"),
 				status: 400,
 			},
 			data: undefined,

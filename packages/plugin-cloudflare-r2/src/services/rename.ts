@@ -1,4 +1,4 @@
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceRenameKey } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 
@@ -11,8 +11,8 @@ const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
 				return {
 					error: {
 						type: "plugin",
-						message: text.server(
-							"plugin.cloudflare.r2.objects.copy.source.missing",
+						message: copy(
+							"server:plugin.cloudflare.r2.objects.copy.source.missing",
 						),
 					},
 					data: undefined,
@@ -23,7 +23,7 @@ const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
 				return {
 					error: {
 						type: "plugin",
-						message: text.server("plugin.cloudflare.r2.objects.body.missing"),
+						message: copy("server:plugin.cloudflare.r2.objects.body.missing"),
 					},
 					data: undefined,
 				};
@@ -42,7 +42,7 @@ const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
 				return {
 					error: {
 						type: "plugin",
-						message: text.server("plugin.cloudflare.r2.objects.copy.failed"),
+						message: copy("server:plugin.cloudflare.r2.objects.copy.failed"),
 					},
 					data: undefined,
 				};
@@ -65,8 +65,8 @@ const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
 					type: "plugin",
 					message:
 						error instanceof Error
-							? text.literal(error.message)
-							: text.server("plugin.cloudflare.r2.errors.unknown"),
+							? copy.literal(error.message)
+							: copy("server:plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,
 			};

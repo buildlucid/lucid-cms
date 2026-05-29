@@ -1,4 +1,4 @@
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterStreamBody, ServiceFn } from "@lucidcms/core/types";
 import { STORAGE_DOWNLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";
@@ -49,8 +49,8 @@ const storageDownload =
 				error: {
 					type: "basic",
 					status: 403,
-					message: text.server(
-						"plugin.cloudflare.r2.signed.urls.invalid.or.expired",
+					message: copy(
+						"server:plugin.cloudflare.r2.signed.urls.invalid.or.expired",
 					),
 				},
 				data: undefined,

@@ -1,12 +1,12 @@
-import { CollectionBuilder, text, z } from "@lucidcms/core";
+import { CollectionBuilder, copy, z } from "@lucidcms/core";
 import SimpleBrick from "../bricks/simple.js";
 import SimpleFixedBrick from "../bricks/simple-fixed.js";
 
 const SimpleCollection = new CollectionBuilder("simple", {
 	mode: "multiple",
 	details: {
-		name: text.admin("collections.simple.name", { defaultMessage: "Simple" }),
-		singularName: text.admin("collections.simple.singularName", {
+		name: copy("admin:collections.simple.name", { defaultMessage: "Simple" }),
+		singularName: copy("admin:collections.simple.singularName", {
 			defaultMessage: "Simple",
 		}),
 	},
@@ -21,7 +21,7 @@ const SimpleCollection = new CollectionBuilder("simple", {
 })
 	.addText("simpleHeading", {
 		details: {
-			label: text.admin("collections.simple.fields.simpleHeading.label", {
+			label: copy("admin:collections.simple.fields.simpleHeading.label", {
 				defaultMessage: "Heading Default",
 			}),
 		},

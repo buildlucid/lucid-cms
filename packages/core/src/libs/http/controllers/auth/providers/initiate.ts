@@ -12,7 +12,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import softAuthenticate from "../../../middleware/soft-authenticate.js";
 import validate from "../../../middleware/validate.js";
@@ -62,8 +62,8 @@ const providerInitiateController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: text.server("core.routes.initiate.auth.error.name"),
-					message: text.server("core.routes.initiate.auth.error.message"),
+					name: copy("server:core.routes.initiate.auth.error.name"),
+					message: copy("server:core.routes.initiate.auth.error.message"),
 				},
 			},
 		)(context, {

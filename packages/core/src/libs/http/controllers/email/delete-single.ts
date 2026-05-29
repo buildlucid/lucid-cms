@@ -8,7 +8,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -43,8 +43,8 @@ const deleteSingleController = factory.createHandlers(
 			transaction: true,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.routes.email.delete.error.name"),
-				message: text.server("core.routes.email.delete.error.message"),
+				name: copy("server:core.routes.email.delete.error.name"),
+				message: copy("server:core.routes.email.delete.error.message"),
 			},
 		})(context, {
 			id: Number.parseInt(id, 10),

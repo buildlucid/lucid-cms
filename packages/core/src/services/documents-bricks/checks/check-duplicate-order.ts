@@ -1,4 +1,4 @@
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
@@ -17,8 +17,8 @@ const checkDuplicateOrder = (
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.saving.bricks"),
-				message: text.server("core.error.saving.page.duplicate.order", {
+				name: copy("server:core.error.saving.bricks"),
+				message: copy("server:core.error.saving.page.duplicate.order", {
 					data: {
 						order: builderOrderDuplicates.join(", "),
 					},

@@ -1,4 +1,4 @@
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import { createSignedMediaUrl } from "../../../signed-url.js";
 import type {
 	FileSystemMediaAdapterOptions,
@@ -30,7 +30,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 		} catch (e) {
 			return {
 				error: {
-					message: text.server("core.media.download.url.sign.failed", {
+					message: copy("server:core.media.download.url.sign.failed", {
 						defaultMessage:
 							e instanceof Error ? e.message : "Failed to sign download URL",
 					}),

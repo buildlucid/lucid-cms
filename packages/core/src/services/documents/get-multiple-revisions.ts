@@ -5,7 +5,7 @@ import {
 import formatter, {
 	documentVersionsFormatter,
 } from "../../libs/formatters/index.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
 import type { DocumentVersion } from "../../types/response.js";
@@ -34,8 +34,8 @@ const getMultipleRevisions: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.documents.revisions.not.enabled.error.name"),
-				message: text.server("core.documents.revisions.not.enabled.message"),
+				name: copy("server:core.documents.revisions.not.enabled.error.name"),
+				message: copy("server:core.documents.revisions.not.enabled.message"),
 				status: 400,
 			},
 			data: undefined,

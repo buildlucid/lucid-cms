@@ -9,8 +9,10 @@ test("should throw duplicate collection key error", async () => {
 			path: path.resolve(__dirname, "./duplicate-collections.ts"),
 		}),
 	).rejects.toThrow(
-		translate.server("core.config.duplicate.keys", {
-			builder: "collections",
+		translate("server:core.config.duplicate.keys", {
+			data: {
+				builder: "collections",
+			},
 		}),
 	);
 });

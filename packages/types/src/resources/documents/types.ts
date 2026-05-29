@@ -1,4 +1,4 @@
-import type { AdminTextDescriptor } from "../locales/types.js";
+import type { AdminCopyDescriptor } from "../locales/types.js";
 import type { MediaRef, ProfilePicture } from "../media/types.js";
 import type { UserRef } from "../users/types.js";
 
@@ -311,8 +311,8 @@ export type WorkflowStageColor =
 export interface CollectionBrickConfig {
 	key: string;
 	details: {
-		name: AdminTextDescriptor;
-		summary?: AdminTextDescriptor;
+		name: AdminCopyDescriptor;
+		summary?: AdminCopyDescriptor;
 	};
 	preview:
 		| {
@@ -323,14 +323,14 @@ export interface CollectionBrickConfig {
 }
 
 type FieldDetails = {
-	label?: AdminTextDescriptor;
-	summary?: AdminTextDescriptor;
-	placeholder?: AdminTextDescriptor;
+	label?: AdminCopyDescriptor;
+	summary?: AdminCopyDescriptor;
+	placeholder?: AdminCopyDescriptor;
 };
 
 type RelationFieldDetails = {
-	label?: AdminTextDescriptor;
-	summary?: AdminTextDescriptor;
+	label?: AdminCopyDescriptor;
+	summary?: AdminCopyDescriptor;
 };
 
 type FieldConfigOptions<TDefault = unknown> = {
@@ -359,8 +359,8 @@ type SharedCollectionFieldConfig<TType extends FieldType> = {
 export interface CheckboxFieldConfig
 	extends SharedCollectionFieldConfig<"checkbox"> {
 	details: FieldDetails & {
-		true?: AdminTextDescriptor;
-		false?: AdminTextDescriptor;
+		true?: AdminCopyDescriptor;
+		false?: AdminCopyDescriptor;
 	};
 	config: FieldConfigOptions<boolean>;
 	validation?: RequiredValidation;
@@ -450,7 +450,7 @@ export interface RichTextFieldConfig
 
 export interface SelectFieldConfig
 	extends SharedCollectionFieldConfig<"select"> {
-	options: Array<{ label: AdminTextDescriptor; value: string }>;
+	options: Array<{ label: AdminCopyDescriptor; value: string }>;
 	config: FieldConfigOptions<string>;
 	validation?: RequiredValidation;
 }
@@ -509,9 +509,9 @@ export interface Collection {
 	documentId?: number | null;
 	mode: CollectionMode;
 	details: {
-		name: AdminTextDescriptor;
-		singularName: AdminTextDescriptor;
-		summary: AdminTextDescriptor | null;
+		name: AdminCopyDescriptor;
+		singularName: AdminCopyDescriptor;
+		summary: AdminCopyDescriptor | null;
 	};
 	config: {
 		localized: boolean;
@@ -533,7 +533,7 @@ export interface Collection {
 			initial: string;
 			stages: Array<{
 				key: string;
-				name: AdminTextDescriptor;
+				name: AdminCopyDescriptor;
 				color: WorkflowStageColor;
 				publishTargets: string[];
 				permissions: {
@@ -544,7 +544,7 @@ export interface Collection {
 		};
 		environments: {
 			key: string;
-			name: AdminTextDescriptor;
+			name: AdminCopyDescriptor;
 			permissions: {
 				publish: string;
 				review: string;

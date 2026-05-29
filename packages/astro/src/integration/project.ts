@@ -139,7 +139,7 @@ export const prepareAssetSourceTree = async (
 	assetRoot: string,
 ) => {
 	const translate = createTranslator({
-		config: project.loaded.config,
+		store: project.loaded.translationStore,
 		locale: "en",
 	});
 
@@ -157,7 +157,7 @@ export const prepareAssetSourceTree = async (
 	if (publicResult.error) {
 		throw new LucidError({
 			message:
-				translate.english.text(publicResult.error.message) ??
+				translate.english(publicResult.error.message) ??
 				"Lucid Astro integration could not prepare the Lucid public assets.",
 		});
 	}
@@ -172,7 +172,7 @@ export const prepareAssetSourceTree = async (
 	if (spaResult.error) {
 		throw new LucidError({
 			message:
-				translate.english.text(spaResult.error.message) ??
+				translate.english(spaResult.error.message) ??
 				"Lucid Astro integration could not prepare the Lucid SPA assets.",
 		});
 	}
@@ -260,6 +260,7 @@ export const runDevBootstrap = async (
 
 	const migrationResult = await migrateCommand({
 		config: bootstrapProject.loaded.config,
+		translationStore: bootstrapProject.loaded.translationStore,
 		mode: "return",
 	})({
 		force: false,

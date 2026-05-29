@@ -36,11 +36,11 @@ const getMultiple = async (
 		{
 			name: {
 				key: "core.toolkit.media.get.multiple.error.name",
-				fallback: "Media Toolkit Error",
+				defaultMessage: "Media Toolkit Error",
 			},
 			message: {
 				key: "core.toolkit.media.get.multiple.error.message",
-				fallback: "Lucid toolkit could not fetch multiple media items.",
+				defaultMessage: "Lucid toolkit could not fetch multiple media items.",
 			},
 		},
 	);

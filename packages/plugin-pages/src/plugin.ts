@@ -1,5 +1,4 @@
 import { logger } from "@lucidcms/core";
-import { mergeTranslationBundles } from "@lucidcms/core/plugin";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import {
@@ -10,10 +9,6 @@ import {
 	versionPromoteHandler,
 } from "./services/hooks/index.js";
 import { pluginOptions, registerFields } from "./services/index.js";
-import adminTexts from "./translations/en.admin.json" with { type: "json" };
-import serverTranslations from "./translations/en.server.json" with {
-	type: "json",
-};
 import type { PluginOptions } from "./types/types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (plugin) => {
@@ -23,15 +18,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
-			draft.i18n.translations = mergeTranslationBundles(
-				draft.i18n.translations,
-				{
-					en: {
-						admin: adminTexts,
-						server: serverTranslations,
-					},
-				},
-			);
+			draft.i18n.sources.push("@lucidcms/plugin-pages/translations");
 
 			for (const collectionConfig of options.collections) {
 				const collectionInstance = draft.collections.find(

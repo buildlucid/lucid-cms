@@ -3,7 +3,7 @@ import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import inferSchema from "./infer-schema.js";
 
 // -----------------------------------------------
@@ -19,10 +19,10 @@ describe("Schema inference", async () => {
 		pagesCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.pages.name", {
+				name: copy("admin:tests.collections.pages.name", {
 					defaultMessage: "Pages",
 				}),
-				singularName: text.admin("tests.collections.pages.singularName", {
+				singularName: copy("admin:tests.collections.pages.singularName", {
 					defaultMessage: "Page",
 				}),
 			},
@@ -184,10 +184,10 @@ describe("Schema inference", async () => {
 		const brickScopedCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.pages.name", {
+				name: copy("admin:tests.collections.pages.name", {
 					defaultMessage: "Pages",
 				}),
-				singularName: text.admin("tests.collections.pages.singularName", {
+				singularName: copy("admin:tests.collections.pages.singularName", {
 					defaultMessage: "Page",
 				}),
 			},
@@ -227,10 +227,10 @@ describe("Schema inference", async () => {
 		const brickScopedCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.pages.name", {
+				name: copy("admin:tests.collections.pages.name", {
 					defaultMessage: "Pages",
 				}),
-				singularName: text.admin("tests.collections.pages.singularName", {
+				singularName: copy("admin:tests.collections.pages.singularName", {
 					defaultMessage: "Page",
 				}),
 			},

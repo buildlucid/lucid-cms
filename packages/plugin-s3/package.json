@@ -10,7 +10,8 @@
 		".": {
 			"import": "./dist/index.mjs",
 			"types": "./dist/index.d.ts"
-		}
+		},
+		"./translations": "./translations"
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
@@ -23,7 +24,8 @@
 		"check:fix": "biome check --write ./src"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"translations"
 	],
 	"author": "Lucid",
 	"repository": {

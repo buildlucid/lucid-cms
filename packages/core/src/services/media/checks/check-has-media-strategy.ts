@@ -1,4 +1,4 @@
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import getMediaAdapter from "../../../libs/media/get-adapter.js";
 import type { MediaAdapterInstance } from "../../../libs/media/types.js";
 import type {
@@ -15,8 +15,8 @@ const checkHasMediaStrategy = async (
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.config.error.name"),
-				message: text.server("core.media.strategy.not.configured.message"),
+				name: copy("server:core.config.error.name"),
+				message: copy("server:core.media.strategy.not.configured.message"),
 				status: 500,
 			},
 			data: undefined,

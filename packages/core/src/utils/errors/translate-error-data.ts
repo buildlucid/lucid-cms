@@ -1,29 +1,29 @@
 import type { PublicErrorData } from "@lucidcms/types";
-import { isTranslatableText } from "../../libs/i18n/index.js";
+import { isTranslatableCopy } from "../../libs/i18n/index.js";
 import type { Translator } from "../../libs/i18n/types.js";
-import type { ErrorText, LucidErrorData } from "../../types/errors.js";
+import type { ErrorCopy, LucidErrorData } from "../../types/errors.js";
 
-const translateErrorText = (
-	text: ErrorText | undefined,
+const translateErrorCopy = (
+	text: ErrorCopy | undefined,
 	translator: Translator,
 ) => {
 	if (!text) return text;
-	return translator.text(text);
+	return translator(text);
 };
 
-const translateNestedErrorText = (
+const translateNestedErrorCopy = (
 	value: unknown,
 	translator: Translator,
 ): unknown => {
-	if (isTranslatableText(value)) return translator.text(value);
+	if (isTranslatableCopy(value)) return translator(value);
 	if (Array.isArray(value)) {
-		return value.map((item) => translateNestedErrorText(item, translator));
+		return value.map((item) => translateNestedErrorCopy(item, translator));
 	}
 	if (value && typeof value === "object") {
 		return Object.fromEntries(
 			Object.entries(value).map(([key, nested]) => [
 				key,
-				translateNestedErrorText(nested, translator),
+				translateNestedErrorCopy(nested, translator),
 			]),
 		);
 	}
@@ -38,9 +38,9 @@ const translateErrorData = (
 	translator: Translator,
 ): PublicErrorData => ({
 	...error,
-	name: translateErrorText(error.name, translator),
-	message: translateErrorText(error.message, translator),
-	errors: translateNestedErrorText(
+	name: translateErrorCopy(error.name, translator),
+	message: translateErrorCopy(error.message, translator),
+	errors: translateNestedErrorCopy(
 		error.errors,
 		translator,
 	) as PublicErrorData["errors"],

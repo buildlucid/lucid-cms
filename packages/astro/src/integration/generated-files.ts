@@ -117,7 +117,7 @@ export default emailTemplates;
 		),
 		fs.writeFile(
 			i18nTranslationsModulePath,
-			`const i18nTranslations = ${JSON.stringify(props.project.loaded.config.i18n.translations, null, 2)};
+			`const i18nTranslations = ${JSON.stringify(props.project.loaded.translationStore.bundles, null, 2)};
 export default i18nTranslations;
 `,
 		),
@@ -157,6 +157,7 @@ export const writeCloudflareWorkerFiles = async (
 
 	const processedArtifacts = await prepareBuildArtifacts({
 		config: project.loaded.config,
+		translationStore: project.loaded.translationStore,
 		definition: project.loaded.definition,
 		silent: true,
 		configPath: project.configPath,
@@ -178,7 +179,7 @@ export const writeCloudflareWorkerFiles = async (
 		),
 		fs.writeFile(
 			path.join(workerDir, astroConstants.files.i18nTranslationsJson),
-			JSON.stringify(project.loaded.config.i18n.translations, null, 2),
+			JSON.stringify(project.loaded.translationStore.bundles, null, 2),
 		),
 		fs.writeFile(
 			path.join(workerDir, astroConstants.files.worker),

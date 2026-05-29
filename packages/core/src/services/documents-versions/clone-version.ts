@@ -5,7 +5,7 @@ import {
 	getTableNames,
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentBricksFormatter } from "../../libs/formatters/index.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	DocumentBricksRepository,
 	DocumentVersionsRepository,
@@ -54,8 +54,8 @@ const cloneVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.schema.migration.required.name"),
-				message: text.server("core.error.schema.migration.required.message"),
+				name: copy("server:core.error.schema.migration.required.name"),
+				message: copy("server:core.error.schema.migration.required.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -83,7 +83,7 @@ const cloneVersion: ServiceFn<
 				validation: {
 					enabled: true,
 					defaultError: {
-						message: text.server("core.documents.version.not.found.message"),
+						message: copy("server:core.documents.version.not.found.message"),
 						status: 404,
 					},
 				},
@@ -112,7 +112,7 @@ const cloneVersion: ServiceFn<
 		return {
 			error: {
 				status: 404,
-				message: text.server("core.documents.version.not.found.message"),
+				message: copy("server:core.documents.version.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -122,7 +122,7 @@ const cloneVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.documents.version.document.mismatch"),
+				message: copy("server:core.documents.version.document.mismatch"),
 				status: 404,
 			},
 			data: undefined,
@@ -146,7 +146,7 @@ const cloneVersion: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 400,
-					message: text.server("core.documents.create.failed"),
+					message: copy("server:core.documents.create.failed"),
 				},
 			},
 		},
@@ -161,7 +161,7 @@ const cloneVersion: ServiceFn<
 		collection: collectionRes.data,
 		documentId: data.documentId,
 		versionId: newVersionRes.data.id,
-		localization: context.config.i18n.content,
+		localization: context.config.localization,
 		bricks: documentBricksFormatter.formatMultiple({
 			bricksQuery: bricksQueryRes.data,
 			bricksSchema: bricksTableSchemaRes.data,

@@ -9,7 +9,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -42,8 +42,8 @@ const updateLicenseController = factory.createHandlers(
 			transaction: true,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.errors.default.name"),
-				message: text.server("core.errors.default.message"),
+				name: copy("server:core.errors.default.name"),
+				message: copy("server:core.errors.default.message"),
 			},
 		})(context, {
 			licenseKey: body.licenseKey,

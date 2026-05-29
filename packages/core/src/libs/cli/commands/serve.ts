@@ -3,6 +3,7 @@ import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email/templates/prerender-mjml-templates.js";
 import { createTranslator } from "../../i18n/index.js";
+import prepareTranslations from "../../i18n/prepare-translations.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import generateTypes from "../../type-generation/index.js";
@@ -39,8 +40,14 @@ const serveCommand = async () => {
 		const configRes = await loadConfigFile({
 			path: configPath,
 		});
-		const translate = createTranslator({
+		const translations = await prepareTranslations({
 			config: configRes.config,
+			projectRoot: configRes.projectRoot,
+			outputPath: configRes.config.build.paths.outDir,
+		});
+		const translationStore = translations.translationStore;
+		const translate = createTranslator({
+			store: translationStore,
 			locale: "en",
 		});
 		const adapterCLI = configRes.adapter.cli;
@@ -61,10 +68,11 @@ const serveCommand = async () => {
 		generateTypes({
 			envSchema: configRes.envSchema,
 			configPath: configPath,
+			projectRoot: configRes.projectRoot,
 			adapterModule: configRes.definition.adapter.module,
 			databaseModule: configRes.definition.database.module,
 			collections: configRes.config.collections,
-			localization: configRes.config.i18n.content,
+			localization: configRes.config.localization,
 		});
 
 		if (!envValid) {
@@ -74,6 +82,7 @@ const serveCommand = async () => {
 
 		const migrateResult = await migrateCommand({
 			config: configRes.config,
+			translationStore,
 			mode: "return",
 		})({
 			skipSyncSteps: false,
@@ -87,8 +96,7 @@ const serveCommand = async () => {
 		const viteBuildRes = await vite.buildApp(configRes.config);
 		if (viteBuildRes.error) {
 			cliLogger.error(
-				translate.english.text(viteBuildRes.error.message) ??
-					"Failed to build app",
+				translate.english(viteBuildRes.error.message) ?? "Failed to build app",
 			);
 			process.exit(1);
 		}
@@ -105,14 +113,14 @@ const serveCommand = async () => {
 		]);
 		if (mjmlTemplatesRes.error) {
 			cliLogger.error(
-				translate.english.text(mjmlTemplatesRes.error.message) ??
+				translate.english(mjmlTemplatesRes.error.message) ??
 					"Failed to pre-render MJML templates",
 			);
 			process.exit(1);
 		}
 		if (publicAssetsRes.error) {
 			cliLogger.error(
-				translate.english.text(publicAssetsRes.error.message) ??
+				translate.english(publicAssetsRes.error.message) ??
 					"Failed to copy public assets",
 			);
 			process.exit(1);
@@ -120,6 +128,7 @@ const serveCommand = async () => {
 
 		const serverRes = await adapterCLI.serve({
 			config: configRes.config,
+			translationStore,
 			logger: {
 				instance: cliLogger,
 				silent: false,

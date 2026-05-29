@@ -1,8 +1,8 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import type { ErrorText } from "../../types/errors.js";
+import type { ErrorCopy } from "../../types/errors.js";
 import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -15,7 +15,7 @@ const sendResetPassword: ServiceFn<
 		},
 	],
 	{
-		message: ErrorText;
+		message: ErrorCopy;
 	}
 > = async (context, data) => {
 	if (context.config.auth.password.enabled === false) {
@@ -23,8 +23,8 @@ const sendResetPassword: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: text.server(
-					"core.auth.password.authentication.disabled.message",
+				message: copy(
+					"server:core.auth.password.authentication.disabled.message",
 				),
 			},
 			data: undefined,
@@ -49,7 +49,7 @@ const sendResetPassword: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				message: text.server("core.auth.password.reset.request.accepted"),
+				message: copy("server:core.auth.password.reset.request.accepted"),
 			},
 		};
 	}
@@ -71,7 +71,7 @@ const sendResetPassword: ServiceFn<
 		type: "internal",
 		to: userExistsRes.data.email,
 		subject: formatEmailSubject(
-			context.translate.server("core.email.password.reset.email.subject"),
+			context.translate("server:core.email.password.reset.email.subject"),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.resetPassword.key,
@@ -92,7 +92,7 @@ const sendResetPassword: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			message: text.server("core.auth.password.reset.request.accepted"),
+			message: copy("server:core.auth.password.reset.request.accepted"),
 		},
 	};
 };

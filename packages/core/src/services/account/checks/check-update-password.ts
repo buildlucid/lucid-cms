@@ -1,6 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../../constants/constants.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import { decrypt } from "../../../utils/helpers/encrypt-decrypt.js";
 import generateSecret from "../../../utils/helpers/generate-secret.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -37,12 +37,12 @@ const checkUpdatePassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.input.provide.current.password"),
+				message: copy("server:core.input.provide.current.password"),
 				status: 400,
 				errors: {
 					currentPassword: {
 						code: "required",
-						message: text.server("core.input.provide.current.password"),
+						message: copy("server:core.input.provide.current.password"),
 					},
 				},
 			},
@@ -58,12 +58,12 @@ const checkUpdatePassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.input.provide.new.password"),
+				message: copy("server:core.input.provide.new.password"),
 				status: 400,
 				errors: {
 					newPassword: {
 						code: "required",
-						message: text.server("core.input.provide.new.password"),
+						message: copy("server:core.input.provide.new.password"),
 					},
 				},
 			},
@@ -87,12 +87,12 @@ const checkUpdatePassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.input.ensure.passwords.match"),
+				message: copy("server:core.input.ensure.passwords.match"),
 				status: 400,
 				errors: {
 					passwordConfirmation: {
 						code: "invalid",
-						message: text.server("core.input.ensure.passwords.match"),
+						message: copy("server:core.input.ensure.passwords.match"),
 					},
 				},
 			},
@@ -111,12 +111,12 @@ const checkUpdatePassword: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.input.ensure.password.is.correct"),
+				message: copy("server:core.input.ensure.password.is.correct"),
 				status: 400,
 				errors: {
 					currentPassword: {
 						code: "invalid",
-						message: text.server("core.input.ensure.password.is.correct"),
+						message: copy("server:core.input.ensure.password.is.correct"),
 					},
 				},
 			},

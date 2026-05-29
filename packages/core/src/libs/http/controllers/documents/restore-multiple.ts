@@ -9,7 +9,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
@@ -46,8 +46,8 @@ const restoreMultipleController = factory.createHandlers(
 			transaction: true,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.routes.document.update.error.name"),
-				message: text.server("core.routes.document.update.error.message"),
+				name: copy("server:core.routes.document.update.error.name"),
+				message: copy("server:core.routes.document.update.error.message"),
 			},
 		})(context, {
 			ids,

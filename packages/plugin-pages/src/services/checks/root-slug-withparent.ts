@@ -1,4 +1,4 @@
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type {
 	FieldError,
 	FieldInputSchema,
@@ -28,7 +28,7 @@ const checkRootSlugWithParent = (data: {
 				fieldErrors.push({
 					key: constants.fields.slug.key,
 					localeCode: key,
-					message: text.server("plugin.pages.slug.root.with.parent.denied"),
+					message: copy("server:plugin.pages.slug.root.with.parent.denied"),
 				});
 			}
 		}
@@ -37,7 +37,7 @@ const checkRootSlugWithParent = (data: {
 				error: {
 					type: "basic",
 					status: 400,
-					message: text.server("plugin.pages.slug.root.with.parent.denied"),
+					message: copy("server:plugin.pages.slug.root.with.parent.denied"),
 					errors: {
 						fields: fieldErrors,
 					},
@@ -50,12 +50,12 @@ const checkRootSlugWithParent = (data: {
 			error: {
 				type: "basic",
 				status: 400,
-				message: text.server("plugin.pages.slug.root.with.parent.denied"),
+				message: copy("server:plugin.pages.slug.root.with.parent.denied"),
 				errors: {
 					fields: [
 						{
 							key: constants.fields.parentPage.key,
-							message: text.server("plugin.pages.slug.root.with.parent.denied"),
+							message: copy("server:plugin.pages.slug.root.with.parent.denied"),
 						},
 					],
 				},

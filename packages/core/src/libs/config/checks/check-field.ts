@@ -23,11 +23,13 @@ const checkField = (field: CFConfig<FieldTypes>, config: Config) => {
 				}
 
 				throw new Error(
-					translate.server(
-						"core.fields.document.validation.collection.not.found",
+					translate(
+						"server:core.fields.document.validation.collection.not.found",
 						{
-							collection: collectionKey,
-							field: field.key,
+							data: {
+								collection: collectionKey,
+								field: field.key,
+							},
 						},
 					),
 				);

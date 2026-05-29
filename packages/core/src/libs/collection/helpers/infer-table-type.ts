@@ -4,7 +4,7 @@ import registeredFields, {
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
 import type { ServiceResponse } from "../../../types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import { collectionTableParts } from "./table-parts.js";
 
 const HASHED_TABLE_SUFFIX_REGEX = /_[0-9a-f]{8}$/;
@@ -38,8 +38,8 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 		return {
 			data: undefined,
 			error: {
-				message: text.server(
-					"core.collections.schema.table.name.format.start.with",
+				message: copy(
+					"server:core.collections.schema.table.name.format.start.with",
 					{
 						data: {
 							prefix: prefix,
@@ -57,8 +57,8 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 			return {
 				data: undefined,
 				error: {
-					message: text.server(
-						"core.collections.schema.table.name.format.insufficient.parts",
+					message: copy(
+						"server:core.collections.schema.table.name.format.insufficient.parts",
 					),
 				},
 			};
@@ -82,8 +82,8 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 				return {
 					data: undefined,
 					error: {
-						message: text.server(
-							"core.collections.schema.table.name.format.insufficient.parts",
+						message: copy(
+							"server:core.collections.schema.table.name.format.insufficient.parts",
 						),
 					},
 				};
@@ -94,8 +94,8 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 			return {
 				data: undefined,
 				error: {
-					message: text.server(
-						"core.collections.schema.table.name.format.insufficient.parts",
+					message: copy(
+						"server:core.collections.schema.table.name.format.insufficient.parts",
 					),
 				},
 			};
@@ -109,8 +109,8 @@ const inferTableType = (name: string): Awaited<ServiceResponse<TableType>> => {
 		return {
 			data: undefined,
 			error: {
-				message: text.server(
-					"core.collections.schema.table.parts.infer.failed",
+				message: copy(
+					"server:core.collections.schema.table.parts.infer.failed",
 					e instanceof Error ? { defaultMessage: e.message } : undefined,
 				),
 			},

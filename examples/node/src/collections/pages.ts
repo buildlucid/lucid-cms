@@ -1,14 +1,14 @@
-import { CollectionBuilder, text, z } from "@lucidcms/core";
+import { CollectionBuilder, copy, z } from "@lucidcms/core";
 import ContentBrick from "../bricks/content.js";
 import SeoBrick from "../bricks/seo.js";
 
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: text.admin("collections.page.name", {
+		name: copy("admin:collections.page.name", {
 			defaultMessage: "Pages",
 		}),
-		singularName: text.admin("collections.page.singularName", {
+		singularName: copy("admin:collections.page.singularName", {
 			defaultMessage: "Page",
 		}),
 	},
@@ -19,7 +19,7 @@ const PageCollection = new CollectionBuilder("page", {
 })
 	.addText("title", {
 		details: {
-			label: text.admin("collections.page.fields.title.label", {
+			label: copy("admin:collections.page.fields.title.label", {
 				defaultMessage: "Title",
 			}),
 		},
@@ -31,7 +31,7 @@ const PageCollection = new CollectionBuilder("page", {
 	})
 	.addTextarea("summary", {
 		details: {
-			label: text.admin("collections.page.fields.summary.label", {
+			label: copy("admin:collections.page.fields.summary.label", {
 				defaultMessage: "Summary",
 			}),
 		},

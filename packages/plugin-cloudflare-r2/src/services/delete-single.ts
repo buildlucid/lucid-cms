@@ -1,4 +1,4 @@
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceDeleteSingle } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 
@@ -19,8 +19,8 @@ const deleteSingle = (
 					type: "plugin",
 					message:
 						error instanceof Error
-							? text.literal(error.message)
-							: text.server("plugin.cloudflare.r2.errors.unknown"),
+							? copy.literal(error.message)
+							: copy("server:plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,
 			};

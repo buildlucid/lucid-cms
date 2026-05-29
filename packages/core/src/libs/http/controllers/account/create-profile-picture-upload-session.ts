@@ -10,7 +10,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
@@ -52,11 +52,11 @@ const createProfilePictureUploadSessionController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: text.server(
-						"core.routes.profile.picture.upload.session.error.message",
+					name: copy(
+						"server:core.routes.profile.picture.upload.session.error.message",
 					),
-					message: text.server(
-						"core.routes.profile.picture.upload.session.error.message",
+					message: copy(
+						"server:core.routes.profile.picture.upload.session.error.message",
 					),
 				},
 			},

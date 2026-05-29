@@ -2,6 +2,7 @@ import type { EnvironmentVariables } from "../../libs/runtime/types.js";
 import type { Config } from "../../types/config.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import { createTranslator } from "../i18n/index.js";
+import type { TranslationStore } from "../i18n/types.js";
 import { passthroughKVAdapter } from "../kv/index.js";
 import { passthroughQueueAdapter } from "../queue/index.js";
 import type { CreateToolkitServiceContextOptions } from "./types.js";
@@ -24,7 +25,7 @@ export const createToolkitServiceContext = (
 		env: options.env ?? null,
 		queue: options.queue ?? passthroughQueueAdapter(),
 		kv: options.kv ?? passthroughKVAdapter(),
-		translate: createTranslator({ config: options.config, locale }),
+		translate: createTranslator({ store: options.translationStore, locale }),
 		request: {
 			url:
 				options.request?.url ??
@@ -36,4 +37,4 @@ export const createToolkitServiceContext = (
 	};
 };
 
-export type { Config, EnvironmentVariables };
+export type { Config, EnvironmentVariables, TranslationStore };

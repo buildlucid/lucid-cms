@@ -1,4 +1,4 @@
-import { CollectionBuilder, text, z } from "@lucidcms/core";
+import { CollectionBuilder, copy, z } from "@lucidcms/core";
 import BannerBrick from "../bricks/banner.js";
 import IntroBrick from "../bricks/intro.js";
 import SEOBrick from "../bricks/seo.js";
@@ -7,11 +7,11 @@ import TestingBrick from "../bricks/testing.js";
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: text.admin("collections.page.name", { defaultMessage: "Pages" }),
-		singularName: text.admin("collections.page.singularName", {
+		name: copy("admin:collections.page.name", { defaultMessage: "Pages" }),
+		singularName: copy("admin:collections.page.singularName", {
 			defaultMessage: "Page",
 		}),
-		summary: text.admin("collections.page.summary", {
+		summary: copy("admin:collections.page.summary", {
 			defaultMessage: "Manage the pages and content on your website.",
 		}),
 	},
@@ -41,14 +41,14 @@ const PageCollection = new CollectionBuilder("page", {
 			stages: [
 				{
 					key: "todo",
-					name: text.admin("collections.page.workflow.todo.name", {
+					name: copy("admin:collections.page.workflow.todo.name", {
 						defaultMessage: "To do",
 					}),
 					color: "yellow",
 				},
 				{
 					key: "in-progress",
-					name: text.admin("collections.page.workflow.in-progress.name", {
+					name: copy("admin:collections.page.workflow.in-progress.name", {
 						defaultMessage: "In progress",
 					}),
 					publishTargets: ["staging"],
@@ -56,7 +56,7 @@ const PageCollection = new CollectionBuilder("page", {
 				},
 				{
 					key: "done",
-					name: text.admin("collections.page.workflow.done.name", {
+					name: copy("admin:collections.page.workflow.done.name", {
 						defaultMessage: "Done",
 					}),
 					publishTargets: ["production", "staging"],
@@ -71,7 +71,7 @@ const PageCollection = new CollectionBuilder("page", {
 		environments: [
 			{
 				key: "staging",
-				name: text.admin("collections.page.environments.staging.name", {
+				name: copy("admin:collections.page.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 				permissions: {
@@ -81,7 +81,7 @@ const PageCollection = new CollectionBuilder("page", {
 			},
 			{
 				key: "production",
-				name: text.admin("collections.page.environments.production.name", {
+				name: copy("admin:collections.page.environments.production.name", {
 					defaultMessage: "Production",
 				}),
 				permissions: {
@@ -144,10 +144,10 @@ const PageCollection = new CollectionBuilder("page", {
 })
 	.addText("page_title", {
 		details: {
-			label: text.admin("collections.page.fields.page_title.label", {
+			label: copy("admin:collections.page.fields.page_title.label", {
 				defaultMessage: "Page title",
 			}),
-			summary: text.admin("collections.page.fields.page_title.summary", {
+			summary: copy("admin:collections.page.fields.page_title.summary", {
 				defaultMessage: "The title of the page.",
 			}),
 		},

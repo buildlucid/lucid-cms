@@ -1,20 +1,18 @@
 import { describe, expect, test } from "vitest";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../types.js";
 import aggregateBrickTables from "./aggregate-brick-tables.js";
 
 const TEST_CONFIG = {
-	i18n: {
-		content: {
-			locales: [
-				{ label: "English", code: "en" },
-				{ label: "French", code: "fr" },
-			],
-			defaultLocale: "en",
-		},
+	localization: {
+		locales: [
+			{ label: "English", code: "en" },
+			{ label: "French", code: "fr" },
+		],
+		defaultLocale: "en",
 	},
 	documentId: 39,
 	versionId: 39,
@@ -34,10 +32,10 @@ describe("brick table construction", () => {
 		const simpleCollection = new CollectionBuilder("simple", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.simple.name", {
+				name: copy("admin:tests.collections.simple.name", {
 					defaultMessage: "Simple",
 				}),
-				singularName: text.admin("tests.collections.simple.singularName", {
+				singularName: copy("admin:tests.collections.simple.singularName", {
 					defaultMessage: "Simple",
 				}),
 			},
@@ -50,7 +48,7 @@ describe("brick table construction", () => {
 			},
 		}).addText("simpleHeading", {
 			details: {
-				label: text.admin("tests.fields.simpleHeading.label", {
+				label: copy("admin:tests.fields.simpleHeading.label", {
 					defaultMessage: "Heading Default",
 				}),
 			},
@@ -184,7 +182,7 @@ describe("brick table construction", () => {
 			collection: simpleCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localization: TEST_CONFIG.i18n.content,
+			localization: TEST_CONFIG.localization,
 			bricks: simpleInputData.bricks,
 			fields: simpleInputData.fields,
 			tableNameByteLimit: null,
@@ -319,10 +317,10 @@ describe("brick table construction", () => {
 		const deepCollection = new CollectionBuilder("deep", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.deep.name", {
+				name: copy("admin:tests.collections.deep.name", {
 					defaultMessage: "Deep",
 				}),
-				singularName: text.admin("tests.collections.deep.singularName", {
+				singularName: copy("admin:tests.collections.deep.singularName", {
 					defaultMessage: "Deep",
 				}),
 			},
@@ -409,7 +407,7 @@ describe("brick table construction", () => {
 			collection: deepCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localization: TEST_CONFIG.i18n.content,
+			localization: TEST_CONFIG.localization,
 			bricks: deepInputData.bricks,
 			fields: [],
 			tableNameByteLimit: null,
@@ -480,10 +478,10 @@ describe("brick table construction", () => {
 		const galleryCollection = new CollectionBuilder("gallery", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.gallery.name", {
+				name: copy("admin:tests.collections.gallery.name", {
 					defaultMessage: "Gallery",
 				}),
-				singularName: text.admin("tests.collections.gallery.singularName", {
+				singularName: copy("admin:tests.collections.gallery.singularName", {
 					defaultMessage: "Gallery",
 				}),
 			},
@@ -505,7 +503,7 @@ describe("brick table construction", () => {
 			collection: galleryCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localization: TEST_CONFIG.i18n.content,
+			localization: TEST_CONFIG.localization,
 			fields: [
 				{
 					key: "relatedPage",
@@ -679,10 +677,10 @@ describe("brick table construction", () => {
 		const articleCollection = new CollectionBuilder("articles", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.articles.name", {
+				name: copy("admin:tests.collections.articles.name", {
 					defaultMessage: "Articles",
 				}),
-				singularName: text.admin("tests.collections.articles.singularName", {
+				singularName: copy("admin:tests.collections.articles.singularName", {
 					defaultMessage: "Article",
 				}),
 			},
@@ -707,7 +705,7 @@ describe("brick table construction", () => {
 			collection: articleCollection,
 			documentId: TEST_CONFIG.documentId,
 			versionId: TEST_CONFIG.versionId,
-			localization: TEST_CONFIG.i18n.content,
+			localization: TEST_CONFIG.localization,
 			fields: [
 				{
 					key: "author",

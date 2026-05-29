@@ -1,12 +1,11 @@
 import type { AddressInfo } from "node:net";
-import type { WritableDraft } from "immer";
 import type z from "zod";
 import type { Config, LucidConfig } from "../../types/config.js";
 import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import type { RenderedTemplates } from "../email/types.js";
-import type { TranslationBundles, Translator } from "../i18n/types.js";
+import type { TranslationStore } from "../i18n/types.js";
 import type RuntimeAdapterSchema from "./schema.js";
 
 export type RuntimeBuildArtifactFile = {
@@ -34,6 +33,7 @@ export type RuntimeBuildArtifact =
 
 export type ServeHandler = (props: {
 	config: Config;
+	translationStore: TranslationStore;
 	logger: {
 		instance: CLILogger;
 		silent: boolean;
@@ -60,6 +60,7 @@ export type RuntimeBuildArtifacts = {
 
 export type BuildHandler = (props: {
 	config: Config;
+	translationStore: TranslationStore;
 	definition: LucidConfigDefinition;
 	configPath: string;
 	outputPath: string;
@@ -119,7 +120,6 @@ export type AdapterLifecycleContext = {
 	config: Config;
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
-	translate: Translator;
 };
 
 export type GetEnvVarsLogger = {
@@ -137,7 +137,7 @@ export type RuntimeAdapterCLI = {
 };
 
 export type AdapterDefineConfig = (env: EnvironmentVariables) => LucidConfig;
-export type LucidConfigRecipe = (draft: WritableDraft<Config>) => void;
+export type LucidConfigRecipe = (draft: Config) => void;
 
 export interface AdapterOptionsByModule {
 	[path: string]: Record<string, unknown> | undefined;
@@ -178,7 +178,6 @@ export type LazyDatabaseAdapterReference<
 
 export type LucidConfigDefinitionMeta = {
 	emailTemplates?: RenderedTemplates;
-	i18nTranslations?: TranslationBundles;
 };
 
 export type LucidConfigDefinition<

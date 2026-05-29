@@ -1,7 +1,7 @@
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
@@ -48,8 +48,8 @@ const upsertSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.locked.collection.name"),
-				message: text.server("core.error.locked.collection.message"),
+				name: copy("server:core.error.locked.collection.name"),
+				message: copy("server:core.error.locked.collection.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -66,8 +66,8 @@ const upsertSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.schema.migration.required.name"),
-				message: text.server("core.error.schema.migration.required.message"),
+				name: copy("server:core.error.schema.migration.required.name"),
+				message: copy("server:core.error.schema.migration.required.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -100,7 +100,7 @@ const upsertSingle: ServiceFn<
 				validation: {
 					enabled: true,
 					defaultError: {
-						message: text.server("core.documents.not.found.message"),
+						message: copy("server:core.documents.not.found.message"),
 						status: 404,
 					},
 				},

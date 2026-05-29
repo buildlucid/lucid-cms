@@ -1,5 +1,4 @@
 import { LucidError } from "@lucidcms/core";
-import { mergeTranslationBundles } from "@lucidcms/core/plugin";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import cloudflareR2Adapter from "./adapter.js";
 import {
@@ -9,9 +8,6 @@ import {
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
 import routes from "./routes/index.js";
-import serverTranslations from "./translations/en.server.json" with {
-	type: "json",
-};
 import type { PluginOptions } from "./types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
@@ -37,10 +33,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			}
 		},
 		recipe: (draft) => {
-			draft.i18n.translations = mergeTranslationBundles(
-				draft.i18n.translations,
-				{ en: { server: serverTranslations } },
-			);
+			draft.i18n.sources.push("@lucidcms/plugin-cloudflare-r2/translations");
 
 			if (!pluginOptions.http) {
 				draft.hono?.routes?.push(routes(pluginOptions));

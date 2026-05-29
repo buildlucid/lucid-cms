@@ -4,8 +4,10 @@ import constants from "../../../constants/constants.js";
 import loadBuildProject from "../../compile/load-build-project.js";
 import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
 import prerenderMjmlTemplates from "../../email/templates/prerender-mjml-templates.js";
-import { createTranslator } from "../../i18n/index.js";
-import prerenderTranslations from "../../i18n/prerender-translations.js";
+import {
+	createTranslator,
+	writeTranslationArtifact,
+} from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import vite from "../../vite/index.js";
@@ -31,7 +33,7 @@ const buildCommand = async (options?: {
 		});
 		const { configPath, loaded: configRes } = buildProject;
 		const translate = createTranslator({
-			config: configRes.config,
+			store: configRes.translationStore,
 			locale: "en",
 		});
 
@@ -79,35 +81,25 @@ const buildCommand = async (options?: {
 			".js",
 		);
 
-		const [mjmlTemplatesRes, translationsRes, publicAssetsRes] =
-			await Promise.all([
-				prerenderMjmlTemplates({
-					config: configRes.config,
-					silent,
-				}),
-				prerenderTranslations({
-					config: configRes.config,
-				}),
-				copyPublicAssets({
-					config: configRes.config,
-					silent,
-				}),
-			]);
+		await writeTranslationArtifact({
+			translationStore: configRes.translationStore,
+			outputPath: configRes.config.build.paths.outDir,
+		});
+
+		const [mjmlTemplatesRes, publicAssetsRes] = await Promise.all([
+			prerenderMjmlTemplates({
+				config: configRes.config,
+				silent,
+			}),
+			copyPublicAssets({
+				config: configRes.config,
+				silent,
+			}),
+		]);
 		if (mjmlTemplatesRes.error) {
 			cliLogger.error(
-				translate.english.text(mjmlTemplatesRes.error.message) ??
+				translate.english(mjmlTemplatesRes.error.message) ??
 					"Failed to pre-render MJML templates",
-				{
-					silent,
-				},
-			);
-			logger.setBuffering(false);
-			process.exit(1);
-		}
-		if (translationsRes.error) {
-			cliLogger.error(
-				translate.english.text(translationsRes.error.message) ??
-					"Failed to pre-render translations",
 				{
 					silent,
 				},
@@ -117,7 +109,7 @@ const buildCommand = async (options?: {
 		}
 		if (publicAssetsRes.error) {
 			cliLogger.error(
-				translate.english.text(publicAssetsRes.error.message) ??
+				translate.english(publicAssetsRes.error.message) ??
 					"Failed to copy public assets",
 				{
 					silent,
@@ -126,8 +118,10 @@ const buildCommand = async (options?: {
 			logger.setBuffering(false);
 			process.exit(1);
 		}
+		const translationStore = configRes.translationStore;
 		const processedArtifacts = await prepareBuildArtifacts({
 			config: configRes.config,
+			translationStore,
 			definition: configRes.definition,
 			silent,
 			configPath,
@@ -140,6 +134,7 @@ const buildCommand = async (options?: {
 			vite.buildApp(configRes.config),
 			adapterCLI.build({
 				config: configRes.config,
+				translationStore,
 				definition: configRes.definition,
 				configPath,
 				outputPath: configRes.config.build.paths.outDir,
@@ -153,7 +148,7 @@ const buildCommand = async (options?: {
 		]);
 		if (viteBuildRes.error) {
 			cliLogger.error(
-				translate.english.text(viteBuildRes.error.message) ??
+				translate.english(viteBuildRes.error.message) ??
 					"There was an error while building the SPA or component plugins",
 				{
 					silent,

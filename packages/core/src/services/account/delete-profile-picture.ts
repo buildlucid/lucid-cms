@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
@@ -19,7 +19,7 @@ const deleteProfilePicture: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.users.self.update.denied"),
+				message: copy("server:core.users.self.update.denied"),
 				status: 400,
 			},
 			data: undefined,
@@ -45,8 +45,8 @@ const deleteProfilePicture: ServiceFn<
 			defaultError: {
 				message:
 					data.allowSelf === true
-						? text.server("core.account.not.found.message")
-						: text.server("core.user.not.found.message"),
+						? copy("server:core.account.not.found.message")
+						: copy("server:core.user.not.found.message"),
 				status: 404,
 			},
 		},

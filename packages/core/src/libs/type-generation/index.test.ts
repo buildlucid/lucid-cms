@@ -1,18 +1,40 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, test } from "vitest";
 import BrickBuilder from "../collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { text } from "../i18n/index.js";
+import { copy } from "../i18n/index.js";
 import generateTypes from "./index.js";
 
 test("generates collection-aware client document types that lean on the public Lucid contracts", async () => {
 	const cwd = process.cwd();
 	const tempDir = await mkdtemp(path.join(tmpdir(), "lucid-type-gen-"));
 	const configPath = path.join(tempDir, "lucid.config.ts");
+	const translationsDir = path.join(tempDir, "translations");
 
 	await writeFile(configPath, "export default {};\n");
+	await mkdir(translationsDir);
+	await writeFile(
+		path.join(translationsDir, "en.admin.json"),
+		JSON.stringify({
+			"custom.admin.title": "Custom admin title",
+			"custom.shared.key": "Admin shared key",
+		}),
+	);
+	await writeFile(
+		path.join(translationsDir, "en.server.json"),
+		JSON.stringify({
+			"custom.server.error": "Custom server error",
+		}),
+	);
+	await writeFile(
+		path.join(translationsDir, "fr.admin.json"),
+		JSON.stringify({
+			"custom.admin.french": "Titre admin",
+			"custom.shared.key": "Cle partagee",
+		}),
+	);
 
 	const BannerBrick = new BrickBuilder("banner")
 		.addTab("content_tab")
@@ -32,10 +54,10 @@ test("generates collection-aware client document types that lean on the public L
 	const PageCollection = new CollectionBuilder("page", {
 		mode: "multiple",
 		details: {
-			name: text.admin("tests.collections.page.name", {
+			name: copy("admin:tests.collections.page.name", {
 				defaultMessage: "Pages",
 			}),
-			singularName: text.admin("tests.collections.page.singularName", {
+			singularName: copy("admin:tests.collections.page.singularName", {
 				defaultMessage: "Page",
 			}),
 		},
@@ -44,7 +66,7 @@ test("generates collection-aware client document types that lean on the public L
 			environments: [
 				{
 					key: "published",
-					name: text.admin("tests.environments.published.name", {
+					name: copy("admin:tests.environments.published.name", {
 						defaultMessage: "Published",
 					}),
 				},
@@ -85,6 +107,7 @@ test("generates collection-aware client document types that lean on the public L
 
 		await generateTypes({
 			configPath,
+			projectRoot: tempDir,
 			collections: [PageCollection],
 			localization: {
 				locales: [
@@ -111,6 +134,29 @@ test("generates collection-aware client document types that lean on the public L
 		);
 
 		expect(typesContent).toContain('/// <reference path="./client.d.ts" />');
+		expect(typesContent).toContain(
+			'import type translationSource0 from "../translations/en.admin.json";',
+		);
+		expect(typesContent).toContain(
+			'import type translationSource1 from "../translations/en.server.json";',
+		);
+		expect(typesContent).toContain(
+			'import type translationSource2 from "../translations/fr.admin.json";',
+		);
+		expect(typesContent).toMatch(
+			/`admin:\$\{Extract<keyof typeof translationSource0, string>\}`/,
+		);
+		expect(typesContent).toMatch(
+			/`admin:\$\{Extract<keyof typeof translationSource2, string>\}`/,
+		);
+		expect(typesContent).toMatch(
+			/`server:\$\{Extract<keyof typeof translationSource1, string>\}`/,
+		);
+		expect(typesContent).toContain(
+			"interface CopyTranslationKeys extends Record<GeneratedCopyTranslationKey, true> {}",
+		);
+		expect(typesContent).not.toContain('"admin:custom.admin.title": true;');
+		expect(typesContent).not.toContain('"server:custom.server.error": true;');
 		expect(clientContent).toContain(`from "@lucidcms/core/types";`);
 		expect(clientContent).toContain(
 			`export interface GeneratedCollectionDocumentLocaleCodes {

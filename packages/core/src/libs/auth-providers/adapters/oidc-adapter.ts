@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
 import logger from "../../../libs/logger/index.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import mapStandardUserInfo from "../helpers/default-user-info-mapper.js";
 import type { OIDCAdapter, OIDCAuthConfig } from "../types.js";
 
@@ -56,11 +56,11 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 					error: {
 						type: "basic",
 						status: 500,
-						name: text.server(
-							"core.auth.oidc.failed.to.generate.auth.url.name",
+						name: copy(
+							"server:core.auth.oidc.failed.to.generate.auth.url.name",
 						),
-						message: text.server(
-							"core.auth.oidc.failed.to.generate.auth.url.message",
+						message: copy(
+							"server:core.auth.oidc.failed.to.generate.auth.url.message",
 							err instanceof Error
 								? { defaultMessage: err.message }
 								: undefined,
@@ -95,9 +95,9 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 						error: {
 							type: "basic",
 							status: tokenResponse.status,
-							name: text.server("core.auth.oidc.token.exchange.failed.name"),
-							message: text.server(
-								"core.auth.oidc.token.exchange.failed.message",
+							name: copy("server:core.auth.oidc.token.exchange.failed.name"),
+							message: copy(
+								"server:core.auth.oidc.token.exchange.failed.message",
 								{
 									data: {
 										message: errorText,
@@ -117,9 +117,9 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 						error: {
 							type: "basic",
 							status: 500,
-							name: text.server("core.auth.oidc.access.token.missing.name"),
-							message: text.server(
-								"core.auth.oidc.access.token.missing.message",
+							name: copy("server:core.auth.oidc.access.token.missing.name"),
+							message: copy(
+								"server:core.auth.oidc.access.token.missing.message",
 							),
 						},
 						data: undefined,
@@ -141,9 +141,9 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 						error: {
 							type: "basic",
 							status: userInfoResponse.status,
-							name: text.server("core.auth.oidc.user.info.fetch.failed.name"),
-							message: text.server(
-								"core.auth.oidc.user.info.fetch.failed.message",
+							name: copy("server:core.auth.oidc.user.info.fetch.failed.name"),
+							message: copy(
+								"server:core.auth.oidc.user.info.fetch.failed.message",
 								{
 									data: {
 										message: errorText,
@@ -172,9 +172,9 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 					return {
 						error: {
 							status: 500,
-							name: text.server("core.auth.oidc.user.info.incomplete.name"),
-							message: text.server(
-								"core.auth.oidc.user.info.incomplete.message",
+							name: copy("server:core.auth.oidc.user.info.incomplete.name"),
+							message: copy(
+								"server:core.auth.oidc.user.info.incomplete.message",
 							),
 						},
 						data: undefined,
@@ -194,9 +194,9 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 					error: {
 						type: "basic",
 						status: 500,
-						name: text.server("core.auth.oidc.callback.failed.name"),
-						message: text.server(
-							"core.auth.oidc.callback.failed.message",
+						name: copy("server:core.auth.oidc.callback.failed.name"),
+						message: copy(
+							"server:core.auth.oidc.callback.failed.message",
 							err instanceof Error
 								? { defaultMessage: err.message }
 								: undefined,

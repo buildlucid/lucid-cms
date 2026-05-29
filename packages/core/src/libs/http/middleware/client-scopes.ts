@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 
 const clientScopes = (requiredScopes: string[]) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
@@ -16,9 +16,9 @@ const clientScopes = (requiredScopes: string[]) =>
 		if (!hasAllRequired) {
 			throw new LucidAPIError({
 				type: "authorisation",
-				name: text.server("core.client.integrations.scopes.error.name"),
-				message: text.server(
-					"core.client.integrations.scopes.missing.message",
+				name: copy("server:core.client.integrations.scopes.error.name"),
+				message: copy(
+					"server:core.client.integrations.scopes.missing.message",
 					{
 						data: {
 							requiredScopes: requiredScopes.join(", "),

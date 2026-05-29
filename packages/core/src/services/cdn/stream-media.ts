@@ -1,5 +1,5 @@
 import mime from "mime-types";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
 import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 import {
@@ -54,8 +54,8 @@ const streamMedia: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				name: text.server("core.media.not.found.name"),
-				message: text.server("core.media.not.found.message"),
+				name: copy("server:core.media.not.found.name"),
+				message: copy("server:core.media.not.found.message"),
 			},
 			data: undefined,
 		};

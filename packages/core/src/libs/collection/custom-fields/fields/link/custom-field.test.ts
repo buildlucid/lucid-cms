@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import constants from "../../../../../constants/constants.js";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import LinkCustomField from "./custom-field.js";
@@ -11,10 +11,10 @@ import LinkCustomField from "./custom-field.js";
 const LinkCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: text.admin("tests.collections.collection.name", {
+		name: copy("admin:tests.collections.collection.name", {
 			defaultMessage: "Test",
 		}),
-		singularName: text.admin("tests.collections.collection.singularName", {
+		singularName: copy("admin:tests.collections.collection.singularName", {
 			defaultMessage: "Test",
 		}),
 	},
@@ -109,7 +109,7 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: text.server("core.fields.validation.errors.unknown", {
+			message: copy("server:core.fields.validation.errors.unknown", {
 				defaultMessage:
 					"Invalid input: expected string, received boolean → at url",
 			}),
@@ -143,7 +143,7 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: text.server("core.fields.link.validation.target.error.message", {
+			message: copy("server:core.fields.link.validation.target.error.message", {
 				data: {
 					valid: constants.customFields.link.targets.join(", "),
 				},
@@ -178,7 +178,7 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: text.server("core.fields.validation.errors.unknown", {
+			message: copy("server:core.fields.validation.errors.unknown", {
 				defaultMessage:
 					"Invalid input: expected string, received boolean → at label",
 			}),
@@ -208,7 +208,7 @@ test("fail to validate field - link", async () => {
 		{
 			key: "required_link",
 			localeCode: null,
-			message: text.server("core.fields.validation.required"),
+			message: copy("server:core.fields.validation.required"),
 		},
 	]);
 });
@@ -218,13 +218,13 @@ test("fail to validate field - link", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new LinkCustomField("field", {
 		details: {
-			label: text.admin("tests.fields.field.label", {
+			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: text.admin("tests.fields.field.summary", {
+			summary: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
-			placeholder: text.admin("tests.fields.field.placeholder", {
+			placeholder: copy("admin:tests.fields.field.placeholder", {
 				defaultMessage: "placeholder",
 			}),
 		},

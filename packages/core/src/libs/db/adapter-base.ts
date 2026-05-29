@@ -203,7 +203,7 @@ export default abstract class DatabaseAdapter {
 				message:
 					error instanceof Error
 						? error?.message
-						: translate.server("core.database.migrations.failed"),
+						: translate("server:core.database.migrations.failed"),
 				// @ts-expect-error
 				data: error.errors,
 			});
@@ -238,7 +238,7 @@ export default abstract class DatabaseAdapter {
 	get client() {
 		if (!this.db) {
 			throw new LucidError({
-				message: translate.server("core.database.connection.error"),
+				message: translate("server:core.database.connection.error"),
 			});
 		}
 		return this.db;

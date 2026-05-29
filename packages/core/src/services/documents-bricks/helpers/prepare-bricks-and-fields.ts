@@ -15,7 +15,7 @@ const processFields = (props: {
 	collection: CollectionBuilder;
 	fields: Array<FieldInputSchema>;
 	customFields: Map<string, CustomField<FieldTypes>>;
-	localization: Config["i18n"]["content"];
+	localization: Config["localization"];
 }): Array<FieldInputSchema> => {
 	return props.fields
 		.filter((field) => props.customFields.has(field.key))
@@ -103,7 +103,7 @@ const prepareBricksAndFields = (props: {
 	collection: CollectionBuilder;
 	bricks?: Array<BrickInputSchema>;
 	fields?: Array<FieldInputSchema>;
-	localization: Config["i18n"]["content"];
+	localization: Config["localization"];
 }) => {
 	// Process collection fields
 	const preparedFields = props.fields

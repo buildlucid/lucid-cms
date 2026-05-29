@@ -12,7 +12,9 @@ const checkDuplicateBuilderKeys = (
 
 	if (hasDuplicates) {
 		throw new Error(
-			translate.server("core.config.duplicate.keys", { builder: builder }),
+			translate("server:core.config.duplicate.keys", {
+				data: { builder: builder },
+			}),
 		);
 	}
 };

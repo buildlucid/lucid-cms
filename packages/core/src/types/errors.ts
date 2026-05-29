@@ -5,11 +5,11 @@ import type {
 	GroupError as PublicGroupError,
 } from "@lucidcms/types";
 import type z from "zod";
-import type { LiteralText, ServerTextDescriptor } from "../libs/i18n/types.js";
+import type { LiteralCopy, ServerCopyDescriptor } from "../libs/i18n/types.js";
 
 export type { PublicErrorData };
 
-export type ErrorText = ServerTextDescriptor | LiteralText;
+export type ErrorCopy = ServerCopyDescriptor | LiteralCopy;
 
 export type ErrorResultValue =
 	| ErrorResultObj
@@ -17,13 +17,13 @@ export type ErrorResultValue =
 	| FieldError[]
 	| GroupError[]
 	| BrickError[]
-	| ErrorText
+	| ErrorCopy
 	| string
 	| undefined;
 
 export interface ErrorResultObj {
 	code?: string;
-	message?: ErrorText;
+	message?: ErrorCopy;
 	children?: ErrorResultObj[];
 	[key: string]: ErrorResultValue;
 }
@@ -32,7 +32,7 @@ export type ErrorResult = Record<string, ErrorResultValue>;
 
 export interface FieldError
 	extends Omit<PublicFieldError, "message" | "groupErrors"> {
-	message: ErrorText;
+	message: ErrorCopy;
 	groupErrors?: Array<GroupError>;
 }
 
@@ -46,8 +46,8 @@ export interface BrickError extends Omit<PublicBrickError, "fields"> {
 
 export interface LucidErrorData
 	extends Omit<PublicErrorData, "name" | "message" | "errors"> {
-	name?: ErrorText;
-	message?: ErrorText;
+	name?: ErrorCopy;
+	message?: ErrorCopy;
 	errors?: ErrorResult;
 	zod?: z.ZodError;
 	cause?: unknown;

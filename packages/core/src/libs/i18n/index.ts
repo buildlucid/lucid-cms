@@ -1,14 +1,20 @@
-export { loadProjectTranslations } from "./load-project-translations.js";
 export {
-	adminTextDescriptorSchema,
-	isTextDescriptor,
-	isTranslatableText,
-	literalTextSchema,
-	serverTextDescriptorSchema,
-	text,
-	textDescriptorSchema,
-	translatableTextSchema,
-} from "./text.js";
+	adminCopyDescriptorSchema,
+	copy,
+	copyDescriptorSchema,
+	isCopyDescriptor,
+	isTranslatableCopy,
+	literalCopySchema,
+	parseCopyKey,
+	serverCopyDescriptorSchema,
+	translatableCopySchema,
+} from "./copy.js";
+export { loadTranslationSources } from "./load-project-translations.js";
+export {
+	default as prepareTranslations,
+	writeTranslationArtifact,
+} from "./prepare-translations.js";
+export { createTranslationStore } from "./store.js";
 export {
 	createTranslator,
 	resolveInterfaceLocale,
@@ -22,23 +28,23 @@ export {
 	normalizeTranslationBundles,
 } from "./translations.js";
 export type {
-	AdminTextDescriptor,
-	BoundTranslateTextOptions,
+	AdminCopyDescriptor,
+	BoundTranslateCopyOptions,
+	CopyDescriptor,
 	InterfaceDirection,
-	LiteralText,
+	LiteralCopy,
 	LocaleDirection,
-	ServerTextDescriptor,
-	TextDescriptor,
-	TranslatableText,
+	ServerCopyDescriptor,
+	TranslatableCopy,
+	TranslateCopy,
+	TranslateCopyOptions,
 	TranslateKey,
 	TranslateOptions,
-	TranslateText,
-	TranslateTextOptions,
 	TranslationBundle,
 	TranslationBundles,
 	TranslationScope,
+	TranslationSource,
+	TranslationStore,
 	TranslationValues,
 	Translator,
-	TranslatorConfig,
 } from "./types.js";
-export { getZodIssueText, zodTextIssue } from "./zod.js";

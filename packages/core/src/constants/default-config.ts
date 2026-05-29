@@ -1,11 +1,11 @@
-import { text } from "../libs/i18n/index.js";
+import { copy } from "../libs/i18n/index.js";
 import type { Config, LucidConfig } from "../types/config.js";
 import constants from "./constants.js";
 
 export const coreAiGuidance = [
 	{
 		key: "improve",
-		label: text.admin("core.ai.guidance.improve.label", {
+		label: copy("admin:core.ai.guidance.improve.label", {
 			defaultMessage: "Improve",
 		}),
 		instructions:
@@ -14,7 +14,7 @@ export const coreAiGuidance = [
 	},
 	{
 		key: "expand",
-		label: text.admin("core.ai.guidance.expand.label", {
+		label: copy("admin:core.ai.guidance.expand.label", {
 			defaultMessage: "Expand",
 		}),
 		instructions:
@@ -23,7 +23,7 @@ export const coreAiGuidance = [
 	},
 	{
 		key: "shorten",
-		label: text.admin("core.ai.guidance.shorten.label", {
+		label: copy("admin:core.ai.guidance.shorten.label", {
 			defaultMessage: "Shorten",
 		}),
 		instructions:
@@ -57,28 +57,26 @@ export const defaultConfig: Partial<LucidConfig> = {
 	openAPI: {
 		enabled: false,
 	},
+	localization: {
+		locales: [
+			{
+				label: "English",
+				code: "en",
+				direction: "ltr",
+			},
+		],
+		defaultLocale: "en",
+	},
 	i18n: {
-		content: {
-			locales: [
-				{
-					label: "English",
-					code: "en",
-					direction: "ltr",
-				},
-			],
-			defaultLocale: "en",
-		},
-		interface: {
-			locales: [
-				{
-					label: "English",
-					code: "en",
-					direction: "ltr",
-				},
-			],
-			defaultLocale: "en",
-		},
-		translations: {},
+		locales: [
+			{
+				label: "English",
+				code: "en",
+				direction: "ltr",
+			},
+		],
+		defaultLocale: "en",
+		sources: [],
 	},
 	media: {
 		limits: {

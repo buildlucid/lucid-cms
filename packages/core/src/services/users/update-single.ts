@@ -1,6 +1,6 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
@@ -50,7 +50,7 @@ const updateSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.users.self.update.denied"),
+				message: copy("server:core.users.self.update.denied"),
 				status: 400,
 			},
 			data: undefined,
@@ -73,7 +73,7 @@ const updateSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: text.server("core.user.not.found.message"),
+				message: copy("server:core.user.not.found.message"),
 				status: 404,
 			},
 		},
@@ -132,7 +132,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					email: {
 						code: "invalid",
-						message: text.server("core.users.email.duplicate"),
+						message: copy("server:core.users.email.duplicate"),
 					},
 				},
 			},
@@ -147,7 +147,7 @@ const updateSingle: ServiceFn<
 				errors: {
 					username: {
 						code: "invalid",
-						message: text.server("core.users.username.duplicate"),
+						message: copy("server:core.users.username.duplicate"),
 					},
 				},
 			},
@@ -179,7 +179,7 @@ const updateSingle: ServiceFn<
 						role.translations?.find(
 							(translation) =>
 								translation.locale_code ===
-								context.config.i18n.content.defaultLocale,
+								context.config.localization.defaultLocale,
 						)?.name ??
 						role.translations?.find((translation) => translation.name !== null)
 							?.name ??
@@ -249,7 +249,7 @@ const updateSingle: ServiceFn<
 			type: "internal",
 			to: auditLogsRes.data.emailChange.newValue,
 			subject: formatEmailSubject(
-				context.translate.server("core.email.update.success.subject"),
+				context.translate("server:core.email.update.success.subject"),
 				context.config.brand?.name,
 			),
 			data: {

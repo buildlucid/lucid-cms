@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import type { ErrorResult } from "../../types/errors.js";
 import type { Permission } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -46,7 +46,7 @@ const validatePermissions: ServiceFn<
 					error: {
 						key: permission,
 						code: "invalid",
-						message: text.server("core.permissions.invalid", {
+						message: copy("server:core.permissions.invalid", {
 							data: {
 								permission: permission,
 							},

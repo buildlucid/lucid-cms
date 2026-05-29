@@ -12,6 +12,7 @@ import type { Config, EnvironmentVariables } from "../../types.js";
 import { LucidAPIError, translateErrorData } from "../../utils/errors/index.js";
 import getEmailAdapter from "../email/get-adapter.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
+import type { TranslationStore } from "../i18n/types.js";
 import { getInitializedKVAdapter } from "../kv/lifecycle.js";
 import getMediaAdapter from "../media/get-adapter.js";
 import getQueueAdapter from "../queue/get-adapter.js";
@@ -26,6 +27,7 @@ import featureSupportChecks from "./utils/feature-support-checks.js";
  */
 const createApp = async (props: {
 	config: Config;
+	translationStore: TranslationStore;
 	runtimeContext: AdapterRuntimeContext;
 	env?: EnvironmentVariables;
 	app?: Hono<LucidHonoGeneric>;
@@ -96,6 +98,7 @@ const createApp = async (props: {
 		)
 		.use(async (c, next) => {
 			c.set("config", props.config);
+			c.set("translationStore", props.translationStore);
 			c.set("runtimeContext", props.runtimeContext);
 			c.set("queue", queueInstance);
 			c.set("kv", kvInstance);
@@ -112,7 +115,10 @@ const createApp = async (props: {
 				locale: c.req.header(constants.headers.interfaceLocale),
 				acceptLanguage: c.req.header("Accept-Language"),
 			});
-			const translate = createTranslator({ config: props.config, locale });
+			const translate = createTranslator({
+				store: props.translationStore,
+				locale,
+			});
 
 			if (err instanceof LucidAPIError) {
 				const error = translateErrorData(err.error, translate);
@@ -133,9 +139,11 @@ const createApp = async (props: {
 				c.status(429);
 				return c.json({
 					code: "rate_limit",
-					name: translate.server("core.rate.limit.error.name"),
-					message: translate.server("core.rate.limit.exceeded.message", {
-						resetSeconds,
+					name: translate("server:core.rate.limit.error.name"),
+					message: translate("server:core.rate.limit.exceeded.message", {
+						data: {
+							resetSeconds,
+						},
 					}),
 					status: 429,
 				} satisfies PublicErrorData);
@@ -143,10 +151,10 @@ const createApp = async (props: {
 
 			c.status(500);
 			return c.json({
-				name: translate.server("core.errors.default.name", undefined, {
+				name: translate("server:core.errors.default.name", {
 					defaultMessage: constants.errors.name,
 				}),
-				message: translate.server("core.errors.default.message", undefined, {
+				message: translate("server:core.errors.default.message", {
 					defaultMessage: constants.errors.message,
 				}),
 				status: constants.errors.status,
@@ -160,18 +168,21 @@ const createApp = async (props: {
 				locale: c.req.header(constants.headers.interfaceLocale),
 				acceptLanguage: c.req.header("Accept-Language"),
 			});
-			const translate = createTranslator({ config: props.config, locale });
+			const translate = createTranslator({
+				store: props.translationStore,
+				locale,
+			});
 
 			if (c.req.url.includes(`/${constants.directories.base}/api`)) {
 				return c.json({
 					status: 404,
 					code: "not_found",
-					name: translate.server("core.routes.not.found"),
-					message: translate.server("core.routes.not.found.message"),
+					name: translate("server:core.routes.not.found"),
+					message: translate("server:core.routes.not.found.message"),
 				} satisfies PublicErrorData);
 			}
 			c.status(404);
-			return c.text(translate.server("core.pages.not.found"));
+			return c.text(translate("server:core.pages.not.found"));
 		});
 
 	//* Hono Extensions

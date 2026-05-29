@@ -12,10 +12,6 @@
 	"plugin.pages.parents.fields.fetch.failed": "An error occurred while getting the parent page fields.",
 	"plugin.pages.descendants.fields.fetch.failed": "An error occurred while getting the descendant page fields.",
 	"plugin.pages.full.slug.children.update.failed": "An error occurred while updating the fullSlug children fields.",
-	"plugin.pages.slug.validation.format": "The slug field may only contain letters, numbers, underscores, and hyphens.",
 	"plugin.pages.documents.version.fields.fetch.failed": "An error occurred while getting the document version fields.",
-	"plugin.pages.fields.full.slug.name": "Full Slug",
-	"plugin.pages.fields.slug.name": "Slug",
-	"plugin.pages.fields.parent.page.name": "Parent Page",
 	"plugin.pages.fields.validation.required": "This field is required."
 }

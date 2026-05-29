@@ -12,12 +12,10 @@ export { default as validateCSRFMiddleware } from "./libs/http/middleware/valida
 export { default as formatAPIResponse } from "./libs/http/utils/build-response.js";
 export { default as createServiceContext } from "./libs/http/utils/create-service-context.js";
 export {
+	copy,
 	createTranslator,
-	isTranslatableText,
-	mergeTranslationBundles,
-	text,
+	isTranslatableCopy,
 	translate,
-	zodTextIssue,
 } from "./libs/i18n/index.js";
 export { PermissionSets, Permissions } from "./libs/permission/definitions.js";
 export { LucidAPIError } from "./utils/errors/index.js";

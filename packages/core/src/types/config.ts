@@ -11,10 +11,10 @@ import type {
 } from "../libs/email/types.js";
 import type { AllHooks } from "../libs/hooks/types.js";
 import type {
-	AdminTextDescriptor,
+	AdminCopyDescriptor,
 	InterfaceDirection,
 	LocaleDirection,
-	TranslationBundles,
+	TranslationSource,
 } from "../libs/i18n/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../libs/kv/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
@@ -60,11 +60,11 @@ export type AccessPermissionDetails = {
 	/**
 	 * The permission or group label shown in the admin UI.
 	 */
-	name: AdminTextDescriptor;
+	name: AdminCopyDescriptor;
 	/**
 	 * Optional helper text for the permission or group shown in the admin UI.
 	 */
-	description?: AdminTextDescriptor | null;
+	description?: AdminCopyDescriptor | null;
 };
 
 export type AccessPermissionDefinition = {
@@ -84,7 +84,7 @@ export type AccessPermissionDefinition = {
 
 export type AccessPermissionGroupDefinition = AccessPermissionDetails;
 
-export type ConfiguredLocaleValue = AdminTextDescriptor;
+export type ConfiguredLocaleValue = AdminCopyDescriptor;
 
 export type AccessRoleDefinition = {
 	/**
@@ -130,7 +130,7 @@ export type AccessConfig = {
 	roles?: AccessRoleDefinition[];
 };
 
-export type ContentI18nConfig = {
+export type LocalizationConfig = {
 	/**
 	 * A list of locales you want to write content in.
 	 */
@@ -154,7 +154,7 @@ export type ContentI18nConfig = {
 	defaultLocale: string;
 };
 
-export type InterfaceI18nConfig = {
+export type I18nConfig = {
 	/**
 	 * A list of locales supported by the Lucid CMS interface.
 	 */
@@ -176,6 +176,12 @@ export type InterfaceI18nConfig = {
 	 * The default CMS interface locale code. Eg. `en`.
 	 */
 	defaultLocale: string;
+	/**
+	 * Translation files or directories to load for the CMS interface and API
+	 * messages. Plugins should register package-local sources with exported
+	 * package subpaths such as `@scope/plugin/translations`.
+	 */
+	sources?: TranslationSource[];
 };
 
 export type AiGuidanceConfig = {
@@ -346,13 +352,13 @@ export interface LucidConfig {
 		enabled?: boolean;
 	};
 	/**
-	 * Internationalisation settings for content and the CMS interface.
+	 * Content localization settings.
 	 */
-	i18n?: {
-		content?: ContentI18nConfig;
-		interface?: InterfaceI18nConfig;
-		translations?: TranslationBundles;
-	};
+	localization?: LocalizationConfig;
+	/**
+	 * Internationalisation settings for the admin UI and API messages.
+	 */
+	i18n?: I18nConfig;
 	/**
 	 * Email settings.
 	 */
@@ -608,11 +614,8 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	openAPI: {
 		enabled: boolean;
 	};
-	i18n: {
-		content: ContentI18nConfig;
-		interface: Required<InterfaceI18nConfig>;
-		translations: TranslationBundles;
-	};
+	localization: LocalizationConfig;
+	i18n: Required<I18nConfig>;
 	media: {
 		adapter?:
 			| MediaAdapter

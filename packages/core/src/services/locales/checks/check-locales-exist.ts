@@ -1,4 +1,4 @@
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import { LocalesRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -49,7 +49,7 @@ const checkLocalesExist: ServiceFn<
 				errors: {
 					translations: {
 						code: "invalid",
-						message: text.server("core.i18n.content.locales.missing"),
+						message: copy("server:core.localization.locales.missing"),
 					},
 				},
 			},

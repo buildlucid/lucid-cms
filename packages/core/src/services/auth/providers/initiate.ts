@@ -5,7 +5,7 @@ import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js"
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
 import formatter from "../../../libs/formatters/index.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import {
 	AuthStatesRepository,
 	UsersRepository,
@@ -49,8 +49,8 @@ const initiate: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				name: text.server("core.auth.providers.not.found.name"),
-				message: text.server("core.auth.providers.not.found.message"),
+				name: copy("server:core.auth.providers.not.found.name"),
+				message: copy("server:core.auth.providers.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -92,7 +92,7 @@ const initiate: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 404,
-					message: text.server("core.tokens.not.found.message"),
+					message: copy("server:core.tokens.not.found.message"),
 				},
 			},
 		});
@@ -111,7 +111,7 @@ const initiate: ServiceFn<
 				enabled: true,
 				defaultError: {
 					status: 404,
-					message: text.server("core.user.not.found.message"),
+					message: copy("server:core.user.not.found.message"),
 				},
 			},
 		});
@@ -122,9 +122,9 @@ const initiate: ServiceFn<
 				error: {
 					type: "basic",
 					status: 400,
-					name: text.server("core.auth.invitations.user.already.accepted.name"),
-					message: text.server(
-						"core.auth.invitations.user.already.accepted.message",
+					name: copy("server:core.auth.invitations.user.already.accepted.name"),
+					message: copy(
+						"server:core.auth.invitations.user.already.accepted.message",
 					),
 				},
 				data: undefined,

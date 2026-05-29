@@ -99,10 +99,12 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 		storageLimit,
 		storageRemaining,
 	};
-	const title = context.translate.server(
-		"core.alerts.storage.triggered.title",
+	const title = context.translate(
+		"server:core.alerts.storage.triggered.title",
 		{
-			percent: threshold.percent,
+			data: {
+				percent: threshold.percent,
+			},
 		},
 	);
 	let emailId: number | null = null;
@@ -110,8 +112,10 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 		const sendEmailRes = await sendEmail(context, {
 			type: "internal",
 			to: alertEmail,
-			subject: context.translate.server("core.alerts.storage.email.subject", {
-				percent: threshold.percent,
+			subject: context.translate("server:core.alerts.storage.email.subject", {
+				data: {
+					percent: threshold.percent,
+				},
 			}),
 			template: constants.email.templates.storageAlert.key,
 			priority: "high",
@@ -140,10 +144,12 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 			level: threshold.level,
 			dedupe_key: dedupeKey,
 			title,
-			message: context.translate.server(
-				"core.alerts.storage.triggered.message",
+			message: context.translate(
+				"server:core.alerts.storage.triggered.message",
 				{
-					percent: threshold.percent,
+					data: {
+						percent: threshold.percent,
+					},
 				},
 			),
 			metadata,

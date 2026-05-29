@@ -31,7 +31,7 @@ const getConfigPath = (cwd: string, filename?: string): string => {
 	search(cwd);
 
 	if (!configPath) {
-		throw new Error(translate.server("core.config.file.not.found"));
+		throw new Error(translate("server:core.config.file.not.found"));
 	}
 
 	return configPath;

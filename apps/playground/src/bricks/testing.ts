@@ -1,4 +1,4 @@
-import { BrickBuilder, text } from "@lucidcms/core";
+import { BrickBuilder, copy } from "@lucidcms/core";
 
 const TestingBrick = new BrickBuilder("testing", {
 	preview: {
@@ -8,20 +8,20 @@ const TestingBrick = new BrickBuilder("testing", {
 })
 	.addTab("content_tab", {
 		details: {
-			label: text.admin("bricks.testing.tabs.content_tab.label", {
+			label: copy("admin:bricks.testing.tabs.content_tab.label", {
 				defaultMessage: "Content",
 			}),
 		},
 	})
 	.addText("text-key", {
 		details: {
-			label: text.admin("bricks.testing.fields.text-key.label", {
+			label: copy("admin:bricks.testing.fields.text-key.label", {
 				defaultMessage: "Text",
 			}),
-			summary: text.admin("bricks.testing.fields.text-key.summary", {
+			summary: copy("admin:bricks.testing.fields.text-key.summary", {
 				defaultMessage: "Testing title",
 			}),
-			placeholder: text.admin("bricks.testing.fields.text-key.placeholder", {
+			placeholder: copy("admin:bricks.testing.fields.text-key.placeholder", {
 				defaultMessage: "Testing title",
 			}),
 		},
@@ -42,13 +42,13 @@ const TestingBrick = new BrickBuilder("testing", {
 	.addNumber("number-key")
 	.addCheckbox("checkbox-key", {
 		details: {
-			label: text.admin("bricks.testing.fields.checkbox-key.label", {
+			label: copy("admin:bricks.testing.fields.checkbox-key.label", {
 				defaultMessage: "Checkbox",
 			}),
-			true: text.admin("bricks.testing.fields.checkbox-key.trueLabel", {
+			true: copy("admin:bricks.testing.fields.checkbox-key.trueLabel", {
 				defaultMessage: "Show",
 			}),
-			false: text.admin("bricks.testing.fields.checkbox-key.falseLabel", {
+			false: copy("admin:bricks.testing.fields.checkbox-key.falseLabel", {
 				defaultMessage: "Hide",
 			}),
 		},
@@ -56,22 +56,19 @@ const TestingBrick = new BrickBuilder("testing", {
 	.addSelect("select-key", {
 		options: [
 			{
-				label: text.admin(
-					"bricks.testing.fields.select-key.options.option-1.label",
+				label: copy("admin:bricks.testing.fields.select-key.options.option-1.label",
 					{ defaultMessage: "Option 1" },
 				),
 				value: "option-1",
 			},
 			{
-				label: text.admin(
-					"bricks.testing.fields.select-key.options.option-2.label",
+				label: copy("admin:bricks.testing.fields.select-key.options.option-2.label",
 					{ defaultMessage: "Option 2" },
 				),
 				value: "option-2",
 			},
 			{
-				label: text.admin(
-					"bricks.testing.fields.select-key.options.option-3.label",
+				label: copy("admin:bricks.testing.fields.select-key.options.option-3.label",
 					{ defaultMessage: "Option 3" },
 				),
 				value: "option-3",
@@ -83,21 +80,20 @@ const TestingBrick = new BrickBuilder("testing", {
 	})
 	.addTextarea("textarea-key", {
 		details: {
-			label: text.admin("bricks.testing.fields.textarea-key.label", {
+			label: copy("admin:bricks.testing.fields.textarea-key.label", {
 				defaultMessage: "Textarea",
 			}),
-			placeholder: text.admin(
-				"bricks.testing.fields.textarea-key.placeholder",
+			placeholder: copy("admin:bricks.testing.fields.textarea-key.placeholder",
 				{ defaultMessage: "Testing textarea" },
 			),
-			summary: text.admin("bricks.testing.fields.textarea-key.summary", {
+			summary: copy("admin:bricks.testing.fields.textarea-key.summary", {
 				defaultMessage: "Testing textarea",
 			}),
 		},
 	})
 	.addTab("advanced_tab", {
 		details: {
-			label: text.admin("bricks.testing.tabs.advanced_tab.label", {
+			label: copy("admin:bricks.testing.tabs.advanced_tab.label", {
 				defaultMessage: "Advanced",
 			}),
 		},

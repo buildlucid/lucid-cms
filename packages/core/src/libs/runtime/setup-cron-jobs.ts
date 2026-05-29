@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
-import { createTranslator, text } from "../i18n/index.js";
+import { copy } from "../i18n/index.js";
 import logger from "../logger/index.js";
 import passthroughQueueAdapter from "../queue/adapters/passthrough.js";
 import getQueueAdapter from "../queue/get-adapter.js";
@@ -31,7 +31,7 @@ const executeCronJob = async (
 			logError: true,
 			defaultError: {
 				type: "cron",
-				name: text.server("core.cron.job.error.name"),
+				name: copy("server:core.cron.job.error.name"),
 				message: job.error,
 			},
 		})(context);
@@ -55,7 +55,7 @@ const executeCronJob = async (
 			return {
 				key,
 				success: false,
-				error: context.translate.english.text(result.error.message),
+				error: context.translate.english(result.error.message),
 			};
 		}
 	}
@@ -115,7 +115,7 @@ const setupCronJobs = async (config: {
 				const cronContext: ServiceContext = {
 					...context,
 					queue: cronQueue,
-					translate: createTranslator({ config: context.config, locale: "en" }),
+					translate: context.translate.forLocale("en"),
 					request: {
 						...context.request,
 						locale: "en",

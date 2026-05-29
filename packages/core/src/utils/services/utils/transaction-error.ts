@@ -4,7 +4,7 @@ import type { LucidErrorData } from "../../../types/errors.js";
 class TransactionError extends Error {
 	error: LucidErrorData;
 	constructor(error: LucidErrorData) {
-		super(translate.text(error.message));
+		super(translate(error.message));
 		this.error = error;
 	}
 }

@@ -1,7 +1,7 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import { trimStringInput } from "../../utils/helpers/normalize-input.js";
@@ -23,8 +23,8 @@ const login: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: text.server(
-					"core.auth.password.authentication.disabled.message",
+				message: copy(
+					"server:core.auth.password.authentication.disabled.message",
 				),
 			},
 			data: undefined,
@@ -44,7 +44,7 @@ const login: ServiceFn<
 			enabled: true,
 			defaultError: {
 				type: "authorisation",
-				message: text.server("core.auth.login.error.message"),
+				message: copy("server:core.auth.login.error.message"),
 				status: 401,
 			},
 		},
@@ -55,7 +55,7 @@ const login: ServiceFn<
 		return {
 			error: {
 				type: "authorisation",
-				message: text.server("core.auth.login.suspended.error.message"),
+				message: copy("server:core.auth.login.suspended.error.message"),
 				status: 401,
 			},
 			data: undefined,
@@ -66,7 +66,7 @@ const login: ServiceFn<
 		return {
 			error: {
 				type: "authorisation",
-				message: text.server("core.auth.login.locked.error.message"),
+				message: copy("server:core.auth.login.locked.error.message"),
 				status: 401,
 			},
 			data: undefined,
@@ -87,7 +87,7 @@ const login: ServiceFn<
 		return {
 			error: {
 				type: "authorisation",
-				message: text.server("core.auth.login.error.message"),
+				message: copy("server:core.auth.login.error.message"),
 				status: 401,
 			},
 			data: undefined,

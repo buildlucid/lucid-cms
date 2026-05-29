@@ -5,12 +5,12 @@ import type CustomField from "../../../libs/collection/custom-fields/custom-fiel
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
 import type { FieldTypes } from "../../../libs/collection/custom-fields/types.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type {
 	BrickError,
-	ErrorText,
+	ErrorCopy,
 	FieldError,
 	FieldInputSchema,
 	GroupError,
@@ -49,7 +49,7 @@ const checkValidateBricksFields: ServiceFn<
 		bricks: data.bricks,
 		collection: data.collection,
 		validationData: refDataRes.data,
-		defaultLocale: context.config.i18n.content.defaultLocale,
+		defaultLocale: context.config.localization.defaultLocale,
 	});
 	const fieldErrors = recursiveFieldValidate({
 		fields: data.fields,
@@ -57,7 +57,7 @@ const checkValidateBricksFields: ServiceFn<
 		validationData: refDataRes.data,
 		meta: {
 			localized: data.collection.getData.config.localized,
-			defaultLocale: context.config.i18n.content.defaultLocale,
+			defaultLocale: context.config.localization.defaultLocale,
 		},
 	});
 
@@ -66,8 +66,8 @@ const checkValidateBricksFields: ServiceFn<
 			data: undefined,
 			error: {
 				type: "basic",
-				name: text.server("core.fields.validation.error.name"),
-				message: text.server("core.fields.validation.error.message"),
+				name: copy("server:core.fields.validation.error.name"),
+				message: copy("server:core.fields.validation.error.message"),
 				status: 400,
 				errors: {
 					bricks: brickErrors,
@@ -167,8 +167,8 @@ const recursiveFieldValidate = (props: {
 			errors.push({
 				key: field.key,
 				localeCode: null,
-				message: text.server(
-					"core.fields.lookup.not.found.in.collection.or.brick",
+				message: copy(
+					"server:core.fields.lookup.not.found.in.collection.or.brick",
 				),
 			});
 			continue;
@@ -191,8 +191,8 @@ const recursiveFieldValidate = (props: {
 					localeCode: null,
 					message:
 						validationResult.message ||
-						text.server(
-							"core.fields.repeater.validation.field.contains.errors",
+						copy(
+							"server:core.fields.repeater.validation.field.contains.errors",
 						),
 				});
 			}
@@ -222,8 +222,8 @@ const recursiveFieldValidate = (props: {
 				errors.push({
 					key: field.key,
 					localeCode: null,
-					message: text.server(
-						"core.fields.repeater.validation.field.contains.errors",
+					message: copy(
+						"server:core.fields.repeater.validation.field.contains.errors",
 					),
 					groupErrors: groupErrors,
 				});
@@ -265,7 +265,7 @@ const recursiveFieldValidate = (props: {
 			errors.push({
 				key: key,
 				localeCode: null,
-				message: text.server("core.fields.validation.is.required"),
+				message: copy("server:core.fields.validation.is.required"),
 			});
 		}
 	});
@@ -287,13 +287,13 @@ export const validateField = (props: {
 }): FieldError[] => {
 	const errors: FieldError[] = [];
 	const refData = props.validationData[props.field.type];
-	const toFieldErrors = (localeCode: string | null, message?: ErrorText) => {
+	const toFieldErrors = (localeCode: string | null, message?: ErrorCopy) => {
 		return (
 			message
 				? [{ message }]
 				: [
 						{
-							message: text.server("core.fields.validation.errors.unknown"),
+							message: copy("server:core.fields.validation.errors.unknown"),
 						},
 					]
 		).map((error) => ({
@@ -311,7 +311,7 @@ export const validateField = (props: {
 				key: props.field.key,
 				localeCode,
 				message:
-					error.message || text.server("core.fields.validation.errors.unknown"),
+					error.message || copy("server:core.fields.validation.errors.unknown"),
 				itemIndex: error.itemIndex,
 			}));
 		}

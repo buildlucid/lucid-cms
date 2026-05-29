@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
-import { text } from "../i18n/index.js";
+import { copy } from "../i18n/index.js";
 import logger from "../logger/index.js";
 import { QueueJobsRepository } from "../repositories/index.js";
 import getJobHandler from "./job-handlers.js";
@@ -147,7 +147,7 @@ const executeSingleJob: (
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: text.server("core.queue.jobs.not.found", {
+				message: copy("server:core.queue.jobs.not.found", {
 					defaultMessage: `Queue job not found: ${data.jobId}`,
 				}),
 				status: 404,
@@ -159,7 +159,7 @@ const executeSingleJob: (
 			success: false,
 			shouldRetry: false,
 			message:
-				context.translate.english.text(jobRes.error.message) ??
+				context.translate.english(jobRes.error.message) ??
 				"Queue job not found",
 		};
 	}
@@ -231,7 +231,7 @@ const executeSingleJob: (
 
 		if (handlerResult.error) {
 			const errorMessage =
-				context.translate.english.text(handlerResult.error.message) ??
+				context.translate.english(handlerResult.error.message) ??
 				"Unknown error";
 			const shouldRetry = await handleRetryLogic({
 				jobId: data.jobId,

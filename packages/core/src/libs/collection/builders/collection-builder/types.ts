@@ -4,7 +4,7 @@ import type {
 	LucidVersionTableName,
 } from "../../../../types.js";
 import type { CollectionBuilderHooks } from "../../../hooks/types.js";
-import type { AdminTextDescriptor } from "../../../i18n/types.js";
+import type { AdminCopyDescriptor } from "../../../i18n/types.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 
@@ -45,7 +45,7 @@ export type PublishingWorkflowStageColor =
 
 export type PublishingWorkflowStageConfig = {
 	key: string;
-	name: AdminTextDescriptor;
+	name: AdminCopyDescriptor;
 	color: PublishingWorkflowStageColor;
 	publishTargets: string[];
 	permissions: {
@@ -63,9 +63,9 @@ export type CollectionConfigSchemaType = {
 	key: string;
 	mode: "single" | "multiple";
 	details: {
-		name: AdminTextDescriptor;
-		singularName: AdminTextDescriptor;
-		summary?: AdminTextDescriptor;
+		name: AdminCopyDescriptor;
+		singularName: AdminCopyDescriptor;
+		summary?: AdminCopyDescriptor;
 	};
 	permissions?: CollectionPermissions;
 	config?: {
@@ -86,7 +86,7 @@ export type CollectionConfigSchemaType = {
 			initial?: string;
 			stages: Array<{
 				key: string;
-				name: AdminTextDescriptor;
+				name: AdminCopyDescriptor;
 				color?: PublishingWorkflowStageColor;
 				publishTargets?: string[];
 				permissions?: {
@@ -97,7 +97,7 @@ export type CollectionConfigSchemaType = {
 		};
 		environments?: Array<{
 			key: string;
-			name: AdminTextDescriptor;
+			name: AdminCopyDescriptor;
 			permissions?: CollectionEnvironmentPermissions;
 			relations?: CollectionEnvironmentRelations;
 		}>;
@@ -114,9 +114,9 @@ export type CollectionData = {
 	key: string;
 	mode: CollectionConfigSchemaType["mode"];
 	details: {
-		name: AdminTextDescriptor;
-		singularName: AdminTextDescriptor;
-		summary: AdminTextDescriptor | null;
+		name: AdminCopyDescriptor;
+		singularName: AdminCopyDescriptor;
+		summary: AdminCopyDescriptor | null;
 	};
 	config: {
 		locked: boolean;
@@ -129,7 +129,7 @@ export type CollectionData = {
 		displayInListing: string[];
 		environments: {
 			key: string;
-			name: AdminTextDescriptor;
+			name: AdminCopyDescriptor;
 			permissions: CollectionEnvironmentPermissions;
 			relations: CollectionEnvironmentRelations;
 		}[];

@@ -9,7 +9,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
@@ -43,8 +43,8 @@ const getSettingsController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.routes.settings.fetch.error.name"),
-				message: text.server("core.routes.settings.fetch.error.message"),
+				name: copy("server:core.routes.settings.fetch.error.name"),
+				message: copy("server:core.routes.settings.fetch.error.message"),
 			},
 		})(context, {
 			includes: formattedQuery.include,

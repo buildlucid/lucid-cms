@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import type { LucidErrorData } from "../../types/errors.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -25,8 +25,8 @@ const streamFallbackMedia: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.media.not.found.name"),
-				message: text.server("core.media.not.found.message"),
+				name: copy("server:core.media.not.found.name"),
+				message: copy("server:core.media.not.found.message"),
 				status: 404,
 			},
 			data: undefined,
@@ -56,8 +56,8 @@ const streamFallbackMedia: ServiceFn<
 	return {
 		error: {
 			type: "basic",
-			name: text.server("core.media.not.found.name"),
-			message: text.server("core.media.not.found.message"),
+			name: copy("server:core.media.not.found.name"),
+			message: copy("server:core.media.not.found.message"),
 			status: 404,
 		},
 		data: undefined,

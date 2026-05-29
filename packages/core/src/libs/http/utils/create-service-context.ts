@@ -22,7 +22,7 @@ const createServiceContext = (c: LucidHonoContext): ServiceContext => {
 		queue: c.get("queue"),
 		env: c.get("env"),
 		kv: c.get("kv"),
-		translate: createTranslator({ config, locale }),
+		translate: createTranslator({ store: c.get("translationStore"), locale }),
 		request: {
 			url: c.req.url,
 			ipAddress: connectionInfo.address ?? null,

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import SelectCustomField from "./custom-field.js";
@@ -8,19 +8,19 @@ import SelectCustomField from "./custom-field.js";
 const CONSTANTS = {
 	selectOptions: [
 		{
-			label: text.admin("core.tests.fields.select.options.option.1", {
+			label: copy("admin:core.tests.fields.select.options.option.1", {
 				defaultMessage: "Option 1",
 			}),
 			value: "option-1",
 		},
 		{
-			label: text.admin("core.tests.fields.select.options.option.2", {
+			label: copy("admin:core.tests.fields.select.options.option.2", {
 				defaultMessage: "Option 2",
 			}),
 			value: "option-2",
 		},
 		{
-			label: text.admin("core.tests.fields.select.options.option.3", {
+			label: copy("admin:core.tests.fields.select.options.option.3", {
 				defaultMessage: "Option 3",
 			}),
 			value: "option-3",
@@ -33,10 +33,10 @@ const CONSTANTS = {
 const SelectCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: text.admin("tests.collections.collection.name", {
+		name: copy("admin:tests.collections.collection.name", {
 			defaultMessage: "Test",
 		}),
-		singularName: text.admin("tests.collections.collection.singularName", {
+		singularName: copy("admin:tests.collections.collection.singularName", {
 			defaultMessage: "Test",
 		}),
 	},
@@ -164,14 +164,14 @@ test("fail to validate field - select", async () => {
 			{
 				key: "standard_select",
 				localeCode: null,
-				message: text.server("core.fields.select.validation.option.invalid"),
+				message: copy("server:core.fields.select.validation.option.invalid"),
 			},
 		],
 		number: [
 			{
 				key: "standard_select",
 				localeCode: null,
-				message: text.server("core.fields.validation.errors.unknown", {
+				message: copy("server:core.fields.validation.errors.unknown", {
 					defaultMessage: "Invalid input: expected string, received number",
 				}),
 			},
@@ -201,7 +201,7 @@ test("fail to validate field - select", async () => {
 		{
 			key: "required_select",
 			localeCode: null,
-			message: text.server("core.fields.select.validation.required"),
+			message: copy("server:core.fields.select.validation.required"),
 		},
 	]);
 });
@@ -211,13 +211,13 @@ test("fail to validate field - select", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new SelectCustomField("field", {
 		details: {
-			label: text.admin("tests.fields.field.label", {
+			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: text.admin("tests.fields.field.summary", {
+			summary: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
-			placeholder: text.admin("tests.fields.field.placeholder", {
+			placeholder: copy("admin:tests.fields.field.placeholder", {
 				defaultMessage: "placeholder",
 			}),
 		},

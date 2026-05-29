@@ -8,7 +8,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import validate from "../../middleware/validate.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -35,11 +35,11 @@ const verifyEmailChangeConfirmController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: text.server(
-						"core.routes.verify.email.change.confirm.error.message",
+					name: copy(
+						"server:core.routes.verify.email.change.confirm.error.message",
 					),
-					message: text.server(
-						"core.routes.verify.email.change.confirm.error.message",
+					message: copy(
+						"server:core.routes.verify.email.change.confirm.error.message",
 					),
 				},
 			},

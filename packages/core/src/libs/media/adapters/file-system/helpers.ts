@@ -9,7 +9,7 @@ export const keyPaths = (key: string, uploadDir: string) => {
 	const keyPath = key.split("/").slice(0, -1).join("/");
 	const filename = key.split("/").pop();
 
-	if (!filename) throw new Error(translate.server("core.keys.invalid"));
+	if (!filename) throw new Error(translate("server:core.keys.invalid"));
 
 	const targetDir = path.join(uploadDir, keyPath);
 	const targetPath = path.join(targetDir, filename);

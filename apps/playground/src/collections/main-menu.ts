@@ -1,15 +1,15 @@
-import { CollectionBuilder, text } from "@lucidcms/core";
+import { CollectionBuilder, copy } from "@lucidcms/core";
 
 const MainMenuCollection = new CollectionBuilder("main-menu", {
 	mode: "single",
 	details: {
-		name: text.admin("collections.main-menu.name", {
+		name: copy("admin:collections.main-menu.name", {
 			defaultMessage: "Main Menu",
 		}),
-		singularName: text.admin("collections.main-menu.singularName", {
+		singularName: copy("admin:collections.main-menu.singularName", {
 			defaultMessage: "Main Menu",
 		}),
-		summary: text.admin("collections.main-menu.summary", {
+		summary: copy("admin:collections.main-menu.summary", {
 			defaultMessage: "The main menu for your website.",
 		}),
 	},
@@ -20,7 +20,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 })
 	.addRepeater("items", {
 		details: {
-			label: text.admin("collections.main-menu.fields.items.label", {
+			label: copy("admin:collections.main-menu.fields.items.label", {
 				defaultMessage: "Items",
 			}),
 		},

@@ -22,7 +22,7 @@ const honoOpenAPIParamaters = (props: {
 			in: "header",
 			name: "X-CSRF-Token",
 			required: props.headers.csrf,
-			description: translate.server("core.openapi.csrf.header.description"),
+			description: translate("server:core.openapi.csrf.header.description"),
 			schema: {
 				type: "string",
 			},
@@ -33,8 +33,8 @@ const honoOpenAPIParamaters = (props: {
 			in: "header",
 			name: "Authorization",
 			required: props.headers.authorization,
-			description: translate.server(
-				"core.openapi.authorization.header.description",
+			description: translate(
+				"server:core.openapi.authorization.header.description",
 			),
 			schema: {
 				type: "string",

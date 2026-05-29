@@ -4,13 +4,18 @@ import validateEnvVars from "../cli/services/validate-env-vars.js";
 import getConfigPath from "../config/get-config-path.js";
 import loadConfigFile from "../config/load-config-file.js";
 import type { RenderedTemplates } from "../email/types.js";
+import prepareTranslations from "../i18n/prepare-translations.js";
+import type { TranslationStore } from "../i18n/types.js";
 import generateTypes from "../type-generation/index.js";
 
 type LoadConfigResult = Awaited<ReturnType<typeof loadConfigFile>>;
+type PreparedLoadConfigResult = LoadConfigResult & {
+	translationStore: TranslationStore;
+};
 
 export type LoadBuildProjectResult = {
 	configPath: string;
-	loaded: LoadConfigResult;
+	loaded: PreparedLoadConfigResult;
 	emailTemplates?: RenderedTemplates;
 };
 
@@ -34,27 +39,36 @@ const loadBuildProject = async (props?: {
 		silent: props?.silent,
 		configureLucidPath: props?.configureLucidPath,
 	});
+	const translations = await prepareTranslations({
+		config: loaded.config,
+		projectRoot: loaded.projectRoot,
+	});
+	const preparedLoaded = {
+		...loaded,
+		translationStore: translations.translationStore,
+	};
 
 	const [envValid, _typeGen, emailTemplates] = await Promise.all([
 		props?.validateEnv &&
 			validateEnvVars({
-				envSchema: props.envSchema ?? loaded.envSchema,
-				env: loaded.env,
+				envSchema: props.envSchema ?? preparedLoaded.envSchema,
+				env: preparedLoaded.env,
 			}),
 		props?.generateTypes !== false &&
 			generateTypes({
-				envSchema: props?.envSchema ?? loaded.envSchema,
+				envSchema: props?.envSchema ?? preparedLoaded.envSchema,
 				configPath,
-				adapterModule: loaded.definition.adapter.module,
-				databaseModule: loaded.definition.database.module,
-				collections: loaded.config.collections,
-				localization: loaded.config.i18n.content,
+				projectRoot: preparedLoaded.projectRoot,
+				adapterModule: preparedLoaded.definition.adapter.module,
+				databaseModule: preparedLoaded.definition.database.module,
+				collections: preparedLoaded.config.collections,
+				localization: preparedLoaded.config.localization,
 			}),
 		props?.renderEmailTemplates
 			? import("../email/templates/render-mjml-templates.js").then(
 					({ default: renderEmailTemplates }) =>
 						renderEmailTemplates({
-							config: loaded.config,
+							config: preparedLoaded.config,
 							silent: props?.silent,
 						}),
 				)
@@ -70,7 +84,7 @@ const loadBuildProject = async (props?: {
 
 	return {
 		configPath,
-		loaded,
+		loaded: preparedLoaded,
 		emailTemplates,
 	};
 };

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import CollectionBuilder from "../../collection/builders/collection-builder/index.js";
-import { text, translate } from "../../i18n/index.js";
+import { copy, translate } from "../../i18n/index.js";
 import checkCollectionEnvironmentRelations from "./check-collection-environment-relations.js";
 
 const buildConfig = (collections: CollectionBuilder[]) =>
@@ -13,10 +13,10 @@ describe("collection environment relation config checks", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.pages.name", {
+				name: copy("admin:tests.collections.pages.name", {
 					defaultMessage: "Pages",
 				}),
-				singularName: text.admin("tests.collections.pages.singularName", {
+				singularName: copy("admin:tests.collections.pages.singularName", {
 					defaultMessage: "Page",
 				}),
 			},
@@ -24,7 +24,7 @@ describe("collection environment relation config checks", () => {
 				environments: [
 					{
 						key: "staging",
-						name: text.admin("tests.environments.staging.name", {
+						name: copy("admin:tests.environments.staging.name", {
 							defaultMessage: "Staging",
 						}),
 						relations: {
@@ -38,10 +38,10 @@ describe("collection environment relation config checks", () => {
 		const blog = new CollectionBuilder("blog", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.blog.name", {
+				name: copy("admin:tests.collections.blog.name", {
 					defaultMessage: "Blog",
 				}),
-				singularName: text.admin("tests.collections.blog.singularName", {
+				singularName: copy("admin:tests.collections.blog.singularName", {
 					defaultMessage: "Post",
 				}),
 			},
@@ -49,7 +49,7 @@ describe("collection environment relation config checks", () => {
 				environments: [
 					{
 						key: "signed-off",
-						name: text.admin("tests.environments.signed-off.name", {
+						name: copy("admin:tests.environments.signed-off.name", {
 							defaultMessage: "Signed off",
 						}),
 					},
@@ -59,10 +59,10 @@ describe("collection environment relation config checks", () => {
 		const settings = new CollectionBuilder("settings", {
 			mode: "single",
 			details: {
-				name: text.admin("tests.collections.settings.name", {
+				name: copy("admin:tests.collections.settings.name", {
 					defaultMessage: "Settings",
 				}),
-				singularName: text.admin("tests.collections.settings.singularName", {
+				singularName: copy("admin:tests.collections.settings.singularName", {
 					defaultMessage: "Settings",
 				}),
 			},
@@ -77,10 +77,10 @@ describe("collection environment relation config checks", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.pages.name", {
+				name: copy("admin:tests.collections.pages.name", {
 					defaultMessage: "Pages",
 				}),
-				singularName: text.admin("tests.collections.pages.singularName", {
+				singularName: copy("admin:tests.collections.pages.singularName", {
 					defaultMessage: "Page",
 				}),
 			},
@@ -88,7 +88,7 @@ describe("collection environment relation config checks", () => {
 				environments: [
 					{
 						key: "staging",
-						name: text.admin("tests.environments.staging.name", {
+						name: copy("admin:tests.environments.staging.name", {
 							defaultMessage: "Staging",
 						}),
 						relations: {
@@ -102,12 +102,14 @@ describe("collection environment relation config checks", () => {
 		expect(() =>
 			checkCollectionEnvironmentRelations(buildConfig([pages])),
 		).toThrow(
-			translate.server(
-				"core.config.collection.environment.relation.collection.not.found",
+			translate(
+				"server:core.config.collection.environment.relation.collection.not.found",
 				{
-					collection: "pages",
-					environment: "staging",
-					targetCollection: "missing",
+					data: {
+						collection: "pages",
+						environment: "staging",
+						targetCollection: "missing",
+					},
 				},
 			),
 		);
@@ -117,10 +119,10 @@ describe("collection environment relation config checks", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.pages.name", {
+				name: copy("admin:tests.collections.pages.name", {
 					defaultMessage: "Pages",
 				}),
-				singularName: text.admin("tests.collections.pages.singularName", {
+				singularName: copy("admin:tests.collections.pages.singularName", {
 					defaultMessage: "Page",
 				}),
 			},
@@ -128,7 +130,7 @@ describe("collection environment relation config checks", () => {
 				environments: [
 					{
 						key: "staging",
-						name: text.admin("tests.environments.staging.name", {
+						name: copy("admin:tests.environments.staging.name", {
 							defaultMessage: "Staging",
 						}),
 						relations: {
@@ -141,10 +143,10 @@ describe("collection environment relation config checks", () => {
 		const blog = new CollectionBuilder("blog", {
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.blog.name", {
+				name: copy("admin:tests.collections.blog.name", {
 					defaultMessage: "Blog",
 				}),
-				singularName: text.admin("tests.collections.blog.singularName", {
+				singularName: copy("admin:tests.collections.blog.singularName", {
 					defaultMessage: "Post",
 				}),
 			},
@@ -152,7 +154,7 @@ describe("collection environment relation config checks", () => {
 				environments: [
 					{
 						key: "production",
-						name: text.admin("tests.environments.production.name", {
+						name: copy("admin:tests.environments.production.name", {
 							defaultMessage: "Production",
 						}),
 					},
@@ -163,13 +165,15 @@ describe("collection environment relation config checks", () => {
 		expect(() =>
 			checkCollectionEnvironmentRelations(buildConfig([pages, blog])),
 		).toThrow(
-			translate.server(
-				"core.config.collection.environment.relation.version.not.found",
+			translate(
+				"server:core.config.collection.environment.relation.version.not.found",
 				{
-					collection: "pages",
-					environment: "staging",
-					targetCollection: "blog",
-					targetVersion: "signed-off",
+					data: {
+						collection: "pages",
+						environment: "staging",
+						targetCollection: "blog",
+						targetVersion: "signed-off",
+					},
 				},
 			),
 		);

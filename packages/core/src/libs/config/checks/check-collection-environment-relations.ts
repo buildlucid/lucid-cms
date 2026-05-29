@@ -21,12 +21,14 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 
 				if (!targetCollection) {
 					throw new Error(
-						translate.server(
-							"core.config.collection.environment.relation.collection.not.found",
+						translate(
+							"server:core.config.collection.environment.relation.collection.not.found",
 							{
-								collection: collection.key,
-								environment: environment.key,
-								targetCollection: targetCollectionKey,
+								data: {
+									collection: collection.key,
+									environment: environment.key,
+									targetCollection: targetCollectionKey,
+								},
 							},
 						),
 					);
@@ -41,13 +43,15 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 
 				if (!targetEnvironmentExists) {
 					throw new Error(
-						translate.server(
-							"core.config.collection.environment.relation.version.not.found",
+						translate(
+							"server:core.config.collection.environment.relation.version.not.found",
 							{
-								collection: collection.key,
-								environment: environment.key,
-								targetCollection: targetCollectionKey,
-								targetVersion: targetVersionType,
+								data: {
+									collection: collection.key,
+									environment: environment.key,
+									targetCollection: targetCollectionKey,
+									targetVersion: targetVersionType,
+								},
 							},
 						),
 					);

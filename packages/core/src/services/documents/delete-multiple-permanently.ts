@@ -1,6 +1,6 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import {
@@ -36,8 +36,8 @@ const deleteMultiplePermanently: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.locked.collection.name"),
-				message: text.server("core.error.locked.collection.message.delete"),
+				name: copy("server:core.error.locked.collection.name"),
+				message: copy("server:core.error.locked.collection.message.delete"),
 				status: 400,
 			},
 			data: undefined,
@@ -68,10 +68,10 @@ const deleteMultiplePermanently: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.documents.not.found.message"),
+				message: copy("server:core.documents.not.found.message"),
 				errors: {
 					ids: {
-						message: text.server("core.documents.ids.not.found.partial", {
+						message: copy("server:core.documents.ids.not.found.partial", {
 							data: {
 								ids: docsExistRes.data.map((doc) => doc.id).join(", "),
 							},
@@ -141,8 +141,8 @@ const deleteMultiplePermanently: ServiceFn<
 		documentPublishOperationServices.cancelForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: data.ids,
-			comment: context.translate.server(
-				"core.documents.permanently.deleted.publish.request.comment",
+			comment: context.translate(
+				"server:core.documents.permanently.deleted.publish.request.comment",
 			),
 		}),
 		documentWorkflowServices.deleteForDocuments(context, {

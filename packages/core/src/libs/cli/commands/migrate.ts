@@ -4,6 +4,8 @@ import type { Config } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { createTranslator } from "../../i18n/index.js";
+import prepareTranslations from "../../i18n/prepare-translations.js";
+import type { TranslationStore } from "../../i18n/types.js";
 import passthroughKVAdapter from "../../kv/adapters/passthrough.js";
 import {
 	destroyKVAdapter,
@@ -18,6 +20,7 @@ import validateEnvVars from "../services/validate-env-vars.js";
 
 const migrateCommand = (props?: {
 	config?: Config;
+	translationStore?: TranslationStore;
 	mode: "process" | "return";
 }) => {
 	return async (options?: {
@@ -27,8 +30,11 @@ const migrateCommand = (props?: {
 	}) => {
 		let kvInstance: KVAdapterInstance | undefined;
 		let config: Config | undefined;
+		let translationStore: TranslationStore | undefined;
 		const cleanupKV = async () => {
-			if (config) await destroyKVAdapter(kvInstance, { config });
+			if (config && translationStore) {
+				await destroyKVAdapter(kvInstance, { config });
+			}
 			kvInstance = undefined;
 		};
 
@@ -41,9 +47,16 @@ const migrateCommand = (props?: {
 
 			if (props?.config) {
 				config = props.config;
+				translationStore = props.translationStore;
 			} else {
 				const res = await loadConfigFile();
 				config = res.config;
+				translationStore = (
+					await prepareTranslations({
+						config,
+						projectRoot: res.projectRoot,
+					})
+				).translationStore;
 
 				if (options?.skipEnvValidation !== true) {
 					const envValid = await validateEnvVars({
@@ -57,9 +70,15 @@ const migrateCommand = (props?: {
 					}
 				}
 			}
+			if (!translationStore) {
+				throw new Error("Lucid could not resolve the translation store.");
+			}
 
 			const queue = passthroughQueueAdapter();
-			const translate = createTranslator({ config, locale: "en" });
+			const translate = createTranslator({
+				store: translationStore,
+				locale: "en",
+			});
 
 			cliLogger.info("Checking the migration status");
 
@@ -85,7 +104,7 @@ const migrateCommand = (props?: {
 			let needsCollectionMigrations = false;
 			if (collectionMigrationResult.error) {
 				cliLogger.warn(
-					`Could not check collection migration status: ${translate.english.text(collectionMigrationResult.error.message) || "Unknown error"}`,
+					`Could not check collection migration status: ${translate.english(collectionMigrationResult.error.message) || "Unknown error"}`,
 				);
 				needsCollectionMigrations = true;
 			} else {
@@ -113,7 +132,7 @@ const migrateCommand = (props?: {
 			//* if no migrations are needed, just run seeds and exit
 			if (!needsCollectionMigrations && !needsDbMigrations) {
 				if (!skipSyncSteps) {
-					const syncResult = await runSyncTasks(config, mode);
+					const syncResult = await runSyncTasks(config, translationStore, mode);
 					if (!syncResult && mode === "return") {
 						return false;
 					}
@@ -222,7 +241,7 @@ const migrateCommand = (props?: {
 				if (preCollectionSyncResult.error) {
 					cliLogger.error(
 						"Sync failed during pre-migration collection sync, with error:",
-						translate.english.text(preCollectionSyncResult.error.message) ||
+						translate.english(preCollectionSyncResult.error.message) ||
 							"unknown",
 					);
 					if (mode === "process") {
@@ -259,8 +278,8 @@ const migrateCommand = (props?: {
 					if (result.error) {
 						cliLogger.error(
 							"Migration failed on step collection migrations",
-							translate.english.text(result.error.message) ? "with error:" : "",
-							translate.english.text(result.error.message) || "",
+							translate.english(result.error.message) ? "with error:" : "",
+							translate.english(result.error.message) || "",
 						);
 						if (mode === "process") {
 							await cleanupKV();
@@ -294,7 +313,12 @@ const migrateCommand = (props?: {
 
 			//* run sync tasks after migrations so sync can rely on latest schema changes
 			if (!skipSyncSteps) {
-				const syncResult = await runSyncTasks(config, mode, kvInstance);
+				const syncResult = await runSyncTasks(
+					config,
+					translationStore,
+					mode,
+					kvInstance,
+				);
 				if (!syncResult && mode === "return") {
 					await cleanupKV();
 					return false;

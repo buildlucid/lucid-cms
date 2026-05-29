@@ -3,7 +3,7 @@ import {
 	AlertRecipientsRepository,
 	AlertsRepository,
 } from "../../libs/repositories/index.js";
-import type { ErrorText } from "../../types/errors.js";
+import type { ErrorCopy } from "../../types/errors.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendEmail from "../email/send-email.js";
@@ -14,7 +14,7 @@ export type PublishOperationNotificationRecipient = {
 };
 
 type PublishOperationNotificationDetail = {
-	label: ErrorText;
+	label: ErrorCopy;
 	value: string | number | Date | null | undefined;
 };
 
@@ -32,11 +32,11 @@ const notifyPublishOperationUsers: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			recipients: PublishOperationNotificationRecipient[];
-			title: ErrorText;
-			message: ErrorText;
+			title: ErrorCopy;
+			message: ErrorCopy;
 			dedupeAction: string;
 			comment?: {
-				label: ErrorText;
+				label: ErrorCopy;
 				value: string | null | undefined;
 			};
 			details?: PublishOperationNotificationDetail[];
@@ -61,17 +61,17 @@ const notifyPublishOperationUsers: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const title = context.translate.text(data.title) ?? "";
-	const message = context.translate.text(data.message);
+	const title = context.translate(data.title) ?? "";
+	const message = context.translate(data.message);
 	const details = (data.details ?? [])
 		.filter((detail) => detail.value !== null && detail.value !== undefined)
 		.map((detail) => ({
-			label: context.translate.text(detail.label) ?? "",
+			label: context.translate(detail.label) ?? "",
 			value: formatNotificationDetailValue(detail.value),
 		}));
 	const comment = data.comment?.value?.trim() || null;
 	const commentLabel = data.comment
-		? context.translate.text(data.comment.label)
+		? context.translate(data.comment.label)
 		: undefined;
 
 	const alertRes = await Alerts.createSingle({

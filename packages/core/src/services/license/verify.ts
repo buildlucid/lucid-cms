@@ -106,7 +106,7 @@ const verifyLicense: ServiceFn<
 		const persistRes = await persistSnapshot({
 			valid: false,
 			aiEnabled: false,
-			errorMessage: context.translate.server("core.license.is.not.set"),
+			errorMessage: context.translate("server:core.license.is.not.set"),
 		});
 		if (persistRes.error) return persistRes;
 
@@ -116,7 +116,7 @@ const verifyLicense: ServiceFn<
 				key: null,
 				valid: false,
 				lastChecked: now,
-				errorMessage: context.translate.server("core.license.is.not.set"),
+				errorMessage: context.translate("server:core.license.is.not.set"),
 				aiEnabled: false,
 			},
 		};
@@ -132,7 +132,7 @@ const verifyLicense: ServiceFn<
 		const persistRes = await persistSnapshot({
 			valid: false,
 			aiEnabled: false,
-			errorMessage: context.translate.server("core.license.is.not.set"),
+			errorMessage: context.translate("server:core.license.is.not.set"),
 		});
 		if (persistRes.error) return persistRes;
 
@@ -142,7 +142,7 @@ const verifyLicense: ServiceFn<
 				key: null,
 				valid: false,
 				lastChecked: now,
-				errorMessage: context.translate.server("core.license.is.not.set"),
+				errorMessage: context.translate("server:core.license.is.not.set"),
 				aiEnabled: false,
 			},
 		};
@@ -156,8 +156,8 @@ const verifyLicense: ServiceFn<
 
 	if (verifyRes.error) {
 		const errorMessage =
-			context.translate.text(verifyRes.error.message) ||
-			context.translate.server("core.license.verification.failed");
+			context.translate(verifyRes.error.message) ||
+			context.translate("server:core.license.verification.failed");
 		snapshot =
 			(verifyRes.error.status ?? 500) >= 500
 				? {
@@ -177,7 +177,7 @@ const verifyLicense: ServiceFn<
 			aiEnabled: valid ? !!ok.ai?.enabled : false,
 			errorMessage:
 				ok.message ||
-				(valid ? null : context.translate.server("core.license.is.invalid")),
+				(valid ? null : context.translate("server:core.license.is.invalid")),
 		};
 	}
 

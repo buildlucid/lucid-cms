@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import executeSingleJob from "../execute-single-job.js";
 import { insertJobs } from "../insert-job.js";
@@ -46,8 +46,8 @@ function passthroughQueueAdapter(
 				if (params.options?.scheduledFor) {
 					return {
 						error: {
-							message: text.server(
-								"core.queue.adapters.scheduled.jobs.not.supported",
+							message: copy(
+								"server:core.queue.adapters.scheduled.jobs.not.supported",
 							),
 						},
 						data: undefined,
@@ -72,7 +72,7 @@ function passthroughQueueAdapter(
 				if (!jobData) {
 					return {
 						error: {
-							message: text.server("core.queue.jobs.create.failed", {
+							message: copy("server:core.queue.jobs.create.failed", {
 								defaultMessage: "Failed to create job",
 							}),
 						},
@@ -107,7 +107,7 @@ function passthroughQueueAdapter(
 				) {
 					return {
 						error: {
-							message: text.server("core.queue.jobs.execute.failed", {
+							message: copy("server:core.queue.jobs.execute.failed", {
 								defaultMessage: executeResult.message,
 							}),
 						},
@@ -137,7 +137,7 @@ function passthroughQueueAdapter(
 
 				return {
 					error: {
-						message: text.server("core.queue.jobs.add.failed", {
+						message: copy("server:core.queue.jobs.add.failed", {
 							defaultMessage: "Error adding event to the queue",
 						}),
 					},
@@ -150,8 +150,8 @@ function passthroughQueueAdapter(
 				if (params.options?.scheduledFor) {
 					return {
 						error: {
-							message: text.server(
-								"core.queue.adapters.scheduled.jobs.not.supported",
+							message: copy(
+								"server:core.queue.adapters.scheduled.jobs.not.supported",
 							),
 						},
 						data: undefined,
@@ -248,7 +248,7 @@ function passthroughQueueAdapter(
 
 					return {
 						error: {
-							message: text.server("core.queue.jobs.batch.execute.failed", {
+							message: copy("server:core.queue.jobs.batch.execute.failed", {
 								defaultMessage: `${failedJobs.length} of ${allResults.length} jobs failed. First error: ${errorMessage}`,
 							}),
 						},
@@ -285,7 +285,7 @@ function passthroughQueueAdapter(
 
 				return {
 					error: {
-						message: text.server("core.queue.jobs.add.batch.failed", {
+						message: copy("server:core.queue.jobs.add.batch.failed", {
 							defaultMessage: "Error adding batch events to the queue",
 						}),
 					},

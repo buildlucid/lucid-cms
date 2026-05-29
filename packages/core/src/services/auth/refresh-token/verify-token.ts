@@ -2,9 +2,9 @@ import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import {
+	copy,
 	createTranslator,
 	resolveInterfaceLocale,
-	text,
 } from "../../../libs/i18n/index.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
@@ -28,8 +28,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: text.server("core.auth.refresh.token.error.name"),
-					message: text.server("core.auth.refresh.token.missing"),
+					name: copy("server:core.auth.refresh.token.error.name"),
+					message: copy("server:core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -73,8 +73,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: text.server("core.auth.refresh.token.error.name"),
-					message: text.server("core.auth.refresh.token.missing"),
+					name: copy("server:core.auth.refresh.token.error.name"),
+					message: copy("server:core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -96,7 +96,10 @@ const verifyToken = async (
 						queue: c.get("queue"),
 						env: c.get("env"),
 						kv: c.get("kv"),
-						translate: createTranslator({ config, locale }),
+						translate: createTranslator({
+							store: c.get("translationStore"),
+							locale,
+						}),
 						request: {
 							url: c.req.url,
 							ipAddress: connectionInfo.address ?? null,
@@ -121,8 +124,8 @@ const verifyToken = async (
 				return {
 					error: {
 						type: "authorisation",
-						name: text.server("core.auth.refresh.token.error.name"),
-						message: text.server("core.auth.refresh.token.error.message"),
+						name: copy("server:core.auth.refresh.token.error.name"),
+						message: copy("server:core.auth.refresh.token.error.message"),
 					},
 					data: undefined,
 				};
@@ -131,8 +134,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: text.server("core.auth.refresh.token.error.name"),
-					message: text.server("core.auth.refresh.token.missing"),
+					name: copy("server:core.auth.refresh.token.error.name"),
+					message: copy("server:core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -142,8 +145,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: text.server("core.auth.refresh.token.error.name"),
-					message: text.server("core.auth.refresh.token.missing"),
+					name: copy("server:core.auth.refresh.token.error.name"),
+					message: copy("server:core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -154,8 +157,8 @@ const verifyToken = async (
 			return {
 				error: {
 					type: "authorisation",
-					name: text.server("core.auth.refresh.token.error.name"),
-					message: text.server("core.auth.refresh.token.missing"),
+					name: copy("server:core.auth.refresh.token.error.name"),
+					message: copy("server:core.auth.refresh.token.missing"),
 				},
 				data: undefined,
 			};
@@ -197,8 +200,8 @@ const verifyToken = async (
 		return {
 			error: {
 				type: "authorisation",
-				name: text.server("core.auth.refresh.token.error.name"),
-				message: text.server("core.auth.refresh.token.error.message"),
+				name: copy("server:core.auth.refresh.token.error.name"),
+				message: copy("server:core.auth.refresh.token.error.message"),
 			},
 			data: undefined,
 		};

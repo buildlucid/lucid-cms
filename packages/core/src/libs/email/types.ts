@@ -3,7 +3,7 @@ import type {
 	emailDeliveryStatusSchema,
 	emailTypeSchema,
 } from "../../schemas/email.js";
-import type { TranslatableText } from "../i18n/types.js";
+import type { TranslatableCopy } from "../i18n/types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
 
 export type RenderedTemplates = {
@@ -72,7 +72,7 @@ export type EmailAttachment =
 export type EmailStrategyResponse = {
 	success: boolean;
 	deliveryStatus: EmailDeliveryStatus;
-	message: TranslatableText;
+	message: TranslatableCopy;
 	externalMessageId?: string | null;
 	data?: Record<string, unknown> | null;
 };

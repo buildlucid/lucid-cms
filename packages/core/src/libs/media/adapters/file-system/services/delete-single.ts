@@ -1,6 +1,6 @@
 import { constants } from "node:fs";
 import { access, unlink } from "node:fs/promises";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceDeleteSingle,
@@ -17,7 +17,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			} catch {
 				return {
 					error: {
-						message: text.server("core.files.not.found"),
+						message: copy("server:core.files.not.found"),
 					},
 					data: undefined,
 				};
@@ -32,7 +32,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			const error = e as Error;
 			return {
 				error: {
-					message: text.server("core.errors.default.message", {
+					message: copy("server:core.errors.default.message", {
 						defaultMessage: error.message,
 					}),
 				},

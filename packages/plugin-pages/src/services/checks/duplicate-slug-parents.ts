@@ -1,4 +1,4 @@
-import { prefixGeneratedColName, text } from "@lucidcms/core/plugin";
+import { copy, prefixGeneratedColName } from "@lucidcms/core/plugin";
 import type {
 	CollectionTableNames,
 	DocumentVersionType,
@@ -50,7 +50,7 @@ const checkDuplicateSlugParents: ServiceFn<
 
 		if (data.fields.slug.value) {
 			slugConditions.push({
-				localeCode: context.config.i18n.content.defaultLocale,
+				localeCode: context.config.localization.defaultLocale,
 				slug: normalizePathValue(data.fields.slug.value) || "/",
 			});
 		}
@@ -138,15 +138,15 @@ const checkDuplicateSlugParents: ServiceFn<
 					localeCode: duplicate.locale || undefined,
 					message:
 						duplicate[parentPageColumn] === null
-							? text.server("plugin.pages.slug.duplicate")
-							: text.server("plugin.pages.slug.parent.duplicate"),
+							? copy("server:plugin.pages.slug.duplicate")
+							: copy("server:plugin.pages.slug.parent.duplicate"),
 				});
 			}
 			return {
 				error: {
 					type: "basic",
 					status: 400,
-					message: text.server("plugin.pages.slug.duplicate"),
+					message: copy("server:plugin.pages.slug.duplicate"),
 					errors: {
 						fields: fieldErrors,
 					},
@@ -163,7 +163,7 @@ const checkDuplicateSlugParents: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: text.server("plugin.pages.slug.duplicate.check.failed"),
+				message: copy("server:plugin.pages.slug.duplicate.check.failed"),
 			},
 			data: undefined,
 		};

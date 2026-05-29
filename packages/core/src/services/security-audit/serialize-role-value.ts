@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import type { SecurityAuditRoleValue } from "../../types/security-audit.js";
 import { sortRoleSnapshot } from "../../utils/security-audit/sort-role-snapshot.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -20,7 +20,7 @@ const serializeRoleValue: ServiceFn<[SecurityAuditRoleValue], string> = async (
 			error: {
 				type: "basic",
 				status: 500,
-				message: text.server("core.errors.default.message"),
+				message: copy("server:core.errors.default.message"),
 			},
 			data: undefined,
 		};

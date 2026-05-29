@@ -27,6 +27,7 @@ const prepareMainWorkerEntry = (
 			exports: [
 				"createApp",
 				"createConfiguredDatabaseAdapter",
+				"prepareTranslations",
 				"processConfig",
 				"setupCronJobs",
 			],
@@ -68,7 +69,6 @@ const prepareMainWorkerEntry = (
 			params: ["request", "env", "ctx"],
 			content: /** ts */ `const wrappedDefinition = configureLucid(config, {
     emailTemplates: emailTemplates,
-    i18nTranslations: i18nTranslations,
 });
 const databaseAdapter = createConfiguredDatabaseAdapter(
     ConfiguredDatabaseAdapter,
@@ -83,9 +83,14 @@ const resolved = await processConfig(
         skipValidation: true,
     },
 );
+const { translationStore } = await prepareTranslations({
+    config: resolved,
+    bundles: i18nTranslations,
+});
 
 const { app } = await createApp({
     config: resolved,
+    translationStore: translationStore,
     env: env,
     runtimeContext: getRuntimeContext({
         server: "cloudflare",
@@ -133,7 +138,6 @@ return app.fetch(request, env, ctx);`,
 			content: /** ts */ `const runCronService = async () => {
     const wrappedDefinition = configureLucid(config, {
         emailTemplates: emailTemplates,
-        i18nTranslations: i18nTranslations,
     });
     const databaseAdapter = createConfiguredDatabaseAdapter(
         ConfiguredDatabaseAdapter,
@@ -148,12 +152,16 @@ return app.fetch(request, env, ctx);`,
             skipValidation: true,
         },
     );
+    const { translationStore } = await prepareTranslations({
+        config: resolved,
+        bundles: i18nTranslations,
+    });
     const runtimeContext = getRuntimeContext({
         server: "cloudflare",
         compiled: true,
     });
-    const translate = createTranslator({ config: resolved, locale: "en" });
-    const kv = await getInitializedKVAdapter(resolved, {
+const translate = createTranslator({ store: translationStore, locale: "en" });
+const kv = await getInitializedKVAdapter(resolved, {
         env,
         runtimeContext,
     });
@@ -166,13 +174,14 @@ return app.fetch(request, env, ctx);`,
         });
         await cronJobSetup.register({
             config: resolved,
+            translationStore,
             db: { client: resolved.db.client },
             queue: cronJobSetup.queue,
             env: env,
             kv: kv,
             request: {
                 url: resolved.baseUrl || "http://localhost",
-                locale: resolved.i18n.interface.defaultLocale,
+                locale: resolved.i18n.defaultLocale,
             },
             translate,
         }, {

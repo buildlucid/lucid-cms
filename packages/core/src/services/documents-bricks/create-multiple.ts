@@ -25,7 +25,7 @@ const createMultiple: ServiceFn<
 		collection: data.collection,
 		bricks: data.bricks,
 		fields: data.fields,
-		localization: context.config.i18n.content,
+		localization: context.config.localization,
 	});
 
 	// -------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ const createMultiple: ServiceFn<
 		collection: data.collection,
 		documentId: data.documentId,
 		versionId: data.versionId,
-		localization: context.config.i18n.content,
+		localization: context.config.localization,
 		bricks: preparedBricks,
 		fields: preparedFields,
 		tableNameByteLimit: context.config.db.config.tableNameByteLimit,

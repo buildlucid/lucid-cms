@@ -6,7 +6,7 @@ import type {
 import decodeError from "../../utils/errors/decode-error.js";
 import flattenDocumentFilters from "../../utils/helpers/flatten-document-filters.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
-import { text } from "../i18n/index.js";
+import { copy } from "../i18n/index.js";
 
 type PaginatedQuery = {
 	page?: number;
@@ -19,14 +19,14 @@ type DocumentQuery = {
 
 type ResolvedServiceResponse<T> = Awaited<ServiceResponse<T>>;
 
-type ToolkitServiceErrorText = {
+type ToolkitServiceErrorCopy = {
 	key: string;
-	fallback: string;
+	defaultMessage: string;
 };
 
 type ToolkitServiceErrorConfig = {
-	name?: ToolkitServiceErrorText;
-	message: ToolkitServiceErrorText;
+	name?: ToolkitServiceErrorCopy;
+	message: ToolkitServiceErrorCopy;
 };
 
 /** Applies Lucid's default pagination when toolkit callers omit it. */
@@ -94,12 +94,12 @@ export const runToolkitService = async <T>(
 			error: {
 				type: "basic",
 				name: errorConfig.name
-					? text.server(errorConfig.name.key, {
-							defaultMessage: errorConfig.name.fallback,
+					? copy(`server:${errorConfig.name.key}`, {
+							defaultMessage: errorConfig.name.defaultMessage,
 						})
 					: undefined,
-				message: text.server(errorConfig.message.key, {
-					defaultMessage: errorConfig.message.fallback,
+				message: copy(`server:${errorConfig.message.key}`, {
+					defaultMessage: errorConfig.message.defaultMessage,
 				}),
 				status: 500,
 			},
@@ -113,14 +113,14 @@ export const runToolkitService = async <T>(
 				error: {
 					type: "basic",
 					name: errorConfig.name
-						? text.server(errorConfig.name.key, {
-								defaultMessage: errorConfig.name.fallback,
+						? copy(`server:${errorConfig.name.key}`, {
+								defaultMessage: errorConfig.name.defaultMessage,
 							})
-						: text.server("core.errors.default.name", {
+						: copy("server:core.errors.default.name", {
 								defaultMessage: decodedError.name,
 							}),
-					message: text.server(errorConfig.message.key, {
-						defaultMessage: errorConfig.message.fallback,
+					message: copy(`server:${errorConfig.message.key}`, {
+						defaultMessage: errorConfig.message.defaultMessage,
 					}),
 					status: decodedError.status,
 					code: decodedError.code,
@@ -134,14 +134,14 @@ export const runToolkitService = async <T>(
 			error: {
 				type: "basic",
 				name: errorConfig.name
-					? text.server(errorConfig.name.key, {
-							defaultMessage: errorConfig.name.fallback,
+					? copy(`server:${errorConfig.name.key}`, {
+							defaultMessage: errorConfig.name.defaultMessage,
 						})
-					: text.server("core.errors.default.name", {
+					: copy("server:core.errors.default.name", {
 							defaultMessage: constants.errors.name,
 						}),
-				message: text.server(errorConfig.message.key, {
-					defaultMessage: errorConfig.message.fallback,
+				message: copy(`server:${errorConfig.message.key}`, {
+					defaultMessage: errorConfig.message.defaultMessage,
 				}),
 				status: constants.errors.status,
 			},

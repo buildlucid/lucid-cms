@@ -10,11 +10,21 @@ import type {
 	TranslationValues,
 } from "./types.js";
 
+/**
+ * Creates a complete, empty locale bundle so merge operations can safely add
+ * admin and server keys independently.
+ */
 const emptyBundle = (): TranslationBundle => ({
 	admin: {},
 	server: {},
 });
 
+/**
+ * Built-in Lucid English translations.
+ *
+ * Most application code should use `copy`, `translate`, or
+ * `createTranslator` instead of reading this object directly.
+ */
 export const coreTranslations: TranslationBundles = {
 	en: {
 		admin: coreEnAdmin,
@@ -22,6 +32,16 @@ export const coreTranslations: TranslationBundles = {
 	},
 };
 
+/**
+ * Ensures a partial locale bundle always has both admin and server scopes.
+ *
+ * @example
+ * ```ts
+ * const bundle = normalizeTranslationBundle({
+ *   admin: { "collections.posts.name": "Posts" },
+ * });
+ * ```
+ */
 export const normalizeTranslationBundle = (
 	bundle: Partial<TranslationBundle> | undefined,
 ): TranslationBundle => ({
@@ -29,6 +49,17 @@ export const normalizeTranslationBundle = (
 	server: { ...(bundle?.server ?? {}) },
 });
 
+/**
+ * Normalizes all locale bundles so every locale contains admin and server
+ * scopes.
+ *
+ * @example
+ * ```ts
+ * const translations = normalizeTranslationBundles({
+ *   fr: { server: { "posts.not.found": "Article introuvable." } },
+ * });
+ * ```
+ */
 export const normalizeTranslationBundles = (
 	bundles?: Record<string, Partial<TranslationBundle>>,
 ): TranslationBundles => {
@@ -41,6 +72,18 @@ export const normalizeTranslationBundles = (
 	return normalized;
 };
 
+/**
+ * Merges translation bundles in order, with later sources overriding earlier
+ * ones.
+ *
+ * Use this in build tooling when combining generated, plugin, or project
+ * translation bundles before creating a translation store.
+ *
+ * @example
+ * ```ts
+ * const translations = mergeTranslationBundles(coreTranslations, pluginTranslations);
+ * ```
+ */
 export const mergeTranslationBundles = (
 	...sources: Array<Record<string, Partial<TranslationBundle>> | undefined>
 ): TranslationBundles => {
@@ -63,6 +106,14 @@ export const mergeTranslationBundles = (
 	return merged;
 };
 
+/**
+ * Replaces `{{value}}` placeholders with the provided interpolation data.
+ *
+ * @example
+ * ```ts
+ * formatTranslation("Hello {{name}}", { name: "Ada" });
+ * ```
+ */
 export const formatTranslation = (
 	translation: string,
 	values?: TranslationValues,

@@ -3,7 +3,7 @@ import path from "node:path";
 import Mustache from "mustache";
 import constants from "../../../constants/constants.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import type { RenderedTemplates } from "../types.js";
 
 /**
@@ -25,7 +25,7 @@ const renderMustacheTemplate: ServiceFn<
 		if (preRenderedTemplate === undefined) {
 			return {
 				error: {
-					message: text.server("core.email.templates.not.found.message"),
+					message: copy("server:core.email.templates.not.found.message"),
 					status: 404,
 				},
 				data: undefined,
@@ -54,7 +54,7 @@ const renderMustacheTemplate: ServiceFn<
 		if (!templateData) {
 			return {
 				error: {
-					message: text.server("core.email.templates.not.found.message"),
+					message: copy("server:core.email.templates.not.found.message"),
 					status: 404,
 				},
 				data: undefined,
@@ -70,8 +70,8 @@ const renderMustacheTemplate: ServiceFn<
 	} catch (error) {
 		return {
 			error: {
-				message: text.server(
-					"core.email.templates.not.found.message",
+				message: copy(
+					"server:core.email.templates.not.found.message",
 					error instanceof Error
 						? { defaultMessage: error.message }
 						: undefined,

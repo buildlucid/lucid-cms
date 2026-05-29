@@ -9,12 +9,14 @@ const checkRepeaterDepth = (
 	for (const [repeaterKey, depth] of Object.entries(repeaterDepth)) {
 		if (depth > constants.fieldBuiler.maxRepeaterDepth) {
 			throw new Error(
-				translate.server("core.fields.repeater.validation.depth.message", {
-					type: type,
-					typeKey: typeKey,
-					repeaterKey: repeaterKey,
-					depth: depth,
-					maxRepeaterDepth: constants.fieldBuiler.maxRepeaterDepth,
+				translate("server:core.fields.repeater.validation.depth.message", {
+					data: {
+						type: type,
+						typeKey: typeKey,
+						repeaterKey: repeaterKey,
+						depth: depth,
+						maxRepeaterDepth: constants.fieldBuiler.maxRepeaterDepth,
+					},
 				}),
 			);
 		}

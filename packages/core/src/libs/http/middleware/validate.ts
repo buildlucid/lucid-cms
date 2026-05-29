@@ -1,7 +1,7 @@
 import type { ValidationTargets } from "hono";
 import type { ZodType } from "zod";
 import { LucidAPIError } from "../../../utils/errors/index.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import { zValidator as zv } from "./z-validator.js";
 
 const validate = <T extends ZodType, Target extends keyof ValidationTargets>(
@@ -12,7 +12,7 @@ const validate = <T extends ZodType, Target extends keyof ValidationTargets>(
 		if (!result.success) {
 			throw new LucidAPIError({
 				type: "validation",
-				message: text.server("core.errors.validation.message"),
+				message: copy("server:core.errors.validation.message"),
 				zod: result.error,
 			});
 		}

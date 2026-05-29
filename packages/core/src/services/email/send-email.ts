@@ -62,7 +62,7 @@ const sendEmail: ServiceFn<
 	const fromName = data.from?.name ?? emailFrom.name;
 	const toAddress = Array.isArray(data.to) ? data.to.join(",") : data.to;
 
-	const attachmentsRes = normalizeEmailAttachments(context, data.attachments);
+	const attachmentsRes = normalizeEmailAttachments(data.attachments);
 	if (attachmentsRes.error) return attachmentsRes;
 
 	const storageStrategyRes = normalizeEmailStorageConfig(data.storage);
@@ -177,7 +177,7 @@ const sendEmail: ServiceFn<
 				data: {
 					delivery_status: "failed",
 					message:
-						context.translate.english.text(queueRes.error.message) ||
+						context.translate.english(queueRes.error.message) ||
 						"Failed to queue email",
 					updated_at: new Date().toISOString(),
 				},

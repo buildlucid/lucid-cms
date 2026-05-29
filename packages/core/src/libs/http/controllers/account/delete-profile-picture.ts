@@ -7,7 +7,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -37,9 +37,9 @@ const deleteProfilePictureController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: text.server("core.routes.profile.picture.delete.error.name"),
-					message: text.server(
-						"core.routes.profile.picture.delete.error.message",
+					name: copy("server:core.routes.profile.picture.delete.error.name"),
+					message: copy(
+						"server:core.routes.profile.picture.delete.error.message",
 					),
 				},
 			},

@@ -1,5 +1,5 @@
 import type { OIDCUserInfo, ServiceResponse } from "../../../types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 
 /**
  * Maps a standard user info response to data we expect
@@ -19,8 +19,8 @@ const mapStandardUserInfo = (
 		return {
 			error: {
 				status: 400,
-				name: text.server("core.auth.oidc.user.info.incomplete.name"),
-				message: text.server("core.auth.oidc.user.info.incomplete.message"),
+				name: copy("server:core.auth.oidc.user.info.incomplete.name"),
+				message: copy("server:core.auth.oidc.user.info.incomplete.message"),
 			},
 			data: undefined,
 		};

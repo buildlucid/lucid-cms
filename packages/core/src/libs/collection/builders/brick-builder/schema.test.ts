@@ -1,15 +1,15 @@
 import { expect, test } from "vitest";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import BrickBuilder from "./index.js";
 import BrickConfigSchema from "./schema.js";
 
 test("brick builder config passes schema validation", async () => {
 	const brick = new BrickBuilder("block", {
 		details: {
-			name: text.admin("tests.bricks.block.name", {
+			name: copy("admin:tests.bricks.block.name", {
 				defaultMessage: "Block",
 			}),
-			summary: text.admin("tests.bricks.block.summary", {
+			summary: copy("admin:tests.bricks.block.summary", {
 				defaultMessage: "This is an example block",
 			}),
 		},

@@ -1,4 +1,4 @@
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceCompleteUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types.js";
@@ -18,8 +18,8 @@ export const completeUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: text.server(
-							"plugin.cloudflare.r2.http.fallback.not.configured",
+						message: copy(
+							"server:plugin.cloudflare.r2.http.fallback.not.configured",
 						),
 					},
 					data: undefined,
@@ -30,8 +30,8 @@ export const completeUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: text.server(
-							"plugin.cloudflare.r2.http.client.not.configured",
+						message: copy(
+							"server:plugin.cloudflare.r2.http.client.not.configured",
 						),
 					},
 					data: undefined,
@@ -63,8 +63,8 @@ export const completeUploadSession = (
 				return {
 					error: {
 						type: "plugin",
-						message: text.server(
-							"plugin.cloudflare.r2.upload.sessions.complete.failed",
+						message: copy(
+							"server:plugin.cloudflare.r2.upload.sessions.complete.failed",
 							{
 								data: {
 									status: response.status,
@@ -92,8 +92,8 @@ export const completeUploadSession = (
 					type: "plugin",
 					message:
 						error instanceof Error
-							? text.literal(error.message)
-							: text.server("plugin.cloudflare.r2.errors.unknown"),
+							? copy.literal(error.message)
+							: copy("server:plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,
 			};

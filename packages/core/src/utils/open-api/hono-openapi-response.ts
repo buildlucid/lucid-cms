@@ -61,7 +61,7 @@ const linksObject: OpenAPIV3.SchemaObject = {
 
 export const defaultErrorResponse = {
 	type: "object",
-	description: translate.server("core.openapi.response.default"),
+	description: translate("server:core.openapi.response.default"),
 	properties: {
 		status: {
 			type: "number",
@@ -104,7 +104,7 @@ const honoOpenAPIResponse = (config?: {
 
 	if (config?.schema) {
 		response[200] = {
-			description: translate.server("core.openapi.response.200"),
+			description: translate("server:core.openapi.response.200"),
 			content: {
 				"application/json": {
 					schema:
@@ -123,7 +123,7 @@ const honoOpenAPIResponse = (config?: {
 		};
 	} else {
 		response[204] = {
-			description: translate.server("core.openapi.response.204"),
+			description: translate("server:core.openapi.response.204"),
 			content: {
 				"application/json": {
 					schema: {
@@ -136,7 +136,7 @@ const honoOpenAPIResponse = (config?: {
 	}
 
 	response.default = {
-		description: translate.server("core.openapi.response.default"),
+		description: translate("server:core.openapi.response.default"),
 		content: {
 			"application/json": {
 				schema: defaultErrorResponse,

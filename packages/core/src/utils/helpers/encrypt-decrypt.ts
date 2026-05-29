@@ -22,7 +22,7 @@ export const decrypt = (encryptedSecret: string, encryptionKey: string) => {
 	const [iv, encrypted] = encryptedSecret.split(":");
 	if (!iv || !encrypted) {
 		throw new LucidError({
-			message: translate.server("core.security.secrets.encrypted.invalid"),
+			message: translate("server:core.security.secrets.encrypted.invalid"),
 		});
 	}
 	const key = encryptionKeyToHex(encryptionKey);

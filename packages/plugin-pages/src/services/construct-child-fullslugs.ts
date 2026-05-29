@@ -12,7 +12,7 @@ import buildFullSlug from "../utils/build-fullslug-from-slugs.js";
  */
 const constructChildFullSlug = (data: {
 	descendants: DescendantFieldsResponse[];
-	localization: Config["i18n"]["content"];
+	localization: Config["localization"];
 	parentFullSlugField?: FieldInputSchema;
 	collection: CollectionConfig;
 }): Awaited<

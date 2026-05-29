@@ -185,7 +185,7 @@ export const buildNodeAdminBarMiddlewareSource = (
 	return `import { defineMiddleware } from "astro:middleware";
 import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
 import ConfiguredDatabaseAdapter from ${JSON.stringify(databaseAdapterImportPath)};
-import { createApp, createConfiguredDatabaseAdapter, processConfig } from "@lucidcms/core/runtime";
+import { createApp, createConfiguredDatabaseAdapter, prepareTranslations, processConfig } from "@lucidcms/core/runtime";
 import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
 import { maybeInjectLucidAdminBar } from "@lucidcms/astro/runtime";
 import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
@@ -248,7 +248,6 @@ const ensureApp = async () => {
 \t\tappPromise = (async () => {
 \t\t\tconst wrappedDefinition = configureLucid(lucidConfigModule.default, {
 \t\t\t\temailTemplates,
-\t\t\t\ti18nTranslations,
 \t\t\t});
 \t\t\tconst adapterFactory = await getAdapterFactory();
 \t\t\tconst adapter = await adapterFactory(wrappedDefinition.adapter.options);
@@ -273,6 +272,10 @@ const ensureApp = async () => {
 \t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
 \t\t\t});
+\t\t\tconst { translationStore } = await prepareTranslations({
+\t\t\t\tconfig: resolvedConfig,
+\t\t\t\tbundles: i18nTranslations,
+\t\t\t});
 \t\t\tconst runtimeContext = {
 \t\t\t\t...getRuntimeContext({
 \t\t\t\t\tcompiled: false,
@@ -290,6 +293,7 @@ const ensureApp = async () => {
 
 \t\t\treturn createApp({
 \t\t\t\tconfig: resolvedConfig,
+\t\t\t\ttranslationStore,
 \t\t\t\tenv,
 \t\t\t\truntimeContext,
 \t\t\t});
@@ -372,6 +376,7 @@ const loadRuntimeModules = async () => {
 \t\t\t\tcreateConfiguredDatabaseAdapter:
 \t\t\t\t\truntimeModule.createConfiguredDatabaseAdapter,
 \t\t\t\tDatabaseAdapterClass: databaseAdapterModule.default,
+\t\t\t\tprepareTranslations: runtimeModule.prepareTranslations,
 \t\t\t\tprocessConfig: runtimeModule.processConfig,
 \t\t\t\tconfigureLucid: configureLucidModule.default,
 \t\t\t\tgetRuntimeContext: runtimeContextModule.getRuntimeContext,
@@ -394,6 +399,7 @@ const ensureApp = async () => {
 \t\t\t\tcreateApp,
 \t\t\t\tcreateConfiguredDatabaseAdapter,
 \t\t\t\tDatabaseAdapterClass,
+\t\t\t\tprepareTranslations,
 \t\t\t\tprocessConfig,
 \t\t\t\tconfigureLucid,
 \t\t\t\tgetRuntimeContext,
@@ -407,7 +413,6 @@ const ensureApp = async () => {
 
 \t\t\tconst wrappedDefinition = configureLucid(definition, {
 \t\t\t\temailTemplates,
-\t\t\t\ti18nTranslations,
 \t\t\t});
 \t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
 \t\t\t\tDatabaseAdapterClass,
@@ -420,9 +425,14 @@ const ensureApp = async () => {
 \t\t\t\tresolvedDb: databaseAdapter,
 \t\t\t\tskipValidation: true,
 \t\t\t});
+\t\t\tconst { translationStore } = await prepareTranslations({
+\t\t\t\tconfig: resolvedConfig,
+\t\t\t\tbundles: i18nTranslations,
+\t\t\t});
 
 \t\t\treturn createApp({
 \t\t\t\tconfig: resolvedConfig,
+\t\t\t\ttranslationStore,
 \t\t\t\tenv: cloudflareEnv,
 \t\t\t\truntimeContext: getRuntimeContext({
 \t\t\t\t\tserver: "cloudflare",

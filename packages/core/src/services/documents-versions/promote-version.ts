@@ -6,7 +6,7 @@ import {
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	DocumentBricksRepository,
 	DocumentsRepository,
@@ -64,9 +64,9 @@ const promoteVersion: ServiceFn<
 			return {
 				error: {
 					type: "basic",
-					name: text.server("core.collections.permission.error.name"),
-					message: text.server(
-						"core.publish.operations.required.for.environment.target",
+					name: copy("server:core.collections.permission.error.name"),
+					message: copy(
+						"server:core.publish.operations.required.for.environment.target",
 					),
 					status: 403,
 				},
@@ -85,8 +85,8 @@ const promoteVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.schema.migration.required.name"),
-				message: text.server("core.error.schema.migration.required.message"),
+				name: copy("server:core.error.schema.migration.required.name"),
+				message: copy("server:core.error.schema.migration.required.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -116,7 +116,7 @@ const promoteVersion: ServiceFn<
 				validation: {
 					enabled: true,
 					defaultError: {
-						message: text.server("core.documents.version.not.found.message"),
+						message: copy("server:core.documents.version.not.found.message"),
 						status: 404,
 					},
 				},
@@ -143,7 +143,7 @@ const promoteVersion: ServiceFn<
 		return {
 			error: {
 				status: 404,
-				message: text.server("core.documents.version.not.found.message"),
+				message: copy("server:core.documents.version.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -154,7 +154,7 @@ const promoteVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.documents.version.document.mismatch"),
+				message: copy("server:core.documents.version.document.mismatch"),
 				status: 404,
 			},
 			data: undefined,
@@ -165,7 +165,7 @@ const promoteVersion: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: text.server("core.documents.versions.promote.same.version"),
+				message: copy("server:core.documents.versions.promote.same.version"),
 			},
 			data: undefined,
 		};
@@ -175,7 +175,7 @@ const promoteVersion: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: text.server("core.documents.revisions.promote.denied"),
+				message: copy("server:core.documents.revisions.promote.denied"),
 			},
 			data: undefined,
 		};
@@ -184,8 +184,8 @@ const promoteVersion: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.error.locked.collection.name"),
-				message: text.server("core.error.locked.collection.message"),
+				name: copy("server:core.error.locked.collection.name"),
+				message: copy("server:core.error.locked.collection.message"),
 				status: 400,
 			},
 			data: undefined,
@@ -266,7 +266,7 @@ const promoteVersion: ServiceFn<
 					enabled: true,
 					defaultError: {
 						status: 400,
-						message: text.server("core.documents.create.failed"),
+						message: copy("server:core.documents.create.failed"),
 					},
 				},
 			},
@@ -291,7 +291,7 @@ const promoteVersion: ServiceFn<
 					enabled: true,
 					defaultError: {
 						status: 400,
-						message: text.server("core.documents.create.failed"),
+						message: copy("server:core.documents.create.failed"),
 					},
 				},
 			},
@@ -310,7 +310,7 @@ const promoteVersion: ServiceFn<
 		collection: collectionRes.data,
 		documentId: data.documentId,
 		versionId: createVersionRes.data.id,
-		localization: context.config.i18n.content,
+		localization: context.config.localization,
 		bricks: documentBricksFormatter.formatMultiple({
 			bricksQuery: bricksQueryRes.data,
 			bricksSchema: bricksTableSchemaRes.data,

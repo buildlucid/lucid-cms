@@ -1,14 +1,14 @@
 import type { ColumnDataType } from "kysely";
 import type constants from "../../../constants/constants.js";
 import type { Config } from "../../../types/config.js";
-import type { ErrorText } from "../../../types/errors.js";
+import type { ErrorCopy } from "../../../types/errors.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import type {
 	LucidBrickTableName,
 	OnDelete,
 	OnUpdate,
 } from "../../db/types.js";
-import type { AdminTextDescriptor } from "../../i18n/types.js";
+import type { AdminCopyDescriptor } from "../../i18n/types.js";
 import type { BrickBuilder, CollectionBuilder } from "../builders/index.js";
 import type {
 	CollectionSchemaColumn,
@@ -92,8 +92,8 @@ export type SharedFieldConfig = {
 	key: string;
 	type: FieldTypes;
 	details: {
-		label?: AdminTextDescriptor;
-		summary?: AdminTextDescriptor;
+		label?: AdminCopyDescriptor;
+		summary?: AdminCopyDescriptor;
 	};
 };
 
@@ -252,15 +252,15 @@ export type FieldRelationRefTarget = {
 // Validation/Errors
 export type CustomFieldErrorItem = {
 	condition?: (...args: unknown[]) => boolean;
-	message: ErrorText;
+	message: ErrorCopy;
 };
 export type CustomFieldValidationError = {
-	message: ErrorText;
+	message: ErrorCopy;
 	itemIndex?: number;
 };
 export type CustomFieldValidateResponse = {
 	valid: boolean;
-	message?: ErrorText;
+	message?: ErrorCopy;
 	errors?: CustomFieldValidationError[];
 };
 

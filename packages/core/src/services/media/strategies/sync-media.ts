@@ -1,4 +1,4 @@
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -77,7 +77,7 @@ const syncMedia: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.files.validation.storage.limit.exceeded", {
+				message: copy("server:core.files.validation.storage.limit.exceeded", {
 					data: {
 						size: formatBytes(storageLimit),
 					},
@@ -86,8 +86,8 @@ const syncMedia: ServiceFn<
 				errors: {
 					file: {
 						code: "storage",
-						message: text.server(
-							"core.files.validation.storage.limit.exceeded",
+						message: copy(
+							"server:core.files.validation.storage.limit.exceeded",
 							{
 								data: {
 									size: formatBytes(storageLimit),

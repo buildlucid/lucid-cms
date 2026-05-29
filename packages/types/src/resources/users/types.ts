@@ -1,4 +1,4 @@
-import type { AdminTextDescriptor } from "../locales/types.js";
+import type { AdminCopyDescriptor } from "../locales/types.js";
 import type { ProfilePicture } from "../media/types.js";
 
 export type CorePermission =
@@ -38,8 +38,8 @@ export type CorePermission =
 export type Permission = CorePermission | (string & {});
 
 export type PermissionDetails = {
-	name: AdminTextDescriptor;
-	description?: AdminTextDescriptor | null;
+	name: AdminCopyDescriptor;
+	description?: AdminCopyDescriptor | null;
 };
 
 export type PermissionDefinition = {

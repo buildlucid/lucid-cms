@@ -1,21 +1,19 @@
-import { CollectionBuilder, text } from "@lucidcms/core";
+import { CollectionBuilder, copy } from "@lucidcms/core";
 import { expect, test } from "vitest";
 import type { ZodType } from "zod";
 import registerFields from "./register-fields.js";
 
-const slugFormatMessage = text.server("plugin.pages.slug.validation.format", {
-	defaultMessage:
-		"The slug field may only contain letters, numbers, underscores, and hyphens.",
-});
+const slugFormatMessage =
+	"The slug field may only contain letters, numbers, underscores, and hyphens.";
 
-test("slug validation keeps a server text descriptor for API translation", () => {
+test("slug validation returns an English zod message", () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: text.admin("tests.collections.pages.name", {
+			name: copy("admin:tests.collections.pages.name", {
 				defaultMessage: "Pages",
 			}),
-			singularName: text.admin("tests.collections.pages.singularName", {
+			singularName: copy("admin:tests.collections.pages.singularName", {
 				defaultMessage: "Page",
 			}),
 		},
@@ -38,8 +36,6 @@ test("slug validation keeps a server text descriptor for API translation", () =>
 
 	expect(result.error.issues[0]).toMatchObject({
 		code: "custom",
-		params: {
-			lucidText: slugFormatMessage,
-		},
+		message: slugFormatMessage,
 	});
 });

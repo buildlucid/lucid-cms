@@ -1,4 +1,4 @@
-import { prefixGeneratedColName, text } from "@lucidcms/core/plugin";
+import { copy, prefixGeneratedColName } from "@lucidcms/core/plugin";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
@@ -70,7 +70,7 @@ const updateFullSlugFields: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: text.server("plugin.pages.full.slug.children.update.failed"),
+				message: copy("server:plugin.pages.full.slug.children.update.failed"),
 			},
 			data: undefined,
 		};

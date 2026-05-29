@@ -14,7 +14,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import getMediaAdapter from "../../../media/get-adapter.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
@@ -48,8 +48,8 @@ const downloadMediaController = factory.createHandlers(
 			});
 			throw new LucidAPIError({
 				type: "basic",
-				name: text.server("core.routes.fs.download.error.name"),
-				message: text.server("core.routes.fs.download.error.message"),
+				name: copy("server:core.routes.fs.download.error.name"),
+				message: copy("server:core.routes.fs.download.error.message"),
 			});
 		}
 
@@ -59,8 +59,8 @@ const downloadMediaController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.routes.fs.download.error.name"),
-				message: text.server("core.routes.fs.download.error.message"),
+				name: copy("server:core.routes.fs.download.error.name"),
+				message: copy("server:core.routes.fs.download.error.message"),
 			},
 		})(context, {
 			key: query.key,

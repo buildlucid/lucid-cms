@@ -6,6 +6,7 @@ import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prerenderMjmlTemplates from "../../email/templates/prerender-mjml-templates.js";
 import { createTranslator } from "../../i18n/index.js";
+import prepareTranslations from "../../i18n/prepare-translations.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import generateTypes from "../../type-generation/index.js";
@@ -37,8 +38,14 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			await serverDestroy?.();
 
 			const configResult = await loadConfigFile({ path: configPath });
-			const translate = createTranslator({
+			const translations = await prepareTranslations({
 				config: configResult.config,
+				projectRoot: configResult.projectRoot,
+				outputPath: configResult.config.build.paths.outDir,
+			});
+			const translationStore = translations.translationStore;
+			const translate = createTranslator({
+				store: translationStore,
 				locale: "en",
 			});
 			const adapterCLI = configResult.adapter.cli;
@@ -59,10 +66,11 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			generateTypes({
 				envSchema: configResult.envSchema,
 				configPath: configPath,
+				projectRoot: configResult.projectRoot,
 				adapterModule: configResult.definition.adapter.module,
 				databaseModule: configResult.definition.database.module,
 				collections: configResult.config.collections,
-				localization: configResult.config.i18n.content,
+				localization: configResult.config.localization,
 			});
 
 			if (!envValid) {
@@ -72,6 +80,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			const migrateResult = await migrateCommand({
 				config: configResult.config,
+				translationStore,
 				mode: "return",
 			})({
 				skipSyncSteps: !isInitialRun,
@@ -86,7 +95,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			const viteBuildRes = await vite.buildApp(configResult.config);
 			if (viteBuildRes.error) {
 				cliLogger.error(
-					translate.english.text(viteBuildRes.error.message) ??
+					translate.english(viteBuildRes.error.message) ??
 						"Failed to build app",
 				);
 				logger.setBuffering(false);
@@ -106,7 +115,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			]);
 			if (mjmlTemplatesRes.error) {
 				cliLogger.error(
-					translate.english.text(mjmlTemplatesRes.error.message) ??
+					translate.english(mjmlTemplatesRes.error.message) ??
 						"Failed to pre-render MJML templates",
 				);
 				logger.setBuffering(false);
@@ -115,7 +124,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 			}
 			if (publicAssetsRes.error) {
 				cliLogger.error(
-					translate.english.text(publicAssetsRes.error.message) ??
+					translate.english(publicAssetsRes.error.message) ??
 						"Failed to copy public assets",
 				);
 				logger.setBuffering(false);
@@ -127,6 +136,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			const serverRes = await adapterCLI.serve({
 				config: configResult.config,
+				translationStore,
 				logger: {
 					instance: cliLogger,
 					silent: false,

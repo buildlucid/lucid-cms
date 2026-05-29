@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import type { Config, ServiceContext } from "../../../types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import renderMustacheTemplate from "./render-mustache-template.js";
 
 const createServiceContext = (
@@ -39,7 +39,7 @@ describe("renderMustacheTemplate", () => {
 		});
 
 		expect(result.error).toMatchObject({
-			message: text.server("core.email.templates.not.found.message"),
+			message: copy("server:core.email.templates.not.found.message"),
 			status: 404,
 		});
 	});

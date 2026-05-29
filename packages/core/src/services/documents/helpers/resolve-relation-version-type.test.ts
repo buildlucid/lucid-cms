@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import constants from "../../../constants/constants.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 
 const mocks = vi.hoisted(() => ({
 	selectSingle: vi.fn(),
@@ -35,10 +35,10 @@ const createCollection = (
 	new CollectionBuilder(key, {
 		mode: "multiple",
 		details: {
-			name: text.admin(`tests.collections.${key}.name`, {
+			name: copy(`admin:tests.collections.${key}.name`, {
 				defaultMessage: key,
 			}),
-			singularName: text.admin(`tests.collections.${key}.singularName`, {
+			singularName: copy(`admin:tests.collections.${key}.singularName`, {
 				defaultMessage: key,
 			}),
 		},
@@ -96,7 +96,7 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: text.admin("tests.environments.staging.name", {
+				name: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 				relations: {
@@ -107,7 +107,7 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: text.admin("tests.environments.signed-off.name", {
+				name: copy("admin:tests.environments.signed-off.name", {
 					defaultMessage: "Signed off",
 				}),
 			},
@@ -137,7 +137,7 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: text.admin("tests.environments.staging.name", {
+				name: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 			},
@@ -145,7 +145,7 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "staging",
-				name: text.admin("tests.environments.staging.name", {
+				name: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 			},
@@ -173,7 +173,7 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: text.admin("tests.environments.staging.name", {
+				name: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 			},
@@ -181,7 +181,7 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: text.admin("tests.environments.signed-off.name", {
+				name: copy("admin:tests.environments.signed-off.name", {
 					defaultMessage: "Signed off",
 				}),
 			},
@@ -249,7 +249,7 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: text.admin("tests.environments.staging.name", {
+				name: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 				relations: {
@@ -260,7 +260,7 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: text.admin("tests.environments.signed-off.name", {
+				name: copy("admin:tests.environments.signed-off.name", {
 					defaultMessage: "Signed off",
 				}),
 			},

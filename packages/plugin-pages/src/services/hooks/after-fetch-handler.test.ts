@@ -13,11 +13,9 @@ import afterFetchHandler from "./after-fetch-handler.js";
 
 const context = {
 	config: {
-		i18n: {
-			content: {
-				defaultLocale: "en",
-				locales: [{ code: "en" }],
-			},
+		localization: {
+			defaultLocale: "en",
+			locales: [{ code: "en" }],
 		},
 	},
 } as never;

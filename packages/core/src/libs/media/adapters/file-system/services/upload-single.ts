@@ -1,7 +1,7 @@
 import { createWriteStream } from "node:fs";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { Readable } from "node:stream";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceUploadSingle,
@@ -51,7 +51,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			const error = e as Error;
 			return {
 				error: {
-					message: text.server("core.errors.default.message", {
+					message: copy("server:core.errors.default.message", {
 						defaultMessage: error.message,
 					}),
 				},

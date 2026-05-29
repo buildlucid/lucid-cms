@@ -1,4 +1,5 @@
 import type { Context } from "hono";
+import type { TranslationStore } from "../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../libs/kv/types.js";
 import type { QueueAdapterInstance } from "../libs/queue/types.js";
 import type { AdapterRuntimeContext } from "../libs/runtime/types.js";
@@ -37,6 +38,7 @@ export type LucidExecutionContext = {
 
 export type LucidHonoVariables = {
 	config: Config;
+	translationStore: TranslationStore;
 	runtimeContext: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;
 	kv: KVAdapterInstance;

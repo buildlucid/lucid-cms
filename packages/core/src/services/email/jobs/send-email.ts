@@ -8,7 +8,7 @@ import {
 } from "../../../libs/email/storage/index.js";
 import renderMustacheTemplate from "../../../libs/email/templates/render-mustache-template.js";
 import type { EmailStrategyResponse } from "../../../libs/email/types.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
@@ -37,7 +37,7 @@ const sendEmail: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: text.server("core.email.not.found.message"),
+					message: copy("server:core.email.not.found.message"),
 					status: 404,
 				},
 			},
@@ -56,7 +56,6 @@ const sendEmail: ServiceFn<
 		emailRes.data.storage_strategy,
 	);
 	const attachmentsRes = normalizeEmailAttachments(
-		context,
 		emailRes.data.attachments?.map((attachment) => ({
 			type: attachment.type,
 			url: attachment.url,
@@ -109,7 +108,7 @@ const sendEmail: ServiceFn<
 				where: [{ key: "id", operator: "=", value: data.transactionId }],
 				data: {
 					delivery_status: "failed",
-					message: context.translate.english.text(preSendError.message) ?? null,
+					message: context.translate.english(preSendError.message) ?? null,
 					updated_at: new Date().toISOString(),
 				},
 			}),
@@ -126,7 +125,7 @@ const sendEmail: ServiceFn<
 		result = {
 			success: true,
 			deliveryStatus: "sent",
-			message: text.server("core.email.successfully.sent"),
+			message: copy("server:core.email.successfully.sent"),
 			data: null,
 		};
 	} else {
@@ -157,8 +156,8 @@ const sendEmail: ServiceFn<
 				deliveryStatus: "failed",
 				message:
 					error instanceof Error
-						? text.literal(error.message)
-						: text.server("core.email.failed.to.send"),
+						? copy.literal(error.message)
+						: copy("server:core.email.failed.to.send"),
 				externalMessageId: null,
 			};
 		}
@@ -217,7 +216,7 @@ const sendEmail: ServiceFn<
 				delivery_status: result.deliveryStatus,
 				message: result.success
 					? null
-					: (context.translate.english.text(result.message) ?? null),
+					: (context.translate.english(result.message) ?? null),
 				strategy_data: result.data,
 				external_message_id: result.externalMessageId,
 				updated_at: new Date().toISOString(),

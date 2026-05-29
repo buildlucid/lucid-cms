@@ -1,4 +1,4 @@
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import { createSignedMediaUrl } from "../../../signed-url.js";
 import type {
 	FileSystemMediaAdapterOptions,
@@ -33,7 +33,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			const error = e as Error;
 			return {
 				error: {
-					message: text.server("core.media.upload.sessions.create.failed", {
+					message: copy("server:core.media.upload.sessions.create.failed", {
 						defaultMessage: error.message,
 					}),
 					status: 500,

@@ -10,6 +10,7 @@ import logger from "../logger/index.js";
 import generateAdapterOptionsTypes from "./adapter-options-type.js";
 import generateDatabaseOptionsTypes from "./database-options-type.js";
 import generateEnvTypes from "./env-type.js";
+import generateTranslationCopyTypes from "./translation-copy-type.js";
 import type {
 	TypeGenerationContribution,
 	TypeGenerationFile,
@@ -84,11 +85,15 @@ const buildCoreTypesFile = (props: {
 	const imports = props.contributions.flatMap(
 		(contribution) => contribution.imports ?? [],
 	);
+	const declarations = props.contributions.flatMap(
+		(contribution) => contribution.declarations ?? [],
+	);
 
 	return {
 		filename: constants.typeGeneration.files.core,
 		references: [`./${constants.typeGeneration.files.client}`],
 		imports: Array.from(new Set(imports)),
+		declarations: Array.from(new Set(declarations)),
 		moduleAugmentations: mergeModuleAugmentations(props.contributions),
 	};
 };
@@ -96,10 +101,11 @@ const buildCoreTypesFile = (props: {
 const generateTypes = async (props: {
 	envSchema?: ZodType;
 	configPath: string;
+	projectRoot?: string;
 	adapterModule?: string;
 	databaseModule?: string;
 	collections: CollectionBuilder[];
-	localization: Config["i18n"]["content"];
+	localization: Config["localization"];
 }) => {
 	const lucidDir = await ensureLucidDirectoryExists();
 	const configRelativePath = relative(lucidDir, props.configPath);
@@ -115,6 +121,9 @@ const generateTypes = async (props: {
 			}),
 			generateDatabaseOptionsTypes({
 				databaseModule: props.databaseModule,
+			}),
+			generateTranslationCopyTypes({
+				projectRoot: props.projectRoot,
 			}),
 		])
 	).filter((result): result is TypeGenerationContribution => Boolean(result));

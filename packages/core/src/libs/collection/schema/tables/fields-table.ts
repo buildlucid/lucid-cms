@@ -6,7 +6,7 @@ import type {
 	FieldTypes,
 	ServiceResponse,
 } from "../../../../types.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import registeredFields from "../../custom-fields/registered-fields.js";
 import {
 	getFieldDatabaseConfig,
@@ -247,8 +247,8 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: text.server(
-								"core.collections.schema.table.name.format.insufficient.parts",
+							message: copy(
+								"server:core.collections.schema.table.name.format.insufficient.parts",
 							),
 						},
 					};
@@ -259,8 +259,8 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: text.server(
-								"core.collections.schema.table.name.format.insufficient.parts",
+							message: copy(
+								"server:core.collections.schema.table.name.format.insufficient.parts",
 							),
 						},
 					};
@@ -314,8 +314,8 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: text.server(
-								"core.fields.lookup.not.found.with.key.in.collection.brick",
+							message: copy(
+								"server:core.fields.lookup.not.found.with.key.in.collection.brick",
 								{
 									data: {
 										key: field.key,
@@ -375,8 +375,8 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: text.server(
-								"core.collections.schema.table.name.format.insufficient.parts",
+							message: copy(
+								"server:core.collections.schema.table.name.format.insufficient.parts",
 							),
 						},
 					};
@@ -390,8 +390,8 @@ const createFieldTables = (props: {
 					return {
 						data: undefined,
 						error: {
-							message: text.server(
-								"core.fields.lookup.not.found.with.key.in.collection.brick",
+							message: copy(
+								"server:core.fields.lookup.not.found.with.key.in.collection.brick",
 								{
 									data: {
 										key: field.key,

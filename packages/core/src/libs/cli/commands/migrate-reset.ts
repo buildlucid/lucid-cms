@@ -1,6 +1,8 @@
 import { confirm } from "@inquirer/prompts";
 import type { Config } from "../../../types.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import prepareTranslations from "../../i18n/prepare-translations.js";
+import type { TranslationStore } from "../../i18n/types.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
@@ -12,11 +14,13 @@ import validateEnvVars from "../services/validate-env-vars.js";
 
 const migrateResetCommand = (props?: {
 	config?: Config;
+	translationStore?: TranslationStore;
 	mode: "process" | "return";
 }) => {
 	return async (options?: { force?: boolean }) => {
 		let kvInstance: KVAdapterInstance | undefined;
 		let config: Config | undefined;
+		let translationStore: TranslationStore | undefined;
 		try {
 			logger.setBuffering(true);
 			const startTime = cliLogger.startTimer();
@@ -25,9 +29,16 @@ const migrateResetCommand = (props?: {
 
 			if (props?.config) {
 				config = props.config;
+				translationStore = props.translationStore;
 			} else {
 				const res = await loadConfigFile();
 				config = res.config;
+				translationStore = (
+					await prepareTranslations({
+						config,
+						projectRoot: res.projectRoot,
+					})
+				).translationStore;
 
 				const envValid = await validateEnvVars({
 					envSchema: res.envSchema,
@@ -40,6 +51,9 @@ const migrateResetCommand = (props?: {
 						process.exit(1);
 					} else return false;
 				}
+			}
+			if (!translationStore) {
+				throw new Error("Lucid could not resolve the translation store.");
 			}
 
 			cliLogger.warn("This will drop all database tables");
@@ -122,7 +136,9 @@ const migrateResetCommand = (props?: {
 				return true;
 			}
 		} catch (error) {
-			if (config) await destroyKVAdapter(kvInstance, { config });
+			if (config && translationStore) {
+				await destroyKVAdapter(kvInstance, { config });
+			}
 			cliLogger.error(
 				"Database reset failed",
 				error instanceof Error ? error.message : "Unknown error",

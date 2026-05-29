@@ -3,6 +3,7 @@ import type { QueueAdapterInstance } from "../../libs/queue/types.js";
 import type { EnvironmentVariables } from "../../libs/runtime/types.js";
 import type { Config } from "../../types/config.js";
 import type { ServiceContext } from "../../utils/services/types.js";
+import type { TranslationStore } from "../i18n/types.js";
 import type { ToolkitDocuments } from "./documents/index.js";
 import type { ToolkitEmail } from "./email/index.js";
 import type { ToolkitLocales } from "./locales/index.js";
@@ -15,6 +16,8 @@ export type ToolkitContext = ServiceContext;
 export type CreateToolkitServiceContextOptions = {
 	/** Resolved Lucid config to build the toolkit from. */
 	config: Config;
+	/** Translation store resolved alongside the config. */
+	translationStore: TranslationStore;
 	/** Optional runtime env bindings associated with the config. */
 	env?: EnvironmentVariables | null;
 	/** Optional queue adapter instance to use for toolkit-backed services. */

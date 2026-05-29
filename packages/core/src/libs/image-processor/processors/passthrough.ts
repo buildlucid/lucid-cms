@@ -1,6 +1,6 @@
 import mime from "mime-types";
 import type { ImageProcessor } from "../../../types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 
 /**
  * A passthrough image processor that returns the original buffer without any processing.
@@ -36,7 +36,7 @@ const passthroughProcessor: ImageProcessor = async (stream, options) => {
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.media.image.process.failed", {
+				message: copy("server:core.media.image.process.failed", {
 					defaultMessage:
 						error instanceof Error
 							? error.message

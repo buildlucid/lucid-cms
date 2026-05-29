@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../types.js";
 import prepareBricksAndFields from "./prepare-bricks-and-fields.js";
@@ -34,10 +34,10 @@ describe("testing prepareBricksAndFields", () => {
 	const simpleCollection = new CollectionBuilder("simple", {
 		mode: "multiple",
 		details: {
-			name: text.admin("tests.collections.simple.name", {
+			name: copy("admin:tests.collections.simple.name", {
 				defaultMessage: "Simple",
 			}),
-			singularName: text.admin("tests.collections.simple.singularName", {
+			singularName: copy("admin:tests.collections.simple.singularName", {
 				defaultMessage: "Simple",
 			}),
 		},
@@ -46,7 +46,7 @@ describe("testing prepareBricksAndFields", () => {
 		},
 	}).addText("simpleHeading", {
 		details: {
-			label: text.admin("tests.fields.simpleHeading.label", {
+			label: copy("admin:tests.fields.simpleHeading.label", {
 				defaultMessage: "Heading Default",
 			}),
 		},
@@ -202,10 +202,10 @@ describe("testing prepareBricksAndFields", () => {
 		const collection = new CollectionBuilder("trim-test", {
 			mode: "single",
 			details: {
-				name: text.admin("tests.collections.trim-test.name", {
+				name: copy("admin:tests.collections.trim-test.name", {
 					defaultMessage: "Trim Test",
 				}),
-				singularName: text.admin("tests.collections.trim-test.singularName", {
+				singularName: copy("admin:tests.collections.trim-test.singularName", {
 					defaultMessage: "Trim Test",
 				}),
 			},
@@ -217,13 +217,13 @@ describe("testing prepareBricksAndFields", () => {
 			.addSelect("status", {
 				options: [
 					{
-						label: text.admin("tests.fields.status.options.draft", {
+						label: copy("admin:tests.fields.status.options.draft", {
 							defaultMessage: "Draft",
 						}),
 						value: "draft",
 					},
 					{
-						label: text.admin("tests.fields.status.options.live", {
+						label: copy("admin:tests.fields.status.options.live", {
 							defaultMessage: "Live",
 						}),
 						value: "live",

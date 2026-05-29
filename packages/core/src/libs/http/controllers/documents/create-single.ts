@@ -10,7 +10,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
@@ -50,8 +50,8 @@ const createSingleController = factory.createHandlers(
 			transaction: true,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.routes.document.create.error.name"),
-				message: text.server("core.routes.document.create.error.message"),
+				name: copy("server:core.routes.document.create.error.name"),
+				message: copy("server:core.routes.document.create.error.message"),
 			},
 		})(context, {
 			collectionKey,

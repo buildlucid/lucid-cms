@@ -1,7 +1,7 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	OptionsRepository,
 	UsersRepository,
@@ -33,7 +33,7 @@ const createInitialAdmin: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.setup.already.completed"),
+				message: copy("server:core.setup.already.completed"),
 				status: 400,
 			},
 			data: undefined,

@@ -14,9 +14,11 @@ const checkPluginVersion = (data: {
 	if (!semver.satisfies(lucidVersion, data.requiredVersions)) {
 		throw new LucidError({
 			scope: data.key,
-			message: translate.server("core.plugins.version.not.supported", {
-				version: lucidVersion as string,
-				supportedVersions: data.requiredVersions,
+			message: translate("server:core.plugins.version.not.supported", {
+				data: {
+					version: lucidVersion as string,
+					supportedVersions: data.requiredVersions,
+				},
 			}),
 		});
 	}

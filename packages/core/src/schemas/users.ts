@@ -120,7 +120,7 @@ const updateProfilePictureBodySchema = z
 	.refine(
 		(data) => (data.key === undefined) === (data.fileName === undefined),
 		{
-			message: translate.server("core.profile.picture.file.name.key.required"),
+			message: translate("server:core.profile.picture.file.name.key.required"),
 			path: ["fileName"],
 		},
 	);

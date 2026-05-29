@@ -1,5 +1,5 @@
 import z from "zod";
-import { adminTextDescriptorSchema } from "../libs/i18n/index.js";
+import { adminCopyDescriptorSchema } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { brickConfigSchema } from "./collection-bricks.js";
 import { fieldConfigSchema } from "./collection-fields.js";
@@ -43,28 +43,28 @@ const collectionResponseSchema = z.object({
 		})
 		.optional(),
 	details: z.object({
-		name: adminTextDescriptorSchema.meta({
+		name: adminCopyDescriptorSchema.meta({
 			description: "Display name for the collection",
 			example: {
-				type: "lucid.text",
+				type: "lucid.copy",
 				scope: "admin",
 				key: "collections.page.name",
 				defaultMessage: "Pages",
 			},
 		}),
-		singularName: adminTextDescriptorSchema.meta({
+		singularName: adminCopyDescriptorSchema.meta({
 			description: "Singular display name for items in the collection",
 			example: {
-				type: "lucid.text",
+				type: "lucid.copy",
 				scope: "admin",
 				key: "collections.page.singularName",
 				defaultMessage: "Page",
 			},
 		}),
-		summary: adminTextDescriptorSchema.nullable().meta({
+		summary: adminCopyDescriptorSchema.nullable().meta({
 			description: "Description text for the collection",
 			example: {
-				type: "lucid.text",
+				type: "lucid.copy",
 				scope: "admin",
 				key: "collections.page.summary",
 				defaultMessage: "Manage the pages and content on your website.",
@@ -113,7 +113,7 @@ const collectionResponseSchema = z.object({
 				stages: z.array(
 					z.object({
 						key: z.string(),
-						name: adminTextDescriptorSchema,
+						name: adminCopyDescriptorSchema,
 						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
 						publishTargets: z.array(z.string()),
 						permissions: z.object({
@@ -134,10 +134,10 @@ const collectionResponseSchema = z.object({
 					description: "The environment key",
 					example: "production",
 				}),
-				name: adminTextDescriptorSchema.meta({
+				name: adminCopyDescriptorSchema.meta({
 					description: "Display name for the environment",
 					example: {
-						type: "lucid.text",
+						type: "lucid.copy",
 						scope: "admin",
 						key: "collections.page.environments.production.name",
 						defaultMessage: "Production",

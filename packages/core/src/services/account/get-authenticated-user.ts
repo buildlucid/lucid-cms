@@ -1,5 +1,5 @@
 import { usersFormatter } from "../../libs/formatters/index.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
@@ -41,7 +41,7 @@ const getAuthenticatedUser: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: text.server("core.user.not.found.message"),
+					message: copy("server:core.user.not.found.message"),
 					status: 404,
 				},
 			},
@@ -59,8 +59,8 @@ const getAuthenticatedUser: ServiceFn<
 			user: userRes.data,
 			authUser: data.authUser,
 			host: getBaseUrl(context),
-			locales: context.config.i18n.content.locales.map((locale) => locale.code),
-			defaultLocale: context.config.i18n.content.defaultLocale,
+			locales: context.config.localization.locales.map((locale) => locale.code),
+			defaultLocale: context.config.localization.defaultLocale,
 			pendingEmailChange: pendingEmailChangeRes.data
 				? {
 						email: pendingEmailChangeRes.data.new_email,

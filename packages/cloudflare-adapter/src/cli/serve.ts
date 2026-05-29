@@ -15,7 +15,7 @@ const serveCommand =
 		options: AdapterOptions | undefined,
 		platformProxy: PlatformProxy | undefined,
 	): ServeHandler =>
-	async ({ config, logger, onListening }) => {
+	async ({ config, translationStore, logger, onListening }) => {
 		logger.instance.info(
 			"Using:",
 			logger.instance.color.blue("Cloudflare Worker Adapter"),
@@ -53,6 +53,7 @@ const serveCommand =
 
 		const { app, destroy, issues } = await createApp({
 			config,
+			translationStore,
 			runtimeContext: runtimeContext,
 			env: platformProxy?.env,
 			app: cloudflareApp,

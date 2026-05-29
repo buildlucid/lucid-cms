@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { constants } from "node:fs";
 import { access, stat } from "node:fs/promises";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterServiceGetMeta,
@@ -18,7 +18,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			} catch {
 				return {
 					error: {
-						message: text.server("core.files.not.found"),
+						message: copy("server:core.files.not.found"),
 						status: 404,
 					},
 					data: undefined,
@@ -52,7 +52,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			const error = e as Error;
 			return {
 				error: {
-					message: text.server("core.errors.default.message", {
+					message: copy("server:core.errors.default.message", {
 						defaultMessage: error.message,
 					}),
 					status: 500,

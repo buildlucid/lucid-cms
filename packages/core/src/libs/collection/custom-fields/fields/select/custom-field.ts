@@ -1,7 +1,7 @@
 import merge from "lodash.merge";
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -29,7 +29,7 @@ class SelectCustomField extends CustomField<"select"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					text.admin(`fields.${this.type}.${this.key}.label`, {
+					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
@@ -49,7 +49,7 @@ class SelectCustomField extends CustomField<"select"> {
 	get errors() {
 		return merge(super.errors, {
 			required: {
-				message: text.server("core.fields.select.validation.required"),
+				message: copy("server:core.fields.select.validation.required"),
 			},
 		});
 	}
@@ -88,7 +88,7 @@ class SelectCustomField extends CustomField<"select"> {
 			if (!optionValues.includes(value as string)) {
 				return {
 					valid: false,
-					message: text.server("core.fields.select.validation.option.invalid"),
+					message: copy("server:core.fields.select.validation.option.invalid"),
 				};
 			}
 		}

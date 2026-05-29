@@ -1,4 +1,4 @@
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import { validateSignedMediaUrl } from "../../../libs/media/signed-url.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -29,7 +29,7 @@ const validatePresignedToken: ServiceFn<
 			error: {
 				status: 403,
 				type: "basic",
-				message: text.server("core.tokens.invalid.or.expired"),
+				message: copy("server:core.tokens.invalid.or.expired"),
 			},
 			data: undefined,
 		};

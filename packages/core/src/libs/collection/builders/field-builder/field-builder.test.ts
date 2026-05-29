@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import FieldBuilder from "./index.js";
 
 test("all fields should be added", async () => {
@@ -114,7 +114,7 @@ test("flat fields should return correct config", async () => {
 			key: "text_test",
 			type: "text",
 			details: {
-				label: text.admin("fields.text.text_test.label", {
+				label: copy("admin:fields.text.text_test.label", {
 					defaultMessage: "Text Test",
 				}),
 				summary: undefined,
@@ -132,7 +132,7 @@ test("flat fields should return correct config", async () => {
 			key: "textarea_test",
 			type: "textarea",
 			details: {
-				label: text.admin("fields.textarea.textarea_test.label", {
+				label: copy("admin:fields.textarea.textarea_test.label", {
 					defaultMessage: "Textarea Test",
 				}),
 				summary: undefined,
@@ -150,7 +150,7 @@ test("flat fields should return correct config", async () => {
 			key: "rich_text_test",
 			type: "rich-text",
 			details: {
-				label: text.admin("fields.rich-text.rich_text_test.label", {
+				label: copy("admin:fields.rich-text.rich_text_test.label", {
 					defaultMessage: "Rich Text Test",
 				}),
 				summary: undefined,
@@ -171,7 +171,7 @@ test("flat fields should return correct config", async () => {
 			key: "number_test",
 			type: "number",
 			details: {
-				label: text.admin("fields.number.number_test.label", {
+				label: copy("admin:fields.number.number_test.label", {
 					defaultMessage: "Number Test",
 				}),
 				summary: undefined,
@@ -189,7 +189,7 @@ test("flat fields should return correct config", async () => {
 			key: "checkbox_test",
 			type: "checkbox",
 			details: {
-				label: text.admin("fields.checkbox.checkbox_test.label", {
+				label: copy("admin:fields.checkbox.checkbox_test.label", {
 					defaultMessage: "Checkbox Test",
 				}),
 				summary: undefined,
@@ -208,7 +208,7 @@ test("flat fields should return correct config", async () => {
 			key: "select_test",
 			type: "select",
 			details: {
-				label: text.admin("fields.select.select_test.label", {
+				label: copy("admin:fields.select.select_test.label", {
 					defaultMessage: "Select Test",
 				}),
 				summary: undefined,
@@ -227,7 +227,7 @@ test("flat fields should return correct config", async () => {
 			key: "json_test",
 			type: "json",
 			details: {
-				label: text.admin("fields.json.json_test.label", {
+				label: copy("admin:fields.json.json_test.label", {
 					defaultMessage: "Json Test",
 				}),
 				summary: undefined,
@@ -245,7 +245,7 @@ test("flat fields should return correct config", async () => {
 			key: "color_test",
 			type: "color",
 			details: {
-				label: text.admin("fields.color.color_test.label", {
+				label: copy("admin:fields.color.color_test.label", {
 					defaultMessage: "Color Test",
 				}),
 				summary: undefined,
@@ -263,7 +263,7 @@ test("flat fields should return correct config", async () => {
 			key: "media_test",
 			type: "media",
 			details: {
-				label: text.admin("fields.media.media_test.label", {
+				label: copy("admin:fields.media.media_test.label", {
 					defaultMessage: "Media Test",
 				}),
 				summary: undefined,
@@ -281,7 +281,7 @@ test("flat fields should return correct config", async () => {
 			key: "datetime_test",
 			type: "datetime",
 			details: {
-				label: text.admin("fields.datetime.datetime_test.label", {
+				label: copy("admin:fields.datetime.datetime_test.label", {
 					defaultMessage: "Datetime Test",
 				}),
 				summary: undefined,
@@ -300,7 +300,7 @@ test("flat fields should return correct config", async () => {
 			key: "link_test",
 			type: "link",
 			details: {
-				label: text.admin("fields.link.link_test.label", {
+				label: copy("admin:fields.link.link_test.label", {
 					defaultMessage: "Link Test",
 				}),
 				summary: undefined,
@@ -322,7 +322,7 @@ test("flat fields should return correct config", async () => {
 			key: "user_test",
 			type: "user",
 			details: {
-				label: text.admin("fields.user.user_test.label", {
+				label: copy("admin:fields.user.user_test.label", {
 					defaultMessage: "User Test",
 				}),
 				summary: undefined,
@@ -341,7 +341,7 @@ test("flat fields should return correct config", async () => {
 			key: "repeater_test",
 			type: "repeater",
 			details: {
-				label: text.admin("fields.repeater.repeater_test.label", {
+				label: copy("admin:fields.repeater.repeater_test.label", {
 					defaultMessage: "Repeater Test",
 				}),
 				summary: undefined,
@@ -356,7 +356,7 @@ test("flat fields should return correct config", async () => {
 			key: "repeater_text_test",
 			type: "text",
 			details: {
-				label: text.admin("fields.text.repeater_text_test.label", {
+				label: copy("admin:fields.text.repeater_text_test.label", {
 					defaultMessage: "Repeater Text Test",
 				}),
 				summary: undefined,

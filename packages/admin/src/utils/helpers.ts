@@ -1,6 +1,6 @@
-import type { AdminTextDescriptor, Media, User } from "@types";
+import type { AdminCopyDescriptor, Media, User } from "@types";
 import type { Accessor, Setter } from "solid-js";
-import { translateAdminText } from "@/translations";
+import { translateAdminCopy } from "@/translations";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 
 // biome-ignore lint/suspicious/noExplicitAny: explanation
@@ -253,14 +253,14 @@ const getRecordTranslation = (
 // ---------------------------------------------
 // Content Locale Value
 const getLocaleValue = (props: {
-	value: AdminTextDescriptor | string | undefined | null;
+	value: AdminCopyDescriptor | string | undefined | null;
 	fallback?: string;
 }) => {
 	if (props.value === undefined || props.value === null)
 		return props.fallback ?? "";
 	if (typeof props.value === "string") return props.value;
-	if (props.value.type === "lucid.text" && props.value.scope === "admin") {
-		return translateAdminText(props.value, { defaultMessage: props.fallback });
+	if (props.value.type === "lucid.copy" && props.value.scope === "admin") {
+		return translateAdminCopy(props.value, { defaultMessage: props.fallback });
 	}
 	return props.fallback ?? "";
 };

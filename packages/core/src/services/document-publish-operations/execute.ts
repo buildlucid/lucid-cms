@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
@@ -38,7 +38,7 @@ const execute: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.publish.operations.not.found"),
+				message: copy("server:core.publish.operations.not.found"),
 				status: 404,
 			},
 			data: undefined,
@@ -71,7 +71,7 @@ const execute: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.publish.operations.execution.user.missing"),
+				message: copy("server:core.publish.operations.execution.user.missing"),
 				status: 400,
 			},
 			data: undefined,
@@ -115,7 +115,7 @@ const execute: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.publish.requests.target.not.enabled"),
+				message: copy("server:core.publish.requests.target.not.enabled"),
 				status: 400,
 			},
 			data: undefined,
@@ -137,7 +137,7 @@ const execute: ServiceFn<
 				data: {
 					execution_status: "failed",
 					failed_at: new Date().toISOString(),
-					execution_error_message: context.translate.text(
+					execution_error_message: context.translate(
 						workflowPublishRes.error.message,
 					),
 					execution_error_data: {
@@ -166,9 +166,7 @@ const execute: ServiceFn<
 				data: {
 					execution_status: "failed",
 					failed_at: new Date().toISOString(),
-					execution_error_message: context.translate.text(
-						promoteRes.error.message,
-					),
+					execution_error_message: context.translate(promoteRes.error.message),
 					execution_error_data: {
 						source: "execution",
 					},

@@ -11,10 +11,12 @@ const checkDuplicateFieldKeys = (
 
 	if (duplicateKeys.length > 0) {
 		throw new Error(
-			translate.server("core.collections.fields.duplicates", {
-				type: type,
-				keys: duplicateKeys.join(", "),
-				typeKey: typeKey,
+			translate("server:core.collections.fields.duplicates", {
+				data: {
+					type: type,
+					keys: duplicateKeys.join(", "),
+					typeKey: typeKey,
+				},
 			}),
 		);
 	}

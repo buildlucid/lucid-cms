@@ -3,7 +3,6 @@ import { relative } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { getBuildPaths } from "@lucidcms/core/build";
 import type {
-	LucidConfigDefinitionMeta,
 	RuntimeConfigureLucid,
 	WrappedLucidConfigDefinition,
 } from "@lucidcms/core/types";
@@ -13,7 +12,6 @@ const configureLucid: RuntimeConfigureLucid = <
 	DatabaseModule extends string,
 >(
 	definition: WrappedLucidConfigDefinition<AdapterModule, DatabaseModule>,
-	meta?: LucidConfigDefinitionMeta,
 ) => {
 	return {
 		...definition,

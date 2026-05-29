@@ -32,7 +32,7 @@ export const getErrorObject = (
 	if (Array.isArray(error)) return undefined;
 	if (
 		"type" in error &&
-		((error as { type?: string }).type === "lucid.text" ||
+		((error as { type?: string }).type === "lucid.copy" ||
 			(error as { type?: string }).type === "lucid.literal")
 	) {
 		return undefined;

@@ -3,7 +3,7 @@ import type {
 	Select,
 	ServiceResponse,
 } from "../../../types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import buildSchemaIndex from "../helpers/build-schema-index.js";
 import prefixGeneratedColName from "../helpers/prefix-generated-column-name.js";
 import type {
@@ -106,7 +106,7 @@ abstract class CustomField<T extends FieldTypes> {
 		return {
 			fieldType: {
 				condition: (value: unknown) => value !== this.type,
-				message: text.server("core.fields.validation.type.mismatch", {
+				message: copy("server:core.fields.validation.type.mismatch", {
 					data: {
 						received: "unknown",
 						expected: this.config.type,
@@ -116,10 +116,10 @@ abstract class CustomField<T extends FieldTypes> {
 			required: {
 				condition: (value: unknown) =>
 					value === undefined || value === null || value === "",
-				message: text.server("core.fields.validation.required"),
+				message: copy("server:core.fields.validation.required"),
 			},
 			zod: {
-				message: text.server("core.fields.validation.invalid"),
+				message: copy("server:core.fields.validation.invalid"),
 			},
 		};
 	}
@@ -251,7 +251,7 @@ abstract class CustomField<T extends FieldTypes> {
 		if (this.errors.fieldType.condition?.(type)) {
 			return {
 				valid: false,
-				message: text.server("core.fields.validation.type.mismatch", {
+				message: copy("server:core.fields.validation.type.mismatch", {
 					data: {
 						received: type,
 						expected: this.config.type,

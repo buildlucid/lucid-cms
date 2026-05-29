@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -28,7 +28,7 @@ const deleteSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: text.server("core.client.integrations.not.found.message"),
+				message: copy("server:core.client.integrations.not.found.message"),
 				status: 404,
 			},
 		},

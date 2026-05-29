@@ -1,17 +1,11 @@
 import z from "zod";
-import type {
-	ServiceContext,
-	ServiceResponse,
-} from "../../utils/services/types.js";
-import { text } from "../i18n/index.js";
-import type { TranslationValues } from "../i18n/types.js";
+import type { ServiceResponse } from "../../utils/services/types.js";
+import { copy, translate } from "../i18n/index.js";
 import type { EmailAttachment } from "./types.js";
 
 const MAX_ATTACHMENTS = 10;
 const MAX_FILENAME_LENGTH = 255;
 const CONTENT_TYPE_REGEX = /^[A-Za-z0-9!#$&^_.+-]+\/[A-Za-z0-9!#$&^_.+-]+$/;
-
-type AttachmentTranslator = (key: string, data?: TranslationValues) => string;
 
 /**
  * Keeps attachment sources on remote HTTP/S URLs only.
@@ -59,84 +53,80 @@ const isValidFilename = (value: string) => {
 /**
  * Shared URL attachment schema used by all send paths before persistence.
  */
-const createEmailAttachmentBaseSchema = (translate: AttachmentTranslator) =>
-	z.object({
-		type: z.literal("url"),
-		url: z.url().refine((value) => isHttpUrl(value), {
-			message: translate("core.email.attachment.url.must.use.http"),
-		}),
-		filename: z
-			.string()
-			.trim()
-			.refine(
-				isValidFilename,
-				translate("core.email.attachment.filename.invalid"),
-			),
-		contentType: z
-			.string()
-			.trim()
-			.regex(
-				CONTENT_TYPE_REGEX,
-				translate("core.email.attachment.content.type.invalid"),
-			)
-			.optional(),
-	});
+const emailAttachmentBaseSchema = z.object({
+	type: z.literal("url"),
+	url: z.url().refine((value) => isHttpUrl(value), {
+		message: translate("server:core.email.attachment.url.must.use.http"),
+	}),
+	filename: z
+		.string()
+		.trim()
+		.refine(
+			isValidFilename,
+			translate("server:core.email.attachment.filename.invalid"),
+		),
+	contentType: z
+		.string()
+		.trim()
+		.regex(
+			CONTENT_TYPE_REGEX,
+			translate("server:core.email.attachment.content.type.invalid"),
+		)
+		.optional(),
+});
 
 /**
  * Enforces the public attachment union, including inline CID requirements.
  */
-const createEmailAttachmentSchema = (translate: AttachmentTranslator) => {
-	const baseSchema = createEmailAttachmentBaseSchema(translate);
-
-	return z.union([
-		baseSchema.extend({
-			disposition: z.literal("attachment").optional().default("attachment"),
-			contentId: z.never().optional(),
-		}),
-		baseSchema.extend({
-			disposition: z.literal("inline"),
-			contentId: z
-				.string()
-				.trim()
-				.refine(
-					isValidContentId,
-					translate("core.email.attachment.content.id.invalid"),
-				),
-		}),
-	]);
-};
+const emailAttachmentSchema = z.union([
+	emailAttachmentBaseSchema.extend({
+		disposition: z.literal("attachment").optional().default("attachment"),
+		contentId: z.never().optional(),
+	}),
+	emailAttachmentBaseSchema.extend({
+		disposition: z.literal("inline"),
+		contentId: z
+			.string()
+			.trim()
+			.refine(
+				isValidContentId,
+				translate("server:core.email.attachment.content.id.invalid"),
+			),
+	}),
+]);
 
 /**
  * Applies per-email limits and cross-attachment checks.
  */
-const createEmailAttachmentsSchema = (translate: AttachmentTranslator) =>
-	z
-		.array(createEmailAttachmentSchema(translate))
-		.max(
-			MAX_ATTACHMENTS,
-			translate("core.email.attachment.max.attachments", {
+const emailAttachmentsSchema = z
+	.array(emailAttachmentSchema)
+	.max(
+		MAX_ATTACHMENTS,
+		translate("server:core.email.attachment.max.attachments", {
+			data: {
 				max: MAX_ATTACHMENTS,
-			}),
-		)
-		.superRefine((attachments, ctx) => {
-			const contentIds = new Set<string>();
+			},
+		}),
+	)
+	.superRefine((attachments, ctx) => {
+		const contentIds = new Set<string>();
 
-			for (const [index, attachment] of attachments.entries()) {
-				if (attachment.disposition !== "inline") continue;
+		for (const [index, attachment] of attachments.entries()) {
+			if (attachment.disposition !== "inline") continue;
 
-				if (contentIds.has(attachment.contentId)) {
-					ctx.addIssue({
-						code: "custom",
-						path: [index, "contentId"],
-						message: translate(
-							"core.email.attachment.content.id.must.be.unique",
-						),
-					});
-				}
-
-				contentIds.add(attachment.contentId);
+			if (contentIds.has(attachment.contentId)) {
+				ctx.addIssue({
+					code: "custom",
+					path: [index, "contentId"],
+					message: translate(
+						"server:core.email.attachment.content.id.must.be.unique",
+					),
+				});
 			}
-		});
+
+			contentIds.add(attachment.contentId);
+		}
+	});
 
 /**
  * Normalizes untrusted send input into the internal attachment shape.
@@ -145,7 +135,6 @@ const createEmailAttachmentsSchema = (translate: AttachmentTranslator) =>
  * email or attachment rows are inserted.
  */
 export const normalizeEmailAttachments = (
-	context: ServiceContext,
 	attachments?: unknown[] | null,
 ): Awaited<ServiceResponse<EmailAttachment[]>> => {
 	if (!attachments || attachments.length === 0) {
@@ -155,15 +144,13 @@ export const normalizeEmailAttachments = (
 		};
 	}
 
-	const result = createEmailAttachmentsSchema(
-		context.translate.server,
-	).safeParse(attachments);
+	const result = emailAttachmentsSchema.safeParse(attachments);
 	if (!result.success) {
 		return {
 			error: {
 				type: "validation",
-				name: text.server("core.errors.validation.name"),
-				message: text.server("core.errors.validation.message"),
+				name: copy("server:core.errors.validation.name"),
+				message: copy("server:core.errors.validation.message"),
 				status: 400,
 				zod: result.error,
 			},

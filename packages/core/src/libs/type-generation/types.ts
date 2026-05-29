@@ -10,6 +10,7 @@ export type TypeGenerationModuleAugmentation = {
 
 export type TypeGenerationContribution = {
 	imports?: string[];
+	declarations?: string[];
 	moduleAugmentations: TypeGenerationModuleAugmentation[];
 };
 

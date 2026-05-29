@@ -4,7 +4,6 @@ import type {
 	CloudflareWorkerImport,
 } from "@lucidcms/cloudflare-adapter/types";
 import { LucidError } from "@lucidcms/core";
-import { mergeTranslationBundles } from "@lucidcms/core/plugin";
 import type {
 	LucidPlugin,
 	RuntimeBuildArtifactCustom,
@@ -17,9 +16,6 @@ import {
 	PLUGIN_KEY,
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
-import serverTranslations from "./translations/en.server.json" with {
-	type: "json",
-};
 import type { PluginOptions } from "./types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
@@ -44,11 +40,15 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					},
 					{
 						path: "@lucidcms/core/runtime",
-						exports: ["createConfiguredDatabaseAdapter", "processConfig"],
+						exports: [
+							"createConfiguredDatabaseAdapter",
+							"prepareTranslations",
+							"processConfig",
+						],
 					},
 					{
 						path: "@lucidcms/core/plugin",
-						exports: ["createTranslator", "mergeTranslationBundles"],
+						exports: ["createTranslator"],
 					},
 					{
 						path: props.definition.database.module,
@@ -87,13 +87,6 @@ const lucidConfig = wrappedDefinition.config(env);
 lucidConfig.preRenderedEmailTemplates = Object.fromEntries(
     Object.entries(emailTemplates).map(([key, value]) => [key, value.html]),
 );
-lucidConfig.i18n = {
-    ...lucidConfig.i18n,
-    translations: mergeTranslationBundles(
-        lucidConfig.i18n?.translations,
-        i18nTranslations,
-    ),
-};
 const databaseAdapter = createConfiguredDatabaseAdapter(
     ConfiguredDatabaseAdapter,
     wrappedDefinition.database,
@@ -106,8 +99,14 @@ const resolved = await processConfig(
         skipValidation: true,
     },
 );
-const translate = createTranslator({ config: resolved, locale: "en" });
-const kvInstance = await getInitializedKVAdapter(resolved, { env });
+const { translationStore } = await prepareTranslations({
+    config: resolved,
+    bundles: i18nTranslations,
+});
+const translate = createTranslator({ store: translationStore, locale: "en" });
+const kvInstance = await getInitializedKVAdapter(resolved, {
+    env,
+});
 
 const internalQueueAdapter = passthroughQueueAdapter({
     bypassImmediateExecution: true,
@@ -138,7 +137,7 @@ try {
                     translate,
                     request: {
                         url: resolved.baseUrl || "http://localhost",
-                        locale: resolved.i18n.interface.defaultLocale,
+                        locale: resolved.i18n.defaultLocale,
                     },
                 },
                 {
@@ -221,9 +220,8 @@ try {
 			}
 		},
 		recipe: (draft) => {
-			draft.i18n.translations = mergeTranslationBundles(
-				draft.i18n.translations,
-				{ en: { server: serverTranslations } },
+			draft.i18n.sources.push(
+				"@lucidcms/plugin-cloudflare-queues/translations",
 			);
 
 			if (draft.queue?.adapter) {

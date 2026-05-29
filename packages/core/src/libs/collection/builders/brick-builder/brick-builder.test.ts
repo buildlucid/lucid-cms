@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import FieldBuilder from "../field-builder/index.js";
 import BrickBuilder from "./index.js";
 
@@ -63,10 +63,10 @@ test("tab fields are added and nesting is correct", async () => {
 test("brick config is correct", async () => {
 	const brick = new BrickBuilder("brick", {
 		details: {
-			name: text.admin("tests.bricks.brick.name", {
+			name: copy("admin:tests.bricks.brick.name", {
 				defaultMessage: "Brick",
 			}),
-			summary: text.admin("tests.bricks.brick.summary", {
+			summary: copy("admin:tests.bricks.brick.summary", {
 				defaultMessage: "Brick Summary",
 			}),
 		},
@@ -78,10 +78,10 @@ test("brick config is correct", async () => {
 	expect(brick.config).toEqual({
 		key: "brick",
 		details: {
-			name: text.admin("tests.bricks.brick.name", {
+			name: copy("admin:tests.bricks.brick.name", {
 				defaultMessage: "Brick",
 			}),
-			summary: text.admin("tests.bricks.brick.summary", {
+			summary: copy("admin:tests.bricks.brick.summary", {
 				defaultMessage: "Brick Summary",
 			}),
 		},

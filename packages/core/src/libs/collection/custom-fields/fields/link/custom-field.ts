@@ -1,7 +1,7 @@
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
 import type { LinkResValue, ServiceResponse } from "../../../../../types.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -29,7 +29,7 @@ class LinkCustomField extends CustomField<"link"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					text.admin(`fields.${this.type}.${this.key}.label`, {
+					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
@@ -104,8 +104,8 @@ class LinkCustomField extends CustomField<"link"> {
 		) {
 			return {
 				valid: false,
-				message: text.server(
-					"core.fields.link.validation.target.error.message",
+				message: copy(
+					"server:core.fields.link.validation.target.error.message",
 					{
 						data: {
 							valid: constants.customFields.link.targets.join(", "),

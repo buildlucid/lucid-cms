@@ -1,18 +1,18 @@
 import { expect, test } from "vitest";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import CollectionBuilder from "./index.js";
 
 test("collection config is correct along with field includes and filters", async () => {
 	const pagesCollection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: text.admin("tests.collections.pages.name", {
+			name: copy("admin:tests.collections.pages.name", {
 				defaultMessage: "Pages",
 			}),
-			singularName: text.admin("tests.collections.pages.singularName", {
+			singularName: copy("admin:tests.collections.pages.singularName", {
 				defaultMessage: "Page",
 			}),
-			summary: text.admin("tests.collections.pages.summary", {
+			summary: copy("admin:tests.collections.pages.summary", {
 				defaultMessage:
 					"Pages are used to create static content on your website.",
 			}),
@@ -101,13 +101,13 @@ test("collection config is correct along with field includes and filters", async
 		key: "pages",
 		mode: "multiple",
 		details: {
-			name: text.admin("tests.collections.pages.name", {
+			name: copy("admin:tests.collections.pages.name", {
 				defaultMessage: "Pages",
 			}),
-			singularName: text.admin("tests.collections.pages.singularName", {
+			singularName: copy("admin:tests.collections.pages.singularName", {
 				defaultMessage: "Page",
 			}),
-			summary: text.admin("tests.collections.pages.summary", {
+			summary: copy("admin:tests.collections.pages.summary", {
 				defaultMessage:
 					"Pages are used to create static content on your website.",
 			}),
@@ -139,10 +139,10 @@ test("collection workflow config normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: text.admin("tests.collections.pages.name", {
+			name: copy("admin:tests.collections.pages.name", {
 				defaultMessage: "Pages",
 			}),
-			singularName: text.admin("tests.collections.pages.singularName", {
+			singularName: copy("admin:tests.collections.pages.singularName", {
 				defaultMessage: "Page",
 			}),
 		},
@@ -150,7 +150,7 @@ test("collection workflow config normalizes defaults", async () => {
 			environments: [
 				{
 					key: "production",
-					name: text.admin("tests.environments.production.name", {
+					name: copy("admin:tests.environments.production.name", {
 						defaultMessage: "Production",
 					}),
 				},
@@ -159,13 +159,13 @@ test("collection workflow config normalizes defaults", async () => {
 				stages: [
 					{
 						key: "todo",
-						name: text.admin("tests.workflow.todo.name", {
+						name: copy("admin:tests.workflow.todo.name", {
 							defaultMessage: "To do",
 						}),
 					},
 					{
 						key: "done",
-						name: text.admin("tests.workflow.done.name", {
+						name: copy("admin:tests.workflow.done.name", {
 							defaultMessage: "Done",
 						}),
 						color: "green",
@@ -184,7 +184,7 @@ test("collection workflow config normalizes defaults", async () => {
 		stages: [
 			{
 				key: "todo",
-				name: text.admin("tests.workflow.todo.name", {
+				name: copy("admin:tests.workflow.todo.name", {
 					defaultMessage: "To do",
 				}),
 				color: "grey",
@@ -193,7 +193,7 @@ test("collection workflow config normalizes defaults", async () => {
 			},
 			{
 				key: "done",
-				name: text.admin("tests.workflow.done.name", {
+				name: copy("admin:tests.workflow.done.name", {
 					defaultMessage: "Done",
 				}),
 				color: "green",
@@ -210,10 +210,10 @@ test("collection environment relation config normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: text.admin("tests.collections.pages.name", {
+			name: copy("admin:tests.collections.pages.name", {
 				defaultMessage: "Pages",
 			}),
-			singularName: text.admin("tests.collections.pages.singularName", {
+			singularName: copy("admin:tests.collections.pages.singularName", {
 				defaultMessage: "Page",
 			}),
 		},
@@ -221,7 +221,7 @@ test("collection environment relation config normalizes defaults", async () => {
 			environments: [
 				{
 					key: "staging",
-					name: text.admin("tests.environments.staging.name", {
+					name: copy("admin:tests.environments.staging.name", {
 						defaultMessage: "Staging",
 					}),
 					relations: {
@@ -230,7 +230,7 @@ test("collection environment relation config normalizes defaults", async () => {
 				},
 				{
 					key: "production",
-					name: text.admin("tests.environments.production.name", {
+					name: copy("admin:tests.environments.production.name", {
 						defaultMessage: "Production",
 					}),
 				},
@@ -241,7 +241,7 @@ test("collection environment relation config normalizes defaults", async () => {
 	expect(collection.getData.config.environments).toEqual([
 		{
 			key: "staging",
-			name: text.admin("tests.environments.staging.name", {
+			name: copy("admin:tests.environments.staging.name", {
 				defaultMessage: "Staging",
 			}),
 			permissions: {},
@@ -251,7 +251,7 @@ test("collection environment relation config normalizes defaults", async () => {
 		},
 		{
 			key: "production",
-			name: text.admin("tests.environments.production.name", {
+			name: copy("admin:tests.environments.production.name", {
 				defaultMessage: "Production",
 			}),
 			permissions: {},

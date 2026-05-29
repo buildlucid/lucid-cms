@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 
@@ -70,7 +70,7 @@ const defaultOptions: ServiceFn<[], undefined> = async (
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.options.error.occurred.saving.default"),
+				message: copy("server:core.options.error.occurred.saving.default"),
 			},
 			data: undefined,
 		};

@@ -1,5 +1,5 @@
 import type { ServiceResponse } from "../../../../../types.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -33,7 +33,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					text.admin(`fields.${this.type}.${this.key}.label`, {
+					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
@@ -66,8 +66,8 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			if (value.length > this.config.validation?.maxGroups) {
 				return {
 					valid: false,
-					message: text.server(
-						"core.fields.repeater.validation.max.groups.exceeded",
+					message: copy(
+						"server:core.fields.repeater.validation.max.groups.exceeded",
 						{
 							data: {
 								groups: this.config.validation.maxGroups,
@@ -85,8 +85,8 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			if (this.config.validation?.minGroups > value.length) {
 				return {
 					valid: false,
-					message: text.server(
-						"core.fields.repeater.validation.groups.exceeded.min",
+					message: copy(
+						"server:core.fields.repeater.validation.groups.exceeded.min",
 						{
 							data: {
 								groups: this.config.validation.minGroups,

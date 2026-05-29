@@ -7,6 +7,8 @@ import getConfigPath from "../../../config/get-config-path.js";
 import loadConfigFile from "../../../config/load-config-file.js";
 import { resolveConfigDefinition } from "../../../config/resolve-config-definition.js";
 import { createTranslator } from "../../../i18n/index.js";
+import prepareTranslations from "../../../i18n/prepare-translations.js";
+import type { TranslationStore } from "../../../i18n/types.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
@@ -39,6 +41,7 @@ const BATCH_SIZE = options.batchSize ?? constants.queue.batchSize;
  */
 const getConfig = async (): Promise<{
 	config: Config;
+	translationStore: TranslationStore;
 	env: EnvironmentVariables | undefined;
 }> => {
 	try {
@@ -50,8 +53,13 @@ const getConfig = async (): Promise<{
 				skipValidation: true,
 			},
 		});
+		const translations = await prepareTranslations({
+			config: result.config,
+			projectRoot: result.projectRoot,
+		});
 		return {
 			config: result.config,
+			translationStore: translations.translationStore,
 			env: result.env,
 		};
 	} catch (_) {
@@ -68,9 +76,20 @@ const getConfig = async (): Promise<{
 				skipValidation: true,
 			},
 		});
+		const translationsModule = await import(
+			pathToFileURL(
+				path.join(path.dirname(configPath), constants.i18n.renderedOutput),
+			).href,
+			{ with: { type: "json" } }
+		);
+		const translations = await prepareTranslations({
+			config: resolved.config,
+			bundles: translationsModule.default,
+		});
 
 		return {
 			config: resolved.config,
+			translationStore: translations.translationStore,
 			env: resolved.env,
 		};
 	}
@@ -79,14 +98,22 @@ const getConfig = async (): Promise<{
 const startConsumer = async () => {
 	let kvInstance: KVAdapterInstance | undefined;
 	let kvLifecycleContext:
-		| { config: Config; env?: EnvironmentVariables }
+		| {
+				config: Config;
+				env?: EnvironmentVariables;
+		  }
 		| undefined;
 	try {
-		const { config, env } = await getConfig();
-		const translate = createTranslator({ config, locale: "en" });
+		const { config, translationStore, env } = await getConfig();
+		const translate = createTranslator({
+			store: translationStore,
+			locale: "en",
+		});
 		kvLifecycleContext = { config, env };
 
-		kvInstance = await getInitializedKVAdapter(config, { env });
+		kvInstance = await getInitializedKVAdapter(config, {
+			env,
+		});
 		const kv = kvInstance;
 
 		const internalQueueAdapter = passthroughQueueAdapter({

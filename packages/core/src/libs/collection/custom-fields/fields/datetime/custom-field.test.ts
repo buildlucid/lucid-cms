@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import DatetimeCustomField from "./custom-field.js";
@@ -11,10 +11,10 @@ import DatetimeCustomField from "./custom-field.js";
 const DateTimeCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: text.admin("tests.collections.collection.name", {
+		name: copy("admin:tests.collections.collection.name", {
 			defaultMessage: "Test",
 		}),
-		singularName: text.admin("tests.collections.collection.singularName", {
+		singularName: copy("admin:tests.collections.collection.singularName", {
 			defaultMessage: "Test",
 		}),
 	},
@@ -160,7 +160,7 @@ test("fail to validate field - datetime", async () => {
 		{
 			key: "standard_datetime",
 			localeCode: null,
-			message: text.server("core.fields.validation.errors.unknown", {
+			message: copy("server:core.fields.validation.errors.unknown", {
 				defaultMessage: "Invalid input",
 			}),
 		},
@@ -189,7 +189,7 @@ test("fail to validate field - datetime", async () => {
 		{
 			key: "standard_datetime",
 			localeCode: null,
-			message: text.server("core.fields.date.validation.invalid"),
+			message: copy("server:core.fields.date.validation.invalid"),
 		},
 	]);
 
@@ -216,7 +216,7 @@ test("fail to validate field - datetime", async () => {
 		{
 			key: "standard_datetime",
 			localeCode: null,
-			message: text.server("core.fields.date.validation.invalid"),
+			message: copy("server:core.fields.date.validation.invalid"),
 		},
 	]);
 
@@ -243,7 +243,7 @@ test("fail to validate field - datetime", async () => {
 		{
 			key: "required_datetime",
 			localeCode: null,
-			message: text.server("core.fields.validation.required"),
+			message: copy("server:core.fields.validation.required"),
 		},
 	]);
 });
@@ -253,13 +253,13 @@ test("fail to validate field - datetime", async () => {
 test("custom field config passes schema validation", async () => {
 	const field = new DatetimeCustomField("field", {
 		details: {
-			label: text.admin("tests.fields.field.label", {
+			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: text.admin("tests.fields.field.summary", {
+			summary: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
-			placeholder: text.admin("tests.fields.field.placeholder", {
+			placeholder: copy("admin:tests.fields.field.placeholder", {
 				defaultMessage: "placeholder",
 			}),
 		},

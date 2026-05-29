@@ -10,7 +10,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
@@ -50,8 +50,8 @@ const createSingleController = factory.createHandlers(
 			transaction: true,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.routes.roles.create.error.name"),
-				message: text.server("core.routes.roles.create.error.message"),
+				name: copy("server:core.routes.roles.create.error.name"),
+				message: copy("server:core.routes.roles.create.error.message"),
 			},
 		})(context, {
 			name: body.name,
@@ -64,8 +64,8 @@ const createSingleController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.routes.roles.fetch.error.name"),
-				message: text.server("core.routes.roles.fetch.error.message"),
+				name: copy("server:core.routes.roles.fetch.error.name"),
+				message: copy("server:core.routes.roles.fetch.error.message"),
 			},
 		})(context, {
 			id: roleId.data,

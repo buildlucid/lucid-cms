@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import CollectionBuilder from "./index.js";
 import CollectionConfigSchema from "./schema.js";
 
@@ -7,13 +7,13 @@ test("collection builder config passes schema validation", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: text.admin("tests.collections.pages.name", {
+			name: copy("admin:tests.collections.pages.name", {
 				defaultMessage: "Pages",
 			}),
-			singularName: text.admin("tests.collections.pages.singularName", {
+			singularName: copy("admin:tests.collections.pages.singularName", {
 				defaultMessage: "Page",
 			}),
-			summary: text.admin("tests.collections.pages.summary", {
+			summary: copy("admin:tests.collections.pages.summary", {
 				defaultMessage:
 					"Pages are used to create static content on your website.",
 			}),
@@ -80,10 +80,10 @@ test("collection workflow config validates stages, targets and palette", async (
 		key: "pages",
 		mode: "multiple",
 		details: {
-			name: text.admin("tests.collections.pages.name", {
+			name: copy("admin:tests.collections.pages.name", {
 				defaultMessage: "Pages",
 			}),
-			singularName: text.admin("tests.collections.pages.singularName", {
+			singularName: copy("admin:tests.collections.pages.singularName", {
 				defaultMessage: "Page",
 			}),
 		},
@@ -93,13 +93,13 @@ test("collection workflow config validates stages, targets and palette", async (
 				stages: [
 					{
 						key: "todo",
-						name: text.admin("tests.workflow.todo.name", {
+						name: copy("admin:tests.workflow.todo.name", {
 							defaultMessage: "To do",
 						}),
 					},
 					{
 						key: "done",
-						name: text.admin("tests.workflow.done.name", {
+						name: copy("admin:tests.workflow.done.name", {
 							defaultMessage: "Done",
 						}),
 						color: "green",
@@ -110,7 +110,7 @@ test("collection workflow config validates stages, targets and palette", async (
 			environments: [
 				{
 					key: "production",
-					name: text.admin("tests.environments.production.name", {
+					name: copy("admin:tests.environments.production.name", {
 						defaultMessage: "Production",
 					}),
 				},
@@ -148,13 +148,13 @@ test("collection workflow config validates stages, targets and palette", async (
 					stages: [
 						{
 							key: "todo",
-							name: text.admin("tests.workflow.todo.name", {
+							name: copy("admin:tests.workflow.todo.name", {
 								defaultMessage: "To do",
 							}),
 						},
 						{
 							key: "todo",
-							name: text.admin("tests.workflow.duplicate.name", {
+							name: copy("admin:tests.workflow.duplicate.name", {
 								defaultMessage: "Duplicate",
 							}),
 						},
@@ -175,7 +175,7 @@ test("collection workflow config validates stages, targets and palette", async (
 					stages: [
 						{
 							key: "todo",
-							name: text.admin("tests.workflow.todo.name", {
+							name: copy("admin:tests.workflow.todo.name", {
 								defaultMessage: "To do",
 							}),
 							color: "orange",
@@ -197,7 +197,7 @@ test("collection workflow config validates stages, targets and palette", async (
 					stages: [
 						{
 							key: "done",
-							name: text.admin("tests.workflow.done.name", {
+							name: copy("admin:tests.workflow.done.name", {
 								defaultMessage: "Done",
 							}),
 							publishTargets: ["missing"],
@@ -217,10 +217,10 @@ test("collection environment relation config passes schema validation", async ()
 			key: "pages",
 			mode: "multiple",
 			details: {
-				name: text.admin("tests.collections.pages.name", {
+				name: copy("admin:tests.collections.pages.name", {
 					defaultMessage: "Pages",
 				}),
-				singularName: text.admin("tests.collections.pages.singularName", {
+				singularName: copy("admin:tests.collections.pages.singularName", {
 					defaultMessage: "Page",
 				}),
 			},
@@ -228,7 +228,7 @@ test("collection environment relation config passes schema validation", async ()
 				environments: [
 					{
 						key: "staging",
-						name: text.admin("tests.environments.staging.name", {
+						name: copy("admin:tests.environments.staging.name", {
 							defaultMessage: "Staging",
 						}),
 						relations: {

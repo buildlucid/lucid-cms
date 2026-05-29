@@ -12,7 +12,7 @@ const values = <R extends Record<string, unknown>, A extends string>(
 	const firstRecord = records[0];
 	if (!firstRecord) {
 		throw new LucidError({
-			message: translate.server("core.no.records.provided"),
+			message: translate("server:core.no.records.provided"),
 		});
 	}
 	const keys = Object.keys(firstRecord);

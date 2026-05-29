@@ -1,4 +1,4 @@
-import { produce } from "immer";
+import { castDraft, produce } from "immer";
 import defaultConfig from "../../constants/default-config.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
@@ -6,13 +6,7 @@ import BrickConfigSchema from "../collection/builders/brick-builder/schema.js";
 import CollectionConfigSchema from "../collection/builders/collection-builder/schema.js";
 import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
-import {
-	coreTranslations,
-	loadProjectTranslations,
-	mergeTranslationBundles,
-	translate,
-} from "../i18n/index.js";
-import type { TranslationBundles } from "../i18n/types.js";
+import { translate } from "../i18n/index.js";
 import { initializeLogger } from "../logger/index.js";
 import type { LucidConfigRecipe } from "../runtime/types.js";
 import checkAccess from "./checks/check-access.js";
@@ -40,8 +34,6 @@ const processConfig = async (
 		skipValidation?: boolean;
 		resolvedDb?: DatabaseAdapter;
 		recipe?: LucidConfigRecipe;
-		projectRoot?: string;
-		i18nTranslations?: TranslationBundles;
 	},
 ): Promise<Config> => {
 	if (cachedConfig !== undefined && !options?.bypassCache) {
@@ -72,11 +64,10 @@ const processConfig = async (
 		configRes = produce(configRes, options.recipe);
 	}
 
+	const userTranslationSources = [...(configRes.i18n.sources ?? [])];
+
 	configRes = produce(configRes, (draft) => {
-		draft.i18n.translations = mergeTranslationBundles(
-			coreTranslations,
-			draft.i18n.translations,
-		);
+		draft.i18n.sources = [];
 	});
 
 	// merge plugin config
@@ -99,9 +90,11 @@ const processConfig = async (
 					throw new LucidError({
 						scope: pluginDef.key,
 						message:
-							translate.text(res.error.message) ??
-							translate.server("core.plugins.init.failed", {
-								key: pluginDef.key,
+							translate(res.error.message) ??
+							translate("server:core.plugins.init.failed", {
+								data: {
+									key: pluginDef.key,
+								},
 							}),
 					});
 				}
@@ -111,27 +104,21 @@ const processConfig = async (
 		}
 	}
 
-	const projectTranslations = await loadProjectTranslations({
-		projectRoot: options?.projectRoot,
-	});
+	const pluginTranslationSources = [...(configRes.i18n.sources ?? [])];
 
 	configRes = produce(configRes, (draft) => {
-		draft.i18n.translations = mergeTranslationBundles(
-			coreTranslations,
-			draft.i18n.translations,
-			options?.i18nTranslations,
-			projectTranslations,
-		);
-		draft.i18n.content.locales = draft.i18n.content.locales.map((locale) => ({
+		draft.i18n.sources = castDraft([
+			...pluginTranslationSources,
+			...userTranslationSources,
+		]);
+		draft.localization.locales = draft.localization.locales.map((locale) => ({
 			...locale,
 			direction: locale.direction ?? "ltr",
 		}));
-		draft.i18n.interface.locales = draft.i18n.interface.locales.map(
-			(locale) => ({
-				...locale,
-				direction: locale.direction ?? "ltr",
-			}),
-		);
+		draft.i18n.locales = draft.i18n.locales.map((locale) => ({
+			...locale,
+			direction: locale.direction ?? "ltr",
+		}));
 	});
 
 	if (!options?.skipValidation) {
@@ -139,8 +126,8 @@ const processConfig = async (
 		configRes = ConfigSchema.parse(configRes) as Config;
 
 		// i18n checks
-		checkLocales(configRes.i18n.content);
-		checkLocales(configRes.i18n.interface);
+		checkLocales(configRes.localization);
+		checkLocales(configRes.i18n);
 
 		// collection checks
 		checkDuplicateBuilderKeys(
@@ -201,7 +188,7 @@ const processConfig = async (
 
 	cachedConfig = configRes;
 
-	return configRes;
+	return cachedConfig;
 };
 
 export default processConfig;

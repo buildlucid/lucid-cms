@@ -1,6 +1,6 @@
 import z from "zod";
 import constants from "../../../../constants/constants.js";
-import { adminTextDescriptorSchema } from "../../../i18n/index.js";
+import { adminCopyDescriptorSchema } from "../../../i18n/index.js";
 import { collectionTableParts } from "../../helpers/table-parts.js";
 
 // TODO: merge with brickConfigSchema from schemas/collection-bricks
@@ -20,8 +20,8 @@ const BrickConfigSchema = z.object({
 		}),
 	details: z
 		.object({
-			name: adminTextDescriptorSchema,
-			summary: adminTextDescriptorSchema.optional(),
+			name: adminCopyDescriptorSchema,
+			summary: adminCopyDescriptorSchema.optional(),
 		})
 		.optional(),
 });

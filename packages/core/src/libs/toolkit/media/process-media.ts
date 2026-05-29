@@ -25,11 +25,11 @@ const processMedia = async (
 		{
 			name: {
 				key: "core.toolkit.media.process.error.name",
-				fallback: "Media Toolkit Error",
+				defaultMessage: "Media Toolkit Error",
 			},
 			message: {
 				key: "core.toolkit.media.process.error.message",
-				fallback: "Lucid toolkit could not process media.",
+				defaultMessage: "Lucid toolkit could not process media.",
 			},
 		},
 	);

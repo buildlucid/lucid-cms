@@ -40,11 +40,11 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 		{
 			name: {
 				key: "core.toolkit.documents.get.single.error.name",
-				fallback: "Documents Toolkit Error",
+				defaultMessage: "Documents Toolkit Error",
 			},
 			message: {
 				key: "core.toolkit.documents.get.single.error.message",
-				fallback: "Lucid toolkit could not fetch a document.",
+				defaultMessage: "Lucid toolkit could not fetch a document.",
 			},
 		},
 	);

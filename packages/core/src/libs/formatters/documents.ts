@@ -331,8 +331,8 @@ const formatRefs = (props: {
 	if (!props.data) return null;
 
 	const localization = {
-		locales: props.config.i18n.content.locales.map((l) => l.code),
-		default: props.config.i18n.content.defaultLocale,
+		locales: props.config.localization.locales.map((l) => l.code),
+		default: props.config.localization.defaultLocale,
 	} satisfies FieldRefParams["localization"];
 
 	for (const key of registeredFieldTypes) {

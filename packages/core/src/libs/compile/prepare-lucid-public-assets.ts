@@ -4,7 +4,7 @@ import constants from "../../constants/constants.js";
 import type { Config, ServiceResponse } from "../../types.js";
 import { getDirName } from "../../utils/helpers/index.js";
 import cliLogger from "../cli/logger.js";
-import { text } from "../i18n/index.js";
+import { copy } from "../i18n/index.js";
 
 const currentDir = getDirName(import.meta.url);
 
@@ -146,7 +146,7 @@ const prepareLucidPublicAssets = async (props: {
 	} catch (error) {
 		return {
 			error: {
-				message: text.server("core.build.public.assets.copy.failed", {
+				message: copy("server:core.build.public.assets.copy.failed", {
 					defaultMessage:
 						error instanceof Error
 							? error.message

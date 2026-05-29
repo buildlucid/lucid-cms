@@ -1,4 +1,4 @@
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceDeleteMultiple } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
@@ -30,7 +30,7 @@ ${keys.map((key) => `<Object><Key>${key}</Key></Object>`).join("")}
 				return {
 					error: {
 						type: "plugin",
-						message: text.server("plugin.s3.objects.delete.multiple.failed", {
+						message: copy("server:plugin.s3.objects.delete.multiple.failed", {
 							data: {
 								status: result.status,
 								statusText: result.statusText,
@@ -51,8 +51,8 @@ ${keys.map((key) => `<Object><Key>${key}</Key></Object>`).join("")}
 					type: "plugin",
 					message:
 						e instanceof Error
-							? text.literal(e.message)
-							: text.server("plugin.s3.errors.unknown"),
+							? copy.literal(e.message)
+							: copy("server:plugin.s3.errors.unknown"),
 				},
 				data: undefined,
 			};

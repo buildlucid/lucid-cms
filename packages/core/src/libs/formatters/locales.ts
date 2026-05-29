@@ -5,7 +5,7 @@ import formatter from "./index.js";
 
 const formatMultiple = (props: {
 	locales: Select<LucidLocales>[];
-	localization: Config["i18n"]["content"];
+	localization: Config["localization"];
 }): Locale[] => {
 	return props.locales
 		.map((l) => {
@@ -26,8 +26,8 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: {
 	locale: Select<LucidLocales>;
-	configLocale: Config["i18n"]["content"]["locales"][0];
-	defaultLocale: Config["i18n"]["content"]["defaultLocale"];
+	configLocale: Config["localization"]["locales"][0];
+	defaultLocale: Config["localization"]["defaultLocale"];
 }): Locale => {
 	return {
 		code: props.locale.code,

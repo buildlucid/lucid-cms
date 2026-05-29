@@ -1,14 +1,14 @@
-import { CollectionBuilder, text, z } from "@lucidcms/core";
+import { CollectionBuilder, copy, z } from "@lucidcms/core";
 import IntroBrick from "../bricks/intro.js";
 
 const TestCollection = new CollectionBuilder("test", {
 	mode: "multiple",
 	details: {
-		name: text.admin("collections.test.name", { defaultMessage: "Test" }),
-		singularName: text.admin("collections.test.singularName", {
+		name: copy("admin:collections.test.name", { defaultMessage: "Test" }),
+		singularName: copy("admin:collections.test.singularName", {
 			defaultMessage: "Test",
 		}),
-		summary: text.admin("collections.test.summary", {
+		summary: copy("admin:collections.test.summary", {
 			defaultMessage:
 				"A test collection for the revisions and draft/published functionality.",
 		}),
@@ -24,7 +24,7 @@ const TestCollection = new CollectionBuilder("test", {
 	},
 }).addText("title", {
 	details: {
-		label: text.admin("collections.test.fields.title.label", {
+		label: copy("admin:collections.test.fields.title.label", {
 			defaultMessage: "Title",
 		}),
 	},

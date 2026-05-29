@@ -57,7 +57,7 @@ const beforeUpsertHandler =
 		normalizePathField(slug);
 
 		const checkParentIsPageOfSelfRes = checkParentIsPageOfSelf({
-			defaultLocale: context.config.i18n.content.defaultLocale,
+			defaultLocale: context.config.localization.defaultLocale,
 			documentId: data.data.documentId,
 			fields: {
 				parentPage: parentPage,
@@ -67,7 +67,7 @@ const beforeUpsertHandler =
 
 		const checkRootSlugWithParentRes = checkRootSlugWithParent({
 			collection: targetCollectionRes.data,
-			defaultLocale: context.config.i18n.content.defaultLocale,
+			defaultLocale: context.config.localization.defaultLocale,
 			fields: {
 				slug: slug,
 				parentPage: parentPage,
@@ -102,7 +102,7 @@ const beforeUpsertHandler =
 			const circularParentsRes = await checkCircularParents(context, {
 				documentId: data.data.documentId,
 				versionType: data.data.versionType,
-				defaultLocale: context.config.i18n.content.defaultLocale,
+				defaultLocale: context.config.localization.defaultLocale,
 				collectionKey: targetCollectionRes.data.collectionKey,
 				fields: {
 					parentPage: parentPage,
@@ -112,7 +112,7 @@ const beforeUpsertHandler =
 			if (circularParentsRes.error) return circularParentsRes;
 
 			const parentFieldsRes = await getParentFields(context, {
-				defaultLocale: context.config.i18n.content.defaultLocale,
+				defaultLocale: context.config.localization.defaultLocale,
 				versionType: data.data.versionType,
 				collectionKey: targetCollectionRes.data.collectionKey,
 				fields: {
@@ -128,7 +128,7 @@ const beforeUpsertHandler =
 		// fullSlug construction
 		const fullSlugRes = constructParentFullSlug({
 			parentFields: parentFieldsData,
-			localization: context.config.i18n.content,
+			localization: context.config.localization,
 			collection: targetCollectionRes.data,
 			fields: {
 				slug: slug,
@@ -138,7 +138,7 @@ const beforeUpsertHandler =
 
 		setFullSlug({
 			fullSlug: fullSlugRes.data,
-			defaultLocale: context.config.i18n.content.defaultLocale,
+			defaultLocale: context.config.localization.defaultLocale,
 			collection: targetCollectionRes.data,
 			fields: {
 				fullSlug: fullSlug,

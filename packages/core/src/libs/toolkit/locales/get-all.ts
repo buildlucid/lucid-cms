@@ -10,11 +10,11 @@ const getAll = async (context: ServiceContext): ServiceResponse<Locale[]> =>
 	runToolkitService(() => localeServices.client.getAll(context), {
 		name: {
 			key: "core.toolkit.locales.get.all.error.name",
-			fallback: "Locales Toolkit Error",
+			defaultMessage: "Locales Toolkit Error",
 		},
 		message: {
 			key: "core.toolkit.locales.get.all.error.message",
-			fallback: "Lucid toolkit could not fetch locales.",
+			defaultMessage: "Lucid toolkit could not fetch locales.",
 		},
 	});
 

@@ -14,7 +14,7 @@ import type { ParentPageQueryResponse } from "./get-parent-fields.js";
 const constructParentFullSlug = (data: {
 	collection: CollectionConfig;
 	parentFields: Array<ParentPageQueryResponse>;
-	localization: Config["i18n"]["content"];
+	localization: Config["localization"];
 	fields: {
 		slug: FieldInputSchema;
 	};

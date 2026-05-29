@@ -10,7 +10,7 @@ import type { LucidErrorData } from "../../../types.js";
 import { tidyZodError } from "../../../utils/errors/index.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import type { Insert, KyselyDB, LucidDB, Update } from "../../db/types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import type {
 	ExecuteMeta,
@@ -188,7 +188,7 @@ abstract class BaseRepository<
 					...config?.defaultError,
 					message:
 						config?.defaultError?.message ??
-						text.server("core.errors.validation.name"),
+						copy("server:core.errors.validation.name"),
 					type: config?.defaultError?.type ?? "validation",
 					status: config?.defaultError?.status ?? 400,
 				},
@@ -271,8 +271,8 @@ abstract class BaseRepository<
 				response: {
 					data: undefined,
 					error: {
-						message: text.server(
-							"core.errors.unknown",
+						message: copy(
+							"server:core.errors.unknown",
 							error instanceof Error
 								? { defaultMessage: error.message }
 								: undefined,

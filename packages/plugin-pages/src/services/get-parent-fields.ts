@@ -1,4 +1,4 @@
-import { prefixGeneratedColName, text } from "@lucidcms/core/plugin";
+import { copy, prefixGeneratedColName } from "@lucidcms/core/plugin";
 import type {
 	CollectionTableNames,
 	DocumentVersionType,
@@ -94,16 +94,16 @@ const getParentFields: ServiceFn<
 				error: {
 					type: "basic",
 					status: 404,
-					message: text.server(
-						"plugin.pages.parents.published.version.not.found",
+					message: copy(
+						"server:plugin.pages.parents.published.version.not.found",
 					),
 					errors: {
 						fields: [
 							{
 								key: constants.fields.parentPage.key,
 								localeCode: data.defaultLocale,
-								message: text.server(
-									"plugin.pages.parents.published.version.not.found",
+								message: copy(
+									"server:plugin.pages.parents.published.version.not.found",
 								),
 							},
 						],
@@ -122,7 +122,7 @@ const getParentFields: ServiceFn<
 			error: {
 				type: "basic",
 				status: 500,
-				message: text.server("plugin.pages.parents.fields.fetch.failed"),
+				message: copy("server:plugin.pages.parents.fields.fetch.failed"),
 			},
 			data: undefined,
 		};

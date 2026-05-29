@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import type { OptionsName } from "../../schemas/options.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -37,7 +37,7 @@ const adjustInt: ServiceFn<
 			return {
 				error: {
 					type: "basic",
-					message: text.server("core.options.not.found.message"),
+					message: copy("server:core.options.not.found.message"),
 					status: 404,
 				},
 				data: undefined,

@@ -1,5 +1,5 @@
 import z from "zod";
-import { adminTextDescriptorSchema } from "../libs/i18n/index.js";
+import { adminCopyDescriptorSchema } from "../libs/i18n/index.js";
 import {
 	fieldClientResponseSchema,
 	fieldConfigSchema,
@@ -24,21 +24,21 @@ export const brickConfigSchema = z.object({
 		example: "banner",
 	}),
 	details: z.object({
-		name: adminTextDescriptorSchema.meta({
+		name: adminCopyDescriptorSchema.meta({
 			description: "Display name for the brick",
 			example: {
-				type: "lucid.text",
+				type: "lucid.copy",
 				scope: "admin",
 				key: "bricks.banner.name",
 				defaultMessage: "Banner",
 			},
 		}),
-		summary: adminTextDescriptorSchema
+		summary: adminCopyDescriptorSchema
 			.nullable()
 			.meta({
 				description: "Description text for the brick",
 				example: {
-					type: "lucid.text",
+					type: "lucid.copy",
 					scope: "admin",
 					key: "bricks.banner.summary",
 					defaultMessage: "A banner with a title and intro text",

@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
@@ -39,7 +39,7 @@ const confirmEmailChange: ServiceFn<
 			defaultError: {
 				type: "basic",
 				status: 404,
-				message: text.server("core.tokens.not.found.message"),
+				message: copy("server:core.tokens.not.found.message"),
 			},
 		},
 	});
@@ -53,7 +53,7 @@ const confirmEmailChange: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: text.server("core.tokens.not.found.message"),
+				message: copy("server:core.tokens.not.found.message"),
 			},
 			data: undefined,
 		};
@@ -66,7 +66,7 @@ const confirmEmailChange: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 404,
-				message: text.server("core.user.not.found.message"),
+				message: copy("server:core.user.not.found.message"),
 			},
 		},
 	});
@@ -77,7 +77,7 @@ const confirmEmailChange: ServiceFn<
 			error: {
 				type: "basic",
 				status: 409,
-				message: text.server("core.email.change.request.stale.message"),
+				message: copy("server:core.email.change.request.stale.message"),
 			},
 			data: undefined,
 		};
@@ -106,7 +106,7 @@ const confirmEmailChange: ServiceFn<
 			error: {
 				type: "basic",
 				status: 409,
-				message: text.server("core.email.change.email.unavailable.message"),
+				message: copy("server:core.email.change.email.unavailable.message"),
 			},
 			data: undefined,
 		};
@@ -134,7 +134,7 @@ const confirmEmailChange: ServiceFn<
 			defaultError: {
 				type: "basic",
 				status: 404,
-				message: text.server("core.tokens.not.found.message"),
+				message: copy("server:core.tokens.not.found.message"),
 			},
 		},
 	});
@@ -178,7 +178,7 @@ const confirmEmailChange: ServiceFn<
 				defaultError: {
 					type: "basic",
 					status: 404,
-					message: text.server("core.tokens.not.found.message"),
+					message: copy("server:core.tokens.not.found.message"),
 				},
 			},
 		}),

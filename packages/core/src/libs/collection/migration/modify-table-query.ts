@@ -2,7 +2,7 @@ import type { AlterTableColumnAlteringBuilder } from "kysely";
 import constants from "../../../constants/constants.js";
 import logger from "../../../libs/logger/index.js";
 import type { ServiceFn } from "../../../types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import { addColumn, dropColumn, modifyColumn } from "./column-builder.js";
 import { addIndex, dropIndex } from "./index-builder.js";
 import type { TableMigration } from "./types.js";
@@ -141,7 +141,7 @@ const modifyTableQuery: ServiceFn<
 		return {
 			data: undefined,
 			error: {
-				message: text.server("core.errors.default.message", {
+				message: copy("server:core.errors.default.message", {
 					defaultMessage:
 						err instanceof Error
 							? err.message

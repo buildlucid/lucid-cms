@@ -120,6 +120,7 @@ export const buildCloudflareMainWorkerSource = (props: {
 			path: "@lucidcms/core/runtime",
 			exports: [
 				"createConfiguredDatabaseAdapter",
+				"prepareTranslations",
 				"processConfig",
 				"setupCronJobs",
 			],
@@ -177,7 +178,6 @@ return astroWorker.fetch(request, env, ctx);`,
 
 	const wrappedDefinition = astroConfigureLucid(configDefinition, {
 		emailTemplates,
-		i18nTranslations,
 	});
 	const databaseAdapter = createConfiguredDatabaseAdapter(
 		ConfiguredDatabaseAdapter,
@@ -190,11 +190,15 @@ return astroWorker.fetch(request, env, ctx);`,
 		resolvedDb: databaseAdapter,
 		skipValidation: true,
 	});
+	const { translationStore } = await prepareTranslations({
+		config: resolvedConfig,
+		bundles: i18nTranslations,
+	});
 		const runtimeContext = getRuntimeContext({
 			server: "cloudflare",
 			compiled: true,
 		});
-		const translate = createTranslator({ config: resolvedConfig, locale: "en" });
+		const translate = createTranslator({ store: translationStore, locale: "en" });
 		const kv = await getInitializedKVAdapter(resolvedConfig, {
 			env,
 			runtimeContext,
@@ -208,13 +212,14 @@ return astroWorker.fetch(request, env, ctx);`,
 			});
 			await cronJobSetup.register({
 				config: resolvedConfig,
+				translationStore,
 				db: { client: resolvedConfig.db.client },
 				queue: cronJobSetup.queue,
 				env,
 				kv,
 				request: {
 					url: resolvedConfig.baseUrl || "http://localhost",
-					locale: resolvedConfig.i18n.interface.defaultLocale,
+					locale: resolvedConfig.i18n.defaultLocale,
 				},
 				translate,
 			}, {

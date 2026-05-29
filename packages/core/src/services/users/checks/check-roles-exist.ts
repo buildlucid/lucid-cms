@@ -1,4 +1,4 @@
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import { RolesRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -41,7 +41,7 @@ const checkRolesExist: ServiceFn<
 				errors: {
 					roleIds: {
 						code: "invalid",
-						message: text.server("core.roles.not.found.message"),
+						message: copy("server:core.roles.not.found.message"),
 					},
 				},
 			},

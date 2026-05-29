@@ -14,7 +14,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
@@ -78,8 +78,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 				transaction: false,
 				defaultError: {
 					type: "basic",
-					name: text.server("core.routes.callback.auth.error.name"),
-					message: text.server("core.routes.callback.auth.error.message"),
+					name: copy("server:core.routes.callback.auth.error.name"),
+					message: copy("server:core.routes.callback.auth.error.message"),
 				},
 			},
 		)(context, {
@@ -107,8 +107,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: text.server("core.routes.callback.auth.error.name"),
-					message: text.server("core.routes.callback.auth.error.message"),
+					name: copy("server:core.routes.callback.auth.error.name"),
+					message: copy("server:core.routes.callback.auth.error.message"),
 				},
 			},
 		)(context, {
@@ -162,8 +162,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 					transaction: false,
 					defaultError: {
 						type: "basic",
-						name: text.server("core.routes.login.error.name"),
-						message: text.server("core.routes.login.error.message"),
+						name: copy("server:core.routes.login.error.name"),
+						message: copy("server:core.routes.login.error.message"),
 					},
 				},
 			)(context, {

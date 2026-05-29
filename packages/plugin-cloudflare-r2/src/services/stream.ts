@@ -1,4 +1,4 @@
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceStream } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 
@@ -17,7 +17,7 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 						return {
 							error: {
 								type: "plugin",
-								message: text.server("plugin.cloudflare.r2.objects.not.found"),
+								message: copy("server:plugin.cloudflare.r2.objects.not.found"),
 							},
 							data: undefined,
 						};
@@ -53,7 +53,7 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 					return {
 						error: {
 							type: "plugin",
-							message: text.server("plugin.cloudflare.r2.objects.not.found"),
+							message: copy("server:plugin.cloudflare.r2.objects.not.found"),
 						},
 						data: undefined,
 					};
@@ -75,7 +75,7 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 				return {
 					error: {
 						type: "plugin",
-						message: text.server("plugin.cloudflare.r2.objects.not.found"),
+						message: copy("server:plugin.cloudflare.r2.objects.not.found"),
 					},
 					data: undefined,
 				};
@@ -95,7 +95,7 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 				return {
 					error: {
 						type: "plugin",
-						message: text.server("plugin.cloudflare.r2.objects.not.found"),
+						message: copy("server:plugin.cloudflare.r2.objects.not.found"),
 					},
 					data: undefined,
 				};
@@ -122,8 +122,8 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 					type: "plugin",
 					message:
 						error instanceof Error
-							? text.literal(error.message)
-							: text.server("plugin.cloudflare.r2.errors.unknown"),
+							? copy.literal(error.message)
+							: copy("server:plugin.cloudflare.r2.errors.unknown"),
 				},
 				data: undefined,
 			};

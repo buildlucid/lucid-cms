@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { DocumentWorkflowsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getCollectionInstance from "../collections/get-single-instance.js";
@@ -58,7 +58,7 @@ const canPublishTarget: ServiceFn<
 	return {
 		error: {
 			type: "basic",
-			message: text.server("core.documents.workflows.publish.not.allowed"),
+			message: copy("server:core.documents.workflows.publish.not.allowed"),
 			status: 403,
 		},
 		data: undefined,

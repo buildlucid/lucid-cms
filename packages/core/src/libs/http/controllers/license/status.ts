@@ -6,7 +6,7 @@ import { licenseServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -29,8 +29,8 @@ const statusController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.errors.default.name"),
-				message: text.server("core.errors.default.message"),
+				name: copy("server:core.errors.default.name"),
+				message: copy("server:core.errors.default.message"),
 			},
 		})(context);
 		if (res.error) throw new LucidAPIError(res.error);

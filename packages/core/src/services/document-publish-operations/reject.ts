@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -35,7 +35,7 @@ const reject: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.publish.requests.not.pending"),
+				message: copy("server:core.publish.requests.not.pending"),
 				status: 400,
 			},
 			data: undefined,
@@ -58,8 +58,8 @@ const reject: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				name: text.server("core.collections.permission.error.name"),
-				message: text.server("core.collections.permission.error.message", {
+				name: copy("server:core.collections.permission.error.name"),
+				message: copy("server:core.collections.permission.error.message", {
 					data: {
 						collection: operationRes.data.collection_key,
 						action: "review",
@@ -80,7 +80,7 @@ const reject: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.publish.requests.decision.comment.required"),
+				message: copy("server:core.publish.requests.decision.comment.required"),
 				status: 400,
 			},
 			data: undefined,
@@ -128,8 +128,8 @@ const reject: ServiceFn<
 		collectionKey: operationRes.data.collection_key,
 		documentId: operationRes.data.document_id,
 		recipients: requester,
-		title: text.server("core.publish.requests.rejected.title"),
-		message: text.server("core.publish.requests.rejected.message", {
+		title: copy("server:core.publish.requests.rejected.title"),
+		message: copy("server:core.publish.requests.rejected.message", {
 			data: {
 				user: data.user.email,
 				collection: operationRes.data.collection_key,
@@ -138,41 +138,41 @@ const reject: ServiceFn<
 		}),
 		dedupeAction: "rejected",
 		comment: {
-			label: text.server("core.publish.requests.email.decision.comment"),
+			label: copy("server:core.publish.requests.email.decision.comment"),
 			value: comment,
 		},
 		details: [
 			{
-				label: text.server("core.publish.requests.email.detail.release"),
+				label: copy("server:core.publish.requests.email.detail.release"),
 				value: `#${operationRes.data.id}`,
 			},
 			{
-				label: text.server("core.publish.requests.email.detail.collection"),
+				label: copy("server:core.publish.requests.email.detail.collection"),
 				value: operationRes.data.collection_key,
 			},
 			{
-				label: text.server("core.publish.requests.email.detail.document"),
+				label: copy("server:core.publish.requests.email.detail.document"),
 				value: `#${operationRes.data.document_id}`,
 			},
 			{
-				label: text.server("core.publish.requests.email.detail.target"),
+				label: copy("server:core.publish.requests.email.detail.target"),
 				value: operationRes.data.target,
 			},
 			{
-				label: text.server("core.publish.requests.email.detail.requested.by"),
+				label: copy("server:core.publish.requests.email.detail.requested.by"),
 				value: operationRes.data.requested_by_email,
 			},
 			{
-				label: text.server("core.publish.requests.email.detail.rejected.by"),
+				label: copy("server:core.publish.requests.email.detail.rejected.by"),
 				value: data.user.email,
 			},
 			{
-				label: text.server("core.publish.requests.email.detail.scheduled.for"),
+				label: copy("server:core.publish.requests.email.detail.scheduled.for"),
 				value: operationRes.data.scheduled_at,
 			},
 			{
-				label: text.server(
-					"core.publish.requests.email.detail.scheduled.timezone",
+				label: copy(
+					"server:core.publish.requests.email.detail.scheduled.timezone",
 				),
 				value: operationRes.data.scheduled_timezone,
 			},

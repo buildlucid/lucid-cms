@@ -57,7 +57,7 @@ const afterUpsertHandler =
 
 		const docFullSlugsRes = constructChildFullSlug({
 			descendants: descendantsRes.data,
-			localization: context.config.i18n.content,
+			localization: context.config.localization,
 			parentFullSlugField: currentFullSlugField,
 			collection: targetCollectionRes.data,
 		});

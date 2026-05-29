@@ -21,9 +21,11 @@ const ensureNoDuplicates = (label: string, values: string[]) => {
 	const duplicates = [...new Set(findDuplicates(values))];
 	if (duplicates.length > 0) {
 		throw new Error(
-			translate.server("core.config.access.duplicate.keys", {
-				label,
-				keys: duplicates.join(", "),
+			translate("server:core.config.access.duplicate.keys", {
+				data: {
+					label,
+					keys: duplicates.join(", "),
+				},
 			}),
 		);
 	}
@@ -39,9 +41,11 @@ const ensureValidReference = (
 ) => {
 	if (!validPermissions.has(permission)) {
 		throw new Error(
-			translate.server("core.config.access.unknown.permission.reference", {
-				context,
-				permission,
+			translate("server:core.config.access.unknown.permission.reference", {
+				data: {
+					context,
+					permission,
+				},
 			}),
 		);
 	}
@@ -68,8 +72,10 @@ const checkAccess = (config: Config) => {
 	for (const groupKey of Object.keys(customGroups)) {
 		if (coreGroupReferences.has(groupKey)) {
 			throw new Error(
-				translate.server("core.config.access.core.group.collision", {
-					group: groupKey,
+				translate("server:core.config.access.core.group.collision", {
+					data: {
+						group: groupKey,
+					},
 				}),
 			);
 		}
@@ -78,15 +84,19 @@ const checkAccess = (config: Config) => {
 	for (const permission of customPermissionKeys) {
 		if (!permissionKeyRegex.test(permission)) {
 			throw new Error(
-				translate.server("core.config.access.invalid.permission.key", {
-					permission,
+				translate("server:core.config.access.invalid.permission.key", {
+					data: {
+						permission,
+					},
 				}),
 			);
 		}
 		if (isCorePermission(permission)) {
 			throw new Error(
-				translate.server("core.config.access.core.permission.collision", {
-					permission,
+				translate("server:core.config.access.core.permission.collision", {
+					data: {
+						permission,
+					},
 				}),
 			);
 		}
@@ -97,11 +107,13 @@ const checkAccess = (config: Config) => {
 			(!coreGroupReferences.has(group) && !customGroups[group])
 		) {
 			throw new Error(
-				translate.server(
-					"core.config.access.unknown.permission.group.reference",
+				translate(
+					"server:core.config.access.unknown.permission.group.reference",
 					{
-						permission,
-						group: group ?? "",
+						data: {
+							permission,
+							group: group ?? "",
+						},
 					},
 				),
 			);
@@ -118,8 +130,10 @@ const checkAccess = (config: Config) => {
 			ensureValidReference(
 				validPermissions,
 				permission,
-				translate.server("core.config.access.managed.role.context", {
-					role: role.key,
+				translate("server:core.config.access.managed.role.context", {
+					data: {
+						role: role.key,
+					},
 				}),
 			);
 		}
@@ -133,9 +147,11 @@ const checkAccess = (config: Config) => {
 			ensureValidReference(
 				validPermissions,
 				permission,
-				translate.server("core.config.access.collection.permission.context", {
-					collection: collection.key,
-					action,
+				translate("server:core.config.access.collection.permission.context", {
+					data: {
+						collection: collection.key,
+						action,
+					},
 				}),
 			);
 		}
@@ -145,11 +161,13 @@ const checkAccess = (config: Config) => {
 				ensureValidReference(
 					validPermissions,
 					environment.permissions.publish,
-					translate.server(
-						"core.config.access.collection.environment.publish.context",
+					translate(
+						"server:core.config.access.collection.environment.publish.context",
 						{
-							collection: collection.key,
-							environment: environment.key,
+							data: {
+								collection: collection.key,
+								environment: environment.key,
+							},
 						},
 					),
 				);
@@ -159,11 +177,13 @@ const checkAccess = (config: Config) => {
 				ensureValidReference(
 					validPermissions,
 					environment.permissions.review,
-					translate.server(
-						"core.config.access.collection.environment.review.context",
+					translate(
+						"server:core.config.access.collection.environment.review.context",
 						{
-							collection: collection.key,
-							environment: environment.key,
+							data: {
+								collection: collection.key,
+								environment: environment.key,
+							},
 						},
 					),
 				);

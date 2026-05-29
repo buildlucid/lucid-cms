@@ -118,7 +118,7 @@ const resolveNextRoleSnapshot = async (
 			{
 				key: "locale_code",
 				operator: "=",
-				value: context.config.i18n.content.defaultLocale,
+				value: context.config.localization.defaultLocale,
 			},
 		],
 		validation: {

@@ -1,5 +1,5 @@
 import z from "zod";
-import { adminTextDescriptorSchema } from "../libs/i18n/index.js";
+import { adminCopyDescriptorSchema } from "../libs/i18n/index.js";
 
 export const fieldInputSchema = z.object({
 	key: z.string(),
@@ -57,55 +57,55 @@ export const fieldConfigSchema = z.object({
 		})
 		.optional(),
 	details: z.object({
-		label: adminTextDescriptorSchema
+		label: adminCopyDescriptorSchema
 			.meta({
 				description: "Display label for the field",
 				example: {
-					type: "lucid.text",
+					type: "lucid.copy",
 					scope: "admin",
 					key: "collections.page.fields.pageTitle.label",
 					defaultMessage: "Page title",
 				},
 			})
 			.optional(),
-		summary: adminTextDescriptorSchema
+		summary: adminCopyDescriptorSchema
 			.meta({
 				description: "Description text for the field",
 				example: {
-					type: "lucid.text",
+					type: "lucid.copy",
 					scope: "admin",
 					key: "collections.page.fields.pageTitle.summary",
 					defaultMessage: "The title of the page.",
 				},
 			})
 			.optional(),
-		placeholder: adminTextDescriptorSchema
+		placeholder: adminCopyDescriptorSchema
 			.meta({
 				description: "Placeholder text for input fields",
 				example: {
-					type: "lucid.text",
+					type: "lucid.copy",
 					scope: "admin",
 					key: "collections.page.fields.pageTitle.placeholder",
 					defaultMessage: "Enter page title...",
 				},
 			})
 			.optional(),
-		true: adminTextDescriptorSchema
+		true: adminCopyDescriptorSchema
 			.meta({
 				description: "Label for true value in boolean fields",
 				example: {
-					type: "lucid.text",
+					type: "lucid.copy",
 					scope: "admin",
 					key: "collections.page.fields.featured.trueLabel",
 					defaultMessage: "Yes",
 				},
 			})
 			.optional(),
-		false: adminTextDescriptorSchema
+		false: adminCopyDescriptorSchema
 			.meta({
 				description: "Label for false value in boolean fields",
 				example: {
-					type: "lucid.text",
+					type: "lucid.copy",
 					scope: "admin",
 					key: "collections.page.fields.featured.falseLabel",
 					defaultMessage: "No",
@@ -262,10 +262,10 @@ export const fieldConfigSchema = z.object({
 	options: z
 		.array(
 			z.object({
-				label: adminTextDescriptorSchema.meta({
+				label: adminCopyDescriptorSchema.meta({
 					description: "Display label for the option",
 					example: {
-						type: "lucid.text",
+						type: "lucid.copy",
 						scope: "admin",
 						key: "collections.page.fields.status.options.draft.label",
 						defaultMessage: "Draft",

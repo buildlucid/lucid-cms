@@ -1,6 +1,6 @@
 import type z from "zod";
 import constants from "../../constants/constants.js";
-import { getZodIssueText, text, translate } from "../../libs/i18n/index.js";
+import { copy, translate } from "../../libs/i18n/index.js";
 import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
 import errorTypeDefaults from "./error-type-defaults.js";
 
@@ -34,7 +34,7 @@ import errorTypeDefaults from "./error-type-defaults.js";
 class LucidAPIError extends Error {
 	error: LucidErrorData;
 	constructor(error: LucidErrorData) {
-		super(translate.text(error.message) ?? constants.errors.message);
+		super(translate(error.message) ?? constants.errors.message);
 		this.error = error;
 
 		if (error.zod !== undefined) {
@@ -48,9 +48,8 @@ class LucidAPIError extends Error {
 		this.error.status = errorTypeRes.status;
 		this.error.name = errorTypeRes.name;
 		this.error.message = errorTypeRes.message;
-		this.name = translate.text(this.error.name) ?? constants.errors.message;
-		this.message =
-			translate.text(this.error.message) ?? constants.errors.message;
+		this.name = translate(this.error.name) ?? constants.errors.message;
+		this.message = translate(this.error.message) ?? constants.errors.message;
 	}
 	// static
 	static formatZodErrors(error: z.core.$ZodIssue[]) {
@@ -73,7 +72,7 @@ class LucidAPIError extends Error {
 				}
 			}
 			current.code = item.code;
-			current.message = getZodIssueText(item) ?? text.literal(item.message);
+			current.message = copy.literal(item.message);
 		}
 
 		return result ?? undefined;

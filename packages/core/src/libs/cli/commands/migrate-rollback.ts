@@ -3,6 +3,8 @@ import { Migrator } from "kysely";
 import constants from "../../../constants/constants.js";
 import type { Config } from "../../../types.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import prepareTranslations from "../../i18n/prepare-translations.js";
+import type { TranslationStore } from "../../i18n/types.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
@@ -18,6 +20,7 @@ const migrateRollbackCommand = async (options?: {
 }) => {
 	let kvInstance: KVAdapterInstance | undefined;
 	let config: Config | undefined;
+	let translationStore: TranslationStore | undefined;
 	try {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
@@ -26,6 +29,12 @@ const migrateRollbackCommand = async (options?: {
 
 		const res = await loadConfigFile();
 		config = res.config;
+		translationStore = (
+			await prepareTranslations({
+				config,
+				projectRoot: res.projectRoot,
+			})
+		).translationStore;
 
 		const envValid = await validateEnvVars({
 			envSchema: res.envSchema,
@@ -186,7 +195,9 @@ const migrateRollbackCommand = async (options?: {
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
-		if (config) await destroyKVAdapter(kvInstance, { config });
+		if (config && translationStore) {
+			await destroyKVAdapter(kvInstance, { config });
+		}
 		cliLogger.error(
 			"Rollback failed",
 			error instanceof Error ? error.message : "Unknown error",

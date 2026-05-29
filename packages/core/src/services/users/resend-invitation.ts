@@ -1,7 +1,7 @@
 import { add } from "date-fns";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	UsersRepository,
 	UserTokensRepository,
@@ -39,7 +39,7 @@ const resendInvitation: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: text.server("core.user.not.found.message"),
+				message: copy("server:core.user.not.found.message"),
 				status: 404,
 			},
 		},
@@ -51,9 +51,9 @@ const resendInvitation: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				name: text.server("core.auth.invitations.user.already.accepted.name"),
-				message: text.server(
-					"core.auth.invitations.user.already.accepted.message",
+				name: copy("server:core.auth.invitations.user.already.accepted.name"),
+				message: copy(
+					"server:core.auth.invitations.user.already.accepted.message",
 				),
 			},
 			data: undefined,
@@ -104,7 +104,7 @@ const resendInvitation: ServiceFn<
 		type: "internal",
 		to: userRes.data.email,
 		subject: formatEmailSubject(
-			context.translate.server("core.email.invitations.email.subject"),
+			context.translate("server:core.email.invitations.email.subject"),
 			context.config.brand?.name,
 		),
 		template: constants.email.templates.userInvite.key,

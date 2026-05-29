@@ -11,7 +11,7 @@ import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -72,8 +72,8 @@ const streamMediaController = factory.createHandlers(
 			throw new LucidAPIError({
 				type: "authorisation",
 				status: 401,
-				name: text.server("core.share.stream.password.required.title"),
-				message: text.server("core.share.stream.password.required.message"),
+				name: copy("server:core.share.stream.password.required.title"),
+				message: copy("server:core.share.stream.password.required.message"),
 			});
 		}
 
@@ -82,9 +82,9 @@ const streamMediaController = factory.createHandlers(
 			throw new LucidAPIError({
 				type: "basic",
 				status: 415,
-				name: text.server("core.share.stream.unsupported.media.type.name"),
-				message: text.server(
-					"core.share.stream.unsupported.media.type.message",
+				name: copy("server:core.share.stream.unsupported.media.type.name"),
+				message: copy(
+					"server:core.share.stream.unsupported.media.type.message",
 				),
 			});
 		}

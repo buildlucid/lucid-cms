@@ -1,6 +1,6 @@
 import mime from "mime-types";
 import type { ImageProcessor } from "../../../types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 
 /**
  * A Sharp-based image processor that can resize, convert formats, and optimize images.
@@ -44,7 +44,7 @@ const sharpProcessor: ImageProcessor = async (stream, options) => {
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.media.image.process.failed", {
+				message: copy("server:core.media.image.process.failed", {
 					defaultMessage:
 						error instanceof Error
 							? error.message

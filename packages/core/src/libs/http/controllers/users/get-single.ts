@@ -9,7 +9,7 @@ import {
 	honoOpenAPIResponse,
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import { text } from "../../../i18n/index.js";
+import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -39,8 +39,8 @@ const getSingleController = factory.createHandlers(
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: text.server("core.routes.user.fetch.error.name"),
-				message: text.server("core.routes.user.fetch.error.message"),
+				name: copy("server:core.routes.user.fetch.error.name"),
+				message: copy("server:core.routes.user.fetch.error.message"),
 			},
 		})(context, {
 			userId: Number.parseInt(id, 10),

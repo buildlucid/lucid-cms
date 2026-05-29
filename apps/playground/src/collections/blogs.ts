@@ -1,13 +1,13 @@
-import { CollectionBuilder, text } from "@lucidcms/core";
+import { CollectionBuilder, copy } from "@lucidcms/core";
 
 const BlogCollection = new CollectionBuilder("blog", {
 	mode: "multiple",
 	details: {
-		name: text.admin("collections.blog.name", { defaultMessage: "Blogs" }),
-		singularName: text.admin("collections.blog.singularName", {
+		name: copy("admin:collections.blog.name", { defaultMessage: "Blogs" }),
+		singularName: copy("admin:collections.blog.singularName", {
 			defaultMessage: "Blog",
 		}),
-		summary: text.admin("collections.blog.summary", {
+		summary: copy("admin:collections.blog.summary", {
 			defaultMessage: "Manage your blogs.",
 		}),
 	},
@@ -25,7 +25,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 		environments: [
 			{
 				key: "staging",
-				name: text.admin("collections.blog.environments.staging.name", {
+				name: copy("admin:collections.blog.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 			},

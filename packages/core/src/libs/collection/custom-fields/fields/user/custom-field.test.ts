@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import UserCustomField from "./custom-field.js";
@@ -10,10 +10,10 @@ import UserCustomField from "./custom-field.js";
 const UserCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: text.admin("tests.collections.collection.name", {
+		name: copy("admin:tests.collections.collection.name", {
 			defaultMessage: "Test",
 		}),
-		singularName: text.admin("tests.collections.collection.singularName", {
+		singularName: copy("admin:tests.collections.collection.singularName", {
 			defaultMessage: "Test",
 		}),
 	},
@@ -53,9 +53,9 @@ test("successfully validate field - user", async () => {
 				{
 					id: 1,
 					// email: "test@test.com",
-					// first_name: text.admin("tests.collections.collection.name", { defaultMessage: "Test" }),
-					// last_name: text.admin("tests.collections.collection.name", { defaultMessage: "User" }),
-					// username: text.admin("tests.collections.collection.name", { defaultMessage: "test-user" }),
+					// first_name: copy("admin:tests.collections.collection.name", { defaultMessage: "Test" }),
+					// last_name: copy("admin:tests.collections.collection.name", { defaultMessage: "User" }),
+					// username: copy("admin:tests.collections.collection.name", { defaultMessage: "test-user" }),
 				},
 			],
 			document: [],
@@ -82,9 +82,9 @@ test("successfully validate field - user", async () => {
 				{
 					id: 1,
 					// email: "test@test.com",
-					// first_name: text.admin("tests.collections.collection.name", { defaultMessage: "Test" }),
-					// last_name: text.admin("tests.collections.collection.name", { defaultMessage: "User" }),
-					// username: text.admin("tests.collections.collection.name", { defaultMessage: "test-user" }),
+					// first_name: copy("admin:tests.collections.collection.name", { defaultMessage: "Test" }),
+					// last_name: copy("admin:tests.collections.collection.name", { defaultMessage: "User" }),
+					// username: copy("admin:tests.collections.collection.name", { defaultMessage: "test-user" }),
 				},
 			],
 			document: [],
@@ -142,7 +142,7 @@ test("fail to validate field - user", async () => {
 			{
 				key: "required_user",
 				localeCode: null,
-				message: text.server("core.fields.user.validation.not.found"),
+				message: copy("server:core.fields.user.validation.not.found"),
 				itemIndex: 0,
 			},
 		],
@@ -150,7 +150,7 @@ test("fail to validate field - user", async () => {
 			{
 				key: "required_user",
 				localeCode: null,
-				message: text.server("core.fields.validation.required"),
+				message: copy("server:core.fields.validation.required"),
 			},
 		],
 	});
@@ -216,7 +216,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: text.server("core.fields.relation.validation.min.items", {
+			message: copy("server:core.fields.relation.validation.min.items", {
 				data: {
 					min: 2,
 				},
@@ -227,7 +227,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: text.server("core.fields.relation.validation.max.items", {
+			message: copy("server:core.fields.relation.validation.max.items", {
 				data: {
 					max: 3,
 				},
@@ -238,13 +238,13 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: text.server("core.fields.user.validation.not.found"),
+			message: copy("server:core.fields.user.validation.not.found"),
 			itemIndex: 1,
 		},
 		{
 			key: "multi_user",
 			localeCode: null,
-			message: text.server("core.fields.user.validation.not.found"),
+			message: copy("server:core.fields.user.validation.not.found"),
 			itemIndex: 2,
 		},
 	]);
@@ -255,10 +255,10 @@ test("user field validates multiple item counts and indexed errors", async () =>
 test("custom field config passes schema validation", async () => {
 	const field = new UserCustomField("field", {
 		details: {
-			label: text.admin("tests.fields.field.label", {
+			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: text.admin("tests.fields.field.summary", {
+			summary: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 		},

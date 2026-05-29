@@ -1,15 +1,15 @@
 import { expect, test } from "vitest";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 
 const TranslatedCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: text.admin("tests.collections.collection.name", {
+		name: copy("admin:tests.collections.collection.name", {
 			defaultMessage: "Test",
 		}),
-		singularName: text.admin("tests.collections.collection.singularName", {
+		singularName: copy("admin:tests.collections.collection.singularName", {
 			defaultMessage: "Test",
 		}),
 	},
@@ -27,11 +27,11 @@ const TranslatedCollection = new CollectionBuilder("collection", {
 const NonTranslatedCollection = new CollectionBuilder("non_translated", {
 	mode: "multiple",
 	details: {
-		name: text.admin("core.tests.collections.non.translated.name", {
+		name: copy("admin:core.tests.collections.non.translated.name", {
 			defaultMessage: "Non-Translated",
 		}),
-		singularName: text.admin(
-			"core.tests.collections.non.translated.singularName",
+		singularName: copy(
+			"admin:core.tests.collections.non.translated.singularName",
 			{ defaultMessage: "Non-Translated" },
 		),
 	},
@@ -72,7 +72,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withTranslationsObject[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: "en",
-		message: text.server("core.fields.validation.errors.unknown", {
+		message: copy("server:core.fields.validation.errors.unknown", {
 			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});
@@ -97,7 +97,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValue[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: defaultLocale,
-		message: text.server("core.fields.validation.errors.unknown", {
+		message: copy("server:core.fields.validation.errors.unknown", {
 			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});
@@ -122,7 +122,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValueFrench[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: frenchDefaultLocale,
-		message: text.server("core.fields.validation.errors.unknown", {
+		message: copy("server:core.fields.validation.errors.unknown", {
 			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});
@@ -147,7 +147,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatedCollection[0]).toMatchObject({
 		key: "text_field",
 		localeCode: null,
-		message: text.server("core.fields.validation.errors.unknown", {
+		message: copy("server:core.fields.validation.errors.unknown", {
 			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});
@@ -172,7 +172,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatableField[0]).toMatchObject({
 		key: "non_translatable_field",
 		localeCode: null,
-		message: text.server("core.fields.validation.errors.unknown", {
+		message: copy("server:core.fields.validation.errors.unknown", {
 			defaultMessage: "Invalid input: expected string, received number",
 		}),
 	});

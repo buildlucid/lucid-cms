@@ -6,7 +6,7 @@ import type { NodeAdapterOptions } from "../types.js";
 
 const serveCommand =
 	(options: NodeAdapterOptions | undefined): ServeHandler =>
-	async ({ config, logger, onListening }) => {
+	async ({ config, translationStore, logger, onListening }) => {
 		logger.instance.info(
 			"Using:",
 			logger.instance.color.blue("Node Runtime Adapter"),
@@ -24,6 +24,7 @@ const serveCommand =
 
 		const { app, destroy, issues } = await createApp({
 			config,
+			translationStore,
 			runtimeContext: runtimeContext,
 			env: process.env,
 		});

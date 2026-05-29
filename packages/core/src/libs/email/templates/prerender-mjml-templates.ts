@@ -3,7 +3,7 @@ import path from "node:path";
 import constants from "../../../constants/constants.js";
 import type { Config } from "../../../types.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import renderMjmlTemplates from "./render-mjml-templates.js";
 
 /**
@@ -31,8 +31,8 @@ const prerenderMjmlTemplates = async (props: {
 	} catch (error) {
 		return {
 			error: {
-				message: text.server(
-					"core.email.templates.prerender.failed",
+				message: copy(
+					"server:core.email.templates.prerender.failed",
 					error instanceof Error
 						? { defaultMessage: error.message }
 						: undefined,

@@ -15,7 +15,7 @@ const unwrap = <T>(response: Awaited<ServiceResponse<T>>) => {
 describe("email storage config", () => {
 	test("rejects invalid rule flags as error values", () => {
 		expect(
-			translate.text(
+			translate(
 				normalizeEmailStorageConfig({
 					secret: {
 						encrypt: false,
@@ -25,7 +25,7 @@ describe("email storage config", () => {
 		).toContain("can only set encrypt to true");
 
 		expect(
-			translate.text(
+			translate(
 				normalizeEmailStorageConfig({
 					secret: {
 						neverStore: true,
@@ -36,7 +36,7 @@ describe("email storage config", () => {
 		).toContain("cannot combine neverStore");
 
 		expect(
-			translate.text(
+			translate(
 				normalizeEmailStorageConfig({
 					secret: {},
 				} as unknown as EmailStorageConfig).error?.message,
@@ -66,13 +66,13 @@ describe("email storage config", () => {
 			{ type: "key", key: "token" },
 		]);
 		expect(
-			translate.text(parseEmailStorageSelector("payload[").error?.message),
+			translate(parseEmailStorageSelector("payload[").error?.message),
 		).toContain("Invalid email storage selector");
 		expect(
-			translate.text(parseEmailStorageSelector("payload[]").error?.message),
+			translate(parseEmailStorageSelector("payload[]").error?.message),
 		).toContain("Invalid email storage selector");
 		expect(
-			translate.text(parseEmailStorageSelector("payload..ssn").error?.message),
+			translate(parseEmailStorageSelector("payload..ssn").error?.message),
 		).toContain("Invalid email storage selector");
 	});
 });

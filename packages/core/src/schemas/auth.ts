@@ -189,7 +189,7 @@ export const controllerSchemas = {
 				}),
 			})
 			.refine((data) => data.password === data.passwordConfirmation, {
-				message: translate.server("core.input.ensure.passwords.match"),
+				message: translate("server:core.input.ensure.passwords.match"),
 				path: ["passwordConfirmation"],
 			}),
 		query: {

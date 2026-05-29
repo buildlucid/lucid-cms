@@ -1,10 +1,10 @@
 import {
+	copy,
 	createServiceContext,
 	honoOpenAPIRequestBody,
 	honoOpenAPIResponse,
 	LucidAPIError,
 	serviceWrapper,
-	text,
 } from "@lucidcms/core/plugin";
 import type { LucidHonoContext } from "@lucidcms/core/types";
 import { createFactory } from "hono/factory";
@@ -35,8 +35,8 @@ const webhookController = (pluginOptions: PluginOptions) =>
 				transaction: true,
 				defaultError: {
 					type: "basic",
-					name: text.server("plugin.resend.routes.webhook.error.name"),
-					message: text.server("plugin.resend.routes.webhook.error.message"),
+					name: copy("server:plugin.resend.routes.webhook.error.name"),
+					message: copy("server:plugin.resend.routes.webhook.error.message"),
 				},
 			})(context, {
 				rawBody: rawBody,

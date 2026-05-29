@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import { text } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import { isRecord } from "./paths.js";
 import type {
 	EmailStorageConfig,
@@ -24,7 +24,7 @@ export const parseEmailStorageSelector = (
 				error: {
 					type: "validation",
 					status: 400,
-					message: text.server("core.email.storage.invalid.selector", {
+					message: copy("server:core.email.storage.invalid.selector", {
 						data: {
 							selector,
 						},
@@ -45,7 +45,7 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: text.server("core.email.storage.invalid.selector", {
+						message: copy("server:core.email.storage.invalid.selector", {
 							data: {
 								selector,
 							},
@@ -72,7 +72,7 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: text.server("core.email.storage.invalid.selector", {
+						message: copy("server:core.email.storage.invalid.selector", {
 							data: {
 								selector,
 							},
@@ -95,7 +95,7 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: text.server("core.email.storage.invalid.selector", {
+						message: copy("server:core.email.storage.invalid.selector", {
 							data: {
 								selector,
 							},
@@ -114,7 +114,7 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: text.server("core.email.storage.invalid.selector", {
+						message: copy("server:core.email.storage.invalid.selector", {
 							data: {
 								selector,
 							},
@@ -129,7 +129,7 @@ export const parseEmailStorageSelector = (
 					error: {
 						type: "validation",
 						status: 400,
-						message: text.server("core.email.storage.invalid.selector", {
+						message: copy("server:core.email.storage.invalid.selector", {
 							data: {
 								selector,
 							},
@@ -146,7 +146,7 @@ export const parseEmailStorageSelector = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: text.server("core.email.storage.invalid.selector", {
+				message: copy("server:core.email.storage.invalid.selector", {
 					data: {
 						selector,
 					},
@@ -171,7 +171,7 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: text.server("core.email.storage.rule.must.be.object", {
+				message: copy("server:core.email.storage.rule.must.be.object", {
 					data: {
 						selector,
 					},
@@ -190,7 +190,7 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: text.server("core.email.storage.rule.flag.true", {
+				message: copy("server:core.email.storage.rule.flag.true", {
 					data: {
 						selector,
 						flag: "encrypt",
@@ -206,7 +206,7 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: text.server("core.email.storage.rule.flag.true", {
+				message: copy("server:core.email.storage.rule.flag.true", {
 					data: {
 						selector,
 						flag: "redact",
@@ -222,7 +222,7 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: text.server("core.email.storage.rule.flag.true", {
+				message: copy("server:core.email.storage.rule.flag.true", {
 					data: {
 						selector,
 						flag: "neverStore",
@@ -242,7 +242,7 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: text.server("core.email.storage.rule.requires.flag", {
+				message: copy("server:core.email.storage.rule.requires.flag", {
 					data: {
 						selector,
 					},
@@ -257,7 +257,7 @@ const normalizeEmailStorageRule = (
 			error: {
 				type: "validation",
 				status: 400,
-				message: text.server("core.email.storage.rule.never.store.exclusive", {
+				message: copy("server:core.email.storage.rule.never.store.exclusive", {
 					data: {
 						selector,
 					},

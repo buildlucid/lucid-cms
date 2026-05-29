@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import { mediaFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import getMediaAdapter from "../../libs/media/get-adapter.js";
@@ -98,7 +98,7 @@ const createSingle: ServiceFn<
 				errors: {
 					focalPoint: {
 						code: "media_error",
-						message: text.server("core.media.errors.focal.point.image.only"),
+						message: copy("server:core.media.errors.focal.point.image.only"),
 					},
 				},
 			},
@@ -233,7 +233,7 @@ const createSingle: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: text.server("core.media.not.found.message"),
+				message: copy("server:core.media.not.found.message"),
 				status: 404,
 			},
 		},

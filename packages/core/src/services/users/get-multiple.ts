@@ -35,10 +35,10 @@ const getMultiple: ServiceFn<
 				users: usersRes.data[0],
 				authUser: data.authUser,
 				host: getBaseUrl(context),
-				locales: context.config.i18n.content.locales.map(
+				locales: context.config.localization.locales.map(
 					(locale) => locale.code,
 				),
-				defaultLocale: context.config.i18n.content.defaultLocale,
+				defaultLocale: context.config.localization.defaultLocale,
 			}),
 			count: formatter.parseCount(usersRes.data[1]?.count),
 		},

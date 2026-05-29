@@ -1,5 +1,5 @@
 import type { Readable } from "node:stream";
-import { text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceStream } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
@@ -57,7 +57,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			if (!result.ok) {
 				return {
 					error: {
-						message: text.server("plugin.s3.objects.stream.failed", {
+						message: copy("server:plugin.s3.objects.stream.failed", {
 							data: {
 								status: result.status,
 								statusText: result.statusText,
@@ -71,7 +71,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			if (!result.body) {
 				return {
 					error: {
-						message: text.server("plugin.s3.objects.body.missing"),
+						message: copy("server:plugin.s3.objects.body.missing"),
 					},
 					data: undefined,
 				};
@@ -120,8 +120,8 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 					type: "plugin",
 					message:
 						e instanceof Error
-							? text.literal(e.message)
-							: text.server("plugin.s3.errors.unknown"),
+							? copy.literal(e.message)
+							: copy("server:plugin.s3.errors.unknown"),
 				},
 				data: undefined,
 			};

@@ -56,11 +56,11 @@ const getMultiple = async <TCollectionKey extends CollectionDocumentKey>(
 		{
 			name: {
 				key: "core.toolkit.documents.get.multiple.error.name",
-				fallback: "Documents Toolkit Error",
+				defaultMessage: "Documents Toolkit Error",
 			},
 			message: {
 				key: "core.toolkit.documents.get.multiple.error.message",
-				fallback: "Lucid toolkit could not fetch multiple documents.",
+				defaultMessage: "Lucid toolkit could not fetch multiple documents.",
 			},
 		},
 	);

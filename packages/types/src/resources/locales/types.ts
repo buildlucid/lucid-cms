@@ -1,7 +1,7 @@
 export type TranslationValues = Record<string, string | number | undefined>;
 
-export type AdminTextDescriptor = {
-	type: "lucid.text";
+export type AdminCopyDescriptor = {
+	type: "lucid.copy";
 	scope: "admin";
 	key: string;
 	values?: TranslationValues;

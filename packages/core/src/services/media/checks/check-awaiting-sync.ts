@@ -1,6 +1,6 @@
 import { addMilliseconds } from "date-fns";
 import constants from "../../../constants/constants.js";
-import { text } from "../../../libs/i18n/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import { MediaAwaitingSyncRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -50,7 +50,7 @@ const checkAwaitingSync: ServiceFn<
 				errors: {
 					file: {
 						code: "media_error",
-						message: text.server("core.media.errors.not.awaiting.sync"),
+						message: copy("server:core.media.errors.not.awaiting.sync"),
 					},
 				},
 			},

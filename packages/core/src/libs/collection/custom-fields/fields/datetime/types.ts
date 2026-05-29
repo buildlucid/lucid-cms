@@ -1,13 +1,13 @@
 import type { ZodType } from "zod";
-import type { AdminTextDescriptor } from "../../../../i18n/types.js";
+import type { AdminCopyDescriptor } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface DatetimeFieldConfig extends SharedFieldConfig {
 	type: "datetime";
 	details: {
-		label?: AdminTextDescriptor;
-		summary?: AdminTextDescriptor;
-		placeholder?: AdminTextDescriptor;
+		label?: AdminCopyDescriptor;
+		summary?: AdminCopyDescriptor;
+		placeholder?: AdminCopyDescriptor;
 	};
 	config: {
 		localized?: boolean;

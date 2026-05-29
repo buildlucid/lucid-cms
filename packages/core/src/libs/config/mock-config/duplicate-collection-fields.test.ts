@@ -9,10 +9,12 @@ test("should throw duplicate collection field key error", async () => {
 			path: path.resolve(__dirname, "./duplicate-collection-fields.ts"),
 		}),
 	).rejects.toThrow(
-		translate.server("core.collections.fields.duplicates", {
-			type: "collection",
-			keys: ["title"].join(", "),
-			typeKey: "page",
+		translate("server:core.collections.fields.duplicates", {
+			data: {
+				type: "collection",
+				keys: ["title"].join(", "),
+				typeKey: "page",
+			},
 		}),
 	);
 });

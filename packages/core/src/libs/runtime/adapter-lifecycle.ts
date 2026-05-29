@@ -1,5 +1,4 @@
 import type { Config } from "../../types/config.js";
-import { createTranslator } from "../i18n/index.js";
 import type {
 	AdapterLifecycleContext,
 	AdapterRuntimeContext,
@@ -14,5 +13,4 @@ export const createAdapterLifecycleContext = (props: {
 	config: props.config,
 	env: props.env,
 	runtimeContext: props.runtimeContext,
-	translate: createTranslator({ config: props.config, locale: "en" }),
 });

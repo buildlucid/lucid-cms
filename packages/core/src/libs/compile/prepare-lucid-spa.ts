@@ -3,7 +3,7 @@ import { join } from "node:path";
 import constants from "../../constants/constants.js";
 import type { ServiceResponse } from "../../types.js";
 import getDirName from "../../utils/helpers/get-dir-name.js";
-import { text } from "../i18n/index.js";
+import { copy } from "../i18n/index.js";
 
 const currentDir = getDirName(import.meta.url);
 
@@ -53,8 +53,8 @@ const prepareLucidSPA = async (props: {
 		return {
 			data: undefined,
 			error: {
-				message: text.server(
-					"core.build.vite.error.message",
+				message: copy(
+					"server:core.build.vite.error.message",
 					err instanceof Error ? { defaultMessage: err.message } : undefined,
 				),
 			},

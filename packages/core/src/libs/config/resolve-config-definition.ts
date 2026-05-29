@@ -136,7 +136,6 @@ export const resolveConfigDefinition = async (props: {
 	// and validation once the adapter/env/bootstrap layer has been resolved.
 	const config = await processConfig(wrappedDefinition.config(env || {}), {
 		...(props.processConfigOptions ?? {}),
-		i18nTranslations: props.meta?.i18nTranslations,
 		recipe: wrappedDefinition.recipe,
 		resolvedDb: db,
 	});

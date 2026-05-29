@@ -90,7 +90,7 @@ const buildCommand: BuildHandler = async ({
 import * as lucidConfigModule from "./${constants.CONFIG_FILE}.js";
 import i18nTranslations from "./i18n-translations.json" with { type: "json" };
 import { resolveConfigDefinition } from "@lucidcms/core/build";
-import { createApp, setupCronJobs } from "@lucidcms/core/runtime";
+import { createApp, prepareTranslations, setupCronJobs } from "@lucidcms/core/runtime";
 import { createTranslator } from "@lucidcms/core/plugin";
 import { serve } from "@hono/node-server";
 import cron from "node-cron";
@@ -101,17 +101,19 @@ const startServer = async () => {
 		const { config: resolved, env } = await resolveConfigDefinition({
 			definition: lucidConfigModule.default,
 			envSchema: lucidConfigModule.env,
-			meta: {
-				i18nTranslations,
-			},
 			processConfigOptions: {
 				skipValidation: true,
 			},
 		});
-		const translate = createTranslator({ config: resolved, locale: "en" });
+		const { translationStore } = await prepareTranslations({
+			config: resolved,
+			bundles: i18nTranslations,
+		});
+		const translate = createTranslator({ store: translationStore, locale: "en" });
 
 		const { app, destroy, queue, kv } = await createApp({
 			config: resolved,
+			translationStore,
 			env: env,
 			runtimeContext: getRuntimeContext({
                 compiled: true,
@@ -135,13 +137,14 @@ const startServer = async () => {
 			cron.schedule(schedule, async () => {
 				await cronJobSetup.register({
 					config: resolved,
+					translationStore,
 					db: { client: resolved.db.client },
 					queue: queue,
 					env: env,
 					kv: kv,
 					request: {
 						url: "http://localhost:" + port,
-						locale: resolved.i18n.interface.defaultLocale,
+						locale: resolved.i18n.defaultLocale,
 					},
 					translate,
 				}, {

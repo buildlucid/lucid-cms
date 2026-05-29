@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { isCorePermission } from "../../libs/permission/registry.js";
 import {
 	RolePermissionsRepository,
@@ -28,7 +28,7 @@ const createSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const defaultRoleLocale = context.config.i18n.content.defaultLocale;
+	const defaultRoleLocale = context.config.i18n.defaultLocale;
 
 	const defaultName = getTranslationValue(data.name, defaultRoleLocale);
 	const defaultDescription = getTranslationValue(
@@ -40,12 +40,12 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.errors.validation.message"),
+				message: copy("server:core.errors.validation.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: text.server("core.fields.validation.required"),
+						message: copy("server:core.fields.validation.required"),
 					},
 				},
 			},
@@ -80,12 +80,12 @@ const createSingle: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				message: text.server("core.validation.unique.message"),
+				message: copy("server:core.validation.unique.message"),
 				status: 400,
 				errors: {
 					name: {
 						code: "invalid",
-						message: text.server("core.validation.unique.message"),
+						message: copy("server:core.validation.unique.message"),
 					},
 				},
 			},

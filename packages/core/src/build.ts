@@ -12,6 +12,7 @@ export { default as prepareLucidPublicAssets } from "./libs/compile/prepare-luci
 export { default as prepareLucidSPA } from "./libs/compile/prepare-lucid-spa.js";
 export { default as getConfigPath } from "./libs/config/get-config-path.js";
 export { default as resolveConfigDefinition } from "./libs/config/resolve-config-definition.js";
+export { default as prepareTranslations } from "./libs/i18n/prepare-translations.js";
 export { default as checkAllPluginsCompatibility } from "./libs/plugins/check-all-plugins-compatibility.js";
 export { default as handlePluginBuildHooks } from "./libs/plugins/hooks/handle-build.js";
 export { default as stripAdapterExportPlugin } from "./libs/runtime/plugins/strip-adapter-export-plugin.js";

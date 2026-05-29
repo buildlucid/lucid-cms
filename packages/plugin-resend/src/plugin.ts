@@ -1,4 +1,4 @@
-import { mergeTranslationBundles, text } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
 	LUCID_VERSION,
@@ -8,9 +8,6 @@ import {
 	WEBHOOK_ENABLED,
 } from "./constants.js";
 import routes from "./routes/index.js";
-import serverTranslations from "./translations/en.server.json" with {
-	type: "json",
-};
 import type { PluginOptions } from "./types/types.js";
 import isValidData from "./utils/is-valid-data.js";
 
@@ -25,10 +22,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
-			draft.i18n.translations = mergeTranslationBundles(
-				draft.i18n.translations,
-				{ en: { server: serverTranslations } },
-			);
+			draft.i18n.sources.push("@lucidcms/plugin-resend/translations");
 
 			const simulate = draft.email.simulate;
 
@@ -49,7 +43,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							return {
 								success: true,
 								deliveryStatus: "sent",
-								message: text.server("plugin.resend.email.send.success"),
+								message: copy("server:plugin.resend.email.send.success"),
 								data: null,
 							};
 						}
@@ -94,14 +88,14 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							return {
 								success: false,
 								deliveryStatus: "failed",
-								message: text.server("plugin.resend.email.send.failed"),
+								message: copy("server:plugin.resend.email.send.failed"),
 							};
 						}
 
 						return {
 							success: true,
 							deliveryStatus: webhookEnabled ? "sent" : "delivered",
-							message: text.server("plugin.resend.email.send.success"),
+							message: copy("server:plugin.resend.email.send.success"),
 							data: isValidData(data) ? data : null,
 							externalMessageId: data.id,
 						};
@@ -111,8 +105,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 							deliveryStatus: "failed",
 							message:
 								error instanceof Error
-									? text.literal(error.message)
-									: text.server("plugin.resend.email.send.failed"),
+									? copy.literal(error.message)
+									: copy("server:plugin.resend.email.send.failed"),
 						};
 					}
 				},

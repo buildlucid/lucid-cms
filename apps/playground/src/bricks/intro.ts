@@ -1,13 +1,13 @@
-import { BrickBuilder, text } from "@lucidcms/core";
+import { BrickBuilder, copy } from "@lucidcms/core";
 
 const IntroBrick = new BrickBuilder("intro", {
 	details: {
-		name: text.admin("bricks.intro.name", { defaultMessage: "Intro" }),
+		name: copy("admin:bricks.intro.name", { defaultMessage: "Intro" }),
 	},
 })
 	.addTab("content_tab", {
 		details: {
-			label: text.admin("bricks.intro.tabs.content_tab.label", {
+			label: copy("admin:bricks.intro.tabs.content_tab.label", {
 				defaultMessage: "Content",
 			}),
 		},
@@ -20,14 +20,14 @@ const IntroBrick = new BrickBuilder("intro", {
 	.addRichText("intro")
 	.addTab("advanced_tab", {
 		details: {
-			label: text.admin("bricks.intro.tabs.advanced_tab.label", {
+			label: copy("admin:bricks.intro.tabs.advanced_tab.label", {
 				defaultMessage: "Advanced",
 			}),
 		},
 	})
 	.addJSON("json", {
 		details: {
-			label: text.admin("bricks.intro.fields.json.label", {
+			label: copy("admin:bricks.intro.fields.json.label", {
 				defaultMessage: "JSON",
 			}),
 		},

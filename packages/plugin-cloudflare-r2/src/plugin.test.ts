@@ -6,7 +6,7 @@ import plugin from "./plugin.js";
 
 type PluginDraft = {
 	i18n: {
-		translations: Record<string, unknown>;
+		sources: Array<string | URL>;
 	};
 	media: Record<string, unknown>;
 	hono: {
@@ -16,7 +16,7 @@ type PluginDraft = {
 
 const buildDraft = (): PluginDraft => ({
 	i18n: {
-		translations: {},
+		sources: [],
 	},
 	media: {},
 	hono: {
@@ -72,12 +72,12 @@ describe("Cloudflare R2 plugin", () => {
 			? (() => {
 					const draft = {
 						i18n: {
-							translations: {},
+							sources: [],
 						},
 						media: {},
 					} as {
 						i18n: {
-							translations: Record<string, unknown>;
+							sources: Array<string | URL>;
 						};
 						media: {
 							adapter?: {

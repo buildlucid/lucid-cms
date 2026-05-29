@@ -5,13 +5,15 @@ import type {
 import type { Config } from "../../../types/config.js";
 import type { ServiceResponse } from "../../../types.js";
 import cliLogger from "../../cli/logger.js";
-import { createTranslator, text } from "../../i18n/index.js";
+import { copy, createTranslator } from "../../i18n/index.js";
+import type { TranslationStore } from "../../i18n/types.js";
 
 /**
  * Responsible for running the plugin build hooks and collecting artifacts
  */
 const handlePluginBuildHooks = async (props: {
 	config: Config;
+	translationStore: TranslationStore;
 	definition: LucidConfigDefinition;
 	silent?: boolean;
 	configPath: string;
@@ -21,7 +23,10 @@ const handlePluginBuildHooks = async (props: {
 	try {
 		const pluginArtifacts: Array<RuntimeBuildArtifact> = [];
 		const silent = props.silent ?? false;
-		const translate = createTranslator({ config: props.config, locale: "en" });
+		const translate = createTranslator({
+			store: props.translationStore,
+			locale: "en",
+		});
 
 		await Promise.all(
 			props.config.plugins.map(async (plugin) => {
@@ -38,7 +43,7 @@ const handlePluginBuildHooks = async (props: {
 				});
 				if (res.error) {
 					cliLogger.error(
-						translate.english.text(res.error.message) ??
+						translate.english(res.error.message) ??
 							`An unknown error occurred while building the ${plugin.key} plugin`,
 						{
 							silent,
@@ -58,7 +63,7 @@ const handlePluginBuildHooks = async (props: {
 	} catch (error) {
 		return {
 			error: {
-				message: text.server("core.plugins.build.failed", {
+				message: copy("server:core.plugins.build.failed", {
 					defaultMessage:
 						error instanceof Error
 							? error.message

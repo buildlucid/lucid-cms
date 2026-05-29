@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { EmailChangeRequestsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { userTokenServices } from "../index.js";
@@ -29,7 +29,7 @@ const verifyEmailChangeRevert: ServiceFn<
 			enabled: true,
 			defaultError: {
 				status: 404,
-				message: text.server("core.tokens.not.found.message"),
+				message: copy("server:core.tokens.not.found.message"),
 			},
 		},
 	});
@@ -44,7 +44,7 @@ const verifyEmailChangeRevert: ServiceFn<
 			error: {
 				type: "basic",
 				status: 404,
-				message: text.server("core.tokens.not.found.message"),
+				message: copy("server:core.tokens.not.found.message"),
 			},
 			data: undefined,
 		};

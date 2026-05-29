@@ -13,6 +13,7 @@ import getConfigPath from "./get-config-path.js";
 import { resolveConfigDefinition } from "./resolve-config-definition.js";
 
 export type LoadConfigResult = {
+	projectRoot: string;
 	config: Config;
 	adapter: RuntimeAdapter;
 	envSchema?: ZodType;
@@ -29,6 +30,7 @@ export const loadConfigFile = async (props?: {
 	>[0]["processConfigOptions"];
 }): Promise<LoadConfigResult> => {
 	const configPath = props?.path ? props.path : getConfigPath(process.cwd());
+	const projectRoot = path.dirname(path.resolve(configPath));
 	const importPath = pathToFileURL(path.resolve(configPath)).href;
 
 	const jiti = createJiti(import.meta.url, {
@@ -52,12 +54,12 @@ export const loadConfigFile = async (props?: {
 		},
 		processConfigOptions: {
 			bypassCache: true,
-			projectRoot: path.dirname(path.resolve(configPath)),
 			...(props?.processConfigOptions ?? {}),
 		},
 	});
 
 	return {
+		projectRoot,
 		config: resolved.config,
 		adapter: resolved.adapter,
 		envSchema: resolved.envSchema,

@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
@@ -26,8 +26,8 @@ const updateMe: ServiceFn<
 			error: {
 				type: "basic",
 				status: 400,
-				message: text.server(
-					"core.auth.password.authentication.disabled.message",
+				message: copy(
+					"server:core.auth.password.authentication.disabled.message",
 				),
 			},
 			data: undefined,
@@ -50,7 +50,7 @@ const updateMe: ServiceFn<
 		validation: {
 			enabled: true,
 			defaultError: {
-				message: text.server("core.account.not.found.message"),
+				message: copy("server:core.account.not.found.message"),
 				status: 404,
 			},
 		},
@@ -98,7 +98,7 @@ const updateMe: ServiceFn<
 				errors: {
 					username: {
 						code: "invalid",
-						message: text.server("core.users.username.duplicate"),
+						message: copy("server:core.users.username.duplicate"),
 					},
 				},
 			},
@@ -128,7 +128,7 @@ const updateMe: ServiceFn<
 			validation: {
 				enabled: true,
 				defaultError: {
-					message: text.server("core.routes.user.me.update.error.message"),
+					message: copy("server:core.routes.user.me.update.error.message"),
 					status: 400,
 				},
 			},

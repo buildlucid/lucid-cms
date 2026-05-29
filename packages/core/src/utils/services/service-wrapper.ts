@@ -1,4 +1,4 @@
-import { text } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
 import type {
 	ServiceContext,
@@ -89,7 +89,7 @@ const serviceWrapper =
 				return {
 					error: mergeServiceError(
 						{
-							message: text.server("core.errors.default.message"),
+							message: copy("server:core.errors.default.message"),
 							cause: error,
 						},
 						wrapperConfig.defaultError,
@@ -101,7 +101,7 @@ const serviceWrapper =
 			return {
 				error: mergeServiceError(
 					{
-						message: text.server("core.errors.default.message"),
+						message: copy("server:core.errors.default.message"),
 						cause: error,
 					},
 					wrapperConfig.defaultError,

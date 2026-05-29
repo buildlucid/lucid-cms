@@ -1,7 +1,7 @@
 import { isValid } from "date-fns";
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
-import { text } from "../../../../i18n/index.js";
+import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -29,7 +29,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			details: {
 				label:
 					this.props?.details?.label ??
-					text.admin(`fields.${this.type}.${this.key}.label`, {
+					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
 				summary: this.props?.details?.summary,
@@ -81,7 +81,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 		if (!isValid(date)) {
 			return {
 				valid: false,
-				message: text.server("core.fields.date.validation.invalid"),
+				message: copy("server:core.fields.date.validation.invalid"),
 			};
 		}
 
