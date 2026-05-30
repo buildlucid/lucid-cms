@@ -218,7 +218,6 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 						type="text"
 						copy={{
 							label: T()("common.name"),
-							placeholder: T()("common.optional"),
 						}}
 						errors={getBodyError("name", errors)}
 					/>
@@ -229,7 +228,6 @@ const UpsertShareLinkPanel: Component<UpsertShareLinkPanelProps> = (props) => {
 						name="description"
 						copy={{
 							label: T()("common.description"),
-							placeholder: T()("common.optional"),
 						}}
 						errors={getBodyError("description", errors)}
 					/>
