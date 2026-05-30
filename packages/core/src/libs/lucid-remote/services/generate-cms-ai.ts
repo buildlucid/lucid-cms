@@ -60,7 +60,7 @@ type CmsAiGenerateBaseRequest<
 
 export type CustomFieldInputV1Request = CmsAiGenerateBaseRequest<
 	{
-		key: "custom-field-input";
+		key: "custom-field.input.generate";
 		version: "v1";
 	},
 	CmsAiGenerateRequestInputText<
@@ -77,7 +77,10 @@ export type CustomFieldInputV1Request = CmsAiGenerateBaseRequest<
 		field: {
 			key: string;
 			type: string;
-			details?: unknown;
+			details?: {
+				label?: string;
+				summary?: string;
+			};
 			translations?: Record<string, unknown>;
 			valueSchema: unknown;
 		};
@@ -124,8 +127,27 @@ export type CmsAiGenerateData = {
 		model: string;
 		providerRequestId?: string;
 		tokens: {
-			input: number;
-			output: number;
+			input: {
+				text: number;
+				image: number;
+				audio: number;
+				cached: {
+					total: number;
+					text: number;
+					image: number;
+					audio: number;
+				};
+				total: number;
+			};
+			output: {
+				text: number;
+				image: number;
+				audio: number;
+				reasoning: number;
+				acceptedPrediction: number;
+				rejectedPrediction: number;
+				total: number;
+			};
 			total: number;
 		};
 		cost: {

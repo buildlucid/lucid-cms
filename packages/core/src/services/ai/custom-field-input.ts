@@ -8,9 +8,32 @@ import type {
 } from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
 import type { CustomFieldAiContextItem } from "../../types.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
 import normalizeCurrentValueTranslations from "./helpers/normalize-current-value-translations.js";
+
+const getTranslatedFieldDetails = (
+	context: ServiceContext,
+	targetField: {
+		details: {
+			label?: Parameters<ServiceContext["translate"]>[0];
+			summary?: Parameters<ServiceContext["translate"]>[0];
+		};
+	},
+) => {
+	const translate = context.translate.forLocale(
+		context.config.i18n.defaultLocale,
+	);
+	const label = translate(targetField.details.label);
+	const summary = translate(targetField.details.summary);
+
+	if (!label && !summary) return undefined;
+
+	return {
+		...(label ? { label } : {}),
+		...(summary ? { summary } : {}),
+	};
+};
 
 const customFieldInput: ServiceFn<
 	[
@@ -174,7 +197,7 @@ const customFieldInput: ServiceFn<
 
 	const request: CustomFieldInputV1Request = {
 		feature: {
-			key: "custom-field-input",
+			key: "custom-field.input.generate",
 			version: "v1",
 		},
 		input,
@@ -186,7 +209,7 @@ const customFieldInput: ServiceFn<
 			field: {
 				key: targetField.key,
 				type: targetField.type,
-				details: targetField.details,
+				details: getTranslatedFieldDetails(context, targetField),
 				translations: currentValueTranslations,
 				valueSchema: targetField.jsonSchema,
 			},

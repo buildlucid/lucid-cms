@@ -6,7 +6,17 @@ const mediaAltMaxBase64ImageLength = 8_000_000;
 const localeSchema = z
 	.object({
 		source: z.string().trim().min(2).max(32).optional(),
-		target: z.array(z.string().trim().min(2).max(32)).min(1),
+		target: z
+			.array(z.string().trim().min(2).max(32))
+			.min(1)
+			.superRefine((locales, context) => {
+				if (new Set(locales).size !== locales.length) {
+					context.addIssue({
+						code: "custom",
+						message: "Target locales must be unique.",
+					});
+				}
+			}),
 	})
 	.strict();
 
@@ -26,8 +36,33 @@ const aiGenerateResponseSchema = z
 				providerRequestId: z.string().optional(),
 				tokens: z
 					.object({
-						input: z.number().int().nonnegative(),
-						output: z.number().int().nonnegative(),
+						input: z
+							.object({
+								text: z.number().int().nonnegative(),
+								image: z.number().int().nonnegative(),
+								audio: z.number().int().nonnegative(),
+								cached: z
+									.object({
+										total: z.number().int().nonnegative(),
+										text: z.number().int().nonnegative(),
+										image: z.number().int().nonnegative(),
+										audio: z.number().int().nonnegative(),
+									})
+									.strict(),
+								total: z.number().int().nonnegative(),
+							})
+							.strict(),
+						output: z
+							.object({
+								text: z.number().int().nonnegative(),
+								image: z.number().int().nonnegative(),
+								audio: z.number().int().nonnegative(),
+								reasoning: z.number().int().nonnegative(),
+								acceptedPrediction: z.number().int().nonnegative(),
+								rejectedPrediction: z.number().int().nonnegative(),
+								total: z.number().int().nonnegative(),
+							})
+							.strict(),
 						total: z.number().int().nonnegative(),
 					})
 					.strict(),
@@ -44,7 +79,7 @@ const aiGenerateResponseSchema = z
 
 const mediaAltResponseSchema = z.record(
 	z.string().trim().min(2).max(32),
-	z.string().max(250),
+	z.string(),
 );
 
 export const controllerSchemas = {
@@ -72,7 +107,7 @@ export const controllerSchemas = {
 		response: aiGenerateResponseSchema.extend({
 			feature: z
 				.object({
-					key: z.literal("custom-field-input"),
+					key: z.literal("custom-field.input.generate"),
 					version: z.literal("v1"),
 				})
 				.strict(),
@@ -93,16 +128,10 @@ export const controllerSchemas = {
 					.object({
 						id: z.union([z.string().trim().min(1), z.number()]).optional(),
 						name: z
-							.record(
-								z.string().trim().min(2).max(32),
-								z.string().trim().max(255),
-							)
+							.record(z.string().trim().min(2).max(32), z.string().trim())
 							.optional(),
 						alt: z
-							.record(
-								z.string().trim().min(2).max(32),
-								z.string().trim().max(1_000),
-							)
+							.record(z.string().trim().min(2).max(32), z.string().trim())
 							.optional(),
 					})
 					.strict(),

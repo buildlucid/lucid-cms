@@ -5,7 +5,7 @@ import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
 
-const mediaAltOutputSchema = z.record(z.string(), z.string().max(250));
+const mediaAltOutputSchema = z.record(z.string(), z.string());
 
 const mediaAlt: ServiceFn<
 	[
