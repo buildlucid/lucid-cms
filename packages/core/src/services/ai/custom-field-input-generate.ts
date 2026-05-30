@@ -8,34 +8,12 @@ import type {
 } from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
 import type { CustomFieldAiContextItem } from "../../types.js";
-import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
+import getTranslatedFieldDetails from "./helpers/get-translated-field-details.js";
 import normalizeCurrentValueTranslations from "./helpers/normalize-current-value-translations.js";
 
-const getTranslatedFieldDetails = (
-	context: ServiceContext,
-	targetField: {
-		details: {
-			label?: Parameters<ServiceContext["translate"]>[0];
-			summary?: Parameters<ServiceContext["translate"]>[0];
-		};
-	},
-) => {
-	const translate = context.translate.forLocale(
-		context.config.i18n.defaultLocale,
-	);
-	const label = translate(targetField.details.label);
-	const summary = translate(targetField.details.summary);
-
-	if (!label && !summary) return undefined;
-
-	return {
-		...(label ? { label } : {}),
-		...(summary ? { summary } : {}),
-	};
-};
-
-const customFieldInput: ServiceFn<
+const customFieldInputGenerate: ServiceFn<
 	[
 		{
 			instruction: string;
@@ -123,7 +101,7 @@ const customFieldInput: ServiceFn<
 	if (targetField.aiConfig.instructions?.trim()) {
 		input.push({
 			type: "text",
-			role: "field-instructions",
+			role: "field-instruction",
 			value: targetField.aiConfig.instructions,
 		});
 	}
@@ -229,4 +207,4 @@ const customFieldInput: ServiceFn<
 	};
 };
 
-export default customFieldInput;
+export default customFieldInputGenerate;

@@ -1,13 +1,16 @@
 import z from "zod";
 import { copy } from "../../libs/i18n/index.js";
-import type { MediaAltGenerateV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
+import type {
+	CmsAiGenerateData,
+	MediaAltGenerateV1Request,
+} from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
 
 const mediaAltOutputSchema = z.record(z.string(), z.string());
 
-const mediaAlt: ServiceFn<
+const mediaAltGenerate: ServiceFn<
 	[
 		{
 			image: {
@@ -27,7 +30,7 @@ const mediaAlt: ServiceFn<
 			};
 		},
 	],
-	Record<string, string>
+	CmsAiGenerateData
 > = async (context, props) => {
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
@@ -92,8 +95,11 @@ const mediaAlt: ServiceFn<
 
 	return {
 		error: undefined,
-		data: outputParse.data,
+		data: {
+			...generateRes.data.json.data,
+			output: outputParse.data,
+		},
 	};
 };
 
-export default mediaAlt;
+export default mediaAltGenerate;

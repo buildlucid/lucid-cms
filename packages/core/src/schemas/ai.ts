@@ -1,7 +1,8 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
 
-const mediaAltMaxBase64ImageLength = 8_000_000;
+const aiMaxBase64ImageLength = 8_000_000;
+const aiImageDetailSchema = z.enum(["low", "high", "auto"]).default("low");
 
 const localeSchema = z
 	.object({
@@ -77,11 +78,6 @@ const aiGenerateResponseSchema = z
 	})
 	.strict();
 
-const mediaAltResponseSchema = z.record(
-	z.string().trim().min(2).max(32),
-	z.string(),
-);
-
 export const controllerSchemas = {
 	customFieldInput: {
 		body: z
@@ -111,6 +107,7 @@ export const controllerSchemas = {
 					version: z.literal("v1"),
 				})
 				.strict(),
+			output: z.record(z.string().trim().min(2).max(32), z.unknown()),
 		}),
 	} satisfies ControllerSchema,
 	mediaAlt: {
@@ -118,9 +115,9 @@ export const controllerSchemas = {
 			.object({
 				image: z
 					.object({
-						data: z.string().trim().min(1).max(mediaAltMaxBase64ImageLength),
+						data: z.string().trim().min(1).max(aiMaxBase64ImageLength),
 						mimeType: z.literal("image/webp"),
-						detail: z.enum(["low", "high", "auto"]).default("low"),
+						detail: aiImageDetailSchema,
 						filename: z.string().trim().min(1).max(255).optional(),
 					})
 					.strict(),
@@ -143,7 +140,87 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: mediaAltResponseSchema,
+		response: aiGenerateResponseSchema.extend({
+			feature: z
+				.object({
+					key: z.literal("media.alt.generate"),
+					version: z.literal("v1"),
+				})
+				.strict(),
+			output: z.record(z.string().trim().min(2).max(32), z.string()),
+		}),
+	} satisfies ControllerSchema,
+	mediaImageGenerate: {
+		body: z
+			.object({
+				instruction: z.string().trim().min(1).max(8_000),
+				guidance: z.string().trim().min(1).optional(),
+				image: z
+					.object({
+						type: z.literal("url"),
+						url: z.url().trim().max(2_048),
+						detail: aiImageDetailSchema,
+						filename: z.string().trim().min(1).max(255).optional(),
+						mimeType: z
+							.enum(["image/webp", "image/png", "image/jpeg"])
+							.optional(),
+					})
+					.strict()
+					.optional(),
+				generation: z
+					.object({
+						size: z
+							.enum([
+								"auto",
+								"1024x1024",
+								"1536x1024",
+								"1024x1536",
+								"2048x2048",
+								"2048x1152",
+								"3840x2160",
+								"2160x3840",
+							])
+							.default("1024x1024"),
+						quality: z
+							.enum(["auto", "low", "medium", "high"])
+							.default("medium"),
+						outputFormat: z.enum(["webp", "png", "jpeg"]).default("webp"),
+					})
+					.strict()
+					.default({
+						size: "1024x1024",
+						quality: "medium",
+						outputFormat: "webp",
+					}),
+			})
+			.strict(),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: aiGenerateResponseSchema.extend({
+			feature: z
+				.object({
+					key: z.literal("media.image.generate"),
+					version: z.literal("v1"),
+				})
+				.strict(),
+			output: z
+				.object({
+					id: z.string(),
+					url: z.string(),
+					urlExpiresAt: z.string(),
+					storageKey: z.string(),
+					byteSize: z.number().int().nonnegative(),
+					mimeType: z.string(),
+					extension: z.string(),
+					size: z.string(),
+					quality: z.string(),
+					outputFormat: z.string(),
+				})
+				.strict(),
+		}),
 	} satisfies ControllerSchema,
 };
 
@@ -151,3 +228,6 @@ export type CustomFieldInputBody = z.infer<
 	typeof controllerSchemas.customFieldInput.body
 >;
 export type MediaAltBody = z.infer<typeof controllerSchemas.mediaAlt.body>;
+export type MediaImageGenerateBody = z.infer<
+	typeof controllerSchemas.mediaImageGenerate.body
+>;

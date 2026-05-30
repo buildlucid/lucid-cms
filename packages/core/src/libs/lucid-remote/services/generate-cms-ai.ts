@@ -9,7 +9,10 @@ export type CmsAiGenerateRequestInputText<TRole extends string = string> = {
 	value: string;
 };
 
-export type CmsAiGenerateRequestInputImage<TRole extends string = string> = {
+export type CmsAiGenerateRequestInputImage<
+	TRole extends string = string,
+	TMimeType extends string = string,
+> = {
 	type: "image";
 	role: TRole;
 	image:
@@ -18,12 +21,12 @@ export type CmsAiGenerateRequestInputImage<TRole extends string = string> = {
 				url: string;
 				detail?: "low" | "high" | "auto";
 				filename?: string;
-				mimeType?: string;
+				mimeType?: TMimeType;
 		  }
 		| {
 				type: "base64";
 				data: string;
-				mimeType: "image/webp";
+				mimeType: TMimeType;
 				detail?: "low" | "high" | "auto";
 				filename?: string;
 		  };
@@ -64,7 +67,7 @@ export type CustomFieldInputV1Request = CmsAiGenerateBaseRequest<
 		version: "v1";
 	},
 	CmsAiGenerateRequestInputText<
-		"user-instruction" | "field-instructions" | "guidance"
+		"user-instruction" | "field-instruction" | "guidance"
 	>,
 	{
 		locale: {
@@ -108,9 +111,37 @@ export type MediaAltGenerateV1Request = CmsAiGenerateBaseRequest<
 	}
 >;
 
+export type MediaImageGenerateV1Request = {
+	feature: {
+		key: "media.image.generate";
+		version: "v1";
+	};
+	input: (
+		| CmsAiGenerateRequestInputText<"user-instruction" | "guidance">
+		| CmsAiGenerateRequestInputImage<
+				"source-image",
+				"image/webp" | "image/png" | "image/jpeg"
+		  >
+	)[];
+	generation: {
+		size:
+			| "auto"
+			| "1024x1024"
+			| "1536x1024"
+			| "1024x1536"
+			| "2048x2048"
+			| "2048x1152"
+			| "3840x2160"
+			| "2160x3840";
+		quality: "auto" | "low" | "medium" | "high";
+		outputFormat: "webp" | "png" | "jpeg";
+	};
+};
+
 export type CmsAiGenerateRequest =
 	| CustomFieldInputV1Request
-	| MediaAltGenerateV1Request;
+	| MediaAltGenerateV1Request
+	| MediaImageGenerateV1Request;
 
 export type CmsAiGenerateRequestFeature = CmsAiGenerateRequest["feature"];
 
@@ -167,7 +198,7 @@ const generateCmsAi: ServiceFn<
 	const client = getLucidRemoteClient(context);
 
 	return client.request<CmsAiGenerateData>(lucidRemotePaths.generateCmsAi, {
-		retries: 1,
+		retries: 0,
 		method: "POST",
 		headers: {
 			Authorization: `Bearer ${props.licenseKey}`,

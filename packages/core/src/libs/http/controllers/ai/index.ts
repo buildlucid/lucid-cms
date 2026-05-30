@@ -1,7 +1,9 @@
-import customFieldInput from "./custom-field-input.js";
-import mediaAlt from "./media-alt.js";
+import customFieldInputGenerate from "./custom-field-input-generate.js";
+import mediaAltGenerate from "./media-alt-generate.js";
+import mediaImageGenerate from "./media-image-generate.js";
 
 export default {
-	customFieldInput,
-	mediaAlt,
+	customFieldInputGenerate,
+	mediaImageGenerate,
+	mediaAltGenerate,
 };

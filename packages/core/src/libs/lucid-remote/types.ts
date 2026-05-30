@@ -10,6 +10,7 @@ export type {
 	CmsAiGenerateRequestItem,
 	CustomFieldInputV1Request,
 	MediaAltGenerateV1Request,
+	MediaImageGenerateV1Request,
 } from "./services/generate-cms-ai.js";
 export type { VerifyCmsLicenseData } from "./services/verify-cms-license.js";
 

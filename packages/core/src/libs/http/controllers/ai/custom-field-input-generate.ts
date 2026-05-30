@@ -2,8 +2,8 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
 import {
+	type CustomFieldInputBody,
 	controllerSchemas,
-	type MediaAltBody,
 } from "../../../../schemas/ai.js";
 import { aiServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -14,9 +14,8 @@ import {
 } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
-import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
-import { permissionCheck } from "../../middleware/permissions.js";
+import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -24,15 +23,17 @@ import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const mediaAltController = factory.createHandlers(
+const customFieldInputGenerateController = factory.createHandlers(
 	describeRoute({
-		description: "Generate alt text for media using Lucid AI.",
+		description: "Generate a value for a custom field using Lucid AI.",
 		tags: ["ai"],
-		summary: "Generate Media Alt Text",
+		summary: "Generate Custom Field Input",
 		responses: honoOpenAPIResponse({
-			schema: z.toJSONSchema(controllerSchemas.mediaAlt.response),
+			schema: z.toJSONSchema(controllerSchemas.customFieldInput.response),
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.mediaAlt.body),
+		requestBody: honoOpenAPIRequestBody(
+			controllerSchemas.customFieldInput.body,
+		),
 		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
@@ -41,27 +42,35 @@ const mediaAltController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	validate("json", controllerSchemas.mediaAlt.body),
+	validate("json", controllerSchemas.customFieldInput.body),
+	collectionPermissions("ai", {
+		getCollectionKey: (c) => {
+			const request = c.req as {
+				valid: (target: "json") => CustomFieldInputBody;
+			};
+			const body = request.valid("json");
+			return body.target.collectionKey;
+		},
+	}),
 	async (c) => {
-		const body = c.req.valid("json") as MediaAltBody;
-		permissionCheck(
-			c,
-			body.media.id === undefined
-				? Permissions.MediaCreate
-				: Permissions.MediaUpdate,
-		);
+		const body = c.req.valid("json");
 		const context = createServiceContext(c);
 
-		const generateRes = await serviceWrapper(aiServices.mediaAlt, {
-			transaction: false,
-			defaultError: {
-				type: "basic",
-				name: copy("server:core.routes.ai.generate.error.name"),
-				message: copy("server:core.routes.ai.generate.error.message"),
+		const generateRes = await serviceWrapper(
+			aiServices.customFieldInputGenerate,
+			{
+				transaction: false,
+				defaultError: {
+					type: "basic",
+					name: copy("server:core.routes.ai.generate.error.name"),
+					message: copy("server:core.routes.ai.generate.error.message"),
+				},
 			},
-		})(context, {
-			image: body.image,
-			media: body.media,
+		)(context, {
+			instruction: body.instruction,
+			guidance: body.guidance,
+			currentValue: body.currentValue,
+			target: body.target,
 			locale: body.locale,
 		});
 		if (generateRes.error) throw new LucidAPIError(generateRes.error);
@@ -75,4 +84,4 @@ const mediaAltController = factory.createHandlers(
 	},
 );
 
-export default mediaAltController;
+export default customFieldInputGenerateController;
