@@ -303,7 +303,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 	// ------------------------------------
 	// Classes
 	const actionButtonClasses = classNames(
-		"bg-input-base text-input-contrast hover:text-secondary-contrast border border-border h-8 flex justify-center items-center font-medium text-sm py-2 px-2 rounded-md transition-all duration-200 hover:bg-secondary-hover focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base",
+		"bg-input-base md:gap-2 text-input-contrast hover:text-secondary-contrast border border-border h-8 flex justify-center items-center font-medium text-sm py-2 px-2 rounded-md transition-all duration-200 hover:bg-secondary-hover focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base",
 	);
 	const showFocalPoint = createMemo(
 		() => props.data.type === "image" && props.focalPoint !== undefined,
@@ -430,7 +430,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 								props.actions.downloadFile();
 						}}
 					>
-						<FaSolidMagnifyingGlass class="block md:mr-2 text-current" />
+						<FaSolidMagnifyingGlass class="block text-current" />
 						<span class="hidden md:inline">{T()("common.preview")}</span>
 					</button>
 				</Show>
@@ -440,7 +440,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 						class={classNames(actionButtonClasses)}
 						onClick={() => setFocalEditorOpen(true)}
 					>
-						<FaSolidBullseye class="block md:mr-2 text-current" />
+						<FaSolidBullseye class="block text-current" />
 						<span class="hidden md:inline">
 							{T()("media.focal.point.label")}
 						</span>
@@ -453,7 +453,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 						props.actions.uploadFile();
 					}}
 				>
-					<FaSolidArrowUpFromBracket class="block md:mr-2 text-current" />
+					<FaSolidArrowUpFromBracket class="block text-current" />
 					<span class="hidden md:inline">{T()("media.file.choose")}</span>
 				</button>
 				<Show when={props.actions.clearFile !== undefined}>
@@ -465,7 +465,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 								props.actions.clearFile();
 						}}
 					>
-						<FaSolidXmark class="block md:mr-2 text-current" />
+						<FaSolidXmark class="block text-current" />
 						<span class="hidden md:inline">{T()("common.remove")}</span>
 					</button>
 				</Show>

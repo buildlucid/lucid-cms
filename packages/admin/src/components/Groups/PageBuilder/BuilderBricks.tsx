@@ -64,8 +64,8 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 		<Show when={props.brickConfig.length > 0}>
 			<div class="p-6 h-full">
 				<div class="flex justify-between mb-4">
-					<div class="flex items-center">
-						<FaSolidLayerGroup class="text-white text-xl mr-2.5" />
+					<div class="flex items-center gap-2.5">
+						<FaSolidLayerGroup class="text-white text-xl" />
 						<h2>{T()("builder.area.label")}</h2>
 					</div>
 					<Button
@@ -244,10 +244,10 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				role="button"
 				tabIndex="0"
 			>
-				<div class="flex items-center">
+				<div class="flex items-center gap-2">
 					<button
 						type="button"
-						class="text-icon-faded mr-2 hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-icon-faded hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
 								ref: props.brick.ref,

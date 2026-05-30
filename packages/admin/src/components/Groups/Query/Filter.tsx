@@ -345,13 +345,13 @@ export const Filter: Component<FilterProps> = (props) => {
 	return (
 		<DropdownMenu.Root getAnchorRect={getAnchorRect} modal={false}>
 			<DropdownMenu.Trigger
-				class="dropdown-trigger bg-secondary-base hover:bg-secondary-hover text-secondary-contrast pl-2 pr-3 h-9 text-sm border border-transparent rounded-md flex items-center disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused"
+				class="dropdown-trigger gap-2 bg-secondary-base hover:bg-secondary-hover text-secondary-contrast pl-2 pr-3 h-9 text-sm border border-transparent rounded-md flex items-center disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused"
 				disabled={props.disabled}
 			>
 				<DropdownMenu.Icon>
 					<FaSolidFilter />
 				</DropdownMenu.Icon>
-				<span class="ml-2">{T()("common.filter")}</span>
+				<span>{T()("common.filter")}</span>
 			</DropdownMenu.Trigger>
 			<DropdownContent
 				options={{

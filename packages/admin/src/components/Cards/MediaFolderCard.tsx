@@ -6,6 +6,7 @@ import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { Checkbox } from "@/components/Groups/Form";
 import ActionDropdown from "@/components/Partials/ActionDropdown";
 import { Permissions } from "@/constants/permissions";
+import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import type useRowTarget from "@/hooks/useRowTarget";
 import mediaStore from "@/store/mediaStore";
 import userStore from "@/store/userStore";
@@ -39,6 +40,7 @@ export const MediaFolderCard: Component<{
 	// State & Hooks
 	const location = useLocation();
 	const navigate = useNavigate();
+	const interfaceDirection = useInterfaceDirection();
 
 	// ----------------------------------
 	// Memos
@@ -89,7 +91,15 @@ export const MediaFolderCard: Component<{
 				}
 			}}
 		>
-			<div class="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100">
+			<div
+				class={classNames(
+					"absolute top-3 z-10 opacity-0 group-hover:opacity-100",
+					{
+						"right-3": interfaceDirection.isLTR(),
+						"left-3": interfaceDirection.isRTL(),
+					},
+				)}
+			>
 				<ActionDropdown
 					actions={[
 						{
@@ -105,6 +115,9 @@ export const MediaFolderCard: Component<{
 					]}
 					options={{
 						border: true,
+						placement: interfaceDirection.isRTL()
+							? "bottom-start"
+							: "bottom-end",
 					}}
 				/>
 			</div>

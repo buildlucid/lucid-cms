@@ -92,8 +92,8 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					"flex justify-between pt-4 md:pt-6 px-4 md:px-6 focus:outline-hidden"
 				}
 			>
-				<div class="flex items-center">
-					<FaSolidShield class="text-white text-lg mr-2.5" />
+				<div class="flex items-center gap-2.5">
+					<FaSolidShield class="text-white text-lg" />
 					<h2>
 						{helpers.getLocaleValue({
 							value: config()?.details.name,

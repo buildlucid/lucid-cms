@@ -53,7 +53,7 @@ export const Th: Component<ThProps> = (props) => {
 	return (
 		<th
 			class={classNames(
-				"text-left relative px-4 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
+				"text-left relative gap-2.5 px-4 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
 				{
 					"hover:bg-card-base": props.options?.sortable,
 					hidden: props.options?.include === false,
@@ -78,14 +78,14 @@ export const Th: Component<ThProps> = (props) => {
 				<Match when={props?.label !== undefined}>
 					<Switch>
 						<Match when={props.options?.sortable !== true}>
-							<div class="flex items-center min-h-12.5">
-								<span class="text-sm mr-2.5 fill-body">{props?.icon}</span>
+							<div class="flex items-center min-h-12.5 gap-2.5">
+								<span class="text-sm fill-body">{props?.icon}</span>
 								<span class="text-sm text-body">{props?.label}</span>
 							</div>
 						</Match>
 						<Match when={props.options?.sortable === true}>
 							<button
-								class="justify-between flex items-center w-full min-h-12.5"
+								class="justify-between gap-2.5 flex items-center w-full min-h-12.5"
 								onClick={() => {
 									if (props.searchParams === undefined) return;
 									if (props.key === undefined) return;
@@ -107,15 +107,15 @@ export const Th: Component<ThProps> = (props) => {
 								}}
 								type="button"
 							>
-								<div class="flex items-center">
-									<span class="text-sm mr-2.5 fill-body">{props?.icon}</span>
+								<div class="flex items-center gap-2.5">
+									<span class="text-sm fill-body">{props?.icon}</span>
 									<span class="text-sm text-body">{props?.label}</span>
 								</div>
 								<Switch>
 									<Match when={sort() === "desc" || sort() === "asc"}>
 										<FaSolidCaretUp
 											aria-hidden="true"
-											class={classNames("w-3 h-3 ml-2 text-icon-base", {
+											class={classNames("w-3 h-3 text-icon-base", {
 												"transform rotate-180": sort() === "desc",
 											})}
 										/>

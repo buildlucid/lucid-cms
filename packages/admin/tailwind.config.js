@@ -110,6 +110,9 @@ export default {
 				"animate-slide-from-right-in": "animate-slide-from-right-in 200ms ease",
 				"animate-slide-from-right-out":
 					"animate-slide-from-right-out 200ms ease 100ms forwards",
+				"animate-slide-from-left-in": "animate-slide-from-left-in 200ms ease",
+				"animate-slide-from-left-out":
+					"animate-slide-from-left-out 200ms ease 100ms forwards",
 
 				"animate-slide-from-bottom-in":
 					"animate-slide-from-bottom-in 200ms ease",

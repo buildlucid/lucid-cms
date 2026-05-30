@@ -5,6 +5,7 @@ import { FaSolidChevronDown } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import DropdownContent from "@/components/Partials/DropdownContent";
 import Spinner from "@/components/Partials/Spinner";
+import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
@@ -37,6 +38,10 @@ export const ReleaseTrigger: Component<{
 	permission?: boolean;
 	loading?: boolean;
 }> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const interfaceDirection = useInterfaceDirection();
+
 	// ----------------------------------------
 	// Memos
 	const isDisabled = createMemo(() => {
@@ -103,7 +108,10 @@ export const ReleaseTrigger: Component<{
 					"px-4 h-9 text-sm",
 					{
 						"rounded-md": !hasOptions(),
-						"rounded-l-md border-r border-black/10": hasOptions(),
+						"rounded-l-md border-r border-black/10":
+							hasOptions() && interfaceDirection.isLTR(),
+						"rounded-r-md border-l border-black/10":
+							hasOptions() && interfaceDirection.isRTL(),
 						"opacity-80 cursor-not-allowed":
 							props.saveDisabled || props.savePermission === false,
 					},
@@ -115,10 +123,12 @@ export const ReleaseTrigger: Component<{
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger
 						class={classNames(
-							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-r-md relative font-base gap-2",
+							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative font-base gap-2",
 							"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base",
 							"px-2 w-9 h-9 text-sm",
 							{
+								"rounded-r-md": interfaceDirection.isLTR(),
+								"rounded-l-md": interfaceDirection.isRTL(),
 								"opacity-80 cursor-not-allowed":
 									isDisabled() || props.permission === false,
 							},

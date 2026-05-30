@@ -38,7 +38,7 @@ export interface ActionDropdownProps {
 	}>;
 	options?: {
 		border?: boolean;
-		placement?: "bottom-end";
+		placement?: "bottom-end" | "bottom-start";
 		raised?: boolean;
 	};
 }

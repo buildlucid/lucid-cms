@@ -61,7 +61,7 @@ const SortItem: Component<SortItemProps> = (props) => {
 				</label>
 				<div
 					class={classNames(
-						"w-5 h-5 min-w-[20px] rounded-md flex items-center justify-center transition-colors duration-200",
+						"w-5 h-5 min-w-5 rounded-md flex items-center justify-center transition-colors duration-200",
 						{
 							"bg-secondary-base group-hover:bg-secondary-hover":
 								sort() === "desc" || sort() === "asc",
@@ -124,13 +124,13 @@ export const Sort: Component<SortProps> = (props) => {
 		<DropdownMenu.Root getAnchorRect={getAnchorRect}>
 			<DropdownMenu.Trigger
 				class={
-					"dropdown-trigger pl-2 pr-3 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent rounded-md fill-secondary-contrast flex items-center"
+					"dropdown-trigger gap-2 pl-2 pr-3 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent rounded-md fill-secondary-contrast flex items-center"
 				}
 			>
 				<DropdownMenu.Icon>
 					<FaSolidSort />
 				</DropdownMenu.Icon>
-				<span class="ml-2">{T()("common.sort")}</span>
+				<span>{T()("common.sort")}</span>
 			</DropdownMenu.Trigger>
 			<DropdownContent
 				options={{

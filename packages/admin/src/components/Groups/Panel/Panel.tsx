@@ -18,6 +18,7 @@ import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import ErrorMessage from "@/components/Partials/ErrorMessage";
+import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { PanelFooter } from "./PanelFooter";
@@ -71,6 +72,7 @@ export const Panel: Component<{
 	const [contentLocale, setContentLocale] = createSignal<string | undefined>(
 		undefined,
 	);
+	const interfaceDirection = useInterfaceDirection();
 
 	// ------------------------------
 	// Functions
@@ -122,7 +124,15 @@ export const Panel: Component<{
 				<Dialog.Overlay class="fixed inset-0 z-40 bg-background-base/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
 				<div class="fixed inset-4 z-40 flex justify-end">
 					<Dialog.Content
-						class="w-full relative flex flex-col rounded-xl scrollbar border border-border max-w-200 bg-background-base animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in outline-hidden overflow-y-auto"
+						class={classNames(
+							"w-full relative flex flex-col rounded-xl scrollbar border border-border max-w-200 bg-background-base outline-hidden overflow-y-auto",
+							{
+								"animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in":
+									interfaceDirection.isLTR(),
+								"animate-animate-slide-from-left-out data-expanded:animate-animate-slide-from-left-in":
+									interfaceDirection.isRTL(),
+							},
+						)}
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
 							if (target.hasAttribute("data-panel-ignore")) {

@@ -36,7 +36,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 		>
 			<div class="flex items-center justify-between">
 				<Checkbox.Root
-					class="flex items-center"
+					class="flex items-center gap-2.5"
 					required={props.required}
 					name={props.name}
 					checked={props.value}
@@ -52,7 +52,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 							e.stopPropagation();
 						}}
 						class={classnames(
-							"h-5 w-5 min-w-[20px] text-secondary-contrast rounded-md border-border border cursor-pointer hover:border-secondary-base bg-input-base data-checked:bg-secondary-base data-checked:border-secondary-hover data-checked:fill-secondary-contrast transition-colors duration-200",
+							"h-5 w-5 min-w-5 text-secondary-contrast rounded-md border-border border cursor-pointer hover:border-secondary-base bg-input-base data-checked:bg-secondary-base data-checked:border-secondary-hover data-checked:fill-secondary-contrast transition-colors duration-200",
 							{
 								"border-primary-base": inputFocus(),
 							},
@@ -67,7 +67,7 @@ export const CheckboxInput: Component<CheckboxInputProps> = (props) => {
 					{props.copy.label && (
 						<Checkbox.Label
 							class={classnames(
-								"text-sm transition-colors duration-200 ease-in-out ml-2.5 text-body",
+								"text-sm transition-colors duration-200 ease-in-out text-body",
 								{
 									"text-primary-hover": inputFocus(),
 								},

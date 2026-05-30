@@ -29,10 +29,10 @@ export const Label: Component<LabelProps> = (props) => {
 					},
 				)}
 			>
-				<span class="flex items-center">
+				<span class="flex items-center gap-1">
 					<Show when={props.fieldColumnIsMissing}>
 						<span
-							class="text-error-base mr-1 inline"
+							class="text-error-base inline"
 							title={T()("fields.database.missing")}
 						>
 							<FaSolidDatabase size={12} />
@@ -40,7 +40,7 @@ export const Label: Component<LabelProps> = (props) => {
 					</Show>
 					<Show when={props.localised}>
 						<span
-							class={classnames("mr-1 inline", {
+							class={classnames("inline", {
 								"text-error-base": props.altLocaleError,
 							})}
 							title={
@@ -54,7 +54,7 @@ export const Label: Component<LabelProps> = (props) => {
 					</Show>
 					{props?.label}
 					<Show when={props.required}>
-						<span class="text-error-base ml-1 inline text-xs">*</span>
+						<span class="text-error-base inline text-xs">*</span>
 					</Show>
 				</span>
 
