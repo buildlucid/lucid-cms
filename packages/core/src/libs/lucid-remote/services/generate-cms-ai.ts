@@ -12,13 +12,21 @@ export type CmsAiGenerateRequestInputText<TRole extends string = string> = {
 export type CmsAiGenerateRequestInputImage<TRole extends string = string> = {
 	type: "image";
 	role: TRole;
-	image: {
-		type: "url";
-		url: string;
-		detail?: "low" | "high" | "auto";
-		filename?: string;
-		mimeType?: string;
-	};
+	image:
+		| {
+				type: "url";
+				url: string;
+				detail?: "low" | "high" | "auto";
+				filename?: string;
+				mimeType?: string;
+		  }
+		| {
+				type: "base64";
+				data: string;
+				mimeType: "image/webp";
+				detail?: "low" | "high" | "auto";
+				filename?: string;
+		  };
 };
 
 export type CmsAiGenerateRequestInput =
@@ -82,16 +90,18 @@ export type MediaAltGenerateV1Request = CmsAiGenerateBaseRequest<
 		key: "media.alt.generate";
 		version: "v1";
 	},
-	CmsAiGenerateRequestInput,
+	| CmsAiGenerateRequestInputText<"user-instruction" | "guidance">
+	| CmsAiGenerateRequestInputImage<"source-image">,
 	{
-		locale?: string;
+		locale: {
+			source?: string;
+			target: string | string[];
+		};
 		media: {
 			id?: string | number;
-			title?: string;
-			existingAlt?: string;
+			name?: Record<string, string>;
+			alt?: Record<string, string>;
 		};
-		usage?: Record<string, unknown>;
-		items: CmsAiGenerateRequestItem[];
 	}
 >;
 

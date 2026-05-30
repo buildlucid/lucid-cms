@@ -1,6 +1,15 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
 
+const mediaAltMaxBase64ImageLength = 8_000_000;
+
+const localeSchema = z
+	.object({
+		source: z.string().trim().min(2).max(32).optional(),
+		target: z.array(z.string().trim().min(2).max(32)).min(1),
+	})
+	.strict();
+
 const aiGenerateResponseSchema = z
 	.object({
 		requestId: z.string(),
@@ -33,6 +42,11 @@ const aiGenerateResponseSchema = z
 	})
 	.strict();
 
+const mediaAltResponseSchema = z.record(
+	z.string().trim().min(2).max(32),
+	z.string().max(250),
+);
+
 export const controllerSchemas = {
 	customFieldInput: {
 		body: z
@@ -47,12 +61,7 @@ export const controllerSchemas = {
 						fieldKey: z.string().trim().min(1),
 					})
 					.strict(),
-				locale: z
-					.object({
-						source: z.string().trim().min(2).max(32).optional(),
-						target: z.array(z.string().trim().min(2).max(32)).min(1),
-					})
-					.strict(),
+				locale: localeSchema,
 			})
 			.strict(),
 		query: {
@@ -69,8 +78,47 @@ export const controllerSchemas = {
 				.strict(),
 		}),
 	} satisfies ControllerSchema,
+	mediaAlt: {
+		body: z
+			.object({
+				image: z
+					.object({
+						data: z.string().trim().min(1).max(mediaAltMaxBase64ImageLength),
+						mimeType: z.literal("image/webp"),
+						detail: z.enum(["low", "high", "auto"]).default("low"),
+						filename: z.string().trim().min(1).max(255).optional(),
+					})
+					.strict(),
+				media: z
+					.object({
+						id: z.union([z.string().trim().min(1), z.number()]).optional(),
+						name: z
+							.record(
+								z.string().trim().min(2).max(32),
+								z.string().trim().max(255),
+							)
+							.optional(),
+						alt: z
+							.record(
+								z.string().trim().min(2).max(32),
+								z.string().trim().max(1_000),
+							)
+							.optional(),
+					})
+					.strict(),
+				locale: localeSchema,
+			})
+			.strict(),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: mediaAltResponseSchema,
+	} satisfies ControllerSchema,
 };
 
 export type CustomFieldInputBody = z.infer<
 	typeof controllerSchemas.customFieldInput.body
 >;
+export type MediaAltBody = z.infer<typeof controllerSchemas.mediaAlt.body>;
