@@ -19,7 +19,6 @@ export const documentActionPermissions = {
 	restore: Permissions.DocumentsRestore,
 	publish: Permissions.DocumentsPublish,
 	review: Permissions.DocumentsReview,
-	ai: Permissions.DocumentsAi,
 } satisfies Record<CollectionPermissionAction, Permission>;
 
 /**
@@ -65,10 +64,6 @@ export const resolveCollectionPermissions = (
 		review: resolveCollectionPermission({
 			collection,
 			action: "review",
-		}),
-		ai: resolveCollectionPermission({
-			collection,
-			action: "ai",
 		}),
 	};
 };

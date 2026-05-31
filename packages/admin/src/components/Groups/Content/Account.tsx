@@ -199,6 +199,7 @@ export const Account: Component = () => {
 					<InfoRow.Content
 						title={T()("common.password")}
 						description={T()("account.password.description")}
+						reducedMargin={true}
 						actions={
 							<Button
 								theme="border-outline"
@@ -216,6 +217,7 @@ export const Account: Component = () => {
 					<InfoRow.Content
 						title={T()("common.password")}
 						description={T()("account.password.set.description")}
+						reducedMargin={true}
 						actions={
 							<Button
 								theme="border-outline"
@@ -246,6 +248,7 @@ export const Account: Component = () => {
 					<InfoRow.Content
 						title={T()("account.auth.providers.title")}
 						description={T()("account.auth.providers.description")}
+						reducedMargin={true}
 					>
 						<div class="flex flex-col gap-3">
 							<For each={providersList()}>

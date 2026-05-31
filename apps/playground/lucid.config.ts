@@ -337,6 +337,7 @@ export default configureLucid({
 						...PermissionSets.Documents,
 						...PermissionSets.Integrations,
 						...PermissionSets.Settings,
+						...PermissionSets.Ai,
 						"page:full",
 						"page:read",
 						"page:create",

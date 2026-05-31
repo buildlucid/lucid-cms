@@ -1,3 +1,4 @@
+export { default as AiGenerationsRepository } from "./ai-generations.js";
 export { default as AlertRecipientsRepository } from "./alert-recipients.js";
 export { default as AlertsRepository } from "./alerts.js";
 export { default as AuthStatesRepository } from "./auth-states.js";

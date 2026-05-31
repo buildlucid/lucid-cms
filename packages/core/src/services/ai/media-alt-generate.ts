@@ -7,6 +7,7 @@ import type {
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
+import storeGeneration from "./helpers/store-generation.js";
 
 const mediaAltOutputSchema = z.record(z.string(), z.string());
 
@@ -28,6 +29,7 @@ const mediaAltGenerate: ServiceFn<
 				source?: string;
 				target: string[];
 			};
+			userId: number;
 		},
 	],
 	CmsAiGenerateData
@@ -93,12 +95,29 @@ const mediaAltGenerate: ServiceFn<
 		};
 	}
 
+	const response = {
+		...generateRes.data.json.data,
+		output: outputParse.data,
+	};
+	const storeRes = await storeGeneration(context, {
+		userId: props.userId,
+		response,
+		targetType: "media-alt",
+		target: {
+			mediaId: props.media.id ?? null,
+			locale: props.locale,
+			image: {
+				detail: props.image.detail,
+				filename: props.image.filename ?? null,
+				mimeType: props.image.mimeType,
+			},
+		},
+	});
+	if (storeRes.error) return storeRes;
+
 	return {
 		error: undefined,
-		data: {
-			...generateRes.data.json.data,
-			output: outputParse.data,
-		},
+		data: response,
 	};
 };
 

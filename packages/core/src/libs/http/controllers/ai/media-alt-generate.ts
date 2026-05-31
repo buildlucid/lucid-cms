@@ -16,7 +16,7 @@ import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
-import { permissionCheck } from "../../middleware/permissions.js";
+import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import formatAPIResponse from "../../utils/build-response.js";
@@ -41,15 +41,10 @@ const mediaAltGenerateController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
+	permissions([Permissions.AiAltGenerate]),
 	validate("json", controllerSchemas.mediaAlt.body),
 	async (c) => {
 		const body = c.req.valid("json") as MediaAltBody;
-		permissionCheck(
-			c,
-			body.media.id === undefined
-				? Permissions.MediaCreate
-				: Permissions.MediaUpdate,
-		);
 		const context = createServiceContext(c);
 
 		const generateRes = await serviceWrapper(aiServices.mediaAltGenerate, {
@@ -63,6 +58,7 @@ const mediaAltGenerateController = factory.createHandlers(
 			image: body.image,
 			media: body.media,
 			locale: body.locale,
+			userId: c.get("auth").id,
 		});
 		if (generateRes.error) throw new LucidAPIError(generateRes.error);
 

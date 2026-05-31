@@ -53,6 +53,7 @@ export const License: Component = () => {
 						title={T()("license.purchase.title")}
 						description={T()("license.purchase.description")}
 						actionAlignment="center"
+						reducedMargin={true}
 						actions={
 							<Button
 								type="button"
@@ -69,12 +70,14 @@ export const License: Component = () => {
 					<InfoRow.Content
 						title={T()(Permissions.LicenseUpdate)}
 						description={T()("license.host.blurb")}
+						reducedMargin={true}
 					>
 						<UpdateLicenseForm licenseKey={license()?.key || ""} />
 					</InfoRow.Content>
 					<InfoRow.Content
 						title={T()("license.status.label")}
 						description={T()("license.status.description")}
+						reducedMargin={true}
 					>
 						<div class="flex flex-col gap-4">
 							<DetailsList

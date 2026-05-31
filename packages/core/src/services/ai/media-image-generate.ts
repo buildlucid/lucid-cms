@@ -6,6 +6,7 @@ import type {
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
+import storeGeneration from "./helpers/store-generation.js";
 
 const mediaImageGenerate: ServiceFn<
 	[
@@ -17,6 +18,7 @@ const mediaImageGenerate: ServiceFn<
 				{ type: "image" }
 			>["image"];
 			generation: MediaImageGenerateV1Request["generation"];
+			userId: number;
 		},
 	],
 	CmsAiGenerateData
@@ -76,6 +78,24 @@ const mediaImageGenerate: ServiceFn<
 		request,
 	});
 	if (generateRes.error) return generateRes;
+
+	const storeRes = await storeGeneration(context, {
+		userId: props.userId,
+		response: generateRes.data.json.data,
+		targetType: "media-image",
+		target: {
+			generation: props.generation,
+			sourceImage: props.image
+				? {
+						type: props.image.type,
+						detail: props.image.detail ?? null,
+						filename: props.image.filename ?? null,
+						mimeType: props.image.mimeType ?? null,
+					}
+				: null,
+		},
+	});
+	if (storeRes.error) return storeRes;
 
 	return {
 		error: undefined,

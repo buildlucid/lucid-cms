@@ -12,6 +12,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
 import getTranslatedFieldDetails from "./helpers/get-translated-field-details.js";
 import normalizeCurrentValueTranslations from "./helpers/normalize-current-value-translations.js";
+import storeGeneration from "./helpers/store-generation.js";
 
 const customFieldInputGenerate: ServiceFn<
 	[
@@ -28,6 +29,7 @@ const customFieldInputGenerate: ServiceFn<
 				source?: string;
 				target: string[];
 			};
+			userId: number;
 		},
 	],
 	CmsAiGenerateData
@@ -200,6 +202,20 @@ const customFieldInputGenerate: ServiceFn<
 		request,
 	});
 	if (generateRes.error) return generateRes;
+
+	const storeRes = await storeGeneration(context, {
+		userId: props.userId,
+		response: generateRes.data.json.data,
+		targetType: "custom-field",
+		target: {
+			collectionKey: props.target.collectionKey,
+			brickKey: props.target.brickKey,
+			fieldKey: props.target.fieldKey,
+			guidance: props.guidance ?? null,
+			locale: props.locale,
+		},
+	});
+	if (storeRes.error) return storeRes;
 
 	return {
 		error: undefined,

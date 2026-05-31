@@ -212,6 +212,39 @@ export interface LucidQueueJobs {
 	updated_at: TimestampMutateable;
 }
 
+export type AiGenerationStatus = "success";
+
+export interface LucidAiGenerations {
+	id: Generated<number>;
+	request_id: string;
+	provider_request_id: string | null;
+	feature_key: string;
+	feature_version: string;
+	user_id: number | null;
+	target_type: string;
+	target: JSONColumnType<
+		Record<string, unknown>,
+		Record<string, unknown>,
+		Record<string, unknown>
+	>;
+	output: JSONColumnType<
+		Record<string, unknown>,
+		Record<string, unknown>,
+		Record<string, unknown>
+	>;
+	usage: JSONColumnType<
+		Record<string, unknown>,
+		Record<string, unknown>,
+		Record<string, unknown>
+	>;
+	model: string;
+	cost_currency: string;
+	cost_total_minor: number;
+	status: AiGenerationStatus;
+	error_message: string | null;
+	created_at: TimestampImmutable;
+}
+
 export interface LucidUsers {
 	id: Generated<number>;
 	super_admin: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
@@ -804,6 +837,7 @@ export interface LucidDB {
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
 	lucid_queue_jobs: LucidQueueJobs;
+	lucid_ai_generations: LucidAiGenerations;
 	lucid_auth_states: LucidAuthStates;
 	[key: LucidDocumentTableName]: LucidDocumentTable;
 	// @ts-expect-error

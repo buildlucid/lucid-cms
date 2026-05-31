@@ -36,7 +36,11 @@ export const Permissions = {
 	DocumentsRestore: "documents:restore",
 	DocumentsPublish: "documents:publish",
 	DocumentsReview: "documents:review",
-	DocumentsAi: "documents:ai",
+
+	// AI permissions
+	AiCustomFieldValue: "ai:custom-field-value",
+	AiImageGenerate: "ai:image-generate",
+	AiAltGenerate: "ai:alt-generate",
 
 	// Client integration permissions
 	IntegrationRead: "integrations:read",
@@ -71,6 +75,11 @@ export const PermissionSets = {
 		Permissions.MediaUpdate,
 		Permissions.MediaDelete,
 	],
+	Ai: [
+		Permissions.AiCustomFieldValue,
+		Permissions.AiImageGenerate,
+		Permissions.AiAltGenerate,
+	],
 	Email: [
 		Permissions.EmailRead,
 		Permissions.EmailDelete,
@@ -85,7 +94,6 @@ export const PermissionSets = {
 		Permissions.DocumentsRestore,
 		Permissions.DocumentsPublish,
 		Permissions.DocumentsReview,
-		Permissions.DocumentsAi,
 	],
 	Integrations: [
 		Permissions.IntegrationRead,
@@ -244,6 +252,44 @@ export const PermissionGroups = Object.freeze({
 			},
 		],
 	},
+	ai: {
+		key: "ai_permissions",
+		details: {
+			name: copy("admin:core.permissions.ai.permissions", {
+				defaultMessage: "AI Permissions",
+			}),
+		},
+		core: true,
+		permissions: [
+			{
+				key: Permissions.AiCustomFieldValue,
+				details: {
+					name: copy("admin:core.permissions.custom.field.value", {
+						defaultMessage: "Custom Field Value",
+					}),
+				},
+				core: true,
+			},
+			{
+				key: Permissions.AiImageGenerate,
+				details: {
+					name: copy("admin:core.permissions.image.generate", {
+						defaultMessage: "Image Generate",
+					}),
+				},
+				core: true,
+			},
+			{
+				key: Permissions.AiAltGenerate,
+				details: {
+					name: copy("admin:core.permissions.alt.generate", {
+						defaultMessage: "Alt Generate",
+					}),
+				},
+				core: true,
+			},
+		],
+	},
 	emails: {
 		key: "emails_permissions",
 		details: {
@@ -370,15 +416,6 @@ export const PermissionGroups = Object.freeze({
 				details: {
 					name: copy("admin:core.permissions.review.document.releases", {
 						defaultMessage: "Review Document Releases",
-					}),
-				},
-				core: true,
-			},
-			{
-				key: Permissions.DocumentsAi,
-				details: {
-					name: copy("admin:core.permissions.use.document.ai", {
-						defaultMessage: "Use Document AI",
 					}),
 				},
 				core: true,

@@ -43,7 +43,7 @@ const mediaImageGenerateController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate,
-	permissions([Permissions.MediaCreate]),
+	permissions([Permissions.AiImageGenerate]),
 	validate("json", controllerSchemas.mediaImageGenerate.body),
 	async (c) => {
 		const body = c.req.valid("json") as MediaImageGenerateBody;
@@ -61,6 +61,7 @@ const mediaImageGenerateController = factory.createHandlers(
 			guidance: body.guidance,
 			image: body.image,
 			generation: body.generation,
+			userId: c.get("auth").id,
 		});
 		if (generateRes.error) throw new LucidAPIError(generateRes.error);
 
