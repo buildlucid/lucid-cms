@@ -26,6 +26,7 @@ import PanelTabs from "@/components/Partials/PanelTabs";
 import Pill from "@/components/Partials/Pill";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import { useCreateMedia, useUpdateMedia } from "@/hooks/actions";
+import useMediaAltGeneration from "@/hooks/ai/useMediaAltGeneration";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -168,6 +169,37 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 		return null;
 	});
+	const mediaAltImage = createMemo(() => {
+		if (!showAltInput()) return null;
+
+		const file = MediaFile.getFile();
+		if (file) return { file, filename: file.name };
+
+		if (media.data?.data.type === "image" && media.data.data.url) {
+			return {
+				url: media.data.data.url,
+				filename: media.data.data.fileName ?? media.data.data.key,
+			};
+		}
+
+		return null;
+	});
+	const posterAltImage = createMemo(() => {
+		if (!showPosterAltInput()) return null;
+
+		const file = PosterFile.getFile();
+		if (file) return { file, filename: file.name };
+
+		const poster = media.data?.data.poster;
+		if (poster?.url) {
+			return {
+				url: poster.url,
+				filename: poster.fileName ?? poster.key,
+			};
+		}
+
+		return null;
+	});
 	const posterMeta = createMemo(() => {
 		const file = PosterFile.getFile();
 		if (file) {
@@ -251,7 +283,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		return typeof d === "string" ? Number.parseInt(d, 10) : d;
 	});
 
-	const mutateIsLoading = createMemo(() => {
+	const coreMutateIsLoading = createMemo(() => {
 		return panelMode() === "create"
 			? createMedia.isLoading()
 			: updateMedia?.isLoading() ||
@@ -322,6 +354,39 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 	const targetState = createMemo(() => {
 		return targetAction()?.state;
+	});
+	const mediaAltGeneration = useMediaAltGeneration({
+		image: mediaAltImage,
+		media: () => ({
+			id: media.data?.data.id,
+			name: targetState()?.title(),
+			alt: targetState()?.alt(),
+		}),
+		locales,
+		setAlt: (value) => {
+			targetAction()?.setAlt(value);
+		},
+		disabled: coreMutateIsLoading,
+	});
+	const posterAltGeneration = useMediaAltGeneration({
+		image: posterAltImage,
+		media: () => ({
+			id: media.data?.data.poster?.id,
+			name: media.data?.data.poster?.title,
+			alt: posterAlt(),
+		}),
+		locales,
+		setAlt: setPosterAlt,
+		disabled: coreMutateIsLoading,
+	});
+	const MediaAltGenerationButton = mediaAltGeneration.ActionButton;
+	const PosterAltGenerationButton = posterAltGeneration.ActionButton;
+	const mutateIsLoading = createMemo(() => {
+		return (
+			coreMutateIsLoading() ||
+			mediaAltGeneration.isLoading() ||
+			posterAltGeneration.isLoading()
+		);
 	});
 	const updateData = createMemo(() => {
 		const state = targetState();
@@ -751,7 +816,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										autoComplete="off"
 									/>
 									<Show when={showAltInput()}>
-										<Input
+										<Textarea
 											id={`alt-${locale.code}`}
 											value={
 												getTranslation(targetState()?.alt(), locale.code) || ""
@@ -763,11 +828,16 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 												});
 											}}
 											name={`alt-${locale.code}`}
-											type="text"
 											copy={{
 												label: T()("common.alt"),
 											}}
 											errors={getErrorObject(inputError(index())?.alt)}
+											rows={3}
+											rightSlot={
+												<Show when={mediaAltGeneration.hasPermission()}>
+													<MediaAltGenerationButton />
+												</Show>
+											}
 										/>
 									</Show>
 									<Show when={showDescriptionInput()}>
@@ -966,7 +1036,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							<For each={locales()}>
 								{(locale, index) => (
 									<Show when={locale.code === lang?.contentLocale()}>
-										<Input
+										<Textarea
 											id={`poster-alt-${locale.code}`}
 											value={getTranslation(posterAlt(), locale.code) || ""}
 											onChange={(val) => {
@@ -976,11 +1046,16 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 												});
 											}}
 											name={`poster-alt-${locale.code}`}
-											type="text"
 											copy={{
 												label: T()("media.poster.alt"),
 											}}
 											errors={getErrorObject(posterAltError(index()))}
+											rows={3}
+											rightSlot={
+												<Show when={posterAltGeneration.hasPermission()}>
+													<PosterAltGenerationButton />
+												</Show>
+											}
 										/>
 									</Show>
 								)}

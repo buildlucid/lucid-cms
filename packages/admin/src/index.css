@@ -409,4 +409,31 @@
 			transform: scale(0.96);
 		}
 	}
+
+	@property --ai-border-angle {
+		syntax: "<angle>";
+		initial-value: 0deg;
+		inherits: false;
+	}
+
+	@keyframes ai-border-spin {
+		to {
+			--ai-border-angle: 360deg;
+		}
+	}
+
+	.ai-action-button[data-loading="true"] {
+		border-color: transparent;
+		background:
+			linear-gradient(#181818, #181818) padding-box,
+			conic-gradient(
+				from var(--ai-border-angle),
+				transparent 0deg,
+				transparent 245deg,
+				#38bdf8 285deg,
+				#c1fe77 360deg
+			)
+			border-box;
+		animation: ai-border-spin 900ms linear infinite;
+	}
 }

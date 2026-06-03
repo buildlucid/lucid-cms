@@ -41,18 +41,13 @@ const getLucidRemoteApiDomain = (context: ServiceContext) => {
 	).replace(/\/+$/, "");
 };
 
-export const getLucidRemoteUrl = (context: ServiceContext, path: string) =>
-	new URL(path, getLucidRemoteApiDomain(context)).toString();
-
-const getErrorMessage = (error: unknown) =>
-	error instanceof Error ? error.message : "Lucid remote request failed.";
-
 const createRequestError = (error: unknown, status = 500) => ({
 	error: {
 		type: "basic" as const,
 		status,
 		message: copy("server:core.lucid.remote.request.failed", {
-			defaultMessage: getErrorMessage(error),
+			defaultMessage:
+				error instanceof Error ? error.message : "Lucid remote request failed.",
 		}),
 	},
 	data: undefined,

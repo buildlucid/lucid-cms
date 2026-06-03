@@ -1,6 +1,6 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { type Component, createSignal } from "solid-js";
+import { type Component, createSignal, type JSXElement, Show } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 
 interface TextareaProps {
@@ -26,6 +26,7 @@ interface TextareaProps {
 	rows?: number;
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
+	rightSlot?: JSXElement;
 }
 
 export const Textarea: Component<TextareaProps> = (props) => {
@@ -50,33 +51,41 @@ export const Textarea: Component<TextareaProps> = (props) => {
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 				hideOptionalText={props.hideOptionalText}
 			/>
-			<textarea
-				class={
-					"focus:outline-hidden text-sm text-subtitle font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors"
-				}
-				onKeyDown={(e) => {
-					e.stopPropagation();
-				}}
-				id={props.id}
-				data-focus-key={props.focusKey}
-				name={props.name}
-				value={props.value}
-				onInput={(e) => props.onChange(e.currentTarget.value)}
-				placeholder={props.copy?.placeholder}
-				aria-describedby={
-					props.copy?.describedBy ? `${props.id}-description` : undefined
-				}
-				autofocus={props.autoFoucs}
-				required={props.required}
-				disabled={props.disabled}
-				onFocus={() => setInputFocus(true)}
-				onKeyUp={(e) => props.onKeyUp?.(e)}
-				onBlur={() => {
-					setInputFocus(false);
-					props.onBlur?.();
-				}}
-				rows={props.rows ?? 6}
-			/>
+			<div class="relative">
+				<textarea
+					class={classnames(
+						"focus:outline-hidden text-sm text-subtitle font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors",
+						{
+							"pr-10": props.rightSlot,
+						},
+					)}
+					onKeyDown={(e) => {
+						e.stopPropagation();
+					}}
+					id={props.id}
+					data-focus-key={props.focusKey}
+					name={props.name}
+					value={props.value}
+					onInput={(e) => props.onChange(e.currentTarget.value)}
+					placeholder={props.copy?.placeholder}
+					aria-describedby={
+						props.copy?.describedBy ? `${props.id}-description` : undefined
+					}
+					autofocus={props.autoFoucs}
+					required={props.required}
+					disabled={props.disabled}
+					onFocus={() => setInputFocus(true)}
+					onKeyUp={(e) => props.onKeyUp?.(e)}
+					onBlur={() => {
+						setInputFocus(false);
+						props.onBlur?.();
+					}}
+					rows={props.rows ?? 6}
+				/>
+				<Show when={props.rightSlot}>
+					<div class="absolute right-1.5 top-2 z-10">{props.rightSlot}</div>
+				</Show>
+			</div>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>

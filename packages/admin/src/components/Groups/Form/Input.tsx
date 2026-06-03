@@ -42,6 +42,7 @@ export const Input: Component<{
 	noMargin?: boolean;
 	hideOptionalText?: boolean;
 	fieldColumnIsMissing?: boolean;
+	rightSlot?: JSXElement;
 	rightAction?: JSXElement;
 }> = (props) => {
 	const [inputFocus, setInputFocus] = createSignal(false);
@@ -79,6 +80,7 @@ export const Input: Component<{
 						"w-full focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
 						{
 							"pr-8": props.type === "password" || props.rightAction,
+							"pr-10": props.rightSlot,
 						},
 					)}
 					onKeyDown={(e) => {
@@ -107,6 +109,11 @@ export const Input: Component<{
 						props.onBlur?.();
 					}}
 				/>
+				<Show when={props.rightSlot}>
+					<div class="absolute right-1.5 top-1/2 z-10 -translate-y-1/2">
+						{props.rightSlot}
+					</div>
+				</Show>
 				<Show when={props.rightAction}>{props.rightAction}</Show>
 				<Show when={props.type === "password"}>
 					<button

@@ -8,9 +8,10 @@ import {
 	on,
 	Show,
 } from "solid-js";
-import { Input } from "@/components/Groups/Form";
+import { Input, Textarea } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
 import { useCreateMedia } from "@/hooks/actions";
+import useMediaAltGeneration from "@/hooks/ai/useMediaAltGeneration";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -81,7 +82,7 @@ const CreateUpdateProfilePicturePanel: Component<
 		}
 		return panelMode() === "update" && profilePictureMedia()?.type === "image";
 	});
-	const mutateIsLoading = createMemo(() => {
+	const coreMutateIsLoading = createMemo(() => {
 		return (
 			accountCreateUploadSession.action.isPending ||
 			userCreateUploadSession.action.isPending ||
@@ -131,6 +132,37 @@ const CreateUpdateProfilePicturePanel: Component<
 	const mutateIsDisabled = createMemo(() => {
 		if (panelMode() === "create") return MediaFile.getFile() === null;
 		return !updateData().changed;
+	});
+	const profileAltImage = createMemo(() => {
+		if (!showAltInput()) return null;
+
+		const file = MediaFile.getFile();
+		if (file) return { file, filename: file.name };
+
+		const profilePicture = profilePictureMedia();
+		if (profilePicture?.url) {
+			return {
+				url: profilePicture.url,
+				filename: profilePicture.fileName ?? profilePicture.key,
+			};
+		}
+
+		return null;
+	});
+	const profileAltGeneration = useMediaAltGeneration({
+		image: profileAltImage,
+		media: () => ({
+			id: profilePictureMedia()?.id,
+			name: createMedia.state.title(),
+			alt: createMedia.state.alt(),
+		}),
+		locales,
+		setAlt: createMedia.setAlt,
+		disabled: coreMutateIsLoading,
+	});
+	const ProfileAltGenerationButton = profileAltGeneration.ActionButton;
+	const mutateIsLoading = createMemo(() => {
+		return coreMutateIsLoading() || profileAltGeneration.isLoading();
 	});
 	const panelContent = createMemo(() => {
 		return {
@@ -375,7 +407,7 @@ const CreateUpdateProfilePicturePanel: Component<
 									autoComplete="off"
 								/>
 								<Show when={showAltInput()}>
-									<Input
+									<Textarea
 										id={`alt-${locale.code}`}
 										value={
 											getTranslation(createMedia.state.alt(), locale.code) || ""
@@ -387,11 +419,16 @@ const CreateUpdateProfilePicturePanel: Component<
 											});
 										}}
 										name={`alt-${locale.code}`}
-										type="text"
 										copy={{
 											label: T()("common.alt"),
 										}}
 										errors={getErrorObject(inputError(index())?.alt)}
+										rows={3}
+										rightSlot={
+											<Show when={profileAltGeneration.hasPermission()}>
+												<ProfileAltGenerationButton />
+											</Show>
+										}
 									/>
 								</Show>
 							</Show>
