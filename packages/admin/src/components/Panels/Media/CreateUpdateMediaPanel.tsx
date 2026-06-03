@@ -380,7 +380,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		disabled: coreMutateIsLoading,
 	});
 	const MediaAltGenerationButton = mediaAltGeneration.ActionButton;
+	const MediaAltGenerationModal = mediaAltGeneration.Modal;
 	const PosterAltGenerationButton = posterAltGeneration.ActionButton;
+	const PosterAltGenerationModal = posterAltGeneration.Modal;
 	const mutateIsLoading = createMemo(() => {
 		return (
 			coreMutateIsLoading() ||
@@ -754,6 +756,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			{(lang) => (
 				<>
 					<MediaFile.Render />
+					<MediaAltGenerationModal />
+					<PosterAltGenerationModal />
 					<PanelTabs
 						items={visibleTabs().map((tab) => ({
 							value: tab,

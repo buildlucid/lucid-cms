@@ -55,6 +55,9 @@ const mediaAltGenerateController = factory.createHandlers(
 				message: copy("server:core.routes.ai.generate.error.message"),
 			},
 		})(context, {
+			instruction: body.instruction,
+			guidance: body.guidance,
+			previousResponses: body.previousResponses,
 			image: body.image,
 			media: body.media,
 			locale: body.locale,

@@ -14,6 +14,12 @@ const mediaAltOutputSchema = z.record(z.string(), z.string());
 const mediaAltGenerate: ServiceFn<
 	[
 		{
+			instruction?: string;
+			guidance?: string;
+			previousResponses?: {
+				instruction?: string;
+				output: Record<string, string>;
+			}[];
 			image: {
 				data: string;
 				mimeType: "image/webp";
@@ -37,27 +43,60 @@ const mediaAltGenerate: ServiceFn<
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
 
+	const input: MediaAltGenerateV1Request["input"] = [];
+
+	if (props.instruction) {
+		input.push({
+			type: "text",
+			role: "user-instruction",
+			value: props.instruction,
+		});
+	}
+
+	if (props.guidance) {
+		const guidance = context.config.ai.guidance.find(
+			(item) => item.key === props.guidance,
+		);
+		if (!guidance) {
+			return {
+				error: {
+					type: "basic",
+					status: 400,
+					message: copy("server:core.ai.guidance.not.found"),
+				},
+				data: undefined,
+			};
+		}
+
+		input.push({
+			type: "text",
+			role: "guidance",
+			value: guidance.instructions,
+		});
+	}
+
+	input.push({
+		type: "image",
+		role: "source-image",
+		image: {
+			type: "base64",
+			data: props.image.data,
+			mimeType: props.image.mimeType,
+			detail: props.image.detail,
+			filename: props.image.filename,
+		},
+	});
+
 	const request: MediaAltGenerateV1Request = {
 		feature: {
 			key: "media.alt.generate",
 			version: "v1",
 		},
-		input: [
-			{
-				type: "image",
-				role: "source-image",
-				image: {
-					type: "base64",
-					data: props.image.data,
-					mimeType: props.image.mimeType,
-					detail: props.image.detail,
-					filename: props.image.filename,
-				},
-			},
-		],
+		input,
 		context: {
 			locale: props.locale,
 			media: props.media,
+			previousResponses: props.previousResponses,
 		},
 	};
 

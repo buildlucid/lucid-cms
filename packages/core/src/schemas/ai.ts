@@ -113,6 +113,22 @@ export const controllerSchemas = {
 	mediaAlt: {
 		body: z
 			.object({
+				instruction: z.string().trim().min(1).max(8_000).optional(),
+				guidance: z.string().trim().min(1).optional(),
+				previousResponses: z
+					.array(
+						z
+							.object({
+								instruction: z.string().trim().min(1).max(8_000).optional(),
+								output: z.record(
+									z.string().trim().min(2).max(32),
+									z.string().trim(),
+								),
+							})
+							.strict(),
+					)
+					.max(10)
+					.optional(),
 				image: z
 					.object({
 						data: z.string().trim().min(1).max(aiMaxBase64ImageLength),

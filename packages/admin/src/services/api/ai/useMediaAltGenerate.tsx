@@ -5,6 +5,12 @@ import serviceHelpers from "@/utils/service-helpers";
 
 interface Params {
 	body: {
+		instruction?: string;
+		guidance?: string;
+		previousResponses?: {
+			instruction?: string;
+			output: Record<string, string>;
+		}[];
 		image: {
 			data: string;
 			mimeType: "image/webp";

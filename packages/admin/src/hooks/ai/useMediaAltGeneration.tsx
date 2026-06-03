@@ -1,6 +1,16 @@
 import type { Locale, Media } from "@types";
-import { type Accessor, type Component, createMemo } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	onCleanup,
+} from "solid-js";
 import { AiIconButton } from "@/components/Groups/AI";
+import MediaAltGenerationModal, {
+	type MediaAltGenerationCandidate,
+} from "@/components/Modals/AI/MediaAltGenerationModal";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
@@ -53,6 +63,18 @@ const translationsToRecord = (translations?: TranslationValue[]) => {
 
 const useMediaAltGeneration = (props: UseMediaAltGenerationProps) => {
 	// -----------------------------
+	// State
+	const [modalOpen, setModalOpen] = createSignal(false);
+	const [generations, setGenerations] = createSignal<
+		MediaAltGenerationCandidate[]
+	>([]);
+	const [selectedGenerationId, setSelectedGenerationId] =
+		createSignal<string>();
+	const [previewUrl, setPreviewUrl] = createSignal<string>();
+	const [clientError, setClientError] = createSignal<string>();
+	let generationId = 0;
+
+	// -----------------------------
 	// Mutation
 	const generateAlt = api.ai.useMediaAltGenerate();
 
@@ -85,6 +107,14 @@ const useMediaAltGeneration = (props: UseMediaAltGenerationProps) => {
 		if (isLoading()) return T()("ai.media.alt.generate.loading");
 		return T()("ai.media.alt.generate.action");
 	});
+	const responseError = createMemo(() => {
+		return clientError() ?? generateAlt.errors()?.message;
+	});
+	const selectedGeneration = createMemo(() => {
+		return generations().find(
+			(generation) => generation.id === selectedGenerationId(),
+		);
+	});
 
 	// -----------------------------
 	// Functions
@@ -108,16 +138,22 @@ const useMediaAltGeneration = (props: UseMediaAltGenerationProps) => {
 			}) as Media["alt"];
 		});
 	};
-	const generate = async () => {
+	const generate = async (values: { instruction?: string } = {}) => {
 		const source = image();
 		if (!source || isDisabled()) return;
 
 		try {
+			setClientError(undefined);
 			generateAlt.reset();
 			const preparedImage = await prepareAiImage(source);
 			const media = props.media();
 			const response = await generateAlt.action.mutateAsync({
 				body: {
+					instruction: values.instruction,
+					previousResponses: generations().map((generation) => ({
+						instruction: generation.instruction,
+						output: generation.output,
+					})),
 					image: {
 						data: preparedImage.data,
 						mimeType: preparedImage.mimeType,
@@ -136,19 +172,75 @@ const useMediaAltGeneration = (props: UseMediaAltGenerationProps) => {
 				},
 			});
 
-			applyGeneratedAlt(response.data.output);
+			const id = `${Date.now()}-${generationId}`;
+			generationId += 1;
+			setGenerations((previous) => [
+				...previous,
+				{
+					id,
+					instruction: values.instruction,
+					output: { ...response.data.output },
+					originalOutput: { ...response.data.output },
+				},
+			]);
+			setSelectedGenerationId(id);
 		} catch (error) {
 			if (error instanceof LucidError) return;
-			if (generateAlt.errors()) return;
+			const message =
+				error instanceof Error
+					? error.message
+					: T()("toasts.ai.media.alt.generate.error.message");
+			setClientError(message);
 			spawnToast({
 				title: T()("toasts.ai.media.alt.generate.error.title"),
-				message:
-					error instanceof Error
-						? error.message
-						: T()("toasts.ai.media.alt.generate.error.message"),
+				message,
 				status: "error",
 			});
 		}
+	};
+	const accept = () => {
+		const generation = selectedGeneration();
+		if (!generation) return;
+		applyGeneratedAlt(generation.output);
+		setGenerations([]);
+		setSelectedGenerationId(undefined);
+		setModalOpen(false);
+	};
+	const clear = () => {
+		setGenerations([]);
+		setSelectedGenerationId(undefined);
+		setClientError(undefined);
+		generateAlt.reset();
+	};
+	const editGeneration = (id: string, localeCode: string, value: string) => {
+		setGenerations((previous) =>
+			previous.map((generation) => {
+				if (generation.id !== id) return generation;
+
+				return {
+					...generation,
+					output: {
+						...generation.output,
+						[localeCode]: value,
+					},
+				};
+			}),
+		);
+	};
+	const revertGeneration = (id: string, localeCode: string) => {
+		setGenerations((previous) =>
+			previous.map((generation) => {
+				if (generation.id !== id) return generation;
+
+				return {
+					...generation,
+					output: {
+						...generation.output,
+						[localeCode]: generation.originalOutput[localeCode] ?? "",
+					},
+				};
+			}),
+		);
 	};
 
 	const ActionButton: Component = () => (
@@ -160,15 +252,55 @@ const useMediaAltGeneration = (props: UseMediaAltGenerationProps) => {
 			onClick={(event) => {
 				event.preventDefault();
 				event.stopPropagation();
+				if (isDisabled()) return;
+				setModalOpen(true);
 				void generate();
 			}}
 		/>
 	);
 
+	const Modal: Component = () => (
+		<MediaAltGenerationModal
+			state={{
+				open: modalOpen(),
+				setOpen: setModalOpen,
+			}}
+			imageUrl={previewUrl()}
+			locales={props.locales()}
+			generations={generations()}
+			selectedGenerationId={selectedGenerationId()}
+			error={responseError()}
+			isLoading={isLoading()}
+			callbacks={{
+				onGenerate: generate,
+				onAccept: accept,
+				onClose: clear,
+				onSelect: setSelectedGenerationId,
+				onEdit: editGeneration,
+				onRevert: revertGeneration,
+			}}
+		/>
+	);
+
+	// -----------------------------
+	// Effects
+	createEffect(() => {
+		const source = image();
+		if (source?.file) {
+			const objectUrl = URL.createObjectURL(source.file);
+			setPreviewUrl(objectUrl);
+			onCleanup(() => URL.revokeObjectURL(objectUrl));
+			return;
+		}
+
+		setPreviewUrl(source?.url ?? undefined);
+	});
+
 	// -----------------------------
 	// Return
 	return {
 		ActionButton,
+		Modal,
 		generate,
 		hasPermission,
 		isDisabled,

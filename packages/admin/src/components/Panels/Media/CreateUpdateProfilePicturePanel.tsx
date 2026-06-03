@@ -161,6 +161,7 @@ const CreateUpdateProfilePicturePanel: Component<
 		disabled: coreMutateIsLoading,
 	});
 	const ProfileAltGenerationButton = profileAltGeneration.ActionButton;
+	const ProfileAltGenerationModal = profileAltGeneration.Modal;
 	const mutateIsLoading = createMemo(() => {
 		return coreMutateIsLoading() || profileAltGeneration.isLoading();
 	});
@@ -374,6 +375,7 @@ const CreateUpdateProfilePicturePanel: Component<
 			{(lang) => (
 				<>
 					<MediaFile.Render />
+					<ProfileAltGenerationModal />
 					<div class="mt-6 border-b border-border mb-4">
 						<div class="flex flex-row flex-wrap items-center gap-4">
 							<button

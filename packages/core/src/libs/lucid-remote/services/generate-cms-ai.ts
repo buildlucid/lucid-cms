@@ -108,6 +108,10 @@ export type MediaAltGenerateV1Request = CmsAiGenerateBaseRequest<
 			name?: Record<string, string>;
 			alt?: Record<string, string>;
 		};
+		previousResponses?: {
+			instruction?: string;
+			output: Record<string, string>;
+		}[];
 	}
 >;
 
