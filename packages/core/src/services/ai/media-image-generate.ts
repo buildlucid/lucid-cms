@@ -1,8 +1,6 @@
+import type { MediaImageGenerateResponse } from "@lucidcms/types";
 import { copy } from "../../libs/i18n/index.js";
-import type {
-	CmsAiGenerateData,
-	MediaImageGenerateV1Request,
-} from "../../libs/lucid-remote/services/generate-cms-ai.js";
+import type { MediaImageGenerateV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
@@ -17,22 +15,23 @@ const mediaImageGenerate: ServiceFn<
 				MediaImageGenerateV1Request["input"][number],
 				{ type: "image" }
 			>["image"];
+			previousInstructions?: string[];
 			generation: MediaImageGenerateV1Request["generation"];
 			userId: number;
 		},
 	],
-	CmsAiGenerateData
+	MediaImageGenerateResponse
 > = async (context, props) => {
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
 
-	const input: MediaImageGenerateV1Request["input"] = [
-		{
-			type: "text",
-			role: "user-instruction",
-			value: props.instruction,
-		},
-	];
+	const input: MediaImageGenerateV1Request["input"] = [];
+
+	input.push({
+		type: "text",
+		role: "user-instruction",
+		value: props.instruction,
+	});
 
 	if (props.guidance) {
 		const guidance = context.config.ai.guidance.find(
@@ -70,6 +69,12 @@ const mediaImageGenerate: ServiceFn<
 			version: "v1",
 		},
 		input,
+		context: {
+			previousInstructions:
+				props.previousInstructions && props.previousInstructions.length > 0
+					? props.previousInstructions
+					: undefined,
+		},
 		generation: props.generation,
 	};
 
@@ -79,12 +84,23 @@ const mediaImageGenerate: ServiceFn<
 	});
 	if (generateRes.error) return generateRes;
 
+	const response: MediaImageGenerateResponse = {
+		...generateRes.data.json.data,
+		feature: {
+			key: "media.image.generate",
+			version: "v1",
+		},
+		output: generateRes.data.json.data
+			.output as MediaImageGenerateResponse["output"],
+	};
+
 	const storeRes = await storeGeneration(context, {
 		userId: props.userId,
-		response: generateRes.data.json.data,
+		response,
 		targetType: "media-image",
 		target: {
 			generation: props.generation,
+			previousInstructions: props.previousInstructions ?? [],
 			sourceImage: props.image
 				? {
 						type: props.image.type,
@@ -99,7 +115,7 @@ const mediaImageGenerate: ServiceFn<
 
 	return {
 		error: undefined,
-		data: generateRes.data.json.data,
+		data: response,
 	};
 };
 

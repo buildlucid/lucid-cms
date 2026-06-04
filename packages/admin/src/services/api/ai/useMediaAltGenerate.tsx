@@ -1,4 +1,4 @@
-import type { ResponseBody } from "@types";
+import type { MediaAltGenerateResponse, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -29,47 +29,6 @@ interface Params {
 		};
 	};
 }
-
-export type MediaAltGenerateResponse = {
-	requestId: string;
-	feature: {
-		key: "media.alt.generate";
-		version: "v1";
-	};
-	output: Record<string, string>;
-	usage: {
-		model: string;
-		providerRequestId?: string;
-		tokens: {
-			input: {
-				text: number;
-				image: number;
-				audio: number;
-				cached: {
-					total: number;
-					text: number;
-					image: number;
-					audio: number;
-				};
-				total: number;
-			};
-			output: {
-				text: number;
-				image: number;
-				audio: number;
-				reasoning: number;
-				acceptedPrediction: number;
-				rejectedPrediction: number;
-				total: number;
-			};
-			total: number;
-		};
-		cost: {
-			currency: string;
-			totalCostMinor: number;
-		};
-	};
-};
 
 export const mediaAltGenerateReq = (params: Params) => {
 	return request<ResponseBody<MediaAltGenerateResponse>>({

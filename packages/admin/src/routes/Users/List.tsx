@@ -5,6 +5,7 @@ import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationModal";
+import MediaImageGenerationModal from "@/components/Modals/AI/MediaImageGenerationModal";
 import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
 import { Permissions } from "@/constants/permissions";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
@@ -133,6 +134,7 @@ const UsersListRoute: Component = () => {
 			}}
 		>
 			<MediaAltGenerationModal />
+			<MediaImageGenerationModal />
 			<UserList
 				state={{
 					searchParams: searchParams,

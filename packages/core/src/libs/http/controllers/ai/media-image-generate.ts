@@ -59,6 +59,7 @@ const mediaImageGenerateController = factory.createHandlers(
 		})(context, {
 			instruction: body.instruction,
 			guidance: body.guidance,
+			previousInstructions: body.previousInstructions,
 			image: body.image,
 			generation: body.generation,
 			userId: c.get("auth").id,

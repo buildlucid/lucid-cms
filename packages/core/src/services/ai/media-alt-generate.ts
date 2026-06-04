@@ -1,9 +1,7 @@
+import type { MediaAltGenerateResponse } from "@lucidcms/types";
 import z from "zod";
 import { copy } from "../../libs/i18n/index.js";
-import type {
-	CmsAiGenerateData,
-	MediaAltGenerateV1Request,
-} from "../../libs/lucid-remote/services/generate-cms-ai.js";
+import type { MediaAltGenerateV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
@@ -37,7 +35,7 @@ const mediaAltGenerate: ServiceFn<
 			userId: number;
 		},
 	],
-	CmsAiGenerateData
+	MediaAltGenerateResponse
 > = async (context, props) => {
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
@@ -111,8 +109,12 @@ const mediaAltGenerate: ServiceFn<
 		};
 	}
 
-	const response = {
+	const response: MediaAltGenerateResponse = {
 		...generateRes.data.json.data,
+		feature: {
+			key: "media.alt.generate",
+			version: "v1",
+		},
 		output: outputParse.data,
 	};
 	const storeRes = await storeGeneration(context, {

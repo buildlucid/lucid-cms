@@ -1,9 +1,18 @@
 import type { ErrorResponse } from "@types";
 import { type Accessor, createSignal } from "solid-js";
 import { SingleFileUpload } from "@/components/Groups/Form";
-import type { SingleFileUploadProps } from "@/components/Groups/Form/SingleFileUpload";
+import type {
+	SingleFileUploadImageGeneration,
+	SingleFileUploadProps,
+} from "@/components/Groups/Form/SingleFileUpload";
 import type { FocalPoint } from "@/components/Modals/Media/FocalPointEditor";
+import useMediaImageGeneration from "@/hooks/ai/useMediaImageGeneration";
+import type {
+	AiImageSource,
+	MediaImageGenerationTarget,
+} from "@/store/aiModalsStore";
 import { getBodyError } from "@/utils/error-helpers";
+import helpers from "@/utils/helpers";
 import {
 	getImageMeta as getFileImageMeta,
 	type ImageMeta,
@@ -21,6 +30,11 @@ interface UseSingleFileUploadProps {
 	progress?: Accessor<SingleFileUploadProps["progress"]>;
 	errors?: Accessor<ErrorResponse | undefined>;
 	noMargin?: SingleFileUploadProps["noMargin"];
+	imageGeneration?: {
+		enabled?: Accessor<boolean>;
+		disabled?: Accessor<boolean>;
+		onSetFile?: (_file: File) => void | Promise<void>;
+	};
 }
 
 const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
@@ -35,9 +49,75 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	const [getFocalPoint, setFocalPoint] = createSignal<FocalPoint | null>(
 		data.currentFile?.focalPoint ?? null,
 	);
+	const mediaImageGeneration = useMediaImageGeneration();
+	const imageGenerationTargetId = mediaImageGeneration.getTargetId();
 
 	// ----------------------------------------
 	// Functions
+	const imageGenerationSource = (): AiImageSource | null => {
+		const file = getFile();
+		if (file && helpers.getMediaType(file.type) === "image") {
+			return {
+				file,
+				filename: file.name,
+			};
+		}
+
+		const currentFile = getCurrentFile();
+		if (
+			getRemovedCurrent() !== true &&
+			currentFile?.type === "image" &&
+			(currentFile.focalPointUrl || currentFile.url)
+		) {
+			return {
+				url: currentFile.focalPointUrl ?? currentFile.url,
+				filename: currentFile.name,
+			};
+		}
+
+		return null;
+	};
+
+	// ----------------------------------------
+	// Functions
+	const imageGenerationEnabled = () => {
+		return (
+			data.imageGeneration !== undefined &&
+			(data.imageGeneration.enabled?.() ?? true) &&
+			mediaImageGeneration.hasPermission()
+		);
+	};
+	const imageGenerationTarget: MediaImageGenerationTarget = {
+		image: () => imageGenerationSource(),
+		setFile: async (file) => {
+			setGetFile(file);
+			setGetRemovedCurrent(false);
+			setFocalPoint(null);
+			await data.imageGeneration?.onSetFile?.(file);
+		},
+		disabled: () =>
+			data.disabled === true || data.imageGeneration?.disabled?.() === true,
+	};
+	const imageGeneration = (): SingleFileUploadImageGeneration | undefined => {
+		if (!imageGenerationEnabled()) return undefined;
+
+		return {
+			state: {
+				loading: mediaImageGeneration.isTargetLoading(imageGenerationTargetId),
+				disabled: mediaImageGeneration.isDisabled(imageGenerationTarget),
+				tooltip: mediaImageGeneration.getTooltip(imageGenerationTarget),
+			},
+			callbacks: {
+				open: () =>
+					mediaImageGeneration.open(
+						imageGenerationTarget,
+						imageGenerationTargetId,
+					),
+			},
+		};
+	};
+
+	// ----------------------------------------
 	const getMimeType = (): string | undefined => {
 		return getFile()?.type;
 	};
@@ -102,6 +182,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 				progress={data.progress?.()}
 				errors={data.errors ? getBodyError(data.name, data.errors) : undefined}
 				noMargin={data.noMargin}
+				imageGeneration={imageGeneration()}
 			/>
 		),
 	};

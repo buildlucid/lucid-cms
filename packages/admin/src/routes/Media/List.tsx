@@ -13,6 +13,7 @@ import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationModal";
+import MediaImageGenerationModal from "@/components/Modals/AI/MediaImageGenerationModal";
 import BulkUploadMediaModal from "@/components/Modals/Media/BulkUploadMedia";
 import CreateMediaFolderModal from "@/components/Modals/Media/CreateMediaFolder";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
@@ -362,6 +363,7 @@ const MediaListRoute: Component = () => {
 				}}
 			>
 				<MediaAltGenerationModal />
+				<MediaImageGenerationModal />
 				<MediaList
 					state={{
 						searchParams: searchParams,

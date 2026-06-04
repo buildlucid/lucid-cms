@@ -5,6 +5,7 @@ import {
 	FaSolidArrowUpFromBracket,
 	FaSolidBullseye,
 	FaSolidFile,
+	FaSolidMagicWandSparkles,
 	FaSolidMagnifyingGlass,
 	FaSolidXmark,
 } from "solid-icons/fa";
@@ -22,8 +23,20 @@ import FocalPointEditor, {
 	type FocalPoint,
 } from "@/components/Modals/Media/FocalPointEditor";
 import ProgressBar from "@/components/Partials/ProgressBar";
+import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+
+export type SingleFileUploadImageGeneration = {
+	state: {
+		loading: boolean;
+		disabled: boolean;
+		tooltip: string;
+	};
+	callbacks: {
+		open: () => void;
+	};
+};
 
 export interface SingleFileUploadProps {
 	id: string;
@@ -65,6 +78,7 @@ export interface SingleFileUploadProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;
+	imageGeneration?: SingleFileUploadImageGeneration;
 }
 
 export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
@@ -204,6 +218,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 							actions={{
 								clearFile,
 								uploadFile,
+								imageGeneration: props.imageGeneration,
 							}}
 						/>
 					</Match>
@@ -260,11 +275,40 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 								clearFile: props.disableRemoveCurrent ? undefined : clearFile,
 								downloadFile,
 								uploadFile,
+								imageGeneration: props.imageGeneration,
 							}}
 						/>
 					</Match>
 				</Switch>
 			</div>
+			<Show
+				when={showState() === "no-file" ? props.imageGeneration : undefined}
+			>
+				{(imageGeneration) => (
+					<div class="mt-2">
+						<button
+							type="button"
+							class="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border bg-input-base px-3 text-sm font-medium text-input-contrast transition-colors duration-200 hover:bg-secondary-hover hover:text-secondary-contrast focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-70"
+							disabled={imageGeneration().state.disabled}
+							title={imageGeneration().state.tooltip}
+							aria-label={T()("ai.media.image.generate.action")}
+							aria-busy={imageGeneration().state.loading ? "true" : undefined}
+							onClick={(event) => {
+								event.preventDefault();
+								event.stopPropagation();
+								imageGeneration().callbacks.open();
+							}}
+						>
+							{imageGeneration().state.loading ? (
+								<Spinner size="sm" />
+							) : (
+								<FaSolidMagicWandSparkles size={13} aria-hidden="true" />
+							)}
+							<span>{T()("ai.media.image.generate.action")}</span>
+						</button>
+					</div>
+				)}
+			</Show>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
@@ -292,6 +336,7 @@ interface FilePreviewScreenProps {
 		clearFile?: () => void;
 		downloadFile?: () => void;
 		uploadFile: () => void;
+		imageGeneration?: SingleFileUploadImageGeneration;
 	};
 }
 
@@ -308,6 +353,15 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 	const showFocalPoint = createMemo(
 		() => props.data.type === "image" && props.focalPoint !== undefined,
 	);
+	const actionCount = createMemo(() => {
+		return [
+			props.actions.downloadFile,
+			showFocalPoint() ? true : undefined,
+			props.actions.imageGeneration,
+			props.actions.uploadFile,
+			props.actions.clearFile,
+		].filter(Boolean).length;
+	});
 
 	// ------------------------------------
 	// Render
@@ -397,27 +451,11 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				class={classNames(
 					"w-full z-10 relative grid gap-2 p-2 bg-background-base border-t border-border",
 					{
-						"grid-cols-2":
-							[
-								props.actions.downloadFile,
-								showFocalPoint() ? true : undefined,
-								props.actions.uploadFile,
-								props.actions.clearFile,
-							].filter(Boolean).length === 2,
-						"grid-cols-3":
-							[
-								props.actions.downloadFile,
-								showFocalPoint() ? true : undefined,
-								props.actions.uploadFile,
-								props.actions.clearFile,
-							].filter(Boolean).length === 3,
-						"grid-cols-4":
-							[
-								props.actions.downloadFile,
-								showFocalPoint() ? true : undefined,
-								props.actions.uploadFile,
-								props.actions.clearFile,
-							].filter(Boolean).length === 4,
+						"grid-cols-1": actionCount() === 1,
+						"grid-cols-2": actionCount() === 2,
+						"grid-cols-3": actionCount() === 3,
+						"grid-cols-4": actionCount() === 4,
+						"grid-cols-5": actionCount() === 5,
 					},
 				)}
 			>
@@ -445,6 +483,36 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 							{T()("media.focal.point.label")}
 						</span>
 					</button>
+				</Show>
+				<Show when={props.actions.imageGeneration}>
+					{(imageGeneration) => (
+						<button
+							type="button"
+							class={classNames(actionButtonClasses)}
+							disabled={imageGeneration().state.disabled}
+							title={imageGeneration().state.tooltip}
+							aria-label={T()("ai.media.image.generate.action")}
+							aria-busy={imageGeneration().state.loading ? "true" : undefined}
+							onClick={(event) => {
+								event.preventDefault();
+								event.stopPropagation();
+								imageGeneration().callbacks.open();
+							}}
+						>
+							{imageGeneration().state.loading ? (
+								<Spinner size="sm" />
+							) : (
+								<FaSolidMagicWandSparkles
+									size={13}
+									class="block text-current"
+									aria-hidden="true"
+								/>
+							)}
+							<span class="hidden md:inline">
+								{T()("ai.media.image.generate.action")}
+							</span>
+						</button>
+					)}
 				</Show>
 				<button
 					type="button"

@@ -12,6 +12,7 @@ import { Input, Textarea } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
 import { useCreateMedia } from "@/hooks/actions";
 import useMediaAltGeneration from "@/hooks/ai/useMediaAltGeneration";
+import useMediaImageGeneration from "@/hooks/ai/useMediaImageGeneration";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -44,6 +45,8 @@ const CreateUpdateProfilePicturePanel: Component<
 	const [uploadProgress, setUploadProgress] = createSignal(0);
 	const createMedia = useCreateMedia();
 	const profileAltGeneration = useMediaAltGeneration();
+	const profileImageGeneration = useMediaImageGeneration();
+
 	const MediaFile = useSingleFileUpload({
 		id: "file",
 		disableRemoveCurrent: true,
@@ -56,6 +59,13 @@ const CreateUpdateProfilePicturePanel: Component<
 			value: uploadProgress(),
 		}),
 		noMargin: false,
+		imageGeneration: {
+			enabled: () => true,
+			disabled: () => coreMutateIsLoading(),
+			onSetFile: () => {
+				setUploadErrors(undefined);
+			},
+		},
 	});
 
 	// ---------------------------------
@@ -161,7 +171,11 @@ const CreateUpdateProfilePicturePanel: Component<
 		disabled: coreMutateIsLoading,
 	});
 	const mutateIsLoading = createMemo(() => {
-		return coreMutateIsLoading() || profileAltGeneration.isLoading();
+		return (
+			coreMutateIsLoading() ||
+			profileAltGeneration.isLoading() ||
+			profileImageGeneration.isLoading()
+		);
 	});
 	const panelContent = createMemo(() => {
 		return {

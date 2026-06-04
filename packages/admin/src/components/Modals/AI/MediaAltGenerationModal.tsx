@@ -1,6 +1,6 @@
-import type { Locale, Media } from "@types";
+import type { Locale, Media, MediaAltGenerateResponse } from "@types";
 import classnames from "classnames";
-import { FaSolidArrowRotateLeft, FaSolidPaperPlane } from "solid-icons/fa";
+import { FaSolidArrowRotateLeft, FaSolidXmark } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -14,7 +14,6 @@ import {
 import { Label } from "@/components/Groups/Form";
 import { Modal, ModalFooter } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
-import Spinner from "@/components/Partials/Spinner";
 import api from "@/services/api";
 import aiModalsStore, {
 	type MediaAltGenerationTarget,
@@ -22,6 +21,7 @@ import aiModalsStore, {
 import T from "@/translations";
 import { prepareAiImage } from "@/utils/ai-image";
 import { LucidError } from "@/utils/error-handling";
+import formatAiCost from "@/utils/format-ai-cost";
 import spawnToast from "@/utils/spawn-toast";
 import {
 	getDefaultTranslationLocale,
@@ -39,6 +39,7 @@ export type MediaAltGenerationCandidate = {
 	instruction?: string;
 	output: Record<string, string>;
 	originalOutput: Record<string, string>;
+	cost: MediaAltGenerateResponse["usage"]["cost"];
 };
 
 interface MediaAltGenerationModalProps {
@@ -81,19 +82,16 @@ const MediaAltGenerationModalContent: Component<
 	const currentOutput = createMemo(() => props.currentAlt ?? {});
 	const hasResponse = createMemo(() => props.generations.length > 0);
 	const hasContent = createMemo(() => hasCurrentAlt() || hasResponse());
-	const hasInstruction = createMemo(() => instruction().trim().length > 0);
-	const responseStatus = createMemo(() => {
-		if (props.isLoading) return T()("ai.generation.loading");
-		if (hasResponse()) {
-			return T()("ai.media.alt.generate.response.history.count", {
-				count: props.generations.length,
-				total: props.locales.length,
-			});
-		}
-		if (hasCurrentAlt()) {
-			return T()("ai.media.alt.generate.response.current.available");
-		}
-		return T()("ai.media.alt.generate.response.waiting");
+	const sessionCost = createMemo(() => {
+		const firstGeneration = props.generations[0];
+		if (!firstGeneration) return undefined;
+
+		const currency = firstGeneration.cost.currency;
+		const totalCostMinor = props.generations
+			.filter((generation) => generation.cost.currency === currency)
+			.reduce((total, generation) => total + generation.cost.totalCostMinor, 0);
+
+		return formatAiCost({ currency, totalCostMinor });
 	});
 	const isEdited = (
 		generation: MediaAltGenerationCandidate,
@@ -121,7 +119,6 @@ const MediaAltGenerationModalContent: Component<
 	const outputLocaleCount = (output: Record<string, string>) => {
 		return props.locales.filter((locale) => output[locale.code]).length;
 	};
-
 	// -----------------------------
 	// Functions
 	const setOpen = (open: boolean) => {
@@ -131,9 +128,8 @@ const MediaAltGenerationModalContent: Component<
 	const generate = (event?: SubmitEvent) => {
 		event?.preventDefault();
 		const trimmedInstruction = instruction().trim();
-		if (trimmedInstruction.length === 0) return;
 		void props.callbacks.onGenerate({
-			instruction: trimmedInstruction,
+			instruction: trimmedInstruction || undefined,
 		});
 	};
 
@@ -157,15 +153,25 @@ const MediaAltGenerationModalContent: Component<
 				noPadding: true,
 			}}
 		>
-			<div class="min-w-0 px-4 py-4 md:px-6 md:py-5 border-b border-border">
-				<h2>{T()("ai.media.alt.generate.modal.title")}</h2>
-				<p class="mt-1 text-sm text-body">
-					{T()("ai.media.alt.generate.modal.description")}
-				</p>
+			<div class="flex min-w-0 items-start justify-between gap-4 border-b border-border px-4 py-4 md:px-6 md:py-5">
+				<div class="min-w-0">
+					<h2>{T()("ai.media.alt.generate.modal.title")}</h2>
+					<p class="mt-1 text-sm text-body">
+						{T()("ai.media.alt.generate.modal.description")}
+					</p>
+				</div>
+				<button
+					type="button"
+					class="flex h-8 min-w-8 w-8 items-center justify-center rounded-full text-body transition-colors duration-200 hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-error-base"
+					onClick={() => setOpen(false)}
+					aria-label={T()("common.close")}
+				>
+					<FaSolidXmark class="fill-current" />
+				</button>
 			</div>
 			<div class="grid min-w-0 w-full gap-0 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
 				<div class="relative min-h-130 min-w-0 w-full overflow-hidden border-b border-border bg-card-base md:border-b-0 md:border-r">
-					<div class="absolute inset-x-0 top-0 bottom-10">
+					<div class="absolute inset-x-0 top-0 bottom-24">
 						<div class="rectangle-background relative flex h-full w-full items-center justify-center overflow-hidden bg-card-base">
 							<Show
 								when={props.imageUrl}
@@ -215,53 +221,29 @@ const MediaAltGenerationModalContent: Component<
 									"ai.media.alt.generate.instruction.placeholder",
 								)}
 								rows={4}
-								class="block min-w-0 max-w-full w-full resize-none rounded-md border border-white/10 bg-black/20 p-3 pr-12 text-sm font-medium text-white outline-hidden backdrop-blur-sm transition-colors duration-200 placeholder:text-white/50 hover:border-white/20 focus:border-primary-base focus:bg-black/30"
+								class="block min-w-0 max-w-full w-full resize-none rounded-md border border-white/10 bg-black/20 p-3 text-sm font-medium text-white outline-hidden backdrop-blur-sm transition-colors duration-200 placeholder:text-white/50 hover:border-white/20 focus:border-primary-base focus:bg-black/30"
 							/>
-							<button
+						</div>
+						<Show when={props.error}>
+							{(error) => <p class="mt-3 text-sm text-error-base">{error()}</p>}
+						</Show>
+						<div class="mt-4">
+							<Button
 								type="submit"
-								class="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-md bg-secondary-base text-secondary-contrast transition-colors duration-200 hover:bg-secondary-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-70"
-								disabled={props.isLoading || !hasInstruction()}
-								title={
-									hasResponse()
-										? T()("ai.media.alt.generate.modal.try.again")
-										: T()("ai.media.alt.generate.modal.generate")
-								}
-								aria-label={
-									hasResponse()
-										? T()("ai.media.alt.generate.modal.try.again")
-										: T()("ai.media.alt.generate.modal.generate")
-								}
+								theme="secondary"
+								size="medium"
+								classes="w-full min-w-0!"
+								loading={props.isLoading}
 							>
-								<Show when={!props.isLoading} fallback={<Spinner size="sm" />}>
-									<FaSolidPaperPlane size={13} aria-hidden="true" />
-								</Show>
-							</button>
+								{hasResponse()
+									? T()("ai.media.alt.generate.modal.try.again")
+									: T()("ai.media.alt.generate.modal.generate")}
+							</Button>
 						</div>
 					</form>
 				</div>
 				<div class="relative flex min-h-130 min-w-0 w-full flex-col p-4 md:p-6">
-					<div class="flex min-w-0 shrink-0 items-start justify-between gap-4">
-						<div class="min-w-0">
-							<h3 class="text-sm font-medium text-title">
-								{T()("ai.media.alt.generate.response.title")}
-							</h3>
-							<p class="mt-1 text-xs text-body">{responseStatus()}</p>
-						</div>
-						<Button
-							type="button"
-							theme="secondary"
-							size="small"
-							onClick={() => {
-								void props.callbacks.onGenerate({});
-							}}
-							loading={props.isLoading}
-						>
-							{hasResponse()
-								? T()("ai.media.alt.generate.modal.try.again")
-								: T()("ai.media.alt.generate.modal.generate")}
-						</Button>
-					</div>
-					<div class="mt-4 min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
+					<div class="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
 						<Show
 							when={hasContent()}
 							fallback={
@@ -376,17 +358,26 @@ const MediaAltGenerationModalContent: Component<
 															</p>
 														</Show>
 													</div>
-													<span class="shrink-0 text-xs font-medium text-unfocused">
-														{T()(
-															"ai.media.alt.generate.response.locale.count",
-															{
-																count: props.locales.filter(
-																	(locale) => generation.output[locale.code],
-																).length,
-																total: props.locales.length,
-															},
-														)}
-													</span>
+													<div class="flex shrink-0 items-center gap-2">
+														<span class="text-xs font-medium text-unfocused">
+															{T()(
+																"ai.media.alt.generate.response.locale.count",
+																{
+																	count: props.locales.filter(
+																		(locale) => generation.output[locale.code],
+																	).length,
+																	total: props.locales.length,
+																},
+															)}
+														</span>
+														<Show when={formatAiCost(generation.cost)}>
+															{(cost) => (
+																<span class="text-xs font-medium text-unfocused">
+																	{cost()}
+																</span>
+															)}
+														</Show>
+													</div>
 												</button>
 												<Show when={selected()}>
 													<div class="min-w-0 space-y-2 border-t border-border p-3 pt-2">
@@ -482,7 +473,16 @@ const MediaAltGenerationModalContent: Component<
 						{T()("common.cancel")}
 					</Button>
 				</div>
-				<div class="flex items-center gap-2">
+				<div class="flex items-center gap-3">
+					<Show when={sessionCost()}>
+						{(cost) => (
+							<p class="hidden text-xs text-body sm:block">
+								{T()("ai.media.image.generate.cost.total", {
+									cost: cost(),
+								})}
+							</p>
+						)}
+					</Show>
 					<Show when={props.selectedGenerationId === CURRENT_ALT_ID}>
 						<Button
 							type="button"
@@ -666,6 +666,7 @@ const MediaAltGenerationModal: Component = () => {
 					instruction: values.instruction,
 					output: { ...response.data.output },
 					originalOutput: { ...response.data.output },
+					cost: response.data.usage.cost,
 				},
 			]);
 			setSelectedGenerationId(id);

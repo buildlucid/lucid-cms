@@ -4,6 +4,7 @@ import { Account } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationModal";
+import MediaImageGenerationModal from "@/components/Modals/AI/MediaImageGenerationModal";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -40,6 +41,7 @@ const AccountRoute: Component = () => {
 			}}
 		>
 			<MediaAltGenerationModal />
+			<MediaImageGenerationModal />
 			<Account />
 		</Wrapper>
 	);

@@ -4,6 +4,7 @@ import {
 	FaSolidArrowUpFromBracket,
 	FaSolidBullseye,
 	FaSolidImage,
+	FaSolidMagicWandSparkles,
 	FaSolidMagnifyingGlass,
 	FaSolidXmark,
 } from "solid-icons/fa";
@@ -27,6 +28,7 @@ import Pill from "@/components/Partials/Pill";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import { useCreateMedia, useUpdateMedia } from "@/hooks/actions";
 import useMediaAltGeneration from "@/hooks/ai/useMediaAltGeneration";
+import useMediaImageGeneration from "@/hooks/ai/useMediaImageGeneration";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -67,6 +69,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	);
 	const createMedia = useCreateMedia();
 	const updateMedia = props.id ? useUpdateMedia(props.id) : null;
+	const mediaAltGeneration = useMediaAltGeneration();
+	const mediaImageGeneration = useMediaImageGeneration();
+	const posterImageGenerationTargetId = mediaImageGeneration.getTargetId();
 
 	const MediaFile = useSingleFileUpload({
 		id: "file",
@@ -80,7 +85,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			value: targetUploadProgress(),
 		}),
 		noMargin: false,
+		imageGeneration: {
+			enabled: () => showMediaImageGenerationAction(),
+			disabled: () => coreMutateIsLoading(),
+			onSetFile: () => {
+				setUploadErrors(undefined);
+			},
+		},
 	});
+
 	const PosterFile = useSingleFileUpload({
 		id: "poster",
 		name: "file",
@@ -88,7 +101,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		errors: () => mutateErrors(),
 		noMargin: false,
 	});
-	const mediaAltGeneration = useMediaAltGeneration();
 
 	// ---------------------------------
 	// Memos
@@ -129,6 +141,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			return helpers.getMediaType(MediaFile.getMimeType());
 		}
 		return media.data?.data.type;
+	});
+	const showMediaImageGenerationAction = createMemo(() => {
+		if (panelMode() === "create") return true;
+		return media.data?.data.type === "image";
 	});
 	const showDescriptionInput = createMemo(() => {
 		const type = currentMediaType();
@@ -193,6 +209,29 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 		const poster = media.data?.data.poster;
 		if (poster?.url) {
+			return {
+				url: poster.url,
+				filename: poster.fileName ?? poster.key,
+			};
+		}
+
+		return null;
+	});
+	const posterImageGenerationSource = createMemo(() => {
+		const file = PosterFile.getFile();
+		if (file && helpers.getMediaType(file.type) === "image") {
+			return {
+				file,
+				filename: file.name,
+			};
+		}
+
+		const poster = media.data?.data.poster;
+		if (
+			PosterFile.getRemovedCurrent() !== true &&
+			poster?.type === "image" &&
+			poster.url
+		) {
 			return {
 				url: poster.url,
 				filename: poster.fileName ?? poster.key,
@@ -382,9 +421,23 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		setAlt: setPosterAlt,
 		disabled: coreMutateIsLoading,
 	});
+	const posterImageGenerationTarget = {
+		image: posterImageGenerationSource,
+		setFile: (file: File) => {
+			PosterFile.setGetFile(file);
+			PosterFile.setGetRemovedCurrent(false);
+			PosterFile.setFocalPoint(null);
+			setUploadErrors(undefined);
+		},
+		disabled: coreMutateIsLoading,
+	};
 
 	const mutateIsLoading = createMemo(() => {
-		return coreMutateIsLoading() || mediaAltGeneration.isLoading();
+		return (
+			coreMutateIsLoading() ||
+			mediaAltGeneration.isLoading() ||
+			mediaImageGeneration.isLoading()
+		);
 	});
 
 	const updateData = createMemo(() => {
@@ -953,6 +1006,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											theme="secondary-subtle"
 											size="icon-subtle"
 											onClick={previewPosterFile}
+											title={T()("common.preview")}
 											aria-label={T()("common.preview")}
 										>
 											<FaSolidMagnifyingGlass size={14} />
@@ -962,9 +1016,44 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											theme="secondary-subtle"
 											size="icon-subtle"
 											onClick={() => setPosterFocalEditorOpen(true)}
+											title={T()("media.focal.point.edit")}
 											aria-label={T()("media.focal.point.edit")}
 										>
 											<FaSolidBullseye size={14} />
+										</Button>
+									</Show>
+									<Show when={mediaImageGeneration.hasPermission()}>
+										<Button
+											type="button"
+											theme="secondary-subtle"
+											size="icon-subtle"
+											onClick={(event) => {
+												event.preventDefault();
+												event.stopPropagation();
+												mediaImageGeneration.open(
+													posterImageGenerationTarget,
+													posterImageGenerationTargetId,
+												);
+											}}
+											title={mediaImageGeneration.getTooltip(
+												posterImageGenerationTarget,
+											)}
+											aria-label={T()("ai.media.image.generate.action")}
+											aria-busy={
+												mediaImageGeneration.isTargetLoading(
+													posterImageGenerationTargetId,
+												)
+													? "true"
+													: undefined
+											}
+											loading={mediaImageGeneration.isTargetLoading(
+												posterImageGenerationTargetId,
+											)}
+											disabled={mediaImageGeneration.isDisabled(
+												posterImageGenerationTarget,
+											)}
+										>
+											<FaSolidMagicWandSparkles size={14} />
 										</Button>
 									</Show>
 									<Button
@@ -972,6 +1061,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										theme="secondary-subtle"
 										size="icon-subtle"
 										onClick={openPosterFileBrowser}
+										title={T()("common.upload")}
 										aria-label={T()("common.upload")}
 									>
 										<FaSolidArrowUpFromBracket size={14} />
@@ -982,6 +1072,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											theme="danger-subtle"
 											size="icon-subtle"
 											onClick={clearPosterFile}
+											title={T()("common.remove")}
 											aria-label={T()("common.remove")}
 										>
 											<FaSolidXmark size={14} />
@@ -997,6 +1088,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											theme="secondary-subtle"
 											size="icon-subtle"
 											onClick={undoPosterFile}
+											title={T()("media.file.back.to.current")}
 											aria-label={T()("media.file.back.to.current")}
 										>
 											<FaSolidArrowRotateLeft size={14} />

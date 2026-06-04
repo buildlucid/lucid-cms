@@ -2,10 +2,11 @@ import type { Locale, Media } from "@types";
 import type { Accessor } from "solid-js";
 import { createStore } from "solid-js/store";
 
-type ImageSource = {
+export type AiImageSource = {
 	file?: File | null;
 	url?: string | null;
 	filename?: string;
+	mimeType?: "image/webp" | "image/png" | "image/jpeg";
 };
 
 type MediaContext = {
@@ -19,10 +20,18 @@ type AltSetter = (
 ) => void | Promise<void>;
 
 export interface MediaAltGenerationTarget {
-	image: Accessor<ImageSource | null>;
+	image: Accessor<AiImageSource | null>;
 	media: Accessor<MediaContext>;
 	locales: Accessor<Locale[]>;
 	setAlt: AltSetter;
+	disabled?: Accessor<boolean>;
+}
+
+type FileSetter = (file: File) => void | Promise<void>;
+
+export interface MediaImageGenerationTarget {
+	image: Accessor<AiImageSource | null>;
+	setFile: FileSetter;
 	disabled?: Accessor<boolean>;
 }
 
@@ -30,6 +39,12 @@ type ModalRegistry = {
 	mediaAltGeneration: {
 		data: {
 			target: MediaAltGenerationTarget;
+			targetId: string;
+		};
+	};
+	mediaImageGeneration: {
+		data: {
+			target: MediaImageGenerationTarget;
 			targetId: string;
 		};
 	};

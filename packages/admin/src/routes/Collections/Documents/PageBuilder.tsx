@@ -23,6 +23,7 @@ import {
 } from "@/components/Groups/PageBuilder";
 import { ReleaseRequestSidebar } from "@/components/Groups/PageBuilder/Sidebar/ReleaseRequestSidebar";
 import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationModal";
+import MediaImageGenerationModal from "@/components/Modals/AI/MediaImageGenerationModal";
 import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
@@ -372,6 +373,7 @@ const CollectionsDocumentsEditRoute: Component<{
 						}}
 					/>
 					<MediaAltGenerationModal />
+					<MediaImageGenerationModal />
 				</PageBuilderStateProvider>
 			</Match>
 		</Switch>

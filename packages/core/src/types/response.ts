@@ -1,4 +1,6 @@
 export type {
+	AiGenerateCost,
+	AiGenerateUsage,
 	AuthProviders,
 	ClientIntegration,
 	Collection,
@@ -29,9 +31,11 @@ export type {
 	License,
 	Locale,
 	Media,
+	MediaAltGenerateResponse,
 	MediaEmbed,
 	MediaFolder,
 	MediaFolderBreadcrumb,
+	MediaImageGenerateResponse,
 	MediaPoster,
 	MediaShareLink,
 	MediaType,

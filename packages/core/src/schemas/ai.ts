@@ -126,7 +126,6 @@ export const controllerSchemas = {
 							})
 							.strict(),
 					)
-					.max(10)
 					.optional(),
 				image: z
 					.object({
@@ -170,17 +169,33 @@ export const controllerSchemas = {
 			.object({
 				instruction: z.string().trim().min(1).max(8_000),
 				guidance: z.string().trim().min(1).optional(),
+				previousInstructions: z
+					.array(z.string().trim().min(1).max(8_000))
+					.max(10)
+					.optional(),
 				image: z
-					.object({
-						type: z.literal("url"),
-						url: z.url().trim().max(2_048),
-						detail: aiImageDetailSchema,
-						filename: z.string().trim().min(1).max(255).optional(),
-						mimeType: z
-							.enum(["image/webp", "image/png", "image/jpeg"])
-							.optional(),
-					})
-					.strict()
+					.discriminatedUnion("type", [
+						z
+							.object({
+								type: z.literal("url"),
+								url: z.url().trim().max(2_048),
+								detail: aiImageDetailSchema,
+								filename: z.string().trim().min(1).max(255).optional(),
+								mimeType: z
+									.enum(["image/webp", "image/png", "image/jpeg"])
+									.optional(),
+							})
+							.strict(),
+						z
+							.object({
+								type: z.literal("base64"),
+								data: z.string().trim().min(1).max(aiMaxBase64ImageLength),
+								mimeType: z.enum(["image/webp", "image/png", "image/jpeg"]),
+								detail: aiImageDetailSchema,
+								filename: z.string().trim().min(1).max(255).optional(),
+							})
+							.strict(),
+					])
 					.optional(),
 				generation: z
 					.object({

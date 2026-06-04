@@ -1,3 +1,4 @@
+import type { AiGenerateUsage } from "@lucidcms/types";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { getLucidRemoteClient } from "../client.js";
 import { lucidRemotePaths } from "../constants.js";
@@ -127,6 +128,9 @@ export type MediaImageGenerateV1Request = {
 				"image/webp" | "image/png" | "image/jpeg"
 		  >
 	)[];
+	context: {
+		previousInstructions?: string[];
+	};
 	generation: {
 		size:
 			| "auto"
@@ -158,38 +162,7 @@ export type CmsAiGenerateData = {
 	requestId: string;
 	feature: CmsAiGenerateRequest["feature"];
 	output: unknown;
-	usage: {
-		model: string;
-		providerRequestId?: string;
-		tokens: {
-			input: {
-				text: number;
-				image: number;
-				audio: number;
-				cached: {
-					total: number;
-					text: number;
-					image: number;
-					audio: number;
-				};
-				total: number;
-			};
-			output: {
-				text: number;
-				image: number;
-				audio: number;
-				reasoning: number;
-				acceptedPrediction: number;
-				rejectedPrediction: number;
-				total: number;
-			};
-			total: number;
-		};
-		cost: {
-			currency: string;
-			totalCostMinor: number;
-		};
-	};
+	usage: AiGenerateUsage;
 };
 
 /**
