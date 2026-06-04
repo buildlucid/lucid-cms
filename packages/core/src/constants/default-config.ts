@@ -1,36 +1,5 @@
-import { copy } from "../libs/i18n/index.js";
 import type { Config, LucidConfig } from "../types/config.js";
 import constants from "./constants.js";
-
-export const coreAiGuidance = [
-	{
-		key: "improve",
-		label: copy("admin:core.ai.guidance.improve.label", {
-			defaultMessage: "Improve",
-		}),
-		instructions:
-			"Improve the writing while preserving the original meaning and important details.",
-		availability: "global",
-	},
-	{
-		key: "expand",
-		label: copy("admin:core.ai.guidance.expand.label", {
-			defaultMessage: "Expand",
-		}),
-		instructions:
-			"Expand the writing with useful detail while staying relevant and accurate.",
-		availability: "global",
-	},
-	{
-		key: "shorten",
-		label: copy("admin:core.ai.guidance.shorten.label", {
-			defaultMessage: "Shorten",
-		}),
-		instructions:
-			"Make the writing shorter while preserving the important details and meaning.",
-		availability: "global",
-	},
-] satisfies NonNullable<LucidConfig["ai"]>["guidance"];
 
 export const defaultConfig: Partial<LucidConfig> = {
 	logger: {
@@ -108,9 +77,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 		groups: {},
 		permissions: {},
 		roles: [],
-	},
-	ai: {
-		guidance: coreAiGuidance,
 	},
 	build: {
 		paths: {

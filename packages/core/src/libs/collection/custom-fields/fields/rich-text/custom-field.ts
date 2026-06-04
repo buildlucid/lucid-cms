@@ -1,6 +1,7 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
 import { copy } from "../../../../i18n/index.js";
+import { defaultTextFieldAiGuidance } from "../../ai-guidance.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -50,6 +51,9 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 	}
 	protected override get supportsAi() {
 		return true;
+	}
+	protected override get defaultAiGuidance() {
+		return defaultTextFieldAiGuidance;
 	}
 	override get jsonSchema() {
 		return {

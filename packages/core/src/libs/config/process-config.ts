@@ -134,10 +134,6 @@ const processConfig = async (
 			"collections",
 			configRes.collections.map((c) => c.getData.key),
 		);
-		checkDuplicateBuilderKeys(
-			"ai guidance",
-			configRes.ai.guidance.map((guidance) => guidance.key),
-		);
 
 		for (const collection of configRes.collections) {
 			CollectionConfigSchema.parse(collection.config);

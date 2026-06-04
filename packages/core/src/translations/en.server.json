@@ -203,6 +203,7 @@
 	"core.routes.ai.generate.error.name": "AI Generation Error",
 	"core.routes.ai.generate.error.message": "An error occurred while generating AI content.",
 	"core.ai.guidance.not.found": "The selected AI guidance does not exist.",
+	"core.ai.media.image.generate.instruction.or.guidance.required": "Provide an instruction, or select guidance with a source image.",
 	"core.ai.custom.field.input.no.supported.field": "No supported AI custom field was found for this collection.",
 	"core.ai.custom.field.input.target.not.found": "The AI target you are trying to use does not exist.",
 	"core.ai.custom.field.input.guidance.not.found": "The selected AI guidance does not exist for this field.",

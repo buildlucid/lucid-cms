@@ -167,7 +167,7 @@ export const controllerSchemas = {
 	mediaImageGenerate: {
 		body: z
 			.object({
-				instruction: z.string().trim().min(1).max(8_000),
+				instruction: z.string().trim().min(1).max(8_000).optional(),
 				guidance: z.string().trim().min(1).optional(),
 				previousInstructions: z
 					.array(z.string().trim().min(1).max(8_000))

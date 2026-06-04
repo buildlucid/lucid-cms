@@ -12,6 +12,7 @@ import type {
 	CFResponse,
 	CustomFieldAiConfig,
 	CustomFieldErrorItem,
+	CustomFieldGuidanceConfig,
 	CustomFieldUserAiConfig,
 	CustomFieldValidateResponse,
 	FieldRelationRefTarget,
@@ -54,6 +55,10 @@ abstract class CustomField<T extends FieldTypes> {
 	protected get supportsAi() {
 		return false;
 	}
+	/** Default guidance presets for fields that support Lucid AI features. */
+	protected get defaultAiGuidance(): CustomFieldGuidanceConfig[] {
+		return [];
+	}
 	/** Normalized field metadata used by Lucid AI features. */
 	get aiConfig(): CustomFieldAiConfig {
 		const aiConfig = (
@@ -67,7 +72,7 @@ abstract class CustomField<T extends FieldTypes> {
 		return {
 			enabled,
 			instructions: aiConfig?.instructions,
-			guidance: aiConfig?.guidance,
+			guidance: enabled ? (aiConfig?.guidance ?? this.defaultAiGuidance) : [],
 			context: aiConfig?.context,
 		};
 	}

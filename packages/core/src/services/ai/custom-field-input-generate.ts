@@ -1,5 +1,4 @@
 import constants from "../../constants/constants.js";
-import { coreAiGuidance } from "../../constants/default-config.js";
 import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
 import type {
@@ -108,13 +107,9 @@ const customFieldInputGenerate: ServiceFn<
 		});
 	}
 	if (props.guidance) {
-		const allowedGuidanceKeys =
-			targetField.aiConfig.guidance ?? coreAiGuidance.map((item) => item.key);
-		const guidance = context.config.ai.guidance.find((item) => {
-			if (item.key !== props.guidance) return false;
-
-			return allowedGuidanceKeys.includes(item.key);
-		});
+		const guidance = targetField.aiConfig.guidance.find(
+			(item) => item.key === props.guidance,
+		);
 		if (!guidance) {
 			return {
 				error: {

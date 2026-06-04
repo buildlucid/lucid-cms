@@ -26,7 +26,17 @@ const CustomFieldSchema = z.object({
 		.object({
 			enabled: z.boolean().optional(),
 			instructions: z.string().optional(),
-			guidance: z.array(z.string().trim().min(1)).optional(),
+			guidance: z
+				.array(
+					z
+						.object({
+							key: z.string().trim().min(1),
+							label: adminCopyDescriptorSchema,
+							instructions: z.string().trim().min(1),
+						})
+						.strict(),
+				)
+				.optional(),
 			context: z.function().optional(),
 		})
 		.optional(),

@@ -1,4 +1,4 @@
-import type { MediaImageGenerateResponse } from "@types";
+import type { ErrorResultObj, MediaImageGenerateResponse } from "@types";
 import classnames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
@@ -16,10 +16,11 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
-import { Label } from "@/components/Groups/Form/Label";
 import { Select } from "@/components/Groups/Form/Select";
+import { Textarea } from "@/components/Groups/Form/Textarea";
 import { Modal, ModalFooter } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
+import Pill from "@/components/Partials/Pill";
 import api from "@/services/api";
 import type {
 	MediaImageGenerateBody,
@@ -31,6 +32,7 @@ import aiModalsStore, { type AiImageSource } from "@/store/aiModalsStore";
 import T from "@/translations";
 import { prepareAiImage } from "@/utils/ai-image";
 import { LucidError } from "@/utils/error-handling";
+import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import formatAiCost from "@/utils/format-ai-cost";
 import helpers from "@/utils/helpers";
 import spawnToast from "@/utils/spawn-toast";
@@ -38,7 +40,8 @@ import spawnToast from "@/utils/spawn-toast";
 type SupportedImageMimeType = "image/webp" | "image/png" | "image/jpeg";
 
 type GenerateValues = {
-	instruction: string;
+	instruction?: string;
+	guidance?: MediaImageGenerationGuidanceKey;
 	size: MediaImageGenerationSize;
 	quality: MediaImageGenerationQuality;
 	outputFormat: MediaImageGenerationOutputFormat;
@@ -57,9 +60,36 @@ type MediaImageGenerationSource = {
 	image: AiImageSource;
 };
 
+const imageGuidanceOptions = [
+	{
+		key: "natural",
+		label: "ai.media.image.generate.guidance.option.natural",
+	},
+	{
+		key: "editorial",
+		label: "ai.media.image.generate.guidance.option.editorial",
+	},
+	{
+		key: "product",
+		label: "ai.media.image.generate.guidance.option.product",
+	},
+	{
+		key: "illustration",
+		label: "ai.media.image.generate.guidance.option.illustration",
+	},
+	{
+		key: "cinematic",
+		label: "ai.media.image.generate.guidance.option.cinematic",
+	},
+] as const;
+
+type MediaImageGenerationGuidanceKey =
+	(typeof imageGuidanceOptions)[number]["key"];
+
 export type MediaImageGenerationCandidate = {
 	id: string;
 	instruction: string;
+	guidance?: MediaImageGenerationGuidanceKey;
 	sourceLabel?: string;
 	source?: MediaImageGenerationSource;
 	previousInstructions: string[];
@@ -85,6 +115,8 @@ const MediaImageGenerationModal: Component = () => {
 	const [sourcePreviewUrl, setSourcePreviewUrl] = createSignal<string>();
 	const [clientError, setClientError] = createSignal<string>();
 	const [instruction, setInstruction] = createSignal("");
+	const [guidance, setGuidance] =
+		createSignal<MediaImageGenerationGuidanceKey>();
 	const [size, setSize] = createSignal<MediaImageGenerationSize>("1024x1024");
 	const [quality, setQuality] =
 		createSignal<MediaImageGenerationQuality>("medium");
@@ -111,12 +143,25 @@ const MediaImageGenerationModal: Component = () => {
 	const responseError = createMemo(() => {
 		return clientError() ?? generateImage.errors()?.message;
 	});
+	const generationErrors = createMemo(() =>
+		getErrorObject(getBodyError("generation", generateImage.errors)),
+	);
+	const instructionError = createMemo(() =>
+		getBodyError("instruction", generateImage.errors),
+	);
+	const generationFieldError = (key: string) => {
+		return generationErrors()?.[key] as ErrorResultObj | undefined;
+	};
 	const selectedGeneration = createMemo(() => {
 		return generations().find(
 			(generation) => generation.id === selectedGenerationId(),
 		);
 	});
 	const hasInstruction = createMemo(() => instruction().trim().length > 0);
+	const canGenerate = createMemo(
+		() =>
+			hasInstruction() || (guidance() !== undefined && source() !== undefined),
+	);
 	const selectedPreviewUrl = createMemo(() => selectedGeneration()?.output.url);
 	const sessionCost = createMemo(() => {
 		const firstGeneration = generations()[0];
@@ -175,6 +220,13 @@ const MediaImageGenerationModal: Component = () => {
 			count: index + 1,
 		});
 	}
+	function guidanceLabel(key?: MediaImageGenerationGuidanceKey) {
+		const option = imageGuidanceOptions.find((option) => option.key === key);
+		return option ? T()(option.label) : undefined;
+	}
+	function generationSummary(generation: MediaImageGenerationCandidate) {
+		return generation.instruction || guidanceLabel(generation.guidance) || "";
+	}
 	function generationMeta(generation: MediaImageGenerationCandidate) {
 		return [
 			generation.output.size,
@@ -202,10 +254,12 @@ const MediaImageGenerationModal: Component = () => {
 	function submitGenerate(event?: SubmitEvent) {
 		event?.preventDefault();
 		const trimmedInstruction = instruction().trim();
-		if (trimmedInstruction.length === 0) return;
+		if (!canGenerate()) return;
 
 		void generateImageRequest({
-			instruction: trimmedInstruction,
+			instruction:
+				trimmedInstruction.length > 0 ? trimmedInstruction : undefined,
+			guidance: guidance(),
 			size: size(),
 			quality: quality(),
 			outputFormat: outputFormat(),
@@ -222,6 +276,7 @@ const MediaImageGenerationModal: Component = () => {
 		return generations()
 			.filter((generation) => generation.includeInPreviousInstructions)
 			.map((generation) => generation.instruction)
+			.filter((instruction) => instruction.trim().length > 0)
 			.slice(-10);
 	}
 	async function buildRequestImage(
@@ -337,6 +392,7 @@ const MediaImageGenerationModal: Component = () => {
 				shouldToast: () => aiModalsStore.isOpen("mediaImageGeneration"),
 				body: {
 					instruction: values.instruction,
+					guidance: values.guidance,
 					previousInstructions:
 						previousInstructions.length > 0 ? previousInstructions : undefined,
 					image,
@@ -353,7 +409,8 @@ const MediaImageGenerationModal: Component = () => {
 			generationId += 1;
 			const candidate: MediaImageGenerationCandidate = {
 				id,
-				instruction: values.instruction,
+				instruction: values.instruction ?? "",
+				guidance: values.guidance,
 				sourceLabel: sourceDescription(requestSource),
 				source: requestSource,
 				previousInstructions,
@@ -399,6 +456,7 @@ const MediaImageGenerationModal: Component = () => {
 		void generateImageRequest(
 			{
 				instruction: generation.instruction,
+				guidance: generation.guidance,
 				size: generation.size,
 				quality: generation.quality,
 				outputFormat: generation.outputFormat,
@@ -458,6 +516,7 @@ const MediaImageGenerationModal: Component = () => {
 	createEffect(() => {
 		if (!isOpen()) return;
 		setInstruction("");
+		setGuidance(undefined);
 		setSize("1024x1024");
 		setQuality("medium");
 		setOutputFormat("webp");
@@ -693,6 +752,7 @@ const MediaImageGenerationModal: Component = () => {
 							noMargin
 							hideOptionalText
 							small
+							errors={generationFieldError("size")}
 						/>
 						<Select
 							id="ai-media-image-generation-quality"
@@ -724,6 +784,7 @@ const MediaImageGenerationModal: Component = () => {
 							noMargin
 							hideOptionalText
 							small
+							errors={generationFieldError("quality")}
 						/>
 						<Select
 							id="ai-media-image-generation-format"
@@ -753,31 +814,58 @@ const MediaImageGenerationModal: Component = () => {
 							noMargin
 							hideOptionalText
 							small
+							errors={generationFieldError("outputFormat")}
 						/>
 					</div>
+					<div class="min-w-0">
+						<span class="text-sm text-body">
+							{T()("ai.generation.guidance.label")}
+						</span>
+						<div class="mt-2 flex min-w-0 flex-wrap gap-2">
+							<For each={imageGuidanceOptions}>
+								{(option) => {
+									const selected = createMemo(() => guidance() === option.key);
+
+									return (
+										<button
+											type="button"
+											class="focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base rounded-full disabled:cursor-not-allowed disabled:opacity-60"
+											aria-pressed={selected()}
+											disabled={isLoading()}
+											onClick={() =>
+												setGuidance(selected() ? undefined : option.key)
+											}
+										>
+											<Pill theme={selected() ? "primary-opaque" : "outline"}>
+												{T()(option.label)}
+											</Pill>
+										</button>
+									);
+								}}
+							</For>
+						</div>
+					</div>
 					<form class="min-w-0" onSubmit={submitGenerate}>
-						<Label
-							id="ai-media-image-generation-instruction"
-							label={T()("ai.generation.instruction.label")}
-							theme="basic"
-							hideOptionalText
-						/>
-						<textarea
+						<Textarea
 							id="ai-media-image-generation-instruction"
 							name="ai-media-image-generation-instruction"
 							value={instruction()}
-							onInput={(event) => setInstruction(event.currentTarget.value)}
-							onKeyDown={(event) => {
-								event.stopPropagation();
+							onChange={setInstruction}
+							onKeyUp={(event) => {
 								if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
 									submitGenerate();
 								}
 							}}
-							placeholder={T()(
-								"ai.media.image.generate.instruction.placeholder",
-							)}
+							copy={{
+								label: T()("ai.generation.instruction.label"),
+								placeholder: T()(
+									"ai.media.image.generate.instruction.placeholder",
+								),
+							}}
 							rows={8}
-							class="block min-w-0 max-w-full w-full resize-none rounded-md border border-border bg-input-base p-3 text-sm font-medium text-subtitle outline-hidden transition-colors duration-200 placeholder:text-body focus:border-primary-base"
+							noMargin
+							hideOptionalText
+							errors={instructionError()}
 						/>
 						<Show when={responseError()}>
 							{(error) => <p class="mt-3 text-sm text-error-base">{error()}</p>}
@@ -789,7 +877,7 @@ const MediaImageGenerationModal: Component = () => {
 								size="medium"
 								classes="w-full min-w-0!"
 								loading={isLoading()}
-								disabled={!hasInstruction()}
+								disabled={!canGenerate()}
 							>
 								{T()("ai.media.image.generate.modal.generate")}
 							</Button>
@@ -868,9 +956,13 @@ const MediaImageGenerationModal: Component = () => {
 																{generationLabel(index())}
 															</p>
 														</div>
-														<p class="mt-1 truncate text-xs text-body">
-															{generation.instruction}
-														</p>
+														<Show when={generationSummary(generation)}>
+															{(summary) => (
+																<p class="truncate text-xs text-body">
+																	{summary()}
+																</p>
+															)}
+														</Show>
 														<div class="mt-1 flex min-w-0 items-center justify-between gap-3">
 															<p class="min-w-0 truncate text-xs text-unfocused">
 																{generationMeta(generation)}

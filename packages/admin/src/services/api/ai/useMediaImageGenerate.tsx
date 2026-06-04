@@ -17,7 +17,7 @@ export type MediaImageGenerationQuality = "auto" | "low" | "medium" | "high";
 export type MediaImageGenerationOutputFormat = "webp" | "png" | "jpeg";
 
 export type MediaImageGenerateBody = {
-	instruction: string;
+	instruction?: string;
 	guidance?: string;
 	previousInstructions?: string[];
 	image?:

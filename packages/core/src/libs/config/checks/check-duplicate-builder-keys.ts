@@ -1,7 +1,7 @@
 import { translate } from "../../i18n/index.js";
 
 const checkDuplicateBuilderKeys = (
-	builder: "ai guidance" | "bricks" | "collections",
+	builder: "bricks" | "collections",
 	keys?: string[],
 ) => {
 	if (keys === undefined) return;
