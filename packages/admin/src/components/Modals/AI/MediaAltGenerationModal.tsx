@@ -1,6 +1,10 @@
 import type { Locale, Media, MediaAltGenerateResponse } from "@types";
 import classnames from "classnames";
-import { FaSolidArrowRotateLeft, FaSolidXmark } from "solid-icons/fa";
+import {
+	FaSolidArrowRotateLeft,
+	FaSolidPaperPlane,
+	FaSolidXmark,
+} from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -171,7 +175,7 @@ const MediaAltGenerationModalContent: Component<
 			</div>
 			<div class="grid min-w-0 w-full gap-0 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
 				<div class="relative min-h-130 min-w-0 w-full overflow-hidden border-b border-border bg-card-base md:border-b-0 md:border-r">
-					<div class="absolute inset-x-0 top-0 bottom-24">
+					<div class="absolute inset-x-0 top-0 bottom-16">
 						<div class="rectangle-background relative flex h-full w-full items-center justify-center overflow-hidden bg-card-base">
 							<Show
 								when={props.imageUrl}
@@ -198,9 +202,8 @@ const MediaAltGenerationModalContent: Component<
 					>
 						<Label
 							id="ai-media-alt-generation-instruction"
-							label={T()("ai.generation.instruction.label")}
+							label={T()("ai.media.alt.generate.direction.label")}
 							theme="basic"
-							hideOptionalText
 						/>
 						<div class="relative min-w-0">
 							<textarea
@@ -221,28 +224,57 @@ const MediaAltGenerationModalContent: Component<
 									"ai.media.alt.generate.instruction.placeholder",
 								)}
 								rows={4}
-								class="block min-w-0 max-w-full w-full resize-none rounded-md border border-white/10 bg-black/20 p-3 text-sm font-medium text-white outline-hidden backdrop-blur-sm transition-colors duration-200 placeholder:text-white/50 hover:border-white/20 focus:border-primary-base focus:bg-black/30"
+								class="block min-w-0 max-w-full w-full resize-none rounded-md border border-white/10 bg-black/20 p-3 pr-12 pb-12 text-sm font-medium text-white outline-hidden backdrop-blur-sm transition-colors duration-200 placeholder:text-white/50 hover:border-white/20 focus:border-primary-base focus:bg-black/30"
 							/>
+							<div class="absolute right-3 bottom-3">
+								<Button
+									type="submit"
+									theme="secondary"
+									size="icon-subtle"
+									disabled={props.isLoading}
+									title={T()("ai.media.alt.generate.modal.generate")}
+									aria-label={T()("ai.media.alt.generate.modal.generate")}
+								>
+									<FaSolidPaperPlane size={13} aria-hidden="true" />
+								</Button>
+							</div>
 						</div>
 						<Show when={props.error}>
 							{(error) => <p class="mt-3 text-sm text-error-base">{error()}</p>}
 						</Show>
-						<div class="mt-4">
-							<Button
-								type="submit"
-								theme="secondary"
-								size="medium"
-								classes="w-full min-w-0!"
-								loading={props.isLoading}
-							>
-								{hasResponse()
-									? T()("ai.media.alt.generate.modal.try.again")
-									: T()("ai.media.alt.generate.modal.generate")}
-							</Button>
-						</div>
 					</form>
 				</div>
 				<div class="relative flex min-h-130 min-w-0 w-full flex-col p-4 md:p-6">
+					<div class="mb-4 flex min-w-0 items-start justify-between gap-4">
+						<div class="min-w-0">
+							<h3 class="text-base font-semibold text-title">
+								{T()("ai.media.alt.generate.response.title")}
+							</h3>
+							<p class="mt-1 text-sm text-body">
+								<Show
+									when={hasResponse()}
+									fallback={
+										hasCurrentAlt()
+											? T()("ai.media.alt.generate.response.current.available")
+											: T()("ai.media.alt.generate.response.waiting")
+									}
+								>
+									{T()("ai.media.alt.generate.response.history.count", {
+										count: props.generations.length,
+									})}
+								</Show>
+							</p>
+						</div>
+						<Button
+							type="button"
+							theme="secondary"
+							size="medium"
+							loading={props.isLoading}
+							onClick={() => generate()}
+						>
+							{T()("ai.media.alt.generate.modal.generate")}
+						</Button>
+					</div>
 					<div class="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
 						<Show
 							when={hasContent()}
