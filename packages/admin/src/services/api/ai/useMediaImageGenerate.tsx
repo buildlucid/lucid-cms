@@ -11,7 +11,8 @@ export type MediaImageGenerationSize =
 	| "2048x2048"
 	| "2048x1152"
 	| "3840x2160"
-	| "2160x3840";
+	| "2160x3840"
+	| [number, number];
 
 export type MediaImageGenerationQuality = "auto" | "low" | "medium" | "high";
 export type MediaImageGenerationOutputFormat = "webp" | "png" | "jpeg";

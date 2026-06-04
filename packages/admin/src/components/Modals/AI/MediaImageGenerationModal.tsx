@@ -16,6 +16,7 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
+import { Input } from "@/components/Groups/Form/Input";
 import { Select } from "@/components/Groups/Form/Select";
 import { Textarea } from "@/components/Groups/Form/Textarea";
 import { Modal, ModalFooter } from "@/components/Groups/Modal";
@@ -59,6 +60,72 @@ type MediaImageGenerationSource = {
 	label: string;
 	image: AiImageSource;
 };
+
+type MediaImageGenerationPresetSize = Exclude<
+	MediaImageGenerationSize,
+	[number, number]
+>;
+type MediaImageGenerationResolutionPreset =
+	| "custom"
+	| MediaImageGenerationPresetSize;
+
+const resolutionPresets: Array<{
+	value: MediaImageGenerationResolutionPreset;
+	label: string;
+	width?: number;
+	height?: number;
+}> = [
+	{
+		value: "custom",
+		label: "ai.media.image.generate.resolution.option.custom",
+	},
+	{
+		value: "1024x1024",
+		label: "ai.media.image.generate.size.option.square",
+		width: 1024,
+		height: 1024,
+	},
+	{
+		value: "1536x1024",
+		label: "ai.media.image.generate.size.option.landscape",
+		width: 1536,
+		height: 1024,
+	},
+	{
+		value: "1024x1536",
+		label: "ai.media.image.generate.size.option.portrait",
+		width: 1024,
+		height: 1536,
+	},
+	{
+		value: "2048x1152",
+		label: "ai.media.image.generate.size.option.wide",
+		width: 2048,
+		height: 1152,
+	},
+	{
+		value: "2048x2048",
+		label: "ai.media.image.generate.size.option.square.large",
+		width: 2048,
+		height: 2048,
+	},
+	{
+		value: "3840x2160",
+		label: "ai.media.image.generate.size.option.large.wide",
+		width: 3840,
+		height: 2160,
+	},
+	{
+		value: "2160x3840",
+		label: "ai.media.image.generate.size.option.large.portrait",
+		width: 2160,
+		height: 3840,
+	},
+	{
+		value: "auto",
+		label: "ai.media.image.generate.size.option.auto",
+	},
+];
 
 const imageGuidanceOptions = [
 	{
@@ -117,7 +184,10 @@ const MediaImageGenerationModal: Component = () => {
 	const [instruction, setInstruction] = createSignal("");
 	const [guidance, setGuidance] =
 		createSignal<MediaImageGenerationGuidanceKey>();
-	const [size, setSize] = createSignal<MediaImageGenerationSize>("1024x1024");
+	const [resolutionPreset, setResolutionPreset] =
+		createSignal<MediaImageGenerationResolutionPreset>("1024x1024");
+	const [customWidth, setCustomWidth] = createSignal("1024");
+	const [customHeight, setCustomHeight] = createSignal("1024");
 	const [quality, setQuality] =
 		createSignal<MediaImageGenerationQuality>("medium");
 	const [outputFormat, setOutputFormat] =
@@ -162,6 +232,14 @@ const MediaImageGenerationModal: Component = () => {
 		() =>
 			hasInstruction() || (guidance() !== undefined && source() !== undefined),
 	);
+	const isCustomResolution = createMemo(() => resolutionPreset() === "custom");
+	const generationSize = createMemo<MediaImageGenerationSize>(() => {
+		if (isCustomResolution()) {
+			return [Number(customWidth()), Number(customHeight())];
+		}
+
+		return resolutionPreset() as MediaImageGenerationPresetSize;
+	});
 	const selectedPreviewUrl = createMemo(() => selectedGeneration()?.output.url);
 	const sessionCost = createMemo(() => {
 		const firstGeneration = generations()[0];
@@ -251,6 +329,19 @@ const MediaImageGenerationModal: Component = () => {
 				return format;
 		}
 	}
+	function updateResolutionPreset(value: MediaImageGenerationResolutionPreset) {
+		setResolutionPreset(value);
+		const preset = resolutionPresets.find((preset) => preset.value === value);
+		if (value === "auto") {
+			setCustomWidth("");
+			setCustomHeight("");
+			return;
+		}
+		if (!preset?.width || !preset.height) return;
+
+		setCustomWidth(String(preset.width));
+		setCustomHeight(String(preset.height));
+	}
 	function submitGenerate(event?: SubmitEvent) {
 		event?.preventDefault();
 		const trimmedInstruction = instruction().trim();
@@ -260,7 +351,7 @@ const MediaImageGenerationModal: Component = () => {
 			instruction:
 				trimmedInstruction.length > 0 ? trimmedInstruction : undefined,
 			guidance: guidance(),
-			size: size(),
+			size: generationSize(),
 			quality: quality(),
 			outputFormat: outputFormat(),
 		});
@@ -517,7 +608,7 @@ const MediaImageGenerationModal: Component = () => {
 		if (!isOpen()) return;
 		setInstruction("");
 		setGuidance(undefined);
-		setSize("1024x1024");
+		updateResolutionPreset("1024x1024");
 		setQuality("medium");
 		setOutputFormat("webp");
 	});
@@ -701,59 +792,63 @@ const MediaImageGenerationModal: Component = () => {
 							)}
 						</Show>
 					</div>
-					<div class="grid min-w-0 gap-3 sm:grid-cols-3">
+					<div class="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(78px,0.32fr)_minmax(78px,0.32fr)] gap-3">
 						<Select
-							id="ai-media-image-generation-size"
-							value={size()}
+							id="ai-media-image-generation-resolution"
+							value={resolutionPreset()}
 							onChange={(value) =>
-								setSize((value ?? "1024x1024") as MediaImageGenerationSize)
+								updateResolutionPreset(
+									(value ??
+										"1024x1024") as MediaImageGenerationResolutionPreset,
+								)
 							}
-							options={[
-								{
-									value: "1024x1024",
-									label: T()("ai.media.image.generate.size.option.square"),
-								},
-								{
-									value: "1536x1024",
-									label: T()("ai.media.image.generate.size.option.landscape"),
-								},
-								{
-									value: "1024x1536",
-									label: T()("ai.media.image.generate.size.option.portrait"),
-								},
-								{
-									value: "2048x1152",
-									label: T()("ai.media.image.generate.size.option.wide"),
-								},
-								{
-									value: "2048x2048",
-									label: T()(
-										"ai.media.image.generate.size.option.square.large",
-									),
-								},
-								{
-									value: "3840x2160",
-									label: T()("ai.media.image.generate.size.option.large.wide"),
-								},
-								{
-									value: "2160x3840",
-									label: T()(
-										"ai.media.image.generate.size.option.large.portrait",
-									),
-								},
-								{
-									value: "auto",
-									label: T()("ai.media.image.generate.size.option.auto"),
-								},
-							]}
-							name="ai-media-image-generation-size"
-							copy={{ label: T()("ai.media.image.generate.size.label") }}
+							options={resolutionPresets.map((option) => ({
+								value: option.value,
+								label: T()(option.label),
+							}))}
+							name="ai-media-image-generation-resolution"
+							copy={{
+								label: T()("ai.media.image.generate.resolution.label"),
+							}}
 							noClear
 							noMargin
 							hideOptionalText
-							small
 							errors={generationFieldError("size")}
 						/>
+						<Input
+							id="ai-media-image-generation-width"
+							name="ai-media-image-generation-width"
+							value={customWidth()}
+							onChange={setCustomWidth}
+							type="number"
+							min={16}
+							max={3840}
+							step={16}
+							disabled={!isCustomResolution()}
+							copy={{
+								label: T()("ai.media.image.generate.resolution.width"),
+							}}
+							noMargin
+							hideOptionalText
+						/>
+						<Input
+							id="ai-media-image-generation-height"
+							name="ai-media-image-generation-height"
+							value={customHeight()}
+							onChange={setCustomHeight}
+							type="number"
+							min={16}
+							max={3840}
+							step={16}
+							disabled={!isCustomResolution()}
+							copy={{
+								label: T()("ai.media.image.generate.resolution.height"),
+							}}
+							noMargin
+							hideOptionalText
+						/>
+					</div>
+					<div class="grid min-w-0 gap-3 sm:grid-cols-2">
 						<Select
 							id="ai-media-image-generation-quality"
 							value={quality()}
@@ -783,7 +878,6 @@ const MediaImageGenerationModal: Component = () => {
 							noClear
 							noMargin
 							hideOptionalText
-							small
 							errors={generationFieldError("quality")}
 						/>
 						<Select
@@ -813,7 +907,6 @@ const MediaImageGenerationModal: Component = () => {
 							noClear
 							noMargin
 							hideOptionalText
-							small
 							errors={generationFieldError("outputFormat")}
 						/>
 					</div>
@@ -876,10 +969,11 @@ const MediaImageGenerationModal: Component = () => {
 								theme="secondary"
 								size="medium"
 								classes="w-full min-w-0!"
-								loading={isLoading()}
-								disabled={!canGenerate()}
+								disabled={isLoading() || !canGenerate()}
 							>
-								{T()("ai.media.image.generate.modal.generate")}
+								{isLoading()
+									? T()("ai.media.image.generate.modal.generating")
+									: T()("ai.media.image.generate.modal.generate")}
 							</Button>
 						</div>
 					</form>
@@ -902,6 +996,18 @@ const MediaImageGenerationModal: Component = () => {
 										}
 									>
 										<span class="skeleton absolute inset-0 z-10 opacity-80" />
+										<div class="relative z-20 max-w-xs px-4 text-center">
+											<p class="text-sm font-medium text-title">
+												{T()(
+													"ai.media.image.generate.response.generating.title",
+												)}
+											</p>
+											<p class="mt-1 text-xs text-body">
+												{T()(
+													"ai.media.image.generate.response.generating.description",
+												)}
+											</p>
+										</div>
 									</Show>
 								}
 							>
@@ -916,6 +1022,20 @@ const MediaImageGenerationModal: Component = () => {
 							<Show when={isLoading() && selectedPreviewUrl()}>
 								<div class="absolute inset-0 z-20 bg-card-base/90">
 									<span class="skeleton absolute inset-0 opacity-80" />
+									<div class="relative z-10 flex h-full w-full items-center justify-center px-4 text-center">
+										<div class="max-w-xs">
+											<p class="text-sm font-medium text-title">
+												{T()(
+													"ai.media.image.generate.response.generating.title",
+												)}
+											</p>
+											<p class="mt-1 text-xs text-body">
+												{T()(
+													"ai.media.image.generate.response.generating.description",
+												)}
+											</p>
+										</div>
+									</div>
 								</div>
 							</Show>
 						</div>

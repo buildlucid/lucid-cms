@@ -3,6 +3,65 @@ import type { ControllerSchema } from "../types.js";
 
 const aiMaxBase64ImageLength = 8_000_000;
 const aiImageDetailSchema = z.enum(["low", "high", "auto"]).default("low");
+const mediaImageMaxEdgeLength = 3_840;
+const mediaImageMinPixels = 655_360;
+const mediaImageMaxPixels = 8_294_400;
+const mediaImageMaxAspectRatio = 3;
+const mediaImageSizeIncrement = 16;
+const mediaImageInvalidSizeMessage =
+	"Image resolution must be a preset or custom width and height.";
+
+const mediaImageCustomSizeSchema = z
+	.tuple([z.number(), z.number()])
+	.superRefine(([width, height], context) => {
+		const hasValidEdges =
+			Number.isInteger(width) &&
+			Number.isInteger(height) &&
+			width > 0 &&
+			height > 0;
+
+		if (!hasValidEdges) {
+			context.addIssue({
+				code: "custom",
+				message: "Image width and height must be positive whole pixels.",
+			});
+			return;
+		}
+
+		if (width > mediaImageMaxEdgeLength || height > mediaImageMaxEdgeLength) {
+			context.addIssue({
+				code: "custom",
+				message: `Image width and height must not exceed ${mediaImageMaxEdgeLength}px.`,
+			});
+		}
+
+		if (
+			width % mediaImageSizeIncrement !== 0 ||
+			height % mediaImageSizeIncrement !== 0
+		) {
+			context.addIssue({
+				code: "custom",
+				message: `Image width and height must be multiples of ${mediaImageSizeIncrement}px.`,
+			});
+		}
+
+		const longEdge = Math.max(width, height);
+		const shortEdge = Math.min(width, height);
+		if (longEdge / shortEdge > mediaImageMaxAspectRatio) {
+			context.addIssue({
+				code: "custom",
+				message: `Image long edge to short edge ratio must not exceed ${mediaImageMaxAspectRatio}:1.`,
+			});
+		}
+
+		const pixels = width * height;
+		if (pixels < mediaImageMinPixels || pixels > mediaImageMaxPixels) {
+			context.addIssue({
+				code: "custom",
+				message: `Image total pixels must be between ${mediaImageMinPixels} and ${mediaImageMaxPixels}.`,
+			});
+		}
+	});
 
 const localeSchema = z
 	.object({
@@ -200,16 +259,22 @@ export const controllerSchemas = {
 				generation: z
 					.object({
 						size: z
-							.enum([
-								"auto",
-								"1024x1024",
-								"1536x1024",
-								"1024x1536",
-								"2048x2048",
-								"2048x1152",
-								"3840x2160",
-								"2160x3840",
-							])
+							.union(
+								[
+									z.enum([
+										"auto",
+										"1024x1024",
+										"1536x1024",
+										"1024x1536",
+										"2048x2048",
+										"2048x1152",
+										"3840x2160",
+										"2160x3840",
+									]),
+									mediaImageCustomSizeSchema,
+								],
+								{ error: mediaImageInvalidSizeMessage },
+							)
 							.default("1024x1024"),
 						quality: z
 							.enum(["auto", "low", "medium", "high"])

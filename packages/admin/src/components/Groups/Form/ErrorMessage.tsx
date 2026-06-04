@@ -40,12 +40,12 @@ export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 				<div class="mt-2 flex flex-col gap-1">
 					<For each={fieldErrors()}>
 						{(error) => (
-							<a class="flex items-start text-sm" href={`#${props.id}`}>
+							<a class="flex min-w-0 items-start text-sm" href={`#${props.id}`}>
 								<FaSolidTriangleExclamation
 									size={16}
 									class="text-error-base mt-[3px] mr-2 shrink-0"
 								/>
-								<span>
+								<span class="min-w-0 break-words">
 									<Show when={typeof error.itemIndex === "number"}>
 										{`${T()("common.item")} ${Number(error.itemIndex) + 1}: `}
 									</Show>
@@ -57,12 +57,12 @@ export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 				</div>
 			</Show>
 			<Show when={fieldErrors().length === 0 && genericMessage()}>
-				<a class="mt-2 flex items-start text-sm" href={`#${props.id}`}>
+				<a class="mt-2 flex min-w-0 items-start text-sm" href={`#${props.id}`}>
 					<FaSolidTriangleExclamation
 						size={16}
-						class="text-error-base mt-[3px] mr-2"
+						class="text-error-base mt-[3px] mr-2 shrink-0"
 					/>
-					{genericMessage()}
+					<span class="min-w-0 break-words">{genericMessage()}</span>
 				</a>
 			</Show>
 		</>

@@ -35,6 +35,9 @@ export const Input: Component<{
 	required?: boolean;
 	minLength?: number;
 	maxLength?: number;
+	min?: number;
+	max?: number;
+	step?: number;
 	disabled?: boolean;
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
@@ -101,6 +104,9 @@ export const Input: Component<{
 					required={props.required}
 					minlength={props.minLength}
 					maxlength={props.maxLength}
+					min={props.min}
+					max={props.max}
+					step={props.step}
 					disabled={props.disabled}
 					onFocus={() => setInputFocus(true)}
 					onKeyUp={(e) => props.onKeyUp?.(e)}

@@ -140,7 +140,8 @@ export type MediaImageGenerateV1Request = {
 			| "2048x2048"
 			| "2048x1152"
 			| "3840x2160"
-			| "2160x3840";
+			| "2160x3840"
+			| [number, number];
 		quality: "auto" | "low" | "medium" | "high";
 		outputFormat: "webp" | "png" | "jpeg";
 	};
