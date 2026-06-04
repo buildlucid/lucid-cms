@@ -22,6 +22,7 @@ import {
 	Sidebar,
 } from "@/components/Groups/PageBuilder";
 import { ReleaseRequestSidebar } from "@/components/Groups/PageBuilder/Sidebar/ReleaseRequestSidebar";
+import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationModal";
 import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
@@ -370,6 +371,7 @@ const CollectionsDocumentsEditRoute: Component<{
 							navigationGuard: navigationGuard,
 						}}
 					/>
+					<MediaAltGenerationModal />
 				</PageBuilderStateProvider>
 			</Match>
 		</Switch>

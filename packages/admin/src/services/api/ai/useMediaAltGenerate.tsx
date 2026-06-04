@@ -4,9 +4,10 @@ import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
 interface Params {
+	signal?: AbortSignal;
+	shouldToast?: () => boolean;
 	body: {
 		instruction?: string;
-		guidance?: string;
 		previousResponses?: {
 			instruction?: string;
 			output: Record<string, string>;
@@ -77,6 +78,7 @@ export const mediaAltGenerateReq = (params: Params) => {
 		config: {
 			method: "POST",
 			body: params.body,
+			signal: params.signal,
 		},
 	});
 };
@@ -87,10 +89,13 @@ const useMediaAltGenerate = () => {
 		ResponseBody<MediaAltGenerateResponse>
 	>({
 		mutationFn: mediaAltGenerateReq,
-		getSuccessToast: () => ({
-			title: T()("toasts.ai.media.alt.generate.success.title"),
-			message: T()("toasts.ai.media.alt.generate.success.message"),
-		}),
+		getSuccessToast: (_data, params) =>
+			params.shouldToast?.() === false
+				? undefined
+				: {
+						title: T()("toasts.ai.media.alt.generate.success.title"),
+						message: T()("toasts.ai.media.alt.generate.success.message"),
+					},
 	});
 };
 

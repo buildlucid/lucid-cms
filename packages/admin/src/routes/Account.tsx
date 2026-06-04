@@ -3,6 +3,7 @@ import Alert from "@/components/Blocks/Alert";
 import { Account } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
+import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationModal";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -38,6 +39,7 @@ const AccountRoute: Component = () => {
 				),
 			}}
 		>
+			<MediaAltGenerationModal />
 			<Account />
 		</Wrapper>
 	);

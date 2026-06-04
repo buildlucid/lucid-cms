@@ -21,8 +21,14 @@ interface QueryParams {
 
 interface MutationWrapperProps<Params, Response> {
 	mutationFn: (_params: Params) => Promise<Response>;
-	getSuccessToast?: () => { title: string; message: string };
-	getErrorToast?: () => { title: string; message: string };
+	getSuccessToast?: (
+		_data: Response,
+		_params: Params,
+	) => { title: string; message: string } | undefined;
+	getErrorToast?: (
+		_error: unknown,
+		_params: Params,
+	) => { title: string; message: string } | undefined;
 	invalidates?: string[];
 	onSuccess?: (_data: Response, _params: Params) => void;
 	onError?: (_errors: ErrorResponse | undefined, _params: Params) => void;
@@ -87,12 +93,14 @@ const useMutationWrapper = <Params, Response>({
 		onSettled: (data, error, params) => {
 			if (data) {
 				if (getSuccessToast) {
-					const successToastData = getSuccessToast();
-					spawnToast({
-						title: successToastData.title,
-						message: successToastData.message,
-						status: "success",
-					});
+					const successToastData = getSuccessToast(data, params);
+					if (successToastData) {
+						spawnToast({
+							title: successToastData.title,
+							message: successToastData.message,
+							status: "success",
+						});
+					}
 				}
 				setErrors(undefined);
 				if (onSuccess) onSuccess(data, params);
@@ -103,12 +111,14 @@ const useMutationWrapper = <Params, Response>({
 				}
 			} else if (error) {
 				if (getErrorToast) {
-					const errorToast = getErrorToast();
-					spawnToast({
-						title: errorToast.title,
-						message: errorToast.message,
-						status: "error",
-					});
+					const errorToast = getErrorToast(error, params);
+					if (errorToast) {
+						spawnToast({
+							title: errorToast.title,
+							message: errorToast.message,
+							status: "error",
+						});
+					}
 				}
 				const errors = validateSetError(error);
 				setErrors(errors);

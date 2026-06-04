@@ -56,7 +56,6 @@ const mediaAltGenerateController = factory.createHandlers(
 			},
 		})(context, {
 			instruction: body.instruction,
-			guidance: body.guidance,
 			previousResponses: body.previousResponses,
 			image: body.image,
 			media: body.media,

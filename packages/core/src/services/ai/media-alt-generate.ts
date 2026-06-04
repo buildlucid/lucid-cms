@@ -15,7 +15,6 @@ const mediaAltGenerate: ServiceFn<
 	[
 		{
 			instruction?: string;
-			guidance?: string;
 			previousResponses?: {
 				instruction?: string;
 				output: Record<string, string>;
@@ -50,28 +49,6 @@ const mediaAltGenerate: ServiceFn<
 			type: "text",
 			role: "user-instruction",
 			value: props.instruction,
-		});
-	}
-
-	if (props.guidance) {
-		const guidance = context.config.ai.guidance.find(
-			(item) => item.key === props.guidance,
-		);
-		if (!guidance) {
-			return {
-				error: {
-					type: "basic",
-					status: 400,
-					message: copy("server:core.ai.guidance.not.found"),
-				},
-				data: undefined,
-			};
-		}
-
-		input.push({
-			type: "text",
-			role: "guidance",
-			value: guidance.instructions,
 		});
 	}
 

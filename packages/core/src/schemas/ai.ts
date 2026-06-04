@@ -114,7 +114,6 @@ export const controllerSchemas = {
 		body: z
 			.object({
 				instruction: z.string().trim().min(1).max(8_000).optional(),
-				guidance: z.string().trim().min(1).optional(),
 				previousResponses: z
 					.array(
 						z

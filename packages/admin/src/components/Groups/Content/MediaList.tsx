@@ -3,6 +3,7 @@ import {
 	DragDropSensors,
 	type DragEventHandler,
 } from "@thisbeyond/solid-dnd";
+import type { Media } from "@types";
 import classNames from "classnames";
 import {
 	type Accessor,
@@ -44,6 +45,7 @@ import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel
 import ViewMediaPanel from "@/components/Panels/Media/ViewMediaPanel";
 import ViewShareLinksPanel from "@/components/Panels/Media/ViewShareLinksPanel";
 import { Permissions } from "@/constants/permissions";
+import useMediaAltGeneration from "@/hooks/ai/useMediaAltGeneration";
 import useRowTarget from "@/hooks/useRowTarget";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
@@ -81,6 +83,7 @@ export const MediaList: Component<{
 			deleteAllShareLinks: false,
 		},
 	});
+	const mediaAltGeneration = useMediaAltGeneration();
 	const [isDragging, setIsDragging] = createSignal(false);
 	const [getMoveModalParams, setMoveModalParams] =
 		createSignal<MoveToFolderParams>({
@@ -119,6 +122,10 @@ export const MediaList: Component<{
 		},
 	});
 
+	// ----------------------------------
+	// Mutations
+	const updateMediaAlt = api.media.useUpdateSingle();
+
 	// ----------------------------------------
 	// Functions
 	const onDragEnd: DragEventHandler = (e) => {
@@ -147,6 +154,31 @@ export const MediaList: Component<{
 	};
 	const openCreateMediaPanel = () => {
 		props.state.setOpenCreateMediaPanel(true);
+	};
+	const openAltGeneration = (item: Media) => {
+		mediaAltGeneration.open({
+			image: () => ({
+				url: item.url,
+				filename: item.fileName ?? item.key,
+			}),
+			media: () => ({
+				id: item.id,
+				name: item.title,
+				alt: item.alt,
+			}),
+			locales: () => contentLocaleStore.get.locales,
+			setAlt: async (value) => {
+				const alt = typeof value === "function" ? value(item.alt ?? []) : value;
+
+				await updateMediaAlt.action.mutateAsync({
+					id: item.id,
+					body: {
+						alt,
+					},
+				});
+			},
+			disabled: () => updateMediaAlt.action.isPending,
+		});
 	};
 
 	// ----------------------------------------
@@ -322,6 +354,7 @@ export const MediaList: Component<{
 								contentLocale={contentLocale()}
 								showingDeleted={props.state.showingDeleted}
 								isDragging={isDragging}
+								onGenerateAlt={openAltGeneration}
 							/>
 						)}
 					</For>

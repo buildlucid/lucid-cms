@@ -43,7 +43,7 @@ const CreateUpdateProfilePicturePanel: Component<
 	const [uploadLoading, setUploadLoading] = createSignal(false);
 	const [uploadProgress, setUploadProgress] = createSignal(0);
 	const createMedia = useCreateMedia();
-
+	const profileAltGeneration = useMediaAltGeneration();
 	const MediaFile = useSingleFileUpload({
 		id: "file",
 		disableRemoveCurrent: true,
@@ -149,7 +149,7 @@ const CreateUpdateProfilePicturePanel: Component<
 
 		return null;
 	});
-	const profileAltGeneration = useMediaAltGeneration({
+	const ProfileAltGenerationButton = profileAltGeneration.createActionButton({
 		image: profileAltImage,
 		media: () => ({
 			id: profilePictureMedia()?.id,
@@ -160,8 +160,6 @@ const CreateUpdateProfilePicturePanel: Component<
 		setAlt: createMedia.setAlt,
 		disabled: coreMutateIsLoading,
 	});
-	const ProfileAltGenerationButton = profileAltGeneration.ActionButton;
-	const ProfileAltGenerationModal = profileAltGeneration.Modal;
 	const mutateIsLoading = createMemo(() => {
 		return coreMutateIsLoading() || profileAltGeneration.isLoading();
 	});
@@ -375,7 +373,6 @@ const CreateUpdateProfilePicturePanel: Component<
 			{(lang) => (
 				<>
 					<MediaFile.Render />
-					<ProfileAltGenerationModal />
 					<div class="mt-6 border-b border-border mb-4">
 						<div class="flex flex-row flex-wrap items-center gap-4">
 							<button

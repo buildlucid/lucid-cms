@@ -7,6 +7,7 @@ type ImageSource = {
 interface PrepareAiImageOptions {
 	maxEdge?: number;
 	quality?: number;
+	signal?: AbortSignal;
 }
 
 export type PreparedAiImage = {
@@ -56,12 +57,13 @@ const canvasToWebp = (canvas: HTMLCanvasElement, quality: number) =>
 		);
 	});
 
-const getImageBlob = async (source: ImageSource) => {
+const getImageBlob = async (source: ImageSource, signal?: AbortSignal) => {
 	if (source.file) return source.file;
 	if (!source.url) throw new Error("No image selected.");
 
 	const response = await fetch(source.url, {
 		credentials: "include",
+		signal,
 	});
 	if (!response.ok) throw new Error("Unable to fetch the selected image.");
 
@@ -74,8 +76,10 @@ export const prepareAiImage = async (
 ): Promise<PreparedAiImage> => {
 	const maxEdge = options.maxEdge ?? 1024;
 	const quality = options.quality ?? 0.82;
-	const blob = await getImageBlob(source);
+	const blob = await getImageBlob(source, options.signal);
+	if (options.signal?.aborted) throw new DOMException("Aborted", "AbortError");
 	const image = await loadImage(blob);
+	if (options.signal?.aborted) throw new DOMException("Aborted", "AbortError");
 	const sourceWidth = image.naturalWidth || image.width;
 	const sourceHeight = image.naturalHeight || image.height;
 	if (sourceWidth <= 0 || sourceHeight <= 0) {
@@ -93,8 +97,10 @@ export const prepareAiImage = async (
 	if (!context) throw new Error("Unable to prepare the selected image.");
 
 	context.drawImage(image, 0, 0, width, height);
+	if (options.signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
 	const webp = await canvasToWebp(canvas, quality);
+	if (options.signal?.aborted) throw new DOMException("Aborted", "AbortError");
 	const dataUrl = await blobToDataUrl(webp);
 
 	return {

@@ -96,7 +96,7 @@ export type MediaAltGenerateV1Request = CmsAiGenerateBaseRequest<
 		key: "media.alt.generate";
 		version: "v1";
 	},
-	| CmsAiGenerateRequestInputText<"user-instruction" | "guidance">
+	| CmsAiGenerateRequestInputText<"user-instruction">
 	| CmsAiGenerateRequestInputImage<"source-image">,
 	{
 		locale: {

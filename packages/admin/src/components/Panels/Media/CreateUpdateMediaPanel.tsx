@@ -88,6 +88,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		errors: () => mutateErrors(),
 		noMargin: false,
 	});
+	const mediaAltGeneration = useMediaAltGeneration();
 
 	// ---------------------------------
 	// Memos
@@ -355,7 +356,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	const targetState = createMemo(() => {
 		return targetAction()?.state;
 	});
-	const mediaAltGeneration = useMediaAltGeneration({
+
+	const MediaAltGenerationButton = mediaAltGeneration.createActionButton({
 		image: mediaAltImage,
 		media: () => ({
 			id: media.data?.data.id,
@@ -368,7 +370,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		},
 		disabled: coreMutateIsLoading,
 	});
-	const posterAltGeneration = useMediaAltGeneration({
+
+	const PosterAltGenerationButton = mediaAltGeneration.createActionButton({
 		image: posterAltImage,
 		media: () => ({
 			id: media.data?.data.poster?.id,
@@ -379,17 +382,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		setAlt: setPosterAlt,
 		disabled: coreMutateIsLoading,
 	});
-	const MediaAltGenerationButton = mediaAltGeneration.ActionButton;
-	const MediaAltGenerationModal = mediaAltGeneration.Modal;
-	const PosterAltGenerationButton = posterAltGeneration.ActionButton;
-	const PosterAltGenerationModal = posterAltGeneration.Modal;
+
 	const mutateIsLoading = createMemo(() => {
-		return (
-			coreMutateIsLoading() ||
-			mediaAltGeneration.isLoading() ||
-			posterAltGeneration.isLoading()
-		);
+		return coreMutateIsLoading() || mediaAltGeneration.isLoading();
 	});
+
 	const updateData = createMemo(() => {
 		const state = targetState();
 		const { changed, data } = helpers.updateData(
@@ -448,6 +445,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			data: data,
 		};
 	});
+
 	const mutateIsDisabled = createMemo(() => {
 		if (panelMode() === "create") {
 			return MediaFile.getFile() === null;
@@ -756,8 +754,6 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			{(lang) => (
 				<>
 					<MediaFile.Render />
-					<MediaAltGenerationModal />
-					<PosterAltGenerationModal />
 					<PanelTabs
 						items={visibleTabs().map((tab) => ({
 							value: tab,
@@ -1056,7 +1052,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											errors={getErrorObject(posterAltError(index()))}
 											rows={3}
 											rightSlot={
-												<Show when={posterAltGeneration.hasPermission()}>
+												<Show when={mediaAltGeneration.hasPermission()}>
 													<PosterAltGenerationButton />
 												</Show>
 											}

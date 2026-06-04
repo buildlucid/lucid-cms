@@ -19,6 +19,7 @@ interface RequestConfig<Data> {
 	method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
 	body?: Data | FormData;
 	headers?: Record<string, string>;
+	signal?: AbortSignal;
 }
 
 export const getFetchURL = (url: string, query?: QueryBuilderProps): string => {
@@ -115,6 +116,7 @@ const request = async <ResponseBody, Data = unknown>(
 		credentials: "include",
 		body: body,
 		headers: headers,
+		signal: params.config?.signal,
 	});
 
 	return handleResponse(params, fetchRes);

@@ -32,6 +32,7 @@ interface MediaCardProps {
 	contentLocale?: string;
 	showingDeleted?: Accessor<boolean>;
 	isDragging: Accessor<boolean>;
+	onGenerateAlt?: (_media: Media) => void;
 }
 
 export const MediaCardLoading: Component = () => {
@@ -69,6 +70,9 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	});
 	const hasDeletePermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.MediaDelete]).all;
+	});
+	const hasAiAltGeneratePermission = createMemo(() => {
+		return userStore.get.hasPermission([Permissions.AiAltGenerate]).all;
 	});
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
@@ -186,6 +190,20 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							permission: hasUpdatePermission(),
 							hide: props.showingDeleted?.(),
 							theme: "error",
+						},
+						{
+							label: T()("ai.media.alt.generate.action"),
+							type: "button",
+							onClick: () => {
+								props.onGenerateAlt?.(props.media);
+							},
+							permission: true,
+							hide:
+								!props.onGenerateAlt ||
+								props.showingDeleted?.() ||
+								props.media.type !== "image" ||
+								!hasUpdatePermission() ||
+								!hasAiAltGeneratePermission(),
 						},
 						{
 							label: T()("media.processed.clear.action"),
