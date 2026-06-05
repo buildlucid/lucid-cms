@@ -52,7 +52,6 @@ export type MediaImageGenerateResponse = {
 	output: {
 		id: string;
 		url: string;
-		urlExpiresAt: string;
 		storageKey: string;
 		byteSize: number;
 		mimeType: string;

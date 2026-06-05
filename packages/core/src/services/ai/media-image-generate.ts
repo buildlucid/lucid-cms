@@ -1,4 +1,5 @@
 import type { MediaImageGenerateResponse } from "@lucidcms/types";
+import z from "zod";
 import { copy } from "../../libs/i18n/index.js";
 import type { MediaImageGenerateV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
@@ -18,6 +19,20 @@ const imageGuidanceInstructions = {
 	cinematic:
 		"Create a cinematic image with dramatic composition, atmospheric lighting, and strong visual storytelling.",
 } as const;
+
+const mediaImageOutputSchema = z
+	.object({
+		id: z.string(),
+		url: z.string(),
+		storageKey: z.string(),
+		byteSize: z.number().int().nonnegative(),
+		mimeType: z.string(),
+		extension: z.string(),
+		size: z.string(),
+		quality: z.string(),
+		outputFormat: z.string(),
+	})
+	.strict();
 
 const mediaImageGenerate: ServiceFn<
 	[
@@ -115,14 +130,27 @@ const mediaImageGenerate: ServiceFn<
 	});
 	if (generateRes.error) return generateRes;
 
+	const outputParse = mediaImageOutputSchema.safeParse(
+		generateRes.data.json.data.output,
+	);
+	if (!outputParse.success) {
+		return {
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy("server:core.routes.ai.generate.error.message"),
+			},
+			data: undefined,
+		};
+	}
+
 	const response: MediaImageGenerateResponse = {
 		...generateRes.data.json.data,
 		feature: {
 			key: "media.image.generate",
 			version: "v1",
 		},
-		output: generateRes.data.json.data
-			.output as MediaImageGenerateResponse["output"],
+		output: outputParse.data,
 	};
 
 	const storeRes = await storeGeneration(context, {

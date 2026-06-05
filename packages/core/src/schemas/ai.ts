@@ -305,7 +305,6 @@ export const controllerSchemas = {
 				.object({
 					id: z.string(),
 					url: z.string(),
-					urlExpiresAt: z.string(),
 					storageKey: z.string(),
 					byteSize: z.number().int().nonnegative(),
 					mimeType: z.string(),

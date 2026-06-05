@@ -240,7 +240,10 @@ const MediaImageGenerationModal: Component = () => {
 
 		return resolutionPreset() as MediaImageGenerationPresetSize;
 	});
-	const selectedPreviewUrl = createMemo(() => selectedGeneration()?.output.url);
+	const selectedPreviewUrl = createMemo(() => {
+		const generation = selectedGeneration();
+		return generation ? generation.output.url : undefined;
+	});
 	const sessionCost = createMemo(() => {
 		const firstGeneration = generations()[0];
 		if (!firstGeneration) return undefined;

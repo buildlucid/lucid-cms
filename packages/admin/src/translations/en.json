@@ -419,7 +419,7 @@
 	"ai.media.image.generate.response.generating.description": "This can take a little while. Keep this modal open while Lucid prepares the result.",
 	"ai.media.image.generate.response.item.label": "Generation {{count}}",
 	"ai.media.image.generate.response.retry": "Retry",
-	"ai.media.image.generate.accept.download.failed": "The generated image could not be downloaded. It may have expired.",
+	"ai.media.image.generate.accept.download.failed": "The generated image could not be downloaded.",
 	"ai.generation.loading": "Generating",
 	"ai.generation.response.empty": "The response will appear here.",
 	"ai.generation.instruction.label": "Instruction",
