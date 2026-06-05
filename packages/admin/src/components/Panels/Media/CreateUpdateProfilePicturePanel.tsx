@@ -321,8 +321,8 @@ const CreateUpdateProfilePicturePanel: Component<
 		if (profilePicture) {
 			MediaFile.setCurrentFile({
 				name: profilePicture.fileName ?? profilePicture.key,
-				url: `${profilePicture.url}?preset=thumbnail&format=webp`,
-				focalPointUrl: profilePicture.url,
+				url: `${profilePicture.url}?preset=thumbnail-medium&format=webp`,
+				focalPointUrl: `${profilePicture.url}?preset=thumbnail-large&format=webp`,
 				type: profilePicture.type,
 				width: profilePicture.meta.width,
 				height: profilePicture.meta.height,

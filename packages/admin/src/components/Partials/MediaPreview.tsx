@@ -19,9 +19,14 @@ interface MediaPreviewProps {
 	richPreview?: boolean;
 	alt: string | null;
 	imageFit?: "cover" | "contain";
+	preset?: "thumbnail-small" | "thumbnail-medium" | "thumbnail-large";
 }
 
 const MediaPreview: Component<MediaPreviewProps> = (props) => {
+	// -------------------------------
+	// Memos
+	const preset = () => props.preset ?? "thumbnail-small";
+
 	// -------------------------------
 	// Render
 	return (
@@ -30,7 +35,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 				<Image
 					classes={"rounded-t-md backface-hidden z-10 relative"}
 					fit={props.imageFit}
-					src={`${props.media.url}?preset=thumbnail&format=webp`}
+					src={`${props.media.url}?preset=${preset()}&format=webp`}
 					alt={props.alt || ""}
 					loading="lazy"
 				/>
@@ -71,7 +76,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 									<Image
 										classes={"z-10 relative backface-hidden"}
 										fit={props.imageFit}
-										src={`${poster().url}?preset=thumbnail&format=webp`}
+										src={`${poster().url}?preset=${preset()}&format=webp`}
 										alt={props.alt || ""}
 										loading="lazy"
 									/>

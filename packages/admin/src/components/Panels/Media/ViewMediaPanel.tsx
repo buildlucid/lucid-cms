@@ -137,6 +137,7 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 										""
 									}
 									imageFit="contain"
+									preset="thumbnail-medium"
 								/>
 							)}
 						</Show>

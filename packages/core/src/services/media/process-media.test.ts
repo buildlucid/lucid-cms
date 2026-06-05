@@ -55,7 +55,7 @@ describe("media process service", () => {
 					media: {
 						images: {
 							presets: {
-								thumbnail: {
+								"thumbnail-small": {
 									width: 400,
 								},
 							},
@@ -67,7 +67,7 @@ describe("media process service", () => {
 			{
 				key: "public/123e4567e89b12d3a456426614174000",
 				body: {
-					preset: "thumbnail",
+					preset: "thumbnail-small",
 					format: "webp",
 				},
 			},
@@ -75,7 +75,7 @@ describe("media process service", () => {
 
 		expect(response.error).toBeUndefined();
 		expect(response.data?.url).toBe(
-			"https://example.com/lucid/cdn/public/123e4567e89b12d3a456426614174000/screenshot-2026-03-26-at-15.webp?preset=thumbnail&format=webp",
+			"https://example.com/lucid/cdn/public/123e4567e89b12d3a456426614174000/screenshot-2026-03-26-at-15.webp?preset=thumbnail-small&format=webp",
 		);
 	});
 
@@ -90,7 +90,7 @@ describe("media process service", () => {
 			{
 				key: "public/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
 				body: {
-					preset: "thumbnail",
+					preset: "thumbnail-small",
 				},
 			},
 		);

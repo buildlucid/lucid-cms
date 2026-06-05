@@ -860,7 +860,7 @@ export const controllerSchemas = {
 				url: z.string().meta({
 					description: "The URL of the media",
 					example:
-						"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/placeholder-image?preset=thumbnail&format=webp",
+						"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/placeholder-image?preset=thumbnail-small&format=webp",
 				}),
 			}),
 		},

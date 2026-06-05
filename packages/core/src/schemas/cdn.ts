@@ -11,7 +11,7 @@ export const controllerSchemas = {
 					.trim()
 					.meta({
 						description: "The preset to use for the image",
-						example: "thumbnail",
+						example: "thumbnail-small",
 					})
 					.optional(),
 				format: z

@@ -55,8 +55,18 @@ export const defaultConfig: Partial<LucidConfig> = {
 		},
 		images: {
 			presets: {
-				thumbnail: {
+				"thumbnail-small": {
 					height: 200,
+					format: "webp",
+					quality: 80,
+				},
+				"thumbnail-medium": {
+					height: 500,
+					format: "webp",
+					quality: 80,
+				},
+				"thumbnail-large": {
+					height: 1000,
 					format: "webp",
 					quality: 80,
 				},

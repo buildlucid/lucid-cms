@@ -178,8 +178,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		) {
 			return {
 				name: T()("media.poster.label"),
-				url: `${media.data?.data.poster?.url}?preset=thumbnail&format=webp`,
-				focalPointUrl: media.data?.data.poster?.url,
+				url: `${media.data?.data.poster?.url}?preset=thumbnail-medium&format=webp`,
+				focalPointUrl: `${media.data?.data.poster?.url}?preset=thumbnail-large&format=webp`,
 				isNew: false,
 			};
 		}
@@ -714,10 +714,12 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				name: media.data.data.key,
 				url: media.data?.data.url
 					? media.data?.data.type === "image"
-						? `${media.data.data.url}?preset=thumbnail&format=webp`
+						? `${media.data.data.url}?preset=thumbnail-medium&format=webp`
 						: media.data.data.url
 					: undefined,
-				focalPointUrl: media.data?.data.url,
+				focalPointUrl: media.data?.data.url
+					? `${media.data.data.url}?preset=thumbnail-large&format=webp`
+					: undefined,
 				type: media.data?.data.type || undefined,
 				width: media.data?.data.meta.width,
 				height: media.data?.data.meta.height,
@@ -727,8 +729,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			if (media.data?.data.poster) {
 				PosterFile.setCurrentFile({
 					name: T()("media.poster.label"),
-					url: `${media.data.data.poster.url}?preset=thumbnail&format=webp`,
-					focalPointUrl: media.data.data.poster.url,
+					url: `${media.data.data.poster.url}?preset=thumbnail-medium&format=webp`,
+					focalPointUrl: `${media.data.data.poster.url}?preset=thumbnail-large&format=webp`,
 					type: "image",
 					width: media.data.data.poster.meta.width,
 					height: media.data.data.poster.meta.height,

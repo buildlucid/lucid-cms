@@ -322,6 +322,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										alt={mediaAlt() || ""}
 										richPreview={true}
 										imageFit="contain"
+										preset="thumbnail-medium"
 									/>
 								</div>
 							</div>
@@ -564,6 +565,7 @@ const MediaSortableItem: Component<{
 						alt={props.alt}
 						richPreview={true}
 						imageFit="contain"
+						preset="thumbnail-medium"
 					/>
 				</div>
 			</div>

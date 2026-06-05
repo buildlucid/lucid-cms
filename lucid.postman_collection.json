@@ -3141,7 +3141,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/cdn/public/ki0ezi-screenshot-2025-05-01-at-19.png?preset=thumbnail",
+							"raw": "{{BASE_URL}}/cdn/public/ki0ezi-screenshot-2025-05-01-at-19.png?preset=thumbnail-small",
 							"host": ["{{BASE_URL}}"],
 							"path": [
 								"cdn",
@@ -3156,7 +3156,7 @@
 								},
 								{
 									"key": "preset",
-									"value": "thumbnail"
+									"value": "thumbnail-small"
 								}
 							]
 						}

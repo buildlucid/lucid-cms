@@ -80,7 +80,7 @@ const media = await client.media.getMultiple({
 const processed = await client.media.process({
     key: "public/hero.jpg",
     body: {
-        preset: "thumbnail", 
+        preset: "thumbnail-small",
         format: "webp",
     },
 });
