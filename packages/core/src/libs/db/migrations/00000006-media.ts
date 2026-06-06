@@ -53,6 +53,9 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.references("lucid_media.id").onDelete("set null"),
 				)
 				.addColumn("e_tag", adapter.getDataType("text"))
+				.addColumn("origin", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
 				.addColumn("public", adapter.getDataType("boolean"), (col) =>
 					col
 						.notNull()

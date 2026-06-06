@@ -16,6 +16,8 @@ interface Params {
 		base64?: string | null;
 		isDark?: boolean;
 		isLight?: boolean;
+		origin?: Media["origin"];
+		aiGenerationRequestId?: string;
 		title?: {
 			localeCode: string;
 			value: string | null;

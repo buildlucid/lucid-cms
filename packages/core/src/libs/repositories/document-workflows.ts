@@ -90,6 +90,7 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 											.select((mediaEb) => [
 												"lucid_media.id",
 												"lucid_media.key",
+												"lucid_media.origin",
 												"lucid_media.type",
 												"lucid_media.mime_type",
 												"lucid_media.file_extension",
@@ -211,6 +212,7 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 											.select((mediaEb) => [
 												"lucid_media.id",
 												"lucid_media.key",
+												"lucid_media.origin",
 												"lucid_media.type",
 												"lucid_media.mime_type",
 												"lucid_media.file_extension",

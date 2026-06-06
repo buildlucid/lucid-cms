@@ -42,6 +42,7 @@ export type {
 	MediaImageGenerateCompletionStatus,
 	MediaImageGenerateResponse,
 	MediaImageGenerateStatus,
+	MediaOrigin,
 	MediaPoster,
 	MediaShareLink,
 	MediaType,

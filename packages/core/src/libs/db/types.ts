@@ -9,6 +9,7 @@ import type {
 } from "kysely";
 import type constants from "../../constants/constants.js";
 import type { OptionsName } from "../../schemas/options.js";
+import type { MediaOrigin } from "../../types/response.js";
 import type {
 	SecurityAuditAction,
 	SecurityAuditRoleSnapshot,
@@ -600,6 +601,8 @@ export interface LucidMedia {
 	folder_id: number | null;
 	poster_id: number | null;
 	e_tag: string | null;
+	origin: MediaOrigin;
+	ai_generation_id: number | null;
 	public: BooleanInt;
 	type: string;
 	mime_type: string;

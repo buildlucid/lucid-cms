@@ -78,6 +78,10 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 	const updateMedia = async (
 		file: File | null,
 		imageMeta: ImageMeta | null,
+		options?: {
+			origin?: Media["origin"];
+			aiGenerationRequestId?: string;
+		},
 	): Promise<boolean> => {
 		if (!id()) return false;
 
@@ -97,6 +101,8 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				alt: getAlt(),
 				description: getDescription(),
 				summary: getSummary(),
+				origin: file ? (options?.origin ?? "human") : options?.origin,
+				aiGenerationRequestId: options?.aiGenerationRequestId,
 				folderId: getFolderId() ?? null,
 				width: imageMeta?.width,
 				height: imageMeta?.height,

@@ -388,6 +388,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 							.select([
 								"lucid_media.id",
 								"lucid_media.key",
+								"lucid_media.origin",
 								"lucid_media.type",
 								"lucid_media.mime_type",
 								"lucid_media.file_extension",
@@ -422,6 +423,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 							.select([
 								"lucid_media.id",
 								"lucid_media.key",
+								"lucid_media.origin",
 								"lucid_media.type",
 								"lucid_media.mime_type",
 								"lucid_media.file_extension",
@@ -649,6 +651,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 														.select((mediaEb) => [
 															"lucid_media.id",
 															"lucid_media.key",
+															"lucid_media.origin",
 															"lucid_media.type",
 															"lucid_media.mime_type",
 															"lucid_media.file_extension",
@@ -738,6 +741,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								.select([
 									"lucid_media.id",
 									"lucid_media.key",
+									"lucid_media.origin",
 									"lucid_media.type",
 									"lucid_media.mime_type",
 									"lucid_media.file_extension",
@@ -772,6 +776,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								.select([
 									"lucid_media.id",
 									"lucid_media.key",
+									"lucid_media.origin",
 									"lucid_media.type",
 									"lucid_media.mime_type",
 									"lucid_media.file_extension",
@@ -1041,6 +1046,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								.select([
 									"lucid_media.id",
 									"lucid_media.key",
+									"lucid_media.origin",
 									"lucid_media.type",
 									"lucid_media.mime_type",
 									"lucid_media.file_extension",
@@ -1075,6 +1081,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								.select([
 									"lucid_media.id",
 									"lucid_media.key",
+									"lucid_media.origin",
 									"lucid_media.type",
 									"lucid_media.mime_type",
 									"lucid_media.file_extension",

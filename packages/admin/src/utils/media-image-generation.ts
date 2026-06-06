@@ -127,6 +127,7 @@ export type MediaImageGenerationGuidanceKey =
 
 export type MediaImageGenerationCandidate = {
 	id: string;
+	requestId: string;
 	instruction: string;
 	guidance?: MediaImageGenerationGuidanceKey;
 	sourceLabel?: string;

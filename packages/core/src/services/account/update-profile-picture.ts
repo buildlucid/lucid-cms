@@ -1,5 +1,6 @@
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
+import type { MediaOrigin } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 
@@ -22,6 +23,8 @@ const updateProfilePicture: ServiceFn<
 			base64?: string | null;
 			isDark?: boolean;
 			isLight?: boolean;
+			origin?: MediaOrigin;
+			aiGenerationRequestId?: string;
 			title?: {
 				localeCode: string;
 				value: string | null;
@@ -92,6 +95,8 @@ const updateProfilePicture: ServiceFn<
 			base64: data.base64,
 			isDark: data.isDark,
 			isLight: data.isLight,
+			origin: data.origin ?? (data.key !== undefined ? "human" : undefined),
+			aiGenerationRequestId: data.aiGenerationRequestId,
 			allowedType: "image",
 			userId: data.actorUserId,
 		});
@@ -148,6 +153,8 @@ const updateProfilePicture: ServiceFn<
 		base64: data.base64,
 		isDark: data.isDark,
 		isLight: data.isLight,
+		origin: data.origin ?? "human",
+		aiGenerationRequestId: data.aiGenerationRequestId,
 		title: data.title || [],
 		alt: data.alt || [],
 		folderId: null,

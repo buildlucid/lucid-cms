@@ -100,7 +100,8 @@ export type MediaGetMultipleQuery = {
 			| "extension"
 			| "isDeleted"
 			| "deletedBy"
-			| "public",
+			| "public"
+			| "origin",
 			FilterObject
 		>
 	>;

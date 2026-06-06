@@ -24,6 +24,8 @@ interface Params {
 			localeCode: string | null;
 			value: string | null;
 		}>;
+		origin?: Media["origin"];
+		aiGenerationRequestId?: string;
 		folderId?: number | null;
 		width?: number | null;
 		height?: number | null;

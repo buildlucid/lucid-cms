@@ -60,6 +60,19 @@ const Migration00000011: MigrationFn = (adapter: DatabaseAdapter) => {
 				.on("lucid_ai_generations")
 				.columns(["user_id", "created_at"])
 				.execute();
+
+			await db.schema
+				.alterTable("lucid_media")
+				.addColumn("ai_generation_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_ai_generations.id").onDelete("set null"),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_media_ai_generation_id")
+				.on("lucid_media")
+				.column("ai_generation_id")
+				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},
 	};

@@ -31,6 +31,7 @@ import useMediaAltGeneration from "@/hooks/ai/useMediaAltGeneration";
 import useMediaImageGeneration from "@/hooks/ai/useMediaImageGeneration";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload";
 import api from "@/services/api";
+import type { MediaImageGenerationTarget } from "@/store/aiModalsStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
@@ -421,10 +422,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		setAlt: setPosterAlt,
 		disabled: coreMutateIsLoading,
 	});
-	const posterImageGenerationTarget = {
+	const posterImageGenerationTarget: MediaImageGenerationTarget = {
 		image: posterImageGenerationSource,
-		setFile: (file: File) => {
+		setFile: (file, meta) => {
 			PosterFile.setGetFile(file);
+			PosterFile.setFileProvenance(meta);
 			PosterFile.setGetRemovedCurrent(false);
 			PosterFile.setFocalPoint(null);
 			setUploadErrors(undefined);
@@ -618,6 +620,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			public: targetState()?.public() ?? true,
 			isHidden: true,
 			focalPoint: PosterFile.getFocalPoint() ?? undefined,
+			origin: PosterFile.getFileProvenance()?.origin,
+			aiGenerationRequestId:
+				PosterFile.getFileProvenance()?.aiGenerationRequestId,
 		});
 
 		return poster?.id ?? null;
@@ -662,6 +667,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						currentMediaType() === "image"
 							? (MediaFile.getFocalPoint() ?? undefined)
 							: undefined,
+					origin: MediaFile.getFileProvenance()?.origin,
+					aiGenerationRequestId:
+						MediaFile.getFileProvenance()?.aiGenerationRequestId,
 				},
 			);
 
@@ -684,6 +692,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			const success = await updateMedia?.updateMedia(
 				MediaFile.getFile(),
 				imageMeta,
+				MediaFile.getFileProvenance(),
 			);
 
 			if (!success) return;

@@ -49,6 +49,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				z.object({
 					id: z.number(),
 					key: z.string(),
+					origin: z.enum(["human", "ai_generated", "ai_modified"]),
 					folder_id: z.number().nullable(),
 					e_tag: z.string().nullable(),
 					type: z.string(),
@@ -386,6 +387,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						.select((mediaEb) => [
 							"lucid_media.id",
 							"lucid_media.key",
+							"lucid_media.origin",
 							"lucid_media.folder_id",
 							"lucid_media.e_tag",
 							"lucid_media.type",
@@ -501,6 +503,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 							.select((mediaEb) => [
 								"lucid_media.id",
 								"lucid_media.key",
+								"lucid_media.origin",
 								"lucid_media.folder_id",
 								"lucid_media.e_tag",
 								"lucid_media.type",
@@ -690,6 +693,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									.select((mediaEb) => [
 										"lucid_media.id",
 										"lucid_media.key",
+										"lucid_media.origin",
 										"lucid_media.folder_id",
 										"lucid_media.e_tag",
 										"lucid_media.type",
@@ -831,6 +835,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									.select((mediaEb) => [
 										"lucid_media.id",
 										"lucid_media.key",
+										"lucid_media.origin",
 										"lucid_media.type",
 										"lucid_media.mime_type",
 										"lucid_media.file_extension",
@@ -943,6 +948,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									.select((mediaEb) => [
 										"lucid_media.id",
 										"lucid_media.key",
+										"lucid_media.origin",
 										"lucid_media.type",
 										"lucid_media.mime_type",
 										"lucid_media.file_extension",

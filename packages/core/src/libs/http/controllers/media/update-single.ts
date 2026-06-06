@@ -73,6 +73,8 @@ const updateSingleController = factory.createHandlers(
 			isLight: body.isLight,
 			isDeleted: body.isDeleted,
 			posterId: body.posterId,
+			origin: body.origin,
+			aiGenerationRequestId: body.aiGenerationRequestId,
 			userId: c.get("auth").id,
 		});
 		if (updateMedia.error) throw new LucidAPIError(updateMedia.error);

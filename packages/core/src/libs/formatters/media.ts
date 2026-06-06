@@ -2,6 +2,7 @@ import type { BooleanInt } from "../../libs/db/types.js";
 import type {
 	Media,
 	MediaEmbed,
+	MediaOrigin,
 	MediaPoster,
 	MediaType,
 } from "../../types/response.js";
@@ -14,6 +15,7 @@ export interface MediaPropsT {
 	key: string;
 	poster_id?: number | null;
 	e_tag: string | null;
+	origin: MediaOrigin;
 	type: string;
 	mime_type: string;
 	file_extension: string;
@@ -48,6 +50,7 @@ export interface MediaPropsT {
 export interface MediaPosterPropsT {
 	id: number;
 	key: string;
+	origin: MediaOrigin;
 	type: string;
 	mime_type: string;
 	file_extension: string;
@@ -121,6 +124,7 @@ const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
 		key: props.media.key,
 		fileName: props.media.file_name,
 		folderId: props.media.folder_id,
+		origin: props.media.origin,
 		url: createMediaUrl({
 			key: props.media.key,
 			host: props.host,
@@ -203,6 +207,7 @@ const formatEmbed = (props: {
 			extension: props.poster.file_extension,
 		}),
 		fileName: props.poster.file_name,
+		origin: props.poster.origin,
 		type: props.poster.type as MediaType,
 		title:
 			props.poster.translations?.map((t) => ({

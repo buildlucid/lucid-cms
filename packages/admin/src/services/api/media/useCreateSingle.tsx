@@ -21,6 +21,8 @@ interface Params {
 		localeCode: string | null;
 		value: string | null;
 	}>;
+	origin: Media["origin"];
+	aiGenerationRequestId?: string;
 	folderId?: number | null;
 	posterId?: number | null;
 	isHidden?: boolean;

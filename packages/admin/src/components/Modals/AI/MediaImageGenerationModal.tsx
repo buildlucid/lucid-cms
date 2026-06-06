@@ -422,6 +422,7 @@ const MediaImageGenerationModal: Component = () => {
 	): MediaImageGenerationCandidate {
 		return {
 			id: pending.id,
+			requestId: response.requestId,
 			instruction: pending.instruction,
 			guidance: pending.guidance,
 			sourceLabel: pending.sourceLabel,
@@ -673,7 +674,10 @@ const MediaImageGenerationModal: Component = () => {
 				type: blob.type || generation.output.mimeType || "image/webp",
 			});
 
-			await requestTarget.setFile(file);
+			await requestTarget.setFile(file, {
+				origin: generation.source ? "ai_modified" : "ai_generated",
+				aiGenerationRequestId: generation.requestId,
+			});
 			close(false);
 		} catch (error) {
 			if (error instanceof DOMException && error.name === "AbortError") return;

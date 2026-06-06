@@ -21,6 +21,12 @@ const focalPointSchema = z.object({
 	}),
 });
 
+export const mediaOriginSchema = z.enum([
+	"human",
+	"ai_generated",
+	"ai_modified",
+]);
+
 const mediaMetaResponseSchema = z
 	.object({
 		mimeType: z
@@ -130,6 +136,10 @@ export const mediaEmbedResponseSchema = z.object({
 		description: "Original file name",
 		example: "placeholder-image.png",
 	}),
+	origin: mediaOriginSchema.meta({
+		description: "The provenance origin of the media item",
+		example: "human",
+	}),
 	type: z.string().meta({ description: "Media type", example: "image" }),
 	title: z.array(mediaTranslationResponseSchema).meta({
 		description: "Translated titles",
@@ -159,6 +169,10 @@ const mediaResponseSchema = z.object({
 	folderId: z.number().nullable().meta({
 		description: "Media folder ID",
 		example: 1,
+	}),
+	origin: mediaOriginSchema.meta({
+		description: "The provenance origin of the media item",
+		example: "human",
 	}),
 	poster: mediaEmbedResponseSchema
 		.nullable()
@@ -242,6 +256,9 @@ const mediaGetMultipleQueryStringSchema = z
 		"filter[public]": queryString.schema.filter(false, {
 			example: "true",
 		}),
+		"filter[origin]": queryString.schema.filter(true, {
+			example: "human,ai_generated",
+		}),
 		sort: queryString.schema.sort(
 			"createdAt,updatedAt,title,mimeType,extension",
 		),
@@ -262,6 +279,7 @@ const mediaGetMultipleQueryFormattedSchema = z.object({
 			isDeleted: queryFormatted.schema.filters.single.optional(),
 			deletedBy: queryFormatted.schema.filters.union.optional(),
 			public: queryFormatted.schema.filters.single.optional(),
+			origin: queryFormatted.schema.filters.union.optional(),
 		})
 		.optional(),
 	sort: z
@@ -426,6 +444,14 @@ export const controllerSchemas = {
 					example: true,
 				})
 				.optional(),
+			origin: mediaOriginSchema.optional().meta({
+				description: "The provenance origin of the media item",
+				example: "ai_generated",
+			}),
+			aiGenerationRequestId: z.string().trim().optional().meta({
+				description: "The AI generation request ID to link to this media item",
+				example: "123e4567-e89b-12d3-a456-426614174000",
+			}),
 			folderId: z
 				.number()
 				.nullable()
@@ -705,6 +731,14 @@ export const controllerSchemas = {
 			fileName: z.string().trim().meta({
 				description: "The filename",
 				example: "funny-cats.jpg",
+			}),
+			origin: mediaOriginSchema.meta({
+				description: "The provenance origin of the media item",
+				example: "human",
+			}),
+			aiGenerationRequestId: z.string().trim().optional().meta({
+				description: "The AI generation request ID to link to this media item",
+				example: "123e4567-e89b-12d3-a456-426614174000",
 			}),
 			title: z
 				.array(

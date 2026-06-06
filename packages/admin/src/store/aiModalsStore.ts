@@ -19,6 +19,11 @@ type AltSetter = (
 	value: Media["alt"] | ((_previous: Media["alt"]) => Media["alt"]),
 ) => void | Promise<void>;
 
+export type MediaImageGenerationFileMeta = {
+	origin: Extract<Media["origin"], "ai_generated" | "ai_modified">;
+	aiGenerationRequestId: string;
+};
+
 export interface MediaAltGenerationTarget {
 	image: Accessor<AiImageSource | null>;
 	media: Accessor<MediaContext>;
@@ -27,7 +32,10 @@ export interface MediaAltGenerationTarget {
 	disabled?: Accessor<boolean>;
 }
 
-type FileSetter = (file: File) => void | Promise<void>;
+type FileSetter = (
+	file: File,
+	meta?: MediaImageGenerationFileMeta,
+) => void | Promise<void>;
 
 export interface MediaImageGenerationTarget {
 	image: Accessor<AiImageSource | null>;

@@ -10,6 +10,7 @@ const shareMediaTypeSchema = z.enum([
 	"archive",
 	"unknown",
 ]);
+const shareMediaOriginSchema = z.enum(["human", "ai_generated", "ai_modified"]);
 
 const shareAccessResponseSchema = z.discriminatedUnion("passwordRequired", [
 	z.object({
@@ -25,6 +26,7 @@ const shareAccessResponseSchema = z.discriminatedUnion("passwordRequired", [
 		passwordRequired: z.literal(false),
 		media: z.object({
 			key: z.string(),
+			origin: shareMediaOriginSchema,
 			type: shareMediaTypeSchema,
 			mimeType: z.string(),
 			extension: z.string(),

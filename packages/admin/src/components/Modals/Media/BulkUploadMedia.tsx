@@ -219,6 +219,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 			await createSingleReq({
 				key: uploadRes.data,
 				fileName: row.file.name,
+				origin: "human",
 				folderId: resolvedFolderId(),
 				width: imageMeta?.width,
 				height: imageMeta?.height,

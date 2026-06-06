@@ -1,4 +1,4 @@
-import type { ErrorResponse } from "@types";
+import type { ErrorResponse, Media } from "@types";
 import { type Accessor, createSignal } from "solid-js";
 import { SingleFileUpload } from "@/components/Groups/Form";
 import type {
@@ -9,6 +9,7 @@ import type { FocalPoint } from "@/components/Modals/Media/FocalPointEditor";
 import useMediaImageGeneration from "@/hooks/ai/useMediaImageGeneration";
 import type {
 	AiImageSource,
+	MediaImageGenerationFileMeta,
 	MediaImageGenerationTarget,
 } from "@/store/aiModalsStore";
 import { getBodyError } from "@/utils/error-helpers";
@@ -33,9 +34,17 @@ interface UseSingleFileUploadProps {
 	imageGeneration?: {
 		enabled?: Accessor<boolean>;
 		disabled?: Accessor<boolean>;
-		onSetFile?: (_file: File) => void | Promise<void>;
+		onSetFile?: (
+			_file: File,
+			_meta?: MediaImageGenerationFileMeta,
+		) => void | Promise<void>;
 	};
 }
+
+type FileProvenance = {
+	origin: Media["origin"];
+	aiGenerationRequestId?: string;
+};
 
 const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	// ----------------------------------------
@@ -49,6 +58,9 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	const [getFocalPoint, setFocalPoint] = createSignal<FocalPoint | null>(
 		data.currentFile?.focalPoint ?? null,
 	);
+	const [getFileProvenance, setFileProvenance] = createSignal<
+		FileProvenance | undefined
+	>();
 	const mediaImageGeneration = useMediaImageGeneration();
 	const imageGenerationTargetId = mediaImageGeneration.getTargetId();
 
@@ -88,11 +100,12 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	};
 	const imageGenerationTarget: MediaImageGenerationTarget = {
 		image: () => imageGenerationSource(),
-		setFile: async (file) => {
+		setFile: async (file, meta) => {
 			setGetFile(file);
 			setGetRemovedCurrent(false);
 			setFocalPoint(null);
-			await data.imageGeneration?.onSetFile?.(file);
+			setFileProvenance(meta);
+			await data.imageGeneration?.onSetFile?.(file, meta);
 		},
 		disabled: () =>
 			data.disabled === true || data.imageGeneration?.disabled?.() === true,
@@ -129,18 +142,25 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		if (!file) return null;
 		return getFileImageMeta(file);
 	};
+	const setFile = (file: File | null) => {
+		setGetFile(file);
+		setFileProvenance(undefined);
+	};
 
 	// ----------------------------------------
 	// Render
 	return {
 		getFile,
-		setGetFile,
+		setGetFile: setFile,
+		getFileProvenance,
+		setFileProvenance,
 		getRemovedCurrent,
 		setGetRemovedCurrent,
 		getCurrentFile,
 		setCurrentFile: (file: SingleFileUploadProps["currentFile"]) => {
 			setCurrentFile(file);
 			setFocalPoint(file?.focalPoint ?? null);
+			setFileProvenance(undefined);
 		},
 		getFocalPoint,
 		setFocalPoint,
@@ -149,6 +169,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		getImageMeta,
 		reset: () => {
 			setGetFile(null);
+			setFileProvenance(undefined);
 			setGetRemovedCurrent(false);
 			setCurrentFile(data.currentFile);
 			setFocalPoint(data.currentFile?.focalPoint ?? null);
@@ -159,12 +180,16 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 					value: getFile(),
 					setValue: (file) => {
 						setGetFile(file);
+						setFileProvenance(undefined);
 						if (file) setFocalPoint(null);
 					},
 					removedCurrent: getRemovedCurrent(),
 					setRemovedCurrent: (removed) => {
 						setGetRemovedCurrent(removed);
-						if (removed) setFocalPoint(null);
+						if (removed) {
+							setFocalPoint(null);
+							setFileProvenance(undefined);
+						}
 					},
 				}}
 				currentFile={getCurrentFile()}

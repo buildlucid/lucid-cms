@@ -9,13 +9,14 @@ import {
 	MediaRepository,
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
-import type { MediaType } from "../../types/response.js";
+import type { MediaOrigin, MediaType } from "../../types/response.js";
 import changeKeyVisibility from "../../utils/media/change-key-visibility.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
+import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
 
 const updateSingle: ServiceFn<
@@ -55,6 +56,8 @@ const updateSingle: ServiceFn<
 			isLight?: boolean | null;
 			isDeleted?: boolean;
 			posterId?: number | null;
+			origin?: MediaOrigin;
+			aiGenerationRequestId?: string;
 			allowedType?: MediaType;
 			userId: number;
 		},
@@ -243,6 +246,12 @@ const updateSingle: ServiceFn<
 		(updateObjectRes !== undefined || renamedKey !== undefined) &&
 		mediaRes.data.type === "image";
 
+	const aiGenerationRes = await resolveAiGeneration(context, {
+		origin: data.origin,
+		aiGenerationRequestId: data.aiGenerationRequestId,
+	});
+	if (aiGenerationRes.error) return aiGenerationRes;
+
 	const [mediaUpdateRes, mediaTranslationsRes, clearProcessedRes] =
 		await Promise.all([
 			Media.updateSingle({
@@ -250,6 +259,8 @@ const updateSingle: ServiceFn<
 				data: {
 					key: updateObjectRes?.key ?? renamedKey,
 					e_tag: updateObjectRes?.etag,
+					origin: data.origin,
+					ai_generation_id: aiGenerationRes.data,
 					type: updateObjectRes?.type,
 					mime_type: updateObjectRes?.mimeType,
 					file_extension: updateObjectRes?.extension,

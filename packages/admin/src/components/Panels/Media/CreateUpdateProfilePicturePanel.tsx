@@ -295,6 +295,11 @@ const CreateUpdateProfilePicturePanel: Component<
 			base64: imageMeta?.base64,
 			isDark: imageMeta?.isDark,
 			isLight: imageMeta?.isLight,
+			origin: file
+				? (MediaFile.getFileProvenance()?.origin ?? "human")
+				: undefined,
+			aiGenerationRequestId:
+				MediaFile.getFileProvenance()?.aiGenerationRequestId,
 			title: toProfileTranslations(createMedia.state.title()),
 			alt: toProfileTranslations(createMedia.state.alt()),
 		};

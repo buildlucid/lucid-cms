@@ -10,13 +10,14 @@ import {
 	MediaRepository,
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
-import type { MediaType } from "../../types/response.js";
+import type { MediaOrigin, MediaType } from "../../types/response.js";
 import type { Media } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
+import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
 
 const createSingle: ServiceFn<
@@ -54,6 +55,8 @@ const createSingle: ServiceFn<
 			folderId?: number | null;
 			isHidden?: boolean;
 			posterId?: number | null;
+			origin: MediaOrigin;
+			aiGenerationRequestId?: string;
 			allowedType?: MediaType;
 			userId: number;
 		},
@@ -120,12 +123,20 @@ const createSingle: ServiceFn<
 		if (posterRes.error) return posterRes;
 	}
 
+	const aiGenerationRes = await resolveAiGeneration(context, {
+		origin: data.origin,
+		aiGenerationRequestId: data.aiGenerationRequestId,
+	});
+	if (aiGenerationRes.error) return aiGenerationRes;
+
 	const [mediaRes, deleteMediaSyncRes, mediaAdapter] = await Promise.all([
 		Media.createSingle({
 			data: {
 				key: syncMediaRes.data.key,
 				poster_id: data.posterId ?? null,
 				e_tag: syncMediaRes.data.etag ?? undefined,
+				origin: data.origin,
+				ai_generation_id: aiGenerationRes.data,
 				public: isPublic,
 				type: syncMediaRes.data.type,
 				mime_type: syncMediaRes.data.mimeType,

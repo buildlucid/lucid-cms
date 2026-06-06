@@ -74,6 +74,8 @@ const updateProfilePictureController = factory.createHandlers(
 			base64: body.base64,
 			isDark: body.isDark,
 			isLight: body.isLight,
+			origin: body.origin,
+			aiGenerationRequestId: body.aiGenerationRequestId,
 			title: body.title,
 			alt: body.alt,
 		});

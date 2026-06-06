@@ -81,6 +81,8 @@ export const useCreateMedia = () => {
 			isHidden?: boolean;
 			posterId?: number | null;
 			focalPoint?: Media["meta"]["focalPoint"];
+			origin?: Media["origin"];
+			aiGenerationRequestId?: string;
 		},
 	): Promise<Media | null> => {
 		let fileKey = getKey();
@@ -101,6 +103,8 @@ export const useCreateMedia = () => {
 			alt: options?.alt ?? getAlt(),
 			description: options?.description ?? getDescription(),
 			summary: options?.summary ?? getSummary(),
+			origin: options?.origin ?? "human",
+			aiGenerationRequestId: options?.aiGenerationRequestId,
 			folderId: options?.folderId ?? getFolderId() ?? null,
 			posterId: options?.posterId,
 			isHidden: options?.isHidden,

@@ -6,6 +6,8 @@ export type MediaType =
 	| "archive"
 	| "unknown";
 
+export type MediaOrigin = "human" | "ai_generated" | "ai_modified";
+
 export interface Media {
 	id: number;
 	key: string;
@@ -13,6 +15,7 @@ export interface Media {
 	fileName: string | null;
 	folderId: number | null;
 	poster?: MediaPoster | null;
+	origin: MediaOrigin;
 	title: MediaTranslation[];
 	alt: MediaTranslation[];
 	description: MediaTranslation[];
@@ -55,6 +58,7 @@ export type MediaEmbed = Pick<
 	| "key"
 	| "url"
 	| "fileName"
+	| "origin"
 	| "type"
 	| "title"
 	| "alt"
@@ -132,6 +136,7 @@ export interface ShareLinkAccessGranted {
 	passwordRequired: false;
 	media: {
 		key: string;
+		origin: MediaOrigin;
 		type: MediaType;
 		mimeType: string;
 		extension: string;

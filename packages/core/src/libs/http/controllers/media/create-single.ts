@@ -69,6 +69,8 @@ const createSingleController = factory.createHandlers(
 			folderId: body.folderId,
 			posterId: body.posterId,
 			isHidden: body.isHidden,
+			origin: body.origin,
+			aiGenerationRequestId: body.aiGenerationRequestId,
 			userId: c.get("auth").id,
 		});
 		if (mediaRes.error) throw new LucidAPIError(mediaRes.error);

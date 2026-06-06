@@ -2,7 +2,7 @@ import z from "zod";
 import { translate } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { mediaEmbedResponseSchema } from "./media.js";
+import { mediaEmbedResponseSchema, mediaOriginSchema } from "./media.js";
 
 const userIdParamSchema = z.object({
 	id: z.string().trim().meta({
@@ -109,6 +109,15 @@ const updateProfilePictureBodySchema = z
 		isLight: z.boolean().optional().meta({
 			description: "Whether the image is light",
 			example: true,
+		}),
+		origin: mediaOriginSchema.optional().meta({
+			description: "The provenance origin of the profile picture",
+			example: "human",
+		}),
+		aiGenerationRequestId: z.string().trim().optional().meta({
+			description:
+				"The AI generation request ID to link to this profile picture",
+			example: "123e4567-e89b-12d3-a456-426614174000",
 		}),
 		title: z.array(profilePictureTranslationSchema).optional().meta({
 			description: "Translated profile picture titles",
