@@ -31,6 +31,7 @@ export type SingleFileUploadImageGeneration = {
 	state: {
 		loading: boolean;
 		disabled: boolean;
+		disabledClickable: boolean;
 		tooltip: string;
 	};
 	callbacks: {
@@ -288,10 +289,22 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					<div class="mt-2">
 						<button
 							type="button"
-							class="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border bg-input-base px-3 text-sm font-medium text-input-contrast transition-colors duration-200 hover:bg-secondary-hover hover:text-secondary-contrast focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-70"
-							disabled={imageGeneration().state.disabled}
+							class={classNames(
+								"inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border bg-input-base px-3 text-sm font-medium text-input-contrast transition-colors duration-200 hover:bg-secondary-hover hover:text-secondary-contrast focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-70",
+								{
+									"cursor-not-allowed opacity-70":
+										imageGeneration().state.disabled,
+								},
+							)}
+							disabled={
+								imageGeneration().state.disabled &&
+								!imageGeneration().state.disabledClickable
+							}
 							title={imageGeneration().state.tooltip}
 							aria-label={T()("ai.media.image.generate.action")}
+							aria-disabled={
+								imageGeneration().state.disabled ? "true" : undefined
+							}
 							aria-busy={imageGeneration().state.loading ? "true" : undefined}
 							onClick={(event) => {
 								event.preventDefault();
@@ -348,7 +361,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 	// ------------------------------------
 	// Classes
 	const actionButtonClasses = classNames(
-		"bg-input-base md:gap-2 text-input-contrast hover:text-secondary-contrast border border-border h-8 flex justify-center items-center font-medium text-sm py-2 px-2 rounded-md transition-all duration-200 hover:bg-secondary-hover focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base",
+		"bg-input-base md:gap-2 text-input-contrast hover:text-secondary-contrast border border-border h-8 flex justify-center items-center font-medium text-sm py-2 px-2 rounded-md transition-all duration-200 hover:bg-secondary-hover focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base disabled:cursor-not-allowed disabled:opacity-70",
 	);
 	const showFocalPoint = createMemo(
 		() => props.data.type === "image" && props.focalPoint !== undefined,
@@ -488,10 +501,19 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					{(imageGeneration) => (
 						<button
 							type="button"
-							class={classNames(actionButtonClasses)}
-							disabled={imageGeneration().state.disabled}
+							class={classNames(actionButtonClasses, {
+								"cursor-not-allowed opacity-70":
+									imageGeneration().state.disabled,
+							})}
+							disabled={
+								imageGeneration().state.disabled &&
+								!imageGeneration().state.disabledClickable
+							}
 							title={imageGeneration().state.tooltip}
 							aria-label={T()("ai.media.image.generate.action")}
+							aria-disabled={
+								imageGeneration().state.disabled ? "true" : undefined
+							}
 							aria-busy={imageGeneration().state.loading ? "true" : undefined}
 							onClick={(event) => {
 								event.preventDefault();

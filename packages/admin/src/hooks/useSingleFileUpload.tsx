@@ -83,8 +83,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	const imageGenerationEnabled = () => {
 		return (
 			data.imageGeneration !== undefined &&
-			(data.imageGeneration.enabled?.() ?? true) &&
-			mediaImageGeneration.hasPermission()
+			(data.imageGeneration.enabled?.() ?? true)
 		);
 	};
 	const imageGenerationTarget: MediaImageGenerationTarget = {
@@ -105,6 +104,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 			state: {
 				loading: mediaImageGeneration.isTargetLoading(imageGenerationTargetId),
 				disabled: mediaImageGeneration.isDisabled(imageGenerationTarget),
+				disabledClickable: mediaImageGeneration.accessState().disabled,
 				tooltip: mediaImageGeneration.getTooltip(imageGenerationTarget),
 			},
 			callbacks: {

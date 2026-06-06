@@ -15,7 +15,8 @@ const factory = createFactory();
 
 const statusController = factory.createHandlers(
 	describeRoute({
-		description: "Returns current license status from database.",
+		description:
+			"Returns current license status and refreshes stale snapshots.",
 		tags: ["license"],
 		summary: "Get License Status",
 		responses: honoOpenAPIResponse({

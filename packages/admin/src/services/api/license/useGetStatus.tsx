@@ -8,6 +8,8 @@ interface QueryParams {
 	queryString?: Accessor<string>;
 }
 
+const LICENSE_STATUS_STALE_TIME_MS = 60 * 60 * 1000;
+
 const useGetStatus = (params: QueryHook<QueryParams>) => {
 	const queryParams = createMemo(() =>
 		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
@@ -24,6 +26,7 @@ const useGetStatus = (params: QueryHook<QueryParams>) => {
 					method: "GET",
 				},
 			}),
+		staleTime: LICENSE_STATUS_STALE_TIME_MS,
 		get enabled() {
 			return params.enabled ? params.enabled() : true;
 		},

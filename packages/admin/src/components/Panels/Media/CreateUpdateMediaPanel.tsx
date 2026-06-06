@@ -888,11 +888,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											}}
 											errors={getErrorObject(inputError(index())?.alt)}
 											rows={3}
-											rightSlot={
-												<Show when={mediaAltGeneration.hasPermission()}>
-													<MediaAltGenerationButton />
-												</Show>
-											}
+											rightSlot={<MediaAltGenerationButton />}
 										/>
 									</Show>
 									<Show when={showDescriptionInput()}>
@@ -1024,40 +1020,52 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											<FaSolidBullseye size={14} />
 										</Button>
 									</Show>
-									<Show when={mediaImageGeneration.hasPermission()}>
-										<Button
-											type="button"
-											theme="secondary-subtle"
-											size="icon-subtle"
-											onClick={(event) => {
-												event.preventDefault();
-												event.stopPropagation();
-												mediaImageGeneration.open(
-													posterImageGenerationTarget,
-													posterImageGenerationTargetId,
-												);
-											}}
-											title={mediaImageGeneration.getTooltip(
+									<Button
+										type="button"
+										theme="secondary-subtle"
+										size="icon-subtle"
+										onClick={(event) => {
+											event.preventDefault();
+											event.stopPropagation();
+											mediaImageGeneration.open(
 												posterImageGenerationTarget,
-											)}
-											aria-label={T()("ai.media.image.generate.action")}
-											aria-busy={
-												mediaImageGeneration.isTargetLoading(
-													posterImageGenerationTargetId,
-												)
-													? "true"
-													: undefined
-											}
-											loading={mediaImageGeneration.isTargetLoading(
 												posterImageGenerationTargetId,
-											)}
-											disabled={mediaImageGeneration.isDisabled(
+											);
+										}}
+										title={mediaImageGeneration.getTooltip(
+											posterImageGenerationTarget,
+										)}
+										aria-label={T()("ai.media.image.generate.action")}
+										aria-disabled={
+											mediaImageGeneration.isDisabled(
 												posterImageGenerationTarget,
-											)}
-										>
-											<FaSolidMagicWandSparkles size={14} />
-										</Button>
-									</Show>
+											)
+												? "true"
+												: undefined
+										}
+										aria-busy={
+											mediaImageGeneration.isTargetLoading(
+												posterImageGenerationTargetId,
+											)
+												? "true"
+												: undefined
+										}
+										loading={mediaImageGeneration.isTargetLoading(
+											posterImageGenerationTargetId,
+										)}
+										disabled={
+											mediaImageGeneration.isDisabled(
+												posterImageGenerationTarget,
+											) && !mediaImageGeneration.accessState().disabled
+										}
+										classes={
+											mediaImageGeneration.accessState().disabled
+												? "opacity-80 cursor-not-allowed"
+												: undefined
+										}
+									>
+										<FaSolidMagicWandSparkles size={14} />
+									</Button>
 									<Button
 										type="button"
 										theme="secondary-subtle"
@@ -1145,11 +1153,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											}}
 											errors={getErrorObject(posterAltError(index()))}
 											rows={3}
-											rightSlot={
-												<Show when={mediaAltGeneration.hasPermission()}>
-													<PosterAltGenerationButton />
-												</Show>
-											}
+											rightSlot={<PosterAltGenerationButton />}
 										/>
 									</Show>
 								)}

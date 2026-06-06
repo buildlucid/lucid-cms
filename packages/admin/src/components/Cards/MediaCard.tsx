@@ -8,6 +8,7 @@ import AspectRatio from "@/components/Partials/AspectRatio";
 import ClickToCopy from "@/components/Partials/ClickToCopy";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import { Permissions } from "@/constants/permissions";
+import type { AiFeatureAccessState } from "@/hooks/ai/access";
 import type useRowTarget from "@/hooks/useRowTarget";
 import mediaStore from "@/store/mediaStore";
 import userStore from "@/store/userStore";
@@ -33,6 +34,7 @@ interface MediaCardProps {
 	showingDeleted?: Accessor<boolean>;
 	isDragging: Accessor<boolean>;
 	onGenerateAlt?: (_media: Media) => void;
+	aiAltAccessState?: AiFeatureAccessState;
 }
 
 export const MediaCardLoading: Component = () => {
@@ -91,6 +93,20 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			return hasUpdatePermission() || hasDeletePermission();
 		}
 		return hasUpdatePermission();
+	});
+	const aiAltAccessDisabledToast = createMemo(() => {
+		if (
+			props.aiAltAccessState?.disabled !== true ||
+			props.aiAltAccessState.reason === "no-permission"
+		) {
+			return undefined;
+		}
+
+		return {
+			title: props.aiAltAccessState.title,
+			message: props.aiAltAccessState.message,
+			status: "warning" as const,
+		};
 	});
 
 	// ----------------------------------
@@ -197,13 +213,16 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							onClick: () => {
 								props.onGenerateAlt?.(props.media);
 							},
-							permission: true,
+							permission: hasAiAltGeneratePermission(),
+							disabled:
+								props.aiAltAccessState?.disabled === true &&
+								props.aiAltAccessState.reason !== "no-permission",
+							disabledToast: aiAltAccessDisabledToast(),
 							hide:
 								!props.onGenerateAlt ||
 								props.showingDeleted?.() ||
 								props.media.type !== "image" ||
-								!hasUpdatePermission() ||
-								!hasAiAltGeneratePermission(),
+								!hasUpdatePermission(),
 						},
 						{
 							label: T()("media.processed.clear.action"),

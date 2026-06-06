@@ -437,11 +437,7 @@ const CreateUpdateProfilePicturePanel: Component<
 										}}
 										errors={getErrorObject(inputError(index())?.alt)}
 										rows={3}
-										rightSlot={
-											<Show when={profileAltGeneration.hasPermission()}>
-												<ProfileAltGenerationButton />
-											</Show>
-										}
+										rightSlot={<ProfileAltGenerationButton />}
 									/>
 								</Show>
 							</Show>

@@ -1,7 +1,11 @@
 import formatter, { licenseFormatter } from "../../libs/formatters/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import type { License } from "../../types.js";
+import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import verifyLicense from "./verify.js";
+
+const LICENSE_STATUS_STALE_AFTER_SECONDS = 60 * 60;
 
 const licenseStatus: ServiceFn<[], License> = async (context) => {
 	const Options = new OptionsRepository(context.db.client, context.config.db);
@@ -39,6 +43,29 @@ const licenseStatus: ServiceFn<[], License> = async (context) => {
 	const aiEnabledOpt = licenseOptionsRes.data?.find(
 		(o) => o.name === "license_ai_enabled",
 	);
+	const lastChecked = lastCheckedOpt?.value_int ?? null;
+	const now = getUnixTimeSeconds();
+
+	if (
+		lastChecked === null ||
+		now - lastChecked >= LICENSE_STATUS_STALE_AFTER_SECONDS
+	) {
+		const verifyRes = await verifyLicense(context);
+		if (verifyRes.error) return verifyRes;
+
+		return {
+			error: undefined,
+			data: licenseFormatter.formatSingle({
+				license: {
+					key: verifyRes.data.key,
+					valid: verifyRes.data.valid,
+					lastChecked: verifyRes.data.lastChecked,
+					errorMessage: verifyRes.data.errorMessage,
+					aiEnabled: verifyRes.data.aiEnabled,
+				},
+			}),
+		};
+	}
 
 	return {
 		error: undefined,
@@ -46,7 +73,7 @@ const licenseStatus: ServiceFn<[], License> = async (context) => {
 			license: {
 				key: licenseKeyDisplayOpt?.value_text ?? null,
 				valid: formatter.formatBoolean(validOpt?.value_bool) ?? false,
-				lastChecked: lastCheckedOpt?.value_int ?? null,
+				lastChecked,
 				errorMessage: errorMsgOpt?.value_text ?? null,
 				aiEnabled: formatter.formatBoolean(aiEnabledOpt?.value_bool) ?? false,
 			},

@@ -6,6 +6,10 @@ import aiModalsStore, {
 } from "@/store/aiModalsStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import {
+	createAiFeatureAccessState,
+	spawnAiFeatureAccessToast,
+} from "./access";
 
 let targetId = 0;
 
@@ -26,8 +30,9 @@ const useMediaImageGeneration = () => {
 	const hasPermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.AiImageGenerate]).all;
 	});
-	const aiFeaturesEnabled = createMemo(() => {
-		return license.data?.data.ai.enabled !== false;
+	const accessState = createAiFeatureAccessState({
+		hasPermission,
+		license: () => license.data?.data,
 	});
 	const isBusy = createMemo(() => {
 		return aiModalsStore.get.isLoading || aiModalsStore.get.isApplying;
@@ -37,12 +42,11 @@ const useMediaImageGeneration = () => {
 	// Functions
 	const targetIsDisabled = (target?: MediaImageGenerationTarget) => {
 		if (!target) return true;
-		return !aiFeaturesEnabled() || isBusy() || target.disabled?.() === true;
+		return accessState().disabled || isBusy() || target.disabled?.() === true;
 	};
 	const targetTooltip = (target?: MediaImageGenerationTarget) => {
-		if (!aiFeaturesEnabled()) {
-			return T()("ai.features.disabled.license");
-		}
+		const access = accessState();
+		if (access.disabled) return access.message;
 		if (isBusy()) return T()("ai.media.image.generate.loading");
 		if (target?.disabled?.()) return T()("ai.media.image.generate.disabled");
 		return T()("ai.media.image.generate.action");
@@ -52,6 +56,7 @@ const useMediaImageGeneration = () => {
 		return modal?.data.targetId === targetId;
 	};
 	const open = (target: MediaImageGenerationTarget, id = getTargetId()) => {
+		if (spawnAiFeatureAccessToast(accessState())) return;
 		if (targetIsDisabled(target)) return;
 
 		aiModalsStore.open("mediaImageGeneration", {
@@ -69,6 +74,7 @@ const useMediaImageGeneration = () => {
 	// Return
 	return {
 		open,
+		accessState,
 		hasPermission,
 		isDisabled: targetIsDisabled,
 		isLoading: isBusy,

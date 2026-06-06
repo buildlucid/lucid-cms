@@ -355,6 +355,7 @@ export const MediaList: Component<{
 								showingDeleted={props.state.showingDeleted}
 								isDragging={isDragging}
 								onGenerateAlt={openAltGeneration}
+								aiAltAccessState={mediaAltGeneration.accessState()}
 							/>
 						)}
 					</For>

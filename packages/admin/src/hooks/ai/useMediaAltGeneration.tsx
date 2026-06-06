@@ -7,6 +7,10 @@ import aiModalsStore, {
 } from "@/store/aiModalsStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import {
+	createAiFeatureAccessState,
+	spawnAiFeatureAccessToast,
+} from "./access";
 
 let targetId = 0;
 
@@ -27,8 +31,9 @@ const useMediaAltGeneration = () => {
 	const hasPermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.AiAltGenerate]).all;
 	});
-	const aiFeaturesEnabled = createMemo(() => {
-		return license.data?.data.ai.enabled !== false;
+	const accessState = createAiFeatureAccessState({
+		hasPermission,
+		license: () => license.data?.data,
 	});
 	const isBusy = createMemo(() => {
 		return aiModalsStore.get.isLoading || aiModalsStore.get.isApplying;
@@ -43,7 +48,7 @@ const useMediaAltGeneration = () => {
 	const targetIsDisabled = (target?: MediaAltGenerationTarget) => {
 		if (!target) return true;
 		return (
-			!aiFeaturesEnabled() ||
+			accessState().disabled ||
 			!targetHasImage(target) ||
 			target.locales().length === 0 ||
 			isBusy() ||
@@ -51,9 +56,8 @@ const useMediaAltGeneration = () => {
 		);
 	};
 	const targetTooltip = (target?: MediaAltGenerationTarget) => {
-		if (!aiFeaturesEnabled()) {
-			return T()("ai.features.disabled.license");
-		}
+		const access = accessState();
+		if (access.disabled) return access.message;
 		if (!targetHasImage(target)) {
 			return T()("ai.media.alt.generate.disabled.no.image");
 		}
@@ -65,6 +69,7 @@ const useMediaAltGeneration = () => {
 		return modal?.data.targetId === targetId;
 	};
 	const open = (target: MediaAltGenerationTarget, id = getTargetId()) => {
+		if (spawnAiFeatureAccessToast(accessState())) return;
 		if (targetIsDisabled(target)) return;
 
 		aiModalsStore.open("mediaAltGeneration", {
@@ -81,6 +86,7 @@ const useMediaAltGeneration = () => {
 				label={T()("ai.media.alt.generate.action")}
 				tooltip={targetTooltip(target)}
 				disabled={targetIsDisabled(target)}
+				disabledClickable={accessState().disabled}
 				loading={aiModalsStore.get.isLoading && isActiveTarget(id)}
 				onClick={(event) => {
 					event.preventDefault();
@@ -98,6 +104,7 @@ const useMediaAltGeneration = () => {
 	return {
 		open,
 		createActionButton,
+		accessState,
 		hasPermission,
 		isDisabled: () => targetIsDisabled(),
 		isLoading: isBusy,
