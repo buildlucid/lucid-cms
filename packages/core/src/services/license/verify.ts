@@ -174,7 +174,7 @@ const verifyLicense: ServiceFn<
 		const valid = !!ok.valid;
 		snapshot = {
 			valid,
-			aiEnabled: valid ? !!ok.ai?.enabled : false,
+			aiEnabled: valid && ok.ai.enabled,
 			errorMessage:
 				ok.message ||
 				(valid ? null : context.translate("server:core.license.is.invalid")),

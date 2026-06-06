@@ -130,6 +130,7 @@ const createApp = async (props: {
 					status: error.status,
 					errors: error.errors,
 					code: error.code,
+					key: error.key,
 				} satisfies PublicErrorData);
 			}
 

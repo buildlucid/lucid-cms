@@ -31,6 +31,7 @@ const decodeError = (error: Error): PublicErrorData => {
 				error.error.errors,
 			) as PublicErrorData["errors"],
 			code: error.error.code,
+			key: error.error.key,
 		};
 	}
 

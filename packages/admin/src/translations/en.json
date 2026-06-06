@@ -336,6 +336,7 @@
 	"common.replace": "Replace",
 	"common.label": "Label",
 	"common.alt": "Alt",
+	"ai.features.disabled.license": "AI features are not enabled for this license.",
 	"ai.media.alt.generate.action": "Generate alt text",
 	"ai.media.alt.generate.loading": "Generating alt text",
 	"ai.media.alt.generate.disabled.no.image": "Select an image before generating alt text.",

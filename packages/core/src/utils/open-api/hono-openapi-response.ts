@@ -71,6 +71,10 @@ export const defaultErrorResponse = {
 			type: "string",
 			nullable: true,
 		},
+		key: {
+			type: "string",
+			nullable: true,
+		},
 		name: {
 			type: "string",
 			nullable: true,

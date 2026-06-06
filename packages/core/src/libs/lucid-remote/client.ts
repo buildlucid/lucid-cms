@@ -25,6 +25,15 @@ type LucidRemoteClient = {
 	) => ServiceResponse<LucidRemoteRequestData<T>>;
 };
 
+type LucidRemoteErrorResponse = {
+	status: number;
+	code?: string;
+	key?: string;
+	name?: string;
+	message: string;
+	errors?: ErrorResponse["errors"];
+};
+
 const clients = new Map<string, LucidRemoteClient>();
 
 /**
@@ -41,18 +50,144 @@ const getLucidRemoteApiDomain = (context: ServiceContext) => {
 	).replace(/\/+$/, "");
 };
 
-const isErrorResponse = (value: unknown): value is ErrorResponse => {
+const isErrorResponse = (value: unknown): value is LucidRemoteErrorResponse => {
 	if (!value || typeof value !== "object") {
 		return false;
 	}
 
-	const error = value as Partial<ErrorResponse>;
+	const error = value as Partial<LucidRemoteErrorResponse>;
 
 	return (
 		typeof error.status === "number" &&
-		typeof error.name === "string" &&
-		typeof error.message === "string"
+		typeof error.message === "string" &&
+		(error.code === undefined || typeof error.code === "string") &&
+		(error.key === undefined || typeof error.key === "string") &&
+		(error.name === undefined || typeof error.name === "string")
 	);
+};
+
+const getErrorCopy = (errorKey?: string) => {
+	switch (errorKey) {
+		case "ai_invalid_license":
+			return {
+				name: copy("server:core.ai.remote.license.invalid.name"),
+				message: copy("server:core.ai.remote.license.invalid.message"),
+			};
+		case "ai_license_key_required":
+			return {
+				name: copy("server:core.ai.remote.license.key.required.name"),
+				message: copy("server:core.ai.remote.license.key.required.message"),
+			};
+		case "failed_to_load_cms_license":
+		case "failed_to_load_cms_licenses":
+			return {
+				name: copy("server:core.ai.remote.license.verify.failed.name"),
+				message: copy("server:core.ai.remote.license.verify.failed.message"),
+			};
+		case "license_not_found":
+			return {
+				name: copy("server:core.ai.remote.license.not.found.name"),
+				message: copy("server:core.ai.remote.license.not.found.message"),
+			};
+		case "organisation_ai_credit_exhausted":
+			return {
+				name: copy("server:core.ai.remote.credit.exhausted.name"),
+				message: copy("server:core.ai.remote.credit.exhausted.message"),
+			};
+		case "organisation_ai_deferred_debit_outstanding":
+			return {
+				name: copy("server:core.ai.remote.deferred.debit.outstanding.name"),
+				message: copy(
+					"server:core.ai.remote.deferred.debit.outstanding.message",
+				),
+			};
+		case "organisation_ai_top_up_requires_payment_method":
+			return {
+				name: copy("server:core.ai.remote.top.up.payment.method.name"),
+				message: copy("server:core.ai.remote.top.up.payment.method.message"),
+			};
+		case "organisation_ai_top_up_pending":
+			return {
+				name: copy("server:core.ai.remote.top.up.pending.name"),
+				message: copy("server:core.ai.remote.top.up.pending.message"),
+			};
+		case "organisation_ai_top_up_failed":
+			return {
+				name: copy("server:core.ai.remote.top.up.failed.name"),
+				message: copy("server:core.ai.remote.top.up.failed.message"),
+			};
+		case "license_ai_period_cap_reached":
+			return {
+				name: copy("server:core.ai.remote.period.cap.reached.name"),
+				message: copy("server:core.ai.remote.period.cap.reached.message"),
+			};
+		case "license_ai_disabled_for_usage":
+			return {
+				name: copy("server:core.ai.remote.license.ai.disabled.name"),
+				message: copy("server:core.ai.remote.license.ai.disabled.message"),
+			};
+		case "license_deactivated_for_usage":
+			return {
+				name: copy("server:core.ai.remote.license.deactivated.name"),
+				message: copy("server:core.ai.remote.license.deactivated.message"),
+			};
+		case "license_not_found_for_usage":
+			return {
+				name: copy("server:core.ai.remote.license.not.found.name"),
+				message: copy("server:core.ai.remote.license.not.found.message"),
+			};
+		case "cms_ai_feature_not_supported":
+			return {
+				name: copy("server:core.ai.remote.feature.not.supported.name"),
+				message: copy("server:core.ai.remote.feature.not.supported.message"),
+			};
+		case "ai_provider_configuration_missing":
+			return {
+				name: copy("server:core.ai.remote.provider.configuration.name"),
+				message: copy("server:core.ai.remote.provider.configuration.message"),
+			};
+		case "ai_usage_pricing_missing":
+		case "ai_pricing_must_be_usd":
+			return {
+				name: copy("server:core.ai.remote.pricing.configuration.name"),
+				message: copy("server:core.ai.remote.pricing.configuration.message"),
+			};
+		case "cms_ai_image_source_invalid":
+			return {
+				name: copy("server:core.ai.remote.image.source.invalid.name"),
+				message: copy("server:core.ai.remote.image.source.invalid.message"),
+			};
+		case "cms_ai_image_storage_configuration_missing":
+			return {
+				name: copy("server:core.ai.remote.image.storage.unavailable.name"),
+				message: copy(
+					"server:core.ai.remote.image.storage.unavailable.message",
+				),
+			};
+		case "cms_ai_generation_request_not_found":
+		case "cms_ai_generated_image_not_found":
+			return {
+				name: copy("server:core.ai.remote.generation.not.found.name"),
+				message: copy("server:core.ai.remote.generation.not.found.message"),
+			};
+		case "cms_ai_idempotency_key_required":
+		case "cms_ai_idempotency_key_conflict":
+			return {
+				name: copy("server:core.ai.remote.generation.request.invalid.name"),
+				message: copy(
+					"server:core.ai.remote.generation.request.invalid.message",
+				),
+			};
+		case "ai_provider_request_failed":
+		case "ai_provider_invalid_response":
+		case "ai_provider_output_truncated":
+			return {
+				name: copy("server:core.ai.remote.provider.failed.name"),
+				message: copy("server:core.ai.remote.provider.failed.message"),
+			};
+		default:
+			return undefined;
+	}
 };
 
 const createRemoteError = (
@@ -60,16 +195,24 @@ const createRemoteError = (
 	json: unknown,
 ): { error: LucidErrorData; data: undefined } => {
 	if (isErrorResponse(json)) {
+		const errorKey = json.key ?? json.code;
+		const errorCopy = getErrorCopy(errorKey);
+
 		return {
 			error: {
 				type: "basic",
 				status: json.status || response.status,
-				name: copy("server:core.lucid.remote.request.failed.name", {
-					defaultMessage: json.name,
-				}),
-				message: copy("server:core.lucid.remote.request.failed", {
-					defaultMessage: json.message,
-				}),
+				key: errorKey,
+				name:
+					errorCopy?.name ??
+					copy("server:core.lucid.remote.request.failed.name", {
+						defaultMessage: json.name ?? "Lucid remote request failed",
+					}),
+				message:
+					errorCopy?.message ??
+					copy("server:core.lucid.remote.request.failed", {
+						defaultMessage: json.message,
+					}),
 				errors: json.errors as LucidErrorData["errors"],
 			},
 			data: undefined,

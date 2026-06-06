@@ -1,5 +1,6 @@
 import { createMemo } from "solid-js";
 import { Permissions } from "@/constants/permissions";
+import api from "@/services/api";
 import aiModalsStore, {
 	type MediaImageGenerationTarget,
 } from "@/store/aiModalsStore";
@@ -15,9 +16,18 @@ const getTargetId = () => {
 
 const useMediaImageGeneration = () => {
 	// -----------------------------
+	// Queries
+	const license = api.license.useGetStatus({
+		queryParams: {},
+	});
+
+	// -----------------------------
 	// Memos
 	const hasPermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.AiImageGenerate]).all;
+	});
+	const aiFeaturesEnabled = createMemo(() => {
+		return license.data?.data.ai.enabled !== false;
 	});
 	const isBusy = createMemo(() => {
 		return aiModalsStore.get.isLoading || aiModalsStore.get.isApplying;
@@ -27,9 +37,12 @@ const useMediaImageGeneration = () => {
 	// Functions
 	const targetIsDisabled = (target?: MediaImageGenerationTarget) => {
 		if (!target) return true;
-		return isBusy() || target.disabled?.() === true;
+		return !aiFeaturesEnabled() || isBusy() || target.disabled?.() === true;
 	};
 	const targetTooltip = (target?: MediaImageGenerationTarget) => {
+		if (!aiFeaturesEnabled()) {
+			return T()("ai.features.disabled.license");
+		}
 		if (isBusy()) return T()("ai.media.image.generate.loading");
 		if (target?.disabled?.()) return T()("ai.media.image.generate.disabled");
 		return T()("ai.media.image.generate.action");

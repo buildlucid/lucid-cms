@@ -10,8 +10,8 @@ type VerifyCmsLicenseProps = {
 export type VerifyCmsLicenseData = {
 	valid: boolean;
 	message?: string;
-	ai?: {
-		enabled?: boolean;
+	ai: {
+		enabled: boolean;
 	};
 };
 

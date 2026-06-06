@@ -1,6 +1,7 @@
 import { type Component, createMemo } from "solid-js";
 import { AiIconButton } from "@/components/Groups/AI";
 import { Permissions } from "@/constants/permissions";
+import api from "@/services/api";
 import aiModalsStore, {
 	type MediaAltGenerationTarget,
 } from "@/store/aiModalsStore";
@@ -16,9 +17,18 @@ const getTargetId = () => {
 
 const useMediaAltGeneration = () => {
 	// -----------------------------
+	// Queries
+	const license = api.license.useGetStatus({
+		queryParams: {},
+	});
+
+	// -----------------------------
 	// Memos
 	const hasPermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.AiAltGenerate]).all;
+	});
+	const aiFeaturesEnabled = createMemo(() => {
+		return license.data?.data.ai.enabled !== false;
 	});
 	const isBusy = createMemo(() => {
 		return aiModalsStore.get.isLoading || aiModalsStore.get.isApplying;
@@ -33,6 +43,7 @@ const useMediaAltGeneration = () => {
 	const targetIsDisabled = (target?: MediaAltGenerationTarget) => {
 		if (!target) return true;
 		return (
+			!aiFeaturesEnabled() ||
 			!targetHasImage(target) ||
 			target.locales().length === 0 ||
 			isBusy() ||
@@ -40,6 +51,9 @@ const useMediaAltGeneration = () => {
 		);
 	};
 	const targetTooltip = (target?: MediaAltGenerationTarget) => {
+		if (!aiFeaturesEnabled()) {
+			return T()("ai.features.disabled.license");
+		}
 		if (!targetHasImage(target)) {
 			return T()("ai.media.alt.generate.disabled.no.image");
 		}

@@ -239,9 +239,6 @@ const MediaAltGenerationModalContent: Component<
 								</Button>
 							</div>
 						</div>
-						<Show when={props.error}>
-							{(error) => <p class="mt-3 text-sm text-error-base">{error()}</p>}
-						</Show>
 					</form>
 				</div>
 				<div class="relative flex min-h-130 min-w-0 w-full flex-col p-4 md:p-6">
@@ -279,20 +276,22 @@ const MediaAltGenerationModalContent: Component<
 						<Show
 							when={hasContent()}
 							fallback={
-								<div class="min-w-0 rounded-md border border-dashed border-border bg-card-base p-5">
-									<Show
-										when={props.error}
-										fallback={
+								<Show
+									when={props.error}
+									fallback={
+										<div class="min-w-0 rounded-md border border-dashed border-border bg-card-base p-5">
 											<p class="text-sm text-body">
 												{T()("ai.media.alt.generate.response.empty")}
 											</p>
-										}
-									>
-										{(error) => (
+										</div>
+									}
+								>
+									{(error) => (
+										<div class="min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
 											<p class="text-sm text-error-base">{error()}</p>
-										)}
-									</Show>
-								</div>
+										</div>
+									)}
+								</Show>
 							}
 						>
 							<div class="min-w-0 space-y-2">
@@ -353,6 +352,13 @@ const MediaAltGenerationModalContent: Component<
 											</div>
 										</Show>
 									</div>
+								</Show>
+								<Show when={props.error}>
+									{(error) => (
+										<div class="min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
+											<p class="text-sm text-error-base">{error()}</p>
+										</div>
+									)}
 								</Show>
 								<For each={props.generations}>
 									{(generation, index) => {

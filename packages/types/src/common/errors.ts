@@ -11,6 +11,7 @@ export interface PublicErrorData {
 	message?: string;
 	status?: number;
 	code?: "csrf" | "login" | "authorisation" | "rate_limit" | "not_found";
+	key?: string;
 	errors?: ErrorResult;
 }
 

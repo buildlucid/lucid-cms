@@ -1083,9 +1083,6 @@ const MediaImageGenerationModal: Component = () => {
 							hideOptionalText
 							errors={instructionError()}
 						/>
-						<Show when={responseError()}>
-							{(error) => <p class="mt-3 text-sm text-error-base">{error()}</p>}
-						</Show>
 						<div class="mt-4">
 							<Button
 								type="submit"
@@ -1162,6 +1159,13 @@ const MediaImageGenerationModal: Component = () => {
 								</div>
 							</Show>
 						</div>
+						<Show when={responseError()}>
+							{(error) => (
+								<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
+									<p class="text-sm text-error-base">{error()}</p>
+								</div>
+							)}
+						</Show>
 						<Show when={pendingGeneration() || generations().length > 0}>
 							<div class="mt-4 min-w-0 space-y-2">
 								<Show when={pendingGeneration()}>
