@@ -5,6 +5,7 @@ export default Object.freeze({
 	openAPIDocsRoute: "/lucid/documentation",
 	headers: {
 		csrf: "X-CSRF-Token",
+		idempotencyKey: "idempotency-key",
 		interfaceLocale: "Lucid-Interface-Locale",
 	},
 	cookies: {

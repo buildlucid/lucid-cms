@@ -1,4 +1,4 @@
-import type { AiGenerateUsage } from "@lucidcms/types";
+import type { AiGenerateMode, AiGenerateUsage } from "@lucidcms/types";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { getLucidRemoteClient } from "../client.js";
 import { lucidRemotePaths } from "../constants.js";
@@ -157,14 +157,28 @@ export type CmsAiGenerateRequestFeature = CmsAiGenerateRequest["feature"];
 type GenerateCmsAiProps = {
 	licenseKey: string;
 	request: CmsAiGenerateRequest;
+	idempotencyKey?: string;
 };
 
-export type CmsAiGenerateData = {
+export type CmsAiGenerateCompletedData = {
+	mode: AiGenerateMode;
+	status?: "complete";
 	requestId: string;
 	feature: CmsAiGenerateRequest["feature"];
 	output: unknown;
 	usage: AiGenerateUsage;
 };
+
+export type CmsAiGenerateAcceptedData = {
+	mode: "async";
+	requestId: string;
+	feature: CmsAiGenerateRequest["feature"];
+	status: "queued" | "processing";
+};
+
+export type CmsAiGenerateData =
+	| CmsAiGenerateCompletedData
+	| CmsAiGenerateAcceptedData;
 
 /**
  * Runs a CMS AI feature against Lucid's remote AI API.
@@ -174,13 +188,15 @@ const generateCmsAi: ServiceFn<
 	LucidRemoteRequestData<CmsAiGenerateData>
 > = async (context, props) => {
 	const client = getLucidRemoteClient(context);
+	const headers = new Headers();
+
+	headers.append("Authorization", `Bearer ${props.licenseKey}`);
+	headers.append("idempotency-key", props.idempotencyKey ?? "");
 
 	return client.request<CmsAiGenerateData>(lucidRemotePaths.generateCmsAi, {
 		retries: 0,
 		method: "POST",
-		headers: {
-			Authorization: `Bearer ${props.licenseKey}`,
-		},
+		headers,
 		body: props.request,
 	});
 };

@@ -212,7 +212,7 @@ export interface LucidQueueJobs {
 	updated_at: TimestampMutateable;
 }
 
-export type AiGenerationStatus = "success";
+export type AiGenerationStatus = "pending" | "success";
 
 export interface LucidAiGenerations {
 	id: Generated<number>;
@@ -228,18 +228,19 @@ export interface LucidAiGenerations {
 		Record<string, unknown>
 	>;
 	output: JSONColumnType<
-		Record<string, unknown>,
-		Record<string, unknown>,
-		Record<string, unknown>
+		Record<string, unknown> | null,
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
 	>;
 	usage: JSONColumnType<
-		Record<string, unknown>,
-		Record<string, unknown>,
-		Record<string, unknown>
+		Record<string, unknown> | null,
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
 	>;
-	model: string;
-	cost_currency: string;
-	cost_total_minor: number;
+	model: string | null;
+	cost_currency: string | null;
+	cost_total_minor: number | null;
+	duration_ms: number | null;
 	status: AiGenerationStatus;
 	error_message: string | null;
 	created_at: TimestampImmutable;

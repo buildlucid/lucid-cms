@@ -1,6 +1,8 @@
 import type { ResponseBody } from "../../types/response.js";
 
 export type {
+	CmsAiGenerateAcceptedData,
+	CmsAiGenerateCompletedData,
 	CmsAiGenerateData,
 	CmsAiGenerateRequest,
 	CmsAiGenerateRequestFeature,

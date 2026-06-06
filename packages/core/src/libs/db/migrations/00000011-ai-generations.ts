@@ -29,19 +29,14 @@ const Migration00000011: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("target", adapter.getDataType("json"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("output", adapter.getDataType("json"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("usage", adapter.getDataType("json"), (col) => col.notNull())
-				.addColumn("model", adapter.getDataType("text"), (col) => col.notNull())
-				.addColumn("cost_currency", adapter.getDataType("text"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("cost_total_minor", adapter.getDataType("integer"), (col) =>
-					col.notNull(),
-				)
+				.addColumn("output", adapter.getDataType("json"))
+				.addColumn("usage", adapter.getDataType("json"))
+				.addColumn("model", adapter.getDataType("text"))
+				.addColumn("cost_currency", adapter.getDataType("text"))
+				.addColumn("cost_total_minor", adapter.getDataType("integer"))
+				.addColumn("duration_ms", adapter.getDataType("integer"))
 				.addColumn("status", adapter.getDataType("text"), (col) =>
-					col.notNull().defaultTo("success"),
+					col.notNull().defaultTo("pending"),
 				)
 				.addColumn("error_message", adapter.getDataType("text"))
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>

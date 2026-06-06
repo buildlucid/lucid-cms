@@ -1,11 +1,12 @@
 import type { MediaImageGenerateResponse } from "@lucidcms/types";
-import z from "zod";
 import { copy } from "../../libs/i18n/index.js";
 import type { MediaImageGenerateV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
+import { isCmsAiGenerateAcceptedData } from "../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
-import storeGeneration from "./helpers/store-generation.js";
+import storeGeneration from "./storage/store-generation.js";
+import storePendingGeneration from "./storage/store-pending-generation.js";
 
 const imageGuidanceInstructions = {
 	natural:
@@ -20,20 +21,6 @@ const imageGuidanceInstructions = {
 		"Create a cinematic image with dramatic composition, atmospheric lighting, and strong visual storytelling.",
 } as const;
 
-const mediaImageOutputSchema = z
-	.object({
-		id: z.string(),
-		url: z.string(),
-		storageKey: z.string(),
-		byteSize: z.number().int().nonnegative(),
-		mimeType: z.string(),
-		extension: z.string(),
-		size: z.string(),
-		quality: z.string(),
-		outputFormat: z.string(),
-	})
-	.strict();
-
 const mediaImageGenerate: ServiceFn<
 	[
 		{
@@ -45,6 +32,7 @@ const mediaImageGenerate: ServiceFn<
 			>["image"];
 			previousInstructions?: string[];
 			generation: MediaImageGenerateV1Request["generation"];
+			idempotencyKey?: string;
 			userId: number;
 		},
 	],
@@ -52,6 +40,20 @@ const mediaImageGenerate: ServiceFn<
 > = async (context, props) => {
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
+
+	const idempotencyKey = props.idempotencyKey?.trim();
+	if (!idempotencyKey) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy(
+					"server:core.ai.media.image.generate.idempotency.key.required",
+				),
+			},
+			data: undefined,
+		};
+	}
 
 	const input: MediaImageGenerateV1Request["input"] = [];
 	const instruction = props.instruction?.trim();
@@ -127,55 +129,57 @@ const mediaImageGenerate: ServiceFn<
 	const generateRes = await generateCmsAi(context, {
 		licenseKey: licenseKeyRes.data,
 		request,
+		idempotencyKey,
 	});
 	if (generateRes.error) return generateRes;
+	const responseData = generateRes.data.json.data;
 
-	const outputParse = mediaImageOutputSchema.safeParse(
-		generateRes.data.json.data.output,
-	);
-	if (!outputParse.success) {
-		return {
-			error: {
-				type: "basic",
-				status: 502,
-				message: copy("server:core.routes.ai.generate.error.message"),
-			},
-			data: undefined,
-		};
-	}
-
-	const response: MediaImageGenerateResponse = {
-		...generateRes.data.json.data,
-		feature: {
-			key: "media.image.generate",
-			version: "v1",
-		},
-		output: outputParse.data,
+	const target = {
+		generation: props.generation,
+		guidance: props.guidance ?? null,
+		previousInstructions: props.previousInstructions ?? [],
+		sourceImage: props.image
+			? {
+					type: props.image.type,
+					detail: props.image.detail ?? null,
+					filename: props.image.filename ?? null,
+					mimeType: props.image.mimeType ?? null,
+				}
+			: null,
 	};
 
-	const storeRes = await storeGeneration(context, {
-		userId: props.userId,
-		response,
-		targetType: "media-image",
-		target: {
-			generation: props.generation,
-			guidance: props.guidance ?? null,
-			previousInstructions: props.previousInstructions ?? [],
-			sourceImage: props.image
-				? {
-						type: props.image.type,
-						detail: props.image.detail ?? null,
-						filename: props.image.filename ?? null,
-						mimeType: props.image.mimeType ?? null,
-					}
-				: null,
-		},
-	});
+	const storeRes = isCmsAiGenerateAcceptedData(responseData)
+		? await storePendingGeneration(context, {
+				userId: props.userId,
+				requestId: responseData.requestId,
+				feature: {
+					key: "media.image.generate",
+					version: "v1",
+				},
+				targetType: "media-image",
+				target,
+			})
+		: await storeGeneration(context, {
+				userId: props.userId,
+				response: responseData,
+				targetType: "media-image",
+				target,
+			});
 	if (storeRes.error) return storeRes;
 
 	return {
 		error: undefined,
-		data: response,
+		data: {
+			mode: "async",
+			requestId: responseData.requestId,
+			feature: {
+				key: "media.image.generate",
+				version: "v1",
+			},
+			status: isCmsAiGenerateAcceptedData(responseData)
+				? responseData.status
+				: "processing",
+		},
 	};
 };
 

@@ -1,6 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
+import constants from "../../../../constants/constants.js";
 import {
 	controllerSchemas,
 	type MediaImageGenerateBody,
@@ -38,6 +39,7 @@ const mediaImageGenerateController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({
 			headers: {
 				csrf: true,
+				idempotencyKey: true,
 			},
 		}),
 	}),
@@ -62,11 +64,12 @@ const mediaImageGenerateController = factory.createHandlers(
 			previousInstructions: body.previousInstructions,
 			image: body.image,
 			generation: body.generation,
+			idempotencyKey: c.req.header(constants.headers.idempotencyKey),
 			userId: c.get("auth").id,
 		});
 		if (generateRes.error) throw new LucidAPIError(generateRes.error);
 
-		c.status(200);
+		c.status(202);
 		return c.json(
 			formatAPIResponse(c, {
 				data: generateRes.data,

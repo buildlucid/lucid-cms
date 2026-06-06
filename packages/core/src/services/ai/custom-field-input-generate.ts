@@ -1,17 +1,16 @@
+import type { CustomFieldInputGenerateResponse } from "@lucidcms/types";
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
-import type {
-	CmsAiGenerateData,
-	CustomFieldInputV1Request,
-} from "../../libs/lucid-remote/services/generate-cms-ai.js";
+import type { CustomFieldInputV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
+import { isCmsAiGenerateCompletedData } from "../../libs/lucid-remote/utils.js";
 import type { CustomFieldAiContextItem } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
 import getTranslatedFieldDetails from "./helpers/get-translated-field-details.js";
 import normalizeCurrentValueTranslations from "./helpers/normalize-current-value-translations.js";
-import storeGeneration from "./helpers/store-generation.js";
+import storeGeneration from "./storage/store-generation.js";
 
 const customFieldInputGenerate: ServiceFn<
 	[
@@ -31,7 +30,7 @@ const customFieldInputGenerate: ServiceFn<
 			userId: number;
 		},
 	],
-	CmsAiGenerateData
+	CustomFieldInputGenerateResponse
 > = async (context, props) => {
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
@@ -198,9 +197,23 @@ const customFieldInputGenerate: ServiceFn<
 	});
 	if (generateRes.error) return generateRes;
 
+	//* This feature is sync-mode only; this guard is proofing against a remote contract mismatch and should never run.
+	if (!isCmsAiGenerateCompletedData(generateRes.data.json.data)) {
+		return {
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy("server:core.routes.ai.generate.error.message"),
+			},
+			data: undefined,
+		};
+	}
+	const responseData = generateRes.data.json
+		.data as CustomFieldInputGenerateResponse;
+
 	const storeRes = await storeGeneration(context, {
 		userId: props.userId,
-		response: generateRes.data.json.data,
+		response: responseData,
 		targetType: "custom-field",
 		target: {
 			collectionKey: props.target.collectionKey,
@@ -214,7 +227,7 @@ const customFieldInputGenerate: ServiceFn<
 
 	return {
 		error: undefined,
-		data: generateRes.data.json.data,
+		data: responseData,
 	};
 };
 

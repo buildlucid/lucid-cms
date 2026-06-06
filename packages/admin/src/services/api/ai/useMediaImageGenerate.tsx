@@ -46,6 +46,7 @@ export type MediaImageGenerateBody = {
 interface Params {
 	signal?: AbortSignal;
 	shouldToast?: () => boolean;
+	idempotencyKey: string;
 	body: MediaImageGenerateBody;
 }
 
@@ -57,6 +58,9 @@ export const mediaImageGenerateReq = (params: Params) => {
 			method: "POST",
 			body: params.body,
 			signal: params.signal,
+			headers: {
+				"idempotency-key": params.idempotencyKey,
+			},
 		},
 	});
 };

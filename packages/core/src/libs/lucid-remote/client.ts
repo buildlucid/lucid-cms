@@ -41,18 +41,6 @@ const getLucidRemoteApiDomain = (context: ServiceContext) => {
 	).replace(/\/+$/, "");
 };
 
-const createRequestError = (error: unknown, status = 500) => ({
-	error: {
-		type: "basic" as const,
-		status,
-		message: copy("server:core.lucid.remote.request.failed", {
-			defaultMessage:
-				error instanceof Error ? error.message : "Lucid remote request failed.",
-		}),
-	},
-	data: undefined,
-});
-
 const isErrorResponse = (value: unknown): value is ErrorResponse => {
 	if (!value || typeof value !== "object") {
 		return false;
@@ -153,7 +141,19 @@ const createLucidRemoteClient = (props: {
 				try {
 					json = responseBody ? JSON.parse(responseBody) : {};
 				} catch (error) {
-					return createRequestError(error, response.status || 500);
+					return {
+						error: {
+							type: "basic",
+							status: response.status || 500,
+							message: copy("server:core.lucid.remote.request.failed", {
+								defaultMessage:
+									error instanceof Error
+										? error.message
+										: "Lucid remote request failed.",
+							}),
+						},
+						data: undefined,
+					};
 				}
 
 				if (!response.ok) {
@@ -172,11 +172,32 @@ const createLucidRemoteClient = (props: {
 					continue;
 				}
 
-				return createRequestError(error);
+				return {
+					error: {
+						type: "basic",
+						status: 500,
+						message: copy("server:core.lucid.remote.request.failed", {
+							defaultMessage:
+								error instanceof Error
+									? error.message
+									: "Lucid remote request failed.",
+						}),
+					},
+					data: undefined,
+				};
 			}
 		}
 
-		return createRequestError(new Error("Lucid remote request failed."));
+		return {
+			error: {
+				type: "basic",
+				status: 500,
+				message: copy("server:core.lucid.remote.request.failed", {
+					defaultMessage: "Lucid remote request failed.",
+				}),
+			},
+			data: undefined,
+		};
 	},
 });
 

@@ -3,6 +3,8 @@ export type AiGenerateCost = {
 	totalCostMinor: number;
 };
 
+export type AiGenerateMode = "sync" | "async";
+
 export type AiGenerateUsage = {
 	model: string;
 	providerRequestId?: string;
@@ -33,7 +35,21 @@ export type AiGenerateUsage = {
 	cost: AiGenerateCost;
 };
 
+export type CustomFieldInputGenerateResponse = {
+	mode: AiGenerateMode;
+	status?: "complete";
+	requestId: string;
+	feature: {
+		key: "custom-field.input.generate";
+		version: "v1";
+	};
+	output: Record<string, unknown>;
+	usage: AiGenerateUsage;
+};
+
 export type MediaAltGenerateResponse = {
+	mode: AiGenerateMode;
+	status?: "complete";
 	requestId: string;
 	feature: {
 		key: "media.alt.generate";
@@ -43,7 +59,22 @@ export type MediaAltGenerateResponse = {
 	usage: AiGenerateUsage;
 };
 
+export type MediaImageGenerateCompletionStatus = "complete";
+export type MediaImageGenerateStatus = "queued" | "processing";
+
 export type MediaImageGenerateResponse = {
+	mode: "async";
+	requestId: string;
+	feature: {
+		key: "media.image.generate";
+		version: "v1";
+	};
+	status: MediaImageGenerateStatus;
+};
+
+export type MediaImageGenerateCompletionResponse = {
+	mode: AiGenerateMode;
+	status?: MediaImageGenerateCompletionStatus;
 	requestId: string;
 	feature: {
 		key: "media.image.generate";
@@ -62,3 +93,7 @@ export type MediaImageGenerateResponse = {
 	};
 	usage: AiGenerateUsage;
 };
+
+export type MediaImageGenerateCompletionPollResponse =
+	| MediaImageGenerateResponse
+	| MediaImageGenerateCompletionResponse;

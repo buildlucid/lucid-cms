@@ -63,6 +63,36 @@ const mediaImageCustomSizeSchema = z
 		}
 	});
 
+const mediaImageGenerationSchema = z
+	.object({
+		size: z
+			.union(
+				[
+					z.enum([
+						"auto",
+						"1024x1024",
+						"1536x1024",
+						"1024x1536",
+						"2048x2048",
+						"2048x1152",
+						"3840x2160",
+						"2160x3840",
+					]),
+					mediaImageCustomSizeSchema,
+				],
+				{ error: mediaImageInvalidSizeMessage },
+			)
+			.default("1024x1024"),
+		quality: z.enum(["auto", "low", "medium", "high"]).default("medium"),
+		outputFormat: z.enum(["webp", "png", "jpeg"]).default("webp"),
+	})
+	.strict()
+	.default({
+		size: "1024x1024",
+		quality: "medium",
+		outputFormat: "webp",
+	});
+
 const localeSchema = z
 	.object({
 		source: z.string().trim().min(2).max(32).optional(),
@@ -82,6 +112,8 @@ const localeSchema = z
 
 const aiGenerateResponseSchema = z
 	.object({
+		mode: z.enum(["sync", "async"]),
+		status: z.literal("complete").optional(),
 		requestId: z.string(),
 		feature: z
 			.object({
@@ -136,6 +168,49 @@ const aiGenerateResponseSchema = z
 			.strict(),
 	})
 	.strict();
+
+const aiGenerateAcceptedResponseSchema = z
+	.object({
+		mode: z.literal("async"),
+		requestId: z.string(),
+		feature: z
+			.object({
+				key: z.string(),
+				version: z.string(),
+			})
+			.strict(),
+		status: z.enum(["queued", "processing"]),
+	})
+	.strict();
+
+const mediaImageFeatureSchema = z
+	.object({
+		key: z.literal("media.image.generate"),
+		version: z.literal("v1"),
+	})
+	.strict();
+
+const mediaImageGenerateResponseSchema =
+	aiGenerateAcceptedResponseSchema.extend({
+		feature: mediaImageFeatureSchema,
+	});
+
+const mediaImageCompletionResponseSchema = aiGenerateResponseSchema.extend({
+	feature: mediaImageFeatureSchema,
+	output: z
+		.object({
+			id: z.string(),
+			url: z.string(),
+			storageKey: z.string(),
+			byteSize: z.number().int().nonnegative(),
+			mimeType: z.string(),
+			extension: z.string(),
+			size: z.string(),
+			quality: z.string(),
+			outputFormat: z.string(),
+		})
+		.strict(),
+});
 
 export const controllerSchemas = {
 	customFieldInput: {
@@ -256,37 +331,7 @@ export const controllerSchemas = {
 							.strict(),
 					])
 					.optional(),
-				generation: z
-					.object({
-						size: z
-							.union(
-								[
-									z.enum([
-										"auto",
-										"1024x1024",
-										"1536x1024",
-										"1024x1536",
-										"2048x2048",
-										"2048x1152",
-										"3840x2160",
-										"2160x3840",
-									]),
-									mediaImageCustomSizeSchema,
-								],
-								{ error: mediaImageInvalidSizeMessage },
-							)
-							.default("1024x1024"),
-						quality: z
-							.enum(["auto", "low", "medium", "high"])
-							.default("medium"),
-						outputFormat: z.enum(["webp", "png", "jpeg"]).default("webp"),
-					})
-					.strict()
-					.default({
-						size: "1024x1024",
-						quality: "medium",
-						outputFormat: "webp",
-					}),
+				generation: mediaImageGenerationSchema,
 			})
 			.strict(),
 		query: {
@@ -294,27 +339,23 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: aiGenerateResponseSchema.extend({
-			feature: z
-				.object({
-					key: z.literal("media.image.generate"),
-					version: z.literal("v1"),
-				})
-				.strict(),
-			output: z
-				.object({
-					id: z.string(),
-					url: z.string(),
-					storageKey: z.string(),
-					byteSize: z.number().int().nonnegative(),
-					mimeType: z.string(),
-					extension: z.string(),
-					size: z.string(),
-					quality: z.string(),
-					outputFormat: z.string(),
-				})
-				.strict(),
-		}),
+		response: mediaImageGenerateResponseSchema,
+	} satisfies ControllerSchema,
+	mediaImageCompletion: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z
+			.object({
+				requestId: z.uuid(),
+			})
+			.strict(),
+		response: z.union([
+			mediaImageGenerateResponseSchema,
+			mediaImageCompletionResponseSchema,
+		]),
 	} satisfies ControllerSchema,
 };
 
@@ -324,4 +365,7 @@ export type CustomFieldInputBody = z.infer<
 export type MediaAltBody = z.infer<typeof controllerSchemas.mediaAlt.body>;
 export type MediaImageGenerateBody = z.infer<
 	typeof controllerSchemas.mediaImageGenerate.body
+>;
+export type MediaImageCompletionParams = z.infer<
+	typeof controllerSchemas.mediaImageCompletion.params
 >;

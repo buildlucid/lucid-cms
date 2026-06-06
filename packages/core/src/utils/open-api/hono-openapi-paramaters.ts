@@ -1,6 +1,7 @@
 import type { DescribeRouteOptions } from "hono-openapi";
 import type { OpenAPIV3 } from "openapi-types";
 import z, { type ZodType } from "zod";
+import constants from "../../constants/constants.js";
 import { translate } from "../../libs/i18n/index.js";
 
 /**
@@ -11,6 +12,7 @@ const honoOpenAPIParamaters = (props: {
 		// undefine means dont include in the schema, boolean means required or not
 		csrf?: boolean;
 		authorization?: boolean;
+		idempotencyKey?: boolean;
 	};
 	params?: ZodType;
 	query?: ZodType;
@@ -23,6 +25,19 @@ const honoOpenAPIParamaters = (props: {
 			name: "X-CSRF-Token",
 			required: props.headers.csrf,
 			description: translate("server:core.openapi.csrf.header.description"),
+			schema: {
+				type: "string",
+			},
+		});
+	}
+	if (props.headers?.idempotencyKey !== undefined) {
+		paramaters.push({
+			in: "header",
+			name: constants.headers.idempotencyKey,
+			required: props.headers.idempotencyKey,
+			description: translate(
+				"server:core.openapi.idempotency.key.header.description",
+			),
 			schema: {
 				type: "string",
 			},

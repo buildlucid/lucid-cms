@@ -1,4 +1,8 @@
-import type { ErrorResultObj, MediaImageGenerateResponse } from "@types";
+import type {
+	ErrorResultObj,
+	MediaImageGenerateCompletionResponse,
+	MediaImageGenerateResponse,
+} from "@types";
 import classnames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
@@ -22,7 +26,9 @@ import { Textarea } from "@/components/Groups/Form/Textarea";
 import { Modal, ModalFooter } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
 import Pill from "@/components/Partials/Pill";
+import { usePollingLoop } from "@/hooks/usePollingLoop";
 import api from "@/services/api";
+import { mediaImageCompletionReq } from "@/services/api/ai/useMediaImageCompletion";
 import type {
 	MediaImageGenerateBody,
 	MediaImageGenerationOutputFormat,
@@ -36,137 +42,28 @@ import { LucidError } from "@/utils/error-handling";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import formatAiCost from "@/utils/format-ai-cost";
 import helpers from "@/utils/helpers";
+import {
+	clearStoredPendingMediaImageGeneration,
+	type GenerateOptions,
+	type GenerateValues,
+	generationFileName,
+	getPendingMediaImageGenerationStorageKey,
+	imageGuidanceOptions,
+	initialCompletionPollDelayMs,
+	loadStoredPendingMediaImageGeneration,
+	type MediaImageGenerationCandidate,
+	type MediaImageGenerationGuidanceKey,
+	type MediaImageGenerationPresetSize,
+	type MediaImageGenerationResolutionPreset,
+	type MediaImageGenerationSource,
+	type PendingMediaImageGeneration,
+	resolutionPresets,
+	type SupportedImageMimeType,
+	steadyCompletionPollAfterMs,
+	steadyCompletionPollDelayMs,
+	storePendingMediaImageGeneration,
+} from "@/utils/media-image-generation";
 import spawnToast from "@/utils/spawn-toast";
-
-type SupportedImageMimeType = "image/webp" | "image/png" | "image/jpeg";
-
-type GenerateValues = {
-	instruction?: string;
-	guidance?: MediaImageGenerationGuidanceKey;
-	size: MediaImageGenerationSize;
-	quality: MediaImageGenerationQuality;
-	outputFormat: MediaImageGenerationOutputFormat;
-};
-
-type GenerateOptions = {
-	source?: MediaImageGenerationSource;
-	previousInstructions?: string[];
-	includeInPreviousInstructions?: boolean;
-};
-
-type MediaImageGenerationSource = {
-	id: string;
-	type: "target" | "upload" | "generation";
-	label: string;
-	image: AiImageSource;
-};
-
-type MediaImageGenerationPresetSize = Exclude<
-	MediaImageGenerationSize,
-	[number, number]
->;
-type MediaImageGenerationResolutionPreset =
-	| "custom"
-	| MediaImageGenerationPresetSize;
-
-const resolutionPresets: Array<{
-	value: MediaImageGenerationResolutionPreset;
-	label: string;
-	width?: number;
-	height?: number;
-}> = [
-	{
-		value: "custom",
-		label: "ai.media.image.generate.resolution.option.custom",
-	},
-	{
-		value: "1024x1024",
-		label: "ai.media.image.generate.size.option.square",
-		width: 1024,
-		height: 1024,
-	},
-	{
-		value: "1536x1024",
-		label: "ai.media.image.generate.size.option.landscape",
-		width: 1536,
-		height: 1024,
-	},
-	{
-		value: "1024x1536",
-		label: "ai.media.image.generate.size.option.portrait",
-		width: 1024,
-		height: 1536,
-	},
-	{
-		value: "2048x1152",
-		label: "ai.media.image.generate.size.option.wide",
-		width: 2048,
-		height: 1152,
-	},
-	{
-		value: "2048x2048",
-		label: "ai.media.image.generate.size.option.square.large",
-		width: 2048,
-		height: 2048,
-	},
-	{
-		value: "3840x2160",
-		label: "ai.media.image.generate.size.option.large.wide",
-		width: 3840,
-		height: 2160,
-	},
-	{
-		value: "2160x3840",
-		label: "ai.media.image.generate.size.option.large.portrait",
-		width: 2160,
-		height: 3840,
-	},
-	{
-		value: "auto",
-		label: "ai.media.image.generate.size.option.auto",
-	},
-];
-
-const imageGuidanceOptions = [
-	{
-		key: "natural",
-		label: "ai.media.image.generate.guidance.option.natural",
-	},
-	{
-		key: "editorial",
-		label: "ai.media.image.generate.guidance.option.editorial",
-	},
-	{
-		key: "product",
-		label: "ai.media.image.generate.guidance.option.product",
-	},
-	{
-		key: "illustration",
-		label: "ai.media.image.generate.guidance.option.illustration",
-	},
-	{
-		key: "cinematic",
-		label: "ai.media.image.generate.guidance.option.cinematic",
-	},
-] as const;
-
-type MediaImageGenerationGuidanceKey =
-	(typeof imageGuidanceOptions)[number]["key"];
-
-export type MediaImageGenerationCandidate = {
-	id: string;
-	instruction: string;
-	guidance?: MediaImageGenerationGuidanceKey;
-	sourceLabel?: string;
-	source?: MediaImageGenerationSource;
-	previousInstructions: string[];
-	includeInPreviousInstructions: boolean;
-	size: MediaImageGenerationSize;
-	quality: MediaImageGenerationQuality;
-	outputFormat: MediaImageGenerationOutputFormat;
-	cost: MediaImageGenerateResponse["usage"]["cost"];
-	output: MediaImageGenerateResponse["output"];
-};
 
 const MediaImageGenerationModal: Component = () => {
 	// -----------------------------
@@ -174,6 +71,9 @@ const MediaImageGenerationModal: Component = () => {
 	const [generations, setGenerations] = createSignal<
 		MediaImageGenerationCandidate[]
 	>([]);
+	const [pendingGeneration, setPendingGeneration] =
+		createSignal<PendingMediaImageGeneration>();
+	const [pollingRequestId, setPollingRequestId] = createSignal<string>();
 	const [selectedGenerationId, setSelectedGenerationId] =
 		createSignal<string>();
 	const [source, setSource] = createSignal<MediaImageGenerationSource>();
@@ -192,10 +92,29 @@ const MediaImageGenerationModal: Component = () => {
 		createSignal<MediaImageGenerationQuality>("medium");
 	const [outputFormat, setOutputFormat] =
 		createSignal<MediaImageGenerationOutputFormat>("webp");
+	const [idempotencyKey, setIdempotencyKey] = createSignal(crypto.randomUUID());
+
 	let responseColumnRef: HTMLDivElement | undefined;
 	let sourceInputRef: HTMLInputElement | undefined;
 	let generationId = 0;
 	let abortController: AbortController | undefined;
+
+	const completionPoller = usePollingLoop<PendingMediaImageGeneration>({
+		poll: pollImageCompletion,
+		onStart: (pending) => {
+			setPollingRequestId(pending.requestId);
+			aiModalsStore.setLoading(true);
+		},
+		onContinue: (pending) => {
+			setPendingGeneration(pending);
+			storePendingMediaImageGeneration(pending);
+		},
+		onStop: () => {
+			setPollingRequestId(undefined);
+			aiModalsStore.setLoading(false);
+		},
+		onError: handleCompletionPollingError,
+	});
 
 	// -----------------------------
 	// Mutations
@@ -209,7 +128,15 @@ const MediaImageGenerationModal: Component = () => {
 	const target = createMemo(() => modal()?.data.target);
 	const targetId = createMemo(() => modal()?.data.targetId);
 	const isOpen = createMemo(() => modal() !== undefined);
-	const isLoading = createMemo(() => generateImage.action.isPending);
+	const isPollingCompletion = createMemo(
+		() => pollingRequestId() !== undefined,
+	);
+	const isLoading = createMemo(
+		() => generateImage.action.isPending || isPollingCompletion(),
+	);
+	const hasPendingGeneration = createMemo(
+		() => pendingGeneration() !== undefined,
+	);
 	const responseError = createMemo(() => {
 		return clientError() ?? generateImage.errors()?.message;
 	});
@@ -230,7 +157,9 @@ const MediaImageGenerationModal: Component = () => {
 	const hasInstruction = createMemo(() => instruction().trim().length > 0);
 	const canGenerate = createMemo(
 		() =>
-			hasInstruction() || (guidance() !== undefined && source() !== undefined),
+			!hasPendingGeneration() &&
+			(hasInstruction() ||
+				(guidance() !== undefined && source() !== undefined)),
 	);
 	const isCustomResolution = createMemo(() => resolutionPreset() === "custom");
 	const generationSize = createMemo<MediaImageGenerationSize>(() => {
@@ -283,14 +212,20 @@ const MediaImageGenerationModal: Component = () => {
 			image,
 		};
 	}
-	function generationFileName(output: MediaImageGenerateResponse["output"]) {
-		const extension = output.extension || output.outputFormat || "webp";
-		return `lucid-ai-image-${output.id}.${extension.replace(/^\./, "")}`;
-	}
 	function generationSourceLabel(generation: MediaImageGenerationCandidate) {
 		return T()("ai.media.image.generate.source.generation.label", {
 			id: generation.id.replace("generation-", ""),
 		});
+	}
+	function nextGenerationId() {
+		generationId += 1;
+		return `generation-${generationId}`;
+	}
+	function syncGenerationId(id: string) {
+		const numericId = Number(id.replace("generation-", ""));
+		if (Number.isFinite(numericId) && numericId > generationId) {
+			generationId = numericId;
+		}
 	}
 	function sourceDescription(currentSource?: MediaImageGenerationSource) {
 		if (!currentSource) return T()("ai.media.image.generate.source.none");
@@ -305,7 +240,10 @@ const MediaImageGenerationModal: Component = () => {
 		const option = imageGuidanceOptions.find((option) => option.key === key);
 		return option ? T()(option.label) : undefined;
 	}
-	function generationSummary(generation: MediaImageGenerationCandidate) {
+	function generationSummary(generation: {
+		instruction: string;
+		guidance?: MediaImageGenerationGuidanceKey;
+	}) {
 		return generation.instruction || guidanceLabel(generation.guidance) || "";
 	}
 	function generationMeta(generation: MediaImageGenerationCandidate) {
@@ -331,6 +269,22 @@ const MediaImageGenerationModal: Component = () => {
 			default:
 				return format;
 		}
+	}
+	function createIdempotencyKey() {
+		return crypto.randomUUID();
+	}
+	function resetIdempotencyKey() {
+		setIdempotencyKey(createIdempotencyKey());
+	}
+	function isCompletionResponse(
+		data: MediaImageGenerateResponse | MediaImageGenerateCompletionResponse,
+	): data is MediaImageGenerateCompletionResponse {
+		return "output" in data && "usage" in data;
+	}
+	function getNextCompletionPollDelay(pending: PendingMediaImageGeneration) {
+		return Date.now() - pending.createdAt >= steadyCompletionPollAfterMs
+			? steadyCompletionPollDelayMs
+			: initialCompletionPollDelayMs;
 	}
 	function updateResolutionPreset(value: MediaImageGenerationResolutionPreset) {
 		setResolutionPreset(value);
@@ -404,11 +358,14 @@ const MediaImageGenerationModal: Component = () => {
 		};
 	}
 	const abortRequest = () => {
+		completionPoller.stop();
 		abortController?.abort();
 		abortController = undefined;
+		setPollingRequestId(undefined);
 	};
 	const clear = () => {
 		setGenerations([]);
+		setPendingGeneration(undefined);
 		setSelectedGenerationId(undefined);
 		setSource(undefined);
 		setInitialSource(undefined);
@@ -459,6 +416,126 @@ const MediaImageGenerationModal: Component = () => {
 		if (!targetSource) return;
 		setSource(targetSource);
 	};
+	function buildCandidateFromCompletion(
+		pending: PendingMediaImageGeneration,
+		response: MediaImageGenerateCompletionResponse,
+	): MediaImageGenerationCandidate {
+		return {
+			id: pending.id,
+			instruction: pending.instruction,
+			guidance: pending.guidance,
+			sourceLabel: pending.sourceLabel,
+			source: pending.source,
+			previousInstructions: pending.previousInstructions,
+			includeInPreviousInstructions: pending.includeInPreviousInstructions,
+			size: pending.size,
+			quality: pending.quality,
+			outputFormat: pending.outputFormat,
+			cost: response.usage.cost,
+			output: response.output,
+		};
+	}
+	function finishPendingGeneration(
+		pending: PendingMediaImageGeneration,
+		response: MediaImageGenerateCompletionResponse,
+	) {
+		const candidate = buildCandidateFromCompletion(pending, response);
+
+		setGenerations((previous) => [...previous, candidate]);
+		setSelectedGenerationId(candidate.id);
+		setPendingGeneration(undefined);
+		setPollingRequestId(undefined);
+		clearStoredPendingMediaImageGeneration(pending, targetId());
+		resetIdempotencyKey();
+		aiModalsStore.setLoading(false);
+
+		if (aiModalsStore.isOpen("mediaImageGeneration")) {
+			spawnToast({
+				title: T()("toasts.ai.media.image.generate.success.title"),
+				message: T()("toasts.ai.media.image.generate.success.message"),
+				status: "success",
+			});
+		}
+	}
+	function scheduleCompletionPoll(
+		pending: PendingMediaImageGeneration,
+		delay = getNextCompletionPollDelay(pending),
+	) {
+		completionPoller.start(pending, delay);
+	}
+	async function pollImageCompletion(
+		pending: PendingMediaImageGeneration,
+		signal: AbortSignal,
+	) {
+		if (
+			pendingGeneration()?.requestId !== pending.requestId ||
+			!aiModalsStore.isOpen("mediaImageGeneration")
+		) {
+			return { type: "complete" as const };
+		}
+
+		setClientError(undefined);
+
+		const response = await mediaImageCompletionReq({
+			requestId: pending.requestId,
+			signal,
+		});
+		if (!aiModalsStore.isOpen("mediaImageGeneration")) {
+			return { type: "complete" as const };
+		}
+
+		if (isCompletionResponse(response.data)) {
+			finishPendingGeneration(pending, response.data);
+			return { type: "complete" as const };
+		}
+
+		const updatedPending = {
+			...pending,
+			status: response.data.status,
+		} satisfies PendingMediaImageGeneration;
+
+		return {
+			type: "continue" as const,
+			item: updatedPending,
+			delay: getNextCompletionPollDelay(updatedPending),
+		};
+	}
+	function handleCompletionPollingError(
+		error: unknown,
+		pending: PendingMediaImageGeneration,
+	) {
+		const message =
+			error instanceof LucidError
+				? error.message
+				: error instanceof Error
+					? error.message
+					: T()("toasts.ai.media.image.generate.error.message");
+		setClientError(message);
+
+		if (error instanceof LucidError) {
+			clearStoredPendingMediaImageGeneration(pending, targetId());
+			setPendingGeneration(undefined);
+		}
+
+		if (aiModalsStore.isOpen("mediaImageGeneration")) {
+			spawnToast({
+				title: T()("toasts.ai.media.image.generate.error.title"),
+				message,
+				status: "error",
+			});
+		}
+	}
+	function resumePendingGeneration(pending: PendingMediaImageGeneration) {
+		setPendingGeneration(pending);
+		scheduleCompletionPoll(pending, 0);
+	}
+	function discardPendingGeneration(pending = pendingGeneration()) {
+		if (!pending) return;
+
+		abortRequest();
+		clearStoredPendingMediaImageGeneration(pending, targetId());
+		setPendingGeneration(undefined);
+	}
 	const generateImageRequest = async (
 		values: GenerateValues,
 		options: GenerateOptions = {},
@@ -481,9 +558,15 @@ const MediaImageGenerationModal: Component = () => {
 			);
 			const previousInstructions =
 				options.previousInstructions ?? buildPreviousInstructions();
+			const storageKey =
+				getPendingMediaImageGenerationStorageKey(requestTargetId);
+			if (!storageKey) return;
+
+			const currentIdempotencyKey = idempotencyKey();
 			const response = await generateImage.action.mutateAsync({
 				signal: abortController.signal,
-				shouldToast: () => aiModalsStore.isOpen("mediaImageGeneration"),
+				shouldToast: () => false,
+				idempotencyKey: currentIdempotencyKey,
 				body: {
 					instruction: values.instruction,
 					guidance: values.guidance,
@@ -499,10 +582,12 @@ const MediaImageGenerationModal: Component = () => {
 			});
 			if (!aiModalsStore.isOpen("mediaImageGeneration")) return;
 
-			const id = `generation-${generationId + 1}`;
-			generationId += 1;
-			const candidate: MediaImageGenerationCandidate = {
+			const id = nextGenerationId();
+			const pending: PendingMediaImageGeneration = {
 				id,
+				requestId: response.data.requestId,
+				idempotencyKey: currentIdempotencyKey,
+				targetId: requestTargetId,
 				instruction: values.instruction ?? "",
 				guidance: values.guidance,
 				sourceLabel: sourceDescription(requestSource),
@@ -513,12 +598,14 @@ const MediaImageGenerationModal: Component = () => {
 				size: values.size,
 				quality: values.quality,
 				outputFormat: values.outputFormat,
-				cost: response.data.usage.cost,
-				output: response.data.output,
+				status: response.data.status,
+				createdAt: Date.now(),
+				storageKey,
 			};
 
-			setGenerations((previous) => [...previous, candidate]);
-			setSelectedGenerationId(id);
+			setPendingGeneration(pending);
+			storePendingMediaImageGeneration(pending);
+			scheduleCompletionPoll(pending, initialCompletionPollDelayMs);
 		} catch (error) {
 			if (error instanceof DOMException && error.name === "AbortError") return;
 
@@ -541,7 +628,9 @@ const MediaImageGenerationModal: Component = () => {
 			}
 		} finally {
 			if (requestTargetId === targetId()) {
-				aiModalsStore.setLoading(false);
+				if (!completionPoller.isActive()) {
+					aiModalsStore.setLoading(false);
+				}
 				abortController = undefined;
 			}
 		}
@@ -614,7 +703,31 @@ const MediaImageGenerationModal: Component = () => {
 		updateResolutionPreset("1024x1024");
 		setQuality("medium");
 		setOutputFormat("webp");
+		resetIdempotencyKey();
 	});
+
+	createEffect(
+		on(
+			() => [
+				instruction(),
+				guidance() ?? "",
+				resolutionPreset(),
+				customWidth(),
+				customHeight(),
+				quality(),
+				outputFormat(),
+				source()?.id ?? "",
+				generations()
+					.map(
+						(generation) =>
+							`${generation.id}:${generation.includeInPreviousInstructions}:${generation.instruction}`,
+					)
+					.join("|"),
+			],
+			() => resetIdempotencyKey(),
+			{ defer: true },
+		),
+	);
 
 	createEffect(() => {
 		if (!isOpen() || !selectedGenerationId()) return;
@@ -644,10 +757,17 @@ const MediaImageGenerationModal: Component = () => {
 			const activeTarget = target();
 			if (!id || !activeTarget) return;
 
+			abortRequest();
 			clear();
 			const targetSource = buildTargetSource(activeTarget.image());
 			setInitialSource(targetSource);
 			setSource(targetSource);
+
+			const storedPending = loadStoredPendingMediaImageGeneration(id);
+			if (storedPending) {
+				syncGenerationId(storedPending.id);
+				setPendingGeneration(storedPending);
+			}
 		}),
 	);
 
@@ -1042,8 +1162,62 @@ const MediaImageGenerationModal: Component = () => {
 								</div>
 							</Show>
 						</div>
-						<Show when={generations().length > 0}>
+						<Show when={pendingGeneration() || generations().length > 0}>
 							<div class="mt-4 min-w-0 space-y-2">
+								<Show when={pendingGeneration()}>
+									{(pending) => (
+										<div class="min-w-0 rounded-md border border-border bg-card-base transition-colors duration-200">
+											<div class="flex min-w-0 w-full items-center gap-3 p-3 text-left">
+												<div class="rectangle-background flex h-14 w-18 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-background-base">
+													<span class="skeleton relative z-10 h-full w-full opacity-80" />
+												</div>
+												<div class="min-w-0 flex-1">
+													<p class="truncate text-sm font-semibold text-title">
+														{T()(
+															"ai.media.image.generate.response.inflight.title",
+														)}
+													</p>
+													<p class="truncate text-xs text-body">
+														{generationSummary(pending()) ||
+															T()(
+																"ai.media.image.generate.response.inflight.description",
+															)}
+													</p>
+													<p class="mt-1 min-w-0 truncate text-xs text-unfocused">
+														{pending().sourceLabel}
+													</p>
+												</div>
+											</div>
+											<div class="flex min-w-0 items-center gap-4 border-t border-border px-3 py-2">
+												<button
+													type="button"
+													class="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-unfocused underline-offset-2 transition-colors duration-200 hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60"
+													disabled={isLoading()}
+													onClick={() => resumePendingGeneration(pending())}
+												>
+													<FaSolidArrowRotateLeft
+														size={12}
+														aria-hidden="true"
+													/>
+													{T()(
+														"ai.media.image.generate.response.inflight.resume",
+													)}
+												</button>
+												<button
+													type="button"
+													class="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-unfocused underline-offset-2 transition-colors duration-200 hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60"
+													disabled={isLoading()}
+													onClick={() => discardPendingGeneration(pending())}
+												>
+													<FaSolidXmark size={12} aria-hidden="true" />
+													{T()(
+														"ai.media.image.generate.response.inflight.discard",
+													)}
+												</button>
+											</div>
+										</div>
+									)}
+								</Show>
 								<For each={generations()}>
 									{(generation, index) => {
 										const selected = createMemo(() => {

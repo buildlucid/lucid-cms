@@ -3,9 +3,10 @@ import z from "zod";
 import { copy } from "../../libs/i18n/index.js";
 import type { MediaAltGenerateV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
+import { isCmsAiGenerateCompletedData } from "../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getLicenseKey from "../options/get-license-key.js";
-import storeGeneration from "./helpers/store-generation.js";
+import storeGeneration from "./storage/store-generation.js";
 
 const mediaAltOutputSchema = z.record(z.string(), z.string());
 
@@ -81,6 +82,18 @@ const mediaAltGenerate: ServiceFn<
 	});
 	if (generateRes.error) return generateRes;
 
+	//* This feature is sync-mode only; this guard is proofing against a remote contract mismatch and should never run.
+	if (!isCmsAiGenerateCompletedData(generateRes.data.json.data)) {
+		return {
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy("server:core.routes.ai.generate.error.message"),
+			},
+			data: undefined,
+		};
+	}
+
 	const outputParse = mediaAltOutputSchema.safeParse(
 		generateRes.data.json.data.output,
 	);
@@ -109,17 +122,9 @@ const mediaAltGenerate: ServiceFn<
 		};
 	}
 
-	const response: MediaAltGenerateResponse = {
-		...generateRes.data.json.data,
-		feature: {
-			key: "media.alt.generate",
-			version: "v1",
-		},
-		output: outputParse.data,
-	};
 	const storeRes = await storeGeneration(context, {
 		userId: props.userId,
-		response,
+		response: generateRes.data.json.data,
 		targetType: "media-alt",
 		target: {
 			mediaId: props.media.id ?? null,
@@ -135,7 +140,16 @@ const mediaAltGenerate: ServiceFn<
 
 	return {
 		error: undefined,
-		data: response,
+		data: {
+			mode: generateRes.data.json.data.mode,
+			requestId: generateRes.data.json.data.requestId,
+			feature: {
+				key: "media.alt.generate",
+				version: "v1",
+			},
+			output: outputParse.data,
+			usage: generateRes.data.json.data.usage,
+		},
 	};
 };
 

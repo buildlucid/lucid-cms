@@ -5,6 +5,7 @@ import aiController from "../../../controllers/ai/index.js";
 const aiRoutes = new Hono<LucidHonoGeneric>()
 	.post("/custom-field", ...aiController.customFieldInputGenerate)
 	.post("/media-image", ...aiController.mediaImageGenerate)
+	.post("/media-image/:requestId", ...aiController.mediaImageCompletion)
 	.post("/media-alt", ...aiController.mediaAltGenerate);
 
 export default aiRoutes;
