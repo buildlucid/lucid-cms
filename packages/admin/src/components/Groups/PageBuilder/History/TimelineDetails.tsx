@@ -687,14 +687,14 @@ const AuthorDisplay: Component<{
 			<UserDisplay
 				user={{
 					username:
-						helpers.formatUserName(user(), "simple") ||
-						T()("media.types.unknown"),
+						user().username ?? user().email ?? T()("media.types.unknown"),
 					firstName: user().firstName,
 					lastName: user().lastName,
 					profilePicture: user().profilePicture,
 				}}
 				mode="short"
 				size="x-small"
+				nameFormat="simple"
 			/>
 		)}
 	</Show>

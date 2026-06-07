@@ -3,7 +3,6 @@ import type { Component } from "solid-js";
 import { Td } from "@/components/Groups/Table/Td";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import T from "@/translations";
-import helpers from "@/utils/helpers";
 
 const PublishOperationUserCol: Component<{
 	user: PublishOperationUser;
@@ -25,7 +24,8 @@ const PublishOperationUserCol: Component<{
 				<UserDisplay
 					user={{
 						username:
-							helpers.formatUserName(props.user, "simple") ||
+							props.user.username ??
+							props.user.email ??
 							T()("media.types.unknown"),
 						firstName: props.user.firstName,
 						lastName: props.user.lastName,
@@ -33,6 +33,7 @@ const PublishOperationUserCol: Component<{
 					}}
 					mode="short"
 					size="x-small"
+					nameFormat="simple"
 				/>
 			) : (
 				"-"

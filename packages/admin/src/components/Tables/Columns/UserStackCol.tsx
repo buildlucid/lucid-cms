@@ -50,7 +50,10 @@ const UserStackCol: Component<{
 								<span class="rounded-full ring-2 ring-card-base">
 									<UserDisplay
 										user={{
-											username: displayName(user),
+											username:
+												user.username ??
+												user.email ??
+												T()("media.types.unknown"),
 											firstName: user.firstName,
 											lastName: user.lastName,
 											profilePicture: user.profilePicture,

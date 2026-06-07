@@ -79,7 +79,9 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 			</span>
 			<Switch>
 				<Match when={props.mode === "short"}>
-					{helpers.formatUserName(props.user, props.nameFormat)}
+					<span class="text-sm">
+						{helpers.formatUserName(props.user, props.nameFormat)}
+					</span>
 				</Match>
 				<Match when={props.mode === "long"}>
 					<div class="flex flex-col ml-2">
