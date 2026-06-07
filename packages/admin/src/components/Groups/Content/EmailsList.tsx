@@ -1,7 +1,6 @@
 import {
 	FaSolidCalendar,
 	FaSolidEnvelope,
-	FaSolidFlag,
 	FaSolidPaperPlane,
 	FaSolidT,
 } from "solid-icons/fa";
@@ -83,40 +82,22 @@ export const EmailsList: Component<{
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("common.priority"),
-						key: "priority",
-						icon: <FaSolidFlag />,
-					},
-					{
-						label: T()("common.subject"),
-						key: "subject",
+						label: T()("common.message"),
+						key: "message",
 						icon: <FaSolidT />,
+						minWidth: 260,
 					},
 					{
-						label: T()("email.templates.singular"),
-						key: "template",
-						icon: <FaSolidT />,
-					},
-					{
-						label: T()("common.to"),
-						key: "to",
+						label: T()("common.addresses"),
+						key: "addresses",
 						icon: <FaSolidEnvelope />,
-					},
-					{
-						label: T()("common.from"),
-						key: "from",
-						icon: <FaSolidEnvelope />,
+						minWidth: 260,
 					},
 					{
 						label: T()("common.attempt.count"),
 						key: "attemptCount",
 						icon: <FaSolidPaperPlane />,
 						sortable: true,
-					},
-					{
-						label: T()("common.type"),
-						key: "type",
-						icon: <FaSolidT />,
 					},
 					{
 						label: T()("common.first.attempt"),

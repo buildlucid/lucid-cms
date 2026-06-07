@@ -1,16 +1,16 @@
 import type { User } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
-import { Td } from "@/components/Groups/Table/Td";
 import { Tr } from "@/components/Groups/Table/Tr";
-import UserDisplay from "@/components/Partials/UserDisplay";
+import PillCol from "@/components/Tables/Columns/PillCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
+import UserIdentityCol from "@/components/Tables/Columns/UserIdentityCol";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import type { TableRowProps } from "@/types/components";
+import helpers from "@/utils/helpers";
 import DateCol from "../Columns/DateCol";
-import PillCol from "../Columns/PillCol";
 
 interface UserRowProps extends TableRowProps {
 	user: User;
@@ -181,28 +181,14 @@ const UserRow: Component<UserRowProps> = (props) => {
 			options={props.options}
 			callbacks={props.callbacks}
 		>
-			<Td options={{ include: props?.include[0] }}>
-				<UserDisplay
-					user={{
-						username: username(),
-						profilePicture: props.user.profilePicture,
-					}}
-					mode="short"
-					size="x-small"
-					nameFormat="username"
-				/>
-			</Td>
+			<UserIdentityCol
+				user={props.user}
+				username={username()}
+				options={{ include: props?.include[0] }}
+			/>
 			<TextCol
-				text={props.user.firstName}
+				text={helpers.formatUserName(props.user, "simple") || "-"}
 				options={{ include: props?.include[1] }}
-			/>
-			<TextCol
-				text={props.user.lastName}
-				options={{ include: props?.include[2] }}
-			/>
-			<TextCol
-				text={props.user.email}
-				options={{ include: props?.include[3] }}
 			/>
 			<TextCol
 				text={
@@ -210,15 +196,16 @@ const UserRow: Component<UserRowProps> = (props) => {
 						? T()("users.super.admin.title")
 						: T()("common.standard")
 				}
-				options={{ include: props?.include[4] }}
+				options={{ include: props?.include[2] }}
 			/>
-			<TextCol
+			<PillCol
 				text={
 					props.user.isLocked
 						? T()("common.status.locked")
 						: T()("common.status.unlocked")
 				}
-				options={{ include: props?.include[5] }}
+				theme={props.user.isLocked ? "warning-opaque" : "outline"}
+				options={{ include: props?.include[3] }}
 			/>
 			<PillCol
 				text={
@@ -229,10 +216,10 @@ const UserRow: Component<UserRowProps> = (props) => {
 							: T()("common.status.pending")
 				}
 				theme={props.user.invitationAccepted ? "outline" : "warning-opaque"}
-				options={{ include: props?.include[6] }}
+				options={{ include: props?.include[4] }}
 			/>
 			<PillCol
-				options={{ include: props?.include[7] }}
+				options={{ include: props?.include[5] }}
 				text={
 					props.user.triggerPasswordReset == null
 						? undefined
@@ -244,7 +231,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 			/>
 			<DateCol
 				date={props.user.createdAt}
-				options={{ include: props?.include[8] }}
+				options={{ include: props?.include[6] }}
 			/>
 		</Tr>
 	);

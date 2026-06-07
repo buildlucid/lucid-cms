@@ -73,19 +73,16 @@ export const JobsList: Component<{
 						icon: <FaSolidT />,
 					},
 					{
-						label: T()("common.event.type"),
-						key: "eventType",
+						label: T()("common.job"),
+						key: "job",
 						icon: <FaSolidT />,
-					},
-					{
-						label: T()("queue.adapter"),
-						key: "queueAdapterKey",
-						icon: <FaSolidT />,
+						minWidth: 260,
 					},
 					{
 						label: T()("common.attempts"),
 						key: "attempts",
 						icon: <FaSolidListOl />,
+						sortable: true,
 					},
 					{
 						label: T()("common.max.attempts"),
@@ -96,6 +93,7 @@ export const JobsList: Component<{
 						label: T()("common.priority"),
 						key: "priority",
 						icon: <FaSolidListOl />,
+						sortable: true,
 					},
 					{
 						label: T()("common.created.at"),

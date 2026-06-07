@@ -3,7 +3,6 @@ import {
 	FaSolidEnvelope,
 	FaSolidIdCard,
 	FaSolidLock,
-	FaSolidT,
 	FaSolidUserTie,
 } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, Index } from "solid-js";
@@ -158,24 +157,15 @@ export const UserList: Component<{
 				searchParams={props.state.searchParams}
 				head={[
 					{
-						label: T()("common.username"),
-						key: "username",
+						label: T()("common.user"),
+						key: "user",
 						icon: <FaSolidIdCard />,
+						minWidth: 260,
 					},
 					{
-						label: T()("common.first.name"),
-						key: "firstName",
-						icon: <FaSolidT />,
-					},
-					{
-						label: T()("common.last.name"),
-						key: "lastName",
-						icon: <FaSolidT />,
-					},
-					{
-						label: T()("common.email"),
-						key: "email",
-						icon: <FaSolidEnvelope />,
+						label: T()("common.name"),
+						key: "name",
+						icon: <FaSolidIdCard />,
 					},
 					{
 						label: T()("users.type"),

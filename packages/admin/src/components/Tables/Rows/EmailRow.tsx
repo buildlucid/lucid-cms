@@ -2,8 +2,9 @@ import type { Email } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table/Tr";
 import DateCol from "@/components/Tables/Columns/DateCol";
+import EmailAddressesCol from "@/components/Tables/Columns/EmailAddressesCol";
+import EmailMessageCol from "@/components/Tables/Columns/EmailMessageCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
-import TextCol from "@/components/Tables/Columns/TextCol";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
@@ -17,17 +18,6 @@ interface EmailRowProps extends TableRowProps {
 }
 
 const EmailRow: Component<EmailRowProps> = (props) => {
-	const priorityTheme = () => {
-		switch (props.email.mailDetails.priority) {
-			case "high":
-				return "error-opaque";
-			case "low":
-				return "grey";
-			default:
-				return "outline";
-		}
-	};
-
 	// ----------------------------------
 	// Render
 	return (
@@ -90,45 +80,26 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 				}
 				options={{ include: props?.include[0] }}
 			/>
-			<PillCol
-				text={props.email.mailDetails.priority}
-				theme={priorityTheme()}
+			<EmailMessageCol
+				email={props.email}
 				options={{ include: props?.include[1] }}
 			/>
-			<TextCol
-				text={props.email.mailDetails.subject}
-				options={{ include: props?.include[2], maxLines: 2 }}
-			/>
-			<PillCol
-				text={props.email.mailDetails.template}
-				options={{ include: props?.include[3] }}
-				theme={"outline"}
-			/>
-			<TextCol
-				text={props.email.mailDetails.to}
-				options={{ include: props?.include[4], maxLines: 1 }}
-			/>
-			<TextCol
-				text={props.email.mailDetails.from.address}
-				options={{ include: props?.include[5], maxLines: 1 }}
+			<EmailAddressesCol
+				email={props.email}
+				options={{ include: props?.include[2] }}
 			/>
 			<PillCol
 				text={props.email.attemptCount || 0}
 				theme={"outline"}
-				options={{ include: props?.include[6] }}
-			/>
-			<PillCol
-				text={props.email.type}
-				theme={"outline"}
-				options={{ include: props?.include[7] }}
+				options={{ include: props?.include[3] }}
 			/>
 			<DateCol
 				date={props.email.createdAt}
-				options={{ include: props?.include[8] }}
+				options={{ include: props?.include[4] }}
 			/>
 			<DateCol
 				date={props.email.lastAttemptedAt}
-				options={{ include: props?.include[9] }}
+				options={{ include: props?.include[5] }}
 			/>
 		</Tr>
 	);

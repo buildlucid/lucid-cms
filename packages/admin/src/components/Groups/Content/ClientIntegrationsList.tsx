@@ -125,18 +125,9 @@ export const ClientIntegrationsList: Component<{
 						},
 						{
 							label: T()("common.last.used.at"),
-							key: "lastUsedAt",
+							key: "lastUsed",
 							icon: <FaSolidCalendar />,
-						},
-						{
-							label: T()("common.ip.address"),
-							key: "lastUsedIp",
-							icon: <FaSolidIdCard />,
-						},
-						{
-							label: T()("users.agent"),
-							key: "lastUsedUserAgent",
-							icon: <FaSolidT />,
+							minWidth: 280,
 						},
 						{
 							label: T()("common.created.at"),

@@ -1,6 +1,7 @@
 import type { ClientIntegration } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table/Tr";
+import ClientIntegrationLastUsedCol from "@/components/Tables/Columns/ClientIntegrationLastUsedCol";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
@@ -95,25 +96,17 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 				text={props.clientIntegration.description}
 				options={{ include: props.include[3], maxLines: 2 }}
 			/>
-			<DateCol
-				date={props.clientIntegration.lastUsedAt}
+			<ClientIntegrationLastUsedCol
+				clientIntegration={props.clientIntegration}
 				options={{ include: props.include[4] }}
-			/>
-			<TextCol
-				text={props.clientIntegration.lastUsedIp}
-				options={{ include: props.include[5], maxLines: 1 }}
-			/>
-			<TextCol
-				text={props.clientIntegration.lastUsedUserAgent}
-				options={{ include: props.include[6], maxLines: 2 }}
 			/>
 			<DateCol
 				date={props.clientIntegration.createdAt}
-				options={{ include: props.include[7] }}
+				options={{ include: props.include[5] }}
 			/>
 			<DateCol
 				date={props.clientIntegration.updatedAt}
-				options={{ include: props.include[8] }}
+				options={{ include: props.include[6] }}
 			/>
 		</Tr>
 	);

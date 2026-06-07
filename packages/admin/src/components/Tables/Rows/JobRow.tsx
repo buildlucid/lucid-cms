@@ -2,8 +2,8 @@ import type { Job } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table/Tr";
 import DateCol from "@/components/Tables/Columns/DateCol";
+import JobDetailsCol from "@/components/Tables/Columns/JobDetailsCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
-import TextCol from "@/components/Tables/Columns/TextCol";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
@@ -51,40 +51,33 @@ const JobRow: Component<JobRowProps> = (props) => {
 				}
 				options={{ include: props?.include[0] }}
 			/>
-			<TextCol
-				text={props.job.eventType}
-				options={{ include: props?.include[1], maxLines: 1 }}
-			/>
-			<TextCol
-				text={props.job.queueAdapterKey}
-				options={{ include: props?.include[2], maxLines: 1 }}
-			/>
+			<JobDetailsCol job={props.job} options={{ include: props?.include[1] }} />
 			<PillCol
 				text={props.job.attempts}
 				theme={"outline"}
-				options={{ include: props?.include[3] }}
+				options={{ include: props?.include[2] }}
 			/>
 			<PillCol
 				text={props.job.maxAttempts}
 				theme={"outline"}
-				options={{ include: props?.include[4] }}
+				options={{ include: props?.include[3] }}
 			/>
 			<PillCol
 				text={props.job.priority ?? "-"}
 				theme={"outline"}
-				options={{ include: props?.include[5] }}
+				options={{ include: props?.include[4] }}
 			/>
 			<DateCol
 				date={props.job.createdAt}
-				options={{ include: props?.include[6] }}
+				options={{ include: props?.include[5] }}
 			/>
 			<DateCol
 				date={props.job.scheduledFor}
-				options={{ include: props?.include[7] }}
+				options={{ include: props?.include[6] }}
 			/>
 			<DateCol
 				date={props.job.completedAt}
-				options={{ include: props?.include[8] }}
+				options={{ include: props?.include[7] }}
 			/>
 		</Tr>
 	);
