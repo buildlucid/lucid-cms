@@ -67,6 +67,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				{
 					label: T()("common.edit"),
 					type: "button",
+					icon: "pen",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("update", true);
@@ -77,6 +78,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				{
 					label: T()("common.details"),
 					type: "button",
+					icon: "info",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("view", true);
@@ -86,6 +88,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				{
 					label: T()("common.logins"),
 					type: "button",
+					icon: "user",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("viewLogins", true);
@@ -96,6 +99,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				{
 					label: T()("common.restore"),
 					type: "button",
+					icon: "restore",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("restore", true);
@@ -107,6 +111,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				{
 					label: T()("actions.reset.password"),
 					type: "button",
+					icon: "lock",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("passwordReset", true);
@@ -122,6 +127,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				{
 					label: T()("users.invitations.resend.action"),
 					type: "button",
+					icon: "email",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("resendInvitation", true);
@@ -135,6 +141,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				{
 					label: T()("users.sessions.revoke.action"),
 					type: "button",
+					icon: "ban",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("revokeRefreshTokens", true);
@@ -147,6 +154,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				{
 					label: T()("common.delete"),
 					type: "button",
+					icon: "trash",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("delete", true);
@@ -159,6 +167,7 @@ const UserRow: Component<UserRowProps> = (props) => {
 				{
 					label: T()("actions.delete.permanently"),
 					type: "button",
+					icon: "trash",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.user.id);
 						props.rowTarget.setTrigger("deletePermanently", true);
@@ -176,12 +185,11 @@ const UserRow: Component<UserRowProps> = (props) => {
 				<UserDisplay
 					user={{
 						username: username(),
-						firstName: props.user.firstName,
-						lastName: props.user.lastName,
 						profilePicture: props.user.profilePicture,
 					}}
 					mode="short"
 					size="x-small"
+					nameFormat="username"
 				/>
 			</Td>
 			<TextCol

@@ -322,6 +322,7 @@ export const DocumentsList: Component<{
 									{
 										label: T()("common.edit"),
 										type: "button",
+										icon: "pen",
 										onClick: () => {
 											navigate(
 												getDocumentRoute("edit", {
@@ -340,6 +341,7 @@ export const DocumentsList: Component<{
 									{
 										label: T()("common.preview"),
 										type: "button",
+										icon: "eye",
 										onClick: () => {
 											navigate(
 												getDocumentRoute("edit", {
@@ -358,6 +360,7 @@ export const DocumentsList: Component<{
 									{
 										label: T()("common.restore"),
 										type: "button",
+										icon: "restore",
 										onClick: () => {
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("restore", true);
@@ -373,6 +376,7 @@ export const DocumentsList: Component<{
 									{
 										label: T()("common.delete"),
 										type: "button",
+										icon: "trash",
 										onClick: () => {
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("delete", true);
@@ -389,6 +393,7 @@ export const DocumentsList: Component<{
 									{
 										label: T()("actions.delete.permanently"),
 										type: "button",
+										icon: "trash",
 										onClick: () => {
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("deletePermanently", true);

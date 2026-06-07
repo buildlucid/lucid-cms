@@ -45,6 +45,7 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 							{
 								label: T()("common.details"),
 								type: "button",
+								icon: "info",
 								onClick: () => {
 									props.rowTarget.setTargetId(props.role.id);
 									props.rowTarget.setTrigger("view", true);
@@ -56,6 +57,7 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 							{
 								label: T()("common.edit"),
 								type: "button",
+								icon: "pen",
 								onClick: () => {
 									props.rowTarget.setTargetId(props.role.id);
 									props.rowTarget.setTrigger("update", true);

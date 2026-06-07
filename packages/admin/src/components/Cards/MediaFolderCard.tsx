@@ -105,6 +105,7 @@ export const MediaFolderCard: Component<{
 						{
 							label: T()("common.edit"),
 							type: "button",
+							icon: "pen",
 							onClick: () => {
 								props.rowTarget.setTargetId(props.folder.id);
 								props.rowTarget.setTrigger("updateFolder", true);

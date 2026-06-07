@@ -14,12 +14,14 @@ import {
 import DropdownContent from "@/components/Partials/DropdownContent";
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
+import ActionIcon, { type ActionIconName } from "./ActionIcon";
 import Spinner from "./Spinner";
 
 export interface ActionDropdownProps {
 	actions: Array<{
 		label: string;
 		type: "button" | "link";
+		icon?: ActionIconName;
 		onClick?: () => void;
 		href?: string;
 		permission?: boolean;
@@ -97,17 +99,18 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 
 	// ----------------------------------------
 	// Classes
-	const liItemClasses =
-		"flex justify-between items-center px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 hover:text-dropdown-contrast fill-dropdown-contrast";
 	const getActionItemClasses = (action: ActionItem) =>
-		classNames(liItemClasses, {
-			"cursor-not-allowed": action.permission === false,
-			"opacity-50 cursor-not-allowed": action.disabled === true,
-			"hover:bg-error-hover hover:text-error-contrast":
-				getActionTheme(action) === "error" && action.disabled !== true,
-			"hover:bg-primary-base hover:text-primary-contrast":
-				getActionTheme(action) === "primary" && action.disabled !== true,
-		});
+		classNames(
+			"flex items-center gap-2 px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 hover:text-dropdown-contrast fill-dropdown-contrast",
+			{
+				"cursor-not-allowed": action.permission === false,
+				"opacity-50 cursor-not-allowed": action.disabled === true,
+				"hover:bg-error-hover hover:text-error-contrast":
+					getActionTheme(action) === "error" && action.disabled !== true,
+				"hover:bg-primary-base hover:text-primary-contrast":
+					getActionTheme(action) === "primary" && action.disabled !== true,
+			},
+		);
 
 	// ----------------------------------------
 	// Functions
@@ -190,8 +193,13 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 													}
 												}}
 											>
-												<span class="line-clamp-1 mr-2.5">{action.label}</span>
-												<FaSolidChevronRight size={14} />
+												<ActionIcon icon={action.icon} />
+												<span class="line-clamp-1 mr-2.5 flex-1">
+													{action.label}
+												</span>
+												<Show when={action.icon === undefined}>
+													<FaSolidChevronRight size={14} />
+												</Show>
 											</A>
 										</Match>
 										<Match when={action.type === "button"}>
@@ -218,8 +226,16 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 												}}
 												class={getActionItemClasses(action)}
 											>
-												<span class="line-clamp-1 mr-2.5">{action.label}</span>
-												<Show when={action.isLoading !== true}>
+												<ActionIcon icon={action.icon} />
+												<span class="line-clamp-1 mr-2.5 flex-1">
+													{action.label}
+												</span>
+												<Show
+													when={
+														action.isLoading !== true &&
+														action.icon === undefined
+													}
+												>
 													<FaSolidChevronRight size={14} />
 												</Show>
 												<Show when={action.isLoading}>

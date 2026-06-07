@@ -229,6 +229,7 @@ const MediaListRoute: Component = () => {
 										setOpen: setOpenCreateMediaFolderModal,
 										permission: canCreateMedia(),
 										label: T()("media.folders.add"),
+										icon: "folder-plus",
 										secondary: true,
 									},
 									{
@@ -236,12 +237,14 @@ const MediaListRoute: Component = () => {
 										setOpen: setCreateMediaPanelOpen,
 										permission: canCreateMedia(),
 										label: T()("media.upload.action"),
+										icon: "upload",
 									},
 									{
 										open: getOpenBulkUploadModal(),
 										setOpen: setBulkUploadModalOpen,
 										permission: canCreateMedia(),
 										label: T()("media.upload.bulk.action"),
+										icon: "images",
 									},
 								],
 								contentLocale: true,

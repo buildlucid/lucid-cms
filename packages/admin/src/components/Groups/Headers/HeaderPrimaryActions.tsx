@@ -8,8 +8,12 @@ import {
 	createSignal,
 	For,
 	Match,
+	Show,
 	Switch,
 } from "solid-js";
+import ActionIcon, {
+	type ActionIconName,
+} from "@/components/Partials/ActionIcon";
 import Button from "@/components/Partials/Button";
 import DropdownContent from "@/components/Partials/DropdownContent";
 import Link from "@/components/Partials/Link";
@@ -19,12 +23,14 @@ export type HeaderPrimaryAction =
 	| {
 			type: "button";
 			label: string;
+			icon?: ActionIconName;
 			onClick: () => void;
 			secondary?: boolean;
 	  }
 	| {
 			type: "link";
 			label: string;
+			icon?: ActionIconName;
 			href: string;
 	  };
 
@@ -36,7 +42,7 @@ const HeaderPrimaryActions: Component<{
 	const [isOpen, setIsOpen] = createSignal(false);
 
 	const dropdownItemClasses =
-		"flex items-center justify-between gap-2 px-2 py-1 rounded-md hover:bg-dropdown-hover hover:text-dropdown-contrast text-sm w-full text-left fill-dropdown-contrast";
+		"flex items-center gap-2 px-2 py-1 rounded-md hover:bg-dropdown-hover hover:text-dropdown-contrast text-sm w-full text-left fill-dropdown-contrast";
 
 	// ----------------------------------
 	// Memos
@@ -116,10 +122,13 @@ const HeaderPrimaryActions: Component<{
 														setIsOpen(false);
 													}}
 												>
-													<span class="line-clamp-1 mr-2.5">
+													<ActionIcon icon={action.icon} />
+													<span class="line-clamp-1 mr-2.5 flex-1">
 														{action.label}
 													</span>
-													<FaSolidChevronRight size={14} />
+													<Show when={action.icon === undefined}>
+														<FaSolidChevronRight size={14} />
+													</Show>
 												</button>
 											</Match>
 											<Match when={action.type === "link"}>
@@ -130,10 +139,13 @@ const HeaderPrimaryActions: Component<{
 														e.stopPropagation();
 													}}
 												>
-													<span class="line-clamp-1 mr-2.5">
+													<ActionIcon icon={action.icon} />
+													<span class="line-clamp-1 mr-2.5 flex-1">
 														{action.label}
 													</span>
-													<FaSolidChevronRight size={14} />
+													<Show when={action.icon === undefined}>
+														<FaSolidChevronRight size={14} />
+													</Show>
 												</A>
 											</Match>
 										</Switch>

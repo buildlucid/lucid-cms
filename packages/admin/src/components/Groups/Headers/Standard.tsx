@@ -2,6 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import classNames from "classnames";
 import { FaSolidTrash } from "solid-icons/fa";
 import { type Component, createMemo, type JSXElement, Show } from "solid-js";
+import type { ActionIconName } from "@/components/Partials/ActionIcon";
 import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import Link from "@/components/Partials/Link";
@@ -17,12 +18,14 @@ export interface StandardCreateAction {
 	setOpen: (_open: boolean) => void;
 	permission?: boolean;
 	label?: string;
+	icon?: ActionIconName;
 	secondary?: boolean;
 }
 
 export interface StandardCreateLinkAction {
 	link: string;
 	label: string;
+	icon?: ActionIconName;
 	permission?: boolean;
 	show?: boolean;
 }
@@ -69,6 +72,7 @@ export const Standard: Component<{
 			actions.push({
 				type: "button",
 				label: action.label ?? T()("common.create"),
+				icon: action.icon,
 				secondary: action.secondary,
 				onClick: () => {
 					action.setOpen(true);
@@ -85,6 +89,7 @@ export const Standard: Component<{
 			actions.push({
 				type: "link",
 				label: createLink.label ?? T()("common.create"),
+				icon: createLink.icon,
 				href: createLink.link,
 			});
 		}

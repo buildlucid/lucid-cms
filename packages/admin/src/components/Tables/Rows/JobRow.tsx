@@ -29,6 +29,7 @@ const JobRow: Component<JobRowProps> = (props) => {
 				{
 					label: T()("common.preview"),
 					type: "button",
+					icon: "eye",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.job.id);
 						props.rowTarget.setTrigger("preview", true);

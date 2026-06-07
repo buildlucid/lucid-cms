@@ -79,6 +79,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 							{
 								label: T()("common.restore"),
 								type: "button",
+								icon: "restore",
 								onClick: () => {
 									props.rowTarget?.setTargetId(props.media.id);
 									props.rowTarget?.setTrigger("restore", true);
@@ -90,6 +91,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 							{
 								label: T()("media.processed.clear.action"),
 								type: "button",
+								icon: "broom",
 								onClick: () => {
 									props.rowTarget?.setTargetId(props.media.id);
 									props.rowTarget?.setTrigger("clear", true);

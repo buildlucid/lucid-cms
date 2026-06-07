@@ -50,12 +50,14 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 				{
 					label: T()("common.open.request"),
 					type: "link",
+					icon: "eye",
 					href: requestHref(),
 					sortOrder: 0,
 				},
 				{
 					type: "button",
 					label: T()("common.approve"),
+					icon: "check",
 					onClick: () => props.callbacks.openDecision(props.request, "approve"),
 					hide:
 						props.request.status !== "pending" ||
@@ -66,18 +68,20 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 				{
 					type: "button",
 					label: T()("common.reject"),
+					icon: "ban",
 					onClick: () => props.callbacks.openDecision(props.request, "reject"),
 					hide:
 						props.request.status !== "pending" ||
 						props.request.permissions.review !== true,
 					theme: "error",
-					sortOrder: 20,
+					sortOrder: 55,
 				},
 				{
 					type: "button",
 					label: props.request.scheduledAt
 						? T()("common.reschedule.release")
 						: T()("common.schedule"),
+					icon: "calendar",
 					onClick: () => props.callbacks.openSchedule(props.request),
 					hide: props.request.permissions.reschedule !== true,
 					sortOrder: 30,
@@ -85,6 +89,7 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 				{
 					type: "button",
 					label: T()("actions.update.reviewers"),
+					icon: "users",
 					onClick: () => props.callbacks.openReviewers(props.request),
 					hide: props.request.permissions.updateReviewers !== true,
 					sortOrder: 40,
@@ -92,6 +97,7 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 				{
 					type: "button",
 					label: T()("common.retry.release"),
+					icon: "rotate",
 					onClick: () => props.callbacks.retry(props.request),
 					hide: props.request.permissions.retry !== true,
 					theme: "primary",
@@ -100,6 +106,7 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 				{
 					type: "button",
 					label: T()("common.cancel"),
+					icon: "ban",
 					onClick: () => props.callbacks.openDecision(props.request, "cancel"),
 					hide: props.request.permissions.cancel !== true,
 					theme: "error",

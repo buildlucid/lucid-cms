@@ -33,6 +33,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 				{
 					label: T()("common.update"),
 					type: "button",
+					icon: "pen",
 					permission: props.permissions.update,
 					onClick: () => {
 						props.rowTarget.setTargetId(props.link.id);
@@ -42,6 +43,7 @@ const ShareLinkRow: Component<ShareLinkRowProps> = (props) => {
 				{
 					label: T()("common.delete"),
 					type: "button",
+					icon: "trash",
 					permission: props.permissions.delete,
 					onClick: () => {
 						props.rowTarget.setTargetId(props.link.id);

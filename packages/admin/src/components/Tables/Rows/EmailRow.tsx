@@ -40,6 +40,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 				{
 					label: T()("common.preview"),
 					type: "button",
+					icon: "eye",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("preview", true);
@@ -49,6 +50,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 				{
 					label: T()("email.resend.action"),
 					type: "button",
+					icon: "email",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("resend", true);
@@ -65,6 +67,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 				{
 					label: T()("common.delete"),
 					type: "button",
+					icon: "trash",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("delete", true);

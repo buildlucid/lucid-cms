@@ -3,7 +3,9 @@ import type { Media } from "@types";
 import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { Checkbox } from "@/components/Groups/Form";
-import ActionDropdown from "@/components/Partials/ActionDropdown";
+import ActionMenubar, {
+	type ActionMenubarItem,
+} from "@/components/Partials/ActionMenubar";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import ClickToCopy from "@/components/Partials/ClickToCopy";
 import MediaPreview from "@/components/Partials/MediaPreview";
@@ -60,6 +62,24 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	const draggable = createDraggable(`media:${props.media.id}`);
 
 	// ----------------------------------
+	// Functions
+	const openMediaAction = (
+		trigger:
+			| "clear"
+			| "delete"
+			| "update"
+			| "restore"
+			| "deletePermanently"
+			| "view"
+			| "viewShareLinks"
+			| "createShareLink"
+			| "deleteAllShareLinks",
+	) => {
+		props.rowTarget.setTargetId(props.media.id);
+		props.rowTarget.setTrigger(trigger, true);
+	};
+
+	// ----------------------------------
 	// Memos
 	const hasUpdatePermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.MediaUpdate]).all;
@@ -108,6 +128,114 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			status: "warning" as const,
 		};
 	});
+	const actionMenuActions = createMemo<ActionMenubarItem[]>(() => [
+		{
+			label: T()("common.preview"),
+			type: "button",
+			icon: "eye",
+			onClick: () => openMediaAction("view"),
+			permission: true,
+			hide: !props.showingDeleted?.(),
+		},
+		{
+			label: T()("common.edit"),
+			type: "button",
+			icon: "pen",
+			onClick: () => openMediaAction("update"),
+			permission: hasUpdatePermission(),
+			hide: props.showingDeleted?.(),
+		},
+		{
+			label: T()("common.restore"),
+			type: "button",
+			icon: "restore",
+			onClick: () => openMediaAction("restore"),
+			permission: hasUpdatePermission(),
+			hide: props.showingDeleted?.() === false,
+			theme: "primary",
+		},
+		{
+			label: T()("media.images.action"),
+			type: "group",
+			icon: "image",
+			hide: props.media.type !== "image",
+			actions: [
+				{
+					label: T()("ai.media.alt.generate.action"),
+					type: "button",
+					icon: "sparkle",
+					onClick: () => {
+						props.onGenerateAlt?.(props.media);
+					},
+					permission: hasAiAltGeneratePermission(),
+					disabled:
+						props.aiAltAccessState?.disabled === true &&
+						props.aiAltAccessState.reason !== "no-permission",
+					disabledToast: aiAltAccessDisabledToast(),
+					hide:
+						!props.onGenerateAlt ||
+						props.showingDeleted?.() ||
+						!hasUpdatePermission(),
+				},
+				{
+					label: T()("media.processed.clear.action"),
+					type: "button",
+					icon: "broom",
+					onClick: () => openMediaAction("clear"),
+					permission: hasUpdatePermission(),
+					theme: "error",
+				},
+			],
+		},
+		{
+			label: T()("media.share.links.action"),
+			type: "group",
+			icon: "link",
+			hide: props.showingDeleted?.(),
+			actions: [
+				{
+					label: T()("media.share.links.create.action"),
+					type: "button",
+					icon: "plus",
+					onClick: () => openMediaAction("createShareLink"),
+					permission: hasCreatePermission(),
+				},
+				{
+					label: T()("media.share.links.view.action"),
+					type: "button",
+					icon: "eye",
+					onClick: () => openMediaAction("viewShareLinks"),
+					permission: canReadMedia(),
+				},
+				{
+					label: T()("media.share.links.delete.action"),
+					type: "button",
+					icon: "trash",
+					onClick: () => openMediaAction("deleteAllShareLinks"),
+					permission: hasUpdatePermission(),
+					theme: "error",
+				},
+			],
+		},
+		{
+			label: T()("common.delete"),
+			type: "button",
+			icon: "trash",
+			onClick: () => openMediaAction("delete"),
+			permission: hasDeletePermission(),
+			hide: props.showingDeleted?.(),
+			theme: "error",
+		},
+		{
+			label: T()("actions.delete.permanently"),
+			type: "button",
+			icon: "trash",
+			onClick: () => openMediaAction("deletePermanently"),
+			permission: hasDeletePermission(),
+			hide: props.showingDeleted?.() === false,
+			theme: "error",
+		},
+	]);
 
 	// ----------------------------------
 	// Return
@@ -143,124 +271,11 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onKeyPress={() => {}}
 		>
 			<div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100">
-				<ActionDropdown
-					actions={[
-						{
-							label: T()("common.preview"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("view", true);
-							},
-							permission: true,
-							hide: !props.showingDeleted?.(),
-						},
-						{
-							label: T()("common.edit"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("update", true);
-							},
-							permission: hasUpdatePermission(),
-							hide: props.showingDeleted?.(),
-						},
-						{
-							label: T()("common.restore"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("restore", true);
-							},
-							permission: hasUpdatePermission(),
-							hide: props.showingDeleted?.() === false,
-							theme: "primary",
-						},
-						{
-							label: T()("media.share.links.create.action"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("createShareLink", true);
-							},
-							permission: hasCreatePermission(),
-							hide: props.showingDeleted?.(),
-						},
-						{
-							label: T()("media.share.links.view.action"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("viewShareLinks", true);
-							},
-							permission: canReadMedia(),
-							hide: props.showingDeleted?.(),
-						},
-						{
-							label: T()("media.share.links.delete.action"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("deleteAllShareLinks", true);
-							},
-							permission: hasUpdatePermission(),
-							hide: props.showingDeleted?.(),
-							theme: "error",
-						},
-						{
-							label: T()("ai.media.alt.generate.action"),
-							type: "button",
-							onClick: () => {
-								props.onGenerateAlt?.(props.media);
-							},
-							permission: hasAiAltGeneratePermission(),
-							disabled:
-								props.aiAltAccessState?.disabled === true &&
-								props.aiAltAccessState.reason !== "no-permission",
-							disabledToast: aiAltAccessDisabledToast(),
-							hide:
-								!props.onGenerateAlt ||
-								props.showingDeleted?.() ||
-								props.media.type !== "image" ||
-								!hasUpdatePermission(),
-						},
-						{
-							label: T()("media.processed.clear.action"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("clear", true);
-							},
-							hide: props.media.type !== "image",
-							permission: hasUpdatePermission(),
-							theme: "error",
-						},
-						{
-							label: T()("common.delete"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("delete", true);
-							},
-							permission: hasDeletePermission(),
-							hide: props.showingDeleted?.(),
-							theme: "error",
-						},
-
-						{
-							label: T()("actions.delete.permanently"),
-							type: "button",
-							onClick: () => {
-								props.rowTarget.setTargetId(props.media.id);
-								props.rowTarget.setTrigger("deletePermanently", true);
-							},
-							permission: hasDeletePermission(),
-							hide: props.showingDeleted?.() === false,
-							theme: "error",
-						},
-					]}
+				<ActionMenubar
+					actions={actionMenuActions()}
 					options={{
 						border: true,
+						placement: "bottom-start",
 					}}
 				/>
 			</div>

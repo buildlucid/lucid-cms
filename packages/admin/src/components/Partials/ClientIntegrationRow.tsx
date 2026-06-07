@@ -59,6 +59,7 @@ const ClientIntegrationRow: Component<ClientIntegrationRow> = (props) => {
 					{
 						type: "button",
 						label: T()("common.update"),
+						icon: "pen",
 						onClick: () => {
 							props.rowTarget.setTargetId(props.clientIntegration.id);
 							props.rowTarget.setTrigger("update", true);
@@ -68,6 +69,7 @@ const ClientIntegrationRow: Component<ClientIntegrationRow> = (props) => {
 					{
 						type: "button",
 						label: T()("common.delete"),
+						icon: "trash",
 						onClick: () => {
 							props.rowTarget.setTargetId(props.clientIntegration.id);
 							props.rowTarget.setTrigger("delete", true);
@@ -77,6 +79,7 @@ const ClientIntegrationRow: Component<ClientIntegrationRow> = (props) => {
 					{
 						type: "button",
 						label: T()("client.integrations.api.keys.regenerate.action"),
+						icon: "key",
 						onClick: () => {
 							props.rowTarget.setTargetId(props.clientIntegration.id);
 							props.rowTarget.setTrigger("regenerateAPIKey", true);
