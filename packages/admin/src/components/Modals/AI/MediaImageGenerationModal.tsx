@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/solid-query";
 import type {
 	ErrorResultObj,
 	MediaImageGenerateCompletionResponse,
@@ -67,7 +68,9 @@ import spawnToast from "@/utils/spawn-toast";
 
 const MediaImageGenerationModal: Component = () => {
 	// -----------------------------
-	// State
+	// Hooks & State
+	const queryClient = useQueryClient();
+
 	const [generations, setGenerations] = createSignal<
 		MediaImageGenerationCandidate[]
 	>([]);
@@ -487,6 +490,11 @@ const MediaImageGenerationModal: Component = () => {
 
 		if (isCompletionResponse(response.data)) {
 			finishPendingGeneration(pending, response.data);
+			for (const query of ["ai.getUsage", "ai.getUsageChart"]) {
+				queryClient.invalidateQueries({
+					queryKey: [query],
+				});
+			}
 			return { type: "complete" as const };
 		}
 

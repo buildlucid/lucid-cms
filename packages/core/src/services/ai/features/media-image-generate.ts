@@ -1,12 +1,12 @@
 import type { MediaImageGenerateResponse } from "@lucidcms/types";
-import { copy } from "../../libs/i18n/index.js";
-import type { MediaImageGenerateV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
-import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
-import { isCmsAiGenerateAcceptedData } from "../../libs/lucid-remote/utils.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import getLicenseKey from "../options/get-license-key.js";
-import storeGeneration from "./storage/store-generation.js";
-import storePendingGeneration from "./storage/store-pending-generation.js";
+import { copy } from "../../../libs/i18n/index.js";
+import type { MediaImageGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
+import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
+import { isCmsAiGenerateAcceptedData } from "../../../libs/lucid-remote/utils.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import getLicenseKey from "../../options/get-license-key.js";
+import storeGeneration from "../storage/store-generation.js";
+import storePendingGeneration from "../storage/store-pending-generation.js";
 
 const imageGuidanceInstructions = {
 	natural:
@@ -38,6 +38,7 @@ const mediaImageGenerate: ServiceFn<
 	],
 	MediaImageGenerateResponse
 > = async (context, props) => {
+	const requestStartedAt = Date.now();
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
 
@@ -163,6 +164,7 @@ const mediaImageGenerate: ServiceFn<
 				userId: props.userId,
 				response: responseData,
 				targetType: "media-image",
+				requestStartedAt,
 				target,
 			});
 	if (storeRes.error) return storeRes;

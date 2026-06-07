@@ -1,16 +1,16 @@
 import type { CustomFieldInputGenerateResponse } from "@lucidcms/types";
-import constants from "../../constants/constants.js";
-import { copy } from "../../libs/i18n/index.js";
-import logger from "../../libs/logger/index.js";
-import type { CustomFieldInputV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
-import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
-import { isCmsAiGenerateCompletedData } from "../../libs/lucid-remote/utils.js";
-import type { CustomFieldAiContextItem } from "../../types.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import getLicenseKey from "../options/get-license-key.js";
-import getTranslatedFieldDetails from "./helpers/get-translated-field-details.js";
-import normalizeCurrentValueTranslations from "./helpers/normalize-current-value-translations.js";
-import storeGeneration from "./storage/store-generation.js";
+import constants from "../../../constants/constants.js";
+import { copy } from "../../../libs/i18n/index.js";
+import logger from "../../../libs/logger/index.js";
+import type { CustomFieldInputV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
+import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
+import { isCmsAiGenerateCompletedData } from "../../../libs/lucid-remote/utils.js";
+import type { CustomFieldAiContextItem } from "../../../types.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import getLicenseKey from "../../options/get-license-key.js";
+import getTranslatedFieldDetails from "../helpers/get-translated-field-details.js";
+import normalizeCurrentValueTranslations from "../helpers/normalize-current-value-translations.js";
+import storeGeneration from "../storage/store-generation.js";
 
 const customFieldInputGenerate: ServiceFn<
 	[
@@ -32,6 +32,7 @@ const customFieldInputGenerate: ServiceFn<
 	],
 	CustomFieldInputGenerateResponse
 > = async (context, props) => {
+	const requestStartedAt = Date.now();
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
 
@@ -215,6 +216,7 @@ const customFieldInputGenerate: ServiceFn<
 		userId: props.userId,
 		response: responseData,
 		targetType: "custom-field",
+		requestStartedAt,
 		target: {
 			collectionKey: props.target.collectionKey,
 			brickKey: props.target.brickKey,

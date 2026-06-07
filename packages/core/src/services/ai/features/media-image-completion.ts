@@ -3,15 +3,15 @@ import type {
 	MediaImageGenerateCompletionResponse,
 } from "@lucidcms/types";
 import z from "zod";
-import { copy } from "../../libs/i18n/index.js";
-import { getCmsAiRequest } from "../../libs/lucid-remote/services/index.js";
+import { copy } from "../../../libs/i18n/index.js";
+import { getCmsAiRequest } from "../../../libs/lucid-remote/services/index.js";
 import {
 	isCmsAiGenerateAcceptedData,
 	isCmsAiGenerateCompletedData,
-} from "../../libs/lucid-remote/utils.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import getLicenseKey from "../options/get-license-key.js";
-import completeStoredGeneration from "./storage/complete-stored-generation.js";
+} from "../../../libs/lucid-remote/utils.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import getLicenseKey from "../../options/get-license-key.js";
+import completeStoredGeneration from "../storage/complete-stored-generation.js";
 
 const mediaImageOutputSchema = z
 	.object({

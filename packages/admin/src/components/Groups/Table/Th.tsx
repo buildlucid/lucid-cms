@@ -55,11 +55,17 @@ export const Th: Component<ThProps> = (props) => {
 			class={classNames(
 				"text-left relative gap-2.5 px-4 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
 				{
-					"hover:bg-card-base": props.options?.sortable,
+					"hover:bg-card-base":
+						props.options?.sortable &&
+						(props.theme === "primary" || props.theme === undefined),
+					"hover:bg-card-hover":
+						props.options?.sortable &&
+						(props.theme === "secondary" || props.theme === "contained"),
 					hidden: props.options?.include === false,
 					"bg-background-base":
 						props.theme === "primary" || props.theme === undefined,
 					"bg-card-base": props.theme === "secondary",
+					"bg-input-base": props.theme === "contained",
 					"first:pl-4 md:first:pl-6 last:pr-4 md:last:pr-6":
 						props.options?.padding === "24" ||
 						props.options?.padding === undefined,

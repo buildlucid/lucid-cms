@@ -1,9 +1,14 @@
+import type { UserRef } from "../users/types.js";
+
 export type AiGenerateCost = {
 	currency: string;
 	totalCostMinor: number;
 };
 
 export type AiGenerateMode = "sync" | "async";
+export type AiUsageStatus = "pending" | "success";
+export type AiUsageChartDimension = "day";
+export type AiUsageChartMetric = "requests" | "totalTokens" | "cost";
 
 export type AiGenerateUsage = {
 	model: string;
@@ -97,3 +102,49 @@ export type MediaImageGenerateCompletionResponse = {
 export type MediaImageGenerateCompletionPollResponse =
 	| MediaImageGenerateResponse
 	| MediaImageGenerateCompletionResponse;
+
+export type AiUsage = {
+	id: number;
+	requestId: string;
+	providerRequestId: string | null;
+	feature: {
+		key: string;
+		label: string;
+		version: string;
+	};
+	status: AiUsageStatus;
+	model: string | null;
+	createdAt: string | null;
+	durationMs: number | null;
+	errorMessage: string | null;
+	tokens: {
+		input: number;
+		output: number;
+		total: number;
+	} | null;
+	cost: AiGenerateCost | null;
+	target: {
+		type: string;
+		data: Record<string, unknown>;
+	};
+	user: UserRef;
+};
+
+export type AiUsageChart = {
+	dimension: AiUsageChartDimension;
+	metrics: AiUsageChartMetric[];
+	startDate: string;
+	endDate: string;
+	currency: string | null;
+	feature: {
+		key: string;
+		label: string;
+	} | null;
+	series: Array<{
+		metric: AiUsageChartMetric;
+		points: Array<{
+			date: string;
+			value: number;
+		}>;
+	}>;
+};

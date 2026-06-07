@@ -22,9 +22,17 @@ export const Paginated: Component<{
 	return (
 		<footer
 			class={classNames("border-t border-border", {
-				"p-4 md:p-6": props.options?.padding === "24",
-				"p-4": props.options?.padding === "16",
-				"p-0 mt-4 border-t-0": props.options?.embedded,
+				"p-4 md:p-6":
+					props.options?.embedded !== true && props.options?.padding === "24",
+				"p-4":
+					props.options?.embedded !== true && props.options?.padding === "16",
+				"p-0 mt-4 border-t-0":
+					props.options?.embedded === true &&
+					props.options?.padding === undefined,
+				"px-4 pt-4 border-t-0":
+					props.options?.embedded === true && props.options?.padding === "16",
+				"px-4 md:px-6 pt-4 md:pt-6 border-t-0":
+					props.options?.embedded === true && props.options?.padding === "24",
 			})}
 		>
 			<Pagination

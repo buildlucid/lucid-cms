@@ -81,6 +81,9 @@ const SystemOverviewRoute: Component = () => {
 	const canReadSystemOperations = createMemo(
 		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
 	);
+	const canReadAiUsage = createMemo(
+		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
+	);
 	const canManageLicense = createMemo(
 		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
 	);
@@ -110,6 +113,11 @@ const SystemOverviewRoute: Component = () => {
 											label: T()("common.operations"),
 											href: "/lucid/system/operations",
 											permission: canReadSystemOperations(),
+										},
+										{
+											label: T()("common.ai.usage"),
+											href: "/lucid/system/ai-usage",
+											permission: canReadAiUsage(),
 										},
 										{
 											label: T()("common.license"),

@@ -71,6 +71,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 			path === "/system" ||
 			path.startsWith("/system/overview") ||
 			path.startsWith("/system/operations") ||
+			path.startsWith("/system/ai-usage") ||
 			path.startsWith("/system/license")
 		);
 	});

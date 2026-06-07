@@ -71,6 +71,7 @@ const useMediaImageGenerate = () => {
 		ResponseBody<MediaImageGenerateResponse>
 	>({
 		mutationFn: mediaImageGenerateReq,
+		invalidates: ["ai.getUsage", "ai.getUsageChart"],
 		getSuccessToast: (_data, params) =>
 			params.shouldToast?.() === false
 				? undefined

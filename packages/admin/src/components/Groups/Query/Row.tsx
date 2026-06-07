@@ -27,6 +27,9 @@ interface QueryRowProps {
 	onRefresh?: () => void;
 	showingDeleted?: Accessor<boolean>;
 	setShowingDeleted?: (value: boolean) => void;
+	options?: {
+		padding?: "16" | "24";
+	};
 }
 
 export const QueryRow: Component<QueryRowProps> = (props) => {
@@ -53,7 +56,14 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="w-full px-4 md:px-6 pb-4 md:pb-6 flex flex-wrap justify-between gap-2.5">
+		<div
+			class={classNames("w-full flex flex-wrap justify-between gap-2.5", {
+				"px-4 pb-4": props.options?.padding === "16",
+				"px-4 md:px-6 pb-4 md:pb-6":
+					props.options?.padding === "24" ||
+					props.options?.padding === undefined,
+			})}
+		>
 			<div class="flex flex-wrap gap-2.5 items-center">
 				<Show when={props.filters !== undefined}>
 					<Filter

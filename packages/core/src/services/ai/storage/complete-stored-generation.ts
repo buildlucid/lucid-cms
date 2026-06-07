@@ -1,6 +1,8 @@
 import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import { parseStoredTimestamp } from "../helpers/date-helpers.js";
+import getRequestDurationMs from "../helpers/get-request-duration-ms.js";
 
 const completeStoredGeneration: ServiceFn<
 	[
@@ -16,7 +18,7 @@ const completeStoredGeneration: ServiceFn<
 	);
 
 	const existingRes = await AiGenerations.selectSingle({
-		select: ["created_at"],
+		select: ["id", "created_at"],
 		where: [
 			{
 				key: "request_id",
@@ -34,10 +36,10 @@ const completeStoredGeneration: ServiceFn<
 		};
 	}
 
-	const createdAt = new Date(existingRes.data.created_at).getTime();
-	const durationMs = Number.isFinite(createdAt)
-		? Math.max(0, Date.now() - createdAt)
-		: null;
+	const createdAt = parseStoredTimestamp(existingRes.data.created_at);
+	const durationMs = Number.isNaN(createdAt.getTime())
+		? null
+		: getRequestDurationMs(createdAt.getTime());
 
 	const updateRes = await AiGenerations.updateSingle({
 		data: {

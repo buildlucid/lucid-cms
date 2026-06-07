@@ -1,5 +1,7 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
+import { queryFormatted, queryString } from "./helpers/querystring.js";
+import { mediaEmbedResponseSchema } from "./media.js";
 
 const aiMaxBase64ImageLength = 8_000_000;
 const aiImageDetailSchema = z.enum(["low", "high", "auto"]).default("low");
@@ -8,8 +10,6 @@ const mediaImageMinPixels = 655_360;
 const mediaImageMaxPixels = 8_294_400;
 const mediaImageMaxAspectRatio = 3;
 const mediaImageSizeIncrement = 16;
-const mediaImageInvalidSizeMessage =
-	"Image resolution must be a preset or custom width and height.";
 
 const mediaImageCustomSizeSchema = z
 	.tuple([z.number(), z.number()])
@@ -80,7 +80,10 @@ const mediaImageGenerationSchema = z
 					]),
 					mediaImageCustomSizeSchema,
 				],
-				{ error: mediaImageInvalidSizeMessage },
+				{
+					error:
+						"Image resolution must be a preset or custom width and height.",
+				},
 			)
 			.default("1024x1024"),
 		quality: z.enum(["auto", "low", "medium", "high"]).default("medium"),
@@ -212,7 +215,202 @@ const mediaImageCompletionResponseSchema = aiGenerateResponseSchema.extend({
 		.strict(),
 });
 
+const aiUsageChartDateSchema = z
+	.string()
+	.trim()
+	.regex(/^\d{4}-\d{2}-\d{2}$/);
+
+const aiUsageChartDimensionSchema = z.enum(["day"]);
+const aiUsageChartMetricSchema = z.enum(["requests", "totalTokens", "cost"]);
+
 export const controllerSchemas = {
+	getUsageChart: {
+		body: undefined,
+		query: {
+			string: z
+				.object({
+					dimension: aiUsageChartDimensionSchema.optional().meta({
+						description: "Groups chart points by the selected dimension.",
+						example: "day",
+					}),
+					metric: z
+						.string()
+						.trim()
+						.superRefine((value, ctx) => {
+							const metrics = value
+								.split(",")
+								.map((metric) => metric.trim())
+								.filter(Boolean);
+
+							if (metrics.length === 0) {
+								ctx.addIssue({
+									code: "custom",
+									message: "At least one metric must be provided.",
+								});
+								return;
+							}
+
+							for (const metric of metrics) {
+								if (!aiUsageChartMetricSchema.safeParse(metric).success) {
+									ctx.addIssue({
+										code: "custom",
+										message: `Unsupported metric "${metric}".`,
+									});
+								}
+							}
+						})
+						.optional()
+						.meta({
+							description:
+								"Comma-separated usage metrics to aggregate. Supported values are requests, totalTokens, and cost.",
+							example: "requests,totalTokens",
+						}),
+					startDate: aiUsageChartDateSchema.optional().meta({
+						description: "Inclusive chart start date in YYYY-MM-DD format.",
+						example: "2026-06-01",
+					}),
+					endDate: aiUsageChartDateSchema.optional().meta({
+						description: "Inclusive chart end date in YYYY-MM-DD format.",
+						example: "2026-06-07",
+					}),
+					"filter[featureKey]": queryString.schema.filter(false, {
+						example: "media.image.generate",
+					}),
+				})
+				.meta(queryString.meta),
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z
+			.object({
+				dimension: aiUsageChartDimensionSchema,
+				metrics: z.array(aiUsageChartMetricSchema),
+				startDate: aiUsageChartDateSchema,
+				endDate: aiUsageChartDateSchema,
+				currency: z.string().nullable(),
+				feature: z
+					.object({
+						key: z.string(),
+						label: z.string(),
+					})
+					.strict()
+					.nullable(),
+				series: z.array(
+					z
+						.object({
+							metric: aiUsageChartMetricSchema,
+							points: z.array(
+								z
+									.object({
+										date: aiUsageChartDateSchema,
+										value: z.number().nonnegative(),
+									})
+									.strict(),
+							),
+						})
+						.strict(),
+				),
+			})
+			.strict(),
+	} satisfies ControllerSchema,
+	getUsage: {
+		body: undefined,
+		query: {
+			string: z
+				.object({
+					"filter[featureKey]": queryString.schema.filter(false, {
+						example: "media.image.generate",
+					}),
+					"filter[status]": queryString.schema.filter(true, {
+						example: "success",
+					}),
+					"filter[model]": queryString.schema.filter(false, {
+						example: "gpt-image-1",
+					}),
+					"filter[userId]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					sort: queryString.schema.sort("createdAt,cost,durationMs"),
+					page: queryString.schema.page,
+					perPage: queryString.schema.perPage,
+				})
+				.meta(queryString.meta),
+			formatted: z.object({
+				filter: z
+					.object({
+						featureKey: queryFormatted.schema.filters.single.optional(),
+						status: queryFormatted.schema.filters.union.optional(),
+						model: queryFormatted.schema.filters.single.optional(),
+						userId: queryFormatted.schema.filters.union.optional(),
+					})
+					.optional(),
+				sort: z
+					.array(
+						z.object({
+							key: z.enum(["createdAt", "cost", "durationMs"]),
+							value: z.enum(["asc", "desc"]),
+						}),
+					)
+					.optional(),
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
+			}),
+		},
+		params: undefined,
+		response: z.array(
+			z
+				.object({
+					id: z.number(),
+					requestId: z.string(),
+					providerRequestId: z.string().nullable(),
+					feature: z
+						.object({
+							key: z.string(),
+							label: z.string(),
+							version: z.string(),
+						})
+						.strict(),
+					status: z.enum(["pending", "success"]),
+					model: z.string().nullable(),
+					createdAt: z.string().nullable(),
+					durationMs: z.number().nullable(),
+					errorMessage: z.string().nullable(),
+					tokens: z
+						.object({
+							input: z.number().int().nonnegative(),
+							output: z.number().int().nonnegative(),
+							total: z.number().int().nonnegative(),
+						})
+						.strict()
+						.nullable(),
+					cost: z
+						.object({
+							currency: z.string(),
+							totalCostMinor: z.number().int().nonnegative(),
+						})
+						.strict()
+						.nullable(),
+					target: z
+						.object({
+							type: z.string(),
+							data: z.record(z.string(), z.unknown()),
+						})
+						.strict(),
+					user: z
+						.object({
+							id: z.number(),
+							username: z.string(),
+							email: z.email(),
+							firstName: z.string().nullable(),
+							lastName: z.string().nullable(),
+							profilePicture: mediaEmbedResponseSchema.nullable(),
+						})
+						.strict()
+						.nullable(),
+				})
+				.strict(),
+		),
+	} satisfies ControllerSchema,
 	customFieldInput: {
 		body: z
 			.object({
@@ -368,4 +566,10 @@ export type MediaImageGenerateBody = z.infer<
 >;
 export type MediaImageCompletionParams = z.infer<
 	typeof controllerSchemas.mediaImageCompletion.params
+>;
+export type GetUsageChartQueryParams = z.infer<
+	typeof controllerSchemas.getUsageChart.query.string
+>;
+export type GetUsageQueryParams = z.infer<
+	typeof controllerSchemas.getUsage.query.formatted
 >;

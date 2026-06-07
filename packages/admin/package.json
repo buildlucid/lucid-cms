@@ -57,6 +57,7 @@
 		"@tiptap/core": "^3.20.0",
 		"@tiptap/pm": "^3.20.0",
 		"blurhash": "^2.0.5",
+		"chart.js": "^4.5.1",
 		"classnames": "^2.5.1",
 		"codemirror": "^6.0.2",
 		"dompurify": "^3.3.1",

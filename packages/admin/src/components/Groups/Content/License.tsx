@@ -28,6 +28,9 @@ export const License: Component = () => {
 	const hasPermission = createMemo(
 		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
 	);
+	const hasVerifiedLicense = createMemo(
+		() => !!license()?.key && license()?.valid === true,
+	);
 	const lastCheckedIso = createMemo(() => {
 		const lastChecked = license()?.lastChecked;
 		return lastChecked ? new Date(lastChecked * 1000).toISOString() : null;
@@ -49,24 +52,26 @@ export const License: Component = () => {
 					title={T()("license.manage.title")}
 					description={T()("license.manage.description")}
 				>
-					<InfoRow.Content
-						title={T()("license.purchase.title")}
-						description={T()("license.purchase.description")}
-						actionAlignment="center"
-						reducedMargin={true}
-						actions={
-							<Button
-								type="button"
-								size="medium"
-								theme="secondary"
-								onClick={() => {
-									window.open(constants.cmsMarketingPage, "_blank");
-								}}
-							>
-								{T()("license.purchase.action")}
-							</Button>
-						}
-					></InfoRow.Content>
+					<Show when={!hasVerifiedLicense()}>
+						<InfoRow.Content
+							title={T()("license.purchase.title")}
+							description={T()("license.purchase.description")}
+							actionAlignment="center"
+							reducedMargin={true}
+							actions={
+								<Button
+									type="button"
+									size="medium"
+									theme="secondary"
+									onClick={() => {
+										window.open(constants.cmsMarketingPage, "_blank");
+									}}
+								>
+									{T()("license.purchase.action")}
+								</Button>
+							}
+						></InfoRow.Content>
+					</Show>
 					<InfoRow.Content
 						title={T()(Permissions.LicenseUpdate)}
 						description={T()("license.host.blurb")}

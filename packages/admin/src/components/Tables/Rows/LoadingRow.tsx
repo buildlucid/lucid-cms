@@ -18,7 +18,8 @@ const LoadingRow: Component<LoadingRowProps> = (props) => {
 			class={classNames({
 				"bg-background-base":
 					props.theme === "primary" || props.theme === undefined,
-				"bg-card-base": props.theme === "secondary",
+				"bg-card-base":
+					props.theme === "secondary" || props.theme === "contained",
 			})}
 		>
 			<Show when={props.isSelectable}>

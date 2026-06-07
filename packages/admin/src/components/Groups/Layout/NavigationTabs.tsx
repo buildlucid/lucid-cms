@@ -7,6 +7,7 @@ import {
 	createSignal,
 	For,
 	on,
+	onCleanup,
 	onMount,
 } from "solid-js";
 
@@ -34,6 +35,9 @@ export const NavigationTabs: Component<NavigationTabsProps> = (props) => {
 
 	let containerRef!: HTMLDivElement;
 	const itemRefs: HTMLElement[] = [];
+	let indicatorFrame: number | undefined;
+	let indicatorRetryTimeouts: ReturnType<typeof setTimeout>[] = [];
+	let resizeObserver: ResizeObserver | undefined;
 
 	// ----------------------------------------
 	// Memos
@@ -51,43 +55,91 @@ export const NavigationTabs: Component<NavigationTabsProps> = (props) => {
 
 	// ----------------------------------------
 	// Functions
+	const getTargetIndicatorIndex = () =>
+		isHovering() && hoveredTab() !== null
+			? (hoveredTab() as number)
+			: activeTab();
+	const clearScheduledIndicatorUpdates = () => {
+		if (indicatorFrame !== undefined) {
+			cancelAnimationFrame(indicatorFrame);
+			indicatorFrame = undefined;
+		}
+		for (const timeout of indicatorRetryTimeouts) {
+			clearTimeout(timeout);
+		}
+		indicatorRetryTimeouts = [];
+	};
 	const updateIndicator = (index: number) => {
 		const item = itemRefs[index];
-		if (!item || !containerRef) return;
+		if (!item || !containerRef) return false;
 
 		const containerRect = containerRef.getBoundingClientRect();
 		const itemRect = item.getBoundingClientRect();
+		if (containerRect.width === 0 || itemRect.width === 0) return false;
 
 		setIndicatorStyle({
 			left: itemRect.left - containerRect.left,
 			width: itemRect.width,
 		});
+		return true;
+	};
+	const scheduleIndicatorUpdate = (index = getTargetIndicatorIndex()) => {
+		if (indicatorFrame) cancelAnimationFrame(indicatorFrame);
+
+		indicatorFrame = requestAnimationFrame(() => {
+			indicatorFrame = undefined;
+			updateIndicator(index);
+		});
+	};
+	const scheduleIndicatorRetries = () => {
+		clearScheduledIndicatorUpdates();
+		scheduleIndicatorUpdate();
+
+		for (const delay of [50, 150, 300]) {
+			indicatorRetryTimeouts.push(
+				setTimeout(() => {
+					scheduleIndicatorUpdate();
+				}, delay),
+			);
+		}
 	};
 	const handleMouseEnter = (index: number) => {
 		setIsHovering(true);
 		setHoveredTab(index);
-		updateIndicator(index);
+		scheduleIndicatorUpdate(index);
 	};
 	const handleMouseLeave = () => {
 		setIsHovering(false);
 		setHoveredTab(null);
-		updateIndicator(activeTab());
+		scheduleIndicatorUpdate(activeTab());
 	};
 
 	// ----------------------------------------
 	// Effects
 	onMount(() => {
+		scheduleIndicatorRetries();
+
+		if (typeof ResizeObserver !== "undefined") {
+			resizeObserver = new ResizeObserver(() => {
+				scheduleIndicatorUpdate();
+			});
+			resizeObserver.observe(containerRef);
+		}
+
 		requestAnimationFrame(() => {
-			updateIndicator(activeTab());
 			requestAnimationFrame(() => setIsReady(true));
 		});
+	});
+	onCleanup(() => {
+		clearScheduledIndicatorUpdates();
+		resizeObserver?.disconnect();
 	});
 
 	createEffect(
 		on(
 			() => [activeTab(), tabs().length],
 			() => {
-				updateIndicator(activeTab());
+				scheduleIndicatorRetries();
 			},
 			{ defer: true },
 		),

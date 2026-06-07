@@ -1,12 +1,12 @@
 import type { MediaAltGenerateResponse } from "@lucidcms/types";
 import z from "zod";
-import { copy } from "../../libs/i18n/index.js";
-import type { MediaAltGenerateV1Request } from "../../libs/lucid-remote/services/generate-cms-ai.js";
-import { generateCmsAi } from "../../libs/lucid-remote/services/index.js";
-import { isCmsAiGenerateCompletedData } from "../../libs/lucid-remote/utils.js";
-import type { ServiceFn } from "../../utils/services/types.js";
-import getLicenseKey from "../options/get-license-key.js";
-import storeGeneration from "./storage/store-generation.js";
+import { copy } from "../../../libs/i18n/index.js";
+import type { MediaAltGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
+import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
+import { isCmsAiGenerateCompletedData } from "../../../libs/lucid-remote/utils.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import getLicenseKey from "../../options/get-license-key.js";
+import storeGeneration from "../storage/store-generation.js";
 
 const mediaAltOutputSchema = z.record(z.string(), z.string());
 
@@ -38,6 +38,7 @@ const mediaAltGenerate: ServiceFn<
 	],
 	MediaAltGenerateResponse
 > = async (context, props) => {
+	const requestStartedAt = Date.now();
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
 
@@ -126,6 +127,7 @@ const mediaAltGenerate: ServiceFn<
 		userId: props.userId,
 		response: generateRes.data.json.data,
 		targetType: "media-alt",
+		requestStartedAt,
 		target: {
 			mediaId: props.media.id ?? null,
 			locale: props.locale,

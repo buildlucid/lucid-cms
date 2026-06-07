@@ -27,6 +27,7 @@ const SystemOverviewRoute = lazy(() => import("@/routes/System/Overview/View"));
 const SystemOperationsRoute = lazy(
 	() => import("@/routes/System/Operations/View"),
 );
+const SystemAiUsageRoute = lazy(() => import("@/routes/System/AiUsage/View"));
 const SystemClientIntegrationsRoute = lazy(
 	() => import("@/routes/System/ClientIntegrations/View"),
 );
@@ -178,6 +179,14 @@ const AppRouter: Component = () => {
 					component={() => (
 						<PermissionGuard permission={Permissions.SettingsRead}>
 							<SystemOperationsRoute />
+						</PermissionGuard>
+					)}
+				/>
+				<Route
+					path="/system/ai-usage"
+					component={() => (
+						<PermissionGuard permission={Permissions.SettingsRead}>
+							<SystemAiUsageRoute />
 						</PermissionGuard>
 					)}
 				/>

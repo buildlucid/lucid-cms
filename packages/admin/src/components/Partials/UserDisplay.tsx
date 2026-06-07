@@ -12,6 +12,7 @@ interface UserDisplayProps {
 	};
 	mode: "short" | "long" | "icon";
 	size?: "x-small" | "small" | "medium" | "large";
+	nameFormat?: "username" | "simple";
 }
 
 const UserDisplay: Component<UserDisplayProps> = (props) => {
@@ -77,7 +78,9 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 				</Show>
 			</span>
 			<Switch>
-				<Match when={props.mode === "short"}>{props.user.username}</Match>
+				<Match when={props.mode === "short"}>
+					{helpers.formatUserName(props.user, props.nameFormat)}
+				</Match>
 				<Match when={props.mode === "long"}>
 					<div class="flex flex-col ml-2">
 						<p class="text-sm text-title">{props.user.username}</p>

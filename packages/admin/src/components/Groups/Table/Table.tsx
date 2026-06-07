@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import {
 	type Component,
 	createEffect,
@@ -16,7 +17,7 @@ import { ColumnToggle } from "./ColumnToggle";
 import { SelectAction } from "./SelectAction";
 import { Th } from "./Th";
 
-export type TableTheme = "primary" | "secondary";
+export type TableTheme = "primary" | "secondary" | "contained";
 
 interface TableRootProps {
 	key: string;
@@ -28,6 +29,7 @@ interface TableRootProps {
 		key: string;
 		icon?: JSXElement;
 		sortable?: boolean;
+		width?: number;
 		minWidth?: number;
 	}[];
 	state: {
@@ -61,6 +63,7 @@ interface TableRootProps {
 		isSelectable: boolean;
 		selected: boolean[];
 		setSelected: (_i: number) => void;
+		theme?: TableTheme;
 	}) => JSXElement;
 }
 
@@ -202,7 +205,9 @@ export const Table: Component<TableRootProps> = (props) => {
 		<>
 			{/* Table */}
 			<div
-				class="w-full overflow-x-auto scrollbar"
+				class={classNames("w-full overflow-x-auto scrollbar", {
+					"border-y border-border bg-card-base": props.theme === "contained",
+				})}
 				ref={overflowRef}
 				onScroll={() => {
 					if (!overflowRef) return;
@@ -236,6 +241,7 @@ export const Table: Component<TableRootProps> = (props) => {
 										searchParams={props.searchParams}
 										options={{
 											include: include()[index],
+											width: head().width,
 											minWidth: head().minWidth,
 											sortable: head().sortable,
 											padding: props.options?.padding,
@@ -284,6 +290,7 @@ export const Table: Component<TableRootProps> = (props) => {
 									isSelectable: isSelectable(),
 									selected: selected(),
 									setSelected: setSelectedIndex,
+									theme: props.theme,
 								})}
 							</Match>
 						</Switch>

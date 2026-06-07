@@ -65,7 +65,8 @@ export const Tr: Component<TrProps> = (props) => {
 					(props.theme === "primary" || props.theme === undefined) &&
 					!props.current,
 				"bg-card-base hover:bg-card-hover":
-					props.theme === "secondary" && !props.current,
+					(props.theme === "secondary" || props.theme === "contained") &&
+					!props.current,
 			})}
 			onClick={onClickHandler}
 			onKeyDown={(e) => {
