@@ -50,7 +50,8 @@ export const JobsList: Component<{
 							meta: jobs.data?.meta,
 						}}
 						options={{
-							padding: "24",
+							embedded: true,
+							padding: "16",
 						}}
 					/>
 				),
@@ -60,6 +61,9 @@ export const JobsList: Component<{
 					title: T()("empty.states.jobs.title"),
 					description: T()("empty.states.jobs.description"),
 				},
+			}}
+			options={{
+				inline: true,
 			}}
 		>
 			<Table
@@ -120,9 +124,11 @@ export const JobsList: Component<{
 				}}
 				options={{
 					isSelectable: false,
+					padding: "16",
 				}}
+				theme="contained"
 			>
-				{({ include, isSelectable, selected, setSelected }) => (
+				{({ include, isSelectable, selected, setSelected, theme }) => (
 					<Index each={jobs.data?.data || []}>
 						{(job, i) => (
 							<JobRow
@@ -133,10 +139,12 @@ export const JobsList: Component<{
 								rowTarget={rowTarget}
 								options={{
 									isSelectable,
+									padding: "16",
 								}}
 								callbacks={{
 									setSelected: setSelected,
 								}}
+								theme={theme}
 							/>
 						)}
 					</Index>

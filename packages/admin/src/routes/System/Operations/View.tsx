@@ -1,12 +1,8 @@
 import { type Component, createMemo, createSignal } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
+import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
 import UpdateSystemAlertsForm from "@/components/Forms/System/UpdateSystemAlertsForm";
-import { Standard } from "@/components/Groups/Headers";
-import {
-	DynamicContent,
-	NavigationTabs,
-	Wrapper,
-} from "@/components/Groups/Layout";
+import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import ClearAllProcessedImages from "@/components/Modals/Media/ClearAllProcessedImages";
 import DeleteAllShareLinksSystem from "@/components/Modals/Media/DeleteAllShareLinksSystem";
 import ClearCache from "@/components/Modals/System/ClearCache";
@@ -48,60 +44,13 @@ const SystemOperationsRoute: Component = () => {
 	const canClearAllProcessedImages = createMemo(
 		() => userStore.get.hasPermission([Permissions.MediaUpdate]).all,
 	);
-	const canReadSystemOverview = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canReadSystemOperations = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canReadAiUsage = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canManageLicense = createMemo(
-		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
-	);
 
 	// ----------------------------------------
 	// Render
 	return (
 		<Wrapper
 			slots={{
-				header: (
-					<Standard
-						copy={{
-							title: T()("routes.system.settings.title"),
-							description: T()("routes.system.settings.description"),
-						}}
-						slots={{
-							bottom: (
-								<NavigationTabs
-									tabs={[
-										{
-											label: T()("common.overview"),
-											href: "/lucid/system/overview",
-											permission: canReadSystemOverview(),
-										},
-										{
-											label: T()("common.operations"),
-											href: "/lucid/system/operations",
-											permission: canReadSystemOperations(),
-										},
-										{
-											label: T()("common.ai.usage"),
-											href: "/lucid/system/ai-usage",
-											permission: canReadAiUsage(),
-										},
-										{
-											label: T()("common.license"),
-											href: "/lucid/system/license",
-											permission: canManageLicense(),
-										},
-									]}
-								/>
-							),
-						}}
-					/>
-				),
+				header: <SystemSettingsHeader />,
 			}}
 		>
 			<DynamicContent

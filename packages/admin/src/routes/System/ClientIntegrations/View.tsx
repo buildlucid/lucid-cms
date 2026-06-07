@@ -1,8 +1,9 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import { type Component, createMemo, createSignal } from "solid-js";
+import InfoRow from "@/components/Blocks/InfoRow";
+import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
 import { ClientIntegrationsList } from "@/components/Groups/Content";
-import { Standard } from "@/components/Groups/Headers";
-import { Wrapper } from "@/components/Groups/Layout";
+import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import { Permissions } from "@/constants/permissions";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
@@ -53,11 +54,7 @@ const SystemClientIntegrationsRoute: Component = () => {
 		<Wrapper
 			slots={{
 				header: (
-					<Standard
-						copy={{
-							title: T()("routes.system.client.integrations.title"),
-							description: T()("routes.system.client.integrations.description"),
-						}}
+					<SystemSettingsHeader
 						actions={{
 							create: [
 								{
@@ -68,63 +65,74 @@ const SystemClientIntegrationsRoute: Component = () => {
 								},
 							],
 						}}
-						slots={{
-							bottom: (
-								<QueryRow
-									searchParams={searchParams}
-									onRefresh={() => {
-										queryClient.invalidateQueries({
-											queryKey: ["clientIntegrations.getAll"],
-										});
-									}}
-									filters={[
-										{
-											label: T()("common.name"),
-											key: "name",
-											type: "text",
-										},
-										{
-											label: T()("common.status.active"),
-											key: "enabled",
-											type: "boolean",
-											trueLabel: T()("common.status.active"),
-											falseLabel: T()("common.status.inactive"),
-										},
-									]}
-									sorts={[
-										{
-											label: T()("common.name"),
-											key: "name",
-										},
-										{
-											label: T()("common.description"),
-											key: "description",
-										},
-										{
-											label: T()("common.status.active"),
-											key: "enabled",
-										},
-										{
-											label: T()("common.created.at"),
-											key: "createdAt",
-										},
-									]}
-									perPage={[]}
-								/>
-							),
-						}}
 					/>
 				),
 			}}
 		>
-			<ClientIntegrationsList
-				state={{
-					searchParams,
-					openCreateClientIntegrationPanel: openCreateClientIntegrationPanel,
-					setOpenCreateClientIntegrationPanel:
-						setOpenCreateClientIntegrationPanel,
-				}}
-			/>
+			<DynamicContent options={{ padding: "24" }}>
+				<InfoRow.Root
+					title={T()("client.integrations.manage.title")}
+					description={T()("routes.system.client.integrations.description")}
+				>
+					<InfoRow.Content>
+						<div class="-mx-4 overflow-hidden">
+							<QueryRow
+								searchParams={searchParams}
+								onRefresh={() => {
+									queryClient.invalidateQueries({
+										queryKey: ["clientIntegrations.getAll"],
+									});
+								}}
+								filters={[
+									{
+										label: T()("common.name"),
+										key: "name",
+										type: "text",
+									},
+									{
+										label: T()("common.status.active"),
+										key: "enabled",
+										type: "boolean",
+										trueLabel: T()("common.status.active"),
+										falseLabel: T()("common.status.inactive"),
+									},
+								]}
+								sorts={[
+									{
+										label: T()("common.name"),
+										key: "name",
+									},
+									{
+										label: T()("common.description"),
+										key: "description",
+									},
+									{
+										label: T()("common.status.active"),
+										key: "enabled",
+									},
+									{
+										label: T()("common.created.at"),
+										key: "createdAt",
+									},
+								]}
+								perPage={[]}
+								options={{
+									padding: "16",
+								}}
+							/>
+							<ClientIntegrationsList
+								state={{
+									searchParams,
+									openCreateClientIntegrationPanel:
+										openCreateClientIntegrationPanel,
+									setOpenCreateClientIntegrationPanel:
+										setOpenCreateClientIntegrationPanel,
+								}}
+							/>
+						</div>
+					</InfoRow.Content>
+				</InfoRow.Root>
+			</DynamicContent>
 		</Wrapper>
 	);
 };

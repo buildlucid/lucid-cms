@@ -2,19 +2,13 @@ import { useQueryClient } from "@tanstack/solid-query";
 import type { AiUsageStatus } from "@types";
 import { type Component, createMemo } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
+import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
 import { AiUsageChart } from "@/components/Charts";
 import { AiUsageList } from "@/components/Groups/Content";
-import { Standard } from "@/components/Groups/Headers";
-import {
-	DynamicContent,
-	NavigationTabs,
-	Wrapper,
-} from "@/components/Groups/Layout";
+import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
-import { Permissions } from "@/constants/permissions";
 import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";
-import userStore from "@/store/userStore";
 import T from "@/translations";
 import { getAiUsageFeatureOptions } from "@/utils/ai-usage";
 import helpers from "@/utils/helpers";
@@ -70,18 +64,6 @@ const SystemAiUsageRoute: Component = () => {
 
 	// ----------------------------------------
 	// Memos
-	const canReadSystemOverview = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canReadSystemOperations = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canReadAiUsage = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canManageLicense = createMemo(
-		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
-	);
 	const userOptions = createMemo(() =>
 		(users.data?.data ?? []).map((user) => ({
 			value: user.id,
@@ -97,42 +79,7 @@ const SystemAiUsageRoute: Component = () => {
 	return (
 		<Wrapper
 			slots={{
-				header: (
-					<Standard
-						copy={{
-							title: T()("routes.system.settings.title"),
-							description: T()("routes.system.settings.description"),
-						}}
-						slots={{
-							bottom: (
-								<NavigationTabs
-									tabs={[
-										{
-											label: T()("common.overview"),
-											href: "/lucid/system/overview",
-											permission: canReadSystemOverview(),
-										},
-										{
-											label: T()("common.operations"),
-											href: "/lucid/system/operations",
-											permission: canReadSystemOperations(),
-										},
-										{
-											label: T()("common.ai.usage"),
-											href: "/lucid/system/ai-usage",
-											permission: canReadAiUsage(),
-										},
-										{
-											label: T()("common.license"),
-											href: "/lucid/system/license",
-											permission: canManageLicense(),
-										},
-									]}
-								/>
-							),
-						}}
-					/>
-				),
+				header: <SystemSettingsHeader />,
 			}}
 		>
 			<DynamicContent options={{ padding: "24" }}>

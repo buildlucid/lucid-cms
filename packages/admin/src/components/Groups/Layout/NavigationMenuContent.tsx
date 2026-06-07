@@ -1,4 +1,4 @@
-import { A, useLocation } from "@solidjs/router";
+import { A } from "@solidjs/router";
 import type { Collection, User } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
@@ -40,15 +40,10 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 	props,
 ) => {
 	// ----------------------------------
-	// Hooks
-	const location = useLocation();
-
-	// ----------------------------------
 	// Functions
 	const handleNavigate = () => {
 		props.onNavigate?.();
 	};
-	const normalisePath = (path: string) => path.replace(/^\/lucid(?=\/|$)/, "");
 	const showSystemSection = createMemo(
 		() =>
 			props.canReadSystemOverview ||
@@ -56,25 +51,6 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 			props.canManageLicense ||
 			props.canReadJobs,
 	);
-	const systemSettingsHref = createMemo(() => {
-		if (props.canReadSystemOverview) return "/lucid/system/overview";
-		if (props.canManageLicense) return "/lucid/system/license";
-		return "/lucid/system";
-	});
-	const showSystemSettings = createMemo(
-		() => props.canReadSystemOverview || props.canManageLicense,
-	);
-	const systemSettingsIsActive = createMemo(() => {
-		const path = normalisePath(location.pathname).replace(/\/$/, "");
-
-		return (
-			path === "/system" ||
-			path.startsWith("/system/overview") ||
-			path.startsWith("/system/operations") ||
-			path.startsWith("/system/ai-usage") ||
-			path.startsWith("/system/license")
-		);
-	});
 
 	// ----------------------------------
 	// Render
@@ -199,17 +175,23 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					</Show>
 					<IconLinkFull
 						type="link"
-						href={systemSettingsHref()}
+						href="/lucid/system/overview"
+						icon="overview"
+						title={T()("common.overview")}
+						permission={props.canReadSystemOverview}
+					/>
+					<IconLinkFull
+						type="link"
+						href="/lucid/system/operations"
 						icon="settings"
-						title={T()("system.settings.title")}
-						permission={showSystemSettings()}
-						active={systemSettingsIsActive()}
+						title={T()("common.operations")}
+						permission={props.canReadSystemOverview}
 					/>
 					<IconLinkFull
 						type="link"
 						href="/lucid/system/integrations"
 						icon="client-integrations"
-						title={T()("client.integrations.list.title")}
+						title={T()("routes.system.client.integrations.title")}
 						permission={props.canReadClientIntegrations}
 					/>
 					<IconLinkFull
@@ -218,6 +200,20 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						icon="queue"
 						title={T()("queue.observability")}
 						permission={props.canReadJobs}
+					/>
+					<IconLinkFull
+						type="link"
+						href="/lucid/system/ai-usage"
+						icon="overview"
+						title={T()("common.ai.usage")}
+						permission={props.canReadSystemOverview}
+					/>
+					<IconLinkFull
+						type="link"
+						href="/lucid/system/license"
+						icon="license"
+						title={T()("common.license")}
+						permission={props.canManageLicense}
 					/>
 				</ul>
 			</div>

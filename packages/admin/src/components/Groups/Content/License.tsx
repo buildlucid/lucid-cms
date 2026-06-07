@@ -104,6 +104,7 @@ export const License: Component = () => {
 									{
 										label: T()("license.key.saved"),
 										value: license()?.key ?? T()("common.not.set"),
+										wrap: true,
 									},
 									{
 										label: T()("license.last.checked"),

@@ -74,7 +74,8 @@ export const ClientIntegrationsList: Component<{
 								meta: clientIntegrations.data?.meta,
 							}}
 							options={{
-								padding: "24",
+								embedded: true,
+								padding: "16",
 							}}
 						/>
 					),
@@ -93,6 +94,9 @@ export const ClientIntegrationsList: Component<{
 				}}
 				permissions={{
 					create: hasCreatePermission(),
+				}}
+				options={{
+					inline: true,
 				}}
 			>
 				<Table
@@ -147,9 +151,11 @@ export const ClientIntegrationsList: Component<{
 					}}
 					options={{
 						isSelectable: false,
+						padding: "16",
 					}}
+					theme="contained"
 				>
-					{({ include, isSelectable, selected, setSelected }) => (
+					{({ include, isSelectable, selected, setSelected, theme }) => (
 						<Index each={clientIntegrations.data?.data || []}>
 							{(clientIntegration, i) => (
 								<ClientIntegrationTableRow
@@ -160,10 +166,12 @@ export const ClientIntegrationsList: Component<{
 									rowTarget={rowTarget}
 									options={{
 										isSelectable,
+										padding: "16",
 									}}
 									callbacks={{
 										setSelected: setSelected,
 									}}
+									theme={theme}
 								/>
 							)}
 						</Index>

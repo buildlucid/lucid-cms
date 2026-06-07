@@ -16,6 +16,7 @@ interface DetailsListProps {
 		value?: string | number | null | JSXElement;
 		show?: boolean;
 		stacked?: boolean;
+		wrap?: boolean;
 	}>;
 	theme?: "contained";
 }
@@ -35,7 +36,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 					<Show when={item.show !== false}>
 						<li
 							class={classNames(
-								"flex mb-2 last:mb-0 gap-x-2 border-b border-border pb-2 last:pb-0 last:border-b-0",
+								"flex mb-2 last:mb-0 gap-x-2 gap-y-1 border-b border-border pb-2 last:pb-0 last:border-b-0",
 								{
 									"flex-col items-start lg:justify-between":
 										props.type === "text",
@@ -58,7 +59,11 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 										{item.label}
 									</span>
 									<Show when={item.value !== undefined}>
-										<span class="font-medium text-unfocused text-sm">
+										<span
+											class={classNames("font-medium text-unfocused text-sm", {
+												"min-w-0 break-all text-left lg:text-right": item.wrap,
+											})}
+										>
 											{item.value}
 										</span>
 									</Show>

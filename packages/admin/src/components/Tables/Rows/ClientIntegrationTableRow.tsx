@@ -1,5 +1,6 @@
 import type { ClientIntegration } from "@types";
 import type { Component } from "solid-js";
+import type { TableTheme } from "@/components/Groups/Table/Table";
 import { Tr } from "@/components/Groups/Table/Tr";
 import ClientIntegrationLastUsedCol from "@/components/Tables/Columns/ClientIntegrationLastUsedCol";
 import DateCol from "@/components/Tables/Columns/DateCol";
@@ -14,6 +15,7 @@ import type { TableRowProps } from "@/types/components";
 interface ClientIntegrationTableRowProps extends TableRowProps {
 	clientIntegration: ClientIntegration;
 	include: boolean[];
+	theme?: TableTheme;
 	rowTarget: ReturnType<
 		typeof useRowTarget<"delete" | "update" | "regenerateAPIKey">
 	>;
@@ -30,6 +32,7 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 			selected={props.selected}
 			options={props.options}
 			callbacks={props.callbacks}
+			theme={props.theme}
 			actions={[
 				{
 					label: T()("common.update"),
@@ -82,31 +85,43 @@ const ClientIntegrationTableRow: Component<ClientIntegrationTableRowProps> = (
 				theme={
 					props.clientIntegration.enabled ? "primary-opaque" : "error-opaque"
 				}
-				options={{ include: props.include[0] }}
+				options={{ include: props.include[0], padding: props.options?.padding }}
 			/>
 			<TextCol
 				text={props.clientIntegration.name}
-				options={{ include: props.include[1], maxLines: 1 }}
+				options={{
+					include: props.include[1],
+					maxLines: 1,
+					padding: props.options?.padding,
+				}}
 			/>
 			<TextCol
 				text={props.clientIntegration.key}
-				options={{ include: props.include[2], maxLines: 1 }}
+				options={{
+					include: props.include[2],
+					maxLines: 1,
+					padding: props.options?.padding,
+				}}
 			/>
 			<TextCol
 				text={props.clientIntegration.description}
-				options={{ include: props.include[3], maxLines: 2 }}
+				options={{
+					include: props.include[3],
+					maxLines: 2,
+					padding: props.options?.padding,
+				}}
 			/>
 			<ClientIntegrationLastUsedCol
 				clientIntegration={props.clientIntegration}
-				options={{ include: props.include[4] }}
+				options={{ include: props.include[4], padding: props.options?.padding }}
 			/>
 			<DateCol
 				date={props.clientIntegration.createdAt}
-				options={{ include: props.include[5] }}
+				options={{ include: props.include[5], padding: props.options?.padding }}
 			/>
 			<DateCol
 				date={props.clientIntegration.updatedAt}
-				options={{ include: props.include[6] }}
+				options={{ include: props.include[6], padding: props.options?.padding }}
 			/>
 		</Tr>
 	);

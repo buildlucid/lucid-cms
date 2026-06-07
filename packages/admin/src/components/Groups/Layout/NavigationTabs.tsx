@@ -148,7 +148,7 @@ export const NavigationTabs: Component<NavigationTabsProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<nav class="px-4 md:px-6 pb-4">
+		<nav class="hidden px-4 pb-4 md:px-6 lg:block">
 			<div
 				ref={containerRef}
 				class="relative flex max-w-max flex-row items-center rounded-md border border-border bg-card-base p-1"

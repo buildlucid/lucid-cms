@@ -1,18 +1,12 @@
 import { type Component, createMemo, For, Show } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
-import { Standard } from "@/components/Groups/Headers";
-import {
-	DynamicContent,
-	NavigationTabs,
-	Wrapper,
-} from "@/components/Groups/Layout";
+import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
+import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import DetailsList from "@/components/Partials/DetailsList";
 import Pill from "@/components/Partials/Pill";
 import ProgressBar from "@/components/Partials/ProgressBar";
-import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
@@ -75,18 +69,6 @@ const SystemOverviewRoute: Component = () => {
 		return from ? `${from.name} <${from.email}>` : "-";
 	});
 	const emailTemplates = createMemo(() => emailInfo()?.templates ?? []);
-	const canReadSystemOverview = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canReadSystemOperations = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canReadAiUsage = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canManageLicense = createMemo(
-		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
-	);
 
 	// ----------------------------------------
 	// Render
@@ -94,42 +76,7 @@ const SystemOverviewRoute: Component = () => {
 	return (
 		<Wrapper
 			slots={{
-				header: (
-					<Standard
-						copy={{
-							title: T()("routes.system.settings.title"),
-							description: T()("routes.system.settings.description"),
-						}}
-						slots={{
-							bottom: (
-								<NavigationTabs
-									tabs={[
-										{
-											label: T()("common.overview"),
-											href: "/lucid/system/overview",
-											permission: canReadSystemOverview(),
-										},
-										{
-											label: T()("common.operations"),
-											href: "/lucid/system/operations",
-											permission: canReadSystemOperations(),
-										},
-										{
-											label: T()("common.ai.usage"),
-											href: "/lucid/system/ai-usage",
-											permission: canReadAiUsage(),
-										},
-										{
-											label: T()("common.license"),
-											href: "/lucid/system/license",
-											permission: canManageLicense(),
-										},
-									]}
-								/>
-							),
-						}}
-					/>
-				),
+				header: <SystemSettingsHeader />,
 			}}
 		>
 			<DynamicContent
