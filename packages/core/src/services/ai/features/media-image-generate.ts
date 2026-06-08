@@ -10,15 +10,15 @@ import storePendingGeneration from "../storage/store-pending-generation.js";
 
 const imageGuidanceInstructions = {
 	natural:
-		"Create a natural, realistic image with balanced lighting, believable details, and an authentic visual style.",
-	editorial:
-		"Create a polished editorial image with strong composition, refined lighting, and a magazine-quality finish.",
+		"Create a realistic photograph with natural light, believable texture, accurate perspective, and minimal stylization.",
+	lifestyle:
+		"Create a polished lifestyle image suited to a brand story or magazine article, with a real-world setting, composed framing, and natural lighting.",
 	product:
-		"Create a clean product-focused image with controlled lighting, clear subject emphasis, and minimal distractions.",
+		"Create a clean studio product image with crisp detail, controlled lighting, accurate materials, and minimal background distractions.",
 	illustration:
-		"Create a refined non-photographic illustration with cohesive colors, clear forms, and a polished visual style.",
+		"Create a polished non-photographic illustration with clear shapes, cohesive colors, intentional texture, and no photorealistic camera effects.",
 	cinematic:
-		"Create a cinematic image with dramatic composition, atmospheric lighting, and strong visual storytelling.",
+		"Create a story-led cinematic image with dramatic composition, atmospheric lighting, depth, and a believable mood.",
 } as const;
 
 const mediaImageGenerate: ServiceFn<

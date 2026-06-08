@@ -1,3 +1,4 @@
+import { HoverCard } from "@kobalte/core";
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
 	ErrorResultObj,
@@ -1053,21 +1054,38 @@ const MediaImageGenerationModal: Component = () => {
 							<For each={imageGuidanceOptions}>
 								{(option) => {
 									const selected = createMemo(() => guidance() === option.key);
+									const optionLabel = createMemo(() => T()(option.label));
+									const optionInstruction = createMemo(() =>
+										T()(option.instruction),
+									);
 
 									return (
-										<button
-											type="button"
-											class="focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base rounded-full disabled:cursor-not-allowed disabled:opacity-60"
-											aria-pressed={selected()}
-											disabled={isLoading()}
-											onClick={() =>
-												setGuidance(selected() ? undefined : option.key)
-											}
-										>
-											<Pill theme={selected() ? "primary-opaque" : "outline"}>
-												{T()(option.label)}
-											</Pill>
-										</button>
+										<HoverCard.Root>
+											<HoverCard.Trigger
+												as="button"
+												type="button"
+												class="focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base rounded-full disabled:cursor-not-allowed disabled:opacity-60"
+												aria-pressed={selected()}
+												disabled={isLoading()}
+												onClick={() =>
+													setGuidance(selected() ? undefined : option.key)
+												}
+											>
+												<Pill theme={selected() ? "primary-opaque" : "outline"}>
+													{optionLabel()}
+												</Pill>
+											</HoverCard.Trigger>
+											<HoverCard.Portal>
+												<HoverCard.Content class="z-70 bg-card-base w-80 mt-2 rounded-md border border-border p-3 shadow-xs">
+													<p class="mb-1 text-sm font-semibold text-title">
+														{optionLabel()}
+													</p>
+													<p class="text-sm text-card-contrast">
+														{optionInstruction()}
+													</p>
+												</HoverCard.Content>
+											</HoverCard.Portal>
+										</HoverCard.Root>
 									);
 								}}
 							</For>

@@ -103,22 +103,27 @@ export const imageGuidanceOptions = [
 	{
 		key: "natural",
 		label: "ai.media.image.generate.guidance.option.natural",
+		instruction: "ai.media.image.generate.guidance.instruction.natural",
 	},
 	{
-		key: "editorial",
-		label: "ai.media.image.generate.guidance.option.editorial",
+		key: "lifestyle",
+		label: "ai.media.image.generate.guidance.option.lifestyle",
+		instruction: "ai.media.image.generate.guidance.instruction.lifestyle",
 	},
 	{
 		key: "product",
 		label: "ai.media.image.generate.guidance.option.product",
+		instruction: "ai.media.image.generate.guidance.instruction.product",
 	},
 	{
 		key: "illustration",
 		label: "ai.media.image.generate.guidance.option.illustration",
+		instruction: "ai.media.image.generate.guidance.instruction.illustration",
 	},
 	{
 		key: "cinematic",
 		label: "ai.media.image.generate.guidance.option.cinematic",
+		instruction: "ai.media.image.generate.guidance.instruction.cinematic",
 	},
 ] as const;
 
