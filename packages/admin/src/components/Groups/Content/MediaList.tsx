@@ -34,6 +34,7 @@ import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import DeleteMediaBatch from "@/components/Modals/Media/DeleteMediaBatch";
 import DeleteMediaBatchPermanently from "@/components/Modals/Media/DeleteMediaBatchPermanently";
 import DeleteMediaPermanently from "@/components/Modals/Media/DeleteMediaPermanently";
+import ImageCropEditor from "@/components/Modals/Media/ImageCropEditor";
 import MoveToFolder, {
 	type MoveToFolderParams,
 } from "@/components/Modals/Media/MoveToFolder";
@@ -45,6 +46,7 @@ import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel
 import ViewMediaPanel from "@/components/Panels/Media/ViewMediaPanel";
 import ViewShareLinksPanel from "@/components/Panels/Media/ViewShareLinksPanel";
 import { Permissions } from "@/constants/permissions";
+import { useUpdateMedia } from "@/hooks/actions";
 import useMediaAltGeneration from "@/hooks/ai/useMediaAltGeneration";
 import useRowTarget from "@/hooks/useRowTarget";
 import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
@@ -53,6 +55,8 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import mediaStore from "@/store/mediaStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import type { ImageCropProvenance, ImageCropSource } from "@/utils/image-crop";
+import { getImageMeta as getFileImageMeta } from "@/utils/media-meta";
 
 export const MediaList: Component<{
 	state: {
@@ -81,9 +85,11 @@ export const MediaList: Component<{
 			viewShareLinks: false,
 			copyShareLinkURL: false,
 			deleteAllShareLinks: false,
+			quickCrop: false,
 		},
 	});
 	const mediaAltGeneration = useMediaAltGeneration();
+	const quickCropUpdateMedia = useUpdateMedia(rowTarget.getTargetId);
 	const [isDragging, setIsDragging] = createSignal(false);
 	const [getMoveModalParams, setMoveModalParams] =
 		createSignal<MoveToFolderParams>({
@@ -93,6 +99,11 @@ export const MediaList: Component<{
 		});
 	const [getCreatedShareLinkIds, setCreatedShareLinkIds] =
 		createSignal<[number, number]>();
+	const [activeQuickCropSource, setActiveQuickCropSource] =
+		createSignal<ImageCropSource | null>(null);
+	const [quickCropPreviewKeys, setQuickCropPreviewKeys] = createSignal<
+		Record<number, number>
+	>({});
 
 	// ----------------------------------
 	// Memos
@@ -180,11 +191,57 @@ export const MediaList: Component<{
 			disabled: () => updateMediaAlt.action.isPending,
 		});
 	};
+	const openQuickCrop = (item: Media) => {
+		rowTarget.setTargetId(item.id);
+		setActiveQuickCropSource({
+			url: item.url,
+			name: item.fileName ?? item.key,
+			mimeType: item.meta.mimeType,
+			provenance: {
+				origin: item.origin,
+			},
+		});
+		rowTarget.setTrigger("quickCrop", true);
+	};
+	const applyQuickCrop = async (
+		file: File,
+		provenance: ImageCropProvenance,
+	) => {
+		const item = quickCropMedia();
+		if (!item) throw new Error(T()("media.crop.source.missing"));
+
+		const imageMeta = await getFileImageMeta(file);
+		quickCropUpdateMedia.setTitle(item.title ?? []);
+		quickCropUpdateMedia.setAlt(item.alt ?? []);
+		quickCropUpdateMedia.setDescription(item.description ?? []);
+		quickCropUpdateMedia.setSummary(item.summary ?? []);
+		quickCropUpdateMedia.setFolderId(item.folderId ?? null);
+		quickCropUpdateMedia.setPublic(item.public);
+		quickCropUpdateMedia.setPosterId(item.poster?.id);
+		quickCropUpdateMedia.setFocalPoint(null);
+
+		const success = await quickCropUpdateMedia.updateMedia(
+			file,
+			imageMeta,
+			provenance,
+		);
+		if (!success) return false;
+
+		setQuickCropPreviewKeys((keys) => ({
+			...keys,
+			[item.id]: Date.now(),
+		}));
+		await media.refetch();
+		return undefined;
+	};
 
 	// ----------------------------------------
 	// Memos
 	const foldersCount = createMemo(() => folders.data?.data.folders.length || 0);
 	const mediaCount = createMemo(() => media.data?.data.length || 0);
+	const quickCropMedia = createMemo(() => {
+		return media.data?.data.find((item) => item.id === rowTarget.getTargetId());
+	});
 	const isTopLevel = createMemo(() => props.state.parentFolderId() === "");
 	const isError = createMemo(() => {
 		return media.isError || folders.isError;
@@ -355,7 +412,11 @@ export const MediaList: Component<{
 								showingDeleted={props.state.showingDeleted}
 								isDragging={isDragging}
 								onGenerateAlt={openAltGeneration}
+								onCrop={openQuickCrop}
 								aiAltAccessState={mediaAltGeneration.accessState()}
+								previewCacheKey={
+									quickCropPreviewKeys()[item.id] ?? item.updatedAt
+								}
 							/>
 						)}
 					</For>
@@ -532,6 +593,20 @@ export const MediaList: Component<{
 						rowTarget.setTrigger("deleteAllShareLinks", state);
 					},
 				}}
+			/>
+			<ImageCropEditor
+				state={{
+					open: rowTarget.getTriggers().quickCrop,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("quickCrop", state);
+						if (!state) {
+							setActiveQuickCropSource(null);
+							quickCropUpdateMedia.reset();
+						}
+					},
+				}}
+				source={activeQuickCropSource()}
+				onApply={applyQuickCrop}
 			/>
 		</DynamicContent>
 	);

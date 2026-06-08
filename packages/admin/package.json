@@ -60,6 +60,7 @@
 		"chart.js": "^4.5.1",
 		"classnames": "^2.5.1",
 		"codemirror": "^6.0.2",
+		"cropperjs": "^2.1.1",
 		"dompurify": "^3.3.1",
 		"fast-average-color": "^9.5.0",
 		"fast-deep-equal": "^3.1.3",

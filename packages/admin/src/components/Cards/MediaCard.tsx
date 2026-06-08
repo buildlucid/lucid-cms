@@ -16,6 +16,7 @@ import mediaStore from "@/store/mediaStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { isSupportedCropMimeType } from "@/utils/image-crop";
 
 interface MediaCardProps {
 	media: Media;
@@ -36,7 +37,9 @@ interface MediaCardProps {
 	showingDeleted?: Accessor<boolean>;
 	isDragging: Accessor<boolean>;
 	onGenerateAlt?: (_media: Media) => void;
+	onCrop?: (_media: Media) => void;
 	aiAltAccessState?: AiFeatureAccessState;
+	previewCacheKey?: string | number | null;
 }
 
 export const MediaCardLoading: Component = () => {
@@ -128,6 +131,14 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			status: "warning" as const,
 		};
 	});
+	const showCropAction = createMemo(() => {
+		return (
+			props.media.type === "image" &&
+			isSupportedCropMimeType(props.media.meta.mimeType) &&
+			!props.showingDeleted?.() &&
+			props.onCrop !== undefined
+		);
+	});
 	const actionMenuActions = createMemo<ActionMenubarItem[]>(() => [
 		{
 			label: T()("common.preview"),
@@ -160,6 +171,16 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			icon: "image",
 			hide: props.media.type !== "image",
 			actions: [
+				{
+					label: T()("media.crop.action"),
+					type: "button",
+					icon: "crop",
+					onClick: () => {
+						props.onCrop?.(props.media);
+					},
+					permission: hasUpdatePermission(),
+					hide: !showCropAction(),
+				},
 				{
 					label: T()("ai.media.alt.generate.action"),
 					type: "button",
@@ -290,6 +311,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 				<MediaPreview
 					media={props.media}
 					alt={alt() || displayTitle() || ""}
+					cacheKey={props.previewCacheKey ?? props.media.updatedAt}
 					imageFit={
 						props.media.type === "image" || props.media.poster
 							? "contain"

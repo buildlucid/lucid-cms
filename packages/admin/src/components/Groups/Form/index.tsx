@@ -1,6 +1,7 @@
 export { CheckboxInput as Checkbox } from "./Checkbox";
 export { CheckboxButton } from "./CheckboxButton";
 export { Color } from "./Color";
+export { DegreeRangeControl } from "./DegreeRangeControl";
 export { DescribedBy } from "./DescribedBy";
 export { DocumentSelect } from "./DocumentSelect";
 export { ErrorMessage } from "./ErrorMessage";

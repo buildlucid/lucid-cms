@@ -3,18 +3,17 @@ import classNames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
 	FaSolidArrowUpFromBracket,
-	FaSolidBullseye,
 	FaSolidFile,
 	FaSolidMagicWandSparkles,
-	FaSolidMagnifyingGlass,
-	FaSolidXmark,
 } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
+	For,
 	Match,
+	onCleanup,
 	Show,
 	Switch,
 } from "solid-js";
@@ -22,6 +21,12 @@ import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import FocalPointEditor, {
 	type FocalPoint,
 } from "@/components/Modals/Media/FocalPointEditor";
+import ActionDropdown, {
+	type ActionDropdownProps,
+} from "@/components/Partials/ActionDropdown";
+import ActionIcon, {
+	type ActionIconName,
+} from "@/components/Partials/ActionIcon";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
@@ -32,6 +37,16 @@ export type SingleFileUploadImageGeneration = {
 		loading: boolean;
 		disabled: boolean;
 		disabledClickable: boolean;
+		tooltip: string;
+	};
+	callbacks: {
+		open: () => void;
+	};
+};
+
+export type SingleFileUploadImageCrop = {
+	state: {
+		disabled: boolean;
 		tooltip: string;
 	};
 	callbacks: {
@@ -52,7 +67,10 @@ export interface SingleFileUploadProps {
 		type?: Media["type"];
 		url?: string;
 		focalPointUrl?: string;
+		cropUrl?: string;
 		name?: string;
+		mimeType?: string | null;
+		origin?: Media["origin"];
 		width?: number | null;
 		height?: number | null;
 		focalPoint?: FocalPoint | null;
@@ -80,6 +98,11 @@ export interface SingleFileUploadProps {
 	altLocaleError?: boolean;
 	noMargin?: boolean;
 	imageGeneration?: SingleFileUploadImageGeneration;
+	imageCrop?: SingleFileUploadImageCrop;
+	pendingChange?: {
+		label: string;
+		reset: () => void;
+	};
 }
 
 export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
@@ -216,10 +239,12 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 							}}
 							progress={props.progress}
 							focalPoint={props.focalPoint}
+							pendingChange={props.pendingChange}
 							actions={{
 								clearFile,
 								uploadFile,
 								imageGeneration: props.imageGeneration,
+								imageCrop: props.imageCrop,
 							}}
 						/>
 					</Match>
@@ -272,11 +297,13 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 							}}
 							progress={props.progress}
 							focalPoint={props.focalPoint}
+							pendingChange={props.pendingChange}
 							actions={{
 								clearFile: props.disableRemoveCurrent ? undefined : clearFile,
 								downloadFile,
 								uploadFile,
 								imageGeneration: props.imageGeneration,
+								imageCrop: props.imageCrop,
 							}}
 						/>
 					</Match>
@@ -345,11 +372,16 @@ interface FilePreviewScreenProps {
 		value: FocalPoint | null;
 		setValue: (_value: FocalPoint | null) => void;
 	};
+	pendingChange?: {
+		label: string;
+		reset: () => void;
+	};
 	actions: {
 		clearFile?: () => void;
 		downloadFile?: () => void;
 		uploadFile: () => void;
 		imageGeneration?: SingleFileUploadImageGeneration;
+		imageCrop?: SingleFileUploadImageCrop;
 	};
 }
 
@@ -357,29 +389,97 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 	// ------------------------------------
 	// State
 	const [focalEditorOpen, setFocalEditorOpen] = createSignal(false);
+	const [renderNativeMedia, setRenderNativeMedia] = createSignal(false);
 
 	// ------------------------------------
-	// Classes
-	const actionButtonClasses = classNames(
-		"bg-input-base md:gap-2 text-input-contrast hover:text-secondary-contrast border border-border h-8 flex justify-center items-center font-medium text-sm py-2 px-2 rounded-md transition-all duration-200 hover:bg-secondary-hover focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base disabled:cursor-not-allowed disabled:opacity-70",
-	);
+	// Memos
 	const showFocalPoint = createMemo(
 		() => props.data.type === "image" && props.focalPoint !== undefined,
 	);
-	const actionCount = createMemo(() => {
+	const quickActions = createMemo<PreviewQuickAction[]>(() => {
 		return [
-			props.actions.downloadFile,
-			showFocalPoint() ? true : undefined,
-			props.actions.imageGeneration,
-			props.actions.uploadFile,
-			props.actions.clearFile,
-		].filter(Boolean).length;
+			{
+				label: T()("media.file.pending.reset"),
+				icon: "restore" as const,
+				hide: props.pendingChange === undefined,
+				theme: "primary" as const,
+				onClick: () => props.pendingChange?.reset(),
+			},
+			{
+				label: T()("media.crop.action"),
+				icon: "crop" as const,
+				hide: props.actions.imageCrop === undefined,
+				disabled: props.actions.imageCrop?.state.disabled,
+				onClick: () => props.actions.imageCrop?.callbacks.open(),
+			},
+			{
+				label: T()("ai.media.image.generate.action"),
+				icon: "sparkle" as const,
+				hide: props.actions.imageGeneration === undefined,
+				disabled:
+					props.actions.imageGeneration?.state.disabled === true &&
+					props.actions.imageGeneration.state.disabledClickable !== true,
+				loading: props.actions.imageGeneration?.state.loading,
+				onClick: () => props.actions.imageGeneration?.callbacks.open(),
+			},
+			{
+				label: T()("media.file.replace"),
+				icon: "upload" as const,
+				onClick: () => props.actions.uploadFile(),
+			},
+		].filter((action) => action.hide !== true);
+	});
+	const overflowActions = createMemo<ActionDropdownProps["actions"]>(() => {
+		return [
+			{
+				label: T()("common.preview"),
+				type: "button" as const,
+				icon: "eye" as const,
+				hide: props.actions.downloadFile === undefined,
+				onClick: () => props.actions.downloadFile?.(),
+			},
+			{
+				label: T()("media.focal.point.label"),
+				type: "button" as const,
+				icon: "bullseye" as const,
+				hide: !showFocalPoint(),
+				onClick: () => setFocalEditorOpen(true),
+			},
+			{
+				label: T()("common.remove"),
+				type: "button" as const,
+				icon: "trash" as const,
+				hide: props.actions.clearFile === undefined,
+				theme: "error" as const,
+				onClick: () => props.actions.clearFile?.(),
+			},
+		];
+	});
+
+	// ------------------------------------
+	// Effects
+	createEffect(() => {
+		props.data.type;
+		props.data.url;
+
+		setRenderNativeMedia(false);
+		let secondFrame: number | undefined;
+		const firstFrame = requestAnimationFrame(() => {
+			secondFrame = requestAnimationFrame(() => {
+				setRenderNativeMedia(true);
+			});
+		});
+
+		onCleanup(() => {
+			cancelAnimationFrame(firstFrame);
+			if (secondFrame !== undefined) cancelAnimationFrame(secondFrame);
+		});
 	});
 
 	// ------------------------------------
 	// Render
 	return (
-		<div class="relative w-full h-full flex justify-center items-center flex-col">
+		<div class="group relative w-full h-full flex justify-center items-center flex-col">
 			<Show when={showFocalPoint()}>
 				<FocalPointEditor
 					state={{
@@ -396,11 +496,35 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					onSave={(value) => props.focalPoint?.setValue(value)}
 				/>
 			</Show>
+			<div class="absolute right-3 top-3 z-30 flex max-w-[calc(100%-24px)] flex-wrap items-center justify-end gap-1">
+				<div class="order-2">
+					<ActionDropdown
+						actions={overflowActions()}
+						options={{
+							border: true,
+							placement: "bottom-end",
+							raised: true,
+						}}
+					/>
+				</div>
+				<div class="order-1 flex flex-wrap items-center justify-end gap-1 opacity-100 transition-opacity duration-200 md:pointer-events-none md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:opacity-100">
+					<For each={quickActions()}>
+						{(action) => <PreviewActionButton action={action} />}
+					</For>
+				</div>
+			</div>
+			<Show when={props.pendingChange}>
+				{(pendingChange) => (
+					<div class="absolute bottom-3 left-3 z-30 flex max-w-[calc(100%-24px)] items-center overflow-hidden rounded-md border border-border bg-background-base/90 text-xs font-medium text-title shadow-sm backdrop-blur">
+						<span class="truncate px-2.5 py-1.5">{pendingChange().label}</span>
+					</div>
+				)}
+			</Show>
 			<Switch
 				fallback={
 					<div
 						class={classNames(
-							"w-full h-[calc(100%-49px)] relative z-10 bg-input-base flex flex-col justify-center items-center",
+							"w-full h-full relative z-10 bg-input-base flex flex-col justify-center items-center",
 						)}
 					>
 						<FaSolidFile class="w-10 h-10 mx-auto text-unfocused mb-5" />
@@ -415,7 +539,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				<Match when={props.data.type === "image"}>
 					<div
 						class={classNames(
-							"w-full h-[calc(100%-49px)] relative z-10 p-4 rectangle-background",
+							"w-full h-full relative z-10 p-4 rectangle-background",
 						)}
 					>
 						<img
@@ -428,31 +552,35 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				<Match when={props.data.type === "video"}>
 					<div
 						class={classNames(
-							"w-full h-[calc(100%-49px)] relative z-10 bg-input-base rectangle-background",
+							"w-full h-full relative z-10 bg-input-base rectangle-background",
 						)}
 					>
-						{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-						<video
-							src={props.data.url}
-							class="w-full h-full object-contain z-10 relative"
-							controls
-							preload="auto"
-						/>
+						<Show when={renderNativeMedia()}>
+							{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
+							<video
+								src={props.data.url}
+								class="w-full h-full object-contain z-10 relative"
+								controls
+								preload="auto"
+							/>
+						</Show>
 					</div>
 				</Match>
 				<Match when={props.data.type === "audio"}>
 					<div
 						class={classNames(
-							"w-full h-[calc(100%-49px)] relative z-10 bg-input-base flex justify-center items-center",
+							"w-full h-full relative z-10 bg-input-base flex justify-center items-center",
 						)}
 					>
-						{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-						<audio src={props.data.url} class="w-2/3" controls />
+						<Show when={renderNativeMedia()}>
+							{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
+							<audio src={props.data.url} class="w-2/3" controls />
+						</Show>
 					</div>
 				</Match>
 			</Switch>
 			<Show when={props.progress?.active}>
-				<div class="absolute inset-x-0 bottom-12.25 z-20">
+				<div class="absolute inset-x-0 bottom-0 z-20">
 					<ProgressBar
 						progress={props.progress?.value ?? 0}
 						type="target"
@@ -460,106 +588,51 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					/>
 				</div>
 			</Show>
-			<div
-				class={classNames(
-					"w-full z-10 relative grid gap-2 p-2 bg-background-base border-t border-border",
-					{
-						"grid-cols-1": actionCount() === 1,
-						"grid-cols-2": actionCount() === 2,
-						"grid-cols-3": actionCount() === 3,
-						"grid-cols-4": actionCount() === 4,
-						"grid-cols-5": actionCount() === 5,
-					},
-				)}
-			>
-				<Show when={props.actions.downloadFile !== undefined}>
-					<button
-						type="button"
-						class={classNames(actionButtonClasses)}
-						onClick={() => {
-							if (props.actions.downloadFile !== undefined)
-								props.actions.downloadFile();
-						}}
-					>
-						<FaSolidMagnifyingGlass class="block text-current" />
-						<span class="hidden md:inline">{T()("common.preview")}</span>
-					</button>
-				</Show>
-				<Show when={showFocalPoint()}>
-					<button
-						type="button"
-						class={classNames(actionButtonClasses)}
-						onClick={() => setFocalEditorOpen(true)}
-					>
-						<FaSolidBullseye class="block text-current" />
-						<span class="hidden md:inline">
-							{T()("media.focal.point.label")}
-						</span>
-					</button>
-				</Show>
-				<Show when={props.actions.imageGeneration}>
-					{(imageGeneration) => (
-						<button
-							type="button"
-							class={classNames(actionButtonClasses, {
-								"cursor-not-allowed opacity-70":
-									imageGeneration().state.disabled,
-							})}
-							disabled={
-								imageGeneration().state.disabled &&
-								!imageGeneration().state.disabledClickable
-							}
-							title={imageGeneration().state.tooltip}
-							aria-label={T()("ai.media.image.generate.action")}
-							aria-disabled={
-								imageGeneration().state.disabled ? "true" : undefined
-							}
-							aria-busy={imageGeneration().state.loading ? "true" : undefined}
-							onClick={(event) => {
-								event.preventDefault();
-								event.stopPropagation();
-								imageGeneration().callbacks.open();
-							}}
-						>
-							{imageGeneration().state.loading ? (
-								<Spinner size="sm" />
-							) : (
-								<FaSolidMagicWandSparkles
-									size={13}
-									class="block text-current"
-									aria-hidden="true"
-								/>
-							)}
-							<span class="hidden md:inline">
-								{T()("ai.media.image.generate.action")}
-							</span>
-						</button>
-					)}
-				</Show>
-				<button
-					type="button"
-					class={classNames(actionButtonClasses)}
-					onClick={() => {
-						props.actions.uploadFile();
-					}}
-				>
-					<FaSolidArrowUpFromBracket class="block text-current" />
-					<span class="hidden md:inline">{T()("media.file.choose")}</span>
-				</button>
-				<Show when={props.actions.clearFile !== undefined}>
-					<button
-						type="button"
-						class={classNames(actionButtonClasses)}
-						onClick={() => {
-							if (props.actions.clearFile !== undefined)
-								props.actions.clearFile();
-						}}
-					>
-						<FaSolidXmark class="block text-current" />
-						<span class="hidden md:inline">{T()("common.remove")}</span>
-					</button>
-				</Show>
-			</div>
 		</div>
+	);
+};
+
+type PreviewQuickAction = {
+	label: string;
+	icon: ActionIconName;
+	hide?: boolean;
+	disabled?: boolean;
+	loading?: boolean;
+	theme?: "primary";
+	onClick: () => void;
+};
+
+const PreviewActionButton: Component<{
+	action: PreviewQuickAction;
+}> = (props) => {
+	return (
+		<button
+			type="button"
+			disabled={props.action.disabled}
+			title={props.action.label}
+			aria-label={props.action.label}
+			aria-busy={props.action.loading ? "true" : undefined}
+			class={classNames(
+				"pointer-events-auto inline-flex h-7 max-w-32 items-center gap-1.5 rounded-md border border-border bg-input-base px-2 text-xs font-medium text-subtitle shadow-sm transition-colors duration-200 hover:bg-background-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
+				{
+					"border-primary-base/60 bg-input-base text-primary-base hover:bg-primary-base/10 hover:text-primary-base":
+						props.action.theme === "primary" && !props.action.disabled,
+				},
+			)}
+			onClick={(event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				if (props.action.disabled) return;
+				props.action.onClick();
+			}}
+		>
+			<Show
+				when={props.action.loading}
+				fallback={<ActionIcon icon={props.action.icon} size={13} />}
+			>
+				<Spinner size="sm" />
+			</Show>
+			<span class="truncate">{props.action.label}</span>
+		</button>
 	);
 };

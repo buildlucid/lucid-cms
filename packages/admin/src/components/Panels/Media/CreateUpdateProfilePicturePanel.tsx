@@ -66,6 +66,13 @@ const CreateUpdateProfilePicturePanel: Component<
 				setUploadErrors(undefined);
 			},
 		},
+		imageCrop: {
+			enabled: () => true,
+			disabled: () => coreMutateIsLoading(),
+			onSetFile: () => {
+				setUploadErrors(undefined);
+			},
+		},
 	});
 
 	// ---------------------------------
@@ -328,7 +335,10 @@ const CreateUpdateProfilePicturePanel: Component<
 				name: profilePicture.fileName ?? profilePicture.key,
 				url: `${profilePicture.url}?preset=thumbnail-medium&format=webp`,
 				focalPointUrl: `${profilePicture.url}?preset=thumbnail-large&format=webp`,
+				cropUrl: profilePicture.url,
 				type: profilePicture.type,
+				mimeType: profilePicture.meta.mimeType,
+				origin: profilePicture.origin,
 				width: profilePicture.meta.width,
 				height: profilePicture.meta.height,
 				focalPoint: profilePicture.meta.focalPoint ?? null,
@@ -348,9 +358,12 @@ const CreateUpdateProfilePicturePanel: Component<
 	// ---------------------------------
 	// Effects
 	createEffect(
-		on([profilePictureMedia, () => props.state.open], ([_, open]) => {
-			if (open) hydrateProfilePictureState();
-		}),
+		on(
+			[() => props.state.open, () => profilePictureMedia()?.id ?? null],
+			([open]) => {
+				if (open) hydrateProfilePictureState();
+			},
+		),
 	);
 
 	// ---------------------------------

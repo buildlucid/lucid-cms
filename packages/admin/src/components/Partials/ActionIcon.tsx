@@ -2,10 +2,12 @@ import classNames from "classnames";
 import {
 	FaSolidBan,
 	FaSolidBroom,
+	FaSolidBullseye,
 	FaSolidCalendar,
 	FaSolidCheck,
 	FaSolidCircleInfo,
 	FaSolidClockRotateLeft,
+	FaSolidCrop,
 	FaSolidEnvelope,
 	FaSolidEye,
 	FaSolidFolderPlus,
@@ -32,9 +34,11 @@ import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 export type ActionIconName =
 	| "ban"
 	| "broom"
+	| "bullseye"
 	| "calendar"
 	| "check"
 	| "clock"
+	| "crop"
 	| "email"
 	| "eye"
 	| "folder-plus"
@@ -72,6 +76,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return <FaSolidBan class={iconClasses()} size={iconSize()} />;
 			case "broom":
 				return <FaSolidBroom class={iconClasses()} size={iconSize()} />;
+			case "bullseye":
+				return <FaSolidBullseye class={iconClasses()} size={iconSize()} />;
 			case "calendar":
 				return <FaSolidCalendar class={iconClasses()} size={iconSize()} />;
 			case "check":
@@ -80,6 +86,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return (
 					<FaSolidClockRotateLeft class={iconClasses()} size={iconSize()} />
 				);
+			case "crop":
+				return <FaSolidCrop class={iconClasses()} size={iconSize()} />;
 			case "email":
 				return <FaSolidEnvelope class={iconClasses()} size={iconSize()} />;
 			case "eye":

@@ -187,6 +187,48 @@
 		}
 	}
 
+	.image-cropper-stage cropper-canvas {
+		display: block;
+		width: 100%;
+		height: min(58vh, 560px);
+		min-height: 320px;
+		contain: layout paint;
+	}
+
+	.image-cropper-controls {
+		position: relative;
+		margin: 0;
+		max-height: none;
+	}
+
+	.image-cropper-stage cropper-image,
+	.image-cropper-stage cropper-selection {
+		transform: translateZ(0);
+		will-change: transform;
+	}
+
+	.image-cropper-stage cropper-selection {
+		outline: 1px solid rgba(255, 255, 255, 0.85);
+	}
+
+	@media (min-width: 769px) {
+		.image-cropper-stage cropper-canvas {
+			height: min(72vh, 800px);
+			min-height: 460px;
+		}
+
+		.image-cropper-controls {
+			@apply rounded-md border border-border shadow-xl backdrop-blur;
+			position: absolute;
+			top: 0.75rem;
+			bottom: 0.75rem;
+			left: 0.75rem;
+			width: 18rem;
+			margin: 0;
+			max-height: calc(100% - 1.5rem);
+		}
+	}
+
 	/* Rich Text (TipTap) */
 	.rich-text-content h1 {
 		@apply text-xl font-bold mb-2 mt-4 first:mt-0;
