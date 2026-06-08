@@ -33,7 +33,9 @@ interface UseSingleFileUploadProps {
 	disableRemoveCurrent?: SingleFileUploadProps["disableRemoveCurrent"];
 	name: SingleFileUploadProps["name"];
 	copy?: SingleFileUploadProps["copy"];
-	accept?: SingleFileUploadProps["accept"];
+	accept?:
+		| SingleFileUploadProps["accept"]
+		| Accessor<SingleFileUploadProps["accept"]>;
 	required?: SingleFileUploadProps["required"];
 	disabled?: SingleFileUploadProps["disabled"];
 	progress?: Accessor<SingleFileUploadProps["progress"]>;
@@ -58,13 +60,11 @@ interface UseSingleFileUploadProps {
 }
 
 type FileProvenance = ImageCropProvenance;
-type FileChangeType = "selected" | "cropped" | "generated";
 type FileSnapshot = {
 	file: File | null;
 	removedCurrent: boolean;
 	focalPoint: FocalPoint | null;
 	provenance?: FileProvenance;
-	changeType?: FileChangeType;
 };
 
 const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
@@ -82,7 +82,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	const [getFileProvenance, setFileProvenance] = createSignal<
 		FileProvenance | undefined
 	>();
-	const [getFileChangeType, setFileChangeType] = createSignal<FileChangeType>();
 	const [getCropHistory, setCropHistory] = createSignal<FileSnapshot[]>([]);
 	const [cropEditorOpen, setCropEditorOpen] = createSignal(false);
 	const [cropEditorSource, setCropEditorSource] =
@@ -131,7 +130,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 			setGetRemovedCurrent(false);
 			setFocalPoint(null);
 			setFileProvenance(meta);
-			setFileChangeType("generated");
 			setCropHistory([]);
 			await data.imageGeneration?.onSetFile?.(file, meta);
 		},
@@ -229,7 +227,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 			setGetRemovedCurrent(previousCropState.removedCurrent);
 			setFocalPoint(previousCropState.focalPoint);
 			setFileProvenance(previousCropState.provenance);
-			setFileChangeType(previousCropState.changeType);
 			return;
 		}
 
@@ -237,14 +234,12 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		setGetRemovedCurrent(false);
 		setFocalPoint(getCurrentFile()?.focalPoint ?? null);
 		setFileProvenance(undefined);
-		setFileChangeType(undefined);
 	};
 	const pendingChange = createMemo<SingleFileUploadProps["pendingChange"]>(
 		() => {
 			if (!getFile()) return undefined;
 
 			return {
-				label: T()(`media.file.pending.${getFileChangeType() ?? "selected"}`),
 				reset: resetPendingChange,
 			};
 		},
@@ -265,7 +260,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	const setFile = (file: File | null) => {
 		setGetFile(file);
 		setFileProvenance(undefined);
-		setFileChangeType(file ? "selected" : undefined);
 		setCropHistory([]);
 	};
 	const setGeneratedFile = async (
@@ -276,7 +270,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		setGetRemovedCurrent(false);
 		setFocalPoint(null);
 		setFileProvenance(provenance);
-		setFileChangeType("generated");
 		setCropHistory([]);
 		await data.imageGeneration?.onSetFile?.(file, provenance);
 	};
@@ -288,14 +281,12 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 				removedCurrent: getRemovedCurrent(),
 				focalPoint: getFocalPoint(),
 				provenance: getFileProvenance(),
-				changeType: getFileChangeType(),
 			},
 		]);
 		setGetFile(file);
 		setGetRemovedCurrent(false);
 		setFocalPoint(null);
 		setFileProvenance(provenance);
-		setFileChangeType("cropped");
 		await data.imageCrop?.onSetFile?.(file, provenance);
 		return undefined;
 	};
@@ -316,7 +307,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 			setCurrentFile(file);
 			setFocalPoint(file?.focalPoint ?? null);
 			setFileProvenance(undefined);
-			setFileChangeType(undefined);
 			setCropHistory([]);
 		},
 		getFocalPoint,
@@ -327,7 +317,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		reset: () => {
 			setGetFile(null);
 			setFileProvenance(undefined);
-			setFileChangeType(undefined);
 			setCropHistory([]);
 			setGetRemovedCurrent(false);
 			setCurrentFile(data.currentFile);
@@ -351,7 +340,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 						setValue: (file) => {
 							setGetFile(file);
 							setFileProvenance(undefined);
-							setFileChangeType(file ? "selected" : undefined);
 							setCropHistory([]);
 							if (file) setFocalPoint(null);
 						},
@@ -361,7 +349,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 							if (removed) {
 								setFocalPoint(null);
 								setFileProvenance(undefined);
-								setFileChangeType(undefined);
 								setCropHistory([]);
 							}
 						},
@@ -375,7 +362,9 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 					id={data.id}
 					name={data.name}
 					copy={data.copy}
-					accept={data.accept}
+					accept={
+						typeof data.accept === "function" ? data.accept() : data.accept
+					}
 					required={data.required}
 					disabled={data.disabled}
 					progress={data.progress?.()}

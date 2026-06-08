@@ -100,7 +100,6 @@ export interface SingleFileUploadProps {
 	imageGeneration?: SingleFileUploadImageGeneration;
 	imageCrop?: SingleFileUploadImageCrop;
 	pendingChange?: {
-		label: string;
 		reset: () => void;
 	};
 }
@@ -138,6 +137,27 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 	const uploadFile = () => {
 		clearFile();
 		openFileBrowser();
+	};
+	const fileMatchesAccept = (file: File) => {
+		if (!props.accept) return true;
+
+		return props.accept.split(",").some((accept) => {
+			const value = accept.trim().toLowerCase();
+			if (!value) return false;
+			if (value.startsWith(".")) {
+				return file.name.toLowerCase().endsWith(value);
+			}
+			if (value.endsWith("/*")) {
+				return file.type.toLowerCase().startsWith(value.slice(0, -1));
+			}
+			return file.type.toLowerCase() === value;
+		});
+	};
+	const selectFile = (file: File) => {
+		if (!fileMatchesAccept(file)) return;
+
+		props.state.setValue(file);
+		props.state.setRemovedCurrent(false);
 	};
 
 	// ------------------------------------
@@ -195,8 +215,8 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 				class="hidden"
 				onChange={(e) => {
 					if (e.currentTarget.files?.length) {
-						props.state.setValue(e.currentTarget.files[0]);
-						props.state.setRemovedCurrent(false);
+						selectFile(e.currentTarget.files[0]);
+						e.currentTarget.value = "";
 					} else {
 						props.state.setValue(null);
 						props.state.setRemovedCurrent(true);
@@ -219,8 +239,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 				onDrop={(e) => {
 					e.preventDefault();
 					if (e.dataTransfer?.files.length) {
-						props.state.setValue(e.dataTransfer.files[0]);
-						props.state.setRemovedCurrent(false);
+						selectFile(e.dataTransfer.files[0]);
 					}
 					setDragOver(false);
 				}}
@@ -373,7 +392,6 @@ interface FilePreviewScreenProps {
 		setValue: (_value: FocalPoint | null) => void;
 	};
 	pendingChange?: {
-		label: string;
 		reset: () => void;
 	};
 	actions: {
@@ -513,13 +531,6 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					</For>
 				</div>
 			</div>
-			<Show when={props.pendingChange}>
-				{(pendingChange) => (
-					<div class="absolute bottom-3 left-3 z-30 flex max-w-[calc(100%-24px)] items-center overflow-hidden rounded-md border border-border bg-background-base/90 text-xs font-medium text-title shadow-sm backdrop-blur">
-						<span class="truncate px-2.5 py-1.5">{pendingChange().label}</span>
-					</div>
-				)}
-			</Show>
 			<Switch
 				fallback={
 					<div

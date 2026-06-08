@@ -50,6 +50,7 @@ import {
 	recordToTranslations,
 	updateTranslation,
 } from "@/utils/translation-helpers";
+import { captureVideoPosterFrame } from "@/utils/video-frame";
 
 interface CreateUpdateMediaPanelProps {
 	id?: Accessor<number | undefined>;
@@ -70,8 +71,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	// ------------------------------
 	// State & Hooks
 	let posterInputRef: HTMLInputElement | undefined;
+	let posterCaptureId = 0;
+	let autoCapturedPoster:
+		| {
+				posterFile: File;
+		  }
+		| undefined;
 	const [uploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
 	const [posterAlt, setPosterAlt] = createSignal<Media["alt"]>([]);
+	const [posterSnapshotLoading, setPosterSnapshotLoading] = createSignal(false);
 	const [posterFocalEditorOpen, setPosterFocalEditorOpen] = createSignal(false);
 	const [posterCropEditorOpen, setPosterCropEditorOpen] = createSignal(false);
 	const [activePosterCropSource, setActivePosterCropSource] =
@@ -80,6 +88,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		"details",
 	);
 	const createMedia = useCreateMedia();
+	const createPosterMedia = useCreateMedia();
 	const updateMedia = props.id ? useUpdateMedia(props.id) : null;
 	const mediaAltGeneration = useMediaAltGeneration();
 	const mediaImageGeneration = useMediaImageGeneration();
@@ -89,6 +98,16 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		id: "file",
 		disableRemoveCurrent: true,
 		name: "file",
+		accept: () =>
+			panelMode() === "update"
+				? media.data?.data.type === "image"
+					? "image/*"
+					: media.data?.data.type === "video"
+						? "video/*"
+						: media.data?.data.type === "audio"
+							? "audio/*"
+							: undefined
+				: undefined,
 		required: true,
 		errors: () => mutateErrors(),
 		progress: () => ({
@@ -155,14 +174,14 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		}
 		return panelMode() === "create" ? false : media.data?.data.type === "image";
 	});
-	const showPosterInput = createMemo(() => {
-		return panelMode() === "update" && media.data?.data.type === "video";
-	});
 	const currentMediaType = createMemo(() => {
 		if (MediaFile.getFile() !== null) {
 			return helpers.getMediaType(MediaFile.getMimeType());
 		}
 		return media.data?.data.type;
+	});
+	const showPosterInput = createMemo(() => {
+		return currentMediaType() === "video";
 	});
 	const showMediaImageGenerationAction = createMemo(() => {
 		if (panelMode() === "create") return true;
@@ -343,6 +362,23 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		}
 		return T()("media.poster.empty.description");
 	});
+	const posterSnapshotSource = createMemo(() => {
+		if (!showPosterInput() || posterPreview() !== null) return null;
+
+		const file = MediaFile.getFile();
+		if (file && helpers.getMediaType(file.type) === "video") {
+			return file;
+		}
+
+		if (media.data?.data.type === "video" && media.data.data.url) {
+			return {
+				url: media.data.data.url,
+				fileName: media.data.data.fileName ?? media.data.data.key,
+			};
+		}
+
+		return null;
+	});
 	const fileSizeMeta = createMemo(() => {
 		const values = [
 			helpers.bytesToSize(media.data?.data.meta.fileSize ?? 0),
@@ -382,18 +418,20 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 	const coreMutateIsLoading = createMemo(() => {
 		return panelMode() === "create"
-			? createMedia.isLoading()
+			? createMedia.isLoading() || createPosterMedia.isLoading()
 			: updateMedia?.isLoading() ||
 					createMedia.isLoading() ||
+					createPosterMedia.isLoading() ||
 					updatePosterMedia?.isLoading() ||
 					updatePosterAlt.action.isPending ||
 					false;
 	});
 	const mutateErrors = createMemo(() => {
 		return panelMode() === "create"
-			? createMedia.errors() || uploadErrors()
+			? createMedia.errors() || createPosterMedia.errors() || uploadErrors()
 			: updateMedia?.errors() ||
 					createMedia.errors() ||
+					createPosterMedia.errors() ||
 					updatePosterMedia?.errors() ||
 					uploadErrors() ||
 					updatePosterAlt.errors();
@@ -449,11 +487,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		if (updatePosterMedia?.isLoading()) {
 			return updatePosterMedia.uploadProgress();
 		}
-		return createMedia.uploadProgress();
+		return createPosterMedia.uploadProgress();
 	});
 	const posterUploadActive = createMemo(() => {
 		return (
-			(createMedia.isLoading() || updatePosterMedia?.isLoading()) &&
+			(createPosterMedia.isLoading() || updatePosterMedia?.isLoading()) &&
 			posterUploadProgress() > 0
 		);
 	});
@@ -678,6 +716,31 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			media.data?.data.poster?.alt ?? recordToTranslations(locales()),
 		);
 	}
+	async function createPosterSnapshot() {
+		const source = posterSnapshotSource();
+		if (!source) return;
+
+		const captureId = ++posterCaptureId;
+		setPosterSnapshotLoading(true);
+
+		try {
+			const posterFile = await captureVideoPosterFrame(source);
+			if (captureId !== posterCaptureId || posterFile === null) return;
+			if (posterSnapshotSource() === null) return;
+
+			PosterFile.setGetFile(posterFile);
+			PosterFile.setGetRemovedCurrent(false);
+			PosterFile.setFocalPoint(null);
+			autoCapturedPoster = {
+				posterFile,
+			};
+			setUploadErrors(undefined);
+		} catch (_error) {
+			return;
+		} finally {
+			if (captureId === posterCaptureId) setPosterSnapshotLoading(false);
+		}
+	}
 	async function createPoster() {
 		const file = PosterFile.getFile();
 		if (!file) return undefined;
@@ -706,7 +769,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			return success ? existingPoster.id : null;
 		}
 
-		const poster = await createMedia.createMedia(file, imageMeta, {
+		const poster = await createPosterMedia.createMedia(file, imageMeta, {
 			title: [],
 			alt: posterAlt(),
 			folderId: null,
@@ -752,10 +815,14 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		const imageMeta = await MediaFile.getImageMeta();
 
 		if (panelMode() === "create") {
+			const posterId = showPosterInput() ? await createPoster() : undefined;
+			if (posterId === null) return;
+
 			const media = await createMedia.createMedia(
 				MediaFile.getFile(),
 				imageMeta,
 				{
+					posterId,
 					focalPoint:
 						currentMediaType() === "image"
 							? (MediaFile.getFocalPoint() ?? undefined)
@@ -799,6 +866,68 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 	// ---------------------------------
 	// Effects
+	createEffect(() => {
+		const file = MediaFile.getFile();
+		const panelOpen = props.state.open;
+		const captureId = ++posterCaptureId;
+
+		if (!panelOpen || !file || helpers.getMediaType(file.type) !== "video") {
+			untrack(() => {
+				if (
+					autoCapturedPoster &&
+					PosterFile.getFile() === autoCapturedPoster.posterFile
+				) {
+					PosterFile.setGetFile(null);
+					PosterFile.setFocalPoint(null);
+				}
+				autoCapturedPoster = undefined;
+			});
+			return;
+		}
+		if (untrack(() => posterPreview() !== null)) return;
+
+		const shouldCapture = untrack(() => {
+			const currentPosterFile = PosterFile.getFile();
+			return (
+				currentPosterFile === null ||
+				currentPosterFile === autoCapturedPoster?.posterFile
+			);
+		});
+		if (!shouldCapture) return;
+
+		void captureVideoPosterFrame(file)
+			.then((posterFile) => {
+				if (
+					captureId !== posterCaptureId ||
+					posterFile === null ||
+					MediaFile.getFile() !== file
+				) {
+					return;
+				}
+
+				untrack(() => {
+					const currentPosterFile = PosterFile.getFile();
+					if (
+						currentPosterFile !== null &&
+						currentPosterFile !== autoCapturedPoster?.posterFile
+					) {
+						return;
+					}
+
+					PosterFile.setGetFile(posterFile);
+					PosterFile.setGetRemovedCurrent(false);
+					PosterFile.setFocalPoint(null);
+					autoCapturedPoster = {
+						posterFile,
+					};
+					setUploadErrors(undefined);
+				});
+			})
+			.catch(() => {
+				if (captureId !== posterCaptureId) return;
+			});
+	});
+
 	createEffect(
 		on(
 			[
@@ -906,11 +1035,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				onSubmit: onSubmit,
 				reset: () => {
 					createMedia.reset();
+					createPosterMedia.reset();
 					updateMedia?.reset();
 					updatePosterMedia?.reset();
 					updatePosterAlt.reset();
 					MediaFile.reset();
 					PosterFile.reset();
+					posterCaptureId += 1;
+					autoCapturedPoster = undefined;
+					setPosterSnapshotLoading(false);
 					setPosterAlt([]);
 					setPosterFocalEditorOpen(false);
 					setPosterCropEditorOpen(false);
@@ -1073,6 +1206,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									PosterFile.setGetFile(e.currentTarget.files[0]);
 									PosterFile.setGetRemovedCurrent(false);
 									PosterFile.setFocalPoint(null);
+									e.currentTarget.value = "";
 								}
 							}}
 						/>
@@ -1154,6 +1288,24 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 												<FaSolidCrop size={14} />
 											</Button>
 										</Show>
+									</Show>
+									<Show when={posterSnapshotSource()}>
+										<Button
+											type="button"
+											theme="secondary-subtle"
+											size="icon-subtle"
+											onClick={(event) => {
+												event.preventDefault();
+												event.stopPropagation();
+												void createPosterSnapshot();
+											}}
+											title={T()("media.poster.snapshot.create")}
+											aria-label={T()("media.poster.snapshot.create")}
+											loading={posterSnapshotLoading()}
+											disabled={posterSnapshotLoading() || mutateIsLoading()}
+										>
+											<FaSolidImage size={14} />
+										</Button>
 									</Show>
 									<Button
 										type="button"
