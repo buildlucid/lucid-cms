@@ -57,6 +57,7 @@ export interface SelectProps<Option extends SelectOptionT = SelectOptionT> {
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
 	hidePlaceholder?: boolean;
+	ariaLabel?: string;
 	renderValue?: (_props: { option: Option }) => JSXElement;
 	renderOption?: (_props: { option: Option; selected: boolean }) => JSXElement;
 }
@@ -149,6 +150,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 					hideOptionalText={props.hideOptionalText}
 				/>
 				<DropdownMenu.Trigger
+					aria-label={props.ariaLabel}
 					class={classNames(
 						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors",
 						{

@@ -10,6 +10,7 @@ import {
 	FaSolidArrowRotateLeft,
 	FaSolidArrowUpFromBracket,
 	FaSolidImage,
+	FaSolidPaperPlane,
 	FaSolidXmark,
 } from "solid-icons/fa";
 import {
@@ -23,6 +24,7 @@ import {
 	Show,
 } from "solid-js";
 import { Input } from "@/components/Groups/Form/Input";
+import { Label } from "@/components/Groups/Form/Label";
 import { Select } from "@/components/Groups/Form/Select";
 import { Textarea } from "@/components/Groups/Form/Textarea";
 import { Modal, ModalFooter } from "@/components/Groups/Modal";
@@ -1047,10 +1049,13 @@ const MediaImageGenerationModal: Component = () => {
 						/>
 					</div>
 					<div class="min-w-0">
-						<span class="text-sm text-body">
-							{T()("ai.generation.guidance.label")}
-						</span>
-						<div class="mt-2 flex min-w-0 flex-wrap gap-2">
+						<Label
+							id="ai-media-image-generation-guidance"
+							label={T()("ai.generation.guidance.label")}
+							theme="basic"
+							hideOptionalText
+						/>
+						<div class="flex min-w-0 flex-wrap gap-2">
 							<For each={imageGuidanceOptions}>
 								{(option) => {
 									const selected = createMemo(() => guidance() === option.key);
@@ -1118,9 +1123,11 @@ const MediaImageGenerationModal: Component = () => {
 								type="submit"
 								theme="secondary"
 								size="medium"
-								classes="w-full min-w-0!"
-								disabled={isLoading() || !canGenerate()}
+								classes="w-full min-w-0! gap-2"
+								loading={isLoading()}
+								disabled={!canGenerate()}
 							>
+								<FaSolidPaperPlane size={12} aria-hidden="true" />
 								{isLoading()
 									? T()("ai.media.image.generate.modal.generating")
 									: T()("ai.media.image.generate.modal.generate")}
