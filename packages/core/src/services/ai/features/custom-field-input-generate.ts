@@ -5,19 +5,74 @@ import logger from "../../../libs/logger/index.js";
 import type { CustomFieldInputV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
 import { isCmsAiGenerateCompletedData } from "../../../libs/lucid-remote/utils.js";
+import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type { CustomFieldAiContextItem } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getLicenseKey from "../../options/get-license-key.js";
+import formatCustomFieldDocumentContext, {
+	formatCustomFieldCollectionDefinition,
+	getTranslatedBrickDetails,
+} from "../helpers/format-custom-field-document-context.js";
+import formatCustomFieldOutput from "../helpers/format-custom-field-output.js";
+import getTranslatedCollectionDetails from "../helpers/get-translated-collection-details.js";
 import getTranslatedFieldDetails from "../helpers/get-translated-field-details.js";
-import normalizeCurrentValueTranslations from "../helpers/normalize-current-value-translations.js";
 import storeGeneration from "../storage/store-generation.js";
+
+const normalizeCustomFieldGenerationLocale = (props: {
+	defaultLocale: string;
+	fieldIsLocalized: boolean;
+	locale: {
+		source?: string;
+		target: string[];
+	};
+	value: Record<string, unknown>;
+}) => {
+	if (props.fieldIsLocalized) {
+		return {
+			locale: props.locale,
+			value: props.value,
+		};
+	}
+
+	if (Object.hasOwn(props.value, props.defaultLocale)) {
+		return {
+			locale: {
+				source: props.defaultLocale,
+				target: [props.defaultLocale],
+			},
+			value: {
+				[props.defaultLocale]: props.value[props.defaultLocale],
+			},
+		};
+	}
+
+	const fallbackValue = Object.values(props.value)[0];
+
+	return {
+		locale: {
+			source: props.defaultLocale,
+			target: [props.defaultLocale],
+		},
+		value:
+			fallbackValue === undefined
+				? {}
+				: {
+						[props.defaultLocale]: fallbackValue,
+					},
+	};
+};
 
 const customFieldInputGenerate: ServiceFn<
 	[
 		{
-			instruction: string;
+			instruction?: string;
 			guidance?: string;
-			currentValue?: unknown;
+			value: Record<string, unknown>;
+			document?: {
+				fields?: FieldInputSchema[];
+				bricks?: BrickInputSchema[];
+			};
 			target: {
 				collectionKey: string;
 				brickKey?: string;
@@ -92,13 +147,24 @@ const customFieldInputGenerate: ServiceFn<
 		};
 	}
 
-	const input: CustomFieldInputV1Request["input"] = [
-		{
+	const fieldIsLocalized =
+		collection.getData.config.localized === true &&
+		targetField.localizedEnabled === true;
+	const generationContext = normalizeCustomFieldGenerationLocale({
+		defaultLocale: context.config.localization.defaultLocale,
+		fieldIsLocalized,
+		locale: props.locale,
+		value: props.value,
+	});
+
+	const input: CustomFieldInputV1Request["input"] = [];
+	if (props.instruction?.trim()) {
+		input.push({
 			type: "text",
 			role: "user-instruction",
 			value: props.instruction,
-		},
-	];
+		});
+	}
 	if (targetField.aiConfig.instructions?.trim()) {
 		input.push({
 			type: "text",
@@ -135,7 +201,7 @@ const customFieldInputGenerate: ServiceFn<
 				collection,
 				brick: targetBrick,
 				field: targetField,
-				locale: props.locale,
+				locale: generationContext.locale,
 			});
 		} catch (err) {
 			logger.error({
@@ -148,26 +214,14 @@ const customFieldInputGenerate: ServiceFn<
 		}
 	}
 
-	const targetLocale = props.locale.target.at(0);
-	if (!targetLocale) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				message: copy("server:core.routes.ai.generate.error.message"),
-			},
-			data: undefined,
-		};
-	}
-
-	const currentValueTranslations = normalizeCurrentValueTranslations({
-		currentValue: props.currentValue,
-		localeCodes: [
-			...context.config.localization.locales.map((locale) => locale.code),
-			...(props.locale.source ? [props.locale.source] : []),
-			...props.locale.target,
-		],
-		targetLocale,
+	const collectionDetails = getTranslatedCollectionDetails(context, collection);
+	const targetFieldDetails = getTranslatedFieldDetails(context, targetField);
+	const targetBrickDetails = targetBrick
+		? getTranslatedBrickDetails(context, targetBrick)
+		: undefined;
+	const collectionDefinition = formatCustomFieldCollectionDefinition({
+		context,
+		collection,
 	});
 
 	const request: CustomFieldInputV1Request = {
@@ -176,19 +230,39 @@ const customFieldInputGenerate: ServiceFn<
 			version: "v1",
 		},
 		input,
+		outputSchema: targetField.jsonSchema,
 		context: {
-			locale: props.locale,
+			locale: generationContext.locale,
+			target: {
+				collection: {
+					key: props.target.collectionKey,
+					...(collectionDetails ?? {}),
+				},
+				...(targetBrick
+					? {
+							brick: {
+								key: targetBrick.key,
+								...(targetBrickDetails ?? {}),
+							},
+						}
+					: {}),
+				field: {
+					key: targetField.key,
+					type: targetField.type,
+					...(targetFieldDetails ?? {}),
+					value: generationContext.value,
+				},
+			},
 			collection: {
 				key: props.target.collectionKey,
-			},
-			field: {
-				key: targetField.key,
-				type: targetField.type,
-				details: getTranslatedFieldDetails(context, targetField),
-				translations: currentValueTranslations,
-				valueSchema: targetField.jsonSchema,
+				...(collectionDetails ?? {}),
+				...collectionDefinition,
 			},
 			items: contextItems,
+			document: formatCustomFieldDocumentContext({
+				collection,
+				document: props.document,
+			}),
 		},
 	};
 
@@ -212,11 +286,30 @@ const customFieldInputGenerate: ServiceFn<
 	const responseData = generateRes.data.json
 		.data as CustomFieldInputGenerateResponse;
 
+	const formattedOutputRes = formatCustomFieldOutput({
+		field: targetField,
+		output: responseData.output,
+	});
+
+	const responseForStorage: CustomFieldInputGenerateResponse =
+		formattedOutputRes.error === undefined
+			? {
+					...responseData,
+					output: formattedOutputRes.data,
+				}
+			: responseData;
+	const formattingErrorMessage =
+		formattedOutputRes.error === undefined
+			? null
+			: context.translate(formattedOutputRes.error.message);
+
 	const storeRes = await storeGeneration(context, {
 		userId: props.userId,
-		response: responseData,
+		response: responseForStorage,
 		targetType: "custom-field",
 		requestStartedAt,
+		status: formattedOutputRes.error === undefined ? "success" : "failed",
+		errorMessage: formattingErrorMessage,
 		target: {
 			collectionKey: props.target.collectionKey,
 			brickKey: props.target.brickKey,
@@ -226,10 +319,11 @@ const customFieldInputGenerate: ServiceFn<
 		},
 	});
 	if (storeRes.error) return storeRes;
+	if (formattedOutputRes.error) return formattedOutputRes;
 
 	return {
 		error: undefined,
-		data: responseData,
+		data: responseForStorage,
 	};
 };
 

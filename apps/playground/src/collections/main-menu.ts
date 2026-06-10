@@ -3,15 +3,9 @@ import { CollectionBuilder, copy } from "@lucidcms/core";
 const MainMenuCollection = new CollectionBuilder("main-menu", {
 	mode: "single",
 	details: {
-		name: copy("admin:collections.main-menu.name", {
-			defaultMessage: "Main Menu",
-		}),
-		singularName: copy("admin:collections.main-menu.singularName", {
-			defaultMessage: "Main Menu",
-		}),
-		summary: copy("admin:collections.main-menu.summary", {
-			defaultMessage: "The main menu for your website.",
-		}),
+		name: copy("admin:collections.main-menu.name"),
+		singularName: copy("admin:collections.main-menu.singularName"),
+		summary: copy("admin:collections.main-menu.summary"),
 	},
 	config: {
 		revisions: true,
@@ -20,9 +14,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 })
 	.addRepeater("items", {
 		details: {
-			label: copy("admin:collections.main-menu.fields.items.label", {
-				defaultMessage: "Items",
-			}),
+			label: copy("admin:collections.main-menu.fields.items.label"),
 		},
 		validation: {
 			maxGroups: 5,

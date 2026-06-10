@@ -6,6 +6,7 @@ import type {
 	ResponseBody,
 } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 
 interface QueryParams {

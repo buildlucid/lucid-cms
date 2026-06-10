@@ -1,6 +1,6 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { type Component, createSignal, type JSXElement, Show } from "solid-js";
+import { type Component, createSignal, type JSXElement } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 
 interface TextareaProps {
@@ -26,7 +26,7 @@ interface TextareaProps {
 	rows?: number;
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
-	rightSlot?: JSXElement;
+	labelRightSlot?: JSXElement;
 }
 
 export const Textarea: Component<TextareaProps> = (props) => {
@@ -50,15 +50,11 @@ export const Textarea: Component<TextareaProps> = (props) => {
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 				hideOptionalText={props.hideOptionalText}
+				rightSlot={props.labelRightSlot}
 			/>
 			<div class="relative">
 				<textarea
-					class={classnames(
-						"focus:outline-hidden text-sm text-subtitle font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors",
-						{
-							"pr-10": props.rightSlot,
-						},
-					)}
+					class="focus:outline-hidden text-sm text-subtitle font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors"
 					onKeyDown={(e) => {
 						e.stopPropagation();
 					}}
@@ -82,9 +78,6 @@ export const Textarea: Component<TextareaProps> = (props) => {
 					}}
 					rows={props.rows ?? 6}
 				/>
-				<Show when={props.rightSlot}>
-					<div class="absolute right-1.5 top-2 z-10">{props.rightSlot}</div>
-				</Show>
 			</div>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={props.errors} />

@@ -12,7 +12,7 @@ interface UserDisplayProps {
 	};
 	mode: "short" | "long" | "icon";
 	size?: "x-small" | "small" | "medium" | "large";
-	nameFormat?: "username" | "simple";
+	nameFormat?: "username" | "username-only" | "simple";
 }
 
 const UserDisplay: Component<UserDisplayProps> = (props) => {

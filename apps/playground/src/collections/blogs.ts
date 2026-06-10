@@ -3,13 +3,9 @@ import { CollectionBuilder, copy } from "@lucidcms/core";
 const BlogCollection = new CollectionBuilder("blog", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.blog.name", { defaultMessage: "Blogs" }),
-		singularName: copy("admin:collections.blog.singularName", {
-			defaultMessage: "Blog",
-		}),
-		summary: copy("admin:collections.blog.summary", {
-			defaultMessage: "Manage your blogs.",
-		}),
+		name: copy("admin:collections.blog.name"),
+		singularName: copy("admin:collections.blog.singularName"),
+		summary: copy("admin:collections.blog.summary"),
 	},
 	permissions: {
 		read: "blog:full",
@@ -25,9 +21,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 		environments: [
 			{
 				key: "staging",
-				name: copy("admin:collections.blog.environments.staging.name", {
-					defaultMessage: "Staging",
-				}),
+				name: copy("admin:collections.blog.environments.staging.name"),
 			},
 		],
 	},

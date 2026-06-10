@@ -213,7 +213,7 @@ export interface LucidQueueJobs {
 	updated_at: TimestampMutateable;
 }
 
-export type AiGenerationStatus = "pending" | "success";
+export type AiGenerationStatus = "failed" | "pending" | "success";
 
 export interface LucidAiGenerations {
 	id: Generated<number>;

@@ -5,6 +5,11 @@ export const getObject = (value: unknown): Record<string, unknown> | null => {
 	return value as Record<string, unknown>;
 };
 
+export const isJsonContainerValue = (
+	value: unknown,
+): value is Record<string, unknown> | unknown[] =>
+	value !== null && typeof value === "object";
+
 export const getNumber = (value: unknown): number | null => {
 	if (typeof value !== "number" || !Number.isFinite(value)) return null;
 	return value;

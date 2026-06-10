@@ -1,15 +1,16 @@
-import type { CFConfig, FieldError, InternalDocumentField } from "@types";
+import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { Select } from "@/components/Groups/Form";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import T from "@/translations";
+import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
 interface SelectFieldProps {
 	state: {
-		fieldConfig: CFConfig<"select">;
+		fieldConfig: CollectionFieldConfigByType<"select">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;

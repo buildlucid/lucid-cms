@@ -1,5 +1,4 @@
 import type {
-	CFConfig,
 	DocumentFieldValue,
 	DocumentRef,
 	FieldError,
@@ -15,13 +14,14 @@ import {
 import { DocumentSelect } from "@/components/Groups/Form";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
+import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
 import helpers from "@/utils/helpers";
 
 interface DocumentFieldProps {
 	state: {
-		fieldConfig: CFConfig<"document">;
+		fieldConfig: CollectionFieldConfigByType<"document">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;

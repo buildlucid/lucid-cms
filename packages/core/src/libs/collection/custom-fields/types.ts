@@ -186,6 +186,16 @@ export type CustomFieldUserAiConfig<T extends FieldTypes = FieldTypes> = {
 	context?: CustomFieldAiContextCallback<T>;
 };
 
+export type CustomFieldAiFormatResponse =
+	| {
+			success: true;
+			value: unknown;
+	  }
+	| {
+			success: false;
+			message?: ErrorCopy;
+	  };
+
 // -----------------------------------------------
 // Custom Field Map
 export type CustomFieldMap = {

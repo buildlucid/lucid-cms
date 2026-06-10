@@ -4,15 +4,9 @@ import SEOBrick from "../bricks/seo.js";
 const SettingsCollection = new CollectionBuilder("settings", {
 	mode: "single",
 	details: {
-		name: copy("admin:collections.settings.name", {
-			defaultMessage: "Settings",
-		}),
-		singularName: copy("admin:collections.settings.singularName", {
-			defaultMessage: "Setting",
-		}),
-		summary: copy("admin:collections.settings.summary", {
-			defaultMessage: "Set shared settings for your website.",
-		}),
+		name: copy("admin:collections.settings.name"),
+		singularName: copy("admin:collections.settings.singularName"),
+		summary: copy("admin:collections.settings.summary"),
 	},
 	config: {
 		revisions: true,
@@ -23,30 +17,22 @@ const SettingsCollection = new CollectionBuilder("settings", {
 })
 	.addText("site_title", {
 		details: {
-			label: copy("admin:collections.settings.fields.site_title.label", {
-				defaultMessage: "Site Title",
-			}),
+			label: copy("admin:collections.settings.fields.site_title.label"),
 		},
 	})
 	.addMedia("site_logo", {
 		details: {
-			label: copy("admin:collections.settings.fields.site_logo.label", {
-				defaultMessage: "Site Logo",
-			}),
+			label: copy("admin:collections.settings.fields.site_logo.label"),
 		},
 	})
 	.addRepeater("social_links", {
 		details: {
-			label: copy("admin:collections.settings.fields.social_links.label", {
-				defaultMessage: "Social Links",
-			}),
+			label: copy("admin:collections.settings.fields.social_links.label"),
 		},
 	})
 	.addText("social_name", {
 		details: {
-			label: copy("admin:collections.settings.fields.social_name.label", {
-				defaultMessage: "Name",
-			}),
+			label: copy("admin:collections.settings.fields.social_name.label"),
 		},
 		validation: {
 			zod: z.string(),
@@ -55,9 +41,7 @@ const SettingsCollection = new CollectionBuilder("settings", {
 	})
 	.addText("social_url", {
 		details: {
-			label: copy("admin:collections.settings.fields.social_url.label", {
-				defaultMessage: "URL",
-			}),
+			label: copy("admin:collections.settings.fields.social_url.label"),
 		},
 		validation: {
 			zod: z.string().url(),

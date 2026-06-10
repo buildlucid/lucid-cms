@@ -18,7 +18,7 @@ export interface AiUsagePropT {
 	cost_currency: string | null;
 	cost_total_minor: number | null;
 	duration_ms: number | null;
-	status: "pending" | "success";
+	status: "failed" | "pending" | "success";
 	error_message: string | null;
 	created_at: Date | string | null;
 	email: string | null;

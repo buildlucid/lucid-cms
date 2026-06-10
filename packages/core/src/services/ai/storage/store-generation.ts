@@ -1,3 +1,4 @@
+import type { AiGenerationStatus } from "../../../libs/db/types.js";
 import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -11,6 +12,8 @@ const storeGeneration: ServiceFn<
 			targetType: string;
 			target: Record<string, unknown>;
 			requestStartedAt: number;
+			status?: AiGenerationStatus;
+			errorMessage?: string | null;
 		},
 	],
 	undefined
@@ -54,8 +57,8 @@ const storeGeneration: ServiceFn<
 			cost_currency: props.response.usage.cost.currency,
 			cost_total_minor: props.response.usage.cost.totalCostMinor,
 			duration_ms: getRequestDurationMs(props.requestStartedAt),
-			status: "success",
-			error_message: null,
+			status: props.status ?? "success",
+			error_message: props.errorMessage ?? null,
 		},
 		returning: ["id"],
 	});

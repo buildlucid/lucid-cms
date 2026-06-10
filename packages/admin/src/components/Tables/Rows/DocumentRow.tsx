@@ -1,9 +1,4 @@
-import type {
-	CFConfig,
-	Collection,
-	FieldTypes,
-	InternalCollectionDocument,
-} from "@types";
+import type { Collection, InternalCollectionDocument } from "@types";
 import { type Component, For, Show } from "solid-js";
 import type { TableTheme } from "@/components/Groups/Table/Table";
 import { Tr } from "@/components/Groups/Table/Tr";
@@ -14,12 +9,13 @@ import DocumentDynamicColumns from "@/components/Tables/Columns/DocumentDynamicC
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import WorkflowAssigneeCol from "@/components/Tables/Columns/WorkflowAssigneeCol";
 import WorkflowStageCol from "@/components/Tables/Columns/WorkflowStageCol";
+import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import type { TableRowProps } from "@/types/components";
 
 interface DocumentRowProps extends TableRowProps {
 	document: InternalCollectionDocument;
 	collection: Collection;
-	fieldInclude: CFConfig<FieldTypes>[];
+	fieldInclude: CollectionLeafFieldConfig[];
 	include: boolean[];
 	actions?: ActionDropdownProps["actions"];
 	contentLocale?: string;
@@ -69,9 +65,6 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 			</Show>
 			<For each={props.fieldInclude}>
 				{(field, i) => {
-					if (field.type === "tab") return null;
-					if (field.type === "repeater") return null;
-
 					return (
 						<DocumentDynamicColumns
 							field={field}

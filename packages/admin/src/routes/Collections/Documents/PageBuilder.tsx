@@ -22,6 +22,7 @@ import {
 	Sidebar,
 } from "@/components/Groups/PageBuilder";
 import { ReleaseRequestSidebar } from "@/components/Groups/PageBuilder/Sidebar/ReleaseRequestSidebar";
+import CustomFieldGenerationModal from "@/components/Modals/AI/CustomFieldGenerationModal";
 import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/Modals/AI/MediaImageGenerationModal";
 import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
@@ -248,6 +249,15 @@ const CollectionsDocumentsEditRoute: Component<{
 		}
 		return versionType();
 	});
+	const collectionFields = createMemo(
+		() => docState.collection()?.fields ?? [],
+	);
+	const fixedBrickConfig = createMemo(
+		() => docState.collection()?.fixedBricks ?? [],
+	);
+	const builderBrickConfig = createMemo(
+		() => docState.collection()?.builderBricks ?? [],
+	);
 
 	// ----------------------------------
 	// Render
@@ -323,7 +333,7 @@ const CollectionsDocumentsEditRoute: Component<{
 						<div class="w-full flex flex-col xl:flex-row grow h-full  bg-background-base rounded-t-xl border border-border">
 							<div class={"w-full min-w-0 flex flex-col"}>
 								<CollectionPseudoBrick
-									fields={docState.collection()?.fields || []}
+									fields={collectionFields()}
 									collectionMigrationStatus={
 										docState.collection()?.migrationStatus
 									}
@@ -331,7 +341,7 @@ const CollectionsDocumentsEditRoute: Component<{
 									documentId={docState.documentId()}
 								/>
 								<FixedBricks
-									brickConfig={docState.collection()?.fixedBricks || []}
+									brickConfig={fixedBrickConfig()}
 									collectionMigrationStatus={
 										docState.collection()?.migrationStatus
 									}
@@ -339,7 +349,7 @@ const CollectionsDocumentsEditRoute: Component<{
 									documentId={docState.documentId()}
 								/>
 								<BuilderBricks
-									brickConfig={docState.collection()?.builderBricks || []}
+									brickConfig={builderBrickConfig()}
 									collectionMigrationStatus={
 										docState.collection()?.migrationStatus
 									}
@@ -372,6 +382,7 @@ const CollectionsDocumentsEditRoute: Component<{
 							navigationGuard: navigationGuard,
 						}}
 					/>
+					<CustomFieldGenerationModal />
 					<MediaAltGenerationModal />
 					<MediaImageGenerationModal />
 				</PageBuilderStateProvider>

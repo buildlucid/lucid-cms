@@ -1,4 +1,4 @@
-interface QueryHook<T> {
+export interface QueryHook<T> {
 	queryParams: T;
 	key?: () => unknown;
 	enabled?: () => boolean;

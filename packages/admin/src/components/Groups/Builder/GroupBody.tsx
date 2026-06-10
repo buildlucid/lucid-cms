@@ -1,4 +1,4 @@
-import type { CFConfig, GroupError, InternalDocumentFieldGroup } from "@types";
+import type { GroupError, InternalDocumentFieldGroup } from "@types";
 import classNames from "classnames";
 import { FaSolidChevronUp, FaSolidGripLines } from "solid-icons/fa";
 import {
@@ -16,12 +16,13 @@ import Pill from "@/components/Partials/Pill";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import T from "@/translations/index";
+import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
 interface GroupBodyProps {
 	state: {
-		fieldConfig: CFConfig<"repeater">;
+		fieldConfig: CollectionFieldConfigByType<"repeater">;
 		groupRef: string;
 		groupPath: string;
 		group: Accessor<InternalDocumentFieldGroup | undefined>;
@@ -71,7 +72,10 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		const firstTextConfig = configs.find(
 			// include textarea as it's also "text input" content
 			(f) => f.type === "text" || f.type === "textarea",
-		) as CFConfig<"text"> | CFConfig<"textarea"> | undefined;
+		) as
+			| CollectionFieldConfigByType<"text">
+			| CollectionFieldConfigByType<"textarea">
+			| undefined;
 
 		if (!firstTextConfig) return "";
 

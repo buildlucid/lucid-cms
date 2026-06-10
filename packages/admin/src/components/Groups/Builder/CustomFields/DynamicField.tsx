@@ -1,9 +1,4 @@
-import type {
-	CFConfig,
-	FieldError,
-	FieldTypes,
-	InternalDocumentField,
-} from "@types";
+import type { FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
 import {
 	type Component,
@@ -30,10 +25,14 @@ import {
 import FieldTypeIcon from "@/components/Partials/FieldTypeIcon";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
+import type {
+	CollectionFieldConfig,
+	CollectionFieldConfigByType,
+} from "@/types/collection-config";
 
 interface DynamicFieldProps {
 	state: {
-		fieldConfig: CFConfig<FieldTypes>;
+		fieldConfig: CollectionFieldConfig;
 		fields: InternalDocumentField[];
 		fieldErrors: FieldError[];
 		activeTab?: string;
@@ -160,7 +159,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								},
 							)}
 						>
-							<Index each={(fieldConfig() as CFConfig<"tab">).fields}>
+							<Index
+								each={
+									(fieldConfig() as CollectionFieldConfigByType<"tab">).fields
+								}
+							>
 								{(config) => (
 									<DynamicField
 										state={{
@@ -181,7 +184,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "repeater"}>
 						<RepeaterField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"repeater">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"repeater">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								groupPath: props.state.groupPath,
@@ -195,7 +199,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						<InputField
 							type="text"
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"text">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"text">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -210,7 +215,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "user"}>
 						<UserField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"user">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"user">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -225,7 +231,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "document"}>
 						<DocumentField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"document">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"document">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -241,7 +248,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						<InputField
 							type="number"
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"number">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"number">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -256,12 +264,14 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "datetime"}>
 						<InputField
 							type={
-								(fieldConfig() as CFConfig<"datetime">).config.time === false
+								(fieldConfig() as CollectionFieldConfigByType<"datetime">)
+									.config.time === false
 									? "date"
 									: "datetime-local"
 							}
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"datetime">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"datetime">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -276,7 +286,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "checkbox"}>
 						<CheckboxField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"checkbox">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"checkbox">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -290,7 +301,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "color"}>
 						<ColorField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"color">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"color">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -304,7 +316,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "json"}>
 						<JSONField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"json">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"json">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -318,7 +331,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "link"}>
 						<LinkField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"link">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"link">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -332,7 +346,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "media"}>
 						<MediaField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"media">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"media">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -347,7 +362,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "select"}>
 						<SelectField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"select">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"select">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -361,7 +377,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "textarea"}>
 						<TextareaField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"textarea">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"textarea">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
@@ -376,7 +393,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Match when={fieldConfig().type === "rich-text"}>
 						<RichTextField
 							state={{
-								fieldConfig: fieldConfig() as CFConfig<"rich-text">,
+								fieldConfig:
+									fieldConfig() as CollectionFieldConfigByType<"rich-text">,
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,

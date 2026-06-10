@@ -301,6 +301,7 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 											}}
 											mode="short"
 											size="small"
+											nameFormat="username-only"
 										/>
 									</Td>
 									<TextCol

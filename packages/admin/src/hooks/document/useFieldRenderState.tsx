@@ -8,6 +8,8 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 
 type FieldRenderStateContextValue = {
 	brickIndex: Accessor<number>;
+	collectionKey: Accessor<string | undefined>;
+	brickKey: Accessor<string | undefined>;
 	contentLocale: Accessor<string>;
 	contentLocales: Accessor<string[]>;
 	missingFieldColumns: Accessor<string[]>;
@@ -15,6 +17,8 @@ type FieldRenderStateContextValue = {
 
 const FieldRenderStateContext = createContext<FieldRenderStateContextValue>({
 	brickIndex: () => -1,
+	collectionKey: () => undefined,
+	brickKey: () => undefined,
 	contentLocale: () => contentLocaleStore.get.contentLocale ?? "",
 	contentLocales: () =>
 		contentLocaleStore.get.locales.map((locale) => locale.code) || [],
@@ -28,6 +32,8 @@ export const FieldRenderStateProvider: ParentComponent<
 		<FieldRenderStateContext.Provider
 			value={{
 				brickIndex: props.brickIndex,
+				collectionKey: props.collectionKey,
+				brickKey: props.brickKey,
 				contentLocale: props.contentLocale,
 				contentLocales: props.contentLocales,
 				missingFieldColumns: props.missingFieldColumns,

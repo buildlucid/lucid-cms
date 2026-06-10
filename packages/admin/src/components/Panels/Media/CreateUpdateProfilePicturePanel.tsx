@@ -436,6 +436,7 @@ const CreateUpdateProfilePicturePanel: Component<
 									}}
 									errors={getErrorObject(inputError(index())?.name)}
 									autoComplete="off"
+									hideOptionalText={true}
 								/>
 								<Show when={showAltInput()}>
 									<Textarea
@@ -455,7 +456,8 @@ const CreateUpdateProfilePicturePanel: Component<
 										}}
 										errors={getErrorObject(inputError(index())?.alt)}
 										rows={3}
-										rightSlot={<ProfileAltGenerationButton />}
+										hideOptionalText={true}
+										labelRightSlot={<ProfileAltGenerationButton />}
 									/>
 								</Show>
 							</Show>

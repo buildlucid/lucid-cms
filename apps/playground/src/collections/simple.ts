@@ -5,10 +5,8 @@ import SimpleFixedBrick from "../bricks/simple-fixed.js";
 const SimpleCollection = new CollectionBuilder("simple", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.simple.name", { defaultMessage: "Simple" }),
-		singularName: copy("admin:collections.simple.singularName", {
-			defaultMessage: "Simple",
-		}),
+		name: copy("admin:collections.simple.name"),
+		singularName: copy("admin:collections.simple.singularName"),
 	},
 	config: {
 		localized: true,
@@ -21,9 +19,7 @@ const SimpleCollection = new CollectionBuilder("simple", {
 })
 	.addText("simpleHeading", {
 		details: {
-			label: copy("admin:collections.simple.fields.simpleHeading.label", {
-				defaultMessage: "Heading Default",
-			}),
+			label: copy("admin:collections.simple.fields.simpleHeading.label"),
 		},
 		validation: {
 			required: true,

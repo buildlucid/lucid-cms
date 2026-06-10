@@ -5,12 +5,8 @@ import SeoBrick from "../bricks/seo.js";
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.page.name", {
-			defaultMessage: "Pages",
-		}),
-		singularName: copy("admin:collections.page.singularName", {
-			defaultMessage: "Page",
-		}),
+		name: copy("admin:collections.page.name"),
+		singularName: copy("admin:collections.page.singularName"),
 	},
 	bricks: {
 		fixed: [SeoBrick],
@@ -19,9 +15,7 @@ const PageCollection = new CollectionBuilder("page", {
 })
 	.addText("title", {
 		details: {
-			label: copy("admin:collections.page.fields.title.label", {
-				defaultMessage: "Title",
-			}),
+			label: copy("admin:collections.page.fields.title.label"),
 		},
 		validation: {
 			required: true,
@@ -31,9 +25,7 @@ const PageCollection = new CollectionBuilder("page", {
 	})
 	.addTextarea("summary", {
 		details: {
-			label: copy("admin:collections.page.fields.summary.label", {
-				defaultMessage: "Summary",
-			}),
+			label: copy("admin:collections.page.fields.summary.label"),
 		},
 	});
 

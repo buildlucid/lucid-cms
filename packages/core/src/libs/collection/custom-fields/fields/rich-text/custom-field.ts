@@ -7,6 +7,7 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
+	CustomFieldAiFormatResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -49,66 +50,55 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"rich-text">;
 	}
-	protected override get supportsAi() {
+	override get supportsAi() {
 		return true;
 	}
 	protected override get defaultAiGuidance() {
 		return defaultTextFieldAiGuidance;
 	}
 	override get jsonSchema() {
+		const textNodeSchema = {
+			type: "object",
+			additionalProperties: false,
+			required: ["type", "text"],
+			properties: {
+				type: {
+					type: "string",
+					const: "text",
+				},
+				text: {
+					type: "string",
+				},
+			},
+		};
+		const paragraphNodeSchema = {
+			type: "object",
+			additionalProperties: false,
+			required: ["type", "content"],
+			properties: {
+				type: {
+					type: "string",
+					const: "paragraph",
+				},
+				content: {
+					type: "array",
+					items: textNodeSchema,
+				},
+			},
+		};
+
 		return {
 			type: "object",
 			additionalProperties: false,
 			required: ["type", "content"],
 			properties: {
 				type: {
+					type: "string",
 					const: "doc",
 				},
 				content: {
 					type: "array",
-					items: {
-						$ref: "#/$defs/node",
-					},
-				},
-			},
-			$defs: {
-				node: {
-					type: "object",
-					additionalProperties: true,
-					required: ["type"],
-					properties: {
-						type: {
-							type: "string",
-						},
-						attrs: {
-							type: "object",
-						},
-						content: {
-							type: "array",
-							items: {
-								$ref: "#/$defs/node",
-							},
-						},
-						text: {
-							type: "string",
-						},
-						marks: {
-							type: "array",
-							items: {
-								type: "object",
-								additionalProperties: true,
-								required: ["type"],
-								properties: {
-									type: {
-										type: "string",
-									},
-									attrs: {
-										type: "object",
-									},
-								},
-							},
-						},
-					},
+					items: paragraphNodeSchema,
 				},
 			},
 		};
@@ -134,6 +124,19 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"rich-text">["value"];
+	}
+	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
+		if (value && typeof value === "object" && !Array.isArray(value)) {
+			return {
+				success: true,
+				value,
+			};
+		}
+
+		return {
+			success: false,
+			message: copy("server:core.routes.ai.generate.error.message"),
+		};
 	}
 	uniqueValidation(value: unknown) {
 		const valueSchema = z.record(

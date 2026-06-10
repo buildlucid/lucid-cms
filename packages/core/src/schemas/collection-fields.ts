@@ -113,6 +113,31 @@ export const fieldConfigSchema = z.object({
 			})
 			.optional(),
 	}),
+	ai: z
+		.object({
+			enabled: z.boolean().meta({
+				description: "Whether AI generation is enabled for this field",
+				example: true,
+			}),
+			guidance: z.array(
+				z.object({
+					key: z.string().meta({
+						description: "Unique key for the guidance option",
+						example: "improve",
+					}),
+					label: adminCopyDescriptorSchema.meta({
+						description: "Display label for the guidance option",
+						example: {
+							type: "lucid.copy",
+							scope: "admin",
+							key: "core.ai.guidance.improve.label",
+							defaultMessage: "Improve",
+						},
+					}),
+				}),
+			),
+		})
+		.optional(),
 	config: z
 		.object({
 			localized: z

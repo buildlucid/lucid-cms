@@ -7,9 +7,11 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
+	CustomFieldAiFormatResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
+import { zodToJsonSchema } from "../../utils/helpers.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { textareaFieldConfig } from "./config.js";
@@ -46,16 +48,16 @@ class TextareaCustomField extends CustomField<"textarea"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"textarea">;
 	}
-	protected override get supportsAi() {
+	override get supportsAi() {
 		return true;
 	}
 	protected override get defaultAiGuidance() {
 		return defaultTextFieldAiGuidance;
 	}
 	override get jsonSchema() {
-		return {
+		return zodToJsonSchema(this.config.validation?.zod, {
 			type: "string",
-		};
+		});
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
@@ -78,6 +80,12 @@ class TextareaCustomField extends CustomField<"textarea"> {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"textarea">["value"];
+	}
+	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
+		return {
+			success: true,
+			value: typeof value === "string" ? value : String(value ?? ""),
+		};
 	}
 	override normalizeInputValue(value: unknown) {
 		return typeof value === "string" ? value.trim() : value;

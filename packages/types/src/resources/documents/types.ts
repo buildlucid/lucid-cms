@@ -39,6 +39,7 @@ export type DocumentFieldValueResponse =
 	| string
 	| LinkValue
 	| Record<string, unknown>
+	| unknown[]
 	| DocumentRelationValue[]
 	| number[]
 	| null
@@ -350,10 +351,19 @@ type ZodValidation = RequiredValidation & {
 	zod?: any;
 };
 
+export type CollectionFieldAiConfig = {
+	enabled: boolean;
+	guidance: Array<{
+		key: string;
+		label: AdminCopyDescriptor;
+	}>;
+};
+
 type SharedCollectionFieldConfig<TType extends FieldType> = {
 	key: string;
 	type: TType;
 	details: FieldDetails;
+	ai?: CollectionFieldAiConfig;
 };
 
 export interface CheckboxFieldConfig
@@ -394,7 +404,7 @@ export interface DocumentFieldConfig
 }
 
 export interface JsonFieldConfig extends SharedCollectionFieldConfig<"json"> {
-	config: FieldConfigOptions<Record<string, unknown>>;
+	config: FieldConfigOptions<Record<string, unknown> | unknown[]>;
 	validation?: ZodValidation;
 }
 

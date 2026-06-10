@@ -1,12 +1,8 @@
-import type {
-	CFConfig,
-	FieldTypes,
-	InternalCollectionDocument,
-	UserRef,
-} from "@types";
+import type { InternalCollectionDocument, UserRef } from "@types";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
+import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import DateCol from "./DateCol";
 import PillCol from "./PillCol";
@@ -14,7 +10,7 @@ import TextCol from "./TextCol";
 import UserStackCol from "./UserStackCol";
 
 const DocumentDynamicColumns: Component<{
-	field: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
+	field: CollectionLeafFieldConfig;
 	document: InternalCollectionDocument;
 	include: boolean[];
 	index: number;

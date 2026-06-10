@@ -9,6 +9,6 @@ export default {
 	validateInput: null,
 	formatRef: null,
 	clientTypeGen: createValueFieldTypeGenerator(
-		"Record<string, unknown> | null",
+		"Record<string, unknown> | unknown[] | null",
 	),
 };

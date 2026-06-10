@@ -1,4 +1,4 @@
-import type { Collection, CollectionBrickConfig } from "@types";
+import type { Collection } from "@types";
 import classNames from "classnames";
 import {
 	FaSolidChevronUp,
@@ -22,6 +22,7 @@ import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import brickStore, { type BrickData } from "@/store/brickStore";
 import T from "@/translations";
+import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 import { tabStateHelpers } from "@/utils/tab-state-helpers";
 

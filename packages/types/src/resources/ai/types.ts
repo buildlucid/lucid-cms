@@ -6,7 +6,7 @@ export type AiGenerateCost = {
 };
 
 export type AiGenerateMode = "sync" | "async";
-export type AiUsageStatus = "pending" | "success";
+export type AiUsageStatus = "failed" | "pending" | "success";
 export type AiUsageChartDimension = "day";
 export type AiUsageChartMetric = "requests" | "totalTokens" | "cost";
 

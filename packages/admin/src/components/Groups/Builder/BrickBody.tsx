@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, FieldTypes } from "@types";
+import type { FieldError } from "@types";
 import classNames from "classnames";
 import {
 	type Component,
@@ -16,6 +16,7 @@ import {
 import { FieldRenderStateProvider } from "@/hooks/document/useFieldRenderState";
 import type { BrickData } from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import type { CollectionFieldConfig } from "@/types/collection-config";
 import { tabStateHelpers } from "@/utils/tab-state-helpers";
 
 interface BrickProps {
@@ -23,7 +24,7 @@ interface BrickProps {
 		open: boolean;
 		brick: BrickData;
 		brickIndex: number;
-		configFields: CFConfig<FieldTypes>[];
+		configFields: CollectionFieldConfig[];
 		labelledby?: string;
 		fieldErrors: FieldError[];
 		missingFieldColumns: string[];
@@ -54,6 +55,11 @@ export const BrickBody: Component<BrickProps> = (props) => {
 		() => contentLocaleStore.get.locales.map((locale) => locale.code) || [],
 	);
 	const brickIndex = createMemo(() => props.state.brickIndex);
+	const collectionKey = createMemo(() => props.state.collectionKey);
+	const brickKey = createMemo(() => {
+		if (props.state.brick.type === "collection-fields") return undefined;
+		return props.state.brick.key;
+	});
 	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
 
 	// ----------------------------------
@@ -124,6 +130,8 @@ export const BrickBody: Component<BrickProps> = (props) => {
 			>
 				<FieldRenderStateProvider
 					brickIndex={brickIndex}
+					collectionKey={collectionKey}
+					brickKey={brickKey}
 					contentLocale={contentLocale}
 					contentLocales={contentLocales}
 					missingFieldColumns={missingFieldColumns}

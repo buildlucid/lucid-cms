@@ -2,10 +2,8 @@ import { BrickBuilder, copy } from "@lucidcms/core";
 
 const BannerBrick = new BrickBuilder("banner", {
 	details: {
-		name: copy("admin:bricks.banner.name", { defaultMessage: "Banner" }),
-		summary: copy("admin:bricks.banner.summary", {
-			defaultMessage: "A banner with a title and intro text",
-		}),
+		name: copy("admin:bricks.banner.name"),
+		summary: copy("admin:bricks.banner.summary"),
 	},
 	preview: {
 		image: "https://headless-dev.up.railway.app/public/banner-brick.png",
@@ -13,17 +11,12 @@ const BannerBrick = new BrickBuilder("banner", {
 })
 	.addTab("content_tab", {
 		details: {
-			label: copy("admin:bricks.banner.tabs.content_tab.label", {
-				defaultMessage: "Content",
-			}),
+			label: copy("admin:bricks.banner.tabs.content_tab.label"),
 		},
 	})
 	.addText("title", {
 		details: {
-			summary: copy("admin:bricks.banner.fields.title.summary", {
-				defaultMessage:
-					"The title of the banner. This is displayed as an H1 tag.",
-			}),
+			summary: copy("admin:bricks.banner.fields.title.summary"),
 		},
 		config: {
 			default: "Welcome to our website",
@@ -35,9 +28,7 @@ const BannerBrick = new BrickBuilder("banner", {
 	.addRichText("intro")
 	.addRepeater("call_to_actions", {
 		details: {
-			label: copy("admin:bricks.banner.fields.call_to_actions.label", {
-				defaultMessage: "Call to Actions",
-			}),
+			label: copy("admin:bricks.banner.fields.call_to_actions.label"),
 		},
 		validation: {
 			maxGroups: 3,
@@ -45,16 +36,12 @@ const BannerBrick = new BrickBuilder("banner", {
 	})
 	.addText("call_to_action_title", {
 		details: {
-			label: copy("admin:bricks.banner.fields.call_to_action_title.label", {
-				defaultMessage: "Link Text",
-			}),
+			label: copy("admin:bricks.banner.fields.call_to_action_title.label"),
 		},
 	})
 	.addLink("link", {
 		details: {
-			label: copy("admin:bricks.banner.fields.link.label", {
-				defaultMessage: "Link",
-			}),
+			label: copy("admin:bricks.banner.fields.link.label"),
 		},
 	})
 	.addRepeater("nested_repeater")
@@ -63,16 +50,12 @@ const BannerBrick = new BrickBuilder("banner", {
 	.endRepeater()
 	.addTab("config_tab", {
 		details: {
-			label: copy("admin:bricks.banner.tabs.config_tab.label", {
-				defaultMessage: "Config",
-			}),
+			label: copy("admin:bricks.banner.tabs.config_tab.label"),
 		},
 	})
 	.addCheckbox("full_width", {
 		details: {
-			summary: copy("admin:bricks.banner.fields.full_width.summary", {
-				defaultMessage: "Make the banner fullwidth",
-			}),
+			summary: copy("admin:bricks.banner.fields.full_width.summary"),
 		},
 	});
 

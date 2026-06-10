@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import type { CFConfig, Collection, FieldTypes } from "@types";
+import type { Collection } from "@types";
 import {
 	FaSolidBarsProgress,
 	FaSolidCalendar,
@@ -20,6 +20,7 @@ import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import { tableHeadColumns } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
@@ -28,7 +29,7 @@ export const DocumentsList: Component<{
 	state: {
 		collection?: Collection;
 		isLoading: boolean;
-		displayInListing: Accessor<CFConfig<FieldTypes>[]>;
+		displayInListing: Accessor<CollectionLeafFieldConfig[]>;
 		collectionIsSuccess: Accessor<boolean>;
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
 		showingDeleted: Accessor<boolean>;

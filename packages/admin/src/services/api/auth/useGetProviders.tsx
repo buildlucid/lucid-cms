@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { AuthProviders, ResponseBody } from "@types";
+import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 
 // biome-ignore lint/suspicious/noEmptyInterface: explanation

@@ -1,8 +1,9 @@
-import type { Collection, CollectionBrickConfig } from "@types";
+import type { Collection } from "@types";
 import { FaSolidShield } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, For } from "solid-js";
 import { BrickBody } from "@/components/Groups/Builder";
 import brickStore, { type BrickData } from "@/store/brickStore";
+import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 
 interface FixedBricksProps {

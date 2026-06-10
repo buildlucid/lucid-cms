@@ -148,12 +148,16 @@ const formatUserName = (
 		  }
 		| null
 		| undefined,
-	pref?: "username" | "simple",
+	pref?: "username" | "username-only" | "simple",
 ): string => {
 	if (!user) return "";
 
 	const username = user.username ?? user.email ?? "";
 	if (!username) return "";
+
+	if (pref === "username-only") {
+		return username;
+	}
 
 	if (pref === "simple") {
 		if (user.firstName && user.lastName) {

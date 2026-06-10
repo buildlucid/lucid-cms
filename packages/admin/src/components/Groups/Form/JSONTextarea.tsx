@@ -10,7 +10,12 @@ import {
 	createEditorControlledValue,
 	createEditorReadonly,
 } from "solid-codemirror";
-import { type Component, createMemo, createSignal } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	type JSXElement,
+} from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import T from "@/translations";
 import { cmHighlighting, cmTheme } from "@/utils/codemirror-json-theme";
@@ -36,6 +41,7 @@ interface JSONTextareaProps {
 	noMargin?: boolean;
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
+	labelRightSlot?: JSXElement;
 }
 
 export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
@@ -149,6 +155,7 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 				hideOptionalText={props.hideOptionalText}
+				rightSlot={props.labelRightSlot}
 			/>
 			<div
 				id={props.id}

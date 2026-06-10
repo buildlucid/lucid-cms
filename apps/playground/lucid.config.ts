@@ -226,108 +226,72 @@ export default configureLucid({
 		access: {
 			groups: {
 				pages: {
-					name: copy("admin:access.groups.pages.name", {
-						defaultMessage: "Page Permissions",
-					}),
+					name: copy("admin:access.groups.pages.name"),
 				},
 				blogs: {
-					name: copy("admin:access.groups.blogs.name", {
-						defaultMessage: "Blog Permissions",
-					}),
+					name: copy("admin:access.groups.blogs.name"),
 				},
 			},
 			permissions: {
 				"page:full": {
-					name: copy("admin:access.permissions.page-full.name", {
-						defaultMessage: "Full Page Access",
-					}),
-					description: copy("admin:access.permissions.page-full.description", {
-						defaultMessage: "Grants full access to pages.",
-					}),
+					name: copy("admin:access.permissions.page-full.name"),
+					description: copy("admin:access.permissions.page-full.description"),
 					group: "pages",
 				},
 				"page:read": {
-					name: copy("admin:access.permissions.page-read.name", {
-						defaultMessage: "Read Pages",
-					}),
+					name: copy("admin:access.permissions.page-read.name"),
 					group: "pages",
 				},
 				"page:create": {
-					name: copy("admin:access.permissions.page-create.name", {
-						defaultMessage: "Create Pages",
-					}),
+					name: copy("admin:access.permissions.page-create.name"),
 					group: "pages",
 				},
 				"page:update": {
-					name: copy("admin:access.permissions.page-update.name", {
-						defaultMessage: "Update Pages",
-					}),
+					name: copy("admin:access.permissions.page-update.name"),
 					group: "pages",
 				},
 				"page:delete": {
-					name: copy("admin:access.permissions.page-delete.name", {
-						defaultMessage: "Delete Pages",
-					}),
+					name: copy("admin:access.permissions.page-delete.name"),
 					group: "pages",
 				},
 				"page:restore": {
-					name: copy("admin:access.permissions.page-restore.name", {
-						defaultMessage: "Restore Pages",
-					}),
+					name: copy("admin:access.permissions.page-restore.name"),
 					group: "pages",
 				},
 				"page:publish": {
-					name: copy("admin:access.permissions.page-publish.name", {
-						defaultMessage: "Publish Pages",
-					}),
+					name: copy("admin:access.permissions.page-publish.name"),
 					group: "pages",
 				},
 				"page:review": {
-					name: copy("admin:access.permissions.page-review.name", {
-						defaultMessage: "Review Page Publish Requests",
-					}),
+					name: copy("admin:access.permissions.page-review.name"),
 					group: "pages",
 				},
 				"page:publish:staging": {
-					name: copy("admin:access.permissions.page-publish-staging.name", {
-						defaultMessage: "Publish Pages To Staging",
-					}),
+					name: copy("admin:access.permissions.page-publish-staging.name"),
 					group: "pages",
 				},
 				"page:review:staging": {
-					name: copy("admin:access.permissions.page-review-staging.name", {
-						defaultMessage: "Review Page Publish Requests To Staging",
-					}),
+					name: copy("admin:access.permissions.page-review-staging.name"),
 					group: "pages",
 				},
 				"page:publish:production": {
-					name: copy("admin:access.permissions.page-publish-production.name", {
-						defaultMessage: "Publish Pages To Production",
-					}),
+					name: copy("admin:access.permissions.page-publish-production.name"),
 					group: "pages",
 				},
 				"page:review:production": {
-					name: copy("admin:access.permissions.page-review-production.name", {
-						defaultMessage: "Review Page Publish Requests To Production",
-					}),
+					name: copy("admin:access.permissions.page-review-production.name"),
 					group: "pages",
 				},
 				"blog:full": {
-					name: copy("admin:access.permissions.blog-full.name", {
-						defaultMessage: "Full Blog Access",
-					}),
+					name: copy("admin:access.permissions.blog-full.name"),
 					group: "blogs",
 				},
 			},
 			roles: [
 				{
 					key: "admin",
-					name: copy("admin:access.roles.admin.name", {
-						defaultMessage: "Admin",
-					}),
-					description: copy("admin:access.roles.admin.description", {
-						defaultMessage: "Full admin access for the playground.",
-					}),
+					name: copy("admin:access.roles.admin.name"),
+					description: copy("admin:access.roles.admin.description"),
 					permissions: [
 						...PermissionSets.Users,
 						...PermissionSets.Roles,

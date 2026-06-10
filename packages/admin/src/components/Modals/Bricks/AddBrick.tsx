@@ -1,5 +1,4 @@
 import brickIcon from "@assets/svgs/default-brick-icon-white.svg";
-import type { CollectionBrickConfig } from "@types";
 import classNames from "classnames";
 import {
 	FaSolidImage,
@@ -11,6 +10,7 @@ import { Tooltip as FormTooltip } from "@/components/Groups/Form/Tooltip";
 import { Modal } from "@/components/Groups/Modal";
 import BrickPreview from "@/components/Partials/BrickPreview";
 import brickStore from "@/store/brickStore";
+import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 
 interface AddBrickProps {

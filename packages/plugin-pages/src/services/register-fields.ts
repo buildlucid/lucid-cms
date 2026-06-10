@@ -22,6 +22,9 @@ const registerFields = (
 				hidden: !config.displayFullSlug,
 				disabled: true,
 			},
+			ai: {
+				enabled: false,
+			},
 			displayInListing: config.displayFullSlug,
 		})
 		.addText(constants.fields.slug.key, {
@@ -34,6 +37,9 @@ const registerFields = (
 				localized: config.localized,
 				hidden: false,
 				disabled: false,
+			},
+			ai: {
+				enabled: false,
 			},
 			validation: {
 				required: true,

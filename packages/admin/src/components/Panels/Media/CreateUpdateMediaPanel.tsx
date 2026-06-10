@@ -1090,6 +1090,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							errors={getBodyError("folderId", mutateErrors())}
 							noMargin={false}
 							noClear={true}
+							hideOptionalText={true}
 						/>
 						<Checkbox
 							id="public"
@@ -1125,6 +1126,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										}}
 										errors={getErrorObject(inputError(index())?.name)}
 										autoComplete="off"
+										hideOptionalText={true}
 									/>
 									<Show when={showAltInput()}>
 										<Textarea
@@ -1144,7 +1146,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											}}
 											errors={getErrorObject(inputError(index())?.alt)}
 											rows={3}
-											rightSlot={<MediaAltGenerationButton />}
+											hideOptionalText={true}
+											labelRightSlot={<MediaAltGenerationButton />}
 										/>
 									</Show>
 									<Show when={showDescriptionInput()}>
@@ -1167,6 +1170,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 												label: T()("common.description"),
 											}}
 											errors={getErrorObject(descriptionError(index()))}
+											hideOptionalText={true}
 										/>
 									</Show>
 									<Show when={showSummaryInput()}>
@@ -1187,6 +1191,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 												label: T()("common.summary"),
 											}}
 											errors={getErrorObject(summaryError(index()))}
+											hideOptionalText={true}
 										/>
 									</Show>
 								</Show>
@@ -1448,7 +1453,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											}}
 											errors={getErrorObject(posterAltError(index()))}
 											rows={3}
-											rightSlot={<PosterAltGenerationButton />}
+											hideOptionalText={true}
+											labelRightSlot={<PosterAltGenerationButton />}
 										/>
 									</Show>
 								)}

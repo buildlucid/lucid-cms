@@ -29,8 +29,17 @@ const useSearchParamsState = (
 	const filterValueToString = (value?: FilterValues) => {
 		if (value === undefined) return undefined;
 		if (typeof value === "boolean") return value ? "1" : "0";
-		if (Array.isArray(value)) return value.length ? value.join(",") : undefined;
+		if (Array.isArray(value)) {
+			const values = value.filter((item) => String(item).trim().length > 0);
+			return values.length ? values.join(",") : undefined;
+		}
+		if (typeof value === "string" && value.trim().length === 0) {
+			return undefined;
+		}
 		return value.toString();
+	};
+	const filterHasValue = (value?: FilterValues) => {
+		return filterValueToString(value) !== undefined;
 	};
 	const setParams = (params: {
 		filters?: { [key: string]: FilterValues };
@@ -94,7 +103,13 @@ const useSearchParamsState = (
 				if (value.value === "") {
 					filterMap.set(key, undefined);
 				} else if (value.type === "array") {
-					filterMap.set(key, [value.value]);
+					if (!filterHasValue(value.value)) {
+						filterMap.set(key, undefined);
+					} else if (Array.isArray(value.value)) {
+						filterMap.set(key, value.value);
+					} else {
+						filterMap.set(key, [value.value as string | number]);
+					}
 				} else filterMap.set(key, value.value);
 			}
 			setFilters(filterMap);
@@ -157,7 +172,7 @@ const useSearchParamsState = (
 	};
 	const updateHasFiltersApplied = () => {
 		for (const [_key, value] of getFilters()) {
-			if (value !== undefined) {
+			if (filterHasValue(value)) {
 				setHasFiltersApplied(true);
 				break;
 			}

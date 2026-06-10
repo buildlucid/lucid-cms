@@ -1,5 +1,7 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
+import { brickInputSchema } from "./collection-bricks.js";
+import { fieldInputSchema } from "./collection-fields.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaEmbedResponseSchema } from "./media.js";
 
@@ -370,7 +372,7 @@ export const controllerSchemas = {
 							version: z.string(),
 						})
 						.strict(),
-					status: z.enum(["pending", "success"]),
+					status: z.enum(["failed", "pending", "success"]),
 					model: z.string().nullable(),
 					createdAt: z.string().nullable(),
 					durationMs: z.number().nullable(),
@@ -414,9 +416,16 @@ export const controllerSchemas = {
 	customFieldInput: {
 		body: z
 			.object({
-				instruction: z.string().trim().min(1).max(8_000),
+				instruction: z.string().trim().min(1).max(8_000).optional(),
 				guidance: z.string().trim().min(1).optional(),
-				currentValue: z.unknown().optional(),
+				value: z.record(z.string().trim().min(2).max(32), z.unknown()),
+				document: z
+					.object({
+						fields: z.array(fieldInputSchema).optional(),
+						bricks: z.array(brickInputSchema).optional(),
+					})
+					.strict()
+					.optional(),
 				target: z
 					.object({
 						collectionKey: z.string().trim().min(1),

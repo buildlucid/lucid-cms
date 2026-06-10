@@ -7,13 +7,9 @@ import TestingBrick from "../bricks/testing.js";
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.page.name", { defaultMessage: "Pages" }),
-		singularName: copy("admin:collections.page.singularName", {
-			defaultMessage: "Page",
-		}),
-		summary: copy("admin:collections.page.summary", {
-			defaultMessage: "Manage the pages and content on your website.",
-		}),
+		name: copy("admin:collections.page.name"),
+		singularName: copy("admin:collections.page.singularName"),
+		summary: copy("admin:collections.page.summary"),
 	},
 	config: {
 		localized: true,
@@ -22,15 +18,11 @@ const PageCollection = new CollectionBuilder("page", {
 		environments: [
 			{
 				key: "staging",
-				name: copy("admin:collections.page.environments.staging.name", {
-					defaultMessage: "Staging",
-				}),
+				name: copy("admin:collections.page.environments.staging.name"),
 			},
 			{
 				key: "production",
-				name: copy("admin:collections.page.environments.production.name", {
-					defaultMessage: "Production",
-				}),
+				name: copy("admin:collections.page.environments.production.name"),
 			},
 		],
 	},
@@ -87,12 +79,8 @@ const PageCollection = new CollectionBuilder("page", {
 })
 	.addText("page_title", {
 		details: {
-			label: copy("admin:collections.page.fields.page_title.label", {
-				defaultMessage: "Page title",
-			}),
-			summary: copy("admin:collections.page.fields.page_title.summary", {
-				defaultMessage: "The title of the page.",
-			}),
+			label: copy("admin:collections.page.fields.page_title.label"),
+			summary: copy("admin:collections.page.fields.page_title.summary"),
 		},
 		config: {
 			hidden: false,

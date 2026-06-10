@@ -1,8 +1,6 @@
 import type {
 	BrickError,
-	CFConfig,
 	Collection,
-	CollectionBrickConfig,
 	DocumentRef,
 	FieldError,
 	FieldRef,
@@ -14,6 +12,11 @@ import type {
 import { nanoid } from "nanoid";
 import { batch } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
+import type {
+	CollectionBrickConfig,
+	CollectionLeafFieldConfig,
+	CollectionNonTabFieldConfig,
+} from "@/types/collection-config";
 import brickHelpers, { clearTargetFieldErrors } from "@/utils/brick-helpers";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 
@@ -62,7 +65,7 @@ const [get, set] = createStore<{
 	setFieldValue: (params: {
 		brickIndex: number;
 		key: string;
-		fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
+		fieldConfig: CollectionLeafFieldConfig;
 		repeaterKey?: string;
 		ref?: string;
 		value: FieldValue;
@@ -71,14 +74,14 @@ const [get, set] = createStore<{
 	}) => void;
 	addField: (params: {
 		brickIndex: number;
-		fieldConfig: CFConfig<Exclude<FieldTypes, "tab">>;
+		fieldConfig: CollectionNonTabFieldConfig;
 		ref?: string;
 		repeaterKey?: string;
 		locales: string[];
 	}) => InternalDocumentField;
 	addRepeaterGroup: (params: {
 		brickIndex: number;
-		fieldConfig: CFConfig<Exclude<FieldTypes, "tab">>[];
+		fieldConfig: CollectionNonTabFieldConfig[];
 		key: string;
 		ref?: string;
 		parentRepeaterKey?: string;

@@ -104,6 +104,7 @@
 	},
 	"dependencies": {
 		"@inquirer/prompts": "^8.3.0",
+		"@lucidcms/rich-text": "1.0.0",
 		"@lucidcms/types": "^0.1.0",
 		"@noble/hashes": "^2.0.1",
 		"@scalar/hono-api-reference": "^0.9.46",

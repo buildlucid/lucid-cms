@@ -34,7 +34,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		cost_currency: z.string().nullable(),
 		cost_total_minor: z.number().nullable(),
 		duration_ms: z.number().nullable(),
-		status: z.enum(["pending", "success"]),
+		status: z.enum(["failed", "pending", "success"]),
 		error_message: z.string().nullable(),
 		created_at: z.union([z.string(), z.date()]),
 	});

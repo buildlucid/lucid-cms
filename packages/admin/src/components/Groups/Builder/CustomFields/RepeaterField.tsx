@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, InternalDocumentField } from "@types";
+import type { FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
 import { FaSolidPlus } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
@@ -8,11 +8,12 @@ import RelationCount from "@/components/Partials/RelationCount";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import T from "@/translations/index";
+import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 
 interface RepeaterFieldProps {
 	state: {
-		fieldConfig: CFConfig<"repeater">;
+		fieldConfig: CollectionFieldConfigByType<"repeater">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		groupPath?: string;

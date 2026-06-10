@@ -1,16 +1,14 @@
-import type {
-	CFConfig,
-	Collection,
-	DocumentField,
-	DocumentRef,
-	FieldTypes,
-} from "@types";
+import type { Collection, DocumentField, DocumentRef } from "@types";
 import { FaSolidT, FaSolidUser } from "solid-icons/fa";
 import T from "@/translations";
+import type {
+	CollectionFieldConfig,
+	CollectionLeafFieldConfig,
+} from "@/types/collection-config";
 import dateHelpers from "@/utils/date-helpers";
 import helpers from "@/utils/helpers";
 
-export const tableHeadColumns = (fields: CFConfig<FieldTypes>[]) => {
+export const tableHeadColumns = (fields: CollectionFieldConfig[]) => {
 	return fields.map((field) => {
 		switch (field.type) {
 			case "user":
@@ -55,14 +53,18 @@ export const formatFieldFilters = (props: { fieldKey: string }) => {
 };
 
 export const collectionFieldIncludes = (collection?: Collection) => {
-	const fieldsRes: CFConfig<FieldTypes>[] = [];
+	const fieldsRes: CollectionLeafFieldConfig[] = [];
 
-	const fieldRecursive = (fields?: CFConfig<FieldTypes>[]) => {
+	const fieldRecursive = (fields?: CollectionFieldConfig[]) => {
 		if (!fields) return;
 		for (const field of fields) {
-			if (field.type === "repeater" && field.fields) {
+			if (field.type === "repeater") {
 				fieldRecursive(field.fields);
-				return;
+				continue;
+			}
+			if (field.type === "tab") {
+				fieldRecursive(field.fields);
+				continue;
 			}
 			if (collection?.config.displayInListing.includes(field.key)) {
 				fieldsRes.push(field);
@@ -105,8 +107,6 @@ export const getDocumentListingPreviewFields = (props: {
 
 	return collectionFieldIncludes(collection)
 		.map((field) => {
-			if (field.type === "tab" || field.type === "repeater") return null;
-
 			const documentField = findDocumentField({
 				fields: props.documentRef?.fields || {},
 				fieldKey: field.key,
@@ -153,7 +153,7 @@ const findDocumentField = (props: {
 };
 
 const getDocumentFieldValue = (props: {
-	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
+	fieldConfig: CollectionLeafFieldConfig;
 	fieldData?: DocumentField;
 	contentLocale: string;
 	collectionLocalized: boolean;
@@ -174,7 +174,7 @@ const getDocumentFieldValue = (props: {
 };
 
 const formatDocumentPreviewValue = (props: {
-	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
+	fieldConfig: CollectionLeafFieldConfig;
 	fieldData?: DocumentField;
 	contentLocale: string;
 	collectionLocalized: boolean;

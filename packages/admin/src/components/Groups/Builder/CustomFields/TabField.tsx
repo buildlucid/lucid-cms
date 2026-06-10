@@ -1,10 +1,14 @@
-import type { CFConfig, FieldError, FieldTypes, TabFieldConfig } from "@types";
+import type { FieldError } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo } from "solid-js";
+import type {
+	CollectionFieldConfig,
+	CollectionFieldConfigByType,
+} from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 
 export const TabField: Component<{
-	tab: TabFieldConfig;
+	tab: CollectionFieldConfigByType<"tab">;
 	setActiveTab: (key: string) => void;
 	getActiveTab: () => string | undefined;
 	fieldErrors: FieldError[];
@@ -14,7 +18,7 @@ export const TabField: Component<{
 	const childrenKeys = createMemo(() => {
 		const fieldKeys: string[] = [];
 
-		const recursiveFieldSearch = (fields: CFConfig<FieldTypes>[]) => {
+		const recursiveFieldSearch = (fields: CollectionFieldConfig[]) => {
 			for (const field of fields) {
 				if (field.type === "tab") {
 					recursiveFieldSearch(field.fields);

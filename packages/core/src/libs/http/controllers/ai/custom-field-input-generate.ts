@@ -59,7 +59,8 @@ const customFieldInputGenerateController = factory.createHandlers(
 		)(context, {
 			instruction: body.instruction,
 			guidance: body.guidance,
-			currentValue: body.currentValue,
+			value: body.value,
+			document: body.document,
 			target: body.target,
 			locale: body.locale,
 			userId: c.get("auth").id,

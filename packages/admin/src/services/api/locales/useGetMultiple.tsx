@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/solid-query";
 import type { Locale, ResponseBody } from "@types";
 import { type Accessor, createEffect, createMemo } from "solid-js";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 

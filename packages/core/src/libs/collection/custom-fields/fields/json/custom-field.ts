@@ -1,11 +1,13 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
+import { isJsonContainerValue } from "../../../../../utils/helpers/index.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
+	CustomFieldAiFormatResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -38,7 +40,7 @@ class JsonCustomField extends CustomField<"json"> {
 			ai: this.props?.ai,
 			config: {
 				localized: this.props?.config?.localized ?? false,
-				default: this.props?.config?.default || {},
+				default: this.props?.config?.default ?? {},
 				hidden: this.props?.config?.hidden,
 				disabled: this.props?.config?.disabled,
 				index: this.props?.config?.index,
@@ -46,12 +48,14 @@ class JsonCustomField extends CustomField<"json"> {
 			validation: this.props?.validation,
 		} satisfies CFConfig<"json">;
 	}
-	protected override get supportsAi() {
+	override get supportsAi() {
 		return true;
 	}
 	override get jsonSchema() {
 		return zodToJsonSchema(this.config.validation?.zod, {
-			type: "object",
+			type: "string",
+			description:
+				"A serialized JSON value. Return only JSON.stringify(value) for the generated JSON field value. The decoded value may be an object, array, string, number, boolean, or null.",
 		});
 	}
 	getSchemaDefinition(
@@ -71,12 +75,47 @@ class JsonCustomField extends CustomField<"json"> {
 			error: undefined,
 		};
 	}
-	formatResponseValue(value?: Record<string, unknown> | null) {
+	formatResponseValue(value?: Record<string, unknown> | unknown[] | null) {
 		return (value ??
 			this.config.config.default ??
 			null) satisfies CFResponse<"json">["value"];
 	}
+	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
+		if (typeof value === "string") {
+			try {
+				const parsed = JSON.parse(value) as unknown;
+
+				return {
+					success: true,
+					value: isJsonContainerValue(parsed) ? parsed : { value: parsed },
+				};
+			} catch {
+				return {
+					success: true,
+					value: { value },
+				};
+			}
+		}
+
+		if (isJsonContainerValue(value)) {
+			return {
+				success: true,
+				value,
+			};
+		}
+
+		return {
+			success: true,
+			value: { value },
+		};
+	}
 	uniqueValidation(value: unknown) {
+		if (Array.isArray(value)) {
+			return {
+				valid: true,
+			};
+		}
+
 		const valueSchema = z.record(
 			z.union([z.string(), z.number(), z.symbol()]),
 			z.unknown(),

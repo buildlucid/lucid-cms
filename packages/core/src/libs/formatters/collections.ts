@@ -1,5 +1,11 @@
 import type { Collection } from "../../types/response.js";
+import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CustomField from "../collection/custom-fields/custom-field.js";
+import type {
+	CFConfig,
+	FieldTypes,
+} from "../collection/custom-fields/types.js";
 import type { MigrationStatus } from "../collection/get-collection-migration-status.js";
 import {
 	resolveCollectionPermission,
@@ -93,12 +99,87 @@ const formatSingle = (props: {
 		permissions: resolvedPermissions,
 		migrationStatus: props.migrationStatus ?? null,
 		fixedBricks: props.include?.bricks
-			? (props.collection.fixedBricks ?? [])
+			? (props.collection.config.bricks?.fixed?.map(formatBrick) ?? [])
 			: [],
 		builderBricks: props.include?.bricks
-			? (props.collection.builderBricks ?? [])
+			? (props.collection.config.bricks?.builder?.map(formatBrick) ?? [])
 			: [],
-		fields: props.include?.fields ? (props.collection.fieldTree ?? []) : [],
+		fields: props.include?.fields
+			? formatFields(props.collection.fieldTree, props.collection.fields)
+			: [],
+	};
+};
+
+const formatBrick = (
+	brick: BrickBuilder,
+): Collection["fixedBricks"][number] => ({
+	key: brick.key,
+	details: brick.config.details,
+	preview: brick.config.preview,
+	fields: formatFields(brick.fieldTree, brick.fields),
+});
+
+const formatFields = (
+	fields: CFConfig<FieldTypes>[],
+	instances: Map<string, CustomField<FieldTypes>>,
+): Collection["fields"] => {
+	return fields.map((field) => formatField(field, instances));
+};
+
+const formatField = (
+	field: CFConfig<FieldTypes>,
+	instances: Map<string, CustomField<FieldTypes>>,
+): Collection["fields"][number] => {
+	const nestedFields =
+		"fields" in field && Array.isArray(field.fields) ? field.fields : undefined;
+
+	const fieldInstance = instances.get(field.key);
+	const aiConfig = fieldInstance
+		? getFieldAiConfig(field, fieldInstance)
+		: undefined;
+
+	const formattedField = {
+		...field,
+	} as Collection["fields"][number] & {
+		fields?: Collection["fields"];
+		ai?: Collection["fields"][number]["ai"];
+	};
+
+	if (aiConfig) {
+		formattedField.ai = aiConfig;
+	} else {
+		delete formattedField.ai;
+	}
+
+	if (nestedFields) {
+		formattedField.fields = formatFields(nestedFields, instances);
+	}
+
+	return formattedField;
+};
+
+const getFieldAiConfig = (
+	field: CFConfig<FieldTypes>,
+	fieldInstance: CustomField<FieldTypes>,
+): Collection["fields"][number]["ai"] => {
+	if (!fieldInstance.supportsAi) return undefined;
+
+	const fieldHasAiConfig = Object.hasOwn(field, "ai");
+	const aiConfig = fieldInstance.aiConfig;
+	if (
+		aiConfig.enabled !== true &&
+		aiConfig.guidance.length === 0 &&
+		fieldHasAiConfig === false
+	) {
+		return undefined;
+	}
+
+	return {
+		enabled: aiConfig.enabled,
+		guidance: aiConfig.guidance.map((guidance) => ({
+			key: guidance.key,
+			label: guidance.label,
+		})),
 	};
 };
 

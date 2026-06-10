@@ -1,4 +1,4 @@
-import type { CFConfig, FieldError, InternalDocumentField } from "@types";
+import type { FieldError, FieldValue, InternalDocumentField } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -8,8 +8,10 @@ import {
 	Suspense,
 	untrack,
 } from "solid-js";
+import useCustomFieldGeneration from "@/hooks/ai/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
+import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
@@ -21,7 +23,7 @@ const JSONTextarea = lazy(() =>
 
 interface JSONFieldProps {
 	state: {
-		fieldConfig: CFConfig<"json">;
+		fieldConfig: CollectionFieldConfigByType<"json">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
@@ -36,6 +38,7 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
 	const [getValue, setValue] = createSignal("");
+	const customFieldGeneration = useCustomFieldGeneration();
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
@@ -44,7 +47,7 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<string>({
+		return brickHelpers.getFieldValue<Record<string, unknown> | null>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: fieldRenderState.contentLocale(),
@@ -53,6 +56,69 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 	const disabled = createMemo(
 		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
 	);
+	const aiGuidance = createMemo(
+		() =>
+			props.state.fieldConfig.ai?.guidance?.map((item) => ({
+				key: item.key,
+				label: helpers.getLocaleValue({
+					value: item.label,
+					fallback: item.key,
+				}),
+			})) ?? [],
+	);
+
+	const AiGenerationButton = customFieldGeneration.createActionButton({
+		field: () => ({
+			key: props.state.fieldConfig.key,
+			type: "json" as const,
+			label: helpers.getLocaleValue({
+				value: props.state.fieldConfig.details.label,
+				fallback: props.state.fieldConfig.key,
+			}),
+			localized: props.state.localised,
+			guidance: aiGuidance(),
+		}),
+		request: () => ({
+			collectionKey: fieldRenderState.collectionKey(),
+			brickKey: fieldRenderState.brickKey(),
+			fieldKey: props.state.fieldConfig.key,
+			locale: {
+				source: fieldRenderState.contentLocale() || undefined,
+				target: fieldRenderState.contentLocale()
+					? [fieldRenderState.contentLocale()]
+					: [],
+			},
+		}),
+		value: (localeCode?: string) =>
+			brickHelpers.getFieldValue<Record<string, unknown> | null>({
+				fieldData: fieldData(),
+				fieldConfig: props.state.fieldConfig,
+				contentLocale: localeCode ?? fieldRenderState.contentLocale(),
+			}),
+		document: () => ({
+			fields: brickHelpers.getCollectionPseudoBrickFields(),
+			bricks: brickHelpers.getUpsertBricks(),
+		}),
+		setValue: (value: unknown, localeCode?: string) => {
+			const targetLocale = localeCode ?? fieldRenderState.contentLocale();
+			brickStore.get.setFieldValue({
+				brickIndex: fieldRenderState.brickIndex(),
+				fieldConfig: props.state.fieldConfig,
+				key: props.state.fieldConfig.key,
+				ref: props.state.groupRef,
+				repeaterKey: props.state.repeaterKey,
+				value: value as FieldValue,
+				contentLocale: targetLocale,
+			});
+			if (
+				!props.state.localised ||
+				targetLocale === fieldRenderState.contentLocale()
+			) {
+				setValue(JSON.stringify(value ?? {}, null, 2));
+			}
+		},
+		disabled,
+	});
 
 	// -------------------------------
 	// Effects
@@ -121,6 +187,11 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 				errors={props.state.fieldError}
 				required={props.state.fieldConfig.validation?.required || false}
 				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+				labelRightSlot={
+					props.state.fieldConfig.ai?.enabled === true ? (
+						<AiGenerationButton />
+					) : undefined
+				}
 				hideOptionalText
 			/>
 		</Suspense>

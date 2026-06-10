@@ -5,6 +5,8 @@ import type {
 	SharedFieldConfig,
 } from "../../types.js";
 
+export type JsonValue = Record<string, unknown> | unknown[];
+
 export interface JsonFieldConfig extends SharedFieldConfig {
 	type: "json";
 	details: {
@@ -18,7 +20,7 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 		hidden?: boolean;
 		disabled?: boolean;
 		index?: true;
-		default?: Record<string, unknown>;
+		default?: JsonValue;
 	};
 	validation?: {
 		required?: boolean;
@@ -28,7 +30,7 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 
 export type JsonFieldProps = Partial<Omit<JsonFieldConfig, "type">>;
 
-export type JsonResValue = Record<string, unknown> | null;
+export type JsonResValue = JsonValue | null;
 export type JsonRef = null;
 
 export type JsonCustomFieldMapItem = {

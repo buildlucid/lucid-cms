@@ -4,14 +4,9 @@ import IntroBrick from "../bricks/intro.js";
 const TestCollection = new CollectionBuilder("test", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.test.name", { defaultMessage: "Test" }),
-		singularName: copy("admin:collections.test.singularName", {
-			defaultMessage: "Test",
-		}),
-		summary: copy("admin:collections.test.summary", {
-			defaultMessage:
-				"A test collection for the revisions and draft/published functionality.",
-		}),
+		name: copy("admin:collections.test.name"),
+		singularName: copy("admin:collections.test.singularName"),
+		summary: copy("admin:collections.test.summary"),
 	},
 	config: {
 		localized: false,
@@ -24,9 +19,7 @@ const TestCollection = new CollectionBuilder("test", {
 	},
 }).addText("title", {
 	details: {
-		label: copy("admin:collections.test.fields.title.label", {
-			defaultMessage: "Title",
-		}),
+		label: copy("admin:collections.test.fields.title.label"),
 	},
 	config: {
 		hidden: false,

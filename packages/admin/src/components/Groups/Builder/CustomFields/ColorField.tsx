@@ -1,14 +1,15 @@
-import type { CFConfig, FieldError, InternalDocumentField } from "@types";
+import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { Color } from "@/components/Groups/Form";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
+import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
 interface ColorFieldProps {
 	state: {
-		fieldConfig: CFConfig<"color">;
+		fieldConfig: CollectionFieldConfigByType<"color">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;

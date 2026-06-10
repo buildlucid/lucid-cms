@@ -1,19 +1,22 @@
 import type {
 	BrickError,
-	CFConfig,
 	Collection,
 	DocumentField,
 	DocumentFieldValue,
 	DocumentRef,
 	FieldError,
-	FieldTypes,
 	InternalCollectionDocument,
 	InternalDocumentField,
 	MediaRef,
 	UserRef,
 } from "@types";
 import { nanoid } from "nanoid";
-import brickStore from "@/store/brickStore";
+import brickStore, { type BrickData } from "@/store/brickStore";
+import type { CollectionLeafFieldConfig } from "@/types/collection-config";
+
+type UpsertBrickData = Omit<BrickData, "type"> & {
+	type: "builder" | "fixed";
+};
 
 const findFieldRecursive = (props: {
 	fields: InternalDocumentField[];
@@ -83,8 +86,10 @@ const getCollectionPseudoBrickFields = () => {
 	return pseudoBrick.fields;
 };
 
-const getUpsertBricks = () =>
-	brickStore.get.bricks.filter((b) => b.type !== "collection-fields");
+const getUpsertBricks = (): UpsertBrickData[] =>
+	brickStore.get.bricks.filter(
+		(brick): brick is UpsertBrickData => brick.type !== "collection-fields",
+	);
 
 const customFieldId = (props: {
 	key: string;
@@ -98,7 +103,7 @@ const customFieldId = (props: {
 };
 
 const getFieldValue = <T>(props: {
-	fieldConfig: CFConfig<Exclude<FieldTypes, "repeater" | "tab">>;
+	fieldConfig: CollectionLeafFieldConfig;
 	fieldData?: InternalDocumentField;
 	contentLocale: string;
 	collectionLocalized?: boolean;

@@ -1,7 +1,7 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { type Component, Show } from "solid-js";
+import { type Component, type JSXElement, Show } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Toolbar from "./Toolbar";
 import useEditor from "./useEditor";
@@ -24,6 +24,7 @@ interface RichTextProps {
 	noMargin?: boolean;
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
+	labelRightSlot?: JSXElement;
 }
 
 export const RichText: Component<RichTextProps> = (props) => {
@@ -48,17 +49,20 @@ export const RichText: Component<RichTextProps> = (props) => {
 			})}
 			data-focus-key={props.focusKey}
 		>
-			<Label
-				id={props.id}
-				label={props.copy?.label}
-				focused={focused()}
-				required={props.required}
-				theme={"basic"}
-				altLocaleError={props.altLocaleError}
-				localised={props.localised}
-				fieldColumnIsMissing={props.fieldColumnIsMissing}
-				hideOptionalText={props.hideOptionalText}
-			/>
+			<div class="relative">
+				<Label
+					id={props.id}
+					label={props.copy?.label}
+					focused={focused()}
+					required={props.required}
+					theme={"basic"}
+					altLocaleError={props.altLocaleError}
+					localised={props.localised}
+					fieldColumnIsMissing={props.fieldColumnIsMissing}
+					hideOptionalText={props.hideOptionalText}
+					rightSlot={props.labelRightSlot}
+				/>
+			</div>
 			<div
 				class={classnames(
 					"rounded-md border border-border bg-input-base overflow-hidden focus-within:border-primary-base transition-colors duration-200",

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { DocumentWorkflowAssignee, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 

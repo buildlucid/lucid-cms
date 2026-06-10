@@ -1,9 +1,4 @@
-import type {
-	CFConfig,
-	FieldError,
-	InternalDocumentField,
-	LinkResValue,
-} from "@types";
+import type { FieldError, InternalDocumentField, LinkResValue } from "@types";
 import {
 	batch,
 	type Component,
@@ -14,12 +9,13 @@ import {
 import { LinkSelect } from "@/components/Groups/Form";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
+import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
 interface LinkFieldProps {
 	state: {
-		fieldConfig: CFConfig<"link">;
+		fieldConfig: CollectionFieldConfigByType<"link">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;

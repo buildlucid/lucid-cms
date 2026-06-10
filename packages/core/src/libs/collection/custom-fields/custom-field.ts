@@ -11,6 +11,7 @@ import type {
 	CFProps,
 	CFResponse,
 	CustomFieldAiConfig,
+	CustomFieldAiFormatResponse,
 	CustomFieldErrorItem,
 	CustomFieldGuidanceConfig,
 	CustomFieldUserAiConfig,
@@ -52,7 +53,7 @@ abstract class CustomField<T extends FieldTypes> {
 		};
 	}
 	/** Whether this field type supports Lucid AI features. */
-	protected get supportsAi() {
+	get supportsAi() {
 		return false;
 	}
 	/** Default guidance presets for fields that support Lucid AI features. */
@@ -87,6 +88,13 @@ abstract class CustomField<T extends FieldTypes> {
 	/** Normalizes input values before validation and persistence. */
 	public normalizeInputValue(value: unknown): unknown {
 		return value;
+	}
+	/** Formats a single AI-generated locale value before it is returned. */
+	public formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
+		return {
+			success: true,
+			value,
+		};
 	}
 	/** Whether this field should be processed with localization translations. */
 	get localizedEnabled(): boolean {
