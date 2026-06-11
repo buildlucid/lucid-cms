@@ -9,6 +9,7 @@ export {
 	serverCopyDescriptorSchema,
 	translatableCopySchema,
 } from "./copy.js";
+export { hydrateAdminCopyDefaults } from "./hydrate-admin-copy-defaults.js";
 export { loadTranslationSources } from "./load-project-translations.js";
 export {
 	default as prepareTranslations,

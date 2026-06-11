@@ -14,6 +14,7 @@ export { default as createServiceContext } from "./libs/http/utils/create-servic
 export {
 	copy,
 	createTranslator,
+	hydrateAdminCopyDefaults,
 	isTranslatableCopy,
 	translate,
 } from "./libs/i18n/index.js";

@@ -40,6 +40,10 @@ const getSingle: ServiceFn<
 	});
 	if (migrationStatus.error) return migrationStatus;
 
+	const adminTranslations = context.translate
+		.forLocale(context.config.i18n.defaultLocale)
+		.adminBundle();
+
 	if (collection.getData.mode === "single") {
 		const Documents = new DocumentsRepository(
 			context.db.client,
@@ -68,6 +72,7 @@ const getSingle: ServiceFn<
 			data: collectionsFormatter.formatSingle({
 				collection: collection,
 				queueSupportsScheduling: context.queue.support.scheduling,
+				adminTranslations,
 				include: {
 					bricks: true,
 					fields: true,
@@ -90,6 +95,7 @@ const getSingle: ServiceFn<
 		data: collectionsFormatter.formatSingle({
 			collection: collection,
 			queueSupportsScheduling: context.queue.support.scheduling,
+			adminTranslations,
 			migrationStatus: migrationStatus.data,
 			include: {
 				bricks: true,

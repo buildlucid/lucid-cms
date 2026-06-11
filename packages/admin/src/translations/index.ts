@@ -213,6 +213,8 @@ export const translateAdminCopy = (
 		values?: Record<string, string | number | undefined>;
 	},
 ) => {
+	getTranslationVersion();
+
 	return i18next.t(copy.key, {
 		...(copy.values ?? {}),
 		...(options?.values ?? {}),

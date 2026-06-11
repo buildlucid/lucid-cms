@@ -7,6 +7,7 @@ import type {
 	FieldTypes,
 } from "../collection/custom-fields/types.js";
 import type { MigrationStatus } from "../collection/get-collection-migration-status.js";
+import { hydrateAdminCopyDefaults } from "../i18n/hydrate-admin-copy-defaults.js";
 import {
 	resolveCollectionPermission,
 	resolveCollectionPermissions,
@@ -15,6 +16,7 @@ import {
 const formatMultiple = (props: {
 	collections: CollectionBuilder[];
 	queueSupportsScheduling?: boolean;
+	adminTranslations?: Record<string, string>;
 	include?: {
 		bricks?: boolean;
 		fields?: boolean;
@@ -29,6 +31,7 @@ const formatMultiple = (props: {
 		formatSingle({
 			collection: c,
 			queueSupportsScheduling: props.queueSupportsScheduling,
+			adminTranslations: props.adminTranslations,
 			include: props.include,
 			documents: props.documents,
 		}),
@@ -38,6 +41,7 @@ const formatMultiple = (props: {
 const formatSingle = (props: {
 	collection: CollectionBuilder;
 	queueSupportsScheduling?: boolean;
+	adminTranslations?: Record<string, string>;
 	migrationStatus?: MigrationStatus;
 	include?: {
 		bricks?: boolean;
@@ -53,7 +57,7 @@ const formatSingle = (props: {
 	const key = props.collection.key;
 	const resolvedPermissions = resolveCollectionPermissions(props.collection);
 
-	return {
+	const formattedCollection: Collection = {
 		key: key,
 		mode: collectionData.mode,
 		documentId: props.include?.documentId
@@ -108,6 +112,8 @@ const formatSingle = (props: {
 			? formatFields(props.collection.fieldTree, props.collection.fields)
 			: [],
 	};
+
+	return hydrateAdminCopyDefaults(formattedCollection, props.adminTranslations);
 };
 
 const formatBrick = (

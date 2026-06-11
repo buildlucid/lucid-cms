@@ -16,6 +16,10 @@ const getAll: ServiceFn<
 > = async (context, data) => {
 	const collections = context.config.collections ?? [];
 
+	const adminTranslations = context.translate
+		.forLocale(context.config.i18n.defaultLocale)
+		.adminBundle();
+
 	if (data.includeDocumentId === true) {
 		const singleCollections = collections.filter(
 			(collection) => collection.getData.mode === "single",
@@ -53,6 +57,7 @@ const getAll: ServiceFn<
 			data: collectionsFormatter.formatMultiple({
 				collections: collections,
 				queueSupportsScheduling: context.queue.support.scheduling,
+				adminTranslations,
 				include: {
 					bricks: false,
 					fields: data.includeFields === true,
@@ -68,6 +73,7 @@ const getAll: ServiceFn<
 		data: collectionsFormatter.formatMultiple({
 			collections: collections,
 			queueSupportsScheduling: context.queue.support.scheduling,
+			adminTranslations,
 			include: {
 				bricks: false,
 				fields: data.includeFields === true,
