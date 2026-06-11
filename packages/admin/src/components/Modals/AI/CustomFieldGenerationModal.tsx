@@ -1,6 +1,5 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { CustomFieldInputGenerateResponse } from "@types";
-import classnames from "classnames";
 import {
 	FaSolidLanguage,
 	FaSolidMagicWandSparkles,
@@ -746,26 +745,24 @@ const CustomFieldGenerationModal: Component = () => {
 										);
 
 										return (
-											<button
-												type="button"
-												class="rounded-full focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60"
+											<Pill
+												as="button"
+												theme={selected() ? "primary-opaque" : "outline"}
 												aria-pressed={selected()}
 												disabled={isLoading()}
 												onClick={() =>
 													setGuidance(selected() ? undefined : option.value)
 												}
 											>
-												<Pill theme={selected() ? "primary-opaque" : "outline"}>
-													{option.label}
-												</Pill>
-											</button>
+												{option.label}
+											</Pill>
 										);
 									}}
 								</For>
 							</div>
 						</div>
 					</Show>
-					<Show when={field()?.localized}>
+					<Show when={field()?.localized && localeOptions().length > 1}>
 						<div class="min-w-0">
 							<Label
 								id="ai-custom-field-generation-locales"
@@ -780,7 +777,7 @@ const CustomFieldGenerationModal: Component = () => {
 									</span>
 								}
 							/>
-							<div class="grid min-w-0 gap-2">
+							<div class="flex min-w-0 flex-wrap gap-2">
 								<For each={localeOptions()}>
 									{(locale) => {
 										const selected = createMemo(() =>
@@ -788,41 +785,15 @@ const CustomFieldGenerationModal: Component = () => {
 										);
 
 										return (
-											<button
-												type="button"
-												class={classnames(
-													"flex h-10 min-w-0 items-center justify-between gap-3 rounded-md border px-3 text-left transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
-													{
-														"border-primary-muted-border bg-primary-muted-bg text-title":
-															selected(),
-														"border-border bg-input-base text-body hover:text-title":
-															!selected(),
-													},
-												)}
+											<Pill
+												as="button"
+												theme={selected() ? "primary-opaque" : "outline"}
 												aria-pressed={selected()}
 												disabled={isLoading()}
 												onClick={() => toggleLocale(locale.code)}
 											>
-												<span class="flex min-w-0 items-center gap-2">
-													<FaSolidLanguage
-														class={classnames(
-															"shrink-0 transition-colors duration-200",
-															{
-																"text-primary-base": selected(),
-																"text-icon-fade": !selected(),
-															},
-														)}
-														size={13}
-														aria-hidden="true"
-													/>
-													<span class="min-w-0 truncate text-sm font-medium">
-														{locale.name ?? locale.code}
-													</span>
-												</span>
-												<span class="shrink-0 text-xs text-unfocused">
-													{locale.code}
-												</span>
-											</button>
+												{locale.name ?? locale.code}
+											</Pill>
 										);
 									}}
 								</For>
@@ -870,7 +841,7 @@ const CustomFieldGenerationModal: Component = () => {
 						</Button>
 					</div>
 				</form>
-				<div class="dotted-background relative flex min-h-130 min-w-0 flex-col self-stretch overflow-hidden px-4 md:px-6">
+				<div class="dotted-background relative flex max-h-[min(86vh,820px)] min-h-130 min-w-0 flex-col self-stretch overflow-hidden px-4 md:px-6">
 					<div class="relative min-h-0 min-w-0 flex-1">
 						<div class="relative z-10 flex h-full min-h-0 min-w-0 flex-col gap-3 md:grid md:grid-cols-[116px_minmax(0,1fr)] md:gap-4">
 							<GenerationHistory
@@ -1001,24 +972,26 @@ const CustomFieldGenerationModal: Component = () => {
 						</Show>
 					</div>
 					<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card-base/95 p-6 backdrop-blur-sm md:-mx-6">
-						<Button
-							type="button"
-							theme="border-outline"
-							size="medium"
-							onClick={() => close(false)}
-						>
-							{T()("common.cancel")}
-						</Button>
-						<div class="flex items-center gap-3">
+						<div class="min-w-0 flex-1">
 							<Show when={costLabel()}>
 								{(cost) => (
-									<p class="hidden text-xs text-body sm:block">
+									<p class="text-xs text-body">
 										{T()("ai.media.image.generate.cost.total", {
 											cost: cost(),
 										})}
 									</p>
 								)}
 							</Show>
+						</div>
+						<div class="flex shrink-0 items-center gap-3">
+							<Button
+								type="button"
+								theme="border-outline"
+								size="medium"
+								onClick={() => close(false)}
+							>
+								{T()("common.cancel")}
+							</Button>
 							<Button
 								type="button"
 								theme="primary"

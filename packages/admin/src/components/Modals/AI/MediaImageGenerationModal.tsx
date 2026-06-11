@@ -5,11 +5,11 @@ import type {
 	MediaImageGenerateCompletionResponse,
 	MediaImageGenerateResponse,
 } from "@types";
-import classnames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
 	FaSolidArrowUpFromBracket,
 	FaSolidImage,
+	FaSolidMagicWandSparkles,
 	FaSolidPaperPlane,
 	FaSolidXmark,
 } from "solid-icons/fa";
@@ -27,9 +27,10 @@ import { Input } from "@/components/Groups/Form/Input";
 import { Label } from "@/components/Groups/Form/Label";
 import { Select } from "@/components/Groups/Form/Select";
 import { Textarea } from "@/components/Groups/Form/Textarea";
-import { Modal, ModalFooter } from "@/components/Groups/Modal";
+import { Modal } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
-import Pill from "@/components/Partials/Pill";
+import DetailsList from "@/components/Partials/DetailsList";
+import Pill, { type PillButtonProps } from "@/components/Partials/Pill";
 import { usePollingLoop } from "@/hooks/usePollingLoop";
 import api from "@/services/api";
 import { mediaImageCompletionReq } from "@/services/api/ai/useMediaImageCompletion";
@@ -68,6 +69,22 @@ import {
 	storePendingMediaImageGeneration,
 } from "@/utils/media-image-generation";
 import spawnToast from "@/utils/spawn-toast";
+import GenerationHistory, {
+	type AiGenerationHistoryItem,
+} from "./GenerationHistory";
+
+type WorkingMediaImageGeneration = {
+	id: string;
+	instruction: string;
+	guidance?: MediaImageGenerationGuidanceKey;
+	sourceLabel: string;
+	source?: MediaImageGenerationSource;
+	previousInstructions: string[];
+	includeInPreviousInstructions: boolean;
+	size: MediaImageGenerationSize;
+	quality: MediaImageGenerationQuality;
+	outputFormat: MediaImageGenerationOutputFormat;
+};
 
 const MediaImageGenerationModal: Component = () => {
 	// -----------------------------
@@ -77,8 +94,12 @@ const MediaImageGenerationModal: Component = () => {
 	const [generations, setGenerations] = createSignal<
 		MediaImageGenerationCandidate[]
 	>([]);
+	const [workingGeneration, setWorkingGeneration] =
+		createSignal<WorkingMediaImageGeneration>();
 	const [pendingGeneration, setPendingGeneration] =
 		createSignal<PendingMediaImageGeneration>();
+	const [resumablePendingGenerationId, setResumablePendingGenerationId] =
+		createSignal<string>();
 	const [pollingRequestId, setPollingRequestId] = createSignal<string>();
 	const [selectedGenerationId, setSelectedGenerationId] =
 		createSignal<string>();
@@ -138,10 +159,14 @@ const MediaImageGenerationModal: Component = () => {
 		() => pollingRequestId() !== undefined,
 	);
 	const isLoading = createMemo(
-		() => generateImage.action.isPending || isPollingCompletion(),
+		() =>
+			generateImage.action.isPending ||
+			isPollingCompletion() ||
+			workingGeneration() !== undefined,
 	);
 	const hasPendingGeneration = createMemo(
-		() => pendingGeneration() !== undefined,
+		() =>
+			pendingGeneration() !== undefined || workingGeneration() !== undefined,
 	);
 	const responseError = createMemo(() => {
 		return clientError() ?? generateImage.errors()?.message;
@@ -160,6 +185,26 @@ const MediaImageGenerationModal: Component = () => {
 			(generation) => generation.id === selectedGenerationId(),
 		);
 	});
+	const selectedPendingGeneration = createMemo(() => {
+		const pending = pendingGeneration();
+		return pending?.id === selectedGenerationId() ? pending : undefined;
+	});
+	const selectedWorkingGeneration = createMemo(() => {
+		const working = workingGeneration();
+		if (working?.id === selectedGenerationId()) return working;
+
+		return selectedPendingGeneration();
+	});
+	const selectedPendingGenerationIsResumable = createMemo(() => {
+		const pending = selectedPendingGeneration();
+		return (
+			pending !== undefined && pending.id === resumablePendingGenerationId()
+		);
+	});
+	const resumableSelectedPendingGeneration = createMemo(() => {
+		if (!selectedPendingGenerationIsResumable()) return undefined;
+		return selectedPendingGeneration();
+	});
 	const hasInstruction = createMemo(() => instruction().trim().length > 0);
 	const canGenerate = createMemo(
 		() =>
@@ -175,9 +220,37 @@ const MediaImageGenerationModal: Component = () => {
 
 		return resolutionPreset() as MediaImageGenerationPresetSize;
 	});
-	const selectedPreviewUrl = createMemo(() => {
-		const generation = selectedGeneration();
-		return generation ? generation.output.url : undefined;
+	const historyItems = createMemo<AiGenerationHistoryItem[]>(() => {
+		const items = generations().map((generation, index) => ({
+			id: generation.id,
+			label: generationLabel(index),
+			meta: formatAiCost(generation.cost) ?? generationMeta(generation),
+		}));
+		const working = workingGeneration();
+		if (working) {
+			return [
+				...items,
+				{
+					id: working.id,
+					label: generationLabelFromId(working.id, items.length),
+					meta: T()("ai.media.image.generate.history.generating.meta"),
+				},
+			];
+		}
+
+		const pending = pendingGeneration();
+		if (!pending) return items;
+
+		return [
+			...items,
+			{
+				id: pending.id,
+				label: generationLabelFromId(pending.id, items.length),
+				meta: isPollingCompletion()
+					? T()("ai.media.image.generate.history.generating.meta")
+					: T()("ai.media.image.generate.response.inflight.title"),
+			},
+		];
 	});
 	const sessionCost = createMemo(() => {
 		const firstGeneration = generations()[0];
@@ -224,8 +297,7 @@ const MediaImageGenerationModal: Component = () => {
 		});
 	}
 	function nextGenerationId() {
-		generationId += 1;
-		return `generation-${generationId}`;
+		return `generation-${generationId + 1}`;
 	}
 	function syncGenerationId(id: string) {
 		const numericId = Number(id.replace("generation-", ""));
@@ -241,6 +313,13 @@ const MediaImageGenerationModal: Component = () => {
 		return T()("ai.media.image.generate.response.item.label", {
 			count: index + 1,
 		});
+	}
+	function generationLabelFromId(id: string, fallbackIndex: number) {
+		const numericId = Number(id.replace("generation-", ""));
+		if (Number.isFinite(numericId) && numericId > 0) {
+			return generationLabel(numericId - 1);
+		}
+		return generationLabel(fallbackIndex);
 	}
 	function guidanceLabel(key?: MediaImageGenerationGuidanceKey) {
 		const option = imageGuidanceOptions.find((option) => option.key === key);
@@ -262,6 +341,26 @@ const MediaImageGenerationModal: Component = () => {
 			.filter(Boolean)
 			.join(" · ");
 	}
+	function generationSizeLabel(size: MediaImageGenerationSize | string) {
+		if (Array.isArray(size)) return `${size[0]}x${size[1]}`;
+		return size;
+	}
+	function generationQualityLabel(
+		currentQuality: MediaImageGenerationQuality | string,
+	) {
+		switch (currentQuality) {
+			case "medium":
+				return T()("ai.media.image.generate.quality.option.medium");
+			case "low":
+				return T()("ai.media.image.generate.quality.option.low");
+			case "high":
+				return T()("ai.media.image.generate.quality.option.high");
+			case "auto":
+				return T()("ai.media.image.generate.quality.option.auto");
+			default:
+				return currentQuality;
+		}
+	}
 	function generationFormatLabel(
 		format: MediaImageGenerationOutputFormat | string,
 	) {
@@ -275,6 +374,62 @@ const MediaImageGenerationModal: Component = () => {
 			default:
 				return format;
 		}
+	}
+	function pendingGenerationDetails(
+		generation: WorkingMediaImageGeneration | PendingMediaImageGeneration,
+	) {
+		return [
+			{
+				label: T()("ai.media.image.generate.source.label"),
+				value: generation.sourceLabel,
+				wrap: true,
+			},
+			{
+				label: T()("ai.media.image.generate.resolution.label"),
+				value: generationSizeLabel(generation.size),
+			},
+			{
+				label: T()("ai.media.image.generate.quality.label"),
+				value: generationQualityLabel(generation.quality),
+			},
+			{
+				label: T()("ai.media.image.generate.format.label"),
+				value: generationFormatLabel(generation.outputFormat),
+			},
+		];
+	}
+	function completedGenerationDetails(
+		generation: MediaImageGenerationCandidate,
+	) {
+		const cost = formatAiCost(generation.cost);
+		return [
+			{
+				label: T()("ai.media.image.generate.source.label"),
+				value: generation.sourceLabel,
+				wrap: true,
+			},
+			{
+				label: T()("ai.media.image.generate.resolution.label"),
+				value: generation.output.size,
+			},
+			{
+				label: T()("ai.media.image.generate.quality.label"),
+				value: generationQualityLabel(generation.output.quality),
+			},
+			{
+				label: T()("ai.media.image.generate.format.label"),
+				value: generationFormatLabel(generation.output.outputFormat),
+			},
+			{
+				label: T()("ai.media.image.generate.response.size"),
+				value: helpers.bytesToSize(generation.output.byteSize),
+			},
+			{
+				label: T()("ai.media.image.generate.cost.label"),
+				value: cost,
+				show: cost !== undefined,
+			},
+		];
 	}
 	function createIdempotencyKey() {
 		return crypto.randomUUID();
@@ -371,7 +526,9 @@ const MediaImageGenerationModal: Component = () => {
 	};
 	const clear = () => {
 		setGenerations([]);
+		setWorkingGeneration(undefined);
 		setPendingGeneration(undefined);
+		setResumablePendingGenerationId(undefined);
 		setSelectedGenerationId(undefined);
 		setSource(undefined);
 		setInitialSource(undefined);
@@ -451,6 +608,7 @@ const MediaImageGenerationModal: Component = () => {
 		setGenerations((previous) => [...previous, candidate]);
 		setSelectedGenerationId(candidate.id);
 		setPendingGeneration(undefined);
+		setResumablePendingGenerationId(undefined);
 		setPollingRequestId(undefined);
 		clearStoredPendingMediaImageGeneration(pending, targetId());
 		resetIdempotencyKey();
@@ -527,9 +685,13 @@ const MediaImageGenerationModal: Component = () => {
 		if (error instanceof LucidError) {
 			clearStoredPendingMediaImageGeneration(pending, targetId());
 			setPendingGeneration(undefined);
+			setResumablePendingGenerationId(undefined);
 		}
 
-		if (aiModalsStore.isOpen("mediaImageGeneration")) {
+		if (
+			!(error instanceof LucidError) &&
+			aiModalsStore.isOpen("mediaImageGeneration")
+		) {
 			spawnToast({
 				title: T()("toasts.ai.media.image.generate.error.title"),
 				message,
@@ -538,6 +700,8 @@ const MediaImageGenerationModal: Component = () => {
 		}
 	}
 	function resumePendingGeneration(pending: PendingMediaImageGeneration) {
+		setSelectedGenerationId(pending.id);
+		setResumablePendingGenerationId(undefined);
 		setPendingGeneration(pending);
 		scheduleCompletionPoll(pending, 0);
 	}
@@ -547,6 +711,13 @@ const MediaImageGenerationModal: Component = () => {
 		abortRequest();
 		clearStoredPendingMediaImageGeneration(pending, targetId());
 		setPendingGeneration(undefined);
+		setResumablePendingGenerationId(undefined);
+		if (selectedGenerationId() === pending.id) {
+			const completedGenerations = generations();
+			setSelectedGenerationId(
+				completedGenerations[completedGenerations.length - 1]?.id,
+			);
+		}
 	}
 	const generateImageRequest = async (
 		values: GenerateValues,
@@ -556,23 +727,44 @@ const MediaImageGenerationModal: Component = () => {
 	) => {
 		if (!requestTarget || !requestTargetId) return;
 
+		const id = nextGenerationId();
+		const requestSource = options.source ?? source();
+		const previousInstructions =
+			options.previousInstructions ?? buildPreviousInstructions();
+		const draft: WorkingMediaImageGeneration = {
+			id,
+			instruction: values.instruction ?? "",
+			guidance: values.guidance,
+			sourceLabel: sourceDescription(requestSource),
+			source: requestSource,
+			previousInstructions,
+			includeInPreviousInstructions:
+				options.includeInPreviousInstructions ?? true,
+			size: values.size,
+			quality: values.quality,
+			outputFormat: values.outputFormat,
+		};
+
 		try {
 			abortRequest();
+			setWorkingGeneration(draft);
+			setSelectedGenerationId(id);
+			setResumablePendingGenerationId(undefined);
 			abortController = new AbortController();
 			setClientError(undefined);
 			generateImage.reset();
 			aiModalsStore.setLoading(true);
 
-			const requestSource = options.source ?? source();
 			const image = await buildRequestImage(
 				requestSource,
 				abortController.signal,
 			);
-			const previousInstructions =
-				options.previousInstructions ?? buildPreviousInstructions();
 			const storageKey =
 				getPendingMediaImageGenerationStorageKey(requestTargetId);
-			if (!storageKey) return;
+			if (!storageKey) {
+				setWorkingGeneration(undefined);
+				return;
+			}
 
 			const currentIdempotencyKey = idempotencyKey();
 			const response = await generateImage.action.mutateAsync({
@@ -594,28 +786,20 @@ const MediaImageGenerationModal: Component = () => {
 			});
 			if (!aiModalsStore.isOpen("mediaImageGeneration")) return;
 
-			const id = nextGenerationId();
 			const pending: PendingMediaImageGeneration = {
-				id,
+				...draft,
 				requestId: response.data.requestId,
 				idempotencyKey: currentIdempotencyKey,
 				targetId: requestTargetId,
-				instruction: values.instruction ?? "",
-				guidance: values.guidance,
-				sourceLabel: sourceDescription(requestSource),
-				source: requestSource,
-				previousInstructions,
-				includeInPreviousInstructions:
-					options.includeInPreviousInstructions ?? true,
-				size: values.size,
-				quality: values.quality,
-				outputFormat: values.outputFormat,
 				status: response.data.status,
 				createdAt: Date.now(),
 				storageKey,
 			};
 
+			syncGenerationId(id);
+			setWorkingGeneration(undefined);
 			setPendingGeneration(pending);
+			setSelectedGenerationId(id);
 			storePendingMediaImageGeneration(pending);
 			scheduleCompletionPoll(pending, initialCompletionPollDelayMs);
 		} catch (error) {
@@ -628,6 +812,13 @@ const MediaImageGenerationModal: Component = () => {
 						? error.message
 						: T()("toasts.ai.media.image.generate.error.message");
 			setClientError(message);
+			setWorkingGeneration(undefined);
+			if (selectedGenerationId() === id) {
+				const completedGenerations = generations();
+				setSelectedGenerationId(
+					completedGenerations[completedGenerations.length - 1]?.id,
+				);
+			}
 			if (
 				!(error instanceof LucidError) &&
 				aiModalsStore.isOpen("mediaImageGeneration")
@@ -782,6 +973,8 @@ const MediaImageGenerationModal: Component = () => {
 			if (storedPending) {
 				syncGenerationId(storedPending.id);
 				setPendingGeneration(storedPending);
+				setResumablePendingGenerationId(storedPending.id);
+				setSelectedGenerationId(storedPending.id);
 			}
 		}),
 	);
@@ -804,24 +997,8 @@ const MediaImageGenerationModal: Component = () => {
 				noPadding: true,
 			}}
 		>
-			<div class="flex min-w-0 items-start justify-between gap-4 border-b border-border px-4 py-4 md:px-6 md:py-5">
-				<div class="min-w-0">
-					<h2>{T()("ai.media.image.generate.modal.title")}</h2>
-					<p class="mt-1 text-sm text-body">
-						{T()("ai.media.image.generate.modal.description")}
-					</p>
-				</div>
-				<button
-					type="button"
-					class="flex h-8 min-w-8 w-8 items-center justify-center rounded-full text-body transition-colors duration-200 hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-error-base"
-					onClick={() => close(false)}
-					aria-label={T()("common.close")}
-				>
-					<FaSolidXmark class="fill-current" />
-				</button>
-			</div>
-			<div class="grid min-w-0 w-full gap-0 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-				<div class="flex min-h-130 min-w-0 w-full flex-col gap-4 border-b border-border bg-card-base p-4 lg:border-b-0 lg:border-r md:p-6">
+			<div class="grid min-w-0 w-full items-stretch gap-0 lg:grid-cols-[minmax(27rem,0.72fr)_minmax(0,1fr)]">
+				<div class="flex min-h-130 min-w-0 w-full flex-col gap-4 border-b border-border bg-card-base p-4 md:p-6 lg:border-r lg:border-b-0">
 					<div class="min-w-0">
 						<div class="mb-1.5 flex items-center justify-between gap-2">
 							<span class="text-sm text-body">
@@ -1067,18 +1244,17 @@ const MediaImageGenerationModal: Component = () => {
 									return (
 										<HoverCard.Root>
 											<HoverCard.Trigger
-												as="button"
-												type="button"
-												class="focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base rounded-full disabled:cursor-not-allowed disabled:opacity-60"
+												as={(triggerProps: Omit<PillButtonProps, "as">) => (
+													<Pill {...triggerProps} as="button" />
+												)}
+												theme={selected() ? "primary-opaque" : "outline"}
 												aria-pressed={selected()}
 												disabled={isLoading()}
 												onClick={() =>
 													setGuidance(selected() ? undefined : option.key)
 												}
 											>
-												<Pill theme={selected() ? "primary-opaque" : "outline"}>
-													{optionLabel()}
-												</Pill>
+												{optionLabel()}
 											</HoverCard.Trigger>
 											<HoverCard.Portal>
 												<HoverCard.Content class="z-70 bg-card-base w-80 mt-2 rounded-md border border-border p-3 shadow-xs">
@@ -1118,6 +1294,13 @@ const MediaImageGenerationModal: Component = () => {
 							hideOptionalText
 							errors={instructionError()}
 						/>
+						<Show when={responseError()}>
+							{(error) => (
+								<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
+									<p class="text-sm text-error-base">{error()}</p>
+								</div>
+							)}
+						</Show>
 						<div class="mt-4">
 							<Button
 								type="submit"
@@ -1135,252 +1318,214 @@ const MediaImageGenerationModal: Component = () => {
 						</div>
 					</form>
 				</div>
-				<div
-					ref={responseColumnRef}
-					class="relative flex max-h-[min(72vh,760px)] min-h-130 min-w-0 w-full flex-col overflow-y-auto p-4 md:p-6"
-				>
-					<div class="min-w-0 pr-1">
-						<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card-base">
-							<Show
-								when={selectedPreviewUrl()}
-								fallback={
-									<Show
-										when={isLoading()}
-										fallback={
-											<div class="relative z-10 max-w-xs px-4 text-center text-sm text-body">
-												{T()("ai.media.image.generate.response.empty")}
-											</div>
-										}
-									>
-										<span class="skeleton absolute inset-0 z-10 opacity-80" />
-										<div class="relative z-20 max-w-xs px-4 text-center">
-											<p class="text-sm font-medium text-title">
-												{T()(
-													"ai.media.image.generate.response.generating.title",
-												)}
-											</p>
-											<p class="mt-1 text-xs text-body">
-												{T()(
-													"ai.media.image.generate.response.generating.description",
-												)}
-											</p>
-										</div>
-									</Show>
-								}
+				<div class="dotted-background relative flex max-h-[min(86vh,820px)] min-h-130 min-w-0 flex-col self-stretch overflow-hidden px-4 md:px-6">
+					<div class="relative min-h-0 min-w-0 flex-1">
+						<div
+							class={
+								historyItems().length > 0
+									? "relative z-10 flex h-full min-h-0 min-w-0 flex-col gap-3 md:grid md:grid-cols-[116px_minmax(0,1fr)] md:gap-4"
+									: "relative z-10 flex h-full min-h-0 min-w-0 flex-col"
+							}
+						>
+							<Show when={historyItems().length > 0}>
+								<GenerationHistory
+									id="ai-media-image-generation-history"
+									items={historyItems()}
+									activeItemId={selectedGenerationId()}
+									onSelect={setSelectedGenerationId}
+								/>
+							</Show>
+							<div
+								ref={responseColumnRef}
+								class="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto pt-0 pr-1 pb-0 md:py-6"
 							>
-								{(url) => (
-									<img
-										src={url()}
-										alt=""
-										class="relative z-10 h-full max-h-96 w-full object-contain p-4"
-									/>
-								)}
-							</Show>
-							<Show when={isLoading() && selectedPreviewUrl()}>
-								<div class="absolute inset-0 z-20 bg-card-base/90">
-									<span class="skeleton absolute inset-0 opacity-80" />
-									<div class="relative z-10 flex h-full w-full items-center justify-center px-4 text-center">
-										<div class="max-w-xs">
-											<p class="text-sm font-medium text-title">
-												{T()(
-													"ai.media.image.generate.response.generating.title",
-												)}
-											</p>
-											<p class="mt-1 text-xs text-body">
-												{T()(
-													"ai.media.image.generate.response.generating.description",
-												)}
-											</p>
-										</div>
-									</div>
-								</div>
-							</Show>
-						</div>
-						<Show when={responseError()}>
-							{(error) => (
-								<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
-									<p class="text-sm text-error-base">{error()}</p>
-								</div>
-							)}
-						</Show>
-						<Show when={pendingGeneration() || generations().length > 0}>
-							<div class="mt-4 min-w-0 space-y-2">
-								<Show when={pendingGeneration()}>
-									{(pending) => (
-										<div class="min-w-0 rounded-md border border-border bg-card-base transition-colors duration-200">
-											<div class="flex min-w-0 w-full items-center gap-3 p-3 text-left">
-												<div class="rectangle-background flex h-14 w-18 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-background-base">
-													<span class="skeleton relative z-10 h-full w-full opacity-80" />
-												</div>
-												<div class="min-w-0 flex-1">
-													<p class="truncate text-sm font-semibold text-title">
-														{T()(
-															"ai.media.image.generate.response.inflight.title",
-														)}
-													</p>
-													<p class="truncate text-xs text-body">
-														{generationSummary(pending()) ||
-															T()(
-																"ai.media.image.generate.response.inflight.description",
+								<Show
+									when={selectedWorkingGeneration()}
+									fallback={
+										<Show when={selectedGeneration()}>
+											{(generation) => (
+												<div class="min-w-0 space-y-3">
+													<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card-base">
+														<img
+															src={generation().output.url}
+															alt=""
+															class="relative z-10 h-full max-h-96 w-full object-contain p-4"
+														/>
+													</div>
+													<div class="space-y-3">
+														<Show when={generationSummary(generation())}>
+															{(summary) => (
+																<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+																	<p class="line-clamp-3 text-sm leading-5 text-body">
+																		{summary()}
+																	</p>
+																</div>
 															)}
-													</p>
-													<p class="mt-1 min-w-0 truncate text-xs text-unfocused">
-														{pending().sourceLabel}
-													</p>
+														</Show>
+														<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+															<DetailsList
+																type="text"
+																theme="contained"
+																items={completedGenerationDetails(generation())}
+															/>
+														</div>
+														<div class="flex min-w-0 flex-wrap gap-2">
+															<Button
+																type="button"
+																theme="secondary"
+																size="small"
+																classes="gap-2"
+																onClick={() =>
+																	useGenerationAsSource(generation())
+																}
+															>
+																<FaSolidImage size={12} aria-hidden="true" />
+																{T()("ai.media.image.generate.source.use")}
+															</Button>
+															<Button
+																type="button"
+																theme="border-outline"
+																size="small"
+																classes="gap-2"
+																disabled={isLoading()}
+																onClick={() => retryGeneration(generation())}
+															>
+																<FaSolidArrowRotateLeft
+																	size={12}
+																	aria-hidden="true"
+																/>
+																{T()("ai.media.image.generate.response.retry")}
+															</Button>
+														</div>
+													</div>
+												</div>
+											)}
+										</Show>
+									}
+								>
+									{(pending) => (
+										<div class="min-w-0 space-y-3">
+											<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card-base">
+												<span class="skeleton absolute inset-0 z-10 opacity-80" />
+												<div class="relative z-20 flex min-w-0 max-w-xs flex-col items-center gap-2 px-4 text-center">
+													<span
+														class="ai-action-button__surface flex h-8 min-w-8 items-center justify-center rounded-md border border-border text-primary-base"
+														data-loading={isLoading()}
+													>
+														<FaSolidMagicWandSparkles
+															size={12}
+															aria-hidden="true"
+														/>
+													</span>
+													<div class="min-w-0 max-w-60">
+														<p class="text-xs font-medium text-unfocused">
+															{T()(
+																"ai.media.image.generate.response.inflight.title",
+															)}
+														</p>
+													</div>
 												</div>
 											</div>
-											<div class="flex min-w-0 items-center gap-4 border-t border-border px-3 py-2">
-												<button
-													type="button"
-													class="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-unfocused underline-offset-2 transition-colors duration-200 hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60"
-													disabled={isLoading()}
-													onClick={() => resumePendingGeneration(pending())}
-												>
-													<FaSolidArrowRotateLeft
-														size={12}
-														aria-hidden="true"
+											<div class="space-y-3">
+												<Show when={generationSummary(pending())}>
+													{(summary) => (
+														<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+															<p class="line-clamp-3 text-sm leading-5 text-body">
+																{summary()}
+															</p>
+														</div>
+													)}
+												</Show>
+												<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+													<DetailsList
+														type="text"
+														theme="contained"
+														items={pendingGenerationDetails(pending())}
 													/>
-													{T()(
-														"ai.media.image.generate.response.inflight.resume",
+												</div>
+												<Show when={resumableSelectedPendingGeneration()}>
+													{(resumablePending) => (
+														<div class="flex min-w-0 flex-wrap gap-2">
+															<Button
+																type="button"
+																theme="border-outline"
+																size="small"
+																classes="gap-2"
+																disabled={isLoading()}
+																onClick={() =>
+																	resumePendingGeneration(resumablePending())
+																}
+															>
+																<FaSolidArrowRotateLeft
+																	size={12}
+																	aria-hidden="true"
+																/>
+																{T()(
+																	"ai.media.image.generate.response.inflight.resume",
+																)}
+															</Button>
+															<Button
+																type="button"
+																theme="danger-outline"
+																size="small"
+																classes="gap-2"
+																disabled={isLoading()}
+																onClick={() =>
+																	discardPendingGeneration(resumablePending())
+																}
+															>
+																<FaSolidXmark size={12} aria-hidden="true" />
+																{T()(
+																	"ai.media.image.generate.response.inflight.discard",
+																)}
+															</Button>
+														</div>
 													)}
-												</button>
-												<button
-													type="button"
-													class="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-unfocused underline-offset-2 transition-colors duration-200 hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60"
-													disabled={isLoading()}
-													onClick={() => discardPendingGeneration(pending())}
-												>
-													<FaSolidXmark size={12} aria-hidden="true" />
-													{T()(
-														"ai.media.image.generate.response.inflight.discard",
-													)}
-												</button>
+												</Show>
 											</div>
 										</div>
 									)}
 								</Show>
-								<For each={generations()}>
-									{(generation, index) => {
-										const selected = createMemo(() => {
-											return generation.id === selectedGenerationId();
-										});
-
-										return (
-											<div
-												class={classnames(
-													"min-w-0 rounded-md border bg-card-base transition-colors duration-200",
-													{
-														"border-primary-muted-border": selected(),
-														"border-border hover:border-primary-muted-border":
-															!selected(),
-													},
-												)}
-											>
-												<button
-													type="button"
-													class="flex min-w-0 w-full items-center gap-3 p-3 text-left"
-													onClick={() => setSelectedGenerationId(generation.id)}
-												>
-													<div class="rectangle-background flex h-14 w-18 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-background-base">
-														<img
-															src={generation.output.url}
-															alt=""
-															class="relative z-10 h-full w-full object-contain"
-														/>
-													</div>
-													<div class="min-w-0 flex-1">
-														<div class="flex min-w-0 items-center gap-3">
-															<p class="truncate text-sm font-semibold text-title">
-																{generationLabel(index())}
-															</p>
-														</div>
-														<Show when={generationSummary(generation)}>
-															{(summary) => (
-																<p class="truncate text-xs text-body">
-																	{summary()}
-																</p>
-															)}
-														</Show>
-														<div class="mt-1 flex min-w-0 items-center justify-between gap-3">
-															<p class="min-w-0 truncate text-xs text-unfocused">
-																{generationMeta(generation)}
-															</p>
-															<Show when={formatAiCost(generation.cost)}>
-																{(cost) => (
-																	<span class="shrink-0 text-xs font-medium text-unfocused">
-																		{cost()}
-																	</span>
-																)}
-															</Show>
-														</div>
-													</div>
-												</button>
-												<div class="flex min-w-0 items-center gap-4 border-t border-border px-3 py-2">
-													<button
-														type="button"
-														class="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-unfocused underline-offset-2 transition-colors duration-200 hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
-														onClick={() => useGenerationAsSource(generation)}
-													>
-														<FaSolidImage size={12} aria-hidden="true" />
-														{T()("ai.media.image.generate.source.use")}
-													</button>
-													<button
-														type="button"
-														class="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-unfocused underline-offset-2 transition-colors duration-200 hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60"
-														disabled={isLoading()}
-														onClick={() => retryGeneration(generation)}
-													>
-														<FaSolidArrowRotateLeft
-															size={12}
-															aria-hidden="true"
-														/>
-														{T()("ai.media.image.generate.response.retry")}
-													</button>
-												</div>
-											</div>
-										);
-									}}
-								</For>
 							</div>
-						</Show>
+						</div>
+					</div>
+					<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card-base/95 p-6 backdrop-blur-sm md:-mx-6">
+						<div class="min-w-0 flex-1">
+							<Show when={sessionCost()}>
+								{(cost) => (
+									<p class="text-xs text-body">
+										{T()("ai.media.image.generate.cost.total", {
+											cost: cost(),
+										})}
+									</p>
+								)}
+							</Show>
+						</div>
+						<div class="flex shrink-0 items-center gap-3">
+							<Button
+								type="button"
+								theme="border-outline"
+								size="medium"
+								onClick={() => close(false)}
+							>
+								{T()("common.cancel")}
+							</Button>
+							<Button
+								type="button"
+								theme="primary"
+								size="medium"
+								onClick={() => {
+									void accept();
+								}}
+								loading={aiModalsStore.get.isApplying}
+								disabled={!selectedGeneration() || isLoading()}
+							>
+								{T()("ai.media.image.generate.modal.accept")}
+							</Button>
+						</div>
 					</div>
 				</div>
 			</div>
-			<ModalFooter>
-				<div class="flex items-center gap-2">
-					<Button
-						type="button"
-						theme="border-outline"
-						size="medium"
-						onClick={() => close(false)}
-					>
-						{T()("common.cancel")}
-					</Button>
-				</div>
-				<div class="flex items-center gap-3">
-					<Show when={sessionCost()}>
-						{(cost) => (
-							<p class="hidden text-xs text-body sm:block">
-								{T()("ai.media.image.generate.cost.total", {
-									cost: cost(),
-								})}
-							</p>
-						)}
-					</Show>
-					<Button
-						type="button"
-						theme="primary"
-						size="medium"
-						onClick={() => {
-							void accept();
-						}}
-						loading={aiModalsStore.get.isApplying}
-						disabled={!selectedGeneration() || isLoading()}
-					>
-						{T()("ai.media.image.generate.modal.accept")}
-					</Button>
-				</div>
-			</ModalFooter>
 		</Modal>
 	);
 };

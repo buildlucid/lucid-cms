@@ -4,7 +4,12 @@ import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { CustomFieldInputV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
-import { isCmsAiGenerateCompletedData } from "../../../libs/lucid-remote/utils.js";
+import {
+	getCmsAiGenerateFailedMessage,
+	isCmsAiGenerateAcceptedData,
+	isCmsAiGenerateCompletedData,
+	isCmsAiGenerateFailedData,
+} from "../../../libs/lucid-remote/utils.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type { CustomFieldAiContextItem } from "../../../types.js";
@@ -17,6 +22,7 @@ import formatCustomFieldDocumentContext, {
 import formatCustomFieldOutput from "../helpers/format-custom-field-output.js";
 import getTranslatedCollectionDetails from "../helpers/get-translated-collection-details.js";
 import getTranslatedFieldDetails from "../helpers/get-translated-field-details.js";
+import storeFailedGeneration from "../storage/store-failed-generation.js";
 import storeGeneration from "../storage/store-generation.js";
 
 const normalizeCustomFieldGenerationLocale = (props: {
@@ -271,9 +277,49 @@ const customFieldInputGenerate: ServiceFn<
 		request,
 	});
 	if (generateRes.error) return generateRes;
+	const responseData = generateRes.data.json.data;
 
 	//* This feature is sync-mode only; this guard is proofing against a remote contract mismatch and should never run.
-	if (!isCmsAiGenerateCompletedData(generateRes.data.json.data)) {
+	const responseDataFailed = isCmsAiGenerateFailedData(responseData);
+	if (isCmsAiGenerateAcceptedData(responseData) || responseDataFailed) {
+		const errorMessage = responseDataFailed
+			? getCmsAiGenerateFailedMessage(
+					responseData,
+					context.translate("server:core.routes.ai.generate.error.message"),
+				)
+			: context.translate("server:core.routes.ai.generate.error.message");
+
+		const storeRes = await storeFailedGeneration(context, {
+			userId: props.userId,
+			requestId: responseData.requestId,
+			feature: responseData.feature,
+			targetType: "custom-field",
+			target: {
+				collectionKey: props.target.collectionKey,
+				brickKey: props.target.brickKey,
+				fieldKey: props.target.fieldKey,
+				guidance: props.guidance ?? null,
+				locale: props.locale,
+			},
+			requestStartedAt,
+			errorMessage,
+			usage: responseDataFailed ? responseData.usage : undefined,
+		});
+		if (storeRes.error) return storeRes;
+
+		return {
+			error: {
+				type: "basic",
+				status: 502,
+				message: responseDataFailed
+					? copy.literal(errorMessage)
+					: copy("server:core.routes.ai.generate.error.message"),
+			},
+			data: undefined,
+		};
+	}
+
+	if (!isCmsAiGenerateCompletedData(responseData)) {
 		return {
 			error: {
 				type: "basic",
@@ -283,21 +329,21 @@ const customFieldInputGenerate: ServiceFn<
 			data: undefined,
 		};
 	}
-	const responseData = generateRes.data.json
-		.data as CustomFieldInputGenerateResponse;
+	const responseForFormatting =
+		responseData as CustomFieldInputGenerateResponse;
 
 	const formattedOutputRes = formatCustomFieldOutput({
 		field: targetField,
-		output: responseData.output,
+		output: responseForFormatting.output,
 	});
 
 	const responseForStorage: CustomFieldInputGenerateResponse =
 		formattedOutputRes.error === undefined
 			? {
-					...responseData,
+					...responseForFormatting,
 					output: formattedOutputRes.data,
 				}
-			: responseData;
+			: responseForFormatting;
 	const formattingErrorMessage =
 		formattedOutputRes.error === undefined
 			? null

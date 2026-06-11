@@ -238,9 +238,23 @@ export type CmsAiGenerateAcceptedData = {
 	status: "queued" | "processing";
 };
 
+export type CmsAiGenerateFailedData = {
+	mode: AiGenerateMode;
+	requestId: string;
+	feature: CmsAiGenerateRequest["feature"];
+	status: "failed";
+	usage?: AiGenerateUsage;
+	error?: {
+		message?: string | null;
+	} | null;
+	errorMessage?: string;
+	message?: string;
+};
+
 export type CmsAiGenerateData =
 	| CmsAiGenerateCompletedData
-	| CmsAiGenerateAcceptedData;
+	| CmsAiGenerateAcceptedData
+	| CmsAiGenerateFailedData;
 
 /**
  * Runs a CMS AI feature against Lucid's remote AI API.

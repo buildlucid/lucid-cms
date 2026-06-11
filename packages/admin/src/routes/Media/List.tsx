@@ -81,6 +81,8 @@ const MediaListRoute: Component = () => {
 		createSignal<boolean>(false);
 	const [getOpenBulkUploadModal, setOpenBulkUploadModal] =
 		createSignal<boolean>(false);
+	const [getOpenImageGenerationOnCreate, setOpenImageGenerationOnCreate] =
+		createSignal(false);
 	const [getSingleUploadInitialFile, setSingleUploadInitialFile] =
 		createSignal<File | null>(null);
 	const [getBulkUploadInitialFiles, setBulkUploadInitialFiles] = createSignal<
@@ -129,12 +131,16 @@ const MediaListRoute: Component = () => {
 
 	// ----------------------------------------
 	// Functions
+	const resetCreateMediaPanelIntent = () => {
+		setSingleUploadInitialFile(null);
+		setOpenImageGenerationOnCreate(false);
+	};
 	const hasDraggedFiles = (event: DragEvent) => {
 		return Array.from(event.dataTransfer?.types ?? []).includes("Files");
 	};
 	const setCreateMediaPanelOpen = (state: boolean) => {
-		if (state) setSingleUploadInitialFile(null);
-		if (!state) setSingleUploadInitialFile(null);
+		if (state) resetCreateMediaPanelIntent();
+		if (!state) resetCreateMediaPanelIntent();
 		setOpenCreateMediaPanel(state);
 	};
 	const setBulkUploadModalOpen = (state: boolean) => {
@@ -143,12 +149,18 @@ const MediaListRoute: Component = () => {
 		setOpenBulkUploadModal(state);
 	};
 	const openSingleUploadWithFile = (file: File) => {
+		setOpenImageGenerationOnCreate(false);
 		setSingleUploadInitialFile(file);
 		setOpenCreateMediaPanel(true);
 	};
 	const openBulkUploadWithFiles = (files: File[]) => {
 		setBulkUploadInitialFiles(files);
 		setOpenBulkUploadModal(true);
+	};
+	const openCreateMediaPanelWithImageGeneration = () => {
+		setSingleUploadInitialFile(null);
+		setOpenImageGenerationOnCreate(true);
+		setOpenCreateMediaPanel(true);
 	};
 	const onDragEnter = (event: DragEvent) => {
 		if (!canDropFiles() || !hasDraggedFiles(event)) return;
@@ -238,6 +250,14 @@ const MediaListRoute: Component = () => {
 										permission: canCreateMedia(),
 										label: T()("media.upload.action"),
 										icon: "upload",
+									},
+									{
+										open: getOpenCreateMediaPanel(),
+										setOpen: setCreateMediaPanelOpen,
+										onClick: openCreateMediaPanelWithImageGeneration,
+										permission: canCreateMedia(),
+										label: T()("ai.media.image.generate.modal.title"),
+										icon: "sparkle",
 									},
 									{
 										open: getOpenBulkUploadModal(),
@@ -377,10 +397,16 @@ const MediaListRoute: Component = () => {
 				/>
 				<CreateUpdateMediaPanel
 					initialFile={getSingleUploadInitialFile}
+					openImageGenerationOnCreate={getOpenImageGenerationOnCreate}
 					state={{
 						open: getOpenCreateMediaPanel(),
 						setOpen: setCreateMediaPanelOpen,
 						parentFolderId: folderIdFilter,
+					}}
+					callbacks={{
+						onImageGenerationOpened: () => {
+							setOpenImageGenerationOnCreate(false);
+						},
 					}}
 				/>
 				<BulkUploadMediaModal

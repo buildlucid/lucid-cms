@@ -3,9 +3,15 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/index.js";
 import type { MediaAltGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
-import { isCmsAiGenerateCompletedData } from "../../../libs/lucid-remote/utils.js";
+import {
+	getCmsAiGenerateFailedMessage,
+	isCmsAiGenerateAcceptedData,
+	isCmsAiGenerateCompletedData,
+	isCmsAiGenerateFailedData,
+} from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getLicenseKey from "../../options/get-license-key.js";
+import storeFailedGeneration from "../storage/store-failed-generation.js";
 import storeGeneration from "../storage/store-generation.js";
 
 const mediaAltOutputSchema = z.record(z.string(), z.string());
@@ -82,9 +88,51 @@ const mediaAltGenerate: ServiceFn<
 		request,
 	});
 	if (generateRes.error) return generateRes;
+	const responseData = generateRes.data.json.data;
 
 	//* This feature is sync-mode only; this guard is proofing against a remote contract mismatch and should never run.
-	if (!isCmsAiGenerateCompletedData(generateRes.data.json.data)) {
+	const responseDataFailed = isCmsAiGenerateFailedData(responseData);
+	if (isCmsAiGenerateAcceptedData(responseData) || responseDataFailed) {
+		const errorMessage = responseDataFailed
+			? getCmsAiGenerateFailedMessage(
+					responseData,
+					context.translate("server:core.routes.ai.generate.error.message"),
+				)
+			: context.translate("server:core.routes.ai.generate.error.message");
+
+		const storeRes = await storeFailedGeneration(context, {
+			userId: props.userId,
+			requestId: responseData.requestId,
+			feature: responseData.feature,
+			targetType: "media-alt",
+			target: {
+				mediaId: props.media.id ?? null,
+				locale: props.locale,
+				image: {
+					detail: props.image.detail,
+					filename: props.image.filename ?? null,
+					mimeType: props.image.mimeType,
+				},
+			},
+			requestStartedAt,
+			errorMessage,
+			usage: responseDataFailed ? responseData.usage : undefined,
+		});
+		if (storeRes.error) return storeRes;
+
+		return {
+			error: {
+				type: "basic",
+				status: 502,
+				message: responseDataFailed
+					? copy.literal(errorMessage)
+					: copy("server:core.routes.ai.generate.error.message"),
+			},
+			data: undefined,
+		};
+	}
+
+	if (!isCmsAiGenerateCompletedData(responseData)) {
 		return {
 			error: {
 				type: "basic",
@@ -95,10 +143,29 @@ const mediaAltGenerate: ServiceFn<
 		};
 	}
 
-	const outputParse = mediaAltOutputSchema.safeParse(
-		generateRes.data.json.data.output,
-	);
+	const outputParse = mediaAltOutputSchema.safeParse(responseData.output);
 	if (!outputParse.success) {
+		const storeRes = await storeGeneration(context, {
+			userId: props.userId,
+			response: responseData,
+			targetType: "media-alt",
+			requestStartedAt,
+			status: "failed",
+			errorMessage: context.translate(
+				"server:core.routes.ai.generate.error.message",
+			),
+			target: {
+				mediaId: props.media.id ?? null,
+				locale: props.locale,
+				image: {
+					detail: props.image.detail,
+					filename: props.image.filename ?? null,
+					mimeType: props.image.mimeType,
+				},
+			},
+		});
+		if (storeRes.error) return storeRes;
+
 		return {
 			error: {
 				type: "basic",
@@ -113,6 +180,27 @@ const mediaAltGenerate: ServiceFn<
 		(locale) => outputParse.data[locale] === undefined,
 	);
 	if (missingLocale) {
+		const storeRes = await storeGeneration(context, {
+			userId: props.userId,
+			response: responseData,
+			targetType: "media-alt",
+			requestStartedAt,
+			status: "failed",
+			errorMessage: context.translate(
+				"server:core.routes.ai.generate.error.message",
+			),
+			target: {
+				mediaId: props.media.id ?? null,
+				locale: props.locale,
+				image: {
+					detail: props.image.detail,
+					filename: props.image.filename ?? null,
+					mimeType: props.image.mimeType,
+				},
+			},
+		});
+		if (storeRes.error) return storeRes;
+
 		return {
 			error: {
 				type: "basic",
@@ -125,7 +213,7 @@ const mediaAltGenerate: ServiceFn<
 
 	const storeRes = await storeGeneration(context, {
 		userId: props.userId,
-		response: generateRes.data.json.data,
+		response: responseData,
 		targetType: "media-alt",
 		requestStartedAt,
 		target: {
@@ -143,14 +231,14 @@ const mediaAltGenerate: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			mode: generateRes.data.json.data.mode,
-			requestId: generateRes.data.json.data.requestId,
+			mode: responseData.mode,
+			requestId: responseData.requestId,
 			feature: {
 				key: "media.alt.generate",
 				version: "v1",
 			},
 			output: outputParse.data,
-			usage: generateRes.data.json.data.usage,
+			usage: responseData.usage,
 		},
 	};
 };

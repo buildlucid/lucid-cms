@@ -314,6 +314,9 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		getMimeType,
 		getFileName,
 		getImageMeta,
+		openImageGeneration: () => {
+			imageGeneration()?.callbacks.open();
+		},
 		reset: () => {
 			setGetFile(null);
 			setFileProvenance(undefined);

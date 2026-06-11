@@ -74,24 +74,24 @@ export const Pagination: Component<{
 					count={lastPage()}
 					itemComponent={(props) => (
 						<KobPagination.Item
-							class="h-9 w-9 flex items-center justify-center data-current:bg-secondary-base data-current:text-secondary-contrast hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors bg-card-base"
+							class="h-9 w-9 flex text-sm items-center justify-center data-current:bg-secondary-base data-current:text-secondary-contrast hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors bg-card-base"
 							page={props.page}
 						>
 							{props.page}
 						</KobPagination.Item>
 					)}
 					ellipsisComponent={() => (
-						<KobPagination.Ellipsis class="h-9 w-9 flex items-center justify-center bg-card-base">
+						<KobPagination.Ellipsis class="h-9 w-9 text-unfocused flex items-center justify-center bg-card-base">
 							...
 						</KobPagination.Ellipsis>
 					)}
 				>
-					<KobPagination.Previous class="h-9 w-9 flex items-center justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50 bg-card-base">
-						<FaSolidChevronLeft />
+					<KobPagination.Previous class="h-9 w-9 flex items-center justify-center text-body hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50 bg-card-base">
+						<FaSolidChevronLeft size={14} />
 					</KobPagination.Previous>
 					<KobPagination.Items />
-					<KobPagination.Next class="h-9 w-9 flex items-center justify-center text-title hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50 bg-card-base">
-						<FaSolidChevronRight />
+					<KobPagination.Next class="h-9 w-9 flex items-center justify-center text-body hover:bg-secondary-base hover:text-secondary-contrast duration-200 transition-colors disabled:opacity-50 bg-card-base">
+						<FaSolidChevronRight size={14} />
 					</KobPagination.Next>
 				</KobPagination.Root>
 			</Show>

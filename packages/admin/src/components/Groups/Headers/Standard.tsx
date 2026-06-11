@@ -16,6 +16,7 @@ import HeaderPrimaryActions, {
 export interface StandardCreateAction {
 	open: boolean;
 	setOpen: (_open: boolean) => void;
+	onClick?: () => void;
 	permission?: boolean;
 	label?: string;
 	icon?: ActionIconName;
@@ -75,6 +76,10 @@ export const Standard: Component<{
 				icon: action.icon,
 				secondary: action.secondary,
 				onClick: () => {
+					if (action.onClick) {
+						action.onClick();
+						return;
+					}
 					action.setOpen(true);
 				},
 			});

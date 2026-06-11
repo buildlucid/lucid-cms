@@ -6,12 +6,15 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCmsAiRequest } from "../../../libs/lucid-remote/services/index.js";
 import {
+	getCmsAiGenerateFailedMessage,
 	isCmsAiGenerateAcceptedData,
 	isCmsAiGenerateCompletedData,
+	isCmsAiGenerateFailedData,
 } from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getLicenseKey from "../../options/get-license-key.js";
 import completeStoredGeneration from "../storage/complete-stored-generation.js";
+import storeFailedGeneration from "../storage/store-failed-generation.js";
 
 const mediaImageOutputSchema = z
 	.object({
@@ -42,7 +45,21 @@ const mediaImageCompletion: ServiceFn<
 		licenseKey: licenseKeyRes.data,
 		requestId: props.requestId,
 	});
-	if (requestRes.error) return requestRes;
+	if (requestRes.error) {
+		if (
+			requestRes.error.key?.startsWith("ai_provider_") ||
+			requestRes.error.key === "cms_ai_generation_request_not_found" ||
+			requestRes.error.key === "cms_ai_generated_image_not_found"
+		) {
+			const storeRes = await storeFailedGeneration(context, {
+				requestId: props.requestId,
+				errorMessage: context.translate(requestRes.error.message) ?? null,
+			});
+			if (storeRes.error) return storeRes;
+		}
+
+		return requestRes;
+	}
 
 	if (isCmsAiGenerateAcceptedData(requestRes.data.json.data)) {
 		return {
@@ -59,7 +76,37 @@ const mediaImageCompletion: ServiceFn<
 		};
 	}
 
+	if (isCmsAiGenerateFailedData(requestRes.data.json.data)) {
+		const errorMessage = getCmsAiGenerateFailedMessage(
+			requestRes.data.json.data,
+			context.translate("server:core.routes.ai.generate.error.message"),
+		);
+		const storeRes = await storeFailedGeneration(context, {
+			requestId: requestRes.data.json.data.requestId,
+			errorMessage,
+			usage: requestRes.data.json.data.usage,
+		});
+		if (storeRes.error) return storeRes;
+
+		return {
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy.literal(errorMessage),
+			},
+			data: undefined,
+		};
+	}
+
 	if (!isCmsAiGenerateCompletedData(requestRes.data.json.data)) {
+		const storeRes = await storeFailedGeneration(context, {
+			requestId: props.requestId,
+			errorMessage: context.translate(
+				"server:core.routes.ai.generate.error.message",
+			),
+		});
+		if (storeRes.error) return storeRes;
+
 		return {
 			error: {
 				type: "basic",
@@ -74,6 +121,15 @@ const mediaImageCompletion: ServiceFn<
 		requestRes.data.json.data.output,
 	);
 	if (!outputParse.success) {
+		const storeRes = await storeFailedGeneration(context, {
+			requestId: requestRes.data.json.data.requestId,
+			errorMessage: context.translate(
+				"server:core.routes.ai.generate.error.message",
+			),
+			usage: requestRes.data.json.data.usage,
+		});
+		if (storeRes.error) return storeRes;
+
 		return {
 			error: {
 				type: "basic",

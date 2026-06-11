@@ -2,9 +2,15 @@ import type { MediaImageGenerateResponse } from "@lucidcms/types";
 import { copy } from "../../../libs/i18n/index.js";
 import type { MediaImageGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
-import { isCmsAiGenerateAcceptedData } from "../../../libs/lucid-remote/utils.js";
+import {
+	getCmsAiGenerateFailedMessage,
+	isCmsAiGenerateAcceptedData,
+	isCmsAiGenerateCompletedData,
+	isCmsAiGenerateFailedData,
+} from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getLicenseKey from "../../options/get-license-key.js";
+import storeFailedGeneration from "../storage/store-failed-generation.js";
 import storeGeneration from "../storage/store-generation.js";
 import storePendingGeneration from "../storage/store-pending-generation.js";
 
@@ -149,24 +155,78 @@ const mediaImageGenerate: ServiceFn<
 			: null,
 	};
 
-	const storeRes = isCmsAiGenerateAcceptedData(responseData)
-		? await storePendingGeneration(context, {
-				userId: props.userId,
+	if (isCmsAiGenerateAcceptedData(responseData)) {
+		const storeRes = await storePendingGeneration(context, {
+			userId: props.userId,
+			requestId: responseData.requestId,
+			feature: {
+				key: "media.image.generate",
+				version: "v1",
+			},
+			targetType: "media-image",
+			target,
+		});
+		if (storeRes.error) return storeRes;
+
+		return {
+			error: undefined,
+			data: {
+				mode: "async",
 				requestId: responseData.requestId,
 				feature: {
 					key: "media.image.generate",
 					version: "v1",
 				},
-				targetType: "media-image",
-				target,
-			})
-		: await storeGeneration(context, {
-				userId: props.userId,
-				response: responseData,
-				targetType: "media-image",
-				requestStartedAt,
-				target,
-			});
+				status: responseData.status,
+			},
+		};
+	}
+
+	if (isCmsAiGenerateFailedData(responseData)) {
+		const errorMessage = getCmsAiGenerateFailedMessage(
+			responseData,
+			context.translate("server:core.routes.ai.generate.error.message"),
+		);
+		const storeRes = await storeFailedGeneration(context, {
+			userId: props.userId,
+			requestId: responseData.requestId,
+			feature: responseData.feature,
+			targetType: "media-image",
+			target,
+			requestStartedAt,
+			errorMessage,
+			usage: responseData.usage,
+		});
+		if (storeRes.error) return storeRes;
+
+		return {
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy.literal(errorMessage),
+			},
+			data: undefined,
+		};
+	}
+
+	if (!isCmsAiGenerateCompletedData(responseData)) {
+		return {
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy("server:core.routes.ai.generate.error.message"),
+			},
+			data: undefined,
+		};
+	}
+
+	const storeRes = await storeGeneration(context, {
+		userId: props.userId,
+		response: responseData,
+		targetType: "media-image",
+		requestStartedAt,
+		target,
+	});
 	if (storeRes.error) return storeRes;
 
 	return {
@@ -178,9 +238,7 @@ const mediaImageGenerate: ServiceFn<
 				key: "media.image.generate",
 				version: "v1",
 			},
-			status: isCmsAiGenerateAcceptedData(responseData)
-				? responseData.status
-				: "processing",
+			status: "processing",
 		},
 	};
 };

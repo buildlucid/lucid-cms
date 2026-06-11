@@ -55,6 +55,7 @@ import { captureVideoPosterFrame } from "@/utils/video-frame";
 interface CreateUpdateMediaPanelProps {
 	id?: Accessor<number | undefined>;
 	initialFile?: Accessor<File | null | undefined>;
+	openImageGenerationOnCreate?: Accessor<boolean>;
 	state: {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
@@ -62,6 +63,7 @@ interface CreateUpdateMediaPanelProps {
 	};
 	callbacks?: {
 		onSuccess?: (_media: Media) => void;
+		onImageGenerationOpened?: () => void;
 	};
 }
 
@@ -1009,6 +1011,19 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			MediaFile.setFocalPoint(null);
 			setUploadErrors(undefined);
 		});
+	});
+
+	createEffect(() => {
+		if (
+			!props.state.open ||
+			panelMode() !== "create" ||
+			props.openImageGenerationOnCreate?.() !== true
+		) {
+			return;
+		}
+
+		props.callbacks?.onImageGenerationOpened?.();
+		MediaFile.openImageGeneration();
 	});
 
 	createEffect(() => {

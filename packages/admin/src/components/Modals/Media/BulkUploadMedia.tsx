@@ -404,8 +404,11 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						when={rows().length > 0}
 						fallback={
 							<div class="mt-4 flex min-h-72 flex-col items-center justify-center rounded-md border-2 border-dashed border-border p-6 text-center">
-								<FaSolidArrowUpFromBracket class="mb-5 h-7 w-7 text-unfocused" />
-								<p class="text-base font-medium text-subtitle">
+								<FaSolidArrowUpFromBracket
+									size={18}
+									class="mb-2 text-unfocused"
+								/>
+								<p class="text-sm font-medium text-subtitle">
 									{T()("media.upload.bulk.drop.title")}{" "}
 									<button
 										type="button"
@@ -415,7 +418,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 										{T()("media.upload.drop.here")}
 									</button>
 								</p>
-								<p class="mt-2 text-sm text-body">
+								<p class="mt-1 text-xs text-body">
 									{T()("media.upload.bulk.drop.description")}
 								</p>
 							</div>

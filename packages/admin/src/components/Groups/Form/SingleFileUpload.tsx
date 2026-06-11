@@ -269,8 +269,11 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					</Match>
 					<Match when={showState() === "no-file"}>
 						<div class="w-full h-full flex justify-center items-center flex-col p-4 md:p-6">
-							<FaSolidArrowUpFromBracket class="w-7 h-7 mx-auto text-unfocused mb-5" />
-							<p class="text-center text-base font-medium text-subtitle">
+							<FaSolidArrowUpFromBracket
+								size="18"
+								class="mx-auto text-unfocused mb-2"
+							/>
+							<p class="text-center text-sm font-medium text-subtitle">
 								{T()("media.upload.drop.or")}{" "}
 								<button
 									type="button"

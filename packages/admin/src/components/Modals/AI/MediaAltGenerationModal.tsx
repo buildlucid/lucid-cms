@@ -1,9 +1,8 @@
 import type { Locale, Media, MediaAltGenerateResponse } from "@types";
-import classnames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
+	FaSolidMagicWandSparkles,
 	FaSolidPaperPlane,
-	FaSolidXmark,
 } from "solid-icons/fa";
 import {
 	type Component,
@@ -15,9 +14,11 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
-import { Label } from "@/components/Groups/Form";
-import { Modal, ModalFooter } from "@/components/Groups/Modal";
+import { Label } from "@/components/Groups/Form/Label";
+import { Textarea } from "@/components/Groups/Form/Textarea";
+import { Modal } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
+import Pill from "@/components/Partials/Pill";
 import api from "@/services/api";
 import aiModalsStore, {
 	type MediaAltGenerationTarget,
@@ -31,9 +32,13 @@ import {
 	getDefaultTranslationLocale,
 	type TranslationValue,
 } from "@/utils/translation-helpers";
+import GenerationHistory, {
+	type AiGenerationHistoryItem,
+} from "./GenerationHistory";
 
 type GenerateValues = {
 	instruction?: string;
+	localeCodes?: string[];
 };
 
 const CURRENT_ALT_ID = "current-alt";
@@ -53,16 +58,19 @@ interface MediaAltGenerationModalProps {
 	};
 	imageUrl?: string;
 	locales: Locale[];
+	selectedLocales: string[];
 	currentAlt?: Record<string, string>;
 	generations: MediaAltGenerationCandidate[];
 	selectedGenerationId?: string;
 	error?: string;
 	isLoading: boolean;
+	isApplying: boolean;
 	callbacks: {
 		onGenerate: (_values: GenerateValues) => void | Promise<void>;
 		onAccept: () => void | Promise<void>;
 		onClose: () => void;
 		onSelect: (_id: string) => void;
+		onToggleLocale: (_localeCode: string) => void;
 		onEdit: (_id: string, _localeCode: string, _value: string) => void;
 		onRevert: (_id: string, _localeCode: string) => void;
 	};
@@ -77,15 +85,37 @@ const MediaAltGenerationModalContent: Component<
 
 	// -----------------------------
 	// Memos
-	const hasCurrentAlt = createMemo(() => {
-		return Object.keys(props.currentAlt ?? {}).length > 0;
-	});
+	function generationLabel(index: number) {
+		return T()("ai.media.alt.generate.response.item.label", {
+			count: index + 1,
+		});
+	}
 	const currentSelected = createMemo(() => {
-		return props.selectedGenerationId === CURRENT_ALT_ID;
+		return (
+			props.selectedGenerationId === undefined ||
+			props.selectedGenerationId === CURRENT_ALT_ID
+		);
 	});
 	const currentOutput = createMemo(() => props.currentAlt ?? {});
+	const activeGeneration = createMemo(() => {
+		return props.generations.find(
+			(generation) => generation.id === props.selectedGenerationId,
+		);
+	});
+	const activeOutput = createMemo<Record<string, string>>(() => {
+		if (currentSelected()) return currentOutput();
+		return activeGeneration()?.output ?? currentOutput();
+	});
+	const activeDraftId = createMemo(() => {
+		if (currentSelected()) return CURRENT_ALT_ID;
+		return activeGeneration()?.id;
+	});
+	const visibleLocales = createMemo(() =>
+		props.locales.filter((locale) =>
+			props.selectedLocales.includes(locale.code),
+		),
+	);
 	const hasResponse = createMemo(() => props.generations.length > 0);
-	const hasContent = createMemo(() => hasCurrentAlt() || hasResponse());
 	const sessionCost = createMemo(() => {
 		const firstGeneration = props.generations[0];
 		if (!firstGeneration) return undefined;
@@ -105,24 +135,32 @@ const MediaAltGenerationModalContent: Component<
 			generation.output[localeCode] !== generation.originalOutput[localeCode]
 		);
 	};
-	const generationLabel = (index: number) => {
-		return T()("ai.media.alt.generate.response.item.label", {
-			count: index + 1,
-		});
-	};
-	const generationSnippet = (generation: MediaAltGenerationCandidate) => {
-		return outputSnippet(generation.output);
-	};
-	const outputSnippet = (output: Record<string, string>) => {
-		return (
-			output[props.locales[0]?.code] ??
-			Object.values(output)[0] ??
-			T()("common.empty")
-		);
-	};
 	const outputLocaleCount = (output: Record<string, string>) => {
 		return props.locales.filter((locale) => output[locale.code]).length;
 	};
+	const localeLabel = (locale: Locale) => {
+		return `${locale.name ?? locale.code} · ${locale.code}`;
+	};
+	const historyItems = createMemo<AiGenerationHistoryItem[]>(() => [
+		{
+			id: CURRENT_ALT_ID,
+			label: T()("ai.media.alt.generate.history.current"),
+			meta: T()("ai.media.alt.generate.response.locale.count", {
+				count: outputLocaleCount(currentOutput()),
+				total: props.locales.length,
+			}),
+		},
+		...props.generations.map((generation, index) => ({
+			id: generation.id,
+			label: generationLabel(index),
+			meta:
+				formatAiCost(generation.cost) ??
+				T()("ai.media.alt.generate.response.locale.count", {
+					count: outputLocaleCount(generation.output),
+					total: props.locales.length,
+				}),
+		})),
+	]);
 	// -----------------------------
 	// Functions
 	const setOpen = (open: boolean) => {
@@ -131,9 +169,12 @@ const MediaAltGenerationModalContent: Component<
 	};
 	const generate = (event?: SubmitEvent) => {
 		event?.preventDefault();
+		if (props.selectedLocales.length === 0) return;
+
 		const trimmedInstruction = instruction().trim();
 		void props.callbacks.onGenerate({
 			instruction: trimmedInstruction || undefined,
+			localeCodes: props.selectedLocales,
 		});
 	};
 
@@ -157,400 +198,283 @@ const MediaAltGenerationModalContent: Component<
 				noPadding: true,
 			}}
 		>
-			<div class="flex min-w-0 items-start justify-between gap-4 border-b border-border px-4 py-4 md:px-6 md:py-5">
-				<div class="min-w-0">
-					<h2>{T()("ai.media.alt.generate.modal.title")}</h2>
-					<p class="mt-1 text-sm text-body">
-						{T()("ai.media.alt.generate.modal.description")}
-					</p>
-				</div>
-				<button
-					type="button"
-					class="flex h-8 min-w-8 w-8 items-center justify-center rounded-full text-body transition-colors duration-200 hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-error-base"
-					onClick={() => setOpen(false)}
-					aria-label={T()("common.close")}
+			<div class="grid min-w-0 w-full items-stretch gap-0 md:grid-cols-[minmax(24rem,0.5fr)_minmax(0,1fr)]">
+				<form
+					class="flex min-h-130 min-w-0 flex-col gap-4 border-b border-border bg-card-base p-4 md:border-r md:border-b-0 md:p-6"
+					onSubmit={generate}
 				>
-					<FaSolidXmark class="fill-current" />
-				</button>
-			</div>
-			<div class="grid min-w-0 w-full gap-0 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-				<div class="relative min-h-130 min-w-0 w-full overflow-hidden border-b border-border bg-card-base md:border-b-0 md:border-r">
-					<div class="absolute inset-x-0 top-0 bottom-16">
-						<div class="rectangle-background relative flex h-full w-full items-center justify-center overflow-hidden bg-card-base">
-							<Show
-								when={props.imageUrl}
-								fallback={
-									<div class="relative z-10 flex h-full items-center justify-center px-4 text-center text-sm text-body">
-										{T()("ai.media.alt.generate.preview.empty")}
-									</div>
-								}
-							>
-								{(url) => (
-									<img
-										src={url()}
-										alt=""
-										class="relative z-10 h-full w-full object-contain"
-									/>
-								)}
-							</Show>
-						</div>
-					</div>
-					<div class="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-56 bg-linear-to-t from-background-base via-background-base/85 to-transparent" />
-					<form
-						class="absolute inset-x-4 bottom-4 z-20 min-w-0 md:inset-x-6 md:bottom-6"
-						onSubmit={generate}
-					>
-						<Label
-							id="ai-media-alt-generation-instruction"
-							label={T()("ai.media.alt.generate.direction.label")}
-							theme="basic"
-						/>
-						<div class="relative min-w-0">
-							<textarea
-								id="ai-media-alt-generation-instruction"
-								name="ai-media-alt-generation-instruction"
-								value={instruction()}
-								onInput={(event) => setInstruction(event.currentTarget.value)}
-								onKeyDown={(event) => {
-									event.stopPropagation();
-									if (
-										(event.metaKey || event.ctrlKey) &&
-										event.key === "Enter"
-									) {
-										generate();
-									}
-								}}
-								placeholder={T()(
-									"ai.media.alt.generate.instruction.placeholder",
-								)}
-								rows={4}
-								class="block min-w-0 max-w-full w-full resize-none rounded-md border border-white/10 bg-black/20 p-3 pr-12 pb-12 text-sm font-medium text-white outline-hidden backdrop-blur-sm transition-colors duration-200 placeholder:text-white/50 hover:border-white/20 focus:border-primary-base focus:bg-black/30"
-							/>
-							<div class="absolute right-3 bottom-3">
-								<Button
-									type="submit"
-									theme="secondary"
-									size="icon-subtle"
-									disabled={props.isLoading}
-									title={T()("ai.media.alt.generate.modal.generate")}
-									aria-label={T()("ai.media.alt.generate.modal.generate")}
-								>
-									<FaSolidPaperPlane size={13} aria-hidden="true" />
-								</Button>
-							</div>
-						</div>
-					</form>
-				</div>
-				<div class="relative flex min-h-130 min-w-0 w-full flex-col p-4 md:p-6">
-					<div class="mb-4 flex min-w-0 items-start justify-between gap-4">
-						<div class="min-w-0">
-							<h3 class="text-base font-semibold text-title">
-								{T()("ai.media.alt.generate.response.title")}
-							</h3>
-							<p class="mt-1 text-sm text-body">
-								<Show
-									when={hasResponse()}
-									fallback={
-										hasCurrentAlt()
-											? T()("ai.media.alt.generate.response.current.available")
-											: T()("ai.media.alt.generate.response.waiting")
-									}
-								>
-									{T()("ai.media.alt.generate.response.history.count", {
-										count: props.generations.length,
-									})}
-								</Show>
-							</p>
-						</div>
-						<Button
-							type="button"
-							theme="secondary"
-							size="medium"
-							loading={props.isLoading}
-							onClick={() => generate()}
-						>
-							{T()("ai.media.alt.generate.modal.generate")}
-						</Button>
-					</div>
-					<div class="min-h-0 min-w-0 flex-1 overflow-y-auto pr-1">
+					<div class="rectangle-background relative flex min-h-64 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-border bg-background-base">
 						<Show
-							when={hasContent()}
+							when={props.imageUrl}
 							fallback={
-								<Show
-									when={props.error}
-									fallback={
-										<div class="min-w-0 rounded-md border border-dashed border-border bg-card-base p-5">
-											<p class="text-sm text-body">
-												{T()("ai.media.alt.generate.response.empty")}
-											</p>
-										</div>
-									}
-								>
-									{(error) => (
-										<div class="min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
-											<p class="text-sm text-error-base">{error()}</p>
-										</div>
-									)}
-								</Show>
+								<div class="relative z-10 flex h-full items-center justify-center px-4 text-center text-sm text-body">
+									{T()("ai.media.alt.generate.preview.empty")}
+								</div>
 							}
 						>
-							<div class="min-w-0 space-y-2">
-								<Show when={hasCurrentAlt()}>
-									<div
-										class={classnames(
-											"min-w-0 rounded-md border bg-card-base transition-colors duration-200",
-											{
-												"border-primary-muted-border": currentSelected(),
-												"border-border hover:border-primary-muted-border":
-													!currentSelected(),
-											},
-										)}
-									>
-										<button
-											type="button"
-											class="flex min-w-0 w-full items-center justify-between gap-3 p-3 text-left"
-											onClick={() => props.callbacks.onSelect(CURRENT_ALT_ID)}
-										>
-											<div class="min-w-0 flex-1">
-												<p class="text-sm font-semibold text-title">
-													{T()("ai.media.alt.generate.response.current.title")}
-												</p>
-												<Show when={!currentSelected()}>
-													<p class="mt-1 truncate text-xs text-body">
-														{outputSnippet(currentOutput())}
-													</p>
-												</Show>
-											</div>
-											<span class="shrink-0 text-xs font-medium text-unfocused">
-												{T()("ai.media.alt.generate.response.locale.count", {
-													count: outputLocaleCount(currentOutput()),
-													total: props.locales.length,
-												})}
-											</span>
-										</button>
-										<Show when={currentSelected()}>
-											<div class="min-w-0 space-y-2 border-t border-border p-3 pt-2">
-												<For each={props.locales}>
-													{(locale) => (
-														<div class="min-w-0">
-															<div class="mb-1.5 flex min-w-0 items-center gap-2 text-sm text-body">
-																<span class="truncate text-sm text-body">
-																	{locale.name ?? locale.code}
-																</span>
-																<span class="text-sm text-body">·</span>
-																<span class="text-sm text-body">
-																	{locale.code}
-																</span>
-															</div>
-															<p class="min-h-10 rounded-md border border-border bg-background-base p-2 text-sm leading-5 text-body">
-																{currentOutput()[locale.code] ??
-																	T()("common.empty")}
-															</p>
-														</div>
-													)}
-												</For>
-											</div>
-										</Show>
-									</div>
-								</Show>
-								<Show when={props.error}>
-									{(error) => (
-										<div class="min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
-											<p class="text-sm text-error-base">{error()}</p>
-										</div>
-									)}
-								</Show>
-								<For each={props.generations}>
-									{(generation, index) => {
-										const selected = createMemo(() => {
-											return generation.id === props.selectedGenerationId;
-										});
+							{(url) => (
+								<img
+									src={url()}
+									alt=""
+									class="relative z-10 h-full max-h-80 w-full object-contain p-2"
+								/>
+							)}
+						</Show>
+					</div>
+					<Show when={props.locales.length > 1}>
+						<div class="min-w-0">
+							<Label
+								id="ai-media-alt-generation-locales"
+								label={T()("ai.media.alt.generate.locales.label")}
+								theme="basic"
+								hideOptionalText
+								rightSlot={
+									<span class="text-xs text-unfocused">
+										{T()("ai.media.alt.generate.locales.selected", {
+											count: props.selectedLocales.length,
+										})}
+									</span>
+								}
+							/>
+							<div class="flex min-w-0 flex-wrap gap-2">
+								<For each={props.locales}>
+									{(locale) => {
+										const selected = createMemo(() =>
+											props.selectedLocales.includes(locale.code),
+										);
 
 										return (
-											<div
-												class={classnames(
-													"min-w-0 rounded-md border bg-card-base transition-colors duration-200",
-													{
-														"border-primary-muted-border": selected(),
-														"border-border hover:border-primary-muted-border":
-															!selected(),
-													},
-												)}
+											<Pill
+												as="button"
+												theme={selected() ? "primary-opaque" : "outline"}
+												aria-pressed={selected()}
+												disabled={props.isLoading || props.isApplying}
+												onClick={() =>
+													props.callbacks.onToggleLocale(locale.code)
+												}
 											>
-												<button
-													type="button"
-													class="flex min-w-0 w-full items-center justify-between gap-3 p-3 text-left"
-													onClick={() =>
-														props.callbacks.onSelect(generation.id)
-													}
-												>
-													<div class="min-w-0 flex-1">
-														<div class="flex items-center gap-2">
-															<p class="text-sm font-semibold text-title">
-																{generationLabel(index())}
-															</p>
-														</div>
-														<Show when={!selected()}>
-															<p class="mt-1 truncate text-xs text-body">
-																{generationSnippet(generation)}
-															</p>
-														</Show>
-													</div>
-													<div class="flex shrink-0 items-center gap-2">
-														<span class="text-xs font-medium text-unfocused">
-															{T()(
-																"ai.media.alt.generate.response.locale.count",
-																{
-																	count: props.locales.filter(
-																		(locale) => generation.output[locale.code],
-																	).length,
-																	total: props.locales.length,
-																},
-															)}
-														</span>
-														<Show when={formatAiCost(generation.cost)}>
-															{(cost) => (
-																<span class="text-xs font-medium text-unfocused">
-																	{cost()}
-																</span>
-															)}
-														</Show>
-													</div>
-												</button>
-												<Show when={selected()}>
-													<div class="min-w-0 space-y-2 border-t border-border p-3 pt-2">
-														<For each={props.locales}>
-															{(locale) => {
-																const fieldId = `ai-media-alt-generation-${generation.id}-${locale.code}`;
-
-																return (
-																	<div class="min-w-0">
-																		<div class="mb-1.5 flex min-w-0 items-center justify-between gap-2 text-sm text-body">
-																			<label
-																				for={fieldId}
-																				class="flex min-w-0 items-center gap-2 text-sm text-body"
-																			>
-																				<span class="truncate text-sm text-body">
-																					{locale.name ?? locale.code}
-																				</span>
-																				<span class="text-sm text-body">·</span>
-																				<span class="text-sm text-body">
-																					{locale.code}
-																				</span>
-																			</label>
-																			<Show
-																				when={isEdited(generation, locale.code)}
-																			>
-																				<button
-																					type="button"
-																					class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-icon-fade transition-colors duration-200 hover:bg-input-base hover:text-title focus-visible:ring-1 focus-visible:ring-primary-base"
-																					title={T()(
-																						"ai.media.alt.generate.response.revert",
-																					)}
-																					aria-label={T()(
-																						"ai.media.alt.generate.response.revert",
-																					)}
-																					onClick={() =>
-																						props.callbacks.onRevert(
-																							generation.id,
-																							locale.code,
-																						)
-																					}
-																				>
-																					<FaSolidArrowRotateLeft
-																						size={11}
-																						aria-hidden="true"
-																					/>
-																				</button>
-																			</Show>
-																		</div>
-																		<textarea
-																			id={fieldId}
-																			value={
-																				generation.output[locale.code] ?? ""
-																			}
-																			onInput={(event) =>
-																				props.callbacks.onEdit(
-																					generation.id,
-																					locale.code,
-																					event.currentTarget.value,
-																				)
-																			}
-																			onFocus={() =>
-																				props.callbacks.onSelect(generation.id)
-																			}
-																			onKeyDown={(event) =>
-																				event.stopPropagation()
-																			}
-																			rows={2}
-																			class="block min-w-0 max-w-full w-full resize-none rounded-md border border-border bg-background-base p-2 text-sm leading-5 text-body outline-hidden transition-colors duration-200 focus:border-primary-base"
-																		/>
-																	</div>
-																);
-															}}
-														</For>
-													</div>
-												</Show>
-											</div>
+												{locale.name ?? locale.code}
+											</Pill>
 										);
 									}}
 								</For>
 							</div>
+						</div>
+					</Show>
+					<div>
+						<Textarea
+							id="ai-media-alt-generation-instruction"
+							name="ai-media-alt-generation-instruction"
+							value={instruction()}
+							onChange={setInstruction}
+							onKeyUp={(event) => {
+								if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+									generate();
+								}
+							}}
+							copy={{
+								label: T()("ai.media.alt.generate.direction.label"),
+								placeholder: T()(
+									"ai.media.alt.generate.instruction.placeholder",
+								),
+							}}
+							rows={5}
+						/>
+						<Show when={props.error}>
+							{(error) => (
+								<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
+									<p class="text-sm text-error-base">{error()}</p>
+								</div>
+							)}
 						</Show>
+					</div>
+					<div class="mt-auto">
+						<Button
+							type="submit"
+							theme="secondary"
+							size="medium"
+							classes="w-full min-w-0! gap-2"
+							loading={props.isLoading}
+							disabled={
+								props.selectedLocales.length === 0 ||
+								props.isLoading ||
+								props.isApplying
+							}
+						>
+							<FaSolidPaperPlane size={12} aria-hidden="true" />
+							{T()("ai.media.alt.generate.modal.generate")}
+						</Button>
+					</div>
+				</form>
+				<div class="dotted-background relative flex max-h-[min(86vh,820px)] min-h-130 min-w-0 flex-col self-stretch overflow-hidden px-4 md:px-6">
+					<div class="relative min-h-0 min-w-0 flex-1">
+						<div class="relative z-10 flex h-full min-h-0 min-w-0 flex-col gap-3 md:grid md:grid-cols-[116px_minmax(0,1fr)] md:gap-4">
+							<GenerationHistory
+								id="ai-media-alt-generation-history"
+								items={historyItems()}
+								activeItemId={props.selectedGenerationId}
+								onSelect={props.callbacks.onSelect}
+								loading={props.isLoading}
+								loadingLabel={T()("ai.media.alt.generate.history.generating")}
+								loadingMeta={T()(
+									"ai.media.alt.generate.history.generating.meta",
+								)}
+							/>
+							<div class="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto pt-0 pr-1 pb-0 md:py-6">
+								<div class="min-w-0 space-y-3">
+									<For each={visibleLocales()}>
+										{(locale) => {
+											const editableGeneration = createMemo(() => {
+												if (currentSelected()) return undefined;
+												return activeGeneration();
+											});
+											const canRevert = createMemo(() => {
+												const generation = editableGeneration();
+												if (!generation) return false;
+												return isEdited(generation, locale.code);
+											});
+											const value = createMemo(
+												() => activeOutput()[locale.code] ?? "",
+											);
+											const fieldId = createMemo(
+												() =>
+													`ai-media-alt-generation-${props.selectedGenerationId ?? CURRENT_ALT_ID}-${locale.code}`,
+											);
+
+											return (
+												<div class="min-w-0 overflow-hidden rounded-lg border border-border bg-background-base">
+													<div class="flex min-w-0 items-center justify-between gap-3 border-b border-border px-3 py-2.5">
+														<label
+															for={fieldId()}
+															class="min-w-0 truncate text-sm font-medium text-body"
+														>
+															{localeLabel(locale)}
+														</label>
+														<Show when={canRevert()}>
+															<button
+																type="button"
+																class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-icon-fade transition-colors duration-200 hover:bg-input-base hover:text-title focus-visible:ring-1 focus-visible:ring-primary-base"
+																title={T()(
+																	"ai.media.alt.generate.response.revert",
+																)}
+																aria-label={T()(
+																	"ai.media.alt.generate.response.revert",
+																)}
+																onClick={() => {
+																	const generation = editableGeneration();
+																	if (!generation) return;
+
+																	props.callbacks.onRevert(
+																		generation.id,
+																		locale.code,
+																	);
+																}}
+															>
+																<FaSolidArrowRotateLeft
+																	size={11}
+																	aria-hidden="true"
+																/>
+															</button>
+														</Show>
+													</div>
+													<div class="p-3">
+														<Textarea
+															id={fieldId()}
+															name={fieldId()}
+															value={value()}
+															onChange={(nextValue) => {
+																const draftId = activeDraftId();
+																if (!draftId) return;
+
+																props.callbacks.onEdit(
+																	draftId,
+																	locale.code,
+																	nextValue,
+																);
+															}}
+															onBlur={() => {
+																const draftId = activeDraftId();
+																if (!draftId) return;
+
+																props.callbacks.onSelect(draftId);
+															}}
+															rows={2}
+															noMargin
+															hideOptionalText
+														/>
+													</div>
+												</div>
+											);
+										}}
+									</For>
+								</div>
+							</div>
+						</div>
+						<Show when={props.isLoading}>
+							<div class="absolute inset-0 z-20 flex items-center justify-center bg-background-base/70 p-6 backdrop-blur-sm">
+								<div class="flex min-w-0 max-w-xs flex-col items-center gap-3 text-center">
+									<span
+										class="ai-action-button__surface flex h-11 min-w-11 items-center justify-center rounded-md border border-border text-primary-base"
+										data-loading="true"
+									>
+										<FaSolidMagicWandSparkles size={16} aria-hidden="true" />
+									</span>
+									<div class="min-w-0 max-w-60">
+										<p class="text-sm font-semibold text-title">
+											{T()("ai.media.alt.generate.loading")}
+										</p>
+										<p class="mt-1 text-sm leading-5 text-body">
+											{T()(
+												"ai.media.alt.generate.response.generating.description",
+											)}
+										</p>
+									</div>
+								</div>
+							</div>
+						</Show>
+					</div>
+					<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card-base/95 p-6 backdrop-blur-sm md:-mx-6">
+						<div class="min-w-0 flex-1">
+							<Show when={sessionCost()}>
+								{(cost) => (
+									<p class="text-xs text-body">
+										{T()("ai.media.image.generate.cost.total", {
+											cost: cost(),
+										})}
+									</p>
+								)}
+							</Show>
+						</div>
+						<div class="flex shrink-0 items-center gap-3">
+							<Button
+								type="button"
+								theme="border-outline"
+								size="medium"
+								onClick={() => setOpen(false)}
+							>
+								{T()("common.cancel")}
+							</Button>
+							<Show when={hasResponse() || currentSelected()}>
+								<Button
+									type="button"
+									theme="primary"
+									size="medium"
+									onClick={() => {
+										void props.callbacks.onAccept();
+									}}
+									disabled={
+										props.selectedLocales.length === 0 ||
+										props.isLoading ||
+										props.isApplying
+									}
+								>
+									{T()("ai.media.alt.generate.modal.accept")}
+								</Button>
+							</Show>
+						</div>
 					</div>
 				</div>
 			</div>
-			<ModalFooter>
-				<div class="flex items-center gap-2">
-					<Button
-						type="button"
-						theme="border-outline"
-						size="medium"
-						onClick={() => setOpen(false)}
-					>
-						{T()("common.cancel")}
-					</Button>
-				</div>
-				<div class="flex items-center gap-3">
-					<Show when={sessionCost()}>
-						{(cost) => (
-							<p class="hidden text-xs text-body sm:block">
-								{T()("ai.media.image.generate.cost.total", {
-									cost: cost(),
-								})}
-							</p>
-						)}
-					</Show>
-					<Show when={props.selectedGenerationId === CURRENT_ALT_ID}>
-						<Button
-							type="button"
-							theme="primary"
-							size="medium"
-							onClick={() => setOpen(false)}
-							disabled={props.isLoading}
-						>
-							{T()("ai.media.alt.generate.modal.keep.current")}
-						</Button>
-					</Show>
-					<Show
-						when={
-							hasResponse() && props.selectedGenerationId !== CURRENT_ALT_ID
-						}
-					>
-						<Button
-							type="button"
-							theme="primary"
-							size="medium"
-							onClick={() => {
-								void props.callbacks.onAccept();
-							}}
-							disabled={props.isLoading}
-						>
-							{T()("ai.media.alt.generate.modal.accept")}
-						</Button>
-					</Show>
-				</div>
-			</ModalFooter>
 		</Modal>
 	);
 };
@@ -558,11 +482,15 @@ const MediaAltGenerationModalContent: Component<
 const MediaAltGenerationModal: Component = () => {
 	// -----------------------------
 	// State
+	const [currentAltDraft, setCurrentAltDraft] = createSignal<
+		Record<string, string>
+	>({});
 	const [generations, setGenerations] = createSignal<
 		MediaAltGenerationCandidate[]
 	>([]);
 	const [selectedGenerationId, setSelectedGenerationId] =
 		createSignal<string>();
+	const [selectedLocales, setSelectedLocales] = createSignal<string[]>([]);
 	const [previewUrl, setPreviewUrl] = createSignal<string>();
 	const [clientError, setClientError] = createSignal<string>();
 	let generationId = 0;
@@ -587,8 +515,15 @@ const MediaAltGenerationModal: Component = () => {
 			(generation) => generation.id === selectedGenerationId(),
 		);
 	});
-	const currentAlt = createMemo(() => {
-		return translationsToRecord(target()?.media().alt);
+	const currentSelected = createMemo(() => {
+		return (
+			selectedGenerationId() === undefined ||
+			selectedGenerationId() === CURRENT_ALT_ID
+		);
+	});
+	const activeOutput = createMemo(() => {
+		if (currentSelected()) return currentAltDraft();
+		return selectedGeneration()?.output ?? currentAltDraft();
 	});
 
 	// -----------------------------
@@ -607,11 +542,32 @@ const MediaAltGenerationModal: Component = () => {
 
 		return Object.keys(record).length > 0 ? record : undefined;
 	}
+	function outputToRecord(output: Record<string, string>) {
+		const record = Object.entries(output).reduce<Record<string, string>>(
+			(accumulator, [localeCode, value]) => {
+				if (!value) return accumulator;
+				accumulator[localeCode] = value;
+				return accumulator;
+			},
+			{},
+		);
+
+		return Object.keys(record).length > 0 ? record : undefined;
+	}
+	function buildCurrentAltDraft(target: MediaAltGenerationTarget) {
+		const output = translationsToRecord(target.media().alt) ?? {};
+		for (const locale of target.locales()) {
+			output[locale.code] ??= "";
+		}
+		return output;
+	}
 	function buildGeneratedAlt(
 		target: MediaAltGenerationTarget,
 		output: Record<string, string>,
+		targetLocaleCodes: string[],
 	) {
 		const previousRows = target.media().alt ?? [];
+		const targetLocaleSet = new Set(targetLocaleCodes);
 		const localeRows =
 			target.locales().length > 0
 				? target.locales().map((locale) => locale.code)
@@ -624,7 +580,9 @@ const MediaAltGenerationModal: Component = () => {
 
 			return {
 				localeCode,
-				value: output[localeCode] ?? existing?.value ?? null,
+				value: targetLocaleSet.has(localeCode)
+					? (output[localeCode] ?? existing?.value ?? null)
+					: (existing?.value ?? null),
 			};
 		}) as Media["alt"];
 	}
@@ -633,8 +591,10 @@ const MediaAltGenerationModal: Component = () => {
 		abortController = undefined;
 	};
 	const clear = () => {
+		setCurrentAltDraft({});
 		setGenerations([]);
 		setSelectedGenerationId(undefined);
+		setSelectedLocales([]);
 		setClientError(undefined);
 		generateAlt.reset();
 		aiModalsStore.setLoading(false);
@@ -648,12 +608,20 @@ const MediaAltGenerationModal: Component = () => {
 		aiModalsStore.close();
 	};
 	const generate = async (
-		values: { instruction?: string } = {},
+		values: GenerateValues = {},
 		requestTarget = target(),
 		requestTargetId = targetId(),
+		requestLocaleCodes = values.localeCodes ?? selectedLocales(),
 	) => {
 		const source = requestTarget?.image();
-		if (!requestTarget || !source || !requestTargetId) return;
+		if (
+			!requestTarget ||
+			!source ||
+			!requestTargetId ||
+			requestLocaleCodes.length === 0
+		) {
+			return;
+		}
 
 		try {
 			abortRequest();
@@ -684,11 +652,11 @@ const MediaAltGenerationModal: Component = () => {
 					media: {
 						id: media.id,
 						name: translationsToRecord(media.name),
-						alt: translationsToRecord(media.alt),
+						alt: outputToRecord(activeOutput()),
 					},
 					locale: {
 						source: getDefaultTranslationLocale(requestTarget.locales()),
-						target: requestTarget.locales().map((locale) => locale.code),
+						target: requestLocaleCodes,
 					},
 				},
 			});
@@ -735,20 +703,28 @@ const MediaAltGenerationModal: Component = () => {
 	};
 	const accept = async () => {
 		const activeTarget = target();
-		const generation = selectedGeneration();
-		if (!activeTarget || !generation) return;
+		const targetLocaleCodes = selectedLocales();
+		if (!activeTarget || targetLocaleCodes.length === 0) return;
 
 		try {
 			aiModalsStore.setApplying(true);
 			await activeTarget.setAlt(
-				buildGeneratedAlt(activeTarget, generation.output),
+				buildGeneratedAlt(activeTarget, activeOutput(), targetLocaleCodes),
 			);
 			close(false);
 		} finally {
 			aiModalsStore.setApplying(false);
 		}
 	};
-	const editGeneration = (id: string, localeCode: string, value: string) => {
+	const editAltDraft = (id: string, localeCode: string, value: string) => {
+		if (id === CURRENT_ALT_ID) {
+			setCurrentAltDraft((previous) => ({
+				...previous,
+				[localeCode]: value,
+			}));
+			return;
+		}
+
 		setGenerations((previous) =>
 			previous.map((generation) => {
 				if (generation.id !== id) return generation;
@@ -778,6 +754,18 @@ const MediaAltGenerationModal: Component = () => {
 			}),
 		);
 	};
+	const toggleLocale = (localeCode: string) => {
+		if (isLoading() || aiModalsStore.get.isApplying) return;
+
+		const selected = selectedLocales();
+		if (selected.includes(localeCode)) {
+			if (selected.length === 1) return;
+			setSelectedLocales(selected.filter((item) => item !== localeCode));
+			return;
+		}
+
+		setSelectedLocales([...selected, localeCode]);
+	};
 
 	// -----------------------------
 	// Effects
@@ -799,13 +787,16 @@ const MediaAltGenerationModal: Component = () => {
 			if (!id || !activeTarget) return;
 
 			clear();
+			const localeCodes = activeTarget.locales().map((locale) => locale.code);
+			setCurrentAltDraft(buildCurrentAltDraft(activeTarget));
+			setSelectedLocales(localeCodes);
+			setSelectedGenerationId(CURRENT_ALT_ID);
 			const currentOutput = translationsToRecord(activeTarget.media().alt);
 			if (currentOutput && Object.keys(currentOutput).length > 0) {
-				setSelectedGenerationId(CURRENT_ALT_ID);
 				return;
 			}
 
-			void generate({}, activeTarget, id);
+			void generate({}, activeTarget, id, localeCodes);
 		}),
 	);
 
@@ -824,11 +815,13 @@ const MediaAltGenerationModal: Component = () => {
 			}}
 			imageUrl={previewUrl()}
 			locales={target()?.locales() ?? []}
-			currentAlt={currentAlt()}
+			selectedLocales={selectedLocales()}
+			currentAlt={currentAltDraft()}
 			generations={generations()}
 			selectedGenerationId={selectedGenerationId()}
 			error={responseError()}
-			isLoading={isLoading() || aiModalsStore.get.isApplying}
+			isLoading={isLoading()}
+			isApplying={aiModalsStore.get.isApplying}
 			callbacks={{
 				onGenerate: generate,
 				onAccept: accept,
@@ -837,7 +830,8 @@ const MediaAltGenerationModal: Component = () => {
 					clear();
 				},
 				onSelect: setSelectedGenerationId,
-				onEdit: editGeneration,
+				onToggleLocale: toggleLocale,
+				onEdit: editAltDraft,
 				onRevert: revertGeneration,
 			}}
 		/>
