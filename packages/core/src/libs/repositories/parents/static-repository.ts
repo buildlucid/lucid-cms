@@ -306,11 +306,13 @@ abstract class StaticRepository<
 			}
 		>,
 	) {
-		let query = this.db.insertInto(this.tableName).values(
-			this.formatData(props.data, {
-				type: "insert",
-			}),
-		);
+		const formattedData = this.formatData(props.data, {
+			type: "insert",
+		});
+		let query =
+			Object.keys(formattedData).length > 0
+				? this.db.insertInto(this.tableName).values(formattedData)
+				: this.db.insertInto(this.tableName).defaultValues();
 
 		if (
 			props.returnAll !== true &&

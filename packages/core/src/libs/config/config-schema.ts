@@ -125,6 +125,14 @@ const ConfigSchema = z.object({
 	openAPI: z.object({
 		enabled: z.boolean(),
 	}),
+	ai: z.object({
+		enabled: z.boolean(),
+		features: z.object({
+			imageGeneration: z.boolean(),
+			altGeneration: z.boolean(),
+			customFieldGeneration: z.boolean(),
+		}),
+	}),
 	localization: z
 		.object({
 			locales: z.array(

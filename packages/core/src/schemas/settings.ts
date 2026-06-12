@@ -3,6 +3,31 @@ import type { ControllerSchema } from "../types.js";
 import { queryString } from "./helpers/querystring.js";
 
 const settingsResponseSchema = z.object({
+	ai: z
+		.object({
+			enabled: z.boolean().meta({
+				description: "Whether AI features are enabled in the Lucid CMS config",
+				example: true,
+			}),
+			features: z
+				.object({
+					imageGeneration: z.boolean().meta({
+						description: "Whether AI image generation is enabled",
+						example: true,
+					}),
+					altGeneration: z.boolean().meta({
+						description: "Whether AI alt text generation is enabled",
+						example: true,
+					}),
+					customFieldGeneration: z.boolean().meta({
+						description: "Whether AI custom field generation is enabled",
+						example: true,
+					}),
+				})
+				.strict(),
+		})
+		.strict()
+		.optional(),
 	email: z
 		.object({
 			simulated: z.boolean().meta({
@@ -118,12 +143,12 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					include: queryString.schema.include("email,media,license,system"),
+					include: queryString.schema.include("email,media,license,system,ai"),
 				})
 				.meta(queryString.meta),
 			formatted: z.object({
 				include: z
-					.array(z.enum(["email", "media", "license", "system"]))
+					.array(z.enum(["email", "media", "license", "system", "ai"]))
 					.optional(),
 			}),
 		},

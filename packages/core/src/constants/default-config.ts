@@ -26,6 +26,14 @@ export const defaultConfig: Partial<LucidConfig> = {
 	openAPI: {
 		enabled: false,
 	},
+	ai: {
+		enabled: true,
+		features: {
+			imageGeneration: true,
+			altGeneration: true,
+			customFieldGeneration: true,
+		},
+	},
 	localization: {
 		locales: [
 			{

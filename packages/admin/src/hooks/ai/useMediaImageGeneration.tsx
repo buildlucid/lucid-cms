@@ -1,9 +1,9 @@
 import { createMemo } from "solid-js";
 import { Permissions } from "@/constants/permissions";
-import api from "@/services/api";
 import aiModalsStore, {
 	type MediaImageGenerationTarget,
 } from "@/store/aiModalsStore";
+import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import {
@@ -20,19 +20,16 @@ const getTargetId = () => {
 
 const useMediaImageGeneration = () => {
 	// -----------------------------
-	// Queries
-	const license = api.license.useGetStatus({
-		queryParams: {},
-	});
-
-	// -----------------------------
 	// Memos
+	const featureEnabled = createMemo(() =>
+		siteStore.get.isAiFeatureEnabled("imageGeneration"),
+	);
 	const hasPermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.AiImageGenerate]).all;
 	});
 	const accessState = createAiFeatureAccessState({
 		hasPermission,
-		license: () => license.data?.data,
+		license: () => siteStore.get.license ?? undefined,
 	});
 	const isBusy = createMemo(() => {
 		return aiModalsStore.get.isLoading || aiModalsStore.get.isApplying;
@@ -42,9 +39,15 @@ const useMediaImageGeneration = () => {
 	// Functions
 	const targetIsDisabled = (target?: MediaImageGenerationTarget) => {
 		if (!target) return true;
-		return accessState().disabled || isBusy() || target.disabled?.() === true;
+		return (
+			!featureEnabled() ||
+			accessState().disabled ||
+			isBusy() ||
+			target.disabled?.() === true
+		);
 	};
 	const targetTooltip = (target?: MediaImageGenerationTarget) => {
+		if (!featureEnabled()) return T()("ai.media.image.generate.disabled");
 		const access = accessState();
 		if (access.disabled) return access.message;
 		if (isBusy()) return T()("ai.media.image.generate.loading");
@@ -56,6 +59,7 @@ const useMediaImageGeneration = () => {
 		return modal?.data.targetId === targetId;
 	};
 	const open = (target: MediaImageGenerationTarget, id = getTargetId()) => {
+		if (!featureEnabled()) return;
 		if (spawnAiFeatureAccessToast(accessState())) return;
 		if (targetIsDisabled(target)) return;
 
@@ -74,6 +78,7 @@ const useMediaImageGeneration = () => {
 	// Return
 	return {
 		open,
+		isFeatureEnabled: featureEnabled,
 		accessState,
 		hasPermission,
 		isDisabled: targetIsDisabled,

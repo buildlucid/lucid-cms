@@ -162,6 +162,13 @@ export default configureLucid({
 		// 		},
 		// 	},
 		// ],
+		// ai: {
+		// 	features: {
+		// 		imageGeneration: false,
+		// 		altGeneration: false,
+		// 		customFieldGeneration: false,
+		// 	},
+		// },
 		hono: {
 			routes: [
 				async (app) => {

@@ -11,6 +11,7 @@ import Pill from "@/components/Partials/Pill";
 import constants from "@/constants";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
+import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -35,6 +36,9 @@ export const License: Component = () => {
 		const lastChecked = license()?.lastChecked;
 		return lastChecked ? new Date(lastChecked * 1000).toISOString() : null;
 	});
+	const showAiLicenseStatus = createMemo(() =>
+		siteStore.get.hasAnyAiFeatureEnabled(),
+	);
 
 	// ----------------------------------------
 	// Render
@@ -142,6 +146,7 @@ export const License: Component = () => {
 									},
 									{
 										label: T()("common.ai.features"),
+										show: showAiLicenseStatus(),
 										value: (
 											<Pill
 												theme={

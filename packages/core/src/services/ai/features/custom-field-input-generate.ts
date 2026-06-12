@@ -15,6 +15,7 @@ import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type { CustomFieldAiContextItem } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getLicenseKey from "../../options/get-license-key.js";
+import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import formatCustomFieldDocumentContext, {
 	formatCustomFieldCollectionDefinition,
 	getTranslatedBrickDetails,
@@ -93,6 +94,11 @@ const customFieldInputGenerate: ServiceFn<
 	],
 	CustomFieldInputGenerateResponse
 > = async (context, props) => {
+	const featureEnabledRes = await checkFeatureEnabled(context, {
+		feature: "customFieldGeneration",
+	});
+	if (featureEnabledRes.error) return featureEnabledRes;
+
 	const requestStartedAt = Date.now();
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;

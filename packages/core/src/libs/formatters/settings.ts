@@ -34,6 +34,17 @@ const formatSingle = (props: {
 	const includeSet = new Set(includes);
 	const response: Settings = {};
 
+	if (includeSet.has("ai")) {
+		response.ai = {
+			enabled: props.config.ai.enabled,
+			features: {
+				imageGeneration: props.config.ai.features.imageGeneration,
+				altGeneration: props.config.ai.features.altGeneration,
+				customFieldGeneration: props.config.ai.features.customFieldGeneration,
+			},
+		};
+	}
+
 	if (includeSet.has("email")) {
 		response.email = {
 			simulated: props.settings.emailSimulated,

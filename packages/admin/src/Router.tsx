@@ -1,10 +1,13 @@
 import { Route, Router } from "@solidjs/router";
 import { type Component, lazy } from "solid-js";
 import { Permissions } from "@/constants/permissions";
+import ConditionGuard from "@/guards/Condition";
 import PermissionGuard from "@/guards/Permission";
 import AuthRoutes from "@/layouts/AuthRoutes";
 import MainLayout from "@/layouts/Main";
 import PublicRoutes from "@/layouts/PublicRoutes";
+import siteStore from "@/store/siteStore";
+import userStore from "@/store/userStore";
 
 // Routes
 const ComponentsRoute = lazy(() => import("@/routes/Components"));
@@ -185,9 +188,18 @@ const AppRouter: Component = () => {
 				<Route
 					path="/system/ai-usage"
 					component={() => (
-						<PermissionGuard permission={Permissions.SettingsRead}>
-							<SystemAiUsageRoute />
-						</PermissionGuard>
+						<ConditionGuard
+							condition={() => siteStore.get.hasAnyAiFeatureEnabled()}
+							redirect={() =>
+								userStore.get.hasPermission([Permissions.SettingsRead]).all
+									? "/lucid/system/overview"
+									: "/lucid"
+							}
+						>
+							<PermissionGuard permission={Permissions.SettingsRead}>
+								<SystemAiUsageRoute />
+							</PermissionGuard>
+						</ConditionGuard>
 					)}
 				/>
 				<Route

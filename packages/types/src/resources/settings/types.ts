@@ -1,6 +1,14 @@
-export type SettingsInclude = "email" | "media" | "license" | "system";
+export type SettingsInclude = "email" | "media" | "license" | "system" | "ai";
 
 export interface Settings {
+	ai?: {
+		enabled: boolean;
+		features: {
+			imageGeneration: boolean;
+			altGeneration: boolean;
+			customFieldGeneration: boolean;
+		};
+	};
 	email?: {
 		simulated: boolean;
 		templates: string[];

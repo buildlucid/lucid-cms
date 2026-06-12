@@ -423,7 +423,6 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				label: T()("media.file.pending.reset"),
 				icon: "restore" as const,
 				hide: props.pendingChange === undefined,
-				theme: "primary" as const,
 				onClick: () => props.pendingChange?.reset(),
 			},
 			{
@@ -612,7 +611,6 @@ type PreviewQuickAction = {
 	hide?: boolean;
 	disabled?: boolean;
 	loading?: boolean;
-	theme?: "primary";
 	onClick: () => void;
 };
 
@@ -626,13 +624,7 @@ const PreviewActionButton: Component<{
 			title={props.action.label}
 			aria-label={props.action.label}
 			aria-busy={props.action.loading ? "true" : undefined}
-			class={classNames(
-				"pointer-events-auto inline-flex h-7 max-w-32 items-center gap-1.5 rounded-md border border-border bg-input-base px-2 text-xs font-medium text-subtitle shadow-sm transition-colors duration-200 hover:bg-background-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
-				{
-					"border-primary-base/60 bg-input-base text-primary-base hover:bg-primary-base/10 hover:text-primary-base":
-						props.action.theme === "primary" && !props.action.disabled,
-				},
-			)}
+			class="pointer-events-auto inline-flex h-7 max-w-32 items-center gap-1.5 rounded-md border border-border bg-input-base px-2 text-xs font-medium text-subtitle shadow-sm transition-colors duration-200 hover:bg-background-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60"
 			onClick={(event) => {
 				event.preventDefault();
 				event.stopPropagation();

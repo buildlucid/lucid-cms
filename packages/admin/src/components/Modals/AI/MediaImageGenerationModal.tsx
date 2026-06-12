@@ -41,6 +41,7 @@ import type {
 	MediaImageGenerationSize,
 } from "@/services/api/ai/useMediaImageGenerate";
 import aiModalsStore, { type AiImageSource } from "@/store/aiModalsStore";
+import siteStore from "@/store/siteStore";
 import T from "@/translations";
 import { prepareAiImage } from "@/utils/ai-image";
 import { LucidError } from "@/utils/error-handling";
@@ -149,6 +150,9 @@ const MediaImageGenerationModal: Component = () => {
 
 	// -----------------------------
 	// Memos
+	const featureEnabled = createMemo(() =>
+		siteStore.get.isAiFeatureEnabled("imageGeneration"),
+	);
 	const modal = createMemo(() =>
 		aiModalsStore.getModal("mediaImageGeneration"),
 	);
@@ -947,6 +951,10 @@ const MediaImageGenerationModal: Component = () => {
 	});
 
 	createEffect(() => {
+		if (!featureEnabled() && isOpen()) close(false);
+	});
+
+	createEffect(() => {
 		const currentSource = source();
 		if (currentSource?.image.file) {
 			const objectUrl = URL.createObjectURL(currentSource.image.file);
@@ -987,546 +995,560 @@ const MediaImageGenerationModal: Component = () => {
 	// -----------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: isOpen(),
-				setOpen: close,
-			}}
-			options={{
-				size: "large",
-				noPadding: true,
-			}}
-		>
-			<div class="grid min-w-0 w-full items-stretch gap-0 lg:grid-cols-[minmax(27rem,0.72fr)_minmax(0,1fr)]">
-				<div class="flex min-h-130 min-w-0 w-full flex-col gap-4 border-b border-border bg-card-base p-4 md:p-6 lg:border-r lg:border-b-0">
-					<div class="min-w-0">
-						<div class="mb-1.5 flex items-center justify-between gap-2">
-							<span class="text-sm text-body">
-								{T()("ai.media.image.generate.source.label")}
-							</span>
-						</div>
-						<input
-							ref={sourceInputRef}
-							type="file"
-							accept="image/*"
-							class="hidden"
-							onChange={selectSourceFile}
-						/>
-						<Show
-							when={source()}
-							fallback={
-								<div class="grid min-h-20.5 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-dashed border-border bg-background-base p-2">
-									<p class="min-w-0 ml-2 truncate text-sm text-body">
-										{T()("ai.media.image.generate.source.empty")}
-									</p>
-									<div class="flex items-center gap-1">
-										<Show
-											when={
-												source() === undefined && initialSource() !== undefined
-											}
-										>
+		<Show when={featureEnabled()}>
+			<Modal
+				state={{
+					open: isOpen(),
+					setOpen: close,
+				}}
+				options={{
+					size: "large",
+					noPadding: true,
+				}}
+			>
+				<div class="grid min-w-0 w-full items-stretch gap-0 lg:grid-cols-[minmax(27rem,0.72fr)_minmax(0,1fr)]">
+					<div class="flex min-h-130 min-w-0 w-full flex-col gap-4 border-b border-border bg-card-base p-4 md:p-6 lg:border-r lg:border-b-0">
+						<div class="min-w-0">
+							<div class="mb-1.5 flex items-center justify-between gap-2">
+								<span class="text-sm text-body">
+									{T()("ai.media.image.generate.source.label")}
+								</span>
+							</div>
+							<input
+								ref={sourceInputRef}
+								type="file"
+								accept="image/*"
+								class="hidden"
+								onChange={selectSourceFile}
+							/>
+							<Show
+								when={source()}
+								fallback={
+									<div class="grid min-h-20.5 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-dashed border-border bg-background-base p-2">
+										<p class="min-w-0 ml-2 truncate text-sm text-body">
+											{T()("ai.media.image.generate.source.empty")}
+										</p>
+										<div class="flex items-center gap-1">
+											<Show
+												when={
+													source() === undefined &&
+													initialSource() !== undefined
+												}
+											>
+												<Button
+													type="button"
+													theme="secondary-subtle"
+													size="icon-subtle"
+													title={T()("ai.media.image.generate.source.restore")}
+													aria-label={T()(
+														"ai.media.image.generate.source.restore",
+													)}
+													onClick={restoreSource}
+												>
+													<FaSolidArrowRotateLeft size={14} />
+												</Button>
+											</Show>
 											<Button
 												type="button"
 												theme="secondary-subtle"
 												size="icon-subtle"
-												title={T()("ai.media.image.generate.source.restore")}
-												aria-label={T()(
-													"ai.media.image.generate.source.restore",
-												)}
-												onClick={restoreSource}
+												title={T()("ai.media.image.generate.source.add")}
+												aria-label={T()("ai.media.image.generate.source.add")}
+												onClick={() => sourceInputRef?.click()}
 											>
-												<FaSolidArrowRotateLeft size={14} />
+												<FaSolidArrowUpFromBracket size={14} />
 											</Button>
-										</Show>
-										<Button
-											type="button"
-											theme="secondary-subtle"
-											size="icon-subtle"
-											title={T()("ai.media.image.generate.source.add")}
-											aria-label={T()("ai.media.image.generate.source.add")}
-											onClick={() => sourceInputRef?.click()}
-										>
-											<FaSolidArrowUpFromBracket size={14} />
-										</Button>
+										</div>
 									</div>
-								</div>
-							}
-						>
-							{(source) => (
-								<div class="grid min-w-0 grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-border bg-input-base p-2">
-									<div class="rectangle-background flex h-16 min-w-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-background-base">
-										<Show
-											when={sourcePreviewUrl()}
-											fallback={
-												<FaSolidImage
-													class="relative z-10 h-5 w-5 text-icon-fade"
-													aria-hidden="true"
-												/>
-											}
-										>
-											{(url) => (
-												<img
-													src={url()}
-													alt=""
-													class="relative z-10 h-full w-full object-contain"
-												/>
-											)}
-										</Show>
-									</div>
-									<div class="min-w-0">
-										<p class="truncate text-sm font-medium text-title">
-											{source().label}
-										</p>
-										<p class="mt-1 text-xs text-body">
-											{T()(`ai.media.image.generate.source.${source().type}`)}
-										</p>
-									</div>
-									<div class="flex items-center gap-1">
-										<Button
-											type="button"
-											theme="secondary-subtle"
-											size="icon-subtle"
-											title={T()("ai.media.image.generate.source.replace")}
-											aria-label={T()("ai.media.image.generate.source.replace")}
-											onClick={() => sourceInputRef?.click()}
-										>
-											<FaSolidArrowUpFromBracket size={14} />
-										</Button>
-										<Button
-											type="button"
-											theme="danger-subtle"
-											size="icon-subtle"
-											title={T()("common.remove")}
-											aria-label={T()("common.remove")}
-											onClick={() => setSource(undefined)}
-										>
-											<FaSolidXmark size={14} />
-										</Button>
-									</div>
-								</div>
-							)}
-						</Show>
-					</div>
-					<div class="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(78px,0.32fr)_minmax(78px,0.32fr)] gap-3">
-						<Select
-							id="ai-media-image-generation-resolution"
-							value={resolutionPreset()}
-							onChange={(value) =>
-								updateResolutionPreset(
-									(value ??
-										"1024x1024") as MediaImageGenerationResolutionPreset,
-								)
-							}
-							options={resolutionPresets.map((option) => ({
-								value: option.value,
-								label: T()(option.label),
-							}))}
-							name="ai-media-image-generation-resolution"
-							copy={{
-								label: T()("ai.media.image.generate.resolution.label"),
-							}}
-							noClear
-							noMargin
-							hideOptionalText
-							errors={generationFieldError("size")}
-						/>
-						<Input
-							id="ai-media-image-generation-width"
-							name="ai-media-image-generation-width"
-							value={customWidth()}
-							onChange={setCustomWidth}
-							type="number"
-							min={16}
-							max={3840}
-							step={16}
-							disabled={!isCustomResolution()}
-							copy={{
-								label: T()("ai.media.image.generate.resolution.width"),
-							}}
-							noMargin
-							hideOptionalText
-						/>
-						<Input
-							id="ai-media-image-generation-height"
-							name="ai-media-image-generation-height"
-							value={customHeight()}
-							onChange={setCustomHeight}
-							type="number"
-							min={16}
-							max={3840}
-							step={16}
-							disabled={!isCustomResolution()}
-							copy={{
-								label: T()("ai.media.image.generate.resolution.height"),
-							}}
-							noMargin
-							hideOptionalText
-						/>
-					</div>
-					<div class="grid min-w-0 gap-3 sm:grid-cols-2">
-						<Select
-							id="ai-media-image-generation-quality"
-							value={quality()}
-							onChange={(value) =>
-								setQuality((value ?? "medium") as MediaImageGenerationQuality)
-							}
-							options={[
-								{
-									value: "medium",
-									label: T()("ai.media.image.generate.quality.option.medium"),
-								},
-								{
-									value: "low",
-									label: T()("ai.media.image.generate.quality.option.low"),
-								},
-								{
-									value: "high",
-									label: T()("ai.media.image.generate.quality.option.high"),
-								},
-								{
-									value: "auto",
-									label: T()("ai.media.image.generate.quality.option.auto"),
-								},
-							]}
-							name="ai-media-image-generation-quality"
-							copy={{ label: T()("ai.media.image.generate.quality.label") }}
-							noClear
-							noMargin
-							hideOptionalText
-							errors={generationFieldError("quality")}
-						/>
-						<Select
-							id="ai-media-image-generation-format"
-							value={outputFormat()}
-							onChange={(value) =>
-								setOutputFormat(
-									(value ?? "webp") as MediaImageGenerationOutputFormat,
-								)
-							}
-							options={[
-								{
-									value: "webp",
-									label: T()("ai.media.image.generate.format.option.webp"),
-								},
-								{
-									value: "png",
-									label: T()("ai.media.image.generate.format.option.png"),
-								},
-								{
-									value: "jpeg",
-									label: T()("ai.media.image.generate.format.option.jpeg"),
-								},
-							]}
-							name="ai-media-image-generation-format"
-							copy={{ label: T()("ai.media.image.generate.format.label") }}
-							noClear
-							noMargin
-							hideOptionalText
-							errors={generationFieldError("outputFormat")}
-						/>
-					</div>
-					<div class="min-w-0">
-						<Label
-							id="ai-media-image-generation-guidance"
-							label={T()("ai.generation.guidance.label")}
-							theme="basic"
-							hideOptionalText
-						/>
-						<div class="flex min-w-0 flex-wrap gap-2">
-							<For each={imageGuidanceOptions}>
-								{(option) => {
-									const selected = createMemo(() => guidance() === option.key);
-									const optionLabel = createMemo(() => T()(option.label));
-									const optionInstruction = createMemo(() =>
-										T()(option.instruction),
-									);
-
-									return (
-										<HoverCard.Root>
-											<HoverCard.Trigger
-												as={(triggerProps: Omit<PillButtonProps, "as">) => (
-													<Pill {...triggerProps} as="button" />
-												)}
-												theme={selected() ? "primary-opaque" : "outline"}
-												aria-pressed={selected()}
-												disabled={isLoading()}
-												onClick={() =>
-													setGuidance(selected() ? undefined : option.key)
+								}
+							>
+								{(source) => (
+									<div class="grid min-w-0 grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-border bg-input-base p-2">
+										<div class="rectangle-background flex h-16 min-w-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-background-base">
+											<Show
+												when={sourcePreviewUrl()}
+												fallback={
+													<FaSolidImage
+														class="relative z-10 h-5 w-5 text-icon-fade"
+														aria-hidden="true"
+													/>
 												}
 											>
-												{optionLabel()}
-											</HoverCard.Trigger>
-											<HoverCard.Portal>
-												<HoverCard.Content class="z-70 bg-card-base w-80 mt-2 rounded-md border border-border p-3 shadow-xs">
-													<p class="mb-1 text-sm font-semibold text-title">
-														{optionLabel()}
-													</p>
-													<p class="text-sm text-card-contrast">
-														{optionInstruction()}
-													</p>
-												</HoverCard.Content>
-											</HoverCard.Portal>
-										</HoverCard.Root>
-									);
-								}}
-							</For>
-						</div>
-					</div>
-					<form class="min-w-0" onSubmit={submitGenerate}>
-						<Textarea
-							id="ai-media-image-generation-instruction"
-							name="ai-media-image-generation-instruction"
-							value={instruction()}
-							onChange={setInstruction}
-							onKeyUp={(event) => {
-								if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-									submitGenerate();
-								}
-							}}
-							copy={{
-								label: T()("ai.generation.instruction.label"),
-								placeholder: T()(
-									"ai.media.image.generate.instruction.placeholder",
-								),
-							}}
-							rows={8}
-							noMargin
-							hideOptionalText
-							errors={instructionError()}
-						/>
-						<Show when={responseError()}>
-							{(error) => (
-								<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
-									<p class="text-sm text-error-base">{error()}</p>
-								</div>
-							)}
-						</Show>
-						<div class="mt-4">
-							<Button
-								type="submit"
-								theme="secondary"
-								size="medium"
-								classes="w-full min-w-0! gap-2"
-								loading={isLoading()}
-								disabled={!canGenerate()}
-							>
-								<FaSolidPaperPlane size={12} aria-hidden="true" />
-								{isLoading()
-									? T()("ai.media.image.generate.modal.generating")
-									: T()("ai.media.image.generate.modal.generate")}
-							</Button>
-						</div>
-					</form>
-				</div>
-				<div class="dotted-background relative flex max-h-[min(86vh,820px)] min-h-130 min-w-0 flex-col self-stretch overflow-hidden px-4 md:px-6">
-					<div class="relative min-h-0 min-w-0 flex-1">
-						<div
-							class={
-								historyItems().length > 0
-									? "relative z-10 flex h-full min-h-0 min-w-0 flex-col gap-3 md:grid md:grid-cols-[116px_minmax(0,1fr)] md:gap-4"
-									: "relative z-10 flex h-full min-h-0 min-w-0 flex-col"
-							}
-						>
-							<Show when={historyItems().length > 0}>
-								<GenerationHistory
-									id="ai-media-image-generation-history"
-									items={historyItems()}
-									activeItemId={selectedGenerationId()}
-									onSelect={setSelectedGenerationId}
-								/>
-							</Show>
-							<div
-								ref={responseColumnRef}
-								class="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto pt-0 pr-1 pb-0 md:py-6"
-							>
-								<Show
-									when={selectedWorkingGeneration()}
-									fallback={
-										<Show when={selectedGeneration()}>
-											{(generation) => (
-												<div class="min-w-0 space-y-3">
-													<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card-base">
-														<img
-															src={generation().output.url}
-															alt=""
-															class="relative z-10 h-full max-h-96 w-full object-contain p-4"
-														/>
-													</div>
-													<div class="space-y-3">
-														<Show when={generationSummary(generation())}>
-															{(summary) => (
-																<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
-																	<p class="line-clamp-3 text-sm leading-5 text-body">
-																		{summary()}
-																	</p>
-																</div>
-															)}
-														</Show>
-														<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
-															<DetailsList
-																type="text"
-																theme="contained"
-																items={completedGenerationDetails(generation())}
-															/>
-														</div>
-														<div class="flex min-w-0 flex-wrap gap-2">
-															<Button
-																type="button"
-																theme="secondary"
-																size="small"
-																classes="gap-2"
-																onClick={() =>
-																	useGenerationAsSource(generation())
-																}
-															>
-																<FaSolidImage size={12} aria-hidden="true" />
-																{T()("ai.media.image.generate.source.use")}
-															</Button>
-															<Button
-																type="button"
-																theme="border-outline"
-																size="small"
-																classes="gap-2"
-																disabled={isLoading()}
-																onClick={() => retryGeneration(generation())}
-															>
-																<FaSolidArrowRotateLeft
-																	size={12}
-																	aria-hidden="true"
-																/>
-																{T()("ai.media.image.generate.response.retry")}
-															</Button>
-														</div>
-													</div>
-												</div>
-											)}
-										</Show>
-									}
-								>
-									{(pending) => (
-										<div class="min-w-0 space-y-3">
-											<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card-base">
-												<span class="skeleton absolute inset-0 z-10 opacity-80" />
-												<div class="relative z-20 flex min-w-0 max-w-xs flex-col items-center gap-2 px-4 text-center">
-													<span
-														class="ai-action-button__surface flex h-8 min-w-8 items-center justify-center rounded-md border border-border text-primary-base"
-														data-loading={isLoading()}
-													>
-														<FaSolidMagicWandSparkles
-															size={12}
-															aria-hidden="true"
-														/>
-													</span>
-													<div class="min-w-0 max-w-60">
-														<p class="text-xs font-medium text-unfocused">
-															{T()(
-																"ai.media.image.generate.response.inflight.title",
-															)}
-														</p>
-													</div>
-												</div>
-											</div>
-											<div class="space-y-3">
-												<Show when={generationSummary(pending())}>
-													{(summary) => (
-														<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
-															<p class="line-clamp-3 text-sm leading-5 text-body">
-																{summary()}
-															</p>
-														</div>
-													)}
-												</Show>
-												<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
-													<DetailsList
-														type="text"
-														theme="contained"
-														items={pendingGenerationDetails(pending())}
+												{(url) => (
+													<img
+														src={url()}
+														alt=""
+														class="relative z-10 h-full w-full object-contain"
 													/>
-												</div>
-												<Show when={resumableSelectedPendingGeneration()}>
-													{(resumablePending) => (
-														<div class="flex min-w-0 flex-wrap gap-2">
-															<Button
-																type="button"
-																theme="border-outline"
-																size="small"
-																classes="gap-2"
-																disabled={isLoading()}
-																onClick={() =>
-																	resumePendingGeneration(resumablePending())
-																}
-															>
-																<FaSolidArrowRotateLeft
-																	size={12}
-																	aria-hidden="true"
-																/>
-																{T()(
-																	"ai.media.image.generate.response.inflight.resume",
-																)}
-															</Button>
-															<Button
-																type="button"
-																theme="danger-outline"
-																size="small"
-																classes="gap-2"
-																disabled={isLoading()}
-																onClick={() =>
-																	discardPendingGeneration(resumablePending())
-																}
-															>
-																<FaSolidXmark size={12} aria-hidden="true" />
-																{T()(
-																	"ai.media.image.generate.response.inflight.discard",
-																)}
-															</Button>
-														</div>
-													)}
-												</Show>
-											</div>
+												)}
+											</Show>
 										</div>
-									)}
-								</Show>
-							</div>
-						</div>
-					</div>
-					<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card-base/95 p-6 backdrop-blur-sm md:-mx-6">
-						<div class="min-w-0 flex-1">
-							<Show when={sessionCost()}>
-								{(cost) => (
-									<p class="text-xs text-body">
-										{T()("ai.media.image.generate.cost.total", {
-											cost: cost(),
-										})}
-									</p>
+										<div class="min-w-0">
+											<p class="truncate text-sm font-medium text-title">
+												{source().label}
+											</p>
+											<p class="mt-1 text-xs text-body">
+												{T()(`ai.media.image.generate.source.${source().type}`)}
+											</p>
+										</div>
+										<div class="flex items-center gap-1">
+											<Button
+												type="button"
+												theme="secondary-subtle"
+												size="icon-subtle"
+												title={T()("ai.media.image.generate.source.replace")}
+												aria-label={T()(
+													"ai.media.image.generate.source.replace",
+												)}
+												onClick={() => sourceInputRef?.click()}
+											>
+												<FaSolidArrowUpFromBracket size={14} />
+											</Button>
+											<Button
+												type="button"
+												theme="danger-subtle"
+												size="icon-subtle"
+												title={T()("common.remove")}
+												aria-label={T()("common.remove")}
+												onClick={() => setSource(undefined)}
+											>
+												<FaSolidXmark size={14} />
+											</Button>
+										</div>
+									</div>
 								)}
 							</Show>
 						</div>
-						<div class="flex shrink-0 items-center gap-3">
-							<Button
-								type="button"
-								theme="border-outline"
-								size="medium"
-								onClick={() => close(false)}
-							>
-								{T()("common.cancel")}
-							</Button>
-							<Button
-								type="button"
-								theme="primary"
-								size="medium"
-								onClick={() => {
-									void accept();
+						<div class="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(78px,0.32fr)_minmax(78px,0.32fr)] gap-3">
+							<Select
+								id="ai-media-image-generation-resolution"
+								value={resolutionPreset()}
+								onChange={(value) =>
+									updateResolutionPreset(
+										(value ??
+											"1024x1024") as MediaImageGenerationResolutionPreset,
+									)
+								}
+								options={resolutionPresets.map((option) => ({
+									value: option.value,
+									label: T()(option.label),
+								}))}
+								name="ai-media-image-generation-resolution"
+								copy={{
+									label: T()("ai.media.image.generate.resolution.label"),
 								}}
-								loading={aiModalsStore.get.isApplying}
-								disabled={!selectedGeneration() || isLoading()}
+								noClear
+								noMargin
+								hideOptionalText
+								errors={generationFieldError("size")}
+							/>
+							<Input
+								id="ai-media-image-generation-width"
+								name="ai-media-image-generation-width"
+								value={customWidth()}
+								onChange={setCustomWidth}
+								type="number"
+								min={16}
+								max={3840}
+								step={16}
+								disabled={!isCustomResolution()}
+								copy={{
+									label: T()("ai.media.image.generate.resolution.width"),
+								}}
+								noMargin
+								hideOptionalText
+							/>
+							<Input
+								id="ai-media-image-generation-height"
+								name="ai-media-image-generation-height"
+								value={customHeight()}
+								onChange={setCustomHeight}
+								type="number"
+								min={16}
+								max={3840}
+								step={16}
+								disabled={!isCustomResolution()}
+								copy={{
+									label: T()("ai.media.image.generate.resolution.height"),
+								}}
+								noMargin
+								hideOptionalText
+							/>
+						</div>
+						<div class="grid min-w-0 gap-3 sm:grid-cols-2">
+							<Select
+								id="ai-media-image-generation-quality"
+								value={quality()}
+								onChange={(value) =>
+									setQuality((value ?? "medium") as MediaImageGenerationQuality)
+								}
+								options={[
+									{
+										value: "medium",
+										label: T()("ai.media.image.generate.quality.option.medium"),
+									},
+									{
+										value: "low",
+										label: T()("ai.media.image.generate.quality.option.low"),
+									},
+									{
+										value: "high",
+										label: T()("ai.media.image.generate.quality.option.high"),
+									},
+									{
+										value: "auto",
+										label: T()("ai.media.image.generate.quality.option.auto"),
+									},
+								]}
+								name="ai-media-image-generation-quality"
+								copy={{ label: T()("ai.media.image.generate.quality.label") }}
+								noClear
+								noMargin
+								hideOptionalText
+								errors={generationFieldError("quality")}
+							/>
+							<Select
+								id="ai-media-image-generation-format"
+								value={outputFormat()}
+								onChange={(value) =>
+									setOutputFormat(
+										(value ?? "webp") as MediaImageGenerationOutputFormat,
+									)
+								}
+								options={[
+									{
+										value: "webp",
+										label: T()("ai.media.image.generate.format.option.webp"),
+									},
+									{
+										value: "png",
+										label: T()("ai.media.image.generate.format.option.png"),
+									},
+									{
+										value: "jpeg",
+										label: T()("ai.media.image.generate.format.option.jpeg"),
+									},
+								]}
+								name="ai-media-image-generation-format"
+								copy={{ label: T()("ai.media.image.generate.format.label") }}
+								noClear
+								noMargin
+								hideOptionalText
+								errors={generationFieldError("outputFormat")}
+							/>
+						</div>
+						<div class="min-w-0">
+							<Label
+								id="ai-media-image-generation-guidance"
+								label={T()("ai.generation.guidance.label")}
+								theme="basic"
+								hideOptionalText
+							/>
+							<div class="flex min-w-0 flex-wrap gap-2">
+								<For each={imageGuidanceOptions}>
+									{(option) => {
+										const selected = createMemo(
+											() => guidance() === option.key,
+										);
+										const optionLabel = createMemo(() => T()(option.label));
+										const optionInstruction = createMemo(() =>
+											T()(option.instruction),
+										);
+
+										return (
+											<HoverCard.Root>
+												<HoverCard.Trigger
+													as={(triggerProps: Omit<PillButtonProps, "as">) => (
+														<Pill {...triggerProps} as="button" />
+													)}
+													theme={selected() ? "primary-opaque" : "outline"}
+													aria-pressed={selected()}
+													disabled={isLoading()}
+													onClick={() =>
+														setGuidance(selected() ? undefined : option.key)
+													}
+												>
+													{optionLabel()}
+												</HoverCard.Trigger>
+												<HoverCard.Portal>
+													<HoverCard.Content class="z-70 bg-card-base w-80 mt-2 rounded-md border border-border p-3 shadow-xs">
+														<p class="mb-1 text-sm font-semibold text-title">
+															{optionLabel()}
+														</p>
+														<p class="text-sm text-card-contrast">
+															{optionInstruction()}
+														</p>
+													</HoverCard.Content>
+												</HoverCard.Portal>
+											</HoverCard.Root>
+										);
+									}}
+								</For>
+							</div>
+						</div>
+						<form class="min-w-0" onSubmit={submitGenerate}>
+							<Textarea
+								id="ai-media-image-generation-instruction"
+								name="ai-media-image-generation-instruction"
+								value={instruction()}
+								onChange={setInstruction}
+								onKeyUp={(event) => {
+									if (
+										(event.metaKey || event.ctrlKey) &&
+										event.key === "Enter"
+									) {
+										submitGenerate();
+									}
+								}}
+								copy={{
+									label: T()("ai.generation.instruction.label"),
+									placeholder: T()(
+										"ai.media.image.generate.instruction.placeholder",
+									),
+								}}
+								rows={8}
+								noMargin
+								hideOptionalText
+								errors={instructionError()}
+							/>
+							<Show when={responseError()}>
+								{(error) => (
+									<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
+										<p class="text-sm text-error-base">{error()}</p>
+									</div>
+								)}
+							</Show>
+							<div class="mt-4">
+								<Button
+									type="submit"
+									theme="secondary"
+									size="medium"
+									classes="w-full min-w-0! gap-2"
+									loading={isLoading()}
+									disabled={!canGenerate()}
+								>
+									<FaSolidPaperPlane size={12} aria-hidden="true" />
+									{isLoading()
+										? T()("ai.media.image.generate.modal.generating")
+										: T()("ai.media.image.generate.modal.generate")}
+								</Button>
+							</div>
+						</form>
+					</div>
+					<div class="dotted-background relative flex max-h-[min(86vh,820px)] min-h-130 min-w-0 flex-col self-stretch overflow-hidden px-4 md:px-6">
+						<div class="relative min-h-0 min-w-0 flex-1">
+							<div
+								class={
+									historyItems().length > 0
+										? "relative z-10 flex h-full min-h-0 min-w-0 flex-col gap-3 md:grid md:grid-cols-[116px_minmax(0,1fr)] md:gap-4"
+										: "relative z-10 flex h-full min-h-0 min-w-0 flex-col"
+								}
 							>
-								{T()("ai.media.image.generate.modal.accept")}
-							</Button>
+								<Show when={historyItems().length > 0}>
+									<GenerationHistory
+										id="ai-media-image-generation-history"
+										items={historyItems()}
+										activeItemId={selectedGenerationId()}
+										onSelect={setSelectedGenerationId}
+									/>
+								</Show>
+								<div
+									ref={responseColumnRef}
+									class="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto pt-0 pr-1 pb-0 md:py-6"
+								>
+									<Show
+										when={selectedWorkingGeneration()}
+										fallback={
+											<Show when={selectedGeneration()}>
+												{(generation) => (
+													<div class="min-w-0 space-y-3">
+														<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card-base">
+															<img
+																src={generation().output.url}
+																alt=""
+																class="relative z-10 h-full max-h-96 w-full object-contain p-4"
+															/>
+														</div>
+														<div class="space-y-3">
+															<Show when={generationSummary(generation())}>
+																{(summary) => (
+																	<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+																		<p class="line-clamp-3 text-sm leading-5 text-body">
+																			{summary()}
+																		</p>
+																	</div>
+																)}
+															</Show>
+															<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+																<DetailsList
+																	type="text"
+																	theme="contained"
+																	items={completedGenerationDetails(
+																		generation(),
+																	)}
+																/>
+															</div>
+															<div class="flex min-w-0 flex-wrap gap-2">
+																<Button
+																	type="button"
+																	theme="secondary"
+																	size="small"
+																	classes="gap-2"
+																	onClick={() =>
+																		useGenerationAsSource(generation())
+																	}
+																>
+																	<FaSolidImage size={12} aria-hidden="true" />
+																	{T()("ai.media.image.generate.source.use")}
+																</Button>
+																<Button
+																	type="button"
+																	theme="border-outline"
+																	size="small"
+																	classes="gap-2"
+																	disabled={isLoading()}
+																	onClick={() => retryGeneration(generation())}
+																>
+																	<FaSolidArrowRotateLeft
+																		size={12}
+																		aria-hidden="true"
+																	/>
+																	{T()(
+																		"ai.media.image.generate.response.retry",
+																	)}
+																</Button>
+															</div>
+														</div>
+													</div>
+												)}
+											</Show>
+										}
+									>
+										{(pending) => (
+											<div class="min-w-0 space-y-3">
+												<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card-base">
+													<span class="skeleton absolute inset-0 z-10 opacity-80" />
+													<div class="relative z-20 flex min-w-0 max-w-xs flex-col items-center gap-2 px-4 text-center">
+														<span
+															class="ai-action-button__surface flex h-8 min-w-8 items-center justify-center rounded-md border border-border text-primary-base"
+															data-loading={isLoading()}
+														>
+															<FaSolidMagicWandSparkles
+																size={12}
+																aria-hidden="true"
+															/>
+														</span>
+														<div class="min-w-0 max-w-60">
+															<p class="text-xs font-medium text-unfocused">
+																{T()(
+																	"ai.media.image.generate.response.inflight.title",
+																)}
+															</p>
+														</div>
+													</div>
+												</div>
+												<div class="space-y-3">
+													<Show when={generationSummary(pending())}>
+														{(summary) => (
+															<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+																<p class="line-clamp-3 text-sm leading-5 text-body">
+																	{summary()}
+																</p>
+															</div>
+														)}
+													</Show>
+													<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+														<DetailsList
+															type="text"
+															theme="contained"
+															items={pendingGenerationDetails(pending())}
+														/>
+													</div>
+													<Show when={resumableSelectedPendingGeneration()}>
+														{(resumablePending) => (
+															<div class="flex min-w-0 flex-wrap gap-2">
+																<Button
+																	type="button"
+																	theme="border-outline"
+																	size="small"
+																	classes="gap-2"
+																	disabled={isLoading()}
+																	onClick={() =>
+																		resumePendingGeneration(resumablePending())
+																	}
+																>
+																	<FaSolidArrowRotateLeft
+																		size={12}
+																		aria-hidden="true"
+																	/>
+																	{T()(
+																		"ai.media.image.generate.response.inflight.resume",
+																	)}
+																</Button>
+																<Button
+																	type="button"
+																	theme="danger-outline"
+																	size="small"
+																	classes="gap-2"
+																	disabled={isLoading()}
+																	onClick={() =>
+																		discardPendingGeneration(resumablePending())
+																	}
+																>
+																	<FaSolidXmark size={12} aria-hidden="true" />
+																	{T()(
+																		"ai.media.image.generate.response.inflight.discard",
+																	)}
+																</Button>
+															</div>
+														)}
+													</Show>
+												</div>
+											</div>
+										)}
+									</Show>
+								</div>
+							</div>
+						</div>
+						<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card-base/95 p-6 backdrop-blur-sm md:-mx-6">
+							<div class="min-w-0 flex-1">
+								<Show when={sessionCost()}>
+									{(cost) => (
+										<p class="text-xs text-body">
+											{T()("ai.media.image.generate.cost.total", {
+												cost: cost(),
+											})}
+										</p>
+									)}
+								</Show>
+							</div>
+							<div class="flex shrink-0 items-center gap-3">
+								<Button
+									type="button"
+									theme="border-outline"
+									size="medium"
+									onClick={() => close(false)}
+								>
+									{T()("common.cancel")}
+								</Button>
+								<Button
+									type="button"
+									theme="primary"
+									size="medium"
+									onClick={() => {
+										void accept();
+									}}
+									loading={aiModalsStore.get.isApplying}
+									disabled={!selectedGeneration() || isLoading()}
+								>
+									{T()("ai.media.image.generate.modal.accept")}
+								</Button>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</Modal>
+			</Modal>
+		</Show>
 	);
 };
 

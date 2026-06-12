@@ -5,6 +5,7 @@ import {
 } from "@/components/Groups/Headers/Standard";
 import { NavigationTabs } from "@/components/Groups/Layout";
 import { Permissions } from "@/constants/permissions";
+import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -24,6 +25,9 @@ const SystemSettingsHeader: Component<{
 	);
 	const canManageLicense = createMemo(
 		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
+	);
+	const canReadAiUsage = createMemo(
+		() => canReadSettings() && siteStore.get.hasAnyAiFeatureEnabled(),
 	);
 
 	// ----------------------------------------
@@ -62,7 +66,7 @@ const SystemSettingsHeader: Component<{
 							{
 								label: T()("common.ai.usage"),
 								href: "/lucid/system/ai-usage",
-								permission: canReadSettings(),
+								permission: canReadAiUsage(),
 							},
 							{
 								label: T()("common.license"),

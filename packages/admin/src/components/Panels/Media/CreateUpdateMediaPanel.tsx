@@ -1327,52 +1327,54 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 											<FaSolidImage size={14} />
 										</Button>
 									</Show>
-									<Button
-										type="button"
-										theme="secondary-subtle"
-										size="icon-subtle"
-										onClick={(event) => {
-											event.preventDefault();
-											event.stopPropagation();
-											mediaImageGeneration.open(
+									<Show when={mediaImageGeneration.isFeatureEnabled()}>
+										<Button
+											type="button"
+											theme="secondary-subtle"
+											size="icon-subtle"
+											onClick={(event) => {
+												event.preventDefault();
+												event.stopPropagation();
+												mediaImageGeneration.open(
+													posterImageGenerationTarget,
+													posterImageGenerationTargetId,
+												);
+											}}
+											title={mediaImageGeneration.getTooltip(
 												posterImageGenerationTarget,
+											)}
+											aria-label={T()("ai.media.image.generate.action")}
+											aria-disabled={
+												mediaImageGeneration.isDisabled(
+													posterImageGenerationTarget,
+												)
+													? "true"
+													: undefined
+											}
+											aria-busy={
+												mediaImageGeneration.isTargetLoading(
+													posterImageGenerationTargetId,
+												)
+													? "true"
+													: undefined
+											}
+											loading={mediaImageGeneration.isTargetLoading(
 												posterImageGenerationTargetId,
-											);
-										}}
-										title={mediaImageGeneration.getTooltip(
-											posterImageGenerationTarget,
-										)}
-										aria-label={T()("ai.media.image.generate.action")}
-										aria-disabled={
-											mediaImageGeneration.isDisabled(
-												posterImageGenerationTarget,
-											)
-												? "true"
-												: undefined
-										}
-										aria-busy={
-											mediaImageGeneration.isTargetLoading(
-												posterImageGenerationTargetId,
-											)
-												? "true"
-												: undefined
-										}
-										loading={mediaImageGeneration.isTargetLoading(
-											posterImageGenerationTargetId,
-										)}
-										disabled={
-											mediaImageGeneration.isDisabled(
-												posterImageGenerationTarget,
-											) && !mediaImageGeneration.accessState().disabled
-										}
-										classes={
-											mediaImageGeneration.accessState().disabled
-												? "opacity-80 cursor-not-allowed"
-												: undefined
-										}
-									>
-										<FaSolidMagicWandSparkles size={14} />
-									</Button>
+											)}
+											disabled={
+												mediaImageGeneration.isDisabled(
+													posterImageGenerationTarget,
+												) && !mediaImageGeneration.accessState().disabled
+											}
+											classes={
+												mediaImageGeneration.accessState().disabled
+													? "opacity-80 cursor-not-allowed"
+													: undefined
+											}
+										>
+											<FaSolidMagicWandSparkles size={14} />
+										</Button>
+									</Show>
 									<Button
 										type="button"
 										theme="secondary-subtle"

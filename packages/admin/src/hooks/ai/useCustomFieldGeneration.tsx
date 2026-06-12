@@ -13,6 +13,7 @@ import aiModalsStore, {
 	type CustomFieldGenerationTarget,
 } from "@/store/aiModalsStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import { validateSetError } from "@/utils/error-handling";
@@ -53,23 +54,20 @@ const useCustomFieldGeneration = () => {
 	const [superKeyHeld, setSuperKeyHeld] = createSignal(false);
 
 	// -----------------------------
-	// Queries
-	const license = api.license.useGetStatus({
-		queryParams: {},
-	});
-
-	// -----------------------------
 	// Mutations
 	const generateField = api.ai.useCustomFieldGenerate();
 
 	// -----------------------------
 	// Memos
+	const featureEnabled = createMemo(() =>
+		siteStore.get.isAiFeatureEnabled("customFieldGeneration"),
+	);
 	const hasPermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.AiCustomFieldValue]).all;
 	});
 	const accessState = createAiFeatureAccessState({
 		hasPermission,
-		license: () => license.data?.data,
+		license: () => siteStore.get.license ?? undefined,
 	});
 	const isBusy = createMemo(() => {
 		return aiModalsStore.get.isLoading || aiModalsStore.get.isApplying;
@@ -101,6 +99,7 @@ const useCustomFieldGeneration = () => {
 		if (!target) return true;
 		const request = target.request();
 		return (
+			!featureEnabled() ||
 			accessState().disabled ||
 			!request.collectionKey ||
 			!request.fieldKey ||
@@ -111,6 +110,7 @@ const useCustomFieldGeneration = () => {
 		);
 	};
 	const targetTooltip = (target?: CustomFieldGenerationTarget) => {
+		if (!featureEnabled()) return T()("ai.custom.field.generate.disabled");
 		const access = accessState();
 		if (access.disabled) return access.message;
 		if (isBusy()) return T()("ai.custom.field.generate.loading");
@@ -128,6 +128,7 @@ const useCustomFieldGeneration = () => {
 		target: CustomFieldGenerationTarget,
 		id = getTargetId(),
 	) => {
+		if (!featureEnabled()) return;
 		if (spawnAiFeatureAccessToast(accessState())) return;
 		if (targetIsDisabled(target)) return;
 
@@ -214,6 +215,7 @@ const useCustomFieldGeneration = () => {
 		}
 	};
 	const open = (target: CustomFieldGenerationTarget, id = getTargetId()) => {
+		if (!featureEnabled()) return;
 		if (spawnAiFeatureAccessToast(accessState())) return;
 		if (targetIsDisabled(target)) return;
 
@@ -235,37 +237,39 @@ const useCustomFieldGeneration = () => {
 	): Component => {
 		const id = getTargetId();
 		const ActionButton: Component = () => (
-			<div class="relative">
-				<AiIconButton
-					label={T()("ai.custom.field.generate.action")}
-					tooltip={targetTooltip(target)}
-					disabled={targetIsDisabled(target)}
-					disabledClickable={accessState().disabled}
-					loading={isTargetLoading(id)}
-					quickActionActive={superKeyHeld() && !targetIsDisabled(target)}
-					variant="subtle"
-					onClick={(event) => {
-						event.preventDefault();
-						event.stopPropagation();
-						if (event.metaKey || superKeyHeld()) {
-							void generateAndApply(target, id);
-							return;
-						}
+			<Show when={featureEnabled()}>
+				<div class="relative">
+					<AiIconButton
+						label={T()("ai.custom.field.generate.action")}
+						tooltip={targetTooltip(target)}
+						disabled={targetIsDisabled(target)}
+						disabledClickable={accessState().disabled}
+						loading={isTargetLoading(id)}
+						quickActionActive={superKeyHeld() && !targetIsDisabled(target)}
+						variant="subtle"
+						onClick={(event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							if (event.metaKey || superKeyHeld()) {
+								void generateAndApply(target, id);
+								return;
+							}
 
-						open(target, id);
-					}}
-				/>
-				<Show when={pendingDirectGeneration()?.targetId === id}>
-					<AiDraftReviewPill
-						label={T()("ai.custom.field.generate.quick.review.label")}
-						disabled={aiModalsStore.get.isApplying}
-						onAccept={acceptDirectGeneration}
-						onReject={() => {
-							void rejectDirectGeneration(target);
+							open(target, id);
 						}}
 					/>
-				</Show>
-			</div>
+					<Show when={pendingDirectGeneration()?.targetId === id}>
+						<AiDraftReviewPill
+							label={T()("ai.custom.field.generate.quick.review.label")}
+							disabled={aiModalsStore.get.isApplying}
+							onAccept={acceptDirectGeneration}
+							onReject={() => {
+								void rejectDirectGeneration(target);
+							}}
+						/>
+					</Show>
+				</div>
+			</Show>
 		);
 
 		return ActionButton;
@@ -301,6 +305,7 @@ const useCustomFieldGeneration = () => {
 		open,
 		generateAndApply,
 		createActionButton,
+		isFeatureEnabled: featureEnabled,
 		accessState,
 		hasPermission,
 		isDisabled: targetIsDisabled,

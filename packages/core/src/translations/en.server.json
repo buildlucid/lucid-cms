@@ -212,6 +212,8 @@
 	"core.ai.usage.features.media.alt.generate": "Alt Text",
 	"core.ai.usage.features.media.image.generate": "Image Generation",
 	"core.ai.guidance.not.found": "The selected AI guidance does not exist.",
+	"core.ai.config.feature.disabled.name": "AI feature unavailable",
+	"core.ai.config.feature.disabled.message": "The requested AI feature has been disabled in the Lucid config.",
 	"core.ai.media.image.generate.instruction.or.guidance.required": "Provide an instruction, or select guidance with a source image.",
 	"core.ai.media.image.generate.idempotency.key.required": "Image generation idempotency key is required.",
 	"core.ai.custom.field.input.no.supported.field": "No supported AI custom field was found for this collection.",

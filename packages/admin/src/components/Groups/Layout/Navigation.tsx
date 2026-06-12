@@ -19,6 +19,7 @@ import UserDisplay from "@/components/Partials/UserDisplay";
 import { Permissions } from "@/constants/permissions";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import api from "@/services/api";
+import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -57,6 +58,9 @@ export const NavigationChrome: Component = () => {
 	const canReadSystemOverview = createMemo(
 		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
 	);
+	const canReadAiUsage = createMemo(
+		() => canReadSystemOverview() && siteStore.get.hasAnyAiFeatureEnabled(),
+	);
 	const showAccessAndPermissions = createMemo(
 		() => canReadUsers() || canReadRoles(),
 	);
@@ -66,14 +70,10 @@ export const NavigationChrome: Component = () => {
 	const collections = api.collections.useGetAll({
 		queryParams: {},
 	});
-	const license = api.license.useGetStatus({
-		queryParams: {},
-	});
-
 	// ----------------------------------
 	// Memos
 	const showLicenseAlert = createMemo(() => {
-		return license.data?.data.valid === false;
+		return siteStore.get.license?.valid === false;
 	});
 	const collectionsIsLoading = createMemo(() => {
 		return collections.isLoading;
@@ -238,6 +238,7 @@ export const NavigationChrome: Component = () => {
 						canReadUsers={canReadUsers()}
 						canReadRoles={canReadRoles()}
 						canReadJobs={canReadJobs()}
+						canReadAiUsage={canReadAiUsage()}
 						canManageLicense={canManageLicense()}
 						canReadClientIntegrations={canReadClientIntegrations()}
 						canReadSystemOverview={canReadSystemOverview()}
@@ -323,6 +324,7 @@ export const NavigationChrome: Component = () => {
 								canReadUsers={canReadUsers()}
 								canReadRoles={canReadRoles()}
 								canReadJobs={canReadJobs()}
+								canReadAiUsage={canReadAiUsage()}
 								canManageLicense={canManageLicense()}
 								canReadClientIntegrations={canReadClientIntegrations()}
 								canReadSystemOverview={canReadSystemOverview()}

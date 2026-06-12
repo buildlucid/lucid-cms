@@ -119,6 +119,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 	// Functions
 	const imageGenerationEnabled = () => {
 		return (
+			mediaImageGeneration.isFeatureEnabled() &&
 			data.imageGeneration !== undefined &&
 			(data.imageGeneration.enabled?.() ?? true)
 		);

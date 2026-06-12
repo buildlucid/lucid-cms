@@ -14,6 +14,7 @@ import { NavigationChrome, Wrapper } from "@/components/Groups/Layout";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import api from "@/services/api";
+import siteStore from "@/store/siteStore";
 import T, { getReady, initAdminTranslations } from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
@@ -40,6 +41,13 @@ const MainLayout: Component<{
 	const license = api.license.useGetStatus({
 		queryParams: {},
 	});
+	const settings = api.settings.useGetSettings({
+		queryParams: {
+			include: {
+				ai: true,
+			},
+		},
+	});
 
 	// ----------------------------------
 	// Memos
@@ -48,6 +56,7 @@ const MainLayout: Component<{
 			authenticatedUser.isLoading ||
 			locales.isLoading ||
 			license.isLoading ||
+			settings.isLoading ||
 			(authenticatedUser.isSuccess && translationsInitialized() === false)
 		);
 	});
@@ -56,6 +65,7 @@ const MainLayout: Component<{
 			authenticatedUser.isSuccess &&
 			locales.isSuccess &&
 			license.isSuccess &&
+			settings.isSuccess &&
 			translationsInitialized()
 		);
 	});
@@ -80,6 +90,16 @@ const MainLayout: Component<{
 			});
 
 			navigate("/lucid/account");
+		}
+	});
+
+	createEffect(() => {
+		if (license.isSuccess) {
+			siteStore.setLicense(license.data.data);
+		}
+
+		if (settings.isSuccess) {
+			siteStore.setAi(settings.data.data.ai);
 		}
 	});
 

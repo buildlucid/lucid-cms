@@ -18,9 +18,11 @@ import BulkUploadMediaModal from "@/components/Modals/Media/BulkUploadMedia";
 import CreateMediaFolderModal from "@/components/Modals/Media/CreateMediaFolder";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import { Permissions } from "@/constants/permissions";
+import useMediaImageGeneration from "@/hooks/ai/useMediaImageGeneration";
 import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import mediaStore from "@/store/mediaStore";
+import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -75,6 +77,7 @@ const MediaListRoute: Component = () => {
 		},
 	);
 	const params = useParams();
+	const mediaImageGeneration = useMediaImageGeneration();
 	const [getOpenCreateMediaPanel, setOpenCreateMediaPanel] =
 		createSignal<boolean>(false);
 	const [getOpenCreateMediaFolderModal, setOpenCreateMediaFolderModal] =
@@ -105,6 +108,22 @@ const MediaListRoute: Component = () => {
 	});
 	const canCreateMedia = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.MediaCreate]).all;
+	});
+	const aiImageGenerationEnabled = createMemo(() =>
+		siteStore.get.isAiFeatureEnabled("imageGeneration"),
+	);
+	const aiImageGenerationAccess = createMemo(() =>
+		mediaImageGeneration.accessState(),
+	);
+	const aiImageGenerationDisabledToast = createMemo(() => {
+		const access = aiImageGenerationAccess();
+		if (!access.disabled) return undefined;
+
+		return {
+			title: access.title,
+			message: access.message,
+			status: "warning" as const,
+		};
 	});
 	const canDropFiles = createMemo(() => canCreateMedia() && !showingDeleted());
 	const routeFileDragActive = createMemo(
@@ -158,6 +177,8 @@ const MediaListRoute: Component = () => {
 		setOpenBulkUploadModal(true);
 	};
 	const openCreateMediaPanelWithImageGeneration = () => {
+		if (!aiImageGenerationEnabled()) return;
+		if (aiImageGenerationAccess().disabled) return;
 		setSingleUploadInitialFile(null);
 		setOpenImageGenerationOnCreate(true);
 		setOpenCreateMediaPanel(true);
@@ -255,7 +276,10 @@ const MediaListRoute: Component = () => {
 										open: getOpenCreateMediaPanel(),
 										setOpen: setCreateMediaPanelOpen,
 										onClick: openCreateMediaPanelWithImageGeneration,
-										permission: canCreateMedia(),
+										permission: canCreateMedia() && aiImageGenerationEnabled(),
+										disabled: aiImageGenerationAccess().disabled,
+										disabledClickable: true,
+										disabledToast: aiImageGenerationDisabledToast(),
 										label: T()("ai.media.image.generate.modal.title"),
 										icon: "sparkle",
 									},

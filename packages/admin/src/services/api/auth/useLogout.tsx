@@ -1,5 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import type { ResponseBody } from "@types";
+import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import request from "@/utils/request";
@@ -44,6 +45,7 @@ const useLogout = (props?: UseLogoutProps) => {
 		invalidates: ["roles.getMultiple", "roles.getSingle"],
 		onSuccess: () => {
 			userStore.get.reset();
+			siteStore.get.reset();
 			navigate("/lucid/login");
 			clearCsrfSession();
 			props?.onSuccess?.();

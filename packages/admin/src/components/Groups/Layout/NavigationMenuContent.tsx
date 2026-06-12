@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import type { Collection, User } from "@types";
 import classNames from "classnames";
+import { FaSolidKey } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { IconLinkFull } from "@/components/Groups/Navigation";
 import UserDisplay from "@/components/Partials/UserDisplay";
@@ -26,6 +27,7 @@ export type NavigationMenuContentProps = {
 	canReadUsers: boolean;
 	canReadRoles: boolean;
 	canReadJobs: boolean;
+	canReadAiUsage: boolean;
 	canManageLicense: boolean;
 	canReadClientIntegrations: boolean;
 	canReadSystemOverview: boolean;
@@ -49,7 +51,8 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 			props.canReadSystemOverview ||
 			props.canReadClientIntegrations ||
 			props.canManageLicense ||
-			props.canReadJobs,
+			props.canReadJobs ||
+			props.canReadAiUsage,
 	);
 
 	// ----------------------------------
@@ -206,7 +209,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						href="/lucid/system/ai-usage"
 						icon="overview"
 						title={T()("common.ai.usage")}
-						permission={props.canReadSystemOverview}
+						permission={props.canReadAiUsage}
 					/>
 					<IconLinkFull
 						type="link"
@@ -254,9 +257,42 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					})}
 				>
 					<Show when={props.showLicenseAlert}>
-						<div class="bg-warning-base/10 border border-warning-base/20 rounded-md px-2 py-2 text-center">
-							<p class="text-xs">{T()("license.status.invalid.message")}</p>
-						</div>
+						<Show
+							when={props.canManageLicense}
+							fallback={
+								<div class="flex w-full min-w-0 items-start gap-1 rounded-md border border-warning-base/20 bg-warning-base/10 px-2 py-1.5">
+									<span class="flex size-5 shrink-0 items-center justify-center rounded-md text-icon-base">
+										<FaSolidKey class="size-3" />
+									</span>
+									<span class="flex min-w-0 flex-col">
+										<span class="text-xs font-medium leading-4 text-title">
+											{T()("license.banner.nav.title")}
+										</span>
+										<span class="text-[11px] leading-4 text-body">
+											{T()("license.banner.nav.status")}
+										</span>
+									</span>
+								</div>
+							}
+						>
+							<A
+								href="/lucid/system/license"
+								class="flex w-full min-w-0 items-start gap-1 rounded-md border border-warning-base/20 bg-warning-base/10 px-2 py-1.5 text-left transition-colors hover:bg-warning-base/10 focus:outline-none focus-visible:ring-1 ring-primary-base"
+								onClick={handleNavigate}
+							>
+								<span class="flex size-5 shrink-0 items-center justify-center rounded-md text-icon-base">
+									<FaSolidKey class="size-3" />
+								</span>
+								<span class="flex min-w-0 flex-col">
+									<span class="text-xs font-medium leading-4 text-title">
+										{T()("license.banner.nav.title")}
+									</span>
+									<span class="text-[11px] leading-4 text-body">
+										{T()("license.banner.nav.status")}
+									</span>
+								</span>
+							</A>
+						</Show>
 					</Show>
 					<small class="text-xs leading-none bg-background-base rounded-md px-2 py-2 block text-center">
 						v{packageJson.version}

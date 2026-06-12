@@ -33,6 +33,7 @@ import aiModalsStore, {
 	type CustomFieldGenerationTarget,
 } from "@/store/aiModalsStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import siteStore from "@/store/siteStore";
 import T from "@/translations";
 import {
 	cloneGenerationValue,
@@ -153,6 +154,9 @@ const CustomFieldGenerationModal: Component = () => {
 
 	// -----------------------------
 	// Memos
+	const featureEnabled = createMemo(() =>
+		siteStore.get.isAiFeatureEnabled("customFieldGeneration"),
+	);
 	const modal = createMemo(() =>
 		aiModalsStore.getModal("customFieldGeneration"),
 	);
@@ -678,6 +682,10 @@ const CustomFieldGenerationModal: Component = () => {
 
 	// -----------------------------
 	// Effects
+	createEffect(() => {
+		if (!featureEnabled() && isOpen()) close(false);
+	});
+
 	createEffect(
 		on(targetId, (id) => {
 			abortRequest();
@@ -698,322 +706,333 @@ const CustomFieldGenerationModal: Component = () => {
 	// -----------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: isOpen(),
-				setOpen: close,
-			}}
-			options={{
-				size: "large",
-				noPadding: true,
-			}}
-		>
-			<div class="grid min-w-0 w-full items-stretch gap-0 md:grid-cols-[minmax(24rem,0.5fr)_minmax(0,1fr)]">
-				<form
-					class="flex min-h-130 min-w-0 flex-col gap-4 border-b border-border bg-card-base p-4 md:border-r md:border-b-0 md:p-6"
-					onSubmit={submit}
-				>
-					<div class="min-w-0 border-b border-border pb-4">
-						<div class="min-w-0">
-							<p class="truncate text-xs font-medium leading-4 text-body">
-								{T()("ai.custom.field.generate.context.title")}
-							</p>
-							<div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-								<p class="min-w-0 truncate text-sm font-semibold leading-5 text-title">
-									{field()?.label ?? field()?.key ?? T()("common.empty")}
+		<Show when={featureEnabled()}>
+			<Modal
+				state={{
+					open: isOpen(),
+					setOpen: close,
+				}}
+				options={{
+					size: "large",
+					noPadding: true,
+				}}
+			>
+				<div class="grid min-w-0 w-full items-stretch gap-0 md:grid-cols-[minmax(24rem,0.5fr)_minmax(0,1fr)]">
+					<form
+						class="flex min-h-130 min-w-0 flex-col gap-4 border-b border-border bg-card-base p-4 md:border-r md:border-b-0 md:p-6"
+						onSubmit={submit}
+					>
+						<div class="min-w-0 border-b border-border pb-4">
+							<div class="min-w-0">
+								<p class="truncate text-xs font-medium leading-4 text-body">
+									{T()("ai.custom.field.generate.context.title")}
 								</p>
-								<div class="flex min-w-0 flex-wrap gap-2 sm:justify-end">
-									<Pill theme="primary-opaque">{fieldModeLabel()}</Pill>
-									<Pill theme="outline">{fieldTypeLabel()}</Pill>
-								</div>
-							</div>
-						</div>
-					</div>
-					<Show when={guidanceOptions().length > 0}>
-						<div class="min-w-0">
-							<Label
-								id="ai-custom-field-generation-guidance"
-								label={T()("ai.custom.field.generate.guidance.label")}
-								theme="basic"
-								hideOptionalText
-							/>
-							<div class="flex min-w-0 flex-wrap gap-2">
-								<For each={guidanceOptions()}>
-									{(option) => {
-										const selected = createMemo(
-											() => guidance() === option.value,
-										);
-
-										return (
-											<Pill
-												as="button"
-												theme={selected() ? "primary-opaque" : "outline"}
-												aria-pressed={selected()}
-												disabled={isLoading()}
-												onClick={() =>
-													setGuidance(selected() ? undefined : option.value)
-												}
-											>
-												{option.label}
-											</Pill>
-										);
-									}}
-								</For>
-							</div>
-						</div>
-					</Show>
-					<Show when={field()?.localized && localeOptions().length > 1}>
-						<div class="min-w-0">
-							<Label
-								id="ai-custom-field-generation-locales"
-								label={T()("ai.custom.field.generate.locales.label")}
-								theme="basic"
-								hideOptionalText
-								rightSlot={
-									<span class="text-xs text-unfocused">
-										{T()("ai.custom.field.generate.locales.selected", {
-											count: selectedLocales().length,
-										})}
-									</span>
-								}
-							/>
-							<div class="flex min-w-0 flex-wrap gap-2">
-								<For each={localeOptions()}>
-									{(locale) => {
-										const selected = createMemo(() =>
-											selectedLocales().includes(locale.code),
-										);
-
-										return (
-											<Pill
-												as="button"
-												theme={selected() ? "primary-opaque" : "outline"}
-												aria-pressed={selected()}
-												disabled={isLoading()}
-												onClick={() => toggleLocale(locale.code)}
-											>
-												{locale.name ?? locale.code}
-											</Pill>
-										);
-									}}
-								</For>
-							</div>
-						</div>
-					</Show>
-					<div>
-						<Textarea
-							id="ai-custom-field-generation-instruction"
-							name="ai-custom-field-generation-instruction"
-							value={instruction()}
-							onChange={setInstruction}
-							onKeyUp={(event) => {
-								if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-									submit();
-								}
-							}}
-							copy={{
-								label: T()("ai.custom.field.generate.instruction.label"),
-								placeholder: T()(
-									"ai.custom.field.generate.instruction.placeholder",
-								),
-							}}
-							rows={5}
-						/>
-						<Show when={responseError()}>
-							{(error) => (
-								<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
-									<p class="text-sm text-error-base">{error()}</p>
-								</div>
-							)}
-						</Show>
-					</div>
-					<div class="mt-auto">
-						<Button
-							type="submit"
-							theme="secondary"
-							size="medium"
-							classes="w-full min-w-0! gap-2"
-							loading={isLoading()}
-							disabled={!canGenerate()}
-						>
-							<FaSolidPaperPlane size={12} aria-hidden="true" />
-							{T()("ai.custom.field.generate.modal.generate")}
-						</Button>
-					</div>
-				</form>
-				<div class="dotted-background relative flex max-h-[min(86vh,820px)] min-h-130 min-w-0 flex-col self-stretch overflow-hidden px-4 md:px-6">
-					<div class="relative min-h-0 min-w-0 flex-1">
-						<div class="relative z-10 flex h-full min-h-0 min-w-0 flex-col gap-3 md:grid md:grid-cols-[116px_minmax(0,1fr)] md:gap-4">
-							<GenerationHistory
-								id="ai-custom-field-generation-history"
-								items={generationHistoryItems()}
-								activeItemId={activeHistoryItem()?.id}
-								onSelect={selectHistoryItem}
-								loading={isLoading()}
-								loadingLabel={T()(
-									"ai.custom.field.generate.history.generating",
-								)}
-								loadingMeta={T()(
-									"ai.custom.field.generate.history.generating.meta",
-								)}
-							/>
-							<div class="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto pt-0 pr-1 pb-0 md:py-6">
-								<Show
-									when={field()?.localized}
-									fallback={
-										<div class="min-w-0 overflow-hidden rounded-lg border border-border bg-background-base">
-											<div class="flex min-w-0 items-center justify-between gap-3 border-b border-border px-3 py-2.5">
-												<label
-													for={`ai-custom-field-generation-preview-${field()?.type}-${activeLocale()}`}
-													class="min-w-0 truncate text-sm font-medium text-body"
-												>
-													{field()?.label ??
-														T()("ai.custom.field.generate.response.title")}
-												</label>
-												<Show when={activeHistoryItem()?.type === "generation"}>
-													<FaSolidMagicWandSparkles
-														class="shrink-0 text-icon-base"
-														size={12}
-														aria-hidden="true"
-													/>
-												</Show>
-											</div>
-											<div class="p-3">
-												<DraftEditor
-													fieldType={field()?.type}
-													localeCode={activeLocale()}
-													value={activeValues()[activeLocale()]}
-													jsonText={activeJsonText()[activeLocale()]}
-													jsonValid={activeJsonValid()[activeLocale()]}
-													selectedLocaleCount={1}
-													onChange={(targetLocale, nextValue) =>
-														setDraft(field()?.type, targetLocale, nextValue)
-													}
-													onJsonChange={updateJsonDraft}
-												/>
-											</div>
-										</div>
-									}
-								>
-									<For each={selectedLocales()}>
-										{(localeCode) => {
-											const generated = createMemo(() =>
-												(activeHistoryItem()?.generatedLocales ?? []).includes(
-													localeCode,
-												),
-											);
-
-											return (
-												<div class="min-w-0 overflow-hidden rounded-lg border border-border bg-background-base transition-colors duration-200">
-													<div class="flex min-w-0 items-center justify-between gap-3 border-b border-border px-3 py-2.5">
-														<label
-															for={`ai-custom-field-generation-preview-${field()?.type}-${localeCode}`}
-															class="flex min-w-0 items-center gap-2 text-sm font-medium text-body"
-														>
-															<FaSolidLanguage
-																class="shrink-0 text-icon-fade"
-																size={12}
-																aria-hidden="true"
-															/>
-															<span class="min-w-0 truncate">
-																{getLocaleLabel(localeCode)}
-															</span>
-														</label>
-														<Show when={generated()}>
-															<FaSolidMagicWandSparkles
-																class="shrink-0 text-icon-base"
-																size={12}
-																aria-hidden="true"
-															/>
-														</Show>
-													</div>
-													<div class="p-3">
-														<DraftEditor
-															fieldType={field()?.type}
-															localeCode={localeCode}
-															value={activeValues()[localeCode]}
-															jsonText={activeJsonText()[localeCode]}
-															jsonValid={activeJsonValid()[localeCode]}
-															selectedLocaleCount={selectedLocales().length}
-															onChange={(targetLocale, nextValue) =>
-																setDraft(field()?.type, targetLocale, nextValue)
-															}
-															onJsonChange={updateJsonDraft}
-														/>
-													</div>
-												</div>
-											);
-										}}
-									</For>
-								</Show>
-							</div>
-						</div>
-						<Show when={isLoading()}>
-							<div class="absolute inset-0 z-20 flex items-center justify-center bg-background-base/70 p-6 backdrop-blur-sm">
-								<div class="flex min-w-0 max-w-xs flex-col items-center gap-3 text-center">
-									<span
-										class="ai-action-button__surface flex h-11 min-w-11 items-center justify-center rounded-md border border-border text-primary-base"
-										data-loading="true"
-									>
-										<FaSolidMagicWandSparkles size={16} aria-hidden="true" />
-									</span>
-									<div class="min-w-0">
-										<p class="text-sm font-semibold text-title">
-											{T()("ai.custom.field.generate.loading")}
-										</p>
-										<p class="mt-1 text-sm leading-5 text-body">
-											{T()(
-												"ai.custom.field.generate.response.generating.description",
-											)}
-										</p>
+								<div class="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+									<p class="min-w-0 truncate text-sm font-semibold leading-5 text-title">
+										{field()?.label ?? field()?.key ?? T()("common.empty")}
+									</p>
+									<div class="flex min-w-0 flex-wrap gap-2 sm:justify-end">
+										<Pill theme="primary-opaque">{fieldModeLabel()}</Pill>
+										<Pill theme="outline">{fieldTypeLabel()}</Pill>
 									</div>
 								</div>
 							</div>
+						</div>
+						<Show when={guidanceOptions().length > 0}>
+							<div class="min-w-0">
+								<Label
+									id="ai-custom-field-generation-guidance"
+									label={T()("ai.custom.field.generate.guidance.label")}
+									theme="basic"
+									hideOptionalText
+								/>
+								<div class="flex min-w-0 flex-wrap gap-2">
+									<For each={guidanceOptions()}>
+										{(option) => {
+											const selected = createMemo(
+												() => guidance() === option.value,
+											);
+
+											return (
+												<Pill
+													as="button"
+													theme={selected() ? "primary-opaque" : "outline"}
+													aria-pressed={selected()}
+													disabled={isLoading()}
+													onClick={() =>
+														setGuidance(selected() ? undefined : option.value)
+													}
+												>
+													{option.label}
+												</Pill>
+											);
+										}}
+									</For>
+								</div>
+							</div>
 						</Show>
-					</div>
-					<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card-base/95 p-6 backdrop-blur-sm md:-mx-6">
-						<div class="min-w-0 flex-1">
-							<Show when={costLabel()}>
-								{(cost) => (
-									<p class="text-xs text-body">
-										{T()("ai.media.image.generate.cost.total", {
-											cost: cost(),
-										})}
-									</p>
+						<Show when={field()?.localized && localeOptions().length > 1}>
+							<div class="min-w-0">
+								<Label
+									id="ai-custom-field-generation-locales"
+									label={T()("ai.custom.field.generate.locales.label")}
+									theme="basic"
+									hideOptionalText
+									rightSlot={
+										<span class="text-xs text-unfocused">
+											{T()("ai.custom.field.generate.locales.selected", {
+												count: selectedLocales().length,
+											})}
+										</span>
+									}
+								/>
+								<div class="flex min-w-0 flex-wrap gap-2">
+									<For each={localeOptions()}>
+										{(locale) => {
+											const selected = createMemo(() =>
+												selectedLocales().includes(locale.code),
+											);
+
+											return (
+												<Pill
+													as="button"
+													theme={selected() ? "primary-opaque" : "outline"}
+													aria-pressed={selected()}
+													disabled={isLoading()}
+													onClick={() => toggleLocale(locale.code)}
+												>
+													{locale.name ?? locale.code}
+												</Pill>
+											);
+										}}
+									</For>
+								</div>
+							</div>
+						</Show>
+						<div>
+							<Textarea
+								id="ai-custom-field-generation-instruction"
+								name="ai-custom-field-generation-instruction"
+								value={instruction()}
+								onChange={setInstruction}
+								onKeyUp={(event) => {
+									if (
+										(event.metaKey || event.ctrlKey) &&
+										event.key === "Enter"
+									) {
+										submit();
+									}
+								}}
+								copy={{
+									label: T()("ai.custom.field.generate.instruction.label"),
+									placeholder: T()(
+										"ai.custom.field.generate.instruction.placeholder",
+									),
+								}}
+								rows={5}
+							/>
+							<Show when={responseError()}>
+								{(error) => (
+									<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
+										<p class="text-sm text-error-base">{error()}</p>
+									</div>
 								)}
 							</Show>
 						</div>
-						<div class="flex shrink-0 items-center gap-3">
+						<div class="mt-auto">
 							<Button
-								type="button"
-								theme="border-outline"
+								type="submit"
+								theme="secondary"
 								size="medium"
-								onClick={() => close(false)}
+								classes="w-full min-w-0! gap-2"
+								loading={isLoading()}
+								disabled={!canGenerate()}
 							>
-								{T()("common.cancel")}
+								<FaSolidPaperPlane size={12} aria-hidden="true" />
+								{T()("ai.custom.field.generate.modal.generate")}
 							</Button>
-							<Button
-								type="button"
-								theme="primary"
-								size="medium"
-								onClick={() => {
-									void apply();
-								}}
-								disabled={
-									hasInvalidJson() ||
-									selectedLocales().length === 0 ||
-									isLoading() ||
-									aiModalsStore.get.isApplying ||
-									!target()
-								}
-							>
-								{T()("ai.custom.field.generate.modal.accept")}
-							</Button>
+						</div>
+					</form>
+					<div class="dotted-background relative flex max-h-[min(86vh,820px)] min-h-130 min-w-0 flex-col self-stretch overflow-hidden px-4 md:px-6">
+						<div class="relative min-h-0 min-w-0 flex-1">
+							<div class="relative z-10 flex h-full min-h-0 min-w-0 flex-col gap-3 md:grid md:grid-cols-[116px_minmax(0,1fr)] md:gap-4">
+								<GenerationHistory
+									id="ai-custom-field-generation-history"
+									items={generationHistoryItems()}
+									activeItemId={activeHistoryItem()?.id}
+									onSelect={selectHistoryItem}
+									loading={isLoading()}
+									loadingLabel={T()(
+										"ai.custom.field.generate.history.generating",
+									)}
+									loadingMeta={T()(
+										"ai.custom.field.generate.history.generating.meta",
+									)}
+								/>
+								<div class="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto pt-0 pr-1 pb-0 md:py-6">
+									<Show
+										when={field()?.localized}
+										fallback={
+											<div class="min-w-0 overflow-hidden rounded-lg border border-border bg-background-base">
+												<div class="flex min-w-0 items-center justify-between gap-3 border-b border-border px-3 py-2.5">
+													<label
+														for={`ai-custom-field-generation-preview-${field()?.type}-${activeLocale()}`}
+														class="min-w-0 truncate text-sm font-medium text-body"
+													>
+														{field()?.label ??
+															T()("ai.custom.field.generate.response.title")}
+													</label>
+													<Show
+														when={activeHistoryItem()?.type === "generation"}
+													>
+														<FaSolidMagicWandSparkles
+															class="shrink-0 text-icon-base"
+															size={12}
+															aria-hidden="true"
+														/>
+													</Show>
+												</div>
+												<div class="p-3">
+													<DraftEditor
+														fieldType={field()?.type}
+														localeCode={activeLocale()}
+														value={activeValues()[activeLocale()]}
+														jsonText={activeJsonText()[activeLocale()]}
+														jsonValid={activeJsonValid()[activeLocale()]}
+														selectedLocaleCount={1}
+														onChange={(targetLocale, nextValue) =>
+															setDraft(field()?.type, targetLocale, nextValue)
+														}
+														onJsonChange={updateJsonDraft}
+													/>
+												</div>
+											</div>
+										}
+									>
+										<For each={selectedLocales()}>
+											{(localeCode) => {
+												const generated = createMemo(() =>
+													(
+														activeHistoryItem()?.generatedLocales ?? []
+													).includes(localeCode),
+												);
+
+												return (
+													<div class="min-w-0 overflow-hidden rounded-lg border border-border bg-background-base transition-colors duration-200">
+														<div class="flex min-w-0 items-center justify-between gap-3 border-b border-border px-3 py-2.5">
+															<label
+																for={`ai-custom-field-generation-preview-${field()?.type}-${localeCode}`}
+																class="flex min-w-0 items-center gap-2 text-sm font-medium text-body"
+															>
+																<FaSolidLanguage
+																	class="shrink-0 text-icon-fade"
+																	size={12}
+																	aria-hidden="true"
+																/>
+																<span class="min-w-0 truncate">
+																	{getLocaleLabel(localeCode)}
+																</span>
+															</label>
+															<Show when={generated()}>
+																<FaSolidMagicWandSparkles
+																	class="shrink-0 text-icon-base"
+																	size={12}
+																	aria-hidden="true"
+																/>
+															</Show>
+														</div>
+														<div class="p-3">
+															<DraftEditor
+																fieldType={field()?.type}
+																localeCode={localeCode}
+																value={activeValues()[localeCode]}
+																jsonText={activeJsonText()[localeCode]}
+																jsonValid={activeJsonValid()[localeCode]}
+																selectedLocaleCount={selectedLocales().length}
+																onChange={(targetLocale, nextValue) =>
+																	setDraft(
+																		field()?.type,
+																		targetLocale,
+																		nextValue,
+																	)
+																}
+																onJsonChange={updateJsonDraft}
+															/>
+														</div>
+													</div>
+												);
+											}}
+										</For>
+									</Show>
+								</div>
+							</div>
+							<Show when={isLoading()}>
+								<div class="absolute inset-0 z-20 flex items-center justify-center bg-background-base/70 p-6 backdrop-blur-sm">
+									<div class="flex min-w-0 max-w-xs flex-col items-center gap-3 text-center">
+										<span
+											class="ai-action-button__surface flex h-11 min-w-11 items-center justify-center rounded-md border border-border text-primary-base"
+											data-loading="true"
+										>
+											<FaSolidMagicWandSparkles size={16} aria-hidden="true" />
+										</span>
+										<div class="min-w-0">
+											<p class="text-sm font-semibold text-title">
+												{T()("ai.custom.field.generate.loading")}
+											</p>
+											<p class="mt-1 text-sm leading-5 text-body">
+												{T()(
+													"ai.custom.field.generate.response.generating.description",
+												)}
+											</p>
+										</div>
+									</div>
+								</div>
+							</Show>
+						</div>
+						<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card-base/95 p-6 backdrop-blur-sm md:-mx-6">
+							<div class="min-w-0 flex-1">
+								<Show when={costLabel()}>
+									{(cost) => (
+										<p class="text-xs text-body">
+											{T()("ai.media.image.generate.cost.total", {
+												cost: cost(),
+											})}
+										</p>
+									)}
+								</Show>
+							</div>
+							<div class="flex shrink-0 items-center gap-3">
+								<Button
+									type="button"
+									theme="border-outline"
+									size="medium"
+									onClick={() => close(false)}
+								>
+									{T()("common.cancel")}
+								</Button>
+								<Button
+									type="button"
+									theme="primary"
+									size="medium"
+									onClick={() => {
+										void apply();
+									}}
+									disabled={
+										hasInvalidJson() ||
+										selectedLocales().length === 0 ||
+										isLoading() ||
+										aiModalsStore.get.isApplying ||
+										!target()
+									}
+								>
+									{T()("ai.custom.field.generate.modal.accept")}
+								</Button>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</Modal>
+			</Modal>
+		</Show>
 	);
 };
 

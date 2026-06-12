@@ -18,6 +18,7 @@ import Button from "@/components/Partials/Button";
 import DropdownContent from "@/components/Partials/DropdownContent";
 import Link from "@/components/Partials/Link";
 import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
 
 export type HeaderPrimaryAction =
 	| {
@@ -26,6 +27,14 @@ export type HeaderPrimaryAction =
 			icon?: ActionIconName;
 			onClick: () => void;
 			secondary?: boolean;
+			disabled?: boolean;
+			disabledClickable?: boolean;
+			disabledToast?: {
+				title: string;
+				message?: string;
+				status?: "success" | "error" | "warning" | "info";
+				duration?: number;
+			};
 	  }
 	| {
 			type: "link";
@@ -50,6 +59,27 @@ const HeaderPrimaryActions: Component<{
 	const singleAction = createMemo(() => visibleActions()[0]);
 
 	// ----------------------------------
+	// Functions
+	const spawnDisabledToast = (action: HeaderPrimaryAction) => {
+		if (action.type !== "button" || !action.disabledToast) return;
+
+		spawnToast({
+			...action.disabledToast,
+			status: action.disabledToast.status ?? "warning",
+		});
+	};
+	const handleButtonAction = (
+		action: Extract<HeaderPrimaryAction, { type: "button" }>,
+	) => {
+		if (action.disabled) {
+			spawnDisabledToast(action);
+			return;
+		}
+
+		action.onClick();
+	};
+
+	// ----------------------------------
 	// Render
 	const renderSingleAction = () => {
 		const action = singleAction();
@@ -63,7 +93,12 @@ const HeaderPrimaryActions: Component<{
 					size="icon"
 					title={action.label}
 					aria-label={action.label}
-					onClick={action.onClick}
+					disabled={action.disabled && !action.disabledClickable}
+					aria-disabled={action.disabled ? "true" : undefined}
+					onClick={() => handleButtonAction(action)}
+					classes={classNames({
+						"opacity-80 cursor-not-allowed": action.disabled,
+					})}
 				>
 					<FaSolidPlus />
 				</Button>
@@ -115,12 +150,22 @@ const HeaderPrimaryActions: Component<{
 											<Match when={action.type === "button"}>
 												<button
 													type="button"
-													class={dropdownItemClasses}
+													class={classNames(dropdownItemClasses, {
+														"cursor-not-allowed opacity-60":
+															action.type === "button" && action.disabled,
+													})}
 													onClick={(e) => {
 														e.stopPropagation();
-														if (action.type === "button") action.onClick();
+														if (action.type === "button") {
+															handleButtonAction(action);
+														}
 														setIsOpen(false);
 													}}
+													aria-disabled={
+														action.type === "button" && action.disabled
+															? "true"
+															: undefined
+													}
 												>
 													<ActionIcon icon={action.icon} />
 													<span class="line-clamp-1 mr-2.5 flex-1">

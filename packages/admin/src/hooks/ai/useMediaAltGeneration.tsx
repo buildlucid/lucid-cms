@@ -12,6 +12,7 @@ import api from "@/services/api";
 import aiModalsStore, {
 	type MediaAltGenerationTarget,
 } from "@/store/aiModalsStore";
+import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import { prepareAiImage } from "@/utils/ai-image";
@@ -55,23 +56,20 @@ const useMediaAltGeneration = () => {
 	const [superKeyHeld, setSuperKeyHeld] = createSignal(false);
 
 	// -----------------------------
-	// Queries
-	const license = api.license.useGetStatus({
-		queryParams: {},
-	});
-
-	// -----------------------------
 	// Mutations
 	const generateAlt = api.ai.useMediaAltGenerate();
 
 	// -----------------------------
 	// Memos
+	const featureEnabled = createMemo(() =>
+		siteStore.get.isAiFeatureEnabled("altGeneration"),
+	);
 	const hasPermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.AiAltGenerate]).all;
 	});
 	const accessState = createAiFeatureAccessState({
 		hasPermission,
-		license: () => license.data?.data,
+		license: () => siteStore.get.license ?? undefined,
 	});
 	const isBusy = createMemo(() => {
 		return aiModalsStore.get.isLoading || aiModalsStore.get.isApplying;
@@ -86,6 +84,7 @@ const useMediaAltGeneration = () => {
 	const targetIsDisabled = (target?: MediaAltGenerationTarget) => {
 		if (!target) return true;
 		return (
+			!featureEnabled() ||
 			accessState().disabled ||
 			!targetHasImage(target) ||
 			target.locales().length === 0 ||
@@ -95,6 +94,7 @@ const useMediaAltGeneration = () => {
 		);
 	};
 	const targetTooltip = (target?: MediaAltGenerationTarget) => {
+		if (!featureEnabled()) return T()("ai.media.alt.generate.disabled");
 		const access = accessState();
 		if (access.disabled) return access.message;
 		if (!targetHasImage(target)) {
@@ -149,6 +149,7 @@ const useMediaAltGeneration = () => {
 		target: MediaAltGenerationTarget,
 		id = getTargetId(),
 	) => {
+		if (!featureEnabled()) return;
 		if (spawnAiFeatureAccessToast(accessState())) return;
 		if (targetIsDisabled(target)) return;
 
@@ -227,6 +228,7 @@ const useMediaAltGeneration = () => {
 		}
 	};
 	const open = (target: MediaAltGenerationTarget, id = getTargetId()) => {
+		if (!featureEnabled()) return;
 		if (spawnAiFeatureAccessToast(accessState())) return;
 		if (targetIsDisabled(target)) return;
 
@@ -246,37 +248,39 @@ const useMediaAltGeneration = () => {
 	const createActionButton = (target: MediaAltGenerationTarget): Component => {
 		const id = getTargetId();
 		const ActionButton: Component = () => (
-			<div class="relative">
-				<AiIconButton
-					label={T()("ai.media.alt.generate.action")}
-					tooltip={targetTooltip(target)}
-					disabled={targetIsDisabled(target)}
-					disabledClickable={accessState().disabled}
-					loading={isTargetLoading(id)}
-					quickActionActive={superKeyHeld() && !targetIsDisabled(target)}
-					variant="subtle"
-					onClick={(event) => {
-						event.preventDefault();
-						event.stopPropagation();
-						if (event.metaKey || superKeyHeld()) {
-							void generateAndApply(target, id);
-							return;
-						}
+			<Show when={featureEnabled()}>
+				<div class="relative">
+					<AiIconButton
+						label={T()("ai.media.alt.generate.action")}
+						tooltip={targetTooltip(target)}
+						disabled={targetIsDisabled(target)}
+						disabledClickable={accessState().disabled}
+						loading={isTargetLoading(id)}
+						quickActionActive={superKeyHeld() && !targetIsDisabled(target)}
+						variant="subtle"
+						onClick={(event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							if (event.metaKey || superKeyHeld()) {
+								void generateAndApply(target, id);
+								return;
+							}
 
-						open(target, id);
-					}}
-				/>
-				<Show when={pendingDirectGeneration()?.targetId === id}>
-					<AiDraftReviewPill
-						label={T()("ai.media.alt.generate.quick.review.label")}
-						disabled={aiModalsStore.get.isApplying}
-						onAccept={acceptDirectGeneration}
-						onReject={() => {
-							void rejectDirectGeneration(target);
+							open(target, id);
 						}}
 					/>
-				</Show>
-			</div>
+					<Show when={pendingDirectGeneration()?.targetId === id}>
+						<AiDraftReviewPill
+							label={T()("ai.media.alt.generate.quick.review.label")}
+							disabled={aiModalsStore.get.isApplying}
+							onAccept={acceptDirectGeneration}
+							onReject={() => {
+								void rejectDirectGeneration(target);
+							}}
+						/>
+					</Show>
+				</div>
+			</Show>
 		);
 
 		return ActionButton;
@@ -312,6 +316,7 @@ const useMediaAltGeneration = () => {
 		open,
 		generateAndApply,
 		createActionButton,
+		isFeatureEnabled: featureEnabled,
 		accessState,
 		hasPermission,
 		isDisabled: targetIsDisabled,

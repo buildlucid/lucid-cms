@@ -23,6 +23,7 @@ import api from "@/services/api";
 import aiModalsStore, {
 	type MediaAltGenerationTarget,
 } from "@/store/aiModalsStore";
+import siteStore from "@/store/siteStore";
 import T from "@/translations";
 import { prepareAiImage } from "@/utils/ai-image";
 import { LucidError } from "@/utils/error-handling";
@@ -36,12 +37,12 @@ import GenerationHistory, {
 	type AiGenerationHistoryItem,
 } from "./GenerationHistory";
 
+const CURRENT_ALT_ID = "current-alt";
+
 type GenerateValues = {
 	instruction?: string;
 	localeCodes?: string[];
 };
-
-const CURRENT_ALT_ID = "current-alt";
 
 export type MediaAltGenerationCandidate = {
 	id: string;
@@ -51,7 +52,7 @@ export type MediaAltGenerationCandidate = {
 	cost: MediaAltGenerateResponse["usage"]["cost"];
 };
 
-interface MediaAltGenerationModalProps {
+const MediaAltGenerationModalContent: Component<{
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -74,11 +75,7 @@ interface MediaAltGenerationModalProps {
 		onEdit: (_id: string, _localeCode: string, _value: string) => void;
 		onRevert: (_id: string, _localeCode: string) => void;
 	};
-}
-
-const MediaAltGenerationModalContent: Component<
-	MediaAltGenerationModalProps
-> = (props) => {
+}> = (props) => {
 	// -----------------------------
 	// State
 	const [instruction, setInstruction] = createSignal("");
@@ -502,6 +499,9 @@ const MediaAltGenerationModal: Component = () => {
 
 	// -----------------------------
 	// Memos
+	const featureEnabled = createMemo(() =>
+		siteStore.get.isAiFeatureEnabled("altGeneration"),
+	);
 	const modal = createMemo(() => aiModalsStore.getModal("mediaAltGeneration"));
 	const target = createMemo(() => modal()?.data.target);
 	const targetId = createMemo(() => modal()?.data.targetId);
@@ -770,6 +770,10 @@ const MediaAltGenerationModal: Component = () => {
 	// -----------------------------
 	// Effects
 	createEffect(() => {
+		if (!featureEnabled() && isOpen()) close(false);
+	});
+
+	createEffect(() => {
 		const source = target()?.image();
 		if (source?.file) {
 			const objectUrl = URL.createObjectURL(source.file);
@@ -808,33 +812,35 @@ const MediaAltGenerationModal: Component = () => {
 	// -----------------------------
 	// Render
 	return (
-		<MediaAltGenerationModalContent
-			state={{
-				open: isOpen(),
-				setOpen: close,
-			}}
-			imageUrl={previewUrl()}
-			locales={target()?.locales() ?? []}
-			selectedLocales={selectedLocales()}
-			currentAlt={currentAltDraft()}
-			generations={generations()}
-			selectedGenerationId={selectedGenerationId()}
-			error={responseError()}
-			isLoading={isLoading()}
-			isApplying={aiModalsStore.get.isApplying}
-			callbacks={{
-				onGenerate: generate,
-				onAccept: accept,
-				onClose: () => {
-					abortRequest();
-					clear();
-				},
-				onSelect: setSelectedGenerationId,
-				onToggleLocale: toggleLocale,
-				onEdit: editAltDraft,
-				onRevert: revertGeneration,
-			}}
-		/>
+		<Show when={featureEnabled()}>
+			<MediaAltGenerationModalContent
+				state={{
+					open: isOpen(),
+					setOpen: close,
+				}}
+				imageUrl={previewUrl()}
+				locales={target()?.locales() ?? []}
+				selectedLocales={selectedLocales()}
+				currentAlt={currentAltDraft()}
+				generations={generations()}
+				selectedGenerationId={selectedGenerationId()}
+				error={responseError()}
+				isLoading={isLoading()}
+				isApplying={aiModalsStore.get.isApplying}
+				callbacks={{
+					onGenerate: generate,
+					onAccept: accept,
+					onClose: () => {
+						abortRequest();
+						clear();
+					},
+					onSelect: setSelectedGenerationId,
+					onToggleLocale: toggleLocale,
+					onEdit: editAltDraft,
+					onRevert: revertGeneration,
+				}}
+			/>
+		</Show>
 	);
 };
 

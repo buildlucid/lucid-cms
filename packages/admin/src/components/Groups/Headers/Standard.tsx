@@ -18,6 +18,14 @@ export interface StandardCreateAction {
 	setOpen: (_open: boolean) => void;
 	onClick?: () => void;
 	permission?: boolean;
+	disabled?: boolean;
+	disabledClickable?: boolean;
+	disabledToast?: {
+		title: string;
+		message?: string;
+		status?: "success" | "error" | "warning" | "info";
+		duration?: number;
+	};
 	label?: string;
 	icon?: ActionIconName;
 	secondary?: boolean;
@@ -75,6 +83,9 @@ export const Standard: Component<{
 				label: action.label ?? T()("common.create"),
 				icon: action.icon,
 				secondary: action.secondary,
+				disabled: action.disabled,
+				disabledClickable: action.disabledClickable,
+				disabledToast: action.disabledToast,
 				onClick: () => {
 					if (action.onClick) {
 						action.onClick();
@@ -139,6 +150,7 @@ export const Standard: Component<{
 			callback: () => {
 				const action = firstPrimaryAction();
 				if (!action) return;
+				if (action.type === "button" && action.disabled) return;
 				if (action.type === "button") action.onClick();
 				if (action.type === "link") navigate(action.href);
 			},

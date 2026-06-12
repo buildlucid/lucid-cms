@@ -1,10 +1,12 @@
-import { type Component, createMemo, For } from "solid-js";
+import { type Component, createMemo, For, Show } from "solid-js";
 import Alert from "@/components/Blocks/Alert";
 import StartingPoints from "@/components/Blocks/StartingPoints";
 import { DynamicContent } from "@/components/Groups/Layout";
+import Link from "@/components/Partials/Link";
 import constants from "@/constants";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
+import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -65,6 +67,12 @@ export const Dashboard: Component = () => {
 	const canReadRoles = createMemo(
 		() => userStore.get.hasPermission([Permissions.RolesRead]).all,
 	);
+	const canManageLicense = createMemo(
+		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
+	);
+	const showLicenseBanner = createMemo(
+		() => siteStore.get.license?.valid === false,
+	);
 
 	// ----------------------------------------
 	// Render
@@ -74,6 +82,23 @@ export const Dashboard: Component = () => {
 				padding: "24",
 			}}
 		>
+			<Show when={showLicenseBanner()}>
+				<section class="mb-4 flex flex-col gap-3 rounded-md border border-warning-base/20 bg-warning-base/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+					<div>
+						<h2 class="text-sm font-medium text-title">
+							{T()("license.dashboard.banner.title")}
+						</h2>
+						<p class="mt-1 text-sm text-body">
+							{T()("license.dashboard.banner.description")}
+						</p>
+					</div>
+					<Show when={canManageLicense()}>
+						<Link theme="secondary" size="medium" href="/lucid/system/license">
+							{T()("license.dashboard.banner.action")}
+						</Link>
+					</Show>
+				</section>
+			</Show>
 			<Alert
 				style="block"
 				alerts={[

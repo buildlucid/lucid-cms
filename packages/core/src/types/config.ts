@@ -210,6 +210,15 @@ export type SecurityContentSecurityPolicy = {
 	trustedTypes?: string[];
 };
 
+export type AiFeatureConfig = {
+	/* Enables AI Image generation */
+	imageGeneration?: boolean;
+	/* Enables AI alt text generation */
+	altGeneration?: boolean;
+	/* Enables AI custom field value generation */
+	customFieldGeneration?: boolean;
+};
+
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
 	/**
@@ -324,6 +333,19 @@ export interface LucidConfig {
 		 * Whether the OpenAPI documentation site is enabled.
 		 */
 		enabled?: boolean;
+	};
+	/**
+	 * AI feature availability.
+	 */
+	ai?: {
+		/**
+		 * Whether AI features are available in the admin UI and backend feature endpoints.
+		 */
+		enabled?: boolean;
+		/**
+		 * Per-feature AI availability. Omitted features default to enabled.
+		 */
+		features?: AiFeatureConfig;
 	};
 	/**
 	 * Content localization settings.
@@ -583,6 +605,10 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	};
 	openAPI: {
 		enabled: boolean;
+	};
+	ai: {
+		enabled: boolean;
+		features: Required<AiFeatureConfig>;
 	};
 	localization: LocalizationConfig;
 	i18n: Required<I18nConfig>;

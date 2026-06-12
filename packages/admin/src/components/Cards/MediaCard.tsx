@@ -39,6 +39,7 @@ interface MediaCardProps {
 	onGenerateAlt?: (_media: Media) => void;
 	onCrop?: (_media: Media) => void;
 	aiAltAccessState?: AiFeatureAccessState;
+	aiAltFeatureEnabled?: boolean;
 	previewCacheKey?: string | number | null;
 }
 
@@ -194,6 +195,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 						props.aiAltAccessState.reason !== "no-permission",
 					disabledToast: aiAltAccessDisabledToast(),
 					hide:
+						props.aiAltFeatureEnabled === false ||
 						!props.onGenerateAlt ||
 						props.showingDeleted?.() ||
 						!hasUpdatePermission(),

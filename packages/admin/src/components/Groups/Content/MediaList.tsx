@@ -414,6 +414,7 @@ export const MediaList: Component<{
 								onGenerateAlt={openAltGeneration}
 								onCrop={openQuickCrop}
 								aiAltAccessState={mediaAltGeneration.accessState()}
+								aiAltFeatureEnabled={mediaAltGeneration.isFeatureEnabled()}
 								previewCacheKey={
 									quickCropPreviewKeys()[item.id] ?? item.updatedAt
 								}

@@ -10,6 +10,7 @@ import {
 } from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getLicenseKey from "../../options/get-license-key.js";
+import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import storeFailedGeneration from "../storage/store-failed-generation.js";
 import storeGeneration from "../storage/store-generation.js";
 import storePendingGeneration from "../storage/store-pending-generation.js";
@@ -44,6 +45,11 @@ const mediaImageGenerate: ServiceFn<
 	],
 	MediaImageGenerateResponse
 > = async (context, props) => {
+	const featureEnabledRes = await checkFeatureEnabled(context, {
+		feature: "imageGeneration",
+	});
+	if (featureEnabledRes.error) return featureEnabledRes;
+
 	const requestStartedAt = Date.now();
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;
