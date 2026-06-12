@@ -1,11 +1,10 @@
+import constants from "../../constants/constants.js";
 import formatter, { licenseFormatter } from "../../libs/formatters/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import type { License } from "../../types.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import verifyLicense from "./verify.js";
-
-const LICENSE_STATUS_STALE_AFTER_SECONDS = 60 * 60;
 
 const licenseStatus: ServiceFn<[], License> = async (context) => {
 	const Options = new OptionsRepository(context.db.client, context.config.db);
@@ -48,7 +47,7 @@ const licenseStatus: ServiceFn<[], License> = async (context) => {
 
 	if (
 		lastChecked === null ||
-		now - lastChecked >= LICENSE_STATUS_STALE_AFTER_SECONDS
+		now - lastChecked >= constants.license.statusRecheckIntervalSeconds
 	) {
 		const verifyRes = await verifyLicense(context);
 		if (verifyRes.error) return verifyRes;

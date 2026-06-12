@@ -179,7 +179,7 @@ export default Object.freeze({
 		previewableTypes: ["image", "video", "audio"] as const,
 	},
 	license: {
-		statusRecheckIntervalSeconds: 21600, //  6 hours
+		statusRecheckIntervalSeconds: 3600, // 1 hour
 	},
 	endpoints: {
 		lucidRemoteApiDomain: "https://api.lucidcms.io",

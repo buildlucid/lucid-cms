@@ -158,17 +158,10 @@ const verifyLicense: ServiceFn<
 		const errorMessage =
 			context.translate(verifyRes.error.message) ||
 			context.translate("server:core.license.verification.failed");
-		snapshot =
-			(verifyRes.error.status ?? 500) >= 500
-				? {
-						...existingSnapshot,
-						errorMessage,
-					}
-				: {
-						valid: false,
-						aiEnabled: false,
-						errorMessage,
-					};
+		snapshot = {
+			...existingSnapshot,
+			errorMessage,
+		};
 	} else {
 		const ok = verifyRes.data.json.data;
 		const valid = !!ok.valid;
