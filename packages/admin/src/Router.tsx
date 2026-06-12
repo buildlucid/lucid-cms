@@ -43,7 +43,6 @@ const ReleaseRequestsListRoute = lazy(
 	() => import("@/routes/ReleaseRequests/List"),
 );
 const AccountRoute = lazy(() => import("@/routes/Account"));
-const CollectionsListRoute = lazy(() => import("@/routes/Collections/List"));
 const CollectionsDocumentsListRoute = lazy(
 	() => import("./routes/Collections/Documents/List"),
 );
@@ -66,7 +65,6 @@ const AppRouter: Component = () => {
 				<Route path="/components" component={ComponentsRoute} />
 				<Route path="/account" component={AccountRoute} />
 				{/* Collections */}
-				<Route path="/collections" component={() => <CollectionsListRoute />} />
 				<Route
 					path="/collections/:collectionKey"
 					component={() => <CollectionsDocumentsListRoute />}

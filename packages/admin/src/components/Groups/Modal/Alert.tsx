@@ -30,7 +30,7 @@ export const Alert: Component<{
 									{props.copy.title}
 								</AlertDialog.Title>
 								<Show when={props.copy.description}>
-									<AlertDialog.Description class="mt-1 text-base text-body">
+									<AlertDialog.Description class="mt-1 text-sm text-body">
 										{props.copy.description}
 									</AlertDialog.Description>
 								</Show>

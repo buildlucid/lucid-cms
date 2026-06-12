@@ -183,6 +183,7 @@ const streamSingleController = factory.createHandlers(
 			applyRangeHeaders(c, { cacheControl });
 			applyStreamingHeaders(c, {
 				key: response.data.key,
+				contentType: response.data.contentType,
 				etag,
 			});
 			c.status(304);

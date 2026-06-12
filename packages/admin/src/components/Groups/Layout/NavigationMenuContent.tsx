@@ -199,13 +199,6 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					/>
 					<IconLinkFull
 						type="link"
-						href="/lucid/system/queue-observability"
-						icon="queue"
-						title={T()("queue.observability")}
-						permission={props.canReadJobs}
-					/>
-					<IconLinkFull
-						type="link"
 						href="/lucid/system/ai-usage"
 						icon="overview"
 						title={T()("common.ai.usage")}
@@ -217,6 +210,13 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						icon="license"
 						title={T()("common.license")}
 						permission={props.canManageLicense}
+					/>
+					<IconLinkFull
+						type="link"
+						href="/lucid/system/queue-observability"
+						icon="queue"
+						title={T()("queue.observability")}
+						permission={props.canReadJobs}
 					/>
 				</ul>
 			</div>

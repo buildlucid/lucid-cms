@@ -59,11 +59,6 @@ const SystemSettingsHeader: Component<{
 								permission: canReadClientIntegrations(),
 							},
 							{
-								label: T()("common.queue"),
-								href: "/lucid/system/queue-observability",
-								permission: canReadJobs(),
-							},
-							{
 								label: T()("common.ai.usage"),
 								href: "/lucid/system/ai-usage",
 								permission: canReadAiUsage(),
@@ -72,6 +67,11 @@ const SystemSettingsHeader: Component<{
 								label: T()("common.license"),
 								href: "/lucid/system/license",
 								permission: canManageLicense(),
+							},
+							{
+								label: T()("common.queue"),
+								href: "/lucid/system/queue-observability",
+								permission: canReadJobs(),
 							},
 						]}
 					/>

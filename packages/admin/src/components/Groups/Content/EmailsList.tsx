@@ -1,8 +1,12 @@
 import {
+	FaSolidAt,
+	FaSolidBolt,
 	FaSolidCalendar,
-	FaSolidEnvelope,
+	FaSolidCircleCheck,
+	FaSolidLayerGroup,
 	FaSolidPaperPlane,
 	FaSolidT,
+	FaSolidTag,
 } from "solid-icons/fa";
 import { type Component, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
@@ -72,44 +76,59 @@ export const EmailsList: Component<{
 			}}
 		>
 			<Table
-				key={"emails.list"}
+				key={"emails.list.v2"}
 				rows={emails.data?.data.length || 0}
 				searchParams={props.state.searchParams}
 				head={[
 					{
 						label: T()("common.status"),
-						key: "status",
-						icon: <FaSolidT />,
+						key: "currentStatus",
+						icon: <FaSolidCircleCheck />,
+						minWidth: 140,
 					},
 					{
-						label: T()("common.message"),
-						key: "message",
+						label: T()("common.subject"),
+						key: "subject",
 						icon: <FaSolidT />,
-						minWidth: 260,
+						minWidth: 320,
 					},
 					{
-						label: T()("common.addresses"),
-						key: "addresses",
-						icon: <FaSolidEnvelope />,
-						minWidth: 260,
+						label: T()("common.to"),
+						key: "toAddress",
+						icon: <FaSolidAt />,
+						minWidth: 240,
+					},
+					{
+						label: T()("email.templates.singular"),
+						key: "template",
+						icon: <FaSolidLayerGroup />,
+						minWidth: 180,
+					},
+					{
+						label: T()("common.type"),
+						key: "type",
+						icon: <FaSolidTag />,
+						minWidth: 120,
+					},
+					{
+						label: T()("common.priority"),
+						key: "priority",
+						icon: <FaSolidBolt />,
+						minWidth: 120,
 					},
 					{
 						label: T()("common.attempt.count"),
 						key: "attemptCount",
 						icon: <FaSolidPaperPlane />,
 						sortable: true,
-					},
-					{
-						label: T()("common.first.attempt"),
-						key: "createdAt",
-						icon: <FaSolidCalendar />,
-						sortable: true,
+						minWidth: 140,
 					},
 					{
 						label: T()("common.last.attempt"),
 						key: "lastAttemptedAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,
+						minWidth: 170,
 					},
 				]}
 				state={{

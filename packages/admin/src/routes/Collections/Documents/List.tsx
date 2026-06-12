@@ -156,7 +156,19 @@ const CollectionsDocumentsListRoute: Component = () => {
 	createEffect(() => {
 		if (collection.isSuccess) {
 			if (collection.data.data.mode === "single") {
-				navigate("/lucid/collections");
+				navigate(
+					collection.data.data.documentId
+						? getDocumentRoute("edit", {
+								collectionKey: collection.data.data.key,
+								documentId: collection.data.data.documentId,
+							})
+						: getDocumentRoute("create", {
+								collectionKey: collection.data.data.key,
+							}),
+					{
+						replace: true,
+					},
+				);
 			}
 		}
 	});

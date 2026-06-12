@@ -41,7 +41,7 @@ const ReleaseRequestTitleCol: Component<{
 							`${props.collectionLabel} #${props.request.documentId}`}
 					</span>
 				</div>
-				<div class="mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-body">
+				<div class="mt-1 flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-body">
 					<Show when={props.request.documentLabel}>
 						<span class="truncate">
 							{props.collectionLabel} #{props.request.documentId}
@@ -54,7 +54,7 @@ const ReleaseRequestTitleCol: Component<{
 						{T()("documents.release.request")} #{props.request.id}
 					</span>
 					<span class="text-border">/</span>
-					<span class="rounded border border-border bg-input-base px-1.5 py-0.5 text-[11px] leading-none text-body">
+					<span class="capitalize text-xs text-body">
 						{props.request.target}
 					</span>
 				</div>

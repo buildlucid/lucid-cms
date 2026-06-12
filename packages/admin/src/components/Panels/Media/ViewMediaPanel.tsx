@@ -1,4 +1,3 @@
-import classNames from "classnames";
 import {
 	type Accessor,
 	type Component,
@@ -10,10 +9,9 @@ import {
 } from "solid-js";
 import { Checkbox, Input, Select } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
-import AspectRatio from "@/components/Partials/AspectRatio";
 import DetailsList from "@/components/Partials/DetailsList";
-import MediaPreview from "@/components/Partials/MediaPreview";
 import PanelTabs from "@/components/Partials/PanelTabs";
+import ReadonlyMediaPreview from "@/components/Partials/ReadonlyMediaPreview";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
@@ -118,30 +116,22 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 			{(lang) => (
 				<>
 					{/* Preview */}
-					<AspectRatio
-						ratio="16:9"
-						innerClass={classNames(
-							"overflow-hidden rounded-md z-0 bg-card-hover",
-							{
-								"rectangle-background": media.data?.data?.type === "image",
-							},
+					<Show when={media.data?.data} keyed>
+						{(item) => (
+							<ReadonlyMediaPreview
+								media={{
+									type: item.type,
+									url: item.url,
+									updatedAt: item.updatedAt,
+								}}
+								alt={
+									helpers.getTranslation(item.alt, lang?.contentLocale()) ||
+									helpers.getTranslation(item.title, lang?.contentLocale()) ||
+									""
+								}
+							/>
 						)}
-					>
-						<Show when={media.data?.data} keyed>
-							{(item) => (
-								<MediaPreview
-									media={{ type: item.type, url: item.url }}
-									alt={
-										helpers.getTranslation(item.alt, lang?.contentLocale()) ||
-										helpers.getTranslation(item.title, lang?.contentLocale()) ||
-										""
-									}
-									imageFit="contain"
-									preset="thumbnail-medium"
-								/>
-							)}
-						</Show>
-					</AspectRatio>
+					</Show>
 					<PanelTabs
 						items={visibleTabs().map((tab) => ({
 							value: tab,

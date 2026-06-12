@@ -1,10 +1,10 @@
-import type { Email } from "@types";
+import type { Email, EmailDeliveryStatus } from "@types";
 import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table/Tr";
+import type { PillProps } from "@/components/Partials/Pill";
 import DateCol from "@/components/Tables/Columns/DateCol";
-import EmailAddressesCol from "@/components/Tables/Columns/EmailAddressesCol";
-import EmailMessageCol from "@/components/Tables/Columns/EmailMessageCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
+import TextCol from "@/components/Tables/Columns/TextCol";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
@@ -18,6 +18,29 @@ interface EmailRowProps extends TableRowProps {
 }
 
 const EmailRow: Component<EmailRowProps> = (props) => {
+	// ----------------------------------
+	// Helpers
+	const getPillTheme = (
+		deliveryStatus: EmailDeliveryStatus,
+	): PillProps["theme"] => {
+		if (
+			deliveryStatus === "sent" ||
+			deliveryStatus === "delivered" ||
+			deliveryStatus === "opened" ||
+			deliveryStatus === "clicked"
+		) {
+			return "primary-opaque";
+		}
+		if (
+			deliveryStatus === "failed" ||
+			deliveryStatus === "bounced" ||
+			deliveryStatus === "complained"
+		) {
+			return "error-opaque";
+		}
+		return "outline";
+	};
+
 	// ----------------------------------
 	// Render
 	return (
@@ -70,36 +93,56 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 		>
 			<PillCol
 				text={props.email.currentStatus}
-				theme={
-					props.email.currentStatus === "sent" ||
-					props.email.currentStatus === "delivered"
-						? "primary-opaque"
-						: props.email.currentStatus === "failed"
-							? "error-opaque"
-							: "outline"
-				}
+				theme={getPillTheme(props.email.currentStatus)}
 				options={{ include: props?.include[0] }}
 			/>
-			<EmailMessageCol
-				email={props.email}
-				options={{ include: props?.include[1] }}
+			<TextCol
+				text={props.email.mailDetails.subject}
+				options={{
+					include: props?.include[1],
+					minWidth: 320,
+					maxLines: 1,
+				}}
 			/>
-			<EmailAddressesCol
-				email={props.email}
-				options={{ include: props?.include[2] }}
+			<TextCol
+				text={props.email.mailDetails.to}
+				options={{
+					include: props?.include[2],
+					minWidth: 240,
+					maxLines: 1,
+				}}
 			/>
-			<PillCol
+			<TextCol
+				text={props.email.mailDetails.template}
+				options={{
+					include: props?.include[3],
+					minWidth: 180,
+					maxLines: 1,
+				}}
+			/>
+			<TextCol
+				text={props.email.type}
+				options={{
+					include: props?.include[4],
+					minWidth: 120,
+					classes: "capitalize",
+				}}
+			/>
+			<TextCol
+				text={props.email.mailDetails.priority}
+				options={{
+					include: props?.include[5],
+					minWidth: 120,
+					classes: "capitalize",
+				}}
+			/>
+			<TextCol
 				text={props.email.attemptCount || 0}
-				theme={"outline"}
-				options={{ include: props?.include[3] }}
-			/>
-			<DateCol
-				date={props.email.createdAt}
-				options={{ include: props?.include[4] }}
+				options={{ include: props?.include[6], minWidth: 140 }}
 			/>
 			<DateCol
 				date={props.email.lastAttemptedAt}
-				options={{ include: props?.include[5] }}
+				options={{ include: props?.include[7] }}
 			/>
 		</Tr>
 	);

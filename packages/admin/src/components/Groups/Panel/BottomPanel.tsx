@@ -182,7 +182,7 @@ export const BottomPanel: Component<{
 												</h2>
 											</Show>
 											<Show when={props.copy?.description}>
-												<p class="mt-1 text-base text-body">
+												<p class="mt-1 text-sm text-body">
 													{props.copy?.description}
 												</p>
 											</Show>

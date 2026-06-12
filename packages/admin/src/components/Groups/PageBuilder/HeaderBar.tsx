@@ -87,8 +87,8 @@ export const HeaderBar: Component<{
 
 		return [
 			{
-				link: "/lucid/collections",
-				label: T()("common.collections"),
+				link: "/lucid",
+				label: T()("common.dashboard"),
 			},
 			{
 				link: `/lucid/collections/${props.state.collectionKey()}`,

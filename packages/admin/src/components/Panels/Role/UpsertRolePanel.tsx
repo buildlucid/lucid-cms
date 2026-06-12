@@ -1,5 +1,4 @@
 import type { Permission } from "@types";
-import { FaSolidTriangleExclamation } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
@@ -237,9 +236,6 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 				description: isLocked()
 					? T()("roles.config.managed.description")
 					: undefined,
-				descriptionIcon: isLocked() ? (
-					<FaSolidTriangleExclamation size="14" />
-				) : undefined,
 				submit: props.viewOnly ? undefined : panelSubmit(),
 			}}
 			options={{

@@ -1,7 +1,6 @@
 export { Account } from "./Account";
 export { AiUsageList } from "./AiUsageList";
 export { ClientIntegrationsList } from "./ClientIntegrationsList";
-export { CollectionsList } from "./CollectionsList";
 export { Dashboard } from "./Dashboard";
 export { DocumentsList } from "./DocumentsList";
 export { EmailsList } from "./EmailsList";

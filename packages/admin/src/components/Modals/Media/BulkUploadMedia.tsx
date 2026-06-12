@@ -385,7 +385,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 							<h2 class="text-base font-semibold text-title">
 								{T()("media.upload.bulk.title")}
 							</h2>
-							<p class="mt-1 text-base text-body">
+							<p class="mt-1 text-sm text-body">
 								{T()("media.upload.bulk.description")}
 							</p>
 						</div>

@@ -73,6 +73,7 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 							src={`${url()}?preset=thumbnail-small&format=webp`}
 							alt=""
 							class="h-full w-full rounded-full object-cover"
+							loading="lazy"
 						/>
 					)}
 				</Show>

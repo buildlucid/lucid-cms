@@ -33,6 +33,7 @@ import DeleteAllShareLinks from "@/components/Modals/Media/DeleteAllShareLinks";
 import DeleteMedia from "@/components/Modals/Media/DeleteMedia";
 import DeleteMediaBatch from "@/components/Modals/Media/DeleteMediaBatch";
 import DeleteMediaBatchPermanently from "@/components/Modals/Media/DeleteMediaBatchPermanently";
+import DeleteMediaFolder from "@/components/Modals/Media/DeleteMediaFolder";
 import DeleteMediaPermanently from "@/components/Modals/Media/DeleteMediaPermanently";
 import ImageCropEditor from "@/components/Modals/Media/ImageCropEditor";
 import MoveToFolder, {
@@ -81,6 +82,7 @@ export const MediaList: Component<{
 			moveToFolder: false,
 			view: false,
 			updateFolder: false,
+			deleteFolder: false,
 			createShareLink: false,
 			viewShareLinks: false,
 			copyShareLinkURL: false,
@@ -515,6 +517,15 @@ export const MediaList: Component<{
 						rowTarget.setTrigger("updateFolder", state);
 					},
 					parentFolderId: props.state.parentFolderId,
+				}}
+			/>
+			<DeleteMediaFolder
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().deleteFolder,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("deleteFolder", state);
+					},
 				}}
 			/>
 			<DeleteMedia

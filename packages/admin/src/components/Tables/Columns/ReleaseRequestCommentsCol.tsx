@@ -26,7 +26,7 @@ const ReleaseRequestCommentsCol: Component<{
 				<Show when={props.request.requestComment}>
 					{(comment) => (
 						<p
-							class="flex min-w-0 items-center gap-1.5 text-sm leading-5 text-body"
+							class="flex min-w-0 items-center gap-1.5 text-sm leading-5 text-subtitle"
 							title={comment()}
 						>
 							<span class="flex size-4 shrink-0 items-center justify-center">
@@ -43,7 +43,7 @@ const ReleaseRequestCommentsCol: Component<{
 				<Show when={props.request.decisionComment}>
 					{(comment) => (
 						<p
-							class="flex min-w-0 items-center gap-1.5 text-sm leading-5 text-body"
+							class="flex min-w-0 items-center gap-1.5 text-sm leading-5 text-subtitle"
 							title={comment()}
 						>
 							<span class="flex size-4 shrink-0 items-center justify-center">

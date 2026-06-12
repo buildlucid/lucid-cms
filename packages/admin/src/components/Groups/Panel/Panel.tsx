@@ -193,7 +193,7 @@ export const Panel: Component<{
 												</h2>
 											</Show>
 											<Show when={props.copy?.description}>
-												<p class="mt-1 flex items-start gap-2 text-base text-body">
+												<p class="mt-1 flex items-start gap-2 text-sm text-body">
 													<Show when={props.copy?.descriptionIcon}>
 														<span class="mt-1.5 text-warning-base">
 															{props.copy?.descriptionIcon}

@@ -8,12 +8,12 @@ const SystemIndexRoute: Component = () => {
 		return <Navigate href="/lucid/system/overview" />;
 	}
 
-	if (userStore.get.hasPermission([Permissions.LicenseUpdate]).all) {
-		return <Navigate href="/lucid/system/license" />;
-	}
-
 	if (userStore.get.hasPermission([Permissions.IntegrationsRead]).all) {
 		return <Navigate href="/lucid/system/integrations" />;
+	}
+
+	if (userStore.get.hasPermission([Permissions.LicenseUpdate]).all) {
+		return <Navigate href="/lucid/system/license" />;
 	}
 
 	if (userStore.get.hasPermission([Permissions.JobsRead]).all) {

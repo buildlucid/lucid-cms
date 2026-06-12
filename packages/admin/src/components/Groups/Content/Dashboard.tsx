@@ -1,195 +1,379 @@
-import { type Component, createMemo, For, Show } from "solid-js";
-import Alert from "@/components/Blocks/Alert";
-import StartingPoints from "@/components/Blocks/StartingPoints";
+import {
+	FaSolidDatabase,
+	FaSolidFolderPlus,
+	FaSolidImages,
+	FaSolidKey,
+	FaSolidPlus,
+	FaSolidTriangleExclamation,
+	FaSolidUpload,
+	FaSolidUser,
+	FaSolidUserCheck,
+} from "solid-icons/fa";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
+import {
+	DashboardAttention,
+	type DashboardAttentionItem,
+	DashboardContentShortcuts,
+	type DashboardQuickAction,
+	DashboardQuickActions,
+	DashboardReleaseOverview,
+} from "@/components/Groups/Dashboard";
 import { DynamicContent } from "@/components/Groups/Layout";
-import Link from "@/components/Partials/Link";
-import constants from "@/constants";
+import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationModal";
+import MediaImageGenerationModal from "@/components/Modals/AI/MediaImageGenerationModal";
+import BulkUploadMediaModal from "@/components/Modals/Media/BulkUploadMedia";
+import CreateMediaFolderModal from "@/components/Modals/Media/CreateMediaFolder";
+import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
+import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import helpers from "@/utils/helpers";
+import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const Dashboard: Component = () => {
 	// ----------------------------------------
-	// Queries / Mutations
-	const settings = api.settings.useGetSettings({
-		queryParams: {
-			include: {
-				media: true,
-			},
-		},
-	});
+	// State
+	const [createMediaPanelOpen, setCreateMediaPanelOpen] = createSignal(false);
+	const [bulkUploadModalOpen, setBulkUploadModalOpen] = createSignal(false);
+	const [createFolderModalOpen, setCreateFolderModalOpen] = createSignal(false);
+	const [createUserPanelOpen, setCreateUserPanelOpen] = createSignal(false);
 
 	// ----------------------------------------
-	// Local
-	const docsLinks: Array<{ label: string; href: string }> = [
-		{
-			label: T()("help.configuring.lucid.cms.title"),
-			href: `${constants.documentationUrl}/configuration/configuring-lucid-cms/`,
-		},
-		{
-			label: T()("builder.collections.title"),
-			href: `${constants.documentationUrl}/configuration/collection-builder/`,
-		},
-		{
-			label: T()("builder.bricks.title"),
-			href: `${constants.documentationUrl}/configuration/brick-builder/`,
-		},
-		{
-			label: T()("common.fetching.data"),
-			href: `${constants.documentationUrl}/fetching-data/rest-api/`,
-		},
-		{
-			label: T()("common.hooks"),
-			href: `${constants.documentationUrl}/extending-lucid/hooks/`,
-		},
-		{
-			label: T()("common.plugins"),
-			href: `${constants.documentationUrl}/extending-lucid/plugins/`,
-		},
-	];
+	// Permissions
 	const canReadSystemOverview = createMemo(
 		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
 	);
 	const canReadCollections = createMemo(
 		() => userStore.get.hasPermission([Permissions.DocumentsRead]).all,
 	);
-	const canReadMedia = createMemo(
-		() => userStore.get.hasPermission([Permissions.MediaRead]).all,
+	const canCreateDocuments = createMemo(
+		() => userStore.get.hasPermission([Permissions.DocumentsCreate]).all,
 	);
-	const canReadEmails = createMemo(
-		() => userStore.get.hasPermission([Permissions.EmailRead]).all,
+	const canCreateMedia = createMemo(
+		() => userStore.get.hasPermission([Permissions.MediaCreate]).all,
 	);
-	const canReadUsers = createMemo(
-		() => userStore.get.hasPermission([Permissions.UsersRead]).all,
+	const canReviewDocuments = createMemo(
+		() => userStore.get.hasPermission([Permissions.DocumentsReview]).all,
 	);
-	const canReadRoles = createMemo(
-		() => userStore.get.hasPermission([Permissions.RolesRead]).all,
+	const canCreateUsers = createMemo(
+		() => userStore.get.hasPermission([Permissions.UsersCreate]).all,
 	);
 	const canManageLicense = createMemo(
 		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
 	);
-	const showLicenseBanner = createMemo(
+
+	// ----------------------------------------
+	// Queries
+	const settings = api.settings.useGetSettings({
+		queryParams: {
+			include: {
+				media: true,
+			},
+		},
+		enabled: () => canReadSystemOverview(),
+	});
+	const collections = api.collections.useGetAll({
+		queryParams: {},
+		enabled: () =>
+			canReadCollections() || canCreateDocuments() || canReviewDocuments(),
+	});
+
+	// ----------------------------------------
+	// Memos
+	const collectionsData = createMemo(() => collections.data?.data ?? []);
+
+	const releaseRequestsAvailable = createMemo(
+		() =>
+			canReviewDocuments() &&
+			collectionsData().some(
+				(collection) =>
+					(collection.config.review?.requiredFor?.length ?? 0) > 0,
+			),
+	);
+
+	// ----------------------------------------
+	// Queries
+	const releaseOverview = api.publishOperations.useGetOverview({
+		queryParams: {},
+		enabled: () => releaseRequestsAvailable(),
+	});
+
+	// ----------------------------------------
+	// Memos
+	const mediaInfo = createMemo(() => settings.data?.data?.media);
+	const showLicenseAttention = createMemo(
 		() => siteStore.get.license?.valid === false,
 	);
+	const readableCollections = createMemo(() =>
+		collectionsData().filter((collection) => {
+			if (collection.mode === "single") {
+				return userStore.get.hasPermission([
+					collection.permissions.read,
+					collection.documentId
+						? collection.permissions.update
+						: collection.permissions.create,
+				]).all;
+			}
+
+			return userStore.get.hasPermission([collection.permissions.read]).all;
+		}),
+	);
+	const storagePercentUsed = createMemo(() => {
+		const storage = mediaInfo()?.storage;
+		if (!storage || storage.total === null || storage.used === null) return 0;
+		if (storage.total <= 0 || storage.used <= 0) return 0;
+		return Math.max(
+			0,
+			Math.min(100, Math.floor((storage.used / storage.total) * 100)),
+		);
+	});
+	const storageNeedsAttention = createMemo(() => {
+		const storage = mediaInfo()?.storage;
+		if (!storage || storage.total === null) return false;
+		return storagePercentUsed() >= 90;
+	});
+	const creatableCollections = createMemo(() =>
+		collectionsData()
+			.filter((collection) => {
+				if (collection.config.locked) return false;
+				if (
+					userStore.get.hasPermission([collection.permissions.create]).some ===
+					false
+				) {
+					return false;
+				}
+				if (collection.mode === "single" && collection.documentId) return false;
+				return true;
+			})
+			.slice(0, 3),
+	);
+	const createDocumentActions = createMemo<DashboardQuickAction[]>(() =>
+		creatableCollections().map((collection) => {
+			const name =
+				helpers.getLocaleValue({
+					value: collection.details.singularName,
+					fallback: collection.key,
+				}) || collection.key;
+			return {
+				key: `create-${collection.key}`,
+				title: T()("actions.create.dynamic", {
+					name,
+				}),
+				description: T()(
+					"dashboard.quick.actions.create.document.description",
+					{
+						name,
+					},
+				),
+				icon: <FaSolidPlus size={14} />,
+				href: getDocumentRoute("create", {
+					collectionKey: collection.key,
+				}),
+			};
+		}),
+	);
+	const quickActions = createMemo<DashboardQuickAction[]>(() => [
+		...createDocumentActions(),
+		{
+			key: "upload-media",
+			title: T()("media.upload.action"),
+			description: T()("dashboard.quick.actions.upload.media.description"),
+			icon: <FaSolidUpload size={14} />,
+			onClick: () => setCreateMediaPanelOpen(true),
+			show: canCreateMedia(),
+		},
+		{
+			key: "bulk-upload-media",
+			title: T()("media.upload.bulk.action"),
+			description: T()("dashboard.quick.actions.bulk.upload.description"),
+			icon: <FaSolidImages size={14} />,
+			onClick: () => setBulkUploadModalOpen(true),
+			show: canCreateMedia(),
+		},
+		{
+			key: "create-folder",
+			title: T()("media.folders.add"),
+			description: T()("dashboard.quick.actions.create.folder.description"),
+			icon: <FaSolidFolderPlus size={14} />,
+			onClick: () => setCreateFolderModalOpen(true),
+			show: canCreateMedia(),
+		},
+		{
+			key: "review-releases",
+			title: T()("dashboard.quick.actions.review.releases.title"),
+			description: T()("dashboard.quick.actions.review.releases.description"),
+			icon: <FaSolidUserCheck size={14} />,
+			href: "/lucid/release-requests?filter[assignedToMe]=true",
+			show: releaseRequestsAvailable(),
+		},
+		{
+			key: "invite-user",
+			title: T()("users.add"),
+			description: T()("dashboard.quick.actions.invite.user.description"),
+			icon: <FaSolidUser size={14} />,
+			onClick: () => setCreateUserPanelOpen(true),
+			show: canCreateUsers(),
+		},
+	]);
+	const visibleQuickActions = createMemo(() =>
+		quickActions().filter((action) => action.show !== false),
+	);
+	const showContentShortcuts = createMemo(
+		() =>
+			canReadCollections() &&
+			(collections.isLoading ||
+				collections.isError ||
+				readableCollections().length > 0),
+	);
+	const attentionItems = createMemo<DashboardAttentionItem[]>(() => {
+		const items: DashboardAttentionItem[] = [];
+		const overview = releaseOverview.data?.data;
+
+		if (showLicenseAttention() && canManageLicense()) {
+			items.push({
+				key: "license",
+				title: T()("license.dashboard.banner.title"),
+				description: T()("license.dashboard.banner.description"),
+				icon: <FaSolidKey size={14} />,
+				tone: "warning",
+				action: {
+					label: T()("license.dashboard.banner.action"),
+					href: "/lucid/system/license",
+				},
+			});
+		}
+
+		if (canReadSystemOverview() && mediaInfo()?.enabled === false) {
+			items.push({
+				key: "media-disabled",
+				title: T()("dashboard.attention.media.disabled.title"),
+				description: T()("media.storage.strategy.missing.message"),
+				icon: <FaSolidTriangleExclamation size={14} />,
+				tone: "warning",
+				action: {
+					label: T()("dashboard.attention.view.system"),
+					href: "/lucid/system/overview",
+				},
+			});
+		}
+
+		if (canReadSystemOverview() && storageNeedsAttention()) {
+			items.push({
+				key: "storage",
+				title: T()("dashboard.attention.storage.title", {
+					percent: storagePercentUsed(),
+				}),
+				description: T()("dashboard.attention.storage.description", {
+					remaining: helpers.bytesToSize(mediaInfo()?.storage.remaining),
+				}),
+				icon: <FaSolidDatabase size={14} />,
+				tone: storagePercentUsed() >= 98 ? "danger" : "warning",
+				action: {
+					label: T()("dashboard.attention.view.system"),
+					href: "/lucid/system/overview",
+				},
+			});
+		}
+
+		if (releaseRequestsAvailable() && (overview?.assignedToMe ?? 0) > 0) {
+			items.push({
+				key: "assigned-releases",
+				title: T()("dashboard.attention.release.assigned.title", {
+					count: overview?.assignedToMe ?? 0,
+				}),
+				description: T()("dashboard.attention.release.assigned.description"),
+				icon: <FaSolidUserCheck size={14} />,
+				tone: "info",
+				action: {
+					label: T()("dashboard.attention.review.now"),
+					href: "/lucid/release-requests?filter[assignedToMe]=true",
+				},
+			});
+		}
+
+		if (releaseRequestsAvailable() && (overview?.failed ?? 0) > 0) {
+			items.push({
+				key: "failed-releases",
+				title: T()("dashboard.attention.release.failed.title", {
+					count: overview?.failed ?? 0,
+				}),
+				description: T()("dashboard.attention.release.failed.description"),
+				icon: <FaSolidTriangleExclamation size={14} />,
+				tone: "danger",
+				action: {
+					label: T()("dashboard.attention.view.failed"),
+					href: "/lucid/release-requests?filter[executionStatus]=failed",
+				},
+			});
+		}
+
+		return items;
+	});
 
 	// ----------------------------------------
 	// Render
 	return (
-		<DynamicContent
-			options={{
-				padding: "24",
-			}}
-		>
-			<Show when={showLicenseBanner()}>
-				<section class="mb-4 flex flex-col gap-3 rounded-md border border-warning-base/20 bg-warning-base/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-					<div>
-						<h2 class="text-sm font-medium text-title">
-							{T()("license.dashboard.banner.title")}
-						</h2>
-						<p class="mt-1 text-sm text-body">
-							{T()("license.dashboard.banner.description")}
-						</p>
-					</div>
-					<Show when={canManageLicense()}>
-						<Link theme="secondary" size="medium" href="/lucid/system/license">
-							{T()("license.dashboard.banner.action")}
-						</Link>
+		<>
+			<DynamicContent
+				options={{
+					padding: "24",
+				}}
+			>
+				<div class="flex min-w-0 flex-col gap-6">
+					<Show when={attentionItems().length > 0}>
+						<DashboardAttention items={attentionItems()} />
 					</Show>
-				</section>
-			</Show>
-			<Alert
-				style="block"
-				alerts={[
-					{
-						type: "warning",
-						message: T()("media.storage.strategy.missing.message"),
-						show: settings.data?.data?.media?.enabled === false,
-					},
-				]}
-			/>
-			<div class="flex flex-col lg:flex-row lg:items-start gap-6">
-				<div class="flex-1">
-					<StartingPoints
-						links={[
-							{
-								title: T()("dashboard.starting.points.collections.title"),
-								description: T()(
-									"dashboard.starting.points.collections.description",
-								),
-								href: "/lucid/collections",
-								icon: "collection",
-								permission: canReadCollections(),
-							},
-							{
-								title: T()("dashboard.starting.points.media.title"),
-								description: T()("dashboard.starting.points.media.description"),
-								href: "/lucid/media",
-								icon: "media",
-								permission: canReadMedia(),
-							},
-							{
-								title: T()("dashboard.starting.points.emails.title"),
-								description: T()(
-									"dashboard.starting.points.emails.description",
-								),
-								href: "/lucid/emails",
-								icon: "email",
-								permission: canReadEmails(),
-							},
-							{
-								title: T()("dashboard.starting.points.users.title"),
-								description: T()("dashboard.starting.points.users.description"),
-								href: "/lucid/users",
-								icon: "users",
-								permission: canReadUsers(),
-							},
-							{
-								title: T()("dashboard.starting.points.roles.title"),
-								description: T()("dashboard.starting.points.roles.description"),
-								href: "/lucid/roles",
-								icon: "roles",
-								permission: canReadRoles(),
-							},
-							{
-								title: T()("dashboard.starting.points.settings.title"),
-								description: T()(
-									"dashboard.starting.points.settings.description",
-								),
-								href: "/lucid/system",
-								icon: "settings",
-								permission: canReadSystemOverview(),
-							},
-						]}
-					/>
+					<Show when={visibleQuickActions().length > 0}>
+						<DashboardQuickActions actions={visibleQuickActions()} />
+					</Show>
+					<Show when={releaseRequestsAvailable()}>
+						<DashboardReleaseOverview
+							overview={releaseOverview.data?.data}
+							loading={releaseOverview.isFetching}
+						/>
+					</Show>
+					<Show when={showContentShortcuts()}>
+						<DashboardContentShortcuts
+							collections={readableCollections()}
+							loading={collections.isLoading}
+							error={collections.isError}
+						/>
+					</Show>
 				</div>
-				<aside class="w-full lg:max-w-[260px] lg:sticky lg:top-4 self-start">
-					<h2 class="mb-4">{T()("common.documentation")}</h2>
-					<ul>
-						<For each={docsLinks}>
-							{(link) => (
-								<li>
-									<a
-										href={link.href}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="first:border-t px-2 group flex items-center justify-between text-sm text-title hover:text-primary-hover border-b border-border py-4"
-									>
-										<span>{link.label}</span>
-										<span
-											aria-hidden="true"
-											class="transition-transform group-hover:translate-x-0.5"
-										>
-											&rarr;
-										</span>
-									</a>
-								</li>
-							)}
-						</For>
-					</ul>
-				</aside>
-			</div>
-		</DynamicContent>
+			</DynamicContent>
+
+			<MediaAltGenerationModal />
+			<MediaImageGenerationModal />
+			<CreateUpdateMediaPanel
+				state={{
+					open: createMediaPanelOpen(),
+					setOpen: setCreateMediaPanelOpen,
+					parentFolderId: () => undefined,
+				}}
+			/>
+			<BulkUploadMediaModal
+				state={{
+					open: bulkUploadModalOpen(),
+					setOpen: setBulkUploadModalOpen,
+					parentFolderId: () => undefined,
+				}}
+			/>
+			<CreateMediaFolderModal
+				state={{
+					open: createFolderModalOpen(),
+					setOpen: setCreateFolderModalOpen,
+					parentFolderId: () => undefined,
+				}}
+			/>
+			<CreateUserPanel
+				state={{
+					open: createUserPanelOpen(),
+					setOpen: setCreateUserPanelOpen,
+				}}
+			/>
+		</>
 	);
 };

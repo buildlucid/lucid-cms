@@ -51,7 +51,7 @@ export const Confirmation: Component<{
 									{props.copy.title}
 								</AlertDialog.Title>
 								<Show when={props.copy.description}>
-									<AlertDialog.Description class="text-base text-body">
+									<AlertDialog.Description class="text-sm text-body">
 										{props.copy.description}
 									</AlertDialog.Description>
 								</Show>

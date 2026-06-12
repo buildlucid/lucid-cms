@@ -28,7 +28,7 @@ export const MediaFolderCardLoading: Component = () => {
 export const MediaFolderCard: Component<{
 	folder: MediaFolder;
 	isDragging: Accessor<boolean>;
-	rowTarget: ReturnType<typeof useRowTarget<"updateFolder">>;
+	rowTarget: ReturnType<typeof useRowTarget<"deleteFolder" | "updateFolder">>;
 }> = (props) => {
 	// ----------------------------------
 	// Hooks
@@ -46,6 +46,9 @@ export const MediaFolderCard: Component<{
 	// Memos
 	const hasUpdatePermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.MediaUpdate]).all;
+	});
+	const hasDeletePermission = createMemo(() => {
+		return userStore.get.hasPermission([Permissions.MediaDelete]).all;
 	});
 	const isSelected = createMemo(() => {
 		return mediaStore.get.selectedFolders.includes(props.folder.id);
@@ -112,6 +115,16 @@ export const MediaFolderCard: Component<{
 							},
 							permission: userStore.get.hasPermission([Permissions.MediaUpdate])
 								.all,
+						},
+						{
+							label: T()("common.delete"),
+							type: "button",
+							icon: "trash",
+							onClick: () => {
+								props.rowTarget.setTargetId(props.folder.id);
+								props.rowTarget.setTrigger("deleteFolder", true);
+							},
+							permission: hasDeletePermission(),
 						},
 					]}
 					options={{
