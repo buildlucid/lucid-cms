@@ -8,7 +8,7 @@ import {
 import {
 	formatEmailSubject,
 	generateSecret,
-	getBaseUrl,
+	getEmailLogoUrl,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
@@ -171,8 +171,6 @@ const resetPassword: ServiceFn<
 	if (updatedUserRes.error) return updatedUserRes;
 	if (auditRes.error) return auditRes;
 
-	const baseUrl = getBaseUrl(context);
-
 	const sendEmail = await emailServices.sendEmail(context, {
 		template: constants.email.templates.passwordResetSuccess.key,
 		type: "internal",
@@ -184,7 +182,7 @@ const resetPassword: ServiceFn<
 		data: {
 			firstName: updatedUserRes.data.first_name,
 			lastName: updatedUserRes.data.last_name,
-			logoUrl: `${baseUrl}${constants.email.assets.logo}`,
+			logoUrl: getEmailLogoUrl(context),
 			brand: {
 				name: context.config.brand?.name,
 			},

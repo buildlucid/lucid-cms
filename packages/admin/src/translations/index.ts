@@ -1,6 +1,6 @@
 import type { AdminCopyDescriptor } from "@types";
 import i18next from "i18next";
-import { createMemo, createSignal } from "solid-js";
+import { createMemo, createRoot, createSignal } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 // locales
 import en from "./en.json";
@@ -82,12 +82,6 @@ const [getTranslationVersion, setTranslationVersion] = createSignal(0);
 const [localesConfig, setLocalesConfig] = createStore<InterfaceLocaleConfig[]>([
 	fallbackLocaleConfig,
 ]);
-const getDirection = createMemo<InterfaceDirection>(() => {
-	return (
-		localesConfig.find((locale) => locale.code === getLocale())?.direction ??
-		"ltr"
-	);
-});
 
 i18next.init({
 	lng: getLocale(),
@@ -109,6 +103,28 @@ const syncDocumentLocale = (locale: string, direction: InterfaceDirection) => {
 	document.documentElement.lang = locale;
 	document.documentElement.dir = direction;
 };
+
+const { getDirection, T } = createRoot(() => {
+	const getDirection = createMemo<InterfaceDirection>(() => {
+		return (
+			localesConfig.find((locale) => locale.code === getLocale())?.direction ??
+			"ltr"
+		);
+	});
+
+	const T = createMemo(() => {
+		getTranslationVersion();
+		i18next.changeLanguage(getLocale());
+		syncDocumentLocale(getLocale(), getDirection());
+
+		return i18next.t.bind(i18next) as (
+			key: TranslationKeys,
+			data?: Record<string, string | number | undefined>,
+		) => string;
+	});
+
+	return { getDirection, T };
+});
 
 const syncTranslations = (
 	payload: AdminTranslationsPayload,
@@ -221,17 +237,6 @@ export const translateAdminCopy = (
 		defaultValue: copy.defaultMessage ?? options?.defaultMessage ?? copy.key,
 	});
 };
-
-const T = createMemo(() => {
-	getTranslationVersion();
-	i18next.changeLanguage(getLocale());
-	syncDocumentLocale(getLocale(), getDirection());
-
-	return i18next.t.bind(i18next) as (
-		key: TranslationKeys,
-		data?: Record<string, string | number | undefined>,
-	) => string;
-});
 
 export { getDirection, getLoading, getLocale, getReady, localesConfig };
 export default T;

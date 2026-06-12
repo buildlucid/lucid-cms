@@ -4,7 +4,7 @@ import {
 	AlertsRepository,
 } from "../../libs/repositories/index.js";
 import type { ErrorCopy } from "../../types/errors.js";
-import { getBaseUrl } from "../../utils/helpers/index.js";
+import { getBaseUrl, getEmailLogoUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendEmail from "../email/send-email.js";
 
@@ -118,7 +118,7 @@ const notifyPublishOperationUsers: ServiceFn<
 			template: constants.email.templates.publishRequest.key,
 			data: {
 				brand: context.config.brand,
-				logoUrl: constants.email.assets.logo,
+				logoUrl: getEmailLogoUrl(context),
 				title,
 				message,
 				actionUrl,

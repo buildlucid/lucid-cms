@@ -6,7 +6,10 @@ import {
 	UsersRepository,
 } from "../../libs/repositories/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
-import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
+import {
+	formatEmailSubject,
+	getEmailLogoUrl,
+} from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
@@ -242,8 +245,6 @@ const updateSingle: ServiceFn<
 	}
 
 	if (auditLogsRes.data.emailChange) {
-		const baseUrl = getBaseUrl(context);
-
 		const sendEmailRes = await emailServices.sendEmail(context, {
 			template: constants.email.templates.emailChanged.key,
 			type: "internal",
@@ -254,7 +255,7 @@ const updateSingle: ServiceFn<
 			),
 			data: {
 				firstName: data.firstName || userRes.data.first_name,
-				logoUrl: `${baseUrl}${constants.email.assets.logo}`,
+				logoUrl: getEmailLogoUrl(context),
 				brand: {
 					name: context.config.brand?.name,
 				},

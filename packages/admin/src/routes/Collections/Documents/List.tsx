@@ -26,6 +26,8 @@ import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 const CollectionsDocumentsListRoute: Component = () => {
+	let filterSchemaKey: string | undefined;
+
 	// ----------------------------------
 	// Hooks & State
 	const queryClient = useQueryClient();
@@ -60,15 +62,6 @@ const CollectionsDocumentsListRoute: Component = () => {
 		refetchOnWindowFocus: false,
 		enabled: () => !!collectionKey(),
 	});
-	const workflowAssignees = api.documents.useGetWorkflowAssignees({
-		queryParams: {
-			location: {
-				collectionKey: collectionKey,
-			},
-		},
-		enabled: () =>
-			Boolean(collectionKey() && collection.data?.data.config.workflow),
-	});
 	const users = api.users.useGetMultiple({
 		queryParams: {
 			filters: {
@@ -78,16 +71,30 @@ const CollectionsDocumentsListRoute: Component = () => {
 		},
 	});
 
+	const collectionData = createMemo(() => collection.data?.data);
+	const collectionHasWorkflow = createMemo(
+		() => collectionData()?.config.workflow !== undefined,
+	);
+	const workflowAssignees = api.documents.useGetWorkflowAssignees({
+		queryParams: {
+			location: {
+				collectionKey: collectionKey,
+			},
+		},
+		enabled: () => Boolean(collectionKey() && collectionHasWorkflow()),
+	});
+
 	// ----------------------------------
 	// Memos
+	const collectionIsSuccess = createMemo(() => collection.isSuccess);
 	const getCollectionFieldIncludes = createMemo(() =>
-		collectionFieldIncludes(collection.data?.data),
+		collectionFieldIncludes(collectionData()),
 	);
 	const getCollectionFieldFilters = createMemo(() =>
-		collectionFieldFilters(collection.data?.data),
+		collectionFieldFilters(collectionData()),
 	);
 	const getWorkflowFilters = createMemo(() => {
-		const workflow = collection.data?.data.config.workflow;
+		const workflow = collectionData()?.config.workflow;
 		if (!workflow) return [];
 
 		return [
@@ -134,36 +141,36 @@ const CollectionsDocumentsListRoute: Component = () => {
 			user,
 		})),
 	);
-	const collectionIsSuccess = createMemo(() => collection.isSuccess);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collection.data?.data.details.name,
+			value: collectionData()?.details.name,
 		}),
 	);
 	const collectionSingularName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collection.data?.data.details.singularName,
+			value: collectionData()?.details.singularName,
 		}),
 	);
 	const collectionSummary = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collection.data?.data.details.summary,
+			value: collectionData()?.details.summary,
 		}),
 	);
 
 	// ----------------------------------
 	// Effects
 	createEffect(() => {
-		if (collection.isSuccess) {
-			if (collection.data.data.mode === "single") {
+		const activeCollection = collectionData();
+		if (collectionIsSuccess() && activeCollection) {
+			if (activeCollection.mode === "single") {
 				navigate(
-					collection.data.data.documentId
+					activeCollection.documentId
 						? getDocumentRoute("edit", {
-								collectionKey: collection.data.data.key,
-								documentId: collection.data.data.documentId,
+								collectionKey: activeCollection.key,
+								documentId: activeCollection.documentId,
 							})
 						: getDocumentRoute("create", {
-								collectionKey: collection.data.data.key,
+								collectionKey: activeCollection.key,
 							}),
 					{
 						replace: true,
@@ -173,46 +180,54 @@ const CollectionsDocumentsListRoute: Component = () => {
 		}
 	});
 	createEffect(() => {
-		if (collection.isSuccess) {
-			const filterConfig: FilterSchema = {};
-			for (const field of getCollectionFieldFilters()) {
-				switch (field.type) {
-					case "user": {
-						filterConfig[
-							formatFieldFilters({
-								fieldKey: field.key,
-							})
-						] = {
-							type: "array",
-							value: [],
-						};
-						break;
-					}
-					default: {
-						filterConfig[
-							formatFieldFilters({
-								fieldKey: field.key,
-							})
-						] = {
-							type: "text",
-							value: "",
-						};
-						break;
-					}
-				}
-			}
-			if (collection.data.data.config.workflow) {
-				filterConfig.workflowStage = {
-					type: "text",
-					value: "",
-				};
-				filterConfig.workflowAssignee = {
+		const activeCollectionKey = collectionKey();
+		const activeCollection = collectionData();
+		if (!collectionIsSuccess() || !activeCollection || !activeCollectionKey) {
+			return;
+		}
+
+		const fieldFilters = getCollectionFieldFilters();
+		const nextFilterSchemaKey = JSON.stringify({
+			collectionKey: activeCollectionKey,
+			fields: fieldFilters.map((field) => ({
+				key: field.key,
+				type: field.type,
+			})),
+			workflow: activeCollection.config.workflow !== undefined,
+		});
+		if (filterSchemaKey === nextFilterSchemaKey) return;
+		filterSchemaKey = nextFilterSchemaKey;
+
+		const filterConfig: FilterSchema = {};
+		for (const field of fieldFilters) {
+			const fieldKey = formatFieldFilters({
+				fieldKey: field.key,
+			});
+
+			if (field.type === "user") {
+				filterConfig[fieldKey] = {
 					type: "array",
 					value: [],
 				};
+				continue;
 			}
-			searchParams.setFilterSchema(filterConfig);
+
+			filterConfig[fieldKey] = {
+				type: "text",
+				value: "",
+			};
 		}
+		if (activeCollection.config.workflow) {
+			filterConfig.workflowStage = {
+				type: "text",
+				value: "",
+			};
+			filterConfig.workflowAssignee = {
+				type: "array",
+				value: [],
+			};
+		}
+		searchParams.setFilterSchema(filterConfig);
 	});
 
 	// ----------------------------------
@@ -227,7 +242,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 							{
 								type: "warning",
 								message: T()("collections.locked.message"),
-								show: collection.data?.data.config.locked === true,
+								show: collectionData()?.config.locked === true,
 							},
 						]}
 					/>
@@ -239,15 +254,15 @@ const CollectionsDocumentsListRoute: Component = () => {
 							description: collectionSummary(),
 						}}
 						actions={{
-							contentLocale: collection.data?.data.config.localized ?? false,
+							contentLocale: collectionData()?.config.localized ?? false,
 							createLink: {
 								link: getDocumentRoute("create", {
 									collectionKey: collectionKey() || "",
 								}),
 								permission: userStore.get.hasPermission([
-									collection.data?.data.permissions.create,
+									collectionData()?.permissions.create,
 								]).some,
-								show: collection.data?.data.config.locked !== true,
+								show: collectionData()?.config.locked !== true,
 								label: T()("actions.create.dynamic", {
 									name: collectionSingularName() || "",
 								}),
@@ -346,7 +361,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 		>
 			<DocumentsList
 				state={{
-					collection: collection.data?.data,
+					collection: collectionData(),
 					displayInListing: getCollectionFieldIncludes,
 					searchParams: searchParams,
 					isLoading: collection.isFetching,

@@ -7,7 +7,11 @@ import {
 	UsersRepository,
 } from "../../libs/repositories/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
-import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
+import {
+	formatEmailSubject,
+	getBaseUrl,
+	getEmailLogoUrl,
+} from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userServices, userTokenServices } from "../index.js";
@@ -130,7 +134,7 @@ const inviteSingle: ServiceFn<
 			lastName: data.lastName,
 			email: email,
 			inviteLink: `${baseUrl}${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
-			logoUrl: `${baseUrl}${constants.email.assets.logo}`,
+			logoUrl: getEmailLogoUrl(context),
 			brand: {
 				name: context.config.brand?.name,
 			},

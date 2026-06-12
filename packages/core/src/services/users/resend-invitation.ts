@@ -6,7 +6,11 @@ import {
 	UsersRepository,
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
-import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
+import {
+	formatEmailSubject,
+	getBaseUrl,
+	getEmailLogoUrl,
+} from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -113,7 +117,7 @@ const resendInvitation: ServiceFn<
 			lastName: userRes.data.last_name,
 			email: userRes.data.email,
 			inviteLink: `${baseUrl}${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
-			logoUrl: `${baseUrl}${constants.email.assets.logo}`,
+			logoUrl: getEmailLogoUrl(context),
 			brand: {
 				name: context.config.brand?.name,
 			},

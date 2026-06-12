@@ -3,7 +3,11 @@ import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ErrorCopy } from "../../types/errors.js";
-import { formatEmailSubject, getBaseUrl } from "../../utils/helpers/index.js";
+import {
+	formatEmailSubject,
+	getBaseUrl,
+	getEmailLogoUrl,
+} from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
@@ -80,7 +84,7 @@ const sendResetPassword: ServiceFn<
 			lastName: userExistsRes.data.last_name,
 			email: userExistsRes.data.email,
 			resetLink: `${baseUrl}${constants.email.locations.resetPassword}?token=${userToken.data.token}`,
-			logoUrl: `${baseUrl}${constants.email.assets.logo}`,
+			logoUrl: getEmailLogoUrl(context),
 			brand: {
 				name: context.config.brand?.name,
 			},

@@ -4,6 +4,8 @@ import {
 	createEffect,
 	createMemo,
 	createSignal,
+	onCleanup,
+	untrack,
 } from "solid-js";
 
 export const DEFAULT_PAGE = 1;
@@ -69,6 +71,8 @@ const useSearchParamsLocation = (
 	const [getSettled, setSettled] = createSignal(false);
 	const [getSettledTimeout, setSettledTimeout] =
 		createSignal<ReturnType<typeof setTimeout>>();
+	const [getFilterSchemaTimeout, setFilterSchemaTimeout] =
+		createSignal<ReturnType<typeof setTimeout>>();
 	const [getPrevQueryString, setPrevQueryString] = createSignal("");
 	const [getQueryString, setQueryString] = createSignal("");
 	const [getInitialParamsPath, setInitialParamsPath] = createSignal<
@@ -80,6 +84,11 @@ const useSearchParamsLocation = (
 		page: DEFAULT_PAGE,
 		perPage: DEFAULT_PER_PAGE,
 	});
+
+	const filterSchemaKey = (filters: SearchParamsSchema["filters"]) => {
+		if (filters === undefined) return "__undefined__";
+		return JSON.stringify(filters);
+	};
 
 	const filterValueToString = (value?: FilterValues) => {
 		if (value === undefined) return undefined;
@@ -210,10 +219,54 @@ const useSearchParamsLocation = (
 			if (!searchParams.has(k)) nextObj[k] = undefined;
 		setSearchParams(nextObj, { scroll: false });
 	};
+	const getQueryStringFromState = (props: {
+		filters: FilterMap;
+		sorts: SortMap;
+		pagination: {
+			page: number;
+			perPage: number;
+		};
+	}) => {
+		const searchParams = new URLSearchParams();
+
+		for (const [key, value] of props.filters) {
+			const filterVal = filterValueToString(value);
+			if (filterVal !== undefined) {
+				searchParams.set(`filter[${key}]`, filterVal);
+			}
+		}
+
+		let sortsStr = "";
+		for (const [key, value] of props.sorts) {
+			if (value === "asc") {
+				sortsStr += `${key},`;
+			} else if (value === "desc") {
+				sortsStr += `-${key},`;
+			}
+		}
+
+		if (sortsStr) {
+			sortsStr = sortsStr.slice(0, -1);
+			searchParams.set("sort", sortsStr);
+		}
+
+		if (props.pagination.page) {
+			searchParams.set("page", props.pagination.page.toString());
+		}
+		if (props.pagination.perPage) {
+			searchParams.set("perPage", props.pagination.perPage.toString());
+		}
+
+		return searchParams.toString();
+	};
 	const setStateFromLocation = (searchParams: URLSearchParams) => {
 		// on location change - update filters and sorts based on search params
 		const filters = new Map<string, FilterValues>();
 		const sorts = new Map<string, "asc" | "desc" | undefined>();
+		const pagination = {
+			page: DEFAULT_PAGE,
+			perPage: DEFAULT_PER_PAGE,
+		};
 		const schema = getSchema();
 
 		// --------------------
@@ -292,60 +345,28 @@ const useSearchParamsLocation = (
 		const page = searchParams.get("page");
 		const perPage = searchParams.get("perPage");
 		if (page) {
-			setPagination((prev) => ({ ...prev, page: Number(page) }));
+			pagination.page = Number(page);
 		} else {
-			setPagination((prev) => ({ ...prev, page: DEFAULT_PAGE }));
+			pagination.page = DEFAULT_PAGE;
 		}
 		if (perPage) {
-			setPagination((prev) => ({ ...prev, perPage: Number(perPage) }));
+			pagination.perPage = Number(perPage);
 		} else {
-			setPagination((prev) => ({ ...prev, perPage: DEFAULT_PER_PAGE }));
+			pagination.perPage = DEFAULT_PER_PAGE;
 		}
 
 		// --------------------
 		// Set signals
 		setFilters(filters);
 		setSorts(sorts);
-	};
-	const buildQueryString = () => {
-		// from filters and sorts, build a query string
-		const searchParams = new URLSearchParams();
-
-		// Set filters
-		for (const [key, value] of getFilters()) {
-			const filterVal = filterValueToString(value);
-			if (filterVal !== undefined) {
-				searchParams.set(`filter[${key}]`, filterVal);
-			}
-		}
-
-		// Set sorts
-		const sorts = getSorts();
-		let sortsStr = "";
-		for (const [key, value] of sorts) {
-			if (value === "asc") {
-				sortsStr += `${key},`;
-			} else if (value === "desc") {
-				sortsStr += `-${key},`;
-			}
-		}
-
-		if (sortsStr) {
-			sortsStr = sortsStr.slice(0, -1); // remove last comma
-			searchParams.set("sort", sortsStr);
-		}
-
-		// Set pagination
-		const pagination = getPagination();
-		if (pagination.page) {
-			searchParams.set("page", pagination.page.toString());
-		}
-		if (pagination.perPage) {
-			searchParams.set("perPage", pagination.perPage.toString());
-		}
-
-		setPrevQueryString(getQueryString());
-		setQueryString(searchParams.toString());
+		setPagination(pagination);
+		setQueryString(
+			getQueryStringFromState({
+				filters,
+				sorts,
+				pagination,
+			}),
+		);
 	};
 
 	const setDefaultParams = () => {
@@ -420,13 +441,13 @@ const useSearchParamsLocation = (
 
 	// sync filters, sort by location and build query string
 	createEffect(() => {
-		if (options?.manualSettled !== true) setSettled(false);
+		const pathChanged = getInitialParamsPath() !== location.pathname;
+		if (options?.manualSettled !== true || pathChanged) setSettled(false);
+
 		setDefaultParams();
 
 		const searchParams = new URLSearchParams(location.search);
 		setStateFromLocation(searchParams);
-
-		buildQueryString();
 	});
 
 	// handle query string settled
@@ -434,7 +455,10 @@ const useSearchParamsLocation = (
 		const currentQueryString = getQueryString();
 
 		if (currentQueryString !== getPrevQueryString()) {
-			if (options?.manualSettled) return;
+			if (options?.manualSettled) {
+				setPrevQueryString(currentQueryString);
+				return;
+			}
 
 			if (getSettledTimeout()) {
 				clearTimeout(getSettledTimeout());
@@ -497,6 +521,14 @@ const useSearchParamsLocation = (
 		return true;
 	});
 
+	onCleanup(() => {
+		const settledTimeout = getSettledTimeout();
+		const filterSchemaTimeout = getFilterSchemaTimeout();
+
+		if (settledTimeout) clearTimeout(settledTimeout);
+		if (filterSchemaTimeout) clearTimeout(filterSchemaTimeout);
+	});
+
 	return {
 		getFilters,
 		getSorts,
@@ -505,10 +537,21 @@ const useSearchParamsLocation = (
 		getQueryString,
 		setParams: setLocation,
 		setFilterSchema: (filters: SearchParamsSchema["filters"]) => {
-			setSchema((prev) => ({ ...prev, filters }));
-			setTimeout(() => {
+			const prevSchema = untrack(getSchema);
+			if (filterSchemaKey(prevSchema?.filters) === filterSchemaKey(filters)) {
+				return;
+			}
+
+			setSettled(false);
+			setSchema({ ...prevSchema, filters });
+
+			const prevTimeout = untrack(getFilterSchemaTimeout);
+			if (prevTimeout) clearTimeout(prevTimeout);
+
+			const timeout = setTimeout(() => {
 				setSettled(true);
 			}, 1);
+			setFilterSchemaTimeout(timeout);
 		},
 
 		hasFiltersApplied,
