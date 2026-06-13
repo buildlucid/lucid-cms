@@ -125,6 +125,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 			},
 			documentFieldsTableSchema: documentFieldsTableSchemaRes.data,
 			includeWorkflow: false,
+			tenantKey: context.request.tenantKey,
 		},
 		{
 			tableName: tableNameRes.data.document,

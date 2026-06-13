@@ -14,7 +14,7 @@ const getSingle: ServiceFn<
 > = async (context, data) => {
 	const Jobs = new QueueJobsRepository(context.db.client, context.config.db);
 
-	const jobRes = await Jobs.selectSingle({
+	const jobRes = await Jobs.selectSingleById({
 		select: [
 			"id",
 			"job_id",
@@ -35,13 +35,8 @@ const getSingle: ServiceFn<
 			"created_by_user_id",
 			"updated_at",
 		],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.id,
-			},
-		],
+		id: data.id,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {

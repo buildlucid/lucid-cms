@@ -4,12 +4,14 @@ import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	UsersRepository,
+	UserTenantsRepository,
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import {
 	formatEmailSubject,
 	getBaseUrl,
 	getEmailLogoUrl,
+	multiTenancyEnabled,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
@@ -31,8 +33,8 @@ const resendInvitation: ServiceFn<
 		context.config.db,
 	);
 
-	const userRes = await Users.selectSingle({
-		select: ["id", "email", "first_name", "last_name", "invitation_accepted"],
+	const userRes = await Users.selectSinglePreset({
+		tenantKey: context.request.tenantKey,
 		where: [
 			{
 				key: "id",
@@ -62,6 +64,26 @@ const resendInvitation: ServiceFn<
 			},
 			data: undefined,
 		};
+	}
+
+	let tenantKeys: string[] = [];
+	if (multiTenancyEnabled(context.config)) {
+		const UserTenants = new UserTenantsRepository(
+			context.db.client,
+			context.config.db,
+		);
+		const tenantKeysRes = await UserTenants.selectMultiple({
+			select: ["tenant_key"],
+			where: [
+				{
+					key: "user_id",
+					operator: "=",
+					value: userRes.data.id,
+				},
+			],
+		});
+		if (tenantKeysRes.error) return tenantKeysRes;
+		tenantKeys = (tenantKeysRes.data ?? []).map((tenant) => tenant.tenant_key);
 	}
 
 	const now = new Date().toISOString();
@@ -123,6 +145,7 @@ const resendInvitation: ServiceFn<
 			},
 		},
 		storage: constants.email.templates.userInvite.storage,
+		tenantKeys,
 	});
 	if (sendEmailRes.error) return sendEmailRes;
 

@@ -33,7 +33,7 @@ const decisionRejectController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.decision.body),
 	validate("param", controllerSchemas.decision.params),
 	async (c) => {

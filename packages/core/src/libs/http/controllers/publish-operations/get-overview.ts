@@ -31,7 +31,7 @@ const getOverviewController = factory.createHandlers(
 			query: controllerSchemas.getOverview.query.string,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	permissions([Permissions.DocumentsReview]),
 	validate("query", controllerSchemas.getOverview.query.string),
 	async (c) => {

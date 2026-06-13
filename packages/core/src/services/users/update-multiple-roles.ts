@@ -7,6 +7,7 @@ const updateMultipleRoles: ServiceFn<
 		{
 			userId: number;
 			roleIds?: number[];
+			tenantKey?: string | null;
 		},
 	],
 	undefined
@@ -26,6 +27,7 @@ const updateMultipleRoles: ServiceFn<
 	const [roleExistsRes, deleteMultipleRes] = await Promise.all([
 		userServices.checks.checkRolesExist(context, {
 			roleIds: data.roleIds || [],
+			tenantKey: data.tenantKey,
 		}),
 		UserRoles.deleteMultiple({
 			where: [

@@ -17,7 +17,7 @@ const getMultiple: ServiceFn<
 > = async (context, data) => {
 	const Jobs = new QueueJobsRepository(context.db.client, context.config.db);
 
-	const jobsRes = await Jobs.selectMultipleFiltered({
+	const jobsRes = await Jobs.selectMultipleFilteredFixed({
 		select: [
 			"id",
 			"job_id",
@@ -39,6 +39,7 @@ const getMultiple: ServiceFn<
 			"updated_at",
 		],
 		queryParams: data.query,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

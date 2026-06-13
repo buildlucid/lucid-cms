@@ -29,7 +29,7 @@ const getAdminTranslationsController = factory.createHandlers(
 			params: controllerSchemas.getAdminTranslations.params,
 		}),
 	}),
-	authenticate,
+	authenticate({ tenantScope: "allow-global" }),
 	validate("param", controllerSchemas.getAdminTranslations.params),
 	async (c) => {
 		const { locale } = c.req.valid("param");

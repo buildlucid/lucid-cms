@@ -25,7 +25,9 @@ const deleteSinglePermanently: ServiceFn<
 			config: context.config,
 		},
 		{
-			meta: {},
+			meta: {
+				tenantKey: context.request.tenantKey ?? null,
+			},
 			data: {
 				ids: [data.id],
 				userId: data.userId,

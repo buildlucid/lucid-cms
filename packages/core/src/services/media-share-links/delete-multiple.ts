@@ -1,5 +1,6 @@
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import assertMediaAccess from "./helpers/assert-media-access.js";
 
 const deleteMultiple: ServiceFn<
 	[
@@ -9,6 +10,11 @@ const deleteMultiple: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
+	const mediaAccessRes = await assertMediaAccess(context, {
+		mediaId: data.mediaId,
+	});
+	if (mediaAccessRes.error) return mediaAccessRes;
+
 	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db.client,
 		context.config.db,

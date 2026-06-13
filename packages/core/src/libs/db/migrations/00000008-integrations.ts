@@ -15,6 +15,7 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("enabled", adapter.getDataType("boolean"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("tenant_key", adapter.getDataType("text"))
 				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.notNull().unique(),
 				)
@@ -49,6 +50,12 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_client_integrations_key")
 				.on("lucid_client_integrations")
 				.column("key")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_client_integrations_tenant_key")
+				.on("lucid_client_integrations")
+				.column("tenant_key")
 				.execute();
 
 			await db.schema

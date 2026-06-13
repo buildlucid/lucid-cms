@@ -145,6 +145,14 @@ const ConfigSchema = z.object({
 			defaultLocale: z.string(),
 		})
 		.optional(),
+	tenants: z
+		.array(
+			z.object({
+				key: z.string().min(1),
+				name: adminCopyDescriptorSchema,
+			}),
+		)
+		.optional(),
 	i18n: z
 		.object({
 			locales: z.array(

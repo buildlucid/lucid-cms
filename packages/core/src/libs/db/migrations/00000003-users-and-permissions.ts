@@ -6,6 +6,40 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 	return {
 		async up(db: Kysely<unknown>) {
 			await db.schema
+				.createTable("lucid_tenants")
+				.addColumn("key", adapter.getDataType("text"), (col) =>
+					col.primaryKey(),
+				)
+				.addColumn("is_deleted", adapter.getDataType("boolean"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"boolean",
+							adapter.getDefault("boolean", "false"),
+						),
+					),
+				)
+				.addColumn("is_deleted_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(null),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.execute();
+
+			await db.schema
 				.createTable("lucid_users")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
@@ -95,6 +129,51 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createTable("lucid_user_tenants")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("tenant_key", adapter.getDataType("text"), (col) =>
+					col.references("lucid_tenants.key").onDelete("cascade").notNull(),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addUniqueConstraint("lucid_user_tenants_user_id_tenant_key_unique", [
+					"user_id",
+					"tenant_key",
+				])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_user_tenants_user_id")
+				.on("lucid_user_tenants")
+				.column("user_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_user_tenants_tenant_key")
+				.on("lucid_user_tenants")
+				.column("tenant_key")
+				.execute();
+
+			await db.schema
 				.createTable("lucid_user_auth_providers")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
@@ -165,6 +244,7 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 							),
 						),
 				)
+				.addColumn("tenant_key", adapter.getDataType("text"))
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
@@ -181,6 +261,12 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 						),
 					),
 				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_roles_tenant_key")
+				.on("lucid_roles")
+				.column("tenant_key")
 				.execute();
 
 			await db.schema

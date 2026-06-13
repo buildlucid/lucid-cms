@@ -36,7 +36,7 @@ const mediaImageCompletionController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.AiImageGenerate]),
 	validate("param", controllerSchemas.mediaImageCompletion.params),
 	async (c) => {

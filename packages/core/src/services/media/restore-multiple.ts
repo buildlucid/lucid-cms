@@ -3,6 +3,7 @@ import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 
 const restoreMultiple: ServiceFn<
 	[
@@ -74,9 +75,7 @@ const restoreMultiple: ServiceFn<
 
 	await Promise.all([
 		...data.ids.map((id) =>
-			context.kv.delete(cacheKeys.http.static.clientMediaSingle(id), {
-				hash: true,
-			}),
+			clearClientMediaSingleCache(context.kv, context.config, id),
 		),
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);

@@ -268,6 +268,7 @@ const updateSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.user.id,
 				collectionTableNames: tableNamesRes.data,
+				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				collectionKey: data.collectionKey,

@@ -35,7 +35,7 @@ const updateWorkflowController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.updateWorkflow.body),
 	validate("param", controllerSchemas.updateWorkflow.params),
 	collectionPermissions("update"),

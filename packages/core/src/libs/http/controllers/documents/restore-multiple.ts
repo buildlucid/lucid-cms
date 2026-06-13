@@ -33,7 +33,7 @@ const restoreMultipleController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("param", controllerSchemas.restoreMultiple.params),
 	validate("json", controllerSchemas.restoreMultiple.body),
 	collectionPermissions("update"),

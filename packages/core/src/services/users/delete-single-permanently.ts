@@ -1,6 +1,7 @@
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import { userServices } from "../index.js";
 
 const deleteSinglePermanently: ServiceFn<
@@ -63,6 +64,8 @@ const deleteSinglePermanently: ServiceFn<
 		},
 	});
 	if (deleteUserRes.error) return deleteUserRes;
+
+	await invalidateAuthCache(context.kv);
 
 	return {
 		error: undefined,

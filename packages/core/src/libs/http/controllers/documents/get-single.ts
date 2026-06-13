@@ -33,7 +33,7 @@ const getSingleController = factory.createHandlers(
 			query: controllerSchemas.getSingle.query.string,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	validate("param", controllerSchemas.getSingle.params),
 	validate("query", controllerSchemas.getSingle.query.string),
 	collectionPermissions("read"),

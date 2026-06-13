@@ -45,15 +45,21 @@ export interface Settings {
 	};
 }
 
-export type OptionsName =
-	| "media_storage_used"
-	| "system_alert_email"
+export type LicenseOptionName =
 	| "license_key"
 	| "license_key_display"
 	| "license_valid"
 	| "license_last_checked"
 	| "license_error_message"
 	| "license_ai_enabled";
+
+export type TenantScopedLicenseOptionName = `${LicenseOptionName}:t:${string}`;
+
+export type OptionsName =
+	| "media_storage_used"
+	| "system_alert_email"
+	| LicenseOptionName
+	| TenantScopedLicenseOptionName;
 
 export interface Option {
 	name: OptionsName;

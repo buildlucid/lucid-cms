@@ -31,6 +31,7 @@ export type CreateToolkitServiceContextOptions = {
 	request?: {
 		url?: string;
 		ipAddress?: string | null;
+		tenantKey?: string | null;
 	};
 };
 

@@ -33,7 +33,7 @@ const updateProfilePictureController = factory.createHandlers(
 		),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.updateProfilePicture.body),
 	async (c) => {
 		const body = c.req.valid("json");

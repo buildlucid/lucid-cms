@@ -69,6 +69,7 @@ export type QueueJobOptions = {
 	maxAttempts?: number;
 	scheduledFor?: Date;
 	createdByUserId?: number;
+	tenantKeys?: string[];
 };
 
 export type QueueAdapter<T = undefined> = T extends undefined

@@ -1,3 +1,4 @@
+import formatter from "../../libs/formatters/index.js";
 import {
 	getValidPermissions,
 	isCorePermission,
@@ -8,6 +9,7 @@ import {
 	RoleTranslationsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import {
 	getTranslationValue,
 	normalizeTranslationArray,
@@ -41,7 +43,7 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 	const managedRoleIdsToDelete = rolesRes.data
 		.filter(
 			(role) =>
-				role.locked === context.config.db.getDefault("boolean", "true") &&
+				formatter.formatBoolean(role.locked) &&
 				role.key !== null &&
 				!managedRoleKeys.includes(role.key),
 		)
@@ -194,6 +196,8 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 		returning: ["id"],
 	});
 	if (prunePermissionsRes.error) return prunePermissionsRes;
+
+	await invalidateAuthCache(context.kv);
 
 	return {
 		error: undefined,

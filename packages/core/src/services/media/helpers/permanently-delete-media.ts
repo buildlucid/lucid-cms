@@ -7,6 +7,7 @@ import {
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
+import clearClientMediaSingleCache from "./clear-client-media-cache.js";
 
 const permanentlyDeleteMedia: ServiceFn<
 	[
@@ -101,9 +102,7 @@ const permanentlyDeleteMedia: ServiceFn<
 	}
 
 	await Promise.all([
-		context.kv.delete(cacheKeys.http.static.clientMediaSingle(data.id), {
-			hash: true,
-		}),
+		clearClientMediaSingleCache(context.kv, context.config, data.id),
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);
 

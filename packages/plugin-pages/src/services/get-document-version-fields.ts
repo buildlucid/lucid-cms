@@ -7,6 +7,7 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
+import { applyDocumentVersionTenantScope } from "../utils/apply-tenant-scope.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 
 export type VersionFieldsQueryResponse = {
@@ -37,7 +38,11 @@ const getDocumentVersionFields: ServiceFn<
 	Array<VersionFieldsQueryResponse> | null
 > = async (context, data) => {
 	try {
-		const { version: versionTable, documentFields: fieldsTable } = data.tables;
+		const {
+			document: documentTable,
+			version: versionTable,
+			documentFields: fieldsTable,
+		} = data.tables;
 		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
 		const fullSlugColumn = prefixGeneratedColName(
 			constants.fields.fullSlug.key,
@@ -50,7 +55,7 @@ const getDocumentVersionFields: ServiceFn<
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
 
-		const fields = await context.db.client
+		const fieldsQuery = context.db.client
 			.selectFrom(fieldsTable)
 			.innerJoin(
 				versionTable,
@@ -72,8 +77,13 @@ const getDocumentVersionFields: ServiceFn<
 			])
 			.where(`${versionTable}.document_id`, "=", data.documentId)
 			.where(`${versionTable}.id`, "=", data.versionId)
-			.where(`${versionTable}.type`, "=", data.versionType)
-			.execute();
+			.where(`${versionTable}.type`, "=", data.versionType);
+
+		const fields = await applyDocumentVersionTenantScope(fieldsQuery, {
+			tenantKey: context.request.tenantKey,
+			documentTable,
+			versionTable,
+		}).execute();
 
 		if (!fields || fields.length === 0) {
 			return {

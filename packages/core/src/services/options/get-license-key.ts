@@ -2,9 +2,11 @@ import { copy } from "../../libs/i18n/index.js";
 import { OptionsRepository } from "../../libs/repositories/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { getLicenseOptionName } from "../license/helpers/option-names.js";
 
 const getLicenseKey: ServiceFn<[], string> = async (context) => {
 	const Options = new OptionsRepository(context.db.client, context.config.db);
+	const tenantKey = context.request.tenantKey ?? null;
 
 	const licenseKeyRes = await Options.selectSingle({
 		select: ["name", "value_text"],
@@ -12,7 +14,7 @@ const getLicenseKey: ServiceFn<[], string> = async (context) => {
 			{
 				key: "name",
 				operator: "=",
-				value: "license_key",
+				value: getLicenseOptionName(tenantKey, "license_key"),
 			},
 		],
 	});

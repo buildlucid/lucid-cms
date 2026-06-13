@@ -199,6 +199,7 @@ class CollectionBuilder extends FieldBuilder {
 				revisionRetentionDays:
 					this.config.config?.revisionRetentionDays ??
 					constants.collectionBuilder.revisionRetentionDays,
+				tenantKeys: this.config.config?.tenantKeys ?? [],
 			},
 			permissions: this.config.permissions ?? {},
 		};
@@ -209,6 +210,7 @@ class CollectionBuilder extends FieldBuilder {
 				key: brick.key,
 				details: brick.config.details,
 				preview: brick.config.preview,
+				tenantKeys: brick.config.tenantKeys,
 				fields: brick.fieldTree,
 			})) ?? []
 		);
@@ -219,6 +221,7 @@ class CollectionBuilder extends FieldBuilder {
 				key: brick.key,
 				details: brick.config.details,
 				preview: brick.config.preview,
+				tenantKeys: brick.config.tenantKeys,
 				fields: brick.fieldTree,
 			})) ?? []
 		);

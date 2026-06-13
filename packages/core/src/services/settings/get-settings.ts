@@ -8,6 +8,10 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { optionServices, processedImageServices } from "../index.js";
+import {
+	getLicenseOptionBaseName,
+	getLicenseOptionName,
+} from "../license/helpers/option-names.js";
 
 const getSettings: ServiceFn<
 	[
@@ -19,6 +23,7 @@ const getSettings: ServiceFn<
 	],
 	Settings
 > = async (context, data) => {
+	const tenantKey = context.request.tenantKey ?? null;
 	const [
 		optionsRes,
 		processedImageCountRes,
@@ -29,7 +34,7 @@ const getSettings: ServiceFn<
 		optionServices.getMultiple(context, {
 			names: [
 				"media_storage_used",
-				"license_key_display",
+				getLicenseOptionName(tenantKey, "license_key_display"),
 				"system_alert_email",
 			],
 		}),
@@ -45,7 +50,7 @@ const getSettings: ServiceFn<
 		(o) => o.name === "media_storage_used",
 	);
 	const licenseKeyDisplayRes = optionsRes.data.find(
-		(o) => o.name === "license_key_display",
+		(o) => getLicenseOptionBaseName(o.name) === "license_key_display",
 	);
 	const systemAlertEmailRes = optionsRes.data.find(
 		(o) => o.name === "system_alert_email",

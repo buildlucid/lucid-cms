@@ -34,7 +34,7 @@ const deleteProfilePictureController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.UsersUpdate]),
 	validate("param", controllerSchemas.deleteProfilePicture.params),
 	async (c) => {

@@ -39,7 +39,7 @@ const customFieldInputGenerateController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.AiCustomFieldValue]),
 	validate("json", controllerSchemas.customFieldInput.body),
 	async (c) => {

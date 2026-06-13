@@ -1,5 +1,5 @@
 import z from "zod";
-import { translate } from "../libs/i18n/index.js";
+import { adminCopyDescriptorSchema, translate } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaEmbedResponseSchema, mediaOriginSchema } from "./media.js";
@@ -226,6 +226,27 @@ export const userResponseSchema = z.object({
 		})
 		.optional(),
 	permissions: z.array(userResponsePermissionSchema).optional(),
+	tenants: z
+		.array(
+			z.object({
+				key: z
+					.string()
+					.meta({ description: "The tenant key", example: "alpha" }),
+				name: adminCopyDescriptorSchema.meta({
+					description: "The tenant's name",
+					example: {
+						type: "lucid.copy",
+						scope: "admin",
+						key: "tenants.alpha.name",
+						defaultMessage: "Alpha",
+					},
+				}),
+			}),
+		)
+		.meta({
+			description: "The tenants the user has access to",
+		})
+		.optional(),
 	isDeleted: z.boolean().meta({
 		description: "If the user is soft-deleted or not",
 		example: true,
@@ -322,6 +343,14 @@ export const controllerSchemas = {
 					example: true,
 				})
 				.optional(),
+			tenantKeys: z
+				.array(z.string())
+				.meta({
+					description:
+						"A list of tenant keys to give the user access to. Only super admins can set this, for other users the new user is added to the current tenant.",
+					example: ["alpha"],
+				})
+				.optional(),
 		}),
 		query: {
 			string: undefined,
@@ -366,6 +395,14 @@ export const controllerSchemas = {
 				.meta({
 					description: "Lock or unlock the user",
 					example: false,
+				})
+				.optional(),
+			tenantKeys: z
+				.array(z.string())
+				.meta({
+					description:
+						"A list of tenant keys to give the user access to. Replaces the user's existing tenant memberships. Only super admins can set this.",
+					example: ["alpha"],
 				})
 				.optional(),
 		}),

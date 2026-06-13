@@ -14,6 +14,7 @@ import changeKeyVisibility from "../../utils/media/change-key-visibility.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
+import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
@@ -375,9 +376,7 @@ const updateSingle: ServiceFn<
 	}
 
 	await Promise.all([
-		context.kv.delete(cacheKeys.http.static.clientMediaSingle(data.id), {
-			hash: true,
-		}),
+		clearClientMediaSingleCache(context.kv, context.config, data.id),
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);
 
@@ -389,7 +388,9 @@ const updateSingle: ServiceFn<
 			config: context.config,
 		},
 		{
-			meta: {},
+			meta: {
+				tenantKey: context.request.tenantKey ?? null,
+			},
 			data: {
 				id: mediaUpdateRes.data.id,
 				userId: data.userId,

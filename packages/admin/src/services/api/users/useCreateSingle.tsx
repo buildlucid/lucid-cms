@@ -11,6 +11,7 @@ interface Params {
 		lastName?: string;
 		superAdmin?: boolean;
 		roleIds: number[];
+		tenantKeys?: string[];
 	};
 }
 

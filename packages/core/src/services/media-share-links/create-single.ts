@@ -8,6 +8,7 @@ import type { MediaShareLink } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import generateShareToken from "../../utils/share-link/generate-token.js";
+import assertMediaAccess from "./helpers/assert-media-access.js";
 
 const createSingle: ServiceFn<
 	[
@@ -22,6 +23,11 @@ const createSingle: ServiceFn<
 	],
 	MediaShareLink
 > = async (context, data) => {
+	const mediaAccessRes = await assertMediaAccess(context, {
+		mediaId: data.mediaId,
+	});
+	if (mediaAccessRes.error) return mediaAccessRes;
+
 	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db.client,
 		context.config.db,

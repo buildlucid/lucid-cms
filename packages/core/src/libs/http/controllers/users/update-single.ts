@@ -36,7 +36,7 @@ const updateSingleController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateSingle.body),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.UsersUpdate]),
 	validate("param", controllerSchemas.updateSingle.params),
 	validate("json", controllerSchemas.updateSingle.body),
@@ -64,6 +64,7 @@ const updateSingleController = factory.createHandlers(
 			triggerPasswordReset: body.triggerPasswordReset,
 			isDeleted: body.isDeleted,
 			isLocked: body.isLocked,
+			tenantKeys: body.tenantKeys,
 		});
 		if (updateUser.error) throw new LucidAPIError(updateUser.error);
 

@@ -66,6 +66,39 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createTable("lucid_queue_job_tenants")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("queue_job_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_queue_jobs.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("tenant_key", adapter.getDataType("text"), (col) =>
+					col.references("lucid_tenants.key").onDelete("cascade").notNull(),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addUniqueConstraint(
+					"lucid_queue_job_tenants_job_id_tenant_key_unique",
+					["queue_job_id", "tenant_key"],
+				)
+				.execute();
+
+			await db.schema
 				.createIndex("idx_queue_jobs_job_id")
 				.on("lucid_queue_jobs")
 				.column("job_id")
@@ -93,6 +126,18 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_queue_jobs_created")
 				.on("lucid_queue_jobs")
 				.column("created_at")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_queue_job_tenants_queue_job_id")
+				.on("lucid_queue_job_tenants")
+				.column("queue_job_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_queue_job_tenants_tenant_key")
+				.on("lucid_queue_job_tenants")
+				.column("tenant_key")
 				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},

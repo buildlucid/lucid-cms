@@ -19,6 +19,7 @@ const getMultiple: ServiceFn<
 
 	const rolesRes = await Roles.selectMultipleFilteredFixed({
 		queryParams: data.query,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

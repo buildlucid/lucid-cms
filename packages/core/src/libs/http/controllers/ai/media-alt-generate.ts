@@ -40,7 +40,7 @@ const mediaAltGenerateController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.AiAltGenerate]),
 	validate("json", controllerSchemas.mediaAlt.body),
 	async (c) => {

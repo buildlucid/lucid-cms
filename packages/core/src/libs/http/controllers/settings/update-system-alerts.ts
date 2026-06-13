@@ -33,7 +33,7 @@ const updateSystemAlertsController = factory.createHandlers(
 		),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.SettingsUpdate]),
 	validate("json", controllerSchemas.updateSystemAlerts.body),
 	async (c) => {

@@ -17,4 +17,9 @@ export { default as groupDocumentFilters } from "./group-document-filters.js";
 export { default as isRequestSecure } from "./is-request-secure.js";
 export { normalizeEmailInput, trimStringInput } from "./normalize-input.js";
 export { default as sameNumericSet } from "./same-numeric-set.js";
+export {
+	getTenantConfig,
+	multiTenancyEnabled,
+	tenantAccessAllowed,
+} from "./tenants.js";
 export { default as urlAddPath } from "./url-add-path.js";

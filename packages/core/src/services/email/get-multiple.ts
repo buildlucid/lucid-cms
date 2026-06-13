@@ -17,7 +17,7 @@ const getMultiple: ServiceFn<
 > = async (context, data) => {
 	const Emails = new EmailsRepository(context.db.client, context.config.db);
 
-	const emailsRes = await Emails.selectMultipleFiltered({
+	const emailsRes = await Emails.selectMultipleFilteredFixed({
 		select: [
 			"id",
 			"from_address",
@@ -37,6 +37,7 @@ const getMultiple: ServiceFn<
 			"updated_at",
 		],
 		queryParams: data.query,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

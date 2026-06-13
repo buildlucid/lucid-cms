@@ -3,7 +3,7 @@ import { UsersRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { User } from "../../types/response.js";
-import { getBaseUrl } from "../../utils/helpers/index.js";
+import { getBaseUrl, multiTenancyEnabled } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getMultiple: ServiceFn<
@@ -22,6 +22,8 @@ const getMultiple: ServiceFn<
 
 	const usersRes = await Users.selectMultipleFilteredFixed({
 		queryParams: data.query,
+		tenantKey: context.request.tenantKey,
+		includeTenants: multiTenancyEnabled(context.config),
 		validation: {
 			enabled: true,
 		},
@@ -39,6 +41,7 @@ const getMultiple: ServiceFn<
 					(locale) => locale.code,
 				),
 				defaultLocale: context.config.localization.defaultLocale,
+				tenants: context.config.tenants,
 			}),
 			count: formatter.parseCount(usersRes.data[1]?.count),
 		},

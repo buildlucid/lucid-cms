@@ -37,7 +37,7 @@ const updateSingleController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateSingle.body),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaUpdate]),
 	validate("param", controllerSchemas.updateSingle.params),
 	validate("json", controllerSchemas.updateSingle.body),

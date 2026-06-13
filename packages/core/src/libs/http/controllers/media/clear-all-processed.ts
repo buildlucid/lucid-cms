@@ -31,7 +31,7 @@ const clearAllProcessedController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaUpdate]),
 	async (c) => {
 		const context = createServiceContext(c);

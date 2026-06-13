@@ -33,7 +33,7 @@ const rescheduleController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.reschedule.body),
 	validate("param", controllerSchemas.reschedule.params),
 	async (c) => {

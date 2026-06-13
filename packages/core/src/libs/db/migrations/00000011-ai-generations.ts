@@ -20,6 +20,7 @@ const Migration00000011: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("feature_version", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("tenant_key", adapter.getDataType("text"))
 				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
@@ -53,6 +54,12 @@ const Migration00000011: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_ai_generations_feature")
 				.on("lucid_ai_generations")
 				.columns(["feature_key", "created_at"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_ai_generations_tenant_key")
+				.on("lucid_ai_generations")
+				.column("tenant_key")
 				.execute();
 
 			await db.schema

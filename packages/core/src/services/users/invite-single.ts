@@ -5,12 +5,14 @@ import {
 	EmailChangeRequestsRepository,
 	UserRolesRepository,
 	UsersRepository,
+	UserTenantsRepository,
 } from "../../libs/repositories/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import {
 	formatEmailSubject,
 	getBaseUrl,
 	getEmailLogoUrl,
+	getTenantConfig,
 } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -25,6 +27,7 @@ const inviteSingle: ServiceFn<
 			lastName?: string;
 			superAdmin?: boolean;
 			roleIds: Array<number>;
+			tenantKeys?: Array<string>;
 			authSuperAdmin: boolean;
 		},
 	],
@@ -50,6 +53,7 @@ const inviteSingle: ServiceFn<
 		}),
 		userServices.checks.checkRolesExist(context, {
 			roleIds: data.roleIds,
+			tenantKey: data.authSuperAdmin ? undefined : context.request.tenantKey,
 		}),
 	]);
 	if (userExistsRes.error) return userExistsRes;
@@ -107,6 +111,47 @@ const inviteSingle: ServiceFn<
 	});
 	if (newUserRes.error) return newUserRes;
 
+	// Tenant memberships - only super admins decide them, other users add the new user to their current tenant
+	const tenantKeys = Array.from(
+		new Set(
+			data.authSuperAdmin
+				? (data.tenantKeys ?? [])
+				: context.request.tenantKey
+					? [context.request.tenantKey]
+					: [],
+		),
+	);
+
+	if (tenantKeys.length > 0) {
+		const unknownTenant = tenantKeys.find(
+			(key) => getTenantConfig(context.config, key) === undefined,
+		);
+		if (unknownTenant !== undefined) {
+			return {
+				error: {
+					type: "basic",
+					message: copy("server:core.tenants.unknown", {
+						data: { key: unknownTenant },
+					}),
+					status: 400,
+				},
+				data: undefined,
+			};
+		}
+
+		const UserTenants = new UserTenantsRepository(
+			context.db.client,
+			context.config.db,
+		);
+		const createTenantsRes = await UserTenants.createMultiple({
+			data: tenantKeys.map((key) => ({
+				user_id: newUserRes.data.id,
+				tenant_key: key,
+			})),
+		});
+		if (createTenantsRes.error) return createTenantsRes;
+	}
+
 	// Email Invite
 	const expiryDate = add(new Date(), {
 		minutes: constants.userInviteTokenExpirationMinutes,
@@ -140,6 +185,7 @@ const inviteSingle: ServiceFn<
 			},
 		},
 		storage: constants.email.templates.userInvite.storage,
+		tenantKeys,
 	});
 	if (sendEmailRes.error) return sendEmailRes;
 

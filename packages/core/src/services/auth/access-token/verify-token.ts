@@ -2,10 +2,15 @@ import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
 import { copy } from "../../../libs/i18n/index.js";
-import type { LucidAuth, LucidHonoContext } from "../../../types/hono.js";
+import type {
+	LucidAccessToken,
+	LucidHonoContext,
+} from "../../../types/hono.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
-const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
+const verifyToken = async (
+	c: LucidHonoContext,
+): ServiceResponse<LucidAccessToken> => {
 	try {
 		const config = c.get("config");
 		const _access = getCookie(c, constants.cookies.accessToken);
@@ -25,7 +30,7 @@ const verifyToken = async (c: LucidHonoContext): ServiceResponse<LucidAuth> => {
 			_access,
 			config.secrets.accessToken,
 			constants.jwt.algorithm,
-		)) as LucidAuth;
+		)) as LucidAccessToken;
 
 		return {
 			error: undefined,

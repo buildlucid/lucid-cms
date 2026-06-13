@@ -21,15 +21,10 @@ const storePendingGeneration: ServiceFn<
 		context.config.db,
 	);
 
-	const existingRes = await AiGenerations.selectSingle({
+	const existingRes = await AiGenerations.selectSingleByRequestId({
+		requestId: props.requestId,
 		select: ["id"],
-		where: [
-			{
-				key: "request_id",
-				operator: "=",
-				value: props.requestId,
-			},
-		],
+		tenantKey: context.request.tenantKey,
 	});
 	if (existingRes.error) return existingRes;
 
@@ -46,6 +41,7 @@ const storePendingGeneration: ServiceFn<
 			provider_request_id: null,
 			feature_key: props.feature.key,
 			feature_version: props.feature.version,
+			tenant_key: context.request.tenantKey ?? null,
 			user_id: props.userId,
 			target_type: props.targetType,
 			target: props.target,

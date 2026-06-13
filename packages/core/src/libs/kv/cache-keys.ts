@@ -22,6 +22,8 @@ const cacheKeys = {
 	 */
 	auth: {
 		client: (apiKey: string) => `auth:client:${apiKey}`,
+		user: (userId: string | number, namespaceToken: string) =>
+			`auth:user:${namespaceToken}:${userId}`,
 		/**
 		 * Cache key for refresh token existence
 		 */
@@ -47,8 +49,8 @@ const cacheKeys = {
 		},
 		static: {
 			clientLocales: `${HTTP_STATIC_PREFIX}client-locales`,
-			clientMediaSingle: (id: string | number) =>
-				`${HTTP_STATIC_PREFIX}client-media:${id}` as `${typeof HTTP_STATIC_PREFIX}client-media:${string}`,
+			clientMediaSingle: (id: string | number, tenantKey?: string | null) =>
+				`${HTTP_STATIC_PREFIX}client-media:${tenantKey ?? "global"}:${id}` as `${typeof HTTP_STATIC_PREFIX}client-media:${string}`,
 		},
 	},
 } as const;

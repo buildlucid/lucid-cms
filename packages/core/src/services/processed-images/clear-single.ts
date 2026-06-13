@@ -34,18 +34,12 @@ const clearSingle: ServiceFn<
 	);
 	let mediaKey = data.key;
 
-	if (!mediaKey) {
+	if (data.id !== undefined) {
 		const Media = new MediaRepository(context.db.client, context.config.db);
 
-		const mediaRes = await Media.selectSingle({
-			select: ["key"],
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.id,
-				},
-			],
+		const mediaRes = await Media.selectSingleById({
+			id: data.id,
+			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 			},

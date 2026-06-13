@@ -181,6 +181,22 @@ export interface LucidLocales {
 	is_deleted_at: TimestampMutateable;
 }
 
+export interface LucidTenants {
+	key: string;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
+	is_deleted_at: TimestampMutateable;
+}
+
+export interface LucidUserTenants {
+	id: Generated<number>;
+	user_id: number;
+	tenant_key: string;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
 export interface LucidOptions {
 	name: OptionsName;
 	value_int: number | null;
@@ -213,6 +229,14 @@ export interface LucidQueueJobs {
 	updated_at: TimestampMutateable;
 }
 
+export interface LucidQueueJobTenants {
+	id: Generated<number>;
+	queue_job_id: number;
+	tenant_key: string;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
 export type AiGenerationStatus = "failed" | "pending" | "success";
 
 export interface LucidAiGenerations {
@@ -221,6 +245,7 @@ export interface LucidAiGenerations {
 	provider_request_id: string | null;
 	feature_key: string;
 	feature_version: string;
+	tenant_key: string | null;
 	user_id: number | null;
 	target_type: string;
 	target: JSONColumnType<
@@ -294,6 +319,7 @@ export interface LucidRoles {
 	id: Generated<number>;
 	key: string | null;
 	locked: BooleanInt;
+	tenant_key: string | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
 }
@@ -419,6 +445,14 @@ export interface LucidEmails {
 	current_status: EmailDeliveryStatus;
 	attempt_count: number;
 	last_attempted_at: TimestampMutateable;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
+export interface LucidEmailTenants {
+	id: Generated<number>;
+	email_id: number;
+	tenant_key: string;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
 }
@@ -619,6 +653,7 @@ export interface LucidMedia {
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
 	custom_meta: string | null;
+	tenant_key: string | null;
 	is_hidden: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted_at: TimestampMutateable;
@@ -716,6 +751,7 @@ export interface LucidClientIntegrations {
 	key: string;
 	api_key: string;
 	secret: string;
+	tenant_key: string | null;
 	last_used_at: TimestampMutateable;
 	last_used_ip: string | null;
 	last_used_user_agent: string | null;
@@ -737,6 +773,7 @@ export interface LucidDocumentTable {
 	id: Generated<number>;
 	collection_key: string;
 	collection_migration_id: number;
+	tenant_key: string | null;
 	is_deleted: BooleanInt;
 	is_deleted_at: TimestampMutateable;
 	deleted_by: number;
@@ -808,6 +845,8 @@ export interface LucidAuthStates {
 // Database
 export interface LucidDB {
 	lucid_locales: LucidLocales;
+	lucid_tenants: LucidTenants;
+	lucid_user_tenants: LucidUserTenants;
 	lucid_options: LucidOptions;
 	lucid_users: LucidUsers;
 	lucid_roles: LucidRoles;
@@ -820,6 +859,7 @@ export interface LucidDB {
 	lucid_user_auth_providers: LucidUserAuthProviders;
 	lucid_security_audit_logs: LucidSecurityAuditLogs;
 	lucid_emails: LucidEmails;
+	lucid_email_tenants: LucidEmailTenants;
 	lucid_email_attachments: LucidEmailAttachments;
 	lucid_email_transactions: LucidEmailTransactions;
 	lucid_alerts: LucidAlerts;
@@ -841,6 +881,7 @@ export interface LucidDB {
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
 	lucid_queue_jobs: LucidQueueJobs;
+	lucid_queue_job_tenants: LucidQueueJobTenants;
 	lucid_ai_generations: LucidAiGenerations;
 	lucid_auth_states: LucidAuthStates;
 	[key: LucidDocumentTableName]: LucidDocumentTable;

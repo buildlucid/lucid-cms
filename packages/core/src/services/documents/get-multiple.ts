@@ -129,6 +129,7 @@ const getMultiple: ServiceFn<
 			documentFieldRelationTableSchemas,
 			includeWorkflow,
 			workflowAssigneeFilterValues,
+			tenantKey: context.request.tenantKey,
 		},
 		{
 			tableName: tableNameRes.data.document,
@@ -174,6 +175,7 @@ const getMultiple: ServiceFn<
 				collection: collectionRes.data,
 				collectionKey: data.collectionKey,
 				collectionTableNames: tableNameRes.data,
+				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				versionType: data.status,

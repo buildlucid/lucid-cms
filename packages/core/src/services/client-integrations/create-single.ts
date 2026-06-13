@@ -64,6 +64,7 @@ const createSingle: ServiceFn<
 			key: key,
 			secret: secret,
 			api_key: apiKeyHash,
+			tenant_key: context.request.tenantKey ?? null,
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString(),
 		},

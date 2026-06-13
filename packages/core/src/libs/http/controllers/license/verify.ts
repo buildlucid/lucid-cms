@@ -27,7 +27,7 @@ const verifyLicenseController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.LicenseUpdate]),
 	async (c) => {
 		const context = createServiceContext(c);
@@ -38,7 +38,9 @@ const verifyLicenseController = factory.createHandlers(
 				name: copy("server:core.errors.default.name"),
 				message: copy("server:core.errors.default.message"),
 			},
-		})(context);
+		})(context, {
+			tenantKey: context.request.tenantKey ?? null,
+		});
 		if (res.error) throw new LucidAPIError(res.error);
 
 		c.status(204);

@@ -25,6 +25,7 @@ const getAll: ServiceFn<
 	const integrationsRes =
 		await ClientIntegrations.selectMultipleFilteredWithScopes({
 			queryParams: data.query,
+			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 			},

@@ -5,6 +5,7 @@ import checkField from "./check-field.js";
 import checkLocales from "./check-locales.js";
 import checkPluginVersion from "./check-plugin-version.js";
 import checkRepeaterDepth from "./check-repeater-depth.js";
+import checkTenants from "./check-tenants.js";
 
 export default {
 	checkDuplicateBuilderKeys,
@@ -14,4 +15,5 @@ export default {
 	checkPluginVersion,
 	checkLocales,
 	checkField,
+	checkTenants,
 };

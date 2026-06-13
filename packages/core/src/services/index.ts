@@ -27,6 +27,7 @@ export * as securityAuditServices from "./security-audit/index.js";
 export * as seedServices from "./seed/index.js";
 export * as settingServices from "./settings/index.js";
 export * as syncServices from "./sync/index.js";
+export * as tenantServices from "./tenants/index.js";
 export * as userLoginServices from "./user-logins/index.js";
 export * as userTokenServices from "./user-tokens/index.js";
 export * as userServices from "./users/index.js";

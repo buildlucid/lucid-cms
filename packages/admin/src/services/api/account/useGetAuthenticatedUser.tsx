@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody, User } from "@types";
 import { createEffect, createMemo } from "solid-js";
+import tenantStore from "@/store/tenantStore";
 import userStore from "@/store/userStore";
 import type { QueryHook } from "@/types/utils";
 import getLoginRedirectURL from "@/utils/login-route";
@@ -31,6 +32,7 @@ const useGetAuthenticatedUser = (
 				url: "/lucid/api/v1/account",
 				config: {
 					method: "GET",
+					tenant: false,
 				},
 			}),
 		get enabled() {
@@ -41,6 +43,7 @@ const useGetAuthenticatedUser = (
 	createEffect(() => {
 		if (query.isSuccess) {
 			userStore.set("user", query.data.data);
+			tenantStore.get.syncTenants(query.data.data.tenants ?? []);
 		}
 		if (query.isError) {
 			if (options?.authLayout) {

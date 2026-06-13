@@ -44,7 +44,7 @@ const mediaImageGenerateController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.AiImageGenerate]),
 	validate("json", controllerSchemas.mediaImageGenerate.body),
 	async (c) => {

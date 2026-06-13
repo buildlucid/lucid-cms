@@ -4,6 +4,7 @@ import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
+import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 
 const deleteSingle: ServiceFn<
 	[
@@ -40,9 +41,7 @@ const deleteSingle: ServiceFn<
 	if (deleteMediaRes.error) return deleteMediaRes;
 
 	await Promise.all([
-		context.kv.delete(cacheKeys.http.static.clientMediaSingle(data.id), {
-			hash: true,
-		}),
+		clearClientMediaSingleCache(context.kv, context.config, data.id),
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);
 
@@ -55,7 +54,9 @@ const deleteSingle: ServiceFn<
 				config: context.config,
 			},
 			{
-				meta: {},
+				meta: {
+					tenantKey: context.request.tenantKey ?? null,
+				},
 				data: {
 					ids: [deleteMediaRes.data.id],
 					userId: data.userId,

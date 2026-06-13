@@ -52,6 +52,10 @@ const getSingleController = factory.createHandlers(
 				c.req.param("collectionKey"),
 			),
 		],
+		keyContext: (c) => {
+			const tenantKey = c.get("tenant")?.key;
+			return tenantKey ? { tenant: tenantKey } : {};
+		},
 	}),
 	async (c) => {
 		const { collectionKey, status } = c.req.valid("param");

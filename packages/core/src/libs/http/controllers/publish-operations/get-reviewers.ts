@@ -28,7 +28,7 @@ const getReviewersController = factory.createHandlers(
 			query: controllerSchemas.getReviewers.query.string,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	validate("query", controllerSchemas.getReviewers.query.string),
 	async (c) => {
 		const query = c.req.valid("query");

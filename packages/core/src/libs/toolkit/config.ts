@@ -33,6 +33,7 @@ export const createToolkitServiceContext = (
 				toolkitFallbackRequestUrl,
 			ipAddress: options.request?.ipAddress ?? null,
 			locale,
+			tenantKey: options.request?.tenantKey ?? null,
 		},
 	};
 };

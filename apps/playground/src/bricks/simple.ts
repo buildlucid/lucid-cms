@@ -1,6 +1,8 @@
 import { BrickBuilder } from "@lucidcms/core";
 
-const SimpleBrick = new BrickBuilder("simple")
+const SimpleBrick = new BrickBuilder("simple", {
+	// tenantKeys: ["marketing"],
+})
 	.addText("heading", {
 		config: {
 			localized: false,

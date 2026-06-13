@@ -21,7 +21,7 @@ const deleteAllController = factory.createHandlers(
 		responses: honoOpenAPIResponse({ noProperties: true }),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaDelete]),
 	async (c) => {
 		const context = createServiceContext(c);

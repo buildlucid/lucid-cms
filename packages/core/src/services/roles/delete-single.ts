@@ -1,6 +1,8 @@
+import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { RolesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 
 const deleteSingle: ServiceFn<
 	[
@@ -27,7 +29,7 @@ const deleteSingle: ServiceFn<
 	});
 	if (roleRes.error) return roleRes;
 
-	if (roleRes.data.locked === context.config.db.getDefault("boolean", "true")) {
+	if (formatter.formatBoolean(roleRes.data.locked)) {
 		return {
 			error: {
 				type: "basic",
@@ -62,6 +64,8 @@ const deleteSingle: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	await invalidateAuthCache(context.kv);
 
 	return {
 		error: undefined,

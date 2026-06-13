@@ -3,6 +3,7 @@ import { OptionsRepository } from "../../libs/repositories/index.js";
 import { encrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { licenseServices } from "../index.js";
+import { getLicenseOptionName } from "./helpers/option-names.js";
 
 const updateLicense: ServiceFn<
 	[
@@ -13,6 +14,7 @@ const updateLicense: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const Options = new OptionsRepository(context.db.client, context.config.db);
+	const tenantKey = context.request.tenantKey ?? null;
 
 	const plain = data.licenseKey?.trim() || null;
 	const display = licenseFormatter.createLicenseKeyDisplay(plain);
@@ -23,13 +25,13 @@ const updateLicense: ServiceFn<
 	const [keyRes, displayRes] = await Promise.all([
 		Options.upsertSingle({
 			data: {
-				name: "license_key",
+				name: getLicenseOptionName(tenantKey, "license_key"),
 				value_text: encrypted,
 			},
 		}),
 		Options.upsertSingle({
 			data: {
-				name: "license_key_display",
+				name: getLicenseOptionName(tenantKey, "license_key_display"),
 				value_text: display,
 			},
 		}),
@@ -37,7 +39,9 @@ const updateLicense: ServiceFn<
 	if (keyRes.error) return keyRes;
 	if (displayRes.error) return displayRes;
 
-	const verifyRes = await licenseServices.verifyLicense(context);
+	const verifyRes = await licenseServices.verifyLicense(context, {
+		tenantKey,
+	});
 	if (verifyRes.error) return verifyRes;
 
 	return {

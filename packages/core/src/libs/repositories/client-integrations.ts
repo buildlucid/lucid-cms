@@ -29,6 +29,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 		key: z.string(),
 		api_key: z.string(),
 		secret: z.string(),
+		tenant_key: z.string().nullable(),
 		last_used_at: z.union([z.string(), z.date()]).nullable(),
 		last_used_ip: z.string().nullable(),
 		last_used_user_agent: z.string().nullable(),
@@ -43,6 +44,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 		key: this.dbAdapter.getDataType("text"),
 		api_key: this.dbAdapter.getDataType("text"),
 		secret: this.dbAdapter.getDataType("text"),
+		tenant_key: this.dbAdapter.getDataType("text"),
 		last_used_at: this.dbAdapter.getDataType("timestamp"),
 		last_used_ip: this.dbAdapter.getDataType("varchar", 255),
 		last_used_user_agent: this.dbAdapter.getDataType("text"),
@@ -86,6 +88,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 				"name",
 				"description",
 				"enabled",
+				"tenant_key",
 				"last_used_at",
 				"last_used_ip",
 				"last_used_user_agent",
@@ -120,6 +123,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 				"name",
 				"description",
 				"enabled",
+				"tenant_key",
 				"last_used_at",
 				"last_used_ip",
 				"last_used_user_agent",
@@ -146,6 +150,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 				"api_key",
 				"secret",
 				"enabled",
+				"tenant_key",
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -178,6 +183,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 			V,
 			{
 				queryParams: GetAllQueryParams;
+				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -191,6 +197,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 						"name",
 						"description",
 						"enabled",
+						"tenant_key",
 						"last_used_at",
 						"last_used_ip",
 						"last_used_user_agent",
@@ -208,11 +215,23 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 									),
 							)
 							.as("scopes"),
-					]);
+					])
+					.$call((qb) =>
+						queryBuilder.tenantScope(qb, {
+							tenantKey: props.tenantKey,
+							column: "lucid_client_integrations.tenant_key",
+						}),
+					);
 
 				const countQuery = this.db
 					.selectFrom("lucid_client_integrations")
-					.select(sql`count(*)`.as("count"));
+					.select(sql`count(*)`.as("count"))
+					.$call((qb) =>
+						queryBuilder.tenantScope(qb, {
+							tenantKey: props.tenantKey,
+							column: "lucid_client_integrations.tenant_key",
+						}),
+					);
 
 				const { main, count } = queryBuilder.main(
 					{
@@ -247,6 +266,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 				"name",
 				"description",
 				"enabled",
+				"tenant_key",
 				"last_used_at",
 				"last_used_ip",
 				"last_used_user_agent",

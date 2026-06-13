@@ -35,7 +35,7 @@ const deleteSingleController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.UsersDelete]),
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {

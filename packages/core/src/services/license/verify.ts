@@ -4,6 +4,11 @@ import { OptionsRepository } from "../../libs/repositories/index.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import {
+	getLicenseOptionBaseName,
+	getLicenseOptionName,
+	getLicenseOptionNames,
+} from "./helpers/option-names.js";
 
 type LicenseSnapshot = {
 	valid: boolean;
@@ -11,8 +16,16 @@ type LicenseSnapshot = {
 	errorMessage: string | null;
 };
 
+/**
+ * Verifies and persists license state for a single tenant scope.
+ * The tenant key is passed in so cron checks do not need to reshape request context.
+ */
 const verifyLicense: ServiceFn<
-	[],
+	[
+		{
+			tenantKey: string | null | undefined;
+		},
+	],
 	{
 		key: string | null;
 		valid: boolean;
@@ -20,9 +33,10 @@ const verifyLicense: ServiceFn<
 		errorMessage: string | null;
 		aiEnabled: boolean;
 	}
-> = async (context) => {
+> = async (context, data) => {
 	const Options = new OptionsRepository(context.db.client, context.config.db);
 	const now = getUnixTimeSeconds();
+	const tenantKey = data.tenantKey ?? null;
 
 	const existingStateRes = await Options.selectMultiple({
 		select: ["name", "value_bool", "value_text"],
@@ -30,7 +44,11 @@ const verifyLicense: ServiceFn<
 			{
 				key: "name",
 				operator: "in",
-				value: ["license_valid", "license_error_message", "license_ai_enabled"],
+				value: getLicenseOptionNames(tenantKey, [
+					"license_valid",
+					"license_error_message",
+					"license_ai_enabled",
+				]),
 			},
 		],
 	});
@@ -39,43 +57,49 @@ const verifyLicense: ServiceFn<
 	const existingSnapshot: LicenseSnapshot = {
 		valid:
 			formatter.formatBoolean(
-				existingStateRes.data?.find((o) => o.name === "license_valid")
-					?.value_bool,
+				existingStateRes.data?.find(
+					(o) => getLicenseOptionBaseName(o.name) === "license_valid",
+				)?.value_bool,
 			) ?? false,
 		aiEnabled:
 			formatter.formatBoolean(
-				existingStateRes.data?.find((o) => o.name === "license_ai_enabled")
-					?.value_bool,
+				existingStateRes.data?.find(
+					(o) => getLicenseOptionBaseName(o.name) === "license_ai_enabled",
+				)?.value_bool,
 			) ?? false,
 		errorMessage:
-			existingStateRes.data?.find((o) => o.name === "license_error_message")
-				?.value_text ?? null,
+			existingStateRes.data?.find(
+				(o) => getLicenseOptionBaseName(o.name) === "license_error_message",
+			)?.value_text ?? null,
 	};
 
+	/**
+	 * Stores the latest verification state under the same tenant-scoped option names.
+	 */
 	const persistSnapshot = async (snapshot: LicenseSnapshot) => {
 		const [validRes, lastCheckedRes, errorMsgRes, aiEnabledRes] =
 			await Promise.all([
 				Options.upsertSingle({
 					data: {
-						name: "license_valid",
+						name: getLicenseOptionName(tenantKey, "license_valid"),
 						value_bool: snapshot.valid,
 					},
 				}),
 				Options.upsertSingle({
 					data: {
-						name: "license_last_checked",
+						name: getLicenseOptionName(tenantKey, "license_last_checked"),
 						value_int: now,
 					},
 				}),
 				Options.upsertSingle({
 					data: {
-						name: "license_error_message",
+						name: getLicenseOptionName(tenantKey, "license_error_message"),
 						value_text: snapshot.errorMessage,
 					},
 				}),
 				Options.upsertSingle({
 					data: {
-						name: "license_ai_enabled",
+						name: getLicenseOptionName(tenantKey, "license_ai_enabled"),
 						value_bool: snapshot.aiEnabled,
 					},
 				}),
@@ -96,7 +120,7 @@ const verifyLicense: ServiceFn<
 			{
 				key: "name",
 				operator: "=",
-				value: "license_key",
+				value: getLicenseOptionName(tenantKey, "license_key"),
 			},
 		],
 	});

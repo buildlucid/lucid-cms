@@ -24,15 +24,9 @@ const resendSingle: ServiceFn<
 	);
 
 	const [emailRes, emailAdapter] = await Promise.all([
-		Emails.selectSingle({
-			select: ["id", "created_at", "storage_strategy"],
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.id,
-				},
-			],
+		Emails.selectSingleById({
+			id: data.id,
+			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 				defaultError: {
@@ -99,6 +93,10 @@ const resendSingle: ServiceFn<
 		payload: {
 			emailId: emailRes.data.id,
 			transactionId: transactionRes.data.id ?? 0,
+		},
+		options: {
+			tenantKeys:
+				emailRes.data.tenants?.map((tenant) => tenant.tenant_key) ?? [],
 		},
 		context: context,
 	});

@@ -7,6 +7,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
+import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 
 const deleteBatch: ServiceFn<
 	[
@@ -86,10 +87,7 @@ const deleteBatch: ServiceFn<
 				for (const item of r.data) {
 					deletedMediaIds.add(item.id);
 					clearCachePromises.push(
-						context.kv.delete(
-							cacheKeys.http.static.clientMediaSingle(item.id),
-							{ hash: true },
-						),
+						clearClientMediaSingleCache(context.kv, context.config, item.id),
 					);
 				}
 			}
@@ -119,7 +117,9 @@ const deleteBatch: ServiceFn<
 				config: context.config,
 			},
 			{
-				meta: {},
+				meta: {
+					tenantKey: context.request.tenantKey ?? null,
+				},
 				data: {
 					ids: Array.from(deletedMediaIds),
 					userId: data.userId,

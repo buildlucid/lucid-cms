@@ -7,6 +7,7 @@ import type {
 } from "../../../types/hono.js";
 import { decodeApiKey } from "../../../utils/client-integrations/encode-api-key.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
+import { multiTenancyEnabled } from "../../../utils/helpers/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import { copy } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
@@ -42,7 +43,11 @@ const clientAuthentication = createMiddleware(
 		});
 
 		if (cached) {
+			const tenantKey = multiTenancyEnabled(c.get("config"))
+				? cached.tenantKey
+				: null;
 			c.set("clientIntegrationAuth", cached);
+			c.set("tenant", tenantKey ? { key: tenantKey } : null);
 			const response = await next();
 
 			void clientIntegrationServices
@@ -71,7 +76,11 @@ const clientAuthentication = createMiddleware(
 		});
 		if (verifyApiKey.error) throw new LucidAPIError(verifyApiKey.error);
 
+		const tenantKey = multiTenancyEnabled(c.get("config"))
+			? verifyApiKey.data.tenantKey
+			: null;
 		c.set("clientIntegrationAuth", verifyApiKey.data);
+		c.set("tenant", tenantKey ? { key: tenantKey } : null);
 		const response = await next();
 
 		void Promise.all([

@@ -34,7 +34,7 @@ const getUploadSessionController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaCreate, Permissions.MediaUpdate]),
 	validate("param", controllerSchemas.getUploadSession.params),
 	async (c) => {

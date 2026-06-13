@@ -11,4 +11,5 @@ export { default as restoreMultiple } from "./restore-multiple.js";
 export { default as revokeRefreshTokens } from "./revoke-refresh-tokens.js";
 export { default as unlinkAuthProvider } from "./unlink-auth-provider.js";
 export { default as updateMultipleRoles } from "./update-multiple-roles.js";
+export { default as updateMultipleTenants } from "./update-multiple-tenants.js";
 export { default as updateSingle } from "./update-single.js";

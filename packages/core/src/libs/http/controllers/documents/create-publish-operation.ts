@@ -33,7 +33,7 @@ const createPublishOperationController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.createSingle.body),
 	validate("param", controllerSchemas.createSingle.params),
 	async (c) => {

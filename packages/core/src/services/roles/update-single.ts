@@ -1,3 +1,4 @@
+import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { isCorePermission } from "../../libs/permission/registry.js";
 import {
@@ -5,7 +6,9 @@ import {
 	RolesRepository,
 	RoleTranslationsRepository,
 } from "../../libs/repositories/index.js";
+import { getTenantConfig } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import { roleServices } from "../index.js";
 import {
 	getTranslationValue,
@@ -20,6 +23,8 @@ const updateSingle: ServiceFn<
 			name?: RoleTranslationInput;
 			description?: RoleTranslationInput;
 			permissions?: string[];
+			tenantKey?: string | null;
+			authSuperAdmin: boolean;
 		},
 	],
 	undefined
@@ -40,7 +45,7 @@ const updateSingle: ServiceFn<
 		defaultRoleLocale,
 	);
 
-	const [roleRes, validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
+	const [roleRes, validatePermsRes] = await Promise.all([
 		Roles.selectSingleById({
 			id: data.id,
 			validation: {
@@ -52,34 +57,43 @@ const updateSingle: ServiceFn<
 					permissions: data.permissions,
 				})
 			: undefined,
-		defaultName !== undefined
-			? RoleTranslations.selectSingle({
-					select: ["role_id"],
-					where: [
-						{
-							key: "name",
-							operator: "=",
-							value: defaultName,
-						},
-						{
-							key: "role_id",
-							operator: "!=",
-							value: data.id,
-						},
-						{
-							key: "locale_code",
-							operator: "=",
-							value: defaultRoleLocale,
-						},
-					],
-				})
-			: undefined,
 	]);
 	if (roleRes.error) return roleRes;
-	if (checkNameIsUniqueRes?.error) return checkNameIsUniqueRes;
 	if (validatePermsRes?.error) return validatePermsRes;
 
-	if (roleRes.data.locked === context.config.db.getDefault("boolean", "true")) {
+	if (formatter.formatBoolean(roleRes.data.locked)) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.permissions.denied"),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
+	const tenantKey =
+		data.tenantKey === undefined ? roleRes.data.tenant_key : data.tenantKey;
+
+	/**
+	 * Explicit tenant assignment can move a role across tenant boundaries, so it is super-admin only.
+	 */
+	if (data.tenantKey !== undefined && !data.authSuperAdmin) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.permissions.denied"),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
+	if (
+		context.request.tenantKey !== null &&
+		roleRes.data.tenant_key !== context.request.tenantKey &&
+		!data.authSuperAdmin
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -107,7 +121,34 @@ const updateSingle: ServiceFn<
 		};
 	}
 
-	if (defaultName !== undefined && checkNameIsUniqueRes?.data !== undefined) {
+	if (
+		tenantKey !== null &&
+		getTenantConfig(context.config, tenantKey) === undefined
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.tenants.unknown", {
+					data: { key: tenantKey },
+				}),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
+	const checkNameIsUniqueRes =
+		defaultName != null
+			? await Roles.selectRoleIdByTranslationName({
+					name: defaultName,
+					localeCode: defaultRoleLocale,
+					tenantKey,
+					excludeRoleId: data.id,
+				})
+			: undefined;
+	if (checkNameIsUniqueRes?.error) return checkNameIsUniqueRes;
+
+	if (defaultName != null && checkNameIsUniqueRes?.data !== undefined) {
 		return {
 			error: {
 				type: "basic",
@@ -123,9 +164,15 @@ const updateSingle: ServiceFn<
 			data: undefined,
 		};
 	}
-	const updateData = {
+	const updateData: {
+		updated_at: string;
+		tenant_key?: string | null;
+	} = {
 		updated_at: new Date().toISOString(),
 	};
+	if (data.tenantKey !== undefined) {
+		updateData.tenant_key = data.tenantKey;
+	}
 	const updateRoleRes = await Roles.updateSingle({
 		data: updateData,
 		where: [
@@ -141,6 +188,8 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (updateRoleRes.error) return updateRoleRes;
+
+	await invalidateAuthCache(context.kv);
 
 	if (data.name !== undefined || data.description !== undefined) {
 		const existingNameTranslations: RoleTranslationInput =
@@ -252,6 +301,8 @@ const updateSingle: ServiceFn<
 			if (rolePermsRes.error) return rolePermsRes;
 		}
 	}
+
+	await invalidateAuthCache(context.kv);
 
 	return {
 		error: undefined,

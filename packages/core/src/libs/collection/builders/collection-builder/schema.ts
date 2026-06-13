@@ -171,6 +171,7 @@ const CollectionConfigSchema = z
 					.union([z.number().int().positive(), z.literal(false)])
 					.default(constants.collectionBuilder.revisionRetentionDays)
 					.optional(),
+				tenantKeys: z.array(z.string().min(1)).optional(),
 			})
 			.optional(),
 		hooks: z

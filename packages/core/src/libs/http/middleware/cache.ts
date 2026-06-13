@@ -23,6 +23,11 @@ type CacheOptions = {
 	tags?: string[] | ((c: LucidHonoContext) => string[]);
 	/** Bypasses hash generation and uses a simple string key. Useful for endpoints with no variations. */
 	staticKey?: HttpStaticValues | ((c: LucidHonoContext) => HttpStaticValues);
+	/**
+	 * Extra request context to include in the cache key, ie. the resolved tenant.
+	 * Return an empty object to leave the key unchanged. Not supported alongside staticKey.
+	 */
+	keyContext?: (c: LucidHonoContext) => Record<string, unknown>;
 };
 
 /**
@@ -70,6 +75,13 @@ const generateCacheKey = (
 				// @ts-expect-error
 				cacheObject.headers[headerName] = headerValue;
 			}
+		}
+	}
+
+	if (options.keyContext) {
+		const keyContext = options.keyContext(c);
+		if (Object.keys(keyContext).length > 0) {
+			cacheObject.keyContext = keyContext;
 		}
 	}
 

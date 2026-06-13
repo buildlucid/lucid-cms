@@ -22,7 +22,7 @@ const getAllController = factory.createHandlers(
 			schema: z.toJSONSchema(controllerSchemas.hierarchy.response),
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);
 

@@ -23,6 +23,7 @@ const getUsage: ServiceFn<
 
 	const aiUsageRes = await AiGenerations.selectUsageMultiple({
 		queryParams: data.query,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

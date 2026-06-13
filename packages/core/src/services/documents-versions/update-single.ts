@@ -154,6 +154,7 @@ const updateSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				documentId: data.documentId,
@@ -194,6 +195,7 @@ const updateSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				documentId: data.documentId,

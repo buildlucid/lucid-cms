@@ -3,6 +3,7 @@ import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 
 const moveFolder: ServiceFn<
 	[
@@ -65,9 +66,7 @@ const moveFolder: ServiceFn<
 	if (mediaUpdateRes.error) return mediaUpdateRes;
 
 	await Promise.all([
-		context.kv.delete(cacheKeys.http.static.clientMediaSingle(data.id), {
-			hash: true,
-		}),
+		clearClientMediaSingleCache(context.kv, context.config, data.id),
 		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
 	]);
 

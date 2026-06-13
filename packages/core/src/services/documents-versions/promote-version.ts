@@ -353,6 +353,7 @@ const promoteVersion: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNameRes.data,
+				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				documentId: data.documentId,

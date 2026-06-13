@@ -7,6 +7,7 @@ interface RolePropsT {
 	id: number;
 	key: string | null;
 	locked: BooleanInt;
+	tenant_key: string | null;
 	translations?: Array<{
 		name: string | null;
 		description: string | null;
@@ -33,6 +34,7 @@ const formatSingle = (props: { role: RolePropsT }): Role => {
 	return {
 		id: props.role.id,
 		key: props.role.key,
+		tenantKey: props.role.tenant_key,
 		name:
 			props.role.translations?.map((translation) => ({
 				value: translation.name,

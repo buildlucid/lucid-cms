@@ -20,6 +20,7 @@ const getMultiple: ServiceFn<
 
 	const mediaRes = await Media.selectMultipleFilteredFixed({
 		queryParams: data.query,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

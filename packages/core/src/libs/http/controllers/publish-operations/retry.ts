@@ -31,7 +31,7 @@ const retryController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("param", controllerSchemas.retry.params),
 	async (c) => {
 		const { id } = c.req.valid("param");

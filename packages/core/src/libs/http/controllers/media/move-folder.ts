@@ -36,7 +36,7 @@ const moveFolderController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.moveFolder.body),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaUpdate]),
 	validate("param", controllerSchemas.moveFolder.params),
 	validate("json", controllerSchemas.moveFolder.body),

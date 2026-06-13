@@ -33,7 +33,7 @@ const resendInvitationController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.UsersCreate]),
 	validate("param", controllerSchemas.resendInvitation.params),
 	async (c) => {

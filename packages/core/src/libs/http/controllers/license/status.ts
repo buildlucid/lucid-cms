@@ -23,7 +23,7 @@ const statusController = factory.createHandlers(
 			schema: z.toJSONSchema(controllerSchemas.status.response),
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);
 		const res = await serviceWrapper(licenseServices.licenseStatus, {

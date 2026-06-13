@@ -6,7 +6,8 @@ export default Object.freeze({
 	headers: {
 		csrf: "X-CSRF-Token",
 		idempotencyKey: "idempotency-key",
-		interfaceLocale: "Lucid-Interface-Locale",
+		interfaceLocale: "Lucid-Locale",
+		tenant: "X-Lucid-Tenant",
 	},
 	cookies: {
 		csrf: "_csrf",
@@ -158,6 +159,7 @@ export default Object.freeze({
 	csrfExpiration: 604800, // 7 days in seconds
 	refreshTokenExpiration: 604800, // 7 days in seconds
 	accessTokenExpiration: 300, // 5 minutes in seconds
+	authCacheExpiration: 60, // 1 minute in seconds
 	passwordResetTokenExpirationMinutes: 15, // 15 minutes
 	userInviteTokenExpirationMinutes: 1440, // 24 hours in minutes
 	emailChangeTokenExpirationMinutes: 1440, // 24 hours in minutes

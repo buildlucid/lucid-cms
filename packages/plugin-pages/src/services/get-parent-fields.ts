@@ -6,6 +6,7 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
+import { applyDocumentVersionTenantScope } from "../utils/apply-tenant-scope.js";
 import getParentPageId from "../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 
@@ -44,7 +45,11 @@ const getParentFields: ServiceFn<
 			};
 		}
 
-		const { version: versionTable, documentFields: fieldsTable } = data.tables;
+		const {
+			document: documentTable,
+			version: versionTable,
+			documentFields: fieldsTable,
+		} = data.tables;
 
 		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
 		const parentPageColumn = prefixGeneratedColName("document_id");
@@ -58,7 +63,7 @@ const getParentFields: ServiceFn<
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
 
-		const parentFields = await context.db.client
+		const parentFieldsQuery = context.db.client
 			.selectFrom(fieldsTable)
 			.innerJoin(
 				versionTable,
@@ -79,8 +84,16 @@ const getParentFields: ServiceFn<
 				`${fieldsTable}.locale`,
 			])
 			.where(`${versionTable}.document_id`, "=", parentPageId)
-			.where(`${versionTable}.type`, "=", data.versionType)
-			.execute();
+			.where(`${versionTable}.type`, "=", data.versionType);
+
+		const parentFields = await applyDocumentVersionTenantScope(
+			parentFieldsQuery,
+			{
+				tenantKey: context.request.tenantKey,
+				documentTable,
+				versionTable,
+			},
+		).execute();
 
 		if (!parentFields || parentFields.length === 0) {
 			if (data.missingParentIsEmpty) {

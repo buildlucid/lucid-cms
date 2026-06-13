@@ -107,6 +107,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			)
 			.optional(),
 		custom_meta: z.string().nullable(),
+		tenant_key: z.string().nullable(),
 		is_deleted: z.union([
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
@@ -142,6 +143,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		is_dark: this.dbAdapter.getDataType("boolean"),
 		is_light: this.dbAdapter.getDataType("boolean"),
 		custom_meta: this.dbAdapter.getDataType("text"),
+		tenant_key: this.dbAdapter.getDataType("text"),
 		is_hidden: this.dbAdapter.getDataType("boolean"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
@@ -208,6 +210,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			V,
 			{
 				id: number;
+				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -240,6 +243,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
+				"tenant_key",
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -303,7 +307,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					)
 					.as("translations"),
 			])
-			.where("id", "=", props.id);
+			.where("id", "=", props.id)
+			.$call((qb) =>
+				queryBuilder.tenantScope(qb, {
+					tenantKey: props.tenantKey,
+					column: "lucid_media.tenant_key",
+				}),
+			);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
@@ -382,6 +392,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
+				"tenant_key",
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -492,6 +503,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			V,
 			{
 				queryParams: GetMultipleQueryParams;
+				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -596,7 +608,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"=",
 						this.dbAdapter.getDefault("boolean", "false"),
 					)
-					.groupBy("lucid_media.id");
+					.groupBy("lucid_media.id")
+					.$call((qb) =>
+						queryBuilder.tenantScope(qb, {
+							tenantKey: props.tenantKey,
+							column: "lucid_media.tenant_key",
+						}),
+					);
 
 				const countQuery = this.db
 					.selectFrom("lucid_media")
@@ -608,6 +626,12 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.is_hidden",
 						"=",
 						this.dbAdapter.getDefault("boolean", "false"),
+					)
+					.$call((qb) =>
+						queryBuilder.tenantScope(qb, {
+							tenantKey: props.tenantKey,
+							column: "lucid_media.tenant_key",
+						}),
 					);
 
 				const { main, count } = queryBuilder.main(

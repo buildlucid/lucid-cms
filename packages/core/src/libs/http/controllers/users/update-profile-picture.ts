@@ -38,7 +38,7 @@ const updateProfilePictureController = factory.createHandlers(
 		),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.UsersUpdate]),
 	validate("param", controllerSchemas.updateProfilePicture.params),
 	validate("json", controllerSchemas.updateProfilePicture.body),

@@ -94,6 +94,7 @@ const verifyApiKey: ServiceFn<
 			id: clientIntegrationRes.data.id,
 			key: clientIntegrationRes.data.key,
 			scopes: (clientIntegrationRes.data.scopes || []).map((s) => s.scope),
+			tenantKey: clientIntegrationRes.data.tenant_key ?? null,
 		},
 	};
 };

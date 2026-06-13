@@ -32,7 +32,7 @@ const getMultipleController = factory.createHandlers(
 			query: controllerSchemas.getMultiple.query.string,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	permissions([Permissions.DocumentsReview]),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {

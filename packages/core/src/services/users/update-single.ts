@@ -4,14 +4,17 @@ import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
+	UserTenantsRepository,
 } from "../../libs/repositories/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import {
 	formatEmailSubject,
 	getEmailLogoUrl,
+	multiTenancyEnabled,
 } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import {
 	emailServices,
 	securityAuditServices,
@@ -33,6 +36,7 @@ const updateSingle: ServiceFn<
 			triggerPasswordReset?: boolean;
 			isDeleted?: boolean;
 			isLocked?: boolean;
+			tenantKeys?: string[];
 			auth: {
 				id: number;
 				superAdmin: boolean;
@@ -61,6 +65,7 @@ const updateSingle: ServiceFn<
 	}
 
 	const userRes = await Users.selectSinglePreset({
+		tenantKey: data.auth.superAdmin ? undefined : context.request.tenantKey,
 		where: [
 			{
 				key: "id",
@@ -197,7 +202,7 @@ const updateSingle: ServiceFn<
 	});
 	if (auditLogsRes.error) return auditLogsRes;
 
-	const [updateUserRes, updateRolesRes] = await Promise.all([
+	const [updateUserRes, updateRolesRes, updateTenantsRes] = await Promise.all([
 		Users.updateSingle({
 			data: {
 				first_name: data.firstName,
@@ -230,10 +235,19 @@ const updateSingle: ServiceFn<
 		userServices.updateMultipleRoles(context, {
 			userId: data.userId,
 			roleIds: data.roleIds,
+			tenantKey: data.auth.superAdmin ? undefined : context.request.tenantKey,
+		}),
+		userServices.updateMultipleTenants(context, {
+			userId: data.userId,
+			//* only super admins can manage tenant memberships
+			tenantKeys: data.auth.superAdmin ? data.tenantKeys : undefined,
 		}),
 	]);
+	await invalidateAuthCache(context.kv);
+
 	if (updateRolesRes.error) return updateRolesRes;
 	if (updateUserRes.error) return updateUserRes;
+	if (updateTenantsRes.error) return updateTenantsRes;
 
 	const auditResults = await Promise.all(
 		auditLogsRes.data.logs.map((auditLog) =>
@@ -245,6 +259,33 @@ const updateSingle: ServiceFn<
 	}
 
 	if (auditLogsRes.data.emailChange) {
+		let existingTenantKeys: string[] = [];
+		if (multiTenancyEnabled(context.config)) {
+			const UserTenants = new UserTenantsRepository(
+				context.db.client,
+				context.config.db,
+			);
+			const tenantKeysRes = await UserTenants.selectMultiple({
+				select: ["tenant_key"],
+				where: [
+					{
+						key: "user_id",
+						operator: "=",
+						value: data.userId,
+					},
+				],
+			});
+			if (tenantKeysRes.error) return tenantKeysRes;
+			existingTenantKeys = (tenantKeysRes.data ?? []).map(
+				(tenant) => tenant.tenant_key,
+			);
+		}
+
+		const emailTenantKeys =
+			data.auth.superAdmin && data.tenantKeys !== undefined
+				? Array.from(new Set(data.tenantKeys))
+				: existingTenantKeys;
+
 		const sendEmailRes = await emailServices.sendEmail(context, {
 			template: constants.email.templates.emailChanged.key,
 			type: "internal",
@@ -260,6 +301,7 @@ const updateSingle: ServiceFn<
 					name: context.config.brand?.name,
 				},
 			},
+			tenantKeys: emailTenantKeys,
 		});
 		if (sendEmailRes.error) return sendEmailRes;
 	}

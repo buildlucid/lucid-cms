@@ -12,13 +12,15 @@ import type {
 	EmailPriority,
 } from "../../libs/email/types.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailAttachmentsRepository,
 	EmailsRepository,
+	EmailTenantsRepository,
 	EmailTransactionsRepository,
 } from "../../libs/repositories/index.js";
 import type { Email } from "../../types/response.js";
-import { getEmailFrom } from "../../utils/helpers/index.js";
+import { getEmailFrom, getTenantConfig } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const sendEmail: ServiceFn<
@@ -36,6 +38,7 @@ const sendEmail: ServiceFn<
 			attachments?: EmailAttachment[];
 			data: Record<string, unknown>;
 			storage?: EmailStorageConfig;
+			tenantKeys?: string[];
 			from?: {
 				email?: string;
 				name?: string;
@@ -56,11 +59,37 @@ const sendEmail: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const EmailTenants = new EmailTenantsRepository(
+		context.db.client,
+		context.config.db,
+	);
 
 	const emailFrom = getEmailFrom(context.config, context.request.url);
 	const fromAddress = data.from?.email ?? emailFrom.email;
 	const fromName = data.from?.name ?? emailFrom.name;
 	const toAddress = Array.isArray(data.to) ? data.to.join(",") : data.to;
+	const tenantKeys = Array.from(
+		new Set(
+			data.tenantKeys ??
+				(context.request.tenantKey ? [context.request.tenantKey] : []),
+		),
+	);
+
+	const unknownTenant = tenantKeys.find(
+		(key) => getTenantConfig(context.config, key) === undefined,
+	);
+	if (unknownTenant !== undefined) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.tenants.unknown", {
+					data: { key: unknownTenant },
+				}),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
 
 	const attachmentsRes = normalizeEmailAttachments(data.attachments);
 	if (attachmentsRes.error) return attachmentsRes;
@@ -106,6 +135,16 @@ const sendEmail: ServiceFn<
 	]);
 	if (newEmailRes.error) return newEmailRes;
 
+	if (tenantKeys.length > 0) {
+		const createTenantsRes = await EmailTenants.createMultiple({
+			data: tenantKeys.map((tenantKey) => ({
+				email_id: newEmailRes.data.id,
+				tenant_key: tenantKey,
+			})),
+		});
+		if (createTenantsRes.error) return createTenantsRes;
+	}
+
 	if (attachmentsRes.data.length > 0) {
 		const attachmentsCreateRes = await EmailAttachments.createMultiple({
 			data: attachmentsRes.data.map((attachment, index) => ({
@@ -147,6 +186,9 @@ const sendEmail: ServiceFn<
 		payload: {
 			emailId: newEmailRes.data.id,
 			transactionId: initialTransactionRes.data?.id ?? 0,
+		},
+		options: {
+			tenantKeys,
 		},
 		context: context,
 	});

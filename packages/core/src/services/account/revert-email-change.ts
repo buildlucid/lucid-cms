@@ -6,6 +6,7 @@ import {
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import {
 	authServices,
 	securityAuditServices,
@@ -282,6 +283,9 @@ const revertEmailChange: ServiceFn<
 				revokeReason: constants.refreshTokenRevokeReasons.emailChangeReverted,
 			}),
 		]);
+
+	await invalidateAuthCache(context.kv);
+
 	if (updateUserRes.error) return updateUserRes;
 	if (consumeTokenRes.error) return consumeTokenRes;
 	if (auditRes.error) return auditRes;

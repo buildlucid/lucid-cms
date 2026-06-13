@@ -30,7 +30,7 @@ const getWorkflowAssigneesController = factory.createHandlers(
 			params: controllerSchemas.getWorkflowAssignees.params,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	validate("param", controllerSchemas.getWorkflowAssignees.params),
 	collectionPermissions("read"),
 	async (c) => {

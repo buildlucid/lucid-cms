@@ -3,7 +3,7 @@ import z from "zod";
 import type { GetUsageQueryParams } from "../../schemas/ai.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import queryBuilder from "../db/query-builder/index.js";
-import type { KyselyDB } from "../db/types.js";
+import type { KyselyDB, LucidAiGenerations, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
@@ -25,6 +25,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		provider_request_id: z.string().nullable(),
 		feature_key: z.string(),
 		feature_version: z.string(),
+		tenant_key: z.string().nullable(),
 		user_id: z.number().nullable(),
 		target_type: z.string(),
 		target: z.record(z.string(), z.unknown()),
@@ -44,6 +45,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		provider_request_id: this.dbAdapter.getDataType("text"),
 		feature_key: this.dbAdapter.getDataType("text"),
 		feature_version: this.dbAdapter.getDataType("text"),
+		tenant_key: this.dbAdapter.getDataType("text"),
 		user_id: this.dbAdapter.getDataType("integer"),
 		target_type: this.dbAdapter.getDataType("text"),
 		target: this.dbAdapter.getDataType("json"),
@@ -76,6 +78,47 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		},
 	} as const;
 
+	async selectSingleByRequestId<
+		K extends keyof Select<LucidAiGenerations>,
+		V extends boolean = false,
+	>(
+		props: QueryProps<
+			V,
+			{
+				requestId: string;
+				select: K[];
+				tenantKey?: string | null;
+			}
+		>,
+	) {
+		let query = this.db
+			.selectFrom("lucid_ai_generations")
+			.select(props.select)
+			.where("request_id", "=", props.requestId);
+
+		query = queryBuilder.tenantScope(query, {
+			tenantKey: props.tenantKey,
+			column: "lucid_ai_generations.tenant_key",
+		});
+
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as Promise<
+					Pick<Select<LucidAiGenerations>, K> | undefined
+				>,
+			{
+				method: "selectSingleByRequestId",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.select,
+		});
+	}
+
 	async selectUsageChartRows<V extends boolean = false>(
 		props: QueryProps<
 			V,
@@ -83,6 +126,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 				startDate: string;
 				endDate: string;
 				featureKey?: string;
+				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -99,6 +143,11 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 					])
 					.where("created_at", ">=", props.startDate)
 					.where("created_at", "<", props.endDate);
+
+				query = queryBuilder.tenantScope(query, {
+					tenantKey: props.tenantKey,
+					column: "lucid_ai_generations.tenant_key",
+				});
 
 				if (props.featureKey) {
 					query = query.where("feature_key", "=", props.featureKey);
@@ -137,12 +186,13 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			V,
 			{
 				queryParams: GetUsageQueryParams;
+				tenantKey?: string | null;
 			}
 		>,
 	) {
 		const exec = await this.executeQuery(
 			async () => {
-				const mainQuery = this.db
+				let mainQuery = this.db
 					.selectFrom("lucid_ai_generations")
 					.leftJoin(
 						"lucid_users",
@@ -225,7 +275,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 							.as("profile_picture"),
 					]);
 
-				const countQuery = this.db
+				let countQuery = this.db
 					.selectFrom("lucid_ai_generations")
 					.leftJoin(
 						"lucid_users",
@@ -233,6 +283,14 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 						"lucid_ai_generations.user_id",
 					)
 					.select(sql`count(*)`.as("count"));
+				mainQuery = queryBuilder.tenantScope(mainQuery, {
+					tenantKey: props.tenantKey,
+					column: "lucid_ai_generations.tenant_key",
+				});
+				countQuery = queryBuilder.tenantScope(countQuery, {
+					tenantKey: props.tenantKey,
+					column: "lucid_ai_generations.tenant_key",
+				});
 
 				const { main, count } = queryBuilder.main(
 					{

@@ -31,7 +31,7 @@ const getUsageChartController = factory.createHandlers(
 			query: controllerSchemas.getUsageChart.query.string,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	permissions([Permissions.SettingsRead]),
 	validate("query", controllerSchemas.getUsageChart.query.string),
 	async (c) => {

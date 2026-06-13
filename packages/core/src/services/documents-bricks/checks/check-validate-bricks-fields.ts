@@ -15,6 +15,7 @@ import type {
 	FieldInputSchema,
 	GroupError,
 } from "../../../types.js";
+import { tenantAccessAllowed } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import fetchValidationData, {
 	type ValidationData,
@@ -50,6 +51,7 @@ const checkValidateBricksFields: ServiceFn<
 		collection: data.collection,
 		validationData: refDataRes.data,
 		defaultLocale: context.config.localization.defaultLocale,
+		tenantKey: context.request.tenantKey,
 	});
 	const fieldErrors = recursiveFieldValidate({
 		fields: data.fields,
@@ -91,6 +93,7 @@ const validateBricks = (props: {
 	collection: CollectionBuilder;
 	validationData: ValidationData;
 	defaultLocale: string;
+	tenantKey?: string | null;
 }): Array<BrickError> => {
 	const errors: BrickError[] = [];
 
@@ -112,7 +115,10 @@ const validateBricks = (props: {
 			}
 		}
 
-		if (!instance) {
+		if (
+			!instance ||
+			!tenantAccessAllowed(instance.config.tenantKeys, props.tenantKey)
+		) {
 			logger.error({
 				scope: constants.logScopes.validation,
 				message: "Brick config was not found during document validation",
@@ -120,7 +126,21 @@ const validateBricks = (props: {
 					key: brick.key || "",
 				},
 			});
-			return errors;
+			errors.push({
+				ref: brick.ref,
+				key: brick.key,
+				order: brick.order,
+				fields: [
+					{
+						key: brick.key,
+						localeCode: null,
+						message: copy(
+							"server:core.fields.lookup.not.found.in.collection.or.brick",
+						),
+					},
+				],
+			});
+			continue;
 		}
 
 		const fieldErrors = recursiveFieldValidate({

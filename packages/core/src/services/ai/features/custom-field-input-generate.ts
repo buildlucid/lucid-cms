@@ -13,6 +13,7 @@ import {
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type { CustomFieldAiContextItem } from "../../../types.js";
+import { tenantAccessAllowed } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getLicenseKey from "../../options/get-license-key.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
@@ -23,52 +24,9 @@ import formatCustomFieldDocumentContext, {
 import formatCustomFieldOutput from "../helpers/format-custom-field-output.js";
 import getTranslatedCollectionDetails from "../helpers/get-translated-collection-details.js";
 import getTranslatedFieldDetails from "../helpers/get-translated-field-details.js";
+import normalizeCustomFieldGenerationLocale from "../helpers/normalize-custom-field-generation-locale.js";
 import storeFailedGeneration from "../storage/store-failed-generation.js";
 import storeGeneration from "../storage/store-generation.js";
-
-const normalizeCustomFieldGenerationLocale = (props: {
-	defaultLocale: string;
-	fieldIsLocalized: boolean;
-	locale: {
-		source?: string;
-		target: string[];
-	};
-	value: Record<string, unknown>;
-}) => {
-	if (props.fieldIsLocalized) {
-		return {
-			locale: props.locale,
-			value: props.value,
-		};
-	}
-
-	if (Object.hasOwn(props.value, props.defaultLocale)) {
-		return {
-			locale: {
-				source: props.defaultLocale,
-				target: [props.defaultLocale],
-			},
-			value: {
-				[props.defaultLocale]: props.value[props.defaultLocale],
-			},
-		};
-	}
-
-	const fallbackValue = Object.values(props.value)[0];
-
-	return {
-		locale: {
-			source: props.defaultLocale,
-			target: [props.defaultLocale],
-		},
-		value:
-			fallbackValue === undefined
-				? {}
-				: {
-						[props.defaultLocale]: fallbackValue,
-					},
-	};
-};
 
 const customFieldInputGenerate: ServiceFn<
 	[
@@ -106,7 +64,13 @@ const customFieldInputGenerate: ServiceFn<
 	const collection = context.config.collections.find(
 		(item) => item.key === props.target.collectionKey,
 	);
-	if (!collection) {
+	if (
+		!collection ||
+		!tenantAccessAllowed(
+			collection.getData.config.tenantKeys,
+			context.request.tenantKey,
+		)
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -122,9 +86,14 @@ const customFieldInputGenerate: ServiceFn<
 				(brick) => brick.key === props.target.brickKey,
 			)
 		: undefined;
-	const fieldSource = targetBrick ?? collection;
-
-	if (props.target.brickKey && !targetBrick) {
+	if (
+		props.target.brickKey &&
+		(!targetBrick ||
+			!tenantAccessAllowed(
+				targetBrick.config.tenantKeys,
+				context.request.tenantKey,
+			))
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -134,6 +103,8 @@ const customFieldInputGenerate: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const fieldSource = targetBrick ?? collection;
 
 	const targetField = fieldSource.fields.get(props.target.fieldKey);
 
@@ -162,6 +133,7 @@ const customFieldInputGenerate: ServiceFn<
 	const fieldIsLocalized =
 		collection.getData.config.localized === true &&
 		targetField.localizedEnabled === true;
+
 	const generationContext = normalizeCustomFieldGenerationLocale({
 		defaultLocale: context.config.localization.defaultLocale,
 		fieldIsLocalized,
@@ -272,6 +244,7 @@ const customFieldInputGenerate: ServiceFn<
 			},
 			items: contextItems,
 			document: formatCustomFieldDocumentContext({
+				context,
 				collection,
 				document: props.document,
 			}),

@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 import { type Component, createEffect, on, onMount } from "solid-js";
 import { Toaster } from "solid-toast";
 import Router from "@/Router";
+import tenantStore from "@/store/tenantStore";
 import { getLocale, getReady, initAdminTranslations } from "@/translations";
 import { LucidError } from "./utils/error-handling";
 import "solid-devtools";
@@ -36,6 +37,17 @@ const App: Component = () => {
 	createEffect(
 		on(
 			getLocale,
+			() => {
+				if (!getReady()) return;
+				void queryClient.invalidateQueries();
+			},
+			{ defer: true },
+		),
+	);
+
+	createEffect(
+		on(
+			() => tenantStore.get.tenant,
 			() => {
 				if (!getReady()) return;
 				void queryClient.invalidateQueries();

@@ -47,6 +47,10 @@ const getMultipleController = factory.createHandlers(
 		ttl: minutesToSeconds(5),
 		mode: "include-query",
 		tags: [cacheKeys.http.tags.clientMedia],
+		keyContext: (c) => {
+			const tenantKey = c.get("tenant")?.key;
+			return tenantKey ? { tenant: tenantKey } : {};
+		},
 	}),
 	async (c) => {
 		const formattedQuery = await buildFormattedQuery(

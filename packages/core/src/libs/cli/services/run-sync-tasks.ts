@@ -25,49 +25,75 @@ const runSyncTasks = async (
 	const translate = createTranslator({ store: translationStore, locale: "en" });
 
 	try {
-		const [localesResult, collectionsResult, rolesResult] = await Promise.all([
-			syncServices.syncLocales({
-				db: { client: config.db.client },
-				config: config,
-				queue: queue,
-				env: null,
-				kv: kv,
-				translate,
-				request: {
-					url: config.baseUrl ?? "",
-					locale: "en",
-				},
-			}),
-			syncServices.syncCollections({
-				db: { client: config.db.client },
-				config: config,
-				queue: queue,
-				env: null,
-				kv: kv,
-				translate,
-				request: {
-					url: config.baseUrl ?? "",
-					locale: "en",
-				},
-			}),
-			syncServices.syncRoles({
-				db: { client: config.db.client },
-				config: config,
-				queue: queue,
-				env: null,
-				kv: kv,
-				translate,
-				request: {
-					url: config.baseUrl ?? "",
-					locale: "en",
-				},
-			}),
-		]);
+		const [localesResult, tenantsResult, collectionsResult, rolesResult] =
+			await Promise.all([
+				syncServices.syncLocales({
+					db: { client: config.db.client },
+					config: config,
+					queue: queue,
+					env: null,
+					kv: kv,
+					translate,
+					request: {
+						url: config.baseUrl ?? "",
+						locale: "en",
+					},
+				}),
+				syncServices.syncTenants({
+					db: { client: config.db.client },
+					config: config,
+					queue: queue,
+					env: null,
+					kv: kv,
+					translate,
+					request: {
+						url: config.baseUrl ?? "",
+						locale: "en",
+					},
+				}),
+				syncServices.syncCollections({
+					db: { client: config.db.client },
+					config: config,
+					queue: queue,
+					env: null,
+					kv: kv,
+					translate,
+					request: {
+						url: config.baseUrl ?? "",
+						locale: "en",
+					},
+				}),
+				syncServices.syncRoles({
+					db: { client: config.db.client },
+					config: config,
+					queue: queue,
+					env: null,
+					kv: kv,
+					translate,
+					request: {
+						url: config.baseUrl ?? "",
+						locale: "en",
+					},
+				}),
+			]);
 
 		if (localesResult.error) {
 			cliLogger.error(
 				"Sync failed during locale sync, with error:",
 				translate.english(localesResult.error.message) || "unknown",
+			);
+			if (mode === "process") {
+				if (shouldDestroyKV) {
+					await destroyKVAdapter(kv, { config });
+				}
+				logger.setBuffering(false);
+				process.exit(1);
+			} else return false;
+		}
+		if (tenantsResult.error) {
+			cliLogger.error(
+				"Sync failed during tenants sync, with error:",
+				translate.english(tenantsResult.error.message) || "unknown",
 			);
 			if (mode === "process") {
 				if (shouldDestroyKV) {

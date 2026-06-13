@@ -35,7 +35,7 @@ const deleteMultipleController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.deleteMultiple.body),
 	validate("param", controllerSchemas.deleteMultiple.params),
 	collectionPermissions("delete"),

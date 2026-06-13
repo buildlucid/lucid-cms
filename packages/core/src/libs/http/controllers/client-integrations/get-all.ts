@@ -33,7 +33,7 @@ const getAllController = factory.createHandlers(
 			query: controllerSchemas.getAll.query.string,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	permissions([Permissions.IntegrationRead]),
 	validate("query", controllerSchemas.getAll.query.string),
 	async (c) => {

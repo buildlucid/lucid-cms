@@ -4,6 +4,7 @@ import formatter from "../../libs/formatters/index.js";
 import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import generateShareToken from "../../utils/share-link/generate-token.js";
+import assertMediaAccess from "./helpers/assert-media-access.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -19,6 +20,11 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
+	const mediaAccessRes = await assertMediaAccess(context, {
+		mediaId: data.mediaId,
+	});
+	if (mediaAccessRes.error) return mediaAccessRes;
+
 	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db.client,
 		context.config.db,

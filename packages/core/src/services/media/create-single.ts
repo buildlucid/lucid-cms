@@ -161,6 +161,7 @@ const createSingle: ServiceFn<
 				is_light: data.isLight ?? null,
 				folder_id: data.folderId ?? null,
 				is_hidden: data.isHidden ?? false,
+				tenant_key: context.request.tenantKey ?? null,
 				created_by: data.userId,
 				updated_by: data.userId,
 				updated_at: new Date().toISOString(),
@@ -241,6 +242,7 @@ const createSingle: ServiceFn<
 
 	const mediaFetchRes = await Media.selectSingleById({
 		id: mediaRes.data.id,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -264,7 +266,9 @@ const createSingle: ServiceFn<
 			config: context.config,
 		},
 		{
-			meta: {},
+			meta: {
+				tenantKey: context.request.tenantKey ?? null,
+			},
 			data: {
 				id: mediaFetchRes.data.id,
 				userId: data.userId,

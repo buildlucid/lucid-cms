@@ -1,6 +1,7 @@
 import { sql } from "kysely";
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
+import queryBuilder from "../db/query-builder/index.js";
 import type { KyselyDB } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 
@@ -42,5 +43,36 @@ export default class ProcessedImagesRepository extends StaticRepository<"lucid_p
 			error: undefined,
 			data: Number(exec.response.data?.total ?? 0),
 		};
+	}
+
+	async selectMultipleByMediaTenant(props: { tenantKey: string }) {
+		const query = this.db
+			.selectFrom("lucid_processed_images")
+			.innerJoin(
+				"lucid_media",
+				"lucid_media.key",
+				"lucid_processed_images.media_key",
+			)
+			.select([
+				"lucid_processed_images.key",
+				"lucid_processed_images.file_size",
+			])
+			.$call((qb) =>
+				queryBuilder.tenantScope(qb, {
+					tenantKey: props.tenantKey,
+					column: "lucid_media.tenant_key",
+				}),
+			);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectMultipleByMediaTenant",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: true,
+			mode: "multiple",
+			select: ["key", "file_size"],
+		});
 	}
 }

@@ -37,7 +37,7 @@ const createSingleController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.createSingle.body),
 	validate("param", controllerSchemas.createSingle.params),
 	collectionPermissions("create"),

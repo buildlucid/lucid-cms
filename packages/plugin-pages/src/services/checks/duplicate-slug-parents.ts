@@ -8,6 +8,7 @@ import type {
 } from "@lucidcms/core/types";
 import { sql } from "kysely";
 import constants from "../../constants.js";
+import applyTenantScope from "../../utils/apply-tenant-scope.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../../utils/get-parent-page-relation-table.js";
 import normalizePathValue from "../../utils/normalize-path-value.js";
@@ -71,7 +72,7 @@ const checkDuplicateSlugParents: ServiceFn<
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
 
-		const duplicates = await context.db.client
+		const duplicatesQuery = context.db.client
 			.selectFrom(documentTable)
 			.leftJoin(
 				versionTable,
@@ -127,17 +128,22 @@ const checkDuplicateSlugParents: ServiceFn<
 				`${documentTable}.is_deleted`,
 				"=",
 				context.config.db.getDefault("boolean", "false"),
-			)
-			.execute();
+			);
+
+		const duplicates = (await applyTenantScope(duplicatesQuery, {
+			tenantKey: context.request.tenantKey,
+			column: `${documentTable}.tenant_key`,
+		}).execute()) as Array<Record<string, unknown> & { locale: string | null }>;
 
 		if (duplicates.length > 0) {
 			const fieldErrors: FieldError[] = [];
 			for (const duplicate of duplicates) {
+				const duplicateParentPage = duplicate[parentPageColumn];
 				fieldErrors.push({
 					key: constants.fields.slug.key,
-					localeCode: duplicate.locale || undefined,
+					localeCode: duplicate.locale ?? null,
 					message:
-						duplicate[parentPageColumn] === null
+						duplicateParentPage === null || duplicateParentPage === undefined
 							? copy("server:plugin.pages.slug.duplicate")
 							: copy("server:plugin.pages.slug.parent.duplicate"),
 				});

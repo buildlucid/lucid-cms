@@ -2,6 +2,7 @@ import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 
 const deleteMultiplePermanently: ServiceFn<
 	[
@@ -110,6 +111,8 @@ const deleteMultiplePermanently: ServiceFn<
 		},
 	});
 	if (deleteUsersRes.error) return deleteUsersRes;
+
+	await invalidateAuthCache(context.kv);
 
 	return {
 		error: undefined,

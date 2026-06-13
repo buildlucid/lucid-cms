@@ -40,7 +40,7 @@ const createProfilePictureUploadSessionController = factory.createHandlers(
 		),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.createProfilePictureUploadSession.body),
 	async (c) => {
 		const body = c.req.valid("json");

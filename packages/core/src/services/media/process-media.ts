@@ -44,7 +44,7 @@ const processMedia: ServiceFn<
 
 	//* fetches the media item, if its not an image return the original url
 	const mediaRes = await Media.selectSingle({
-		select: ["type", "key", "file_name", "file_extension"],
+		select: ["type", "key", "file_name", "file_extension", "tenant_key"],
 		where: [
 			{
 				key: "key",
@@ -55,6 +55,20 @@ const processMedia: ServiceFn<
 	});
 	if (mediaRes.error) return mediaRes;
 	if (!mediaRes.data) {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				message: copy("server:core.media.not.found.message"),
+			},
+			data: undefined,
+		};
+	}
+	if (
+		mediaRes.data.tenant_key &&
+		context.request.tenantKey &&
+		mediaRes.data.tenant_key !== context.request.tenantKey
+	) {
 		return {
 			error: {
 				type: "basic",

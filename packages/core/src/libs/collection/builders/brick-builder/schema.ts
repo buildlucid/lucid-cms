@@ -24,6 +24,7 @@ const BrickConfigSchema = z.object({
 			summary: adminCopyDescriptorSchema.optional(),
 		})
 		.optional(),
+	tenantKeys: z.array(z.string().min(1)).optional(),
 });
 
 export default BrickConfigSchema;

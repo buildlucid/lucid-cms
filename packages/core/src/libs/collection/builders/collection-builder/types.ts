@@ -101,6 +101,7 @@ export type CollectionConfigSchemaType = {
 			relations?: CollectionEnvironmentRelations;
 		}>;
 		revisionRetentionDays?: number | false;
+		tenantKeys?: string[];
 	};
 	hooks?: CollectionBuilderHooks[];
 	bricks?: {
@@ -133,6 +134,7 @@ export type CollectionData = {
 			relations: CollectionEnvironmentRelations;
 		}[];
 		revisionRetentionDays: number | false;
+		tenantKeys: string[];
 	};
 	permissions: CollectionPermissions;
 };
@@ -146,6 +148,7 @@ export interface CollectionBrickConfig {
 	key: BrickBuilder["key"];
 	details: BrickBuilder["config"]["details"];
 	preview: BrickBuilder["config"]["preview"];
+	tenantKeys: BrickBuilder["config"]["tenantKeys"];
 	fields: CFConfig<FieldTypes>[];
 }
 

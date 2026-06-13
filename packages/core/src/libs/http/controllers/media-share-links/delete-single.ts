@@ -30,7 +30,7 @@ const deleteSingleController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaDelete]),
 	validate("param", controllerSchemas.deleteSingle.params),
 	async (c) => {

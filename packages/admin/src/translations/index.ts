@@ -7,7 +7,7 @@ import en from "./en.json";
 
 const FALLBACK_LOCALE = "en";
 const INTERFACE_LOCALE_KEY = "lucid_interface_locale";
-export const interfaceLocaleHeader = "Lucid-Interface-Locale";
+export const interfaceLocaleHeader = "Lucid-Locale";
 
 export type SupportedLocales = string;
 export type TranslationKeys = keyof typeof en | (string & {});

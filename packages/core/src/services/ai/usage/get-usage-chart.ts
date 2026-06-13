@@ -37,6 +37,7 @@ const getUsageChart: ServiceFn<
 		startDate: formatDbTimestamp(query.start),
 		endDate: formatDbTimestamp(query.endExclusive),
 		featureKey: query.featureKey,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

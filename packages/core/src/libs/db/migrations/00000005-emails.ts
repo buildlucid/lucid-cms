@@ -60,6 +60,51 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createTable("lucid_email_tenants")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("email_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_emails.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("tenant_key", adapter.getDataType("text"), (col) =>
+					col.references("lucid_tenants.key").onDelete("cascade").notNull(),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col.defaultTo(
+						adapter.formatDefaultValue(
+							"timestamp",
+							adapter.getDefault("timestamp", "now"),
+						),
+					),
+				)
+				.addUniqueConstraint("lucid_email_tenants_email_id_tenant_key_unique", [
+					"email_id",
+					"tenant_key",
+				])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_email_tenants_email_id")
+				.on("lucid_email_tenants")
+				.column("email_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_email_tenants_tenant_key")
+				.on("lucid_email_tenants")
+				.column("tenant_key")
+				.execute();
+
+			await db.schema
 				.createTable("lucid_email_attachments")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),

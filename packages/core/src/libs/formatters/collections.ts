@@ -1,4 +1,5 @@
 import type { Collection } from "../../types/response.js";
+import { tenantAccessAllowed } from "../../utils/helpers/index.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type CustomField from "../collection/custom-fields/custom-field.js";
@@ -15,6 +16,7 @@ import {
 
 const formatMultiple = (props: {
 	collections: CollectionBuilder[];
+	tenantKey?: string | null;
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
 	include?: {
@@ -30,6 +32,7 @@ const formatMultiple = (props: {
 	return props.collections.map((c) =>
 		formatSingle({
 			collection: c,
+			tenantKey: props.tenantKey,
 			queueSupportsScheduling: props.queueSupportsScheduling,
 			adminTranslations: props.adminTranslations,
 			include: props.include,
@@ -40,6 +43,7 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: {
 	collection: CollectionBuilder;
+	tenantKey?: string | null;
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
 	migrationStatus?: MigrationStatus;
@@ -103,10 +107,18 @@ const formatSingle = (props: {
 		permissions: resolvedPermissions,
 		migrationStatus: props.migrationStatus ?? null,
 		fixedBricks: props.include?.bricks
-			? (props.collection.config.bricks?.fixed?.map(formatBrick) ?? [])
+			? (props.collection.config.bricks?.fixed
+					?.filter((brick) =>
+						tenantAccessAllowed(brick.config.tenantKeys, props.tenantKey),
+					)
+					.map(formatBrick) ?? [])
 			: [],
 		builderBricks: props.include?.bricks
-			? (props.collection.config.bricks?.builder?.map(formatBrick) ?? [])
+			? (props.collection.config.bricks?.builder
+					?.filter((brick) =>
+						tenantAccessAllowed(brick.config.tenantKeys, props.tenantKey),
+					)
+					.map(formatBrick) ?? [])
 			: [],
 		fields: props.include?.fields
 			? formatFields(props.collection.fieldTree, props.collection.fields)

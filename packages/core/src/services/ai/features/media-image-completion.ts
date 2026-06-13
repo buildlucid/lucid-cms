@@ -11,6 +11,7 @@ import {
 	isCmsAiGenerateCompletedData,
 	isCmsAiGenerateFailedData,
 } from "../../../libs/lucid-remote/utils.js";
+import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getLicenseKey from "../../options/get-license-key.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
@@ -43,6 +44,24 @@ const mediaImageCompletion: ServiceFn<
 		feature: "imageGeneration",
 	});
 	if (featureEnabledRes.error) return featureEnabledRes;
+
+	const AiGenerations = new AiGenerationsRepository(
+		context.db.client,
+		context.config.db,
+	);
+	const storedGenerationRes = await AiGenerations.selectSingleByRequestId({
+		requestId: props.requestId,
+		select: ["id"],
+		tenantKey: context.request.tenantKey,
+		validation: {
+			enabled: true,
+			defaultError: {
+				message: copy("server:core.ai.generation.request.not.found"),
+				status: 404,
+			},
+		},
+	});
+	if (storedGenerationRes.error) return storedGenerationRes;
 
 	const licenseKeyRes = await getLicenseKey(context);
 	if (licenseKeyRes.error) return licenseKeyRes;

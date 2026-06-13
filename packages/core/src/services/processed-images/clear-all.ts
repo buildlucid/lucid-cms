@@ -13,12 +13,18 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 		context.config.db,
 	);
 
-	const processedImagesRes = await ProcessedImages.selectMultiple({
-		select: ["key", "file_size"],
-		validation: {
-			enabled: true,
-		},
-	});
+	const processedImagesRes =
+		context.request.tenantKey !== undefined &&
+		context.request.tenantKey !== null
+			? await ProcessedImages.selectMultipleByMediaTenant({
+					tenantKey: context.request.tenantKey,
+				})
+			: await ProcessedImages.selectMultiple({
+					select: ["key", "file_size"],
+					validation: {
+						enabled: true,
+					},
+				});
 	if (processedImagesRes.error) return processedImagesRes;
 
 	if (processedImagesRes.data.length === 0) {
@@ -37,7 +43,17 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 			processedImagesRes.data.map((i) => i.key),
 		),
 		ProcessedImages.deleteMultiple({
-			where: [],
+			where:
+				context.request.tenantKey !== undefined &&
+				context.request.tenantKey !== null
+					? [
+							{
+								key: "key",
+								operator: "in",
+								value: processedImagesRes.data.map((i) => i.key),
+							},
+						]
+					: [],
 		}),
 		optionServices.adjustInt(context, {
 			name: "media_storage_used",

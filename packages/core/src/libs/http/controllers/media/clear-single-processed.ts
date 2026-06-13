@@ -35,7 +35,7 @@ const clearSingleProcessedController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaUpdate]),
 	validate("param", controllerSchemas.clearSingleProcessed.params),
 	async (c) => {

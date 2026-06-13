@@ -31,7 +31,7 @@ const updateLicenseController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.update.body),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.LicenseUpdate]),
 	validate("json", controllerSchemas.update.body),
 	async (c) => {

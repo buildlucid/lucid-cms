@@ -15,6 +15,7 @@ import {
 	Show,
 } from "solid-js";
 import { NavigationMenuContent } from "@/components/Groups/Layout/NavigationMenuContent";
+import TenantSelect from "@/components/Partials/TenantSelect";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import { Permissions } from "@/constants/permissions";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
@@ -224,6 +225,9 @@ export const NavigationChrome: Component = () => {
 						<div class="flex items-center pl-2">
 							<img src={LogoIcon} alt="Lucid CMS Logo" class="h-6" />
 						</div>
+						<div class="mt-5">
+							<TenantSelect />
+						</div>
 					</div>
 					<NavigationMenuContent
 						class="w-55 flex-1"
@@ -294,23 +298,28 @@ export const NavigationChrome: Component = () => {
 						)}
 					>
 						<div class="h-full flex flex-col overflow-y-auto scrollbar">
-							<div class="px-6 pt-4 flex items-center justify-between">
-								<div class="flex items-center gap-2">
-									<img
-										src={LogoIcon}
-										alt="Lucid CMS Logo"
-										class="h-5"
-										loading="lazy"
-									/>
+							<div class="px-6 pt-4">
+								<div class="flex items-center justify-between">
+									<div class="flex items-center gap-2">
+										<img
+											src={LogoIcon}
+											alt="Lucid CMS Logo"
+											class="h-5"
+											loading="lazy"
+										/>
+									</div>
+									<button
+										type="button"
+										class="h-9 w-9 rounded-lg text-title/80 hover:text-title flex items-center justify-center transition-colors"
+										aria-label={T()("common.close")}
+										onClick={() => setMobileMenuOpen(false)}
+									>
+										<FaSolidXmark class="size-3.5" />
+									</button>
 								</div>
-								<button
-									type="button"
-									class="h-9 w-9 rounded-lg text-title/80 hover:text-title flex items-center justify-center transition-colors"
-									aria-label={T()("common.close")}
-									onClick={() => setMobileMenuOpen(false)}
-								>
-									<FaSolidXmark class="size-3.5" />
-								</button>
+								<div class="mt-4">
+									<TenantSelect />
+								</div>
 							</div>
 							<NavigationMenuContent
 								class="flex-1"

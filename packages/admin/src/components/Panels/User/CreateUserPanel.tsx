@@ -5,8 +5,9 @@ import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultip
 import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import tenantStore from "@/store/tenantStore";
 import userStore from "@/store/userStore";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 import {
 	getDefaultTranslationLocale,
@@ -24,6 +25,9 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 	// ------------------------------
 	// State
 	const [getSelectedRoles, setSelectedRoles] = createSignal<
+		SelectMultipleValueT[]
+	>([]);
+	const [getSelectedTenants, setSelectedTenants] = createSignal<
 		SelectMultipleValueT[]
 	>([]);
 	const [getUsername, setUsername] = createSignal<string>("");
@@ -77,6 +81,17 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 			})) ?? []
 		);
 	});
+	const tenantOptions = createMemo(() => {
+		return tenantStore.get.tenants.map((tenant) => ({
+			value: tenant.key,
+			label: `${translateAdminCopy(tenant.name)} (${tenant.key})`,
+		}));
+	});
+	const showTenantSelect = createMemo(() => {
+		return Boolean(
+			userStore.get.user?.superAdmin && tenantOptions().length > 0,
+		);
+	});
 
 	// ---------------------------------
 	// Render
@@ -106,6 +121,11 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 								? getIsSuperAdmin()
 								: undefined,
 							roleIds: getSelectedRoles().map((role) => role.value) as number[],
+							tenantKeys: userStore.get.user?.superAdmin
+								? (getSelectedTenants().map(
+										(tenant) => tenant.value,
+									) as string[])
+								: undefined,
 						},
 					});
 				},
@@ -117,6 +137,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 					setEmail("");
 					setIsSuperAdmin(false);
 					setSelectedRoles([]);
+					setSelectedTenants([]);
 				},
 			}}
 			copy={{
@@ -194,6 +215,19 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 						options={roleOptions()}
 						errors={getBodyError("roleIds", createUser.errors)}
 					/>
+					<Show when={showTenantSelect()}>
+						<SelectMultiple
+							id="tenantKeys"
+							values={getSelectedTenants()}
+							onChange={setSelectedTenants}
+							name={"tenantKeys"}
+							copy={{
+								label: T()("common.tenants"),
+							}}
+							options={tenantOptions()}
+							errors={getBodyError("tenantKeys", createUser.errors)}
+						/>
+					</Show>
 					<Show when={userStore.get.user?.superAdmin}>
 						<Checkbox
 							id="superAdmin"

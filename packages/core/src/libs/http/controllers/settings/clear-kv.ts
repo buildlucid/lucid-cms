@@ -20,7 +20,7 @@ const clearKVController = factory.createHandlers(
 		parameters: honoOpenAPIParamaters({ headers: { csrf: true } }),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.CacheClear]),
 	async (c) => {
 		await c.get("kv").clear();

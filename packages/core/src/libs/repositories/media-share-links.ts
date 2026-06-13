@@ -151,4 +151,38 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 			],
 		});
 	}
+
+	async deleteMultipleByMediaTenant(props: { tenantKey: string }) {
+		const exec = await this.executeQuery(
+			() =>
+				this.db
+					.deleteFrom("lucid_media_share_links")
+					.where((eb) =>
+						eb.exists(
+							eb
+								.selectFrom("lucid_media")
+								.select("lucid_media.id")
+								.whereRef(
+									"lucid_media.id",
+									"=",
+									"lucid_media_share_links.media_id",
+								)
+								.where((mediaEb) =>
+									mediaEb.or([
+										mediaEb("lucid_media.tenant_key", "=", props.tenantKey),
+										mediaEb("lucid_media.tenant_key", "is", null),
+									]),
+								),
+						),
+					)
+					.execute(),
+			{ method: "deleteMultipleByMediaTenant" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: undefined,
+		};
+	}
 }

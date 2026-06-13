@@ -1,5 +1,6 @@
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 
 const restoreMultiple: ServiceFn<
 	[
@@ -37,6 +38,8 @@ const restoreMultiple: ServiceFn<
 		},
 	});
 	if (updateRes.error) return updateRes;
+
+	await invalidateAuthCache(context.kv);
 
 	return {
 		error: undefined,

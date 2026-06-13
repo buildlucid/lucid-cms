@@ -6,6 +6,7 @@ import type { GetMultipleShareLinksQueryParams } from "../../schemas/media-share
 import type { MediaShareLink } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import assertMediaAccess from "./helpers/assert-media-access.js";
 
 const getMultiple: ServiceFn<
 	[
@@ -19,6 +20,11 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
+	const mediaAccessRes = await assertMediaAccess(context, {
+		mediaId: data.mediaId,
+	});
+	if (mediaAccessRes.error) return mediaAccessRes;
+
 	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db.client,
 		context.config.db,

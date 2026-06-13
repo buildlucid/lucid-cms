@@ -31,7 +31,7 @@ const getMultipleController = factory.createHandlers(
 			query: controllerSchemas.getMultiple.query.string,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	validate("query", controllerSchemas.getMultiple.query.string),
 	async (c) => {
 		const formattedQuery = await buildFormattedQuery(

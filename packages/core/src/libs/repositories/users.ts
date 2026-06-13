@@ -1,4 +1,4 @@
-import { sql } from "kysely";
+import { type SelectQueryBuilder, sql } from "kysely";
 import z from "zod";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
@@ -133,6 +133,13 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				}),
 			)
 			.optional(),
+		tenants: z
+			.array(
+				z.object({
+					tenant_key: z.string(),
+				}),
+			)
+			.optional(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
@@ -240,6 +247,14 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						.whereRef("user_id", "=", "lucid_users.id"),
 				)
 				.as("roles"),
+			this.dbAdapter
+				.jsonArrayFrom(
+					eb
+						.selectFrom("lucid_user_tenants")
+						.select(["lucid_user_tenants.tenant_key"])
+						.whereRef("lucid_user_tenants.user_id", "=", "lucid_users.id"),
+				)
+				.as("tenants"),
 		]);
 
 		query = queryBuilder.select(query, props.where);
@@ -252,7 +267,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "single",
-			select: ["id", "username", "email", "super_admin", "roles"],
+			select: ["id", "username", "email", "super_admin", "roles", "tenants"],
 		});
 	}
 	async selectAuditActorById<V extends boolean = false>(
@@ -307,9 +322,32 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				where: QueryBuilderWhere<"lucid_users">;
+				tenantKey?: string | null;
+				includeTenants?: boolean;
 			}
 		>,
 	) {
+		//* users with no memberships are global and are visible in every tenant
+		const applyUserTenantScope = <DB, TB extends keyof DB, O>(
+			qb: SelectQueryBuilder<DB, TB, O>,
+		) => {
+			const tenantKey = props.tenantKey;
+			if (tenantKey == null) return qb;
+			return qb.where(
+				sql<boolean>`(
+					exists (
+						select 1 from lucid_user_tenants
+						where lucid_user_tenants.user_id = lucid_users.id
+						and lucid_user_tenants.tenant_key = ${tenantKey}
+					)
+					or not exists (
+						select 1 from lucid_user_tenants
+						where lucid_user_tenants.user_id = lucid_users.id
+					)
+				)`,
+			);
+		};
+
 		let query = this.db.selectFrom("lucid_users").select((eb) => [
 			"email",
 			"first_name",
@@ -443,7 +481,21 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				.as("profile_picture"),
 		]);
 
+		query = query.$if(props.includeTenants === true, (qb) =>
+			qb.select((eb) => [
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_user_tenants")
+							.select(["lucid_user_tenants.tenant_key"])
+							.whereRef("lucid_user_tenants.user_id", "=", "lucid_users.id"),
+					)
+					.as("tenants"),
+			]),
+		);
+
 		query = queryBuilder.select(query, props.where);
+		query = applyUserTenantScope(query);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
@@ -469,6 +521,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"roles",
 				"auth_providers",
 				"profile_picture",
+				...(props.includeTenants === true ? ["tenants"] : []),
 			],
 		});
 	}
@@ -634,9 +687,32 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				queryParams: GetMultipleQueryParams;
+				tenantKey?: string | null;
+				includeTenants?: boolean;
 			}
 		>,
 	) {
+		//* users with no memberships are global and are visible in every tenant
+		const applyUserTenantScope = <DB, TB extends keyof DB, O>(
+			qb: SelectQueryBuilder<DB, TB, O>,
+		) => {
+			const tenantKey = props.tenantKey;
+			if (tenantKey == null) return qb;
+			return qb.where(
+				sql<boolean>`(
+					exists (
+						select 1 from lucid_user_tenants
+						where lucid_user_tenants.user_id = lucid_users.id
+						and lucid_user_tenants.tenant_key = ${tenantKey}
+					)
+					or not exists (
+						select 1 from lucid_user_tenants
+						where lucid_user_tenants.user_id = lucid_users.id
+					)
+				)`,
+			);
+		};
+
 		const exec = await this.executeQuery(
 			async () => {
 				const mainQuery = this.db
@@ -748,17 +824,35 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 							)
 							.as("profile_picture"),
 					])
+					.$if(props.includeTenants === true, (qb) =>
+						qb.select((eb) => [
+							this.dbAdapter
+								.jsonArrayFrom(
+									eb
+										.selectFrom("lucid_user_tenants")
+										.select(["lucid_user_tenants.tenant_key"])
+										.whereRef(
+											"lucid_user_tenants.user_id",
+											"=",
+											"lucid_users.id",
+										),
+								)
+								.as("tenants"),
+						]),
+					)
 					.leftJoin("lucid_user_roles", (join) =>
 						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
 					)
-					.groupBy("lucid_users.id");
+					.groupBy("lucid_users.id")
+					.$call(applyUserTenantScope);
 
 				const countQuery = this.db
 					.selectFrom("lucid_users")
 					.select(sql`count(distinct lucid_users.id)`.as("count"))
 					.leftJoin("lucid_user_roles", (join) =>
 						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
-					);
+					)
+					.$call(applyUserTenantScope);
 
 				const { main, count } = queryBuilder.main(
 					{
@@ -802,6 +896,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"roles",
 				"invitation_accepted",
 				"profile_picture",
+				...(props.includeTenants === true ? ["tenants"] : []),
 			],
 		});
 	}

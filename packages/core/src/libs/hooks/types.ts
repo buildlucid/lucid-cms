@@ -52,6 +52,7 @@ type CollectionHookMeta = {
 
 type DocumentHookMeta = CollectionHookMeta & {
 	collectionTableNames: CollectionTableNames;
+	tenantKey: string | null;
 };
 
 type DocumentUserHookMeta = DocumentHookMeta & {
@@ -60,6 +61,10 @@ type DocumentUserHookMeta = DocumentHookMeta & {
 
 type DocumentDeleteHookMeta = DocumentUserHookMeta & {
 	hardDelete: boolean;
+};
+
+type MediaHookMeta = {
+	tenantKey: string | null;
 };
 
 export type DocumentBeforeUpsertHookData = {
@@ -257,15 +262,15 @@ export type HookServiceHandlers = {
 	};
 	media: {
 		afterCreate: ServiceFn<
-			[EffectHookPayload<Record<string, never>, MediaAfterCreateHookData>],
+			[EffectHookPayload<MediaHookMeta, MediaAfterCreateHookData>],
 			undefined
 		>;
 		afterUpdate: ServiceFn<
-			[EffectHookPayload<Record<string, never>, MediaAfterUpdateHookData>],
+			[EffectHookPayload<MediaHookMeta, MediaAfterUpdateHookData>],
 			undefined
 		>;
 		afterDelete: ServiceFn<
-			[EffectHookPayload<Record<string, never>, MediaAfterDeleteHookData>],
+			[EffectHookPayload<MediaHookMeta, MediaAfterDeleteHookData>],
 			undefined
 		>;
 	};

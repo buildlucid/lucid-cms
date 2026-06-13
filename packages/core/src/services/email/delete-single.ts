@@ -1,3 +1,4 @@
+import { copy } from "../../libs/i18n/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -10,6 +11,19 @@ const deleteSingle: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const Emails = new EmailsRepository(context.db.client, context.config.db);
+
+	const emailRes = await Emails.selectSingleById({
+		id: data.id,
+		tenantKey: context.request.tenantKey,
+		validation: {
+			enabled: true,
+			defaultError: {
+				message: copy("server:core.email.not.found.message"),
+				status: 404,
+			},
+		},
+	});
+	if (emailRes.error) return emailRes;
 
 	const deleteEmailRes = await Emails.deleteSingle({
 		returning: ["id"],

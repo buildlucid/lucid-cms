@@ -21,6 +21,7 @@ class BrickBuilder extends FieldBuilder {
 				summary: config?.details?.summary,
 			},
 			preview: config?.preview || {},
+			tenantKeys: config?.tenantKeys ?? [],
 		};
 	}
 	// Builder methods

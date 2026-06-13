@@ -74,9 +74,23 @@ export default configureLucid({
 		// 		origin: [],
 		// 	},
 		// },
-		logger: {
-			level: "silent",
-		},
+		// logger: {
+		// 	level: "silent",
+		// },
+		tenants: [
+			{
+				key: "marketing",
+				name: copy("admin:tenants.marketing.name", {
+					defaultMessage: "Marketing",
+				}),
+			},
+			{
+				key: "documentation",
+				name: copy("admin:tenants.documentation.name", {
+					defaultMessage: "Documentation",
+				}),
+			},
+		],
 		auth: {
 			password: {
 				enabled: true,

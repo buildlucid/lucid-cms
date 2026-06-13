@@ -39,12 +39,13 @@ const createSingleController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.createSingle.body),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.RolesCreate]),
 	validate("json", controllerSchemas.createSingle.body),
 	async (c) => {
 		const body = c.req.valid("json");
 		const context = createServiceContext(c);
+		const auth = c.get("auth");
 
 		const roleId = await serviceWrapper(roleServices.createSingle, {
 			transaction: true,
@@ -57,6 +58,8 @@ const createSingleController = factory.createHandlers(
 			name: body.name,
 			description: body.description,
 			permissions: body.permissions,
+			tenantKey: body.tenantKey,
+			authSuperAdmin: auth.superAdmin,
 		});
 		if (roleId.error) throw new LucidAPIError(roleId.error);
 

@@ -31,7 +31,7 @@ const getSingleController = factory.createHandlers(
 			query: controllerSchemas.getSingle.query.string,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	permissions([Permissions.DocumentsReview]),
 	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {

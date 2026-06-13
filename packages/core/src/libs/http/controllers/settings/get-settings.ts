@@ -30,7 +30,7 @@ const getSettingsController = factory.createHandlers(
 			query: controllerSchemas.getSettings.query.string,
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	validate("query", controllerSchemas.getSettings.query.string),
 	async (c) => {
 		const formattedQuery = await buildFormattedQuery(

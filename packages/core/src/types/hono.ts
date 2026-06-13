@@ -16,19 +16,27 @@ export type LucidAuth = {
 	email: string;
 	superAdmin: boolean;
 	permissions: UserPermission["permissions"] | undefined;
+	tenantKeys: string[];
 	exp: number;
 	iat: number;
 	nonce: string;
 };
 
+export type LucidAccessToken = Pick<LucidAuth, "id" | "exp" | "iat" | "nonce">;
+
 export type LucidClientIntegrationAuth = {
 	id: number;
 	key: string;
 	scopes: string[];
+	tenantKey: string | null;
 };
 
 export type LucidLocale = {
 	code: Locale["code"];
+};
+
+export type LucidTenant = {
+	key: string;
 };
 
 export type LucidExecutionContext = {
@@ -45,6 +53,7 @@ export type LucidHonoVariables = {
 	auth: LucidAuth;
 	clientIntegrationAuth: LucidClientIntegrationAuth;
 	locale: LucidLocale;
+	tenant: LucidTenant | null;
 	env: EnvironmentVariables | null;
 	cf: unknown | null;
 	caches: CacheStorage | null;

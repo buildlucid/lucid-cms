@@ -30,7 +30,7 @@ const deleteMultipleController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaDelete]),
 	validate("param", controllerSchemas.deleteMultiple.params),
 	async (c) => {

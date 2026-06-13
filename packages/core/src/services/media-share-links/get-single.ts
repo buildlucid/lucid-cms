@@ -3,6 +3,7 @@ import { MediaShareLinksRepository } from "../../libs/repositories/index.js";
 import type { MediaShareLink } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import assertMediaAccess from "./helpers/assert-media-access.js";
 
 const getSingle: ServiceFn<
 	[
@@ -13,6 +14,11 @@ const getSingle: ServiceFn<
 	],
 	MediaShareLink
 > = async (context, data) => {
+	const mediaAccessRes = await assertMediaAccess(context, {
+		mediaId: data.mediaId,
+	});
+	if (mediaAccessRes.error) return mediaAccessRes;
+
 	const MediaShareLinks = new MediaShareLinksRepository(
 		context.db.client,
 		context.config.db,

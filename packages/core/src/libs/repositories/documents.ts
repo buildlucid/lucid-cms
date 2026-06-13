@@ -80,6 +80,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		id: z.number(),
 		collection_key: z.string(),
 		collection_migration_id: z.number(),
+		tenant_key: z.string().nullable(),
 		created_by: z.number().nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_by: z.number().nullable(),
@@ -111,6 +112,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		id: this.dbAdapter.getDataType("primary"),
 		collection_key: this.dbAdapter.getDataType("text"),
 		collection_migration_id: this.dbAdapter.getDataType("integer"),
+		tenant_key: this.dbAdapter.getDataType("text"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
 		deleted_by: this.dbAdapter.getDataType("integer"),
@@ -263,6 +265,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			.select([
 				`${dynamicConfig.tableName}.id`,
 				`${dynamicConfig.tableName}.collection_key`,
+				`${dynamicConfig.tableName}.tenant_key`,
 				`${dynamicConfig.tableName}.created_by`,
 				`${dynamicConfig.tableName}.created_at`,
 				`${dynamicConfig.tableName}.updated_at`,
@@ -486,6 +489,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			config: Config;
 			includeWorkflow: boolean;
 			workflowAssigneeFilterValues?: Array<string | number>;
+			tenantKey?: string | null;
 			tables: {
 				versions: LucidVersionTableName;
 				documentFields: LucidBrickTableName;
@@ -879,6 +883,15 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				props.tables.versions,
 			);
 
+			query = queryBuilder.tenantScope(query, {
+				tenantKey: props.tenantKey,
+				column: `${dynamicConfig.tableName}.tenant_key`,
+			});
+			queryCount = queryBuilder.tenantScope(queryCount, {
+				tenantKey: props.tenantKey,
+				column: `${dynamicConfig.tableName}.tenant_key`,
+			});
+
 			const { main, count } = queryBuilder.main(
 				{
 					main: query,
@@ -948,6 +961,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			query: ClientGetSingleQueryParams;
 			collection: CollectionBuilder;
 			config: Config;
+			tenantKey?: string | null;
 			tables: {
 				versions: LucidVersionTableName;
 			};
@@ -1119,6 +1133,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 			);
+
+			query = queryBuilder.tenantScope(query, {
+				tenantKey: props.tenantKey,
+				column: `${dynamicConfig.tableName}.tenant_key`,
+			});
 
 			const { main } = queryBuilder.main(
 				{

@@ -2,11 +2,10 @@ import { randomBytes } from "node:crypto";
 import { setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import constants from "../../../constants/constants.js";
-import formatter, {
-	userPermissionsFormatter,
-} from "../../../libs/formatters/index.js";
-import { UsersRepository } from "../../../libs/repositories/index.js";
-import type { LucidAuth, LucidHonoContext } from "../../../types/hono.js";
+import type {
+	LucidAccessToken,
+	LucidHonoContext,
+} from "../../../types/hono.js";
 import { isRequestSecure } from "../../../utils/helpers/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
@@ -17,44 +16,16 @@ const generateToken = async (
 	try {
 		const config = c.get("config");
 
-		const Users = new UsersRepository(config.db.client, config.db);
-		const userRes = await Users.selectAccessTokenUser({
-			where: [
-				{ key: "id", operator: "=", value: userId },
-				{
-					key: "is_deleted",
-					operator: "=",
-					value: config.db.getDefault("boolean", "false"),
-				},
-				{
-					key: "is_locked",
-					operator: "=",
-					value: config.db.getDefault("boolean", "false"),
-				},
-			],
-			validation: { enabled: true },
-		});
-		if (userRes.error) return userRes;
-
 		const now = Date.now();
 		const nonce = randomBytes(8).toString("hex");
 
-		const { permissions } = userPermissionsFormatter.formatMultiple({
-			roles: userRes.data.roles || [],
-			defaultLocale: config.localization.defaultLocale,
-		});
-
 		const token = await sign(
 			{
-				id: userRes.data.id,
-				username: userRes.data.username,
-				email: userRes.data.email,
-				permissions: permissions,
-				superAdmin: formatter.formatBoolean(userRes.data.super_admin ?? false),
+				id: userId,
 				exp: Math.floor(now / 1000) + constants.accessTokenExpiration,
 				iat: Math.floor(now / 1000),
 				nonce: nonce,
-			} satisfies LucidAuth,
+			} satisfies LucidAccessToken,
 			config.secrets.accessToken,
 			constants.jwt.algorithm,
 		);

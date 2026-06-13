@@ -27,7 +27,7 @@ const abortUploadSessionController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaCreate, Permissions.MediaUpdate]),
 	validate("param", controllerSchemas.abortUploadSession.params),
 	async (c) => {

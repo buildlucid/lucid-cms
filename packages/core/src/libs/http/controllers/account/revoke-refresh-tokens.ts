@@ -29,7 +29,7 @@ const revokeRefreshTokensController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);
 		const auth = c.get("auth");

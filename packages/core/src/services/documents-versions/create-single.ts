@@ -129,6 +129,7 @@ const createSingle: ServiceFn<
 				collectionKey: data.collection.key,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				documentId: data.documentId,
@@ -170,6 +171,7 @@ const createSingle: ServiceFn<
 				collectionKey: data.collection.key,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				documentId: data.documentId,

@@ -3,6 +3,7 @@ import { getDocumentTableSchema } from "../../libs/collection/schema/runtime/run
 import { collectionsFormatter } from "../../libs/formatters/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { Collection } from "../../types/response.js";
+import { tenantAccessAllowed } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAll: ServiceFn<
@@ -14,7 +15,12 @@ const getAll: ServiceFn<
 	],
 	Collection[]
 > = async (context, data) => {
-	const collections = context.config.collections ?? [];
+	const collections = (context.config.collections ?? []).filter((collection) =>
+		tenantAccessAllowed(
+			collection.getData.config.tenantKeys,
+			context.request.tenantKey,
+		),
+	);
 
 	const adminTranslations = context.translate
 		.forLocale(context.config.i18n.defaultLocale)
@@ -56,6 +62,7 @@ const getAll: ServiceFn<
 			error: undefined,
 			data: collectionsFormatter.formatMultiple({
 				collections: collections,
+				tenantKey: context.request.tenantKey,
 				queueSupportsScheduling: context.queue.support.scheduling,
 				adminTranslations,
 				include: {
@@ -72,6 +79,7 @@ const getAll: ServiceFn<
 		error: undefined,
 		data: collectionsFormatter.formatMultiple({
 			collections: collections,
+			tenantKey: context.request.tenantKey,
 			queueSupportsScheduling: context.queue.support.scheduling,
 			adminTranslations,
 			include: {

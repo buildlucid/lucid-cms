@@ -25,7 +25,7 @@ const getScopesController = factory.createHandlers(
 			schema: z.toJSONSchema(controllerSchemas.getScopes.response),
 		}),
 	}),
-	authenticate,
+	authenticate(),
 	permissions([Permissions.IntegrationRead]),
 	async (c) => {
 		const context = createServiceContext(c);

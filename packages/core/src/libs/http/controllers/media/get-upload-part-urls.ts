@@ -38,7 +38,7 @@ const getUploadPartUrlsController = factory.createHandlers(
 		),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaCreate, Permissions.MediaUpdate]),
 	validate("param", controllerSchemas.getUploadPartUrls.params),
 	validate("json", controllerSchemas.getUploadPartUrls.body),

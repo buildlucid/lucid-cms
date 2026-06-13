@@ -34,7 +34,7 @@ const deleteBatchController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.MediaDelete]),
 	validate("json", controllerSchemas.deleteBatch.body),
 	async (c) => {

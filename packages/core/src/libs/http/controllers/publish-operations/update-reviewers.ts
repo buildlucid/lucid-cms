@@ -33,7 +33,7 @@ const updateReviewersController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.updateReviewers.body),
 	validate("param", controllerSchemas.updateReviewers.params),
 	async (c) => {

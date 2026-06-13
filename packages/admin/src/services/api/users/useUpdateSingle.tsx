@@ -11,6 +11,7 @@ interface Params {
 		triggerPasswordReset?: boolean;
 		isDeleted?: false;
 		isLocked?: boolean;
+		tenantKeys?: string[];
 	};
 }
 

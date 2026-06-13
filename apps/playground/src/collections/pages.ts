@@ -76,6 +76,7 @@ const PageCollection = new CollectionBuilder("page", {
 				},
 			},
 		],
+		// tenantKeys: ["marketing"],
 	},
 	hooks: [
 		{

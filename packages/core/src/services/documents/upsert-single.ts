@@ -130,6 +130,8 @@ const upsertSingle: ServiceFn<
 				id: data.documentId,
 				collection_key: data.collectionKey,
 				collection_migration_id: migrationIdRes.data,
+				//* only applied on insert - the conflict update does not touch tenant_key, so existing documents are never re-stamped
+				tenant_key: context.request.tenantKey ?? null,
 				created_by: data.userId,
 				updated_by: data.userId,
 				is_deleted: false,

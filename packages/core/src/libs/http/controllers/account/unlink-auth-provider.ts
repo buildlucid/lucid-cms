@@ -32,7 +32,7 @@ const unlinkAuthProviderController = factory.createHandlers(
 		}),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("param", controllerSchemas.unlinkAuthProvider.params),
 	async (c) => {
 		const { providerId } = c.req.valid("param");

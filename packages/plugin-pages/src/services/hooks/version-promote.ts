@@ -189,6 +189,7 @@ const versionPromoteHandler =
 				collectionKey: data.meta.collectionKey,
 				userId: data.meta.userId,
 				collectionTableNames: data.meta.collectionTableNames,
+				tenantKey: data.meta.tenantKey,
 			},
 			data: {
 				documentId: data.data.documentId,

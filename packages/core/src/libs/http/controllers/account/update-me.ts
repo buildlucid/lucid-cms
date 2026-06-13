@@ -31,7 +31,7 @@ const updateMeController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateMe.body),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	validate("json", controllerSchemas.updateMe.body),
 	async (c) => {
 		const {

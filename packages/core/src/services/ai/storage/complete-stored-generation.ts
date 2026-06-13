@@ -17,15 +17,10 @@ const completeStoredGeneration: ServiceFn<
 		context.config.db,
 	);
 
-	const existingRes = await AiGenerations.selectSingle({
+	const existingRes = await AiGenerations.selectSingleByRequestId({
+		requestId: props.response.requestId,
 		select: ["id", "created_at"],
-		where: [
-			{
-				key: "request_id",
-				operator: "=",
-				value: props.response.requestId,
-			},
-		],
+		tenantKey: context.request.tenantKey,
 	});
 	if (existingRes.error) return existingRes;
 

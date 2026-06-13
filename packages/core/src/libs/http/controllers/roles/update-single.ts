@@ -37,7 +37,7 @@ const updateSingleController = factory.createHandlers(
 		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateSingle.body),
 	}),
 	validateCSRF,
-	authenticate,
+	authenticate(),
 	permissions([Permissions.RolesUpdate]),
 	validate("param", controllerSchemas.updateSingle.params),
 	validate("json", controllerSchemas.updateSingle.body),
@@ -45,6 +45,7 @@ const updateSingleController = factory.createHandlers(
 		const { id } = c.req.valid("param");
 		const body = c.req.valid("json");
 		const context = createServiceContext(c);
+		const auth = c.get("auth");
 
 		const updateRole = await serviceWrapper(roleServices.updateSingle, {
 			transaction: true,
@@ -58,6 +59,8 @@ const updateSingleController = factory.createHandlers(
 			name: body.name,
 			description: body.description,
 			permissions: body.permissions,
+			tenantKey: body.tenantKey,
+			authSuperAdmin: auth.superAdmin,
 		});
 		if (updateRole.error) throw new LucidAPIError(updateRole.error);
 

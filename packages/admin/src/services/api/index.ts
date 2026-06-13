@@ -16,6 +16,7 @@ import publishOperations from "./publish-operations";
 import roles from "./roles";
 import settings from "./settings";
 import share from "./share";
+import tenants from "./tenants";
 import userLogins from "./user-logins";
 import users from "./users";
 
@@ -40,6 +41,7 @@ const exportObject = {
 	documents,
 	clientIntegrations,
 	license,
+	tenants,
 };
 
 export default exportObject;

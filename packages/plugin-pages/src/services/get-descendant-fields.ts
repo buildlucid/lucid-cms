@@ -3,10 +3,12 @@ import { copy, prefixGeneratedColName } from "@lucidcms/core/plugin";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
+	LucidDocumentTableName,
 	LucidVersionTableName,
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
+import { applyDocumentVersionTenantScope } from "../utils/apply-tenant-scope.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 
 export type DescendantFieldsResponse = {
@@ -30,6 +32,7 @@ const getDescendantFields: ServiceFn<
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
 			tables: {
+				document: LucidDocumentTableName;
 				documentFields: LucidBrickTableName;
 				version: LucidVersionTableName;
 			};
@@ -45,7 +48,11 @@ const getDescendantFields: ServiceFn<
 			};
 		}
 
-		const { documentFields: fieldsTable, version: versionTable } = data.tables;
+		const {
+			document: documentTable,
+			documentFields: fieldsTable,
+			version: versionTable,
+		} = data.tables;
 		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
 		const fullSlugColumn = prefixGeneratedColName(
 			constants.fields.fullSlug.key,
@@ -60,23 +67,30 @@ const getDescendantFields: ServiceFn<
 
 		const descendants = await context.db.client
 			.withRecursive("recursive_cte", (db) =>
-				db
-					.selectFrom(parentPageTable)
-					.innerJoin(
+				applyDocumentVersionTenantScope(
+					db
+						.selectFrom(parentPageTable)
+						.innerJoin(
+							versionTable,
+							`${versionTable}.id`,
+							`${parentPageTable}.document_version_id`,
+						)
+						.select([
+							`${versionTable}.document_id as document_id`,
+							`${parentPageTable}.${parentPageColumn} as parent_id`,
+							`${parentPageTable}.document_version_id`,
+						])
+						.where(({ eb }) =>
+							eb(`${parentPageTable}.${parentPageColumn}`, "in", data.ids),
+						)
+						.where(`${versionTable}.type`, "=", data.versionType),
+					{
+						tenantKey: context.request.tenantKey,
+						documentTable,
 						versionTable,
-						`${versionTable}.id`,
-						`${parentPageTable}.document_version_id`,
-					)
-					.select([
-						`${versionTable}.document_id as document_id`,
-						`${parentPageTable}.${parentPageColumn} as parent_id`,
-						`${parentPageTable}.document_version_id`,
-					])
-					.where(({ eb }) =>
-						eb(`${parentPageTable}.${parentPageColumn}`, "in", data.ids),
-					)
-					.where(`${versionTable}.type`, "=", data.versionType)
-					.unionAll(
+					},
+				).unionAll(
+					applyDocumentVersionTenantScope(
 						db
 							.selectFrom(parentPageTable)
 							.innerJoin(
@@ -95,7 +109,13 @@ const getDescendantFields: ServiceFn<
 								`${parentPageTable}.document_version_id`,
 							])
 							.where(`${versionTable}.type`, "=", data.versionType),
+						{
+							tenantKey: context.request.tenantKey,
+							documentTable,
+							versionTable,
+						},
 					),
+				),
 			)
 			.selectFrom("recursive_cte")
 			.select((eb) => [

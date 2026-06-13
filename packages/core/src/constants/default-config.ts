@@ -44,6 +44,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 		],
 		defaultLocale: "en",
 	},
+	tenants: [],
 	i18n: {
 		locales: [
 			{
