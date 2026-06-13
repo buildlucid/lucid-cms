@@ -131,6 +131,7 @@ test("collection config is correct along with field includes and filters", async
 			],
 			environments: [],
 			revisionRetentionDays: 30,
+			tenantKeys: [],
 		},
 	});
 });

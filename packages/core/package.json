@@ -57,7 +57,7 @@
 		"./package.json": "./package.json"
 	},
 	"scripts": {
-		"build": "tsc && tsdown",
+		"build": "NODE_OPTIONS=--max-old-space-size=4096 tsc && tsdown",
 		"dev": "tsdown --watch --no-clean",
 		"format": "biome format ./src",
 		"format:fix": "biome format --write ./src",
