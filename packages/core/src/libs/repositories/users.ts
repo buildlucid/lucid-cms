@@ -327,27 +327,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			}
 		>,
 	) {
-		//* users with no memberships are global and are visible in every tenant
-		const applyUserTenantScope = <DB, TB extends keyof DB, O>(
-			qb: SelectQueryBuilder<DB, TB, O>,
-		) => {
-			const tenantKey = props.tenantKey;
-			if (tenantKey == null) return qb;
-			return qb.where(
-				sql<boolean>`(
-					exists (
-						select 1 from lucid_user_tenants
-						where lucid_user_tenants.user_id = lucid_users.id
-						and lucid_user_tenants.tenant_key = ${tenantKey}
-					)
-					or not exists (
-						select 1 from lucid_user_tenants
-						where lucid_user_tenants.user_id = lucid_users.id
-					)
-				)`,
-			);
-		};
-
 		let query = this.db.selectFrom("lucid_users").select((eb) => [
 			"email",
 			"first_name",
@@ -495,7 +474,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		);
 
 		query = queryBuilder.select(query, props.where);
-		query = applyUserTenantScope(query);
+		query = this.applyUserTenantScope(query, props.tenantKey);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
@@ -530,6 +509,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				ids: number[];
+				tenantKey?: string | null;
 				where?: QueryBuilderWhere<"lucid_users">;
 			}
 		>,
@@ -617,6 +597,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			query = queryBuilder.select(query, props.where);
 		}
 
+		query = this.applyUserTenantScope(query, props.tenantKey);
+
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleByIds",
 		});
@@ -692,27 +674,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			}
 		>,
 	) {
-		//* users with no memberships are global and are visible in every tenant
-		const applyUserTenantScope = <DB, TB extends keyof DB, O>(
-			qb: SelectQueryBuilder<DB, TB, O>,
-		) => {
-			const tenantKey = props.tenantKey;
-			if (tenantKey == null) return qb;
-			return qb.where(
-				sql<boolean>`(
-					exists (
-						select 1 from lucid_user_tenants
-						where lucid_user_tenants.user_id = lucid_users.id
-						and lucid_user_tenants.tenant_key = ${tenantKey}
-					)
-					or not exists (
-						select 1 from lucid_user_tenants
-						where lucid_user_tenants.user_id = lucid_users.id
-					)
-				)`,
-			);
-		};
-
 		const exec = await this.executeQuery(
 			async () => {
 				const mainQuery = this.db
@@ -844,7 +805,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
 					)
 					.groupBy("lucid_users.id")
-					.$call(applyUserTenantScope);
+					.$call((qb) => this.applyUserTenantScope(qb, props.tenantKey));
 
 				const countQuery = this.db
 					.selectFrom("lucid_users")
@@ -852,7 +813,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 					.leftJoin("lucid_user_roles", (join) =>
 						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
 					)
-					.$call(applyUserTenantScope);
+					.$call((qb) => this.applyUserTenantScope(qb, props.tenantKey));
 
 				const { main, count } = queryBuilder.main(
 					{
@@ -1125,5 +1086,32 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			...props.validation,
 			mode: "multiple",
 		});
+	}
+
+	// ----------------------------------------
+	// helpers
+
+	/**
+	 * Scopes user reads to a tenant. Users with no tenant memberships are global
+	 * and remain visible to every tenant-scoped request.
+	 */
+	private applyUserTenantScope<DB, TB extends keyof DB, O>(
+		qb: SelectQueryBuilder<DB, TB, O>,
+		tenantKey: string | null | undefined,
+	) {
+		if (tenantKey == null) return qb;
+		return qb.where(
+			sql<boolean>`(
+				exists (
+					select 1 from lucid_user_tenants
+					where lucid_user_tenants.user_id = lucid_users.id
+					and lucid_user_tenants.tenant_key = ${tenantKey}
+				)
+				or not exists (
+					select 1 from lucid_user_tenants
+					where lucid_user_tenants.user_id = lucid_users.id
+				)
+			)`,
+		);
 	}
 }

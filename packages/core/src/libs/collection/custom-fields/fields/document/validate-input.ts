@@ -72,16 +72,10 @@ const fetchDocumentsFromCollection = async (
 			context.config.db,
 		);
 
-		const documentIdRes = await Document.selectMultiple(
+		const documentIdRes = await Document.selectMultipleValidationIds(
 			{
-				select: ["id"],
-				where: [
-					{
-						key: "id",
-						operator: "in",
-						value: ids,
-					},
-				],
+				ids,
+				tenantKey: context.request.tenantKey,
 				validation: {
 					enabled: true,
 				},

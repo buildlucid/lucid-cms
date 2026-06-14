@@ -18,15 +18,9 @@ const validateUserInputData = async (
 	try {
 		const Users = new UsersRepository(context.db.client, context.config.db);
 
-		const usersRes = await Users.selectMultiple({
-			select: ["id"],
-			where: [
-				{
-					key: "id",
-					operator: "in",
-					value: userIds,
-				},
-			],
+		const usersRes = await Users.selectMultipleByIds({
+			ids: userIds,
+			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 			},

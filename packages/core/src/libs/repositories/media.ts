@@ -498,6 +498,40 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			],
 		});
 	}
+	/**
+	 * Fetches media rows used by field validation, scoped to the request tenant while
+	 * keeping global media available to every tenant.
+	 */
+	async selectMultipleValidationData<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				ids: number[];
+				tenantKey?: string | null;
+			}
+		>,
+	) {
+		let query = this.db
+			.selectFrom("lucid_media")
+			.select(["id", "file_extension", "width", "height", "type"])
+			.where("id", "in", props.ids);
+
+		query = queryBuilder.tenantScope(query, {
+			tenantKey: props.tenantKey,
+			column: "lucid_media.tenant_key",
+		});
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectMultipleValidationData",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: ["id", "file_extension", "width", "height", "type"],
+		});
+	}
 	async selectMultipleFilteredFixed<V extends boolean = false>(
 		props: QueryProps<
 			V,

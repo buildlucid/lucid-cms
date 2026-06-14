@@ -18,15 +18,9 @@ const validateMediaInputData = async (
 	try {
 		const Media = new MediaRepository(context.db.client, context.config.db);
 
-		const mediaRes = await Media.selectMultiple({
-			select: ["id", "file_extension", "width", "height", "type"],
-			where: [
-				{
-					key: "id",
-					operator: "in",
-					value: mediaIds,
-				},
-			],
+		const mediaRes = await Media.selectMultipleValidationData({
+			ids: mediaIds,
+			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 			},

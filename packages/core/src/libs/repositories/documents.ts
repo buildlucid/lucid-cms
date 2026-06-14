@@ -1183,6 +1183,44 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
+	/**
+	 * Fetches document IDs used by field validation, scoped to the request tenant
+	 * while keeping global documents available to every tenant.
+	 */
+	async selectMultipleValidationIds<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				ids: number[];
+				tenantKey?: string | null;
+			}
+		>,
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		let query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.select("id")
+			.where("id", "in", props.ids);
+
+		query = queryBuilder.tenantScope(query, {
+			tenantKey: props.tenantKey,
+			column: `${dynamicConfig.tableName}.tenant_key`,
+		});
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectMultipleValidationIds",
+			tableName: dynamicConfig.tableName,
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: ["id"],
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
+
 	async selectMultipleUnion(props: { tables: LucidDocumentTableName[] }) {
 		if (props.tables.length === 0) {
 			return {
