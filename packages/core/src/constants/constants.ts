@@ -178,6 +178,12 @@ export default Object.freeze({
 			private: "private",
 			public: "public",
 		} as const,
+		reservedTenantKeys: [
+			"processed",
+			"awaiting-sync",
+			"private",
+			"public",
+		] as const,
 		previewableTypes: ["image", "video", "audio"] as const,
 	},
 	license: {

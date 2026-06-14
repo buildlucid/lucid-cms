@@ -7,6 +7,7 @@ import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
 import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 import { createBufferETag, matchesETag } from "../../utils/http/etag.js";
+import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
 	mediaServices,
@@ -36,8 +37,19 @@ const processImage: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
+	const sourceTenant = resolveMediaKeyTenant(context.config, data.key);
+	const processedTenant = resolveMediaKeyTenant(
+		context.config,
+		data.processKey,
+	);
+
 	// get og image
-	const mediaRes = await mediaStrategyRes.data.stream(data.key);
+	const mediaRes = await mediaStrategyRes.data.stream({
+		key: data.key,
+		context: {
+			tenant: sourceTenant,
+		},
+	});
 	if (mediaRes.error) return mediaRes;
 
 	// If the response is not an image
@@ -192,6 +204,9 @@ const processImage: ServiceFn<
 					size: imageRes.data.size,
 					type: "image",
 				},
+				context: {
+					tenant: processedTenant,
+				},
 			}),
 		]);
 
@@ -213,7 +228,12 @@ const processImage: ServiceFn<
 						})
 					: Promise.resolve(),
 				uploadRes.error === undefined
-					? mediaStrategyRes.data.delete(data.processKey)
+					? mediaStrategyRes.data.delete({
+							key: data.processKey,
+							context: {
+								tenant: processedTenant,
+							},
+						})
 					: Promise.resolve(),
 			]);
 

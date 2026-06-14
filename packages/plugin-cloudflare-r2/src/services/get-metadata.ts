@@ -5,7 +5,7 @@ import type { PluginOptions } from "../types.js";
 const getMetadata = (
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceGetMeta => {
-	return async (key) => {
+	return async ({ key }) => {
 		try {
 			const object = await pluginOptions.binding.head(key);
 

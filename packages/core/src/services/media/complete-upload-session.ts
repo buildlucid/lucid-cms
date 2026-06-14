@@ -5,6 +5,7 @@ import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
 } from "../../libs/repositories/index.js";
+import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const completeUploadSession: ServiceFn<
@@ -96,6 +97,9 @@ const completeUploadSession: ServiceFn<
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
 		parts: data.parts,
+		context: {
+			tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),
+		},
 	});
 	if (completeRes.error) return completeRes;
 

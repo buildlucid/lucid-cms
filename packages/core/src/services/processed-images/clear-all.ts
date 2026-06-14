@@ -1,4 +1,5 @@
 import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
+import { resolveMediaTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, optionServices } from "../index.js";
 
@@ -11,6 +12,10 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 	const ProcessedImages = new ProcessedImagesRepository(
 		context.db.client,
 		context.config.db,
+	);
+	const tenant = resolveMediaTenant(
+		context.config,
+		context.request.tenantKey ?? null,
 	);
 
 	const processedImagesRes =
@@ -39,9 +44,12 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 		0,
 	);
 	const [_, clearProcessedRes, updateStorageRes] = await Promise.all([
-		mediaStrategyRes.data.deleteMultiple(
-			processedImagesRes.data.map((i) => i.key),
-		),
+		mediaStrategyRes.data.deleteMultiple({
+			keys: processedImagesRes.data.map((i) => i.key),
+			context: {
+				tenant,
+			},
+		}),
 		ProcessedImages.deleteMultiple({
 			where:
 				context.request.tenantKey !== undefined &&

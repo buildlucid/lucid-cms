@@ -6,10 +6,10 @@ import type { PluginOptions } from "../types/types.js";
 import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async (
+	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async ({
 		key,
 		meta,
-	) => {
+	}) => {
 		try {
 			const objectUrl = new URL(
 				`${pluginOptions.endpoint}/${pluginOptions.bucket}/${key}`,

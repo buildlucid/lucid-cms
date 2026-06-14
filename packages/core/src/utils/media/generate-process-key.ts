@@ -1,11 +1,12 @@
 import constants from "../../constants/constants.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 import getKeyVisibility from "./get-key-visibility.js";
+import { getMediaKeyParts } from "./media-key-tenant.js";
 import normalizeMediaKey from "./normalize-media-key.js";
 
 /**
  * Generates a unique key for processed images based on the media key, its options and visibility. Looks like:
- * private/processed/def456-image-w400-fwebp
+ * private/tenant-key/processed/def456-image-w400-fwebp
  */
 const generateProcessKey = (data: {
 	key: string;
@@ -14,8 +15,15 @@ const generateProcessKey = (data: {
 }) => {
 	const normalizedKey = normalizeMediaKey(data.key);
 	const visibility = getKeyVisibility(normalizedKey);
-
-	const keyWithoutVisibility = normalizedKey.replace(`${visibility}/`, "");
+	const keyParts = getMediaKeyParts(normalizedKey);
+	const keyIdentity =
+		keyParts.identityIndex === -1
+			? normalizedKey
+			: keyParts.parts.slice(keyParts.identityIndex).join("/");
+	const prefix =
+		keyParts.scopedPathStartIndex === -1
+			? visibility
+			: keyParts.parts.slice(0, keyParts.scopedPathStartIndex).join("/");
 
 	const suffixes: string[] = [];
 	if (data.options.width) suffixes.push(`w${data.options.width}`);
@@ -25,7 +33,7 @@ const generateProcessKey = (data: {
 	const suffix = suffixes.length > 0 ? `-${suffixes.join("-")}` : "";
 	const finalFormat = data.options.format ?? data.extension ?? "bin";
 
-	return `${visibility}/${constants.media.processedKey}/${keyWithoutVisibility}${suffix}-f${finalFormat}`;
+	return `${prefix}/${constants.media.processedKey}/${keyIdentity}${suffix}-f${finalFormat}`;
 };
 
 export default generateProcessKey;

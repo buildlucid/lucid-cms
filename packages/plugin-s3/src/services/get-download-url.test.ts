@@ -18,10 +18,16 @@ describe("getDownloadUrl", () => {
 			},
 		);
 
-		const response = await service("public/uuid", {
-			host: "https://example.com",
-			secretKey: "secret",
-			fileName: "Screenshot 2026-02-13 at 10.png",
+		const response = await service({
+			key: "public/uuid",
+			meta: {
+				host: "https://example.com",
+				secretKey: "secret",
+				fileName: "Screenshot 2026-02-13 at 10.png",
+			},
+			context: {
+				tenant: null,
+			},
 		});
 
 		expect(response.error).toBeUndefined();
@@ -49,10 +55,16 @@ describe("getDownloadUrl", () => {
 			},
 		);
 
-		const response = await service("public/uuid", {
-			host: "https://example.com",
-			secretKey: "secret",
-			extension: "png",
+		const response = await service({
+			key: "public/uuid",
+			meta: {
+				host: "https://example.com",
+				secretKey: "secret",
+				extension: "png",
+			},
+			context: {
+				tenant: null,
+			},
 		});
 
 		expect(response.error).toBeUndefined();
@@ -79,10 +91,16 @@ describe("getDownloadUrl", () => {
 			},
 		);
 
-		const response = await service("public/uuid", {
-			host: "https://example.com",
-			secretKey: "secret",
-			fileName: '../"Quarterly\r\nReport".png',
+		const response = await service({
+			key: "public/uuid",
+			meta: {
+				host: "https://example.com",
+				secretKey: "secret",
+				fileName: '../"Quarterly\r\nReport".png',
+			},
+			context: {
+				tenant: null,
+			},
 		});
 
 		expect(response.error).toBeUndefined();

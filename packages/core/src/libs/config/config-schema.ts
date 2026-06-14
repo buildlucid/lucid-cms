@@ -1,5 +1,6 @@
 import type { Hono } from "hono";
 import z from "zod";
+import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
@@ -79,6 +80,18 @@ const ContentSecurityPolicySchema = z
 
 const OverridableHeaderSchema = z.union([z.boolean(), z.string()]);
 
+/**
+ * Tenant keys share the media URL path, so they cannot use reserved media words.
+ */
+const isReservedTenantKey = (key: string) =>
+	(constants.media.reservedTenantKeys as readonly string[]).includes(key);
+
+/**
+ * Global media IDs are 32-char hex UUIDs; tenant keys matching that are ambiguous.
+ */
+const isGeneratedMediaIdTenantKey = (key: string) =>
+	/^[a-f0-9]{32}$/i.test(key);
+
 const ConfigSchema = z.object({
 	db: z.unknown(),
 	baseUrl: z.string().optional(),
@@ -148,7 +161,15 @@ const ConfigSchema = z.object({
 	tenants: z
 		.array(
 			z.object({
-				key: z.string().min(1),
+				key: z
+					.string()
+					.min(2)
+					.refine((key) => !isReservedTenantKey(key), {
+						message: `Tenant key cannot be one of: ${constants.media.reservedTenantKeys.join(", ")}`,
+					})
+					.refine((key) => !isGeneratedMediaIdTenantKey(key), {
+						message: "Tenant key cannot match a generated media ID.",
+					}),
 				name: adminCopyDescriptorSchema,
 			}),
 		)

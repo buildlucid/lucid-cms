@@ -14,7 +14,7 @@ export default (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceGetDownloadUrl => {
-	return async (key, meta) => {
+	return async ({ key, meta }) => {
 		try {
 			if (!pluginOptions.http) {
 				return {

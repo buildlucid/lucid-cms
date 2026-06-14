@@ -1,5 +1,6 @@
 import { MediaRepository } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
+import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 
@@ -30,15 +31,18 @@ const requestDownload: ServiceFn<
 	});
 	if (mediaRes.error) return mediaRes;
 
-	const downloadUrlRes = await mediaStrategyRes.data.getDownloadUrl(
-		data.mediaKey,
-		{
+	const downloadUrlRes = await mediaStrategyRes.data.getDownloadUrl({
+		key: data.mediaKey,
+		meta: {
 			host: getBaseUrl(context),
 			secretKey: context.config.secrets.cookie,
 			fileName: mediaRes.data?.file_name,
 			extension: mediaRes.data?.file_extension,
 		},
-	);
+		context: {
+			tenant: resolveMediaKeyTenant(context.config, data.mediaKey),
+		},
+	});
 	if (downloadUrlRes.error) return downloadUrlRes;
 
 	return {

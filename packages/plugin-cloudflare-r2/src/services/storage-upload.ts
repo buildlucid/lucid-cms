@@ -1,34 +1,10 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy, resolveMediaKeyTenant } from "@lucidcms/core/plugin";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { DEFAULT_MAX_UPLOAD_SIZE, STORAGE_UPLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";
 import { createFixedLengthStream } from "../utils/create-fixed-length-stream.js";
 import { validateSignedMediaUrl } from "../utils/signed-media-url.js";
 import { putObject } from "./upload-single.js";
-
-const buildFileTooLargeError = (maxUploadSize: number) => ({
-	error: {
-		type: "basic" as const,
-		status: 413,
-		message: copy("server:plugin.cloudflare.r2.upload.file.too.large", {
-			data: {
-				size: String(maxUploadSize),
-			},
-		}),
-	},
-	data: undefined,
-});
-
-const buildMissingContentLengthError = () => ({
-	error: {
-		type: "basic" as const,
-		status: 411,
-		message: copy(
-			"server:plugin.cloudflare.r2.upload.headers.content.length.missing",
-		),
-	},
-	data: undefined,
-});
 
 const storageUpload =
 	(
@@ -91,11 +67,31 @@ const storageUpload =
 			!Number.isFinite(data.contentLength) ||
 			data.contentLength < 0
 		) {
-			return buildMissingContentLengthError();
+			return {
+				error: {
+					type: "basic" as const,
+					status: 411,
+					message: copy(
+						"server:plugin.cloudflare.r2.upload.headers.content.length.missing",
+					),
+				},
+				data: undefined,
+			};
 		}
 
 		if (data.contentLength > maxUploadSize) {
-			return buildFileTooLargeError(maxUploadSize);
+			return {
+				error: {
+					type: "basic" as const,
+					status: 413,
+					message: copy("server:plugin.cloudflare.r2.upload.file.too.large", {
+						data: {
+							size: String(maxUploadSize),
+						},
+					}),
+				},
+				data: undefined,
+			};
 		}
 
 		const fixedLengthBody = createFixedLengthStream(
@@ -104,6 +100,7 @@ const storageUpload =
 		);
 		let uploadError: unknown;
 		let streamError: unknown;
+		const tenant = resolveMediaKeyTenant(context.config, data.key);
 
 		try {
 			await Promise.all([
@@ -115,6 +112,9 @@ const storageUpload =
 						extension: data.extension ?? "",
 						size: data.contentLength,
 						type: "unknown",
+					},
+					context: {
+						tenant,
 					},
 				}),
 				fixedLengthBody.completed.catch((error) => {

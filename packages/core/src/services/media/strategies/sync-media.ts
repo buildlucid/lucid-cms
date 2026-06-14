@@ -1,6 +1,7 @@
 import { copy } from "../../../libs/i18n/index.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
+import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices, optionServices } from "../../index.js";
 import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
@@ -27,7 +28,14 @@ const syncMedia: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const mediaMetaRes = await mediaStrategyRes.data.getMeta(data.key);
+	const tenant = resolveMediaKeyTenant(context.config, data.key);
+
+	const mediaMetaRes = await mediaStrategyRes.data.getMeta({
+		key: data.key,
+		context: {
+			tenant,
+		},
+	});
 	if (mediaMetaRes.error) return mediaMetaRes;
 
 	const proposedSizeRes = await mediaServices.checks.checkCanStoreMedia(
@@ -37,19 +45,32 @@ const syncMedia: ServiceFn<
 		},
 	);
 	if (proposedSizeRes.error) {
-		await mediaStrategyRes.data.delete(data.key);
+		await mediaStrategyRes.data.delete({
+			key: data.key,
+			context: {
+				tenant,
+			},
+		});
 		return proposedSizeRes;
 	}
 
 	const fileMetaData = await validateUploadedMedia({
 		stream: mediaStrategyRes.data.stream,
+		context: {
+			tenant,
+		},
 		key: data.key,
 		mimeType: mediaMetaRes.data.mimeType,
 		fileName: data.fileName,
 		allowedType: data.allowedType,
 	});
 	if (fileMetaData.error) {
-		await mediaStrategyRes.data.delete(data.key);
+		await mediaStrategyRes.data.delete({
+			key: data.key,
+			context: {
+				tenant,
+			},
+		});
 		return fileMetaData;
 	}
 
@@ -72,7 +93,12 @@ const syncMedia: ServiceFn<
 			};
 		}
 
-		await mediaStrategyRes.data.delete(data.key);
+		await mediaStrategyRes.data.delete({
+			key: data.key,
+			context: {
+				tenant,
+			},
+		});
 
 		return {
 			error: {

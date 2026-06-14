@@ -31,6 +31,10 @@ describe("media update strategy", () => {
 	});
 
 	it("uses the promoted target metadata etag for in-place replacements", async () => {
+		const tenant = {
+			key: "marketing",
+			name: "Marketing",
+		};
 		const stream = vi.fn().mockResolvedValue({
 			error: undefined,
 			data: {
@@ -50,28 +54,29 @@ describe("media update strategy", () => {
 			},
 			data: undefined,
 		});
+		const getMeta = vi
+			.fn()
+			.mockResolvedValueOnce({
+				error: undefined,
+				data: {
+					size: 42,
+					mimeType: "image/png",
+					etag: "temporary-etag",
+				},
+			})
+			.mockResolvedValueOnce({
+				error: undefined,
+				data: {
+					size: 42,
+					mimeType: "image/png",
+					etag: "canonical-etag",
+				},
+			});
 
 		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
 			error: undefined,
 			data: {
-				getMeta: vi
-					.fn()
-					.mockResolvedValueOnce({
-						error: undefined,
-						data: {
-							size: 42,
-							mimeType: "image/png",
-							etag: "temporary-etag",
-						},
-					})
-					.mockResolvedValueOnce({
-						error: undefined,
-						data: {
-							size: 42,
-							mimeType: "image/png",
-							etag: "canonical-etag",
-						},
-					}),
+				getMeta,
 				stream,
 				upload,
 				delete: deleteObject,
@@ -92,6 +97,7 @@ describe("media update strategy", () => {
 		const response = await update(
 			{
 				config: {
+					tenants: [tenant],
 					media: {
 						limits: {
 							storage: false,
@@ -103,18 +109,31 @@ describe("media update strategy", () => {
 				fileName: "replacement.png",
 				previousEtag: "previous-etag",
 				previousSize: 24,
-				previousKey: "public/original",
+				previousKey: "public/marketing/original",
 				previousType: "image",
-				updatedKey: "awaiting-sync/upload",
-				targetKey: "public/original",
+				updatedKey: "awaiting-sync/marketing/upload",
+				targetKey: "public/marketing/original",
 			},
 		);
 
 		expect(response.error).toBeUndefined();
 		expect(response.data?.etag).toBe("canonical-etag");
 		expect(response.data?.sourceDeleted).toBe(false);
+		expect(getMeta).toHaveBeenCalledWith({
+			key: "awaiting-sync/marketing/upload",
+			context: {
+				tenant,
+			},
+		});
+		expect(mocks.detectStreamMimeType).toHaveBeenCalledWith(
+			stream,
+			"awaiting-sync/marketing/upload",
+			{
+				tenant,
+			},
+		);
 		expect(upload).toHaveBeenCalledWith({
-			key: "public/original",
+			key: "public/marketing/original",
 			data: Buffer.from("replacement-image"),
 			meta: {
 				mimeType: "image/png",
@@ -122,8 +141,16 @@ describe("media update strategy", () => {
 				size: 42,
 				type: "image",
 			},
+			context: {
+				tenant,
+			},
 		});
-		expect(deleteObject).toHaveBeenCalledWith("awaiting-sync/upload");
+		expect(deleteObject).toHaveBeenCalledWith({
+			key: "awaiting-sync/marketing/upload",
+			context: {
+				tenant,
+			},
+		});
 	});
 
 	it("rejects replacement uploads that change the media type", async () => {
@@ -173,6 +200,136 @@ describe("media update strategy", () => {
 		);
 
 		expect(response.error?.status).toBe(400);
-		expect(deleteObject).toHaveBeenCalledWith("awaiting-sync/upload");
+		expect(deleteObject).toHaveBeenCalledWith({
+			key: "awaiting-sync/upload",
+			context: {
+				tenant: null,
+			},
+		});
+	});
+
+	it("copies global replacement uploads into tenant media targets", async () => {
+		const tenant = {
+			key: "marketing",
+			name: "Marketing",
+		};
+		const stream = vi.fn().mockResolvedValue({
+			error: undefined,
+			data: {
+				body: Buffer.from("replacement-image"),
+			},
+		});
+		const upload = vi.fn().mockResolvedValue({
+			error: undefined,
+			data: {
+				etag: "upload-etag",
+			},
+		});
+		const deleteObject = vi.fn().mockResolvedValue({
+			error: undefined,
+			data: undefined,
+		});
+		const rename = vi.fn();
+		const getMeta = vi
+			.fn()
+			.mockResolvedValueOnce({
+				error: undefined,
+				data: {
+					size: 42,
+					mimeType: "image/png",
+					etag: "temporary-etag",
+				},
+			})
+			.mockResolvedValueOnce({
+				error: undefined,
+				data: {
+					size: 42,
+					mimeType: "image/png",
+					etag: "canonical-etag",
+				},
+			});
+
+		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+			error: undefined,
+			data: {
+				getMeta,
+				stream,
+				upload,
+				delete: deleteObject,
+				rename,
+			},
+		});
+		mocks.checkCanUpdateMedia.mockResolvedValueOnce({
+			error: undefined,
+			data: undefined,
+		});
+		mocks.adjustInt.mockResolvedValueOnce({
+			error: undefined,
+			data: {
+				applied: true,
+			},
+		});
+		mocks.detectStreamMimeType.mockResolvedValueOnce("image/png");
+
+		const response = await update(
+			{
+				config: {
+					tenants: [tenant],
+					media: {
+						limits: {
+							storage: false,
+						},
+					},
+				},
+			} as never,
+			{
+				fileName: "replacement.png",
+				previousEtag: "previous-etag",
+				previousSize: 24,
+				previousKey: "public/marketing/original",
+				previousType: "image",
+				updatedKey: "awaiting-sync/upload",
+				targetKey: "private/marketing/original",
+			},
+		);
+
+		expect(response.error).toBeUndefined();
+		expect(response.data).toMatchObject({
+			key: "private/marketing/original",
+			etag: "canonical-etag",
+			sourceDeleted: true,
+		});
+		expect(rename).not.toHaveBeenCalled();
+		expect(stream).toHaveBeenCalledWith({
+			key: "awaiting-sync/upload",
+			context: {
+				tenant: null,
+			},
+		});
+		expect(upload).toHaveBeenCalledWith({
+			key: "private/marketing/original",
+			data: Buffer.from("replacement-image"),
+			meta: {
+				mimeType: "image/png",
+				extension: "png",
+				size: 42,
+				type: "image",
+			},
+			context: {
+				tenant,
+			},
+		});
+		expect(deleteObject).toHaveBeenCalledWith({
+			key: "awaiting-sync/upload",
+			context: {
+				tenant: null,
+			},
+		});
+		expect(deleteObject).toHaveBeenCalledWith({
+			key: "public/marketing/original",
+			context: {
+				tenant,
+			},
+		});
 	});
 });

@@ -2,10 +2,13 @@ import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceGetMeta } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
-import { METADATA_SIZE_HEADER, parseStoredSize } from "./metadata-headers.js";
+import {
+	METADATA_SIZE_HEADER,
+	parseStoredSize,
+} from "../utils/metadata-headers.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const getMetadata: MediaAdapterServiceGetMeta = async (key) => {
+	const getMetadata: MediaAdapterServiceGetMeta = async ({ key }) => {
 		try {
 			const response = await client.sign(
 				new Request(

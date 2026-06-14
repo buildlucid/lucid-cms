@@ -5,7 +5,7 @@ import type { PluginOptions } from "../types.js";
 const deleteSingle = (
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceDeleteSingle => {
-	return async (key) => {
+	return async ({ key }) => {
 		try {
 			await pluginOptions.binding.delete(key);
 

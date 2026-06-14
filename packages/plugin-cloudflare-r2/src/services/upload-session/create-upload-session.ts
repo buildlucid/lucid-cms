@@ -18,7 +18,7 @@ export const createUploadSession = (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceCreateUploadSession => {
-	return async (key, meta) => {
+	return async ({ key, meta }) => {
 		try {
 			if (!pluginOptions.http) {
 				return {

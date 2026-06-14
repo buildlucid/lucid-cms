@@ -31,18 +31,24 @@ describe("media sync strategy", () => {
 	});
 
 	it("uses sniffed mime type when storage metadata is generic", async () => {
+		const tenant = {
+			key: "marketing",
+			name: "Marketing",
+		};
+		const getMeta = vi.fn().mockResolvedValueOnce({
+			error: undefined,
+			data: {
+				size: 42,
+				mimeType: "application/octet-stream",
+				etag: "object-etag",
+			},
+		});
+		const stream = vi.fn();
 		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
 			error: undefined,
 			data: {
-				getMeta: vi.fn().mockResolvedValueOnce({
-					error: undefined,
-					data: {
-						size: 42,
-						mimeType: "application/octet-stream",
-						etag: "object-etag",
-					},
-				}),
-				stream: vi.fn(),
+				getMeta,
+				stream,
 				delete: vi.fn(),
 			},
 		});
@@ -61,6 +67,7 @@ describe("media sync strategy", () => {
 		const response = await syncMedia(
 			{
 				config: {
+					tenants: [tenant],
 					media: {
 						limits: {
 							storage: false,
@@ -69,7 +76,7 @@ describe("media sync strategy", () => {
 				},
 			} as never,
 			{
-				key: "public/upload",
+				key: "public/marketing/upload",
 				fileName: "upload.bin",
 			},
 		);
@@ -78,6 +85,19 @@ describe("media sync strategy", () => {
 		expect(response.data?.mimeType).toBe("image/png");
 		expect(response.data?.type).toBe("image");
 		expect(response.data?.extension).toBe("png");
+		expect(getMeta).toHaveBeenCalledWith({
+			key: "public/marketing/upload",
+			context: {
+				tenant,
+			},
+		});
+		expect(mocks.detectStreamMimeType).toHaveBeenCalledWith(
+			stream,
+			"public/marketing/upload",
+			{
+				tenant,
+			},
+		);
 	});
 
 	it("rejects detected content that does not match the declared media type", async () => {
@@ -125,7 +145,12 @@ describe("media sync strategy", () => {
 		);
 
 		expect(response.error?.status).toBe(400);
-		expect(deleteObject).toHaveBeenCalledWith("public/upload");
+		expect(deleteObject).toHaveBeenCalledWith({
+			key: "public/upload",
+			context: {
+				tenant: null,
+			},
+		});
 		expect(mocks.adjustInt).not.toHaveBeenCalled();
 	});
 });

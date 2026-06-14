@@ -1,3 +1,4 @@
+import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
 
@@ -17,6 +18,9 @@ const rename: ServiceFn<
 	const res = await mediaStrategyRes.data.rename({
 		from: data.from,
 		to: data.to,
+		context: {
+			tenant: resolveMediaKeyTenant(context.config, data.to),
+		},
 	});
 	if (res.error) {
 		return {

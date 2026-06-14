@@ -2,7 +2,7 @@ import type { MediaAdapterUploadPart } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../../constants.js";
 import type { PluginOptions } from "../../types/types.js";
-import { applyMetadataHeaders } from "../metadata-headers.js";
+import { applyMetadataHeaders } from "../../utils/metadata-headers.js";
 
 /** Builds the S3 object URL that aws4fetch signs for multipart operations. */
 export const objectUrl = (

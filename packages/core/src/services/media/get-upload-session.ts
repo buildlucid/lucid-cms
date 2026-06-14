@@ -3,6 +3,7 @@ import { copy } from "../../libs/i18n/index.js";
 import getMediaAdapter from "../../libs/media/get-adapter.js";
 import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
+import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getUploadSession: ServiceFn<
@@ -97,6 +98,9 @@ const getUploadSession: ServiceFn<
 	const partsRes = await mediaAdapter.adapter.listUploadParts({
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
+		context: {
+			tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),
+		},
 	});
 	if (partsRes.error) return partsRes;
 

@@ -2,7 +2,7 @@ import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceUploadSingle } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
-import { applyMetadataHeaders } from "./metadata-headers.js";
+import { applyMetadataHeaders } from "../utils/metadata-headers.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
 	const uploadSingle: MediaAdapterServiceUploadSingle = async (props) => {

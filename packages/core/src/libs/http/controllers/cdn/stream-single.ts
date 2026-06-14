@@ -7,7 +7,11 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/cdn.js";
 import { cdnServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { normalizeMediaKey } from "../../../../utils/media/index.js";
+import { getTenantConfig } from "../../../../utils/helpers/index.js";
+import {
+	getMediaKeyTenantKey,
+	normalizeMediaKey,
+} from "../../../../utils/media/index.js";
 import { defaultErrorResponse } from "../../../../utils/open-api/hono-openapi-response.js";
 import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -142,8 +146,17 @@ const streamSingleController = factory.createHandlers(
 	async (c) => {
 		const params = c.req.valid("param");
 		const query = c.req.valid("query");
-		const context = createServiceContext(c);
+
 		const normalizedKey = normalizeMediaKey(params.key);
+		const tenantKey = getMediaKeyTenantKey(normalizedKey);
+
+		const tenant = tenantKey
+			? getTenantConfig(c.get("config"), tenantKey)
+			: undefined;
+
+		c.set("tenant", tenant ? { key: tenant.key } : null);
+
+		const context = createServiceContext(c);
 
 		const range = parseRangeHeader(c.req.header("range"));
 		const ifNoneMatch = c.req.header("if-none-match");

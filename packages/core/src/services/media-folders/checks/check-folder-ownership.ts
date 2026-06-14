@@ -3,8 +3,8 @@ import { MediaFoldersRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Confirms a folder belongs to the current tenant before tenant-scoped writes.
- * Tenants may read global folders, but they must not mutate or delete them.
+ * Confirms a folder belongs to the current tenant before destructive writes.
+ * Tenants may update global folders, but deleting them could remove shared media.
  */
 const checkFolderOwnership: ServiceFn<
 	[

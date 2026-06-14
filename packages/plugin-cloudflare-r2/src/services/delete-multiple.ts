@@ -5,7 +5,7 @@ import type { PluginOptions } from "../types.js";
 const deleteMultiple = (
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceDeleteMultiple => {
-	return async (keys) => {
+	return async ({ keys }) => {
 		try {
 			if (keys.length === 0) {
 				return {

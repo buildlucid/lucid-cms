@@ -1,4 +1,5 @@
 import type { Readable } from "node:stream";
+import type { TenantConfig } from "../../types/config.js";
 import type { MediaType, ServiceResponse } from "../../types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
 
@@ -18,6 +19,20 @@ export type MediaAdapterUploadPart = {
 	size?: number;
 };
 
+/**
+ * The tenant responsible for the media operation.
+ * Adapters can use this to choose tenant-specific buckets, clients, or paths.
+ */
+export type MediaAdapterTenant = TenantConfig | null;
+
+/**
+ * Shared operation context passed to every adapter service.
+ * This keeps request scope separate from file metadata and service options.
+ */
+export type MediaAdapterServiceContext = {
+	tenant: MediaAdapterTenant;
+};
+
 export type MediaAdapterCreateUploadSessionResponse =
 	| {
 			mode: "single";
@@ -34,22 +49,24 @@ export type MediaAdapterCreateUploadSessionResponse =
 			uploadedParts: MediaAdapterUploadPart[];
 	  };
 
-export type MediaAdapterServiceCreateUploadSession = (
-	key: string,
+export type MediaAdapterServiceCreateUploadSession = (props: {
+	key: string;
 	meta: {
 		host: string;
 		secretKey: string;
 		mimeType: string;
 		extension?: string;
 		size: number;
-	},
-) => ServiceResponse<MediaAdapterCreateUploadSessionResponse>;
+	};
+	context: MediaAdapterServiceContext;
+}) => ServiceResponse<MediaAdapterCreateUploadSessionResponse>;
 
 export type MediaAdapterServiceGetUploadPartUrls = (props: {
 	key: string;
 	uploadId: string;
 	partNumbers: number[];
 	expiresAt: string;
+	context: MediaAdapterServiceContext;
 }) => ServiceResponse<{
 	parts: Array<{
 		partNumber: number;
@@ -61,6 +78,7 @@ export type MediaAdapterServiceGetUploadPartUrls = (props: {
 export type MediaAdapterServiceListUploadParts = (props: {
 	key: string;
 	uploadId: string;
+	context: MediaAdapterServiceContext;
 }) => ServiceResponse<{
 	uploadedParts: MediaAdapterUploadPart[];
 }>;
@@ -69,6 +87,7 @@ export type MediaAdapterServiceCompleteUploadSession = (props: {
 	key: string;
 	uploadId: string;
 	parts: MediaAdapterUploadPart[];
+	context: MediaAdapterServiceContext;
 }) => ServiceResponse<{
 	etag?: string | null;
 }>;
@@ -76,36 +95,40 @@ export type MediaAdapterServiceCompleteUploadSession = (props: {
 export type MediaAdapterServiceAbortUploadSession = (props: {
 	key: string;
 	uploadId: string;
+	context: MediaAdapterServiceContext;
 }) => ServiceResponse<undefined>;
 
-export type MediaAdapterServiceGetDownloadUrl = (
-	key: string,
+export type MediaAdapterServiceGetDownloadUrl = (props: {
+	key: string;
 	meta: {
 		host: string;
 		secretKey: string;
 		fileName?: string | null;
 		extension?: string | null;
-	},
-) => ServiceResponse<{
+	};
+	context: MediaAdapterServiceContext;
+}) => ServiceResponse<{
 	url: string;
 }>;
 
-export type MediaAdapterServiceGetMeta = (key: string) => ServiceResponse<{
+export type MediaAdapterServiceGetMeta = (props: {
+	key: string;
+	context: MediaAdapterServiceContext;
+}) => ServiceResponse<{
 	size: number;
 	mimeType: string | null;
 	etag: string | null;
 }>;
 
-export type MediaAdapterServiceStream = (
-	key: string,
-	options?: {
-		ifNoneMatch?: string;
-		range?: {
-			start: number;
-			end?: number;
-		};
-	},
-) => ServiceResponse<{
+export type MediaAdapterServiceStream = (props: {
+	key: string;
+	ifNoneMatch?: string;
+	range?: {
+		start: number;
+		end?: number;
+	};
+	context: MediaAdapterServiceContext;
+}) => ServiceResponse<{
 	contentLength: number | undefined;
 	contentType: string | undefined;
 	body: MediaAdapterStreamBody;
@@ -128,21 +151,25 @@ export type MediaAdapterServiceUploadSingle = (props: {
 		size: number;
 		type: MediaType;
 	};
+	context: MediaAdapterServiceContext;
 }) => ServiceResponse<{
 	etag?: string;
 }>;
 
-export type MediaAdapterServiceDeleteSingle = (
-	key: string,
-) => ServiceResponse<undefined>;
+export type MediaAdapterServiceDeleteSingle = (props: {
+	key: string;
+	context: MediaAdapterServiceContext;
+}) => ServiceResponse<undefined>;
 
-export type MediaAdapterServiceDeleteMultiple = (
-	keys: string[],
-) => ServiceResponse<undefined>;
+export type MediaAdapterServiceDeleteMultiple = (props: {
+	keys: string[];
+	context: MediaAdapterServiceContext;
+}) => ServiceResponse<undefined>;
 
 export type MediaAdapterServiceRenameKey = (props: {
 	from: string;
 	to: string;
+	context: MediaAdapterServiceContext;
 }) => ServiceResponse<undefined>;
 
 export type MediaAdapter<T = undefined> = T extends undefined

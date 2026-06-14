@@ -13,18 +13,9 @@ import { keyPaths } from "../helpers.js";
 import { readStoredMetadata } from "../metadata.js";
 
 export default (adapterOptions: FileSystemMediaAdapterOptions) => {
-	const stream: MediaAdapterServiceStream = async (
-		key: string,
-		options?: {
-			ifNoneMatch?: string;
-			range?: {
-				start: number;
-				end?: number;
-			};
-		},
-	) => {
+	const stream: MediaAdapterServiceStream = async (props) => {
 		try {
-			const { targetPath } = keyPaths(key, adapterOptions.uploadDir);
+			const { targetPath } = keyPaths(props.key, adapterOptions.uploadDir);
 			const fileType = await import("file-type");
 			try {
 				await access(targetPath, constants.F_OK);
@@ -50,11 +41,11 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 				mimeType = fileTypeResult.mime;
 			} else {
 				mimeType =
-					(await readStoredMetadata(adapterOptions.uploadDir, key))?.mimeType ??
-					undefined;
+					(await readStoredMetadata(adapterOptions.uploadDir, props.key))
+						?.mimeType ?? undefined;
 			}
 
-			if (!options?.range && matchesETag(options?.ifNoneMatch, etag)) {
+			if (!props.range && matchesETag(props.ifNoneMatch, etag)) {
 				return {
 					error: undefined,
 					data: {
@@ -68,9 +59,9 @@ export default (adapterOptions: FileSystemMediaAdapterOptions) => {
 			}
 
 			//* handle range requests
-			if (options?.range) {
-				const start = options.range.start;
-				const end = options.range.end ?? totalSize - 1;
+			if (props.range) {
+				const start = props.range.start;
+				const end = props.range.end ?? totalSize - 1;
 				//* validate range
 				if (start >= totalSize || end >= totalSize || start > end) {
 					return {

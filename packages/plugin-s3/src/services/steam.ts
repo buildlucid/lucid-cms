@@ -5,28 +5,23 @@ import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const stream: MediaAdapterServiceStream = async (
-		key: string,
-		options?: {
-			ifNoneMatch?: string;
-			range?: {
-				start: number;
-				end?: number;
-			};
-		},
-	) => {
+	const stream: MediaAdapterServiceStream = async ({
+		key,
+		range,
+		ifNoneMatch,
+	}) => {
 		try {
 			const headers: Record<string, string> = {};
 
-			if (options?.range) {
-				const start = options.range.start;
-				const end = options.range.end;
+			if (range) {
+				const start = range.start;
+				const end = range.end;
 				headers.Range =
 					end !== undefined ? `bytes=${start}-${end}` : `bytes=${start}-`;
 			}
 
-			if (options?.ifNoneMatch) {
-				headers["If-None-Match"] = options.ifNoneMatch;
+			if (ifNoneMatch) {
+				headers["If-None-Match"] = ifNoneMatch;
 			}
 
 			const response = await client.sign(
@@ -79,14 +74,14 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 
 			let isPartialContent = false;
 			let totalSize: number | undefined;
-			let range: { start: number; end: number } | undefined;
+			let rangeRes: { start: number; end: number } | undefined;
 
 			const contentRange = result.headers.get("content-range");
 			if (contentRange) {
 				isPartialContent = true;
 				const match = contentRange.match(/bytes (\d+)-(\d+)\/(\d+)/);
 				if (match?.[1] && match[2] && match[3]) {
-					range = {
+					rangeRes = {
 						start: Number.parseInt(match[1], 10),
 						end: Number.parseInt(match[2], 10),
 					};
@@ -111,7 +106,7 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 					totalSize:
 						totalSize ||
 						(contentLength ? Number.parseInt(contentLength, 10) : undefined),
-					range,
+					range: rangeRes,
 				},
 			};
 		} catch (e) {

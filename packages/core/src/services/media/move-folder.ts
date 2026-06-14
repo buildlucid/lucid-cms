@@ -4,6 +4,7 @@ import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
+import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compatibility.js";
 import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 
 const moveFolder: ServiceFn<
@@ -46,18 +47,12 @@ const moveFolder: ServiceFn<
 		};
 	}
 
-	const updateData: {
-		folder_id: number | null;
-		updated_by: number;
-		tenant_key?: string | null;
-	} = {
-		folder_id: data.folderId,
-		updated_by: data.userId,
-	};
-
-	if (data.folderId !== null) {
-		updateData.tenant_key = folderAccessRes.data?.tenant_key ?? null;
-	}
+	const folderTenantRes = checkFolderTenantCompatibility({
+		folderId: data.folderId,
+		folderTenantKey: folderAccessRes.data?.tenant_key ?? null,
+		mediaTenantKey: mediaRes.data.tenant_key,
+	});
+	if (folderTenantRes.error) return folderTenantRes;
 
 	const mediaUpdateRes = await Media.updateSingle({
 		where: [
@@ -66,14 +61,11 @@ const moveFolder: ServiceFn<
 				operator: "=",
 				value: data.id,
 			},
-			{
-				key: "tenant_key",
-				operator: "=",
-				value: context.request.tenantKey ?? null,
-				condition: context.request.tenantKey != null,
-			},
 		],
-		data: updateData,
+		data: {
+			folder_id: data.folderId,
+			updated_by: data.userId,
+		},
 		returning: ["id"],
 		validation: {
 			enabled: true,

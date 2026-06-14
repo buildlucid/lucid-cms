@@ -10,9 +10,9 @@ import { keyPaths } from "../helpers.js";
 import { readStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
-	const getMetadata: MediaAdapterServiceGetMeta = async (key) => {
+	const getMetadata: MediaAdapterServiceGetMeta = async (props) => {
 		try {
-			const { targetPath } = keyPaths(key, options.uploadDir);
+			const { targetPath } = keyPaths(props.key, options.uploadDir);
 			try {
 				await access(targetPath, constants.F_OK);
 			} catch {
@@ -34,7 +34,8 @@ export default (options: FileSystemMediaAdapterOptions) => {
 				mimeType = fileTypeResult.mime;
 			} else {
 				mimeType =
-					(await readStoredMetadata(options.uploadDir, key))?.mimeType ?? null;
+					(await readStoredMetadata(options.uploadDir, props.key))?.mimeType ??
+					null;
 			}
 			const etag = crypto
 				.createHash("md5")

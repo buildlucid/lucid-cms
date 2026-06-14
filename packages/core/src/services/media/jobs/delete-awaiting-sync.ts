@@ -1,4 +1,5 @@
 import { MediaAwaitingSyncRepository } from "../../../libs/repositories/index.js";
+import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
 
@@ -22,7 +23,12 @@ const deleteAwaitingSyncMedia: ServiceFn<
 		context.config.db,
 	);
 
-	await mediaStrategyRes.data.delete(data.key);
+	await mediaStrategyRes.data.delete({
+		key: data.key,
+		context: {
+			tenant: resolveMediaKeyTenant(context.config, data.key),
+		},
+	});
 
 	const deleteRes = await MediaAwaitingSync.deleteSingle({
 		where: [

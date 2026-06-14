@@ -2,7 +2,12 @@ import { createMiddleware } from "hono/factory";
 import constants from "../../../constants/constants.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
-import getKeyVisibility from "../../../utils/media/get-key-visibility.js";
+import { multiTenancyEnabled } from "../../../utils/helpers/index.js";
+import {
+	getKeyVisibility,
+	getMediaKeyTenantKey,
+	normalizeMediaKey,
+} from "../../../utils/media/index.js";
 import { copy } from "../../i18n/index.js";
 import { authenticationCheck } from "./authenticate.js";
 
@@ -23,9 +28,26 @@ const authorizePrivateMedia = createMiddleware(
 			});
 		}
 
-		const keyVisibility = getKeyVisibility(key);
+		const normalizedKey = normalizeMediaKey(key);
+		const keyVisibility = getKeyVisibility(normalizedKey);
+
 		if (keyVisibility === constants.media.visibilityKeys.private) {
 			await authenticationCheck(c);
+
+			const tenantKey = getMediaKeyTenantKey(normalizedKey);
+			const auth = c.get("auth");
+			if (
+				tenantKey &&
+				multiTenancyEnabled(c.get("config")) &&
+				!auth.superAdmin &&
+				!auth.tenantKeys.includes(tenantKey)
+			) {
+				throw new LucidAPIError({
+					type: "authorisation",
+					message: copy("server:core.tenants.no.access"),
+					status: 403,
+				});
+			}
 		}
 
 		return await next();

@@ -40,11 +40,19 @@ describe("file-system upload metadata", () => {
 				size: 46,
 				type: "image",
 			},
+			context: {
+				tenant: null,
+			},
 		});
 
 		expect(uploadRes.error).toBeUndefined();
 
-		const metadataRes = await getMetadata(options)("public/uuid");
+		const metadataRes = await getMetadata(options)({
+			key: "public/uuid",
+			context: {
+				tenant: null,
+			},
+		});
 		expect(metadataRes.error).toBeUndefined();
 		expect(metadataRes.data?.mimeType).toBe("image/svg+xml");
 
@@ -59,13 +67,22 @@ describe("file-system upload metadata", () => {
 			access(path.join(uploadDir, ".lucid", "file-system-meta.json")),
 		).rejects.toThrow();
 
-		const streamRes = await stream(options)("public/uuid");
+		const streamRes = await stream(options)({
+			key: "public/uuid",
+			context: {
+				tenant: null,
+			},
+		});
 		expect(streamRes.error).toBeUndefined();
 		expect(streamRes.data?.contentType).toBe("image/svg+xml");
 		expect(streamRes.data?.etag).toBeTruthy();
 
-		const conditionalStreamRes = await stream(options)("public/uuid", {
+		const conditionalStreamRes = await stream(options)({
+			key: "public/uuid",
 			ifNoneMatch: `"${streamRes.data?.etag}"`,
+			context: {
+				tenant: null,
+			},
 		});
 		expect(conditionalStreamRes.error).toBeUndefined();
 		expect(conditionalStreamRes.data?.notModified).toBe(true);
@@ -87,16 +104,27 @@ describe("file-system upload metadata", () => {
 				size: 46,
 				type: "image",
 			},
+			context: {
+				tenant: null,
+			},
 		});
 
 		const renameRes = await rename(options)({
 			from: "public/source",
 			to: "private/source",
+			context: {
+				tenant: null,
+			},
 		});
 
 		expect(renameRes.error).toBeUndefined();
 
-		const streamRes = await stream(options)("private/source");
+		const streamRes = await stream(options)({
+			key: "private/source",
+			context: {
+				tenant: null,
+			},
+		});
 		expect(streamRes.error).toBeUndefined();
 		expect(streamRes.data?.contentType).toBe("image/svg+xml");
 		expect(streamRes.data?.etag).toBeTruthy();

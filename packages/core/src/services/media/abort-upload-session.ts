@@ -3,6 +3,7 @@ import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
 } from "../../libs/repositories/index.js";
+import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const abortUploadSession: ServiceFn<
@@ -33,6 +34,7 @@ const abortUploadSession: ServiceFn<
 		},
 	});
 	if (sessionRes.error) return sessionRes;
+	const tenant = resolveMediaKeyTenant(context.config, sessionRes.data.key);
 
 	const mediaAdapter = await getMediaAdapter(context.config);
 	if (
@@ -43,6 +45,9 @@ const abortUploadSession: ServiceFn<
 		const abortRes = await mediaAdapter.adapter.abortUploadSession({
 			key: sessionRes.data.key,
 			uploadId: sessionRes.data.adapter_upload_id,
+			context: {
+				tenant,
+			},
 		});
 		if (abortRes.error) return abortRes;
 	}
@@ -52,7 +57,12 @@ const abortUploadSession: ServiceFn<
 			where: [{ key: "key", operator: "=", value: sessionRes.data.key }],
 		}),
 		mediaAdapter.enabled
-			? mediaAdapter.adapter.delete(sessionRes.data.key)
+			? mediaAdapter.adapter.delete({
+					key: sessionRes.data.key,
+					context: {
+						tenant,
+					},
+				})
 			: null,
 	]);
 

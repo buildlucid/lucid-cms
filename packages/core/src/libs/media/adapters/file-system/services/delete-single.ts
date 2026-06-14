@@ -9,9 +9,9 @@ import { keyPaths } from "../helpers.js";
 import { deleteStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
-	const deletSingle: MediaAdapterServiceDeleteSingle = async (key) => {
+	const deletSingle: MediaAdapterServiceDeleteSingle = async (props) => {
 		try {
-			const { targetPath } = keyPaths(key, options.uploadDir);
+			const { targetPath } = keyPaths(props.key, options.uploadDir);
 			try {
 				await access(targetPath, constants.F_OK);
 			} catch {
@@ -23,7 +23,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 				};
 			}
 			await unlink(targetPath);
-			await deleteStoredMetadata(options.uploadDir, key);
+			await deleteStoredMetadata(options.uploadDir, props.key);
 			return {
 				error: undefined,
 				data: undefined,

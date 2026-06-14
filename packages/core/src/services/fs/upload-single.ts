@@ -1,7 +1,10 @@
 import { copy } from "../../libs/i18n/index.js";
 import { FILE_SYSTEM_UPLOAD_PATH } from "../../libs/media/adapters/file-system/helpers.js";
 import type { FileSystemMediaAdapterOptions } from "../../libs/media/types.js";
-import { getFileMetadata } from "../../utils/media/index.js";
+import {
+	getFileMetadata,
+	resolveMediaKeyTenant,
+} from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import { validatePresignedToken } from "./checks/index.js";
@@ -61,6 +64,9 @@ const uploadSingle: ServiceFn<
 			extension: fileMetadataRes.data.extension,
 			size: data.buffer.length,
 			type: fileMetadataRes.data.type,
+		},
+		context: {
+			tenant: resolveMediaKeyTenant(context.config, data.key),
 		},
 	});
 	if (uploadRes.error) return uploadRes;

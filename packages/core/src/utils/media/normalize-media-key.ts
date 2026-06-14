@@ -1,30 +1,20 @@
-import constants from "../../constants/constants.js";
+import { getMediaKeyParts } from "./media-key-tenant.js";
 
 /**
  * Converts a browser-facing media path back into the canonical storage key.
- * The visual filename segment is ignored so old and new slugs resolve equally.
+ * The visual filename segment is ignored so display URLs resolve to storage keys.
  */
 const normalizeMediaKey = (key: string) => {
-	const parts = key.split("/").filter(Boolean);
-	if (parts.length === 0) return key;
+	const keyParts = getMediaKeyParts(key);
+	if (keyParts.parts.length === 0) return key;
 
-	const [visibility] = parts;
-	const isVisibilityKey = Object.values(
-		constants.media.visibilityKeys,
-	).includes(
-		visibility as (typeof constants.media.visibilityKeys)[keyof typeof constants.media.visibilityKeys],
-	);
-	if (!isVisibilityKey) return parts.join("/");
+	if (keyParts.rootIndex === -1) return keyParts.parts.join("/");
 
-	if (parts[1] !== constants.media.processedKey && parts[1]) {
-		return parts.slice(0, 2).join("/");
+	if (keyParts.identity) {
+		return keyParts.parts.slice(0, keyParts.identityIndex + 1).join("/");
 	}
 
-	if (parts[1] === constants.media.processedKey && parts[2]) {
-		return parts.slice(0, 3).join("/");
-	}
-
-	return parts.join("/");
+	return keyParts.parts.join("/");
 };
 
 export default normalizeMediaKey;

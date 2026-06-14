@@ -14,9 +14,11 @@ import type { MediaOrigin, MediaType } from "../../types/response.js";
 import type { Media } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
+import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
+import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compatibility.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
@@ -79,6 +81,15 @@ const createSingle: ServiceFn<
 	});
 	if (folderAccessRes.error) return folderAccessRes;
 
+	const mediaTenantKey = context.request.tenantKey ?? null;
+
+	const folderTenantRes = checkFolderTenantCompatibility({
+		folderId: data.folderId,
+		folderTenantKey: folderAccessRes.data?.tenant_key ?? null,
+		mediaTenantKey,
+	});
+	if (folderTenantRes.error) return folderTenantRes;
+
 	const awaitingSyncRes = await mediaServices.checks.checkAwaitingSync(
 		context,
 		{
@@ -93,10 +104,11 @@ const createSingle: ServiceFn<
 		allowedType: data.allowedType,
 	});
 	if (syncMediaRes.error) return syncMediaRes;
+	const mediaKey = syncMediaRes.data.key;
 
 	if (data.focalPoint !== undefined && syncMediaRes.data.type !== "image") {
 		await mediaServices.strategies.deleteObject(context, {
-			key: syncMediaRes.data.key,
+			key: mediaKey,
 			size: syncMediaRes.data.size,
 			processedSize: 0,
 		});
@@ -115,7 +127,7 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	const keyVisibility = getKeyVisibility(syncMediaRes.data.key);
+	const keyVisibility = getKeyVisibility(mediaKey);
 
 	//* we infer the public value based on the key so there cannot be drift between the media uploaded via the
 	//* upload endpoint and this media update endpoint which the SPA calls afterwards
@@ -138,7 +150,7 @@ const createSingle: ServiceFn<
 	const [mediaRes, deleteMediaSyncRes, mediaAdapter] = await Promise.all([
 		Media.createSingle({
 			data: {
-				key: syncMediaRes.data.key,
+				key: mediaKey,
 				poster_id: data.posterId ?? null,
 				e_tag: syncMediaRes.data.etag ?? undefined,
 				origin: data.origin,
@@ -167,7 +179,7 @@ const createSingle: ServiceFn<
 				is_light: data.isLight ?? null,
 				folder_id: data.folderId ?? null,
 				is_hidden: data.isHidden ?? false,
-				tenant_key: context.request.tenantKey ?? null,
+				tenant_key: mediaTenantKey,
 				created_by: data.userId,
 				updated_by: data.userId,
 				updated_at: new Date().toISOString(),
@@ -195,7 +207,12 @@ const createSingle: ServiceFn<
 
 	if (mediaRes.data === undefined) {
 		if (mediaAdapter.enabled) {
-			await mediaAdapter.adapter.delete(syncMediaRes.data.key);
+			await mediaAdapter.adapter.delete({
+				key: mediaKey,
+				context: {
+					tenant: resolveMediaKeyTenant(context.config, mediaKey),
+				},
+			});
 		}
 		return {
 			error: {
@@ -238,7 +255,12 @@ const createSingle: ServiceFn<
 		});
 		if (mediaTranslationsRes.error) {
 			if (mediaAdapter.enabled) {
-				await mediaAdapter.adapter.delete(syncMediaRes.data.key);
+				await mediaAdapter.adapter.delete({
+					key: mediaKey,
+					context: {
+						tenant: resolveMediaKeyTenant(context.config, mediaKey),
+					},
+				});
 			}
 			return mediaTranslationsRes;
 		}

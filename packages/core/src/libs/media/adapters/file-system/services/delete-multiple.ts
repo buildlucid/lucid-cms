@@ -9,9 +9,9 @@ import { keyPaths } from "../helpers.js";
 import { deleteStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
-	const deleteMultiple: MediaAdapterServiceDeleteMultiple = async (keys) => {
+	const deleteMultiple: MediaAdapterServiceDeleteMultiple = async (props) => {
 		try {
-			for (const key of keys) {
+			for (const key of props.keys) {
 				const { targetPath } = keyPaths(key, options.uploadDir);
 				try {
 					await access(targetPath, constants.F_OK);

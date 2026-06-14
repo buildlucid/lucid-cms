@@ -6,6 +6,7 @@ import {
 	generateProcessKey,
 	isProcessedImageKey,
 	normalizeMediaKey,
+	resolveMediaKeyTenant,
 	resolveProcessingRequest,
 } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -48,6 +49,7 @@ const streamMedia: ServiceFn<
 
 	const normalizedKey = normalizeMediaKey(data.key);
 	const isProcessedKey = isProcessedImageKey(normalizedKey);
+	const tenant = resolveMediaKeyTenant(context.config, normalizedKey);
 
 	if (isProcessedKey) {
 		return {
@@ -69,9 +71,13 @@ const streamMedia: ServiceFn<
 	});
 
 	if (!processingRequest.hasProcessing) {
-		const res = await mediaStrategyRes.data.stream(normalizedKey, {
+		const res = await mediaStrategyRes.data.stream({
+			key: normalizedKey,
 			ifNoneMatch: data.ifNoneMatch,
 			range: data.range,
+			context: {
+				tenant,
+			},
 		});
 		if (res.error) return res;
 		return {
@@ -94,7 +100,12 @@ const streamMedia: ServiceFn<
 	// Processed Image
 	let sourceExtension: string | null = processingRequest.format ?? null;
 	if (!sourceExtension) {
-		const metaRes = await mediaStrategyRes.data.getMeta(normalizedKey);
+		const metaRes = await mediaStrategyRes.data.getMeta({
+			key: normalizedKey,
+			context: {
+				tenant,
+			},
+		});
 		if (metaRes.error) return metaRes;
 		sourceExtension = mime.extension(metaRes.data.mimeType || "") || null;
 	}
@@ -110,9 +121,13 @@ const streamMedia: ServiceFn<
 		},
 	});
 
-	const res = await mediaStrategyRes.data.stream(processKey, {
+	const res = await mediaStrategyRes.data.stream({
+		key: processKey,
 		ifNoneMatch: data.ifNoneMatch,
 		range: data.range,
+		context: {
+			tenant: resolveMediaKeyTenant(context.config, processKey),
+		},
 	});
 	if (res.data) {
 		return {

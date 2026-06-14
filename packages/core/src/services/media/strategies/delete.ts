@@ -1,3 +1,4 @@
+import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices, optionServices } from "../../index.js";
 
@@ -15,8 +16,15 @@ const deleteObject: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
+	const tenant = resolveMediaKeyTenant(context.config, data.key);
+
 	const [_, updateStorageRes] = await Promise.all([
-		mediaStrategyRes.data.delete(data.key),
+		mediaStrategyRes.data.delete({
+			key: data.key,
+			context: {
+				tenant,
+			},
+		}),
 		optionServices.adjustInt(context, {
 			name: "media_storage_used",
 			delta: -(data.size + data.processedSize),

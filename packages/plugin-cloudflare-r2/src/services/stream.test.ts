@@ -18,8 +18,12 @@ describe("stream", () => {
 			} as unknown as R2Bucket,
 		});
 
-		const response = await service("public/uuid", {
+		const response = await service({
+			key: "public/uuid",
 			ifNoneMatch: '"etag"',
+			context: {
+				tenant: null,
+			},
 		});
 
 		expect(response.error).toBeUndefined();

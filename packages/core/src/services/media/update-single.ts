@@ -16,6 +16,7 @@ import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
+import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compatibility.js";
 import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
@@ -82,30 +83,9 @@ const updateSingle: ServiceFn<
 	});
 	if (folderAccessRes.error) return folderAccessRes;
 
-	const mediaRes = await Media.selectSingle({
-		select: [
-			"id",
-			"key",
-			"file_size",
-			"file_extension",
-			"public",
-			"type",
-			"e_tag",
-			"poster_id",
-		],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.id,
-			},
-			{
-				key: "tenant_key",
-				operator: "=",
-				value: context.request.tenantKey ?? null,
-				condition: context.request.tenantKey != null,
-			},
-		],
+	const mediaRes = await Media.selectSingleById({
+		id: data.id,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -115,6 +95,13 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (mediaRes.error) return mediaRes;
+
+	const folderTenantRes = checkFolderTenantCompatibility({
+		folderId: data.folderId,
+		folderTenantKey: folderAccessRes.data?.tenant_key ?? null,
+		mediaTenantKey: mediaRes.data.tenant_key,
+	});
+	if (folderTenantRes.error) return folderTenantRes;
 
 	if (data.focalPoint !== undefined && mediaRes.data.type !== "image") {
 		return {
@@ -186,6 +173,7 @@ const updateSingle: ServiceFn<
 			updatedKey: data.key,
 			allowedType: data.allowedType,
 			fileName: data.fileName,
+			//* The final media key remains the existing media key, so replacement uploads cannot reassign tenants.
 			targetKey:
 				targetPublic === currentPublic
 					? mediaRes.data.key
@@ -219,24 +207,26 @@ const updateSingle: ServiceFn<
 	}
 
 	//* if no new key/file provided but public flag differs, rename the key only
-	if (data.key === undefined && data.public !== undefined) {
-		if (currentPublic !== data.public) {
-			const targetVisibility = data.public
-				? constants.media.visibilityKeys.public
-				: constants.media.visibilityKeys.private;
-			const newKey = changeKeyVisibility({
-				key: mediaRes.data.key,
-				visibility: targetVisibility,
-			});
+	if (
+		data.key === undefined &&
+		data.public !== undefined &&
+		currentPublic !== data.public
+	) {
+		const targetVisibility = data.public
+			? constants.media.visibilityKeys.public
+			: constants.media.visibilityKeys.private;
+		const newKey = changeKeyVisibility({
+			key: mediaRes.data.key,
+			visibility: targetVisibility,
+		});
 
-			const renameRes = await mediaServices.strategies.rename(context, {
-				from: mediaRes.data.key,
-				to: newKey,
-			});
-			if (renameRes.error) return renameRes;
+		const renameRes = await mediaServices.strategies.rename(context, {
+			from: mediaRes.data.key,
+			to: newKey,
+		});
+		if (renameRes.error) return renameRes;
 
-			renamedKey = newKey;
-		}
+		renamedKey = newKey;
 	}
 
 	//* key visibility infered from either the new key, or if we're changing the visibility, the renamed key
@@ -317,10 +307,6 @@ const updateSingle: ServiceFn<
 		updated_by: data.userId,
 	};
 
-	if (data.folderId !== undefined && data.folderId !== null) {
-		updateData.tenant_key = folderAccessRes.data?.tenant_key ?? null;
-	}
-
 	const [mediaUpdateRes, mediaTranslationsRes, clearProcessedRes] =
 		await Promise.all([
 			Media.updateSingle({
@@ -329,12 +315,6 @@ const updateSingle: ServiceFn<
 						key: "id",
 						operator: "=",
 						value: data.id,
-					},
-					{
-						key: "tenant_key",
-						operator: "=",
-						value: context.request.tenantKey ?? null,
-						condition: context.request.tenantKey != null,
 					},
 				],
 				data: updateData,

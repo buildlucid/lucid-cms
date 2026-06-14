@@ -1,5 +1,8 @@
 import type { Readable } from "node:stream";
-import type { MediaAdapterServiceStream } from "../../../libs/media/types.js";
+import type {
+	MediaAdapterServiceContext,
+	MediaAdapterServiceStream,
+} from "../../../libs/media/types.js";
 
 const MIME_SNIFF_BYTES = 8192;
 
@@ -45,8 +48,11 @@ const readBodyChunk = async (body: {
 const detectStreamMimeType = async (
 	streamMedia: MediaAdapterServiceStream,
 	key: string,
+	context: MediaAdapterServiceContext,
 ) => {
-	const streamRes = await streamMedia(key, {
+	const streamRes = await streamMedia({
+		key,
+		context,
 		range: {
 			start: 0,
 			end: MIME_SNIFF_BYTES - 1,

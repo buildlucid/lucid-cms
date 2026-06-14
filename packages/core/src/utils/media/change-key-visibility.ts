@@ -1,5 +1,6 @@
-import constants from "../../constants/constants.js";
+import type constants from "../../constants/constants.js";
 import getKeyVisibility from "./get-key-visibility.js";
+import { getMediaKeyParts } from "./media-key-tenant.js";
 import normalizeMediaKey from "./normalize-media-key.js";
 
 type MediaVisibility =
@@ -12,13 +13,13 @@ const changeKeyVisibility = (data: {
 	const normalizedKey = normalizeMediaKey(data.key);
 	const current = getKeyVisibility(normalizedKey);
 	if (current === data.visibility) return normalizedKey;
-	const withoutPrefix = normalizedKey.replace(
-		new RegExp(
-			`^(${constants.media.visibilityKeys.public}|${constants.media.visibilityKeys.private})/`,
-		),
-		"",
-	);
-	return `${data.visibility}/${withoutPrefix}`;
+
+	const keyParts = getMediaKeyParts(normalizedKey);
+	const parts = [...keyParts.parts];
+	if (keyParts.visibilityIndex === -1) return normalizedKey;
+
+	parts[keyParts.visibilityIndex] = data.visibility;
+	return parts.join("/");
 };
 
 export default changeKeyVisibility;

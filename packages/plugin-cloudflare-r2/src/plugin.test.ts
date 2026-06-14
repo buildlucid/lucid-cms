@@ -81,16 +81,19 @@ describe("Cloudflare R2 plugin", () => {
 						};
 						media: {
 							adapter?: {
-								createUploadSession: (
-									key: string,
+								createUploadSession: (props: {
+									key: string;
 									meta: {
 										host: string;
 										secretKey: string;
 										mimeType: string;
 										extension?: string;
 										size: number;
-									},
-								) => Promise<{
+									};
+									context: {
+										tenant: null;
+									};
+								}) => Promise<{
 									error?: {
 										type: string;
 										message: string;
@@ -109,12 +112,18 @@ describe("Cloudflare R2 plugin", () => {
 				})()
 			: undefined;
 
-		const result = await adapter?.createUploadSession("public/test.png", {
-			host: "https://example.com",
-			secretKey: "a".repeat(64),
-			mimeType: "image/png",
-			extension: "png",
-			size: 1024,
+		const result = await adapter?.createUploadSession({
+			key: "public/test.png",
+			meta: {
+				host: "https://example.com",
+				secretKey: "a".repeat(64),
+				mimeType: "image/png",
+				extension: "png",
+				size: 1024,
+			},
+			context: {
+				tenant: null,
+			},
 		});
 
 		expect(result?.error).toBeUndefined();

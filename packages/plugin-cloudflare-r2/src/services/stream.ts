@@ -3,13 +3,13 @@ import type { MediaAdapterServiceStream } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 
 const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
-	return async (key, options) => {
+	return async ({ key, range, ifNoneMatch }) => {
 		try {
-			if (!options?.range) {
-				if (options?.ifNoneMatch) {
+			if (!range) {
+				if (ifNoneMatch) {
 					const object = await pluginOptions.binding.get(key, {
 						onlyIf: new Headers({
-							"If-None-Match": options.ifNoneMatch,
+							"If-None-Match": ifNoneMatch,
 						}),
 					});
 
@@ -81,8 +81,8 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 				};
 			}
 
-			const start = options.range.start;
-			const end = options.range.end ?? meta.size - 1;
+			const start = range.start;
+			const end = range.end ?? meta.size - 1;
 
 			const object = await pluginOptions.binding.get(key, {
 				range: {

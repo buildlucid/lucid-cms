@@ -3,7 +3,7 @@ import type { MediaAdapterServiceCreateUploadSession } from "@lucidcms/core/type
 import type { AwsClient } from "aws4fetch";
 import { DEFAULT_PART_SIZE, PRESIGNED_URL_EXPIRY } from "../../constants.js";
 import type { PluginOptions } from "../../types/types.js";
-import { applyMetadataHeaders } from "../metadata-headers.js";
+import { applyMetadataHeaders } from "../../utils/metadata-headers.js";
 import {
 	createSingleUploadSession,
 	extractXmlValue,
@@ -18,7 +18,7 @@ export const createUploadSession = (
 	client: AwsClient,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceCreateUploadSession => {
-	return async (key, meta) => {
+	return async ({ key, meta }) => {
 		try {
 			if (meta.size === 0) {
 				return {

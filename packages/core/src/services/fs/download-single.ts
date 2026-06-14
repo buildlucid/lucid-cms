@@ -3,6 +3,7 @@ import type {
 	FileSystemMediaAdapterOptions,
 	MediaAdapterStreamBody,
 } from "../../libs/media/types.js";
+import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import { validatePresignedToken } from "./checks/index.js";
@@ -43,7 +44,12 @@ const downloadSingle: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const streamRes = await mediaStrategyRes.data.stream(data.key);
+	const streamRes = await mediaStrategyRes.data.stream({
+		key: data.key,
+		context: {
+			tenant: resolveMediaKeyTenant(context.config, data.key),
+		},
+	});
 	if (streamRes.error) return streamRes;
 
 	return {

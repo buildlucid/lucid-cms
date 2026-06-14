@@ -2,7 +2,6 @@ import { copy } from "../../libs/i18n/index.js";
 import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "./checks/check-folder-access.js";
-import checkFolderOwnership from "./checks/check-folder-ownership.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -38,7 +37,7 @@ const updateSingle: ServiceFn<
 		};
 	}
 
-	const folderAccessRes = await checkFolderOwnership(context, {
+	const folderAccessRes = await checkFolderAccess(context, {
 		folderId: data.id,
 	});
 	if (folderAccessRes.error) return folderAccessRes;
@@ -47,6 +46,31 @@ const updateSingle: ServiceFn<
 		folderId: data.parentFolderId,
 	});
 	if (parentFolderAccessRes.error) return parentFolderAccessRes;
+
+	//* A global folder nested under a tenant folder would disappear for other tenants.
+	if (
+		folderAccessRes.data?.tenant_key === null &&
+		parentFolderAccessRes.data?.tenant_key !== undefined &&
+		parentFolderAccessRes.data.tenant_key !== null
+	) {
+		return {
+			error: {
+				message: copy("server:core.media.folders.parents.tenant.mismatch"),
+				status: 400,
+				errors: {
+					fields: [
+						{
+							key: "parentFolderId",
+							message: copy(
+								"server:core.media.folders.parents.tenant.mismatch",
+							),
+						},
+					],
+				},
+			},
+			data: undefined,
+		};
+	}
 
 	if (data.parentFolderId) {
 		const circularParentsRes = await MediaFolders.checkCircularParents({
@@ -87,12 +111,6 @@ const updateSingle: ServiceFn<
 				key: "id",
 				operator: "=",
 				value: data.id,
-			},
-			{
-				key: "tenant_key",
-				operator: "=",
-				value: context.request.tenantKey ?? null,
-				condition: context.request.tenantKey != null,
 			},
 		],
 		returning: ["id"],
