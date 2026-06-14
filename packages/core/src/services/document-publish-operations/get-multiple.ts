@@ -57,6 +57,7 @@ const getMultiple: ServiceFn<
 		where,
 		queryParams: data.query,
 		assignedTo: assignedToMe ? data.user.id : undefined,
+		tenantKey: context.request.tenantKey,
 		reviewerIds:
 			reviewerIds === undefined
 				? undefined

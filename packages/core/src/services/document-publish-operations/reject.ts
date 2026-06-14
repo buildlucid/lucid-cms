@@ -22,6 +22,7 @@ const reject: ServiceFn<
 		context.config.db,
 	);
 	const operationRes = await Operations.selectSingleDetailed({
+		tenantKey: context.request.tenantKey,
 		where: [
 			{
 				key: "lucid_document_publish_operations.id",

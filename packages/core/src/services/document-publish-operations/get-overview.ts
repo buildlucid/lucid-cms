@@ -23,6 +23,7 @@ const getOverview: ServiceFn<
 		userId: data.user.id,
 		collectionKey: data.query.filter?.collectionKey?.value?.toString(),
 		target: data.query.filter?.target?.value?.toString(),
+		tenantKey: context.request.tenantKey,
 	});
 	if (overviewRes.error) return overviewRes;
 

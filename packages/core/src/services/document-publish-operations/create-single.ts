@@ -3,6 +3,7 @@ import { copy } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationAssigneesRepository,
 	DocumentPublishOperationsRepository,
+	DocumentsRepository,
 	DocumentVersionsRepository,
 	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
@@ -242,6 +243,10 @@ const createSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+	const Documents = new DocumentsRepository(
+		context.db.client,
+		context.config.db,
+	);
 	const Operations = new DocumentPublishOperationsRepository(
 		context.db.client,
 		context.config.db,
@@ -258,7 +263,31 @@ const createSingle: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const [latestVersionRes, activeRes] = await Promise.all([
+	const [documentRes, latestVersionRes, activeRes] = await Promise.all([
+		Documents.selectSingle(
+			{
+				select: ["id", "tenant_key"],
+				where: [
+					{ key: "id", operator: "=", value: data.documentId },
+					{ key: "collection_key", operator: "=", value: data.collectionKey },
+					{
+						key: "is_deleted",
+						operator: "=",
+						value: context.config.db.getDefault("boolean", "false"),
+					},
+				],
+				validation: {
+					enabled: true,
+					defaultError: {
+						message: copy("server:core.documents.not.found.message"),
+						status: 404,
+					},
+				},
+			},
+			{
+				tableName: tableNamesRes.data.document,
+			},
+		),
 		Versions.selectSingle(
 			{
 				select: ["id", "content_id"],
@@ -305,8 +334,24 @@ const createSingle: ServiceFn<
 			],
 		}),
 	]);
+	if (documentRes.error) return documentRes;
 	if (latestVersionRes.error) return latestVersionRes;
 	if (activeRes.error) return activeRes;
+
+	if (
+		documentRes.data.tenant_key &&
+		context.request.tenantKey &&
+		documentRes.data.tenant_key !== context.request.tenantKey
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.documents.not.found.message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
 
 	// Retire any unresolved operation for this document and target before creating the new release.
 	if (activeRes.data) {
@@ -331,6 +376,7 @@ const createSingle: ServiceFn<
 
 		const [activeDetailedRes, supersedeRes] = await Promise.all([
 			Operations.selectSingleDetailed({
+				tenantKey: context.request.tenantKey,
 				where: [
 					{
 						key: "lucid_document_publish_operations.id",
@@ -427,6 +473,7 @@ const createSingle: ServiceFn<
 	const operationRes = await Operations.createSingle({
 		data: {
 			collection_key: data.collectionKey,
+			tenant_key: documentRes.data.tenant_key,
 			document_id: data.documentId,
 			target: data.target,
 			operation_type: operationType,

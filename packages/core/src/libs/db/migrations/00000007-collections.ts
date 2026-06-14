@@ -66,6 +66,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
 					col.notNull().references("lucid_collections.key").onDelete("cascade"),
 				)
+				.addColumn("tenant_key", adapter.getDataType("text"))
 				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
@@ -182,6 +183,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 						),
 					),
 				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_publish_operations_tenant_key")
+				.on("lucid_document_publish_operations")
+				.column("tenant_key")
 				.execute();
 
 			await db.schema

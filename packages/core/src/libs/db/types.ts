@@ -550,6 +550,7 @@ export type DocumentPublishOperationEventType =
 export interface LucidDocumentPublishOperations {
 	id: Generated<number>;
 	collection_key: string;
+	tenant_key: string | null;
 	document_id: number;
 	target: string;
 	operation_type: DocumentPublishOperationType;
