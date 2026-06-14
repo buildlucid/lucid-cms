@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import type { LucidMedia, Update } from "../../libs/db/types.js";
 import formatter from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -14,6 +15,7 @@ import changeKeyVisibility from "../../utils/media/change-key-visibility.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
+import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
@@ -75,6 +77,11 @@ const updateSingle: ServiceFn<
 		context.config.db,
 	);
 
+	const folderAccessRes = await checkFolderAccess(context, {
+		folderId: data.folderId,
+	});
+	if (folderAccessRes.error) return folderAccessRes;
+
 	const mediaRes = await Media.selectSingle({
 		select: [
 			"id",
@@ -91,6 +98,12 @@ const updateSingle: ServiceFn<
 				key: "id",
 				operator: "=",
 				value: data.id,
+			},
+			{
+				key: "tenant_key",
+				operator: "=",
+				value: context.request.tenantKey ?? null,
+				condition: context.request.tenantKey != null,
 			},
 		],
 		validation: {
@@ -253,60 +266,78 @@ const updateSingle: ServiceFn<
 	});
 	if (aiGenerationRes.error) return aiGenerationRes;
 
+	const updateData: Partial<Update<LucidMedia>> = {
+		key: updateObjectRes?.key ?? renamedKey,
+		e_tag: updateObjectRes?.etag,
+		origin: data.origin,
+		ai_generation_id: aiGenerationRes.data,
+		type: updateObjectRes?.type,
+		mime_type: updateObjectRes?.mimeType,
+		file_extension: updateObjectRes?.extension,
+		file_name: data.fileName,
+		file_size: updateObjectRes?.size,
+		width: data.width,
+		height: data.height,
+		focal_x:
+			finalType !== "image"
+				? null
+				: data.focalPoint === undefined
+					? undefined
+					: data.focalPoint === null
+						? null
+						: Math.round(data.focalPoint.x * 10000),
+		focal_y:
+			finalType !== "image"
+				? null
+				: data.focalPoint === undefined
+					? undefined
+					: data.focalPoint === null
+						? null
+						: Math.round(data.focalPoint.y * 10000),
+		blur_hash: data.blurHash,
+		average_color: data.averageColor,
+		base64: finalType !== "image" ? null : data.base64,
+		is_dark: data.isDark,
+		is_light: data.isLight,
+		folder_id: data.folderId,
+		poster_id: data.posterId,
+		public: isPublic ?? data.public,
+		is_deleted: data.isDeleted,
+		is_deleted_at: data.isDeleted
+			? new Date().toISOString()
+			: data.isDeleted === false
+				? null
+				: undefined,
+		deleted_by: data.isDeleted
+			? data.userId
+			: data.isDeleted === false
+				? null
+				: undefined,
+		updated_at: new Date().toISOString(),
+		updated_by: data.userId,
+	};
+
+	if (data.folderId !== undefined && data.folderId !== null) {
+		updateData.tenant_key = folderAccessRes.data?.tenant_key ?? null;
+	}
+
 	const [mediaUpdateRes, mediaTranslationsRes, clearProcessedRes] =
 		await Promise.all([
 			Media.updateSingle({
-				where: [{ key: "id", operator: "=", value: data.id }],
-				data: {
-					key: updateObjectRes?.key ?? renamedKey,
-					e_tag: updateObjectRes?.etag,
-					origin: data.origin,
-					ai_generation_id: aiGenerationRes.data,
-					type: updateObjectRes?.type,
-					mime_type: updateObjectRes?.mimeType,
-					file_extension: updateObjectRes?.extension,
-					file_name: data.fileName,
-					file_size: updateObjectRes?.size,
-					width: data.width,
-					height: data.height,
-					focal_x:
-						finalType !== "image"
-							? null
-							: data.focalPoint === undefined
-								? undefined
-								: data.focalPoint === null
-									? null
-									: Math.round(data.focalPoint.x * 10000),
-					focal_y:
-						finalType !== "image"
-							? null
-							: data.focalPoint === undefined
-								? undefined
-								: data.focalPoint === null
-									? null
-									: Math.round(data.focalPoint.y * 10000),
-					blur_hash: data.blurHash,
-					average_color: data.averageColor,
-					base64: finalType !== "image" ? null : data.base64,
-					is_dark: data.isDark,
-					is_light: data.isLight,
-					folder_id: data.folderId,
-					poster_id: data.posterId,
-					public: isPublic ?? data.public,
-					is_deleted: data.isDeleted,
-					is_deleted_at: data.isDeleted
-						? new Date().toISOString()
-						: data.isDeleted === false
-							? null
-							: undefined,
-					deleted_by: data.isDeleted
-						? data.userId
-						: data.isDeleted === false
-							? null
-							: undefined,
-					updated_at: new Date().toISOString(),
-					updated_by: data.userId,
-				},
+				where: [
+					{
+						key: "id",
+						operator: "=",
+						value: data.id,
+					},
+					{
+						key: "tenant_key",
+						operator: "=",
+						value: context.request.tenantKey ?? null,
+						condition: context.request.tenantKey != null,
+					},
+				],
+				data: updateData,
 				returning: ["id"],
 				validation: {
 					enabled: true,

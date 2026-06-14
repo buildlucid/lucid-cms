@@ -29,6 +29,7 @@ const getMultiple: ServiceFn<
 	const [foldersRes, breadcrumbsRes] = await Promise.all([
 		MediaFolders.selectMultipleWithCounts({
 			queryParams: data.query,
+			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 			},
@@ -36,6 +37,7 @@ const getMultiple: ServiceFn<
 		searchBreadcrumbs
 			? MediaFolders.getBreadcrumb({
 					folderId: parsedId,
+					tenantKey: context.request.tenantKey,
 				})
 			: undefined,
 	]);

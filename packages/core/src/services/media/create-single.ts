@@ -16,6 +16,7 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
+import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
@@ -72,6 +73,11 @@ const createSingle: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
+
+	const folderAccessRes = await checkFolderAccess(context, {
+		folderId: data.folderId,
+	});
+	if (folderAccessRes.error) return folderAccessRes;
 
 	const awaitingSyncRes = await mediaServices.checks.checkAwaitingSync(
 		context,

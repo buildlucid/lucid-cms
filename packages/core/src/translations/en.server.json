@@ -466,6 +466,7 @@
 	"core.license.is.invalid": "License is invalid.",
 	"core.license.verification.unknown.error": "Unknown verification error.",
 	"core.license.is.not.set": "License is not set.",
+	"core.media.folders.not.found.message": "The media folder you are trying to access does not exist.",
 	"core.media.folders.parents.circular": "The media folder cannot be a parent of itself.",
 	"core.media.move.deleted.denied": "You cannot move media that has been deleted.",
 	"core.files.not.found": "File not found.",

@@ -1,5 +1,6 @@
 import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkFolderAccess from "./checks/check-folder-access.js";
 
 const createSingle: ServiceFn<
 	[
@@ -16,10 +17,16 @@ const createSingle: ServiceFn<
 		context.config.db,
 	);
 
+	const parentFolderAccessRes = await checkFolderAccess(context, {
+		folderId: data.parentFolderId,
+	});
+	if (parentFolderAccessRes.error) return parentFolderAccessRes;
+
 	const newMediaFolderRes = await MediaFolders.createSingle({
 		data: {
 			title: data.title,
-			parent_folder_id: data.parentFolderId,
+			tenant_key: context.request.tenantKey ?? null,
+			parent_folder_id: data.parentFolderId ?? null,
 			created_by: data.userId,
 		},
 		returning: ["id"],

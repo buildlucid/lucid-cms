@@ -1,6 +1,8 @@
 import { copy } from "../../libs/i18n/index.js";
 import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkFolderAccess from "./checks/check-folder-access.js";
+import checkFolderOwnership from "./checks/check-folder-ownership.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -36,10 +38,21 @@ const updateSingle: ServiceFn<
 		};
 	}
 
+	const folderAccessRes = await checkFolderOwnership(context, {
+		folderId: data.id,
+	});
+	if (folderAccessRes.error) return folderAccessRes;
+
+	const parentFolderAccessRes = await checkFolderAccess(context, {
+		folderId: data.parentFolderId,
+	});
+	if (parentFolderAccessRes.error) return parentFolderAccessRes;
+
 	if (data.parentFolderId) {
 		const circularParentsRes = await MediaFolders.checkCircularParents({
 			folderId: data.id,
 			parentFolderId: data.parentFolderId,
+			tenantKey: context.request.tenantKey,
 		});
 		if (circularParentsRes.error) return circularParentsRes;
 
@@ -74,6 +87,12 @@ const updateSingle: ServiceFn<
 				key: "id",
 				operator: "=",
 				value: data.id,
+			},
+			{
+				key: "tenant_key",
+				operator: "=",
+				value: context.request.tenantKey ?? null,
+				condition: context.request.tenantKey != null,
 			},
 		],
 		returning: ["id"],

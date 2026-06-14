@@ -622,6 +622,7 @@ export interface LucidDocumentWorkflowAssignees {
 export interface LucidMediaFolders {
 	id: Generated<number>;
 	title: string;
+	tenant_key: string | null;
 	parent_folder_id: number | null;
 	created_by: number | null;
 	updated_by: number | null;

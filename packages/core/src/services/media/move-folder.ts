@@ -3,6 +3,7 @@ import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 
 const moveFolder: ServiceFn<
@@ -17,15 +18,14 @@ const moveFolder: ServiceFn<
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db.client, context.config.db);
 
-	const mediaRes = await Media.selectSingle({
-		select: ["id", "folder_id", "is_deleted"],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.id,
-			},
-		],
+	const folderAccessRes = await checkFolderAccess(context, {
+		folderId: data.folderId,
+	});
+	if (folderAccessRes.error) return folderAccessRes;
+
+	const mediaRes = await Media.selectSingleById({
+		id: data.id,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -46,6 +46,19 @@ const moveFolder: ServiceFn<
 		};
 	}
 
+	const updateData: {
+		folder_id: number | null;
+		updated_by: number;
+		tenant_key?: string | null;
+	} = {
+		folder_id: data.folderId,
+		updated_by: data.userId,
+	};
+
+	if (data.folderId !== null) {
+		updateData.tenant_key = folderAccessRes.data?.tenant_key ?? null;
+	}
+
 	const mediaUpdateRes = await Media.updateSingle({
 		where: [
 			{
@@ -53,11 +66,14 @@ const moveFolder: ServiceFn<
 				operator: "=",
 				value: data.id,
 			},
+			{
+				key: "tenant_key",
+				operator: "=",
+				value: context.request.tenantKey ?? null,
+				condition: context.request.tenantKey != null,
+			},
 		],
-		data: {
-			folder_id: data.folderId,
-			updated_by: data.userId,
-		},
+		data: updateData,
 		returning: ["id"],
 		validation: {
 			enabled: true,

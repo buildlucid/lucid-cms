@@ -14,6 +14,8 @@ export type QueryBuilderWhere<Table extends keyof LucidDB> = Array<{
 	key: ReferenceExpression<LucidDB, Table>;
 	operator: ComparisonOperatorExpression;
 	value: OperandValueExpressionOrList<LucidDB, Table, keyof Table>;
+	/** Skips this where clause when false, useful for optional service filters. */
+	condition?: boolean | (() => boolean);
 }>;
 
 export default {

@@ -1,3 +1,4 @@
+export * as checks from "./checks/index.js";
 export { default as createSingle } from "./create-single.js";
 export { default as deleteSingle } from "./delete-single.js";
 export { default as getHierarchy } from "./get-hierarchy.js";

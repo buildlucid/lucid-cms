@@ -8,7 +8,11 @@ const deleteQueryBuilder = <Table extends keyof LucidDB, O>(
 ) => {
 	let kyselyQuery = query;
 
-	for (const { key, operator, value } of where) {
+	for (const { key, operator, value, condition } of where) {
+		const shouldApply =
+			typeof condition === "function" ? condition() : condition;
+		if (shouldApply === false) continue;
+
 		kyselyQuery = kyselyQuery.where(key, operator, value);
 	}
 

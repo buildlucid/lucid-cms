@@ -41,6 +41,8 @@ const deleteBatch: ServiceFn<
 	if (data.recursiveMedia && data.folderIds && data.folderIds.length > 0) {
 		const execFolders = await MediaFolders.getDescendantIds({
 			folderIds: data.folderIds,
+			tenantKey: context.request.tenantKey,
+			scope: "owner",
 		});
 		if (execFolders.error) return execFolders;
 
@@ -51,7 +53,15 @@ const deleteBatch: ServiceFn<
 		...(data.mediaIds && data.mediaIds.length > 0
 			? [
 					Media.updateMultiple({
-						where: [{ key: "id", operator: "in", value: data.mediaIds }],
+						where: [
+							{ key: "id", operator: "in", value: data.mediaIds },
+							{
+								key: "tenant_key",
+								operator: "=",
+								value: context.request.tenantKey ?? null,
+								condition: context.request.tenantKey != null,
+							},
+						],
 						data: {
 							is_deleted: true,
 							is_deleted_at: new Date().toISOString(),
@@ -66,6 +76,12 @@ const deleteBatch: ServiceFn<
 					Media.updateMultiple({
 						where: [
 							{ key: "folder_id", operator: "in", value: descendantFolderIds },
+							{
+								key: "tenant_key",
+								operator: "=",
+								value: context.request.tenantKey ?? null,
+								condition: context.request.tenantKey != null,
+							},
 						],
 						data: {
 							is_deleted: true,
@@ -97,7 +113,19 @@ const deleteBatch: ServiceFn<
 	//* folders are deleted after otherwise we would orphan media before being able to mark them as deleted
 	if (data.folderIds && data.folderIds.length > 0) {
 		const delFoldersRes = await MediaFolders.deleteMultiple({
-			where: [{ key: "id", operator: "in", value: data.folderIds }],
+			where: [
+				{
+					key: "id",
+					operator: "in",
+					value: data.folderIds,
+				},
+				{
+					key: "tenant_key",
+					operator: "=",
+					value: context.request.tenantKey ?? null,
+					condition: context.request.tenantKey != null,
+				},
+			],
 			validation: { enabled: false },
 		});
 		if (delFoldersRes.error) return delFoldersRes;
