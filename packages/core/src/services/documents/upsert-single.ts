@@ -82,33 +82,11 @@ const upsertSingle: ServiceFn<
 
 	//* check if document exists within the collection
 	if (data.documentId !== undefined) {
-		const existingDocumentRes = await Document.selectSingle(
-			{
-				select: ["id"],
-				where: [
-					{
-						key: "id",
-						operator: "=",
-						value: data.documentId,
-					},
-					{
-						key: "collection_key",
-						operator: "=",
-						value: data.collectionKey,
-					},
-				],
-				validation: {
-					enabled: true,
-					defaultError: {
-						message: copy("server:core.documents.not.found.message"),
-						status: 404,
-					},
-				},
-			},
-			{
-				tableName: tableNamesRes.data.document,
-			},
-		);
+		const existingDocumentRes =
+			await documentServices.checks.checkDocumentAccess(context, {
+				collectionKey: data.collectionKey,
+				id: data.documentId,
+			});
 		if (existingDocumentRes.error) return existingDocumentRes;
 	}
 

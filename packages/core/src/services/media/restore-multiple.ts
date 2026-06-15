@@ -3,6 +3,7 @@ import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { mediaServices } from "../index.js";
 import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 
 const restoreMultiple: ServiceFn<
@@ -18,6 +19,11 @@ const restoreMultiple: ServiceFn<
 	}
 
 	const Media = new MediaRepository(context.db.client, context.config.db);
+
+	const accessRes = await mediaServices.checks.checkMediaAccess(context, {
+		ids: data.ids,
+	});
+	if (accessRes.error) return accessRes;
 
 	const existRes = await Media.selectMultiple({
 		select: ["id"],

@@ -20,6 +20,12 @@ const deleteSingle: ServiceFn<
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const Media = new MediaRepository(context.db.client, context.config.db);
+
+	const accessRes = await mediaServices.checks.checkMediaAccess(context, {
+		id: data.id,
+	});
+	if (accessRes.error) return accessRes;
+
 	const deleteMediaRes = await Media.updateSingle({
 		where: [
 			{

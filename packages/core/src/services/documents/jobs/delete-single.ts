@@ -32,6 +32,12 @@ const deleteDocument: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
+	const accessRes = await documentServices.checks.checkDocumentAccess(context, {
+		collectionKey: data.collectionKey,
+		id: data.id,
+	});
+	if (accessRes.error) return accessRes;
+
 	const getDocumentRes = await Documents.selectSingle(
 		{
 			select: ["id"],

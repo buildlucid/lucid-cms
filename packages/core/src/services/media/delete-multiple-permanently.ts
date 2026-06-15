@@ -2,6 +2,7 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { mediaServices } from "../index.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 
 const deleteMultiplePermanently: ServiceFn<
@@ -21,6 +22,11 @@ const deleteMultiplePermanently: ServiceFn<
 	}
 
 	const Media = new MediaRepository(context.db.client, context.config.db);
+
+	const accessRes = await mediaServices.checks.checkMediaAccess(context, {
+		ids: data.ids,
+	});
+	if (accessRes.error) return accessRes;
 
 	const existRes = await Media.selectMultiple({
 		select: ["id"],

@@ -1,10 +1,10 @@
-import { copy } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import {
 	ClientIntegrationScopesRepository,
 	ClientIntegrationsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkIntegrationAccess from "./checks/check-integration-access.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -27,22 +27,8 @@ const updateSingle: ServiceFn<
 		context.config.db,
 	);
 
-	const checkExistsRes = await ClientIntegrations.selectSingle({
-		select: ["id", "key"],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.id,
-			},
-		],
-		validation: {
-			enabled: true,
-			defaultError: {
-				message: copy("server:core.client.integrations.not.found.message"),
-				status: 404,
-			},
-		},
+	const checkExistsRes = await checkIntegrationAccess(context, {
+		id: data.id,
 	});
 	if (checkExistsRes.error) return checkExistsRes;
 

@@ -16,6 +16,7 @@ const getSingle: ServiceFn<
 
 	const roleRes = await Roles.selectSingleById({
 		id: data.id,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -25,21 +26,6 @@ const getSingle: ServiceFn<
 		},
 	});
 	if (roleRes.error) return roleRes;
-
-	if (
-		roleRes.data.tenant_key &&
-		context.request.tenantKey &&
-		roleRes.data.tenant_key !== context.request.tenantKey
-	) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.roles.not.found.message"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
 
 	return {
 		error: undefined,

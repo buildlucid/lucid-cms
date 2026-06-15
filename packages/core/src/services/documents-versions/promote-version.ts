@@ -16,7 +16,11 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import invalidateClientDocumentCache from "../documents/helpers/invalidate-client-cache.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
-import { collectionServices, documentBrickServices } from "../index.js";
+import {
+	collectionServices,
+	documentBrickServices,
+	documentServices,
+} from "../index.js";
 
 const promoteVersion: ServiceFn<
 	[
@@ -101,6 +105,15 @@ const promoteVersion: ServiceFn<
 
 	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
+
+	const documentAccessRes = await documentServices.checks.checkDocumentAccess(
+		context,
+		{
+			collectionKey: data.collectionKey,
+			id: data.documentId,
+		},
+	);
+	if (documentAccessRes.error) return documentAccessRes;
 
 	const [versionRes, bricksQueryRes] = await Promise.all([
 		Versions.selectSingle(

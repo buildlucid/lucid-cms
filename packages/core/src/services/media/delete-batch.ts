@@ -7,6 +7,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
+import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 
 const deleteBatch: ServiceFn<
@@ -37,31 +38,60 @@ const deleteBatch: ServiceFn<
 		return { error: undefined, data: undefined };
 	}
 
+	if (data.mediaIds && data.mediaIds.length > 0) {
+		const mediaAccessRes = await mediaServices.checks.checkMediaAccess(
+			context,
+			{
+				ids: data.mediaIds,
+			},
+		);
+		if (mediaAccessRes.error) return mediaAccessRes;
+	}
+
+	if (data.folderIds && data.folderIds.length > 0) {
+		const folderAccessResults = await Promise.all(
+			data.folderIds.map((folderId) =>
+				checkFolderAccess(context, {
+					folderId,
+				}),
+			),
+		);
+		const folderAccessError = folderAccessResults.find((res) => res.error);
+		if (folderAccessError?.error) {
+			return {
+				error: folderAccessError.error,
+				data: undefined,
+			};
+		}
+	}
+
 	let descendantFolderIds: number[] = [];
 	if (data.recursiveMedia && data.folderIds && data.folderIds.length > 0) {
 		const execFolders = await MediaFolders.getDescendantIds({
 			folderIds: data.folderIds,
 			tenantKey: context.request.tenantKey,
-			scope: "owner",
+			scope: "read",
 		});
 		if (execFolders.error) return execFolders;
 
 		descendantFolderIds = execFolders.data.map((r) => r.id);
 	}
 
+	const recursiveMediaIds =
+		data.recursiveMedia && descendantFolderIds.length > 0
+			? await Media.selectMultipleIdsByFolderIds({
+					folderIds: descendantFolderIds,
+					tenantKey: context.request.tenantKey,
+					validation: { enabled: true },
+				})
+			: undefined;
+	if (recursiveMediaIds?.error) return recursiveMediaIds;
+
 	const updates = [
 		...(data.mediaIds && data.mediaIds.length > 0
 			? [
 					Media.updateMultiple({
-						where: [
-							{ key: "id", operator: "in", value: data.mediaIds },
-							{
-								key: "tenant_key",
-								operator: "=",
-								value: context.request.tenantKey ?? null,
-								condition: context.request.tenantKey != null,
-							},
-						],
+						where: [{ key: "id", operator: "in", value: data.mediaIds }],
 						data: {
 							is_deleted: true,
 							is_deleted_at: new Date().toISOString(),
@@ -71,16 +101,14 @@ const deleteBatch: ServiceFn<
 					}),
 				]
 			: []),
-		...(data.recursiveMedia && descendantFolderIds.length > 0
+		...(recursiveMediaIds !== undefined && recursiveMediaIds.data.length > 0
 			? [
 					Media.updateMultiple({
 						where: [
-							{ key: "folder_id", operator: "in", value: descendantFolderIds },
 							{
-								key: "tenant_key",
-								operator: "=",
-								value: context.request.tenantKey ?? null,
-								condition: context.request.tenantKey != null,
+								key: "id",
+								operator: "in",
+								value: recursiveMediaIds.data.map((media) => media.id),
 							},
 						],
 						data: {
@@ -118,12 +146,6 @@ const deleteBatch: ServiceFn<
 					key: "id",
 					operator: "in",
 					value: data.folderIds,
-				},
-				{
-					key: "tenant_key",
-					operator: "=",
-					value: context.request.tenantKey ?? null,
-					condition: context.request.tenantKey != null,
 				},
 			],
 			validation: { enabled: false },

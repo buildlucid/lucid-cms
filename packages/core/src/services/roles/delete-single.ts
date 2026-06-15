@@ -3,6 +3,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { RolesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import checkRoleAccess from "./checks/check-role-access.js";
 
 const deleteSingle: ServiceFn<
 	[
@@ -14,18 +15,8 @@ const deleteSingle: ServiceFn<
 > = async (context, data) => {
 	const Roles = new RolesRepository(context.db.client, context.config.db);
 
-	const roleRes = await Roles.selectSingle({
-		select: ["id", "locked"],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.id,
-			},
-		],
-		validation: {
-			enabled: true,
-		},
+	const roleRes = await checkRoleAccess(context, {
+		id: data.id,
 	});
 	if (roleRes.error) return roleRes;
 

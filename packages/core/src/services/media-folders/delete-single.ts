@@ -1,6 +1,6 @@
 import { MediaFoldersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import checkFolderOwnership from "./checks/check-folder-ownership.js";
+import checkFolderAccess from "./checks/check-folder-access.js";
 
 const deleteSingle: ServiceFn<
 	[
@@ -15,7 +15,7 @@ const deleteSingle: ServiceFn<
 		context.config.db,
 	);
 
-	const folderAccessRes = await checkFolderOwnership(context, {
+	const folderAccessRes = await checkFolderAccess(context, {
 		folderId: data.id,
 	});
 	if (folderAccessRes.error) return folderAccessRes;
@@ -26,12 +26,6 @@ const deleteSingle: ServiceFn<
 				key: "id",
 				operator: "=",
 				value: data.id,
-			},
-			{
-				key: "tenant_key",
-				operator: "=",
-				value: context.request.tenantKey ?? null,
-				condition: context.request.tenantKey != null,
 			},
 		],
 		returning: ["id"],

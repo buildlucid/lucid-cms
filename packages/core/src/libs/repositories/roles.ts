@@ -151,6 +151,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			V,
 			{
 				id: number;
+				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -196,7 +197,13 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 					)
 					.as("permissions"),
 			])
-			.where("id", "=", props.id);
+			.where("id", "=", props.id)
+			.$call((qb) =>
+				queryBuilder.tenantScope(qb, {
+					tenantKey: props.tenantKey,
+					column: "lucid_roles.tenant_key",
+				}),
+			);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",

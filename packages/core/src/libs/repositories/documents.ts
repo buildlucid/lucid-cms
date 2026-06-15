@@ -1221,6 +1221,49 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
+	/**
+	 * Fetches document IDs for collection-level checks using tenant visibility.
+	 * Single collections use this so each tenant can have its own document.
+	 */
+	async selectMultipleCollectionDocumentIds<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				collectionKey: string;
+				tenantKey?: string | null;
+				isDeleted?: Select<LucidDocumentTable>["is_deleted"];
+			}
+		>,
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		let query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.select("id")
+			.where("collection_key", "=", props.collectionKey);
+
+		if (props.isDeleted !== undefined) {
+			query = query.where("is_deleted", "=", props.isDeleted);
+		}
+
+		query = queryBuilder.tenantScope(query, {
+			tenantKey: props.tenantKey,
+			column: `${dynamicConfig.tableName}.tenant_key`,
+		});
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectMultipleCollectionDocumentIds",
+			tableName: dynamicConfig.tableName,
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: ["id"],
+			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
+
 	async selectMultipleUnion(props: { tables: LucidDocumentTableName[] }) {
 		if (props.tables.length === 0) {
 			return {

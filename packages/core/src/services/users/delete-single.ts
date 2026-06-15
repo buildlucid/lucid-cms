@@ -26,7 +26,13 @@ const deleteSingle: ServiceFn<
 		};
 	}
 
-	await userServices.checks.checkNotLastUser(context);
+	const accessRes = await userServices.checks.checkUserAccess(context, {
+		id: data.userId,
+	});
+	if (accessRes.error) return accessRes;
+
+	const notLastUserRes = await userServices.checks.checkNotLastUser(context);
+	if (notLastUserRes.error) return notLastUserRes;
 
 	const deleteUserRes = await Users.updateSingle({
 		data: {

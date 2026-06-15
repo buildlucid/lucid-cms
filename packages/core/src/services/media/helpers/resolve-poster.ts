@@ -32,9 +32,9 @@ const resolvePoster: ServiceFn<
 
 	const Media = new MediaRepository(context.db.client, context.config.db);
 
-	const posterRes = await Media.selectSingle({
-		select: ["id", "type", "is_deleted"],
-		where: [{ key: "id", operator: "=", value: data.posterId }],
+	const posterRes = await Media.selectSingleById({
+		id: data.posterId,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {

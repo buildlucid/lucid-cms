@@ -46,6 +46,12 @@ const restoreMultiple: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
+	const accessRes = await documentServices.checks.checkDocumentAccess(context, {
+		collectionKey: data.collectionKey,
+		ids: data.ids,
+	});
+	if (accessRes.error) return accessRes;
+
 	const docsExistRes = await Documents.selectMultiple(
 		{
 			select: ["id"],

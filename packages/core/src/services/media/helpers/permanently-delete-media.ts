@@ -29,15 +29,9 @@ const permanentlyDeleteMedia: ServiceFn<
 		context.config.db,
 	);
 
-	const getMediaRes = await Media.selectSingle({
-		select: ["key", "poster_id"],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.id,
-			},
-		],
+	const getMediaRes = await Media.selectSingleById({
+		id: data.id,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {

@@ -30,26 +30,17 @@ const checkSingleCollectionDocumentCount: ServiceFn<
 		context.config.db,
 	);
 
-	const existingDocumentRes = await Document.selectMultiple(
-		{
-			select: ["id"],
-			where: [
-				{
-					key: "collection_key",
-					operator: "=",
-					value: data.collectionKey,
-				},
-				{
-					key: "is_deleted",
-					operator: "=",
-					value: context.config.db.getDefault("boolean", "false"),
-				},
-			],
-		},
-		{
-			tableName: data.documentTable,
-		},
-	);
+	const existingDocumentRes =
+		await Document.selectMultipleCollectionDocumentIds(
+			{
+				collectionKey: data.collectionKey,
+				isDeleted: context.config.db.getDefault("boolean", "false"),
+				tenantKey: context.request.tenantKey,
+			},
+			{
+				tableName: data.documentTable,
+			},
+		);
 	if (existingDocumentRes.error) return existingDocumentRes;
 
 	//* check if there are documents besides the one being updated

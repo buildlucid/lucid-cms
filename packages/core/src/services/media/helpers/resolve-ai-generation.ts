@@ -71,28 +71,17 @@ const resolveAiGeneration: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const aiGenerationRes = await AiGenerations.selectSingle({
-		select: ["id"],
-		where: [
-			{
-				key: "request_id",
-				operator: "=",
-				value: data.aiGenerationRequestId,
-			},
-			{
-				key: "feature_key",
-				operator: "=",
-				value: "media.image.generate",
-			},
-			{
-				key: "status",
-				operator: "=",
-				value: "success",
-			},
-		],
+	const aiGenerationRes = await AiGenerations.selectSingleByRequestId({
+		requestId: data.aiGenerationRequestId,
+		select: ["id", "feature_key", "status"],
+		tenantKey: context.request.tenantKey,
 	});
 	if (aiGenerationRes.error) return aiGenerationRes;
-	if (aiGenerationRes.data === undefined) {
+	if (
+		aiGenerationRes.data === undefined ||
+		aiGenerationRes.data.feature_key !== "media.image.generate" ||
+		aiGenerationRes.data.status !== "success"
+	) {
 		return {
 			error: {
 				type: "basic",

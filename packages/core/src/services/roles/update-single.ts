@@ -10,6 +10,7 @@ import { getTenantConfig } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import { roleServices } from "../index.js";
+import checkRoleAccess from "./checks/check-role-access.js";
 import {
 	getTranslationValue,
 	prepareRoleTranslations,
@@ -46,11 +47,8 @@ const updateSingle: ServiceFn<
 	);
 
 	const [roleRes, validatePermsRes] = await Promise.all([
-		Roles.selectSingleById({
+		checkRoleAccess(context, {
 			id: data.id,
-			validation: {
-				enabled: true,
-			},
 		}),
 		data.permissions !== undefined
 			? roleServices.validatePermissions(context, {
@@ -90,7 +88,8 @@ const updateSingle: ServiceFn<
 	}
 
 	if (
-		context.request.tenantKey !== null &&
+		context.request.tenantKey != null &&
+		roleRes.data.tenant_key !== null &&
 		roleRes.data.tenant_key !== context.request.tenantKey &&
 		!data.authSuperAdmin
 	) {

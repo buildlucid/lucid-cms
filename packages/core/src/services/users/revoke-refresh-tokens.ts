@@ -1,8 +1,6 @@
 import constants from "../../constants/constants.js";
-import { copy } from "../../libs/i18n/index.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { authServices } from "../index.js";
+import { authServices, userServices } from "../index.js";
 
 const revokeRefreshTokens: ServiceFn<
 	[
@@ -12,24 +10,8 @@ const revokeRefreshTokens: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
-
-	const userRes = await Users.selectSingle({
-		select: ["id"],
-		where: [
-			{
-				key: "id",
-				operator: "=",
-				value: data.userId,
-			},
-		],
-		validation: {
-			enabled: true,
-			defaultError: {
-				message: copy("server:core.user.not.found.message"),
-				status: 404,
-			},
-		},
+	const userRes = await userServices.checks.checkUserAccess(context, {
+		id: data.userId,
 	});
 	if (userRes.error) return userRes;
 

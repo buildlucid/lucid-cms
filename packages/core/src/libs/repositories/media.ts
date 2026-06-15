@@ -532,6 +532,44 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			select: ["id", "file_extension", "width", "height", "type"],
 		});
 	}
+
+	/**
+	 * Fetches media IDs inside folders using tenant visibility rules.
+	 * Delete flows use the returned IDs so updates cannot touch hidden tenant rows.
+	 */
+	async selectMultipleIdsByFolderIds<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				folderIds: number[];
+				tenantKey?: string | null;
+			}
+		>,
+	) {
+		let query = this.db
+			.selectFrom("lucid_media")
+			.select(["id"])
+			.where("folder_id", "in", props.folderIds);
+
+		query = queryBuilder.tenantScope(query, {
+			tenantKey: props.tenantKey,
+			column: "lucid_media.tenant_key",
+		});
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectMultipleIdsByFolderIds",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			schema: this.tableSchema.pick({
+				id: true,
+			}),
+			select: ["id"],
+		});
+	}
 	async selectMultipleFilteredFixed<V extends boolean = false>(
 		props: QueryProps<
 			V,

@@ -42,6 +42,15 @@ const updateSingle: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
+	const documentAccessRes = await documentServices.checks.checkDocumentAccess(
+		context,
+		{
+			collectionKey: data.collectionKey,
+			id: data.documentId,
+		},
+	);
+	if (documentAccessRes.error) return documentAccessRes;
+
 	//* check collection is locked
 	if (collectionRes.data.getData.config.locked) {
 		return {

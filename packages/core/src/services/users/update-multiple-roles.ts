@@ -29,15 +29,9 @@ const updateMultipleRoles: ServiceFn<
 			roleIds: data.roleIds || [],
 			tenantKey: data.tenantKey,
 		}),
-		UserRoles.deleteMultiple({
-			where: [
-				{
-					key: "user_id",
-					operator: "=",
-					value: data.userId,
-				},
-			],
-			returning: ["id"],
+		UserRoles.deleteMultipleByUserTenantScope({
+			userId: data.userId,
+			tenantKey: data.tenantKey,
 			validation: {
 				enabled: true,
 			},

@@ -35,8 +35,8 @@ const unlinkAuthProvider: ServiceFn<
 	const passwordEnabled = context.config.auth.password.enabled === true;
 
 	const [userRes, providerRes, providersCountRes] = await Promise.all([
-		Users.selectSingle({
-			select: ["id", "password"],
+		Users.selectSinglePreset({
+			tenantKey: context.request.tenantKey,
 			where: [
 				{
 					key: "id",

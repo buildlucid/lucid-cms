@@ -3,7 +3,6 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import {
-	DocumentsRepository,
 	DocumentWorkflowAssigneesRepository,
 	DocumentWorkflowsRepository,
 	UsersRepository,
@@ -12,6 +11,7 @@ import type { LucidAuth } from "../../types/hono.js";
 import { sameNumericSet } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getCollectionInstance from "../collections/get-single-instance.js";
+import { documentServices } from "../index.js";
 import {
 	canMoveWorkflowStage,
 	getWorkflowConfig,
@@ -65,31 +65,14 @@ const updateSingle: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	// Confirm the document exists before mutating workflow rows.
-	const Documents = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const documentRes = await Documents.selectSingle(
+	const documentAccessRes = await documentServices.checks.checkDocumentAccess(
+		context,
 		{
-			select: ["id"],
-			where: [
-				{ key: "id", operator: "=", value: data.documentId },
-				{ key: "collection_key", operator: "=", value: data.collectionKey },
-			],
-			validation: {
-				enabled: true,
-				defaultError: {
-					message: copy("server:core.documents.not.found.message"),
-					status: 404,
-				},
-			},
-		},
-		{
-			tableName: tableNamesRes.data.document,
+			collectionKey: data.collectionKey,
+			id: data.documentId,
 		},
 	);
-	if (documentRes.error) return documentRes;
+	if (documentAccessRes.error) return documentAccessRes;
 
 	const Workflows = new DocumentWorkflowsRepository(
 		context.db.client,
@@ -182,6 +165,7 @@ const updateSingle: ServiceFn<
 		const Users = new UsersRepository(context.db.client, context.config.db);
 		const assignableUsersRes = await Users.selectMultipleWithPermission({
 			permission,
+			tenantKey: context.request.tenantKey,
 		});
 		if (assignableUsersRes.error) return assignableUsersRes;
 

@@ -4,6 +4,7 @@ import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-se
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
 import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkMediaKeyAccess from "./checks/check-media-key-access.js";
 
 const getUploadPartUrls: ServiceFn<
 	[
@@ -38,6 +39,11 @@ const getUploadPartUrls: ServiceFn<
 		},
 	});
 	if (sessionRes.error) return sessionRes;
+
+	const keyAccessRes = await checkMediaKeyAccess(context, {
+		key: sessionRes.data.key,
+	});
+	if (keyAccessRes.error) return keyAccessRes;
 
 	const mediaAdapter = await getMediaAdapter(context.config);
 	if (!mediaAdapter.enabled) {

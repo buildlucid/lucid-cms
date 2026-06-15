@@ -65,7 +65,7 @@ const updateSingle: ServiceFn<
 	}
 
 	const userRes = await Users.selectSinglePreset({
-		tenantKey: data.auth.superAdmin ? undefined : context.request.tenantKey,
+		tenantKey: context.request.tenantKey,
 		where: [
 			{
 				key: "id",
@@ -235,7 +235,7 @@ const updateSingle: ServiceFn<
 		userServices.updateMultipleRoles(context, {
 			userId: data.userId,
 			roleIds: data.roleIds,
-			tenantKey: data.auth.superAdmin ? undefined : context.request.tenantKey,
+			tenantKey: context.request.tenantKey,
 		}),
 		userServices.updateMultipleTenants(context, {
 			userId: data.userId,

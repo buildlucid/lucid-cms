@@ -77,6 +77,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 			V,
 			{
 				id: number;
+				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -107,7 +108,13 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 					)
 					.as("scopes"),
 			])
-			.where("id", "=", props.id);
+			.where("id", "=", props.id)
+			.$call((qb) =>
+				queryBuilder.tenantScope(qb, {
+					tenantKey: props.tenantKey,
+					column: "lucid_client_integrations.tenant_key",
+				}),
+			);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleByIdWithScopes",
