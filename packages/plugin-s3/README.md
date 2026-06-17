@@ -16,9 +16,9 @@ To use the S3 plugin, you need to add it to your Lucid CMS config file. You'll n
 
 ```typescript
 import { configureLucid } from "@lucidcms/core";
-import { node } from "@lucidcms/node-adapter";
+import { node } from "@lucidcms/runtime-node";
 import { s3Plugin } from "@lucidcms/plugin-s3";
-import { sqlite } from "@lucidcms/sqlite-adapter";
+import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
 	runtime: node,

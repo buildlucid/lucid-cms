@@ -1,9 +1,9 @@
 import { configureLucid, z } from "@lucidcms/core";
-import { node } from "@lucidcms/node-adapter";
+import { sqlite } from "@lucidcms/db-sqlite";
 import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
-import { sqlite } from "@lucidcms/sqlite-adapter";
+import { node } from "@lucidcms/runtime-node";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export const env = z.object({

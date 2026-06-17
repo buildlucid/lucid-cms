@@ -37,14 +37,14 @@ A modern, TypeScript-first headless CMS designed for ultimate flexibility. Power
 
 ## ⚙️ Runtime Adapters
 
-- [Node](https://github.com/buildlucid/lucid-cms/tree/master/packages/node-adapter)
-- [Cloudflare Workers](https://github.com/buildlucid/lucid-cms/tree/master/packages/cloudflare-adapter)
+- [Node](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-node)
+- [Cloudflare Workers](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-cloudflare)
 
 ## 💾 DB Adapters
 
-- [PostgreSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/postgres-adapter)
-- [LibSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/libsql-adapter)
-- [SQLite](https://github.com/buildlucid/lucid-cms/tree/master/packages/sqlite-adapter)
+- [PostgreSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-postgres)
+- [LibSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-libsql)
+- [SQLite](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-sqlite)
 
 ## 🛠️ First Party Plugins
 
@@ -58,7 +58,7 @@ A modern, TypeScript-first headless CMS designed for ultimate flexibility. Power
 
 ## 🏁 Getting Started
 
-To get started you can follow the [Getting Started](https://lucidcms.io/en/cms/docs/getting-started/installation/) guide from our documentation. Lucid CMS is super easy to get up and running and with the SQLite DB adapter along with the [Local Storage](https://lucidcms.io/plugins/local-storage/) plugin, you can get set up without needing any third party services.
+To get started you can follow the [Getting Started](https://lucidcms.io/en/cms/docs/getting-started/installation/) guide from our documentation. Lucid CMS is super easy to get up and running and with the SQLite database adapter along with the [Local Storage](https://lucidcms.io/plugins/local-storage/) plugin, you can get set up without needing any third party services.
 
 ## 🖥️ Lucid UI
 

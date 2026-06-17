@@ -1,4 +1,4 @@
-import { SQLiteAdapter } from "@lucidcms/sqlite-adapter";
+import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, describe, expect, test } from "vitest";
 import RolesRepository from "./roles";
 

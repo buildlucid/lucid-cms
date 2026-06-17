@@ -100,7 +100,7 @@ export const getAstroRuntimeContext = async (props: {
 }): Promise<AdapterRuntimeContext> => {
 	if (props.project.runtime === "cloudflare") {
 		const { getRuntimeContext } = await import(
-			"@lucidcms/cloudflare-adapter/runtime"
+			"@lucidcms/runtime-cloudflare/runtime"
 		);
 		return getRuntimeContext({
 			server: "cloudflare",
@@ -108,7 +108,7 @@ export const getAstroRuntimeContext = async (props: {
 		});
 	}
 
-	const { getRuntimeContext } = await import("@lucidcms/node-adapter/runtime");
+	const { getRuntimeContext } = await import("@lucidcms/runtime-node/runtime");
 	return getRuntimeContext({
 		compiled: props.compiled,
 	});

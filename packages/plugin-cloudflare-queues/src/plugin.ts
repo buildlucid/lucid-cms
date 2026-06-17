@@ -1,13 +1,13 @@
-import type {
-	CloudflareWorkerExport,
-	CloudflareWorkerExportArtifact,
-	CloudflareWorkerImport,
-} from "@lucidcms/cloudflare-adapter/types";
 import { LucidError } from "@lucidcms/core";
 import type {
 	LucidPlugin,
 	RuntimeBuildArtifactCustom,
 } from "@lucidcms/core/types";
+import type {
+	CloudflareWorkerExport,
+	CloudflareWorkerExportArtifact,
+	CloudflareWorkerImport,
+} from "@lucidcms/runtime-cloudflare/types";
 import cloudflareQueuesAdapter from "./adapter.js";
 import {
 	BASE_DELAY_SECONDS,

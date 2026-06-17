@@ -79,8 +79,8 @@ const lucidCMS = (
 					"@lucidcms/core",
 					"@lucidcms/astro",
 					project.runtime === "cloudflare"
-						? "@lucidcms/cloudflare-adapter"
-						: "@lucidcms/node-adapter",
+						? "@lucidcms/runtime-cloudflare"
+						: "@lucidcms/runtime-node",
 				];
 
 				if (project.runtime === "cloudflare") {

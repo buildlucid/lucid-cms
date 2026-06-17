@@ -1,9 +1,9 @@
+import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
 import type {
 	CloudflareWorkerExport,
 	CloudflareWorkerExportArtifact,
 	CloudflareWorkerImport,
-} from "@lucidcms/cloudflare-adapter/types";
-import type { RuntimeBuildArtifactCustom } from "@lucidcms/core/types";
+} from "@lucidcms/runtime-cloudflare/types";
 import astroConstants from "../constants.js";
 
 const mergeWorkerImports = (importsInput: CloudflareWorkerImport[]) => {
@@ -151,7 +151,7 @@ export const buildCloudflareMainWorkerSource = (props: {
 			exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 		},
 		{
-			path: "@lucidcms/cloudflare-adapter/runtime",
+			path: "@lucidcms/runtime-cloudflare/runtime",
 			exports: ["getRuntimeContext"],
 		},
 		{

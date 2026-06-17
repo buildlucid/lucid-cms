@@ -26,9 +26,9 @@ To use the Pages plugin, you need to add it to your Lucid CMS config file. You w
 
 ```typescript
 import { configureLucid } from "@lucidcms/core";
-import { node } from "@lucidcms/node-adapter";
+import { node } from "@lucidcms/runtime-node";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
-import { sqlite } from "@lucidcms/sqlite-adapter";
+import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
 	runtime: node,

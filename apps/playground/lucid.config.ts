@@ -1,21 +1,22 @@
 // import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
-import { githubAuthPlugin } from "@lucidcms/auth-github";
-import { googleAuthPlugin } from "@lucidcms/auth-google";
-import { microsoftAuthPlugin } from "@lucidcms/auth-microsoft";
+
 import { configureLucid, copy, z } from "@lucidcms/core";
 // import { passthroughEmailAdapter } from "@lucidcms/core/email";
 // import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { createServiceContext, PermissionSets } from "@lucidcms/core/plugin";
 // import { passthroughQueueAdapter } from "@lucidcms/core/queue";
 import { createToolkit } from "@lucidcms/core/toolkit";
-import { node } from "@lucidcms/node-adapter";
-import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
-import { pagesPlugin } from "@lucidcms/plugin-pages";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
 // import { s3Plugin } from "@lucidcms/plugin-s3";
-import { sqlite } from "@lucidcms/sqlite-adapter";
+import { sqlite } from "@lucidcms/db-sqlite";
+import { githubAuthPlugin } from "@lucidcms/plugin-github-auth";
+import { googleAuthPlugin } from "@lucidcms/plugin-google-auth";
+import { microsoftAuthPlugin } from "@lucidcms/plugin-microsoft-auth";
+import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
+import { pagesPlugin } from "@lucidcms/plugin-pages";
+import { node } from "@lucidcms/runtime-node";
 import { describeRoute } from "hono-openapi";
 // Collections
 import BlogCollection from "./src/collections/blogs.js";

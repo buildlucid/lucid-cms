@@ -73,7 +73,7 @@ describe("@lucidcms/astro internals", () => {
 		);
 		expect(nodeSource).toContain('import db from "./lucid/db.js";');
 		expect(nodeSource).toContain('import runtime from "./lucid/runtime.js";');
-		expect(nodeSource).not.toContain('import("@lucidcms/node-adapter")');
+		expect(nodeSource).not.toContain('import("@lucidcms/runtime-node")');
 		expect(nodeSource).toContain("resolveDatabaseAdapter");
 		expect(nodeSource).toContain(
 			'import configureLucid from "@lucidcms/astro/configure-lucid";',

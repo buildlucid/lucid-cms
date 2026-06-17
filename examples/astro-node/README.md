@@ -1,6 +1,6 @@
 # Lucid CMS: Astro + Node
 
-Minimal Lucid CMS example using Astro, the Node adapter, SQLite, the Filesystem plugin, the SQLite KV plugin, the Pages plugin, one fixed `seo` brick, and one repeatable `content` brick.
+Minimal Lucid CMS example using Astro, the Node runtime, SQLite, the Filesystem plugin, the SQLite KV plugin, the Pages plugin, one fixed `seo` brick, and one repeatable `content` brick.
 
 ## Commands
 

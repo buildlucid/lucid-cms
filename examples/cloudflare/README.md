@@ -1,6 +1,6 @@
 # Lucid CMS: Cloudflare
 
-Minimal Lucid CMS example using the Cloudflare adapter, LibSQL, the Pages plugin, Cloudflare R2 media storage, and a Cloudflare KV adapter.
+Minimal Lucid CMS example using the Cloudflare runtime, LibSQL, the Pages plugin, Cloudflare R2 media storage, and a Cloudflare KV adapter.
 
 ## Commands
 
@@ -59,4 +59,4 @@ const ContentBrick = new BrickBuilder("content", {
 ## Learn more
 
 - [Lucid getting started](https://lucidcms.io/en/cms/docs/getting-started/installation/)
-- [Cloudflare adapter](https://github.com/buildlucid/lucid-cms/tree/master/packages/cloudflare-adapter)
+- [Cloudflare runtime](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-cloudflare)

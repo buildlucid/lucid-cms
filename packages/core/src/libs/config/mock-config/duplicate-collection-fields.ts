@@ -1,6 +1,6 @@
 import { CollectionBuilder, configureLucid, copy } from "@lucidcms/core";
-import { node } from "@lucidcms/node-adapter";
-import { sqlite } from "@lucidcms/sqlite-adapter";
+import { sqlite } from "@lucidcms/db-sqlite";
+import { node } from "@lucidcms/runtime-node";
 import testingConstants from "../../../constants/testing-constants.js";
 
 const collection = new CollectionBuilder("page", {

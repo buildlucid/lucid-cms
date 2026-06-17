@@ -11,9 +11,9 @@ test("splits lucid config into isolated config, db, runtime, and env artifacts",
 	await writeFile(
 		configPath,
 		`import { configureLucid, z } from "@lucidcms/core";
-import { node } from "@lucidcms/node-adapter";
+import { node } from "@lucidcms/runtime-node";
 import PagesPlugin from "@lucidcms/plugin-pages";
-import { libsql } from "@lucidcms/libsql-adapter";
+import { libsql } from "@lucidcms/db-libsql";
 import PageCollection from "./src/collections/pages.js";
 
 const makePlugins = () => [PagesPlugin()];
@@ -57,27 +57,27 @@ export default configureLucid({ runtime, db, config });
 		expect(config).toContain("../../src/collections/pages.js");
 		expect(config).toContain("const config =");
 		expect(config).toContain("makePlugins");
-		expect(config).not.toContain("@lucidcms/libsql-adapter");
-		expect(config).not.toContain("@lucidcms/node-adapter");
+		expect(config).not.toContain("@lucidcms/db-libsql");
+		expect(config).not.toContain("@lucidcms/runtime-node");
 
-		expect(db).toContain("@lucidcms/libsql-adapter");
+		expect(db).toContain("@lucidcms/db-libsql");
 		expect(db).toContain("const db =");
 		expect(db).toContain("libsql");
 		expect(db).not.toContain("@lucidcms/plugin-pages");
-		expect(db).not.toContain("@lucidcms/node-adapter");
+		expect(db).not.toContain("@lucidcms/runtime-node");
 
-		expect(runtime).toContain("@lucidcms/node-adapter/runtime");
+		expect(runtime).toContain("@lucidcms/runtime-node/runtime");
 		expect(runtime).toContain("const runtime =");
 		expect(runtime).toContain("node");
-		expect(runtime).not.toContain('@lucidcms/node-adapter";');
-		expect(runtime).not.toContain("@lucidcms/libsql-adapter");
+		expect(runtime).not.toContain('@lucidcms/runtime-node";');
+		expect(runtime).not.toContain("@lucidcms/db-libsql");
 
 		expect(envArtifact).toContain('import { z } from "@lucidcms/core";');
 		expect(envArtifact).toContain("export const env = z.object");
 		expect(envArtifact).toContain("LIBSQL_URL");
 		expect(envArtifact).toContain("LIBSQL_AUTH_TOKEN");
 		expect(envArtifact).not.toContain("configureLucid");
-		expect(envArtifact).not.toContain("@lucidcms/libsql-adapter");
+		expect(envArtifact).not.toContain("@lucidcms/db-libsql");
 	} finally {
 		await rm(tempDir, { recursive: true, force: true });
 	}

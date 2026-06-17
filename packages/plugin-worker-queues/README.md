@@ -14,9 +14,9 @@ npm install @lucidcms/plugin-worker-queues
 
 ```ts
 import { configureLucid } from "@lucidcms/core";
-import { node } from "@lucidcms/node-adapter";
+import { node } from "@lucidcms/runtime-node";
 import { workerQueuesPlugin } from "@lucidcms/plugin-worker-queues";
-import { sqlite } from "@lucidcms/sqlite-adapter";
+import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
 	runtime: node,

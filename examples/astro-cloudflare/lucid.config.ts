@@ -1,9 +1,9 @@
-import { cloudflare } from "@lucidcms/cloudflare-adapter";
 import { configureLucid, z } from "@lucidcms/core";
-import { libsql } from "@lucidcms/libsql-adapter";
+import { libsql } from "@lucidcms/db-libsql";
 import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
+import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export const env = z.object({

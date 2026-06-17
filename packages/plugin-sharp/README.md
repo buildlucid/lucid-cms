@@ -14,9 +14,9 @@ npm install @lucidcms/plugin-sharp
 
 ```ts
 import { configureLucid } from "@lucidcms/core";
-import { node } from "@lucidcms/node-adapter";
+import { node } from "@lucidcms/runtime-node";
 import { sharpPlugin } from "@lucidcms/plugin-sharp";
-import { sqlite } from "@lucidcms/sqlite-adapter";
+import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
 	runtime: node,

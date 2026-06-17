@@ -9,8 +9,8 @@ import {
 } from "./config-artifacts.js";
 
 const runtimeSafeImportPaths = new Map([
-	["@lucidcms/node-adapter", "@lucidcms/node-adapter/runtime"],
-	["@lucidcms/cloudflare-adapter", "@lucidcms/cloudflare-adapter/runtime"],
+	["@lucidcms/runtime-node", "@lucidcms/runtime-node/runtime"],
+	["@lucidcms/runtime-cloudflare", "@lucidcms/runtime-cloudflare/runtime"],
 ]);
 
 const artifactProperties = {

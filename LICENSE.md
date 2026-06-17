@@ -25,24 +25,33 @@ The following packages are licensed under the **MIT License**, a permissive open
 - `@lucidcms/plugin-s3`
 - `@lucidcms/plugin-nodemailer`
 - `@lucidcms/plugin-pages`
-- `@lucidcms/auth-github`
-- `@lucidcms/auth-google`
-- `@lucidcms/auth-microsoft`
+- `@lucidcms/plugin-github-auth`
+- `@lucidcms/plugin-google-auth`
+- `@lucidcms/plugin-microsoft-auth`
+- `@lucidcms/plugin-worker-queues`
+- `@lucidcms/plugin-sqlite-kv`
+- `@lucidcms/plugin-sharp`
+- `@lucidcms/plugin-resend`
+- `@lucidcms/plugin-redis`
+- `@lucidcms/plugin-filesystem`
+- `@lucidcms/plugin-cloudflare-r2`
+- `@lucidcms/plugin-cloudflare-queues`
+- `@lucidcms/plugin-cloudflare-kv`
 - All other packages in `packages/` that are prefixed with `plugin-`
 
 Each MIT-licensed package includes its own `LICENSE` file.
 
 ---
 
-## 🗄 Adapters (MIT)
+## 🗄 Database and Runtime Packages (MIT)
 
 Also MIT-licensed:
 
-- `@lucidcms/sqlite-adapter`
-- `@lucidcms/postgres-adapter`
-- `@lucidcms/libsql-adapter`
-- `@lucidcms/node-adapter`
-- `@lucidcms/cloudflare-adapter`
+- `@lucidcms/db-sqlite`
+- `@lucidcms/db-postgres`
+- `@lucidcms/db-libsql`
+- `@lucidcms/runtime-node`
+- `@lucidcms/runtime-cloudflare`
 
 ---
 

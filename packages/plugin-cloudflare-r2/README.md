@@ -14,8 +14,8 @@ npm install @lucidcms/plugin-cloudflare-r2
 
 ```ts
 import { configureLucid, z } from "@lucidcms/core";
-import { cloudflare } from "@lucidcms/cloudflare-adapter";
-import { libsql } from "@lucidcms/libsql-adapter";
+import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import { libsql } from "@lucidcms/db-libsql";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 
 export const env = z.object({

@@ -3,7 +3,7 @@
 > [!CAUTION]
 > Lucid's support for Astro on Cloudflare is experimental.
 
-Minimal Lucid CMS example using Astro, the Cloudflare adapter, LibSQL, the Pages plugin, Cloudflare R2 media storage, and a Cloudflare KV adapter.
+Minimal Lucid CMS example using Astro, the Cloudflare runtime, LibSQL, the Pages plugin, Cloudflare R2 media storage, and a Cloudflare KV adapter.
 
 ## Commands
 
@@ -81,4 +81,4 @@ const response = await toolkit.documents.getSingle({
 
 - [Lucid getting started](https://lucidcms.io/en/cms/docs/getting-started/installation/)
 - [Astro integration](https://github.com/buildlucid/lucid-cms/tree/master/packages/astro)
-- [Cloudflare adapter](https://github.com/buildlucid/lucid-cms/tree/master/packages/cloudflare-adapter)
+- [Cloudflare runtime](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-cloudflare)

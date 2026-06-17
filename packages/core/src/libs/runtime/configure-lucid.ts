@@ -8,8 +8,8 @@ import type { LucidConfigDefinition } from "./types.js";
  *
  * @example
  * ```ts
- * import { node } from "@lucidcms/node-adapter";
- * import { sqlite } from "@lucidcms/sqlite-adapter";
+ * import { node } from "@lucidcms/runtime-node";
+ * import { sqlite } from "@lucidcms/db-sqlite";
  *
  * export default configureLucid({
  *   runtime: node,
