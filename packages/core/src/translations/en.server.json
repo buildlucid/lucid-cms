@@ -103,6 +103,7 @@
 	"core.config.default.locale.not.found": "Please ensure the defaultLocale exists in the locales array.",
 	"core.config.duplicate.locale": "Please ensure the locales array does not contain duplicate values.",
 	"core.config.duplicate.tenant": "Please ensure the tenants array does not contain duplicate keys. Duplicate: {{key}}.",
+	"core.config.duplicate.default.tenant": "Please ensure only one tenant is marked as default. Defaults: {{keys}}.",
 	"core.tenants.unknown": "The tenant \"{{key}}\" does not exist.",
 	"core.tenants.no.access": "You do not have access to this tenant.",
 	"core.routes.tenants.fetch.error.name": "Tenant Fetch Error",

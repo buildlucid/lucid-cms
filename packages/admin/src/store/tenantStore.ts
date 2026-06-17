@@ -18,6 +18,9 @@ const getInitialTenant = () => {
 	return undefined;
 };
 
+const getFallbackTenant = (tenants: Tenant[]) =>
+	tenants.find((tenant) => tenant.default)?.key ?? tenants[0]?.key;
+
 const [get, set] = createStore<TenantStoreT>({
 	tenant: getInitialTenant(),
 	tenants: [],
@@ -40,7 +43,7 @@ const [get, set] = createStore<TenantStoreT>({
 			}
 		}
 
-		const nextTenant = tenants[0]?.key;
+		const nextTenant = getFallbackTenant(tenants);
 		if (nextTenant === undefined) {
 			localStorage.removeItem(TENANT_KEY);
 			set("tenant", undefined);

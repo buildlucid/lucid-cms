@@ -161,6 +161,7 @@ const formatSingle = (props: {
 						{
 							key: tenant.key,
 							name: tenant.name,
+							default: tenant.default ?? false,
 						},
 					];
 				}) ?? [];

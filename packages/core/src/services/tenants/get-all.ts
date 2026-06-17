@@ -29,6 +29,7 @@ const getAll: ServiceFn<
 			data: context.config.tenants.map((tenant) => ({
 				key: tenant.key,
 				name: tenant.name,
+				default: tenant.default ?? false,
 			})),
 		};
 	}
@@ -60,6 +61,7 @@ const getAll: ServiceFn<
 			.map((tenant) => ({
 				key: tenant.key,
 				name: tenant.name,
+				default: tenant.default ?? false,
 			})),
 	};
 };

@@ -25,6 +25,10 @@ export const controllerSchemas = {
 						defaultMessage: "Alpha",
 					},
 				}),
+				default: z.boolean().optional().meta({
+					description: "Whether this tenant is the default admin selection",
+					example: true,
+				}),
 			}),
 		),
 	} satisfies ControllerSchema,

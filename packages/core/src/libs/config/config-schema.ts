@@ -171,6 +171,7 @@ const ConfigSchema = z.object({
 						message: "Tenant key cannot match a generated media ID.",
 					}),
 				name: adminCopyDescriptorSchema,
+				default: z.boolean().optional(),
 			}),
 		)
 		.optional(),

@@ -28,6 +28,15 @@ const checkTenants = (config: Config) => {
 		);
 	}
 
+	const defaultTenants = config.tenants.filter((tenant) => tenant.default);
+	if (defaultTenants.length > 1) {
+		throw new Error(
+			translate("server:core.config.duplicate.default.tenant", {
+				data: { keys: defaultTenants.map((tenant) => tenant.key).join(", ") },
+			}),
+		);
+	}
+
 	const validTenantKeys = new Set(tenantKeys);
 	for (const collection of config.collections) {
 		checkTenantKeyReferences(

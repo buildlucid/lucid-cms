@@ -241,6 +241,10 @@ export const userResponseSchema = z.object({
 						defaultMessage: "Alpha",
 					},
 				}),
+				default: z.boolean().optional().meta({
+					description: "Whether this tenant is the default admin selection",
+					example: true,
+				}),
 			}),
 		)
 		.meta({

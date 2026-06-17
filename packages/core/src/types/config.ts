@@ -163,6 +163,11 @@ export type TenantConfig = {
 	 * The tenant name shown in the admin UI.
 	 */
 	name: AdminCopyDescriptor;
+	/**
+	 * Marks this tenant as the default selection in the admin UI when a user has
+	 * access to multiple tenants and no valid tenant is already selected.
+	 */
+	default?: boolean;
 };
 
 export type I18nConfig = {

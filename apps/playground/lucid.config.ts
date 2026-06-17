@@ -76,6 +76,7 @@ export default configureLucid({
 				name: copy("admin:tenants.marketing.name", {
 					defaultMessage: "Marketing",
 				}),
+				default: true,
 			},
 			{
 				key: "documentation",
