@@ -1,4 +1,4 @@
-import SQLiteAdapter from "@lucidcms/sqlite-adapter";
+import { SQLiteAdapter } from "@lucidcms/sqlite-adapter";
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";

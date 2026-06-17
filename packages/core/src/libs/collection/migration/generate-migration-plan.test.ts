@@ -1,4 +1,4 @@
-import SQLiteAdapter from "@lucidcms/sqlite-adapter";
+import { SQLiteAdapter } from "@lucidcms/sqlite-adapter";
 import { afterAll, describe, expect, test } from "vitest";
 import type { CollectionSchema } from "../../../libs/collection/schema/types.js";
 import type { InferredTable } from "../../../types.js";
