@@ -38,7 +38,7 @@ const generateBase64Placeholder = async (
 		const blob = await new Promise<Blob | null>((resolve) => {
 			canvas.toBlob(resolve, "image/webp", 0.5);
 		});
-		if (!blob || blob.type !== "image/webp") return null;
+		if (blob?.type !== "image/webp") return null;
 
 		return await new Promise<string>((resolve, reject) => {
 			const reader = new FileReader();

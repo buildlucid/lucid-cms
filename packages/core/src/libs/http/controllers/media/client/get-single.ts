@@ -44,11 +44,15 @@ const getSingleController = factory.createHandlers(
 	cache({
 		ttl: minutesToSeconds(5),
 		mode: "static",
-		staticKey: (c) =>
-			cacheKeys.http.static.clientMediaSingle(
-				c.req.param("id"),
+		staticKey: (c) => {
+			const id = c.req.param("id");
+			if (!id) return null;
+
+			return cacheKeys.http.static.clientMediaSingle(
+				id,
 				c.get("tenant")?.key ?? null,
-			),
+			);
+		},
 	}),
 	async (c) => {
 		const { id } = c.req.valid("param");

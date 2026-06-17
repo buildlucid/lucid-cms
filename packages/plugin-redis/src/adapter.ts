@@ -13,6 +13,7 @@ import type {
 	KVSetInput,
 	KVSetOptions,
 } from "@lucidcms/core/types";
+import type { Redis as RedisClient } from "ioredis";
 import { Redis } from "ioredis";
 import type { PluginOptions } from "./types.js";
 import getRedisExpirationTtl from "./utils/get-expiration-ttl.js";
@@ -31,22 +32,37 @@ return { value, redis.call("TTL", KEYS[1]) }
 `;
 
 const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
-	const client =
-		typeof options.connection === "string"
-			? new Redis(options.connection)
-			: new Redis(options.connection);
+	let client: RedisClient | undefined;
 	const namespace = options.namespace ?? DEFAULT_KV_NAMESPACE;
 	const namespacePrefix = getNamespacePrefix(namespace);
 
 	const resolveRedisKey = (key: string, keyOptions?: KVKeyOptions) =>
 		resolveKey(key, keyOptions, { maxKeyBytes: MAX_KEY_BYTES, namespace });
 
+	const getClient = () => {
+		if (!client) {
+			throw new Error("Redis KV adapter has not been initialized.");
+		}
+		return client;
+	};
+
 	return {
 		type: "kv-adapter",
 		key: "redis",
 		lifecycle: {
+			init: async () => {
+				if (client) return;
+				client =
+					typeof options.connection === "string"
+						? new Redis(options.connection)
+						: new Redis(options.connection);
+			},
 			destroy: async () => {
-				await client.quit();
+				const activeClient = client;
+				client = undefined;
+				if (activeClient && activeClient.status !== "end") {
+					await activeClient.quit();
+				}
 			},
 		},
 		get: async <R>(
@@ -54,7 +70,7 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			kvOptions?: KVKeyOptions,
 		): Promise<R | null> => {
 			const resolvedKey = resolveRedisKey(key, kvOptions);
-			const value = await client.get(resolvedKey);
+			const value = await getClient().get(resolvedKey);
 			if (value === null) return null;
 
 			return parseKVValue(value);
@@ -69,20 +85,20 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			const ttl = getRedisExpirationTtl(kvOptions);
 
 			if (ttl) {
-				await client.setex(resolvedKey, ttl, serialised);
+				await getClient().setex(resolvedKey, ttl, serialised);
 				return;
 			}
 
-			await client.set(resolvedKey, serialised);
+			await getClient().set(resolvedKey, serialised);
 		},
 		has: async (key: string, kvOptions?: KVKeyOptions): Promise<boolean> => {
 			const resolvedKey = resolveRedisKey(key, kvOptions);
-			const exists = await client.exists(resolvedKey);
+			const exists = await getClient().exists(resolvedKey);
 			return exists === 1;
 		},
 		delete: async (key: string, kvOptions?: KVKeyOptions): Promise<void> => {
 			const resolvedKey = resolveRedisKey(key, kvOptions);
-			await client.unlink(resolvedKey);
+			await getClient().unlink(resolvedKey);
 		},
 		getMany: async <R>(keys: KVKeyInput[], options?: KVKeyOptions) => {
 			const resolvedKeys = keys.map((input) => {
@@ -94,7 +110,9 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			});
 			const values =
 				resolvedKeys.length > 0
-					? await client.mget(...resolvedKeys.map((item) => item.resolvedKey))
+					? await getClient().mget(
+							...resolvedKeys.map((item) => item.resolvedKey),
+						)
 					: [];
 
 			return resolvedKeys.map((item, index) => {
@@ -106,7 +124,7 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			});
 		},
 		setMany: async (items: Array<KVSetInput>, options?: KVSetOptions) => {
-			const pipeline = client.pipeline();
+			const pipeline = getClient().pipeline();
 
 			for (const item of items) {
 				const kvOptions = { ...(options ?? {}), ...(item.options ?? {}) };
@@ -128,6 +146,7 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 				const resolved = resolveKeyInput(input, options);
 				return resolveRedisKey(resolved.key, resolved.options);
 			});
+			const client = getClient();
 
 			for (let i = 0; i < resolvedKeys.length; i += CLEAR_BATCH_SIZE) {
 				const batch = resolvedKeys.slice(i, i + CLEAR_BATCH_SIZE);
@@ -142,7 +161,7 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 		): Promise<KVIncrementResult> => {
 			const resolvedKey = resolveRedisKey(key, kvOptions);
 			const ttl = getRedisExpirationTtl(kvOptions) ?? 0;
-			const result = (await client.eval(
+			const result = (await getClient().eval(
 				INCREMENT_SCRIPT,
 				1,
 				resolvedKey,
@@ -158,6 +177,7 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 		clear: async (): Promise<void> => {
 			const keys: string[] = [];
 			let cursor = "0";
+			const client = getClient();
 			// Escape Redis glob metacharacters so namespace prefixes match literally.
 			const pattern = namespacePrefix
 				? `${namespacePrefix.replace(/[\\*?[\]]/g, "\\$&")}*`

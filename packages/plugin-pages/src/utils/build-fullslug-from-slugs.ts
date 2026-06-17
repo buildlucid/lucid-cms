@@ -11,7 +11,7 @@ const buildFullSlugFromSlugs = (data: {
 		(row) => row.locale === data.targetLocale,
 	);
 
-	if (!rowForLocale || !rowForLocale._slug) return null;
+	if (!rowForLocale?._slug) return null;
 
 	const slugFieldValue = rowForLocale._slug;
 	const parentPageValue = rowForLocale._parentPage;

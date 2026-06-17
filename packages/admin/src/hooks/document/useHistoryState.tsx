@@ -414,7 +414,7 @@ export function useHistoryState() {
 		const item = selectedItem();
 		const retentionDays = collection()?.config.revisionRetentionDays;
 
-		if (!item || item.type !== "revision") {
+		if (item?.type !== "revision") {
 			return {
 				state: "protected",
 				label: T()("documents.revisions.retention.current.version.title"),

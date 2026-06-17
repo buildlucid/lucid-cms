@@ -42,7 +42,7 @@ const approve: ServiceFn<
 		],
 	});
 	if (operationRes.error) return operationRes;
-	if (!operationRes.data || operationRes.data.status !== "pending") {
+	if (operationRes.data?.status !== "pending") {
 		return {
 			error: {
 				type: "basic",

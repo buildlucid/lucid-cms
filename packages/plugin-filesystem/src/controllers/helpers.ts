@@ -20,7 +20,7 @@ export const resolveFileSystemMediaAdapter = async (
 			: config.media.adapter;
 	const resolved = await adapter;
 
-	if (!resolved || resolved.key !== "file-system") {
+	if (resolved?.key !== "file-system") {
 		return null;
 	}
 

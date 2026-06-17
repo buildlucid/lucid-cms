@@ -32,8 +32,7 @@ const retry: ServiceFn<
 	});
 	if (operationRes.error) return operationRes;
 	if (
-		!operationRes.data ||
-		operationRes.data.status !== "approved" ||
+		operationRes.data?.status !== "approved" ||
 		operationRes.data.execution_status !== "failed"
 	) {
 		return {

@@ -150,9 +150,7 @@ const updateAvailable = async (): Promise<CoreUpdateAvailable> => {
 	}
 
 	const updateAvailableFlag =
-		!!latestVersion &&
-		semver.valid(latestVersion) &&
-		semver.valid(currentVersion)
+		latestVersion && semver.valid(latestVersion) && semver.valid(currentVersion)
 			? semver.gt(latestVersion, currentVersion)
 			: false;
 

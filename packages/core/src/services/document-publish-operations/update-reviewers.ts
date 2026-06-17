@@ -40,8 +40,7 @@ const updateReviewers: ServiceFn<
 	});
 	if (operationRes.error) return operationRes;
 	if (
-		!operationRes.data ||
-		operationRes.data.operation_type !== "request" ||
+		operationRes.data?.operation_type !== "request" ||
 		operationRes.data.status !== "pending"
 	) {
 		return {

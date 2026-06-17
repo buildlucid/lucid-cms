@@ -7,6 +7,7 @@ import type { StatusCode } from "hono/utils/http-status";
 import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
+import { logger } from "../../index.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { Config, EnvironmentVariables } from "../../types.js";
 import { LucidAPIError, translateErrorData } from "../../utils/errors/index.js";
@@ -134,6 +135,8 @@ const createApp = async (props: {
 				} satisfies PublicErrorData);
 			}
 
+			logger.error({ message: err.message });
+
 			// @ts-expect-error
 			if (err?.statusCode === 429) {
 				const resetSeconds = c.res.headers.get("Retry-After") ?? 0;
@@ -152,12 +155,10 @@ const createApp = async (props: {
 
 			c.status(500);
 			return c.json({
-				name: translate("server:core.errors.default.name", {
-					defaultMessage: constants.errors.name,
-				}),
-				message: translate("server:core.errors.default.message", {
-					defaultMessage: constants.errors.message,
-				}),
+				name: translate("server:core.errors.default.name"),
+				message: err.message
+					? err.message
+					: translate("server:core.errors.default.message"),
 				status: constants.errors.status,
 				errors: constants.errors.errors,
 				code: constants.errors.code,

@@ -48,12 +48,14 @@ const getMultipleController = factory.createHandlers(
 	cache({
 		ttl: hoursToSeconds(24),
 		mode: "include-query",
-		tags: (c) => [
-			cacheKeys.http.tags.clientDocuments,
-			cacheKeys.http.tags.clientDocumentsCollection(
-				c.req.param("collectionKey"),
-			),
-		],
+		tags: (c) => {
+			const collectionKey = c.req.param("collectionKey");
+			const tags: string[] = [cacheKeys.http.tags.clientDocuments];
+			if (collectionKey) {
+				tags.push(cacheKeys.http.tags.clientDocumentsCollection(collectionKey));
+			}
+			return tags;
+		},
 		keyContext: (c) => {
 			const tenantKey = c.get("tenant")?.key;
 			return tenantKey ? { tenant: tenantKey } : {};

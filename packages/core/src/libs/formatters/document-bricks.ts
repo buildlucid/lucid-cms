@@ -219,7 +219,7 @@ const getRelationRows = (props: {
 		}
 
 		const relationPath = schema.key.fieldPath;
-		if (!relationPath || relationPath.length !== 1) return false;
+		if (relationPath?.length !== 1) return false;
 
 		return relationPath[0] === props.fieldKey;
 	});

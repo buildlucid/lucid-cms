@@ -22,7 +22,9 @@ type CacheOptions = {
 	/** The tags to add the cache key to. */
 	tags?: string[] | ((c: LucidHonoContext) => string[]);
 	/** Bypasses hash generation and uses a simple string key. Useful for endpoints with no variations. */
-	staticKey?: HttpStaticValues | ((c: LucidHonoContext) => HttpStaticValues);
+	staticKey?:
+		| HttpStaticValues
+		| ((c: LucidHonoContext) => HttpStaticValues | null);
 	/**
 	 * Extra request context to include in the cache key, ie. the resolved tenant.
 	 * Return an empty object to leave the key unchanged. Not supported alongside staticKey.
@@ -130,6 +132,8 @@ const cache = (options: CacheOptions) =>
 				? await getHttpCacheNamespaceTokens(kv, tags)
 				: undefined;
 		const cacheKey = generateCacheKey(c, options, namespaceTokens);
+
+		if (cacheKey === null) return await next();
 
 		const cached = await kv.get<{ data: unknown; cachedAt: number }>(cacheKey, {
 			hash: true,
