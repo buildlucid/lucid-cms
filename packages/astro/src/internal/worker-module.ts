@@ -189,6 +189,7 @@ return astroWorker.fetch(request, env, ctx);`,
 	const wrappedDefinition = astroConfigureLucid({
 		runtime,
 		db,
+		env: envSchema,
 		config: configFactory,
 	}, {
 		emailTemplates,

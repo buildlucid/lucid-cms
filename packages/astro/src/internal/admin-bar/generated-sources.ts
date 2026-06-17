@@ -246,6 +246,7 @@ const ensureApp = async () => {
 \t\t\tconst wrappedDefinition = configureLucid({
 \t\t\t\truntime: runtimeAdapter,
 \t\t\t\tdb,
+\t\t\t\tenv: envSchema,
 \t\t\t\tconfig: configFactory,
 \t\t\t}, {
 \t\t\t\temailTemplates,
@@ -372,6 +373,7 @@ const ensureApp = async () => {
 \t\t\tconst wrappedDefinition = configureLucid({
 \t\t\t\truntime: runtimeAdapter,
 \t\t\t\tdb,
+\t\t\t\tenv: envSchema,
 \t\t\t\tconfig: configFactory,
 \t\t\t}, {
 \t\t\t\temailTemplates,

@@ -125,7 +125,7 @@ export const resolveConfigDefinition = async (props: {
 					logger,
 				})
 			: undefined);
-	const envSchema = props.envSchema;
+	const envSchema = wrappedDefinition.env ?? props.envSchema;
 
 	if (envSchema && env) {
 		envSchema.parse(env);

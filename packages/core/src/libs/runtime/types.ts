@@ -116,6 +116,12 @@ export type AdapterRuntimeContext = {
 };
 
 export interface EnvironmentVariables extends Record<string, unknown> {}
+export type EnvironmentSchema = z.ZodType;
+export type InferEnvironmentVariables<
+	TEnvSchema extends EnvironmentSchema | undefined,
+> = [TEnvSchema] extends [EnvironmentSchema]
+	? z.infer<TEnvSchema>
+	: EnvironmentVariables;
 
 export type AdapterLifecycleContext = {
 	config: Config;
@@ -141,7 +147,11 @@ export type RuntimeAdapterCLI = {
 	build: BuildHandler;
 };
 
-export type AdapterDefineConfig = (env: EnvironmentVariables) => LucidConfig;
+export type AdapterDefineConfig<
+	TEnvSchema extends EnvironmentSchema | undefined =
+		| EnvironmentSchema
+		| undefined,
+> = (env: InferEnvironmentVariables<TEnvSchema>) => LucidConfig;
 export type LucidConfigRecipe = (draft: Config) => void;
 
 export type LucidConfigDefinitionMeta = {
@@ -159,13 +169,22 @@ export type DatabaseAdapterValue =
 	| DatabaseAdapterFactory
 	| Promise<DatabaseAdapterFactory>;
 
-export type LucidConfigDefinition = {
+export type LucidConfigDefinition<
+	TEnvSchema extends EnvironmentSchema | undefined =
+		| EnvironmentSchema
+		| undefined,
+> = {
 	runtime: RuntimeAdapterValue;
 	db: DatabaseAdapterValue;
-	config: AdapterDefineConfig;
+	env?: TEnvSchema;
+	config: AdapterDefineConfig<TEnvSchema>;
 };
 
-export type WrappedLucidConfigDefinition = LucidConfigDefinition & {
+export type WrappedLucidConfigDefinition<
+	TEnvSchema extends EnvironmentSchema | undefined =
+		| EnvironmentSchema
+		| undefined,
+> = LucidConfigDefinition<TEnvSchema> & {
 	recipe?: LucidConfigRecipe;
 };
 

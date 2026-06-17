@@ -6,16 +6,15 @@ import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
 import { node } from "@lucidcms/runtime-node";
 import PageCollection from "./src/lucid/collections/pages.js";
 
-export const env = z.object({
-	ENCRYPTION_SECRET: z.string(),
-	COOKIE_SECRET: z.string(),
-	REFRESH_TOKEN_SECRET: z.string(),
-	ACCESS_TOKEN_SECRET: z.string(),
-});
-
 export default configureLucid({
 	runtime: node,
 	db: sqlite,
+	env: z.object({
+		ENCRYPTION_SECRET: z.string(),
+		COOKIE_SECRET: z.string(),
+		REFRESH_TOKEN_SECRET: z.string(),
+		ACCESS_TOKEN_SECRET: z.string(),
+	}),
 	config: (env) => ({
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,

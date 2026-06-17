@@ -27,25 +27,6 @@ import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
 import transporter from "./src/services/email-transporter.js";
 
-export const env = z.object({
-	DATABASE_URL: z.string(),
-	LUCID_ENCRYPTION_SECRET: z.string(),
-	LUCID_COOKIE_SECRET: z.string(),
-	LUCID_REFRESH_TOKEN_SECRET: z.string(),
-	LUCID_ACCESS_TOKEN_SECRET: z.string(),
-	LUCID_LOCAL_STORAGE_SECRET_KEY: z.string(),
-	LUCID_RESEND_API_KEY: z.string(),
-	LUCID_RESEND_WEBHOOK_SECRET: z.string(),
-	GITHUB_CLIENT_ID: z.string(),
-	GITHUB_CLIENT_SECRET: z.string(),
-	GOOGLE_CLIENT_ID: z.string(),
-	GOOGLE_CLIENT_SECRET: z.string(),
-	MICROSOFT_CLIENT_ID: z.string(),
-	MICROSOFT_CLIENT_SECRET: z.string(),
-	MICROSOFT_TENANT_ID: z.string(),
-	// REDIS_CONNECTION: z.string(),
-});
-
 export default configureLucid({
 	runtime: node,
 	// runtime: node({
@@ -62,6 +43,24 @@ export default configureLucid({
 	// 		url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
 	// 		authToken: env?.TURSO_AUTH_TOKEN as string,
 	// 	})),
+	env: z.object({
+		DATABASE_URL: z.string(),
+		LUCID_ENCRYPTION_SECRET: z.string(),
+		LUCID_COOKIE_SECRET: z.string(),
+		LUCID_REFRESH_TOKEN_SECRET: z.string(),
+		LUCID_ACCESS_TOKEN_SECRET: z.string(),
+		LUCID_LOCAL_STORAGE_SECRET_KEY: z.string(),
+		LUCID_RESEND_API_KEY: z.string(),
+		LUCID_RESEND_WEBHOOK_SECRET: z.string(),
+		GITHUB_CLIENT_ID: z.string(),
+		GITHUB_CLIENT_SECRET: z.string(),
+		GOOGLE_CLIENT_ID: z.string(),
+		GOOGLE_CLIENT_SECRET: z.string(),
+		MICROSOFT_CLIENT_ID: z.string(),
+		MICROSOFT_CLIENT_SECRET: z.string(),
+		MICROSOFT_TENANT_ID: z.string(),
+		// REDIS_CONNECTION: z.string(),
+	}),
 	config: (env) => ({
 		// security: {
 		// 	cors: {

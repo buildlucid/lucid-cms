@@ -13,23 +13,22 @@ import SettingsCollection from "./src/lucid/collections/settings.js";
 import SimpleCollection from "./src/lucid/collections/simple.js";
 import TestCollection from "./src/lucid/collections/test.js";
 
-export const env = z.object({
-	LIBSQL_URL: z.string(),
-	LIBSQL_AUTH_TOKEN: z.string().optional(),
-	LUCID_ENCRYPTION_SECRET: z.string(),
-	LUCID_COOKIE_SECRET: z.string(),
-	LUCID_REFRESH_TOKEN_SECRET: z.string(),
-	LUCID_ACCESS_TOKEN_SECRET: z.string(),
-	LUCID_RESEND_API_KEY: z.string(),
-	LUCID_RESEND_WEBHOOK_SECRET: z.string(),
-	LUCID_MEDIA_BUCKET: z.any(),
-	LUCID_KV: z.any(),
-	LUCID_QUEUE: z.any(),
-});
-
 export default configureLucid({
 	runtime: cloudflare,
 	db: libsql,
+	env: z.object({
+		LIBSQL_URL: z.string(),
+		LIBSQL_AUTH_TOKEN: z.string().optional(),
+		LUCID_ENCRYPTION_SECRET: z.string(),
+		LUCID_COOKIE_SECRET: z.string(),
+		LUCID_REFRESH_TOKEN_SECRET: z.string(),
+		LUCID_ACCESS_TOKEN_SECRET: z.string(),
+		LUCID_RESEND_API_KEY: z.string(),
+		LUCID_RESEND_WEBHOOK_SECRET: z.string(),
+		LUCID_MEDIA_BUCKET: z.any(),
+		LUCID_KV: z.any(),
+		LUCID_QUEUE: z.any(),
+	}),
 	config: (env) => ({
 		brand: {
 			name: "Playground",

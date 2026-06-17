@@ -100,6 +100,7 @@ await runtimeAdapter.resolveOptions?.(env);
 const definition = {
     runtime: runtimeAdapter,
     db,
+    env: envSchema,
     config: configFactory,
 };
 const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {
@@ -182,6 +183,7 @@ return app.fetch(request, env, ctx);`,
     const definition = {
         runtime: runtimeAdapter,
         db,
+        env: envSchema,
         config: configFactory,
     };
     const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {

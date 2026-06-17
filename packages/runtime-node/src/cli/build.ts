@@ -106,6 +106,7 @@ const startServer = async () => {
 		const definition = {
 			runtime: runtimeAdapter,
 			db,
+			env: envSchema,
 			config: configFactory,
 		};
 		const wrappedDefinition = runtimeAdapter.configureLucid

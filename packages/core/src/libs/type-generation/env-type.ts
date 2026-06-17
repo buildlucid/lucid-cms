@@ -12,8 +12,18 @@ const generateEnvTypes = async (props: {
 	return {
 		imports: props.schema
 			? [
-					`import type { env } from "${props.configRelativePath}";`,
+					`import type * as lucidConfig from "${props.configRelativePath}";`,
 					'import type { z } from "@lucidcms/core";',
+				]
+			: undefined,
+		declarations: props.schema
+			? [
+					`type LucidGeneratedEnvSchema =
+	typeof lucidConfig.default extends { env: infer TEnv }
+		? TEnv
+		: typeof lucidConfig extends { env: infer TEnv }
+			? TEnv
+			: never;`,
 				]
 			: undefined,
 		moduleAugmentations: [
@@ -21,7 +31,7 @@ const generateEnvTypes = async (props: {
 				module: constants.typeGeneration.modules.coreTypes,
 				declarations: [
 					props.schema
-						? "interface EnvironmentVariables extends z.infer<typeof env> {}"
+						? "interface EnvironmentVariables extends z.infer<LucidGeneratedEnvSchema> {}"
 						: "interface EnvironmentVariables extends Record<string, unknown> {}",
 				],
 			},

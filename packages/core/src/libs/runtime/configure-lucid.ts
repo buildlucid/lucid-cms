@@ -1,5 +1,10 @@
 import { produce } from "immer";
-import type { LucidConfigDefinition } from "./types.js";
+import type { EnvironmentSchema, LucidConfigDefinition } from "./types.js";
+
+type LucidConfigDefinitionWithEnv<TEnvSchema extends EnvironmentSchema> =
+	LucidConfigDefinition<TEnvSchema> & {
+		env: TEnvSchema;
+	};
 
 /**
  * Wraps your Lucid CMS config and gives it the right shape for `lucid.config.*`.
@@ -8,23 +13,39 @@ import type { LucidConfigDefinition } from "./types.js";
  *
  * @example
  * ```ts
+ * import { configureLucid, z } from "@lucidcms/core";
  * import { node } from "@lucidcms/runtime-node";
  * import { sqlite } from "@lucidcms/db-sqlite";
  *
  * export default configureLucid({
  *   runtime: node,
  *   db: sqlite,
+ *   env: z.object({
+ *     SECRET: z.string(),
+ *   }),
  *   config: (env) => ({
+ *     secrets: {
+ *       encryption: env.SECRET,
+ *       cookie: env.SECRET,
+ *       refreshToken: env.SECRET,
+ *       accessToken: env.SECRET,
+ *     },
  *     collections: [],
  *     plugins: [],
  *   }),
  * });
  * ```
  */
-const configureLucid = (
+function configureLucid<TEnvSchema extends EnvironmentSchema>(
+	definition: LucidConfigDefinitionWithEnv<TEnvSchema>,
+): LucidConfigDefinitionWithEnv<TEnvSchema>;
+function configureLucid(
+	definition: LucidConfigDefinition<undefined>,
+): LucidConfigDefinition<undefined>;
+function configureLucid(
 	definition: LucidConfigDefinition,
-): LucidConfigDefinition => {
+): LucidConfigDefinition {
 	return produce(definition, () => {});
-};
+}
 
 export default configureLucid;
