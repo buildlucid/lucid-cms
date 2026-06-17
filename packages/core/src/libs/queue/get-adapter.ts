@@ -7,7 +7,7 @@ import type { QueueAdapterInstance } from "./types.js";
 
 const getQueueAdapter = async (
 	config: Config,
-	runtimeContext: AdapterRuntimeContext,
+	_runtimeContext: AdapterRuntimeContext,
 ): Promise<QueueAdapterInstance> => {
 	try {
 		if (config.queue?.adapter) {
@@ -19,14 +19,7 @@ const getQueueAdapter = async (
 			return await adapter;
 		}
 
-		if (!runtimeContext.configEntryPoint) {
-			return passthroughQueueAdapter();
-		}
-
-		const { default: workerQueueAdapter } = await import(
-			"./adapters/worker/index.js"
-		);
-		return workerQueueAdapter();
+		return passthroughQueueAdapter();
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.queueAdapter,

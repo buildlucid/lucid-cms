@@ -3,21 +3,17 @@ import type { LucidConfigDefinition } from "./types.js";
 
 /**
  * Wraps your Lucid CMS config and gives it the right shape for `lucid.config.*`.
- * Use it to declare the runtime adapter and return the rest of your
+ * Use it to pass the runtime/database adapters and return the rest of your
  * config from the `config(env)` callback.
  *
  * @example
  * ```ts
+ * import { node } from "@lucidcms/node-adapter";
+ * import { sqlite } from "@lucidcms/sqlite-adapter";
+ *
  * export default configureLucid({
- *   adapter: {
- *     module: "@lucidcms/node-adapter",
- *   },
- *   database: {
- *     module: "@lucidcms/sqlite-adapter",
- *     options: {
- *       database: "./db.sqlite",
- *     },
- *   },
+ *   runtime: node,
+ *   db: sqlite,
  *   config: (env) => ({
  *     collections: [],
  *     plugins: [],
@@ -25,12 +21,9 @@ import type { LucidConfigDefinition } from "./types.js";
  * });
  * ```
  */
-const configureLucid = <
-	AdapterModule extends string,
-	DatabaseModule extends string,
->(
-	definition: LucidConfigDefinition<AdapterModule, DatabaseModule>,
-): LucidConfigDefinition<AdapterModule, DatabaseModule> => {
+const configureLucid = (
+	definition: LucidConfigDefinition,
+): LucidConfigDefinition => {
 	return produce(definition, () => {});
 };
 

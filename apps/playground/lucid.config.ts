@@ -1,25 +1,25 @@
-// import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
-// import RedisPlugin from "@lucidcms/plugin-redis";
-// import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
-import GitHubAuth from "@lucidcms/auth-github";
-import GoogleAuth from "@lucidcms/auth-google";
-import MicrosoftAuth from "@lucidcms/auth-microsoft";
+// import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
+// import { redisPlugin } from "@lucidcms/plugin-redis";
+// import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
+import { githubAuthPlugin } from "@lucidcms/auth-github";
+import { googleAuthPlugin } from "@lucidcms/auth-google";
+import { microsoftAuthPlugin } from "@lucidcms/auth-microsoft";
 import { configureLucid, copy, z } from "@lucidcms/core";
 // import { passthroughEmailAdapter } from "@lucidcms/core/email";
-// import { fileSystemMediaAdapter } from "@lucidcms/core/media";
+// import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { createServiceContext, PermissionSets } from "@lucidcms/core/plugin";
 // import { passthroughQueueAdapter } from "@lucidcms/core/queue";
 import { createToolkit } from "@lucidcms/core/toolkit";
-// Plugins
-// Adapters
-import NodemailerPlugin from "@lucidcms/plugin-nodemailer";
-import PagesPlugin from "@lucidcms/plugin-pages";
-// import ResendPlugin from "@lucidcms/plugin-resend";
-// import S3Plugin from "@lucidcms/plugin-s3";
+import { node } from "@lucidcms/node-adapter";
+import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
+import { pagesPlugin } from "@lucidcms/plugin-pages";
+// import { resendPlugin } from "@lucidcms/plugin-resend";
+// import { s3Plugin } from "@lucidcms/plugin-s3";
+import { sqlite } from "@lucidcms/sqlite-adapter";
 import { describeRoute } from "hono-openapi";
+// Collections
 import BlogCollection from "./src/collections/blogs.js";
 import MainMenuCollection from "./src/collections/main-menu.js";
-// Collections
 import PageCollection from "./src/collections/pages.js";
 import SettingsCollection from "./src/collections/settings.js";
 import SimpleCollection from "./src/collections/simple.js";
@@ -46,28 +46,21 @@ export const env = z.object({
 });
 
 export default configureLucid({
-	adapter: {
-		module: "@lucidcms/node-adapter",
-		// module: "@lucidcms/cloudflare-adapter",
-		// options: {
-		// 	server: {
-		// 		port: 1092,
-		// 	}
-		// },
-	},
-	database: {
-		module: "@lucidcms/sqlite-adapter",
-		// module: "@lucidcms/postgres-adapter",
-		// options: (env) => ({
-		// 	url: env?.DATABASE_URL as string,
-		// 	max: 5,
-		// }),
-		// module: "@lucidcms/libsql-adapter",
-		// options: (env) => ({
-		// 	url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
-		// 	authToken: env?.TURSO_AUTH_TOKEN as string,
-		// }),
-	},
+	runtime: node,
+	// runtime: node({
+	// 	server: {
+	// 		port: 1092,
+	// 	},
+	// }),
+	db: sqlite,
+	// db: postgres((env) => ({
+	// 		url: env?.DATABASE_URL as string,
+	// 		max: 5,
+	// 	})),
+	// db: libsql((env) => ({
+	// 		url: "libsql://lucid-cloudflare-willyallop.aws-eu-west-1.turso.io",
+	// 		authToken: env?.TURSO_AUTH_TOKEN as string,
+	// 	})),
 	config: (env) => ({
 		// security: {
 		// 	cors: {
@@ -139,24 +132,6 @@ export default configureLucid({
 		},
 		openAPI: {
 			enabled: true,
-		},
-		media: {
-			// adapter: fileSystemMediaAdapter({
-			// 	uploadDir: "uploads",
-			// 	secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
-			// }),
-			limits: {
-				fileSize: 200 * 1024 * 1024, // 200MB.
-				processedImages: 10,
-			},
-			images: {
-				storeProcessed: true,
-				onDemandFormats: true,
-			},
-			fallback: {
-				image: "https://placehold.co/600x400",
-				video: "https://cdn.pixabay.com/video/2026/01/05/326081_large.mp4",
-			},
 		},
 		// email: {
 		// 	adapter: passthroughEmailAdapter,
@@ -349,20 +324,20 @@ export default configureLucid({
 			SimpleCollection,
 		],
 		plugins: [
-			GitHubAuth({
+			githubAuthPlugin({
 				clientId: env.GITHUB_CLIENT_ID,
 				clientSecret: env.GITHUB_CLIENT_SECRET,
 			}),
-			GoogleAuth({
+			googleAuthPlugin({
 				clientId: env.GOOGLE_CLIENT_ID,
 				clientSecret: env.GOOGLE_CLIENT_SECRET,
 			}),
-			MicrosoftAuth({
+			microsoftAuthPlugin({
 				clientId: env.MICROSOFT_CLIENT_ID,
 				clientSecret: env.MICROSOFT_CLIENT_SECRET,
 				tenant: env.MICROSOFT_TENANT_ID,
 			}),
-			PagesPlugin({
+			pagesPlugin({
 				collections: [
 					{
 						collectionKey: "page",
@@ -380,20 +355,24 @@ export default configureLucid({
 					},
 				],
 			}),
-			// RedisPlugin({
+			// redisPlugin({
 			// 	connection: env.REDIS_CONNECTION,
 			// }),
-			NodemailerPlugin({
+			nodemailerPlugin({
 				transporter: transporter,
 			}),
-			// ResendPlugin({
+			// filesystemPlugin({
+			// 	uploadDir: "uploads",
+			// 	secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
+			// }),
+			// resendPlugin({
 			// 	apiKey: env.LUCID_RESEND_API_KEY,
 			// 	webhook: {
 			// 		enabled: true,
 			// 		secret: env.LUCID_RESEND_WEBHOOK_SECRET,
 			// 	},
 			// }),
-			// S3Plugin({
+			// s3Plugin({
 			// 	endpoint: `https://${env?.LUCID_CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
 			// 	bucket: "headless-cms",
 			// 	clientOptions: {

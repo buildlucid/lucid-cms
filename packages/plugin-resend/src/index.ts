@@ -1,5 +1,5 @@
 import plugin from "./plugin.js";
 
-const lucidResendPlugin = plugin;
+export { default as resendPlugin } from "./plugin.js";
 
-export default lucidResendPlugin;
+export default plugin;

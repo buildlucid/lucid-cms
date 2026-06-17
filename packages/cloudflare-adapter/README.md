@@ -14,26 +14,44 @@ npm install @lucidcms/cloudflare-adapter
 
 ## Setup
 
-To use the Cloudflare adapter, you must export the adapter from your `lucid.config.ts` file as well as default exporting the config with the `defineConfig` function.
+Use the Cloudflare runtime in your `lucid.config.ts` file.
 
 ```typescript
-import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
+import { configureLucid } from "@lucidcms/core";
+import { cloudflare } from "@lucidcms/cloudflare-adapter";
+import { libsql } from "@lucidcms/libsql-adapter";
 
-export const adapter = cloudflareAdapter();
-
-export default defineConfig((env) => ({
-    // ...other config
-}));
+export default configureLucid({
+	runtime: cloudflare,
+	db: libsql,
+	config: () => ({
+		// ...other config
+	}),
+});
 ```
 
 ### Configuration
 
-The `cloudflareAdapter` function accepts a single parameter, `options`, which is an optional object with the following properties:
+The `cloudflare` function accepts a single parameter, `options`, which is either an optional object or a callback that receives Lucid's resolved env object.
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `platformProxy` | `GetPlatformProxyOptions` | A Wrangler platform proxy options object |
 | `server` | `{ port?: number; hostname?: string }` | The server options. The `lucidcms dev` script uses these when serving the local Node server |
+
+```typescript
+export default configureLucid({
+	runtime: cloudflare((env) => ({
+		server: {
+			port: Number(env.PORT ?? 6543),
+		},
+	})),
+	db: libsql,
+	config: () => ({
+		// ...other config
+	}),
+});
+```
 
 ## Wrangler Configuration
 
@@ -66,19 +84,22 @@ cwd = "./"
 Due to the nature of Cloudflare Workers, they don't support file system operations. Because of this, you'll want to avoid the [LocalStorage](https://lucidjs.build/en/cms/docs/plugins/localstorage) plugin. For Cloudflare R2 bindings, we recommend the [Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2) plugin. For other object stores, the [S3](https://lucidjs.build/en/cms/docs/plugins/s3) plugin remains the generic option.
 
 ```typescript
-import { cloudflareAdapter, defineConfig } from "@lucidcms/cloudflare-adapter";
+import { configureLucid } from "@lucidcms/core";
+import { cloudflare } from "@lucidcms/cloudflare-adapter";
+import { libsql } from "@lucidcms/libsql-adapter";
 import CloudflareR2 from "@lucidcms/plugin-cloudflare-r2";
 
-export const adapter = cloudflareAdapter();
-
-export default defineConfig((env) => ({
-    plugins: [
-        CloudflareR2({
-            binding: env.MEDIA_BUCKET,
-        }),
-    ],
-    // ...other config
-}));
+export default configureLucid({
+	runtime: cloudflare,
+	db: libsql,
+	config: (env) => ({
+		plugins: [
+			CloudflareR2({
+				binding: env.MEDIA_BUCKET,
+			}),
+		],
+	}),
+});
 ```
 
 ## Media Streaming

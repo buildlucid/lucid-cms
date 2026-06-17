@@ -1,5 +1,5 @@
 import plugin from "./plugin.js";
 
-const lucidGitHubAuthPlugin = plugin;
+export { default as githubAuthPlugin } from "./plugin.js";
 
-export default lucidGitHubAuthPlugin;
+export default plugin;

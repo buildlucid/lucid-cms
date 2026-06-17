@@ -1,5 +1,5 @@
 import plugin from "./plugin.js";
 
-const lucidCloudflareQueuesPlugin = plugin;
+export { default as cloudflareQueuesPlugin } from "./plugin.js";
 
-export default lucidCloudflareQueuesPlugin;
+export default plugin;

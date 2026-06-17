@@ -1,6 +1,6 @@
 # Lucid CMS: Node
 
-Minimal Lucid CMS example using the Node adapter, SQLite, the Pages plugin, one fixed `seo` brick, and one repeatable `content` brick.
+Minimal Lucid CMS example using the Node adapter, SQLite, the Filesystem plugin, the SQLite KV plugin, the Pages plugin, one fixed `seo` brick, and one repeatable `content` brick.
 
 ## Commands
 
@@ -58,3 +58,6 @@ const ContentBrick = new BrickBuilder("content", {
 
 - [Lucid getting started](https://lucidcms.io/en/cms/docs/getting-started/installation/)
 - [Node adapter](https://github.com/buildlucid/lucid-cms/tree/master/packages/node-adapter)
+- [Filesystem plugin](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-filesystem)
+- [SQLite KV plugin](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-sqlite-kv)
+- [Pages plugin](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-pages)

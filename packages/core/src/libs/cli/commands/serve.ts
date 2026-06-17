@@ -54,7 +54,7 @@ const serveCommand = async () => {
 
 		if (!adapterCLI) {
 			cliLogger.error(
-				`Lucid could not load CLI handlers from "${configRes.definition.adapter.module}".`,
+				`Lucid could not load CLI handlers from the "${configRes.adapter.key}" runtime adapter.`,
 			);
 			logger.setBuffering(false);
 			process.exit(1);
@@ -69,8 +69,6 @@ const serveCommand = async () => {
 			envSchema: configRes.envSchema,
 			configPath: configPath,
 			projectRoot: configRes.projectRoot,
-			adapterModule: configRes.definition.adapter.module,
-			databaseModule: configRes.definition.database.module,
 			collections: configRes.config.collections,
 			localization: configRes.config.localization,
 		});

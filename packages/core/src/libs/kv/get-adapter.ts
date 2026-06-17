@@ -1,6 +1,7 @@
 import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
-import LucidError from "../../utils/errors/lucid-error.js";
+import logger from "../logger/index.js";
+import passthroughKVAdapter from "./adapters/passthrough.js";
 import type { KVAdapterInstance } from "./types.js";
 
 /**
@@ -17,20 +18,16 @@ const getKVAdapter = async (config: Config): Promise<KVAdapterInstance> => {
 			return await adapter;
 		}
 
-		const { default: betterSQLiteKVAdapter } = await import(
-			"./adapters/better-sqlite.js"
-		);
-		return await betterSQLiteKVAdapter({
-			namespace: config.kv?.namespace,
-		});
+		return passthroughKVAdapter();
 	} catch (error) {
-		throw new LucidError({
+		logger.error({
 			scope: constants.logScopes.kvAdapter,
-			message:
-				error instanceof Error
-					? error.message
-					: "Failed to initialize KV adapter",
+			message: "Failed to initialize KV adapter",
+			data: {
+				errorMessage: error instanceof Error ? error.message : String(error),
+			},
 		});
+		return passthroughKVAdapter();
 	}
 };
 

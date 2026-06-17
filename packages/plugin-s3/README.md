@@ -15,25 +15,28 @@ npm install @lucidcms/plugin-s3
 To use the S3 plugin, you need to add it to your Lucid CMS config file. You'll need to provide your S3 endpoint, bucket name, and client configuration.
 
 ```typescript
-import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
-import LucidS3 from "@lucidcms/plugin-s3";
+import { configureLucid } from "@lucidcms/core";
+import { node } from "@lucidcms/node-adapter";
+import { s3Plugin } from "@lucidcms/plugin-s3";
+import { sqlite } from "@lucidcms/sqlite-adapter";
 
-export const adapter = nodeAdapter();
-
-export default defineConfig((env) => ({
-    // ...other config
-    plugins: [
-        LucidS3({
-            endpoint: env.S3_ENDPOINT,
-            bucket: env.S3_BUCKET,
-            clientOptions: {
-                region: "auto",
-                accessKeyId: env.S3_ACCESS_KEY_ID,
-                secretAccessKey: env.S3_SECRET_ACCESS_KEY,
-            },
-        }),
-    ],
-}));
+export default configureLucid({
+	runtime: node,
+	db: sqlite,
+	config: (env) => ({
+		plugins: [
+			s3Plugin({
+				endpoint: env.S3_ENDPOINT,
+				bucket: env.S3_BUCKET,
+				clientOptions: {
+					region: "auto",
+					accessKeyId: env.S3_ACCESS_KEY_ID,
+					secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+				},
+			}),
+		],
+	}),
+});
 ```
 
 ## Configuration

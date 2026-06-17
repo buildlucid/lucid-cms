@@ -16,27 +16,21 @@ To use the LibSQL adapter, you must add it to your Lucid CMS configuration file.
 
 ```typescript
 import { configureLucid } from "@lucidcms/core";
+import { node } from "@lucidcms/node-adapter";
+import { libsql } from "@lucidcms/libsql-adapter";
 
 export default configureLucid({
-    adapter: {
-        module: "@lucidcms/node-adapter",
-    },
-    database: {
-        module: "@lucidcms/libsql-adapter",
-        options: (env) => ({
-            url: env.LIBSQL_URL,
-            authToken: env.LIBSQL_AUTH_TOKEN,
-        }),
-    },
-    config: () => ({
-        // ...other config
-    }),
+	runtime: node,
+	db: libsql,
+	config: () => ({
+		// ...other config
+	}),
 });
 ```
 
 ## Configuration
 
-The adapter constructor accepts a configuration object via `database.options` with the following options:
+The no-call `db: libsql` form reads `LIBSQL_URL` and optional `LIBSQL_AUTH_TOKEN` from Lucid's resolved env. You can also pass a configuration object or env callback via `libsql()` with the following options:
 
 | Property | Type | Description |
 |----------|------|-------------|

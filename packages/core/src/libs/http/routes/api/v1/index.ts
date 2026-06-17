@@ -8,7 +8,6 @@ import clientIntegrationsRoutes from "./client-integrations.routes.js";
 import collectionRoutes from "./collections.routes.js";
 import documentRoutes from "./document.routes.js";
 import emailRoutes from "./email.routes.js";
-import fsRoutes from "./fs.routes.js";
 import i18nRoutes from "./i18n.routes.js";
 import jobsRoutes from "./jobs.routes.js";
 import licenseRoutes from "./license.routes.js";
@@ -42,7 +41,6 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/users", userRoutes)
 	.route("/media", mediaRoutes)
 	.route("/share", shareRoutes)
-	.route("/client", clientRoutes)
-	.route("/fs", fsRoutes);
+	.route("/client", clientRoutes);
 
 export default routes;

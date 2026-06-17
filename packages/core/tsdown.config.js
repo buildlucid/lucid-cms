@@ -11,7 +11,6 @@ export default defineConfig({
 		"src/runtime.ts",
 		"src/libs/cli/index.ts",
 		"src/libs/queue/index.ts",
-		"src/libs/queue/adapters/worker/consumer.ts",
 		"src/libs/db/index.ts",
 		"src/libs/email/index.ts",
 		// "src/libs/image-processor/index.ts",

@@ -10,6 +10,7 @@ import {
 } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
+import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
@@ -37,6 +38,30 @@ const buildCommand = async (options?: {
 			locale: "en",
 		});
 
+		const adapterRuntime = configRes.adapter;
+		const adapterCLI = adapterRuntime.cli;
+
+		if (!adapterCLI) {
+			cliLogger.error(
+				`Lucid could not load CLI handlers from the "${configRes.adapter.key}" runtime adapter.`,
+				{
+					silent,
+				},
+			);
+			logger.setBuffering(false);
+			process.exit(1);
+		}
+
+		await checkAllPluginsCompatibility({
+			runtimeContext: {
+				runtime: adapterRuntime.key,
+				compiled: true,
+				getConnectionInfo: () => ({}),
+				configEntryPoint: null,
+			} satisfies AdapterRuntimeContext,
+			config: configRes.config,
+		});
+
 		if (options?.cacheSpa) {
 			await partialBuildDirClear(configRes.config.build.paths.outDir);
 		} else {
@@ -45,20 +70,6 @@ const buildCommand = async (options?: {
 				force: true,
 			});
 			await mkdir(configRes.config.build.paths.outDir);
-		}
-
-		const adapterRuntime = configRes.adapter;
-		const adapterCLI = configRes.adapter.cli;
-
-		if (!adapterCLI) {
-			cliLogger.error(
-				`Lucid could not load CLI handlers from "${configRes.definition.adapter.module}".`,
-				{
-					silent,
-				},
-			);
-			logger.setBuffering(false);
-			process.exit(1);
 		}
 
 		//* the path to the config, relative from the CWD

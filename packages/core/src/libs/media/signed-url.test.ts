@@ -1,9 +1,8 @@
 import { describe, expect, test } from "vitest";
-import {
-	FILE_SYSTEM_DOWNLOAD_PATH,
-	FILE_SYSTEM_UPLOAD_PATH,
-} from "./adapters/file-system/helpers.js";
 import { createSignedMediaUrl, validateSignedMediaUrl } from "./signed-url.js";
+
+const FILE_SYSTEM_UPLOAD_PATH = "fs/upload";
+const FILE_SYSTEM_DOWNLOAD_PATH = "fs/download";
 
 describe("signed media URLs", () => {
 	test("scopes tokens to the requested path", () => {

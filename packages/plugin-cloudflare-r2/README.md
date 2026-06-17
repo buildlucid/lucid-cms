@@ -14,19 +14,22 @@ npm install @lucidcms/plugin-cloudflare-r2
 
 ```ts
 import { configureLucid, z } from "@lucidcms/core";
-import CloudflareR2Plugin from "@lucidcms/plugin-cloudflare-r2";
+import { cloudflare } from "@lucidcms/cloudflare-adapter";
+import { libsql } from "@lucidcms/libsql-adapter";
+import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 
 export const env = z.object({
+	LIBSQL_URL: z.string(),
+	LIBSQL_AUTH_TOKEN: z.string().optional(),
 	MEDIA_BUCKET: z.any(),
 });
 
 export default configureLucid({
-	adapter: {
-		module: "@lucidcms/cloudflare-adapter",
-	},
+	runtime: cloudflare,
+	db: libsql,
 	config: (env) => ({
 		plugins: [
-			CloudflareR2Plugin({
+			cloudflareR2Plugin({
 				binding: env.MEDIA_BUCKET,
 			}),
 		],

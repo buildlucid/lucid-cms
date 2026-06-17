@@ -1,5 +1,5 @@
 import plugin from "./plugin.js";
 
-const lucidMicrosoftAuthPlugin = plugin;
+export { default as microsoftAuthPlugin } from "./plugin.js";
 
-export default lucidMicrosoftAuthPlugin;
+export default plugin;

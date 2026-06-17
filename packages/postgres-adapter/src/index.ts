@@ -1,4 +1,7 @@
-import { DatabaseAdapter } from "@lucidcms/core/db";
+import {
+	createDatabaseAdapterCreator,
+	DatabaseAdapter,
+} from "@lucidcms/core/db";
 import type {
 	DatabaseConfig,
 	InferredColumn,
@@ -11,22 +14,19 @@ import type {
 import { type ColumnDataType, ParseJSONResultsPlugin, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
 import { PostgresJSDialect } from "kysely-postgres-js";
-import postgres from "postgres";
+import postgresClient from "postgres";
+import type {
+	PostgresAdapterCreator,
+	PostgresAdapterOptions,
+} from "./types.js";
+import createPostgresAdapter from "./utils/create-adapter.js";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
+import getDefaultPostgresConfig from "./utils/get-default-config.js";
 
-export type PostgresClientOptions = Omit<
-	NonNullable<Parameters<typeof postgres>[1]>,
-	"onnotice"
->;
-
-export type PostgresAdapterOptions = PostgresClientOptions & {
-	url: string;
-};
-
-class PostgresAdapter extends DatabaseAdapter {
+export class PostgresAdapter extends DatabaseAdapter {
 	constructor(config?: PostgresAdapterOptions) {
 		if (!config?.url) {
 			throw new Error(
@@ -39,7 +39,7 @@ class PostgresAdapter extends DatabaseAdapter {
 		super({
 			adapter: "postgres",
 			dialect: new PostgresJSDialect({
-				postgres: postgres(url, {
+				postgres: postgresClient(url, {
 					...postgresOptions,
 					onnotice: () => {},
 				}),
@@ -299,4 +299,9 @@ class PostgresAdapter extends DatabaseAdapter {
 	}
 }
 
-export default PostgresAdapter;
+export const postgres = createDatabaseAdapterCreator(createPostgresAdapter, {
+	adapter: "postgres",
+	resolve: (env) => new PostgresAdapter(getDefaultPostgresConfig(env)),
+}) as PostgresAdapterCreator;
+
+export default postgres;

@@ -1,0 +1,4 @@
+{
+	"plugin.worker.queues.worker.not.started": "Worker queue is not started.",
+	"plugin.worker.queues.jobs.create.failed": "Failed to create job."
+}

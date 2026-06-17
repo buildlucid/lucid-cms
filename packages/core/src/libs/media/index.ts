@@ -1,6 +1,5 @@
 import constants from "../../constants/constants.js";
 
-export { default as fileSystemMediaAdapter } from "./adapters/file-system/index.js";
 export { splitBodyForProcessing, toNodeReadable } from "./normalize-body.js";
 export {
 	createSignedMediaToken,

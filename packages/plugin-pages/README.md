@@ -25,27 +25,30 @@ npm install @lucidcms/plugin-pages
 To use the Pages plugin, you need to add it to your Lucid CMS config file. You will need to provide it with the necessary configuration options, such as a list of collections to enable the plugin on.
 
 ```typescript
-import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
-import LucidPages from "@lucidcms/plugin-pages";
+import { configureLucid } from "@lucidcms/core";
+import { node } from "@lucidcms/node-adapter";
+import { pagesPlugin } from "@lucidcms/plugin-pages";
+import { sqlite } from "@lucidcms/sqlite-adapter";
 
-export const adapter = nodeAdapter();
-
-export default defineConfig((env) => ({
-    // ...other config
-    plugins: [
-        LucidPages({
-            collections: [{
-                collectionKey: "page",
-                localized: true,
-                displayFullSlug: true,
-                prefix: {
-                    en: "en",
-                    fr: "fr",
-                },
-            }],
-        }),
-    ],
-}));
+export default configureLucid({
+	runtime: node,
+	db: sqlite,
+	config: () => ({
+		plugins: [
+			pagesPlugin({
+				collections: [{
+					collectionKey: "page",
+					localized: true,
+					displayFullSlug: true,
+					prefix: {
+						en: "en",
+						fr: "fr",
+					},
+				}],
+			}),
+		],
+	}),
+});
 ```
 
 ## Configuration

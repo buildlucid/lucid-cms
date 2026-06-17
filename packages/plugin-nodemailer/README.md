@@ -15,19 +15,22 @@ npm install @lucidcms/plugin-nodemailer
 To use the Nodemailer plugin, you need to add it to your Lucid CMS config file. You'll need to provide the from email configuration and a Nodemailer transporter instance.
 
 ```typescript
-import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
-import LucidNodemailer from "@lucidcms/plugin-nodemailer";
+import { configureLucid } from "@lucidcms/core";
+import { node } from "@lucidcms/node-adapter";
+import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
+import { sqlite } from "@lucidcms/sqlite-adapter";
 
-export const adapter = nodeAdapter();
-
-export default defineConfig((env) => ({
-    // ...other config
-    plugins: [
-        LucidNodemailer({
-            transporter: transporter,
-        }),
-    ],
-}));
+export default configureLucid({
+	runtime: node,
+	db: sqlite,
+	config: () => ({
+		plugins: [
+			nodemailerPlugin({
+				transporter,
+			}),
+		],
+	}),
+});
 ```
 
 ## Configuration

@@ -1,7 +1,7 @@
 import type { Hono } from "hono";
 import z from "zod";
 import constants from "../../constants/constants.js";
-import type { Config } from "../../types/config.js";
+import type { Config, ImageProcessor } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
@@ -19,12 +19,12 @@ const HonoAppSchema = z.custom<
 
 // TODO: improve all function custom schemas bellow
 
-// const ImageProcessorSchema = z.custom<ImageProcessor>(
-// 	(data) => typeof data === "function",
-// 	{
-// 		message: "Expected an ImageProcessor function",
-// 	},
-// );
+const ImageProcessorSchema = z.custom<ImageProcessor>(
+	(data) => typeof data === "function",
+	{
+		message: "Expected an ImageProcessor function",
+	},
+);
 
 const QueueAdapterSchema = z.custom<
 	QueueAdapter | QueueAdapterInstance | Promise<QueueAdapterInstance>
@@ -209,8 +209,7 @@ const ConfigSchema = z.object({
 			processedImages: z.number(),
 		}),
 		images: z.object({
-			//* disabled for beta release
-			// processor: ImageProcessorSchema.optional(),
+			processor: ImageProcessorSchema.optional(),
 			presets: z.record(
 				z.string(),
 				z.object({

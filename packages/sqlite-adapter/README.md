@@ -17,26 +17,21 @@ If you don't pass options, Lucid will instantiate `SQLiteAdapter` with the defau
 
 ```typescript
 import { configureLucid } from "@lucidcms/core";
+import { node } from "@lucidcms/node-adapter";
+import { sqlite } from "@lucidcms/sqlite-adapter";
 
 export default configureLucid({
-    adapter: {
-        module: "@lucidcms/node-adapter",
-    },
-    database: {
-        module: "@lucidcms/sqlite-adapter",
-        options: {
-            database: "./db.sqlite",
-        },
-    },
-    config: () => ({
-        // ...other config
-    }),
+	runtime: node,
+	db: sqlite,
+	config: () => ({
+		// ...other config
+	}),
 });
 ```
 
 ## Configuration
 
-The adapter constructor accepts a configuration object with the following options. These are the values you pass to `database.options`.
+The no-call `db: sqlite` form uses the same default as `sqlite()`: `./db.sqlite`. You can pass a configuration object to `sqlite()` when you need to override it.
 
 | Property | Type | Description |
 |----------|------|-------------|

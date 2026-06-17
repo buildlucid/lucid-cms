@@ -23,9 +23,20 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		hooks: {
-			build: async (props) => {
-				const configImportPath = `./${props.paths.outputRelativeConfigPath}`;
+			build: async () => {
 				const imports: CloudflareWorkerImport[] = [
+					{
+						path: "./lucid/config.js",
+						default: "configFactory",
+					},
+					{
+						path: "./lucid/env.js",
+						exports: [{ name: "env", as: "envSchema" }],
+					},
+					{
+						path: "./lucid/db.js",
+						default: "db",
+					},
 					{
 						path: "@lucidcms/core/queue",
 						exports: [
@@ -41,9 +52,9 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					{
 						path: "@lucidcms/core/runtime",
 						exports: [
-							"createConfiguredDatabaseAdapter",
 							"prepareTranslations",
 							"processConfig",
+							"resolveDatabaseAdapter",
 						],
 					},
 					{
@@ -51,15 +62,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						exports: ["createTranslator"],
 					},
 					{
-						path: props.definition.database.module,
-						default: "ConfiguredDatabaseAdapter",
-					},
-					{
 						path: "@lucidcms/core",
-						exports: [
-							{ name: "configureLucid", as: "coreConfigureLucid" },
-							"logger",
-						],
+						exports: ["logger"],
 					},
 					{
 						path: "./email-templates.json",
@@ -75,21 +79,16 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						name: "queue",
 						async: true,
 						params: ["batch", "env"],
-						content: /** ts */ `const { default: configDefinition, env: envSchema } =
-    await import(${JSON.stringify(configImportPath)});
-
-if (envSchema) {
+						content: /** ts */ `if (envSchema) {
     envSchema.parse(env);
 }
 
-const wrappedDefinition = coreConfigureLucid(configDefinition);
-const lucidConfig = wrappedDefinition.config(env);
+const lucidConfig = configFactory(env);
 lucidConfig.preRenderedEmailTemplates = Object.fromEntries(
     Object.entries(emailTemplates).map(([key, value]) => [key, value.html]),
 );
-const databaseAdapter = createConfiguredDatabaseAdapter(
-    ConfiguredDatabaseAdapter,
-    wrappedDefinition.database,
+const databaseAdapter = await resolveDatabaseAdapter(
+    db,
     env,
 );
 const resolved = await processConfig(

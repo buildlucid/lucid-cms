@@ -6,12 +6,29 @@ import type {
 	CloudflareWorkerImport,
 } from "../types.js";
 
+const resolveRuntimeSource = /** ts */ `const resolveRuntime = async () => {
+    const runtimeValue = typeof runtime === "function" ? runtime() : runtime;
+    const runtimeAdapter = await runtimeValue;
+
+    if (!runtimeAdapter || typeof runtimeAdapter !== "object") {
+        throw new Error(
+            "Lucid Cloudflare adapter could not resolve the configured runtime adapter.",
+        );
+    }
+
+    return runtimeAdapter;
+};`;
+
 /**
  * Prepares the main worker entry file and add additional imports/exports from custom artifacts
  */
 const prepareMainWorkerEntry = (
-	configPath: string,
-	databaseAdapterImportPath: string,
+	configArtifacts: {
+		config: string;
+		env: string;
+		db: string;
+		runtime: string;
+	},
 	customArtifacts: RuntimeBuildArtifactCustom[],
 ): {
 	imports: CloudflareWorkerImport[];
@@ -19,22 +36,30 @@ const prepareMainWorkerEntry = (
 } => {
 	const imports: CloudflareWorkerImport[] = [
 		{
-			path: `./${configPath}`,
-			default: "config",
+			path: configArtifacts.config,
+			default: "configFactory",
+		},
+		{
+			path: configArtifacts.env,
+			exports: [{ name: "env", as: "envSchema" }],
+		},
+		{
+			path: configArtifacts.db,
+			default: "db",
+		},
+		{
+			path: configArtifacts.runtime,
+			default: "runtime",
 		},
 		{
 			path: "@lucidcms/core/runtime",
 			exports: [
 				"createApp",
-				"createConfiguredDatabaseAdapter",
 				"prepareTranslations",
 				"processConfig",
+				"resolveDatabaseAdapter",
 				"setupCronJobs",
 			],
-		},
-		{
-			path: databaseAdapterImportPath,
-			default: "ConfiguredDatabaseAdapter",
 		},
 		{
 			path: "@lucidcms/core/kv",
@@ -53,10 +78,6 @@ const prepareMainWorkerEntry = (
 			exports: ["createTranslator"],
 		},
 		{
-			path: "@lucidcms/cloudflare-adapter",
-			exports: ["configureLucid"],
-		},
-		{
 			path: "@lucidcms/cloudflare-adapter/runtime",
 			exports: ["getRuntimeContext"],
 		},
@@ -67,12 +88,25 @@ const prepareMainWorkerEntry = (
 			name: "fetch",
 			async: true,
 			params: ["request", "env", "ctx"],
-			content: /** ts */ `const wrappedDefinition = configureLucid(config, {
+			content: /** ts */ `${resolveRuntimeSource}
+
+const runtimeAdapter = await resolveRuntime();
+
+if (envSchema) {
+    envSchema.parse(env);
+}
+await runtimeAdapter.resolveOptions?.(env);
+
+const definition = {
+    runtime: runtimeAdapter,
+    db,
+    config: configFactory,
+};
+const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {
     emailTemplates: emailTemplates,
-});
-const databaseAdapter = createConfiguredDatabaseAdapter(
-    ConfiguredDatabaseAdapter,
-    wrappedDefinition.database,
+}) : definition;
+const databaseAdapter = await resolveDatabaseAdapter(
+    wrappedDefinition.db,
     env,
 );
 const resolved = await processConfig(
@@ -136,12 +170,25 @@ return app.fetch(request, env, ctx);`,
 			async: true,
 			params: ["controller", "env", "ctx"],
 			content: /** ts */ `const runCronService = async () => {
-    const wrappedDefinition = configureLucid(config, {
+    ${resolveRuntimeSource}
+
+    const runtimeAdapter = await resolveRuntime();
+
+    if (envSchema) {
+        envSchema.parse(env);
+    }
+    await runtimeAdapter.resolveOptions?.(env);
+
+    const definition = {
+        runtime: runtimeAdapter,
+        db,
+        config: configFactory,
+    };
+    const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {
         emailTemplates: emailTemplates,
-    });
-    const databaseAdapter = createConfiguredDatabaseAdapter(
-        ConfiguredDatabaseAdapter,
-        wrappedDefinition.database,
+    }) : definition;
+    const databaseAdapter = await resolveDatabaseAdapter(
+        wrappedDefinition.db,
         env,
     );
     const resolved = await processConfig(

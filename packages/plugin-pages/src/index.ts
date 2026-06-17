@@ -1,5 +1,5 @@
 import plugin from "./plugin.js";
 
-const lucidPagesPlugin = plugin;
+export { default as pagesPlugin } from "./plugin.js";
 
-export default lucidPagesPlugin;
+export default plugin;

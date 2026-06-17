@@ -44,14 +44,14 @@ const processConfig = async (
 	if (Object.hasOwn(config, "db")) {
 		throw new LucidError({
 			message:
-				"Lucid config must not define `config.db`. Move your database adapter to the top-level `database: { module, options }` descriptor instead.",
+				"Lucid config must not define `config.db`. Move your database adapter to the top-level `db` property passed to configureLucid().",
 		});
 	}
 
 	if (!options?.resolvedDb) {
 		throw new LucidError({
 			message:
-				"Lucid could not resolve the configured database adapter. Define it via `configureLucid({ database: { module, options }, config })`.",
+				"Lucid could not resolve the configured database adapter. Define it via `configureLucid({ db, config })`.",
 		});
 	}
 

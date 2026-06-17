@@ -1,23 +1,39 @@
 import astroConstants from "../constants.js";
 
+type ConfigArtifactImportPaths = {
+	config: string;
+	env: string;
+	db: string;
+	runtime: string;
+};
+
+const resolveRuntimeSource = `const resolveRuntime = async () => {
+\tconst runtimeValue = typeof runtime === "function" ? runtime() : runtime;
+\tconst runtimeAdapter = await runtimeValue;
+
+\tif (!runtimeAdapter || typeof runtimeAdapter !== "object") {
+\t\tthrow new Error(
+\t\t\t"Lucid Astro could not resolve the configured runtime adapter.",
+\t\t);
+\t}
+
+\treturn runtimeAdapter;
+};`;
+
 /**
  * Astro's Node adapter does not expose Lucid's usual connection helper, so the
  * generated route derives a stable client address before Lucid middleware runs.
  */
 export const buildNodeRouteSource = (
-	configImportPath: string,
-	runtimeAdapterImportPath: string,
-	databaseAdapterImportPath: string,
+	configArtifacts: ConfigArtifactImportPaths,
 ): string => {
-	const runtimeAdapterErrorMessage = JSON.stringify(
-		`Lucid Astro could not load the runtime adapter export from "${runtimeAdapterImportPath}".`,
-	);
-
-	return `import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
-import ConfiguredDatabaseAdapter from ${JSON.stringify(databaseAdapterImportPath)};
-import { createApp, createConfiguredDatabaseAdapter, prepareTranslations, processConfig } from "@lucidcms/core/runtime";
+	return `import configFactory from ${JSON.stringify(configArtifacts.config)};
+import { env as envSchema } from ${JSON.stringify(configArtifacts.env)};
+import db from ${JSON.stringify(configArtifacts.db)};
+import runtime from ${JSON.stringify(configArtifacts.runtime)};
+import { createApp, prepareTranslations, processConfig, resolveDatabaseAdapter } from "@lucidcms/core/runtime";
 import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
-import { createLucidSpaResponse, shouldServeLucidSpaShell } from "@lucidcms/astro/runtime";
+import { createLucidSpaResponse, shouldServeLucidSpaShell } from "@lucidcms/astro/internal/runtime";
 import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
 import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
@@ -26,7 +42,6 @@ import spaHtml from "./${astroConstants.files.spaHtmlModule}";
 export const prerender = false;
 
 let appPromise;
-let runtimeAdapterModulePromise;
 
 const silentLogger = {
 \tinstance: {
@@ -42,27 +57,6 @@ const silentLogger = {
 \tsilent: true,
 };
 
-const loadRuntimeAdapterModule = async () => {
-\tif (!runtimeAdapterModulePromise) {
-\t\truntimeAdapterModulePromise = import(${JSON.stringify(runtimeAdapterImportPath)});
-\t}
-
-\treturn runtimeAdapterModulePromise;
-};
-
-const getAdapterFactory = async () => {
-\tconst runtimeAdapterModule = await loadRuntimeAdapterModule();
-\tconst adapterFactory =
-\t\truntimeAdapterModule.adapter ??
-\t\truntimeAdapterModule.default;
-
-\tif (typeof adapterFactory !== "function") {
-\t\tthrow new Error(${runtimeAdapterErrorMessage});
-\t}
-
-\treturn adapterFactory;
-};
-
 const resolveRemoteAddress = (request) => {
 \t// Astro proxies Lucid requests through its own server, so we recover the user IP here instead of assuming a dedicated Lucid server layer.
 \tconst forwardedFor = request.headers.get("x-forwarded-for");
@@ -75,27 +69,32 @@ const resolveRemoteAddress = (request) => {
 \t);
 };
 
+${resolveRuntimeSource}
+
 const ensureApp = async () => {
 \tif (!appPromise) {
 \t\tappPromise = (async () => {
-\t\t\tconst wrappedDefinition = configureLucid(lucidConfigModule.default, {
+\t\t\tconst runtimeAdapter = await resolveRuntime();
+\t\t\tconst wrappedDefinition = configureLucid({
+\t\t\t\truntime: runtimeAdapter,
+\t\t\t\tdb,
+\t\t\t\tconfig: configFactory,
+\t\t\t}, {
 \t\t\t\temailTemplates,
 \t\t\t});
-\t\t\tconst adapterFactory = await getAdapterFactory();
-\t\t\tconst adapter = await adapterFactory(wrappedDefinition.adapter.options);
-\t\t\tconst env = adapter.getEnvVars
-\t\t\t\t? await adapter.getEnvVars({
+\t\t\tconst env = runtimeAdapter.getEnvVars
+\t\t\t\t? await runtimeAdapter.getEnvVars({
 \t\t\t\t\tlogger: silentLogger,
 \t\t\t\t})
 \t\t\t\t: undefined;
 
-\t\t\tif (lucidConfigModule.env && env) {
-\t\t\t\tlucidConfigModule.env.parse(env);
+\t\t\tif (envSchema && env) {
+\t\t\t\tenvSchema.parse(env);
 \t\t\t}
+\t\t\tawait runtimeAdapter.resolveOptions?.(env || {});
 
-\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
-\t\t\t\tConfiguredDatabaseAdapter,
-\t\t\t\twrappedDefinition.database,
+\t\t\tconst databaseAdapter = await resolveDatabaseAdapter(
+\t\t\t\twrappedDefinition.db,
 \t\t\t\tenv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(env || {}), {
@@ -157,24 +156,19 @@ export const ALL = async (context) => {
  * config without each project wiring the runtime setup by hand.
  */
 export const buildNodeToolkitSource = (
-	configImportPath: string,
-	runtimeAdapterImportPath: string,
-	databaseAdapterImportPath: string,
+	configArtifacts: ConfigArtifactImportPaths,
 ): string => {
-	const runtimeAdapterErrorMessage = JSON.stringify(
-		`Lucid Astro could not load the runtime adapter export from "${runtimeAdapterImportPath}".`,
-	);
-
-	return `import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
-import ConfiguredDatabaseAdapter from ${JSON.stringify(databaseAdapterImportPath)};
-import { createConfiguredDatabaseAdapter, prepareTranslations, processConfig } from "@lucidcms/core/runtime";
+	return `import configFactory from ${JSON.stringify(configArtifacts.config)};
+import { env as envSchema } from ${JSON.stringify(configArtifacts.env)};
+import db from ${JSON.stringify(configArtifacts.db)};
+import runtime from ${JSON.stringify(configArtifacts.runtime)};
+import { prepareTranslations, processConfig, resolveDatabaseAdapter } from "@lucidcms/core/runtime";
 import { createToolkit, createToolkitServiceContext } from "@lucidcms/core/toolkit";
 import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
 import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
 
 let toolkitPromise;
-let runtimeAdapterModulePromise;
 
 const silentLogger = {
 \tinstance: {
@@ -190,49 +184,33 @@ const silentLogger = {
 \tsilent: true,
 };
 
-const loadRuntimeAdapterModule = async () => {
-\tif (!runtimeAdapterModulePromise) {
-\t\truntimeAdapterModulePromise = import(${JSON.stringify(runtimeAdapterImportPath)});
-\t}
-
-\treturn runtimeAdapterModulePromise;
-};
-
-const getAdapterFactory = async () => {
-\tconst runtimeAdapterModule = await loadRuntimeAdapterModule();
-\tconst adapterFactory =
-\t\truntimeAdapterModule.adapter ??
-\t\truntimeAdapterModule.default;
-
-\tif (typeof adapterFactory !== "function") {
-\t\tthrow new Error(${runtimeAdapterErrorMessage});
-\t}
-
-\treturn adapterFactory;
-};
+${resolveRuntimeSource}
 
 /** Reuses one resolved toolkit across Astro page calls in the same server process. */
 const ensureToolkit = async () => {
 \tif (!toolkitPromise) {
 \t\ttoolkitPromise = (async () => {
-\t\t\tconst wrappedDefinition = configureLucid(lucidConfigModule.default, {
+\t\t\tconst runtimeAdapter = await resolveRuntime();
+\t\t\tconst wrappedDefinition = configureLucid({
+\t\t\t\truntime: runtimeAdapter,
+\t\t\t\tdb,
+\t\t\t\tconfig: configFactory,
+\t\t\t}, {
 \t\t\t\temailTemplates,
 \t\t\t});
-\t\t\tconst adapterFactory = await getAdapterFactory();
-\t\t\tconst adapter = await adapterFactory(wrappedDefinition.adapter.options);
-\t\t\tconst env = adapter.getEnvVars
-\t\t\t\t? await adapter.getEnvVars({
+\t\t\tconst env = runtimeAdapter.getEnvVars
+\t\t\t\t? await runtimeAdapter.getEnvVars({
 \t\t\t\t\tlogger: silentLogger,
 \t\t\t\t})
 \t\t\t\t: undefined;
 
-\t\t\tif (lucidConfigModule.env && env) {
-\t\t\t\tlucidConfigModule.env.parse(env);
+\t\t\tif (envSchema && env) {
+\t\t\t\tenvSchema.parse(env);
 \t\t\t}
+\t\t\tawait runtimeAdapter.resolveOptions?.(env || {});
 
-\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
-\t\t\t\tConfiguredDatabaseAdapter,
-\t\t\t\twrappedDefinition.database,
+\t\t\tconst databaseAdapter = await resolveDatabaseAdapter(
+\t\t\t\twrappedDefinition.db,
 \t\t\t\tenv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(env || {}), {
@@ -272,12 +250,22 @@ export default getToolkit;
  * request context with the Lucid app instance that Hono expects.
  */
 export const buildCloudflareRouteSource = (
-	configImportPath: string,
-	databaseAdapterImportPath: string,
-): string => `export const prerender = false;
+	configArtifacts: ConfigArtifactImportPaths,
+): string => `import configFactory from ${JSON.stringify(configArtifacts.config)};
+import { env as envSchema } from ${JSON.stringify(configArtifacts.env)};
+import db from ${JSON.stringify(configArtifacts.db)};
+import runtime from ${JSON.stringify(configArtifacts.runtime)};
+import { createApp, prepareTranslations, processConfig, resolveDatabaseAdapter } from "@lucidcms/core/runtime";
+import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
+import { getRuntimeContext } from "@lucidcms/cloudflare-adapter/runtime";
+import { createLucidSpaResponse, shouldServeLucidSpaShell } from "@lucidcms/astro/internal/runtime";
+import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
+import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
+import spaHtml from "./${astroConstants.files.spaHtmlModule}";
+
+export const prerender = false;
 
 let appPromise;
-let runtimeModulesPromise;
 
 const getCloudflareEnv = () => {
 \tconst env =
@@ -293,81 +281,28 @@ const getCloudflareEnv = () => {
 \treturn env;
 };
 
-const loadRuntimeModules = async () => {
-\tif (!runtimeModulesPromise) {
-\t\truntimeModulesPromise = Promise.all([
-\t\t\timport(${JSON.stringify(configImportPath)}),
-\t\t\timport("@lucidcms/core/runtime"),
-\t\t\timport(${JSON.stringify(databaseAdapterImportPath)}),
-\t\t\timport(${JSON.stringify(astroConstants.integration.configureLucidModuleId)}),
-\t\t\timport("@lucidcms/cloudflare-adapter/runtime"),
-\t\t\timport("@lucidcms/astro/runtime"),
-\t\t\timport("./${astroConstants.files.emailTemplatesModule}"),
-			import("./${astroConstants.files.i18nTranslationsModule}"),
-\t\t\timport("./${astroConstants.files.spaHtmlModule}"),
-\t\t]).then(
-\t\t\t([
-\t\t\t\tlucidConfigModule,
-\t\t\t\truntimeModule,
-\t\t\t\tdatabaseAdapterModule,
-\t\t\t\tconfigureLucidModule,
-\t\t\t\truntimeContextModule,
-\t\t\t\tastroRuntimeModule,
-\t\t\t\temailTemplatesModule,
-				i18nTranslationsModule,
-\t\t\t\tspaHtmlModule,
-\t\t\t]) => ({
-\t\t\t\tdefinition: lucidConfigModule.default,
-\t\t\t\tenvSchema: lucidConfigModule.env,
-\t\t\t\tcreateApp: runtimeModule.createApp,
-\t\t\t\tcreateConfiguredDatabaseAdapter:
-\t\t\t\t\truntimeModule.createConfiguredDatabaseAdapter,
-\t\t\t\tDatabaseAdapterClass: databaseAdapterModule.default,
-\t\t\t\tprepareTranslations: runtimeModule.prepareTranslations,
-\t\t\t\tprocessConfig: runtimeModule.processConfig,
-\t\t\t\tconfigureLucid: configureLucidModule.default,
-\t\t\t\tgetRuntimeContext: runtimeContextModule.getRuntimeContext,
-\t\t\t\tcreateLucidSpaResponse: astroRuntimeModule.createLucidSpaResponse,
-\t\t\t\tshouldServeLucidSpaShell:
-\t\t\t\t\tastroRuntimeModule.shouldServeLucidSpaShell,
-\t\t\t\temailTemplates: emailTemplatesModule.default,
-				i18nTranslations: i18nTranslationsModule.default,
-\t\t\t\tspaHtml: spaHtmlModule.default,
-\t\t\t}),
-\t\t);
-\t}
-
-\treturn runtimeModulesPromise;
-};
+${resolveRuntimeSource}
 
 const ensureApp = async () => {
 \tif (!appPromise) {
 \t\tappPromise = (async () => {
 \t\t\tconst cloudflareEnv = getCloudflareEnv();
-\t\t\tconst {
-\t\t\t\tdefinition,
-\t\t\t\tenvSchema,
-\t\t\t\tcreateApp,
-\t\t\t\tcreateConfiguredDatabaseAdapter,
-\t\t\t\tDatabaseAdapterClass,
-\t\t\t\tprepareTranslations,
-\t\t\t\tprocessConfig,
-\t\t\t\tconfigureLucid,
-\t\t\t\tgetRuntimeContext,
-\t\t\t\temailTemplates,
-\t\t\t\ti18nTranslations,
-\t\t\t} = await loadRuntimeModules();
+\t\t\tconst runtimeAdapter = await resolveRuntime();
 
 \t\t\tif (envSchema) {
 \t\t\t\tenvSchema.parse(cloudflareEnv);
 \t\t\t}
+\t\t\tawait runtimeAdapter.resolveOptions?.(cloudflareEnv);
 
-\t\t\tconst wrappedDefinition = configureLucid(definition, {
+\t\t\tconst wrappedDefinition = configureLucid({
+\t\t\t\truntime: runtimeAdapter,
+\t\t\t\tdb,
+\t\t\t\tconfig: configFactory,
+\t\t\t}, {
 \t\t\t\temailTemplates,
 \t\t\t});
-\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
-\t\t\t\tDatabaseAdapterClass,
-\t\t\t\twrappedDefinition.database,
+\t\t\tconst databaseAdapter = await resolveDatabaseAdapter(
+\t\t\t\twrappedDefinition.db,
 \t\t\t\tcloudflareEnv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(cloudflareEnv), {
@@ -432,11 +367,6 @@ const ensureApp = async () => {
 
 export const ALL = async (context) => {
 \tconst cloudflareEnv = getCloudflareEnv();
-\tconst {
-\t\tcreateLucidSpaResponse,
-\t\tshouldServeLucidSpaShell,
-\t\tspaHtml,
-\t} = await loadRuntimeModules();
 \tconst { app } = await ensureApp();
 \tconst response = await app.fetch(
 \t\tcontext.request,
@@ -458,10 +388,18 @@ export const ALL = async (context) => {
  * request handling and during Astro prerendering.
  */
 export const buildCloudflareToolkitSource = (
-	configImportPath: string,
-	databaseAdapterImportPath: string,
-): string => `let toolkitPromise;
-let runtimeModulesPromise;
+	configArtifacts: ConfigArtifactImportPaths,
+): string => `import configFactory from ${JSON.stringify(configArtifacts.config)};
+import { env as envSchema } from ${JSON.stringify(configArtifacts.env)};
+import db from ${JSON.stringify(configArtifacts.db)};
+import runtime from ${JSON.stringify(configArtifacts.runtime)};
+import { prepareTranslations, processConfig, resolveDatabaseAdapter } from "@lucidcms/core/runtime";
+import { createToolkit, createToolkitServiceContext } from "@lucidcms/core/toolkit";
+import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
+import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
+import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
+
+let toolkitPromise;
 
 /** Reads the build-time Lucid context captured during Astro setup for prerender. */
 const getPrerenderContext = () =>
@@ -487,82 +425,35 @@ const getCloudflareEnv = () => {
 \treturn env;
 };
 
-/** Loads the modules needed to build the runtime-specific toolkit instance. */
-const loadRuntimeModules = async () => {
-\tif (!runtimeModulesPromise) {
-\t\truntimeModulesPromise = Promise.all([
-\t\t\timport(${JSON.stringify(configImportPath)}),
-\t\t\timport("@lucidcms/core/runtime"),
-\t\t\timport(${JSON.stringify(databaseAdapterImportPath)}),
-\t\t\timport("@lucidcms/core/toolkit"),
-\t\t\timport(${JSON.stringify(astroConstants.integration.configureLucidModuleId)}),
-\t\t\timport("./${astroConstants.files.emailTemplatesModule}"),
-			import("./${astroConstants.files.i18nTranslationsModule}"),
-\t\t]).then(
-\t\t\t([
-\t\t\t\tlucidConfigModule,
-\t\t\t\truntimeModule,
-\t\t\t\tdatabaseAdapterModule,
-\t\t\t\ttoolkitModule,
-\t\t\t\tconfigureLucidModule,
-\t\t\t\temailTemplatesModule,
-				i18nTranslationsModule,
-\t\t\t]) => ({
-\t\t\t\tdefinition: lucidConfigModule.default,
-\t\t\t\tenvSchema: lucidConfigModule.env,
-\t\t\t\tcreateConfiguredDatabaseAdapter:
-\t\t\t\t\truntimeModule.createConfiguredDatabaseAdapter,
-\t\t\t\tDatabaseAdapterClass: databaseAdapterModule.default,
-\t\t\t\tprepareTranslations: runtimeModule.prepareTranslations,
-\t\t\t\tprocessConfig: runtimeModule.processConfig,
-\t\t\t\tcreateToolkit: toolkitModule.createToolkit,
-\t\t\t\tcreateToolkitServiceContext:
-\t\t\t\t\ttoolkitModule.createToolkitServiceContext,
-\t\t\t\tconfigureLucid: configureLucidModule.default,
-\t\t\t\temailTemplates: emailTemplatesModule.default,
-				i18nTranslations: i18nTranslationsModule.default,
-\t\t\t}),
-\t\t);
-\t}
-
-\treturn runtimeModulesPromise;
-};
+${resolveRuntimeSource}
 
 /** Reuses one resolved toolkit across Astro page calls in the same server process. */
 const ensureToolkit = async () => {
 \tif (!toolkitPromise) {
 \t\ttoolkitPromise = (async () => {
 \t\t\tconst cloudflareEnv = readCloudflareEnv();
-\t\t\tconst {
-\t\t\t\tcreateToolkit,
-\t\t\t\tcreateToolkitServiceContext,
-\t\t\t\tdefinition,
-\t\t\t\tenvSchema,
-\t\t\t\tcreateConfiguredDatabaseAdapter,
-\t\t\t\tDatabaseAdapterClass,
-\t\t\t\tprepareTranslations,
-\t\t\t\tprocessConfig,
-\t\t\t\tconfigureLucid,
-\t\t\t\temailTemplates,
-\t\t\t\ti18nTranslations,
-\t\t\t} = await loadRuntimeModules();
 \t\t\tconst prerenderContext = !cloudflareEnv ? getPrerenderContext() : null;
 
 \t\t\tif (prerenderContext) {
 \t\t\t\treturn createToolkit(createToolkitServiceContext(prerenderContext));
 \t\t\t}
 \t\t\tconst resolvedCloudflareEnv = getCloudflareEnv();
+\t\t\tconst runtimeAdapter = await resolveRuntime();
 
 \t\t\tif (envSchema) {
 \t\t\t\tenvSchema.parse(resolvedCloudflareEnv);
 \t\t\t}
+\t\t\tawait runtimeAdapter.resolveOptions?.(resolvedCloudflareEnv);
 
-\t\t\tconst wrappedDefinition = configureLucid(definition, {
+\t\t\tconst wrappedDefinition = configureLucid({
+\t\t\t\truntime: runtimeAdapter,
+\t\t\t\tdb,
+\t\t\t\tconfig: configFactory,
+\t\t\t}, {
 \t\t\t\temailTemplates,
 \t\t\t});
-\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
-\t\t\t\tDatabaseAdapterClass,
-\t\t\t\twrappedDefinition.database,
+\t\t\tconst databaseAdapter = await resolveDatabaseAdapter(
+\t\t\t\twrappedDefinition.db,
 \t\t\t\tresolvedCloudflareEnv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(

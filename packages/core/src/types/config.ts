@@ -237,7 +237,7 @@ export interface LucidConfig {
 	 */
 	kv?: {
 		/**
-		 * The KV adapter to use. If not provided, Lucid will use the default better-sqlite3 KV adapter.
+		 * The KV adapter to use. If not provided, Lucid will use the passthrough KV adapter.
 		 */
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
 		/**
@@ -438,8 +438,8 @@ export interface LucidConfig {
 		 * Image settings.
 		 */
 		images?: {
-			// /** The image processor to use. */
-			// processor?: ImageProcessor;
+			/** The image processor to use. */
+			processor?: ImageProcessor;
 			/**
 			 * The image presets to use. These are used to generate the processed images.
 			 */
@@ -499,7 +499,7 @@ export interface LucidConfig {
 	 */
 	queue?: {
 		/**
-		 * The queue adapter to use. If not provided, defaults to the worker adapter, then falls back to a passthrough adapter.
+		 * The queue adapter to use. If not provided, Lucid will use the passthrough queue adapter.
 		 */
 		adapter?:
 			| QueueAdapter
@@ -641,7 +641,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			processedImages: number;
 		};
 		images: {
-			// processor?: ImageProcessor;
+			processor?: ImageProcessor;
 			presets: Record<
 				string,
 				{

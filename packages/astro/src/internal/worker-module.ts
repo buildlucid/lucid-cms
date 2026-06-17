@@ -108,26 +108,39 @@ export default worker;
  * runtime hooks it cannot get from Astro's default Cloudflare entrypoint.
  */
 export const buildCloudflareMainWorkerSource = (props: {
-	configImportPath: string;
-	databaseAdapterImportPath: string;
+	configArtifacts: {
+		config: string;
+		env: string;
+		db: string;
+		runtime: string;
+	};
 	customArtifacts: RuntimeBuildArtifactCustom[];
 }): string => {
-	const configImportPath = props.configImportPath.startsWith(".")
-		? props.configImportPath
-		: `./${props.configImportPath}`;
 	const imports: CloudflareWorkerImport[] = [
+		{
+			path: props.configArtifacts.config,
+			default: "configFactory",
+		},
+		{
+			path: props.configArtifacts.env,
+			exports: [{ name: "env", as: "envSchema" }],
+		},
+		{
+			path: props.configArtifacts.db,
+			default: "db",
+		},
+		{
+			path: props.configArtifacts.runtime,
+			default: "runtime",
+		},
 		{
 			path: "@lucidcms/core/runtime",
 			exports: [
-				"createConfiguredDatabaseAdapter",
 				"prepareTranslations",
 				"processConfig",
+				"resolveDatabaseAdapter",
 				"setupCronJobs",
 			],
-		},
-		{
-			path: props.databaseAdapterImportPath,
-			default: "ConfiguredDatabaseAdapter",
 		},
 		{
 			path: astroConstants.integration.configureLucidModuleId,
@@ -168,20 +181,20 @@ return astroWorker.fetch(request, env, ctx);`,
 			async: true,
 			params: ["controller", "env", "ctx"],
 			content: `const runCronService = async () => {
-	const [{ default: configDefinition, env: envSchema }] = await Promise.all([
-		import(${JSON.stringify(configImportPath)}),
-	]);
-
 	if (envSchema) {
 		envSchema.parse(env);
 	}
+	await runtime.resolveOptions?.(env);
 
-	const wrappedDefinition = astroConfigureLucid(configDefinition, {
+	const wrappedDefinition = astroConfigureLucid({
+		runtime,
+		db,
+		config: configFactory,
+	}, {
 		emailTemplates,
 	});
-	const databaseAdapter = createConfiguredDatabaseAdapter(
-		ConfiguredDatabaseAdapter,
-		wrappedDefinition.database,
+	const databaseAdapter = await resolveDatabaseAdapter(
+		wrappedDefinition.db,
 		env,
 	);
 	const resolvedConfig = await processConfig(wrappedDefinition.config(env), {

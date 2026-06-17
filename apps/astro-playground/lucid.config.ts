@@ -1,9 +1,11 @@
+import { cloudflare } from "@lucidcms/cloudflare-adapter";
 import { configureLucid, z } from "@lucidcms/core";
-import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
-import CloudflareQueuesPlugin from "@lucidcms/plugin-cloudflare-queues";
-import CloudflareR2Plugin from "@lucidcms/plugin-cloudflare-r2";
-import PagesPlugin from "@lucidcms/plugin-pages";
-import ResendPlugin from "@lucidcms/plugin-resend";
+import { libsql } from "@lucidcms/libsql-adapter";
+import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
+import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
+import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
+import { pagesPlugin } from "@lucidcms/plugin-pages";
+import { resendPlugin } from "@lucidcms/plugin-resend";
 import BlogCollection from "./src/lucid/collections/blogs.js";
 import MainMenuCollection from "./src/lucid/collections/main-menu.js";
 import PageCollection from "./src/lucid/collections/pages.js";
@@ -26,16 +28,8 @@ export const env = z.object({
 });
 
 export default configureLucid({
-	adapter: {
-		module: "@lucidcms/cloudflare-adapter",
-	},
-	database: {
-		module: "@lucidcms/libsql-adapter",
-		options: (env) => ({
-			url: env.LIBSQL_URL,
-			authToken: env.LIBSQL_AUTH_TOKEN,
-		}),
-	},
+	runtime: cloudflare,
+	db: libsql,
 	config: (env) => ({
 		brand: {
 			name: "Playground",
@@ -110,7 +104,7 @@ export default configureLucid({
 			SimpleCollection,
 		],
 		plugins: [
-			PagesPlugin({
+			pagesPlugin({
 				collections: [
 					{
 						collectionKey: PageCollection.key,
@@ -128,16 +122,16 @@ export default configureLucid({
 					},
 				],
 			}),
-			CloudflareKVPlugin({
+			cloudflareKVPlugin({
 				binding: env.LUCID_KV,
 			}),
-			CloudflareQueuesPlugin({
+			cloudflareQueuesPlugin({
 				binding: env.LUCID_QUEUE,
 			}),
-			CloudflareR2Plugin({
+			cloudflareR2Plugin({
 				binding: env.LUCID_MEDIA_BUCKET,
 			}),
-			ResendPlugin({
+			resendPlugin({
 				apiKey: env.LUCID_RESEND_API_KEY,
 				webhook: {
 					enabled: true,

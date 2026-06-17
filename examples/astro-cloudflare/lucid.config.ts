@@ -1,7 +1,9 @@
+import { cloudflare } from "@lucidcms/cloudflare-adapter";
 import { configureLucid, z } from "@lucidcms/core";
-import CloudflareKVPlugin from "@lucidcms/plugin-cloudflare-kv";
-import CloudflareR2Plugin from "@lucidcms/plugin-cloudflare-r2";
-import PagesPlugin from "@lucidcms/plugin-pages";
+import { libsql } from "@lucidcms/libsql-adapter";
+import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
+import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
+import { pagesPlugin } from "@lucidcms/plugin-pages";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export const env = z.object({
@@ -16,16 +18,8 @@ export const env = z.object({
 });
 
 export default configureLucid({
-	adapter: {
-		module: "@lucidcms/cloudflare-adapter",
-	},
-	database: {
-		module: "@lucidcms/libsql-adapter",
-		options: (env) => ({
-			url: env.LIBSQL_URL,
-			authToken: env.LIBSQL_AUTH_TOKEN,
-		}),
-	},
+	runtime: cloudflare,
+	db: libsql,
 	config: (env) => ({
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,
@@ -35,7 +29,7 @@ export default configureLucid({
 		},
 		collections: [PageCollection],
 		plugins: [
-			PagesPlugin({
+			pagesPlugin({
 				collections: [
 					{
 						collectionKey: PageCollection.key,
@@ -43,10 +37,10 @@ export default configureLucid({
 					},
 				],
 			}),
-			CloudflareKVPlugin({
+			cloudflareKVPlugin({
 				binding: env.KV_BINDING,
 			}),
-			CloudflareR2Plugin({
+			cloudflareR2Plugin({
 				binding: env.MEDIA_BUCKET,
 			}),
 		],

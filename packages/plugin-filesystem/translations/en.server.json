@@ -1,0 +1,13 @@
+{
+	"plugin.filesystem.media.download.url.sign.failed": "Failed to sign download URL.",
+	"plugin.filesystem.media.upload.sessions.create.failed": "Failed to create upload session.",
+	"plugin.filesystem.media.stream.range.invalid": "Invalid range.",
+	"plugin.filesystem.media.files.not.found": "File not found.",
+	"plugin.filesystem.media.files.invalid": "Invalid file.",
+	"plugin.filesystem.media.tokens.invalid.or.expired": "Invalid or expired token.",
+	"plugin.filesystem.media.routes.upload.error.name": "File Upload Error",
+	"plugin.filesystem.media.routes.upload.error.message": "There was an error uploading the file.",
+	"plugin.filesystem.media.routes.download.error.name": "File Download Error",
+	"plugin.filesystem.media.routes.download.error.message": "There was an error downloading the file.",
+	"plugin.filesystem.media.errors.default.message": "An error occurred! Please try again later."
+}

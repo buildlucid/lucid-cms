@@ -20,7 +20,12 @@ export {
 } from "./libs/i18n/index.js";
 export { PermissionSets, Permissions } from "./libs/permission/definitions.js";
 export { LucidAPIError } from "./utils/errors/index.js";
-export { resolveMediaKeyTenant } from "./utils/media/index.js";
+export { ensureLucidDirectoryExists } from "./utils/helpers/lucid-directory.js";
+export {
+	buildDownloadContentDisposition,
+	getFileMetadata,
+	resolveMediaKeyTenant,
+} from "./utils/media/index.js";
 export { default as honoOpenAPIParamaters } from "./utils/open-api/hono-openapi-paramaters.js";
 export { default as honoOpenAPIRequestBody } from "./utils/open-api/hono-openapi-request-body.js";
 export { default as honoOpenAPIResponse } from "./utils/open-api/hono-openapi-response.js";

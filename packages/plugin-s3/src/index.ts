@@ -1,5 +1,5 @@
 import plugin from "./plugin.js";
 
-const lucidS3Plugin = plugin;
+export { default as s3Plugin } from "./plugin.js";
 
-export default lucidS3Plugin;
+export default plugin;

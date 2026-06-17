@@ -1,6 +1,6 @@
 import plugin from "./plugin.js";
 
-const lucidCloudflareR2Plugin = plugin;
-
-export default lucidCloudflareR2Plugin;
+export { default as cloudflareR2Plugin } from "./plugin.js";
 export type { HttpOptions, PluginOptions } from "./types.js";
+
+export default plugin;

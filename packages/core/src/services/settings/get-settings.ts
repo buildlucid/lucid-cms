@@ -66,7 +66,7 @@ const getSettings: ServiceFn<
 		new Set([...defaultTemplates, ...preRenderedTemplates]),
 	);
 	const imageProcessorKey =
-		image === passthroughProcessor ? "passthrough" : "sharp";
+		image === passthroughProcessor ? "passthrough" : "custom";
 
 	return {
 		error: undefined,

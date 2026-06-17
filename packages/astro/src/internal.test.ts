@@ -11,9 +11,18 @@ import {
 } from "./internal/compatibility.js";
 import {
 	buildCloudflareRouteSource,
+	buildCloudflareToolkitSource,
 	buildNodeRouteSource,
+	buildNodeToolkitSource,
 } from "./internal/generated-sources.js";
 import { buildCloudflareMainWorkerSource } from "./internal/worker-module.js";
+
+const configArtifacts = {
+	config: "./lucid/config.js",
+	env: "./lucid/env.js",
+	db: "./lucid/db.js",
+	runtime: "./lucid/runtime.js",
+};
 
 describe("@lucidcms/astro internals", () => {
 	test("detects supported runtime combinations", () => {
@@ -35,7 +44,7 @@ describe("@lucidcms/astro internals", () => {
 
 	test("rejects unsupported or mismatched runtimes", () => {
 		expect(() => detectLucidRuntime(undefined)).toThrow(
-			/configureLucid\(\{ adapter: \{ module:/,
+			/configureLucid\(\{ runtime, db, config \}\)/,
 		);
 		expect(() => detectLucidRuntime({ key: "bun" } as never)).toThrow(
 			/does not support the "bun" runtime adapter/,
@@ -55,34 +64,37 @@ describe("@lucidcms/astro internals", () => {
 		).toBe("cloudflare");
 	});
 
-	test("generates Node and Cloudflare route sources with concrete adapter imports", () => {
-		const nodeSource = buildNodeRouteSource(
-			"./lucid.config.ts",
-			"@lucidcms/node-adapter",
-			"@lucidcms/sqlite-adapter",
-		);
-		const cloudflareSource = buildCloudflareRouteSource(
-			"./lucid.config.ts",
-			"@lucidcms/sqlite-adapter",
-		);
+	test("generates Node and Cloudflare route sources with split config artifacts", () => {
+		const nodeSource = buildNodeRouteSource(configArtifacts);
+		const cloudflareSource = buildCloudflareRouteSource(configArtifacts);
 
-		expect(nodeSource).toContain('import("@lucidcms/node-adapter")');
 		expect(nodeSource).toContain(
-			'import ConfiguredDatabaseAdapter from "@lucidcms/sqlite-adapter";',
+			'import configFactory from "./lucid/config.js";',
 		);
+		expect(nodeSource).toContain('import db from "./lucid/db.js";');
+		expect(nodeSource).toContain('import runtime from "./lucid/runtime.js";');
+		expect(nodeSource).not.toContain('import("@lucidcms/node-adapter")');
+		expect(nodeSource).toContain("resolveDatabaseAdapter");
 		expect(nodeSource).toContain(
 			'import configureLucid from "@lucidcms/astro/configure-lucid";',
 		);
 		expect(nodeSource).not.toContain("resolveConfigDefinition");
-		expect(nodeSource).not.toContain(
-			'Reflect.get(lucidConfigModule, "envSchema")',
+		expect(nodeSource).toContain(
+			'const runtimeValue = typeof runtime === "function" ? runtime() : runtime;',
 		);
-		expect(nodeSource).not.toContain(
-			'Reflect.get(lucidConfigModule, "adapter")',
+		expect(nodeSource).toContain(
+			"const runtimeAdapter = await resolveRuntime();",
+		);
+		expect(nodeSource).toContain("runtime: runtimeAdapter");
+		expect(nodeSource).toContain("runtimeAdapter.getEnvVars");
+		expect(cloudflareSource).toContain(
+			'import configureLucid from "@lucidcms/astro/configure-lucid";',
 		);
 		expect(cloudflareSource).toContain(
-			'import("@lucidcms/astro/configure-lucid")',
+			'import configFactory from "./lucid/config.js";',
 		);
+		expect(cloudflareSource).toContain('import db from "./lucid/db.js";');
+		expect(cloudflareSource).not.toContain("loadRuntimeModules");
 		expect(nodeSource).toContain("export const prerender = false;");
 		expect(nodeSource).toContain("configEntryPoint: null");
 		expect(nodeSource).toContain('request.headers.get("x-forwarded-for")');
@@ -90,21 +102,32 @@ describe("@lucidcms/astro internals", () => {
 		expect(cloudflareSource).toContain(
 			"context.locals?.cfContext ?? undefined",
 		);
+		expect(cloudflareSource).toContain("runtimeAdapter.resolveOptions");
 		expect(cloudflareSource).not.toContain("currentExecutionContext");
 	});
 
-	test("generates Node and Cloudflare admin bar middleware sources", () => {
-		const nodeSource = buildNodeAdminBarMiddlewareSource(
-			"./lucid.config.ts",
-			"@lucidcms/node-adapter",
-			"@lucidcms/sqlite-adapter",
-			{
-				disable: false,
-			},
+	test("generates toolkit sources that resolve no-call runtime adapters", () => {
+		const nodeSource = buildNodeToolkitSource(configArtifacts);
+		const cloudflareSource = buildCloudflareToolkitSource(configArtifacts);
+
+		expect(nodeSource).toContain(
+			"const runtimeAdapter = await resolveRuntime();",
 		);
+		expect(nodeSource).toContain("runtime: runtimeAdapter");
+		expect(nodeSource).toContain("runtimeAdapter.getEnvVars");
+		expect(cloudflareSource).toContain(
+			"const runtimeAdapter = await resolveRuntime();",
+		);
+		expect(cloudflareSource).toContain("runtime: runtimeAdapter");
+		expect(cloudflareSource).toContain("runtimeAdapter.resolveOptions");
+	});
+
+	test("generates Node and Cloudflare admin bar middleware sources", () => {
+		const nodeSource = buildNodeAdminBarMiddlewareSource(configArtifacts, {
+			disable: false,
+		});
 		const cloudflareSource = buildCloudflareAdminBarMiddlewareSource(
-			"./lucid.config.ts",
-			"@lucidcms/sqlite-adapter",
+			configArtifacts,
 			{
 				disable: true,
 			},
@@ -114,11 +137,15 @@ describe("@lucidcms/astro internals", () => {
 			'import { defineMiddleware } from "astro:middleware";',
 		);
 		expect(nodeSource).toContain(
-			'import { maybeInjectLucidAdminBar } from "@lucidcms/astro/runtime";',
+			'import { maybeInjectLucidAdminBar } from "@lucidcms/astro/internal/admin-bar";',
 		);
 		expect(nodeSource).toContain('"disable": false');
 		expect(nodeSource).toContain("return maybeInjectLucidAdminBar({");
 		expect(nodeSource).toContain("return app.fetch(request);");
+		expect(nodeSource).toContain(
+			"const runtimeAdapter = await resolveRuntime();",
+		);
+		expect(nodeSource).toContain("runtimeAdapter.getEnvVars");
 
 		expect(cloudflareSource).toContain(
 			'import { defineMiddleware } from "astro:middleware";',
@@ -127,6 +154,7 @@ describe("@lucidcms/astro internals", () => {
 		expect(cloudflareSource).toContain(
 			"context.locals?.cfContext ?? undefined",
 		);
+		expect(cloudflareSource).toContain("runtimeAdapter.resolveOptions");
 		expect(cloudflareSource).toContain("return maybeInjectLucidAdminBar({");
 	});
 
@@ -153,8 +181,7 @@ describe("@lucidcms/astro internals", () => {
 
 	test("generates the Cloudflare main worker with Astro fetch and Lucid scheduled handlers", () => {
 		const source = buildCloudflareMainWorkerSource({
-			configImportPath: "../lucid.config.ts",
-			databaseAdapterImportPath: "@lucidcms/sqlite-adapter",
+			configArtifacts,
 			customArtifacts: [
 				{
 					type: "worker-export",
@@ -182,7 +209,9 @@ describe("@lucidcms/astro internals", () => {
 		);
 		expect(source).toContain("...astroWorker");
 		expect(source).toContain("async scheduled(controller, env, ctx)");
-		expect(source).toContain("astroConfigureLucid(configDefinition");
+		expect(source).toContain("astroConfigureLucid({");
+		expect(source).toContain('import configFactory from "./lucid/config.js";');
+		expect(source).toContain('import db from "./lucid/db.js";');
 		expect(source).toContain(
 			'import astroConfigureLucid from "@lucidcms/astro/configure-lucid";',
 		);

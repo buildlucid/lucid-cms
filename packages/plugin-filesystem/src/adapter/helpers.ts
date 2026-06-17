@@ -1,0 +1,24 @@
+import path from "node:path";
+
+export {
+	FILE_SYSTEM_DOWNLOAD_PATH,
+	FILE_SYSTEM_UPLOAD_PATH,
+} from "../constants.js";
+
+export const keyPaths = (key: string, uploadDir: string) => {
+	// key example: 2024/01/gdfh4-banner
+	const keyPath = key.split("/").slice(0, -1).join("/");
+	const filename = key.split("/").pop();
+
+	if (!filename) throw new Error("Invalid media key");
+
+	const targetDir = path.join(uploadDir, keyPath);
+	const targetPath = path.join(targetDir, filename);
+
+	return {
+		keyPath,
+		filename,
+		targetDir,
+		targetPath,
+	};
+};

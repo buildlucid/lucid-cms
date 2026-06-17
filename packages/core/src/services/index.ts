@@ -11,7 +11,6 @@ export * as documentServices from "./documents/index.js";
 export * as documentBrickServices from "./documents-bricks/index.js";
 export * as documentVersionServices from "./documents-versions/index.js";
 export * as emailServices from "./email/index.js";
-export * as fsServices from "./fs/index.js";
 export * as i18nServices from "./i18n/index.js";
 export * as jobServices from "./jobs/index.js";
 export * as licenseServices from "./license/index.js";

@@ -1,5 +1,25 @@
 import astroConstants from "../../constants.js";
 
+type ConfigArtifactImportPaths = {
+	config: string;
+	env: string;
+	db: string;
+	runtime: string;
+};
+
+const resolveRuntimeSource = `const resolveRuntime = async () => {
+\tconst runtimeValue = typeof runtime === "function" ? runtime() : runtime;
+\tconst runtimeAdapter = await runtimeValue;
+
+\tif (!runtimeAdapter || typeof runtimeAdapter !== "object") {
+\t\tthrow new Error(
+\t\t\t"Lucid Astro could not resolve the configured runtime adapter.",
+\t\t);
+\t}
+
+\treturn runtimeAdapter;
+};`;
+
 export const buildLucidAdminBarDevToolbarAppSource =
 	(): string => `import { defineToolbarApp } from "astro/toolbar";
 
@@ -171,23 +191,19 @@ export default defineToolbarApp({
 `;
 
 export const buildNodeAdminBarMiddlewareSource = (
-	configImportPath: string,
-	runtimeAdapterImportPath: string,
-	databaseAdapterImportPath: string,
+	configArtifacts: ConfigArtifactImportPaths,
 	adminBarOptions: {
 		disable: boolean;
 	},
 ): string => {
-	const runtimeAdapterErrorMessage = JSON.stringify(
-		`Lucid Astro could not load the runtime adapter export from "${runtimeAdapterImportPath}".`,
-	);
-
 	return `import { defineMiddleware } from "astro:middleware";
-import * as lucidConfigModule from ${JSON.stringify(configImportPath)};
-import ConfiguredDatabaseAdapter from ${JSON.stringify(databaseAdapterImportPath)};
-import { createApp, createConfiguredDatabaseAdapter, prepareTranslations, processConfig } from "@lucidcms/core/runtime";
+import configFactory from ${JSON.stringify(configArtifacts.config)};
+import { env as envSchema } from ${JSON.stringify(configArtifacts.env)};
+import db from ${JSON.stringify(configArtifacts.db)};
+import runtime from ${JSON.stringify(configArtifacts.runtime)};
+import { createApp, prepareTranslations, processConfig, resolveDatabaseAdapter } from "@lucidcms/core/runtime";
 import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
-import { maybeInjectLucidAdminBar } from "@lucidcms/astro/runtime";
+import { maybeInjectLucidAdminBar } from "@lucidcms/astro/internal/admin-bar";
 import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
 import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
@@ -195,7 +211,6 @@ import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
 const adminBarOptions = ${JSON.stringify(adminBarOptions, null, 2)};
 
 let appPromise;
-let runtimeAdapterModulePromise;
 
 const silentLogger = {
 \tinstance: {
@@ -211,27 +226,6 @@ const silentLogger = {
 \tsilent: true,
 };
 
-const loadRuntimeAdapterModule = async () => {
-\tif (!runtimeAdapterModulePromise) {
-\t\truntimeAdapterModulePromise = import(${JSON.stringify(runtimeAdapterImportPath)});
-\t}
-
-\treturn runtimeAdapterModulePromise;
-};
-
-const getAdapterFactory = async () => {
-\tconst runtimeAdapterModule = await loadRuntimeAdapterModule();
-\tconst adapterFactory =
-\t\truntimeAdapterModule.adapter ??
-\t\truntimeAdapterModule.default;
-
-\tif (typeof adapterFactory !== "function") {
-\t\tthrow new Error(${runtimeAdapterErrorMessage});
-\t}
-
-\treturn adapterFactory;
-};
-
 const resolveRemoteAddress = (request) => {
 \tconst forwardedFor = request.headers.get("x-forwarded-for");
 \tconst firstForwardedAddress = forwardedFor?.split(",")[0]?.trim();
@@ -243,27 +237,32 @@ const resolveRemoteAddress = (request) => {
 \t);
 };
 
+${resolveRuntimeSource}
+
 const ensureApp = async () => {
 \tif (!appPromise) {
 \t\tappPromise = (async () => {
-\t\t\tconst wrappedDefinition = configureLucid(lucidConfigModule.default, {
+\t\t\tconst runtimeAdapter = await resolveRuntime();
+\t\t\tconst wrappedDefinition = configureLucid({
+\t\t\t\truntime: runtimeAdapter,
+\t\t\t\tdb,
+\t\t\t\tconfig: configFactory,
+\t\t\t}, {
 \t\t\t\temailTemplates,
 \t\t\t});
-\t\t\tconst adapterFactory = await getAdapterFactory();
-\t\t\tconst adapter = await adapterFactory(wrappedDefinition.adapter.options);
-\t\t\tconst env = adapter.getEnvVars
-\t\t\t\t? await adapter.getEnvVars({
+\t\t\tconst env = runtimeAdapter.getEnvVars
+\t\t\t\t? await runtimeAdapter.getEnvVars({
 \t\t\t\t\tlogger: silentLogger,
 \t\t\t\t})
 \t\t\t\t: undefined;
 
-\t\t\tif (lucidConfigModule.env && env) {
-\t\t\t\tlucidConfigModule.env.parse(env);
+\t\t\tif (envSchema && env) {
+\t\t\t\tenvSchema.parse(env);
 \t\t\t}
+\t\t\tawait runtimeAdapter.resolveOptions?.(env || {});
 
-\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
-\t\t\t\tConfiguredDatabaseAdapter,
-\t\t\t\twrappedDefinition.database,
+\t\t\tconst databaseAdapter = await resolveDatabaseAdapter(
+\t\t\t\twrappedDefinition.db,
 \t\t\t\tenv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(env || {}), {
@@ -323,18 +322,25 @@ export const onRequest = defineMiddleware(async (context, next) => {
 };
 
 export const buildCloudflareAdminBarMiddlewareSource = (
-	configImportPath: string,
-	databaseAdapterImportPath: string,
+	configArtifacts: ConfigArtifactImportPaths,
 	adminBarOptions: {
 		disable: boolean;
 	},
 ): string => `import { defineMiddleware } from "astro:middleware";
-import { maybeInjectLucidAdminBar } from "@lucidcms/astro/runtime";
+import configFactory from ${JSON.stringify(configArtifacts.config)};
+import { env as envSchema } from ${JSON.stringify(configArtifacts.env)};
+import db from ${JSON.stringify(configArtifacts.db)};
+import runtime from ${JSON.stringify(configArtifacts.runtime)};
+import { createApp, prepareTranslations, processConfig, resolveDatabaseAdapter } from "@lucidcms/core/runtime";
+import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
+import { getRuntimeContext } from "@lucidcms/cloudflare-adapter/runtime";
+import { maybeInjectLucidAdminBar } from "@lucidcms/astro/internal/admin-bar";
+import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
+import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
 
 const adminBarOptions = ${JSON.stringify(adminBarOptions, null, 2)};
 
 let appPromise;
-let runtimeModulesPromise;
 
 const getCloudflareEnv = () => {
 \tconst env =
@@ -350,73 +356,28 @@ const getCloudflareEnv = () => {
 \treturn env;
 };
 
-const loadRuntimeModules = async () => {
-\tif (!runtimeModulesPromise) {
-\t\truntimeModulesPromise = Promise.all([
-\t\t\timport(${JSON.stringify(configImportPath)}),
-\t\t\timport("@lucidcms/core/runtime"),
-\t\t\timport(${JSON.stringify(databaseAdapterImportPath)}),
-\t\t\timport(${JSON.stringify(astroConstants.integration.configureLucidModuleId)}),
-\t\t\timport("@lucidcms/cloudflare-adapter/runtime"),
-\t\t\timport("./${astroConstants.files.emailTemplatesModule}"),
-			import("./${astroConstants.files.i18nTranslationsModule}"),
-\t\t]).then(
-\t\t\t([
-\t\t\t\tlucidConfigModule,
-\t\t\t\truntimeModule,
-\t\t\t\tdatabaseAdapterModule,
-\t\t\t\tconfigureLucidModule,
-\t\t\t\truntimeContextModule,
-\t\t\t\temailTemplatesModule,
-				i18nTranslationsModule,
-\t\t\t]) => ({
-\t\t\t\tdefinition: lucidConfigModule.default,
-\t\t\t\tenvSchema: lucidConfigModule.env,
-\t\t\t\tcreateApp: runtimeModule.createApp,
-\t\t\t\tcreateConfiguredDatabaseAdapter:
-\t\t\t\t\truntimeModule.createConfiguredDatabaseAdapter,
-\t\t\t\tDatabaseAdapterClass: databaseAdapterModule.default,
-\t\t\t\tprepareTranslations: runtimeModule.prepareTranslations,
-\t\t\t\tprocessConfig: runtimeModule.processConfig,
-\t\t\t\tconfigureLucid: configureLucidModule.default,
-\t\t\t\tgetRuntimeContext: runtimeContextModule.getRuntimeContext,
-\t\t\t\temailTemplates: emailTemplatesModule.default,
-				i18nTranslations: i18nTranslationsModule.default,
-\t\t\t}),
-\t\t);
-\t}
-
-\treturn runtimeModulesPromise;
-};
+${resolveRuntimeSource}
 
 const ensureApp = async () => {
 \tif (!appPromise) {
 \t\tappPromise = (async () => {
 \t\t\tconst cloudflareEnv = getCloudflareEnv();
-\t\t\tconst {
-\t\t\t\tdefinition,
-\t\t\t\tenvSchema,
-\t\t\t\tcreateApp,
-\t\t\t\tcreateConfiguredDatabaseAdapter,
-\t\t\t\tDatabaseAdapterClass,
-\t\t\t\tprepareTranslations,
-\t\t\t\tprocessConfig,
-\t\t\t\tconfigureLucid,
-\t\t\t\tgetRuntimeContext,
-\t\t\t\temailTemplates,
-\t\t\t\ti18nTranslations,
-\t\t\t} = await loadRuntimeModules();
+\t\t\tconst runtimeAdapter = await resolveRuntime();
 
 \t\t\tif (envSchema) {
 \t\t\t\tenvSchema.parse(cloudflareEnv);
 \t\t\t}
+\t\t\tawait runtimeAdapter.resolveOptions?.(cloudflareEnv);
 
-\t\t\tconst wrappedDefinition = configureLucid(definition, {
+\t\t\tconst wrappedDefinition = configureLucid({
+\t\t\t\truntime: runtimeAdapter,
+\t\t\t\tdb,
+\t\t\t\tconfig: configFactory,
+\t\t\t}, {
 \t\t\t\temailTemplates,
 \t\t\t});
-\t\t\tconst databaseAdapter = createConfiguredDatabaseAdapter(
-\t\t\t\tDatabaseAdapterClass,
-\t\t\t\twrappedDefinition.database,
+\t\t\tconst databaseAdapter = await resolveDatabaseAdapter(
+\t\t\t\twrappedDefinition.db,
 \t\t\t\tcloudflareEnv,
 \t\t\t);
 \t\t\tconst resolvedConfig = await processConfig(wrappedDefinition.config(cloudflareEnv), {

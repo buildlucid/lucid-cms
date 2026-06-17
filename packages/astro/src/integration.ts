@@ -48,7 +48,6 @@ const lucidCMS = (
 	let middlewareEntrypoint = "";
 	let devToolbarAppEntrypoint = "";
 	let devBootstrapPromise: Promise<void> | undefined;
-	let currentCommand: "dev" | "build" | "preview" | "sync" | undefined;
 	const registeredWatchPaths = new Set<string>();
 
 	return {
@@ -69,9 +68,12 @@ const lucidCMS = (
 				// of the deployable artifact.
 				if (command === "preview") return;
 
-				currentCommand = command;
 				const configPath = getConfigPath(process.cwd());
 				project = await loadLucidProject(configPath);
+				await assertLucidPluginCompatibility({
+					project,
+					compiled: command === "build",
+				});
 				devBootstrapPromise = undefined;
 				const lucidSsrExternal = [
 					"@lucidcms/core",
@@ -146,7 +148,7 @@ const lucidCMS = (
 
 				updateConfig({
 					vite: {
-						...(command === "dev"
+						...(command === "dev" && project.runtime !== "cloudflare"
 							? {
 									ssr: {
 										external: lucidSsrExternal,
@@ -175,10 +177,6 @@ const lucidCMS = (
 				if (!project) return;
 
 				assertAstroCompatibility(project.runtime, config.adapter as never);
-				await assertLucidPluginCompatibility({
-					project,
-					compiled: currentCommand === "build",
-				});
 
 				if (project.runtime === "cloudflare") {
 					await writeCloudflareWorkerFiles(project);

@@ -12,7 +12,7 @@ import type { LucidAstroAdminBarContext } from "./types.js";
  * @example
  * ```astro
  * ---
- * import { setAdminBar } from "@lucidcms/astro";
+ * import { setAdminBar } from "@lucidcms/astro/admin-bar";
  *
  * setAdminBar(Astro, {
  *   edit: {
@@ -24,7 +24,7 @@ import type { LucidAstroAdminBarContext } from "./types.js";
  * ---
  * ```
  */
-const setAdminBar = (
+export const setAdminBar = (
 	astro: Pick<AstroGlobal, "locals">,
 	context: LucidAstroAdminBarContext,
 ) => {

@@ -7,8 +7,6 @@ import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import generateCollectionClientTypes from "../collection/type-gen/index.js";
 import logger from "../logger/index.js";
-import generateAdapterOptionsTypes from "./adapter-options-type.js";
-import generateDatabaseOptionsTypes from "./database-options-type.js";
 import generateEnvTypes from "./env-type.js";
 import generateTranslationCopyTypes from "./translation-copy-type.js";
 import type {
@@ -102,8 +100,6 @@ const generateTypes = async (props: {
 	envSchema?: ZodType;
 	configPath: string;
 	projectRoot?: string;
-	adapterModule?: string;
-	databaseModule?: string;
 	collections: CollectionBuilder[];
 	localization: Config["localization"];
 }) => {
@@ -115,12 +111,6 @@ const generateTypes = async (props: {
 			generateEnvTypes({
 				schema: props.envSchema,
 				configRelativePath,
-			}),
-			generateAdapterOptionsTypes({
-				adapterModule: props.adapterModule,
-			}),
-			generateDatabaseOptionsTypes({
-				databaseModule: props.databaseModule,
 			}),
 			generateTranslationCopyTypes({
 				projectRoot: props.projectRoot,

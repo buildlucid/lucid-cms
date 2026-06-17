@@ -1,4 +1,7 @@
-import { DatabaseAdapter } from "@lucidcms/core/db";
+import {
+	createDatabaseAdapterCreator,
+	DatabaseAdapter,
+} from "@lucidcms/core/db";
 import type {
 	DatabaseConfig,
 	InferredColumn,
@@ -15,17 +18,15 @@ import {
 	sql,
 } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
+import type { SQLiteAdapterCreator, SQLiteAdapterOptions } from "./types.js";
+import createSQLiteAdapter from "./utils/create-adapter.js";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
-import normalizeSQLiteConfig, {
-	type SQLiteAdapterOptions,
-} from "./utils/normalize-config.js";
+import normalizeSQLiteConfig from "./utils/normalize-config.js";
 
-export type { SQLiteAdapterOptions } from "./utils/normalize-config.js";
-
-class SQLiteAdapter extends DatabaseAdapter {
+export class SQLiteAdapter extends DatabaseAdapter {
 	constructor(config: SQLiteAdapterOptions = {}) {
 		super({
 			adapter: "sqlite",
@@ -320,4 +321,9 @@ class SQLiteAdapter extends DatabaseAdapter {
 	}
 }
 
-export default SQLiteAdapter;
+export const sqlite = createDatabaseAdapterCreator(createSQLiteAdapter, {
+	adapter: "sqlite",
+	resolve: () => new SQLiteAdapter(),
+}) as SQLiteAdapterCreator;
+
+export default sqlite;

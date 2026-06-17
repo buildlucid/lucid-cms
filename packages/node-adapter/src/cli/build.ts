@@ -1,7 +1,8 @@
 import { unlink, writeFile } from "node:fs/promises";
 import {
-	stripAdapterExportPlugin,
-	stripImportsPlugin,
+	configArtifactEntries,
+	getConfigArtifactImportPaths,
+	prepareConfigArtifacts,
 } from "@lucidcms/core/build";
 import type { BuildHandler } from "@lucidcms/core/types";
 import { build } from "rolldown";
@@ -24,10 +25,18 @@ const buildCommand: BuildHandler = async ({
 	);
 
 	try {
+		const configArtifacts = await prepareConfigArtifacts({
+			configPath,
+			outputPath,
+		});
 		const buildInput = {
-			[constants.CONFIG_FILE]: configPath,
+			[configArtifactEntries.config]: configArtifacts.config,
+			[configArtifactEntries.env]: configArtifacts.env,
+			[configArtifactEntries.db]: configArtifacts.db,
+			[configArtifactEntries.runtime]: configArtifacts.runtime,
 			...buildArtifacts.compile,
 		};
+		const configArtifactImports = getConfigArtifactImportPaths(".");
 
 		await build({
 			input: buildInput,
@@ -35,75 +44,81 @@ const buildCommand: BuildHandler = async ({
 				dir: outputPath,
 				format: "esm",
 				minify: true,
-				codeSplitting: false,
 			},
-			plugins: [
-				nodeExternals(),
-				stripAdapterExportPlugin("adapter"),
-				stripImportsPlugin("node-adapter", ["rolldown"]),
-				// 	{
-				// 		name: "bundle-analyzer",
-				// 		generateBundle(options, bundle) {
-				// 			for (const [fileName, chunk] of Object.entries(bundle)) {
-				// 				if (chunk.type === "chunk") {
-				// 					console.log(`\n📦 Bundle: ${fileName}`);
-				// 					console.log(
-				// 						`📏 Size: ${(chunk.code.length / 1024 / 1024).toFixed(2)}MB`,
-				// 					);
-
-				// 					const modules = chunk.modules || {};
-				// 					const sortedModules = Object.entries(modules)
-				// 						.map(([id, module]) => ({
-				// 							id,
-				// 							size: module.code?.length || 0,
-				// 						}))
-				// 						.sort((a, b) => b.size - a.size)
-				// 						.slice(0, 20);
-				// 					console.log("\n📋 Largest bundled modules:");
-				// 					for (const { id, size } of sortedModules) {
-				// 						console.log(`  ${(size / 1024).toFixed(1)}KB - ${id}`);
-				// 					}
-				// 				}
-				// 			}
-				// 		},
-				// 	},
-				// 	{
-				// 		name: "import-tracer",
-				// 		buildStart() {
-				// 			this.addWatchFile = () => {}; // Prevent watch issues
-				// 		},
-				// 		resolveId(id, importer) {
-				// 			if (id.includes("typescript") || id.includes("prettier")) {
-				// 				console.log(`🔍 ${id}`);
-				// 				console.log(`   ← imported by: ${importer || "entry"}`);
-				// 				console.log("");
-				// 			}
-				// 			return null;
-				// 		},
-				// 	},
-			],
+			plugins: [nodeExternals()],
 			treeshake: true,
 			platform: "node",
 		});
 
 		const entry = /* ts */ `
-import * as lucidConfigModule from "./${constants.CONFIG_FILE}.js";
+import configFactory from "${configArtifactImports.config}";
+import { env as envSchema } from "${configArtifactImports.env}";
+import db from "${configArtifactImports.db}";
+import runtime from "${configArtifactImports.runtime}";
 import i18nTranslations from "./i18n-translations.json" with { type: "json" };
-import { resolveConfigDefinition } from "@lucidcms/core/build";
-import { createApp, prepareTranslations, setupCronJobs } from "@lucidcms/core/runtime";
+import { createApp, prepareTranslations, processConfig, resolveDatabaseAdapter, setupCronJobs } from "@lucidcms/core/runtime";
 import { createTranslator } from "@lucidcms/core/plugin";
 import { serve } from "@hono/node-server";
 import cron from "node-cron";
-import { getRuntimeContext } from "@lucidcms/node-adapter";
+import { getRuntimeContext } from "@lucidcms/node-adapter/runtime";
+
+const silentLogger = {
+	instance: {
+		info: () => {},
+		warn: () => {},
+		error: () => {},
+		log: () => {},
+		success: () => {},
+		color: {
+			blue: (value) => String(value),
+		},
+	},
+	silent: true,
+};
+
+const resolveRuntime = async () => {
+	const runtimeValue = typeof runtime === "function" ? runtime() : runtime;
+	const runtimeAdapter = await runtimeValue;
+
+	if (!runtimeAdapter || typeof runtimeAdapter !== "object") {
+		throw new Error(
+			"Lucid Node adapter could not resolve the configured runtime adapter.",
+		);
+	}
+
+	return runtimeAdapter;
+};
 
 const startServer = async () => {
 	try {
-		const { config: resolved, env } = await resolveConfigDefinition({
-			definition: lucidConfigModule.default,
-			envSchema: lucidConfigModule.env,
-			processConfigOptions: {
-				skipValidation: true,
-			},
+		const runtimeAdapter = await resolveRuntime();
+		const env = runtimeAdapter.getEnvVars
+			? await runtimeAdapter.getEnvVars({
+					logger: silentLogger,
+				})
+			: undefined;
+
+		if (envSchema && env) {
+			envSchema.parse(env);
+		}
+		await runtimeAdapter.resolveOptions?.(env || {});
+
+		const definition = {
+			runtime: runtimeAdapter,
+			db,
+			config: configFactory,
+		};
+		const wrappedDefinition = runtimeAdapter.configureLucid
+			? runtimeAdapter.configureLucid(definition)
+			: definition;
+		const databaseAdapter = await resolveDatabaseAdapter(
+			wrappedDefinition.db,
+			env,
+		);
+		const resolved = await processConfig(wrappedDefinition.config(env || {}), {
+			recipe: wrappedDefinition.recipe,
+			resolvedDb: databaseAdapter,
+			skipValidation: true,
 		});
 		const { translationStore } = await prepareTranslations({
 			config: resolved,
@@ -124,8 +139,12 @@ const startServer = async () => {
 			createQueue: false,
 		});
 
-		const port = Number.parseInt(process.env.PORT || "6543", 10);
-		const hostname = process.env.HOST || process.env.HOSTNAME;
+		const runtimeOptions = runtimeAdapter.getOptions?.();
+		const port =
+			runtimeOptions?.server?.port ??
+			Number.parseInt(process.env.PORT || "6543", 10);
+		const hostname =
+			runtimeOptions?.server?.hostname ?? process.env.HOST ?? process.env.HOSTNAME;
 
 		const server = serve({
 			fetch: app.fetch,
@@ -192,8 +211,10 @@ startServer();`;
 		const entryOutput = `${outputPath}/${constants.ENTRY_FILE}`;
 		await writeFile(entryOutput, entry);
 
-		for (const artifact of Object.values(buildInput)) {
-			if (artifact === configPath) continue;
+		for (const artifact of [
+			...Object.values(configArtifacts),
+			...Object.values(buildArtifacts.compile),
+		]) {
 			await unlink(artifact);
 		}
 

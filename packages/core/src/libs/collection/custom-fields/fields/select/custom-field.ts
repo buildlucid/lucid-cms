@@ -1,6 +1,6 @@
-import merge from "lodash.merge";
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
+import deepMerge from "../../../../../utils/helpers/deep-merge.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
@@ -47,7 +47,7 @@ class SelectCustomField extends CustomField<"select"> {
 		} satisfies CFConfig<"select">;
 	}
 	get errors() {
-		return merge(super.errors, {
+		return deepMerge(super.errors, {
 			required: {
 				message: copy("server:core.fields.select.validation.required"),
 			},

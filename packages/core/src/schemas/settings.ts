@@ -127,7 +127,7 @@ const settingsResponseSchema = z.object({
 			}),
 			imageProcessor: z.string().nullable().meta({
 				description: "The image processor key",
-				example: "sharp",
+				example: "custom",
 			}),
 			alertEmail: z.email().nullable().meta({
 				description: "The email address system alerts are sent to",

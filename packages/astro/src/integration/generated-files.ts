@@ -1,6 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { prepareBuildArtifacts } from "@lucidcms/core/build";
+import {
+	getConfigArtifactImportPaths,
+	prepareBuildArtifacts,
+	prepareConfigArtifacts,
+} from "@lucidcms/core/build";
 import astroConstants from "../constants.js";
 import {
 	buildCloudflareAdminBarMiddlewareSource,
@@ -13,7 +17,7 @@ import {
 	buildNodeRouteSource,
 	buildNodeToolkitSource,
 } from "../internal/generated-sources.js";
-import { toImportPath, toPosixPath } from "../internal/paths.js";
+import { toPosixPath } from "../internal/paths.js";
 import { buildCloudflareMainWorkerSource } from "../internal/worker-module.js";
 import type { LucidAstroAdminBarOptions } from "../types.js";
 import { ensureDirectory } from "./filesystem.js";
@@ -62,10 +66,11 @@ export const writeGeneratedRouteFiles = async (props: {
 	);
 	const spaHtml = await fs.readFile(spaHtmlPath, "utf-8");
 
-	const configImportPath = toImportPath(
-		props.codegenDir,
-		props.project.configPath,
-	);
+	await prepareConfigArtifacts({
+		configPath: props.project.configPath,
+		outputPath: props.codegenDir,
+	});
+	const configArtifactImports = getConfigArtifactImportPaths(".");
 	const routeFilename =
 		props.project.runtime === "node"
 			? astroConstants.files.nodeRoute
@@ -73,37 +78,17 @@ export const writeGeneratedRouteFiles = async (props: {
 	const routePath = path.join(props.codegenDir, routeFilename);
 	const routeSource =
 		props.project.runtime === "node"
-			? buildNodeRouteSource(
-					configImportPath,
-					props.project.loaded.definition.adapter.module,
-					props.project.loaded.definition.database.module,
-				)
-			: buildCloudflareRouteSource(
-					configImportPath,
-					props.project.loaded.definition.database.module,
-				);
+			? buildNodeRouteSource(configArtifactImports)
+			: buildCloudflareRouteSource(configArtifactImports);
 	const toolkitSource =
 		props.project.runtime === "node"
-			? buildNodeToolkitSource(
-					configImportPath,
-					props.project.loaded.definition.adapter.module,
-					props.project.loaded.definition.database.module,
-				)
-			: buildCloudflareToolkitSource(
-					configImportPath,
-					props.project.loaded.definition.database.module,
-				);
+			? buildNodeToolkitSource(configArtifactImports)
+			: buildCloudflareToolkitSource(configArtifactImports);
 	const middlewareSource =
 		props.project.runtime === "node"
-			? buildNodeAdminBarMiddlewareSource(
-					configImportPath,
-					props.project.loaded.definition.adapter.module,
-					props.project.loaded.definition.database.module,
-					props.adminBar,
-				)
+			? buildNodeAdminBarMiddlewareSource(configArtifactImports, props.adminBar)
 			: buildCloudflareAdminBarMiddlewareSource(
-					configImportPath,
-					props.project.loaded.definition.database.module,
+					configArtifactImports,
 					props.adminBar,
 				);
 	const devToolbarAppSource = buildLucidAdminBarDevToolbarAppSource();
@@ -150,6 +135,11 @@ export const writeCloudflareWorkerFiles = async (
 	const workerDir = path.join(process.cwd(), astroConstants.paths.workerDir);
 	await fs.rm(workerDir, { recursive: true, force: true });
 	await ensureDirectory(workerDir);
+	await prepareConfigArtifacts({
+		configPath: project.configPath,
+		outputPath: workerDir,
+	});
+	const configArtifactImports = getConfigArtifactImportPaths(".");
 
 	const outputRelativeConfigPath = toPosixPath(
 		path.relative(workerDir, project.configPath),
@@ -167,8 +157,7 @@ export const writeCloudflareWorkerFiles = async (
 	});
 
 	const mainWorkerSource = buildCloudflareMainWorkerSource({
-		configImportPath: outputRelativeConfigPath,
-		databaseAdapterImportPath: project.loaded.definition.database.module,
+		configArtifacts: configArtifactImports,
 		customArtifacts: processedArtifacts.custom,
 	});
 

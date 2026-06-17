@@ -1,7 +1,7 @@
 import { unlink } from "node:fs/promises";
 import {
-	stripAdapterExportPlugin,
-	stripImportsPlugin,
+	getConfigArtifactImportPaths,
+	prepareConfigArtifacts,
 } from "@lucidcms/core/build";
 import type { BuildHandler } from "@lucidcms/core/types";
 import { build } from "rolldown";
@@ -11,10 +11,8 @@ import prepareMainWorkerEntry from "../services/prepare-worker-entry.js";
 import writeWorkerEntries from "../services/write-worker-entries.js";
 
 const buildCommand: BuildHandler = async ({
-	definition,
 	configPath,
 	outputPath,
-	outputRelativeConfigPath,
 	buildArtifacts,
 	logger,
 }) => {
@@ -27,12 +25,16 @@ const buildCommand: BuildHandler = async ({
 	);
 
 	try {
+		const configArtifacts = await prepareConfigArtifacts({
+			configPath,
+			outputPath,
+		});
+		const configArtifactImports = getConfigArtifactImportPaths(".");
 		const configIsTs = configPath.endsWith(".ts");
 		const extension = configIsTs ? "ts" : "js";
 
 		const mainWorkerEntry = prepareMainWorkerEntry(
-			outputRelativeConfigPath,
-			definition.database.module,
+			configArtifactImports,
 			buildArtifacts.custom,
 		);
 
@@ -59,16 +61,6 @@ const buildCommand: BuildHandler = async ({
 						minify: true,
 						codeSplitting: false,
 					},
-					treeshake: {
-						moduleSideEffects: (id) => {
-							const noSideEffects = [
-								"kv-adapter/adapters/better-sqlite",
-								"image-processor/processors/sharp",
-								"media/adapters/file-system",
-							];
-							return !noSideEffects.some((path) => id.includes(path));
-						},
-					},
 					platform: "node",
 					resolve: {
 						alias: {
@@ -85,24 +77,18 @@ const buildCommand: BuildHandler = async ({
 								);
 							},
 						},
-						stripAdapterExportPlugin("adapter"),
-						stripImportsPlugin("cloudflare-adapter", [
-							"wrangler",
-							"@hono/node-server",
-							"@hono/node-server/serve-static",
-							"rolldown",
-						]),
 					],
-					external: ["sharp", "ws", "better-sqlite3", "file-type"],
 				}),
 			),
 		);
 
 		//* cleanup temp files
 		await Promise.all(
-			[...tempFiles, ...Object.values(buildArtifacts.compile)].map((file) =>
-				unlink(file),
-			),
+			[
+				...tempFiles,
+				...Object.values(configArtifacts),
+				...Object.values(buildArtifacts.compile),
+			].map((file) => unlink(file)),
 		);
 
 		return {

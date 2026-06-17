@@ -1,13 +1,8 @@
 import type z from "zod";
 import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
-import { createConfiguredDatabaseAdapter } from "../runtime/create-configured-database-adapter.js";
-import {
-	createAdapter,
-	getAdapterConfigureLucid,
-	getAdapterModule,
-	getDatabaseAdapterClass,
-} from "../runtime/loaders.js";
+import { getConfigureLucidModule } from "../runtime/loaders.js";
+import { resolveDatabaseAdapter } from "../runtime/resolve-database-adapter.js";
 import type {
 	EnvironmentVariables,
 	GetEnvVarsLogger,
@@ -30,7 +25,7 @@ const defaultLoggerInstance = {
 } as unknown as GetEnvVarsLogger["instance"];
 
 export const invalidConfigDefinitionMessage =
-	"Lucid config must default export configureLucid({ adapter, database, config }).";
+	"Lucid config must default export configureLucid({ runtime, db, config }).";
 
 export type ResolveConfigDefinitionResult = {
 	config: Config;
@@ -40,22 +35,20 @@ export type ResolveConfigDefinitionResult = {
 	definition: WrappedLucidConfigDefinition;
 };
 
-const isConfigDefinition = (
-	value: unknown,
-): value is LucidConfigDefinition<string> => {
+const isConfigDefinition = (value: unknown): value is LucidConfigDefinition => {
 	if (!value || typeof value !== "object") {
 		return false;
 	}
 
 	const definition = value as {
-		adapter?: { module?: unknown };
-		database?: { module?: unknown };
+		runtime?: unknown;
+		db?: unknown;
 		config?: unknown;
 	};
 
 	return (
-		typeof definition.adapter?.module === "string" &&
-		typeof definition.database?.module === "string" &&
+		definition.runtime !== undefined &&
+		definition.db !== undefined &&
 		typeof definition.config === "function"
 	);
 };
@@ -64,9 +57,7 @@ const isConfigDefinition = (
  * Config modules should stay declarative. This guard keeps the failure focused
  * on the public config shape before Lucid attempts any adapter resolution.
  */
-const assertConfigDefinition = (
-	value: unknown,
-): LucidConfigDefinition<string> => {
+const assertConfigDefinition = (value: unknown): LucidConfigDefinition => {
 	if (!isConfigDefinition(value)) {
 		throw new LucidError({
 			message: invalidConfigDefinitionMessage,
@@ -76,11 +67,25 @@ const assertConfigDefinition = (
 	return value;
 };
 
+const resolveRuntimeAdapter = async (
+	runtime: LucidConfigDefinition["runtime"],
+): Promise<RuntimeAdapter> => {
+	const adapter = typeof runtime === "function" ? runtime() : runtime;
+	const resolved = await adapter;
+
+	if (!resolved || typeof resolved !== "object") {
+		throw new LucidError({
+			message:
+				"Lucid could not resolve the configured runtime adapter. Pass a runtime adapter instance to `configureLucid({ runtime })`.",
+		});
+	}
+
+	return resolved;
+};
+
 /**
- * Config resolution is the one place where Lucid has to bridge descriptor
- * metadata, adapter env loading, wrapper semantics and final config processing.
- * The work is staged so hosted runtimes can skip the adapter capabilities they
- * already own, like runtime env injection or CLI handlers.
+ * Config resolution is the one place where Lucid bridges direct adapter values,
+ * env loading, wrapper semantics and final config processing.
  */
 export const resolveConfigDefinition = async (props: {
 	definition: unknown;
@@ -92,18 +97,21 @@ export const resolveConfigDefinition = async (props: {
 	processConfigOptions?: Parameters<typeof processConfig>[1];
 }): Promise<ResolveConfigDefinitionResult> => {
 	const definition = assertConfigDefinition(props.definition);
-	const adapterModule = await getAdapterModule(definition.adapter.module);
+	const adapter = await resolveRuntimeAdapter(definition.runtime);
 
 	// Hosted integrations can supply their own configureLucid wrapper so the
 	// runtime adapter identity stays separate from host-specific config shaping.
-	const configureLucid =
-		props.configureLucidPath &&
-		props.configureLucidPath !== definition.adapter.module
-			? await getAdapterConfigureLucid(props.configureLucidPath)
-			: adapterModule.configureLucid;
+	const configureLucid = props.configureLucidPath
+		? await getConfigureLucidModule(props.configureLucidPath)
+		: (adapter.configureLucid ?? ((value) => value));
 
-	const wrappedDefinition = configureLucid(definition, props.meta);
-	const adapter = await createAdapter(adapterModule, wrappedDefinition.adapter);
+	const wrappedDefinition = configureLucid(
+		{
+			...definition,
+			runtime: adapter,
+		},
+		props.meta,
+	);
 	const logger = props.logger ?? {
 		instance: defaultLoggerInstance,
 		silent: true,
@@ -123,14 +131,9 @@ export const resolveConfigDefinition = async (props: {
 		envSchema.parse(env);
 	}
 
-	const DatabaseAdapterCtor = await getDatabaseAdapterClass(
-		wrappedDefinition.database.module,
-	);
-	const db = createConfiguredDatabaseAdapter(
-		DatabaseAdapterCtor,
-		wrappedDefinition.database,
-		env,
-	);
+	await adapter.resolveOptions?.(env ?? {});
+
+	const db = await resolveDatabaseAdapter(wrappedDefinition.db, env);
 
 	// processConfig remains the shared source of truth for plugin init, merging
 	// and validation once the adapter/env/bootstrap layer has been resolved.

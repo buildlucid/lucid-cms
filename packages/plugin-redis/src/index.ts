@@ -1,5 +1,5 @@
 import plugin from "./plugin.js";
 
-const lucidRedisPlugin = plugin;
+export { default as redisPlugin } from "./plugin.js";
 
-export default lucidRedisPlugin;
+export default plugin;

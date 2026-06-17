@@ -1,4 +1,8 @@
-import type { GetPlatformProxyOptions } from "wrangler";
+import type {
+	EnvironmentVariables,
+	RuntimeAdapter,
+} from "@lucidcms/core/types";
+import type { GetPlatformProxyOptions, PlatformProxy } from "wrangler";
 
 export type CloudflareWorkerImport = {
 	path: string;
@@ -30,6 +34,21 @@ export type AdapterOptions = {
 		port?: number;
 		hostname?: string;
 	};
+};
+
+export type CloudflareAdapterOptionsFactory = (
+	env: EnvironmentVariables,
+) => AdapterOptions | Promise<AdapterOptions>;
+
+export type CloudflareAdapterOptionsValue =
+	| AdapterOptions
+	| CloudflareAdapterOptionsFactory;
+
+export type CloudflareRuntimeAdapter = RuntimeAdapter & {
+	getOptions: () => AdapterOptions | undefined;
+	resolveOptions: (env: EnvironmentVariables) => Promise<void>;
+	getPlatformProxy: () => PlatformProxy | undefined;
+	setPlatformProxy: (platformProxy: PlatformProxy | undefined) => void;
 };
 
 export type CloudflareAdapterOptions = AdapterOptions;

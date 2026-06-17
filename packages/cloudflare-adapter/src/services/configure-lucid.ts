@@ -4,11 +4,8 @@ import type {
 	WrappedLucidConfigDefinition,
 } from "@lucidcms/core/types";
 
-const configureLucid: RuntimeConfigureLucid = <
-	AdapterModule extends string,
-	DatabaseModule extends string,
->(
-	definition: WrappedLucidConfigDefinition<AdapterModule, DatabaseModule>,
+const configureLucid: RuntimeConfigureLucid = (
+	definition: WrappedLucidConfigDefinition,
 	meta?: LucidConfigDefinitionMeta,
 ) => {
 	return {

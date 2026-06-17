@@ -1,5 +1,5 @@
 import plugin from "./plugin.js";
 
-const lucidCloudflareKvPlugin = plugin;
+export { default as cloudflareKVPlugin } from "./plugin.js";
 
-export default lucidCloudflareKvPlugin;
+export default plugin;

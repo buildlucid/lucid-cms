@@ -32,13 +32,9 @@ const getMediaAdapter = async (
 			};
 		}
 
-		const { default: getDefaultMediaAdapter } = await import(
-			"./get-default-adapter.js"
-		);
-
 		return {
-			adapter: await getDefaultMediaAdapter(config),
-			enabled: true,
+			adapter: null,
+			enabled: false,
 		};
 	} catch (error) {
 		logger.error({

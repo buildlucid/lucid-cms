@@ -1,39 +1,54 @@
-import type { GetEnvVarsLogger, RuntimeAdapter } from "@lucidcms/core/types";
-import type { PlatformProxy } from "wrangler";
-import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
-import type { AdapterOptions } from "./types.js";
+import type { GetEnvVarsLogger } from "@lucidcms/core/types";
+import { cloudflare as createCloudflareRuntime } from "./runtime.js";
+import type {
+	CloudflareAdapterOptionsValue,
+	CloudflareRuntimeAdapter,
+} from "./types.js";
 
-const adapter = (options?: AdapterOptions): RuntimeAdapter => {
-	let platformProxy: PlatformProxy | undefined;
+const cloudflare = (
+	options?: CloudflareAdapterOptionsValue,
+): CloudflareRuntimeAdapter => {
+	const runtime = createCloudflareRuntime(options);
 
-	return {
-		key: ADAPTER_KEY,
-		lucid: LUCID_VERSION,
-		config: {
-			customBuildArtifacts: [constants.WORKER_EXPORT_ARTIFACT_TYPE],
-		},
-		getEnvVars: async ({ logger }: { logger: GetEnvVarsLogger }) => {
-			const { default: getEnvVars } = await import(
-				"./services/get-env-vars.js"
-			);
-			const result = await getEnvVars({
+	runtime.getEnvVars = async ({ logger }: { logger: GetEnvVarsLogger }) => {
+		const { default: getEnvVars } = await import("./services/get-env-vars.js");
+		const initialOptions = typeof options === "function" ? undefined : options;
+		const initialResult = await getEnvVars({
+			logger,
+			options: initialOptions,
+		});
+		await runtime.resolveOptions(initialResult.env);
+
+		const resolvedOptions = runtime.getOptions();
+		if (typeof options === "function" && resolvedOptions?.platformProxy) {
+			await initialResult.platformProxy.dispose?.();
+			const resolvedResult = await getEnvVars({
 				logger,
-				options,
+				options: resolvedOptions,
 			});
-			platformProxy = result.platformProxy;
-			return result.env;
+			runtime.setPlatformProxy(resolvedResult.platformProxy);
+			return resolvedResult.env;
+		}
+
+		runtime.setPlatformProxy(initialResult.platformProxy);
+		return initialResult.env;
+	};
+
+	runtime.cli = {
+		serve: async (props) => {
+			const { default: serveCommand } = await import("./cli/serve.js");
+			return serveCommand(
+				runtime.getOptions(),
+				runtime.getPlatformProxy(),
+			)(props);
 		},
-		cli: {
-			serve: async (props) => {
-				const { default: serveCommand } = await import("./cli/serve.js");
-				return serveCommand(options, platformProxy)(props);
-			},
-			build: async (props) => {
-				const { default: buildCommand } = await import("./cli/build.js");
-				return buildCommand(props);
-			},
+		build: async (props) => {
+			const { default: buildCommand } = await import("./cli/build.js");
+			return buildCommand(props);
 		},
 	};
+
+	return runtime;
 };
 
-export default adapter;
+export default cloudflare;

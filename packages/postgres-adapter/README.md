@@ -16,26 +16,21 @@ To use the Postgres adapter, you need to add it to your Lucid CMS config file. Y
 
 ```typescript
 import { configureLucid } from "@lucidcms/core";
+import { node } from "@lucidcms/node-adapter";
+import { postgres } from "@lucidcms/postgres-adapter";
 
 export default configureLucid({
-    adapter: {
-        module: "@lucidcms/node-adapter",
-    },
-    database: {
-        module: "@lucidcms/postgres-adapter",
-        options: (env) => ({
-            url: env.DATABASE_URL,
-        }),
-    },
-    config: () => ({
-        // ...other config
-    }),
+	runtime: node,
+	db: postgres,
+	config: () => ({
+		// ...other config
+	}),
 });
 ```
 
 ## Configuration
 
-The adapter constructor accepts a single configuration object via `database.options`:
+The no-call `db: postgres` form reads `DATABASE_URL` from Lucid's resolved env. You can also pass a configuration object or env callback via `postgres()`:
 
 ```ts
 {

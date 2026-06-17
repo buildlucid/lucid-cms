@@ -15,19 +15,22 @@ npm install @lucidcms/plugin-resend
 To use the Resend plugin, you need to add it to your Lucid CMS config file. You'll need to provide the from email configuration and your Resend API key.
 
 ```typescript
-import { nodeAdapter, defineConfig } from "@lucidcms/node-adapter";
-import LucidResend from "@lucidcms/plugin-resend";
+import { configureLucid } from "@lucidcms/core";
+import { node } from "@lucidcms/node-adapter";
+import { resendPlugin } from "@lucidcms/plugin-resend";
+import { sqlite } from "@lucidcms/sqlite-adapter";
 
-export const adapter = nodeAdapter();
-
-export default defineConfig((env) => ({
-    // ...other config
-    plugins: [
-        LucidResend({
-            apiKey: env.RESEND_API_KEY,
-        }),
-    ],
-}));
+export default configureLucid({
+	runtime: node,
+	db: sqlite,
+	config: (env) => ({
+		plugins: [
+			resendPlugin({
+				apiKey: env.RESEND_API_KEY,
+			}),
+		],
+	}),
+});
 ```
 
 ## Configuration

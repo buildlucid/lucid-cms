@@ -1,5 +1,5 @@
 import plugin from "./plugin.js";
 
-const lucidGoogleAuthPlugin = plugin;
+export { default as googleAuthPlugin } from "./plugin.js";
 
-export default lucidGoogleAuthPlugin;
+export default plugin;

@@ -3,18 +3,19 @@ import type { Config, ImageProcessor } from "../../types/config.js";
 import logger from "../logger/index.js";
 import passthroughProcessor from "./processors/passthrough.js";
 
-/**
- * Returns the ideal Image Processor based on config and the runtime environment
- */
-const getImageProcessor = async (_config: Config): Promise<ImageProcessor> => {
-	//* disabled for beta release
-	// if (config.media.images.processor) {
-	// 	return config.media.images.processor;
-	// }
-
+const getImageProcessor = async (config: Config): Promise<ImageProcessor> => {
 	try {
-		const { default: sharpProcessor } = await import("./processors/sharp.js");
-		return sharpProcessor;
+		if (config.media.images.processor) {
+			return config.media.images.processor;
+		}
+
+		logger.debug({
+			scope: constants.logScopes.imageProcessor,
+			message:
+				"No image processor configured. Falling back to passthrough image processing.",
+		});
+
+		return passthroughProcessor;
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.imageProcessor,

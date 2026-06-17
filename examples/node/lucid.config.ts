@@ -1,5 +1,9 @@
 import { configureLucid, z } from "@lucidcms/core";
-import PagesPlugin from "@lucidcms/plugin-pages";
+import { node } from "@lucidcms/node-adapter";
+import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
+import { pagesPlugin } from "@lucidcms/plugin-pages";
+import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
+import { sqlite } from "@lucidcms/sqlite-adapter";
 import PageCollection from "./src/collections/pages.js";
 
 export const env = z.object({
@@ -10,15 +14,8 @@ export const env = z.object({
 });
 
 export default configureLucid({
-	adapter: {
-		module: "@lucidcms/node-adapter",
-	},
-	database: {
-		module: "@lucidcms/sqlite-adapter",
-		options: {
-			database: "db.sqlite",
-		},
-	},
+	runtime: node,
+	db: sqlite,
 	config: (env) => ({
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,
@@ -28,7 +25,9 @@ export default configureLucid({
 		},
 		collections: [PageCollection],
 		plugins: [
-			PagesPlugin({
+			sqliteKVPlugin(),
+			filesystemPlugin(),
+			pagesPlugin({
 				collections: [
 					{
 						collectionKey: PageCollection.key,

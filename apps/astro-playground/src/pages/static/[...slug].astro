@@ -1,5 +1,5 @@
 ---
-import { setAdminBar } from "@lucidcms/astro";
+import { setAdminBar } from "@lucidcms/astro/admin-bar";
 import getToolkit from "@lucidcms/astro/toolkit";
 import { asDocument } from "@lucidcms/client";
 
@@ -22,7 +22,8 @@ export async function getStaticPaths() {
 	});
 
 	if (response.error) {
-		throw new Error(response.error.message ?? "Failed to load Lucid pages.");
+		console.log(response.error);
+		throw new Error("Failed to load Lucid pages.");
 	}
 
 	return response.data.data.map((page) => ({

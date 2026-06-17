@@ -1,4 +1,7 @@
-import { DatabaseAdapter } from "@lucidcms/core/db";
+import {
+	createDatabaseAdapterCreator,
+	DatabaseAdapter,
+} from "@lucidcms/core/db";
 import type {
 	DatabaseConfig,
 	InferredColumn,
@@ -14,12 +17,15 @@ import {
 	LibsqlDialect,
 	type LibsqlDialectConfig,
 } from "./lib/kysely-libsql.js";
+import type { LibSQLAdapterCreator } from "./types.js";
+import createLibSQLAdapter from "./utils/create-adapter.js";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
+import getDefaultLibSQLConfig from "./utils/get-default-config.js";
 
-class LibSQLAdapter extends DatabaseAdapter {
+export class LibSQLAdapter extends DatabaseAdapter {
 	constructor(config: LibsqlDialectConfig) {
 		super({
 			adapter: "libsql",
@@ -310,4 +316,9 @@ class LibSQLAdapter extends DatabaseAdapter {
 	}
 }
 
-export default LibSQLAdapter;
+export const libsql = createDatabaseAdapterCreator(createLibSQLAdapter, {
+	adapter: "libsql",
+	resolve: (env) => new LibSQLAdapter(getDefaultLibSQLConfig(env)),
+}) as LibSQLAdapterCreator;
+
+export default libsql;

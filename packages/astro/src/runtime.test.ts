@@ -1,13 +1,15 @@
 import { describe, expect, test, vi } from "vitest";
 import {
 	buildLucidAdminBarEditHref,
-	createLucidSpaResponse,
 	maybeInjectLucidAdminBar,
 	normalizeLucidAdminBarOptions,
 	readLucidAdminBarContext,
 	shouldInjectLucidAdminBar,
+} from "./internal/admin-bar.js";
+import {
+	createLucidSpaResponse,
 	shouldServeLucidSpaShell,
-} from "./runtime.js";
+} from "./internal/runtime.js";
 
 describe("@lucidcms/astro runtime", () => {
 	test("serves the SPA shell for Lucid client routes", () => {

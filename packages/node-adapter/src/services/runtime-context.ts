@@ -3,7 +3,7 @@ import type {
 	AdapterRuntimeContext,
 	LucidHonoContext,
 } from "@lucidcms/core/types";
-import constants, { ADAPTER_KEY } from "../constants.js";
+import { ADAPTER_KEY } from "../constants.js";
 
 const getRuntimeContext = (params: { compiled: boolean }) =>
 	({
@@ -21,7 +21,7 @@ const getRuntimeContext = (params: { compiled: boolean }) =>
 				],
 			},
 		},
-		configEntryPoint: constants.CONFIG_FILE,
+		configEntryPoint: "lucid/config.js",
 	}) satisfies AdapterRuntimeContext;
 
 export default getRuntimeContext;
