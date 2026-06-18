@@ -1,3 +1,4 @@
+import { normalizeCopy } from "../../libs/i18n/index.js";
 import { UserTenantsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Tenant } from "../../types/response.js";
@@ -28,7 +29,7 @@ const getAll: ServiceFn<
 			error: undefined,
 			data: context.config.tenants.map((tenant) => ({
 				key: tenant.key,
-				name: tenant.name,
+				name: normalizeCopy(tenant.name),
 				default: tenant.default ?? false,
 			})),
 		};
@@ -60,7 +61,7 @@ const getAll: ServiceFn<
 			.filter((tenant) => memberKeys.includes(tenant.key))
 			.map((tenant) => ({
 				key: tenant.key,
-				name: tenant.name,
+				name: normalizeCopy(tenant.name),
 				default: tenant.default ?? false,
 			})),
 	};

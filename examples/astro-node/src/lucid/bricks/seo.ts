@@ -1,18 +1,18 @@
-import { BrickBuilder, copy } from "@lucidcms/core";
+import { BrickBuilder } from "@lucidcms/core";
 
 const SeoBrick = new BrickBuilder("seo", {
 	details: {
-		name: copy("admin:bricks.seo.name"),
+		name: "SEO",
 	},
 })
 	.addText("metaTitle", {
 		details: {
-			label: copy("admin:bricks.seo.fields.metaTitle.label"),
+			label: "Meta Title",
 		},
 	})
 	.addTextarea("metaDescription", {
 		details: {
-			label: copy("admin:bricks.seo.fields.metaDescription.label"),
+			label: "Meta Description",
 		},
 	});
 

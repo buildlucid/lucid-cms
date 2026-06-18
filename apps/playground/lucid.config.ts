@@ -2,7 +2,7 @@
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 
-import { configureLucid, copy, z } from "@lucidcms/core";
+import { configureLucid, z } from "@lucidcms/core";
 // import { passthroughEmailAdapter } from "@lucidcms/core/email";
 // import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { createServiceContext, PermissionSets } from "@lucidcms/core/plugin";
@@ -73,16 +73,12 @@ export default configureLucid({
 		tenants: [
 			{
 				key: "marketing",
-				name: copy("admin:tenants.marketing.name", {
-					defaultMessage: "Marketing",
-				}),
+				name: "Marketing",
 				default: true,
 			},
 			{
 				key: "documentation",
-				name: copy("admin:tenants.documentation.name", {
-					defaultMessage: "Documentation",
-				}),
+				name: "Documentation",
 			},
 		],
 		auth: {
@@ -223,72 +219,72 @@ export default configureLucid({
 		access: {
 			groups: {
 				pages: {
-					name: copy("admin:access.groups.pages.name"),
+					name: "Page Permissions",
 				},
 				blogs: {
-					name: copy("admin:access.groups.blogs.name"),
+					name: "Blog Permissions",
 				},
 			},
 			permissions: {
 				"page:full": {
-					name: copy("admin:access.permissions.page-full.name"),
-					description: copy("admin:access.permissions.page-full.description"),
+					name: "Full Page Access",
+					description: "Grants full access to pages.",
 					group: "pages",
 				},
 				"page:read": {
-					name: copy("admin:access.permissions.page-read.name"),
+					name: "Read Pages",
 					group: "pages",
 				},
 				"page:create": {
-					name: copy("admin:access.permissions.page-create.name"),
+					name: "Create Pages",
 					group: "pages",
 				},
 				"page:update": {
-					name: copy("admin:access.permissions.page-update.name"),
+					name: "Update Pages",
 					group: "pages",
 				},
 				"page:delete": {
-					name: copy("admin:access.permissions.page-delete.name"),
+					name: "Delete Pages",
 					group: "pages",
 				},
 				"page:restore": {
-					name: copy("admin:access.permissions.page-restore.name"),
+					name: "Restore Pages",
 					group: "pages",
 				},
 				"page:publish": {
-					name: copy("admin:access.permissions.page-publish.name"),
+					name: "Publish Pages",
 					group: "pages",
 				},
 				"page:review": {
-					name: copy("admin:access.permissions.page-review.name"),
+					name: "Review Page Publish Requests",
 					group: "pages",
 				},
 				"page:publish:staging": {
-					name: copy("admin:access.permissions.page-publish-staging.name"),
+					name: "Publish Pages To Staging",
 					group: "pages",
 				},
 				"page:review:staging": {
-					name: copy("admin:access.permissions.page-review-staging.name"),
+					name: "Review Page Publish Requests To Staging",
 					group: "pages",
 				},
 				"page:publish:production": {
-					name: copy("admin:access.permissions.page-publish-production.name"),
+					name: "Publish Pages To Production",
 					group: "pages",
 				},
 				"page:review:production": {
-					name: copy("admin:access.permissions.page-review-production.name"),
+					name: "Review Page Publish Requests To Production",
 					group: "pages",
 				},
 				"blog:full": {
-					name: copy("admin:access.permissions.blog-full.name"),
+					name: "Full Blog Access",
 					group: "blogs",
 				},
 			},
 			roles: [
 				{
 					key: "admin",
-					name: copy("admin:access.roles.admin.name"),
-					description: copy("admin:access.roles.admin.description"),
+					name: "Admin",
+					description: "Full admin access for the playground.",
 					permissions: [
 						...PermissionSets.Users,
 						...PermissionSets.Roles,

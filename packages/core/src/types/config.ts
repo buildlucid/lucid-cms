@@ -11,7 +11,7 @@ import type {
 } from "../libs/email/types.js";
 import type { AllHooks } from "../libs/hooks/types.js";
 import type {
-	AdminCopyDescriptor,
+	AdminCopyInput,
 	InterfaceDirection,
 	LocaleDirection,
 	TranslationSource,
@@ -60,11 +60,11 @@ export type AccessPermissionDetails = {
 	/**
 	 * The permission or group label shown in the admin UI.
 	 */
-	name: AdminCopyDescriptor;
+	name: AdminCopyInput;
 	/**
 	 * Optional helper text for the permission or group shown in the admin UI.
 	 */
-	description?: AdminCopyDescriptor | null;
+	description?: AdminCopyInput | null;
 };
 
 export type AccessPermissionDefinition = {
@@ -84,7 +84,7 @@ export type AccessPermissionDefinition = {
 
 export type AccessPermissionGroupDefinition = AccessPermissionDetails;
 
-export type ConfiguredLocaleValue = AdminCopyDescriptor;
+export type ConfiguredLocaleValue = AdminCopyInput;
 
 export type AccessRoleDefinition = {
 	/**
@@ -162,7 +162,7 @@ export type TenantConfig = {
 	/**
 	 * The tenant name shown in the admin UI.
 	 */
-	name: AdminCopyDescriptor;
+	name: AdminCopyInput;
 	/**
 	 * Marks this tenant as the default selection in the admin UI when a user has
 	 * access to multiple tenants and no valid tenant is already selected.

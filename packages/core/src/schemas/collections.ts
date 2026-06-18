@@ -1,5 +1,5 @@
 import z from "zod";
-import { adminCopyDescriptorSchema } from "../libs/i18n/index.js";
+import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { brickConfigSchema } from "./collection-bricks.js";
 import { fieldConfigSchema } from "./collection-fields.js";
@@ -43,7 +43,7 @@ const collectionResponseSchema = z.object({
 		})
 		.optional(),
 	details: z.object({
-		name: adminCopyDescriptorSchema.meta({
+		name: resolvedAdminCopySchema.meta({
 			description: "Display name for the collection",
 			example: {
 				type: "lucid.copy",
@@ -52,7 +52,7 @@ const collectionResponseSchema = z.object({
 				defaultMessage: "Pages",
 			},
 		}),
-		singularName: adminCopyDescriptorSchema.meta({
+		singularName: resolvedAdminCopySchema.meta({
 			description: "Singular display name for items in the collection",
 			example: {
 				type: "lucid.copy",
@@ -61,7 +61,7 @@ const collectionResponseSchema = z.object({
 				defaultMessage: "Page",
 			},
 		}),
-		summary: adminCopyDescriptorSchema.nullable().meta({
+		summary: resolvedAdminCopySchema.nullable().meta({
 			description: "Description text for the collection",
 			example: {
 				type: "lucid.copy",
@@ -113,7 +113,7 @@ const collectionResponseSchema = z.object({
 				stages: z.array(
 					z.object({
 						key: z.string(),
-						name: adminCopyDescriptorSchema,
+						name: resolvedAdminCopySchema,
 						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
 						publishTargets: z.array(z.string()),
 						permissions: z.object({
@@ -134,7 +134,7 @@ const collectionResponseSchema = z.object({
 					description: "The environment key",
 					example: "production",
 				}),
-				name: adminCopyDescriptorSchema.meta({
+				name: resolvedAdminCopySchema.meta({
 					description: "Display name for the environment",
 					example: {
 						type: "lucid.copy",

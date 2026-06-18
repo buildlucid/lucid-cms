@@ -1,13 +1,13 @@
-import type { AdminCopyDescriptor } from "../../../../i18n/types.js";
+import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface CheckboxFieldConfig extends SharedFieldConfig {
 	type: "checkbox";
 	details: {
-		label?: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
-		true?: AdminCopyDescriptor;
-		false?: AdminCopyDescriptor;
+		label?: AdminCopyInput;
+		summary?: AdminCopyInput;
+		true?: AdminCopyInput;
+		false?: AdminCopyInput;
 	};
 	config: {
 		localized?: boolean;

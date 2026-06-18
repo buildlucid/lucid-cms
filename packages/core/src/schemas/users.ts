@@ -1,5 +1,5 @@
 import z from "zod";
-import { adminCopyDescriptorSchema, translate } from "../libs/i18n/index.js";
+import { resolvedAdminCopySchema, translate } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaEmbedResponseSchema, mediaOriginSchema } from "./media.js";
@@ -232,7 +232,7 @@ export const userResponseSchema = z.object({
 				key: z
 					.string()
 					.meta({ description: "The tenant key", example: "alpha" }),
-				name: adminCopyDescriptorSchema.meta({
+				name: resolvedAdminCopySchema.meta({
 					description: "The tenant's name",
 					example: {
 						type: "lucid.copy",

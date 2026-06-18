@@ -1,11 +1,15 @@
 export {
 	adminCopyDescriptorSchema,
+	adminCopyInputSchema,
 	copy,
 	copyDescriptorSchema,
+	copyInputSchema,
 	isCopyDescriptor,
 	isTranslatableCopy,
 	literalCopySchema,
+	normalizeCopy,
 	parseCopyKey,
+	resolvedAdminCopySchema,
 	serverCopyDescriptorSchema,
 	translatableCopySchema,
 } from "./copy.js";
@@ -30,11 +34,14 @@ export {
 } from "./translations.js";
 export type {
 	AdminCopyDescriptor,
+	AdminCopyInput,
 	BoundTranslateCopyOptions,
 	CopyDescriptor,
+	CopyInput,
 	InterfaceDirection,
 	LiteralCopy,
 	LocaleDirection,
+	ResolvedAdminCopy,
 	ServerCopyDescriptor,
 	TranslatableCopy,
 	TranslateCopy,

@@ -1,7 +1,9 @@
 import z from "zod";
 import type {
 	AdminCopyDescriptor,
+	AdminCopyInput,
 	CopyDescriptor,
+	CopyInput,
 	LiteralCopy,
 	RegisteredCopyTranslationKey,
 	ServerCopyDescriptor,
@@ -119,6 +121,70 @@ export const literalCopySchema = z
  */
 export const translatableCopySchema = z.union([
 	copyDescriptorSchema,
+	literalCopySchema,
+]);
+
+/**
+ * Normalises copy authored in config into Lucid's internal descriptor shape.
+ *
+ * Plain strings become literal copy (`copy.literal`) so they flow through the
+ * same translator pipeline as descriptors. Existing descriptors/literals and
+ * nullish values pass through untouched.
+ *
+ * @example
+ * ```ts
+ * normalizeCopy("Posts"); // { type: "lucid.literal", value: "Posts" }
+ * normalizeCopy(copy("admin:collections.posts.name")); // unchanged
+ * ```
+ */
+export function normalizeCopy<T extends TranslatableCopy>(
+	value: T | string,
+): T | LiteralCopy;
+export function normalizeCopy<T extends TranslatableCopy>(
+	value: T | string | null,
+): T | LiteralCopy | null;
+export function normalizeCopy<T extends TranslatableCopy>(
+	value: T | string | undefined,
+): T | LiteralCopy | undefined;
+export function normalizeCopy<T extends TranslatableCopy>(
+	value: T | string | null | undefined,
+): T | LiteralCopy | null | undefined;
+export function normalizeCopy(
+	value: string | TranslatableCopy | null | undefined,
+) {
+	if (value === null || value === undefined) return value;
+	if (typeof value === "string") {
+		return { type: "lucid.literal", value } satisfies LiteralCopy;
+	}
+	return value;
+}
+
+/**
+ * Schema for copy authored in config: accepts a plain string, a copy
+ * descriptor, or a literal, and normalises strings into literal copy.
+ *
+ * The static output is typed as {@link CopyInput} so processed config types stay
+ * compatible with their authored counterparts; at runtime the value is always a
+ * descriptor or literal.
+ */
+export const copyInputSchema = z
+	.union([z.string(), copyDescriptorSchema, literalCopySchema])
+	.transform((value): CopyInput => normalizeCopy(value));
+
+/**
+ * Admin-scoped variant of {@link copyInputSchema}. Use this anywhere config
+ * accepts admin UI copy so authors can pass a string instead of `copy(...)`.
+ */
+export const adminCopyInputSchema = z
+	.union([z.string(), adminCopyDescriptorSchema, literalCopySchema])
+	.transform((value): AdminCopyInput => normalizeCopy(value));
+
+/**
+ * Schema for already-normalised admin copy as it appears in API responses
+ * (descriptor or literal — never a bare string). Use this in resource schemas.
+ */
+export const resolvedAdminCopySchema = z.union([
+	adminCopyDescriptorSchema,
 	literalCopySchema,
 ]);
 

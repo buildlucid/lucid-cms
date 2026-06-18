@@ -1,5 +1,5 @@
 import type { ZodType } from "zod";
-import type { AdminCopyDescriptor } from "../../../../i18n/types.js";
+import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
 	SharedFieldConfig,
@@ -10,9 +10,9 @@ export type JsonValue = Record<string, unknown> | unknown[];
 export interface JsonFieldConfig extends SharedFieldConfig {
 	type: "json";
 	details: {
-		label?: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
-		placeholder?: AdminCopyDescriptor;
+		label?: AdminCopyInput;
+		summary?: AdminCopyInput;
+		placeholder?: AdminCopyInput;
 	};
 	ai?: CustomFieldUserAiConfig<"json">;
 	config: {

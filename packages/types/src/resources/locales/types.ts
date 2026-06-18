@@ -8,6 +8,18 @@ export type AdminCopyDescriptor = {
 	defaultMessage?: string;
 };
 
+export type LiteralCopy = {
+	type: "lucid.literal";
+	value: string;
+	values?: TranslationValues;
+};
+
+/**
+ * Admin copy as it appears in API responses: either a copy descriptor or a
+ * literal (a plain string authored in config, normalised internally).
+ */
+export type ResolvedAdminCopy = AdminCopyDescriptor | LiteralCopy;
+
 export interface Locale {
 	code: string;
 	name: string | null;

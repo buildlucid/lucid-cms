@@ -1,12 +1,12 @@
-import { CollectionBuilder, copy, z } from "@lucidcms/core";
+import { CollectionBuilder, z } from "@lucidcms/core";
 import ContentBrick from "../bricks/content.js";
 import SeoBrick from "../bricks/seo.js";
 
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.page.name"),
-		singularName: copy("admin:collections.page.singularName"),
+		name: "Pages",
+		singularName: "Page",
 	},
 	bricks: {
 		fixed: [SeoBrick],
@@ -15,7 +15,7 @@ const PageCollection = new CollectionBuilder("page", {
 })
 	.addText("title", {
 		details: {
-			label: copy("admin:collections.page.fields.title.label"),
+			label: "Title",
 		},
 		validation: {
 			required: true,
@@ -25,7 +25,7 @@ const PageCollection = new CollectionBuilder("page", {
 	})
 	.addTextarea("summary", {
 		details: {
-			label: copy("admin:collections.page.fields.summary.label"),
+			label: "Summary",
 		},
 	});
 

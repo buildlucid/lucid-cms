@@ -1,6 +1,6 @@
 import z from "zod";
 import constants from "../../../constants/constants.js";
-import { adminCopyDescriptorSchema } from "../../i18n/index.js";
+import { adminCopyInputSchema } from "../../i18n/index.js";
 
 // TODO: test this through lucid.config.* - have a feeling it isnt being used properly
 const CustomFieldSchema = z.object({
@@ -16,10 +16,10 @@ const CustomFieldSchema = z.object({
 	collection: z.union([z.string(), z.array(z.string())]).optional(),
 	details: z
 		.object({
-			label: adminCopyDescriptorSchema.optional(),
-			summary: adminCopyDescriptorSchema.optional(),
-			true: adminCopyDescriptorSchema.optional(),
-			false: adminCopyDescriptorSchema.optional(),
+			label: adminCopyInputSchema.optional(),
+			summary: adminCopyInputSchema.optional(),
+			true: adminCopyInputSchema.optional(),
+			false: adminCopyInputSchema.optional(),
 		})
 		.optional(),
 	ai: z
@@ -31,7 +31,7 @@ const CustomFieldSchema = z.object({
 					z
 						.object({
 							key: z.string().trim().min(1),
-							label: adminCopyDescriptorSchema,
+							label: adminCopyInputSchema,
 							instructions: z.string().trim().min(1),
 						})
 						.strict(),
@@ -64,7 +64,7 @@ const CustomFieldSchema = z.object({
 	options: z
 		.array(
 			z.object({
-				label: adminCopyDescriptorSchema,
+				label: adminCopyInputSchema,
 				value: z.string(),
 			}),
 		)

@@ -80,6 +80,26 @@ export type ServerCopyDescriptor = CopyDescriptor<"server">;
 export type TranslatableCopy = CopyDescriptor | LiteralCopy;
 
 /**
+ * Copy as authored in config: a plain string, a copy descriptor, or a literal.
+ *
+ * Strings are normalised into {@link LiteralCopy} via `normalizeCopy` before
+ * they reach the runtime, so consumers only ever resolve descriptor/literal
+ * objects.
+ */
+export type CopyInput = string | TranslatableCopy;
+
+/**
+ * Admin-scoped {@link CopyInput} for config positions that render admin UI copy.
+ */
+export type AdminCopyInput = string | AdminCopyDescriptor | LiteralCopy;
+
+/**
+ * Already-normalised admin copy as it appears in API responses (descriptor or
+ * literal — never a bare string).
+ */
+export type ResolvedAdminCopy = AdminCopyDescriptor | LiteralCopy;
+
+/**
  * Translation keys for each scope within one locale.
  */
 export type TranslationBundle = Record<

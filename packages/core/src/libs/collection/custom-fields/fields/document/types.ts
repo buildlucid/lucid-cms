@@ -1,5 +1,5 @@
 import type { DocumentField } from "../../../../../types/response.js";
-import type { AdminCopyDescriptor } from "../../../../i18n/types.js";
+import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export type DocumentFieldValue = {
@@ -11,8 +11,8 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 	type: "document";
 	collection: string | string[];
 	details: {
-		label?: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
+		label?: AdminCopyInput;
+		summary?: AdminCopyInput;
 	};
 	config: {
 		localized?: boolean;

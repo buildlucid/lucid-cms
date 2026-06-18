@@ -260,3 +260,33 @@ test("collection environment relation config normalizes defaults", async () => {
 		},
 	]);
 });
+
+test("plain string copy on details and fields is normalised to literal copy", () => {
+	const collection = new CollectionBuilder("snippets", {
+		mode: "multiple",
+		details: {
+			name: "Snippets",
+			singularName: "Snippet",
+			summary: "Reusable content snippets.",
+		},
+	}).addText("title", {
+		details: {
+			label: "Title",
+			placeholder: "Enter a title",
+		},
+	});
+
+	expect(collection.getData.details).toEqual({
+		name: { type: "lucid.literal", value: "Snippets" },
+		singularName: { type: "lucid.literal", value: "Snippet" },
+		summary: { type: "lucid.literal", value: "Reusable content snippets." },
+	});
+
+	const titleField = collection.fieldTree.find(
+		(field) => field.key === "title",
+	);
+	expect(titleField?.details).toMatchObject({
+		label: { type: "lucid.literal", value: "Title" },
+		placeholder: { type: "lucid.literal", value: "Enter a title" },
+	});
+});

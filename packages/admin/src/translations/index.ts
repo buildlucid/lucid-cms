@@ -1,4 +1,4 @@
-import type { AdminCopyDescriptor } from "@types";
+import type { ResolvedAdminCopy } from "@types";
 import i18next from "i18next";
 import { createMemo, createRoot, createSignal } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
@@ -223,13 +223,23 @@ export const getRequestInterfaceLocale = () =>
 	getHasResolvedLocale() ? getLocale() : undefined;
 
 export const translateAdminCopy = (
-	copy: AdminCopyDescriptor,
+	copy: ResolvedAdminCopy,
 	options?: {
 		defaultMessage?: string;
 		values?: Record<string, string | number | undefined>;
 	},
 ) => {
 	getTranslationVersion();
+
+	// Literal copy is already written text (a string authored in config), so it
+	// is interpolated directly rather than looked up as a translation key.
+	if (copy.type === "lucid.literal") {
+		const values = { ...(copy.values ?? {}), ...(options?.values ?? {}) };
+		return copy.value.replace(
+			/\{\{(\w+)\}\}/g,
+			(_, key) => values[key]?.toString() ?? "",
+		);
+	}
 
 	return i18next.t(copy.key, {
 		...(copy.values ?? {}),

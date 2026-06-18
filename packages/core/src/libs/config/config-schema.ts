@@ -5,7 +5,7 @@ import type { Config, ImageProcessor } from "../../types/config.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
-import { adminCopyDescriptorSchema } from "../i18n/index.js";
+import { adminCopyInputSchema } from "../i18n/index.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
@@ -170,7 +170,7 @@ const ConfigSchema = z.object({
 					.refine((key) => !isGeneratedMediaIdTenantKey(key), {
 						message: "Tenant key cannot match a generated media ID.",
 					}),
-				name: adminCopyDescriptorSchema,
+				name: adminCopyInputSchema,
 				default: z.boolean().optional(),
 			}),
 		)
@@ -260,8 +260,8 @@ const ConfigSchema = z.object({
 				.record(
 					z.string(),
 					z.object({
-						name: adminCopyDescriptorSchema,
-						description: adminCopyDescriptorSchema.nullable().optional(),
+						name: adminCopyInputSchema,
+						description: adminCopyInputSchema.nullable().optional(),
 					}),
 				)
 				.optional(),
@@ -269,8 +269,8 @@ const ConfigSchema = z.object({
 				.record(
 					z.string(),
 					z.object({
-						name: adminCopyDescriptorSchema,
-						description: adminCopyDescriptorSchema.nullable().optional(),
+						name: adminCopyInputSchema,
+						description: adminCopyInputSchema.nullable().optional(),
 						group: z.string(),
 					}),
 				)
@@ -279,8 +279,8 @@ const ConfigSchema = z.object({
 				.array(
 					z.object({
 						key: z.string(),
-						name: adminCopyDescriptorSchema,
-						description: adminCopyDescriptorSchema.optional(),
+						name: adminCopyInputSchema,
+						description: adminCopyInputSchema.optional(),
 						permissions: z.array(z.string()),
 					}),
 				)

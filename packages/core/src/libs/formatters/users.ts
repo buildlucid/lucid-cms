@@ -2,6 +2,7 @@ import type { Config } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Tenant, User } from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
+import { normalizeCopy } from "../i18n/index.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
 import formatter from "./index.js";
@@ -160,7 +161,7 @@ const formatSingle = (props: {
 					return [
 						{
 							key: tenant.key,
-							name: tenant.name,
+							name: normalizeCopy(tenant.name),
 							default: tenant.default ?? false,
 						},
 					];

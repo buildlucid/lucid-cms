@@ -1,4 +1,5 @@
 import type { Config } from "../../types/config.js";
+import { normalizeCopy } from "../i18n/index.js";
 import { PermissionGroups, Permissions } from "./definitions.js";
 import type {
 	CorePermission,
@@ -52,8 +53,8 @@ export const getPermissionRegistry = (config?: Pick<Config, "access">) => {
 		groups.push({
 			key,
 			details: {
-				name: group.name,
-				description: group.description,
+				name: normalizeCopy(group.name),
+				description: normalizeCopy(group.description),
 			},
 			core: false,
 			permissions: [],
@@ -70,8 +71,8 @@ export const getPermissionRegistry = (config?: Pick<Config, "access">) => {
 		group.permissions.push({
 			key,
 			details: {
-				name: permission.name,
-				description: permission.description,
+				name: normalizeCopy(permission.name),
+				description: normalizeCopy(permission.description),
 			},
 			core: false,
 		} satisfies PermissionDefinition);

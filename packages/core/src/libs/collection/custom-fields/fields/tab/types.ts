@@ -1,11 +1,11 @@
-import type { AdminCopyDescriptor } from "../../../../i18n/types.js";
+import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { CFConfig, FieldTypes, SharedFieldConfig } from "../../types.js";
 
 export interface TabFieldConfig extends SharedFieldConfig {
 	type: "tab";
 	details: {
-		label?: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
+		label?: AdminCopyInput;
+		summary?: AdminCopyInput;
 	};
 	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
 }

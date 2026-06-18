@@ -8,7 +8,7 @@ import type {
 	OnDelete,
 	OnUpdate,
 } from "../../db/types.js";
-import type { AdminCopyDescriptor } from "../../i18n/types.js";
+import type { AdminCopyDescriptor, AdminCopyInput } from "../../i18n/types.js";
 import type { BrickBuilder, CollectionBuilder } from "../builders/index.js";
 import type {
 	CollectionSchemaColumn,
@@ -92,8 +92,8 @@ export type SharedFieldConfig = {
 	key: string;
 	type: FieldTypes;
 	details: {
-		label?: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
+		label?: AdminCopyInput;
+		summary?: AdminCopyInput;
 	};
 };
 

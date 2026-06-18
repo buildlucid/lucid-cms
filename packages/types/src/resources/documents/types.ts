@@ -1,4 +1,4 @@
-import type { AdminCopyDescriptor } from "../locales/types.js";
+import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaRef, ProfilePicture } from "../media/types.js";
 import type { UserRef } from "../users/types.js";
 
@@ -312,8 +312,8 @@ export type WorkflowStageColor =
 export interface CollectionBrickConfig {
 	key: string;
 	details: {
-		name: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
+		name: ResolvedAdminCopy;
+		summary?: ResolvedAdminCopy;
 	};
 	preview:
 		| {
@@ -324,14 +324,14 @@ export interface CollectionBrickConfig {
 }
 
 type FieldDetails = {
-	label?: AdminCopyDescriptor;
-	summary?: AdminCopyDescriptor;
-	placeholder?: AdminCopyDescriptor;
+	label?: ResolvedAdminCopy;
+	summary?: ResolvedAdminCopy;
+	placeholder?: ResolvedAdminCopy;
 };
 
 type RelationFieldDetails = {
-	label?: AdminCopyDescriptor;
-	summary?: AdminCopyDescriptor;
+	label?: ResolvedAdminCopy;
+	summary?: ResolvedAdminCopy;
 };
 
 type FieldConfigOptions<TDefault = unknown> = {
@@ -355,7 +355,7 @@ export type CollectionFieldAiConfig = {
 	enabled: boolean;
 	guidance: Array<{
 		key: string;
-		label: AdminCopyDescriptor;
+		label: ResolvedAdminCopy;
 	}>;
 };
 
@@ -369,8 +369,8 @@ type SharedCollectionFieldConfig<TType extends FieldType> = {
 export interface CheckboxFieldConfig
 	extends SharedCollectionFieldConfig<"checkbox"> {
 	details: FieldDetails & {
-		true?: AdminCopyDescriptor;
-		false?: AdminCopyDescriptor;
+		true?: ResolvedAdminCopy;
+		false?: ResolvedAdminCopy;
 	};
 	config: FieldConfigOptions<boolean>;
 	validation?: RequiredValidation;
@@ -460,7 +460,7 @@ export interface RichTextFieldConfig
 
 export interface SelectFieldConfig
 	extends SharedCollectionFieldConfig<"select"> {
-	options: Array<{ label: AdminCopyDescriptor; value: string }>;
+	options: Array<{ label: ResolvedAdminCopy; value: string }>;
 	config: FieldConfigOptions<string>;
 	validation?: RequiredValidation;
 }
@@ -519,9 +519,9 @@ export interface Collection {
 	documentId?: number | null;
 	mode: CollectionMode;
 	details: {
-		name: AdminCopyDescriptor;
-		singularName: AdminCopyDescriptor;
-		summary: AdminCopyDescriptor | null;
+		name: ResolvedAdminCopy;
+		singularName: ResolvedAdminCopy;
+		summary: ResolvedAdminCopy | null;
 	};
 	config: {
 		localized: boolean;
@@ -543,7 +543,7 @@ export interface Collection {
 			initial: string;
 			stages: Array<{
 				key: string;
-				name: AdminCopyDescriptor;
+				name: ResolvedAdminCopy;
 				color: WorkflowStageColor;
 				publishTargets: string[];
 				permissions: {
@@ -554,7 +554,7 @@ export interface Collection {
 		};
 		environments: {
 			key: string;
-			name: AdminCopyDescriptor;
+			name: ResolvedAdminCopy;
 			permissions: {
 				publish: string;
 				review: string;

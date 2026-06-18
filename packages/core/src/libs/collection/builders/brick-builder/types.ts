@@ -1,10 +1,10 @@
 import type constants from "../../../../constants/constants.js";
-import type { AdminCopyDescriptor } from "../../../i18n/types.js";
+import type { AdminCopyInput, ResolvedAdminCopy } from "../../../i18n/types.js";
 
 export interface BrickConfigProps {
 	details?: {
-		name?: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
+		name?: AdminCopyInput;
+		summary?: AdminCopyInput;
 	};
 	preview?: {
 		image?: string;
@@ -14,8 +14,8 @@ export interface BrickConfigProps {
 export interface BrickConfig {
 	key: string;
 	details: {
-		name: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
+		name: ResolvedAdminCopy;
+		summary?: ResolvedAdminCopy;
 	};
 	preview?: {
 		image?: string;

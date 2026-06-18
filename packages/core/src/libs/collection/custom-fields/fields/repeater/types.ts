@@ -1,4 +1,4 @@
-import type { AdminCopyDescriptor } from "../../../../i18n/types.js";
+import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CFConfig,
 	FieldTypes,
@@ -10,8 +10,8 @@ export interface RepeaterFieldConfig extends SharedFieldConfig {
 	type: "repeater";
 	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
 	details: {
-		label?: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
+		label?: AdminCopyInput;
+		summary?: AdminCopyInput;
 	};
 	config: {
 		disabled?: boolean;

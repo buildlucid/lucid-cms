@@ -1,5 +1,5 @@
 import z from "zod";
-import { adminCopyDescriptorSchema } from "../libs/i18n/index.js";
+import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 
 export const fieldInputSchema = z.object({
 	key: z.string(),
@@ -57,7 +57,7 @@ export const fieldConfigSchema = z.object({
 		})
 		.optional(),
 	details: z.object({
-		label: adminCopyDescriptorSchema
+		label: resolvedAdminCopySchema
 			.meta({
 				description: "Display label for the field",
 				example: {
@@ -68,7 +68,7 @@ export const fieldConfigSchema = z.object({
 				},
 			})
 			.optional(),
-		summary: adminCopyDescriptorSchema
+		summary: resolvedAdminCopySchema
 			.meta({
 				description: "Description text for the field",
 				example: {
@@ -79,7 +79,7 @@ export const fieldConfigSchema = z.object({
 				},
 			})
 			.optional(),
-		placeholder: adminCopyDescriptorSchema
+		placeholder: resolvedAdminCopySchema
 			.meta({
 				description: "Placeholder text for input fields",
 				example: {
@@ -90,7 +90,7 @@ export const fieldConfigSchema = z.object({
 				},
 			})
 			.optional(),
-		true: adminCopyDescriptorSchema
+		true: resolvedAdminCopySchema
 			.meta({
 				description: "Label for true value in boolean fields",
 				example: {
@@ -101,7 +101,7 @@ export const fieldConfigSchema = z.object({
 				},
 			})
 			.optional(),
-		false: adminCopyDescriptorSchema
+		false: resolvedAdminCopySchema
 			.meta({
 				description: "Label for false value in boolean fields",
 				example: {
@@ -125,7 +125,7 @@ export const fieldConfigSchema = z.object({
 						description: "Unique key for the guidance option",
 						example: "improve",
 					}),
-					label: adminCopyDescriptorSchema.meta({
+					label: resolvedAdminCopySchema.meta({
 						description: "Display label for the guidance option",
 						example: {
 							type: "lucid.copy",
@@ -287,7 +287,7 @@ export const fieldConfigSchema = z.object({
 	options: z
 		.array(
 			z.object({
-				label: adminCopyDescriptorSchema.meta({
+				label: resolvedAdminCopySchema.meta({
 					description: "Display label for the option",
 					example: {
 						type: "lucid.copy",

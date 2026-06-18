@@ -1,13 +1,13 @@
 import z from "zod";
-import { adminCopyDescriptorSchema } from "../libs/i18n/index.js";
+import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 
 const permissionDetailsResponseSchema = z.object({
-	name: adminCopyDescriptorSchema.meta({
+	name: resolvedAdminCopySchema.meta({
 		description: "The display name for the permission or group",
 		example: "User Permissions",
 	}),
-	description: adminCopyDescriptorSchema.nullable().optional().meta({
+	description: resolvedAdminCopySchema.nullable().optional().meta({
 		description: "Optional display description",
 		example: "Controls access to user management",
 	}),

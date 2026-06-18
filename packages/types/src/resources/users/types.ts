@@ -1,4 +1,4 @@
-import type { AdminCopyDescriptor } from "../locales/types.js";
+import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { ProfilePicture } from "../media/types.js";
 import type { Tenant } from "../tenants/types.js";
 
@@ -42,8 +42,8 @@ export type CorePermission =
 export type Permission = CorePermission | (string & {});
 
 export type PermissionDetails = {
-	name: AdminCopyDescriptor;
-	description?: AdminCopyDescriptor | null;
+	name: ResolvedAdminCopy;
+	description?: ResolvedAdminCopy | null;
 };
 
 export type PermissionDefinition = {

@@ -1,5 +1,5 @@
 import z from "zod";
-import { adminCopyDescriptorSchema } from "../libs/i18n/index.js";
+import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 
 export const controllerSchemas = {
@@ -16,7 +16,7 @@ export const controllerSchemas = {
 					description: "The tenant key",
 					example: "alpha",
 				}),
-				name: adminCopyDescriptorSchema.meta({
+				name: resolvedAdminCopySchema.meta({
 					description: "The tenant's name",
 					example: {
 						type: "lucid.copy",

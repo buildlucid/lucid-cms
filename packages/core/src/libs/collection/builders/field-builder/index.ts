@@ -21,6 +21,7 @@ import type {
 	FieldTypes,
 	TabFieldConfig,
 } from "../../custom-fields/types.js";
+import normalizeFieldCopy from "../../custom-fields/utils/normalize-field-copy.js";
 import type { FieldBuilderMeta } from "./types.js";
 
 class FieldBuilder {
@@ -39,6 +40,7 @@ class FieldBuilder {
 	}
 
 	private registerField(key: string, field: CustomField<FieldTypes>) {
+		normalizeFieldCopy(field.config);
 		this.fields.set(key, field);
 		this.meta.fieldKeys.push(key);
 		this.invalidateFieldTreeCache();

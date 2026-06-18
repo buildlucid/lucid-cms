@@ -1,6 +1,7 @@
-import { copy } from "../../../i18n/index.js";
+import { copy, normalizeCopy } from "../../../i18n/index.js";
 import TabCustomField from "../../custom-fields/fields/tab/custom-field.js";
 import type { CFProps } from "../../custom-fields/types.js";
+import normalizeFieldCopy from "../../custom-fields/utils/normalize-field-copy.js";
 import FieldBuilder from "../field-builder/index.js";
 import type { BrickConfig, BrickConfigProps } from "./types.js";
 
@@ -14,11 +15,11 @@ class BrickBuilder extends FieldBuilder {
 			key: this.key,
 			details: {
 				name:
-					config?.details?.name ||
+					normalizeCopy(config?.details?.name) ||
 					copy(`admin:bricks.${this.key}.name`, {
 						defaultMessage: key,
 					}),
-				summary: config?.details?.summary,
+				summary: normalizeCopy(config?.details?.summary),
 			},
 			preview: config?.preview || {},
 			tenantKeys: config?.tenantKeys ?? [],
@@ -35,7 +36,9 @@ class BrickBuilder extends FieldBuilder {
 		return this;
 	}
 	public addTab(key: string, props?: CFProps<"tab">) {
-		this.fields.set(key, new TabCustomField(key, props));
+		const field = new TabCustomField(key, props);
+		normalizeFieldCopy(field.config);
+		this.fields.set(key, field);
 		this.meta.fieldKeys.push(key);
 		this.invalidateFieldTreeCache();
 		return this;

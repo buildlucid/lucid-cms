@@ -1,4 +1,5 @@
 import constants from "../../../../constants/constants.js";
+import { normalizeCopy } from "../../../i18n/index.js";
 import type { CFProps } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 import FieldBuilder from "../field-builder/index.js";
@@ -134,9 +135,9 @@ class CollectionBuilder extends FieldBuilder {
 			key: this.key,
 			mode: this.config.mode,
 			details: {
-				name: this.config.details.name,
-				singularName: this.config.details.singularName,
-				summary: this.config.details.summary ?? null,
+				name: normalizeCopy(this.config.details.name),
+				singularName: normalizeCopy(this.config.details.singularName),
+				summary: normalizeCopy(this.config.details.summary) ?? null,
 			},
 			config: {
 				locked:
@@ -179,7 +180,7 @@ class CollectionBuilder extends FieldBuilder {
 									"",
 								stages: this.config.config.workflow.stages.map((stage) => ({
 									key: stage.key,
-									name: stage.name,
+									name: normalizeCopy(stage.name),
 									color:
 										stage.color ??
 										constants.collectionBuilder.publishing.workflow.color,
@@ -193,6 +194,7 @@ class CollectionBuilder extends FieldBuilder {
 				environments:
 					this.config.config?.environments?.map((environment) => ({
 						...environment,
+						name: normalizeCopy(environment.name),
 						permissions: environment.permissions ?? {},
 						relations: environment.relations ?? {},
 					})) ?? [],

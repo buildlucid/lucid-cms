@@ -1,11 +1,11 @@
-import type { AdminCopyDescriptor } from "../../../../i18n/types.js";
+import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { SharedFieldConfig } from "../../types.js";
 
 export interface ColorFieldConfig extends SharedFieldConfig {
 	type: "color";
 	details: {
-		label?: AdminCopyDescriptor;
-		summary?: AdminCopyDescriptor;
+		label?: AdminCopyInput;
+		summary?: AdminCopyInput;
 	};
 	presets: string[];
 	config: {
