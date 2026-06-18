@@ -1,6 +1,7 @@
 import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices, optionServices } from "../../index.js";
+import { mediaServices } from "../../index.js";
+import adjustStorageUsage from "../adjust-storage-usage.js";
 
 const deleteObject: ServiceFn<
 	[
@@ -8,6 +9,7 @@ const deleteObject: ServiceFn<
 			key: string;
 			size: number;
 			processedSize: number;
+			tenantKey?: string | null;
 		},
 	],
 	undefined
@@ -25,8 +27,8 @@ const deleteObject: ServiceFn<
 				tenant,
 			},
 		}),
-		optionServices.adjustInt(context, {
-			name: "media_storage_used",
+		adjustStorageUsage(context, {
+			tenantKey: data.tenantKey ?? null,
 			delta: -(data.size + data.processedSize),
 			min: 0,
 		}),

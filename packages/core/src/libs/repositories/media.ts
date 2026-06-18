@@ -205,6 +205,62 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		};
 	}
 
+	async sumFileSizeByTenant(props: { tenantKey: string | null }) {
+		let query = this.db
+			.selectFrom("lucid_media")
+			.select(sql<string | number>`COALESCE(SUM(file_size), 0)`.as("total"));
+
+		query =
+			props.tenantKey === null
+				? query.where("tenant_key", "is", null)
+				: query.where("tenant_key", "=", props.tenantKey);
+
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as Promise<
+					{ total: string | number | null } | undefined
+				>,
+			{
+				method: "sumFileSizeByTenant",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: Number(exec.response.data?.total ?? 0),
+		};
+	}
+
+	async sumFileSizeGroupedByTenant() {
+		const query = this.db
+			.selectFrom("lucid_media")
+			.select([
+				"tenant_key",
+				sql<string | number>`COALESCE(SUM(file_size), 0)`.as("total"),
+			])
+			.groupBy("tenant_key");
+
+		const exec = await this.executeQuery(
+			() =>
+				query.execute() as Promise<
+					{ tenant_key: string | null; total: string | number | null }[]
+				>,
+			{
+				method: "sumFileSizeGroupedByTenant",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: exec.response.data.map((row) => ({
+				tenant_key: row.tenant_key,
+				total: Number(row.total ?? 0),
+			})),
+		};
+	}
+
 	async selectSingleById<V extends boolean = false>(
 		props: QueryProps<
 			V,

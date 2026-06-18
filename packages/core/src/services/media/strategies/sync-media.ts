@@ -3,7 +3,8 @@ import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices, optionServices } from "../../index.js";
+import { mediaServices } from "../../index.js";
+import adjustStorageUsage from "../adjust-storage-usage.js";
 import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
 const syncMedia: ServiceFn<
@@ -75,8 +76,8 @@ const syncMedia: ServiceFn<
 	}
 
 	const storageLimit = context.config.media.limits.storage;
-	const adjustStorageRes = await optionServices.adjustInt(context, {
-		name: "media_storage_used",
+	const adjustStorageRes = await adjustStorageUsage(context, {
+		tenantKey: context.request?.tenantKey ?? null,
 		delta: mediaMetaRes.data.size,
 		max: storageLimit === false ? undefined : storageLimit,
 		min: 0,

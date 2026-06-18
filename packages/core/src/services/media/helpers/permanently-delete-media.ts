@@ -64,7 +64,7 @@ const permanentlyDeleteMedia: ServiceFn<
 					value: data.id,
 				},
 			],
-			returning: ["file_size", "id", "key"],
+			returning: ["file_size", "id", "key", "tenant_key"],
 			validation: {
 				enabled: true,
 			},
@@ -88,6 +88,7 @@ const permanentlyDeleteMedia: ServiceFn<
 				(acc, i) => acc + i.file_size,
 				0,
 			),
+			tenantKey: deleteMediaRes.data.tenant_key,
 		}),
 	]);
 	if (deleteObjectRes.error) return deleteObjectRes;

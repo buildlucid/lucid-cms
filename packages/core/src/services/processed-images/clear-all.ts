@@ -1,7 +1,8 @@
 import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import { resolveMediaTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices, optionServices } from "../index.js";
+import { mediaServices } from "../index.js";
+import adjustStorageUsage from "../media/adjust-storage-usage.js";
 
 // TODO: push this to a queue
 const clearAll: ServiceFn<[], undefined> = async (context) => {
@@ -19,17 +20,9 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 	);
 
 	const processedImagesRes =
-		context.request.tenantKey !== undefined &&
-		context.request.tenantKey !== null
-			? await ProcessedImages.selectMultipleByMediaTenant({
-					tenantKey: context.request.tenantKey,
-				})
-			: await ProcessedImages.selectMultiple({
-					select: ["key", "file_size"],
-					validation: {
-						enabled: true,
-					},
-				});
+		await ProcessedImages.selectMultipleWithMediaTenant({
+			tenantKey: context.request.tenantKey,
+		});
 	if (processedImagesRes.error) return processedImagesRes;
 
 	if (processedImagesRes.data.length === 0) {
@@ -39,11 +32,15 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const totalSize = processedImagesRes.data.reduce(
-		(acc, i) => acc + i.file_size,
-		0,
-	);
-	const [_, clearProcessedRes, updateStorageRes] = await Promise.all([
+	const sizeByTenant = new Map<string | null, number>();
+	for (const image of processedImagesRes.data) {
+		sizeByTenant.set(
+			image.tenant_key,
+			(sizeByTenant.get(image.tenant_key) ?? 0) + image.file_size,
+		);
+	}
+
+	const [_, clearProcessedRes] = await Promise.all([
 		mediaStrategyRes.data.deleteMultiple({
 			keys: processedImagesRes.data.map((i) => i.key),
 			context: {
@@ -63,14 +60,17 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 						]
 					: [],
 		}),
-		optionServices.adjustInt(context, {
-			name: "media_storage_used",
-			delta: -totalSize,
-			min: 0,
-		}),
 	]);
 	if (clearProcessedRes.error) return clearProcessedRes;
-	if (updateStorageRes.error) return updateStorageRes;
+
+	for (const [tenantKey, totalSize] of sizeByTenant.entries()) {
+		const updateStorageRes = await adjustStorageUsage(context, {
+			tenantKey,
+			delta: -totalSize,
+			min: 0,
+		});
+		if (updateStorageRes.error) return updateStorageRes;
+	}
 
 	return {
 		error: undefined,

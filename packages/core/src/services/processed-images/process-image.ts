@@ -7,13 +7,13 @@ import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
 import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import type { ImageProcessorOptions } from "../../types/config.js";
 import { createBufferETag, matchesETag } from "../../utils/http/etag.js";
-import { resolveMediaKeyTenant } from "../../utils/media/index.js";
-import type { ServiceFn } from "../../utils/services/types.js";
 import {
-	mediaServices,
-	optionServices,
-	processedImageServices,
-} from "../index.js";
+	getMediaKeyTenantKey,
+	resolveMediaKeyTenant,
+} from "../../utils/media/index.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import { mediaServices, processedImageServices } from "../index.js";
+import adjustStorageUsage from "../media/adjust-storage-usage.js";
 
 const processImage: ServiceFn<
 	[
@@ -42,6 +42,7 @@ const processImage: ServiceFn<
 		context.config,
 		data.processKey,
 	);
+	const sourceTenantKey = getMediaKeyTenantKey(data.key);
 
 	// get og image
 	const mediaRes = await mediaStrategyRes.data.stream({
@@ -146,6 +147,7 @@ const processImage: ServiceFn<
 		context,
 		{
 			size: imageRes.data.size,
+			tenantKey: sourceTenantKey,
 		},
 	);
 	if (canStoreRes.error) {
@@ -168,8 +170,8 @@ const processImage: ServiceFn<
 
 	if (context.config.media.images.storeProcessed === true) {
 		const storageLimit = context.config.media.limits.storage;
-		const adjustStorageRes = await optionServices.adjustInt(context, {
-			name: "media_storage_used",
+		const adjustStorageRes = await adjustStorageUsage(context, {
+			tenantKey: sourceTenantKey,
 			delta: imageRes.data.size,
 			max: storageLimit === false ? undefined : storageLimit,
 			min: 0,
@@ -214,8 +216,8 @@ const processImage: ServiceFn<
 			createProcessedImageRes.error !== undefined ||
 			uploadRes.error !== undefined
 		) {
-			await optionServices.adjustInt(context, {
-				name: "media_storage_used",
+			await adjustStorageUsage(context, {
+				tenantKey: sourceTenantKey,
 				delta: imageRes.data.size * -1,
 				min: 0,
 			});

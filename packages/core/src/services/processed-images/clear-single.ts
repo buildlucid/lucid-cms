@@ -2,9 +2,13 @@ import {
 	MediaRepository,
 	ProcessedImagesRepository,
 } from "../../libs/repositories/index.js";
-import { resolveMediaKeyTenant } from "../../utils/media/index.js";
+import {
+	getMediaKeyTenantKey,
+	resolveMediaKeyTenant,
+} from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices, optionServices } from "../index.js";
+import { mediaServices } from "../index.js";
+import adjustStorageUsage from "../media/adjust-storage-usage.js";
 
 // TODO: push this to a queue
 const clearSingle: ServiceFn<
@@ -34,6 +38,8 @@ const clearSingle: ServiceFn<
 		context.config.db,
 	);
 	let mediaKey = data.key;
+	let mediaTenantKey =
+		mediaKey === undefined ? null : getMediaKeyTenantKey(mediaKey);
 
 	if (mediaKey === undefined && data.id !== undefined) {
 		const Media = new MediaRepository(context.db.client, context.config.db);
@@ -48,6 +54,7 @@ const clearSingle: ServiceFn<
 		if (mediaRes.error) return mediaRes;
 
 		mediaKey = mediaRes.data.key;
+		mediaTenantKey = mediaRes.data.tenant_key;
 	}
 
 	const processedImagesRes = await ProcessedImages.selectMultiple({
@@ -94,8 +101,8 @@ const clearSingle: ServiceFn<
 				},
 			],
 		}),
-		optionServices.adjustInt(context, {
-			name: "media_storage_used",
+		adjustStorageUsage(context, {
+			tenantKey: mediaTenantKey,
 			delta: -totalSize,
 			min: 0,
 		}),

@@ -88,6 +88,41 @@ export default class OptionsRepository extends StaticRepository<"lucid_options">
 
 	// ----------------------------------------
 	// queries
+	async selectMediaStorageUsageOptions() {
+		const query = this.db
+			.selectFrom("lucid_options")
+			.select(["name", "value_int"]);
+
+		const exec = await this.executeQuery(
+			() =>
+				query.execute() as Promise<
+					{ name: Select<LucidOptions>["name"]; value_int: number | null }[]
+				>,
+			{
+				method: "selectMediaStorageUsageOptions",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		const filteredExec = {
+			...exec,
+			response: {
+				...exec.response,
+				data: exec.response.data.filter(
+					(option) =>
+						option.name === "media_storage_used" ||
+						option.name.startsWith("media_storage_used:t:"),
+				),
+			},
+		};
+
+		return this.validateResponse(filteredExec, {
+			enabled: true,
+			mode: "multiple",
+			select: ["name", "value_int"],
+		});
+	}
+
 	async adjustInt<V extends boolean = false>(
 		props: QueryProps<
 			V,

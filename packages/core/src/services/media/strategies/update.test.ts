@@ -110,6 +110,7 @@ describe("media update strategy", () => {
 				previousEtag: "previous-etag",
 				previousSize: 24,
 				previousKey: "public/marketing/original",
+				tenantKey: "marketing",
 				previousType: "image",
 				updatedKey: "awaiting-sync/marketing/upload",
 				targetKey: "public/marketing/original",
@@ -150,6 +151,13 @@ describe("media update strategy", () => {
 			context: {
 				tenant,
 			},
+		});
+		expect(mocks.adjustInt).toHaveBeenCalledWith(expect.anything(), {
+			name: "media_storage_used:t:marketing",
+			delta: 18,
+			max: undefined,
+			min: 0,
+			ensure: true,
 		});
 	});
 
@@ -193,6 +201,7 @@ describe("media update strategy", () => {
 				fileName: "replacement.mp4",
 				previousSize: 24,
 				previousKey: "public/original",
+				tenantKey: null,
 				previousType: "image",
 				updatedKey: "awaiting-sync/upload",
 				targetKey: "public/original",
@@ -287,6 +296,7 @@ describe("media update strategy", () => {
 				previousEtag: "previous-etag",
 				previousSize: 24,
 				previousKey: "public/marketing/original",
+				tenantKey: "marketing",
 				previousType: "image",
 				updatedKey: "awaiting-sync/upload",
 				targetKey: "private/marketing/original",

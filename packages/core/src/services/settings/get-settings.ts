@@ -6,8 +6,13 @@ import passthroughProcessor from "../../libs/image-processor/processors/passthro
 import getMediaAdapter from "../../libs/media/get-adapter.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
+import { multiTenancyEnabled } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { optionServices, processedImageServices } from "../index.js";
+import {
+	mediaServices,
+	optionServices,
+	processedImageServices,
+} from "../index.js";
 import {
 	getLicenseOptionBaseName,
 	getLicenseOptionName,
@@ -30,10 +35,10 @@ const getSettings: ServiceFn<
 		mediaAdapter,
 		emailAdapter,
 		image,
+		mediaStorageUsed,
 	] = await Promise.all([
 		optionServices.getMultiple(context, {
 			names: [
-				"media_storage_used",
 				getLicenseOptionName(tenantKey, "license_key_display"),
 				"system_alert_email",
 			],
@@ -42,13 +47,15 @@ const getSettings: ServiceFn<
 		getMediaAdapter(context.config),
 		getEmailAdapter(context.config),
 		getImageProcessor(context.config),
+		mediaServices.getStorageUsage(context, {
+			tenantKey,
+			includeAllBuckets: !multiTenancyEnabled(context.config),
+		}),
 	]);
 	if (processedImageCountRes.error) return processedImageCountRes;
 	if (optionsRes.error) return optionsRes;
+	if (mediaStorageUsed.error) return mediaStorageUsed;
 
-	const mediaStorageUsedRes = optionsRes.data.find(
-		(o) => o.name === "media_storage_used",
-	);
 	const licenseKeyDisplayRes = optionsRes.data.find(
 		(o) => getLicenseOptionBaseName(o.name) === "license_key_display",
 	);
@@ -72,7 +79,7 @@ const getSettings: ServiceFn<
 		error: undefined,
 		data: settingsFormatter.formatSingle({
 			settings: {
-				mediaStorageUsed: mediaStorageUsedRes?.valueInt || 0,
+				mediaStorageUsed: mediaStorageUsed.data.total,
 				processedImageCount: processedImageCountRes.data,
 				licenseKey: licenseKeyDisplayRes?.valueText ?? null,
 				mediaAdapterEnabled: mediaAdapter.enabled,

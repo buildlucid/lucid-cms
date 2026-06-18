@@ -54,9 +54,13 @@ export type LicenseOptionName =
 	| "license_ai_enabled";
 
 export type TenantScopedLicenseOptionName = `${LicenseOptionName}:t:${string}`;
+export type MediaStorageOptionName = "media_storage_used";
+export type TenantScopedMediaStorageOptionName =
+	`${MediaStorageOptionName}:t:${string}`;
 
 export type OptionsName =
-	| "media_storage_used"
+	| MediaStorageOptionName
+	| TenantScopedMediaStorageOptionName
 	| "system_alert_email"
 	| LicenseOptionName
 	| TenantScopedLicenseOptionName;

@@ -1,11 +1,12 @@
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { optionServices } from "../../index.js";
+import getStorageUsage from "../../media/get-storage-usage.js";
 
 const checkCanStore: ServiceFn<
 	[
 		{
 			size: number;
+			tenantKey?: string | null;
 		},
 	],
 	{
@@ -24,12 +25,12 @@ const checkCanStore: ServiceFn<
 		};
 	}
 
-	const storageUsed = await optionServices.getSingle(context, {
-		name: "media_storage_used",
+	const storageUsageRes = await getStorageUsage(context, {
+		tenantKey: data.tenantKey ?? null,
 	});
-	if (storageUsed.error) return storageUsed;
+	if (storageUsageRes.error) return storageUsageRes;
 
-	const proposedSize = (storageUsed.data.valueInt || 0) + data.size;
+	const proposedSize = storageUsageRes.data.total + data.size;
 	if (storageLimit !== false && proposedSize > storageLimit) {
 		return {
 			error: {

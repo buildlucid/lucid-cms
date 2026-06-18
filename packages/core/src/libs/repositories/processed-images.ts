@@ -45,6 +45,78 @@ export default class ProcessedImagesRepository extends StaticRepository<"lucid_p
 		};
 	}
 
+	async sumFileSizeByMediaTenant(props: { tenantKey: string | null }) {
+		let query = this.db
+			.selectFrom("lucid_processed_images")
+			.leftJoin(
+				"lucid_media",
+				"lucid_media.key",
+				"lucid_processed_images.media_key",
+			)
+			.select(
+				sql<
+					string | number
+				>`COALESCE(SUM(lucid_processed_images.file_size), 0)`.as("total"),
+			);
+
+		query =
+			props.tenantKey === null
+				? query.where("lucid_media.tenant_key", "is", null)
+				: query.where("lucid_media.tenant_key", "=", props.tenantKey);
+
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as Promise<
+					{ total: string | number | null } | undefined
+				>,
+			{
+				method: "sumFileSizeByMediaTenant",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: Number(exec.response.data?.total ?? 0),
+		};
+	}
+
+	async sumFileSizeGroupedByMediaTenant() {
+		const query = this.db
+			.selectFrom("lucid_processed_images")
+			.leftJoin(
+				"lucid_media",
+				"lucid_media.key",
+				"lucid_processed_images.media_key",
+			)
+			.select([
+				"lucid_media.tenant_key as tenant_key",
+				sql<
+					string | number
+				>`COALESCE(SUM(lucid_processed_images.file_size), 0)`.as("total"),
+			])
+			.groupBy("lucid_media.tenant_key");
+
+		const exec = await this.executeQuery(
+			() =>
+				query.execute() as Promise<
+					{ tenant_key: string | null; total: string | number | null }[]
+				>,
+			{
+				method: "sumFileSizeGroupedByMediaTenant",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: exec.response.data.map((row) => ({
+				tenant_key: row.tenant_key,
+				total: Number(row.total ?? 0),
+			})),
+		};
+	}
+
 	async selectMultipleByMediaTenant(props: { tenantKey: string }) {
 		const query = this.db
 			.selectFrom("lucid_processed_images")
@@ -74,5 +146,39 @@ export default class ProcessedImagesRepository extends StaticRepository<"lucid_p
 			mode: "multiple",
 			select: ["key", "file_size"],
 		});
+	}
+
+	async selectMultipleWithMediaTenant(props?: { tenantKey?: string | null }) {
+		const query = this.db
+			.selectFrom("lucid_processed_images")
+			.leftJoin(
+				"lucid_media",
+				"lucid_media.key",
+				"lucid_processed_images.media_key",
+			)
+			.select([
+				"lucid_processed_images.key",
+				"lucid_processed_images.media_key",
+				"lucid_processed_images.file_size",
+				"lucid_media.tenant_key as tenant_key",
+			])
+			.$call((qb) =>
+				props?.tenantKey
+					? queryBuilder.tenantScope(qb, {
+							tenantKey: props.tenantKey,
+							column: "lucid_media.tenant_key",
+						})
+					: qb,
+			);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectMultipleWithMediaTenant",
+		});
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: exec.response.data,
+		};
 	}
 }

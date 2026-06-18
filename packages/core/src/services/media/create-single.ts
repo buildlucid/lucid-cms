@@ -111,6 +111,7 @@ const createSingle: ServiceFn<
 			key: mediaKey,
 			size: syncMediaRes.data.size,
 			processedSize: 0,
+			tenantKey: mediaTenantKey,
 		});
 		return {
 			error: {

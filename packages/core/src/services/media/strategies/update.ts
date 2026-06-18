@@ -7,7 +7,8 @@ import {
 	resolveMediaKeyTenant,
 } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices, optionServices } from "../../index.js";
+import { mediaServices } from "../../index.js";
+import adjustStorageUsage from "../adjust-storage-usage.js";
 import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
 const update: ServiceFn<
@@ -17,6 +18,7 @@ const update: ServiceFn<
 			previousEtag?: string | null;
 			previousSize: number;
 			previousKey: string;
+			tenantKey: string | null;
 			previousType: MediaType;
 			updatedKey: string;
 			targetKey: string;
@@ -56,8 +58,8 @@ const update: ServiceFn<
 	const revertStorageDelta = async (delta: number) => {
 		if (delta === 0) return;
 
-		await optionServices.adjustInt(context, {
-			name: "media_storage_used",
+		await adjustStorageUsage(context, {
+			tenantKey: data.tenantKey,
 			delta: delta * -1,
 			min: 0,
 		});
@@ -102,8 +104,8 @@ const update: ServiceFn<
 
 	const delta = mediaMetaRes.data.size - data.previousSize;
 	const storageLimit = context.config.media.limits.storage;
-	const storageRes = await optionServices.adjustInt(context, {
-		name: "media_storage_used",
+	const storageRes = await adjustStorageUsage(context, {
+		tenantKey: data.tenantKey,
 		delta: delta,
 		max: storageLimit === false ? undefined : storageLimit,
 		min: 0,

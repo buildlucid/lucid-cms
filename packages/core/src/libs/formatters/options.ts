@@ -10,7 +10,7 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: { option: Select<LucidOptions> }): Option => {
 	return {
-		name: props.option.name,
+		name: props.option.name as Option["name"],
 		valueText: props.option.value_text,
 		valueInt: props.option.value_int,
 		valueBool: formatter.formatBoolean(props.option.value_bool),

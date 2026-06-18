@@ -66,6 +66,9 @@ describe("media sync strategy", () => {
 
 		const response = await syncMedia(
 			{
+				request: {
+					tenantKey: "marketing",
+				},
 				config: {
 					tenants: [tenant],
 					media: {
@@ -98,6 +101,13 @@ describe("media sync strategy", () => {
 				tenant,
 			},
 		);
+		expect(mocks.adjustInt).toHaveBeenCalledWith(expect.anything(), {
+			name: "media_storage_used:t:marketing",
+			delta: 42,
+			max: undefined,
+			min: 0,
+			ensure: true,
+		});
 	});
 
 	it("rejects detected content that does not match the declared media type", async () => {

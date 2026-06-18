@@ -168,6 +168,7 @@ const updateSingle: ServiceFn<
 		const updateRes = await mediaServices.strategies.update(context, {
 			previousSize: mediaRes.data.file_size,
 			previousKey: mediaRes.data.key,
+			tenantKey: mediaRes.data.tenant_key,
 			previousType: mediaRes.data.type as MediaType,
 			previousEtag: mediaRes.data.e_tag,
 			updatedKey: data.key,

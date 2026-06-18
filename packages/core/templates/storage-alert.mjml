@@ -45,6 +45,11 @@
         <mj-text padding-bottom="8px">
           Limit: {{storageLimit}}
         </mj-text>
+        <mj-raw>{{#tenantScope}}</mj-raw>
+        <mj-text padding-bottom="8px">
+          Tenant: {{tenantScope}}
+        </mj-text>
+        <mj-raw>{{/tenantScope}}</mj-raw>
         <mj-text padding-bottom="24px">
           Remaining: {{storageRemaining}}
         </mj-text>
