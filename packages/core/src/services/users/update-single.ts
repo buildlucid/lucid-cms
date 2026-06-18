@@ -9,7 +9,6 @@ import {
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import {
 	formatEmailSubject,
-	getEmailLogoUrl,
 	multiTenancyEnabled,
 } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
@@ -307,7 +306,6 @@ const updateSingle: ServiceFn<
 				),
 			data: {
 				firstName: data.firstName || userRes.data.first_name,
-				logoUrl: getEmailLogoUrl(context),
 			},
 			tenantKeys: emailTenantKeys,
 		});

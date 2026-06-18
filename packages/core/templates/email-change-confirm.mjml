@@ -21,7 +21,7 @@
     <mj-section padding="20px 0"></mj-section>
     <mj-section background-color="#0F0F0F" border-radius="12px" padding="40px 30px">
       <mj-column width="100%">
-        <mj-image src="{{logoUrl}}" alt="Lucid CMS" width="99px" align="center" padding-bottom="24px" />
+        <mj-image src="{{context.host}}{{context.brand.logoPath}}" alt="Lucid CMS" width="99px" align="center" padding-bottom="24px" />
         <mj-text color="#F1F1F1" font-size="24px" font-weight="600" align="center" padding-bottom="8px">
           Confirm your new email address
         </mj-text>

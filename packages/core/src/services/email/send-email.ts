@@ -1,3 +1,4 @@
+import constants from "../../constants/constants.js";
 import { normalizeEmailAttachments } from "../../libs/email/attachments.js";
 import getEmailAdapter from "../../libs/email/get-adapter.js";
 import {
@@ -85,6 +86,7 @@ const sendEmail: ServiceFn<
 		context: {
 			brand: {
 				name: brandName ?? "",
+				logoPath: constants.email.assets.logo,
 			},
 			host: getBaseUrl(context),
 		},

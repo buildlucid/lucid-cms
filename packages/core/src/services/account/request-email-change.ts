@@ -7,10 +7,7 @@ import {
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
-import {
-	formatEmailSubject,
-	getEmailLogoUrl,
-} from "../../utils/helpers/index.js";
+import { formatEmailSubject } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -179,7 +176,6 @@ const requestEmailChange: ServiceFn<
 		lastName: data.lastName,
 		oldEmail: data.oldEmail,
 		newEmail: data.newEmail,
-		logoUrl: getEmailLogoUrl(context),
 	};
 
 	const confirmEmailRes = await emailServices.sendEmail(context, {

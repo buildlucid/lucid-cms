@@ -21,6 +21,7 @@ export type EmailHeaders = Record<string, string>;
 export type EmailContextData = {
 	brand: {
 		name: string;
+		logoPath: string;
 	};
 	host: string;
 };

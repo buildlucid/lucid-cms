@@ -4,7 +4,6 @@ import {
 	AlertsRepository,
 } from "../../libs/repositories/index.js";
 import type { ErrorCopy } from "../../types/errors.js";
-import { getEmailLogoUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendEmail from "../email/send-email.js";
 
@@ -117,7 +116,6 @@ const notifyPublishOperationUsers: ServiceFn<
 			subject: title,
 			template: constants.email.templates.publishRequest.key,
 			data: {
-				logoUrl: getEmailLogoUrl(context),
 				title,
 				message,
 				actionUrl,

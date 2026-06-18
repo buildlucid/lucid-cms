@@ -8,10 +8,7 @@ import {
 	UserTenantsRepository,
 } from "../../libs/repositories/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
-import {
-	formatEmailSubject,
-	getEmailLogoUrl,
-} from "../../utils/helpers/index.js";
+import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userServices, userTokenServices } from "../index.js";
@@ -174,7 +171,6 @@ const inviteSingle: ServiceFn<
 			lastName: data.lastName,
 			email: email,
 			inviteLink: `${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
-			logoUrl: getEmailLogoUrl(context),
 		},
 		storage: constants.email.templates.userInvite.storage,
 		tenantKeys,

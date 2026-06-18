@@ -8,7 +8,6 @@ import {
 import {
 	formatEmailSubject,
 	generateSecret,
-	getEmailLogoUrl,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
@@ -183,7 +182,6 @@ const resetPassword: ServiceFn<
 		data: {
 			firstName: updatedUserRes.data.first_name,
 			lastName: updatedUserRes.data.last_name,
-			logoUrl: getEmailLogoUrl(context),
 		},
 	});
 	if (sendEmail.error) return sendEmail;

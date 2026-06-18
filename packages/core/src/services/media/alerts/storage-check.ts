@@ -4,7 +4,7 @@ import {
 	AlertsRepository,
 	OptionsRepository,
 } from "../../../libs/repositories/index.js";
-import { formatBytes, getEmailLogoUrl } from "../../../utils/helpers/index.js";
+import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import sendEmail from "../../email/send-email.js";
 import getStorageUsage from "../get-storage-usage.js";
@@ -128,7 +128,6 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 				storageRemaining: formatBytes(metadata.storageRemaining),
 				repeat: false,
 				title,
-				logoUrl: getEmailLogoUrl(context),
 			},
 			storage: constants.email.templates.storageAlert.storage ?? undefined,
 		});

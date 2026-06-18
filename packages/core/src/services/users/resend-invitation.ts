@@ -8,7 +8,6 @@ import {
 } from "../../libs/repositories/index.js";
 import {
 	formatEmailSubject,
-	getEmailLogoUrl,
 	multiTenancyEnabled,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -120,7 +119,6 @@ const resendInvitation: ServiceFn<
 			lastName: userRes.data.last_name,
 			email: userRes.data.email,
 			inviteLink: `${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
-			logoUrl: getEmailLogoUrl(context),
 		},
 		storage: constants.email.templates.userInvite.storage,
 		tenantKeys,
