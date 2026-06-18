@@ -175,17 +175,15 @@ const resetPassword: ServiceFn<
 		template: constants.email.templates.passwordResetSuccess.key,
 		type: "internal",
 		to: updatedUserRes.data.email,
-		subject: formatEmailSubject(
-			context.translate("server:core.auth.password.reset.success.subject"),
-			context.config.brand?.name,
-		),
+		subject: (emailData) =>
+			formatEmailSubject(
+				context.translate("server:core.auth.password.reset.success.subject"),
+				emailData.context.brand.name,
+			),
 		data: {
 			firstName: updatedUserRes.data.first_name,
 			lastName: updatedUserRes.data.last_name,
 			logoUrl: getEmailLogoUrl(context),
-			brand: {
-				name: context.config.brand?.name,
-			},
 		},
 	});
 	if (sendEmail.error) return sendEmail;

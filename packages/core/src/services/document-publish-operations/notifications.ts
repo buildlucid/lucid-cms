@@ -4,7 +4,7 @@ import {
 	AlertsRepository,
 } from "../../libs/repositories/index.js";
 import type { ErrorCopy } from "../../types/errors.js";
-import { getBaseUrl, getEmailLogoUrl } from "../../utils/helpers/index.js";
+import { getEmailLogoUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import sendEmail from "../email/send-email.js";
 
@@ -110,14 +110,13 @@ const notifyPublishOperationUsers: ServiceFn<
 		recipient.email ? [recipient.email] : [],
 	);
 	if (emailRecipients.length > 0) {
-		const actionUrl = `${getBaseUrl(context)}/lucid/collections/${data.collectionKey}/${data.documentId}/publish-operations/${data.operationId}`;
+		const actionUrl = `/lucid/collections/${data.collectionKey}/${data.documentId}/publish-operations/${data.operationId}`;
 		const emailRes = await sendEmail(context, {
 			type: "internal",
 			to: emailRecipients,
 			subject: title,
 			template: constants.email.templates.publishRequest.key,
 			data: {
-				brand: context.config.brand,
 				logoUrl: getEmailLogoUrl(context),
 				title,
 				message,

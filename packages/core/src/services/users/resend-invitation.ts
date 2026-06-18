@@ -8,7 +8,6 @@ import {
 } from "../../libs/repositories/index.js";
 import {
 	formatEmailSubject,
-	getBaseUrl,
 	getEmailLogoUrl,
 	multiTenancyEnabled,
 } from "../../utils/helpers/index.js";
@@ -107,25 +106,21 @@ const resendInvitation: ServiceFn<
 	});
 	if (userTokenRes.error) return userTokenRes;
 
-	const baseUrl = getBaseUrl(context);
-
 	const sendEmailRes = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: userRes.data.email,
-		subject: formatEmailSubject(
-			context.translate("server:core.email.invitations.email.subject"),
-			context.config.brand?.name,
-		),
+		subject: (emailData) =>
+			formatEmailSubject(
+				context.translate("server:core.email.invitations.email.subject"),
+				emailData.context.brand.name,
+			),
 		template: constants.email.templates.userInvite.key,
 		data: {
 			firstName: userRes.data.first_name,
 			lastName: userRes.data.last_name,
 			email: userRes.data.email,
-			inviteLink: `${baseUrl}${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
+			inviteLink: `${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
 			logoUrl: getEmailLogoUrl(context),
-			brand: {
-				name: context.config.brand?.name,
-			},
 		},
 		storage: constants.email.templates.userInvite.storage,
 		tenantKeys,

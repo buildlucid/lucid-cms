@@ -300,16 +300,14 @@ const updateSingle: ServiceFn<
 			template: constants.email.templates.emailChanged.key,
 			type: "internal",
 			to: auditLogsRes.data.emailChange.newValue,
-			subject: formatEmailSubject(
-				context.translate("server:core.email.update.success.subject"),
-				context.config.brand?.name,
-			),
+			subject: (emailData) =>
+				formatEmailSubject(
+					context.translate("server:core.email.update.success.subject"),
+					emailData.context.brand.name,
+				),
 			data: {
 				firstName: data.firstName || userRes.data.first_name,
 				logoUrl: getEmailLogoUrl(context),
-				brand: {
-					name: context.config.brand?.name,
-				},
 			},
 			tenantKeys: emailTenantKeys,
 		});

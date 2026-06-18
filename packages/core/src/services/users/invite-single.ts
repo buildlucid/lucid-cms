@@ -10,7 +10,6 @@ import {
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import {
 	formatEmailSubject,
-	getBaseUrl,
 	getEmailLogoUrl,
 } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
@@ -161,25 +160,21 @@ const inviteSingle: ServiceFn<
 	});
 	if (userTokenRes.error) return userTokenRes;
 
-	const baseUrl = getBaseUrl(context);
-
 	const sendEmailRes = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: email,
-		subject: formatEmailSubject(
-			context.translate("server:core.email.invitations.email.subject"),
-			context.config.brand?.name,
-		),
+		subject: (emailData) =>
+			formatEmailSubject(
+				context.translate("server:core.email.invitations.email.subject"),
+				emailData.context.brand.name,
+			),
 		template: constants.email.templates.userInvite.key,
 		data: {
 			firstName: data.firstName,
 			lastName: data.lastName,
 			email: email,
-			inviteLink: `${baseUrl}${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
+			inviteLink: `${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
 			logoUrl: getEmailLogoUrl(context),
-			brand: {
-				name: context.config.brand?.name,
-			},
 		},
 		storage: constants.email.templates.userInvite.storage,
 		tenantKeys,

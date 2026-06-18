@@ -5,7 +5,6 @@ import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ErrorCopy } from "../../types/errors.js";
 import {
 	formatEmailSubject,
-	getBaseUrl,
 	getEmailLogoUrl,
 } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
@@ -69,25 +68,21 @@ const sendResetPassword: ServiceFn<
 	});
 	if (userToken.error) return userToken;
 
-	const baseUrl = getBaseUrl(context);
-
 	const sendEmail = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: userExistsRes.data.email,
-		subject: formatEmailSubject(
-			context.translate("server:core.email.password.reset.email.subject"),
-			context.config.brand?.name,
-		),
+		subject: (emailData) =>
+			formatEmailSubject(
+				context.translate("server:core.email.password.reset.email.subject"),
+				emailData.context.brand.name,
+			),
 		template: constants.email.templates.resetPassword.key,
 		data: {
 			firstName: userExistsRes.data.first_name,
 			lastName: userExistsRes.data.last_name,
 			email: userExistsRes.data.email,
-			resetLink: `${baseUrl}${constants.email.locations.resetPassword}?token=${userToken.data.token}`,
+			resetLink: `${constants.email.locations.resetPassword}?token=${userToken.data.token}`,
 			logoUrl: getEmailLogoUrl(context),
-			brand: {
-				name: context.config.brand?.name,
-			},
 		},
 		storage: constants.email.templates.resetPassword.storage,
 	});

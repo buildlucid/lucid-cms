@@ -25,16 +25,16 @@
         <mj-text color="#F1F1F1" font-size="24px" font-weight="600" align="center" padding-bottom="8px">
           Email address changed
         </mj-text>
-        <mj-raw>{{#brand.name}}</mj-raw>
+        <mj-raw>{{#context.brand.name}}</mj-raw>
         <mj-text color="#a1a1a1" font-size="16px" align="center" padding-bottom="32px">
-          for {{brand.name}}'s Lucid CMS
+          for {{context.brand.name}}'s Lucid CMS
         </mj-text>
-        <mj-raw>{{/brand.name}}</mj-raw>
-        <mj-raw>{{^brand.name}}</mj-raw>
+        <mj-raw>{{/context.brand.name}}</mj-raw>
+        <mj-raw>{{^context.brand.name}}</mj-raw>
         <mj-text color="#a1a1a1" font-size="16px" align="center" padding-bottom="32px">
           for Lucid CMS
         </mj-text>
-        <mj-raw>{{/brand.name}}</mj-raw>
+        <mj-raw>{{/context.brand.name}}</mj-raw>
         <mj-divider border-color="rgba(255, 255, 255, 0.1)" border-width="1px" padding="0 0 32px 0" />
         <mj-text padding-bottom="12px">
           Hi{{#firstName}} {{firstName}}{{/firstName}},

@@ -18,6 +18,19 @@ export type EmailType = z.infer<typeof emailTypeSchema>;
 export type EmailPriority = "low" | "normal" | "high";
 export type EmailHeaders = Record<string, string>;
 
+export type EmailContextData = {
+	brand: {
+		name: string;
+	};
+	host: string;
+};
+
+export type EmailTemplateData = Record<string, unknown> & {
+	context: EmailContextData;
+};
+
+export type EmailSubject = string | ((data: EmailTemplateData) => string);
+
 /**
  * How the attachment should be presented:
  * - `attachment` appears as a normal file attachment.

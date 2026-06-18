@@ -1,6 +1,10 @@
 import constants from "../../constants/constants.js";
 import type { EmailStorageConfig } from "../../libs/email/storage/types.js";
-import type { EmailAttachment, EmailPriority } from "../../libs/email/types.js";
+import type {
+	EmailAttachment,
+	EmailPriority,
+	EmailSubject,
+} from "../../libs/email/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import type { Email } from "../../types/response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
@@ -11,7 +15,7 @@ const sendExternal: ServiceFn<
 	[
 		{
 			to: string;
-			subject: string;
+			subject: EmailSubject;
 			template: string;
 			cc?: string;
 			bcc?: string;

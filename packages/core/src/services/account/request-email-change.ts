@@ -9,7 +9,6 @@ import {
 import type { LucidAuth } from "../../types/hono.js";
 import {
 	formatEmailSubject,
-	getBaseUrl,
 	getEmailLogoUrl,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -175,29 +174,26 @@ const requestEmailChange: ServiceFn<
 	});
 	if (createRequestRes.error) return createRequestRes;
 
-	const baseUrl = getBaseUrl(context);
 	const commonData = {
 		firstName: data.firstName,
 		lastName: data.lastName,
 		oldEmail: data.oldEmail,
 		newEmail: data.newEmail,
 		logoUrl: getEmailLogoUrl(context),
-		brand: {
-			name: context.config.brand?.name,
-		},
 	};
 
 	const confirmEmailRes = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: data.newEmail,
-		subject: formatEmailSubject(
-			context.translate("server:core.email.change.confirm.subject"),
-			context.config.brand?.name,
-		),
+		subject: (emailData) =>
+			formatEmailSubject(
+				context.translate("server:core.email.change.confirm.subject"),
+				emailData.context.brand.name,
+			),
 		template: constants.email.templates.emailChangeConfirm.key,
 		data: {
 			...commonData,
-			confirmLink: `${baseUrl}${constants.email.locations.emailChangeConfirm}?token=${confirmTokenRes.data.token}`,
+			confirmLink: `${constants.email.locations.emailChangeConfirm}?token=${confirmTokenRes.data.token}`,
 		},
 		storage: constants.email.templates.emailChangeConfirm.storage,
 	});
@@ -206,14 +202,15 @@ const requestEmailChange: ServiceFn<
 	const revertEmailRes = await emailServices.sendEmail(context, {
 		type: "internal",
 		to: data.oldEmail,
-		subject: formatEmailSubject(
-			context.translate("server:core.email.change.revert.subject"),
-			context.config.brand?.name,
-		),
+		subject: (emailData) =>
+			formatEmailSubject(
+				context.translate("server:core.email.change.revert.subject"),
+				emailData.context.brand.name,
+			),
 		template: constants.email.templates.emailChangeRevert.key,
 		data: {
 			...commonData,
-			revertLink: `${baseUrl}${constants.email.locations.emailChangeRevert}?token=${revertTokenRes.data.token}`,
+			revertLink: `${constants.email.locations.emailChangeRevert}?token=${revertTokenRes.data.token}`,
 		},
 		storage: constants.email.templates.emailChangeRevert.storage,
 	});

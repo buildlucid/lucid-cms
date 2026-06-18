@@ -10,6 +10,7 @@ import type {
 	EmailAttachment,
 	EmailHeaders,
 	EmailPriority,
+	EmailSubject,
 } from "../../libs/email/types.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -20,15 +21,21 @@ import {
 	EmailTransactionsRepository,
 } from "../../libs/repositories/index.js";
 import type { Email } from "../../types/response.js";
-import { getEmailFrom, getTenantConfig } from "../../utils/helpers/index.js";
+import {
+	getBaseUrl,
+	getEmailFrom,
+	getTenantConfig,
+	resolveEmailBrandName,
+} from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import mergeEmailContextData from "./helpers/merge-email-context-data.js";
 
 const sendEmail: ServiceFn<
 	[
 		{
 			type: "internal" | "external";
 			to: string | string[];
-			subject: string;
+			subject: EmailSubject;
 			template: string;
 			cc?: string;
 			bcc?: string;
@@ -68,6 +75,23 @@ const sendEmail: ServiceFn<
 	const fromAddress = data.from?.email ?? emailFrom.email;
 	const fromName = data.from?.name ?? emailFrom.name;
 	const toAddress = Array.isArray(data.to) ? data.to.join(",") : data.to;
+	const brandName = resolveEmailBrandName({
+		config: context.config,
+		translate: context.translate,
+		tenantKey: context.request.tenantKey,
+	});
+	const emailData = mergeEmailContextData({
+		data: data.data,
+		context: {
+			brand: {
+				name: brandName ?? "",
+			},
+			host: getBaseUrl(context),
+		},
+	});
+	const subject =
+		typeof data.subject === "function" ? data.subject(emailData) : data.subject;
+
 	const tenantKeys = Array.from(
 		new Set(
 			data.tenantKeys ??
@@ -98,7 +122,7 @@ const sendEmail: ServiceFn<
 	if (storageStrategyRes.error) return storageStrategyRes;
 
 	const storedDataRes = createStoredEmailData({
-		data: data.data,
+		data: emailData,
 		storage: storageStrategyRes.data,
 		encryptionKey: context.config.secrets.encryption,
 	});
@@ -110,7 +134,7 @@ const sendEmail: ServiceFn<
 				from_address: fromAddress,
 				from_name: fromName,
 				to_address: toAddress,
-				subject: data.subject,
+				subject,
 				template: data.template,
 				priority: data.priority ?? "normal",
 				headers: data.headers ?? null,

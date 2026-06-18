@@ -25,16 +25,16 @@
         <mj-text color="#F1F1F1" font-size="24px" font-weight="600" align="center" padding-bottom="8px">
           You've been invited
         </mj-text>
-        <mj-raw>{{#brand.name}}</mj-raw>
+        <mj-raw>{{#context.brand.name}}</mj-raw>
         <mj-text color="#a1a1a1" font-size="16px" align="center" padding-bottom="32px">
-          to join {{brand.name}}'s Lucid CMS
+          to join {{context.brand.name}}'s Lucid CMS
         </mj-text>
-        <mj-raw>{{/brand.name}}</mj-raw>
-        <mj-raw>{{^brand.name}}</mj-raw>
+        <mj-raw>{{/context.brand.name}}</mj-raw>
+        <mj-raw>{{^context.brand.name}}</mj-raw>
         <mj-text color="#a1a1a1" font-size="16px" align="center" padding-bottom="32px">
           to join Lucid CMS
         </mj-text>
-        <mj-raw>{{/brand.name}}</mj-raw>
+        <mj-raw>{{/context.brand.name}}</mj-raw>
         <mj-divider border-color="rgba(255, 255, 255, 0.1)" border-width="1px" padding="0 0 32px 0" />
         <mj-text padding-bottom="12px">
           Hi{{#firstName}} {{firstName}}{{/firstName}},
@@ -42,7 +42,7 @@
         <mj-text padding-bottom="32px">
           An account has been created for you. Click the button below to accept your invitation and get started.
         </mj-text>
-        <mj-button href="{{inviteLink}}" background-color="#E5E5E5" color="#171717" font-size="14px" font-weight="500" border-radius="8px" padding="0 0 32px 0" inner-padding="12px 24px">
+        <mj-button href="{{context.host}}{{inviteLink}}" background-color="#E5E5E5" color="#171717" font-size="14px" font-weight="500" border-radius="8px" padding="0 0 32px 0" inner-padding="12px 24px">
           Accept invitation
         </mj-button>
         <mj-divider border-color="rgba(255, 255, 255, 0.1)" border-width="1px" padding="0 0 24px 0" />
