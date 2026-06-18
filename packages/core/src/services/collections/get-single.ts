@@ -88,6 +88,7 @@ const getSingle: ServiceFn<
 			error: undefined,
 			data: collectionsFormatter.formatSingle({
 				collection: collection,
+				allCollections: context.config.collections ?? [],
 				tenantKey: context.request.tenantKey,
 				queueSupportsScheduling: context.queue.support.scheduling,
 				adminTranslations,
@@ -112,6 +113,7 @@ const getSingle: ServiceFn<
 		error: undefined,
 		data: collectionsFormatter.formatSingle({
 			collection: collection,
+			allCollections: context.config.collections ?? [],
 			tenantKey: context.request.tenantKey,
 			queueSupportsScheduling: context.queue.support.scheduling,
 			adminTranslations,

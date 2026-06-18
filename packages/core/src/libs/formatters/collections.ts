@@ -16,6 +16,7 @@ import {
 
 const formatMultiple = (props: {
 	collections: CollectionBuilder[];
+	allCollections: CollectionBuilder[];
 	tenantKey?: string | null;
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
@@ -29,9 +30,15 @@ const formatMultiple = (props: {
 		collection_key: string;
 	}>;
 }) => {
+	const documentTargetCollectionKeys = getDocumentTargetCollectionKeys({
+		collections: props.allCollections,
+		tenantKey: props.tenantKey,
+	});
+
 	return props.collections.map((c) =>
 		formatSingle({
 			collection: c,
+			documentTargetCollectionKeys,
 			tenantKey: props.tenantKey,
 			queueSupportsScheduling: props.queueSupportsScheduling,
 			adminTranslations: props.adminTranslations,
@@ -43,6 +50,8 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: {
 	collection: CollectionBuilder;
+	allCollections?: CollectionBuilder[];
+	documentTargetCollectionKeys?: Set<string>;
 	tenantKey?: string | null;
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
@@ -60,6 +69,12 @@ const formatSingle = (props: {
 	const collectionData = props.collection.getData;
 	const key = props.collection.key;
 	const resolvedPermissions = resolveCollectionPermissions(props.collection);
+	const documentTargetCollectionKeys =
+		props.documentTargetCollectionKeys ??
+		getDocumentTargetCollectionKeys({
+			collections: props.allCollections ?? [props.collection],
+			tenantKey: props.tenantKey,
+		});
 
 	const formattedCollection: Collection = {
 		key: key,
@@ -111,42 +126,65 @@ const formatSingle = (props: {
 					?.filter((brick) =>
 						tenantAccessAllowed(brick.config.tenantKeys, props.tenantKey),
 					)
-					.map(formatBrick) ?? [])
+					.map((brick) =>
+						formatBrick({
+							brick,
+							documentTargetCollectionKeys,
+						}),
+					) ?? [])
 			: [],
 		builderBricks: props.include?.bricks
 			? (props.collection.config.bricks?.builder
 					?.filter((brick) =>
 						tenantAccessAllowed(brick.config.tenantKeys, props.tenantKey),
 					)
-					.map(formatBrick) ?? [])
+					.map((brick) =>
+						formatBrick({
+							brick,
+							documentTargetCollectionKeys,
+						}),
+					) ?? [])
 			: [],
 		fields: props.include?.fields
-			? formatFields(props.collection.fieldTree, props.collection.fields)
+			? formatFields(
+					props.collection.fieldTree,
+					props.collection.fields,
+					documentTargetCollectionKeys,
+				)
 			: [],
 	};
 
 	return hydrateAdminCopyDefaults(formattedCollection, props.adminTranslations);
 };
 
-const formatBrick = (
-	brick: BrickBuilder,
-): Collection["fixedBricks"][number] => ({
-	key: brick.key,
-	details: brick.config.details,
-	preview: brick.config.preview,
-	fields: formatFields(brick.fieldTree, brick.fields),
+const formatBrick = (props: {
+	brick: BrickBuilder;
+	documentTargetCollectionKeys: Set<string>;
+}): Collection["fixedBricks"][number] => ({
+	key: props.brick.key,
+	details: props.brick.config.details,
+	preview: props.brick.config.preview,
+	fields: formatFields(
+		props.brick.fieldTree,
+		props.brick.fields,
+		props.documentTargetCollectionKeys,
+	),
 });
 
 const formatFields = (
 	fields: CFConfig<FieldTypes>[],
 	instances: Map<string, CustomField<FieldTypes>>,
+	documentTargetCollectionKeys: Set<string>,
 ): Collection["fields"] => {
-	return fields.map((field) => formatField(field, instances));
+	return fields.map((field) =>
+		formatField(field, instances, documentTargetCollectionKeys),
+	);
 };
 
 const formatField = (
 	field: CFConfig<FieldTypes>,
 	instances: Map<string, CustomField<FieldTypes>>,
+	documentTargetCollectionKeys: Set<string>,
 ): Collection["fields"][number] => {
 	const nestedFields =
 		"fields" in field && Array.isArray(field.fields) ? field.fields : undefined;
@@ -169,11 +207,49 @@ const formatField = (
 		delete formattedField.ai;
 	}
 
+	if (formattedField.type === "document") {
+		const filteredCollection = (
+			Array.isArray(formattedField.collection)
+				? formattedField.collection
+				: [formattedField.collection]
+		).filter((collectionKey) =>
+			documentTargetCollectionKeys.has(collectionKey),
+		);
+
+		formattedField.collection = filteredCollection;
+		formattedField.config = {
+			...formattedField.config,
+			default: formattedField.config.default?.filter((defaultValue) =>
+				documentTargetCollectionKeys.has(defaultValue.collectionKey),
+			),
+		};
+	}
+
 	if (nestedFields) {
-		formattedField.fields = formatFields(nestedFields, instances);
+		formattedField.fields = formatFields(
+			nestedFields,
+			instances,
+			documentTargetCollectionKeys,
+		);
 	}
 
 	return formattedField;
+};
+
+const getDocumentTargetCollectionKeys = (props: {
+	collections: CollectionBuilder[];
+	tenantKey?: string | null;
+}) => {
+	return new Set(
+		props.collections
+			.filter((collection) =>
+				tenantAccessAllowed(
+					collection.getData.config.tenantKeys,
+					props.tenantKey,
+				),
+			)
+			.map((collection) => collection.key),
+	);
 };
 
 const getFieldAiConfig = (

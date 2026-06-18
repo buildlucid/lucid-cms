@@ -73,6 +73,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const pageBuilderState = usePageBuilderState();
 	const canOpenSelectModal = () =>
 		props.disabled !== true &&
+		props.collectionKeys.length > 0 &&
 		(props.multiple !== true ||
 			typeof props.maxItems !== "number" ||
 			(props.value?.length ?? 0) < props.maxItems);

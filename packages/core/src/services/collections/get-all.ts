@@ -62,6 +62,7 @@ const getAll: ServiceFn<
 			error: undefined,
 			data: collectionsFormatter.formatMultiple({
 				collections: collections,
+				allCollections: context.config.collections ?? [],
 				tenantKey: context.request.tenantKey,
 				queueSupportsScheduling: context.queue.support.scheduling,
 				adminTranslations,
@@ -79,6 +80,7 @@ const getAll: ServiceFn<
 		error: undefined,
 		data: collectionsFormatter.formatMultiple({
 			collections: collections,
+			allCollections: context.config.collections ?? [],
 			tenantKey: context.request.tenantKey,
 			queueSupportsScheduling: context.queue.support.scheduling,
 			adminTranslations,
