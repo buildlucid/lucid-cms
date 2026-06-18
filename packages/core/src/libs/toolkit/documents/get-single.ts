@@ -8,7 +8,12 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import { normalizeDocumentQuery, runToolkitService } from "../utils.js";
+import type { ToolkitTenantOptions } from "../types.js";
+import {
+	normalizeDocumentQuery,
+	runToolkitService,
+	withToolkitTenant,
+} from "../utils.js";
 import type { ToolkitDocumentStatus } from "./index.js";
 
 export type ToolkitDocumentsGetSingleQuery<
@@ -17,7 +22,7 @@ export type ToolkitDocumentsGetSingleQuery<
 
 export type ToolkitDocumentsGetSingleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = {
+> = ToolkitTenantOptions & {
 	collectionKey: TCollectionKey;
 	status?: ToolkitDocumentStatus<TCollectionKey>;
 	query?: ToolkitDocumentsGetSingleQuery<TCollectionKey>;
@@ -29,10 +34,11 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 ): ServiceResponse<CollectionDocument<TCollectionKey>> => {
 	const status = (input.status ??
 		"latest") as ToolkitDocumentStatus<TCollectionKey>;
+	const serviceContext = withToolkitTenant(context, input);
 
 	return runToolkitService(
 		() =>
-			documentServices.client.getSingle(context, {
+			documentServices.client.getSingle(serviceContext, {
 				collectionKey: input.collectionKey,
 				status,
 				query: normalizeDocumentQuery(input.query),

@@ -10,9 +10,10 @@ import type {
 	EmailPriority,
 	EmailSubject,
 } from "../../email/types.js";
-import { runToolkitService } from "../utils.js";
+import type { ToolkitTenantOptions } from "../types.js";
+import { runToolkitService, withToolkitTenant } from "../utils.js";
 
-export type ToolkitEmailSendInput = {
+export type ToolkitEmailSendInput = ToolkitTenantOptions & {
 	to: string;
 	subject: EmailSubject;
 	template: string;
@@ -37,16 +38,33 @@ export type ToolkitEmailSendResult = {
 const send = async (
 	context: ServiceContext,
 	input: ToolkitEmailSendInput,
-): ServiceResponse<ToolkitEmailSendResult> =>
-	runToolkitService(() => emailServices.sendExternal(context, input), {
-		name: {
-			key: "core.toolkit.email.send.error.name",
-			defaultMessage: "Email Toolkit Error",
+): ServiceResponse<ToolkitEmailSendResult> => {
+	return runToolkitService(
+		() =>
+			emailServices.sendExternal(withToolkitTenant(context, input), {
+				to: input.to,
+				subject: input.subject,
+				template: input.template,
+				cc: input.cc,
+				bcc: input.bcc,
+				replyTo: input.replyTo,
+				priority: input.priority,
+				attachments: input.attachments,
+				data: input.data,
+				storage: input.storage,
+				from: input.from,
+			}),
+		{
+			name: {
+				key: "core.toolkit.email.send.error.name",
+				defaultMessage: "Email Toolkit Error",
+			},
+			message: {
+				key: "core.toolkit.email.send.error.message",
+				defaultMessage: "Lucid toolkit could not send the email.",
+			},
 		},
-		message: {
-			key: "core.toolkit.email.send.error.message",
-			defaultMessage: "Lucid toolkit could not send the email.",
-		},
-	});
+	);
+};
 
 export default send;

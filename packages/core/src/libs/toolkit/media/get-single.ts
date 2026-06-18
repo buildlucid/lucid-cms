@@ -4,9 +4,10 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import { runToolkitService } from "../utils.js";
+import type { ToolkitTenantOptions } from "../types.js";
+import { runToolkitService, withToolkitTenant } from "../utils.js";
 
-export type ToolkitMediaGetSingleInput = {
+export type ToolkitMediaGetSingleInput = ToolkitTenantOptions & {
 	id: number;
 };
 
@@ -14,15 +15,21 @@ const getSingle = async (
 	context: ServiceContext,
 	input: ToolkitMediaGetSingleInput,
 ): ServiceResponse<Media> =>
-	runToolkitService(() => mediaServices.client.getSingle(context, input), {
-		name: {
-			key: "core.toolkit.media.get.single.error.name",
-			defaultMessage: "Media Toolkit Error",
+	runToolkitService(
+		() =>
+			mediaServices.client.getSingle(withToolkitTenant(context, input), {
+				id: input.id,
+			}),
+		{
+			name: {
+				key: "core.toolkit.media.get.single.error.name",
+				defaultMessage: "Media Toolkit Error",
+			},
+			message: {
+				key: "core.toolkit.media.get.single.error.message",
+				defaultMessage: "Lucid toolkit could not fetch a media item.",
+			},
 		},
-		message: {
-			key: "core.toolkit.media.get.single.error.message",
-			defaultMessage: "Lucid toolkit could not fetch a media item.",
-		},
-	});
+	);
 
 export default getSingle;

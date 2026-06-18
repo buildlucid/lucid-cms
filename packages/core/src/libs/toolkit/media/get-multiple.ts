@@ -5,7 +5,12 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import { normalizePaginatedQuery, runToolkitService } from "../utils.js";
+import type { ToolkitTenantOptions } from "../types.js";
+import {
+	normalizePaginatedQuery,
+	runToolkitService,
+	withToolkitTenant,
+} from "../utils.js";
 
 export type ToolkitMediaGetMultipleQuery = Omit<
 	ClientGetMultipleQueryParams,
@@ -15,7 +20,7 @@ export type ToolkitMediaGetMultipleQuery = Omit<
 	perPage?: number;
 };
 
-export type ToolkitMediaGetMultipleInput = {
+export type ToolkitMediaGetMultipleInput = ToolkitTenantOptions & {
 	query?: ToolkitMediaGetMultipleQuery;
 };
 
@@ -30,7 +35,7 @@ const getMultiple = async (
 ): ServiceResponse<ToolkitMediaGetMultipleResult> =>
 	runToolkitService(
 		() =>
-			mediaServices.client.getMultiple(context, {
+			mediaServices.client.getMultiple(withToolkitTenant(context, input), {
 				query: normalizePaginatedQuery(input.query),
 			}),
 		{

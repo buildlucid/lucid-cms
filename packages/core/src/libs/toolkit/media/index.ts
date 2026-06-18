@@ -14,13 +14,13 @@ import type { ToolkitMediaProcessInput } from "./process-media.js";
 import processMedia from "./process-media.js";
 
 export type ToolkitMedia = {
-	/** Returns multiple media items and a total count. */
+	/** Returns multiple media items and a total count. Accepts tenantKey for per-call tenant scope. */
 	getMultiple: (
 		input?: ToolkitMediaGetMultipleInput,
 	) => ServiceResponse<ToolkitMediaGetMultipleResult>;
-	/** Returns a single media item by ID. */
+	/** Returns a single media item by ID. Accepts tenantKey for per-call tenant scope. */
 	getSingle: (input: ToolkitMediaGetSingleInput) => ServiceResponse<Media>;
-	/** Returns a media URL, with optional processing such as resizing or format changes. */
+	/** Returns a media URL, with optional processing such as resizing or format changes. Accepts tenantKey for per-call tenant scope. */
 	processMedia: (input: ToolkitMediaProcessInput) => ServiceResponse<MediaUrl>;
 };
 

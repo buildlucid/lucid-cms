@@ -32,6 +32,7 @@ export type ToolkitDocuments = {
 	 * ```ts
 	 * await toolkit.documents.getMultiple({
 	 *   collectionKey: "page",
+	 *   tenantKey: "marketing",
 	 *   status: "published",
 	 *   query: {
 	 *     perPage: 50,
@@ -51,6 +52,7 @@ export type ToolkitDocuments = {
 	 * ```ts
 	 * await toolkit.documents.getSingle({
 	 *   collectionKey: "page",
+	 *   tenantKey: "marketing",
 	 *   query: {
 	 *     filter: {
 	 *       _fullSlug: {

@@ -6,7 +6,7 @@ import type { ToolkitEmailSendInput, ToolkitEmailSendResult } from "./send.js";
 import send from "./send.js";
 
 export type ToolkitEmail = {
-	/** Queues an external email send. */
+	/** Queues an external email send. Accepts tenantKey for per-call tenant scope. */
 	send: (
 		input: ToolkitEmailSendInput,
 	) => ServiceResponse<ToolkitEmailSendResult>;

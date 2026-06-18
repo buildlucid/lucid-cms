@@ -35,6 +35,11 @@ export type CreateToolkitServiceContextOptions = {
 	};
 };
 
+export type ToolkitTenantOptions = {
+	/** Overrides the tenant scope for this toolkit call. null targets global content. */
+	tenantKey?: string | null;
+};
+
 export type Toolkit = {
 	/** Helpers for reading collection documents. */
 	documents: ToolkitDocuments;

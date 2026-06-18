@@ -5,8 +5,12 @@ import type {
 } from "../../types/query-params.js";
 import decodeError from "../../utils/errors/decode-error.js";
 import flattenDocumentFilters from "../../utils/helpers/flatten-document-filters.js";
-import type { ServiceResponse } from "../../utils/services/types.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
+import type { ToolkitTenantOptions } from "./types.js";
 
 type PaginatedQuery = {
 	page?: number;
@@ -77,6 +81,22 @@ export const normalizePaginatedDocumentQuery = <
 /** Clones optional query objects so toolkit services can pass a stable shape downstream. */
 export const normalizeQuery = <T extends object>(query?: T): T =>
 	({ ...(query ?? {}) }) as T;
+
+/** Creates a per-call toolkit context when a tenant override is supplied. */
+export const withToolkitTenant = (
+	context: ServiceContext,
+	options?: ToolkitTenantOptions,
+): ServiceContext => {
+	if (options?.tenantKey === undefined) return context;
+
+	return {
+		...context,
+		request: {
+			...context.request,
+			tenantKey: options.tenantKey,
+		},
+	};
+};
 
 /** Converts unexpected exceptions into standard Lucid service error values. */
 export const runToolkitService = async <T>(
