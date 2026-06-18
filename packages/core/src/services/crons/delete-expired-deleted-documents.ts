@@ -72,6 +72,7 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 						id: d.id,
 						collectionKey: d.collection_key,
 						userId: d.deleted_by ?? d.created_by,
+						tenantKey: d.tenant_key,
 					},
 					tenantKeys: [d.tenant_key],
 				})),

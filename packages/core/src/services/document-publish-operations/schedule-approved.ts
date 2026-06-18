@@ -108,6 +108,7 @@ const scheduleApproved: ServiceFn<
 			const queueRes = await context.queue.add(publishOperationExecuteEvent, {
 				payload: {
 					operationId: operationRes.data.id,
+					tenantKey: operationRes.data.tenant_key,
 				},
 				options: {
 					scheduledFor: scheduledAt,

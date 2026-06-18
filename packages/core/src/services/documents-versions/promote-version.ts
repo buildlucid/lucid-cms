@@ -34,6 +34,7 @@ const promoteVersion: ServiceFn<
 			/** If set to false, a revision will not be created even if the collection supports revisions. */
 			createRevision?: boolean;
 			requirePublishOperationForEnvironmentTarget?: boolean;
+			tenantKey?: string | null;
 		},
 	],
 	undefined
@@ -366,7 +367,10 @@ const promoteVersion: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNameRes.data,
-				tenantKey: context.request.tenantKey ?? null,
+				tenantKey:
+					data.tenantKey !== undefined
+						? data.tenantKey
+						: (context.request.tenantKey ?? null),
 			},
 			data: {
 				documentId: data.documentId,
