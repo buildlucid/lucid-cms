@@ -22,7 +22,9 @@ const updateMultipleTenants: ServiceFn<
 		};
 	}
 
-	const unknownTenant = data.tenantKeys.find(
+	const tenantKeys = Array.from(new Set(data.tenantKeys));
+
+	const unknownTenant = tenantKeys.find(
 		(key) => getTenantConfig(context.config, key) === undefined,
 	);
 	if (unknownTenant !== undefined) {
@@ -58,7 +60,7 @@ const updateMultipleTenants: ServiceFn<
 	});
 	if (deleteMultipleRes.error) return deleteMultipleRes;
 
-	if (data.tenantKeys.length === 0) {
+	if (tenantKeys.length === 0) {
 		return {
 			error: undefined,
 			data: undefined,
@@ -66,7 +68,7 @@ const updateMultipleTenants: ServiceFn<
 	}
 
 	const createMultipleRes = await UserTenants.createMultiple({
-		data: data.tenantKeys.map((key) => ({
+		data: tenantKeys.map((key) => ({
 			user_id: data.userId,
 			tenant_key: key,
 		})),

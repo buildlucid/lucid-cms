@@ -120,6 +120,14 @@ const UpdateUserPanel: Component<{
 			label: `${translateAdminCopy(tenant.name)} (${tenant.key})`,
 		}));
 	});
+	const defaultTenantOption = createMemo(() => {
+		const tenantKey =
+			tenantStore.get.tenant ??
+			tenantStore.get.tenants.find((tenant) => tenant.default)?.key ??
+			tenantStore.get.tenants[0]?.key;
+
+		return tenantOptions().find((tenant) => tenant.value === tenantKey);
+	});
 	const showTenantSelect = createMemo(() => {
 		return Boolean(
 			userStore.get.user?.superAdmin && tenantOptions().length > 0,
@@ -210,6 +218,18 @@ const UpdateUserPanel: Component<{
 		}
 	});
 
+	createEffect(() => {
+		if (!props.state.open) return;
+		if (!showTenantSelect()) return;
+		if (getIsSuperAdmin()) return;
+		if (getSelectedTenants().length > 0) return;
+
+		const defaultTenant = defaultTenantOption();
+		if (defaultTenant === undefined) return;
+
+		setSelectedTenants([defaultTenant]);
+	});
+
 	// ---------------------------------
 	// Render
 	return (
@@ -292,6 +312,7 @@ const UpdateUserPanel: Component<{
 									copy={{
 										label: T()("common.tenants"),
 									}}
+									required={!getIsSuperAdmin()}
 									options={tenantOptions()}
 									errors={getBodyError("tenantKeys", updateUser.errors)}
 								/>

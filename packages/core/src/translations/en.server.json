@@ -36,6 +36,7 @@
 	"core.validation.unique.message": "Please ensure that the value is unique and try again.",
 	"core.users.email.duplicate": "This email address is already in use.",
 	"core.users.username.duplicate": "This username is already in use.",
+	"core.users.tenants.required": "Select at least one tenant for standard users.",
 	"core.permissions.denied": "You do not have permission to perform this action.",
 	"core.database.connection.error": "An error occurred while connecting to the database.",
 	"core.auth.password.reset.request.accepted": "If an account exists with the email provided, a password reset link will be sent to the email address.",

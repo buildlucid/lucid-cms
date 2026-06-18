@@ -1,4 +1,10 @@
-import { type Component, createMemo, createSignal, Show } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Show,
+} from "solid-js";
 import InputGrid from "@/components/Containers/InputGrid";
 import { Checkbox, Input, SelectMultiple } from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
@@ -87,10 +93,32 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 			label: `${translateAdminCopy(tenant.name)} (${tenant.key})`,
 		}));
 	});
+	const defaultTenantOption = createMemo(() => {
+		const tenantKey =
+			tenantStore.get.tenant ??
+			tenantStore.get.tenants.find((tenant) => tenant.default)?.key ??
+			tenantStore.get.tenants[0]?.key;
+
+		return tenantOptions().find((tenant) => tenant.value === tenantKey);
+	});
 	const showTenantSelect = createMemo(() => {
 		return Boolean(
 			userStore.get.user?.superAdmin && tenantOptions().length > 0,
 		);
+	});
+
+	// ---------------------------------
+	// Effects
+	createEffect(() => {
+		if (!props.state.open) return;
+		if (!showTenantSelect()) return;
+		if (getIsSuperAdmin()) return;
+		if (getSelectedTenants().length > 0) return;
+
+		const defaultTenant = defaultTenantOption();
+		if (defaultTenant === undefined) return;
+
+		setSelectedTenants([defaultTenant]);
 	});
 
 	// ---------------------------------
@@ -224,6 +252,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 							copy={{
 								label: T()("common.tenants"),
 							}}
+							required={!getIsSuperAdmin()}
 							options={tenantOptions()}
 							errors={getBodyError("tenantKeys", createUser.errors)}
 						/>

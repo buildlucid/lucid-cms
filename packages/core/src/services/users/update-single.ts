@@ -1,10 +1,10 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
+import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
-	UserTenantsRepository,
 } from "../../libs/repositories/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
 import {
@@ -21,6 +21,7 @@ import {
 	userServices,
 } from "../index.js";
 import prepareUpdateSingleAuditLogs from "./helpers/prepare-update-single-audit-logs.js";
+import validateUserTenantMemberships from "./helpers/validate-user-tenant-memberships.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -87,6 +88,34 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (userRes.error) return userRes;
+
+	const currentSuperAdmin = formatter.formatBoolean(
+		userRes.data.super_admin ?? false,
+	);
+	const existingTenantKeys = multiTenancyEnabled(context.config)
+		? userRes.data.tenants.map((tenant) => tenant.tenant_key)
+		: [];
+	const targetSuperAdmin =
+		data.auth.superAdmin && data.superAdmin !== undefined
+			? data.superAdmin
+			: currentSuperAdmin;
+
+	const targetTenantKeys =
+		data.auth.superAdmin && data.tenantKeys !== undefined
+			? Array.from(new Set(data.tenantKeys))
+			: existingTenantKeys;
+
+	const tenantMembershipsError = validateUserTenantMemberships({
+		config: context.config,
+		tenantKeys: targetTenantKeys,
+		targetSuperAdmin,
+	});
+	if (tenantMembershipsError !== undefined) {
+		return {
+			error: tenantMembershipsError,
+			data: undefined,
+		};
+	}
 
 	const [emailExists, reservedEmail, usernameExists] = await Promise.all([
 		normalizedEmail !== undefined && normalizedEmail !== userRes.data.email
@@ -240,7 +269,10 @@ const updateSingle: ServiceFn<
 		userServices.updateMultipleTenants(context, {
 			userId: data.userId,
 			//* only super admins can manage tenant memberships
-			tenantKeys: data.auth.superAdmin ? data.tenantKeys : undefined,
+			tenantKeys:
+				data.auth.superAdmin && data.tenantKeys !== undefined
+					? targetTenantKeys
+					: undefined,
 		}),
 	]);
 	await invalidateAuthCache(context.kv);
@@ -259,31 +291,9 @@ const updateSingle: ServiceFn<
 	}
 
 	if (auditLogsRes.data.emailChange) {
-		let existingTenantKeys: string[] = [];
-		if (multiTenancyEnabled(context.config)) {
-			const UserTenants = new UserTenantsRepository(
-				context.db.client,
-				context.config.db,
-			);
-			const tenantKeysRes = await UserTenants.selectMultiple({
-				select: ["tenant_key"],
-				where: [
-					{
-						key: "user_id",
-						operator: "=",
-						value: data.userId,
-					},
-				],
-			});
-			if (tenantKeysRes.error) return tenantKeysRes;
-			existingTenantKeys = (tenantKeysRes.data ?? []).map(
-				(tenant) => tenant.tenant_key,
-			);
-		}
-
 		const emailTenantKeys =
 			data.auth.superAdmin && data.tenantKeys !== undefined
-				? Array.from(new Set(data.tenantKeys))
+				? targetTenantKeys
 				: existingTenantKeys;
 
 		const sendEmailRes = await emailServices.sendEmail(context, {

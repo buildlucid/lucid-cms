@@ -323,7 +323,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			{
 				where: QueryBuilderWhere<"lucid_users">;
 				tenantKey?: string | null;
-				includeTenants?: boolean;
 			}
 		>,
 	) {
@@ -458,20 +457,15 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						),
 				)
 				.as("profile_picture"),
+			this.dbAdapter
+				.jsonArrayFrom(
+					eb
+						.selectFrom("lucid_user_tenants")
+						.select(["lucid_user_tenants.tenant_key"])
+						.whereRef("lucid_user_tenants.user_id", "=", "lucid_users.id"),
+				)
+				.as("tenants"),
 		]);
-
-		query = query.$if(props.includeTenants === true, (qb) =>
-			qb.select((eb) => [
-				this.dbAdapter
-					.jsonArrayFrom(
-						eb
-							.selectFrom("lucid_user_tenants")
-							.select(["lucid_user_tenants.tenant_key"])
-							.whereRef("lucid_user_tenants.user_id", "=", "lucid_users.id"),
-					)
-					.as("tenants"),
-			]),
-		);
 
 		query = queryBuilder.select(query, props.where);
 		query = this.applyUserTenantScope(query, props.tenantKey);
@@ -500,7 +494,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"roles",
 				"auth_providers",
 				"profile_picture",
-				...(props.includeTenants === true ? ["tenants"] : []),
+				"tenants",
 			],
 		});
 	}

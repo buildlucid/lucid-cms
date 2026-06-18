@@ -351,7 +351,7 @@ export const controllerSchemas = {
 				.array(z.string())
 				.meta({
 					description:
-						"A list of tenant keys to give the user access to. Only super admins can set this, for other users the new user is added to the current tenant.",
+						"A list of tenant keys to give the user access to. Only super admins can set this, for other users the new user is added to the current tenant. Required for standard users when multi-tenancy is enabled.",
 					example: ["alpha"],
 				})
 				.optional(),
@@ -405,7 +405,7 @@ export const controllerSchemas = {
 				.array(z.string())
 				.meta({
 					description:
-						"A list of tenant keys to give the user access to. Replaces the user's existing tenant memberships. Only super admins can set this.",
+						"A list of tenant keys to give the user access to. Replaces the user's existing tenant memberships. Only super admins can set this. Required for standard users when multi-tenancy is enabled.",
 					example: ["alpha"],
 				})
 				.optional(),

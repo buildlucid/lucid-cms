@@ -4,7 +4,6 @@ import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	UsersRepository,
-	UserTenantsRepository,
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
 import {
@@ -66,25 +65,9 @@ const resendInvitation: ServiceFn<
 		};
 	}
 
-	let tenantKeys: string[] = [];
-	if (multiTenancyEnabled(context.config)) {
-		const UserTenants = new UserTenantsRepository(
-			context.db.client,
-			context.config.db,
-		);
-		const tenantKeysRes = await UserTenants.selectMultiple({
-			select: ["tenant_key"],
-			where: [
-				{
-					key: "user_id",
-					operator: "=",
-					value: userRes.data.id,
-				},
-			],
-		});
-		if (tenantKeysRes.error) return tenantKeysRes;
-		tenantKeys = (tenantKeysRes.data ?? []).map((tenant) => tenant.tenant_key);
-	}
+	const tenantKeys = multiTenancyEnabled(context.config)
+		? (userRes.data.tenants ?? []).map((tenant) => tenant.tenant_key)
+		: [];
 
 	const now = new Date().toISOString();
 	const revokeExistingRes = await UserTokens.updateMultiple({

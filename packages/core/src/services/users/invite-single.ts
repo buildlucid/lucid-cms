@@ -12,11 +12,11 @@ import {
 	formatEmailSubject,
 	getBaseUrl,
 	getEmailLogoUrl,
-	getTenantConfig,
 } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userServices, userTokenServices } from "../index.js";
+import validateUserTenantMemberships from "./helpers/validate-user-tenant-memberships.js";
 
 const inviteSingle: ServiceFn<
 	[
@@ -87,6 +87,30 @@ const inviteSingle: ServiceFn<
 		};
 	}
 
+	// Tenant memberships - only super admins decide them, other users add the new user to their current tenant
+	const targetSuperAdmin = data.authSuperAdmin && data.superAdmin === true;
+	const tenantKeys = Array.from(
+		new Set(
+			data.authSuperAdmin
+				? (data.tenantKeys ?? [])
+				: context.request.tenantKey
+					? [context.request.tenantKey]
+					: [],
+		),
+	);
+
+	const tenantMembershipsError = validateUserTenantMemberships({
+		config: context.config,
+		tenantKeys,
+		targetSuperAdmin,
+	});
+	if (tenantMembershipsError !== undefined) {
+		return {
+			error: tenantMembershipsError,
+			data: undefined,
+		};
+	}
+
 	const { encryptSecret } = generateSecret(context.config.secrets.encryption);
 
 	const newUserRes = await Users.createSingle({
@@ -95,7 +119,7 @@ const inviteSingle: ServiceFn<
 			username: data.username,
 			first_name: data.firstName,
 			last_name: data.lastName,
-			super_admin: data.authSuperAdmin ? data.superAdmin : false,
+			super_admin: targetSuperAdmin,
 			triggered_password_reset: false,
 			secret: encryptSecret,
 			invitation_accepted: false,
@@ -111,34 +135,7 @@ const inviteSingle: ServiceFn<
 	});
 	if (newUserRes.error) return newUserRes;
 
-	// Tenant memberships - only super admins decide them, other users add the new user to their current tenant
-	const tenantKeys = Array.from(
-		new Set(
-			data.authSuperAdmin
-				? (data.tenantKeys ?? [])
-				: context.request.tenantKey
-					? [context.request.tenantKey]
-					: [],
-		),
-	);
-
 	if (tenantKeys.length > 0) {
-		const unknownTenant = tenantKeys.find(
-			(key) => getTenantConfig(context.config, key) === undefined,
-		);
-		if (unknownTenant !== undefined) {
-			return {
-				error: {
-					type: "basic",
-					message: copy("server:core.tenants.unknown", {
-						data: { key: unknownTenant },
-					}),
-					status: 400,
-				},
-				data: undefined,
-			};
-		}
-
 		const UserTenants = new UserTenantsRepository(
 			context.db.client,
 			context.config.db,

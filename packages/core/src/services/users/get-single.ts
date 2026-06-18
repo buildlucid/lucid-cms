@@ -4,7 +4,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { User } from "../../types/response.js";
-import { getBaseUrl, multiTenancyEnabled } from "../../utils/helpers/index.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -36,7 +36,6 @@ const getSingle: ServiceFn<
 	}
 
 	const userRes = await Users.selectSinglePreset({
-		includeTenants: multiTenancyEnabled(context.config),
 		tenantKey: context.request.tenantKey,
 		where: userQueryWhere,
 		validation: {
