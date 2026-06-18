@@ -40,6 +40,7 @@ const getAssignees: ServiceFn<
 	const Users = new UsersRepository(context.db.client, context.config.db);
 	const usersRes = await Users.selectMultipleWithPermission({
 		permission,
+		tenantKey: context.request.tenantKey,
 	});
 	if (usersRes.error) return usersRes;
 

@@ -96,6 +96,7 @@ const getReviewers: ServiceFn<
 	const Users = new UsersRepository(context.db.client, context.config.db);
 	const reviewersRes = await Users.selectMultiplePublishReviewers({
 		permission,
+		tenantKey: context.request.tenantKey,
 	});
 	if (reviewersRes.error) return reviewersRes;
 
