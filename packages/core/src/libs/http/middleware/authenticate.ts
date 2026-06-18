@@ -33,9 +33,10 @@ type CachedAuthState = Omit<LucidAuth, "exp" | "iat" | "nonce">;
 const getCachedAuthState = async (
 	c: LucidHonoContext,
 	token: LucidAccessToken,
+	tenantKey?: string | null,
 ) => {
 	const namespaceToken = await getAuthCacheNamespaceToken(c.get("kv"));
-	const cacheKey = cacheKeys.auth.user(token.id, namespaceToken);
+	const cacheKey = cacheKeys.auth.user(token.id, namespaceToken, tenantKey);
 
 	return {
 		cacheKey,
@@ -50,6 +51,7 @@ const getCachedAuthState = async (
 const fetchAuthState = async (
 	c: LucidHonoContext,
 	token: LucidAccessToken,
+	tenantKey?: string | null,
 ): Promise<CachedAuthState> => {
 	const config = c.get("config");
 	const Users = new UsersRepository(config.db.client, config.db);
@@ -68,6 +70,7 @@ const fetchAuthState = async (
 				value: config.db.getDefault("boolean", "false"),
 			},
 		],
+		tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -106,9 +109,10 @@ const fetchAuthState = async (
 const resolveAuthState = async (
 	c: LucidHonoContext,
 	token: LucidAccessToken,
+	tenantKey?: string | null,
 ): Promise<LucidAuth> => {
-	const cached = await getCachedAuthState(c, token);
-	const authState = cached.data ?? (await fetchAuthState(c, token));
+	const cached = await getCachedAuthState(c, token, tenantKey);
+	const authState = cached.data ?? (await fetchAuthState(c, token, tenantKey));
 
 	if (cached.data == null) {
 		await c.get("kv").set(cached.cacheKey, authState, {
@@ -131,7 +135,7 @@ const resolveAuthState = async (
  */
 export const authenticationCheck = async (
 	c: LucidHonoContext,
-	options?: { soft?: boolean },
+	options?: { soft?: boolean; tenantKey?: string | null },
 ) => {
 	const accessTokenRes = await authServices.accessToken.verifyToken(c);
 	if (accessTokenRes.error) {
@@ -141,11 +145,30 @@ export const authenticationCheck = async (
 	if (!accessTokenRes.data) return;
 
 	try {
-		c.set("auth", await resolveAuthState(c, accessTokenRes.data));
+		c.set(
+			"auth",
+			await resolveAuthState(c, accessTokenRes.data, options?.tenantKey),
+		);
 	} catch (error) {
 		if (options?.soft === true) return;
 		throw error;
 	}
+};
+
+/**
+ * Determines the tenant key that should scope auth permissions.
+ * Full tenant access validation still happens after auth is loaded.
+ */
+const resolveAuthTenantKey = (c: LucidHonoContext) => {
+	const config = c.get("config");
+	if (!multiTenancyEnabled(config)) return null;
+
+	const tenantKey = c.req.header(constants.headers.tenant);
+	if (!tenantKey) return null;
+
+	return config.tenants.some((tenant) => tenant.key === tenantKey)
+		? tenantKey
+		: null;
 };
 
 /**
@@ -164,7 +187,7 @@ const resolveTenantCheck = (
 
 	const tenantKey = c.req.header(constants.headers.tenant);
 	const auth = c.get("auth");
-	if (!tenantKey || tenantKey === "global") {
+	if (!tenantKey) {
 		if (options?.tenantScope === "allow-global" || auth.superAdmin) {
 			c.set("tenant", null);
 			return;
@@ -207,7 +230,7 @@ const resolveTenantCheck = (
  */
 const authenticate = (options?: AuthenticateOptions) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
-		await authenticationCheck(c);
+		await authenticationCheck(c, { tenantKey: resolveAuthTenantKey(c) });
 		resolveTenantCheck(c, options);
 		return await next();
 	});

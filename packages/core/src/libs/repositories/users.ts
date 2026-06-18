@@ -201,6 +201,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				where: QueryBuilderWhere<"lucid_users">;
+				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -244,7 +245,13 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 								)
 								.as("permissions"),
 						])
-						.whereRef("user_id", "=", "lucid_users.id"),
+						.whereRef("user_id", "=", "lucid_users.id")
+						.$call((qb) =>
+							queryBuilder.tenantScope(qb, {
+								tenantKey: props.tenantKey,
+								column: "lucid_roles.tenant_key",
+							}),
+						),
 				)
 				.as("roles"),
 			this.dbAdapter

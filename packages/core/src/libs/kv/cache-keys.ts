@@ -1,5 +1,8 @@
 const HTTP_STATIC_PREFIX = "http:static:";
 
+const authTenantCacheSegment = (tenantKey?: string | null) =>
+	tenantKey == null ? "no-tenant" : `tenant:${encodeURIComponent(tenantKey)}`;
+
 const cacheKeys = {
 	/**
 	 * Generate cache keys for collection schema + migration metadata.
@@ -22,8 +25,12 @@ const cacheKeys = {
 	 */
 	auth: {
 		client: (apiKey: string) => `auth:client:${apiKey}`,
-		user: (userId: string | number, namespaceToken: string) =>
-			`auth:user:${namespaceToken}:${userId}`,
+		user: (
+			userId: string | number,
+			namespaceToken: string,
+			tenantKey?: string | null,
+		) =>
+			`auth:user:${namespaceToken}:${userId}:${authTenantCacheSegment(tenantKey)}`,
 		/**
 		 * Cache key for refresh token existence
 		 */
