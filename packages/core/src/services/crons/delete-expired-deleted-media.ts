@@ -1,6 +1,7 @@
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
+import groupQueuePayloadsByTenant from "./helpers/group-queue-payloads-by-tenant.js";
 
 /**
  * Finds all soft-deleted media older than 30 days and queues them for permanent deletion
@@ -11,7 +12,7 @@ const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 	const compDate = getRetentionDays(context.config.softDelete, "media");
 
 	const softDeletedMediaRes = await Media.selectMultiple({
-		select: ["id"],
+		select: ["id", "tenant_key"],
 		where: [
 			{
 				key: "is_deleted",
@@ -37,13 +38,26 @@ const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.addBatch("media:delete", {
-		payloads: softDeletedMediaRes.data.map((media) => ({
-			mediaId: media.id,
+	const groups = groupQueuePayloadsByTenant(
+		softDeletedMediaRes.data.map((media) => ({
+			payload: {
+				mediaId: media.id,
+			},
+			tenantKeys: [media.tenant_key],
 		})),
-		context: context,
-	});
-	if (queueRes.error) return queueRes;
+	);
+
+	for (const group of groups) {
+		const queueRes = await context.queue.addBatch("media:delete", {
+			payloads: group.payloads,
+			options:
+				group.tenantKeys.length > 0
+					? { tenantKeys: group.tenantKeys }
+					: undefined,
+			context: context,
+		});
+		if (queueRes.error) return queueRes;
+	}
 
 	return {
 		error: undefined,

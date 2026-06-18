@@ -42,6 +42,7 @@ const scheduleApproved: ServiceFn<
 			"scheduled_job_id",
 			"requested_by",
 			"decided_by",
+			"tenant_key",
 		],
 		where: [{ key: "id", operator: "=", value: data.id }],
 		validation: {
@@ -111,6 +112,9 @@ const scheduleApproved: ServiceFn<
 				options: {
 					scheduledFor: scheduledAt,
 					createdByUserId: actorUserId ?? undefined,
+					tenantKeys: operationRes.data.tenant_key
+						? [operationRes.data.tenant_key]
+						: undefined,
 				},
 				context,
 			});

@@ -4,7 +4,9 @@ import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
 } from "../../libs/repositories/index.js";
+import { getMediaKeyTenantKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import groupQueuePayloadsByTenant from "./helpers/group-queue-payloads-by-tenant.js";
 
 /**
  * Finds all expired media keys that are still awaiting sync and queues them for deletion
@@ -39,7 +41,7 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 			},
 		}),
 		MediaUploadSessions.selectMultiple({
-			select: ["session_id"],
+			select: ["session_id", "key"],
 			where: [
 				{
 					key: "expires_at",
@@ -70,26 +72,49 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 		};
 	}
 
-	const queueRes = await Promise.all([
-		allExpiredMediaRes.data.length > 0
-			? context.queue.addBatch("media:delete-unsynced", {
-					payloads: allExpiredMediaRes.data.map((media) => ({
-						key: media.key,
-					})),
-					context: context,
-				})
-			: Promise.resolve({ error: undefined, data: undefined }),
-		allExpiredSessionsRes.data.length > 0
-			? context.queue.addBatch("media:abort-upload-session", {
-					payloads: allExpiredSessionsRes.data.map((session) => ({
-						sessionId: session.session_id,
-					})),
-					context: context,
-				})
-			: Promise.resolve({ error: undefined, data: undefined }),
-	]);
-	const queueError = queueRes.find((res) => res.error);
-	if (queueError?.error) return queueError;
+	const expiredMediaGroups = groupQueuePayloadsByTenant(
+		allExpiredMediaRes.data.map((media) => ({
+			payload: {
+				key: media.key,
+			},
+			tenantKeys: [getMediaKeyTenantKey(media.key)],
+		})),
+	);
+	const expiredSessionGroups = groupQueuePayloadsByTenant(
+		allExpiredSessionsRes.data.map((session) => ({
+			payload: {
+				sessionId: session.session_id,
+			},
+			tenantKeys: [getMediaKeyTenantKey(session.key)],
+		})),
+	);
+
+	for (const group of expiredMediaGroups) {
+		const queueRes = await context.queue.addBatch("media:delete-unsynced", {
+			payloads: group.payloads,
+			options:
+				group.tenantKeys.length > 0
+					? { tenantKeys: group.tenantKeys }
+					: undefined,
+			context: context,
+		});
+		if (queueRes.error) return queueRes;
+	}
+
+	for (const group of expiredSessionGroups) {
+		const queueRes = await context.queue.addBatch(
+			"media:abort-upload-session",
+			{
+				payloads: group.payloads,
+				options:
+					group.tenantKeys.length > 0
+						? { tenantKeys: group.tenantKeys }
+						: undefined,
+				context: context,
+			},
+		);
+		if (queueRes.error) return queueRes;
+	}
 
 	return {
 		error: undefined,
