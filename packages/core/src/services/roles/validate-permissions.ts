@@ -1,8 +1,8 @@
 import { copy } from "../../libs/i18n/index.js";
+import { getValidPermissions } from "../../libs/permission/registry.js";
 import type { ErrorResult } from "../../types/errors.js";
 import type { Permission } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { permissionServices } from "../index.js";
 
 const validatePermissions: ServiceFn<
 	[
@@ -21,11 +21,7 @@ const validatePermissions: ServiceFn<
 		};
 	}
 
-	const permissionsRes = await permissionServices.getAll(context);
-	if (permissionsRes.error) return permissionsRes;
-	const validPermissions = permissionsRes.data.flatMap((group) =>
-		group.permissions.map((permission) => permission.key),
-	);
+	const validPermissions = getValidPermissions(context.config);
 
 	const permErrors: Array<{
 		key: string;

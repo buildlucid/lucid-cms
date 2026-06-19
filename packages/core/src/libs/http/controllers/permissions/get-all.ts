@@ -4,7 +4,7 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/permissions.js";
 import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import { permissionsFormatter } from "../../../formatters/index.js";
-import { getPermissionRegistry } from "../../../permission/registry.js";
+import { getGrantablePermissionRegistry } from "../../../permission/registry.js";
 import authenticate from "../../middleware/authenticate.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -27,7 +27,7 @@ const getAllController = factory.createHandlers(
 		return c.json(
 			formatAPIResponse(c, {
 				data: permissionsFormatter.formatMultiple({
-					permissions: getPermissionRegistry(context.config),
+					permissions: getGrantablePermissionRegistry(context.config),
 				}),
 			}),
 		);

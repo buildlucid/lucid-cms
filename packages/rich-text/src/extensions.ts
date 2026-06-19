@@ -1,10 +1,29 @@
-import { type Extensions, flattenExtensions } from "@tiptap/core";
+import {
+	type AnyConfig,
+	type AnyExtension,
+	type Extensions,
+	getExtensionField,
+} from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 
 const flattenRichTextExtensions = (inputExtensions: Extensions): Extensions => {
-	return flattenExtensions(inputExtensions).filter(
-		(extension) => !extension.config.addExtensions,
-	);
+	return inputExtensions.flatMap((extension) => {
+		const addExtensions = getExtensionField<AnyConfig["addExtensions"]>(
+			extension,
+			"addExtensions",
+			{
+				name: extension.name,
+				options: extension.options,
+				storage: extension.storage,
+			},
+		);
+
+		if (extension.type !== "extension" || !addExtensions) {
+			return extension;
+		}
+
+		return flattenRichTextExtensions(addExtensions() as AnyExtension[]);
+	});
 };
 
 const createCoreExtensions = (): Extensions => {

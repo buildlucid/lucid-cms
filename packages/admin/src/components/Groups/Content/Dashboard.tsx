@@ -46,12 +46,6 @@ export const Dashboard: Component = () => {
 	const canReadSystemOverview = createMemo(
 		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
 	);
-	const canReadCollections = createMemo(
-		() => userStore.get.hasPermission([Permissions.DocumentsRead]).all,
-	);
-	const canCreateDocuments = createMemo(
-		() => userStore.get.hasPermission([Permissions.DocumentsCreate]).all,
-	);
 	const canCreateMedia = createMemo(
 		() => userStore.get.hasPermission([Permissions.MediaCreate]).all,
 	);
@@ -77,8 +71,6 @@ export const Dashboard: Component = () => {
 	});
 	const collections = api.collections.useGetAll({
 		queryParams: {},
-		enabled: () =>
-			canReadCollections() || canCreateDocuments() || canReviewDocuments(),
 	});
 
 	// ----------------------------------------
@@ -223,10 +215,9 @@ export const Dashboard: Component = () => {
 	);
 	const showContentShortcuts = createMemo(
 		() =>
-			canReadCollections() &&
-			(collections.isLoading ||
-				collections.isError ||
-				readableCollections().length > 0),
+			collections.isLoading ||
+			collections.isError ||
+			readableCollections().length > 0,
 	);
 	const attentionItems = createMemo<DashboardAttentionItem[]>(() => {
 		const items: DashboardAttentionItem[] = [];
