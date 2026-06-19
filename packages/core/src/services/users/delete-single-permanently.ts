@@ -1,3 +1,4 @@
+import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -31,11 +32,8 @@ const deleteSinglePermanently: ServiceFn<
 	});
 	if (accessRes.error) return accessRes;
 
-	const notLastUserRes = await userServices.checks.checkNotLastUser(context);
-	if (notLastUserRes.error) return notLastUserRes;
-
 	const getUserRes = await Users.selectSingle({
-		select: ["id"],
+		select: ["id", "is_deleted"],
 		where: [
 			{
 				key: "id",
@@ -52,6 +50,11 @@ const deleteSinglePermanently: ServiceFn<
 		},
 	});
 	if (getUserRes.error) return getUserRes;
+
+	if (!formatter.formatBoolean(getUserRes.data.is_deleted)) {
+		const notLastUserRes = await userServices.checks.checkNotLastUser(context);
+		if (notLastUserRes.error) return notLastUserRes;
+	}
 
 	const deleteUserRes = await Users.deleteSingle({
 		where: [
