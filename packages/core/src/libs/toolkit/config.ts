@@ -1,3 +1,4 @@
+import constants from "../../constants/constants.js";
 import type { EnvironmentVariables } from "../../libs/runtime/types.js";
 import type { Config } from "../../types/config.js";
 import type { ServiceContext } from "../../utils/services/types.js";
@@ -6,8 +7,6 @@ import type { TranslationStore } from "../i18n/types.js";
 import { passthroughKVAdapter } from "../kv/index.js";
 import { passthroughQueueAdapter } from "../queue/index.js";
 import type { CreateToolkitServiceContextOptions } from "./types.js";
-
-const toolkitFallbackRequestUrl = "http://localhost:6543";
 
 /**
  * Builds a toolkit-ready service context from resolved Lucid runtime values.
@@ -28,9 +27,7 @@ export const createToolkitServiceContext = (
 		translate: createTranslator({ store: options.translationStore, locale }),
 		request: {
 			url:
-				options.request?.url ??
-				options.config.baseUrl ??
-				toolkitFallbackRequestUrl,
+				options.request?.url ?? options.config.host ?? constants.urls.localhost,
 			ipAddress: options.request?.ipAddress ?? null,
 			locale,
 			tenantKey: options.request?.tenantKey ?? null,

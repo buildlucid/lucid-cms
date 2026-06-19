@@ -232,7 +232,7 @@ return astroWorker.fetch(request, env, ctx);`,
 				env,
 				kv,
 				request: {
-					url: resolvedConfig.baseUrl || "http://localhost",
+					url: resolvedConfig.host || "http://localhost",
 					locale: resolvedConfig.i18n.defaultLocale,
 				},
 				translate,

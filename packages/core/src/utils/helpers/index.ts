@@ -3,7 +3,7 @@ export { default as flattenDocumentFilters } from "./flatten-document-filters.js
 export { default as formatBytes } from "./format-bytes.js";
 export { default as formatEmailSubject } from "./format-email-subject.js";
 export { default as generateSecret } from "./generate-secret.js";
-export { default as getBaseUrl } from "./get-base-url.js";
+export { default as getBaseUrl, normalizeHost } from "./get-base-url.js";
 export { default as getDirName } from "./get-dir-name.js";
 export { default as getEmailFrom } from "./get-email-from.js";
 export { default as getFilterValues } from "./get-filter-values.js";

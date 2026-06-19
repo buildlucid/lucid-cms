@@ -11,6 +11,7 @@ import { logger } from "../../index.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { Config, EnvironmentVariables } from "../../types.js";
 import { LucidAPIError, translateErrorData } from "../../utils/errors/index.js";
+import { normalizeHost } from "../../utils/helpers/index.js";
 import getEmailAdapter from "../email/get-adapter.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
@@ -42,6 +43,9 @@ const createApp = async (props: {
 	};
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
+	const configuredHost = props.config.host?.trim()
+		? normalizeHost(props.config.host)
+		: undefined;
 	const adapterLifecycleContext = createAdapterLifecycleContext({
 		config: props.config,
 		env: props.env,
@@ -76,7 +80,7 @@ const createApp = async (props: {
 			cors({
 				origin: [
 					"http://localhost:3000",
-					...(props.config.baseUrl ? [props.config.baseUrl] : []),
+					...(configuredHost ? [configuredHost] : []),
 					...(props.config.security.cors?.origin || []),
 				],
 				allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -313,12 +317,12 @@ const createApp = async (props: {
 								"Client locale endpoints for fetching locale information.",
 						},
 					],
-					servers: props.config.baseUrl
+					servers: configuredHost
 						? [
 								{
-									url: props.config.baseUrl.includes("[::1]")
-										? props.config.baseUrl.replace("[::1]", "localhost")
-										: props.config.baseUrl,
+									url: configuredHost.includes("[::1]")
+										? configuredHost.replace("[::1]", "localhost")
+										: configuredHost,
 									description: "Development server",
 								},
 							]

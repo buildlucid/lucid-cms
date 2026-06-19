@@ -18,7 +18,7 @@ export type ServiceContext = {
 	kv: KVAdapterInstance;
 	translate: Translator;
 	request: {
-		/** The request URL. Used to derive the base URL if config.baseUrl is not set. */
+		/** The request URL. Used to derive the base URL if config.host is not set. */
 		url: string;
 		/** The connecting client IP address when the service runs in an HTTP request context. */
 		ipAddress?: string | null;

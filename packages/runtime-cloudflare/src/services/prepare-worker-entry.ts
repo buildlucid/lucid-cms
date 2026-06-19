@@ -229,7 +229,7 @@ const kv = await getInitializedKVAdapter(resolved, {
             env: env,
             kv: kv,
             request: {
-                url: resolved.baseUrl || "http://localhost",
+                url: resolved.host || "http://localhost",
                 locale: resolved.i18n.defaultLocale,
             },
             translate,

@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import type { ResponseBody } from "../../../types/response.js";
+import { normalizeHost } from "../../../utils/helpers/index.js";
 
 // --------------------------------------------------
 // Types
@@ -21,8 +22,15 @@ type FormatAPIResponse = (
 // Helpers
 
 const constructBaseUrl = (c: Context): URL => {
-	const url = new URL(c.req.url);
-	return url;
+	const requestUrl = new URL(c.req.url);
+	const config = c.get("config") as { host?: string } | undefined;
+
+	if (!config?.host?.trim()) return requestUrl;
+
+	return new URL(
+		`${requestUrl.pathname}${requestUrl.search}`,
+		normalizeHost(config.host),
+	);
 };
 
 const getPath = (c: Context) => {

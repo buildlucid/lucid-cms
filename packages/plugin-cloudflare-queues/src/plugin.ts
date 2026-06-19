@@ -135,7 +135,7 @@ try {
                     kv: kvInstance,
                     translate,
                     request: {
-                        url: resolved.baseUrl || "http://localhost",
+                        url: resolved.host || "http://localhost",
                         locale: resolved.i18n.defaultLocale,
                     },
                 },

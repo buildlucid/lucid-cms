@@ -50,7 +50,7 @@ describe("media process service", () => {
 					url: "https://example.com/lucid/api/v1/client/media/process/public/test",
 				},
 				config: {
-					baseUrl: "https://example.com",
+					host: "https://example.com",
 					db: {},
 					media: {
 						images: {
@@ -83,7 +83,7 @@ describe("media process service", () => {
 		const response = await processMedia(
 			{
 				config: {
-					baseUrl: "https://example.com",
+					host: "https://example.com",
 					db: {},
 				},
 			} as never,

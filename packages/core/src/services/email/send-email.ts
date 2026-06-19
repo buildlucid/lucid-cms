@@ -74,7 +74,8 @@ const sendEmail: ServiceFn<
 		context.config.db,
 	);
 
-	const emailFrom = getEmailFrom(context.config, context.request.url);
+	const baseUrl = getBaseUrl(context);
+	const emailFrom = getEmailFrom(context.config, baseUrl);
 	const fromAddress = data.from?.email ?? emailFrom.email;
 	const fromName = data.from?.name ?? emailFrom.name;
 	const toAddress = Array.isArray(data.to) ? data.to.join(",") : data.to;
@@ -94,7 +95,7 @@ const sendEmail: ServiceFn<
 				name: brandName ?? "",
 				logoPath: constants.email.assets.logo,
 			},
-			host: getBaseUrl(context),
+			host: baseUrl,
 		},
 	});
 	const subject =

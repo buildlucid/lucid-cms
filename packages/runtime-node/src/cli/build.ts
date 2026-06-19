@@ -163,7 +163,7 @@ const startServer = async () => {
 					env: env,
 					kv: kv,
 					request: {
-						url: "http://localhost:" + port,
+						url: resolved.host ?? "http://localhost:" + port,
 						locale: resolved.i18n.defaultLocale,
 					},
 					translate,

@@ -26,7 +26,7 @@ export type CreateToolkitServiceContextOptions = {
 	kv?: KVAdapterInstance;
 	/**
 	 * Request URL to use when Lucid needs to build absolute URLs.
-	 * If omitted, Lucid uses `config.baseUrl`, then falls back to `http://localhost:6543`.
+	 * If omitted, Lucid uses `config.host`, then falls back to the local Lucid URL.
 	 */
 	request?: {
 		url?: string;

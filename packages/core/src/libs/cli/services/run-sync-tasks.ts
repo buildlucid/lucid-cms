@@ -1,3 +1,4 @@
+import constants from "../../../constants/constants.js";
 import { syncServices } from "../../../services/index.js";
 import type { Config } from "../../../types.js";
 import { createTranslator } from "../../i18n/index.js";
@@ -35,7 +36,7 @@ const runSyncTasks = async (
 					kv: kv,
 					translate,
 					request: {
-						url: config.baseUrl ?? "",
+						url: config.host ?? constants.urls.localhost,
 						locale: "en",
 					},
 				}),
@@ -47,7 +48,7 @@ const runSyncTasks = async (
 					kv: kv,
 					translate,
 					request: {
-						url: config.baseUrl ?? "",
+						url: config.host ?? constants.urls.localhost,
 						locale: "en",
 					},
 				}),
@@ -59,7 +60,7 @@ const runSyncTasks = async (
 					kv: kv,
 					translate,
 					request: {
-						url: config.baseUrl ?? "",
+						url: config.host ?? constants.urls.localhost,
 						locale: "en",
 					},
 				}),
@@ -71,7 +72,7 @@ const runSyncTasks = async (
 					kv: kv,
 					translate,
 					request: {
-						url: config.baseUrl ?? "",
+						url: config.host ?? constants.urls.localhost,
 						locale: "en",
 					},
 				}),

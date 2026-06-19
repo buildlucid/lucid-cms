@@ -94,7 +94,7 @@ const isGeneratedMediaIdTenantKey = (key: string) =>
 
 const ConfigSchema = z.object({
 	db: z.unknown(),
-	baseUrl: z.string().optional(),
+	host: z.string().trim().min(1).optional(),
 	security: z
 		.object({
 			trustProxyHeaders: z.boolean().optional(),

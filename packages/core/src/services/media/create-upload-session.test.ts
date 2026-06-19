@@ -89,7 +89,7 @@ describe("create upload session", () => {
 					url: "https://example.com/lucid/api/v1/media/upload-session",
 				},
 				config: {
-					baseUrl: "https://example.com",
+					host: "https://example.com",
 					db: {},
 					secrets: {
 						cookie: "secret",
@@ -155,7 +155,7 @@ describe("create upload session", () => {
 					url: "https://example.com/lucid/api/v1/media/upload-session",
 				},
 				config: {
-					baseUrl: "https://example.com",
+					host: "https://example.com",
 					db: {},
 					secrets: {
 						cookie: "secret",

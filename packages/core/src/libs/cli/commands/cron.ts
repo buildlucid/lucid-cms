@@ -1,4 +1,5 @@
 import { select } from "@inquirer/prompts";
+import constants from "../../../constants/constants.js";
 import type { Config } from "../../../types.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import getConfigPath from "../../config/get-config-path.js";
@@ -118,7 +119,7 @@ const cronCommand = async (jobName?: string) => {
 				kv: kvInstance,
 				translate,
 				request: {
-					url: configRes.config.baseUrl ?? "",
+					url: configRes.config.host ?? constants.urls.localhost,
 					locale: "en",
 				},
 			});

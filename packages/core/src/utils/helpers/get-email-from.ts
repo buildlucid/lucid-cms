@@ -3,7 +3,7 @@ import type { Config } from "../../types/config.js";
 /**
  * Returns the email "from" values based on the following priority:
  * 1. If config.email.from is set, use it
- * 2. If a request URL is provided, use noreply@{host} and "Lucid CMS" for the name
+ * 2. If a host URL is provided, use noreply@{host} and "Lucid CMS" for the name
  * 3. Fallback to noreply@example.com and "Lucid CMS" for the name
  */
 const getEmailFrom = (

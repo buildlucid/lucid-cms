@@ -289,9 +289,10 @@ export interface LucidConfig {
 		};
 	};
 	/**
-	 * The base URL of the Lucid instance. If not provided, the request URL will be used.
+	 * The public host of the Lucid instance. If not provided, the request URL will be used.
+	 * Values without a protocol are treated as HTTPS.
 	 */
-	baseUrl?: string;
+	host?: string;
 	/**
 	 * `64 character` length secrets to encrypt and sign data.
 	 */

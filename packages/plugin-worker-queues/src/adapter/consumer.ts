@@ -222,7 +222,7 @@ const startConsumer = async () => {
 										kv,
 										translate,
 										request: {
-											url: config.baseUrl ?? "",
+											url: config.host ?? "http://localhost",
 											locale: "en",
 										},
 									},

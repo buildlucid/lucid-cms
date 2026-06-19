@@ -1,27 +1,27 @@
 import type { ServiceContext } from "../services/types.js";
 
-const normalizeBaseUrl = (baseUrl: string) => {
-	const trimmedBaseUrl = baseUrl.trim().replace(/\/+$/, "");
+export const normalizeHost = (host: string) => {
+	const trimmedHost = host.trim().replace(/\/+$/, "");
 
-	if (/^https?:\/\//i.test(trimmedBaseUrl)) {
-		return trimmedBaseUrl;
+	if (/^https?:\/\//i.test(trimmedHost)) {
+		return trimmedHost;
 	}
 
-	return `https://${trimmedBaseUrl}`;
+	return `https://${trimmedHost}`;
 };
 
 /**
  * Returns the base URL for the Lucid instance.
- * If config.baseUrl is set, it will be used.
+ * If config.host is set, it will be used.
  * Otherwise, the origin is extracted from the request URL.
  */
 const getBaseUrl = (context: ServiceContext): string => {
-	if (context.config.baseUrl?.trim()) {
-		return normalizeBaseUrl(context.config.baseUrl);
+	if (context.config.host?.trim()) {
+		return normalizeHost(context.config.host);
 	}
 
 	const url = new URL(context.request.url);
-	return normalizeBaseUrl(url.origin);
+	return normalizeHost(url.origin);
 };
 
 export default getBaseUrl;

@@ -12,8 +12,8 @@ import type { Toolkit, ToolkitContext } from "./types.js";
  *
  * For client-side data fetching, use the Lucid SDK instead.
  *
- * When Lucid needs to build absolute URLs, it uses `request.url`, then
- * `config.baseUrl`, and finally falls back to `http://localhost:6543`.
+ * When Lucid needs to build absolute URLs, it uses `config.host`, then
+ * `request.url`, and finally falls back to the local Lucid URL.
  *
  * Each toolkit method returns Lucid's standard `{ error, data }` response shape.
  *

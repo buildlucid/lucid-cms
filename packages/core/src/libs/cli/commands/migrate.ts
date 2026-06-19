@@ -1,4 +1,5 @@
 import { confirm } from "@inquirer/prompts";
+import constants from "../../../constants/constants.js";
 import { syncServices } from "../../../services/index.js";
 import type { Config } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
@@ -92,7 +93,7 @@ const migrateCommand = (props?: {
 					kv: passthroughKVAdapter(),
 					translate,
 					request: {
-						url: config.baseUrl ?? "",
+						url: config.host ?? constants.urls.localhost,
 						locale: "en",
 					},
 				},
@@ -234,7 +235,7 @@ const migrateCommand = (props?: {
 					kv: kvInstance,
 					translate,
 					request: {
-						url: config.baseUrl ?? "",
+						url: config.host ?? constants.urls.localhost,
 						locale: "en",
 					},
 				});
@@ -268,7 +269,7 @@ const migrateCommand = (props?: {
 							kv: kvInstance,
 							translate,
 							request: {
-								url: config.baseUrl ?? "",
+								url: config.host ?? constants.urls.localhost,
 								locale: "en",
 							},
 						},

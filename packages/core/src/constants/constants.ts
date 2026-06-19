@@ -3,6 +3,9 @@ import emailConstants from "./emails.js";
 export default Object.freeze({
 	locales: ["en"] as const,
 	openAPIDocsRoute: "/lucid/documentation",
+	urls: {
+		localhost: "http://localhost:6543",
+	},
 	headers: {
 		csrf: "X-CSRF-Token",
 		idempotencyKey: "idempotency-key",
