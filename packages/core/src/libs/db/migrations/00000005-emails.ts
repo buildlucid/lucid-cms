@@ -34,6 +34,16 @@ const Migration00000005: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("data", adapter.getDataType("json"))
 				.addColumn("storage_strategy", adapter.getDataType("json"))
 				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull()) // 'internal' or 'external'
+				.addColumn("is_system", adapter.getDataType("boolean"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"boolean",
+								adapter.getDefault("boolean", "false"),
+							),
+						),
+				)
 				.addColumn("current_status", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				) // 'pending', 'delivered', 'failed'

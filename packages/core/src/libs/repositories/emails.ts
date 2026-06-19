@@ -28,6 +28,10 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		data: z.record(z.string(), z.unknown()).nullable(),
 		storage_strategy: z.record(z.string(), z.unknown()).nullable(),
 		type: z.string(),
+		is_system: z.union([
+			z.literal(this.dbAdapter.config.defaults.boolean.true),
+			z.literal(this.dbAdapter.config.defaults.boolean.false),
+		]),
 		current_status: emailDeliveryStatusSchema,
 		attempt_count: z.number(),
 		last_attempted_at: z.union([z.string(), z.date()]).nullable(),
@@ -85,6 +89,7 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 		data: this.dbAdapter.getDataType("json"),
 		storage_strategy: this.dbAdapter.getDataType("json"),
 		type: this.dbAdapter.getDataType("text"),
+		is_system: this.dbAdapter.getDataType("boolean"),
 		current_status: this.dbAdapter.getDataType("text"),
 		attempt_count: this.dbAdapter.getDataType("integer"),
 		last_attempted_at: this.dbAdapter.getDataType("timestamp"),
@@ -246,6 +251,7 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				select: K[];
 				queryParams: Partial<QueryParams>;
 				tenantKey?: string | null;
+				includeSystem?: boolean;
 			}
 		>,
 	) {
@@ -258,6 +264,11 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 
 				mainQuery = this.applyTenantScope(mainQuery, props.tenantKey);
 				countQuery = this.applyTenantScope(countQuery, props.tenantKey);
+				if (props.includeSystem !== true) {
+					const nonSystemValue = this.dbAdapter.getDefault("boolean", "false");
+					mainQuery = mainQuery.where("is_system", "=", nonSystemValue);
+					countQuery = countQuery.where("is_system", "=", nonSystemValue);
+				}
 
 				const { main, count } = queryBuilder.main(
 					{

@@ -30,6 +30,7 @@
 		"@lucidcms/runtime-node": "*",
 		"@lucidcms/plugin-cloudflare-kv": "*",
 		"@lucidcms/plugin-cloudflare-queues": "*",
+		"@lucidcms/plugin-filesystem": "*",
 		"@lucidcms/plugin-nodemailer": "*",
 		"@lucidcms/plugin-pages": "*",
 		"@lucidcms/plugin-redis": "*",

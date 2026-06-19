@@ -1,6 +1,7 @@
 import formatter, { emailsFormatter } from "../../libs/formatters/index.js";
 import { EmailsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/email.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { Email } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -8,6 +9,7 @@ const getMultiple: ServiceFn<
 	[
 		{
 			query: GetMultipleQueryParams;
+			authUser: LucidAuth;
 		},
 	],
 	{
@@ -38,6 +40,7 @@ const getMultiple: ServiceFn<
 		],
 		queryParams: data.query,
 		tenantKey: context.request.tenantKey,
+		includeSystem: data.authUser.superAdmin,
 		validation: {
 			enabled: true,
 		},

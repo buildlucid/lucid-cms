@@ -442,6 +442,7 @@ export interface LucidEmails {
 		EmailStorageConfig | null
 	>;
 	type: EmailType;
+	is_system: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	current_status: EmailDeliveryStatus;
 	attempt_count: number;
 	last_attempted_at: TimestampMutateable;

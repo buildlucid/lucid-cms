@@ -11,7 +11,7 @@ import type {
 	EmailSubject,
 } from "../../email/types.js";
 import type { ToolkitTenantOptions } from "../types.js";
-import { runToolkitService, withToolkitTenant } from "../utils.js";
+import { runToolkitService } from "../utils.js";
 
 export type ToolkitEmailSendInput = ToolkitTenantOptions & {
 	to: string;
@@ -41,7 +41,7 @@ const send = async (
 ): ServiceResponse<ToolkitEmailSendResult> => {
 	return runToolkitService(
 		() =>
-			emailServices.sendExternal(withToolkitTenant(context, input), {
+			emailServices.sendExternal(context, {
 				to: input.to,
 				subject: input.subject,
 				template: input.template,
@@ -52,6 +52,7 @@ const send = async (
 				attachments: input.attachments,
 				data: input.data,
 				storage: input.storage,
+				tenantKey: input.tenantKey,
 				from: input.from,
 			}),
 		{

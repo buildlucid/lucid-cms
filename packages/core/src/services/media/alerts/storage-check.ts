@@ -140,6 +140,8 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 				}),
 				template: constants.email.templates.storageAlert.key,
 				priority: "high",
+				isSystem: true,
+				tenantKey: tenantConfig && bucket.tenantKey ? bucket.tenantKey : null,
 				data: {
 					triggerSource: source,
 					thresholdPercent: threshold.percent,

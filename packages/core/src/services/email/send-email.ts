@@ -46,7 +46,9 @@ const sendEmail: ServiceFn<
 			attachments?: EmailAttachment[];
 			data: Record<string, unknown>;
 			storage?: EmailStorageConfig;
+			tenantKey?: string | null;
 			tenantKeys?: string[];
+			isSystem?: boolean;
 			from?: {
 				email?: string;
 				name?: string;
@@ -76,10 +78,14 @@ const sendEmail: ServiceFn<
 	const fromAddress = data.from?.email ?? emailFrom.email;
 	const fromName = data.from?.name ?? emailFrom.name;
 	const toAddress = Array.isArray(data.to) ? data.to.join(",") : data.to;
+	const tenantKey =
+		data.tenantKey === undefined
+			? (context.request.tenantKey ?? null)
+			: data.tenantKey;
 	const brandName = resolveEmailBrandName({
 		config: context.config,
 		translate: context.translate,
-		tenantKey: context.request.tenantKey,
+		tenantKey,
 	});
 	const emailData = mergeEmailContextData({
 		data: data.data,
@@ -95,10 +101,7 @@ const sendEmail: ServiceFn<
 		typeof data.subject === "function" ? data.subject(emailData) : data.subject;
 
 	const tenantKeys = Array.from(
-		new Set(
-			data.tenantKeys ??
-				(context.request.tenantKey ? [context.request.tenantKey] : []),
-		),
+		new Set(data.tenantKeys ?? (tenantKey ? [tenantKey] : [])),
 	);
 
 	const unknownTenant = tenantKeys.find(
@@ -145,6 +148,7 @@ const sendEmail: ServiceFn<
 				data: storedDataRes.data,
 				storage_strategy: storageStrategyRes.data,
 				type: data.type,
+				is_system: data.isSystem ?? false,
 				current_status: "scheduled",
 				attempt_count: 0,
 				last_attempted_at: undefined,
