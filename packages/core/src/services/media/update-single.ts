@@ -160,6 +160,14 @@ const updateSingle: ServiceFn<
 	const targetPublic = data.public ?? currentPublic;
 
 	if (data.key !== undefined && data.fileName !== undefined) {
+		const keyAccessRes = await mediaServices.checks.checkMediaKeyAccess(
+			context,
+			{
+				key: data.key,
+			},
+		);
+		if (keyAccessRes.error) return keyAccessRes;
+
 		const awaitingSync = await mediaServices.checks.checkAwaitingSync(context, {
 			key: data.key,
 		});

@@ -48,6 +48,7 @@ const versionPromoteHandler =
 			versionId: data.data.versionId,
 			versionType: data.data.versionType,
 			collectionKey: targetCollectionRes.data.collectionKey,
+			tenantKey: data.meta.tenantKey,
 			tables: data.meta.collectionTableNames,
 		});
 		if (docVersionFieldRes.error) return docVersionFieldRes;
@@ -91,6 +92,7 @@ const versionPromoteHandler =
 					versionId: data.data.versionId,
 					versionType: data.data.versionType,
 					collectionKey: targetCollectionRes.data.collectionKey,
+					tenantKey: data.meta.tenantKey,
 					fields: {
 						slug: slug,
 						parentPage: parentPage,
@@ -111,6 +113,7 @@ const versionPromoteHandler =
 					versionType: data.data.versionType,
 					defaultLocale: context.config.localization.defaultLocale,
 					collectionKey: targetCollectionRes.data.collectionKey,
+					tenantKey: data.meta.tenantKey,
 					fields: {
 						parentPage: parentPage,
 					},
@@ -122,6 +125,7 @@ const versionPromoteHandler =
 					defaultLocale: context.config.localization.defaultLocale,
 					versionType: data.data.versionType,
 					collectionKey: targetCollectionRes.data.collectionKey,
+					tenantKey: data.meta.tenantKey,
 					fields: {
 						parentPage: parentPage,
 					},

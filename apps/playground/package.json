@@ -38,6 +38,7 @@
 		"@lucidcms/plugin-s3": "*",
 		"@lucidcms/db-postgres": "*",
 		"@lucidcms/db-sqlite": "*",
+		"@lucidcms/plugin-worker-queues": "*",
 		"nodemailer": "^8.0.1"
 	},
 	"author": "",

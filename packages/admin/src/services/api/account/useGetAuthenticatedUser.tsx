@@ -24,15 +24,18 @@ const useGetAuthenticatedUser = (
 		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
 	);
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
+	const tenantKey = createMemo(() =>
+		options?.authLayout ? undefined : tenantStore.get.tenant,
+	);
 
 	const query = useQuery(() => ({
-		queryKey: ["users.getSingle", queryKey(), params.key?.()],
+		queryKey: ["users.getSingle", queryKey(), params.key?.(), tenantKey()],
 		queryFn: () =>
 			request<ResponseBody<User>>({
 				url: "/lucid/api/v1/account",
 				config: {
 					method: "GET",
-					tenant: false,
+					tenant: !options?.authLayout,
 				},
 			}),
 		get enabled() {

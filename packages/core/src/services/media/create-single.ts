@@ -90,6 +90,11 @@ const createSingle: ServiceFn<
 	});
 	if (folderTenantRes.error) return folderTenantRes;
 
+	const keyAccessRes = await mediaServices.checks.checkMediaKeyAccess(context, {
+		key: data.key,
+	});
+	if (keyAccessRes.error) return keyAccessRes;
+
 	const awaitingSyncRes = await mediaServices.checks.checkAwaitingSync(
 		context,
 		{

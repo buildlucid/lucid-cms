@@ -23,6 +23,7 @@ const checkDuplicateSlugParents: ServiceFn<
 			versionId: number;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
+			tenantKey: string | null;
 			fields: {
 				slug: FieldInputSchema;
 				parentPage: FieldInputSchema;
@@ -131,7 +132,7 @@ const checkDuplicateSlugParents: ServiceFn<
 			);
 
 		const duplicates = (await applyTenantScope(duplicatesQuery, {
-			tenantKey: context.request.tenantKey,
+			tenantKey: data.tenantKey,
 			column: `${documentTable}.tenant_key`,
 		}).execute()) as Array<Record<string, unknown> & { locale: string | null }>;
 

@@ -28,6 +28,7 @@ const getDocumentVersionFields: ServiceFn<
 			versionId: number;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
+			tenantKey: string | null;
 			tables: {
 				document: LucidDocumentTableName;
 				version: LucidVersionTableName;
@@ -80,7 +81,7 @@ const getDocumentVersionFields: ServiceFn<
 			.where(`${versionTable}.type`, "=", data.versionType);
 
 		const fields = await applyDocumentVersionTenantScope(fieldsQuery, {
-			tenantKey: context.request.tenantKey,
+			tenantKey: data.tenantKey,
 			documentTable,
 			versionTable,
 		}).execute();

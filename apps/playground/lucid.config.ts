@@ -16,6 +16,7 @@ import { googleAuthPlugin } from "@lucidcms/plugin-google-auth";
 import { microsoftAuthPlugin } from "@lucidcms/plugin-microsoft-auth";
 import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
+import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
 import { describeRoute } from "hono-openapi";
 // Collections
@@ -321,6 +322,7 @@ export default configureLucid({
 			SimpleCollection,
 		],
 		plugins: [
+			workerQueuePlugin(),
 			filesystemPlugin(),
 			githubAuthPlugin({
 				clientId: env.GITHUB_CLIENT_ID,

@@ -27,6 +27,7 @@ const getParentFields: ServiceFn<
 			defaultLocale: string;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
+			tenantKey: string | null;
 			fields: {
 				parentPage: FieldInputSchema;
 			};
@@ -89,7 +90,7 @@ const getParentFields: ServiceFn<
 		const parentFields = await applyDocumentVersionTenantScope(
 			parentFieldsQuery,
 			{
-				tenantKey: context.request.tenantKey,
+				tenantKey: data.tenantKey,
 				documentTable,
 				versionTable,
 			},

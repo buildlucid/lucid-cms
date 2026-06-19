@@ -20,6 +20,7 @@ const checkCircularParents: ServiceFn<
 			documentId: number;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
+			tenantKey: string | null;
 			fields: {
 				parentPage: FieldInputSchema;
 			};
@@ -65,7 +66,7 @@ const checkCircularParents: ServiceFn<
 						.where(`${versionTable}.type`, "=", data.versionType)
 						.where(`${versionTable}.document_id`, "=", parentPageId),
 					{
-						tenantKey: context.request.tenantKey,
+						tenantKey: data.tenantKey,
 						documentTable,
 						versionTable,
 					},
@@ -90,7 +91,7 @@ const checkCircularParents: ServiceFn<
 							.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
 							.where(`${versionTable}.type`, "=", data.versionType),
 						{
-							tenantKey: context.request.tenantKey,
+							tenantKey: data.tenantKey,
 							documentTable,
 							versionTable,
 						},

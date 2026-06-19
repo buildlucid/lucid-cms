@@ -36,7 +36,7 @@ export type CreateToolkitServiceContextOptions = {
 };
 
 export type ToolkitTenantOptions = {
-	/** Overrides the tenant scope for this toolkit call. null targets global content. */
+	/** Overrides tenant scope for this toolkit call. A string scopes to that tenant plus global rows; null clears tenant scope. */
 	tenantKey?: string | null;
 };
 

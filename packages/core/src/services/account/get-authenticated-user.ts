@@ -27,6 +27,7 @@ const getAuthenticatedUser: ServiceFn<
 
 	const [userRes, pendingEmailChangeRes, tenantsRes] = await Promise.all([
 		Users.selectSinglePreset({
+			tenantKey: context.request.tenantKey,
 			where: [
 				{
 					key: "id",
