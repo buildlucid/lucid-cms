@@ -150,6 +150,8 @@
 	"selectors.link": "Select Link",
 	"common.roles": "Roles",
 	"common.tenants": "Tenants",
+	"common.workspace": "Workspace",
+	"common.switch.tenant": "Switch tenant",
 	"actions.add.entry": "Add Entry",
 	"actions.reset.password": "Reset Password",
 	"users.invitations.resend.action": "Resend Invitation",

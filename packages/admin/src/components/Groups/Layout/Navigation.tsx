@@ -225,9 +225,7 @@ export const NavigationChrome: Component = () => {
 						<div class="flex items-center pl-2">
 							<img src={LogoIcon} alt="Lucid CMS Logo" class="h-6" />
 						</div>
-						<div class="mt-5">
-							<TenantSelect />
-						</div>
+						<TenantSelect class="mt-5" />
 					</div>
 					<NavigationMenuContent
 						class="w-55 flex-1"
@@ -317,9 +315,7 @@ export const NavigationChrome: Component = () => {
 										<FaSolidXmark class="size-3.5" />
 									</button>
 								</div>
-								<div class="mt-4">
-									<TenantSelect />
-								</div>
+								<TenantSelect class="mt-4" />
 							</div>
 							<NavigationMenuContent
 								class="flex-1"
