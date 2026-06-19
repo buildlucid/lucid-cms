@@ -7,6 +7,7 @@ import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
+import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
 
 export function useDocumentState(props: {
@@ -88,7 +89,15 @@ export function useDocumentState(props: {
 		},
 	});
 	const isDocumentMutated = createMemo(() => brickStore.getDocumentMutated());
+	const collectionAccessError = createMemo(
+		() => collectionQuery.isError && isInaccessibleError(collectionQuery.error),
+	);
+	const documentAccessError = createMemo(
+		() => documentQuery.isError && isInaccessibleError(documentQuery.error),
+	);
 	const shouldBlockNavigation = createMemo(() => {
+		//* nothing to guard when the document can't be loaded for the active tenant
+		if (documentAccessError()) return false;
 		if (props.version() !== "latest") return false;
 		return isDocumentMutated();
 	});
@@ -109,6 +118,8 @@ export function useDocumentState(props: {
 		document,
 		isDocumentMutated,
 		shouldBlockNavigation,
+		collectionAccessError,
+		documentAccessError,
 	};
 }
 

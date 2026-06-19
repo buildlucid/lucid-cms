@@ -1,4 +1,12 @@
-import { type Component, For, Match, Show, Switch } from "solid-js";
+import { useNavigate } from "@solidjs/router";
+import {
+	type Component,
+	createEffect,
+	For,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import { HeaderBar } from "@/components/Groups/PageBuilder";
 import TimelineCardWrapper from "@/components/Groups/PageBuilder/History/TimelineCard";
 import TimelineDetails from "@/components/Groups/PageBuilder/History/TimelineDetails";
@@ -11,10 +19,33 @@ import T from "@/translations";
 const CollectionsDocumentsHistoryRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
+	const navigate = useNavigate();
 	const state = useHistoryState();
 	const uiState = useHistoryUIState({
 		collectionQuery: state.collectionQuery,
 		collection: state.collection,
+	});
+
+	// ----------------------------------
+	// Effects
+
+	//* Redirect out of the history view when the document/collection isn't
+	//* available for the active tenant (e.g. after switching tenant). Multiple
+	//* collections fall back to their document list, everything else to the dashboard.
+	createEffect(() => {
+		if (state.collectionAccessError()) {
+			navigate("/lucid", { replace: true });
+			return;
+		}
+		if (state.documentAccessError()) {
+			if (state.collection()?.mode === "multiple") {
+				navigate(`/lucid/collections/${state.collectionKey()}`, {
+					replace: true,
+				});
+				return;
+			}
+			navigate("/lucid", { replace: true });
+		}
 	});
 
 	// ----------------------------------

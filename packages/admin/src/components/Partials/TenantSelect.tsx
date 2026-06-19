@@ -41,7 +41,7 @@ const TenantSelect: Component<TenantSelectProps> = (props) => {
 				>
 					<DropdownMenu.Trigger
 						aria-label={T()("common.switch.tenant")}
-						class="group w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left transition-colors duration-200 hover:bg-white/5 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
+						class="group border border-border w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left transition-colors duration-200 hover:bg-white/5 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
 					>
 						<span class="flex min-w-0 flex-col">
 							<span class="text-[11px] leading-none text-body">

@@ -48,6 +48,7 @@ export const AiUsageList: Component<{
 						options={{
 							embedded: true,
 							padding: "16",
+							hideEmptyMessage: true,
 						}}
 					/>
 				),

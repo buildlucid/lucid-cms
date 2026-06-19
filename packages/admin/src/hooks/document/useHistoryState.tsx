@@ -6,6 +6,7 @@ import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import useSearchParamsState from "../useSearchParamsState";
@@ -231,6 +232,12 @@ export function useHistoryState() {
 		}));
 	});
 	const document = createMemo(() => documentQuery.data?.data);
+	const collectionAccessError = createMemo(
+		() => collectionQuery.isError && isInaccessibleError(collectionQuery.error),
+	);
+	const documentAccessError = createMemo(
+		() => documentQuery.isError && isInaccessibleError(documentQuery.error),
+	);
 
 	const timelineData = createMemo((): TimelineGroup[] => {
 		const documentData = document();
@@ -607,6 +614,8 @@ export function useHistoryState() {
 		collection,
 		document,
 		documentQuery,
+		collectionAccessError,
+		documentAccessError,
 		selectedVersionDocument: () => selectedVersionDocumentQuery.data?.data,
 		collectionKey,
 		documentId,

@@ -90,7 +90,7 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 	const tenantOptions = createMemo(() => {
 		return tenantStore.get.tenants.map((tenant) => ({
 			value: tenant.key,
-			label: `${translateAdminCopy(tenant.name)} (${tenant.key})`,
+			label: translateAdminCopy(tenant.name),
 		}));
 	});
 	const defaultTenantOption = createMemo(() => {

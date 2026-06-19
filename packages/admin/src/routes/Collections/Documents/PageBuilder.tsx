@@ -1,4 +1,4 @@
-import { useParams } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
 import type { PublishOperation } from "@types";
 import type { Accessor } from "solid-js";
 import {
@@ -45,6 +45,7 @@ const CollectionsDocumentsEditRoute: Component<{
 	// ----------------------------------
 	// Hooks & State
 	const params = useParams();
+	const navigate = useNavigate();
 	const [getStateLoading, setStateLoading] = createSignal(true);
 	const versionType = createMemo(
 		() => props.version || params.versionType || "latest",
@@ -215,6 +216,25 @@ const CollectionsDocumentsEditRoute: Component<{
 		hydratedViewKey = null;
 		brickStore.get.reset();
 		pageBuilderModalsStore.reset();
+	});
+
+	//* Redirect out of the document view when the document/collection isn't
+	//* available for the active tenant (e.g. after switching tenant). Multiple
+	//* collections fall back to their document list, everything else to the dashboard.
+	createEffect(() => {
+		if (docState.collectionAccessError()) {
+			navigate("/lucid", { replace: true });
+			return;
+		}
+		if (docState.documentAccessError()) {
+			if (docState.collection()?.mode === "multiple") {
+				navigate(`/lucid/collections/${docState.collectionKey()}`, {
+					replace: true,
+				});
+				return;
+			}
+			navigate("/lucid", { replace: true });
+		}
 	});
 
 	// ---------------------------------

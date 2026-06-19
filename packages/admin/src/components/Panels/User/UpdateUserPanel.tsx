@@ -117,7 +117,7 @@ const UpdateUserPanel: Component<{
 	const tenantOptions = createMemo(() => {
 		return tenantStore.get.tenants.map((tenant) => ({
 			value: tenant.key,
-			label: `${translateAdminCopy(tenant.name)} (${tenant.key})`,
+			label: translateAdminCopy(tenant.name),
 		}));
 	});
 	const defaultTenantOption = createMemo(() => {
@@ -211,7 +211,7 @@ const UpdateUserPanel: Component<{
 				user.data?.data.tenants?.map((tenant) => {
 					return {
 						value: tenant.key,
-						label: `${translateAdminCopy(tenant.name)} (${tenant.key})`,
+						label: translateAdminCopy(tenant.name),
 					};
 				}) || [],
 			);

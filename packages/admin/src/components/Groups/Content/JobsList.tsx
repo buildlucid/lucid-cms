@@ -52,6 +52,7 @@ export const JobsList: Component<{
 						options={{
 							embedded: true,
 							padding: "16",
+							hideEmptyMessage: true,
 						}}
 					/>
 				),

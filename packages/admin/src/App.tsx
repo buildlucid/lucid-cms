@@ -16,6 +16,10 @@ const App: Component = () => {
 						switch (error.errorRes.status) {
 							case 401:
 								return false;
+							case 403:
+								return false;
+							case 404:
+								return false;
 							case 429:
 								return false;
 							default:

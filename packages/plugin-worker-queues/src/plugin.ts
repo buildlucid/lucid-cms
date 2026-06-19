@@ -1,12 +1,12 @@
-import type { LucidPlugin } from "@lucidcms/core/types";
+import type { LucidPluginResponse } from "@lucidcms/core/types";
 import workerQueueAdapter, {
 	type WorkerQueueAdapterOptions,
 } from "./adapter/index.js";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 
-const plugin: LucidPlugin<WorkerQueueAdapterOptions | undefined> = (
-	pluginOptions,
-) => {
+const plugin = (
+	pluginOptions?: WorkerQueueAdapterOptions,
+): LucidPluginResponse => {
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,

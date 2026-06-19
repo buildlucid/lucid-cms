@@ -76,6 +76,7 @@ export const ClientIntegrationsList: Component<{
 							options={{
 								embedded: true,
 								padding: "16",
+								hideEmptyMessage: true,
 							}}
 						/>
 					),

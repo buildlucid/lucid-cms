@@ -1,10 +1,6 @@
 import { A } from "@solidjs/router";
 import type { Collection } from "@types";
-import {
-	FaSolidArrowRight,
-	FaSolidBox,
-	FaSolidBoxesStacked,
-} from "solid-icons/fa";
+import { FaSolidBox, FaSolidBoxesStacked } from "solid-icons/fa";
 import { type Component, createMemo, For, Show } from "solid-js";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -131,10 +127,6 @@ const DashboardContentShortcuts: Component<{
 														)}
 													</Show>
 												</span>
-												<FaSolidArrowRight
-													aria-hidden="true"
-													class="h-3 w-3 shrink-0 text-icon-base transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary-base"
-												/>
 											</A>
 										</li>
 									)}
