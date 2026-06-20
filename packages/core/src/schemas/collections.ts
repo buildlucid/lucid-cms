@@ -143,6 +143,11 @@ const collectionResponseSchema = z.object({
 						defaultMessage: "Production",
 					},
 				}),
+				requires: z.array(z.string()).meta({
+					description:
+						"Environment keys that must match latest before releases can be created for this environment",
+					example: ["staging"],
+				}),
 				permissions: z.object({
 					publish: z.string().meta({
 						description: "Permission required to publish to this environment",

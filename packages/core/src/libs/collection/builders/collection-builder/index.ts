@@ -195,6 +195,7 @@ class CollectionBuilder extends FieldBuilder {
 					this.config.config?.environments?.map((environment) => ({
 						...environment,
 						name: normalizeCopy(environment.name),
+						requires: environment.requires ?? [],
 						permissions: environment.permissions ?? {},
 						relations: environment.relations ?? {},
 					})) ?? [],

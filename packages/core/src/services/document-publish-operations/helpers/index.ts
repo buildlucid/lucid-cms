@@ -49,6 +49,33 @@ export const canUsePublishOperationsForTarget = (params: {
 	target: string;
 }) => getPublishOperationTargets(params.collection).includes(params.target);
 
+/** Returns environment targets that must be current before a release can be created. */
+export const getReleaseRequirementTargets = (params: {
+	collection: CollectionBuilder;
+	target: string;
+}) => {
+	const targetEnvironment = params.collection.getData.config.environments.find(
+		(environment) => environment.key === params.target,
+	);
+
+	return Array.from(new Set(targetEnvironment?.requires ?? []));
+};
+
+/** Returns configured release requirements whose content does not match the submitted source. */
+export const getUnmetReleaseRequirementTargets = (params: {
+	collection: CollectionBuilder;
+	target: string;
+	sourceContentId: string;
+	contentIdsByTarget: Map<string, string | null | undefined>;
+}) =>
+	getReleaseRequirementTargets({
+		collection: params.collection,
+		target: params.target,
+	}).filter(
+		(requiredTarget) =>
+			params.contentIdsByTarget.get(requiredTarget) !== params.sourceContentId,
+	);
+
 /** Checks scheduling support across collection config, target type, and runtime queue capability. */
 export const collectionTargetSupportsScheduling = (params: {
 	collection: CollectionBuilder;

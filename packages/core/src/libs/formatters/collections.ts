@@ -100,6 +100,7 @@ const formatSingle = (props: {
 			environments: collectionData.config.environments.map((environment) => ({
 				key: environment.key,
 				name: environment.name,
+				requires: environment.requires,
 				permissions: {
 					publish: resolveCollectionPermission({
 						collection: props.collection,

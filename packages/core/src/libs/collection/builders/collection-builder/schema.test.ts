@@ -243,3 +243,79 @@ test("collection environment relation config passes schema validation", async ()
 		success: true,
 	});
 });
+
+test("collection environment requires config validates environment references", async () => {
+	const validConfig = {
+		key: "pages",
+		mode: "multiple",
+		details: {
+			name: copy("admin:tests.collections.pages.name", {
+				defaultMessage: "Pages",
+			}),
+			singularName: copy("admin:tests.collections.pages.singularName", {
+				defaultMessage: "Page",
+			}),
+		},
+		config: {
+			environments: [
+				{
+					key: "staging",
+					name: copy("admin:tests.environments.staging.name", {
+						defaultMessage: "Staging",
+					}),
+				},
+				{
+					key: "production",
+					name: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
+					}),
+					requires: ["staging"],
+				},
+			],
+		},
+	};
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync(validConfig),
+	).resolves.toMatchObject({
+		success: true,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			config: {
+				environments: [
+					{
+						key: "production",
+						name: copy("admin:tests.environments.production.name", {
+							defaultMessage: "Production",
+						}),
+						requires: ["staging"],
+					},
+				],
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			config: {
+				environments: [
+					{
+						key: "production",
+						name: copy("admin:tests.environments.production.name", {
+							defaultMessage: "Production",
+						}),
+						requires: ["production"],
+					},
+				],
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+});

@@ -70,6 +70,7 @@ const PageCollection = new CollectionBuilder("page", {
 			{
 				key: "production",
 				name: copy("admin:collections.page.environments.production.name"),
+				requires: ["staging"],
 				permissions: {
 					publish: "page:publish:production",
 					review: "page:review:production",

@@ -1,5 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { isInSchedulingDispatchWindow, parseScheduleInput } from "./index.js";
+import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { copy } from "../../../libs/i18n/index.js";
+import {
+	getReleaseRequirementTargets,
+	getUnmetReleaseRequirementTargets,
+	isInSchedulingDispatchWindow,
+	parseScheduleInput,
+} from "./index.js";
 
 describe("Tests for publish operation scheduling helpers", () => {
 	test("parses valid schedule input to UTC minute precision", () => {
@@ -63,5 +70,74 @@ describe("Tests for publish operation scheduling helpers", () => {
 				scheduledAt: new Date("2026-01-01T18:01:00.000Z"),
 			}),
 		).toBe(false);
+	});
+});
+
+describe("Tests for publish operation release requirement helpers", () => {
+	const collection = new CollectionBuilder("pages", {
+		mode: "multiple",
+		details: {
+			name: copy("admin:tests.collections.pages.name", {
+				defaultMessage: "Pages",
+			}),
+			singularName: copy("admin:tests.collections.pages.singularName", {
+				defaultMessage: "Page",
+			}),
+		},
+		config: {
+			environments: [
+				{
+					key: "staging",
+					name: copy("admin:tests.environments.staging.name", {
+						defaultMessage: "Staging",
+					}),
+				},
+				{
+					key: "production",
+					name: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
+					}),
+					requires: ["staging", "staging"],
+				},
+			],
+		},
+	});
+
+	test("returns unique release requirement targets", () => {
+		expect(
+			getReleaseRequirementTargets({
+				collection,
+				target: "production",
+			}),
+		).toEqual(["staging"]);
+	});
+
+	test("detects stale or missing release requirements", () => {
+		expect(
+			getUnmetReleaseRequirementTargets({
+				collection,
+				target: "production",
+				sourceContentId: "latest-content",
+				contentIdsByTarget: new Map([["staging", "old-content"]]),
+			}),
+		).toEqual(["staging"]);
+
+		expect(
+			getUnmetReleaseRequirementTargets({
+				collection,
+				target: "production",
+				sourceContentId: "latest-content",
+				contentIdsByTarget: new Map(),
+			}),
+		).toEqual(["staging"]);
+
+		expect(
+			getUnmetReleaseRequirementTargets({
+				collection,
+				target: "production",
+				sourceContentId: "latest-content",
+				contentIdsByTarget: new Map([["staging", "latest-content"]]),
+			}),
+		).toEqual([]);
 	});
 });

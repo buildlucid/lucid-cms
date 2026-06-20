@@ -203,10 +203,15 @@ export const HeaderBar: Component<{
 		const workflowStage = workflow?.stages.find(
 			(stage) => stage.key === document.workflow?.stage,
 		);
+		const environmentLabels = new Map(
+			environments.map((environment) => [
+				environment.key,
+				helpers.getLocaleValue({ value: environment.name }) || environment.key,
+			]),
+		);
 
 		return environments.map((environment) => {
-			const label =
-				helpers.getLocaleValue({ value: environment.name }) || environment.key;
+			const label = environmentLabels.get(environment.key) || environment.key;
 
 			const isPromoted =
 				props.state.document()?.version[environment.key]?.contentId ===
@@ -236,6 +241,22 @@ export const HeaderBar: Component<{
 				T()("documents.workflow.no.stage");
 
 			const workflowDisabled = !workflowAllowsTarget;
+			const latestContentId = document.version.latest?.contentId;
+			const unmetReleaseRequirementLabels =
+				latestContentId === undefined
+					? []
+					: (environment.requires ?? [])
+							.filter(
+								(requiredTarget) =>
+									document.version[requiredTarget]?.contentId !==
+									latestContentId,
+							)
+							.map(
+								(requiredTarget) =>
+									environmentLabels.get(requiredTarget) || requiredTarget,
+							);
+			const releaseRequirementsDisabled =
+				unmetReleaseRequirementLabels.length > 0;
 
 			let disabledToast: ReleaseTriggerOption["disabledToast"];
 			if (isPromoted) {
@@ -258,6 +279,14 @@ export const HeaderBar: Component<{
 					message: T()("toasts.common.workflow.release.disabled.message", {
 						stage: workflowStageLabel,
 						environment: label.toLowerCase(),
+					}),
+				};
+			} else if (releaseRequirementsDisabled) {
+				disabledToast = {
+					title: T()("toasts.release.requires.disabled.title"),
+					message: T()("toasts.release.requires.disabled.message", {
+						environment: label,
+						required: unmetReleaseRequirementLabels.join(", "),
 					}),
 				};
 			} else if (

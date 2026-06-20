@@ -21,6 +21,8 @@ import {
 	activePublishOperationStatuses,
 	canUsePublishOperationsForTarget,
 	collectionTargetSupportsScheduling,
+	getReleaseRequirementTargets,
+	getUnmetReleaseRequirementTargets,
 	hasCollectionTargetPermission,
 	parseScheduleInput,
 	snapshotVersionType,
@@ -353,7 +355,57 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	// Retire any unresolved operation for this document and target before creating the new release.
+	// Checks the target environment's required environment list and that they are in sync with latest before allowing the publish
+	const releaseRequirementTargets = getReleaseRequirementTargets({
+		collection,
+		target: data.target,
+	});
+	if (releaseRequirementTargets.length > 0) {
+		const requirementVersionsRes = await Versions.selectMultiple(
+			{
+				select: ["type", "content_id"],
+				where: [
+					{ key: "collection_key", operator: "=", value: data.collectionKey },
+					{ key: "document_id", operator: "=", value: data.documentId },
+					{ key: "type", operator: "in", value: releaseRequirementTargets },
+				],
+			},
+			{
+				tableName: tableNamesRes.data.version,
+			},
+		);
+		if (requirementVersionsRes.error) return requirementVersionsRes;
+
+		const unmetRequirements = getUnmetReleaseRequirementTargets({
+			collection,
+			target: data.target,
+			sourceContentId: latestVersionRes.data.content_id,
+			contentIdsByTarget: new Map(
+				(requirementVersionsRes.data ?? []).map((version) => [
+					version.type,
+					version.content_id,
+				]),
+			),
+		});
+
+		if (unmetRequirements.length > 0) {
+			return {
+				error: {
+					type: "basic",
+					message: copy("server:core.publish.requests.requires.not.current", {
+						data: {
+							target: data.target,
+							required: unmetRequirements.join(", "),
+						},
+					}),
+					status: 403,
+				},
+				data: undefined,
+			};
+		}
+	}
+
+	// Retire any unresolved operation for this document and target before creating the new release
 	if (activeRes.data) {
 		const now = new Date().toISOString();
 

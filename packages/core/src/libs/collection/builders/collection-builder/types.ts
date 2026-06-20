@@ -97,6 +97,7 @@ export type CollectionConfigSchemaType = {
 		environments?: Array<{
 			key: string;
 			name: AdminCopyInput;
+			requires?: string[];
 			permissions?: CollectionEnvironmentPermissions;
 			relations?: CollectionEnvironmentRelations;
 		}>;
@@ -130,6 +131,7 @@ export type CollectionData = {
 		environments: {
 			key: string;
 			name: ResolvedAdminCopy;
+			requires: string[];
 			permissions: CollectionEnvironmentPermissions;
 			relations: CollectionEnvironmentRelations;
 		}[];

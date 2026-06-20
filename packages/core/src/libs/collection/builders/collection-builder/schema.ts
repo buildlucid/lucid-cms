@@ -155,6 +155,7 @@ const CollectionConfigSchema = z
 								},
 							),
 							name: adminCopyInputSchema,
+							requires: z.array(environmentKeySchema).optional(),
 							permissions: z
 								.object({
 									publish: z.string().optional(),
@@ -195,6 +196,42 @@ const CollectionConfigSchema = z
 		const environmentKeys = new Set(
 			data.config?.environments?.map((environment) => environment.key) ?? [],
 		);
+
+		for (const [environmentIndex, environment] of (
+			data.config?.environments ?? []
+		).entries()) {
+			for (const [targetIndex, target] of (
+				environment.requires ?? []
+			).entries()) {
+				if (target === environment.key) {
+					ctx.addIssue({
+						code: "custom",
+						path: [
+							"config",
+							"environments",
+							environmentIndex,
+							"requires",
+							targetIndex,
+						],
+						message: `Environment "${environment.key}" cannot require itself`,
+					});
+					continue;
+				}
+
+				if (environmentKeys.has(target)) continue;
+				ctx.addIssue({
+					code: "custom",
+					path: [
+						"config",
+						"environments",
+						environmentIndex,
+						"requires",
+						targetIndex,
+					],
+					message: `Environment requires target "${target}" must reference a configured environment`,
+				});
+			}
+		}
 
 		const review = data.config?.review;
 		for (const [targetIndex, target] of (review?.requiredFor ?? []).entries()) {

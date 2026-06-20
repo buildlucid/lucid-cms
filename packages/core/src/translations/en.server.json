@@ -549,6 +549,7 @@
 	"core.publish.operations.not.retryable": "Publish operation cannot be retried.",
 	"core.publish.requests.invalid.assignees": "One or more assignees cannot review this release.",
 	"core.publish.requests.snapshot.latest.only": "Only latest versions can be submitted for release review.",
+	"core.publish.requests.requires.not.current": "Release to {{target}} requires {{required}} to be up to date.",
 	"core.publish.requests.not.found": "Release not found.",
 	"core.publish.requests.approved.title": "Release approved",
 	"core.publish.requests.rejected.title": "Release rejected",

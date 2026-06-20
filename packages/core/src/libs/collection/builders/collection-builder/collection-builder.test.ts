@@ -234,6 +234,7 @@ test("collection environment relation config normalizes defaults", async () => {
 					name: copy("admin:tests.environments.production.name", {
 						defaultMessage: "Production",
 					}),
+					requires: ["staging"],
 				},
 			],
 		},
@@ -245,6 +246,7 @@ test("collection environment relation config normalizes defaults", async () => {
 			name: copy("admin:tests.environments.staging.name", {
 				defaultMessage: "Staging",
 			}),
+			requires: [],
 			permissions: {},
 			relations: {
 				blog: "signed-off",
@@ -255,6 +257,7 @@ test("collection environment relation config normalizes defaults", async () => {
 			name: copy("admin:tests.environments.production.name", {
 				defaultMessage: "Production",
 			}),
+			requires: ["staging"],
 			permissions: {},
 			relations: {},
 		},

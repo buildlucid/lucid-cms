@@ -555,6 +555,7 @@ export interface Collection {
 		environments: {
 			key: string;
 			name: ResolvedAdminCopy;
+			requires: string[];
 			permissions: {
 				publish: string;
 				review: string;

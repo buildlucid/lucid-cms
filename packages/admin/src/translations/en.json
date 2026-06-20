@@ -1207,6 +1207,8 @@
 	"toasts.release.current.disabled.message": "{{environment}} is already up to date.",
 	"toasts.release.permission.disabled.title": "No Release Permission",
 	"toasts.release.permission.disabled.message": "You do not have permission to release to {{environment}}.",
+	"toasts.release.requires.disabled.title": "Release Unavailable",
+	"toasts.release.requires.disabled.message": "Release {{required}} before releasing to {{environment}}.",
 	"toasts.release.unsaved.disabled.title": "Save Required",
 	"toasts.release.unsaved.disabled.message": "Save content changes before releasing to {{environment}}.",
 	"toasts.release.saving.disabled.title": "Release Unavailable",
