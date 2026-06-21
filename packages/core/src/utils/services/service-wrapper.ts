@@ -36,8 +36,12 @@ const serviceWrapper =
 				}
 			}
 
-			//* If transactions are not enabled or the service is already in a transaction via a parent
-			if (!wrapperConfig.transaction || service.db.client.isTransaction) {
+			//* If transactions are not enabled, unsupported by the DB, or the service is already in a parent transaction
+			if (
+				!wrapperConfig.transaction ||
+				!service.config.db.supports("transaction") ||
+				service.db.client.isTransaction
+			) {
 				const result = await fn(service, ...args);
 				if (result.error)
 					return {

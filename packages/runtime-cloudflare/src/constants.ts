@@ -3,6 +3,7 @@ export const LUCID_VERSION = "0.x.x";
 export const DEFAULT_KV_BINDING = "LUCID_KV";
 export const DEFAULT_R2_BINDING = "LUCID_MEDIA_BUCKET";
 export const DEFAULT_QUEUE_BINDING = "LUCID_QUEUE";
+export const DEFAULT_D1_BINDING = "LUCID_D1";
 
 export default {
 	CONFIG_FILE: "lucid.config.js",

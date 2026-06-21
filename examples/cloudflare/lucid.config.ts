@@ -1,5 +1,5 @@
 import { configureLucid, z } from "@lucidcms/core";
-import { libsql } from "@lucidcms/db-libsql";
+import { d1 } from "@lucidcms/db-d1";
 import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
@@ -10,17 +10,14 @@ export default configureLucid({
 	runtime: cloudflare({
 		wrangler: {
 			bindings: {
+				d1: true,
 				kv: true,
-				r2: {
-					bucketName: "lucid-cloudflare-example-media",
-				},
+				r2: true
 			},
 		},
 	}),
-	db: libsql,
+	db: d1,
 	env: z.object({
-		LIBSQL_URL: z.string(),
-		LIBSQL_AUTH_TOKEN: z.string().optional(),
 		ENCRYPTION_SECRET: z.string(),
 		COOKIE_SECRET: z.string(),
 		REFRESH_TOKEN_SECRET: z.string(),

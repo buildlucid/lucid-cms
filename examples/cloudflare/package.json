@@ -20,7 +20,7 @@
 	"dependencies": {
 		"@lucidcms/runtime-cloudflare": "1.0.0",
 		"@lucidcms/core": "0.12.0-alpha.1",
-		"@lucidcms/db-libsql": "1.0.0",
+		"@lucidcms/db-d1": "1.0.0",
 		"@lucidcms/plugin-cloudflare-kv": "1.0.0",
 		"@lucidcms/plugin-cloudflare-r2": "1.0.0",
 		"@lucidcms/plugin-pages": "0.3.3"

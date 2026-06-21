@@ -3,7 +3,7 @@
 > [!CAUTION]
 > Lucid's support for Astro on Cloudflare is experimental.
 
-Minimal Lucid CMS example using Astro, the Cloudflare runtime, LibSQL, the Pages plugin, Cloudflare R2 media storage, and a Cloudflare KV adapter.
+Minimal Lucid CMS example using Astro, the Cloudflare runtime, Cloudflare D1, the Pages plugin, Cloudflare R2 media storage, and a Cloudflare KV adapter.
 
 ## Commands
 

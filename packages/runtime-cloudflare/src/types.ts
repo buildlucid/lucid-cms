@@ -93,10 +93,19 @@ export type CloudflareQueueBindingOptions = {
 	};
 };
 
+export type CloudflareD1DatabaseBindingOptions = {
+	binding?: string;
+	databaseName?: string;
+	databaseId?: string;
+	previewDatabaseId?: string;
+	remote?: boolean;
+};
+
 export type CloudflareBindingsOptions = {
 	kv?: true | string | CloudflareKVNamespaceBindingOptions;
 	r2?: true | string | CloudflareR2BucketBindingOptions;
 	queues?: true | string | CloudflareQueueBindingOptions;
+	d1?: true | string | CloudflareD1DatabaseBindingOptions;
 };
 
 export type CloudflareAdapterOptionsFactory = (

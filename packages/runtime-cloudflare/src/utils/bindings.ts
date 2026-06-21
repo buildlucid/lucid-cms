@@ -1,10 +1,12 @@
 import {
+	DEFAULT_D1_BINDING,
 	DEFAULT_KV_BINDING,
 	DEFAULT_QUEUE_BINDING,
 	DEFAULT_R2_BINDING,
 } from "../constants.js";
 import type {
 	CloudflareBindingsOptions,
+	CloudflareD1DatabaseBindingOptions,
 	CloudflareKVNamespaceBindingOptions,
 	CloudflareQueueBindingOptions,
 	CloudflareR2BucketBindingOptions,
@@ -18,6 +20,7 @@ type NormalizedBinding<T extends { binding?: string }> = Omit<T, "binding"> & {
 const normalizeBinding = <
 	T extends
 		| CloudflareKVNamespaceBindingOptions
+		| CloudflareD1DatabaseBindingOptions
 		| CloudflareR2BucketBindingOptions
 		| CloudflareQueueBindingOptions,
 >(
@@ -53,5 +56,9 @@ export const normalizeCloudflareBindings = (
 	queues: normalizeBinding<CloudflareQueueBindingOptions>(
 		bindings?.queues,
 		DEFAULT_QUEUE_BINDING,
+	),
+	d1: normalizeBinding<CloudflareD1DatabaseBindingOptions>(
+		bindings?.d1,
+		DEFAULT_D1_BINDING,
 	),
 });

@@ -315,6 +315,32 @@ const applyQueue = (
 };
 
 /**
+ * Adds or updates the D1 database entry for the runtime binding.
+ */
+const applyD1Database = (
+	config: WranglerConfig,
+	binding: NonNullable<ReturnType<typeof normalizeCloudflareBindings>["d1"]>,
+	workerName: string,
+) => {
+	const databases = getObjectArray(config.d1_databases);
+	config.d1_databases = upsertObject(
+		databases,
+		{
+			binding: binding.binding,
+			database_name:
+				binding.databaseName ??
+				defaultResourceName(workerName, binding.binding),
+			...(binding.databaseId ? { database_id: binding.databaseId } : {}),
+			...(binding.previewDatabaseId
+				? { preview_database_id: binding.previewDatabaseId }
+				: {}),
+			...(binding.remote !== undefined ? { remote: binding.remote } : {}),
+		},
+		"binding",
+	);
+};
+
+/**
  * Applies all binding types currently modelled by the Cloudflare runtime.
  */
 const applyRuntimeBindings = (props: {
@@ -333,6 +359,9 @@ const applyRuntimeBindings = (props: {
 	}
 	if (bindings.queues) {
 		applyQueue(props.config, bindings.queues, props.workerName);
+	}
+	if (bindings.d1) {
+		applyD1Database(props.config, bindings.d1, props.workerName);
 	}
 };
 
