@@ -33,7 +33,8 @@ const clearToken = async (
 	const UserTokens = new UserTokensRepository(config.db.client, config.db);
 	const context = createServiceContext(c);
 
-	await context.kv.delete(context, cacheKeys.auth.refresh(_refresh), {
+	await context.kv.delete(context, {
+		key: cacheKeys.auth.refresh(_refresh),
 		hash: true,
 	});
 

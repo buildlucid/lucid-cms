@@ -60,16 +60,13 @@ const createUploadSession: ServiceFn<
 		context.request.tenantKey ?? null,
 	);
 
-	const sessionRes = await context.media.createUploadSession({
-		context,
+	const sessionRes = await context.media.createUploadSession(context, {
 		key: keyRes.data,
-		meta: {
-			host: getBaseUrl(context),
-			secretKey: context.config.secrets.cookie,
-			mimeType: data.mimeType,
-			extension: extension || undefined,
-			size: data.size,
-		},
+		host: getBaseUrl(context),
+		secretKey: context.config.secrets.cookie,
+		mimeType: data.mimeType,
+		extension: extension || undefined,
+		size: data.size,
 		tenant,
 	});
 	if (sessionRes.error) {

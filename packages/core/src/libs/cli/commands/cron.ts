@@ -98,6 +98,7 @@ const cronCommand = async (jobName?: string) => {
 		const configPath = getConfigPath(process.cwd());
 		const configRes = await loadConfigFile({
 			path: configPath,
+			prepareRuntime: true,
 		});
 		config = configRes.config;
 		runtimeContext = configRes.runtimeContext;

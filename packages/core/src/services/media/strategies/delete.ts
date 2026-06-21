@@ -21,8 +21,7 @@ const deleteObject: ServiceFn<
 	const tenant = resolveMediaKeyTenant(context.config, data.key);
 
 	const [_, updateStorageRes] = await Promise.all([
-		mediaStrategyRes.data.delete({
-			context,
+		mediaStrategyRes.data.delete(context, {
 			key: data.key,
 			tenant,
 		}),

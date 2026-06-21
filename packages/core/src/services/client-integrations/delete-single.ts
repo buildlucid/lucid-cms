@@ -37,7 +37,7 @@ const deleteSingle: ServiceFn<
 	if (deleteRes.error) return deleteRes;
 
 	const cacheKey = cacheKeys.auth.client(checkExistsRes.data.key);
-	await context.kv.delete(context, cacheKey, { hash: true });
+	await context.kv.delete(context, { key: cacheKey, hash: true });
 
 	return {
 		error: undefined,

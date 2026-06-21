@@ -9,7 +9,7 @@ import { keyPaths } from "../helpers.js";
 import { copyStoredMetadata, deleteStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
-	const rename: MediaAdapterServiceRenameKey = async (props) => {
+	const rename: MediaAdapterServiceRenameKey = async (_context, props) => {
 		try {
 			const from = keyPaths(props.from, options.uploadDir);
 			const to = keyPaths(props.to, options.uploadDir);

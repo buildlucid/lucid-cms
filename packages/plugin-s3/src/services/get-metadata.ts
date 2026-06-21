@@ -8,7 +8,7 @@ import {
 } from "../utils/metadata-headers.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const getMetadata: MediaAdapterServiceGetMeta = async ({ key }) => {
+	const getMetadata: MediaAdapterServiceGetMeta = async (_context, { key }) => {
 		try {
 			const response = await client.sign(
 				new Request(

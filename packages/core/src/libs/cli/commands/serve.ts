@@ -39,6 +39,7 @@ const serveCommand = async () => {
 	try {
 		const configRes = await loadConfigFile({
 			path: configPath,
+			prepareRuntime: true,
 		});
 		const translations = await prepareTranslations({
 			config: configRes.config,

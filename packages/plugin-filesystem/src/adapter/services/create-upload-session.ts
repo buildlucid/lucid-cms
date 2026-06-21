@@ -8,6 +8,7 @@ import { FILE_SYSTEM_UPLOAD_PATH } from "../helpers.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
 	const createUploadSession: MediaAdapterServiceCreateUploadSession = async (
+		_context,
 		props,
 	) => {
 		try {
@@ -17,13 +18,13 @@ export default (options: FileSystemMediaAdapterOptions) => {
 					mode: "single",
 					key: props.key,
 					url: createSignedMediaUrl({
-						host: props.meta.host,
+						host: props.host,
 						path: FILE_SYSTEM_UPLOAD_PATH,
 						key: props.key,
 						secretKey: options.secretKey,
 						query: {
-							mimeType: props.meta.mimeType,
-							extension: props.meta.extension,
+							mimeType: props.mimeType,
+							extension: props.extension,
 						},
 					}),
 				},

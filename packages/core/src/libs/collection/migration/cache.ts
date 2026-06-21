@@ -37,10 +37,9 @@ const getCachedMigrationResult = async (
 	const memoryCached = migrationCache.get(configSignature);
 	if (memoryCached) return memoryCached;
 
-	const cached = await context.kv.get<CachedMigrationResult>(
-		context,
-		getCacheKey(configSignature),
-	);
+	const cached = await context.kv.get<CachedMigrationResult>(context, {
+		key: getCacheKey(configSignature),
+	});
 	if (!cached) return undefined;
 
 	migrationCache.set(configSignature, cached);
@@ -53,7 +52,10 @@ const setCachedMigrationResult = async (
 	result: CachedMigrationResult,
 ): Promise<void> => {
 	migrationCache.set(configSignature, result);
-	await context.kv.set(context, getCacheKey(configSignature), result);
+	await context.kv.set(context, {
+		key: getCacheKey(configSignature),
+		value: result,
+	});
 };
 
 export const resolveCachedMigrationResult = async (

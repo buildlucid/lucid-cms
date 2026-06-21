@@ -12,13 +12,10 @@ const clearClientMediaSingleCache = (
 	Promise.all(
 		[null, ...context.config.tenants.map((tenant) => tenant.key)].map(
 			(tenantKey) =>
-				context.kv.delete(
-					context,
-					cacheKeys.http.static.clientMediaSingle(id, tenantKey),
-					{
-						hash: true,
-					},
-				),
+				context.kv.delete(context, {
+					key: cacheKeys.http.static.clientMediaSingle(id, tenantKey),
+					hash: true,
+				}),
 		),
 	);
 

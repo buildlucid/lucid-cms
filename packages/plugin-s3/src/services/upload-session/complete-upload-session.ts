@@ -12,7 +12,7 @@ export const completeUploadSession = (
 	client: AwsClient,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceCompleteUploadSession => {
-	return async (props) => {
+	return async (_context, props) => {
 		try {
 			const body = `<CompleteMultipartUpload>${props.parts
 				.sort((a, b) => a.partNumber - b.partNumber)

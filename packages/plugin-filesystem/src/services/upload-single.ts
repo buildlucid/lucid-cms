@@ -58,16 +58,13 @@ const uploadSingle: ServiceFn<
 	});
 	if (fileMetadataRes.error) return fileMetadataRes;
 
-	const uploadRes = await mediaAdapterRes.data.upload({
-		context,
+	const uploadRes = await mediaAdapterRes.data.upload(context, {
 		key: data.key,
-		data: data.buffer,
-		meta: {
-			mimeType: fileMetadataRes.data.mimeType,
-			extension: fileMetadataRes.data.extension,
-			size: data.buffer.length,
-			type: fileMetadataRes.data.type,
-		},
+		body: data.buffer,
+		mimeType: fileMetadataRes.data.mimeType,
+		extension: fileMetadataRes.data.extension,
+		size: data.buffer.length,
+		type: fileMetadataRes.data.type,
 		tenant: resolveMediaKeyTenant(context.config, data.key),
 	});
 	if (uploadRes.error) return uploadRes;

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import stream from "./steam.js";
+import stream from "./stream.js";
 
 describe("stream", () => {
 	afterEach(() => {
@@ -31,11 +31,10 @@ describe("stream", () => {
 			},
 		);
 
-		const response = await service({
+		const response = await service({} as never, {
 			key: "public/uuid",
 			ifNoneMatch: '"etag"',
 			tenant: null,
-			context: {} as never,
 		});
 
 		expect(response.error).toBeUndefined();

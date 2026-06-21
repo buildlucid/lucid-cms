@@ -39,6 +39,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			const configResult = await loadConfigFile({
 				path: configPath,
+				prepareRuntime: true,
 			});
 			buildOutDir = configResult.config.build.paths.outDir;
 			buildWatchIgnore = configResult.config.build.watch?.ignore ?? [];

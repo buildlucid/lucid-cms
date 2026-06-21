@@ -42,27 +42,33 @@ export type MediaAdapterCreateUploadSessionResponse =
 			uploadedParts: MediaAdapterUploadPart[];
 	  };
 
-export type MediaAdapterServiceCreateUploadSession = (props: {
+export type MediaAdapterCreateUploadSessionParams = {
 	key: string;
-	meta: {
-		host: string;
-		secretKey: string;
-		mimeType: string;
-		extension?: string;
-		size: number;
-	};
+	host: string;
+	secretKey: string;
+	mimeType: string;
+	extension?: string;
+	size: number;
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<MediaAdapterCreateUploadSessionResponse>;
+};
 
-export type MediaAdapterServiceGetUploadPartUrls = (props: {
+export type MediaAdapterServiceCreateUploadSession = (
+	context: ServiceContext,
+	params: MediaAdapterCreateUploadSessionParams,
+) => ServiceResponse<MediaAdapterCreateUploadSessionResponse>;
+
+export type MediaAdapterGetUploadPartUrlsParams = {
 	key: string;
 	uploadId: string;
 	partNumbers: number[];
 	expiresAt: string;
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<{
+};
+
+export type MediaAdapterServiceGetUploadPartUrls = (
+	context: ServiceContext,
+	params: MediaAdapterGetUploadPartUrlsParams,
+) => ServiceResponse<{
 	parts: Array<{
 		partNumber: number;
 		url: string;
@@ -70,57 +76,75 @@ export type MediaAdapterServiceGetUploadPartUrls = (props: {
 	}>;
 }>;
 
-export type MediaAdapterServiceListUploadParts = (props: {
+export type MediaAdapterListUploadPartsParams = {
 	key: string;
 	uploadId: string;
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<{
+};
+
+export type MediaAdapterServiceListUploadParts = (
+	context: ServiceContext,
+	params: MediaAdapterListUploadPartsParams,
+) => ServiceResponse<{
 	uploadedParts: MediaAdapterUploadPart[];
 }>;
 
-export type MediaAdapterServiceCompleteUploadSession = (props: {
+export type MediaAdapterCompleteUploadSessionParams = {
 	key: string;
 	uploadId: string;
 	parts: MediaAdapterUploadPart[];
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<{
+};
+
+export type MediaAdapterServiceCompleteUploadSession = (
+	context: ServiceContext,
+	params: MediaAdapterCompleteUploadSessionParams,
+) => ServiceResponse<{
 	etag?: string | null;
 }>;
 
-export type MediaAdapterServiceAbortUploadSession = (props: {
+export type MediaAdapterAbortUploadSessionParams = {
 	key: string;
 	uploadId: string;
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<undefined>;
+};
 
-export type MediaAdapterServiceGetDownloadUrl = (props: {
+export type MediaAdapterServiceAbortUploadSession = (
+	context: ServiceContext,
+	params: MediaAdapterAbortUploadSessionParams,
+) => ServiceResponse<undefined>;
+
+export type MediaAdapterGetDownloadUrlParams = {
 	key: string;
-	meta: {
-		host: string;
-		secretKey: string;
-		fileName?: string | null;
-		extension?: string | null;
-	};
+	host: string;
+	secretKey: string;
+	fileName?: string | null;
+	extension?: string | null;
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<{
+};
+
+export type MediaAdapterServiceGetDownloadUrl = (
+	context: ServiceContext,
+	params: MediaAdapterGetDownloadUrlParams,
+) => ServiceResponse<{
 	url: string;
 }>;
 
-export type MediaAdapterServiceGetMeta = (props: {
+export type MediaAdapterGetMetaParams = {
 	key: string;
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<{
+};
+
+export type MediaAdapterServiceGetMeta = (
+	context: ServiceContext,
+	params: MediaAdapterGetMetaParams,
+) => ServiceResponse<{
 	size: number;
 	mimeType: string | null;
 	etag: string | null;
 }>;
 
-export type MediaAdapterServiceStream = (props: {
+export type MediaAdapterStreamParams = {
 	key: string;
 	ifNoneMatch?: string;
 	range?: {
@@ -128,8 +152,12 @@ export type MediaAdapterServiceStream = (props: {
 		end?: number;
 	};
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<{
+};
+
+export type MediaAdapterServiceStream = (
+	context: ServiceContext,
+	params: MediaAdapterStreamParams,
+) => ServiceResponse<{
 	contentLength: number | undefined;
 	contentType: string | undefined;
 	body: MediaAdapterStreamBody;
@@ -143,39 +171,53 @@ export type MediaAdapterServiceStream = (props: {
 	};
 }>;
 
-export type MediaAdapterServiceUploadSingle = (props: {
+export type MediaAdapterUploadSingleParams = {
 	key: string;
-	data: MediaAdapterUploadBody;
-	meta: {
-		mimeType: string;
-		extension: string;
-		size: number;
-		type: MediaType;
-	};
+	body: MediaAdapterUploadBody;
+	mimeType: string;
+	extension: string;
+	size: number;
+	type: MediaType;
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<{
+};
+
+export type MediaAdapterServiceUploadSingle = (
+	context: ServiceContext,
+	params: MediaAdapterUploadSingleParams,
+) => ServiceResponse<{
 	etag?: string;
 }>;
 
-export type MediaAdapterServiceDeleteSingle = (props: {
+export type MediaAdapterDeleteSingleParams = {
 	key: string;
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<undefined>;
+};
 
-export type MediaAdapterServiceDeleteMultiple = (props: {
+export type MediaAdapterServiceDeleteSingle = (
+	context: ServiceContext,
+	params: MediaAdapterDeleteSingleParams,
+) => ServiceResponse<undefined>;
+
+export type MediaAdapterDeleteMultipleParams = {
 	keys: string[];
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<undefined>;
+};
 
-export type MediaAdapterServiceRenameKey = (props: {
+export type MediaAdapterServiceDeleteMultiple = (
+	context: ServiceContext,
+	params: MediaAdapterDeleteMultipleParams,
+) => ServiceResponse<undefined>;
+
+export type MediaAdapterRenameKeyParams = {
 	from: string;
 	to: string;
 	tenant: MediaAdapterTenant;
-	context: ServiceContext;
-}) => ServiceResponse<undefined>;
+};
+
+export type MediaAdapterServiceRenameKey = (
+	context: ServiceContext,
+	params: MediaAdapterRenameKeyParams,
+) => ServiceResponse<undefined>;
 
 export type MediaAdapter<T = undefined> = T extends undefined
 	? () => MediaAdapterInstance | Promise<MediaAdapterInstance>

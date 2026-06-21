@@ -21,16 +21,13 @@ const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
 
 	const queueResults = await Promise.all(
 		collectionsWithRevisions.map(async (collection) => {
-			const queueRes = await context.queue.add(
-				"document-versions:delete-expired",
-				{
-					payload: {
-						collectionKey: collection.key,
-						retentionDays: collection.getData.config.revisionRetentionDays,
-					},
-					context: context,
+			const queueRes = await context.queue.add(context, {
+				event: "document-versions:delete-expired",
+				payload: {
+					collectionKey: collection.key,
+					retentionDays: collection.getData.config.revisionRetentionDays,
 				},
-			);
+			});
 			return queueRes;
 		}),
 	);

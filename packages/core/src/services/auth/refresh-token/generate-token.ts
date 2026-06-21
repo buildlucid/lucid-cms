@@ -91,12 +91,12 @@ const generateToken = async (
 	const context = createServiceContext(c);
 	const kv = context.kv;
 
-	await kv.set(
-		context,
-		cacheKeys.auth.refresh(token),
-		{ user_id: userId },
-		{ expirationTtl: constants.refreshTokenExpiration, hash: true },
-	);
+	await kv.set(context, {
+		key: cacheKeys.auth.refresh(token),
+		value: { user_id: userId },
+		expirationTtl: constants.refreshTokenExpiration,
+		hash: true,
+	});
 
 	return {
 		error: undefined,

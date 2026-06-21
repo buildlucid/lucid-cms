@@ -30,6 +30,7 @@ const buildCommand = async (options?: {
 		const buildProject = await loadBuildProject({
 			silent,
 			renderEmailTemplates: false,
+			prepareRuntime: true,
 		});
 		const { configPath, loaded: configRes } = buildProject;
 		const translate = createTranslator({

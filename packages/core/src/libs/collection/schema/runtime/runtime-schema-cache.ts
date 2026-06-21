@@ -48,7 +48,9 @@ export const getRuntimeSchemaFromCache = async (
 	const memoryCached = schemaCache.get(cacheKey);
 	if (memoryCached) return memoryCached;
 
-	const kvCached = await context.kv.get<CollectionSchema>(context, cacheKey);
+	const kvCached = await context.kv.get<CollectionSchema>(context, {
+		key: cacheKey,
+	});
 	if (!kvCached) return undefined;
 
 	schemaCache.set(cacheKey, kvCached);
@@ -75,7 +77,10 @@ export const setRuntimeSchema = async (
 	const cacheKey = getSchemaKey(collectionKey, signature);
 
 	schemaCache.set(cacheKey, schema);
-	await context.kv.set(context, cacheKey, schema);
+	await context.kv.set(context, {
+		key: cacheKey,
+		value: schema,
+	});
 };
 
 export const resolveRuntimeSchema = async (

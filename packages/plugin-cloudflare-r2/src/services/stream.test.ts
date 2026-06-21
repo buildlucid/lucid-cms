@@ -17,16 +17,18 @@ describe("stream", () => {
 		} as unknown as R2Bucket;
 		const service = stream({ binding: "R2" });
 
-		const response = await service({
-			key: "public/uuid",
-			ifNoneMatch: '"etag"',
-			tenant: null,
-			context: {
+		const response = await service(
+			{
 				env: {
 					R2: binding,
 				},
 			} as never,
-		});
+			{
+				key: "public/uuid",
+				ifNoneMatch: '"etag"',
+				tenant: null,
+			},
+		);
 
 		expect(response.error).toBeUndefined();
 		expect(response.data?.notModified).toBe(true);

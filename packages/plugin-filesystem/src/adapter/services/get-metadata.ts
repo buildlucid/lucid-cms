@@ -10,7 +10,7 @@ import { keyPaths } from "../helpers.js";
 import { readStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
-	const getMetadata: MediaAdapterServiceGetMeta = async (props) => {
+	const getMetadata: MediaAdapterServiceGetMeta = async (_context, props) => {
 		try {
 			const { targetPath } = keyPaths(props.key, options.uploadDir);
 			try {

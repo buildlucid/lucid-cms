@@ -58,10 +58,9 @@ const storageDownload =
 		}
 
 		const streamMedia = stream(pluginOptions);
-		const streamRes = await streamMedia({
+		const streamRes = await streamMedia(context, {
 			key: data.key,
 			tenant: resolveMediaKeyTenant(context.config, data.key),
-			context,
 		});
 		if (streamRes.error) {
 			return streamRes;

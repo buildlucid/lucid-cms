@@ -15,8 +15,7 @@ const rename: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const res = await mediaStrategyRes.data.rename({
-		context,
+	const res = await mediaStrategyRes.data.rename(context, {
 		from: data.from,
 		to: data.to,
 		tenant: resolveMediaKeyTenant(context.config, data.to),

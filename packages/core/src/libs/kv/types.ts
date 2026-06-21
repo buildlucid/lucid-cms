@@ -5,14 +5,6 @@ export type KVAdapter<T = undefined> = T extends undefined
 	? () => KVAdapterInstance | Promise<KVAdapterInstance>
 	: (options: T) => KVAdapterInstance | Promise<KVAdapterInstance>;
 
-export interface KVKeyOptions {
-	/**
-	 * If true, the adapter should hash this key before performing the operation.
-	 * Useful for KV backends with key size limits or performance issues with large keys.
-	 */
-	hash?: boolean;
-}
-
 /** Namespace prefix applied before provider-specific key limits are checked. */
 export type KVNamespace = string | false;
 
@@ -27,7 +19,16 @@ export interface KVAdapterOptions {
 /**
  * Batch key input. Object form lets callers override key options per item.
  */
-export type KVKeyInput = string | { key: string; options?: KVKeyOptions };
+export type KVKeyInput =
+	| string
+	| {
+			key: string;
+			/**
+			 * If true, the adapter should hash this key before performing the operation.
+			 * Useful for KV backends with key size limits or performance issues with large keys.
+			 */
+			hash?: boolean;
+	  };
 
 /**
  * Batch set input. Object form keeps value and per-item write options together.
@@ -35,14 +36,57 @@ export type KVKeyInput = string | { key: string; options?: KVKeyOptions };
 export type KVSetInput<T = unknown> = {
 	key: string;
 	value: T;
-	options?: KVSetOptions;
-};
-
-/** Options for adapters that support atomic counter increments. */
-export interface KVIncrementOptions extends KVKeyOptions {
+	hash?: boolean;
 	expirationTtl?: number; // seconds
 	expirationTimestamp?: number; // unix timestamp in seconds
-}
+};
+
+export type KVGetParams = {
+	key: string;
+	hash?: boolean;
+};
+
+export type KVSetParams<T = unknown> = {
+	key: string;
+	value: T;
+	hash?: boolean;
+	expirationTtl?: number; // seconds
+	expirationTimestamp?: number; // unix timestamp in seconds
+};
+
+export type KVHasParams = {
+	key: string;
+	hash?: boolean;
+};
+
+export type KVDeleteParams = {
+	key: string;
+	hash?: boolean;
+};
+
+export type KVGetManyParams = {
+	keys: KVKeyInput[];
+	hash?: boolean;
+};
+
+export type KVSetManyParams<T = unknown> = {
+	items: Array<KVSetInput<T>>;
+	hash?: boolean;
+	expirationTtl?: number; // seconds
+	expirationTimestamp?: number; // unix timestamp in seconds
+};
+
+export type KVDeleteManyParams = {
+	keys: KVKeyInput[];
+	hash?: boolean;
+};
+
+export type KVIncrementParams = {
+	key: string;
+	hash?: boolean;
+	expirationTtl?: number; // seconds
+	expirationTimestamp?: number; // unix timestamp in seconds
+};
 
 /** Result returned from an atomic counter increment operation. */
 export interface KVIncrementResult {
@@ -59,8 +103,7 @@ export interface KVIncrementResult {
 export type KVIncrementCapability = {
 	increment: (
 		context: ServiceContext,
-		key: string,
-		options?: KVIncrementOptions,
+		params: KVIncrementParams,
 	) => Promise<KVIncrementResult>;
 };
 
@@ -79,50 +122,30 @@ export type KVAdapterInstance = {
 		destroy?: (context: AdapterLifecycleContext) => Promise<void>;
 	};
 	/** Read a single key, returning null when the key is missing or expired. */
-	get: <R>(
-		context: ServiceContext,
-		key: string,
-		options?: KVKeyOptions,
-	) => Promise<R | null>;
+	get: <R>(context: ServiceContext, params: KVGetParams) => Promise<R | null>;
 	/** Set a single key, optionally with an expiration. */
-	set: <T>(
-		context: ServiceContext,
-		key: string,
-		value: T,
-		options?: KVSetOptions,
-	) => Promise<void>;
+	set: <T>(context: ServiceContext, params: KVSetParams<T>) => Promise<void>;
 	/** Check whether a non-expired key exists. */
-	has: (
-		context: ServiceContext,
-		key: string,
-		options?: KVKeyOptions,
-	) => Promise<boolean>;
+	has: (context: ServiceContext, params: KVHasParams) => Promise<boolean>;
 	/** Delete a single key. */
-	delete: (
-		context: ServiceContext,
-		key: string,
-		options?: KVKeyOptions,
-	) => Promise<void>;
+	delete: (context: ServiceContext, params: KVDeleteParams) => Promise<void>;
 	/**
 	 * Read many keys, preserving input order. Missing or expired keys should be
 	 * returned with a null value.
 	 */
 	getMany: <R>(
 		context: ServiceContext,
-		keys: KVKeyInput[],
-		options?: KVKeyOptions,
+		params: KVGetManyParams,
 	) => Promise<Array<{ key: string; value: R | null }>>;
 	/** Set many keys. Adapters should use provider batch primitives where available. */
 	setMany: <T>(
 		context: ServiceContext,
-		items: Array<KVSetInput<T>>,
-		options?: KVSetOptions,
+		params: KVSetManyParams<T>,
 	) => Promise<void>;
 	/** Delete many keys. Adapters should use provider batch primitives where available. */
 	deleteMany: (
 		context: ServiceContext,
-		keys: KVKeyInput[],
-		options?: KVKeyOptions,
+		params: KVDeleteManyParams,
 	) => Promise<void>;
 	/**
 	 * Clear Lucid-owned keys for the adapter namespace. Adapters configured with
@@ -130,8 +153,3 @@ export type KVAdapterInstance = {
 	 */
 	clear: (context: ServiceContext) => Promise<void>;
 } & Partial<KVIncrementCapability>;
-
-export interface KVSetOptions extends KVKeyOptions {
-	expirationTtl?: number; // seconds
-	expirationTimestamp?: number; // unix timestamp in seconds
-}

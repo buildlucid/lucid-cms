@@ -31,15 +31,12 @@ const requestDownload: ServiceFn<
 	});
 	if (mediaRes.error) return mediaRes;
 
-	const downloadUrlRes = await mediaStrategyRes.data.getDownloadUrl({
-		context,
+	const downloadUrlRes = await mediaStrategyRes.data.getDownloadUrl(context, {
 		key: data.mediaKey,
-		meta: {
-			host: getBaseUrl(context),
-			secretKey: context.config.secrets.cookie,
-			fileName: mediaRes.data?.file_name,
-			extension: mediaRes.data?.file_extension,
-		},
+		host: getBaseUrl(context),
+		secretKey: context.config.secrets.cookie,
+		fileName: mediaRes.data?.file_name,
+		extension: mediaRes.data?.file_extension,
 		tenant: resolveMediaKeyTenant(context.config, data.mediaKey),
 	});
 	if (downloadUrlRes.error) return downloadUrlRes;

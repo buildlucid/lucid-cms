@@ -38,13 +38,10 @@ const clientAuthentication = createMiddleware(
 		}
 
 		const cacheKey = cacheKeys.auth.client(decodedKey);
-		const cached = await context.kv.get<LucidClientIntegrationAuth>(
-			context,
-			cacheKey,
-			{
-				hash: true,
-			},
-		);
+		const cached = await context.kv.get<LucidClientIntegrationAuth>(context, {
+			key: cacheKey,
+			hash: true,
+		});
 
 		if (cached) {
 			const tenantKey = multiTenancyEnabled(c.get("config"))
@@ -88,7 +85,9 @@ const clientAuthentication = createMiddleware(
 		const response = await next();
 
 		void Promise.all([
-			context.kv.set(context, cacheKey, verifyApiKey.data, {
+			context.kv.set(context, {
+				key: cacheKey,
+				value: verifyApiKey.data,
 				expirationTtl: minutesToSeconds(5),
 				hash: true,
 			}),

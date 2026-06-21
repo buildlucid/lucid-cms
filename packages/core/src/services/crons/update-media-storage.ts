@@ -4,9 +4,9 @@ import type { ServiceFn } from "../../utils/services/types.js";
  * Queues a job to recalculate the media storage usage
  */
 const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
-	const queueRes = await context.queue.add("media:update-storage", {
+	const queueRes = await context.queue.add(context, {
+		event: "media:update-storage",
 		payload: {},
-		context: context,
 	});
 	if (queueRes.error) return queueRes;
 

@@ -9,7 +9,10 @@ import { keyPaths } from "../helpers.js";
 import { deleteStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
-	const deletSingle: MediaAdapterServiceDeleteSingle = async (props) => {
+	const deleteSingle: MediaAdapterServiceDeleteSingle = async (
+		_context,
+		props,
+	) => {
 		try {
 			const { targetPath } = keyPaths(props.key, options.uploadDir);
 			try {
@@ -43,5 +46,5 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			};
 		}
 	};
-	return deletSingle;
+	return deleteSingle;
 };

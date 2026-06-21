@@ -12,7 +12,7 @@ export const completeUploadSession = (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceCompleteUploadSession => {
-	return async (props) => {
+	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
 				return {

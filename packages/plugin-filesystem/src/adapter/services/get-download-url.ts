@@ -7,19 +7,22 @@ import type {
 import { FILE_SYSTEM_DOWNLOAD_PATH } from "../helpers.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
-	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async (props) => {
+	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async (
+		_context,
+		props,
+	) => {
 		try {
 			return {
 				error: undefined,
 				data: {
 					url: createSignedMediaUrl({
-						host: props.meta.host,
+						host: props.host,
 						path: FILE_SYSTEM_DOWNLOAD_PATH,
 						key: props.key,
 						secretKey: options.secretKey,
 						query: {
-							fileName: props.meta.fileName ?? undefined,
-							extension: props.meta.extension ?? undefined,
+							fileName: props.fileName ?? undefined,
+							extension: props.extension ?? undefined,
 						},
 					}),
 				},

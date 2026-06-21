@@ -86,7 +86,8 @@ function workerQueueAdapter(
 				}
 			},
 		},
-		add: async (event, params) => {
+		add: async (context, params) => {
+			const { event } = params;
 			if (!worker) {
 				return {
 					error: {
@@ -104,7 +105,7 @@ function workerQueueAdapter(
 				data: { event },
 			});
 
-			const createJobRes = await insertJobs(params.context, {
+			const createJobRes = await insertJobs(context, {
 				event,
 				payloads: [params.payload],
 				options: params.options,
@@ -135,7 +136,8 @@ function workerQueueAdapter(
 				},
 			};
 		},
-		addBatch: async (event, params) => {
+		addBatch: async (context, params) => {
+			const { event } = params;
 			if (!worker) {
 				return {
 					error: {
@@ -153,7 +155,7 @@ function workerQueueAdapter(
 				data: { event, count: params.payloads.length },
 			});
 
-			const createJobsRes = await insertJobs(params.context, {
+			const createJobsRes = await insertJobs(context, {
 				event,
 				payloads: params.payloads,
 				options: params.options,

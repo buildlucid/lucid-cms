@@ -39,7 +39,9 @@ const migrateResetCommand = (props?: {
 				config = props.config;
 				translationStore = props.translationStore;
 			} else {
-				const res = await loadConfigFile();
+				const res = await loadConfigFile({
+					prepareRuntime: true,
+				});
 				config = res.config;
 				env = res.env;
 				runtimeContext = res.runtimeContext;

@@ -16,13 +16,10 @@ export const getNamespaceToken = async (
 	context: ServiceContext,
 	namespace: string,
 ) => {
-	const token = await context.kv.get<string>(
-		context,
-		cacheKeys.namespace.token(namespace),
-		{
-			hash: true,
-		},
-	);
+	const token = await context.kv.get<string>(context, {
+		key: cacheKeys.namespace.token(namespace),
+		hash: true,
+	});
 
 	return token ?? DEFAULT_NAMESPACE_TOKEN;
 };
@@ -35,13 +32,12 @@ export const getNamespaceTokens = async (
 	namespaces: string[],
 ) => {
 	const uniqueNamespaces = Array.from(new Set(namespaces));
-	const tokens = await context.kv.getMany<string>(
-		context,
-		uniqueNamespaces.map((namespace) => ({
+	const tokens = await context.kv.getMany<string>(context, {
+		keys: uniqueNamespaces.map((namespace) => ({
 			key: cacheKeys.namespace.token(namespace),
-			options: { hash: true },
+			hash: true,
 		})),
-	);
+	});
 	const tokenPairs = uniqueNamespaces.map((namespace, index) => [
 		namespace,
 		tokens[index]?.value ?? DEFAULT_NAMESPACE_TOKEN,
@@ -57,14 +53,11 @@ export const invalidateNamespace = async (
 	context: ServiceContext,
 	namespace: string,
 ) => {
-	await context.kv.set(
-		context,
-		cacheKeys.namespace.token(namespace),
-		createNamespaceToken(),
-		{
-			hash: true,
-		},
-	);
+	await context.kv.set(context, {
+		key: cacheKeys.namespace.token(namespace),
+		value: createNamespaceToken(),
+		hash: true,
+	});
 };
 
 /**
@@ -74,12 +67,11 @@ export const invalidateNamespaces = async (
 	context: ServiceContext,
 	namespaces: string[],
 ) => {
-	await context.kv.setMany(
-		context,
-		Array.from(new Set(namespaces)).map((namespace) => ({
+	await context.kv.setMany(context, {
+		items: Array.from(new Set(namespaces)).map((namespace) => ({
 			key: cacheKeys.namespace.token(namespace),
 			value: createNamespaceToken(),
-			options: { hash: true },
+			hash: true,
 		})),
-	);
+	});
 };

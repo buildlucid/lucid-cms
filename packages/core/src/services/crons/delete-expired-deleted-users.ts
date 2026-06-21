@@ -75,13 +75,13 @@ const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
 	);
 
 	for (const group of groups) {
-		const queueRes = await context.queue.addBatch("users:delete", {
+		const queueRes = await context.queue.addBatch(context, {
+			event: "users:delete",
 			payloads: group.payloads,
 			options:
 				group.tenantKeys.length > 0
 					? { tenantKeys: group.tenantKeys }
 					: undefined,
-			context: context,
 		});
 		if (queueRes.error) return queueRes;
 	}

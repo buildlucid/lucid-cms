@@ -75,8 +75,7 @@ const permanentlyDeleteMedia: ServiceFn<
 	const tenant = resolveMediaKeyTenant(context.config, deleteMediaRes.data.key);
 
 	const [_, deleteObjectRes] = await Promise.all([
-		mediaStrategyRes.data.deleteMultiple({
-			context,
+		mediaStrategyRes.data.deleteMultiple(context, {
 			keys: processedImagesRes.data.map((i) => i.key),
 			tenant,
 		}),

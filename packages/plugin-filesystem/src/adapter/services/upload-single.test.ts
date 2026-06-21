@@ -31,25 +31,21 @@ describe("file-system upload metadata", () => {
 			secretKey: "secret",
 		};
 
-		const uploadRes = await uploadSingle(options)({
+		const uploadRes = await uploadSingle(options)({} as never, {
 			key: "public/uuid",
-			data: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>'),
-			meta: {
-				mimeType: "image/svg+xml",
-				extension: "svg",
-				size: 46,
-				type: "image",
-			},
+			body: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>'),
+			mimeType: "image/svg+xml",
+			extension: "svg",
+			size: 46,
+			type: "image",
 			tenant: null,
-			context: {} as never,
 		});
 
 		expect(uploadRes.error).toBeUndefined();
 
-		const metadataRes = await getMetadata(options)({
+		const metadataRes = await getMetadata(options)({} as never, {
 			key: "public/uuid",
 			tenant: null,
-			context: {} as never,
 		});
 		expect(metadataRes.error).toBeUndefined();
 		expect(metadataRes.data?.mimeType).toBe("image/svg+xml");
@@ -68,20 +64,18 @@ describe("file-system upload metadata", () => {
 			access(path.join(uploadDir, ".lucid", "file-system-meta.json")),
 		).rejects.toThrow();
 
-		const streamRes = await stream(options)({
+		const streamRes = await stream(options)({} as never, {
 			key: "public/uuid",
 			tenant: null,
-			context: {} as never,
 		});
 		expect(streamRes.error).toBeUndefined();
 		expect(streamRes.data?.contentType).toBe("image/svg+xml");
 		expect(streamRes.data?.etag).toBeTruthy();
 
-		const conditionalStreamRes = await stream(options)({
+		const conditionalStreamRes = await stream(options)({} as never, {
 			key: "public/uuid",
 			ifNoneMatch: `"${streamRes.data?.etag}"`,
 			tenant: null,
-			context: {} as never,
 		});
 		expect(conditionalStreamRes.error).toBeUndefined();
 		expect(conditionalStreamRes.data?.notModified).toBe(true);
@@ -94,32 +88,27 @@ describe("file-system upload metadata", () => {
 			secretKey: "secret",
 		};
 
-		await uploadSingle(options)({
+		await uploadSingle(options)({} as never, {
 			key: "public/source",
-			data: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>'),
-			meta: {
-				mimeType: "image/svg+xml",
-				extension: "svg",
-				size: 46,
-				type: "image",
-			},
+			body: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>'),
+			mimeType: "image/svg+xml",
+			extension: "svg",
+			size: 46,
+			type: "image",
 			tenant: null,
-			context: {} as never,
 		});
 
-		const renameRes = await rename(options)({
+		const renameRes = await rename(options)({} as never, {
 			from: "public/source",
 			to: "private/source",
 			tenant: null,
-			context: {} as never,
 		});
 
 		expect(renameRes.error).toBeUndefined();
 
-		const streamRes = await stream(options)({
+		const streamRes = await stream(options)({} as never, {
 			key: "private/source",
 			tenant: null,
-			context: {} as never,
 		});
 		expect(streamRes.error).toBeUndefined();
 		expect(streamRes.data?.contentType).toBe("image/svg+xml");

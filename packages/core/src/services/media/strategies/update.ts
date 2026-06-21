@@ -47,8 +47,7 @@ const update: ServiceFn<
 	);
 
 	const cleanupUpdatedKey = async () => {
-		await mediaStrategyRes.data.delete({
-			context,
+		await mediaStrategyRes.data.delete(context, {
 			key: data.updatedKey,
 			tenant: updatedTenant,
 		});
@@ -65,8 +64,7 @@ const update: ServiceFn<
 	};
 
 	// Fetch meta data from new file
-	const mediaMetaRes = await mediaStrategyRes.data.getMeta({
-		context,
+	const mediaMetaRes = await mediaStrategyRes.data.getMeta(context, {
 		key: data.updatedKey,
 		tenant: updatedTenant,
 	});
@@ -154,8 +152,7 @@ const update: ServiceFn<
 	const getVerifiedTargetMeta = async (options?: {
 		requireChangedEtag?: boolean;
 	}) => {
-		const targetMetaRes = await mediaStrategyRes.data.getMeta({
-			context,
+		const targetMetaRes = await mediaStrategyRes.data.getMeta(context, {
 			key: data.targetKey,
 			tenant: targetTenant,
 		});
@@ -204,8 +201,7 @@ const update: ServiceFn<
 		getMediaKeyTenantKey(data.targetKey);
 
 	if (data.targetKey === data.previousKey || uploadChangesTenantScope) {
-		const updatedStreamRes = await mediaStrategyRes.data.stream({
-			context,
+		const updatedStreamRes = await mediaStrategyRes.data.stream(context, {
 			key: data.updatedKey,
 			tenant: updatedTenant,
 		});
@@ -216,19 +212,16 @@ const update: ServiceFn<
 			);
 		}
 
-		const uploadRes = await mediaStrategyRes.data.upload({
-			context,
+		const uploadRes = await mediaStrategyRes.data.upload(context, {
 			key: data.targetKey,
-			data:
+			body:
 				updatedStreamRes.data.body instanceof Uint8Array
 					? Buffer.from(updatedStreamRes.data.body)
 					: updatedStreamRes.data.body,
-			meta: {
-				mimeType: fileMetaData.data.mimeType,
-				extension: fileMetaData.data.extension,
-				size: mediaMetaRes.data.size,
-				type: fileMetaData.data.type,
-			},
+			mimeType: fileMetaData.data.mimeType,
+			extension: fileMetaData.data.extension,
+			size: mediaMetaRes.data.size,
+			type: fileMetaData.data.type,
 			tenant: targetTenant,
 		});
 
@@ -252,14 +245,12 @@ const update: ServiceFn<
 		}
 
 		if (data.targetKey !== data.previousKey) {
-			const deleteOldRes = await mediaStrategyRes.data.delete({
-				context,
+			const deleteOldRes = await mediaStrategyRes.data.delete(context, {
 				key: data.previousKey,
 				tenant: previousTenant,
 			});
 			if (deleteOldRes.error) {
-				await mediaStrategyRes.data.delete({
-					context,
+				await mediaStrategyRes.data.delete(context, {
 					key: data.targetKey,
 					tenant: targetTenant,
 				});
@@ -283,8 +274,7 @@ const update: ServiceFn<
 		}
 
 		let sourceDeleted = true;
-		const deleteUpdatedRes = await mediaStrategyRes.data.delete({
-			context,
+		const deleteUpdatedRes = await mediaStrategyRes.data.delete(context, {
 			key: data.updatedKey,
 			tenant: updatedTenant,
 		});
@@ -306,8 +296,7 @@ const update: ServiceFn<
 		};
 	}
 
-	const promoteRes = await mediaStrategyRes.data.rename({
-		context,
+	const promoteRes = await mediaStrategyRes.data.rename(context, {
 		from: data.updatedKey,
 		to: data.targetKey,
 		tenant: targetTenant,
@@ -320,22 +309,19 @@ const update: ServiceFn<
 			);
 		}
 
-		const deleteUpdatedRes = await mediaStrategyRes.data.delete({
-			context,
+		const deleteUpdatedRes = await mediaStrategyRes.data.delete(context, {
 			key: data.updatedKey,
 			tenant: updatedTenant,
 		});
 		const sourceDeleted = deleteUpdatedRes.error === undefined;
 
 		if (data.targetKey !== data.previousKey) {
-			const deleteOldRes = await mediaStrategyRes.data.delete({
-				context,
+			const deleteOldRes = await mediaStrategyRes.data.delete(context, {
 				key: data.previousKey,
 				tenant: previousTenant,
 			});
 			if (deleteOldRes.error) {
-				await mediaStrategyRes.data.delete({
-					context,
+				await mediaStrategyRes.data.delete(context, {
 					key: data.targetKey,
 					tenant: targetTenant,
 				});
@@ -378,14 +364,12 @@ const update: ServiceFn<
 	}
 
 	if (data.targetKey !== data.previousKey) {
-		const deleteOldRes = await mediaStrategyRes.data.delete({
-			context,
+		const deleteOldRes = await mediaStrategyRes.data.delete(context, {
 			key: data.previousKey,
 			tenant: previousTenant,
 		});
 		if (deleteOldRes.error) {
-			await mediaStrategyRes.data.delete({
-				context,
+			await mediaStrategyRes.data.delete(context, {
 				key: data.targetKey,
 				tenant: targetTenant,
 			});

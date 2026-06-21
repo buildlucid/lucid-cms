@@ -127,27 +127,22 @@ const sendEmail: ServiceFn<
 		};
 	} else {
 		try {
-			result = await context.email.send(
-				context,
-				{
-					to: emailRes.data.to_address,
-					subject: emailRes.data.subject ?? "",
-					from: {
-						email: emailRes.data.from_address,
-						name: emailRes.data.from_name,
-					},
-					html: htmlData ?? "",
-					cc: emailRes.data.cc ?? undefined,
-					bcc: emailRes.data.bcc ?? undefined,
-					priority: emailRes.data.priority,
-					headers: emailRes.data.headers,
-					attachments: attachmentsRes.data,
+			result = await context.email.send(context, {
+				to: emailRes.data.to_address,
+				subject: emailRes.data.subject ?? "",
+				from: {
+					email: emailRes.data.from_address,
+					name: emailRes.data.from_name,
 				},
-				{
-					data: sendData ?? {},
-					template: emailRes.data.template,
-				},
-			);
+				html: htmlData ?? "",
+				cc: emailRes.data.cc ?? undefined,
+				bcc: emailRes.data.bcc ?? undefined,
+				priority: emailRes.data.priority,
+				headers: emailRes.data.headers,
+				attachments: attachmentsRes.data,
+				data: sendData ?? {},
+				template: emailRes.data.template,
+			});
 		} catch (error) {
 			result = {
 				success: false,

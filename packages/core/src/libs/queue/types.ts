@@ -72,6 +72,18 @@ export type QueueJobOptions = {
 	tenantKeys?: string[];
 };
 
+export type QueueAdapterAddParams = {
+	event: QueueEvent;
+	payload: Record<string, unknown>;
+	options?: QueueJobOptions;
+};
+
+export type QueueAdapterAddBatchParams = {
+	event: QueueEvent;
+	payloads: Record<string, unknown>[];
+	options?: QueueJobOptions;
+};
+
 export type QueueAdapter<T = undefined> = T extends undefined
 	? () => QueueAdapterInstance | Promise<QueueAdapterInstance>
 	: (options: T) => QueueAdapterInstance | Promise<QueueAdapterInstance>;
@@ -95,20 +107,12 @@ export type QueueAdapterInstance = {
 	};
 	/** Push a job to the queue */
 	add: (
-		event: QueueEvent,
-		params: {
-			payload: Record<string, unknown>;
-			options?: QueueJobOptions;
-			context: ServiceContext;
-		},
+		context: ServiceContext,
+		params: QueueAdapterAddParams,
 	) => ServiceResponse<QueueJobResponse>;
 	/** Push multiple jobs of the same type to the queue */
 	addBatch: (
-		event: QueueEvent,
-		params: {
-			payloads: Record<string, unknown>[];
-			options?: QueueJobOptions;
-			context: ServiceContext;
-		},
+		context: ServiceContext,
+		params: QueueAdapterAddBatchParams,
 	) => ServiceResponse<QueueBatchJobResponse>;
 };

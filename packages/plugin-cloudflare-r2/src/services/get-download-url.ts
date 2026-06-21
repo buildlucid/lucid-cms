@@ -14,20 +14,20 @@ export default (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceGetDownloadUrl => {
-	return async ({ key, meta }) => {
+	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
 				return {
 					error: undefined,
 					data: {
 						url: createSignedMediaUrl({
-							host: meta.host,
+							host: props.host,
 							path: STORAGE_DOWNLOAD_PATH,
-							key,
-							secretKey: meta.secretKey,
+							key: props.key,
+							secretKey: props.secretKey,
 							query: {
-								fileName: meta.fileName ?? undefined,
-								extension: meta.extension ?? undefined,
+								fileName: props.fileName ?? undefined,
+								extension: props.extension ?? undefined,
 							},
 						}),
 					},
@@ -47,15 +47,15 @@ export default (
 			}
 
 			const objectUrl = new URL(
-				`${pluginOptions.http.endpoint}/${pluginOptions.http.bucket}/${key}`,
+				`${pluginOptions.http.endpoint}/${pluginOptions.http.bucket}/${props.key}`,
 			);
 			objectUrl.searchParams.set("X-Amz-Expires", String(PRESIGNED_URL_EXPIRY));
 			objectUrl.searchParams.set(
 				"response-content-disposition",
 				buildDownloadContentDisposition({
-					key,
-					fileName: meta.fileName,
-					extension: meta.extension,
+					key: props.key,
+					fileName: props.fileName,
+					extension: props.extension,
 				}),
 			);
 

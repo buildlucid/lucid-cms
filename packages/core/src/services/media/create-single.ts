@@ -211,8 +211,7 @@ const createSingle: ServiceFn<
 
 	if (mediaRes.data === undefined) {
 		if (context.media) {
-			await context.media.delete({
-				context,
+			await context.media.delete(context, {
 				key: mediaKey,
 				tenant: resolveMediaKeyTenant(context.config, mediaKey),
 			});
@@ -258,8 +257,7 @@ const createSingle: ServiceFn<
 		});
 		if (mediaTranslationsRes.error) {
 			if (context.media) {
-				await context.media.delete({
-					context,
+				await context.media.delete(context, {
 					key: mediaKey,
 					tenant: resolveMediaKeyTenant(context.config, mediaKey),
 				});

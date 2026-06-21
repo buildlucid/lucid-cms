@@ -18,17 +18,17 @@ export const createUploadSession = (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceCreateUploadSession => {
-	return async ({ key, meta }) => {
+	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
 				return {
 					error: undefined,
-					data: createBindingSingleSession(key, meta),
+					data: createBindingSingleSession(props.key, props),
 				};
 			}
 
 			const http = pluginOptions.http;
-			if (meta.size === 0) {
+			if (props.size === 0) {
 				if (!client) {
 					return {
 						error: {
@@ -42,7 +42,7 @@ export const createUploadSession = (
 				}
 				return {
 					error: undefined,
-					data: await createSingleSession(client, http, key, meta),
+					data: await createSingleSession(client, http, props.key, props),
 				};
 			}
 			if (!client) {
@@ -58,10 +58,10 @@ export const createUploadSession = (
 			}
 
 			const headers = new Headers();
-			if (meta.mimeType) headers.set("Content-Type", meta.mimeType);
-			if (meta.extension) headers.set("x-amz-meta-extension", meta.extension);
+			if (props.mimeType) headers.set("Content-Type", props.mimeType);
+			if (props.extension) headers.set("x-amz-meta-extension", props.extension);
 			const signed = await client.sign(
-				new Request(objectUrl(http, key, "?uploads"), {
+				new Request(objectUrl(http, props.key, "?uploads"), {
 					method: "POST",
 					headers,
 				}),
@@ -102,7 +102,7 @@ export const createUploadSession = (
 				error: undefined,
 				data: {
 					mode: "resumable",
-					key,
+					key: props.key,
 					uploadId,
 					partSize: DEFAULT_PART_SIZE,
 					expiresAt: new Date(

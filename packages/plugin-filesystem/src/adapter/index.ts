@@ -4,7 +4,7 @@ import type {
 } from "@lucidcms/core/types";
 import createUploadSession from "./services/create-upload-session.js";
 import deleteMultiple from "./services/delete-multiple.js";
-import deletSingle from "./services/delete-single.js";
+import deleteSingle from "./services/delete-single.js";
 import getDownloadUrl from "./services/get-download-url.js";
 import getMetadata from "./services/get-metadata.js";
 import rename from "./services/rename.js";
@@ -22,7 +22,7 @@ const fileSystemAdapter: MediaAdapter<FileSystemMediaAdapterOptions> = (
 		getMeta: getMetadata(options),
 		stream: stream(options),
 		upload: uploadSingle(options),
-		delete: deletSingle(options),
+		delete: deleteSingle(options),
 		deleteMultiple: deleteMultiple(options),
 		rename: rename(options),
 		getOptions: () => options,

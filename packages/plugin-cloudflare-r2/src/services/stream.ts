@@ -4,7 +4,7 @@ import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
 
 const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
-	return async ({ key, range, ifNoneMatch, context }) => {
+	return async (context, { key, range, ifNoneMatch }) => {
 		try {
 			const binding = resolveBinding(context, pluginOptions);
 			if (!range) {

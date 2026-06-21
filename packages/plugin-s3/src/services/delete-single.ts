@@ -4,7 +4,10 @@ import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const deletSingle: MediaAdapterServiceDeleteSingle = async ({ key }) => {
+	const deleteSingle: MediaAdapterServiceDeleteSingle = async (
+		_context,
+		{ key },
+	) => {
 		try {
 			const response = await client.sign(
 				new Request(
@@ -50,5 +53,5 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 		}
 	};
 
-	return deletSingle;
+	return deleteSingle;
 };

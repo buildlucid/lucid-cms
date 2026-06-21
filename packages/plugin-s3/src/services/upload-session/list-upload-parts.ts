@@ -12,7 +12,7 @@ export const listUploadParts = (
 	client: AwsClient,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceListUploadParts => {
-	return async (props) => {
+	return async (_context, props) => {
 		try {
 			const signed = await client.sign(
 				new Request(

@@ -18,25 +18,25 @@ export const createUploadSession = (
 	client: AwsClient,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceCreateUploadSession => {
-	return async ({ key, meta }) => {
+	return async (_context, props) => {
 		try {
-			if (meta.size === 0) {
+			if (props.size === 0) {
 				return {
 					error: undefined,
 					data: await createSingleUploadSession(
 						client,
 						pluginOptions,
-						key,
-						meta,
+						props.key,
+						props,
 					),
 				};
 			}
 
 			const headers = new Headers();
-			applyMetadataHeaders(headers, meta);
+			applyMetadataHeaders(headers, props);
 
 			const signed = await client.sign(
-				new Request(objectUrl(pluginOptions, key, "?uploads"), {
+				new Request(objectUrl(pluginOptions, props.key, "?uploads"), {
 					method: "POST",
 					headers,
 				}),
@@ -72,7 +72,7 @@ export const createUploadSession = (
 				error: undefined,
 				data: {
 					mode: "resumable",
-					key,
+					key: props.key,
 					uploadId,
 					partSize: DEFAULT_PART_SIZE,
 					expiresAt: new Date(

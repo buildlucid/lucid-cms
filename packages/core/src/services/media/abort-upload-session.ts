@@ -47,8 +47,7 @@ const abortUploadSession: ServiceFn<
 		sessionRes.data.adapter_upload_id &&
 		context.media.abortUploadSession
 	) {
-		const abortRes = await context.media.abortUploadSession({
-			context,
+		const abortRes = await context.media.abortUploadSession(context, {
 			key: sessionRes.data.key,
 			uploadId: sessionRes.data.adapter_upload_id,
 			tenant,
@@ -61,8 +60,7 @@ const abortUploadSession: ServiceFn<
 			where: [{ key: "key", operator: "=", value: sessionRes.data.key }],
 		}),
 		context.media
-			? context.media.delete({
-					context,
+			? context.media.delete(context, {
 					key: sessionRes.data.key,
 					tenant,
 				})

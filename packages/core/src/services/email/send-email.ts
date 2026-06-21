@@ -210,7 +210,8 @@ const sendEmail: ServiceFn<
 	});
 	if (initialTransactionRes.error) return initialTransactionRes;
 
-	const queueRes = await context.queue.add("email:send", {
+	const queueRes = await context.queue.add(context, {
+		event: "email:send",
 		payload: {
 			emailId: newEmailRes.data.id,
 			transactionId: initialTransactionRes.data?.id ?? 0,
@@ -218,7 +219,6 @@ const sendEmail: ServiceFn<
 		options: {
 			tenantKeys,
 		},
-		context: context,
 	});
 	if (queueRes.error) {
 		//* if queueing fails, update email and transaction to failed

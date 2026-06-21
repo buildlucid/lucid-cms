@@ -6,7 +6,7 @@ import { resolveBinding } from "../utils/resolve-binding.js";
 const deleteMultiple = (
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceDeleteMultiple => {
-	return async ({ keys, context }) => {
+	return async (context, { keys }) => {
 		try {
 			if (keys.length === 0) {
 				return {

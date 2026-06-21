@@ -120,33 +120,28 @@ describe("media update strategy", () => {
 		expect(response.error).toBeUndefined();
 		expect(response.data?.etag).toBe("canonical-etag");
 		expect(response.data?.sourceDeleted).toBe(false);
-		expect(getMeta).toHaveBeenCalledWith({
+		expect(getMeta).toHaveBeenCalledWith(expect.any(Object), {
 			key: "awaiting-sync/marketing/upload",
 			tenant,
-			context: expect.any(Object),
 		});
 		expect(mocks.detectStreamMimeType).toHaveBeenCalledWith(
+			expect.any(Object),
 			stream,
 			"awaiting-sync/marketing/upload",
 			tenant,
-			expect.any(Object),
 		);
-		expect(upload).toHaveBeenCalledWith({
+		expect(upload).toHaveBeenCalledWith(expect.any(Object), {
 			key: "public/marketing/original",
-			data: Buffer.from("replacement-image"),
-			meta: {
-				mimeType: "image/png",
-				extension: "png",
-				size: 42,
-				type: "image",
-			},
+			body: Buffer.from("replacement-image"),
+			mimeType: "image/png",
+			extension: "png",
+			size: 42,
+			type: "image",
 			tenant,
-			context: expect.any(Object),
 		});
-		expect(deleteObject).toHaveBeenCalledWith({
+		expect(deleteObject).toHaveBeenCalledWith(expect.any(Object), {
 			key: "awaiting-sync/marketing/upload",
 			tenant,
-			context: expect.any(Object),
 		});
 		expect(mocks.adjustInt).toHaveBeenCalledWith(expect.anything(), {
 			name: "media_storage_used:t:marketing",
@@ -205,10 +200,9 @@ describe("media update strategy", () => {
 		);
 
 		expect(response.error?.status).toBe(400);
-		expect(deleteObject).toHaveBeenCalledWith({
+		expect(deleteObject).toHaveBeenCalledWith(expect.any(Object), {
 			key: "awaiting-sync/upload",
 			tenant: null,
-			context: expect.any(Object),
 		});
 	});
 
@@ -305,32 +299,26 @@ describe("media update strategy", () => {
 			sourceDeleted: true,
 		});
 		expect(rename).not.toHaveBeenCalled();
-		expect(stream).toHaveBeenCalledWith({
+		expect(stream).toHaveBeenCalledWith(expect.any(Object), {
 			key: "awaiting-sync/upload",
 			tenant: null,
-			context: expect.any(Object),
 		});
-		expect(upload).toHaveBeenCalledWith({
+		expect(upload).toHaveBeenCalledWith(expect.any(Object), {
 			key: "private/marketing/original",
-			data: Buffer.from("replacement-image"),
-			meta: {
-				mimeType: "image/png",
-				extension: "png",
-				size: 42,
-				type: "image",
-			},
+			body: Buffer.from("replacement-image"),
+			mimeType: "image/png",
+			extension: "png",
+			size: 42,
+			type: "image",
 			tenant,
-			context: expect.any(Object),
 		});
-		expect(deleteObject).toHaveBeenCalledWith({
+		expect(deleteObject).toHaveBeenCalledWith(expect.any(Object), {
 			key: "awaiting-sync/upload",
 			tenant: null,
-			context: expect.any(Object),
 		});
-		expect(deleteObject).toHaveBeenCalledWith({
+		expect(deleteObject).toHaveBeenCalledWith(expect.any(Object), {
 			key: "public/marketing/original",
 			tenant,
-			context: expect.any(Object),
 		});
 	});
 });

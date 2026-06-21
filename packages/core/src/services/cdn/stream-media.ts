@@ -71,8 +71,7 @@ const streamMedia: ServiceFn<
 	});
 
 	if (!processingRequest.hasProcessing) {
-		const res = await mediaStrategyRes.data.stream({
-			context,
+		const res = await mediaStrategyRes.data.stream(context, {
 			key: normalizedKey,
 			ifNoneMatch: data.ifNoneMatch,
 			range: data.range,
@@ -99,8 +98,7 @@ const streamMedia: ServiceFn<
 	// Processed Image
 	let sourceExtension: string | null = processingRequest.format ?? null;
 	if (!sourceExtension) {
-		const metaRes = await mediaStrategyRes.data.getMeta({
-			context,
+		const metaRes = await mediaStrategyRes.data.getMeta(context, {
 			key: normalizedKey,
 			tenant,
 		});
@@ -119,8 +117,7 @@ const streamMedia: ServiceFn<
 		},
 	});
 
-	const res = await mediaStrategyRes.data.stream({
-		context,
+	const res = await mediaStrategyRes.data.stream(context, {
 		key: processKey,
 		ifNoneMatch: data.ifNoneMatch,
 		range: data.range,

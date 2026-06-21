@@ -1,4 +1,4 @@
-import type { KVAdapterInstance, KVKeyInput } from "../types.js";
+import type { KVAdapterInstance } from "../types.js";
 
 /**
  * Passthrough KV adapter implementation.
@@ -13,8 +13,8 @@ const passthroughKVAdapter = (): KVAdapterInstance => ({
 	set: async () => {},
 	has: async () => false,
 	delete: async () => {},
-	getMany: async (_context, keys: KVKeyInput[]) => {
-		return keys.map((key) => ({
+	getMany: async (_context, params) => {
+		return params.keys.map((key) => ({
 			key: typeof key === "string" ? key : key.key,
 			value: null,
 		}));

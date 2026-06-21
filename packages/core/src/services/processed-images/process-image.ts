@@ -45,8 +45,7 @@ const processImage: ServiceFn<
 	const sourceTenantKey = getMediaKeyTenantKey(data.key);
 
 	// get og image
-	const mediaRes = await mediaStrategyRes.data.stream({
-		context,
+	const mediaRes = await mediaStrategyRes.data.stream(context, {
 		key: data.key,
 		tenant: sourceTenant,
 	});
@@ -196,16 +195,13 @@ const processImage: ServiceFn<
 					file_size: imageRes.data.size,
 				},
 			}),
-			mediaStrategyRes.data.upload({
-				context,
+			mediaStrategyRes.data.upload(context, {
 				key: data.processKey,
-				data: imageRes.data.buffer,
-				meta: {
-					mimeType: imageRes.data.mimeType,
-					extension: imageRes.data.extension,
-					size: imageRes.data.size,
-					type: "image",
-				},
+				body: imageRes.data.buffer,
+				mimeType: imageRes.data.mimeType,
+				extension: imageRes.data.extension,
+				size: imageRes.data.size,
+				type: "image",
 				tenant: processedTenant,
 			}),
 		]);
@@ -228,8 +224,7 @@ const processImage: ServiceFn<
 						})
 					: Promise.resolve(),
 				uploadRes.error === undefined
-					? mediaStrategyRes.data.delete({
-							context,
+					? mediaStrategyRes.data.delete(context, {
 							key: data.processKey,
 							tenant: processedTenant,
 						})

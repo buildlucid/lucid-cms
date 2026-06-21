@@ -79,13 +79,13 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 			);
 
 			for (const group of groups) {
-				const queueRes = await context.queue.addBatch("documents:delete", {
+				const queueRes = await context.queue.addBatch(context, {
+					event: "documents:delete",
 					payloads: group.payloads,
 					options:
 						group.tenantKeys.length > 0
 							? { tenantKeys: group.tenantKeys }
 							: undefined,
-					context: context,
 				});
 				if (queueRes.error) return queueRes;
 			}

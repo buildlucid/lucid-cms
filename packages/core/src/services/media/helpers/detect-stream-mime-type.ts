@@ -52,8 +52,7 @@ const detectStreamMimeType = async (
 	key: string,
 	tenant: MediaAdapterTenant,
 ) => {
-	const streamRes = await streamMedia({
-		context,
+	const streamRes = await streamMedia(context, {
 		key,
 		tenant,
 		range: {

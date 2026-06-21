@@ -5,11 +5,10 @@ import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const stream: MediaAdapterServiceStream = async ({
-		key,
-		range,
-		ifNoneMatch,
-	}) => {
+	const stream: MediaAdapterServiceStream = async (
+		_context,
+		{ key, range, ifNoneMatch },
+	) => {
 		try {
 			const headers: Record<string, string> = {};
 

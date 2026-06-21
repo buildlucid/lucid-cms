@@ -138,13 +138,10 @@ const cache = (options: CacheOptions) =>
 
 		if (cacheKey === null) return await next();
 
-		const cached = await kv.get<{ data: unknown; cachedAt: number }>(
-			context,
-			cacheKey,
-			{
-				hash: true,
-			},
-		);
+		const cached = await kv.get<{ data: unknown; cachedAt: number }>(context, {
+			key: cacheKey,
+			hash: true,
+		});
 		if (cached !== null) {
 			const age = Math.floor((Date.now() - cached.cachedAt) / 1000);
 			c.header("X-Cache", "HIT");
@@ -160,18 +157,15 @@ const cache = (options: CacheOptions) =>
 			response.headers.get("content-type")?.includes("application/json")
 		) {
 			const data = await response.json();
-			await kv.set(
-				context,
-				cacheKey,
-				{
+			await kv.set(context, {
+				key: cacheKey,
+				value: {
 					data: data,
 					cachedAt: Date.now(),
 				},
-				{
-					expirationTtl: options.ttl,
-					hash: true,
-				},
-			);
+				expirationTtl: options.ttl,
+				hash: true,
+			});
 		}
 
 		c.header("X-Cache", "MISS");

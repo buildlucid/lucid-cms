@@ -10,7 +10,7 @@ import { keyPaths } from "../helpers.js";
 import { readStoredMetadata } from "../metadata.js";
 
 export default (adapterOptions: FileSystemMediaAdapterOptions) => {
-	const stream: MediaAdapterServiceStream = async (props) => {
+	const stream: MediaAdapterServiceStream = async (_context, props) => {
 		try {
 			const { targetPath } = keyPaths(props.key, adapterOptions.uploadDir);
 			const fileType = await import("file-type");

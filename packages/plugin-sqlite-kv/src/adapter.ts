@@ -3,18 +3,20 @@ import {
 	DEFAULT_KV_NAMESPACE,
 	getNamespacePrefix,
 	resolveKey,
-	resolveKeyInput,
 } from "@lucidcms/core/kv";
 import { ensureLucidDirectoryExists } from "@lucidcms/core/plugin";
 import type {
 	KVAdapterInstance,
 	KVAdapterOptions,
-	KVIncrementOptions,
+	KVDeleteManyParams,
+	KVGetManyParams,
+	KVGetParams,
+	KVIncrementParams,
 	KVIncrementResult,
 	KVKeyInput,
-	KVKeyOptions,
 	KVSetInput,
-	KVSetOptions,
+	KVSetManyParams,
+	KVSetParams,
 	ServiceContext,
 } from "@lucidcms/core/types";
 import Database from "better-sqlite3";
@@ -45,15 +47,15 @@ type SQLiteStatements = {
 
 type SetManyTransaction = (
 	items: Array<KVSetInput>,
-	setOptions?: KVSetOptions,
+	setOptions?: Omit<KVSetManyParams, "items">,
 ) => void;
 type DeleteManyTransaction = (
 	keys: KVKeyInput[],
-	keyOptions?: KVKeyOptions,
+	keyOptions?: Omit<KVDeleteManyParams, "keys">,
 ) => void;
 type IncrementTransaction = (
 	key: string,
-	incrementOptions?: KVIncrementOptions,
+	incrementOptions?: Omit<KVIncrementParams, "key">,
 ) => KVIncrementResult;
 
 const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
@@ -66,10 +68,18 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 	let incrementTransaction: IncrementTransaction | undefined;
 	let cleanupInterval: NodeJS.Timeout | undefined;
 
-	const resolveSQLiteKey = (key: string, keyOptions?: KVKeyOptions) =>
-		resolveKey(key, keyOptions, { namespace });
+	const resolveSQLiteKey = (
+		key: string,
+		keyOptions?: {
+			hash?: boolean;
+		},
+	) => resolveKey(key, keyOptions, { namespace });
 
-	const getExpiresAt = (setOptions?: KVSetOptions | KVIncrementOptions) => {
+	const getExpiresAt = (
+		setOptions?:
+			| Omit<KVSetParams, "key" | "value">
+			| Omit<KVIncrementParams, "key">,
+	) => {
 		let expiresAt: number | null = null;
 
 		if (setOptions?.expirationTtl) {
@@ -100,7 +110,11 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 		return statements;
 	};
 
-	const setValue = (key: string, value: unknown, setOptions?: KVSetOptions) => {
+	const setValue = (
+		key: string,
+		value: unknown,
+		setOptions?: Omit<KVSetParams, "key" | "value">,
+	) => {
 		getStatements().set.run(
 			resolveSQLiteKey(key, setOptions),
 			serialise(value),
@@ -156,29 +170,37 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 
 				statements = nextStatements;
 				setManyTransaction = nextDatabase.transaction(
-					(items: Array<KVSetInput>, setOptions?: KVSetOptions) => {
+					(
+						items: Array<KVSetInput>,
+						setOptions?: Omit<KVSetManyParams, "items">,
+					) => {
 						for (const item of items) {
-							setValue(item.key, item.value, {
+							const { key, value, ...itemOptions } = item;
+							setValue(key, value, {
 								...(setOptions ?? {}),
-								...(item.options ?? {}),
+								...itemOptions,
 							});
 						}
 					},
 				);
 				deleteManyTransaction = nextDatabase.transaction(
-					(keys: KVKeyInput[], keyOptions?: KVKeyOptions) => {
+					(
+						keys: KVKeyInput[],
+						keyOptions?: Omit<KVDeleteManyParams, "keys">,
+					) => {
 						for (const input of keys) {
-							const resolved = resolveKeyInput(input, keyOptions);
-							nextStatements.delete.run(
-								resolveSQLiteKey(resolved.key, resolved.options),
-							);
+							const { key, ...perKeyOptions } =
+								typeof input === "string"
+									? { key: input, ...(keyOptions ?? {}) }
+									: { ...(keyOptions ?? {}), ...input };
+							nextStatements.delete.run(resolveSQLiteKey(key, perKeyOptions));
 						}
 					},
 				);
 				incrementTransaction = nextDatabase.transaction(
 					(
 						key: string,
-						incrementOptions?: KVIncrementOptions,
+						incrementOptions?: Omit<KVIncrementParams, "key">,
 					): KVIncrementResult => {
 						const now = Date.now();
 						const resolvedKey = resolveSQLiteKey(key, incrementOptions);
@@ -224,84 +246,69 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 		},
 		get: async <R>(
 			_context: ServiceContext,
-			key: string,
-			options?: KVKeyOptions,
+			params: KVGetParams,
 		): Promise<R | null> => {
-			const resolvedKey = resolveSQLiteKey(key, options);
+			const { key, ...kvOptions } = params;
+			const resolvedKey = resolveSQLiteKey(key, kvOptions);
 			const row = getStatements().get.get(resolvedKey, Date.now());
 
 			if (!row) return null;
 
 			return getValue(row.value);
 		},
-		set: async (
-			_context,
-			key: string,
-			value: unknown,
-			options?: KVSetOptions,
-		) => {
-			setValue(key, value, options);
+		set: async (_context, params) => {
+			const { key, value, ...kvOptions } = params;
+			setValue(key, value, kvOptions);
 		},
-		has: async (
-			_context,
-			key: string,
-			options?: KVKeyOptions,
-		): Promise<boolean> => {
-			const resolvedKey = resolveSQLiteKey(key, options);
+		has: async (_context, params): Promise<boolean> => {
+			const { key, ...kvOptions } = params;
+			const resolvedKey = resolveSQLiteKey(key, kvOptions);
 			const row = getStatements().has.get(resolvedKey, Date.now());
 			return row !== undefined;
 		},
-		delete: async (_context, key: string, options?: KVKeyOptions) => {
-			const resolvedKey = resolveSQLiteKey(key, options);
+		delete: async (_context, params) => {
+			const { key, ...kvOptions } = params;
+			const resolvedKey = resolveSQLiteKey(key, kvOptions);
 			getStatements().delete.run(resolvedKey);
 		},
-		getMany: async <R>(
-			_context: ServiceContext,
-			keys: KVKeyInput[],
-			options?: KVKeyOptions,
-		) => {
+		getMany: async <R>(_context: ServiceContext, params: KVGetManyParams) => {
+			const { keys, ...kvOptions } = params;
 			return keys.map((input) => {
-				const resolved = resolveKeyInput(input, options);
+				const { key, ...keyOptions } =
+					typeof input === "string"
+						? { key: input, ...kvOptions }
+						: { ...kvOptions, ...input };
 				const row = getStatements().get.get(
-					resolveSQLiteKey(resolved.key, resolved.options),
+					resolveSQLiteKey(key, keyOptions),
 					Date.now(),
 				);
 
 				return {
-					key: resolved.key,
+					key,
 					value: row ? getValue<R>(row.value) : null,
 				};
 			});
 		},
-		setMany: async (
-			_context,
-			items: Array<KVSetInput>,
-			options?: KVSetOptions,
-		) => {
+		setMany: async (_context, params) => {
 			if (!setManyTransaction) {
 				throw new Error("SQLite KV adapter has not been initialized.");
 			}
-			setManyTransaction(items, options);
+			const { items, ...kvOptions } = params;
+			setManyTransaction(items, kvOptions);
 		},
-		deleteMany: async (
-			_context,
-			keys: KVKeyInput[],
-			options?: KVKeyOptions,
-		) => {
+		deleteMany: async (_context, params) => {
 			if (!deleteManyTransaction) {
 				throw new Error("SQLite KV adapter has not been initialized.");
 			}
-			deleteManyTransaction(keys, options);
+			const { keys, ...kvOptions } = params;
+			deleteManyTransaction(keys, kvOptions);
 		},
-		increment: async (
-			_context,
-			key: string,
-			options?: KVIncrementOptions,
-		): Promise<KVIncrementResult> => {
+		increment: async (_context, params): Promise<KVIncrementResult> => {
 			if (!incrementTransaction) {
 				throw new Error("SQLite KV adapter has not been initialized.");
 			}
-			return incrementTransaction(key, options);
+			const { key, ...kvOptions } = params;
+			return incrementTransaction(key, kvOptions);
 		},
 		clear: async (_context) => {
 			if (namespacePrefix) {

@@ -4,9 +4,9 @@ import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
 
 const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
-	return async (props) => {
+	return async (context, props) => {
 		try {
-			const binding = resolveBinding(props.context, pluginOptions);
+			const binding = resolveBinding(context, pluginOptions);
 			const source = await binding.get(props.from);
 
 			if (!source) {

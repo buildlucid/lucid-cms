@@ -1,11 +1,11 @@
 import type { MediaAdapter } from "@lucidcms/core/types";
 import getAwsClient from "./clients/aws-client.js";
 import deleteMultiple from "./services/delete-multiple.js";
-import deletSingle from "./services/delete-single.js";
+import deleteSingle from "./services/delete-single.js";
 import getDownloadUrl from "./services/get-download-url.js";
 import getMetadata from "./services/get-metadata.js";
 import rename from "./services/rename.js";
-import stream from "./services/steam.js";
+import stream from "./services/stream.js";
 import { abortUploadSession } from "./services/upload-session/abort-upload-session.js";
 import { completeUploadSession } from "./services/upload-session/complete-upload-session.js";
 import { createUploadSession } from "./services/upload-session/create-upload-session.js";
@@ -29,7 +29,7 @@ const s3MediaAdapter: MediaAdapter<PluginOptions> = (options) => {
 		getMeta: getMetadata(client, options),
 		stream: stream(client, options),
 		upload: uploadSingle(client, options),
-		delete: deletSingle(client, options),
+		delete: deleteSingle(client, options),
 		deleteMultiple: deleteMultiple(client, options),
 		rename: rename(client, options),
 		getOptions: () => options,

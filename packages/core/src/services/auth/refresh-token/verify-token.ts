@@ -138,11 +138,10 @@ const verifyToken = async (
 
 		const context = createServiceContext(c);
 		const kv = context.kv;
-		const kvEntry = await kv.get<{ user_id: number }>(
-			context,
-			cacheKeys.auth.refresh(_refresh),
-			{ hash: true },
-		);
+		const kvEntry = await kv.get<{ user_id: number }>(context, {
+			key: cacheKeys.auth.refresh(_refresh),
+			hash: true,
+		});
 
 		if (kvEntry && kvEntry.user_id === tokenRes.data.user_id) {
 			return {
@@ -151,12 +150,12 @@ const verifyToken = async (
 			};
 		}
 
-		await kv.set(
-			context,
-			cacheKeys.auth.refresh(_refresh),
-			{ user_id: tokenRes.data.user_id },
-			{ expirationTtl: constants.refreshTokenExpiration, hash: true },
-		);
+		await kv.set(context, {
+			key: cacheKeys.auth.refresh(_refresh),
+			value: { user_id: tokenRes.data.user_id },
+			expirationTtl: constants.refreshTokenExpiration,
+			hash: true,
+		});
 
 		return {
 			error: undefined,

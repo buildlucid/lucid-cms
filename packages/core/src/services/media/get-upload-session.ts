@@ -99,8 +99,7 @@ const getUploadSession: ServiceFn<
 		};
 	}
 
-	const partsRes = await context.media.listUploadParts({
-		context,
+	const partsRes = await context.media.listUploadParts(context, {
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
 		tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),

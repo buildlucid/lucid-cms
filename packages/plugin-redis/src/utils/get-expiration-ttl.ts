@@ -1,12 +1,13 @@
-import type { KVIncrementOptions, KVSetOptions } from "@lucidcms/core/types";
+type ExpirationOptions = {
+	expirationTtl?: number;
+	expirationTimestamp?: number;
+};
 
 /**
  * Converts Lucid's expiration options to the relative TTL shape Redis commands
  * need for SETEX and EXPIRE.
  */
-const getRedisExpirationTtl = (
-	kvOptions?: KVSetOptions | KVIncrementOptions,
-) => {
+const getRedisExpirationTtl = (kvOptions?: ExpirationOptions) => {
 	if (kvOptions?.expirationTtl) {
 		return kvOptions.expirationTtl;
 	}

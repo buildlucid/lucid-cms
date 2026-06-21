@@ -40,11 +40,11 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.addBatch("collections:delete", {
+	const queueRes = await context.queue.addBatch(context, {
+		event: "collections:delete",
 		payloads: expiredCollectionsRes.data.map((collection) => ({
 			collectionKey: collection.key,
 		})),
-		context: context,
 	});
 	if (queueRes.error) return queueRes;
 

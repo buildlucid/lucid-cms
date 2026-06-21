@@ -90,29 +90,26 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 	);
 
 	for (const group of expiredMediaGroups) {
-		const queueRes = await context.queue.addBatch("media:delete-unsynced", {
+		const queueRes = await context.queue.addBatch(context, {
+			event: "media:delete-unsynced",
 			payloads: group.payloads,
 			options:
 				group.tenantKeys.length > 0
 					? { tenantKeys: group.tenantKeys }
 					: undefined,
-			context: context,
 		});
 		if (queueRes.error) return queueRes;
 	}
 
 	for (const group of expiredSessionGroups) {
-		const queueRes = await context.queue.addBatch(
-			"media:abort-upload-session",
-			{
-				payloads: group.payloads,
-				options:
-					group.tenantKeys.length > 0
-						? { tenantKeys: group.tenantKeys }
-						: undefined,
-				context: context,
-			},
-		);
+		const queueRes = await context.queue.addBatch(context, {
+			event: "media:abort-upload-session",
+			payloads: group.payloads,
+			options:
+				group.tenantKeys.length > 0
+					? { tenantKeys: group.tenantKeys }
+					: undefined,
+		});
 		if (queueRes.error) return queueRes;
 	}
 

@@ -13,7 +13,7 @@ export const getUploadPartUrls = (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceGetUploadPartUrls => {
-	return async (props) => {
+	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
 				return {

@@ -89,8 +89,7 @@ const getUploadPartUrls: ServiceFn<
 		};
 	}
 
-	const urlsRes = await context.media.getUploadPartUrls({
-		context,
+	const urlsRes = await context.media.getUploadPartUrls(context, {
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
 		partNumbers: data.partNumbers,

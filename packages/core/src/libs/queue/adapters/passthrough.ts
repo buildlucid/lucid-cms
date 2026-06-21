@@ -41,8 +41,9 @@ function passthroughQueueAdapter(
 				});
 			},
 		},
-		add: async (event, params) => {
+		add: async (context, params) => {
 			try {
+				const { event } = params;
 				if (params.options?.scheduledFor) {
 					return {
 						error: {
@@ -60,7 +61,7 @@ function passthroughQueueAdapter(
 					data: { event },
 				});
 
-				const createJobRes = await insertJobs(params.context, {
+				const createJobRes = await insertJobs(context, {
 					event,
 					payloads: [params.payload],
 					options: params.options,
@@ -93,7 +94,7 @@ function passthroughQueueAdapter(
 				}
 
 				//* execute the event handler immediately
-				const executeResult = await executeSingleJob(params.context, {
+				const executeResult = await executeSingleJob(context, {
 					jobId: jobData.jobId,
 					event: event,
 					payload: params.payload,
@@ -145,8 +146,9 @@ function passthroughQueueAdapter(
 				};
 			}
 		},
-		addBatch: async (event, params) => {
+		addBatch: async (context, params) => {
 			try {
+				const { event } = params;
 				if (params.options?.scheduledFor) {
 					return {
 						error: {
@@ -164,7 +166,7 @@ function passthroughQueueAdapter(
 					data: { event, count: params.payloads.length },
 				});
 
-				const createJobsRes = await insertJobs(params.context, {
+				const createJobsRes = await insertJobs(context, {
 					event,
 					payloads: params.payloads,
 					options: params.options,
@@ -219,7 +221,7 @@ function passthroughQueueAdapter(
 				const allResults = await Promise.allSettled(
 					jobChunks.flatMap((chunk) =>
 						chunk.map((job) =>
-							executeSingleJob(params.context, {
+							executeSingleJob(context, {
 								jobId: job.jobId,
 								event,
 								payload: job.payload,

@@ -6,21 +6,21 @@ import type { PluginOptions } from "../types/types.js";
 import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async ({
-		key,
-		meta,
-	}) => {
+	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async (
+		_context,
+		props,
+	) => {
 		try {
 			const objectUrl = new URL(
-				`${pluginOptions.endpoint}/${pluginOptions.bucket}/${key}`,
+				`${pluginOptions.endpoint}/${pluginOptions.bucket}/${props.key}`,
 			);
 			objectUrl.searchParams.set("X-Amz-Expires", String(PRESIGNED_URL_EXPIRY));
 			objectUrl.searchParams.set(
 				"response-content-disposition",
 				buildDownloadContentDisposition({
-					key,
-					fileName: meta.fileName,
-					extension: meta.extension,
+					key: props.key,
+					fileName: props.fileName,
+					extension: props.extension,
 				}),
 			);
 

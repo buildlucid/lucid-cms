@@ -36,8 +36,9 @@ const cloudflareQueuesAdapter = (
 				});
 			},
 		},
-		add: async (event, params) => {
+		add: async (context, params) => {
 			try {
+				const { event } = params;
 				if (params.options?.scheduledFor && !consumerSupported) {
 					return {
 						error: {
@@ -55,7 +56,7 @@ const cloudflareQueuesAdapter = (
 					data: { event },
 				});
 
-				const createJobRes = await insertJobs(params.context, {
+				const createJobRes = await insertJobs(context, {
 					event,
 					payloads: [params.payload],
 					options: params.options,
@@ -79,7 +80,7 @@ const cloudflareQueuesAdapter = (
 				}
 
 				if (consumerSupported) {
-					const binding = resolveBinding(params.context, options);
+					const binding = resolveBinding(context, options);
 					await binding.send(
 						{
 							jobId: jobData.jobId,
@@ -93,7 +94,7 @@ const cloudflareQueuesAdapter = (
 							: undefined,
 					);
 				} else {
-					const executeResult = await executeSingleJob(params.context, {
+					const executeResult = await executeSingleJob(context, {
 						jobId: jobData.jobId,
 						event: event,
 						payload: params.payload,
@@ -150,8 +151,9 @@ const cloudflareQueuesAdapter = (
 				};
 			}
 		},
-		addBatch: async (event, params) => {
+		addBatch: async (context, params) => {
 			try {
+				const { event } = params;
 				if (params.options?.scheduledFor && !consumerSupported) {
 					return {
 						error: {
@@ -169,7 +171,7 @@ const cloudflareQueuesAdapter = (
 					data: { event, count: params.payloads.length },
 				});
 
-				const createJobsRes = await insertJobs(params.context, {
+				const createJobsRes = await insertJobs(context, {
 					event,
 					payloads: params.payloads,
 					options: params.options,
@@ -178,7 +180,7 @@ const cloudflareQueuesAdapter = (
 				if (createJobsRes.error) return createJobsRes;
 
 				if (consumerSupported) {
-					const binding = resolveBinding(params.context, options);
+					const binding = resolveBinding(context, options);
 					await binding.sendBatch(
 						createJobsRes.data.jobs.map((job) => ({
 							body: {
@@ -223,7 +225,7 @@ const cloudflareQueuesAdapter = (
 					const allResults = await Promise.allSettled(
 						jobChunks.flatMap((chunk) =>
 							chunk.map((job) =>
-								executeSingleJob(params.context, {
+								executeSingleJob(context, {
 									jobId: job.jobId,
 									event,
 									payload: job.payload,

@@ -105,7 +105,8 @@ const scheduleApproved: ServiceFn<
 				};
 			}
 
-			const queueRes = await context.queue.add(publishOperationExecuteEvent, {
+			const queueRes = await context.queue.add(context, {
+				event: publishOperationExecuteEvent,
 				payload: {
 					operationId: operationRes.data.id,
 					tenantKey: operationRes.data.tenant_key,
@@ -117,7 +118,6 @@ const scheduleApproved: ServiceFn<
 						? [operationRes.data.tenant_key]
 						: undefined,
 				},
-				context,
 			});
 			if (queueRes.error) return queueRes;
 			scheduledJobId = queueRes.data.jobId;

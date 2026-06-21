@@ -12,7 +12,7 @@ export const listUploadParts = (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceListUploadParts => {
-	return async (props) => {
+	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
 				return {

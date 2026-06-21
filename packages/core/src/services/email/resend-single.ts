@@ -86,7 +86,8 @@ const resendSingle: ServiceFn<
 	if (transactionRes.error) return transactionRes;
 	if (updateEmailRes.error) return updateEmailRes;
 
-	const queueRes = await context.queue.add("email:send", {
+	const queueRes = await context.queue.add(context, {
+		event: "email:send",
 		payload: {
 			emailId: emailRes.data.id,
 			transactionId: transactionRes.data.id ?? 0,
@@ -95,7 +96,6 @@ const resendSingle: ServiceFn<
 			tenantKeys:
 				emailRes.data.tenants?.map((tenant) => tenant.tenant_key) ?? [],
 		},
-		context: context,
 	});
 	if (queueRes.error) {
 		await Promise.all([

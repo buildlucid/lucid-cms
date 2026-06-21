@@ -15,6 +15,7 @@ const typegenCommand = async () => {
 			silent: false,
 			generateTypes: true,
 			renderEmailTemplates: false,
+			prepareRuntime: true,
 		});
 
 		const relativeConfigPath = path.relative(

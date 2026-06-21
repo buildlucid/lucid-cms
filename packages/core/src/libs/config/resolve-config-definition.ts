@@ -98,6 +98,7 @@ export const resolveConfigDefinition = async (props: {
 	configureLucidPath?: string;
 	configPath?: string;
 	projectRoot?: string;
+	prepareRuntime?: boolean;
 	logger?: GetEnvVarsLogger;
 	processConfigOptions?: Parameters<typeof processConfig>[1];
 }): Promise<ResolveConfigDefinitionResult> => {
@@ -108,7 +109,12 @@ export const resolveConfigDefinition = async (props: {
 		silent: true,
 	};
 
-	if (adapter.cli?.prepare && props.configPath && props.projectRoot) {
+	if (
+		props.prepareRuntime &&
+		adapter.cli?.prepare &&
+		props.configPath &&
+		props.projectRoot
+	) {
 		await adapter.cli.prepare({
 			configPath: props.configPath,
 			projectRoot: props.projectRoot,

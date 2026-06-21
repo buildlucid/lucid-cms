@@ -6,7 +6,7 @@ import { resolveBinding } from "../utils/resolve-binding.js";
 const getMetadata = (
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceGetMeta => {
-	return async ({ key, context }) => {
+	return async (context, { key }) => {
 		try {
 			const binding = resolveBinding(context, pluginOptions);
 			const object = await binding.head(key);

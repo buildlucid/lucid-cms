@@ -5,14 +5,14 @@ const checkSystemAlerts: ServiceFn<[], undefined> = async (context) => {
 	for (const config of getAlertConfigs()) {
 		if (!config.nightly) continue;
 
-		const queueRes = await context.queue.add("alert:execute", {
+		const queueRes = await context.queue.add(context, {
+			event: "alert:execute",
 			payload: {
 				key: config.key,
 				source: "cron",
 				trigger: "scheduled",
 				metadata: {},
 			},
-			context,
 		});
 		if (queueRes.error) return queueRes;
 	}

@@ -10,7 +10,10 @@ import { keyPaths } from "../helpers.js";
 import { deleteStoredMetadata, writeStoredMetadata } from "../metadata.js";
 
 export default (options: FileSystemMediaAdapterOptions) => {
-	const uploadSingle: MediaAdapterServiceUploadSingle = async (props) => {
+	const uploadSingle: MediaAdapterServiceUploadSingle = async (
+		_context,
+		props,
+	) => {
 		const { targetDir, targetPath } = keyPaths(props.key, options.uploadDir);
 
 		const cleanup = async () => {
@@ -22,14 +25,14 @@ export default (options: FileSystemMediaAdapterOptions) => {
 
 		try {
 			await mkdir(targetDir, { recursive: true });
-			if (Buffer.isBuffer(props.data)) {
-				await writeFile(targetPath, props.data);
+			if (Buffer.isBuffer(props.body)) {
+				await writeFile(targetPath, props.body);
 			} else {
 				const writeStream = createWriteStream(targetPath);
 				const readable =
-					props.data instanceof Readable
-						? props.data
-						: Readable.fromWeb(props.data as never);
+					props.body instanceof Readable
+						? props.body
+						: Readable.fromWeb(props.body as never);
 				readable.pipe(writeStream);
 				await new Promise<void>((resolve, reject) => {
 					writeStream.on("finish", resolve);
@@ -38,8 +41,8 @@ export default (options: FileSystemMediaAdapterOptions) => {
 			}
 
 			await writeStoredMetadata(options.uploadDir, props.key, {
-				mimeType: props.meta.mimeType,
-				extension: props.meta.extension,
+				mimeType: props.mimeType,
+				extension: props.extension,
 			});
 
 			return {

@@ -4,7 +4,7 @@ import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const rename: MediaAdapterServiceRenameKey = async (props) => {
+	const rename: MediaAdapterServiceRenameKey = async (_context, props) => {
 		try {
 			const signObjectRequest = async (
 				key: string,

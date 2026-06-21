@@ -3,8 +3,6 @@ import { utf8ToBytes } from "@noble/hashes/utils.js";
 import type {
 	KVAdapterInstance,
 	KVIncrementCapability,
-	KVKeyInput,
-	KVKeyOptions,
 	KVNamespace,
 } from "./types.js";
 
@@ -75,31 +73,13 @@ const parseResolveKeyOptions = (
 };
 
 /**
- * Normalises a batch input and merges shared options with per-key options.
- */
-export const resolveKeyInput = (
-	input: KVKeyInput,
-	options?: KVKeyOptions,
-): { key: string; options?: KVKeyOptions } => {
-	if (typeof input === "string") {
-		return { key: input, options };
-	}
-
-	return {
-		key: input.key,
-		options:
-			options || input.options
-				? { ...(options ?? {}), ...(input.options ?? {}) }
-				: undefined,
-	};
-};
-
-/**
  * Resolve the KV key
  */
 export const resolveKey = (
 	key: string,
-	options?: KVKeyOptions,
+	options?: {
+		hash?: boolean;
+	},
 	resolveOptions?: number | ResolveKeyOptions,
 ): string => {
 	const { maxKeyBytes, namespacePrefix } =

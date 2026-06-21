@@ -24,7 +24,9 @@ const syncCommand = async (options?: { skipEnvValidation?: boolean }) => {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
 
-		const res = await loadConfigFile();
+		const res = await loadConfigFile({
+			prepareRuntime: true,
+		});
 		config = res.config;
 		env = res.env;
 		runtimeContext = res.runtimeContext;

@@ -12,7 +12,7 @@ export const abortUploadSession = (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceAbortUploadSession => {
-	return async (props) => {
+	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
 				return {

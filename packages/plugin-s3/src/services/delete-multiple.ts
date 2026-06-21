@@ -4,9 +4,10 @@ import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const deleteMultiple: MediaAdapterServiceDeleteMultiple = async ({
-		keys,
-	}) => {
+	const deleteMultiple: MediaAdapterServiceDeleteMultiple = async (
+		_context,
+		{ keys },
+	) => {
 		try {
 			const deleteXml = `<?xml version="1.0" encoding="UTF-8"?>
 <Delete>

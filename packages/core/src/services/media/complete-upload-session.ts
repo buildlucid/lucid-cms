@@ -97,8 +97,7 @@ const completeUploadSession: ServiceFn<
 		};
 	}
 
-	const completeRes = await context.media.completeUploadSession({
-		context,
+	const completeRes = await context.media.completeUploadSession(context, {
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
 		parts: data.parts,

@@ -31,8 +31,7 @@ const syncMedia: ServiceFn<
 
 	const tenant = resolveMediaKeyTenant(context.config, data.key);
 
-	const mediaMetaRes = await mediaStrategyRes.data.getMeta({
-		context,
+	const mediaMetaRes = await mediaStrategyRes.data.getMeta(context, {
 		key: data.key,
 		tenant,
 	});
@@ -45,8 +44,7 @@ const syncMedia: ServiceFn<
 		},
 	);
 	if (proposedSizeRes.error) {
-		await mediaStrategyRes.data.delete({
-			context,
+		await mediaStrategyRes.data.delete(context, {
 			key: data.key,
 			tenant,
 		});
@@ -63,8 +61,7 @@ const syncMedia: ServiceFn<
 		allowedType: data.allowedType,
 	});
 	if (fileMetaData.error) {
-		await mediaStrategyRes.data.delete({
-			context,
+		await mediaStrategyRes.data.delete(context, {
 			key: data.key,
 			tenant,
 		});
@@ -90,8 +87,7 @@ const syncMedia: ServiceFn<
 			};
 		}
 
-		await mediaStrategyRes.data.delete({
-			context,
+		await mediaStrategyRes.data.delete(context, {
 			key: data.key,
 			tenant,
 		});

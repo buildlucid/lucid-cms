@@ -48,13 +48,13 @@ const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 	);
 
 	for (const group of groups) {
-		const queueRes = await context.queue.addBatch("media:delete", {
+		const queueRes = await context.queue.addBatch(context, {
+			event: "media:delete",
 			payloads: group.payloads,
 			options:
 				group.tenantKeys.length > 0
 					? { tenantKeys: group.tenantKeys }
 					: undefined,
-			context: context,
 		});
 		if (queueRes.error) return queueRes;
 	}

@@ -92,30 +92,28 @@ export type EmailStrategyResponse = {
 	data?: Record<string, unknown> | null;
 };
 
+export type EmailAdapterSendParams = {
+	to: string;
+	subject: string;
+	from: {
+		email: string;
+		name: string;
+	};
+	html: string;
+	text?: string;
+	cc?: string;
+	bcc?: string;
+	replyTo?: string;
+	priority: EmailPriority;
+	headers?: EmailHeaders | null;
+	attachments?: EmailAttachment[];
+	data: Record<string, unknown>;
+	template: string;
+};
+
 export type EmailAdapterServiceSend = (
 	context: ServiceContext,
-	email: {
-		to: string;
-		subject: string;
-		from: {
-			email: string;
-			name: string;
-		};
-		html: string;
-		text?: string;
-		cc?: string;
-		bcc?: string;
-		replyTo?: string;
-		priority: EmailPriority;
-		headers?: EmailHeaders | null;
-		attachments?: EmailAttachment[];
-	},
-	meta: {
-		data: {
-			[key: string]: unknown;
-		};
-		template: string;
-	},
+	params: EmailAdapterSendParams,
 ) => Promise<EmailStrategyResponse>;
 
 export type EmailAdapter<T = undefined> = T extends undefined

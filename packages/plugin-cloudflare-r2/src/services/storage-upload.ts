@@ -104,17 +104,14 @@ const storageUpload =
 
 		try {
 			await Promise.all([
-				putObject(pluginOptions, {
+				putObject(pluginOptions, context, {
 					key: data.key,
-					data: fixedLengthBody.stream,
-					meta: {
-						mimeType: data.contentType ?? "application/octet-stream",
-						extension: data.extension ?? "",
-						size: data.contentLength,
-						type: "unknown",
-					},
+					body: fixedLengthBody.stream,
+					mimeType: data.contentType ?? "application/octet-stream",
+					extension: data.extension ?? "",
+					size: data.contentLength,
+					type: "unknown",
 					tenant,
-					context,
 				}),
 				fixedLengthBody.completed.catch((error) => {
 					streamError = error;

@@ -6,7 +6,7 @@ import { resolveBinding } from "../utils/resolve-binding.js";
 const deleteSingle = (
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceDeleteSingle => {
-	return async ({ key, context }) => {
+	return async (context, { key }) => {
 		try {
 			const binding = resolveBinding(context, pluginOptions);
 			await binding.delete(key);

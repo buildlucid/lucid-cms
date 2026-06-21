@@ -86,8 +86,7 @@ const clearSingle: ServiceFn<
 	const tenant = resolveMediaKeyTenant(context.config, mediaKey as string);
 
 	const [_, clearProcessedRes, updateStorageRes] = await Promise.all([
-		mediaStrategyRes.data.deleteMultiple({
-			context,
+		mediaStrategyRes.data.deleteMultiple(context, {
 			keys: processedImagesRes.data.map((i) => i.key),
 			tenant,
 		}),

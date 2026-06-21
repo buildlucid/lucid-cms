@@ -43,7 +43,8 @@ const getCachedAuthState = async (
 	return {
 		cacheKey,
 		context,
-		data: await context.kv.get<CachedAuthState>(context, cacheKey, {
+		data: await context.kv.get<CachedAuthState>(context, {
+			key: cacheKey,
 			hash: true,
 		}),
 	};
@@ -120,7 +121,9 @@ const resolveAuthState = async (
 	const authState = cached.data ?? (await fetchAuthState(c, token, tenantKey));
 
 	if (cached.data == null) {
-		await cached.context.kv.set(cached.context, cached.cacheKey, authState, {
+		await cached.context.kv.set(cached.context, {
+			key: cached.cacheKey,
+			value: authState,
 			expirationTtl: constants.authCacheExpiration,
 			hash: true,
 		});

@@ -1,10 +1,13 @@
 import { Readable } from "node:stream";
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceUploadSingle } from "@lucidcms/core/types";
+import type {
+	MediaAdapterServiceUploadSingle,
+	ServiceContext,
+} from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
 
-type UploadSingleProps = Parameters<MediaAdapterServiceUploadSingle>[0];
+type UploadSingleProps = Parameters<MediaAdapterServiceUploadSingle>[1];
 
 /**
  * Centralizes writes to the R2 binding so direct adapter uploads and the
@@ -12,22 +15,23 @@ type UploadSingleProps = Parameters<MediaAdapterServiceUploadSingle>[0];
  */
 export const putObject = async (
 	pluginOptions: PluginOptions,
+	context: ServiceContext,
 	props: UploadSingleProps,
 ) => {
-	const binding = resolveBinding(props.context, pluginOptions);
+	const binding = resolveBinding(context, pluginOptions);
 	const body =
-		props.data instanceof Readable
-			? (Readable.toWeb(props.data) as unknown as ReadableStream)
-			: props.data;
+		props.body instanceof Readable
+			? (Readable.toWeb(props.body) as unknown as ReadableStream)
+			: props.body;
 
 	return await binding.put(props.key, body, {
 		httpMetadata: {
 			...pluginOptions.upload?.httpMetadata,
-			contentType: props.meta.mimeType,
+			contentType: props.mimeType,
 		},
 		customMetadata: {
 			...(pluginOptions.upload?.customMetadata ?? {}),
-			extension: props.meta.extension,
+			extension: props.extension,
 		},
 		storageClass: pluginOptions.upload?.storageClass,
 	});
@@ -41,9 +45,9 @@ export const putObject = async (
 const uploadSingle = (
 	options: PluginOptions,
 ): MediaAdapterServiceUploadSingle => {
-	return async (props) => {
+	return async (context, props) => {
 		try {
-			const object = await putObject(options, props);
+			const object = await putObject(options, context, props);
 
 			return {
 				error: undefined,

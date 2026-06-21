@@ -5,18 +5,21 @@ import type { PluginOptions } from "../types/types.js";
 import { applyMetadataHeaders } from "../utils/metadata-headers.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const uploadSingle: MediaAdapterServiceUploadSingle = async (props) => {
+	const uploadSingle: MediaAdapterServiceUploadSingle = async (
+		_context,
+		props,
+	) => {
 		try {
 			const headers = new Headers();
 
-			applyMetadataHeaders(headers, props.meta);
+			applyMetadataHeaders(headers, props);
 
 			const response = await client.sign(
 				new Request(
 					`${pluginOptions.endpoint}/${pluginOptions.bucket}/${props.key}`,
 					{
 						method: "PUT",
-						body: props.data as unknown as BodyInit,
+						body: props.body as unknown as BodyInit,
 						headers: headers,
 					},
 				),

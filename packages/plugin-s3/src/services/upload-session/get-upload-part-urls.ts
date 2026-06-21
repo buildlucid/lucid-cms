@@ -13,7 +13,7 @@ export const getUploadPartUrls = (
 	client: AwsClient,
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceGetUploadPartUrls => {
-	return async (props) => {
+	return async (_context, props) => {
 		try {
 			const parts = await Promise.all(
 				props.partNumbers.map(async (partNumber) => {

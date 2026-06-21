@@ -45,8 +45,7 @@ const downloadSingle: ServiceFn<
 	});
 	if (checkPresignedTokenRes.error) return checkPresignedTokenRes;
 
-	const streamRes = await mediaAdapterRes.data.stream({
-		context,
+	const streamRes = await mediaAdapterRes.data.stream(context, {
 		key: data.key,
 		tenant: resolveMediaKeyTenant(context.config, data.key),
 	});
