@@ -1,4 +1,3 @@
-import getMediaAdapter from "../../libs/media/get-adapter.js";
 import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
@@ -43,18 +42,16 @@ const abortUploadSession: ServiceFn<
 
 	const tenant = resolveMediaKeyTenant(context.config, sessionRes.data.key);
 
-	const mediaAdapter = await getMediaAdapter(context.config);
 	if (
-		mediaAdapter.enabled &&
+		context.media &&
 		sessionRes.data.adapter_upload_id &&
-		mediaAdapter.adapter.abortUploadSession
+		context.media.abortUploadSession
 	) {
-		const abortRes = await mediaAdapter.adapter.abortUploadSession({
+		const abortRes = await context.media.abortUploadSession({
+			context,
 			key: sessionRes.data.key,
 			uploadId: sessionRes.data.adapter_upload_id,
-			context: {
-				tenant,
-			},
+			tenant,
 		});
 		if (abortRes.error) return abortRes;
 	}
@@ -63,12 +60,11 @@ const abortUploadSession: ServiceFn<
 		MediaAwaitingSync.deleteSingle({
 			where: [{ key: "key", operator: "=", value: sessionRes.data.key }],
 		}),
-		mediaAdapter.enabled
-			? mediaAdapter.adapter.delete({
+		context.media
+			? context.media.delete({
+					context,
 					key: sessionRes.data.key,
-					context: {
-						tenant,
-					},
+					tenant,
 				})
 			: null,
 	]);

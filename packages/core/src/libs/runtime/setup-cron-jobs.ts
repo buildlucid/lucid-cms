@@ -4,15 +4,13 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
 import logger from "../logger/index.js";
 import passthroughQueueAdapter from "../queue/adapters/passthrough.js";
-import getQueueAdapter from "../queue/get-adapter.js";
+import {
+	destroyQueueAdapter,
+	getInitializedQueueAdapter,
+} from "../queue/lifecycle.js";
 import type { QueueAdapterInstance } from "../queue/types.js";
-import { createAdapterLifecycleContext } from "./adapter-lifecycle.js";
 import getCronJobs, { type CronJobDefinition } from "./cron-jobs.js";
-import type {
-	AdapterLifecycleContext,
-	AdapterRuntimeContext,
-	EnvironmentVariables,
-} from "./types.js";
+import type { AdapterRuntimeContext, EnvironmentVariables } from "./types.js";
 
 const MAX_RETRIES = 3;
 
@@ -96,19 +94,12 @@ const setupCronJobs = async (config: {
 		) => {
 			let cronQueue = context.queue ?? queueInstance;
 			let createdQueue: QueueAdapterInstance | undefined;
-			let createdQueueLifecycleContext: AdapterLifecycleContext | undefined;
 			try {
 				if (config.createQueue && config.runtimeContext) {
-					createdQueue = await getQueueAdapter(
-						context.config,
-						config.runtimeContext,
-					);
-					createdQueueLifecycleContext = createAdapterLifecycleContext({
-						config: context.config,
+					createdQueue = await getInitializedQueueAdapter(context.config, {
 						runtimeContext: config.runtimeContext,
 						env: config.env ?? context.env ?? undefined,
 					});
-					await createdQueue.lifecycle?.init?.(createdQueueLifecycleContext);
 					cronQueue = createdQueue;
 				}
 
@@ -154,10 +145,11 @@ const setupCronJobs = async (config: {
 					scope: constants.logScopes.cron,
 				});
 			} finally {
-				if (createdQueueLifecycleContext)
-					await createdQueue?.lifecycle?.destroy?.(
-						createdQueueLifecycleContext,
-					);
+				await destroyQueueAdapter(createdQueue, {
+					config: context.config,
+					runtimeContext: config.runtimeContext,
+					env: config.env ?? context.env ?? undefined,
+				});
 			}
 		},
 		queue: queueInstance,

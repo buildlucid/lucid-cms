@@ -1,9 +1,14 @@
 import { confirm } from "@inquirer/prompts";
 import constants from "../../../constants/constants.js";
 import { syncServices } from "../../../services/index.js";
-import type { Config } from "../../../types.js";
+import type { Config, EnvironmentVariables } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import {
+	destroyEmailAdapter,
+	getInitializedEmailAdapter,
+} from "../../email/lifecycle.js";
+import type { EmailAdapterInstance } from "../../email/types.js";
 import { createTranslator } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
@@ -14,13 +19,22 @@ import {
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
 import logger from "../../logger/index.js";
+import {
+	destroyMediaAdapter,
+	getInitializedMediaAdapter,
+} from "../../media/lifecycle.js";
+import type { MediaAdapterInstance } from "../../media/types.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
+import type { AdapterRuntimeContext } from "../../runtime/types.js";
+import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
 import runSyncTasks from "../services/run-sync-tasks.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
 const migrateCommand = (props?: {
 	config?: Config;
+	env?: EnvironmentVariables;
+	runtimeContext?: AdapterRuntimeContext;
 	translationStore?: TranslationStore;
 	mode: "process" | "return";
 }) => {
@@ -29,14 +43,38 @@ const migrateCommand = (props?: {
 		skipEnvValidation?: boolean;
 		force?: boolean;
 	}) => {
-		let kvInstance: KVAdapterInstance | undefined;
 		let config: Config | undefined;
+		let env: EnvironmentVariables | undefined = props?.env;
+		let runtimeContext: AdapterRuntimeContext | undefined =
+			props?.runtimeContext;
 		let translationStore: TranslationStore | undefined;
-		const cleanupKV = async () => {
+		let kvInstance: KVAdapterInstance | undefined;
+		let mediaInstance: MediaAdapterInstance | null | undefined;
+		let emailInstance: EmailAdapterInstance | undefined;
+
+		const cleanupAdapters = async () => {
 			if (config && translationStore) {
-				await destroyKVAdapter(kvInstance, { config });
+				await Promise.allSettled([
+					destroyKVAdapter(kvInstance, {
+						config,
+						env,
+						runtimeContext,
+					}),
+					destroyMediaAdapter(mediaInstance, {
+						config,
+						env,
+						runtimeContext,
+					}),
+					destroyEmailAdapter(emailInstance, {
+						config,
+						env,
+						runtimeContext,
+					}),
+				]);
 			}
 			kvInstance = undefined;
+			mediaInstance = undefined;
+			emailInstance = undefined;
 		};
 
 		try {
@@ -52,6 +90,8 @@ const migrateCommand = (props?: {
 			} else {
 				const res = await loadConfigFile();
 				config = res.config;
+				env = res.env;
+				runtimeContext = res.runtimeContext;
 				translationStore = (
 					await prepareTranslations({
 						config,
@@ -80,6 +120,12 @@ const migrateCommand = (props?: {
 				store: translationStore,
 				locale: "en",
 			});
+			[mediaInstance, emailInstance] = await Promise.all([
+				getInitializedMediaAdapter(config, { env, runtimeContext }),
+				getInitializedEmailAdapter(config, { env, runtimeContext }),
+			]);
+			const media = mediaInstance;
+			const email = emailInstance;
 
 			cliLogger.info("Checking the migration status");
 
@@ -89,8 +135,11 @@ const migrateCommand = (props?: {
 					db: { client: config.db.client },
 					config: config,
 					queue: queue,
-					env: null,
+					env: env ?? null,
+					runtimeContext,
 					kv: passthroughKVAdapter(),
+					media,
+					email,
 					translate,
 					request: {
 						url: config.host ?? constants.urls.localhost,
@@ -133,8 +182,16 @@ const migrateCommand = (props?: {
 			//* if no migrations are needed, just run seeds and exit
 			if (!needsCollectionMigrations && !needsDbMigrations) {
 				if (!skipSyncSteps) {
-					const syncResult = await runSyncTasks(config, translationStore, mode);
+					const syncResult = await runSyncTasks(
+						config,
+						translationStore,
+						mode,
+						undefined,
+						env,
+						runtimeContext,
+					);
 					if (!syncResult && mode === "return") {
+						await cleanupAdapters();
 						return false;
 					}
 				}
@@ -152,6 +209,7 @@ const migrateCommand = (props?: {
 						},
 					);
 					logger.setBuffering(false);
+					await cleanupAdapters();
 					process.exit(0);
 				} else {
 					cliLogger.success(
@@ -160,6 +218,7 @@ const migrateCommand = (props?: {
 						"in",
 						cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
 					);
+					await cleanupAdapters();
 					return true; //* dont clear logger buffer here as it was called by the serve command
 				}
 			}
@@ -176,11 +235,15 @@ const migrateCommand = (props?: {
 				} catch (error) {
 					if (error instanceof Error && error.name === "ExitPromptError") {
 						if (mode === "process") {
+							await cleanupAdapters();
 							logger.setBuffering(false);
 							process.exit(0);
 						}
 						//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
-						else return false;
+						else {
+							await cleanupAdapters();
+							return false;
+						}
 					}
 					throw error;
 				}
@@ -189,15 +252,22 @@ const migrateCommand = (props?: {
 						"Exiting without running migrations. Run this command again when you're ready",
 					);
 					if (mode === "process") {
+						await cleanupAdapters();
 						logger.setBuffering(false);
 						process.exit(0);
 					}
 					//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
-					else return false;
+					else {
+						await cleanupAdapters();
+						return false;
+					}
 				}
 			}
 
-			kvInstance = await getInitializedKVAdapter(config);
+			kvInstance = await getInitializedKVAdapter(config, {
+				env,
+				runtimeContext,
+			});
 
 			//* run database migrations if needed
 			if (needsDbMigrations) {
@@ -215,11 +285,11 @@ const migrateCommand = (props?: {
 					);
 					if (error instanceof Error) cliLogger.errorInstance(error);
 					if (mode === "process") {
-						await cleanupKV();
+						await cleanupAdapters();
 						logger.setBuffering(false);
 						process.exit(1);
 					} else {
-						await cleanupKV();
+						await cleanupAdapters();
 						return false;
 					}
 				}
@@ -231,8 +301,11 @@ const migrateCommand = (props?: {
 					db: { client: config.db.client },
 					config: config,
 					queue: queue,
-					env: null,
+					env: env ?? null,
+					runtimeContext,
 					kv: kvInstance,
+					media,
+					email,
 					translate,
 					request: {
 						url: config.host ?? constants.urls.localhost,
@@ -246,11 +319,11 @@ const migrateCommand = (props?: {
 							"unknown",
 					);
 					if (mode === "process") {
-						await cleanupKV();
+						await cleanupAdapters();
 						logger.setBuffering(false);
 						process.exit(1);
 					} else {
-						await cleanupKV();
+						await cleanupAdapters();
 						return false;
 					}
 				}
@@ -265,8 +338,11 @@ const migrateCommand = (props?: {
 							db: { client: config.db.client },
 							config: config,
 							queue: queue,
-							env: null,
+							env: env ?? null,
+							runtimeContext,
 							kv: kvInstance,
+							media,
+							email,
 							translate,
 							request: {
 								url: config.host ?? constants.urls.localhost,
@@ -283,11 +359,11 @@ const migrateCommand = (props?: {
 							translate.english(result.error.message) || "",
 						);
 						if (mode === "process") {
-							await cleanupKV();
+							await cleanupAdapters();
 							logger.setBuffering(false);
 							process.exit(1);
 						} else {
-							await cleanupKV();
+							await cleanupAdapters();
 							return false;
 						}
 					}
@@ -302,11 +378,11 @@ const migrateCommand = (props?: {
 					);
 					if (error instanceof Error) cliLogger.errorInstance(error);
 					if (mode === "process") {
-						await cleanupKV();
+						await cleanupAdapters();
 						logger.setBuffering(false);
 						process.exit(1);
 					} else {
-						await cleanupKV();
+						await cleanupAdapters();
 						return false;
 					}
 				}
@@ -319,16 +395,29 @@ const migrateCommand = (props?: {
 					translationStore,
 					mode,
 					kvInstance,
+					env,
+					runtimeContext,
 				);
 				if (!syncResult && mode === "return") {
-					await cleanupKV();
+					await cleanupAdapters();
 					return false;
 				}
 			}
 
 			cliLogger.info("Clearing KV cache...");
-			await kvInstance.clear();
-			await cleanupKV();
+			await kvInstance.clear(
+				createToolkitServiceContext({
+					config,
+					translationStore,
+					env,
+					runtimeContext,
+					queue,
+					kv: kvInstance,
+					media,
+					email,
+				}),
+			);
+			await cleanupAdapters();
 
 			const endTime = startTime();
 			if (mode === "process") {
@@ -354,7 +443,7 @@ const migrateCommand = (props?: {
 				return true;
 			}
 		} catch (error) {
-			await cleanupKV();
+			await cleanupAdapters();
 			cliLogger.error(
 				"Migration failed",
 				error instanceof Error ? error.message : "Unknown error",

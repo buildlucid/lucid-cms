@@ -343,10 +343,23 @@ const adminBarOptions = ${JSON.stringify(adminBarOptions, null, 2)};
 
 let appPromise;
 
-const getCloudflareEnv = () => {
-\tconst env =
+const readCloudflareEnv = async () => {
+\tconst bridgedEnv =
 \t\tglobalThis[${JSON.stringify(astroConstants.cloudflare.runtimeEnvGlobal)}] ??
 \t\tglobalThis[${JSON.stringify(astroConstants.cloudflare.devEnvGlobal)}];
+
+\tif (bridgedEnv) return bridgedEnv;
+
+\ttry {
+\t\tconst workers = await import("cloudflare:workers");
+\t\treturn workers.env ?? null;
+\t} catch {
+\t\treturn null;
+\t}
+};
+
+const getCloudflareEnv = async () => {
+\tconst env = await readCloudflareEnv();
 
 \tif (!env) {
 \t\tthrow new Error(
@@ -362,7 +375,7 @@ ${resolveRuntimeSource}
 const ensureApp = async () => {
 \tif (!appPromise) {
 \t\tappPromise = (async () => {
-\t\t\tconst cloudflareEnv = getCloudflareEnv();
+\t\t\tconst cloudflareEnv = await getCloudflareEnv();
 \t\t\tconst runtimeAdapter = await resolveRuntime();
 
 \t\t\tif (envSchema) {
@@ -449,7 +462,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 \t\toptions: adminBarOptions,
 \t\tisDev: import.meta.env.DEV,
 \t\tappFetch: async (request) => {
-\t\t\tconst cloudflareEnv = getCloudflareEnv();
+\t\t\tconst cloudflareEnv = await getCloudflareEnv();
 \t\t\tconst { app } = await ensureApp();
 \t\t\treturn app.fetch(
 \t\t\t\trequest,

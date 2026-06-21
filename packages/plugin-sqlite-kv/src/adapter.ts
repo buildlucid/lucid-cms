@@ -15,6 +15,7 @@ import type {
 	KVKeyOptions,
 	KVSetInput,
 	KVSetOptions,
+	ServiceContext,
 } from "@lucidcms/core/types";
 import Database from "better-sqlite3";
 
@@ -221,7 +222,11 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 				incrementTransaction = undefined;
 			},
 		},
-		get: async <R>(key: string, options?: KVKeyOptions): Promise<R | null> => {
+		get: async <R>(
+			_context: ServiceContext,
+			key: string,
+			options?: KVKeyOptions,
+		): Promise<R | null> => {
 			const resolvedKey = resolveSQLiteKey(key, options);
 			const row = getStatements().get.get(resolvedKey, Date.now());
 
@@ -229,19 +234,32 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 
 			return getValue(row.value);
 		},
-		set: async (key: string, value: unknown, options?: KVSetOptions) => {
+		set: async (
+			_context,
+			key: string,
+			value: unknown,
+			options?: KVSetOptions,
+		) => {
 			setValue(key, value, options);
 		},
-		has: async (key: string, options?: KVKeyOptions): Promise<boolean> => {
+		has: async (
+			_context,
+			key: string,
+			options?: KVKeyOptions,
+		): Promise<boolean> => {
 			const resolvedKey = resolveSQLiteKey(key, options);
 			const row = getStatements().has.get(resolvedKey, Date.now());
 			return row !== undefined;
 		},
-		delete: async (key: string, options?: KVKeyOptions) => {
+		delete: async (_context, key: string, options?: KVKeyOptions) => {
 			const resolvedKey = resolveSQLiteKey(key, options);
 			getStatements().delete.run(resolvedKey);
 		},
-		getMany: async <R>(keys: KVKeyInput[], options?: KVKeyOptions) => {
+		getMany: async <R>(
+			_context: ServiceContext,
+			keys: KVKeyInput[],
+			options?: KVKeyOptions,
+		) => {
 			return keys.map((input) => {
 				const resolved = resolveKeyInput(input, options);
 				const row = getStatements().get.get(
@@ -255,19 +273,28 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 				};
 			});
 		},
-		setMany: async (items: Array<KVSetInput>, options?: KVSetOptions) => {
+		setMany: async (
+			_context,
+			items: Array<KVSetInput>,
+			options?: KVSetOptions,
+		) => {
 			if (!setManyTransaction) {
 				throw new Error("SQLite KV adapter has not been initialized.");
 			}
 			setManyTransaction(items, options);
 		},
-		deleteMany: async (keys: KVKeyInput[], options?: KVKeyOptions) => {
+		deleteMany: async (
+			_context,
+			keys: KVKeyInput[],
+			options?: KVKeyOptions,
+		) => {
 			if (!deleteManyTransaction) {
 				throw new Error("SQLite KV adapter has not been initialized.");
 			}
 			deleteManyTransaction(keys, options);
 		},
 		increment: async (
+			_context,
 			key: string,
 			options?: KVIncrementOptions,
 		): Promise<KVIncrementResult> => {
@@ -276,7 +303,7 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 			}
 			return incrementTransaction(key, options);
 		},
-		clear: async () => {
+		clear: async (_context) => {
 			if (namespacePrefix) {
 				getStatements().clearNamespace.run(namespacePrefix);
 				return;

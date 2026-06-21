@@ -12,13 +12,21 @@ import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { Config, EnvironmentVariables } from "../../types.js";
 import { LucidAPIError, translateErrorData } from "../../utils/errors/index.js";
 import { normalizeHost } from "../../utils/helpers/index.js";
-import getEmailAdapter from "../email/get-adapter.js";
+import {
+	destroyEmailAdapter,
+	getInitializedEmailAdapter,
+} from "../email/lifecycle.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
-import { getInitializedKVAdapter } from "../kv/lifecycle.js";
-import getMediaAdapter from "../media/get-adapter.js";
-import getQueueAdapter from "../queue/get-adapter.js";
-import { createAdapterLifecycleContext } from "../runtime/adapter-lifecycle.js";
+import { destroyKVAdapter, getInitializedKVAdapter } from "../kv/lifecycle.js";
+import {
+	destroyMediaAdapter,
+	getInitializedMediaAdapter,
+} from "../media/lifecycle.js";
+import {
+	destroyQueueAdapter,
+	getInitializedQueueAdapter,
+} from "../queue/lifecycle.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/index.js";
@@ -46,11 +54,6 @@ const createApp = async (props: {
 	const configuredHost = props.config.host?.trim()
 		? normalizeHost(props.config.host)
 		: undefined;
-	const adapterLifecycleContext = createAdapterLifecycleContext({
-		config: props.config,
-		env: props.env,
-		runtimeContext: props.runtimeContext,
-	});
 
 	const kvInstance = await getInitializedKVAdapter(props.config, {
 		env: props.env,
@@ -58,17 +61,17 @@ const createApp = async (props: {
 	});
 
 	const [queueInstance, mediaInstance, emailInstance] = await Promise.all([
-		getQueueAdapter(props.config, props.runtimeContext).then(async (a) => {
-			await a.lifecycle?.init?.(adapterLifecycleContext);
-			return a;
+		getInitializedQueueAdapter(props.config, {
+			env: props.env,
+			runtimeContext: props.runtimeContext,
 		}),
-		getMediaAdapter(props.config).then(async (a) => {
-			await a.adapter?.lifecycle?.init?.(adapterLifecycleContext);
-			return a.adapter;
+		getInitializedMediaAdapter(props.config, {
+			env: props.env,
+			runtimeContext: props.runtimeContext,
 		}),
-		getEmailAdapter(props.config).then(async (a) => {
-			await a.adapter?.lifecycle?.init?.(adapterLifecycleContext);
-			return a.adapter;
+		getInitializedEmailAdapter(props.config, {
+			env: props.env,
+			runtimeContext: props.runtimeContext,
 		}),
 		...(props.config.hono?.middleware || []).map((m) => m(app, props.config)),
 		...(props.hono?.middleware || []).map((m) => m(app, props.config)),
@@ -107,10 +110,12 @@ const createApp = async (props: {
 			c.set("runtimeContext", props.runtimeContext);
 			c.set("queue", queueInstance);
 			c.set("kv", kvInstance);
-			c.set("env", props.env ?? null);
-			c.set("cf", null);
-			c.set("caches", null);
-			c.set("ctx", null);
+			c.set("media", mediaInstance);
+			c.set("email", emailInstance);
+			c.set("env", c.get("env") ?? props.env ?? null);
+			c.set("cf", c.get("cf") ?? null);
+			c.set("caches", c.get("caches") ?? null);
+			c.set("ctx", c.get("ctx") ?? null);
 			await next();
 		})
 		.route("/", routes)
@@ -347,7 +352,7 @@ const createApp = async (props: {
 		{
 			queue: queueInstance.key,
 			kv: kvInstance.key,
-			media: mediaInstance?.key || null,
+			media: mediaInstance?.key ?? null,
 			email: emailInstance.key,
 			database: props.config.db.adapter,
 		},
@@ -358,13 +363,31 @@ const createApp = async (props: {
 		app,
 		queue: queueInstance,
 		kv: kvInstance,
+		media: mediaInstance,
+		email: emailInstance,
 		issues: supportChecksRes.issues,
 		destroy: async () => {
 			await Promise.allSettled([
-				queueInstance.lifecycle?.destroy?.(adapterLifecycleContext),
-				kvInstance.lifecycle?.destroy?.(adapterLifecycleContext),
-				mediaInstance?.lifecycle?.destroy?.(adapterLifecycleContext),
-				emailInstance?.lifecycle?.destroy?.(adapterLifecycleContext),
+				destroyQueueAdapter(queueInstance, {
+					config: props.config,
+					env: props.env,
+					runtimeContext: props.runtimeContext,
+				}),
+				destroyKVAdapter(kvInstance, {
+					config: props.config,
+					env: props.env,
+					runtimeContext: props.runtimeContext,
+				}),
+				destroyMediaAdapter(mediaInstance, {
+					config: props.config,
+					env: props.env,
+					runtimeContext: props.runtimeContext,
+				}),
+				destroyEmailAdapter(emailInstance, {
+					config: props.config,
+					env: props.env,
+					runtimeContext: props.runtimeContext,
+				}),
 				props.config.db.client.destroy(),
 			]);
 		},

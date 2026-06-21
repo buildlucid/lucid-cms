@@ -1,5 +1,6 @@
 import { deleteCookie, getCookie } from "hono/cookie";
 import constants from "../../../constants/constants.js";
+import createServiceContext from "../../../libs/http/utils/create-service-context.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
@@ -30,8 +31,11 @@ const clearToken = async (
 	const hashedRefreshToken = hashUserToken(_refresh);
 
 	const UserTokens = new UserTokensRepository(config.db.client, config.db);
+	const context = createServiceContext(c);
 
-	await c.get("kv").delete(cacheKeys.auth.refresh(_refresh), { hash: true });
+	await context.kv.delete(context, cacheKeys.auth.refresh(_refresh), {
+		hash: true,
+	});
 
 	const updateTokenRes = await UserTokens.updateMultiple({
 		data: {

@@ -46,10 +46,9 @@ const processImage: ServiceFn<
 
 	// get og image
 	const mediaRes = await mediaStrategyRes.data.stream({
+		context,
 		key: data.key,
-		context: {
-			tenant: sourceTenant,
-		},
+		tenant: sourceTenant,
 	});
 	if (mediaRes.error) return mediaRes;
 
@@ -198,6 +197,7 @@ const processImage: ServiceFn<
 				},
 			}),
 			mediaStrategyRes.data.upload({
+				context,
 				key: data.processKey,
 				data: imageRes.data.buffer,
 				meta: {
@@ -206,9 +206,7 @@ const processImage: ServiceFn<
 					size: imageRes.data.size,
 					type: "image",
 				},
-				context: {
-					tenant: processedTenant,
-				},
+				tenant: processedTenant,
 			}),
 		]);
 
@@ -231,10 +229,9 @@ const processImage: ServiceFn<
 					: Promise.resolve(),
 				uploadRes.error === undefined
 					? mediaStrategyRes.data.delete({
+							context,
 							key: data.processKey,
-							context: {
-								tenant: processedTenant,
-							},
+							tenant: processedTenant,
 						})
 					: Promise.resolve(),
 			]);

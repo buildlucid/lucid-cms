@@ -9,7 +9,7 @@ import type {
 	RuntimeBuildArtifactFile,
 } from "../runtime/types.js";
 
-export type LucidPluginBuildHookResult = {
+export type LucidPluginRuntimeHookResult = {
 	artifacts?: Array<
 		| RuntimeBuildArtifactFile
 		| RuntimeBuildArtifactCompile
@@ -18,14 +18,14 @@ export type LucidPluginBuildHookResult = {
 };
 
 export type LucidPluginHookInit = () => ServiceResponse<undefined>;
-export type LucidPluginHookBuild = (props: {
+export type LucidPluginHookRuntime = (props: {
 	definition: LucidConfigDefinition;
 	paths: {
 		configPath: string;
 		outputPath: string;
 		outputRelativeConfigPath: string;
 	};
-}) => ServiceResponse<LucidPluginBuildHookResult>;
+}) => ServiceResponse<LucidPluginRuntimeHookResult>;
 
 export type LucidPluginHooks = {
 	/**
@@ -33,11 +33,11 @@ export type LucidPluginHooks = {
 	 */
 	init?: LucidPluginHookInit;
 	/**
-	 * This hook is called when the CLI build command is ran.
+	 * This hook is called when the runtime needs plugin artifacts for build or setup work.
 	 *
 	 * Its artifacts are collected, processed and potentially passed to the runtime adapter based on the type.
 	 */
-	build?: LucidPluginHookBuild;
+	runtime?: LucidPluginHookRuntime;
 };
 
 export type LucidPluginRecipe = LucidConfigRecipe;

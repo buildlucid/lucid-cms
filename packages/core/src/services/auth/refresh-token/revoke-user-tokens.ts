@@ -80,7 +80,9 @@ const revokeUserTokens: ServiceFn<
 
 	await Promise.all(
 		activeTokenRes.data.map((token) =>
-			context.kv.delete(cacheKeys.auth.refresh(token.token), { hash: true }),
+			context.kv.delete(context, cacheKeys.auth.refresh(token.token), {
+				hash: true,
+			}),
 		),
 	);
 

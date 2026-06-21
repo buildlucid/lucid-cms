@@ -4,7 +4,6 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
-import getMediaAdapter from "../../libs/media/get-adapter.js";
 import {
 	MediaAwaitingSyncRepository,
 	MediaRepository,
@@ -153,7 +152,7 @@ const createSingle: ServiceFn<
 	});
 	if (aiGenerationRes.error) return aiGenerationRes;
 
-	const [mediaRes, deleteMediaSyncRes, mediaAdapter] = await Promise.all([
+	const [mediaRes, deleteMediaSyncRes] = await Promise.all([
 		Media.createSingle({
 			data: {
 				key: mediaKey,
@@ -206,18 +205,16 @@ const createSingle: ServiceFn<
 				enabled: true,
 			},
 		}),
-		getMediaAdapter(context.config),
 	]);
 	if (mediaRes.error) return mediaRes;
 	if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
 
 	if (mediaRes.data === undefined) {
-		if (mediaAdapter.enabled) {
-			await mediaAdapter.adapter.delete({
+		if (context.media) {
+			await context.media.delete({
+				context,
 				key: mediaKey,
-				context: {
-					tenant: resolveMediaKeyTenant(context.config, mediaKey),
-				},
+				tenant: resolveMediaKeyTenant(context.config, mediaKey),
 			});
 		}
 		return {
@@ -260,19 +257,18 @@ const createSingle: ServiceFn<
 			},
 		});
 		if (mediaTranslationsRes.error) {
-			if (mediaAdapter.enabled) {
-				await mediaAdapter.adapter.delete({
+			if (context.media) {
+				await context.media.delete({
+					context,
 					key: mediaKey,
-					context: {
-						tenant: resolveMediaKeyTenant(context.config, mediaKey),
-					},
+					tenant: resolveMediaKeyTenant(context.config, mediaKey),
 				});
 			}
 			return mediaTranslationsRes;
 		}
 	}
 
-	await invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]);
+	await invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]);
 
 	const mediaFetchRes = await Media.selectSingleById({
 		id: mediaRes.data.id,

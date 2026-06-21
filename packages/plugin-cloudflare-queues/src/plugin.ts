@@ -1,6 +1,6 @@
 import { LucidError } from "@lucidcms/core";
 import type {
-	LucidPlugin,
+	LucidPluginResponse,
 	RuntimeBuildArtifactCustom,
 } from "@lucidcms/core/types";
 import type {
@@ -18,12 +18,14 @@ import {
 } from "./constants.js";
 import type { PluginOptions } from "./types.js";
 
-const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
+const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
+	const resolvedOptions = pluginOptions ?? {};
+
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		hooks: {
-			build: async () => {
+			runtime: async () => {
 				const imports: CloudflareWorkerImport[] = [
 					{
 						path: "./lucid/config.js",
@@ -38,6 +40,10 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						default: "db",
 					},
 					{
+						path: "./lucid/runtime.js",
+						default: "runtime",
+					},
+					{
 						path: "@lucidcms/core/queue",
 						exports: [
 							"passthroughQueueAdapter",
@@ -48,6 +54,14 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					{
 						path: "@lucidcms/core/kv",
 						exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
+					},
+					{
+						path: "@lucidcms/core/media",
+						exports: ["destroyMediaAdapter", "getInitializedMediaAdapter"],
+					},
+					{
+						path: "@lucidcms/core/email",
+						exports: ["destroyEmailAdapter", "getInitializedEmailAdapter"],
 					},
 					{
 						path: "@lucidcms/core/runtime",
@@ -66,6 +80,10 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						exports: ["logger"],
 					},
 					{
+						path: "@lucidcms/runtime-cloudflare/runtime",
+						exports: ["getRuntimeContext"],
+					},
+					{
 						path: "./email-templates.json",
 						default: "emailTemplates",
 					},
@@ -79,9 +97,25 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						name: "queue",
 						async: true,
 						params: ["batch", "env"],
-						content: /** ts */ `if (envSchema) {
+						content: /** ts */ `const resolveRuntime = async () => {
+    const runtimeValue = typeof runtime === "function" ? runtime() : runtime;
+    const runtimeAdapter = await runtimeValue;
+
+    if (!runtimeAdapter || typeof runtimeAdapter !== "object") {
+        throw new Error(
+            "Lucid Cloudflare runtime could not resolve the configured runtime adapter.",
+        );
+    }
+
+    return runtimeAdapter;
+};
+
+const runtimeAdapter = await resolveRuntime();
+
+if (envSchema) {
     envSchema.parse(env);
 }
+await runtimeAdapter.resolveOptions?.(env);
 
 const lucidConfig = configFactory(env);
 lucidConfig.preRenderedEmailTemplates = Object.fromEntries(
@@ -103,15 +137,33 @@ const { translationStore } = await prepareTranslations({
     bundles: i18nTranslations,
 });
 const translate = createTranslator({ store: translationStore, locale: "en" });
-const kvInstance = await getInitializedKVAdapter(resolved, {
-    env,
+const runtimeContext = getRuntimeContext({
+    server: "cloudflare",
+    compiled: true,
 });
 
-const internalQueueAdapter = passthroughQueueAdapter({
-    bypassImmediateExecution: true,
-});
+let kvInstance;
+let media;
+let email;
 
 try {
+    kvInstance = await getInitializedKVAdapter(resolved, {
+        env,
+        runtimeContext,
+    });
+    media = await getInitializedMediaAdapter(resolved, {
+        env,
+        runtimeContext,
+    });
+    email = await getInitializedEmailAdapter(resolved, {
+        env,
+        runtimeContext,
+    });
+
+    const internalQueueAdapter = passthroughQueueAdapter({
+        bypassImmediateExecution: true,
+});
+
     for (const message of batch.messages) {
         try {
             const { jobId, event, payload } = message.body;
@@ -131,8 +183,11 @@ try {
                     config: resolved,
                     db: { client: resolved.db.client },
                     env: env || null,
+                    runtimeContext,
                     queue: internalQueueAdapter,
                     kv: kvInstance,
+                    media,
+                    email,
                     translate,
                     request: {
                         url: resolved.host || "http://localhost",
@@ -144,7 +199,7 @@ try {
                     event,
                     payload,
                     attempts: message.attempts - 1, // starts at 1
-                    maxAttempts: ${pluginOptions.maxRetries ?? MAX_RETRIES},
+                    maxAttempts: ${resolvedOptions.maxRetries ?? MAX_RETRIES},
                     setNextRetryAt: false,
                 },
             );
@@ -163,7 +218,7 @@ try {
                     data: { jobId, event, message: result.message },
                 });
                 message.retry({
-                    delaySeconds: calculateExponentialBackoff(message.attempts, ${pluginOptions.baseDelaySeconds ?? BASE_DELAY_SECONDS}),
+                    delaySeconds: calculateExponentialBackoff(message.attempts, ${resolvedOptions.baseDelaySeconds ?? BASE_DELAY_SECONDS}),
                 });
             } else {
                 logger.error({
@@ -187,7 +242,15 @@ try {
     }
 } finally {
     await Promise.allSettled([
-        destroyKVAdapter(kvInstance, { config: resolved, env }),
+        kvInstance
+            ? destroyKVAdapter(kvInstance, { config: resolved, env, runtimeContext })
+            : undefined,
+        media
+            ? destroyMediaAdapter(media, { config: resolved, env, runtimeContext })
+            : undefined,
+        email
+            ? destroyEmailAdapter(email, { config: resolved, env, runtimeContext })
+            : undefined,
         resolved.db.client.destroy(),
     ]);
 }`,
@@ -224,10 +287,10 @@ try {
 			);
 
 			if (draft.queue?.adapter) {
-				draft.queue.adapter = cloudflareQueuesAdapter(pluginOptions);
+				draft.queue.adapter = cloudflareQueuesAdapter(resolvedOptions);
 			} else {
 				draft.queue = {
-					adapter: cloudflareQueuesAdapter(pluginOptions),
+					adapter: cloudflareQueuesAdapter(resolvedOptions),
 				};
 			}
 		},

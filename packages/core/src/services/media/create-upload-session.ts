@@ -3,7 +3,6 @@ import { addMilliseconds } from "date-fns";
 import mime from "mime-types";
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
-import getMediaAdapter from "../../libs/media/get-adapter.js";
 import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
@@ -30,8 +29,7 @@ const createUploadSession: ServiceFn<
 	],
 	UploadSessionResponse
 > = async (context, data) => {
-	const mediaAdapter = await getMediaAdapter(context.config);
-	if (!mediaAdapter.enabled) {
+	if (!context.media) {
 		return {
 			error: {
 				type: "basic",
@@ -62,7 +60,8 @@ const createUploadSession: ServiceFn<
 		context.request.tenantKey ?? null,
 	);
 
-	const sessionRes = await mediaAdapter.adapter.createUploadSession({
+	const sessionRes = await context.media.createUploadSession({
+		context,
 		key: keyRes.data,
 		meta: {
 			host: getBaseUrl(context),
@@ -71,9 +70,7 @@ const createUploadSession: ServiceFn<
 			extension: extension || undefined,
 			size: data.size,
 		},
-		context: {
-			tenant,
-		},
+		tenant,
 	});
 	if (sessionRes.error) {
 		return {
@@ -138,7 +135,7 @@ const createUploadSession: ServiceFn<
 		data: {
 			session_id: sessionId,
 			key: uploadKey,
-			adapter_key: mediaAdapter.adapter.key,
+			adapter_key: context.media.key,
 			adapter_upload_id: sessionRes.data.uploadId,
 			mode: "resumable",
 			status: "active",

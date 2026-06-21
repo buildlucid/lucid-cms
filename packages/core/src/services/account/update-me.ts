@@ -145,7 +145,7 @@ const updateMe: ServiceFn<
 			: undefined,
 	]);
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	if (updateMeRes.error) return updateMeRes;
 	if (updatePasswordAuditRes?.error) return updatePasswordAuditRes;

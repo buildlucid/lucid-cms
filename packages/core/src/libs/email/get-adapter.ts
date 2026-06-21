@@ -9,10 +9,7 @@ import type { EmailAdapterInstance } from "./types.js";
  */
 const getEmailAdapter = async (
 	config: Config,
-): Promise<{
-	adapter: EmailAdapterInstance;
-	simulated: boolean;
-}> => {
+): Promise<EmailAdapterInstance> => {
 	try {
 		if (config.email?.adapter) {
 			const adapter =
@@ -20,16 +17,10 @@ const getEmailAdapter = async (
 					? await config.email.adapter()
 					: config.email.adapter;
 
-			return {
-				adapter: await adapter,
-				simulated: config.email.simulate,
-			};
+			return await adapter;
 		}
 
-		return {
-			adapter: await passthroughEmailAdapter(),
-			simulated: true,
-		};
+		return await passthroughEmailAdapter();
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.emailAdapter,
@@ -39,10 +30,7 @@ const getEmailAdapter = async (
 			},
 		});
 
-		return {
-			adapter: await passthroughEmailAdapter(),
-			simulated: true,
-		};
+		return await passthroughEmailAdapter();
 	}
 };
 

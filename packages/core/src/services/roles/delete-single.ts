@@ -56,7 +56,7 @@ const deleteSingle: ServiceFn<
 		};
 	}
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	return {
 		error: undefined,

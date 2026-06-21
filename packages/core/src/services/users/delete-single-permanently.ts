@@ -74,7 +74,7 @@ const deleteSinglePermanently: ServiceFn<
 	});
 	if (deleteUserRes.error) return deleteUserRes;
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	return {
 		error: undefined,

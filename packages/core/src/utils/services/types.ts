@@ -1,9 +1,14 @@
 import type { ZodType } from "zod";
 import type { KyselyDB } from "../../libs/db/types.js";
+import type { EmailAdapterInstance } from "../../libs/email/types.js";
 import type { Translator } from "../../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../../libs/kv/types.js";
+import type { MediaAdapterInstance } from "../../libs/media/types.js";
 import type { QueueAdapterInstance } from "../../libs/queue/types.js";
-import type { EnvironmentVariables } from "../../libs/runtime/types.js";
+import type {
+	AdapterRuntimeContext,
+	EnvironmentVariables,
+} from "../../libs/runtime/types.js";
 import type { Config } from "../../types/config.js";
 import type { LucidErrorData } from "../../types/errors.js";
 
@@ -14,8 +19,11 @@ export type ServiceContext = {
 	};
 	config: Config;
 	env: EnvironmentVariables | null;
+	runtimeContext?: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;
 	kv: KVAdapterInstance;
+	media: MediaAdapterInstance | null;
+	email: EmailAdapterInstance;
 	translate: Translator;
 	request: {
 		/** The request URL. Used to derive the base URL if config.host is not set. */

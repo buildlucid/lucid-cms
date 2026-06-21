@@ -1,5 +1,4 @@
 import { copy } from "../../../libs/i18n/index.js";
-import getMediaAdapter from "../../../libs/media/get-adapter.js";
 import type { MediaAdapterInstance } from "../../../libs/media/types.js";
 import type {
 	ServiceContext,
@@ -9,9 +8,7 @@ import type {
 const checkHasMediaStrategy = async (
 	context: ServiceContext,
 ): ServiceResponse<MediaAdapterInstance> => {
-	const mediaAdapter = await getMediaAdapter(context.config);
-
-	if (!mediaAdapter.enabled) {
+	if (!context.media) {
 		return {
 			error: {
 				type: "basic",
@@ -25,7 +22,7 @@ const checkHasMediaStrategy = async (
 
 	return {
 		error: undefined,
-		data: mediaAdapter.adapter,
+		data: context.media,
 	};
 };
 

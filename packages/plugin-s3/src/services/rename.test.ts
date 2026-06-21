@@ -31,9 +31,8 @@ describe("rename", () => {
 		const response = await service({
 			from: "public/source.png",
 			to: "public/target.png",
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 
 		expect(response.error).toBeUndefined();

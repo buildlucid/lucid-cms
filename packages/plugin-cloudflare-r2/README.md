@@ -19,18 +19,23 @@ import { libsql } from "@lucidcms/db-libsql";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 
 export default configureLucid({
-	runtime: cloudflare,
+	runtime: cloudflare({
+		wrangler: {
+			bindings: {
+				r2: {
+					bucketName: "lucid-media",
+				},
+			},
+		},
+	}),
 	db: libsql,
 	env: z.object({
 		LIBSQL_URL: z.string(),
 		LIBSQL_AUTH_TOKEN: z.string().optional(),
-		MEDIA_BUCKET: z.any(),
 	}),
 	config: (env) => ({
 		plugins: [
-			cloudflareR2Plugin({
-				binding: env.MEDIA_BUCKET,
-			}),
+			cloudflareR2Plugin(),
 		],
 	}),
 });
@@ -40,7 +45,7 @@ export default configureLucid({
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `binding` | `R2Bucket` | The Cloudflare R2 binding to use |
+| `binding` | `string` | Cloudflare R2 binding name. Defaults to `LUCID_MEDIA_BUCKET`. If you customize `wrangler.bindings.r2`, pass the same custom name here |
 | `http` | `object` | Optional S3-compatible HTTP fallback for direct browser uploads/downloads |
 | `upload` | `object` | Optional default R2 HTTP metadata, custom metadata, and storage class |
 

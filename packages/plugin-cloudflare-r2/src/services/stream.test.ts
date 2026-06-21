@@ -12,18 +12,20 @@ describe("stream", () => {
 			},
 		}));
 
-		const service = stream({
-			binding: {
-				get,
-			} as unknown as R2Bucket,
-		});
+		const binding = {
+			get,
+		} as unknown as R2Bucket;
+		const service = stream({ binding: "R2" });
 
 		const response = await service({
 			key: "public/uuid",
 			ifNoneMatch: '"etag"',
+			tenant: null,
 			context: {
-				tenant: null,
-			},
+				env: {
+					R2: binding,
+				},
+			} as never,
 		});
 
 		expect(response.error).toBeUndefined();

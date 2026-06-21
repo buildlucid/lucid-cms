@@ -32,10 +32,9 @@ const syncMedia: ServiceFn<
 	const tenant = resolveMediaKeyTenant(context.config, data.key);
 
 	const mediaMetaRes = await mediaStrategyRes.data.getMeta({
+		context,
 		key: data.key,
-		context: {
-			tenant,
-		},
+		tenant,
 	});
 	if (mediaMetaRes.error) return mediaMetaRes;
 
@@ -47,19 +46,17 @@ const syncMedia: ServiceFn<
 	);
 	if (proposedSizeRes.error) {
 		await mediaStrategyRes.data.delete({
+			context,
 			key: data.key,
-			context: {
-				tenant,
-			},
+			tenant,
 		});
 		return proposedSizeRes;
 	}
 
 	const fileMetaData = await validateUploadedMedia({
+		context,
 		stream: mediaStrategyRes.data.stream,
-		context: {
-			tenant,
-		},
+		tenant,
 		key: data.key,
 		mimeType: mediaMetaRes.data.mimeType,
 		fileName: data.fileName,
@@ -67,10 +64,9 @@ const syncMedia: ServiceFn<
 	});
 	if (fileMetaData.error) {
 		await mediaStrategyRes.data.delete({
+			context,
 			key: data.key,
-			context: {
-				tenant,
-			},
+			tenant,
 		});
 		return fileMetaData;
 	}
@@ -95,10 +91,9 @@ const syncMedia: ServiceFn<
 		}
 
 		await mediaStrategyRes.data.delete({
+			context,
 			key: data.key,
-			context: {
-				tenant,
-			},
+			tenant,
 		});
 
 		return {

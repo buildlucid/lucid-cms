@@ -7,7 +7,7 @@ import type { QueueAdapterInstance } from "./types.js";
 
 const getQueueAdapter = async (
 	config: Config,
-	_runtimeContext: AdapterRuntimeContext,
+	_runtimeContext?: AdapterRuntimeContext,
 ): Promise<QueueAdapterInstance> => {
 	try {
 		if (config.queue?.adapter) {

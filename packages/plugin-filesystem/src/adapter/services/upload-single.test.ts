@@ -40,18 +40,16 @@ describe("file-system upload metadata", () => {
 				size: 46,
 				type: "image",
 			},
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 
 		expect(uploadRes.error).toBeUndefined();
 
 		const metadataRes = await getMetadata(options)({
 			key: "public/uuid",
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 		expect(metadataRes.error).toBeUndefined();
 		expect(metadataRes.data?.mimeType).toBe("image/svg+xml");
@@ -72,9 +70,8 @@ describe("file-system upload metadata", () => {
 
 		const streamRes = await stream(options)({
 			key: "public/uuid",
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 		expect(streamRes.error).toBeUndefined();
 		expect(streamRes.data?.contentType).toBe("image/svg+xml");
@@ -83,9 +80,8 @@ describe("file-system upload metadata", () => {
 		const conditionalStreamRes = await stream(options)({
 			key: "public/uuid",
 			ifNoneMatch: `"${streamRes.data?.etag}"`,
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 		expect(conditionalStreamRes.error).toBeUndefined();
 		expect(conditionalStreamRes.data?.notModified).toBe(true);
@@ -107,26 +103,23 @@ describe("file-system upload metadata", () => {
 				size: 46,
 				type: "image",
 			},
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 
 		const renameRes = await rename(options)({
 			from: "public/source",
 			to: "private/source",
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 
 		expect(renameRes.error).toBeUndefined();
 
 		const streamRes = await stream(options)({
 			key: "private/source",
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 		expect(streamRes.error).toBeUndefined();
 		expect(streamRes.data?.contentType).toBe("image/svg+xml");

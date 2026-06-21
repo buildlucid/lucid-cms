@@ -1,9 +1,9 @@
-import type { AdapterLifecycleContext } from "../../types.js";
 import type {
 	ServiceContext,
 	ServiceFn,
 	ServiceResponse,
 } from "../../utils/services/types.js";
+import type { AdapterLifecycleContext } from "../runtime/types.js";
 
 export type QueueEvent<T extends string = string> =
 	| "alert:execute"

@@ -16,7 +16,10 @@ export type HttpOptions = {
 };
 
 export type PluginOptions = {
-	binding: R2Bucket;
+	/**
+	 * Cloudflare R2 binding name. Defaults to "LUCID_MEDIA_BUCKET".
+	 */
+	binding?: string;
 	http?: HttpOptions;
 	upload?: {
 		httpMetadata?: Pick<

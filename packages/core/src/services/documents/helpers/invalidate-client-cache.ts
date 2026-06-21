@@ -9,7 +9,7 @@ const invalidateClientDocumentCache = async (
 	context: ServiceContext,
 	collectionKey: string,
 ) => {
-	await invalidateHttpCacheTags(context.kv, [
+	await invalidateHttpCacheTags(context, [
 		cacheKeys.http.tags.clientDocuments,
 		cacheKeys.http.tags.clientDocumentsCollection(collectionKey),
 	]);

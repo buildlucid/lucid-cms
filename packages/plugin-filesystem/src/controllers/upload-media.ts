@@ -16,7 +16,6 @@ import {
 } from "../constants.js";
 import { controllerSchemas } from "../schema/fs.js";
 import { uploadSingle } from "../services/index.js";
-import { resolveFileSystemMediaAdapter } from "./helpers.js";
 
 const factory = createFactory();
 
@@ -41,17 +40,6 @@ const uploadMediaController = factory.createHandlers(
 	validate("query", controllerSchemas.upload.query.string),
 	async (c) => {
 		const context = createServiceContext(c);
-		const mediaAdapter = await resolveFileSystemMediaAdapter(c.get("config"));
-		if (!mediaAdapter) {
-			throw new LucidAPIError({
-				type: "basic",
-				name: copy("server:plugin.filesystem.media.routes.upload.error.name"),
-				message: copy(
-					"server:plugin.filesystem.media.routes.upload.error.message",
-				),
-			});
-		}
-
 		const query = c.req.valid("query");
 		const buffer = await c.req.arrayBuffer();
 
@@ -65,7 +53,6 @@ const uploadMediaController = factory.createHandlers(
 				),
 			},
 		})(context, {
-			adapter: mediaAdapter,
 			buffer: buffer ? Buffer.from(buffer) : undefined,
 			key: query.key,
 			mimeType: query.mimeType,

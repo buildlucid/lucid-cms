@@ -45,7 +45,7 @@ const restoreMultiple: ServiceFn<
 	});
 	if (updateRes.error) return updateRes;
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	return {
 		error: undefined,

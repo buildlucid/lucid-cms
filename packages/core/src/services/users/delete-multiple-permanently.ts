@@ -118,7 +118,7 @@ const deleteMultiplePermanently: ServiceFn<
 	});
 	if (deleteUsersRes.error) return deleteUsersRes;
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	return {
 		error: undefined,

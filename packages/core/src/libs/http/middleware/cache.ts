@@ -3,6 +3,7 @@ import { hasher } from "node-object-hash";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import cacheKeys, { type HttpStaticValues } from "../../kv/cache-keys.js";
 import { getHttpCacheNamespaceTokens } from "../../kv/http-cache.js";
+import createServiceContext from "../utils/create-service-context.js";
 
 const hashInstance = hasher({ sort: true, coerce: true });
 
@@ -124,20 +125,26 @@ const cache = (options: CacheOptions) =>
 			return await next();
 		}
 
-		const kv = c.get("kv");
+		const context = createServiceContext(c);
+		const kv = context.kv;
+
 		const tags =
 			typeof options.tags === "function" ? options.tags(c) : options.tags;
 		const namespaceTokens =
 			tags && tags.length > 0
-				? await getHttpCacheNamespaceTokens(kv, tags)
+				? await getHttpCacheNamespaceTokens(context, tags)
 				: undefined;
 		const cacheKey = generateCacheKey(c, options, namespaceTokens);
 
 		if (cacheKey === null) return await next();
 
-		const cached = await kv.get<{ data: unknown; cachedAt: number }>(cacheKey, {
-			hash: true,
-		});
+		const cached = await kv.get<{ data: unknown; cachedAt: number }>(
+			context,
+			cacheKey,
+			{
+				hash: true,
+			},
+		);
 		if (cached !== null) {
 			const age = Math.floor((Date.now() - cached.cachedAt) / 1000);
 			c.header("X-Cache", "HIT");
@@ -154,6 +161,7 @@ const cache = (options: CacheOptions) =>
 		) {
 			const data = await response.json();
 			await kv.set(
+				context,
 				cacheKey,
 				{
 					data: data,

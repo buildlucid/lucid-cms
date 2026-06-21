@@ -31,7 +31,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 						pluginOptions.transporter.close();
 					},
 				},
-				send: async (email) => {
+				send: async (_context, email) => {
 					try {
 						if (simulate) {
 							return {

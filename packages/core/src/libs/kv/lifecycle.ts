@@ -23,6 +23,7 @@ export const getInitializedKVAdapter = async (
 			runtimeContext: options.runtimeContext,
 		}),
 	);
+
 	return adapter;
 };
 

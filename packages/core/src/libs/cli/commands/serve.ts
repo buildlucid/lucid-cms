@@ -80,6 +80,8 @@ const serveCommand = async () => {
 
 		const migrateResult = await migrateCommand({
 			config: configRes.config,
+			env: configRes.env,
+			runtimeContext: configRes.runtimeContext,
 			translationStore,
 			mode: "return",
 		})({

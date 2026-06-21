@@ -2,6 +2,7 @@ export const PLUGIN_KEY = "cloudflare-r2";
 export const ADAPTER_KEY = "cloudflare-r2";
 export const LUCID_VERSION = "0.x.x";
 export const SUPPORTED_RUNTIME_ADAPTER_KEY = "cloudflare";
+export const DEFAULT_R2_BINDING = "LUCID_MEDIA_BUCKET";
 export const DEFAULT_MAX_UPLOAD_SIZE = 100 * 1024 * 1024; // 100MB
 export const PRESIGNED_URL_EXPIRY = 3600; // 1 hour
 export const DEFAULT_PART_SIZE = 8 * 1024 * 1024; // 8 MiB

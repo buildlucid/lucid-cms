@@ -284,7 +284,7 @@ const revertEmailChange: ServiceFn<
 			}),
 		]);
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	if (updateUserRes.error) return updateUserRes;
 	if (consumeTokenRes.error) return consumeTokenRes;

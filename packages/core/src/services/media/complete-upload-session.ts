@@ -1,5 +1,4 @@
 import { copy } from "../../libs/i18n/index.js";
-import getMediaAdapter from "../../libs/media/get-adapter.js";
 import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import {
 	MediaAwaitingSyncRepository,
@@ -53,8 +52,7 @@ const completeUploadSession: ServiceFn<
 	});
 	if (keyAccessRes.error) return keyAccessRes;
 
-	const mediaAdapter = await getMediaAdapter(context.config);
-	if (!mediaAdapter.enabled) {
+	if (!context.media) {
 		return {
 			error: {
 				type: "basic",
@@ -64,7 +62,7 @@ const completeUploadSession: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (sessionRes.data.adapter_key !== mediaAdapter.adapter.key) {
+	if (sessionRes.data.adapter_key !== context.media.key) {
 		return {
 			error: {
 				type: "basic",
@@ -74,7 +72,7 @@ const completeUploadSession: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (!hasResumableUploadSessions(mediaAdapter.adapter)) {
+	if (!hasResumableUploadSessions(context.media)) {
 		return {
 			error: {
 				type: "basic",
@@ -99,13 +97,12 @@ const completeUploadSession: ServiceFn<
 		};
 	}
 
-	const completeRes = await mediaAdapter.adapter.completeUploadSession({
+	const completeRes = await context.media.completeUploadSession({
+		context,
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
 		parts: data.parts,
-		context: {
-			tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),
-		},
+		tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),
 	});
 	if (completeRes.error) return completeRes;
 

@@ -9,26 +9,33 @@ import { createTranslator, resolveInterfaceLocale } from "../../i18n/index.js";
 const createServiceContext = (c: LucidHonoContext): ServiceContext => {
 	const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
 	const config = c.get("config");
+	const env = c.get("env");
+	const runtimeContext = c.get("runtimeContext");
+	const db = { client: config.db.client };
 
 	const locale = resolveInterfaceLocale({
 		config,
 		locale: c.req.header(constants.headers.interfaceLocale),
 		acceptLanguage: c.req.header("Accept-Language"),
 	});
+	const request = {
+		url: c.req.url,
+		ipAddress: connectionInfo.address ?? null,
+		locale,
+		tenantKey: c.get("tenant")?.key ?? null,
+	};
 
 	return {
-		db: { client: config.db.client },
+		db,
 		config,
 		queue: c.get("queue"),
-		env: c.get("env"),
+		env,
+		runtimeContext,
 		kv: c.get("kv"),
+		media: c.get("media"),
+		email: c.get("email"),
 		translate: createTranslator({ store: c.get("translationStore"), locale }),
-		request: {
-			url: c.req.url,
-			ipAddress: connectionInfo.address ?? null,
-			locale,
-			tenantKey: c.get("tenant")?.key ?? null,
-		},
+		request,
 	};
 };
 

@@ -165,6 +165,9 @@ import db from ${JSON.stringify(configArtifacts.db)};
 import runtime from ${JSON.stringify(configArtifacts.runtime)};
 import { prepareTranslations, processConfig, resolveDatabaseAdapter } from "@lucidcms/core/runtime";
 import { createToolkit, createToolkitServiceContext } from "@lucidcms/core/toolkit";
+import { getInitializedEmailAdapter } from "@lucidcms/core/email";
+import { getInitializedMediaAdapter } from "@lucidcms/core/media";
+import { getRuntimeContext } from "@lucidcms/runtime-node/runtime";
 import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
 import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
@@ -225,10 +228,26 @@ const ensureToolkit = async () => {
 \t\t\t\tconfig: resolvedConfig,
 \t\t\t\tbundles: i18nTranslations,
 \t\t\t});
+\t\t\tconst runtimeContext = getRuntimeContext({
+\t\t\t\tcompiled: false,
+\t\t\t});
+\t\t\tconst [media, email] = await Promise.all([
+\t\t\t\tgetInitializedMediaAdapter(resolvedConfig, {
+\t\t\t\t\tenv,
+\t\t\t\t\truntimeContext,
+\t\t\t\t}),
+\t\t\t\tgetInitializedEmailAdapter(resolvedConfig, {
+\t\t\t\t\tenv,
+\t\t\t\t\truntimeContext,
+\t\t\t\t}),
+\t\t\t]);
 \t\t\tconst context = createToolkitServiceContext({
 \t\t\t\tconfig: resolvedConfig,
 \t\t\t\ttranslationStore,
 \t\t\t\tenv,
+\t\t\t\truntimeContext,
+\t\t\t\tmedia,
+\t\t\t\temail,
 \t\t\t});
 
 \t\t\treturn createToolkit(context);
@@ -269,10 +288,23 @@ export const prerender = false;
 
 let appPromise;
 
-const getCloudflareEnv = () => {
-\tconst env =
+const readCloudflareEnv = async () => {
+\tconst bridgedEnv =
 \t\tglobalThis[${JSON.stringify(astroConstants.cloudflare.runtimeEnvGlobal)}] ??
 \t\tglobalThis[${JSON.stringify(astroConstants.cloudflare.devEnvGlobal)}];
+
+\tif (bridgedEnv) return bridgedEnv;
+
+\ttry {
+\t\tconst workers = await import("cloudflare:workers");
+\t\treturn workers.env ?? null;
+\t} catch {
+\t\treturn null;
+\t}
+};
+
+const getCloudflareEnv = async () => {
+\tconst env = await readCloudflareEnv();
 
 \tif (!env) {
 \t\tthrow new Error(
@@ -288,7 +320,7 @@ ${resolveRuntimeSource}
 const ensureApp = async () => {
 \tif (!appPromise) {
 \t\tappPromise = (async () => {
-\t\t\tconst cloudflareEnv = getCloudflareEnv();
+\t\t\tconst cloudflareEnv = await getCloudflareEnv();
 \t\t\tconst runtimeAdapter = await resolveRuntime();
 
 \t\t\tif (envSchema) {
@@ -369,7 +401,7 @@ const ensureApp = async () => {
 };
 
 export const ALL = async (context) => {
-\tconst cloudflareEnv = getCloudflareEnv();
+\tconst cloudflareEnv = await getCloudflareEnv();
 \tconst { app } = await ensureApp();
 \tconst response = await app.fetch(
 \t\tcontext.request,
@@ -398,6 +430,9 @@ import db from ${JSON.stringify(configArtifacts.db)};
 import runtime from ${JSON.stringify(configArtifacts.runtime)};
 import { prepareTranslations, processConfig, resolveDatabaseAdapter } from "@lucidcms/core/runtime";
 import { createToolkit, createToolkitServiceContext } from "@lucidcms/core/toolkit";
+import { getInitializedEmailAdapter } from "@lucidcms/core/email";
+import { getInitializedMediaAdapter } from "@lucidcms/core/media";
+import { getRuntimeContext } from "@lucidcms/runtime-cloudflare/runtime";
 import configureLucid from ${JSON.stringify(astroConstants.integration.configureLucidModuleId)};
 import emailTemplates from "./${astroConstants.files.emailTemplatesModule}";
 import i18nTranslations from "./${astroConstants.files.i18nTranslationsModule}";
@@ -410,14 +445,24 @@ const getPrerenderContext = () =>
 \tnull;
 
 /** Reads Cloudflare env bindings when they exist without forcing prerender to fail. */
-const readCloudflareEnv = () =>
-\tglobalThis[${JSON.stringify(astroConstants.cloudflare.runtimeEnvGlobal)}] ??
-\tglobalThis[${JSON.stringify(astroConstants.cloudflare.devEnvGlobal)}] ??
-\tnull;
+const readCloudflareEnv = async () => {
+\tconst bridgedEnv =
+\t\tglobalThis[${JSON.stringify(astroConstants.cloudflare.runtimeEnvGlobal)}] ??
+\t\tglobalThis[${JSON.stringify(astroConstants.cloudflare.devEnvGlobal)}];
+
+\tif (bridgedEnv) return bridgedEnv;
+
+\ttry {
+\t\tconst workers = await import("cloudflare:workers");
+\t\treturn workers.env ?? null;
+\t} catch {
+\t\treturn null;
+\t}
+};
 
 /** Ensures request-time toolkit calls fail clearly when Worker bindings are missing. */
-const getCloudflareEnv = () => {
-\tconst env = readCloudflareEnv();
+const getCloudflareEnv = async () => {
+\tconst env = await readCloudflareEnv();
 
 \tif (!env) {
 \t\tthrow new Error(
@@ -434,13 +479,13 @@ ${resolveRuntimeSource}
 const ensureToolkit = async () => {
 \tif (!toolkitPromise) {
 \t\ttoolkitPromise = (async () => {
-\t\t\tconst cloudflareEnv = readCloudflareEnv();
+\t\t\tconst cloudflareEnv = await readCloudflareEnv();
 \t\t\tconst prerenderContext = !cloudflareEnv ? getPrerenderContext() : null;
 
 \t\t\tif (prerenderContext) {
 \t\t\t\treturn createToolkit(createToolkitServiceContext(prerenderContext));
 \t\t\t}
-\t\t\tconst resolvedCloudflareEnv = getCloudflareEnv();
+\t\t\tconst resolvedCloudflareEnv = await getCloudflareEnv();
 \t\t\tconst runtimeAdapter = await resolveRuntime();
 
 \t\t\tif (envSchema) {
@@ -473,10 +518,27 @@ const ensureToolkit = async () => {
 \t\t\t\tconfig: resolvedConfig,
 \t\t\t\tbundles: i18nTranslations,
 \t\t\t});
+\t\t\tconst runtimeContext = getRuntimeContext({
+\t\t\t\tserver: "cloudflare",
+\t\t\t\tcompiled: false,
+\t\t\t});
+\t\t\tconst [media, email] = await Promise.all([
+\t\t\t\tgetInitializedMediaAdapter(resolvedConfig, {
+\t\t\t\t\tenv: resolvedCloudflareEnv,
+\t\t\t\t\truntimeContext,
+\t\t\t\t}),
+\t\t\t\tgetInitializedEmailAdapter(resolvedConfig, {
+\t\t\t\t\tenv: resolvedCloudflareEnv,
+\t\t\t\t\truntimeContext,
+\t\t\t\t}),
+\t\t\t]);
 \t\t\tconst context = createToolkitServiceContext({
 \t\t\t\tconfig: resolvedConfig,
 \t\t\t\ttranslationStore,
 \t\t\t\tenv: resolvedCloudflareEnv,
+\t\t\t\truntimeContext,
+\t\t\t\tmedia,
+\t\t\t\temail,
 \t\t\t});
 
 \t\t\treturn createToolkit(context);

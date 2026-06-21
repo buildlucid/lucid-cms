@@ -8,17 +8,7 @@ import type { MediaAdapterInstance } from "./types.js";
  */
 const getMediaAdapter = async (
 	config: Config,
-): Promise<
-	| {
-			adapter: MediaAdapterInstance;
-			enabled: true;
-	  }
-	| {
-			adapter: null;
-			/** Typically we'd have a passthrough adapter as a fallback, but we cannot mock media uploads so this value needs to exist */
-			enabled: false;
-	  }
-> => {
+): Promise<MediaAdapterInstance | null> => {
 	try {
 		if (config.media.adapter) {
 			const adapter =
@@ -26,16 +16,10 @@ const getMediaAdapter = async (
 					? await config.media.adapter()
 					: config.media.adapter;
 
-			return {
-				adapter: await adapter,
-				enabled: true,
-			};
+			return await adapter;
 		}
 
-		return {
-			adapter: null,
-			enabled: false,
-		};
+		return null;
 	} catch (error) {
 		logger.error({
 			scope: constants.logScopes.mediaAdapter,
@@ -44,10 +28,7 @@ const getMediaAdapter = async (
 				errorMessage: error instanceof Error ? error.message : String(error),
 			},
 		});
-		return {
-			adapter: null,
-			enabled: false,
-		};
+		return null;
 	}
 };
 

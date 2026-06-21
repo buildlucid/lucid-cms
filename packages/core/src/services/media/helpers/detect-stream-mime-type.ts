@@ -1,8 +1,9 @@
 import type { Readable } from "node:stream";
 import type {
-	MediaAdapterServiceContext,
-	MediaAdapterServiceStream,
+	MediaAdapterInstance,
+	MediaAdapterTenant,
 } from "../../../libs/media/types.js";
+import type { ServiceContext } from "../../../utils/services/types.js";
 
 const MIME_SNIFF_BYTES = 8192;
 
@@ -46,13 +47,15 @@ const readBodyChunk = async (body: {
  * can't be bypassed just by spoofing the uploaded content type.
  */
 const detectStreamMimeType = async (
-	streamMedia: MediaAdapterServiceStream,
+	context: ServiceContext,
+	streamMedia: MediaAdapterInstance["stream"],
 	key: string,
-	context: MediaAdapterServiceContext,
+	tenant: MediaAdapterTenant,
 ) => {
 	const streamRes = await streamMedia({
-		key,
 		context,
+		key,
+		tenant,
 		range: {
 			start: 0,
 			end: MIME_SNIFF_BYTES - 1,

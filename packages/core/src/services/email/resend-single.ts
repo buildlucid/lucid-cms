@@ -1,4 +1,4 @@
-import getEmailAdapter from "../../libs/email/get-adapter.js";
+import isEmailSimulated from "../../libs/email/is-simulated.js";
 import { getEmailResendState } from "../../libs/email/storage/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
@@ -23,20 +23,17 @@ const resendSingle: ServiceFn<
 		context.config.db,
 	);
 
-	const [emailRes, emailAdapter] = await Promise.all([
-		Emails.selectSingleById({
-			id: data.id,
-			tenantKey: context.request.tenantKey,
-			validation: {
-				enabled: true,
-				defaultError: {
-					message: copy("server:core.email.not.found.message"),
-					status: 404,
-				},
+	const emailRes = await Emails.selectSingleById({
+		id: data.id,
+		tenantKey: context.request.tenantKey,
+		validation: {
+			enabled: true,
+			defaultError: {
+				message: copy("server:core.email.not.found.message"),
+				status: 404,
 			},
-		}),
-		getEmailAdapter(context.config),
-	]);
+		},
+	});
 	if (emailRes.error) return emailRes;
 
 	const resend = getEmailResendState({
@@ -75,9 +72,9 @@ const resendSingle: ServiceFn<
 				email_id: emailRes.data.id,
 				delivery_status: "scheduled",
 				message: null,
-				strategy_identifier: emailAdapter.adapter.key,
+				strategy_identifier: context.email.key,
 				strategy_data: null,
-				simulate: emailAdapter.simulated,
+				simulate: isEmailSimulated(context),
 				external_message_id: null,
 			},
 			validation: {

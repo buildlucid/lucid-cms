@@ -32,6 +32,7 @@ const requestDownload: ServiceFn<
 	if (mediaRes.error) return mediaRes;
 
 	const downloadUrlRes = await mediaStrategyRes.data.getDownloadUrl({
+		context,
 		key: data.mediaKey,
 		meta: {
 			host: getBaseUrl(context),
@@ -39,9 +40,7 @@ const requestDownload: ServiceFn<
 			fileName: mediaRes.data?.file_name,
 			extension: mediaRes.data?.file_extension,
 		},
-		context: {
-			tenant: resolveMediaKeyTenant(context.config, data.mediaKey),
-		},
+		tenant: resolveMediaKeyTenant(context.config, data.mediaKey),
 	});
 	if (downloadUrlRes.error) return downloadUrlRes;
 

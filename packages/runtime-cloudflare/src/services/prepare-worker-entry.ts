@@ -66,6 +66,14 @@ const prepareMainWorkerEntry = (
 			exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 		},
 		{
+			path: "@lucidcms/core/media",
+			exports: ["destroyMediaAdapter", "getInitializedMediaAdapter"],
+		},
+		{
+			path: "@lucidcms/core/email",
+			exports: ["destroyEmailAdapter", "getInitializedEmailAdapter"],
+		},
+		{
 			path: "./email-templates.json",
 			default: "emailTemplates",
 		},
@@ -88,83 +96,113 @@ const prepareMainWorkerEntry = (
 			name: "fetch",
 			async: true,
 			params: ["request", "env", "ctx"],
-			content: /** ts */ `${resolveRuntimeSource}
-
-const runtimeAdapter = await resolveRuntime();
-
-if (envSchema) {
-    envSchema.parse(env);
-}
-await runtimeAdapter.resolveOptions?.(env);
-
-const definition = {
-    runtime: runtimeAdapter,
-    db,
-    env: envSchema,
-    config: configFactory,
+			content: /** ts */ `const lucidGlobal = globalThis as typeof globalThis & {
+    __lucidCloudflareAppPromise?: Promise<Awaited<ReturnType<typeof createApp>>>;
 };
-const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {
-    emailTemplates: emailTemplates,
-}) : definition;
-const databaseAdapter = await resolveDatabaseAdapter(
-    wrappedDefinition.db,
-    env,
-);
-const resolved = await processConfig(
-    wrappedDefinition.config(env),
-    {
-        recipe: wrappedDefinition.recipe,
-        resolvedDb: databaseAdapter,
-        skipValidation: true,
-    },
-);
-const { translationStore } = await prepareTranslations({
-    config: resolved,
-    bundles: i18nTranslations,
-});
 
-const { app } = await createApp({
-    config: resolved,
-    translationStore: translationStore,
-    env: env,
-    runtimeContext: getRuntimeContext({
-        server: "cloudflare",
-        compiled: true,
-    }),
-    hono: {
-        middleware: [
-            async (app, config) => {
-                app.use("*", async (c, next) => {
-                    c.env = Object.assign(c.env, env);
-                    c.set("cf", env.cf);
-                    c.set("caches", env.caches);
-                    c.set("ctx", {
-                        waitUntil: ctx.waitUntil,
-                        passThroughOnException: ctx.passThroughOnException,
-                    });
-                    await next();
-                });
-            },
-        ],
-        routes: [
-            async (app, config) => {
-                app.get("/lucid/*", async (c) => {
-                    const url = new URL(c.req.url);
+	const ensureApp = async () => {
+	    if (!lucidGlobal.__lucidCloudflareAppPromise) {
+	        lucidGlobal.__lucidCloudflareAppPromise = (async () => {
+	            ${resolveRuntimeSource}
 
-                    const indexRequestUrl = url.origin + "/lucid/index.html";
-                    const indexRequest = new Request(indexRequestUrl);
-                    const indexAsset = await c.env.ASSETS.fetch(indexRequest);
-                    return new Response(indexAsset.body, {
-                        status: indexAsset.status,
-                        headers: indexAsset.headers,
-                    });
-                });
-            },
-        ],
-    },
-});
+	            const runtimeAdapter = await resolveRuntime();
 
-return app.fetch(request, env, ctx);`,
+	            if (envSchema) {
+	                envSchema.parse(env);
+	            }
+	            await runtimeAdapter.resolveOptions?.(env);
+
+	            const definition = {
+	                runtime: runtimeAdapter,
+	                db,
+	                env: envSchema,
+	                config: configFactory,
+	            };
+	            const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {
+	                emailTemplates: emailTemplates,
+	            }) : definition;
+	            const databaseAdapter = await resolveDatabaseAdapter(
+	                wrappedDefinition.db,
+	                env,
+	            );
+	            const resolved = await processConfig(
+	                wrappedDefinition.config(env),
+	                {
+	                    recipe: wrappedDefinition.recipe,
+	                    resolvedDb: databaseAdapter,
+	                    skipValidation: true,
+	                },
+	            );
+	            const { translationStore } = await prepareTranslations({
+	                config: resolved,
+	                bundles: i18nTranslations,
+	            });
+
+	            return createApp({
+	                config: resolved,
+	                translationStore: translationStore,
+	                env: env,
+	                runtimeContext: getRuntimeContext({
+	                    server: "cloudflare",
+	                    compiled: true,
+	                }),
+	                hono: {
+	                    middleware: [
+	                        async (app, config) => {
+	                            app.use("*", async (c, next) => {
+	                                c.set("env", c.env ?? env ?? null);
+	                                c.set("cf", c.req.raw.cf ?? null);
+	                                c.set("caches", globalThis.caches ?? null);
+	                                let executionContext = null;
+	                                try {
+	                                    executionContext = c.executionCtx ?? null;
+	                                } catch {}
+	                                c.set(
+	                                    "ctx",
+	                                    executionContext
+	                                        ? {
+	                                                waitUntil: executionContext.waitUntil.bind(executionContext),
+	                                                ...(typeof executionContext.passThroughOnException === "function"
+	                                                    ? {
+	                                                            passThroughOnException:
+	                                                                executionContext.passThroughOnException.bind(executionContext),
+	                                                        }
+	                                                    : {}),
+	                                            }
+	                                        : null,
+	                                );
+	                                await next();
+	                            });
+	                        },
+	                    ],
+	                    routes: [
+	                        async (app, config) => {
+	                            app.get("/lucid/*", async (c) => {
+	                                const url = new URL(c.req.url);
+
+	                                const indexRequestUrl = url.origin + "/lucid/index.html";
+	                                const indexRequest = new Request(indexRequestUrl);
+	                                const indexAsset = await c.env.ASSETS.fetch(indexRequest);
+	                                return new Response(indexAsset.body, {
+	                                    status: indexAsset.status,
+	                                    headers: indexAsset.headers,
+	                                });
+	                            });
+	                        },
+	                    ],
+	                },
+	            });
+	        })().catch((error) => {
+	            delete lucidGlobal.__lucidCloudflareAppPromise;
+	            throw error;
+	        });
+	    }
+
+	    return lucidGlobal.__lucidCloudflareAppPromise;
+	};
+
+	const { app } = await ensureApp();
+	return app.fetch(request, env, ctx);`,
 		},
 		{
 			name: "scheduled",
@@ -209,13 +247,25 @@ return app.fetch(request, env, ctx);`,
         server: "cloudflare",
         compiled: true,
     });
-const translate = createTranslator({ store: translationStore, locale: "en" });
-const kv = await getInitializedKVAdapter(resolved, {
-        env,
-        runtimeContext,
-    });
+    const translate = createTranslator({ store: translationStore, locale: "en" });
+    let kv;
+    let media;
+    let email;
 
     try {
+        kv = await getInitializedKVAdapter(resolved, {
+            env,
+            runtimeContext,
+        });
+        media = await getInitializedMediaAdapter(resolved, {
+            env,
+            runtimeContext,
+        });
+        email = await getInitializedEmailAdapter(resolved, {
+            env,
+            runtimeContext,
+        });
+
         const cronJobSetup = await setupCronJobs({
             createQueue: true,
             runtimeContext,
@@ -227,7 +277,10 @@ const kv = await getInitializedKVAdapter(resolved, {
             db: { client: resolved.db.client },
             queue: cronJobSetup.queue,
             env: env,
+            runtimeContext,
             kv: kv,
+            media,
+            email,
             request: {
                 url: resolved.host || "http://localhost",
                 locale: resolved.i18n.defaultLocale,
@@ -238,7 +291,15 @@ const kv = await getInitializedKVAdapter(resolved, {
         });
     } finally {
         await Promise.allSettled([
-            destroyKVAdapter(kv, { config: resolved, env, runtimeContext }),
+            kv
+                ? destroyKVAdapter(kv, { config: resolved, env, runtimeContext })
+                : undefined,
+            media
+                ? destroyMediaAdapter(media, { config: resolved, env, runtimeContext })
+                : undefined,
+            email
+                ? destroyEmailAdapter(email, { config: resolved, env, runtimeContext })
+                : undefined,
             resolved.db.client.destroy(),
         ]);
     }

@@ -2,6 +2,7 @@ import { Readable } from "node:stream";
 import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceUploadSingle } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
+import { resolveBinding } from "../utils/resolve-binding.js";
 
 type UploadSingleProps = Parameters<MediaAdapterServiceUploadSingle>[0];
 
@@ -13,12 +14,13 @@ export const putObject = async (
 	pluginOptions: PluginOptions,
 	props: UploadSingleProps,
 ) => {
+	const binding = resolveBinding(props.context, pluginOptions);
 	const body =
 		props.data instanceof Readable
 			? (Readable.toWeb(props.data) as unknown as ReadableStream)
 			: props.data;
 
-	return await pluginOptions.binding.put(props.key, body, {
+	return await binding.put(props.key, body, {
 		httpMetadata: {
 			...pluginOptions.upload?.httpMetadata,
 			contentType: props.meta.mimeType,
@@ -37,16 +39,16 @@ export const putObject = async (
  * share `putObject()` so they stay behaviorally aligned.
  */
 const uploadSingle = (
-	pluginOptions: PluginOptions,
+	options: PluginOptions,
 ): MediaAdapterServiceUploadSingle => {
 	return async (props) => {
 		try {
-			const object = await putObject(pluginOptions, props);
+			const object = await putObject(options, props);
 
 			return {
 				error: undefined,
 				data: {
-					etag: object.etag,
+					etag: object?.etag,
 				},
 			};
 		} catch (error) {

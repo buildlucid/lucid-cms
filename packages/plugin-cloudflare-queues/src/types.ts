@@ -2,13 +2,11 @@
 
 export type PluginOptions = {
 	/**
-	 * The queue binding to use.
+	 * Cloudflare Queue binding name. Defaults to "LUCID_QUEUE".
 	 */
-	binding: Queue;
+	binding?: string;
 	/**
 	 * The maximum number of attempts to retry a job. Defaults to 3.
-	 *
-	 * If in your wrangler config you have set `max_retries`, then keep this value in sync with it.
 	 */
 	maxRetries?: number;
 	/**

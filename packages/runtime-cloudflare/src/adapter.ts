@@ -11,30 +11,26 @@ const cloudflare = (
 	const runtime = createCloudflareRuntime(options);
 
 	runtime.getEnvVars = async ({ logger }: { logger: GetEnvVarsLogger }) => {
-		const { default: getEnvVars } = await import("./services/get-env-vars.js");
-		const initialOptions = typeof options === "function" ? undefined : options;
-		const initialResult = await getEnvVars({
+		const { default: loadEnvVars } = await import(
+			"./services/load-env-vars.js"
+		);
+
+		return loadEnvVars({
 			logger,
-			options: initialOptions,
+			optionsValue: options,
+			runtime,
+			prepared: runtime.getPreparedWranglerConfig(),
+			setPreparedWranglerConfig: runtime.setPreparedWranglerConfig,
 		});
-		await runtime.resolveOptions(initialResult.env);
-
-		const resolvedOptions = runtime.getOptions();
-		if (typeof options === "function" && resolvedOptions?.platformProxy) {
-			await initialResult.platformProxy.dispose?.();
-			const resolvedResult = await getEnvVars({
-				logger,
-				options: resolvedOptions,
-			});
-			runtime.setPlatformProxy(resolvedResult.platformProxy);
-			return resolvedResult.env;
-		}
-
-		runtime.setPlatformProxy(initialResult.platformProxy);
-		return initialResult.env;
 	};
 
 	runtime.cli = {
+		prepare: async (props) => {
+			const { default: prepareCommand } = await import("./cli/prepare.js");
+			return prepareCommand(runtime.getOptions(), {
+				setPreparedWranglerConfig: runtime.setPreparedWranglerConfig,
+			})(props);
+		},
 		serve: async (props) => {
 			const { default: serveCommand } = await import("./cli/serve.js");
 			return serveCommand(
@@ -44,7 +40,7 @@ const cloudflare = (
 		},
 		build: async (props) => {
 			const { default: buildCommand } = await import("./cli/build.js");
-			return buildCommand(props);
+			return buildCommand(runtime.getOptions())(props);
 		},
 	};
 

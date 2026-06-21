@@ -102,6 +102,7 @@ export const getAstroRuntimeContext = async (props: {
 		const { getRuntimeContext } = await import(
 			"@lucidcms/runtime-cloudflare/runtime"
 		);
+
 		return getRuntimeContext({
 			server: "cloudflare",
 			compiled: props.compiled,
@@ -260,6 +261,8 @@ export const runDevBootstrap = async (
 
 	const migrationResult = await migrateCommand({
 		config: bootstrapProject.loaded.config,
+		env: bootstrapProject.loaded.env,
+		runtimeContext: bootstrapProject.loaded.runtimeContext,
 		translationStore: bootstrapProject.loaded.translationStore,
 		mode: "return",
 	})({

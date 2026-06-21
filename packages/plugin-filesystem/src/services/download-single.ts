@@ -1,17 +1,14 @@
-import { resolveMediaKeyTenant } from "@lucidcms/core/plugin";
-import type {
-	FileSystemMediaAdapterOptions,
-	MediaAdapterInstance,
-	MediaAdapterStreamBody,
-	ServiceFn,
-} from "@lucidcms/core/types";
+import { copy, resolveMediaKeyTenant } from "@lucidcms/core/plugin";
+import type { MediaAdapterStreamBody, ServiceFn } from "@lucidcms/core/types";
 import { FILE_SYSTEM_DOWNLOAD_PATH } from "../constants.js";
-import { validatePresignedToken } from "./checks/index.js";
+import {
+	checkFileSystemMediaAdapter,
+	validatePresignedToken,
+} from "./checks/index.js";
 
 const downloadSingle: ServiceFn<
 	[
 		{
-			adapter: MediaAdapterInstance<FileSystemMediaAdapterOptions>;
 			key: string;
 			token: string;
 			timestamp: string;
@@ -26,7 +23,15 @@ const downloadSingle: ServiceFn<
 		body: MediaAdapterStreamBody;
 	}
 > = async (context, data) => {
-	const adapterOptions = data.adapter.getOptions?.();
+	const mediaAdapterRes = await checkFileSystemMediaAdapter(context, {
+		name: copy("server:plugin.filesystem.media.routes.download.error.name"),
+		message: copy(
+			"server:plugin.filesystem.media.routes.download.error.message",
+		),
+	});
+	if (mediaAdapterRes.error) return mediaAdapterRes;
+
+	const adapterOptions = mediaAdapterRes.data.getOptions?.();
 	const checkPresignedTokenRes = await validatePresignedToken(context, {
 		key: data.key,
 		token: data.token,
@@ -40,11 +45,10 @@ const downloadSingle: ServiceFn<
 	});
 	if (checkPresignedTokenRes.error) return checkPresignedTokenRes;
 
-	const streamRes = await data.adapter.stream({
+	const streamRes = await mediaAdapterRes.data.stream({
+		context,
 		key: data.key,
-		context: {
-			tenant: resolveMediaKeyTenant(context.config, data.key),
-		},
+		tenant: resolveMediaKeyTenant(context.config, data.key),
 	});
 	if (streamRes.error) return streamRes;
 

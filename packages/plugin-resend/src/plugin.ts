@@ -37,7 +37,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			draft.email.adapter = {
 				type: "email-adapter",
 				key: PLUGIN_IDENTIFIER,
-				send: async (email) => {
+				send: async (_context, email) => {
 					try {
 						if (simulate) {
 							return {

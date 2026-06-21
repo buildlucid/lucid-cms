@@ -42,10 +42,9 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 
 	const [_, clearProcessedRes] = await Promise.all([
 		mediaStrategyRes.data.deleteMultiple({
+			context,
 			keys: processedImagesRes.data.map((i) => i.key),
-			context: {
-				tenant,
-			},
+			tenant,
 		}),
 		ProcessedImages.deleteMultiple({
 			where:

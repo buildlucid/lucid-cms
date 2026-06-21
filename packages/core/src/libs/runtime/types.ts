@@ -77,6 +77,15 @@ export type BuildHandler = (props: {
 	runtimeContext: AdapterRuntimeContext;
 }>;
 
+export type PrepareHandler = (props: {
+	configPath: string;
+	projectRoot: string;
+	logger: {
+		instance: CLILogger;
+		silent: boolean;
+	};
+}) => Promise<void>;
+
 export type AdapterKeys = {
 	queue: string;
 	kv: string;
@@ -143,6 +152,7 @@ export type RuntimeAdapterOptionsResolver = (
 ) => void | Promise<void>;
 
 export type RuntimeAdapterCLI = {
+	prepare?: PrepareHandler;
 	serve: ServeHandler;
 	build: BuildHandler;
 };

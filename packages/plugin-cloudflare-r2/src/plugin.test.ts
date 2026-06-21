@@ -36,7 +36,7 @@ const buildConfig = (fileSize: number) =>
 describe("Cloudflare R2 plugin", () => {
 	test("requires the Cloudflare runtime", () => {
 		const cloudflareR2Plugin = plugin({
-			binding: {} as R2Bucket,
+			binding: "MEDIA_BUCKET",
 		});
 
 		expect(() =>
@@ -51,7 +51,7 @@ describe("Cloudflare R2 plugin", () => {
 
 	test("enforces a binding upload limit when http fallback is disabled", () => {
 		const cloudflareR2Plugin = plugin({
-			binding: {} as R2Bucket,
+			binding: "MEDIA_BUCKET",
 		});
 
 		expect(() =>
@@ -66,7 +66,7 @@ describe("Cloudflare R2 plugin", () => {
 
 	test("returns signed Lucid upload URLs when using binding-only mode", async () => {
 		const cloudflareR2Plugin = plugin({
-			binding: {} as R2Bucket,
+			binding: "MEDIA_BUCKET",
 		});
 		const adapter = cloudflareR2Plugin.recipe
 			? (() => {
@@ -90,9 +90,8 @@ describe("Cloudflare R2 plugin", () => {
 										extension?: string;
 										size: number;
 									};
-									context: {
-										tenant: null;
-									};
+									tenant: null;
+									context: object;
 								}) => Promise<{
 									error?: {
 										type: string;
@@ -121,9 +120,8 @@ describe("Cloudflare R2 plugin", () => {
 				extension: "png",
 				size: 1024,
 			},
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 
 		expect(result?.error).toBeUndefined();
@@ -136,7 +134,7 @@ describe("Cloudflare R2 plugin", () => {
 
 	test("registers plugin-owned storage routes in binding-only mode", () => {
 		const cloudflareR2Plugin = plugin({
-			binding: {} as R2Bucket,
+			binding: "MEDIA_BUCKET",
 		});
 		const draft = buildDraft();
 
@@ -147,7 +145,7 @@ describe("Cloudflare R2 plugin", () => {
 
 	test("does not register storage routes when http fallback is enabled", () => {
 		const cloudflareR2Plugin = plugin({
-			binding: {} as R2Bucket,
+			binding: "MEDIA_BUCKET",
 			http: {
 				endpoint: "https://example.com",
 				bucket: "media",

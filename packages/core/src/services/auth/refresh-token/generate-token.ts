@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { getCookie, setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import constants from "../../../constants/constants.js";
+import createServiceContext from "../../../libs/http/utils/create-service-context.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
@@ -87,8 +88,11 @@ const generateToken = async (
 		path: "/",
 	});
 
-	const kv = c.get("kv");
+	const context = createServiceContext(c);
+	const kv = context.kv;
+
 	await kv.set(
+		context,
 		cacheKeys.auth.refresh(token),
 		{ user_id: userId },
 		{ expirationTtl: constants.refreshTokenExpiration, hash: true },

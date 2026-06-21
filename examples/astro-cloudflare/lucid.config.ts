@@ -7,7 +7,16 @@ import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export default configureLucid({
-	runtime: cloudflare,
+	runtime: cloudflare({
+		wrangler: {
+			bindings: {
+				kv: true,
+				r2: {
+					bucketName: "lucid-astro-cloudflare-example-media",
+				},
+			},
+		},
+	}),
 	db: libsql,
 	env: z.object({
 		LIBSQL_URL: z.string(),
@@ -16,8 +25,6 @@ export default configureLucid({
 		COOKIE_SECRET: z.string(),
 		REFRESH_TOKEN_SECRET: z.string(),
 		ACCESS_TOKEN_SECRET: z.string(),
-		KV_BINDING: z.any(),
-		MEDIA_BUCKET: z.any(),
 	}),
 	config: (env) => ({
 		secrets: {
@@ -36,12 +43,8 @@ export default configureLucid({
 					},
 				],
 			}),
-			cloudflareKVPlugin({
-				binding: env.KV_BINDING,
-			}),
-			cloudflareR2Plugin({
-				binding: env.MEDIA_BUCKET,
-			}),
+			cloudflareKVPlugin(),
+			cloudflareR2Plugin(),
 		],
 	}),
 });

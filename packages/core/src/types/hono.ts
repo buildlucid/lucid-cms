@@ -1,6 +1,8 @@
 import type { Context } from "hono";
+import type { EmailAdapterInstance } from "../libs/email/types.js";
 import type { TranslationStore } from "../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../libs/kv/types.js";
+import type { MediaAdapterInstance } from "../libs/media/types.js";
 import type { QueueAdapterInstance } from "../libs/queue/types.js";
 import type { AdapterRuntimeContext } from "../libs/runtime/types.js";
 import type {
@@ -50,6 +52,8 @@ export type LucidHonoVariables = {
 	runtimeContext: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;
 	kv: KVAdapterInstance;
+	media: MediaAdapterInstance | null;
+	email: EmailAdapterInstance;
 	auth: LucidAuth;
 	clientIntegrationAuth: LucidClientIntegrationAuth;
 	locale: LucidLocale;

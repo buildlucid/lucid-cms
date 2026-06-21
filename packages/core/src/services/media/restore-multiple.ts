@@ -80,10 +80,8 @@ const restoreMultiple: ServiceFn<
 	if (updateRes.error) return updateRes;
 
 	await Promise.all([
-		...data.ids.map((id) =>
-			clearClientMediaSingleCache(context.kv, context.config, id),
-		),
-		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
+		...data.ids.map((id) => clearClientMediaSingleCache(context, id)),
+		invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
 	]);
 
 	return { error: undefined, data: undefined };

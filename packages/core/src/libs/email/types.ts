@@ -3,6 +3,7 @@ import type {
 	emailDeliveryStatusSchema,
 	emailTypeSchema,
 } from "../../schemas/email.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import type { TranslatableCopy } from "../i18n/types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
 
@@ -92,6 +93,7 @@ export type EmailStrategyResponse = {
 };
 
 export type EmailAdapterServiceSend = (
+	context: ServiceContext,
 	email: {
 		to: string;
 		subject: string;

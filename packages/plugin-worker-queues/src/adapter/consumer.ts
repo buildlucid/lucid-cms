@@ -7,7 +7,15 @@ import {
 	loadBuildProject,
 	resolveConfigDefinition,
 } from "@lucidcms/core/build";
+import {
+	destroyEmailAdapter,
+	getInitializedEmailAdapter,
+} from "@lucidcms/core/email";
 import { destroyKVAdapter, getInitializedKVAdapter } from "@lucidcms/core/kv";
+import {
+	destroyMediaAdapter,
+	getInitializedMediaAdapter,
+} from "@lucidcms/core/media";
 import { createTranslator } from "@lucidcms/core/plugin";
 import {
 	executeSingleJob,
@@ -17,9 +25,12 @@ import {
 } from "@lucidcms/core/queue";
 import { prepareTranslations } from "@lucidcms/core/runtime";
 import type {
+	AdapterRuntimeContext,
 	Config,
+	EmailAdapterInstance,
 	EnvironmentVariables,
 	KVAdapterInstance,
+	MediaAdapterInstance,
 	TranslationStore,
 } from "@lucidcms/core/types";
 import type { WorkerQueueAdapterOptions } from "./index.js";
@@ -47,6 +58,7 @@ const getConfig = async (): Promise<{
 	config: Config;
 	translationStore: TranslationStore;
 	env: EnvironmentVariables | undefined;
+	runtimeContext: AdapterRuntimeContext | undefined;
 }> => {
 	try {
 		const configPath = getConfigPath(process.cwd());
@@ -60,6 +72,7 @@ const getConfig = async (): Promise<{
 			config: result.loaded.config,
 			translationStore: result.loaded.translationStore,
 			env: result.loaded.env,
+			runtimeContext: result.loaded.runtimeContext,
 		};
 	} catch (_) {
 		const configPath = path.resolve(process.cwd(), runtime.configEntryPath);
@@ -101,30 +114,46 @@ const getConfig = async (): Promise<{
 			config: resolved.config,
 			translationStore: translations.translationStore,
 			env: resolved.env,
+			runtimeContext: resolved.runtimeContext,
 		};
 	}
 };
 
 const startConsumer = async () => {
 	let kvInstance: KVAdapterInstance | undefined;
-	let kvLifecycleContext:
+	let mediaInstance: MediaAdapterInstance | null | undefined;
+	let emailInstance: EmailAdapterInstance | undefined;
+	let adapterLifecycleContext:
 		| {
 				config: Config;
 				env?: EnvironmentVariables;
+				runtimeContext?: AdapterRuntimeContext;
 		  }
 		| undefined;
 	try {
-		const { config, translationStore, env } = await getConfig();
+		const { config, translationStore, env, runtimeContext } = await getConfig();
 		const translate = createTranslator({
 			store: translationStore,
 			locale: "en",
 		});
-		kvLifecycleContext = { config, env };
+
+		adapterLifecycleContext = { config, env, runtimeContext };
 
 		kvInstance = await getInitializedKVAdapter(config, {
 			env,
+			runtimeContext,
+		});
+		mediaInstance = await getInitializedMediaAdapter(config, {
+			env,
+			runtimeContext,
+		});
+		emailInstance = await getInitializedEmailAdapter(config, {
+			env,
+			runtimeContext,
 		});
 		const kv = kvInstance;
+		const media = mediaInstance;
+		const email = emailInstance;
 
 		const internalQueueAdapter = passthroughQueueAdapter({
 			bypassImmediateExecution: true,
@@ -144,8 +173,14 @@ const startConsumer = async () => {
 			if (shuttingDown) return;
 			shuttingDown = true;
 			if (pollTimeout) clearTimeout(pollTimeout);
-			if (kvLifecycleContext)
-				await destroyKVAdapter(kvInstance, kvLifecycleContext);
+			if (adapterLifecycleContext) {
+				await Promise.allSettled([
+					destroyKVAdapter(kvInstance, adapterLifecycleContext),
+					destroyMediaAdapter(mediaInstance, adapterLifecycleContext),
+					destroyEmailAdapter(emailInstance, adapterLifecycleContext),
+				]);
+			}
+
 			await config.db.client.destroy();
 			process.exit(exitCode);
 		};
@@ -215,11 +250,14 @@ const startConsumer = async () => {
 										config: config,
 										db: { client: config.db.client },
 										env: env ?? null,
+										runtimeContext,
 										// TODO: should handlers be able to push jobs to the queue??
 										//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.
 										//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter
 										queue: internalQueueAdapter,
 										kv,
+										media,
+										email,
 										translate,
 										request: {
 											url: config.host ?? "http://localhost",
@@ -284,8 +322,13 @@ const startConsumer = async () => {
 		});
 		checkNow();
 	} catch (error) {
-		if (kvLifecycleContext)
-			await destroyKVAdapter(kvInstance, kvLifecycleContext);
+		if (adapterLifecycleContext) {
+			await Promise.allSettled([
+				destroyKVAdapter(kvInstance, adapterLifecycleContext),
+				destroyMediaAdapter(mediaInstance, adapterLifecycleContext),
+				destroyEmailAdapter(emailInstance, adapterLifecycleContext),
+			]);
+		}
 		logger.error({
 			message: "Consumer startup error",
 			scope: logScope,

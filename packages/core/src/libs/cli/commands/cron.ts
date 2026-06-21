@@ -4,6 +4,11 @@ import type { Config } from "../../../types.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import {
+	destroyEmailAdapter,
+	getInitializedEmailAdapter,
+} from "../../email/lifecycle.js";
+import type { EmailAdapterInstance } from "../../email/types.js";
 import { copy, createTranslator } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
@@ -13,17 +18,42 @@ import {
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
 import logger from "../../logger/index.js";
+import {
+	destroyMediaAdapter,
+	getInitializedMediaAdapter,
+} from "../../media/lifecycle.js";
+import type { MediaAdapterInstance } from "../../media/types.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import getCronJobs, { type CronJobKey } from "../../runtime/cron-jobs.js";
-import type { EnvironmentVariables } from "../../runtime/types.js";
+import type {
+	AdapterRuntimeContext,
+	EnvironmentVariables,
+} from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
 const cronCommand = async (jobName?: string) => {
-	let kv: KVAdapterInstance | undefined;
 	let config: Config | undefined;
 	let translationStore: TranslationStore | undefined;
 	let env: EnvironmentVariables | undefined;
+	let runtimeContext: AdapterRuntimeContext | undefined;
+	let kv: KVAdapterInstance | undefined;
+	let media: MediaAdapterInstance | null | undefined;
+	let email: EmailAdapterInstance | undefined;
+
+	const cleanupAdapters = async () => {
+		if (config && translationStore) {
+			await Promise.allSettled([
+				destroyKVAdapter(kv, { config, env, runtimeContext }),
+				destroyMediaAdapter(media, { config, env, runtimeContext }),
+				destroyEmailAdapter(email, { config, env, runtimeContext }),
+			]);
+		}
+		kv = undefined;
+		media = undefined;
+		email = undefined;
+	};
+
 	try {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
@@ -66,8 +96,11 @@ const cronCommand = async (jobName?: string) => {
 
 		//* load config
 		const configPath = getConfigPath(process.cwd());
-		const configRes = await loadConfigFile({ path: configPath });
+		const configRes = await loadConfigFile({
+			path: configPath,
+		});
 		config = configRes.config;
+		runtimeContext = configRes.runtimeContext;
 		translationStore = (
 			await prepareTranslations({
 				config,
@@ -93,9 +126,17 @@ const cronCommand = async (jobName?: string) => {
 		//* any jobs pushed to the queue by the cron are executed straight away
 		const queue = passthroughQueueAdapter();
 		kv = await getInitializedKVAdapter(configRes.config, {
-			env: configRes.env,
+			env,
+			runtimeContext,
 		});
-		const kvInstance = kv;
+		media = await getInitializedMediaAdapter(configRes.config, {
+			env,
+			runtimeContext,
+		});
+		email = await getInitializedEmailAdapter(configRes.config, {
+			env,
+			runtimeContext,
+		});
 
 		//* run the selected cron job with retry support
 		const maxRetries = 3;
@@ -114,9 +155,12 @@ const cronCommand = async (jobName?: string) => {
 			})({
 				db: { client: configRes.config.db.client },
 				config: configRes.config,
-				env: configRes.env ?? null,
+				env: env ?? null,
+				runtimeContext,
 				queue: queue,
-				kv: kvInstance,
+				kv,
+				media,
+				email,
 				translate,
 				request: {
 					url: configRes.config.host ?? constants.urls.localhost,
@@ -143,10 +187,7 @@ const cronCommand = async (jobName?: string) => {
 				`Cron job "${job.label}" failed after ${maxRetries} attempts:`,
 				lastError ?? "Unknown error",
 			);
-			if (config && translationStore) {
-				await destroyKVAdapter(kv, { config, env });
-			}
-			kv = undefined;
+			await cleanupAdapters();
 			logger.setBuffering(false);
 			process.exit(1);
 		}
@@ -164,16 +205,11 @@ const cronCommand = async (jobName?: string) => {
 			},
 		);
 
-		if (config && translationStore) {
-			await destroyKVAdapter(kv, { config, env });
-		}
-		kv = undefined;
+		await cleanupAdapters();
 		logger.setBuffering(false);
 		process.exit(0);
 	} catch (error) {
-		if (config && translationStore) {
-			await destroyKVAdapter(kv, { config, env });
-		}
+		await cleanupAdapters();
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error);
 		}

@@ -1,5 +1,5 @@
 import { normalizeEmailAttachments } from "../../../libs/email/attachments.js";
-import getEmailAdapter from "../../../libs/email/get-adapter.js";
+import isEmailSimulated from "../../../libs/email/is-simulated.js";
 import {
 	createStoredEmailData,
 	hasNeverStoreEmailStorageRules,
@@ -31,19 +31,16 @@ const sendEmail: ServiceFn<
 		context.config.db,
 	);
 
-	const [emailRes, emailAdapter] = await Promise.all([
-		Emails.selectSingleById({
-			id: data.emailId,
-			validation: {
-				enabled: true,
-				defaultError: {
-					message: copy("server:core.email.not.found.message"),
-					status: 404,
-				},
+	const emailRes = await Emails.selectSingleById({
+		id: data.emailId,
+		validation: {
+			enabled: true,
+			defaultError: {
+				message: copy("server:core.email.not.found.message"),
+				status: 404,
 			},
-		}),
-		getEmailAdapter(context.config),
-	]);
+		},
+	});
 	if (emailRes.error) return emailRes;
 
 	const sendDataRes = resolveEmailData({
@@ -121,7 +118,7 @@ const sendEmail: ServiceFn<
 	}
 
 	let result: EmailStrategyResponse;
-	if (emailAdapter.simulated) {
+	if (isEmailSimulated(context)) {
 		result = {
 			success: true,
 			deliveryStatus: "sent",
@@ -130,7 +127,8 @@ const sendEmail: ServiceFn<
 		};
 	} else {
 		try {
-			result = await emailAdapter.adapter.send(
+			result = await context.email.send(
+				context,
 				{
 					to: emailRes.data.to_address,
 					subject: emailRes.data.subject ?? "",

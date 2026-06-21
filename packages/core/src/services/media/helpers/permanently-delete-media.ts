@@ -76,10 +76,9 @@ const permanentlyDeleteMedia: ServiceFn<
 
 	const [_, deleteObjectRes] = await Promise.all([
 		mediaStrategyRes.data.deleteMultiple({
+			context,
 			keys: processedImagesRes.data.map((i) => i.key),
-			context: {
-				tenant,
-			},
+			tenant,
 		}),
 		mediaServices.strategies.deleteObject(context, {
 			key: deleteMediaRes.data.key,
@@ -102,8 +101,8 @@ const permanentlyDeleteMedia: ServiceFn<
 	}
 
 	await Promise.all([
-		clearClientMediaSingleCache(context.kv, context.config, data.id),
-		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
+		clearClientMediaSingleCache(context, data.id),
+		invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
 	]);
 
 	return {

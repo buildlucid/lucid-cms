@@ -2,7 +2,7 @@ import type { Config } from "../../types/config.js";
 import processBuildArtifacts from "../cli/services/process-build-artifacts.js";
 import { createTranslator } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
-import handlePluginBuildHooks from "../plugins/hooks/handle-build.js";
+import handlePluginRuntimeHooks from "../plugins/hooks/handle-runtime.js";
 import type {
 	LucidConfigDefinition,
 	RuntimeBuildArtifacts,
@@ -22,7 +22,7 @@ const prepareBuildArtifacts = async (props: {
 		store: props.translationStore,
 		locale: "en",
 	});
-	const pluginBuildArtifactsRes = await handlePluginBuildHooks({
+	const pluginBuildArtifactsRes = await handlePluginRuntimeHooks({
 		config: props.config,
 		translationStore: props.translationStore,
 		definition: props.definition,

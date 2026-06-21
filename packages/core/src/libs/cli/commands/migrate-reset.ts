@@ -1,5 +1,5 @@
 import { confirm } from "@inquirer/prompts";
-import type { Config } from "../../../types.js";
+import type { Config, EnvironmentVariables } from "../../../types.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
@@ -9,18 +9,26 @@ import {
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
 import logger from "../../logger/index.js";
+import type { AdapterRuntimeContext } from "../../runtime/types.js";
+import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
 const migrateResetCommand = (props?: {
 	config?: Config;
+	env?: EnvironmentVariables;
+	runtimeContext?: AdapterRuntimeContext;
 	translationStore?: TranslationStore;
 	mode: "process" | "return";
 }) => {
 	return async (options?: { force?: boolean }) => {
 		let kvInstance: KVAdapterInstance | undefined;
 		let config: Config | undefined;
+		let env: EnvironmentVariables | undefined = props?.env;
+		let runtimeContext: AdapterRuntimeContext | undefined =
+			props?.runtimeContext;
 		let translationStore: TranslationStore | undefined;
+
 		try {
 			logger.setBuffering(true);
 			const startTime = cliLogger.startTimer();
@@ -33,6 +41,8 @@ const migrateResetCommand = (props?: {
 			} else {
 				const res = await loadConfigFile();
 				config = res.config;
+				env = res.env;
+				runtimeContext = res.runtimeContext;
 				translationStore = (
 					await prepareTranslations({
 						config,
@@ -106,9 +116,20 @@ const migrateResetCommand = (props?: {
 			}
 
 			cliLogger.info("Clearing KV cache...");
-			kvInstance = await getInitializedKVAdapter(config);
-			await kvInstance.clear();
-			await destroyKVAdapter(kvInstance, { config });
+			kvInstance = await getInitializedKVAdapter(config, {
+				env,
+				runtimeContext,
+			});
+			await kvInstance.clear(
+				createToolkitServiceContext({
+					config,
+					translationStore,
+					env,
+					runtimeContext,
+					kv: kvInstance,
+				}),
+			);
+			await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
 			kvInstance = undefined;
 
 			const endTime = startTime();
@@ -137,7 +158,7 @@ const migrateResetCommand = (props?: {
 			}
 		} catch (error) {
 			if (config && translationStore) {
-				await destroyKVAdapter(kvInstance, { config });
+				await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
 			}
 			cliLogger.error(
 				"Database reset failed",

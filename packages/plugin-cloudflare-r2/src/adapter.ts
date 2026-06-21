@@ -1,4 +1,4 @@
-import type { MediaAdapter } from "@lucidcms/core/types";
+import type { MediaAdapterInstance } from "@lucidcms/core/types";
 import { AwsClient } from "aws4fetch";
 import { ADAPTER_KEY } from "./constants.js";
 import deleteMultiple from "./services/delete-multiple.js";
@@ -20,7 +20,9 @@ import type { PluginOptions } from "./types.js";
  * Adapts the R2 binding to Lucid's media adapter contract and wires in the
  * optional HTTP fallback for URL generation when direct browser transfers are needed.
  */
-const cloudflareR2Adapter: MediaAdapter<PluginOptions> = (options) => {
+const cloudflareR2Adapter = (
+	options: PluginOptions,
+): MediaAdapterInstance<PluginOptions> => {
 	const httpClient = options.http
 		? new AwsClient(options.http.clientOptions)
 		: null;

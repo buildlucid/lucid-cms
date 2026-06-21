@@ -274,7 +274,7 @@ const updateSingle: ServiceFn<
 					: undefined,
 		}),
 	]);
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	if (updateRolesRes.error) return updateRolesRes;
 	if (updateUserRes.error) return updateUserRes;

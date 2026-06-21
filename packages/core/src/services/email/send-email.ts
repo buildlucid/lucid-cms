@@ -1,6 +1,6 @@
 import constants from "../../constants/constants.js";
 import { normalizeEmailAttachments } from "../../libs/email/attachments.js";
-import getEmailAdapter from "../../libs/email/get-adapter.js";
+import isEmailSimulated from "../../libs/email/is-simulated.js";
 import {
 	createStoredEmailData,
 	type EmailStorageConfig,
@@ -134,36 +134,33 @@ const sendEmail: ServiceFn<
 	});
 	if (storedDataRes.error) return storedDataRes;
 
-	const [newEmailRes, emailAdapter] = await Promise.all([
-		Emails.createSingle({
-			data: {
-				from_address: fromAddress,
-				from_name: fromName,
-				to_address: toAddress,
-				subject,
-				template: data.template,
-				priority: data.priority ?? "normal",
-				headers: data.headers ?? null,
-				cc: data.cc,
-				bcc: data.bcc,
-				data: storedDataRes.data,
-				storage_strategy: storageStrategyRes.data,
-				type: data.type,
-				is_system: data.isSystem ?? false,
-				current_status: "scheduled",
-				attempt_count: 0,
-				last_attempted_at: undefined,
+	const newEmailRes = await Emails.createSingle({
+		data: {
+			from_address: fromAddress,
+			from_name: fromName,
+			to_address: toAddress,
+			subject,
+			template: data.template,
+			priority: data.priority ?? "normal",
+			headers: data.headers ?? null,
+			cc: data.cc,
+			bcc: data.bcc,
+			data: storedDataRes.data,
+			storage_strategy: storageStrategyRes.data,
+			type: data.type,
+			is_system: data.isSystem ?? false,
+			current_status: "scheduled",
+			attempt_count: 0,
+			last_attempted_at: undefined,
+		},
+		returnAll: true,
+		validation: {
+			enabled: true,
+			defaultError: {
+				status: 500,
 			},
-			returnAll: true,
-			validation: {
-				enabled: true,
-				defaultError: {
-					status: 500,
-				},
-			},
-		}),
-		getEmailAdapter(context.config),
-	]);
+		},
+	});
 	if (newEmailRes.error) return newEmailRes;
 
 	if (tenantKeys.length > 0) {
@@ -204,9 +201,9 @@ const sendEmail: ServiceFn<
 			email_id: newEmailRes.data.id,
 			delivery_status: "scheduled",
 			message: null,
-			strategy_identifier: emailAdapter.adapter.key,
+			strategy_identifier: context.email.key,
 			strategy_data: null,
-			simulate: emailAdapter.simulated,
+			simulate: isEmailSimulated(context),
 			external_message_id: null,
 		},
 		returnAll: true,

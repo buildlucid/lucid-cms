@@ -1,13 +1,15 @@
 import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceDeleteSingle } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
+import { resolveBinding } from "../utils/resolve-binding.js";
 
 const deleteSingle = (
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceDeleteSingle => {
-	return async ({ key }) => {
+	return async ({ key, context }) => {
 		try {
-			await pluginOptions.binding.delete(key);
+			const binding = resolveBinding(context, pluginOptions);
+			await binding.delete(key);
 
 			return {
 				error: undefined,

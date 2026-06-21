@@ -1,5 +1,5 @@
 import { LucidError } from "@lucidcms/core";
-import type { LucidPlugin } from "@lucidcms/core/types";
+import type { LucidPluginResponse } from "@lucidcms/core/types";
 import cloudflareR2Adapter from "./adapter.js";
 import {
 	DEFAULT_MAX_UPLOAD_SIZE,
@@ -10,7 +10,7 @@ import {
 import routes from "./routes/index.js";
 import type { PluginOptions } from "./types.js";
 
-const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
+const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
@@ -22,7 +22,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				});
 			}
 
-			if (pluginOptions.http) {
+			if (pluginOptions?.http) {
 				return;
 			}
 
@@ -35,11 +35,11 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 		recipe: (draft) => {
 			draft.i18n.sources.push("@lucidcms/plugin-cloudflare-r2/translations");
 
-			if (!pluginOptions.http) {
-				draft.hono?.routes?.push(routes(pluginOptions));
+			if (!pluginOptions?.http) {
+				draft.hono?.routes?.push(routes(pluginOptions ?? {}));
 			}
 
-			draft.media.adapter = cloudflareR2Adapter(pluginOptions);
+			draft.media.adapter = cloudflareR2Adapter(pluginOptions ?? {});
 		},
 	};
 };

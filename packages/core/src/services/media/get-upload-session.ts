@@ -1,6 +1,5 @@
 import type { UploadSessionStateResponse } from "@lucidcms/types";
 import { copy } from "../../libs/i18n/index.js";
-import getMediaAdapter from "../../libs/media/get-adapter.js";
 import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
 import { resolveMediaKeyTenant } from "../../utils/media/index.js";
@@ -47,8 +46,7 @@ const getUploadSession: ServiceFn<
 	});
 	if (keyAccessRes.error) return keyAccessRes;
 
-	const mediaAdapter = await getMediaAdapter(context.config);
-	if (!mediaAdapter.enabled) {
+	if (!context.media) {
 		return {
 			error: {
 				type: "basic",
@@ -58,7 +56,7 @@ const getUploadSession: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (sessionRes.data.adapter_key !== mediaAdapter.adapter.key) {
+	if (sessionRes.data.adapter_key !== context.media.key) {
 		return {
 			error: undefined,
 			data: {
@@ -68,7 +66,7 @@ const getUploadSession: ServiceFn<
 			},
 		};
 	}
-	if (!hasResumableUploadSessions(mediaAdapter.adapter)) {
+	if (!hasResumableUploadSessions(context.media)) {
 		return {
 			error: undefined,
 			data: {
@@ -101,12 +99,11 @@ const getUploadSession: ServiceFn<
 		};
 	}
 
-	const partsRes = await mediaAdapter.adapter.listUploadParts({
+	const partsRes = await context.media.listUploadParts({
+		context,
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
-		context: {
-			tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),
-		},
+		tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),
 	});
 	if (partsRes.error) return partsRes;
 

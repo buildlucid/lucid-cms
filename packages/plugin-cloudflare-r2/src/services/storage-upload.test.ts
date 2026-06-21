@@ -18,28 +18,30 @@ const createBody = (chunks: number[]) =>
 describe("storage upload", () => {
 	test("rejects uploads that exceed the configured limit", async () => {
 		const timestamp = `${Date.now()}`;
-		const service = storageUpload({
-			binding: {
-				put: vi.fn(async (_key, body) => {
-					if (body instanceof ReadableStream) {
-						const reader = body.getReader();
-						while (true) {
-							const result = await reader.read();
-							if (result.done) {
-								break;
-							}
+		const binding = {
+			put: vi.fn(async (_key, body) => {
+				if (body instanceof ReadableStream) {
+					const reader = body.getReader();
+					while (true) {
+						const result = await reader.read();
+						if (result.done) {
+							break;
 						}
 					}
+				}
 
-					return {
-						etag: "etag",
-					};
-				}),
-			} as unknown as R2Bucket,
-		});
+				return {
+					etag: "etag",
+				};
+			}),
+		} as unknown as R2Bucket;
+		const service = storageUpload({ binding: "R2" });
 
 		const response = await service(
 			{
+				env: {
+					R2: binding,
+				},
 				config: {
 					media: {
 						limits: {
@@ -75,14 +77,16 @@ describe("storage upload", () => {
 
 	test("requires a content-length header for binding uploads", async () => {
 		const timestamp = `${Date.now()}`;
-		const service = storageUpload({
-			binding: {
-				put: vi.fn(),
-			} as unknown as R2Bucket,
-		});
+		const binding = {
+			put: vi.fn(),
+		} as unknown as R2Bucket;
+		const service = storageUpload({ binding: "R2" });
 
 		const response = await service(
 			{
+				env: {
+					R2: binding,
+				},
 				config: {
 					media: {
 						limits: {

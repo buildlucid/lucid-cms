@@ -1,6 +1,11 @@
+import type { EmailAdapterInstance } from "../../libs/email/types.js";
 import type { KVAdapterInstance } from "../../libs/kv/types.js";
+import type { MediaAdapterInstance } from "../../libs/media/types.js";
 import type { QueueAdapterInstance } from "../../libs/queue/types.js";
-import type { EnvironmentVariables } from "../../libs/runtime/types.js";
+import type {
+	AdapterRuntimeContext,
+	EnvironmentVariables,
+} from "../../libs/runtime/types.js";
 import type { Config } from "../../types/config.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { TranslationStore } from "../i18n/types.js";
@@ -20,10 +25,16 @@ export type CreateToolkitServiceContextOptions = {
 	translationStore: TranslationStore;
 	/** Optional runtime env bindings associated with the config. */
 	env?: EnvironmentVariables | null;
+	/** Optional runtime context associated with the config. */
+	runtimeContext?: AdapterRuntimeContext;
 	/** Optional queue adapter instance to use for toolkit-backed services. */
 	queue?: QueueAdapterInstance;
 	/** Optional KV adapter instance to use for toolkit-backed services. */
 	kv?: KVAdapterInstance;
+	/** Optional initialized media adapter instance to use for toolkit-backed services. */
+	media?: MediaAdapterInstance | null;
+	/** Optional initialized email adapter instance to use for toolkit-backed services. */
+	email?: EmailAdapterInstance;
 	/**
 	 * Request URL to use when Lucid needs to build absolute URLs.
 	 * If omitted, Lucid uses `config.host`, then falls back to the local Lucid URL.

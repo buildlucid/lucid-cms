@@ -16,11 +16,10 @@ const rename: ServiceFn<
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const res = await mediaStrategyRes.data.rename({
+		context,
 		from: data.from,
 		to: data.to,
-		context: {
-			tenant: resolveMediaKeyTenant(context.config, data.to),
-		},
+		tenant: resolveMediaKeyTenant(context.config, data.to),
 	});
 	if (res.error) {
 		return {

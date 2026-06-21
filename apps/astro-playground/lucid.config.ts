@@ -14,7 +14,22 @@ import SimpleCollection from "./src/lucid/collections/simple.js";
 import TestCollection from "./src/lucid/collections/test.js";
 
 export default configureLucid({
-	runtime: cloudflare,
+	runtime: cloudflare({
+		wrangler: {
+			bindings: {
+				kv: true,
+				queues: {
+					queueName: "lucid-astro-playground",
+					consumer: {
+						maxBatchSize: 1,
+					},
+				},
+				r2: {
+					bucketName: "lucid-astro-playground-media",
+				},
+			},
+		},
+	}),
 	db: libsql,
 	env: z.object({
 		LIBSQL_URL: z.string(),
@@ -25,9 +40,6 @@ export default configureLucid({
 		LUCID_ACCESS_TOKEN_SECRET: z.string(),
 		LUCID_RESEND_API_KEY: z.string(),
 		LUCID_RESEND_WEBHOOK_SECRET: z.string(),
-		LUCID_MEDIA_BUCKET: z.any(),
-		LUCID_KV: z.any(),
-		LUCID_QUEUE: z.any(),
 	}),
 	config: (env) => ({
 		brand: {
@@ -121,15 +133,9 @@ export default configureLucid({
 					},
 				],
 			}),
-			cloudflareKVPlugin({
-				binding: env.LUCID_KV,
-			}),
-			cloudflareQueuesPlugin({
-				binding: env.LUCID_QUEUE,
-			}),
-			cloudflareR2Plugin({
-				binding: env.LUCID_MEDIA_BUCKET,
-			}),
+			cloudflareKVPlugin(),
+			cloudflareQueuesPlugin(),
+			cloudflareR2Plugin(),
 			resendPlugin({
 				apiKey: env.LUCID_RESEND_API_KEY,
 				webhook: {

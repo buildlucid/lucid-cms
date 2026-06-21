@@ -151,6 +151,14 @@ export const buildCloudflareMainWorkerSource = (props: {
 			exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
 		},
 		{
+			path: "@lucidcms/core/media",
+			exports: ["destroyMediaAdapter", "getInitializedMediaAdapter"],
+		},
+		{
+			path: "@lucidcms/core/email",
+			exports: ["destroyEmailAdapter", "getInitializedEmailAdapter"],
+		},
+		{
 			path: "@lucidcms/runtime-cloudflare/runtime",
 			exports: ["getRuntimeContext"],
 		},
@@ -217,6 +225,14 @@ return astroWorker.fetch(request, env, ctx);`,
 			env,
 			runtimeContext,
 		});
+		const media = await getInitializedMediaAdapter(resolvedConfig, {
+			env,
+			runtimeContext,
+		});
+		const email = await getInitializedEmailAdapter(resolvedConfig, {
+			env,
+			runtimeContext,
+		});
 
 		try {
 			const cronJobSetup = await setupCronJobs({
@@ -230,7 +246,10 @@ return astroWorker.fetch(request, env, ctx);`,
 				db: { client: resolvedConfig.db.client },
 				queue: cronJobSetup.queue,
 				env,
+				runtimeContext,
 				kv,
+				media,
+				email,
 				request: {
 					url: resolvedConfig.host || "http://localhost",
 					locale: resolvedConfig.i18n.defaultLocale,
@@ -242,6 +261,8 @@ return astroWorker.fetch(request, env, ctx);`,
 		} finally {
 			await Promise.allSettled([
 				destroyKVAdapter(kv, { config: resolvedConfig, env, runtimeContext }),
+				destroyMediaAdapter(media, { config: resolvedConfig, env, runtimeContext }),
+				destroyEmailAdapter(email, { config: resolvedConfig, env, runtimeContext }),
 				resolvedConfig.db.client.destroy(),
 			]);
 		}

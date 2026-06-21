@@ -1,6 +1,6 @@
 import { bytesToHex, randomBytes } from "@noble/hashes/utils.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import cacheKeys from "./cache-keys.js";
-import type { KVAdapterInstance } from "./types.js";
 
 const DEFAULT_NAMESPACE_TOKEN = "0";
 
@@ -13,12 +13,16 @@ const createNamespaceToken = () => {
  * Uses a stable default token when the namespace has not been initialized.
  */
 export const getNamespaceToken = async (
-	kv: KVAdapterInstance,
+	context: ServiceContext,
 	namespace: string,
 ) => {
-	const token = await kv.get<string>(cacheKeys.namespace.token(namespace), {
-		hash: true,
-	});
+	const token = await context.kv.get<string>(
+		context,
+		cacheKeys.namespace.token(namespace),
+		{
+			hash: true,
+		},
+	);
 
 	return token ?? DEFAULT_NAMESPACE_TOKEN;
 };
@@ -27,11 +31,12 @@ export const getNamespaceToken = async (
  * Returns current tokens for multiple namespaces in a single call.
  */
 export const getNamespaceTokens = async (
-	kv: KVAdapterInstance,
+	context: ServiceContext,
 	namespaces: string[],
 ) => {
 	const uniqueNamespaces = Array.from(new Set(namespaces));
-	const tokens = await kv.getMany<string>(
+	const tokens = await context.kv.getMany<string>(
+		context,
 		uniqueNamespaces.map((namespace) => ({
 			key: cacheKeys.namespace.token(namespace),
 			options: { hash: true },
@@ -49,22 +54,28 @@ export const getNamespaceTokens = async (
  * Rotates a namespace token so any keys derived from that token become stale.
  */
 export const invalidateNamespace = async (
-	kv: KVAdapterInstance,
+	context: ServiceContext,
 	namespace: string,
 ) => {
-	await kv.set(cacheKeys.namespace.token(namespace), createNamespaceToken(), {
-		hash: true,
-	});
+	await context.kv.set(
+		context,
+		cacheKeys.namespace.token(namespace),
+		createNamespaceToken(),
+		{
+			hash: true,
+		},
+	);
 };
 
 /**
  * Rotates tokens for multiple namespaces.
  */
 export const invalidateNamespaces = async (
-	kv: KVAdapterInstance,
+	context: ServiceContext,
 	namespaces: string[],
 ) => {
-	await kv.setMany(
+	await context.kv.setMany(
+		context,
 		Array.from(new Set(namespaces)).map((namespace) => ({
 			key: cacheKeys.namespace.token(namespace),
 			value: createNamespaceToken(),

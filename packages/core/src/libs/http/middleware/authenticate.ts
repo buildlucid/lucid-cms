@@ -13,6 +13,7 @@ import formatter, { userPermissionsFormatter } from "../../formatters/index.js";
 import { copy } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
 import { UsersRepository } from "../../repositories/index.js";
+import createServiceContext from "../utils/create-service-context.js";
 
 type TenantScope = "required" | "allow-global";
 
@@ -35,12 +36,16 @@ const getCachedAuthState = async (
 	token: LucidAccessToken,
 	tenantKey?: string | null,
 ) => {
-	const namespaceToken = await getAuthCacheNamespaceToken(c.get("kv"));
+	const context = createServiceContext(c);
+	const namespaceToken = await getAuthCacheNamespaceToken(context);
 	const cacheKey = cacheKeys.auth.user(token.id, namespaceToken, tenantKey);
 
 	return {
 		cacheKey,
-		data: await c.get("kv").get<CachedAuthState>(cacheKey, { hash: true }),
+		context,
+		data: await context.kv.get<CachedAuthState>(context, cacheKey, {
+			hash: true,
+		}),
 	};
 };
 
@@ -115,7 +120,7 @@ const resolveAuthState = async (
 	const authState = cached.data ?? (await fetchAuthState(c, token, tenantKey));
 
 	if (cached.data == null) {
-		await c.get("kv").set(cached.cacheKey, authState, {
+		await cached.context.kv.set(cached.context, cached.cacheKey, authState, {
 			expirationTtl: constants.authCacheExpiration,
 			hash: true,
 		});

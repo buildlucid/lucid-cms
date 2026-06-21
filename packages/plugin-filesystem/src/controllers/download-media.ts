@@ -19,7 +19,6 @@ import {
 } from "../constants.js";
 import { controllerSchemas } from "../schema/fs.js";
 import { downloadSingle } from "../services/index.js";
-import { resolveFileSystemMediaAdapter } from "./helpers.js";
 
 const factory = createFactory();
 
@@ -42,17 +41,6 @@ const downloadMediaController = factory.createHandlers(
 	validate("query", controllerSchemas.download.query.string),
 	async (c) => {
 		const context = createServiceContext(c);
-		const mediaAdapter = await resolveFileSystemMediaAdapter(c.get("config"));
-		if (!mediaAdapter) {
-			throw new LucidAPIError({
-				type: "basic",
-				name: copy("server:plugin.filesystem.media.routes.download.error.name"),
-				message: copy(
-					"server:plugin.filesystem.media.routes.download.error.message",
-				),
-			});
-		}
-
 		const query = c.req.valid("query");
 
 		const downloadMedia = await serviceWrapper(downloadSingle, {
@@ -65,7 +53,6 @@ const downloadMediaController = factory.createHandlers(
 				),
 			},
 		})(context, {
-			adapter: mediaAdapter,
 			key: query.key,
 			token: query.token,
 			timestamp: query.timestamp,

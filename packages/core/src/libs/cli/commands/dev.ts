@@ -25,8 +25,8 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 	let serverDestroy: (() => Promise<void>) | undefined;
 	let rebuilding = false;
 	let isInitialRun = true;
-
-	const currentConfig = await loadConfigFile({ path: configPath });
+	let buildOutDir = "dist";
+	let buildWatchIgnore: string[] = [];
 
 	const startServer = async () => {
 		if (rebuilding) return;
@@ -37,7 +37,12 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 		try {
 			await serverDestroy?.();
 
-			const configResult = await loadConfigFile({ path: configPath });
+			const configResult = await loadConfigFile({
+				path: configPath,
+			});
+			buildOutDir = configResult.config.build.paths.outDir;
+			buildWatchIgnore = configResult.config.build.watch?.ignore ?? [];
+
 			const translations = await prepareTranslations({
 				config: configResult.config,
 				projectRoot: configResult.projectRoot,
@@ -78,6 +83,8 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 
 			const migrateResult = await migrateCommand({
 				config: configResult.config,
+				env: configResult.env,
+				runtimeContext: configResult.runtimeContext,
 				translationStore,
 				mode: "return",
 			})({
@@ -210,10 +217,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 	const watchPath =
 		typeof options?.watch === "string" ? options?.watch : process.cwd();
 
-	const distPath = path.join(
-		process.cwd(),
-		currentConfig.config.build.paths.outDir,
-	);
+	const distPath = path.join(process.cwd(), buildOutDir);
 
 	const ignorePatterns = [
 		"**/node_modules/**",
@@ -232,7 +236,7 @@ const devCommand = async (options?: { watch?: string | boolean }) => {
 		"**/*.sqlite-shm",
 		"**/*.sqlite-wal",
 		`${constants.defaultUploadDirectory}/**`,
-		...(currentConfig.config.build.watch?.ignore ?? []),
+		...buildWatchIgnore,
 	];
 
 	const isIgnoredFile = (filePath: string) => {

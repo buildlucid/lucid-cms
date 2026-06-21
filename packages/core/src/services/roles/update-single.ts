@@ -188,7 +188,7 @@ const updateSingle: ServiceFn<
 	});
 	if (updateRoleRes.error) return updateRoleRes;
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	if (data.name !== undefined || data.description !== undefined) {
 		const existingNameTranslations: RoleTranslationInput =
@@ -301,7 +301,7 @@ const updateSingle: ServiceFn<
 		}
 	}
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	return {
 		error: undefined,

@@ -5,6 +5,7 @@ import type { QueueAdapterInstance } from "@lucidcms/core/types";
 import { ADAPTER_KEY, CONCURRENT_LIMIT } from "./constants.js";
 import { getDelaySeconds } from "./helper.js";
 import type { PluginOptions } from "./types.js";
+import { resolveBinding } from "./utils/resolve-binding.js";
 
 const cloudflareQueuesAdapter = (
 	options: PluginOptions,
@@ -78,7 +79,8 @@ const cloudflareQueuesAdapter = (
 				}
 
 				if (consumerSupported) {
-					await options.binding.send(
+					const binding = resolveBinding(params.context, options);
+					await binding.send(
 						{
 							jobId: jobData.jobId,
 							event,
@@ -176,7 +178,8 @@ const cloudflareQueuesAdapter = (
 				if (createJobsRes.error) return createJobsRes;
 
 				if (consumerSupported) {
-					await options.binding.sendBatch(
+					const binding = resolveBinding(params.context, options);
+					await binding.sendBatch(
 						createJobsRes.data.jobs.map((job) => ({
 							body: {
 								jobId: job.jobId,

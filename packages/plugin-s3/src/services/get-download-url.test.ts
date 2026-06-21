@@ -25,9 +25,8 @@ describe("getDownloadUrl", () => {
 				secretKey: "secret",
 				fileName: "Screenshot 2026-02-13 at 10.png",
 			},
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 
 		expect(response.error).toBeUndefined();
@@ -62,9 +61,8 @@ describe("getDownloadUrl", () => {
 				secretKey: "secret",
 				extension: "png",
 			},
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 
 		expect(response.error).toBeUndefined();
@@ -98,9 +96,8 @@ describe("getDownloadUrl", () => {
 				secretKey: "secret",
 				fileName: '../"Quarterly\r\nReport".png',
 			},
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: {} as never,
 		});
 
 		expect(response.error).toBeUndefined();

@@ -72,12 +72,11 @@ const streamMedia: ServiceFn<
 
 	if (!processingRequest.hasProcessing) {
 		const res = await mediaStrategyRes.data.stream({
+			context,
 			key: normalizedKey,
 			ifNoneMatch: data.ifNoneMatch,
 			range: data.range,
-			context: {
-				tenant,
-			},
+			tenant,
 		});
 		if (res.error) return res;
 		return {
@@ -101,10 +100,9 @@ const streamMedia: ServiceFn<
 	let sourceExtension: string | null = processingRequest.format ?? null;
 	if (!sourceExtension) {
 		const metaRes = await mediaStrategyRes.data.getMeta({
+			context,
 			key: normalizedKey,
-			context: {
-				tenant,
-			},
+			tenant,
 		});
 		if (metaRes.error) return metaRes;
 		sourceExtension = mime.extension(metaRes.data.mimeType || "") || null;
@@ -122,12 +120,11 @@ const streamMedia: ServiceFn<
 	});
 
 	const res = await mediaStrategyRes.data.stream({
+		context,
 		key: processKey,
 		ifNoneMatch: data.ifNoneMatch,
 		range: data.range,
-		context: {
-			tenant: resolveMediaKeyTenant(context.config, processKey),
-		},
+		tenant: resolveMediaKeyTenant(context.config, processKey),
 	});
 	if (res.data) {
 		return {

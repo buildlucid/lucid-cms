@@ -5,3 +5,4 @@ export const ADAPTER_KEY = "cloudflare-queues";
 export const CONCURRENT_LIMIT = 5;
 export const SUPPORTED_RUNTIME_ADAPTER_KEY = "cloudflare";
 export const BASE_DELAY_SECONDS = 30;
+export const DEFAULT_QUEUE_BINDING = "LUCID_QUEUE";

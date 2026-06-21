@@ -15,4 +15,4 @@ export { default as resolveConfigDefinition } from "./libs/config/resolve-config
 export { default as renderMjmlTemplates } from "./libs/email/templates/render-mjml-templates.js";
 export { default as prepareTranslations } from "./libs/i18n/prepare-translations.js";
 export { default as checkAllPluginsCompatibility } from "./libs/plugins/check-all-plugins-compatibility.js";
-export { default as handlePluginBuildHooks } from "./libs/plugins/hooks/handle-build.js";
+export { default as handlePluginRuntimeHooks } from "./libs/plugins/hooks/handle-runtime.js";

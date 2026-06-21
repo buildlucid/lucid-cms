@@ -12,6 +12,7 @@ import type {
 	KVKeyOptions,
 	KVSetInput,
 	KVSetOptions,
+	ServiceContext,
 } from "@lucidcms/core/types";
 import type { Redis as RedisClient } from "ioredis";
 import { Redis } from "ioredis";
@@ -66,6 +67,7 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			},
 		},
 		get: async <R>(
+			_context: ServiceContext,
 			key: string,
 			kvOptions?: KVKeyOptions,
 		): Promise<R | null> => {
@@ -76,6 +78,7 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			return parseKVValue(value);
 		},
 		set: async (
+			_context,
 			key: string,
 			value: unknown,
 			kvOptions?: KVSetOptions,
@@ -91,16 +94,28 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 
 			await getClient().set(resolvedKey, serialised);
 		},
-		has: async (key: string, kvOptions?: KVKeyOptions): Promise<boolean> => {
+		has: async (
+			_context,
+			key: string,
+			kvOptions?: KVKeyOptions,
+		): Promise<boolean> => {
 			const resolvedKey = resolveRedisKey(key, kvOptions);
 			const exists = await getClient().exists(resolvedKey);
 			return exists === 1;
 		},
-		delete: async (key: string, kvOptions?: KVKeyOptions): Promise<void> => {
+		delete: async (
+			_context,
+			key: string,
+			kvOptions?: KVKeyOptions,
+		): Promise<void> => {
 			const resolvedKey = resolveRedisKey(key, kvOptions);
 			await getClient().unlink(resolvedKey);
 		},
-		getMany: async <R>(keys: KVKeyInput[], options?: KVKeyOptions) => {
+		getMany: async <R>(
+			_context: ServiceContext,
+			keys: KVKeyInput[],
+			options?: KVKeyOptions,
+		) => {
 			const resolvedKeys = keys.map((input) => {
 				const resolved = resolveKeyInput(input, options);
 				return {
@@ -123,7 +138,11 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 				};
 			});
 		},
-		setMany: async (items: Array<KVSetInput>, options?: KVSetOptions) => {
+		setMany: async (
+			_context,
+			items: Array<KVSetInput>,
+			options?: KVSetOptions,
+		) => {
 			const pipeline = getClient().pipeline();
 
 			for (const item of items) {
@@ -141,7 +160,11 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 
 			await pipeline.exec();
 		},
-		deleteMany: async (keys: KVKeyInput[], options?: KVKeyOptions) => {
+		deleteMany: async (
+			_context,
+			keys: KVKeyInput[],
+			options?: KVKeyOptions,
+		) => {
 			const resolvedKeys = keys.map((input) => {
 				const resolved = resolveKeyInput(input, options);
 				return resolveRedisKey(resolved.key, resolved.options);
@@ -156,6 +179,7 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 			}
 		},
 		increment: async (
+			_context,
 			key: string,
 			kvOptions?: KVIncrementOptions,
 		): Promise<KVIncrementResult> => {
@@ -174,7 +198,7 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 				expirationTtl,
 			};
 		},
-		clear: async (): Promise<void> => {
+		clear: async (_context): Promise<void> => {
 			const keys: string[] = [];
 			let cursor = "0";
 			const client = getClient();

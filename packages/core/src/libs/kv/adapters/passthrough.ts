@@ -1,9 +1,9 @@
-import type { KVAdapterInstance } from "../types.js";
+import type { KVAdapterInstance, KVKeyInput } from "../types.js";
 
 /**
  * Passthrough KV adapter implementation.
  *
- * This adapter is a no-op implementation of the KVAdapterInstance interface.
+ * This adapter is a no-op implementation of both KV adapter call shapes.
  * It does not perform any actual key-value operations and returns as if the operation was successful and that there is no cache.
  */
 const passthroughKVAdapter = (): KVAdapterInstance => ({
@@ -13,11 +13,12 @@ const passthroughKVAdapter = (): KVAdapterInstance => ({
 	set: async () => {},
 	has: async () => false,
 	delete: async () => {},
-	getMany: async (keys) =>
-		keys.map((key) => ({
+	getMany: async (_context, keys: KVKeyInput[]) => {
+		return keys.map((key) => ({
 			key: typeof key === "string" ? key : key.key,
 			value: null,
-		})),
+		}));
+	},
 	setMany: async () => {},
 	deleteMany: async () => {},
 	increment: async () => ({ value: 1 }),

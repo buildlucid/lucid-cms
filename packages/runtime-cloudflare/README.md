@@ -37,6 +37,7 @@ The `cloudflare` function accepts a single parameter, `options`, which is either
 |----------|------|-------------|
 | `platformProxy` | `GetPlatformProxyOptions` | A Wrangler platform proxy options object |
 | `server` | `{ port?: number; hostname?: string }` | The server options. The `lucidcms dev` script uses these when serving the local Node server |
+| `wrangler` | `{ generate?: boolean; bindings?: object; configPath?: string; name?: string; compatibilityDate?: string; compatibilityFlags?: string[]; crons?: string[] }` | Controls generated Wrangler config output. Generation is enabled by default. Bindings are opt-in and support Lucid defaults with `true` |
 
 ```typescript
 export default configureLucid({
@@ -54,28 +55,50 @@ export default configureLucid({
 
 ## Wrangler Configuration
 
-You'll need to configure Wrangler to deploy your Cloudflare Worker. Create a `wrangler.toml` file in your project root:
+The Cloudflare runtime generates a deploy-ready Wrangler config by default during `lucidcms build`.
 
-```toml
-name = "lucid-cms"
-main = "dist/server.js"
-compatibility_date = "2025-06-12"
-compatibility_flags = ["nodejs_compat"]
+For local CLI commands that need Cloudflare bindings, Lucid writes a temporary Wrangler config to:
 
-[assets]
-directory = "./dist/public/"
-binding = "ASSETS"
+```text
+.lucid/wrangler.jsonc
+```
 
-[[triggers.crons]]
-cron = "0 0 * * *"
+The generated config is written to your build output directory:
 
-[[triggers.crons]]
-cron = "0 */4 * * *"
+```text
+dist/wrangler.jsonc
+```
 
-[build]
-watch_dir = "./src"
-command = "lucidcms build --cache-spa --silent"
-cwd = "./"
+Lucid also writes Cloudflare's generated-config redirect:
+
+```text
+.wrangler/deploy/config.json
+```
+
+After building, you can deploy with:
+
+```bash
+wrangler deploy
+```
+
+If you already have a `wrangler.jsonc`, `wrangler.json`, or `wrangler.toml`, Lucid treats it as source config and merges it into the generated output. Lucid owns the required Worker entry, assets binding, Node compatibility flag, and default cron triggers in the generated config.
+
+Bindings are generated only when explicitly enabled. Passing `true` uses Lucid's convention names: `LUCID_KV`, `LUCID_MEDIA_BUCKET`, and `LUCID_QUEUE`. If you use a custom binding name, pass the same custom name to the matching Cloudflare plugin.
+
+To disable generation and fully own your Wrangler config, pass:
+
+```typescript
+export default configureLucid({
+	runtime: cloudflare({
+		wrangler: {
+			generate: false,
+		},
+	}),
+	db: libsql,
+	config: () => ({
+		// ...other config
+	}),
+});
 ```
 
 ## Media Storage
@@ -89,13 +112,19 @@ import { libsql } from "@lucidcms/db-libsql";
 import CloudflareR2 from "@lucidcms/plugin-cloudflare-r2";
 
 export default configureLucid({
-	runtime: cloudflare,
+	runtime: cloudflare({
+		wrangler: {
+			bindings: {
+				r2: {
+					bucketName: "lucid-media",
+				},
+			},
+		},
+	}),
 	db: libsql,
-	config: (env) => ({
+	config: () => ({
 		plugins: [
-			CloudflareR2({
-				binding: env.MEDIA_BUCKET,
-			}),
+			CloudflareR2(),
 		],
 	}),
 });

@@ -90,16 +90,14 @@ describe("media sync strategy", () => {
 		expect(response.data?.extension).toBe("png");
 		expect(getMeta).toHaveBeenCalledWith({
 			key: "public/marketing/upload",
-			context: {
-				tenant,
-			},
+			tenant,
+			context: expect.any(Object),
 		});
 		expect(mocks.detectStreamMimeType).toHaveBeenCalledWith(
 			stream,
 			"public/marketing/upload",
-			{
-				tenant,
-			},
+			tenant,
+			expect.any(Object),
 		);
 		expect(mocks.adjustInt).toHaveBeenCalledWith(expect.anything(), {
 			name: "media_storage_used:t:marketing",
@@ -157,9 +155,8 @@ describe("media sync strategy", () => {
 		expect(response.error?.status).toBe(400);
 		expect(deleteObject).toHaveBeenCalledWith({
 			key: "public/upload",
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: expect.any(Object),
 		});
 		expect(mocks.adjustInt).not.toHaveBeenCalled();
 	});

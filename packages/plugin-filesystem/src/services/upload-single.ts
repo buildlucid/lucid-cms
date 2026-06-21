@@ -3,18 +3,16 @@ import {
 	getFileMetadata,
 	resolveMediaKeyTenant,
 } from "@lucidcms/core/plugin";
-import type {
-	FileSystemMediaAdapterOptions,
-	MediaAdapterInstance,
-	ServiceFn,
-} from "@lucidcms/core/types";
+import type { ServiceFn } from "@lucidcms/core/types";
 import { FILE_SYSTEM_UPLOAD_PATH } from "../constants.js";
-import { validatePresignedToken } from "./checks/index.js";
+import {
+	checkFileSystemMediaAdapter,
+	validatePresignedToken,
+} from "./checks/index.js";
 
 const uploadSingle: ServiceFn<
 	[
 		{
-			adapter: MediaAdapterInstance<FileSystemMediaAdapterOptions>;
 			buffer: Buffer | undefined | null;
 			key: string;
 			mimeType: string;
@@ -25,7 +23,13 @@ const uploadSingle: ServiceFn<
 	],
 	boolean
 > = async (context, data) => {
-	const adapterOptions = data.adapter.getOptions?.();
+	const mediaAdapterRes = await checkFileSystemMediaAdapter(context, {
+		name: copy("server:plugin.filesystem.media.routes.upload.error.name"),
+		message: copy("server:plugin.filesystem.media.routes.upload.error.message"),
+	});
+	if (mediaAdapterRes.error) return mediaAdapterRes;
+
+	const adapterOptions = mediaAdapterRes.data.getOptions?.();
 	const checkPresignedTokenRes = await validatePresignedToken(context, {
 		key: data.key,
 		token: data.token,
@@ -54,7 +58,8 @@ const uploadSingle: ServiceFn<
 	});
 	if (fileMetadataRes.error) return fileMetadataRes;
 
-	const uploadRes = await data.adapter.upload({
+	const uploadRes = await mediaAdapterRes.data.upload({
+		context,
 		key: data.key,
 		data: data.buffer,
 		meta: {
@@ -63,9 +68,7 @@ const uploadSingle: ServiceFn<
 			size: data.buffer.length,
 			type: fileMetadataRes.data.type,
 		},
-		context: {
-			tenant: resolveMediaKeyTenant(context.config, data.key),
-		},
+		tenant: resolveMediaKeyTenant(context.config, data.key),
 	});
 	if (uploadRes.error) return uploadRes;
 

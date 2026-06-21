@@ -50,7 +50,7 @@ const regenerateKeys: ServiceFn<
 	if (updateKeysRes.error) return updateKeysRes;
 
 	const cacheKey = cacheKeys.auth.client(checkExistsRes.data.key);
-	await context.kv.delete(cacheKey, { hash: true });
+	await context.kv.delete(context, cacheKey, { hash: true });
 
 	return {
 		error: undefined,

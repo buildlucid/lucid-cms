@@ -5,6 +5,7 @@ import type {
 	AdapterOptions,
 	CloudflareAdapterOptionsValue,
 	CloudflareRuntimeAdapter,
+	PreparedWranglerConfig,
 } from "./types.js";
 
 export const cloudflare = (
@@ -14,6 +15,7 @@ export const cloudflare = (
 		typeof options === "function" ? undefined : options;
 	let optionsResolved = typeof options !== "function";
 	let platformProxy: ReturnType<CloudflareRuntimeAdapter["getPlatformProxy"]>;
+	let preparedWranglerConfig: PreparedWranglerConfig | undefined;
 
 	const resolveOptions = async (env: EnvironmentVariables) => {
 		if (optionsResolved) {
@@ -40,6 +42,10 @@ export const cloudflare = (
 		getPlatformProxy: () => platformProxy,
 		setPlatformProxy: (nextPlatformProxy) => {
 			platformProxy = nextPlatformProxy;
+		},
+		getPreparedWranglerConfig: () => preparedWranglerConfig,
+		setPreparedWranglerConfig: (nextConfig) => {
+			preparedWranglerConfig = nextConfig;
 		},
 	};
 };

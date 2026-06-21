@@ -4,6 +4,7 @@ import { LucidError } from "../../utils/errors/index.js";
 import { getConfigureLucidModule } from "../runtime/loaders.js";
 import { resolveDatabaseAdapter } from "../runtime/resolve-database-adapter.js";
 import type {
+	AdapterRuntimeContext,
 	EnvironmentVariables,
 	GetEnvVarsLogger,
 	LucidConfigDefinition,
@@ -21,6 +22,7 @@ const defaultLoggerInstance = {
 	success: () => {},
 	color: {
 		blue: (value: unknown) => String(value),
+		green: (value: unknown) => String(value),
 	},
 } as unknown as GetEnvVarsLogger["instance"];
 
@@ -30,6 +32,7 @@ export const invalidConfigDefinitionMessage =
 export type ResolveConfigDefinitionResult = {
 	config: Config;
 	adapter: RuntimeAdapter;
+	runtimeContext: AdapterRuntimeContext;
 	envSchema?: z.ZodType;
 	env: EnvironmentVariables | undefined;
 	definition: WrappedLucidConfigDefinition;
@@ -93,11 +96,31 @@ export const resolveConfigDefinition = async (props: {
 	meta?: LucidConfigDefinitionMeta;
 	env?: EnvironmentVariables;
 	configureLucidPath?: string;
+	configPath?: string;
+	projectRoot?: string;
 	logger?: GetEnvVarsLogger;
 	processConfigOptions?: Parameters<typeof processConfig>[1];
 }): Promise<ResolveConfigDefinitionResult> => {
 	const definition = assertConfigDefinition(props.definition);
 	const adapter = await resolveRuntimeAdapter(definition.runtime);
+	const logger = props.logger ?? {
+		instance: defaultLoggerInstance,
+		silent: true,
+	};
+
+	if (adapter.cli?.prepare && props.configPath && props.projectRoot) {
+		await adapter.cli.prepare({
+			configPath: props.configPath,
+			projectRoot: props.projectRoot,
+			logger,
+		});
+	}
+	const runtimeContext = {
+		runtime: adapter.key,
+		compiled: false,
+		getConnectionInfo: () => ({}),
+		configEntryPoint: null,
+	} satisfies AdapterRuntimeContext;
 
 	// Hosted integrations can supply their own configureLucid wrapper so the
 	// runtime adapter identity stays separate from host-specific config shaping.
@@ -112,12 +135,8 @@ export const resolveConfigDefinition = async (props: {
 		},
 		props.meta,
 	);
-	const logger = props.logger ?? {
-		instance: defaultLoggerInstance,
-		silent: true,
-	};
 	// Env loading is optional because some hosts, like Astro Cloudflare, already
-	// own the runtime bindings and can pass them in directly.
+	// own request-time env loading and can pass it in directly.
 	const env =
 		props.env ??
 		(adapter.getEnvVars
@@ -146,6 +165,7 @@ export const resolveConfigDefinition = async (props: {
 	return {
 		config,
 		adapter,
+		runtimeContext,
 		envSchema,
 		env,
 		definition: wrappedDefinition,

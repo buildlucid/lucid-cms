@@ -131,7 +131,7 @@ const deleteBatch: ServiceFn<
 				for (const item of r.data) {
 					deletedMediaIds.add(item.id);
 					clearCachePromises.push(
-						clearClientMediaSingleCache(context.kv, context.config, item.id),
+						clearClientMediaSingleCache(context, item.id),
 					);
 				}
 			}
@@ -155,7 +155,7 @@ const deleteBatch: ServiceFn<
 
 	await Promise.all([
 		...clearCachePromises,
-		invalidateHttpCacheTags(context.kv, [cacheKeys.http.tags.clientMedia]),
+		invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
 	]);
 
 	if (deletedMediaIds.size > 0) {

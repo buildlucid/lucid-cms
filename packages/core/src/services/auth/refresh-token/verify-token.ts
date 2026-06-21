@@ -1,11 +1,8 @@
 import { getCookie } from "hono/cookie";
 import { verify } from "hono/jwt";
 import constants from "../../../constants/constants.js";
-import {
-	copy,
-	createTranslator,
-	resolveInterfaceLocale,
-} from "../../../libs/i18n/index.js";
+import createServiceContext from "../../../libs/http/utils/create-service-context.js";
+import { copy } from "../../../libs/i18n/index.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
 import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
@@ -82,35 +79,10 @@ const verifyToken = async (
 
 		if (tokenRes.data.revoked_at !== null) {
 			if (tokenRes.data.replaced_by_token_id !== null) {
-				const connectionInfo = c.get("runtimeContext").getConnectionInfo(c);
-				const locale = resolveInterfaceLocale({
-					config,
-					locale: c.req.header(constants.headers.interfaceLocale),
-					acceptLanguage: c.req.header("Accept-Language"),
+				await revokeUserTokens(createServiceContext(c), {
+					userId: tokenRes.data.user_id,
+					revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
 				});
-
-				await revokeUserTokens(
-					{
-						db: { client: config.db.client },
-						config: config,
-						queue: c.get("queue"),
-						env: c.get("env"),
-						kv: c.get("kv"),
-						translate: createTranslator({
-							store: c.get("translationStore"),
-							locale,
-						}),
-						request: {
-							url: c.req.url,
-							ipAddress: connectionInfo.address ?? null,
-							locale,
-						},
-					},
-					{
-						userId: tokenRes.data.user_id,
-						revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
-					},
-				);
 
 				const [refreshRes, accessRes] = await Promise.all([
 					authServices.refreshToken.clearToken(c, {
@@ -164,8 +136,10 @@ const verifyToken = async (
 			};
 		}
 
-		const kv = c.get("kv");
+		const context = createServiceContext(c);
+		const kv = context.kv;
 		const kvEntry = await kv.get<{ user_id: number }>(
+			context,
 			cacheKeys.auth.refresh(_refresh),
 			{ hash: true },
 		);
@@ -178,6 +152,7 @@ const verifyToken = async (
 		}
 
 		await kv.set(
+			context,
 			cacheKeys.auth.refresh(_refresh),
 			{ user_id: tokenRes.data.user_id },
 			{ expirationTtl: constants.refreshTokenExpiration, hash: true },

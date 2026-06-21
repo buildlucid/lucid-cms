@@ -9,9 +9,9 @@ import { copy, createTranslator } from "../../i18n/index.js";
 import type { TranslationStore } from "../../i18n/types.js";
 
 /**
- * Responsible for running the plugin build hooks and collecting artifacts
+ * Responsible for running the plugin runtime hooks and collecting artifacts.
  */
-const handlePluginBuildHooks = async (props: {
+const handlePluginRuntimeHooks = async (props: {
 	config: Config;
 	translationStore: TranslationStore;
 	definition: LucidConfigDefinition;
@@ -30,10 +30,10 @@ const handlePluginBuildHooks = async (props: {
 
 		await Promise.all(
 			props.config.plugins.map(async (plugin) => {
-				if (!plugin.hooks?.build) {
+				if (!plugin.hooks?.runtime) {
 					return;
 				}
-				const res = await plugin.hooks.build({
+				const res = await plugin.hooks.runtime({
 					definition: props.definition,
 					paths: {
 						configPath: props.configPath,
@@ -44,7 +44,7 @@ const handlePluginBuildHooks = async (props: {
 				if (res.error) {
 					cliLogger.error(
 						translate.english(res.error.message) ??
-							`An unknown error occurred while building the ${plugin.key} plugin`,
+							`An unknown error occurred while running the ${plugin.key} plugin runtime hook`,
 						{
 							silent,
 						},
@@ -67,7 +67,7 @@ const handlePluginBuildHooks = async (props: {
 					defaultMessage:
 						error instanceof Error
 							? error.message
-							: "An unknown error occurred while building the plugins",
+							: "An unknown error occurred while preparing plugin runtime artifacts",
 				}),
 				status: 500,
 			},
@@ -76,4 +76,4 @@ const handlePluginBuildHooks = async (props: {
 	}
 };
 
-export default handlePluginBuildHooks;
+export default handlePluginRuntimeHooks;

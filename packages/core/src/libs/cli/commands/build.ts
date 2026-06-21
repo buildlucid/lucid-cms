@@ -10,7 +10,6 @@ import {
 } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
-import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
@@ -53,12 +52,7 @@ const buildCommand = async (options?: {
 		}
 
 		await checkAllPluginsCompatibility({
-			runtimeContext: {
-				runtime: adapterRuntime.key,
-				compiled: true,
-				getConnectionInfo: () => ({}),
-				configEntryPoint: null,
-			} satisfies AdapterRuntimeContext,
+			runtimeContext: configRes.runtimeContext,
 			config: configRes.config,
 		});
 
@@ -140,7 +134,6 @@ const buildCommand = async (options?: {
 			outputRelativeConfigPath: normalisedOutputRelativePath,
 			customArtifactTypes: adapterRuntime.config?.customBuildArtifacts,
 		});
-
 		const [viteBuildRes, runtimeBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config),
 			adapterCLI.build({

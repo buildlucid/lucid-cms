@@ -1,13 +1,15 @@
 import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceGetMeta } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
+import { resolveBinding } from "../utils/resolve-binding.js";
 
 const getMetadata = (
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceGetMeta => {
-	return async ({ key }) => {
+	return async ({ key, context }) => {
 		try {
-			const object = await pluginOptions.binding.head(key);
+			const binding = resolveBinding(context, pluginOptions);
+			const object = await binding.head(key);
 
 			if (!object) {
 				return {

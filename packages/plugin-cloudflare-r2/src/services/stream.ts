@@ -1,13 +1,15 @@
 import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceStream } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
+import { resolveBinding } from "../utils/resolve-binding.js";
 
 const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
-	return async ({ key, range, ifNoneMatch }) => {
+	return async ({ key, range, ifNoneMatch, context }) => {
 		try {
+			const binding = resolveBinding(context, pluginOptions);
 			if (!range) {
 				if (ifNoneMatch) {
-					const object = await pluginOptions.binding.get(key, {
+					const object = await binding.get(key, {
 						onlyIf: new Headers({
 							"If-None-Match": ifNoneMatch,
 						}),
@@ -47,7 +49,7 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 					};
 				}
 
-				const object = await pluginOptions.binding.get(key);
+				const object = await binding.get(key);
 
 				if (!object) {
 					return {
@@ -70,7 +72,7 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 				};
 			}
 
-			const meta = await pluginOptions.binding.head(key);
+			const meta = await binding.head(key);
 			if (!meta) {
 				return {
 					error: {
@@ -84,7 +86,7 @@ const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
 			const start = range.start;
 			const end = range.end ?? meta.size - 1;
 
-			const object = await pluginOptions.binding.get(key, {
+			const object = await binding.get(key, {
 				range: {
 					offset: start,
 					length: end - start + 1,

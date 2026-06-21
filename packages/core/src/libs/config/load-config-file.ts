@@ -5,6 +5,7 @@ import type { ZodType } from "zod";
 import type { Config } from "../../types/config.js";
 import cliLogger from "../cli/logger.js";
 import type {
+	AdapterRuntimeContext,
 	EnvironmentVariables,
 	LucidConfigDefinition,
 	RuntimeAdapter,
@@ -13,7 +14,9 @@ import getConfigPath from "./get-config-path.js";
 import { resolveConfigDefinition } from "./resolve-config-definition.js";
 
 export type LoadConfigResult = {
+	configPath: string;
 	projectRoot: string;
+	runtimeContext: AdapterRuntimeContext;
 	config: Config;
 	adapter: RuntimeAdapter;
 	envSchema?: ZodType;
@@ -48,6 +51,8 @@ export const loadConfigFile = async (props?: {
 		definition: configModule.default,
 		envSchema: hasNamedEnvExport ? configModule.env : undefined,
 		configureLucidPath: props?.configureLucidPath,
+		configPath,
+		projectRoot,
 		logger: {
 			instance: cliLogger,
 			silent: props?.silent ?? false,
@@ -59,7 +64,9 @@ export const loadConfigFile = async (props?: {
 	});
 
 	return {
+		configPath,
 		projectRoot,
+		runtimeContext: resolved.runtimeContext,
 		config: resolved.config,
 		adapter: resolved.adapter,
 		envSchema: resolved.envSchema,

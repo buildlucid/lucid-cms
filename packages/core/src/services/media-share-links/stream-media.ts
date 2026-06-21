@@ -37,11 +37,10 @@ const streamMedia: ServiceFn<
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const res = await mediaStrategyRes.data.stream({
+		context,
 		key: data.mediaKey,
 		range: data.range,
-		context: {
-			tenant: resolveMediaKeyTenant(context.config, data.mediaKey),
-		},
+		tenant: resolveMediaKeyTenant(context.config, data.mediaKey),
 	});
 	if (res.error) return res;
 

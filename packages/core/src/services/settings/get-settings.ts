@@ -1,9 +1,8 @@
 import constants from "../../constants/constants.js";
-import getEmailAdapter from "../../libs/email/get-adapter.js";
+import isEmailSimulated from "../../libs/email/is-simulated.js";
 import { settingsFormatter } from "../../libs/formatters/index.js";
 import getImageProcessor from "../../libs/image-processor/get-processor.js";
 import passthroughProcessor from "../../libs/image-processor/processors/passthrough.js";
-import getMediaAdapter from "../../libs/media/get-adapter.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import { multiTenancyEnabled } from "../../utils/helpers/index.js";
@@ -29,29 +28,21 @@ const getSettings: ServiceFn<
 	Settings
 > = async (context, data) => {
 	const tenantKey = context.request.tenantKey ?? null;
-	const [
-		optionsRes,
-		processedImageCountRes,
-		mediaAdapter,
-		emailAdapter,
-		image,
-		mediaStorageUsed,
-	] = await Promise.all([
-		optionServices.getMultiple(context, {
-			names: [
-				getLicenseOptionName(tenantKey, "license_key_display"),
-				"system_alert_email",
-			],
-		}),
-		processedImageServices.getCount(context),
-		getMediaAdapter(context.config),
-		getEmailAdapter(context.config),
-		getImageProcessor(context.config),
-		mediaServices.getStorageUsage(context, {
-			tenantKey,
-			includeAllBuckets: !multiTenancyEnabled(context.config),
-		}),
-	]);
+	const [optionsRes, processedImageCountRes, image, mediaStorageUsed] =
+		await Promise.all([
+			optionServices.getMultiple(context, {
+				names: [
+					getLicenseOptionName(tenantKey, "license_key_display"),
+					"system_alert_email",
+				],
+			}),
+			processedImageServices.getCount(context),
+			getImageProcessor(context.config),
+			mediaServices.getStorageUsage(context, {
+				tenantKey,
+				includeAllBuckets: !multiTenancyEnabled(context.config),
+			}),
+		]);
 	if (processedImageCountRes.error) return processedImageCountRes;
 	if (optionsRes.error) return optionsRes;
 	if (mediaStorageUsed.error) return mediaStorageUsed;
@@ -82,10 +73,10 @@ const getSettings: ServiceFn<
 				mediaStorageUsed: mediaStorageUsed.data.total,
 				processedImageCount: processedImageCountRes.data,
 				licenseKey: licenseKeyDisplayRes?.valueText ?? null,
-				mediaAdapterEnabled: mediaAdapter.enabled,
-				mediaAdapterKey: mediaAdapter.enabled ? mediaAdapter.adapter.key : null,
-				emailAdapterKey: emailAdapter.adapter.key,
-				emailSimulated: emailAdapter.simulated,
+				mediaAdapterEnabled: context.media !== null,
+				mediaAdapterKey: context.media?.key ?? null,
+				emailAdapterKey: context.email.key,
+				emailSimulated: isEmailSimulated(context),
 				emailTemplates,
 				imageProcessorKey,
 				systemAlertEmail: systemAlertEmailRes?.valueText ?? null,

@@ -5,6 +5,7 @@ import { LucidAPIError } from "../../../utils/errors/index.js";
 import { copy } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
 import { supportsKVIncrement } from "../../kv/utils.js";
+import createServiceContext from "../utils/create-service-context.js";
 
 type RateLimitMode = "ip" | "user" | "client";
 
@@ -55,7 +56,9 @@ const rateLimiter = (options: RateLimitOptions) =>
 			return;
 		}
 
-		const kv = c.get("kv");
+		const context = createServiceContext(c);
+		const kv = context.kv;
+
 		const scope = await resolveScope(c, options.scope);
 		let key: string;
 
@@ -111,7 +114,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 
 		if (supportsKVIncrement(kv)) {
 			const ttl = Math.max(1, Math.ceil(options.windowMs / 1000));
-			const result = await kv.increment(`${key}:counter`, {
+			const result = await kv.increment(context, `${key}:counter`, {
 				expirationTtl: ttl,
 			});
 
@@ -119,7 +122,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 			resetSeconds = result.expirationTtl ?? ttl;
 		} else {
 			const now = Date.now();
-			const existing = await kv.get<RateLimitRecord>(key);
+			const existing = await kv.get<RateLimitRecord>(context, key);
 
 			let record: RateLimitRecord;
 			if (existing && existing.resetTime > now) {
@@ -139,7 +142,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 				Math.ceil((record.resetTime - now) / 1000) +
 					constants.rateLimit.ttlBufferSeconds,
 			);
-			await kv.set(key, record, { expirationTtl: ttl });
+			await kv.set(context, key, record, { expirationTtl: ttl });
 
 			count = record.count;
 			resetSeconds = Math.max(0, Math.ceil((record.resetTime - now) / 1000));

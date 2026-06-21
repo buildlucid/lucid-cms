@@ -1,3 +1,4 @@
+import type { ServiceContext } from "../../utils/services/types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
 
 export type KVAdapter<T = undefined> = T extends undefined
@@ -57,6 +58,7 @@ export interface KVIncrementResult {
  */
 export type KVIncrementCapability = {
 	increment: (
+		context: ServiceContext,
 		key: string,
 		options?: KVIncrementOptions,
 	) => Promise<KVIncrementResult>;
@@ -77,33 +79,56 @@ export type KVAdapterInstance = {
 		destroy?: (context: AdapterLifecycleContext) => Promise<void>;
 	};
 	/** Read a single key, returning null when the key is missing or expired. */
-	get: <R>(key: string, options?: KVKeyOptions) => Promise<R | null>;
+	get: <R>(
+		context: ServiceContext,
+		key: string,
+		options?: KVKeyOptions,
+	) => Promise<R | null>;
 	/** Set a single key, optionally with an expiration. */
-	set: <T>(key: string, value: T, options?: KVSetOptions) => Promise<void>;
+	set: <T>(
+		context: ServiceContext,
+		key: string,
+		value: T,
+		options?: KVSetOptions,
+	) => Promise<void>;
 	/** Check whether a non-expired key exists. */
-	has: (key: string, options?: KVKeyOptions) => Promise<boolean>;
+	has: (
+		context: ServiceContext,
+		key: string,
+		options?: KVKeyOptions,
+	) => Promise<boolean>;
 	/** Delete a single key. */
-	delete: (key: string, options?: KVKeyOptions) => Promise<void>;
+	delete: (
+		context: ServiceContext,
+		key: string,
+		options?: KVKeyOptions,
+	) => Promise<void>;
 	/**
 	 * Read many keys, preserving input order. Missing or expired keys should be
 	 * returned with a null value.
 	 */
 	getMany: <R>(
+		context: ServiceContext,
 		keys: KVKeyInput[],
 		options?: KVKeyOptions,
 	) => Promise<Array<{ key: string; value: R | null }>>;
 	/** Set many keys. Adapters should use provider batch primitives where available. */
 	setMany: <T>(
+		context: ServiceContext,
 		items: Array<KVSetInput<T>>,
 		options?: KVSetOptions,
 	) => Promise<void>;
 	/** Delete many keys. Adapters should use provider batch primitives where available. */
-	deleteMany: (keys: KVKeyInput[], options?: KVKeyOptions) => Promise<void>;
+	deleteMany: (
+		context: ServiceContext,
+		keys: KVKeyInput[],
+		options?: KVKeyOptions,
+	) => Promise<void>;
 	/**
 	 * Clear Lucid-owned keys for the adapter namespace. Adapters configured with
 	 * namespace: false may clear the whole backing store.
 	 */
-	clear: () => Promise<void>;
+	clear: (context: ServiceContext) => Promise<void>;
 } & Partial<KVIncrementCapability>;
 
 export interface KVSetOptions extends KVKeyOptions {

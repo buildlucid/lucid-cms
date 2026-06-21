@@ -113,9 +113,8 @@ const storageUpload =
 						size: data.contentLength,
 						type: "unknown",
 					},
-					context: {
-						tenant,
-					},
+					tenant,
+					context,
 				}),
 				fixedLengthBody.completed.catch((error) => {
 					streamError = error;

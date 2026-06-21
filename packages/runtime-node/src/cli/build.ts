@@ -126,14 +126,15 @@ const startServer = async () => {
 			bundles: i18nTranslations,
 		});
 		const translate = createTranslator({ store: translationStore, locale: "en" });
+		const runtimeContext = getRuntimeContext({
+			compiled: true,
+		});
 
-		const { app, destroy, queue, kv } = await createApp({
+		const { app, destroy, queue, kv, media, email } = await createApp({
 			config: resolved,
 			translationStore,
 			env: env,
-			runtimeContext: getRuntimeContext({
-                compiled: true,
-            }),
+			runtimeContext,
 		});
 
 		const cronJobSetup = await setupCronJobs({
@@ -161,7 +162,10 @@ const startServer = async () => {
 					db: { client: resolved.db.client },
 					queue: queue,
 					env: env,
+					runtimeContext,
 					kv: kv,
+					media,
+					email,
 					request: {
 						url: resolved.host ?? "http://localhost:" + port,
 						locale: resolved.i18n.defaultLocale,

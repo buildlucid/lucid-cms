@@ -24,10 +24,9 @@ const deleteAwaitingSyncMedia: ServiceFn<
 	);
 
 	await mediaStrategyRes.data.delete({
+		context,
 		key: data.key,
-		context: {
-			tenant: resolveMediaKeyTenant(context.config, data.key),
-		},
+		tenant: resolveMediaKeyTenant(context.config, data.key),
 	});
 
 	const deleteRes = await MediaAwaitingSync.deleteSingle({

@@ -22,10 +22,9 @@ const deleteObject: ServiceFn<
 
 	const [_, updateStorageRes] = await Promise.all([
 		mediaStrategyRes.data.delete({
+			context,
 			key: data.key,
-			context: {
-				tenant,
-			},
+			tenant,
 		}),
 		adjustStorageUsage(context, {
 			tenantKey: data.tenantKey ?? null,

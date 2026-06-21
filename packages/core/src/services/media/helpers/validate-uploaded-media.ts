@@ -1,12 +1,15 @@
 import { copy } from "../../../libs/i18n/index.js";
 import type {
-	MediaAdapterServiceContext,
-	MediaAdapterServiceStream,
+	MediaAdapterInstance,
+	MediaAdapterTenant,
 } from "../../../libs/media/types.js";
 import type { MediaType } from "../../../types/response.js";
 import type { FileMetadata } from "../../../utils/media/index.js";
 import { getFileMetadata } from "../../../utils/media/index.js";
-import type { ServiceResponse } from "../../../utils/services/types.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../../utils/services/types.js";
 import detectStreamMimeType from "./detect-stream-mime-type.js";
 
 /**
@@ -14,8 +17,9 @@ import detectStreamMimeType from "./detect-stream-mime-type.js";
  * back to adapter metadata for formats `file-type` cannot identify.
  */
 const validateUploadedMedia = async (props: {
-	stream: MediaAdapterServiceStream;
-	context: MediaAdapterServiceContext;
+	context: ServiceContext;
+	stream: MediaAdapterInstance["stream"];
+	tenant: MediaAdapterTenant;
 	key: string;
 	fileName: string;
 	mimeType: string | null;
@@ -23,9 +27,10 @@ const validateUploadedMedia = async (props: {
 	expectedType?: MediaType;
 }): ServiceResponse<FileMetadata> => {
 	const detectedMimeType = await detectStreamMimeType(
+		props.context,
 		props.stream,
 		props.key,
-		props.context,
+		props.tenant,
 	);
 	const storedMetaRes = await getFileMetadata({
 		mimeType: props.mimeType,

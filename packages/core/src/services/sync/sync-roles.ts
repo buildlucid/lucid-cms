@@ -197,7 +197,7 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 	});
 	if (prunePermissionsRes.error) return prunePermissionsRes;
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	return {
 		error: undefined,

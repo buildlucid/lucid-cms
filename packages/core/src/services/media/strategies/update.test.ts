@@ -122,16 +122,14 @@ describe("media update strategy", () => {
 		expect(response.data?.sourceDeleted).toBe(false);
 		expect(getMeta).toHaveBeenCalledWith({
 			key: "awaiting-sync/marketing/upload",
-			context: {
-				tenant,
-			},
+			tenant,
+			context: expect.any(Object),
 		});
 		expect(mocks.detectStreamMimeType).toHaveBeenCalledWith(
 			stream,
 			"awaiting-sync/marketing/upload",
-			{
-				tenant,
-			},
+			tenant,
+			expect.any(Object),
 		);
 		expect(upload).toHaveBeenCalledWith({
 			key: "public/marketing/original",
@@ -142,15 +140,13 @@ describe("media update strategy", () => {
 				size: 42,
 				type: "image",
 			},
-			context: {
-				tenant,
-			},
+			tenant,
+			context: expect.any(Object),
 		});
 		expect(deleteObject).toHaveBeenCalledWith({
 			key: "awaiting-sync/marketing/upload",
-			context: {
-				tenant,
-			},
+			tenant,
+			context: expect.any(Object),
 		});
 		expect(mocks.adjustInt).toHaveBeenCalledWith(expect.anything(), {
 			name: "media_storage_used:t:marketing",
@@ -211,9 +207,8 @@ describe("media update strategy", () => {
 		expect(response.error?.status).toBe(400);
 		expect(deleteObject).toHaveBeenCalledWith({
 			key: "awaiting-sync/upload",
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: expect.any(Object),
 		});
 	});
 
@@ -312,9 +307,8 @@ describe("media update strategy", () => {
 		expect(rename).not.toHaveBeenCalled();
 		expect(stream).toHaveBeenCalledWith({
 			key: "awaiting-sync/upload",
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: expect.any(Object),
 		});
 		expect(upload).toHaveBeenCalledWith({
 			key: "private/marketing/original",
@@ -325,21 +319,18 @@ describe("media update strategy", () => {
 				size: 42,
 				type: "image",
 			},
-			context: {
-				tenant,
-			},
+			tenant,
+			context: expect.any(Object),
 		});
 		expect(deleteObject).toHaveBeenCalledWith({
 			key: "awaiting-sync/upload",
-			context: {
-				tenant: null,
-			},
+			tenant: null,
+			context: expect.any(Object),
 		});
 		expect(deleteObject).toHaveBeenCalledWith({
 			key: "public/marketing/original",
-			context: {
-				tenant,
-			},
+			tenant,
+			context: expect.any(Object),
 		});
 	});
 });

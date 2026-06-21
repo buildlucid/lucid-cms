@@ -1,11 +1,13 @@
 import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceRenameKey } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
+import { resolveBinding } from "../utils/resolve-binding.js";
 
 const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
 	return async (props) => {
 		try {
-			const source = await pluginOptions.binding.get(props.from);
+			const binding = resolveBinding(props.context, pluginOptions);
+			const source = await binding.get(props.from);
 
 			if (!source) {
 				return {
@@ -29,15 +31,15 @@ const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
 				};
 			}
 
-			await pluginOptions.binding.put(props.to, source.body, {
+			await binding.put(props.to, source.body, {
 				httpMetadata: source.httpMetadata,
 				customMetadata: source.customMetadata,
 				storageClass: source.storageClass,
 			});
 
-			const target = await pluginOptions.binding.head(props.to);
+			const target = await binding.head(props.to);
 			if (!target || target.size !== source.size) {
-				await pluginOptions.binding.delete(props.to);
+				await binding.delete(props.to);
 
 				return {
 					error: {
@@ -49,9 +51,9 @@ const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
 			}
 
 			try {
-				await pluginOptions.binding.delete(props.from);
+				await binding.delete(props.from);
 			} catch (error) {
-				await pluginOptions.binding.delete(props.to);
+				await binding.delete(props.to);
 				throw error;
 			}
 

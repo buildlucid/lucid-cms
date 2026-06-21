@@ -53,7 +53,7 @@ const deleteUser: ServiceFn<
 	});
 	if (deleteRes.error) return deleteRes;
 
-	await invalidateAuthCache(context.kv);
+	await invalidateAuthCache(context);
 
 	return {
 		error: undefined,

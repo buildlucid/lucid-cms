@@ -1,11 +1,12 @@
 import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterServiceDeleteMultiple } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
+import { resolveBinding } from "../utils/resolve-binding.js";
 
 const deleteMultiple = (
 	pluginOptions: PluginOptions,
 ): MediaAdapterServiceDeleteMultiple => {
-	return async ({ keys }) => {
+	return async ({ keys, context }) => {
 		try {
 			if (keys.length === 0) {
 				return {
@@ -14,7 +15,8 @@ const deleteMultiple = (
 				};
 			}
 
-			await pluginOptions.binding.delete(keys);
+			const binding = resolveBinding(context, pluginOptions);
+			await binding.delete(keys);
 
 			return {
 				error: undefined,
