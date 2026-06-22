@@ -1,6 +1,9 @@
 # Lucid CMS - Cloudflare D1 Database Adapter
 > The official Cloudflare D1 database adapter for Lucid CMS
 
+> [!CAUTION]
+> This adapter is currently in beta. D1 does not support Lucid's transaction layer, so failed multi-step writes may leave partial data behind.
+
 The Lucid CMS D1 database adapter allows you to use Cloudflare D1 as your database when running Lucid on Cloudflare Workers.
 
 ## Installation

@@ -1,7 +1,7 @@
 {
-	"name": "@lucidcms/playground",
+	"name": "@lucidcms/node-playground",
 	"private": true,
-	"description": "This is the Lucid playground app used for internal testing.",
+	"description": "Internal Node playground used for Lucid CMS testing.",
 	"main": "src/index.ts",
 	"type": "module",
 	"scripts": {

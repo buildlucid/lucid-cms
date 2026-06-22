@@ -1,7 +1,7 @@
 {
-	"name": "@lucidcms/cloudflare-example",
+	"name": "@lucidcms/cloudflare-playground",
 	"private": true,
-	"description": "This is the Lucid CMS Cloudflare example app",
+	"description": "Internal Cloudflare playground used for Lucid CMS testing.",
 	"main": "src/index.ts",
 	"type": "module",
 	"scripts": {
@@ -18,18 +18,18 @@
 		"wrangler:deploy": "npm run build && wrangler deploy"
 	},
 	"dependencies": {
-		"@lucidcms/runtime-cloudflare": "1.0.0",
-		"@lucidcms/core": "0.12.0-alpha.1",
-		"@lucidcms/db-d1": "1.0.0",
-		"@lucidcms/plugin-cloudflare-kv": "1.0.0",
-		"@lucidcms/plugin-cloudflare-r2": "1.0.0",
-		"@lucidcms/plugin-pages": "0.3.3"
+		"@lucidcms/runtime-cloudflare": "*",
+		"@lucidcms/core": "*",
+		"@lucidcms/db-d1": "*",
+		"@lucidcms/plugin-cloudflare-kv": "*",
+		"@lucidcms/plugin-cloudflare-r2": "*",
+		"@lucidcms/plugin-pages": "*"
 	},
 	"author": "Lucid",
 	"license": "MIT",
 	"devDependencies": {
-		"typescript": "^5.9.3",
-		"wrangler": "^4.82.2"
+		"typescript": "*",
+		"wrangler": "*"
 	},
 	"volta": {
 		"node": "24.11.1"

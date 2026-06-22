@@ -3,9 +3,9 @@
 	"scripts": {
 		"start": "turbo run start",
 		"build": "turbo run build",
-		"dev:full": "turbo dev --filter=@lucidcms/playground --filter=@lucidcms/admin --filter=@lucidcms/core",
-		"dev:core": "turbo dev --filter=@lucidcms/playground --filter=@lucidcms/core",
-		"dev:cms": "turbo dev --filter=@lucidcms/playground --filter=@lucidcms/admin",
+		"dev:full": "turbo dev --filter=@lucidcms/node-playground --filter=@lucidcms/admin --filter=@lucidcms/core",
+		"dev:core": "turbo dev --filter=@lucidcms/node-playground --filter=@lucidcms/core",
+		"dev:cms": "turbo dev --filter=@lucidcms/node-playground --filter=@lucidcms/admin",
 		"test": "vitest run --test-timeout=0 --hook-timeout=0 --silent",
 		"test:watch": "vitest watch --test-timeout=0 --hook-timeout=0",
 		"format": "turbo run format",
@@ -28,8 +28,7 @@
 	"packageManager": "npm@10.2.4",
 	"workspaces": [
 		"apps/*",
-		"packages/*",
-		"examples/*"
+		"packages/*"
 	],
 	"volta": {
 		"node": "24.11.1"

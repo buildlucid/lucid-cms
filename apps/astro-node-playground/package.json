@@ -1,7 +1,7 @@
 {
-	"name": "@lucidcms/astro-node-example",
+	"name": "@lucidcms/astro-node-playground",
 	"private": true,
-	"description": "This is the Lucid CMS Astro Node example app",
+	"description": "Internal Astro Node playground used for Lucid CMS testing.",
 	"type": "module",
 	"version": "0.0.1",
 	"scripts": {
@@ -17,16 +17,16 @@
 		"migrate:fresh": "lucidcms migrate:fresh"
 	},
 	"dependencies": {
-		"astro": "^6.1.6",
-		"@astrojs/node": "^10.0.4",
-		"@lucidcms/astro": "0.12.0-alpha.1",
-		"@lucidcms/client": "0.1.0",
-		"@lucidcms/core": "0.12.0-alpha.1",
-		"@lucidcms/runtime-node": "1.0.0",
-		"@lucidcms/plugin-filesystem": "1.0.0",
-		"@lucidcms/db-sqlite": "1.0.0",
-		"@lucidcms/plugin-sqlite-kv": "1.0.0",
-		"@lucidcms/plugin-pages": "0.3.3"
+		"astro": "*",
+		"@astrojs/node": "*",
+		"@lucidcms/astro": "*",
+		"@lucidcms/client": "*",
+		"@lucidcms/core": "*",
+		"@lucidcms/runtime-node": "*",
+		"@lucidcms/plugin-filesystem": "*",
+		"@lucidcms/db-sqlite": "*",
+		"@lucidcms/plugin-sqlite-kv": "*",
+		"@lucidcms/plugin-pages": "*"
 	},
 	"author": "Lucid",
 	"license": "MIT",

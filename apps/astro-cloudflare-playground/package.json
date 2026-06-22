@@ -1,7 +1,7 @@
 {
-	"name": "@lucidcms/astro-cloudflare-example",
+	"name": "@lucidcms/astro-cloudflare-playground",
 	"private": true,
-	"description": "This is the Lucid CMS Astro Cloudflare example app",
+	"description": "Internal Astro Cloudflare playground used for Lucid CMS testing.",
 	"type": "module",
 	"version": "0.0.1",
 	"scripts": {
@@ -19,19 +19,19 @@
 		"migrate:fresh": "lucidcms migrate:fresh"
 	},
 	"dependencies": {
-		"astro": "^6.1.6",
-		"@astrojs/cloudflare": "^13.1.9",
-		"@lucidcms/core": "0.12.0-alpha.1",
-		"@lucidcms/astro": "0.12.0-alpha.1",
-		"@lucidcms/client": "0.1.0",
-		"@lucidcms/runtime-cloudflare": "1.0.0",
-		"@lucidcms/db-d1": "1.0.0",
-		"@lucidcms/plugin-cloudflare-kv": "1.0.0",
-		"@lucidcms/plugin-cloudflare-r2": "1.0.0",
-		"@lucidcms/plugin-pages": "0.3.3"
+		"astro": "*",
+		"@astrojs/cloudflare": "*",
+		"@lucidcms/core": "*",
+		"@lucidcms/astro": "*",
+		"@lucidcms/client": "*",
+		"@lucidcms/runtime-cloudflare": "*",
+		"@lucidcms/db-d1": "*",
+		"@lucidcms/plugin-cloudflare-kv": "*",
+		"@lucidcms/plugin-cloudflare-r2": "*",
+		"@lucidcms/plugin-pages": "*"
 	},
 	"devDependencies": {
-		"wrangler": "^4.82.2"
+		"wrangler": "*"
 	},
 	"author": "Lucid",
 	"license": "MIT",
