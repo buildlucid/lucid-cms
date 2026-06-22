@@ -42,6 +42,7 @@ const migrateCommand = (props?: {
 		skipSyncSteps?: boolean;
 		skipEnvValidation?: boolean;
 		force?: boolean;
+		remote?: boolean;
 	}) => {
 		let config: Config | undefined;
 		let env: EnvironmentVariables | undefined = props?.env;

@@ -1,0 +1,13 @@
+node_modules
+.lucid
+.dev.vars
+.wrangler
+dist
+db.sqlite
+db.sqlite-shm
+db.sqlite-wal
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp

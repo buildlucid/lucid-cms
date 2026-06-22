@@ -10,6 +10,7 @@ import type {
 	CloudflareRuntimeAdapter,
 	PreparedWranglerConfig,
 } from "../types.js";
+import shouldUseRemoteBindings from "../utils/remote-bindings.js";
 import getEnvVars from "./get-env-vars.js";
 import writeWranglerConfig from "./write-wrangler-config.js";
 
@@ -23,7 +24,7 @@ const getPlatformProxyOptions = (
 	return {
 		...(configPath ? { configPath } : {}),
 		...(options?.environment ? { environment: options.environment } : {}),
-		remoteBindings: false,
+		remoteBindings: shouldUseRemoteBindings(),
 	};
 };
 

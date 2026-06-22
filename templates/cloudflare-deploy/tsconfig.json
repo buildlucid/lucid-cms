@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"resolveJsonModule": true,
+		"target": "ESNext",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"noImplicitAny": false,
+		"skipLibCheck": true,
+		"types": ["@cloudflare/workers-types"],
+		"outDir": "dist"
+	},
+	"include": ["lucid.config.ts", "src/**/*"],
+	"exclude": ["node_modules"]
+}

@@ -5,6 +5,12 @@ The Lucid CMS Cloudflare Workers runtime allows you to deploy your CMS to Cloudf
 
 Using this runtime is by far the simplest way to deploy Lucid CMS.
 
+## One-click Deploy
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/buildlucid/lucid-cms/tree/master/templates/cloudflare-deploy)
+
+Use the Cloudflare deploy template to deploy a Lucid CMS Worker with D1, KV, R2, and the Pages plugin.
+
 ## Installation
 
 ```bash
@@ -83,6 +89,14 @@ After building, you can deploy with:
 ```bash
 wrangler deploy
 ```
+
+For CLI commands that need to use remote Cloudflare resources, pass `--remote`:
+
+```bash
+lucidcms migrate --force --remote
+```
+
+The `--remote` flag tells the Cloudflare runtime to load remote bindings through Wrangler's platform proxy while that command runs.
 
 If you already own a Wrangler config, pass its path to `wrangler`. Lucid will use that config for local Cloudflare env/binding loading and will not generate `wrangler.lucid.jsonc` or merge binding artifacts into your file:
 

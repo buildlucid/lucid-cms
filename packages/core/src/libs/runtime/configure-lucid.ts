@@ -21,15 +21,10 @@ type LucidConfigDefinitionWithEnv<TEnvSchema extends EnvironmentSchema> =
  *   runtime: node,
  *   db: sqlite,
  *   env: z.object({
- *     SECRET: z.string(),
+ *     SECRET: z.string().length(64),
  *   }),
  *   config: (env) => ({
- *     secrets: {
- *       encryption: env.SECRET,
- *       cookie: env.SECRET,
- *       refreshToken: env.SECRET,
- *       accessToken: env.SECRET,
- *     },
+ *     secrets: env.SECRET,
  *     collections: [],
  *     plugins: [],
  *   }),

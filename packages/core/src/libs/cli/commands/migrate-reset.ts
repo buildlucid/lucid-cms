@@ -21,7 +21,7 @@ const migrateResetCommand = (props?: {
 	translationStore?: TranslationStore;
 	mode: "process" | "return";
 }) => {
-	return async (options?: { force?: boolean }) => {
+	return async (options?: { force?: boolean; remote?: boolean }) => {
 		let kvInstance: KVAdapterInstance | undefined;
 		let config: Config | undefined;
 		let env: EnvironmentVariables | undefined = props?.env;

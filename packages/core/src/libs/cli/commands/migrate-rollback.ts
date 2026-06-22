@@ -18,6 +18,7 @@ import validateEnvVars from "../services/validate-env-vars.js";
 
 const migrateRollbackCommand = async (options?: {
 	force?: boolean;
+	remote?: boolean;
 	steps?: number;
 }) => {
 	let kvInstance: KVAdapterInstance | undefined;

@@ -235,6 +235,25 @@ export type AiFeatureConfig = {
 	customFieldGeneration?: boolean;
 };
 
+export type SecretConfig = {
+	/**
+	 * Used to encrypt user secrets and API keys. Must be `64 characters` long.
+	 */
+	encryption: string;
+	/**
+	 * Used to sign cookies. Must be `64 characters` long.
+	 */
+	cookie: string;
+	/**
+	 * Used to sign the access token JWT. Must be `64 characters` long.
+	 */
+	accessToken: string;
+	/**
+	 * Used to sign the refresh token JWT. Must be `64 characters` long.
+	 */
+	refreshToken: string;
+};
+
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
 	/**
@@ -294,26 +313,10 @@ export interface LucidConfig {
 	 */
 	host?: string;
 	/**
-	 * `64 character` length secrets to encrypt and sign data.
+	 * A single `64 character` root secret, or separate `64 character` secrets
+	 * to encrypt and sign data.
 	 */
-	secrets: {
-		/**
-		 * Used to encrypt user secrets and API keys. Must be `64 characters` long.
-		 */
-		encryption: string;
-		/**
-		 * Used to sign cookies. Must be `64 characters` long.
-		 */
-		cookie: string;
-		/**
-		 * Used to sign the access token JWT. Must be `64 characters` long.
-		 */
-		accessToken: string;
-		/**
-		 * Used to sign the refresh token JWT. Must be `64 characters` long.
-		 */
-		refreshToken: string;
-	};
+	secrets: string | SecretConfig;
 	/**
 	 * The logger configuration
 	 */
@@ -601,6 +604,7 @@ export interface LucidConfig {
 
 export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
+	secrets: SecretConfig;
 	kv?: {
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
 		/**

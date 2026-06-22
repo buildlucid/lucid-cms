@@ -14,7 +14,10 @@ import cliLogger from "../logger.js";
 import runSyncTasks from "../services/run-sync-tasks.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
-const syncCommand = async (options?: { skipEnvValidation?: boolean }) => {
+const syncCommand = async (options?: {
+	skipEnvValidation?: boolean;
+	remote?: boolean;
+}) => {
 	let kvInstance: KVAdapterInstance | undefined;
 	let config: Config | undefined;
 	let env: EnvironmentVariables | undefined;

@@ -1,0 +1,1 @@
+LUCID_SECRET="" # Generate with: openssl rand -hex 32

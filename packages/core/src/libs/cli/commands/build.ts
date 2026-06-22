@@ -21,6 +21,7 @@ import copyPublicAssets from "../services/copy-public-assets.js";
 const buildCommand = async (options?: {
 	cacheSpa?: boolean;
 	silent?: boolean;
+	remote?: boolean;
 }) => {
 	logger.setBuffering(true);
 	const startTime = cliLogger.startTimer();

@@ -17,7 +17,10 @@ import updateAvailable from "../services/update-available.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
 
-const devCommand = async (options?: { watch?: string | boolean }) => {
+const devCommand = async (options?: {
+	watch?: string | boolean;
+	remote?: boolean;
+}) => {
 	const configPath = getConfigPath(process.cwd());
 
 	const coreUpdateAvailable = updateAvailable();

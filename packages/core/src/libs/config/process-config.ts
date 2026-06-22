@@ -19,6 +19,7 @@ import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import checkTenants from "./checks/check-tenants.js";
 import ConfigSchema from "./config-schema.js";
 import mergeConfig from "./merge-config.js";
+import normalizeSecrets from "./normalize-secrets.js";
 
 let cachedConfig: Config | undefined;
 
@@ -60,9 +61,17 @@ const processConfig = async (
 	Object.assign(configRes, {
 		db: options.resolvedDb,
 	});
+	configRes = produce(configRes, (draft) => {
+		draft.secrets = normalizeSecrets((draft as unknown as LucidConfig).secrets);
+	});
 
 	if (options?.recipe) {
 		configRes = produce(configRes, options.recipe);
+		configRes = produce(configRes, (draft) => {
+			draft.secrets = normalizeSecrets(
+				(draft as unknown as LucidConfig).secrets,
+			);
+		});
 	}
 
 	const userTranslationSources = [...(configRes.i18n.sources ?? [])];

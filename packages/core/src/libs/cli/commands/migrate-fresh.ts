@@ -4,7 +4,10 @@ import cliLogger from "../logger.js";
 import migrateCommand from "./migrate.js";
 import migrateResetCommand from "./migrate-reset.js";
 
-const migrateFreshCommand = async (options?: { force?: boolean }) => {
+const migrateFreshCommand = async (options?: {
+	force?: boolean;
+	remote?: boolean;
+}) => {
 	try {
 		logger.setBuffering(true);
 		const startTime = cliLogger.startTimer();
