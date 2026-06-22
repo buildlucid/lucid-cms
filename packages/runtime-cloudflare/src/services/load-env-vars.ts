@@ -1,9 +1,9 @@
-import path from "node:path";
 import type {
 	EnvironmentVariables,
 	GetEnvVarsLogger,
 	RuntimePrepareArtifacts,
 } from "@lucidcms/core/types";
+import type { GetPlatformProxyOptions } from "wrangler";
 import type {
 	AdapterOptions,
 	CloudflareAdapterOptionsValue,
@@ -13,48 +13,17 @@ import type {
 import getEnvVars from "./get-env-vars.js";
 import writeWranglerConfig from "./write-wrangler-config.js";
 
-/** Mirrors Wrangler's local env file lookup when Lucid supplies a generated config. */
-const getPreparedEnvFiles = (
-	projectRoot: string | undefined,
-	environment: string | undefined,
-): string[] | undefined => {
-	if (!projectRoot) return undefined;
-
-	return [
-		path.resolve(projectRoot, ".env"),
-		path.resolve(projectRoot, ".env.local"),
-		...(environment
-			? [
-					path.resolve(projectRoot, `.env.${environment}`),
-					path.resolve(projectRoot, `.env.${environment}.local`),
-				]
-			: []),
-		path.resolve(projectRoot, ".dev.vars"),
-		...(environment
-			? [path.resolve(projectRoot, `.dev.vars.${environment}`)]
-			: []),
-	];
-};
-
-/** Points platform-proxy at Lucid's prepared Wrangler config when one exists. */
-const withPreparedConfig = (
+/** Converts Lucid runtime config into the Wrangler platform-proxy options. */
+const getPlatformProxyOptions = (
 	options: AdapterOptions | undefined,
 	prepared: PreparedWranglerConfig | undefined,
-): AdapterOptions | undefined => {
-	if (!prepared) return options;
-	const environment = options?.platformProxy?.environment;
+): GetPlatformProxyOptions => {
+	const configPath = prepared?.wranglerConfigPath ?? options?.wrangler;
 
 	return {
-		...(options ?? {}),
-		platformProxy: {
-			...(options?.platformProxy ?? {}),
-			configPath:
-				options?.platformProxy?.configPath ?? prepared.generatedConfigPath,
-			envFiles:
-				options?.platformProxy?.envFiles ??
-				getPreparedEnvFiles(prepared.projectRoot, environment),
-			remoteBindings: options?.platformProxy?.remoteBindings ?? false,
-		},
+		...(configPath ? { configPath } : {}),
+		...(options?.environment ? { environment: options.environment } : {}),
+		remoteBindings: false,
 	};
 };
 
@@ -65,20 +34,20 @@ const rewritePreparedWranglerConfig = async (
 	prepareArtifacts: RuntimePrepareArtifacts | undefined,
 ): Promise<PreparedWranglerConfig | undefined> => {
 	if (!prepared) return undefined;
-	const outputPath = path.dirname(prepared.generatedConfigPath);
 	const result = await writeWranglerConfig({
-		configPath: prepared.configPath,
-		outputPath,
+		configPath: prepared.lucidConfigPath,
+		outputPath: prepared.projectRoot,
 		options,
 		prepareArtifacts,
 		target: "prepare",
 	});
 
-	if (!result.generatedConfigPath) return undefined;
+	if (!result.configPath) return undefined;
 
 	return {
 		...prepared,
-		generatedConfigPath: result.generatedConfigPath,
+		wranglerConfigPath: result.configPath,
+		generated: result.generated,
 		prepareArtifacts: prepareArtifacts ?? prepared.prepareArtifacts,
 	};
 };
@@ -89,7 +58,7 @@ const shouldReloadAfterResolve = (
 	resolvedOptions: AdapterOptions | undefined,
 ) =>
 	typeof optionsValue === "function" &&
-	(resolvedOptions?.platformProxy !== undefined ||
+	(resolvedOptions?.environment !== undefined ||
 		resolvedOptions?.bindings !== undefined ||
 		resolvedOptions?.worker !== undefined ||
 		resolvedOptions?.wrangler !== undefined);
@@ -110,13 +79,12 @@ const loadEnvVars = async (props: {
 	await props.runtime.getPlatformProxy()?.dispose?.();
 	props.runtime.setPlatformProxy(undefined);
 
-	const initialOptions = withPreparedConfig(
-		typeof props.optionsValue === "function" ? undefined : props.optionsValue,
-		props.prepared,
-	);
 	const initialResult = await getEnvVars({
 		logger: props.logger,
-		options: initialOptions,
+		platformProxy: getPlatformProxyOptions(
+			typeof props.optionsValue === "function" ? undefined : props.optionsValue,
+			props.prepared,
+		),
 	});
 
 	await props.runtime.resolveOptions(initialResult.env);
@@ -132,7 +100,7 @@ const loadEnvVars = async (props: {
 		props.setPreparedWranglerConfig(prepared);
 		const resolvedResult = await getEnvVars({
 			logger: props.logger,
-			options: withPreparedConfig(resolvedOptions, prepared),
+			platformProxy: getPlatformProxyOptions(resolvedOptions, prepared),
 		});
 		props.runtime.setPlatformProxy(resolvedResult.platformProxy);
 		return resolvedResult.env;

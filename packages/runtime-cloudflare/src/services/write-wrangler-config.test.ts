@@ -1,6 +1,7 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { parse as parseJsonc } from "jsonc-parser";
 import { afterEach, describe, expect, test } from "vitest";
 import constants from "../constants.js";
 import writeWranglerConfig from "./write-wrangler-config.js";
@@ -15,12 +16,13 @@ const createProject = async () => {
 	return {
 		projectRoot,
 		configPath,
-		outputPath: path.join(projectRoot, "dist"),
+		outputPath: projectRoot,
+		buildOutputPath: path.join(projectRoot, "dist"),
 	};
 };
 
 const readGeneratedConfig = async (filepath: string) =>
-	JSON.parse(await readFile(filepath, "utf-8"));
+	parseJsonc(await readFile(filepath, "utf-8"));
 
 afterEach(async () => {
 	await Promise.all(
@@ -69,6 +71,9 @@ describe("writeWranglerConfig", () => {
 			},
 		});
 
+		expect(path.basename(result.generatedConfigPath ?? "")).toBe(
+			constants.WRANGLER_DEV_CONFIG_FILE,
+		);
 		const config = await readGeneratedConfig(result.generatedConfigPath ?? "");
 
 		expect(config.d1_databases).toEqual([
@@ -145,18 +150,110 @@ describe("writeWranglerConfig", () => {
 		]);
 	});
 
-	test("skips generation when wrangler is false", async () => {
+	test("uses manual Wrangler config paths without generating", async () => {
 		const project = await createProject();
+		const manualConfigPath = path.join(project.projectRoot, "wrangler.jsonc");
+		const generatedConfigPath = path.join(
+			project.projectRoot,
+			constants.WRANGLER_DEV_CONFIG_FILE,
+		);
+		await writeFile(manualConfigPath, "{}");
+		await writeFile(
+			generatedConfigPath,
+			`// ${constants.WRANGLER_GENERATED_CONFIG_MARKER}\n{}\n`,
+		);
+
+		const result = await writeWranglerConfig({
+			configPath: project.configPath,
+			outputPath: project.outputPath,
+			target: "prepare",
+			options: {
+				wrangler: "./wrangler.jsonc",
+			},
+		});
+
+		expect(result).toEqual({
+			configPath: manualConfigPath,
+			generated: false,
+		});
+		await expect(readFile(generatedConfigPath, "utf-8")).rejects.toThrow();
+	});
+
+	test("does not delete the generated path when it is supplied as manual config", async () => {
+		const project = await createProject();
+		const generatedConfigPath = path.join(
+			project.projectRoot,
+			constants.WRANGLER_DEV_CONFIG_FILE,
+		);
+		await writeFile(generatedConfigPath, "{}");
+
+		const result = await writeWranglerConfig({
+			configPath: project.configPath,
+			outputPath: project.outputPath,
+			target: "prepare",
+			options: {
+				wrangler: "./wrangler.lucid.jsonc",
+			},
+		});
+
+		expect(result).toEqual({
+			configPath: generatedConfigPath,
+			generated: false,
+		});
+		expect(await readFile(generatedConfigPath, "utf-8")).toBe("{}");
+	});
+
+	test("rejects overwriting an unmarked root generated config", async () => {
+		const project = await createProject();
+		await writeFile(
+			path.join(project.projectRoot, constants.WRANGLER_DEV_CONFIG_FILE),
+			"{}",
+		);
 
 		await expect(
 			writeWranglerConfig({
 				configPath: project.configPath,
 				outputPath: project.outputPath,
 				target: "prepare",
-				options: {
-					wrangler: false,
-				},
 			}),
-		).resolves.toEqual({});
+		).rejects.toThrow("does not include Lucid's generated-file marker");
+	});
+
+	test("removes stale build deploy redirects in manual mode", async () => {
+		const project = await createProject();
+		const deployConfigPath = path.join(
+			project.projectRoot,
+			constants.WRANGLER_DEPLOY_CONFIG_FILE,
+		);
+		const deployConfigDirectory = path.dirname(deployConfigPath);
+		await mkdir(deployConfigDirectory, { recursive: true });
+		await writeFile(path.join(project.projectRoot, "wrangler.jsonc"), "{}");
+		await writeFile(
+			deployConfigPath,
+			JSON.stringify({
+				configPath: path.relative(
+					deployConfigDirectory,
+					path.join(
+						project.buildOutputPath,
+						constants.WRANGLER_BUILD_CONFIG_FILE,
+					),
+				),
+			}),
+		);
+
+		const result = await writeWranglerConfig({
+			configPath: project.configPath,
+			outputPath: project.buildOutputPath,
+			target: "build",
+			options: {
+				wrangler: "./wrangler.jsonc",
+			},
+		});
+
+		expect(result).toEqual({
+			configPath: path.join(project.projectRoot, "wrangler.jsonc"),
+			generated: false,
+		});
+		await expect(readFile(deployConfigPath, "utf-8")).rejects.toThrow();
 	});
 });

@@ -107,8 +107,8 @@ const serveCommand =
 		}
 		const server = serve({
 			fetch: app.fetch,
-			port: options?.server?.port ?? 6543,
-			hostname: options?.server?.hostname,
+			port: options?.dev?.port ?? 6543,
+			hostname: options?.dev?.hostname,
 		});
 
 		server.on("listening", () => {

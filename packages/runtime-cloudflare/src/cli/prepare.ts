@@ -16,7 +16,8 @@ const prepareCommand =
 		},
 	): PrepareHandler =>
 	async (props) => {
-		const outputPath = path.resolve(path.dirname(props.configPath), ".lucid");
+		const outputPath = path.resolve(path.dirname(props.configPath));
+
 		const wranglerConfig = await writeWranglerConfig({
 			configPath: props.configPath,
 			outputPath,
@@ -25,17 +26,22 @@ const prepareCommand =
 			target: "prepare",
 		});
 
-		if (!wranglerConfig.generatedConfigPath) {
+		if (!wranglerConfig.configPath) {
 			prepareState.setPreparedWranglerConfig(undefined);
 			return;
 		}
 
 		prepareState.setPreparedWranglerConfig({
-			configPath: props.configPath,
-			generatedConfigPath: wranglerConfig.generatedConfigPath,
+			lucidConfigPath: props.configPath,
+			wranglerConfigPath: wranglerConfig.configPath,
+			generated: wranglerConfig.generated,
 			projectRoot: props.projectRoot,
 			prepareArtifacts: props.prepareArtifacts,
 		});
+
+		if (!wranglerConfig.generatedConfigPath) {
+			return;
+		}
 
 		props.logger.instance.info(
 			"Wrangler config generated:",

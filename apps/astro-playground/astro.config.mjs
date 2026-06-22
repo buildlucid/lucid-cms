@@ -7,9 +7,8 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
 	output: "server",
 	adapter: cloudflare({
-		configPath: "./.lucid/wrangler.jsonc",
+		configPath: "./wrangler.lucid.jsonc",
 		imageService: "passthrough",
-		prerenderEnvironment: "node",
 		sessionKVBindingName: "LUCID_KV",
 	}),
 	integrations: [lucidCMS()],

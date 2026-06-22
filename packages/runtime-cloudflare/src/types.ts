@@ -3,7 +3,7 @@ import type {
 	RuntimeAdapter,
 	RuntimePrepareArtifacts,
 } from "@lucidcms/core/types";
-import type { GetPlatformProxyOptions, PlatformProxy } from "wrangler";
+import type { PlatformProxy } from "wrangler";
 
 export type CloudflareWorkerImport = {
 	path: string;
@@ -34,24 +34,19 @@ export type CloudflareWranglerConfigArtifact = {
 };
 
 export type AdapterOptions = {
-	platformProxy?: GetPlatformProxyOptions;
-	server?: {
+	/**
+	 * Wrangler environment used when Lucid loads local Cloudflare bindings and env.
+	 */
+	environment?: string;
+	dev?: {
 		port?: number;
 		hostname?: string;
 	};
 	/**
-	 * Generate a Wrangler deployment config. Defaults to true. Set false if you
-	 * fully own Wrangler config outside Lucid.
+	 * Path to a user-owned Wrangler config. Omit this to let Lucid generate
+	 * `wrangler.lucid.jsonc` at the project root.
 	 */
-	wrangler?:
-		| boolean
-		| {
-				/**
-				 * Optional source Wrangler config to merge into the generated config.
-				 * Relative paths resolve from the Lucid config directory.
-				 */
-				configPath?: string;
-		  };
+	wrangler?: string;
 	/**
 	 * Explicit Cloudflare bindings Lucid should generate in the Wrangler config.
 	 * Cloudflare-aware plugins and adapters can also provide these automatically.
@@ -59,12 +54,12 @@ export type AdapterOptions = {
 	bindings?: CloudflareBindingsOptions;
 	worker?: {
 		/**
-		 * The generated Worker name. Defaults to the source Wrangler config name,
-		 * package name, or project directory name.
+		 * The generated Worker name. Defaults to the package name or project
+		 * directory name.
 		 */
 		name?: string;
 		/**
-		 * Defaults to today's date if the source Wrangler config does not provide one.
+		 * Defaults to today's date.
 		 */
 		compatibilityDate?: string;
 		/**
@@ -125,8 +120,9 @@ export type CloudflareAdapterOptionsValue =
 	| CloudflareAdapterOptionsFactory;
 
 export type PreparedWranglerConfig = {
-	configPath: string;
-	generatedConfigPath: string;
+	lucidConfigPath: string;
+	wranglerConfigPath: string;
+	generated: boolean;
 	projectRoot: string;
 	prepareArtifacts: RuntimePrepareArtifacts;
 };

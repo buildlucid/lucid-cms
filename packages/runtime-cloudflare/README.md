@@ -35,16 +35,17 @@ The `cloudflare` function accepts a single parameter, `options`, which is either
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `platformProxy` | `GetPlatformProxyOptions` | A Wrangler platform proxy options object |
-| `server` | `{ port?: number; hostname?: string }` | The server options. The `lucidcms dev` script uses these when serving the local Node server |
-| `wrangler` | `boolean \| { configPath?: string }` | Controls generated Wrangler config output. Generation is enabled by default. Set to `false` to fully own Wrangler config |
+| `environment` | `string` | Wrangler environment used when Lucid loads local Cloudflare bindings and env |
+| `dev` | `{ port?: number; hostname?: string }` | Local Lucid dev server listen options |
+| `wrangler` | `string` | Path to a user-owned Wrangler config. Omit this to let Lucid generate `wrangler.lucid.jsonc` |
 | `bindings` | `object` | Explicit Cloudflare bindings to generate or override. Passing `true` for a binding uses Lucid's default binding name |
 | `worker` | `{ name?: string; compatibilityDate?: string; compatibilityFlags?: string[]; crons?: string[] }` | Worker config that Lucid writes into the generated Wrangler config |
 
 ```typescript
 export default configureLucid({
 	runtime: cloudflare((env) => ({
-		server: {
+		environment: "staging",
+		dev: {
 			port: Number(env.PORT ?? 6543),
 		},
 	})),
@@ -57,15 +58,15 @@ export default configureLucid({
 
 ## Wrangler Configuration
 
-The Cloudflare runtime generates a deploy-ready Wrangler config by default during `lucidcms build`.
-
-For local CLI commands that need Cloudflare bindings, Lucid writes a temporary Wrangler config to:
+The Cloudflare runtime generates Wrangler config by default. During local prepare steps, Lucid writes:
 
 ```text
-.lucid/wrangler.jsonc
+wrangler.lucid.jsonc
 ```
 
-The generated config is written to your build output directory:
+This file is generated, should be added to `.gitignore`, and is overwritten by Lucid when the Cloudflare runtime prepares. It lives at the project root so Wrangler, Astro's Cloudflare adapter, and other Cloudflare tools keep their normal root `.dev.vars` and `.env` lookup behavior.
+
+During `lucidcms build`, Lucid writes a deploy-ready Wrangler config to your build output directory:
 
 ```text
 dist/wrangler.jsonc
@@ -83,7 +84,21 @@ After building, you can deploy with:
 wrangler deploy
 ```
 
-If you already have a `wrangler.jsonc`, `wrangler.json`, or `wrangler.toml`, Lucid treats it as source config and merges it into the generated output. Lucid owns the required Worker entry, assets binding, Node compatibility flag, and default cron triggers in the generated config.
+If you already own a Wrangler config, pass its path to `wrangler`. Lucid will use that config for local Cloudflare env/binding loading and will not generate `wrangler.lucid.jsonc` or merge binding artifacts into your file:
+
+```typescript
+export default configureLucid({
+	runtime: cloudflare({
+		wrangler: "./wrangler.jsonc",
+	}),
+	db: libsql,
+	config: () => ({
+		// ...other config
+	}),
+});
+```
+
+Manual Wrangler mode means you own the bindings and deploy config. Lucid removes its old `wrangler.lucid.jsonc` only when the file is marked as Lucid-generated.
 
 Cloudflare-aware Lucid packages can ask the runtime to generate their Wrangler bindings. For example, `db: d1`, `cloudflareKVPlugin()`, `cloudflareR2Plugin()`, and `cloudflareQueuesPlugin()` generate the matching D1, KV, R2, and Queue bindings with Lucid's convention names. Pass binding/resource details to the plugin or adapter that owns the feature:
 
@@ -118,20 +133,6 @@ export default configureLucid({
 				bucketName: "lucid-media",
 			},
 		},
-	}),
-	db: libsql,
-	config: () => ({
-		// ...other config
-	}),
-});
-```
-
-To disable generation and fully own your Wrangler config, pass:
-
-```typescript
-export default configureLucid({
-	runtime: cloudflare({
-		wrangler: false,
 	}),
 	db: libsql,
 	config: () => ({

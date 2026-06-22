@@ -58,7 +58,6 @@
 		"@hono/node-server": "^1.19.9",
 		"jsonc-parser": "^3.3.1",
 		"rolldown": "^1.0.0-rc.6",
-		"smol-toml": "^1.6.1",
 		"wrangler": "^4.69.0"
 	},
 	"peerDependencies": {

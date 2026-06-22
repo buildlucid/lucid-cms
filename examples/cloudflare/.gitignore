@@ -5,6 +5,7 @@ db.sqlite-wal
 /.env.keys
 /.lucid
 /.dev.vars
+wrangler.lucid.jsonc
 /dist
 /.wrangler
 .DS_Store

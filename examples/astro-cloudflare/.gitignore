@@ -26,6 +26,7 @@ pnpm-debug.log*
 
 # wrangler
 .wrangler/
+wrangler.lucid.jsonc
 
 # lucid cms
 ./uploads

@@ -1,10 +1,8 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import type { RuntimePrepareArtifacts } from "@lucidcms/core/types";
-import { parse as parseJsonc } from "jsonc-parser";
-import { parse as parseToml } from "smol-toml";
 import constants from "../constants.js";
 import type {
 	AdapterOptions,
@@ -18,6 +16,12 @@ import {
 
 type WranglerConfig = Record<string, unknown>;
 type WranglerConfigTarget = "build" | "prepare";
+type WriteWranglerConfigResult = {
+	configPath?: string;
+	generatedConfigPath?: string;
+	deployConfigPath?: string;
+	generated: boolean;
+};
 const require = createRequire(import.meta.url);
 
 const toPosix = (value: string) => value.split(path.sep).join("/");
@@ -54,11 +58,6 @@ const mergeObject = (
 	return result;
 };
 
-const withoutEnv = (config: WranglerConfig): WranglerConfig => {
-	const { env: _env, ...rest } = config;
-	return rest;
-};
-
 const readJsonFile = async (
 	filepath: string,
 ): Promise<WranglerConfig | null> => {
@@ -72,70 +71,92 @@ const readJsonFile = async (
 };
 
 /**
- * Finds an existing user Wrangler config so Lucid can extend it instead of
- * forcing all config to live in `lucid.config`.
+ * Resolves user-owned Wrangler config paths from the project root, matching
+ * the convention Lucid uses for generated root-level config.
  */
-const findSourceConfigPath = async (props: {
+const resolveManualWranglerConfigPath = (props: {
 	projectRoot: string;
-	configPath?: string;
-}): Promise<string | undefined> => {
-	if (props.configPath) {
-		return path.isAbsolute(props.configPath)
-			? props.configPath
-			: path.resolve(props.projectRoot, props.configPath);
-	}
+	configPath: string;
+}) =>
+	path.isAbsolute(props.configPath)
+		? props.configPath
+		: path.resolve(props.projectRoot, props.configPath);
 
-	const candidates = ["wrangler.jsonc", "wrangler.json", "wrangler.toml"];
-	for (const candidate of candidates) {
-		const filepath = path.resolve(props.projectRoot, candidate);
-		try {
-			await readFile(filepath, "utf-8");
-			return filepath;
-		} catch {
-			// Continue checking the remaining supported Wrangler config names.
-		}
-	}
+const getGeneratedConfigPath = (props: {
+	outputPath: string;
+	target: WranglerConfigTarget;
+}) =>
+	path.resolve(
+		props.outputPath,
+		props.target === "prepare"
+			? constants.WRANGLER_DEV_CONFIG_FILE
+			: constants.WRANGLER_BUILD_CONFIG_FILE,
+	);
 
-	return undefined;
+const readFileIfExists = async (filepath: string) => {
+	try {
+		return await readFile(filepath, "utf-8");
+	} catch {
+		return undefined;
+	}
+};
+
+const hasGeneratedConfigMarker = (content: string) =>
+	content.includes(constants.WRANGLER_GENERATED_CONFIG_MARKER);
+
+/**
+ * Root generated config is user-visible, so Lucid refuses to overwrite files
+ * it cannot positively identify as its own generated output.
+ */
+const assertCanWriteGeneratedConfig = async (filepath: string) => {
+	const content = await readFileIfExists(filepath);
+	if (!content || hasGeneratedConfigMarker(content)) return;
+
+	throw new Error(
+		`Lucid cannot write ${path.basename(filepath)} because it already exists and does not include Lucid's generated-file marker. Move or remove the file, or configure the Cloudflare runtime to use it as a manual Wrangler config.`,
+	);
 };
 
 /**
- * Reads the source Wrangler config and merges the selected env block because
- * generated configs are written for one effective environment at a time.
+ * Manual Wrangler mode should clean up old Lucid-generated root config without
+ * deleting a file the user may now own.
  */
-const readSourceConfig = async (props: {
+const removeGeneratedConfigIfOwned = async (filepath: string) => {
+	const content = await readFileIfExists(filepath);
+	if (!content || !hasGeneratedConfigMarker(content)) return;
+
+	await rm(filepath, { force: true });
+};
+
+const getGeneratedConfigContent = (config: WranglerConfig) =>
+	[
+		`// ${constants.WRANGLER_GENERATED_CONFIG_MARKER}`,
+		"// This file is overwritten when Lucid prepares the Cloudflare runtime.",
+		`${JSON.stringify(config, null, "\t")}\n`,
+	].join("\n");
+
+const removeDeployConfigIfGenerated = async (props: {
 	projectRoot: string;
-	configPath?: string;
-	environment?: string;
-}): Promise<WranglerConfig> => {
-	const sourcePath = await findSourceConfigPath({
-		projectRoot: props.projectRoot,
-		configPath: props.configPath,
-	});
-	if (!sourcePath) return {};
+	generatedConfigPath: string;
+}) => {
+	const deployConfigPath = path.resolve(
+		props.projectRoot,
+		constants.WRANGLER_DEPLOY_CONFIG_FILE,
+	);
+	const deployConfig = await readJsonFile(deployConfigPath);
+	const configPath =
+		typeof deployConfig?.configPath === "string"
+			? deployConfig.configPath
+			: undefined;
+	if (!configPath) return;
 
-	const source = await readFile(sourcePath, "utf-8");
-	const ext = path.extname(sourcePath);
-	const parsed =
-		ext === ".toml"
-			? parseToml(source)
-			: parseJsonc(source, undefined, {
-					allowTrailingComma: true,
-					disallowComments: false,
-				});
+	const resolvedConfigPath = path.resolve(
+		path.dirname(deployConfigPath),
+		configPath,
+	);
+	if (resolvedConfigPath !== props.generatedConfigPath) return;
 
-	if (!isObject(parsed)) return {};
-
-	const topLevel = withoutEnv(parsed);
-	let envConfig: WranglerConfig | undefined;
-	if (props.environment && isObject(parsed.env)) {
-		const rawEnvConfig = parsed.env[props.environment];
-		if (isObject(rawEnvConfig)) {
-			envConfig = withoutEnv(rawEnvConfig);
-		}
-	}
-
-	return envConfig ? mergeObject(topLevel, envConfig) : topLevel;
+	await rm(deployConfigPath, { force: true });
 };
 
 const getPackageName = async (
@@ -161,12 +182,10 @@ const slug = (value: string) => {
 const unique = (values: string[]) => Array.from(new Set(values));
 
 const resolveName = async (props: {
-	config: WranglerConfig;
 	options?: AdapterOptions["worker"];
 	projectRoot: string;
 }) => {
 	if (props.options?.name) return slug(props.options.name);
-	if (typeof props.config.name === "string") return slug(props.config.name);
 	const packageName = await getPackageName(props.projectRoot);
 	if (packageName) return slug(packageName);
 	return slug(path.basename(props.projectRoot));
@@ -204,14 +223,8 @@ const resolveSchemaPath = (props: {
 		),
 	);
 
-const resolveCompatibilityDate = (
-	config: WranglerConfig,
-	options?: AdapterOptions["worker"],
-) => {
+const resolveCompatibilityDate = (options?: AdapterOptions["worker"]) => {
 	if (options?.compatibilityDate) return options.compatibilityDate;
-	if (typeof config.compatibility_date === "string") {
-		return config.compatibility_date;
-	}
 	return new Date().toISOString().slice(0, 10);
 };
 
@@ -404,7 +417,6 @@ const applyRuntimeBindings = (props: {
  * assets, cron, compatibility, and binding requirements.
  */
 const resolveConfig = async (props: {
-	sourceConfig: WranglerConfig;
 	projectRoot: string;
 	outputPath: string;
 	workerOptions?: AdapterOptions["worker"];
@@ -412,9 +424,8 @@ const resolveConfig = async (props: {
 	prepareArtifacts?: RuntimePrepareArtifacts;
 	target: WranglerConfigTarget;
 }) => {
-	const config: WranglerConfig = { ...props.sourceConfig };
+	const config: WranglerConfig = {};
 	const workerName = await resolveName({
-		config,
 		options: props.workerOptions,
 		projectRoot: props.projectRoot,
 	});
@@ -427,10 +438,7 @@ const resolveConfig = async (props: {
 					outputPath: props.outputPath,
 				});
 	config.name = workerName;
-	config.compatibility_date = resolveCompatibilityDate(
-		config,
-		props.workerOptions,
-	);
+	config.compatibility_date = resolveCompatibilityDate(props.workerOptions);
 	config.compatibility_flags = unique([
 		...getStringArray(config.compatibility_flags),
 		...(props.workerOptions?.compatibilityFlags ?? []),
@@ -479,24 +487,46 @@ const writeWranglerConfig = async (props: {
 	options?: AdapterOptions;
 	prepareArtifacts?: RuntimePrepareArtifacts;
 	target: WranglerConfigTarget;
-}): Promise<{ generatedConfigPath?: string; deployConfigPath?: string }> => {
-	const wranglerOptions = props.options?.wrangler;
-	if (wranglerOptions === false) {
-		return {};
-	}
-
+}): Promise<WriteWranglerConfigResult> => {
 	const projectRoot = path.dirname(path.resolve(props.configPath));
 	const outputPath = path.resolve(props.outputPath);
-	const sourceConfig = await readSourceConfig({
-		projectRoot,
-		configPath:
-			typeof wranglerOptions === "object"
-				? wranglerOptions.configPath
-				: undefined,
-		environment: props.options?.platformProxy?.environment,
+	const generatedConfigPath = getGeneratedConfigPath({
+		outputPath,
+		target: props.target,
 	});
+	const manualConfigPath = props.options?.wrangler
+		? resolveManualWranglerConfigPath({
+				projectRoot,
+				configPath: props.options.wrangler,
+			})
+		: undefined;
+
+	if (manualConfigPath) {
+		const generatedDevConfigPath = getGeneratedConfigPath({
+			outputPath: projectRoot,
+			target: "prepare",
+		});
+		if (manualConfigPath !== generatedDevConfigPath) {
+			await removeGeneratedConfigIfOwned(generatedDevConfigPath);
+		}
+		if (props.target === "build") {
+			await removeDeployConfigIfGenerated({
+				projectRoot,
+				generatedConfigPath,
+			});
+		}
+
+		return {
+			configPath: manualConfigPath,
+			generated: false,
+		};
+	}
+
+	if (props.target === "prepare") {
+		await assertCanWriteGeneratedConfig(generatedConfigPath);
+	}
+
 	const config = await resolveConfig({
-		sourceConfig,
 		projectRoot,
 		outputPath,
 		workerOptions: props.options?.worker,
@@ -504,19 +534,14 @@ const writeWranglerConfig = async (props: {
 		prepareArtifacts: props.prepareArtifacts,
 		target: props.target,
 	});
-	const generatedConfigPath = path.resolve(
-		outputPath,
-		constants.WRANGLER_CONFIG_FILE,
-	);
 	await mkdir(outputPath, { recursive: true });
-	await writeFile(
-		generatedConfigPath,
-		`${JSON.stringify(config, null, "\t")}\n`,
-	);
+	await writeFile(generatedConfigPath, getGeneratedConfigContent(config));
 
 	if (props.target !== "build") {
 		return {
+			configPath: generatedConfigPath,
 			generatedConfigPath,
+			generated: true,
 		};
 	}
 
@@ -538,8 +563,10 @@ const writeWranglerConfig = async (props: {
 	);
 
 	return {
+		configPath: generatedConfigPath,
 		generatedConfigPath,
 		deployConfigPath,
+		generated: true,
 	};
 };
 

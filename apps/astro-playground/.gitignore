@@ -6,6 +6,7 @@
 /dist
 /uploads
 /.dev.vars
+wrangler.lucid.jsonc
 /.wrangler
 .DS_Store
 ._*
