@@ -15,6 +15,7 @@ import type {
 type NormalizedBinding<T extends { binding?: string }> = Omit<T, "binding"> & {
 	binding: string;
 };
+type BindingOption<T extends { binding?: string }> = true | string | T;
 
 /** Converts boolean/string shorthand into the expanded Wrangler binding shape. */
 const normalizeBinding = <
@@ -62,3 +63,44 @@ export const normalizeCloudflareBindings = (
 		DEFAULT_D1_BINDING,
 	),
 });
+
+const toObjectBinding = <T extends { binding?: string }>(
+	value: BindingOption<T>,
+): T => {
+	if (value === true) return {} as T;
+	if (typeof value === "string") return { binding: value } as T;
+	return value;
+};
+
+const mergeBinding = <T extends { binding?: string }>(
+	base: BindingOption<T> | undefined,
+	extension: BindingOption<T> | undefined,
+): BindingOption<T> | undefined => {
+	if (extension === undefined) return base;
+	if (base === undefined) return extension;
+	if (extension === true) return base;
+	if (base === true) return extension;
+
+	return {
+		...toObjectBinding(base),
+		...toObjectBinding(extension),
+	};
+};
+
+/** Merges Cloudflare binding declarations while treating `true` as "enable defaults". */
+export const mergeCloudflareBindings = (
+	...bindingOptions: Array<CloudflareBindingsOptions | undefined>
+): CloudflareBindingsOptions | undefined => {
+	const merged: CloudflareBindingsOptions = {};
+
+	for (const bindings of bindingOptions) {
+		merged.kv = mergeBinding(merged.kv, bindings?.kv);
+		merged.r2 = mergeBinding(merged.r2, bindings?.r2);
+		merged.queues = mergeBinding(merged.queues, bindings?.queues);
+		merged.d1 = mergeBinding(merged.d1, bindings?.d1);
+	}
+
+	return Object.values(merged).some((value) => value !== undefined)
+		? merged
+		: undefined;
+};

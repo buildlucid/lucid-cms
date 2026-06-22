@@ -21,6 +21,7 @@ const prepareCommand =
 			configPath: props.configPath,
 			outputPath,
 			options,
+			prepareArtifacts: props.prepareArtifacts,
 			target: "prepare",
 		});
 
@@ -33,6 +34,7 @@ const prepareCommand =
 			configPath: props.configPath,
 			generatedConfigPath: wranglerConfig.generatedConfigPath,
 			projectRoot: props.projectRoot,
+			prepareArtifacts: props.prepareArtifacts,
 		});
 
 		props.logger.instance.info(

@@ -22,6 +22,7 @@ import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
 import getDefaultD1Config from "./utils/get-default-config.js";
+import { createD1WranglerArtifact } from "./utils/wrangler-artifact.js";
 
 export class D1Adapter extends DatabaseAdapter {
 	constructor(config: D1DialectConfig) {
@@ -311,6 +312,9 @@ export { DEFAULT_D1_BINDING };
 export const d1 = createDatabaseAdapterCreator(createD1Adapter, {
 	adapter: "d1",
 	resolve: (env) => new D1Adapter(getDefaultD1Config(env)),
+	hooks: {
+		runtime: [createD1WranglerArtifact()],
+	},
 }) as D1AdapterCreator;
 
 export default d1;

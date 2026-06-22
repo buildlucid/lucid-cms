@@ -1,13 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	getMediaAdapter: vi.fn(),
 	createAwaitingSync: vi.fn(),
 	createUploadRecord: vi.fn(),
-}));
-
-vi.mock("../../libs/media/get-adapter.js", () => ({
-	default: mocks.getMediaAdapter,
 }));
 
 vi.mock("../../libs/repositories/index.js", () => ({
@@ -28,15 +23,12 @@ describe("create upload session", () => {
 
 	it("rejects files over the configured size limit before creating adapter sessions", async () => {
 		const adapterCreateUploadSession = vi.fn();
-		mocks.getMediaAdapter.mockResolvedValueOnce({
-			enabled: true,
-			adapter: {
-				createUploadSession: adapterCreateUploadSession,
-			},
-		});
 
 		const response = await createUploadSession(
 			{
+				media: {
+					createUploadSession: adapterCreateUploadSession,
+				},
 				config: {
 					media: {
 						limits: {
@@ -59,18 +51,12 @@ describe("create upload session", () => {
 	});
 
 	it("returns single upload session data for single upload adapters", async () => {
-		mocks.getMediaAdapter.mockResolvedValueOnce({
-			enabled: true,
-			adapter: {
-				key: "file-system",
-				createUploadSession: vi.fn().mockResolvedValueOnce({
-					error: undefined,
-					data: {
-						mode: "single",
-						key: "public/test.png",
-						url: "https://example.com/upload",
-					},
-				}),
+		const adapterCreateUploadSession = vi.fn().mockResolvedValueOnce({
+			error: undefined,
+			data: {
+				mode: "single",
+				key: "public/test.png",
+				url: "https://example.com/upload",
 			},
 		});
 		mocks.createAwaitingSync.mockResolvedValueOnce({
@@ -84,6 +70,10 @@ describe("create upload session", () => {
 			{
 				db: {
 					client: {},
+				},
+				media: {
+					key: "file-system",
+					createUploadSession: adapterCreateUploadSession,
 				},
 				request: {
 					url: "https://example.com/lucid/api/v1/media/upload-session",
@@ -119,24 +109,15 @@ describe("create upload session", () => {
 	});
 
 	it("returns resumable upload session data for resumable upload adapters", async () => {
-		mocks.getMediaAdapter.mockResolvedValueOnce({
-			enabled: true,
-			adapter: {
-				key: "s3",
-				createUploadSession: vi.fn().mockResolvedValueOnce({
-					error: undefined,
-					data: {
-						mode: "resumable",
-						key: "public/test.png",
-						uploadId: "adapter-upload-id",
-						partSize: 5,
-						expiresAt: "2026-05-02T10:00:00.000Z",
-						uploadedParts: [],
-					},
-				}),
-				getUploadPartUrls: vi.fn(),
-				listUploadParts: vi.fn(),
-				completeUploadSession: vi.fn(),
+		const adapterCreateUploadSession = vi.fn().mockResolvedValueOnce({
+			error: undefined,
+			data: {
+				mode: "resumable",
+				key: "public/test.png",
+				uploadId: "adapter-upload-id",
+				partSize: 5,
+				expiresAt: "2026-05-02T10:00:00.000Z",
+				uploadedParts: [],
 			},
 		});
 		mocks.createUploadRecord.mockResolvedValueOnce({
@@ -150,6 +131,13 @@ describe("create upload session", () => {
 			{
 				db: {
 					client: {},
+				},
+				media: {
+					key: "s3",
+					createUploadSession: adapterCreateUploadSession,
+					getUploadPartUrls: vi.fn(),
+					listUploadParts: vi.fn(),
+					completeUploadSession: vi.fn(),
 				},
 				request: {
 					url: "https://example.com/lucid/api/v1/media/upload-session",

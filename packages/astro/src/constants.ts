@@ -46,7 +46,7 @@ const astroConstants = {
 		typescriptExtension: ".ts",
 	},
 	workerArtifacts: {
-		exportType: "worker-export",
+		exportType: "cloudflare:worker-export",
 	},
 	http: {
 		devOrigin: "http://astro.local",

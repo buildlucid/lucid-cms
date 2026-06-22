@@ -16,7 +16,7 @@ export const resolveBinding = (
 	const binding = context.env?.[bindingName];
 	if (!binding) {
 		throw new LucidError({
-			message: `Cloudflare R2 binding "${bindingName}" was not found in the runtime environment. Enable it with \`cloudflare({ wrangler: { bindings: { r2: true } } })\` or pass a matching \`binding\` to the Cloudflare R2 plugin.`,
+			message: `Cloudflare R2 binding "${bindingName}" was not found in the runtime environment. Configure the R2 binding in the Cloudflare runtime or pass the matching plugin binding option.`,
 			scope: PLUGIN_KEY,
 		});
 	}

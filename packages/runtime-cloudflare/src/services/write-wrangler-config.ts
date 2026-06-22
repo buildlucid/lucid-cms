@@ -2,11 +2,19 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
+import type { RuntimePrepareArtifacts } from "@lucidcms/core/types";
 import { parse as parseJsonc } from "jsonc-parser";
 import { parse as parseToml } from "smol-toml";
 import constants from "../constants.js";
-import type { AdapterOptions } from "../types.js";
-import { normalizeCloudflareBindings } from "../utils/bindings.js";
+import type {
+	AdapterOptions,
+	CloudflareBindingsOptions,
+	CloudflareWranglerConfigArtifact,
+} from "../types.js";
+import {
+	mergeCloudflareBindings,
+	normalizeCloudflareBindings,
+} from "../utils/bindings.js";
 
 type WranglerConfig = Record<string, unknown>;
 type WranglerConfigTarget = "build" | "prepare";
@@ -154,7 +162,7 @@ const unique = (values: string[]) => Array.from(new Set(values));
 
 const resolveName = async (props: {
 	config: WranglerConfig;
-	options?: AdapterOptions["wrangler"];
+	options?: AdapterOptions["worker"];
 	projectRoot: string;
 }) => {
 	if (props.options?.name) return slug(props.options.name);
@@ -198,7 +206,7 @@ const resolveSchemaPath = (props: {
 
 const resolveCompatibilityDate = (
 	config: WranglerConfig,
-	options?: AdapterOptions["wrangler"],
+	options?: AdapterOptions["worker"],
 ) => {
 	if (options?.compatibilityDate) return options.compatibilityDate;
 	if (typeof config.compatibility_date === "string") {
@@ -228,6 +236,28 @@ const upsertObject = <T extends WranglerConfig>(
 
 const getObjectArray = <T extends WranglerConfig>(value: unknown): T[] =>
 	Array.isArray(value) ? (value.filter(isObject) as T[]) : [];
+
+const isWranglerConfigArtifact = (
+	artifact: RuntimePrepareArtifacts["custom"][number],
+): artifact is RuntimePrepareArtifacts["custom"][number] & {
+	custom: CloudflareWranglerConfigArtifact;
+} =>
+	artifact.type === constants.WRANGLER_CONFIG_ARTIFACT_TYPE &&
+	isObject(artifact.custom);
+
+const getArtifactBindings = (
+	prepareArtifacts: RuntimePrepareArtifacts | undefined,
+): CloudflareBindingsOptions | undefined => {
+	if (!prepareArtifacts) {
+		return undefined;
+	}
+
+	return mergeCloudflareBindings(
+		...prepareArtifacts.custom
+			.filter(isWranglerConfigArtifact)
+			.map((artifact) => artifact.custom.bindings),
+	);
+};
 
 /**
  * Adds or updates the KV namespace entry for the runtime-declared binding.
@@ -346,10 +376,14 @@ const applyD1Database = (
 const applyRuntimeBindings = (props: {
 	config: WranglerConfig;
 	options?: AdapterOptions;
+	prepareArtifacts?: RuntimePrepareArtifacts;
 	workerName: string;
 }) => {
 	const bindings = normalizeCloudflareBindings(
-		props.options?.wrangler?.bindings,
+		mergeCloudflareBindings(
+			getArtifactBindings(props.prepareArtifacts),
+			props.options?.bindings,
+		),
 	);
 	if (bindings.kv) {
 		applyKVNamespace(props.config, bindings.kv);
@@ -373,14 +407,15 @@ const resolveConfig = async (props: {
 	sourceConfig: WranglerConfig;
 	projectRoot: string;
 	outputPath: string;
-	options?: AdapterOptions["wrangler"];
+	workerOptions?: AdapterOptions["worker"];
 	adapterOptions?: AdapterOptions;
+	prepareArtifacts?: RuntimePrepareArtifacts;
 	target: WranglerConfigTarget;
 }) => {
 	const config: WranglerConfig = { ...props.sourceConfig };
 	const workerName = await resolveName({
 		config,
-		options: props.options,
+		options: props.workerOptions,
 		projectRoot: props.projectRoot,
 	});
 
@@ -392,10 +427,13 @@ const resolveConfig = async (props: {
 					outputPath: props.outputPath,
 				});
 	config.name = workerName;
-	config.compatibility_date = resolveCompatibilityDate(config, props.options);
+	config.compatibility_date = resolveCompatibilityDate(
+		config,
+		props.workerOptions,
+	);
 	config.compatibility_flags = unique([
 		...getStringArray(config.compatibility_flags),
-		...(props.options?.compatibilityFlags ?? []),
+		...(props.workerOptions?.compatibilityFlags ?? []),
 		"nodejs_compat",
 	]);
 	if (props.target === "build") {
@@ -409,7 +447,7 @@ const resolveConfig = async (props: {
 		const triggers = isObject(config.triggers) ? { ...config.triggers } : {};
 		triggers.crons = unique([
 			...getStringArray(triggers.crons),
-			...(props.options?.crons ?? constants.DEFAULT_CRONS),
+			...(props.workerOptions?.crons ?? constants.DEFAULT_CRONS),
 		]);
 		config.triggers = triggers;
 	} else {
@@ -421,6 +459,7 @@ const resolveConfig = async (props: {
 	applyRuntimeBindings({
 		config,
 		options: props.adapterOptions,
+		prepareArtifacts: props.prepareArtifacts,
 		workerName,
 	});
 
@@ -438,10 +477,11 @@ const writeWranglerConfig = async (props: {
 	configPath: string;
 	outputPath: string;
 	options?: AdapterOptions;
+	prepareArtifacts?: RuntimePrepareArtifacts;
 	target: WranglerConfigTarget;
 }): Promise<{ generatedConfigPath?: string; deployConfigPath?: string }> => {
 	const wranglerOptions = props.options?.wrangler;
-	if (wranglerOptions?.generate === false) {
+	if (wranglerOptions === false) {
 		return {};
 	}
 
@@ -449,15 +489,19 @@ const writeWranglerConfig = async (props: {
 	const outputPath = path.resolve(props.outputPath);
 	const sourceConfig = await readSourceConfig({
 		projectRoot,
-		configPath: wranglerOptions?.configPath,
+		configPath:
+			typeof wranglerOptions === "object"
+				? wranglerOptions.configPath
+				: undefined,
 		environment: props.options?.platformProxy?.environment,
 	});
 	const config = await resolveConfig({
 		sourceConfig,
 		projectRoot,
 		outputPath,
-		options: wranglerOptions,
+		workerOptions: props.options?.worker,
 		adapterOptions: props.options,
+		prepareArtifacts: props.prepareArtifacts,
 		target: props.target,
 	});
 	const generatedConfigPath = path.resolve(

@@ -2,6 +2,7 @@ import path from "node:path";
 import type {
 	EnvironmentVariables,
 	GetEnvVarsLogger,
+	RuntimePrepareArtifacts,
 } from "@lucidcms/core/types";
 import type {
 	AdapterOptions,
@@ -61,6 +62,7 @@ const withPreparedConfig = (
 const rewritePreparedWranglerConfig = async (
 	options: AdapterOptions | undefined,
 	prepared: PreparedWranglerConfig | undefined,
+	prepareArtifacts: RuntimePrepareArtifacts | undefined,
 ): Promise<PreparedWranglerConfig | undefined> => {
 	if (!prepared) return undefined;
 	const outputPath = path.dirname(prepared.generatedConfigPath);
@@ -68,6 +70,7 @@ const rewritePreparedWranglerConfig = async (
 		configPath: prepared.configPath,
 		outputPath,
 		options,
+		prepareArtifacts,
 		target: "prepare",
 	});
 
@@ -76,6 +79,7 @@ const rewritePreparedWranglerConfig = async (
 	return {
 		...prepared,
 		generatedConfigPath: result.generatedConfigPath,
+		prepareArtifacts: prepareArtifacts ?? prepared.prepareArtifacts,
 	};
 };
 
@@ -86,6 +90,8 @@ const shouldReloadAfterResolve = (
 ) =>
 	typeof optionsValue === "function" &&
 	(resolvedOptions?.platformProxy !== undefined ||
+		resolvedOptions?.bindings !== undefined ||
+		resolvedOptions?.worker !== undefined ||
 		resolvedOptions?.wrangler !== undefined);
 
 /** Loads Cloudflare env values while keeping generated Wrangler config in sync. */
@@ -94,13 +100,16 @@ const loadEnvVars = async (props: {
 	optionsValue?: CloudflareAdapterOptionsValue;
 	runtime: Pick<
 		CloudflareRuntimeAdapter,
-		"getOptions" | "resolveOptions" | "setPlatformProxy"
+		"getOptions" | "getPlatformProxy" | "resolveOptions" | "setPlatformProxy"
 	>;
 	prepared?: PreparedWranglerConfig;
 	setPreparedWranglerConfig: (
 		config: PreparedWranglerConfig | undefined,
 	) => void;
 }): Promise<EnvironmentVariables> => {
+	await props.runtime.getPlatformProxy()?.dispose?.();
+	props.runtime.setPlatformProxy(undefined);
+
 	const initialOptions = withPreparedConfig(
 		typeof props.optionsValue === "function" ? undefined : props.optionsValue,
 		props.prepared,
@@ -118,6 +127,7 @@ const loadEnvVars = async (props: {
 		const prepared = await rewritePreparedWranglerConfig(
 			resolvedOptions,
 			props.prepared,
+			props.prepared?.prepareArtifacts,
 		);
 		props.setPreparedWranglerConfig(prepared);
 		const resolvedResult = await getEnvVars({

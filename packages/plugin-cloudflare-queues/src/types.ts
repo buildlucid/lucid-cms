@@ -6,6 +6,19 @@ export type PluginOptions = {
 	 */
 	binding?: string;
 	/**
+	 * Wrangler Queue name. Defaults to a generated name based on the worker and
+	 * binding.
+	 */
+	queueName?: string;
+	/**
+	 * Wrangler Queue consumer options.
+	 */
+	consumer?: {
+		maxBatchSize?: number;
+		maxRetries?: number;
+		maxConcurrency?: number;
+	};
+	/**
 	 * The maximum number of attempts to retry a job. Defaults to 3.
 	 */
 	maxRetries?: number;

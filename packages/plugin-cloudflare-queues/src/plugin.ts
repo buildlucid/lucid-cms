@@ -17,6 +17,7 @@ import {
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
 import type { PluginOptions } from "./types.js";
+import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
 
 const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 	const resolvedOptions = pluginOptions ?? {};
@@ -25,7 +26,16 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		hooks: {
-			runtime: async () => {
+			runtime: async ({ phase }) => {
+				if (phase === "prepare") {
+					return {
+						error: undefined,
+						data: {
+							artifacts: [createWranglerArtifact(resolvedOptions)],
+						},
+					};
+				}
+
 				const imports: CloudflareWorkerImport[] = [
 					{
 						path: "./lucid/config.js",
@@ -262,7 +272,7 @@ try {
 					data: {
 						artifacts: [
 							{
-								type: "worker-export",
+								type: "cloudflare:worker-export",
 								custom: {
 									imports,
 									exports,

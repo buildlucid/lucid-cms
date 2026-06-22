@@ -8,7 +8,8 @@ export const DEFAULT_D1_BINDING = "LUCID_D1";
 export default {
 	CONFIG_FILE: "lucid.config.js",
 	ENTRY_FILE: "server",
-	WORKER_EXPORT_ARTIFACT_TYPE: "worker-export",
+	WORKER_EXPORT_ARTIFACT_TYPE: "cloudflare:worker-export",
+	WRANGLER_CONFIG_ARTIFACT_TYPE: "cloudflare:wrangler",
 	WRANGLER_CONFIG_FILE: "wrangler.jsonc",
 	WRANGLER_DEPLOY_CONFIG_FILE: ".wrangler/deploy/config.json",
 	ASSETS_BINDING: "ASSETS",

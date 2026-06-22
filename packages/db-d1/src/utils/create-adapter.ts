@@ -10,6 +10,7 @@ import type {
 	D1AdapterOptionsFactory,
 } from "../types.js";
 import getDefaultD1Config from "./get-default-config.js";
+import { createD1WranglerArtifact } from "./wrangler-artifact.js";
 
 const hasDatabase = (
 	config: D1AdapterOptions | D1AdapterBindingOptions,
@@ -33,6 +34,9 @@ const createD1Adapter = (
 		return createDatabaseAdapterFactory({
 			adapter: "d1",
 			resolve: (env) => new D1Adapter(getDefaultD1Config(env)),
+			hooks: {
+				runtime: [createD1WranglerArtifact()],
+			},
 		});
 	}
 
@@ -41,6 +45,14 @@ const createD1Adapter = (
 			adapter: "d1",
 			resolve: async (env) =>
 				new D1Adapter(resolveD1Config(await config(env), env)),
+			hooks: {
+				runtime: async (env) => {
+					const resolved = await config(env);
+					return hasDatabase(resolved)
+						? []
+						: [createD1WranglerArtifact(resolved)];
+				},
+			},
 		});
 	}
 
@@ -51,6 +63,9 @@ const createD1Adapter = (
 	return createDatabaseAdapterFactory({
 		adapter: "d1",
 		resolve: (env) => new D1Adapter(resolveD1Config(config, env)),
+		hooks: {
+			runtime: [createD1WranglerArtifact(config)],
+		},
 	});
 };
 

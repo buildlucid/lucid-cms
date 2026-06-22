@@ -37,7 +37,9 @@ The `cloudflare` function accepts a single parameter, `options`, which is either
 |----------|------|-------------|
 | `platformProxy` | `GetPlatformProxyOptions` | A Wrangler platform proxy options object |
 | `server` | `{ port?: number; hostname?: string }` | The server options. The `lucidcms dev` script uses these when serving the local Node server |
-| `wrangler` | `{ generate?: boolean; bindings?: object; configPath?: string; name?: string; compatibilityDate?: string; compatibilityFlags?: string[]; crons?: string[] }` | Controls generated Wrangler config output. Generation is enabled by default. Bindings are opt-in and support Lucid defaults with `true` |
+| `wrangler` | `boolean \| { configPath?: string }` | Controls generated Wrangler config output. Generation is enabled by default. Set to `false` to fully own Wrangler config |
+| `bindings` | `object` | Explicit Cloudflare bindings to generate or override. Passing `true` for a binding uses Lucid's default binding name |
+| `worker` | `{ name?: string; compatibilityDate?: string; compatibilityFlags?: string[]; crons?: string[] }` | Worker config that Lucid writes into the generated Wrangler config |
 
 ```typescript
 export default configureLucid({
@@ -83,16 +85,53 @@ wrangler deploy
 
 If you already have a `wrangler.jsonc`, `wrangler.json`, or `wrangler.toml`, Lucid treats it as source config and merges it into the generated output. Lucid owns the required Worker entry, assets binding, Node compatibility flag, and default cron triggers in the generated config.
 
-Bindings are generated only when explicitly enabled. Passing `true` uses Lucid's convention names: `LUCID_KV`, `LUCID_MEDIA_BUCKET`, and `LUCID_QUEUE`. If you use a custom binding name, pass the same custom name to the matching Cloudflare plugin.
+Cloudflare-aware Lucid packages can ask the runtime to generate their Wrangler bindings. For example, `db: d1`, `cloudflareKVPlugin()`, `cloudflareR2Plugin()`, and `cloudflareQueuesPlugin()` generate the matching D1, KV, R2, and Queue bindings with Lucid's convention names. Pass binding/resource details to the plugin or adapter that owns the feature:
+
+```typescript
+import { configureLucid } from "@lucidcms/core";
+import { d1 } from "@lucidcms/db-d1";
+import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
+import { cloudflare } from "@lucidcms/runtime-cloudflare";
+
+export default configureLucid({
+	runtime: cloudflare,
+	db: d1({ databaseName: "lucid-db" }),
+	config: () => ({
+		plugins: [
+			cloudflareR2Plugin({
+				bucketName: "lucid-media",
+			}),
+		],
+	}),
+});
+```
+
+Use `bindings` when you want the runtime to force or override generated binding details:
+
+```typescript
+export default configureLucid({
+	runtime: cloudflare({
+		bindings: {
+			kv: true,
+			r2: {
+				binding: "MEDIA",
+				bucketName: "lucid-media",
+			},
+		},
+	}),
+	db: libsql,
+	config: () => ({
+		// ...other config
+	}),
+});
+```
 
 To disable generation and fully own your Wrangler config, pass:
 
 ```typescript
 export default configureLucid({
 	runtime: cloudflare({
-		wrangler: {
-			generate: false,
-		},
+		wrangler: false,
 	}),
 	db: libsql,
 	config: () => ({
@@ -107,24 +146,18 @@ Due to the nature of Cloudflare Workers, they don't support file system operatio
 
 ```typescript
 import { configureLucid } from "@lucidcms/core";
-import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { libsql } from "@lucidcms/db-libsql";
-import CloudflareR2 from "@lucidcms/plugin-cloudflare-r2";
+import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
+import { cloudflare } from "@lucidcms/runtime-cloudflare";
 
 export default configureLucid({
-	runtime: cloudflare({
-		wrangler: {
-			bindings: {
-				r2: {
-					bucketName: "lucid-media",
-				},
-			},
-		},
-	}),
+	runtime: cloudflare,
 	db: libsql,
 	config: () => ({
 		plugins: [
-			CloudflareR2(),
+			cloudflareR2Plugin({
+				bucketName: "lucid-media",
+			}),
 		],
 	}),
 });

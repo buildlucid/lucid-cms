@@ -16,7 +16,7 @@ export const resolveBinding = (
 	const binding = context.env?.[bindingName];
 	if (!binding) {
 		throw new LucidError({
-			message: `Cloudflare KV binding "${bindingName}" was not found in the runtime environment. Enable it with \`cloudflare({ wrangler: { bindings: { kv: true } } })\` or pass a matching \`binding\` to the Cloudflare KV plugin.`,
+			message: `Cloudflare KV binding "${bindingName}" was not found in the runtime environment. Configure the KV binding in the Cloudflare runtime or pass the matching plugin binding option.`,
 			scope: PLUGIN_KEY,
 		});
 	}

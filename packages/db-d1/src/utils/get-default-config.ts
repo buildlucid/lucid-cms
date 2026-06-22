@@ -19,7 +19,7 @@ const getDefaultD1Config = (
 	const database = env[binding];
 	if (!isD1Binding(database)) {
 		throw new Error(
-			`Cloudflare D1 database adapter requires a D1 binding named "${binding}". Enable it with \`cloudflare({ wrangler: { bindings: { d1: true } } })\`, pass a matching binding with \`d1({ binding: "${binding}" })\`, or pass explicit options with \`d1({ database })\` / \`d1((env) => ({ database: env.${binding} }))\`.`,
+			`Cloudflare D1 database adapter requires a D1 binding named "${binding}". The binding was not present in the runtime environment; configure the D1 binding in the Cloudflare runtime or pass explicit database options.`,
 		);
 	}
 

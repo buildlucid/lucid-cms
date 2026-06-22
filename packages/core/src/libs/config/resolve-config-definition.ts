@@ -2,6 +2,10 @@ import type z from "zod";
 import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import { getConfigureLucidModule } from "../runtime/loaders.js";
+import {
+	collectRuntimePrepareArtifacts,
+	createRuntimePrepareArtifacts,
+} from "../runtime/prepare-artifacts.js";
 import { resolveDatabaseAdapter } from "../runtime/resolve-database-adapter.js";
 import type {
 	AdapterRuntimeContext,
@@ -108,19 +112,6 @@ export const resolveConfigDefinition = async (props: {
 		instance: defaultLoggerInstance,
 		silent: true,
 	};
-
-	if (
-		props.prepareRuntime &&
-		adapter.cli?.prepare &&
-		props.configPath &&
-		props.projectRoot
-	) {
-		await adapter.cli.prepare({
-			configPath: props.configPath,
-			projectRoot: props.projectRoot,
-			logger,
-		});
-	}
 	const runtimeContext = {
 		runtime: adapter.key,
 		compiled: false,
@@ -141,15 +132,37 @@ export const resolveConfigDefinition = async (props: {
 		},
 		props.meta,
 	);
+
+	const prepareRuntimeContext =
+		props.prepareRuntime &&
+		adapter.cli?.prepare &&
+		props.configPath &&
+		props.projectRoot
+			? {
+					prepare: adapter.cli.prepare,
+					configPath: props.configPath,
+					projectRoot: props.projectRoot,
+				}
+			: undefined;
+
+	if (prepareRuntimeContext) {
+		await prepareRuntimeContext.prepare({
+			configPath: prepareRuntimeContext.configPath,
+			projectRoot: prepareRuntimeContext.projectRoot,
+			prepareArtifacts: createRuntimePrepareArtifacts(),
+			logger,
+		});
+	}
 	// Env loading is optional because some hosts, like Astro Cloudflare, already
 	// own request-time env loading and can pass it in directly.
-	const env =
+	let env =
 		props.env ??
 		(adapter.getEnvVars
 			? await adapter.getEnvVars({
 					logger,
 				})
 			: undefined);
+
 	const envSchema = wrappedDefinition.env ?? props.envSchema;
 
 	if (envSchema && env) {
@@ -158,11 +171,48 @@ export const resolveConfigDefinition = async (props: {
 
 	await adapter.resolveOptions?.(env ?? {});
 
+	let rawConfig = wrappedDefinition.config(env || {});
+	const prepareArtifacts = prepareRuntimeContext
+		? await collectRuntimePrepareArtifacts({
+				db: wrappedDefinition.db,
+				plugins: rawConfig.plugins ?? [],
+				env: env ?? {},
+				definition: wrappedDefinition,
+				paths: {
+					configPath: prepareRuntimeContext.configPath,
+					projectRoot: prepareRuntimeContext.projectRoot,
+				},
+				customArtifactTypes: adapter.config?.customPrepareArtifacts,
+			})
+		: createRuntimePrepareArtifacts();
+
+	if (prepareRuntimeContext && prepareArtifacts.custom.length > 0) {
+		await prepareRuntimeContext.prepare({
+			configPath: prepareRuntimeContext.configPath,
+			projectRoot: prepareRuntimeContext.projectRoot,
+			prepareArtifacts,
+			logger,
+		});
+
+		if (!props.env && adapter.getEnvVars) {
+			env = await adapter.getEnvVars({
+				logger,
+			});
+
+			if (envSchema && env) {
+				envSchema.parse(env);
+			}
+
+			await adapter.resolveOptions?.(env ?? {});
+			rawConfig = wrappedDefinition.config(env || {});
+		}
+	}
+
 	const db = await resolveDatabaseAdapter(wrappedDefinition.db, env);
 
 	// processConfig remains the shared source of truth for plugin init, merging
 	// and validation once the adapter/env/bootstrap layer has been resolved.
-	const config = await processConfig(wrappedDefinition.config(env || {}), {
+	const config = await processConfig(rawConfig, {
 		...(props.processConfigOptions ?? {}),
 		recipe: wrappedDefinition.recipe,
 		resolvedDb: db,

@@ -2,10 +2,11 @@ import type { Config } from "../../types/config.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import type {
 	AdapterRuntimeContext,
+	EnvironmentVariables,
 	LucidConfigDefinition,
 	LucidConfigRecipe,
+	RuntimeArtifactCustom,
 	RuntimeBuildArtifactCompile,
-	RuntimeBuildArtifactCustom,
 	RuntimeBuildArtifactFile,
 } from "../runtime/types.js";
 
@@ -13,17 +14,21 @@ export type LucidPluginRuntimeHookResult = {
 	artifacts?: Array<
 		| RuntimeBuildArtifactFile
 		| RuntimeBuildArtifactCompile
-		| RuntimeBuildArtifactCustom
+		| RuntimeArtifactCustom
 	>;
 };
 
 export type LucidPluginHookInit = () => ServiceResponse<undefined>;
+export type LucidPluginRuntimeHookPhase = "prepare" | "build";
 export type LucidPluginHookRuntime = (props: {
+	phase: LucidPluginRuntimeHookPhase;
+	env?: EnvironmentVariables;
 	definition: LucidConfigDefinition;
-	paths: {
-		configPath: string;
-		outputPath: string;
-		outputRelativeConfigPath: string;
+	paths?: {
+		configPath?: string;
+		projectRoot?: string;
+		outputPath?: string;
+		outputRelativeConfigPath?: string;
 	};
 }) => ServiceResponse<LucidPluginRuntimeHookResult>;
 

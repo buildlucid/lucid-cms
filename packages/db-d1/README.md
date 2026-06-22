@@ -17,13 +17,7 @@ import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { d1 } from "@lucidcms/db-d1";
 
 export default configureLucid({
-	runtime: cloudflare({
-		wrangler: {
-			bindings: {
-				d1: true,
-			},
-		},
-	}),
+	runtime: cloudflare,
 	db: d1,
 	config: () => ({
 		// ...other config
@@ -33,10 +27,11 @@ export default configureLucid({
 
 ## Configuration
 
-The no-call `db: d1` form reads the default `LUCID_D1` binding from Lucid's resolved env. You can also pass a binding name or the D1 database binding directly.
+The no-call `db: d1` form reads the default `LUCID_D1` binding from Lucid's resolved env and asks the Cloudflare runtime to generate the matching Wrangler D1 binding. You can also pass a binding name, Wrangler D1 details, or the D1 database binding directly.
 
 ```ts
 d1({ binding: "DB" });
+d1({ binding: "DB", databaseName: "lucid-db" });
 d1({ database: env.DB });
 d1((env) => ({ database: env.DB }));
 ```

@@ -27,10 +27,28 @@ export type RuntimeBuildArtifactCustom<T = any> = {
 	custom: T;
 };
 
+export type RuntimeArtifactCustom<T = unknown> = {
+	type: string;
+	custom: T;
+};
+
 export type RuntimeBuildArtifact =
 	| RuntimeBuildArtifactFile
 	| RuntimeBuildArtifactCompile
 	| RuntimeBuildArtifactCustom;
+
+export type RuntimeArtifactProvider =
+	| Array<RuntimeArtifactCustom>
+	| ((
+			env: EnvironmentVariables,
+	  ) => Array<RuntimeArtifactCustom> | Promise<Array<RuntimeArtifactCustom>>);
+
+export type RuntimePrepareArtifacts = {
+	/**
+	 * Custom artifacts that are specific to the runtime adapter.
+	 */
+	custom: Array<RuntimeArtifactCustom>;
+};
 
 export type ServeHandler = (props: {
 	config: Config;
@@ -80,6 +98,7 @@ export type BuildHandler = (props: {
 export type PrepareHandler = (props: {
 	configPath: string;
 	projectRoot: string;
+	prepareArtifacts: RuntimePrepareArtifacts;
 	logger: {
 		instance: CLILogger;
 		silent: boolean;

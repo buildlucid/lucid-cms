@@ -184,7 +184,7 @@ describe("@lucidcms/astro internals", () => {
 			configArtifacts,
 			customArtifacts: [
 				{
-					type: "worker-export",
+					type: "cloudflare:worker-export",
 					custom: {
 						imports: [
 							{

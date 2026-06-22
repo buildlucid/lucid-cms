@@ -3,7 +3,10 @@ import {
 	getConfigArtifactImportPaths,
 	prepareConfigArtifacts,
 } from "@lucidcms/core/build";
-import type { BuildHandler } from "@lucidcms/core/types";
+import type {
+	BuildHandler,
+	RuntimePrepareArtifacts,
+} from "@lucidcms/core/types";
 import { build } from "rolldown";
 import constants from "../constants.js";
 import getRuntimeContext from "../services/get-runtime-context.js";
@@ -14,7 +17,10 @@ import type { AdapterOptions } from "../types.js";
 import toDisplayPath from "../utils/path-to-display.js";
 
 const buildCommand =
-	(options: AdapterOptions | undefined): BuildHandler =>
+	(
+		options: AdapterOptions | undefined,
+		prepareArtifacts?: RuntimePrepareArtifacts,
+	): BuildHandler =>
 	async ({ configPath, outputPath, buildArtifacts, logger }) => {
 		logger.instance.info(
 			"Using:",
@@ -29,6 +35,7 @@ const buildCommand =
 				configPath,
 				outputPath,
 				options,
+				prepareArtifacts,
 				target: "build",
 			});
 			if (wranglerConfig.generatedConfigPath) {

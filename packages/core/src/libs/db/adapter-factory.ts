@@ -1,4 +1,7 @@
-import type { EnvironmentVariables } from "../runtime/types.js";
+import type {
+	EnvironmentVariables,
+	RuntimeArtifactProvider,
+} from "../runtime/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
 
 export type DatabaseAdapterOptionsFactory<TOptions> = (
@@ -10,6 +13,9 @@ export type DatabaseAdapterFactory<
 > = {
 	adapter: string;
 	resolve: (env: EnvironmentVariables) => TAdapter | Promise<TAdapter>;
+	hooks?: {
+		runtime?: RuntimeArtifactProvider;
+	};
 };
 
 export type DatabaseAdapterCreator<
@@ -23,9 +29,11 @@ export const createDatabaseAdapterFactory = <
 >(props: {
 	adapter: string;
 	resolve: (env: EnvironmentVariables) => TAdapter | Promise<TAdapter>;
+	hooks?: DatabaseAdapterFactory<TAdapter>["hooks"];
 }): DatabaseAdapterFactory<TAdapter> => ({
 	adapter: props.adapter,
 	resolve: props.resolve,
+	hooks: props.hooks,
 });
 
 export const createDatabaseAdapterCreator = <
@@ -37,10 +45,12 @@ export const createDatabaseAdapterCreator = <
 	props: {
 		adapter: string;
 		resolve: (env: EnvironmentVariables) => TAdapter | Promise<TAdapter>;
+		hooks?: DatabaseAdapterFactory<TAdapter>["hooks"];
 	},
 ): TCreator & DatabaseAdapterCreator<TAdapter> =>
 	Object.assign(creator, {
 		adapter: props.adapter,
 		resolve: props.resolve,
+		hooks: props.hooks,
 		__lucidDatabaseAdapterCreator: true as const,
 	});

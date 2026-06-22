@@ -1,6 +1,7 @@
 import type {
 	EnvironmentVariables,
 	RuntimeAdapter,
+	RuntimePrepareArtifacts,
 } from "@lucidcms/core/types";
 import type { GetPlatformProxyOptions, PlatformProxy } from "wrangler";
 
@@ -28,28 +29,35 @@ export type CloudflareWorkerExportArtifact = {
 	exports: CloudflareWorkerExport[];
 };
 
+export type CloudflareWranglerConfigArtifact = {
+	bindings?: CloudflareBindingsOptions;
+};
+
 export type AdapterOptions = {
 	platformProxy?: GetPlatformProxyOptions;
 	server?: {
 		port?: number;
 		hostname?: string;
 	};
-	wrangler?: {
-		/**
-		 * Generate a Wrangler deployment config into the build output directory.
-		 *
-		 * Defaults to true.
-		 */
-		generate?: boolean;
-		/**
-		 * Cloudflare bindings Lucid should generate in the Wrangler config.
-		 */
-		bindings?: CloudflareBindingsOptions;
-		/**
-		 * Optional source Wrangler config to merge into the generated config.
-		 * Relative paths resolve from the Lucid config directory.
-		 */
-		configPath?: string;
+	/**
+	 * Generate a Wrangler deployment config. Defaults to true. Set false if you
+	 * fully own Wrangler config outside Lucid.
+	 */
+	wrangler?:
+		| boolean
+		| {
+				/**
+				 * Optional source Wrangler config to merge into the generated config.
+				 * Relative paths resolve from the Lucid config directory.
+				 */
+				configPath?: string;
+		  };
+	/**
+	 * Explicit Cloudflare bindings Lucid should generate in the Wrangler config.
+	 * Cloudflare-aware plugins and adapters can also provide these automatically.
+	 */
+	bindings?: CloudflareBindingsOptions;
+	worker?: {
 		/**
 		 * The generated Worker name. Defaults to the source Wrangler config name,
 		 * package name, or project directory name.
@@ -120,6 +128,7 @@ export type PreparedWranglerConfig = {
 	configPath: string;
 	generatedConfigPath: string;
 	projectRoot: string;
+	prepareArtifacts: RuntimePrepareArtifacts;
 };
 
 export type CloudflareRuntimeAdapter = RuntimeAdapter & {

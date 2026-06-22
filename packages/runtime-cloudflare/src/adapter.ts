@@ -40,7 +40,10 @@ const cloudflare = (
 		},
 		build: async (props) => {
 			const { default: buildCommand } = await import("./cli/build.js");
-			return buildCommand(runtime.getOptions())(props);
+			return buildCommand(
+				runtime.getOptions(),
+				runtime.getPreparedWranglerConfig()?.prepareArtifacts,
+			)(props);
 		},
 	};
 

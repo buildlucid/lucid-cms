@@ -9,11 +9,25 @@ import {
 } from "./constants.js";
 import routes from "./routes/index.js";
 import type { PluginOptions } from "./types.js";
+import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
 
 const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
+	const resolvedOptions = pluginOptions ?? {};
+
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		hooks: {
+			runtime: async ({ phase }) => ({
+				error: undefined,
+				data: {
+					artifacts:
+						phase === "prepare"
+							? [createWranglerArtifact(resolvedOptions)]
+							: [],
+				},
+			}),
+		},
 		checkCompatibility: ({ runtimeContext, config }) => {
 			if (runtimeContext.runtime !== SUPPORTED_RUNTIME_ADAPTER_KEY) {
 				throw new LucidError({
@@ -35,11 +49,11 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 		recipe: (draft) => {
 			draft.i18n.sources.push("@lucidcms/plugin-cloudflare-r2/translations");
 
-			if (!pluginOptions?.http) {
-				draft.hono?.routes?.push(routes(pluginOptions ?? {}));
+			if (!resolvedOptions.http) {
+				draft.hono?.routes?.push(routes(resolvedOptions));
 			}
 
-			draft.media.adapter = cloudflareR2Adapter(pluginOptions ?? {});
+			draft.media.adapter = cloudflareR2Adapter(resolvedOptions);
 		},
 	};
 };

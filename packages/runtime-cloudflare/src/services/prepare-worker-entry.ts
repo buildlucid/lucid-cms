@@ -309,7 +309,7 @@ ctx.waitUntil(runCronService());`,
 		},
 	];
 
-	//* merge in worker-export artifacts
+	//* merge in Cloudflare worker export artifacts
 	for (const artifact of customArtifacts) {
 		if (artifact.type === constants.WORKER_EXPORT_ARTIFACT_TYPE) {
 			const custom = artifact.custom as CloudflareWorkerExportArtifact;

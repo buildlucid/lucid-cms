@@ -17,6 +17,23 @@ export type D1AdapterBindingOptions = {
 	 * Cloudflare D1 binding name. Defaults to "LUCID_D1".
 	 */
 	binding?: string;
+	/**
+	 * Wrangler D1 database name. Defaults to a generated name based on the worker
+	 * and binding.
+	 */
+	databaseName?: string;
+	/**
+	 * Wrangler D1 database id.
+	 */
+	databaseId?: string;
+	/**
+	 * Wrangler D1 preview database id.
+	 */
+	previewDatabaseId?: string;
+	/**
+	 * Whether Wrangler should use the remote D1 database in local development.
+	 */
+	remote?: boolean;
 };
 
 export type D1AdapterOptionsFactory = DatabaseAdapterOptionsFactory<

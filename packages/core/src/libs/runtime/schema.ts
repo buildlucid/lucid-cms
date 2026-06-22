@@ -5,6 +5,7 @@ const RuntimeAdapterSchema = z.object({
 	config: z
 		.object({
 			customBuildArtifacts: z.array(z.string()).optional(),
+			customPrepareArtifacts: z.array(z.string()).optional(),
 		})
 		.optional(),
 	lucid: z.string(),

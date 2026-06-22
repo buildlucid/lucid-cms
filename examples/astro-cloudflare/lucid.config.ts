@@ -7,17 +7,7 @@ import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export default configureLucid({
-	runtime: cloudflare({
-		wrangler: {
-			bindings: {
-				d1: true,
-				kv: true,
-				r2: {
-					bucketName: "lucid-astro-cloudflare-example-media",
-				},
-			},
-		},
-	}),
+	runtime: cloudflare,
 	db: d1,
 	env: z.object({
 		ENCRYPTION_SECRET: z.string(),
@@ -43,7 +33,9 @@ export default configureLucid({
 				],
 			}),
 			cloudflareKVPlugin(),
-			cloudflareR2Plugin(),
+			cloudflareR2Plugin({
+				bucketName: "lucid-astro-cloudflare-example-media",
+			}),
 		],
 	}),
 });

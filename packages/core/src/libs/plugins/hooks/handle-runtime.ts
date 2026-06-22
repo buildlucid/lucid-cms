@@ -34,6 +34,7 @@ const handlePluginRuntimeHooks = async (props: {
 					return;
 				}
 				const res = await plugin.hooks.runtime({
+					phase: "build",
 					definition: props.definition,
 					paths: {
 						configPath: props.configPath,

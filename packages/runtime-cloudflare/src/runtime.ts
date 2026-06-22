@@ -35,6 +35,7 @@ export const cloudflare = (
 		lucid: LUCID_VERSION,
 		config: {
 			customBuildArtifacts: [constants.WORKER_EXPORT_ARTIFACT_TYPE],
+			customPrepareArtifacts: [constants.WRANGLER_CONFIG_ARTIFACT_TYPE],
 		},
 		configureLucid,
 		getOptions: () => resolvedOptions,

@@ -1,7 +1,11 @@
 import { expect, expectTypeOf, test, vi } from "vitest";
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
-import { createDatabaseAdapterCreator } from "../db/adapter-factory.js";
+import {
+	createDatabaseAdapterCreator,
+	createDatabaseAdapterFactory,
+} from "../db/adapter-factory.js";
+import type { LucidPluginHookRuntime } from "../plugins/types.js";
 import configureLucid from "../runtime/configure-lucid.js";
 import resolveConfigDefinition from "./resolve-config-definition.js";
 
@@ -101,4 +105,127 @@ test("resolves env schema from the config definition", async () => {
 
 	expect(result.envSchema).toBe(env);
 	expect(result.config.db).toBe(adapter);
+});
+
+test("passes supported prepare artifacts from db factories and plugins to the runtime", async () => {
+	const adapter = createAdapter("prepare");
+	const db = createDatabaseAdapterFactory({
+		adapter: "prepare",
+		resolve: () => adapter,
+		hooks: {
+			runtime: [
+				{
+					type: "test:prepare",
+					custom: {
+						source: "db",
+					},
+				},
+			],
+		},
+	});
+	const prepare = vi.fn(async () => undefined);
+	const getEnvVars = vi.fn(async () => ({
+		SECRET: "a".repeat(64),
+	}));
+	const runtimeHook = vi.fn(
+		async ({ phase }: Parameters<LucidPluginHookRuntime>[0]) => ({
+			error: undefined,
+			data: {
+				artifacts:
+					phase === "prepare"
+						? [
+								{
+									type: "test:prepare",
+									custom: {
+										source: "plugin",
+									},
+								},
+								{
+									type: "ignored:prepare",
+									custom: {
+										source: "plugin",
+									},
+								},
+							]
+						: [],
+			},
+		}),
+	);
+
+	await resolveConfigDefinition({
+		definition: configureLucid({
+			runtime: {
+				key: "test",
+				lucid: "0.0.0",
+				config: {
+					customPrepareArtifacts: ["test:prepare"],
+				},
+				getEnvVars,
+				cli: {
+					prepare,
+					serve: vi.fn(),
+					build: vi.fn(),
+				},
+			} as never,
+			db,
+			config: (env) => ({
+				secrets: {
+					encryption: env.SECRET as string,
+					cookie: env.SECRET as string,
+					refreshToken: env.SECRET as string,
+					accessToken: env.SECRET as string,
+				},
+				collections: [],
+				plugins: [
+					{
+						key: "prepare-plugin",
+						lucid: "0.0.0",
+						hooks: {
+							runtime: runtimeHook,
+						},
+						recipe: () => undefined,
+					},
+				],
+			}),
+		}),
+		configPath: "/tmp/lucid.config.ts",
+		projectRoot: "/tmp",
+		prepareRuntime: true,
+		processConfigOptions: {
+			bypassCache: true,
+			skipValidation: true,
+		},
+	});
+
+	expect(prepare).toHaveBeenCalledTimes(2);
+	expect(prepare.mock.calls[0]?.[0].prepareArtifacts).toEqual({
+		custom: [],
+	});
+	expect(prepare.mock.calls[1]?.[0].prepareArtifacts.custom).toEqual([
+		{
+			type: "test:prepare",
+			custom: {
+				source: "db",
+			},
+		},
+		{
+			type: "test:prepare",
+			custom: {
+				source: "plugin",
+			},
+		},
+	]);
+	expect(runtimeHook).toHaveBeenCalledWith(
+		expect.objectContaining({
+			phase: "prepare",
+			env: {
+				SECRET: "a".repeat(64),
+			},
+			paths: {
+				configPath: "/tmp/lucid.config.ts",
+				projectRoot: "/tmp",
+			},
+		}),
+	);
+	expect(getEnvVars).toHaveBeenCalledTimes(2);
 });
