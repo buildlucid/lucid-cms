@@ -1,35 +1,17 @@
-import { type Component, createMemo } from "solid-js";
-import Alert from "@/components/Blocks/Alert";
+import type { Component } from "solid-js";
 import { Account } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/Modals/AI/MediaImageGenerationModal";
-import userStore from "@/store/userStore";
 import T from "@/translations";
 
 const AccountRoute: Component = () => {
-	// ----------------------------------------
-	// Memos
-	const user = createMemo(() => userStore.get.user);
-
 	// ----------------------------------------
 	// Render
 	return (
 		<Wrapper
 			slots={{
-				topBar: (
-					<Alert
-						style="layout"
-						alerts={[
-							{
-								type: "error",
-								message: T()("auth.password.reset.required.message"),
-								show: user()?.triggerPasswordReset === true,
-							},
-						]}
-					/>
-				),
 				header: (
 					<Standard
 						copy={{

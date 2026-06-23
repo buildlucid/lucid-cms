@@ -1,4 +1,4 @@
-import { type Component, createMemo, createSignal } from "solid-js";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 import { Input } from "@/components/Groups/Form";
 import { Modal, ModalFooter } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
@@ -11,6 +11,12 @@ interface UpdatePasswordModalProps {
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
+	};
+	options?: {
+		forced?: boolean;
+	};
+	callbacks?: {
+		onSuccess?: () => void;
 	};
 }
 
@@ -28,12 +34,14 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 			setCurrentPassword("");
 			setNewPassword("");
 			setConfirmPassword("");
+			props.callbacks?.onSuccess?.();
 			props.state.setOpen(false);
 		},
 	});
 
 	// ----------------------------------------
 	// Memos
+	const forced = createMemo(() => props.options?.forced === true);
 	const submitDisabled = createMemo(() => {
 		const hasValues =
 			currentPassword().length > 0 &&
@@ -53,6 +61,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 			}}
 			options={{
 				noPadding: true,
+				preventDismiss: forced(),
 			}}
 		>
 			<form
@@ -69,10 +78,14 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 				<div class="p-4 md:p-6">
 					<div class="mb-4">
 						<h2 class="text-base font-semibold text-title">
-							{T()("actions.update.password")}
+							{forced()
+								? T()("auth.password.reset.required.title")
+								: T()("actions.update.password")}
 						</h2>
 						<p class="mt-1 text-sm text-body">
-							{T()("auth.password.description")}
+							{forced()
+								? T()("auth.password.reset.required.message")
+								: T()("auth.password.description")}
 						</p>
 					</div>
 					<Input
@@ -87,7 +100,7 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 						errors={getBodyError("currentPassword", updateMe.errors)}
 						hideOptionalText={true}
 					/>
-					<div class="grid grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<Input
 							id="newPassword"
 							name="newPassword"
@@ -124,15 +137,17 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 				<ModalFooter>
 					<div />
 					<div class="flex gap-2.5">
-						<Button
-							type="button"
-							theme="border-outline"
-							size="medium"
-							disabled={updateMe.action.isPending}
-							onClick={() => props.state.setOpen(false)}
-						>
-							{T()("common.cancel")}
-						</Button>
+						<Show when={!forced()}>
+							<Button
+								type="button"
+								theme="border-outline"
+								size="medium"
+								disabled={updateMe.action.isPending}
+								onClick={() => props.state.setOpen(false)}
+							>
+								{T()("common.cancel")}
+							</Button>
+						</Show>
 						<Button
 							type="submit"
 							theme="primary"

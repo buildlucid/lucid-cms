@@ -1,4 +1,3 @@
-import { useLocation, useNavigate } from "@solidjs/router";
 import classNames from "classnames";
 import {
 	type Component,
@@ -11,25 +10,25 @@ import {
 	Switch,
 } from "solid-js";
 import { NavigationChrome, Wrapper } from "@/components/Groups/Layout";
+import UpdatePasswordModal from "@/components/Modals/User/UpdatePassword";
 import FullPageLoading from "@/components/Partials/FullPageLoading";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import api from "@/services/api";
 import siteStore from "@/store/siteStore";
 import tenantStore from "@/store/tenantStore";
-import T, { getReady, initAdminTranslations } from "@/translations";
-import spawnToast from "@/utils/spawn-toast";
+import { getReady, initAdminTranslations } from "@/translations";
 
 const MainLayout: Component<{
 	children?: JSXElement;
 }> = (props) => {
 	// ----------------------------------
 	// Hooks
-	const navigate = useNavigate();
-	const location = useLocation();
 	const interfaceDirection = useInterfaceDirection();
 	const [translationsInitialized, setTranslationsInitialized] = createSignal(
 		getReady(),
 	);
+	const [forcedPasswordModalOpen, setForcedPasswordModalOpen] =
+		createSignal(false);
 
 	// ----------------------------------
 	// Mutations & Queries
@@ -81,6 +80,9 @@ const MainLayout: Component<{
 			translationsInitialized()
 		);
 	});
+	const requiresPasswordReset = createMemo(() => {
+		return authenticatedUser.data?.data.triggerPasswordReset === true;
+	});
 
 	// ------------------------------------------------------
 	// Effects
@@ -90,19 +92,11 @@ const MainLayout: Component<{
 				setTranslationsInitialized(true);
 			});
 		}
+	});
 
-		if (
-			authenticatedUser.data?.data.triggerPasswordReset === true &&
-			location.pathname !== "/lucid/account"
-		) {
-			spawnToast({
-				title: T()("auth.password.reset.required.title"),
-				message: T()("auth.password.reset.required.message"),
-				status: "error",
-			});
-
-			navigate("/lucid/account");
-		}
+	createEffect(() => {
+		if (!authenticatedUser.isSuccess) return;
+		setForcedPasswordModalOpen(requiresPasswordReset());
 	});
 
 	createEffect(() => {
@@ -136,6 +130,15 @@ const MainLayout: Component<{
 					>
 						<Suspense fallback={<Wrapper />}>{props.children}</Suspense>
 					</main>
+					<UpdatePasswordModal
+						state={{
+							open: forcedPasswordModalOpen(),
+							setOpen: setForcedPasswordModalOpen,
+						}}
+						options={{
+							forced: true,
+						}}
+					/>
 				</div>
 			</Match>
 		</Switch>
