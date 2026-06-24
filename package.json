@@ -18,11 +18,11 @@
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",
-		"turbo": "^2.8.12",
-		"vitest": "^4.0.18"
+		"turbo": "^2.9.18",
+		"vitest": "^4.1.9"
 	},
 	"optionalDependencies": {
-		"@rollup/rollup-linux-x64-gnu": "4.59.0"
+		"@rollup/rollup-linux-x64-gnu": "4.62.2"
 	},
 	"name": "lucid",
 	"packageManager": "npm@10.2.4",

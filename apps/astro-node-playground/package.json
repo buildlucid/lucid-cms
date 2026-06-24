@@ -17,8 +17,8 @@
 		"migrate:fresh": "lucidcms migrate:fresh"
 	},
 	"dependencies": {
-		"astro": "*",
-		"@astrojs/node": "*",
+		"astro": "^7.0.2",
+		"@astrojs/node": "^11.0.0",
 		"@lucidcms/astro": "*",
 		"@lucidcms/client": "*",
 		"@lucidcms/core": "*",

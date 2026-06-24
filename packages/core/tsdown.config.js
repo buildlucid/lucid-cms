@@ -17,7 +17,10 @@ export default defineConfig({
 		"src/libs/kv/index.ts",
 		"src/libs/media/index.ts",
 	],
-	external: [...Object.keys(packageJson.dependencies)],
+	deps: {
+		neverBundle: [...Object.keys(packageJson.dependencies)],
+		onlyBundle: false,
+	},
 	dts: true,
 	format: "esm",
 	shims: false,

@@ -11,7 +11,7 @@ import type {
 	OnDelete,
 	OnUpdate,
 } from "@lucidcms/core/types";
-import { type ColumnDataType, ParseJSONResultsPlugin, sql } from "kysely";
+import { type ColumnDataType, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import {
 	LibsqlDialect,
@@ -19,6 +19,7 @@ import {
 } from "./lib/kysely-libsql.js";
 import type { LibSQLAdapterCreator } from "./types.js";
 import createLibSQLAdapter from "./utils/create-adapter.js";
+import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
@@ -30,7 +31,7 @@ export class LibSQLAdapter extends DatabaseAdapter {
 		super({
 			adapter: "libsql",
 			dialect: new LibsqlDialect(config),
-			plugins: [new ParseJSONResultsPlugin()],
+			plugins: [createJSONResultsPlugin()],
 		});
 	}
 	async initialize() {

@@ -45,10 +45,10 @@
 		"Browser"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.4",
-		"@types/node": "^24.10.4",
-		"tsdown": "^0.20.3",
-		"typescript": "^5.9.3"
+		"@biomejs/biome": "^2.5.1",
+		"@types/node": "^24.13.2",
+		"tsdown": "^0.22.3",
+		"typescript": "^6.0.3"
 	},
 	"dependencies": {
 		"@lucidcms/types": "^0.1.0"

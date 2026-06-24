@@ -1,5 +1,5 @@
 import { confirm } from "@inquirer/prompts";
-import { Migrator } from "kysely";
+import { Migrator } from "kysely/migration";
 import constants from "../../../constants/constants.js";
 import type { Config, EnvironmentVariables } from "../../../types.js";
 import loadConfigFile from "../../config/load-config-file.js";

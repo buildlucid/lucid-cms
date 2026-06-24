@@ -11,15 +11,11 @@ import type {
 	OnDelete,
 	OnUpdate,
 } from "@lucidcms/core/types";
-import {
-	type ColumnDataType,
-	ParseJSONResultsPlugin,
-	SqliteDialect,
-	sql,
-} from "kysely";
+import { type ColumnDataType, SqliteDialect, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import type { SQLiteAdapterCreator, SQLiteAdapterOptions } from "./types.js";
 import createSQLiteAdapter from "./utils/create-adapter.js";
+import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
@@ -31,7 +27,7 @@ export class SQLiteAdapter extends DatabaseAdapter {
 		super({
 			adapter: "sqlite",
 			dialect: new SqliteDialect(normalizeSQLiteConfig(config)),
-			plugins: [new ParseJSONResultsPlugin()],
+			plugins: [createJSONResultsPlugin()],
 		});
 	}
 	async initialize() {

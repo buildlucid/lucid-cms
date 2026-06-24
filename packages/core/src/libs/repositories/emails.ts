@@ -282,7 +282,7 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				);
 
 				const [mainResult, countResult] = await Promise.all([
-					main.execute() as Promise<Pick<Select<LucidEmails>, K>[]>,
+					main.execute() as unknown as Promise<Pick<Select<LucidEmails>, K>[]>,
 					count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
 				]);
 

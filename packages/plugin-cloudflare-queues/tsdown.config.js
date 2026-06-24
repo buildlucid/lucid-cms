@@ -8,5 +8,7 @@ export default defineConfig({
 	sourcemap: true,
 	clean: true,
 	metafile: true,
-	inlineOnly: false,
+	deps: {
+		onlyBundle: false,
+	},
 });

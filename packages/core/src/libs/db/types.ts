@@ -4,9 +4,9 @@ import type {
 	Generated,
 	JSONColumnType,
 	Kysely,
-	Migration,
 	Transaction,
 } from "kysely";
+import type { Migration } from "kysely/migration";
 import type constants from "../../constants/constants.js";
 import type { OptionsName } from "../../schemas/options.js";
 import type { MediaOrigin } from "../../types/response.js";

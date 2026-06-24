@@ -1,6 +1,5 @@
 import path from "node:path";
 import chokidar from "chokidar";
-import { minimatch } from "minimatch";
 import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
@@ -245,7 +244,9 @@ const devCommand = async (options?: {
 
 	const isIgnoredFile = (filePath: string) => {
 		const relativePath = path.relative(watchPath, filePath);
-		return ignorePatterns.some((pattern) => minimatch(relativePath, pattern));
+		return ignorePatterns.some((pattern) =>
+			path.matchesGlob(relativePath, pattern),
+		);
 	};
 
 	const watcher = chokidar

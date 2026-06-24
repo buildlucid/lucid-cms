@@ -39,13 +39,13 @@
 		"@lucidcms/db-postgres": "*",
 		"@lucidcms/db-sqlite": "*",
 		"@lucidcms/plugin-worker-queues": "*",
-		"nodemailer": "^8.0.1"
+		"nodemailer": "^9.0.1"
 	},
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
 		"@types/better-sqlite3": "^7.6.13",
-		"typescript": "^5.9.3"
+		"typescript": "^6.0.3"
 	},
 	"volta": {
 		"node": "24.11.1"

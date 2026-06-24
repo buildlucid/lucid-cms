@@ -47,14 +47,14 @@
 		"Tiptap"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.4",
-		"tsdown": "^0.20.3",
-		"typescript": "^5.9.3"
+		"@biomejs/biome": "^2.5.1",
+		"tsdown": "^0.22.3",
+		"typescript": "^6.0.3"
 	},
 	"dependencies": {
-		"@tiptap/core": "^3.20.0",
-		"@tiptap/html": "^3.20.0",
-		"@tiptap/starter-kit": "^3.20.0"
+		"@tiptap/core": "^3.27.1",
+		"@tiptap/html": "^3.27.1",
+		"@tiptap/starter-kit": "^3.27.1"
 	},
 	"volta": {
 		"node": "24.11.1"

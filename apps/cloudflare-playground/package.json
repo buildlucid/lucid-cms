@@ -28,8 +28,8 @@
 	"author": "Lucid",
 	"license": "MIT",
 	"devDependencies": {
-		"typescript": "*",
-		"wrangler": "*"
+		"typescript": "^6.0.3",
+		"wrangler": "^4.104.0"
 	},
 	"volta": {
 		"node": "24.11.1"

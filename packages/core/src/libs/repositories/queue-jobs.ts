@@ -175,7 +175,9 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 				);
 
 				const [mainResult, countResult] = await Promise.all([
-					main.execute() as Promise<Pick<Select<LucidQueueJobs>, K>[]>,
+					main.execute() as unknown as Promise<
+						Pick<Select<LucidQueueJobs>, K>[]
+					>,
 					count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
 				]);
 

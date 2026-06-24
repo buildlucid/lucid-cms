@@ -4,10 +4,10 @@ import {
 	type Dialect,
 	Kysely,
 	type KyselyPlugin,
-	Migrator,
 	sql,
 } from "kysely";
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
+import { Migrator } from "kysely/migration";
 import constants from "../../constants/constants.js";
 import { LucidError } from "../../utils/errors/index.js";
 import { translate } from "../i18n/index.js";
@@ -201,13 +201,21 @@ export default abstract class DatabaseAdapter {
 		}
 
 		if (error) {
+			const errorData =
+				typeof error === "object" &&
+				error !== null &&
+				"errors" in error &&
+				typeof error.errors === "object" &&
+				error.errors !== null
+					? (error.errors as Record<string, unknown>)
+					: undefined;
+
 			throw new LucidError({
 				message:
 					error instanceof Error
 						? error?.message
 						: translate("server:core.database.migrations.failed"),
-				// @ts-expect-error
-				data: error.errors,
+				data: errorData,
 			});
 		}
 	}

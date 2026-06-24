@@ -40,9 +40,9 @@
 		"TypeScript"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.4",
-		"tsdown": "^0.20.3",
-		"typescript": "^5.9.3"
+		"@biomejs/biome": "^2.5.1",
+		"tsdown": "^0.22.3",
+		"typescript": "^6.0.3"
 	},
 	"sideEffects": false,
 	"volta": {

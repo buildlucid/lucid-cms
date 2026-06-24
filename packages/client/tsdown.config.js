@@ -4,7 +4,9 @@ export default defineConfig({
 	entry: ["src/index.ts", "src/types.ts"],
 	dts: true,
 	format: "esm",
-	inlineOnly: false,
+	deps: {
+		onlyBundle: false,
+	},
 	shims: false,
 	sourcemap: true,
 	clean: true,

@@ -16,6 +16,7 @@
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"skipLibCheck": true,
+		"types": ["node"],
 		"rootDir": "./src",
 		"outDir": "./dist"
 	},

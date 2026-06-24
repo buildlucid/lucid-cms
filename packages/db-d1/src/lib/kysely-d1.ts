@@ -4,7 +4,6 @@ import {
 	type CompiledQuery,
 	type DatabaseConnection,
 	type DatabaseIntrospector,
-	type DatabaseMetadata,
 	type DatabaseMetadataOptions,
 	type Dialect,
 	type DialectAdapter,
@@ -148,6 +147,7 @@ class D1Introspector implements DatabaseIntrospector {
 			return {
 				name,
 				isView: type === "view",
+				isForeign: false,
 				columns: columns.map((col) => ({
 					name: col.name,
 					dataType: col.type,
@@ -158,14 +158,6 @@ class D1Introspector implements DatabaseIntrospector {
 				})),
 			};
 		});
-	}
-
-	async getMetadata(
-		options?: DatabaseMetadataOptions,
-	): Promise<DatabaseMetadata> {
-		return {
-			tables: await this.getTables(options),
-		};
 	}
 }
 
