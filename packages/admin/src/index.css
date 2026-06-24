@@ -230,60 +230,66 @@
 	}
 
 	/* Rich Text (TipTap) */
+	.rich-text-content {
+		@apply text-sm leading-5 tracking-normal text-body font-body;
+	}
 	.rich-text-content h1 {
-		@apply text-xl font-bold mb-2 mt-4 first:mt-0;
+		@apply text-base leading-6 tracking-normal font-semibold text-title mb-2 mt-3 first:mt-0;
 	}
 	.rich-text-content h2 {
-		@apply text-lg font-bold mb-2 mt-3 first:mt-0;
+		@apply text-base leading-6 tracking-normal font-semibold text-title mb-2 mt-3 first:mt-0;
 	}
 	.rich-text-content h3 {
-		@apply text-base font-semibold mb-1.5 mt-3 first:mt-0;
+		@apply text-sm leading-5 tracking-normal font-semibold text-title mb-1.5 mt-3 first:mt-0;
 	}
 	.rich-text-content h4 {
-		@apply text-base font-medium mb-1.5 mt-2 first:mt-0;
+		@apply text-sm leading-5 tracking-normal font-medium text-title mb-1.5 mt-2 first:mt-0;
 	}
 	.rich-text-content h5,
 	.rich-text-content h6 {
-		@apply text-sm font-medium mb-1 mt-2 first:mt-0;
+		@apply text-sm leading-5 tracking-normal font-medium text-title mb-1 mt-2 first:mt-0;
 	}
 	.rich-text-content p {
-		@apply mb-2 last:mb-0 leading-relaxed;
+		@apply mb-2 last:mb-0 text-sm leading-5 tracking-normal text-subtitle;
 	}
 	.rich-text-content ul {
-		@apply list-disc pl-6 mb-2;
+		@apply list-disc pl-5 mb-2 text-sm leading-5 tracking-normal text-subtitle marker:text-unfocused;
 	}
 	.rich-text-content ol {
-		@apply list-decimal pl-6 mb-2;
+		@apply list-decimal pl-5 mb-2 text-sm leading-5 tracking-normal text-subtitle marker:text-unfocused;
 	}
 	.rich-text-content li {
-		@apply mb-0.5;
+		@apply mb-1 text-sm leading-5 tracking-normal text-subtitle;
 	}
 	.rich-text-content li p {
 		@apply mb-0;
 	}
+	.rich-text-content strong {
+		@apply font-semibold text-title;
+	}
 	.rich-text-content blockquote {
-		@apply border-l-3 border-border pl-4 italic text-body/80 my-2;
+		@apply border-l-2 border-border pl-3 italic text-sm leading-5 text-subtitle my-2;
 	}
 	.rich-text-content code {
-		@apply bg-background-hover rounded px-1 py-0.5 text-xs font-mono;
+		@apply bg-background-hover rounded px-1 py-0.5 text-xs leading-4 text-subtitle font-mono;
 	}
 	.rich-text-content pre {
-		@apply bg-background-hover rounded-md p-3 my-2 overflow-x-auto;
+		@apply bg-background-hover rounded-md p-3 my-2 overflow-x-auto text-xs leading-5 text-subtitle;
 	}
 	.rich-text-content pre code {
 		@apply bg-transparent p-0;
 	}
 	.rich-text-content a {
-		@apply underline;
+		@apply text-sm leading-5 tracking-normal text-primary-base underline underline-offset-2 decoration-primary-base/60;
 	}
 	.rich-text-content a:hover {
-		@apply cursor-pointer;
+		@apply cursor-pointer text-primary-hover decoration-primary-hover;
 	}
 	.rich-text-content hr {
-		@apply border-border my-4;
+		@apply border-border my-3;
 	}
 	.rich-text-content p.is-editor-empty:first-child::before {
-		@apply text-body/40 float-left h-0 pointer-events-none;
+		@apply text-sm leading-5 text-subtitle float-left h-0 pointer-events-none;
 		content: attr(data-placeholder);
 	}
 
