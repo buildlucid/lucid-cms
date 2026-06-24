@@ -1,5 +1,5 @@
 import type {
-	DocumentVersionUpdateResponse,
+	DocumentVersionCheckResponse,
 	ErrorResponse,
 	InternalDocumentField,
 	ResponseBody,
@@ -12,47 +12,43 @@ export interface Params {
 	collectionKey: string;
 	documentId: number;
 	versionId: number;
+	requestCounter?: number;
 	body: {
 		bricks?: Array<BrickData>;
 		fields?: Array<InternalDocumentField>;
 	};
 }
 
-export const updateSingleVersionReq = (params: Params) => {
-	return request<ResponseBody<DocumentVersionUpdateResponse>>({
-		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}`,
+export const checkSingleVersionReq = (params: Params) => {
+	return request<ResponseBody<DocumentVersionCheckResponse>>({
+		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}/check`,
 		csrf: true,
 		config: {
-			method: "PATCH",
+			method: "POST",
 			body: params.body,
 		},
 	});
 };
 
-interface UseUpdateSingleVersionProps {
+interface UseCheckSingleVersionProps {
 	onSuccess?: (
-		_data: ResponseBody<DocumentVersionUpdateResponse>,
+		_data: ResponseBody<DocumentVersionCheckResponse>,
 		_params: Params,
 	) => void;
 	onError?: (_errors: ErrorResponse | undefined, _params: Params) => void;
 	onMutate?: (_params: Params) => void;
-	getCollectionName: () => string;
-	invalidates?: string[];
 }
 
-const useUpdateSingleVersion = (props: UseUpdateSingleVersionProps) => {
-	// -----------------------------
-	// Mutation
+const useCheckSingleVersion = (props?: UseCheckSingleVersionProps) => {
 	return serviceHelpers.useMutationWrapper<
 		Params,
-		ResponseBody<DocumentVersionUpdateResponse>
+		ResponseBody<DocumentVersionCheckResponse>
 	>({
-		mutationFn: updateSingleVersionReq,
-		invalidates: props.invalidates ?? ["documents.getMultiple"],
+		mutationFn: checkSingleVersionReq,
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 		onMutate: props?.onMutate,
 	});
 };
 
-export default useUpdateSingleVersion;
+export default useCheckSingleVersion;

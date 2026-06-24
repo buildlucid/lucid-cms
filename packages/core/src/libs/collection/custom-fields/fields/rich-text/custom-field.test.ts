@@ -134,9 +134,7 @@ test("fail to validate field - rich text", async () => {
 		{
 			key: "standard_rich_text",
 			localeCode: "en",
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: "Invalid input: expected record, received number",
-			}),
+			message: copy.literal("Invalid input: expected record, received number"),
 		},
 	]);
 
@@ -222,9 +220,7 @@ test("fail to validate field - rich text", async () => {
 		{
 			key: "min_length_rich_text",
 			localeCode: "en",
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: 'Invalid input: expected "doc" → at type',
-			}),
+			message: copy.literal('Invalid input: expected "doc" → at type'),
 		},
 	]);
 });

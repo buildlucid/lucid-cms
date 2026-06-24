@@ -4,10 +4,11 @@ import type {
 	BrickError,
 	Collection,
 	DocumentVersionType,
+	DocumentVersionUpdateResponse,
 	FieldError,
 	InternalCollectionDocument,
 } from "@types";
-import type { Accessor } from "solid-js";
+import { type Accessor, createEffect, createSignal, on } from "solid-js";
 import api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -27,6 +28,15 @@ export function useDocumentMutations(props: {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	let latestAutoSaveRequestCounter: number | null = null;
+	const [autoSaveMetadata, setAutoSaveMetadata] =
+		createSignal<DocumentVersionUpdateResponse | null>(null);
+
+	createEffect(
+		on(
+			() => [props.documentId(), props.versionId()],
+			() => setAutoSaveMetadata(null),
+		),
+	);
 
 	const createDocumentMutation = api.documents.useCreateSingle({
 		onSuccess: (data) => {
@@ -81,15 +91,15 @@ export function useDocumentMutations(props: {
 		onMutate: () => {
 			latestAutoSaveRequestCounter = brickStore.get.autoSaveCounter;
 		},
-		onSuccess: () => {
+		onSuccess: (data) => {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
+			setAutoSaveMetadata(data.data);
 			const requestCounter = latestAutoSaveRequestCounter;
 			latestAutoSaveRequestCounter = null;
 
 			// If new edits landed after this autosave started, keep the current
-			// baseline so the refetch doesn't reconcile stale server state over
-			// newer local changes. The next autosave will pick up those edits.
+			// dirty baseline. The next autosave will pick up those edits.
 			if (requestCounter === null) return;
 			if (brickStore.get.autoSaveCounter !== requestCounter) return;
 
@@ -108,6 +118,38 @@ export function useDocumentMutations(props: {
 			);
 		},
 		getCollectionName: props.collectionSingularName,
+	});
+
+	const checkSingleVersionMutation = api.documents.useCheckSingleVersion({
+		onSuccess: (data, params) => {
+			if (
+				params.requestCounter !== undefined &&
+				brickStore.get.autoSaveCounter !== params.requestCounter
+			) {
+				return;
+			}
+
+			brickStore.set("fieldsErrors", []);
+			brickStore.set("brickErrors", []);
+			brickStore.get.mergeDraftCheckResponse(data.data);
+		},
+		onError: (errors, params) => {
+			if (
+				params.requestCounter !== undefined &&
+				brickStore.get.autoSaveCounter !== params.requestCounter
+			) {
+				return;
+			}
+
+			brickStore.set(
+				"fieldsErrors",
+				getBodyError<FieldError[]>("fields", errors) || [],
+			);
+			brickStore.set(
+				"brickErrors",
+				getBodyError<BrickError[]>("bricks", errors) || [],
+			);
+		},
 	});
 
 	const createPublishOperationMutation =
@@ -282,12 +324,14 @@ export function useDocumentMutations(props: {
 		createDocumentMutation,
 		createSingleVersionMutation,
 		updateSingleVersionMutation,
+		checkSingleVersionMutation,
 		createPublishOperationMutation,
 		updateWorkflowMutation,
 		upsertDocumentAction,
 		publishDocumentAction,
 		createPublishOperationAction,
 		autoSaveDocument,
+		autoSaveMetadata,
 		restoreRevision,
 		restoreRevisionAction,
 		updateWorkflowAction,

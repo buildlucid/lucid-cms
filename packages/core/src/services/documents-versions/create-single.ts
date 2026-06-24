@@ -130,6 +130,11 @@ const createSingle: ServiceFn<
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
 				tenantKey: context.request.tenantKey ?? null,
+				execution: {
+					mode: "upsert",
+					action: "create",
+					willPersist: true,
+				},
 			},
 			data: {
 				documentId: data.documentId,

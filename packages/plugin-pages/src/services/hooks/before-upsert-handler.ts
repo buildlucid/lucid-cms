@@ -2,7 +2,6 @@ import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
-import normalizePathField from "../../utils/normalize-path-field.js";
 import {
 	checkCircularParents,
 	checkDuplicateSlugParents,
@@ -54,7 +53,6 @@ const beforeUpsertHandler =
 		});
 		if (checkFieldsExistRes.error) return checkFieldsExistRes;
 		const { slug, parentPage, fullSlug } = checkFieldsExistRes.data;
-		normalizePathField(slug);
 
 		const checkParentIsPageOfSelfRes = checkParentIsPageOfSelf({
 			defaultLocale: context.config.localization.defaultLocale,

@@ -3,8 +3,10 @@ import type { WritableDraft } from "immer";
 import constants from "../constants.js";
 import type { CollectionConfig } from "../types/types.js";
 
+const slugSlashMessage = 'Only use a slash when the slug is exactly "/".';
+const slugSpaceMessage = "The slug cannot contain spaces.";
 const slugFormatMessage =
-	"The slug field may only contain letters, numbers, underscores, and hyphens.";
+	"The slug may only contain letters, numbers, underscores, and hyphens.";
 
 const registerFields = (
 	collection: WritableDraft<CollectionBuilder>,
@@ -43,16 +45,29 @@ const registerFields = (
 			},
 			validation: {
 				required: true,
-				zod: z.union([
-					z.literal("/"),
-					z.string().superRefine((value, ctx) => {
-						if (/^[a-zA-Z0-9_-]+$/.test(value)) return;
+				zod: z.string().superRefine((value, ctx) => {
+					if (value === "/") return;
+					if (value.includes("/")) {
 						ctx.addIssue({
 							code: "custom",
-							message: slugFormatMessage,
+							message: slugSlashMessage,
 						});
-					}),
-				]),
+						return;
+					}
+					if (/\s/.test(value)) {
+						ctx.addIssue({
+							code: "custom",
+							message: slugSpaceMessage,
+						});
+						return;
+					}
+					if (/^[a-zA-Z0-9_-]+$/.test(value)) return;
+
+					ctx.addIssue({
+						code: "custom",
+						message: slugFormatMessage,
+					});
+				}),
 			},
 			displayInListing: true,
 		})

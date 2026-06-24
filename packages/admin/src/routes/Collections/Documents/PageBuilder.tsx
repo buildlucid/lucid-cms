@@ -31,7 +31,6 @@ import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
 import { PageBuilderStateProvider } from "@/hooks/document/usePageBuilderState";
-import { useFocusSnapshot } from "@/hooks/useFocusSnapshot";
 import brickStore from "@/store/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
@@ -90,14 +89,15 @@ const CollectionsDocumentsEditRoute: Component<{
 
 	const autoSave = useDocumentAutoSave({
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
+		checkSingleVersionMutation: mutations.checkSingleVersionMutation,
 		document: docState.document,
 		collection: docState.collection,
-		hasAutoSavePermission: uiState.hasAutoSavePermission,
-		autoSaveUserEnabled: uiState.autoSaveUserEnabled,
+		hasDraftSyncPermission: () =>
+			uiState.hasSavePermission() && !uiState.isBuilderLocked(),
+		autoSaveActive: uiState.isAutoSaveActive,
 	});
 
 	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
-	const { captureFocusSnapshot, restoreFocusSnapshot } = useFocusSnapshot();
 
 	// ------------------------------------------
 	// Setup document state
@@ -141,8 +141,6 @@ const CollectionsDocumentsEditRoute: Component<{
 		if (!shouldMerge) {
 			setStateLoading(true);
 		}
-
-		const focusSnapshot = shouldMerge ? captureFocusSnapshot() : null;
 
 		batch(() => {
 			if (!shouldMerge) {
@@ -189,8 +187,6 @@ const CollectionsDocumentsEditRoute: Component<{
 			setStateLoading(false);
 			return;
 		}
-
-		restoreFocusSnapshot(focusSnapshot);
 	};
 
 	// ---------------------------------
@@ -321,6 +317,7 @@ const CollectionsDocumentsEditRoute: Component<{
 							collectionSingularName: docState.collectionSingularName,
 							documentID: docState.documentId,
 							document: docState.document,
+							autoSaveMetadata: mutations.autoSaveMetadata,
 							ui: uiState,
 							autoSave: autoSave,
 							autoSaveUserEnabled: uiState.autoSaveUserEnabled,
@@ -387,6 +384,7 @@ const CollectionsDocumentsEditRoute: Component<{
 									collection={docState.collection}
 									collectionKey={docState.collectionKey}
 									document={docState.document}
+									autoSaveMetadata={mutations.autoSaveMetadata}
 									documentId={docState.documentId}
 									disabled={disableWorkflow}
 									mutations={mutations}

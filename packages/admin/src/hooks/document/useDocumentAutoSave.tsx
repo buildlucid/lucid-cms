@@ -11,16 +11,24 @@ export function useDocumentAutoSave(props: {
 	updateSingleVersionMutation: ReturnType<
 		typeof api.documents.useUpdateSingleVersion
 	>;
+	checkSingleVersionMutation: ReturnType<
+		typeof api.documents.useCheckSingleVersion
+	>;
 	document: Accessor<InternalCollectionDocument | undefined>;
 	collection: Accessor<Collection | undefined>;
-	hasAutoSavePermission: Accessor<boolean | undefined>;
-	autoSaveUserEnabled: Accessor<boolean>;
+	hasDraftSyncPermission: Accessor<boolean | undefined>;
+	autoSaveActive: Accessor<boolean | undefined>;
 }) {
 	let debounceProgressRaf: number | undefined;
 	let debounceProgressStart = 0;
-	let lastAttemptedAutoSaveCounter = 0;
+	let lastAttemptedDraftCounter = 0;
 	const [isDebouncePending, setIsDebouncePending] = createSignal(false);
 	const [debounceProgress, setDebounceProgress] = createSignal(0);
+
+	const buildRequestBody = () => ({
+		bricks: brickHelpers.getUpsertBricks(),
+		fields: brickHelpers.getCollectionPseudoBrickFields(),
+	});
 
 	const clearDebounceProgress = () => {
 		if (debounceProgressRaf) {
@@ -58,7 +66,28 @@ export function useDocumentAutoSave(props: {
 		debounceProgressRaf = requestAnimationFrame(tickDebounceProgress);
 	};
 
-	const rawDebouncedAutoSave = debounce(() => {
+	const runDraftCheck = async (params: {
+		collectionKey: string;
+		documentId: number;
+		versionId: number;
+		requestCounter: number;
+	}) => {
+		try {
+			await props.checkSingleVersionMutation.action.mutateAsync({
+				collectionKey: params.collectionKey,
+				documentId: params.documentId,
+				versionId: params.versionId,
+				requestCounter: params.requestCounter,
+				body: buildRequestBody(),
+			});
+		} catch {
+			return false;
+		}
+
+		return brickStore.get.autoSaveCounter === params.requestCounter;
+	};
+
+	const rawDebouncedDraftSync = debounce(async () => {
 		clearDebounceProgress();
 
 		const collectionKey = props.collection()?.key;
@@ -70,34 +99,46 @@ export function useDocumentAutoSave(props: {
 			return;
 		}
 
-		lastAttemptedAutoSaveCounter = requestCounter;
+		const shouldAutoSave = props.autoSaveActive() === true;
 
-		props.updateSingleVersionMutation.action.mutate({
-			collectionKey: collectionKey,
-			documentId: documentId,
-			versionId: versionId,
-			body: {
-				bricks: brickHelpers.getUpsertBricks(),
-				fields: brickHelpers.getCollectionPseudoBrickFields(),
-			},
+		lastAttemptedDraftCounter = requestCounter;
+
+		const draftCheckIsCurrent = await runDraftCheck({
+			collectionKey,
+			documentId,
+			versionId,
+			requestCounter,
 		});
+		if (!draftCheckIsCurrent) return;
+
+		if (shouldAutoSave) {
+			props.updateSingleVersionMutation.action.mutate({
+				collectionKey: collectionKey,
+				documentId: documentId,
+				versionId: versionId,
+				body: buildRequestBody(),
+			});
+		}
 	}, AUTO_SAVE_DEBOUNCE_MS);
 
 	const debouncedAutoSave = Object.assign(
 		() => {
 			startDebounceProgress();
-			rawDebouncedAutoSave();
+			rawDebouncedDraftSync();
 		},
 		{
 			clear: () => {
 				clearDebounceProgress();
-				rawDebouncedAutoSave.clear();
+				rawDebouncedDraftSync.clear();
 			},
 		},
 	);
 
 	createEffect(() => {
-		if (props.updateSingleVersionMutation.action.isPending) {
+		if (
+			props.updateSingleVersionMutation.action.isPending ||
+			props.checkSingleVersionMutation.action.isPending
+		) {
 			debouncedAutoSave.clear();
 			return;
 		}
@@ -114,16 +155,15 @@ export function useDocumentAutoSave(props: {
 
 		if (!brickStore.getDocumentMutated()) return;
 		if (brickStore.get.autoSaveCounter === 0) {
-			lastAttemptedAutoSaveCounter = 0;
+			lastAttemptedDraftCounter = 0;
 			return;
 		}
-		// A failed autosave should pause until the user makes another edit.
+		// A failed draft sync should pause until the user makes another edit.
 		// Otherwise the same invalid payload is retried every time isPending flips.
-		if (brickStore.get.autoSaveCounter === lastAttemptedAutoSaveCounter) {
+		if (brickStore.get.autoSaveCounter === lastAttemptedDraftCounter) {
 			return;
 		}
-		if (!props.hasAutoSavePermission()) return;
-		if (!props.autoSaveUserEnabled()) return;
+		if (!props.hasDraftSyncPermission()) return;
 
 		if (brickStore.get.skipAutoSave) {
 			brickStore.set("skipAutoSave", false);
@@ -141,6 +181,8 @@ export function useDocumentAutoSave(props: {
 		debouncedAutoSave,
 		isDebouncePending,
 		debounceProgress,
+		isDraftCheckPending: () =>
+			props.checkSingleVersionMutation.action.isPending || false,
 	};
 }
 

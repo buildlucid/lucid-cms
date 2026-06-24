@@ -647,6 +647,43 @@ export interface InternalCollectionDocument {
 	workflow?: DocumentWorkflow | null;
 }
 
+export interface DocumentVersionUpdateResponse {
+	id: number;
+	versionId: number;
+	versionType: DocumentVersionType;
+	contentId: string;
+	updatedAt: string | null;
+}
+
+export interface DocumentVersionCheckField {
+	key: string;
+	type: FieldType;
+	groupRef?: string;
+	translations?: Record<string, DocumentFieldValueResponse>;
+	value?: DocumentFieldValueResponse;
+	groups?: Array<{
+		ref: string;
+		order?: number;
+		open?: boolean;
+		fields: Array<DocumentVersionCheckField>;
+	}>;
+}
+
+export interface DocumentVersionCheckBrick {
+	id?: number | null;
+	ref: string;
+	key: string;
+	order: number;
+	open?: boolean;
+	type: BrickType;
+	fields?: Array<DocumentVersionCheckField>;
+}
+
+export interface DocumentVersionCheckResponse {
+	bricks: Array<DocumentVersionCheckBrick>;
+	fields: Array<DocumentVersionCheckField>;
+}
+
 export type PublishOperationStatus =
 	| "pending"
 	| "approved"

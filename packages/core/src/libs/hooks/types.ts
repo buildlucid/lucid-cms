@@ -59,6 +59,16 @@ type DocumentUserHookMeta = DocumentHookMeta & {
 	userId: number;
 };
 
+export type DocumentBeforeUpsertHookExecution = {
+	mode: "upsert" | "check";
+	action: "create" | "update";
+	willPersist: boolean;
+};
+
+type DocumentBeforeUpsertHookMeta = DocumentUserHookMeta & {
+	execution: DocumentBeforeUpsertHookExecution;
+};
+
 type DocumentDeleteHookMeta = DocumentUserHookMeta & {
 	hardDelete: boolean;
 };
@@ -211,7 +221,7 @@ export type HookServiceHandlers = {
 		beforeUpsert: ServiceFn<
 			[
 				TransformHookPayload<
-					DocumentUserHookMeta,
+					DocumentBeforeUpsertHookMeta,
 					DocumentBeforeUpsertHookData
 				>,
 			],

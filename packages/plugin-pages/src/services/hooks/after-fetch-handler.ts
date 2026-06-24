@@ -7,7 +7,6 @@ import type {
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
-import normalizePathField from "../../utils/normalize-path-field.js";
 import constructParentFullSlug from "../construct-parent-fullslug.js";
 import getParentFields, {
 	type ParentPageQueryResponse,
@@ -135,7 +134,6 @@ const afterFetchHandler =
 
 			const slug = cloneFieldAsInput(slugField);
 			const parentPage = cloneFieldAsInput(parentPageField);
-			normalizePathField(slug);
 
 			let parentFieldsData: Array<ParentPageQueryResponse> = [];
 			const parentPageId = getParentPageId(parentPage);

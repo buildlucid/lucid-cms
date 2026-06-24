@@ -20,18 +20,18 @@ import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const updateVersionController = factory.createHandlers(
+const checkVersionController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Update a single document version for a given collection key and document ID.",
+			"Check a draft document version without persisting any changes.",
 		tags: ["documents"],
-		summary: "Update Document Version",
+		summary: "Check Document Version Draft",
 		responses: honoOpenAPIResponse({
-			schema: z.toJSONSchema(controllerSchemas.updateVersion.response),
+			schema: z.toJSONSchema(controllerSchemas.checkVersion.response),
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateVersion.body),
+		requestBody: honoOpenAPIRequestBody(controllerSchemas.checkVersion.body),
 		parameters: honoOpenAPIParamaters({
-			params: controllerSchemas.updateVersion.params,
+			params: controllerSchemas.checkVersion.params,
 			headers: {
 				csrf: true,
 			},
@@ -39,25 +39,22 @@ const updateVersionController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate(),
-	validate("json", controllerSchemas.updateVersion.body),
-	validate("param", controllerSchemas.updateVersion.params),
+	validate("json", controllerSchemas.checkVersion.body),
+	validate("param", controllerSchemas.checkVersion.params),
 	collectionPermissions("update"),
 	async (c) => {
 		const { bricks, fields } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");
 		const context = createServiceContext(c);
 
-		const updateRes = await serviceWrapper(
-			documentVersionServices.updateSingle,
-			{
-				transaction: true,
-				defaultError: {
-					type: "basic",
-					name: copy("server:core.routes.document.update.error.name"),
-					message: copy("server:core.routes.document.update.error.message"),
-				},
+		const checkRes = await serviceWrapper(documentVersionServices.checkSingle, {
+			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.document.update.error.name"),
+				message: copy("server:core.routes.document.update.error.message"),
 			},
-		)(context, {
+		})(context, {
 			collectionKey,
 			userId: c.get("auth").id,
 			documentId: Number.parseInt(id, 10),
@@ -65,15 +62,15 @@ const updateVersionController = factory.createHandlers(
 			bricks,
 			fields,
 		});
-		if (updateRes.error) throw new LucidAPIError(updateRes.error);
+		if (checkRes.error) throw new LucidAPIError(checkRes.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: updateRes.data,
+				data: checkRes.data,
 			}),
 		);
 	},
 );
 
-export default updateVersionController;
+export default checkVersionController;

@@ -15,7 +15,6 @@ interface InputFieldProps {
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
-		focusKey: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
@@ -132,7 +131,6 @@ export const InputField: Component<InputFieldProps> = (props) => {
 				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,
 			})}
-			focusKey={props.state.focusKey}
 			value={fieldValue()}
 			onChange={(value) => {
 				brickStore.get.setFieldValue({

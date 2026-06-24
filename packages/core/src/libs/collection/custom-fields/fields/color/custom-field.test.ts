@@ -96,9 +96,7 @@ test("fail to validate field - color", async () => {
 		{
 			key: "standard_color",
 			localeCode: null,
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: "Invalid input: expected string, received number",
-			}),
+			message: copy.literal("Invalid input: expected string, received number"),
 		},
 	]);
 

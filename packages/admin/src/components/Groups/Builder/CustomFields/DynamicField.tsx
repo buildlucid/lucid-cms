@@ -120,13 +120,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	const fieldColumnIsMissing = createMemo(() => {
 		return fieldRenderState.missingFieldColumns().includes(fieldConfig().key);
 	});
-	const focusKey = createMemo(() => {
-		const parts = [`brick:${fieldRenderState.brickIndex()}`];
-		if (props.state.groupPath) parts.push(`group:${props.state.groupPath}`);
-		parts.push(`field:${fieldConfig().key}`);
-		return parts.join("|");
-	});
-
 	// -------------------------------
 	// Render
 	return (
@@ -204,7 +197,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								focusKey: focusKey(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -253,7 +245,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								focusKey: focusKey(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -275,7 +266,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								focusKey: focusKey(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -382,7 +372,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								focusKey: focusKey(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),
@@ -398,7 +387,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								fieldData: fieldData(),
 								groupRef: props.state.groupRef,
 								repeaterKey: props.state.repeaterKey,
-								focusKey: focusKey(),
 								fieldError: fieldError(),
 								altLocaleError: altLocaleError(),
 								localised: isLocalised(),

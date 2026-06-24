@@ -14,7 +14,6 @@ interface TextareaFieldProps {
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
-		focusKey: string;
 		fieldError: FieldError | undefined;
 		altLocaleError: boolean;
 		localised: boolean;
@@ -109,7 +108,6 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,
 			})}
-			focusKey={props.state.focusKey}
 			value={fieldValue() ?? ""}
 			onChange={(value) => {
 				brickStore.get.setFieldValue({

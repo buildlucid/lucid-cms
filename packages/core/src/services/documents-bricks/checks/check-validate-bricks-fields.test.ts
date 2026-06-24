@@ -72,9 +72,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withTranslationsObject[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: "en",
-		message: copy("server:core.fields.validation.errors.unknown", {
-			defaultMessage: "Invalid input: expected string, received number",
-		}),
+		message: copy.literal("Invalid input: expected string, received number"),
 	});
 
 	// ---------------
@@ -97,9 +95,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValue[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: defaultLocale,
-		message: copy("server:core.fields.validation.errors.unknown", {
-			defaultMessage: "Invalid input: expected string, received number",
-		}),
+		message: copy.literal("Invalid input: expected string, received number"),
 	});
 
 	// ---------------
@@ -122,9 +118,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(withDirectValueFrench[0]).toMatchObject({
 		key: "translatable_field",
 		localeCode: frenchDefaultLocale,
-		message: copy("server:core.fields.validation.errors.unknown", {
-			defaultMessage: "Invalid input: expected string, received number",
-		}),
+		message: copy.literal("Invalid input: expected string, received number"),
 	});
 
 	// ---------------
@@ -147,9 +141,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatedCollection[0]).toMatchObject({
 		key: "text_field",
 		localeCode: null,
-		message: copy("server:core.fields.validation.errors.unknown", {
-			defaultMessage: "Invalid input: expected string, received number",
-		}),
+		message: copy.literal("Invalid input: expected string, received number"),
 	});
 
 	// ---------------
@@ -172,8 +164,6 @@ test("localeCode is correctly included or omitted based on translation support",
 	expect(nonTranslatableField[0]).toMatchObject({
 		key: "non_translatable_field",
 		localeCode: null,
-		message: copy("server:core.fields.validation.errors.unknown", {
-			defaultMessage: "Invalid input: expected string, received number",
-		}),
+		message: copy.literal("Invalid input: expected string, received number"),
 	});
 });

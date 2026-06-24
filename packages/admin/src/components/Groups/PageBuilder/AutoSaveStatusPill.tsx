@@ -20,7 +20,7 @@ const SAVED_STATE_MS = 2200;
 export const AutoSaveStatusPill: Component<{
 	ui: UseDocumentUIState;
 	autoSave?: UseDocumentAutoSave;
-	autoSaveUserEnabled?: Accessor<boolean>;
+	draftCheckEnabled?: Accessor<boolean | undefined>;
 }> = (props) => {
 	// ----------------------------------
 	// State / Hooks
@@ -36,15 +36,24 @@ export const AutoSaveStatusPill: Component<{
 
 	// ----------------------------------
 	// Memos
+	const isAutoSaveMode = createMemo(() => {
+		return props.ui.isAutoSaveActive?.() === true;
+	});
 	const showAutoSaveStatus = createMemo(() => {
-		return (
-			props.ui.hasAutoSavePermission?.() === true &&
-			!!props.autoSaveUserEnabled?.()
-		);
+		return isAutoSaveMode() || props.draftCheckEnabled?.() === true;
 	});
 	const autoSaveStatusLabel = createMemo(() => {
-		if (showAutoSaveSavingState()) return T()("common.status.saving");
-		if (showAutoSaveSavedState()) return T()("common.status.saved");
+		if (showAutoSaveSavingState()) {
+			return isAutoSaveMode()
+				? T()("common.status.saving")
+				: T()("common.status.validating");
+		}
+		if (showAutoSaveSavedState()) {
+			return isAutoSaveMode()
+				? T()("common.status.saved")
+				: T()("common.status.validated");
+		}
+		if (!isAutoSaveMode()) return T()("builder.validation.label");
 		return T()("builder.auto.save.label");
 	});
 	const isAutoSaveDebouncePending = createMemo(() => {
@@ -68,9 +77,11 @@ export const AutoSaveStatusPill: Component<{
 	// ----------------------------------
 	// Effects
 	createEffect(() => {
-		const isAutoSaving = props.ui.isAutoSaving?.() || false;
+		const requestPending = isAutoSaveMode()
+			? props.ui.isAutoSaving?.() || props.autoSave?.isDraftCheckPending?.()
+			: props.autoSave?.isDraftCheckPending?.();
 
-		if (isAutoSaving) {
+		if (requestPending) {
 			autoSaveSavingStartedAt = performance.now();
 			wasAutoSaving = true;
 			setShowAutoSaveSavingState(true);

@@ -109,10 +109,9 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage:
-					"Invalid input: expected string, received boolean → at url",
-			}),
+			message: copy.literal(
+				"Invalid input: expected string, received boolean → at url",
+			),
 		},
 	]);
 
@@ -178,10 +177,9 @@ test("fail to validate field - link", async () => {
 		{
 			key: "standard_link",
 			localeCode: null,
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage:
-					"Invalid input: expected string, received boolean → at label",
-			}),
+			message: copy.literal(
+				"Invalid input: expected string, received boolean → at label",
+			),
 		},
 	]);
 

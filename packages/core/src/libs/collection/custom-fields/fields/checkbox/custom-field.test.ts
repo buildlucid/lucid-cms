@@ -96,9 +96,7 @@ test("fail to validate field - checkbox", async () => {
 		{
 			key: "standard_checkbox",
 			localeCode: null,
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: "Invalid input",
-			}),
+			message: copy.literal("Invalid input"),
 		},
 	]);
 

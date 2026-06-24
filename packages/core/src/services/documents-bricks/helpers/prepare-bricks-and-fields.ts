@@ -8,7 +8,7 @@ import type { Config, FieldInputSchema, FieldTypes } from "../../../types.js";
 /**
  * - Processes fields to remove any that don't exist in the custom fields.
  * - Processes recursively for tree-table fields with nested groups.
- * - Based on collection and field translation support, sort out the fields translations/value props and fill missing translations with default values
+ * - Based on collection and field translation support, sort out the fields translations/value props
  * - Normalizes the input value of the field using the custom field instance's normalizeInputValue method
  */
 const processFields = (props: {
@@ -73,22 +73,8 @@ const processFields = (props: {
 				if (processedField.translations && processedField.value === undefined) {
 					const translationValue =
 						processedField.translations[props.localization.defaultLocale];
-					processedField.value =
-						translationValue !== undefined
-							? translationValue
-							: cfInstance.defaultValue;
+					processedField.value = translationValue;
 					processedField.translations = undefined;
-				}
-			}
-
-			// if processField.translations is set, ensure that each supported locale has a key. Use the cfInstance.defaultValue for missing locales
-			if (processedField.translations) {
-				for (const locale of props.localization.locales) {
-					const localeCode = locale.code;
-					//* if null its intentionally empty - no default should be set
-					if (processedField.translations[localeCode] === undefined) {
-						processedField.translations[localeCode] = cfInstance.defaultValue;
-					}
 				}
 			}
 

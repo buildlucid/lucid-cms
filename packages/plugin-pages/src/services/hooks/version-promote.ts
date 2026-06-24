@@ -3,7 +3,6 @@ import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import fieldResToSchema from "../../utils/field-res-to-schema.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
-import normalizePathField from "../../utils/normalize-path-field.js";
 import {
 	checkCircularParents,
 	checkDuplicateSlugParents,
@@ -80,7 +79,6 @@ const versionPromoteHandler =
 		});
 		if (checkFieldsExistRes.error) return checkFieldsExistRes;
 		const { slug, parentPage, fullSlug } = checkFieldsExistRes.data;
-		normalizePathField(slug);
 
 		// ----------------------------------------------------------------
 		// create fullSlug - close to the beforeUpsert hook

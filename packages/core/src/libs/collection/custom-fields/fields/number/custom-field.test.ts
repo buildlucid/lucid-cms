@@ -123,9 +123,7 @@ test("fail to validate field - number", async () => {
 		{
 			key: "standard_number",
 			localeCode: null,
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: "Invalid input: expected number, received string",
-			}),
+			message: copy.literal("Invalid input: expected number, received string"),
 		},
 	]);
 
@@ -179,9 +177,7 @@ test("fail to validate field - number", async () => {
 		{
 			key: "min_number",
 			localeCode: null,
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: "Too small: expected number to be >=5",
-			}),
+			message: copy.literal("Too small: expected number to be >=5"),
 		},
 	]);
 });

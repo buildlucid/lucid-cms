@@ -160,9 +160,7 @@ test("fail to validate field - datetime", async () => {
 		{
 			key: "standard_datetime",
 			localeCode: null,
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: "Invalid input",
-			}),
+			message: copy.literal("Invalid input"),
 		},
 	]);
 

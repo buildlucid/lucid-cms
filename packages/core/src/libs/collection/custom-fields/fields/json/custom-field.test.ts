@@ -133,9 +133,7 @@ test("fail to validate field - json", async () => {
 		{
 			key: "standard_json",
 			localeCode: null,
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: "Invalid input: expected record, received string",
-			}),
+			message: copy.literal("Invalid input: expected record, received string"),
 		},
 	]);
 
@@ -192,10 +190,9 @@ test("fail to validate field - json", async () => {
 		{
 			key: "zod_json",
 			localeCode: null,
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage:
-					"Invalid input: expected string, received boolean → at value",
-			}),
+			message: copy.literal(
+				"Invalid input: expected string, received boolean → at value",
+			),
 		},
 	]);
 });

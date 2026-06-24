@@ -1,6 +1,8 @@
+import type { DocumentVersionUpdateResponse } from "../../types/response.js";
 import type { DocumentVersion, LucidBrickTableName } from "../../types.js";
 import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
+import type { LucidVersionTable, Select } from "../db/types.js";
 import type { RevisionsQueryResponse } from "../repositories/document-versions.js";
 import formatter from "./index.js";
 
@@ -61,7 +63,24 @@ const formatSingle = (props: {
 	};
 };
 
+const formatUpdateSingle = (props: {
+	documentId: number;
+	version: Pick<
+		Select<LucidVersionTable>,
+		"id" | "type" | "content_id" | "updated_at"
+	>;
+}): DocumentVersionUpdateResponse => {
+	return {
+		id: props.documentId,
+		versionId: props.version.id,
+		versionType: props.version.type,
+		contentId: props.version.content_id,
+		updatedAt: formatter.formatDate(props.version.updated_at),
+	};
+};
+
 export default {
 	formatMultiple,
 	formatSingle,
+	formatUpdateSingle,
 };

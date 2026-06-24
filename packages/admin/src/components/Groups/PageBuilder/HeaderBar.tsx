@@ -1,4 +1,8 @@
-import type { Collection, InternalCollectionDocument } from "@types";
+import type {
+	Collection,
+	DocumentVersionUpdateResponse,
+	InternalCollectionDocument,
+} from "@types";
 import classNames from "classnames";
 import {
 	FaSolidCalendarPlus,
@@ -45,6 +49,7 @@ export const HeaderBar: Component<{
 		collectionSingularName: Accessor<string>;
 		documentID: Accessor<number | undefined>;
 		document: Accessor<InternalCollectionDocument | undefined>;
+		autoSaveMetadata?: Accessor<DocumentVersionUpdateResponse | null>;
 		ui: UseDocumentUIState;
 		autoSave?: UseDocumentAutoSave;
 		autoSaveUserEnabled?: Accessor<boolean>;
@@ -72,6 +77,26 @@ export const HeaderBar: Component<{
 	const hasMultipleLocales = createMemo(() => {
 		return contentLocaleStore.get.locales.length > 1;
 	});
+	const matchingAutoSaveMetadata = createMemo(() => {
+		const document = props.state.document();
+		const metadata = props.state.autoSaveMetadata?.();
+		if (!document || !metadata) return null;
+		if (metadata.id !== document.id) return null;
+		if (metadata.versionId !== document.versionId) return null;
+
+		return metadata;
+	});
+	const documentUpdatedAt = createMemo(() => {
+		return (
+			matchingAutoSaveMetadata()?.updatedAt ?? props.state.document()?.updatedAt
+		);
+	});
+	const versionContentId = (versionType: string) => {
+		const metadata = matchingAutoSaveMetadata();
+		if (metadata?.versionType === versionType) return metadata.contentId;
+
+		return props.state.document()?.version[versionType]?.contentId;
+	};
 	const breadcrumbs = createMemo(() => {
 		const documentRoute = getDocumentRoute("edit", {
 			collectionKey: props.state.collectionKey(),
@@ -170,8 +195,7 @@ export const HeaderBar: Component<{
 				status: {
 					isPublished: isPublished,
 					upToDate:
-						props.state.document()?.version[environment.key]?.contentId ===
-						props.state.document()?.version.latest?.contentId,
+						versionContentId(environment.key) === versionContentId("latest"),
 				},
 			});
 		}
@@ -214,8 +238,7 @@ export const HeaderBar: Component<{
 			const label = environmentLabels.get(environment.key) || environment.key;
 
 			const isPromoted =
-				props.state.document()?.version[environment.key]?.contentId ===
-				props.state.document()?.version.latest?.contentId;
+				versionContentId(environment.key) === versionContentId("latest");
 
 			const publishRequestTargetEnabled =
 				publishReview?.requiredFor.includes(environment.key) === true;
@@ -241,15 +264,14 @@ export const HeaderBar: Component<{
 				T()("documents.workflow.no.stage");
 
 			const workflowDisabled = !workflowAllowsTarget;
-			const latestContentId = document.version.latest?.contentId;
+			const latestContentId = versionContentId("latest");
 			const unmetReleaseRequirementLabels =
 				latestContentId === undefined
 					? []
 					: (environment.requires ?? [])
 							.filter(
 								(requiredTarget) =>
-									document.version[requiredTarget]?.contentId !==
-									latestContentId,
+									versionContentId(requiredTarget) !== latestContentId,
 							)
 							.map(
 								(requiredTarget) =>
@@ -404,7 +426,7 @@ export const HeaderBar: Component<{
 								</div>
 								<div class="flex items-center gap-1.5 text-body">
 									<FaSolidClock size={12} />
-									<DateText date={props.state.document()?.updatedAt} />
+									<DateText date={documentUpdatedAt()} />
 								</div>
 							</div>
 							<Show when={props.state.ui.hasAutoSavePermission?.()}>
@@ -565,7 +587,12 @@ export const HeaderBar: Component<{
 			<AutoSaveStatusPill
 				ui={props.state.ui}
 				autoSave={props.state.autoSave}
-				autoSaveUserEnabled={props.state.autoSaveUserEnabled}
+				draftCheckEnabled={() =>
+					props.mode === "edit" &&
+					props.state.ui.hasSavePermission?.() === true &&
+					props.state.ui.isBuilderLocked?.() !== true &&
+					props.state.ui.isAutoSaveActive?.() !== true
+				}
 			/>
 		</>
 	);

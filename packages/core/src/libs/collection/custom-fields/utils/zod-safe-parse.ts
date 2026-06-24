@@ -28,9 +28,7 @@ const zodSafeParse = (
 
 	return {
 		valid: false,
-		message: copy("server:core.fields.validation.errors.unknown", {
-			defaultMessage: message,
-		}),
+		message: copy.literal(message),
 	};
 };
 

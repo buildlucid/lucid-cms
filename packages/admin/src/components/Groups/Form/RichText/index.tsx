@@ -8,7 +8,6 @@ import useEditor from "./useEditor";
 
 interface RichTextProps {
 	id: string;
-	focusKey?: string;
 	value: RichTextJSON | null | undefined;
 	onChange: (_value: RichTextJSON) => void;
 	copy?: {
@@ -47,7 +46,6 @@ export const RichText: Component<RichTextProps> = (props) => {
 			class={classnames("w-full max-w-full", {
 				"mb-3 last:mb-0": props.noMargin !== true,
 			})}
-			data-focus-key={props.focusKey}
 		>
 			<div class="relative">
 				<Label

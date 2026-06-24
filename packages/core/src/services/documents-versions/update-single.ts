@@ -1,15 +1,14 @@
 import { randomUUID } from "node:crypto";
-import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
-import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
-import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import { documentVersionsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { copy } from "../../libs/i18n/index.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import type { DocumentVersionUpdateResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import invalidateClientDocumentCache from "../documents/helpers/invalidate-client-cache.js";
-import { documentBrickServices, documentServices } from "../index.js";
+import { documentBrickServices } from "../index.js";
+import getUpdateContext from "./helpers/get-update-context.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -23,7 +22,7 @@ const updateSingle: ServiceFn<
 			fields?: Array<FieldInputSchema>;
 		},
 	],
-	number
+	DocumentVersionUpdateResponse
 > = async (context, data) => {
 	const Version = new DocumentVersionsRepository(
 		context.db.client,
@@ -33,107 +32,12 @@ const updateSingle: ServiceFn<
 	// ----------------------------------------------
 	// Checks
 
-	//* check collection exists
-	const collectionRes = await documentServices.checks.checkCollection(context, {
-		key: data.collectionKey,
+	const updateContextRes = await getUpdateContext(context, {
+		collectionKey: data.collectionKey,
+		documentId: data.documentId,
+		versionId: data.versionId,
 	});
-	if (collectionRes.error) return collectionRes;
-
-	const tableNamesRes = await getTableNames(context, data.collectionKey);
-	if (tableNamesRes.error) return tableNamesRes;
-
-	const documentAccessRes = await documentServices.checks.checkDocumentAccess(
-		context,
-		{
-			collectionKey: data.collectionKey,
-			id: data.documentId,
-		},
-	);
-	if (documentAccessRes.error) return documentAccessRes;
-
-	//* check collection is locked
-	if (collectionRes.data.getData.config.locked) {
-		return {
-			error: {
-				type: "basic",
-				name: copy("server:core.error.locked.collection.name"),
-				message: copy("server:core.error.locked.collection.message"),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
-
-	//* check the schema status and if a migration is required
-	const migrationStatusRes = await getMigrationStatus(context, {
-		collection: collectionRes.data,
-	});
-	if (migrationStatusRes.error) return migrationStatusRes;
-
-	if (migrationStatusRes.data.requiresMigration) {
-		return {
-			error: {
-				type: "basic",
-				name: copy("server:core.error.schema.migration.required.name"),
-				message: copy("server:core.error.schema.migration.required.message"),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
-
-	const migrationIdRes = await getCurrentCollectionMigrationId(
-		context,
-		data.collectionKey,
-	);
-	if (migrationIdRes.error) return migrationIdRes;
-
-	//* check if document exists within the collection
-	const versionExistsRes = await Version.selectSingle(
-		{
-			select: ["id", "type"],
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.versionId,
-				},
-				{
-					key: "collection_key",
-					operator: "=",
-					value: data.collectionKey,
-				},
-				{
-					key: "document_id",
-					operator: "=",
-					value: data.documentId,
-				},
-			],
-			validation: {
-				enabled: true,
-				defaultError: {
-					message: copy("server:core.documents.versions.not.found.message"),
-					status: 404,
-				},
-			},
-		},
-		{
-			tableName: tableNamesRes.data.version,
-		},
-	);
-	if (versionExistsRes.error) return versionExistsRes;
-
-	if (versionExistsRes.data.type === "revision") {
-		return {
-			error: {
-				type: "basic",
-				name: copy("server:core.error.update.revision.version.name"),
-				message: copy("server:core.error.update.revision.version.message"),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
+	if (updateContextRes.error) return updateContextRes;
 
 	// ----------------------------------------------
 	// Update document
@@ -155,20 +59,25 @@ const updateSingle: ServiceFn<
 			service: "documents",
 			event: "beforeUpsert",
 			config: context.config,
-			collectionInstance: collectionRes.data,
+			collectionInstance: updateContextRes.data.collection,
 		},
 		{
 			meta: {
-				collection: collectionRes.data,
+				collection: updateContextRes.data.collection,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
-				collectionTableNames: tableNamesRes.data,
+				collectionTableNames: updateContextRes.data.tableNames,
 				tenantKey: context.request.tenantKey ?? null,
+				execution: {
+					mode: "upsert",
+					action: "update",
+					willPersist: true,
+				},
 			},
 			data: {
 				documentId: data.documentId,
 				versionId: data.versionId,
-				versionType: versionExistsRes.data.type,
+				versionType: updateContextRes.data.versionType,
 				bricks: data.bricks,
 				fields: data.fields,
 			},
@@ -184,7 +93,7 @@ const updateSingle: ServiceFn<
 			documentId: data.documentId,
 			bricks: hookResponse.data.bricks,
 			fields: hookResponse.data.fields,
-			collection: collectionRes.data,
+			collection: updateContextRes.data.collection,
 		},
 	);
 	if (createMultipleBricks.error) return createMultipleBricks;
@@ -196,20 +105,20 @@ const updateSingle: ServiceFn<
 			service: "documents",
 			event: "afterUpsert",
 			config: context.config,
-			collectionInstance: collectionRes.data,
+			collectionInstance: updateContextRes.data.collection,
 		},
 		{
 			meta: {
-				collection: collectionRes.data,
+				collection: updateContextRes.data.collection,
 				collectionKey: data.collectionKey,
 				userId: data.userId,
-				collectionTableNames: tableNamesRes.data,
+				collectionTableNames: updateContextRes.data.tableNames,
 				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				documentId: data.documentId,
 				versionId: data.versionId,
-				versionType: versionExistsRes.data.type,
+				versionType: updateContextRes.data.versionType,
 				bricks: hookResponse.data.bricks || [],
 				fields: hookResponse.data.fields || [],
 			},
@@ -218,17 +127,23 @@ const updateSingle: ServiceFn<
 	if (hookAfterRes.error) return hookAfterRes;
 
 	//* update the version with the updated at/by values
+	const contentId = randomUUID();
+	const updatedAt = new Date().toISOString();
 	const updateVersionRes = await Version.updateSingle(
 		{
 			where: [{ key: "id", operator: "=", value: data.versionId }],
 			data: {
-				content_id: randomUUID(),
-				collection_migration_id: migrationIdRes.data,
+				content_id: contentId,
+				collection_migration_id: updateContextRes.data.migrationId,
 				updated_by: data.userId,
-				updated_at: new Date().toISOString(),
+				updated_at: updatedAt,
+			},
+			returning: ["id", "type", "content_id", "updated_at"],
+			validation: {
+				enabled: true,
 			},
 		},
-		{ tableName: tableNamesRes.data.version },
+		{ tableName: updateContextRes.data.tableNames.version },
 	);
 	if (updateVersionRes.error) return updateVersionRes;
 
@@ -236,7 +151,10 @@ const updateSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: data.documentId,
+		data: documentVersionsFormatter.formatUpdateSingle({
+			documentId: data.documentId,
+			version: updateVersionRes.data,
+		}),
 	};
 };
 

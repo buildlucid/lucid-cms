@@ -1,4 +1,8 @@
-import type { Collection, InternalCollectionDocument } from "@types";
+import type {
+	Collection,
+	DocumentVersionUpdateResponse,
+	InternalCollectionDocument,
+} from "@types";
 import { FaSolidInfo } from "solid-icons/fa";
 import {
 	type Accessor,
@@ -51,6 +55,7 @@ const UserDetailValue: Component<{
 export const DocumentDetails: Component<{
 	collection: Accessor<Collection | undefined>;
 	document: Accessor<InternalCollectionDocument | undefined>;
+	autoSaveMetadata?: Accessor<DocumentVersionUpdateResponse | null>;
 	documentId: Accessor<number | undefined>;
 }> = (props) => {
 	// ----------------------------------
@@ -87,6 +92,15 @@ export const DocumentDetails: Component<{
 			},
 		].filter((detail) => detail.show);
 	});
+	const updatedAt = createMemo(() => {
+		const document = props.document();
+		const metadata = props.autoSaveMetadata?.();
+		if (!document || !metadata) return document?.updatedAt;
+		if (metadata.id !== document.id) return document.updatedAt;
+		if (metadata.versionId !== document.versionId) return document.updatedAt;
+
+		return metadata.updatedAt;
+	});
 
 	// ----------------------------------
 	// Render
@@ -103,9 +117,9 @@ export const DocumentDetails: Component<{
 							<DateText date={props.document()?.createdAt} class="text-xs" />
 						</DetailRow>
 					</Show>
-					<Show when={props.document()?.updatedAt}>
+					<Show when={updatedAt()}>
 						<DetailRow label={T()("common.updated.at")}>
-							<DateText date={props.document()?.updatedAt} class="text-xs" />
+							<DateText date={updatedAt()} class="text-xs" />
 						</DetailRow>
 					</Show>
 					<For each={details()}>

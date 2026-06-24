@@ -10,7 +10,10 @@ import {
 	fieldInputSchema,
 	fieldResponseSchema,
 } from "./collection-fields.js";
-import { documentVersionResponseSchema } from "./document-versions.js";
+import {
+	documentVersionResponseSchema,
+	versionTypesSchema,
+} from "./document-versions.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaEmbedResponseSchema } from "./media.js";
 
@@ -238,6 +241,60 @@ export const controllerSchemas = {
 				description: "The document's ID",
 				example: 1,
 			}),
+			versionId: z.number().meta({
+				description: "The updated version ID",
+				example: 1,
+			}),
+			versionType: versionTypesSchema.meta({
+				description: "The updated version type",
+				example: "latest",
+			}),
+			contentId: z.string().meta({
+				description: "The updated version content ID",
+				example: "123e4567-e89b-12d3-a456-426614174000",
+			}),
+			updatedAt: z.string().nullable().meta({
+				description: "The timestamp when this version was updated",
+				example: "2025-04-10T15:45:00Z",
+			}),
+		}),
+	} satisfies ControllerSchema,
+	checkVersion: {
+		body: z.object({
+			bricks: z
+				.array(brickInputSchema)
+				.meta({
+					description: "An array of draft bricks to check",
+				})
+				.optional(),
+			fields: z
+				.array(fieldInputSchema)
+				.meta({
+					description: "Draft collection field values to check",
+				})
+				.optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().trim().meta({
+				description: "The document's ID",
+				example: 1,
+			}),
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			versionId: z.string().trim().meta({
+				description: "The version ID",
+				example: 1,
+			}),
+		}),
+		response: z.object({
+			bricks: z.array(brickInputSchema),
+			fields: z.array(fieldInputSchema),
 		}),
 	} satisfies ControllerSchema,
 	deleteMultiple: {

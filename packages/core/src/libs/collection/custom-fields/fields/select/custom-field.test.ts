@@ -171,9 +171,9 @@ test("fail to validate field - select", async () => {
 			{
 				key: "standard_select",
 				localeCode: null,
-				message: copy("server:core.fields.validation.errors.unknown", {
-					defaultMessage: "Invalid input: expected string, received number",
-				}),
+				message: copy.literal(
+					"Invalid input: expected string, received number",
+				),
 			},
 		],
 	});

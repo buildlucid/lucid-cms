@@ -2,6 +2,7 @@ import type {
 	BrickError,
 	Collection,
 	DocumentRef,
+	DocumentVersionCheckResponse,
 	FieldError,
 	FieldRef,
 	FieldTypes,
@@ -18,6 +19,7 @@ import type {
 	CollectionNonTabFieldConfig,
 } from "@/types/collection-config";
 import brickHelpers, { clearTargetFieldErrors } from "@/utils/brick-helpers";
+import { mergeDraftCheckFields } from "@/utils/draft-check-helpers";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 
 export interface BrickData {
@@ -114,6 +116,7 @@ const [get, set] = createStore<{
 		fieldType: "media" | "document" | "user",
 		ref: FieldRef | FieldRef[],
 	) => void;
+	mergeDraftCheckResponse: (response: DocumentVersionCheckResponse) => void;
 	startRelationFieldDrag: () => void;
 	endRelationFieldDrag: () => void;
 }>({
@@ -621,6 +624,44 @@ const [get, set] = createStore<{
 				}
 			}),
 		);
+	},
+	mergeDraftCheckResponse(response) {
+		const collectionFieldsPseudoBrickIndex = get.bricks.findIndex(
+			(brick) => brick.type === "collection-fields",
+		);
+
+		if (collectionFieldsPseudoBrickIndex !== -1 && response.fields.length > 0) {
+			set(
+				"bricks",
+				collectionFieldsPseudoBrickIndex,
+				"fields",
+				produce((fields) => {
+					mergeDraftCheckFields(fields, response.fields);
+				}),
+			);
+		}
+
+		response.bricks.forEach((responseBrick) => {
+			const responseBrickFields = responseBrick.fields ?? [];
+			const brickIndex = get.bricks.findIndex((brick) => {
+				if (brick.type === "collection-fields") return false;
+				if (brick.type !== responseBrick.type) return false;
+				if (brick.key !== responseBrick.key) return false;
+				if (brick.type === "builder") return brick.ref === responseBrick.ref;
+				return true;
+			});
+
+			if (brickIndex === -1 || responseBrickFields.length === 0) return;
+
+			set(
+				"bricks",
+				brickIndex,
+				"fields",
+				produce((fields) => {
+					mergeDraftCheckFields(fields, responseBrickFields);
+				}),
+			);
+		});
 	},
 	startRelationFieldDrag() {
 		set("relationFieldDragCount", (prev) => prev + 1);

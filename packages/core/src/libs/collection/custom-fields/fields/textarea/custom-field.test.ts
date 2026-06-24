@@ -123,9 +123,7 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "standard_textarea",
 			localeCode: "en",
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: "Invalid input: expected string, received number",
-			}),
+			message: copy.literal("Invalid input: expected string, received number"),
 		},
 	]);
 
@@ -179,9 +177,9 @@ test("fail to validate field - textarea", async () => {
 		{
 			key: "min_length_textarea",
 			localeCode: "en",
-			message: copy("server:core.fields.validation.errors.unknown", {
-				defaultMessage: "Too small: expected string to have >=5 characters",
-			}),
+			message: copy.literal(
+				"Too small: expected string to have >=5 characters",
+			),
 		},
 	]);
 });

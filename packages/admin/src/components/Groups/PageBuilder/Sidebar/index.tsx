@@ -1,4 +1,8 @@
-import type { Collection, InternalCollectionDocument } from "@types";
+import type {
+	Collection,
+	DocumentVersionUpdateResponse,
+	InternalCollectionDocument,
+} from "@types";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import { DocumentDetails } from "./DocumentDetails";
@@ -9,6 +13,7 @@ export const Sidebar: Component<{
 	collection: Accessor<Collection | undefined>;
 	collectionKey: Accessor<string>;
 	document: Accessor<InternalCollectionDocument | undefined>;
+	autoSaveMetadata?: Accessor<DocumentVersionUpdateResponse | null>;
 	documentId: Accessor<number | undefined>;
 	disabled: Accessor<boolean>;
 	mutations: UseDocumentMutations;
@@ -53,6 +58,7 @@ export const Sidebar: Component<{
 			<DocumentDetails
 				collection={props.collection}
 				document={props.document}
+				autoSaveMetadata={props.autoSaveMetadata}
 				documentId={props.documentId}
 			/>
 		</aside>
