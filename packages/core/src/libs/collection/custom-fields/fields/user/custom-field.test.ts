@@ -17,7 +17,7 @@ const UserCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	config: {
+	features: {
 		localized: true,
 	},
 })
@@ -61,7 +61,7 @@ test("successfully validate field - user", async () => {
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.config.localized,
+			localized: UserCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -90,7 +90,7 @@ test("successfully validate field - user", async () => {
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.config.localized,
+			localized: UserCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -114,7 +114,7 @@ test("fail to validate field - user", async () => {
 				document: [],
 			},
 			meta: {
-				localized: UserCollection.getData.config.localized,
+				localized: UserCollection.getData.features.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -132,7 +132,7 @@ test("fail to validate field - user", async () => {
 				document: [],
 			},
 			meta: {
-				localized: UserCollection.getData.config.localized,
+				localized: UserCollection.getData.features.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -171,7 +171,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.config.localized,
+			localized: UserCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -189,7 +189,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.config.localized,
+			localized: UserCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -207,7 +207,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.config.localized,
+			localized: UserCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});

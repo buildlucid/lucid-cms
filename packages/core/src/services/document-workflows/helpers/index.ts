@@ -11,7 +11,7 @@ import type { LucidAuth } from "../../../types/hono.js";
  */
 export const getWorkflowConfig = (
 	collection: CollectionBuilder,
-): PublishingWorkflowConfig | undefined => collection.getData.config.workflow;
+): PublishingWorkflowConfig | undefined => collection.getData.features.workflow;
 
 /**
  * Finds a configured workflow stage by key without applying initial-stage fallback.

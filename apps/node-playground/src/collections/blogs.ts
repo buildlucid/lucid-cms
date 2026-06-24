@@ -18,7 +18,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 	group: {
 		key: "content",
 	},
-	config: {
+	features: {
 		localized: true,
 		scheduling: true,
 		environments: [
@@ -34,13 +34,13 @@ const BlogCollection = new CollectionBuilder("blog", {
 			hidden: false,
 			disabled: false,
 		},
-		displayInListing: true,
+		listing: true,
 	})
 	.addTextarea("page_excerpt", {
-		displayInListing: true,
+		listing: true,
 	})
 	.addUser("author", {
-		displayInListing: true,
+		listing: true,
 	})
 	.addRichText("content");
 

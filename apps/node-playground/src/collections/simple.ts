@@ -8,7 +8,7 @@ const SimpleCollection = new CollectionBuilder("simple", {
 		name: copy("admin:collections.simple.name"),
 		singularName: copy("admin:collections.simple.singularName"),
 	},
-	config: {
+	features: {
 		localized: true,
 		revisions: true,
 	},
@@ -25,7 +25,7 @@ const SimpleCollection = new CollectionBuilder("simple", {
 			required: true,
 			zod: z.string().min(2).max(128),
 		},
-		displayInListing: true,
+		listing: true,
 	})
 	.addUser("user")
 	.addMedia("media")

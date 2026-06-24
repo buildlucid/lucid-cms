@@ -79,6 +79,7 @@ const formatSingle = (props: {
 	const formattedCollection: Collection = {
 		key: key,
 		mode: collectionData.mode,
+		tenants: collectionData.tenants,
 		group: collectionData.group,
 		documentId: props.include?.documentId
 			? getDocumentId(key, props.documents)
@@ -88,17 +89,17 @@ const formatSingle = (props: {
 			singularName: collectionData.details.singularName,
 			summary: collectionData.details.summary,
 		},
-		config: {
-			localized: collectionData.config.localized,
-			revisions: collectionData.config.revisions,
-			locked: collectionData.config.locked,
-			displayInListing: props.collection.displayInListing,
-			autoSave: collectionData.config.autoSave,
-			scheduling: collectionData.config.scheduling,
-			revisionRetentionDays: collectionData.config.revisionRetentionDays,
-			review: collectionData.config.review,
-			workflow: collectionData.config.workflow,
-			environments: collectionData.config.environments.map((environment) => ({
+		features: {
+			localized: collectionData.features.localized,
+			revisions: collectionData.features.revisions,
+			locked: collectionData.features.locked,
+			listing: props.collection.listing,
+			autoSave: collectionData.features.autoSave,
+			scheduling: collectionData.features.scheduling,
+			revisionRetentionDays: collectionData.features.revisionRetentionDays,
+			review: collectionData.features.review,
+			workflow: collectionData.features.workflow,
+			environments: collectionData.features.environments.map((environment) => ({
 				key: environment.key,
 				name: environment.name,
 				requires: environment.requires,
@@ -118,7 +119,7 @@ const formatSingle = (props: {
 		},
 		capabilities: {
 			scheduling:
-				collectionData.config.scheduling === true &&
+				collectionData.features.scheduling === true &&
 				props.queueSupportsScheduling === true,
 		},
 		permissions: resolvedPermissions,
@@ -126,7 +127,7 @@ const formatSingle = (props: {
 		fixedBricks: props.include?.bricks
 			? (props.collection.config.bricks?.fixed
 					?.filter((brick) =>
-						tenantAccessAllowed(brick.config.tenantKeys, props.tenantKey),
+						tenantAccessAllowed(brick.config.tenants, props.tenantKey),
 					)
 					.map((brick) =>
 						formatBrick({
@@ -138,7 +139,7 @@ const formatSingle = (props: {
 		builderBricks: props.include?.bricks
 			? (props.collection.config.bricks?.builder
 					?.filter((brick) =>
-						tenantAccessAllowed(brick.config.tenantKeys, props.tenantKey),
+						tenantAccessAllowed(brick.config.tenants, props.tenantKey),
 					)
 					.map((brick) =>
 						formatBrick({
@@ -245,10 +246,7 @@ const getDocumentTargetCollectionKeys = (props: {
 	return new Set(
 		props.collections
 			.filter((collection) =>
-				tenantAccessAllowed(
-					collection.getData.config.tenantKeys,
-					props.tenantKey,
-				),
+				tenantAccessAllowed(collection.getData.tenants, props.tenantKey),
 			)
 			.map((collection) => collection.key),
 	);

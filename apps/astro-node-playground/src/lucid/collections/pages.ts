@@ -21,7 +21,7 @@ const PageCollection = new CollectionBuilder("page", {
 			required: true,
 			zod: z.string().min(2).max(96),
 		},
-		displayInListing: true,
+		listing: true,
 	})
 	.addTextarea("summary", {
 		details: {

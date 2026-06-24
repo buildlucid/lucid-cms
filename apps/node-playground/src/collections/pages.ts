@@ -23,7 +23,7 @@ const PageCollection = new CollectionBuilder("page", {
 	group: {
 		key: "content",
 	},
-	config: {
+	features: {
 		localized: true,
 		revisions: true,
 		autoSave: true,
@@ -80,7 +80,7 @@ const PageCollection = new CollectionBuilder("page", {
 				},
 			},
 		],
-		// tenantKeys: ["marketing"],
+		// tenants: ["marketing"],
 	},
 	hooks: [
 		{
@@ -146,10 +146,10 @@ const PageCollection = new CollectionBuilder("page", {
 			required: true,
 			zod: z.string().min(2).max(128),
 		},
-		displayInListing: true,
+		listing: true,
 	})
 	.addUser("author", {
-		displayInListing: true,
+		listing: true,
 		config: {
 			multiple: true,
 		},

@@ -48,7 +48,9 @@ export const Workflow: Component<{
 
 	// ----------------------------------
 	// Memos
-	const workflowConfig = createMemo(() => props.collection()?.config.workflow);
+	const workflowConfig = createMemo(
+		() => props.collection()?.features.workflow,
+	);
 	const workflow = createMemo(() => props.document()?.workflow);
 	const workflowKey = createMemo(() =>
 		[

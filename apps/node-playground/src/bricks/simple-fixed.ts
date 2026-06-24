@@ -1,7 +1,7 @@
 import { BrickBuilder } from "@lucidcms/core";
 
 const SimpleFixedBrick = new BrickBuilder("simple-fixed", {
-	// tenantKeys: ["documentation"],
+	// tenants: ["documentation"],
 }).addText("heading", {
 	config: {
 		localized: false,

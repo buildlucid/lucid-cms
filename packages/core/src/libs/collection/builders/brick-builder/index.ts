@@ -22,7 +22,7 @@ class BrickBuilder extends FieldBuilder {
 				summary: normalizeCopy(config?.details?.summary),
 			},
 			preview: config?.preview || {},
-			tenantKeys: config?.tenantKeys ?? [],
+			tenants: config?.tenants ?? [],
 		};
 	}
 	// Builder methods

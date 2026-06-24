@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { copy } from "../../../i18n/index.js";
 import CollectionBuilder from "./index.js";
 
-test("collection config is correct along with field includes and filters", async () => {
+test("collection options are correct along with field includes and filters", async () => {
 	const pagesCollection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
@@ -17,7 +17,7 @@ test("collection config is correct along with field includes and filters", async
 					"Pages are used to create static content on your website.",
 			}),
 		},
-		config: {
+		features: {
 			localized: true,
 		},
 		hooks: [
@@ -64,28 +64,28 @@ test("collection config is correct along with field includes and filters", async
 		],
 	})
 		.addText("text_test", {
-			displayInListing: true,
+			listing: true,
 		})
 		.addTextarea("textarea_test", {
-			displayInListing: true,
+			listing: true,
 		})
 		.addNumber("number_test", {
-			displayInListing: true,
+			listing: true,
 		})
 		.addCheckbox("checkbox_test", {
-			displayInListing: true,
+			listing: true,
 		})
 		.addSelect("select_test", {
-			displayInListing: true,
+			listing: true,
 		})
 		.addDateTime("datetime_test", {
-			displayInListing: true,
+			listing: true,
 		})
 		.addUser("user_test", {
-			displayInListing: true,
+			listing: true,
 		})
 		.addMedia("media_test", {
-			displayInListing: true,
+			listing: true,
 		})
 		.addRichText("rich_text_test")
 		.addLink("link_test")
@@ -114,13 +114,13 @@ test("collection config is correct along with field includes and filters", async
 			}),
 		},
 		permissions: {},
-		config: {
+		features: {
 			locked: false,
 			revisions: false,
 			localized: true,
 			autoSave: false,
 			scheduling: false,
-			displayInListing: [
+			listing: [
 				"text_test",
 				"textarea_test",
 				"number_test",
@@ -132,12 +132,12 @@ test("collection config is correct along with field includes and filters", async
 			],
 			environments: [],
 			revisionRetentionDays: 30,
-			tenantKeys: [],
 		},
+		tenants: [],
 	});
 });
 
-test("collection workflow config normalizes defaults", async () => {
+test("collection workflow features normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
@@ -148,7 +148,7 @@ test("collection workflow config normalizes defaults", async () => {
 				defaultMessage: "Page",
 			}),
 		},
-		config: {
+		features: {
 			environments: [
 				{
 					key: "production",
@@ -181,7 +181,7 @@ test("collection workflow config normalizes defaults", async () => {
 		},
 	});
 
-	expect(collection.getData.config.workflow).toEqual({
+	expect(collection.getData.features.workflow).toEqual({
 		initial: "todo",
 		stages: [
 			{
@@ -208,7 +208,7 @@ test("collection workflow config normalizes defaults", async () => {
 	});
 });
 
-test("collection environment relation config normalizes defaults", async () => {
+test("collection environment relation features normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
@@ -219,7 +219,7 @@ test("collection environment relation config normalizes defaults", async () => {
 				defaultMessage: "Page",
 			}),
 		},
-		config: {
+		features: {
 			environments: [
 				{
 					key: "staging",
@@ -241,7 +241,7 @@ test("collection environment relation config normalizes defaults", async () => {
 		},
 	});
 
-	expect(collection.getData.config.environments).toEqual([
+	expect(collection.getData.features.environments).toEqual([
 		{
 			key: "staging",
 			name: copy("admin:tests.environments.staging.name", {

@@ -61,7 +61,7 @@ test("generates collection-aware client document types that lean on the public L
 				defaultMessage: "Page",
 			}),
 		},
-		config: {
+		features: {
 			localized: true,
 			environments: [
 				{

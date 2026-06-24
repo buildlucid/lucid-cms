@@ -33,9 +33,9 @@ const shouldIndexField = (
 	const config = "config" in field ? field.config : undefined;
 	const hasConfiguredIndex =
 		(config as { index?: true } | undefined)?.index === true;
-	const isDisplayedInListing = collection.displayInListing.includes(field.key);
+	const isListedField = collection.listing.includes(field.key);
 
-	return hasConfiguredIndex || isDisplayedInListing;
+	return hasConfiguredIndex || isListedField;
 };
 
 const hasCoreColumn = (columns: CollectionSchemaColumn[], name: string) =>

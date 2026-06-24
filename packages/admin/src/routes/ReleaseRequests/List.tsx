@@ -89,7 +89,7 @@ const ReleaseRequestsListRoute: Component = () => {
 				(collections.data?.data ?? [])
 					.filter(
 						(collection) =>
-							(collection.config.review?.requiredFor?.length ?? 0) > 0,
+							(collection.features.review?.requiredFor?.length ?? 0) > 0,
 					)
 					.map((collection) => collection.key),
 			),
@@ -129,7 +129,7 @@ const ReleaseRequestsListRoute: Component = () => {
 			) {
 				continue;
 			}
-			for (const target of collection.config.review?.requiredFor ?? [])
+			for (const target of collection.features.review?.requiredFor ?? [])
 				keys.add(target);
 		}
 		return Array.from(keys).map((key) => ({

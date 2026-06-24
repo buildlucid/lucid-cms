@@ -34,7 +34,7 @@ export const PublishRequests: Component<{
 	// ----------------------------------
 	// Memos
 	const environmentCount = createMemo(() =>
-		Math.max(props.collection()?.config.environments.length ?? 1, 1),
+		Math.max(props.collection()?.features.environments.length ?? 1, 1),
 	);
 
 	// ----------------------------------
@@ -50,7 +50,7 @@ export const PublishRequests: Component<{
 			perPage: () => environmentCount(),
 		},
 		enabled: () =>
-			(props.collection()?.config.review?.requiredFor?.length ?? 0) > 0 &&
+			(props.collection()?.features.review?.requiredFor?.length ?? 0) > 0 &&
 			props.documentId() !== undefined,
 	});
 	const scheduledRequests = api.publishOperations.useGetMultiple({
@@ -78,7 +78,7 @@ export const PublishRequests: Component<{
 	// ----------------------------------
 	// Memos
 	const reviewEnabled = createMemo(
-		() => (props.collection()?.config.review?.requiredFor?.length ?? 0) > 0,
+		() => (props.collection()?.features.review?.requiredFor?.length ?? 0) > 0,
 	);
 	const schedulingEnabled = createMemo(
 		() => props.collection()?.capabilities.scheduling === true,

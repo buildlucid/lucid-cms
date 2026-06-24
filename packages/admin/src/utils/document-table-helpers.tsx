@@ -66,7 +66,7 @@ export const collectionFieldIncludes = (collection?: Collection) => {
 				fieldRecursive(field.fields);
 				continue;
 			}
-			if (collection?.config.displayInListing.includes(field.key)) {
+			if (collection?.features.listing.includes(field.key)) {
 				fieldsRes.push(field);
 			}
 		}
@@ -115,7 +115,7 @@ export const getDocumentListingPreviewFields = (props: {
 				fieldConfig: field,
 				fieldData: documentField,
 				contentLocale: props.contentLocale,
-				collectionLocalized: collection.config.localized,
+				collectionLocalized: collection.features.localized,
 			});
 
 			if (!value) return null;

@@ -18,7 +18,7 @@ const NumberCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	config: {
+	features: {
 		localized: true,
 	},
 })
@@ -50,7 +50,7 @@ test("successfully validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			localized: NumberCollection.getData.config.localized,
+			localized: NumberCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -71,7 +71,7 @@ test("successfully validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			localized: NumberCollection.getData.config.localized,
+			localized: NumberCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -92,7 +92,7 @@ test("successfully validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			localized: NumberCollection.getData.config.localized,
+			localized: NumberCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -115,7 +115,7 @@ test("fail to validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			localized: NumberCollection.getData.config.localized,
+			localized: NumberCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -142,7 +142,7 @@ test("fail to validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			localized: NumberCollection.getData.config.localized,
+			localized: NumberCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -169,7 +169,7 @@ test("fail to validate field - number", async () => {
 			document: [],
 		},
 		meta: {
-			localized: NumberCollection.getData.config.localized,
+			localized: NumberCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});

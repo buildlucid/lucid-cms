@@ -66,10 +66,7 @@ const customFieldInputGenerate: ServiceFn<
 	);
 	if (
 		!collection ||
-		!tenantAccessAllowed(
-			collection.getData.config.tenantKeys,
-			context.request.tenantKey,
-		)
+		!tenantAccessAllowed(collection.getData.tenants, context.request.tenantKey)
 	) {
 		return {
 			error: {
@@ -90,7 +87,7 @@ const customFieldInputGenerate: ServiceFn<
 		props.target.brickKey &&
 		(!targetBrick ||
 			!tenantAccessAllowed(
-				targetBrick.config.tenantKeys,
+				targetBrick.config.tenants,
 				context.request.tenantKey,
 			))
 	) {
@@ -131,7 +128,7 @@ const customFieldInputGenerate: ServiceFn<
 	}
 
 	const fieldIsLocalized =
-		collection.getData.config.localized === true &&
+		collection.getData.features.localized === true &&
 		targetField.localizedEnabled === true;
 
 	const generationContext = normalizeCustomFieldGenerationLocale({

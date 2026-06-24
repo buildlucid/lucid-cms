@@ -8,7 +8,7 @@ const SettingsCollection = new CollectionBuilder("settings", {
 		singularName: copy("admin:collections.settings.singularName"),
 		summary: copy("admin:collections.settings.summary"),
 	},
-	config: {
+	features: {
 		revisions: true,
 	},
 	bricks: {

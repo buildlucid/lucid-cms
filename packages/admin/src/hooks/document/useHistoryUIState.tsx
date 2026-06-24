@@ -64,7 +64,7 @@ export function useHistoryUIState(props: {
 	 * Determines if the auto save is enabled on the collection
 	 */
 	const autoSave = createMemo(() => {
-		return props.collection()?.config.autoSave;
+		return props.collection()?.features.autoSave;
 	});
 
 	/**

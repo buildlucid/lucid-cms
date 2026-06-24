@@ -149,7 +149,7 @@ const CollectionsDocumentsEditRoute: Component<{
 
 			brickStore.set(
 				"collectionLocalized",
-				collection.config.localized || false,
+				collection.features.localized || false,
 			);
 
 			//* preserve local unsaved edits during same-view background query updates
@@ -237,7 +237,7 @@ const CollectionsDocumentsEditRoute: Component<{
 	// Memos
 	const disableWorkflow = createMemo(
 		() =>
-			docState.collection()?.config.locked === true ||
+			docState.collection()?.features.locked === true ||
 			docState.document()?.isDeleted === true,
 	);
 	const trailingBreadcrumbs = createMemo(() => {

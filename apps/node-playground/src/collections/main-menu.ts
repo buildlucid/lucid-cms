@@ -7,7 +7,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		singularName: copy("admin:collections.main-menu.singularName"),
 		summary: copy("admin:collections.main-menu.summary"),
 	},
-	config: {
+	features: {
 		revisions: true,
 		localized: true,
 	},

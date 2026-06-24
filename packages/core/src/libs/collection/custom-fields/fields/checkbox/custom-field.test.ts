@@ -17,7 +17,7 @@ const CheckboxCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Page",
 		}),
 	},
-	config: {
+	features: {
 		localized: true,
 	},
 })
@@ -44,7 +44,7 @@ test("successfully validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			localized: CheckboxCollection.getData.config.localized,
+			localized: CheckboxCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -65,7 +65,7 @@ test("successfully validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			localized: CheckboxCollection.getData.config.localized,
+			localized: CheckboxCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -88,7 +88,7 @@ test("fail to validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			localized: CheckboxCollection.getData.config.localized,
+			localized: CheckboxCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -115,7 +115,7 @@ test("fail to validate field - checkbox", async () => {
 			document: [],
 		},
 		meta: {
-			localized: CheckboxCollection.getData.config.localized,
+			localized: CheckboxCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});

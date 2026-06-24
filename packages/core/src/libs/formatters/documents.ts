@@ -202,8 +202,8 @@ const formatVersion = (props: {
 		latest: null,
 	};
 
-	if (props.collection.getData.config.environments) {
-		for (const env of props.collection.getData.config.environments) {
+	if (props.collection.getData.features.environments) {
+		for (const env of props.collection.getData.features.environments) {
 			versions[env.key] = null;
 		}
 	}

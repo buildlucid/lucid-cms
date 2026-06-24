@@ -113,7 +113,7 @@ const execute: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	const targetIsEnvironment =
-		collectionRes.data.getData.config.environments.some(
+		collectionRes.data.getData.features.environments.some(
 			(environment) => environment.key === operation.target,
 		);
 	if (!targetIsEnvironment) {

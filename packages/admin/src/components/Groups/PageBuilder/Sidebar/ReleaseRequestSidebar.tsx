@@ -149,7 +149,7 @@ export const ReleaseRequestSidebar: Component<{
 	);
 	const requireDecisionComment = createMemo(
 		() =>
-			props.collection()?.config.review?.comments.decision === "required" &&
+			props.collection()?.features.review?.comments.decision === "required" &&
 			decisionAction() !== "cancel",
 	);
 	const canReviewRequest = createMemo(

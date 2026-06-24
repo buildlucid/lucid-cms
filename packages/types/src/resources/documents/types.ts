@@ -518,6 +518,7 @@ export interface Collection {
 	key: string;
 	documentId?: number | null;
 	mode: CollectionMode;
+	tenants: string[];
 	group: {
 		key: string;
 		name: ResolvedAdminCopy | null;
@@ -528,11 +529,11 @@ export interface Collection {
 		singularName: ResolvedAdminCopy;
 		summary: ResolvedAdminCopy | null;
 	};
-	config: {
+	features: {
 		localized: boolean;
 		revisions: boolean;
 		locked: boolean;
-		displayInListing: string[];
+		listing: string[];
 		autoSave: boolean;
 		scheduling: boolean;
 		revisionRetentionDays: number | false;

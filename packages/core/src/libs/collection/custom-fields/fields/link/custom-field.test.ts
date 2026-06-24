@@ -18,7 +18,7 @@ const LinkCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	config: {
+	features: {
 		localized: true,
 	},
 })
@@ -49,7 +49,7 @@ test("successfully validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			localized: LinkCollection.getData.config.localized,
+			localized: LinkCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -74,7 +74,7 @@ test("successfully validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			localized: LinkCollection.getData.config.localized,
+			localized: LinkCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -101,7 +101,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			localized: LinkCollection.getData.config.localized,
+			localized: LinkCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -134,7 +134,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			localized: LinkCollection.getData.config.localized,
+			localized: LinkCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -169,7 +169,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			localized: LinkCollection.getData.config.localized,
+			localized: LinkCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -198,7 +198,7 @@ test("fail to validate field - link", async () => {
 			document: [],
 		},
 		meta: {
-			localized: LinkCollection.getData.config.localized,
+			localized: LinkCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});

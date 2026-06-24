@@ -8,7 +8,7 @@ const buildConfig = (collections: CollectionBuilder[]) =>
 		collections,
 	}) as never;
 
-describe("collection environment relation config checks", () => {
+describe("collection environment relation features checks", () => {
 	it("allows latest and target collection environment mappings", () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
@@ -20,7 +20,7 @@ describe("collection environment relation config checks", () => {
 					defaultMessage: "Page",
 				}),
 			},
-			config: {
+			features: {
 				environments: [
 					{
 						key: "staging",
@@ -45,7 +45,7 @@ describe("collection environment relation config checks", () => {
 					defaultMessage: "Post",
 				}),
 			},
-			config: {
+			features: {
 				environments: [
 					{
 						key: "signed-off",
@@ -84,7 +84,7 @@ describe("collection environment relation config checks", () => {
 					defaultMessage: "Page",
 				}),
 			},
-			config: {
+			features: {
 				environments: [
 					{
 						key: "staging",
@@ -126,7 +126,7 @@ describe("collection environment relation config checks", () => {
 					defaultMessage: "Page",
 				}),
 			},
-			config: {
+			features: {
 				environments: [
 					{
 						key: "staging",
@@ -150,7 +150,7 @@ describe("collection environment relation config checks", () => {
 					defaultMessage: "Post",
 				}),
 			},
-			config: {
+			features: {
 				environments: [
 					{
 						key: "production",

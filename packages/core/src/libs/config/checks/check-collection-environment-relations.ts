@@ -13,7 +13,7 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 	);
 
 	for (const collection of config.collections) {
-		for (const environment of collection.getData.config.environments) {
+		for (const environment of collection.getData.features.environments) {
 			for (const [targetCollectionKey, targetVersionType] of Object.entries(
 				environment.relations ?? {},
 			)) {
@@ -37,7 +37,7 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 				if (targetVersionType === latestVersionType) continue;
 
 				const targetEnvironmentExists =
-					targetCollection.getData.config.environments.some(
+					targetCollection.getData.features.environments.some(
 						(targetEnvironment) => targetEnvironment.key === targetVersionType,
 					);
 

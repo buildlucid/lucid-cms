@@ -35,7 +35,7 @@ export const resolveCollectionPermission = (params: {
 		(params.action === "publish" || params.action === "review") &&
 		params.target !== undefined
 	) {
-		const environment = collectionData.config.environments.find(
+		const environment = collectionData.features.environments.find(
 			(env) => env.key === params.target,
 		);
 		const permission = environment?.permissions[params.action];

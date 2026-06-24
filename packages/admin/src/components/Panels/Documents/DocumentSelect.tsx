@@ -184,7 +184,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		tableHeadColumns(getCollectionFieldIncludes()),
 	);
 	const workflowHeadColumn = createMemo(() =>
-		collection.data?.data.config.workflow
+		collection.data?.data.features.workflow
 			? [
 					{
 						label: T()("documents.workflow.stage"),

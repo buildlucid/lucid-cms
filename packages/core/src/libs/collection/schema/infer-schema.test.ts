@@ -293,9 +293,9 @@ describe("Schema inference", async () => {
 		);
 	});
 
-	test("creates column field indexes from displayInListing", () => {
+	test("creates column field indexes from listing", () => {
 		pagesCollection.addText("title", {
-			displayInListing: true,
+			listing: true,
 		});
 
 		const res = inferSchema(pagesCollection, db);

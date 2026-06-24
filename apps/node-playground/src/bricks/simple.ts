@@ -1,7 +1,7 @@
 import { BrickBuilder } from "@lucidcms/core";
 
 const SimpleBrick = new BrickBuilder("simple", {
-	// tenantKeys: ["marketing"],
+	// tenants: ["marketing"],
 })
 	.addText("heading", {
 		config: {

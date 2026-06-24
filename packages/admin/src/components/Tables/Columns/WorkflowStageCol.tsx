@@ -17,7 +17,7 @@ const WorkflowStageCol: Component<{
 	// -----------------------------------
 	// Memos
 	const stage = createMemo(() =>
-		props.collection.config.workflow?.stages.find(
+		props.collection.features.workflow?.stages.find(
 			(stage) => stage.key === props.document.workflow?.stage,
 		),
 	);

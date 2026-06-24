@@ -73,7 +73,7 @@ const getMultiple: ServiceFn<
 	);
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
 
-	const includeWorkflow = Boolean(collectionRes.data.getData.config.workflow);
+	const includeWorkflow = Boolean(collectionRes.data.getData.features.workflow);
 	const documentFieldRelationTableSchemas = bricksTableSchemaRes.data.filter(
 		(schema) => {
 			const databaseConfig = getFieldDatabaseConfig(schema.type);
@@ -84,7 +84,7 @@ const getMultiple: ServiceFn<
 				isStorageMode(databaseConfig, "relation-table") &&
 				schema.key.brick === undefined &&
 				fieldKey !== undefined &&
-				collectionRes.data.displayInListing.includes(fieldKey)
+				collectionRes.data.listing.includes(fieldKey)
 			);
 		},
 	);

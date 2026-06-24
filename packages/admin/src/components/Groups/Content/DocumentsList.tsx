@@ -29,7 +29,7 @@ export const DocumentsList: Component<{
 	state: {
 		collection?: Collection;
 		isLoading: boolean;
-		displayInListing: Accessor<CollectionLeafFieldConfig[]>;
+		listing: Accessor<CollectionLeafFieldConfig[]>;
 		collectionIsSuccess: Accessor<boolean>;
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
 		showingDeleted: Accessor<boolean>;
@@ -66,10 +66,10 @@ export const DocumentsList: Component<{
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
 	const getTableHeadColumns = createMemo(() =>
-		tableHeadColumns(props.state.displayInListing()),
+		tableHeadColumns(props.state.listing()),
 	);
 	const workflowHeadColumn = createMemo(() =>
-		props.state.collection?.config.workflow
+		props.state.collection?.features.workflow
 			? [
 					{
 						label: T()("documents.workflow.stage"),
@@ -308,7 +308,7 @@ export const DocumentsList: Component<{
 							<DocumentRow
 								index={i}
 								document={doc()}
-								fieldInclude={props.state.displayInListing()}
+								fieldInclude={props.state.listing()}
 								collection={props.state.collection as Collection}
 								include={include}
 								contentLocale={contentLocale()}

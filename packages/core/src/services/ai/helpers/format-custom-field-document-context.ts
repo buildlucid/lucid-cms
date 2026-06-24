@@ -254,7 +254,7 @@ const formatFieldDefinitions = (props: {
 		acc[fieldInstance.key] = {
 			type: fieldInstance.type,
 			localized:
-				props.collection.getData.config.localized === true &&
+				props.collection.getData.features.localized === true &&
 				fieldInstance.localizedEnabled === true,
 			...(details?.label ? { label: details.label } : {}),
 			...(details?.summary ? { summary: details.summary } : {}),
@@ -309,7 +309,7 @@ const formatBrickDefinitions = (props: {
 	return (props.bricks ?? [])
 		.filter((brick) =>
 			tenantAccessAllowed(
-				brick.config.tenantKeys,
+				brick.config.tenants,
 				props.context.request.tenantKey,
 			),
 		)
@@ -371,7 +371,7 @@ const formatCustomFieldDocumentContext = (
 				if (!brickInstance) return [];
 				if (
 					!tenantAccessAllowed(
-						brickInstance.config.tenantKeys,
+						brickInstance.config.tenants,
 						props.context.request.tenantKey,
 					)
 				) {

@@ -13,7 +13,7 @@ const TranslatedCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	config: {
+	features: {
 		localized: true,
 	},
 })
@@ -35,7 +35,7 @@ const NonTranslatedCollection = new CollectionBuilder("non_translated", {
 			{ defaultMessage: "Non-Translated" },
 		),
 	},
-	config: {
+	features: {
 		localized: false,
 	},
 }).addText("text_field");
@@ -64,7 +64,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			localized: TranslatedCollection.getData.config.localized,
+			localized: TranslatedCollection.getData.features.localized,
 			defaultLocale,
 		},
 	});
@@ -87,7 +87,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			localized: TranslatedCollection.getData.config.localized,
+			localized: TranslatedCollection.getData.features.localized,
 			defaultLocale,
 		},
 	});
@@ -110,7 +110,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			localized: TranslatedCollection.getData.config.localized,
+			localized: TranslatedCollection.getData.features.localized,
 			defaultLocale: frenchDefaultLocale,
 		},
 	});
@@ -133,7 +133,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: NonTranslatedCollection.fields.get("text_field")!,
 		validationData,
 		meta: {
-			localized: NonTranslatedCollection.getData.config.localized,
+			localized: NonTranslatedCollection.getData.features.localized,
 			defaultLocale,
 		},
 	});
@@ -156,7 +156,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("non_translatable_field")!,
 		validationData,
 		meta: {
-			localized: TranslatedCollection.getData.config.localized,
+			localized: TranslatedCollection.getData.features.localized,
 			defaultLocale,
 		},
 	});

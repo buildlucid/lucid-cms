@@ -18,7 +18,7 @@ const DateTimeCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	config: {
+	features: {
 		localized: true,
 	},
 })
@@ -45,7 +45,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DateTimeCollection.getData.config.localized,
+			localized: DateTimeCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -66,7 +66,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DateTimeCollection.getData.config.localized,
+			localized: DateTimeCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -87,7 +87,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DateTimeCollection.getData.config.localized,
+			localized: DateTimeCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -108,7 +108,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DateTimeCollection.getData.config.localized,
+			localized: DateTimeCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -129,7 +129,7 @@ test("successfully validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DateTimeCollection.getData.config.localized,
+			localized: DateTimeCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -152,7 +152,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DateTimeCollection.getData.config.localized,
+			localized: DateTimeCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -179,7 +179,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DateTimeCollection.getData.config.localized,
+			localized: DateTimeCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -206,7 +206,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DateTimeCollection.getData.config.localized,
+			localized: DateTimeCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -233,7 +233,7 @@ test("fail to validate field - datetime", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DateTimeCollection.getData.config.localized,
+			localized: DateTimeCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});

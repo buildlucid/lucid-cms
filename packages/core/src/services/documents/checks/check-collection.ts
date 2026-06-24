@@ -28,7 +28,7 @@ const checkCollection: ServiceFn<
 
 	if (
 		!tenantAccessAllowed(
-			collectionInstance.getData.config.tenantKeys,
+			collectionInstance.getData.tenants,
 			context.request.tenantKey,
 		)
 	) {

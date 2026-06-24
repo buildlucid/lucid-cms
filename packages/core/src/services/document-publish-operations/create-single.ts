@@ -53,8 +53,8 @@ const createSingle: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	const collection = collectionRes.data;
-	const publishReview = collection.getData.config.review;
-	const targetIsEnvironment = collection.getData.config.environments.some(
+	const publishReview = collection.getData.features.review;
+	const targetIsEnvironment = collection.getData.features.environments.some(
 		(environment) => environment.key === data.target,
 	);
 	const requiresApproval = canUsePublishOperationsForTarget({

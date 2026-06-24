@@ -16,10 +16,7 @@ const getAll: ServiceFn<
 	Collection[]
 > = async (context, data) => {
 	const collections = (context.config.collections ?? []).filter((collection) =>
-		tenantAccessAllowed(
-			collection.getData.config.tenantKeys,
-			context.request.tenantKey,
-		),
+		tenantAccessAllowed(collection.getData.tenants, context.request.tenantKey),
 	);
 
 	const adminTranslations = context.translate

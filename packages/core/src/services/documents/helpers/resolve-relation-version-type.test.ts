@@ -29,7 +29,7 @@ const buildContext = (collections: CollectionBuilder[] = []) =>
 const createCollection = (
 	key: string,
 	environments: NonNullable<
-		ConstructorParameters<typeof CollectionBuilder>[1]["config"]
+		ConstructorParameters<typeof CollectionBuilder>[1]["features"]
 	>["environments"] = [],
 ) =>
 	new CollectionBuilder(key, {
@@ -42,7 +42,7 @@ const createCollection = (
 				defaultMessage: key,
 			}),
 		},
-		config: {
+		features: {
 			environments,
 		},
 	});

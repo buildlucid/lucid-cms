@@ -46,7 +46,7 @@ const getUpdateContext: ServiceFn<
 	);
 	if (documentAccessRes.error) return documentAccessRes;
 
-	if (collectionRes.data.getData.config.locked) {
+	if (collectionRes.data.getData.features.locked) {
 		return {
 			error: {
 				type: "basic" as const,

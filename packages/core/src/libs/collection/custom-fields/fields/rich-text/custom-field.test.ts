@@ -18,7 +18,7 @@ const RichTextCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	config: {
+	features: {
 		localized: true,
 	},
 })
@@ -55,7 +55,7 @@ test("successfully validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.config.localized,
+			localized: RichTextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -79,7 +79,7 @@ test("successfully validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.config.localized,
+			localized: RichTextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -103,7 +103,7 @@ test("successfully validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.config.localized,
+			localized: RichTextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -126,7 +126,7 @@ test("fail to validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.config.localized,
+			localized: RichTextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -154,7 +154,7 @@ test("fail to validate field - rich text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: RichTextCollection.getData.config.localized,
+				localized: RichTextCollection.getData.features.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -172,7 +172,7 @@ test("fail to validate field - rich text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: RichTextCollection.getData.config.localized,
+				localized: RichTextCollection.getData.features.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -212,7 +212,7 @@ test("fail to validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.config.localized,
+			localized: RichTextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});

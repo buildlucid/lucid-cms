@@ -58,7 +58,7 @@ const checkValidateBricksFields: ServiceFn<
 		instance: data.collection,
 		validationData: refDataRes.data,
 		meta: {
-			localized: data.collection.getData.config.localized,
+			localized: data.collection.getData.features.localized,
 			defaultLocale: context.config.localization.defaultLocale,
 		},
 	});
@@ -117,7 +117,7 @@ const validateBricks = (props: {
 
 		if (
 			!instance ||
-			!tenantAccessAllowed(instance.config.tenantKeys, props.tenantKey)
+			!tenantAccessAllowed(instance.config.tenants, props.tenantKey)
 		) {
 			logger.error({
 				scope: constants.logScopes.validation,
@@ -148,7 +148,7 @@ const validateBricks = (props: {
 			instance: instance,
 			validationData: props.validationData,
 			meta: {
-				localized: props.collection.getData.config.localized,
+				localized: props.collection.getData.features.localized,
 				defaultLocale: props.defaultLocale,
 			},
 		});

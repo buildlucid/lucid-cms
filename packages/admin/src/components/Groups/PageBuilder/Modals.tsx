@@ -40,7 +40,7 @@ export const Modals: Component<{
 		const target = props.hooks.uiState.getReleaseEnvironmentTarget();
 		if (!target) return "";
 		const environments =
-			props.hooks.state.collection()?.config.environments ?? [];
+			props.hooks.state.collection()?.features.environments ?? [];
 		const env = environments.find((e) => e.key === target);
 		return helpers.getLocaleValue({ value: env?.name }) || target;
 	});

@@ -11,7 +11,7 @@ import type {
 const supportedLabelFieldTypes = ["text", "textarea"] as const;
 
 const getLabelField = (collection: CollectionBuilder) => {
-	for (const fieldKey of collection.displayInListing) {
+	for (const fieldKey of collection.listing) {
 		const field = collection.flatFields.find((field) => field.key === fieldKey);
 		if (field && supportedLabelFieldTypes.some((type) => type === field.type)) {
 			return field;

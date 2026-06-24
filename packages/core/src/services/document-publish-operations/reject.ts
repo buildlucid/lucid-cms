@@ -74,7 +74,7 @@ const reject: ServiceFn<
 
 	const comment = data.comment?.trim() || null;
 	if (
-		collectionRes.data.getData.config.review?.comments.decision ===
+		collectionRes.data.getData.features.review?.comments.decision ===
 			"required" &&
 		!comment
 	) {

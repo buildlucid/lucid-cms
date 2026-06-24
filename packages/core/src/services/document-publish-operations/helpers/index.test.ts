@@ -84,7 +84,7 @@ describe("Tests for publish operation release requirement helpers", () => {
 				defaultMessage: "Page",
 			}),
 		},
-		config: {
+		features: {
 			environments: [
 				{
 					key: "staging",

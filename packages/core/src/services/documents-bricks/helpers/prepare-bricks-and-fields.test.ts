@@ -209,7 +209,7 @@ describe("testing prepareBricksAndFields", () => {
 					defaultMessage: "Trim Test",
 				}),
 			},
-			config: {
+			features: {
 				localized: true,
 			},
 		})

@@ -18,7 +18,7 @@ const TextCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	config: {
+	features: {
 		localized: true,
 	},
 })
@@ -50,7 +50,7 @@ test("successfully validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.config.localized,
+			localized: TextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -71,7 +71,7 @@ test("successfully validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.config.localized,
+			localized: TextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -92,7 +92,7 @@ test("successfully validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.config.localized,
+			localized: TextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -115,7 +115,7 @@ test("fail to validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.config.localized,
+			localized: TextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -143,7 +143,7 @@ test("fail to validate field - text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: TextCollection.getData.config.localized,
+				localized: TextCollection.getData.features.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -161,7 +161,7 @@ test("fail to validate field - text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: TextCollection.getData.config.localized,
+				localized: TextCollection.getData.features.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -179,7 +179,7 @@ test("fail to validate field - text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: TextCollection.getData.config.localized,
+				localized: TextCollection.getData.features.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -223,7 +223,7 @@ test("fail to validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.config.localized,
+			localized: TextCollection.getData.features.localized,
 			defaultLocale: "en",
 		},
 	});

@@ -3,7 +3,7 @@ import { copy } from "../../../i18n/index.js";
 import CollectionBuilder from "./index.js";
 import CollectionConfigSchema from "./schema.js";
 
-test("collection builder config passes schema validation", async () => {
+test("collection builder options passes schema validation", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
@@ -18,7 +18,7 @@ test("collection builder config passes schema validation", async () => {
 					"Pages are used to create static content on your website.",
 			}),
 		},
-		config: {
+		features: {
 			localized: true,
 		},
 		hooks: [
@@ -65,17 +65,17 @@ test("collection builder config passes schema validation", async () => {
 		],
 	})
 		.addText("text_test", {
-			displayInListing: true,
+			listing: true,
 		})
 		.addTextarea("textarea_test", {
-			displayInListing: true,
+			listing: true,
 		});
 
 	const res = await CollectionConfigSchema.safeParseAsync(collection.config);
 	expect(res.success).toBe(true);
 });
 
-test("collection workflow config validates stages, targets and palette", async () => {
+test("collection workflow features validates stages, targets and palette", async () => {
 	const validConfig = {
 		key: "pages",
 		mode: "multiple",
@@ -87,7 +87,7 @@ test("collection workflow config validates stages, targets and palette", async (
 				defaultMessage: "Page",
 			}),
 		},
-		config: {
+		features: {
 			workflow: {
 				initial: "todo",
 				stages: [
@@ -127,11 +127,11 @@ test("collection workflow config validates stages, targets and palette", async (
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			config: {
-				...validConfig.config,
+			features: {
+				...validConfig.features,
 				workflow: {
 					initial: "missing",
-					stages: validConfig.config.workflow.stages,
+					stages: validConfig.features.workflow.stages,
 				},
 			},
 		}),
@@ -142,8 +142,8 @@ test("collection workflow config validates stages, targets and palette", async (
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			config: {
-				...validConfig.config,
+			features: {
+				...validConfig.features,
 				workflow: {
 					stages: [
 						{
@@ -169,8 +169,8 @@ test("collection workflow config validates stages, targets and palette", async (
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			config: {
-				...validConfig.config,
+			features: {
+				...validConfig.features,
 				workflow: {
 					stages: [
 						{
@@ -191,8 +191,8 @@ test("collection workflow config validates stages, targets and palette", async (
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			config: {
-				...validConfig.config,
+			features: {
+				...validConfig.features,
 				workflow: {
 					stages: [
 						{
@@ -292,7 +292,7 @@ test("collection group config validates shorthand and named groups", async () =>
 	});
 });
 
-test("collection environment relation config passes schema validation", async () => {
+test("collection environment relation features passes schema validation", async () => {
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			key: "pages",
@@ -305,7 +305,7 @@ test("collection environment relation config passes schema validation", async ()
 					defaultMessage: "Page",
 				}),
 			},
-			config: {
+			features: {
 				environments: [
 					{
 						key: "staging",
@@ -325,7 +325,7 @@ test("collection environment relation config passes schema validation", async ()
 	});
 });
 
-test("collection environment requires config validates environment references", async () => {
+test("collection environment requires features validates environment references", async () => {
 	const validConfig = {
 		key: "pages",
 		mode: "multiple",
@@ -337,7 +337,7 @@ test("collection environment requires config validates environment references", 
 				defaultMessage: "Page",
 			}),
 		},
-		config: {
+		features: {
 			environments: [
 				{
 					key: "staging",
@@ -365,7 +365,7 @@ test("collection environment requires config validates environment references", 
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			config: {
+			features: {
 				environments: [
 					{
 						key: "production",
@@ -384,7 +384,7 @@ test("collection environment requires config validates environment references", 
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			config: {
+			features: {
 				environments: [
 					{
 						key: "production",

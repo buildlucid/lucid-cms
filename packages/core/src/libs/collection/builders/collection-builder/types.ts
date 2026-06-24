@@ -8,7 +8,7 @@ import type { AdminCopyInput, ResolvedAdminCopy } from "../../../i18n/types.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 
-export type DisplayInListing = boolean;
+export type Listing = boolean;
 export type CollectionPermissionAction =
 	| "read"
 	| "create"
@@ -74,13 +74,14 @@ export type CollectionConfigSchemaType = {
 	key: string;
 	mode: "single" | "multiple";
 	group?: CollectionGroupConfigInput;
+	tenants?: string[];
 	details: {
 		name: AdminCopyInput;
 		singularName: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
 	permissions?: CollectionPermissions;
-	config?: {
+	features?: {
 		locked?: boolean;
 		localized?: boolean;
 		revisions?: boolean;
@@ -115,7 +116,6 @@ export type CollectionConfigSchemaType = {
 			relations?: CollectionEnvironmentRelations;
 		}>;
 		revisionRetentionDays?: number | false;
-		tenantKeys?: string[];
 	};
 	hooks?: CollectionBuilderHooks[];
 	bricks?: {
@@ -133,7 +133,7 @@ export type CollectionData = {
 		singularName: ResolvedAdminCopy;
 		summary: ResolvedAdminCopy | null;
 	};
-	config: {
+	features: {
 		locked: boolean;
 		revisions: boolean;
 		localized: boolean;
@@ -141,7 +141,7 @@ export type CollectionData = {
 		scheduling: boolean;
 		review?: PublishingReviewConfig;
 		workflow?: PublishingWorkflowConfig;
-		displayInListing: string[];
+		listing: string[];
 		environments: {
 			key: string;
 			name: ResolvedAdminCopy;
@@ -150,8 +150,8 @@ export type CollectionData = {
 			relations: CollectionEnvironmentRelations;
 		}[];
 		revisionRetentionDays: number | false;
-		tenantKeys: string[];
 	};
+	tenants: string[];
 	permissions: CollectionPermissions;
 };
 
@@ -164,7 +164,7 @@ export interface CollectionBrickConfig {
 	key: BrickBuilder["key"];
 	details: BrickBuilder["config"]["details"];
 	preview: BrickBuilder["config"]["preview"];
-	tenantKeys: BrickBuilder["config"]["tenantKeys"];
+	tenants: BrickBuilder["config"]["tenants"];
 	fields: CFConfig<FieldTypes>[];
 }
 

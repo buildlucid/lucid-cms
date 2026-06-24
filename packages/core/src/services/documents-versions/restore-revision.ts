@@ -30,7 +30,7 @@ const restoreRevision: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	if (collectionRes.data.getData.config.revisions === false) {
+	if (collectionRes.data.getData.features.revisions === false) {
 		return {
 			error: {
 				type: "basic",

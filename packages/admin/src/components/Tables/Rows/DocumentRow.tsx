@@ -35,7 +35,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 	// ----------------------------------
 	// Memos
 	const includeOffset = () => (props.selection ? 1 : 0);
-	const workflowOffset = () => (props.collection.config.workflow ? 2 : 0);
+	const workflowOffset = () => (props.collection.features.workflow ? 2 : 0);
 	const authorStartIndex = () =>
 		includeOffset() + props.fieldInclude.length + workflowOffset();
 
@@ -71,12 +71,12 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 							document={props.document}
 							include={props.include}
 							index={includeOffset() + i()}
-							collectionLocalized={props.collection.config.localized}
+							collectionLocalized={props.collection.features.localized}
 						/>
 					);
 				}}
 			</For>
-			<Show when={props.collection.config.workflow}>
+			<Show when={props.collection.features.workflow}>
 				<WorkflowStageCol
 					document={props.document}
 					collection={props.collection}

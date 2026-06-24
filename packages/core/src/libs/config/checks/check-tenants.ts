@@ -39,13 +39,10 @@ const checkTenants = (config: Config) => {
 
 	const validTenantKeys = new Set(tenantKeys);
 	for (const collection of config.collections) {
-		checkTenantKeyReferences(
-			validTenantKeys,
-			collection.getData.config.tenantKeys,
-		);
+		checkTenantKeyReferences(validTenantKeys, collection.getData.tenants);
 
 		for (const brick of collection.brickInstances) {
-			checkTenantKeyReferences(validTenantKeys, brick.config.tenantKeys);
+			checkTenantKeyReferences(validTenantKeys, brick.config.tenants);
 		}
 	}
 };

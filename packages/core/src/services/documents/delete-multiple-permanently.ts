@@ -32,7 +32,7 @@ const deleteMultiplePermanently: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	if (collectionRes.data.getData.config.locked) {
+	if (collectionRes.data.getData.features.locked) {
 		return {
 			error: {
 				type: "basic",

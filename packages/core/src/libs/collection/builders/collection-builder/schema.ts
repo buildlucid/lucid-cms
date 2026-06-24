@@ -47,6 +47,7 @@ const CollectionConfigSchema = z
 				}),
 			])
 			.optional(),
+		tenants: z.array(z.string().min(1)).optional(),
 		details: z.object({
 			name: adminCopyInputSchema,
 			singularName: adminCopyInputSchema,
@@ -63,7 +64,7 @@ const CollectionConfigSchema = z
 				review: z.string().optional(),
 			})
 			.optional(),
-		config: z
+		features: z
 			.object({
 				locked: z
 					.boolean()
@@ -191,7 +192,6 @@ const CollectionConfigSchema = z
 					.union([z.number().int().positive(), z.literal(false)])
 					.default(constants.collectionBuilder.revisionRetentionDays)
 					.optional(),
-				tenantKeys: z.array(z.string().min(1)).optional(),
 			})
 			.optional(),
 		hooks: z
@@ -213,11 +213,11 @@ const CollectionConfigSchema = z
 	})
 	.superRefine((data, ctx) => {
 		const environmentKeys = new Set(
-			data.config?.environments?.map((environment) => environment.key) ?? [],
+			data.features?.environments?.map((environment) => environment.key) ?? [],
 		);
 
 		for (const [environmentIndex, environment] of (
-			data.config?.environments ?? []
+			data.features?.environments ?? []
 		).entries()) {
 			for (const [targetIndex, target] of (
 				environment.requires ?? []
@@ -226,7 +226,7 @@ const CollectionConfigSchema = z
 					ctx.addIssue({
 						code: "custom",
 						path: [
-							"config",
+							"features",
 							"environments",
 							environmentIndex,
 							"requires",
@@ -241,7 +241,7 @@ const CollectionConfigSchema = z
 				ctx.addIssue({
 					code: "custom",
 					path: [
-						"config",
+						"features",
 						"environments",
 						environmentIndex,
 						"requires",
@@ -252,17 +252,17 @@ const CollectionConfigSchema = z
 			}
 		}
 
-		const review = data.config?.review;
+		const review = data.features?.review;
 		for (const [targetIndex, target] of (review?.requiredFor ?? []).entries()) {
 			if (environmentKeys.has(target)) continue;
 			ctx.addIssue({
 				code: "custom",
-				path: ["config", "review", "requiredFor", targetIndex],
+				path: ["features", "review", "requiredFor", targetIndex],
 				message: `Review requiredFor target "${target}" must reference a configured environment`,
 			});
 		}
 
-		const workflow = data.config?.workflow;
+		const workflow = data.features?.workflow;
 		if (!workflow) return;
 
 		const stageKeys = workflow.stages.map((stage) => stage.key);
@@ -272,7 +272,7 @@ const CollectionConfigSchema = z
 		if (duplicateStageKeys.length > 0) {
 			ctx.addIssue({
 				code: "custom",
-				path: ["config", "workflow", "stages"],
+				path: ["features", "workflow", "stages"],
 				message: `Workflow stage keys must be unique: ${Array.from(new Set(duplicateStageKeys)).join(", ")}`,
 			});
 		}
@@ -280,7 +280,7 @@ const CollectionConfigSchema = z
 		if (workflow.initial && !stageKeys.includes(workflow.initial)) {
 			ctx.addIssue({
 				code: "custom",
-				path: ["config", "workflow", "initial"],
+				path: ["features", "workflow", "initial"],
 				message:
 					"Workflow initial stage must reference one of the configured stages",
 			});
@@ -294,7 +294,7 @@ const CollectionConfigSchema = z
 				ctx.addIssue({
 					code: "custom",
 					path: [
-						"config",
+						"features",
 						"workflow",
 						"stages",
 						stageIndex,

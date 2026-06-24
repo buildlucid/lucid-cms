@@ -179,7 +179,7 @@ export const HeaderBar: Component<{
 			});
 		}
 
-		for (const environment of props.state.collection()?.config.environments ??
+		for (const environment of props.state.collection()?.features.environments ??
 			[]) {
 			const isPublished = !!props.state.document()?.version[environment.key];
 
@@ -221,9 +221,9 @@ export const HeaderBar: Component<{
 		const document = props.state.document();
 		if (!collection || !document) return [];
 
-		const environments = collection.config.environments ?? [];
-		const publishReview = collection.config.review;
-		const workflow = collection.config.workflow;
+		const environments = collection.features.environments ?? [];
+		const publishReview = collection.features.review;
+		const workflow = collection.features.workflow;
 		const workflowStage = workflow?.stages.find(
 			(stage) => stage.key === document.workflow?.stage,
 		);
@@ -366,13 +366,13 @@ export const HeaderBar: Component<{
 		const collection = props.state.collection();
 		if (!collection) return false;
 
-		const environments = collection.config.environments ?? [];
+		const environments = collection.features.environments ?? [];
 
 		return (
 			props.mode !== "create" &&
-			(collection.config.revisions ||
+			(collection.features.revisions ||
 				environments.length > 0 ||
-				(collection.config.review?.requiredFor?.length ?? 0) > 0)
+				(collection.features.review?.requiredFor?.length ?? 0) > 0)
 		);
 	});
 	// ----------------------------------
@@ -506,7 +506,7 @@ export const HeaderBar: Component<{
 							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
 								<Show
 									when={
-										props.state.collection()?.config.localized &&
+										props.state.collection()?.features.localized &&
 										hasMultipleLocales()
 									}
 								>
@@ -519,7 +519,7 @@ export const HeaderBar: Component<{
 								</Show>
 								<Show
 									when={
-										(props.state.collection()?.config.localized !== true ||
+										(props.state.collection()?.features.localized !== true ||
 											!hasMultipleLocales()) &&
 										displayLocale()
 									}

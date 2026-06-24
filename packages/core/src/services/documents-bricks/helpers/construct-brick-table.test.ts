@@ -39,7 +39,7 @@ describe("brick table construction", () => {
 					defaultMessage: "Simple",
 				}),
 			},
-			config: {
+			features: {
 				localized: true,
 				revisions: true,
 			},
@@ -53,7 +53,7 @@ describe("brick table construction", () => {
 				}),
 			},
 			validation: { required: true },
-			displayInListing: true,
+			listing: true,
 		});
 
 		const simpleInputData = {
@@ -324,7 +324,7 @@ describe("brick table construction", () => {
 					defaultMessage: "Deep",
 				}),
 			},
-			config: {
+			features: {
 				localized: true,
 				revisions: true,
 			},
@@ -485,7 +485,7 @@ describe("brick table construction", () => {
 					defaultMessage: "Gallery",
 				}),
 			},
-			config: {
+			features: {
 				localized: true,
 				revisions: true,
 			},
@@ -684,7 +684,7 @@ describe("brick table construction", () => {
 					defaultMessage: "Article",
 				}),
 			},
-			config: {
+			features: {
 				localized: true,
 				revisions: true,
 			},

@@ -27,7 +27,7 @@ const registerFields = (
 			ai: {
 				enabled: false,
 			},
-			displayInListing: config.displayFullSlug,
+			listing: config.displayFullSlug,
 		})
 		.addText(constants.fields.slug.key, {
 			details: {
@@ -69,7 +69,7 @@ const registerFields = (
 					});
 				}),
 			},
-			displayInListing: true,
+			listing: true,
 		})
 		.addDocument(constants.fields.parentPage.key, {
 			collection: collection.key,

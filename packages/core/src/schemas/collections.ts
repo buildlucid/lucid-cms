@@ -148,8 +148,8 @@ const collectionResponseSchema = z.object({
 				),
 			})
 			.optional(),
-		displayInListing: z.array(z.string()).meta({
-			description: "Field keys to display in the document listing columns",
+		listing: z.array(z.string()).meta({
+			description: "Field keys included in the document listing columns",
 			example: ["pageTitle", "author", "fullSlug", "slug"],
 		}),
 		environments: z.array(

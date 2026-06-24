@@ -8,7 +8,7 @@ const TestCollection = new CollectionBuilder("test", {
 		singularName: copy("admin:collections.test.singularName"),
 		summary: copy("admin:collections.test.summary"),
 	},
-	config: {
+	features: {
 		localized: false,
 		revisions: true,
 		locked: false,
@@ -29,7 +29,7 @@ const TestCollection = new CollectionBuilder("test", {
 		required: true,
 		zod: z.string().min(2).max(128),
 	},
-	displayInListing: true,
+	listing: true,
 });
 
 export default TestCollection;

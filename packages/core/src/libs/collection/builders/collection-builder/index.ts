@@ -7,13 +7,13 @@ import type {
 	CollectionBrickConfig,
 	CollectionConfigSchemaType,
 	CollectionData,
-	DisplayInListing,
+	Listing,
 } from "./types.js";
 
 class CollectionBuilder extends FieldBuilder {
 	key: string;
 	config: CollectionConfigSchemaType;
-	displayInListing: string[] = [];
+	listing: string[] = [];
 	constructor(key: string, config: Omit<CollectionConfigSchemaType, "key">) {
 		super();
 		this.key = key;
@@ -38,80 +38,80 @@ class CollectionBuilder extends FieldBuilder {
 	addText(
 		key: string,
 		props?: CFProps<"text"> & {
-			displayInListing?: DisplayInListing;
+			listing?: Listing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.displayInListing);
+		this.#fieldCollectionHelper(key, props?.listing);
 		super.addText(key, props);
 		return this;
 	}
 	addNumber(
 		key: string,
 		props?: CFProps<"number"> & {
-			displayInListing?: DisplayInListing;
+			listing?: Listing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.displayInListing);
+		this.#fieldCollectionHelper(key, props?.listing);
 		super.addNumber(key, props);
 		return this;
 	}
 	addCheckbox(
 		key: string,
 		props?: CFProps<"checkbox"> & {
-			displayInListing?: DisplayInListing;
+			listing?: Listing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.displayInListing);
+		this.#fieldCollectionHelper(key, props?.listing);
 		super.addCheckbox(key, props);
 		return this;
 	}
 	addSelect(
 		key: string,
 		props?: CFProps<"select"> & {
-			displayInListing?: DisplayInListing;
+			listing?: Listing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.displayInListing);
+		this.#fieldCollectionHelper(key, props?.listing);
 		super.addSelect(key, props);
 		return this;
 	}
 	addTextarea(
 		key: string,
 		props?: CFProps<"textarea"> & {
-			displayInListing?: DisplayInListing;
+			listing?: Listing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.displayInListing);
+		this.#fieldCollectionHelper(key, props?.listing);
 		super.addTextarea(key, props);
 		return this;
 	}
 	addDateTime(
 		key: string,
 		props?: CFProps<"datetime"> & {
-			displayInListing?: DisplayInListing;
+			listing?: Listing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.displayInListing);
+		this.#fieldCollectionHelper(key, props?.listing);
 		super.addDateTime(key, props);
 		return this;
 	}
 	addUser(
 		key: string,
 		props?: CFProps<"user"> & {
-			displayInListing?: DisplayInListing;
+			listing?: Listing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.displayInListing);
+		this.#fieldCollectionHelper(key, props?.listing);
 		super.addUser(key, props);
 		return this;
 	}
 	addMedia(
 		key: string,
 		props?: CFProps<"media"> & {
-			displayInListing?: DisplayInListing;
+			listing?: Listing;
 		},
 	) {
-		this.#fieldCollectionHelper(key, props?.displayInListing);
+		this.#fieldCollectionHelper(key, props?.listing);
 		super.addMedia(key, props);
 		return this;
 	}
@@ -124,8 +124,8 @@ class CollectionBuilder extends FieldBuilder {
 			(brick, index) => bricks.findIndex((b) => b.key === brick.key) === index,
 		);
 	};
-	#fieldCollectionHelper = (key: string, display?: DisplayInListing) => {
-		if (display) this.displayInListing.push(key);
+	#fieldCollectionHelper = (key: string, listing?: Listing) => {
+		if (listing) this.listing.push(key);
 	};
 	#formatGroup = (): CollectionData["group"] => {
 		const group = this.config.group;
@@ -157,46 +157,47 @@ class CollectionBuilder extends FieldBuilder {
 				singularName: normalizeCopy(this.config.details.singularName),
 				summary: normalizeCopy(this.config.details.summary) ?? null,
 			},
-			config: {
+			features: {
 				locked:
-					this.config.config?.locked ?? constants.collectionBuilder.locked,
+					this.config.features?.locked ?? constants.collectionBuilder.locked,
 				revisions:
-					this.config.config?.revisions ??
+					this.config.features?.revisions ??
 					constants.collectionBuilder.revisions,
 				localized:
-					this.config.config?.localized ??
+					this.config.features?.localized ??
 					constants.collectionBuilder.localized,
 				autoSave:
-					this.config.config?.autoSave ?? constants.collectionBuilder.autoSave,
+					this.config.features?.autoSave ??
+					constants.collectionBuilder.autoSave,
 				scheduling:
-					this.config.config?.scheduling ??
+					this.config.features?.scheduling ??
 					constants.collectionBuilder.scheduling,
-				...(this.config.config?.review
+				...(this.config.features?.review
 					? {
 							review: {
-								requiredFor: this.config.config.review?.requiredFor ?? [],
+								requiredFor: this.config.features.review?.requiredFor ?? [],
 								allowSelfApproval:
-									this.config.config.review?.allowSelfApproval ??
+									this.config.features.review?.allowSelfApproval ??
 									constants.collectionBuilder.publishing.allowSelfApproval,
 								comments: {
 									request:
-										this.config.config.review?.comments?.request ??
+										this.config.features.review?.comments?.request ??
 										constants.collectionBuilder.publishing.comments.request,
 									decision:
-										this.config.config.review?.comments?.decision ??
+										this.config.features.review?.comments?.decision ??
 										constants.collectionBuilder.publishing.comments.decision,
 								},
 							},
 						}
 					: {}),
-				...(this.config.config?.workflow
+				...(this.config.features?.workflow
 					? {
 							workflow: {
 								initial:
-									this.config.config.workflow.initial ??
-									this.config.config.workflow.stages[0]?.key ??
+									this.config.features.workflow.initial ??
+									this.config.features.workflow.stages[0]?.key ??
 									"",
-								stages: this.config.config.workflow.stages.map((stage) => ({
+								stages: this.config.features.workflow.stages.map((stage) => ({
 									key: stage.key,
 									name: normalizeCopy(stage.name),
 									color:
@@ -208,9 +209,9 @@ class CollectionBuilder extends FieldBuilder {
 							},
 						}
 					: {}),
-				displayInListing: this.displayInListing,
+				listing: this.listing,
 				environments:
-					this.config.config?.environments?.map((environment) => ({
+					this.config.features?.environments?.map((environment) => ({
 						...environment,
 						name: normalizeCopy(environment.name),
 						requires: environment.requires ?? [],
@@ -218,10 +219,10 @@ class CollectionBuilder extends FieldBuilder {
 						relations: environment.relations ?? {},
 					})) ?? [],
 				revisionRetentionDays:
-					this.config.config?.revisionRetentionDays ??
+					this.config.features?.revisionRetentionDays ??
 					constants.collectionBuilder.revisionRetentionDays,
-				tenantKeys: this.config.config?.tenantKeys ?? [],
 			},
+			tenants: this.config.tenants ?? [],
 			permissions: this.config.permissions ?? {},
 		};
 	}
@@ -231,7 +232,7 @@ class CollectionBuilder extends FieldBuilder {
 				key: brick.key,
 				details: brick.config.details,
 				preview: brick.config.preview,
-				tenantKeys: brick.config.tenantKeys,
+				tenants: brick.config.tenants,
 				fields: brick.fieldTree,
 			})) ?? []
 		);
@@ -242,7 +243,7 @@ class CollectionBuilder extends FieldBuilder {
 				key: brick.key,
 				details: brick.config.details,
 				preview: brick.config.preview,
-				tenantKeys: brick.config.tenantKeys,
+				tenants: brick.config.tenants,
 				fields: brick.fieldTree,
 			})) ?? []
 		);

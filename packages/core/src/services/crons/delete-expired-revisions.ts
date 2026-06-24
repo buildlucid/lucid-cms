@@ -7,7 +7,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
 	const collectionsWithRevisions = context.config.collections.filter(
 		(collection) => {
-			const config = collection.getData.config;
+			const config = collection.getData.features;
 			return config.revisions && config.revisionRetentionDays !== false;
 		},
 	);
@@ -25,7 +25,7 @@ const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
 				event: "document-versions:delete-expired",
 				payload: {
 					collectionKey: collection.key,
-					retentionDays: collection.getData.config.revisionRetentionDays,
+					retentionDays: collection.getData.features.revisionRetentionDays,
 				},
 			});
 			return queueRes;

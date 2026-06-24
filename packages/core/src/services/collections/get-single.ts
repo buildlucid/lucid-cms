@@ -34,10 +34,7 @@ const getSingle: ServiceFn<
 	}
 
 	if (
-		!tenantAccessAllowed(
-			collection.getData.config.tenantKeys,
-			context.request.tenantKey,
-		)
+		!tenantAccessAllowed(collection.getData.tenants, context.request.tenantKey)
 	) {
 		return {
 			error: {
