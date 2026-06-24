@@ -79,6 +79,7 @@ const formatSingle = (props: {
 	const formattedCollection: Collection = {
 		key: key,
 		mode: collectionData.mode,
+		group: collectionData.group,
 		documentId: props.include?.documentId
 			? getDocumentId(key, props.documents)
 			: undefined,

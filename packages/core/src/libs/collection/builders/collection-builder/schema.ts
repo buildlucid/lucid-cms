@@ -11,6 +11,15 @@ const environmentKeySchema = z
 			"Environment key must contain only lowercase letters, numbers, hyphens and underscores",
 	});
 
+const groupKeySchema = z
+	.string()
+	.min(1)
+	.max(50)
+	.regex(/^[a-z0-9-_]+$/, {
+		message:
+			"Collection group key must contain only lowercase letters, numbers, hyphens and underscores",
+	});
+
 const relationCollectionKeySchema = z
 	.string()
 	.min(1)
@@ -28,6 +37,16 @@ const CollectionConfigSchema = z
 				message: `Collection key cannot contain '${constants.db.nameSeparator}'`,
 			}),
 		mode: z.enum(["single", "multiple"]),
+		group: z
+			.union([
+				groupKeySchema,
+				z.object({
+					key: groupKeySchema,
+					name: adminCopyInputSchema.optional(),
+					order: z.number().optional(),
+				}),
+			])
+			.optional(),
 		details: z.object({
 			name: adminCopyInputSchema,
 			singularName: adminCopyInputSchema,

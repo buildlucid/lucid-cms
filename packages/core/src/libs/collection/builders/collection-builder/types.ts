@@ -24,6 +24,18 @@ export type CollectionEnvironmentPermissions = Partial<
 	Pick<Record<CollectionPermissionAction, string>, "publish" | "review">
 >;
 export type CollectionEnvironmentRelations = Record<string, string>;
+export type CollectionGroupConfigInput =
+	| string
+	| {
+			key: string;
+			name?: AdminCopyInput;
+			order?: number;
+	  };
+export type CollectionGroupConfig = {
+	key: string;
+	name: ResolvedAdminCopy | null;
+	order: number | null;
+};
 
 export type PublishingReviewCommentRequirement = "required" | "optional";
 export type PublishingReviewConfig = {
@@ -61,6 +73,7 @@ export type PublishingWorkflowConfig = {
 export type CollectionConfigSchemaType = {
 	key: string;
 	mode: "single" | "multiple";
+	group?: CollectionGroupConfigInput;
 	details: {
 		name: AdminCopyInput;
 		singularName: AdminCopyInput;
@@ -114,6 +127,7 @@ export type CollectionConfigSchemaType = {
 export type CollectionData = {
 	key: string;
 	mode: CollectionConfigSchemaType["mode"];
+	group: CollectionGroupConfig | null;
 	details: {
 		name: ResolvedAdminCopy;
 		singularName: ResolvedAdminCopy;

@@ -100,6 +100,7 @@ test("collection config is correct along with field includes and filters", async
 	expect(pagesCollection.getData).toEqual({
 		key: "pages",
 		mode: "multiple",
+		group: null,
 		details: {
 			name: copy("admin:tests.collections.pages.name", {
 				defaultMessage: "Pages",
@@ -262,6 +263,42 @@ test("collection environment relation config normalizes defaults", async () => {
 			relations: {},
 		},
 	]);
+});
+
+test("collection group config normalizes shorthand and named groups", () => {
+	const shorthandCollection = new CollectionBuilder("pages", {
+		mode: "multiple",
+		group: "content",
+		details: {
+			name: "Pages",
+			singularName: "Page",
+		},
+	});
+
+	expect(shorthandCollection.getData.group).toEqual({
+		key: "content",
+		name: null,
+		order: null,
+	});
+
+	const namedCollection = new CollectionBuilder("blogs", {
+		mode: "multiple",
+		group: {
+			key: "content",
+			name: "Content",
+			order: 10,
+		},
+		details: {
+			name: "Blogs",
+			singularName: "Blog",
+		},
+	});
+
+	expect(namedCollection.getData.group).toEqual({
+		key: "content",
+		name: { type: "lucid.literal", value: "Content" },
+		order: 10,
+	});
 });
 
 test("plain string copy on details and fields is normalised to literal copy", () => {

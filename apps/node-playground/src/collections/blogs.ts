@@ -15,6 +15,9 @@ const BlogCollection = new CollectionBuilder("blog", {
 		restore: "blog:full",
 		publish: "blog:full",
 	},
+	group: {
+		key: "content",
+	},
 	config: {
 		localized: true,
 		scheduling: true,

@@ -33,6 +33,30 @@ const collectionResponseSchema = z.object({
 			"Whether the collection has one document or multiple documents",
 		example: "multiple",
 	}),
+	group: z
+		.object({
+			key: z.string().meta({
+				description: "The collection group key",
+				example: "content",
+			}),
+			name: resolvedAdminCopySchema.nullable().meta({
+				description: "Display name for the collection group",
+				example: {
+					type: "lucid.copy",
+					scope: "admin",
+					key: "collections.groups.content.name",
+					defaultMessage: "Content",
+				},
+			}),
+			order: z.number().nullable().meta({
+				description: "Optional order value for sorting collection groups",
+				example: 10,
+			}),
+		})
+		.nullable()
+		.meta({
+			description: "Admin navigation group metadata for the collection",
+		}),
 	documentId: z
 		.number()
 		.nullable()

@@ -127,6 +127,23 @@ class CollectionBuilder extends FieldBuilder {
 	#fieldCollectionHelper = (key: string, display?: DisplayInListing) => {
 		if (display) this.displayInListing.push(key);
 	};
+	#formatGroup = (): CollectionData["group"] => {
+		const group = this.config.group;
+		if (group === undefined) return null;
+		if (typeof group === "string") {
+			return {
+				key: group,
+				name: null,
+				order: null,
+			};
+		}
+
+		return {
+			key: group.key,
+			name: normalizeCopy(group.name) ?? null,
+			order: group.order ?? null,
+		};
+	};
 
 	// ------------------------------------
 	// Getters
@@ -134,6 +151,7 @@ class CollectionBuilder extends FieldBuilder {
 		return {
 			key: this.key,
 			mode: this.config.mode,
+			group: this.#formatGroup(),
 			details: {
 				name: normalizeCopy(this.config.details.name),
 				singularName: normalizeCopy(this.config.details.singularName),

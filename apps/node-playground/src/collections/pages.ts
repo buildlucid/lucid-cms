@@ -20,6 +20,9 @@ const PageCollection = new CollectionBuilder("page", {
 		publish: "page:publish",
 		review: "page:review",
 	},
+	group: {
+		key: "content",
+	},
 	config: {
 		localized: true,
 		revisions: true,

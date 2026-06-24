@@ -518,6 +518,11 @@ export interface Collection {
 	key: string;
 	documentId?: number | null;
 	mode: CollectionMode;
+	group: {
+		key: string;
+		name: ResolvedAdminCopy | null;
+		order: number | null;
+	} | null;
 	details: {
 		name: ResolvedAdminCopy;
 		singularName: ResolvedAdminCopy;

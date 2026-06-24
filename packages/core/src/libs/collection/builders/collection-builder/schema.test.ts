@@ -211,6 +211,87 @@ test("collection workflow config validates stages, targets and palette", async (
 	});
 });
 
+test("collection group config validates shorthand and named groups", async () => {
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			key: "pages",
+			mode: "multiple",
+			group: "content",
+			details: {
+				name: "Pages",
+				singularName: "Page",
+			},
+		}),
+	).resolves.toMatchObject({
+		success: true,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			key: "blogs",
+			mode: "multiple",
+			group: {
+				key: "content",
+				name: copy("admin:tests.groups.content.name", {
+					defaultMessage: "Content",
+				}),
+				order: 10,
+			},
+			details: {
+				name: "Blogs",
+				singularName: "Blog",
+			},
+		}),
+	).resolves.toMatchObject({
+		success: true,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			key: "pages",
+			mode: "multiple",
+			group: "",
+			details: {
+				name: "Pages",
+				singularName: "Page",
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			key: "pages",
+			mode: "multiple",
+			group: "Content",
+			details: {
+				name: "Pages",
+				singularName: "Page",
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			key: "pages",
+			mode: "multiple",
+			group: {
+				key: "content",
+				order: "first",
+			},
+			details: {
+				name: "Pages",
+				singularName: "Page",
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+});
+
 test("collection environment relation config passes schema validation", async () => {
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
