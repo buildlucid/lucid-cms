@@ -3,63 +3,89 @@
 [![Tests](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml/badge.svg)](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml)
 [![NPM Version](https://img.shields.io/npm/v/@lucidcms/core/latest.svg)](https://www.npmjs.com/package/@lucidcms/core)
 ![NPM Downloads](https://img.shields.io/npm/dw/@lucidcms/core)
-![NPM License](https://img.shields.io/npm/l/@lucidcms/core)
+[![License](https://img.shields.io/badge/license-BSL%201.1%20%2F%20MIT-blue)](./LICENSE.md)
 
-<hr/>
+---
 
 > [!CAUTION]
-> Lucid CMS is still in Alpha and under heavy development and hasnt implemented licensing yet and so cannot be used in a production setting. There is currently no commitment to backwards compatibility and breaking changes will be released on a regular basis while APIs and interfaces are being finalized.
+> Lucid CMS is currently in alpha. The core is licensed under BSL 1.1, with free use for non-commercial projects, education, and non-profits. Commercial licensing and hosted AI access will launch alongside the beta release. Until then, expect breaking changes while APIs and product surfaces are finalized.
 
-<hr/>
+---
 
-A modern, TypeScript-first headless CMS designed for ultimate flexibility. Powered by sophisticated collection and brick builders, Lucid CMS gives you the freedom to craft content structures that match your exact needs. Whether you're deploying to traditional servers or the edge, connecting to your preferred database, or integrating through our extensive plugin ecosystem, Lucid CMS adapts to your workflow whilst delivering an exceptional experience for developers and content creators alike.
+Lucid CMS is a TypeScript-first headless CMS for teams that need flexible content modeling, polished editorial workflows, and control over where their content platform runs.
+
+It gives developers a code-defined collection system, typed client integrations, runtime and database adapters, and a plugin architecture that keeps infrastructure choices open. For content teams, it provides a modern editing experience with media management, release review, scheduled publishing, localization, and AI-assisted content tools.
 
 ## ✨ Features
 
-- 🚀 Deploy Anywhere:
-    - Runtime Adapters: Deploy seamlessly to Node.js or Cloudflare Workers
-    - Database Adapters: Full support for PostgreSQL, LibSQL, and SQLite
-- 📝 Content Modeling:
-    - Collection Builder: Create flexible collections for single or multiple documents
-    - Brick Builder: Build reusable content blocks that can be mixed and matched across your collections
-    - 15+ Custom Fields: Tailor your content with a wide range of field types
-- 🎛️ Content Management:
-    - Revisions & Drafts: Complete version history with rollback support
-    - Media Library: Centralized asset management
-    - Localization: Built-in multilingual content support
-- 🔧 Built-in Capabilities:
-    - Image Processing: On-demand resizing with next-gen formats and custom preset support
-    - Email Integration: Flexible email strategies with customizable templates
-    - User Management: Invite users and assign roles with granular permissions
-- 🔌 Extensibility:
-    - Plugin Ecosystem: Extend functionality with first-party and third-party plugins
-    - Client Integrations: API access for fetching content in your websites and applications
+- **Model content your way:** code-defined collections, reusable bricks, built-in custom fields, localization, and generated TypeScript types.
+- **Manage publishing with confidence:** drafts, revisions, rollback, workflow stages, release review, approvals, and scheduled publishing.
+- **Organize teams and sites:** tenants, roles, granular permissions, client integrations, and soft-delete recovery.
+- **Handle media properly:** folders, private media, shareable links, image processing, cropping, and flexible storage adapters.
+- **Choose your infrastructure:** Node.js or Cloudflare Workers, PostgreSQL, LibSQL, SQLite, D1, queues, KV, email, auth, OpenAPI, and Hono extension points.
+- **Use AI where it helps:** generate and edit images, generate alt text, create custom field values, and track AI usage.
+
+AI features require Lucid's license-backed AI service, which is planned to become publicly available with the beta release.
 
 ## ⚙️ Runtime Adapters
 
-- [Node](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-node)
-- [Cloudflare Workers](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-cloudflare)
+- [Node.js](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-node) for traditional servers, VPS deployments, local development, and full Node runtime access.
+- [Cloudflare Workers](https://github.com/buildlucid/lucid-cms/tree/master/packages/runtime-cloudflare) for edge deployments with generated Wrangler configuration, bindings, scheduled handlers, and queue handlers.
 
-## 💾 DB Adapters
+## 💾 Database Adapters
 
 - [PostgreSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-postgres)
 - [LibSQL](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-libsql)
 - [SQLite](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-sqlite)
+- [Cloudflare D1](https://github.com/buildlucid/lucid-cms/tree/master/packages/db-d1) (beta)
 
-## 🛠️ First Party Plugins
+## 🔌 First-Party Plugins
 
-- **[Pages](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-pages):** Adds nested document support to your collections along with slugs and computed fullSlugs based parent relationships.
-- **[Nodemailer](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-nodemailer):** Extend the email strategy to support Nodemailer by passing down a custom transport.
-- **[Resend](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-resend):** Extend the email strategy to use [Resend](https://resend.com/home).
-- **[S3](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-s3):** Extend the media strategy to support using any S3 compatible storage solution.
-- **[Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2):** Extend the media strategy to use a Cloudflare R2 binding, with an optional HTTP fallback for direct browser uploads.
-- **Menus:** Coming soon!
-- **Form Builder:** Coming soon!
+- [Pages](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-pages): adds hierarchical documents, slugs, parent pages, and computed full slugs for website page collections.
+- [Filesystem](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-filesystem): stores uploaded media on the local filesystem.
+- [S3](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-s3): stores media in AWS S3, Cloudflare R2, or another S3-compatible provider.
+- [Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2): uses a Cloudflare R2 binding with optional S3-compatible HTTP fallback.
+- [Sharp](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-sharp): enables Sharp-backed image processing for Lucid media presets.
+- [Nodemailer](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-nodemailer): sends email through a custom Nodemailer transport.
+- [Resend](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-resend): sends email through Resend and supports Resend webhooks for delivery tracking.
+- [GitHub Auth](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-github-auth): adds GitHub as an authentication provider.
+- [Google Auth](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-google-auth): adds Google as an authentication provider.
+- [Microsoft Auth](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-microsoft-auth): adds Microsoft as an authentication provider.
+- [Worker Queues](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-worker-queues): registers a Node worker-thread queue adapter for background jobs and scheduled work.
+- [Cloudflare Queues](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-queues): registers a Cloudflare Queues adapter.
+- [SQLite KV](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-sqlite-kv): registers a local SQLite-backed KV adapter.
+- [Redis](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-redis): registers a Redis-backed KV adapter.
+- [Cloudflare KV](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-kv): registers a Cloudflare KV adapter.
+
+## 🧩 Framework And Client Packages
+
+- [Astro](https://github.com/buildlucid/lucid-cms/tree/master/packages/astro): official Astro integration for Lucid routes, generated files, Cloudflare support, and the development toolbar.
+- [Client](https://github.com/buildlucid/lucid-cms/tree/master/packages/client): typed client for public document, media, and locale endpoints.
+- [Rich Text](https://github.com/buildlucid/lucid-cms/tree/master/packages/rich-text): shared Tiptap extensions and rich text conversion utilities.
 
 ## 🏁 Getting Started
 
-To get started you can follow the [Getting Started](https://lucidcms.io/en/cms/docs/getting-started/installation/) guide from our documentation. Lucid CMS is super easy to get up and running and with the SQLite database adapter along with the [Local Storage](https://lucidcms.io/plugins/local-storage/) plugin, you can get set up without needing any third party services.
+Follow the [installation guide](https://lucidcms.io/en/cms/docs/getting-started/installation/) for the full setup flow.
 
-## 🖥️ Lucid UI
+For a local Node.js project, the smallest useful setup is typically:
 
-Still under development, Lucid UI is an Astro and TailwindCSS based UI library that is built to be used with Lucid CMS. It's not quite ready for prime time yet, but you can expect to see it launch down the line.
+```bash
+npm install @lucidcms/core @lucidcms/runtime-node @lucidcms/db-sqlite @lucidcms/plugin-filesystem
+```
+
+Then create a `lucid.config.ts` file with a runtime, database adapter, secrets, media settings, and collections. SQLite plus the filesystem plugin is the fastest way to explore Lucid locally without external infrastructure.
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/buildlucid/lucid-cms/tree/master/templates/cloudflare-deploy)
+
+The Cloudflare deploy template creates a Lucid CMS Worker with D1, KV, R2, and the Pages plugin. You can also compose the Cloudflare runtime manually with the adapters and plugins your project needs.
+
+## 📄 Licensing
+
+Lucid CMS uses a mixed-license model:
+
+- The core CMS is licensed under BSL 1.1.
+- Runtime adapters, database adapters, plugins, the client, shared types, and rich text utilities are MIT licensed.
+- Free use is intended for non-commercial projects, education, and non-profits.
+- Commercial use will require a license purchased through the Lucid website once beta launches.
+
+See [LICENSE.md](./LICENSE.md) for the repository licensing summary.
