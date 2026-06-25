@@ -9,6 +9,10 @@ import PublicRoutes from "@/layouts/PublicRoutes";
 import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 
+type LazyRoute = {
+	preload: () => Promise<unknown>;
+};
+
 // Routes
 const ComponentsRoute = lazy(() => import("@/routes/Components"));
 const LoginRoute = lazy(() => import("@/routes/Login"));
@@ -56,9 +60,15 @@ const CollectionsDocumentsReleaseRequestDetailRoute = lazy(
 	() => import("./routes/Collections/Documents/ReleaseRequestDetail"),
 );
 
+const preloadRoutes =
+	(...routes: LazyRoute[]) =>
+	() => {
+		void Promise.all(routes.map((route) => route.preload()));
+	};
+
 const AppRouter: Component = () => {
 	return (
-		<Router>
+		<Router preload>
 			{/* Authenticated */}
 			<Route path="/lucid" component={MainLayout}>
 				<Route path="/" component={DashboardRoute} />
@@ -67,11 +77,13 @@ const AppRouter: Component = () => {
 				{/* Collections */}
 				<Route
 					path="/collections/:collectionKey"
+					preload={preloadRoutes(CollectionsDocumentsListRoute)}
 					component={() => <CollectionsDocumentsListRoute />}
 				/>
 				{/* Page builder */}
 				<Route
 					path="/collections/:collectionKey/latest/create"
+					preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
 					component={() => (
 						<CollectionDocumentPageBuilderRoute
 							mode="create"
@@ -81,6 +93,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/collections/:collectionKey/snapshot/:documentId/:versionId"
+					preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
 					component={() => (
 						<CollectionDocumentPageBuilderRoute
 							mode="edit"
@@ -90,10 +103,12 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/collections/:collectionKey/:versionType/:documentId"
+					preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
 					component={() => <CollectionDocumentPageBuilderRoute mode="edit" />}
 				/>
 				<Route
 					path="/collections/:collectionKey/revision/:documentId/:versionId"
+					preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
 					component={() => (
 						<CollectionDocumentPageBuilderRoute
 							mode="edit"
@@ -103,10 +118,12 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/collections/:collectionKey/:documentId/history"
+					preload={preloadRoutes(CollectionsDocumentsHistoryRoute)}
 					component={() => <CollectionsDocumentsHistoryRoute />}
 				/>
 				<Route
 					path="/collections/:collectionKey/:documentId/release-requests/:releaseRequestId"
+					preload={preloadRoutes(CollectionsDocumentsReleaseRequestDetailRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.DocumentsReview}>
 							<CollectionsDocumentsReleaseRequestDetailRoute />
@@ -116,6 +133,7 @@ const AppRouter: Component = () => {
 				{/* Media */}
 				<Route
 					path="/media"
+					preload={preloadRoutes(MediaListRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.MediaRead}>
 							<MediaListRoute />
@@ -124,6 +142,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/media/:folderId"
+					preload={preloadRoutes(MediaListRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.MediaRead}>
 							<MediaListRoute />
@@ -133,6 +152,7 @@ const AppRouter: Component = () => {
 				{/* Users */}
 				<Route
 					path="/users"
+					preload={preloadRoutes(UsersListRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.UsersRead}>
 							<UsersListRoute />
@@ -142,6 +162,7 @@ const AppRouter: Component = () => {
 				{/* Roles */}
 				<Route
 					path="/roles"
+					preload={preloadRoutes(RolesListRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.RolesRead}>
 							<RolesListRoute />
@@ -151,6 +172,7 @@ const AppRouter: Component = () => {
 				{/* Emails */}
 				<Route
 					path="/emails"
+					preload={preloadRoutes(EmailListRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.EmailRead}>
 							<EmailListRoute />
@@ -159,6 +181,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/release-requests"
+					preload={preloadRoutes(ReleaseRequestsListRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.DocumentsReview}>
 							<ReleaseRequestsListRoute />
@@ -166,9 +189,14 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				{/* System */}
-				<Route path="/system" component={() => <SystemIndexRoute />} />
+				<Route
+					path="/system"
+					preload={preloadRoutes(SystemIndexRoute)}
+					component={() => <SystemIndexRoute />}
+				/>
 				<Route
 					path="/system/overview"
+					preload={preloadRoutes(SystemOverviewRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.SettingsRead}>
 							<SystemOverviewRoute />
@@ -177,6 +205,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/system/operations"
+					preload={preloadRoutes(SystemOperationsRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.SettingsRead}>
 							<SystemOperationsRoute />
@@ -185,6 +214,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/system/ai-usage"
+					preload={preloadRoutes(SystemAiUsageRoute)}
 					component={() => (
 						<ConditionGuard
 							condition={() => siteStore.get.hasAnyAiFeatureEnabled()}
@@ -202,6 +232,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/system/queue-observability"
+					preload={preloadRoutes(SystemQueueObservabilityRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.JobsRead}>
 							<SystemQueueObservabilityRoute />
@@ -210,6 +241,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/system/integrations"
+					preload={preloadRoutes(SystemClientIntegrationsRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.IntegrationsRead}>
 							<SystemClientIntegrationsRoute />
@@ -218,6 +250,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/system/license"
+					preload={preloadRoutes(SystemLicenseRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.LicenseUpdate}>
 							<SystemLicenseRoute />

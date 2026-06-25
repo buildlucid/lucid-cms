@@ -85,7 +85,7 @@ a {
 }
 
 .brand-logo {
-	width: 148px;
+	width: auto;
 	height: 30px;
 	display: block;
 }

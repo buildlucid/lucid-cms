@@ -1,12 +1,15 @@
-import LogoColumn from "@assets/svgs/logo-column.svg";
 import type { Component } from "solid-js";
 
 const FullPageLoading: Component = () => {
 	return (
-		<div class="fixed inset-0 z-50 bg-background-base flex items-center justify-center">
-			<div class="absolute inset-0 z-20 flex-col flex items-center justify-center">
-				<img src={LogoColumn} alt="Lucid CMS Logo" class="h-24 animate-pulse" />
-			</div>
+		<div
+			class="pointer-events-none absolute inset-0 z-20 overflow-hidden rounded-t-xl bg-background-base/40 border-border border"
+			role="status"
+			aria-live="polite"
+			aria-label="Loading Lucid CMS"
+		>
+			<span class="sr-only">Loading Lucid CMS</span>
+			<span class="skeleton-shimmer absolute inset-0 opacity-80" />
 		</div>
 	);
 };

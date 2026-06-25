@@ -115,6 +115,24 @@
 		@apply bg-input-base rounded-md animate-pulse;
 	}
 
+	.skeleton-shimmer {
+		display: block;
+		background: linear-gradient(
+			90deg,
+			rgba(24, 24, 24, 0.88) 0%,
+			rgba(48, 48, 48, 0.95) 50%,
+			rgba(24, 24, 24, 0.88) 100%
+		);
+		background-size: 200% 100%;
+		animation: shimmer 3s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.skeleton-shimmer {
+			animation: none;
+		}
+	}
+
 	.blur-background {
 		background:
 			radial-gradient(
@@ -339,6 +357,15 @@
 		100% {
 			transform: translateX(0px);
 			opacity: 1;
+		}
+	}
+
+	@keyframes shimmer {
+		0% {
+			background-position: 200% 0;
+		}
+		100% {
+			background-position: -200% 0;
 		}
 	}
 

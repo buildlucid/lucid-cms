@@ -223,7 +223,7 @@ export const NavigationChrome: Component = () => {
 				<div class="w-55 h-full flex flex-col overflow-y-auto scrollbar">
 					<div class="pt-6 px-4">
 						<div class="flex items-center pl-2">
-							<img src={LogoIcon} alt="Lucid CMS Logo" class="h-6" />
+							<img src={LogoIcon} alt="Lucid CMS Logo" class="h-5" />
 						</div>
 						<TenantSelect class="mt-5" />
 					</div>

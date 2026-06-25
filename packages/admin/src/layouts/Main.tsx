@@ -5,9 +5,8 @@ import {
 	createMemo,
 	createSignal,
 	type JSXElement,
-	Match,
+	Show,
 	Suspense,
-	Switch,
 } from "solid-js";
 import { NavigationChrome, Wrapper } from "@/components/Groups/Layout";
 import UpdatePasswordModal from "@/components/Modals/User/UpdatePassword";
@@ -112,24 +111,34 @@ const MainLayout: Component<{
 	// ------------------------------------------------------
 	// Render
 	return (
-		<Switch>
-			<Match when={isLoading()}>
-				<FullPageLoading />
-			</Match>
-			<Match when={isSuccess()}>
-				<div class="grid grid-cols-1 md:grid-cols-main-layout min-h-full relative">
-					<NavigationChrome />
-					<main
-						class={classNames(
-							"flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0 md:min-w-[calc(100vw-236px)]",
-							{
-								"md:pr-4": interfaceDirection.isLTR(),
-								"md:pl-4": interfaceDirection.isRTL(),
-							},
-						)}
+		<Show when={isLoading() || isSuccess()}>
+			<div class="grid grid-cols-1 md:grid-cols-main-layout min-h-full relative">
+				<NavigationChrome />
+				<main
+					class={classNames(
+						"relative flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0 md:min-w-[calc(100vw-236px)]",
+						{
+							"md:pr-4": interfaceDirection.isLTR(),
+							"md:pl-4": interfaceDirection.isRTL(),
+						},
+					)}
+					aria-busy={isLoading()}
+				>
+					<Show
+						when={isSuccess()}
+						fallback={
+							<Wrapper>
+								<div />
+							</Wrapper>
+						}
 					>
 						<Suspense fallback={<Wrapper />}>{props.children}</Suspense>
-					</main>
+					</Show>
+					<Show when={isLoading()}>
+						<FullPageLoading />
+					</Show>
+				</main>
+				<Show when={isSuccess()}>
 					<UpdatePasswordModal
 						state={{
 							open: forcedPasswordModalOpen(),
@@ -139,9 +148,9 @@ const MainLayout: Component<{
 							forced: true,
 						}}
 					/>
-				</div>
-			</Match>
-		</Switch>
+				</Show>
+			</div>
+		</Show>
 	);
 };
 
