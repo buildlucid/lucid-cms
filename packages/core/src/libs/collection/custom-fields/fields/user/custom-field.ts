@@ -42,24 +42,24 @@ class UserCustomField extends CustomField<"user"> {
 					}),
 				summary: this.props?.details?.summary,
 			},
-			config: {
-				localized: this.props?.config?.localized ?? false,
-				default: this.props?.config?.default ?? [],
-				hidden: this.props?.config?.hidden,
-				disabled: this.props?.config?.disabled,
-				index: this.props?.config?.index,
-				multiple: this.props?.config?.multiple,
+			localized: this.props?.localized ?? false,
+			default: this.props?.default ?? [],
+			index: this.props?.index,
+			multiple: this.props?.multiple,
+			ui: {
+				hidden: this.props?.ui?.hidden,
+				disabled: this.props?.ui?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"user">;
 	}
 	override normalizeInputValue(value: unknown) {
-		return clampRelationInputValue(value, this.config.config.multiple);
+		return clampRelationInputValue(value, this.config.multiple);
 	}
 	override get defaultValue(): unknown {
 		return normalizeStoredRelationValues(
-			this.config.config.default,
-			this.config.config.multiple,
+			this.config.default,
+			this.config.multiple,
 		);
 	}
 	override get errors(): {
@@ -102,7 +102,7 @@ class UserCustomField extends CustomField<"user"> {
 	formatResponseValue(value: unknown) {
 		return normalizeStoredRelationValues(
 			value,
-			this.config.config.multiple,
+			this.config.multiple,
 		) satisfies CFResponse<"user">["value"];
 	}
 	override get relationValueColumn() {
@@ -111,19 +111,15 @@ class UserCustomField extends CustomField<"user"> {
 	override serializeRelationFieldValue(
 		value: unknown,
 	): Array<Record<string, unknown>> {
-		return normalizeStoredRelationValues(
-			value,
-			this.config.config.multiple,
-		).map((userId) => ({
-			[prefixGeneratedColName("user_id")]: userId,
-		}));
+		return normalizeStoredRelationValues(value, this.config.multiple).map(
+			(userId) => ({
+				[prefixGeneratedColName("user_id")]: userId,
+			}),
+		);
 	}
 	uniqueValidation(value: unknown, refData?: UserValidationData[]) {
 		const valueSchema = z.array(z.number());
-		const candidateValue = clampRelationInputValue(
-			value,
-			this.config.config.multiple,
-		);
+		const candidateValue = clampRelationInputValue(value, this.config.multiple);
 		const valueValidate = zodSafeParse(candidateValue, valueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
@@ -133,7 +129,7 @@ class UserCustomField extends CustomField<"user"> {
 				)
 			: [];
 		const itemCountValidation = validateRelationItemCount({
-			multiple: this.config.config.multiple,
+			multiple: this.config.multiple,
 			length: normalizedValue.length,
 			validation: this.config.validation,
 		});

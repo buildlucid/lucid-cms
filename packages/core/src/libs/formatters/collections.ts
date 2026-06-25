@@ -220,12 +220,9 @@ const formatField = (
 		);
 
 		formattedField.collection = filteredCollection;
-		formattedField.config = {
-			...formattedField.config,
-			default: formattedField.config.default?.filter((defaultValue) =>
-				documentTargetCollectionKeys.has(defaultValue.collectionKey),
-			),
-		};
+		formattedField.default = formattedField.default?.filter((defaultValue) =>
+			documentTargetCollectionKeys.has(defaultValue.collectionKey),
+		);
 	}
 
 	if (nestedFields) {

@@ -2,6 +2,7 @@ import type { ZodType } from "zod";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
+	FieldUIConfig,
 	SharedFieldConfig,
 } from "../../types.js";
 
@@ -13,13 +14,10 @@ export interface TextareaFieldConfig extends SharedFieldConfig {
 		placeholder?: AdminCopyInput;
 	};
 	ai?: CustomFieldUserAiConfig<"textarea">;
-	config: {
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		default?: string;
-	};
+	localized?: boolean;
+	default?: string;
+	index?: true;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown>;

@@ -38,12 +38,12 @@ class TextareaCustomField extends CustomField<"textarea"> {
 				placeholder: this.props?.details?.placeholder,
 			},
 			ai: this.props?.ai,
-			config: {
-				localized: this.props?.config?.localized ?? true,
-				default: this.props?.config?.default ?? "",
-				hidden: this.props?.config?.hidden,
-				disabled: this.props?.config?.disabled,
-				index: this.props?.config?.index,
+			localized: this.props?.localized ?? true,
+			default: this.props?.default ?? "",
+			index: this.props?.index,
+			ui: {
+				hidden: this.props?.ui?.hidden,
+				disabled: this.props?.ui?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"textarea">;
@@ -69,7 +69,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 						name: this.key,
 						type: props.db.getDataType("text"),
 						nullable: true,
-						default: this.config.config.default,
+						default: this.config.default,
 					},
 				],
 			},
@@ -78,7 +78,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 	}
 	formatResponseValue(value?: string | null) {
 		return (value ??
-			this.config.config.default ??
+			this.config.default ??
 			null) satisfies CFResponse<"textarea">["value"];
 	}
 	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {

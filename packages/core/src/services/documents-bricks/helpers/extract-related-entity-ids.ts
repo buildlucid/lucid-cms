@@ -68,18 +68,13 @@ const hasMultipleFlag = (
 	fieldInstance: CustomField<FieldTypes>,
 ): fieldInstance is CustomField<FieldTypes> & {
 	config: {
-		config: {
-			multiple?: boolean;
-		};
+		multiple?: boolean;
 	};
 } => {
 	return (
 		typeof fieldInstance.config === "object" &&
 		fieldInstance.config !== null &&
-		"config" in fieldInstance.config &&
-		typeof fieldInstance.config.config === "object" &&
-		fieldInstance.config.config !== null &&
-		"multiple" in fieldInstance.config.config
+		"multiple" in fieldInstance.config
 	);
 };
 
@@ -108,7 +103,7 @@ const shouldSkipRelationRow = (
 
 	if (!hasMultipleFlag(fieldInstance)) return false;
 
-	return fieldInstance.config.config.multiple !== true;
+	return fieldInstance.config.multiple !== true;
 };
 
 /**

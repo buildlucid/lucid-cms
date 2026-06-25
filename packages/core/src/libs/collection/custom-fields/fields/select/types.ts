@@ -1,5 +1,5 @@
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export interface SelectFieldConfig extends SharedFieldConfig {
 	type: "select";
@@ -9,13 +9,10 @@ export interface SelectFieldConfig extends SharedFieldConfig {
 		placeholder?: AdminCopyInput;
 	};
 	options: Array<{ label: AdminCopyInput; value: string }>;
-	config: {
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		default?: string;
-	};
+	localized?: boolean;
+	default?: string;
+	index?: true;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 	};

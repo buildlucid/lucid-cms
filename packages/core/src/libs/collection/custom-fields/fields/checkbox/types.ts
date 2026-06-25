@@ -1,5 +1,5 @@
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export interface CheckboxFieldConfig extends SharedFieldConfig {
 	type: "checkbox";
@@ -9,13 +9,10 @@ export interface CheckboxFieldConfig extends SharedFieldConfig {
 		true?: AdminCopyInput;
 		false?: AdminCopyInput;
 	};
-	config: {
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		default?: boolean;
-	};
+	localized?: boolean;
+	default?: boolean;
+	index?: true;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 	};

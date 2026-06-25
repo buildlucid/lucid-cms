@@ -1,6 +1,6 @@
 import type { DocumentField } from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export type DocumentFieldValue = {
 	id: number;
@@ -14,14 +14,11 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 		label?: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
-	config: {
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		multiple?: boolean;
-		default?: DocumentFieldValue[];
-	};
+	localized?: boolean;
+	default?: DocumentFieldValue[];
+	index?: true;
+	multiple?: boolean;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 		minItems?: number;

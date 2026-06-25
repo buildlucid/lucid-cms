@@ -334,12 +334,16 @@ type RelationFieldDetails = {
 	summary?: ResolvedAdminCopy;
 };
 
-type FieldConfigOptions<TDefault = unknown> = {
-	localized?: boolean;
+type FieldUIConfig = {
 	hidden?: boolean;
 	disabled?: boolean;
+};
+
+type FieldConfigOptions<TDefault = unknown> = {
+	localized?: boolean;
 	index?: true;
 	default?: TDefault;
+	ui?: FieldUIConfig;
 };
 
 type RequiredValidation = {
@@ -367,57 +371,58 @@ type SharedCollectionFieldConfig<TType extends FieldType> = {
 };
 
 export interface CheckboxFieldConfig
-	extends SharedCollectionFieldConfig<"checkbox"> {
+	extends SharedCollectionFieldConfig<"checkbox">,
+		FieldConfigOptions<boolean> {
 	details: FieldDetails & {
 		true?: ResolvedAdminCopy;
 		false?: ResolvedAdminCopy;
 	};
-	config: FieldConfigOptions<boolean>;
 	validation?: RequiredValidation;
 }
 
-export interface ColorFieldConfig extends SharedCollectionFieldConfig<"color"> {
+export interface ColorFieldConfig
+	extends SharedCollectionFieldConfig<"color">,
+		FieldConfigOptions<string> {
 	presets: string[];
-	config: FieldConfigOptions<string>;
 	validation?: RequiredValidation;
 }
 
 export interface DatetimeFieldConfig
-	extends SharedCollectionFieldConfig<"datetime"> {
-	config: FieldConfigOptions<string> & {
-		time?: boolean;
-	};
+	extends SharedCollectionFieldConfig<"datetime">,
+		FieldConfigOptions<string> {
+	time?: boolean;
 	validation?: ZodValidation;
 }
 
 export interface DocumentFieldConfig
-	extends SharedCollectionFieldConfig<"document"> {
+	extends SharedCollectionFieldConfig<"document">,
+		FieldConfigOptions<DocumentRelationValue[]> {
 	collection: string | string[];
 	details: RelationFieldDetails;
-	config: FieldConfigOptions<DocumentRelationValue[]> & {
-		multiple?: boolean;
-	};
+	multiple?: boolean;
 	validation?: RequiredValidation & {
 		minItems?: number;
 		maxItems?: number;
 	};
 }
 
-export interface JsonFieldConfig extends SharedCollectionFieldConfig<"json"> {
-	config: FieldConfigOptions<Record<string, unknown> | unknown[]>;
+export interface JsonFieldConfig
+	extends SharedCollectionFieldConfig<"json">,
+		FieldConfigOptions<Record<string, unknown> | unknown[]> {
 	validation?: ZodValidation;
 }
 
-export interface LinkFieldConfig extends SharedCollectionFieldConfig<"link"> {
-	config: FieldConfigOptions<LinkValue>;
+export interface LinkFieldConfig
+	extends SharedCollectionFieldConfig<"link">,
+		FieldConfigOptions<LinkValue> {
 	validation?: RequiredValidation;
 }
 
-export interface MediaFieldConfig extends SharedCollectionFieldConfig<"media"> {
+export interface MediaFieldConfig
+	extends SharedCollectionFieldConfig<"media">,
+		FieldConfigOptions<number[]> {
 	details: RelationFieldDetails;
-	config: FieldConfigOptions<number[]> & {
-		multiple?: boolean;
-	};
+	multiple?: boolean;
 	validation?: RequiredValidation & {
 		minItems?: number;
 		maxItems?: number;
@@ -435,17 +440,15 @@ export interface MediaFieldConfig extends SharedCollectionFieldConfig<"media"> {
 }
 
 export interface NumberFieldConfig
-	extends SharedCollectionFieldConfig<"number"> {
-	config: FieldConfigOptions<number | null>;
+	extends SharedCollectionFieldConfig<"number">,
+		FieldConfigOptions<number | null> {
 	validation?: ZodValidation;
 }
 
 export interface RepeaterFieldConfig
 	extends SharedCollectionFieldConfig<"repeater"> {
 	fields: CollectionNonTabFieldConfig[];
-	config: {
-		disabled?: boolean;
-	};
+	ui?: Pick<FieldUIConfig, "disabled">;
 	validation?: {
 		maxGroups?: number;
 		minGroups?: number;
@@ -453,15 +456,15 @@ export interface RepeaterFieldConfig
 }
 
 export interface RichTextFieldConfig
-	extends SharedCollectionFieldConfig<"rich-text"> {
-	config: FieldConfigOptions<Record<string, unknown>>;
+	extends SharedCollectionFieldConfig<"rich-text">,
+		FieldConfigOptions<Record<string, unknown>> {
 	validation?: ZodValidation;
 }
 
 export interface SelectFieldConfig
-	extends SharedCollectionFieldConfig<"select"> {
+	extends SharedCollectionFieldConfig<"select">,
+		FieldConfigOptions<string> {
 	options: Array<{ label: ResolvedAdminCopy; value: string }>;
-	config: FieldConfigOptions<string>;
 	validation?: RequiredValidation;
 }
 
@@ -469,22 +472,23 @@ export interface TabFieldConfig extends SharedCollectionFieldConfig<"tab"> {
 	fields: CollectionNonTabFieldConfig[];
 }
 
-export interface TextFieldConfig extends SharedCollectionFieldConfig<"text"> {
-	config: FieldConfigOptions<string>;
+export interface TextFieldConfig
+	extends SharedCollectionFieldConfig<"text">,
+		FieldConfigOptions<string> {
 	validation?: ZodValidation;
 }
 
 export interface TextareaFieldConfig
-	extends SharedCollectionFieldConfig<"textarea"> {
-	config: FieldConfigOptions<string>;
+	extends SharedCollectionFieldConfig<"textarea">,
+		FieldConfigOptions<string> {
 	validation?: ZodValidation;
 }
 
-export interface UserFieldConfig extends SharedCollectionFieldConfig<"user"> {
+export interface UserFieldConfig
+	extends SharedCollectionFieldConfig<"user">,
+		FieldConfigOptions<number[]> {
 	details: RelationFieldDetails;
-	config: FieldConfigOptions<number[]> & {
-		multiple?: boolean;
-	};
+	multiple?: boolean;
 	validation?: RequiredValidation & {
 		minItems?: number;
 		maxItems?: number;

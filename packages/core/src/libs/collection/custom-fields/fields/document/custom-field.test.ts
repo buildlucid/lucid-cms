@@ -38,9 +38,7 @@ const DocumentCollection = new CollectionBuilder("collection", {
 	})
 	.addDocument("multi_doc", {
 		collection: "page",
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 		validation: {
 			minItems: 2,
 			maxItems: 3,
@@ -48,9 +46,7 @@ const DocumentCollection = new CollectionBuilder("collection", {
 	})
 	.addDocument("multi_collection_doc", {
 		collection: ["page", "blog"],
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 	});
 
 test("successfully validate field - document", async () => {
@@ -373,8 +369,8 @@ test("custom field config passes schema validation", async () => {
 				defaultMessage: "description",
 			}),
 		},
-		config: {
-			localized: true,
+		localized: true,
+		ui: {
 			hidden: false,
 			disabled: false,
 		},
@@ -389,19 +385,17 @@ test("custom field config passes schema validation", async () => {
 test("custom field config supports multiple target collections", async () => {
 	const field = new DocumentCustomField("field", {
 		collection: ["page", "blog"],
-		config: {
-			default: [
-				{
-					id: 1,
-					collectionKey: "page",
-				},
-				{
-					id: 2,
-					collectionKey: "blog",
-				},
-			],
-			multiple: true,
-		},
+		default: [
+			{
+				id: 1,
+				collectionKey: "page",
+			},
+			{
+				id: 2,
+				collectionKey: "blog",
+			},
+		],
+		multiple: true,
 	});
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 
@@ -415,15 +409,11 @@ test("custom field config supports multiple target collections", async () => {
 test("document field controls its grouped validation input", () => {
 	const singleField = new DocumentCustomField("single_doc", {
 		collection: "page",
-		config: {
-			multiple: false,
-		},
+		multiple: false,
 	});
 	const multipleField = new DocumentCustomField("multiple_doc", {
 		collection: "page",
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 	});
 
 	expect(
@@ -449,15 +439,11 @@ test("document field controls its grouped validation input", () => {
 test("multiple config controls how many document IDs are kept", () => {
 	const singleField = new DocumentCustomField("single_doc", {
 		collection: "page",
-		config: {
-			multiple: false,
-		},
+		multiple: false,
 	});
 	const multipleField = new DocumentCustomField("multiple_doc", {
 		collection: "page",
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 	});
 
 	const values = [

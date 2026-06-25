@@ -38,12 +38,12 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 				true: this.props?.details?.true,
 				false: this.props?.details?.false,
 			},
-			config: {
-				localized: this.props?.config?.localized ?? false,
-				default: this.props?.config?.default ?? false,
-				hidden: this.props?.config?.hidden,
-				disabled: this.props?.config?.disabled,
-				index: this.props?.config?.index,
+			localized: this.props?.localized ?? false,
+			default: this.props?.default ?? false,
+			index: this.props?.index,
+			ui: {
+				hidden: this.props?.ui?.hidden,
+				disabled: this.props?.ui?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"checkbox">;
@@ -69,7 +69,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 						nullable: true,
 						default: props.db.formatInsertValue<BooleanInt>(
 							"boolean",
-							this.config.config.default,
+							this.config.default,
 						),
 					},
 				],
@@ -79,7 +79,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 	}
 	formatResponseValue(value?: BooleanInt | null) {
 		return formatter.formatBoolean(
-			Boolean(value) ?? this.config.config.default,
+			Boolean(value) ?? this.config.default,
 		) satisfies CFResponse<"checkbox">["value"];
 	}
 	uniqueValidation(value: unknown) {

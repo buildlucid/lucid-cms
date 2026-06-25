@@ -21,7 +21,7 @@ const TestCollection = new CollectionBuilder("test", {
 	details: {
 		label: copy("admin:collections.test.fields.title.label"),
 	},
-	config: {
+	ui: {
 		hidden: false,
 		disabled: false,
 	},

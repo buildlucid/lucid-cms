@@ -226,13 +226,13 @@ test("custom field config passes schema validation", async () => {
 				defaultMessage: "placeholder",
 			}),
 		},
-		config: {
-			localized: true,
-			default: {
-				url: "https://example.com",
-				label: "Link 1",
-				target: "_blank",
-			},
+		localized: true,
+		default: {
+			url: "https://example.com",
+			label: "Link 1",
+			target: "_blank",
+		},
+		ui: {
 			hidden: false,
 			disabled: false,
 		},

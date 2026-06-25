@@ -18,9 +18,7 @@ const BannerBrick = new BrickBuilder("banner", {
 		details: {
 			summary: copy("admin:bricks.banner.fields.title.summary"),
 		},
-		config: {
-			default: "Welcome to our website",
-		},
+		default: "Welcome to our website",
 		validation: {
 			required: true,
 		},

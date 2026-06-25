@@ -253,12 +253,12 @@ test("custom field config passes schema validation", async () => {
 				defaultMessage: "placeholder",
 			}),
 		},
-		config: {
-			localized: true,
-			default: "",
+		localized: true,
+		default: "",
+		index: true,
+		ui: {
 			hidden: false,
 			disabled: false,
-			index: true,
 		},
 		validation: {
 			required: true,
@@ -274,9 +274,7 @@ test("custom field config rejects index false", async () => {
 	const res = await CustomFieldSchema.safeParseAsync({
 		type: "text",
 		key: "field",
-		config: {
-			index: false,
-		},
+		index: false,
 	});
 
 	expect(res.success).toBe(false);

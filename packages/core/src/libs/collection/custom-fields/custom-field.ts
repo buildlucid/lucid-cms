@@ -99,16 +99,16 @@ abstract class CustomField<T extends FieldTypes> {
 	/** Whether this field should be processed with localization translations. */
 	get localizedEnabled(): boolean {
 		if (!hasRuntimeConfig(this.config)) return false;
-		return this.config.config.localized ?? false;
+		return this.config.localized ?? false;
 	}
 	/** Default fallback value used while normalizing missing field input. */
 	get defaultValue(): unknown {
 		if (!hasRuntimeConfig(this.config)) return null;
-		if (!Object.hasOwn(this.config.config, "default")) {
+		if (!Object.hasOwn(this.config, "default")) {
 			return null;
 		}
 
-		return this.config.config.default;
+		return this.config.default;
 	}
 	/** Shared error builders used by `validate*` checks. */
 	get errors(): {

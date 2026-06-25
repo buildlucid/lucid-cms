@@ -28,9 +28,7 @@ const UserCollection = new CollectionBuilder("collection", {
 		},
 	})
 	.addUser("multi_user", {
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 		validation: {
 			minItems: 2,
 			maxItems: 3,
@@ -262,8 +260,8 @@ test("custom field config passes schema validation", async () => {
 				defaultMessage: "description",
 			}),
 		},
-		config: {
-			localized: true,
+		localized: true,
+		ui: {
 			hidden: false,
 			disabled: false,
 		},
@@ -277,14 +275,10 @@ test("custom field config passes schema validation", async () => {
 
 test("user field controls its grouped validation input", () => {
 	const singleField = new UserCustomField("single_user", {
-		config: {
-			multiple: false,
-		},
+		multiple: false,
 	});
 	const multipleField = new UserCustomField("multiple_user", {
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 	});
 
 	expect(singleField.getRelationFieldValidationInput([1, 2, 3])).toEqual({
@@ -297,14 +291,10 @@ test("user field controls its grouped validation input", () => {
 
 test("multiple config controls how many user IDs are kept", () => {
 	const singleField = new UserCustomField("single_user", {
-		config: {
-			multiple: false,
-		},
+		multiple: false,
 	});
 	const multipleField = new UserCustomField("multiple_user", {
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 	});
 
 	expect(singleField.normalizeInputValue([1, 2, 3])).toEqual([1]);

@@ -35,16 +35,16 @@ class LinkCustomField extends CustomField<"link"> {
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,
 			},
-			config: {
-				localized: this.props?.config?.localized ?? false,
-				default: this.props?.config?.default ?? {
-					url: null,
-					label: null,
-					target: null,
-				},
-				hidden: this.props?.config?.hidden,
-				disabled: this.props?.config?.disabled,
-				index: this.props?.config?.index,
+			localized: this.props?.localized ?? false,
+			default: this.props?.default ?? {
+				url: null,
+				label: null,
+				target: null,
+			},
+			index: this.props?.index,
+			ui: {
+				hidden: this.props?.ui?.hidden,
+				disabled: this.props?.ui?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"link">;
@@ -59,7 +59,7 @@ class LinkCustomField extends CustomField<"link"> {
 						name: this.key,
 						type: props.db.getDataType("json"),
 						nullable: true,
-						default: this.config.config.default,
+						default: this.config.default,
 					},
 				],
 			},
@@ -68,9 +68,9 @@ class LinkCustomField extends CustomField<"link"> {
 	}
 	formatResponseValue(value?: LinkResValue | null) {
 		return {
-			url: value?.url ?? this.config.config.default.url ?? null,
-			label: value?.label ?? this.config.config.default.label ?? null,
-			target: value?.target ?? this.config.config.default.target ?? null,
+			url: value?.url ?? this.config.default.url ?? null,
+			label: value?.label ?? this.config.default.label ?? null,
+			target: value?.target ?? this.config.default.target ?? null,
 		} satisfies CFResponse<"link">["value"];
 	}
 	override normalizeInputValue(value: unknown) {

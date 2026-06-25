@@ -45,8 +45,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 		}`;
 	});
 	const disabled = createMemo(
-		() =>
-			!canAddGroup() || fieldConfig().config.disabled || brickStore.get.locked,
+		() => !canAddGroup() || fieldConfig().ui?.disabled || brickStore.get.locked,
 	);
 	const groupErrors = createMemo(() => {
 		return props.state.fieldError?.groupErrors || [];

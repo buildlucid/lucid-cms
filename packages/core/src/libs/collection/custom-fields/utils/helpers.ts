@@ -7,17 +7,13 @@ import type { CFConfig, FieldTypes } from "../types.js";
 export const hasRuntimeConfig = (
 	config: CFConfig<FieldTypes>,
 ): config is CFConfig<FieldTypes> & {
-	config: {
-		localized?: boolean;
-		default?: unknown;
-	};
+	localized?: boolean;
+	default?: unknown;
 } => {
 	return (
 		typeof config === "object" &&
 		config !== null &&
-		"config" in config &&
-		typeof config.config === "object" &&
-		config.config !== null
+		("localized" in config || "default" in config)
 	);
 };
 

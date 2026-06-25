@@ -1,6 +1,6 @@
 import type { Media, MediaType } from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export interface MediaFieldConfig extends SharedFieldConfig {
 	type: "media";
@@ -8,14 +8,11 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 		label?: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
-	config: {
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		multiple?: boolean;
-		default?: number[];
-	};
+	localized?: boolean;
+	default?: number[];
+	index?: true;
+	multiple?: boolean;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 		minItems?: number;

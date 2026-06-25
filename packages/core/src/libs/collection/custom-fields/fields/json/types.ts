@@ -2,6 +2,7 @@ import type { ZodType } from "zod";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
+	FieldUIConfig,
 	SharedFieldConfig,
 } from "../../types.js";
 
@@ -15,13 +16,10 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 		placeholder?: AdminCopyInput;
 	};
 	ai?: CustomFieldUserAiConfig<"json">;
-	config: {
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		default?: JsonValue;
-	};
+	localized?: boolean;
+	default?: JsonValue;
+	index?: true;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown>;

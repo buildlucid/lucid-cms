@@ -261,10 +261,10 @@ test("custom field config passes schema validation", async () => {
 				defaultMessage: "placeholder",
 			}),
 		},
-		config: {
-			localized: true,
-			time: false,
-			default: "2024-06-15T14:14:21.704Z",
+		localized: true,
+		time: false,
+		default: "2024-06-15T14:14:21.704Z",
+		ui: {
 			hidden: false,
 			disabled: false,
 		},
@@ -280,5 +280,5 @@ test("custom field config passes schema validation", async () => {
 
 test("datetime config defaults to date-only mode", () => {
 	const field = new DatetimeCustomField("field");
-	expect(field.config.config.time).toBe(false);
+	expect(field.config.time).toBe(false);
 });

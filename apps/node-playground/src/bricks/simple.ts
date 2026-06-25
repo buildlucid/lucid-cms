@@ -4,9 +4,7 @@ const SimpleBrick = new BrickBuilder("simple", {
 	// tenants: ["marketing"],
 })
 	.addText("heading", {
-		config: {
-			localized: false,
-		},
+		localized: false,
 	})
 	.addMedia("image")
 	.addDocument("document", {

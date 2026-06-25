@@ -21,7 +21,7 @@ const TEST_CONFIG = {
 describe("brick table construction", () => {
 	test("should correctly generate tables for two level nested repeaters", () => {
 		const simpleBrick = new BrickBuilder("simple")
-			.addText("heading", { config: { localized: false } })
+			.addText("heading", { localized: false })
 			.addRepeater("items")
 			.addText("itemTitle")
 			.addRepeater("nestedItems")
@@ -463,15 +463,11 @@ describe("brick table construction", () => {
 	test("should create relation tables for relation fields and keep repeater relations top-level", () => {
 		const galleryBrick = new BrickBuilder("gallery")
 			.addMedia("heroMedia", {
-				config: {
-					multiple: true,
-				},
+				multiple: true,
 			})
 			.addRepeater("items")
 			.addMedia("itemMedia", {
-				config: {
-					multiple: true,
-				},
+				multiple: true,
 			})
 			.endRepeater();
 
@@ -494,9 +490,7 @@ describe("brick table construction", () => {
 			},
 		}).addDocument("relatedPage", {
 			collection: "page",
-			config: {
-				multiple: true,
-			},
+			multiple: true,
 		});
 
 		const brickTables = aggregateBrickTables({
@@ -690,15 +684,11 @@ describe("brick table construction", () => {
 			},
 		})
 			.addUser("author", {
-				config: {
-					multiple: true,
-				},
+				multiple: true,
 			})
 			.addDocument("relatedPage", {
 				collection: "page",
-				config: {
-					multiple: true,
-				},
+				multiple: true,
 			});
 
 		const brickTables = aggregateBrickTables({

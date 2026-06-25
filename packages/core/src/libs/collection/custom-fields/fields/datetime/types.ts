@@ -1,6 +1,6 @@
 import type { ZodType } from "zod";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export interface DatetimeFieldConfig extends SharedFieldConfig {
 	type: "datetime";
@@ -9,14 +9,11 @@ export interface DatetimeFieldConfig extends SharedFieldConfig {
 		summary?: AdminCopyInput;
 		placeholder?: AdminCopyInput;
 	};
-	config: {
-		localized?: boolean;
-		time?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		default?: string;
-	};
+	localized?: boolean;
+	time?: boolean;
+	default?: string;
+	index?: true;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown>;

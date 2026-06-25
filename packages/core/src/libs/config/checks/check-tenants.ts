@@ -3,8 +3,10 @@ import { translate } from "../../i18n/index.js";
 
 const checkTenantKeyReferences = (
 	validTenantKeys: Set<string>,
-	keys: string[],
+	keys?: string[],
 ) => {
+	if (keys === undefined) return;
+
 	const unknownTenant = keys.find((key) => !validTenantKeys.has(key));
 	if (unknownTenant !== undefined) {
 		throw new Error(

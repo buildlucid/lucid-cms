@@ -15,7 +15,7 @@ test("custom field config passes schema validation", async () => {
 				defaultMessage: "description",
 			}),
 		},
-		config: {
+		ui: {
 			disabled: false,
 		},
 		validation: {

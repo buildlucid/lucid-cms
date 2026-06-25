@@ -221,9 +221,9 @@ test("custom field config passes schema validation", async () => {
 				defaultMessage: "placeholder",
 			}),
 		},
-		config: {
-			localized: true,
-			default: "",
+		localized: true,
+		default: "",
+		ui: {
 			hidden: false,
 			disabled: false,
 		},

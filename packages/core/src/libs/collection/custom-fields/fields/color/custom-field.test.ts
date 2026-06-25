@@ -194,9 +194,9 @@ test("custom field config passes schema validation", async () => {
 				defaultMessage: "description",
 			}),
 		},
-		config: {
-			localized: true,
-			default: "2024-06-15T14:14:21.704Z",
+		localized: true,
+		default: "2024-06-15T14:14:21.704Z",
+		ui: {
 			hidden: false,
 			disabled: false,
 		},

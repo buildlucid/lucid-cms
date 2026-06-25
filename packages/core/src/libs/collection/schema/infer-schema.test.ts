@@ -269,9 +269,7 @@ describe("Schema inference", async () => {
 
 	test("creates column field indexes from explicit config", () => {
 		pagesCollection.addText("title", {
-			config: {
-				index: true,
-			},
+			index: true,
 		});
 
 		const res = inferSchema(pagesCollection, db);

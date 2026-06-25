@@ -37,15 +37,15 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				placeholder: this.props?.details?.placeholder,
 			},
 			ai: this.props?.ai,
-			config: {
-				localized: this.props?.config?.localized ?? true,
-				default: this.props?.config?.default ?? {
-					type: "doc",
-					content: [{ type: "paragraph" }],
-				},
-				hidden: this.props?.config?.hidden,
-				disabled: this.props?.config?.disabled,
-				index: this.props?.config?.index,
+			localized: this.props?.localized ?? true,
+			default: this.props?.default ?? {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
+			index: this.props?.index,
+			ui: {
+				hidden: this.props?.ui?.hidden,
+				disabled: this.props?.ui?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"rich-text">;
@@ -113,7 +113,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 						name: this.key,
 						type: props.db.getDataType("json"),
 						nullable: true,
-						default: this.config.config.default,
+						default: this.config.default,
 					},
 				],
 			},
@@ -122,7 +122,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 	}
 	formatResponseValue(value?: Record<string, unknown> | null) {
 		return (value ??
-			this.config.config.default ??
+			this.config.default ??
 			null) satisfies CFResponse<"rich-text">["value"];
 	}
 	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {

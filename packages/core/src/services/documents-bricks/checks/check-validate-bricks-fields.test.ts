@@ -19,9 +19,7 @@ const TranslatedCollection = new CollectionBuilder("collection", {
 })
 	.addText("translatable_field")
 	.addText("non_translatable_field", {
-		config: {
-			localized: false,
-		},
+		localized: false,
 	});
 
 const NonTranslatedCollection = new CollectionBuilder("non_translated", {

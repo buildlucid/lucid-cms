@@ -35,13 +35,13 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,
 			},
-			config: {
-				localized: this.props?.config?.localized ?? false,
-				time: this.props?.config?.time ?? false,
-				default: this.props?.config?.default ?? "",
-				hidden: this.props?.config?.hidden,
-				disabled: this.props?.config?.disabled,
-				index: this.props?.config?.index,
+			localized: this.props?.localized ?? false,
+			time: this.props?.time ?? false,
+			default: this.props?.default ?? "",
+			index: this.props?.index,
+			ui: {
+				hidden: this.props?.ui?.hidden,
+				disabled: this.props?.ui?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"datetime">;
@@ -56,7 +56,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 						name: this.key,
 						type: props.db.getDataType("timestamp"),
 						nullable: true,
-						default: this.config.config.default,
+						default: this.config.default,
 					},
 				],
 			},
@@ -65,7 +65,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 	}
 	formatResponseValue(value?: string | null) {
 		return (value ??
-			this.config.config.default ??
+			this.config.default ??
 			null) satisfies CFResponse<"datetime">["value"];
 	}
 	override normalizeInputValue(value: unknown) {

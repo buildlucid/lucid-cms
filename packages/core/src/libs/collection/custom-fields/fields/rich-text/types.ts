@@ -2,6 +2,7 @@ import type { ZodType } from "zod";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
+	FieldUIConfig,
 	SharedFieldConfig,
 } from "../../types.js";
 
@@ -13,13 +14,10 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 		placeholder?: AdminCopyInput;
 	};
 	ai?: CustomFieldUserAiConfig<"rich-text">;
-	config: {
-		localized?: boolean;
-		default?: Record<string, unknown>;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-	};
+	localized?: boolean;
+	default?: Record<string, unknown>;
+	index?: true;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown> | undefined;

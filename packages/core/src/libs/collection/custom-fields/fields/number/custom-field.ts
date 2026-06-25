@@ -34,12 +34,12 @@ class NumberCustomField extends CustomField<"number"> {
 				summary: this.props?.details?.summary,
 				placeholder: this.props?.details?.placeholder,
 			},
-			config: {
-				localized: this.props?.config?.localized ?? false,
-				default: this.props?.config?.default,
-				hidden: this.props?.config?.hidden,
-				disabled: this.props?.config?.disabled,
-				index: this.props?.config?.index,
+			localized: this.props?.localized ?? false,
+			default: this.props?.default,
+			index: this.props?.index,
+			ui: {
+				hidden: this.props?.ui?.hidden,
+				disabled: this.props?.ui?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"number">;
@@ -54,7 +54,7 @@ class NumberCustomField extends CustomField<"number"> {
 						name: this.key,
 						type: props.db.getDataType("integer"),
 						nullable: true,
-						default: this.config.config.default,
+						default: this.config.default,
 					},
 				],
 			},
@@ -63,7 +63,7 @@ class NumberCustomField extends CustomField<"number"> {
 	}
 	formatResponseValue(value?: number | null) {
 		return (value ??
-			this.config.config.default ??
+			this.config.default ??
 			null) satisfies CFResponse<"number">["value"];
 	}
 	uniqueValidation(value: unknown) {

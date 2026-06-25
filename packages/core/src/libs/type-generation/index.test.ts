@@ -39,15 +39,11 @@ test("generates collection-aware client document types that lean on the public L
 	const BannerBrick = new BrickBuilder("banner")
 		.addTab("content_tab")
 		.addText("title", {
-			config: {
-				localized: true,
-			},
+			localized: true,
 		})
 		.addRepeater("call_to_actions")
 		.addText("label", {
-			config: {
-				localized: false,
-			},
+			localized: false,
 		})
 		.endRepeater();
 
@@ -77,28 +73,20 @@ test("generates collection-aware client document types that lean on the public L
 		},
 	})
 		.addText("_page_title", {
-			config: {
-				localized: true,
-			},
+			localized: true,
 		})
 		.addDocument("_related_page", {
 			collection: "page",
-			config: {
-				localized: false,
-			},
+			localized: false,
 		})
 		.addDocument("_related_content", {
 			collection: ["page", "blog"],
-			config: {
-				localized: false,
-				multiple: true,
-			},
+			localized: false,
+			multiple: true,
 		})
 		.addRepeater("sections")
 		.addText("_section_title", {
-			config: {
-				localized: false,
-			},
+			localized: false,
 		})
 		.endRepeater();
 

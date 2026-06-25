@@ -2,6 +2,7 @@ import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CFConfig,
 	FieldTypes,
+	FieldUIConfig,
 	SharedFieldConfig,
 	TabFieldConfig,
 } from "../../types.js";
@@ -13,9 +14,7 @@ export interface RepeaterFieldConfig extends SharedFieldConfig {
 		label?: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
-	config: {
-		disabled?: boolean;
-	};
+	ui?: Pick<FieldUIConfig, "disabled">;
 	validation?: {
 		maxGroups?: number;
 		minGroups?: number;

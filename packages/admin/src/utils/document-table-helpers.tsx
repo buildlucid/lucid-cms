@@ -160,10 +160,7 @@ const getDocumentFieldValue = (props: {
 }) => {
 	if (!props.fieldData) return undefined;
 
-	if (
-		props.collectionLocalized &&
-		props.fieldConfig.config.localized === true
-	) {
+	if (props.collectionLocalized && props.fieldConfig.localized === true) {
 		return (
 			props.fieldData.translations?.[props.contentLocale] ??
 			props.fieldData.value
@@ -233,10 +230,7 @@ const formatDocumentPreviewValue = (props: {
 				: null;
 		case "datetime":
 			return typeof rawValue === "string" || typeof rawValue === "number"
-				? formatDateTimeListValue(
-						rawValue,
-						props.fieldConfig.config.time !== false,
-					)
+				? formatDateTimeListValue(rawValue, props.fieldConfig.time !== false)
 				: null;
 
 		case "json":

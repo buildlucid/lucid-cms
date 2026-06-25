@@ -120,9 +120,9 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 				placeholder: undefined,
 			},
-			config: {
-				localized: true,
-				default: "",
+			localized: true,
+			default: "",
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -138,9 +138,9 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 				placeholder: undefined,
 			},
-			config: {
-				localized: true,
-				default: "",
+			localized: true,
+			default: "",
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -156,12 +156,12 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 				placeholder: undefined,
 			},
-			config: {
-				localized: true,
-				default: {
-					type: "doc",
-					content: [{ type: "paragraph" }],
-				},
+			localized: true,
+			default: {
+				type: "doc",
+				content: [{ type: "paragraph" }],
+			},
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -177,9 +177,9 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 				placeholder: undefined,
 			},
-			config: {
-				localized: false,
-				default: undefined,
+			localized: false,
+			default: undefined,
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -196,9 +196,9 @@ test("flat fields should return correct config", async () => {
 				true: undefined,
 				false: undefined,
 			},
-			config: {
-				localized: false,
-				default: false,
+			localized: false,
+			default: false,
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -214,9 +214,9 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 				placeholder: undefined,
 			},
-			config: {
-				localized: false,
-				default: "",
+			localized: false,
+			default: "",
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -233,9 +233,9 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 				placeholder: undefined,
 			},
-			config: {
-				localized: false,
-				default: {},
+			localized: false,
+			default: {},
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -251,9 +251,9 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 			},
 			presets: [],
-			config: {
-				localized: false,
-				default: "",
+			localized: false,
+			default: "",
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -268,12 +268,12 @@ test("flat fields should return correct config", async () => {
 				}),
 				summary: undefined,
 			},
-			config: {
-				localized: false,
-				default: [],
+			localized: false,
+			default: [],
+			multiple: undefined,
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
-				multiple: undefined,
 			},
 			validation: undefined,
 		},
@@ -287,10 +287,10 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 				placeholder: undefined,
 			},
-			config: {
-				localized: false,
-				time: false,
-				default: "",
+			localized: false,
+			time: false,
+			default: "",
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -306,13 +306,13 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 				placeholder: undefined,
 			},
-			config: {
-				localized: false,
-				default: {
-					url: null,
-					label: null,
-					target: null,
-				},
+			localized: false,
+			default: {
+				url: null,
+				label: null,
+				target: null,
+			},
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},
@@ -327,12 +327,12 @@ test("flat fields should return correct config", async () => {
 				}),
 				summary: undefined,
 			},
-			config: {
-				localized: false,
-				default: [],
+			localized: false,
+			default: [],
+			multiple: undefined,
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
-				multiple: undefined,
 			},
 
 			validation: undefined,
@@ -346,7 +346,7 @@ test("flat fields should return correct config", async () => {
 				}),
 				summary: undefined,
 			},
-			config: {
+			ui: {
 				disabled: undefined,
 			},
 			fields: [],
@@ -362,9 +362,9 @@ test("flat fields should return correct config", async () => {
 				summary: undefined,
 				placeholder: undefined,
 			},
-			config: {
-				localized: true,
-				default: "",
+			localized: true,
+			default: "",
+			ui: {
 				hidden: undefined,
 				disabled: undefined,
 			},

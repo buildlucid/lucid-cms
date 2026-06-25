@@ -38,8 +38,8 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 					}),
 				summary: this.props?.details?.summary,
 			},
-			config: {
-				disabled: this.props?.config?.disabled,
+			ui: {
+				disabled: this.props?.ui?.disabled,
 			},
 			fields: [],
 			validation: this.props?.validation,

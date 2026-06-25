@@ -212,11 +212,11 @@ test("custom field config passes schema validation", async () => {
 				defaultMessage: "placeholder",
 			}),
 		},
-		config: {
-			localized: true,
-			default: {
-				hello: "world",
-			},
+		localized: true,
+		default: {
+			hello: "world",
+		},
+		ui: {
 			hidden: false,
 			disabled: false,
 		},

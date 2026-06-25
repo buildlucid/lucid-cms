@@ -30,7 +30,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 	},
 })
 	.addText("page_title", {
-		config: {
+		ui: {
 			hidden: false,
 			disabled: false,
 		},

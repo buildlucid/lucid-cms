@@ -54,24 +54,24 @@ class DocumentCustomField extends CustomField<"document"> {
 					}),
 				summary: this.props?.details?.summary,
 			},
-			config: {
-				localized: this.props?.config?.localized ?? false,
-				default: this.props?.config?.default ?? [],
-				hidden: this.props?.config?.hidden,
-				disabled: this.props?.config?.disabled,
-				index: this.props?.config?.index,
-				multiple: this.props?.config?.multiple,
+			localized: this.props?.localized ?? false,
+			default: this.props?.default ?? [],
+			index: this.props?.index,
+			multiple: this.props?.multiple,
+			ui: {
+				hidden: this.props?.ui?.hidden,
+				disabled: this.props?.ui?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"document">;
 	}
 	override normalizeInputValue(value: unknown) {
-		return clampDocumentFieldInput(value, this.config.config.multiple);
+		return clampDocumentFieldInput(value, this.config.multiple);
 	}
 	override get defaultValue(): unknown {
 		return normalizeStoredDocumentFieldValues(
-			this.config.config.default,
-			this.config.config.multiple,
+			this.config.default,
+			this.config.multiple,
 		);
 	}
 	override get errors(): {
@@ -131,19 +131,18 @@ class DocumentCustomField extends CustomField<"document"> {
 	formatResponseValue(value: unknown) {
 		return normalizeStoredDocumentFieldValues(
 			value,
-			this.config.config.multiple,
+			this.config.multiple,
 		) satisfies CFResponse<"document">["value"];
 	}
 	override serializeRelationFieldValue(
 		value: unknown,
 	): Array<Record<string, unknown>> {
-		return normalizeStoredDocumentFieldValues(
-			value,
-			this.config.config.multiple,
-		).map((documentValue) => ({
-			[prefixGeneratedColName("collection_key")]: documentValue.collectionKey,
-			[prefixGeneratedColName("document_id")]: documentValue.id,
-		}));
+		return normalizeStoredDocumentFieldValues(value, this.config.multiple).map(
+			(documentValue) => ({
+				[prefixGeneratedColName("collection_key")]: documentValue.collectionKey,
+				[prefixGeneratedColName("document_id")]: documentValue.id,
+			}),
+		);
 	}
 	override extractRelationFieldValue(
 		row: Select<LucidBricksTable>,
@@ -164,7 +163,7 @@ class DocumentCustomField extends CustomField<"document"> {
 	): FieldRelationValidationInput {
 		return normalizeStoredDocumentFieldValues(
 			value,
-			this.config.config.multiple,
+			this.config.multiple,
 		).reduce<Record<string, number[]>>((acc, item) => {
 			if (!acc[item.collectionKey]) {
 				acc[item.collectionKey] = [];
@@ -203,19 +202,16 @@ class DocumentCustomField extends CustomField<"document"> {
 				collectionKey: z.string(),
 			}),
 		);
-		const candidateValue = clampDocumentFieldInput(
-			value,
-			this.config.config.multiple,
-		);
+		const candidateValue = clampDocumentFieldInput(value, this.config.multiple);
 		const valueValidate = zodSafeParse(candidateValue, valueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
 		const normalizedValue = normalizeStoredDocumentFieldValues(
 			candidateValue,
-			this.config.config.multiple,
+			this.config.multiple,
 		);
 		const itemCountValidation = validateRelationItemCount({
-			multiple: this.config.config.multiple,
+			multiple: this.config.multiple,
 			length: normalizedValue.length,
 			validation: this.config.validation,
 		});

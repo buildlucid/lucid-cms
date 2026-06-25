@@ -22,9 +22,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	})
 	.addDocument("item", {
 		collection: ["page", "blog"],
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 	})
 	.endRepeater();
 

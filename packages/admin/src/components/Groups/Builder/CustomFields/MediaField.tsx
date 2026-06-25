@@ -53,10 +53,10 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 		});
 	});
 	const isMultiple = createMemo(
-		() => props.state.fieldConfig.config.multiple === true,
+		() => props.state.fieldConfig.multiple === true,
 	);
 	const disabled = createMemo(
-		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
+		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
 
 	// -------------------------------

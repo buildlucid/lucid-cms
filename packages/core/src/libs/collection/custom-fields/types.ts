@@ -97,10 +97,13 @@ export type SharedFieldConfig = {
 	};
 };
 
-export type OmitDefault<T> = T extends { config: unknown }
-	? Omit<T, "config"> & {
-			config?: Omit<T["config"], "default">;
-		}
+export type FieldUIConfig = {
+	hidden?: boolean;
+	disabled?: boolean;
+};
+
+export type OmitDefault<T> = T extends { default?: unknown }
+	? Omit<T, "default">
 	: T;
 
 export type FieldDatabaseMode =

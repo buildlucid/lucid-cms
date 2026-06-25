@@ -11,9 +11,7 @@ const IntroBrick = new BrickBuilder("intro", {
 		},
 	})
 	.addText("title", {
-		config: {
-			localized: true,
-		},
+		localized: true,
 	})
 	.addRichText("intro")
 	.addTab("advanced_tab", {

@@ -1,6 +1,6 @@
 import type { ProfilePicture } from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export interface UserFieldConfig extends SharedFieldConfig {
 	type: "user";
@@ -8,14 +8,11 @@ export interface UserFieldConfig extends SharedFieldConfig {
 		label?: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
-	config: {
-		default?: number[];
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		multiple?: boolean;
-	};
+	localized?: boolean;
+	default?: number[];
+	index?: true;
+	multiple?: boolean;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 		minItems?: number;

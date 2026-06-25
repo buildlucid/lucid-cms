@@ -138,7 +138,7 @@ const PageCollection = new CollectionBuilder("page", {
 			label: copy("admin:collections.page.fields.page_title.label"),
 			summary: copy("admin:collections.page.fields.page_title.summary"),
 		},
-		config: {
+		ui: {
 			hidden: false,
 			disabled: false,
 		},
@@ -150,9 +150,7 @@ const PageCollection = new CollectionBuilder("page", {
 	})
 	.addUser("author", {
 		listing: true,
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 	});
 
 export default PageCollection;

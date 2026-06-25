@@ -113,10 +113,7 @@ const getFieldValue = <T>(props: {
 	const collectionLocalized =
 		props.collectionLocalized ?? brickStore.get.collectionLocalized;
 
-	if (
-		props.fieldConfig.config.localized === true &&
-		collectionLocalized === true
-	) {
+	if (props.fieldConfig.localized === true && collectionLocalized === true) {
 		return props.fieldData.translations?.[props.contentLocale] as T;
 	}
 	return props.fieldData.value as T;

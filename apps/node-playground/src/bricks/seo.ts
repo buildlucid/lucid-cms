@@ -52,9 +52,7 @@ const SEOBrick = new BrickBuilder("seo", {
 		validation: {
 			type: "image",
 		},
-		config: {
-			multiple: true,
-		},
+		multiple: true,
 	})
 	.addTab("advanced_tab", {
 		details: {

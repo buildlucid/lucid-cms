@@ -138,33 +138,49 @@ export const fieldConfigSchema = z.object({
 			),
 		})
 		.optional(),
-	config: z
+	localized: z
+		.boolean()
+		.meta({
+			description: "Whether the field supports localized content",
+			example: true,
+		})
+		.nullable()
+		.optional(),
+	time: z
+		.boolean()
+		.meta({
+			description: "Whether datetime fields include time selection",
+			example: true,
+		})
+		.nullable()
+		.optional(),
+	multiple: z
+		.boolean()
+		.meta({
+			description:
+				"Whether relation fields can store more than one related item",
+			example: true,
+		})
+		.nullable()
+		.optional(),
+	index: z
+		.literal(true)
+		.meta({
+			description: "Whether Lucid generates an index for the field",
+			example: true,
+		})
+		.nullable()
+		.optional(),
+	default: z
+		.any()
+		.meta({
+			description: "Default value for the field",
+			example: "Welcome to our website",
+		})
+		.nullable()
+		.optional(),
+	ui: z
 		.object({
-			localized: z
-				.boolean()
-				.meta({
-					description: "Whether the field supports localized content",
-					example: true,
-				})
-				.nullable()
-				.optional(),
-			time: z
-				.boolean()
-				.meta({
-					description: "Whether datetime fields include time selection",
-					example: true,
-				})
-				.nullable()
-				.optional(),
-			multiple: z
-				.boolean()
-				.meta({
-					description:
-						"Whether relation fields can store more than one related item",
-					example: true,
-				})
-				.nullable()
-				.optional(),
 			hidden: z
 				.boolean()
 				.meta({
@@ -178,22 +194,6 @@ export const fieldConfigSchema = z.object({
 				.meta({
 					description: "Whether the field is disabled for editing",
 					example: false,
-				})
-				.nullable()
-				.optional(),
-			index: z
-				.literal(true)
-				.meta({
-					description: "Whether Lucid generates an index for the field",
-					example: true,
-				})
-				.nullable()
-				.optional(),
-			default: z
-				.any()
-				.meta({
-					description: "Default value for the field",
-					example: "Welcome to our website",
 				})
 				.nullable()
 				.optional(),

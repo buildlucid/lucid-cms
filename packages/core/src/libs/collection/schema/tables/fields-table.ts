@@ -30,9 +30,7 @@ const shouldIndexField = (
 	collection: CollectionBuilder,
 	field: CFConfig<FieldTypes>,
 ) => {
-	const config = "config" in field ? field.config : undefined;
-	const hasConfiguredIndex =
-		(config as { index?: true } | undefined)?.index === true;
+	const hasConfiguredIndex = "index" in field && field.index === true;
 	const isListedField = collection.listing.includes(field.key);
 
 	return hasConfiguredIndex || isListedField;

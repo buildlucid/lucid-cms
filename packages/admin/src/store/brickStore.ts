@@ -282,7 +282,7 @@ const [get, set] = createStore<{
 				if (!field) return;
 
 				if (
-					params.fieldConfig.config.localized === true &&
+					params.fieldConfig.localized === true &&
 					get.collectionLocalized === true
 				) {
 					const previousValue = field.translations?.[params.contentLocale];
@@ -303,7 +303,7 @@ const [get, set] = createStore<{
 		if (fieldChanged) {
 			const brick = get.bricks[params.brickIndex];
 			const localeCode =
-				params.fieldConfig.config.localized === true &&
+				params.fieldConfig.localized === true &&
 				get.collectionLocalized === true
 					? params.contentLocale
 					: null;
@@ -356,16 +356,16 @@ const [get, set] = createStore<{
 
 		if (params.fieldConfig.type !== "repeater") {
 			if (
-				params.fieldConfig.config.localized === true &&
+				params.fieldConfig.localized === true &&
 				get.collectionLocalized === true
 			) {
 				newField.translations = {};
 
 				for (const locale of params.locales) {
-					newField.translations[locale] = params.fieldConfig.config.default;
+					newField.translations[locale] = params.fieldConfig.default;
 				}
 			} else {
-				newField.value = params.fieldConfig.config.default;
+				newField.value = params.fieldConfig.default;
 			}
 		}
 
@@ -435,17 +435,14 @@ const [get, set] = createStore<{
 					};
 
 					if (field.type !== "repeater") {
-						if (
-							field.config.localized === true &&
-							get.collectionLocalized === true
-						) {
+						if (field.localized === true && get.collectionLocalized === true) {
 							newField.translations = {};
 
 							for (const locale of params.locales) {
-								newField.translations[locale] = field.config.default;
+								newField.translations[locale] = field.default;
 							}
 						} else {
-							newField.value = field.config.default;
+							newField.value = field.default;
 						}
 					}
 

@@ -40,25 +40,25 @@ const CustomFieldSchema = z.object({
 			context: z.function().optional(),
 		})
 		.optional(),
-	config: z
+	default: z
+		.union([
+			z.boolean(),
+			z.string(),
+			z.number(),
+			z.undefined(),
+			z.object({}),
+			z.array(z.any()),
+			z.null(),
+		])
+		.optional(),
+	localized: z.boolean().optional(),
+	time: z.boolean().optional(),
+	multiple: z.boolean().optional(),
+	index: z.literal(true).optional(),
+	ui: z
 		.object({
-			default: z
-				.union([
-					z.boolean(),
-					z.string(),
-					z.number(),
-					z.undefined(),
-					z.object({}),
-					z.array(z.any()),
-					z.null(),
-				])
-				.optional(),
-			localized: z.boolean().optional(),
-			time: z.boolean().optional(),
-			multiple: z.boolean().optional(),
 			hidden: z.boolean().optional(),
 			disabled: z.boolean().optional(),
-			index: z.literal(true).optional(),
 		})
 		.optional(),
 	options: z

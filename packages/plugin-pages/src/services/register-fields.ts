@@ -19,8 +19,8 @@ const registerFields = (
 					defaultMessage: "Full slug",
 				}),
 			},
-			config: {
-				localized: config.localized,
+			localized: config.localized,
+			ui: {
 				hidden: !config.displayFullSlug,
 				disabled: true,
 			},
@@ -35,8 +35,8 @@ const registerFields = (
 					defaultMessage: "Slug",
 				}),
 			},
-			config: {
-				localized: config.localized,
+			localized: config.localized,
+			ui: {
 				hidden: false,
 				disabled: false,
 			},
@@ -78,10 +78,10 @@ const registerFields = (
 					defaultMessage: "Parent page",
 				}),
 			},
-			config: {
+			multiple: false,
+			ui: {
 				hidden: false,
 				disabled: false,
-				multiple: false,
 			},
 		});
 };

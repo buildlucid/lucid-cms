@@ -224,11 +224,10 @@ const getCollectionTargets = (field: CFConfig<FieldTypes>) => {
  * Returns relation multiplicity for field definitions.
  */
 const getMultiple = (field: CFConfig<FieldTypes>) => {
-	if (!("config" in field)) return undefined;
-	const config = field.config as { multiple?: unknown } | undefined;
-	if (typeof config?.multiple !== "boolean") return undefined;
+	if (!("multiple" in field)) return undefined;
+	if (typeof field.multiple !== "boolean") return undefined;
 
-	return config.multiple;
+	return field.multiple;
 };
 
 /**

@@ -36,12 +36,12 @@ class SelectCustomField extends CustomField<"select"> {
 				placeholder: this.props?.details?.placeholder,
 			},
 			options: this.props?.options ?? [],
-			config: {
-				localized: this.props?.config?.localized ?? false,
-				default: this.props?.config?.default ?? "",
-				hidden: this.props?.config?.hidden,
-				disabled: this.props?.config?.disabled,
-				index: this.props?.config?.index,
+			localized: this.props?.localized ?? false,
+			default: this.props?.default ?? "",
+			index: this.props?.index,
+			ui: {
+				hidden: this.props?.ui?.hidden,
+				disabled: this.props?.ui?.disabled,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"select">;
@@ -74,7 +74,7 @@ class SelectCustomField extends CustomField<"select"> {
 	}
 	formatResponseValue(value?: string | null) {
 		return (value ??
-			this.config.config.default ??
+			this.config.default ??
 			null) satisfies CFResponse<"select">["value"];
 	}
 	uniqueValidation(value: unknown) {

@@ -47,7 +47,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 		});
 	});
 	const disabled = createMemo(
-		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
+		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
 
 	// -------------------------------

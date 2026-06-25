@@ -1,6 +1,6 @@
 import type { ZodType } from "zod";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export interface NumberFieldConfig extends SharedFieldConfig {
 	type: "number";
@@ -9,13 +9,10 @@ export interface NumberFieldConfig extends SharedFieldConfig {
 		summary?: AdminCopyInput;
 		placeholder?: AdminCopyInput;
 	};
-	config: {
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		default?: number | null;
-	};
+	localized?: boolean;
+	default?: number | null;
+	index?: true;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown>;

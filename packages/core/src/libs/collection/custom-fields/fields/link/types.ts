@@ -1,5 +1,5 @@
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export type LinkResValue = {
 	url: string | null;
@@ -14,13 +14,10 @@ export interface LinkFieldConfig extends SharedFieldConfig {
 		summary?: AdminCopyInput;
 		placeholder?: AdminCopyInput;
 	};
-	config: {
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		default?: LinkResValue;
-	};
+	localized?: boolean;
+	default?: LinkResValue;
+	index?: true;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 	};

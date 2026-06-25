@@ -1,5 +1,5 @@
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { SharedFieldConfig } from "../../types.js";
+import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export interface ColorFieldConfig extends SharedFieldConfig {
 	type: "color";
@@ -8,13 +8,10 @@ export interface ColorFieldConfig extends SharedFieldConfig {
 		summary?: AdminCopyInput;
 	};
 	presets: string[];
-	config: {
-		localized?: boolean;
-		hidden?: boolean;
-		disabled?: boolean;
-		index?: true;
-		default?: string;
-	};
+	localized?: boolean;
+	default?: string;
+	index?: true;
+	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 	};

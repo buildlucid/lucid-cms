@@ -58,7 +58,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 		return value;
 	});
 	const disabled = createMemo(
-		() => props.state.fieldConfig.config.disabled || brickStore.get.locked,
+		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
 	const fieldAiConfig = createMemo(() => {
 		if (props.type !== "text") return undefined;
