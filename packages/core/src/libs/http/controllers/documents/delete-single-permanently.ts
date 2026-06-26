@@ -3,16 +3,13 @@ import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { documentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -23,10 +20,10 @@ const deleteSinglePermanentlyController = factory.createHandlers(
 			"Permanently delete a single document by ID. The document must be soft-deleted first before it can be permanently deleted.",
 		tags: ["documents"],
 		summary: "Delete Document Permanently",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			noProperties: true,
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.deleteSinglePermanently.params,
 			headers: {
 				csrf: true,

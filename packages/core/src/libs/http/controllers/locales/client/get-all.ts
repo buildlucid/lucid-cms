@@ -5,10 +5,6 @@ import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/locales.js";
 import { localeServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
@@ -16,6 +12,7 @@ import { ClientScopes } from "../../../../permission/client-scopes.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import clientScopes from "../../../middleware/client-scopes.js";
+import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 
@@ -26,11 +23,11 @@ const getAllController = factory.createHandlers(
 		description: "Returns all enabled locales via the client integration.",
 		tags: ["client-locales"],
 		summary: "Get All Locales",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.client.getAll.response),
 			paginated: true,
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			headers: {
 				authorization: true,
 			},

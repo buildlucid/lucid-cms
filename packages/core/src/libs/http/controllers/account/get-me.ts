@@ -5,10 +5,10 @@ import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -19,7 +19,7 @@ const getMeController = factory.createHandlers(
 		description: "Returns the authenticated user based on the access token.",
 		tags: ["account"],
 		summary: "Get Authenticated User",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getMe.response),
 		}),
 	}),

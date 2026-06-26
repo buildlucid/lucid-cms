@@ -4,14 +4,11 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/settings.js";
 import { settingServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
+import openAPI from "../../openapi/index.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -23,10 +20,10 @@ const getSettingsController = factory.createHandlers(
 		description: "Returns the site settings including meta data.",
 		tags: ["settings"],
 		summary: "Get Settings",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getSettings.response),
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			query: controllerSchemas.getSettings.query.string,
 		}),
 	}),

@@ -9,14 +9,11 @@ import {
 	userLoginServices,
 } from "../../../../../services/index.js";
 import urlAddPath from "../../../../../utils/helpers/url-add-path.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
+import openAPI from "../../../openapi/index.js";
 import buildErrorURL from "../../../utils/build-error-url.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 import getRequestBaseUrl from "../../../utils/get-request-base-url.js";
@@ -28,8 +25,8 @@ const providerOIDCCallbackController = factory.createHandlers(
 		description: "Handle OAuth callback from authentication provider.",
 		tags: ["auth"],
 		summary: "OIDC Provider Authentication Callback",
-		responses: honoOpenAPIResponse(),
-		parameters: honoOpenAPIParamaters({
+		responses: openAPI.responses(),
+		parameters: openAPI.parameters({
 			params: controllerSchemas.providerOIDCCallback.params,
 			query: controllerSchemas.providerOIDCCallback.query.string,
 		}),

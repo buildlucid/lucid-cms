@@ -4,16 +4,13 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { documentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import type { DocumentVersionType } from "../../../db/types.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
+import openAPI from "../../openapi/index.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -25,10 +22,10 @@ const getSingleController = factory.createHandlers(
 		description: "Get a single document from the collection key and ID.",
 		tags: ["documents"],
 		summary: "Get Document",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.getSingle.params,
 			query: controllerSchemas.getSingle.query.string,
 		}),

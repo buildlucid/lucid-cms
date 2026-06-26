@@ -8,15 +8,11 @@ import { controllerSchemas } from "../../../../schemas/share.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import { isRequestSecure } from "../../../../utils/helpers/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
+import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -30,11 +26,11 @@ const authorizeStreamController = factory.createHandlers(
 		description: "Validate share password and set a session cookie.",
 		tags: ["share"],
 		summary: "Authorize Stream",
-		responses: honoOpenAPIResponse(),
-		parameters: honoOpenAPIParamaters({
+		responses: openAPI.responses(),
+		parameters: openAPI.parameters({
 			params: controllerSchemas.authorizeShare.params,
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.authorizeShare.body),
+		requestBody: openAPI.requestBody(controllerSchemas.authorizeShare.body),
 	}),
 	rateLimiter({
 		mode: "ip",

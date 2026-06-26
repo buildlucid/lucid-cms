@@ -6,10 +6,6 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { clientIntegrationServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -18,6 +14,7 @@ import permissions from "../../middleware/permissions.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -28,10 +25,10 @@ const regenerateKeysController = factory.createHandlers(
 		description: "Regenerates the API key for the given client integration.",
 		tags: ["client-integrations"],
 		summary: "Regenerate Client Integration API Key",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.regenerateKeys.response),
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
 			},

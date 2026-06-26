@@ -3,15 +3,11 @@ import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/publish-operation-management.js";
 import { documentPublishOperationServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -21,11 +17,11 @@ const rescheduleController = factory.createHandlers(
 		description: "Reschedule a publish operation.",
 		tags: ["publish-operations"],
 		summary: "Reschedule Publish Operation",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			noProperties: true,
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.reschedule.body),
-		parameters: honoOpenAPIParamaters({
+		requestBody: openAPI.requestBody(controllerSchemas.reschedule.body),
+		parameters: openAPI.parameters({
 			params: controllerSchemas.reschedule.params,
 			headers: {
 				csrf: true,

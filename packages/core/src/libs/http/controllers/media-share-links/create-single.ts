@@ -4,11 +4,6 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -16,6 +11,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -26,14 +22,14 @@ const createSingleController = factory.createHandlers(
 		description: "Create a media share link for a media item.",
 		tags: ["media-share-links"],
 		summary: "Create Media Share Link",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.createSingle.params,
 			headers: { csrf: true },
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.createSingle.body),
+		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
 	}),
 	validateCSRF,
 	authenticate(),

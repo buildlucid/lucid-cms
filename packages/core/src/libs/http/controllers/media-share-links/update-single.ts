@@ -3,11 +3,6 @@ import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/media-share-links.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -15,6 +10,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -24,12 +20,12 @@ const updateSingleController = factory.createHandlers(
 		description: "Update a media share link.",
 		tags: ["media-share-links"],
 		summary: "Update Media Share Link",
-		responses: honoOpenAPIResponse({ noProperties: true }),
-		parameters: honoOpenAPIParamaters({
+		responses: openAPI.responses({ noProperties: true }),
+		parameters: openAPI.parameters({
 			params: controllerSchemas.updateSingle.params,
 			headers: { csrf: true },
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateSingle.body),
+		requestBody: openAPI.requestBody(controllerSchemas.updateSingle.body),
 	}),
 	validateCSRF,
 	authenticate(),

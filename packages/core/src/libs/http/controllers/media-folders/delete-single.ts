@@ -3,10 +3,6 @@ import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/media-folders.js";
 import { mediaFolderServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -14,6 +10,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -23,10 +20,10 @@ const deleteSingleController = factory.createHandlers(
 		description: "Delete a single media folder.",
 		tags: ["media-folders"],
 		summary: "Delete Media Folder",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			noProperties: true,
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.deleteSingle.params,
 			headers: {
 				csrf: true,

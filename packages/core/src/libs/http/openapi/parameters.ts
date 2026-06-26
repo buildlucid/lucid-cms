@@ -1,15 +1,15 @@
 import type { DescribeRouteOptions } from "hono-openapi";
 import type { OpenAPIV3 } from "openapi-types";
 import z, { type ZodType } from "zod";
-import constants from "../../constants/constants.js";
-import { translate } from "../../libs/i18n/index.js";
+import constants from "../../../constants/constants.js";
+import { translate } from "../../i18n/index.js";
 
 /**
- * Used to construct paramaters JSON schema for OpenAPI
+ * Used to construct parameters JSON schema for OpenAPI.
  */
-const honoOpenAPIParamaters = (props: {
+const parameters = (props: {
 	headers?: {
-		// undefine means dont include in the schema, boolean means required or not
+		// Undefined omits the header, boolean controls whether it is required.
 		csrf?: boolean;
 		authorization?: boolean;
 		idempotencyKey?: boolean;
@@ -17,12 +17,12 @@ const honoOpenAPIParamaters = (props: {
 	params?: ZodType;
 	query?: ZodType;
 }) => {
-	const paramaters: DescribeRouteOptions["parameters"] = [];
+	const routeParameters: DescribeRouteOptions["parameters"] = [];
 
 	if (props.headers?.csrf !== undefined) {
-		paramaters.push({
+		routeParameters.push({
 			in: "header",
-			name: "X-CSRF-Token",
+			name: constants.headers.csrf,
 			required: props.headers.csrf,
 			description: translate("server:core.openapi.csrf.header.description"),
 			schema: {
@@ -31,7 +31,7 @@ const honoOpenAPIParamaters = (props: {
 		});
 	}
 	if (props.headers?.idempotencyKey !== undefined) {
-		paramaters.push({
+		routeParameters.push({
 			in: "header",
 			name: constants.headers.idempotencyKey,
 			required: props.headers.idempotencyKey,
@@ -44,7 +44,7 @@ const honoOpenAPIParamaters = (props: {
 		});
 	}
 	if (props.headers?.authorization !== undefined) {
-		paramaters.push({
+		routeParameters.push({
 			in: "header",
 			name: "Authorization",
 			required: props.headers.authorization,
@@ -64,7 +64,7 @@ const honoOpenAPIParamaters = (props: {
 				paramsSchema.properties,
 			)) {
 				const schema = paramSchema as OpenAPIV3.SchemaObject;
-				paramaters.push({
+				routeParameters.push({
 					name: paramName,
 					in: "path",
 					required: true,
@@ -82,7 +82,7 @@ const honoOpenAPIParamaters = (props: {
 				querySchema.properties,
 			)) {
 				const schema = paramSchema as OpenAPIV3.SchemaObject;
-				paramaters.push({
+				routeParameters.push({
 					name: paramName,
 					in: "query",
 					required: querySchema.required?.includes(paramName),
@@ -93,7 +93,7 @@ const honoOpenAPIParamaters = (props: {
 		}
 	}
 
-	return paramaters;
+	return routeParameters;
 };
 
-export default honoOpenAPIParamaters;
+export default parameters;

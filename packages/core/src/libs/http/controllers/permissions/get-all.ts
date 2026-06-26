@@ -2,10 +2,10 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/permissions.js";
-import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import { permissionsFormatter } from "../../../formatters/index.js";
 import { getGrantablePermissionRegistry } from "../../../permission/registry.js";
 import authenticate from "../../middleware/authenticate.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -16,7 +16,7 @@ const getAllController = factory.createHandlers(
 		description: "Returns a list of all permissions available for users.",
 		tags: ["permissions"],
 		summary: "Get All Permissions",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getAll.response),
 		}),
 	}),

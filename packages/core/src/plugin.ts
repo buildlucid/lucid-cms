@@ -11,6 +11,7 @@ export { default as permissionsMiddleware } from "./libs/http/middleware/permiss
 export { default as rateLimiterMiddleware } from "./libs/http/middleware/rate-limiter.js";
 export { default as validateMiddleware } from "./libs/http/middleware/validate.js";
 export { default as validateCSRFMiddleware } from "./libs/http/middleware/validate-csrf.js";
+export { default as openAPI } from "./libs/http/openapi/index.js";
 export { default as formatAPIResponse } from "./libs/http/utils/build-response.js";
 export { default as createServiceContext } from "./libs/http/utils/create-service-context.js";
 export {
@@ -28,7 +29,4 @@ export {
 	getFileMetadata,
 	resolveMediaKeyTenant,
 } from "./utils/media/index.js";
-export { default as honoOpenAPIParamaters } from "./utils/open-api/hono-openapi-paramaters.js";
-export { default as honoOpenAPIRequestBody } from "./utils/open-api/hono-openapi-request-body.js";
-export { default as honoOpenAPIResponse } from "./utils/open-api/hono-openapi-response.js";
 export { default as serviceWrapper } from "./utils/services/service-wrapper.js";

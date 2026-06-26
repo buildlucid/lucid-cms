@@ -7,14 +7,11 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -26,10 +23,10 @@ const requestDownloadController = factory.createHandlers(
 			"Request a direct download URL for a shared media item after validating share access.",
 		tags: ["share"],
 		summary: "Request Share Download URL",
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.requestDownload.params,
 		}),
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.requestDownload.response),
 		}),
 	}),

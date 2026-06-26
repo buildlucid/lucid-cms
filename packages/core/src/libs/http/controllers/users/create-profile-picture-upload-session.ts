@@ -4,11 +4,6 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/users.js";
 import { accountServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -16,6 +11,7 @@ import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -26,18 +22,18 @@ const createProfilePictureUploadSessionController = factory.createHandlers(
 		description: "Create an upload session for a user's profile picture.",
 		tags: ["users"],
 		summary: "Create User Profile Picture Upload Session",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(
 				controllerSchemas.createProfilePictureUploadSession.response,
 			),
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
 			},
 			params: controllerSchemas.createProfilePictureUploadSession.params,
 		}),
-		requestBody: honoOpenAPIRequestBody(
+		requestBody: openAPI.requestBody(
 			controllerSchemas.createProfilePictureUploadSession.body,
 		),
 	}),

@@ -5,10 +5,6 @@ import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/media.js";
 import { mediaServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
@@ -17,6 +13,7 @@ import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import clientScopes from "../../../middleware/client-scopes.js";
 import validate from "../../../middleware/validate.js";
+import openAPI from "../../../openapi/index.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";
@@ -29,11 +26,11 @@ const getMultipleController = factory.createHandlers(
 			"Get multiple media items by filters via the client integration. Supports pagination and translated metadata.",
 		tags: ["client-media"],
 		summary: "Get Multiple Media",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.client.getMultiple.response),
 			paginated: true,
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			query: controllerSchemas.client.getMultiple.query.string,
 			headers: {
 				authorization: true,

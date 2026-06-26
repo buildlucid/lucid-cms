@@ -4,17 +4,13 @@ import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/media.js";
 import { mediaServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import { ClientScopes } from "../../../../permission/client-scopes.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import clientScopes from "../../../middleware/client-scopes.js";
 import validate from "../../../middleware/validate.js";
+import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 
@@ -26,16 +22,16 @@ const processMediaController = factory.createHandlers(
 			"Get a single media item by key and return the public CDN URL. This supports image presets and formats.",
 		tags: ["client-media"],
 		summary: "Get Media URL",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.client.processMedia.response),
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.client.processMedia.params,
 			headers: {
 				authorization: true,
 			},
 		}),
-		requestBody: honoOpenAPIRequestBody(
+		requestBody: openAPI.requestBody(
 			controllerSchemas.client.processMedia.body,
 		),
 	}),

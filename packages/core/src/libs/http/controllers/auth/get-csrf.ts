@@ -7,8 +7,8 @@ import { controllerSchemas } from "../../../../schemas/auth.js";
 import { authServices } from "../../../../services/index.js";
 import type { LucidHonoContext } from "../../../../types/hono.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 
 const factory = createFactory();
@@ -19,7 +19,7 @@ const csrfController = factory.createHandlers(
 			"This endpoint returns a CSRF token in the response body as well as setting a _csrf httpOnly cookie. Some endpoints require this value to be passed via a X-CSRF-Token header.",
 		tags: ["auth"],
 		summary: "CSRF Token",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getCSRF.response),
 		}),
 	}),

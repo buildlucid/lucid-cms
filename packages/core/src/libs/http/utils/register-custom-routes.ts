@@ -5,12 +5,8 @@ import type {
 	LucidHonoContext,
 	LucidHonoGeneric,
 } from "../../../types/hono.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../utils/open-api/index.js";
 import validate from "../middleware/validate.js";
+import openAPI from "../openapi/index.js";
 import type { LucidRouteDefinition, LucidRouteInput } from "../types.js";
 import buildFormattedQuery from "./build-formatted-query.js";
 import createServiceContext from "./create-service-context.js";
@@ -32,23 +28,23 @@ const buildOpenAPIOptions = (
 	route: LucidRouteDefinition,
 ): DescribeRouteOptions => {
 	const schema = route.schema;
-	const openAPI = route.openAPI ?? {};
-	const parameters = honoOpenAPIParamaters({
+	const openAPIOptions = route.openAPI ?? {};
+	const parameters = openAPI.parameters({
 		params: schema?.params,
 		query: schema?.query?.string,
 	});
 
 	return {
-		...openAPI,
-		...(openAPI.parameters === undefined && parameters.length > 0
+		...openAPIOptions,
+		...(openAPIOptions.parameters === undefined && parameters.length > 0
 			? { parameters }
 			: {}),
-		...(openAPI.requestBody === undefined && schema?.body
-			? { requestBody: honoOpenAPIRequestBody(schema.body) }
+		...(openAPIOptions.requestBody === undefined && schema?.body
+			? { requestBody: openAPI.requestBody(schema.body) }
 			: {}),
-		...(openAPI.responses === undefined
+		...(openAPIOptions.responses === undefined
 			? {
-					responses: honoOpenAPIResponse(
+					responses: openAPI.responses(
 						schema?.response
 							? {
 									schema: z.toJSONSchema(schema.response),

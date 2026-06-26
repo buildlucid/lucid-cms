@@ -4,11 +4,11 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/collections.js";
 import { collectionServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import hasAccess from "../../../permission/has-access.js";
 import authenticate from "../../middleware/authenticate.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -19,7 +19,7 @@ const getAllController = factory.createHandlers(
 		description: "Returns all the config for all collection instances.",
 		tags: ["collections"],
 		summary: "Get All Collections",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getAll.response),
 		}),
 	}),

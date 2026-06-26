@@ -5,10 +5,6 @@ import z from "zod";
 import { controllerSchemas } from "../../../../../schemas/media.js";
 import { mediaServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
@@ -17,6 +13,7 @@ import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import clientScopes from "../../../middleware/client-scopes.js";
 import validate from "../../../middleware/validate.js";
+import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 
@@ -28,10 +25,10 @@ const getSingleController = factory.createHandlers(
 			"Get a single media item by ID via the client integration. Returns translated metadata.",
 		tags: ["client-media"],
 		summary: "Get Media",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.client.getSingle.response),
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.client.getSingle.params,
 			headers: {
 				authorization: true,

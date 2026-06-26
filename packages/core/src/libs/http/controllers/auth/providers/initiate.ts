@@ -6,17 +6,13 @@ import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import softAuthenticate from "../../../middleware/soft-authenticate.js";
 import validate from "../../../middleware/validate.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
+import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 
@@ -28,18 +24,16 @@ const providerInitiateController = factory.createHandlers(
 			"Handle oidc auth initiation. Creates auth state and redirects to provider login page",
 		tags: ["auth"],
 		summary: "Initiate Provider Authentication",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.providerInitiate.response),
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.providerInitiate.params,
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoOpenAPIRequestBody(
-			controllerSchemas.providerInitiate.body,
-		),
+		requestBody: openAPI.requestBody(controllerSchemas.providerInitiate.body),
 	}),
 	validateCSRF,
 	softAuthenticate,

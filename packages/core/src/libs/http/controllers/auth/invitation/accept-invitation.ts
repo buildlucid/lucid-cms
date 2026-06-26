@@ -5,16 +5,12 @@ import constants from "../../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
 import { authServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
 import validate from "../../../middleware/validate.js";
 import validateCSRF from "../../../middleware/validate-csrf.js";
+import openAPI from "../../../openapi/index.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -25,16 +21,14 @@ const acceptInvitationController = factory.createHandlers(
 			"Accepts an invitation and sets the user's password. This will mark the invitation as accepted.",
 		tags: ["auth"],
 		summary: "Accept Invitation",
-		responses: honoOpenAPIResponse(),
-		parameters: honoOpenAPIParamaters({
+		responses: openAPI.responses(),
+		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
 			},
 			params: controllerSchemas.acceptInvitation.params,
 		}),
-		requestBody: honoOpenAPIRequestBody(
-			controllerSchemas.acceptInvitation.body,
-		),
+		requestBody: openAPI.requestBody(controllerSchemas.acceptInvitation.body),
 	}),
 	validateCSRF,
 	rateLimiter({

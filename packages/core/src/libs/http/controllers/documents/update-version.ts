@@ -4,17 +4,13 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { documentVersionServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -26,11 +22,11 @@ const updateVersionController = factory.createHandlers(
 			"Update a single document version for a given collection key and document ID.",
 		tags: ["documents"],
 		summary: "Update Document Version",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.updateVersion.response),
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateVersion.body),
-		parameters: honoOpenAPIParamaters({
+		requestBody: openAPI.requestBody(controllerSchemas.updateVersion.body),
+		parameters: openAPI.parameters({
 			params: controllerSchemas.updateVersion.params,
 			headers: {
 				csrf: true,

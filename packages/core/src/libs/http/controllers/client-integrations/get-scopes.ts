@@ -4,12 +4,12 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { clientIntegrationServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoOpenAPIResponse } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -21,7 +21,7 @@ const getScopesController = factory.createHandlers(
 			"Returns all available client integration scopes grouped by key.",
 		tags: ["client-integrations"],
 		summary: "Get Client Integration Scopes",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getScopes.response),
 		}),
 	}),

@@ -1,9 +1,8 @@
 import {
 	copy,
 	createRoute,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
 	LucidAPIError,
+	openAPI,
 	serviceWrapper,
 } from "@lucidcms/core/plugin";
 import { controllerSchemas } from "../schema/webhook.js";
@@ -18,8 +17,8 @@ const routes = (pluginOptions: PluginOptions) => [
 			description: "Webhook for receiving delivery status updates.",
 			tags: ["resend-plugin"],
 			summary: "Resend Webhook",
-			requestBody: honoOpenAPIRequestBody(controllerSchemas.webhook.body),
-			responses: honoOpenAPIResponse({
+			requestBody: openAPI.requestBody(controllerSchemas.webhook.body),
+			responses: openAPI.responses({
 				noProperties: true,
 			}),
 		},

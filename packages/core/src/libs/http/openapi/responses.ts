@@ -1,6 +1,6 @@
 import type { OpenAPIV3 } from "openapi-types";
-import constants from "../../constants/constants.js";
-import { translate } from "../../libs/i18n/index.js";
+import constants from "../../../constants/constants.js";
+import { translate } from "../../i18n/index.js";
 
 const metaObject: OpenAPIV3.SchemaObject = {
 	type: "object",
@@ -95,7 +95,7 @@ export const defaultErrorResponse = {
 /**
  * Used to construct a response object for OpenAPI
  */
-const honoOpenAPIResponse = (config?: {
+const responses = (config?: {
 	schema?: unknown;
 	paginated?: boolean;
 	noProperties?: boolean;
@@ -151,4 +151,4 @@ const honoOpenAPIResponse = (config?: {
 	return response;
 };
 
-export default honoOpenAPIResponse;
+export default responses;

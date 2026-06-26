@@ -6,16 +6,12 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/account.js";
 import { accountServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
@@ -27,17 +23,15 @@ const sendResetPasswordController = factory.createHandlers(
 			"Sends an email to the given email address informing them to reset their password.",
 		tags: ["account"],
 		summary: "Send Password Reset",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.sendResetPassword.response),
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
 			},
 		}),
-		requestBody: honoOpenAPIRequestBody(
-			controllerSchemas.sendResetPassword.body,
-		),
+		requestBody: openAPI.requestBody(controllerSchemas.sendResetPassword.body),
 	}),
 	validateCSRF,
 	rateLimiter({

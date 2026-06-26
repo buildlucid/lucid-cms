@@ -4,16 +4,13 @@ import z from "zod";
 import { controllerSchemas } from "../../../../schemas/client-integrations.js";
 import { clientIntegrationServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
+import openAPI from "../../openapi/index.js";
 import buildFormattedQuery from "../../utils/build-formatted-query.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -25,11 +22,11 @@ const getAllController = factory.createHandlers(
 		description: "Returns client integrations based on the query parameters.",
 		tags: ["client-integrations"],
 		summary: "Get All Client Integrations",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getAll.response),
 			paginated: true,
 		}),
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			query: controllerSchemas.getAll.query.string,
 		}),
 	}),

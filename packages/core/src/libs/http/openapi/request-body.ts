@@ -1,9 +1,7 @@
 import type { OpenAPIV3 } from "openapi-types";
 import z, { type ZodType } from "zod";
 
-const honoOpenAPIRequestBody = (
-	schema: ZodType,
-): OpenAPIV3.RequestBodyObject => {
+const requestBody = (schema: ZodType): OpenAPIV3.RequestBodyObject => {
 	return {
 		content: {
 			"application/json": {
@@ -13,4 +11,4 @@ const honoOpenAPIRequestBody = (
 	};
 };
 
-export default honoOpenAPIRequestBody;
+export default requestBody;

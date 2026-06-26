@@ -3,17 +3,13 @@ import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/documents.js";
 import { documentWorkflowServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIRequestBody,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import collectionPermissions from "../../middleware/collection-permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
@@ -23,11 +19,11 @@ const updateWorkflowController = factory.createHandlers(
 		description: "Update a document workflow stage or assignees.",
 		tags: ["documents"],
 		summary: "Update Document Workflow",
-		responses: honoOpenAPIResponse({
+		responses: openAPI.responses({
 			noProperties: true,
 		}),
-		requestBody: honoOpenAPIRequestBody(controllerSchemas.updateWorkflow.body),
-		parameters: honoOpenAPIParamaters({
+		requestBody: openAPI.requestBody(controllerSchemas.updateWorkflow.body),
+		parameters: openAPI.parameters({
 			params: controllerSchemas.updateWorkflow.params,
 			headers: {
 				csrf: true,

@@ -8,12 +8,12 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/share.js";
 import { mediaShareLinkServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
 import { copy } from "../../../i18n/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
+import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 import {
 	applyRangeHeaders,
@@ -31,7 +31,7 @@ const streamMediaController = factory.createHandlers(
 		description: "Streams shared media content by token.",
 		tags: ["share"],
 		summary: "Stream Shared Media",
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.streamShareMedia.params,
 		}),
 	}),

@@ -2,12 +2,9 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { authServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import {
-	honoOpenAPIParamaters,
-	honoOpenAPIResponse,
-} from "../../../../utils/open-api/index.js";
 import authenticate from "../../middleware/authenticate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
 
 const factory = createFactory();
 
@@ -17,8 +14,8 @@ const logoutController = factory.createHandlers(
 			"Logs out a user by clearing the refresh token and access token, it also clears the CSRF token.",
 		tags: ["auth"],
 		summary: "Logout",
-		responses: honoOpenAPIResponse(),
-		parameters: honoOpenAPIParamaters({
+		responses: openAPI.responses(),
+		parameters: openAPI.parameters({
 			headers: {
 				csrf: true,
 			},

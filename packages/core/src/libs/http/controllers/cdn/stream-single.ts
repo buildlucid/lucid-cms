@@ -12,12 +12,11 @@ import {
 	getMediaKeyTenantKey,
 	normalizeMediaKey,
 } from "../../../../utils/media/index.js";
-import { defaultErrorResponse } from "../../../../utils/open-api/hono-openapi-response.js";
-import { honoOpenAPIParamaters } from "../../../../utils/open-api/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authorizePrivateMedia from "../../middleware/authorize-private-media.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import validate from "../../middleware/validate.js";
+import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
 import {
 	applyRangeHeaders,
@@ -36,7 +35,7 @@ const streamSingleController = factory.createHandlers(
 			"Streams a piece of media based on the given key. If its an image, you can resize and format it on request. These will count towards the processed image usage that is unique to each image. This limit is configurable on a per project bases. Once it has been hit, instead of returning the processed image, it will return the original image. This is to prevent abuse of the endpoint.",
 		tags: ["cdn"],
 		summary: "Stream Media",
-		parameters: honoOpenAPIParamaters({
+		parameters: openAPI.parameters({
 			params: controllerSchemas.streamSingle.params,
 			query: controllerSchemas.streamSingle.query.string,
 		}),
@@ -127,11 +126,11 @@ const streamSingleController = factory.createHandlers(
 				description: "Range Not Satisfiable",
 				content: {
 					"application/json": {
-						schema: defaultErrorResponse,
+						schema: openAPI.defaultErrorResponse,
 					},
 				},
 			},
-			default: defaultErrorResponse,
+			default: openAPI.defaultErrorResponse,
 		},
 	}),
 	rateLimiter({
