@@ -9,7 +9,7 @@ type PluginDraft = {
 		sources: Array<string | URL>;
 	};
 	media: Record<string, unknown>;
-	hono: {
+	http: {
 		routes: unknown[];
 	};
 };
@@ -19,7 +19,7 @@ const buildDraft = (): PluginDraft => ({
 		sources: [],
 	},
 	media: {},
-	hono: {
+	http: {
 		routes: [],
 	},
 });
@@ -75,6 +75,9 @@ describe("Cloudflare R2 plugin", () => {
 							sources: [],
 						},
 						media: {},
+						http: {
+							routes: [],
+						},
 					} as {
 						i18n: {
 							sources: Array<string | URL>;
@@ -104,6 +107,9 @@ describe("Cloudflare R2 plugin", () => {
 									};
 								}>;
 							};
+						};
+						http: {
+							routes: unknown[];
 						};
 					};
 					cloudflareR2Plugin.recipe(draft as never);
@@ -137,7 +143,7 @@ describe("Cloudflare R2 plugin", () => {
 
 		cloudflareR2Plugin.recipe(draft as never);
 
-		expect(draft.hono.routes).toHaveLength(1);
+		expect(draft.http.routes).toHaveLength(2);
 	});
 
 	test("does not register storage routes when http fallback is enabled", () => {
@@ -156,6 +162,6 @@ describe("Cloudflare R2 plugin", () => {
 
 		cloudflareR2Plugin.recipe(draft as never);
 
-		expect(draft.hono.routes).toHaveLength(0);
+		expect(draft.http.routes).toHaveLength(0);
 	});
 });

@@ -26,12 +26,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 
 			const simulate = draft.email.simulate;
 
-			if (
-				pluginOptions.webhook?.enabled &&
-				draft.hono?.routes &&
-				Array.isArray(draft.hono.routes)
-			) {
-				draft.hono.routes.push(routes(pluginOptions));
+			if (pluginOptions.webhook?.enabled) {
+				draft.http.routes.push(...routes(pluginOptions));
 			}
 
 			draft.email.adapter = {

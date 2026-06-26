@@ -50,7 +50,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 			draft.i18n.sources.push("@lucidcms/plugin-cloudflare-r2/translations");
 
 			if (!resolvedOptions.http) {
-				draft.hono?.routes?.push(routes(resolvedOptions));
+				draft.http.routes.push(...routes(resolvedOptions));
 			}
 
 			draft.media.adapter = cloudflareR2Adapter(resolvedOptions);

@@ -14,7 +14,7 @@ const configureLucid: RuntimeConfigureLucid = (
 		...definition,
 		recipe: (draft) => {
 			definition.recipe?.(draft);
-			draft.hono.routes.push(async (app, config) => {
+			draft.http.hooks.afterOpenAPI.push(async (app, config) => {
 				const paths = getBuildPaths(config);
 				app.use(
 					"/*",

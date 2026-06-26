@@ -1,21 +1,28 @@
-import type { Hono } from "hono";
 import z from "zod";
 import constants from "../../constants/constants.js";
-import type { Config, ImageProcessor } from "../../types/config.js";
-import type { LucidHonoGeneric } from "../../types/hono.js";
+import type { ImageProcessor } from "../../types/config.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
+import type { HttpAppHook, LucidRouteDefinition } from "../http/types.js";
 import { adminCopyInputSchema } from "../i18n/index.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
 
-const HonoAppSchema = z.custom<
-	(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
->((data) => typeof data === "function", {
-	message: "Expected a Hono app function",
-});
+const HttpAppHookSchema = z.custom<HttpAppHook>(
+	(data) => typeof data === "function",
+	{
+		message: "Expected an HTTP app hook function",
+	},
+);
+
+const LucidRouteDefinitionSchema = z.custom<LucidRouteDefinition>(
+	(data) => typeof data === "object" && data !== null,
+	{
+		message: "Expected a Lucid route definition",
+	},
+);
 
 // TODO: improve all function custom schemas bellow
 
@@ -95,24 +102,41 @@ const isGeneratedMediaIdTenantKey = (key: string) =>
 const ConfigSchema = z.object({
 	db: z.unknown(),
 	host: z.string().trim().min(1).optional(),
-	security: z
+	http: z
 		.object({
-			trustProxyHeaders: z.boolean().optional(),
-			cors: z
+			security: z
 				.object({
-					origin: z.array(z.string()).optional(),
-					allowHeaders: z.array(z.string()).optional(),
+					trustProxyHeaders: z.boolean().optional(),
+					cors: z
+						.object({
+							origin: z.array(z.string()).optional(),
+							allowHeaders: z.array(z.string()).optional(),
+						})
+						.optional(),
+					headers: z
+						.object({
+							contentSecurityPolicy: ContentSecurityPolicySchema,
+							strictTransportSecurity: OverridableHeaderSchema.optional(),
+							xFrameOptions: OverridableHeaderSchema.optional(),
+							referrerPolicy: OverridableHeaderSchema.optional(),
+							crossOriginResourcePolicy: OverridableHeaderSchema.optional(),
+							crossOriginOpenerPolicy: OverridableHeaderSchema.optional(),
+							crossOriginEmbedderPolicy: OverridableHeaderSchema.optional(),
+						})
+						.optional(),
 				})
 				.optional(),
-			headers: z
+			openAPI: z
 				.object({
-					contentSecurityPolicy: ContentSecurityPolicySchema,
-					strictTransportSecurity: OverridableHeaderSchema.optional(),
-					xFrameOptions: OverridableHeaderSchema.optional(),
-					referrerPolicy: OverridableHeaderSchema.optional(),
-					crossOriginResourcePolicy: OverridableHeaderSchema.optional(),
-					crossOriginOpenerPolicy: OverridableHeaderSchema.optional(),
-					crossOriginEmbedderPolicy: OverridableHeaderSchema.optional(),
+					enabled: z.boolean(),
+				})
+				.optional(),
+			routes: z.array(LucidRouteDefinitionSchema).optional(),
+			hooks: z
+				.object({
+					beforeCore: z.array(HttpAppHookSchema).optional(),
+					afterCore: z.array(HttpAppHookSchema).optional(),
+					afterOpenAPI: z.array(HttpAppHookSchema).optional(),
 				})
 				.optional(),
 		})
@@ -135,9 +159,6 @@ const ConfigSchema = z.object({
 			providers: z.array(AuthProviderSchema).optional(),
 		})
 		.optional(),
-	openAPI: z.object({
-		enabled: z.boolean(),
-	}),
 	ai: z.object({
 		enabled: z.boolean(),
 		features: z.object({
@@ -245,10 +266,6 @@ const ConfigSchema = z.object({
 			handler: z.unknown(),
 		}),
 	),
-	hono: z.object({
-		middleware: z.array(HonoAppSchema).optional(),
-		routes: z.array(HonoAppSchema).optional(),
-	}),
 	queue: z
 		.object({
 			adapter: QueueAdapterSchema.optional(),

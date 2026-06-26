@@ -146,8 +146,9 @@ const prepareMainWorkerEntry = (
 	                    server: "cloudflare",
 	                    compiled: true,
 	                }),
-	                hono: {
-	                    middleware: [
+	                http: {
+	                    hooks: {
+	                        beforeCore: [
 	                        async (app, config) => {
 	                            app.use("*", async (c, next) => {
 	                                c.set("env", c.env ?? env ?? null);
@@ -174,8 +175,8 @@ const prepareMainWorkerEntry = (
 	                                await next();
 	                            });
 	                        },
-	                    ],
-	                    routes: [
+	                        ],
+	                        afterOpenAPI: [
 	                        async (app, config) => {
 	                            app.get("/lucid/*", async (c) => {
 	                                const url = new URL(c.req.url);
@@ -189,7 +190,8 @@ const prepareMainWorkerEntry = (
 	                                });
 	                            });
 	                        },
-	                    ],
+	                        ],
+	                    },
 	                },
 	            });
 	        })().catch((error) => {

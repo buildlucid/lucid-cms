@@ -23,7 +23,7 @@ Developers get a code-first collection system, typed APIs for consuming content,
 - **Manage publishing with confidence:** environments, revisions, workflow stages, release review, approvals, and scheduled publishing.
 - **Organize teams and sites:** tenants, roles, granular permissions, and client integrations.
 - **Handle media and email properly:** folders, private media, shareable links, image processing, cropping, email logs, previews, and redaction policies.
-- **Extend it for your project:** plugins, service hooks, toolkit, and Hono routes or middleware let you add content behavior, integrations, and side effects.
+- **Extend it for your project:** plugins, service hooks, toolkit, and custom routes let you add content behavior, integrations, and side effects.
 - **Choose your infrastructure:** Node.js or Cloudflare Workers, PostgreSQL, LibSQL, SQLite, D1, queues, KV, email, storage.
 - **Use AI where it helps:** generate and edit images, generate alt text, create custom field values, and track AI usage.
 

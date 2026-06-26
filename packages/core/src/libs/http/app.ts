@@ -30,7 +30,9 @@ import {
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/index.js";
+import type { HttpHooks } from "./types.js";
 import featureSupportChecks from "./utils/feature-support-checks.js";
+import registerCustomRoutes from "./utils/register-custom-routes.js";
 
 /**
  * The entry point for creating the Hono app.
@@ -41,19 +43,21 @@ const createApp = async (props: {
 	runtimeContext: AdapterRuntimeContext;
 	env?: EnvironmentVariables;
 	app?: Hono<LucidHonoGeneric>;
-	hono?: {
-		middleware?: Array<
-			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
-		>;
-		routes?: Array<
-			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
-		>;
+	http?: {
+		hooks?: Partial<HttpHooks>;
 	};
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
 	const configuredHost = props.config.host?.trim()
 		? normalizeHost(props.config.host)
 		: undefined;
+
+	for (const hook of [
+		...(props.http?.hooks?.beforeCore ?? []),
+		...(props.config.http.hooks.beforeCore ?? []),
+	]) {
+		await hook(app, props.config);
+	}
 
 	const kvInstance = await getInitializedKVAdapter(props.config, {
 		env: props.env,
@@ -73,8 +77,6 @@ const createApp = async (props: {
 			env: props.env,
 			runtimeContext: props.runtimeContext,
 		}),
-		...(props.config.hono?.middleware || []).map((m) => m(app, props.config)),
-		...(props.hono?.middleware || []).map((m) => m(app, props.config)),
 	]);
 
 	app
@@ -84,7 +86,7 @@ const createApp = async (props: {
 				origin: [
 					"http://localhost:3000",
 					...(configuredHost ? [configuredHost] : []),
-					...(props.config.security.cors?.origin || []),
+					...(props.config.http.security.cors?.origin || []),
 				],
 				allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 				allowHeaders: [
@@ -92,14 +94,14 @@ const createApp = async (props: {
 					"Authorization",
 					"Content-Length",
 					...Object.values(constants.headers),
-					...(props.config.security.cors?.allowHeaders || []),
+					...(props.config.http.security.cors?.allowHeaders || []),
 				],
 				credentials: true,
 			}),
 		)
 		.use(
 			secureHeaders(
-				props.config.security.headers ?? {
+				props.config.http.security.headers ?? {
 					crossOriginResourcePolicy: false,
 				},
 			),
@@ -196,15 +198,17 @@ const createApp = async (props: {
 			return c.text(translate("server:core.pages.not.found"));
 		});
 
-	//* Hono Extensions
-	for (const route of props.config.hono?.routes || []) {
-		await route(app, props.config);
-	}
-	for (const route of props.hono?.routes || []) {
-		await route(app, props.config);
+	//* HTTP extensions
+	registerCustomRoutes(app, props.config.http.routes);
+
+	for (const hook of [
+		...(props.config.http.hooks.afterCore ?? []),
+		...(props.http?.hooks?.afterCore ?? []),
+	]) {
+		await hook(app, props.config);
 	}
 
-	if (props.config.openAPI?.enabled) {
+	if (props.config.http.openAPI?.enabled) {
 		app.get(
 			`/${constants.directories.base}/openapi`,
 			openAPIRouteHandler(app, {
@@ -346,6 +350,13 @@ const createApp = async (props: {
 				},
 			}),
 		);
+	}
+
+	for (const hook of [
+		...(props.config.http.hooks.afterOpenAPI ?? []),
+		...(props.http?.hooks?.afterOpenAPI ?? []),
+	]) {
+		await hook(app, props.config);
 	}
 
 	const supportChecksRes = featureSupportChecks(

@@ -57,32 +57,34 @@ const serveCommand =
 			runtimeContext: runtimeContext,
 			env: platformProxy?.env,
 			app: cloudflareApp,
-			hono: {
-				routes: [
-					async (app, config) => {
-						const paths = getBuildPaths(config);
-						app.use(
-							"/*",
-							serveStatic({
-								rewriteRequestPath: (path) => {
-									const relativeClientDist = relative(
-										process.cwd(),
-										paths.publicDist,
-									);
-									return `${relativeClientDist}${path}`;
-								},
-							}),
-						);
-						app.get("/lucid", (c) => {
-							const html = readFileSync(paths.spaDistHtml, "utf-8");
-							return c.html(html);
-						});
-						app.get("/lucid/*", (c) => {
-							const html = readFileSync(paths.spaDistHtml, "utf-8");
-							return c.html(html);
-						});
-					},
-				],
+			http: {
+				hooks: {
+					afterOpenAPI: [
+						async (app, config) => {
+							const paths = getBuildPaths(config);
+							app.use(
+								"/*",
+								serveStatic({
+									rewriteRequestPath: (path) => {
+										const relativeClientDist = relative(
+											process.cwd(),
+											paths.publicDist,
+										);
+										return `${relativeClientDist}${path}`;
+									},
+								}),
+							);
+							app.get("/lucid", (c) => {
+								const html = readFileSync(paths.spaDistHtml, "utf-8");
+								return c.html(html);
+							});
+							app.get("/lucid/*", (c) => {
+								const html = readFileSync(paths.spaDistHtml, "utf-8");
+								return c.html(html);
+							});
+						},
+					],
+				},
 			},
 		});
 

@@ -11,3 +11,13 @@ export type ControllerSchema = {
 	body: z.ZodType | undefined;
 	response: z.ZodType | undefined;
 };
+
+export type RouteSchema = {
+	query?: {
+		string?: z.ZodType | undefined;
+		formatted?: z.ZodType | undefined;
+	};
+	params?: z.ZodType | undefined;
+	body?: z.ZodType | undefined;
+	response?: z.ZodType | undefined;
+};

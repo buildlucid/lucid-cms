@@ -1,5 +1,4 @@
 import type { Readable } from "node:stream";
-import type { Hono } from "hono";
 import type z from "zod";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
@@ -10,6 +9,7 @@ import type {
 	EmailAdapterInstance,
 } from "../libs/email/types.js";
 import type { AllHooks } from "../libs/hooks/types.js";
+import type { HttpHooks, LucidRouteDefinition } from "../libs/http/types.js";
 import type {
 	AdminCopyInput,
 	InterfaceDirection,
@@ -29,7 +29,6 @@ import type {
 } from "../libs/queue/types.js";
 import type { CorePermission } from "../types.js";
 import type { ServiceResponse } from "../utils/services/types.js";
-import type { LucidHonoGeneric } from "./hono.js";
 
 export type CopyPublicEntry =
 	| string
@@ -226,6 +225,66 @@ export type SecurityContentSecurityPolicy = {
 	trustedTypes?: string[];
 };
 
+export type HttpSecurityConfig = {
+	/**
+	 * Whether proxy-forwarded protocol headers should be trusted when
+	 * determining secure request context.
+	 */
+	trustProxyHeaders?: boolean;
+	/**
+	 * The CORS configuration.
+	 */
+	cors?: {
+		/**
+		 * Allowed origins.
+		 */
+		origin?: string[];
+		/**
+		 * Allowed headers.
+		 */
+		allowHeaders?: string[];
+	};
+	/**
+	 * The secure headers configuration.
+	 */
+	headers?: {
+		/**
+		 * Content-Security-Policy directives.
+		 */
+		contentSecurityPolicy?: SecurityContentSecurityPolicy;
+		strictTransportSecurity?: boolean | string;
+		xFrameOptions?: boolean | string;
+		referrerPolicy?: boolean | string;
+		crossOriginResourcePolicy?: boolean | string;
+		crossOriginOpenerPolicy?: boolean | string;
+		crossOriginEmbedderPolicy?: boolean | string;
+	};
+};
+
+export type HttpConfig = {
+	/**
+	 * HTTP transport and response security settings.
+	 */
+	security?: HttpSecurityConfig;
+	/**
+	 * OpenAPI documentation settings.
+	 */
+	openAPI?: {
+		/**
+		 * Whether the OpenAPI documentation site is enabled.
+		 */
+		enabled?: boolean;
+	};
+	/**
+	 * Custom HTTP routes to register after Lucid's core routes.
+	 */
+	routes?: LucidRouteDefinition[];
+	/**
+	 * Low-level HTTP app lifecycle hooks.
+	 */
+	hooks?: Partial<HttpHooks>;
+};
+
 export type AiFeatureConfig = {
 	/* Enables AI Image generation */
 	imageGeneration?: boolean;
@@ -270,43 +329,9 @@ export interface LucidConfig {
 		namespace?: string | false;
 	};
 	/**
-	 * Security settings.
+	 * HTTP transport configuration.
 	 */
-	security?: {
-		/**
-		 * Whether proxy-forwarded protocol headers should be trusted when
-		 * determining secure request context.
-		 */
-		trustProxyHeaders?: boolean;
-		/**
-		 * The CORS configuration.
-		 */
-		cors?: {
-			/**
-			 * Allowed origins.
-			 */
-			origin?: string[];
-			/**
-			 * Allowed headers.
-			 */
-			allowHeaders?: string[];
-		};
-		/**
-		 * The secure headers configuration.
-		 */
-		headers?: {
-			/**
-			 * Content-Security-Policy directives.
-			 */
-			contentSecurityPolicy?: SecurityContentSecurityPolicy;
-			strictTransportSecurity?: boolean | string;
-			xFrameOptions?: boolean | string;
-			referrerPolicy?: boolean | string;
-			crossOriginResourcePolicy?: boolean | string;
-			crossOriginOpenerPolicy?: boolean | string;
-			crossOriginEmbedderPolicy?: boolean | string;
-		};
-	};
+	http?: HttpConfig;
 	/**
 	 * The public host of the Lucid instance. If not provided, the request URL will be used.
 	 * Values without a protocol are treated as HTTPS.
@@ -347,12 +372,6 @@ export interface LucidConfig {
 		 * The authentication providers to use.
 		 */
 		providers?: AuthProvider[];
-	};
-	openAPI?: {
-		/**
-		 * Whether the OpenAPI documentation site is enabled.
-		 */
-		enabled?: boolean;
 	};
 	/**
 	 * AI feature availability.
@@ -485,25 +504,6 @@ export interface LucidConfig {
 		};
 	};
 	/**
-	 * Hono middleware and routes to register.
-	 */
-	hono?: {
-		/**
-		 * Runs before Lucid's core routes.
-		 * Use for setting up context, environment bindings, custom middleware, etc.
-		 */
-		middleware?: Array<
-			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
-		>;
-		/**
-		 * Runs after Lucid's core routes.
-		 * Use for adding custom routes, serving static files, catch-all handlers, etc.
-		 */
-		routes?: Array<
-			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
-		>;
-	};
-	/**
 	 * Queue configuration for background job processing.
 	 */
 	queue?: {
@@ -630,8 +630,15 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		simulate: boolean;
 		resendWindowDays: number;
 	};
-	openAPI: {
-		enabled: boolean;
+	http: {
+		security: HttpSecurityConfig & {
+			trustProxyHeaders: boolean;
+		};
+		openAPI: {
+			enabled: boolean;
+		};
+		routes: LucidRouteDefinition[];
+		hooks: HttpHooks;
 	};
 	ai: {
 		enabled: boolean;
@@ -668,30 +675,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			image?: string;
 			video?: string;
 		};
-	};
-	security: {
-		trustProxyHeaders: boolean;
-		cors?: {
-			origin?: string[];
-			allowHeaders?: string[];
-		};
-		headers?: {
-			contentSecurityPolicy?: SecurityContentSecurityPolicy;
-			strictTransportSecurity?: boolean | string;
-			xFrameOptions?: boolean | string;
-			referrerPolicy?: boolean | string;
-			crossOriginResourcePolicy?: boolean | string;
-			crossOriginOpenerPolicy?: boolean | string;
-			crossOriginEmbedderPolicy?: boolean | string;
-		};
-	};
-	hono: {
-		middleware: Array<
-			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
-		>;
-		routes: Array<
-			(app: Hono<LucidHonoGeneric>, config: Config) => Promise<void>
-		>;
 	};
 	queue?: {
 		adapter?:

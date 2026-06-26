@@ -5,12 +5,23 @@ export const defaultConfig: Partial<LucidConfig> = {
 	logger: {
 		level: "info",
 	},
-	security: {
-		trustProxyHeaders: false,
-		headers: {
-			crossOriginResourcePolicy: false,
-			xFrameOptions: true,
-			referrerPolicy: "strict-origin-when-cross-origin",
+	http: {
+		security: {
+			trustProxyHeaders: false,
+			headers: {
+				crossOriginResourcePolicy: false,
+				xFrameOptions: true,
+				referrerPolicy: "strict-origin-when-cross-origin",
+			},
+		},
+		openAPI: {
+			enabled: false,
+		},
+		routes: [],
+		hooks: {
+			beforeCore: [],
+			afterCore: [],
+			afterOpenAPI: [],
 		},
 	},
 	auth: {
@@ -22,9 +33,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 	email: {
 		simulate: false,
 		resendWindowDays: 7,
-	},
-	openAPI: {
-		enabled: false,
 	},
 	ai: {
 		enabled: true,
@@ -84,10 +92,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 			storeProcessed: true,
 		},
 		fallback: undefined,
-	},
-	hono: {
-		middleware: [],
-		routes: [],
 	},
 	hooks: [],
 	collections: [],

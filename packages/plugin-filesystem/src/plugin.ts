@@ -18,7 +18,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 				uploadDir: pluginOptions?.uploadDir ?? DEFAULT_UPLOAD_DIRECTORY,
 				secretKey: pluginOptions?.secretKey ?? draft.secrets.encryption,
 			});
-			draft.hono?.routes?.push(routes());
+			draft.http.routes.push(...routes());
 		},
 	};
 };

@@ -359,8 +359,9 @@ const ensureApp = async () => {
 \t\t\t\t\tserver: "cloudflare",
 \t\t\t\t\tcompiled: false,
 \t\t\t\t}),
-\t\t\t\thono: {
-\t\t\t\t\tmiddleware: [
+\t\t\t\thttp: {
+\t\t\t\t\thooks: {
+\t\t\t\t\t\tbeforeCore: [
 \t\t\t\t\t\tasync (app) => {
 \t\t\t\t\t\t\tapp.use("*", async (c, next) => {
 \t\t\t\t\t\t\t\tc.set("env", c.env ?? cloudflareEnv);
@@ -388,7 +389,8 @@ const ensureApp = async () => {
 \t\t\t\t\t\t\t\tawait next();
 \t\t\t\t\t\t\t});
 \t\t\t\t\t\t},
-\t\t\t\t\t],
+\t\t\t\t\t\t],
+\t\t\t\t\t},
 \t\t\t\t},
 \t\t\t});
 \t\t})().catch((error) => {
