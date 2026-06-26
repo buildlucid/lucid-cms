@@ -19,7 +19,7 @@ Developers get a code-first collection system, typed APIs for consuming content,
 ## ✨ Features
 
 - **Model content your way:** code-defined collections, reusable bricks, custom fields and localization.
-- **Manage publishing with confidence:** environments, revisions, rollback, workflow stages, release review, approvals, and scheduled publishing.
+- **Manage publishing with confidence:** environments, revisions, workflow stages, release review, approvals, and scheduled publishing.
 - **Organize teams and sites:** tenants, roles, granular permissions, and client integrations.
 - **Handle media and email properly:** folders, private media, shareable links, image processing, cropping, email logs, previews, and redaction policies.
 - **Extend it for your project:** plugins, service hooks, toolkit, and Hono routes or middleware let you add content behavior, integrations, and side effects.
