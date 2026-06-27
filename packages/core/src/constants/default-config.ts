@@ -29,6 +29,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 	email: {
 		simulate: false,
 		resendWindowDays: 7,
+		templates: {
+			directory: "./templates",
+		},
 	},
 	ai: {
 		enabled: true,
@@ -100,7 +103,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 	build: {
 		paths: {
 			outDir: "dist",
-			emailTemplates: "./templates",
 			copyPublic: [],
 		},
 		watch: {

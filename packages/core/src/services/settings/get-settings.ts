@@ -57,8 +57,8 @@ const getSettings: ServiceFn<
 	const defaultTemplates = Object.values(constants.email.templates).map(
 		(template) => template.key,
 	);
-	const preRenderedTemplates = context.config.preRenderedEmailTemplates
-		? Object.keys(context.config.preRenderedEmailTemplates)
+	const preRenderedTemplates = context.config.email.templates.rendered
+		? Object.keys(context.config.email.templates.rendered)
 		: [];
 	const emailTemplates = Array.from(
 		new Set([...defaultTemplates, ...preRenderedTemplates]),

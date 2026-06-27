@@ -61,7 +61,7 @@ const renderMjmlTemplates = async (props: {
 	const silent = props.silent ?? false;
 	const renderedTemplates: RenderedTemplates = {};
 
-	const projectTemplatePath = props.config.build.paths.emailTemplates;
+	const projectTemplatePath = props.config.email.templates.directory;
 	const packageTemplatePath = path.join(currentDir, "../../../../templates");
 
 	await processTemplatesInDirectory(

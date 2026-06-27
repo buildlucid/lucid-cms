@@ -435,11 +435,20 @@ export interface LucidConfig {
 		 * Number of days an email can be resent for after it was created.
 		 */
 		resendWindowDays?: number;
+		/**
+		 * Email template settings.
+		 */
+		templates?: {
+			/**
+			 * The path to the MJML email templates directory. This can be used to override or extend the default templates.
+			 */
+			directory?: string;
+			/**
+			 * Pre-rendered Mustache templates to use at runtime.
+			 */
+			rendered?: Record<string, string>;
+		};
 	};
-	/**
-	 * The pre-rendered MJML templates to use.
-	 */
-	preRenderedEmailTemplates?: Record<string, string>;
 	/**
 	 * Media settings.
 	 */
@@ -578,10 +587,6 @@ export interface LucidConfig {
 			 */
 			outDir?: string;
 			/**
-			 * The path to the email templates directory. This can be used to override or extend the default templates.
-			 */
-			emailTemplates?: string;
-			/**
 			 * Additional files or directories to copy into the public output directory.
 			 */
 			copyPublic?: CopyPublicEntry[];
@@ -632,6 +637,10 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| Promise<EmailAdapterInstance>;
 		simulate: boolean;
 		resendWindowDays: number;
+		templates: {
+			directory: string;
+			rendered?: Record<string, string>;
+		};
 	};
 	http: {
 		security: HttpSecurityConfig & {
@@ -706,7 +715,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	build: {
 		paths: {
 			outDir: string;
-			emailTemplates: string;
 			copyPublic: CopyPublicEntry[];
 		};
 		watch: {

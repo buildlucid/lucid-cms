@@ -224,9 +224,14 @@ const ConfigSchema = z.object({
 			simulate: z.boolean().optional(),
 			resendWindowDays: z.number().int().min(0).optional(),
 			adapter: EmailAdapterSchema.optional(),
+			templates: z
+				.object({
+					directory: z.string().optional(),
+					rendered: z.record(z.string(), z.string()).optional(),
+				})
+				.optional(),
 		})
 		.optional(),
-	preRenderedEmailTemplates: z.record(z.string(), z.string()).optional(),
 	media: z.object({
 		adapter: MediaAdapterSchema.optional(),
 		limits: z.object({
@@ -321,7 +326,6 @@ const ConfigSchema = z.object({
 			paths: z
 				.object({
 					outDir: z.string().optional(),
-					emailTemplates: z.string().optional(),
 					copyPublic: z
 						.array(
 							z.union([

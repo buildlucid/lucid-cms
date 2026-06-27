@@ -4,11 +4,15 @@ import { copy } from "../../i18n/index.js";
 import renderMustacheTemplate from "./render-mustache-template.js";
 
 const createServiceContext = (
-	preRenderedEmailTemplates: Record<string, string>,
+	renderedTemplates: Record<string, string>,
 ): ServiceContext =>
 	({
 		config: {
-			preRenderedEmailTemplates,
+			email: {
+				templates: {
+					rendered: renderedTemplates,
+				},
+			},
 		} as Config,
 	}) as ServiceContext;
 

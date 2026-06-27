@@ -18,10 +18,11 @@ const renderMustacheTemplate: ServiceFn<
 	],
 	string
 > = async (context, data) => {
+	const renderedTemplates = context.config.email.templates.rendered;
+
 	//* use pre-rendered templates if available
-	if (context.config.preRenderedEmailTemplates) {
-		const preRenderedTemplate =
-			context.config.preRenderedEmailTemplates[data.template];
+	if (renderedTemplates) {
+		const preRenderedTemplate = renderedTemplates[data.template];
 		if (preRenderedTemplate === undefined) {
 			return {
 				error: {

@@ -229,11 +229,11 @@ export const addLucidWatchFiles = async (
 		registerWatchPath(path.dirname(dependencyPath));
 	}
 	registerWatchPath(
-		path.isAbsolute(project.loaded.config.build.paths.emailTemplates)
-			? project.loaded.config.build.paths.emailTemplates
+		path.isAbsolute(project.loaded.config.email.templates.directory)
+			? project.loaded.config.email.templates.directory
 			: path.join(
 					process.cwd(),
-					project.loaded.config.build.paths.emailTemplates,
+					project.loaded.config.email.templates.directory,
 				),
 	);
 

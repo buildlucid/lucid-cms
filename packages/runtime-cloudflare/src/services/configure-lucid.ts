@@ -12,14 +12,17 @@ const configureLucid: RuntimeConfigureLucid = (
 		...definition,
 		recipe: (draft) => {
 			definition.recipe?.(draft);
-			draft.preRenderedEmailTemplates = meta?.emailTemplates
-				? Object.fromEntries(
+			if (meta?.emailTemplates) {
+				draft.email.templates.rendered = {
+					...(draft.email.templates.rendered ?? {}),
+					...Object.fromEntries(
 						Object.entries(meta.emailTemplates).map(([key, value]) => [
 							key,
 							value.html,
 						]),
-					)
-				: undefined;
+					),
+				};
+			}
 		},
 	};
 };

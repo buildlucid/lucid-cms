@@ -62,13 +62,6 @@ export default configureLucid({
 		// REDIS_CONNECTION: z.string(),
 	}),
 	config: (env) => ({
-		// http: {
-		// 	security: {
-		// 		cors: {
-		// 			origin: [],
-		// 		},
-		// 	},
-		// },
 		// logger: {
 		// 	level: "silent",
 		// },
@@ -133,6 +126,11 @@ export default configureLucid({
 			openAPI: {
 				enabled: true,
 			},
+			// 	security: {
+			// 		cors: {
+			// 			origin: [],
+			// 		},
+			// 	},
 			routes: [
 				createRoute({
 					method: "post",
@@ -215,6 +213,11 @@ export default configureLucid({
 		// 		altGeneration: false,
 		// 		customFieldGeneration: false,
 		// 	},
+		// },
+		// media: {
+		// 	images: {
+
+		// 	}
 		// },
 		access: {
 			groups: {

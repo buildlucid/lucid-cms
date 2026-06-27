@@ -128,9 +128,14 @@ if (envSchema) {
 await runtimeAdapter.resolveOptions?.(env);
 
 const lucidConfig = configFactory(env);
-lucidConfig.preRenderedEmailTemplates = Object.fromEntries(
-    Object.entries(emailTemplates).map(([key, value]) => [key, value.html]),
-);
+lucidConfig.email = lucidConfig.email ?? {};
+lucidConfig.email.templates = lucidConfig.email.templates ?? {};
+lucidConfig.email.templates.rendered = {
+    ...(lucidConfig.email.templates.rendered ?? {}),
+    ...Object.fromEntries(
+        Object.entries(emailTemplates).map(([key, value]) => [key, value.html]),
+    ),
+};
 const databaseAdapter = await resolveDatabaseAdapter(
     db,
     env,
