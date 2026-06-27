@@ -54,7 +54,7 @@ const formatSingle = (props: {
 	}
 
 	if (includeSet.has("media")) {
-		const storageTotal = props.config.media.limits.storage;
+		const storageTotal = props.config.media.limits.storageBytes;
 		const storageRemaining =
 			storageTotal === false
 				? null
@@ -69,7 +69,7 @@ const formatSingle = (props: {
 			},
 			processed: {
 				stored: props.config.media.images.storeProcessed,
-				imageLimit: props.config.media.limits.processedImages,
+				imageLimit: props.config.media.limits.processedImagesPerFile,
 				total: props.settings.processedImageCount,
 			},
 		};

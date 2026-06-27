@@ -98,7 +98,7 @@ const update: ServiceFn<
 	}
 
 	const delta = mediaMetaRes.data.size - data.previousSize;
-	const storageLimit = context.config.media.limits.storage;
+	const storageLimit = context.config.media.limits.storageBytes;
 	const storageRes = await adjustStorageUsage(context, {
 		tenantKey: data.tenantKey,
 		delta: delta,

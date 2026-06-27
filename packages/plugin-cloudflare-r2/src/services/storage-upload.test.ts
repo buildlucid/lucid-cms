@@ -45,7 +45,7 @@ describe("storage upload", () => {
 				config: {
 					media: {
 						limits: {
-							fileSize: 3,
+							uploadBytes: 3,
 						},
 					},
 					secrets: {
@@ -90,7 +90,7 @@ describe("storage upload", () => {
 				config: {
 					media: {
 						limits: {
-							fileSize: 10,
+							uploadBytes: 10,
 						},
 					},
 					secrets: {

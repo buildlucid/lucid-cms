@@ -60,7 +60,7 @@ const storageUpload =
 		}
 
 		const maxUploadSize =
-			context.config.media.limits.fileSize ?? DEFAULT_MAX_UPLOAD_SIZE;
+			context.config.media.limits.uploadBytes ?? DEFAULT_MAX_UPLOAD_SIZE;
 
 		if (
 			data.contentLength === undefined ||

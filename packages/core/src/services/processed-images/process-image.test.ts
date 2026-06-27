@@ -82,7 +82,7 @@ describe("processImage", () => {
 				config: {
 					media: {
 						limits: {
-							processedImages: 10,
+							processedImagesPerFile: 10,
 						},
 						images: {
 							storeProcessed: false,
@@ -156,7 +156,7 @@ describe("processImage", () => {
 				config: {
 					media: {
 						limits: {
-							processedImages: 10,
+							processedImagesPerFile: 10,
 						},
 						images: {
 							storeProcessed: false,

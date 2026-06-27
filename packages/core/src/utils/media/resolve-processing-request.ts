@@ -20,12 +20,12 @@ type ProcessingQuery = {
  */
 const resolveProcessingRequest = (props: {
 	presets?: Record<string, ProcessingPreset>;
-	onDemandFormats: boolean;
+	allowFormatQuery: boolean;
 	query: ProcessingQuery;
 	accept?: string;
 }) => {
 	const selectedPreset = props.presets?.[props.query.preset ?? ""];
-	const format = props.onDemandFormats
+	const format = props.allowFormatQuery
 		? chooseAcceptHeaderFormat(props.accept, props.query.format)
 		: selectedPreset?.format;
 
@@ -38,7 +38,7 @@ const resolveProcessingRequest = (props: {
 		hasProcessing: Boolean(selectedPreset || format),
 		publicQuery: {
 			preset: selectedPreset ? props.query.preset : undefined,
-			format: props.onDemandFormats ? format : undefined,
+			format: props.allowFormatQuery ? format : undefined,
 		},
 	};
 };

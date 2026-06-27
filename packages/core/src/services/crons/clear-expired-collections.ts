@@ -11,7 +11,10 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 		context.config.db,
 	);
 
-	const compDate = getRetentionDays(context.config.softDelete, "collections");
+	const compDate = getRetentionDays(
+		context.config.retention,
+		"removedCollections",
+	);
 
 	const expiredCollectionsRes = await Collections.selectMultiple({
 		select: ["key"],

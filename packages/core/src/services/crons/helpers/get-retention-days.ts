@@ -2,20 +2,20 @@ import { subDays } from "date-fns";
 import type { Config } from "../../../types.js";
 
 export type RetentionDaysTypes = keyof NonNullable<
-	Config["softDelete"]["retentionDays"]
+	Config["retention"]["purgeAfterDays"]
 >;
 
 /**
  * Gets the retention days for a given data type
  */
 const getRetentionDays = (
-	softDeleteConfig: Config["softDelete"],
+	retentionConfig: Config["retention"],
 	type: RetentionDaysTypes,
 ) => {
-	const retentionDays = softDeleteConfig.retentionDays?.[type];
+	const purgeAfterDays = retentionConfig.purgeAfterDays?.[type];
 	return subDays(
 		new Date(),
-		retentionDays ?? softDeleteConfig.defaultRetentionDays,
+		purgeAfterDays ?? retentionConfig.defaultPurgeAfterDays,
 	).toISOString();
 };
 

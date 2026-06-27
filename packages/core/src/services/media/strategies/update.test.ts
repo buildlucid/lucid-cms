@@ -100,7 +100,7 @@ describe("media update strategy", () => {
 					tenants: [tenant],
 					media: {
 						limits: {
-							storage: false,
+							storageBytes: false,
 						},
 					},
 				},
@@ -183,7 +183,7 @@ describe("media update strategy", () => {
 				config: {
 					media: {
 						limits: {
-							storage: false,
+							storageBytes: false,
 						},
 					},
 				},
@@ -275,7 +275,7 @@ describe("media update strategy", () => {
 					tenants: [tenant],
 					media: {
 						limits: {
-							storage: false,
+							storageBytes: false,
 						},
 					},
 				},

@@ -65,9 +65,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 	},
 	media: {
 		limits: {
-			storage: false,
-			fileSize: 16777216,
-			processedImages: 10,
+			storageBytes: false,
+			uploadBytes: 16777216,
+			processedImagesPerFile: 10,
 		},
 		images: {
 			presets: {
@@ -87,17 +87,16 @@ export const defaultConfig: Partial<LucidConfig> = {
 					quality: 80,
 				},
 			},
-			onDemandFormats: false,
+			allowFormatQuery: false,
 			storeProcessed: true,
 		},
-		fallback: undefined,
+		video: {},
 	},
 	hooks: [],
 	collections: [],
 	plugins: [],
 	access: {
 		groups: {},
-		permissions: {},
 		roles: [],
 	},
 	build: {
@@ -109,9 +108,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 			ignore: [],
 		},
 	},
-	softDelete: {
-		defaultRetentionDays: constants.retention,
-	} satisfies Config["softDelete"],
+	retention: {
+		defaultPurgeAfterDays: constants.retention,
+	} satisfies Config["retention"],
 };
 
 export default defaultConfig;

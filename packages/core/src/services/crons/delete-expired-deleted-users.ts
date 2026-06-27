@@ -16,7 +16,7 @@ const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
 		context.config.db,
 	);
 
-	const compDate = getRetentionDays(context.config.softDelete, "users");
+	const compDate = getRetentionDays(context.config.retention, "deletedUsers");
 
 	const softDeletedUsersRes = await Users.selectMultiple({
 		select: ["id"],

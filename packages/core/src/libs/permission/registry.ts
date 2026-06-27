@@ -33,15 +33,16 @@ export const isCorePermission = (
 	return corePermissionKeys.includes(permission as CorePermission);
 };
 
-/**
- * Accepts either a core group enum key or group key so config can extend core groups.
- */
-const resolveGroupKey = (group: string) => {
-	const coreGroup = Object.entries(PermissionGroups).find(
-		([key, value]) => key === group || value.key === group,
+export const getCustomPermissionDefinitions = (
+	groups: Config["access"]["groups"],
+) =>
+	Object.entries(groups).flatMap(([groupKey, group]) =>
+		Object.entries(group.permissions).map(([key, permission]) => ({
+			key,
+			groupKey,
+			permission,
+		})),
 	);
-	return coreGroup?.[1].key ?? group;
-};
 
 /**
  * Builds the combined core and config permission catalogue used by API and UI metadata.
@@ -62,25 +63,18 @@ export const getPermissionRegistry = (config?: Pick<Config, "access">) => {
 				description: normalizeCopy(group.description),
 			},
 			core: false,
-			permissions: [],
+			permissions: Object.entries(group.permissions).map(
+				([permissionKey, permission]) =>
+					({
+						key: permissionKey,
+						details: {
+							name: normalizeCopy(permission.name),
+							description: normalizeCopy(permission.description),
+						},
+						core: false,
+					}) satisfies PermissionDefinition,
+			),
 		});
-	}
-
-	for (const [key, permission] of Object.entries(
-		config?.access.permissions ?? {},
-	)) {
-		const groupKey = resolveGroupKey(permission.group);
-		const group = groups.find((group) => group.key === groupKey);
-		if (!group) continue;
-
-		group.permissions.push({
-			key,
-			details: {
-				name: normalizeCopy(permission.name),
-				description: normalizeCopy(permission.description),
-			},
-			core: false,
-		} satisfies PermissionDefinition);
 	}
 
 	return groups;

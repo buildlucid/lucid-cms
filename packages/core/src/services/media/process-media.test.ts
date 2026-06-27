@@ -59,7 +59,7 @@ describe("media process service", () => {
 									width: 400,
 								},
 							},
-							onDemandFormats: true,
+							allowFormatQuery: true,
 						},
 					},
 				},

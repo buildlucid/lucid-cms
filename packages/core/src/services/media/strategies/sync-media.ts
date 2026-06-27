@@ -68,7 +68,7 @@ const syncMedia: ServiceFn<
 		return fileMetaData;
 	}
 
-	const storageLimit = context.config.media.limits.storage;
+	const storageLimit = context.config.media.limits.storageBytes;
 	const adjustStorageRes = await adjustStorageUsage(context, {
 		tenantKey: context.request?.tenantKey ?? null,
 		delta: mediaMetaRes.data.size,

@@ -127,7 +127,9 @@ const processImage: ServiceFn<
 	}
 
 	// Check if the processed image limit has been reached for this key, if so return processed image without saving
-	if (processedCountRes.data >= context.config.media.limits.processedImages) {
+	if (
+		processedCountRes.data >= context.config.media.limits.processedImagesPerFile
+	) {
 		return {
 			error: undefined,
 			data: {
@@ -167,7 +169,7 @@ const processImage: ServiceFn<
 	);
 
 	if (context.config.media.images.storeProcessed === true) {
-		const storageLimit = context.config.media.limits.storage;
+		const storageLimit = context.config.media.limits.storageBytes;
 		const adjustStorageRes = await adjustStorageUsage(context, {
 			tenantKey: sourceTenantKey,
 			delta: imageRes.data.size,

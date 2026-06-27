@@ -32,7 +32,7 @@ describe("create upload session", () => {
 				config: {
 					media: {
 						limits: {
-							fileSize: 10,
+							uploadBytes: 10,
 						},
 					},
 				},
@@ -86,7 +86,7 @@ describe("create upload session", () => {
 					},
 					media: {
 						limits: {
-							fileSize: 100,
+							uploadBytes: 100,
 						},
 					},
 				},
@@ -150,7 +150,7 @@ describe("create upload session", () => {
 					},
 					media: {
 						limits: {
-							fileSize: 100,
+							uploadBytes: 100,
 						},
 					},
 				},

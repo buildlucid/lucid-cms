@@ -223,64 +223,53 @@ export default configureLucid({
 			groups: {
 				pages: {
 					name: "Page Permissions",
+					permissions: {
+						"page:full": {
+							name: "Full Page Access",
+							description: "Grants full access to pages.",
+						},
+						"page:read": {
+							name: "Read Pages",
+						},
+						"page:create": {
+							name: "Create Pages",
+						},
+						"page:update": {
+							name: "Update Pages",
+						},
+						"page:delete": {
+							name: "Delete Pages",
+						},
+						"page:restore": {
+							name: "Restore Pages",
+						},
+						"page:publish": {
+							name: "Publish Pages",
+						},
+						"page:review": {
+							name: "Review Page Publish Requests",
+						},
+						"page:publish:staging": {
+							name: "Publish Pages To Staging",
+						},
+						"page:review:staging": {
+							name: "Review Page Publish Requests To Staging",
+						},
+						"page:publish:production": {
+							name: "Publish Pages To Production",
+						},
+						"page:review:production": {
+							name: "Review Page Publish Requests To Production",
+						},
+					},
 				},
 				blogs: {
 					name: "Blog Permissions",
-				},
-			},
-			permissions: {
-				"page:full": {
-					name: "Full Page Access",
-					description: "Grants full access to pages.",
-					group: "pages",
-				},
-				"page:read": {
-					name: "Read Pages",
-					group: "pages",
-				},
-				"page:create": {
-					name: "Create Pages",
-					group: "pages",
-				},
-				"page:update": {
-					name: "Update Pages",
-					group: "pages",
-				},
-				"page:delete": {
-					name: "Delete Pages",
-					group: "pages",
-				},
-				"page:restore": {
-					name: "Restore Pages",
-					group: "pages",
-				},
-				"page:publish": {
-					name: "Publish Pages",
-					group: "pages",
-				},
-				"page:review": {
-					name: "Review Page Publish Requests",
-					group: "pages",
-				},
-				"page:publish:staging": {
-					name: "Publish Pages To Staging",
-					group: "pages",
-				},
-				"page:review:staging": {
-					name: "Review Page Publish Requests To Staging",
-					group: "pages",
-				},
-				"page:publish:production": {
-					name: "Publish Pages To Production",
-					group: "pages",
-				},
-				"page:review:production": {
-					name: "Review Page Publish Requests To Production",
-					group: "pages",
-				},
-				"blog:full": {
-					name: "Full Blog Access",
-					group: "blogs",
+					permissions: {
+						"blog:full": {
+							name: "Full Blog Access",
+						},
+					},
 				},
 			},
 			roles: [

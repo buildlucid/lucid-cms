@@ -9,7 +9,7 @@ import groupQueuePayloadsByTenant from "./helpers/group-queue-payloads-by-tenant
 const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 	const Media = new MediaRepository(context.db.client, context.config.db);
 
-	const compDate = getRetentionDays(context.config.softDelete, "media");
+	const compDate = getRetentionDays(context.config.retention, "deletedMedia");
 
 	const softDeletedMediaRes = await Media.selectMultiple({
 		select: ["id", "tenant_key"],

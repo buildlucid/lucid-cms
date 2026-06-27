@@ -78,13 +78,7 @@ export type AccessPermissionDefinition = {
 	 * Optional helper text for the custom permission shown in the admin UI.
 	 */
 	description?: AccessPermissionDetails["description"];
-	/**
-	 * The custom permission group key, or an existing Lucid core permission group key.
-	 */
-	group: string;
 };
-
-export type AccessPermissionGroupDefinition = AccessPermissionDetails;
 
 export type ConfiguredLocaleValue = AdminCopyInput;
 
@@ -112,6 +106,13 @@ export type AccessPermissionDefinitions = Record<
 	AccessPermissionDefinition
 >;
 
+export type AccessPermissionGroupDefinition = AccessPermissionDetails & {
+	/**
+	 * Custom permissions available within this group.
+	 */
+	permissions: AccessPermissionDefinitions;
+};
+
 export type AccessPermissionGroupDefinitions = Record<
 	string,
 	AccessPermissionGroupDefinition
@@ -119,13 +120,9 @@ export type AccessPermissionGroupDefinitions = Record<
 
 export type AccessConfig = {
 	/**
-	 * Custom permission groups available in the admin role editor.
+	 * Custom permission groups and permissions available in the admin role editor.
 	 */
 	groups?: AccessPermissionGroupDefinitions;
-	/**
-	 * Custom permissions available for roles and collection permission mappings.
-	 */
-	permissions?: AccessPermissionDefinitions;
 	/**
 	 * Config-managed roles that are synced into the database and locked in the admin UI.
 	 */
@@ -464,15 +461,15 @@ export interface LucidConfig {
 			/**
 			 * The storage limit in bytes.
 			 */
-			storage?: number | false;
+			storageBytes?: number | false;
 			/**
-			 * The maximum file size in bytes.
+			 * The maximum upload size in bytes.
 			 */
-			fileSize?: number;
+			uploadBytes?: number;
 			/**
-			 * The processed image limit.
+			 * The processed image limit per source file.
 			 */
-			processedImages?: number;
+			processedImagesPerFile?: number;
 		};
 		/**
 		 * Image settings.
@@ -499,20 +496,17 @@ export interface LucidConfig {
 			/**
 			 * If true, the format query parameter will be allowed on the CDN route. If enabled, there is a higher potential for abuse.
 			 */
-			onDemandFormats?: boolean;
-		};
-		/**
-		 * Fallback URLs to redirect to when media cannot be found. Only used when the `fallback` query param is set and the sec-fetch-dest header is set to `image` or `video`.
-		 */
-		fallback?: {
+			allowFormatQuery?: boolean;
 			/**
 			 * The fallback image URL to redirect to when an image cannot be found.
 			 */
-			image?: string;
+			fallbackUrl?: string;
+		};
+		video?: {
 			/**
 			 * The fallback video URL to redirect to when a video cannot be found.
 			 */
-			video?: string;
+			fallbackUrl?: string;
 		};
 	};
 	/**
@@ -532,37 +526,37 @@ export interface LucidConfig {
 	 */
 	access?: AccessConfig;
 	/**
-	 * Configure the soft-delete behavior for different data types
+	 * Configure the purge behavior for retained deleted data.
 	 */
-	softDelete?: {
+	retention?: {
 		/**
-		 * The fallback number of days to retain deleted data. If left blank, this will fallback to 30 days.
+		 * The fallback number of days to retain deleted data before purging. If left blank, this will fallback to 30 days.
 		 */
-		defaultRetentionDays?: number;
+		defaultPurgeAfterDays?: number;
 		/**
-		 * Define retention days for specific data types
+		 * Define purge windows for specific retained data types.
 		 */
-		retentionDays?: {
+		purgeAfterDays?: {
 			/**
 			 * Days to retain locales that don't exist in your lucid.config
 			 */
-			locales?: number;
+			removedLocales?: number;
 			/**
 			 * Days to retain users
 			 */
-			users?: number;
+			deletedUsers?: number;
 			/**
 			 * Days to retain media
 			 */
-			media?: number;
+			deletedMedia?: number;
 			/**
 			 * Days to retain collections that don't exist in your lucid.config
 			 */
-			collections?: number;
+			removedCollections?: number;
 			/**
 			 * Days to retain documents
 			 */
-			documents?: number;
+			deletedDocuments?: number;
 		};
 	};
 	/**
@@ -665,9 +659,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| MediaAdapterInstance
 			| Promise<MediaAdapterInstance>;
 		limits: {
-			storage: number | false;
-			fileSize: number;
-			processedImages: number;
+			storageBytes: number | false;
+			uploadBytes: number;
+			processedImagesPerFile: number;
 		};
 		images: {
 			processor?: ImageProcessor;
@@ -681,11 +675,11 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 				}
 			>;
 			storeProcessed: boolean;
-			onDemandFormats: boolean;
+			allowFormatQuery: boolean;
+			fallbackUrl?: string;
 		};
-		fallback?: {
-			image?: string;
-			video?: string;
+		video: {
+			fallbackUrl?: string;
 		};
 	};
 	queue?: {
@@ -696,17 +690,16 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	};
 	access: {
 		groups: AccessPermissionGroupDefinitions;
-		permissions: AccessPermissionDefinitions;
 		roles: AccessRoleDefinition[];
 	};
-	softDelete: {
-		defaultRetentionDays: number;
-		retentionDays?: {
-			locales?: number;
-			users?: number;
-			media?: number;
-			collections?: number;
-			documents?: number;
+	retention: {
+		defaultPurgeAfterDays: number;
+		purgeAfterDays?: {
+			removedLocales?: number;
+			deletedUsers?: number;
+			deletedMedia?: number;
+			removedCollections?: number;
+			deletedDocuments?: number;
 		};
 	};
 	hooks: Array<AllHooks>;

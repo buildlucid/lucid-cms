@@ -21,7 +21,7 @@ const streamFallbackMedia: ServiceFn<
 		};
 	}
 
-	if (!data.fallback || !context.config.media.fallback) {
+	if (!data.fallback) {
 		return {
 			error: {
 				type: "basic",
@@ -34,21 +34,23 @@ const streamFallbackMedia: ServiceFn<
 	}
 
 	const dest = data.secFetchDest ?? "";
+	const imageFallbackUrl = context.config.media.images.fallbackUrl;
+	const videoFallbackUrl = context.config.media.video.fallbackUrl;
 
-	if (dest === "image" && context.config.media.fallback.image) {
+	if (dest === "image" && imageFallbackUrl) {
 		return {
 			error: undefined,
 			data: {
-				redirectUrl: context.config.media.fallback.image,
+				redirectUrl: imageFallbackUrl,
 			},
 		};
 	}
 
-	if (dest === "video" && context.config.media.fallback.video) {
+	if (dest === "video" && videoFallbackUrl) {
 		return {
 			error: undefined,
 			data: {
-				redirectUrl: context.config.media.fallback.video,
+				redirectUrl: videoFallbackUrl,
 			},
 		};
 	}

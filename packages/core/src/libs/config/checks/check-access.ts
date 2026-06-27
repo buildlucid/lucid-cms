@@ -3,6 +3,7 @@ import { translate } from "../../i18n/index.js";
 import { PermissionGroups } from "../../permission/definitions.js";
 import {
 	corePermissionKeys,
+	getCustomPermissionDefinitions,
 	isCorePermission,
 	permissionKeyRegex,
 } from "../../permission/registry.js";
@@ -56,13 +57,14 @@ const ensureValidReference = (
  */
 const checkAccess = (config: Config) => {
 	const customGroups = config.access.groups;
-	const customPermissions = config.access.permissions;
-	const customPermissionKeys = Object.keys(customPermissions);
+	const customPermissions = getCustomPermissionDefinitions(customGroups);
+	const customPermissionKeys = customPermissions.map(({ key }) => key);
 
 	ensureNoDuplicates(
 		"access.roles",
 		config.access.roles.map((role) => role.key),
 	);
+	ensureNoDuplicates("access.groups permissions", customPermissionKeys);
 
 	const coreGroupReferences = new Set<string>([
 		...Object.keys(PermissionGroups),
@@ -81,7 +83,7 @@ const checkAccess = (config: Config) => {
 		}
 	}
 
-	for (const permission of customPermissionKeys) {
+	for (const { key: permission } of customPermissions) {
 		if (!permissionKeyRegex.test(permission)) {
 			throw new Error(
 				translate("server:core.config.access.invalid.permission.key", {
@@ -98,24 +100,6 @@ const checkAccess = (config: Config) => {
 						permission,
 					},
 				}),
-			);
-		}
-
-		const group = customPermissions[permission]?.group;
-		if (
-			group === undefined ||
-			(!coreGroupReferences.has(group) && !customGroups[group])
-		) {
-			throw new Error(
-				translate(
-					"server:core.config.access.unknown.permission.group.reference",
-					{
-						data: {
-							permission,
-							group: group ?? "",
-						},
-					},
-				),
 			);
 		}
 	}

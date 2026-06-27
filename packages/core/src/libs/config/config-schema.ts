@@ -235,9 +235,9 @@ const ConfigSchema = z.object({
 	media: z.object({
 		adapter: MediaAdapterSchema.optional(),
 		limits: z.object({
-			storage: z.union([z.number(), z.literal(false)]),
-			fileSize: z.number(),
-			processedImages: z.number(),
+			storageBytes: z.union([z.number(), z.literal(false)]),
+			uploadBytes: z.number(),
+			processedImagesPerFile: z.number(),
 		}),
 		images: z.object({
 			processor: ImageProcessorSchema.optional(),
@@ -258,14 +258,12 @@ const ConfigSchema = z.object({
 				}),
 			),
 			storeProcessed: z.boolean(),
-			onDemandFormats: z.boolean(),
+			allowFormatQuery: z.boolean(),
+			fallbackUrl: z.string().optional(),
 		}),
-		fallback: z
-			.object({
-				image: z.string().optional(),
-				video: z.string().optional(),
-			})
-			.optional(),
+		video: z.object({
+			fallbackUrl: z.string().optional(),
+		}),
 	}),
 	hooks: z.array(
 		z.object({
@@ -288,16 +286,13 @@ const ConfigSchema = z.object({
 					z.object({
 						name: adminCopyInputSchema,
 						description: adminCopyInputSchema.nullable().optional(),
-					}),
-				)
-				.optional(),
-			permissions: z
-				.record(
-					z.string(),
-					z.object({
-						name: adminCopyInputSchema,
-						description: adminCopyInputSchema.nullable().optional(),
-						group: z.string(),
+						permissions: z.record(
+							z.string(),
+							z.object({
+								name: adminCopyInputSchema,
+								description: adminCopyInputSchema.nullable().optional(),
+							}),
+						),
 					}),
 				)
 				.optional(),
@@ -346,16 +341,16 @@ const ConfigSchema = z.object({
 				.optional(),
 		})
 		.optional(),
-	softDelete: z
+	retention: z
 		.object({
-			defaultRetentionDays: z.number().int().positive().optional(),
-			retentionDays: z
+			defaultPurgeAfterDays: z.number().int().positive().optional(),
+			purgeAfterDays: z
 				.object({
-					locales: z.number().int().positive().optional(),
-					users: z.number().int().positive().optional(),
-					media: z.number().int().positive().optional(),
-					collections: z.number().int().positive().optional(),
-					documents: z.number().int().positive().optional(),
+					removedLocales: z.number().int().positive().optional(),
+					deletedUsers: z.number().int().positive().optional(),
+					deletedMedia: z.number().int().positive().optional(),
+					removedCollections: z.number().int().positive().optional(),
+					deletedDocuments: z.number().int().positive().optional(),
 				})
 				.optional(),
 		})

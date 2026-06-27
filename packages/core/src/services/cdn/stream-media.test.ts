@@ -36,7 +36,7 @@ describe("cdn stream media", () => {
 					media: {
 						images: {
 							presets: {},
-							onDemandFormats: true,
+							allowFormatQuery: true,
 						},
 					},
 				},

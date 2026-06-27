@@ -29,7 +29,10 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 		.map((table) => table.data)
 		.filter((table) => table !== undefined);
 
-	const compDate = getRetentionDays(context.config.softDelete, "documents");
+	const compDate = getRetentionDays(
+		context.config.retention,
+		"deletedDocuments",
+	);
 
 	const expiredDocLookup = await Promise.all(
 		docTables.map(async (table) => {

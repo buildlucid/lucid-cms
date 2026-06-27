@@ -24,11 +24,11 @@ const buildDraft = (): PluginDraft => ({
 	},
 });
 
-const buildConfig = (fileSize: number) =>
+const buildConfig = (uploadBytes: number) =>
 	({
 		media: {
 			limits: {
-				fileSize,
+				uploadBytes,
 			},
 		},
 	}) as never;

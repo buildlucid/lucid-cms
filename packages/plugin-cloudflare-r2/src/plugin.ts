@@ -40,9 +40,9 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 				return;
 			}
 
-			if (config.media.limits.fileSize > DEFAULT_MAX_UPLOAD_SIZE) {
+			if (config.media.limits.uploadBytes > DEFAULT_MAX_UPLOAD_SIZE) {
 				throw new LucidError({
-					message: `Cloudflare R2 binding uploads proxy files through the Worker. Reduce config.media.limits.fileSize to ${DEFAULT_MAX_UPLOAD_SIZE} bytes or configure the plugin's optional http fallback.`,
+					message: `Cloudflare R2 binding uploads proxy files through the Worker. Reduce config.media.limits.uploadBytes to ${DEFAULT_MAX_UPLOAD_SIZE} bytes or configure the plugin's optional http fallback.`,
 				});
 			}
 		},

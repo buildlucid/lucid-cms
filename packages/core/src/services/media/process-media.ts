@@ -94,7 +94,7 @@ const processMedia: ServiceFn<
 
 	const processingRequest = resolveProcessingRequest({
 		presets: context.config.media.images.presets,
-		onDemandFormats: context.config.media.images.onDemandFormats,
+		allowFormatQuery: context.config.media.images.allowFormatQuery,
 		query: data.body,
 	});
 

@@ -31,8 +31,8 @@
 
 ### Breaking changes:
 
-- The CDN endpoint no longer supports width, height or quality params for image resizing/processing. The format query param is now locked behind a disabled by default onDemandFormats media option. ([690fbfc](https://github.com/buildlucid/lucid-cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
-- Storage and processed media config options have been renamed to be more descriptive. storage is storageLimit, maxSize is maxFileSize, process.limit is processedImageLimit and process.store is storeProcessedImages. ([690fbfc](https://github.com/buildlucid/lucid-cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
+- The CDN endpoint no longer supports width, height or quality params for image resizing/processing. The format query param is now locked behind a disabled by default `media.images.allowFormatQuery` option. ([690fbfc](https://github.com/buildlucid/lucid-cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
+- Media config limits now use byte-based names: `limits.storageBytes`, `limits.uploadBytes`, `limits.processedImagesPerFile`, and `images.storeProcessed`. ([690fbfc](https://github.com/buildlucid/lucid-cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
 - Fallback image config no longer accepts a boolean to denote it should stream the local 404 image. Instead we just support remote URLs now or the standard 404 response. ([0893f27](https://github.com/buildlucid/lucid-cms/commit/0893f27d79c8535bde5397edc4aa7bb53c4762a5))
 - The argon2 package has been replaced with @‌noble/hashes scrypt due to not being supported in some serverless environments. ([8191b1b](https://github.com/buildlucid/lucid-cms/commit/8191b1be7735cca97fed37b91290fec4483af720))
 - Dropped the need for the lucid-client-key for authenticating with the client integrations. This is now encoded in the API key you receive on creating/regenerating a client integration. ([0528f28](https://github.com/buildlucid/lucid-cms/commit/0528f28e8cf79a44b08cee6edbef4b2b39c199c7))

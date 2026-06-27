@@ -73,7 +73,7 @@ describe("media sync strategy", () => {
 					tenants: [tenant],
 					media: {
 						limits: {
-							storage: false,
+							storageBytes: false,
 						},
 					},
 				},
@@ -139,7 +139,7 @@ describe("media sync strategy", () => {
 				config: {
 					media: {
 						limits: {
-							storage: false,
+							storageBytes: false,
 						},
 					},
 				},
