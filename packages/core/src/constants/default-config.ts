@@ -18,11 +18,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 			enabled: false,
 		},
 		routes: [],
-		hooks: {
-			beforeCore: [],
-			afterCore: [],
-			afterOpenAPI: [],
-		},
+		extensions: [],
 	},
 	auth: {
 		password: {

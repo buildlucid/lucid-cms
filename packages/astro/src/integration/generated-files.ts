@@ -127,7 +127,7 @@ export default spaHtml;
 
 /**
  * Astro's Cloudflare hosting uses a single Lucid-owned worker entry that
- * layers Lucid hooks onto Astro's generated server worker.
+ * layers Lucid extensions onto Astro's generated server worker.
  */
 export const writeCloudflareWorkerFiles = async (
 	project: ResolvedLucidProject,

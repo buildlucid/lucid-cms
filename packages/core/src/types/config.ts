@@ -9,7 +9,10 @@ import type {
 	EmailAdapterInstance,
 } from "../libs/email/types.js";
 import type { AllHooks } from "../libs/hooks/types.js";
-import type { HttpHooks, LucidRouteDefinition } from "../libs/http/types.js";
+import type {
+	HttpExtension,
+	LucidRouteDefinition,
+} from "../libs/http/types.js";
 import type {
 	AdminCopyInput,
 	InterfaceDirection,
@@ -280,9 +283,9 @@ export type HttpConfig = {
 	 */
 	routes?: LucidRouteDefinition[];
 	/**
-	 * Low-level HTTP app lifecycle hooks.
+	 * Low-level HTTP app extensions.
 	 */
-	hooks?: Partial<HttpHooks>;
+	extensions?: HttpExtension[];
 };
 
 export type AiFeatureConfig = {
@@ -638,7 +641,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			enabled: boolean;
 		};
 		routes: LucidRouteDefinition[];
-		hooks: HttpHooks;
+		extensions: HttpExtension[];
 	};
 	ai: {
 		enabled: boolean;

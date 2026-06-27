@@ -360,37 +360,39 @@ const ensureApp = async () => {
 \t\t\t\t\tcompiled: false,
 \t\t\t\t}),
 \t\t\t\thttp: {
-\t\t\t\t\thooks: {
-\t\t\t\t\t\tbeforeCore: [
-\t\t\t\t\t\tasync (app) => {
-\t\t\t\t\t\t\tapp.use("*", async (c, next) => {
-\t\t\t\t\t\t\t\tc.set("env", c.env ?? cloudflareEnv);
-\t\t\t\t\t\t\t\tc.set("cf", c.req.raw.cf ?? null);
-\t\t\t\t\t\t\t\tc.set("caches", globalThis.caches ?? null);
-\t\t\t\t\t\t\t\tlet executionContext = null;
-\t\t\t\t\t\t\t\ttry {
-\t\t\t\t\t\t\t\t\texecutionContext = c.executionCtx ?? null;
-\t\t\t\t\t\t\t\t} catch {}
-\t\t\t\t\t\t\t\tc.set(
-\t\t\t\t\t\t\t\t\t"ctx",
-\t\t\t\t\t\t\t\t\texecutionContext
-\t\t\t\t\t\t\t\t\t\t? {
-\t\t\t\t\t\t\t\t\t\t\t\t// Astro owns the request lifecycle, so Lucid only receives the pieces its middleware stack depends on.
-\t\t\t\t\t\t\t\t\t\t\t\twaitUntil: executionContext.waitUntil.bind(executionContext),
-\t\t\t\t\t\t\t\t\t\t\t\t...(typeof executionContext.passThroughOnException === "function"
-\t\t\t\t\t\t\t\t\t\t\t\t\t? {
-\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tpassThroughOnException:
-\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\texecutionContext.passThroughOnException.bind(executionContext),
-\t\t\t\t\t\t\t\t\t\t\t\t\t\t}
-\t\t\t\t\t\t\t\t\t\t\t\t\t: {}),
-\t\t\t\t\t\t\t\t\t\t}
-\t\t\t\t\t\t\t\t\t\t: null,
-\t\t\t\t\t\t\t\t);
-\t\t\t\t\t\t\t\tawait next();
-\t\t\t\t\t\t\t});
+\t\t\t\t\textensions: [
+\t\t\t\t\t\t{
+\t\t\t\t\t\t\tname: "astro:cloudflare-platform-context",
+\t\t\t\t\t\t\tpriority: 0,
+\t\t\t\t\t\t\tregister: async (app) => {
+\t\t\t\t\t\t\t\tapp.use("*", async (c, next) => {
+\t\t\t\t\t\t\t\t\tc.set("env", c.env ?? cloudflareEnv);
+\t\t\t\t\t\t\t\t\tc.set("cf", c.req.raw.cf ?? null);
+\t\t\t\t\t\t\t\t\tc.set("caches", globalThis.caches ?? null);
+\t\t\t\t\t\t\t\t\tlet executionContext = null;
+\t\t\t\t\t\t\t\t\ttry {
+\t\t\t\t\t\t\t\t\t\texecutionContext = c.executionCtx ?? null;
+\t\t\t\t\t\t\t\t\t} catch {}
+\t\t\t\t\t\t\t\t\tc.set(
+\t\t\t\t\t\t\t\t\t\t"ctx",
+\t\t\t\t\t\t\t\t\t\texecutionContext
+\t\t\t\t\t\t\t\t\t\t\t? {
+\t\t\t\t\t\t\t\t\t\t\t\t\t// Astro owns the request lifecycle, so Lucid only receives the pieces its middleware stack depends on.
+\t\t\t\t\t\t\t\t\t\t\t\t\twaitUntil: executionContext.waitUntil.bind(executionContext),
+\t\t\t\t\t\t\t\t\t\t\t\t\t...(typeof executionContext.passThroughOnException === "function"
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t? {
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tpassThroughOnException:
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\texecutionContext.passThroughOnException.bind(executionContext),
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t}
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t: {}),
+\t\t\t\t\t\t\t\t\t\t\t\t}
+\t\t\t\t\t\t\t\t\t\t\t: null,
+\t\t\t\t\t\t\t\t\t);
+\t\t\t\t\t\t\t\t\tawait next();
+\t\t\t\t\t\t\t\t});
+\t\t\t\t\t\t\t},
 \t\t\t\t\t\t},
-\t\t\t\t\t\t],
-\t\t\t\t\t},
+\t\t\t\t\t],
 \t\t\t\t},
 \t\t\t});
 \t\t})().catch((error) => {

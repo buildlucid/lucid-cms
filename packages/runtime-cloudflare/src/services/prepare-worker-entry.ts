@@ -147,51 +147,55 @@ const prepareMainWorkerEntry = (
 	                    compiled: true,
 	                }),
 	                http: {
-	                    hooks: {
-	                        beforeCore: [
-	                        async (app, config) => {
-	                            app.use("*", async (c, next) => {
-	                                c.set("env", c.env ?? env ?? null);
-	                                c.set("cf", c.req.raw.cf ?? null);
-	                                c.set("caches", globalThis.caches ?? null);
-	                                let executionContext = null;
-	                                try {
-	                                    executionContext = c.executionCtx ?? null;
-	                                } catch {}
-	                                c.set(
-	                                    "ctx",
-	                                    executionContext
-	                                        ? {
-	                                                waitUntil: executionContext.waitUntil.bind(executionContext),
-	                                                ...(typeof executionContext.passThroughOnException === "function"
-	                                                    ? {
-	                                                            passThroughOnException:
-	                                                                executionContext.passThroughOnException.bind(executionContext),
-	                                                        }
-	                                                    : {}),
-	                                            }
-	                                        : null,
-	                                );
-	                                await next();
-	                            });
-	                        },
-	                        ],
-	                        afterOpenAPI: [
-	                        async (app, config) => {
-	                            app.get("/lucid/*", async (c) => {
-	                                const url = new URL(c.req.url);
-
-	                                const indexRequestUrl = url.origin + "/lucid/index.html";
-	                                const indexRequest = new Request(indexRequestUrl);
-	                                const indexAsset = await c.env.ASSETS.fetch(indexRequest);
-	                                return new Response(indexAsset.body, {
-	                                    status: indexAsset.status,
-	                                    headers: indexAsset.headers,
+	                    extensions: [
+	                        {
+	                            name: "runtime-cloudflare:platform-context",
+	                            priority: 0,
+	                            register: async (app, config) => {
+	                                app.use("*", async (c, next) => {
+	                                    c.set("env", c.env ?? env ?? null);
+	                                    c.set("cf", c.req.raw.cf ?? null);
+	                                    c.set("caches", globalThis.caches ?? null);
+	                                    let executionContext = null;
+	                                    try {
+	                                        executionContext = c.executionCtx ?? null;
+	                                    } catch {}
+	                                    c.set(
+	                                        "ctx",
+	                                        executionContext
+	                                            ? {
+	                                                    waitUntil: executionContext.waitUntil.bind(executionContext),
+	                                                    ...(typeof executionContext.passThroughOnException === "function"
+	                                                        ? {
+	                                                                passThroughOnException:
+	                                                                    executionContext.passThroughOnException.bind(executionContext),
+	                                                            }
+	                                                        : {}),
+	                                                }
+	                                            : null,
+	                                    );
+	                                    await next();
 	                                });
-	                            });
+	                            },
 	                        },
-	                        ],
-	                    },
+	                        {
+	                            name: "runtime-cloudflare:spa-shell",
+	                            priority: 2,
+	                            register: async (app, config) => {
+	                                app.get("/lucid/*", async (c) => {
+	                                    const url = new URL(c.req.url);
+
+	                                    const indexRequestUrl = url.origin + "/lucid/index.html";
+	                                    const indexRequest = new Request(indexRequestUrl);
+	                                    const indexAsset = await c.env.ASSETS.fetch(indexRequest);
+	                                    return new Response(indexAsset.body, {
+	                                        status: indexAsset.status,
+	                                        headers: indexAsset.headers,
+	                                    });
+	                                });
+	                            },
+	                        },
+	                    ],
 	                },
 	            });
 	        })().catch((error) => {

@@ -14,28 +14,32 @@ const configureLucid: RuntimeConfigureLucid = (
 		...definition,
 		recipe: (draft) => {
 			definition.recipe?.(draft);
-			draft.http.hooks.afterOpenAPI.push(async (app, config) => {
-				const paths = getBuildPaths(config);
-				app.use(
-					"/*",
-					serveStatic({
-						rewriteRequestPath: (path) => {
-							const relativeClientDist = relative(
-								process.cwd(),
-								paths.publicDist,
-							);
-							return `${relativeClientDist}${path}`;
-						},
-					}),
-				);
-				app.get("/lucid", (c) => {
-					const html = readFileSync(paths.spaDistHtml, "utf-8");
-					return c.html(html);
-				});
-				app.get("/lucid/*", (c) => {
-					const html = readFileSync(paths.spaDistHtml, "utf-8");
-					return c.html(html);
-				});
+			draft.http.extensions.push({
+				name: "runtime-node:static-assets",
+				priority: 2,
+				register: async (app, config) => {
+					const paths = getBuildPaths(config);
+					app.use(
+						"/*",
+						serveStatic({
+							rewriteRequestPath: (path) => {
+								const relativeClientDist = relative(
+									process.cwd(),
+									paths.publicDist,
+								);
+								return `${relativeClientDist}${path}`;
+							},
+						}),
+					);
+					app.get("/lucid", (c) => {
+						const html = readFileSync(paths.spaDistHtml, "utf-8");
+						return c.html(html);
+					});
+					app.get("/lucid/*", (c) => {
+						const html = readFileSync(paths.spaDistHtml, "utf-8");
+						return c.html(html);
+					});
+				},
 			});
 		},
 	};

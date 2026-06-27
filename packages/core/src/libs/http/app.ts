@@ -30,9 +30,10 @@ import {
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/index.js";
-import type { HttpHooks } from "./types.js";
+import type { HttpExtension } from "./types.js";
 import featureSupportChecks from "./utils/feature-support-checks.js";
 import registerCustomRoutes from "./utils/register-custom-routes.js";
+import runHttpExtensions from "./utils/run-http-extensions.js";
 
 /**
  * The entry point for creating the Hono app.
@@ -44,7 +45,7 @@ const createApp = async (props: {
 	env?: EnvironmentVariables;
 	app?: Hono<LucidHonoGeneric>;
 	http?: {
-		hooks?: Partial<HttpHooks>;
+		extensions?: HttpExtension[];
 	};
 }) => {
 	const app = props.app || new Hono<LucidHonoGeneric>();
@@ -52,12 +53,15 @@ const createApp = async (props: {
 		? normalizeHost(props.config.host)
 		: undefined;
 
-	for (const hook of [
-		...(props.http?.hooks?.beforeCore ?? []),
-		...(props.config.http.hooks.beforeCore ?? []),
-	]) {
-		await hook(app, props.config);
-	}
+	await runHttpExtensions({
+		app,
+		config: props.config,
+		priority: 0,
+		extensions: [
+			...(props.http?.extensions ?? []),
+			...props.config.http.extensions,
+		],
+	});
 
 	const kvInstance = await getInitializedKVAdapter(props.config, {
 		env: props.env,
@@ -201,12 +205,15 @@ const createApp = async (props: {
 	//* HTTP extensions
 	registerCustomRoutes(app, props.config.http.routes);
 
-	for (const hook of [
-		...(props.config.http.hooks.afterCore ?? []),
-		...(props.http?.hooks?.afterCore ?? []),
-	]) {
-		await hook(app, props.config);
-	}
+	await runHttpExtensions({
+		app,
+		config: props.config,
+		priority: 1,
+		extensions: [
+			...props.config.http.extensions,
+			...(props.http?.extensions ?? []),
+		],
+	});
 
 	if (props.config.http.openAPI?.enabled) {
 		app.get(
@@ -352,12 +359,15 @@ const createApp = async (props: {
 		);
 	}
 
-	for (const hook of [
-		...(props.config.http.hooks.afterOpenAPI ?? []),
-		...(props.http?.hooks?.afterOpenAPI ?? []),
-	]) {
-		await hook(app, props.config);
-	}
+	await runHttpExtensions({
+		app,
+		config: props.config,
+		priority: 2,
+		extensions: [
+			...props.config.http.extensions,
+			...(props.http?.extensions ?? []),
+		],
+	});
 
 	const supportChecksRes = featureSupportChecks(
 		{

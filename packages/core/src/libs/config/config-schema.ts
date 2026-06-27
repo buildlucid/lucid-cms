@@ -3,19 +3,29 @@ import constants from "../../constants/constants.js";
 import type { ImageProcessor } from "../../types/config.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
-import type { HttpAppHook, LucidRouteDefinition } from "../http/types.js";
+import type {
+	HttpExtension,
+	HttpExtensionRegister,
+	LucidRouteDefinition,
+} from "../http/types.js";
 import { adminCopyInputSchema } from "../i18n/index.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
 
-const HttpAppHookSchema = z.custom<HttpAppHook>(
+const HttpExtensionRegisterSchema = z.custom<HttpExtensionRegister>(
 	(data) => typeof data === "function",
 	{
-		message: "Expected an HTTP app hook function",
+		message: "Expected an HTTP extension register function",
 	},
 );
+
+const HttpExtensionSchema = z.object({
+	name: z.string().trim().min(1),
+	priority: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+	register: HttpExtensionRegisterSchema,
+}) satisfies z.ZodType<HttpExtension>;
 
 const LucidRouteDefinitionSchema = z.custom<LucidRouteDefinition>(
 	(data) => typeof data === "object" && data !== null,
@@ -132,13 +142,7 @@ const ConfigSchema = z.object({
 				})
 				.optional(),
 			routes: z.array(LucidRouteDefinitionSchema).optional(),
-			hooks: z
-				.object({
-					beforeCore: z.array(HttpAppHookSchema).optional(),
-					afterCore: z.array(HttpAppHookSchema).optional(),
-					afterOpenAPI: z.array(HttpAppHookSchema).optional(),
-				})
-				.optional(),
+			extensions: z.array(HttpExtensionSchema).optional(),
 		})
 		.optional(),
 	secrets: z.object({

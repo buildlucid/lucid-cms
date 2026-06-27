@@ -6,15 +6,17 @@ import type { LucidHonoContext, LucidHonoGeneric } from "../../types/hono.js";
 import type { RouteSchema } from "../../types/schema.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 
-export type HttpAppHook = (
+export type HttpExtensionRegister = (
 	app: Hono<LucidHonoGeneric>,
 	config: Config,
 ) => void | Promise<void>;
 
-export type HttpHooks = {
-	beforeCore: HttpAppHook[];
-	afterCore: HttpAppHook[];
-	afterOpenAPI: HttpAppHook[];
+export type HttpExtensionPriority = 0 | 1 | 2;
+
+export type HttpExtension = {
+	name: string;
+	priority: HttpExtensionPriority;
+	register: HttpExtensionRegister;
 };
 
 export type LucidRouteMethod =

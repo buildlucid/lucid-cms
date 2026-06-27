@@ -58,9 +58,11 @@ const serveCommand =
 			env: platformProxy?.env,
 			app: cloudflareApp,
 			http: {
-				hooks: {
-					afterOpenAPI: [
-						async (app, config) => {
+				extensions: [
+					{
+						name: "runtime-cloudflare:static-assets",
+						priority: 2,
+						register: async (app, config) => {
 							const paths = getBuildPaths(config);
 							app.use(
 								"/*",
@@ -83,8 +85,8 @@ const serveCommand =
 								return c.html(html);
 							});
 						},
-					],
-				},
+					},
+				],
 			},
 		});
 

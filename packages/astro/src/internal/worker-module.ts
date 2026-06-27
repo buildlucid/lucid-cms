@@ -105,7 +105,7 @@ export default worker;
 
 /**
  * The main worker is where Astro handles requests, so Lucid only layers in the
- * runtime hooks it cannot get from Astro's default Cloudflare entrypoint.
+ * runtime extensions it cannot get from Astro's default Cloudflare entrypoint.
  */
 export const buildCloudflareMainWorkerSource = (props: {
 	configArtifacts: {
