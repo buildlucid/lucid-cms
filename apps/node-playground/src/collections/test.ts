@@ -8,11 +8,9 @@ const TestCollection = new CollectionBuilder("test", {
 		singularName: copy("admin:collections.test.singularName"),
 		summary: copy("admin:collections.test.summary"),
 	},
-	features: {
-		localized: false,
-		revisions: true,
-		locked: false,
-	},
+	localized: false,
+	revisions: true,
+	locked: false,
 	hooks: [],
 	bricks: {
 		builder: [IntroBrick],

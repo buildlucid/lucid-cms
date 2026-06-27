@@ -156,7 +156,7 @@ const checkAccess = (config: Config) => {
 			);
 		}
 
-		for (const environment of collection.getData.features.environments) {
+		for (const environment of collection.getData.environments) {
 			if (environment.permissions.publish !== undefined) {
 				ensureValidReference(
 					validPermissions,

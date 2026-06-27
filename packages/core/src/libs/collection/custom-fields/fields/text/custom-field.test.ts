@@ -18,9 +18,7 @@ const TextCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addText("standard_text")
 	.addText("required_text", {
@@ -50,7 +48,7 @@ test("successfully validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.features.localized,
+			localized: TextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -71,7 +69,7 @@ test("successfully validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.features.localized,
+			localized: TextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -92,7 +90,7 @@ test("successfully validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.features.localized,
+			localized: TextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -115,7 +113,7 @@ test("fail to validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.features.localized,
+			localized: TextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -143,7 +141,7 @@ test("fail to validate field - text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: TextCollection.getData.features.localized,
+				localized: TextCollection.getData.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -161,7 +159,7 @@ test("fail to validate field - text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: TextCollection.getData.features.localized,
+				localized: TextCollection.getData.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -179,7 +177,7 @@ test("fail to validate field - text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: TextCollection.getData.features.localized,
+				localized: TextCollection.getData.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -223,7 +221,7 @@ test("fail to validate field - text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextCollection.getData.features.localized,
+			localized: TextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});

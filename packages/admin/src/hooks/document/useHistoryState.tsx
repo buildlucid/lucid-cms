@@ -419,7 +419,7 @@ export function useHistoryState() {
 	});
 	const selectedRetention = createMemo((): RetentionInfo => {
 		const item = selectedItem();
-		const retentionDays = collection()?.features.revisionRetentionDays;
+		const retentionDays = collection()?.revisionRetentionDays;
 
 		if (item?.type !== "revision") {
 			return {

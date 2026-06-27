@@ -115,8 +115,7 @@ export const NavigationChrome: Component = () => {
 		() =>
 			userStore.get.hasPermission([Permissions.DocumentsReview]).all &&
 			(collections.data?.data ?? []).some(
-				(collection) =>
-					(collection.features.review?.requiredFor?.length ?? 0) > 0,
+				(collection) => (collection.review?.requiredFor?.length ?? 0) > 0,
 			),
 	);
 

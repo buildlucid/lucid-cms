@@ -113,7 +113,7 @@ const TimelineDetails: Component<{
 	const formatTargetName = (target: string) => {
 		const environment = props
 			.collection()
-			?.features.environments.find((environment) => environment.key === target);
+			?.environments.find((environment) => environment.key === target);
 
 		return (
 			helpers.getLocaleValue({

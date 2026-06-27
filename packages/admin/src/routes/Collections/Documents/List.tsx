@@ -73,7 +73,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 
 	const collectionData = createMemo(() => collection.data?.data);
 	const collectionHasWorkflow = createMemo(
-		() => collectionData()?.features.workflow !== undefined,
+		() => collectionData()?.workflow !== undefined,
 	);
 	const workflowAssignees = api.documents.useGetWorkflowAssignees({
 		queryParams: {
@@ -94,7 +94,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 		collectionFieldFilters(collectionData()),
 	);
 	const getWorkflowFilters = createMemo(() => {
-		const workflow = collectionData()?.features.workflow;
+		const workflow = collectionData()?.workflow;
 		if (!workflow) return [];
 
 		return [
@@ -193,7 +193,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 				key: field.key,
 				type: field.type,
 			})),
-			workflow: activeCollection.features.workflow !== undefined,
+			workflow: activeCollection.workflow !== undefined,
 		});
 		if (filterSchemaKey === nextFilterSchemaKey) return;
 		filterSchemaKey = nextFilterSchemaKey;
@@ -217,7 +217,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 				value: "",
 			};
 		}
-		if (activeCollection.features.workflow) {
+		if (activeCollection.workflow) {
 			filterConfig.workflowStage = {
 				type: "text",
 				value: "",
@@ -242,7 +242,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 							{
 								type: "warning",
 								message: T()("collections.locked.message"),
-								show: collectionData()?.features.locked === true,
+								show: collectionData()?.locked === true,
 							},
 						]}
 					/>
@@ -254,7 +254,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 							description: collectionSummary(),
 						}}
 						actions={{
-							contentLocale: collectionData()?.features.localized ?? false,
+							contentLocale: collectionData()?.localized ?? false,
 							createLink: {
 								link: getDocumentRoute("create", {
 									collectionKey: collectionKey() || "",
@@ -262,7 +262,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 								permission: userStore.get.hasPermission([
 									collectionData()?.permissions.create,
 								]).some,
-								show: collectionData()?.features.locked !== true,
+								show: collectionData()?.locked !== true,
 								label: T()("actions.create.dynamic", {
 									name: collectionSingularName() || "",
 								}),

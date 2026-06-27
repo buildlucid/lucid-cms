@@ -112,7 +112,7 @@ const getCollectionDocumentPermissionsInUse = (
 
 			if (action !== "publish" && action !== "review") continue;
 
-			for (const environment of collectionData.features.environments) {
+			for (const environment of collectionData.environments) {
 				permissions.add(
 					resolveCollectionPermission({
 						collection,

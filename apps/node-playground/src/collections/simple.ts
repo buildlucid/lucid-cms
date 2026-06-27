@@ -8,10 +8,8 @@ const SimpleCollection = new CollectionBuilder("simple", {
 		name: copy("admin:collections.simple.name"),
 		singularName: copy("admin:collections.simple.singularName"),
 	},
-	features: {
-		localized: true,
-		revisions: true,
-	},
+	localized: true,
+	revisions: true,
 	bricks: {
 		builder: [SimpleBrick, SimpleFixedBrick],
 		fixed: [SimpleFixedBrick],

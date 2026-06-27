@@ -29,8 +29,8 @@ const buildContext = (collections: CollectionBuilder[] = []) =>
 const createCollection = (
 	key: string,
 	environments: NonNullable<
-		ConstructorParameters<typeof CollectionBuilder>[1]["features"]
-	>["environments"] = [],
+		ConstructorParameters<typeof CollectionBuilder>[1]["environments"]
+	> = [],
 ) =>
 	new CollectionBuilder(key, {
 		mode: "multiple",
@@ -42,9 +42,7 @@ const createCollection = (
 				defaultMessage: key,
 			}),
 		},
-		features: {
-			environments,
-		},
+		environments,
 	});
 
 describe("resolve relation version type", () => {

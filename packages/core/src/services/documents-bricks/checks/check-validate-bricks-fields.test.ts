@@ -13,9 +13,7 @@ const TranslatedCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addText("translatable_field")
 	.addText("non_translatable_field", {
@@ -33,9 +31,7 @@ const NonTranslatedCollection = new CollectionBuilder("non_translated", {
 			{ defaultMessage: "Non-Translated" },
 		),
 	},
-	features: {
-		localized: false,
-	},
+	localized: false,
 }).addText("text_field");
 
 test("localeCode is correctly included or omitted based on translation support", async () => {
@@ -62,7 +58,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			localized: TranslatedCollection.getData.features.localized,
+			localized: TranslatedCollection.getData.localized,
 			defaultLocale,
 		},
 	});
@@ -85,7 +81,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			localized: TranslatedCollection.getData.features.localized,
+			localized: TranslatedCollection.getData.localized,
 			defaultLocale,
 		},
 	});
@@ -108,7 +104,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("translatable_field")!,
 		validationData,
 		meta: {
-			localized: TranslatedCollection.getData.features.localized,
+			localized: TranslatedCollection.getData.localized,
 			defaultLocale: frenchDefaultLocale,
 		},
 	});
@@ -131,7 +127,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: NonTranslatedCollection.fields.get("text_field")!,
 		validationData,
 		meta: {
-			localized: NonTranslatedCollection.getData.features.localized,
+			localized: NonTranslatedCollection.getData.localized,
 			defaultLocale,
 		},
 	});
@@ -154,7 +150,7 @@ test("localeCode is correctly included or omitted based on translation support",
 		instance: TranslatedCollection.fields.get("non_translatable_field")!,
 		validationData,
 		meta: {
-			localized: TranslatedCollection.getData.features.localized,
+			localized: TranslatedCollection.getData.localized,
 			defaultLocale,
 		},
 	});

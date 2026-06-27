@@ -89,37 +89,35 @@ const formatSingle = (props: {
 			singularName: collectionData.details.singularName,
 			summary: collectionData.details.summary,
 		},
-		features: {
-			localized: collectionData.features.localized,
-			revisions: collectionData.features.revisions,
-			locked: collectionData.features.locked,
-			listing: props.collection.listing,
-			autoSave: collectionData.features.autoSave,
-			scheduling: collectionData.features.scheduling,
-			revisionRetentionDays: collectionData.features.revisionRetentionDays,
-			review: collectionData.features.review,
-			workflow: collectionData.features.workflow,
-			environments: collectionData.features.environments.map((environment) => ({
-				key: environment.key,
-				name: environment.name,
-				requires: environment.requires,
-				permissions: {
-					publish: resolveCollectionPermission({
-						collection: props.collection,
-						action: "publish",
-						target: environment.key,
-					}),
-					review: resolveCollectionPermission({
-						collection: props.collection,
-						action: "review",
-						target: environment.key,
-					}),
-				},
-			})),
-		},
+		localized: collectionData.localized,
+		revisions: collectionData.revisions,
+		locked: collectionData.locked,
+		listing: props.collection.listing,
+		autoSave: collectionData.autoSave,
+		scheduling: collectionData.scheduling,
+		revisionRetentionDays: collectionData.revisionRetentionDays,
+		review: collectionData.review,
+		workflow: collectionData.workflow,
+		environments: collectionData.environments.map((environment) => ({
+			key: environment.key,
+			name: environment.name,
+			requires: environment.requires,
+			permissions: {
+				publish: resolveCollectionPermission({
+					collection: props.collection,
+					action: "publish",
+					target: environment.key,
+				}),
+				review: resolveCollectionPermission({
+					collection: props.collection,
+					action: "review",
+					target: environment.key,
+				}),
+			},
+		})),
 		capabilities: {
 			scheduling:
-				collectionData.features.scheduling === true &&
+				collectionData.scheduling === true &&
 				props.queueSupportsScheduling === true,
 		},
 		permissions: resolvedPermissions,

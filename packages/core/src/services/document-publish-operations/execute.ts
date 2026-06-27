@@ -112,10 +112,9 @@ const execute: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const targetIsEnvironment =
-		collectionRes.data.getData.features.environments.some(
-			(environment) => environment.key === operation.target,
-		);
+	const targetIsEnvironment = collectionRes.data.getData.environments.some(
+		(environment) => environment.key === operation.target,
+	);
 	if (!targetIsEnvironment) {
 		return {
 			error: {

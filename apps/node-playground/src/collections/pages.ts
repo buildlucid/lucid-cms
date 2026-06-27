@@ -23,65 +23,62 @@ const PageCollection = new CollectionBuilder("page", {
 	group: {
 		key: "content",
 	},
-	features: {
-		localized: true,
-		revisions: true,
-		autoSave: true,
-		scheduling: true,
-		review: {
-			requiredFor: ["production"],
-			allowSelfApproval: true,
-			comments: {
-				request: "required",
-				decision: "optional",
-			},
+	localized: true,
+	revisions: true,
+	autoSave: true,
+	scheduling: true,
+	review: {
+		requiredFor: ["production"],
+		allowSelfApproval: true,
+		comments: {
+			request: "required",
+			decision: "optional",
 		},
-		workflow: {
-			stages: [
-				{
-					key: "todo",
-					name: copy("admin:collections.page.workflow.todo.name"),
-					color: "yellow",
-				},
-				{
-					key: "in-progress",
-					name: copy("admin:collections.page.workflow.in-progress.name"),
-					publishTargets: ["staging"],
-					color: "blue",
-				},
-				{
-					key: "done",
-					name: copy("admin:collections.page.workflow.done.name"),
-					publishTargets: ["production", "staging"],
-					color: "green",
-					permissions: {
-						moveTo: "page:workflow:done",
-						moveFrom: "page:workflow:todo",
-					},
-				},
-			],
-		},
-		environments: [
+	},
+	workflow: {
+		stages: [
 			{
-				key: "staging",
-				name: copy("admin:collections.page.environments.staging.name"),
-				permissions: {
-					publish: "page:publish:staging",
-					review: "page:review:staging",
-				},
+				key: "todo",
+				name: copy("admin:collections.page.workflow.todo.name"),
+				color: "yellow",
 			},
 			{
-				key: "production",
-				name: copy("admin:collections.page.environments.production.name"),
-				requires: ["staging"],
+				key: "in-progress",
+				name: copy("admin:collections.page.workflow.in-progress.name"),
+				publishTargets: ["staging"],
+				color: "blue",
+			},
+			{
+				key: "done",
+				name: copy("admin:collections.page.workflow.done.name"),
+				publishTargets: ["production", "staging"],
+				color: "green",
 				permissions: {
-					publish: "page:publish:production",
-					review: "page:review:production",
+					moveTo: "page:workflow:done",
+					moveFrom: "page:workflow:todo",
 				},
 			},
 		],
-		// tenants: ["marketing"],
 	},
+	environments: [
+		{
+			key: "staging",
+			name: copy("admin:collections.page.environments.staging.name"),
+			permissions: {
+				publish: "page:publish:staging",
+				review: "page:review:staging",
+			},
+		},
+		{
+			key: "production",
+			name: copy("admin:collections.page.environments.production.name"),
+			requires: ["staging"],
+			permissions: {
+				publish: "page:publish:production",
+				review: "page:review:production",
+			},
+		},
+	],
 	hooks: [
 		{
 			service: "documents",

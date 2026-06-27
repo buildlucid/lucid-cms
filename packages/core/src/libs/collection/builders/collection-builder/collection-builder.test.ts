@@ -17,9 +17,7 @@ test("collection options are correct along with field includes and filters", asy
 					"Pages are used to create static content on your website.",
 			}),
 		},
-		features: {
-			localized: true,
-		},
+		localized: true,
 		hooks: [
 			{
 				service: "documents",
@@ -114,25 +112,23 @@ test("collection options are correct along with field includes and filters", asy
 			}),
 		},
 		permissions: {},
-		features: {
-			locked: false,
-			revisions: false,
-			localized: true,
-			autoSave: false,
-			scheduling: false,
-			listing: [
-				"text_test",
-				"textarea_test",
-				"number_test",
-				"checkbox_test",
-				"select_test",
-				"datetime_test",
-				"user_test",
-				"media_test",
-			],
-			environments: [],
-			revisionRetentionDays: 30,
-		},
+		locked: false,
+		revisions: false,
+		localized: true,
+		autoSave: false,
+		scheduling: false,
+		listing: [
+			"text_test",
+			"textarea_test",
+			"number_test",
+			"checkbox_test",
+			"select_test",
+			"datetime_test",
+			"user_test",
+			"media_test",
+		],
+		environments: [],
+		revisionRetentionDays: 30,
 		tenants: [],
 	});
 });
@@ -148,40 +144,38 @@ test("collection workflow features normalizes defaults", async () => {
 				defaultMessage: "Page",
 			}),
 		},
-		features: {
-			environments: [
+		environments: [
+			{
+				key: "production",
+				name: copy("admin:tests.environments.production.name", {
+					defaultMessage: "Production",
+				}),
+			},
+		],
+		workflow: {
+			stages: [
 				{
-					key: "production",
-					name: copy("admin:tests.environments.production.name", {
-						defaultMessage: "Production",
+					key: "todo",
+					name: copy("admin:tests.workflow.todo.name", {
+						defaultMessage: "To do",
 					}),
 				},
+				{
+					key: "done",
+					name: copy("admin:tests.workflow.done.name", {
+						defaultMessage: "Done",
+					}),
+					color: "green",
+					publishTargets: ["production"],
+					permissions: {
+						moveTo: "page:workflow:done",
+					},
+				},
 			],
-			workflow: {
-				stages: [
-					{
-						key: "todo",
-						name: copy("admin:tests.workflow.todo.name", {
-							defaultMessage: "To do",
-						}),
-					},
-					{
-						key: "done",
-						name: copy("admin:tests.workflow.done.name", {
-							defaultMessage: "Done",
-						}),
-						color: "green",
-						publishTargets: ["production"],
-						permissions: {
-							moveTo: "page:workflow:done",
-						},
-					},
-				],
-			},
 		},
 	});
 
-	expect(collection.getData.features.workflow).toEqual({
+	expect(collection.getData.workflow).toEqual({
 		initial: "todo",
 		stages: [
 			{
@@ -219,29 +213,27 @@ test("collection environment relation features normalizes defaults", async () =>
 				defaultMessage: "Page",
 			}),
 		},
-		features: {
-			environments: [
-				{
-					key: "staging",
-					name: copy("admin:tests.environments.staging.name", {
-						defaultMessage: "Staging",
-					}),
-					relations: {
-						blog: "signed-off",
-					},
+		environments: [
+			{
+				key: "staging",
+				name: copy("admin:tests.environments.staging.name", {
+					defaultMessage: "Staging",
+				}),
+				relations: {
+					blog: "signed-off",
 				},
-				{
-					key: "production",
-					name: copy("admin:tests.environments.production.name", {
-						defaultMessage: "Production",
-					}),
-					requires: ["staging"],
-				},
-			],
-		},
+			},
+			{
+				key: "production",
+				name: copy("admin:tests.environments.production.name", {
+					defaultMessage: "Production",
+				}),
+				requires: ["staging"],
+			},
+		],
 	});
 
-	expect(collection.getData.features.environments).toEqual([
+	expect(collection.getData.environments).toEqual([
 		{
 			key: "staging",
 			name: copy("admin:tests.environments.staging.name", {

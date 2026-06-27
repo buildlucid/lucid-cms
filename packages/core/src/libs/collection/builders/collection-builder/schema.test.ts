@@ -18,9 +18,7 @@ test("collection builder options passes schema validation", async () => {
 					"Pages are used to create static content on your website.",
 			}),
 		},
-		features: {
-			localized: true,
-		},
+		localized: true,
 		hooks: [
 			{
 				service: "documents",
@@ -87,35 +85,33 @@ test("collection workflow features validates stages, targets and palette", async
 				defaultMessage: "Page",
 			}),
 		},
-		features: {
-			workflow: {
-				initial: "todo",
-				stages: [
-					{
-						key: "todo",
-						name: copy("admin:tests.workflow.todo.name", {
-							defaultMessage: "To do",
-						}),
-					},
-					{
-						key: "done",
-						name: copy("admin:tests.workflow.done.name", {
-							defaultMessage: "Done",
-						}),
-						color: "green",
-						publishTargets: ["production"],
-					},
-				],
-			},
-			environments: [
+		workflow: {
+			initial: "todo",
+			stages: [
 				{
-					key: "production",
-					name: copy("admin:tests.environments.production.name", {
-						defaultMessage: "Production",
+					key: "todo",
+					name: copy("admin:tests.workflow.todo.name", {
+						defaultMessage: "To do",
 					}),
+				},
+				{
+					key: "done",
+					name: copy("admin:tests.workflow.done.name", {
+						defaultMessage: "Done",
+					}),
+					color: "green",
+					publishTargets: ["production"],
 				},
 			],
 		},
+		environments: [
+			{
+				key: "production",
+				name: copy("admin:tests.environments.production.name", {
+					defaultMessage: "Production",
+				}),
+			},
+		],
 	};
 
 	await expect(
@@ -127,12 +123,9 @@ test("collection workflow features validates stages, targets and palette", async
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			features: {
-				...validConfig.features,
-				workflow: {
-					initial: "missing",
-					stages: validConfig.features.workflow.stages,
-				},
+			workflow: {
+				initial: "missing",
+				stages: validConfig.workflow.stages,
 			},
 		}),
 	).resolves.toMatchObject({
@@ -142,24 +135,21 @@ test("collection workflow features validates stages, targets and palette", async
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			features: {
-				...validConfig.features,
-				workflow: {
-					stages: [
-						{
-							key: "todo",
-							name: copy("admin:tests.workflow.todo.name", {
-								defaultMessage: "To do",
-							}),
-						},
-						{
-							key: "todo",
-							name: copy("admin:tests.workflow.duplicate.name", {
-								defaultMessage: "Duplicate",
-							}),
-						},
-					],
-				},
+			workflow: {
+				stages: [
+					{
+						key: "todo",
+						name: copy("admin:tests.workflow.todo.name", {
+							defaultMessage: "To do",
+						}),
+					},
+					{
+						key: "todo",
+						name: copy("admin:tests.workflow.duplicate.name", {
+							defaultMessage: "Duplicate",
+						}),
+					},
+				],
 			},
 		}),
 	).resolves.toMatchObject({
@@ -169,19 +159,16 @@ test("collection workflow features validates stages, targets and palette", async
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			features: {
-				...validConfig.features,
-				workflow: {
-					stages: [
-						{
-							key: "todo",
-							name: copy("admin:tests.workflow.todo.name", {
-								defaultMessage: "To do",
-							}),
-							color: "orange",
-						},
-					],
-				},
+			workflow: {
+				stages: [
+					{
+						key: "todo",
+						name: copy("admin:tests.workflow.todo.name", {
+							defaultMessage: "To do",
+						}),
+						color: "orange",
+					},
+				],
 			},
 		}),
 	).resolves.toMatchObject({
@@ -191,19 +178,16 @@ test("collection workflow features validates stages, targets and palette", async
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			features: {
-				...validConfig.features,
-				workflow: {
-					stages: [
-						{
-							key: "done",
-							name: copy("admin:tests.workflow.done.name", {
-								defaultMessage: "Done",
-							}),
-							publishTargets: ["missing"],
-						},
-					],
-				},
+			workflow: {
+				stages: [
+					{
+						key: "done",
+						name: copy("admin:tests.workflow.done.name", {
+							defaultMessage: "Done",
+						}),
+						publishTargets: ["missing"],
+					},
+				],
 			},
 		}),
 	).resolves.toMatchObject({
@@ -305,20 +289,18 @@ test("collection environment relation features passes schema validation", async 
 					defaultMessage: "Page",
 				}),
 			},
-			features: {
-				environments: [
-					{
-						key: "staging",
-						name: copy("admin:tests.environments.staging.name", {
-							defaultMessage: "Staging",
-						}),
-						relations: {
-							blog: "signed-off",
-							settings: "latest",
-						},
+			environments: [
+				{
+					key: "staging",
+					name: copy("admin:tests.environments.staging.name", {
+						defaultMessage: "Staging",
+					}),
+					relations: {
+						blog: "signed-off",
+						settings: "latest",
 					},
-				],
-			},
+				},
+			],
 		}),
 	).resolves.toMatchObject({
 		success: true,
@@ -337,23 +319,21 @@ test("collection environment requires features validates environment references"
 				defaultMessage: "Page",
 			}),
 		},
-		features: {
-			environments: [
-				{
-					key: "staging",
-					name: copy("admin:tests.environments.staging.name", {
-						defaultMessage: "Staging",
-					}),
-				},
-				{
-					key: "production",
-					name: copy("admin:tests.environments.production.name", {
-						defaultMessage: "Production",
-					}),
-					requires: ["staging"],
-				},
-			],
-		},
+		environments: [
+			{
+				key: "staging",
+				name: copy("admin:tests.environments.staging.name", {
+					defaultMessage: "Staging",
+				}),
+			},
+			{
+				key: "production",
+				name: copy("admin:tests.environments.production.name", {
+					defaultMessage: "Production",
+				}),
+				requires: ["staging"],
+			},
+		],
 	};
 
 	await expect(
@@ -365,17 +345,15 @@ test("collection environment requires features validates environment references"
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			features: {
-				environments: [
-					{
-						key: "production",
-						name: copy("admin:tests.environments.production.name", {
-							defaultMessage: "Production",
-						}),
-						requires: ["staging"],
-					},
-				],
-			},
+			environments: [
+				{
+					key: "production",
+					name: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
+					}),
+					requires: ["staging"],
+				},
+			],
 		}),
 	).resolves.toMatchObject({
 		success: false,
@@ -384,17 +362,15 @@ test("collection environment requires features validates environment references"
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			features: {
-				environments: [
-					{
-						key: "production",
-						name: copy("admin:tests.environments.production.name", {
-							defaultMessage: "Production",
-						}),
-						requires: ["production"],
-					},
-				],
-			},
+			environments: [
+				{
+					key: "production",
+					name: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
+					}),
+					requires: ["production"],
+				},
+			],
 		}),
 	).resolves.toMatchObject({
 		success: false,

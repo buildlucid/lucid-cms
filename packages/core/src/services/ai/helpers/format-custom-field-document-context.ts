@@ -253,7 +253,7 @@ const formatFieldDefinitions = (props: {
 		acc[fieldInstance.key] = {
 			type: fieldInstance.type,
 			localized:
-				props.collection.getData.features.localized === true &&
+				props.collection.getData.localized === true &&
 				fieldInstance.localizedEnabled === true,
 			...(details?.label ? { label: details.label } : {}),
 			...(details?.summary ? { summary: details.summary } : {}),

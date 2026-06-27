@@ -60,10 +60,9 @@ const promoteVersion: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	if (data.requirePublishOperationForEnvironmentTarget === true) {
-		const isEnvironmentTarget =
-			collectionRes.data.getData.features.environments.some(
-				(environment) => environment.key === data.toVersionType,
-			);
+		const isEnvironmentTarget = collectionRes.data.getData.environments.some(
+			(environment) => environment.key === data.toVersionType,
+		);
 
 		if (isEnvironmentTarget) {
 			return {
@@ -194,7 +193,7 @@ const promoteVersion: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (collectionRes.data.getData.features.locked === true) {
+	if (collectionRes.data.getData.locked === true) {
 		return {
 			error: {
 				type: "basic",
@@ -215,8 +214,7 @@ const promoteVersion: ServiceFn<
 	//-------------------------------------------------------------------------------
 	// Mutate/create revisions and update the document
 	const shouldCreateRevision =
-		collectionRes.data.getData.features.revisions &&
-		data.createRevision !== false;
+		collectionRes.data.getData.revisions && data.createRevision !== false;
 
 	const [, upsertDocumentRes, createVersionRes] = await Promise.all([
 		shouldCreateRevision

@@ -17,9 +17,7 @@ const MediaCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addMedia("standard_media")
 	.addMedia("required_media", {
@@ -97,7 +95,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -126,7 +124,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -155,7 +153,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -184,7 +182,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -213,7 +211,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -242,7 +240,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -271,7 +269,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -300,7 +298,7 @@ test("successfully validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -323,7 +321,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -351,7 +349,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -386,7 +384,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -426,7 +424,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -466,7 +464,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -506,7 +504,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -546,7 +544,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -586,7 +584,7 @@ test("fail to validate field - media", async () => {
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -627,7 +625,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -674,7 +672,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -700,7 +698,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			document: [],
 		},
 		meta: {
-			localized: MediaCollection.getData.features.localized,
+			localized: MediaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});

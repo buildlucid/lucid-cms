@@ -58,7 +58,7 @@ const checkValidateBricksFields: ServiceFn<
 		instance: data.collection,
 		validationData: refDataRes.data,
 		meta: {
-			localized: data.collection.getData.features.localized,
+			localized: data.collection.getData.localized,
 			defaultLocale: context.config.localization.defaultLocale,
 		},
 	});
@@ -148,7 +148,7 @@ const validateBricks = (props: {
 			instance: instance,
 			validationData: props.validationData,
 			meta: {
-				localized: props.collection.getData.features.localized,
+				localized: props.collection.getData.localized,
 				defaultLocale: props.defaultLocale,
 			},
 		});

@@ -34,10 +34,10 @@ export const schedulingDispatchWindowMs =
 
 /** Returns environment targets that require release review for the collection. */
 export const getPublishOperationTargets = (collection: CollectionBuilder) => {
-	const targets = collection.getData.features.review?.requiredFor;
+	const targets = collection.getData.review?.requiredFor;
 	if (targets === undefined) return [];
 
-	const environmentKeys = collection.getData.features.environments.map(
+	const environmentKeys = collection.getData.environments.map(
 		(environment) => environment.key,
 	);
 	return targets.filter((target) => environmentKeys.includes(target));
@@ -54,10 +54,9 @@ export const getReleaseRequirementTargets = (params: {
 	collection: CollectionBuilder;
 	target: string;
 }) => {
-	const targetEnvironment =
-		params.collection.getData.features.environments.find(
-			(environment) => environment.key === params.target,
-		);
+	const targetEnvironment = params.collection.getData.environments.find(
+		(environment) => environment.key === params.target,
+	);
 
 	return Array.from(new Set(targetEnvironment?.requires ?? []));
 };
@@ -83,14 +82,13 @@ export const collectionTargetSupportsScheduling = (params: {
 	target: string;
 	queueSupportsScheduling: boolean;
 }) => {
-	const targetIsEnvironment =
-		params.collection.getData.features.environments.some(
-			(environment) => environment.key === params.target,
-		);
+	const targetIsEnvironment = params.collection.getData.environments.some(
+		(environment) => environment.key === params.target,
+	);
 
 	return (
 		targetIsEnvironment &&
-		params.collection.getData.features.scheduling === true &&
+		params.collection.getData.scheduling === true &&
 		params.queueSupportsScheduling === true
 	);
 };

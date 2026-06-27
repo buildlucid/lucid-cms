@@ -18,9 +18,7 @@ const TextareaCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addTextarea("standard_textarea")
 	.addTextarea("required_textarea", {
@@ -50,7 +48,7 @@ test("successfully validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextareaCollection.getData.features.localized,
+			localized: TextareaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -71,7 +69,7 @@ test("successfully validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextareaCollection.getData.features.localized,
+			localized: TextareaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -92,7 +90,7 @@ test("successfully validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextareaCollection.getData.features.localized,
+			localized: TextareaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -115,7 +113,7 @@ test("fail to validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextareaCollection.getData.features.localized,
+			localized: TextareaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -142,7 +140,7 @@ test("fail to validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextareaCollection.getData.features.localized,
+			localized: TextareaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -169,7 +167,7 @@ test("fail to validate field - textarea", async () => {
 			document: [],
 		},
 		meta: {
-			localized: TextareaCollection.getData.features.localized,
+			localized: TextareaCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});

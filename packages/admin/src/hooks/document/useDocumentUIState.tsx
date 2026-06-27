@@ -120,7 +120,7 @@ export function useDocumentUIState(props: {
 	 * Determines if the auto save is enabled on the collection
 	 */
 	const autoSave = createMemo(() => {
-		return props.collection()?.features.autoSave;
+		return props.collection()?.autoSave;
 	});
 
 	/**
@@ -173,7 +173,7 @@ export function useDocumentUIState(props: {
 		if (props.mode === "history") return true;
 
 		// lock builder if collection is locked
-		if (props.collection()?.features.locked === true) {
+		if (props.collection()?.locked === true) {
 			return true;
 		}
 
@@ -206,7 +206,7 @@ export function useDocumentUIState(props: {
 	 */
 	const showRevisionNavigation = createMemo(() => {
 		// if (props.mode === "create") return false;
-		return props.collection()?.features.revisions ?? false;
+		return props.collection()?.revisions ?? false;
 	});
 
 	/**
@@ -269,7 +269,7 @@ export function useDocumentUIState(props: {
 
 		return (
 			userStore.get.hasPermission([permission]).all &&
-			props.collection()?.features.autoSave
+			props.collection()?.autoSave
 		);
 	});
 
@@ -281,7 +281,7 @@ export function useDocumentUIState(props: {
 
 		const environmentPermission = props
 			.collection()
-			?.features.environments.find((environment) => environment.key === target)
+			?.environments.find((environment) => environment.key === target)
 			?.permissions.publish;
 
 		const permission =
@@ -311,7 +311,7 @@ export function useDocumentUIState(props: {
 		if (props.mode === "history") return false;
 		if (props.version() !== "revision") return false;
 		if (props.document()?.isDeleted) return false;
-		if (props.collection()?.features.revisions === false) return false;
+		if (props.collection()?.revisions === false) return false;
 		if (props.versionId() === undefined) return false;
 		return true;
 	});

@@ -81,42 +81,40 @@ export type CollectionConfigSchemaType = {
 		summary?: AdminCopyInput;
 	};
 	permissions?: CollectionPermissions;
-	features?: {
-		locked?: boolean;
-		localized?: boolean;
-		revisions?: boolean;
-		autoSave?: boolean;
-		scheduling?: boolean;
-		review?: {
-			requiredFor?: string[];
-			allowSelfApproval?: boolean;
-			comments?: {
-				request?: PublishingReviewCommentRequirement;
-				decision?: PublishingReviewCommentRequirement;
-			};
+	locked?: boolean;
+	localized?: boolean;
+	revisions?: boolean;
+	autoSave?: boolean;
+	scheduling?: boolean;
+	review?: {
+		requiredFor?: string[];
+		allowSelfApproval?: boolean;
+		comments?: {
+			request?: PublishingReviewCommentRequirement;
+			decision?: PublishingReviewCommentRequirement;
 		};
-		workflow?: {
-			initial?: string;
-			stages: Array<{
-				key: string;
-				name: AdminCopyInput;
-				color?: PublishingWorkflowStageColor;
-				publishTargets?: string[];
-				permissions?: {
-					moveTo?: string;
-					moveFrom?: string;
-				};
-			}>;
-		};
-		environments?: Array<{
+	};
+	workflow?: {
+		initial?: string;
+		stages: Array<{
 			key: string;
 			name: AdminCopyInput;
-			requires?: string[];
-			permissions?: CollectionEnvironmentPermissions;
-			relations?: CollectionEnvironmentRelations;
+			color?: PublishingWorkflowStageColor;
+			publishTargets?: string[];
+			permissions?: {
+				moveTo?: string;
+				moveFrom?: string;
+			};
 		}>;
-		revisionRetentionDays?: number | false;
 	};
+	environments?: Array<{
+		key: string;
+		name: AdminCopyInput;
+		requires?: string[];
+		permissions?: CollectionEnvironmentPermissions;
+		relations?: CollectionEnvironmentRelations;
+	}>;
+	revisionRetentionDays?: number | false;
 	hooks?: CollectionBuilderHooks[];
 	bricks?: {
 		fixed?: Array<BrickBuilder>;
@@ -133,24 +131,22 @@ export type CollectionData = {
 		singularName: ResolvedAdminCopy;
 		summary: ResolvedAdminCopy | null;
 	};
-	features: {
-		locked: boolean;
-		revisions: boolean;
-		localized: boolean;
-		autoSave: boolean;
-		scheduling: boolean;
-		review?: PublishingReviewConfig;
-		workflow?: PublishingWorkflowConfig;
-		listing: string[];
-		environments: {
-			key: string;
-			name: ResolvedAdminCopy;
-			requires: string[];
-			permissions: CollectionEnvironmentPermissions;
-			relations: CollectionEnvironmentRelations;
-		}[];
-		revisionRetentionDays: number | false;
-	};
+	locked: boolean;
+	revisions: boolean;
+	localized: boolean;
+	autoSave: boolean;
+	scheduling: boolean;
+	review?: PublishingReviewConfig;
+	workflow?: PublishingWorkflowConfig;
+	listing: string[];
+	environments: {
+		key: string;
+		name: ResolvedAdminCopy;
+		requires: string[];
+		permissions: CollectionEnvironmentPermissions;
+		relations: CollectionEnvironmentRelations;
+	}[];
+	revisionRetentionDays: number | false;
 	tenants: string[];
 	permissions: CollectionPermissions;
 };

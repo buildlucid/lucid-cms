@@ -40,9 +40,7 @@ const SelectCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addSelect("standard_select", {
 		options: CONSTANTS.selectOptions,
@@ -70,7 +68,7 @@ test("successfully validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			localized: SelectCollection.getData.features.localized,
+			localized: SelectCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -91,7 +89,7 @@ test("successfully validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			localized: SelectCollection.getData.features.localized,
+			localized: SelectCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -112,7 +110,7 @@ test("successfully validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			localized: SelectCollection.getData.features.localized,
+			localized: SelectCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -136,7 +134,7 @@ test("fail to validate field - select", async () => {
 				document: [],
 			},
 			meta: {
-				localized: SelectCollection.getData.features.localized,
+				localized: SelectCollection.getData.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -154,7 +152,7 @@ test("fail to validate field - select", async () => {
 				document: [],
 			},
 			meta: {
-				localized: SelectCollection.getData.features.localized,
+				localized: SelectCollection.getData.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -193,7 +191,7 @@ test("fail to validate field - select", async () => {
 			document: [],
 		},
 		meta: {
-			localized: SelectCollection.getData.features.localized,
+			localized: SelectCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});

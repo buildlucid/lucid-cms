@@ -157,71 +157,61 @@ class CollectionBuilder extends FieldBuilder {
 				singularName: normalizeCopy(this.config.details.singularName),
 				summary: normalizeCopy(this.config.details.summary) ?? null,
 			},
-			features: {
-				locked:
-					this.config.features?.locked ?? constants.collectionBuilder.locked,
-				revisions:
-					this.config.features?.revisions ??
-					constants.collectionBuilder.revisions,
-				localized:
-					this.config.features?.localized ??
-					constants.collectionBuilder.localized,
-				autoSave:
-					this.config.features?.autoSave ??
-					constants.collectionBuilder.autoSave,
-				scheduling:
-					this.config.features?.scheduling ??
-					constants.collectionBuilder.scheduling,
-				...(this.config.features?.review
-					? {
-							review: {
-								requiredFor: this.config.features.review?.requiredFor ?? [],
-								allowSelfApproval:
-									this.config.features.review?.allowSelfApproval ??
-									constants.collectionBuilder.publishing.allowSelfApproval,
-								comments: {
-									request:
-										this.config.features.review?.comments?.request ??
-										constants.collectionBuilder.publishing.comments.request,
-									decision:
-										this.config.features.review?.comments?.decision ??
-										constants.collectionBuilder.publishing.comments.decision,
-								},
+			locked: this.config.locked ?? constants.collectionBuilder.locked,
+			revisions: this.config.revisions ?? constants.collectionBuilder.revisions,
+			localized: this.config.localized ?? constants.collectionBuilder.localized,
+			autoSave: this.config.autoSave ?? constants.collectionBuilder.autoSave,
+			scheduling:
+				this.config.scheduling ?? constants.collectionBuilder.scheduling,
+			...(this.config.review
+				? {
+						review: {
+							requiredFor: this.config.review?.requiredFor ?? [],
+							allowSelfApproval:
+								this.config.review?.allowSelfApproval ??
+								constants.collectionBuilder.publishing.allowSelfApproval,
+							comments: {
+								request:
+									this.config.review?.comments?.request ??
+									constants.collectionBuilder.publishing.comments.request,
+								decision:
+									this.config.review?.comments?.decision ??
+									constants.collectionBuilder.publishing.comments.decision,
 							},
-						}
-					: {}),
-				...(this.config.features?.workflow
-					? {
-							workflow: {
-								initial:
-									this.config.features.workflow.initial ??
-									this.config.features.workflow.stages[0]?.key ??
-									"",
-								stages: this.config.features.workflow.stages.map((stage) => ({
-									key: stage.key,
-									name: normalizeCopy(stage.name),
-									color:
-										stage.color ??
-										constants.collectionBuilder.publishing.workflow.color,
-									publishTargets: stage.publishTargets ?? [],
-									permissions: stage.permissions ?? {},
-								})),
-							},
-						}
-					: {}),
-				listing: this.listing,
-				environments:
-					this.config.features?.environments?.map((environment) => ({
-						...environment,
-						name: normalizeCopy(environment.name),
-						requires: environment.requires ?? [],
-						permissions: environment.permissions ?? {},
-						relations: environment.relations ?? {},
-					})) ?? [],
-				revisionRetentionDays:
-					this.config.features?.revisionRetentionDays ??
-					constants.collectionBuilder.revisionRetentionDays,
-			},
+						},
+					}
+				: {}),
+			...(this.config.workflow
+				? {
+						workflow: {
+							initial:
+								this.config.workflow.initial ??
+								this.config.workflow.stages[0]?.key ??
+								"",
+							stages: this.config.workflow.stages.map((stage) => ({
+								key: stage.key,
+								name: normalizeCopy(stage.name),
+								color:
+									stage.color ??
+									constants.collectionBuilder.publishing.workflow.color,
+								publishTargets: stage.publishTargets ?? [],
+								permissions: stage.permissions ?? {},
+							})),
+						},
+					}
+				: {}),
+			listing: this.listing,
+			environments:
+				this.config.environments?.map((environment) => ({
+					...environment,
+					name: normalizeCopy(environment.name),
+					requires: environment.requires ?? [],
+					permissions: environment.permissions ?? {},
+					relations: environment.relations ?? {},
+				})) ?? [],
+			revisionRetentionDays:
+				this.config.revisionRetentionDays ??
+				constants.collectionBuilder.revisionRetentionDays,
 			tenants: this.config.tenants ?? [],
 			permissions: this.config.permissions ?? {},
 		};

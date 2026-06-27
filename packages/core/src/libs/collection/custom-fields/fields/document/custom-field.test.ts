@@ -17,9 +17,7 @@ const DocumentCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addDocument("standard_doc", {
 		collection: "page",
@@ -70,7 +68,7 @@ test("successfully validate field - document", async () => {
 			],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -96,7 +94,7 @@ test("successfully validate field - document", async () => {
 			],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -119,7 +117,7 @@ test("fail to validate field - document", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -147,7 +145,7 @@ test("fail to validate field - document", async () => {
 			document: [],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -179,7 +177,7 @@ test("fail to validate field - document", async () => {
 			],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -208,7 +206,7 @@ test("document field validates multiple item counts and indexed errors", async (
 			document: [{ id: 1, collection_key: "page" }],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -236,7 +234,7 @@ test("document field validates multiple item counts and indexed errors", async (
 			],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -258,7 +256,7 @@ test("document field validates multiple item counts and indexed errors", async (
 			document: [{ id: 1, collection_key: "page" }],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -322,7 +320,7 @@ test("document field validates multiple target collections", async () => {
 			],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -340,7 +338,7 @@ test("document field validates multiple target collections", async () => {
 			document: [{ id: 1, collection_key: "author" }],
 		},
 		meta: {
-			localized: DocumentCollection.getData.features.localized,
+			localized: DocumentCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});

@@ -533,45 +533,43 @@ export interface Collection {
 		singularName: ResolvedAdminCopy;
 		summary: ResolvedAdminCopy | null;
 	};
-	features: {
-		localized: boolean;
-		revisions: boolean;
-		locked: boolean;
-		listing: string[];
-		autoSave: boolean;
-		scheduling: boolean;
-		revisionRetentionDays: number | false;
-		review?: {
-			requiredFor: string[];
-			allowSelfApproval: boolean;
-			comments: {
-				request: "required" | "optional";
-				decision: "required" | "optional";
-			};
+	localized: boolean;
+	revisions: boolean;
+	locked: boolean;
+	listing: string[];
+	autoSave: boolean;
+	scheduling: boolean;
+	revisionRetentionDays: number | false;
+	review?: {
+		requiredFor: string[];
+		allowSelfApproval: boolean;
+		comments: {
+			request: "required" | "optional";
+			decision: "required" | "optional";
 		};
-		workflow?: {
-			initial: string;
-			stages: Array<{
-				key: string;
-				name: ResolvedAdminCopy;
-				color: WorkflowStageColor;
-				publishTargets: string[];
-				permissions: {
-					moveTo?: string;
-					moveFrom?: string;
-				};
-			}>;
-		};
-		environments: {
+	};
+	workflow?: {
+		initial: string;
+		stages: Array<{
 			key: string;
 			name: ResolvedAdminCopy;
-			requires: string[];
+			color: WorkflowStageColor;
+			publishTargets: string[];
 			permissions: {
-				publish: string;
-				review: string;
+				moveTo?: string;
+				moveFrom?: string;
 			};
-		}[];
+		}>;
 	};
+	environments: {
+		key: string;
+		name: ResolvedAdminCopy;
+		requires: string[];
+		permissions: {
+			publish: string;
+			review: string;
+		};
+	}[];
 	capabilities: {
 		scheduling: boolean;
 	};

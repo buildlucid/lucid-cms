@@ -39,10 +39,8 @@ describe("brick table construction", () => {
 					defaultMessage: "Simple",
 				}),
 			},
-			features: {
-				localized: true,
-				revisions: true,
-			},
+			localized: true,
+			revisions: true,
 			bricks: {
 				builder: [simpleBrick],
 			},
@@ -324,10 +322,8 @@ describe("brick table construction", () => {
 					defaultMessage: "Deep",
 				}),
 			},
-			features: {
-				localized: true,
-				revisions: true,
-			},
+			localized: true,
+			revisions: true,
 			bricks: {
 				builder: [deepBrick],
 			},
@@ -481,10 +477,8 @@ describe("brick table construction", () => {
 					defaultMessage: "Gallery",
 				}),
 			},
-			features: {
-				localized: true,
-				revisions: true,
-			},
+			localized: true,
+			revisions: true,
 			bricks: {
 				builder: [galleryBrick],
 			},
@@ -678,10 +672,8 @@ describe("brick table construction", () => {
 					defaultMessage: "Article",
 				}),
 			},
-			features: {
-				localized: true,
-				revisions: true,
-			},
+			localized: true,
+			revisions: true,
 		})
 			.addUser("author", {
 				multiple: true,

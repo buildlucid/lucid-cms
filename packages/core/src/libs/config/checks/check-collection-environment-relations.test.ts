@@ -20,20 +20,18 @@ describe("collection environment relation features checks", () => {
 					defaultMessage: "Page",
 				}),
 			},
-			features: {
-				environments: [
-					{
-						key: "staging",
-						name: copy("admin:tests.environments.staging.name", {
-							defaultMessage: "Staging",
-						}),
-						relations: {
-							blog: "signed-off",
-							settings: "latest",
-						},
+			environments: [
+				{
+					key: "staging",
+					name: copy("admin:tests.environments.staging.name", {
+						defaultMessage: "Staging",
+					}),
+					relations: {
+						blog: "signed-off",
+						settings: "latest",
 					},
-				],
-			},
+				},
+			],
 		});
 		const blog = new CollectionBuilder("blog", {
 			mode: "multiple",
@@ -45,16 +43,14 @@ describe("collection environment relation features checks", () => {
 					defaultMessage: "Post",
 				}),
 			},
-			features: {
-				environments: [
-					{
-						key: "signed-off",
-						name: copy("admin:tests.environments.signed-off.name", {
-							defaultMessage: "Signed off",
-						}),
-					},
-				],
-			},
+			environments: [
+				{
+					key: "signed-off",
+					name: copy("admin:tests.environments.signed-off.name", {
+						defaultMessage: "Signed off",
+					}),
+				},
+			],
 		});
 		const settings = new CollectionBuilder("settings", {
 			mode: "single",
@@ -84,19 +80,17 @@ describe("collection environment relation features checks", () => {
 					defaultMessage: "Page",
 				}),
 			},
-			features: {
-				environments: [
-					{
-						key: "staging",
-						name: copy("admin:tests.environments.staging.name", {
-							defaultMessage: "Staging",
-						}),
-						relations: {
-							missing: "latest",
-						},
+			environments: [
+				{
+					key: "staging",
+					name: copy("admin:tests.environments.staging.name", {
+						defaultMessage: "Staging",
+					}),
+					relations: {
+						missing: "latest",
 					},
-				],
-			},
+				},
+			],
 		});
 
 		expect(() =>
@@ -126,19 +120,17 @@ describe("collection environment relation features checks", () => {
 					defaultMessage: "Page",
 				}),
 			},
-			features: {
-				environments: [
-					{
-						key: "staging",
-						name: copy("admin:tests.environments.staging.name", {
-							defaultMessage: "Staging",
-						}),
-						relations: {
-							blog: "signed-off",
-						},
+			environments: [
+				{
+					key: "staging",
+					name: copy("admin:tests.environments.staging.name", {
+						defaultMessage: "Staging",
+					}),
+					relations: {
+						blog: "signed-off",
 					},
-				],
-			},
+				},
+			],
 		});
 		const blog = new CollectionBuilder("blog", {
 			mode: "multiple",
@@ -150,16 +142,14 @@ describe("collection environment relation features checks", () => {
 					defaultMessage: "Post",
 				}),
 			},
-			features: {
-				environments: [
-					{
-						key: "production",
-						name: copy("admin:tests.environments.production.name", {
-							defaultMessage: "Production",
-						}),
-					},
-				],
-			},
+			environments: [
+				{
+					key: "production",
+					name: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
+					}),
+				},
+			],
 		});
 
 		expect(() =>

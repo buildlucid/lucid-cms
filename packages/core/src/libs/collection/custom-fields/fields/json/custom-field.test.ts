@@ -18,9 +18,7 @@ const JSONCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addJSON("standard_json")
 	.addJSON("required_json", {
@@ -55,7 +53,7 @@ test("successfully validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			localized: JSONCollection.getData.features.localized,
+			localized: JSONCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -78,7 +76,7 @@ test("successfully validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			localized: JSONCollection.getData.features.localized,
+			localized: JSONCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -102,7 +100,7 @@ test("successfully validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			localized: JSONCollection.getData.features.localized,
+			localized: JSONCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -125,7 +123,7 @@ test("fail to validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			localized: JSONCollection.getData.features.localized,
+			localized: JSONCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -152,7 +150,7 @@ test("fail to validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			localized: JSONCollection.getData.features.localized,
+			localized: JSONCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -182,7 +180,7 @@ test("fail to validate field - json", async () => {
 			document: [],
 		},
 		meta: {
-			localized: JSONCollection.getData.features.localized,
+			localized: JSONCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});

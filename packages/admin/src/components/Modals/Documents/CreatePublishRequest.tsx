@@ -103,21 +103,19 @@ const CreatePublishRequest: Component<{
 		},
 	]);
 	const requireComment = createMemo(
-		() => props.collection()?.features.review?.comments.request === "required",
+		() => props.collection()?.review?.comments.request === "required",
 	);
 	const requireDecisionComment = createMemo(
-		() => props.collection()?.features.review?.comments.decision === "required",
+		() => props.collection()?.review?.comments.decision === "required",
 	);
 	const targetEnvironment = createMemo(() =>
 		props
 			.collection()
-			?.features.environments.find(
-				(environment) => environment.key === props.target(),
-			),
+			?.environments.find((environment) => environment.key === props.target()),
 	);
 	const canAutoAccept = createMemo(() => {
 		const environment = targetEnvironment();
-		const publishReview = props.collection()?.features.review;
+		const publishReview = props.collection()?.review;
 		if (!environment || publishReview?.allowSelfApproval !== true) {
 			return false;
 		}

@@ -18,16 +18,14 @@ const BlogCollection = new CollectionBuilder("blog", {
 	group: {
 		key: "content",
 	},
-	features: {
-		localized: true,
-		scheduling: true,
-		environments: [
-			{
-				key: "staging",
-				name: copy("admin:collections.blog.environments.staging.name"),
-			},
-		],
-	},
+	localized: true,
+	scheduling: true,
+	environments: [
+		{
+			key: "staging",
+			name: copy("admin:collections.blog.environments.staging.name"),
+		},
+	],
 })
 	.addText("page_title", {
 		ui: {

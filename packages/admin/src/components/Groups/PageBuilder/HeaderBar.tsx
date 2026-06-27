@@ -179,8 +179,7 @@ export const HeaderBar: Component<{
 			});
 		}
 
-		for (const environment of props.state.collection()?.features.environments ??
-			[]) {
+		for (const environment of props.state.collection()?.environments ?? []) {
 			const isPublished = !!props.state.document()?.version[environment.key];
 
 			options.push({
@@ -221,9 +220,9 @@ export const HeaderBar: Component<{
 		const document = props.state.document();
 		if (!collection || !document) return [];
 
-		const environments = collection.features.environments ?? [];
-		const publishReview = collection.features.review;
-		const workflow = collection.features.workflow;
+		const environments = collection.environments ?? [];
+		const publishReview = collection.review;
+		const workflow = collection.workflow;
 		const workflowStage = workflow?.stages.find(
 			(stage) => stage.key === document.workflow?.stage,
 		);
@@ -366,13 +365,13 @@ export const HeaderBar: Component<{
 		const collection = props.state.collection();
 		if (!collection) return false;
 
-		const environments = collection.features.environments ?? [];
+		const environments = collection.environments ?? [];
 
 		return (
 			props.mode !== "create" &&
-			(collection.features.revisions ||
+			(collection.revisions ||
 				environments.length > 0 ||
-				(collection.features.review?.requiredFor?.length ?? 0) > 0)
+				(collection.review?.requiredFor?.length ?? 0) > 0)
 		);
 	});
 	// ----------------------------------
@@ -506,8 +505,7 @@ export const HeaderBar: Component<{
 							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
 								<Show
 									when={
-										props.state.collection()?.features.localized &&
-										hasMultipleLocales()
+										props.state.collection()?.localized && hasMultipleLocales()
 									}
 								>
 									<div class="flex-1 min-w-0 lg:flex-none lg:w-54">
@@ -519,7 +517,7 @@ export const HeaderBar: Component<{
 								</Show>
 								<Show
 									when={
-										(props.state.collection()?.features.localized !== true ||
+										(props.state.collection()?.localized !== true ||
 											!hasMultipleLocales()) &&
 										displayLocale()
 									}

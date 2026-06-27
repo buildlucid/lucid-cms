@@ -94,7 +94,7 @@ const PublishOperationDecision: Component<{
 	);
 	const requireDecisionComment = createMemo(
 		() =>
-			props.collection()?.features.review?.comments.decision === "required" &&
+			props.collection()?.review?.comments.decision === "required" &&
 			props.action() !== "cancel",
 	);
 	const releaseTimingOptions = createMemo(() => [

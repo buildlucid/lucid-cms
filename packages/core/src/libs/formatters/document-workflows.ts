@@ -23,7 +23,7 @@ const getEffectiveStage = (props: {
 	collection: CollectionBuilder;
 	stageKey?: string | null;
 }) => {
-	const workflow = props.collection.getData.features.workflow;
+	const workflow = props.collection.getData.workflow;
 	if (!workflow) return null;
 
 	if (

@@ -316,9 +316,7 @@ const getCollectionStatusKeys = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
 		"latest",
 		"revision",
-		...collection.getData.features.environments.map(
-			(environment) => environment.key,
-		),
+		...collection.getData.environments.map((environment) => environment.key),
 	]);
 };
 
@@ -326,9 +324,7 @@ const getCollectionStatusKeys = (collection: CollectionBuilder): string[] => {
 const getCollectionVersionKeys = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
 		"latest",
-		...collection.getData.features.environments.map(
-			(environment) => environment.key,
-		),
+		...collection.getData.environments.map((environment) => environment.key),
 	]);
 };
 
@@ -361,7 +357,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 	);
 	const collectionFields = renderFieldMap(collection.persistedFieldTree, {
 		builder: collection,
-		collectionUsesTranslations: collection.getData.features.localized,
+		collectionUsesTranslations: collection.getData.localized,
 		withinGroup: false,
 	});
 	const collectionDeclarations = [...collectionFields.declarations];
@@ -371,7 +367,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 	for (const filterKey of collectionDocumentFilterKeys) {
 		addFilterPath(filterTree, [filterKey]);
 	}
-	if (collection.getData.features.workflow) {
+	if (collection.getData.workflow) {
 		addFilterPath(filterTree, ["workflowStage"]);
 	}
 
@@ -394,7 +390,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 		});
 		const brickFields = renderFieldMap(brick.persistedFieldTree, {
 			builder: brick,
-			collectionUsesTranslations: collection.getData.features.localized,
+			collectionUsesTranslations: collection.getData.localized,
 			withinGroup: false,
 		});
 

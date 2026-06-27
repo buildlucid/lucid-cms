@@ -7,10 +7,8 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		singularName: copy("admin:collections.main-menu.singularName"),
 		summary: copy("admin:collections.main-menu.summary"),
 	},
-	features: {
-		revisions: true,
-		localized: true,
-	},
+	revisions: true,
+	localized: true,
 })
 	.addRepeater("items", {
 		details: {

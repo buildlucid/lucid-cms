@@ -73,7 +73,7 @@ const getMultiple: ServiceFn<
 	);
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
 
-	const includeWorkflow = Boolean(collectionRes.data.getData.features.workflow);
+	const includeWorkflow = Boolean(collectionRes.data.getData.workflow);
 	const documentFieldRelationTableSchemas = bricksTableSchemaRes.data.filter(
 		(schema) => {
 			const databaseConfig = getFieldDatabaseConfig(schema.type);

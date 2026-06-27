@@ -39,8 +39,7 @@ export const Modals: Component<{
 	const environmentLabel = createMemo(() => {
 		const target = props.hooks.uiState.getReleaseEnvironmentTarget();
 		if (!target) return "";
-		const environments =
-			props.hooks.state.collection()?.features.environments ?? [];
+		const environments = props.hooks.state.collection()?.environments ?? [];
 		const env = environments.find((e) => e.key === target);
 		return helpers.getLocaleValue({ value: env?.name }) || target;
 	});

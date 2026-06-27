@@ -18,9 +18,7 @@ const RichTextCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addRichText("standard_rich_text")
 	.addRichText("required_rich_text", {
@@ -55,7 +53,7 @@ test("successfully validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.features.localized,
+			localized: RichTextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -79,7 +77,7 @@ test("successfully validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.features.localized,
+			localized: RichTextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -103,7 +101,7 @@ test("successfully validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.features.localized,
+			localized: RichTextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -126,7 +124,7 @@ test("fail to validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.features.localized,
+			localized: RichTextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -154,7 +152,7 @@ test("fail to validate field - rich text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: RichTextCollection.getData.features.localized,
+				localized: RichTextCollection.getData.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -172,7 +170,7 @@ test("fail to validate field - rich text", async () => {
 				document: [],
 			},
 			meta: {
-				localized: RichTextCollection.getData.features.localized,
+				localized: RichTextCollection.getData.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -212,7 +210,7 @@ test("fail to validate field - rich text", async () => {
 			document: [],
 		},
 		meta: {
-			localized: RichTextCollection.getData.features.localized,
+			localized: RichTextCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});

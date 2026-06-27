@@ -209,9 +209,7 @@ describe("testing prepareBricksAndFields", () => {
 					defaultMessage: "Trim Test",
 				}),
 			},
-			features: {
-				localized: true,
-			},
+			localized: true,
 		})
 			.addText("title")
 			.addSelect("status", {

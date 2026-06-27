@@ -147,10 +147,7 @@ const CollectionsDocumentsEditRoute: Component<{
 				brickStore.get.reset();
 			}
 
-			brickStore.set(
-				"collectionLocalized",
-				collection.features.localized || false,
-			);
+			brickStore.set("collectionLocalized", collection.localized || false);
 
 			//* preserve local unsaved edits during same-view background query updates
 			//* - Without this guard, selecting a relation field can trigger a refetch that rehydrates store fields from stale server data and wipes local changes
@@ -237,7 +234,7 @@ const CollectionsDocumentsEditRoute: Component<{
 	// Memos
 	const disableWorkflow = createMemo(
 		() =>
-			docState.collection()?.features.locked === true ||
+			docState.collection()?.locked === true ||
 			docState.document()?.isDeleted === true,
 	);
 	const trailingBreadcrumbs = createMemo(() => {

@@ -84,23 +84,21 @@ describe("Tests for publish operation release requirement helpers", () => {
 				defaultMessage: "Page",
 			}),
 		},
-		features: {
-			environments: [
-				{
-					key: "staging",
-					name: copy("admin:tests.environments.staging.name", {
-						defaultMessage: "Staging",
-					}),
-				},
-				{
-					key: "production",
-					name: copy("admin:tests.environments.production.name", {
-						defaultMessage: "Production",
-					}),
-					requires: ["staging", "staging"],
-				},
-			],
-		},
+		environments: [
+			{
+				key: "staging",
+				name: copy("admin:tests.environments.staging.name", {
+					defaultMessage: "Staging",
+				}),
+			},
+			{
+				key: "production",
+				name: copy("admin:tests.environments.production.name", {
+					defaultMessage: "Production",
+				}),
+				requires: ["staging", "staging"],
+			},
+		],
 	});
 
 	test("returns unique release requirement targets", () => {

@@ -57,17 +57,15 @@ test("generates collection-aware client document types that lean on the public L
 				defaultMessage: "Page",
 			}),
 		},
-		features: {
-			localized: true,
-			environments: [
-				{
-					key: "published",
-					name: copy("admin:tests.environments.published.name", {
-						defaultMessage: "Published",
-					}),
-				},
-			],
-		},
+		localized: true,
+		environments: [
+			{
+				key: "published",
+				name: copy("admin:tests.environments.published.name", {
+					defaultMessage: "Published",
+				}),
+			},
+		],
 		bricks: {
 			builder: [BannerBrick],
 		},

@@ -22,13 +22,13 @@ export const Sidebar: Component<{
 	// Memos
 	const hasWorkflow = createMemo(
 		() =>
-			props.collection()?.features.workflow !== undefined &&
+			props.collection()?.workflow !== undefined &&
 			props.documentId() !== undefined &&
 			props.document() !== undefined,
 	);
 	const hasPendingReleases = createMemo(
 		() =>
-			(props.collection()?.features.review?.requiredFor?.length ?? 0) > 0 ||
+			(props.collection()?.review?.requiredFor?.length ?? 0) > 0 ||
 			props.collection()?.capabilities.scheduling === true,
 	);
 

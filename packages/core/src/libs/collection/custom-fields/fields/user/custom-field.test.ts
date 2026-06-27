@@ -17,9 +17,7 @@ const UserCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addUser("standard_user")
 	.addUser("required_user", {
@@ -59,7 +57,7 @@ test("successfully validate field - user", async () => {
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.features.localized,
+			localized: UserCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -88,7 +86,7 @@ test("successfully validate field - user", async () => {
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.features.localized,
+			localized: UserCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -112,7 +110,7 @@ test("fail to validate field - user", async () => {
 				document: [],
 			},
 			meta: {
-				localized: UserCollection.getData.features.localized,
+				localized: UserCollection.getData.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -130,7 +128,7 @@ test("fail to validate field - user", async () => {
 				document: [],
 			},
 			meta: {
-				localized: UserCollection.getData.features.localized,
+				localized: UserCollection.getData.localized,
 				defaultLocale: "en",
 			},
 		}),
@@ -169,7 +167,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.features.localized,
+			localized: UserCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -187,7 +185,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.features.localized,
+			localized: UserCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -205,7 +203,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			document: [],
 		},
 		meta: {
-			localized: UserCollection.getData.features.localized,
+			localized: UserCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});

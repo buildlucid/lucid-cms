@@ -64,135 +64,121 @@ const CollectionConfigSchema = z
 				review: z.string().optional(),
 			})
 			.optional(),
-		features: z
+		locked: z.boolean().default(constants.collectionBuilder.locked).optional(),
+		localized: z
+			.boolean()
+			.default(constants.collectionBuilder.localized)
+			.optional(),
+		revisions: z
+			.boolean()
+			.default(constants.collectionBuilder.revisions)
+			.optional(),
+		autoSave: z
+			.boolean()
+			.default(constants.collectionBuilder.autoSave)
+			.optional(),
+		scheduling: z
+			.boolean()
+			.default(constants.collectionBuilder.scheduling)
+			.optional(),
+		review: z
 			.object({
-				locked: z
-					.boolean()
-					.default(constants.collectionBuilder.locked)
-					.optional(),
-				localized: z
-					.boolean()
-					.default(constants.collectionBuilder.localized)
-					.optional(),
-				revisions: z
-					.boolean()
-					.default(constants.collectionBuilder.revisions)
-					.optional(),
-				autoSave: z
-					.boolean()
-					.default(constants.collectionBuilder.autoSave)
-					.optional(),
-				scheduling: z
-					.boolean()
-					.default(constants.collectionBuilder.scheduling)
-					.optional(),
-				review: z
-					.object({
-						requiredFor: z
-							.array(
-								z
-									.string()
-									.min(1)
-									.max(50)
-									.regex(/^[a-z0-9-_]+$/),
-							)
-							.optional(),
-						allowSelfApproval: z
-							.boolean()
-							.default(constants.collectionBuilder.publishing.allowSelfApproval)
-							.optional(),
-						comments: z
-							.object({
-								request: z
-									.enum(["required", "optional"])
-									.default(
-										constants.collectionBuilder.publishing.comments.request,
-									)
-									.optional(),
-								decision: z
-									.enum(["required", "optional"])
-									.default(
-										constants.collectionBuilder.publishing.comments.decision,
-									)
-									.optional(),
-							})
-							.optional(),
-					})
-					.optional(),
-				workflow: z
-					.object({
-						initial: z
+				requiredFor: z
+					.array(
+						z
 							.string()
 							.min(1)
 							.max(50)
-							.regex(/^[a-z0-9-_]+$/)
+							.regex(/^[a-z0-9-_]+$/),
+					)
+					.optional(),
+				allowSelfApproval: z
+					.boolean()
+					.default(constants.collectionBuilder.publishing.allowSelfApproval)
+					.optional(),
+				comments: z
+					.object({
+						request: z
+							.enum(["required", "optional"])
+							.default(constants.collectionBuilder.publishing.comments.request)
 							.optional(),
-						stages: z
-							.array(
-								z.object({
-									key: z
+						decision: z
+							.enum(["required", "optional"])
+							.default(constants.collectionBuilder.publishing.comments.decision)
+							.optional(),
+					})
+					.optional(),
+			})
+			.optional(),
+		workflow: z
+			.object({
+				initial: z
+					.string()
+					.min(1)
+					.max(50)
+					.regex(/^[a-z0-9-_]+$/)
+					.optional(),
+				stages: z
+					.array(
+						z.object({
+							key: z
+								.string()
+								.min(1)
+								.max(50)
+								.regex(/^[a-z0-9-_]+$/),
+							name: adminCopyInputSchema,
+							color: z
+								.enum(
+									constants.collectionBuilder.publishing.workflow.stageColors,
+								)
+								.optional(),
+							publishTargets: z
+								.array(
+									z
 										.string()
 										.min(1)
 										.max(50)
 										.regex(/^[a-z0-9-_]+$/),
-									name: adminCopyInputSchema,
-									color: z
-										.enum(
-											constants.collectionBuilder.publishing.workflow
-												.stageColors,
-										)
-										.optional(),
-									publishTargets: z
-										.array(
-											z
-												.string()
-												.min(1)
-												.max(50)
-												.regex(/^[a-z0-9-_]+$/),
-										)
-										.optional(),
-									permissions: z
-										.object({
-											moveTo: z.string().optional(),
-											moveFrom: z.string().optional(),
-										})
-										.optional(),
-								}),
-							)
-							.min(1),
-					})
-					.optional(),
-				environments: z
-					.array(
-						z.object({
-							key: environmentKeySchema.refine(
-								(val) =>
-									!constants.collectionBuilder.protectedEnvironments.includes(
-										val,
-									),
-								{
-									message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
-								},
-							),
-							name: adminCopyInputSchema,
-							requires: z.array(environmentKeySchema).optional(),
+								)
+								.optional(),
 							permissions: z
 								.object({
-									publish: z.string().optional(),
-									review: z.string().optional(),
+									moveTo: z.string().optional(),
+									moveFrom: z.string().optional(),
 								})
-								.optional(),
-							relations: z
-								.record(relationCollectionKeySchema, environmentKeySchema)
 								.optional(),
 						}),
 					)
-					.optional(),
-				revisionRetentionDays: z
-					.union([z.number().int().positive(), z.literal(false)])
-					.default(constants.collectionBuilder.revisionRetentionDays)
-					.optional(),
+					.min(1),
 			})
+			.optional(),
+		environments: z
+			.array(
+				z.object({
+					key: environmentKeySchema.refine(
+						(val) =>
+							!constants.collectionBuilder.protectedEnvironments.includes(val),
+						{
+							message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
+						},
+					),
+					name: adminCopyInputSchema,
+					requires: z.array(environmentKeySchema).optional(),
+					permissions: z
+						.object({
+							publish: z.string().optional(),
+							review: z.string().optional(),
+						})
+						.optional(),
+					relations: z
+						.record(relationCollectionKeySchema, environmentKeySchema)
+						.optional(),
+				}),
+			)
+			.optional(),
+		revisionRetentionDays: z
+			.union([z.number().int().positive(), z.literal(false)])
+			.default(constants.collectionBuilder.revisionRetentionDays)
 			.optional(),
 		hooks: z
 			.array(
@@ -213,11 +199,11 @@ const CollectionConfigSchema = z
 	})
 	.superRefine((data, ctx) => {
 		const environmentKeys = new Set(
-			data.features?.environments?.map((environment) => environment.key) ?? [],
+			data.environments?.map((environment) => environment.key) ?? [],
 		);
 
 		for (const [environmentIndex, environment] of (
-			data.features?.environments ?? []
+			data.environments ?? []
 		).entries()) {
 			for (const [targetIndex, target] of (
 				environment.requires ?? []
@@ -225,13 +211,7 @@ const CollectionConfigSchema = z
 				if (target === environment.key) {
 					ctx.addIssue({
 						code: "custom",
-						path: [
-							"features",
-							"environments",
-							environmentIndex,
-							"requires",
-							targetIndex,
-						],
+						path: ["environments", environmentIndex, "requires", targetIndex],
 						message: `Environment "${environment.key}" cannot require itself`,
 					});
 					continue;
@@ -240,29 +220,23 @@ const CollectionConfigSchema = z
 				if (environmentKeys.has(target)) continue;
 				ctx.addIssue({
 					code: "custom",
-					path: [
-						"features",
-						"environments",
-						environmentIndex,
-						"requires",
-						targetIndex,
-					],
+					path: ["environments", environmentIndex, "requires", targetIndex],
 					message: `Environment requires target "${target}" must reference a configured environment`,
 				});
 			}
 		}
 
-		const review = data.features?.review;
+		const review = data.review;
 		for (const [targetIndex, target] of (review?.requiredFor ?? []).entries()) {
 			if (environmentKeys.has(target)) continue;
 			ctx.addIssue({
 				code: "custom",
-				path: ["features", "review", "requiredFor", targetIndex],
+				path: ["review", "requiredFor", targetIndex],
 				message: `Review requiredFor target "${target}" must reference a configured environment`,
 			});
 		}
 
-		const workflow = data.features?.workflow;
+		const workflow = data.workflow;
 		if (!workflow) return;
 
 		const stageKeys = workflow.stages.map((stage) => stage.key);
@@ -272,7 +246,7 @@ const CollectionConfigSchema = z
 		if (duplicateStageKeys.length > 0) {
 			ctx.addIssue({
 				code: "custom",
-				path: ["features", "workflow", "stages"],
+				path: ["workflow", "stages"],
 				message: `Workflow stage keys must be unique: ${Array.from(new Set(duplicateStageKeys)).join(", ")}`,
 			});
 		}
@@ -280,7 +254,7 @@ const CollectionConfigSchema = z
 		if (workflow.initial && !stageKeys.includes(workflow.initial)) {
 			ctx.addIssue({
 				code: "custom",
-				path: ["features", "workflow", "initial"],
+				path: ["workflow", "initial"],
 				message:
 					"Workflow initial stage must reference one of the configured stages",
 			});
@@ -294,7 +268,6 @@ const CollectionConfigSchema = z
 				ctx.addIssue({
 					code: "custom",
 					path: [
-						"features",
 						"workflow",
 						"stages",
 						stageIndex,

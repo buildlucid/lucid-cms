@@ -95,97 +95,95 @@ const collectionResponseSchema = z.object({
 			},
 		}),
 	}),
-	config: z.object({
-		localized: z.boolean().meta({
-			description: "Whether the collection supports localized content",
-			example: true,
-		}),
-		revisions: z.boolean().meta({
-			description: "Whether the collection supports document revisions",
-			example: true,
-		}),
-		autoSave: z.boolean().meta({
-			description: "Whether the collection supports auto-save",
-			example: true,
-		}),
-		scheduling: z.boolean().meta({
-			description: "Whether the collection has release scheduling enabled",
-			example: false,
-		}),
-		revisionRetentionDays: z.union([z.number(), z.literal(false)]).meta({
-			description:
-				"Number of days to retain unprotected revisions, or false to retain indefinitely",
-			example: 30,
-		}),
-		locked: z.boolean().meta({
-			description: "Whether the collection structure is locked from editing",
-			example: false,
-		}),
-		review: z
-			.object({
-				requiredFor: z.array(z.string()),
-				allowSelfApproval: z.boolean(),
-				comments: z.object({
-					request: z.enum(["required", "optional"]),
-					decision: z.enum(["required", "optional"]),
-				}),
-			})
-			.optional(),
-		workflow: z
-			.object({
-				initial: z.string(),
-				stages: z.array(
-					z.object({
-						key: z.string(),
-						name: resolvedAdminCopySchema,
-						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
-						publishTargets: z.array(z.string()),
-						permissions: z.object({
-							moveTo: z.string().optional(),
-							moveFrom: z.string().optional(),
-						}),
+	localized: z.boolean().meta({
+		description: "Whether the collection supports localized content",
+		example: true,
+	}),
+	revisions: z.boolean().meta({
+		description: "Whether the collection supports document revisions",
+		example: true,
+	}),
+	autoSave: z.boolean().meta({
+		description: "Whether the collection supports auto-save",
+		example: true,
+	}),
+	scheduling: z.boolean().meta({
+		description: "Whether the collection has release scheduling enabled",
+		example: false,
+	}),
+	revisionRetentionDays: z.union([z.number(), z.literal(false)]).meta({
+		description:
+			"Number of days to retain unprotected revisions, or false to retain indefinitely",
+		example: 30,
+	}),
+	locked: z.boolean().meta({
+		description: "Whether the collection structure is locked from editing",
+		example: false,
+	}),
+	review: z
+		.object({
+			requiredFor: z.array(z.string()),
+			allowSelfApproval: z.boolean(),
+			comments: z.object({
+				request: z.enum(["required", "optional"]),
+				decision: z.enum(["required", "optional"]),
+			}),
+		})
+		.optional(),
+	workflow: z
+		.object({
+			initial: z.string(),
+			stages: z.array(
+				z.object({
+					key: z.string(),
+					name: resolvedAdminCopySchema,
+					color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
+					publishTargets: z.array(z.string()),
+					permissions: z.object({
+						moveTo: z.string().optional(),
+						moveFrom: z.string().optional(),
 					}),
-				),
-			})
-			.optional(),
-		listing: z.array(z.string()).meta({
-			description: "Field keys included in the document listing columns",
-			example: ["pageTitle", "author", "fullSlug", "slug"],
-		}),
-		environments: z.array(
-			z.object({
-				key: z.string().meta({
-					description: "The environment key",
-					example: "production",
 				}),
-				name: resolvedAdminCopySchema.meta({
-					description: "Display name for the environment",
-					example: {
-						type: "lucid.copy",
-						scope: "admin",
-						key: "collections.page.environments.production.name",
-						defaultMessage: "Production",
-					},
+			),
+		})
+		.optional(),
+	listing: z.array(z.string()).meta({
+		description: "Field keys included in the document listing columns",
+		example: ["pageTitle", "author", "fullSlug", "slug"],
+	}),
+	environments: z.array(
+		z.object({
+			key: z.string().meta({
+				description: "The environment key",
+				example: "production",
+			}),
+			name: resolvedAdminCopySchema.meta({
+				description: "Display name for the environment",
+				example: {
+					type: "lucid.copy",
+					scope: "admin",
+					key: "collections.page.environments.production.name",
+					defaultMessage: "Production",
+				},
+			}),
+			requires: z.array(z.string()).meta({
+				description:
+					"Environment keys that must match latest before releases can be created for this environment",
+				example: ["staging"],
+			}),
+			permissions: z.object({
+				publish: z.string().meta({
+					description: "Permission required to publish to this environment",
+					example: "documents:publish",
 				}),
-				requires: z.array(z.string()).meta({
+				review: z.string().optional().meta({
 					description:
-						"Environment keys that must match latest before releases can be created for this environment",
-					example: ["staging"],
-				}),
-				permissions: z.object({
-					publish: z.string().meta({
-						description: "Permission required to publish to this environment",
-						example: "documents:publish",
-					}),
-					review: z.string().optional().meta({
-						description:
-							"Permission required to review releases for this environment",
-						example: "documents:review",
-					}),
+						"Permission required to review releases for this environment",
+					example: "documents:review",
 				}),
 			}),
-		),
-	}),
+		}),
+	),
 	capabilities: z.object({
 		scheduling: z.boolean().meta({
 			description:

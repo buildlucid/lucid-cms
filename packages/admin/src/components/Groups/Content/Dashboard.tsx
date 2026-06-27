@@ -81,8 +81,7 @@ export const Dashboard: Component = () => {
 		() =>
 			canReviewDocuments() &&
 			collectionsData().some(
-				(collection) =>
-					(collection.features.review?.requiredFor?.length ?? 0) > 0,
+				(collection) => (collection.review?.requiredFor?.length ?? 0) > 0,
 			),
 	);
 
@@ -130,7 +129,7 @@ export const Dashboard: Component = () => {
 	const creatableCollections = createMemo(() =>
 		collectionsData()
 			.filter((collection) => {
-				if (collection.features.locked) return false;
+				if (collection.locked) return false;
 				if (
 					userStore.get.hasPermission([collection.permissions.create]).some ===
 					false

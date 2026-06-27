@@ -128,7 +128,7 @@ const customFieldInputGenerate: ServiceFn<
 	}
 
 	const fieldIsLocalized =
-		collection.getData.features.localized === true &&
+		collection.getData.localized === true &&
 		targetField.localizedEnabled === true;
 
 	const generationContext = normalizeCustomFieldGenerationLocale({

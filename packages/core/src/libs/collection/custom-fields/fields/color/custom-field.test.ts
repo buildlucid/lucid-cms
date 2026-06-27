@@ -17,9 +17,7 @@ const ColorCollection = new CollectionBuilder("collection", {
 			defaultMessage: "Test",
 		}),
 	},
-	features: {
-		localized: true,
-	},
+	localized: true,
 })
 	.addColor("standard_color")
 	.addColor("required_color", {
@@ -44,7 +42,7 @@ test("successfully validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			localized: ColorCollection.getData.features.localized,
+			localized: ColorCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -65,7 +63,7 @@ test("successfully validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			localized: ColorCollection.getData.features.localized,
+			localized: ColorCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -88,7 +86,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			localized: ColorCollection.getData.features.localized,
+			localized: ColorCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -115,7 +113,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			localized: ColorCollection.getData.features.localized,
+			localized: ColorCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -142,7 +140,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			localized: ColorCollection.getData.features.localized,
+			localized: ColorCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
@@ -169,7 +167,7 @@ test("fail to validate field - color", async () => {
 			document: [],
 		},
 		meta: {
-			localized: ColorCollection.getData.features.localized,
+			localized: ColorCollection.getData.localized,
 			defaultLocale: "en",
 		},
 	});
