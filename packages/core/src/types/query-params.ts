@@ -6,6 +6,8 @@ import type { DocumentVersionType } from "../libs/db/types.js";
 export type FilterValue =
 	| string
 	| Array<string>
+	| boolean
+	| Array<boolean>
 	| number
 	| Array<number>
 	| null;

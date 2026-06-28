@@ -89,7 +89,9 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	const query: ClientGetMultipleQueryParams = {
 		...data.query,
 		filter: applyDefaultQueryFilters(data.query.filter, {
-			isDeleted: { value: "false" },
+			isDeleted: {
+				value: context.config.db.getDefault("boolean", "false"),
+			},
 		}),
 	};
 

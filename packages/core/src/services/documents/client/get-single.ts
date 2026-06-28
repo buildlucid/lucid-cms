@@ -82,7 +82,9 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	const query: ClientGetSingleQueryParams = {
 		...data.query,
 		filter: applyDefaultQueryFilters(data.query.filter, {
-			isDeleted: { value: "false" },
+			isDeleted: {
+				value: context.config.db.getDefault("boolean", "false"),
+			},
 		}),
 	};
 

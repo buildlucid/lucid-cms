@@ -50,7 +50,8 @@ const buildMetaLinks = (
 	if (!params.pagination) return links;
 
 	const { page, perPage, count } = params.pagination;
-	const totalPages = Math.ceil(count / Number(perPage));
+	const totalPages =
+		perPage === -1 ? (count > 0 ? 1 : 0) : Math.ceil(count / Number(perPage));
 
 	try {
 		const baseUrl = constructBaseUrl(c);
@@ -82,7 +83,8 @@ const buildLinks = (
 
 	try {
 		const { page, perPage, count } = params.pagination;
-		const totalPages = perPage === -1 ? 1 : Math.ceil(count / Number(perPage));
+		const totalPages =
+			perPage === -1 ? (count > 0 ? 1 : 0) : Math.ceil(count / Number(perPage));
 		const baseUrl = constructBaseUrl(c);
 
 		const links: ResponseBody["links"] = {
@@ -99,12 +101,12 @@ const buildLinks = (
 
 		// Set Last
 		const lastUrl = new URL(baseUrl.toString());
-		if (page !== totalPages)
+		if (totalPages > 0 && page !== totalPages)
 			lastUrl.searchParams.set("page", String(totalPages));
 		links.last = lastUrl.toString();
 
 		// Set Next
-		if (page !== totalPages) {
+		if (totalPages > 0 && page < totalPages) {
 			const nextUrl = new URL(baseUrl.toString());
 			nextUrl.searchParams.set("page", String(Number(page) + 1));
 			links.next = nextUrl.toString();
@@ -131,7 +133,7 @@ const formatAPIResponse: FormatAPIResponse = (c, params) => {
 
 	if (params.pagination) {
 		if (params.pagination.perPage === -1) {
-			lastPage = 1;
+			lastPage = params.pagination.count > 0 ? 1 : 0;
 		} else {
 			lastPage = Math.ceil(
 				params.pagination.count / Number(params.pagination.perPage),
@@ -143,7 +145,10 @@ const formatAPIResponse: FormatAPIResponse = (c, params) => {
 		links: buildMetaLinks(c, params),
 		currentPage: params.pagination?.page ?? null,
 		perPage: params.pagination?.perPage ?? null,
-		total: Number(params.pagination?.count) || null,
+		total:
+			params.pagination?.count === undefined
+				? null
+				: Number(params.pagination.count),
 		lastPage: lastPage,
 	};
 	const links = buildLinks(c, params);
