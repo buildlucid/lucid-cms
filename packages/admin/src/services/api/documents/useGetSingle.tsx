@@ -20,13 +20,14 @@ interface QueryParams {
 	};
 	include: {
 		bricks: Accessor<boolean | undefined> | boolean;
+		refs?: Accessor<boolean | undefined> | boolean;
 	};
 }
 
 const useGetSingle = (params: QueryHook<QueryParams>) => {
-	const queryParams = createMemo(() => {
-		return serviceHelpers.getQueryParams<QueryParams>(params.queryParams);
-	});
+	const queryParams = createMemo(() =>
+		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
+	);
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	// -----------------------------

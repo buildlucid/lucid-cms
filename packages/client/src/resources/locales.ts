@@ -12,15 +12,13 @@ export type LocalesGetAllInput = {
 export type LocalesGetAllResponse = ResponseBody<Locale[]>;
 
 export interface LucidLocalesClient {
-	/** Returns the Lucid response body for every available locale. */
+	/** Fetches every available locale. */
 	getAll(
 		input?: LocalesGetAllInput,
 	): Promise<LucidClientResponse<LocalesGetAllResponse>>;
 }
 
-/**
- * Creates the internal locales resource wrapper used by the root client.
- */
+/** Creates the locales resource used by the public Lucid client. */
 export const createLocalesClient = (
 	transport: LucidTransport,
 ): LucidLocalesClient => ({

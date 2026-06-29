@@ -15,11 +15,14 @@ import type {
 	InternalDocumentBrick,
 	InternalDocumentField,
 } from "../../types/response.js";
+import type { FieldTypes } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getSingleInstance } from "../collections/index.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
-import fetchRefData from "./helpers/fetch-ref-data.js";
+import fetchRefData, {
+	type FieldRefResponse,
+} from "./helpers/fetch-ref-data.js";
 
 /**
  * Returns all of the bricks and collection fields
@@ -32,8 +35,14 @@ const getMultiple: ServiceFn<
 			/** The version type to use for any custom field document references  */
 			versionType: Exclude<DocumentVersionType, "revision">;
 			resolveVersionType?: FieldRefVersionTypeResolver;
-			/** When enabled, only fetches from the `document-fields` table */
-			documentFieldsOnly?: boolean;
+			/** When disabled, only collection-level field tables are fetched. */
+			includeBricks?: boolean;
+			/** When disabled, reference rows are not hydrated. */
+			includeRefs?: boolean;
+			/** When provided, only these custom field ref types are hydrated. */
+			refTypes?: FieldTypes[];
+			/** Client responses flatten nested document ref fields; internal responses keep field wrappers. */
+			flattenDocumentRefFields?: boolean;
 		},
 	],
 	{
@@ -61,13 +70,19 @@ const getMultiple: ServiceFn<
 	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
 
+	const includeBricks = data.includeBricks ?? true;
+	const includeRefs = data.includeRefs ?? true;
+	const selectedBricksTableSchema = bricksTableSchemaRes.data.filter(
+		(schema) => {
+			if (includeBricks) return true;
+			return schema.key.brick === undefined;
+		},
+	);
+
 	const bricksQueryRes = await DocumentBricks.selectMultipleByVersionId(
 		{
 			versionId: data.versionId,
-			bricksSchema: bricksTableSchemaRes.data.filter((t) => {
-				if (data.documentFieldsOnly) return t.type === "document-fields";
-				return true;
-			}),
+			bricksSchema: selectedBricksTableSchema,
 		},
 		{
 			tableName: tableNameRes.data.version,
@@ -85,48 +100,61 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	const relationIdRes = await extractRelatedEntityIds(context, {
-		collection: collectionRes.data,
-		brickSchema: bricksTableSchemaRes.data,
-		responses: [bricksQueryRes.data],
-	});
-	if (relationIdRes.error) return relationIdRes;
+	let refData: FieldRefResponse = { data: {} };
 
-	const refDataRes = await fetchRefData(context, {
-		values: relationIdRes.data,
-		versionType: data.versionType,
-		resolveVersionType: data.resolveVersionType,
-	});
-	if (refDataRes.error) return refDataRes;
+	if (includeRefs) {
+		const relationIdRes = await extractRelatedEntityIds(context, {
+			collection: collectionRes.data,
+			brickSchema: selectedBricksTableSchema,
+			responses: [bricksQueryRes.data],
+			includeTypes: data.refTypes,
+		});
+		if (relationIdRes.error) return relationIdRes;
+
+		const refDataRes = await fetchRefData(context, {
+			values: relationIdRes.data,
+			versionType: data.versionType,
+			resolveVersionType: data.resolveVersionType,
+		});
+		if (refDataRes.error) return refDataRes;
+
+		refData = refDataRes.data;
+	}
 
 	const baseUrl = getBaseUrl(context);
 
 	return {
 		error: undefined,
 		data: {
-			bricks: documentBricksFormatter.formatMultiple({
-				bricksQuery: bricksQueryRes.data,
-				bricksSchema: bricksTableSchemaRes.data,
-				refData: refDataRes.data,
-				collection: collectionRes.data,
-				config: context.config,
-				host: baseUrl,
-			}),
+			bricks: includeBricks
+				? documentBricksFormatter.formatMultiple({
+						bricksQuery: bricksQueryRes.data,
+						bricksSchema: selectedBricksTableSchema,
+						refData: refData,
+						collection: collectionRes.data,
+						config: context.config,
+						host: baseUrl,
+					})
+				: [],
 			fields: documentBricksFormatter.formatDocumentFields({
 				bricksQuery: bricksQueryRes.data,
-				bricksSchema: bricksTableSchemaRes.data,
-				refData: refDataRes.data,
+				bricksSchema: selectedBricksTableSchema,
+				refData: refData,
 				collection: collectionRes.data,
 				config: context.config,
 				host: baseUrl,
 			}),
-			refs: documentsFormatter.formatRefs({
-				collection: collectionRes.data,
-				config: context.config,
-				host: baseUrl,
-				bricksTableSchema: bricksTableSchemaRes.data,
-				data: refDataRes.data,
-			}),
+			refs: includeRefs
+				? documentsFormatter.formatRefs({
+						collection: collectionRes.data,
+						config: context.config,
+						host: baseUrl,
+						bricksTableSchema: selectedBricksTableSchema,
+						data: refData,
+						fieldTypes: data.refTypes,
+						flattenDocumentRefFields: data.flattenDocumentRefFields,
+					})
+				: null,
 		},
 	};
 };

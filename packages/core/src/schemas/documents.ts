@@ -1,15 +1,7 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
-import {
-	brickClientResponseSchema,
-	brickInputSchema,
-	brickResponseSchema,
-} from "./collection-bricks.js";
-import {
-	fieldClientResponseSchema,
-	fieldInputSchema,
-	fieldResponseSchema,
-} from "./collection-fields.js";
+import { brickInputSchema, brickResponseSchema } from "./collection-bricks.js";
+import { fieldInputSchema, fieldResponseSchema } from "./collection-fields.js";
 import {
 	documentVersionResponseSchema,
 	versionTypesSchema,
@@ -128,11 +120,41 @@ export const documentResponseSchema = documentResponseBaseSchema.extend({
 	refs: z.record(z.string(), z.array(z.any())).nullable().optional(),
 	workflow: documentWorkflowSchema.nullable().optional(),
 });
-const documentClientResponseSchema = documentResponseBaseSchema.extend({
-	bricks: z.array(brickClientResponseSchema).nullable().optional(),
-	fields: z.record(z.string(), z.array(fieldClientResponseSchema)),
-	refs: z.record(z.string(), z.array(z.any())).nullable().optional(),
+
+const documentClientResponseSchema = z.object({
+	id: z.number(),
+	collectionKey: z.string(),
+	status: z.string().nullable(),
+	fields: z.record(z.string(), z.unknown()),
+	bricks: z
+		.array(
+			z.object({
+				id: z.number(),
+				ref: z.string(),
+				key: z.string(),
+				type: z.enum(["builder", "fixed"]),
+				order: z.number(),
+				fields: z.record(z.string(), z.unknown()),
+			}),
+		)
+		.optional(),
+	refs: z.record(z.string(), z.array(z.any())).optional(),
+	meta: z
+		.object({
+			versionId: z.number().nullable(),
+			version: z.record(z.string(), documentResponseVersionSchema.nullable()),
+			createdAt: z.string().nullable(),
+			updatedAt: z.string().nullable(),
+			createdBy: z.number().nullable(),
+			updatedBy: z.number().nullable(),
+		})
+		.optional(),
 });
+
+const documentRefsIncludeSchema = z.union([
+	z.literal("refs"),
+	z.string().regex(/^refs\.[^,\s]+$/),
+]);
 
 export const controllerSchemas = {
 	createSingle: {
@@ -517,6 +539,7 @@ export const controllerSchemas = {
 							description:
 								"Target a repeater field by adding a repeater key after the brick key",
 						}),
+					include: queryString.schema.include("refs,refs.document"),
 					sort: queryString.schema.sort("createdAt,updatedAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -568,6 +591,7 @@ export const controllerSchemas = {
 						}),
 					)
 					.optional(),
+				include: z.array(documentRefsIncludeSchema).optional(),
 				page: queryFormatted.schema.page,
 				perPage: queryFormatted.schema.perPage,
 			}),
@@ -588,10 +612,12 @@ export const controllerSchemas = {
 	getSingle: {
 		query: {
 			string: z.object({
-				include: queryString.schema.include("bricks"),
+				include: queryString.schema.include("bricks,refs,refs.document"),
 			}),
 			formatted: z.object({
-				include: z.array(z.enum(["bricks"])).optional(),
+				include: z
+					.array(z.union([z.literal("bricks"), documentRefsIncludeSchema]))
+					.optional(),
 			}),
 		},
 		params: z.object({
@@ -717,7 +743,9 @@ export const controllerSchemas = {
 								description:
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
-						include: queryString.schema.include("bricks"),
+						include: queryString.schema.include(
+							"bricks,refs,refs.document,meta",
+						),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,
 					})
@@ -742,7 +770,15 @@ export const controllerSchemas = {
 							}),
 						])
 						.optional(),
-					include: z.array(z.enum(["bricks"])).optional(),
+					include: z
+						.array(
+							z.union([
+								z.literal("bricks"),
+								z.literal("meta"),
+								documentRefsIncludeSchema,
+							]),
+						)
+						.optional(),
 				}),
 			},
 			params: z.object({
@@ -796,6 +832,7 @@ export const controllerSchemas = {
 								description:
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
+						include: queryString.schema.include("refs,refs.document,meta"),
 						sort: queryString.schema.sort("createdAt,updatedAt"),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,
@@ -843,6 +880,9 @@ export const controllerSchemas = {
 								value: z.enum(["asc", "desc"]),
 							}),
 						)
+						.optional(),
+					include: z
+						.array(z.union([z.literal("meta"), documentRefsIncludeSchema]))
 						.optional(),
 					page: queryFormatted.schema.page,
 					perPage: queryFormatted.schema.perPage,

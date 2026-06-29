@@ -136,6 +136,20 @@ const appendRelationTarget = (
 	tableEntry.values.add(target.value);
 };
 
+const shouldIncludeFieldType = (
+	fieldType: FieldTypes,
+	options: {
+		includeTypes?: FieldTypes[];
+		excludeTypes?: FieldTypes[];
+	},
+) => {
+	if (options.includeTypes !== undefined) {
+		return options.includeTypes.includes(fieldType);
+	}
+
+	return options.excludeTypes?.includes(fieldType) !== true;
+};
+
 /**
  * Extracts any custom field reference data based on the brick schema's foreign key information.
  * Works with arrays of BrickQueryResponse and/or DocumentQueryResponse types.
@@ -156,6 +170,8 @@ const extractRelatedEntityIds: ServiceFn<
 				columns: CollectionSchemaColumn[];
 			}[];
 			responses: (BrickQueryResponse | DocumentQueryResponse)[];
+			/** Pass an array of custom field types that should have relation data extracted. */
+			includeTypes?: FieldTypes[];
 			/** Pass a Array of custom field types that should have relation data extracted */
 			excludeTypes?: FieldTypes[];
 		},
@@ -190,7 +206,14 @@ const extractRelatedEntityIds: ServiceFn<
 					const fieldType = schemaColumn.customField.type;
 					const tableName = schemaColumn.foreignKey.table;
 
-					if (data.excludeTypes?.includes(fieldType)) continue;
+					if (
+						!shouldIncludeFieldType(fieldType, {
+							includeTypes: data.includeTypes,
+							excludeTypes: data.excludeTypes,
+						})
+					) {
+						continue;
+					}
 
 					appendRelationTarget(refData, fieldType, {
 						table: tableName,
@@ -199,7 +222,14 @@ const extractRelatedEntityIds: ServiceFn<
 				}
 
 				if (!fieldInstance) continue;
-				if (data.excludeTypes?.includes(fieldInstance.type)) continue;
+				if (
+					!shouldIncludeFieldType(fieldInstance.type, {
+						includeTypes: data.includeTypes,
+						excludeTypes: data.excludeTypes,
+					})
+				) {
+					continue;
+				}
 
 				for (const relationTarget of fieldInstance.getRelationFieldRefTargets(
 					row,

@@ -337,4 +337,5 @@ export type FieldRefParams = {
 			CollectionSchemaTable<LucidBrickTableName>
 		>;
 	};
+	flattenDocumentRefFields?: boolean;
 };

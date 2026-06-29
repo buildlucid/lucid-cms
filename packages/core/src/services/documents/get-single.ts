@@ -14,6 +14,7 @@ import {
 	documentBrickServices,
 	documentWorkflowServices,
 } from "../index.js";
+import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
 
 const getSingle: ServiceFn<
@@ -123,13 +124,17 @@ const getSingle: ServiceFn<
 	if (relationVersionTypeRes.error) return relationVersionTypeRes;
 
 	let document: InternalCollectionDocument;
+	const include = resolveDocumentIncludes(data.query.include);
 
-	if (data.query.include?.includes("bricks")) {
+	if (include.bricks || include.refs) {
 		const bricksRes = await documentBrickServices.getMultiple(context, {
 			versionId: versionId,
 			collectionKey: documentRes.data.collection_key,
 			versionType: relationVersionTypeRes.data.versionType,
 			resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+			includeBricks: include.bricks,
+			includeRefs: include.refs,
+			refTypes: include.refTypes,
 		});
 		if (bricksRes.error) return bricksRes;
 

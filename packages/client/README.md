@@ -108,6 +108,9 @@ const client = createClient({
 
 const response = await client.documents.getSingle({
     collectionKey: "page",
+    query: {
+        include: ["bricks", "refs"],
+    },
 });
 
 if (!response.error) {
@@ -116,7 +119,7 @@ if (!response.error) {
     });
 
     const title = page.field("page_title").value();
-    const relatedPage = page.field("related_page").ref();
+    const relatedPage = page.field("related_page").ref("document");
     const seo = page.brick({
         type: "fixed",
         key: "seo",
@@ -131,34 +134,6 @@ if (!response.error) {
         console.log(brick.key, brick.order);
     }
 }
-```
-
-The low-level helpers are also available if you prefer to work with the raw response data directly:
-
-```typescript
-import {
-    getBrick,
-    getBricks,
-    getFieldGroups,
-    getFieldRef,
-    getFieldRefs,
-    getFieldValue,
-} from "@lucidcms/client";
-
-const title = getFieldValue(page.fields.page_title, {
-    locale: "en",
-});
-const related = getFieldRef(page, page.fields.related_page);
-const images = getFieldRefs(page, page.fields.hero_image);
-const sections = getFieldGroups(page.fields.sections);
-const contentBricks = getBricks(page, {
-    type: "builder",
-});
-const seo = getBrick(page, {
-    type: "fixed",
-    key: "seo",
-});
-const canonicalUrl = seo?.fields.canonical_url.value;
 ```
 
 ## Types

@@ -38,16 +38,17 @@ const formatDocumentRef = (
 		};
 	}
 
-	const documentFields = documentFieldsFormatter.objectifyFields(
-		documentBricksFormatter.formatDocumentFields({
-			bricksQuery: value,
-			bricksSchema: targetBricksSchema,
-			refData: { data: {} },
-			collection: collection,
-			config: params.config,
-			host: params.host,
-		}),
-	);
+	const formattedFields = documentBricksFormatter.formatDocumentFields({
+		bricksQuery: value,
+		bricksSchema: targetBricksSchema,
+		refData: { data: {} },
+		collection: collection,
+		config: params.config,
+		host: params.host,
+	});
+	const documentFields = params.flattenDocumentRefFields
+		? documentFieldsFormatter.flattenFields(formattedFields)
+		: documentFieldsFormatter.objectifyFields(formattedFields);
 
 	return {
 		id: value.document_id,

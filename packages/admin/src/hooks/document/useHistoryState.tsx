@@ -150,6 +150,7 @@ export function useHistoryState() {
 			},
 			include: {
 				bricks: true,
+				refs: true,
 			},
 		},
 		enabled: () => canFetchRevisions() && selectedVersion() !== undefined,

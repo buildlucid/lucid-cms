@@ -46,6 +46,7 @@ export type LucidMiddlewareErrorContext = LucidMiddlewareRequestContext & {
 };
 
 export type LucidMiddleware = {
+	/** Runs before each request and may replace the URL or request init. */
 	onRequest?: (context: LucidMiddlewareRequestContext) =>
 		| undefined
 		| {
@@ -59,9 +60,11 @@ export type LucidMiddleware = {
 						init?: RequestInit;
 				  }
 		  >;
+	/** Runs after a response and may replace it before parsing. */
 	onResponse?: (
 		context: LucidMiddlewareResponseContext,
 	) => undefined | Response | Promise<undefined | Response>;
+	/** Runs after a client error and may replace the error. */
 	onError?: (
 		context: LucidMiddlewareErrorContext,
 	) => undefined | LucidClientError | Promise<undefined | LucidClientError>;

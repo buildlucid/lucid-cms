@@ -45,17 +45,7 @@ export type DocumentFieldValueResponse =
 	| null
 	| undefined;
 
-export interface DocumentRef<
-	TCollectionKey extends string = string,
-	TFields extends DocumentFieldMap | null = DocumentFieldMap | null,
-> {
-	id: number;
-	versionId?: number;
-	collectionKey: TCollectionKey;
-	fields: TFields;
-}
-
-type DocumentFieldRef = DocumentRef | MediaRef | UserRef | null | undefined;
+type DocumentFieldRef = DocumentRef | MediaRef | UserRef | unknown;
 
 type DocumentAuthor = {
 	id: number;
@@ -66,7 +56,7 @@ type DocumentAuthor = {
 	profilePicture: ProfilePicture | null;
 } | null;
 
-type DocumentVersionSummary = {
+export type DocumentVersionSummary = {
 	id: number;
 	promotedFrom: number | null;
 	contentId: string;
@@ -137,6 +127,40 @@ export type CollectionDocumentTranslations<TValue> = [
 	: ExactCollectionDocumentTranslations<TValue> &
 			Partial<Record<string, TValue>>;
 
+export type DocumentFieldPlainValue =
+	| DocumentFieldValueResponse
+	| CollectionDocumentTranslations<DocumentFieldValueResponse>
+	| DocumentFieldValueMap[];
+
+export type DocumentFieldValueMap = Record<string, DocumentFieldPlainValue>;
+
+export interface DocumentRef<
+	TCollectionKey extends string = string,
+	TFields extends
+		| DocumentFieldMap
+		| DocumentFieldValueMap
+		| null = DocumentFieldMap | null,
+> {
+	id: number;
+	versionId?: number;
+	collectionKey: TCollectionKey;
+	fields: TFields;
+}
+
+export type CollectionDocumentMeta<
+	TCollectionKey extends string = CollectionDocumentKey,
+> = {
+	versionId: number | null;
+	version: Record<
+		CollectionDocumentVersionKey<TCollectionKey>,
+		DocumentVersionSummary | null
+	>;
+	createdAt: string | null;
+	updatedAt: string | null;
+	createdBy: number | null;
+	updatedBy: number | null;
+};
+
 export type CollectionDocumentStatus<TCollectionKey extends string = string> =
 	TCollectionKey extends CollectionDocumentStatusKey
 		? CollectionDocumentStatusesByCollection[TCollectionKey]
@@ -151,7 +175,7 @@ export type CollectionDocumentVersionKey<
 type ResolveCollectionDocumentFields<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentFieldKey
 		? CollectionDocumentFieldsByCollection[TCollectionKey]
-		: DocumentFieldMap;
+		: DocumentFieldValueMap;
 
 type ResolveCollectionDocumentBricks<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentBrickKey
@@ -163,11 +187,6 @@ type ResolveCollectionDocumentKey<TCollectionKey extends string> =
 
 type ResolveCollectionDocumentStatus<TCollectionKey extends string> =
 	CollectionDocumentStatus<
-		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
-	>;
-
-type ResolveCollectionDocumentVersionKey<TCollectionKey extends string> =
-	CollectionDocumentVersionKey<
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
 
@@ -242,12 +261,11 @@ export type GroupDocumentField<
 export interface DocumentBrick<
 	TKey extends string = string,
 	TBrickType extends BrickType = BrickType,
-	TFields extends DocumentFieldMap = DocumentFieldMap,
+	TFields extends DocumentFieldValueMap = DocumentFieldValueMap,
 > {
 	ref: string;
 	key: TKey;
 	order: number;
-	open: boolean;
 	type: TBrickType;
 	fields: TFields;
 	id: number;
@@ -282,17 +300,12 @@ export interface CollectionDocument<
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
 	status: ResolveCollectionDocumentStatus<TCollectionKey> | null;
-	version: Record<
-		ResolveCollectionDocumentVersionKey<TCollectionKey>,
-		DocumentVersionSummary | null
-	>;
-	createdBy: DocumentAuthor;
-	createdAt: string | null;
-	updatedAt: string | null;
-	updatedBy: DocumentAuthor;
-	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>> | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
-	refs?: Partial<Record<FieldType, DocumentFieldRef[]>> | null;
+	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
+	refs?: Partial<Record<FieldType | string, DocumentFieldRef[]>>;
+	meta?: CollectionDocumentMeta<
+		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
+	>;
 }
 
 export type CollectionMode = "single" | "multiple";
@@ -651,7 +664,7 @@ export interface InternalCollectionDocument {
 	updatedBy: DocumentAuthor;
 	bricks?: Array<InternalDocumentBrick> | null;
 	fields?: Array<InternalDocumentField> | null;
-	refs?: Partial<Record<FieldType, DocumentFieldRef[]>> | null;
+	refs?: Partial<Record<FieldType | string, DocumentFieldRef[]>> | null;
 	workflow?: DocumentWorkflow | null;
 }
 

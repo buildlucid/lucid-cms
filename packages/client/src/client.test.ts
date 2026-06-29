@@ -14,15 +14,19 @@ describe("@lucidcms/client", () => {
 						id: 1,
 						collectionKey: "page",
 						status: "latest",
-						version: {
-							latest: null,
-						},
-						createdBy: null,
-						createdAt: null,
-						updatedAt: null,
-						updatedBy: null,
 						fields: {},
-						refs: null,
+						bricks: [],
+						refs: {},
+						meta: {
+							versionId: 1,
+							version: {
+								latest: null,
+							},
+							createdBy: null,
+							createdAt: null,
+							updatedAt: null,
+							updatedBy: null,
+						},
 					},
 					meta: {
 						links: [],
@@ -68,7 +72,7 @@ describe("@lucidcms/client", () => {
 						},
 					},
 				},
-				include: ["bricks"],
+				include: ["bricks", "refs.document", "meta"],
 			},
 		});
 
@@ -81,7 +85,7 @@ describe("@lucidcms/client", () => {
 
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toContain(
-			"/document/page/latest?filter%5B_fullSlug%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks",
+			"/document/page/latest?filter%5B_fullSlug%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks%2Crefs.document%2Cmeta",
 		);
 		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
 	});
@@ -139,6 +143,9 @@ describe("@lucidcms/client", () => {
 
 		const response = await client.documents.getMultiple({
 			collectionKey: "page",
+			query: {
+				include: ["refs.document", "meta"],
+			},
 		});
 
 		expect(response.error).toBeUndefined();
@@ -156,6 +163,12 @@ describe("@lucidcms/client", () => {
 			},
 		});
 		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
+			"/documents/page/latest?include=refs.document%2Cmeta",
+		);
+		expect(String(fetchMock.mock.calls[1]?.[0])).toContain(
+			"/documents/page/latest?include=refs.document%2Cmeta",
+		);
 	});
 
 	test("does not retry POST requests by default", async () => {

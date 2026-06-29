@@ -143,17 +143,13 @@ const renderBaseFieldType = (props: {
 	groupFieldsType?: string;
 	hasGroupRef: boolean;
 }): string => {
-	const keyArg = stringLiteral(props.field.key);
-	const typeArg = stringLiteral(props.field.type);
-	const groupRefArg = props.hasGroupRef ? ", true" : "";
-
 	switch (props.mode) {
 		case "groups":
-			return `GroupDocumentField<${keyArg}, ${typeArg}, ${props.groupFieldsType ?? "Record<string, never>"}${groupRefArg}>`;
+			return `Array<${props.groupFieldsType ?? "Record<string, never>"}>`;
 		case "translations":
-			return `TranslatedDocumentField<${keyArg}, ${typeArg}, ${props.valueType ?? "unknown"}${groupRefArg}>`;
+			return `CollectionDocumentTranslations<${props.valueType ?? "unknown"}>`;
 		default:
-			return `ValueDocumentField<${keyArg}, ${typeArg}, ${props.valueType ?? "unknown"}${groupRefArg}>`;
+			return props.valueType ?? "unknown";
 	}
 };
 
@@ -520,13 +516,11 @@ const generateCollectionClientTypes = (props: {
 \tCollectionDocumentStatus as CoreCollectionDocumentStatus,
 \tCollectionDocumentSortKey as CoreCollectionDocumentSortKey,
 \tCollectionDocumentSorts as CoreCollectionDocumentSorts,
+\tCollectionDocumentTranslations,
 \tCollectionDocumentVersionKey as CoreCollectionDocumentVersionKey,
 \tDocumentBrick,
 \tDocumentRelationValue,
 \tFilterObject,
-\tGroupDocumentField,
-\tTranslatedDocumentField,
-\tValueDocumentField,
 } from "${constants.typeGeneration.modules.coreTypes}";`,
 		],
 		declarations: generatedMaps,

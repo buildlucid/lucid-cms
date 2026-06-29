@@ -38,25 +38,23 @@ export type MediaProcessInput = {
 export type MediaProcessResponse = ResponseBody<MediaUrl>;
 
 export interface LucidMediaClient {
-	/** Returns the Lucid response body for one media item. */
+	/** Fetches one media item by id. */
 	getSingle(
 		input: MediaGetSingleInput,
 	): Promise<LucidClientResponse<MediaGetSingleResponse>>;
 
-	/** Returns the Lucid response body for a paginated media list. */
+	/** Fetches a paginated list of media items. */
 	getMultiple(
 		input?: MediaGetMultipleInput,
 	): Promise<LucidClientResponse<MediaGetMultipleResponse>>;
 
-	/** Returns the Lucid response body containing the processed media URL. */
+	/** Processes a media key and returns the resolved media URL. */
 	process(
 		input: MediaProcessInput,
 	): Promise<LucidClientResponse<MediaProcessResponse>>;
 }
 
-/**
- * Creates the internal media resource wrapper so media paths and request typing stay isolated here.
- */
+/** Creates the media resource used by the public Lucid client. */
 export const createMediaClient = (
 	transport: LucidTransport,
 ): LucidMediaClient => ({

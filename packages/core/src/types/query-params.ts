@@ -121,11 +121,20 @@ export type QueryParams = {
 	perPage: QueryParamPagination["perPage"];
 };
 
+export type CollectionDocumentRefInclude = "refs" | `refs.${string}`;
+export type CollectionDocumentSingleInclude =
+	| "bricks"
+	| "meta"
+	| CollectionDocumentRefInclude;
+export type CollectionDocumentMultipleInclude =
+	| "meta"
+	| CollectionDocumentRefInclude;
+
 export type CollectionDocumentSingleQuery<
 	TCollectionKey extends string = string,
 > = {
 	filter?: CollectionDocumentFilters<TCollectionKey>;
-	include?: Array<"bricks">;
+	include?: CollectionDocumentSingleInclude[];
 };
 
 export type CollectionDocumentMultipleQuery<
@@ -133,6 +142,7 @@ export type CollectionDocumentMultipleQuery<
 > = {
 	filter?: CollectionDocumentFilters<TCollectionKey>;
 	sort?: CollectionDocumentSorts<TCollectionKey>;
+	include?: CollectionDocumentMultipleInclude[];
 	page?: QueryParamPagination["page"];
 	perPage?: QueryParamPagination["perPage"];
 };

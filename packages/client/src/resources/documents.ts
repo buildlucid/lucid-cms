@@ -44,18 +44,18 @@ export type DocumentsGetMultipleResponse<
 > = ResponseBody<Array<CollectionDocument<TCollectionKey>>>;
 
 export interface LucidDocumentsClient {
-	/** Returns the Lucid response body for one document in a collection. */
+	/** Fetches one document from a collection. */
 	getSingle<TCollectionKey extends CollectionDocumentKey>(
 		input: DocumentsGetSingleInput<TCollectionKey>,
 	): Promise<LucidClientResponse<DocumentsGetSingleResponse<TCollectionKey>>>;
 
-	/** Returns the Lucid response body for a paginated document list. */
+	/** Fetches a paginated list of documents from a collection. */
 	getMultiple<TCollectionKey extends CollectionDocumentKey>(
 		input: DocumentsGetMultipleInput<TCollectionKey>,
 	): Promise<LucidClientResponse<DocumentsGetMultipleResponse<TCollectionKey>>>;
 }
 
-/** Creates the documents resource for the public Lucid client. */
+/** Creates the documents resource used by the public Lucid client. */
 export const createDocumentsClient = (
 	transport: LucidTransport,
 ): LucidDocumentsClient => ({

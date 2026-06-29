@@ -22,8 +22,11 @@ import {
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
-import fetchRefData from "../documents-bricks/helpers/fetch-ref-data.js";
+import fetchRefData, {
+	type FieldRefResponse,
+} from "../documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../index.js";
+import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
 
 const getMultiple: ServiceFn<
@@ -111,6 +114,10 @@ const getMultiple: ServiceFn<
 	if (tableNameRes.error) return tableNameRes;
 
 	const relationVersionType = relationVersionTypeRes.data.versionType;
+	const include = resolveDocumentIncludes(data.query.include);
+	const includeRefs = data.query.include === undefined ? true : include.refs;
+	const refTypes =
+		data.query.include === undefined ? undefined : include.refTypes;
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
@@ -137,26 +144,33 @@ const getMultiple: ServiceFn<
 	);
 	if (documentsRes.error) return documentsRes;
 
-	const relationIdRes = await extractRelatedEntityIds(context, {
-		collection: collectionRes.data,
-		brickSchema: bricksTableSchemaRes.data,
-		responses: documentsRes.data?.[0] ?? [],
-	});
-	if (relationIdRes.error) return relationIdRes;
+	let refData: FieldRefResponse | undefined;
+	if (includeRefs) {
+		const relationIdRes = await extractRelatedEntityIds(context, {
+			collection: collectionRes.data,
+			brickSchema: bricksTableSchemaRes.data,
+			responses: documentsRes.data?.[0] ?? [],
+			includeTypes: refTypes,
+		});
+		if (relationIdRes.error) return relationIdRes;
 
-	const refDataRes = await fetchRefData(context, {
-		values: relationIdRes.data,
-		versionType: relationVersionType,
-		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
-	});
-	if (refDataRes.error) return refDataRes;
+		const refDataRes = await fetchRefData(context, {
+			values: relationIdRes.data,
+			versionType: relationVersionType,
+			resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+		});
+		if (refDataRes.error) return refDataRes;
+
+		refData = refDataRes.data;
+	}
 
 	const documents = documentsFormatter.formatMultiple({
 		documents: documentsRes.data?.[0] || [],
 		collection: collectionRes.data,
 		config: context.config,
 		host: getBaseUrl(context),
-		refData: refDataRes.data,
+		refData,
+		refTypes,
 		hasFields: true,
 		hasBricks: false,
 		bricksTableSchema: bricksTableSchemaRes.data,

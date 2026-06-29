@@ -21,6 +21,7 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import { collectionServices, documentBrickServices } from "../../index.js";
+import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 
 type ClientDocumentsGetSingleInput<TCollectionKey extends string = string> = {
@@ -87,6 +88,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 			},
 		}),
 	};
+	const include = resolveDocumentIncludes(query.include);
 
 	const { documentFilters, brickFilters } = groupDocumentFilters(
 		bricksTableSchemaRes.data,
@@ -128,7 +130,10 @@ const getSingle: ClientDocumentsGetSingleService = async <
 		collectionKey: collectionRes.data.key,
 		versionType: relationVersionTypeRes.data.versionType,
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
-		documentFieldsOnly: !query.include?.includes("bricks"),
+		includeBricks: include.bricks,
+		includeRefs: include.refs,
+		refTypes: include.refTypes,
+		flattenDocumentRefFields: true,
 	});
 	if (bricksRes.error) return bricksRes;
 
@@ -142,6 +147,11 @@ const getSingle: ClientDocumentsGetSingleService = async <
 			config: context.config,
 			refs: bricksRes.data.refs,
 			host: getBaseUrl(context),
+			include: {
+				bricks: include.bricks,
+				refs: include.refs,
+				meta: include.meta,
+			},
 		}),
 	};
 };

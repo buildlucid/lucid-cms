@@ -158,11 +158,11 @@ test("generates collection-aware client document types that lean on the public L
 		);
 		expect(clientContent).toContain(
 			`export type PageCollectionDocumentFields = {
-	"_page_title": TranslatedDocumentField<"_page_title", "text", string | null>;
-	"_related_page": ValueDocumentField<"_related_page", "document", Array<DocumentRelationValue<"page">>>;
-	"_related_content": ValueDocumentField<"_related_content", "document", Array<DocumentRelationValue<"page" | "blog">>>;
-	"sections": GroupDocumentField<"sections", "repeater", {
-		"_section_title": ValueDocumentField<"_section_title", "text", string | null, true>;
+	"_page_title": CollectionDocumentTranslations<string | null>;
+	"_related_page": Array<DocumentRelationValue<"page">>;
+	"_related_content": Array<DocumentRelationValue<"page" | "blog">>;
+	"sections": Array<{
+		"_section_title": string | null;
 	}>;
 }`,
 		);
@@ -208,9 +208,9 @@ test("generates collection-aware client document types that lean on the public L
 		);
 		expect(clientContent).toContain(
 			`export type PageBannerBuilderBrickFields = {
-	"title": TranslatedDocumentField<"title", "text", string | null>;
-	"call_to_actions": GroupDocumentField<"call_to_actions", "repeater", {
-		"label": ValueDocumentField<"label", "text", string | null, true>;
+	"title": CollectionDocumentTranslations<string | null>;
+	"call_to_actions": Array<{
+		"label": string | null;
 	}>;
 }`,
 		);

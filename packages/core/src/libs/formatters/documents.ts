@@ -2,7 +2,6 @@ import type { FieldRefResponse } from "../../services/documents-bricks/helpers/f
 import type {
 	CollectionDocument,
 	Config,
-	DocumentBrick,
 	DocumentWorkflow,
 	FieldRef,
 	FieldRefParams,
@@ -35,6 +34,7 @@ const formatMultiple = (props: {
 	hasFields: boolean;
 	hasBricks: boolean;
 	refData?: FieldRefResponse;
+	refTypes?: FieldTypes[];
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	workflows?: DocumentWorkflowDetailedQueryResponse[];
 }) => {
@@ -75,6 +75,7 @@ const formatMultiple = (props: {
 			config: props.config,
 			host: props.host,
 			bricksTableSchema: props.bricksTableSchema,
+			fieldTypes: props.refTypes,
 		});
 
 		return formatSingle({
@@ -235,7 +236,13 @@ const formatClientMultiple = <TCollectionKey extends string = string>(props: {
 	hasFields: boolean;
 	hasBricks: boolean;
 	refData?: FieldRefResponse;
+	refTypes?: FieldTypes[];
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
+	include: {
+		bricks: boolean;
+		refs: boolean;
+		meta: boolean;
+	};
 }): CollectionDocument<TCollectionKey>[] => {
 	return props.documents.map((d) => {
 		let fields: InternalDocumentField[] | null = null;
@@ -261,13 +268,17 @@ const formatClientMultiple = <TCollectionKey extends string = string>(props: {
 			});
 		}
 
-		const refs = formatRefs({
-			data: props.refData,
-			collection: props.collection,
-			config: props.config,
-			host: props.host,
-			bricksTableSchema: props.bricksTableSchema,
-		});
+		const refs = props.include.refs
+			? formatRefs({
+					data: props.refData,
+					collection: props.collection,
+					config: props.config,
+					host: props.host,
+					bricksTableSchema: props.bricksTableSchema,
+					fieldTypes: props.refTypes,
+					flattenDocumentRefFields: true,
+				})
+			: null;
 
 		return formatClientSingle<TCollectionKey>({
 			document: d,
@@ -277,8 +288,39 @@ const formatClientMultiple = <TCollectionKey extends string = string>(props: {
 			bricks: bricks || undefined,
 			refs: refs,
 			host: props.host,
+			include: props.include,
 		});
 	});
+};
+
+const formatClientMeta = (props: {
+	document: DocumentQueryResponse;
+	collection: CollectionBuilder;
+}) => {
+	return {
+		versionId: props.document.version_id ?? null,
+		version: formatVersion({
+			document: props.document,
+			collection: props.collection,
+		}),
+		createdAt: formatter.formatDate(props.document.created_at),
+		updatedAt: formatter.formatDate(props.document.updated_at),
+		createdBy: props.document.created_by ?? null,
+		updatedBy: props.document.updated_by ?? null,
+	};
+};
+
+const formatClientBricks = (
+	bricks: InternalDocumentBrick[] | null | undefined,
+) => {
+	return (bricks ?? []).map((brick) => ({
+		id: brick.id,
+		ref: brick.ref,
+		key: brick.key,
+		type: brick.type,
+		order: brick.order,
+		fields: documentFieldsFormatter.flattenFields(brick.fields),
+	}));
 };
 
 /**
@@ -293,31 +335,35 @@ const formatClientSingle = <TCollectionKey extends string = string>(props: {
 	refs?: InternalCollectionDocument["refs"];
 	config: Config;
 	host: string;
+	include: {
+		bricks: boolean;
+		refs: boolean;
+		meta: boolean;
+	};
 }): CollectionDocument<TCollectionKey> => {
-	const res = formatSingle({
-		document: props.document,
-		collection: props.collection,
-		bricks: props.bricks,
-		fields: props.fields,
-		config: props.config,
-		refs: props.refs,
-		host: props.host,
-	});
-	const { workflow: _workflow, ...clientRes } = res;
+	const clientRes: Record<string, unknown> = {
+		id: props.document.id,
+		collectionKey: props.document.collection_key,
+		status: props.document.version_type ?? null,
+		fields: documentFieldsFormatter.flattenFields(props.fields ?? []),
+	};
 
-	return {
-		...clientRes,
-		bricks: clientRes.bricks
-			? clientRes.bricks.map((b) => {
-					return {
-						...b,
-						fields: documentFieldsFormatter.objectifyFields(b.fields),
-					} satisfies DocumentBrick;
-				})
-			: null,
-		fields: documentFieldsFormatter.objectifyFields(clientRes.fields ?? []),
-		refs: clientRes.refs ?? null,
-	} as unknown as CollectionDocument<TCollectionKey>;
+	if (props.include.bricks) {
+		clientRes.bricks = formatClientBricks(props.bricks);
+	}
+
+	if (props.include.refs) {
+		clientRes.refs = props.refs ?? {};
+	}
+
+	if (props.include.meta) {
+		clientRes.meta = formatClientMeta({
+			document: props.document,
+			collection: props.collection,
+		});
+	}
+
+	return clientRes as unknown as CollectionDocument<TCollectionKey>;
 };
 
 const formatRefs = (props: {
@@ -326,8 +372,10 @@ const formatRefs = (props: {
 	config: Config;
 	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-}): Partial<Record<FieldTypes, FieldRef[]>> | null => {
-	const refs: Partial<Record<FieldTypes, FieldRef[]>> = {};
+	fieldTypes?: FieldTypes[];
+	flattenDocumentRefFields?: boolean;
+}): Partial<Record<FieldTypes | string, FieldRef[]>> | null => {
+	const refs: Partial<Record<FieldTypes | string, FieldRef[]>> = {};
 	if (!props.data) return null;
 
 	const localization = {
@@ -335,7 +383,7 @@ const formatRefs = (props: {
 		default: props.config.localization.defaultLocale,
 	} satisfies FieldRefParams["localization"];
 
-	for (const key of registeredFieldTypes) {
+	for (const key of props.fieldTypes ?? registeredFieldTypes) {
 		const formatRef = registeredFields[key].formatRef;
 		const refData = props.data.data[key];
 		if (!formatRef || !refData || !Array.isArray(refData)) continue;
@@ -350,6 +398,7 @@ const formatRefs = (props: {
 				host: props.host,
 				bricksTableSchema: props.bricksTableSchema,
 				documentRefMeta: props.data?.meta?.document,
+				flattenDocumentRefFields: props.flattenDocumentRefFields,
 				localization: localization,
 			});
 			if (formattedRef === null) continue;

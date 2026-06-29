@@ -76,15 +76,20 @@ export type CollectionDocumentVersionKey<
 	? CollectionDocumentVersionKeysByCollection[TCollectionKey]
 	: DefaultCollectionDocumentVersionKey;
 
+export type DocumentRefInclude = "refs" | `refs.${string}`;
+export type DocumentSingleInclude = "bricks" | "meta" | DocumentRefInclude;
+export type DocumentMultipleInclude = "meta" | DocumentRefInclude;
+
 export type DocumentsGetSingleQuery<TCollectionKey extends string = string> = {
 	filter?: CollectionDocumentFilters<TCollectionKey>;
-	include?: Array<"bricks">;
+	include?: DocumentSingleInclude[];
 };
 
 export type DocumentsGetMultipleQuery<TCollectionKey extends string = string> =
 	{
 		filter?: CollectionDocumentFilters<TCollectionKey>;
 		sort?: CollectionDocumentSorts<TCollectionKey>;
+		include?: DocumentMultipleInclude[];
 		page?: number;
 		perPage?: number;
 	};

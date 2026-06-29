@@ -1,10 +1,8 @@
 import type {
 	CollectionDocument as CoreCollectionDocument,
+	CollectionDocumentTranslations as CoreCollectionDocumentTranslations,
 	DocumentBrick as CoreDocumentBrick,
 	DocumentRelationValue as CoreDocumentRelationValue,
-	GroupDocumentField as CoreGroupDocumentField,
-	TranslatedDocumentField as CoreTranslatedDocumentField,
-	ValueDocumentField as CoreValueDocumentField,
 } from "@lucidcms/core/types";
 import { expectTypeOf, test } from "vitest";
 import { asDocument, createClient } from "./index.js";
@@ -19,34 +17,25 @@ import type {
 	CollectionDocumentTranslations,
 	CollectionDocumentVersionKey,
 	DocumentBrick,
+	DocumentMultipleInclude,
 	DocumentRelationValue,
+	DocumentSingleInclude,
 	DocumentsGetMultipleQuery,
 	DocumentsGetMultipleResponse,
 	DocumentsGetSingleQuery,
 	DocumentsGetSingleResponse,
-	GroupDocumentField,
 	LucidClient,
 	LucidClientResponse,
-	TranslatedDocumentField,
-	ValueDocumentField,
 } from "./types.js";
 
 declare module "./types.js" {
 	interface CollectionDocumentFieldsByCollection {
 		page: {
-			page_title: TranslatedDocumentField<"page_title", "text", string | null>;
-			related_page: ValueDocumentField<
-				"related_page",
-				"document",
-				Array<DocumentRelationValue<"page">>
-			>;
-			sections: GroupDocumentField<
-				"sections",
-				"repeater",
-				{
-					heading: ValueDocumentField<"heading", "text", string | null, true>;
-				}
-			>;
+			page_title: CollectionDocumentTranslations<string | null>;
+			related_page: Array<DocumentRelationValue<"page">>;
+			sections: Array<{
+				heading: string | null;
+			}>;
 		};
 	}
 
@@ -56,18 +45,14 @@ declare module "./types.js" {
 					"banner",
 					"builder",
 					{
-						title: TranslatedDocumentField<"title", "text", string | null>;
+						title: CollectionDocumentTranslations<string | null>;
 					}
 			  >
 			| DocumentBrick<
 					"seo",
 					"fixed",
 					{
-						canonical_url: ValueDocumentField<
-							"canonical_url",
-							"text",
-							string | null
-						>;
+						canonical_url: string | null;
 					}
 			  >;
 	}
@@ -116,28 +101,11 @@ declare module "./types.js" {
 declare module "@lucidcms/core/types" {
 	interface CollectionDocumentFieldsByCollection {
 		page: {
-			page_title: CoreTranslatedDocumentField<
-				"page_title",
-				"text",
-				string | null
-			>;
-			related_page: CoreValueDocumentField<
-				"related_page",
-				"document",
-				Array<CoreDocumentRelationValue<"page">>
-			>;
-			sections: CoreGroupDocumentField<
-				"sections",
-				"repeater",
-				{
-					heading: CoreValueDocumentField<
-						"heading",
-						"text",
-						string | null,
-						true
-					>;
-				}
-			>;
+			page_title: CoreCollectionDocumentTranslations<string | null>;
+			related_page: Array<CoreDocumentRelationValue<"page">>;
+			sections: Array<{
+				heading: string | null;
+			}>;
 		};
 	}
 
@@ -147,18 +115,14 @@ declare module "@lucidcms/core/types" {
 					"banner",
 					"builder",
 					{
-						title: CoreTranslatedDocumentField<"title", "text", string | null>;
+						title: CoreCollectionDocumentTranslations<string | null>;
 					}
 			  >
 			| CoreDocumentBrick<
 					"seo",
 					"fixed",
 					{
-						canonical_url: CoreValueDocumentField<
-							"canonical_url",
-							"text",
-							string | null
-						>;
+						canonical_url: string | null;
 					}
 			  >;
 	}
@@ -177,58 +141,23 @@ declare module "@lucidcms/core/types" {
 	}
 }
 
-test("collection documents narrow to generated collection field and brick types", () => {
+test("collection documents narrow to generated plain field and brick types", () => {
 	expectTypeOf<CollectionDocument<"page">["fields"]>().toEqualTypeOf<{
-		page_title: TranslatedDocumentField<"page_title", "text", string | null>;
-		related_page: ValueDocumentField<
-			"related_page",
-			"document",
-			Array<DocumentRelationValue<"page">>
-		>;
-		sections: GroupDocumentField<
-			"sections",
-			"repeater",
-			{
-				heading: ValueDocumentField<"heading", "text", string | null, true>;
-			}
-		>;
+		page_title: CollectionDocumentTranslations<string | null>;
+		related_page: Array<DocumentRelationValue<"page">>;
+		sections: Array<{
+			heading: string | null;
+		}>;
 	}>();
 
 	expectTypeOf<
-		CollectionDocument<"page">["fields"]["page_title"]["translations"]
-	>().toEqualTypeOf<CollectionDocumentTranslations<string | null>>();
-	expectTypeOf<
-		CollectionDocument<"page">["fields"]["page_title"]["translations"]["en"]
+		CollectionDocument<"page">["fields"]["page_title"]["en"]
 	>().toEqualTypeOf<string | null>();
 	expectTypeOf<
-		CollectionDocument<"page">["fields"]["page_title"]["value"]
-	>().toEqualTypeOf<undefined>();
-	expectTypeOf<
-		CollectionDocument<"page">["fields"]["page_title"]["groupRef"]
-	>().toEqualTypeOf<undefined>();
-
-	expectTypeOf<
-		NonNullable<
-			NonNullable<CollectionDocument<"page">["fields"]>["sections"]["groups"]
-		>[number]["fields"]
+		CollectionDocument<"page">["fields"]["sections"][number]
 	>().toEqualTypeOf<{
-		heading: ValueDocumentField<"heading", "text", string | null, true>;
+		heading: string | null;
 	}>();
-	expectTypeOf<
-		NonNullable<
-			NonNullable<CollectionDocument<"page">["fields"]>["sections"]["groups"]
-		>[number]["fields"]["heading"]["groupRef"]
-	>().toEqualTypeOf<string>();
-	expectTypeOf<
-		NonNullable<
-			NonNullable<CollectionDocument<"page">["fields"]>["sections"]["groups"]
-		>[number]["fields"]["heading"]["translations"]
-	>().toEqualTypeOf<undefined>();
-	expectTypeOf<
-		NonNullable<
-			NonNullable<CollectionDocument<"page">["fields"]>["sections"]["groups"]
-		>[number]["fields"]["heading"]["value"]
-	>().toEqualTypeOf<string | null>();
 
 	expectTypeOf<CollectionDocument<"page">["bricks"]>().toEqualTypeOf<
 		| Array<
@@ -236,22 +165,17 @@ test("collection documents narrow to generated collection field and brick types"
 						"banner",
 						"builder",
 						{
-							title: TranslatedDocumentField<"title", "text", string | null>;
+							title: CollectionDocumentTranslations<string | null>;
 						}
 				  >
 				| DocumentBrick<
 						"seo",
 						"fixed",
 						{
-							canonical_url: ValueDocumentField<
-								"canonical_url",
-								"text",
-								string | null
-							>;
+							canonical_url: string | null;
 						}
 				  >
 		  >
-		| null
 		| undefined
 	>();
 	expectTypeOf<CollectionDocument<"page">["status"]>().toEqualTypeOf<
@@ -260,17 +184,25 @@ test("collection documents narrow to generated collection field and brick types"
 	expectTypeOf<
 		CollectionDocument<"page">["collectionKey"]
 	>().toEqualTypeOf<"page">();
-	expectTypeOf<CollectionDocument<"page">["version"]>().toEqualTypeOf<
-		Record<
-			"latest" | "published",
-			{
-				id: number;
-				promotedFrom: number | null;
-				contentId: string;
+	expectTypeOf<CollectionDocument<"page">["meta"]>().toEqualTypeOf<
+		| {
+				versionId: number | null;
+				version: Record<
+					"latest" | "published",
+					{
+						id: number;
+						promotedFrom: number | null;
+						contentId: string;
+						createdAt: string | null;
+						createdBy: number | null;
+					} | null
+				>;
 				createdAt: string | null;
+				updatedAt: string | null;
 				createdBy: number | null;
-			} | null
-		>
+				updatedBy: number | null;
+		  }
+		| undefined
 	>();
 });
 
@@ -286,7 +218,7 @@ test("document helpers accept toolkit collection documents without widening fiel
 	expectTypeOf<ToolkitDocumentView>().toMatchTypeOf<{
 		collectionKey: "page";
 		field: (key: "page_title") => {
-			value: () => string | null | undefined;
+			value: () => CoreCollectionDocumentTranslations<string | null>;
 		};
 	}>();
 });
@@ -342,7 +274,7 @@ test("root client export returns the public LucidClient contract", () => {
 	expectTypeOf(client).toEqualTypeOf<LucidClient>();
 });
 
-test("document client queries narrow filters and sorts from the collection key", () => {
+test("document client queries narrow filters, includes, and sorts from the collection key", () => {
 	expectTypeOf<CollectionDocumentKey>().toMatchTypeOf<string>();
 	expectTypeOf<CollectionDocumentLocaleCode>().toMatchTypeOf<string>();
 	expectTypeOf<CollectionDocumentFilters<"page">>().toEqualTypeOf<{
@@ -379,6 +311,12 @@ test("document client queries narrow filters and sorts from the collection key",
 	expectTypeOf<DocumentsGetSingleQuery<"page">["filter"]>().toEqualTypeOf<
 		CollectionDocumentFilters<"page"> | undefined
 	>();
+	expectTypeOf<DocumentsGetSingleQuery<"page">["include"]>().toEqualTypeOf<
+		DocumentSingleInclude[] | undefined
+	>();
+	expectTypeOf<DocumentsGetMultipleQuery<"page">["include"]>().toEqualTypeOf<
+		DocumentMultipleInclude[] | undefined
+	>();
 	expectTypeOf<DocumentsGetMultipleQuery<"page">["sort"]>().toEqualTypeOf<
 		| Array<{
 				key: "createdAt" | "updatedAt";
@@ -410,4 +348,12 @@ test("document client methods narrow status from the collection key", () => {
 	).toEqualTypeOf<
 		Promise<LucidClientResponse<DocumentsGetMultipleResponse<"page">>>
 	>();
+
+	client.getMultiple({
+		collectionKey: "page",
+		query: {
+			// @ts-expect-error client list responses do not support brick hydration
+			include: ["bricks"],
+		},
+	});
 });

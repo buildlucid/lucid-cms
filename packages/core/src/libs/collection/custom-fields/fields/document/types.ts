@@ -1,4 +1,7 @@
-import type { DocumentField } from "../../../../../types/response.js";
+import type {
+	DocumentFieldMap,
+	DocumentFieldValueMap,
+} from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
@@ -37,7 +40,7 @@ export type DocumentRef = {
 	id: number;
 	versionId?: number;
 	collectionKey: string;
-	fields: Record<string, DocumentField> | null;
+	fields: DocumentFieldMap | DocumentFieldValueMap | null;
 };
 
 export type DocumentValidationData = {

@@ -11,8 +11,11 @@ import { createTransport } from "./transport/fetcher.js";
 import type { CreateClientOptions } from "./types/transport.js";
 
 export interface LucidClient {
+	/** Public document collection endpoints. */
 	documents: LucidDocumentsClient;
+	/** Public locale endpoints. */
 	locales: LucidLocalesClient;
+	/** Public media endpoints. */
 	media: LucidMediaClient;
 }
 

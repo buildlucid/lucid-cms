@@ -24,8 +24,11 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import extractRelatedEntityIds from "../../documents-bricks/helpers/extract-related-entity-ids.js";
-import fetchRefData from "../../documents-bricks/helpers/fetch-ref-data.js";
+import fetchRefData, {
+	type FieldRefResponse,
+} from "../../documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../../index.js";
+import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 
 type ClientDocumentsGetMultipleInput<TCollectionKey extends string = string> = {
@@ -94,6 +97,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 			},
 		}),
 	};
+	const include = resolveDocumentIncludes(query.include);
 
 	const { documentFilters, brickFilters } = groupDocumentFilters(
 		bricksTableSchemaRes.data,
@@ -111,6 +115,13 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	if (relationVersionTypeRes.error) return relationVersionTypeRes;
 
 	const relationVersionType = relationVersionTypeRes.data.versionType;
+	const collectionFieldsTableSchemas = bricksTableSchemaRes.data.filter(
+		(schema) => schema.key.brick === undefined,
+	);
+	const collectionFieldRelationTableSchemas =
+		collectionFieldsTableSchemas.filter(
+			(schema) => schema.type !== "document-fields",
+		);
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
@@ -126,6 +137,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 				documentFields: tableNameRes.data.documentFields,
 			},
 			documentFieldsTableSchema: documentFieldsTableSchemaRes.data,
+			documentFieldRelationTableSchemas: collectionFieldRelationTableSchemas,
 			includeWorkflow: false,
 			tenantKey: context.request.tenantKey,
 		},
@@ -135,32 +147,47 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	);
 	if (documentsRes.error) return documentsRes;
 
-	const relationIdRes = await extractRelatedEntityIds(context, {
-		collection: collectionRes.data,
-		brickSchema: bricksTableSchemaRes.data,
-		responses: documentsRes.data?.[0] ?? [],
-	});
-	if (relationIdRes.error) return relationIdRes;
+	const documents = documentsRes.data?.[0] ?? [];
+	const baseUrl = getBaseUrl(context);
 
-	const refDataRes = await fetchRefData(context, {
-		values: relationIdRes.data,
-		versionType: relationVersionType,
-		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
-	});
-	if (refDataRes.error) return refDataRes;
+	let refData: FieldRefResponse | undefined;
+	if (include.refs) {
+		const relationIdRes = await extractRelatedEntityIds(context, {
+			collection: collectionRes.data,
+			brickSchema: collectionFieldsTableSchemas,
+			responses: documents,
+			includeTypes: include.refTypes,
+		});
+		if (relationIdRes.error) return relationIdRes;
+
+		const refDataRes = await fetchRefData(context, {
+			values: relationIdRes.data,
+			versionType: relationVersionType,
+			resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+		});
+		if (refDataRes.error) return refDataRes;
+
+		refData = refDataRes.data;
+	}
 
 	return {
 		error: undefined,
 		data: {
 			data: documentsFormatter.formatClientMultiple<TCollectionKey>({
-				documents: documentsRes.data?.[0] || [],
+				documents,
 				collection: collectionRes.data,
 				config: context.config,
-				host: getBaseUrl(context),
-				refData: refDataRes.data,
+				host: baseUrl,
+				refData,
+				refTypes: include.refTypes,
 				hasFields: true,
 				hasBricks: false,
-				bricksTableSchema: bricksTableSchemaRes.data,
+				bricksTableSchema: collectionFieldsTableSchemas,
+				include: {
+					bricks: false,
+					refs: include.refs,
+					meta: include.meta,
+				},
 			}),
 			count: formatter.parseCount(documentsRes.data?.[1]?.count),
 		},

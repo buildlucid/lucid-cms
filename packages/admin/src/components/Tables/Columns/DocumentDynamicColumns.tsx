@@ -4,6 +4,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
+import { isUserRef } from "@/utils/relation-field-helpers";
 import DateCol from "./DateCol";
 import PillCol from "./PillCol";
 import TextCol from "./TextCol";
@@ -61,28 +62,11 @@ const DocumentDynamicColumns: Component<{
 
 		return values
 			.map((value) =>
-				refs.find(
-					(ref): ref is NonNullable<UserRef> =>
-						ref !== null &&
-						ref !== undefined &&
-						"username" in ref &&
-						"email" in ref &&
-						"firstName" in ref &&
-						"lastName" in ref &&
-						"profilePicture" in ref &&
-						ref.id === value,
-				),
+				refs.find((ref): ref is NonNullable<UserRef> => {
+					return isUserRef(ref) && ref.id === value;
+				}),
 			)
-			.filter(
-				(ref): ref is NonNullable<UserRef> =>
-					ref !== null &&
-					ref !== undefined &&
-					"username" in ref &&
-					"email" in ref &&
-					"firstName" in ref &&
-					"lastName" in ref &&
-					"profilePicture" in ref,
-			);
+			.filter(isUserRef);
 	});
 
 	// ----------------------------------

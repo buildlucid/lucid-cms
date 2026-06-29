@@ -16,6 +16,7 @@ const response = await toolkit.documents.getSingle({
 				value: Astro.params.slug ? `/${Astro.params.slug}` : "/",
 			},
 		},
+		include: ["bricks", "refs"],
 	},
 });
 

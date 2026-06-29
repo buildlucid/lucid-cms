@@ -4,6 +4,8 @@ import type {
 	CFConfig,
 	Config,
 	DocumentField,
+	DocumentFieldPlainValue,
+	DocumentFieldValueMap,
 	FieldTypes,
 	FieldValue,
 	InternalDocumentField,
@@ -368,6 +370,35 @@ const objectifyFields = (
 	);
 };
 
+const flattenFieldValue = (
+	field: InternalDocumentField,
+): DocumentFieldPlainValue => {
+	if (field.groups) {
+		return field.groups.map((group) => flattenFields(group.fields || []));
+	}
+
+	if (field.translations) {
+		return field.translations;
+	}
+
+	if ("value" in field) {
+		return field.value;
+	}
+
+	return null;
+};
+
+const flattenFields = (
+	fields: InternalDocumentField[],
+): DocumentFieldValueMap => {
+	return fields.reduce((acc, field) => {
+		if (!field) return acc;
+
+		acc[field.key] = flattenFieldValue(field);
+		return acc;
+	}, {} as DocumentFieldValueMap);
+};
+
 /**
  * Generates a unique deterministic reference for a group
  */
@@ -391,4 +422,5 @@ const generateGroupRef = (
 export default {
 	formatMultiple,
 	objectifyFields,
+	flattenFields,
 };

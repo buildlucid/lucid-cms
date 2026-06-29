@@ -1,18 +1,16 @@
 import type {
 	CollectionDocument,
 	DocumentBrick,
-	DocumentField,
-	DocumentFieldGroup,
-	DocumentFieldMap,
+	DocumentFieldValueMap,
 } from "../../types.js";
 import {
 	buildViewOptions,
 	getBrick,
 	getBricks,
 	getFieldGroups,
-	readFieldRef,
-	readFieldRefs,
 	readFieldValue,
+	readRef,
+	readRefs,
 	requireField,
 } from "./helpers.js";
 import type {
@@ -21,94 +19,98 @@ import type {
 	DocumentBrickKeyOf,
 	DocumentBrickView,
 	DocumentFieldGroupView,
-	DocumentFieldRefResult,
-	DocumentFieldRefsResult,
-	DocumentFieldValueResult,
 	DocumentFieldView,
+	DocumentRefType,
+	DocumentRefValue,
 	DocumentView,
 	DocumentViewOptions,
+	DocumentViewOptionsWithLocale,
 	FieldAccessorMethods,
-	FieldGroupRefOf,
 	FieldKeyOf,
 	GroupFieldsOf,
 	LocaleCode,
 } from "./types.js";
 
-/**
- * Builds a field-scoped view so callers can read values, refs, and repeater
- * groups without repeatedly passing the parent document and locale context.
- */
 const createFieldView = <
 	TDocument extends CollectionDocument,
-	TField extends DocumentField,
+	TValue,
+	THasLocale extends boolean,
 >(props: {
 	document: TDocument;
-	field: TField;
+	key: string;
+	value: TValue;
 	context: DocumentViewOptions;
-}): DocumentFieldView<TDocument, TField> => {
+}): DocumentFieldView<TDocument, TValue, THasLocale> => {
 	return {
-		raw: props.field,
-		key: props.field.key,
-		type: props.field.type,
-		groupRef: props.field.groupRef as FieldGroupRefOf<TField>,
+		raw: props.value,
+		key: props.key,
 		withLocale: (locale: LocaleCode) =>
 			createFieldView({
 				document: props.document,
-				field: props.field,
+				key: props.key,
+				value: props.value,
 				context: {
 					locale,
 				},
-			}),
+			}) as DocumentFieldView<TDocument, TValue, true>,
 		value: (options?: DocumentViewOptions) =>
 			readFieldValue(
-				props.field as DocumentField,
+				props.value,
 				buildViewOptions(props.context, options),
-			) as DocumentFieldValueResult<TField>,
-		refs: (options?: DocumentViewOptions) =>
-			readFieldRefs(
+			) as ReturnType<
+				DocumentFieldView<TDocument, TValue, THasLocale>["value"]
+			>,
+		refs: <TRefType extends DocumentRefType>(
+			refType: TRefType,
+			options?: DocumentViewOptions,
+		) =>
+			readRefs(
 				props.document,
-				props.field as DocumentField,
+				refType,
+				props.value,
 				buildViewOptions(props.context, options),
-			) as DocumentFieldRefsResult<TField>,
-		ref: (options?: DocumentViewOptions) =>
-			readFieldRef(
+			),
+		ref: <TRefType extends DocumentRefType>(
+			refType: TRefType,
+			options?: DocumentViewOptions,
+		) =>
+			readRef(
 				props.document,
-				props.field as DocumentField,
+				refType,
+				props.value,
 				buildViewOptions(props.context, options),
-			) as DocumentFieldRefResult<TField>,
+			),
 		groups: () =>
-			getFieldGroups(props.field).map((group) =>
-				createFieldGroupView({
+			getFieldGroups<GroupFieldsOf<TValue>>(props.value).map((group) =>
+				createFieldGroupView<TDocument, GroupFieldsOf<TValue>, THasLocale>({
 					document: props.document,
 					group,
 					context: props.context,
 				}),
-			) as unknown as Array<
-				DocumentFieldGroupView<TDocument, GroupFieldsOf<TField>>
-			>,
-	} as unknown as DocumentFieldView<TDocument, TField>;
+			),
+	} as DocumentFieldView<TDocument, TValue, THasLocale>;
 };
 
-/**
- * Reuses the same field accessor shape across documents, bricks, and repeater
- * groups so navigation stays consistent everywhere.
- */
 const createFieldAccessorMethods = <
 	TDocument extends CollectionDocument,
-	TFields extends DocumentFieldMap,
+	TFields extends DocumentFieldValueMap,
+	THasLocale extends boolean,
 >(props: {
 	document: TDocument;
 	fields: TFields;
 	context: DocumentViewOptions;
-}): FieldAccessorMethods<TDocument, TFields> => {
+}): FieldAccessorMethods<TDocument, TFields, THasLocale> => {
 	const field = <TKey extends FieldKeyOf<TFields>>(
 		key: TKey,
-	): DocumentFieldView<TDocument, TFields[TKey]> => {
-		return createFieldView({
+	): DocumentFieldView<TDocument, TFields[TKey], THasLocale> => {
+		const value = requireField(props.fields, key);
+
+		return createFieldView<TDocument, TFields[TKey], THasLocale>({
 			document: props.document,
-			field: requireField(props.fields, key),
+			key,
+			value,
 			context: props.context,
-		}) as unknown as DocumentFieldView<TDocument, TFields[TKey]>;
+		});
 	};
 
 	return {
@@ -116,96 +118,95 @@ const createFieldAccessorMethods = <
 	};
 };
 
-/**
- * Wraps a repeater group in the same helper surface as the root document so
- * nested content can be read with the same mental model.
- */
 const createFieldGroupView = <
 	TDocument extends CollectionDocument,
-	TFields extends DocumentFieldMap,
+	TFields extends DocumentFieldValueMap,
+	THasLocale extends boolean,
 >(props: {
 	document: TDocument;
-	group: DocumentFieldGroup<TFields>;
+	group: TFields;
 	context: DocumentViewOptions;
-}): DocumentFieldGroupView<TDocument, TFields> => {
+}): DocumentFieldGroupView<TDocument, TFields, THasLocale> => {
 	return {
 		raw: props.group,
-		ref: props.group.ref,
-		order: props.group.order,
-		open: props.group.open,
 		withLocale: (locale: LocaleCode) =>
-			createFieldGroupView({
+			createFieldGroupView<TDocument, TFields, true>({
 				document: props.document,
 				group: props.group,
 				context: {
 					locale,
 				},
-			}),
-		...createFieldAccessorMethods({
+			}) as DocumentFieldGroupView<TDocument, TFields, true>,
+		...createFieldAccessorMethods<TDocument, TFields, THasLocale>({
 			document: props.document,
-			fields: props.group.fields,
+			fields: props.group,
 			context: props.context,
 		}),
-	} as unknown as DocumentFieldGroupView<TDocument, TFields>;
+	};
 };
 
-/**
- * Wraps a brick with field helpers while preserving the brick's own metadata
- * like key, type, and order for rendering decisions.
- */
 const createBrickView = <
 	TDocument extends CollectionDocument,
 	TBrick extends DocumentBrick,
+	THasLocale extends boolean,
 >(props: {
 	document: TDocument;
 	brick: TBrick;
 	context: DocumentViewOptions;
-}): DocumentBrickView<TDocument, TBrick> => {
+}): DocumentBrickView<TDocument, TBrick, THasLocale> => {
 	return {
 		raw: props.brick,
 		id: props.brick.id,
 		ref: props.brick.ref,
 		key: props.brick.key,
 		order: props.brick.order,
-		open: props.brick.open,
 		type: props.brick.type,
 		withLocale: (locale: LocaleCode) =>
-			createBrickView({
+			createBrickView<TDocument, TBrick, true>({
 				document: props.document,
 				brick: props.brick,
 				context: {
 					locale,
 				},
-			}),
-		...createFieldAccessorMethods({
+			}) as DocumentBrickView<TDocument, TBrick, true>,
+		...createFieldAccessorMethods<TDocument, TBrick["fields"], THasLocale>({
 			document: props.document,
 			fields: props.brick.fields,
 			context: props.context,
 		}),
-	} as unknown as DocumentBrickView<TDocument, TBrick>;
+	} as unknown as DocumentBrickView<TDocument, TBrick, THasLocale>;
 };
 
-/** Wraps a document with helpers for fields, refs, groups, and bricks. */
+/** Wraps a document and reads translated fields using the supplied locale. */
+export function asDocument<TDocument extends CollectionDocument>(
+	document: TDocument,
+	options: DocumentViewOptionsWithLocale,
+): DocumentView<TDocument, true>;
+/** Wraps a document with typed helpers for fields, bricks, refs, and locales. */
 export function asDocument<TDocument extends CollectionDocument>(
 	document: TDocument,
 	options?: DocumentViewOptions,
-): DocumentView<TDocument>;
-/** Returns `undefined` when the input document is nullish. */
+): DocumentView<TDocument, false>;
+/** Returns undefined when the document is null or undefined. */
 export function asDocument(
 	document: null | undefined,
 	options?: DocumentViewOptions,
 ): undefined;
+/** Wraps an optional document and reads translated fields using the supplied locale. */
+export function asDocument<TDocument extends CollectionDocument>(
+	document: TDocument | null | undefined,
+	options: DocumentViewOptionsWithLocale,
+): DocumentView<TDocument, true> | undefined;
+/** Wraps an optional document with typed helpers when it is present. */
 export function asDocument<TDocument extends CollectionDocument>(
 	document: TDocument | null | undefined,
 	options?: DocumentViewOptions,
-): DocumentView<TDocument> | undefined;
+): DocumentView<TDocument, false> | undefined;
 export function asDocument<TDocument extends CollectionDocument>(
 	document: TDocument | null | undefined,
 	options: DocumentViewOptions = {},
-): DocumentView<TDocument> | undefined {
-	if (!document) {
-		return undefined;
-	}
+): DocumentView<TDocument, boolean> | undefined {
+	if (!document) return undefined;
 
 	const brick = ((
 		filterOrKey: DocumentBrickKeyOf<TDocument> | DocumentBrickFilter<TDocument>,
@@ -217,12 +218,12 @@ export function asDocument<TDocument extends CollectionDocument>(
 
 		if (!matchedBrick) return undefined;
 
-		return createBrickView({
+		return createBrickView<TDocument, DocumentBrickItem<TDocument>, boolean>({
 			document,
 			brick: matchedBrick as DocumentBrickItem<TDocument>,
 			context: options,
 		});
-	}) as DocumentView<TDocument>["brick"];
+	}) as DocumentView<TDocument, boolean>["brick"];
 
 	const bricks = ((
 		filterOrKey?:
@@ -237,13 +238,13 @@ export function asDocument<TDocument extends CollectionDocument>(
 					: getBricks(document);
 
 		return matchedBricks.map((matchedBrick) =>
-			createBrickView({
+			createBrickView<TDocument, DocumentBrickItem<TDocument>, boolean>({
 				document,
 				brick: matchedBrick as DocumentBrickItem<TDocument>,
 				context: options,
 			}),
 		);
-	}) as unknown as DocumentView<TDocument>["bricks"];
+	}) as DocumentView<TDocument, boolean>["bricks"];
 
 	return {
 		raw: document,
@@ -252,13 +253,21 @@ export function asDocument<TDocument extends CollectionDocument>(
 		withLocale: (locale: LocaleCode) =>
 			asDocument(document, {
 				locale,
-			}),
+			}) as DocumentView<TDocument, true>,
 		brick,
 		bricks,
-		...createFieldAccessorMethods({
+		refs: <TRefType extends DocumentRefType>(
+			refType: TRefType,
+			value: DocumentRefValue<TRefType>,
+		) => readRefs(document, refType, value),
+		ref: <TRefType extends DocumentRefType>(
+			refType: TRefType,
+			value: DocumentRefValue<TRefType>,
+		) => readRef(document, refType, value),
+		...createFieldAccessorMethods<TDocument, TDocument["fields"], boolean>({
 			document,
 			fields: document.fields,
 			context: options,
 		}),
-	} as unknown as DocumentView<TDocument>;
+	} as unknown as DocumentView<TDocument, boolean>;
 }

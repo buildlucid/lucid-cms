@@ -7,9 +7,31 @@ import type {
 	UserRef,
 } from "@types";
 import brickHelpers from "@/utils/brick-helpers";
+import { isObjectRecord } from "@/utils/type-guards";
 
 export type MediaRelationRef = NonNullable<MediaRef>;
 export type UserRelationRef = NonNullable<UserRef>;
+
+export const isDocumentRef = (value: unknown): value is DocumentRef => {
+	return (
+		isObjectRecord(value) &&
+		typeof value.id === "number" &&
+		typeof value.collectionKey === "string" &&
+		"fields" in value
+	);
+};
+
+export const isUserRef = (value: unknown): value is UserRelationRef => {
+	return (
+		isObjectRecord(value) &&
+		typeof value.id === "number" &&
+		"username" in value &&
+		"email" in value &&
+		"firstName" in value &&
+		"lastName" in value &&
+		"profilePicture" in value
+	);
+};
 
 export const mediaResponseToRef = (media: Media): MediaRelationRef => media;
 

@@ -62,6 +62,7 @@ export function useDocumentState(props: {
 			},
 			include: {
 				bricks: true,
+				refs: true,
 			},
 		},
 		enabled: () => canFetchDocument(),

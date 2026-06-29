@@ -7,6 +7,7 @@ import type {
 } from "@/types/collection-config";
 import dateHelpers from "@/utils/date-helpers";
 import helpers from "@/utils/helpers";
+import { isObjectRecord } from "@/utils/type-guards";
 
 export const tableHeadColumns = (fields: CollectionFieldConfig[]) => {
 	return fields.map((field) => {
@@ -104,11 +105,13 @@ export const getDocumentListingPreviewFields = (props: {
 }): Array<DocumentListingPreviewField> => {
 	const collection = props.collection;
 	if (!collection || !props.documentRef?.fields) return [];
+	if (!isDocumentFieldMap(props.documentRef.fields)) return [];
+	const fields = props.documentRef.fields;
 
 	return collectionFieldIncludes(collection)
 		.map((field) => {
 			const documentField = findDocumentField({
-				fields: props.documentRef?.fields || {},
+				fields,
 				fieldKey: field.key,
 			});
 			const value = formatDocumentPreviewValue({
@@ -131,6 +134,22 @@ export const getDocumentListingPreviewFields = (props: {
 			} satisfies DocumentListingPreviewField;
 		})
 		.filter((field): field is DocumentListingPreviewField => Boolean(field));
+};
+
+const isDocumentField = (value: unknown): value is DocumentField => {
+	return (
+		isObjectRecord(value) &&
+		typeof value.key === "string" &&
+		typeof value.type === "string"
+	);
+};
+
+const isDocumentFieldMap = (
+	value: unknown,
+): value is Record<string, DocumentField> => {
+	if (!isObjectRecord(value)) return false;
+
+	return Object.values(value).every(isDocumentField);
 };
 
 const findDocumentField = (props: {

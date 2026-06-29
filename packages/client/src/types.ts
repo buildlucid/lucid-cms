@@ -1,12 +1,10 @@
 import type {
 	DocumentBrick,
-	DocumentField,
-	DocumentFieldGroup,
-	DocumentFieldMap,
+	DocumentFieldValueMap,
 	DocumentRef,
 	DocumentRelationValue,
-	DocumentVersion,
-	GroupDocumentField,
+	DocumentVersionSummary,
+	FieldType,
 	Locale,
 	Media,
 	MediaEmbed,
@@ -18,33 +16,12 @@ import type {
 	MediaUrl,
 	ProfilePicture,
 	UserRef,
-	ValueDocumentField,
 } from "@lucidcms/types";
 import type { LucidClient } from "./client.js";
 import type {
 	CollectionDocumentStatus,
 	CollectionDocumentVersionKey,
 } from "./types/contracts.js";
-
-type CollectionDocumentAuthor = {
-	id: number;
-	email: string | null;
-	firstName: string | null;
-	lastName: string | null;
-	username: string | null;
-} | null;
-
-type CollectionDocumentVersionSummary = Pick<
-	DocumentVersion,
-	"id" | "promotedFrom" | "contentId" | "createdAt" | "createdBy"
->;
-
-type CollectionDocumentRef =
-	| DocumentRef
-	| MediaRef
-	| UserRef
-	| null
-	| undefined;
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
 export interface CollectionDocumentFieldsByCollection {}
@@ -90,27 +67,10 @@ export type CollectionDocumentTranslations<TValue> = [
 	: ExactCollectionDocumentTranslations<TValue> &
 			Partial<Record<string, TValue>>;
 
-type DocumentFieldGroupRefShape<THasGroupRef extends boolean> =
-	THasGroupRef extends true ? { groupRef: string } : { groupRef?: never };
-
-export type TranslatedDocumentField<
-	TKey extends string = string,
-	TType extends DocumentField["type"] = DocumentField["type"],
-	TValue = DocumentField["value"],
-	THasGroupRef extends boolean = false,
-> = Omit<
-	DocumentField<TKey, TType, TValue>,
-	"groupRef" | "groups" | "translations" | "value"
-> & {
-	translations: CollectionDocumentTranslations<TValue>;
-	value?: never;
-	groups?: never;
-} & DocumentFieldGroupRefShape<THasGroupRef>;
-
 type ResolveCollectionDocumentFields<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentFieldKey
 		? CollectionDocumentFieldsByCollection[TCollectionKey]
-		: DocumentFieldMap;
+		: DocumentFieldValueMap;
 
 type ResolveCollectionDocumentBricks<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentBrickKey
@@ -125,10 +85,19 @@ type ResolveCollectionDocumentStatus<TCollectionKey extends string> =
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
 
-type ResolveCollectionDocumentVersionKey<TCollectionKey extends string> =
-	CollectionDocumentVersionKey<
-		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
+export type CollectionDocumentMeta<
+	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
+> = {
+	versionId: number | null;
+	version: Record<
+		CollectionDocumentVersionKey<TCollectionKey>,
+		DocumentVersionSummary | null
 	>;
+	createdAt: string | null;
+	updatedAt: string | null;
+	createdBy: number | null;
+	updatedBy: number | null;
+};
 
 export interface CollectionDocument<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
@@ -136,17 +105,12 @@ export interface CollectionDocument<
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
 	status: ResolveCollectionDocumentStatus<TCollectionKey> | null;
-	version: Record<
-		ResolveCollectionDocumentVersionKey<TCollectionKey>,
-		CollectionDocumentVersionSummary | null
-	>;
-	createdBy: CollectionDocumentAuthor;
-	createdAt: string | null;
-	updatedAt: string | null;
-	updatedBy: CollectionDocumentAuthor;
-	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>> | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
-	refs?: Partial<Record<string, CollectionDocumentRef[]>> | null;
+	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
+	refs?: Partial<Record<FieldType | string, unknown[]>>;
+	meta?: CollectionDocumentMeta<
+		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
+	>;
 }
 
 export type {
@@ -188,6 +152,9 @@ export type {
 	CollectionDocumentStatusesByCollection,
 	CollectionDocumentVersionKey,
 	CollectionDocumentVersionKeysByCollection,
+	DocumentMultipleInclude,
+	DocumentRefInclude,
+	DocumentSingleInclude,
 	DocumentsGetMultipleQuery,
 	DocumentsGetSingleQuery,
 	FilterObject,
@@ -217,12 +184,9 @@ export type {
 } from "./types/transport.js";
 export type {
 	DocumentBrick,
-	DocumentField,
-	DocumentFieldGroup,
-	DocumentFieldMap,
+	DocumentFieldValueMap,
 	DocumentRef,
 	DocumentRelationValue,
-	GroupDocumentField,
 	Locale,
 	LucidClient,
 	Media,
@@ -235,5 +199,4 @@ export type {
 	MediaUrl,
 	ProfilePicture,
 	UserRef,
-	ValueDocumentField,
 };

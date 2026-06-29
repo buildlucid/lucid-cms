@@ -1,7 +1,6 @@
 import type {
 	BrickError,
 	Collection,
-	DocumentRef,
 	DocumentVersionCheckResponse,
 	FieldError,
 	FieldRef,
@@ -20,7 +19,9 @@ import type {
 } from "@/types/collection-config";
 import brickHelpers, { clearTargetFieldErrors } from "@/utils/brick-helpers";
 import { mergeDraftCheckFields } from "@/utils/draft-check-helpers";
+import { isDocumentRef } from "@/utils/relation-field-helpers";
 import safeDeepEqual from "@/utils/safe-deep-equal";
+import { isObjectRecord } from "@/utils/type-guards";
 
 export interface BrickData {
 	ref: string;
@@ -598,19 +599,21 @@ const [get, set] = createStore<{
 						if (!existing || !nextRef) return false;
 
 						if (fieldType === "document") {
-							const existingDoc = existing as DocumentRef;
-							const refDoc = nextRef as DocumentRef;
-							if (!existingDoc || !refDoc) return false;
+							if (!isDocumentRef(existing) || !isDocumentRef(nextRef)) {
+								return false;
+							}
+
 							return (
-								existingDoc.collectionKey === refDoc.collectionKey &&
-								existingDoc.id === refDoc.id
+								existing.collectionKey === nextRef.collectionKey &&
+								existing.id === nextRef.id
 							);
 						}
 
-						const existingItem = existing;
-						const refItem = nextRef;
-						if (!existingItem || !refItem) return false;
-						return existingItem.id === refItem.id;
+						if (!isObjectRecord(existing) || !isObjectRecord(nextRef)) {
+							return false;
+						}
+
+						return existing.id === nextRef.id;
 					});
 
 					if (existingIndex !== -1) {
