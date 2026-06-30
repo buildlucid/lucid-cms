@@ -19,7 +19,7 @@ import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import checkTenants from "./checks/check-tenants.js";
 import ConfigSchema from "./config-schema.js";
 import mergeConfig from "./merge-config.js";
-import normalizeSecrets from "./normalize-secrets.js";
+import normalizeConfigSecrets from "./utils/normalize-config-secrets.js";
 
 let cachedConfig: Config | undefined;
 
@@ -34,11 +34,16 @@ const processConfig = async (
 	options?: {
 		bypassCache?: boolean;
 		skipValidation?: boolean;
+		mode?: "runtime" | "build";
 		resolvedDb?: DatabaseAdapter;
 		recipe?: LucidConfigRecipe;
 	},
 ): Promise<Config> => {
-	if (cachedConfig !== undefined && !options?.bypassCache) {
+	if (
+		cachedConfig !== undefined &&
+		options?.mode !== "build" &&
+		!options?.bypassCache
+	) {
 		return cachedConfig;
 	}
 
@@ -61,17 +66,12 @@ const processConfig = async (
 	Object.assign(configRes, {
 		db: options.resolvedDb,
 	});
-	configRes = produce(configRes, (draft) => {
-		draft.secrets = normalizeSecrets((draft as unknown as LucidConfig).secrets);
-	});
+
+	configRes = normalizeConfigSecrets(configRes, options?.mode);
 
 	if (options?.recipe) {
 		configRes = produce(configRes, options.recipe);
-		configRes = produce(configRes, (draft) => {
-			draft.secrets = normalizeSecrets(
-				(draft as unknown as LucidConfig).secrets,
-			);
-		});
+		configRes = normalizeConfigSecrets(configRes, options?.mode);
 	}
 
 	const userTranslationSources = [...(configRes.i18n.sources ?? [])];
@@ -195,8 +195,11 @@ const processConfig = async (
 		force: true,
 	});
 
-	cachedConfig = configRes;
+	if (options?.mode === "build") {
+		return configRes;
+	}
 
+	cachedConfig = configRes;
 	return cachedConfig;
 };
 

@@ -40,6 +40,10 @@ const loadBuildProject = async (props?: {
 		silent: props?.silent,
 		configureLucidPath: props?.configureLucidPath,
 		prepareRuntime: props?.prepareRuntime,
+		validateEnvSchema: false,
+		processConfigOptions: {
+			mode: "build",
+		},
 	});
 	const translations = await prepareTranslations({
 		config: loaded.config,

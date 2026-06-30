@@ -103,6 +103,7 @@ export const resolveConfigDefinition = async (props: {
 	configPath?: string;
 	projectRoot?: string;
 	prepareRuntime?: boolean;
+	validateEnvSchema?: boolean;
 	logger?: GetEnvVarsLogger;
 	processConfigOptions?: Parameters<typeof processConfig>[1];
 }): Promise<ResolveConfigDefinitionResult> => {
@@ -164,10 +165,18 @@ export const resolveConfigDefinition = async (props: {
 			: undefined);
 
 	const envSchema = wrappedDefinition.env ?? props.envSchema;
+	// Builds do not need runtime env validation; runtime commands validate env
+	// before using it.
+	const shouldValidateEnvSchema = props.validateEnvSchema ?? true;
+	const validateEnv = (envVars: EnvironmentVariables | undefined) => {
+		if (!shouldValidateEnvSchema || !envSchema || !envVars) {
+			return;
+		}
 
-	if (envSchema && env) {
-		envSchema.parse(env);
-	}
+		envSchema.parse(envVars);
+	};
+
+	validateEnv(env);
 
 	await adapter.resolveOptions?.(env ?? {});
 
@@ -199,9 +208,7 @@ export const resolveConfigDefinition = async (props: {
 				logger,
 			});
 
-			if (envSchema && env) {
-				envSchema.parse(env);
-			}
+			validateEnv(env);
 
 			await adapter.resolveOptions?.(env ?? {});
 			rawConfig = wrappedDefinition.config(env || {});

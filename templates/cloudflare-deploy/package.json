@@ -7,7 +7,7 @@
 	"scripts": {
 		"dev": "lucidcms dev",
 		"serve": "lucidcms serve",
-		"build": "LUCID_SECRET=0000000000000000000000000000000000000000000000000000000000000000 lucidcms build",
+		"build": "lucidcms build",
 		"typegen": "lucidcms typegen",
 		"sync": "lucidcms sync",
 		"migrate": "lucidcms migrate",
@@ -15,7 +15,7 @@
 		"migrate:reset": "lucidcms migrate:reset",
 		"migrate:fresh": "lucidcms migrate:fresh",
 		"deploy": "npm run deploy:database && wrangler deploy",
-		"deploy:database": "LUCID_SECRET=0000000000000000000000000000000000000000000000000000000000000000 lucidcms migrate --force --remote",
+		"deploy:database": "lucidcms migrate --force --remote",
 		"wrangler:dev": "lucidcms build --silent && wrangler dev --test-scheduled",
 		"wrangler:deploy": "npm run build && npm run deploy"
 	},

@@ -107,6 +107,55 @@ test("resolves env schema from the config definition", async () => {
 	expect(result.config.db).toBe(adapter);
 });
 
+test("skips env schema validation and fills missing secrets during build resolution", async () => {
+	const adapter = createAdapter("build-env");
+	const env = z.object({
+		SECRET: z.string().length(64),
+	});
+	const definition = configureLucid({
+		runtime: {
+			key: "node",
+			lucid: "0.0.0",
+		},
+		db: adapter,
+		env,
+		config: (env) => ({
+			secrets: env.SECRET,
+			collections: [],
+			plugins: [],
+		}),
+	});
+
+	await expect(
+		resolveConfigDefinition({
+			definition,
+			env: {},
+			processConfigOptions: {
+				bypassCache: true,
+				mode: "build",
+			},
+		}),
+	).rejects.toThrow();
+
+	const result = await resolveConfigDefinition({
+		definition,
+		env: {},
+		validateEnvSchema: false,
+		processConfigOptions: {
+			bypassCache: true,
+			mode: "build",
+		},
+	});
+
+	expect(result.envSchema).toBe(env);
+	expect(Object.values(result.config.secrets)).toHaveLength(4);
+	expect(
+		Object.values(result.config.secrets).every(
+			(secret) => secret.length === 64,
+		),
+	).toBe(true);
+});
+
 test("passes supported prepare artifacts from db factories and plugins to the runtime", async () => {
 	const adapter = createAdapter("prepare");
 	const db = createDatabaseAdapterFactory({
@@ -198,9 +247,11 @@ test("passes supported prepare artifacts from db factories and plugins to the ru
 	});
 
 	expect(prepare).toHaveBeenCalledTimes(2);
+	// @ts-expect-error
 	expect(prepare.mock.calls[0]?.[0].prepareArtifacts).toEqual({
 		custom: [],
 	});
+	// @ts-expect-error
 	expect(prepare.mock.calls[1]?.[0].prepareArtifacts.custom).toEqual([
 		{
 			type: "test:prepare",

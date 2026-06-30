@@ -29,6 +29,7 @@ export const loadConfigFile = async (props?: {
 	silent?: boolean;
 	configureLucidPath?: string;
 	prepareRuntime?: boolean;
+	validateEnvSchema?: boolean;
 	processConfigOptions?: Parameters<
 		typeof resolveConfigDefinition
 	>[0]["processConfigOptions"];
@@ -55,6 +56,7 @@ export const loadConfigFile = async (props?: {
 		configPath,
 		projectRoot,
 		prepareRuntime: props?.prepareRuntime,
+		validateEnvSchema: props?.validateEnvSchema,
 		logger: {
 			instance: cliLogger,
 			silent: props?.silent ?? false,
