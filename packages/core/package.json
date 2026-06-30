@@ -134,7 +134,7 @@
 		"node": "^24.0.0"
 	},
 	"bin": {
-		"lucidcms": "./dist/libs/cli/index.mjs"
+		"lucidcms": "dist/libs/cli/index.mjs"
 	},
 	"sideEffects": false,
 	"license": "BUSL-1.1",
