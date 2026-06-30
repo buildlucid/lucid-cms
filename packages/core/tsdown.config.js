@@ -13,7 +13,7 @@ export default defineConfig({
 		"src/libs/queue/index.ts",
 		"src/libs/db/index.ts",
 		"src/libs/email/index.ts",
-		// "src/libs/image-processor/index.ts",
+		"src/libs/image-processor/index.ts",
 		"src/libs/kv/index.ts",
 		"src/libs/media/index.ts",
 	],

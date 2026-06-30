@@ -1,11 +1,11 @@
 import { PassThrough } from "node:stream";
+import type { ImageProcessorOptions } from "../../libs/image-processor/types.js";
 import {
 	splitBodyForProcessing,
 	toNodeReadable,
 } from "../../libs/media/index.js";
 import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
 import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
-import type { ImageProcessorOptions } from "../../types/config.js";
 import { createBufferETag, matchesETag } from "../../utils/http/etag.js";
 import {
 	getMediaKeyTenantKey,

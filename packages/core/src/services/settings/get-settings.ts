@@ -1,8 +1,7 @@
 import constants from "../../constants/constants.js";
 import isEmailSimulated from "../../libs/email/is-simulated.js";
 import { settingsFormatter } from "../../libs/formatters/index.js";
-import getImageProcessor from "../../libs/image-processor/get-processor.js";
-import passthroughProcessor from "../../libs/image-processor/processors/passthrough.js";
+import getImageProcessor from "../../libs/image-processor/get-adapter.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import { multiTenancyEnabled } from "../../utils/helpers/index.js";
@@ -28,7 +27,7 @@ const getSettings: ServiceFn<
 	Settings
 > = async (context, data) => {
 	const tenantKey = context.request.tenantKey ?? null;
-	const [optionsRes, processedImageCountRes, image, mediaStorageUsed] =
+	const [optionsRes, processedImageCountRes, imageProcessor, mediaStorageUsed] =
 		await Promise.all([
 			optionServices.getMultiple(context, {
 				names: [
@@ -63,8 +62,6 @@ const getSettings: ServiceFn<
 	const emailTemplates = Array.from(
 		new Set([...defaultTemplates, ...preRenderedTemplates]),
 	);
-	const imageProcessorKey =
-		image === passthroughProcessor ? "passthrough" : "custom";
 
 	return {
 		error: undefined,
@@ -78,7 +75,7 @@ const getSettings: ServiceFn<
 				emailAdapterKey: context.email.key,
 				emailSimulated: isEmailSimulated(context),
 				emailTemplates,
-				imageProcessorKey,
+				imageProcessorKey: imageProcessor.key,
 				systemAlertEmail: systemAlertEmailRes?.valueText ?? null,
 				runtimeKey: data.runtime,
 				queueKey: context.queue.key,

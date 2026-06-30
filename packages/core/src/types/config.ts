@@ -1,4 +1,3 @@
-import type { Readable } from "node:stream";
 import type z from "zod";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
@@ -19,6 +18,10 @@ import type {
 	LocaleDirection,
 	TranslationSource,
 } from "../libs/i18n/types.js";
+import type {
+	ImageProcessor,
+	ImageProcessorInstance,
+} from "../libs/image-processor/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../libs/kv/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
 import type {
@@ -31,7 +34,6 @@ import type {
 	QueueAdapterInstance,
 } from "../libs/queue/types.js";
 import type { CorePermission } from "../types.js";
-import type { ServiceResponse } from "../utils/services/types.js";
 
 export type CopyPublicEntry =
 	| string
@@ -39,24 +41,6 @@ export type CopyPublicEntry =
 			input: string;
 			output?: string;
 	  };
-
-export type ImageProcessorOptions = {
-	width?: number;
-	height?: number;
-	format?: "webp" | "avif" | "jpeg" | "png";
-	quality?: number;
-};
-export type ImageProcessorResult = {
-	buffer: Buffer;
-	mimeType: string;
-	size: number;
-	extension: string;
-	shouldStore: boolean;
-};
-export type ImageProcessor = (
-	stream: Readable,
-	options: ImageProcessorOptions,
-) => ServiceResponse<ImageProcessorResult>;
 
 export type AccessPermissionDetails = {
 	/**
@@ -476,7 +460,10 @@ export interface LucidConfig {
 		 */
 		images?: {
 			/** The image processor to use. */
-			processor?: ImageProcessor;
+			processor?:
+				| ImageProcessor
+				| ImageProcessorInstance
+				| Promise<ImageProcessorInstance>;
 			/**
 			 * The image presets to use. These are used to generate the processed images.
 			 */
@@ -664,7 +651,10 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			processedImagesPerFile: number;
 		};
 		images: {
-			processor?: ImageProcessor;
+			processor?:
+				| ImageProcessor
+				| ImageProcessorInstance
+				| Promise<ImageProcessorInstance>;
 			presets: Record<
 				string,
 				{

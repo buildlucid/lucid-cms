@@ -8,6 +8,7 @@ export * from "./libs/email/types.js";
 export * from "./libs/hooks/types.js";
 export * from "./libs/http/types.js";
 export * from "./libs/i18n/types.js";
+export * from "./libs/image-processor/types.js";
 export * from "./libs/kv/types.js";
 export * from "./libs/logger/types.js";
 export * from "./libs/media/types.js";

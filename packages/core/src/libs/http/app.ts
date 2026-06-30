@@ -18,6 +18,10 @@ import {
 } from "../email/lifecycle.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
+import {
+	destroyImageProcessor,
+	getInitializedImageProcessor,
+} from "../image-processor/lifecycle.js";
 import { destroyKVAdapter, getInitializedKVAdapter } from "../kv/lifecycle.js";
 import {
 	destroyMediaAdapter,
@@ -68,20 +72,25 @@ const createApp = async (props: {
 		runtimeContext: props.runtimeContext,
 	});
 
-	const [queueInstance, mediaInstance, emailInstance] = await Promise.all([
-		getInitializedQueueAdapter(props.config, {
-			env: props.env,
-			runtimeContext: props.runtimeContext,
-		}),
-		getInitializedMediaAdapter(props.config, {
-			env: props.env,
-			runtimeContext: props.runtimeContext,
-		}),
-		getInitializedEmailAdapter(props.config, {
-			env: props.env,
-			runtimeContext: props.runtimeContext,
-		}),
-	]);
+	const [queueInstance, mediaInstance, emailInstance, imageProcessorInstance] =
+		await Promise.all([
+			getInitializedQueueAdapter(props.config, {
+				env: props.env,
+				runtimeContext: props.runtimeContext,
+			}),
+			getInitializedMediaAdapter(props.config, {
+				env: props.env,
+				runtimeContext: props.runtimeContext,
+			}),
+			getInitializedEmailAdapter(props.config, {
+				env: props.env,
+				runtimeContext: props.runtimeContext,
+			}),
+			getInitializedImageProcessor(props.config, {
+				env: props.env,
+				runtimeContext: props.runtimeContext,
+			}),
+		]);
 
 	app
 		.use(logRoute)
@@ -405,6 +414,11 @@ const createApp = async (props: {
 					runtimeContext: props.runtimeContext,
 				}),
 				destroyEmailAdapter(emailInstance, {
+					config: props.config,
+					env: props.env,
+					runtimeContext: props.runtimeContext,
+				}),
+				destroyImageProcessor(imageProcessorInstance, {
 					config: props.config,
 					env: props.env,
 					runtimeContext: props.runtimeContext,

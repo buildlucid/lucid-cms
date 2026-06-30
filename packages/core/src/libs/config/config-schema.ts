@@ -1,6 +1,5 @@
 import z from "zod";
 import constants from "../../constants/constants.js";
-import type { ImageProcessor } from "../../types/config.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
 import type {
@@ -9,6 +8,10 @@ import type {
 	LucidRouteDefinition,
 } from "../http/types.js";
 import { adminCopyInputSchema } from "../i18n/index.js";
+import type {
+	ImageProcessor,
+	ImageProcessorInstance,
+} from "../image-processor/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
@@ -36,12 +39,11 @@ const LucidRouteDefinitionSchema = z.custom<LucidRouteDefinition>(
 
 // TODO: improve all function custom schemas bellow
 
-const ImageProcessorSchema = z.custom<ImageProcessor>(
-	(data) => typeof data === "function",
-	{
-		message: "Expected an ImageProcessor function",
-	},
-);
+const ImageProcessorSchema = z.custom<
+	ImageProcessor | ImageProcessorInstance | Promise<ImageProcessorInstance>
+>((data) => typeof data === "function" || typeof data === "object", {
+	message: "Expected an ImageProcessor function",
+});
 
 const QueueAdapterSchema = z.custom<
 	QueueAdapter | QueueAdapterInstance | Promise<QueueAdapterInstance>

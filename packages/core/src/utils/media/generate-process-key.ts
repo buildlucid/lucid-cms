@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import type { ImageProcessorOptions } from "../../types/config.js";
+import type { ImageProcessorOptions } from "../../libs/image-processor/types.js";
 import getKeyVisibility from "./get-key-visibility.js";
 import { getMediaKeyParts } from "./media-key-tenant.js";
 import normalizeMediaKey from "./normalize-media-key.js";
