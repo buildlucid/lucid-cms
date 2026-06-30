@@ -1,4 +1,3 @@
-import cacheKeys from "../../libs/kv/cache-keys.js";
 import { ClientIntegrationsRepository } from "../../libs/repositories/index.js";
 import { encodeApiKey } from "../../utils/client-integrations/encode-api-key.js";
 import generateKeys from "../../utils/client-integrations/generate-keys.js";
@@ -48,9 +47,6 @@ const regenerateKeys: ServiceFn<
 		},
 	});
 	if (updateKeysRes.error) return updateKeysRes;
-
-	const cacheKey = cacheKeys.auth.client(checkExistsRes.data.key);
-	await context.kv.delete(context, { key: cacheKey, hash: true });
 
 	return {
 		error: undefined,

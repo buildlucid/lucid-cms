@@ -21,10 +21,9 @@ const cacheKeys = {
 		record: (key: string) => `rate-limit:record:${key}`,
 	},
 	/**
-	 * Generate a cache key for API key authentication
+	 * Generate cache keys for authentication
 	 */
 	auth: {
-		client: (apiKey: string) => `auth:client:${apiKey}`,
 		user: (
 			userId: string | number,
 			namespaceToken: string,

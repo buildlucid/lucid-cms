@@ -1,16 +1,11 @@
-import { minutesToSeconds } from "date-fns";
 import { createMiddleware } from "hono/factory";
 import { clientIntegrationServices } from "../../../services/index.js";
-import type {
-	LucidClientIntegrationAuth,
-	LucidHonoContext,
-} from "../../../types/hono.js";
+import type { LucidHonoContext } from "../../../types/hono.js";
 import { decodeApiKey } from "../../../utils/client-integrations/encode-api-key.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import { multiTenancyEnabled } from "../../../utils/helpers/index.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import { copy } from "../../i18n/index.js";
-import cacheKeys from "../../kv/cache-keys.js";
 import createServiceContext from "../utils/create-service-context.js";
 
 const clientAuthentication = createMiddleware(
@@ -37,31 +32,6 @@ const clientAuthentication = createMiddleware(
 			});
 		}
 
-		const cacheKey = cacheKeys.auth.client(decodedKey);
-		const cached = await context.kv.get<LucidClientIntegrationAuth>(context, {
-			key: cacheKey,
-			hash: true,
-		});
-
-		if (cached) {
-			const tenantKey = multiTenancyEnabled(c.get("config"))
-				? cached.tenantKey
-				: null;
-			c.set("clientIntegrationAuth", cached);
-			c.set("tenant", tenantKey ? { key: tenantKey } : null);
-			const response = await next();
-
-			void clientIntegrationServices
-				.updateLastUsed(context, {
-					id: cached.id,
-					ipAddress: connectionInfo.address ?? null,
-					userAgent: userAgent,
-				})
-				.catch(() => undefined);
-
-			return response;
-		}
-
 		const verifyApiKey = await serviceWrapper(
 			clientIntegrationServices.verifyApiKey,
 			{
@@ -84,19 +54,13 @@ const clientAuthentication = createMiddleware(
 		c.set("tenant", tenantKey ? { key: tenantKey } : null);
 		const response = await next();
 
-		void Promise.all([
-			context.kv.set(context, {
-				key: cacheKey,
-				value: verifyApiKey.data,
-				expirationTtl: minutesToSeconds(5),
-				hash: true,
-			}),
-			clientIntegrationServices.updateLastUsed(context, {
+		void clientIntegrationServices
+			.updateLastUsed(context, {
 				id: verifyApiKey.data.id,
 				ipAddress: connectionInfo.address ?? null,
 				userAgent: userAgent,
-			}),
-		]).catch(() => undefined);
+			})
+			.catch(() => undefined);
 
 		return response;
 	},

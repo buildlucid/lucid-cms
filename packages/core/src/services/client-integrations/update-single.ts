@@ -1,4 +1,3 @@
-import cacheKeys from "../../libs/kv/cache-keys.js";
 import {
 	ClientIntegrationScopesRepository,
 	ClientIntegrationsRepository,
@@ -80,9 +79,6 @@ const updateSingle: ServiceFn<
 			if (createScopesRes.error) return createScopesRes;
 		}
 	}
-
-	const cacheKey = cacheKeys.auth.client(checkExistsRes.data.key);
-	await context.kv.delete(context, { key: cacheKey, hash: true });
 
 	return {
 		error: undefined,
