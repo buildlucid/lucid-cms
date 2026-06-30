@@ -1,7 +1,5 @@
 # @lucidcms/client
 
-## 0.0.0
+## 0.1.0
 
-### Minor Changes
-
-- First beta release.
+- The initial release of the client.

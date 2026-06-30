@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/admin",
-	"version": "0.12.0-alpha.1",
+	"version": "0.13.0-alpha.0",
 	"description": "The admin SolidJS SPA for Lucid CMS.",
 	"private": true,
 	"type": "module",
@@ -23,7 +23,7 @@
 		"check": "biome check ./src",
 		"check:fix": "biome check --write ./src"
 	},
-	"author": "Lucid",
+	"author": "Build Lucid Ltd",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/buildlucid/lucid-cms.git",

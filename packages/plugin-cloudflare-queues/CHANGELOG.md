@@ -2,6 +2,4 @@
 
 ## 1.0.0
 
-### Major Changes
-
-- First release.
+- The initial release of the Cloudflare Queues plugin for Lucid CMS.

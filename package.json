@@ -35,5 +35,6 @@
 	},
 	"engines": {
 		"node": "^24.0.0"
-	}
+	},
+	"author": "Build Lucid Ltd"
 }

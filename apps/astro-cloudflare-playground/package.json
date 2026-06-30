@@ -33,7 +33,7 @@
 	"devDependencies": {
 		"wrangler": "^4.104.0"
 	},
-	"author": "Lucid",
+	"author": "Build Lucid Ltd",
 	"license": "MIT",
 	"volta": {
 		"node": "24.11.1"

@@ -41,7 +41,7 @@
 		"@lucidcms/plugin-worker-queues": "*",
 		"nodemailer": "^9.0.1"
 	},
-	"author": "",
+	"author": "Build Lucid Ltd",
 	"license": "ISC",
 	"devDependencies": {
 		"@types/better-sqlite3": "^7.6.13",

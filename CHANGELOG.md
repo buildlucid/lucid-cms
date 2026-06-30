@@ -1,5 +1,75 @@
 # @lucidcms/core
 
+## v0.13.0-alpha.0
+
+### Features:
+
+- Complete UI refresh across the SPA. The design is much simpler, tighter and better organised with a number of UX improvements all over.
+- Added optional multi-tenant support across the config, admin SPA, APIs and storage adapters.
+- Added document environments for releasing content to targets such as staging and production.
+- Added document release request support with reviewers, comments, approvals, rejections and snapshot views.
+- Added document release scheduling support through the queue system.
+- Added document workflows with configurable stages, assignees, transition permissions and publish targets.
+- Added custom permission support and config-managed roles that are synced from code and locked in the SPA.
+- Added configurable SSO support via OAuth 2.0/OpenID Connect, allowing users to authenticate with their existing accounts from major identity providers.
+- Created and published 3 official auth provider plugins (GitHub, Google, and Microsoft) for seamless third-party authentication.
+- Password based authentication is now opt out, giving you the flexibility to disable local authentication and enforce SSO only access if required.
+- Added AI image generation support for the media library, including guidance presets, source images and usage tracking.
+- Added AI alt text generation support for media, with locale-aware output and optional editor instructions.
+- Added AI custom field value generation, allowing supported fields to generate structured values from field config, guidance and document context.
+- Implemented the license endpoints and settings page so you can license Lucid CMS for production use.
+- Integrated licensing in a new settings page.
+- Added a new server-side toolkit for reading documents, media and locales, as well as sending emails from application code.
+- The admin SPA is now pre-built and served, making CLI build and serve commands considerably faster.
+- Added an env schema to lucid.config, giving validated and typed environment variables inside the config callback.
+- Reworked lucid.config around clearer top-level runtime, database, environment and CMS config concerns.
+- Moved Sharp, filesystem media, worker queues and SQLite KV into first-party packages to keep core lighter.
+- Implemented a new adapter-based queue system for background jobs, cron tasks and email sending.
+- Published new Cloudflare Queue and Cloudflare KV plugins.
+- Added folder support to the media library so you can organise your media better and run batch operations on them.
+- Media items can now be marked as private, restricting access to authenticated users only. Private media is stored separately from public media and requires authentication to stream.
+- Create shareable links for any media item with optional password protection and expiry dates. Perfect for sharing confidential files with clients or external collaborators without requiring them to have an account.
+- Media can now be soft deleted and restored.
+- Implemented the UI and functionality so that deleted users and documents can be restored and viewed.
+- Soft-delete retention days is now configurable for locales, collections, documents, users and media.
+- Added resumable media upload support, including awaiting-sync tracking and cleanup.
+- Support for "unlimited" media storage by setting the media.limits.storage to false in your config. This is on by default.
+- Added support on the document page builder to upload media directly, meaning you don't have to save and exit to accomplish this anymore.
+- Document revisions now get have retention config and a CRON job to handle cleanup of expired revisions.
+- Added email attachment and priority support.
+- A new simulate option has been added to the email config, allowing plugins and developers to simulate a successful submission without actually having to send an email. Useful for development.
+- The Resend plugin now supports Resend’s webhook feature. Along with changes to the email strategy and sending service, this means deliverability can now be tracked.
+- User logins are now tracked and visible on the view user panel within the SPA. To support getting the user's IP, the runtime adapters now expose a runtimeContext to the app which includes a getConnectionInfo fn.
+- Added support for hooks and a checkCompatibility callback for plugins. The hooks include initwhich is called when the plugin initialized on processing the config along with a build hook that allows plugins to return artifacts that runtime adapters can copy, compile or run custom actions against.
+- Files within the current working directories public directory and any paths added to a new compiler option copyPublic config will now get copied to the out directory on build.
+- A new compiler option to add ignored files and directories for the dev watcher has been added to the config.
+- Added support for a new migration:rollbackcommand so that migrations can be reverted one-by-one or use the --steps flag to run multiple at a time.
+- Added support for a new migration:reset command to reset your database.
+- Added support for a new migration:fresh command that resets and re-runs all of the migrations.
+- Added a new CLI command to trigger specific CRONs to run.
+- New CLI command to run sync tasks.
+- Updated the CDN fallback to no longer stream and instead just redirect to help server load, and added support for setting a fallback for images and video now based on the given Sec-Fetch-Dest header instead of only supporting a fallback for images. 
+
+### Breaking changes:
+
+- Sweeping adjustments across the config shape for better DX and extensibility in the future.
+- Config changes across the collection brick and field builders.
+- Americanised the config and any other APIs. Translations within core and the admin SPA have also been updated.
+- Renamed the `disableSwagger` config to `http.openAPI.enabled' to better reflect what it does. Swagger also hasn't been used for this for a while.
+- Reworked the email migration file so that we store transactions separately as well as added and removed some existing columns.
+- Reworked media translations so they are stored in their own table instead of a generic translation table.
+- Plugins no longer expect you to return a mutated config and instead use immer and require a recipe callback.
+
+### Bug Fixes:
+
+- Fixed a bug with the dev CLI command and the SQLite DB adapter where the DB files weren't being ignored by the watcher. ([4492d0b](https://github.com/buildlucid/lucid-cms/commit/4492d0bf3edac7b53809287b8c4b868f2be0b72c))
+- Fixed a bug with the cron implementation where it didnt have the full ServiceContext being passed to it. This meant it couldn't connect to the database or push to the queue. Fixed for both runtime adapters. ([a8f2057](https://github.com/buildlucid/lucid-cms/commit/a8f20571c76a9b3dd23e10daaf94cdef35136a84))
+- Fixed SPA request response handler bug where we expected a response body from 201 responses. ([cf73786](https://github.com/buildlucid/lucid-cms/commit/cf7378636d564df3759fbc2f66311a5b0649af6d))
+- Fixed CSRF endpoint issue where the the status was incorrect. ([b2dda99](https://github.com/buildlucid/lucid-cms/commit/b2dda9999aff8c4e533e01b51bd69c647eb6a9c4)) 
+- Fixed configuration caching issue in dev mode. The dev command now runs in a single process instead of spawning child processes, resulting in faster and more reliable hot-reloading. ([f68756e](https://github.com/buildlucid/lucid-cms/commit/f68756e7d605e896306f723dd35964ce2941fc51))
+- Fixed an issue with processed images where you could process already processed images. Now if you attempt to process an already processed image, we will just serve the processed image directly.
+
+
 ## v0.12.0-alpha.1
 
 ### Features:

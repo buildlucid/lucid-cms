@@ -28,7 +28,7 @@
 		"@lucidcms/plugin-sqlite-kv": "*",
 		"@lucidcms/plugin-pages": "*"
 	},
-	"author": "Lucid",
+	"author": "Build Lucid Ltd",
 	"license": "MIT",
 	"volta": {
 		"node": "24.11.1"

@@ -20,11 +20,11 @@
 		"wrangler:deploy": "npm run build && npm run deploy"
 	},
 	"dependencies": {
-		"@lucidcms/core": "0.12.0-alpha.1",
-		"@lucidcms/db-d1": "1.0.0",
+		"@lucidcms/core": "0.13.0-alpha.0",
+		"@lucidcms/db-d1": "0.1.0",
 		"@lucidcms/plugin-cloudflare-kv": "1.0.0",
 		"@lucidcms/plugin-cloudflare-r2": "1.0.0",
-		"@lucidcms/plugin-pages": "0.3.3",
+		"@lucidcms/plugin-pages": "0.4.0",
 		"@lucidcms/runtime-cloudflare": "1.0.0"
 	},
 	"devDependencies": {
@@ -41,5 +41,6 @@
 	},
 	"engines": {
 		"node": "^24.0.0"
-	}
+	},
+	"author": "Build Lucid Ltd"
 }
