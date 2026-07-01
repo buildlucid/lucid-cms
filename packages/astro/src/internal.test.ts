@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { getHostedConfigureLucidPath } from "./integration/project.js";
 import {
 	buildCloudflareAdminBarMiddlewareSource,
 	buildLucidAdminBarDevToolbarAppSource,
@@ -40,6 +41,13 @@ describe("@lucidcms/astro internals", () => {
 				name: "@astrojs/cloudflare",
 			} as never),
 		).toBe("cloudflare");
+	});
+
+	test("resolves hosted configureLucid wrapper from the Astro package", () => {
+		const configureLucidPath = getHostedConfigureLucidPath();
+
+		expect(configureLucidPath).not.toBe("@lucidcms/astro/configure-lucid");
+		expect(configureLucidPath).toContain("configure-lucid");
 	});
 
 	test("rejects unsupported or mismatched runtimes", () => {

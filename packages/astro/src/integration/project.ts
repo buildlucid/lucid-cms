@@ -29,6 +29,9 @@ export type ResolvedLucidProject = {
 	emailTemplates: RenderedTemplates;
 };
 
+export const getHostedConfigureLucidPath = (): string =>
+	import.meta.resolve(astroConstants.integration.configureLucidModuleId);
+
 /**
  * Astro config setup is where we establish Lucid's hosted view of the world so
  * every later hook can reuse the same resolved project snapshot.
@@ -36,6 +39,7 @@ export type ResolvedLucidProject = {
 export const loadLucidProject = async (
 	configPath: string,
 ): Promise<ResolvedLucidProject> => {
+	const configureLucidPath = getHostedConfigureLucidPath();
 	const [project, configDependencies] = await Promise.all([
 		loadBuildProject({
 			configPath,
@@ -43,7 +47,7 @@ export const loadLucidProject = async (
 			validateEnv: true,
 			prepareRuntime: true,
 			renderEmailTemplates: true,
-			configureLucidPath: astroConstants.integration.configureLucidModuleId,
+			configureLucidPath,
 		}),
 		collectConfigDependencies(configPath),
 	]);
@@ -75,6 +79,7 @@ export const reloadLucidProjectForDevBootstrap = async (
 		return project;
 	}
 
+	const configureLucidPath = getHostedConfigureLucidPath();
 	const reloaded = await loadBuildProject({
 		configPath: project.configPath,
 		silent: true,
@@ -82,7 +87,7 @@ export const reloadLucidProjectForDevBootstrap = async (
 		prepareRuntime: true,
 		generateTypes: false,
 		renderEmailTemplates: false,
-		configureLucidPath: astroConstants.integration.configureLucidModuleId,
+		configureLucidPath,
 	});
 
 	return {
