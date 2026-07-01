@@ -2,12 +2,19 @@
 
 ## v0.13.0 (unreleased)
 
+### Features:
+
+- Added custom migration support for plugins and projects via a new `migrations.sources` config key, with a project root `migrations` directory picked up automatically. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
+- Added a `migrate:new` CLI command that scaffolds a timestamped migration file. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
+- Added a read-only `migrate:status` CLI command that reports applied, pending and missing migrations along with pending collection migrations. Pass `--check` to exit non-zero when work is pending or history is unhealthy, for use in CI and deploy pipelines. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
+
 ### Breaking changes:
 
 - Moved the image processor to the adapter pattern that media, KV, emails and queues use for consistency and lifecycle support. The Sharp plugin has been updated to reflect this. ([0022b2c](https://github.com/buildlucid/lucid-cms/commit/0022b2c1956dcf8853b0c8034dfdd8962b47a0cc))
 
 ### Bug Fixes:
 
+- Fixed `migrate:reset` and `migrate:fresh` failing on SQLite based adapters when dropping tables. Core tables contain circular foreign key references (eg. users and media) that no drop order can satisfy, so foreign key enforcement is now disabled (or deferred on D1) while tables are dropped. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
 - Improved config validation for when Lucid is being built. Env vars aren't validated on build and certain required config that is never needed on build has dummy values inserted. This fixes Cloudflare Worker build runner where we cant pass it a config.secrets via an environment variable. ([cb0877b](https://github.com/buildlucid/lucid-cms/commit/cb0877bfd20dbb7372174367b724c9a61ccc691d))
 - Fixed client integration authentication so cached integration metadata can no longer bypass verification of the presented API secret. ([652d14b](https://github.com/buildlucid/lucid-cms/commit/652d14b5234ee3d062d782bbfd38391f47421e43))
 
