@@ -89,6 +89,7 @@ const devCommand = async (options?: {
 				env: configResult.env,
 				runtimeContext: configResult.runtimeContext,
 				translationStore,
+				projectRoot: configResult.projectRoot,
 				mode: "return",
 			})({
 				skipSyncSteps: !isInitialRun,

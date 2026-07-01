@@ -63,6 +63,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 		defaultLocale: "en",
 		sources: [],
 	},
+	migrations: {
+		sources: [],
+	},
 	media: {
 		limits: {
 			storageBytes: false,

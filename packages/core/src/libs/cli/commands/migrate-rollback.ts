@@ -1,8 +1,10 @@
 import { confirm } from "@inquirer/prompts";
+import { sql } from "kysely";
 import { Migrator } from "kysely/migration";
 import constants from "../../../constants/constants.js";
 import type { Config, EnvironmentVariables } from "../../../types.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
 import {
@@ -57,6 +59,8 @@ const migrateRollbackCommand = async (options?: {
 
 		cliLogger.info("Checking rollback status");
 
+		await prepareExternalMigrations(config, res.projectRoot);
+
 		const migrator = new Migrator({
 			db: config.db.client,
 			provider: {
@@ -64,14 +68,48 @@ const migrateRollbackCommand = async (options?: {
 					return res.config.db.migrations;
 				},
 			},
+			//* required so new core migrations can run after external migrations have executed
+			allowUnorderedMigrations: true,
 		});
 
 		await config.db.initialize();
 
-		const migrations = await migrator.getMigrations();
-		const executedMigrations = migrations.filter(
-			(m) => m.executedAt !== undefined,
+		//* executed migrations that are no longer registered would fail the rollback midway, so surface them upfront
+		const availableMigrationNames = Object.keys(res.config.db.migrations);
+		let executedMigrationNames: string[] = [];
+		try {
+			const executedRows = await sql<{ name: string }>`
+				SELECT name FROM kysely_migration
+			`.execute(config.db.client);
+			executedMigrationNames = executedRows.rows.map((row) => row.name);
+		} catch (_) {
+			//* the migration table doesnt exist yet - no migrations to rollback
+		}
+
+		const missingMigrations = executedMigrationNames.filter(
+			(name) => !availableMigrationNames.includes(name),
 		);
+		if (missingMigrations.length > 0) {
+			cliLogger.error(
+				`Cannot rollback: previously executed migration(s) are no longer registered: ${missingMigrations.join(", ")}`,
+			);
+			cliLogger.info(
+				"If you removed a plugin or migration file, restore it so its migrations can be rolled back.",
+			);
+			logger.setBuffering(false);
+			process.exit(1);
+		}
+
+		const migrations = await migrator.getMigrations();
+		//* rollbacks happen in execution order, which can diverge from name order with external migrations
+		const executedMigrations = migrations
+			.filter((m) => m.executedAt !== undefined)
+			.sort((a, b) => {
+				const aTime = a.executedAt?.getTime() ?? 0;
+				const bTime = b.executedAt?.getTime() ?? 0;
+				if (aTime === bTime) return a.name.localeCompare(b.name);
+				return aTime - bTime;
+			});
 
 		if (executedMigrations.length === 0) {
 			cliLogger.info("No migrations to rollback");

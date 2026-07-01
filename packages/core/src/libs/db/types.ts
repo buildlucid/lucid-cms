@@ -29,6 +29,13 @@ import type DatabaseAdapter from "./adapter-base.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 export type MigrationFn = (adapter: DatabaseAdapter) => Migration;
+export type ExternalMigrationFn = (ctx: {
+	adapter: DatabaseAdapter;
+}) => Migration;
+export type MigrationSource =
+	| string
+	| URL
+	| { name: string; migration: ExternalMigrationFn };
 
 export type Select<T> = {
 	[P in keyof T]: T[P] extends { __select__: infer S } ? S : T[P];

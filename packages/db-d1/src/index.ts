@@ -292,6 +292,10 @@ export class D1Adapter extends DatabaseAdapter {
 		}
 
 		for (const tableName of dropOrder) {
+			//* d1 doesnt support disabling fk enforcement - defer it per statement instead,
+			//* as core tables contain circular references (eg. users <-> media) that no
+			//* drop order can satisfy
+			await sql`PRAGMA defer_foreign_keys = true`.execute(this.client);
 			await sql`DROP TABLE IF EXISTS ${sql.table(tableName)}`.execute(
 				this.client,
 			);

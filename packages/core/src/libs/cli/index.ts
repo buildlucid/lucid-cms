@@ -6,8 +6,10 @@ import cronCommand from "./commands/cron.js";
 import devCommand from "./commands/dev.js";
 import migrateCommand from "./commands/migrate.js";
 import migrateFreshCommand from "./commands/migrate-fresh.js";
+import migrateNewCommand from "./commands/migrate-new.js";
 import migrateResetCommand from "./commands/migrate-reset.js";
 import migrateRollbackCommand from "./commands/migrate-rollback.js";
+import migrateStatusCommand from "./commands/migrate-status.js";
 import serveCommand from "./commands/serve.js";
 import syncCommand from "./commands/sync.js";
 import typegenCommand from "./commands/typegen.js";
@@ -71,6 +73,16 @@ program
 	.action(syncCommand);
 
 program
+	.command("migrate:status")
+	.description("Show pending migrations and migration history health")
+	.option(
+		"--check",
+		"Exit with a non-zero code when migrations are pending or history is unhealthy",
+	)
+	.option("--remote", remoteOptionDescription)
+	.action(migrateStatusCommand);
+
+program
 	.command("migrate:rollback")
 	.description("Rollback the last database migration")
 	.option("-s, --steps <number>", "Number of migrations to rollback", "1")
@@ -87,6 +99,11 @@ program
 		// @ts-expect-error
 		migrateResetCommand({ mode: "process" }),
 	);
+
+program
+	.command("migrate:new <name>")
+	.description("Create a new timestamped migration file")
+	.action(migrateNewCommand);
 
 program
 	.command("migrate:fresh")

@@ -4,6 +4,7 @@ import { syncServices } from "../../../services/index.js";
 import type { Config, EnvironmentVariables } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
 import {
 	destroyEmailAdapter,
 	getInitializedEmailAdapter,
@@ -36,6 +37,7 @@ const migrateCommand = (props?: {
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
 	translationStore?: TranslationStore;
+	projectRoot?: string;
 	mode: "process" | "return";
 }) => {
 	return async (options?: {
@@ -85,6 +87,8 @@ const migrateCommand = (props?: {
 			const skipSyncSteps = options?.skipSyncSteps ?? false;
 			const force = options?.force ?? false;
 
+			let projectRoot: string | undefined = props?.projectRoot;
+
 			if (props?.config) {
 				config = props.config;
 				translationStore = props.translationStore;
@@ -95,6 +99,7 @@ const migrateCommand = (props?: {
 				config = res.config;
 				env = res.env;
 				runtimeContext = res.runtimeContext;
+				projectRoot = res.projectRoot;
 				translationStore = (
 					await prepareTranslations({
 						config,
@@ -117,6 +122,8 @@ const migrateCommand = (props?: {
 			if (!translationStore) {
 				throw new Error("Lucid could not resolve the translation store.");
 			}
+
+			await prepareExternalMigrations(config, projectRoot);
 
 			const queue = passthroughQueueAdapter();
 			const translate = createTranslator({

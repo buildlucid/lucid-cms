@@ -84,6 +84,7 @@ const serveCommand = async () => {
 			env: configRes.env,
 			runtimeContext: configRes.runtimeContext,
 			translationStore,
+			projectRoot: configRes.projectRoot,
 			mode: "return",
 		})({
 			skipSyncSteps: false,

@@ -7,7 +7,7 @@ import {
 	sql,
 } from "kysely";
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
-import { Migrator } from "kysely/migration";
+import { type Migration, Migrator } from "kysely/migration";
 import constants from "../../constants/constants.js";
 import { LucidError } from "../../utils/errors/index.js";
 import { translate } from "../i18n/index.js";
@@ -26,6 +26,7 @@ import Migration00000010 from "./migrations/00000010-alerts.js";
 import Migration00000011 from "./migrations/00000011-ai-generations.js";
 import type {
 	DatabaseConfig,
+	ExternalMigrationFn,
 	InferredTable,
 	KyselyDB,
 	LucidDB,
@@ -34,6 +35,7 @@ import type {
 export default abstract class DatabaseAdapter {
 	db: Kysely<LucidDB> | undefined;
 	adapter: string;
+	private externalMigrations: Record<string, ExternalMigrationFn> = {};
 	constructor(config: {
 		adapter: string;
 		dialect: Dialect;
@@ -166,8 +168,21 @@ export default abstract class DatabaseAdapter {
 	}
 
 	/**
+	 * Registers external (plugin/project) migrations, replacing any previously
+	 * registered set. These are merged with the core migrations.
+	 */
+	registerExternalMigrations(migrations: Record<string, ExternalMigrationFn>) {
+		for (const name of Object.keys(migrations)) {
+			if (!constants.db.externalMigrationNameRegex.test(name)) {
+				throw new LucidError({
+					message: `External migration "${name}" must start with a 13 digit timestamp, eg. "1751400000000-example".`,
+				});
+			}
+		}
+		this.externalMigrations = migrations;
+	}
+	/**
 	 * Runs all migrations that have not been ran yet. This doesnt include the generated migrations for collections
-	 * @todo expose migrations so they can be extended?
 	 */
 	async migrateToLatest() {
 		const migrations = this.migrations;
@@ -179,6 +194,8 @@ export default abstract class DatabaseAdapter {
 					return migrations;
 				},
 			},
+			//* required so new core migrations can run after external migrations have executed
+			allowUnorderedMigrations: true,
 		});
 
 		await this.initialize();
@@ -209,6 +226,17 @@ export default abstract class DatabaseAdapter {
 				error.errors !== null
 					? (error.errors as Record<string, unknown>)
 					: undefined;
+
+			if (
+				error instanceof Error &&
+				error.message.includes("previously executed migration") &&
+				error.message.includes("is missing")
+			) {
+				throw new LucidError({
+					message: `${error.message}. A migration that has already run is no longer registered - if you removed a plugin or migration file, restore it, or roll its migrations back before removing it.`,
+					data: errorData,
+				});
+			}
 
 			throw new LucidError({
 				message:
@@ -254,10 +282,12 @@ export default abstract class DatabaseAdapter {
 		return this.db;
 	}
 	/**
-	 * Returns the migrations for the database
+	 * Returns the migrations for the database, including any registered external migrations.
+	 * Core names must always use a zero-padded numeric prefix - external names start with a
+	 * 13 digit timestamp so they can never clash and always sort (and run) after core migrations.
 	 */
-	get migrations() {
-		return {
+	get migrations(): Record<string, Migration> {
+		const migrations: Record<string, Migration> = {
 			"00000001-locales": Migration00000001(this),
 			"00000002-options": Migration00000002(this),
 			"00000003-users-and-permissions": Migration00000003(this),
@@ -270,5 +300,11 @@ export default abstract class DatabaseAdapter {
 			"00000010-alerts": Migration00000010(this),
 			"00000011-ai-generations": Migration00000011(this),
 		};
+
+		for (const [name, migrationFn] of Object.entries(this.externalMigrations)) {
+			migrations[name] = migrationFn({ adapter: this });
+		}
+
+		return migrations;
 	}
 }

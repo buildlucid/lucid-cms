@@ -1,0 +1,221 @@
+import { sql } from "kysely";
+import constants from "../../../constants/constants.js";
+import type { Config, EnvironmentVariables } from "../../../types.js";
+import migrateCollections from "../../collection/migrate-collections.js";
+import loadConfigFile from "../../config/load-config-file.js";
+import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
+import {
+	destroyEmailAdapter,
+	getInitializedEmailAdapter,
+} from "../../email/lifecycle.js";
+import type { EmailAdapterInstance } from "../../email/types.js";
+import { createTranslator } from "../../i18n/index.js";
+import prepareTranslations from "../../i18n/prepare-translations.js";
+import passthroughKVAdapter from "../../kv/adapters/passthrough.js";
+import logger from "../../logger/index.js";
+import {
+	destroyMediaAdapter,
+	getInitializedMediaAdapter,
+} from "../../media/lifecycle.js";
+import type { MediaAdapterInstance } from "../../media/types.js";
+import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
+import type { AdapterRuntimeContext } from "../../runtime/types.js";
+import cliLogger from "../logger.js";
+import validateEnvVars from "../services/validate-env-vars.js";
+
+/**
+ * A read-only preflight that reports what `migrate` would do and whether the
+ * migration history is healthy. With `--check` it exits non-zero when
+ * migrations are pending or executed migrations are missing from the
+ * registered set, so it can gate CI and deploy pipelines.
+ */
+const migrateStatusCommand = async (options?: {
+	check?: boolean;
+	remote?: boolean;
+}) => {
+	let config: Config | undefined;
+	let env: EnvironmentVariables | undefined;
+	let runtimeContext: AdapterRuntimeContext | undefined;
+	let mediaInstance: MediaAdapterInstance | null | undefined;
+	let emailInstance: EmailAdapterInstance | undefined;
+
+	const cleanupAdapters = async () => {
+		if (config) {
+			await Promise.allSettled([
+				destroyMediaAdapter(mediaInstance, { config, env, runtimeContext }),
+				destroyEmailAdapter(emailInstance, { config, env, runtimeContext }),
+			]);
+		}
+		mediaInstance = undefined;
+		emailInstance = undefined;
+	};
+
+	try {
+		logger.setBuffering(true);
+		const startTime = cliLogger.startTimer();
+
+		const res = await loadConfigFile({
+			prepareRuntime: true,
+		});
+		config = res.config;
+		env = res.env;
+		runtimeContext = res.runtimeContext;
+		const { translationStore } = await prepareTranslations({
+			config,
+			projectRoot: res.projectRoot,
+		});
+
+		const envValid = await validateEnvVars({
+			envSchema: res.envSchema,
+			env: res.env,
+		});
+		if (!envValid) {
+			logger.setBuffering(false);
+			process.exit(1);
+		}
+
+		cliLogger.info("Checking the migration status");
+
+		await prepareExternalMigrations(config, res.projectRoot);
+		await config.db.initialize();
+
+		//* database migration status
+		const registeredMigrations = Object.keys(config.db.migrations).sort();
+		let executedMigrations: string[] = [];
+		try {
+			const executedRows = await sql<{ name: string }>`
+				SELECT name FROM kysely_migration
+			`.execute(config.db.client);
+			executedMigrations = executedRows.rows.map((row) => row.name);
+		} catch (_) {
+			//* the migration table doesnt exist yet - no migrations have run
+		}
+
+		const pendingMigrations = registeredMigrations.filter(
+			(name) => !executedMigrations.includes(name),
+		);
+		const missingMigrations = executedMigrations.filter(
+			(name) => !registeredMigrations.includes(name),
+		);
+
+		//* collection migration status (dry run)
+		const translate = createTranslator({
+			store: translationStore,
+			locale: "en",
+		});
+		[mediaInstance, emailInstance] = await Promise.all([
+			getInitializedMediaAdapter(config, { env, runtimeContext }),
+			getInitializedEmailAdapter(config, { env, runtimeContext }),
+		]);
+
+		const collectionResult = await migrateCollections(
+			{
+				db: { client: config.db.client },
+				config: config,
+				queue: passthroughQueueAdapter(),
+				env: env ?? null,
+				runtimeContext,
+				kv: passthroughKVAdapter(),
+				media: mediaInstance,
+				email: emailInstance,
+				translate,
+				request: {
+					url: config.host ?? constants.urls.localhost,
+					locale: "en",
+				},
+			},
+			{ dryRun: true },
+		);
+
+		let pendingCollections: string[] = [];
+		let collectionCheckError: string | undefined;
+		if (collectionResult.error) {
+			collectionCheckError =
+				translate.english(collectionResult.error.message) || "Unknown error";
+		} else {
+			pendingCollections = collectionResult.data.migrationPlans
+				.filter((plan) => plan.tables.length > 0)
+				.map((plan) => plan.collectionKey);
+		}
+
+		await cleanupAdapters();
+
+		//* report
+		cliLogger.info(`Found ${executedMigrations.length} applied migration(s)`);
+
+		if (pendingMigrations.length === 0) {
+			cliLogger.success("No database schema migrations are pending");
+		} else {
+			cliLogger.warn(
+				`${pendingMigrations.length} database schema migration(s) are pending`,
+			);
+			for (const name of pendingMigrations) {
+				cliLogger.log(cliLogger.color.yellow(name), { indent: 2 });
+			}
+		}
+
+		if (collectionCheckError) {
+			cliLogger.warn(
+				`Could not check collection migration status: ${collectionCheckError}`,
+			);
+		} else if (pendingCollections.length === 0) {
+			cliLogger.success("No collection/brick table migrations are needed");
+		} else {
+			cliLogger.warn(
+				`${pendingCollections.length} collection(s) need table migrations`,
+			);
+			for (const key of pendingCollections) {
+				cliLogger.log(cliLogger.color.yellow(key), { indent: 2 });
+			}
+		}
+
+		if (missingMigrations.length > 0) {
+			cliLogger.error(
+				`${missingMigrations.length} previously executed migration(s) are no longer registered`,
+			);
+			for (const name of missingMigrations) {
+				cliLogger.log(cliLogger.color.red(name), { indent: 2 });
+			}
+			cliLogger.info(
+				"If you removed a plugin or migration file, restore it so its migrations can be run or rolled back.",
+			);
+		}
+
+		const hasPendingWork =
+			pendingMigrations.length > 0 ||
+			pendingCollections.length > 0 ||
+			collectionCheckError !== undefined;
+		const unhealthy = missingMigrations.length > 0;
+
+		const endTime = startTime();
+		cliLogger.log(
+			cliLogger.createBadge("LUCID CMS"),
+			hasPendingWork || unhealthy
+				? "Migration status checked with"
+				: "Migration status checked",
+			hasPendingWork || unhealthy
+				? cliLogger.color.yellow("outstanding work")
+				: cliLogger.color.green("successfully"),
+			"in",
+			cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
+			{
+				spaceAfter: true,
+				spaceBefore: true,
+			},
+		);
+
+		logger.setBuffering(false);
+		process.exit(options?.check && (hasPendingWork || unhealthy) ? 1 : 0);
+	} catch (error) {
+		await cleanupAdapters();
+		cliLogger.error(
+			"Migration status failed",
+			error instanceof Error ? error.message : "Unknown error",
+		);
+		if (error instanceof Error) cliLogger.errorInstance(error);
+		logger.setBuffering(false);
+		process.exit(1);
+	}
+};
+
+export default migrateStatusCommand;

@@ -230,80 +230,18 @@ export class SQLiteAdapter extends DatabaseAdapter {
 	}
 	async dropAllTables(): Promise<void> {
 		const schema = await this.inferSchema();
-		const allTableNames = new Set(schema.map((t) => t.name));
 
-		//* build dependency map (table -> tables it depends on)
-		const dependencies = new Map<string, Set<string>>();
-
-		for (const table of schema) {
-			dependencies.set(table.name, new Set());
-
-			for (const column of table.columns) {
-				if (column.foreignKey && allTableNames.has(column.foreignKey.table)) {
-					//* ignore self-references - they don't affect drop order
-					if (column.foreignKey.table !== table.name) {
-						dependencies.get(table.name)?.add(column.foreignKey.table);
-					}
-				}
+		//* fk enforcement is disabled while dropping - core tables contain circular
+		//* references (eg. users <-> media) that no drop order can satisfy
+		await sql`PRAGMA foreign_keys = OFF`.execute(this.client);
+		try {
+			for (const table of schema) {
+				await sql`DROP TABLE IF EXISTS ${sql.table(table.name)}`.execute(
+					this.client,
+				);
 			}
-		}
-
-		//* topological sort using Kahn's algorithm
-		const inDegree = new Map<string, number>();
-		for (const table of allTableNames) {
-			inDegree.set(table, 0);
-		}
-
-		//* calculate in-degrees (how many tables depend on this table)
-		for (const deps of dependencies.values()) {
-			for (const dep of deps) {
-				inDegree.set(dep, (inDegree.get(dep) || 0) + 1);
-			}
-		}
-
-		//* add tables that have no dependencies pointing to them
-		const queue: string[] = [];
-		for (const [table, degree] of inDegree.entries()) {
-			if (degree === 0) {
-				queue.push(table);
-			}
-		}
-
-		const dropOrder: string[] = [];
-
-		while (queue.length > 0) {
-			const current = queue.shift();
-			if (!current) continue;
-
-			dropOrder.push(current);
-
-			//* reduce in-degree for tables that this table depends on
-			const deps = dependencies.get(current) || new Set();
-			for (const dep of deps) {
-				const newDegree = (inDegree.get(dep) || 0) - 1;
-				inDegree.set(dep, newDegree);
-
-				if (newDegree === 0) {
-					queue.push(dep);
-				}
-			}
-		}
-
-		//* if we couldn't order all tables, there's a circular dependency (excluding self-refs)
-		if (dropOrder.length < allTableNames.size) {
-			//* add remaining tables (they have circular deps)
-			for (const table of allTableNames) {
-				if (!dropOrder.includes(table)) {
-					dropOrder.push(table);
-				}
-			}
-		}
-
-		//* drop tables in order
-		for (const tableName of dropOrder) {
-			await sql`DROP TABLE IF EXISTS ${sql.table(tableName)}`.execute(
-				this.client,
-			);
+		} finally {
+			await sql`PRAGMA foreign_keys = ON`.execute(this.client);
 		}
 	}
 	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {

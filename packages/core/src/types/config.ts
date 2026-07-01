@@ -3,6 +3,7 @@ import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
 import type ConfigSchema from "../libs/config/config-schema.js";
 import type DatabaseAdapter from "../libs/db/adapter-base.js";
+import type { MigrationSource } from "../libs/db/types.js";
 import type {
 	EmailAdapter,
 	EmailAdapterInstance,
@@ -384,6 +385,18 @@ export interface LucidConfig {
 	 * Internationalisation settings for the admin UI and API messages.
 	 */
 	i18n?: I18nConfig;
+	/**
+	 * Custom database migration settings.
+	 */
+	migrations?: {
+		/**
+		 * Migration files, directories or inline `{ name, migration }` entries to
+		 * load alongside the core migrations. Migrations are created with the
+		 * `defineMigration` helper and names must start with a 13 digit timestamp,
+		 * eg. `1751400000000-example`.
+		 */
+		sources?: MigrationSource[];
+	};
 	/**
 	 * Email settings.
 	 */

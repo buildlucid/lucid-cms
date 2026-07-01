@@ -1,5 +1,6 @@
 export { default as buildTableName } from "./libs/collection/helpers/build-table-name.js";
 export { default as prefixGeneratedColName } from "./libs/collection/helpers/prefix-generated-column-name.js";
+export { default as defineMigration } from "./libs/db/define-migration.js";
 export { default as createMiddleware } from "./libs/http/create-middleware.js";
 export { default as createRoute } from "./libs/http/create-route.js";
 export { default as authenticateMiddleware } from "./libs/http/middleware/authenticate.js";

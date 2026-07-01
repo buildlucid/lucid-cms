@@ -12,6 +12,8 @@
 		"typegen": "lucidcms typegen",
 		"sync": "lucidcms sync",
 		"migrate": "lucidcms migrate",
+		"migrate:new": "lucidcms migrate:new",
+		"migrate:status": "lucidcms migrate:status",
 		"migrate:rollback": "lucidcms migrate:rollback",
 		"migrate:reset": "lucidcms migrate:reset",
 		"migrate:fresh": "lucidcms migrate:fresh"

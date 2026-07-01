@@ -1,6 +1,7 @@
 import z from "zod";
 import constants from "../../constants/constants.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
+import type { ExternalMigrationFn } from "../db/types.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
 import type {
 	HttpExtension,
@@ -213,6 +214,25 @@ const ConfigSchema = z.object({
 			),
 			defaultLocale: z.string(),
 			sources: z.array(z.union([z.string(), z.instanceof(URL)])).optional(),
+		})
+		.optional(),
+	migrations: z
+		.object({
+			sources: z
+				.array(
+					z.union([
+						z.string(),
+						z.instanceof(URL),
+						z.object({
+							name: z.string(),
+							migration: z.custom<ExternalMigrationFn>(
+								(data) => typeof data === "function",
+								{ message: "Expected a migration function" },
+							),
+						}),
+					]),
+				)
+				.optional(),
 		})
 		.optional(),
 	email: z

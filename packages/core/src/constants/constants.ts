@@ -135,6 +135,11 @@ export default Object.freeze({
 		//* max length for collection, brick keys. With the above and database adapter max table name length, we can ensure the table name is not too long
 		//* This is the max size given table structure "lucid_document__{collection-key:16}__${brick-key:16}__{rep/usr/doc/med}_hash"
 		maxBuilderKeyLength: 16,
+		//* core migrations use a zero-padded numeric prefix which always sorts before a
+		//* 13 digit timestamp, so external migrations can never clash and always run after core
+		externalMigrationNameRegex: /^\d{13}-[a-z0-9][a-z0-9-_]*$/,
+		//* project relative directory external migrations are automatically loaded from
+		externalMigrationDirectory: "migrations" as const,
 	},
 	logScopes: {
 		lucid: "lucid",
