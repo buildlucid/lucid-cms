@@ -7,6 +7,7 @@
 - Added custom migration support for plugins and projects via a new `migrations.sources` config key, with a project root `migrations` directory picked up automatically. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
 - Added a `migrate:new` CLI command that scaffolds a timestamped migration file. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
 - Added a read-only `migrate:status` CLI command that reports applied, pending and missing migrations along with pending collection migrations. Pass `--check` to exit non-zero when work is pending or history is unhealthy, for use in CI and deploy pipelines. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
+- Added conditional custom field rendering with local field-scope rules, translation-aware resolution and validation that skips hidden fields and containers. ([e8e3ff9](https://github.com/buildlucid/lucid-cms/commit/e8e3ff9194839d493dece25850a533d8f017ec7c))
 
 ### Breaking changes:
 
