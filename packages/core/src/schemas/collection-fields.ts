@@ -197,6 +197,63 @@ export const fieldConfigSchema = z.object({
 				})
 				.nullable()
 				.optional(),
+			condition: z
+				.object({
+					action: z
+						.enum(["show", "hide"])
+						.meta({
+							description:
+								"Whether matching the condition shows or hides the field",
+							example: "show",
+						})
+						.optional(),
+					translationScope: z
+						.enum(["same", "default", "any"])
+						.meta({
+							description:
+								"How localized target field values are resolved while evaluating the condition",
+							example: "same",
+						})
+						.optional(),
+					groups: z
+						.array(
+							z.array(
+								z.object({
+									field: z.string().meta({
+										description:
+											"Key of the sibling or ancestor-scope field the rule evaluates against",
+										example: "menuType",
+									}),
+									operator: z
+										.enum([
+											"equals",
+											"notEquals",
+											"isEmpty",
+											"isNotEmpty",
+											"contains",
+											"notContains",
+										])
+										.meta({
+											description: "Comparison operator for the rule",
+											example: "equals",
+										}),
+									value: z
+										.union([z.string(), z.number(), z.boolean(), z.null()])
+										.meta({
+											description: "Value the rule compares against",
+											example: "docs",
+										})
+										.optional(),
+								}),
+							),
+						)
+						.meta({
+							description:
+								"Condition rule groups. Groups are OR'd, rules within a group are AND'd",
+						}),
+				})
+				.nullable()
+				.optional(),
 		})
 		.optional(),
 	validation: z

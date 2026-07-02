@@ -40,6 +40,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			},
 			ui: {
 				disabled: this.props?.ui?.disabled,
+				condition: this.props?.ui?.condition,
 			},
 			fields: [],
 			validation: this.props?.validation,

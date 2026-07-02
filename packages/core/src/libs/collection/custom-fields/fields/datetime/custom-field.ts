@@ -42,6 +42,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			ui: {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,
+				condition: this.props?.ui?.condition,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"datetime">;

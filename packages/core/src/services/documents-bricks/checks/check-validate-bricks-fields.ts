@@ -1,10 +1,19 @@
 import constants from "../../../constants/constants.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import {
+	evaluateFieldCondition,
+	type FieldConditionTargetResolver,
+} from "../../../libs/collection/custom-fields/conditions/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
-import type { FieldTypes } from "../../../libs/collection/custom-fields/types.js";
+import type {
+	FieldConditionConfig,
+	FieldConditionTranslationScope,
+	FieldTypes,
+	FieldUIConfig,
+} from "../../../libs/collection/custom-fields/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
@@ -31,6 +40,173 @@ const isRequiredFieldConfig = (
 		typeof config.validation === "object" &&
 		config.validation !== null
 	);
+};
+
+/**
+ * One level of submitted field input. The first entry is the level the field
+ * being evaluated lives in, followed by each ancestor level up to the root.
+ */
+type ConditionScopeLevel = {
+	treeParentKey?: string;
+	fields: Array<FieldInputSchema>;
+};
+
+const getFieldCondition = (
+	instance: CustomField<FieldTypes>,
+): FieldConditionConfig | undefined => {
+	return (instance.config as { ui?: FieldUIConfig }).ui?.condition;
+};
+
+/**
+ * Maps root-level field keys to the condition of the tab they belong to.
+ * Tabs are config-only containers, so submitted fields never nest under them.
+ */
+const buildRootTabConditions = (
+	instance: CollectionBuilder | BrickBuilder,
+): Map<string, FieldConditionConfig> => {
+	const conditions = new Map<string, FieldConditionConfig>();
+	let currentTabCondition: FieldConditionConfig | undefined;
+
+	for (const [key, field] of instance.fields) {
+		if (field.type === "tab") {
+			currentTabCondition = getFieldCondition(field);
+			continue;
+		}
+		if (field.treeParent === null && currentTabCondition) {
+			conditions.set(key, currentTabCondition);
+		}
+	}
+
+	return conditions;
+};
+
+/**
+ * Resolves condition targets against submitted input. Field keys are unique
+ * within a tree, so the target's own scope determines which level of the
+ * chain its value is read from - targets outside the sibling/ancestor chain
+ * stay unresolved.
+ */
+const createConditionTargetResolver = (props: {
+	instance: CollectionBuilder | BrickBuilder;
+	scopes: ConditionScopeLevel[];
+	locale: string;
+	defaultLocale: string;
+	collectionLocalized: boolean;
+	translationScope: FieldConditionTranslationScope;
+}): FieldConditionTargetResolver => {
+	return (fieldKey) => {
+		const target = props.instance.fields.get(fieldKey);
+		if (!target || target.type === "repeater" || target.type === "tab") {
+			return { resolved: false };
+		}
+
+		const scope = props.scopes.find(
+			(level) => (level.treeParentKey ?? null) === target.treeParent,
+		);
+		if (!scope) return { resolved: false };
+
+		const submitted = scope.fields.find((field) => field.key === fieldKey);
+		if (!submitted) {
+			if (
+				props.collectionLocalized &&
+				target.localizedEnabled &&
+				props.translationScope === "any"
+			) {
+				return { resolved: true, match: "any", values: [target.defaultValue] };
+			}
+			return { resolved: true, value: target.defaultValue };
+		}
+
+		if (
+			submitted.translations &&
+			props.collectionLocalized &&
+			target.localizedEnabled
+		) {
+			if (props.translationScope === "any") {
+				return {
+					resolved: true,
+					match: "any",
+					values: Object.values(submitted.translations).map((value) =>
+						target.normalizeInputValue(value),
+					),
+				};
+			}
+
+			const locale =
+				props.translationScope === "default"
+					? props.defaultLocale
+					: props.locale;
+			return {
+				resolved: true,
+				value: target.normalizeInputValue(submitted.translations[locale]),
+			};
+		}
+
+		return {
+			resolved: true,
+			value: target.normalizeInputValue(submitted.value),
+		};
+	};
+};
+
+const getConditionTranslationScope = (
+	condition: FieldConditionConfig,
+	conditionedFieldLocalized: boolean,
+): FieldConditionTranslationScope => {
+	if (condition.translationScope && condition.translationScope !== "same") {
+		return condition.translationScope;
+	}
+
+	return conditionedFieldLocalized ? "same" : "default";
+};
+
+/**
+ * Evaluates whether a field is visible for the given locale, taking the
+ * condition of the tab it belongs to into account at the root level.
+ */
+const isFieldVisible = (props: {
+	fieldKey: string;
+	fieldInstance: CustomField<FieldTypes>;
+	instance: CollectionBuilder | BrickBuilder;
+	scopes: ConditionScopeLevel[];
+	locale: string;
+	defaultLocale: string;
+	collectionLocalized: boolean;
+	rootTabConditions: Map<string, FieldConditionConfig>;
+	atRootLevel: boolean;
+}): boolean => {
+	const condition = getFieldCondition(props.fieldInstance);
+	const tabCondition = props.atRootLevel
+		? props.rootTabConditions.get(props.fieldKey)
+		: undefined;
+	if (!condition && !tabCondition) return true;
+
+	const evaluateCondition = (
+		visibilityCondition: FieldConditionConfig,
+		conditionedFieldLocalized: boolean,
+	) =>
+		evaluateFieldCondition(
+			visibilityCondition,
+			createConditionTargetResolver({
+				instance: props.instance,
+				scopes: props.scopes,
+				locale: props.locale,
+				defaultLocale: props.defaultLocale,
+				collectionLocalized: props.collectionLocalized,
+				translationScope: getConditionTranslationScope(
+					visibilityCondition,
+					conditionedFieldLocalized,
+				),
+			}),
+		);
+
+	if (tabCondition && !evaluateCondition(tabCondition, false)) {
+		return false;
+	}
+
+	return condition
+		? evaluateCondition(condition, props.fieldInstance.localizedEnabled)
+		: true;
 };
 
 const checkValidateBricksFields: ServiceFn<
@@ -168,17 +344,42 @@ const validateBricks = (props: {
 /**
  * Recursively validate fields and return errors
  */
-const recursiveFieldValidate = (props: {
+export const recursiveFieldValidate = (props: {
 	fields: Array<FieldInputSchema>;
 	instance: CollectionBuilder | BrickBuilder;
 	validationData: ValidationData;
 	parentTreeFieldKey?: string;
+	parentScopes?: ConditionScopeLevel[];
+	rootTabConditions?: Map<string, FieldConditionConfig>;
 	meta: {
 		localized: boolean;
 		defaultLocale: string;
 	};
 }) => {
 	const errors: FieldError[] = [];
+
+	const scopes: ConditionScopeLevel[] = [
+		{ treeParentKey: props.parentTreeFieldKey, fields: props.fields },
+		...(props.parentScopes ?? []),
+	];
+	const rootTabConditions =
+		props.rootTabConditions ?? buildRootTabConditions(props.instance);
+	const fieldVisibleForLocale = (
+		fieldKey: string,
+		fieldInstance: CustomField<FieldTypes>,
+		locale: string,
+	) =>
+		isFieldVisible({
+			fieldKey,
+			fieldInstance,
+			instance: props.instance,
+			scopes,
+			locale,
+			defaultLocale: props.meta.defaultLocale,
+			collectionLocalized: props.meta.localized,
+			rootTabConditions,
+			atRootLevel: props.parentTreeFieldKey === undefined,
+		});
 
 	//*  validate all provided fields
 	for (const field of props.fields) {
@@ -197,6 +398,17 @@ const recursiveFieldValidate = (props: {
 
 		//* handle tree-table fields separately with recursive validation
 		if (isStorageMode(databaseConfig, "tree-table")) {
+			//* hidden containers skip validation for their entire subtree
+			if (
+				!fieldVisibleForLocale(
+					field.key,
+					fieldInstance,
+					props.meta.defaultLocale,
+				)
+			) {
+				continue;
+			}
+
 			const groupErrors: Array<GroupError> = [];
 			const groups = field.groups || [];
 
@@ -226,6 +438,8 @@ const recursiveFieldValidate = (props: {
 					instance: props.instance,
 					validationData: props.validationData,
 					parentTreeFieldKey: field.key,
+					parentScopes: scopes,
+					rootTabConditions,
 					meta: props.meta,
 				});
 
@@ -258,6 +472,12 @@ const recursiveFieldValidate = (props: {
 			instance: fieldInstance,
 			validationData: props.validationData,
 			meta: props.meta,
+			isLocaleVisible: (localeCode) =>
+				fieldVisibleForLocale(
+					field.key,
+					fieldInstance,
+					localeCode ?? props.meta.defaultLocale,
+				),
 		});
 		if (fieldErrors.length > 0) {
 			errors.push(...fieldErrors);
@@ -282,6 +502,13 @@ const recursiveFieldValidate = (props: {
 			isRequiredFieldConfig(fieldInstance.config) &&
 			fieldInstance.config.validation.required
 		) {
+			//* hidden fields are exempt from required validation
+			if (
+				!fieldVisibleForLocale(key, fieldInstance, props.meta.defaultLocale)
+			) {
+				return;
+			}
+
 			errors.push({
 				key: key,
 				localeCode: null,
@@ -300,6 +527,11 @@ export const validateField = (props: {
 	field: FieldInputSchema;
 	instance: CustomField<FieldTypes>;
 	validationData: ValidationData;
+	/**
+	 * Visibility check for a given locale (null = the direct value branch).
+	 * Hidden locales skip validation entirely.
+	 */
+	isLocaleVisible?: (localeCode: string | null) => boolean;
 	meta: {
 		localized: boolean;
 		defaultLocale: string;
@@ -342,6 +574,10 @@ export const validateField = (props: {
 	//* handle fields with translations
 	if (props.field.translations) {
 		for (const localeCode in props.field.translations) {
+			if (props.isLocaleVisible && !props.isLocaleVisible(localeCode)) {
+				continue;
+			}
+
 			const value = props.field.translations[localeCode];
 			const validationResult = props.instance.validate({
 				type: props.field.type,
@@ -356,6 +592,10 @@ export const validateField = (props: {
 	}
 	//* handle direct value fields
 	else {
+		if (props.isLocaleVisible && !props.isLocaleVisible(null)) {
+			return errors;
+		}
+
 		const validationResult = props.instance.validate({
 			type: props.field.type,
 			value: props.field.value,

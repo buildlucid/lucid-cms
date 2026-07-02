@@ -14,6 +14,7 @@ import checkCollectionEnvironmentRelations from "./checks/check-collection-envir
 import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
 import checkField from "./checks/check-field.js";
+import checkFieldConditions from "./checks/check-field-conditions.js";
 import checkLocales from "./checks/check-locales.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import checkTenants from "./checks/check-tenants.js";
@@ -167,6 +168,8 @@ const processConfig = async (
 				collection.meta.fieldKeys,
 			);
 
+			checkFieldConditions("collection", collection.key, collection);
+
 			checkRepeaterDepth(
 				"collection",
 				collection.key,
@@ -181,6 +184,7 @@ const processConfig = async (
 				}
 
 				checkDuplicateFieldKeys("brick", brick.key, brick.meta.fieldKeys);
+				checkFieldConditions("brick", brick.key, brick);
 				checkRepeaterDepth("brick", brick.key, brick.meta.repeaterDepth);
 			}
 		}

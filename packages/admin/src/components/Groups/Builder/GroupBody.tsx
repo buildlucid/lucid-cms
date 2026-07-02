@@ -18,6 +18,7 @@ import brickStore from "@/store/brickStore";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
+import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
 
 interface GroupBodyProps {
@@ -34,6 +35,7 @@ interface GroupBodyProps {
 		parentRepeaterKey: string | undefined;
 		parentRef: string | undefined;
 		groupErrors: GroupError[];
+		conditionScopes?: FieldConditionScope[];
 	};
 }
 
@@ -55,6 +57,13 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const groupFields = createMemo(() => {
 		return group()?.fields || [];
 	});
+	const conditionScopes = createMemo<FieldConditionScope[]>(() => [
+		{
+			configFields: configChildrenFields() || [],
+			fields: groupFields(),
+		},
+		...(props.state.conditionScopes ?? []),
+	]);
 	const groupOpen = createMemo(() => group()?.open === true);
 	const disabled = createMemo(
 		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
@@ -248,6 +257,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 									repeaterKey: repeaterKey(),
 									repeaterDepth: nextRepeaterDepth(),
 									fieldErrors: fieldErrors() || [],
+									conditionScopes: conditionScopes(),
 								}}
 							/>
 						)}

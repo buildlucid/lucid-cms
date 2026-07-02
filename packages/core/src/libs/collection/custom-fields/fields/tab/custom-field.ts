@@ -37,6 +37,9 @@ class TabCustomField extends CustomField<"tab"> {
 					}),
 				summary: this.props?.details?.summary,
 			},
+			ui: {
+				condition: this.props?.ui?.condition,
+			},
 			fields: [],
 		} satisfies CFConfig<"tab">;
 	}

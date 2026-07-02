@@ -18,6 +18,9 @@
 		"paths": {
 			"@/*": ["src/*"],
 			"@types": ["../core/src/types.ts"],
+			"@field-conditions": [
+				"../core/src/libs/collection/custom-fields/conditions/index.ts"
+			],
 			"@assets/*": ["src/assets/*"]
 		}
 	}

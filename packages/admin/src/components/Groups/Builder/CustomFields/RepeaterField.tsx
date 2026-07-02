@@ -9,6 +9,7 @@ import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
+import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
 
 interface RepeaterFieldProps {
@@ -20,6 +21,7 @@ interface RepeaterFieldProps {
 		parentRepeaterKey?: string;
 		repeaterDepth: number;
 		fieldError: FieldError | undefined;
+		conditionScopes?: FieldConditionScope[];
 	};
 }
 
@@ -126,6 +128,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 													parentRepeaterKey: props.state.parentRepeaterKey,
 													parentRef: props.state.groupRef,
 													groupErrors: groupErrors(),
+													conditionScopes: props.state.conditionScopes,
 												}}
 											/>
 										)}

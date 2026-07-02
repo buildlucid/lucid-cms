@@ -11,6 +11,7 @@ type FieldRenderStateContextValue = {
 	collectionKey: Accessor<string | undefined>;
 	brickKey: Accessor<string | undefined>;
 	contentLocale: Accessor<string>;
+	defaultLocale: Accessor<string>;
 	contentLocales: Accessor<string[]>;
 	missingFieldColumns: Accessor<string[]>;
 };
@@ -20,6 +21,10 @@ const FieldRenderStateContext = createContext<FieldRenderStateContextValue>({
 	collectionKey: () => undefined,
 	brickKey: () => undefined,
 	contentLocale: () => contentLocaleStore.get.contentLocale ?? "",
+	defaultLocale: () =>
+		contentLocaleStore.get.locales.find((locale) => locale.isDefault)?.code ??
+		contentLocaleStore.get.locales[0]?.code ??
+		"en",
 	contentLocales: () =>
 		contentLocaleStore.get.locales.map((locale) => locale.code) || [],
 	missingFieldColumns: () => [],
@@ -35,6 +40,7 @@ export const FieldRenderStateProvider: ParentComponent<
 				collectionKey: props.collectionKey,
 				brickKey: props.brickKey,
 				contentLocale: props.contentLocale,
+				defaultLocale: props.defaultLocale,
 				contentLocales: props.contentLocales,
 				missingFieldColumns: props.missingFieldColumns,
 			}}

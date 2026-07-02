@@ -15,6 +15,7 @@ import type {
 	CollectionSchemaIndex,
 	CollectionSchemaTable,
 } from "../schema/types.js";
+import type { FieldConditionConfig } from "./conditions/index.js";
 import type CustomField from "./custom-field.js";
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import type { CheckboxCustomFieldMapItem } from "./fields/checkbox/types.js";
@@ -47,6 +48,7 @@ import type { TextareaCustomFieldMapItem } from "./fields/textarea/types.js";
 import { userFieldConfig } from "./fields/user/config.js";
 import type { UserCustomFieldMapItem } from "./fields/user/types.js";
 
+export type * from "./conditions/index.js";
 export type * from "./fields/checkbox/types.js";
 export type * from "./fields/color/types.js";
 export type * from "./fields/datetime/types.js";
@@ -100,6 +102,7 @@ export type SharedFieldConfig = {
 export type FieldUIConfig = {
 	hidden?: boolean;
 	disabled?: boolean;
+	condition?: FieldConditionConfig;
 };
 
 export type OmitDefault<T> = T extends { default?: unknown }

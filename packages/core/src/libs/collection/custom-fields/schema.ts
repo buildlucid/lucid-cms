@@ -1,6 +1,41 @@
 import z from "zod";
 import constants from "../../../constants/constants.js";
 import { adminCopyInputSchema } from "../../i18n/index.js";
+import {
+	fieldConditionOperators,
+	fieldConditionTranslationScopes,
+} from "./conditions/index.js";
+
+const operatorsRequiringValue: string[] = [
+	"equals",
+	"notEquals",
+	"contains",
+	"notContains",
+];
+
+const fieldConditionRuleSchema = z
+	.object({
+		field: z.string().trim().min(1),
+		operator: z.enum(fieldConditionOperators),
+		value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional(),
+	})
+	.strict()
+	.refine(
+		(rule) =>
+			!operatorsRequiringValue.includes(rule.operator) ||
+			rule.value !== undefined,
+		{
+			message: "Condition rules with a comparison operator require a value",
+		},
+	);
+
+const fieldConditionSchema = z
+	.object({
+		action: z.enum(["show", "hide"]).optional(),
+		translationScope: z.enum(fieldConditionTranslationScopes).optional(),
+		groups: z.array(z.array(fieldConditionRuleSchema)),
+	})
+	.strict();
 
 // TODO: test this through lucid.config.* - have a feeling it isnt being used properly
 const CustomFieldSchema = z.object({
@@ -59,6 +94,7 @@ const CustomFieldSchema = z.object({
 		.object({
 			hidden: z.boolean().optional(),
 			disabled: z.boolean().optional(),
+			condition: fieldConditionSchema.optional(),
 		})
 		.optional(),
 	options: z

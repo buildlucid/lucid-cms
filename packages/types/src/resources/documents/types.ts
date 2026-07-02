@@ -347,9 +347,35 @@ type RelationFieldDetails = {
 	summary?: ResolvedAdminCopy;
 };
 
+export type FieldConditionOperator =
+	| "equals"
+	| "notEquals"
+	| "isEmpty"
+	| "isNotEmpty"
+	| "contains"
+	| "notContains";
+
+export type FieldConditionTranslationScope = "same" | "default" | "any";
+
+export type FieldConditionRuleValue = string | number | boolean | null;
+
+export interface FieldConditionRule {
+	field: string;
+	operator: FieldConditionOperator;
+	value?: FieldConditionRuleValue;
+}
+
+export interface FieldConditionConfig {
+	action?: "show" | "hide";
+	translationScope?: FieldConditionTranslationScope;
+	/** Outer array is OR'd, inner rule arrays are AND'd. */
+	groups: FieldConditionRule[][];
+}
+
 type FieldUIConfig = {
 	hidden?: boolean;
 	disabled?: boolean;
+	condition?: FieldConditionConfig;
 };
 
 type FieldConfigOptions<TDefault = unknown> = {
@@ -461,7 +487,7 @@ export interface NumberFieldConfig
 export interface RepeaterFieldConfig
 	extends SharedCollectionFieldConfig<"repeater"> {
 	fields: CollectionNonTabFieldConfig[];
-	ui?: Pick<FieldUIConfig, "disabled">;
+	ui?: Pick<FieldUIConfig, "disabled" | "condition">;
 	validation?: {
 		maxGroups?: number;
 		minGroups?: number;
@@ -482,6 +508,7 @@ export interface SelectFieldConfig
 }
 
 export interface TabFieldConfig extends SharedCollectionFieldConfig<"tab"> {
+	ui?: Pick<FieldUIConfig, "condition">;
 	fields: CollectionNonTabFieldConfig[];
 }
 

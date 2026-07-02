@@ -28,6 +28,12 @@ export default defineConfig({
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),
 			"@types": fileURLToPath(new URL("../core/src/types.ts", import.meta.url)),
+			"@field-conditions": fileURLToPath(
+				new URL(
+					"../core/src/libs/collection/custom-fields/conditions/index.ts",
+					import.meta.url,
+				),
+			),
 			"@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
 		},
 	},

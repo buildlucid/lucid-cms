@@ -16,8 +16,17 @@ import {
 import { FieldRenderStateProvider } from "@/hooks/document/useFieldRenderState";
 import type { BrickData } from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import type { CollectionFieldConfig } from "@/types/collection-config";
+import type {
+	CollectionFieldConfig,
+	CollectionFieldConfigByType,
+} from "@/types/collection-config";
+import {
+	evaluateFieldVisibility,
+	type FieldConditionScope,
+	flattenTabScopeConfigs,
+} from "@/utils/field-condition-helpers";
 import { tabStateHelpers } from "@/utils/tab-state-helpers";
+import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
 
 interface BrickProps {
 	state: {
@@ -44,12 +53,32 @@ export const BrickBody: Component<BrickProps> = (props) => {
 
 	// ----------------------------------
 	// Memos
-	const allTabs = createMemo(
-		() =>
-			props.state.configFields?.filter((field) => field.type === "tab") || [],
-	);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
+	);
+	const defaultLocale = createMemo(() =>
+		getDefaultTranslationLocale(contentLocaleStore.get.locales),
+	);
+	const conditionScopes = createMemo<FieldConditionScope[]>(() => [
+		{
+			configFields: flattenTabScopeConfigs(props.state.configFields || []),
+			fields: props.state.brick.fields,
+		},
+	]);
+	const allTabs = createMemo(() =>
+		(props.state.configFields || [])
+			.filter(
+				(field): field is CollectionFieldConfigByType<"tab"> =>
+					field.type === "tab",
+			)
+			.filter((field) =>
+				evaluateFieldVisibility({
+					fieldConfig: field,
+					scopes: conditionScopes(),
+					contentLocale: contentLocale(),
+					defaultLocale: defaultLocale(),
+				}),
+			),
 	);
 	const contentLocales = createMemo(
 		() => contentLocaleStore.get.locales.map((locale) => locale.code) || [],
@@ -89,6 +118,16 @@ export const BrickBody: Component<BrickProps> = (props) => {
 		} else if (getActiveTab() === undefined) {
 			const firstTab = allTabs()[0]?.key;
 			if (firstTab) setActiveTab(firstTab);
+		}
+	});
+
+	//* select the first visible tab when the active tab is missing or hidden by a condition
+	createEffect(() => {
+		const tabs = allTabs();
+		if (tabs.length === 0) return;
+		const activeTab = getActiveTab();
+		if (!activeTab || !tabs.some((tab) => tab.key === activeTab)) {
+			setActiveTab(tabs[0]?.key);
 		}
 	});
 
@@ -133,6 +172,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					collectionKey={collectionKey}
 					brickKey={brickKey}
 					contentLocale={contentLocale}
+					defaultLocale={defaultLocale}
 					contentLocales={contentLocales}
 					missingFieldColumns={missingFieldColumns}
 				>
@@ -160,6 +200,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 									fieldConfig: config(),
 									activeTab: getActiveTab(),
 									fieldErrors: props.state.fieldErrors,
+									conditionScopes: conditionScopes(),
 								}}
 							/>
 						)}
