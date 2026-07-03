@@ -1,4 +1,5 @@
 import checkbox from "./fields/checkbox/index.js";
+import collapsible from "./fields/collapsible/index.js";
 import color from "./fields/color/index.js";
 import datetime from "./fields/datetime/index.js";
 import document from "./fields/document/index.js";
@@ -8,6 +9,7 @@ import media from "./fields/media/index.js";
 import number from "./fields/number/index.js";
 import repeater from "./fields/repeater/index.js";
 import richText from "./fields/rich-text/index.js";
+import section from "./fields/section/index.js";
 import select from "./fields/select/index.js";
 import tab from "./fields/tab/index.js";
 import text from "./fields/text/index.js";
@@ -18,6 +20,7 @@ import { fieldTypes } from "./types.js";
 
 const registeredFields = {
 	checkbox: checkbox,
+	collapsible: collapsible,
 	color: color,
 	datetime: datetime,
 	document: document,
@@ -26,6 +29,7 @@ const registeredFields = {
 	media: media,
 	number: number,
 	repeater: repeater,
+	section: section,
 	select: select,
 	tab: tab,
 	text: text,

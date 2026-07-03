@@ -23,8 +23,8 @@ import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import brickStore, { type BrickData } from "@/store/brickStore";
 import T from "@/translations";
 import type { CollectionBrickConfig } from "@/types/collection-config";
+import { builderUiStateHelpers } from "@/utils/builder-ui-state-helpers";
 import helpers from "@/utils/helpers";
-import { tabStateHelpers } from "@/utils/tab-state-helpers";
 
 interface BuilderBricksProps {
 	brickConfig: CollectionBrickConfig[];
@@ -100,15 +100,12 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 									});
 
 									if (props.collectionKey && props.documentId) {
-										tabStateHelpers.updateBrickOrders(
+										builderUiStateHelpers.updateBrickOrders(
 											props.collectionKey,
 											props.documentId,
-											// @ts-expect-error
-											builderBricks().map((b) => {
-												return {
-													[b.key]: b.order,
-												};
-											}),
+											Object.fromEntries(
+												builderBricks().map((b) => [b.key, b.order]),
+											),
 										);
 									}
 								}}

@@ -14,7 +14,7 @@ export interface RepeaterFieldConfig extends SharedFieldConfig {
 		label?: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
-	ui?: Pick<FieldUIConfig, "disabled" | "condition">;
+	ui?: Pick<FieldUIConfig, "disabled" | "condition" | "width">;
 	validation?: {
 		maxGroups?: number;
 		minGroups?: number;

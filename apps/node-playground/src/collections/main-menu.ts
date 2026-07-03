@@ -87,7 +87,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 				label: "Link",
 				value: "link",
 			},
-],
+		],
 		default: "document",
 		validation: {
 			required: true,
@@ -145,11 +145,12 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 			},
 		},
 	})
-	.addText("badgeLabel", {
+	.addSection("badge", {
 		details: {
-			label: "Badge label",
+			label: "Badge",
+			summary: "Optional badge shown beside documentation menu items.",
 		},
-		localized: true,
+		output: "inline",
 		ui: {
 			condition: {
 				groups: [
@@ -160,13 +161,22 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 				],
 			},
 		},
+	})
+	.addText("badgeLabel", {
+		details: {
+			label: "Badge label",
+		},
+		localized: true,
+		ui: {
+			width: 6,
+		},
 		validation: {
 			required: true,
 		},
 	})
 	.addSelect("badgeTheme", {
 		details: {
-			label: "Badge theme",
+			label: "Badge colour",
 		},
 		options: [
 			{
@@ -185,20 +195,14 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 				label: "Red",
 				value: "red",
 			},
-],
+		],
 		default: "primary",
 		localized: true,
 		ui: {
-			condition: {
-				groups: [
-					[
-						{ field: "location", operator: "equals", value: "documentation" },
-						{ field: "showBadge", operator: "equals", value: true },
-					],
-				],
-			},
+			width: 6,
 		},
 	})
+	.endSection()
 	.addRepeater("children", {
 		details: {
 			label: "Children",
@@ -232,7 +236,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 				label: "Link",
 				value: "link",
 			},
-],
+		],
 		default: "document",
 		validation: {
 			required: true,
@@ -292,11 +296,12 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 			},
 		},
 	})
-	.addText("childBadgeLabel", {
+	.addSection("childBadge", {
 		details: {
-			label: "Badge label",
+			label: "Badge",
+			summary: "Optional badge shown beside documentation child menu items.",
 		},
-		localized: true,
+		output: "inline",
 		ui: {
 			condition: {
 				groups: [
@@ -307,13 +312,22 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 				],
 			},
 		},
+	})
+	.addText("childBadgeLabel", {
+		details: {
+			label: "Badge label",
+		},
+		localized: true,
+		ui: {
+			width: 6,
+		},
 		validation: {
 			required: true,
 		},
 	})
 	.addSelect("childBadgeTheme", {
 		details: {
-			label: "Badge theme",
+			label: "Badge colour",
 		},
 		options: [
 			{
@@ -332,20 +346,14 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 				label: "Red",
 				value: "red",
 			},
-],
+		],
 		default: "primary",
 		localized: true,
 		ui: {
-			condition: {
-				groups: [
-					[
-						{ field: "location", operator: "equals", value: "documentation" },
-						{ field: "childShowBadge", operator: "equals", value: true },
-					],
-				],
-			},
+			width: 6,
 		},
 	})
+	.endSection()
 	.addRepeater("grandchildren", {
 		details: {
 			label: "Grandchildren",
@@ -379,7 +387,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 				label: "Link",
 				value: "link",
 			},
-],
+		],
 		default: "document",
 		validation: {
 			required: true,
@@ -451,11 +459,13 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 			},
 		},
 	})
-	.addText("grandchildBadgeLabel", {
+	.addSection("grandchildBadge", {
 		details: {
-			label: "Badge label",
+			label: "Badge",
+			summary:
+				"Optional badge shown beside documentation grandchild menu items.",
 		},
-		localized: true,
+		output: "inline",
 		ui: {
 			condition: {
 				groups: [
@@ -466,13 +476,22 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 				],
 			},
 		},
+	})
+	.addText("grandchildBadgeLabel", {
+		details: {
+			label: "Badge label",
+		},
+		localized: true,
+		ui: {
+			width: 6,
+		},
 		validation: {
 			required: true,
 		},
 	})
 	.addSelect("grandchildBadgeTheme", {
 		details: {
-			label: "Badge theme",
+			label: "Badge colour",
 		},
 		options: [
 			{
@@ -491,20 +510,14 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 				label: "Red",
 				value: "red",
 			},
-],
+		],
 		default: "primary",
 		localized: true,
 		ui: {
-			condition: {
-				groups: [
-					[
-						{ field: "location", operator: "equals", value: "documentation" },
-						{ field: "grandchildShowBadge", operator: "equals", value: true },
-					],
-				],
-			},
+			width: 6,
 		},
 	})
+	.endSection()
 	.endRepeater()
 	.endRepeater()
 	.endRepeater();

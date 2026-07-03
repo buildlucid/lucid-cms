@@ -21,22 +21,15 @@ export interface FieldConditionScope {
 	fields: InternalDocumentField[];
 }
 
-/**
- * Tabs are transparent for condition scoping - their fields belong to the
- * root level, both in config and in the submitted field data.
- */
-export const flattenTabScopeConfigs = (
-	configs: CollectionFieldConfig[],
-): CollectionFieldConfig[] => {
-	return configs.flatMap((config) =>
-		config.type === "tab" ? config.fields : [config],
-	);
-};
-
 const isLeafFieldConfig = (
 	config: CollectionFieldConfig,
 ): config is CollectionLeafFieldConfig => {
-	return config.type !== "repeater" && config.type !== "tab";
+	return (
+		config.type !== "repeater" &&
+		config.type !== "tab" &&
+		config.type !== "section" &&
+		config.type !== "collapsible"
+	);
 };
 
 const resolveTargetInScopes = (

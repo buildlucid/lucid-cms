@@ -90,11 +90,22 @@ const CustomFieldSchema = z.object({
 	time: z.boolean().optional(),
 	multiple: z.boolean().optional(),
 	index: z.literal(true).optional(),
+	output: z.enum(["nested", "inline"]).optional(),
+	defaultOpen: z.boolean().optional(),
 	ui: z
 		.object({
 			hidden: z.boolean().optional(),
 			disabled: z.boolean().optional(),
 			condition: fieldConditionSchema.optional(),
+			width: z
+				.union([
+					z.literal(12),
+					z.literal(8),
+					z.literal(6),
+					z.literal(4),
+					z.literal(3),
+				])
+				.optional(),
 		})
 		.optional(),
 	options: z

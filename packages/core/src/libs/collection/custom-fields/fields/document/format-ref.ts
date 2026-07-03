@@ -47,7 +47,10 @@ const formatDocumentRef = (
 		host: params.host,
 	});
 	const documentFields = params.flattenDocumentRefFields
-		? documentFieldsFormatter.flattenFields(formattedFields)
+		? documentFieldsFormatter.flattenFields(
+				formattedFields,
+				collection.clientFieldTree,
+			)
 		: documentFieldsFormatter.objectifyFields(formattedFields);
 
 	return {

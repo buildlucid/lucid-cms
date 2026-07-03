@@ -179,6 +179,23 @@ export const fieldConfigSchema = z.object({
 		})
 		.nullable()
 		.optional(),
+	output: z
+		.enum(["nested", "inline"])
+		.meta({
+			description:
+				"How section/collapsible fields shape their children in client document responses",
+			example: "nested",
+		})
+		.nullable()
+		.optional(),
+	defaultOpen: z
+		.boolean()
+		.meta({
+			description: "Whether a collapsible renders expanded by default",
+			example: false,
+		})
+		.nullable()
+		.optional(),
 	ui: z
 		.object({
 			hidden: z
@@ -186,6 +203,20 @@ export const fieldConfigSchema = z.object({
 				.meta({
 					description: "Whether the field is hidden in the UI",
 					example: false,
+				})
+				.nullable()
+				.optional(),
+			width: z
+				.union([
+					z.literal(12),
+					z.literal(8),
+					z.literal(6),
+					z.literal(4),
+					z.literal(3),
+				])
+				.meta({
+					description: "Admin layout width on a fixed 12-column grid",
+					example: 6,
 				})
 				.nullable()
 				.optional(),

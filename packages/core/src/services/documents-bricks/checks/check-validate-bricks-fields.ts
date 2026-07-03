@@ -58,13 +58,15 @@ const getFieldCondition = (
 };
 
 /**
- * Maps root-level field keys to the condition of the tab they belong to.
- * Tabs are config-only containers, so submitted fields never nest under them.
+ * Maps field keys to the conditions of the structural containers they render
+ * inside: the root tab they belong to plus any section/collapsible ancestors.
+ * Structural fields are config-only containers, so submitted fields never
+ * nest under them - hiding a container must hide its whole subtree.
  */
-const buildRootTabConditions = (
+const buildStructuralConditions = (
 	instance: CollectionBuilder | BrickBuilder,
-): Map<string, FieldConditionConfig> => {
-	const conditions = new Map<string, FieldConditionConfig>();
+): Map<string, FieldConditionConfig[]> => {
+	const conditions = new Map<string, FieldConditionConfig[]>();
 	let currentTabCondition: FieldConditionConfig | undefined;
 
 	for (const [key, field] of instance.fields) {
@@ -72,8 +74,26 @@ const buildRootTabConditions = (
 			currentTabCondition = getFieldCondition(field);
 			continue;
 		}
+
+		const fieldConditions: FieldConditionConfig[] = [];
+
 		if (field.treeParent === null && currentTabCondition) {
-			conditions.set(key, currentTabCondition);
+			fieldConditions.push(currentTabCondition);
+		}
+
+		let structuralParentKey = field.structuralParent;
+		while (structuralParentKey) {
+			const structuralParent = instance.fields.get(structuralParentKey);
+			if (!structuralParent) break;
+
+			const structuralCondition = getFieldCondition(structuralParent);
+			if (structuralCondition) fieldConditions.push(structuralCondition);
+
+			structuralParentKey = structuralParent.structuralParent;
+		}
+
+		if (fieldConditions.length > 0) {
+			conditions.set(key, fieldConditions);
 		}
 	}
 
@@ -96,7 +116,13 @@ const createConditionTargetResolver = (props: {
 }): FieldConditionTargetResolver => {
 	return (fieldKey) => {
 		const target = props.instance.fields.get(fieldKey);
-		if (!target || target.type === "repeater" || target.type === "tab") {
+		if (
+			!target ||
+			target.type === "repeater" ||
+			target.type === "tab" ||
+			target.type === "section" ||
+			target.type === "collapsible"
+		) {
 			return { resolved: false };
 		}
 
@@ -162,7 +188,8 @@ const getConditionTranslationScope = (
 
 /**
  * Evaluates whether a field is visible for the given locale, taking the
- * condition of the tab it belongs to into account at the root level.
+ * conditions of the structural containers it renders inside into account
+ * (root tab plus any section/collapsible ancestors).
  */
 const isFieldVisible = (props: {
 	fieldKey: string;
@@ -172,14 +199,11 @@ const isFieldVisible = (props: {
 	locale: string;
 	defaultLocale: string;
 	collectionLocalized: boolean;
-	rootTabConditions: Map<string, FieldConditionConfig>;
-	atRootLevel: boolean;
+	structuralConditions: Map<string, FieldConditionConfig[]>;
 }): boolean => {
 	const condition = getFieldCondition(props.fieldInstance);
-	const tabCondition = props.atRootLevel
-		? props.rootTabConditions.get(props.fieldKey)
-		: undefined;
-	if (!condition && !tabCondition) return true;
+	const containerConditions = props.structuralConditions.get(props.fieldKey);
+	if (!condition && !containerConditions) return true;
 
 	const evaluateCondition = (
 		visibilityCondition: FieldConditionConfig,
@@ -200,8 +224,10 @@ const isFieldVisible = (props: {
 			}),
 		);
 
-	if (tabCondition && !evaluateCondition(tabCondition, false)) {
-		return false;
+	for (const containerCondition of containerConditions ?? []) {
+		if (!evaluateCondition(containerCondition, false)) {
+			return false;
+		}
 	}
 
 	return condition
@@ -350,7 +376,7 @@ export const recursiveFieldValidate = (props: {
 	validationData: ValidationData;
 	parentTreeFieldKey?: string;
 	parentScopes?: ConditionScopeLevel[];
-	rootTabConditions?: Map<string, FieldConditionConfig>;
+	structuralConditions?: Map<string, FieldConditionConfig[]>;
 	meta: {
 		localized: boolean;
 		defaultLocale: string;
@@ -362,8 +388,8 @@ export const recursiveFieldValidate = (props: {
 		{ treeParentKey: props.parentTreeFieldKey, fields: props.fields },
 		...(props.parentScopes ?? []),
 	];
-	const rootTabConditions =
-		props.rootTabConditions ?? buildRootTabConditions(props.instance);
+	const structuralConditions =
+		props.structuralConditions ?? buildStructuralConditions(props.instance);
 	const fieldVisibleForLocale = (
 		fieldKey: string,
 		fieldInstance: CustomField<FieldTypes>,
@@ -377,8 +403,7 @@ export const recursiveFieldValidate = (props: {
 			locale,
 			defaultLocale: props.meta.defaultLocale,
 			collectionLocalized: props.meta.localized,
-			rootTabConditions,
-			atRootLevel: props.parentTreeFieldKey === undefined,
+			structuralConditions,
 		});
 
 	//*  validate all provided fields
@@ -439,7 +464,7 @@ export const recursiveFieldValidate = (props: {
 					validationData: props.validationData,
 					parentTreeFieldKey: field.key,
 					parentScopes: scopes,
-					rootTabConditions,
+					structuralConditions,
 					meta: props.meta,
 				});
 

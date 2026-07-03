@@ -64,12 +64,76 @@ const SEOBrick = new BrickBuilder("seo", {
 			label: copy("admin:bricks.seo.fields.canonical_url.label"),
 			summary: copy("admin:bricks.seo.fields.canonical_url.summary"),
 		},
+		ui: {
+			width: 6,
+		},
 	})
 	.addText("robots", {
 		details: {
 			label: copy("admin:bricks.seo.fields.robots.label"),
 			summary: copy("admin:bricks.seo.fields.robots.summary"),
 		},
-	});
+		ui: {
+			width: 6,
+		},
+	})
+	.addCollapsible("schema", {
+		details: {
+			label: copy("admin:bricks.seo.collapsibles.schema.label"),
+			summary: copy("admin:bricks.seo.collapsibles.schema.summary"),
+		},
+		defaultOpen: false,
+	})
+	.addSelect("schema_type", {
+		details: {
+			label: copy("admin:bricks.seo.fields.schema_type.label"),
+			summary: copy("admin:bricks.seo.fields.schema_type.summary"),
+		},
+		options: [
+			{
+				label: copy("admin:bricks.seo.fields.schema_type.options.web_page"),
+				value: "web-page",
+			},
+			{
+				label: copy("admin:bricks.seo.fields.schema_type.options.article"),
+				value: "article",
+			},
+			{
+				label: copy("admin:bricks.seo.fields.schema_type.options.faq_page"),
+				value: "faq-page",
+			},
+			{
+				label: copy(
+					"admin:bricks.seo.fields.schema_type.options.software_application",
+				),
+				value: "software-application",
+			},
+		],
+		ui: {
+			width: 4,
+		},
+	})
+	.addText("schema_name", {
+		details: {
+			label: copy("admin:bricks.seo.fields.schema_name.label"),
+			summary: copy("admin:bricks.seo.fields.schema_name.summary"),
+		},
+		ui: {
+			width: 8,
+		},
+	})
+	.addTextarea("schema_description", {
+		details: {
+			label: copy("admin:bricks.seo.fields.schema_description.label"),
+			summary: copy("admin:bricks.seo.fields.schema_description.summary"),
+		},
+	})
+	.addJSON("schema_json", {
+		details: {
+			label: copy("admin:bricks.seo.fields.schema_json.label"),
+			summary: copy("admin:bricks.seo.fields.schema_json.summary"),
+		},
+	})
+	.endCollapsible();
 
 export default SEOBrick;

@@ -7,6 +7,7 @@ export type BrickType = "builder" | "fixed";
 
 export type FieldType =
 	| "checkbox"
+	| "collapsible"
 	| "color"
 	| "datetime"
 	| "document"
@@ -16,6 +17,7 @@ export type FieldType =
 	| "number"
 	| "repeater"
 	| "rich-text"
+	| "section"
 	| "select"
 	| "tab"
 	| "text"
@@ -372,10 +374,15 @@ export interface FieldConditionConfig {
 	groups: FieldConditionRule[][];
 }
 
+export type FieldWidth = 12 | 8 | 6 | 4 | 3;
+
+export type StructuralFieldOutput = "nested" | "inline";
+
 type FieldUIConfig = {
 	hidden?: boolean;
 	disabled?: boolean;
 	condition?: FieldConditionConfig;
+	width?: FieldWidth;
 };
 
 type FieldConfigOptions<TDefault = unknown> = {
@@ -487,11 +494,26 @@ export interface NumberFieldConfig
 export interface RepeaterFieldConfig
 	extends SharedCollectionFieldConfig<"repeater"> {
 	fields: CollectionNonTabFieldConfig[];
-	ui?: Pick<FieldUIConfig, "disabled" | "condition">;
+	ui?: Pick<FieldUIConfig, "disabled" | "condition" | "width">;
 	validation?: {
 		maxGroups?: number;
 		minGroups?: number;
 	};
+}
+
+export interface SectionFieldConfig
+	extends SharedCollectionFieldConfig<"section"> {
+	output: StructuralFieldOutput;
+	ui?: Pick<FieldUIConfig, "condition" | "width">;
+	fields: CollectionNonTabFieldConfig[];
+}
+
+export interface CollapsibleFieldConfig
+	extends SharedCollectionFieldConfig<"collapsible"> {
+	output: StructuralFieldOutput;
+	defaultOpen: boolean;
+	ui?: Pick<FieldUIConfig, "condition" | "width">;
+	fields: CollectionNonTabFieldConfig[];
 }
 
 export interface RichTextFieldConfig
@@ -550,9 +572,14 @@ export type CollectionLeafFieldConfig =
 	| TextareaFieldConfig
 	| UserFieldConfig;
 
+export type CollectionStructuralFieldConfig =
+	| SectionFieldConfig
+	| CollapsibleFieldConfig;
+
 export type CollectionNonTabFieldConfig =
 	| CollectionLeafFieldConfig
-	| RepeaterFieldConfig;
+	| RepeaterFieldConfig
+	| CollectionStructuralFieldConfig;
 
 export type CollectionFieldConfig =
 	| CollectionNonTabFieldConfig

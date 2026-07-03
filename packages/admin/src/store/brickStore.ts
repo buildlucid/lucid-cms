@@ -14,6 +14,7 @@ import { batch } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
 import type {
 	CollectionBrickConfig,
+	CollectionDataFieldConfig,
 	CollectionLeafFieldConfig,
 	CollectionNonTabFieldConfig,
 } from "@/types/collection-config";
@@ -21,6 +22,7 @@ import brickHelpers, { clearTargetFieldErrors } from "@/utils/brick-helpers";
 import { mergeDraftCheckFields } from "@/utils/draft-check-helpers";
 import { isDocumentRef } from "@/utils/relation-field-helpers";
 import safeDeepEqual from "@/utils/safe-deep-equal";
+import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
 import { isObjectRecord } from "@/utils/type-guards";
 
 export interface BrickData {
@@ -77,7 +79,7 @@ const [get, set] = createStore<{
 	}) => void;
 	addField: (params: {
 		brickIndex: number;
-		fieldConfig: CollectionNonTabFieldConfig;
+		fieldConfig: CollectionDataFieldConfig;
 		ref?: string;
 		repeaterKey?: string;
 		locales: string[];
@@ -429,7 +431,8 @@ const [get, set] = createStore<{
 
 				const groupFields: InternalDocumentField[] = [];
 
-				for (const field of params.fieldConfig) {
+				//* structural containers (sections/collapsibles) hold no data - create fields for their children instead
+				for (const field of flattenStructuralScopeConfigs(params.fieldConfig)) {
 					const newField: InternalDocumentField = {
 						key: field.key,
 						type: field.type,

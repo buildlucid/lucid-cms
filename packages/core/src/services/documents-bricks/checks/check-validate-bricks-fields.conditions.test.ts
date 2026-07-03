@@ -336,6 +336,228 @@ describe("hidden tabs skip their fields", () => {
 	});
 });
 
+describe("hidden sections and collapsibles skip their subtree", () => {
+	test("required fields inside a hidden section are skipped", () => {
+		const collection = buildCollection("section_nav")
+			.addSelect("menuType", { options: selectOptions })
+			.addSection("badge", {
+				ui: { condition: showWhen("menuType", "docs") },
+			})
+			.addText("label", {
+				localized: false,
+				validation: { required: true },
+			})
+			.endSection();
+
+		const hidden = recursiveFieldValidate({
+			fields: [{ key: "menuType", type: "select", value: "external" }],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(hidden).toHaveLength(0);
+
+		const visible = recursiveFieldValidate({
+			fields: [{ key: "menuType", type: "select", value: "docs" }],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(visible).toHaveLength(1);
+		expect(visible[0]?.key).toBe("label");
+	});
+
+	test("fields inside a hidden section skip value validation", () => {
+		const collection = buildCollection("section_value_nav")
+			.addSelect("menuType", { options: selectOptions })
+			.addSection("badge", {
+				ui: { condition: showWhen("menuType", "docs") },
+			})
+			.addText("label", { localized: false })
+			.endSection();
+
+		const errors = recursiveFieldValidate({
+			fields: [
+				{ key: "menuType", type: "select", value: "external" },
+				//* invalid value that would fail text validation when visible
+				{ key: "label", type: "text", value: 123 },
+			],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(errors).toHaveLength(0);
+	});
+
+	test("required fields inside a hidden collapsible are skipped", () => {
+		const collection = buildCollection("collapsible_nav")
+			.addSelect("menuType", { options: selectOptions })
+			.addCollapsible("advanced", {
+				ui: { condition: showWhen("menuType", "docs") },
+			})
+			.addText("anchorLabel", {
+				localized: false,
+				validation: { required: true },
+			})
+			.endCollapsible();
+
+		const hidden = recursiveFieldValidate({
+			fields: [{ key: "menuType", type: "select", value: "external" }],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(hidden).toHaveLength(0);
+
+		const visible = recursiveFieldValidate({
+			fields: [{ key: "menuType", type: "select", value: "docs" }],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(visible).toHaveLength(1);
+		expect(visible[0]?.key).toBe("anchorLabel");
+	});
+
+	test("deeply nested descendants of hidden structural fields are skipped", () => {
+		const collection = buildCollection("nested_section_nav")
+			.addSelect("menuType", { options: selectOptions })
+			.addSection("outer", {
+				ui: { condition: showWhen("menuType", "docs") },
+			})
+			.addCollapsible("inner")
+			.addText("innerLabel", {
+				localized: false,
+				validation: { required: true },
+			})
+			.endCollapsible()
+			.endSection();
+
+		const hidden = recursiveFieldValidate({
+			fields: [{ key: "menuType", type: "select", value: "external" }],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(hidden).toHaveLength(0);
+
+		const visible = recursiveFieldValidate({
+			fields: [{ key: "menuType", type: "select", value: "docs" }],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(visible).toHaveLength(1);
+		expect(visible[0]?.key).toBe("innerLabel");
+	});
+
+	test("repeaters inside hidden sections are skipped", () => {
+		const collection = buildCollection("section_repeater_nav")
+			.addSelect("menuType", { options: selectOptions })
+			.addSection("badge", {
+				ui: { condition: showWhen("menuType", "docs") },
+			})
+			.addRepeater("items")
+			.addText("label", {
+				localized: false,
+				validation: { required: true },
+			})
+			.endRepeater()
+			.endSection();
+
+		const errors = recursiveFieldValidate({
+			fields: [
+				{ key: "menuType", type: "select", value: "external" },
+				{
+					key: "items",
+					type: "repeater",
+					groups: [{ ref: "group-1", fields: [] }],
+				},
+			],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(errors).toHaveLength(0);
+	});
+
+	test("hidden sections inside repeater groups skip their children per group", () => {
+		const collection = buildCollection("repeater_section_nav")
+			.addRepeater("links")
+			.addSelect("linkType", { options: selectOptions })
+			.addSection("meta", {
+				ui: { condition: showWhen("linkType", "text") },
+			})
+			.addText("caption", {
+				localized: false,
+				validation: { required: true },
+			})
+			.endSection()
+			.endRepeater();
+
+		const errors = recursiveFieldValidate({
+			fields: [
+				{
+					key: "links",
+					type: "repeater",
+					groups: [
+						{
+							ref: "group-visible",
+							fields: [{ key: "linkType", type: "select", value: "text" }],
+						},
+						{
+							ref: "group-hidden",
+							fields: [{ key: "linkType", type: "select", value: "other" }],
+						},
+					],
+				},
+			],
+			instance: collection,
+			validationData,
+			meta,
+		});
+
+		expect(errors).toHaveLength(1);
+		const groupErrors = errors[0]?.groupErrors ?? [];
+		expect(groupErrors).toHaveLength(1);
+		expect(groupErrors[0]?.ref).toBe("group-visible");
+		expect(groupErrors[0]?.fields.map((f) => f.key)).toEqual(["caption"]);
+	});
+});
+
+describe("hidden collection tabs skip their fields", () => {
+	const collection = buildCollection("tabbed_collection")
+		.addSelect("layout", { options: selectOptions })
+		.addTab("advancedTab", {
+			ui: { condition: showWhen("layout", "advanced") },
+		})
+		.addText("advancedTitle", {
+			localized: false,
+			validation: { required: true },
+		});
+
+	test("fields under a hidden collection tab are skipped", () => {
+		const errors = recursiveFieldValidate({
+			fields: [{ key: "layout", type: "select", value: "simple" }],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(errors).toHaveLength(0);
+	});
+
+	test("fields under a visible collection tab are validated", () => {
+		const errors = recursiveFieldValidate({
+			fields: [{ key: "layout", type: "select", value: "advanced" }],
+			instance: collection,
+			validationData,
+			meta,
+		});
+		expect(errors).toHaveLength(1);
+		expect(errors[0]?.key).toBe("advancedTitle");
+	});
+});
+
 describe("localized controllers evaluate per locale", () => {
 	const collection = new CollectionBuilder("localized_nav", {
 		mode: "multiple",

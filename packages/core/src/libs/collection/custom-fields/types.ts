@@ -19,6 +19,8 @@ import type { FieldConditionConfig } from "./conditions/index.js";
 import type CustomField from "./custom-field.js";
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import type { CheckboxCustomFieldMapItem } from "./fields/checkbox/types.js";
+import { collapsibleFieldConfig } from "./fields/collapsible/config.js";
+import type { CollapsibleCustomFieldMapItem } from "./fields/collapsible/types.js";
 import { colorFieldConfig } from "./fields/color/config.js";
 import type { ColorCustomFieldMapItem } from "./fields/color/types.js";
 import { datetimeFieldConfig } from "./fields/datetime/config.js";
@@ -37,6 +39,8 @@ import { repeaterFieldConfig } from "./fields/repeater/config.js";
 import type { RepeaterCustomFieldMapItem } from "./fields/repeater/types.js";
 import { richTextFieldConfig } from "./fields/rich-text/config.js";
 import type { RichTextCustomFieldMapItem } from "./fields/rich-text/types.js";
+import { sectionFieldConfig } from "./fields/section/config.js";
+import type { SectionCustomFieldMapItem } from "./fields/section/types.js";
 import { selectFieldConfig } from "./fields/select/config.js";
 import type { SelectCustomFieldMapItem } from "./fields/select/types.js";
 import { tabFieldConfig } from "./fields/tab/config.js";
@@ -50,6 +54,7 @@ import type { UserCustomFieldMapItem } from "./fields/user/types.js";
 
 export type * from "./conditions/index.js";
 export type * from "./fields/checkbox/types.js";
+export type * from "./fields/collapsible/types.js";
 export type * from "./fields/color/types.js";
 export type * from "./fields/datetime/types.js";
 export type * from "./fields/document/types.js";
@@ -59,6 +64,7 @@ export type * from "./fields/media/types.js";
 export type * from "./fields/number/types.js";
 export type * from "./fields/repeater/types.js";
 export type * from "./fields/rich-text/types.js";
+export type * from "./fields/section/types.js";
 export type * from "./fields/select/types.js";
 export type * from "./fields/tab/types.js";
 export type * from "./fields/text/types.js";
@@ -70,6 +76,7 @@ export type * from "./fields/user/types.js";
 
 export const fieldTypes = [
 	checkboxFieldConfig.type,
+	collapsibleFieldConfig.type,
 	colorFieldConfig.type,
 	datetimeFieldConfig.type,
 	documentFieldConfig.type,
@@ -78,6 +85,7 @@ export const fieldTypes = [
 	mediaFieldConfig.type,
 	numberFieldConfig.type,
 	repeaterFieldConfig.type,
+	sectionFieldConfig.type,
 	selectFieldConfig.type,
 	tabFieldConfig.type,
 	textFieldConfig.type,
@@ -99,10 +107,19 @@ export type SharedFieldConfig = {
 	};
 };
 
+export const fieldWidths = [12, 8, 6, 4, 3] as const;
+
+/** Admin layout width on a fixed 12-column grid. */
+export type FieldWidth = (typeof fieldWidths)[number];
+
+/** Controls how structural fields shape their children in client responses. */
+export type StructuralFieldOutput = "nested" | "inline";
+
 export type FieldUIConfig = {
 	hidden?: boolean;
 	disabled?: boolean;
 	condition?: FieldConditionConfig;
+	width?: FieldWidth;
 };
 
 export type OmitDefault<T> = T extends { default?: unknown }
@@ -206,6 +223,8 @@ export type CustomFieldAiFormatResponse =
 // Custom Field Map
 export type CustomFieldMap = {
 	tab: TabCustomFieldMapItem;
+	section: SectionCustomFieldMapItem;
+	collapsible: CollapsibleCustomFieldMapItem;
 	text: TextCustomFieldMapItem;
 	"rich-text": RichTextCustomFieldMapItem;
 	media: MediaCustomFieldMapItem;

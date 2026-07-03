@@ -388,15 +388,81 @@ const flattenFieldValue = (
 	return null;
 };
 
+const isStructuralFieldConfig = (
+	config: CFConfig<FieldTypes>,
+): config is CFConfig<"section"> | CFConfig<"collapsible"> => {
+	return config.type === "section" || config.type === "collapsible";
+};
+
+/**
+ * Walks a client field tree level and collects flattened values into `target`.
+ * Tabs are transparent, sections/collapsibles shape their children based on
+ * their `output` config and repeater groups recurse with their child configs.
+ */
+const collectClientFieldValues = (
+	target: DocumentFieldValueMap,
+	fieldMap: Map<string, InternalDocumentField>,
+	configs: CFConfig<FieldTypes>[],
+): void => {
+	for (const config of configs) {
+		if (config.type === "tab") {
+			collectClientFieldValues(target, fieldMap, config.fields);
+			continue;
+		}
+
+		if (isStructuralFieldConfig(config)) {
+			if (config.output === "inline") {
+				collectClientFieldValues(target, fieldMap, config.fields);
+			} else {
+				const nested: DocumentFieldValueMap = {};
+				collectClientFieldValues(nested, fieldMap, config.fields);
+				target[config.key] = nested;
+			}
+			continue;
+		}
+
+		const field = fieldMap.get(config.key);
+		if (!field) continue;
+
+		if (field.groups) {
+			const childConfigs =
+				"fields" in config && Array.isArray(config.fields)
+					? (config.fields as CFConfig<FieldTypes>[])
+					: undefined;
+			target[config.key] = field.groups.map((group) =>
+				flattenFields(group.fields || [], childConfigs),
+			);
+			continue;
+		}
+
+		target[config.key] = flattenFieldValue(field);
+	}
+};
+
+/**
+ * Flattens fields into the client value map. When a client field tree is
+ * provided, sections/collapsibles shape their children based on their
+ * `output` config - nested under their key or inlined as if absent.
+ */
 const flattenFields = (
 	fields: InternalDocumentField[],
+	clientFieldTree?: CFConfig<FieldTypes>[],
 ): DocumentFieldValueMap => {
-	return fields.reduce((acc, field) => {
-		if (!field) return acc;
+	if (!clientFieldTree) {
+		return fields.reduce((acc, field) => {
+			if (!field) return acc;
 
-		acc[field.key] = flattenFieldValue(field);
-		return acc;
-	}, {} as DocumentFieldValueMap);
+			acc[field.key] = flattenFieldValue(field);
+			return acc;
+		}, {} as DocumentFieldValueMap);
+	}
+
+	const fieldMap = new Map(
+		fields.filter((field) => !!field).map((field) => [field.key, field]),
+	);
+	const result: DocumentFieldValueMap = {};
+	collectClientFieldValues(result, fieldMap, clientFieldTree);
+	return result;
 };
 
 /**

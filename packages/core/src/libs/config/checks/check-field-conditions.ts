@@ -76,7 +76,12 @@ const checkFieldConditions = (
 					});
 				}
 
-				if (target.type === "repeater" || target.type === "tab") {
+				if (
+					target.type === "repeater" ||
+					target.type === "tab" ||
+					target.type === "section" ||
+					target.type === "collapsible"
+				) {
 					throw new LucidError({
 						message: translate(
 							"server:core.fields.condition.target.invalid.type",

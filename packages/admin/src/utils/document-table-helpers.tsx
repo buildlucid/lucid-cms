@@ -59,11 +59,12 @@ export const collectionFieldIncludes = (collection?: Collection) => {
 	const fieldRecursive = (fields?: CollectionFieldConfig[]) => {
 		if (!fields) return;
 		for (const field of fields) {
-			if (field.type === "repeater") {
-				fieldRecursive(field.fields);
-				continue;
-			}
-			if (field.type === "tab") {
+			if (
+				field.type === "repeater" ||
+				field.type === "tab" ||
+				field.type === "section" ||
+				field.type === "collapsible"
+			) {
 				fieldRecursive(field.fields);
 				continue;
 			}

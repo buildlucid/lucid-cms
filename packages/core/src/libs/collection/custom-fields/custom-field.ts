@@ -35,6 +35,12 @@ import zodSafeParse from "./utils/zod-safe-parse.js";
 abstract class CustomField<T extends FieldTypes> {
 	/** Tree-table parent key when this field belongs to a nested tree scope. */
 	treeParent: string | null = null;
+	/**
+	 * Structural parent key when this field sits directly inside a
+	 * section/collapsible. Structural parents only affect UI nesting and client
+	 * response shaping - storage is unaffected.
+	 */
+	structuralParent: string | null = null;
 
 	abstract type: T;
 	abstract key: string;

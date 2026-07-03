@@ -50,6 +50,7 @@ class UserCustomField extends CustomField<"user"> {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,
 				condition: this.props?.ui?.condition,
+				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
 		} satisfies CFConfig<"user">;

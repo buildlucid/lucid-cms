@@ -22,6 +22,7 @@ const PageCollection = new CollectionBuilder("page", {
 	},
 	group: {
 		key: "content",
+		order: 0,
 	},
 	localized: true,
 	revisions: true,

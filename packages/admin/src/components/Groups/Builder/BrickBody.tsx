@@ -20,12 +20,12 @@ import type {
 	CollectionFieldConfig,
 	CollectionFieldConfigByType,
 } from "@/types/collection-config";
+import { builderUiStateHelpers } from "@/utils/builder-ui-state-helpers";
 import {
 	evaluateFieldVisibility,
 	type FieldConditionScope,
-	flattenTabScopeConfigs,
 } from "@/utils/field-condition-helpers";
-import { tabStateHelpers } from "@/utils/tab-state-helpers";
+import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
 import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
 
 interface BrickProps {
@@ -61,7 +61,9 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	);
 	const conditionScopes = createMemo<FieldConditionScope[]>(() => [
 		{
-			configFields: flattenTabScopeConfigs(props.state.configFields || []),
+			configFields: flattenStructuralScopeConfigs(
+				props.state.configFields || [],
+			),
 			fields: props.state.brick.fields,
 		},
 	]);
@@ -89,19 +91,22 @@ export const BrickBody: Component<BrickProps> = (props) => {
 		if (props.state.brick.type === "collection-fields") return undefined;
 		return props.state.brick.key;
 	});
+	const uiStateBrickKey = createMemo(() => props.state.brick.key);
+	const brickOrder = createMemo(() => props.state.brick.order);
+	const documentId = createMemo(() => props.state.documentId);
 	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
 
 	// ----------------------------------
 	// Effects
 	onMount(() => {
-		tabStateHelpers.cleanupOldEntries();
+		builderUiStateHelpers.cleanupOldEntries();
 
 		if (
 			props.state.collectionKey &&
 			props.state.documentId &&
 			allTabs().length > 0
 		) {
-			const savedTab = tabStateHelpers.getTabState(
+			const savedTab = builderUiStateHelpers.getActiveTab(
 				props.state.collectionKey,
 				props.state.documentId,
 				props.state.brick.key,
@@ -134,7 +139,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	createEffect(() => {
 		const activeTab = getActiveTab();
 		if (activeTab && props.state.collectionKey && props.state.documentId) {
-			tabStateHelpers.setTabState(
+			builderUiStateHelpers.setActiveTab(
 				props.state.collectionKey,
 				props.state.documentId,
 				props.state.brick.key,
@@ -164,17 +169,20 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					"p-4 pt-0": props.options.padding === "16",
 					"p-6": props.options.padding === "24",
 					"pt-4!": props.options.bleedTop && allTabs().length > 0,
-					"flex flex-col gap-4": allTabs().length === 0,
+					"grid grid-cols-12 gap-4": allTabs().length === 0,
 				})}
 			>
 				<FieldRenderStateProvider
+					brickOrder={brickOrder}
 					brickIndex={brickIndex}
 					collectionKey={collectionKey}
 					brickKey={brickKey}
+					documentId={documentId}
 					contentLocale={contentLocale}
 					defaultLocale={defaultLocale}
 					contentLocales={contentLocales}
 					missingFieldColumns={missingFieldColumns}
+					uiStateBrickKey={uiStateBrickKey}
 				>
 					{/* Tabs */}
 					<Show when={allTabs().length > 0}>

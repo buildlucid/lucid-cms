@@ -1,4 +1,5 @@
 export { CheckboxField } from "./CheckboxField";
+export { CollapsibleField } from "./CollapsibleField";
 export { ColorField } from "./ColorField";
 export { DocumentField } from "./DocumentField";
 export { DynamicField } from "./DynamicField";
@@ -8,6 +9,7 @@ export { LinkField } from "./LinkField";
 export { MediaField } from "./MediaField";
 export { RepeaterField } from "./RepeaterField";
 export { RichTextField } from "./RichTextField";
+export { SectionField } from "./SectionField";
 export { SelectField } from "./SelectField";
 export { TabField } from "./TabField";
 export { TextareaField } from "./TextareaField";

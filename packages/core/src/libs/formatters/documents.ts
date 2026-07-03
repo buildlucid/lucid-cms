@@ -312,15 +312,25 @@ const formatClientMeta = (props: {
 
 const formatClientBricks = (
 	bricks: InternalDocumentBrick[] | null | undefined,
+	collection: CollectionBuilder,
 ) => {
-	return (bricks ?? []).map((brick) => ({
-		id: brick.id,
-		ref: brick.ref,
-		key: brick.key,
-		type: brick.type,
-		order: brick.order,
-		fields: documentFieldsFormatter.flattenFields(brick.fields),
-	}));
+	return (bricks ?? []).map((brick) => {
+		const brickInstance = collection.brickInstances.find(
+			(b) => b.key === brick.key,
+		);
+
+		return {
+			id: brick.id,
+			ref: brick.ref,
+			key: brick.key,
+			type: brick.type,
+			order: brick.order,
+			fields: documentFieldsFormatter.flattenFields(
+				brick.fields,
+				brickInstance?.clientFieldTree,
+			),
+		};
+	});
 };
 
 /**
@@ -345,11 +355,14 @@ const formatClientSingle = <TCollectionKey extends string = string>(props: {
 		id: props.document.id,
 		collectionKey: props.document.collection_key,
 		status: props.document.version_type ?? null,
-		fields: documentFieldsFormatter.flattenFields(props.fields ?? []),
+		fields: documentFieldsFormatter.flattenFields(
+			props.fields ?? [],
+			props.collection.clientFieldTree,
+		),
 	};
 
 	if (props.include.bricks) {
-		clientRes.bricks = formatClientBricks(props.bricks);
+		clientRes.bricks = formatClientBricks(props.bricks, props.collection);
 	}
 
 	if (props.include.refs) {

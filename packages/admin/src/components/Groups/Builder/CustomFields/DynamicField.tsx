@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 import {
 	CheckboxField,
+	CollapsibleField,
 	ColorField,
 	DocumentField,
 	InputField,
@@ -18,14 +19,15 @@ import {
 	MediaField,
 	RepeaterField,
 	RichTextField,
+	SectionField,
 	SelectField,
 	TextareaField,
 	UserField,
 } from "@/components/Groups/Builder/CustomFields";
-import FieldTypeIcon from "@/components/Partials/FieldTypeIcon";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brickStore";
 import type {
+	CollectionDataFieldConfig,
 	CollectionFieldConfig,
 	CollectionFieldConfigByType,
 } from "@/types/collection-config";
@@ -33,6 +35,15 @@ import {
 	evaluateFieldVisibility,
 	type FieldConditionScope,
 } from "@/utils/field-condition-helpers";
+
+/** Maps `ui.width` onto the 12-column grid. Mobile always spans the full row. */
+const fieldWidthClasses: Record<number, string> = {
+	12: "col-span-12",
+	8: "col-span-12 md:col-span-8",
+	6: "col-span-12 md:col-span-6",
+	4: "col-span-12 md:col-span-4",
+	3: "col-span-12 md:col-span-3",
+};
 
 interface DynamicFieldProps {
 	state: {
@@ -70,7 +81,13 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		() => fieldRenderState.contentLocales().length > 1,
 	);
 	const fieldData = createMemo(() => {
-		if (props.state.fieldConfig.type === "tab") return;
+		if (
+			props.state.fieldConfig.type === "tab" ||
+			props.state.fieldConfig.type === "section" ||
+			props.state.fieldConfig.type === "collapsible"
+		) {
+			return;
+		}
 
 		const field = props.state.fields?.find(
 			(f) => f.key === props.state.fieldConfig.key,
@@ -79,7 +96,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		if (!field) {
 			return brickStore.get.addField({
 				brickIndex: fieldRenderState.brickIndex(),
-				fieldConfig: props.state.fieldConfig,
+				fieldConfig: props.state.fieldConfig as CollectionDataFieldConfig,
 				ref: props.state.groupRef,
 				repeaterKey: props.state.repeaterKey,
 				locales: fieldRenderState.contentLocales(),
@@ -134,33 +151,48 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	const fieldColumnIsMissing = createMemo(() => {
 		return fieldRenderState.missingFieldColumns().includes(fieldConfig().key);
 	});
+	const widthClass = createMemo(() => {
+		if (fieldConfig().type === "tab") return fieldWidthClasses[12];
+
+		// @ts-expect-error - not every field config type includes ui.width
+		const width = fieldConfig()?.ui?.width as number | undefined;
+		return fieldWidthClasses[width ?? 12] ?? fieldWidthClasses[12];
+	});
+	const wrapperSpacingClass = createMemo(() => {
+		if (
+			fieldConfig().type === "section" ||
+			fieldConfig().type === "collapsible"
+		) {
+			return "my-2 last:mb-0";
+		}
+
+		return "";
+	});
 	// -------------------------------
 	// Render
 	return (
 		<Show when={conditionVisible()}>
 			<div
-				class={classNames("w-full relative", {
-					"mb-0!": !activeTab(),
-					"invisible h-0 opacity-0 mb-0!":
-						fieldConfig().type !== "tab"
-							? // @ts-expect-error
-								fieldConfig()?.ui?.hidden === true
-							: false,
-				})}
+				class={classNames(
+					"w-full relative",
+					widthClass(),
+					wrapperSpacingClass(),
+					{
+						"mb-0!": !activeTab(),
+						"invisible h-0 opacity-0 mb-0!":
+							fieldConfig().type !== "tab"
+								? // @ts-expect-error
+									fieldConfig()?.ui?.hidden === true
+								: false,
+					},
+				)}
 			>
-				<Show when={fieldConfig().type !== "tab"}>
-					<FieldTypeIcon type={fieldConfig().type} />
-				</Show>
-				<div
-					class={classNames("w-full h-full", {
-						"pl-9.5": fieldConfig().type !== "tab",
-					})}
-				>
+				<div class="w-full h-full">
 					<Switch>
 						<Match when={fieldConfig().type === "tab"}>
 							<div
 								class={classNames(
-									"transition-opacity duration-200 ease-in-out flex flex-col gap-4",
+									"transition-opacity duration-200 ease-in-out grid grid-cols-12 gap-4",
 									{
 										"visible h-full opacity-100": activeTab(),
 										"invisible h-0 opacity-0": !activeTab(),
@@ -189,6 +221,36 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									)}
 								</Index>
 							</div>
+						</Match>
+						<Match when={fieldConfig().type === "section"}>
+							<SectionField
+								state={{
+									fieldConfig:
+										fieldConfig() as CollectionFieldConfigByType<"section">,
+									fields: props.state.fields,
+									fieldErrors: props.state.fieldErrors,
+									conditionScopes: props.state.conditionScopes,
+									groupRef: props.state.groupRef,
+									groupPath: props.state.groupPath,
+									repeaterKey: props.state.repeaterKey,
+									repeaterDepth: props.state.repeaterDepth,
+								}}
+							/>
+						</Match>
+						<Match when={fieldConfig().type === "collapsible"}>
+							<CollapsibleField
+								state={{
+									fieldConfig:
+										fieldConfig() as CollectionFieldConfigByType<"collapsible">,
+									fields: props.state.fields,
+									fieldErrors: props.state.fieldErrors,
+									conditionScopes: props.state.conditionScopes,
+									groupRef: props.state.groupRef,
+									groupPath: props.state.groupPath,
+									repeaterKey: props.state.repeaterKey,
+									repeaterDepth: props.state.repeaterDepth,
+								}}
+							/>
 						</Match>
 						<Match when={fieldConfig().type === "repeater"}>
 							<RepeaterField

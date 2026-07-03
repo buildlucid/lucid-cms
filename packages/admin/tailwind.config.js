@@ -42,6 +42,7 @@ export default {
 				icon: {
 					base: "#E3E3E3",
 					hover: "#E8E8E8",
+					faded: "#a1a1a1",
 				},
 				error: {
 					base: "#F75555",

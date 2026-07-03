@@ -20,6 +20,7 @@ import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
+import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
 
 interface GroupBodyProps {
 	state: {
@@ -59,7 +60,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	});
 	const conditionScopes = createMemo<FieldConditionScope[]>(() => [
 		{
-			configFields: configChildrenFields() || [],
+			configFields: flattenStructuralScopeConfigs(configChildrenFields() || []),
 			fields: groupFields(),
 		},
 		...(props.state.conditionScopes ?? []),
@@ -77,7 +78,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		return groupError()?.fields;
 	});
 	const titlePreview = createMemo(() => {
-		const configs = configChildrenFields() || [];
+		const configs = flattenStructuralScopeConfigs(configChildrenFields() || []);
 		const firstTextConfig = configs.find(
 			// include textarea as it's also "text input" content
 			(f) => f.type === "text" || f.type === "textarea",
@@ -245,7 +246,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					},
 				)}
 			>
-				<div class="border-t border-border p-3 md:p-4 gap-4 flex flex-col">
+				<div class="border-t border-border p-3 md:p-4 grid grid-cols-12 gap-4">
 					<Index each={configChildrenFields()}>
 						{(config) => (
 							<DynamicField

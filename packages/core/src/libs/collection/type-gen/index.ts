@@ -103,15 +103,44 @@ const renderFilterTree = (tree: FilterTreeNode): string => {
 	return `{\n${indentBlock(properties.join("\n"))}\n}`;
 };
 
-/** Renders one persisted field list into a reusable object field map type. */
-const renderFieldMap = (
+/**
+ * Collects the rendered properties for one client field list. Tabs are
+ * transparent, sections/collapsibles nest or inline their children based on
+ * their `output` config to match the client response shape.
+ */
+const collectFieldMapProperties = (
 	fields: CFConfig<FieldTypes>[],
 	context: RenderFieldContext,
-): RenderedFieldMap => {
-	const properties: string[] = [];
-	const declarations: string[] = [];
-
+	properties: string[],
+	declarations: string[],
+): void => {
 	for (const field of fields) {
+		if (field.type === "tab") {
+			collectFieldMapProperties(
+				field.fields,
+				context,
+				properties,
+				declarations,
+			);
+			continue;
+		}
+
+		if (field.type === "section" || field.type === "collapsible") {
+			if (field.output === "inline") {
+				collectFieldMapProperties(
+					field.fields,
+					context,
+					properties,
+					declarations,
+				);
+			} else {
+				const nested = renderFieldMap(field.fields, context);
+				declarations.push(...nested.declarations);
+				properties.push(`${stringLiteral(field.key)}: ${nested.typeText};`);
+			}
+			continue;
+		}
+
 		const renderedField = renderField(field, context);
 		declarations.push(...renderedField.declarations);
 
@@ -121,6 +150,17 @@ const renderFieldMap = (
 
 		properties.push(`${stringLiteral(field.key)}: ${renderedField.fieldType};`);
 	}
+};
+
+/** Renders one client field list into a reusable object field map type. */
+const renderFieldMap = (
+	fields: CFConfig<FieldTypes>[],
+	context: RenderFieldContext,
+): RenderedFieldMap => {
+	const properties: string[] = [];
+	const declarations: string[] = [];
+
+	collectFieldMapProperties(fields, context, properties, declarations);
 
 	if (properties.length === 0) {
 		return {
@@ -351,7 +391,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 	const collectionVersionKeyTypeName = buildCollectionVersionKeyTypeName(
 		collection.key,
 	);
-	const collectionFields = renderFieldMap(collection.persistedFieldTree, {
+	const collectionFields = renderFieldMap(collection.clientFieldTree, {
 		builder: collection,
 		collectionUsesTranslations: collection.getData.localized,
 		withinGroup: false,
@@ -384,7 +424,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 			brickKey: brick.key,
 			brickType,
 		});
-		const brickFields = renderFieldMap(brick.persistedFieldTree, {
+		const brickFields = renderFieldMap(brick.clientFieldTree, {
 			builder: brick,
 			collectionUsesTranslations: collection.getData.localized,
 			withinGroup: false,
