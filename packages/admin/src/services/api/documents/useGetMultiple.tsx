@@ -9,6 +9,8 @@ import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
+type DocumentRefInclude = "refs" | `refs.${string}`;
+
 interface QueryParams {
 	queryString?: Accessor<string>;
 	filters?: Record<
@@ -24,7 +26,9 @@ interface QueryParams {
 			| Accessor<Exclude<DocumentVersionType, "revision">>
 			| Exclude<DocumentVersionType, "revision">;
 	};
-	include?: Record<string, Accessor<boolean | undefined> | boolean>;
+	include?: Partial<
+		Record<DocumentRefInclude, Accessor<boolean | undefined> | boolean>
+	>;
 	perPage?: Accessor<number> | number;
 }
 

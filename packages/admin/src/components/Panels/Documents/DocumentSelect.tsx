@@ -159,9 +159,6 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			filters: {
 				isDeleted: 0,
 			},
-			include: {
-				fields: true,
-			},
 		},
 		enabled: () => searchParams.getSettled() && collection.isSuccess,
 	});

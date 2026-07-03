@@ -9,6 +9,9 @@ import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
+type DocumentRefInclude = "refs" | `refs.${string}`;
+type DocumentInclude = "bricks" | DocumentRefInclude;
+
 interface QueryParams {
 	location: {
 		collectionKey?: Accessor<string | undefined> | string;
@@ -18,10 +21,9 @@ interface QueryParams {
 			| DocumentVersionType
 			| number;
 	};
-	include: {
-		bricks: Accessor<boolean | undefined> | boolean;
-		refs?: Accessor<boolean | undefined> | boolean;
-	};
+	include: Partial<
+		Record<DocumentInclude, Accessor<boolean | undefined> | boolean>
+	>;
 }
 
 const useGetSingle = (params: QueryHook<QueryParams>) => {
