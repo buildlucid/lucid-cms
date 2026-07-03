@@ -25,6 +25,12 @@ const LinkCollection = new CollectionBuilder("collection", {
 		validation: {
 			required: true,
 		},
+	})
+	.addLink("required_localized_link", {
+		localized: true,
+		validation: {
+			required: true,
+		},
 	});
 
 test("successfully validate field - link", async () => {
@@ -77,6 +83,38 @@ test("successfully validate field - link", async () => {
 		},
 	});
 	expect(requiredValidate).length(0);
+
+	const requiredLocalizedValidate = validateField({
+		field: {
+			key: "required_localized_link",
+			type: "link",
+			translations: {
+				en: {
+					url: "https://example.com",
+					target: "_blank",
+					label: "Link 1",
+				},
+				fr: {
+					url: "https://example.fr",
+					target: "_blank",
+					label: "Link 1 FR",
+				},
+			},
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: LinkCollection.fields.get("required_localized_link")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [],
+		},
+		meta: {
+			localized: LinkCollection.getData.localized,
+			defaultLocale: "en",
+			locales: ["en", "fr"],
+		},
+	});
+	expect(requiredLocalizedValidate).length(0);
 });
 
 test("fail to validate field - link", async () => {
@@ -204,6 +242,69 @@ test("fail to validate field - link", async () => {
 		{
 			key: "required_link",
 			localeCode: null,
+			message: copy("server:core.fields.validation.required"),
+		},
+	]);
+
+	const requiredEmptyLinkValidate = validateField({
+		field: {
+			key: "required_link",
+			type: "link",
+			value: {
+				url: "   ",
+				target: "_self",
+				label: "  ",
+			},
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: LinkCollection.fields.get("required_link")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [],
+		},
+		meta: {
+			localized: LinkCollection.getData.localized,
+			defaultLocale: "en",
+		},
+	});
+	expect(requiredEmptyLinkValidate).toEqual([
+		{
+			key: "required_link",
+			localeCode: null,
+			message: copy("server:core.fields.validation.required"),
+		},
+	]);
+
+	const requiredMissingTranslationValidate = validateField({
+		field: {
+			key: "required_localized_link",
+			type: "link",
+			translations: {
+				en: {
+					url: "https://example.com",
+					target: "_blank",
+					label: "Link 1",
+				},
+			},
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: LinkCollection.fields.get("required_localized_link")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [],
+		},
+		meta: {
+			localized: LinkCollection.getData.localized,
+			defaultLocale: "en",
+			locales: ["en", "fr"],
+		},
+	});
+	expect(requiredMissingTranslationValidate).toEqual([
+		{
+			key: "required_localized_link",
+			localeCode: "fr",
 			message: copy("server:core.fields.validation.required"),
 		},
 	]);

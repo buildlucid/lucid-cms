@@ -51,6 +51,12 @@ type ConditionScopeLevel = {
 	fields: Array<FieldInputSchema>;
 };
 
+type ValidationMeta = {
+	localized: boolean;
+	defaultLocale: string;
+	locales?: string[];
+};
+
 const getFieldCondition = (
 	instance: CustomField<FieldTypes>,
 ): FieldConditionConfig | undefined => {
@@ -253,6 +259,7 @@ const checkValidateBricksFields: ServiceFn<
 		collection: data.collection,
 		validationData: refDataRes.data,
 		defaultLocale: context.config.localization.defaultLocale,
+		locales: context.config.localization.locales.map((locale) => locale.code),
 		tenantKey: context.request.tenantKey,
 	});
 	const fieldErrors = recursiveFieldValidate({
@@ -262,6 +269,7 @@ const checkValidateBricksFields: ServiceFn<
 		meta: {
 			localized: data.collection.getData.localized,
 			defaultLocale: context.config.localization.defaultLocale,
+			locales: context.config.localization.locales.map((locale) => locale.code),
 		},
 	});
 
@@ -295,6 +303,7 @@ const validateBricks = (props: {
 	collection: CollectionBuilder;
 	validationData: ValidationData;
 	defaultLocale: string;
+	locales: string[];
 	tenantKey?: string | null;
 }): Array<BrickError> => {
 	const errors: BrickError[] = [];
@@ -352,6 +361,7 @@ const validateBricks = (props: {
 			meta: {
 				localized: props.collection.getData.localized,
 				defaultLocale: props.defaultLocale,
+				locales: props.locales,
 			},
 		});
 		if (fieldErrors.length === 0) continue;
@@ -377,10 +387,7 @@ export const recursiveFieldValidate = (props: {
 	parentTreeFieldKey?: string;
 	parentScopes?: ConditionScopeLevel[];
 	structuralConditions?: Map<string, FieldConditionConfig[]>;
-	meta: {
-		localized: boolean;
-		defaultLocale: string;
-	};
+	meta: ValidationMeta;
 }) => {
 	const errors: FieldError[] = [];
 
@@ -527,6 +534,25 @@ export const recursiveFieldValidate = (props: {
 			isRequiredFieldConfig(fieldInstance.config) &&
 			fieldInstance.config.validation.required
 		) {
+			if (
+				props.meta.localized &&
+				fieldInstance.localizedEnabled &&
+				props.meta.locales?.length
+			) {
+				for (const localeCode of getConfiguredLocaleCodes(props.meta)) {
+					if (!fieldVisibleForLocale(key, fieldInstance, localeCode)) {
+						continue;
+					}
+
+					errors.push({
+						key: key,
+						localeCode,
+						message: copy("server:core.fields.validation.is.required"),
+					});
+				}
+				return;
+			}
+
 			//* hidden fields are exempt from required validation
 			if (
 				!fieldVisibleForLocale(key, fieldInstance, props.meta.defaultLocale)
@@ -545,6 +571,24 @@ export const recursiveFieldValidate = (props: {
 	return errors;
 };
 
+const getConfiguredLocaleCodes = (meta: ValidationMeta) => {
+	const localeCodes = new Set(meta.locales ?? []);
+	localeCodes.add(meta.defaultLocale);
+	return Array.from(localeCodes);
+};
+
+const getTranslationLocaleCodes = (
+	meta: ValidationMeta,
+	translations: NonNullable<FieldInputSchema["translations"]>,
+) => {
+	const submittedLocaleCodes = Object.keys(translations);
+	if (!meta.locales?.length) return submittedLocaleCodes;
+
+	return Array.from(
+		new Set([...getConfiguredLocaleCodes(meta), ...submittedLocaleCodes]),
+	);
+};
+
 /**
  * Validates a single field, handling both direct values and translations
  */
@@ -557,13 +601,12 @@ export const validateField = (props: {
 	 * Hidden locales skip validation entirely.
 	 */
 	isLocaleVisible?: (localeCode: string | null) => boolean;
-	meta: {
-		localized: boolean;
-		defaultLocale: string;
-	};
+	meta: ValidationMeta;
 }): FieldError[] => {
 	const errors: FieldError[] = [];
 	const refData = props.validationData[props.field.type];
+	const fieldUsesTranslations =
+		props.meta.localized && props.instance.localizedEnabled;
 	const toFieldErrors = (localeCode: string | null, message?: ErrorCopy) => {
 		return (
 			message
@@ -598,7 +641,11 @@ export const validateField = (props: {
 
 	//* handle fields with translations
 	if (props.field.translations) {
-		for (const localeCode in props.field.translations) {
+		const localeCodes = fieldUsesTranslations
+			? getTranslationLocaleCodes(props.meta, props.field.translations)
+			: Object.keys(props.field.translations);
+
+		for (const localeCode of localeCodes) {
 			if (props.isLocaleVisible && !props.isLocaleVisible(localeCode)) {
 				continue;
 			}
@@ -617,6 +664,29 @@ export const validateField = (props: {
 	}
 	//* handle direct value fields
 	else {
+		if (fieldUsesTranslations && props.meta.locales?.length) {
+			for (const localeCode of getConfiguredLocaleCodes(props.meta)) {
+				if (props.isLocaleVisible && !props.isLocaleVisible(localeCode)) {
+					continue;
+				}
+
+				const validationResult = props.instance.validate({
+					type: props.field.type,
+					value:
+						localeCode === props.meta.defaultLocale
+							? props.field.value
+							: undefined,
+					refData: refData,
+				});
+
+				if (!validationResult.valid) {
+					errors.push(...buildFieldErrors(localeCode, validationResult));
+				}
+			}
+
+			return errors;
+		}
+
 		if (props.isLocaleVisible && !props.isLocaleVisible(null)) {
 			return errors;
 		}
@@ -630,9 +700,7 @@ export const validateField = (props: {
 		if (!validationResult.valid) {
 			errors.push(
 				...buildFieldErrors(
-					props.meta.localized && props.instance.localizedEnabled
-						? props.meta.defaultLocale
-						: null,
+					fieldUsesTranslations ? props.meta.defaultLocale : null,
 					validationResult,
 				),
 			);

@@ -7,6 +7,7 @@ import type {
 	CFConfig,
 	CFProps,
 	CFResponse,
+	CustomFieldErrorItem,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -86,6 +87,32 @@ class LinkCustomField extends CustomField<"link"> {
 			url: typeof obj.url === "string" ? obj.url.trim() : obj.url,
 			label: typeof obj.label === "string" ? obj.label.trim() : obj.label,
 			target: typeof obj.target === "string" ? obj.target.trim() : obj.target,
+		};
+	}
+	override get errors(): {
+		fieldType: CustomFieldErrorItem;
+		required: CustomFieldErrorItem;
+		zod: CustomFieldErrorItem;
+	} {
+		return {
+			...super.errors,
+			required: {
+				condition: (value: unknown) => {
+					if (value === undefined || value === null || value === "") {
+						return true;
+					}
+					if (!value || typeof value !== "object" || Array.isArray(value)) {
+						return false;
+					}
+
+					const link = value as Partial<NonNullable<LinkResValue>>;
+					const isEmpty = (input: unknown) =>
+						input === undefined || input === null || input === "";
+
+					return isEmpty(link.url) && isEmpty(link.label);
+				},
+				message: copy("server:core.fields.validation.required"),
+			},
 		};
 	}
 	uniqueValidation(value: unknown) {

@@ -16,6 +16,11 @@ const TranslatedCollection = new CollectionBuilder("collection", {
 	localized: true,
 })
 	.addText("translatable_field")
+	.addText("required_translatable_field", {
+		validation: {
+			required: true,
+		},
+	})
 	.addText("non_translatable_field", {
 		localized: false,
 	});
@@ -37,8 +42,8 @@ const NonTranslatedCollection = new CollectionBuilder("non_translated", {
 test("localeCode is correctly included or omitted based on translation support", async () => {
 	const validationData = {
 		media: [],
-		users: [],
-		documents: [],
+		user: [],
+		document: [],
 	};
 	const defaultLocale = "en";
 	const frenchDefaultLocale = "fr";
@@ -160,4 +165,60 @@ test("localeCode is correctly included or omitted based on translation support",
 		localeCode: null,
 		message: copy.literal("Invalid input: expected string, received number"),
 	});
+});
+
+test("required localized fields validate every configured locale", async () => {
+	const validationData = {
+		media: [],
+		user: [],
+		document: [],
+	};
+
+	const withMissingTranslation = validateField({
+		field: {
+			key: "required_translatable_field",
+			type: "text",
+			translations: {
+				en: "English title",
+			},
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: TranslatedCollection.fields.get("required_translatable_field")!,
+		validationData,
+		meta: {
+			localized: TranslatedCollection.getData.localized,
+			defaultLocale: "en",
+			locales: ["en", "fr"],
+		},
+	});
+	expect(withMissingTranslation).toEqual([
+		{
+			key: "required_translatable_field",
+			localeCode: "fr",
+			message: copy("server:core.fields.validation.required"),
+		},
+	]);
+
+	const withDirectValue = validateField({
+		field: {
+			key: "required_translatable_field",
+			type: "text",
+			value: "English title",
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: TranslatedCollection.fields.get("required_translatable_field")!,
+		validationData,
+		meta: {
+			localized: TranslatedCollection.getData.localized,
+			defaultLocale: "en",
+			locales: ["en", "fr"],
+		},
+	});
+	expect(withDirectValue).toEqual([
+		{
+			key: "required_translatable_field",
+			localeCode: "fr",
+			message: copy("server:core.fields.validation.required"),
+		},
+	]);
 });
