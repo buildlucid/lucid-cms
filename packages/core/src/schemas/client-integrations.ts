@@ -70,7 +70,7 @@ const clientIntegrationScopeGroupResponseSchema = z.object({
 		)
 		.meta({
 			description: "The scope group key",
-			example: "media_scopes",
+			example: "media:label",
 		}),
 	scopes: z.array(clientScopeSchema).meta({
 		description: "The scopes for this scope group",

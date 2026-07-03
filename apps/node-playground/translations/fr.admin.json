@@ -236,7 +236,7 @@
 	"permissions.media.process": "Médias de traitement",
 	"permissions.locales.read": "Lire les paramètres régionaux",
 	"client.scopes.documents.label": "Portées des documents",
-	"media.scopes": "Portées des médias",
+	"client.scopes.media.label": "Portées des médias",
 	"client.scopes.locales.label": "Portées des paramètres régionaux",
 	"permissions.license.update": "Mettre à jour la licence",
 	"permissions.settings.read": "Lire les paramètres",

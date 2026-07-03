@@ -7,15 +7,15 @@ export type ClientScopeGroup = {
 
 export const ClientScopeGroups = Object.freeze({
 	documents: {
-		key: "documents_scopes",
+		key: "documents:label",
 		scopes: [ClientScopes.DocumentsRead],
 	},
 	media: {
-		key: "media_scopes",
+		key: "media:label",
 		scopes: [ClientScopes.MediaRead, ClientScopes.MediaProcess],
 	},
 	locales: {
-		key: "locales_scopes",
+		key: "locales:label",
 		scopes: [ClientScopes.LocalesRead],
 	},
 }) satisfies Record<string, ClientScopeGroup>;

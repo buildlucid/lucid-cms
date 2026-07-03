@@ -16,7 +16,7 @@ import {
 } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
-import T, { type TranslationKeys } from "@/translations";
+import T from "@/translations";
 import { clientScopeKeyToTranslation } from "@/translations/helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
@@ -241,7 +241,7 @@ const UpsertClientIntegrationPanel: Component<
 									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card-base">
 										<div class="flex justify-between items-start gap-3">
 											<h4 class="text-sm font-medium text-body">
-												{T()(group.key as TranslationKeys)}
+												{T()(clientScopeKeyToTranslation(group.key))}
 											</h4>
 											<button
 												type="button"

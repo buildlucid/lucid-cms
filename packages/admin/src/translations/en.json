@@ -245,7 +245,7 @@
 	"permissions.media.process": "Process Media",
 	"permissions.locales.read": "Read Locales",
 	"client.scopes.documents.label": "Document Scopes",
-	"media.scopes": "Media Scopes",
+	"client.scopes.media.label": "Media Scopes",
 	"client.scopes.locales.label": "Locale Scopes",
 	"permissions.license.update": "Update License",
 	"license:update": "Update License",
