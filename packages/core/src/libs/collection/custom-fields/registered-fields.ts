@@ -1,4 +1,5 @@
 import checkbox from "./fields/checkbox/index.js";
+import code from "./fields/code/index.js";
 import collapsible from "./fields/collapsible/index.js";
 import color from "./fields/color/index.js";
 import datetime from "./fields/datetime/index.js";
@@ -20,6 +21,7 @@ import { fieldTypes } from "./types.js";
 
 const registeredFields = {
 	checkbox: checkbox,
+	code: code,
 	collapsible: collapsible,
 	color: color,
 	datetime: datetime,

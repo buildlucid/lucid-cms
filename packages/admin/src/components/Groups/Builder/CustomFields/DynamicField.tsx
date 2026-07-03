@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 import {
 	CheckboxField,
+	CodeField,
 	CollapsibleField,
 	ColorField,
 	DocumentField,
@@ -387,6 +388,21 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								state={{
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"json">,
+									fieldData: fieldData(),
+									groupRef: props.state.groupRef,
+									repeaterKey: props.state.repeaterKey,
+									fieldError: fieldError(),
+									altLocaleError: altLocaleError(),
+									localised: isLocalised(),
+									fieldColumnIsMissing: fieldColumnIsMissing(),
+								}}
+							/>
+						</Match>
+						<Match when={fieldConfig().type === "code"}>
+							<CodeField
+								state={{
+									fieldConfig:
+										fieldConfig() as CollectionFieldConfigByType<"code">,
 									fieldData: fieldData(),
 									groupRef: props.state.groupRef,
 									repeaterKey: props.state.repeaterKey,

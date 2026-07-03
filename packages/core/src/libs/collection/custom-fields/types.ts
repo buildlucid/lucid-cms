@@ -19,6 +19,8 @@ import type { FieldConditionConfig } from "./conditions/index.js";
 import type CustomField from "./custom-field.js";
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import type { CheckboxCustomFieldMapItem } from "./fields/checkbox/types.js";
+import { codeFieldConfig } from "./fields/code/config.js";
+import type { CodeCustomFieldMapItem } from "./fields/code/types.js";
 import { collapsibleFieldConfig } from "./fields/collapsible/config.js";
 import type { CollapsibleCustomFieldMapItem } from "./fields/collapsible/types.js";
 import { colorFieldConfig } from "./fields/color/config.js";
@@ -54,6 +56,7 @@ import type { UserCustomFieldMapItem } from "./fields/user/types.js";
 
 export type * from "./conditions/index.js";
 export type * from "./fields/checkbox/types.js";
+export type * from "./fields/code/types.js";
 export type * from "./fields/collapsible/types.js";
 export type * from "./fields/color/types.js";
 export type * from "./fields/datetime/types.js";
@@ -76,6 +79,7 @@ export type * from "./fields/user/types.js";
 
 export const fieldTypes = [
 	checkboxFieldConfig.type,
+	codeFieldConfig.type,
 	collapsibleFieldConfig.type,
 	colorFieldConfig.type,
 	datetimeFieldConfig.type,
@@ -235,6 +239,7 @@ export type CustomFieldMap = {
 	select: SelectCustomFieldMapItem;
 	textarea: TextareaCustomFieldMapItem;
 	json: JsonCustomFieldMapItem;
+	code: CodeCustomFieldMapItem;
 	color: ColorCustomFieldMapItem;
 	datetime: DatetimeCustomFieldMapItem;
 	link: LinkCustomFieldMapItem;

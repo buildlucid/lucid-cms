@@ -61,6 +61,23 @@ export default Object.freeze({
 		link: {
 			targets: ["_self", "_blank", "_parent", "_top", "framename"],
 		},
+		code: {
+			languages: [
+				"text",
+				"javascript",
+				"typescript",
+				"jsx",
+				"tsx",
+				"json",
+				"html",
+				"css",
+				"scss",
+				"markdown",
+				"yaml",
+				"bash",
+				"sql",
+			],
+		},
 	},
 	query: {
 		page: 1,

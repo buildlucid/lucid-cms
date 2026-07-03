@@ -44,6 +44,7 @@ export interface MediaImageGenerationTarget {
 }
 
 export type CustomFieldGenerationFieldType =
+	| "code"
 	| "json"
 	| "rich-text"
 	| "text"
@@ -74,6 +75,8 @@ export interface CustomFieldGenerationTarget {
 		label?: string;
 		localized: boolean;
 		guidance: CustomFieldGenerationGuidance[];
+		/** Language options for code fields. */
+		languages?: string[];
 	}>;
 	request: Accessor<{
 		collectionKey?: string;

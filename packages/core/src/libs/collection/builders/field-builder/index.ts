@@ -1,5 +1,6 @@
 import type CustomField from "../../custom-fields/custom-field.js";
 import CheckboxCustomField from "../../custom-fields/fields/checkbox/custom-field.js";
+import CodeCustomField from "../../custom-fields/fields/code/custom-field.js";
 import CollapsibleCustomField from "../../custom-fields/fields/collapsible/custom-field.js";
 import ColorCustomField from "../../custom-fields/fields/color/custom-field.js";
 import DateTimeCF from "../../custom-fields/fields/datetime/custom-field.js";
@@ -131,6 +132,9 @@ class FieldBuilder {
 	}
 	public addJSON(key: string, props?: CFProps<"json">) {
 		return this.registerField(key, new JSONCF(key, props));
+	}
+	public addCode(key: string, props?: CFProps<"code">) {
+		return this.registerField(key, new CodeCustomField(key, props));
 	}
 	public addColor(key: string, props?: CFProps<"color">) {
 		return this.registerField(key, new ColorCustomField(key, props));

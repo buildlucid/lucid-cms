@@ -77,6 +77,19 @@ const TestingBrick = new BrickBuilder("testing", {
 		},
 	})
 	.addJSON("json-key")
+	.addCode("code-key", {
+		details: {
+			label: copy("admin:bricks.testing.fields.code-key.label"),
+			summary: copy("admin:bricks.testing.fields.code-key.summary"),
+			placeholder: copy("admin:bricks.testing.fields.code-key.placeholder"),
+		},
+	})
+	.addCode("code-key-restricted", {
+		languages: ["javascript", "typescript", "css"],
+		validation: {
+			required: true,
+		},
+	})
 	.addColor("color-key", {
 		presets: ["#000000", "#ffffff"],
 	})

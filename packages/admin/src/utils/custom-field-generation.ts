@@ -29,6 +29,26 @@ export const stringifyJsonValue = (value: unknown) => {
 	}
 };
 
+export type CodeFieldGenerationValue = {
+	language: string;
+	value: string;
+} | null;
+
+/**
+ * Coerces a draft value into the code field `{ language, value }` shape.
+ */
+export const getCodeDraftValue = (value: unknown): CodeFieldGenerationValue => {
+	if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+
+	const code = value as Record<string, unknown>;
+	if (typeof code.value !== "string") return null;
+
+	return {
+		language: typeof code.language === "string" ? code.language : "text",
+		value: code.value,
+	};
+};
+
 /**
  * Coerces AI output into the field shape expected by the matching preview editor.
  */
@@ -44,6 +64,15 @@ export const normalizeOutputValue = (
 		return value && typeof value === "object"
 			? value
 			: createEmptyRichTextValue();
+	}
+
+	if (type === "code") {
+		const codeValue = getCodeDraftValue(value);
+		if (codeValue) return codeValue;
+		if (typeof value === "string" && value.trim() !== "") {
+			return { language: "text", value };
+		}
+		return null;
 	}
 
 	return value ?? {};

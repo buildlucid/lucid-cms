@@ -3,7 +3,7 @@ import { EditorView } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import { createCodeMirror, createEditorReadonly } from "solid-codemirror";
 import type { Component } from "solid-js";
-import { cmHighlighting, cmTheme } from "@/utils/codemirror-json-theme";
+import { cmHighlighting, cmTheme } from "@/utils/codemirror-theme";
 
 interface JSONPreviewProps {
 	title: string;

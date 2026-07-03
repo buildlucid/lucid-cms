@@ -117,6 +117,7 @@ const CustomFieldSchema = z.object({
 		)
 		.optional(),
 	presets: z.array(z.string()).optional(),
+	languages: z.array(z.string()).optional(),
 	validation: z
 		.object({
 			zod: z.any().optional(),

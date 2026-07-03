@@ -7,6 +7,7 @@ export type BrickType = "builder" | "fixed";
 
 export type FieldType =
 	| "checkbox"
+	| "code"
 	| "collapsible"
 	| "color"
 	| "datetime"
@@ -30,6 +31,11 @@ export type LinkValue = {
 	label: string | null;
 } | null;
 
+export type CodeValue = {
+	language: string;
+	value: string;
+} | null;
+
 export type DocumentRelationValue<TCollectionKey extends string = string> = {
 	id: number;
 	collectionKey: TCollectionKey;
@@ -40,6 +46,7 @@ export type DocumentFieldValueResponse =
 	| number
 	| string
 	| LinkValue
+	| CodeValue
 	| Record<string, unknown>
 	| unknown[]
 	| DocumentRelationValue[]
@@ -433,6 +440,13 @@ export interface ColorFieldConfig
 	validation?: RequiredValidation;
 }
 
+export interface CodeFieldConfig
+	extends SharedCollectionFieldConfig<"code">,
+		FieldConfigOptions<CodeValue> {
+	languages: string[];
+	validation?: ZodValidation;
+}
+
 export interface DatetimeFieldConfig
 	extends SharedCollectionFieldConfig<"datetime">,
 		FieldConfigOptions<string> {
@@ -559,6 +573,7 @@ export interface UserFieldConfig
 
 export type CollectionLeafFieldConfig =
 	| CheckboxFieldConfig
+	| CodeFieldConfig
 	| ColorFieldConfig
 	| DatetimeFieldConfig
 	| DocumentFieldConfig

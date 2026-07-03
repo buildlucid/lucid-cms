@@ -1,4 +1,5 @@
 export { CheckboxField } from "./CheckboxField";
+export { CodeField } from "./CodeField";
 export { CollapsibleField } from "./CollapsibleField";
 export { ColorField } from "./ColorField";
 export { DocumentField } from "./DocumentField";

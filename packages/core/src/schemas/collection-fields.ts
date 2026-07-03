@@ -12,6 +12,7 @@ export const fieldInputSchema = z.object({
 		z.literal("select"),
 		z.literal("textarea"),
 		z.literal("json"),
+		z.literal("code"),
 		z.literal("color"),
 		z.literal("datetime"),
 		z.literal("link"),
@@ -402,6 +403,14 @@ export const fieldConfigSchema = z.object({
 		.meta({
 			description: "Preset values for color fields",
 			example: ["#ff0000", "#00ff00", "#0000ff"],
+		})
+		.optional(),
+	languages: z
+		.array(z.string())
+		.nullable()
+		.meta({
+			description: "Language options for code fields",
+			example: ["javascript", "typescript", "css"],
 		})
 		.optional(),
 });

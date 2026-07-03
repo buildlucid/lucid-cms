@@ -1,5 +1,6 @@
 export { CheckboxInput as Checkbox } from "./Checkbox";
 export { CheckboxButton } from "./CheckboxButton";
+export { CodeEditor } from "./CodeEditor";
 export { Color } from "./Color";
 export { DegreeRangeControl } from "./DegreeRangeControl";
 export { DescribedBy } from "./DescribedBy";

@@ -115,14 +115,66 @@ export const cmTheme = EditorView.theme(
 );
 
 const highlightStyle = HighlightStyle.define([
+	// literals
 	{ tag: tags.string, color: "#C1FE77" },
+	{ tag: [tags.special(tags.string), tags.regexp], color: "#FF9E64" },
 	{ tag: tags.number, color: "#7EC8E3" },
-	{ tag: tags.bool, color: "#FF9E64" },
-	{ tag: tags.null, color: "#FF9E64" },
+	{ tag: [tags.bool, tags.null, tags.atom], color: "#FF9E64" },
+	{ tag: tags.escape, color: "#FF9E64" },
+	// keywords & operators
+	{
+		tag: [
+			tags.keyword,
+			tags.modifier,
+			tags.operatorKeyword,
+			tags.controlKeyword,
+			tags.definitionKeyword,
+			tags.moduleKeyword,
+			tags.self,
+		],
+		color: "#B18CFF",
+	},
+	{ tag: tags.operator, color: "#8A8A8A" },
+	// names
 	{ tag: tags.propertyName, color: "#C9C9C9" },
+	{ tag: tags.definition(tags.propertyName), color: "#7EC8E3" },
+	{ tag: tags.variableName, color: "#C9C9C9" },
+	{ tag: tags.definition(tags.variableName), color: "#E3E3E3" },
+	{
+		tag: [tags.function(tags.variableName), tags.function(tags.propertyName)],
+		color: "#82B4FF",
+	},
+	{
+		tag: [tags.typeName, tags.className, tags.namespace],
+		color: "#FFC777",
+	},
+	{ tag: [tags.labelName, tags.macroName], color: "#FFC777" },
+	// markup (html/xml/markdown)
+	{ tag: tags.tagName, color: "#F98A8A" },
+	{ tag: tags.attributeName, color: "#FFC777" },
+	{ tag: tags.attributeValue, color: "#C1FE77" },
+	{ tag: tags.angleBracket, color: "#888" },
+	{ tag: tags.heading, color: "#E3E3E3", fontWeight: "bold" },
+	{ tag: tags.emphasis, fontStyle: "italic" },
+	{ tag: tags.strong, fontWeight: "bold" },
+	{ tag: tags.strikethrough, textDecoration: "line-through" },
+	{ tag: tags.link, color: "#7EC8E3", textDecoration: "underline" },
+	{ tag: tags.url, color: "#7EC8E3" },
+	{ tag: tags.monospace, color: "#C1FE77" },
+	{ tag: tags.contentSeparator, color: "#666" },
+	// comments & meta
+	{
+		tag: [tags.comment, tags.lineComment, tags.blockComment],
+		color: "#6E6E6E",
+		fontStyle: "italic",
+	},
+	{ tag: [tags.meta, tags.documentMeta, tags.annotation], color: "#8A8A8A" },
+	{ tag: tags.processingInstruction, color: "#8A8A8A" },
+	// structure
 	{ tag: tags.punctuation, color: "#666" },
 	{ tag: tags.brace, color: "#888" },
 	{ tag: tags.squareBracket, color: "#888" },
+	{ tag: tags.invalid, color: "#F75555" },
 ]);
 
 export const cmHighlighting = syntaxHighlighting(highlightStyle);

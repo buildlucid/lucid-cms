@@ -18,6 +18,7 @@ import {
 	Switch,
 } from "solid-js";
 import {
+	CodeEditor,
 	Input,
 	JSONTextarea,
 	Label,
@@ -38,6 +39,7 @@ import T from "@/translations";
 import {
 	cloneGenerationValue,
 	createLocaleValueRecord,
+	getCodeDraftValue,
 	isJsonField,
 	normalizeOutputValue,
 	stringifyJsonValue,
@@ -74,10 +76,21 @@ const DraftEditor: Component<{
 	value: unknown;
 	jsonText?: string;
 	jsonValid?: boolean;
+	languages?: string[];
 	selectedLocaleCount: number;
 	onChange: (_localeCode: string, _value: unknown) => void;
 	onJsonChange: (_localeCode: string, _value: string) => void;
 }> = (props) => {
+	const codeValue = () => getCodeDraftValue(props.value);
+	const codeLanguages = () => {
+		const configured = props.languages ?? [];
+		if (configured.length > 0) return configured;
+		const current = codeValue()?.language;
+		return current ? [current] : ["text"];
+	};
+	const codeLanguage = () =>
+		codeValue()?.language ?? codeLanguages()[0] ?? "text";
+
 	return (
 		<Switch>
 			<Match when={props.fieldType === "text"}>
@@ -117,6 +130,30 @@ const DraftEditor: Component<{
 						</p>
 					</Show>
 				</div>
+			</Match>
+			<Match when={props.fieldType === "code"}>
+				<CodeEditor
+					id={`ai-custom-field-generation-preview-code-${props.localeCode}`}
+					name={`ai-custom-field-generation-preview-code-${props.localeCode}`}
+					value={codeValue()?.value ?? ""}
+					language={codeLanguage()}
+					languages={codeLanguages()}
+					onChange={(nextValue) =>
+						props.onChange(
+							props.localeCode,
+							nextValue.trim() === ""
+								? null
+								: { language: codeLanguage(), value: nextValue },
+						)
+					}
+					onLanguageChange={(nextLanguage) =>
+						props.onChange(props.localeCode, {
+							language: nextLanguage,
+							value: codeValue()?.value ?? "",
+						})
+					}
+					noMargin
+				/>
 			</Match>
 			<Match when={props.fieldType === "rich-text"}>
 				<RichText
@@ -899,6 +936,7 @@ const CustomFieldGenerationModal: Component = () => {
 														value={activeValues()[activeLocale()]}
 														jsonText={activeJsonText()[activeLocale()]}
 														jsonValid={activeJsonValid()[activeLocale()]}
+														languages={field()?.languages}
 														selectedLocaleCount={1}
 														onChange={(targetLocale, nextValue) =>
 															setDraft(field()?.type, targetLocale, nextValue)
@@ -948,6 +986,7 @@ const CustomFieldGenerationModal: Component = () => {
 																value={activeValues()[localeCode]}
 																jsonText={activeJsonText()[localeCode]}
 																jsonValid={activeJsonValid()[localeCode]}
+																languages={field()?.languages}
 																selectedLocaleCount={selectedLocales().length}
 																onChange={(targetLocale, nextValue) =>
 																	setDraft(

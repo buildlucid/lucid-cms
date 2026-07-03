@@ -18,7 +18,7 @@ import {
 } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import T from "@/translations";
-import { cmHighlighting, cmTheme } from "@/utils/codemirror-json-theme";
+import { cmHighlighting, cmTheme } from "@/utils/codemirror-theme";
 
 interface JSONTextareaProps {
 	id: string;

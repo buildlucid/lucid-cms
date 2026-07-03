@@ -1128,6 +1128,7 @@
 	"ai.usage.elapsed": "Runtime",
 	"ai.usage.initiated": "Initiated",
 	"fields.json.invalid.save.warning": "Using last valid save",
+	"fields.code.language.aria.label": "Code language",
 	"client.scopes.documents.read": "Read Documents",
 	"client.scopes.media.read": "Read Media",
 	"client.scopes.media.process": "Process Media",

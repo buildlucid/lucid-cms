@@ -159,6 +159,7 @@
 	"core.fields.validation.type.mismatch": "The type of the field does not match the type of the config field. Received: \"{{received}}\" Expected: \"{{expected}}\"",
 	"core.fields.date.validation.invalid": "Please ensure the date you have entered is valid",
 	"core.fields.link.validation.target.error.message": "Please set the target to one of the following: {{valid}}",
+	"core.fields.code.validation.language.error.message": "Please set the language to one of the following: {{valid}}",
 	"core.fields.validation.data.type.mismatch": "The data type is incorrect",
 	"core.services.errors.unknown.name": "An unknown error occurred",
 	"core.services.errors.unknown.message": "An unknown error occurred. Please try again later.",
