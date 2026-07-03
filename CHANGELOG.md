@@ -8,6 +8,9 @@
 - Added a `migrate:new` CLI command that scaffolds a timestamped migration file. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
 - Added a read-only `migrate:status` CLI command that reports applied, pending and missing migrations along with pending collection migrations. Pass `--check` to exit non-zero when work is pending or history is unhealthy, for use in CI and deploy pipelines. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
 - Added conditional custom field rendering with local field-scope rules, translation-aware resolution and validation that skips hidden fields and containers. ([e8e3ff9](https://github.com/buildlucid/lucid-cms/commit/e8e3ff9194839d493dece25850a533d8f017ec7c))
+- Added layout-focused custom fields: `addSection`/`endSection` and `addCollapsible`/`endCollapsible` builder support for grouping fields in the document editor, with an `output: "nested" | "inline"` option controlling whether children nest under the field key in client document responses. ([62d98f2](https://github.com/buildlucid/lucid-cms/commit/62d98f2e70941057b3bfabfb5662f72e60ab206d))
+- Added tab support to collection fields, matching the existing brick tab behaviour. ([62d98f2](https://github.com/buildlucid/lucid-cms/commit/62d98f2e70941057b3bfabfb5662f72e60ab206d))
+- Added a `ui.width` option (`12 | 8 | 6 | 4 | 3`) to custom fields, rendering field lists on a responsive 12-column grid in the admin with a full-width fallback on mobile. ([62d98f2](https://github.com/buildlucid/lucid-cms/commit/62d98f2e70941057b3bfabfb5662f72e60ab206d))
 
 ### Breaking changes:
 
@@ -18,6 +21,7 @@
 - Fixed `migrate:reset` and `migrate:fresh` failing on SQLite based adapters when dropping tables. Core tables contain circular foreign key references (eg. users and media) that no drop order can satisfy, so foreign key enforcement is now disabled (or deferred on D1) while tables are dropped. ([d270b41](https://github.com/buildlucid/lucid-cms/commit/d270b418c21af1bd01d0d53318e21bcc84355a87))
 - Improved config validation for when Lucid is being built. Env vars aren't validated on build and certain required config that is never needed on build has dummy values inserted. This fixes Cloudflare Worker build runner where we cant pass it a config.secrets via an environment variable. ([cb0877b](https://github.com/buildlucid/lucid-cms/commit/cb0877bfd20dbb7372174367b724c9a61ccc691d))
 - Fixed client integration authentication so cached integration metadata can no longer bypass verification of the presented API secret. ([652d14b](https://github.com/buildlucid/lucid-cms/commit/652d14b5234ee3d062d782bbfd38391f47421e43))
+- Fixed the document custom field selector sending an invalid `include=fields` document query, which caused validation errors after the typed ref include changes. ([421000a](https://github.com/buildlucid/lucid-cms/commit/421000a4bcfe18bf9192137d5630b9aea8a84cd8))
 
 ## v0.13.0-alpha.0
 
