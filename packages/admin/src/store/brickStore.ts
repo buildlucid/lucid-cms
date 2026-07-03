@@ -42,6 +42,11 @@ interface BrickSnapshot {
 	fields: Array<InternalDocumentField>;
 }
 
+interface BrickSnapshotPayload {
+	bricks?: Array<BrickData>;
+	fields?: Array<InternalDocumentField>;
+}
+
 const [get, set] = createStore<{
 	bricks: Array<BrickData>;
 	fieldsErrors: Array<FieldError>;
@@ -62,7 +67,8 @@ const [get, set] = createStore<{
 		document?: InternalCollectionDocument,
 		collection?: Collection,
 	) => void;
-	captureInitialSnapshot: () => void;
+	captureInitialSnapshot: (snapshot?: BrickSnapshot[]) => void;
+	createSnapshotFromPayload: (payload: BrickSnapshotPayload) => BrickSnapshot[];
 	addBrick: (props: { brickConfig: CollectionBrickConfig }) => void;
 	removeBrick: (brickIndex: number) => void;
 	toggleBrickOpen: (brickIndex: number) => void;
@@ -74,6 +80,14 @@ const [get, set] = createStore<{
 		repeaterKey?: string;
 		ref?: string;
 		value: FieldValue;
+		contentLocale: string;
+		clearFromItemIndex?: number;
+	}) => void;
+	clearFieldErrors: (params: {
+		brickIndex: number;
+		key: string;
+		fieldConfig: CollectionLeafFieldConfig;
+		ref?: string;
 		contentLocale: string;
 		clearFromItemIndex?: number;
 	}) => void;
@@ -146,8 +160,21 @@ const [get, set] = createStore<{
 			set("refs", {});
 		});
 	},
-	captureInitialSnapshot() {
-		set("initialSnapshot", createBricksSnapshot(get.bricks));
+	captureInitialSnapshot(snapshot) {
+		set("initialSnapshot", snapshot ?? createBricksSnapshot(get.bricks));
+	},
+	createSnapshotFromPayload(payload) {
+		return createBricksSnapshot([
+			{
+				ref: "collection-pseudo-brick",
+				key: "collection-pseudo-brick",
+				order: -1,
+				type: "collection-fields",
+				open: false,
+				fields: structuredClone(unwrap(payload.fields ?? [])),
+			},
+			...structuredClone(unwrap(payload.bricks ?? [])),
+		]);
 	},
 	// Bricks
 	setBricks(document, collection) {
@@ -304,52 +331,64 @@ const [get, set] = createStore<{
 		);
 
 		if (fieldChanged) {
-			const brick = get.bricks[params.brickIndex];
-			const localeCode =
-				params.fieldConfig.localized === true &&
-				get.collectionLocalized === true
-					? params.contentLocale
-					: null;
-			const errorTarget = {
+			get.clearFieldErrors({
+				brickIndex: params.brickIndex,
 				key: params.key,
-				localeCode,
-				groupRef: params.ref,
+				fieldConfig: params.fieldConfig,
+				ref: params.ref,
+				contentLocale: params.contentLocale,
 				clearFromItemIndex: params.clearFromItemIndex,
-			};
-
-			if (brick?.type === "collection-fields") {
-				set(
-					"fieldsErrors",
-					produce((draft) => {
-						const nextErrors = clearTargetFieldErrors(draft, errorTarget);
-						draft.splice(0, draft.length, ...nextErrors);
-					}),
-				);
-			} else if (brick) {
-				set(
-					"brickErrors",
-					produce((draft) => {
-						const brickErrorIndex = draft.findIndex(
-							(error) => error.ref === brick.ref && error.key === brick.key,
-						);
-						if (brickErrorIndex === -1) return;
-
-						const nextFields = clearTargetFieldErrors(
-							draft[brickErrorIndex].fields,
-							errorTarget,
-						);
-						if (nextFields.length === 0) {
-							draft.splice(brickErrorIndex, 1);
-							return;
-						}
-
-						draft[brickErrorIndex].fields = nextFields;
-					}),
-				);
-			}
+			});
 
 			set("autoSaveCounter", (prev) => prev + 1);
 		}
+	},
+	clearFieldErrors(params) {
+		const brick = get.bricks[params.brickIndex];
+		const localeCode =
+			params.fieldConfig.localized === true && get.collectionLocalized === true
+				? params.contentLocale
+				: undefined;
+		const errorTarget = {
+			key: params.key,
+			localeCode,
+			groupRef: params.ref,
+			clearFromItemIndex: params.clearFromItemIndex,
+		};
+
+		if (brick?.type === "collection-fields") {
+			set(
+				"fieldsErrors",
+				produce((draft) => {
+					const nextErrors = clearTargetFieldErrors(draft, errorTarget);
+					draft.splice(0, draft.length, ...nextErrors);
+				}),
+			);
+			return;
+		}
+
+		if (!brick) return;
+
+		set(
+			"brickErrors",
+			produce((draft) => {
+				const brickErrorIndex = draft.findIndex(
+					(error) => error.ref === brick.ref && error.key === brick.key,
+				);
+				if (brickErrorIndex === -1) return;
+
+				const nextFields = clearTargetFieldErrors(
+					draft[brickErrorIndex].fields,
+					errorTarget,
+				);
+				if (nextFields.length === 0) {
+					draft.splice(brickErrorIndex, 1);
+					return;
+				}
+
+				draft[brickErrorIndex].fields = nextFields;
+			}),
+		);
 	},
 	addField(params) {
 		const newField: InternalDocumentField = {

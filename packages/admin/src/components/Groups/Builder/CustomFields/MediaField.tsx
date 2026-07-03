@@ -80,9 +80,11 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 			minItems={props.state.fieldConfig.validation?.minItems}
 			maxItems={props.state.fieldConfig.validation?.maxItems}
 			onChange={(value, refs) => {
+				const currentValue = getValue() ?? fieldValue() ?? [];
+				const removedSelection = value.length < currentValue.length;
 				const clearFromItemIndex = isMultiple()
 					? getChangedItemErrorStartIndex(
-							fieldValue(),
+							currentValue,
 							value,
 							(left, right) => left === right,
 						)
@@ -90,6 +92,16 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 
 				batch(() => {
 					if (refs.length) brickStore.get.addRef("media", refs);
+					if (removedSelection) {
+						brickStore.get.clearFieldErrors({
+							brickIndex: fieldRenderState.brickIndex(),
+							fieldConfig: props.state.fieldConfig,
+							key: props.state.fieldConfig.key,
+							ref: props.state.groupRef,
+							contentLocale: fieldRenderState.contentLocale(),
+							clearFromItemIndex,
+						});
+					}
 					brickStore.get.setFieldValue({
 						brickIndex: fieldRenderState.brickIndex(),
 						fieldConfig: props.state.fieldConfig,

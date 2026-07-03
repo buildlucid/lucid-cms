@@ -120,19 +120,23 @@ const getFieldValue = <T>(props: {
 };
 
 /**
- * Checks whether a field error matches the field, locale, and item range being
- * updated so it can be safely cleared from the store.
+ * Checks whether a field error matches the field, optional locale, and item
+ * range being updated so it can be safely cleared from the store.
  */
 const shouldClearFieldError = (
 	fieldError: FieldError,
 	target: {
 		key: string;
-		localeCode: string | null;
+		localeCode?: string | null;
 		clearFromItemIndex?: number;
 	},
 ) => {
 	if (fieldError.key !== target.key) return false;
-	if (fieldError.localeCode !== target.localeCode) return false;
+	if (
+		target.localeCode !== undefined &&
+		fieldError.localeCode !== target.localeCode
+	)
+		return false;
 
 	if (target.clearFromItemIndex === undefined) {
 		return true;
@@ -152,7 +156,7 @@ const clearFieldErrorsAtLevel = (
 	fieldErrors: FieldError[],
 	target: {
 		key: string;
-		localeCode: string | null;
+		localeCode?: string | null;
 		clearFromItemIndex?: number;
 	},
 ) => {
@@ -169,7 +173,7 @@ const searchAndClearFieldErrors = (
 	fieldErrors: FieldError[],
 	target: {
 		key: string;
-		localeCode: string | null;
+		localeCode?: string | null;
 		groupRef: string;
 		clearFromItemIndex?: number;
 	},
@@ -223,7 +227,7 @@ export const clearTargetFieldErrors = (
 	fieldErrors: FieldError[],
 	target: {
 		key: string;
-		localeCode: string | null;
+		localeCode?: string | null;
 		groupRef?: string;
 		clearFromItemIndex?: number;
 	},

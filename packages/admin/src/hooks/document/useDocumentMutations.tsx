@@ -28,6 +28,9 @@ export function useDocumentMutations(props: {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	let latestAutoSaveRequestCounter: number | null = null;
+	let latestAutoSaveSnapshot: ReturnType<
+		typeof brickStore.get.createSnapshotFromPayload
+	> | null = null;
 	const [autoSaveMetadata, setAutoSaveMetadata] =
 		createSignal<DocumentVersionUpdateResponse | null>(null);
 
@@ -88,26 +91,50 @@ export function useDocumentMutations(props: {
 	});
 
 	const updateSingleVersionMutation = api.documents.useUpdateSingleVersion({
-		onMutate: () => {
+		onMutate: (params) => {
 			latestAutoSaveRequestCounter = brickStore.get.autoSaveCounter;
+			latestAutoSaveSnapshot = brickStore.get.createSnapshotFromPayload(
+				params.body,
+			);
 		},
-		onSuccess: (data) => {
+		onSuccess: (data, params) => {
+			const requestCounter = latestAutoSaveRequestCounter;
+			const requestSnapshot = latestAutoSaveSnapshot;
+			latestAutoSaveRequestCounter = null;
+			latestAutoSaveSnapshot = null;
+
+			if (
+				params.collectionKey !== props.collectionKey() ||
+				params.documentId !== props.documentId() ||
+				params.versionId !== props.document?.()?.versionId
+			) {
+				return;
+			}
+
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
 			setAutoSaveMetadata(data.data);
-			const requestCounter = latestAutoSaveRequestCounter;
-			latestAutoSaveRequestCounter = null;
 
 			// If new edits landed after this autosave started, keep the current
-			// dirty baseline. The next autosave will pick up those edits.
+			// edit counter active, but advance the saved baseline to the payload
+			// that reached the server. This catches add-then-remove races where
+			// local state returns to the old baseline while the server saved the
+			// in-flight payload.
 			if (requestCounter === null) return;
-			if (brickStore.get.autoSaveCounter !== requestCounter) return;
+			if (brickStore.get.autoSaveCounter !== requestCounter) {
+				if (requestSnapshot) {
+					brickStore.get.captureInitialSnapshot(requestSnapshot);
+				}
+				return;
+			}
 
-			brickStore.set("autoSaveCounter", 0);
+			// autoSaveCounter is a monotonic edit version for the active editor
+			// session. The dirty snapshot, not a counter reset, represents saved.
 			brickStore.get.captureInitialSnapshot();
 		},
 		onError: (errors) => {
 			latestAutoSaveRequestCounter = null;
+			latestAutoSaveSnapshot = null;
 			brickStore.set(
 				"fieldsErrors",
 				getBodyError<FieldError[]>("fields", errors) || [],
