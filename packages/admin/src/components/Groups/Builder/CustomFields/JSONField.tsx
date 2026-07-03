@@ -34,6 +34,8 @@ interface JSONFieldProps {
 	};
 }
 
+type JsonFieldValue = Record<string, unknown> | unknown[] | null;
+
 export const JSONField: Component<JSONFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
@@ -42,12 +44,27 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
+	// Helpers
+	const stringifyJsonFieldValue = (value: JsonFieldValue | undefined) => {
+		if (value === null || value === undefined) return "";
+		return JSON.stringify(value, null, 2);
+	};
+	const compactJsonFieldValue = (value: JsonFieldValue | undefined) => {
+		if (value === null || value === undefined) return "";
+		return JSON.stringify(value);
+	};
+	const parseJsonFieldValue = (value: string): FieldValue => {
+		if (value.trim() === "") return null;
+		return JSON.parse(value) as FieldValue;
+	};
+
+	// -------------------------------
 	// Memos
 	const fieldData = createMemo(() => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<Record<string, unknown> | null>({
+		return brickHelpers.getFieldValue<JsonFieldValue>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: fieldRenderState.contentLocale(),
@@ -90,7 +107,7 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 			},
 		}),
 		value: (localeCode?: string) =>
-			brickHelpers.getFieldValue<Record<string, unknown> | null>({
+			brickHelpers.getFieldValue<JsonFieldValue>({
 				fieldData: fieldData(),
 				fieldConfig: props.state.fieldConfig,
 				contentLocale: localeCode ?? fieldRenderState.contentLocale(),
@@ -114,7 +131,7 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 				!props.state.localised ||
 				targetLocale === fieldRenderState.contentLocale()
 			) {
-				setValue(JSON.stringify(value ?? {}, null, 2));
+				setValue(stringifyJsonFieldValue(value as JsonFieldValue));
 			}
 		},
 		disabled,
@@ -124,16 +141,17 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 	// Effects
 	createEffect(() => {
 		const storeVal = fieldValue();
-		const compact = JSON.stringify(storeVal ?? "");
+		const compact = compactJsonFieldValue(storeVal);
 
 		const current = untrack(getValue);
+		if (current.trim() === "" && compact === "") return;
 		try {
 			if (JSON.stringify(JSON.parse(current)) === compact) return;
 		} catch {
 			// current editor content is invalid JSON — fall through to update
 		}
 
-		setValue(JSON.stringify(storeVal ?? "", null, 2));
+		setValue(stringifyJsonFieldValue(storeVal));
 	});
 
 	// -------------------------------
@@ -142,7 +160,7 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 		<Suspense
 			fallback={
 				<div class="w-full mb-3 last:mb-0">
-					<div class="h-52 bg-input-base border border-border rounded-md animate-pulse" />
+					<div class="h-36 bg-input-base border border-border rounded-md animate-pulse" />
 				</div>
 			}
 		>
@@ -156,13 +174,14 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 				onChange={(value) => {
 					setValue(value);
 					try {
+						const parsedValue = parseJsonFieldValue(value);
 						brickStore.get.setFieldValue({
 							brickIndex: fieldRenderState.brickIndex(),
 							fieldConfig: props.state.fieldConfig,
 							key: props.state.fieldConfig.key,
 							ref: props.state.groupRef,
 							repeaterKey: props.state.repeaterKey,
-							value: JSON.parse(value),
+							value: parsedValue,
 							contentLocale: fieldRenderState.contentLocale(),
 						});
 					} catch {

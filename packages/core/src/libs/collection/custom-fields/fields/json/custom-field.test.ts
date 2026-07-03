@@ -59,6 +59,26 @@ test("successfully validate field - json", async () => {
 	});
 	expect(standardValidate).length(0);
 
+	const standardEmptyValidate = validateField({
+		field: {
+			key: "standard_json",
+			type: "json",
+			value: "",
+		},
+		// biome-ignore lint/style/noNonNullAssertion: explanation
+		instance: JSONCollection.fields.get("standard_json")!,
+		validationData: {
+			media: [],
+			user: [],
+			document: [],
+		},
+		meta: {
+			localized: JSONCollection.getData.localized,
+			defaultLocale: "en",
+		},
+	});
+	expect(standardEmptyValidate).length(0);
+
 	// Required
 	const requiredValidate = validateField({
 		field: {
@@ -193,6 +213,15 @@ test("fail to validate field - json", async () => {
 			),
 		},
 	]);
+});
+
+test("normalizes empty json values to null", async () => {
+	const field = new JsonCustomField("field");
+
+	expect(field.config.default).toBeNull();
+	expect(field.normalizeInputValue("")).toBeNull();
+	expect(field.normalizeInputValue("   ")).toBeNull();
+	expect(field.formatResponseValue(null)).toBeNull();
 });
 
 // -----------------------------------------------

@@ -454,7 +454,7 @@ export interface DocumentFieldConfig
 
 export interface JsonFieldConfig
 	extends SharedCollectionFieldConfig<"json">,
-		FieldConfigOptions<Record<string, unknown> | unknown[]> {
+		FieldConfigOptions<Record<string, unknown> | unknown[] | null> {
 	validation?: ZodValidation;
 }
 

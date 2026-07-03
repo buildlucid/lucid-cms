@@ -272,4 +272,37 @@ describe("testing prepareBricksAndFields", () => {
 			target: "_blank",
 		});
 	});
+
+	test("should normalize empty json custom field values to null", () => {
+		const collection = new CollectionBuilder("json-empty-test", {
+			mode: "single",
+			details: {
+				name: copy("admin:tests.collections.json-empty-test.name", {
+					defaultMessage: "JSON Empty Test",
+				}),
+				singularName: copy(
+					"admin:tests.collections.json-empty-test.singularName",
+					{
+						defaultMessage: "JSON Empty Test",
+					},
+				),
+			},
+		}).addJSON("metadata");
+
+		const fields: Array<FieldInputSchema> = [
+			{
+				key: "metadata",
+				type: "json",
+				value: "   ",
+			},
+		];
+
+		const { preparedFields } = prepareBricksAndFields({
+			collection,
+			fields,
+			localization: mockLocalization,
+		});
+
+		expect(preparedFields?.find((f) => f.key === "metadata")?.value).toBeNull();
+	});
 });

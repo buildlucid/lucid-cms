@@ -39,7 +39,7 @@ class JsonCustomField extends CustomField<"json"> {
 			},
 			ai: this.props?.ai,
 			localized: this.props?.localized ?? false,
-			default: this.props?.default ?? {},
+			default: this.props?.default ?? null,
 			index: this.props?.index,
 			ui: {
 				hidden: this.props?.ui?.hidden,
@@ -81,6 +81,10 @@ class JsonCustomField extends CustomField<"json"> {
 		return (value ??
 			this.config.default ??
 			null) satisfies CFResponse<"json">["value"];
+	}
+	override normalizeInputValue(value: unknown) {
+		if (typeof value === "string" && value.trim() === "") return null;
+		return value;
 	}
 	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
 		if (typeof value === "string") {

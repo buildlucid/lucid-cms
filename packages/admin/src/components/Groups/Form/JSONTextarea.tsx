@@ -44,6 +44,8 @@ interface JSONTextareaProps {
 	labelRightSlot?: JSXElement;
 }
 
+const JSON_TEXTAREA_MIN_HEIGHT = "9rem";
+
 export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -71,6 +73,8 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 
 	// ----------------------------------------
 	// Functions
+	const isEmptyJsonValue = (value: string) => value.trim() === "";
+
 	const toggleErrorBorder = (hasError: boolean) => {
 		const view = editorView();
 		if (!view) return;
@@ -85,6 +89,13 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 		createExtension,
 	} = createCodeMirror({
 		onValueChange: (value) => {
+			if (isEmptyJsonValue(value)) {
+				setJsonError(null);
+				toggleErrorBorder(false);
+				props.onChange(value);
+				return;
+			}
+
 			try {
 				JSON.parse(value);
 				setJsonError(null);
@@ -103,17 +114,53 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 	createExtension(basicSetup);
 	createExtension(keymap.of([indentWithTab]));
 	createExtension(json());
-	createExtension(linter(jsonParseLinter()));
+	const jsonLinter = jsonParseLinter();
+	createExtension(
+		linter((view) => {
+			if (isEmptyJsonValue(view.state.doc.toString())) return [];
+			return jsonLinter(view);
+		}),
+	);
 	createExtension(lintGutter());
 	createExtension(cmTheme);
 	createExtension(cmHighlighting);
 	createExtension(EditorView.lineWrapping);
+	createExtension(
+		EditorView.theme({
+			"&": {
+				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+			},
+			".cm-scroller": {
+				alignItems: "stretch",
+				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+			},
+			".cm-content": {
+				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+			},
+			".cm-gutters": {
+				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+			},
+			".cm-gutter": {
+				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+			},
+		}),
+	);
 	createExtension(
 		EditorView.updateListener.of((update) => {
 			if (update.focusChanged) {
 				setInputFocus(update.view.hasFocus);
 				if (!update.view.hasFocus) {
 					const doc = update.view.state.doc.toString();
+					if (isEmptyJsonValue(doc)) {
+						setJsonError(null);
+						toggleErrorBorder(false);
+						if (doc !== "") {
+							props.onChange("");
+						}
+						props.onBlur?.();
+						return;
+					}
+
 					try {
 						const formatted = JSON.stringify(JSON.parse(doc), null, 2);
 						setJsonError(null);

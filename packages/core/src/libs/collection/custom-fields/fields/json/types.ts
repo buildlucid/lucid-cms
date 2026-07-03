@@ -17,7 +17,7 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 	};
 	ai?: CustomFieldUserAiConfig<"json">;
 	localized?: boolean;
-	default?: JsonValue;
+	default?: JsonValue | null;
 	index?: true;
 	ui?: FieldUIConfig;
 	validation?: {

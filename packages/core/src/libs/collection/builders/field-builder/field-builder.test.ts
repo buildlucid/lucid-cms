@@ -234,7 +234,7 @@ test("flat fields should return correct config", async () => {
 				placeholder: undefined,
 			},
 			localized: false,
-			default: {},
+			default: null,
 			ui: {
 				hidden: undefined,
 				disabled: undefined,
