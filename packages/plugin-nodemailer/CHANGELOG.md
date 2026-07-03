@@ -1,5 +1,9 @@
 # @lucidcms/plugin-nodemailer
 
+## 1.1.3
+
+- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
+
 ## 1.1.2
 
 - Added new `simulate` config option so you can stop emails been sent out in a dev environment but have them still registered as a success.

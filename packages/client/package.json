@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/client",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"private": false,
 	"description": "The official client package for Lucid CMS public integration endpoints.",
 	"type": "module",
@@ -51,7 +51,7 @@
 		"typescript": "^6.0.3"
 	},
 	"dependencies": {
-		"@lucidcms/types": "^0.1.0"
+		"@lucidcms/types": "^0.2.0"
 	},
 	"sideEffects": false,
 	"volta": {

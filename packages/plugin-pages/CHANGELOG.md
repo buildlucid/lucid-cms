@@ -1,5 +1,9 @@
 # @lucidcms/plugin-pages
 
+## 0.4.1
+
+- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
+
 ## 0.4.0
 
 - Bumped core peer dependency version to `0.13.0-alpha.0`.

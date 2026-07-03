@@ -1,6 +1,6 @@
 # @lucidcms/core
 
-## v0.13.0 (unreleased)
+## v0.14.0-alpha.0
 
 ### Features:
 
@@ -11,6 +11,7 @@
 - Added layout-focused custom fields: `addSection`/`endSection` and `addCollapsible`/`endCollapsible` builder support for grouping fields in the document editor, with an `output: "nested" | "inline"` option controlling whether children nest under the field key in client document responses. ([62d98f2](https://github.com/buildlucid/lucid-cms/commit/62d98f2e70941057b3bfabfb5662f72e60ab206d))
 - Added tab support to collection fields, matching the existing brick tab behaviour. ([62d98f2](https://github.com/buildlucid/lucid-cms/commit/62d98f2e70941057b3bfabfb5662f72e60ab206d))
 - Added a `ui.width` option (`12 | 8 | 6 | 4 | 3`) to custom fields, rendering field lists on a responsive 12-column grid in the admin with a full-width fallback on mobile. ([62d98f2](https://github.com/buildlucid/lucid-cms/commit/62d98f2e70941057b3bfabfb5662f72e60ab206d))
+- Added a `code` custom field with an admin CodeMirror editor, language selection, syntax highlighting, validation, AI generation, configurable languages, and typed client output. ([8c44a57](https://github.com/buildlucid/lucid-cms/commit/8c44a5702f9a49346e7bd021ce889f30804cebb3))
 
 ### Breaking changes:
 
@@ -22,6 +23,11 @@
 - Improved config validation for when Lucid is being built. Env vars aren't validated on build and certain required config that is never needed on build has dummy values inserted. This fixes Cloudflare Worker build runner where we cant pass it a config.secrets via an environment variable. ([cb0877b](https://github.com/buildlucid/lucid-cms/commit/cb0877bfd20dbb7372174367b724c9a61ccc691d))
 - Fixed client integration authentication so cached integration metadata can no longer bypass verification of the presented API secret. ([652d14b](https://github.com/buildlucid/lucid-cms/commit/652d14b5234ee3d062d782bbfd38391f47421e43))
 - Fixed the document custom field selector sending an invalid `include=fields` document query, which caused validation errors after the typed ref include changes. ([421000a](https://github.com/buildlucid/lucid-cms/commit/421000a4bcfe18bf9192137d5630b9aea8a84cd8))
+- Fixed localized required custom fields so every configured locale must provide a value. ([354f224](https://github.com/buildlucid/lucid-cms/commit/354f224fc3527f472e912d91902f82f338d9c588))
+- Fixed document auto-save tracking for document, media and user custom fields so selecting and clearing relation values both retrigger auto-save and keep the save state in sync. ([5ce6782](https://github.com/buildlucid/lucid-cms/commit/5ce6782dff3dbda8047d6647fe759f467b2f1962))
+- Fixed document, media and user custom fields so removing a selected item clears matching validation errors. ([5ce6782](https://github.com/buildlucid/lucid-cms/commit/5ce6782dff3dbda8047d6647fe759f467b2f1962))
+- Fixed JSON custom fields so they default to an empty value, allow blank input, store empty values as `null`. ([5bf6edb](https://github.com/buildlucid/lucid-cms/commit/5bf6edbad9dc95168e84b16e4bd6d06147211260))
+- Updated client integration scopes so translations are used and options are selected by default. ([39e4c80](https://github.com/buildlucid/lucid-cms/commit/39e4c806c8f6440c745f21e7bb9124567079f527))
 
 ## v0.13.0-alpha.0
 

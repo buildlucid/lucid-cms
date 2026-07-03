@@ -1,8 +1,9 @@
 # @lucidcms/astro
 
-## 0.1.1 (unreleased)
+## 0.1.1
 
 - Fixed configureLucid resolution issue when in workspaces based on where packages are installed.
+- Bumped `@lucidcms/core` to `0.14.0-alpha.0`.
 
 ## 0.1.0
 
