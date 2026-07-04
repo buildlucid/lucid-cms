@@ -454,7 +454,7 @@
 	"core.fields.validation.is.required": "This field is required and not being supplied.",
 	"core.media.documents.fetch.failed": "An error occurred while fetching media relation data on the document get endpoint.",
 	"core.collections.names.fetch.failed": "An error occurred getting the document table names.",
-	"core.email.templates.prerender.failed": "Failed to prerender MJML templates",
+	"core.email.templates.prepare.failed": "Failed to prepare email templates",
 	"core.setup.already.completed": "Setup has already been completed. Please login to core.share.page.continue.",
 	"core.error.schema.migration.required.name": "Schema Migration Required",
 	"core.error.schema.migration.required.message": "The collection requires a schema migration. Please run the migration command to update the database.",

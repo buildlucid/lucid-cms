@@ -14,7 +14,7 @@ const typegenCommand = async () => {
 		const buildProject = await loadBuildProject({
 			silent: false,
 			generateTypes: true,
-			renderEmailTemplates: false,
+			loadEmailTemplates: false,
 			prepareRuntime: true,
 		});
 

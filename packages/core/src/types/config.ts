@@ -434,7 +434,7 @@ export interface LucidConfig {
 		 */
 		templates?: {
 			/**
-			 * The path to the MJML email templates directory. This can be used to override or extend the default templates.
+			 * The path to the email templates directory. Files ending in .mustache and .html can be used to override or extend the default templates.
 			 */
 			directory?: string;
 			/**

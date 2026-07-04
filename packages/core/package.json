@@ -97,7 +97,6 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.1",
 		"@types/mime-types": "^3.0.1",
-		"@types/mjml": "^5.0.0",
 		"@types/mustache": "^4.2.6",
 		"@types/node": "^24.13.2",
 		"@types/semver": "^7.7.1",
@@ -122,7 +121,6 @@
 		"jiti": "^2.7.0",
 		"kysely": "0.29.2",
 		"mime-types": "^3.0.2",
-		"mjml": "5.3.0",
 		"mustache": "^4.2.0",
 		"node-object-hash": "^3.1.1",
 		"picocolors": "^1.1.1",

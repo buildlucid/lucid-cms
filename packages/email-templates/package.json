@@ -1,0 +1,21 @@
+{
+	"name": "@lucidcms/email-templates",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "node scripts/build.ts",
+		"check": "node scripts/build.ts --check"
+	},
+	"devDependencies": {
+		"@types/mjml": "^5.0.0",
+		"@types/node": "^26.1.0",
+		"mjml": "5.4.0"
+	},
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	}
+}

@@ -4,17 +4,17 @@ import constants from "../../../constants/constants.js";
 import type { Config } from "../../../types.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import { copy } from "../../i18n/index.js";
-import renderMjmlTemplates from "./render-mjml-templates.js";
+import loadEmailTemplates from "./load-email-templates.js";
 
 /**
- * Pre-renders all configured MJML templates to a JSON artifact in the build output.
+ * Writes all configured email templates to a JSON artifact in the build output.
  */
-const prerenderMjmlTemplates = async (props: {
+const prepareEmailTemplates = async (props: {
 	config: Config;
 	silent?: boolean;
 }): ServiceResponse<undefined> => {
 	try {
-		const renderedTemplates = await renderMjmlTemplates(props);
+		const renderedTemplates = await loadEmailTemplates(props);
 
 		await mkdir(props.config.build.paths.outDir, { recursive: true });
 
@@ -32,7 +32,7 @@ const prerenderMjmlTemplates = async (props: {
 		return {
 			error: {
 				message: copy(
-					"server:core.email.templates.prerender.failed",
+					"server:core.email.templates.prepare.failed",
 					error instanceof Error
 						? { defaultMessage: error.message }
 						: undefined,
@@ -44,4 +44,4 @@ const prerenderMjmlTemplates = async (props: {
 	}
 };
 
-export default prerenderMjmlTemplates;
+export default prepareEmailTemplates;

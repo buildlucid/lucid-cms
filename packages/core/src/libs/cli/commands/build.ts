@@ -3,7 +3,7 @@ import path, { join } from "node:path";
 import constants from "../../../constants/constants.js";
 import loadBuildProject from "../../compile/load-build-project.js";
 import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
-import prerenderMjmlTemplates from "../../email/templates/prerender-mjml-templates.js";
+import prepareEmailTemplates from "../../email/templates/prepare-email-templates.js";
 import {
 	createTranslator,
 	writeTranslationArtifact,
@@ -30,7 +30,7 @@ const buildCommand = async (options?: {
 	try {
 		const buildProject = await loadBuildProject({
 			silent,
-			renderEmailTemplates: false,
+			loadEmailTemplates: false,
 			prepareRuntime: true,
 		});
 		const { configPath, loaded: configRes } = buildProject;
@@ -93,8 +93,8 @@ const buildCommand = async (options?: {
 			outputPath: configRes.config.build.paths.outDir,
 		});
 
-		const [mjmlTemplatesRes, publicAssetsRes] = await Promise.all([
-			prerenderMjmlTemplates({
+		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
+			prepareEmailTemplates({
 				config: configRes.config,
 				silent,
 			}),
@@ -103,10 +103,10 @@ const buildCommand = async (options?: {
 				silent,
 			}),
 		]);
-		if (mjmlTemplatesRes.error) {
+		if (emailTemplatesRes.error) {
 			cliLogger.error(
-				translate.english(mjmlTemplatesRes.error.message) ??
-					"Failed to pre-render MJML templates",
+				translate.english(emailTemplatesRes.error.message) ??
+					"Failed to prepare email templates",
 				{
 					silent,
 				},

@@ -66,7 +66,7 @@ const getConfig = async (): Promise<{
 			configPath,
 			silent: true,
 			generateTypes: false,
-			renderEmailTemplates: false,
+			loadEmailTemplates: false,
 		});
 		return {
 			config: result.loaded.config,

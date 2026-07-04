@@ -1,7 +1,7 @@
 import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
-import prerenderMjmlTemplates from "../../email/templates/prerender-mjml-templates.js";
+import prepareEmailTemplates from "../../email/templates/prepare-email-templates.js";
 import { createTranslator } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import logger from "../../logger/index.js";
@@ -103,8 +103,8 @@ const serveCommand = async () => {
 			process.exit(1);
 		}
 
-		const [mjmlTemplatesRes, publicAssetsRes] = await Promise.all([
-			prerenderMjmlTemplates({
+		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
+			prepareEmailTemplates({
 				config: configRes.config,
 				silent: false,
 			}),
@@ -113,10 +113,10 @@ const serveCommand = async () => {
 				silent: false,
 			}),
 		]);
-		if (mjmlTemplatesRes.error) {
+		if (emailTemplatesRes.error) {
 			cliLogger.error(
-				translate.english(mjmlTemplatesRes.error.message) ??
-					"Failed to pre-render MJML templates",
+				translate.english(emailTemplatesRes.error.message) ??
+					"Failed to prepare email templates",
 			);
 			process.exit(1);
 		}

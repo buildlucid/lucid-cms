@@ -13,8 +13,16 @@
 			"dependsOn": ["^build"],
 			"outputs": ["../core/spa/**"]
 		},
+		"@lucidcms/email-templates#build": {
+			"cache": false,
+			"outputs": ["../core/templates/**"]
+		},
 		"@lucidcms/core#build": {
-			"dependsOn": ["^build", "@lucidcms/admin#build"],
+			"dependsOn": [
+				"^build",
+				"@lucidcms/admin#build",
+				"@lucidcms/email-templates#build"
+			],
 			"outputs": []
 		},
 		"lint": {},

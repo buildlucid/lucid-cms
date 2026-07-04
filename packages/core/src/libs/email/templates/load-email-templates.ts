@@ -1,12 +1,12 @@
-import { access, readdir, readFile } from "node:fs/promises";
+import { access, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
-import mjml2html from "mjml";
 import type { Config } from "../../../types.js";
 import { getDirName } from "../../../utils/helpers/index.js";
 import cliLogger from "../../cli/logger.js";
 import type { RenderedTemplates } from "../types.js";
 
 const currentDir = getDirName(import.meta.url);
+const templateExtensions = new Set([".html", ".mustache"]);
 
 const pathExists = async (targetPath: string): Promise<boolean> => {
 	try {
@@ -17,6 +17,13 @@ const pathExists = async (targetPath: string): Promise<boolean> => {
 	}
 };
 
+const getTemplateName = (file: string) => {
+	const extension = path.extname(file);
+	if (!templateExtensions.has(extension)) return null;
+
+	return file.slice(0, -extension.length);
+};
+
 const processTemplatesInDirectory = async (
 	directory: string,
 	renderedTemplates: RenderedTemplates,
@@ -25,36 +32,37 @@ const processTemplatesInDirectory = async (
 ): Promise<void> => {
 	if (!(await pathExists(directory))) return;
 
-	const files = await readdir(directory);
-	const mjmlFiles = files.filter((file) => file.endsWith(".mjml"));
+	const files = (await readdir(directory, { withFileTypes: true }))
+		.filter((entry) => entry.isFile())
+		.map((entry) => entry.name)
+		.toSorted();
 
-	await Promise.all(
-		mjmlFiles.map(async (file) => {
-			const templateName = file.replace(".mjml", "");
+	for (const file of files) {
+		const templateName = getTemplateName(file);
+		if (!templateName) continue;
 
-			if (!overwrite && renderedTemplates[templateName]) {
-				return;
-			}
+		if (!overwrite && renderedTemplates[templateName]) {
+			continue;
+		}
 
-			const filePath = path.join(directory, file);
-			const mjmlContent = await readFile(filePath, "utf-8");
-			const htmlOutput = await mjml2html(mjmlContent);
+		const filePath = path.join(directory, file);
+		const [html, fileStat] = await Promise.all([
+			readFile(filePath, "utf-8"),
+			stat(filePath),
+		]);
 
-			renderedTemplates[templateName] = {
-				html: htmlOutput.html,
-				lastModified: new Date().toISOString(),
-			};
+		renderedTemplates[templateName] = {
+			html,
+			lastModified: fileStat.mtime.toISOString(),
+		};
 
-			cliLogger.info(
-				"Pre-rendered email template:",
-				cliLogger.color.green(templateName),
-				{ silent },
-			);
-		}),
-	);
+		cliLogger.info("Prepared email template:", cliLogger.color.green(file), {
+			silent,
+		});
+	}
 };
 
-const renderMjmlTemplates = async (props: {
+const loadEmailTemplates = async (props: {
 	config: Config;
 	silent?: boolean;
 }): Promise<RenderedTemplates> => {
@@ -80,4 +88,4 @@ const renderMjmlTemplates = async (props: {
 	return renderedTemplates;
 };
 
-export default renderMjmlTemplates;
+export default loadEmailTemplates;

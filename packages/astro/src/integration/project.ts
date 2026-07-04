@@ -46,7 +46,7 @@ export const loadLucidProject = async (
 			silent: true,
 			validateEnv: true,
 			prepareRuntime: true,
-			renderEmailTemplates: true,
+			loadEmailTemplates: true,
 			configureLucidPath,
 		}),
 		collectConfigDependencies(configPath),
@@ -86,7 +86,7 @@ export const reloadLucidProjectForDevBootstrap = async (
 		validateEnv: true,
 		prepareRuntime: true,
 		generateTypes: false,
-		renderEmailTemplates: false,
+		loadEmailTemplates: false,
 		configureLucidPath,
 	});
 

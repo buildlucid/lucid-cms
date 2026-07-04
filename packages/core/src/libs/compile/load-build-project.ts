@@ -29,7 +29,7 @@ const loadBuildProject = async (props?: {
 	silent?: boolean;
 	validateEnv?: boolean;
 	generateTypes?: boolean;
-	renderEmailTemplates?: boolean;
+	loadEmailTemplates?: boolean;
 	envSchema?: ZodType;
 	configureLucidPath?: string;
 	prepareRuntime?: boolean;
@@ -68,10 +68,10 @@ const loadBuildProject = async (props?: {
 				collections: preparedLoaded.config.collections,
 				localization: preparedLoaded.config.localization,
 			}),
-		props?.renderEmailTemplates
-			? import("../email/templates/render-mjml-templates.js").then(
-					({ default: renderEmailTemplates }) =>
-						renderEmailTemplates({
+		props?.loadEmailTemplates
+			? import("../email/templates/load-email-templates.js").then(
+					({ default: loadEmailTemplates }) =>
+						loadEmailTemplates({
 							config: preparedLoaded.config,
 							silent: props?.silent,
 						}),
