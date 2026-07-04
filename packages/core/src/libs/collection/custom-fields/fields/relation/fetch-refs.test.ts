@@ -29,7 +29,7 @@ vi.mock("../../../schema/runtime/runtime-schema-selectors.js", () => ({
 	getDocumentVersionTableSchema: mocks.getDocumentVersionTableSchema,
 }));
 
-import fetchDocumentRefs from "./fetch-refs.js";
+import fetchRelationRefs from "./fetch-refs.js";
 
 const context = {
 	db: {
@@ -40,7 +40,7 @@ const context = {
 	},
 } as never;
 
-describe("document field ref fetching", () => {
+describe("relation field ref fetching", () => {
 	beforeEach(() => {
 		mocks.getSingleInstance.mockReturnValue({
 			error: undefined,
@@ -80,7 +80,7 @@ describe("document field ref fetching", () => {
 	});
 
 	it("supports per-related-collection version types", async () => {
-		const response = await fetchDocumentRefs(context, {
+		const response = await fetchRelationRefs(context, {
 			relations: [
 				{
 					table: "lucid_document__pages",
@@ -126,7 +126,7 @@ describe("document field ref fetching", () => {
 	});
 
 	it("returns no hydrated ref when the requested target version is missing", async () => {
-		const response = await fetchDocumentRefs(context, {
+		const response = await fetchRelationRefs(context, {
 			relations: [
 				{
 					table: "lucid_document__pages",

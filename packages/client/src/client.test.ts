@@ -72,7 +72,7 @@ describe("@lucidcms/client", () => {
 						},
 					},
 				},
-				include: ["bricks", "refs.document", "meta"],
+				include: ["bricks", "refs.relation", "meta"],
 			},
 		});
 
@@ -85,7 +85,7 @@ describe("@lucidcms/client", () => {
 
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toContain(
-			"/document/page/latest?filter%5B_fullSlug%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks%2Crefs.document%2Cmeta",
+			"/document/page/latest?filter%5B_fullSlug%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks%2Crefs.relation%2Cmeta",
 		);
 		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
 	});
@@ -144,7 +144,7 @@ describe("@lucidcms/client", () => {
 		const response = await client.documents.getMultiple({
 			collectionKey: "page",
 			query: {
-				include: ["refs.document", "meta"],
+				include: ["refs.relation", "meta"],
 			},
 		});
 
@@ -164,10 +164,10 @@ describe("@lucidcms/client", () => {
 		});
 		expect(fetchMock).toHaveBeenCalledTimes(2);
 		expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
-			"/documents/page/latest?include=refs.document%2Cmeta",
+			"/documents/page/latest?include=refs.relation%2Cmeta",
 		);
 		expect(String(fetchMock.mock.calls[1]?.[0])).toContain(
-			"/documents/page/latest?include=refs.document%2Cmeta",
+			"/documents/page/latest?include=refs.relation%2Cmeta",
 		);
 	});
 

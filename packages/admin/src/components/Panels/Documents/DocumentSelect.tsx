@@ -1,8 +1,8 @@
 import type {
 	Collection,
-	DocumentFieldValue,
 	DocumentRef,
 	InternalCollectionDocument,
+	RelationFieldValue,
 } from "@types";
 import {
 	FaSolidBarsProgress,
@@ -47,12 +47,12 @@ interface DocumentSelectPanelProps {
 		setOpen: (state: boolean) => void;
 		collectionKeys: string[] | undefined;
 		multiple?: boolean;
-		selected?: DocumentFieldValue[];
+		selected?: RelationFieldValue[];
 		selectedRefs?: DocumentRef[];
 	};
 	callbacks: {
 		onSelect: (selection: {
-			value: DocumentFieldValue[];
+			value: RelationFieldValue[];
 			refs: DocumentRef[];
 		}) => void;
 	};
@@ -99,11 +99,11 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 interface DocumentSelectContentProps {
 	collectionKeys: string[] | undefined;
 	multiple?: boolean;
-	selected?: DocumentFieldValue[];
+	selected?: RelationFieldValue[];
 	selectedRefs?: DocumentRef[];
 	onClose: () => void;
 	onSelect: (selection: {
-		value: DocumentFieldValue[];
+		value: RelationFieldValue[];
 		refs: DocumentRef[];
 	}) => void;
 }
@@ -130,7 +130,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
-	const selectedDocumentValues = createMemo<DocumentFieldValue[]>(() =>
+	const selectedDocumentValues = createMemo<RelationFieldValue[]>(() =>
 		selectedDocuments().map((document) => ({
 			id: document.id,
 			collectionKey: document.collectionKey,

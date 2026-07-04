@@ -5,20 +5,20 @@ import type {
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
-export type DocumentFieldValue = {
+export type RelationCustomFieldValue = {
 	id: number;
 	collectionKey: string;
 };
 
-export interface DocumentFieldConfig extends SharedFieldConfig {
-	type: "document";
+export interface RelationFieldConfig extends SharedFieldConfig {
+	type: "relation";
 	collection: string | string[];
 	details: {
 		label?: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
 	localized?: boolean;
-	default?: DocumentFieldValue[];
+	default?: RelationCustomFieldValue[];
 	index?: true;
 	multiple?: boolean;
 	ui?: FieldUIConfig;
@@ -29,30 +29,30 @@ export interface DocumentFieldConfig extends SharedFieldConfig {
 	};
 }
 
-export type DocumentFieldProps = Partial<
-	Omit<DocumentFieldConfig, "type" | "collection">
+export type RelationFieldProps = Partial<
+	Omit<RelationFieldConfig, "type" | "collection">
 > & {
 	collection: string | string[];
 };
 
-export type DocumentResValue = DocumentFieldValue[];
-export type DocumentRef = {
+export type RelationResValue = RelationCustomFieldValue[];
+export type RelationRef = {
 	id: number;
 	versionId?: number;
 	collectionKey: string;
 	fields: DocumentFieldMap | DocumentFieldValueMap | null;
 };
 
-export type DocumentValidationData = {
+export type RelationValidationData = {
 	id: number;
 	collection_key: string;
 };
 
-export type DocumentCustomFieldMapItem = {
-	props: DocumentFieldProps;
-	config: DocumentFieldConfig;
+export type RelationCustomFieldMapItem = {
+	props: RelationFieldProps;
+	config: RelationFieldConfig;
 	response: {
-		value: DocumentResValue;
-		ref: DocumentRef;
+		value: RelationResValue;
+		ref: RelationRef;
 	};
 };

@@ -3,7 +3,7 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
-import DocumentCustomField from "./custom-field.js";
+import RelationCustomField from "./custom-field.js";
 
 // -----------------------------------------------
 // Validation
@@ -19,22 +19,22 @@ const DocumentCollection = new CollectionBuilder("collection", {
 	},
 	localized: true,
 })
-	.addDocument("standard_doc", {
+	.addRelation("standard_doc", {
 		collection: "page",
 	})
-	.addDocument("required_doc", {
+	.addRelation("required_doc", {
 		collection: "page",
 		validation: {
 			required: true,
 		},
 	})
-	.addDocument("wrong_collection", {
+	.addRelation("wrong_collection", {
 		collection: "wrong_collection",
 		validation: {
 			required: true,
 		},
 	})
-	.addDocument("multi_doc", {
+	.addRelation("multi_doc", {
 		collection: "page",
 		multiple: true,
 		validation: {
@@ -42,17 +42,17 @@ const DocumentCollection = new CollectionBuilder("collection", {
 			maxItems: 3,
 		},
 	})
-	.addDocument("multi_collection_doc", {
+	.addRelation("multi_collection_doc", {
 		collection: ["page", "blog"],
 		multiple: true,
 	});
 
-test("successfully validate field - document", async () => {
+test("successfully validate field - relation", async () => {
 	// Standard
 	const standardValidate = validateField({
 		field: {
 			key: "standard_doc",
-			type: "document",
+			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
@@ -60,7 +60,7 @@ test("successfully validate field - document", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [
+			relation: [
 				{
 					id: 1,
 					collection_key: "page",
@@ -78,7 +78,7 @@ test("successfully validate field - document", async () => {
 	const requiredValidate = validateField({
 		field: {
 			key: "required_doc",
-			type: "document",
+			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
@@ -86,7 +86,7 @@ test("successfully validate field - document", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [
+			relation: [
 				{
 					id: 1,
 					collection_key: "page",
@@ -101,12 +101,12 @@ test("successfully validate field - document", async () => {
 	expect(requiredValidate).length(0);
 });
 
-test("fail to validate field - document", async () => {
-	// Required - document not found
+test("fail to validate field - relation", async () => {
+	// Required - relation target not found
 	const requiredExistsValidate = validateField({
 		field: {
 			key: "required_doc",
-			type: "document",
+			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
@@ -114,7 +114,7 @@ test("fail to validate field - document", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DocumentCollection.getData.localized,
@@ -125,7 +125,7 @@ test("fail to validate field - document", async () => {
 		{
 			key: "required_doc",
 			localeCode: null,
-			message: copy("server:core.fields.document.validation.not.found"),
+			message: copy("server:core.fields.relation.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
@@ -134,7 +134,7 @@ test("fail to validate field - document", async () => {
 	const requiredNullValidate = validateField({
 		field: {
 			key: "required_doc",
-			type: "document",
+			type: "relation",
 			value: [],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
@@ -142,7 +142,7 @@ test("fail to validate field - document", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DocumentCollection.getData.localized,
@@ -161,7 +161,7 @@ test("fail to validate field - document", async () => {
 	const wrongCollectionValidate = validateField({
 		field: {
 			key: "wrong_collection",
-			type: "document",
+			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
@@ -169,7 +169,7 @@ test("fail to validate field - document", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [
+			relation: [
 				{
 					id: 1,
 					collection_key: "page",
@@ -185,17 +185,17 @@ test("fail to validate field - document", async () => {
 		{
 			key: "wrong_collection",
 			localeCode: null,
-			message: copy("server:core.fields.document.validation.not.found"),
+			message: copy("server:core.fields.relation.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
 });
 
-test("document field validates multiple item counts and indexed errors", async () => {
+test("relation field validates multiple item counts and indexed errors", async () => {
 	const minItemsValidate = validateField({
 		field: {
 			key: "multi_doc",
-			type: "document",
+			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
@@ -203,7 +203,7 @@ test("document field validates multiple item counts and indexed errors", async (
 		validationData: {
 			media: [],
 			user: [],
-			document: [{ id: 1, collection_key: "page" }],
+			relation: [{ id: 1, collection_key: "page" }],
 		},
 		meta: {
 			localized: DocumentCollection.getData.localized,
@@ -213,7 +213,7 @@ test("document field validates multiple item counts and indexed errors", async (
 	const maxItemsValidate = validateField({
 		field: {
 			key: "multi_doc",
-			type: "document",
+			type: "relation",
 			value: [
 				{ id: 1, collectionKey: "page" },
 				{ id: 2, collectionKey: "page" },
@@ -226,7 +226,7 @@ test("document field validates multiple item counts and indexed errors", async (
 		validationData: {
 			media: [],
 			user: [],
-			document: [
+			relation: [
 				{ id: 1, collection_key: "page" },
 				{ id: 2, collection_key: "page" },
 				{ id: 3, collection_key: "page" },
@@ -241,7 +241,7 @@ test("document field validates multiple item counts and indexed errors", async (
 	const indexedValidate = validateField({
 		field: {
 			key: "multi_doc",
-			type: "document",
+			type: "relation",
 			value: [
 				{ id: 1, collectionKey: "page" },
 				{ id: 99, collectionKey: "page" },
@@ -253,7 +253,7 @@ test("document field validates multiple item counts and indexed errors", async (
 		validationData: {
 			media: [],
 			user: [],
-			document: [{ id: 1, collection_key: "page" }],
+			relation: [{ id: 1, collection_key: "page" }],
 		},
 		meta: {
 			localized: DocumentCollection.getData.localized,
@@ -287,23 +287,23 @@ test("document field validates multiple item counts and indexed errors", async (
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: copy("server:core.fields.document.validation.not.found"),
+			message: copy("server:core.fields.relation.validation.not.found"),
 			itemIndex: 1,
 		},
 		{
 			key: "multi_doc",
 			localeCode: null,
-			message: copy("server:core.fields.document.validation.not.found"),
+			message: copy("server:core.fields.relation.validation.not.found"),
 			itemIndex: 2,
 		},
 	]);
 });
 
-test("document field validates multiple target collections", async () => {
+test("relation field validates multiple target collections", async () => {
 	const allowedValidate = validateField({
 		field: {
 			key: "multi_collection_doc",
-			type: "document",
+			type: "relation",
 			value: [
 				{ id: 1, collectionKey: "page" },
 				{ id: 2, collectionKey: "blog" },
@@ -314,7 +314,7 @@ test("document field validates multiple target collections", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [
+			relation: [
 				{ id: 1, collection_key: "page" },
 				{ id: 2, collection_key: "blog" },
 			],
@@ -327,7 +327,7 @@ test("document field validates multiple target collections", async () => {
 	const disallowedValidate = validateField({
 		field: {
 			key: "multi_collection_doc",
-			type: "document",
+			type: "relation",
 			value: [{ id: 1, collectionKey: "author" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
@@ -335,7 +335,7 @@ test("document field validates multiple target collections", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [{ id: 1, collection_key: "author" }],
+			relation: [{ id: 1, collection_key: "author" }],
 		},
 		meta: {
 			localized: DocumentCollection.getData.localized,
@@ -348,7 +348,7 @@ test("document field validates multiple target collections", async () => {
 		{
 			key: "multi_collection_doc",
 			localeCode: null,
-			message: copy("server:core.fields.document.validation.not.found"),
+			message: copy("server:core.fields.relation.validation.not.found"),
 			itemIndex: 0,
 		},
 	]);
@@ -357,7 +357,7 @@ test("document field validates multiple target collections", async () => {
 // -----------------------------------------------
 // Custom field config
 test("custom field config passes schema validation", async () => {
-	const field = new DocumentCustomField("field", {
+	const field = new RelationCustomField("field", {
 		collection: "page",
 		details: {
 			label: copy("admin:tests.fields.field.label", {
@@ -381,7 +381,7 @@ test("custom field config passes schema validation", async () => {
 });
 
 test("custom field config supports multiple target collections", async () => {
-	const field = new DocumentCustomField("field", {
+	const field = new RelationCustomField("field", {
 		collection: ["page", "blog"],
 		default: [
 			{
@@ -404,12 +404,12 @@ test("custom field config supports multiple target collections", async () => {
 	]);
 });
 
-test("document field controls its grouped validation input", () => {
-	const singleField = new DocumentCustomField("single_doc", {
+test("relation field controls its grouped validation input", () => {
+	const singleField = new RelationCustomField("single_doc", {
 		collection: "page",
 		multiple: false,
 	});
-	const multipleField = new DocumentCustomField("multiple_doc", {
+	const multipleField = new RelationCustomField("multiple_doc", {
 		collection: "page",
 		multiple: true,
 	});
@@ -434,12 +434,12 @@ test("document field controls its grouped validation input", () => {
 	});
 });
 
-test("multiple config controls how many document IDs are kept", () => {
-	const singleField = new DocumentCustomField("single_doc", {
+test("multiple config controls how many relation values are kept", () => {
+	const singleField = new RelationCustomField("single_doc", {
 		collection: "page",
 		multiple: false,
 	});
-	const multipleField = new DocumentCustomField("multiple_doc", {
+	const multipleField = new RelationCustomField("multiple_doc", {
 		collection: "page",
 		multiple: true,
 	});
@@ -454,7 +454,7 @@ test("multiple config controls how many document IDs are kept", () => {
 	expect(singleField.formatResponseValue(values)).toEqual([values[0]]);
 	expect(multipleField.normalizeInputValue(values)).toEqual(values);
 	expect(multipleField.formatResponseValue(values)).toEqual(values);
-	expect(singleField.validate({ type: "document", value: 1 }).valid).toBe(
+	expect(singleField.validate({ type: "relation", value: 1 }).valid).toBe(
 		false,
 	);
 });

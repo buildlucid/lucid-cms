@@ -534,7 +534,7 @@ test("fail to validate field - media", async () => {
 			media: [
 				{
 					id: 1,
-					type: "document",
+					type: "relation",
 					file_extension: "pdf",
 					width: null,
 					height: null,

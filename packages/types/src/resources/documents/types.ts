@@ -11,12 +11,12 @@ export type FieldType =
 	| "collapsible"
 	| "color"
 	| "datetime"
-	| "document"
 	| "json"
 	| "link"
 	| "media"
 	| "number"
 	| "repeater"
+	| "relation"
 	| "rich-text"
 	| "section"
 	| "select"
@@ -36,7 +36,7 @@ export type CodeValue = {
 	value: string;
 } | null;
 
-export type DocumentRelationValue<TCollectionKey extends string = string> = {
+export type RelationFieldValue<TCollectionKey extends string = string> = {
 	id: number;
 	collectionKey: TCollectionKey;
 };
@@ -49,7 +49,7 @@ export type DocumentFieldValueResponse =
 	| CodeValue
 	| Record<string, unknown>
 	| unknown[]
-	| DocumentRelationValue[]
+	| RelationFieldValue[]
 	| number[]
 	| null
 	| undefined;
@@ -454,9 +454,9 @@ export interface DatetimeFieldConfig
 	validation?: ZodValidation;
 }
 
-export interface DocumentFieldConfig
-	extends SharedCollectionFieldConfig<"document">,
-		FieldConfigOptions<DocumentRelationValue[]> {
+export interface RelationFieldConfig
+	extends SharedCollectionFieldConfig<"relation">,
+		FieldConfigOptions<RelationFieldValue[]> {
 	collection: string | string[];
 	details: RelationFieldDetails;
 	multiple?: boolean;
@@ -576,12 +576,12 @@ export type CollectionLeafFieldConfig =
 	| CodeFieldConfig
 	| ColorFieldConfig
 	| DatetimeFieldConfig
-	| DocumentFieldConfig
 	| JsonFieldConfig
 	| LinkFieldConfig
 	| MediaFieldConfig
 	| NumberFieldConfig
 	| RichTextFieldConfig
+	| RelationFieldConfig
 	| SelectFieldConfig
 	| TextFieldConfig
 	| TextareaFieldConfig

@@ -1,8 +1,8 @@
 import type {
-	DocumentFieldValue,
 	DocumentRef,
 	FieldError,
 	InternalDocumentField,
+	RelationFieldValue,
 } from "@types";
 import {
 	batch,
@@ -19,9 +19,9 @@ import brickHelpers from "@/utils/brick-helpers";
 import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
 import helpers from "@/utils/helpers";
 
-interface DocumentFieldProps {
+interface RelationFieldProps {
 	state: {
-		fieldConfig: CollectionFieldConfigByType<"document">;
+		fieldConfig: CollectionFieldConfigByType<"relation">;
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
@@ -33,14 +33,14 @@ interface DocumentFieldProps {
 	};
 }
 
-export const DocumentField: Component<DocumentFieldProps> = (props) => {
+export const RelationField: Component<RelationFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
 	// State
-	const [getValue, setValue] = createSignal<DocumentFieldValue[] | undefined>();
+	const [getValue, setValue] = createSignal<RelationFieldValue[] | undefined>();
 
 	// -------------------------------
 	// Memos
@@ -48,7 +48,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 		return props.state.fieldData;
 	});
 	const fieldValue = createMemo(() => {
-		return brickHelpers.getFieldValue<DocumentFieldValue[]>({
+		return brickHelpers.getFieldValue<RelationFieldValue[]>({
 			fieldData: fieldData(),
 			fieldConfig: props.state.fieldConfig,
 			contentLocale: fieldRenderState.contentLocale(),
@@ -56,7 +56,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 	});
 	const fieldRef = createMemo(() => {
 		return brickHelpers.getFieldRefs({
-			fieldType: "document",
+			fieldType: "relation",
 			fieldValue: fieldValue(),
 		});
 	});
@@ -108,7 +108,7 @@ export const DocumentField: Component<DocumentFieldProps> = (props) => {
 
 				batch(() => {
 					if (refs.length) {
-						brickStore.get.addRef("document", refs as DocumentRef[]);
+						brickStore.get.addRef("relation", refs as DocumentRef[]);
 					}
 					if (removedSelection) {
 						brickStore.get.clearFieldErrors({

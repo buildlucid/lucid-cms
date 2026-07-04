@@ -32,7 +32,7 @@ const getMultiple: ServiceFn<
 		{
 			versionId: number;
 			collectionKey: string;
-			/** The version type to use for any custom field document references  */
+			/** The version type to use for any custom field relation refs  */
 			versionType: Exclude<DocumentVersionType, "revision">;
 			resolveVersionType?: FieldRefVersionTypeResolver;
 			/** When disabled, only collection-level field tables are fetched. */
@@ -41,8 +41,8 @@ const getMultiple: ServiceFn<
 			includeRefs?: boolean;
 			/** When provided, only these custom field ref types are hydrated. */
 			refTypes?: FieldTypes[];
-			/** Client responses flatten nested document ref fields; internal responses keep field wrappers. */
-			flattenDocumentRefFields?: boolean;
+			/** Client responses flatten nested relation ref fields; internal responses keep field wrappers. */
+			flattenRelationRefFields?: boolean;
 		},
 	],
 	{
@@ -152,7 +152,7 @@ const getMultiple: ServiceFn<
 						bricksTableSchema: selectedBricksTableSchema,
 						data: refData,
 						fieldTypes: data.refTypes,
-						flattenDocumentRefFields: data.flattenDocumentRefFields,
+						flattenRelationRefFields: data.flattenRelationRefFields,
 					})
 				: null,
 		},

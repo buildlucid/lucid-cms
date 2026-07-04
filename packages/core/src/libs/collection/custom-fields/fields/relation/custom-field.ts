@@ -25,27 +25,30 @@ import type {
 import keyToTitle from "../../utils/key-to-title.js";
 import { validateRelationItemCount } from "../../utils/relation-item-count-validation.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
-import { documentFieldConfig } from "./config.js";
-import type { DocumentFieldValue, DocumentValidationData } from "./types.js";
+import { relationFieldConfig } from "./config.js";
+import type {
+	RelationCustomFieldValue,
+	RelationValidationData,
+} from "./types.js";
+import { normalizeRelationCollections } from "./utils/normalize-relation-collections.js";
 import {
-	clampDocumentFieldInput,
-	normalizeStoredDocumentFieldValues,
-} from "./utils/document-field-values.js";
-import { normalizeDocumentCollections } from "./utils/normalize-document-collections.js";
+	clampRelationFieldInput,
+	normalizeStoredRelationCustomFieldValues,
+} from "./utils/relation-field-values.js";
 
-class DocumentCustomField extends CustomField<"document"> {
-	type = documentFieldConfig.type;
+class RelationCustomField extends CustomField<"relation"> {
+	type = relationFieldConfig.type;
 	config;
 	key;
 	props;
-	constructor(key: string, props: CFProps<"document">) {
+	constructor(key: string, props: CFProps<"relation">) {
 		super();
 		this.key = key;
 		this.props = props;
 		this.config = {
 			key: this.key,
 			type: this.type,
-			collection: normalizeDocumentCollections(this.props.collection),
+			collection: normalizeRelationCollections(this.props.collection),
 			details: {
 				label:
 					this.props?.details?.label ??
@@ -65,13 +68,13 @@ class DocumentCustomField extends CustomField<"document"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"document">;
+		} satisfies CFConfig<"relation">;
 	}
 	override normalizeInputValue(value: unknown) {
-		return clampDocumentFieldInput(value, this.config.multiple);
+		return clampRelationFieldInput(value, this.config.multiple);
 	}
 	override get defaultValue(): unknown {
-		return normalizeStoredDocumentFieldValues(
+		return normalizeStoredRelationCustomFieldValues(
 			this.config.default,
 			this.config.multiple,
 		);
@@ -131,24 +134,25 @@ class DocumentCustomField extends CustomField<"document"> {
 		];
 	}
 	formatResponseValue(value: unknown) {
-		return normalizeStoredDocumentFieldValues(
+		return normalizeStoredRelationCustomFieldValues(
 			value,
 			this.config.multiple,
-		) satisfies CFResponse<"document">["value"];
+		) satisfies CFResponse<"relation">["value"];
 	}
 	override serializeRelationFieldValue(
 		value: unknown,
 	): Array<Record<string, unknown>> {
-		return normalizeStoredDocumentFieldValues(value, this.config.multiple).map(
-			(documentValue) => ({
-				[prefixGeneratedColName("collection_key")]: documentValue.collectionKey,
-				[prefixGeneratedColName("document_id")]: documentValue.id,
-			}),
-		);
+		return normalizeStoredRelationCustomFieldValues(
+			value,
+			this.config.multiple,
+		).map((documentValue) => ({
+			[prefixGeneratedColName("collection_key")]: documentValue.collectionKey,
+			[prefixGeneratedColName("document_id")]: documentValue.id,
+		}));
 	}
 	override extractRelationFieldValue(
 		row: Select<LucidBricksTable>,
-	): DocumentFieldValue | null {
+	): RelationCustomFieldValue | null {
 		const documentId = row[prefixGeneratedColName("document_id")];
 		const collectionKey = row[prefixGeneratedColName("collection_key")];
 
@@ -163,7 +167,7 @@ class DocumentCustomField extends CustomField<"document"> {
 	override getRelationFieldValidationInput(
 		value: unknown,
 	): FieldRelationValidationInput {
-		return normalizeStoredDocumentFieldValues(
+		return normalizeStoredRelationCustomFieldValues(
 			value,
 			this.config.multiple,
 		).reduce<Record<string, number[]>>((acc, item) => {
@@ -197,18 +201,18 @@ class DocumentCustomField extends CustomField<"document"> {
 			},
 		];
 	}
-	uniqueValidation(value: unknown, refData?: DocumentValidationData[]) {
+	uniqueValidation(value: unknown, refData?: RelationValidationData[]) {
 		const valueSchema = z.array(
 			z.object({
 				id: z.number(),
 				collectionKey: z.string(),
 			}),
 		);
-		const candidateValue = clampDocumentFieldInput(value, this.config.multiple);
+		const candidateValue = clampRelationFieldInput(value, this.config.multiple);
 		const valueValidate = zodSafeParse(candidateValue, valueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
-		const normalizedValue = normalizeStoredDocumentFieldValues(
+		const normalizedValue = normalizeStoredRelationCustomFieldValues(
 			candidateValue,
 			this.config.multiple,
 		);
@@ -218,7 +222,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			validation: this.config.validation,
 		});
 		if (!itemCountValidation.valid) return itemCountValidation;
-		const allowedCollections = normalizeDocumentCollections(
+		const allowedCollections = normalizeRelationCollections(
 			this.config.collection,
 		);
 		const errors: CustomFieldValidationError[] = [];
@@ -227,7 +231,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			if (!allowedCollections.includes(documentValue.collectionKey)) {
 				errors.push({
 					itemIndex,
-					message: copy("server:core.fields.document.validation.not.found"),
+					message: copy("server:core.fields.relation.validation.not.found"),
 				});
 				continue;
 			}
@@ -241,7 +245,7 @@ class DocumentCustomField extends CustomField<"document"> {
 			if (findDocument === undefined) {
 				errors.push({
 					itemIndex,
-					message: copy("server:core.fields.document.validation.not.found"),
+					message: copy("server:core.fields.relation.validation.not.found"),
 				});
 			}
 		}
@@ -257,4 +261,4 @@ class DocumentCustomField extends CustomField<"document"> {
 	}
 }
 
-export default DocumentCustomField;
+export default RelationCustomField;

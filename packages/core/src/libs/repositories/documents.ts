@@ -476,7 +476,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 	async selectMultipleFiltered(
 		props: {
 			status: DocumentVersionType;
-			/** The status used to determine which version of the document custom field relations to fetch */
+			/** The status used to determine which version of the relation custom field refs to fetch */
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];
@@ -954,7 +954,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 	async selectSingleFiltered(
 		props: {
 			status: DocumentVersionType;
-			/** The status used to determine which version of the document custom field relations to fetch */
+			/** The status used to determine which version of the relation custom field refs to fetch */
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];

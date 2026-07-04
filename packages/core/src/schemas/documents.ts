@@ -539,7 +539,7 @@ export const controllerSchemas = {
 							description:
 								"Target a repeater field by adding a repeater key after the brick key",
 						}),
-					include: queryString.schema.include("refs,refs.document"),
+					include: queryString.schema.include("refs,refs.relation"),
 					sort: queryString.schema.sort("createdAt,updatedAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -612,7 +612,7 @@ export const controllerSchemas = {
 	getSingle: {
 		query: {
 			string: z.object({
-				include: queryString.schema.include("bricks,refs,refs.document"),
+				include: queryString.schema.include("bricks,refs,refs.relation"),
 			}),
 			formatted: z.object({
 				include: z
@@ -744,7 +744,7 @@ export const controllerSchemas = {
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
 						include: queryString.schema.include(
-							"bricks,refs,refs.document,meta",
+							"bricks,refs,refs.relation,meta",
 						),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,
@@ -832,7 +832,7 @@ export const controllerSchemas = {
 								description:
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
-						include: queryString.schema.include("refs,refs.document,meta"),
+						include: queryString.schema.include("refs,refs.relation,meta"),
 						sort: queryString.schema.sort("createdAt,updatedAt"),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,

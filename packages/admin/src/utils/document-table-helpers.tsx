@@ -238,7 +238,7 @@ const formatDocumentPreviewValue = (props: {
 
 		case "user":
 		case "media":
-		case "document":
+		case "relation":
 			return String(rawValue);
 
 		case "textarea":

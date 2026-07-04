@@ -13,7 +13,7 @@ const getParentPageRelationTable = (
 	tableNameByteLimit: number | null,
 ): Awaited<ServiceResponse<LucidBrickTableName>> => {
 	const tableNameRes = buildTableName<LucidBrickTableName>(
-		"cf_document",
+		"cf_relation",
 		{
 			collection: collectionKey,
 			fieldPath: [constants.fields.parentPage.key],

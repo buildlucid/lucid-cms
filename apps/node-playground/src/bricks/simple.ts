@@ -7,7 +7,7 @@ const SimpleBrick = new BrickBuilder("simple", {
 		localized: false,
 	})
 	.addMedia("image")
-	.addDocument("document", {
+	.addRelation("document", {
 		collection: "simple",
 		validation: {
 			// required: true,

@@ -13,12 +13,12 @@ export const createValueFieldTypeGenerator =
 	});
 
 /**
- * Creates the collection-aware client value type for document relation fields.
+ * Creates the collection-aware client value type for relation fields.
  */
-export const createDocumentValueFieldTypeGenerator =
-	(): ClientFieldTypeGenerator<"document"> =>
+export const createRelationValueFieldTypeGenerator =
+	(): ClientFieldTypeGenerator<"relation"> =>
 	({ field }) => ({
-		valueType: `Array<DocumentRelationValue<${renderDocumentCollectionKeys(
+		valueType: `Array<RelationFieldValue<${renderDocumentCollectionKeys(
 			field.collection,
 		)}>>`,
 	});

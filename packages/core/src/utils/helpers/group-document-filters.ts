@@ -157,7 +157,7 @@ const groupDocumentFilters = (
 			continue;
 		}
 
-		//* handle document custom fields (prefixed with _)
+		//* handle relation custom fields (prefixed with _)
 		if (key.startsWith(CUSTOMFIELD_FILTER_PREFIX)) {
 			const fieldKey = key.substring(1);
 			const fieldTable = bricksTableSchema.find(

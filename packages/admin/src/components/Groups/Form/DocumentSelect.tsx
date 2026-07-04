@@ -1,8 +1,8 @@
 import type {
-	DocumentFieldValue,
 	DocumentRef,
 	ErrorResult,
 	FieldError,
+	RelationFieldValue,
 } from "@types";
 import classNames from "classnames";
 import {
@@ -38,9 +38,9 @@ import helpers from "@/utils/helpers";
 interface DocumentSelectProps {
 	id: string;
 	collectionKeys: string[];
-	value: DocumentFieldValue[] | undefined;
+	value: RelationFieldValue[] | undefined;
 	refs: Accessor<DocumentRef[] | undefined>;
-	onChange: (value: DocumentFieldValue[], refs: DocumentRef[]) => void;
+	onChange: (value: RelationFieldValue[], refs: DocumentRef[]) => void;
 	multiple?: boolean;
 	minItems?: number;
 	maxItems?: number;
@@ -62,11 +62,11 @@ const DOCUMENT_SELECT_DRAG_DROP_KEY = "document-select-zone";
 
 type SelectedDocumentItem = {
 	key: string;
-	value: DocumentFieldValue;
+	value: RelationFieldValue;
 	document?: DocumentRef;
 };
 
-const getDocumentKey = (document: DocumentFieldValue) =>
+const getDocumentKey = (document: RelationFieldValue) =>
 	`${document.collectionKey}:${document.id}`;
 
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
@@ -96,7 +96,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const clearSelection = () => {
 		props.onChange([], []);
 	};
-	const removeSelectedDocument = (documentValue: DocumentFieldValue) => {
+	const removeSelectedDocument = (documentValue: RelationFieldValue) => {
 		props.onChange(
 			(props.value || []).filter(
 				(selectedDocument) =>
@@ -186,10 +186,10 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const hasItemError = (itemIndex: number) =>
 		getItemErrors(itemIndex).length > 0;
 	const getDocumentCollection = (
-		document?: Pick<DocumentFieldValue, "collectionKey">,
+		document?: Pick<RelationFieldValue, "collectionKey">,
 	) => (document ? collectionsByKey().get(document.collectionKey) : undefined);
 	const getSingularName = (
-		document?: Pick<DocumentFieldValue, "collectionKey">,
+		document?: Pick<RelationFieldValue, "collectionKey">,
 	) =>
 		helpers.getLocaleValue({
 			value: getDocumentCollection(document)?.details.singularName,
@@ -382,7 +382,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 };
 
 const MissingDocumentRefNotice: Component<{
-	document?: DocumentFieldValue;
+	document?: RelationFieldValue;
 	singularName?: string;
 	versionLabel?: string;
 }> = (props) => {
@@ -436,7 +436,7 @@ const DocumentSortableItem: Component<{
 	versionLabel?: string;
 	previewFields: { label: string; value: string }[];
 	hasError: boolean;
-	removeSelectedDocument: (documentValue: DocumentFieldValue) => void;
+	removeSelectedDocument: (documentValue: RelationFieldValue) => void;
 	dragDrop: DragDropCBT;
 	disabled?: boolean;
 }> = (props) => {

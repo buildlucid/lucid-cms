@@ -71,7 +71,7 @@ const registerFields = (
 			},
 			listing: true,
 		})
-		.addDocument(constants.fields.parentPage.key, {
+		.addRelation(constants.fields.parentPage.key, {
 			collection: collection.key,
 			details: {
 				label: copy("admin:plugin.pages.fields.parent.page.label", {

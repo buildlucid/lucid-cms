@@ -119,7 +119,7 @@ if (!response.error) {
     });
 
     const title = page.field("page_title").value();
-    const relatedPage = page.field("related_page").ref("document");
+    const relatedPage = page.field("related_page").ref("relation");
     const seo = page.brick({
         type: "fixed",
         key: "seo",

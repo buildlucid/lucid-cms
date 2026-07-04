@@ -482,7 +482,7 @@ describe("brick table construction", () => {
 			bricks: {
 				builder: [galleryBrick],
 			},
-		}).addDocument("relatedPage", {
+		}).addRelation("relatedPage", {
 			collection: "page",
 			multiple: true,
 		});
@@ -495,7 +495,7 @@ describe("brick table construction", () => {
 			fields: [
 				{
 					key: "relatedPage",
-					type: "document",
+					type: "relation",
 					value: [
 						{ id: 7, collectionKey: "page" },
 						{ id: 8, collectionKey: "page" },
@@ -553,7 +553,7 @@ describe("brick table construction", () => {
 		);
 		const documentRelationTable = brickTables.find(
 			(table) =>
-				table.table === "lucid_document__gallery__fld__doc__relatedPage",
+				table.table === "lucid_document__gallery__fld__rel__relatedPage",
 		);
 		const heroMediaRelationTable = brickTables.find(
 			(table) =>
@@ -678,7 +678,7 @@ describe("brick table construction", () => {
 			.addUser("author", {
 				multiple: true,
 			})
-			.addDocument("relatedPage", {
+			.addRelation("relatedPage", {
 				collection: "page",
 				multiple: true,
 			});
@@ -696,7 +696,7 @@ describe("brick table construction", () => {
 				},
 				{
 					key: "relatedPage",
-					type: "document",
+					type: "relation",
 					value: [],
 				},
 			],
@@ -708,7 +708,7 @@ describe("brick table construction", () => {
 		expect(brickTables.find((table) => table.table.includes("__usr__"))).toBe(
 			undefined,
 		);
-		expect(brickTables.find((table) => table.table.includes("__doc__"))).toBe(
+		expect(brickTables.find((table) => table.table.includes("__rel__"))).toBe(
 			undefined,
 		);
 	});

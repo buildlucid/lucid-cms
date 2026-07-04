@@ -133,7 +133,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 		includeBricks: include.bricks,
 		includeRefs: include.refs,
 		refTypes: include.refTypes,
-		flattenDocumentRefFields: true,
+		flattenRelationRefFields: true,
 	});
 	if (bricksRes.error) return bricksRes;
 

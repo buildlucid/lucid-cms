@@ -1,9 +1,9 @@
 import type {
-	DocumentFieldValue,
 	DocumentRef,
 	LinkResValue,
 	Media,
 	MediaRef,
+	RelationFieldValue,
 	UserRef,
 } from "@types";
 import { createStore } from "solid-js/store";
@@ -38,11 +38,11 @@ type ModalRegistry = {
 		data: {
 			collectionKeys: string[];
 			multiple?: boolean;
-			selected?: DocumentFieldValue[];
+			selected?: RelationFieldValue[];
 			selectedRefs?: Array<DocumentRef>;
 		};
 		result: {
-			value: DocumentFieldValue[];
+			value: RelationFieldValue[];
 			refs: DocumentRef[];
 		};
 	};

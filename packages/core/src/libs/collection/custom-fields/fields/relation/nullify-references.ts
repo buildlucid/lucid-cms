@@ -7,8 +7,8 @@ import type {
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import { getBricksTableSchema } from "../../../schema/runtime/runtime-schema-selectors.js";
 import type { CollectionSchemaTable } from "../../../schema/types.js";
-import { documentFieldConfig } from "./config.js";
-import { normalizeDocumentCollections } from "./utils/normalize-document-collections.js";
+import { relationFieldConfig } from "./config.js";
+import { normalizeRelationCollections } from "./utils/normalize-relation-collections.js";
 
 type FieldConfig = CFConfig<FieldTypes>;
 
@@ -20,15 +20,15 @@ const canReferenceCollection = (
 	targetCollectionKey: string,
 ): boolean => {
 	return (
-		field.type === "document" &&
-		normalizeDocumentCollections(field.collection).includes(targetCollectionKey)
+		field.type === "relation" &&
+		normalizeRelationCollections(field.collection).includes(targetCollectionKey)
 	);
 };
 
 /**
- * Finds the relation table generated for a document custom field.
+ * Finds the relation table generated for a relation custom field.
  */
-const findDocumentRelationTable = (props: {
+const findRelationTable = (props: {
 	schemas: CollectionSchemaTable<LucidBrickTableName>[];
 	collectionKey: string;
 	brickKey?: string;
@@ -36,7 +36,7 @@ const findDocumentRelationTable = (props: {
 }): LucidBrickTableName | null => {
 	const relationSchema = props.schemas.find((schema) => {
 		if (schema.key.collection !== props.collectionKey) return false;
-		if (schema.type !== documentFieldConfig.database.tableType) return false;
+		if (schema.type !== relationFieldConfig.database.tableType) return false;
 		if (schema.key.brick !== props.brickKey) return false;
 
 		const fieldPath = schema.key.fieldPath;
@@ -47,7 +47,7 @@ const findDocumentRelationTable = (props: {
 };
 
 /**
- * Recursively collects document relation tables that reference the deleted collection.
+ * Recursively collects relation tables that reference the deleted collection.
  */
 const collectReferenceTargets = (props: {
 	fields: FieldConfig[];
@@ -59,7 +59,7 @@ const collectReferenceTargets = (props: {
 }): void => {
 	for (const field of props.fields) {
 		if (canReferenceCollection(field, props.targetCollectionKey)) {
-			const relationTable = findDocumentRelationTable({
+			const relationTable = findRelationTable({
 				schemas: props.schemas,
 				collectionKey: props.collectionKey,
 				brickKey: props.brickKey,
@@ -84,9 +84,9 @@ const collectReferenceTargets = (props: {
 };
 
 /**
- * Deletes all stored document relation rows that point at a deleted document.
+ * Deletes all stored relation rows that point at a deleted document.
  */
-const nullifyDocumentReferences: ServiceFn<
+const nullifyRelationReferences: ServiceFn<
 	[
 		{
 			documentId: number;
@@ -141,4 +141,4 @@ const nullifyDocumentReferences: ServiceFn<
 	};
 };
 
-export default nullifyDocumentReferences;
+export default nullifyRelationReferences;

@@ -88,11 +88,11 @@ describe("Schema inference", async () => {
 		);
 	});
 
-	test("creates relation tables for media, user and document fields", () => {
+	test("creates relation tables for media, user and relation fields", () => {
 		pagesCollection
 			.addMedia("hero_media")
 			.addUser("author")
-			.addDocument("related_page", {
+			.addRelation("related_page", {
 				collection: "pages",
 			});
 
@@ -103,8 +103,8 @@ describe("Schema inference", async () => {
 		const userTable = res.data?.tables.find(
 			(table) => table.name === "lucid_document__pages__fld__usr__author",
 		);
-		const documentTable = res.data?.tables.find(
-			(table) => table.name === "lucid_document__pages__fld__doc__related_page",
+		const relationTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__fld__rel__related_page",
 		);
 
 		expect(res.data?.tables).toContainEqual(
@@ -127,8 +127,8 @@ describe("Schema inference", async () => {
 		);
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
-				name: "lucid_document__pages__fld__doc__related_page",
-				type: `${constants.db.customFieldTablePrefix}document`,
+				name: "lucid_document__pages__fld__rel__related_page",
+				type: `${constants.db.customFieldTablePrefix}relation`,
 				key: expect.objectContaining({
 					fieldPath: ["related_page"],
 				}),
@@ -141,7 +141,7 @@ describe("Schema inference", async () => {
 			false,
 		);
 		expect(
-			documentTable?.columns.some((column) => column.name === "is_open"),
+			relationTable?.columns.some((column) => column.name === "is_open"),
 		).toBe(false);
 		expect(
 			mediaTable?.columns.some((column) => column.name === "parent_id_ref"),
@@ -150,10 +150,10 @@ describe("Schema inference", async () => {
 			userTable?.columns.some((column) => column.name === "parent_id_ref"),
 		).toBe(false);
 		expect(
-			documentTable?.columns.some((column) => column.name === "parent_id_ref"),
+			relationTable?.columns.some((column) => column.name === "parent_id_ref"),
 		).toBe(false);
 		expect(
-			documentTable?.columns.find((column) => column.name === "_document_id")
+			relationTable?.columns.find((column) => column.name === "_document_id")
 				?.foreignKey,
 		).toBeUndefined();
 	});
@@ -328,17 +328,17 @@ describe("Schema inference", async () => {
 		).toEqual([]);
 	});
 
-	test("creates composite relation lookup index for document fields", () => {
-		pagesCollection.addDocument("related_page", {
+	test("creates composite relation lookup index for relation fields", () => {
+		pagesCollection.addRelation("related_page", {
 			collection: ["pages", "blog"],
 		});
 
 		const res = inferSchema(pagesCollection, db);
-		const documentTable = res.data?.tables.find(
-			(table) => table.name === "lucid_document__pages__fld__doc__related_page",
+		const relationTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__fld__rel__related_page",
 		);
 
-		expect(documentTable?.indexes).toContainEqual(
+		expect(relationTable?.indexes).toContainEqual(
 			expect.objectContaining({
 				columns: ["_collection_key", "_document_id"],
 				source: "field",

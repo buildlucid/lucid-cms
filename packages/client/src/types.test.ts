@@ -2,7 +2,7 @@ import type {
 	CollectionDocument as CoreCollectionDocument,
 	CollectionDocumentTranslations as CoreCollectionDocumentTranslations,
 	DocumentBrick as CoreDocumentBrick,
-	DocumentRelationValue as CoreDocumentRelationValue,
+	RelationFieldValue as CoreRelationFieldValue,
 } from "@lucidcms/core/types";
 import { expectTypeOf, test } from "vitest";
 import { asDocument, createClient } from "./index.js";
@@ -18,7 +18,6 @@ import type {
 	CollectionDocumentVersionKey,
 	DocumentBrick,
 	DocumentMultipleInclude,
-	DocumentRelationValue,
 	DocumentSingleInclude,
 	DocumentsGetMultipleQuery,
 	DocumentsGetMultipleResponse,
@@ -26,13 +25,14 @@ import type {
 	DocumentsGetSingleResponse,
 	LucidClient,
 	LucidClientResponse,
+	RelationFieldValue,
 } from "./types.js";
 
 declare module "./types.js" {
 	interface CollectionDocumentFieldsByCollection {
 		page: {
 			page_title: CollectionDocumentTranslations<string | null>;
-			related_page: Array<DocumentRelationValue<"page">>;
+			related_page: Array<RelationFieldValue<"page">>;
 			sections: Array<{
 				heading: string | null;
 			}>;
@@ -102,7 +102,7 @@ declare module "@lucidcms/core/types" {
 	interface CollectionDocumentFieldsByCollection {
 		page: {
 			page_title: CoreCollectionDocumentTranslations<string | null>;
-			related_page: Array<CoreDocumentRelationValue<"page">>;
+			related_page: Array<CoreRelationFieldValue<"page">>;
 			sections: Array<{
 				heading: string | null;
 			}>;
@@ -144,7 +144,7 @@ declare module "@lucidcms/core/types" {
 test("collection documents narrow to generated plain field and brick types", () => {
 	expectTypeOf<CollectionDocument<"page">["fields"]>().toEqualTypeOf<{
 		page_title: CollectionDocumentTranslations<string | null>;
-		related_page: Array<DocumentRelationValue<"page">>;
+		related_page: Array<RelationFieldValue<"page">>;
 		sections: Array<{
 			heading: string | null;
 		}>;

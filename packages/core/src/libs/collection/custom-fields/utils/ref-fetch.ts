@@ -29,7 +29,7 @@ export type FieldRefFetchInput = {
 export type FieldRefFetchOutput = {
 	rows: Array<MediaPropsT> | Array<UserPropT> | Array<BrickQueryResponse>;
 	meta?: {
-		document?: {
+		relation?: {
 			fieldsSchemaByCollection: Record<
 				string,
 				CollectionSchemaTable<LucidBrickTableName>

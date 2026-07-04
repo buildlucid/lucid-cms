@@ -7,16 +7,16 @@ import logger from "../../../../logger/index.js";
 import DocumentsRepository from "../../../../repositories/documents.js";
 import buildTableName from "../../../helpers/build-table-name.js";
 import type { FieldRelationValidationInput } from "../../types.js";
-import type { DocumentValidationData } from "./types.js";
+import type { RelationValidationData } from "./types.js";
 
 /**
  * Validate document input data
  */
-const validateDocumentInputData = async (
+const validateRelationInputData = async (
 	context: ServiceContext,
 	input: FieldRelationValidationInput,
-): Promise<DocumentValidationData[]> => {
-	const allDocuments: DocumentValidationData[] = [];
+): Promise<RelationValidationData[]> => {
+	const allDocuments: RelationValidationData[] = [];
 	try {
 		//* create queries for each collection key
 		const promises = Object.entries(input).map(([collectionKey, ids]) => {
@@ -45,7 +45,7 @@ const fetchDocumentsFromCollection = async (
 	context: ServiceContext,
 	collectionKey: string,
 	ids: number[],
-): Promise<DocumentValidationData[]> => {
+): Promise<RelationValidationData[]> => {
 	if (ids.length === 0) return [];
 
 	try {
@@ -111,4 +111,4 @@ const fetchDocumentsFromCollection = async (
 	}
 };
 
-export default validateDocumentInputData;
+export default validateRelationInputData;

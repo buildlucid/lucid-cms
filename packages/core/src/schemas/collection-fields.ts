@@ -18,7 +18,7 @@ export const fieldInputSchema = z.object({
 		z.literal("link"),
 		z.literal("repeater"),
 		z.literal("user"),
-		z.literal("document"),
+		z.literal("relation"),
 	]),
 	translations: z.record(z.string(), z.any()).optional(),
 	value: z.any().optional(),
@@ -53,7 +53,7 @@ export const fieldConfigSchema = z.object({
 		.union([z.string(), z.array(z.string())])
 		.nullable()
 		.meta({
-			description: "Collection key for document reference fields",
+			description: "Collection key for relation fields",
 			example: ["page", "blog"],
 		})
 		.optional(),

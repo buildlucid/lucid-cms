@@ -33,8 +33,8 @@ type RegisteredFieldDefinition = (typeof registeredFields)[FieldTypes];
 export type FieldRefResponse = {
 	data: FieldRefData;
 	meta?: {
-		document?: {
-			/** Document-field table schema for referenced collections, keyed by collection key. */
+		relation?: {
+			/** Document-field table schema for referenced relation collections, keyed by collection key. */
 			fieldsSchemaByCollection: Record<
 				string,
 				CollectionSchemaTable<LucidBrickTableName>
@@ -148,13 +148,13 @@ const fetchRefData: ServiceFn<
 		if (!res.data) continue;
 
 		response.data[fieldType] = res.data.rows;
-		if (res.data.meta?.document) {
+		if (res.data.meta?.relation) {
 			response.meta = {
 				...response.meta,
-				document: {
+				relation: {
 					fieldsSchemaByCollection: {
-						...(response.meta?.document?.fieldsSchemaByCollection || {}),
-						...res.data.meta.document.fieldsSchemaByCollection,
+						...(response.meta?.relation?.fieldsSchemaByCollection || {}),
+						...res.data.meta.relation.fieldsSchemaByCollection,
 					},
 				},
 			};

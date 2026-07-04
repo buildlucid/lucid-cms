@@ -10,7 +10,7 @@ const nullifyDocumentReferences: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	return registeredFields.document.nullifyReferences(context, data);
+	return registeredFields.relation.nullifyReferences(context, data);
 };
 
 export default nullifyDocumentReferences;

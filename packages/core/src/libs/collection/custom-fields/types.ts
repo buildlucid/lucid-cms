@@ -27,8 +27,6 @@ import { colorFieldConfig } from "./fields/color/config.js";
 import type { ColorCustomFieldMapItem } from "./fields/color/types.js";
 import { datetimeFieldConfig } from "./fields/datetime/config.js";
 import type { DatetimeCustomFieldMapItem } from "./fields/datetime/types.js";
-import { documentFieldConfig } from "./fields/document/config.js";
-import type { DocumentCustomFieldMapItem } from "./fields/document/types.js";
 import { jsonFieldConfig } from "./fields/json/config.js";
 import type { JsonCustomFieldMapItem } from "./fields/json/types.js";
 import { linkFieldConfig } from "./fields/link/config.js";
@@ -37,6 +35,8 @@ import { mediaFieldConfig } from "./fields/media/config.js";
 import type { MediaCustomFieldMapItem } from "./fields/media/types.js";
 import { numberFieldConfig } from "./fields/number/config.js";
 import type { NumberCustomFieldMapItem } from "./fields/number/types.js";
+import { relationFieldConfig } from "./fields/relation/config.js";
+import type { RelationCustomFieldMapItem } from "./fields/relation/types.js";
 import { repeaterFieldConfig } from "./fields/repeater/config.js";
 import type { RepeaterCustomFieldMapItem } from "./fields/repeater/types.js";
 import { richTextFieldConfig } from "./fields/rich-text/config.js";
@@ -60,11 +60,11 @@ export type * from "./fields/code/types.js";
 export type * from "./fields/collapsible/types.js";
 export type * from "./fields/color/types.js";
 export type * from "./fields/datetime/types.js";
-export type * from "./fields/document/types.js";
 export type * from "./fields/json/types.js";
 export type * from "./fields/link/types.js";
 export type * from "./fields/media/types.js";
 export type * from "./fields/number/types.js";
+export type * from "./fields/relation/types.js";
 export type * from "./fields/repeater/types.js";
 export type * from "./fields/rich-text/types.js";
 export type * from "./fields/section/types.js";
@@ -83,7 +83,7 @@ export const fieldTypes = [
 	collapsibleFieldConfig.type,
 	colorFieldConfig.type,
 	datetimeFieldConfig.type,
-	documentFieldConfig.type,
+	relationFieldConfig.type,
 	jsonFieldConfig.type,
 	linkFieldConfig.type,
 	mediaFieldConfig.type,
@@ -232,8 +232,8 @@ export type CustomFieldMap = {
 	text: TextCustomFieldMapItem;
 	"rich-text": RichTextCustomFieldMapItem;
 	media: MediaCustomFieldMapItem;
-	document: DocumentCustomFieldMapItem;
 	repeater: RepeaterCustomFieldMapItem;
+	relation: RelationCustomFieldMapItem;
 	number: NumberCustomFieldMapItem;
 	checkbox: CheckboxCustomFieldMapItem;
 	select: SelectCustomFieldMapItem;
@@ -358,11 +358,11 @@ export type FieldRefParams = {
 	config: Config;
 	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-	documentRefMeta?: {
+	relationRefMeta?: {
 		fieldsSchemaByCollection?: Record<
 			string,
 			CollectionSchemaTable<LucidBrickTableName>
 		>;
 	};
-	flattenDocumentRefFields?: boolean;
+	flattenRelationRefFields?: boolean;
 };

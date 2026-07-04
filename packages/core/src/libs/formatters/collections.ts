@@ -208,7 +208,7 @@ const formatField = (
 		delete formattedField.ai;
 	}
 
-	if (formattedField.type === "document") {
+	if (formattedField.type === "relation") {
 		const filteredCollection = (
 			Array.isArray(formattedField.collection)
 				? formattedField.collection

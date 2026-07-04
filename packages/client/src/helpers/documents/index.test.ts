@@ -7,15 +7,15 @@ import type {
 	DocumentBrickView,
 	DocumentFieldGroupView,
 	DocumentRef,
-	DocumentRelationValue,
 	DocumentView,
+	RelationFieldValue,
 } from "../../types.js";
 
 declare module "../../types.js" {
 	interface CollectionDocumentFieldsByCollection {
 		page: {
 			page_title: CollectionDocumentTranslations<string | null>;
-			related_page: Array<DocumentRelationValue<"page">>;
+			related_page: Array<RelationFieldValue<"page">>;
 			hero_image: number[];
 			authors: number[];
 			custom_owner: number[];
@@ -127,7 +127,7 @@ const page = {
 		},
 	],
 	refs: {
-		document: [
+		relation: [
 			{
 				id: 3,
 				collectionKey: "page",
@@ -266,8 +266,8 @@ describe("@lucidcms/client document helpers", () => {
 		});
 
 		expect(pageView.field("page_title").value()).toBe("Homepage");
-		expect(pageView.field("related_page").ref("document")?.id).toBe(2);
-		expect(pageView.ref("document", page.fields.related_page)?.id).toBe(2);
+		expect(pageView.field("related_page").ref("relation")?.id).toBe(2);
+		expect(pageView.ref("relation", page.fields.related_page)?.id).toBe(2);
 		expect(
 			pageView
 				.field("hero_image")
@@ -386,7 +386,7 @@ describe("@lucidcms/client document helpers", () => {
 		expectTypeOf(
 			rawPageView.field("page_title").value({ locale: "en" }),
 		).toEqualTypeOf<string | null | undefined>();
-		expectTypeOf(pageView.field("related_page").refs("document")).toEqualTypeOf<
+		expectTypeOf(pageView.field("related_page").refs("relation")).toEqualTypeOf<
 			DocumentRef[]
 		>();
 		expectTypeOf(pageView.brick("banner")).toEqualTypeOf<

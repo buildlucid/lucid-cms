@@ -62,7 +62,7 @@ describe("resolve relation version type", () => {
 		expect(response.data?.versionType).toBe("latest");
 		expect(
 			response.data?.resolveVersionType?.({
-				fieldType: "document",
+				fieldType: "relation",
 				table: "lucid_document__blog",
 				collectionKey: "blog",
 			}),
@@ -82,7 +82,7 @@ describe("resolve relation version type", () => {
 		expect(response.data?.versionType).toBe("latest");
 		expect(
 			response.data?.resolveVersionType?.({
-				fieldType: "document",
+				fieldType: "relation",
 				table: "lucid_document__blog",
 				collectionKey: "blog",
 			}),
@@ -123,7 +123,7 @@ describe("resolve relation version type", () => {
 		expect(response.data?.versionType).toBe("staging");
 		expect(
 			response.data?.resolveVersionType?.({
-				fieldType: "document",
+				fieldType: "relation",
 				table: "lucid_document__blog",
 				collectionKey: "blog",
 			}),
@@ -160,7 +160,7 @@ describe("resolve relation version type", () => {
 		expect(response.error).toBeUndefined();
 		expect(
 			response.data?.resolveVersionType?.({
-				fieldType: "document",
+				fieldType: "relation",
 				table: "lucid_document__blog",
 				collectionKey: "blog",
 			}),
@@ -196,7 +196,7 @@ describe("resolve relation version type", () => {
 		expect(response.error).toBeUndefined();
 		expect(
 			response.data?.resolveVersionType?.({
-				fieldType: "document",
+				fieldType: "relation",
 				table: "lucid_document__blog",
 				collectionKey: "blog",
 			}),
@@ -222,7 +222,7 @@ describe("resolve relation version type", () => {
 		expect(response.data?.versionType).toBe("staging");
 		expect(
 			response.data?.resolveVersionType?.({
-				fieldType: "document",
+				fieldType: "relation",
 				table: "lucid_document__blog",
 				collectionKey: "blog",
 			}),
@@ -278,7 +278,7 @@ describe("resolve relation version type", () => {
 		expect(response.data?.versionType).toBe("staging");
 		expect(
 			response.data?.resolveVersionType?.({
-				fieldType: "document",
+				fieldType: "relation",
 				table: "lucid_document__blog",
 				collectionKey: "blog",
 			}),
@@ -302,7 +302,7 @@ describe("resolve relation version type", () => {
 		expect(response.data?.versionType).toBe("latest");
 		expect(
 			response.data?.resolveVersionType?.({
-				fieldType: "document",
+				fieldType: "relation",
 				table: "lucid_document__blog",
 				collectionKey: "blog",
 			}),

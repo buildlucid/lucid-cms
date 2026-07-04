@@ -27,7 +27,7 @@ const fieldResToSchema = (
 			if (fieldType === "text") {
 				// @ts-expect-error
 				result.translations[item.locale] = item[`_${key}`] as string | null;
-			} else if (fieldType === "document") {
+			} else if (fieldType === "relation") {
 				// @ts-expect-error
 				const relationId = item[`_${key}`];
 				result.translations[item.locale] =
@@ -43,7 +43,7 @@ const fieldResToSchema = (
 		if (fieldType === "text") {
 			// @ts-expect-error
 			result.value = defaultItem[`_${key}`] as string | null;
-		} else if (fieldType === "document") {
+		} else if (fieldType === "relation") {
 			// @ts-expect-error
 			const relationId = defaultItem[`_${key}`];
 			result.value =
@@ -65,7 +65,7 @@ function getFieldTypeFromKey(
 		case "fullSlug":
 			return "text";
 		case "parentPage":
-			return "document";
+			return "relation";
 		default:
 			return undefined;
 	}

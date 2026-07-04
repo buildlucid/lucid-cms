@@ -1,5 +1,5 @@
 import type { Config } from "../../../types.js";
-import { normalizeDocumentCollections } from "../../collection/custom-fields/fields/document/utils/normalize-document-collections.js";
+import { normalizeRelationCollections } from "../../collection/custom-fields/fields/relation/utils/normalize-relation-collections.js";
 import type {
 	CFConfig,
 	FieldTypes,
@@ -10,12 +10,12 @@ import { translate } from "../../i18n/index.js";
 
 const checkField = (field: CFConfig<FieldTypes>, config: Config) => {
 	switch (field.type) {
-		case "document": {
+		case "relation": {
 			const allMultipleCollections = config.collections
 				.filter((collection) => collection.getData.mode === "multiple")
 				.map((collection) => collection.key);
 
-			for (const collectionKey of normalizeDocumentCollections(
+			for (const collectionKey of normalizeRelationCollections(
 				field.collection,
 			)) {
 				if (allMultipleCollections.includes(collectionKey)) {
@@ -24,7 +24,7 @@ const checkField = (field: CFConfig<FieldTypes>, config: Config) => {
 
 				throw new Error(
 					translate(
-						"server:core.fields.document.validation.collection.not.found",
+						"server:core.fields.relation.validation.collection.not.found",
 						{
 							data: {
 								collection: collectionKey,

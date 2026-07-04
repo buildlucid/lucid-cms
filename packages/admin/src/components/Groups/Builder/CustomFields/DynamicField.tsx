@@ -13,11 +13,11 @@ import {
 	CodeField,
 	CollapsibleField,
 	ColorField,
-	DocumentField,
 	InputField,
 	JSONField,
 	LinkField,
 	MediaField,
+	RelationField,
 	RepeaterField,
 	RichTextField,
 	SectionField,
@@ -300,11 +300,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								}}
 							/>
 						</Match>
-						<Match when={fieldConfig().type === "document"}>
-							<DocumentField
+						<Match when={fieldConfig().type === "relation"}>
+							<RelationField
 								state={{
 									fieldConfig:
-										fieldConfig() as CollectionFieldConfigByType<"document">,
+										fieldConfig() as CollectionFieldConfigByType<"relation">,
 									fieldData: fieldData(),
 									groupRef: props.state.groupRef,
 									repeaterKey: props.state.repeaterKey,

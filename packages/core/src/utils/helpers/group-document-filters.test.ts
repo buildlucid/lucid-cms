@@ -48,7 +48,7 @@ describe("groupDocumentFilters", () => {
 					source: "field",
 					type: "integer",
 					nullable: true,
-					customField: { type: "document" },
+					customField: { type: "relation" },
 				},
 			],
 		},
@@ -222,9 +222,9 @@ describe("groupDocumentFilters", () => {
 			],
 		},
 		{
-			name: "lucid_document__simple__fld__relatedDocument",
-			rawName: "lucid_document__simple__fld__relatedDocument",
-			type: `${constants.db.customFieldTablePrefix}document`,
+			name: "lucid_document__simple__fld__rel__relatedDocument",
+			rawName: "lucid_document__simple__fld__rel__relatedDocument",
+			type: `${constants.db.customFieldTablePrefix}relation`,
 			key: {
 				collection: "simple",
 				brick: undefined,
@@ -249,14 +249,14 @@ describe("groupDocumentFilters", () => {
 					source: "field",
 					type: "text",
 					nullable: false,
-					customField: { type: "document" },
+					customField: { type: "relation" },
 				},
 				{
 					name: "_document_id",
 					source: "field",
 					type: "integer",
 					nullable: false,
-					customField: { type: "document" },
+					customField: { type: "relation" },
 				},
 			],
 		},
@@ -359,7 +359,7 @@ describe("groupDocumentFilters", () => {
 		).toEqual(filters);
 	});
 
-	it("should handle document custom fields with _ prefix", () => {
+	it("should handle relation custom fields with _ prefix", () => {
 		const filters: QueryParamFilters = {
 			_simpleHeading: { value: "Test Heading" },
 		};
@@ -399,7 +399,7 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
-	it("should handle document custom fields stored in generated relation tables", () => {
+	it("should handle relation custom fields stored in generated relation tables", () => {
 		const filters: QueryParamFilters = {
 			_author: { value: [1, 2] },
 			_heroImage: { value: 10 },
@@ -433,7 +433,7 @@ describe("groupDocumentFilters", () => {
 				],
 			},
 			{
-				table: "lucid_document__simple__fld__relatedDocument",
+				table: "lucid_document__simple__fld__rel__relatedDocument",
 				filters: [
 					{
 						key: "relatedDocument",

@@ -27,7 +27,7 @@ const isSupportedRefFieldType = (value: string): value is FieldTypes => {
 };
 
 /**
- * Matches the generic typed ref include syntax, such as `refs.document` or a
+ * Matches the generic typed ref include syntax, such as `refs.relation` or a
  * future custom field include like `refs.product`.
  */
 const isTypedRefInclude = (value: string): value is `refs.${string}` => {

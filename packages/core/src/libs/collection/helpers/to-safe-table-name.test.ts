@@ -28,7 +28,7 @@ describe("toSafeTableName", () => {
 		const userRaw =
 			"lucid_document__page__banner__usr__author__very_long_user_reference_key";
 		const documentRaw =
-			"lucid_document__page__banner__doc__related_post__very_long_document_reference_key";
+			"lucid_document__page__banner__rel__related_post__very_long_document_reference_key";
 
 		const media = toSafeTableName(mediaRaw, 63);
 		const user = toSafeTableName(userRaw, 63);
@@ -41,7 +41,7 @@ describe("toSafeTableName", () => {
 			/^lucid_document__page__banner__usr_[0-9a-f]{8}$/,
 		);
 		expect(document.name).toMatch(
-			/^lucid_document__page__banner__doc_[0-9a-f]{8}$/,
+			/^lucid_document__page__banner__rel_[0-9a-f]{8}$/,
 		);
 	});
 

@@ -146,7 +146,7 @@ describe("checkFieldConditions", () => {
 			.addSelect("linkType")
 			.addRepeater("items")
 			.addText("label")
-			.addDocument("document", {
+			.addRelation("document", {
 				collection: "pages",
 				ui: { condition: showWhen("linkType", "document") },
 			})

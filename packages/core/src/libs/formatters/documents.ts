@@ -276,7 +276,7 @@ const formatClientMultiple = <TCollectionKey extends string = string>(props: {
 					host: props.host,
 					bricksTableSchema: props.bricksTableSchema,
 					fieldTypes: props.refTypes,
-					flattenDocumentRefFields: true,
+					flattenRelationRefFields: true,
 				})
 			: null;
 
@@ -386,7 +386,7 @@ const formatRefs = (props: {
 	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	fieldTypes?: FieldTypes[];
-	flattenDocumentRefFields?: boolean;
+	flattenRelationRefFields?: boolean;
 }): Partial<Record<FieldTypes | string, FieldRef[]>> | null => {
 	const refs: Partial<Record<FieldTypes | string, FieldRef[]>> = {};
 	if (!props.data) return null;
@@ -410,8 +410,8 @@ const formatRefs = (props: {
 				config: props.config,
 				host: props.host,
 				bricksTableSchema: props.bricksTableSchema,
-				documentRefMeta: props.data?.meta?.document,
-				flattenDocumentRefFields: props.flattenDocumentRefFields,
+				relationRefMeta: props.data?.meta?.relation,
+				flattenRelationRefFields: props.flattenRelationRefFields,
 				localization: localization,
 			});
 			if (formattedRef === null) continue;

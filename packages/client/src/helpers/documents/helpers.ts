@@ -3,8 +3,8 @@ import type {
 	DocumentBrick,
 	DocumentFieldValueMap,
 	DocumentRef,
-	DocumentRelationValue,
 	MediaRef,
+	RelationFieldValue,
 	UserRef,
 } from "../../types.js";
 import type {
@@ -93,9 +93,9 @@ export const getFieldGroups = <TFields extends DocumentFieldValueMap>(
 	return value.filter((item): item is TFields => isObjectRecord(item));
 };
 
-const findDocumentRelationRef = (
+const findRelationRef = (
 	refs: CollectionDocumentRef[],
-	relation: DocumentRelationValue<string>,
+	relation: RelationFieldValue<string>,
 ): DocumentRef | undefined => {
 	for (const ref of refs) {
 		if (
@@ -164,9 +164,9 @@ export const readRefs = <TRefType extends DocumentRefType>(
 ): DocumentRefsResult<TRefType> => {
 	const relationValue = readFieldValue(value, options);
 
-	if (refType === "document") {
+	if (refType === "relation") {
 		const relations = Array.isArray(relationValue) ? relationValue : [];
-		const refs = document.refs?.document ?? [];
+		const refs = document.refs?.relation ?? [];
 		const matches: DocumentRef[] = [];
 
 		for (const relation of relations) {
@@ -174,7 +174,7 @@ export const readRefs = <TRefType extends DocumentRefType>(
 			if (typeof relation.id !== "number") continue;
 			if (typeof relation.collectionKey !== "string") continue;
 
-			const match = findDocumentRelationRef(refs, {
+			const match = findRelationRef(refs, {
 				id: relation.id,
 				collectionKey: relation.collectionKey,
 			});

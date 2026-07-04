@@ -78,7 +78,7 @@ const createRelationVersionTypeResolver = (props: {
 	sourceVersionType: RelationVersionType;
 }): FieldRefVersionTypeResolver => {
 	return (input) => {
-		if (input.fieldType !== "document") return props.sourceVersionType;
+		if (input.fieldType !== "relation") return props.sourceVersionType;
 
 		return resolveDocumentRelationVersionType({
 			config: props.config,

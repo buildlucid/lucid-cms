@@ -2,7 +2,6 @@ import type {
 	DocumentBrick,
 	DocumentFieldValueMap,
 	DocumentRef,
-	DocumentRelationValue,
 	DocumentVersionSummary,
 	FieldType,
 	Locale,
@@ -15,6 +14,7 @@ import type {
 	MediaType,
 	MediaUrl,
 	ProfilePicture,
+	RelationFieldValue,
 	UserRef,
 } from "@lucidcms/types";
 import type { LucidClient } from "./client.js";
@@ -186,7 +186,6 @@ export type {
 	DocumentBrick,
 	DocumentFieldValueMap,
 	DocumentRef,
-	DocumentRelationValue,
 	Locale,
 	LucidClient,
 	Media,
@@ -198,5 +197,6 @@ export type {
 	MediaType,
 	MediaUrl,
 	ProfilePicture,
+	RelationFieldValue,
 	UserRef,
 };

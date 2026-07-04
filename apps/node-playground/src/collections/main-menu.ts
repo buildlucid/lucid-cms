@@ -93,7 +93,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 			required: true,
 		},
 	})
-	.addDocument("document", {
+	.addRelation("document", {
 		collection: ["page", "blog"],
 		details: {
 			label: "Document",
@@ -242,7 +242,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 			required: true,
 		},
 	})
-	.addDocument("childDocument", {
+	.addRelation("childDocument", {
 		collection: ["page", "blog"],
 		details: {
 			label: "Document",
@@ -393,7 +393,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 			required: true,
 		},
 	})
-	.addDocument("grandchildDocument", {
+	.addRelation("grandchildDocument", {
 		collection: ["page", "blog"],
 		details: {
 			label: "Document",

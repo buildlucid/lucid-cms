@@ -3,11 +3,11 @@ import code from "./fields/code/index.js";
 import collapsible from "./fields/collapsible/index.js";
 import color from "./fields/color/index.js";
 import datetime from "./fields/datetime/index.js";
-import document from "./fields/document/index.js";
 import json from "./fields/json/index.js";
 import link from "./fields/link/index.js";
 import media from "./fields/media/index.js";
 import number from "./fields/number/index.js";
+import relation from "./fields/relation/index.js";
 import repeater from "./fields/repeater/index.js";
 import richText from "./fields/rich-text/index.js";
 import section from "./fields/section/index.js";
@@ -25,12 +25,12 @@ const registeredFields = {
 	collapsible: collapsible,
 	color: color,
 	datetime: datetime,
-	document: document,
 	json: json,
 	link: link,
 	media: media,
 	number: number,
 	repeater: repeater,
+	relation: relation,
 	section: section,
 	select: select,
 	tab: tab,

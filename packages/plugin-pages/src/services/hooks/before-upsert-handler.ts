@@ -43,7 +43,7 @@ const beforeUpsertHandler =
 				),
 				parentPage: data.data.fields?.find(
 					(f) =>
-						f.key === constants.fields.parentPage.key && f.type === "document",
+						f.key === constants.fields.parentPage.key && f.type === "relation",
 				),
 				//* dont care what this value is - only needed to update translations/value
 				fullSlug: data.data.fields?.find(

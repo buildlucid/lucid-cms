@@ -89,7 +89,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 					ids: number[];
 					versionType?: Exclude<DocumentVersionType, "revision">;
 				}>;
-				/** The status used to determine which version of the document custom field relations to fetch */
+				/** The status used to determine which version of the relation custom field refs to fetch */
 				versionType: Exclude<DocumentVersionType, "revision">;
 			}
 		>,

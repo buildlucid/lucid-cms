@@ -5,8 +5,8 @@ import type {
 	DocumentBrick,
 	DocumentFieldValueMap,
 	DocumentRef,
-	DocumentRelationValue,
 	MediaRef,
+	RelationFieldValue,
 	UserRef,
 } from "../../types.js";
 
@@ -83,17 +83,17 @@ export type DocumentViewOptionsWithLocale = {
 	locale: LocaleCode;
 };
 
-export type DocumentRefType = "document" | "media" | "user" | (string & {});
+export type DocumentRefType = "relation" | "media" | "user" | (string & {});
 
 export type DocumentRefValue<TRefType extends DocumentRefType> =
-	TRefType extends "document"
-		? DocumentRelationValue[]
+	TRefType extends "relation"
+		? RelationFieldValue[]
 		: TRefType extends "media" | "user"
 			? number[]
 			: unknown;
 
 export type DocumentRefsResult<TRefType extends DocumentRefType> =
-	TRefType extends "document"
+	TRefType extends "relation"
 		? Array<DocumentRef<string, DocumentFieldValueMap | null>>
 		: TRefType extends "media"
 			? Array<NonNullable<MediaRef>>

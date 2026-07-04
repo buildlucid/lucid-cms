@@ -49,7 +49,7 @@ const createDocument = (props: {
 			},
 			{
 				key: "parentPage",
-				type: "document",
+				type: "relation",
 				value: [{ id: props.parentId, collectionKey: "pages" }],
 			},
 			{

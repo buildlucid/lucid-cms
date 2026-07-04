@@ -11,10 +11,10 @@ const isBrickQueryResponse = (value: unknown): value is BrickQueryResponse => {
 	return "id" in value && "document_id" in value && "collection_key" in value;
 };
 
-const formatDocumentRef = (
+const formatRelationRef = (
 	value: unknown,
 	params: FieldRefParams,
-): CFResponse<"document">["ref"] | null => {
+): CFResponse<"relation">["ref"] | null => {
 	if (!isBrickQueryResponse(value)) return null;
 
 	const targetCollectionKey = value.collection_key;
@@ -25,8 +25,8 @@ const formatDocumentRef = (
 	const targetBricksSchema =
 		targetCollectionKey === params.collection.key
 			? params.bricksTableSchema
-			: params.documentRefMeta?.fieldsSchemaByCollection?.[targetCollectionKey]
-				? [params.documentRefMeta.fieldsSchemaByCollection[targetCollectionKey]]
+			: params.relationRefMeta?.fieldsSchemaByCollection?.[targetCollectionKey]
+				? [params.relationRefMeta.fieldsSchemaByCollection[targetCollectionKey]]
 				: undefined;
 
 	if (!collection || !targetBricksSchema) {
@@ -46,7 +46,7 @@ const formatDocumentRef = (
 		config: params.config,
 		host: params.host,
 	});
-	const documentFields = params.flattenDocumentRefFields
+	const documentFields = params.flattenRelationRefFields
 		? documentFieldsFormatter.flattenFields(
 				formattedFields,
 				collection.clientFieldTree,
@@ -58,7 +58,7 @@ const formatDocumentRef = (
 		versionId: value.id,
 		collectionKey: targetCollectionKey,
 		fields: Object.keys(documentFields).length > 0 ? documentFields : null,
-	} satisfies CFResponse<"document">["ref"];
+	} satisfies CFResponse<"relation">["ref"];
 };
 
-export default formatDocumentRef;
+export default formatRelationRef;

@@ -14,7 +14,7 @@ import getParentPageRelationTable from "../../utils/get-parent-page-relation-tab
 import normalizePathValue from "../../utils/normalize-path-value.js";
 
 /**
- *  Query for document fields that have same slug and parentPage for each slug translation (would cause duplicate fullSlug)
+ *  Query for documents that have the same slug and parentPage relation for each slug translation (would cause duplicate fullSlug)
  */
 const checkDuplicateSlugParents: ServiceFn<
 	[

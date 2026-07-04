@@ -4,11 +4,11 @@ import CodeCustomField from "../../custom-fields/fields/code/custom-field.js";
 import CollapsibleCustomField from "../../custom-fields/fields/collapsible/custom-field.js";
 import ColorCustomField from "../../custom-fields/fields/color/custom-field.js";
 import DateTimeCF from "../../custom-fields/fields/datetime/custom-field.js";
-import DocumentCustomField from "../../custom-fields/fields/document/custom-field.js";
 import JSONCF from "../../custom-fields/fields/json/custom-field.js";
 import LinkCustomField from "../../custom-fields/fields/link/custom-field.js";
 import MediaCustomField from "../../custom-fields/fields/media/custom-field.js";
 import NumberCustomField from "../../custom-fields/fields/number/custom-field.js";
+import RelationCustomField from "../../custom-fields/fields/relation/custom-field.js";
 import RepeaterCustomField from "../../custom-fields/fields/repeater/custom-field.js";
 import RichTextCustomField from "../../custom-fields/fields/rich-text/custom-field.js";
 import SectionCustomField from "../../custom-fields/fields/section/custom-field.js";
@@ -115,8 +115,8 @@ class FieldBuilder {
 	public addMedia(key: string, props?: CFProps<"media">) {
 		return this.registerField(key, new MediaCustomField(key, props));
 	}
-	public addDocument(key: string, props: CFProps<"document">) {
-		return this.registerField(key, new DocumentCustomField(key, props));
+	public addRelation(key: string, props: CFProps<"relation">) {
+		return this.registerField(key, new RelationCustomField(key, props));
 	}
 	public addNumber(key: string, props?: CFProps<"number">) {
 		return this.registerField(key, new NumberCustomField(key, props));

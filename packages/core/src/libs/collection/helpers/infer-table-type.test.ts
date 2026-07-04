@@ -112,9 +112,9 @@ describe("inferTableType", () => {
 				tableType: `${constants.db.customFieldTablePrefix}media`,
 			},
 			{
-				short: "lucid_document__page__banner__doc__related_post",
-				long: "lucid_document__page__banner__doc__related_post__very_long_document_reference_key",
-				tableType: `${constants.db.customFieldTablePrefix}document`,
+				short: "lucid_document__page__banner__rel__related_post",
+				long: "lucid_document__page__banner__rel__related_post__very_long_document_reference_key",
+				tableType: `${constants.db.customFieldTablePrefix}relation`,
 			},
 			{
 				short: "lucid_document__page__banner__usr__author",

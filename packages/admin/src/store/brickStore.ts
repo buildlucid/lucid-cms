@@ -130,7 +130,7 @@ const [get, set] = createStore<{
 	}) => void;
 	setRefs: (document?: InternalCollectionDocument) => void;
 	addRef: (
-		fieldType: "media" | "document" | "user",
+		fieldType: "media" | "relation" | "user",
 		ref: FieldRef | FieldRef[],
 	) => void;
 	mergeDraftCheckResponse: (response: DocumentVersionCheckResponse) => void;
@@ -640,14 +640,22 @@ const [get, set] = createStore<{
 					const existingIndex = refs.findIndex((existing) => {
 						if (!existing || !nextRef) return false;
 
-						if (fieldType === "document") {
-							if (!isDocumentRef(existing) || !isDocumentRef(nextRef)) {
+						if (fieldType === "relation") {
+							const existingDocumentRef = isDocumentRef(existing)
+								? existing
+								: undefined;
+							const nextDocumentRef = isDocumentRef(nextRef)
+								? nextRef
+								: undefined;
+
+							if (!existingDocumentRef || !nextDocumentRef) {
 								return false;
 							}
 
 							return (
-								existing.collectionKey === nextRef.collectionKey &&
-								existing.id === nextRef.id
+								existingDocumentRef.collectionKey ===
+									nextDocumentRef.collectionKey &&
+								existingDocumentRef.id === nextDocumentRef.id
 							);
 						}
 

@@ -19,14 +19,14 @@ import type {
 	FieldRefFetchOutput,
 } from "../../utils/ref-fetch.js";
 
-type DocumentRefFetchTarget = {
+type RelationRefFetchTarget = {
 	table: LucidDocumentTableName;
 	collectionKey: string;
 	ids: number[];
 	versionType: Exclude<DocumentVersionType, "revision">;
 };
 
-const fetchDocumentRefs: ServiceFn<
+const fetchRelationRefs: ServiceFn<
 	[FieldRefFetchInput],
 	FieldRefFetchOutput
 > = async (context, data) => {
@@ -35,7 +35,7 @@ const fetchDocumentRefs: ServiceFn<
 		context.config.db,
 	);
 
-	const targetsByVersion = new Map<string, DocumentRefFetchTarget>();
+	const targetsByVersion = new Map<string, RelationRefFetchTarget>();
 	for (const relation of data.relations) {
 		if (!relation.table.startsWith("lucid_document__")) continue;
 
@@ -50,7 +50,7 @@ const fetchDocumentRefs: ServiceFn<
 
 		const versionType =
 			data.resolveVersionType?.({
-				fieldType: "document",
+				fieldType: "relation",
 				table: relation.table,
 				collectionKey,
 			}) ?? data.versionType;
@@ -77,7 +77,7 @@ const fetchDocumentRefs: ServiceFn<
 			data: {
 				rows: [] satisfies Array<BrickQueryResponse>,
 				meta: {
-					document: {
+					relation: {
 						fieldsSchemaByCollection: {},
 					},
 				},
@@ -153,7 +153,7 @@ const fetchDocumentRefs: ServiceFn<
 		data: {
 			rows: documentsRes.data || [],
 			meta: {
-				document: {
+				relation: {
 					fieldsSchemaByCollection,
 				},
 			},
@@ -161,4 +161,4 @@ const fetchDocumentRefs: ServiceFn<
 	};
 };
 
-export default fetchDocumentRefs;
+export default fetchRelationRefs;

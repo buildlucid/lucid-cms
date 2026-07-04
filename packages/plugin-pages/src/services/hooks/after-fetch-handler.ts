@@ -119,7 +119,7 @@ const afterFetchHandler =
 			const parentPageField = findField(
 				fields,
 				constants.fields.parentPage.key,
-				"document",
+				"relation",
 			);
 			const fullSlugField = findField(
 				fields,

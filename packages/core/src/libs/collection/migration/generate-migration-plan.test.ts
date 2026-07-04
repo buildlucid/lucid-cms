@@ -88,7 +88,7 @@ describe("Generate migration plan", () => {
 				{
 					name: "lucid_document__pages",
 					rawName: "lucid_document__pages",
-					type: "document",
+					type: "relation",
 					key: { collection: "pages" },
 					columns: [
 						{ name: "id", source: "core", type: "integer", nullable: false },

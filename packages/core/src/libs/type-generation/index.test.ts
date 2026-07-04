@@ -73,11 +73,11 @@ test("generates collection-aware client document types that lean on the public L
 		.addText("_page_title", {
 			localized: true,
 		})
-		.addDocument("_related_page", {
+		.addRelation("_related_page", {
 			collection: "page",
 			localized: false,
 		})
-		.addDocument("_related_content", {
+		.addRelation("_related_content", {
 			collection: ["page", "blog"],
 			localized: false,
 			multiple: true,
@@ -159,8 +159,8 @@ test("generates collection-aware client document types that lean on the public L
 		expect(clientContent).toContain(
 			`export type PageCollectionDocumentFields = {
 	"_page_title": CollectionDocumentTranslations<string | null>;
-	"_related_page": Array<DocumentRelationValue<"page">>;
-	"_related_content": Array<DocumentRelationValue<"page" | "blog">>;
+	"_related_page": Array<RelationFieldValue<"page">>;
+	"_related_content": Array<RelationFieldValue<"page" | "blog">>;
 	"sections": Array<{
 		"_section_title": string | null;
 	}>;
