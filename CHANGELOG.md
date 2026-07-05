@@ -6,7 +6,7 @@
 
 - Added orderable collections via the new `orderable` config flag, with internal fractional order keys, `order` sort support, and an admin order mode for drag-and-drop document reordering. ([f1d4e1b](https://github.com/buildlucid/lucid-cms/commit/f1d4e1b61699d57af9eb723b69b04671369aeed5))
 
-### Breaking changes:
+### Breaking Changes:
 
 - Email templates are now loaded from `.mustache` or `.html` files, and core no longer ships or compiles MJML. The bundled MJML sources now live in the private `@lucidcms/email-templates` workspace package, which generates the default templates before core builds. ([d68e8f1](https://github.com/buildlucid/lucid-cms/commit/d68e8f16dd1b6f83dcb1552062ed694a44559598))
 - Renamed the `document` custom field to `relation`: use `.addRelation()` instead of `.addDocument()`, and `type: "relation"` instead of `type: "document"`. ([f477cf2](https://github.com/buildlucid/lucid-cms/commit/f477cf2c3ac8eb62c73b30592c6aacdb1bf428be))
@@ -24,7 +24,7 @@
 - Added a `ui.width` option (`12 | 8 | 6 | 4 | 3`) to custom fields, rendering field lists on a responsive 12-column grid in the admin with a full-width fallback on mobile. ([62d98f2](https://github.com/buildlucid/lucid-cms/commit/62d98f2e70941057b3bfabfb5662f72e60ab206d))
 - Added a `code` custom field with an admin CodeMirror editor, language selection, syntax highlighting, validation, AI generation, configurable languages, and typed client output. ([8c44a57](https://github.com/buildlucid/lucid-cms/commit/8c44a5702f9a49346e7bd021ce889f30804cebb3))
 
-### Breaking changes:
+### Breaking Changes:
 
 - Moved the image processor to the adapter pattern that media, KV, emails and queues use for consistency and lifecycle support. The Sharp plugin has been updated to reflect this. ([0022b2c](https://github.com/buildlucid/lucid-cms/commit/0022b2c1956dcf8853b0c8034dfdd8962b47a0cc))
 
@@ -90,7 +90,7 @@
 - New CLI command to run sync tasks.
 - Updated the CDN fallback to no longer stream and instead just redirect to help server load, and added support for setting a fallback for images and video now based on the given Sec-Fetch-Dest header instead of only supporting a fallback for images. 
 
-### Breaking changes:
+### Breaking Changes:
 
 - Sweeping adjustments across the config shape for better DX and extensibility in the future.
 - Config changes across the collection brick and field builders.
@@ -139,7 +139,7 @@
 - Added config options to configure CORS origins and headers. ([9ecec69](https://github.com/buildlucid/lucid-cms/commit/9ecec69bb1657db61a6d7ef27ec2adb5b87e93d8))
 - Selected brick tabs are now persisted in local storage. ([a21d947](https://github.com/buildlucid/lucid-cms/commit/a21d9479caa0435f994046ee674d3805fe05c462))
 
-### Breaking changes:
+### Breaking Changes:
 
 - The CDN endpoint no longer supports width, height or quality params for image resizing/processing. The format query param is now locked behind a disabled by default `media.images.allowFormatQuery` option. ([690fbfc](https://github.com/buildlucid/lucid-cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
 - Media config limits now use byte-based names: `limits.storageBytes`, `limits.uploadBytes`, `limits.processedImagesPerFile`, and `images.storeProcessed`. ([690fbfc](https://github.com/buildlucid/lucid-cms/commit/690fbfc800c9ca3451aed41a765c269069117403))
@@ -170,7 +170,7 @@
 - Replaced @‌fastify/swagger-ui with @‌scalar/fastify-api-reference and improved documentation a lot.
 - Improved @‌lucidcms/admin UI and UX by simplifying and adding keyboard shortcuts for common actions along with a number of bug fixes.
 
-### Breaking changes:
+### Breaking Changes:
 - Supported Node version has been increased to the latest LTS 22 and package engines have been defined to be stricter on this. ([71333db](https://github.com/buildlucid/lucid-cms/commit/71333dbcb37075d07a7b479b8ff8677372f1d3fb))
 - SQLite, LibSQL and PostgreSQL DB adapters have been moved out of core and are now independently publish packages. ([ff2daf2](https://github.com/buildlucid/lucid-cms/commit/ff2daf2bec04fbaa5b6c3c291fa91d3ef6575aed))
 - Complete rework on how collections store their documents, versions, fields and bricks.
@@ -202,7 +202,7 @@
 - Collection details config now supports translations allowing you to create a better experience to content editors. ([795ffdc](https://github.com/buildlucid/lucid-cms/commit/795ffdc9aae8f6344e826918b960a4d8bc59ed6b))
 - WebP is now prioritised over AVIF for the on-request image optimisation when the Accept header is being used. ([b7ee0ff](https://github.com/buildlucid/lucid-cms/commit/b7ee0fff18e189210376e9cc3daefc8ae5d3bcba))
 
-### Breaking changes:
+### Breaking Changes:
 - Collections migration edits to support new versions and revisions tables. You’ll need to delete any existing DB. ([a107840](https://github.com/buildlucid/lucid-cms/commit/a107840507285bd3d7ca051ad40f0b98e67bb346))
 - The route to upsert documents has now been split up for creating a document, updating a draft and updating the published version. ([26956a6](https://github.com/buildlucid/lucid-cms/commit/26956a6c4478457b13cc9b5f9f05c89037363fcf))
 - The translations and locked config keys on the collection builder have been renamed for clarity and consistency. ([1642943](https://github.com/buildlucid/lucid-cms/commit/1642943c649db476cc8a3e5296782fd0fae6a97f))
@@ -223,7 +223,7 @@
 - Fastify plugins can now be registered via the lucid.config.ts/js giving plugins the ability to register endpoints etc. ([0a1d542](https://github.com/buildlucid/lucid-cms/commit/0a1d5427fe588079289733ff8fe3d109af32da33))
 - Repeater groups and bricks in the document page builder now have a nice animation when being drag and dropped to change their order. ([d4764e0](https://github.com/buildlucid/lucid-cms/commit/d4764e03ca38c39d27280e0b7e842eed1e84ed2b))
 
-### Breaking changes:
+### Breaking Changes:
 - dotenv package is no longer imported and called within core and so if you want to use environment variables within your project that is on you to configure. ([b1bf97e](https://github.com/buildlucid/lucid-cms/commit/b1bf97e86121d3e11070440bcc8edbde45ef0fce#diff-0b810c38f3c138a3d5e44854edefd5eb966617ca84e62f06511f60acc40546c7L94))
 - Media strategies now require a service to create a signed URL for the client to upload to. ([58c846c](https://github.com/buildlucid/lucid-cms/commit/58c846c59bfc6db5ed4cfc07696eae80583d0011))
 - Media strategies now require a service to fetch metadata on given key. ([2e869a8](https://github.com/buildlucid/lucid-cms/commit/2e869a887076f05bf2781a4acf17d7bc163f9b7b))
@@ -241,7 +241,7 @@
 - Document custom field queries updated to return target documents collection fields in its meta - works for internal and client document endpoints. ([622dfeb](https://github.com/buildlucid/lucid-cms/commit/622dfebbb1731ac618c940c9a50eb31bd0f60c87))
 - Title and alt translations format update for the media custom field meta so that it matches the format of the translations and meta. ([5d3127f](https://github.com/buildlucid/lucid-cms/commit/5d3127f2ce40796aa69382bc9b5b84b1cecbc7be))
 
-### Breaking changes:
+### Breaking Changes:
 
 - Hook and email strategy response format updated to match that of services and media strategies. ([2db7995](https://github.com/buildlucid/lucid-cms/commit/2db799591d1bb32ed2c28ea4f13ca81c394bb45c))
 - Hook functions now use same type as services do internally to keep consistent and give the ability for hooks to use services, db and config from Lucid. ([5cebd3c](https://github.com/buildlucid/lucid-cms/commit/5cebd3c12111e7c2e49cadb92a966d14886e199d))
@@ -269,7 +269,7 @@
 - Image media no includes average color RGBA value and is light/dark information. ([be2a254](https://github.com/buildlucid/lucid-cms/commit/be2a2546a67f0901a33644bc9919f5cc88cda9c4))
 - Holding page styled and content added. ([b8ab6d0](https://github.com/buildlucid/lucid-cms/commit/b8ab6d08b0429b9352657187173b2019f234eea8))
 
-### Breaking changes:
+### Breaking Changes:
 
 - Response format of client document endpoints is updated to return a field object instead of array to make consuming data easier. ([11aa7ce](https://github.com/buildlucid/lucid-cms/commit/11aa7ceee37c25bd71cbe0b741b594f6b849f684))
 - Existing migration file edit for media blur hash, average color columns meaning db will need to be re-created. ([be2a254](https://github.com/buildlucid/lucid-cms/commit/be2a2546a67f0901a33644bc9919f5cc88cda9c4))
@@ -292,7 +292,7 @@
 - Fetch documents client endpoint added along with toolkit support. ([fbcf50f](https://github.com/buildlucid/lucid-cms/commit/fbcf50fc90f5f9fa911fcba27881834eea91182d))
 - Fetch all locales client endpoint added along with toolkit support . ([5e54359](https://github.com/buildlucid/lucid-cms/commit/5e5435937c9421b4fa4b4a9c002ee9b1ee907bd9))
 
-### Breaking changes:
+### Breaking Changes:
 
 - Lucid config keys have new validation schema - they are now required to be 64 characters long. ([e45701d](https://github.com/buildlucid/lucid-cms/commit/e45701d4dfbd2571414fd954db40b946299ed514))
 
@@ -333,7 +333,7 @@
 
 - Bricks and Custom Fields now support locales on labels in config, so optionally users can provide translations for the users selected locale. ([f9d5e5a](https://github.com/buildlucid/lucid-cms/commit/f9d5e5aadfaf76fcadb909299dc4dac91351fe4b))
 
-### Breaking changes:
+### Breaking Changes:
 
 - Custom fields config changed for FieldBuilder and subsequently BrickBuilder and CollectionBuilder. ([786e74a](https://github.com/buildlucid/lucid-cms/commit/786e74a0f0224d43c77f6caf61e35f4e1835afaf))
 
@@ -363,7 +363,7 @@
 - Users can now update their own password on the account route and added support to force accounts to update their password before being able to use the CMS. ([d10572f](https://github.com/buildlucid/lucid-cms/commit/d10572f12ae8c4e36e6c49344600df62999c9cd2))
 - Users with permission can now mark other users to update their password on next login/use of their account. ([032418f](https://github.com/buildlucid/lucid-cms/commit/032418fb03f9631bb4b27827e3583212c1e69896))
 
-### Breaking changes:
+### Breaking Changes:
 
 - Languages have been renamed to locales across the frontend/backend and are now controlled via config ([32f41b9](https://github.com/buildlucid/lucid-cms/commit/32f41b955c0e0536f60464f99c84796aa9af9ecb))
 - Fields req and res objects now either return all locale translations or none depending on if the translation support flag is true on a field. ([e7d83c4](https://github.com/buildlucid/lucid-cms/commit/e7d83c48609132da8d70e5fedf6de3c8dc1fdfe2))
@@ -385,7 +385,7 @@
 - CMS frontend collection document rework.
 - New supported features section on frontend settings page. ([2956ad6](https://github.com/buildlucid/lucid-cms/commit/2956ad6a6d3ad3adf5f2538cbf5855dc67b0e95f))
 
-### Breaking changes:
+### Breaking Changes:
 
 - Group format on collection document request and response requires a group object which includes an id instead of being Fields[][]. Required for frontend to target group in a safer way. ([6ee503e](https://github.com/buildlucid/lucid-cms/commit/6ee503ed4642adaaabf33a35cd5fbafd72952059))
 
