@@ -1,5 +1,16 @@
 # @lucidcms/core
 
+## v0.15.0 (unreleased)
+
+### Features:
+
+- Added orderable collections via the new `orderable` config flag, with internal fractional order keys, `order` sort support, and an admin order mode for drag-and-drop document reordering. ([f1d4e1b](https://github.com/buildlucid/lucid-cms/commit/f1d4e1b61699d57af9eb723b69b04671369aeed5))
+
+### Breaking changes:
+
+- Email templates are now loaded from `.mustache` or `.html` files, and core no longer ships or compiles MJML. The bundled MJML sources now live in the private `@lucidcms/email-templates` workspace package, which generates the default templates before core builds. ([d68e8f1](https://github.com/buildlucid/lucid-cms/commit/d68e8f16dd1b6f83dcb1552062ed694a44559598))
+- Renamed the `document` custom field to `relation`: use `.addRelation()` instead of `.addDocument()`, and `type: "relation"` instead of `type: "document"`. ([f477cf2](https://github.com/buildlucid/lucid-cms/commit/f477cf2c3ac8eb62c73b30592c6aacdb1bf428be))
+
 ## v0.14.0-alpha.0
 
 ### Features:
