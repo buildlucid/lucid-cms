@@ -4,6 +4,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
+import { formatDocumentFieldValue } from "@/utils/document-table-helpers";
 import { isUserRef } from "@/utils/relation-field-helpers";
 import DateCol from "./DateCol";
 import PillCol from "./PillCol";
@@ -44,6 +45,16 @@ const DocumentDynamicColumns: Component<{
 			? (String(fieldValue()) as string)
 			: null,
 	);
+	const selectValue = createMemo(() => {
+		if (props.field.type !== "select") return null;
+
+		return formatDocumentFieldValue({
+			fieldConfig: props.field,
+			fieldData: fieldData(),
+			contentLocale: contentLocale(),
+			collectionLocalized: props.collectionLocalized,
+		});
+	});
 	const userFieldRefs = createMemo(() => {
 		if (props.field.type !== "user") return null;
 
@@ -115,6 +126,14 @@ const DocumentDynamicColumns: Component<{
 					theme="primary-opaque"
 					options={{ include: props.include[props.index] }}
 				/>
+			</Match>
+			<Match when={fieldData()?.type === "select" ? selectValue() : undefined}>
+				{(text) => (
+					<TextCol
+						text={text()}
+						options={{ include: props.include[props.index] }}
+					/>
+				)}
 			</Match>
 			<Match when={fieldData()?.type === "user"}>
 				<UserStackCol

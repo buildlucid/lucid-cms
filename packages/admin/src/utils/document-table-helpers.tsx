@@ -1,4 +1,9 @@
-import type { Collection, DocumentField, DocumentRef } from "@types";
+import type {
+	Collection,
+	DocumentField,
+	DocumentRef,
+	InternalDocumentField,
+} from "@types";
 import { FaSolidT, FaSolidUser } from "solid-icons/fa";
 import T from "@/translations";
 import type {
@@ -115,7 +120,7 @@ export const getDocumentListingPreviewFields = (props: {
 				fields,
 				fieldKey: field.key,
 			});
-			const value = formatDocumentPreviewValue({
+			const value = formatDocumentFieldValue({
 				fieldConfig: field,
 				fieldData: documentField,
 				contentLocale: props.contentLocale,
@@ -174,7 +179,7 @@ const findDocumentField = (props: {
 
 const getDocumentFieldValue = (props: {
 	fieldConfig: CollectionLeafFieldConfig;
-	fieldData?: DocumentField;
+	fieldData?: DocumentField | InternalDocumentField;
 	contentLocale: string;
 	collectionLocalized: boolean;
 }) => {
@@ -190,9 +195,9 @@ const getDocumentFieldValue = (props: {
 	return props.fieldData.value;
 };
 
-const formatDocumentPreviewValue = (props: {
+export const formatDocumentFieldValue = (props: {
 	fieldConfig: CollectionLeafFieldConfig;
-	fieldData?: DocumentField;
+	fieldData?: DocumentField | InternalDocumentField;
 	contentLocale: string;
 	collectionLocalized: boolean;
 }) => {
