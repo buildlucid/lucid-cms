@@ -134,7 +134,7 @@ export const controllerSchemas = {
 								"priority",
 								"attempts",
 							]),
-							value: z.enum(["asc", "desc"]),
+							direction: z.enum(["asc", "desc"]),
 						}),
 					)
 					.optional(),

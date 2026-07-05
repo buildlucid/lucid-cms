@@ -7,11 +7,12 @@ export type FilterObject = {
 	operator?: FilterOperator;
 };
 
-export type SortValue = "asc" | "desc";
+export type SortDirection = "asc" | "desc";
 export type DefaultCollectionDocumentSortKey =
 	| "createdAt"
 	| "updatedAt"
-	| "order";
+	| "order"
+	| `_${string}`;
 
 export type QueryFilters = {
 	[key: string]: FilterObject | QueryFilters | undefined;
@@ -46,7 +47,7 @@ export type CollectionDocumentSortKey<TCollectionKey extends string = string> =
 export type CollectionDocumentSorts<TCollectionKey extends string = string> =
 	Array<{
 		key: CollectionDocumentSortKey<TCollectionKey>;
-		value: SortValue;
+		direction: SortDirection;
 	}>;
 
 export type DefaultCollectionDocumentStatus = "latest" | "revision" | string;
@@ -125,7 +126,7 @@ export type MediaGetMultipleQuery = {
 			| "extension"
 			| "deletedBy"
 			| "isDeletedAt";
-		value: SortValue;
+		direction: SortDirection;
 	}>;
 	page?: number;
 	perPage?: number;

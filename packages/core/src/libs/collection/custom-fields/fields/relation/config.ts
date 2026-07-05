@@ -8,6 +8,10 @@ export const relationFieldConfig = {
 		separator: "rel",
 		tableType: `${constants.db.customFieldTablePrefix}relation`,
 	},
+	capabilities: {
+		filterable: true,
+		sortable: false,
+	},
 } as const satisfies FieldStaticConfig<"relation">;
 
 export type RelationFieldType = typeof relationFieldConfig.type;

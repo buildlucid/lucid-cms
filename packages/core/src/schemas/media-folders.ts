@@ -85,7 +85,7 @@ export const controllerSchemas = {
 					.array(
 						z.object({
 							key: z.enum(["createdAt", "updatedAt", "title"]),
-							value: z.enum(["asc", "desc"]),
+							direction: z.enum(["asc", "desc"]),
 						}),
 					)
 					.optional(),

@@ -19,6 +19,7 @@ export {
 export { default as groupDocumentFilters } from "./group-document-filters.js";
 export { default as isRequestSecure } from "./is-request-secure.js";
 export { normalizeEmailInput, trimStringInput } from "./normalize-input.js";
+export { default as resolveCustomFieldSorts } from "./resolve-custom-field-sorts.js";
 export { default as resolveEmailBrandName } from "./resolve-email-brand-name.js";
 export { default as sameNumericSet } from "./same-numeric-set.js";
 export {

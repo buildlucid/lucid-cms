@@ -162,7 +162,7 @@ export type {
 	FilterValue,
 	MediaGetMultipleQuery,
 	QueryFilters,
-	SortValue,
+	SortDirection,
 } from "./types/contracts.js";
 export type {
 	LucidClientError,

@@ -171,7 +171,7 @@ export const controllerSchemas = {
 								"executedAt",
 								"failedAt",
 							]),
-							value: z.enum(["asc", "desc"]),
+							direction: z.enum(["asc", "desc"]),
 						}),
 					)
 					.optional(),

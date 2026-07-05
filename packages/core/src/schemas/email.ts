@@ -244,7 +244,7 @@ export const controllerSchemas = {
 								"createdAt",
 								"updatedAt",
 							]),
-							value: z.enum(["asc", "desc"]),
+							direction: z.enum(["asc", "desc"]),
 						}),
 					)
 					.optional(),

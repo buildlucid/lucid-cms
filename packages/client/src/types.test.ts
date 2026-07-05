@@ -86,7 +86,7 @@ declare module "./types.js" {
 	}
 
 	interface CollectionDocumentSortsByCollection {
-		page: "createdAt" | "updatedAt";
+		page: "createdAt" | "updatedAt" | "_pageTitle";
 	}
 
 	interface CollectionDocumentStatusesByCollection {
@@ -298,8 +298,11 @@ test("document client queries narrow filters, includes, and sorts from the colle
 		};
 	}>();
 
+	expectTypeOf<CollectionDocumentSortKey>().toEqualTypeOf<
+		"createdAt" | "updatedAt" | "order" | `_${string}`
+	>();
 	expectTypeOf<CollectionDocumentSortKey<"page">>().toEqualTypeOf<
-		"createdAt" | "updatedAt"
+		"createdAt" | "updatedAt" | "_pageTitle"
 	>();
 	expectTypeOf<CollectionDocumentStatus<"page">>().toEqualTypeOf<
 		"latest" | "revision" | "published"
@@ -319,8 +322,8 @@ test("document client queries narrow filters, includes, and sorts from the colle
 	>();
 	expectTypeOf<DocumentsGetMultipleQuery<"page">["sort"]>().toEqualTypeOf<
 		| Array<{
-				key: "createdAt" | "updatedAt";
-				value: "asc" | "desc";
+				key: "createdAt" | "updatedAt" | "_pageTitle";
+				direction: "asc" | "desc";
 		  }>
 		| undefined
 	>();

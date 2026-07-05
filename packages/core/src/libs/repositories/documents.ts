@@ -15,6 +15,9 @@ import type {
 	LucidVersionTable,
 } from "../../types.js";
 import type { BrickFilters } from "../../utils/helpers/group-document-filters.js";
+import resolveCustomFieldSorts, {
+	type CustomFieldSort,
+} from "../../utils/helpers/resolve-custom-field-sorts.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
@@ -894,7 +897,12 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				column: `${dynamicConfig.tableName}.tenant_key`,
 			});
 
-			const { main, count } = queryBuilder.main(
+			const customFieldSorts = resolveCustomFieldSorts(
+				props.documentFieldsTableSchema,
+				props.query.sort,
+			);
+
+			const builtQueries = queryBuilder.main(
 				{
 					main: query,
 					count: queryCount,
@@ -932,11 +940,24 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								...(props.collection.getData.orderable
 									? { order: `${dynamicConfig.tableName}.order` }
 									: {}),
+								...this.buildCustomFieldSortRefs({
+									customFieldSorts,
+									documentFieldsTable: props.tables.documentFields,
+									versionsTable: props.tables.versions,
+									defaultLocale: props.config.localization.defaultLocale,
+								}),
 							},
 						},
 					},
 				},
 			);
+			let main = builtQueries.main;
+			const count = builtQueries.count;
+
+			//* keep custom field sorts stable when values are missing or duplicated
+			if (customFieldSorts.length > 0) {
+				main = main.orderBy(`${dynamicConfig.tableName}.id`, "asc");
+			}
 
 			const [mainResult, countResult] = await Promise.all([
 				main.execute() as unknown as Promise<DocumentQueryResponse[]>,
@@ -1394,6 +1415,24 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 	// ----------------------------------------
 	// helpers
+	/** Builds scalar subqueries for custom field sort values. */
+	buildCustomFieldSortRefs(props: {
+		customFieldSorts: CustomFieldSort[];
+		documentFieldsTable: LucidBrickTableName;
+		versionsTable: LucidVersionTableName;
+		defaultLocale: string;
+	}) {
+		return Object.fromEntries(
+			props.customFieldSorts.map((sort) => [
+				sort.key,
+				sql`(select cf_sort.${sql.ref(sort.column)} from ${sql.table(
+					props.documentFieldsTable,
+				)} as cf_sort where cf_sort.document_version_id = ${sql.ref(
+					`${props.versionsTable}.id`,
+				)} and cf_sort.locale = ${props.defaultLocale} limit 1)`,
+			]),
+		);
+	}
 	applyBrickFiltersToQuery<DB, Table extends keyof DB, O>(
 		query: SelectQueryBuilder<DB, Table, O>,
 		brickFilters: BrickFilters[],

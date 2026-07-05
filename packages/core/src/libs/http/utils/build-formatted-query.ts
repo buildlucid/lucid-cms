@@ -17,12 +17,12 @@ const buildSort = (query: unknown) => {
 		if (sort.startsWith("-")) {
 			return {
 				key: sort.slice(1),
-				value: "desc",
+				direction: "desc",
 			};
 		}
 		return {
 			key: sort,
-			value: "asc",
+			direction: "asc",
 		};
 	});
 };

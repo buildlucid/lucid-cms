@@ -156,6 +156,21 @@ const documentRefsIncludeSchema = z.union([
 	z.string().regex(/^refs\.[^,\s]+$/),
 ]);
 
+//* underscore-prefixed top-level field sorts are resolved later
+const documentSortKeySchema = z.union([
+	z.enum(["createdAt", "updatedAt", "order"]),
+	z.string().regex(/^_[a-zA-Z0-9-_]+$/),
+]);
+
+const documentSortSchema = z
+	.array(
+		z.object({
+			key: documentSortKeySchema,
+			direction: z.enum(["asc", "desc"]),
+		}),
+	)
+	.optional();
+
 export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
@@ -504,7 +519,7 @@ export const controllerSchemas = {
 					.array(
 						z.object({
 							key: z.enum(["createdAt"]),
-							value: z.enum(["asc", "desc"]),
+							direction: z.enum(["asc", "desc"]),
 						}),
 					)
 					.optional(),
@@ -569,7 +584,9 @@ export const controllerSchemas = {
 								"Target a repeater field by adding a repeater key after the brick key",
 						}),
 					include: queryString.schema.include("refs,refs.relation"),
-					sort: queryString.schema.sort("createdAt,updatedAt,order"),
+					sort: queryString.schema.sort(
+						"createdAt,updatedAt,order,_customFieldKey",
+					),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
 				})
@@ -612,14 +629,7 @@ export const controllerSchemas = {
 						}),
 					])
 					.optional(),
-				sort: z
-					.array(
-						z.object({
-							key: z.enum(["createdAt", "updatedAt", "order"]),
-							value: z.enum(["asc", "desc"]),
-						}),
-					)
-					.optional(),
+				sort: documentSortSchema,
 				include: z.array(documentRefsIncludeSchema).optional(),
 				page: queryFormatted.schema.page,
 				perPage: queryFormatted.schema.perPage,
@@ -862,7 +872,9 @@ export const controllerSchemas = {
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
 						include: queryString.schema.include("refs,refs.relation,meta"),
-						sort: queryString.schema.sort("createdAt,updatedAt,order"),
+						sort: queryString.schema.sort(
+							"createdAt,updatedAt,order,_customFieldKey",
+						),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,
 					})
@@ -902,14 +914,7 @@ export const controllerSchemas = {
 							}),
 						])
 						.optional(),
-					sort: z
-						.array(
-							z.object({
-								key: z.enum(["createdAt", "updatedAt", "order"]),
-								value: z.enum(["asc", "desc"]),
-							}),
-						)
-						.optional(),
+					sort: documentSortSchema,
 					include: z
 						.array(z.union([z.literal("meta"), documentRefsIncludeSchema]))
 						.optional(),

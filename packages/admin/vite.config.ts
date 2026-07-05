@@ -34,6 +34,12 @@ export default defineConfig({
 					import.meta.url,
 				),
 			),
+			"@field-capabilities": fileURLToPath(
+				new URL(
+					"../core/src/libs/collection/custom-fields/capabilities.ts",
+					import.meta.url,
+				),
+			),
 			"@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
 		},
 	},

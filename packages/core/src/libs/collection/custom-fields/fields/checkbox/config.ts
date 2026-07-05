@@ -5,6 +5,10 @@ export const checkboxFieldConfig = {
 	database: {
 		mode: "column",
 	},
+	capabilities: {
+		filterable: true,
+		sortable: false,
+	},
 } as const satisfies FieldStaticConfig<"checkbox">;
 
 export type CheckboxFieldType = typeof checkboxFieldConfig.type;

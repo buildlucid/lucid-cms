@@ -5,6 +5,10 @@ export const collapsibleFieldConfig = {
 	database: {
 		mode: "ignore",
 	},
+	capabilities: {
+		filterable: false,
+		sortable: false,
+	},
 } as const satisfies FieldStaticConfig<"collapsible">;
 
 export type CollapsibleFieldType = typeof collapsibleFieldConfig.type;

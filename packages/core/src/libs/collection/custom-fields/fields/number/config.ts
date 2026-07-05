@@ -5,6 +5,10 @@ export const numberFieldConfig = {
 	database: {
 		mode: "column",
 	},
+	capabilities: {
+		filterable: true,
+		sortable: true,
+	},
 } as const satisfies FieldStaticConfig<"number">;
 
 export type NumberFieldType = typeof numberFieldConfig.type;

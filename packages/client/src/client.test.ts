@@ -145,6 +145,10 @@ describe("@lucidcms/client", () => {
 			collectionKey: "page",
 			query: {
 				include: ["refs.relation", "meta"],
+				sort: [
+					{ key: "updatedAt", direction: "asc" },
+					{ key: "_pageTitle", direction: "desc" },
+				],
 			},
 		});
 
@@ -163,11 +167,22 @@ describe("@lucidcms/client", () => {
 			},
 		});
 		expect(fetchMock).toHaveBeenCalledTimes(2);
-		expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
-			"/documents/page/latest?include=refs.relation%2Cmeta",
+		const firstRequestUrl = new URL(String(fetchMock.mock.calls[0]?.[0]));
+		const secondRequestUrl = new URL(String(fetchMock.mock.calls[1]?.[0]));
+		expect(firstRequestUrl.pathname).toBe(
+			"/lucid/api/v1/client/documents/page/latest",
 		);
-		expect(String(fetchMock.mock.calls[1]?.[0])).toContain(
-			"/documents/page/latest?include=refs.relation%2Cmeta",
+		expect(firstRequestUrl.searchParams.get("include")).toBe(
+			"refs.relation,meta",
+		);
+		expect(firstRequestUrl.searchParams.get("sort")).toBe(
+			"updatedAt,-_pageTitle",
+		);
+		expect(secondRequestUrl.searchParams.get("include")).toBe(
+			"refs.relation,meta",
+		);
+		expect(secondRequestUrl.searchParams.get("sort")).toBe(
+			"updatedAt,-_pageTitle",
 		);
 	});
 

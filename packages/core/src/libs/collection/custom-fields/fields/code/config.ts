@@ -5,6 +5,10 @@ export const codeFieldConfig = {
 	database: {
 		mode: "column",
 	},
+	capabilities: {
+		filterable: true,
+		sortable: false,
+	},
 } as const satisfies FieldStaticConfig<"code">;
 
 export type CodeFieldType = typeof codeFieldConfig.type;

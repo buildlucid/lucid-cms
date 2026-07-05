@@ -98,7 +98,7 @@ export const queryString = {
  *      .array(
  *          z.object({
  *              key: z.string(),
- *              value: z.enum(["asc", "desc"]),
+ *              direction: z.enum(["asc", "desc"]),
  *          }),
  *      )
  *      .optional(),

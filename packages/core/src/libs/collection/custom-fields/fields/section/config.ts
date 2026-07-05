@@ -5,6 +5,10 @@ export const sectionFieldConfig = {
 	database: {
 		mode: "ignore",
 	},
+	capabilities: {
+		filterable: false,
+		sortable: false,
+	},
 } as const satisfies FieldStaticConfig<"section">;
 
 export type SectionFieldType = typeof sectionFieldConfig.type;

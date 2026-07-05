@@ -297,7 +297,7 @@ const mediaGetMultipleQueryFormattedSchema = z.object({
 					"deletedBy",
 					"isDeletedAt",
 				]),
-				value: z.enum(["asc", "desc"]),
+				direction: z.enum(["asc", "desc"]),
 			}),
 		)
 		.optional(),

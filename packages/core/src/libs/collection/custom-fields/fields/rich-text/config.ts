@@ -5,6 +5,10 @@ export const richTextFieldConfig = {
 	database: {
 		mode: "column",
 	},
+	capabilities: {
+		filterable: true,
+		sortable: false,
+	},
 } as const satisfies FieldStaticConfig<"rich-text">;
 
 export type RichTextFieldType = typeof richTextFieldConfig.type;

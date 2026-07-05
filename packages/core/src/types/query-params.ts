@@ -36,16 +36,17 @@ export type CollectionDocumentFilters<TCollectionKey extends string = string> =
 
 // -----------------------------------------------
 // Sorts
-export type SortValue = "asc" | "desc";
+export type SortDirection = "asc" | "desc";
 export type QueryParamSorts = Array<{
 	key: string;
-	value: SortValue;
+	direction: SortDirection;
 }>;
 
 export type DefaultCollectionDocumentSortKey =
 	| "createdAt"
 	| "updatedAt"
-	| "order";
+	| "order"
+	| `_${string}`;
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
 export interface CollectionDocumentSortsByCollection {}
@@ -63,7 +64,7 @@ export type CollectionDocumentSortKey<TCollectionKey extends string = string> =
 export type CollectionDocumentSorts<TCollectionKey extends string = string> =
 	Array<{
 		key: CollectionDocumentSortKey<TCollectionKey>;
-		value: SortValue;
+		direction: SortDirection;
 	}>;
 
 // -----------------------------------------------

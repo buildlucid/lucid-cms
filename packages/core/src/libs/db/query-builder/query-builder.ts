@@ -68,7 +68,7 @@ const queryBuilder = <DB, Table extends keyof DB, O>(
 				config.meta?.tableKeys?.sorts,
 			);
 			if (!tableKey) continue;
-			mainQuery = mainQuery.orderBy(tableKey, sort.value);
+			mainQuery = mainQuery.orderBy(tableKey, sort.direction);
 		}
 	}
 

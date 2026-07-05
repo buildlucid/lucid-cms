@@ -3,7 +3,7 @@ import type {
 	FilterObject,
 	FilterValue,
 	QueryFilters,
-	SortValue,
+	SortDirection,
 } from "../types/contracts.js";
 
 /**
@@ -113,7 +113,7 @@ const appendSort = (
 	params: URLSearchParams,
 	sort: Array<{
 		key: string;
-		value: SortValue;
+		direction: SortDirection;
 	}>,
 ) => {
 	if (sort.length === 0) return;
@@ -121,7 +121,7 @@ const appendSort = (
 	params.set(
 		"sort",
 		sort
-			.map((item) => (item.value === "desc" ? `-${item.key}` : item.key))
+			.map((item) => (item.direction === "desc" ? `-${item.key}` : item.key))
 			.join(","),
 	);
 };
@@ -164,7 +164,7 @@ export const serializeQuery = (query?: Record<string, unknown>): string => {
 				params,
 				value as Array<{
 					key: string;
-					value: SortValue;
+					direction: SortDirection;
 				}>,
 			);
 			continue;

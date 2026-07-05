@@ -1,3 +1,7 @@
+import {
+	isFieldTypeFilterable,
+	isFieldTypeSortable,
+} from "@field-capabilities";
 import type {
 	Collection,
 	DocumentField,
@@ -40,12 +44,63 @@ export const tableHeadColumns = (fields: CollectionFieldConfig[]) => {
 	});
 };
 
-export const collectionFieldFilters = (collection?: Collection) => {
+const isStructuralField = (field: CollectionFieldConfig) => {
 	return (
-		collection?.fields.filter((f) => {
-			return f.type !== "repeater";
-		}) || []
+		field.type === "tab" ||
+		field.type === "section" ||
+		field.type === "collapsible"
 	);
+};
+
+/** Returns filterable top-level fields; structural containers inline children. */
+export const collectionFieldFilters = (collection?: Collection) => {
+	const fieldsRes: CollectionLeafFieldConfig[] = [];
+
+	const fieldRecursive = (fields?: CollectionFieldConfig[]) => {
+		if (!fields) return;
+		for (const field of fields) {
+			if (isStructuralField(field)) {
+				fieldRecursive(field.fields);
+				continue;
+			}
+			if (field.type === "repeater") continue;
+			if (!isFieldTypeFilterable(field.type)) continue;
+
+			fieldsRes.push(field);
+		}
+	};
+	fieldRecursive(collection?.fields);
+
+	return fieldsRes;
+};
+
+/** Returns listed top-level fields that can be sorted by stored value. */
+export const collectionFieldSorts = (collection?: Collection) => {
+	const sortsRes: Array<{ label: string; key: string }> = [];
+
+	const fieldRecursive = (fields?: CollectionFieldConfig[]) => {
+		if (!fields) return;
+		for (const field of fields) {
+			if (isStructuralField(field)) {
+				fieldRecursive(field.fields);
+				continue;
+			}
+			if (!isFieldTypeSortable(field.type)) continue;
+			if (!collection?.listing.includes(field.key)) continue;
+
+			sortsRes.push({
+				label:
+					helpers.getLocaleValue({
+						value: field.details.label,
+						fallback: field.key,
+					}) || field.key,
+				key: formatFieldFilters({ fieldKey: field.key }),
+			});
+		}
+	};
+	fieldRecursive(collection?.fields);
+
+	return sortsRes;
 };
 
 /**

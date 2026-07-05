@@ -64,11 +64,37 @@ const collectionDocumentFilterKeys = [
 
 const collectionDocumentSortKeys = ["createdAt", "updatedAt"] as const;
 
+/** Collects sortable top-level field sort keys, independent of listing config. */
+const collectCustomFieldSortKeys = (
+	collection: CollectionBuilder,
+): string[] => {
+	const sortKeys: string[] = [];
+
+	for (const field of collection.persistedFieldTree) {
+		const fieldConfig = registeredFields[field.type].config;
+		if (fieldConfig.database.mode !== "column") continue;
+		if (!fieldConfig.capabilities.sortable) continue;
+
+		sortKeys.push(
+			field.key.startsWith(constants.db.generatedColumnPrefix)
+				? field.key
+				: `${constants.db.generatedColumnPrefix}${field.key}`,
+		);
+	}
+
+	return sortKeys;
+};
+
 /** Returns sort keys for a collection. */
 const getCollectionSortKeys = (collection: CollectionBuilder): string[] => {
-	return collection.getData.orderable
+	const sortKeys = collection.getData.orderable
 		? [...collectionDocumentSortKeys, "order"]
 		: [...collectionDocumentSortKeys];
+
+	return dedupeStrings([
+		...sortKeys,
+		...collectCustomFieldSortKeys(collection),
+	]);
 };
 
 /** Creates a mutable tree that mirrors the nested DX filter object shape. */

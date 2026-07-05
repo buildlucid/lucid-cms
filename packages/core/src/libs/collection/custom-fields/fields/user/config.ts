@@ -8,6 +8,10 @@ export const userFieldConfig = {
 		separator: "usr",
 		tableType: `${constants.db.customFieldTablePrefix}user`,
 	},
+	capabilities: {
+		filterable: true,
+		sortable: false,
+	},
 } as const satisfies FieldStaticConfig<"user">;
 
 export type UserFieldType = typeof userFieldConfig.type;

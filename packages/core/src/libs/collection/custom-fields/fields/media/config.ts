@@ -8,6 +8,10 @@ export const mediaFieldConfig = {
 		separator: "med",
 		tableType: `${constants.db.customFieldTablePrefix}media`,
 	},
+	capabilities: {
+		filterable: true,
+		sortable: false,
+	},
 } as const satisfies FieldStaticConfig<"media">;
 
 export type MediaFieldType = typeof mediaFieldConfig.type;

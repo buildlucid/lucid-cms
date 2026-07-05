@@ -36,6 +36,7 @@ import T from "@/translations";
 import {
 	collectionFieldFilters,
 	collectionFieldIncludes,
+	collectionFieldSorts,
 	formatFieldFilters,
 	tableHeadColumns,
 } from "@/utils/document-table-helpers";
@@ -245,6 +246,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		})),
 	);
 	const documentSortOptions = createMemo(() => [
+		...collectionFieldSorts(collection.data?.data),
 		...(collection.data?.data.orderable === true
 			? [
 					{

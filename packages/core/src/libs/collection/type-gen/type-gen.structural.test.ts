@@ -78,6 +78,54 @@ test("sort key types only include order for orderable collections", async () => 
 	expect(standardSortDeclaration).not.toContain('"order"');
 });
 
+test("sort key types include sortable top-level custom fields regardless of listing", async () => {
+	const collection = buildCollection("articles")
+		.addText("title", { listing: true })
+		.addTextarea("summary")
+		.addNumber("views")
+		.addDateTime("publishedAt")
+		.addSelect("category", {
+			options: [
+				{
+					label: copy("admin:tests.collections.articles.category", {
+						defaultMessage: "News",
+					}),
+					value: "news",
+				},
+			],
+		})
+		.addCheckbox("featured")
+		.addMedia("hero")
+		.addRepeater("items")
+		.addText("itemLabel")
+		.endRepeater();
+
+	const file = generateCollectionClientTypes({
+		collections: [collection],
+		localization: { locales: [{ code: "en" }] },
+	});
+
+	const sortDeclaration = file.declarations.find((declaration) =>
+		declaration.startsWith("export type ArticlesCollectionDocumentSortKey ="),
+	);
+
+	expect(sortDeclaration).toBeDefined();
+	//* sortable types are included even when unlisted
+	expect(sortDeclaration).toContain('"_title"');
+	expect(sortDeclaration).toContain('"_summary"');
+	expect(sortDeclaration).toContain('"_views"');
+	expect(sortDeclaration).toContain('"_publishedAt"');
+	expect(sortDeclaration).toContain('"_category"');
+	//* unsupported types are excluded
+	expect(sortDeclaration).not.toContain('"_featured"');
+	expect(sortDeclaration).not.toContain('"_hero"');
+	expect(sortDeclaration).not.toContain('"_items"');
+	expect(sortDeclaration).not.toContain('"_itemLabel"');
+	//* core sort keys remain
+	expect(sortDeclaration).toContain('"createdAt"');
+	expect(sortDeclaration).toContain('"updatedAt"');
+});
+
 test("client types keep collection tabs transparent", async () => {
 	const collection = buildCollection("pages")
 		.addTab("contentTab")

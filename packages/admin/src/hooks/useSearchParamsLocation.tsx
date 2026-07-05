@@ -124,7 +124,7 @@ const useSearchParamsLocation = (
 		if (params.sorts) {
 			const sorts: {
 				key: string;
-				value: "asc" | "desc";
+				direction: "asc" | "desc";
 				raw: string;
 			}[] = [];
 
@@ -135,7 +135,7 @@ const useSearchParamsLocation = (
 				if (sort) {
 					sorts.push({
 						key: key,
-						value: sort,
+						direction: sort,
 						raw: sort === "asc" ? key : `-${key}`,
 					});
 				}
@@ -152,13 +152,13 @@ const useSearchParamsLocation = (
 							if (sort.startsWith("-")) {
 								sorts.push({
 									key: sort.slice(1),
-									value: "desc",
+									direction: "desc",
 									raw: sort,
 								});
 							} else {
 								sorts.push({
 									key: sort,
-									value: "asc",
+									direction: "asc",
 									raw: sort,
 								});
 							}
@@ -166,8 +166,8 @@ const useSearchParamsLocation = (
 					}
 				}
 
-				for (const [key, value] of Object.entries(params.sorts)) {
-					if (value === undefined) {
+				for (const [key, direction] of Object.entries(params.sorts)) {
+					if (direction === undefined) {
 						const index = sorts.findIndex((sort) => sort.key === key);
 						if (index !== -1) {
 							sorts.splice(index, 1);
@@ -175,13 +175,13 @@ const useSearchParamsLocation = (
 					} else {
 						const index = sorts.findIndex((sort) => sort.key === key);
 						if (index !== -1) {
-							sorts[index].value = value;
-							sorts[index].raw = value === "asc" ? key : `-${key}`;
+							sorts[index].direction = direction;
+							sorts[index].raw = direction === "asc" ? key : `-${key}`;
 						} else {
 							sorts.push({
 								key,
-								value,
-								raw: value === "asc" ? key : `-${key}`,
+								direction,
+								raw: direction === "asc" ? key : `-${key}`,
 							});
 						}
 					}

@@ -162,9 +162,17 @@ export type FieldDatabaseConfig<T extends string = string> =
 	| RelationTableFieldDatabaseConfig<T>
 	| TreeTableFieldDatabaseConfig;
 
+export type FieldCapabilities = {
+	/** Whether documents can be filtered by this field's stored value. */
+	filterable: boolean;
+	/** Whether documents can be sorted by this field's stored value. */
+	sortable: boolean;
+};
+
 export type FieldStaticConfig<T extends string = string> = {
 	type: T;
 	database: FieldDatabaseConfig<T>;
+	capabilities: FieldCapabilities;
 };
 
 export type CustomFieldGuidanceConfig = {

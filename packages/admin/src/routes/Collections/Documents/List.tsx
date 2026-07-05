@@ -24,6 +24,7 @@ import T from "@/translations";
 import {
 	collectionFieldFilters,
 	collectionFieldIncludes,
+	collectionFieldSorts,
 	formatFieldFilters,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
@@ -117,6 +118,9 @@ const CollectionsDocumentsListRoute: Component = () => {
 	);
 	const getCollectionFieldFilters = createMemo(() =>
 		collectionFieldFilters(collectionData()),
+	);
+	const getCollectionFieldSorts = createMemo(() =>
+		collectionFieldSorts(collectionData()),
 	);
 	const getWorkflowFilters = createMemo(() => {
 		const workflow = collectionData()?.workflow;
@@ -420,6 +424,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 										orderMode()
 											? undefined
 											: [
+													...getCollectionFieldSorts(),
 													...(collectionData()?.orderable === true
 														? [
 																{

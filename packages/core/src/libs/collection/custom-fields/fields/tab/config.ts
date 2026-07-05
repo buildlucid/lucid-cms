@@ -5,6 +5,10 @@ export const tabFieldConfig = {
 	database: {
 		mode: "ignore",
 	},
+	capabilities: {
+		filterable: false,
+		sortable: false,
+	},
 } as const satisfies FieldStaticConfig<"tab">;
 
 export type TabFieldType = typeof tabFieldConfig.type;

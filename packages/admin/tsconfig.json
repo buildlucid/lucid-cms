@@ -21,6 +21,9 @@
 			"@field-conditions": [
 				"../core/src/libs/collection/custom-fields/conditions/index.ts"
 			],
+			"@field-capabilities": [
+				"../core/src/libs/collection/custom-fields/capabilities.ts"
+			],
 			"@assets/*": ["src/assets/*"]
 		}
 	}
