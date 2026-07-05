@@ -42,7 +42,10 @@ export type QueryParamSorts = Array<{
 	value: SortValue;
 }>;
 
-export type DefaultCollectionDocumentSortKey = "createdAt" | "updatedAt";
+export type DefaultCollectionDocumentSortKey =
+	| "createdAt"
+	| "updatedAt"
+	| "order";
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
 export interface CollectionDocumentSortsByCollection {}

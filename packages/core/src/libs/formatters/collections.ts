@@ -95,6 +95,7 @@ const formatSingle = (props: {
 		listing: props.collection.listing,
 		autoSave: collectionData.autoSave,
 		scheduling: collectionData.scheduling,
+		orderable: collectionData.orderable,
 		revisionRetentionDays: collectionData.revisionRetentionDays,
 		review: collectionData.review,
 		workflow: collectionData.workflow,

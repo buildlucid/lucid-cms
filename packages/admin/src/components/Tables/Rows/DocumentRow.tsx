@@ -1,6 +1,9 @@
 import type { Collection, InternalCollectionDocument } from "@types";
 import { type Component, For, Show } from "solid-js";
-import type { TableTheme } from "@/components/Groups/Table/Table";
+import type {
+	TableRowReorder,
+	TableTheme,
+} from "@/components/Groups/Table/Table";
 import { Tr } from "@/components/Groups/Table/Tr";
 import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import DateCol from "@/components/Tables/Columns/DateCol";
@@ -29,6 +32,9 @@ interface DocumentRowProps extends TableRowProps {
 	};
 	current?: boolean;
 	theme?: TableTheme;
+	reorder?: {
+		rowReorder: TableRowReorder;
+	};
 }
 
 const DocumentRow: Component<DocumentRowProps> = (props) => {
@@ -51,6 +57,12 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 			onClick={props.callbacks?.onClick}
 			current={props.current}
 			theme={props.theme}
+			reorder={props.reorder}
+			viewTransitionName={
+				props.reorder?.rowReorder.enabled
+					? `document-table-row-${props.document.collectionKey}-${props.document.id}`
+					: undefined
+			}
 		>
 			<Show when={props.selection}>
 				{(selection) => (

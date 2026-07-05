@@ -25,6 +25,7 @@ import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
 import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
 import { Filter } from "@/components/Groups/Query/Filter";
 import { PerPage } from "@/components/Groups/Query/PerPage";
+import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
 import type { FilterSchema } from "@/hooks/useSearchParamsLocation";
@@ -116,13 +117,21 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		[],
 	);
 	const [activeCollectionKey, setActiveCollectionKey] = createSignal<string>();
-	const searchParams = useSearchParamsState({
-		filters: {},
-		sorts: {},
-		pagination: {
-			perPage: 20,
+	const searchParams = useSearchParamsState(
+		{
+			filters: {},
+			sorts: {
+				updatedAt: "desc",
+				createdAt: undefined,
+			},
+			pagination: {
+				perPage: 20,
+			},
 		},
-	});
+		{
+			singleSort: true,
+		},
+	);
 
 	const allowedCollectionKeys = createMemo(() => props.collectionKeys ?? []);
 	const collectionKey = createMemo(() => activeCollectionKey());
@@ -235,6 +244,24 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			user,
 		})),
 	);
+	const documentSortOptions = createMemo(() => [
+		...(collection.data?.data.orderable === true
+			? [
+					{
+						label: T()("documents.order.sort.label"),
+						key: "order",
+					},
+				]
+			: []),
+		{
+			label: T()("common.updated.at"),
+			key: "updatedAt",
+		},
+		{
+			label: T()("common.created.at"),
+			key: "createdAt",
+		},
+	]);
 
 	createEffect(() => {
 		const allowed = allowedCollectionKeys();
@@ -283,12 +310,9 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						undefined,
 					]),
 				),
-				sorts: Object.fromEntries(
-					Array.from(searchParams.getSorts().keys()).map((key) => [
-						key,
-						undefined,
-					]),
-				),
+				sorts: {
+					updatedAt: "desc",
+				},
 				pagination: {
 					page: 1,
 					perPage: searchParams.getPagination().perPage,
@@ -396,6 +420,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						})}
 						searchParams={searchParams}
 					/>
+					<Sort sorts={documentSortOptions()} searchParams={searchParams} />
 					<Show when={allowedCollectionKeys().length > 1}>
 						<div class="w-56 max-w-full">
 							<Select

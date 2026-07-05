@@ -784,6 +784,7 @@ export interface LucidDocumentTable {
 	collection_key: string;
 	collection_migration_id: number;
 	tenant_key: string | null;
+	order: string | null;
 	is_deleted: BooleanInt;
 	is_deleted_at: TimestampMutateable;
 	deleted_by: number;

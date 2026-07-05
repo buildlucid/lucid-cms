@@ -81,6 +81,10 @@ const CollectionConfigSchema = z
 			.boolean()
 			.default(constants.collectionBuilder.scheduling)
 			.optional(),
+		orderable: z
+			.boolean()
+			.default(constants.collectionBuilder.orderable)
+			.optional(),
 		review: z
 			.object({
 				requiredFor: z

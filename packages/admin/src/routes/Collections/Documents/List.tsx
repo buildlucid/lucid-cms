@@ -1,16 +1,20 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
+import { FaSolidArrowDownWideShort } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
+	on,
+	Show,
 } from "solid-js";
 import Alert from "@/components/Blocks/Alert";
 import { DocumentsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
+import Button from "@/components/Partials/Button";
 import useSearchParamsLocation, {
 	type FilterSchema,
 } from "@/hooks/useSearchParamsLocation";
@@ -46,10 +50,31 @@ const CollectionsDocumentsListRoute: Component = () => {
 		},
 	);
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
+	const [orderMode, setOrderMode] = createSignal(false);
 
 	// ----------------------------------
 	// Memos
 	const collectionKey = createMemo(() => params.collectionKey);
+
+	// ----------------------------------
+	// Functions
+	//* order mode pins drag positions to ascending manual order
+	const enterOrderMode = () => {
+		setOrderMode(true);
+		searchParams.setParams({
+			sorts: {
+				order: "asc",
+			},
+		});
+	};
+	const exitOrderMode = () => {
+		setOrderMode(false);
+		searchParams.setParams({
+			sorts: {
+				updatedAt: "desc",
+			},
+		});
+	};
 
 	// ----------------------------------
 	// Queries
@@ -156,9 +181,24 @@ const CollectionsDocumentsListRoute: Component = () => {
 			value: collectionData()?.details.summary,
 		}),
 	);
+	const canReorderDocuments = createMemo(
+		() =>
+			collectionData()?.orderable === true &&
+			userStore.get.hasPermission([collectionData()?.permissions.update]).some,
+	);
 
 	// ----------------------------------
 	// Effects
+	//* reset order mode when switching collections
+	createEffect(
+		on(
+			collectionKey,
+			() => {
+				setOrderMode(false);
+			},
+			{ defer: true },
+		),
+	);
 	createEffect(() => {
 		const activeCollection = collectionData();
 		if (collectionIsSuccess() && activeCollection) {
@@ -272,85 +312,132 @@ const CollectionsDocumentsListRoute: Component = () => {
 							bottom: (
 								<QueryRow
 									searchParams={searchParams}
-									showingDeleted={showingDeleted}
-									setShowingDeleted={setShowingDeleted}
+									showingDeleted={orderMode() ? undefined : showingDeleted}
+									setShowingDeleted={
+										orderMode()
+											? undefined
+											: (value: boolean) => {
+													setShowingDeleted(value);
+												}
+									}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
 											queryKey: ["documents.getMultiple"],
 										});
 									}}
-									filters={[
-										...getCollectionFieldFilters().map((field) => {
-											const fieldKey = formatFieldFilters({
-												fieldKey: field.key,
-											});
+									custom={
+										<Show when={canReorderDocuments() && !showingDeleted()}>
+											<Button
+												theme="secondary-toggle"
+												size="small"
+												type="button"
+												active={orderMode()}
+												classes="gap-2"
+												onClick={() => {
+													if (orderMode()) {
+														exitOrderMode();
+													} else {
+														enterOrderMode();
+													}
+												}}
+											>
+												<FaSolidArrowDownWideShort size={14} />
+												<span>
+													{orderMode()
+														? T()("documents.order.mode.exit")
+														: T()("documents.order.mode.action")}
+												</span>
+											</Button>
+										</Show>
+									}
+									filters={
+										orderMode()
+											? undefined
+											: [
+													...getCollectionFieldFilters().map((field) => {
+														const fieldKey = formatFieldFilters({
+															fieldKey: field.key,
+														});
 
-											switch (field.type) {
-												case "checkbox": {
-													return {
-														label: helpers.getLocaleValue({
-															value: field.details.label,
-															fallback: field.key,
-														}),
-														key: fieldKey,
-														type: "boolean" as const,
-													};
-												}
-												case "select": {
-													return {
-														label: helpers.getLocaleValue({
-															value: field.details.label,
-															fallback: field.key,
-														}),
-														key: fieldKey,
-														type: "select" as const,
-														options: field.options?.map((option, i) => ({
-															value: option.value,
-															label: helpers.getLocaleValue({
-																value: option.label,
-																fallback: T()("fields.options.label", {
-																	count: i,
-																}),
-															}),
-														})),
-													};
-												}
-												case "user": {
-													return {
-														label: helpers.getLocaleValue({
-															value: field.details.label,
-															fallback: field.key,
-														}),
-														key: fieldKey,
-														type: "multi-select" as const,
-														options: userOptions(),
-														optionType: "user" as const,
-													};
-												}
-												default: {
-													return {
-														label: helpers.getLocaleValue({
-															value: field.details.label,
-															fallback: field.key,
-														}),
-														key: fieldKey,
-														type: "text" as const,
-													};
-												}
-											}
-										}),
-										...getWorkflowFilters(),
-									]}
-									sorts={[
-										{
-											label: T()("common.updated.at"),
-											key: "updatedAt",
-										},
-										{
-											label: T()("common.created.at"),
-											key: "createdAt",
-										},
-									]}
+														switch (field.type) {
+															case "checkbox": {
+																return {
+																	label: helpers.getLocaleValue({
+																		value: field.details.label,
+																		fallback: field.key,
+																	}),
+																	key: fieldKey,
+																	type: "boolean" as const,
+																};
+															}
+															case "select": {
+																return {
+																	label: helpers.getLocaleValue({
+																		value: field.details.label,
+																		fallback: field.key,
+																	}),
+																	key: fieldKey,
+																	type: "select" as const,
+																	options: field.options?.map((option, i) => ({
+																		value: option.value,
+																		label: helpers.getLocaleValue({
+																			value: option.label,
+																			fallback: T()("fields.options.label", {
+																				count: i,
+																			}),
+																		}),
+																	})),
+																};
+															}
+															case "user": {
+																return {
+																	label: helpers.getLocaleValue({
+																		value: field.details.label,
+																		fallback: field.key,
+																	}),
+																	key: fieldKey,
+																	type: "multi-select" as const,
+																	options: userOptions(),
+																	optionType: "user" as const,
+																};
+															}
+															default: {
+																return {
+																	label: helpers.getLocaleValue({
+																		value: field.details.label,
+																		fallback: field.key,
+																	}),
+																	key: fieldKey,
+																	type: "text" as const,
+																};
+															}
+														}
+													}),
+													...getWorkflowFilters(),
+												]
+									}
+									sorts={
+										orderMode()
+											? undefined
+											: [
+													...(collectionData()?.orderable === true
+														? [
+																{
+																	label: T()("documents.order.sort.label"),
+																	key: "order",
+																},
+															]
+														: []),
+													{
+														label: T()("common.updated.at"),
+														key: "updatedAt",
+													},
+													{
+														label: T()("common.created.at"),
+														key: "createdAt",
+													},
+												]
+									}
 									perPage={[]}
 								/>
 							),
@@ -367,6 +454,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 					isLoading: collection.isFetching,
 					collectionIsSuccess: collectionIsSuccess,
 					showingDeleted: showingDeleted,
+					orderMode: orderMode,
 				}}
 			/>
 		</Wrapper>

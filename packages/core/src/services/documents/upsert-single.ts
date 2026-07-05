@@ -5,6 +5,10 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import {
+	generateKeyBetween,
+	isFractionalOrderKey,
+} from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
 	documentServices,
@@ -101,6 +105,32 @@ const upsertSingle: ServiceFn<
 	if (checkDocumentCountRes.error) return checkDocumentCountRes;
 
 	// ----------------------------------------------
+	// Data
+
+	//* append new orderable documents after the current last document
+	let order: string | undefined;
+	if (
+		data.documentId === undefined &&
+		collectionRes.data.getData.orderable === true
+	) {
+		const highestOrderRes = await Document.selectHighestOrderKey(
+			{
+				tenantKey: context.request.tenantKey,
+			},
+			{
+				tableName: tableNamesRes.data.document,
+			},
+		);
+		if (highestOrderRes.error) return highestOrderRes;
+
+		const highestOrder = highestOrderRes.data?.order ?? null;
+		order = generateKeyBetween(
+			isFractionalOrderKey(highestOrder) ? highestOrder : null,
+			null,
+		);
+	}
+
+	// ----------------------------------------------
 	// Upsert document
 	const upsertDocRes = await Document.upsertSingle(
 		{
@@ -110,6 +140,8 @@ const upsertSingle: ServiceFn<
 				collection_migration_id: migrationIdRes.data,
 				//* only applied on insert - the conflict update does not touch tenant_key, so existing documents are never re-stamped
 				tenant_key: context.request.tenantKey ?? null,
+				//* only applied on insert; reorders use documentServices.updateOrder
+				order: order ?? null,
 				created_by: data.userId,
 				updated_by: data.userId,
 				is_deleted: false,

@@ -14,6 +14,7 @@ import useGetWorkflowAssignees from "./useGetWorkflowAssignees";
 import usePromoteSingle from "./usePromoteSingle";
 import useRestore from "./useRestore";
 import useRestoreRevision from "./useRestoreRevision";
+import useUpdateOrder from "./useUpdateOrder";
 import useUpdateSingleVersion from "./useUpdateSingleVersion";
 import useUpdateWorkflow from "./useUpdateWorkflow";
 
@@ -31,6 +32,7 @@ const exportObject = {
 	useGetSingleVersion,
 	useGetMultipleRevisions,
 	useRestoreRevision,
+	useUpdateOrder,
 	useUpdateSingleVersion,
 	useUpdateWorkflow,
 	useRestore,

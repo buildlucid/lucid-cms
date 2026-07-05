@@ -412,6 +412,35 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	updateOrder: {
+		body: z.object({
+			previousDocumentId: z.number().nullable().meta({
+				description:
+					"The ID of the document that should come directly before the moved document in the manual order, or null when moving to the start",
+				example: 2,
+			}),
+			nextDocumentId: z.number().nullable().meta({
+				description:
+					"The ID of the document that should come directly after the moved document in the manual order, or null when moving to the end",
+				example: 3,
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().trim().meta({
+				description: "The document ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	updateWorkflow: {
 		body: z.object({
 			stage: z.string().trim().min(1).optional(),
@@ -540,7 +569,7 @@ export const controllerSchemas = {
 								"Target a repeater field by adding a repeater key after the brick key",
 						}),
 					include: queryString.schema.include("refs,refs.relation"),
-					sort: queryString.schema.sort("createdAt,updatedAt"),
+					sort: queryString.schema.sort("createdAt,updatedAt,order"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
 				})
@@ -586,7 +615,7 @@ export const controllerSchemas = {
 				sort: z
 					.array(
 						z.object({
-							key: z.enum(["createdAt", "updatedAt"]),
+							key: z.enum(["createdAt", "updatedAt", "order"]),
 							value: z.enum(["asc", "desc"]),
 						}),
 					)
@@ -833,7 +862,7 @@ export const controllerSchemas = {
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
 						include: queryString.schema.include("refs,refs.relation,meta"),
-						sort: queryString.schema.sort("createdAt,updatedAt"),
+						sort: queryString.schema.sort("createdAt,updatedAt,order"),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,
 					})
@@ -876,7 +905,7 @@ export const controllerSchemas = {
 					sort: z
 						.array(
 							z.object({
-								key: z.enum(["createdAt", "updatedAt"]),
+								key: z.enum(["createdAt", "updatedAt", "order"]),
 								value: z.enum(["asc", "desc"]),
 							}),
 						)

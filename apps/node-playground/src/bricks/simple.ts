@@ -6,7 +6,9 @@ const SimpleBrick = new BrickBuilder("simple", {
 	.addText("heading", {
 		localized: false,
 	})
-	.addMedia("image")
+	.addMedia("image", {
+		multiple: true,
+	})
 	.addRelation("document", {
 		collection: "simple",
 		validation: {

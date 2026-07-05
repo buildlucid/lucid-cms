@@ -621,6 +621,7 @@ export interface Collection {
 	listing: string[];
 	autoSave: boolean;
 	scheduling: boolean;
+	orderable: boolean;
 	revisionRetentionDays: number | false;
 	review?: {
 		requiredFor: string[];

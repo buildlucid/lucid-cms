@@ -46,6 +46,38 @@ test("client types nest section children and inline collapsible children", async
 	expect(fieldsDeclaration).toMatch(/"anchorLabel":/);
 });
 
+test("sort key types only include order for orderable collections", async () => {
+	const orderable = new CollectionBuilder("projects", {
+		mode: "multiple",
+		orderable: true,
+		details: {
+			name: copy("admin:tests.collections.projects.name", {
+				defaultMessage: "projects",
+			}),
+			singularName: copy("admin:tests.collections.projects.singularName", {
+				defaultMessage: "project",
+			}),
+		},
+	});
+	const standard = buildCollection("pages");
+
+	const file = generateCollectionClientTypes({
+		collections: [orderable, standard],
+		localization: { locales: [{ code: "en" }] },
+	});
+
+	const orderableSortDeclaration = file.declarations.find((declaration) =>
+		declaration.startsWith("export type ProjectsCollectionDocumentSortKey ="),
+	);
+	const standardSortDeclaration = file.declarations.find((declaration) =>
+		declaration.startsWith("export type PagesCollectionDocumentSortKey ="),
+	);
+
+	expect(orderableSortDeclaration).toContain('"order"');
+	expect(standardSortDeclaration).toBeDefined();
+	expect(standardSortDeclaration).not.toContain('"order"');
+});
+
 test("client types keep collection tabs transparent", async () => {
 	const collection = buildCollection("pages")
 		.addTab("contentTab")

@@ -111,6 +111,10 @@ const collectionResponseSchema = z.object({
 		description: "Whether the collection has release scheduling enabled",
 		example: false,
 	}),
+	orderable: z.boolean().meta({
+		description: "Whether documents in the collection support manual ordering",
+		example: false,
+	}),
 	revisionRetentionDays: z.union([z.number(), z.literal(false)]).meta({
 		description:
 			"Number of days to retain unprotected revisions, or false to retain indefinitely",

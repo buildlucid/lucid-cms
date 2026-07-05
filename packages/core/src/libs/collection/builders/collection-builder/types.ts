@@ -86,6 +86,7 @@ export type CollectionConfigSchemaType = {
 	revisions?: boolean;
 	autoSave?: boolean;
 	scheduling?: boolean;
+	orderable?: boolean;
 	review?: {
 		requiredFor?: string[];
 		allowSelfApproval?: boolean;
@@ -136,6 +137,7 @@ export type CollectionData = {
 	localized: boolean;
 	autoSave: boolean;
 	scheduling: boolean;
+	orderable: boolean;
 	review?: PublishingReviewConfig;
 	workflow?: PublishingWorkflowConfig;
 	listing: string[];

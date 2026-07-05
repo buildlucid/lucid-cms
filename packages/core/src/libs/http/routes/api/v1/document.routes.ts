@@ -15,6 +15,7 @@ import getWorkflowAssignees from "../../../controllers/documents/get-workflow-as
 import promoteVersion from "../../../controllers/documents/promote-version.js";
 import restoreMultiple from "../../../controllers/documents/restore-multiple.js";
 import restoreRevision from "../../../controllers/documents/restore-revision.js";
+import updateOrder from "../../../controllers/documents/update-order.js";
 import updateVersion from "../../../controllers/documents/update-version.js";
 import updateWorkflow from "../../../controllers/documents/update-workflow.js";
 
@@ -29,6 +30,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.delete("/:collectionKey/:id", ...deleteSingle)
 	.get("/:collectionKey/workflow/assignees", ...getWorkflowAssignees)
 	.patch("/:collectionKey/:id/workflow", ...updateWorkflow)
+	.patch("/:collectionKey/:id/order", ...updateOrder)
 	.get("/:collectionKey/:status", ...getMultiple)
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)
 	.get("/:collectionKey/:id/:statusOrId", ...getSingle)

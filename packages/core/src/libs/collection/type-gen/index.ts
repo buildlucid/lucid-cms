@@ -64,6 +64,13 @@ const collectionDocumentFilterKeys = [
 
 const collectionDocumentSortKeys = ["createdAt", "updatedAt"] as const;
 
+/** Returns sort keys for a collection. */
+const getCollectionSortKeys = (collection: CollectionBuilder): string[] => {
+	return collection.getData.orderable
+		? [...collectionDocumentSortKeys, "order"]
+		: [...collectionDocumentSortKeys];
+};
+
 /** Creates a mutable tree that mirrors the nested DX filter object shape. */
 const createFilterTreeNode = (): FilterTreeNode => new Map();
 
@@ -450,7 +457,9 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 		`export type ${collectionFieldsTypeName} = ${collectionFields.typeText};`,
 		`export type ${collectionBricksTypeName} = ${brickTypeNames.length > 0 ? brickTypeNames.join(" | ") : "never"};`,
 		`export type ${collectionFiltersTypeName} = ${renderFilterTree(filterTree)};`,
-		`export type ${collectionSortKeyTypeName} = ${collectionDocumentSortKeys
+		`export type ${collectionSortKeyTypeName} = ${getCollectionSortKeys(
+			collection,
+		)
 			.map((sortKey) => stringLiteral(sortKey))
 			.join(" | ")};`,
 		`export type ${collectionStatusTypeName} = ${getCollectionStatusKeys(

@@ -117,6 +117,7 @@ test("collection options are correct along with field includes and filters", asy
 		localized: true,
 		autoSave: false,
 		scheduling: false,
+		orderable: false,
 		listing: [
 			"text_test",
 			"textarea_test",

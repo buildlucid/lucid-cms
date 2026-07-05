@@ -8,7 +8,10 @@ export type FilterObject = {
 };
 
 export type SortValue = "asc" | "desc";
-export type DefaultCollectionDocumentSortKey = "createdAt" | "updatedAt";
+export type DefaultCollectionDocumentSortKey =
+	| "createdAt"
+	| "updatedAt"
+	| "order";
 
 export type QueryFilters = {
 	[key: string]: FilterObject | QueryFilters | undefined;

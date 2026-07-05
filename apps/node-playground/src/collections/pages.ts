@@ -24,6 +24,7 @@ const PageCollection = new CollectionBuilder("page", {
 		key: "content",
 		order: 0,
 	},
+	orderable: true,
 	localized: true,
 	revisions: true,
 	autoSave: true,

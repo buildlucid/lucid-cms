@@ -1,5 +1,10 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import type { Collection } from "@types";
+import { useQueryClient } from "@tanstack/solid-query";
+import type {
+	Collection,
+	InternalCollectionDocument,
+	ResponseBody,
+} from "@types";
 import {
 	FaSolidBarsProgress,
 	FaSolidCalendar,
@@ -24,6 +29,7 @@ import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import { tableHeadColumns } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
+import spawnToast from "@/utils/spawn-toast";
 
 export const DocumentsList: Component<{
 	state: {
@@ -33,12 +39,14 @@ export const DocumentsList: Component<{
 		collectionIsSuccess: Accessor<boolean>;
 		searchParams: ReturnType<typeof useSearchParamsLocation>;
 		showingDeleted: Accessor<boolean>;
+		orderMode: Accessor<boolean>;
 	};
 }> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const navigate = useNavigate();
 	const params = useParams<{ collectionKey: string }>();
+	const queryClient = useQueryClient();
 	const rowTarget = useRowTarget({
 		triggers: {
 			delete: false,
@@ -94,6 +102,9 @@ export const DocumentsList: Component<{
 		() => props.state.collection?.permissions,
 	);
 	const rowsAreSelectable = createMemo(() => {
+		//* bulk selection is disabled while reordering
+		if (props.state.orderMode()) return false;
+
 		const permissions = collectionPermissions();
 		if (!permissions) return false;
 
@@ -117,6 +128,21 @@ export const DocumentsList: Component<{
 
 		return userStore.get.hasPermission([permission]).some;
 	});
+	const canUpdateDocuments = createMemo(() => {
+		const permission = collectionPermissions()?.update;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).some;
+	});
+	//* reorder only after order mode pins the list to manual order
+	const rowsAreReorderable = createMemo(
+		() =>
+			props.state.orderMode() &&
+			props.state.collection?.orderable === true &&
+			props.state.showingDeleted() === false &&
+			props.state.searchParams.getSorts().get("order") === "asc" &&
+			canUpdateDocuments(),
+	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
 			value: props.state.collection?.details.name,
@@ -185,6 +211,62 @@ export const DocumentsList: Component<{
 		getCollectionName: collectionSingularName,
 	});
 	const restoreDocuments = api.documents.useRestore();
+	const updateDocumentOrder = api.documents.useUpdateOrder({
+		silent: true,
+		onError: () => {
+			//* restore server order after failed reorder
+			queryClient.invalidateQueries({
+				queryKey: ["documents.getMultiple"],
+			});
+			spawnToast({
+				title: T()("documents.order.reorder.failed.title"),
+				message: T()("documents.order.reorder.failed.message"),
+				status: "error",
+			});
+		},
+	});
+
+	// ----------------------------------
+	// Functions
+	const reorderRows = async (dragIndex: number, targetIndex: number) => {
+		const rows = documents.data?.data ?? [];
+		const dragged = rows[dragIndex];
+		if (!dragged) return;
+
+		//* use visible neighbours as order bounds
+		const reordered = [...rows];
+		reordered.splice(dragIndex, 1);
+		reordered.splice(targetIndex, 0, dragged);
+		const previousDocumentId = reordered[targetIndex - 1]?.id ?? null;
+		const nextDocumentId = reordered[targetIndex + 1]?.id ?? null;
+
+		//* keep rows in place while the reorder mutation runs
+		const visibleIds = rows.map((row) => row.id).join(",");
+		queryClient.setQueriesData<ResponseBody<InternalCollectionDocument[]>>(
+			{ queryKey: ["documents.getMultiple"] },
+			(old) => {
+				if (!old?.data) return old;
+				if (old.data.map((row) => row.id).join(",") !== visibleIds) return old;
+				return {
+					...old,
+					data: reordered,
+				};
+			},
+		);
+
+		try {
+			await updateDocumentOrder.action.mutateAsync({
+				collectionKey: collectionKey(),
+				id: dragged.id,
+				body: {
+					previousDocumentId,
+					nextDocumentId,
+				},
+			});
+		} catch {
+			//* onError handles feedback and cache rollback
+		}
+	};
 
 	// ----------------------------------------
 	// Render
@@ -243,7 +325,8 @@ export const DocumentsList: Component<{
 						label: T()("common.updated.at"),
 						key: "updatedAt",
 						icon: <FaSolidCalendar />,
-						sortable: true,
+						//* lock sorting while editing manual order
+						sortable: !props.state.orderMode(),
 					},
 				]}
 				state={{
@@ -256,6 +339,10 @@ export const DocumentsList: Component<{
 					allowDelete: !props.state.showingDeleted() && canDeleteDocuments(),
 					allowDeletePermanently:
 						props.state.showingDeleted() && canDeleteDocuments(),
+				}}
+				reorder={{
+					enabled: rowsAreReorderable(),
+					onReorder: reorderRows,
 				}}
 				callbacks={{
 					deleteRows: async (selected) => {
@@ -302,7 +389,7 @@ export const DocumentsList: Component<{
 					},
 				}}
 			>
-				{({ include, isSelectable, selected, setSelected }) => (
+				{({ include, isSelectable, selected, setSelected, rowReorder }) => (
 					<Index each={documents.data?.data || []}>
 						{(doc, i) => (
 							<DocumentRow
@@ -313,6 +400,7 @@ export const DocumentsList: Component<{
 								include={include}
 								contentLocale={contentLocale()}
 								selected={selected[i]}
+								reorder={rowReorder.enabled ? { rowReorder } : undefined}
 								options={{
 									isSelectable,
 								}}

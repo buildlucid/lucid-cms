@@ -81,6 +81,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		collection_key: z.string(),
 		collection_migration_id: z.number(),
 		tenant_key: z.string().nullable(),
+		order: z.string().nullable(),
 		created_by: z.number().nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_by: z.number().nullable(),
@@ -113,6 +114,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		collection_key: this.dbAdapter.getDataType("text"),
 		collection_migration_id: this.dbAdapter.getDataType("integer"),
 		tenant_key: this.dbAdapter.getDataType("text"),
+		order: this.dbAdapter.getDataType("text"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
 		deleted_by: this.dbAdapter.getDataType("integer"),
@@ -926,6 +928,10 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 							sorts: {
 								createdAt: `${dynamicConfig.tableName}.created_at`,
 								updatedAt: `${dynamicConfig.tableName}.updated_at`,
+								//* ignore manual order sort for non-orderable collections
+								...(props.collection.getData.orderable
+									? { order: `${dynamicConfig.tableName}.order` }
+									: {}),
 							},
 						},
 					},
@@ -1261,6 +1267,79 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			mode: "multiple",
 			select: ["id"],
 			schema: this.mergeSchema(dynamicConfig.schema),
+		});
+	}
+
+	/** Fetches the last tenant-scoped manual order key. */
+	async selectHighestOrderKey(
+		props: {
+			tenantKey?: string | null;
+		},
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		let query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.select("order")
+			.where("order", "is not", null)
+			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
+			.orderBy("order", "desc")
+			.limit(1);
+
+		query = queryBuilder.tenantScope(query, {
+			tenantKey: props.tenantKey,
+			column: `${dynamicConfig.tableName}.tenant_key`,
+		});
+
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as Promise<
+					{ order: string | null } | undefined
+				>,
+			{
+				method: "selectHighestOrderKey",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: false,
+			mode: "single",
+		});
+	}
+
+	/** Fetches order keys used as manual-order bounds. */
+	async selectOrderKeysByIds(
+		props: {
+			ids: number[];
+		},
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		if (props.ids.length === 0) {
+			return {
+				error: undefined,
+				data: [],
+			};
+		}
+
+		const query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.select(["id", "order"])
+			.where("id", "in", props.ids);
+
+		const exec = await this.executeQuery(
+			() =>
+				query.execute() as Promise<Array<{ id: number; order: string | null }>>,
+			{
+				method: "selectOrderKeysByIds",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: false,
+			mode: "multiple",
 		});
 	}
 

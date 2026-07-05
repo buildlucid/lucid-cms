@@ -72,6 +72,12 @@ const createDocumentTable = (props: {
 						nullable: true,
 					},
 					{
+						name: "order",
+						source: "core",
+						type: props.db.getDataType("text"),
+						nullable: true,
+					},
+					{
 						name: "is_deleted",
 						source: "core",
 						type: props.db.getDataType("boolean"),
@@ -137,6 +143,12 @@ const createDocumentTable = (props: {
 						db: props.db,
 						tableName,
 						columns: ["tenant_key"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["order"],
 						source: "core",
 					}),
 					buildSchemaIndex({

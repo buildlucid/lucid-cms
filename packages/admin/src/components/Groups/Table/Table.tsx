@@ -19,6 +19,16 @@ import { Th } from "./Th";
 
 export type TableTheme = "primary" | "secondary" | "contained";
 
+export interface TableRowReorder {
+	enabled: boolean;
+	draggingIndex: number | null;
+	dropTargetIndex: number | null;
+	onDragStart: (_index: number, _e: DragEvent) => void;
+	onDragEnd: (_e: DragEvent) => void;
+	onDragEnter: (_index: number, _e: DragEvent) => void;
+	onDragOver: (_e: DragEvent) => void;
+}
+
 interface TableRootProps {
 	key: string;
 	rows: number;
@@ -49,6 +59,14 @@ interface TableRootProps {
 		restoreRows?: (_selected: boolean[]) => Promise<void>;
 		deletePermanentlyRows?: (_selected: boolean[]) => Promise<void>;
 	};
+	/** Opt-in row reordering; rows decide whether to render handles. */
+	reorder?: {
+		enabled: boolean;
+		onReorder: (
+			_dragIndex: number,
+			_targetIndex: number,
+		) => void | Promise<void>;
+	};
 	copy?: {
 		deleteModalTitle?: string;
 		deleteModalDescription?: string;
@@ -64,6 +82,7 @@ interface TableRootProps {
 		selected: boolean[];
 		setSelected: (_i: number) => void;
 		theme?: TableTheme;
+		rowReorder: TableRowReorder;
 	}) => JSXElement;
 }
 
@@ -74,6 +93,10 @@ export const Table: Component<TableRootProps> = (props) => {
 
 	const [include, setInclude] = createSignal<boolean[]>([]);
 	const [selected, setSelected] = createSignal<boolean[]>([]);
+	const [dragIndex, setDragIndex] = createSignal<number | null>(null);
+	const [dropTargetIndex, setDropTargetIndex] = createSignal<number | null>(
+		null,
+	);
 
 	// ----------------------------------------
 	// Functions
@@ -147,6 +170,74 @@ export const Table: Component<TableRootProps> = (props) => {
 	};
 
 	// ----------------------------------------
+	// Row Reorder
+	const rowReorderEnabled = createMemo(() => props.reorder?.enabled ?? false);
+	const onRowDragStart = (index: number, e: DragEvent) => {
+		if (!rowReorderEnabled()) return;
+		e.stopPropagation();
+		if (e.dataTransfer) {
+			const dragImage = document.createElement("canvas");
+			dragImage.width = 1;
+			dragImage.height = 1;
+			e.dataTransfer.effectAllowed = "move";
+			e.dataTransfer.setData("text/plain", `${index}`);
+			e.dataTransfer.setDragImage(dragImage, 0, 0);
+		}
+		setDragIndex(index);
+		setDropTargetIndex(index);
+	};
+	const onRowDragEnter = (index: number, e: DragEvent) => {
+		if (dragIndex() === null) return;
+		e.preventDefault();
+		setDropTargetIndex(index);
+	};
+	const onRowDragOver = (e: DragEvent) => {
+		if (dragIndex() === null) return;
+		e.preventDefault();
+	};
+	const onRowDragEnd = (e: DragEvent) => {
+		e.preventDefault();
+		const from = dragIndex();
+		const to = dropTargetIndex();
+
+		if (from === null || to === null || from === to) {
+			setDragIndex(null);
+			setDropTargetIndex(null);
+			return;
+		}
+
+		const updateRows = () => {
+			setDragIndex(null);
+			setDropTargetIndex(null);
+			void props.reorder?.onReorder(from, to);
+		};
+
+		if ("startViewTransition" in document) {
+			document.startViewTransition(updateRows);
+			return;
+		}
+
+		updateRows();
+	};
+
+	//* stable handlers limit reorder updates to rows reading drag state
+	const rowReorder: TableRowReorder = {
+		get enabled() {
+			return rowReorderEnabled();
+		},
+		get draggingIndex() {
+			return dragIndex();
+		},
+		get dropTargetIndex() {
+			return dropTargetIndex();
+		},
+		onDragStart: onRowDragStart,
+		onDragEnd: onRowDragEnd,
+		onDragEnter: onRowDragEnter,
+		onDragOver: onRowDragOver,
+	};
+
+	// ----------------------------------------
 	// Memos
 	const isSelectable = createMemo(() => {
 		return props.options?.isSelectable ?? false;
@@ -198,6 +289,13 @@ export const Table: Component<TableRootProps> = (props) => {
 
 		restoreScrollPosition();
 	});
+	//* index-based selections are cleared when selection is unavailable
+	createEffect(() => {
+		if (isSelectable()) return;
+		setSelected((prev) =>
+			prev.some((selected) => selected) ? prev.map(() => false) : prev,
+		);
+	});
 
 	// ----------------------------------------
 	// Render
@@ -222,6 +320,15 @@ export const Table: Component<TableRootProps> = (props) => {
 					</Show>
 					<thead>
 						<tr class="h-10">
+							<Show when={rowReorderEnabled()}>
+								<Th
+									classes="w-10"
+									theme={props.theme}
+									options={{
+										padding: props.options?.padding,
+									}}
+								/>
+							</Show>
 							<Show when={isSelectable()}>
 								<SelectCol
 									type="th"
@@ -276,7 +383,9 @@ export const Table: Component<TableRootProps> = (props) => {
 								>
 									{() => (
 										<LoadingRow
-											columns={props.head.length}
+											columns={
+												props.head.length + (rowReorderEnabled() ? 1 : 0)
+											}
 											isSelectable={isSelectable()}
 											includes={include()}
 											theme={props.theme}
@@ -291,6 +400,7 @@ export const Table: Component<TableRootProps> = (props) => {
 									selected: selected(),
 									setSelected: setSelectedIndex,
 									theme: props.theme,
+									rowReorder: rowReorder,
 								})}
 							</Match>
 						</Switch>

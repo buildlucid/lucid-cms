@@ -35,6 +35,7 @@ export default Object.freeze({
 		localized: false,
 		autoSave: false,
 		scheduling: false,
+		orderable: false,
 		protectedEnvironments: ["latest", "revision", "snapshot"],
 		revisionRetentionDays: 30,
 		publishing: {

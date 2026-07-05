@@ -2,6 +2,10 @@ export { default as applyDefaultQueryFilters } from "./apply-default-query-filte
 export { default as flattenDocumentFilters } from "./flatten-document-filters.js";
 export { default as formatBytes } from "./format-bytes.js";
 export { default as formatEmailSubject } from "./format-email-subject.js";
+export {
+	generateKeyBetween,
+	isFractionalOrderKey,
+} from "./fractional-order.js";
 export { default as generateSecret } from "./generate-secret.js";
 export { default as getBaseUrl, normalizeHost } from "./get-base-url.js";
 export { default as getDirName } from "./get-dir-name.js";
