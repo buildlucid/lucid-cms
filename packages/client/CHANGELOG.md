@@ -1,6 +1,6 @@
 # @lucidcms/client
 
-## 0.2.0 (unreleased)
+## 0.2.0
 
 - Structured sort descriptors now use `direction` instead of `value`, for example `{ key: "updatedAt", direction: "desc" }`.
 

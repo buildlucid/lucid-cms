@@ -1,5 +1,9 @@
 # @lucidcms/db-sqlite
 
+## 1.0.2
+
+- Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
+
 ## 1.0.1
 
 - Fixed `dropAllTables` so it disables foreign key constraints before dropping tables. Allows us to drop tables even when tables contain circular references.

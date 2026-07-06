@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/client",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"private": false,
 	"description": "The official client package for Lucid CMS public integration endpoints.",
 	"type": "module",
