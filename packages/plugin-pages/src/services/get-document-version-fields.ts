@@ -55,6 +55,7 @@ const getDocumentVersionFields: ServiceFn<
 		);
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
+		const defaultFieldsAlias = "default_fields";
 
 		const fieldsQuery = context.db.client
 			.selectFrom(fieldsTable)
@@ -63,10 +64,31 @@ const getDocumentVersionFields: ServiceFn<
 				`${versionTable}.id`,
 				`${fieldsTable}.document_version_id`,
 			)
-			.leftJoin(
-				parentPageTable,
-				`${parentPageTable}.parent_id`,
-				`${fieldsTable}.id`,
+			.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
+				join
+					.onRef(
+						`${defaultFieldsAlias}.document_version_id`,
+						"=",
+						`${fieldsTable}.document_version_id`,
+					)
+					.on(
+						`${defaultFieldsAlias}.locale`,
+						"=",
+						context.config.localization.defaultLocale,
+					),
+			)
+			.leftJoin(parentPageTable, (join) =>
+				join
+					.onRef(
+						`${parentPageTable}.parent_id`,
+						"=",
+						`${defaultFieldsAlias}.id`,
+					)
+					.on(
+						`${parentPageTable}.locale`,
+						"=",
+						context.config.localization.defaultLocale,
+					),
 			)
 			// @ts-expect-error
 			.select([

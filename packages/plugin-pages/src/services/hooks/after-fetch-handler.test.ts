@@ -26,6 +26,7 @@ const options = {
 			collectionKey: "pages",
 			localized: false,
 			displayFullSlug: true,
+			unique: true,
 		},
 	],
 };

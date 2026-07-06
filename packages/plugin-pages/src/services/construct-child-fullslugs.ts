@@ -6,6 +6,7 @@ import type {
 import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
 import type { CollectionConfig } from "../types/types.js";
 import buildFullSlug from "../utils/build-fullslug-from-slugs.js";
+import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
 
 /**
  *  Constructs the fullSlug for the child documents
@@ -52,7 +53,12 @@ const constructChildFullSlug = (data: {
 					targetLocale: locale.code,
 					currentDescendant: descendant,
 					descendants: data.descendants,
-					topLevelFullSlug: currentFullSlugValue,
+					topLevelFullSlug:
+						currentFullSlugValue ??
+						resolveCollectionPrefix({
+							collection: data.collection,
+							localeCode: locale.code,
+						}),
 				});
 			}
 		} else {
@@ -66,7 +72,12 @@ const constructChildFullSlug = (data: {
 				targetLocale: data.localization.defaultLocale,
 				currentDescendant: descendant,
 				descendants: data.descendants,
-				topLevelFullSlug: data.parentFullSlugField?.value,
+				topLevelFullSlug:
+					data.parentFullSlugField?.value ??
+					resolveCollectionPrefix({
+						collection: data.collection,
+						localeCode: data.localization.defaultLocale,
+					}),
 			});
 		}
 

@@ -1,5 +1,7 @@
+import { copy } from "@lucidcms/core/plugin";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
+import { checkFullSlugUniqueness } from "../checks/index.js";
 import {
 	constructChildFullSlug,
 	getDescendantFields,
@@ -58,11 +60,33 @@ const beforeDeleteHandler =
 			});
 			if (docFullSlugsRes.error) return docFullSlugsRes;
 
-			await updateFullSlugFields(context, {
+			const projectedDocumentIds = docFullSlugsRes.data.map(
+				(doc) => doc.documentId,
+			);
+			const checkFullSlugUniquenessRes = await checkFullSlugUniqueness(
+				context,
+				{
+					collection: targetCollectionRes.data,
+					collectionInstance: data.meta.collection,
+					projectedFullSlugs: docFullSlugsRes.data,
+					versionType,
+					collectionKey: targetCollectionRes.data.collectionKey,
+					tenantKey: data.meta.tenantKey,
+					tables: data.meta.collectionTableNames,
+					excludeDocumentIds: [...data.data.ids, ...projectedDocumentIds],
+					duplicateMessage: copy(
+						"server:plugin.pages.full.slug.duplicate.on.delete",
+					),
+				},
+			);
+			if (checkFullSlugUniquenessRes.error) return checkFullSlugUniquenessRes;
+
+			const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
 				docFullSlugs: docFullSlugsRes.data,
 				versionType,
 				tables: data.meta.collectionTableNames,
 			});
+			if (updateFullSlugFieldsRes.error) return updateFullSlugFieldsRes;
 		}
 
 		return {

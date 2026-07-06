@@ -5,12 +5,14 @@ import fieldResToSchema from "../../utils/field-res-to-schema.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 import {
 	checkCircularParents,
-	checkDuplicateSlugParents,
 	checkFieldsExist,
+	checkFullSlugUniqueness,
 } from "../checks/index.js";
 import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 import {
+	constructChildFullSlug,
 	constructParentFullSlug,
+	getDescendantFields,
 	getDocumentVersionFields,
 	getParentFields,
 	getTargetCollection,
@@ -83,24 +85,6 @@ const versionPromoteHandler =
 		// ----------------------------------------------------------------
 		// create fullSlug - close to the beforeUpsert hook
 		if (createFullSlug) {
-			const checkDuplicateSlugParentsRes = await checkDuplicateSlugParents(
-				context,
-				{
-					documentId: data.data.documentId,
-					versionId: data.data.versionId,
-					versionType: data.data.versionType,
-					collectionKey: targetCollectionRes.data.collectionKey,
-					tenantKey: data.meta.tenantKey,
-					fields: {
-						slug: slug,
-						parentPage: parentPage,
-					},
-					tables: data.meta.collectionTableNames,
-				},
-			);
-			if (checkDuplicateSlugParentsRes.error)
-				return checkDuplicateSlugParentsRes;
-
 			let parentFieldsData: Array<ParentPageQueryResponse> = [];
 			const parentPageId = getParentPageId(parentPage);
 
@@ -145,6 +129,59 @@ const versionPromoteHandler =
 			});
 			if (fullSlugRes.error) return fullSlugRes;
 
+			const candidateFullSlugField = { ...fullSlug };
+			setFullSlug({
+				fullSlug: fullSlugRes.data,
+				defaultLocale: context.config.localization.defaultLocale,
+				collection: targetCollectionRes.data,
+				fields: {
+					fullSlug: candidateFullSlugField,
+				},
+			});
+
+			const projectedFullSlugs = [
+				{
+					documentId: data.data.documentId,
+					versionId: data.data.versionId,
+					fullSlugs: fullSlugRes.data,
+				},
+			];
+
+			const descendantsRes = await getDescendantFields(context, {
+				ids: [data.data.documentId],
+				versionType: data.data.versionType,
+				collectionKey: targetCollectionRes.data.collectionKey,
+				tables: data.meta.collectionTableNames,
+			});
+			if (descendantsRes.error) return descendantsRes;
+
+			if (descendantsRes.data.length > 0) {
+				const descendantFullSlugsRes = constructChildFullSlug({
+					descendants: descendantsRes.data,
+					localization: context.config.localization,
+					parentFullSlugField: candidateFullSlugField,
+					collection: targetCollectionRes.data,
+				});
+				if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
+
+				projectedFullSlugs.push(...descendantFullSlugsRes.data);
+			}
+
+			const checkFullSlugUniquenessRes = await checkFullSlugUniqueness(
+				context,
+				{
+					collection: targetCollectionRes.data,
+					collectionInstance: data.meta.collection,
+					projectedFullSlugs,
+					versionType: data.data.versionType,
+					collectionKey: targetCollectionRes.data.collectionKey,
+					tenantKey: data.meta.tenantKey,
+					tables: data.meta.collectionTableNames,
+					excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
+				},
+			);
+			if (checkFullSlugUniquenessRes.error) return checkFullSlugUniquenessRes;
+
 			setFullSlug({
 				fullSlug: fullSlugRes.data,
 				defaultLocale: context.config.localization.defaultLocale,
@@ -185,7 +222,7 @@ const versionPromoteHandler =
 
 		// ----------------------------------------------------------------
 		// run the afterUpsert hook to update all of the documents versions potential descendants
-		await afterUpsertHandler(options)(context, {
+		const afterUpsertRes = await afterUpsertHandler(options)(context, {
 			meta: {
 				collection: data.meta.collection,
 				collectionKey: data.meta.collectionKey,
@@ -201,6 +238,7 @@ const versionPromoteHandler =
 				fields: [slug, parentPage, fullSlug],
 			},
 		});
+		if (afterUpsertRes.error) return afterUpsertRes;
 
 		return {
 			error: undefined,

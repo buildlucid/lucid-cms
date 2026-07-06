@@ -64,6 +64,7 @@ const getDescendantFields: ServiceFn<
 		);
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
+		const defaultFieldsAlias = "default_fields";
 
 		const sourceDocuments = await context.db.client
 			.selectFrom(documentTable)
@@ -101,6 +102,11 @@ const getDescendantFields: ServiceFn<
 									.where(({ eb }) =>
 										eb(`${parentPageTable}.${parentPageColumn}`, "in", ids),
 									)
+									.where(
+										`${parentPageTable}.locale`,
+										"=",
+										context.config.localization.defaultLocale,
+									)
 									.where(`${versionTable}.type`, "=", data.versionType),
 								{
 									tenantKey,
@@ -126,6 +132,11 @@ const getDescendantFields: ServiceFn<
 											`${parentPageTable}.${parentPageColumn} as parent_id`,
 											`${parentPageTable}.document_version_id`,
 										])
+										.where(
+											`${parentPageTable}.locale`,
+											"=",
+											context.config.localization.defaultLocale,
+										)
 										.where(`${versionTable}.type`, "=", data.versionType),
 									{
 										tenantKey,
@@ -149,9 +160,32 @@ const getDescendantFields: ServiceFn<
 											`${fieldsTable}.document_version_id`,
 										)
 										.leftJoin(
-											parentPageTable,
-											`${parentPageTable}.parent_id`,
-											`${fieldsTable}.id`,
+											`${fieldsTable} as ${defaultFieldsAlias}`,
+											(join) =>
+												join
+													.onRef(
+														`${defaultFieldsAlias}.document_version_id`,
+														"=",
+														`${fieldsTable}.document_version_id`,
+													)
+													.on(
+														`${defaultFieldsAlias}.locale`,
+														"=",
+														context.config.localization.defaultLocale,
+													),
+										)
+										.leftJoin(parentPageTable, (join) =>
+											join
+												.onRef(
+													`${parentPageTable}.parent_id`,
+													"=",
+													`${defaultFieldsAlias}.id`,
+												)
+												.on(
+													`${parentPageTable}.locale`,
+													"=",
+													context.config.localization.defaultLocale,
+												),
 										)
 										// @ts-expect-error
 										.select([

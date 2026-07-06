@@ -7,6 +7,7 @@ const pluginOptions = (given: PluginOptions): PluginOptionsInternal => {
 			localized: c?.localized ?? false,
 			displayFullSlug: c?.displayFullSlug ?? false,
 			prefix: c?.prefix,
+			unique: c?.unique ?? true,
 			// fallbackSlugSource: c?.fallbackSlugSource ?? undefined,
 		})),
 	};

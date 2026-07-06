@@ -8,6 +8,7 @@ test("should resolve a shared string prefix", async () => {
 			collectionKey: "pages",
 			localized: true,
 			displayFullSlug: false,
+			unique: true,
 			prefix: "Blog",
 		} satisfies CollectionConfig,
 		localeCode: "en",
@@ -22,6 +23,7 @@ test("should resolve a locale specific prefix", async () => {
 			collectionKey: "pages",
 			localized: true,
 			displayFullSlug: false,
+			unique: true,
 			prefix: {
 				en: "News",
 				fr: "/Actualites/",

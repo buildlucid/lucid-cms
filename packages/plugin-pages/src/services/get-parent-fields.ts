@@ -63,6 +63,7 @@ const getParentFields: ServiceFn<
 		);
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
+		const defaultFieldsAlias = "default_fields";
 
 		const parentFieldsQuery = context.db.client
 			.selectFrom(fieldsTable)
@@ -71,10 +72,23 @@ const getParentFields: ServiceFn<
 				`${versionTable}.id`,
 				`${fieldsTable}.document_version_id`,
 			)
-			.leftJoin(
-				parentPageTable,
-				`${parentPageTable}.parent_id`,
-				`${fieldsTable}.id`,
+			.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
+				join
+					.onRef(
+						`${defaultFieldsAlias}.document_version_id`,
+						"=",
+						`${fieldsTable}.document_version_id`,
+					)
+					.on(`${defaultFieldsAlias}.locale`, "=", data.defaultLocale),
+			)
+			.leftJoin(parentPageTable, (join) =>
+				join
+					.onRef(
+						`${parentPageTable}.parent_id`,
+						"=",
+						`${defaultFieldsAlias}.id`,
+					)
+					.on(`${parentPageTable}.locale`, "=", data.defaultLocale),
 			)
 			// @ts-expect-error
 			.select([

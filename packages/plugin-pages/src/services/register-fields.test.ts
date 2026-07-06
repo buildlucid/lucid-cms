@@ -25,6 +25,7 @@ test("slug validation returns specific English zod messages", () => {
 		collectionKey: "pages",
 		localized: false,
 		displayFullSlug: true,
+		unique: true,
 	});
 
 	const slugField = collection.flatFields.find((field) => field.key === "slug");

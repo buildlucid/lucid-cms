@@ -63,11 +63,12 @@ const afterUpsertHandler =
 		});
 		if (docFullSlugsRes.error) return docFullSlugsRes;
 
-		await updateFullSlugFields(context, {
+		const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
 			docFullSlugs: docFullSlugsRes.data,
 			versionType: data.data.versionType,
 			tables: data.meta.collectionTableNames,
 		});
+		if (updateFullSlugFieldsRes.error) return updateFullSlugFieldsRes;
 
 		return {
 			error: undefined,

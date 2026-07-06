@@ -1,5 +1,12 @@
 # @lucidcms/plugin-pages
 
+## 0.5.0 (unreleased)
+
+- Added computed `fullSlug` route uniqueness checks.
+- Added `unique.fields` to include selected top-level field values in uniqueness checks.
+- Fixed route collision checks for localized parent relations, root-parent routes, and descendant `fullSlug` updates.
+- Fixed descendant `fullSlug` updates after deleting a parent with collection prefixes configured.
+
 ## 0.4.1
 
 - Bumped `@lucidcms/core` to `0.14.0-alpha.0`.

@@ -58,11 +58,12 @@ This plugin offers several configuration options to control its behavior. Aside 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `collectionKey` | `string` | - | The key of the collection that you wish to enable the plugin on |
-| `translations` | `boolean` | `false` | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields |
+| `localized` | `boolean` | `false` | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields |
 | `displayFullSlug` | `boolean` | `false` | If set to `true`, the plugin will make the `fullSlug` field visible in the documents page builder |
 | `prefix` | `string \| Record<string, string>` | - | Optional prefix prepended to the start of the computed `fullSlug` for the collection |
+| `unique` | `boolean \| { fields?: string[] }` | `true` | Controls route uniqueness validation for computed `fullSlug` values |
 
-### translations
+### localized
 
 If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields. This means that in the documents page builder, the `slug` and `fullSlug` fields will require translations for each locale that you have registered in your Lucid CMS config file.
 
@@ -73,3 +74,11 @@ If set to `true`, the plugin will make the `fullSlug` field visible in the docum
 ### prefix
 
 If set, the plugin prepends the given prefix to the start of the computed `fullSlug`. This does not change the stored `slug` value itself. You can provide either a single string for all locales, or a locale map when translations are enabled.
+
+### unique
+
+By default, each computed `fullSlug` must be unique within the same collection, version type, tenant visibility, and locale. This checks the computed route rather than the raw slug value.
+
+Set `unique: false` to disable this route uniqueness validation for a collection.
+
+Use `unique: { fields: ["fieldKey"] }` to include selected top-level field values in the uniqueness check. Supported field types are `text`, `textarea`, `select`, `number`, `datetime`, `relation`, `media`, and `user`.
