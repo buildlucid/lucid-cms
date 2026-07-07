@@ -2,6 +2,10 @@ import type { ColumnDataType } from "kysely";
 import type constants from "../../../constants/constants.js";
 import type { Config } from "../../../types/config.js";
 import type { ErrorCopy } from "../../../types/errors.js";
+import type {
+	FilterOperator,
+	FilterValue,
+} from "../../../types/query-params.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import type {
 	LucidBrickTableName,
@@ -284,6 +288,13 @@ export type ClientFieldTypeGenerator<T extends FieldTypes = FieldTypes> = (
 	context: ClientFieldTypeGenerationContext<T>,
 ) => ClientFieldTypeGenerationResult;
 
+/** Formats raw query filter values so they match a field's persisted column type. */
+export type CustomFieldFilterFormatter = (props: {
+	value: FilterValue;
+	operator?: FilterOperator;
+	column: CollectionSchemaColumn;
+}) => FilterValue;
+
 export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	config: FieldStaticConfig<T>;
 	class: abstract new (...args: never[]) => unknown;
@@ -291,6 +302,7 @@ export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	fetchRefs?: unknown;
 	validateInput?: unknown;
 	formatRef?: unknown;
+	formatFilterValue?: CustomFieldFilterFormatter | null;
 	nullifyReferences?: unknown;
 	clientTypeGen?: ClientFieldTypeGenerator<T> | null;
 };

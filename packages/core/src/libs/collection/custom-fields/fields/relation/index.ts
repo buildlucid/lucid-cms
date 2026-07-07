@@ -1,4 +1,5 @@
 import { createRelationValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
+import { formatIntegerFilterValue } from "../../utils/filter-values.js";
 import { createFieldRefFetchPlan } from "../../utils/ref-fetch.js";
 import { relationFieldConfig } from "./config.js";
 import RelationCustomField from "./custom-field.js";
@@ -14,6 +15,7 @@ export default {
 	fetchRefs: fetchRelationRefs,
 	validateInput: validateRelationInputData,
 	formatRef: formatRelationRef,
+	formatFilterValue: formatIntegerFilterValue,
 	nullifyReferences: nullifyRelationReferences,
 	clientTypeGen: createRelationValueFieldTypeGenerator(),
 };

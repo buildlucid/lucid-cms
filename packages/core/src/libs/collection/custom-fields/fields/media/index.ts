@@ -1,4 +1,5 @@
 import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
+import { formatIntegerFilterValue } from "../../utils/filter-values.js";
 import { createFieldRefFetchPlan } from "../../utils/ref-fetch.js";
 import { mediaFieldConfig } from "./config.js";
 import MediaCustomField from "./custom-field.js";
@@ -13,5 +14,6 @@ export default {
 	fetchRefs: fetchMediaRefs,
 	validateInput: validateMediaInputData,
 	formatRef: formatMediaRef,
+	formatFilterValue: formatIntegerFilterValue,
 	clientTypeGen: createValueFieldTypeGenerator("number[]"),
 };

@@ -153,6 +153,76 @@ describe("groupDocumentFilters", () => {
 					nullable: true,
 					customField: { type: "text" },
 				},
+				{
+					name: "_simpleNumber",
+					source: "field",
+					type: "integer",
+					nullable: true,
+					customField: { type: "number" },
+				},
+				{
+					name: "_simpleCheckbox",
+					source: "field",
+					type: "boolean",
+					nullable: true,
+					customField: { type: "checkbox" },
+				},
+				{
+					name: "_simpleSelect",
+					source: "field",
+					type: "text",
+					nullable: true,
+					customField: { type: "select" },
+				},
+				{
+					name: "_simpleTextarea",
+					source: "field",
+					type: "text",
+					nullable: true,
+					customField: { type: "textarea" },
+				},
+				{
+					name: "_simpleColor",
+					source: "field",
+					type: "text",
+					nullable: true,
+					customField: { type: "color" },
+				},
+				{
+					name: "_simpleDate",
+					source: "field",
+					type: "timestamp",
+					nullable: true,
+					customField: { type: "datetime" },
+				},
+				{
+					name: "_simpleJson",
+					source: "field",
+					type: "json",
+					nullable: true,
+					customField: { type: "json" },
+				},
+				{
+					name: "_simpleCode",
+					source: "field",
+					type: "json",
+					nullable: true,
+					customField: { type: "code" },
+				},
+				{
+					name: "_simpleLink",
+					source: "field",
+					type: "json",
+					nullable: true,
+					customField: { type: "link" },
+				},
+				{
+					name: "_simpleRichText",
+					source: "field",
+					type: "json",
+					nullable: true,
+					customField: { type: "rich-text" },
+				},
 			],
 		},
 		{
@@ -399,6 +469,99 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
+	it("should format column custom field filter values by field type", () => {
+		const filters: QueryParamFilters = {
+			_simpleHeading: { value: "Test Heading" },
+			_simpleNumber: { value: ["42", "not-a-number"] },
+			_simpleCheckbox: { value: ["true", "false", "maybe"] },
+			_simpleSelect: { value: "published" },
+			_simpleTextarea: { value: "Long text" },
+			_simpleColor: { value: "#ffffff" },
+			_simpleDate: { value: "2024-01-01T00:00:00.000Z" },
+			_simpleJson: { value: '{"ok":true}' },
+			_simpleCode: { value: '{"language":"ts","value":"const a = 1;"}' },
+			_simpleLink: { value: '{"url":"https://example.com"}' },
+			_simpleRichText: { value: '{"type":"doc","content":[]}' },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters);
+
+		expect(result.documentFilters).toEqual({});
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld",
+				filters: [
+					{
+						key: "simpleHeading",
+						value: "Test Heading",
+						operator: "=",
+						column: "_simpleHeading",
+					},
+					{
+						key: "simpleNumber",
+						value: [42, null],
+						operator: "in",
+						column: "_simpleNumber",
+					},
+					{
+						key: "simpleCheckbox",
+						value: [true, false, null],
+						operator: "in",
+						column: "_simpleCheckbox",
+					},
+					{
+						key: "simpleSelect",
+						value: "published",
+						operator: "=",
+						column: "_simpleSelect",
+					},
+					{
+						key: "simpleTextarea",
+						value: "Long text",
+						operator: "=",
+						column: "_simpleTextarea",
+					},
+					{
+						key: "simpleColor",
+						value: "#ffffff",
+						operator: "=",
+						column: "_simpleColor",
+					},
+					{
+						key: "simpleDate",
+						value: "2024-01-01T00:00:00.000Z",
+						operator: "=",
+						column: "_simpleDate",
+					},
+					{
+						key: "simpleJson",
+						value: '{"ok":true}',
+						operator: "=",
+						column: "_simpleJson",
+					},
+					{
+						key: "simpleCode",
+						value: '{"language":"ts","value":"const a = 1;"}',
+						operator: "=",
+						column: "_simpleCode",
+					},
+					{
+						key: "simpleLink",
+						value: '{"url":"https://example.com"}',
+						operator: "=",
+						column: "_simpleLink",
+					},
+					{
+						key: "simpleRichText",
+						value: '{"type":"doc","content":[]}',
+						operator: "=",
+						column: "_simpleRichText",
+					},
+				],
+			},
+		]);
+	});
+
 	it("should handle relation custom fields stored in generated relation tables", () => {
 		const filters: QueryParamFilters = {
 			_author: { value: [1, 2] },
@@ -440,6 +603,65 @@ describe("groupDocumentFilters", () => {
 						value: 5,
 						operator: "=",
 						column: "_document_id",
+					},
+				],
+			},
+		]);
+	});
+
+	it("should format generated relation table filter values by field type", () => {
+		const filters: QueryParamFilters = {
+			_author: { value: ["1", "not-a-number"] },
+			_heroImage: { value: "10" },
+			_relatedDocument: { value: "5" },
+			"simple._reviewer": { value: "3" },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters);
+
+		expect(result.documentFilters).toEqual({});
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld__author",
+				filters: [
+					{
+						key: "author",
+						value: [1, null],
+						operator: "in",
+						column: "_user_id",
+					},
+				],
+			},
+			{
+				table: "lucid_document__simple__fld__heroImage",
+				filters: [
+					{
+						key: "heroImage",
+						value: 10,
+						operator: "=",
+						column: "_media_id",
+					},
+				],
+			},
+			{
+				table: "lucid_document__simple__fld__rel__relatedDocument",
+				filters: [
+					{
+						key: "relatedDocument",
+						value: 5,
+						operator: "=",
+						column: "_document_id",
+					},
+				],
+			},
+			{
+				table: "lucid_document__simple__simple__reviewer",
+				filters: [
+					{
+						key: "reviewer",
+						value: 3,
+						operator: "=",
+						column: "_user_id",
 					},
 				],
 			},
@@ -521,7 +743,7 @@ describe("groupDocumentFilters", () => {
 	it("should handle nested repeater fields by finding matching repeater key", () => {
 		const filters: QueryParamFilters = {
 			"simple.nestedItems._nestedItemTitle": { value: "Nested Title" },
-			"simple.nestedItems._nestedCheckbox": { value: 1 },
+			"simple.nestedItems._nestedCheckbox": { value: "true" },
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);

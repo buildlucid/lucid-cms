@@ -1,4 +1,6 @@
+import registeredFields from "../../libs/collection/custom-fields/registered-fields.js";
 import { getFieldDatabaseConfig } from "../../libs/collection/custom-fields/storage/index.js";
+import type { RegisteredFieldDefinition } from "../../libs/collection/custom-fields/types.js";
 import prefixGeneratedColName from "../../libs/collection/helpers/prefix-generated-column-name.js";
 import type {
 	CollectionSchemaColumn,
@@ -45,15 +47,15 @@ const isPrefixedFieldColumn = (column: string): column is `_${string}` => {
 
 const getRelationFilterColumn = (
 	schema: CollectionSchemaTable<LucidBrickTableName>,
-): `_${string}` | null => {
-	const fieldColumns = schema.columns
-		.filter((column) => column.source === "field")
-		.map((column) => column.name)
-		.filter(isPrefixedFieldColumn);
+): (CollectionSchemaColumn & { name: `_${string}` }) | null => {
+	const fieldColumns = schema.columns.filter(
+		(column): column is CollectionSchemaColumn & { name: `_${string}` } =>
+			column.source === "field" && isPrefixedFieldColumn(column.name),
+	);
 
 	return (
 		fieldColumns.find(
-			(column) => column === prefixGeneratedColName("document_id"),
+			(column) => column.name === prefixGeneratedColName("document_id"),
 		) ??
 		fieldColumns[0] ??
 		null
@@ -67,6 +69,7 @@ const getRelationTableFilterColumn = (params: {
 }): {
 	table: LucidBrickTableName;
 	column: `_${string}`;
+	schemaColumn: CollectionSchemaColumn;
 } | null => {
 	const relationTable = params.bricksTableSchema.find((schema) => {
 		const fieldPath = schema.key.fieldPath;
@@ -85,7 +88,8 @@ const getRelationTableFilterColumn = (params: {
 
 	return {
 		table: relationTable.name,
-		column,
+		column: column.name,
+		schemaColumn: column,
 	};
 };
 
@@ -101,46 +105,38 @@ const pushBrickFilter = (params: {
 	const filters = params.brickFiltersMap.get(params.table) || [];
 	filters.push({
 		key: params.fieldKey,
-		value: normalizeFieldFilterValue(params.value, params.schemaColumn),
+		value: formatFieldFilterValue({
+			value: params.value,
+			operator: params.operator,
+			schemaColumn: params.schemaColumn,
+		}),
 		operator: params.operator || (Array.isArray(params.value) ? "in" : "="),
 		column: params.column ?? prefixGeneratedColName(params.fieldKey),
 	});
 	params.brickFiltersMap.set(params.table, filters);
 };
 
-const normalizeCheckboxValue = (
-	value: string | number | boolean | null,
-	columnType: CollectionSchemaColumn["type"],
-) => {
-	let boolValue: boolean | undefined;
+/** Delegates field-specific filter coercion to the registered custom field. */
+const formatFieldFilterValue = (params: {
+	value: FilterValue;
+	operator?: FilterOperator;
+	schemaColumn?: CollectionSchemaColumn;
+}): FilterValue => {
+	const fieldType = params.schemaColumn?.customField?.type;
+	if (!fieldType || !params.schemaColumn) return params.value;
 
-	if (typeof value === "boolean") {
-		boolValue = value;
-	} else if (typeof value === "number" && (value === 1 || value === 0)) {
-		boolValue = value === 1;
-	} else if (typeof value === "string") {
-		const normalized = value.trim().toLowerCase();
-		if (normalized === "1" || normalized === "true") boolValue = true;
-		if (normalized === "0" || normalized === "false") boolValue = false;
-	}
+	const fieldDefinition = registeredFields[fieldType] as Pick<
+		RegisteredFieldDefinition,
+		"formatFilterValue"
+	>;
 
-	if (boolValue === undefined) return value;
-	return columnType === "boolean" ? boolValue : boolValue ? 1 : 0;
-};
-
-const normalizeFieldFilterValue = (
-	value: FilterValue,
-	schemaColumn?: CollectionSchemaColumn,
-): FilterValue => {
-	if (schemaColumn?.customField?.type !== "checkbox") return value;
-
-	if (Array.isArray(value)) {
-		return value.map((item) =>
-			normalizeCheckboxValue(item, schemaColumn.type),
-		) as FilterValue;
-	}
-
-	return normalizeCheckboxValue(value, schemaColumn.type) as FilterValue;
+	return (
+		fieldDefinition.formatFilterValue?.({
+			value: params.value,
+			operator: params.operator,
+			column: params.schemaColumn,
+		}) ?? params.value
+	);
 };
 
 const matchesStorageMode = (
@@ -231,6 +227,7 @@ const groupDocumentFilters = (
 					value: value.value,
 					operator: value.operator,
 					column: relationTableFilter.column,
+					schemaColumn: relationTableFilter.schemaColumn,
 				});
 			}
 			continue;
@@ -321,6 +318,7 @@ const groupDocumentFilters = (
 						value: value.value,
 						operator: value.operator,
 						column: relationTableFilter.column,
+						schemaColumn: relationTableFilter.schemaColumn,
 					});
 				}
 			}
