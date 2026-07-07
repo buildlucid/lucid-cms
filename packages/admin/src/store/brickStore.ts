@@ -15,6 +15,7 @@ import { createStore, produce, unwrap } from "solid-js/store";
 import type {
 	CollectionBrickConfig,
 	CollectionDataFieldConfig,
+	CollectionFieldConfig,
 	CollectionLeafFieldConfig,
 	CollectionNonTabFieldConfig,
 } from "@/types/collection-config";
@@ -98,6 +99,11 @@ const [get, set] = createStore<{
 		repeaterKey?: string;
 		locales: string[];
 	}) => InternalDocumentField;
+	ensureFields: (params: {
+		brickIndex: number;
+		fieldConfig: CollectionFieldConfig[];
+		locales: string[];
+	}) => void;
 	addRepeaterGroup: (params: {
 		brickIndex: number;
 		fieldConfig: CollectionNonTabFieldConfig[];
@@ -391,25 +397,11 @@ const [get, set] = createStore<{
 		);
 	},
 	addField(params) {
-		const newField: InternalDocumentField = {
-			key: params.fieldConfig.key,
-			type: params.fieldConfig.type,
-		};
-
-		if (params.fieldConfig.type !== "repeater") {
-			if (
-				params.fieldConfig.localized === true &&
-				get.collectionLocalized === true
-			) {
-				newField.translations = {};
-
-				for (const locale of params.locales) {
-					newField.translations[locale] = params.fieldConfig.default;
-				}
-			} else {
-				newField.value = params.fieldConfig.default;
-			}
-		}
+		const newField = createInternalField({
+			fieldConfig: params.fieldConfig,
+			locales: params.locales,
+			collectionLocalized: get.collectionLocalized,
+		});
 
 		// Field belongs on the brick level
 		if (params.ref === undefined) {
@@ -448,6 +440,21 @@ const [get, set] = createStore<{
 		);
 		return newField;
 	},
+	ensureFields(params) {
+		set(
+			"bricks",
+			params.brickIndex,
+			"fields",
+			produce((fieldsDraft) => {
+				ensureFieldsForConfigs({
+					fields: fieldsDraft,
+					fieldConfigs: params.fieldConfig,
+					locales: params.locales,
+					collectionLocalized: get.collectionLocalized,
+				});
+			}),
+		);
+	},
 	// Groups
 	addRepeaterGroup(params) {
 		let groupAdded = false;
@@ -470,26 +477,14 @@ const [get, set] = createStore<{
 
 				const groupFields: InternalDocumentField[] = [];
 
-				//* structural containers (sections/collapsibles) hold no data - create fields for their children instead
 				for (const field of flattenStructuralScopeConfigs(params.fieldConfig)) {
-					const newField: InternalDocumentField = {
-						key: field.key,
-						type: field.type,
-					};
-
-					if (field.type !== "repeater") {
-						if (field.localized === true && get.collectionLocalized === true) {
-							newField.translations = {};
-
-							for (const locale of params.locales) {
-								newField.translations[locale] = field.default;
-							}
-						} else {
-							newField.value = field.default;
-						}
-					}
-
-					groupFields.push(newField);
+					groupFields.push(
+						createInternalField({
+							fieldConfig: field,
+							locales: params.locales,
+							collectionLocalized: get.collectionLocalized,
+						}),
+					);
 				}
 
 				if (field.groups.length === 0) {
@@ -720,6 +715,69 @@ const [get, set] = createStore<{
 		set("relationFieldDragCount", (prev) => Math.max(0, prev - 1));
 	},
 });
+
+const createInternalField = (props: {
+	fieldConfig: CollectionDataFieldConfig;
+	locales: string[];
+	collectionLocalized: boolean;
+}): InternalDocumentField => {
+	const newField: InternalDocumentField = {
+		key: props.fieldConfig.key,
+		type: props.fieldConfig.type,
+	};
+
+	if (props.fieldConfig.type !== "repeater") {
+		if (
+			props.fieldConfig.localized === true &&
+			props.collectionLocalized === true
+		) {
+			newField.translations = {};
+
+			for (const locale of props.locales) {
+				newField.translations[locale] = props.fieldConfig.default;
+			}
+		} else {
+			newField.value = props.fieldConfig.default;
+		}
+	}
+
+	return newField;
+};
+
+const ensureFieldsForConfigs = (props: {
+	fields: InternalDocumentField[];
+	fieldConfigs: CollectionFieldConfig[];
+	locales: string[];
+	collectionLocalized: boolean;
+}) => {
+	const dataFieldConfigs = flattenStructuralScopeConfigs(props.fieldConfigs);
+	const fieldsByKey = new Map(props.fields.map((field) => [field.key, field]));
+
+	for (const fieldConfig of dataFieldConfigs) {
+		let field = fieldsByKey.get(fieldConfig.key);
+
+		if (!field) {
+			field = createInternalField({
+				fieldConfig,
+				locales: props.locales,
+				collectionLocalized: props.collectionLocalized,
+			});
+			props.fields.push(field);
+			fieldsByKey.set(field.key, field);
+		}
+
+		if (fieldConfig.type !== "repeater" || field.type !== "repeater") continue;
+
+		for (const group of field.groups ?? []) {
+			ensureFieldsForConfigs({
+				fields: group.fields,
+				fieldConfigs: fieldConfig.fields,
+				locales: props.locales,
+				collectionLocalized: props.collectionLocalized,
+			});
+		}
+	}
+};
 
 const createBrickSnapshot = (brick: BrickData): BrickSnapshot => ({
 	ref: brick.ref,

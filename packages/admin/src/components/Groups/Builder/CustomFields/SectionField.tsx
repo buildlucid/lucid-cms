@@ -1,5 +1,11 @@
 import type { FieldError, InternalDocumentField } from "@types";
-import { type Component, createMemo, Index, Show } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	Index,
+	Show,
+} from "solid-js";
 import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
@@ -9,8 +15,9 @@ interface SectionFieldProps {
 	state: {
 		fieldConfig: CollectionFieldConfigByType<"section">;
 		fields: InternalDocumentField[];
+		fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
 		fieldErrors: FieldError[];
-		conditionScopes?: FieldConditionScope[];
+		conditionScopes?: Accessor<FieldConditionScope[]>;
 
 		groupRef?: string;
 		groupPath?: string;
@@ -55,6 +62,7 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 							state={{
 								fieldConfig: config(),
 								fields: props.state.fields,
+								fieldsByKey: props.state.fieldsByKey,
 								fieldErrors: props.state.fieldErrors,
 								conditionScopes: props.state.conditionScopes,
 								groupRef: props.state.groupRef,

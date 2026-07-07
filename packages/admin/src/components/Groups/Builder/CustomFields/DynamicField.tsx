@@ -1,8 +1,11 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
 import {
+	type Accessor,
 	type Component,
+	createEffect,
 	createMemo,
+	createSignal,
 	Index,
 	Match,
 	Show,
@@ -50,9 +53,10 @@ interface DynamicFieldProps {
 	state: {
 		fieldConfig: CollectionFieldConfig;
 		fields: InternalDocumentField[];
+		fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
 		fieldErrors: FieldError[];
-		activeTab?: string;
-		conditionScopes?: FieldConditionScope[];
+		activeTab?: Accessor<string | undefined>;
+		conditionScopes?: Accessor<FieldConditionScope[]>;
 
 		groupRef?: string;
 		groupPath?: string;
@@ -65,19 +69,23 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
 	const fieldRenderState = useFieldRenderState();
+	const [tabHasMounted, setTabHasMounted] = createSignal(false);
 
 	// -------------------------------
 	// Memos
 	const fieldConfig = createMemo(() => props.state.fieldConfig);
-	const conditionScopes = createMemo(() => props.state.conditionScopes ?? []);
-	const conditionVisible = createMemo(() =>
-		evaluateFieldVisibility({
-			fieldConfig: fieldConfig(),
-			scopes: conditionScopes(),
+	const fieldsByKey = createMemo(() => props.state.fieldsByKey?.());
+	const conditionVisible = createMemo(() => {
+		const config = fieldConfig();
+		if (!config.ui?.condition) return true;
+
+		return evaluateFieldVisibility({
+			fieldConfig: config,
+			scopes: props.state.conditionScopes?.() ?? [],
 			contentLocale: fieldRenderState.contentLocale(),
 			defaultLocale: fieldRenderState.defaultLocale(),
-		}),
-	);
+		});
+	});
 	const hasMultipleLocales = createMemo(
 		() => fieldRenderState.contentLocales().length > 1,
 	);
@@ -90,9 +98,9 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			return;
 		}
 
-		const field = props.state.fields?.find(
-			(f) => f.key === props.state.fieldConfig.key,
-		);
+		const field =
+			fieldsByKey()?.get(props.state.fieldConfig.key) ??
+			props.state.fields?.find((f) => f.key === props.state.fieldConfig.key);
 
 		if (!field) {
 			return brickStore.get.addField({
@@ -144,10 +152,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	});
 	const activeTab = createMemo(() => {
 		if (fieldConfig().type !== "tab") return true;
-		return (
-			fieldConfig().type === "tab" &&
-			props.state.activeTab === fieldConfig().key
-		);
+		return props.state.activeTab?.() === fieldConfig().key;
+	});
+	const tabBodyMounted = createMemo(() => {
+		if (fieldConfig().type !== "tab") return false;
+		return activeTab() || tabHasMounted();
 	});
 	const fieldColumnIsMissing = createMemo(() => {
 		return fieldRenderState.missingFieldColumns().includes(fieldConfig().key);
@@ -169,6 +178,15 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 
 		return "";
 	});
+
+	// -------------------------------
+	// Effects
+	createEffect(() => {
+		if (fieldConfig().type === "tab" && activeTab()) {
+			setTabHasMounted(true);
+		}
+	});
+
 	// -------------------------------
 	// Render
 	return (
@@ -202,7 +220,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 							>
 								<Index
 									each={
-										(fieldConfig() as CollectionFieldConfigByType<"tab">).fields
+										tabBodyMounted()
+											? (fieldConfig() as CollectionFieldConfigByType<"tab">)
+													.fields
+											: []
 									}
 								>
 									{(config) => (
@@ -210,6 +231,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 											state={{
 												fieldConfig: config(),
 												fields: props.state.fields,
+												fieldsByKey: props.state.fieldsByKey,
 												activeTab: props.state.activeTab,
 												conditionScopes: props.state.conditionScopes,
 												groupRef: props.state.groupRef,
@@ -229,6 +251,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"section">,
 									fields: props.state.fields,
+									fieldsByKey: props.state.fieldsByKey,
 									fieldErrors: props.state.fieldErrors,
 									conditionScopes: props.state.conditionScopes,
 									groupRef: props.state.groupRef,
@@ -244,6 +267,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"collapsible">,
 									fields: props.state.fields,
+									fieldsByKey: props.state.fieldsByKey,
 									fieldErrors: props.state.fieldErrors,
 									conditionScopes: props.state.conditionScopes,
 									groupRef: props.state.groupRef,

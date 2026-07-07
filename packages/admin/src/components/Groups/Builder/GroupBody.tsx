@@ -36,7 +36,7 @@ interface GroupBodyProps {
 		parentRepeaterKey: string | undefined;
 		parentRef: string | undefined;
 		groupErrors: GroupError[];
-		conditionScopes?: FieldConditionScope[];
+		conditionScopes?: Accessor<FieldConditionScope[]>;
 	};
 }
 
@@ -58,12 +58,18 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const groupFields = createMemo(() => {
 		return group()?.fields || [];
 	});
+	const groupFieldsByKey = createMemo(() => {
+		return new Map(groupFields().map((field) => [field.key, field]));
+	});
+	const flattenedConfigChildrenFields = createMemo(() =>
+		flattenStructuralScopeConfigs(configChildrenFields() || []),
+	);
 	const conditionScopes = createMemo<FieldConditionScope[]>(() => [
 		{
-			configFields: flattenStructuralScopeConfigs(configChildrenFields() || []),
+			configFields: flattenedConfigChildrenFields(),
 			fields: groupFields(),
 		},
-		...(props.state.conditionScopes ?? []),
+		...(props.state.conditionScopes?.() ?? []),
 	]);
 	const groupOpen = createMemo(() => group()?.open === true);
 	const disabled = createMemo(
@@ -78,8 +84,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		return groupError()?.fields;
 	});
 	const titlePreview = createMemo(() => {
-		const configs = flattenStructuralScopeConfigs(configChildrenFields() || []);
-		const firstTextConfig = configs.find(
+		const firstTextConfig = flattenedConfigChildrenFields().find(
 			// include textarea as it's also "text input" content
 			(f) => f.type === "text" || f.type === "textarea",
 		) as
@@ -89,7 +94,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 
 		if (!firstTextConfig) return "";
 
-		const data = groupFields()?.find((f) => f.key === firstTextConfig.key);
+		const data = groupFieldsByKey().get(firstTextConfig.key);
 		if (!data) return "";
 
 		const value = brickHelpers.getFieldValue<string>({
@@ -253,12 +258,13 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 								state={{
 									fieldConfig: config(),
 									fields: groupFields(),
+									fieldsByKey: groupFieldsByKey,
 									groupRef: ref(),
 									groupPath: groupPath(),
 									repeaterKey: repeaterKey(),
 									repeaterDepth: nextRepeaterDepth(),
 									fieldErrors: fieldErrors() || [],
-									conditionScopes: conditionScopes(),
+									conditionScopes: conditionScopes,
 								}}
 							/>
 						)}

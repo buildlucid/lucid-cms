@@ -2,7 +2,9 @@ import type { FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
 import { FaSolidChevronUp } from "solid-icons/fa";
 import {
+	type Accessor,
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
 	Index,
@@ -20,8 +22,9 @@ interface CollapsibleFieldProps {
 	state: {
 		fieldConfig: CollectionFieldConfigByType<"collapsible">;
 		fields: InternalDocumentField[];
+		fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
 		fieldErrors: FieldError[];
-		conditionScopes?: FieldConditionScope[];
+		conditionScopes?: Accessor<FieldConditionScope[]>;
 
 		groupRef?: string;
 		groupPath?: string;
@@ -35,6 +38,9 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 	// State & Hooks
 	const fieldRenderState = useFieldRenderState();
 	const [getOpen, setOpen] = createSignal<boolean>(
+		props.state.fieldConfig.defaultOpen === true,
+	);
+	const [childrenMounted, setChildrenMounted] = createSignal<boolean>(
 		props.state.fieldConfig.defaultOpen === true,
 	);
 
@@ -80,6 +86,10 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 
 	// -------------------------------
 	// Effects
+	createEffect(() => {
+		if (getOpen()) setChildrenMounted(true);
+	});
+
 	onMount(() => {
 		const target = uiStateTarget();
 		if (!target) return;
@@ -152,12 +162,13 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 				)}
 			>
 				<div class="border-t border-border p-3 md:p-4 grid grid-cols-12 gap-4">
-					<Index each={fieldConfig().fields}>
+					<Index each={childrenMounted() ? fieldConfig().fields : []}>
 						{(config) => (
 							<DynamicField
 								state={{
 									fieldConfig: config(),
 									fields: props.state.fields,
+									fieldsByKey: props.state.fieldsByKey,
 									fieldErrors: props.state.fieldErrors,
 									conditionScopes: props.state.conditionScopes,
 									groupRef: props.state.groupRef,

@@ -35,10 +35,11 @@ export const TabField: Component<{
 		recursiveFieldSearch(props.tab.fields);
 		return fieldKeys;
 	});
+	const childrenKeySet = createMemo(() => new Set(childrenKeys()));
 	const hasChildrenError = createMemo(() => {
-		return childrenKeys().some((key) => {
-			return props.fieldErrors.find((f) => f.key === key);
-		});
+		return props.fieldErrors.some((fieldError) =>
+			childrenKeySet().has(fieldError.key),
+		);
 	});
 
 	// ----------------------------------------

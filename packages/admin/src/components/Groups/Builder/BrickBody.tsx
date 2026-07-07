@@ -14,7 +14,7 @@ import {
 	TabField,
 } from "@/components/Groups/Builder/CustomFields";
 import { FieldRenderStateProvider } from "@/hooks/document/useFieldRenderState";
-import type { BrickData } from "@/store/brickStore";
+import brickStore, { type BrickData } from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import type {
 	CollectionFieldConfig,
@@ -53,34 +53,38 @@ export const BrickBody: Component<BrickProps> = (props) => {
 
 	// ----------------------------------
 	// Memos
+	const configFields = createMemo(() => props.state.configFields || []);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
 	const defaultLocale = createMemo(() =>
 		getDefaultTranslationLocale(contentLocaleStore.get.locales),
 	);
+	const flattenedConfigFields = createMemo(() =>
+		flattenStructuralScopeConfigs(configFields()),
+	);
 	const conditionScopes = createMemo<FieldConditionScope[]>(() => [
 		{
-			configFields: flattenStructuralScopeConfigs(
-				props.state.configFields || [],
-			),
+			configFields: flattenedConfigFields(),
 			fields: props.state.brick.fields,
 		},
 	]);
 	const allTabs = createMemo(() =>
-		(props.state.configFields || [])
+		configFields()
 			.filter(
 				(field): field is CollectionFieldConfigByType<"tab"> =>
 					field.type === "tab",
 			)
-			.filter((field) =>
-				evaluateFieldVisibility({
+			.filter((field) => {
+				if (!field.ui?.condition) return true;
+
+				return evaluateFieldVisibility({
 					fieldConfig: field,
 					scopes: conditionScopes(),
 					contentLocale: contentLocale(),
 					defaultLocale: defaultLocale(),
-				}),
-			),
+				});
+			}),
 	);
 	const contentLocales = createMemo(
 		() => contentLocaleStore.get.locales.map((locale) => locale.code) || [],
@@ -95,9 +99,22 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	const brickOrder = createMemo(() => props.state.brick.order);
 	const documentId = createMemo(() => props.state.documentId);
 	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
+	const fieldsByKey = createMemo(() => {
+		return new Map(props.state.brick.fields.map((field) => [field.key, field]));
+	});
 
 	// ----------------------------------
 	// Effects
+	createEffect(() => {
+		if (configFields().length === 0) return;
+
+		brickStore.get.ensureFields({
+			brickIndex: brickIndex(),
+			fieldConfig: configFields(),
+			locales: contentLocales(),
+		});
+	});
+
 	onMount(() => {
 		builderUiStateHelpers.cleanupOldEntries();
 
@@ -200,15 +217,16 @@ export const BrickBody: Component<BrickProps> = (props) => {
 						</div>
 					</Show>
 					{/* Body */}
-					<Index each={props.state.configFields}>
+					<Index each={configFields()}>
 						{(config) => (
 							<DynamicField
 								state={{
 									fields: props.state.brick.fields,
+									fieldsByKey: fieldsByKey,
 									fieldConfig: config(),
-									activeTab: getActiveTab(),
+									activeTab: getActiveTab,
 									fieldErrors: props.state.fieldErrors,
-									conditionScopes: conditionScopes(),
+									conditionScopes: conditionScopes,
 								}}
 							/>
 						)}

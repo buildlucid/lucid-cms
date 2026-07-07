@@ -1,7 +1,15 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
 import { FaSolidPlus } from "solid-icons/fa";
-import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	For,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import { GroupBody } from "@/components/Groups/Builder";
 import DragDrop from "@/components/Partials/DragDrop";
 import RelationCount from "@/components/Partials/RelationCount";
@@ -21,7 +29,7 @@ interface RepeaterFieldProps {
 		parentRepeaterKey?: string;
 		repeaterDepth: number;
 		fieldError: FieldError | undefined;
-		conditionScopes?: FieldConditionScope[];
+		conditionScopes?: Accessor<FieldConditionScope[]>;
 	};
 }
 
