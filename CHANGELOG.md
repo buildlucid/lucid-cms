@@ -1,5 +1,15 @@
 # @lucidcms/core
 
+## v0.16.0-alpha.0 (unreleased)
+
+### Features:
+
+- Improved document builder rendering performance for tabbed layouts by memoizing field lookups, condition scopes and structural field config across tabs, sections and collapsibles. Inactive tab and collapsible content now mounts lazily while field defaults are still hydrated up front, making initial load and tab switching smoother. ([4c73b6d](https://github.com/buildlucid/lucid-cms/commit/4c73b6d474937fb6c4425fe8b45fc3029720963c))
+
+### Bug Fixes:
+
+- Fixed checkbox custom field filters for true and false values. ([5710346](https://github.com/buildlucid/lucid-cms/commit/571034652c041bbdcb7d3b64795b7ed523117213))
+
 ## v0.15.0-alpha.0
 
 ### Features:
