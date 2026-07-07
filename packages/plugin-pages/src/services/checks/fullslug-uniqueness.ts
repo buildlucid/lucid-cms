@@ -18,6 +18,7 @@ import type {
 	RouteUniqueValues,
 } from "../../types/types.js";
 import applyTenantScope from "../../utils/apply-tenant-scope.js";
+import getDuplicateRouteMessage from "../../utils/duplicate-route-message.js";
 import normalizePathValue from "../../utils/normalize-path-value.js";
 import {
 	buildRouteUniquenessItems,
@@ -431,9 +432,12 @@ const checkFullSlugUniqueness: ServiceFn<
 		const projectedDuplicates = findProjectedRouteDuplicates(projectedItems);
 
 		if (projectedDuplicates.length > 0) {
-			const message =
-				data.duplicateMessage ??
-				copy("server:plugin.pages.full.slug.duplicate");
+			const message = getDuplicateRouteMessage({
+				translate: context.translate,
+				collectionInstance: data.collectionInstance,
+				uniqueFields: uniqueFieldsRes.data,
+				duplicateMessage: data.duplicateMessage,
+			});
 			const fieldErrors: FieldError[] = projectedDuplicates.map((conflict) => ({
 				key: constants.fields.slug.key,
 				localeCode: conflict.locale,
@@ -471,9 +475,12 @@ const checkFullSlugUniqueness: ServiceFn<
 		});
 
 		if (existingCollisions.length > 0) {
-			const message =
-				data.duplicateMessage ??
-				copy("server:plugin.pages.full.slug.duplicate");
+			const message = getDuplicateRouteMessage({
+				translate: context.translate,
+				collectionInstance: data.collectionInstance,
+				uniqueFields: uniqueFieldsRes.data,
+				duplicateMessage: data.duplicateMessage,
+			});
 			const fieldErrors: FieldError[] = existingCollisions.map((conflict) => ({
 				key: constants.fields.slug.key,
 				localeCode: conflict.locale,

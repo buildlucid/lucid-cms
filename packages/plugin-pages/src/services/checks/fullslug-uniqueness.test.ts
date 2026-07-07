@@ -58,6 +58,26 @@ const uniqueRelationField = (overrides?: Partial<RelationUniqueField>) =>
 		...overrides,
 	}) satisfies RelationUniqueField;
 
+const translateTestCopy = (value: unknown) => {
+	if (!value) return undefined;
+	if (typeof value === "string") return value;
+	if (typeof value !== "object" || !("type" in value)) return undefined;
+
+	if (
+		value.type === "lucid.literal" &&
+		"value" in value &&
+		typeof value.value === "string"
+	) {
+		return value.value;
+	}
+
+	const descriptor = value as {
+		defaultMessage?: string;
+		key?: string;
+	};
+	return descriptor.defaultMessage ?? descriptor.key;
+};
+
 describe("fullSlug route uniqueness", () => {
 	test("detects root-parent fullSlug collisions against top-level routes", () => {
 		const projectedItems = buildItems([
@@ -178,6 +198,105 @@ describe("fullSlug route uniqueness", () => {
 		}
 		const [fieldError] = fieldErrors as Array<{ message: unknown }>;
 		expect(fieldError?.message).toEqual(duplicateMessage);
+	});
+
+	test("mentions configured unique fields in duplicate route errors", async () => {
+		const collectionInstance = new CollectionBuilder("docs", {
+			mode: "multiple",
+			details: {
+				name: copy("admin:tests.collections.docs.name", {
+					defaultMessage: "Docs",
+				}),
+				singularName: copy("admin:tests.collections.docs.singularName", {
+					defaultMessage: "Doc",
+				}),
+			},
+		})
+			.addRelation("product", {
+				collection: "products",
+				details: {
+					label: "Product",
+				},
+			})
+			.addRelation("version", {
+				collection: "versions",
+				details: {
+					label: "Version",
+				},
+			});
+		const collection = {
+			collectionKey: "docs",
+			localized: false,
+			displayFullSlug: false,
+			unique: {
+				fields: ["product", "version"],
+			},
+		} satisfies CollectionConfig;
+		const expectedMessage = copy(
+			"server:plugin.pages.full.slug.duplicate.with.fields",
+			{
+				data: {
+					fields: "Product, Version",
+				},
+			},
+		);
+
+		const res = await checkFullSlugUniqueness(
+			{
+				config: {
+					localization: {
+						defaultLocale: "en",
+						locales: [{ code: "en" }],
+					},
+					db: {
+						config: {
+							tableNameByteLimit: null,
+						},
+					},
+				},
+				translate: translateTestCopy,
+			} as never,
+			{
+				collection,
+				collectionInstance,
+				projectedFullSlugs: [
+					{
+						documentId: 1,
+						versionId: 10,
+						fullSlugs: { en: "/getting-started" },
+						uniqueValues: {
+							en: {
+								product: [{ collectionKey: "products", id: 1 }],
+								version: [{ collectionKey: "versions", id: 2 }],
+							},
+						},
+					},
+					{
+						documentId: 2,
+						versionId: 20,
+						fullSlugs: { en: "/getting-started" },
+						uniqueValues: {
+							en: {
+								product: [{ collectionKey: "products", id: 1 }],
+								version: [{ collectionKey: "versions", id: 2 }],
+							},
+						},
+					},
+				],
+				versionType: "latest",
+				collectionKey: "docs",
+				tenantKey: null,
+				tables: {} as never,
+			},
+		);
+
+		expect(res.error?.message).toEqual(expectedMessage);
+		const fieldErrors = res.error?.errors?.fields;
+		if (!Array.isArray(fieldErrors)) {
+			throw new Error("Expected duplicate route field errors");
+		}
+		const [fieldError] = fieldErrors as Array<{ message: unknown }>;
+		expect(fieldError?.message).toEqual(expectedMessage);
 	});
 
 	test("unique false disables route uniqueness validation", async () => {
