@@ -255,6 +255,13 @@ const CollectionsDocumentsListRoute: Component = () => {
 				};
 				continue;
 			}
+			if (field.type === "checkbox") {
+				filterConfig[fieldKey] = {
+					type: "boolean",
+					value: undefined,
+				};
+				continue;
+			}
 
 			filterConfig[fieldKey] = {
 				type: "text",

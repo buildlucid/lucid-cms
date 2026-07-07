@@ -40,6 +40,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 	.addUser("author", {
 		listing: true,
 	})
+	.addCheckbox("enabled")
 	.addRichText("content");
 
 export default BlogCollection;

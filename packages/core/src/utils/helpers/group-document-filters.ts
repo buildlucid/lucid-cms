@@ -1,6 +1,9 @@
 import { getFieldDatabaseConfig } from "../../libs/collection/custom-fields/storage/index.js";
 import prefixGeneratedColName from "../../libs/collection/helpers/prefix-generated-column-name.js";
-import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
+import type {
+	CollectionSchemaColumn,
+	CollectionSchemaTable,
+} from "../../libs/collection/schema/types.js";
 import type {
 	FilterOperator,
 	FilterValue,
@@ -26,12 +29,12 @@ export type BrickFilters = {
 	filters: BrickFieldFilters[];
 };
 
-const hasFieldColumn = (
+const getFieldColumn = (
 	schema: CollectionSchemaTable<LucidBrickTableName>,
 	fieldKey: string,
-): boolean => {
+): CollectionSchemaColumn | undefined => {
 	const prefixedColName = prefixGeneratedColName(fieldKey);
-	return schema.columns.some(
+	return schema.columns.find(
 		(column) => column.name === prefixedColName && column.source === "field",
 	);
 };
@@ -93,15 +96,51 @@ const pushBrickFilter = (params: {
 	value: FilterValue;
 	operator?: FilterOperator;
 	column?: `_${string}`;
+	schemaColumn?: CollectionSchemaColumn;
 }): void => {
 	const filters = params.brickFiltersMap.get(params.table) || [];
 	filters.push({
 		key: params.fieldKey,
-		value: params.value,
+		value: normalizeFieldFilterValue(params.value, params.schemaColumn),
 		operator: params.operator || (Array.isArray(params.value) ? "in" : "="),
 		column: params.column ?? prefixGeneratedColName(params.fieldKey),
 	});
 	params.brickFiltersMap.set(params.table, filters);
+};
+
+const normalizeCheckboxValue = (
+	value: string | number | boolean | null,
+	columnType: CollectionSchemaColumn["type"],
+) => {
+	let boolValue: boolean | undefined;
+
+	if (typeof value === "boolean") {
+		boolValue = value;
+	} else if (typeof value === "number" && (value === 1 || value === 0)) {
+		boolValue = value === 1;
+	} else if (typeof value === "string") {
+		const normalized = value.trim().toLowerCase();
+		if (normalized === "1" || normalized === "true") boolValue = true;
+		if (normalized === "0" || normalized === "false") boolValue = false;
+	}
+
+	if (boolValue === undefined) return value;
+	return columnType === "boolean" ? boolValue : boolValue ? 1 : 0;
+};
+
+const normalizeFieldFilterValue = (
+	value: FilterValue,
+	schemaColumn?: CollectionSchemaColumn,
+): FilterValue => {
+	if (schemaColumn?.customField?.type !== "checkbox") return value;
+
+	if (Array.isArray(value)) {
+		return value.map((item) =>
+			normalizeCheckboxValue(item, schemaColumn.type),
+		) as FilterValue;
+	}
+
+	return normalizeCheckboxValue(value, schemaColumn.type) as FilterValue;
 };
 
 const matchesStorageMode = (
@@ -163,13 +202,18 @@ const groupDocumentFilters = (
 			const fieldTable = bricksTableSchema.find(
 				(schema) => schema.type === "document-fields",
 			);
-			if (fieldTable && hasFieldColumn(fieldTable, fieldKey)) {
+			const fieldColumn =
+				fieldTable !== undefined
+					? getFieldColumn(fieldTable, fieldKey)
+					: undefined;
+			if (fieldTable && fieldColumn) {
 				pushBrickFilter({
 					brickFiltersMap,
 					table: fieldTable.name,
 					fieldKey,
 					value: value.value,
 					operator: value.operator,
+					schemaColumn: fieldColumn,
 				});
 				continue;
 			}
@@ -251,13 +295,15 @@ const groupDocumentFilters = (
 			}
 
 			if (fieldKey && schemaTable) {
-				if (tableName && hasFieldColumn(schemaTable, fieldKey)) {
+				const fieldColumn = getFieldColumn(schemaTable, fieldKey);
+				if (tableName && fieldColumn) {
 					pushBrickFilter({
 						brickFiltersMap,
 						table: tableName,
 						fieldKey,
 						value: value.value,
 						operator: value.operator,
+						schemaColumn: fieldColumn,
 					});
 					continue;
 				}
