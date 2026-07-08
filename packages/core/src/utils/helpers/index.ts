@@ -16,7 +16,10 @@ export {
 	getObject,
 	isJsonContainerValue,
 } from "./get-typed-value.js";
-export { default as groupDocumentFilters } from "./group-document-filters.js";
+export {
+	default as groupDocumentFilters,
+	groupDocumentFilterConditions,
+} from "./group-document-filters.js";
 export { default as isRequestSecure } from "./is-request-secure.js";
 export { normalizeEmailInput, trimStringInput } from "./normalize-input.js";
 export { default as resolveCustomFieldSorts } from "./resolve-custom-field-sorts.js";

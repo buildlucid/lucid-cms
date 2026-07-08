@@ -128,6 +128,58 @@ describe("createQueryState - memory mode", () => {
 		});
 	});
 
+	it("setOrFilterGroups updates state, storage and query string", () => {
+		createRoot((dispose) => {
+			const adapter = createTestUrlAdapter();
+			const query = createQueryState({
+				schema: buildSchema(),
+				adapter,
+			});
+
+			query.setOrFilterGroups([
+				[
+					{ key: "title", value: "home", operator: "ilike" },
+					{ key: "author", value: [1, 2], operator: "in" },
+				],
+				[{ key: "isDeleted", value: false }],
+			]);
+
+			expect(query.orFilterGroups()).toEqual([
+				[
+					{ key: "title", value: "home", operator: "ilike" },
+					{ key: "author", value: [1, 2], operator: "in" },
+				],
+				[{ key: "isDeleted", value: false }],
+			]);
+			expect(
+				new URLSearchParams(adapter.search()).get("filter[or][0][title:ilike]"),
+			).toBe("home");
+			expect(
+				new URLSearchParams(query.queryString()).get(
+					"filter[or][0][author:in]",
+				),
+			).toBe("1,2");
+			dispose();
+		});
+	});
+
+	it("clearOrFilterGroups removes grouped OR filters", () => {
+		createRoot((dispose) => {
+			const adapter = createTestUrlAdapter();
+			const query = createQueryState({
+				schema: buildSchema(),
+				adapter,
+			});
+
+			query.setOrFilterGroups([[{ key: "title", value: "home" }]]);
+			query.clearOrFilterGroups();
+
+			expect(query.orFilterGroups()).toEqual([]);
+			expect(adapter.search()).toBe("");
+			dispose();
+		});
+	});
+
 	it("setParams accepts explicit filter operator metadata", () => {
 		createRoot((dispose) => {
 			const adapter = createTestUrlAdapter();
@@ -348,13 +400,17 @@ describe("createQueryState - reset", () => {
 				adapter,
 			});
 
-			query.setParams({ filters: { title: "x", author: [1] } });
+			query.setParams({
+				filters: { title: "x", author: [1] },
+				orFilterGroups: [[{ key: "isDeleted", value: false }]],
+			});
 			expect(query.hasFiltersApplied()).toBe(true);
 
 			query.resetFilters();
 			expect(query.hasDefaultFiltersApplied()).toBe(true);
 			expect(query.filters().get("title")).toBe("");
 			expect(query.filters().get("author")).toEqual([]);
+			expect(query.orFilterGroups()).toEqual([]);
 			expect(new URLSearchParams(adapter.search()).has("filter[title]")).toBe(
 				false,
 			);

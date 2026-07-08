@@ -157,6 +157,7 @@ export const controllerSchemas = {
 						enabled: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
+				filterOr: queryFormatted.schema.filterOr,
 				sort: z
 					.array(
 						z.object({

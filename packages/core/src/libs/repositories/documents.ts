@@ -1,4 +1,9 @@
-import type { ComparisonOperatorExpression } from "kysely";
+import type {
+	ComparisonOperatorExpression,
+	ExpressionBuilder,
+	OperandExpression,
+	SqlBool,
+} from "kysely";
 import { type SelectQueryBuilder, sql } from "kysely";
 import z from "zod";
 import constants from "../../constants/constants.js";
@@ -7,7 +12,10 @@ import type {
 	ClientGetSingleQueryParams,
 	GetMultipleQueryParams,
 } from "../../schemas/documents.js";
-import type { QueryParamFilters } from "../../types/query-params.js";
+import type {
+	QueryParamFilterCondition,
+	QueryParamFilters,
+} from "../../types/query-params.js";
 import type {
 	Config,
 	LucidBricksTable,
@@ -35,6 +43,11 @@ import type { MediaPosterPropsT } from "../formatters/media.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "./document-workflows.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
+
+type DocumentFilterOrGroup = {
+	documentFilters: QueryParamFilterCondition[];
+	brickFilters: BrickFilters[];
+};
 
 export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	// Created by user join
@@ -495,6 +508,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			includeWorkflow: boolean;
 			workflowAssigneeFilterValues?: Array<string | number>;
 			tenantKey?: string | null;
+			filterOr?: DocumentFilterOrGroup[];
 			tables: {
 				versions: LucidVersionTableName;
 				documentFields: LucidBrickTableName;
@@ -887,6 +901,20 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 			);
+			query = this.applyDocumentFilterOrToQuery(
+				query,
+				props.filterOr,
+				dynamicConfig.tableName,
+				props.tables.versions,
+				props.includeWorkflow,
+			);
+			queryCount = this.applyDocumentFilterOrToQuery(
+				queryCount,
+				props.filterOr,
+				dynamicConfig.tableName,
+				props.tables.versions,
+				props.includeWorkflow,
+			);
 
 			query = queryBuilder.tenantScope(query, {
 				tenantKey: props.tenantKey,
@@ -989,6 +1017,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			collection: CollectionBuilder;
 			config: Config;
 			tenantKey?: string | null;
+			filterOr?: DocumentFilterOrGroup[];
 			tables: {
 				versions: LucidVersionTableName;
 			};
@@ -1159,6 +1188,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				props.brickFilters,
 				dynamicConfig.tableName,
 				props.tables.versions,
+			);
+			query = this.applyDocumentFilterOrToQuery(
+				query,
+				props.filterOr,
+				dynamicConfig.tableName,
+				props.tables.versions,
+				false,
 			);
 
 			query = queryBuilder.tenantScope(query, {
@@ -1433,6 +1469,150 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			]),
 		);
 	}
+	/** Normalizes scalar and array filter values for custom exists checks. */
+	getDocumentFilterValues(
+		filter: QueryParamFilterCondition,
+	): Array<string | number> {
+		const values = Array.isArray(filter.value) ? filter.value : [filter.value];
+
+		return values.filter((value): value is string | number => value !== null);
+	}
+	/** Mirrors shared default-operator behavior for document OR filters. */
+	getDocumentFilterOperator(
+		filter: QueryParamFilterCondition,
+	): ComparisonOperatorExpression {
+		if (filter.operator !== undefined) {
+			return filter.operator as ComparisonOperatorExpression;
+		}
+		if (Array.isArray(filter.value)) return "in";
+		if (filter.value === null) return "is";
+		return "=";
+	}
+	/** Builds a document-column or workflow expression for one OR condition. */
+	buildDocumentFilterExpression<DB, Table extends keyof DB>(
+		eb: ExpressionBuilder<DB, Table>,
+		filter: QueryParamFilterCondition,
+		documentTableName: string,
+		includeWorkflow: boolean,
+	): OperandExpression<SqlBool> | undefined {
+		if (filter.key === "workflowAssignee") {
+			if (!includeWorkflow) return undefined;
+
+			const values = this.getDocumentFilterValues(filter);
+			if (values.length === 0) return sql<boolean>`1 = 0`;
+
+			return sql<boolean>`exists (
+				select 1
+				from lucid_document_workflow_assignees
+				where lucid_document_workflow_assignees.workflow_id = lucid_document_workflows.id
+				and lucid_document_workflow_assignees.user_id in (${sql.join(values.map((id) => sql`${id}`))})
+			)`;
+		}
+
+		const filterRefs: Record<string, string> = {
+			id: `${documentTableName}.id`,
+			collectionKey: `${documentTableName}.collection_key`,
+			createdBy: `${documentTableName}.created_by`,
+			updatedBy: `${documentTableName}.updated_by`,
+			createdAt: `${documentTableName}.created_at`,
+			updatedAt: `${documentTableName}.updated_at`,
+			isDeleted: `${documentTableName}.is_deleted`,
+			deletedBy: `${documentTableName}.deleted_by`,
+			...(includeWorkflow
+				? {
+						workflowStage: "lucid_document_workflows.stage_key",
+					}
+				: {}),
+		};
+
+		const filterRef = filterRefs[filter.key];
+		if (!filterRef) return undefined;
+
+		const { ref } = this.db.dynamic;
+
+		return eb(
+			ref(filterRef),
+			this.getDocumentFilterOperator(filter),
+			filter.value,
+		);
+	}
+	/** Builds exists expressions for brick/custom-field filter groups. */
+	buildBrickFilterExpressions<DB, Table extends keyof DB>(
+		eb: ExpressionBuilder<DB, Table>,
+		brickFilters: BrickFilters[],
+		documentTableName: string,
+		versionTableName?: string,
+	): OperandExpression<SqlBool>[] {
+		const { table, ref } = this.db.dynamic;
+
+		return brickFilters.map((brickFilter) => {
+			let subQuery = this.db
+				.selectFrom(table(brickFilter.table).as("bf"))
+				.whereRef(ref("bf.document_id"), "=", ref(`${documentTableName}.id`));
+			if (versionTableName !== undefined) {
+				subQuery = subQuery.whereRef(
+					ref("bf.document_version_id"),
+					"=",
+					ref(`${versionTableName}.id`),
+				);
+			}
+
+			for (const filter of brickFilter.filters) {
+				subQuery = subQuery.where(
+					ref(`bf.${filter.column}`),
+					filter.operator as ComparisonOperatorExpression,
+					filter.value,
+				);
+			}
+
+			return eb.exists(subQuery.select(sql.lit(1).as("exists")));
+		});
+	}
+	/** Applies document OR groups while keeping global filters outside the OR. */
+	applyDocumentFilterOrToQuery<DB, Table extends keyof DB, O>(
+		query: SelectQueryBuilder<DB, Table, O>,
+		filterOr: DocumentFilterOrGroup[] | undefined,
+		documentTableName: string,
+		versionTableName: string | undefined,
+		includeWorkflow: boolean,
+	): SelectQueryBuilder<DB, Table, O> {
+		if (!filterOr || filterOr.length === 0) {
+			return query;
+		}
+
+		return query.where((eb) => {
+			const groupConditions: OperandExpression<SqlBool>[] = [];
+
+			for (const group of filterOr) {
+				const expressions: OperandExpression<SqlBool>[] = [];
+
+				for (const filter of group.documentFilters) {
+					const expression = this.buildDocumentFilterExpression(
+						eb,
+						filter,
+						documentTableName,
+						includeWorkflow,
+					);
+					if (expression !== undefined) expressions.push(expression);
+				}
+
+				expressions.push(
+					...this.buildBrickFilterExpressions(
+						eb,
+						group.brickFilters,
+						documentTableName,
+						versionTableName,
+					),
+				);
+
+				if (expressions.length > 0) {
+					groupConditions.push(eb.and(expressions));
+				}
+			}
+
+			return groupConditions.length > 0 ? eb.or(groupConditions) : eb.val(true);
+		});
+	}
 	applyBrickFiltersToQuery<DB, Table extends keyof DB, O>(
 		query: SelectQueryBuilder<DB, Table, O>,
 		brickFilters: BrickFilters[],
@@ -1443,31 +1623,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			return query;
 		}
 
-		const { table, ref } = this.db.dynamic;
-
 		return query.where((eb) => {
-			const filterConditions = brickFilters.map((brickFilter) => {
-				let subQuery = this.db
-					.selectFrom(table(brickFilter.table).as("bf"))
-					.whereRef(ref("bf.document_id"), "=", ref(`${documentTableName}.id`));
-				if (versionTableName !== undefined) {
-					subQuery = subQuery.whereRef(
-						ref("bf.document_version_id"),
-						"=",
-						ref(`${versionTableName}.id`),
-					);
-				}
-
-				for (const filter of brickFilter.filters) {
-					subQuery = subQuery.where(
-						ref(`bf.${filter.column}`),
-						filter.operator as ComparisonOperatorExpression,
-						filter.value,
-					);
-				}
-
-				return eb.exists(subQuery.select(sql.lit(1).as("exists")));
-			});
+			const filterConditions = this.buildBrickFilterExpressions(
+				eb,
+				brickFilters,
+				documentTableName,
+				versionTableName,
+			);
 			return eb.and(filterConditions);
 		});
 	}

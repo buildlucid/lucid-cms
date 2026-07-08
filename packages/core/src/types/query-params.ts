@@ -17,6 +17,10 @@ export type FilterObject = {
 	operator?: FilterOperator;
 };
 export type QueryParamFilters = Record<string, FilterObject>;
+export type QueryParamFilterCondition = FilterObject & {
+	key: string;
+};
+export type QueryParamFilterGroups = QueryParamFilterCondition[][];
 export type QueryFilters = {
 	[key: string]: FilterObject | QueryFilters | undefined;
 };
@@ -33,6 +37,13 @@ export type CollectionDocumentFilters<TCollectionKey extends string = string> =
 	TCollectionKey extends CollectionDocumentFilterCollectionKey
 		? CollectionDocumentFiltersByCollection[TCollectionKey]
 		: QueryFilters;
+
+/** Accepts one AND filter object or OR groups represented as filter objects. */
+export type CollectionDocumentFilterInput<
+	TCollectionKey extends string = string,
+> =
+	| CollectionDocumentFilters<TCollectionKey>
+	| Array<CollectionDocumentFilters<TCollectionKey>>;
 
 // -----------------------------------------------
 // Sorts
@@ -118,6 +129,7 @@ export type QueryParamPagination = {
 // Query Params
 export type QueryParams = {
 	filter: QueryParamFilters | undefined;
+	filterOr: QueryParamFilterGroups | undefined;
 	sort: QueryParamSorts | undefined;
 	include: QueryParamIncludes | undefined;
 	exclude: QueryParamExcludes | undefined;
@@ -137,14 +149,14 @@ export type CollectionDocumentMultipleInclude =
 export type CollectionDocumentSingleQuery<
 	TCollectionKey extends string = string,
 > = {
-	filter?: CollectionDocumentFilters<TCollectionKey>;
+	filter?: CollectionDocumentFilterInput<TCollectionKey>;
 	include?: CollectionDocumentSingleInclude[];
 };
 
 export type CollectionDocumentMultipleQuery<
 	TCollectionKey extends string = string,
 > = {
-	filter?: CollectionDocumentFilters<TCollectionKey>;
+	filter?: CollectionDocumentFilterInput<TCollectionKey>;
 	sort?: CollectionDocumentSorts<TCollectionKey>;
 	include?: CollectionDocumentMultipleInclude[];
 	page?: QueryParamPagination["page"];

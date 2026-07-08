@@ -85,6 +85,11 @@ export const queryString = {
 				description:
 					"Dynamic filter parameter in format filter[fieldName:operator]. Supported operators include: '=', '%', 'like', 'ilike', 'in', 'not in', '<>', 'is not', 'is' and '!='.",
 			},
+			"^filter\\[or\\]\\[[0-9]+\\]\\[([^\\]:]+):?([^\\]]*)\\]$": {
+				type: ["string", "null"],
+				description:
+					"Grouped OR filter parameter in format filter[or][groupIndex][fieldName:operator]. Conditions within a group are ANDed, groups are ORed.",
+			},
 		},
 		additionalProperties: false,
 	},
@@ -112,7 +117,7 @@ export const queryFormatted = {
 	schema: {
 		filters: {
 			single: z.object({
-				value: z.union([z.string(), z.number(), z.null()]),
+				value: z.union([z.string(), z.number(), z.boolean(), z.null()]),
 				operator: filterOperators,
 			}),
 			union: z.object({
@@ -121,10 +126,31 @@ export const queryFormatted = {
 					z.array(z.string()),
 					z.number(),
 					z.array(z.number()),
+					z.boolean(),
+					z.array(z.boolean()),
 				]),
 				operator: filterOperators,
 			}),
 		},
+		filterOr: z
+			.array(
+				z.array(
+					z.object({
+						key: z.string(),
+						value: z.union([
+							z.string(),
+							z.array(z.string()),
+							z.number(),
+							z.array(z.number()),
+							z.boolean(),
+							z.array(z.boolean()),
+							z.null(),
+						]),
+						operator: filterOperators,
+					}),
+				),
+			)
+			.optional(),
 		page: z.number(),
 		perPage: z.number(),
 	},

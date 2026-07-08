@@ -24,6 +24,7 @@ import type {
 	FilterState,
 	FilterStateMap,
 	FilterValue,
+	OrFilterGroups,
 	QueryStateModel,
 	QueryStateOptions,
 	QueryStateParams,
@@ -136,6 +137,11 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 				]),
 			),
 	);
+	const orFilterGroups: Accessor<OrFilterGroups> = createMemo(() =>
+		(getState().orFilterGroups ?? []).map((group) =>
+			group.map((condition) => ({ ...condition })),
+		),
+	);
 	const sorts: Accessor<SortMap> = createMemo(
 		() => new Map(Object.entries(getState().sorts)),
 	);
@@ -153,6 +159,7 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 	return {
 		filters,
 		filterStates,
+		orFilterGroups,
 		getFilter: (key: string) => {
 			const filter = getState().filters[key];
 			return filter ? toPublicFilterState(filter) : undefined;
@@ -196,6 +203,12 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 		},
 		resetFilters: () => {
 			commit(resetFiltersState(untrack(getState), untrack(getSchema)));
+		},
+		setOrFilterGroups: (groups: OrFilterGroups) => {
+			setParams({ orFilterGroups: groups });
+		},
+		clearOrFilterGroups: () => {
+			setParams({ orFilterGroups: [] });
 		},
 
 		setSort: (key: string, direction: SortDirection | undefined) => {

@@ -8,6 +8,7 @@
 - Added field-level `useAsLabel` support for configuring document labels. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
 - Added relation custom field support in document listing columns. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
 - Added color custom field support in document listing columns. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
+- Added grouped OR filter support with `filter[or][groupIndex][key:operator]` query params, shared backend query-builder handling, document custom-field filtering, admin query-state support, and toolkit filter array shorthand.
 
 ### Breaking Changes:
 

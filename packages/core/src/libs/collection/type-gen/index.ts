@@ -566,6 +566,7 @@ const buildGeneratedMapsDeclaration = (props: {
 		`export type CollectionDocument<TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey> = CoreCollectionDocument<TCollectionKey>;`,
 		`export type Document<TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey> = CoreCollectionDocument<TCollectionKey>;`,
 		`export type CollectionDocumentFilters<TCollectionKey extends string = string> = CoreCollectionDocumentFilters<TCollectionKey>;`,
+		`export type CollectionDocumentFilterInput<TCollectionKey extends string = string> = CoreCollectionDocumentFilterInput<TCollectionKey>;`,
 		`export type CollectionDocumentStatus<TCollectionKey extends string = string> = CoreCollectionDocumentStatus<TCollectionKey>;`,
 		`export type CollectionDocumentSortKey<TCollectionKey extends string = string> = CoreCollectionDocumentSortKey<TCollectionKey>;`,
 		`export type CollectionDocumentSorts<TCollectionKey extends string = string> = CoreCollectionDocumentSorts<TCollectionKey>;`,
@@ -587,6 +588,7 @@ const generateCollectionClientTypes = (props: {
 		imports: [
 			`import type {
 \tCollectionDocument as CoreCollectionDocument,
+\tCollectionDocumentFilterInput as CoreCollectionDocumentFilterInput,
 \tCollectionDocumentFilters as CoreCollectionDocumentFilters,
 \tCollectionDocumentStatus as CoreCollectionDocumentStatus,
 \tCollectionDocumentSortKey as CoreCollectionDocumentSortKey,

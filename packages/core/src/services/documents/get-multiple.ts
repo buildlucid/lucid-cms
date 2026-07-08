@@ -18,6 +18,7 @@ import type { InternalCollectionDocument } from "../../types/response.js";
 import {
 	getBaseUrl,
 	getFilterValues,
+	groupDocumentFilterConditions,
 	groupDocumentFilters,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -99,6 +100,11 @@ const getMultiple: ServiceFn<
 			includeWorkflow,
 		},
 	);
+	const filterOr = data.query.filterOr?.map((group) =>
+		groupDocumentFilterConditions(bricksTableSchemaRes.data, group, {
+			includeWorkflow,
+		}),
+	);
 	const workflowAssigneeFilterValues = getFilterValues(
 		documentFilters.workflowAssignee,
 	);
@@ -123,6 +129,7 @@ const getMultiple: ServiceFn<
 			status: data.status,
 			query: data.query,
 			documentFilters,
+			filterOr,
 			brickFilters: brickFilters,
 			collection: collectionRes.data,
 			config: context.config,

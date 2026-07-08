@@ -363,8 +363,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 			{
 				where?: QueryBuilderWhere<"lucid_document_publish_operations">;
 				queryParams: GetMultipleQueryParams;
-				assignedTo?: number;
-				reviewerIds?: number[];
+				currentUserId: number;
 				tenantKey?: string | null;
 			}
 		>,
@@ -390,76 +389,6 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 					column: "lucid_document_publish_operations.tenant_key",
 				});
 
-				if (props.assignedTo) {
-					const assignedTo = props.assignedTo;
-					baseQuery = baseQuery.where(({ exists, selectFrom }) =>
-						exists(
-							selectFrom("lucid_document_publish_operation_assignees")
-								.select(sql.lit(1).as("one"))
-								.whereRef(
-									"lucid_document_publish_operation_assignees.operation_id",
-									"=",
-									"lucid_document_publish_operations.id",
-								)
-								.where(
-									"lucid_document_publish_operation_assignees.user_id",
-									"=",
-									assignedTo,
-								),
-						),
-					);
-					countQuery = countQuery.where(({ exists, selectFrom }) =>
-						exists(
-							selectFrom("lucid_document_publish_operation_assignees")
-								.select(sql.lit(1).as("one"))
-								.whereRef(
-									"lucid_document_publish_operation_assignees.operation_id",
-									"=",
-									"lucid_document_publish_operations.id",
-								)
-								.where(
-									"lucid_document_publish_operation_assignees.user_id",
-									"=",
-									assignedTo,
-								),
-						),
-					);
-				}
-				if (props.reviewerIds !== undefined) {
-					baseQuery = baseQuery.where(({ exists, selectFrom }) =>
-						exists(
-							selectFrom("lucid_document_publish_operation_assignees")
-								.select(sql.lit(1).as("one"))
-								.whereRef(
-									"lucid_document_publish_operation_assignees.operation_id",
-									"=",
-									"lucid_document_publish_operations.id",
-								)
-								.where(
-									"lucid_document_publish_operation_assignees.user_id",
-									"in",
-									props.reviewerIds ?? [],
-								),
-						),
-					);
-					countQuery = countQuery.where(({ exists, selectFrom }) =>
-						exists(
-							selectFrom("lucid_document_publish_operation_assignees")
-								.select(sql.lit(1).as("one"))
-								.whereRef(
-									"lucid_document_publish_operation_assignees.operation_id",
-									"=",
-									"lucid_document_publish_operations.id",
-								)
-								.where(
-									"lucid_document_publish_operation_assignees.user_id",
-									"in",
-									props.reviewerIds ?? [],
-								),
-						),
-					);
-				}
-
 				const queryBuilderRes = queryBuilder.main(
 					{
 						main: baseQuery,
@@ -467,7 +396,79 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 					},
 					{
 						queryParams: props.queryParams,
-						meta: this.queryConfig,
+						meta: {
+							...this.queryConfig,
+							customFilters: {
+								requestedByMe: ({ eb, filter }) => {
+									if (
+										filter.value !== true &&
+										filter.value !== "true" &&
+										filter.value !== "1" &&
+										filter.value !== 1
+									) {
+										return undefined;
+									}
+
+									return eb(
+										"lucid_document_publish_operations.requested_by",
+										"=",
+										props.currentUserId,
+									);
+								},
+								assignedToMe: ({ eb, filter }) => {
+									if (
+										filter.value !== true &&
+										filter.value !== "true" &&
+										filter.value !== "1" &&
+										filter.value !== 1
+									) {
+										return undefined;
+									}
+
+									return eb.exists(
+										eb
+											.selectFrom("lucid_document_publish_operation_assignees")
+											.select(sql.lit(1).as("one"))
+											.whereRef(
+												"lucid_document_publish_operation_assignees.operation_id",
+												"=",
+												"lucid_document_publish_operations.id",
+											)
+											.where(
+												"lucid_document_publish_operation_assignees.user_id",
+												"=",
+												props.currentUserId,
+											),
+									);
+								},
+								reviewers: ({ eb, filter }) => {
+									const values = Array.isArray(filter.value)
+										? filter.value
+										: [filter.value];
+									const reviewerIds = values
+										.map((value) => Number(value))
+										.filter(Number.isFinite);
+
+									if (reviewerIds.length === 0) return sql<boolean>`1 = 0`;
+
+									return eb.exists(
+										eb
+											.selectFrom("lucid_document_publish_operation_assignees")
+											.select(sql.lit(1).as("one"))
+											.whereRef(
+												"lucid_document_publish_operation_assignees.operation_id",
+												"=",
+												"lucid_document_publish_operations.id",
+											)
+											.where(
+												"lucid_document_publish_operation_assignees.user_id",
+												"in",
+												reviewerIds,
+											),
+									);
+								},
+							},
+						},
 					},
 				);
 				const query = queryBuilderRes.main

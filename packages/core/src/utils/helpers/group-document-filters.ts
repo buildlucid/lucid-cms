@@ -9,6 +9,7 @@ import type {
 import type {
 	FilterOperator,
 	FilterValue,
+	QueryParamFilterCondition,
 	QueryParamFilters,
 } from "../../types/query-params.js";
 import type { FieldDatabaseMode, LucidBrickTableName } from "../../types.js";
@@ -29,6 +30,12 @@ export type BrickFieldFilters = {
 export type BrickFilters = {
 	table: LucidBrickTableName;
 	filters: BrickFieldFilters[];
+};
+
+type DocumentFilterEntry = {
+	key: string;
+	value: QueryParamFilterCondition["value"];
+	operator?: QueryParamFilterCondition["operator"];
 };
 
 const getFieldColumn = (
@@ -151,24 +158,22 @@ const matchesStorageMode = (
  * Splits filters based on document columns and brick tables for custom fields.
  *
  * - `filter[_customFieldKey]` Targets the `document-fields` table and checks for a CF with a key of `customFieldKey`.
- * - `filter[fields._customFieldKey]` Targets the `document-fiedls` table and checks for a CF with a key of `customFieldKey`.
+ * - `filter[fields._customFieldKey]` Targets the `document-fields` table and checks for a CF with a key of `customFieldKey`.
  * - `filter[brickKey._customFieldKey]` Targets the `brick` table with a key of `brickKey` and checks for a CF with a key of `customFieldKey`.
  * - `filter[brickKey.treeFieldKey._customFieldKey]` Targets a tree-table custom-field table scoped to the `brick` and checks for a CF with a key of `customFieldKey`.
  *
  * This supports filtering on any tree-table depth. Include the tree field key for the target table path segment.
  */
-const groupDocumentFilters = (
+const groupDocumentFilterEntries = (
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
-	filters?: QueryParamFilters,
+	filters: DocumentFilterEntry[],
 	options?: {
 		includeWorkflow?: boolean;
 	},
 ): {
-	documentFilters: QueryParamFilters;
+	documentFilters: QueryParamFilterCondition[];
 	brickFilters: BrickFilters[];
 } => {
-	if (!filters) return { documentFilters: {}, brickFilters: [] };
-
 	const validDocFilters = [
 		"id",
 		"createdBy",
@@ -182,13 +187,19 @@ const groupDocumentFilters = (
 		validDocFilters.push("workflowStage", "workflowAssignee");
 	}
 
-	const documentFilters: QueryParamFilters = {};
+	const documentFilters: QueryParamFilterCondition[] = [];
 	const brickFiltersMap = new Map<LucidBrickTableName, BrickFieldFilters[]>();
 
-	for (const [key, value] of Object.entries(filters)) {
+	for (const filter of filters) {
+		const { key, value, operator } = filter;
+
 		//* handle document core filters
 		if (validDocFilters.includes(key)) {
-			documentFilters[key] = value;
+			documentFilters.push({
+				key,
+				value,
+				operator,
+			});
 			continue;
 		}
 
@@ -207,8 +218,8 @@ const groupDocumentFilters = (
 					brickFiltersMap,
 					table: fieldTable.name,
 					fieldKey,
-					value: value.value,
-					operator: value.operator,
+					value,
+					operator,
 					schemaColumn: fieldColumn,
 				});
 				continue;
@@ -224,8 +235,8 @@ const groupDocumentFilters = (
 					brickFiltersMap,
 					table: relationTableFilter.table,
 					fieldKey,
-					value: value.value,
-					operator: value.operator,
+					value,
+					operator,
 					column: relationTableFilter.column,
 					schemaColumn: relationTableFilter.schemaColumn,
 				});
@@ -248,7 +259,7 @@ const groupDocumentFilters = (
 				// direct brick field ("hero._title")
 				fieldKey = parts[1].substring(1);
 
-				// handl "fields" as brickKey (document-fields)
+				// handle "fields" as brickKey (document-fields)
 				if (brickKey === DOCUMENT_FIELDS_KEY) {
 					schemaTable = bricksTableSchema.find(
 						(schema) => schema.type === "document-fields",
@@ -298,8 +309,8 @@ const groupDocumentFilters = (
 						brickFiltersMap,
 						table: tableName,
 						fieldKey,
-						value: value.value,
-						operator: value.operator,
+						value,
+						operator,
 						schemaColumn: fieldColumn,
 					});
 					continue;
@@ -315,8 +326,8 @@ const groupDocumentFilters = (
 						brickFiltersMap,
 						table: relationTableFilter.table,
 						fieldKey,
-						value: value.value,
-						operator: value.operator,
+						value,
+						operator,
 						column: relationTableFilter.column,
 						schemaColumn: relationTableFilter.schemaColumn,
 					});
@@ -331,6 +342,52 @@ const groupDocumentFilters = (
 			([table, filters]) => ({ table, filters }),
 		),
 	};
+};
+
+const groupDocumentFilters = (
+	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
+	filters?: QueryParamFilters,
+	options?: {
+		includeWorkflow?: boolean;
+	},
+): {
+	documentFilters: QueryParamFilters;
+	brickFilters: BrickFilters[];
+} => {
+	if (!filters) return { documentFilters: {}, brickFilters: [] };
+
+	const grouped = groupDocumentFilterEntries(
+		bricksTableSchema,
+		Object.entries(filters).map(([key, value]) => ({
+			key,
+			value: value.value,
+			operator: value.operator,
+		})),
+		options,
+	);
+
+	return {
+		documentFilters: Object.fromEntries(
+			grouped.documentFilters.map(({ key, ...filter }) => [key, filter]),
+		),
+		brickFilters: grouped.brickFilters,
+	};
+};
+
+/** Splits ordered filter conditions without losing keys needed for OR groups. */
+export const groupDocumentFilterConditions = (
+	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
+	filters?: QueryParamFilterCondition[],
+	options?: {
+		includeWorkflow?: boolean;
+	},
+): {
+	documentFilters: QueryParamFilterCondition[];
+	brickFilters: BrickFilters[];
+} => {
+	if (!filters) return { documentFilters: [], brickFilters: [] };
+
+	return groupDocumentFilterEntries(bricksTableSchema, filters, options);
 };
 
 export default groupDocumentFilters;

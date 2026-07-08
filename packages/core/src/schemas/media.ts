@@ -282,6 +282,7 @@ const mediaGetMultipleQueryFormattedSchema = z.object({
 			origin: queryFormatted.schema.filters.union.optional(),
 		})
 		.optional(),
+	filterOr: queryFormatted.schema.filterOr,
 	sort: z
 		.array(
 			z.object({

@@ -81,6 +81,7 @@ export const controllerSchemas = {
 						parentFolderId: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
+				filterOr: queryFormatted.schema.filterOr,
 				sort: z
 					.array(
 						z.object({

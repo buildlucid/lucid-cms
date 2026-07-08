@@ -17,6 +17,7 @@ import type {
 import {
 	applyDefaultQueryFilters,
 	getBaseUrl,
+	groupDocumentFilterConditions,
 	groupDocumentFilters,
 } from "../../../utils/helpers/index.js";
 import type {
@@ -103,6 +104,9 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 		bricksTableSchemaRes.data,
 		query.filter,
 	);
+	const filterOr = query.filterOr?.map((group) =>
+		groupDocumentFilterConditions(bricksTableSchemaRes.data, group),
+	);
 
 	const [tableNameRes, relationVersionTypeRes] = await Promise.all([
 		getTableNames(context, data.collectionKey),
@@ -128,6 +132,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 			status: data.status,
 			query,
 			documentFilters,
+			filterOr,
 			brickFilters: brickFilters,
 			collection: collectionRes.data,
 			config: context.config,

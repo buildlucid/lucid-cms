@@ -27,6 +27,7 @@ export type ToolkitDocuments = {
 	 * Returns multiple documents from a collection.
 	 *
 	 * The response includes the matching documents and a total count.
+	 * Pass an array to `query.filter` when each object should be an OR branch.
 	 *
 	 * @example
 	 * ```ts
@@ -47,6 +48,7 @@ export type ToolkitDocuments = {
 	 * Returns a single document from a collection.
 	 *
 	 * Useful when you expect one matching document for a slug, ID, or other filter.
+	 * Pass an array to `query.filter` when each object should be an OR branch.
 	 *
 	 * @example
 	 * ```ts

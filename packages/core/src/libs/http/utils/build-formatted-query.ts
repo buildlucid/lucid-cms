@@ -4,6 +4,7 @@ import type { LucidHonoContext } from "../../../types/hono.js";
 import type {
 	FilterOperator,
 	FilterValue,
+	QueryParamFilterGroups,
 	QueryParamFilters,
 } from "../../../types/query-params.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
@@ -32,7 +33,7 @@ const buildFilter = (query: unknown, nullableFields?: string[]) => {
 		query as Record<string, string>,
 	).reduce<QueryParamFilters>((acc, [key, value]) => {
 		if (key.includes("filter[")) {
-			const match = key.match(/filter\[([^\]:]+):?([^\]]*)\]/);
+			const match = key.match(/^filter\[([^\]:]+):?([^\]]*)\]$/);
 			if (!match) return acc;
 			const [, name, operator] = match;
 			if (!name) return acc;
@@ -55,6 +56,48 @@ const buildFilter = (query: unknown, nullableFields?: string[]) => {
 		}
 		return acc;
 	}, {});
+};
+
+/** Parses grouped OR params while preserving numeric group order. */
+const buildFilterOr = (query: unknown, nullableFields?: string[]) => {
+	const groups = new Map<number, QueryParamFilterGroups[number]>();
+
+	for (const [key, value] of Object.entries(query as Record<string, string>)) {
+		const match = key.match(/^filter\[or\]\[(\d+)\]\[([^\]:]+):?([^\]]*)\]$/);
+		if (!match) continue;
+
+		const [, groupIndexRaw, name, operator] = match;
+		if (!groupIndexRaw || !name) continue;
+
+		const groupIndex = Number.parseInt(groupIndexRaw, 10);
+		if (Number.isNaN(groupIndex)) continue;
+
+		let processedValue: FilterValue = value.includes(",")
+			? value.split(",")
+			: value;
+
+		if (nullableFields?.includes(name) && processedValue === "") {
+			processedValue = null;
+		}
+
+		const group = groups.get(groupIndex) ?? [];
+		group.push({
+			key: name,
+			value: processedValue,
+			operator:
+				operator === "" || operator === undefined
+					? undefined
+					: (operator as FilterOperator),
+		});
+		groups.set(groupIndex, group);
+	}
+
+	const filterGroups = Array.from(groups.entries())
+		.sort(([left], [right]) => left - right)
+		.map(([, group]) => group)
+		.filter((group) => group.length > 0);
+
+	return filterGroups.length > 0 ? filterGroups : undefined;
 };
 
 const buildPage = (query: unknown) => {
@@ -112,6 +155,7 @@ const buildFormattedQuery = async <T extends ZodType>(
 	const formattedQueryObject = {
 		sort: buildSort(queryParams),
 		filter: buildFilter(queryParams, options?.nullableFields),
+		filterOr: buildFilterOr(queryParams, options?.nullableFields),
 		include: buildInclude(queryParams),
 		exclude: buildExclude(queryParams),
 		page: buildPage(queryParams),
@@ -129,7 +173,14 @@ const buildFormattedQuery = async <T extends ZodType>(
 		});
 	}
 
-	return validateResult.data;
+	const parsedQuery = validateResult.data as Record<string, unknown>;
+
+	return {
+		...parsedQuery,
+		...(formattedQueryObject.filterOr !== undefined
+			? { filterOr: formattedQueryObject.filterOr }
+			: {}),
+	} as z.infer<T>;
 };
 
 export default buildFormattedQuery;

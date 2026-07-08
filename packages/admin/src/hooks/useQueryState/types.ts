@@ -50,8 +50,17 @@ export interface QueryFilterState extends FilterState {
 	operatorExplicit?: boolean;
 }
 
+/** One filter condition inside a grouped OR branch. */
+export interface OrFilterCondition extends FilterState {
+	key: string;
+}
+
+/** Conditions inside a group are ANDed; groups are ORed. */
+export type OrFilterGroup = OrFilterCondition[];
+
 export interface QueryStateModel {
 	filters: Record<string, QueryFilterState>;
+	orFilterGroups: OrFilterGroup[];
 	sorts: Record<string, SortDirection | undefined>;
 	pagination: {
 		page: number;
@@ -68,6 +77,7 @@ export interface QueryStateOptions {
 
 export interface QueryStateParams {
 	filters?: Record<string, FilterValue | FilterState>;
+	orFilterGroups?: OrFilterGroup[];
 	sorts?: Record<string, SortDirection | undefined>;
 	pagination?: {
 		page?: number;
@@ -83,4 +93,5 @@ export interface QueryStateStorageAdapter {
 
 export type FilterMap = Map<string, FilterValue>;
 export type FilterStateMap = Map<string, FilterState>;
+export type OrFilterGroups = OrFilterGroup[];
 export type SortMap = Map<string, SortDirection | undefined>;

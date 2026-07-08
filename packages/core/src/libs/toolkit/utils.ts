@@ -1,5 +1,9 @@
 import constants from "../../constants/constants.js";
 import type {
+	ClientGetMultipleQueryParams,
+	ClientGetSingleQueryParams,
+} from "../../schemas/documents.js";
+import type {
 	QueryFilters,
 	QueryParamFilters,
 } from "../../types/query-params.js";
@@ -18,7 +22,7 @@ type PaginatedQuery = {
 };
 
 type DocumentQuery = {
-	filter?: QueryFilters;
+	filter?: QueryFilters | QueryFilters[];
 };
 
 type ResolvedServiceResponse<T> = Awaited<ServiceResponse<T>>;
@@ -31,6 +35,47 @@ type ToolkitServiceErrorCopy = {
 type ToolkitServiceErrorConfig = {
 	name?: ToolkitServiceErrorCopy;
 	message: ToolkitServiceErrorCopy;
+};
+
+type ServiceDocumentFilter = NonNullable<
+	ClientGetSingleQueryParams["filter"] | ClientGetMultipleQueryParams["filter"]
+>;
+type ServiceDocumentFilterOr = NonNullable<
+	| ClientGetSingleQueryParams["filterOr"]
+	| ClientGetMultipleQueryParams["filterOr"]
+>;
+
+type NormalizedDocumentFilters = {
+	filter?: ServiceDocumentFilter;
+	filterOr?: ServiceDocumentFilterOr;
+};
+
+/** Converts one flattened filter map into an AND group for filterOr. */
+const toFilterGroup = (
+	filters?: QueryParamFilters,
+): ServiceDocumentFilterOr[number] =>
+	Object.entries(filters ?? {}).map(([key, filter]) => ({
+		key,
+		...filter,
+	})) as ServiceDocumentFilterOr[number];
+
+/** Maps toolkit filter shorthand to the service filter/filterOr shape. */
+const normalizeToolkitDocumentFilters = (
+	filters?: QueryFilters | QueryFilters[],
+): NormalizedDocumentFilters => {
+	if (!filters) return {};
+
+	if (!Array.isArray(filters)) {
+		return {
+			filter: flattenDocumentFilters(filters) as ServiceDocumentFilter,
+		};
+	}
+
+	const filterOr = filters
+		.map((filterGroup) => toFilterGroup(flattenDocumentFilters(filterGroup)))
+		.filter((filterGroup) => filterGroup.length > 0);
+
+	return filterOr.length > 0 ? { filterOr } : {};
 };
 
 /** Applies Lucid's default pagination when toolkit callers omit it. */
@@ -49,12 +94,13 @@ export const normalizePaginatedQuery = <T extends PaginatedQuery>(
 /** Flattens nested document filters so toolkit calls match the internal service query shape. */
 export const normalizeDocumentQuery = <T extends DocumentQuery>(
 	query?: T,
-): Omit<T, "filter"> & { filter?: QueryParamFilters } => {
+): Omit<T, "filter"> & NormalizedDocumentFilters => {
 	const normalizedQuery = query ?? ({} as T);
+	const { filter, ...restQuery } = normalizedQuery;
 
 	return {
-		...normalizedQuery,
-		filter: flattenDocumentFilters(normalizedQuery.filter),
+		...restQuery,
+		...normalizeToolkitDocumentFilters(filter),
 	};
 };
 
@@ -64,17 +110,19 @@ export const normalizePaginatedDocumentQuery = <
 >(
 	query?: T,
 ): Omit<T, "filter" | "page" | "perPage"> & {
-	filter?: QueryParamFilters;
+	filter?: ServiceDocumentFilter;
+	filterOr?: ServiceDocumentFilterOr;
 	page: number;
 	perPage: number;
 } => {
 	const normalizedQuery = query ?? ({} as T);
+	const { filter, page, perPage, ...restQuery } = normalizedQuery;
 
 	return {
-		...normalizedQuery,
-		filter: flattenDocumentFilters(normalizedQuery.filter),
-		page: normalizedQuery.page ?? constants.query.page,
-		perPage: normalizedQuery.perPage ?? constants.query.perPage,
+		...restQuery,
+		...normalizeToolkitDocumentFilters(filter),
+		page: page ?? constants.query.page,
+		perPage: perPage ?? constants.query.perPage,
 	};
 };
 

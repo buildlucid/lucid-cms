@@ -161,6 +161,7 @@ export const controllerSchemas = {
 						requestedByMe: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
+				filterOr: queryFormatted.schema.filterOr,
 				sort: z
 					.array(
 						z.object({
@@ -202,6 +203,7 @@ export const controllerSchemas = {
 						target: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
+				filterOr: queryFormatted.schema.filterOr,
 			}),
 		},
 		params: z.object({}),

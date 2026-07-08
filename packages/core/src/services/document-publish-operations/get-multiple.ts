@@ -1,5 +1,4 @@
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { QueryBuilderWhere } from "../../libs/db/query-builder/index.js";
 import formatter, {
 	documentPublishOperationsFormatter,
 } from "../../libs/formatters/index.js";
@@ -12,7 +11,7 @@ import type { GetMultipleQueryParams } from "../../schemas/publish-operation-man
 import type { LucidAuth } from "../../types/hono.js";
 import type { PublishOperation } from "../../types/response.js";
 import type { CollectionTableNames } from "../../types.js";
-import { getBaseUrl, getFilterValues } from "../../utils/helpers/index.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import getDocumentLabel from "./helpers/get-document-label.js";
@@ -37,33 +36,11 @@ const getMultiple: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const requestedByMe = data.query.filter?.requestedByMe?.value === "true";
-	const assignedToMe = data.query.filter?.assignedToMe?.value === "true";
-	const reviewerFilterValues = getFilterValues(data.query.filter?.reviewers);
-	const reviewerIds =
-		reviewerFilterValues === undefined
-			? undefined
-			: (reviewerFilterValues
-					.map((value) => Number(value))
-					.filter(Number.isFinite) as number[]);
-
-	const where: QueryBuilderWhere<"lucid_document_publish_operations"> = [];
-
-	if (requestedByMe) {
-		where.push({ key: "requested_by", operator: "=", value: data.user.id });
-	}
 
 	const operationsRes = await Operations.selectMultipleDetailed({
-		where,
 		queryParams: data.query,
-		assignedTo: assignedToMe ? data.user.id : undefined,
+		currentUserId: data.user.id,
 		tenantKey: context.request.tenantKey,
-		reviewerIds:
-			reviewerIds === undefined
-				? undefined
-				: reviewerIds.length > 0
-					? reviewerIds
-					: [-1],
 	});
 	if (operationsRes.error) return operationsRes;
 

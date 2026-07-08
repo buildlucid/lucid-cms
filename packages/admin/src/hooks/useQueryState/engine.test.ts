@@ -41,6 +41,7 @@ describe("defaultQueryState", () => {
 			operator: undefined,
 		});
 		expect(state.filters.author).toEqual({ value: [], operator: "in" });
+		expect(state.orFilterGroups).toEqual([]);
 		expect(state.sorts).toEqual({ updatedAt: "desc", createdAt: undefined });
 		expect(state.pagination).toEqual({ page: 1, perPage: 10 });
 	});
@@ -91,6 +92,21 @@ describe("parseSearchIntoState", () => {
 	it("ignores filter params not in the schema", () => {
 		const state = parseSearchIntoState("filter[unknown]=x", schema);
 		expect(state.filters.unknown).toBeUndefined();
+	});
+
+	it("parses grouped OR filters in index order", () => {
+		const state = parseSearchIntoState(
+			"filter[or][1][isDeleted]=0&filter[or][0][title:ilike]=home&filter[or][0][author:in]=1,2",
+			schema,
+		);
+
+		expect(state.orFilterGroups).toEqual([
+			[
+				{ key: "title", value: "home", operator: "ilike" },
+				{ key: "author", value: [1, 2], operator: "in" },
+			],
+			[{ key: "isDeleted", value: false }],
+		]);
 	});
 });
 
@@ -164,11 +180,29 @@ describe("stateToStorageSearch", () => {
 	it("round-trips through parseSearchIntoState", () => {
 		const state = applyParams(defaultQueryState(schema), schema, {
 			filters: { title: "hi", author: [3, 4] },
+			orFilterGroups: [[{ key: "isDeleted", value: false }]],
 			sorts: { createdAt: "asc" },
 			pagination: { page: 5, perPage: 20 },
 		});
 		const search = stateToStorageSearch(state, schema, "");
 		expect(statesEqual(parseSearchIntoState(search, schema), state)).toBe(true);
+	});
+
+	it("serialises grouped OR filters to storage", () => {
+		const state = applyParams(defaultQueryState(schema), schema, {
+			orFilterGroups: [
+				[
+					{ key: "title", value: "home", operator: "ilike" },
+					{ key: "author", value: [1, 2], operator: "in" },
+				],
+				[{ key: "isDeleted", value: false }],
+			],
+		});
+		const params = new URLSearchParams(stateToStorageSearch(state, schema, ""));
+
+		expect(params.get("filter[or][0][title:ilike]")).toBe("home");
+		expect(params.get("filter[or][0][author:in]")).toBe("1,2");
+		expect(params.get("filter[or][1][isDeleted]")).toBe("0");
 	});
 });
 
@@ -208,6 +242,17 @@ describe("buildQueryString", () => {
 		expect(params.get("page")).toBe("1");
 		expect(params.get("perPage")).toBe("10");
 		expect(params.get("sort")).toBe("-updatedAt");
+	});
+
+	it("serialises grouped OR filters to the API query string", () => {
+		const state = applyParams(defaultQueryState(schema), schema, {
+			orFilterGroups: [[{ key: "title", value: "home", operator: "ilike" }]],
+		});
+		const params = new URLSearchParams(buildQueryString(state, schema));
+
+		expect(params.get("filter[or][0][title:ilike]")).toBe("home");
+		expect(params.get("page")).toBe("1");
+		expect(params.get("perPage")).toBe("10");
 	});
 });
 
@@ -256,6 +301,24 @@ describe("applyParams", () => {
 			operator: "notIn",
 			operatorExplicit: true,
 		});
+	});
+
+	it("accepts grouped OR filters", () => {
+		const state = applyParams(defaultQueryState(schema), schema, {
+			orFilterGroups: [
+				[
+					{ key: "title", value: "home", operator: "ilike" },
+					{ key: "author", value: [1, 2], operator: "in" },
+				],
+			],
+		});
+
+		expect(state.orFilterGroups).toEqual([
+			[
+				{ key: "title", value: "home", operator: "ilike" },
+				{ key: "author", value: [1, 2], operator: "in" },
+			],
+		]);
 	});
 
 	it("preserves an existing explicit operator when raw values change", () => {

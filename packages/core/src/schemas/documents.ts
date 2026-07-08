@@ -515,6 +515,7 @@ export const controllerSchemas = {
 							.optional(),
 					})
 					.optional(),
+				filterOr: queryFormatted.schema.filterOr,
 				sort: z
 					.array(
 						z.object({
@@ -629,6 +630,7 @@ export const controllerSchemas = {
 						}),
 					])
 					.optional(),
+				filterOr: queryFormatted.schema.filterOr,
 				sort: documentSortSchema,
 				include: z.array(documentRefsIncludeSchema).optional(),
 				page: queryFormatted.schema.page,
@@ -809,6 +811,7 @@ export const controllerSchemas = {
 							}),
 						])
 						.optional(),
+					filterOr: queryFormatted.schema.filterOr,
 					include: z
 						.array(
 							z.union([
@@ -914,6 +917,7 @@ export const controllerSchemas = {
 							}),
 						])
 						.optional(),
+					filterOr: queryFormatted.schema.filterOr,
 					sort: documentSortSchema,
 					include: z
 						.array(z.union([z.literal("meta"), documentRefsIncludeSchema]))

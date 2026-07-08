@@ -87,6 +87,7 @@ export const controllerSchemas = {
 						updatedBy: queryFormatted.schema.filters.union.optional(),
 					})
 					.optional(),
+				filterOr: queryFormatted.schema.filterOr,
 				sort: z
 					.array(
 						z.object({

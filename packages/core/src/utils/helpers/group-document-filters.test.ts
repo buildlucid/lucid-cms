@@ -1,9 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import constants from "../../constants/constants.js";
 import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
-import type { QueryParamFilters } from "../../types/query-params.js";
+import type {
+	QueryParamFilterCondition,
+	QueryParamFilters,
+} from "../../types/query-params.js";
 import type { LucidBrickTableName } from "../../types.js";
-import groupDocumentFilters from "./group-document-filters.js";
+import groupDocumentFilters, {
+	groupDocumentFilterConditions,
+} from "./group-document-filters.js";
 
 // Mock the prefixGeneratedColName function
 vi.mock(
@@ -874,5 +879,41 @@ describe("groupDocumentFilters", () => {
 
 		expect(result.documentFilters).toEqual({});
 		expect(result.brickFilters).toHaveLength(0);
+	});
+
+	it("groups condition arrays for OR document filtering", () => {
+		const filters: QueryParamFilterCondition[] = [
+			{ key: "id", value: 1 },
+			{ key: "_simpleHeading", value: "Document Heading", operator: "ilike" },
+			{ key: "simple._heading", value: "Brick Heading" },
+		];
+
+		const result = groupDocumentFilterConditions(sampleSchema, filters);
+
+		expect(result.documentFilters).toEqual([{ key: "id", value: 1 }]);
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld",
+				filters: [
+					{
+						key: "simpleHeading",
+						value: "Document Heading",
+						operator: "ilike",
+						column: "_simpleHeading",
+					},
+				],
+			},
+			{
+				table: "lucid_document__simple__simple",
+				filters: [
+					{
+						key: "heading",
+						value: "Brick Heading",
+						operator: "=",
+						column: "_heading",
+					},
+				],
+			},
+		]);
 	});
 });
