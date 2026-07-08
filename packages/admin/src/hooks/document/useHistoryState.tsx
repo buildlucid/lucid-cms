@@ -9,7 +9,7 @@ import T from "@/translations";
 import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import useSearchParamsState from "../useSearchParamsState";
+import useQueryState, { pagination, sort } from "../useQueryState";
 
 const PER_PAGE = 20;
 
@@ -51,19 +51,18 @@ const getDateGroupKey = (dateStr: string | null): string => {
 export function useHistoryState() {
 	const params = useParams();
 	const navigate = useNavigate();
-	const searchParams = useSearchParamsState(
-		{
+	const searchParams = useQueryState({
+		mode: "memory",
+		schema: {
 			sorts: {
-				createdAt: "desc",
+				createdAt: sort({ defaultValue: "desc" }),
 			},
-			pagination: {
-				perPage: PER_PAGE,
-			},
+			pagination: pagination({ defaultPerPage: PER_PAGE }),
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 
 	const [accumulatedRevisions, setAccumulatedRevisions] = createSignal<
 		DocumentVersion[]
@@ -85,7 +84,7 @@ export function useHistoryState() {
 		return (
 			contentLocale() !== undefined &&
 			documentId() !== undefined &&
-			searchParams.getSettled()
+			searchParams.ready()
 		);
 	});
 	const selectedVersion = createMemo(() => {
@@ -118,7 +117,7 @@ export function useHistoryState() {
 	});
 	const revisionsQuery = api.documents.useGetMultipleRevisions({
 		queryParams: {
-			queryString: searchParams.getQueryString,
+			queryString: searchParams.queryString,
 			location: {
 				collectionKey: collectionKey,
 				documentId: documentId,
@@ -547,7 +546,7 @@ export function useHistoryState() {
 	// Effects
 	createEffect(() => {
 		const data = revisionsQuery.data?.data;
-		const currentPage = searchParams.getPagination().page;
+		const currentPage = searchParams.pagination().page;
 
 		if (data) {
 			if (currentPage === 1) {
@@ -566,7 +565,7 @@ export function useHistoryState() {
 	// Handlers
 	const loadMore = () => {
 		if (hasMore() && !isLoading()) {
-			const currentPage = searchParams.getPagination().page;
+			const currentPage = searchParams.pagination().page;
 			searchParams.setParams({
 				pagination: {
 					page: currentPage + 1,

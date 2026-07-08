@@ -20,15 +20,15 @@ import ViewUserLoginsPanel from "@/components/Panels/User/ViewUserLoginsPanel";
 import ViewUserPanel from "@/components/Panels/User/ViewUserPanel";
 import UserRow from "@/components/Tables/Rows/UserRow";
 import { Permissions } from "@/constants/permissions";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
 export const UserList: Component<{
 	state: {
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 		setOpenCreateUserPanel: (state: boolean) => void;
 		showingDeleted: Accessor<boolean>;
 	};
@@ -99,12 +99,12 @@ export const UserList: Component<{
 	// Queries
 	const users = api.users.useGetMultiple({
 		queryParams: {
-			queryString: props.state?.searchParams.getQueryString,
+			queryString: props.state?.searchParams.queryString,
 			filters: {
 				isDeleted: isDeletedFilter,
 			},
 		},
-		enabled: () => props.state?.searchParams.getSettled(),
+		enabled: () => props.state?.searchParams.ready(),
 	});
 	const providers = api.auth.useGetProviders({
 		queryParams: {},

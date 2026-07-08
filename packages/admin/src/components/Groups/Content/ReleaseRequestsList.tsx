@@ -23,13 +23,13 @@ import PublishOperationReviewers from "@/components/Modals/Documents/PublishOper
 import PublishOperationSchedule from "@/components/Modals/Documents/PublishOperationSchedule";
 import ReleaseRequestOverview from "@/components/Partials/ReleaseRequestOverview";
 import ReleaseRequestRow from "@/components/Tables/Rows/ReleaseRequestRow";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
 
 export const ReleaseRequestsList: Component<{
 	state: {
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 	};
 	data: {
 		collections: Collection[];
@@ -68,15 +68,15 @@ export const ReleaseRequestsList: Component<{
 			),
 	);
 	const collectionKeyFilter = createMemo(() => {
-		const value = props.state.searchParams.getFilters().get("collectionKey");
+		const value = props.state.searchParams.filters().get("collectionKey");
 		return typeof value === "string" && value.length > 0 ? value : undefined;
 	});
 	const targetFilter = createMemo(() => {
-		const value = props.state.searchParams.getFilters().get("target");
+		const value = props.state.searchParams.filters().get("target");
 		return typeof value === "string" && value.length > 0 ? value : undefined;
 	});
 	const statusFilter = createMemo(() => {
-		const value = props.state.searchParams.getFilters().get("status");
+		const value = props.state.searchParams.filters().get("status");
 		return Array.isArray(value) && value.length > 0
 			? (value as PublishOperationStatus[])
 			: undefined;
@@ -86,7 +86,7 @@ export const ReleaseRequestsList: Component<{
 	// Queries
 	const requests = api.publishOperations.useGetMultiple({
 		queryParams: {
-			queryString: props.state.searchParams.getQueryString,
+			queryString: props.state.searchParams.queryString,
 			filters: {
 				status: () =>
 					statusFilter() === undefined
@@ -100,7 +100,7 @@ export const ReleaseRequestsList: Component<{
 				operationType: () => "request",
 			},
 		},
-		enabled: () => props.state.searchParams.getSettled(),
+		enabled: () => props.state.searchParams.ready(),
 	});
 	const overview = api.publishOperations.useGetOverview({
 		queryParams: {
@@ -109,7 +109,7 @@ export const ReleaseRequestsList: Component<{
 				target: targetFilter,
 			},
 		},
-		enabled: () => props.state.searchParams.getSettled(),
+		enabled: () => props.state.searchParams.ready(),
 	});
 
 	// ------------------------------
@@ -169,7 +169,7 @@ export const ReleaseRequestsList: Component<{
 						requests.isLoading ||
 						props.status.collections.isLoading ||
 						overview.isLoading ||
-						!props.state.searchParams.getSettled(),
+						!props.state.searchParams.ready(),
 					isEmpty: rows().length === 0,
 					searchParams: props.state.searchParams,
 				}}

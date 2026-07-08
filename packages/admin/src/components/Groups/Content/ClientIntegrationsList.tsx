@@ -15,15 +15,15 @@ import RegenerateAPIKey from "@/components/Modals/ClientIntegrations/RegenerateA
 import UpsertClientIntegrationPanel from "@/components/Panels/ClientIntegrations/UpsertClientIntegrationPanel";
 import ClientIntegrationTableRow from "@/components/Tables/Rows/ClientIntegrationTableRow";
 import { Permissions } from "@/constants/permissions";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
 export const ClientIntegrationsList: Component<{
 	state: {
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 		openCreateClientIntegrationPanel: Accessor<boolean>;
 		setOpenCreateClientIntegrationPanel: (state: boolean) => void;
 	};
@@ -44,9 +44,9 @@ export const ClientIntegrationsList: Component<{
 	// Queries
 	const clientIntegrations = api.clientIntegrations.useGetAll({
 		queryParams: {
-			queryString: props.state.searchParams.getQueryString,
+			queryString: props.state.searchParams.queryString,
 		},
-		enabled: () => props.state.searchParams.getSettled(),
+		enabled: () => props.state.searchParams.ready(),
 	});
 
 	// ----------------------------------

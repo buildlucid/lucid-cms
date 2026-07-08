@@ -18,7 +18,7 @@ import DropdownContent from "@/components/Partials/DropdownContent";
 import UserSelectOption, {
 	type UserSelectOptionUser,
 } from "@/components/Partials/UserSelectOption";
-import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
 
 type FilterOption = {
@@ -37,12 +37,12 @@ interface FilterItemProps {
 		trueLabel?: string;
 		falseLabel?: string;
 	};
-	searchParams: SearchParamsResponse;
+	searchParams: QueryStateResponse;
 }
 
 export interface FilterProps {
 	filters: Array<FilterItemProps["filter"]>;
-	searchParams: SearchParamsResponse;
+	searchParams: QueryStateResponse;
 	disabled?: boolean;
 }
 
@@ -57,7 +57,7 @@ const FilterItem: Component<FilterItemProps> = (props) => {
 	// Effects
 	createEffect(() => {
 		// on the filter change from search params, update the value
-		const filters = props.searchParams.getFilters();
+		const filters = props.searchParams.filters();
 		const filter = filters.get(props.filter.key);
 
 		if (typeof filter === "string" || typeof filter === "number") {

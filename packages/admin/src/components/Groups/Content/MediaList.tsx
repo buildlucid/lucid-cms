@@ -49,8 +49,8 @@ import ViewShareLinksPanel from "@/components/Panels/Media/ViewShareLinksPanel";
 import { Permissions } from "@/constants/permissions";
 import { useUpdateMedia } from "@/hooks/actions";
 import useMediaAltGeneration from "@/hooks/ai/useMediaAltGeneration";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import mediaStore from "@/store/mediaStore";
@@ -61,7 +61,7 @@ import { getImageMeta as getFileImageMeta } from "@/utils/media-meta";
 
 export const MediaList: Component<{
 	state: {
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 		showingDeleted: Accessor<boolean>;
 		setOpenCreateMediaPanel: (state: boolean) => void;
 		parentFolderId: Accessor<number | string | undefined>;
@@ -118,13 +118,13 @@ export const MediaList: Component<{
 	// Queries
 	const media = api.media.useGetMultiple({
 		queryParams: {
-			queryString: props.state.searchParams.getQueryString,
+			queryString: props.state.searchParams.queryString,
 			filters: {
 				folderId: props.state.parentFolderId,
 				isDeleted: isDeletedFilter,
 			},
 		},
-		enabled: () => props.state.searchParams.getSettled(),
+		enabled: () => props.state.searchParams.ready(),
 	});
 	const folders = api.mediaFolders.useGetMultiple({
 		queryParams: {

@@ -19,7 +19,13 @@ import CreateMediaFolderModal from "@/components/Modals/Media/CreateMediaFolder"
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import { Permissions } from "@/constants/permissions";
 import useMediaImageGeneration from "@/hooks/ai/useMediaImageGeneration";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import useQueryState, {
+	arrayFilter,
+	booleanFilter,
+	pagination,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import api from "@/services/api";
 import mediaStore from "@/store/mediaStore";
 import siteStore from "@/store/siteStore";
@@ -30,52 +36,33 @@ const MediaListRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
 	const queryClient = useQueryClient();
-	const searchParams = useSearchParamsLocation(
-		{
+	const searchParams = useQueryState({
+		mode: "url",
+		schema: {
 			filters: {
-				title: {
-					value: "",
-					type: "text",
-				},
-				extension: {
-					value: "",
-					type: "text",
-				},
-				type: {
-					value: "",
-					type: "array",
-				},
-				mimeType: {
-					value: "",
-					type: "text",
-				},
-				key: {
-					value: "",
-					type: "text",
-				},
-				public: {
-					value: undefined,
-					type: "boolean",
-				},
+				title: textFilter(),
+				extension: textFilter(),
+				type: arrayFilter(),
+				mimeType: textFilter(),
+				key: textFilter(),
+				public: booleanFilter(),
 			},
 			sorts: {
-				fileSize: undefined,
-				title: undefined,
-				width: undefined,
-				height: undefined,
-				mimeType: undefined,
-				extension: undefined,
-				createdAt: undefined,
-				updatedAt: "desc",
+				fileSize: sort(),
+				title: sort(),
+				width: sort(),
+				height: sort(),
+				mimeType: sort(),
+				extension: sort(),
+				createdAt: sort(),
+				updatedAt: sort({ defaultValue: "desc" }),
 			},
-			pagination: {
-				perPage: 20,
-			},
+			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 	const params = useParams();
 	const mediaImageGeneration = useMediaImageGeneration();
 	const [getOpenCreateMediaPanel, setOpenCreateMediaPanel] =

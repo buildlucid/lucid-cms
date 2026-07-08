@@ -2,7 +2,7 @@ import type { ResponseBody } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, Show } from "solid-js";
 import { Pagination } from "@/components/Groups/Query/Pagination";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 
 export const Paginated: Component<{
 	state: {
@@ -10,7 +10,7 @@ export const Paginated: Component<{
 		isError?: boolean;
 		isSuccess?: boolean;
 		meta?: ResponseBody<unknown>["meta"];
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 	};
 	options?: {
 		padding?: "16" | "24";

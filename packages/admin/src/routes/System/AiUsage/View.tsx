@@ -7,7 +7,12 @@ import { AiUsageChart } from "@/components/Charts";
 import { AiUsageList } from "@/components/Groups/Content";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
-import useSearchParamsState from "@/hooks/useSearchParamsState";
+import useQueryState, {
+	arrayFilter,
+	pagination,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAiUsageFeatureOptions } from "@/utils/ai-usage";
@@ -17,39 +22,26 @@ const SystemAiUsageRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
 	const queryClient = useQueryClient();
-	const searchParams = useSearchParamsState(
-		{
+	const searchParams = useQueryState({
+		mode: "memory",
+		schema: {
 			filters: {
-				featureKey: {
-					value: "",
-					type: "text",
-				},
-				status: {
-					value: "",
-					type: "array",
-				},
-				model: {
-					value: "",
-					type: "text",
-				},
-				userId: {
-					value: "",
-					type: "array",
-				},
+				featureKey: textFilter(),
+				status: arrayFilter(),
+				model: textFilter(),
+				userId: arrayFilter(),
 			},
 			sorts: {
-				createdAt: "desc",
-				cost: undefined,
-				durationMs: undefined,
+				createdAt: sort({ defaultValue: "desc" }),
+				cost: sort(),
+				durationMs: sort(),
 			},
-			pagination: {
-				perPage: 20,
-			},
+			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 
 	// ----------------------------------
 	// Queries

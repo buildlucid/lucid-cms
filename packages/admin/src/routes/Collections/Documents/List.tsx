@@ -15,9 +15,13 @@ import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import Button from "@/components/Partials/Button";
-import useSearchParamsLocation, {
-	type FilterSchema,
-} from "@/hooks/useSearchParamsLocation";
+import useQueryState, {
+	arrayFilter,
+	booleanFilter,
+	type QueryFilterSchema,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -38,18 +42,19 @@ const CollectionsDocumentsListRoute: Component = () => {
 	const queryClient = useQueryClient();
 	const params = useParams();
 	const navigate = useNavigate();
-	const searchParams = useSearchParamsLocation(
-		{
+	const searchParams = useQueryState({
+		mode: "url",
+		schema: {
 			sorts: {
-				updatedAt: "desc",
-				createdAt: undefined,
+				updatedAt: sort({ defaultValue: "desc" }),
+				createdAt: sort(),
 			},
 		},
-		{
-			manualSettled: true,
+		options: {
+			awaitSchema: true,
 			singleSort: true,
 		},
-	);
+	});
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
 	const [orderMode, setOrderMode] = createSignal(false);
 
@@ -264,43 +269,28 @@ const CollectionsDocumentsListRoute: Component = () => {
 		if (filterSchemaKey === nextFilterSchemaKey) return;
 		filterSchemaKey = nextFilterSchemaKey;
 
-		const filterConfig: FilterSchema = {};
+		const filterConfig: QueryFilterSchema = {};
 		for (const field of fieldFilters) {
 			const fieldKey = formatFieldFilters({
 				fieldKey: field.key,
 			});
 
 			if (field.type === "user") {
-				filterConfig[fieldKey] = {
-					type: "array",
-					value: [],
-				};
+				filterConfig[fieldKey] = arrayFilter();
 				continue;
 			}
 			if (field.type === "checkbox") {
-				filterConfig[fieldKey] = {
-					type: "boolean",
-					value: undefined,
-				};
+				filterConfig[fieldKey] = booleanFilter();
 				continue;
 			}
 
-			filterConfig[fieldKey] = {
-				type: "text",
-				value: "",
-			};
+			filterConfig[fieldKey] = textFilter();
 		}
 		if (activeCollection.workflow) {
-			filterConfig.workflowStage = {
-				type: "text",
-				value: "",
-			};
-			filterConfig.workflowAssignee = {
-				type: "array",
-				value: [],
-			};
+			filterConfig.workflowStage = textFilter();
+			filterConfig.workflowAssignee = arrayFilter();
 		}
-		searchParams.setFilterSchema(filterConfig);
+		searchParams.setSchema({ filters: filterConfig });
 	});
 
 	// ----------------------------------

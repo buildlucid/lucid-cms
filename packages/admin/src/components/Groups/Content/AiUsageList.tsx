@@ -10,22 +10,22 @@ import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Table } from "@/components/Groups/Table/Table";
 import AiUsageRow from "@/components/Tables/Rows/AiUsageRow";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
 
 export const AiUsageList: Component<{
 	state: {
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 	};
 }> = (props) => {
 	// ----------------------------------
 	// Queries
 	const aiUsage = api.ai.useGetUsage({
 		queryParams: {
-			queryString: props.state.searchParams.getQueryString,
+			queryString: props.state.searchParams.queryString,
 		},
-		enabled: () => props.state.searchParams.getSettled(),
+		enabled: () => props.state.searchParams.ready(),
 	});
 
 	// ----------------------------------------

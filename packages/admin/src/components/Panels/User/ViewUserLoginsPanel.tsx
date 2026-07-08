@@ -19,7 +19,11 @@ import { PerPage } from "@/components/Groups/Query/PerPage";
 import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
 import UserLoginRow from "@/components/Tables/Rows/UserLoginRow";
-import useSearchParamsState from "@/hooks/useSearchParamsState";
+import useQueryState, {
+	pagination,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -73,37 +77,28 @@ const ViewUserLoginsPanelContent: Component<{
 }> = (props) => {
 	// ---------------------------------
 	// Hooks
-	const loginsSearchParams = useSearchParamsState(
-		{
+	const loginsSearchParams = useQueryState({
+		mode: "memory",
+		schema: {
 			filters: {
-				authMethod: {
-					value: "",
-					type: "text",
-				},
-				ipAddress: {
-					value: "",
-					type: "text",
-				},
+				authMethod: textFilter(),
+				ipAddress: textFilter(),
 			},
 			sorts: {
-				createdAt: "desc",
+				createdAt: sort({ defaultValue: "desc" }),
 			},
-			pagination: {
-				perPage: 10,
-			},
+			pagination: pagination({ defaultPerPage: 10 }),
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 
 	// ---------------------------------
 	// Memos
 	const canFetch = createMemo(() => {
 		return (
-			props.state.open &&
-			props.id !== undefined &&
-			loginsSearchParams.getSettled()
+			props.state.open && props.id !== undefined && loginsSearchParams.ready()
 		);
 	});
 
@@ -111,7 +106,7 @@ const ViewUserLoginsPanelContent: Component<{
 	// Queries
 	const userLogins = api.userLogins.useGetMultiple({
 		queryParams: {
-			queryString: loginsSearchParams.getQueryString,
+			queryString: loginsSearchParams.queryString,
 			location: {
 				userId: props.id as Accessor<number | undefined>,
 			},

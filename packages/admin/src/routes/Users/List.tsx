@@ -8,7 +8,11 @@ import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationMo
 import MediaImageGenerationModal from "@/components/Modals/AI/MediaImageGenerationModal";
 import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
 import { Permissions } from "@/constants/permissions";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import useQueryState, {
+	booleanFilter,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -16,39 +20,25 @@ const UsersListRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
 	const queryClient = useQueryClient();
-	const searchParams = useSearchParamsLocation(
-		{
+	const searchParams = useQueryState({
+		mode: "url",
+		schema: {
 			filters: {
-				firstName: {
-					value: "",
-					type: "text",
-				},
-				lastName: {
-					value: "",
-					type: "text",
-				},
-				email: {
-					value: "",
-					type: "text",
-				},
-				username: {
-					value: "",
-					type: "text",
-				},
-				isLocked: {
-					value: undefined,
-					type: "boolean",
-				},
+				firstName: textFilter(),
+				lastName: textFilter(),
+				email: textFilter(),
+				username: textFilter(),
+				isLocked: booleanFilter(),
 			},
 			sorts: {
-				createdAt: undefined,
-				isLocked: undefined,
+				createdAt: sort(),
+				isLocked: sort(),
 			},
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 	const [openCreateUserPanel, setOpenCreateUserPanel] = createSignal(false);
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
 

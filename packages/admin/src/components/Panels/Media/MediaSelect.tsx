@@ -19,8 +19,13 @@ import { PerPage } from "@/components/Groups/Query/PerPage";
 import { Sort } from "@/components/Groups/Query/Sort";
 import ClearProcessedImages from "@/components/Modals/Media/ClearProcessedImages";
 import RestoreMedia from "@/components/Modals/Media/RestoreMedia";
+import useQueryState, {
+	arrayFilter,
+	pagination,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
-import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
@@ -104,48 +109,34 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			clear: false,
 		},
 	});
-	const searchParams = useSearchParamsState(
-		{
+	const searchParams = useQueryState({
+		mode: "memory",
+		schema: {
 			filters: {
-				title: {
-					value: "",
-					type: "text",
-				},
-				extension: {
-					value: props.extensions || "",
-					type: "text",
-				},
-				type: {
-					value: props.type || "",
-					type: "array",
-				},
-				mimeType: {
-					value: "",
-					type: "text",
-				},
-				key: {
-					value: "",
-					type: "text",
-				},
+				title: textFilter(),
+				extension: textFilter({ defaultValue: props.extensions || "" }),
+				type: arrayFilter({
+					defaultValue: props.type ? [props.type] : [],
+				}),
+				mimeType: textFilter(),
+				key: textFilter(),
 			},
 			sorts: {
-				fileSize: undefined,
-				title: undefined,
-				width: undefined,
-				height: undefined,
-				mimeType: undefined,
-				extension: undefined,
-				createdAt: undefined,
-				updatedAt: "desc",
+				fileSize: sort(),
+				title: sort(),
+				width: sort(),
+				height: sort(),
+				mimeType: sort(),
+				extension: sort(),
+				createdAt: sort(),
+				updatedAt: sort({ defaultValue: "desc" }),
 			},
-			pagination: {
-				perPage: 20,
-			},
+			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 	const [showingDeleted, setShowingDeleted] = createSignal<0 | 1>(0);
 	const [selectedMedia, setSelectedMedia] = createSignal<MediaRelationRef[]>(
 		[],
@@ -164,7 +155,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	// Queries
 	const media = api.media.useGetMultiple({
 		queryParams: {
-			queryString: searchParams.getQueryString,
+			queryString: searchParams.queryString,
 			filters: {
 				isDeleted: showingDeleted,
 				public: 1,

@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { FaSolidCaretUp, FaSolidMinus, FaSolidSort } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Switch } from "solid-js";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
 
 interface SortItemProps {
@@ -11,19 +11,19 @@ interface SortItemProps {
 		label: string;
 		key: string;
 	};
-	searchParams: SearchParamsResponse;
+	searchParams: QueryStateResponse;
 }
 
 export interface SortProps {
 	sorts: Array<SortItemProps["sort"]>;
-	searchParams: SearchParamsResponse;
+	searchParams: QueryStateResponse;
 }
 
 const SortItem: Component<SortItemProps> = (props) => {
 	// ----------------------------------
 	// Memos
 	const sort = createMemo(() => {
-		const sorts = props.searchParams.getSorts();
+		const sorts = props.searchParams.sorts();
 		const sort = sorts.get(props.sort.key);
 		return sort;
 	});

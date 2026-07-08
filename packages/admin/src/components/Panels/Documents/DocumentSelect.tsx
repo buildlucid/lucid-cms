@@ -28,8 +28,14 @@ import { PerPage } from "@/components/Groups/Query/PerPage";
 import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
-import type { FilterSchema } from "@/hooks/useSearchParamsLocation";
-import useSearchParamsState from "@/hooks/useSearchParamsState";
+import useQueryState, {
+	arrayFilter,
+	booleanFilter,
+	pagination,
+	type QueryFilterSchema,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
@@ -118,21 +124,20 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		[],
 	);
 	const [activeCollectionKey, setActiveCollectionKey] = createSignal<string>();
-	const searchParams = useSearchParamsState(
-		{
+	const searchParams = useQueryState({
+		mode: "memory",
+		schema: {
 			filters: {},
 			sorts: {
-				updatedAt: "desc",
-				createdAt: undefined,
+				updatedAt: sort({ defaultValue: "desc" }),
+				createdAt: sort(),
 			},
-			pagination: {
-				perPage: 20,
-			},
+			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 
 	const allowedCollectionKeys = createMemo(() => props.collectionKeys ?? []);
 	const collectionKey = createMemo(() => activeCollectionKey());
@@ -169,7 +174,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	});
 	const documents = api.documents.useGetMultiple({
 		queryParams: {
-			queryString: searchParams.getQueryString,
+			queryString: searchParams.queryString,
 			location: {
 				collectionKey: collectionKey,
 				versionType: "latest",
@@ -178,7 +183,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				isDeleted: 0,
 			},
 		},
-		enabled: () => searchParams.getSettled() && collection.isSuccess,
+		enabled: () => searchParams.ready() && collection.isSuccess,
 	});
 	const users = api.users.useGetMultiple({
 		queryParams: {
@@ -314,45 +319,31 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			filterSchemaCollectionKey !== active
 		) {
 			filterSchemaCollectionKey = active;
-			const filterConfig: FilterSchema = {};
+			const filterConfig: QueryFilterSchema = {};
 			for (const field of getCollectionFieldFilters()) {
 				const fieldKey = formatFieldFilters({
 					fieldKey: field.key,
 				});
 				if (field.type === "user") {
-					filterConfig[fieldKey] = {
-						type: "array",
-						value: [],
-					};
+					filterConfig[fieldKey] = arrayFilter();
 					continue;
 				}
 				if (field.type === "checkbox") {
-					filterConfig[fieldKey] = {
-						type: "boolean",
-						value: undefined,
-					};
+					filterConfig[fieldKey] = booleanFilter();
 					continue;
 				}
 
-				filterConfig[fieldKey] = {
-					type: "text",
-					value: "",
-				};
+				filterConfig[fieldKey] = textFilter();
 			}
-			searchParams.setFilterSchema(filterConfig);
+			searchParams.setSchema({ filters: filterConfig });
+			searchParams.resetFilters();
 			searchParams.setParams({
-				filters: Object.fromEntries(
-					Array.from(searchParams.getFilters().keys()).map((key) => [
-						key,
-						undefined,
-					]),
-				),
 				sorts: {
 					updatedAt: "desc",
 				},
 				pagination: {
 					page: 1,
-					perPage: searchParams.getPagination().perPage,
+					perPage: searchParams.pagination().perPage,
 				},
 			});
 		}

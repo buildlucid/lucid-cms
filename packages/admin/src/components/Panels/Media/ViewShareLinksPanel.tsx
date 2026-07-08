@@ -23,8 +23,12 @@ import DeleteShareLink from "@/components/Modals/Media/DeleteShareLink";
 import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel";
 import ShareLinkRow from "@/components/Tables/Rows/ShareLinkRow";
 import { Permissions } from "@/constants/permissions";
+import useQueryState, {
+	pagination,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
-import useSearchParamsState from "@/hooks/useSearchParamsState";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -86,31 +90,24 @@ const ViewShareLinksPanelContent: Component<{
 }> = (props) => {
 	// ---------------------------------
 	// Hooks
-	const shareLinksSearchParams = useSearchParamsState(
-		{
+	const shareLinksSearchParams = useQueryState({
+		mode: "memory",
+		schema: {
 			filters: {
-				name: {
-					value: "",
-					type: "text",
-				},
-				token: {
-					value: "",
-					type: "text",
-				},
+				name: textFilter(),
+				token: textFilter(),
 			},
 			sorts: {
-				name: undefined,
-				expiresAt: undefined,
-				createdAt: "desc",
+				name: sort(),
+				expiresAt: sort(),
+				createdAt: sort({ defaultValue: "desc" }),
 			},
-			pagination: {
-				perPage: 10,
-			},
+			pagination: pagination({ defaultPerPage: 10 }),
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 
 	const rowTarget = useRowTarget<"delete" | "update">({
 		triggers: {
@@ -125,7 +122,7 @@ const ViewShareLinksPanelContent: Component<{
 		return (
 			props.state.open &&
 			props.id !== undefined &&
-			shareLinksSearchParams.getSettled()
+			shareLinksSearchParams.ready()
 		);
 	});
 	const canUpdateShareLinks = createMemo(
@@ -142,7 +139,7 @@ const ViewShareLinksPanelContent: Component<{
 			location: {
 				mediaId: props.id as Accessor<number | undefined>,
 			},
-			queryString: shareLinksSearchParams.getQueryString,
+			queryString: shareLinksSearchParams.queryString,
 		},
 		enabled: canFetch,
 	});

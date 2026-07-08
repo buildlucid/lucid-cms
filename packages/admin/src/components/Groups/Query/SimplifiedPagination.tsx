@@ -9,13 +9,13 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
 
 export const SimplifiedPagination: Component<{
 	state: {
 		meta?: ResponseBody<unknown>["meta"];
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 	};
 }> = (props) => {
 	const [page, setPage] = createSignal(1);

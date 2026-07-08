@@ -4,51 +4,38 @@ import { EmailsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import useQueryState, {
+	arrayFilter,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import T from "@/translations";
 
 const EmailListRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
 	const queryClient = useQueryClient();
-	const searchParams = useSearchParamsLocation(
-		{
+	const searchParams = useQueryState({
+		mode: "url",
+		schema: {
 			filters: {
-				toAddress: {
-					value: "",
-					type: "text",
-				},
-				subject: {
-					value: "",
-					type: "text",
-				},
-				template: {
-					value: "",
-					type: "text",
-				},
-				currentStatus: {
-					value: "",
-					type: "array",
-				},
-				type: {
-					value: "",
-					type: "array",
-				},
-				priority: {
-					value: "",
-					type: "array",
-				},
+				toAddress: textFilter(),
+				subject: textFilter(),
+				template: textFilter(),
+				currentStatus: arrayFilter(),
+				type: arrayFilter(),
+				priority: arrayFilter(),
 			},
 			sorts: {
-				createdAt: "desc",
-				lastAttemptedAt: undefined,
-				attemptCount: undefined,
+				createdAt: sort({ defaultValue: "desc" }),
+				lastAttemptedAt: sort(),
+				attemptCount: sort(),
 			},
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 
 	// ----------------------------------
 	// Render

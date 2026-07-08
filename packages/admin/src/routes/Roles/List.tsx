@@ -6,7 +6,7 @@ import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
 import { Permissions } from "@/constants/permissions";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import useQueryState, { sort, textFilter } from "@/hooks/useQueryState";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -14,23 +14,21 @@ const RolesListRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
 	const queryClient = useQueryClient();
-	const searchParams = useSearchParamsLocation(
-		{
+	const searchParams = useQueryState({
+		mode: "url",
+		schema: {
 			filters: {
-				name: {
-					value: "",
-					type: "text",
-				},
+				name: textFilter(),
 			},
 			sorts: {
-				name: undefined,
-				createdAt: undefined,
+				name: sort(),
+				createdAt: sort(),
 			},
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 	const [openCreateRolePanel, setOpenCreateRolePanel] = createSignal(false);
 
 	// ----------------------------------

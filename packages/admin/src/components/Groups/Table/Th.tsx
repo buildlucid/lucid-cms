@@ -7,7 +7,7 @@ import {
 	Match,
 	Switch,
 } from "solid-js";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import type { TableTheme } from "./Table";
 
 interface ThProps {
@@ -16,7 +16,7 @@ interface ThProps {
 	classes?: string;
 	icon?: JSXElement;
 	label?: string;
-	searchParams?: ReturnType<typeof useSearchParamsLocation>;
+	searchParams?: QueryStateResponse;
 	options?: {
 		include?: boolean;
 		width?: number;
@@ -38,7 +38,7 @@ export const Th: Component<ThProps> = (props) => {
 		if (props.options?.sortable === false) return undefined;
 		if (props.key === undefined) return undefined;
 
-		const sorts = props.searchParams.getSorts();
+		const sorts = props.searchParams.sorts();
 		const sort = sorts.get(props.key);
 		return sort;
 	});

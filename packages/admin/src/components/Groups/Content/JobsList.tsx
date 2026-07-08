@@ -5,14 +5,14 @@ import { DynamicContent } from "@/components/Groups/Layout";
 import { Table } from "@/components/Groups/Table/Table";
 import ViewJobPanel from "@/components/Panels/Job/ViewJobPanel";
 import JobRow from "@/components/Tables/Rows/JobRow";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import T from "@/translations";
 
 export const JobsList: Component<{
 	state: {
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -27,9 +27,9 @@ export const JobsList: Component<{
 	// Queries
 	const jobs = api.jobs.useGetMultiple({
 		queryParams: {
-			queryString: props.state.searchParams.getQueryString,
+			queryString: props.state.searchParams.queryString,
 		},
-		enabled: () => props.state.searchParams.getSettled(),
+		enabled: () => props.state.searchParams.ready(),
 	});
 
 	// ----------------------------------------

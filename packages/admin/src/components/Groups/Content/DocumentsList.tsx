@@ -19,8 +19,8 @@ import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import DeleteDocumentPermanently from "@/components/Modals/Documents/DeleteDocumentPermanently";
 import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
@@ -38,7 +38,7 @@ export const DocumentsList: Component<{
 		isLoading: boolean;
 		listing: Accessor<CollectionLeafFieldConfig[]>;
 		collectionIsSuccess: Accessor<boolean>;
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 		showingDeleted: Accessor<boolean>;
 		orderMode: Accessor<boolean>;
 	};
@@ -105,7 +105,7 @@ export const DocumentsList: Component<{
 	);
 	const documentQueryEnabled = createMemo(
 		() =>
-			props.state.searchParams.getSettled() === true &&
+			props.state.searchParams.ready() === true &&
 			props.state.collectionIsSuccess() === true,
 	);
 	const collectionPermissions = createMemo(
@@ -150,7 +150,7 @@ export const DocumentsList: Component<{
 			props.state.orderMode() &&
 			props.state.collection?.orderable === true &&
 			props.state.showingDeleted() === false &&
-			props.state.searchParams.getSorts().get("order") === "asc" &&
+			props.state.searchParams.sorts().get("order") === "asc" &&
 			canUpdateDocuments(),
 	);
 	const collectionName = createMemo(() =>
@@ -200,7 +200,7 @@ export const DocumentsList: Component<{
 	// Queries
 	const documents = api.documents.useGetMultiple({
 		queryParams: {
-			queryString: props.state.searchParams.getQueryString,
+			queryString: props.state.searchParams.queryString,
 			location: {
 				collectionKey: collectionKey,
 				versionType: "latest",

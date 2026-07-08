@@ -6,7 +6,11 @@ import { ClientIntegrationsList } from "@/components/Groups/Content";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import { Permissions } from "@/constants/permissions";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import useQueryState, {
+	booleanFilter,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -14,29 +18,24 @@ const SystemClientIntegrationsRoute: Component = () => {
 	// ----------------------------------------
 	// State / Hooks
 	const queryClient = useQueryClient();
-	const searchParams = useSearchParamsLocation(
-		{
+	const searchParams = useQueryState({
+		mode: "url",
+		schema: {
 			filters: {
-				name: {
-					value: "",
-					type: "text",
-				},
-				enabled: {
-					value: undefined,
-					type: "boolean",
-				},
+				name: textFilter(),
+				enabled: booleanFilter(),
 			},
 			sorts: {
-				name: undefined,
-				description: undefined,
-				enabled: undefined,
-				createdAt: undefined,
+				name: sort(),
+				description: sort(),
+				enabled: sort(),
+				createdAt: sort(),
 			},
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 	const [
 		openCreateClientIntegrationPanel,
 		setOpenCreateClientIntegrationPanel,

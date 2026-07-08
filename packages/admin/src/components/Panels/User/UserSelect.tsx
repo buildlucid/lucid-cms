@@ -18,7 +18,11 @@ import { Tr } from "@/components/Groups/Table/Tr";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
-import useSearchParamsState from "@/hooks/useSearchParamsState";
+import useQueryState, {
+	pagination,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
 import type { UserRelationRef } from "@/utils/relation-field-helpers";
@@ -87,41 +91,30 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 	const selectedUserIds = createMemo(() =>
 		selectedUsers().map((user) => user.id),
 	);
-	const searchParams = useSearchParamsState({
-		filters: {
-			username: {
-				value: "",
-				type: "text",
+	const searchParams = useQueryState({
+		mode: "memory",
+		schema: {
+			filters: {
+				username: textFilter(),
+				firstName: textFilter(),
+				lastName: textFilter(),
+				email: textFilter(),
 			},
-			firstName: {
-				value: "",
-				type: "text",
+			sorts: {
+				createdAt: sort({ defaultValue: "desc" }),
 			},
-			lastName: {
-				value: "",
-				type: "text",
-			},
-			email: {
-				value: "",
-				type: "text",
-			},
-		},
-		sorts: {
-			createdAt: "desc",
-		},
-		pagination: {
-			perPage: 20,
+			pagination: pagination({ defaultPerPage: 20 }),
 		},
 	});
 
 	const users = api.users.useGetMultiple({
 		queryParams: {
-			queryString: searchParams.getQueryString,
+			queryString: searchParams.queryString,
 			filters: {
 				isDeleted: 0,
 			},
 		},
-		enabled: () => searchParams.getSettled(),
+		enabled: () => searchParams.ready(),
 	});
 
 	const isLoading = createMemo(() => users.isLoading);

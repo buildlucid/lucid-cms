@@ -6,7 +6,7 @@ import Button from "@/components/Partials/Button";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import Loading from "@/components/Partials/Loading";
 import NoEntriesBlock from "@/components/Partials/NoEntriesBlock";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
 
 export const DynamicContent: Component<{
@@ -17,7 +17,7 @@ export const DynamicContent: Component<{
 		isEmpty?: boolean;
 		isLoading?: boolean;
 		hasPermission?: boolean;
-		searchParams?: ReturnType<typeof useSearchParamsLocation>;
+		searchParams?: QueryStateResponse;
 	};
 	slot?: {
 		/** The footer slot - can be used instead of the Layout footer slot if the footer needs state from the content. */

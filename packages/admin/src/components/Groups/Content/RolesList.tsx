@@ -8,15 +8,15 @@ import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
 import ViewRolePanel from "@/components/Panels/Role/ViewRolePanel";
 import RoleRow from "@/components/Tables/Rows/RoleRow";
 import { Permissions } from "@/constants/permissions";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 
 export const RolesList: Component<{
 	state: {
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 		setOpenCreateRolePanel: (state: boolean) => void;
 	};
 }> = (props) => {
@@ -38,12 +38,12 @@ export const RolesList: Component<{
 	// Queries
 	const roles = api.roles.useGetMultiple({
 		queryParams: {
-			queryString: props.state.searchParams.getQueryString,
+			queryString: props.state.searchParams.queryString,
 			include: {
 				permissions: false,
 			},
 		},
-		enabled: () => props.state.searchParams.getSettled(),
+		enabled: () => props.state.searchParams.ready(),
 	});
 
 	// ----------------------------------------

@@ -5,10 +5,18 @@
 ### Features:
 
 - Improved document builder rendering performance for tabbed layouts by memoizing field lookups, condition scopes and structural field config across tabs, sections and collapsibles. Inactive tab and collapsible content now mounts lazily while field defaults are still hydrated up front, making initial load and tab switching smoother. ([4c73b6d](https://github.com/buildlucid/lucid-cms/commit/4c73b6d474937fb6c4425fe8b45fc3029720963c))
+- Added field-level `useAsLabel` support for configuring document labels. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
+- Added relation custom field support in document listing columns. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
+- Added color custom field support in document listing columns. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
+
+### Breaking Changes:
+
+- Renamed the collection field listing option from `listing` to `showInList` for clarity. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
 
 ### Bug Fixes:
 
 - Fixed checkbox custom field filters for true and false values. ([5710346](https://github.com/buildlucid/lucid-cms/commit/571034652c041bbdcb7d3b64795b7ed523117213))
+- Fixed relation custom field filters with non-numeric values crashing generated relation table queries. ([5948ba5](https://github.com/buildlucid/lucid-cms/commit/5948ba5b6643e940ebfa043787cad2dea3e4bc63))
 
 ## v0.15.0-alpha.0
 

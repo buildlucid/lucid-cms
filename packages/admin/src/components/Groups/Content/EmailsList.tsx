@@ -16,14 +16,14 @@ import DeleteEmail from "@/components/Modals/Email/DeleteEmail";
 import ResendEmail from "@/components/Modals/Email/ResendEmail";
 import PreviewEmailPanel from "@/components/Panels/Email/PreviewEmailPanel";
 import EmailRow from "@/components/Tables/Rows/EmailRow";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
 import api from "@/services/api";
 import T from "@/translations";
 
 export const EmailsList: Component<{
 	state: {
-		searchParams: ReturnType<typeof useSearchParamsLocation>;
+		searchParams: QueryStateResponse;
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -40,9 +40,9 @@ export const EmailsList: Component<{
 	// Queries
 	const emails = api.email.useGetMultiple({
 		queryParams: {
-			queryString: props.state.searchParams.getQueryString,
+			queryString: props.state.searchParams.queryString,
 		},
-		enabled: () => props.state.searchParams.getSettled(),
+		enabled: () => props.state.searchParams.ready(),
 	});
 
 	// ----------------------------------------

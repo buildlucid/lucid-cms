@@ -1,10 +1,19 @@
 import { fileURLToPath, URL } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import devtools from "solid-devtools/vite";
-import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+	test: {
+		name: "@lucidcms/admin",
+		environment: "happy-dom",
+		server: {
+			deps: {
+				inline: [/solid-js/, /@solidjs/],
+			},
+		},
+	},
 	build: {
 		minify: true,
 		outDir: "../core/spa",

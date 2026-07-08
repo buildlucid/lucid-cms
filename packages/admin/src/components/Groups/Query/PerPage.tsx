@@ -3,12 +3,12 @@ import classNames from "classnames";
 import { FaSolidSort } from "solid-icons/fa";
 import { type Component, createMemo, For } from "solid-js";
 import DropdownContent from "@/components/Partials/DropdownContent";
-import type { SearchParamsResponse } from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
 
 export interface PerPageProps {
 	options?: Array<number>;
-	searchParams: SearchParamsResponse;
+	searchParams: QueryStateResponse;
 }
 
 export const PerPage: Component<PerPageProps> = (props) => {
@@ -19,7 +19,7 @@ export const PerPage: Component<PerPageProps> = (props) => {
 	});
 
 	const currentPerPage = createMemo(() => {
-		return props.searchParams.getPagination().perPage;
+		return props.searchParams.pagination().perPage;
 	});
 
 	// ----------------------------------

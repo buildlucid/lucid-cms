@@ -8,7 +8,12 @@ import { ReleaseRequestsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import useQueryState, {
+	arrayFilter,
+	pagination,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -17,55 +22,30 @@ const ReleaseRequestsListRoute: Component = () => {
 	// ----------------------------------
 	// State / Hooks
 	const queryClient = useQueryClient();
-	const searchParams = useSearchParamsLocation(
-		{
+	const searchParams = useQueryState({
+		mode: "url",
+		schema: {
 			filters: {
-				collectionKey: {
-					value: "",
-					type: "text",
-				},
-				target: {
-					value: "",
-					type: "text",
-				},
-				status: {
-					value: "",
-					type: "array",
-				},
-				executionStatus: {
-					value: "",
-					type: "array",
-				},
-				requestedBy: {
-					value: "",
-					type: "array",
-				},
-				reviewers: {
-					value: "",
-					type: "array",
-				},
-				assignedToMe: {
-					value: "",
-					type: "text",
-				},
-				requestedByMe: {
-					value: "",
-					type: "text",
-				},
+				collectionKey: textFilter(),
+				target: textFilter(),
+				status: arrayFilter(),
+				executionStatus: arrayFilter(),
+				requestedBy: arrayFilter(),
+				reviewers: arrayFilter(),
+				assignedToMe: textFilter(),
+				requestedByMe: textFilter(),
 			},
 			sorts: {
-				createdAt: "desc",
-				scheduledAt: undefined,
-				updatedAt: undefined,
+				createdAt: sort({ defaultValue: "desc" }),
+				scheduledAt: sort(),
+				updatedAt: sort(),
 			},
-			pagination: {
-				perPage: 20,
-			},
+			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 
 	// ----------------------------------
 	// Queries
@@ -117,9 +97,7 @@ const ReleaseRequestsListRoute: Component = () => {
 	);
 	const targetOptions = createMemo(() => {
 		const keys = new Set<string>();
-		const selectedCollectionKey = searchParams
-			.getFilters()
-			.get("collectionKey");
+		const selectedCollectionKey = searchParams.filters().get("collectionKey");
 		for (const collection of collections.data?.data ?? []) {
 			if (
 				typeof selectedCollectionKey === "string" &&
@@ -148,7 +126,7 @@ const ReleaseRequestsListRoute: Component = () => {
 	// ----------------------------------
 	// Effects
 	createEffect(() => {
-		const selectedTarget = searchParams.getFilters().get("target");
+		const selectedTarget = searchParams.filters().get("target");
 		if (typeof selectedTarget !== "string" || selectedTarget === "") return;
 		if (targetOptions().some((option) => option.value === selectedTarget))
 			return;

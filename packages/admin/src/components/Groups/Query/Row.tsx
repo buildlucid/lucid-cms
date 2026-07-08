@@ -12,7 +12,7 @@ import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
 import type { FilterProps } from "@/components/Groups/Query/Filter";
 import type { SortProps } from "@/components/Groups/Query/Sort";
 import Button from "@/components/Partials/Button";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
 import { Filter } from "./Filter";
 import { PerPage } from "./PerPage";
@@ -23,7 +23,7 @@ interface QueryRowProps {
 	sorts?: SortProps["sorts"];
 	perPage?: Array<number>;
 	custom?: JSX.Element;
-	searchParams: ReturnType<typeof useSearchParamsLocation>;
+	searchParams: QueryStateResponse;
 	onRefresh?: () => void;
 	showingDeleted?: Accessor<boolean>;
 	setShowingDeleted?: (value: boolean) => void;

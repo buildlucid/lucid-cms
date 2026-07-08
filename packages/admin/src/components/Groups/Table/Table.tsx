@@ -12,7 +12,7 @@ import {
 } from "solid-js";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import LoadingRow from "@/components/Tables/Rows/LoadingRow";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import { ColumnToggle } from "./ColumnToggle";
 import { SelectAction } from "./SelectAction";
 import { Th } from "./Th";
@@ -33,7 +33,7 @@ interface TableRootProps {
 	key: string;
 	rows: number;
 	caption?: string;
-	searchParams?: ReturnType<typeof useSearchParamsLocation>;
+	searchParams?: QueryStateResponse;
 	head: {
 		label: string;
 		key: string;

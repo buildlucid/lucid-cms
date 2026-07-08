@@ -11,7 +11,7 @@ import {
 	FaSolidXmark,
 } from "solid-icons/fa";
 import { type Component, createMemo, For, type JSXElement } from "solid-js";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
 import ReleaseRequestOverviewTile from "./ReleaseRequestOverviewTile";
 
@@ -32,7 +32,7 @@ type ReleaseRequestPreset = {
 const ReleaseRequestOverview: Component<{
 	overview?: PublishOperationOverview;
 	loading: boolean;
-	searchParams: ReturnType<typeof useSearchParamsLocation>;
+	searchParams: QueryStateResponse;
 }> = (props) => {
 	// ----------------------------------
 	// Memos
@@ -90,7 +90,7 @@ const ReleaseRequestOverview: Component<{
 	// ----------------------------------
 	// Functions
 	const isActive = (preset: ReleaseRequestPreset) => {
-		const filters = props.searchParams.getFilters();
+		const filters = props.searchParams.filters();
 		const currentStatus = filters.get("status");
 		const currentExecutionStatus = filters.get("executionStatus");
 

@@ -11,13 +11,13 @@ import SkeletonCard from "@/components/Cards/SkeletonCard";
 import NoEntriesBlock, {
 	type NoEntriesBlockProps,
 } from "@/components/Partials/NoEntriesBlock";
-import type useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import type { QueryStateResponse } from "@/hooks/useQueryState";
 
 export const Grid: Component<{
 	state?: {
 		isLoading?: boolean;
 		totalItems: number;
-		searchParams?: ReturnType<typeof useSearchParamsLocation>;
+		searchParams?: QueryStateResponse;
 	};
 	slots?: {
 		loadingCard?: JSXElement;

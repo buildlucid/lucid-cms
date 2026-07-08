@@ -5,47 +5,40 @@ import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
 import { JobsList } from "@/components/Groups/Content";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
-import useSearchParamsLocation from "@/hooks/useSearchParamsLocation";
+import useQueryState, {
+	arrayFilter,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import T from "@/translations";
 
 const SystemQueueObservabilityRoute: Component = () => {
 	// ----------------------------------
 	// Hooks & State
 	const queryClient = useQueryClient();
-	const searchParams = useSearchParamsLocation(
-		{
+	const searchParams = useQueryState({
+		mode: "url",
+		schema: {
 			filters: {
-				jobId: {
-					value: "",
-					type: "text",
-				},
-				eventType: {
-					value: "",
-					type: "text",
-				},
-				status: {
-					value: "",
-					type: "array",
-				},
-				queueAdapterKey: {
-					value: "",
-					type: "text",
-				},
+				jobId: textFilter(),
+				eventType: textFilter(),
+				status: arrayFilter(),
+				queueAdapterKey: textFilter(),
 			},
 			sorts: {
-				createdAt: "desc",
-				scheduledFor: undefined,
-				startedAt: undefined,
-				completedAt: undefined,
-				failedAt: undefined,
-				priority: undefined,
-				attempts: undefined,
+				createdAt: sort({ defaultValue: "desc" }),
+				scheduledFor: sort(),
+				startedAt: sort(),
+				completedAt: sort(),
+				failedAt: sort(),
+				priority: sort(),
+				attempts: sort(),
 			},
 		},
-		{
+		options: {
 			singleSort: true,
 		},
-	);
+	});
 
 	// ----------------------------------
 	// Render
