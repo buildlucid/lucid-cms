@@ -25,7 +25,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 			label: "Title",
 		},
 		localized: true,
-		listing: true,
+		showInList: true,
 		validation: {
 			required: true,
 		},
@@ -49,7 +49,7 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 			},
 		],
 		default: "header",
-		listing: true,
+		showInList: true,
 		validation: {
 			required: true,
 		},

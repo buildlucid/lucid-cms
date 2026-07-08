@@ -93,6 +93,7 @@ const formatSingle = (props: {
 		revisions: collectionData.revisions,
 		locked: collectionData.locked,
 		listing: props.collection.listing,
+		labelFields: collectionData.labelFields,
 		autoSave: collectionData.autoSave,
 		scheduling: collectionData.scheduling,
 		orderable: collectionData.orderable,

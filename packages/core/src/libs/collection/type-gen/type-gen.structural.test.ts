@@ -80,7 +80,7 @@ test("sort key types only include order for orderable collections", async () => 
 
 test("sort key types include sortable top-level custom fields regardless of listing", async () => {
 	const collection = buildCollection("articles")
-		.addText("title", { listing: true })
+		.addText("title", { showInList: true })
 		.addTextarea("summary")
 		.addNumber("views")
 		.addDateTime("publishedAt")

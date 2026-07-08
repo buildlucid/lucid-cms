@@ -8,7 +8,14 @@ import type { AdminCopyInput, ResolvedAdminCopy } from "../../../i18n/types.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 
-export type Listing = boolean;
+export type ShowInList = boolean;
+export type UseAsLabel = boolean;
+export type CollectionListFieldOptions = {
+	showInList?: ShowInList;
+};
+export type CollectionLabelFieldOptions = CollectionListFieldOptions & {
+	useAsLabel?: UseAsLabel;
+};
 export type CollectionPermissionAction =
 	| "read"
 	| "create"
@@ -141,6 +148,7 @@ export type CollectionData = {
 	review?: PublishingReviewConfig;
 	workflow?: PublishingWorkflowConfig;
 	listing: string[];
+	labelFields: string[];
 	environments: {
 		key: string;
 		name: ResolvedAdminCopy;

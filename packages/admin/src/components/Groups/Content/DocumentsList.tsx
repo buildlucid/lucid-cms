@@ -34,6 +34,7 @@ import spawnToast from "@/utils/spawn-toast";
 export const DocumentsList: Component<{
 	state: {
 		collection?: Collection;
+		relationCollections?: Accessor<Collection[]>;
 		isLoading: boolean;
 		listing: Accessor<CollectionLeafFieldConfig[]>;
 		collectionIsSuccess: Accessor<boolean>;
@@ -75,6 +76,15 @@ export const DocumentsList: Component<{
 	);
 	const getTableHeadColumns = createMemo(() =>
 		tableHeadColumns(props.state.listing()),
+	);
+	const relationCollectionsByKey = createMemo(
+		() =>
+			new Map(
+				(props.state.relationCollections?.() ?? []).map((collection) => [
+					collection.key,
+					collection,
+				]),
+			),
 	);
 	const workflowHeadColumn = createMemo(() =>
 		props.state.collection?.workflow
@@ -397,6 +407,7 @@ export const DocumentsList: Component<{
 								document={doc()}
 								fieldInclude={props.state.listing()}
 								collection={props.state.collection as Collection}
+								collectionsByKey={relationCollectionsByKey()}
 								include={include}
 								contentLocale={contentLocale()}
 								selected={selected[i]}

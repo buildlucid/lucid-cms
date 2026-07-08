@@ -1,11 +1,21 @@
-import type { InternalCollectionDocument, UserRef } from "@types";
+import type {
+	Collection,
+	DocumentRef,
+	InternalCollectionDocument,
+	RelationFieldValue,
+	UserRef,
+} from "@types";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
-import { formatDocumentFieldValue } from "@/utils/document-table-helpers";
-import { isUserRef } from "@/utils/relation-field-helpers";
+import {
+	formatDocumentFieldValue,
+	getDocumentPreviewLabel,
+} from "@/utils/document-table-helpers";
+import { isDocumentRef, isUserRef } from "@/utils/relation-field-helpers";
+import ColorCol from "./ColorCol";
 import DateCol from "./DateCol";
 import PillCol from "./PillCol";
 import TextCol from "./TextCol";
@@ -17,6 +27,7 @@ const DocumentDynamicColumns: Component<{
 	include: boolean[];
 	index: number;
 	collectionLocalized: boolean;
+	collectionsByKey?: Map<string, Collection>;
 }> = (props) => {
 	// ----------------------------------
 	// Memos
@@ -79,6 +90,66 @@ const DocumentDynamicColumns: Component<{
 			)
 			.filter(isUserRef);
 	});
+	const relationFieldValues = createMemo(() => {
+		if (props.field.type !== "relation") return null;
+
+		const value = fieldValue();
+		return Array.isArray(value)
+			? value.filter(
+					(item): item is RelationFieldValue =>
+						typeof item === "object" &&
+						item !== null &&
+						"id" in item &&
+						"collectionKey" in item &&
+						typeof item.id === "number" &&
+						typeof item.collectionKey === "string",
+				)
+			: [];
+	});
+	const relationFieldRefs = createMemo(() => {
+		const values = relationFieldValues();
+		if (!values?.length) return [];
+
+		const refs = props.document.refs?.relation;
+		if (!refs) return [];
+
+		return values
+			.map((value) =>
+				refs.find((ref): ref is DocumentRef => {
+					return (
+						isDocumentRef(ref) &&
+						ref.id === value.id &&
+						ref.collectionKey === value.collectionKey
+					);
+				}),
+			)
+			.filter(isDocumentRef);
+	});
+	const relationLabels = createMemo(() => {
+		const values = relationFieldValues();
+		if (!values?.length) return null;
+		const refs = relationFieldRefs();
+
+		return values
+			.map((value) => {
+				const ref = refs.find(
+					(ref) =>
+						ref.id === value.id && ref.collectionKey === value.collectionKey,
+				);
+				return getDocumentPreviewLabel({
+					collection: props.collectionsByKey?.get(value.collectionKey),
+					document:
+						ref ??
+						({
+							id: value.id,
+							collectionKey: value.collectionKey,
+							fields: null,
+						} satisfies DocumentRef),
+					contentLocale: contentLocale(),
+				});
+			})
+			.join(", ");
+	});
 
 	// ----------------------------------
 	// Render
@@ -140,6 +211,26 @@ const DocumentDynamicColumns: Component<{
 					users={userFieldRefs() ?? []}
 					options={{ include: props.include[props.index], minWidth: 200 }}
 				/>
+			</Match>
+			<Match when={fieldData()?.type === "relation" ? relationLabels() : null}>
+				{(text) => (
+					<TextCol
+						text={text()}
+						options={{
+							include: props.include[props.index],
+							maxLines: 2,
+							minWidth: 220,
+						}}
+					/>
+				)}
+			</Match>
+			<Match when={fieldData()?.type === "color" ? textValue() : undefined}>
+				{(value) => (
+					<ColorCol
+						value={value()}
+						options={{ include: props.include[props.index], minWidth: 160 }}
+					/>
+				)}
 			</Match>
 		</Switch>
 	);

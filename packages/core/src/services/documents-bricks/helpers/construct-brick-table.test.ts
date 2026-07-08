@@ -51,7 +51,7 @@ describe("brick table construction", () => {
 				}),
 			},
 			validation: { required: true },
-			listing: true,
+			showInList: true,
 		});
 
 		const simpleInputData = {

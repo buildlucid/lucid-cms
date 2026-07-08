@@ -619,6 +619,7 @@ export interface Collection {
 	revisions: boolean;
 	locked: boolean;
 	listing: string[];
+	labelFields: string[];
 	autoSave: boolean;
 	scheduling: boolean;
 	orderable: boolean;

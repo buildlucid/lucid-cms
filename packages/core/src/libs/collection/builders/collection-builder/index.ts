@@ -7,13 +7,15 @@ import type {
 	CollectionBrickConfig,
 	CollectionConfigSchemaType,
 	CollectionData,
-	Listing,
+	CollectionLabelFieldOptions,
+	CollectionListFieldOptions,
 } from "./types.js";
 
 class CollectionBuilder extends FieldBuilder {
 	key: string;
 	config: CollectionConfigSchemaType;
 	listing: string[] = [];
+	labelFields: string[] = [];
 	constructor(key: string, config: Omit<CollectionConfigSchemaType, "key">) {
 		super();
 		this.key = key;
@@ -35,84 +37,75 @@ class CollectionBuilder extends FieldBuilder {
 	}
 	// ------------------------------------
 	// Builder Methods
-	addText(
-		key: string,
-		props?: CFProps<"text"> & {
-			listing?: Listing;
-		},
-	) {
-		this.#fieldCollectionHelper(key, props?.listing);
+	addText(key: string, props?: CFProps<"text"> & CollectionLabelFieldOptions) {
+		this.#fieldCollectionHelper(key, props);
 		super.addText(key, props);
 		return this;
 	}
 	addNumber(
 		key: string,
-		props?: CFProps<"number"> & {
-			listing?: Listing;
-		},
+		props?: CFProps<"number"> & CollectionLabelFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props?.listing);
+		this.#fieldCollectionHelper(key, props);
 		super.addNumber(key, props);
 		return this;
 	}
 	addCheckbox(
 		key: string,
-		props?: CFProps<"checkbox"> & {
-			listing?: Listing;
-		},
+		props?: CFProps<"checkbox"> & CollectionListFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props?.listing);
+		this.#fieldCollectionHelper(key, props);
 		super.addCheckbox(key, props);
 		return this;
 	}
 	addSelect(
 		key: string,
-		props?: CFProps<"select"> & {
-			listing?: Listing;
-		},
+		props?: CFProps<"select"> & CollectionLabelFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props?.listing);
+		this.#fieldCollectionHelper(key, props);
 		super.addSelect(key, props);
 		return this;
 	}
 	addTextarea(
 		key: string,
-		props?: CFProps<"textarea"> & {
-			listing?: Listing;
-		},
+		props?: CFProps<"textarea"> & CollectionLabelFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props?.listing);
+		this.#fieldCollectionHelper(key, props);
 		super.addTextarea(key, props);
 		return this;
 	}
 	addDateTime(
 		key: string,
-		props?: CFProps<"datetime"> & {
-			listing?: Listing;
-		},
+		props?: CFProps<"datetime"> & CollectionLabelFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props?.listing);
+		this.#fieldCollectionHelper(key, props);
 		super.addDateTime(key, props);
 		return this;
 	}
-	addUser(
-		key: string,
-		props?: CFProps<"user"> & {
-			listing?: Listing;
-		},
-	) {
-		this.#fieldCollectionHelper(key, props?.listing);
+	addUser(key: string, props?: CFProps<"user"> & CollectionListFieldOptions) {
+		this.#fieldCollectionHelper(key, props);
 		super.addUser(key, props);
 		return this;
 	}
-	addMedia(
-		key: string,
-		props?: CFProps<"media"> & {
-			listing?: Listing;
-		},
-	) {
-		this.#fieldCollectionHelper(key, props?.listing);
+	addMedia(key: string, props?: CFProps<"media"> & CollectionListFieldOptions) {
+		this.#fieldCollectionHelper(key, props);
 		super.addMedia(key, props);
+		return this;
+	}
+	addRelation(
+		key: string,
+		props: CFProps<"relation"> & CollectionListFieldOptions,
+	) {
+		this.#fieldCollectionHelper(key, props);
+		super.addRelation(key, props);
+		return this;
+	}
+	addColor(
+		key: string,
+		props?: CFProps<"color"> & CollectionLabelFieldOptions,
+	) {
+		this.#fieldCollectionHelper(key, props);
+		super.addColor(key, props);
 		return this;
 	}
 	// ------------------------------------
@@ -124,8 +117,13 @@ class CollectionBuilder extends FieldBuilder {
 			(brick, index) => bricks.findIndex((b) => b.key === brick.key) === index,
 		);
 	};
-	#fieldCollectionHelper = (key: string, listing?: Listing) => {
-		if (listing) this.listing.push(key);
+	/** Tracks collection-level field display config while fields are registered. */
+	#fieldCollectionHelper = (
+		key: string,
+		options?: CollectionLabelFieldOptions,
+	) => {
+		if (options?.showInList) this.listing.push(key);
+		if (options?.useAsLabel) this.labelFields.push(key);
 	};
 	#formatGroup = (): CollectionData["group"] => {
 		const group = this.config.group;
@@ -202,6 +200,7 @@ class CollectionBuilder extends FieldBuilder {
 					}
 				: {}),
 			listing: this.listing,
+			labelFields: this.labelFields,
 			environments:
 				this.config.environments?.map((environment) => ({
 					...environment,

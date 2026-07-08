@@ -122,6 +122,28 @@ const CollectionsDocumentsListRoute: Component = () => {
 	const getCollectionFieldSorts = createMemo(() =>
 		collectionFieldSorts(collectionData()),
 	);
+	const relationCollectionLookupEnabled = createMemo(() =>
+		getCollectionFieldIncludes().some((field) => field.type === "relation"),
+	);
+	const relationCollections = api.collections.useGetAll({
+		queryParams: {
+			include: {
+				fields: true,
+			},
+		},
+		enabled: () => relationCollectionLookupEnabled(),
+	});
+	const relationCollectionData = createMemo(() => {
+		const map = new Map(
+			(relationCollections.data?.data ?? []).map((collection) => [
+				collection.key,
+				collection,
+			]),
+		);
+		const activeCollection = collectionData();
+		if (activeCollection) map.set(activeCollection.key, activeCollection);
+		return Array.from(map.values());
+	});
 	const getWorkflowFilters = createMemo(() => {
 		const workflow = collectionData()?.workflow;
 		if (!workflow) return [];
@@ -462,6 +484,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 				state={{
 					collection: collectionData(),
 					listing: getCollectionFieldIncludes,
+					relationCollections: relationCollectionData,
 					searchParams: searchParams,
 					isLoading: collection.isFetching,
 					collectionIsSuccess: collectionIsSuccess,

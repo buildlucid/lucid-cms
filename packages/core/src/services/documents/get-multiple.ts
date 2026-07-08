@@ -115,9 +115,8 @@ const getMultiple: ServiceFn<
 
 	const relationVersionType = relationVersionTypeRes.data.versionType;
 	const include = resolveDocumentIncludes(data.query.include);
-	const includeRefs = data.query.include === undefined ? true : include.refs;
-	const refTypes =
-		data.query.include === undefined ? undefined : include.refTypes;
+	const includeRefs = include.refs;
+	const refTypes = include.refTypes;
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{

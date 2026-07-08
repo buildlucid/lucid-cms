@@ -6,6 +6,7 @@ import type {
 	Collection,
 	DocumentField,
 	DocumentRef,
+	InternalCollectionDocument,
 	InternalDocumentField,
 } from "@types";
 import { FaSolidT, FaSolidUser } from "solid-icons/fa";
@@ -64,6 +65,7 @@ export const collectionFieldFilters = (collection?: Collection) => {
 				continue;
 			}
 			if (field.type === "repeater") continue;
+			if (field.type === "color") continue;
 			if (!isFieldTypeFilterable(field.type)) continue;
 
 			fieldsRes.push(field);
@@ -138,12 +140,77 @@ export const collectionFieldIncludes = (collection?: Collection) => {
 	return fieldsRes;
 };
 
+const labelFieldTypes = new Set<CollectionLeafFieldConfig["type"]>([
+	"text",
+	"textarea",
+	"select",
+	"number",
+	"datetime",
+	"color",
+]);
+
+/** Limits labels to scalar fields we can render without extra document fetches. */
+const isLabelField = (
+	field: CollectionFieldConfig,
+): field is CollectionLeafFieldConfig => {
+	if (
+		field.type === "repeater" ||
+		field.type === "tab" ||
+		field.type === "section" ||
+		field.type === "collapsible"
+	) {
+		return false;
+	}
+
+	return labelFieldTypes.has(field.type);
+};
+
+/** Returns direct label-capable fields; tabs are UI-only, nested fields are skipped. */
+const collectionDirectLabelFields = (collection?: Collection) => {
+	const fieldsRes: CollectionLeafFieldConfig[] = [];
+
+	const fieldRecursive = (fields?: CollectionFieldConfig[]) => {
+		if (!fields) return;
+		for (const field of fields) {
+			if (field.type === "tab") {
+				fieldRecursive(field.fields);
+				continue;
+			}
+			if (isStructuralField(field) || field.type === "repeater") continue;
+			if (isLabelField(field)) fieldsRes.push(field);
+		}
+	};
+	fieldRecursive(collection?.fields);
+
+	return fieldsRes;
+};
+
+/** Orders document label candidates by useAsLabel fields, listed fields, then fallback fields. */
+const getDocumentPreviewFieldCandidates = (collection?: Collection) => {
+	const directFields = collectionDirectLabelFields(collection);
+	const labelFields = (collection?.labelFields ?? [])
+		.map((fieldKey) => directFields.find((field) => field.key === fieldKey))
+		.filter((field): field is CollectionLeafFieldConfig => field !== undefined);
+	const listedFields = directFields.filter((field) =>
+		collection?.listing.includes(field.key),
+	);
+	const candidates = [...labelFields, ...listedFields, ...directFields];
+	const seen = new Set<string>();
+
+	return candidates.filter((field) => {
+		if (seen.has(field.key)) return false;
+		seen.add(field.key);
+		return true;
+	});
+};
+
 export interface DocumentListingPreviewField {
 	key: string;
 	label: string;
 	value: string;
 }
 
+/** Formats datetime values consistently for list cells and document labels. */
 export const formatDateTimeListValue = (
 	value: string | number,
 	time: boolean,
@@ -159,21 +226,22 @@ export const formatDateTimeListValue = (
 	);
 };
 
+/** Builds secondary label fields shown beside document relation values. */
 export const getDocumentListingPreviewFields = (props: {
 	collection?: Collection;
-	documentRef?: DocumentRef;
+	documentRef?: DocumentRef | InternalCollectionDocument;
 	contentLocale: string;
 }): Array<DocumentListingPreviewField> => {
 	const collection = props.collection;
 	if (!collection || !props.documentRef?.fields) return [];
-	if (!isDocumentFieldMap(props.documentRef.fields)) return [];
-	const fields = props.documentRef.fields;
+	const fields = getDocumentFields(props.documentRef);
 
-	return collectionFieldIncludes(collection)
+	return getDocumentPreviewFieldCandidates(collection)
 		.map((field) => {
 			const documentField = findDocumentField({
 				fields,
 				fieldKey: field.key,
+				fieldType: field.type,
 			});
 			const value = formatDocumentFieldValue({
 				fieldConfig: field,
@@ -197,7 +265,50 @@ export const getDocumentListingPreviewFields = (props: {
 		.filter((field): field is DocumentListingPreviewField => Boolean(field));
 };
 
-const isDocumentField = (value: unknown): value is DocumentField => {
+/** Resolves the main document label used by relation UI and listing fallbacks. */
+export const getDocumentPreviewLabel = (props: {
+	collection?: Collection;
+	document?: DocumentRef | InternalCollectionDocument;
+	contentLocale: string;
+}) => {
+	const collection = props.collection;
+	const document = props.document;
+	const fields = getDocumentFields(document);
+
+	for (const field of getDocumentPreviewFieldCandidates(collection)) {
+		const documentField = findDocumentField({
+			fields,
+			fieldKey: field.key,
+			fieldType: field.type,
+		});
+		const value = formatDocumentFieldValue({
+			fieldConfig: field,
+			fieldData: documentField,
+			contentLocale: props.contentLocale,
+			collectionLocalized: collection?.localized ?? false,
+		});
+
+		if (value && value.trim().length > 0) return value;
+	}
+
+	const collectionName =
+		helpers.getLocaleValue({
+			value: collection?.details.singularName,
+			fallback: collection?.key ?? document?.collectionKey,
+		}) ||
+		helpers.getLocaleValue({
+			value: collection?.details.name,
+			fallback: document?.collectionKey ?? T()("media.types.document"),
+		}) ||
+		T()("media.types.document");
+
+	return `${collectionName} #${document?.id ?? "?"}`;
+};
+
+type DocumentFieldLike = DocumentField | InternalDocumentField;
+
+/** Guards mixed API field payloads before recursive label lookups. */
+const isDocumentField = (value: unknown): value is DocumentFieldLike => {
 	return (
 		isObjectRecord(value) &&
 		typeof value.key === "string" &&
@@ -205,25 +316,65 @@ const isDocumentField = (value: unknown): value is DocumentField => {
 	);
 };
 
-const isDocumentFieldMap = (
-	value: unknown,
-): value is Record<string, DocumentField> => {
-	if (!isObjectRecord(value)) return false;
+/** Normalizes internal field arrays and ref field maps into one searchable list. */
+const getDocumentFields = (
+	document?: DocumentRef | InternalCollectionDocument,
+): DocumentFieldLike[] => {
+	const fields = document?.fields;
+	if (!fields) return [];
 
-	return Object.values(value).every(isDocumentField);
+	if (Array.isArray(fields)) {
+		return fields.filter(isDocumentField);
+	}
+
+	if (!isObjectRecord(fields)) return [];
+
+	return Object.entries(fields).flatMap(([key, field]) => {
+		if (isDocumentField(field)) return [field];
+
+		return [
+			{
+				key,
+				type: "text",
+				value: field,
+			} satisfies InternalDocumentField,
+		];
+	});
 };
 
+/** Normalizes nested group fields so repeaters can be searched recursively. */
+const getGroupFields = (
+	groupFields:
+		| Record<string, DocumentField>
+		| Array<InternalDocumentField>
+		| undefined,
+) => {
+	if (!groupFields) return [];
+	if (Array.isArray(groupFields)) return groupFields.filter(isDocumentField);
+	if (!isObjectRecord(groupFields)) return [];
+	return Object.values(groupFields).filter(isDocumentField);
+};
+
+/** Finds a field by key across nested groups and applies the configured field type. */
 const findDocumentField = (props: {
-	fields: Record<string, DocumentField>;
+	fields: DocumentFieldLike[];
 	fieldKey: string;
-}): DocumentField | undefined => {
-	for (const field of Object.values(props.fields)) {
-		if (field.key === props.fieldKey) return field;
+	fieldType: CollectionLeafFieldConfig["type"];
+}): DocumentFieldLike | undefined => {
+	for (const field of props.fields) {
+		if (field.key === props.fieldKey) {
+			if (field.type === props.fieldType) return field;
+			return {
+				...field,
+				type: props.fieldType,
+			};
+		}
 
 		for (const group of field.groups || []) {
 			const nestedField = findDocumentField({
-				fields: group.fields,
+				fields: getGroupFields(group.fields),
 				fieldKey: props.fieldKey,
+				fieldType: props.fieldType,
 			});
 			if (nestedField) return nestedField;
 		}
@@ -232,6 +383,7 @@ const findDocumentField = (props: {
 	return undefined;
 };
 
+/** Reads localized values so labels match the active content locale. */
 const getDocumentFieldValue = (props: {
 	fieldConfig: CollectionLeafFieldConfig;
 	fieldData?: DocumentField | InternalDocumentField;
@@ -250,6 +402,7 @@ const getDocumentFieldValue = (props: {
 	return props.fieldData.value;
 };
 
+/** Formats document field values for compact table cells and relation labels. */
 export const formatDocumentFieldValue = (props: {
 	fieldConfig: CollectionLeafFieldConfig;
 	fieldData?: DocumentField | InternalDocumentField;

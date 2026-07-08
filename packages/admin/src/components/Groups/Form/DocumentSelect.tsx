@@ -31,7 +31,10 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 import { moveArrayItem } from "@/utils/array-helpers";
-import { getDocumentListingPreviewFields } from "@/utils/document-table-helpers";
+import {
+	getDocumentListingPreviewFields,
+	getDocumentPreviewLabel,
+} from "@/utils/document-table-helpers";
 import { normalizeFieldErrors } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 
@@ -195,6 +198,23 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 			value: getDocumentCollection(document)?.details.singularName,
 			fallback: T()("media.types.document"),
 		});
+	const getDocumentLabel = (
+		documentRef?: DocumentRef,
+		documentValue?: RelationFieldValue,
+	) =>
+		getDocumentPreviewLabel({
+			collection: getDocumentCollection(documentRef ?? documentValue),
+			document:
+				documentRef ??
+				(documentValue
+					? {
+							id: documentValue.id,
+							collectionKey: documentValue.collectionKey,
+							fields: null,
+						}
+					: undefined),
+			contentLocale: contentLocale(),
+		});
 	const previewFields = (documentRef?: DocumentRef) =>
 		getDocumentListingPreviewFields({
 			collection: getDocumentCollection(documentRef),
@@ -243,7 +263,11 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 												<DocumentSortableItem
 													document={document}
 													dragId={document.key}
-													singularName={getSingularName(document.document)}
+													documentLabel={getDocumentLabel(
+														document.document,
+														document.value,
+													)}
+													singularName={getSingularName(document.value)}
 													versionLabel={relationVersionLabel()}
 													previewFields={previewFields(document.document)}
 													hasError={hasItemError(index())}
@@ -296,7 +320,10 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 											#{selectedDocumentValue()?.id}
 										</Pill>
 										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-subtitle">
-											{getSingularName(selectedDocumentItem()?.document)}
+											{getDocumentLabel(
+												selectedDocumentItem()?.document,
+												selectedDocumentItem()?.value,
+											)}
 										</span>
 									</div>
 								</div>
@@ -432,6 +459,7 @@ const MissingDocumentRefNotice: Component<{
 const DocumentSortableItem: Component<{
 	document: SelectedDocumentItem;
 	dragId: string;
+	documentLabel: string;
 	singularName: string;
 	versionLabel?: string;
 	previewFields: { label: string; value: string }[];
@@ -488,7 +516,7 @@ const DocumentSortableItem: Component<{
 							#{props.document.value.id}
 						</Pill>
 						<p class="truncate text-sm font-medium text-subtitle">
-							{props.singularName}
+							{props.documentLabel}
 						</p>
 					</div>
 					<Show

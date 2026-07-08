@@ -155,6 +155,11 @@ const collectionResponseSchema = z.object({
 		description: "Field keys included in the document listing columns",
 		example: ["pageTitle", "author", "fullSlug", "slug"],
 	}),
+	labelFields: z.array(z.string()).meta({
+		description:
+			"Field keys used, in order, to build the main document display label",
+		example: ["pageTitle", "slug"],
+	}),
 	environments: z.array(
 		z.object({
 			key: z.string().meta({

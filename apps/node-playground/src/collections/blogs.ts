@@ -32,13 +32,13 @@ const BlogCollection = new CollectionBuilder("blog", {
 			hidden: false,
 			disabled: false,
 		},
-		listing: true,
+		showInList: true,
 	})
 	.addTextarea("page_excerpt", {
-		listing: true,
+		showInList: true,
 	})
 	.addUser("author", {
-		listing: true,
+		showInList: true,
 	})
 	.addCheckbox("enabled")
 	.addRichText("content");

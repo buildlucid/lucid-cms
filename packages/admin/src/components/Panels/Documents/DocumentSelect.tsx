@@ -156,8 +156,16 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		enabled: () => !!collectionKey(),
 	});
 	const collections = api.collections.useGetAll({
-		queryParams: {},
-		enabled: () => allowedCollectionKeys().length > 1,
+		queryParams: {
+			include: {
+				fields: true,
+			},
+		},
+		enabled: () =>
+			allowedCollectionKeys().length > 1 ||
+			collectionFieldIncludes(collection.data?.data).some(
+				(field) => field.type === "relation",
+			),
 	});
 	const documents = api.documents.useGetMultiple({
 		queryParams: {
@@ -186,6 +194,26 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	);
 	const getCollectionFieldFilters = createMemo(() =>
 		collectionFieldFilters(collection.data?.data),
+	);
+	const relationCollectionData = createMemo(() => {
+		const map = new Map(
+			(collections.data?.data ?? []).map((collection) => [
+				collection.key,
+				collection,
+			]),
+		);
+		const activeCollection = collection.data?.data;
+		if (activeCollection) map.set(activeCollection.key, activeCollection);
+		return Array.from(map.values());
+	});
+	const relationCollectionsByKey = createMemo(
+		() =>
+			new Map(
+				relationCollectionData().map((collection) => [
+					collection.key,
+					collection,
+				]),
+			),
 	);
 	const getTableHeadColumns = createMemo(() =>
 		tableHeadColumns(getCollectionFieldIncludes()),
@@ -537,6 +565,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 									document={doc()}
 									fieldInclude={getCollectionFieldIncludes()}
 									collection={collection.data?.data as Collection}
+									collectionsByKey={relationCollectionsByKey()}
 									include={include}
 									contentLocale={contentLocale()}
 									selected={selected[i]}

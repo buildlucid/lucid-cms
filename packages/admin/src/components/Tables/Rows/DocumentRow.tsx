@@ -18,6 +18,7 @@ import type { TableRowProps } from "@/types/components";
 interface DocumentRowProps extends TableRowProps {
 	document: InternalCollectionDocument;
 	collection: Collection;
+	collectionsByKey?: Map<string, Collection>;
 	fieldInclude: CollectionLeafFieldConfig[];
 	include: boolean[];
 	actions?: ActionDropdownProps["actions"];
@@ -84,6 +85,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 							include={props.include}
 							index={includeOffset() + i()}
 							collectionLocalized={props.collection.localized}
+							collectionsByKey={props.collectionsByKey}
 						/>
 					);
 				}}

@@ -63,10 +63,11 @@ test("collection builder options passes schema validation", async () => {
 		],
 	})
 		.addText("text_test", {
-			listing: true,
+			showInList: true,
+			useAsLabel: true,
 		})
 		.addTextarea("textarea_test", {
-			listing: true,
+			showInList: true,
 		});
 
 	const res = await CollectionConfigSchema.safeParseAsync(collection.config);

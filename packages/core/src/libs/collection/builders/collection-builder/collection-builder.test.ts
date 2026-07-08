@@ -62,38 +62,45 @@ test("collection options are correct along with field includes and filters", asy
 		],
 	})
 		.addText("text_test", {
-			listing: true,
+			showInList: true,
+			useAsLabel: true,
 		})
 		.addTextarea("textarea_test", {
-			listing: true,
+			showInList: true,
 		})
 		.addNumber("number_test", {
-			listing: true,
+			showInList: true,
 		})
 		.addCheckbox("checkbox_test", {
-			listing: true,
+			showInList: true,
 		})
 		.addSelect("select_test", {
-			listing: true,
+			showInList: true,
 		})
 		.addDateTime("datetime_test", {
-			listing: true,
+			showInList: true,
 		})
 		.addUser("user_test", {
-			listing: true,
+			showInList: true,
 		})
 		.addMedia("media_test", {
-			listing: true,
+			showInList: true,
+		})
+		.addRelation("relation_test", {
+			collection: "pages",
+			showInList: true,
 		})
 		.addRichText("rich_text_test")
 		.addLink("link_test")
 		.addJSON("json_test")
-		.addColor("color_test")
+		.addColor("color_test", {
+			showInList: true,
+		})
 		.addRepeater("repeater_test")
 		.addText("repeater_text_test")
 		.endRepeater();
 
-	expect(pagesCollection.fields.size).toBe(14);
+	expect(pagesCollection.fields.size).toBe(15);
 
 	expect(pagesCollection.getData).toEqual({
 		key: "pages",
@@ -127,7 +134,10 @@ test("collection options are correct along with field includes and filters", asy
 			"datetime_test",
 			"user_test",
 			"media_test",
+			"relation_test",
+			"color_test",
 		],
+		labelFields: ["text_test"],
 		environments: [],
 		revisionRetentionDays: 30,
 		tenants: [],

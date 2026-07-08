@@ -69,7 +69,7 @@ If set to `true`, the plugin will enable translations for the `slug` and `fullSl
 
 ### displayFullSlug
 
-If set to `true`, the plugin will make the `fullSlug` field visible in the documents page builder, along with making it filterable and listable in the document listing. This is mostly intended for testing and development purposes, though there is no reason it can't be used in production. Please note, however, that the `fullSlug` field is always calculated, meaning it is not possible to edit this via the document page builder, and even if this option is set to `true`, the field will be disabled.
+If set to `true`, the plugin will make the `fullSlug` field visible in the documents page builder, along with making it filterable and shown in the document listing. This is mostly intended for testing and development purposes, though there is no reason it can't be used in production. Please note, however, that the `fullSlug` field is always calculated, meaning it is not possible to edit this via the document page builder, and even if this option is set to `true`, the field will be disabled.
 
 ### prefix
 

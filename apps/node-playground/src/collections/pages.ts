@@ -145,10 +145,10 @@ const PageCollection = new CollectionBuilder("page", {
 			required: true,
 			zod: z.string().min(2).max(128),
 		},
-		listing: true,
+		showInList: true,
 	})
 	.addUser("author", {
-		listing: true,
+		showInList: true,
 		multiple: true,
 	});
 

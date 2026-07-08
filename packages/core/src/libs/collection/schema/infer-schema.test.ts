@@ -293,7 +293,7 @@ describe("Schema inference", async () => {
 
 	test("creates column field indexes from listing", () => {
 		pagesCollection.addText("title", {
-			listing: true,
+			showInList: true,
 		});
 
 		const res = inferSchema(pagesCollection, db);
