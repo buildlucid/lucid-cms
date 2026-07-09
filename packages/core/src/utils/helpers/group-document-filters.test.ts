@@ -673,6 +673,111 @@ describe("groupDocumentFilters", () => {
 		]);
 	});
 
+	it("should split compound collectionKey:id relation values into same-table conditions", () => {
+		const filters: QueryParamFilters = {
+			_relatedDocument: { value: "pages:7" },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters);
+
+		expect(result.documentFilters).toEqual({});
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld__rel__relatedDocument",
+				filters: [
+					{
+						key: "relatedDocument",
+						value: "pages",
+						operator: "=",
+						column: "_collection_key",
+					},
+					{
+						key: "relatedDocument",
+						value: 7,
+						operator: "=",
+						column: "_document_id",
+					},
+				],
+			},
+		]);
+	});
+
+	it("should keep the filter operator on the document id for compound relation values", () => {
+		const filters: QueryParamFilters = {
+			_relatedDocument: { value: "articles:12", operator: "!=" },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters);
+
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld__rel__relatedDocument",
+				filters: [
+					{
+						key: "relatedDocument",
+						value: "articles",
+						operator: "=",
+						column: "_collection_key",
+					},
+					{
+						key: "relatedDocument",
+						value: 12,
+						operator: "!=",
+						column: "_document_id",
+					},
+				],
+			},
+		]);
+	});
+
+	it("should not split compound values for relation tables without a collection key column", () => {
+		const filters: QueryParamFilters = {
+			_author: { value: "pages:7" },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters);
+
+		//* user tables have no _collection_key - value falls through and the
+		//* integer formatter nulls it so the filter matches no rows
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld__author",
+				filters: [
+					{
+						key: "author",
+						value: null,
+						operator: "=",
+						column: "_user_id",
+					},
+				],
+			},
+		]);
+	});
+
+	it("should not treat non-matching strings as compound relation values", () => {
+		const filters: QueryParamFilters = {
+			_relatedDocument: { value: "Pages:7" },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters);
+
+		//* invalid collection key casing - falls back to the plain id filter,
+		//* where integer coercion nulls the value
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld__rel__relatedDocument",
+				filters: [
+					{
+						key: "relatedDocument",
+						value: null,
+						operator: "=",
+						column: "_document_id",
+					},
+				],
+			},
+		]);
+	});
+
 	it('should handle brick fields with "brickKey._fieldKey" syntax', () => {
 		const filters: QueryParamFilters = {
 			"simple._heading": { value: "Brick Heading" },

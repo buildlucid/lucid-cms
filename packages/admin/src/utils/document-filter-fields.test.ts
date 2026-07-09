@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
 	buildDocumentFilterSchema,
 	documentFilterFields,
+	filterValueInputType,
+	formatRelationFilterValue,
+	isEntityPickerFieldType,
 	operatorsForFieldType,
+	parseRelationFilterValue,
 } from "./document-filter-fields";
 
 const literal = (value: string): ResolvedAdminCopy => ({
@@ -52,7 +56,7 @@ describe("documentFilterFields", () => {
 		expect(fields).toEqual([]);
 	});
 
-	it("traverses structural containers without including their labels", () => {
+	it("includes only the nearest container label in the display name", () => {
 		const fields = documentFilterFields(
 			buildCollection([
 				{
@@ -72,13 +76,21 @@ describe("documentFilterFields", () => {
 								},
 							],
 						},
+						{
+							key: "tabField",
+							type: "text",
+							details: { label: literal("Tab field") },
+						},
 					],
 				},
 			]),
 		);
 
+		//* the nearest container disambiguates duplicate field labels without
+		//* the full ancestor chain bloating the name
 		expect(fields).toEqual([
-			{ key: "_metaTitle", label: "Meta title", type: "text" },
+			{ key: "_metaTitle", label: "SEO > Meta title", type: "text" },
+			{ key: "_tabField", label: "Main > Tab field", type: "text" },
 		]);
 	});
 
@@ -122,12 +134,12 @@ describe("documentFilterFields", () => {
 			),
 		);
 
-		//* repeater labels stay out of the display name
+		//* the repeater is the nearest container - brick labels always lead
 		expect(fields).toEqual([
-			{ key: "fields.people._name", label: "Name", type: "text" },
+			{ key: "fields.people._name", label: "People > Name", type: "text" },
 			{
 				key: "hero.items._itemTitle",
-				label: "Hero > Item title",
+				label: "Hero > Items > Item title",
 				type: "text",
 			},
 		]);
@@ -152,8 +164,14 @@ describe("documentFilterFields", () => {
 			]),
 		);
 
+		//* only the innermost repeater names the field - key fallback when
+		//* unlabelled
 		expect(fields).toEqual([
-			{ key: "fields.inner._note", label: "note", type: "text" },
+			{
+				key: "fields.inner._note",
+				label: "inner > note",
+				type: "text",
+			},
 		]);
 	});
 
@@ -246,6 +264,131 @@ describe("documentFilterFields", () => {
 			falseLabel: "Hidden",
 		});
 	});
+
+	it("carries relation collection keys for the document picker", () => {
+		const fields = documentFilterFields(
+			buildCollection([
+				{
+					key: "author",
+					type: "relation",
+					details: {},
+					collection: "people",
+				},
+				{
+					key: "related",
+					type: "relation",
+					details: {},
+					collection: ["pages", "articles"],
+				},
+			]),
+		);
+
+		expect(fields[0]).toMatchObject({
+			key: "_author",
+			type: "relation",
+			collections: ["people"],
+		});
+		expect(fields[1]).toMatchObject({
+			key: "_related",
+			type: "relation",
+			collections: ["pages", "articles"],
+		});
+	});
+
+	it("carries media picker constraints from field validation", () => {
+		const fields = documentFilterFields(
+			buildCollection([
+				{
+					key: "thumbnail",
+					type: "media",
+					details: {},
+					validation: {
+						type: "image",
+						extensions: [".png", "jpg"],
+					},
+				},
+				{ key: "attachment", type: "media", details: {} },
+			]),
+		);
+
+		expect(fields[0]).toMatchObject({
+			key: "_thumbnail",
+			type: "media",
+			mediaType: "image",
+			mediaExtensions: "png,jpg",
+		});
+		expect(fields[1]).toEqual({
+			key: "_attachment",
+			label: "attachment",
+			type: "media",
+		});
+	});
+
+	it("adds no picker metadata to user fields", () => {
+		const fields = documentFilterFields(
+			buildCollection([{ key: "owner", type: "user", details: {} }]),
+		);
+
+		expect(fields).toEqual([{ key: "_owner", label: "owner", type: "user" }]);
+	});
+});
+
+describe("isEntityPickerFieldType", () => {
+	it("flags user, relation and media fields only", () => {
+		expect(isEntityPickerFieldType("user")).toBe(true);
+		expect(isEntityPickerFieldType("relation")).toBe(true);
+		expect(isEntityPickerFieldType("media")).toBe(true);
+		expect(isEntityPickerFieldType("text")).toBe(false);
+		expect(isEntityPickerFieldType("number")).toBe(false);
+	});
+});
+
+describe("filterValueInputType", () => {
+	it("falls back to ID inputs for entity picker fields", () => {
+		expect(
+			filterValueInputType({ key: "_owner", label: "Owner", type: "user" }),
+		).toBe("number");
+		//* relation values also accept the `collectionKey:id` form
+		expect(
+			filterValueInputType({
+				key: "_author",
+				label: "Author",
+				type: "relation",
+				collections: ["people"],
+			}),
+		).toBe("text");
+		expect(
+			filterValueInputType({ key: "_image", label: "Image", type: "media" }),
+		).toBe("number");
+	});
+
+	it("keeps existing input types for non-entity fields", () => {
+		expect(
+			filterValueInputType({ key: "_title", label: "Title", type: "text" }),
+		).toBe("text");
+		expect(
+			filterValueInputType({ key: "_amount", label: "Amount", type: "number" }),
+		).toBe("number");
+		expect(
+			filterValueInputType({
+				key: "_publishedAt",
+				label: "Published",
+				type: "datetime",
+				time: false,
+			}),
+		).toBe("date");
+		expect(
+			filterValueInputType({
+				key: "_publishedAt",
+				label: "Published",
+				type: "datetime",
+			}),
+		).toBe("datetime-local");
+		expect(
+			filterValueInputType({ key: "_tint", label: "Tint", type: "color" }),
+		).toBe("color");
+		expect(filterValueInputType(undefined)).toBe("text");
+	});
 });
 
 describe("operatorsForFieldType", () => {
@@ -275,10 +418,38 @@ describe("buildDocumentFilterSchema", () => {
 			{ key: "_title", label: "Title", type: "text" },
 			{ key: "_featured", label: "Featured", type: "checkbox" },
 			{ key: "_author", label: "Author", type: "user" },
+			{ key: "_related", label: "Related", type: "relation" },
 		]);
 
 		expect(schema._title?.type).toBe("text");
 		expect(schema._featured?.type).toBe("boolean");
 		expect(schema._author?.type).toBe("number");
+		//* relation values may be `collectionKey:id` strings
+		expect(schema._related?.type).toBe("text");
+	});
+});
+
+describe("relation filter values", () => {
+	it("round-trips compound collectionKey:id values", () => {
+		const value = formatRelationFilterValue({ collectionKey: "pages", id: 7 });
+
+		expect(value).toBe("pages:7");
+		expect(parseRelationFilterValue(value)).toEqual({
+			collectionKey: "pages",
+			id: 7,
+		});
+	});
+
+	it("parses plain numeric IDs without a collection key", () => {
+		expect(parseRelationFilterValue(7)).toEqual({ id: 7 });
+		expect(parseRelationFilterValue("7")).toEqual({ id: 7 });
+	});
+
+	it("rejects values that are neither IDs nor compound values", () => {
+		expect(parseRelationFilterValue("")).toBeUndefined();
+		expect(parseRelationFilterValue("Pages:7")).toBeUndefined();
+		expect(parseRelationFilterValue("pages:")).toBeUndefined();
+		expect(parseRelationFilterValue("7.5")).toBeUndefined();
+		expect(parseRelationFilterValue(undefined)).toBeUndefined();
 	});
 });

@@ -56,6 +56,12 @@ export interface FilterSectionProps {
 	collectionName: string;
 	fields: DocumentFilterField[];
 	searchParams: QueryStateResponse;
+	/** disables user/media/document picker panels - required when the section
+	 * is rendered inside a picker panel to avoid recursive panels */
+	disableEntityPickers?: boolean;
+	/** standalone card styling for use inside panels instead of bleeding into
+	 * the list header card */
+	embedded?: boolean;
 }
 
 const isValueEmpty = (value: FilterValue): boolean => {
@@ -699,7 +705,13 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 	// Render
 	return (
 		<Show when={props.open}>
-			<div class="-mx-4 md:-mx-6 -mb-4 md:-mb-6 mt-1.5 md:mt-3.5 px-4 md:px-6 py-4 bg-card-base border-t border-border">
+			<div
+				class={
+					props.embedded
+						? "mb-4 px-4 py-4 bg-card-base border border-border rounded-md"
+						: "-mx-4 md:-mx-6 -mb-4 md:-mb-6 mt-1.5 md:mt-3.5 px-4 md:px-6 py-4 bg-card-base border-t border-border"
+				}
+			>
 				<h3 class="text-sm font-medium text-title mb-3">
 					{T()("filter.section.title", {
 						collection: props.collectionName,
@@ -737,6 +749,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 										"filter.section.add.row.unavailable",
 									)}
 									onRemove={() => handleRemove(row())}
+									disableEntityPickers={props.disableEntityPickers}
 								/>
 							</>
 						)}

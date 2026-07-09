@@ -2,12 +2,15 @@ import { FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
 import { type Component, createMemo, Match, Switch } from "solid-js";
 import { Select } from "@/components/Groups/Form/Select";
 import { CommitInput } from "@/components/Groups/Query/FilterSection/CommitInput";
+import { EntityValue } from "@/components/Groups/Query/FilterSection/EntityValue";
 import Button from "@/components/Partials/Button";
 import type { FilterValue } from "@/hooks/useQueryState";
 import T from "@/translations";
 import {
 	type DocumentFilterField,
 	type DocumentFilterOperator,
+	filterValueInputType,
+	isEntityPickerFieldType,
 	operatorLabel,
 	operatorsForFieldType,
 } from "@/utils/document-filter-fields";
@@ -25,6 +28,8 @@ export interface FilterRowProps {
 	canAddRow: boolean;
 	addRowDisabledReason?: string;
 	onRemove: () => void;
+	/** nested contexts (picker panels) fall back to plain numeric ID inputs */
+	disableEntityPickers?: boolean;
 }
 
 const valueToInputString = (value: FilterValue): string => {
@@ -53,22 +58,11 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 		if (props.value === false) return "0";
 		return undefined;
 	});
-	const textInputType = createMemo(() => {
-		switch (props.field?.type) {
-			case "number":
-			case "user":
-			case "relation":
-			case "media":
-				return "number" as const;
-			case "datetime":
-				return props.field.time === false
-					? ("date" as const)
-					: ("datetime-local" as const);
-			case "color":
-				return "color" as const;
-			default:
-				return "text" as const;
-		}
+	const textInputType = createMemo(() => filterValueInputType(props.field));
+	const entityPickerField = createMemo(() => {
+		const field = props.field;
+		if (!field || props.disableEntityPickers === true) return undefined;
+		return isEntityPickerFieldType(field.type) ? field : undefined;
 	});
 	const removeRowTitle = createMemo(() => T()("filter.section.remove.row"));
 	const addRowTitle = createMemo(() =>
@@ -95,6 +89,16 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					noClear={true}
 					noMargin={true}
 					hidePlaceholder={props.field !== undefined}
+					renderValue={({ option }) => (
+						<span class="truncate" title={option.label}>
+							{option.label}
+						</span>
+					)}
+					renderOption={({ option }) => (
+						<span class="line-clamp-1 min-w-0 text-left" title={option.label}>
+							{option.label}
+						</span>
+					)}
 				/>
 			</div>
 			<div class="w-[calc(50%-53px)] md:flex-1 min-w-0">
@@ -154,6 +158,16 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 							ariaLabel={T()("filter.section.value")}
 							noMargin={true}
 						/>
+					</Match>
+					<Match when={entityPickerField()}>
+						{(field) => (
+							<EntityValue
+								id={`${props.id}-value`}
+								field={field()}
+								value={props.value}
+								onCommit={(value) => props.onValueCommit(value)}
+							/>
+						)}
 					</Match>
 				</Switch>
 			</div>

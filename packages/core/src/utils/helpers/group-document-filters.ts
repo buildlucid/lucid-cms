@@ -69,6 +69,19 @@ const getRelationFilterColumn = (
 	);
 };
 
+/** Relation custom-field tables also store the target's collection key. */
+const getRelationCollectionKeyColumn = (
+	schema: CollectionSchemaTable<LucidBrickTableName>,
+): (CollectionSchemaColumn & { name: `_${string}` }) | null => {
+	return (
+		schema.columns.find(
+			(column): column is CollectionSchemaColumn & { name: `_${string}` } =>
+				column.source === "field" &&
+				column.name === prefixGeneratedColName("collection_key"),
+		) ?? null
+	);
+};
+
 const getRelationTableFilterColumn = (params: {
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[];
 	brickKey?: string;
@@ -77,6 +90,7 @@ const getRelationTableFilterColumn = (params: {
 	table: LucidBrickTableName;
 	column: `_${string}`;
 	schemaColumn: CollectionSchemaColumn;
+	collectionKeyColumn: (CollectionSchemaColumn & { name: `_${string}` }) | null;
 } | null => {
 	const relationTable = params.bricksTableSchema.find((schema) => {
 		const fieldPath = schema.key.fieldPath;
@@ -97,7 +111,74 @@ const getRelationTableFilterColumn = (params: {
 		table: relationTable.name,
 		column: column.name,
 		schemaColumn: column,
+		collectionKeyColumn: getRelationCollectionKeyColumn(relationTable),
 	};
+};
+
+//* collection keys are restricted to ^[a-z0-9-_]+$ so ":" is unambiguous
+const RELATION_COMPOUND_VALUE_REGEX = /^([a-z0-9-_]+):(\d+)$/;
+
+/** Parses scalar `collectionKey:id` relation filter values. */
+const parseCompoundRelationValue = (
+	value: FilterValue,
+): { collectionKey: string; documentId: string } | null => {
+	if (typeof value !== "string") return null;
+	const match = value.match(RELATION_COMPOUND_VALUE_REGEX);
+	if (!match?.[1] || !match?.[2]) return null;
+	return { collectionKey: match[1], documentId: match[2] };
+};
+
+/**
+ * Pushes relation-table filters, splitting `collectionKey:id` values into
+ * collection-key and document-id conditions. Filters for one table share a
+ * single EXISTS subquery, so both conditions apply to the same relation row.
+ * The filter's operator applies to the document id - the collection key is
+ * always matched with `=`, so `!=` means "related to another document of
+ * that collection".
+ */
+const pushRelationTableFilter = (params: {
+	brickFiltersMap: Map<LucidBrickTableName, BrickFieldFilters[]>;
+	relationTableFilter: NonNullable<
+		ReturnType<typeof getRelationTableFilterColumn>
+	>;
+	fieldKey: string;
+	value: FilterValue;
+	operator?: FilterOperator;
+}): void => {
+	const { relationTableFilter } = params;
+	const compound = parseCompoundRelationValue(params.value);
+
+	if (compound && relationTableFilter.collectionKeyColumn) {
+		pushBrickFilter({
+			brickFiltersMap: params.brickFiltersMap,
+			table: relationTableFilter.table,
+			fieldKey: params.fieldKey,
+			value: compound.collectionKey,
+			operator: "=",
+			column: relationTableFilter.collectionKeyColumn.name,
+			schemaColumn: relationTableFilter.collectionKeyColumn,
+		});
+		pushBrickFilter({
+			brickFiltersMap: params.brickFiltersMap,
+			table: relationTableFilter.table,
+			fieldKey: params.fieldKey,
+			value: compound.documentId,
+			operator: params.operator,
+			column: relationTableFilter.column,
+			schemaColumn: relationTableFilter.schemaColumn,
+		});
+		return;
+	}
+
+	pushBrickFilter({
+		brickFiltersMap: params.brickFiltersMap,
+		table: relationTableFilter.table,
+		fieldKey: params.fieldKey,
+		value: params.value,
+		operator: params.operator,
+		column: relationTableFilter.column,
+		schemaColumn: relationTableFilter.schemaColumn,
+	});
 };
 
 const pushBrickFilter = (params: {
@@ -136,14 +217,15 @@ const formatFieldFilterValue = (params: {
 		RegisteredFieldDefinition,
 		"formatFilterValue"
 	>;
+	if (!fieldDefinition.formatFilterValue) return params.value;
 
-	return (
-		fieldDefinition.formatFilterValue?.({
-			value: params.value,
-			operator: params.operator,
-			column: params.schemaColumn,
-		}) ?? params.value
-	);
+	//* formatters return null deliberately for invalid input so the filter
+	//* matches no rows - it must not fall back to the raw value
+	return fieldDefinition.formatFilterValue({
+		value: params.value,
+		operator: params.operator,
+		column: params.schemaColumn,
+	});
 };
 
 const matchesStorageMode = (
@@ -231,14 +313,12 @@ const groupDocumentFilterEntries = (
 				fieldKey,
 			});
 			if (relationTableFilter) {
-				pushBrickFilter({
+				pushRelationTableFilter({
 					brickFiltersMap,
-					table: relationTableFilter.table,
+					relationTableFilter,
 					fieldKey,
 					value,
 					operator,
-					column: relationTableFilter.column,
-					schemaColumn: relationTableFilter.schemaColumn,
 				});
 			}
 			continue;
@@ -322,14 +402,12 @@ const groupDocumentFilterEntries = (
 					fieldKey,
 				});
 				if (relationTableFilter) {
-					pushBrickFilter({
+					pushRelationTableFilter({
 						brickFiltersMap,
-						table: relationTableFilter.table,
+						relationTableFilter,
 						fieldKey,
 						value,
 						operator,
-						column: relationTableFilter.column,
-						schemaColumn: relationTableFilter.schemaColumn,
 					});
 				}
 			}

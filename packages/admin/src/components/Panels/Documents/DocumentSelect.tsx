@@ -23,27 +23,25 @@ import { Select } from "@/components/Groups/Form";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
 import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
-import { Filter } from "@/components/Groups/Query/Filter";
+import {
+	FilterSection,
+	FilterSectionToggle,
+} from "@/components/Groups/Query/FilterSection";
 import { PerPage } from "@/components/Groups/Query/PerPage";
 import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
-import useQueryState, {
-	arrayFilter,
-	booleanFilter,
-	pagination,
-	type QueryFilterSchema,
-	sort,
-	textFilter,
-} from "@/hooks/useQueryState";
+import useQueryState, { pagination, sort } from "@/hooks/useQueryState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import {
-	collectionFieldFilters,
+	buildDocumentFilterSchema,
+	documentFilterFields,
+} from "@/utils/document-filter-fields";
+import {
 	collectionFieldIncludes,
 	collectionFieldSorts,
-	formatFieldFilters,
 	tableHeadColumns,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
@@ -119,11 +117,15 @@ interface DocumentSelectContentProps {
 const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	props,
 ) => {
-	let filterSchemaCollectionKey: string | undefined;
 	const [selectedDocuments, setSelectedDocuments] = createSignal<DocumentRef[]>(
 		[],
 	);
 	const [activeCollectionKey, setActiveCollectionKey] = createSignal<string>();
+	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	//* collection key the filter schema was last built for - documents only
+	//* query once this matches, so stale filters never hit a new collection
+	const [filterSchemaCollectionKey, setFilterSchemaCollectionKey] =
+		createSignal<string>();
 	const searchParams = useQueryState({
 		mode: "memory",
 		schema: {
@@ -183,22 +185,16 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				isDeleted: 0,
 			},
 		},
-		enabled: () => searchParams.ready() && collection.isSuccess,
+		enabled: () =>
+			searchParams.ready() &&
+			collection.isSuccess &&
+			filterSchemaCollectionKey() === collectionKey(),
 	});
-	const users = api.users.useGetMultiple({
-		queryParams: {
-			filters: {
-				isDeleted: 0,
-			},
-			perPage: -1,
-		},
-	});
-
 	const getCollectionFieldIncludes = createMemo(() =>
 		collectionFieldIncludes(collection.data?.data),
 	);
-	const getCollectionFieldFilters = createMemo(() =>
-		collectionFieldFilters(collection.data?.data),
+	const getFilterFields = createMemo(() =>
+		documentFilterFields(collection.data?.data),
 	);
 	const relationCollectionData = createMemo(() => {
 		const map = new Map(
@@ -270,14 +266,6 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			};
 		}),
 	);
-	const userOptions = createMemo(() =>
-		(users.data?.data ?? []).map((user) => ({
-			value: user.id,
-			label:
-				helpers.formatUserName(user, "simple") || T()("media.types.unknown"),
-			user,
-		})),
-	);
 	const documentSortOptions = createMemo(() => [
 		...collectionFieldSorts(collection.data?.data),
 		...(collection.data?.data.orderable === true
@@ -313,29 +301,17 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	});
 	createEffect(() => {
 		const active = collectionKey();
+		//* wait for the active collection's own config - a cached previous
+		//* collection would build the wrong filter schema
 		if (
 			collection.isSuccess &&
 			active &&
-			filterSchemaCollectionKey !== active
+			collection.data?.data.key === active &&
+			filterSchemaCollectionKey() !== active
 		) {
-			filterSchemaCollectionKey = active;
-			const filterConfig: QueryFilterSchema = {};
-			for (const field of getCollectionFieldFilters()) {
-				const fieldKey = formatFieldFilters({
-					fieldKey: field.key,
-				});
-				if (field.type === "user") {
-					filterConfig[fieldKey] = arrayFilter();
-					continue;
-				}
-				if (field.type === "checkbox") {
-					filterConfig[fieldKey] = booleanFilter();
-					continue;
-				}
-
-				filterConfig[fieldKey] = textFilter();
-			}
-			searchParams.setSchema({ filters: filterConfig });
+			searchParams.setSchema({
+				filters: buildDocumentFilterSchema(getFilterFields()),
+			});
 			searchParams.resetFilters();
 			searchParams.setParams({
 				sorts: {
@@ -346,6 +322,9 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 					perPage: searchParams.pagination().perPage,
 				},
 			});
+			setFilterSectionOpen(false);
+			//* opens the documents query gate last - filters are clean by now
+			setFilterSchemaCollectionKey(active);
 		}
 	});
 	createEffect(() => {
@@ -387,66 +366,11 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		<div class="flex flex-col h-full">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap">
-					<Filter
-						filters={getCollectionFieldFilters().map((field) => {
-							const fieldKey = formatFieldFilters({
-								fieldKey: field.key,
-							});
-							switch (field.type) {
-								case "checkbox": {
-									return {
-										label: helpers.getLocaleValue({
-											value: field.details.label,
-											fallback: field.key,
-										}),
-										key: fieldKey,
-										type: "boolean",
-									};
-								}
-								case "select": {
-									return {
-										label: helpers.getLocaleValue({
-											value: field.details.label,
-											fallback: field.key,
-										}),
-										key: fieldKey,
-										type: "select",
-										options: field.options?.map((option, i) => ({
-											value: option.value,
-											label: helpers.getLocaleValue({
-												value: option.label,
-												fallback: T()("fields.options.label", {
-													count: i,
-												}),
-											}),
-										})),
-									};
-								}
-								case "user": {
-									return {
-										label: helpers.getLocaleValue({
-											value: field.details.label,
-											fallback: field.key,
-										}),
-										key: fieldKey,
-										type: "multi-select",
-										options: userOptions(),
-										optionType: "user" as const,
-									};
-								}
-								default: {
-									return {
-										label: helpers.getLocaleValue({
-											value: field.details.label,
-											fallback: field.key,
-										}),
-										key: fieldKey,
-										type: "text",
-									};
-								}
-							}
-						})}
+					<FilterSectionToggle
+						open={filterSectionOpen()}
+						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
 						searchParams={searchParams}
+						disabled={getFilterFields().length === 0}
 					/>
 					<Sort sorts={documentSortOptions()} searchParams={searchParams} />
 					<Show when={allowedCollectionKeys().length > 1}>
@@ -470,6 +394,18 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				</div>
 				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 			</div>
+
+			{/* pickers stay disabled here - this section already lives inside a
+			picker panel and must not open further panels */}
+			<FilterSection
+				open={filterSectionOpen()}
+				setOpen={setFilterSectionOpen}
+				collectionName={collectionName()}
+				fields={getFilterFields()}
+				searchParams={searchParams}
+				disableEntityPickers={true}
+				embedded={true}
+			/>
 
 			<DynamicContent
 				class="bg-card-base border border-border rounded-md"

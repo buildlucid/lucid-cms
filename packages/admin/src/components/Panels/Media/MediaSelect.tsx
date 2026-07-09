@@ -138,6 +138,9 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 		},
 	});
 	const [showingDeleted, setShowingDeleted] = createSignal<0 | 1>(0);
+	//* ids drive selection - refs only exist for media picked this session, so
+	//* URL-hydrated ids without refs still pre-select their cards
+	const [selectedIds, setSelectedIds] = createSignal<number[]>([]);
 	const [selectedMedia, setSelectedMedia] = createSignal<MediaRelationRef[]>(
 		[],
 	);
@@ -147,9 +150,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const isMultiple = createMemo(() => props.multiple === true);
 	const isShowingDeleted = createMemo(() => showingDeleted() === 1);
-	const selectedMediaIds = createMemo(() =>
-		selectedMedia().map((media) => media.id),
-	);
+	const selectedMediaIds = createMemo(() => selectedIds());
 
 	// ----------------------------------
 	// Queries
@@ -166,12 +167,9 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	// ----------------------------------
 	// Effects
 	createEffect(() => {
-		if (!props.selectedRefs) {
-			setSelectedMedia([]);
-			return;
-		}
-
-		setSelectedMedia(props.selectedRefs);
+		const refs = props.selectedRefs ?? [];
+		setSelectedIds(props.selected ?? refs.map((media) => media.id));
+		setSelectedMedia(refs);
 	});
 
 	// ----------------------------------
@@ -181,24 +179,22 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	) => {
 		const nextRef = mediaResponseToRef(mediaItem);
 
-		setSelectedMedia((prev) => {
-			const exists = prev.some(
-				(selectedItem) => selectedItem.id === nextRef.id,
-			);
-			if (exists) {
-				return prev.filter((selectedItem) => selectedItem.id !== nextRef.id);
-			}
-
-			if (!isMultiple()) {
-				return [nextRef];
-			}
-
-			return [...prev, nextRef];
-		});
+		if (selectedIds().includes(nextRef.id)) {
+			setSelectedIds((ids) => ids.filter((id) => id !== nextRef.id));
+			setSelectedMedia((refs) => refs.filter((ref) => ref.id !== nextRef.id));
+			return;
+		}
+		if (!isMultiple()) {
+			setSelectedIds([nextRef.id]);
+			setSelectedMedia([nextRef]);
+			return;
+		}
+		setSelectedIds((ids) => [...ids, nextRef.id]);
+		setSelectedMedia((refs) => [...refs, nextRef]);
 	};
 	const confirmSelection = () => {
 		props.onSelect({
-			value: selectedMediaIds(),
+			value: selectedIds(),
 			refs: selectedMedia(),
 		});
 	};

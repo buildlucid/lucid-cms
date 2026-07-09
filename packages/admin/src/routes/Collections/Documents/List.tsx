@@ -154,12 +154,14 @@ const CollectionsDocumentsListRoute: Component = () => {
 
 	// ----------------------------------
 	// Effects
-	//* reset order mode when switching collections
+	//* reset order mode and the filter section when switching collections -
+	//* closing the section also clears its uncommitted draft rows
 	createEffect(
 		on(
 			collectionKey,
 			() => {
 				setOrderMode(false);
+				setFilterSectionOpen(false);
 			},
 			{ defer: true },
 		),

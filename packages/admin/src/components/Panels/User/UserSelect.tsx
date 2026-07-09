@@ -86,11 +86,12 @@ interface UserSelectContentProps {
 }
 
 const UserSelectContent: Component<UserSelectContentProps> = (props) => {
+	//* ids drive selection - refs only exist for users picked this session, so
+	//* URL-hydrated ids without refs still pre-select their rows
+	const [selectedIds, setSelectedIds] = createSignal<number[]>([]);
 	const [selectedUsers, setSelectedUsers] = createSignal<UserRelationRef[]>([]);
 	const isMultiple = createMemo(() => props.multiple === true);
-	const selectedUserIds = createMemo(() =>
-		selectedUsers().map((user) => user.id),
-	);
+	const selectedUserIds = createMemo(() => selectedIds());
 	const searchParams = useQueryState({
 		mode: "memory",
 		schema: {
@@ -120,12 +121,9 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 	const isLoading = createMemo(() => users.isLoading);
 
 	createEffect(() => {
-		if (!props.selectedRefs) {
-			setSelectedUsers([]);
-			return;
-		}
-
-		setSelectedUsers(props.selectedRefs);
+		const refs = props.selectedRefs ?? [];
+		setSelectedIds(props.selected ?? refs.map((user) => user.id));
+		setSelectedUsers(refs);
 	});
 
 	const toggleSelectedUser = (
@@ -133,24 +131,22 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 	) => {
 		const nextRef = userResponseToRef(user);
 
-		setSelectedUsers((prev) => {
-			const exists = prev.some(
-				(selectedUser) => selectedUser.id === nextRef.id,
-			);
-			if (exists) {
-				return prev.filter((selectedUser) => selectedUser.id !== nextRef.id);
-			}
-
-			if (!isMultiple()) {
-				return [nextRef];
-			}
-
-			return [...prev, nextRef];
-		});
+		if (selectedIds().includes(nextRef.id)) {
+			setSelectedIds((ids) => ids.filter((id) => id !== nextRef.id));
+			setSelectedUsers((refs) => refs.filter((ref) => ref.id !== nextRef.id));
+			return;
+		}
+		if (!isMultiple()) {
+			setSelectedIds([nextRef.id]);
+			setSelectedUsers([nextRef]);
+			return;
+		}
+		setSelectedIds((ids) => [...ids, nextRef.id]);
+		setSelectedUsers((refs) => [...refs, nextRef]);
 	};
 	const confirmSelection = () => {
 		props.onSelect({
-			value: selectedUserIds(),
+			value: selectedIds(),
 			refs: selectedUsers(),
 		});
 	};

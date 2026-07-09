@@ -146,6 +146,7 @@ const PageCollection = new CollectionBuilder("page", {
 			zod: z.string().min(2).max(128),
 		},
 		showInList: true,
+		useAsLabel: true,
 	})
 	.addUser("author", {
 		showInList: true,
