@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/solid-query";
+import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type {
 	PublishOperation,
 	PublishOperationExecutionStatus,
@@ -50,6 +50,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 					method: "GET",
 				},
 			}),
+		placeholderData: keepPreviousData,
 		get enabled() {
 			return params.enabled ? params.enabled() : true;
 		},

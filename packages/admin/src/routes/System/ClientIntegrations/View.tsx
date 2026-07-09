@@ -82,20 +82,23 @@ const SystemClientIntegrationsRoute: Component = () => {
 										queryKey: ["clientIntegrations.getAll"],
 									});
 								}}
-								filters={[
-									{
-										label: T()("common.name"),
-										key: "name",
-										type: "text",
-									},
-									{
-										label: T()("common.status.active"),
-										key: "enabled",
-										type: "boolean",
-										trueLabel: T()("common.status.active"),
-										falseLabel: T()("common.status.inactive"),
-									},
-								]}
+								filterSection={{
+									subject: T()("client.integrations.manage.title"),
+									fields: [
+										{
+											label: T()("common.name"),
+											key: "name",
+											type: "text",
+										},
+										{
+											label: T()("common.status.active"),
+											key: "enabled",
+											type: "checkbox",
+											trueLabel: T()("common.status.active"),
+											falseLabel: T()("common.status.inactive"),
+										},
+									],
+								}}
 								sorts={[
 									{
 										label: T()("common.name"),

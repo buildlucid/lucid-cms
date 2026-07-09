@@ -281,7 +281,8 @@ const CollectionsDocumentsListRoute: Component = () => {
 											: {
 													open: filterSectionOpen(),
 													setOpen: setFilterSectionOpen,
-													collectionName: collectionName(),
+													subject: collectionName(),
+													preserveSubjectCase: true,
 													fields: getFilterFields(),
 												}
 									}

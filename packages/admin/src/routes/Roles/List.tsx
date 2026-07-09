@@ -64,13 +64,16 @@ const RolesListRoute: Component = () => {
 											queryKey: ["roles.getMultiple"],
 										});
 									}}
-									filters={[
-										{
-											label: T()("common.name"),
-											key: "name",
-											type: "text",
-										},
-									]}
+									filterSection={{
+										subject: T()("routes.roles.title"),
+										fields: [
+											{
+												label: T()("common.name"),
+												key: "name",
+												type: "text",
+											},
+										],
+									}}
 									sorts={[
 										{
 											label: T()("common.name"),

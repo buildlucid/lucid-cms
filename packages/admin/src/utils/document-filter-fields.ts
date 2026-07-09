@@ -48,6 +48,8 @@ export interface DocumentFilterField {
 	/** media fields - picker constraints from the field's validation */
 	mediaType?: string;
 	mediaExtensions?: string;
+	/** Optional operator subset/order for filters with backend-specific rules. */
+	operators?: DocumentFilterOperator[];
 }
 
 export type DocumentFilterOperator =

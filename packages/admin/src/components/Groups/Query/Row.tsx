@@ -9,7 +9,6 @@ import {
 	Show,
 } from "solid-js";
 import { CheckboxButton } from "@/components/Groups/Form/CheckboxButton";
-import type { FilterProps } from "@/components/Groups/Query/Filter";
 import {
 	FilterSection,
 	type FilterSectionProps,
@@ -19,18 +18,20 @@ import type { SortProps } from "@/components/Groups/Query/Sort";
 import Button from "@/components/Partials/Button";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
-import { Filter } from "./Filter";
 import { PerPage } from "./PerPage";
 import { Sort } from "./Sort";
 
 interface QueryRowProps {
-	filters?: FilterProps["filters"];
-	filterSection?: Omit<FilterSectionProps, "searchParams">;
+	filterSection?: Omit<
+		FilterSectionProps,
+		"searchParams" | "open" | "setOpen" | "parentPadding"
+	> &
+		Partial<Pick<FilterSectionProps, "open" | "setOpen">>;
 	sorts?: SortProps["sorts"];
 	perPage?: Array<number>;
 	custom?: JSX.Element;
 	searchParams: QueryStateResponse;
-	//* overrides the reset button behaviour and shows it without props.filters
+	//* overrides the reset button behaviour
 	onResetFilters?: () => void;
 	onRefresh?: () => void;
 	showingDeleted?: Accessor<boolean>;
@@ -44,6 +45,8 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 	// ----------------------------------------
 	// State
 	const [isRefreshing, setIsRefreshing] = createSignal(false);
+	const [internalFilterSectionOpen, setInternalFilterSectionOpen] =
+		createSignal(false);
 
 	// ----------------------------------------
 	// Memos
@@ -51,6 +54,9 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 		return props.onRefresh !== undefined;
 	});
 	const filterSection = createMemo(() => props.filterSection);
+	const filterSectionOpen = createMemo(
+		() => filterSection()?.open ?? internalFilterSectionOpen(),
+	);
 
 	// ----------------------------------------
 	// Functions
@@ -60,6 +66,11 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 		setTimeout(() => {
 			setIsRefreshing(false);
 		}, 1000);
+	};
+	const setFilterSectionOpen = (open: boolean) => {
+		const setter = filterSection()?.setOpen;
+		if (setter) setter(open);
+		else setInternalFilterSectionOpen(open);
 	};
 
 	// ----------------------------------------
@@ -78,19 +89,12 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 					<Show when={filterSection()}>
 						{(section) => (
 							<FilterSectionToggle
-								open={section().open}
-								onToggle={() => section().setOpen(!section().open)}
+								open={filterSectionOpen()}
+								onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
 								searchParams={props.searchParams}
 								disabled={section().fields.length === 0}
 							/>
 						)}
-					</Show>
-					<Show when={props.filters !== undefined}>
-						<Filter
-							filters={props.filters as FilterProps["filters"]}
-							searchParams={props.searchParams}
-							disabled={props.filters?.length === 0}
-						/>
 					</Show>
 					<Show when={props.sorts !== undefined}>
 						<Sort
@@ -120,8 +124,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 					</Show>
 					<Show
 						when={
-							(props.filters !== undefined ||
-								filterSection() !== undefined ||
+							(filterSection() !== undefined ||
 								props.onResetFilters !== undefined) &&
 							!props.searchParams.hasDefaultFiltersApplied()
 						}
@@ -173,12 +176,14 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 			<Show when={filterSection()}>
 				{(section) => (
 					<FilterSection
-						open={section().open}
-						setOpen={section().setOpen}
-						collectionName={section().collectionName}
+						open={filterSectionOpen()}
+						setOpen={setFilterSectionOpen}
+						subject={section().subject}
 						fields={section().fields}
 						searchParams={props.searchParams}
 						embedded={section().embedded}
+						preserveSubjectCase={section().preserveSubjectCase}
+						parentPadding={props.options?.padding ?? "24"}
 					/>
 				)}
 			</Show>

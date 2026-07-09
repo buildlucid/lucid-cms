@@ -23,6 +23,7 @@ import {
 	type DocumentFilterOperator,
 	operatorsForFieldType,
 } from "@/utils/document-filter-fields";
+import { formatFilterSectionSubject } from "@/utils/filter-fields";
 
 type RowRef =
 	//* top-level filter param - only exists in single-group mode
@@ -53,9 +54,12 @@ interface DraftRow {
 export interface FilterSectionProps {
 	open: boolean;
 	setOpen: (open: boolean) => void;
-	collectionName: string;
+	subject: string;
+	preserveSubjectCase?: boolean;
 	fields: DocumentFilterField[];
 	searchParams: QueryStateResponse;
+	/** Padding of the parent query row that this section bleeds through. */
+	parentPadding?: "16" | "24";
 	/** standalone card styling for use inside panels instead of bleeding into
 	 * the list header card */
 	embedded?: boolean;
@@ -107,6 +111,14 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 			});
 		}
 		return result;
+	});
+	const hasOwnedCommittedFilters = createMemo(() => {
+		if (topConditions().length > 0) return true;
+		return props.searchParams
+			.orFilterGroups()
+			.some((group) =>
+				group.some((condition) => fieldsByKey().has(condition.key)),
+			);
 	});
 	//* committed rows come from query state; drafts hold uncommitted edits
 	const rows = createMemo<RowModel[]>(() => {
@@ -199,7 +211,9 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 
 	const defaultOperator = (fieldKey: string): DocumentFilterOperator => {
 		const field = fieldsByKey().get(fieldKey);
-		return field ? (operatorsForFieldType(field.type)[0] ?? "=") : "=";
+		return field
+			? (field.operators?.[0] ?? operatorsForFieldType(field.type)[0] ?? "=")
+			: "=";
 	};
 
 	const replaceIdentity = (oldId: string, newId: string) => {
@@ -638,10 +652,14 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 
 	// ----------------------------------
 	// Effects
-	//* open for URL-backed filters, close only when no row state remains
+	//* open for active URL-backed filters owned by this section. Default filters
+	//* (for example media-picker constraints) and unrelated route presets should
+	//* not force the section open.
 	createEffect(
 		on(
-			() => !props.searchParams.hasDefaultFiltersApplied(),
+			() =>
+				!props.searchParams.hasDefaultFiltersApplied() &&
+				hasOwnedCommittedFilters(),
 			(active) => {
 				if (active) props.setOpen(true);
 				else if (rows().length === 0) props.setOpen(false);
@@ -706,12 +724,17 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 				class={
 					props.embedded
 						? "mb-4 px-4 py-4 bg-card-base border border-border rounded-md"
-						: "-mx-4 md:-mx-6 -mb-4 md:-mb-6 mt-1.5 md:mt-3.5 px-4 md:px-6 py-4 bg-card-base border-t border-border"
+						: props.parentPadding === "16"
+							? "-mx-4 -mb-4 mt-1.5 md:mt-3.5 px-4 py-4 bg-card-base border-t border-border"
+							: "-mx-4 md:-mx-6 -mb-4 md:-mb-6 mt-1.5 md:mt-3.5 px-4 md:px-6 py-4 bg-card-base border-t border-border"
 				}
 			>
 				<h3 class="text-sm font-medium text-title mb-3">
 					{T()("filter.section.title", {
-						collection: props.collectionName,
+						subject: formatFilterSectionSubject(
+							props.subject,
+							props.preserveSubjectCase,
+						),
 					})}
 				</h3>
 				<div class="w-full flex flex-col gap-2.5">

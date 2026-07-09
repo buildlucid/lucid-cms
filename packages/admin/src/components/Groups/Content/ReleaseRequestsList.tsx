@@ -75,11 +75,10 @@ export const ReleaseRequestsList: Component<{
 		const value = props.state.searchParams.filters().get("target");
 		return typeof value === "string" && value.length > 0 ? value : undefined;
 	});
-	const statusFilter = createMemo(() => {
+	const hasStatusFilter = createMemo(() => {
 		const value = props.state.searchParams.filters().get("status");
-		return Array.isArray(value) && value.length > 0
-			? (value as PublishOperationStatus[])
-			: undefined;
+		if (Array.isArray(value)) return value.length > 0;
+		return typeof value === "string" && value.length > 0;
 	});
 
 	// -------------------------------
@@ -89,14 +88,14 @@ export const ReleaseRequestsList: Component<{
 			queryString: props.state.searchParams.queryString,
 			filters: {
 				status: () =>
-					statusFilter() === undefined
-						? ([
+					hasStatusFilter()
+						? undefined
+						: ([
 								"pending",
 								"approved",
 								"rejected",
 								"cancelled",
-							] satisfies PublishOperationStatus[])
-						: undefined,
+							] satisfies PublishOperationStatus[]),
 				operationType: () => "request",
 			},
 		},

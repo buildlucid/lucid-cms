@@ -8,15 +8,13 @@ import { AiUsageList } from "@/components/Groups/Content";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import useQueryState, {
-	arrayFilter,
+	numberFilter,
 	pagination,
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState";
-import api from "@/services/api";
 import T from "@/translations";
 import { getAiUsageFeatureOptions } from "@/utils/ai-usage";
-import helpers from "@/utils/helpers";
 
 const SystemAiUsageRoute: Component = () => {
 	// ----------------------------------
@@ -27,9 +25,9 @@ const SystemAiUsageRoute: Component = () => {
 		schema: {
 			filters: {
 				featureKey: textFilter(),
-				status: arrayFilter(),
+				status: textFilter(),
 				model: textFilter(),
-				userId: arrayFilter(),
+				userId: numberFilter(),
 			},
 			sorts: {
 				createdAt: sort({ defaultValue: "desc" }),
@@ -43,27 +41,8 @@ const SystemAiUsageRoute: Component = () => {
 		},
 	});
 
-	// ----------------------------------
-	// Queries
-	const users = api.users.useGetMultiple({
-		queryParams: {
-			filters: {
-				isDeleted: 0,
-			},
-			perPage: -1,
-		},
-	});
-
 	// ----------------------------------------
 	// Memos
-	const userOptions = createMemo(() =>
-		(users.data?.data ?? []).map((user) => ({
-			value: user.id,
-			label:
-				helpers.formatUserName(user, "simple") || T()("media.types.unknown"),
-			user,
-		})),
-	);
 	const featureOptions = createMemo(() => getAiUsageFeatureOptions());
 
 	// ----------------------------------
@@ -96,41 +75,42 @@ const SystemAiUsageRoute: Component = () => {
 										queryKey: ["ai.getUsage"],
 									});
 								}}
-								filters={[
-									{
-										label: T()("ai.usage.feature"),
-										key: "featureKey",
-										type: "select",
-										options: featureOptions(),
-									},
-									{
-										label: T()("common.status"),
-										key: "status",
-										type: "multi-select",
-										options: [
-											{
-												label: T()("common.status.pending"),
-												value: "pending" satisfies AiUsageStatus,
-											},
-											{
-												label: T()("common.status.success"),
-												value: "success" satisfies AiUsageStatus,
-											},
-										],
-									},
-									{
-										label: T()("ai.usage.model"),
-										key: "model",
-										type: "text",
-									},
-									{
-										label: T()("common.user"),
-										key: "userId",
-										type: "multi-select",
-										optionType: "user",
-										options: userOptions(),
-									},
-								]}
+								filterSection={{
+									subject: T()("ai.usage.records.title"),
+									fields: [
+										{
+											label: T()("ai.usage.feature"),
+											key: "featureKey",
+											type: "select",
+											options: featureOptions(),
+										},
+										{
+											label: T()("common.status"),
+											key: "status",
+											type: "select",
+											options: [
+												{
+													label: T()("common.status.pending"),
+													value: "pending" satisfies AiUsageStatus,
+												},
+												{
+													label: T()("common.status.success"),
+													value: "success" satisfies AiUsageStatus,
+												},
+											],
+										},
+										{
+											label: T()("ai.usage.model"),
+											key: "model",
+											type: "text",
+										},
+										{
+											label: T()("common.user"),
+											key: "userId",
+											type: "user",
+										},
+									],
+								}}
 								sorts={[
 									{
 										label: T()("ai.usage.initiated"),

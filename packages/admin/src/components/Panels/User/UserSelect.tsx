@@ -10,7 +10,10 @@ import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
 import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
-import { Filter } from "@/components/Groups/Query/Filter";
+import {
+	FilterSection,
+	FilterSectionToggle,
+} from "@/components/Groups/Query/FilterSection";
 import { PerPage } from "@/components/Groups/Query/PerPage";
 import { Table } from "@/components/Groups/Table/Table";
 import { Td } from "@/components/Groups/Table/Td";
@@ -90,6 +93,7 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 	//* URL-hydrated ids without refs still pre-select their rows
 	const [selectedIds, setSelectedIds] = createSignal<number[]>([]);
 	const [selectedUsers, setSelectedUsers] = createSignal<UserRelationRef[]>([]);
+	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
 	const isMultiple = createMemo(() => props.multiple === true);
 	const selectedUserIds = createMemo(() => selectedIds());
 	const searchParams = useQueryState({
@@ -155,34 +159,44 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 		<div class="flex h-full flex-col">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap">
-					<Filter
-						filters={[
-							{
-								label: T()("common.username"),
-								key: "username",
-								type: "text",
-							},
-							{
-								label: T()("common.first.name"),
-								key: "firstName",
-								type: "text",
-							},
-							{
-								label: T()("common.last.name"),
-								key: "lastName",
-								type: "text",
-							},
-							{
-								label: T()("common.email"),
-								key: "email",
-								type: "text",
-							},
-						]}
+					<FilterSectionToggle
+						open={filterSectionOpen()}
+						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
 						searchParams={searchParams}
 					/>
 				</div>
 				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 			</div>
+
+			<FilterSection
+				open={filterSectionOpen()}
+				setOpen={setFilterSectionOpen}
+				subject={T()("common.user")}
+				fields={[
+					{
+						label: T()("common.username"),
+						key: "username",
+						type: "text",
+					},
+					{
+						label: T()("common.first.name"),
+						key: "firstName",
+						type: "text",
+					},
+					{
+						label: T()("common.last.name"),
+						key: "lastName",
+						type: "text",
+					},
+					{
+						label: T()("common.email"),
+						key: "email",
+						type: "text",
+					},
+				]}
+				searchParams={searchParams}
+				embedded={true}
+			/>
 
 			<DynamicContent
 				class="grow bg-card-base border border-border rounded-md"

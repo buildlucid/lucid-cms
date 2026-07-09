@@ -42,10 +42,12 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 	const operatorOptions = createMemo(() => {
 		const field = props.field;
 		if (!field) return [];
-		return operatorsForFieldType(field.type).map((operator) => ({
-			value: operator,
-			label: operatorLabel(operator),
-		}));
+		return (field.operators ?? operatorsForFieldType(field.type)).map(
+			(operator) => ({
+				value: operator,
+				label: operatorLabel(operator),
+			}),
+		);
 	});
 	const booleanOptions = createMemo(() => [
 		{ value: "1", label: props.field?.trueLabel ?? T()("common.yes") },
@@ -171,7 +173,7 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 			</div>
 			<div class="h-10 flex items-center gap-2.5">
 				<Button
-					theme="border-outline"
+					theme="danger-outline"
 					size="icon"
 					type="button"
 					classes="w-10! h-10! min-w-[40px]!"

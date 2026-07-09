@@ -9,13 +9,17 @@ import {
 	type Accessor,
 	type Component,
 	createMemo,
+	createSignal,
 	Index,
 	Show,
 } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
-import { Filter } from "@/components/Groups/Query/Filter";
+import {
+	FilterSection,
+	FilterSectionToggle,
+} from "@/components/Groups/Query/FilterSection";
 import { PerPage } from "@/components/Groups/Query/PerPage";
 import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
@@ -108,6 +112,7 @@ const ViewShareLinksPanelContent: Component<{
 			singleSort: true,
 		},
 	});
+	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
 
 	const rowTarget = useRowTarget<"delete" | "update">({
 		triggers: {
@@ -151,19 +156,9 @@ const ViewShareLinksPanelContent: Component<{
 			<Show when={props.id !== undefined}>
 				<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 					<div class="flex gap-2.5">
-						<Filter
-							filters={[
-								{
-									label: T()("common.name"),
-									key: "name",
-									type: "text",
-								},
-								{
-									label: T()("common.token"),
-									key: "token",
-									type: "text",
-								},
-							]}
+						<FilterSectionToggle
+							open={filterSectionOpen()}
+							onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
 							searchParams={shareLinksSearchParams}
 						/>
 						<Sort
@@ -189,6 +184,25 @@ const ViewShareLinksPanelContent: Component<{
 						searchParams={shareLinksSearchParams}
 					/>
 				</div>
+				<FilterSection
+					open={filterSectionOpen()}
+					setOpen={setFilterSectionOpen}
+					subject={T()("panels.media.share.links.view.title")}
+					fields={[
+						{
+							label: T()("common.name"),
+							key: "name",
+							type: "text",
+						},
+						{
+							label: T()("common.token"),
+							key: "token",
+							type: "text",
+						},
+					]}
+					searchParams={shareLinksSearchParams}
+					embedded={true}
+				/>
 				<DynamicContent
 					class="bg-card-base border border-border rounded-md"
 					state={{

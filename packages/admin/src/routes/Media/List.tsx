@@ -20,7 +20,6 @@ import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaP
 import { Permissions } from "@/constants/permissions";
 import useMediaImageGeneration from "@/hooks/ai/useMediaImageGeneration";
 import useQueryState, {
-	arrayFilter,
 	booleanFilter,
 	pagination,
 	sort,
@@ -42,7 +41,7 @@ const MediaListRoute: Component = () => {
 			filters: {
 				title: textFilter(),
 				extension: textFilter(),
-				type: arrayFilter(),
+				type: textFilter(),
 				mimeType: textFilter(),
 				key: textFilter(),
 				public: booleanFilter(),
@@ -294,66 +293,69 @@ const MediaListRoute: Component = () => {
 												queryKey: ["mediaFolders.getMultiple"],
 											});
 										}}
-										filters={[
-											{
-												label: T()("common.title"),
-												key: "title",
-												type: "text",
-											},
-											{
-												label: T()("common.visibility"),
-												key: "public",
-												type: "boolean",
-												trueLabel: T()("common.public"),
-												falseLabel: T()("common.private"),
-											},
-											{
-												label: T()("common.mime.type"),
-												key: "mimeType",
-												type: "text",
-											},
-											{
-												label: T()("common.key"),
-												key: "key",
-												type: "text",
-											},
-											{
-												label: T()("common.type"),
-												key: "type",
-												type: "multi-select",
-												options: [
-													{
-														label: T()("media.types.image"),
-														value: "image",
-													},
-													{
-														label: T()("media.types.video"),
-														value: "video",
-													},
-													{
-														label: T()("media.types.audio"),
-														value: "audio",
-													},
-													{
-														label: T()("media.types.document"),
-														value: "document",
-													},
-													{
-														label: T()("media.types.archive"),
-														value: "archive",
-													},
-													{
-														label: T()("media.types.unknown"),
-														value: "unknown",
-													},
-												],
-											},
-											{
-												label: T()("common.file.extension"),
-												key: "extension",
-												type: "text",
-											},
-										]}
+										filterSection={{
+											subject: T()("routes.media.title"),
+											fields: [
+												{
+													label: T()("common.title"),
+													key: "title",
+													type: "text",
+												},
+												{
+													label: T()("common.visibility"),
+													key: "public",
+													type: "checkbox",
+													trueLabel: T()("common.public"),
+													falseLabel: T()("common.private"),
+												},
+												{
+													label: T()("common.mime.type"),
+													key: "mimeType",
+													type: "text",
+												},
+												{
+													label: T()("common.key"),
+													key: "key",
+													type: "text",
+												},
+												{
+													label: T()("common.type"),
+													key: "type",
+													type: "select",
+													options: [
+														{
+															label: T()("media.types.image"),
+															value: "image",
+														},
+														{
+															label: T()("media.types.video"),
+															value: "video",
+														},
+														{
+															label: T()("media.types.audio"),
+															value: "audio",
+														},
+														{
+															label: T()("media.types.document"),
+															value: "document",
+														},
+														{
+															label: T()("media.types.archive"),
+															value: "archive",
+														},
+														{
+															label: T()("media.types.unknown"),
+															value: "unknown",
+														},
+													],
+												},
+												{
+													label: T()("common.file.extension"),
+													key: "extension",
+													type: "text",
+												},
+											],
+										}}
 										sorts={[
 											{
 												label: T()("common.title"),

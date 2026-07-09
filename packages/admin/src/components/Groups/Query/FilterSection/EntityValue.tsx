@@ -23,8 +23,8 @@ import type { FilterValue } from "@/hooks/useQueryState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
-import type { DocumentFilterField } from "@/utils/document-filter-fields";
 import {
+	type DocumentFilterField,
 	formatRelationFilterValue,
 	parseRelationFilterValue,
 } from "@/utils/document-filter-fields";
@@ -259,7 +259,7 @@ export const EntityValue: Component<{
 			<Show when={currentId() !== undefined && props.disabled !== true}>
 				<button
 					type="button"
-					class="absolute right-2 top-1/2 -translate-y-1/2 text-unfocused hover:text-error-hover duration-200 transition-colors"
+					class="absolute right-2 top-1/2 -translate-y-1/2 text-subtitle hover:text-error-base duration-200 transition-colors"
 					onClick={clearValue}
 					title={T()("filter.section.entity.clear")}
 					aria-label={T()("filter.section.entity.clear")}

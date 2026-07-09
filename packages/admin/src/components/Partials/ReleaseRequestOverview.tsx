@@ -11,7 +11,7 @@ import {
 	FaSolidXmark,
 } from "solid-icons/fa";
 import { type Component, createMemo, For, type JSXElement } from "solid-js";
-import type { QueryStateResponse } from "@/hooks/useQueryState";
+import type { FilterValue, QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
 import ReleaseRequestOverviewTile from "./ReleaseRequestOverviewTile";
 
@@ -22,11 +22,16 @@ type ReleaseRequestPreset = {
 	icon: JSXElement;
 	tone: "grey" | "blue" | "green" | "purple" | "red" | "yellow";
 	filters: {
-		status?: PublishOperationStatus[];
-		executionStatus?: PublishOperationExecutionStatus[];
-		assignedToMe?: string;
+		status?: PublishOperationStatus;
+		executionStatus?: PublishOperationExecutionStatus;
+		assignedToMe?: boolean;
 		requestedByMe?: string;
 	};
+};
+
+const presetFilterValue = (value: FilterValue): FilterValue => {
+	if (Array.isArray(value)) return value.length === 1 ? value[0] : undefined;
+	return value === "" ? undefined : value;
 };
 
 const ReleaseRequestOverview: Component<{
@@ -52,7 +57,7 @@ const ReleaseRequestOverview: Component<{
 			icon: <FaSolidClock size={14} />,
 			tone: "yellow",
 			filters: {
-				status: ["pending"],
+				status: "pending",
 			},
 		},
 		{
@@ -62,7 +67,7 @@ const ReleaseRequestOverview: Component<{
 			icon: <FaSolidUserCheck size={14} />,
 			tone: "blue",
 			filters: {
-				assignedToMe: "true",
+				assignedToMe: true,
 			},
 		},
 		{
@@ -72,7 +77,7 @@ const ReleaseRequestOverview: Component<{
 			icon: <FaSolidCheck size={14} />,
 			tone: "green",
 			filters: {
-				status: ["approved"],
+				status: "approved",
 			},
 		},
 		{
@@ -82,7 +87,7 @@ const ReleaseRequestOverview: Component<{
 			icon: <FaSolidXmark size={14} />,
 			tone: "red",
 			filters: {
-				status: ["rejected"],
+				status: "rejected",
 			},
 		},
 	]);
@@ -91,16 +96,20 @@ const ReleaseRequestOverview: Component<{
 	// Functions
 	const isActive = (preset: ReleaseRequestPreset) => {
 		const filters = props.searchParams.filters();
-		const currentStatus = filters.get("status");
-		const currentExecutionStatus = filters.get("executionStatus");
+		const currentStatus = presetFilterValue(filters.get("status"));
+		const currentExecutionStatus = presetFilterValue(
+			filters.get("executionStatus"),
+		);
+		const currentAssignedToMe = presetFilterValue(filters.get("assignedToMe"));
+		const currentRequestedByMe = presetFilterValue(
+			filters.get("requestedByMe"),
+		);
 
 		return (
-			JSON.stringify(currentStatus ?? []) ===
-				JSON.stringify(preset.filters.status ?? []) &&
-			JSON.stringify(currentExecutionStatus ?? []) ===
-				JSON.stringify(preset.filters.executionStatus ?? []) &&
-			filters.get("assignedToMe") === preset.filters.assignedToMe &&
-			filters.get("requestedByMe") === preset.filters.requestedByMe
+			currentStatus === preset.filters.status &&
+			currentExecutionStatus === preset.filters.executionStatus &&
+			currentAssignedToMe === preset.filters.assignedToMe &&
+			currentRequestedByMe === preset.filters.requestedByMe
 		);
 	};
 	const applyPreset = (preset: ReleaseRequestPreset) => {

@@ -76,35 +76,38 @@ const UsersListRoute: Component = () => {
 											queryKey: ["users.getMultiple"],
 										});
 									}}
-									filters={[
-										{
-											label: T()("common.first.name"),
-											key: "firstName",
-											type: "text",
-										},
-										{
-											label: T()("common.last.name"),
-											key: "lastName",
-											type: "text",
-										},
-										{
-											label: T()("common.email"),
-											key: "email",
-											type: "text",
-										},
-										{
-											label: T()("common.username"),
-											key: "username",
-											type: "text",
-										},
-										{
-											label: T()("users.status.locked.label"),
-											key: "isLocked",
-											type: "boolean",
-											trueLabel: T()("common.status.locked"),
-											falseLabel: T()("common.status.unlocked"),
-										},
-									]}
+									filterSection={{
+										subject: T()("routes.users.title"),
+										fields: [
+											{
+												label: T()("common.first.name"),
+												key: "firstName",
+												type: "text",
+											},
+											{
+												label: T()("common.last.name"),
+												key: "lastName",
+												type: "text",
+											},
+											{
+												label: T()("common.email"),
+												key: "email",
+												type: "text",
+											},
+											{
+												label: T()("common.username"),
+												key: "username",
+												type: "text",
+											},
+											{
+												label: T()("users.status.locked.label"),
+												key: "isLocked",
+												type: "checkbox",
+												trueLabel: T()("common.status.locked"),
+												falseLabel: T()("common.status.unlocked"),
+											},
+										],
+									}}
 									sorts={[
 										{
 											label: T()("common.created.at"),

@@ -14,13 +14,15 @@ import { Grid } from "@/components/Groups/Grid";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
 import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
-import { Filter } from "@/components/Groups/Query/Filter";
+import {
+	FilterSection,
+	FilterSectionToggle,
+} from "@/components/Groups/Query/FilterSection";
 import { PerPage } from "@/components/Groups/Query/PerPage";
 import { Sort } from "@/components/Groups/Query/Sort";
 import ClearProcessedImages from "@/components/Modals/Media/ClearProcessedImages";
 import RestoreMedia from "@/components/Modals/Media/RestoreMedia";
 import useQueryState, {
-	arrayFilter,
 	pagination,
 	sort,
 	textFilter,
@@ -115,9 +117,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			filters: {
 				title: textFilter(),
 				extension: textFilter({ defaultValue: props.extensions || "" }),
-				type: arrayFilter({
-					defaultValue: props.type ? [props.type] : [],
-				}),
+				type: textFilter({ defaultValue: props.type || "" }),
 				mimeType: textFilter(),
 				key: textFilter(),
 			},
@@ -138,6 +138,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 		},
 	});
 	const [showingDeleted, setShowingDeleted] = createSignal<0 | 1>(0);
+	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
 	//* ids drive selection - refs only exist for media picked this session, so
 	//* URL-hydrated ids without refs still pre-select their cards
 	const [selectedIds, setSelectedIds] = createSignal<number[]>([]);
@@ -205,60 +206,9 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 		<div class="flex h-full flex-col">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap">
-					<Filter
-						filters={[
-							{
-								label: T()("common.title"),
-								key: "title",
-								type: "text",
-							},
-							{
-								label: T()("common.mime.type"),
-								key: "mimeType",
-								type: "text",
-							},
-							{
-								label: T()("common.key"),
-								key: "key",
-								type: "text",
-							},
-							{
-								label: T()("common.type"),
-								key: "type",
-								type: "multi-select",
-								options: [
-									{
-										label: T()("media.types.image"),
-										value: "image",
-									},
-									{
-										label: T()("media.types.video"),
-										value: "video",
-									},
-									{
-										label: T()("media.types.audio"),
-										value: "audio",
-									},
-									{
-										label: T()("media.types.document"),
-										value: "document",
-									},
-									{
-										label: T()("media.types.archive"),
-										value: "archive",
-									},
-									{
-										label: T()("media.types.unknown"),
-										value: "unknown",
-									},
-								],
-							},
-							{
-								label: T()("common.file.extension"),
-								key: "extension",
-								type: "text",
-							},
-						]}
+					<FilterSectionToggle
+						open={filterSectionOpen()}
+						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
 						searchParams={searchParams}
 					/>
 					<Sort
@@ -313,6 +263,67 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 				</div>
 				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 			</div>
+
+			<FilterSection
+				open={filterSectionOpen()}
+				setOpen={setFilterSectionOpen}
+				subject={T()("common.media")}
+				fields={[
+					{
+						label: T()("common.title"),
+						key: "title",
+						type: "text",
+					},
+					{
+						label: T()("common.mime.type"),
+						key: "mimeType",
+						type: "text",
+					},
+					{
+						label: T()("common.key"),
+						key: "key",
+						type: "text",
+					},
+					{
+						label: T()("common.type"),
+						key: "type",
+						type: "select",
+						options: [
+							{
+								label: T()("media.types.image"),
+								value: "image",
+							},
+							{
+								label: T()("media.types.video"),
+								value: "video",
+							},
+							{
+								label: T()("media.types.audio"),
+								value: "audio",
+							},
+							{
+								label: T()("media.types.document"),
+								value: "document",
+							},
+							{
+								label: T()("media.types.archive"),
+								value: "archive",
+							},
+							{
+								label: T()("media.types.unknown"),
+								value: "unknown",
+							},
+						],
+					},
+					{
+						label: T()("common.file.extension"),
+						key: "extension",
+						type: "text",
+					},
+				]}
+				searchParams={searchParams}
+				embedded={true}
+			/>
 
 			<DynamicContent
 				class="grow"

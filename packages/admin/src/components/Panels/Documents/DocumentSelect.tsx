@@ -405,7 +405,8 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			<FilterSection
 				open={filterSectionOpen()}
 				setOpen={setFilterSectionOpen}
-				collectionName={collectionName()}
+				subject={collectionName()}
+				preserveSubjectCase={true}
 				fields={getFilterFields()}
 				searchParams={searchParams}
 				embedded={true}

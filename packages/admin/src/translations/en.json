@@ -200,7 +200,7 @@
 	"common.loading": "Loading",
 	"common.ellipsis": "...",
 	"actions.reset.filters": "Reset Filters",
-	"filter.section.title": "{{collection}} where",
+	"filter.section.title": "{{subject}} where",
 	"filter.section.where": "Where",
 	"filter.section.operator": "Operator",
 	"filter.section.value": "Value",

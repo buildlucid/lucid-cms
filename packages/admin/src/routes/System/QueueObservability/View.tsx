@@ -5,11 +5,7 @@ import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
 import { JobsList } from "@/components/Groups/Content";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
-import useQueryState, {
-	arrayFilter,
-	sort,
-	textFilter,
-} from "@/hooks/useQueryState";
+import useQueryState, { sort, textFilter } from "@/hooks/useQueryState";
 import T from "@/translations";
 
 const SystemQueueObservabilityRoute: Component = () => {
@@ -22,7 +18,7 @@ const SystemQueueObservabilityRoute: Component = () => {
 			filters: {
 				jobId: textFilter(),
 				eventType: textFilter(),
-				status: arrayFilter(),
+				status: textFilter(),
 				queueAdapterKey: textFilter(),
 			},
 			sorts: {
@@ -62,50 +58,53 @@ const SystemQueueObservabilityRoute: Component = () => {
 										queryKey: ["jobs.getMultiple"],
 									});
 								}}
-								filters={[
-									{
-										label: T()("jobs.id"),
-										key: "jobId",
-										type: "text",
-									},
-									{
-										label: T()("common.event.type"),
-										key: "eventType",
-										type: "text",
-									},
-									{
-										label: T()("common.status"),
-										key: "status",
-										type: "multi-select",
-										options: [
-											{
-												label: T()("common.status.pending"),
-												value: "pending",
-											},
-											{
-												label: T()("common.status.processing"),
-												value: "processing",
-											},
-											{
-												label: T()("common.status.completed"),
-												value: "completed",
-											},
-											{
-												label: T()("common.status.failed"),
-												value: "failed",
-											},
-											{
-												label: T()("common.status.cancelled"),
-												value: "cancelled",
-											},
-										],
-									},
-									{
-										label: T()("queue.adapter"),
-										key: "queueAdapterKey",
-										type: "text",
-									},
-								]}
+								filterSection={{
+									subject: T()("routes.system.queue.observability.title"),
+									fields: [
+										{
+											label: T()("jobs.id"),
+											key: "jobId",
+											type: "text",
+										},
+										{
+											label: T()("common.event.type"),
+											key: "eventType",
+											type: "text",
+										},
+										{
+											label: T()("common.status"),
+											key: "status",
+											type: "select",
+											options: [
+												{
+													label: T()("common.status.pending"),
+													value: "pending",
+												},
+												{
+													label: T()("common.status.processing"),
+													value: "processing",
+												},
+												{
+													label: T()("common.status.completed"),
+													value: "completed",
+												},
+												{
+													label: T()("common.status.failed"),
+													value: "failed",
+												},
+												{
+													label: T()("common.status.cancelled"),
+													value: "cancelled",
+												},
+											],
+										},
+										{
+											label: T()("queue.adapter"),
+											key: "queueAdapterKey",
+											type: "text",
+										},
+									],
+								}}
 								sorts={[
 									{
 										label: T()("common.created.at"),
