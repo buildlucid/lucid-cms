@@ -163,6 +163,53 @@ describe("createQueryState - memory mode", () => {
 		});
 	});
 
+	it("compacts OR group indexes when groups are removed", () => {
+		createRoot((dispose) => {
+			const adapter = createTestUrlAdapter();
+			const query = createQueryState({
+				schema: buildSchema(),
+				adapter,
+			});
+
+			query.setOrFilterGroups([
+				[{ key: "title", value: "home", operator: "ilike" }],
+				[{ key: "isDeleted", value: false }],
+			]);
+			//* drop the first group - the remaining group must move to index 0
+			query.setOrFilterGroups([[{ key: "isDeleted", value: false }]]);
+
+			const params = new URLSearchParams(adapter.search());
+			expect(params.get("filter[or][0][isDeleted]")).toBe("0");
+			expect(params.get("filter[or][1][isDeleted]")).toBeNull();
+			expect(params.get("filter[or][0][title:ilike]")).toBeNull();
+			expect(params.get("filter[or][1][title:ilike]")).toBeNull();
+			dispose();
+		});
+	});
+
+	it("drops empty OR conditions and groups instead of writing broken params", () => {
+		createRoot((dispose) => {
+			const adapter = createTestUrlAdapter();
+			const query = createQueryState({
+				schema: buildSchema(),
+				adapter,
+			});
+
+			query.setOrFilterGroups([
+				[{ key: "title", value: "", operator: "like" }],
+				[{ key: "title", value: "home", operator: "like" }],
+			]);
+
+			expect(query.orFilterGroups()).toEqual([
+				[{ key: "title", value: "home", operator: "like" }],
+			]);
+			const params = new URLSearchParams(adapter.search());
+			expect(params.get("filter[or][0][title:like]")).toBe("home");
+			expect(params.get("filter[or][1][title:like]")).toBeNull();
+			dispose();
+		});
+	});
+
 	it("clearOrFilterGroups removes grouped OR filters", () => {
 		createRoot((dispose) => {
 			const adapter = createTestUrlAdapter();
@@ -297,6 +344,53 @@ describe("createQueryState - storage sync", () => {
 			expect(query.pagination().page).toBe(2);
 			dispose();
 		});
+	});
+
+	it("hydrates OR filter groups from storage on initial load", () => {
+		createRoot((dispose) => {
+			const query = createQueryState({
+				schema: buildSchema(),
+				adapter: createTestUrlAdapter(
+					"filter[or][0][title:like]=home&filter[or][1][isDeleted]=0",
+				),
+			});
+
+			expect(query.orFilterGroups()).toEqual([
+				[{ key: "title", value: "home", operator: "like" }],
+				[{ key: "isDeleted", value: false }],
+			]);
+			expect(query.hasFiltersApplied()).toBe(true);
+			dispose();
+		});
+	});
+
+	it("rehydrates OR filter groups on external navigation (back/forward)", async () => {
+		const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+		let dispose = () => {};
+		const adapter = createTestUrlAdapter();
+		const query = createRoot((disposeFn) => {
+			dispose = disposeFn;
+			return createQueryState({ schema: buildSchema(), adapter });
+		});
+
+		query.setOrFilterGroups([
+			[{ key: "title", value: "home", operator: "like" }],
+		]);
+		await tick();
+		expect(query.orFilterGroups()).toHaveLength(1);
+
+		//* simulate the browser navigating back to a URL with different OR groups
+		adapter.set("filter[or][0][isDeleted]=1");
+		await tick();
+		expect(query.orFilterGroups()).toEqual([
+			[{ key: "isDeleted", value: true, operator: undefined }],
+		]);
+
+		//* navigating back to the empty initial URL clears OR groups
+		adapter.set("");
+		await tick();
+		expect(query.orFilterGroups()).toEqual([]);
+		dispose();
 	});
 
 	it("rehydrates on external navigation (back/forward)", async () => {

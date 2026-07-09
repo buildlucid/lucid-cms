@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/solid-query";
+import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type {
 	DocumentVersionType,
 	InternalCollectionDocument,
@@ -52,6 +52,9 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 					method: "GET",
 				},
 			}),
+		//* keeps the previous page rendered while a filter/sort change refetches,
+		//* so the route does not suspend and drop focus in the filter section
+		placeholderData: keepPreviousData,
 		get enabled() {
 			return params.enabled ? params.enabled() : true;
 		},

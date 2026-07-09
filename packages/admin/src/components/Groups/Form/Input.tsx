@@ -28,6 +28,7 @@ export const Input: Component<{
 		tooltip?: string;
 	};
 	onBlur?: () => void;
+	onFocus?: () => void;
 	autoFoucs?: boolean;
 	onKeyUp?: (_e: KeyboardEvent) => void;
 	autoComplete?: string;
@@ -106,7 +107,10 @@ export const Input: Component<{
 					max={props.max}
 					step={props.step}
 					disabled={props.disabled}
-					onFocus={() => setInputFocus(true)}
+					onFocus={() => {
+						setInputFocus(true);
+						props.onFocus?.();
+					}}
 					onKeyUp={(e) => props.onKeyUp?.(e)}
 					onBlur={() => {
 						setInputFocus(false);

@@ -17,7 +17,6 @@ import { QueryRow } from "@/components/Groups/Query/Row";
 import Button from "@/components/Partials/Button";
 import useQueryState, {
 	arrayFilter,
-	booleanFilter,
 	type QueryFilterSchema,
 	sort,
 	textFilter,
@@ -26,10 +25,12 @@ import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import {
-	collectionFieldFilters,
+	buildDocumentFilterSchema,
+	documentFilterFields,
+} from "@/utils/document-filter-fields";
+import {
 	collectionFieldIncludes,
 	collectionFieldSorts,
-	formatFieldFilters,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
@@ -57,6 +58,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 	});
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
 	const [orderMode, setOrderMode] = createSignal(false);
+	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
 
 	// ----------------------------------
 	// Memos
@@ -93,27 +95,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 		refetchOnWindowFocus: false,
 		enabled: () => !!collectionKey(),
 	});
-	const users = api.users.useGetMultiple({
-		queryParams: {
-			filters: {
-				isDeleted: 0,
-			},
-			perPage: -1,
-		},
-	});
-
 	const collectionData = createMemo(() => collection.data?.data);
-	const collectionHasWorkflow = createMemo(
-		() => collectionData()?.workflow !== undefined,
-	);
-	const workflowAssignees = api.documents.useGetWorkflowAssignees({
-		queryParams: {
-			location: {
-				collectionKey: collectionKey,
-			},
-		},
-		enabled: () => Boolean(collectionKey() && collectionHasWorkflow()),
-	});
 
 	// ----------------------------------
 	// Memos
@@ -121,8 +103,8 @@ const CollectionsDocumentsListRoute: Component = () => {
 	const getCollectionFieldIncludes = createMemo(() =>
 		collectionFieldIncludes(collectionData()),
 	);
-	const getCollectionFieldFilters = createMemo(() =>
-		collectionFieldFilters(collectionData()),
+	const getFilterFields = createMemo(() =>
+		documentFilterFields(collectionData()),
 	);
 	const getCollectionFieldSorts = createMemo(() =>
 		collectionFieldSorts(collectionData()),
@@ -149,54 +131,6 @@ const CollectionsDocumentsListRoute: Component = () => {
 		if (activeCollection) map.set(activeCollection.key, activeCollection);
 		return Array.from(map.values());
 	});
-	const getWorkflowFilters = createMemo(() => {
-		const workflow = collectionData()?.workflow;
-		if (!workflow) return [];
-
-		return [
-			{
-				label: T()("documents.workflow.stage"),
-				key: "workflowStage",
-				type: "select" as const,
-				options: workflow.stages.map((stage) => ({
-					value: stage.key,
-					label:
-						helpers.getLocaleValue({
-							value: stage.name,
-							fallback: stage.key,
-						}) || stage.key,
-				})),
-			},
-			{
-				label: T()("documents.workflow.assigned.to"),
-				key: "workflowAssignee",
-				type: "multi-select" as const,
-				options:
-					workflowAssignees.data?.data.map((user) => ({
-						value: user.id,
-						label: helpers.formatUserName(
-							{
-								username:
-									user.username ?? user.email ?? T()("media.types.unknown"),
-								firstName: user.firstName,
-								lastName: user.lastName,
-							},
-							"simple",
-						),
-						user,
-					})) ?? [],
-				optionType: "user" as const,
-			},
-		];
-	});
-	const userOptions = createMemo(() =>
-		(users.data?.data ?? []).map((user) => ({
-			value: user.id,
-			label:
-				helpers.formatUserName(user, "simple") || T()("media.types.unknown"),
-			user,
-		})),
-	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
 			value: collectionData()?.details.name,
@@ -257,10 +191,10 @@ const CollectionsDocumentsListRoute: Component = () => {
 			return;
 		}
 
-		const fieldFilters = getCollectionFieldFilters();
+		const filterFields = getFilterFields();
 		const nextFilterSchemaKey = JSON.stringify({
 			collectionKey: activeCollectionKey,
-			fields: fieldFilters.map((field) => ({
+			fields: filterFields.map((field) => ({
 				key: field.key,
 				type: field.type,
 			})),
@@ -269,23 +203,10 @@ const CollectionsDocumentsListRoute: Component = () => {
 		if (filterSchemaKey === nextFilterSchemaKey) return;
 		filterSchemaKey = nextFilterSchemaKey;
 
-		const filterConfig: QueryFilterSchema = {};
-		for (const field of fieldFilters) {
-			const fieldKey = formatFieldFilters({
-				fieldKey: field.key,
-			});
-
-			if (field.type === "user") {
-				filterConfig[fieldKey] = arrayFilter();
-				continue;
-			}
-			if (field.type === "checkbox") {
-				filterConfig[fieldKey] = booleanFilter();
-				continue;
-			}
-
-			filterConfig[fieldKey] = textFilter();
-		}
+		const filterConfig: QueryFilterSchema =
+			buildDocumentFilterSchema(filterFields);
+		//* not offered by the filter section yet, but existing URLs and API
+		//* consumers still rely on these parsing
 		if (activeCollection.workflow) {
 			filterConfig.workflowStage = textFilter();
 			filterConfig.workflowAssignee = arrayFilter();
@@ -343,11 +264,25 @@ const CollectionsDocumentsListRoute: Component = () => {
 													setShowingDeleted(value);
 												}
 									}
+									onResetFilters={() => {
+										searchParams.resetFilters();
+										setFilterSectionOpen(false);
+									}}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
 											queryKey: ["documents.getMultiple"],
 										});
 									}}
+									filterSection={
+										orderMode()
+											? undefined
+											: {
+													open: filterSectionOpen(),
+													setOpen: setFilterSectionOpen,
+													collectionName: collectionName(),
+													fields: getFilterFields(),
+												}
+									}
 									custom={
 										<Show when={canReorderDocuments() && !showingDeleted()}>
 											<Button
@@ -372,72 +307,6 @@ const CollectionsDocumentsListRoute: Component = () => {
 												</span>
 											</Button>
 										</Show>
-									}
-									filters={
-										orderMode()
-											? undefined
-											: [
-													...getCollectionFieldFilters().map((field) => {
-														const fieldKey = formatFieldFilters({
-															fieldKey: field.key,
-														});
-
-														switch (field.type) {
-															case "checkbox": {
-																return {
-																	label: helpers.getLocaleValue({
-																		value: field.details.label,
-																		fallback: field.key,
-																	}),
-																	key: fieldKey,
-																	type: "boolean" as const,
-																};
-															}
-															case "select": {
-																return {
-																	label: helpers.getLocaleValue({
-																		value: field.details.label,
-																		fallback: field.key,
-																	}),
-																	key: fieldKey,
-																	type: "select" as const,
-																	options: field.options?.map((option, i) => ({
-																		value: option.value,
-																		label: helpers.getLocaleValue({
-																			value: option.label,
-																			fallback: T()("fields.options.label", {
-																				count: i,
-																			}),
-																		}),
-																	})),
-																};
-															}
-															case "user": {
-																return {
-																	label: helpers.getLocaleValue({
-																		value: field.details.label,
-																		fallback: field.key,
-																	}),
-																	key: fieldKey,
-																	type: "multi-select" as const,
-																	options: userOptions(),
-																	optionType: "user" as const,
-																};
-															}
-															default: {
-																return {
-																	label: helpers.getLocaleValue({
-																		value: field.details.label,
-																		fallback: field.key,
-																	}),
-																	key: fieldKey,
-																	type: "text" as const,
-																};
-															}
-														}
-													}),
-													...getWorkflowFilters(),
-												]
 									}
 									sorts={
 										orderMode()

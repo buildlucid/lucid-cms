@@ -67,6 +67,49 @@ describe("buildFormattedQuery", () => {
 		]);
 	});
 
+	test("accepts comparison and like operators through schema validation", async () => {
+		const query = await buildFormattedQuery(
+			contextWithQuery({
+				"filter[_title:like]": "home",
+				"filter[_summary:not like]": "%draft%",
+				"filter[_amount:>=]": "10",
+				"filter[_amount:<]": "100",
+				"filter[or][0][_publishedAt:>]": "2026-01-01",
+				"filter[or][0][_publishedAt:<=]": "2026-12-31",
+			}),
+			querySchema,
+		);
+
+		expect(query.filter).toEqual({
+			_title: {
+				value: "home",
+				operator: "like",
+			},
+			_summary: {
+				value: "%draft%",
+				operator: "not like",
+			},
+			_amount: {
+				value: "100",
+				operator: "<",
+			},
+		});
+		expect(query.filterOr).toEqual([
+			[
+				{
+					key: "_publishedAt",
+					value: "2026-01-01",
+					operator: ">",
+				},
+				{
+					key: "_publishedAt",
+					value: "2026-12-31",
+					operator: "<=",
+				},
+			],
+		]);
+	});
+
 	test("applies nullable field handling inside OR groups", async () => {
 		const query = await buildFormattedQuery(
 			contextWithQuery({

@@ -1,7 +1,23 @@
 import z from "zod";
 
 export const filterOperators = z
-	.enum(["=", "%", "like", "ilike", "in", "not in", "<>", "is not", "is", "!="])
+	.enum([
+		"=",
+		"%",
+		"like",
+		"not like",
+		"ilike",
+		"in",
+		"not in",
+		"<>",
+		"is not",
+		"is",
+		"!=",
+		">",
+		">=",
+		"<",
+		"<=",
+	])
 	.optional();
 
 export const queryString = {
@@ -83,7 +99,7 @@ export const queryString = {
 			"^filter\\[([^\\]:]+):?([^\\]]*)\\]$": {
 				type: ["string", "null"],
 				description:
-					"Dynamic filter parameter in format filter[fieldName:operator]. Supported operators include: '=', '%', 'like', 'ilike', 'in', 'not in', '<>', 'is not', 'is' and '!='.",
+					"Dynamic filter parameter in format filter[fieldName:operator]. Supported operators include: '=', '%', 'like', 'not like', 'ilike', 'in', 'not in', '<>', 'is not', 'is', '!=', '>', '>=', '<' and '<='.",
 			},
 			"^filter\\[or\\]\\[[0-9]+\\]\\[([^\\]:]+):?([^\\]]*)\\]$": {
 				type: ["string", "null"],

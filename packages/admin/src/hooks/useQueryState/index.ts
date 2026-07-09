@@ -1,4 +1,4 @@
-import { useLocation, useSearchParams } from "@solidjs/router";
+import { useLocation, useNavigate } from "@solidjs/router";
 import { createMemoryStorageAdapter } from "./adapters";
 import createQueryState, { type QueryStateResponse } from "./createQueryState";
 import type {
@@ -8,10 +8,12 @@ import type {
 } from "./types";
 
 //* reads/writes browser search params - back/forward rehydrates state via the
-//* reactive location.search, while params the hook does not own are preserved
+//* reactive location.search, while params the hook does not own are preserved.
+//* writes navigate with the full search string rather than setSearchParams,
+//* which silently drops empty-string params (used for operator-only filters)
 const createUrlStorageAdapter = (): QueryStateStorageAdapter => {
 	const location = useLocation();
-	const [, setSearchParams] = useSearchParams();
+	const navigate = useNavigate();
 
 	return {
 		search: () =>
@@ -19,16 +21,10 @@ const createUrlStorageAdapter = (): QueryStateStorageAdapter => {
 				? location.search.slice(1)
 				: location.search,
 		write: (search) => {
-			const next = new URLSearchParams(search);
-			const current = new URLSearchParams(location.search);
-
-			const params: Record<string, string | undefined> = {};
-			for (const [key, value] of next.entries()) params[key] = value;
-			for (const [key] of current.entries()) {
-				if (!next.has(key)) params[key] = undefined;
-			}
-
-			setSearchParams(params, { scroll: false });
+			navigate(
+				`${location.pathname}${search ? `?${search}` : ""}${location.hash}`,
+				{ scroll: false },
+			);
 		},
 	};
 };
