@@ -42,6 +42,7 @@ import {
 import {
 	collectionFieldIncludes,
 	collectionFieldSorts,
+	documentListingRefIncludes,
 	tableHeadColumns,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
@@ -162,6 +163,12 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		},
 		enabled: () => !!collectionKey(),
 	});
+	const getCollectionFieldIncludes = createMemo(() =>
+		collectionFieldIncludes(collection.data?.data),
+	);
+	const getListingRefIncludes = createMemo(() =>
+		documentListingRefIncludes(getCollectionFieldIncludes()),
+	);
 	const collections = api.collections.useGetAll({
 		queryParams: {
 			include: {
@@ -170,9 +177,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		},
 		enabled: () =>
 			allowedCollectionKeys().length > 1 ||
-			collectionFieldIncludes(collection.data?.data).some(
-				(field) => field.type === "relation",
-			),
+			getCollectionFieldIncludes().some((field) => field.type === "relation"),
 	});
 	const documents = api.documents.useGetMultiple({
 		queryParams: {
@@ -184,15 +189,17 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			filters: {
 				isDeleted: 0,
 			},
+			include: {
+				"refs.media": () => getListingRefIncludes()["refs.media"],
+				"refs.relation": () => getListingRefIncludes()["refs.relation"],
+				"refs.user": () => getListingRefIncludes()["refs.user"],
+			},
 		},
 		enabled: () =>
 			searchParams.ready() &&
 			collection.isSuccess &&
 			filterSchemaCollectionKey() === collectionKey(),
 	});
-	const getCollectionFieldIncludes = createMemo(() =>
-		collectionFieldIncludes(collection.data?.data),
-	);
 	const getFilterFields = createMemo(() =>
 		documentFilterFields(collection.data?.data),
 	);

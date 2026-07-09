@@ -140,6 +140,29 @@ export const collectionFieldIncludes = (collection?: Collection) => {
 	return fieldsRes;
 };
 
+const documentListingRefFieldTypes = ["media", "relation", "user"] as const;
+type DocumentListingRefFieldType =
+	(typeof documentListingRefFieldTypes)[number];
+export type DocumentListingRefInclude = `refs.${DocumentListingRefFieldType}`;
+
+/**
+ * Enables typed ref includes only for listed field types whose table cells need
+ * hydrated ref data to render labels/previews.
+ */
+export const documentListingRefIncludes = (
+	fields: CollectionLeafFieldConfig[],
+): Record<DocumentListingRefInclude, boolean> => {
+	const fieldTypes = new Set(fields.map((field) => field.type));
+
+	return documentListingRefFieldTypes.reduce(
+		(includes, fieldType) => {
+			includes[`refs.${fieldType}`] = fieldTypes.has(fieldType);
+			return includes;
+		},
+		{} as Record<DocumentListingRefInclude, boolean>,
+	);
+};
+
 const labelFieldTypes = new Set<CollectionLeafFieldConfig["type"]>([
 	"text",
 	"textarea",

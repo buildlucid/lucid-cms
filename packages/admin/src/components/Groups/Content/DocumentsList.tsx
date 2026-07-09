@@ -26,7 +26,10 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
-import { tableHeadColumns } from "@/utils/document-table-helpers";
+import {
+	documentListingRefIncludes,
+	tableHeadColumns,
+} from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import spawnToast from "@/utils/spawn-toast";
@@ -76,6 +79,9 @@ export const DocumentsList: Component<{
 	);
 	const getTableHeadColumns = createMemo(() =>
 		tableHeadColumns(props.state.listing()),
+	);
+	const getListingRefIncludes = createMemo(() =>
+		documentListingRefIncludes(props.state.listing()),
 	);
 	const relationCollectionsByKey = createMemo(
 		() =>
@@ -207,6 +213,11 @@ export const DocumentsList: Component<{
 			},
 			filters: {
 				isDeleted: isDeletedFilter,
+			},
+			include: {
+				"refs.media": () => getListingRefIncludes()["refs.media"],
+				"refs.relation": () => getListingRefIncludes()["refs.relation"],
+				"refs.user": () => getListingRefIncludes()["refs.user"],
 			},
 		},
 		enabled: () => documentQueryEnabled(),
