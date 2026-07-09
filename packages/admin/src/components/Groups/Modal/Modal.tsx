@@ -31,7 +31,7 @@ export const Modal: Component<ModalProps> = (props) => {
 			<Dialog.Portal>
 				<Dialog.Overlay
 					class={classNames(
-						"fixed inset-0 z-40 bg-black/80 animate-animate-overlay-hide duration-200 transition-colors data-expanded:animate-animate-overlay-show",
+						"fixed inset-0 z-40 bg-overlay-base animate-animate-overlay-hide duration-200 transition-colors data-expanded:animate-animate-overlay-show",
 						{
 							"cursor-pointer": !preventDismiss(),
 						},

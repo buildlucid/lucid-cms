@@ -8,7 +8,7 @@ export const ModalFooter: Component<{
 	return (
 		<div
 			class={
-				"px-4 md:px-6 py-4 md:py-6 flex flex-wrap items-center gap-2 justify-between bg-card-base border-t border-border"
+				"rounded-b-xl px-4 md:px-6 py-4 md:py-6 flex flex-wrap items-center gap-2 justify-between bg-card-base border-t border-border"
 			}
 		>
 			{props.children}

@@ -6,13 +6,16 @@ import { FaSolidXmark } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
+	createContext,
 	createEffect,
 	createMemo,
 	createSignal,
 	type JSXElement,
 	Match,
+	onCleanup,
 	Show,
 	Switch,
+	useContext,
 } from "solid-js";
 import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
@@ -22,7 +25,16 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { PanelFooter } from "./PanelFooter";
 
+interface BottomPanelNestingState {
+	level: Accessor<number>;
+	setChildOpen: (id: symbol, open: boolean) => void;
+}
+
+const BottomPanelNestingContext = createContext<BottomPanelNestingState>();
+
 export const BottomPanel: Component<{
+	/** Visual stack depth. Nested bottom panels infer this automatically. */
+	nestedLevel?: number;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -70,9 +82,24 @@ export const BottomPanel: Component<{
 	const [contentLocale, setContentLocale] = createSignal<string | undefined>(
 		undefined,
 	);
+	const parentPanel = useContext(BottomPanelNestingContext);
+	const panelId = Symbol("bottom-panel");
+	const [openChildPanels, setOpenChildPanels] = createSignal<Set<symbol>>(
+		new Set(),
+	);
 
 	// ------------------------------
 	// Functions
+	const setChildOpen = (id: symbol, open: boolean) => {
+		setOpenChildPanels((current) => {
+			if (current.has(id) === open) return current;
+			const next = new Set(current);
+			if (open) next.add(id);
+			else next.delete(id);
+			return next;
+		});
+	};
+
 	const getDefaultContentLocale = () => {
 		if (!props.langauge?.useDefaultcontentLocale)
 			return contentLocaleStore.get.contentLocale;
@@ -91,9 +118,29 @@ export const BottomPanel: Component<{
 			contentLocaleStore.get.locales.length > 1
 		);
 	});
+	const nestedLevel = createMemo(
+		() => props.nestedLevel ?? (parentPanel?.level() ?? -1) + 1,
+	);
+	//* cap the visual offset so deeply nested panels remain usable
+	const visualLevel = createMemo(() => Math.min(Math.max(nestedLevel(), 0), 6));
+	const isCovered = createMemo(() => openChildPanels().size > 0);
+	const nestingState: BottomPanelNestingState = {
+		level: nestedLevel,
+		setChildOpen,
+	};
+	const PanelChildren = () =>
+		props.children({
+			contentLocale: contentLocale,
+			setContentLocale: setContentLocale,
+		});
 
 	// ------------------------------
 	// Effects
+	createEffect(() => {
+		parentPanel?.setChildOpen(panelId, props.state.open);
+	});
+	onCleanup(() => parentPanel?.setChildOpen(panelId, false));
+
 	createEffect(() => {
 		if (props.state.open) {
 			setLastfocusedElement(document.activeElement);
@@ -118,8 +165,28 @@ export const BottomPanel: Component<{
 			onOpenChange={() => props.state.setOpen(!props.state.open)}
 		>
 			<Dialog.Portal>
-				<Dialog.Overlay class="fixed inset-0 z-40 bg-background-base/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
-				<div class="fixed inset-x-4 bottom-0 top-5 [@media(min-height:500px)]:top-20 [@media(min-height:953px)]:top-56 z-40 flex items-end justify-center">
+				<Dialog.Overlay
+					class={classNames(
+						"fixed inset-0 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show",
+						{
+							"bg-overlay-base": nestedLevel() === 0,
+							"bg-transparent": nestedLevel() > 0,
+						},
+					)}
+					style={{ "z-index": 40 + nestedLevel() * 2 }}
+				/>
+				<div
+					class="fixed inset-x-4 bottom-0 top-5 [@media(min-height:500px)]:top-20 [@media(min-height:953px)]:top-56 flex items-end justify-center origin-bottom transition-transform duration-300 ease-out"
+					style={{
+						"z-index": 40 + nestedLevel() * 2,
+						"padding-top": `${visualLevel() * 24}px`,
+						transform: isCovered()
+							? `rotate(${nestedLevel() % 2 === 0 ? -0.1 : 0.1}deg)`
+							: "rotate(0deg)",
+					}}
+					data-nested-level={nestedLevel()}
+					data-covered={isCovered() ? "" : undefined}
+				>
 					<Dialog.Content
 						class="w-full h-full relative flex flex-col rounded-t-xl scrollbar border border-border bg-background-base animate-animate-slide-from-bottom-out data-expanded:animate-animate-slide-from-bottom-in outline-hidden overflow-y-auto"
 						onPointerDownOutside={(e) => {
@@ -216,10 +283,11 @@ export const BottomPanel: Component<{
 													grow: props.options?.growContent,
 												})}
 											>
-												{props.children({
-													contentLocale: contentLocale,
-													setContentLocale: setContentLocale,
-												})}
+												<BottomPanelNestingContext.Provider
+													value={nestingState}
+												>
+													<PanelChildren />
+												</BottomPanelNestingContext.Provider>
 											</div>
 											{/* footer */}
 											<Show when={!props.options?.hideFooter}>
@@ -281,10 +349,9 @@ export const BottomPanel: Component<{
 												grow: props.options?.growContent,
 											})}
 										>
-											{props.children({
-												contentLocale: contentLocale,
-												setContentLocale: setContentLocale,
-											})}
+											<BottomPanelNestingContext.Provider value={nestingState}>
+												<PanelChildren />
+											</BottomPanelNestingContext.Provider>
 										</div>
 										{/* footer */}
 										<Show when={!props.options?.hideFooter}>

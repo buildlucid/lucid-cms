@@ -56,9 +56,6 @@ export interface FilterSectionProps {
 	collectionName: string;
 	fields: DocumentFilterField[];
 	searchParams: QueryStateResponse;
-	/** disables user/media/document picker panels - required when the section
-	 * is rendered inside a picker panel to avoid recursive panels */
-	disableEntityPickers?: boolean;
 	/** standalone card styling for use inside panels instead of bleeding into
 	 * the list header card */
 	embedded?: boolean;
@@ -749,7 +746,6 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 										"filter.section.add.row.unavailable",
 									)}
 									onRemove={() => handleRemove(row())}
-									disableEntityPickers={props.disableEntityPickers}
 								/>
 							</>
 						)}

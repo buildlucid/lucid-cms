@@ -178,7 +178,6 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 						collectionName={section().collectionName}
 						fields={section().fields}
 						searchParams={props.searchParams}
-						disableEntityPickers={section().disableEntityPickers}
 						embedded={section().embedded}
 					/>
 				)}

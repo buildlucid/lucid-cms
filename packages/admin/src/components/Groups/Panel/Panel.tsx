@@ -121,7 +121,7 @@ export const Panel: Component<{
 			onOpenChange={() => props.state.setOpen(!props.state.open)}
 		>
 			<Dialog.Portal>
-				<Dialog.Overlay class="fixed inset-0 z-40 bg-background-base/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
+				<Dialog.Overlay class="fixed inset-0 z-40 bg-overlay-base animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
 				<div class="fixed inset-4 z-40 flex justify-end">
 					<Dialog.Content
 						class={classNames(

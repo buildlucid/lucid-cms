@@ -83,6 +83,9 @@ export default {
 				border: {
 					DEFAULT: "rgba(255, 255, 255, 0.1)",
 				},
+				overlay: {
+					base: "rgba(16, 16, 16, 0.9)",
+				},
 				// Typography
 				title: "#F1F1F1",
 				subtitle: "#C9C9C9",

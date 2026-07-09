@@ -402,15 +402,12 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 			</div>
 
-			{/* pickers stay disabled here - this section already lives inside a
-			picker panel and must not open further panels */}
 			<FilterSection
 				open={filterSectionOpen()}
 				setOpen={setFilterSectionOpen}
 				collectionName={collectionName()}
 				fields={getFilterFields()}
 				searchParams={searchParams}
-				disableEntityPickers={true}
 				embedded={true}
 			/>
 

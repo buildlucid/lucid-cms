@@ -28,8 +28,6 @@ export interface FilterRowProps {
 	canAddRow: boolean;
 	addRowDisabledReason?: string;
 	onRemove: () => void;
-	/** nested contexts (picker panels) fall back to plain numeric ID inputs */
-	disableEntityPickers?: boolean;
 }
 
 const valueToInputString = (value: FilterValue): string => {
@@ -61,7 +59,7 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 	const textInputType = createMemo(() => filterValueInputType(props.field));
 	const entityPickerField = createMemo(() => {
 		const field = props.field;
-		if (!field || props.disableEntityPickers === true) return undefined;
+		if (!field) return undefined;
 		return isEntityPickerFieldType(field.type) ? field : undefined;
 	});
 	const removeRowTitle = createMemo(() => T()("filter.section.remove.row"));
@@ -101,7 +99,7 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					)}
 				/>
 			</div>
-			<div class="w-[calc(50%-53px)] md:flex-1 min-w-0">
+			<div class="w-[calc(50%-55px)] md:flex-1 min-w-0">
 				<Select
 					id={`${props.id}-operator`}
 					name={`${props.id}-operator`}
@@ -117,7 +115,7 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					noMargin={true}
 				/>
 			</div>
-			<div class="w-[calc(50%-53px)] md:flex-1 min-w-0">
+			<div class="w-[calc(50%-55px)] md:flex-1 min-w-0">
 				<Switch
 					fallback={
 						<CommitInput

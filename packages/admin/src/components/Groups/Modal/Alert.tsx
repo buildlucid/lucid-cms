@@ -21,7 +21,7 @@ export const Alert: Component<{
 			onOpenChange={() => props.state.setOpen(!props.state.open)}
 		>
 			<AlertDialog.Portal>
-				<AlertDialog.Overlay class="fixed inset-0 z-40 bg-black/80 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
+				<AlertDialog.Overlay class="fixed inset-0 z-40 bg-overlay-base animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
 				<div class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
 					<AlertDialog.Content class="z-50 max-w-2xl w-full bg-background-base rounded-xl border-border border m-auto animate-animate-modal-hide data-expanded:animate-animate-modal-show">
 						<div class="flex justify-between mx-4 md:mx-6 py-4 md:py-6">
