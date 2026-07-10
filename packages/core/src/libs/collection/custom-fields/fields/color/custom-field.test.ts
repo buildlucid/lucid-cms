@@ -39,7 +39,7 @@ test("successfully validate field - color", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: ColorCollection.getData.localized,
@@ -60,7 +60,7 @@ test("successfully validate field - color", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: ColorCollection.getData.localized,
@@ -83,7 +83,7 @@ test("fail to validate field - color", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: ColorCollection.getData.localized,
@@ -110,7 +110,7 @@ test("fail to validate field - color", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: ColorCollection.getData.localized,
@@ -137,7 +137,7 @@ test("fail to validate field - color", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: ColorCollection.getData.localized,
@@ -164,7 +164,7 @@ test("fail to validate field - color", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: ColorCollection.getData.localized,

@@ -7,6 +7,7 @@ import json from "./fields/json/index.js";
 import link from "./fields/link/index.js";
 import media from "./fields/media/index.js";
 import number from "./fields/number/index.js";
+import range from "./fields/range/index.js";
 import relation from "./fields/relation/index.js";
 import repeater from "./fields/repeater/index.js";
 import richText from "./fields/rich-text/index.js";
@@ -29,6 +30,7 @@ const registeredFields = {
 	link: link,
 	media: media,
 	number: number,
+	range: range,
 	repeater: repeater,
 	relation: relation,
 	section: section,

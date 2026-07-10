@@ -39,6 +39,8 @@ import { mediaFieldConfig } from "./fields/media/config.js";
 import type { MediaCustomFieldMapItem } from "./fields/media/types.js";
 import { numberFieldConfig } from "./fields/number/config.js";
 import type { NumberCustomFieldMapItem } from "./fields/number/types.js";
+import { rangeFieldConfig } from "./fields/range/config.js";
+import type { RangeCustomFieldMapItem } from "./fields/range/types.js";
 import { relationFieldConfig } from "./fields/relation/config.js";
 import type { RelationCustomFieldMapItem } from "./fields/relation/types.js";
 import { repeaterFieldConfig } from "./fields/repeater/config.js";
@@ -68,6 +70,7 @@ export type * from "./fields/json/types.js";
 export type * from "./fields/link/types.js";
 export type * from "./fields/media/types.js";
 export type * from "./fields/number/types.js";
+export type * from "./fields/range/types.js";
 export type * from "./fields/relation/types.js";
 export type * from "./fields/repeater/types.js";
 export type * from "./fields/rich-text/types.js";
@@ -92,6 +95,7 @@ export const fieldTypes = [
 	linkFieldConfig.type,
 	mediaFieldConfig.type,
 	numberFieldConfig.type,
+	rangeFieldConfig.type,
 	repeaterFieldConfig.type,
 	sectionFieldConfig.type,
 	selectFieldConfig.type,
@@ -247,6 +251,7 @@ export type CustomFieldMap = {
 	repeater: RepeaterCustomFieldMapItem;
 	relation: RelationCustomFieldMapItem;
 	number: NumberCustomFieldMapItem;
+	range: RangeCustomFieldMapItem;
 	checkbox: CheckboxCustomFieldMapItem;
 	select: SelectCustomFieldMapItem;
 	textarea: TextareaCustomFieldMapItem;

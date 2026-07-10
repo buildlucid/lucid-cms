@@ -38,6 +38,21 @@ const formatIntegerValue = (value: ScalarFilterValue) => {
 	return Number.isInteger(numericValue) ? numericValue : null;
 };
 
+/** Converts finite numeric query values, using null for invalid input. */
+const formatNumberValue = (value: ScalarFilterValue) => {
+	if (typeof value === "number") {
+		return Number.isFinite(value) ? value : null;
+	}
+
+	if (typeof value !== "string") return null;
+
+	const trimmed = value.trim();
+	if (trimmed.length === 0) return null;
+
+	const numericValue = Number(trimmed);
+	return Number.isFinite(numericValue) ? numericValue : null;
+};
+
 /** Converts boolean query values to the database's boolean storage representation. */
 const formatBooleanValue = (
 	value: ScalarFilterValue,
@@ -75,4 +90,11 @@ export const formatIntegerFilterValue: CustomFieldFilterFormatter = ({
 	if (!isIntegerColumn(column.type)) return value;
 
 	return mapFilterValue(value, formatIntegerValue);
+};
+
+/** Formats decimal-capable numeric field filters. */
+export const formatNumberFilterValue: CustomFieldFilterFormatter = ({
+	value,
+}) => {
+	return mapFilterValue(value, formatNumberValue);
 };

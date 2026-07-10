@@ -19,6 +19,7 @@ export const FILTERABLE_FIELD_TYPES = [
 	"text",
 	"textarea",
 	"number",
+	"range",
 	"datetime",
 	"checkbox",
 	"select",
@@ -344,6 +345,7 @@ const OPERATORS_BY_FIELD_TYPE: Record<
 	],
 	color: ["=", "!="],
 	number: ["=", "!=", ">", ">=", "<", "<="],
+	range: ["=", "!=", ">", ">=", "<", "<="],
 	datetime: ["=", "!=", ">", ">=", "<", "<="],
 	checkbox: ["="],
 	select: ["=", "!="],
@@ -405,6 +407,7 @@ export const filterValueInputType = (
 ): FilterTextInputType => {
 	switch (field?.type) {
 		case "number":
+		case "range":
 		case "user":
 		case "media":
 			return "number";
@@ -455,6 +458,7 @@ export const codecForFilterFieldType = (type: DocumentFilterFieldType) => {
 		case "checkbox":
 			return booleanFilter();
 		case "number":
+		case "range":
 		case "user":
 		case "media":
 			return numberFilter();

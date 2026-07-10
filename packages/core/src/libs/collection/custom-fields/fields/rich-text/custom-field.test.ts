@@ -50,7 +50,7 @@ test("successfully validate field - rich text", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: RichTextCollection.getData.localized,
@@ -74,7 +74,7 @@ test("successfully validate field - rich text", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: RichTextCollection.getData.localized,
@@ -98,7 +98,7 @@ test("successfully validate field - rich text", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: RichTextCollection.getData.localized,
@@ -121,7 +121,7 @@ test("fail to validate field - rich text", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: RichTextCollection.getData.localized,
@@ -149,7 +149,7 @@ test("fail to validate field - rich text", async () => {
 			validationData: {
 				media: [],
 				user: [],
-				document: [],
+				relation: [],
 			},
 			meta: {
 				localized: RichTextCollection.getData.localized,
@@ -167,7 +167,7 @@ test("fail to validate field - rich text", async () => {
 			validationData: {
 				media: [],
 				user: [],
-				document: [],
+				relation: [],
 			},
 			meta: {
 				localized: RichTextCollection.getData.localized,
@@ -207,7 +207,7 @@ test("fail to validate field - rich text", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: RichTextCollection.getData.localized,

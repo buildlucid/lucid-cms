@@ -13,6 +13,7 @@ export { JSONTextarea } from "./JSONTextarea";
 export { Label } from "./Label";
 export { LinkSelect } from "./LinkSelect";
 export { MediaSelect } from "./MediaSelect";
+export { Range } from "./Range";
 export { RichText } from "./RichText";
 export { Search } from "./Search";
 export { Select } from "./Select";

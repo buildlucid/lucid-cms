@@ -50,7 +50,7 @@ test("successfully validate field - link", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: LinkCollection.getData.localized,
@@ -75,7 +75,7 @@ test("successfully validate field - link", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: LinkCollection.getData.localized,
@@ -106,7 +106,7 @@ test("successfully validate field - link", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: LinkCollection.getData.localized,
@@ -134,7 +134,7 @@ test("fail to validate field - link", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: LinkCollection.getData.localized,
@@ -167,7 +167,7 @@ test("fail to validate field - link", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: LinkCollection.getData.localized,
@@ -202,7 +202,7 @@ test("fail to validate field - link", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: LinkCollection.getData.localized,
@@ -231,7 +231,7 @@ test("fail to validate field - link", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: LinkCollection.getData.localized,
@@ -261,7 +261,7 @@ test("fail to validate field - link", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: LinkCollection.getData.localized,
@@ -293,7 +293,7 @@ test("fail to validate field - link", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: LinkCollection.getData.localized,

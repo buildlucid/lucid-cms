@@ -96,12 +96,14 @@ export type DatabaseConfig = {
 	 *
 	 * Examples:
 	 * - 'primary' maps to 'serial' in PostgreSQL, 'integer' in SQLite (with autoincrement)
+	 * - 'real' maps to 'double precision' in PostgreSQL, 'real' in SQLite
 	 * - 'boolean' maps to 'boolean' in PostgreSQL, 'integer' in SQLite
 	 * - 'json' maps to 'jsonb' in PostgreSQL, 'json' in SQLite
 	 */
 	dataTypes: {
 		primary: ColumnDataType;
 		integer: ColumnDataType;
+		real: ColumnDataType;
 		boolean: ColumnDataType;
 		json: ColumnDataType;
 		text: ColumnDataType;

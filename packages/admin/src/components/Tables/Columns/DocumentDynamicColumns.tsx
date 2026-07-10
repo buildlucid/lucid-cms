@@ -66,6 +66,16 @@ const DocumentDynamicColumns: Component<{
 			collectionLocalized: props.collectionLocalized,
 		});
 	});
+	const rangeValue = createMemo(() => {
+		if (props.field.type !== "range") return null;
+
+		return formatDocumentFieldValue({
+			fieldConfig: props.field,
+			fieldData: fieldData(),
+			contentLocale: contentLocale(),
+			collectionLocalized: props.collectionLocalized,
+		});
+	});
 	const userFieldRefs = createMemo(() => {
 		if (props.field.type !== "user") return null;
 
@@ -199,6 +209,14 @@ const DocumentDynamicColumns: Component<{
 				/>
 			</Match>
 			<Match when={fieldData()?.type === "select" ? selectValue() : undefined}>
+				{(text) => (
+					<TextCol
+						text={text()}
+						options={{ include: props.include[props.index] }}
+					/>
+				)}
+			</Match>
+			<Match when={fieldData()?.type === "range" ? rangeValue() : undefined}>
 				{(text) => (
 					<TextCol
 						text={text()}

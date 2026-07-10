@@ -5,6 +5,7 @@ import {
 	fieldConditionOperators,
 	fieldConditionTranslationScopes,
 } from "./conditions/index.js";
+import { validateRangeConfig } from "./fields/range/schema.js";
 
 const operatorsRequiringValue: string[] = [
 	"equals",
@@ -38,7 +39,7 @@ const fieldConditionSchema = z
 	.strict();
 
 // TODO: test this through lucid.config.* - have a feeling it isnt being used properly
-const CustomFieldSchema = z.object({
+const customFieldSchema = z.object({
 	type: z.string(),
 	key: z
 		.string()
@@ -89,6 +90,10 @@ const CustomFieldSchema = z.object({
 	localized: z.boolean().optional(),
 	time: z.boolean().optional(),
 	multiple: z.boolean().optional(),
+	thumbs: z.union([z.literal(1), z.literal(2)]).optional(),
+	min: z.number().optional(),
+	max: z.number().optional(),
+	step: z.number().positive().optional(),
 	index: z.literal(true).optional(),
 	output: z.enum(["nested", "inline"]).optional(),
 	defaultOpen: z.boolean().optional(),
@@ -142,5 +147,7 @@ const CustomFieldSchema = z.object({
 		})
 		.optional(),
 });
+
+const CustomFieldSchema = customFieldSchema.superRefine(validateRangeConfig);
 
 export default CustomFieldSchema;

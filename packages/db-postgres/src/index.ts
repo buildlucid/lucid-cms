@@ -67,6 +67,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 			dataTypes: {
 				primary: "serial",
 				integer: "integer",
+				real: "double precision",
 				boolean: "boolean",
 				json: "jsonb",
 				text: "text",

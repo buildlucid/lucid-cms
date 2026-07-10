@@ -8,6 +8,7 @@ export const fieldInputSchema = z.object({
 		z.literal("rich-text"),
 		z.literal("media"),
 		z.literal("number"),
+		z.literal("range"),
 		z.literal("checkbox"),
 		z.literal("select"),
 		z.literal("textarea"),
@@ -161,6 +162,38 @@ export const fieldConfigSchema = z.object({
 			description:
 				"Whether relation fields can store more than one related item",
 			example: true,
+		})
+		.nullable()
+		.optional(),
+	thumbs: z
+		.union([z.literal(1), z.literal(2)])
+		.meta({
+			description: "Number of slider thumbs used by range fields",
+			example: 2,
+		})
+		.nullable()
+		.optional(),
+	min: z
+		.number()
+		.meta({
+			description: "Minimum value for range fields",
+			example: 0,
+		})
+		.nullable()
+		.optional(),
+	max: z
+		.number()
+		.meta({
+			description: "Maximum value for range fields",
+			example: 100,
+		})
+		.nullable()
+		.optional(),
+	step: z
+		.number()
+		.meta({
+			description: "Step size for range fields",
+			example: 0.5,
 		})
 		.nullable()
 		.optional(),

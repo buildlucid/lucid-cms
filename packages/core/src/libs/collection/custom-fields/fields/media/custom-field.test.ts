@@ -92,7 +92,7 @@ test("successfully validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -121,7 +121,7 @@ test("successfully validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -150,7 +150,7 @@ test("successfully validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -179,7 +179,7 @@ test("successfully validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -208,7 +208,7 @@ test("successfully validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -237,7 +237,7 @@ test("successfully validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -266,7 +266,7 @@ test("successfully validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -295,7 +295,7 @@ test("successfully validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -318,7 +318,7 @@ test("fail to validate field - media", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -346,7 +346,7 @@ test("fail to validate field - media", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -381,7 +381,7 @@ test("fail to validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -421,7 +421,7 @@ test("fail to validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -461,7 +461,7 @@ test("fail to validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -501,7 +501,7 @@ test("fail to validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -541,7 +541,7 @@ test("fail to validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -581,7 +581,7 @@ test("fail to validate field - media", async () => {
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -622,7 +622,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -669,7 +669,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,
@@ -695,7 +695,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 				},
 			],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: MediaCollection.getData.localized,

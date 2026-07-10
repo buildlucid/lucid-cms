@@ -368,6 +368,32 @@ describe("groupDocumentFilters", () => {
 			],
 		},
 		{
+			name: "lucid_document__simple__fld__rng__priceRange",
+			rawName: "lucid_document__simple__fld__rng__priceRange",
+			type: `${constants.db.customFieldTablePrefix}range`,
+			key: {
+				collection: "simple",
+				brick: undefined,
+				fieldPath: ["priceRange"],
+			},
+			columns: [
+				{
+					name: "id",
+					source: "core",
+					type: "integer",
+					nullable: false,
+					primary: true,
+				},
+				{
+					name: "_value",
+					source: "field",
+					type: "real",
+					nullable: false,
+					customField: { type: "range" },
+				},
+			],
+		},
+		{
 			name: "lucid_document__simple__fld__people",
 			rawName: "lucid_document__simple__fld__people",
 			type: `${constants.db.customFieldTablePrefix}repeater`,
@@ -667,6 +693,29 @@ describe("groupDocumentFilters", () => {
 						value: 3,
 						operator: "=",
 						column: "_user_id",
+					},
+				],
+			},
+		]);
+	});
+
+	it("should filter decimal range values through their generated value table", () => {
+		const filters: QueryParamFilters = {
+			_priceRange: { value: "20.5", operator: ">=" },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters);
+
+		expect(result.documentFilters).toEqual({});
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld__rng__priceRange",
+				filters: [
+					{
+						key: "priceRange",
+						value: 20.5,
+						operator: ">=",
+						column: "_value",
 					},
 				],
 			},

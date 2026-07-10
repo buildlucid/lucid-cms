@@ -4,6 +4,7 @@
 
 - Set `caseInsensitiveLikeOperator` configuration for core.
 - Dropped support for `pg_trgm`.
+- Added `real` data type support using `double precision`.
 
 ## 1.0.2
 

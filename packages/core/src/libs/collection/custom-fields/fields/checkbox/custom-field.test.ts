@@ -39,7 +39,7 @@ test("successfully validate field - checkbox", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: CheckboxCollection.getData.localized,
@@ -60,7 +60,7 @@ test("successfully validate field - checkbox", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: CheckboxCollection.getData.localized,
@@ -83,7 +83,7 @@ test("fail to validate field - checkbox", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: CheckboxCollection.getData.localized,
@@ -110,7 +110,7 @@ test("fail to validate field - checkbox", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: CheckboxCollection.getData.localized,

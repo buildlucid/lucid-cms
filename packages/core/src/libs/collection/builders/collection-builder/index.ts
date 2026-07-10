@@ -50,6 +50,11 @@ class CollectionBuilder extends FieldBuilder {
 		super.addNumber(key, props);
 		return this;
 	}
+	addRange(key: string, props?: CFProps<"range"> & CollectionListFieldOptions) {
+		this.#fieldCollectionHelper(key, props);
+		super.addRange(key, props);
+		return this;
+	}
 	addCheckbox(
 		key: string,
 		props?: CFProps<"checkbox"> & CollectionListFieldOptions,

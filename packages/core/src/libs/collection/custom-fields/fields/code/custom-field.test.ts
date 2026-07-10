@@ -34,7 +34,7 @@ const CodeCollection = new CollectionBuilder("collection", {
 const validationData = {
 	media: [],
 	user: [],
-	document: [],
+	relation: [],
 };
 const validationMeta = {
 	localized: CodeCollection.getData.localized,

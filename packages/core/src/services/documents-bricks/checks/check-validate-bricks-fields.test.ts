@@ -43,7 +43,7 @@ test("localeCode is correctly included or omitted based on translation support",
 	const validationData = {
 		media: [],
 		user: [],
-		document: [],
+		relation: [],
 	};
 	const defaultLocale = "en";
 	const frenchDefaultLocale = "fr";
@@ -171,7 +171,7 @@ test("required localized fields validate every configured locale", async () => {
 	const validationData = {
 		media: [],
 		user: [],
-		document: [],
+		relation: [],
 	};
 
 	const withMissingTranslation = validateField({

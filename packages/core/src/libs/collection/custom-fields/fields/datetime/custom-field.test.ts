@@ -40,7 +40,7 @@ test("successfully validate field - datetime", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DateTimeCollection.getData.localized,
@@ -61,7 +61,7 @@ test("successfully validate field - datetime", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DateTimeCollection.getData.localized,
@@ -82,7 +82,7 @@ test("successfully validate field - datetime", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DateTimeCollection.getData.localized,
@@ -103,7 +103,7 @@ test("successfully validate field - datetime", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DateTimeCollection.getData.localized,
@@ -124,7 +124,7 @@ test("successfully validate field - datetime", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DateTimeCollection.getData.localized,
@@ -147,7 +147,7 @@ test("fail to validate field - datetime", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DateTimeCollection.getData.localized,
@@ -174,7 +174,7 @@ test("fail to validate field - datetime", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DateTimeCollection.getData.localized,
@@ -201,7 +201,7 @@ test("fail to validate field - datetime", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DateTimeCollection.getData.localized,
@@ -228,7 +228,7 @@ test("fail to validate field - datetime", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: DateTimeCollection.getData.localized,

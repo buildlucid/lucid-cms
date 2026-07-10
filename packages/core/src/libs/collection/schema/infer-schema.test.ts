@@ -88,13 +88,14 @@ describe("Schema inference", async () => {
 		);
 	});
 
-	test("creates relation tables for media, user and relation fields", () => {
+	test("creates relation tables for media, user, relation and range fields", () => {
 		pagesCollection
 			.addMedia("hero_media")
 			.addUser("author")
 			.addRelation("related_page", {
 				collection: "pages",
-			});
+			})
+			.addRange("price_range", { thumbs: 2, step: 0.5 });
 
 		const res = inferSchema(pagesCollection, db);
 		const mediaTable = res.data?.tables.find(
@@ -106,6 +107,9 @@ describe("Schema inference", async () => {
 		const relationTable = res.data?.tables.find(
 			(table) => table.name === "lucid_document__pages__fld__rel__related_page",
 		);
+		const rangeTable = res.data?.tables.find(
+			(table) => table.name === "lucid_document__pages__fld__rng__price_range",
+		);
 
 		expect(res.data?.tables).toContainEqual(
 			expect.objectContaining({
@@ -113,6 +117,15 @@ describe("Schema inference", async () => {
 				type: `${constants.db.customFieldTablePrefix}media`,
 				key: expect.objectContaining({
 					fieldPath: ["hero_media"],
+				}),
+			}),
+		);
+		expect(res.data?.tables).toContainEqual(
+			expect.objectContaining({
+				name: "lucid_document__pages__fld__rng__price_range",
+				type: `${constants.db.customFieldTablePrefix}range`,
+				key: expect.objectContaining({
+					fieldPath: ["price_range"],
 				}),
 			}),
 		);
@@ -143,6 +156,12 @@ describe("Schema inference", async () => {
 		expect(
 			relationTable?.columns.some((column) => column.name === "is_open"),
 		).toBe(false);
+		expect(
+			rangeTable?.columns.some((column) => column.name === "is_open"),
+		).toBe(false);
+		expect(rangeTable?.columns).toContainEqual(
+			expect.objectContaining({ name: "_value", type: "real" }),
+		);
 		expect(
 			mediaTable?.columns.some((column) => column.name === "parent_id_ref"),
 		).toBe(false);

@@ -7,6 +7,7 @@ export { InputField } from "./InputField";
 export { JSONField } from "./JSONField";
 export { LinkField } from "./LinkField";
 export { MediaField } from "./MediaField";
+export { RangeField } from "./RangeField";
 export { RelationField } from "./RelationField";
 export { RepeaterField } from "./RepeaterField";
 export { RichTextField } from "./RichTextField";

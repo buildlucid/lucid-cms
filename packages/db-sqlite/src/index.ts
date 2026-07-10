@@ -53,6 +53,7 @@ export class SQLiteAdapter extends DatabaseAdapter {
 			dataTypes: {
 				primary: "integer",
 				integer: "integer",
+				real: "real",
 				boolean: "integer",
 				json: "json",
 				text: "text",

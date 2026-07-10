@@ -45,7 +45,7 @@ test("successfully validate field - textarea", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: TextareaCollection.getData.localized,
@@ -66,7 +66,7 @@ test("successfully validate field - textarea", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: TextareaCollection.getData.localized,
@@ -87,7 +87,7 @@ test("successfully validate field - textarea", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: TextareaCollection.getData.localized,
@@ -110,7 +110,7 @@ test("fail to validate field - textarea", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: TextareaCollection.getData.localized,
@@ -137,7 +137,7 @@ test("fail to validate field - textarea", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: TextareaCollection.getData.localized,
@@ -164,7 +164,7 @@ test("fail to validate field - textarea", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: TextareaCollection.getData.localized,

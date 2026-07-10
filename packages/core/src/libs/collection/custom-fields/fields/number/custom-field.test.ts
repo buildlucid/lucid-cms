@@ -45,7 +45,7 @@ test("successfully validate field - number", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: NumberCollection.getData.localized,
@@ -66,7 +66,7 @@ test("successfully validate field - number", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: NumberCollection.getData.localized,
@@ -87,7 +87,7 @@ test("successfully validate field - number", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: NumberCollection.getData.localized,
@@ -110,7 +110,7 @@ test("fail to validate field - number", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: NumberCollection.getData.localized,
@@ -137,7 +137,7 @@ test("fail to validate field - number", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: NumberCollection.getData.localized,
@@ -164,7 +164,7 @@ test("fail to validate field - number", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: NumberCollection.getData.localized,

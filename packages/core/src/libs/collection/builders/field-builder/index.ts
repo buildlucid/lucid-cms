@@ -8,6 +8,7 @@ import JSONCF from "../../custom-fields/fields/json/custom-field.js";
 import LinkCustomField from "../../custom-fields/fields/link/custom-field.js";
 import MediaCustomField from "../../custom-fields/fields/media/custom-field.js";
 import NumberCustomField from "../../custom-fields/fields/number/custom-field.js";
+import RangeCustomField from "../../custom-fields/fields/range/custom-field.js";
 import RelationCustomField from "../../custom-fields/fields/relation/custom-field.js";
 import RepeaterCustomField from "../../custom-fields/fields/repeater/custom-field.js";
 import RichTextCustomField from "../../custom-fields/fields/rich-text/custom-field.js";
@@ -120,6 +121,9 @@ class FieldBuilder {
 	}
 	public addNumber(key: string, props?: CFProps<"number">) {
 		return this.registerField(key, new NumberCustomField(key, props));
+	}
+	public addRange(key: string, props?: CFProps<"range">) {
+		return this.registerField(key, new RangeCustomField(key, props));
 	}
 	public addCheckbox(key: string, props?: CFProps<"checkbox">) {
 		return this.registerField(key, new CheckboxCustomField(key, props));

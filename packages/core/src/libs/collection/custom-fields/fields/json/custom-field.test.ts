@@ -50,7 +50,7 @@ test("successfully validate field - json", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: JSONCollection.getData.localized,
@@ -70,7 +70,7 @@ test("successfully validate field - json", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: JSONCollection.getData.localized,
@@ -93,7 +93,7 @@ test("successfully validate field - json", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: JSONCollection.getData.localized,
@@ -117,7 +117,7 @@ test("successfully validate field - json", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: JSONCollection.getData.localized,
@@ -140,7 +140,7 @@ test("fail to validate field - json", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: JSONCollection.getData.localized,
@@ -167,7 +167,7 @@ test("fail to validate field - json", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: JSONCollection.getData.localized,
@@ -197,7 +197,7 @@ test("fail to validate field - json", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: JSONCollection.getData.localized,

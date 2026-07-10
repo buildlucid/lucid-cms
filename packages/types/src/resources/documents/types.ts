@@ -15,6 +15,7 @@ export type FieldType =
 	| "link"
 	| "media"
 	| "number"
+	| "range"
 	| "repeater"
 	| "relation"
 	| "rich-text"
@@ -505,6 +506,16 @@ export interface NumberFieldConfig
 	validation?: ZodValidation;
 }
 
+export interface RangeFieldConfig
+	extends SharedCollectionFieldConfig<"range">,
+		FieldConfigOptions<number[]> {
+	min: number;
+	max: number;
+	step: number;
+	thumbs?: 1 | 2;
+	validation?: ZodValidation;
+}
+
 export interface RepeaterFieldConfig
 	extends SharedCollectionFieldConfig<"repeater"> {
 	fields: CollectionNonTabFieldConfig[];
@@ -580,6 +591,7 @@ export type CollectionLeafFieldConfig =
 	| LinkFieldConfig
 	| MediaFieldConfig
 	| NumberFieldConfig
+	| RangeFieldConfig
 	| RichTextFieldConfig
 	| RelationFieldConfig
 	| SelectFieldConfig

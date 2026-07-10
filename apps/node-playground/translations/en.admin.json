@@ -103,6 +103,8 @@
 	"collections.settings.singularName": "Setting",
 	"collections.settings.summary": "Set shared settings for your website.",
 	"collections.simple.fields.simpleHeading.label": "Heading Default",
+	"collections.simple.fields.priceRange.label": "Price range",
+	"collections.simple.fields.priceRange.summary": "Choose a minimum and maximum price in increments of 0.5.",
 	"collections.simple.name": "Simple",
 	"collections.simple.singularName": "Simple",
 	"collections.test.fields.title.label": "Title",

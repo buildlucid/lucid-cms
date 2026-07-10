@@ -484,6 +484,10 @@ export const formatDocumentFieldValue = (props: {
 			return typeof rawValue === "string" || typeof rawValue === "number"
 				? String(rawValue)
 				: null;
+		case "range":
+			return Array.isArray(rawValue)
+				? rawValue.map((value) => String(value)).join(" – ")
+				: null;
 		case "datetime":
 			return typeof rawValue === "string" || typeof rawValue === "number"
 				? formatDateTimeListValue(rawValue, props.fieldConfig.time !== false)

@@ -27,6 +27,18 @@ const SimpleCollection = new CollectionBuilder("simple", {
 	})
 	.addUser("user")
 	.addMedia("media")
+	.addRange("priceRange", {
+		details: {
+			label: copy("admin:collections.simple.fields.priceRange.label"),
+			summary: copy("admin:collections.simple.fields.priceRange.summary"),
+		},
+		min: 0,
+		max: 100,
+		step: 0.5,
+		thumbs: 2,
+		default: [20, 80],
+		showInList: true,
+	})
 	.addRepeater("people")
 	.addText("firstName")
 	.endRepeater();

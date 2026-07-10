@@ -54,7 +54,7 @@ test("successfully validate field - user", async () => {
 					// username: copy("admin:tests.collections.collection.name", { defaultMessage: "test-user" }),
 				},
 			],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: UserCollection.getData.localized,
@@ -83,7 +83,7 @@ test("successfully validate field - user", async () => {
 					// username: copy("admin:tests.collections.collection.name", { defaultMessage: "test-user" }),
 				},
 			],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: UserCollection.getData.localized,
@@ -107,7 +107,7 @@ test("fail to validate field - user", async () => {
 			validationData: {
 				media: [],
 				user: [],
-				document: [],
+				relation: [],
 			},
 			meta: {
 				localized: UserCollection.getData.localized,
@@ -125,7 +125,7 @@ test("fail to validate field - user", async () => {
 			validationData: {
 				media: [],
 				user: [],
-				document: [],
+				relation: [],
 			},
 			meta: {
 				localized: UserCollection.getData.localized,
@@ -164,7 +164,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		validationData: {
 			media: [],
 			user: [{ id: 1 }],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: UserCollection.getData.localized,
@@ -182,7 +182,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		validationData: {
 			media: [],
 			user: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: UserCollection.getData.localized,
@@ -200,7 +200,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 		validationData: {
 			media: [],
 			user: [{ id: 1 }],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: UserCollection.getData.localized,

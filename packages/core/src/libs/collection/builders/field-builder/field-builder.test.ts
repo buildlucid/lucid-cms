@@ -8,6 +8,7 @@ test("all fields should be added", async () => {
 		.addTextarea("textarea_test")
 		.addRichText("rich_text_test")
 		.addNumber("number_test")
+		.addRange("range_test")
 		.addCheckbox("checkbox_test")
 		.addSelect("select_test")
 		.addJSON("json_test")
@@ -20,12 +21,13 @@ test("all fields should be added", async () => {
 		.addText("repeater_text_test")
 		.endRepeater();
 
-	expect(instance.fields.size).toBe(14);
+	expect(instance.fields.size).toBe(15);
 
 	expect(instance.fields.get("text_test")).toBeDefined();
 	expect(instance.fields.get("textarea_test")).toBeDefined();
 	expect(instance.fields.get("rich_text_test")).toBeDefined();
 	expect(instance.fields.get("number_test")).toBeDefined();
+	expect(instance.fields.get("range_test")).toBeDefined();
 	expect(instance.fields.get("checkbox_test")).toBeDefined();
 	expect(instance.fields.get("select_test")).toBeDefined();
 	expect(instance.fields.get("json_test")).toBeDefined();
@@ -95,6 +97,7 @@ test("flat fields should return correct config", async () => {
 		.addTextarea("textarea_test")
 		.addRichText("rich_text_test")
 		.addNumber("number_test")
+		.addRange("range_test")
 		.addCheckbox("checkbox_test")
 		.addSelect("select_test")
 		.addJSON("json_test")
@@ -107,7 +110,7 @@ test("flat fields should return correct config", async () => {
 		.addText("repeater_text_test")
 		.endRepeater();
 
-	expect(instance.flatFields.length).toBe(14);
+	expect(instance.flatFields.length).toBe(15);
 
 	expect(instance.flatFields).toMatchObject([
 		{
@@ -182,6 +185,30 @@ test("flat fields should return correct config", async () => {
 			ui: {
 				hidden: undefined,
 				disabled: undefined,
+			},
+			validation: undefined,
+		},
+		{
+			key: "range_test",
+			type: "range",
+			details: {
+				label: copy("admin:fields.range.range_test.label", {
+					defaultMessage: "Range Test",
+				}),
+				summary: undefined,
+			},
+			min: 0,
+			max: 100,
+			step: 1,
+			localized: false,
+			default: [0],
+			index: undefined,
+			thumbs: undefined,
+			ui: {
+				hidden: undefined,
+				disabled: undefined,
+				condition: undefined,
+				width: undefined,
 			},
 			validation: undefined,
 		},

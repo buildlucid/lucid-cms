@@ -71,6 +71,9 @@ test("collection options are correct along with field includes and filters", asy
 		.addNumber("number_test", {
 			showInList: true,
 		})
+		.addRange("range_test", {
+			showInList: true,
+		})
 		.addCheckbox("checkbox_test", {
 			showInList: true,
 		})
@@ -100,7 +103,7 @@ test("collection options are correct along with field includes and filters", asy
 		.addText("repeater_text_test")
 		.endRepeater();
 
-	expect(pagesCollection.fields.size).toBe(15);
+	expect(pagesCollection.fields.size).toBe(16);
 
 	expect(pagesCollection.getData).toEqual({
 		key: "pages",
@@ -129,6 +132,7 @@ test("collection options are correct along with field includes and filters", asy
 			"text_test",
 			"textarea_test",
 			"number_test",
+			"range_test",
 			"checkbox_test",
 			"select_test",
 			"datetime_test",

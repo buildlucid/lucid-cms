@@ -46,6 +46,10 @@ type DefinitionField = {
 	localized: boolean;
 	collection?: string | string[];
 	multiple?: boolean;
+	thumbs?: 1 | 2;
+	min?: number;
+	max?: number;
+	step?: number;
 	options?: Array<{
 		value: string;
 		label?: string;
@@ -230,6 +234,18 @@ const getMultiple = (field: CFConfig<FieldTypes>) => {
 	return field.multiple;
 };
 
+/** Returns the numeric constraints that describe a range field. */
+const getRangeConstraints = (field: CFConfig<FieldTypes>) => {
+	if (field.type !== "range") return undefined;
+
+	return {
+		min: field.min,
+		max: field.max,
+		step: field.step,
+		...(field.thumbs ? { thumbs: field.thumbs } : {}),
+	};
+};
+
 /**
  * Formats collection field definitions into a key-based lookup.
  */
@@ -248,6 +264,7 @@ const formatFieldDefinitions = (props: {
 		const details = getTranslatedFieldDetails(props.context, fieldInstance);
 		const collection = getCollectionTargets(field);
 		const multiple = getMultiple(field);
+		const rangeConstraints = getRangeConstraints(field);
 		const options = getOptionsDefinition(props.context, field);
 
 		acc[fieldInstance.key] = {
@@ -259,6 +276,7 @@ const formatFieldDefinitions = (props: {
 			...(details?.summary ? { summary: details.summary } : {}),
 			...(collection ? { collection } : {}),
 			...(multiple !== undefined ? { multiple } : {}),
+			...(rangeConstraints ?? {}),
 			...(options ? { options } : {}),
 			...(nestedFields
 				? {

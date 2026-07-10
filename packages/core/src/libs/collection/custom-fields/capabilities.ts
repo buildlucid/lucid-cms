@@ -9,6 +9,7 @@ import { jsonFieldConfig } from "./fields/json/config.js";
 import { linkFieldConfig } from "./fields/link/config.js";
 import { mediaFieldConfig } from "./fields/media/config.js";
 import { numberFieldConfig } from "./fields/number/config.js";
+import { rangeFieldConfig } from "./fields/range/config.js";
 import { relationFieldConfig } from "./fields/relation/config.js";
 import { repeaterFieldConfig } from "./fields/repeater/config.js";
 import { richTextFieldConfig } from "./fields/rich-text/config.js";
@@ -34,6 +35,7 @@ export const fieldTypeCapabilities = {
 	[linkFieldConfig.type]: linkFieldConfig.capabilities,
 	[mediaFieldConfig.type]: mediaFieldConfig.capabilities,
 	[numberFieldConfig.type]: numberFieldConfig.capabilities,
+	[rangeFieldConfig.type]: rangeFieldConfig.capabilities,
 	[relationFieldConfig.type]: relationFieldConfig.capabilities,
 	[repeaterFieldConfig.type]: repeaterFieldConfig.capabilities,
 	[richTextFieldConfig.type]: richTextFieldConfig.capabilities,

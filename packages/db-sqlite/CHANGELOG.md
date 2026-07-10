@@ -3,6 +3,7 @@
 ## 1.0.3 (unreleased)
 
 - Set `caseInsensitiveLikeOperator` configuration for core.
+- Added `real` data type support.
 
 ## 1.0.2
 

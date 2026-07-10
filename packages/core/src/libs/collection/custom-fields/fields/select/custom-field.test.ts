@@ -65,7 +65,7 @@ test("successfully validate field - select", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: SelectCollection.getData.localized,
@@ -86,7 +86,7 @@ test("successfully validate field - select", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: SelectCollection.getData.localized,
@@ -107,7 +107,7 @@ test("successfully validate field - select", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: SelectCollection.getData.localized,
@@ -131,7 +131,7 @@ test("fail to validate field - select", async () => {
 			validationData: {
 				media: [],
 				user: [],
-				document: [],
+				relation: [],
 			},
 			meta: {
 				localized: SelectCollection.getData.localized,
@@ -149,7 +149,7 @@ test("fail to validate field - select", async () => {
 			validationData: {
 				media: [],
 				user: [],
-				document: [],
+				relation: [],
 			},
 			meta: {
 				localized: SelectCollection.getData.localized,
@@ -188,7 +188,7 @@ test("fail to validate field - select", async () => {
 		validationData: {
 			media: [],
 			user: [],
-			document: [],
+			relation: [],
 		},
 		meta: {
 			localized: SelectCollection.getData.localized,

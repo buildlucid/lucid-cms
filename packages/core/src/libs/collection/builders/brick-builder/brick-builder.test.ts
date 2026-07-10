@@ -8,6 +8,7 @@ test("all brick fields are added", async () => {
 		.addText("text_test")
 		.addTextarea("textarea_test")
 		.addNumber("number_test")
+		.addRange("range_test")
 		.addCheckbox("checkbox_test")
 		.addSelect("select_test")
 		.addDateTime("datetime_test")
@@ -21,7 +22,7 @@ test("all brick fields are added", async () => {
 		.addText("repeater_text_test")
 		.endRepeater();
 
-	expect(brick.fields.size).toBe(14);
+	expect(brick.fields.size).toBe(15);
 });
 
 test("brick addFields custom field is working", async () => {

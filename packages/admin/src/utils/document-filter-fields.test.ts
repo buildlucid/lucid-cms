@@ -34,12 +34,14 @@ describe("documentFilterFields", () => {
 			buildCollection([
 				{ key: "title", type: "text", details: { label: literal("Title") } },
 				{ key: "amount", type: "number", details: {} },
+				{ key: "price", type: "range", details: {} },
 			]),
 		);
 
 		expect(fields).toEqual([
 			{ key: "_title", label: "Title", type: "text" },
 			{ key: "_amount", label: "amount", type: "number" },
+			{ key: "_price", label: "price", type: "range" },
 		]);
 	});
 
@@ -409,6 +411,9 @@ describe("filterValueInputType", () => {
 			filterValueInputType({ key: "_amount", label: "Amount", type: "number" }),
 		).toBe("number");
 		expect(
+			filterValueInputType({ key: "_price", label: "Price", type: "range" }),
+		).toBe("number");
+		expect(
 			filterValueInputType({
 				key: "_publishedAt",
 				label: "Published",
@@ -451,6 +456,14 @@ describe("operatorsForFieldType", () => {
 			"<",
 			"<=",
 		]);
+		expect(operatorsForFieldType("range")).toEqual([
+			"=",
+			"!=",
+			">",
+			">=",
+			"<",
+			"<=",
+		]);
 		expect(operatorsForFieldType("checkbox")).toEqual(["="]);
 		expect(operatorsForFieldType("relation")).toEqual(["=", "!="]);
 	});
@@ -462,12 +475,14 @@ describe("buildDocumentFilterSchema", () => {
 			{ key: "_title", label: "Title", type: "text" },
 			{ key: "_featured", label: "Featured", type: "checkbox" },
 			{ key: "_author", label: "Author", type: "user" },
+			{ key: "_price", label: "Price", type: "range" },
 			{ key: "_related", label: "Related", type: "relation" },
 		]);
 
 		expect(schema._title?.type).toBe("text");
 		expect(schema._featured?.type).toBe("boolean");
 		expect(schema._author?.type).toBe("number");
+		expect(schema._price?.type).toBe("number");
 		//* relation values may be `collectionKey:id` strings
 		expect(schema._related?.type).toBe("text");
 	});
