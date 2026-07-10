@@ -10,10 +10,12 @@
 - Added color custom field support in document listing columns. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
 - Added grouped OR filter support with `filter[or][groupIndex][key:operator]` query params, shared backend query-builder handling, document custom-field filtering, admin query-state support, and toolkit filter array shorthand. ([536a957](https://github.com/buildlucid/lucid-cms/commit/536a9571ae7c8bf32d546059afa00a0a03798315))
 - Added new filter builder UI for documents with OR support and full collection/brick custom field filtering. ([bc9bccc](https://github.com/buildlucid/lucid-cms/commit/bc9bccc40d360b6861b231836d5151312669f15f))
+- Migrated all filters to use the new filter builder UI instead and widened what fields are supported across all resources. ([1062d8f](https://github.com/buildlucid/lucid-cms/commit/1062d8f585f15be9fdac3f1834f6f72127d5e5a8))
 
 ### Breaking Changes:
 
 - Renamed the collection field listing option from `listing` to `showInList` for clarity. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
+- Replaced raw SQL-like filter operators with semantic text operators (`contains`, `not-contains`, `starts-with`, `not-starts-with`, `ends-with`, and `not-ends-with`) and standardised multi-word operators as hyphenated tokens (`not-in` and `is-not`). Existing filter query strings and toolkit calls using `like`, `not like`, `not in`, or `is not` must be updated; `%` and `_` in filter values are now treated as literal text. ([2c1a6b4](https://github.com/buildlucid/lucid-cms/commit/2c1a6b4422fbb7366af152c12e826b96fc41985c))
 
 ### Bug Fixes:
 
