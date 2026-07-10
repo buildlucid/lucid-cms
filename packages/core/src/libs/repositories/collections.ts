@@ -36,7 +36,7 @@ export default class CollectionsRepository extends StaticRepository<"lucid_colle
 			},
 		},
 		operators: {
-			key: this.dbAdapter.config.fuzzOperator,
+			key: "contains",
 		},
 	} as const;
 }

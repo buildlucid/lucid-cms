@@ -1,5 +1,9 @@
 # @lucidcms/db-libsql
 
+## 1.0.3 (unreleased)
+
+- Set `caseInsensitiveLikeOperator` configuration for core.
+
 ## 1.0.2
 
 - Bumped `@lucidcms/core` to `0.15.0-alpha.0`.

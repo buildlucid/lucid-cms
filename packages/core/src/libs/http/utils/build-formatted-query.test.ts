@@ -30,10 +30,10 @@ describe("buildFormattedQuery", () => {
 	test("parses grouped OR filters without adding them to top-level filters", async () => {
 		const query = await buildFormattedQuery(
 			contextWithQuery({
-				"filter[title:ilike]": "home",
+				"filter[title:contains]": "home",
 				"filter[or][1][slug]": "about",
-				"filter[or][0][title:ilike]": "landing",
-				"filter[or][0][createdBy:in]": "1,2",
+				"filter[or][0][title:starts-with]": "landing",
+				"filter[or][0][createdBy:not-in]": "1,2",
 			}),
 			querySchema,
 		);
@@ -41,7 +41,7 @@ describe("buildFormattedQuery", () => {
 		expect(query.filter).toEqual({
 			title: {
 				value: "home",
-				operator: "ilike",
+				operator: "contains",
 			},
 		});
 		expect(query.filterOr).toEqual([
@@ -49,12 +49,12 @@ describe("buildFormattedQuery", () => {
 				{
 					key: "title",
 					value: "landing",
-					operator: "ilike",
+					operator: "starts-with",
 				},
 				{
 					key: "createdBy",
 					value: ["1", "2"],
-					operator: "in",
+					operator: "not-in",
 				},
 			],
 			[
@@ -67,11 +67,11 @@ describe("buildFormattedQuery", () => {
 		]);
 	});
 
-	test("accepts comparison and like operators through schema validation", async () => {
+	test("accepts comparison and semantic text operators", async () => {
 		const query = await buildFormattedQuery(
 			contextWithQuery({
-				"filter[_title:like]": "home",
-				"filter[_summary:not like]": "%draft%",
+				"filter[_title:contains]": "home, 50%_page\\",
+				"filter[_summary:not-ends-with]": "draft",
 				"filter[_amount:>=]": "10",
 				"filter[_amount:<]": "100",
 				"filter[or][0][_publishedAt:>]": "2026-01-01",
@@ -82,12 +82,12 @@ describe("buildFormattedQuery", () => {
 
 		expect(query.filter).toEqual({
 			_title: {
-				value: "home",
-				operator: "like",
+				value: "home, 50%_page\\",
+				operator: "contains",
 			},
 			_summary: {
-				value: "%draft%",
-				operator: "not like",
+				value: "draft",
+				operator: "not-ends-with",
 			},
 			_amount: {
 				value: "100",

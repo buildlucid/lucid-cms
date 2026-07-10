@@ -119,8 +119,8 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 			},
 		},
 		operators: {
-			subject: this.dbAdapter.config.fuzzOperator,
-			template: this.dbAdapter.config.fuzzOperator,
+			subject: "contains",
+			template: "contains",
 		},
 	} as const;
 
@@ -282,6 +282,7 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						meta: this.queryConfig,
 					},
 				);

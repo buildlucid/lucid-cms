@@ -401,6 +401,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						meta: {
 							...this.queryConfig,
 							customFilters: {

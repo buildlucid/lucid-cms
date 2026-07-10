@@ -440,9 +440,14 @@ describe("operatorsForFieldType", () => {
 		expect(operatorsForFieldType("text")).toEqual([
 			"=",
 			"!=",
-			"like",
-			"not like",
+			"contains",
+			"not-contains",
+			"starts-with",
+			"not-starts-with",
+			"ends-with",
+			"not-ends-with",
 		]);
+		expect(operatorsForFieldType("color")).toEqual(["=", "!="]);
 		expect(operatorsForFieldType("number")).toEqual([
 			"=",
 			"!=",

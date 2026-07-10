@@ -96,13 +96,13 @@ describe("parseSearchIntoState", () => {
 
 	it("parses grouped OR filters in index order", () => {
 		const state = parseSearchIntoState(
-			"filter[or][1][isDeleted]=0&filter[or][0][title:ilike]=home&filter[or][0][author:in]=1,2",
+			"filter[or][1][isDeleted]=0&filter[or][0][title:contains]=home&filter[or][0][author:in]=1,2",
 			schema,
 		);
 
 		expect(state.orFilterGroups).toEqual([
 			[
-				{ key: "title", value: "home", operator: "ilike" },
+				{ key: "title", value: "home", operator: "contains" },
 				{ key: "author", value: [1, 2], operator: "in" },
 			],
 			[{ key: "isDeleted", value: false }],
@@ -192,7 +192,7 @@ describe("stateToStorageSearch", () => {
 		const state = applyParams(defaultQueryState(schema), schema, {
 			orFilterGroups: [
 				[
-					{ key: "title", value: "home", operator: "ilike" },
+					{ key: "title", value: "home", operator: "contains" },
 					{ key: "author", value: [1, 2], operator: "in" },
 				],
 				[{ key: "isDeleted", value: false }],
@@ -200,7 +200,7 @@ describe("stateToStorageSearch", () => {
 		});
 		const params = new URLSearchParams(stateToStorageSearch(state, schema, ""));
 
-		expect(params.get("filter[or][0][title:ilike]")).toBe("home");
+		expect(params.get("filter[or][0][title:contains]")).toBe("home");
 		expect(params.get("filter[or][0][author:in]")).toBe("1,2");
 		expect(params.get("filter[or][1][isDeleted]")).toBe("0");
 	});
@@ -209,16 +209,16 @@ describe("stateToStorageSearch", () => {
 		const state = applyParams(defaultQueryState(schema), schema, {
 			orFilterGroups: [
 				[
-					{ key: "title", value: "home", operator: "like" },
-					{ key: "title", value: "archive", operator: "not like" },
+					{ key: "title", value: "home", operator: "contains" },
+					{ key: "title", value: "archive", operator: "not-contains" },
 				],
 			],
 		});
 		const search = stateToStorageSearch(state, schema, "");
 		const params = new URLSearchParams(search);
 
-		expect(params.get("filter[or][0][title:like]")).toBe("home");
-		expect(params.get("filter[or][0][title:not like]")).toBe("archive");
+		expect(params.get("filter[or][0][title:contains]")).toBe("home");
+		expect(params.get("filter[or][0][title:not-contains]")).toBe("archive");
 		expect(parseSearchIntoState(search, schema).orFilterGroups).toEqual(
 			state.orFilterGroups,
 		);
@@ -265,11 +265,11 @@ describe("buildQueryString", () => {
 
 	it("serialises grouped OR filters to the API query string", () => {
 		const state = applyParams(defaultQueryState(schema), schema, {
-			orFilterGroups: [[{ key: "title", value: "home", operator: "ilike" }]],
+			orFilterGroups: [[{ key: "title", value: "home", operator: "contains" }]],
 		});
 		const params = new URLSearchParams(buildQueryString(state, schema));
 
-		expect(params.get("filter[or][0][title:ilike]")).toBe("home");
+		expect(params.get("filter[or][0][title:contains]")).toBe("home");
 		expect(params.get("page")).toBe("1");
 		expect(params.get("perPage")).toBe("10");
 	});
@@ -313,11 +313,11 @@ describe("applyParams", () => {
 
 	it("accepts explicit filter operator metadata", () => {
 		const state = applyParams(defaultQueryState(schema), schema, {
-			filters: { author: { value: [5], operator: "notIn" } },
+			filters: { author: { value: [5], operator: "not-in" } },
 		});
 		expect(state.filters.author).toMatchObject({
 			value: [5],
-			operator: "notIn",
+			operator: "not-in",
 			operatorExplicit: true,
 		});
 	});
@@ -326,7 +326,7 @@ describe("applyParams", () => {
 		const state = applyParams(defaultQueryState(schema), schema, {
 			orFilterGroups: [
 				[
-					{ key: "title", value: "home", operator: "ilike" },
+					{ key: "title", value: "home", operator: "contains" },
 					{ key: "author", value: [1, 2], operator: "in" },
 				],
 			],
@@ -334,7 +334,7 @@ describe("applyParams", () => {
 
 		expect(state.orFilterGroups).toEqual([
 			[
-				{ key: "title", value: "home", operator: "ilike" },
+				{ key: "title", value: "home", operator: "contains" },
 				{ key: "author", value: [1, 2], operator: "in" },
 			],
 		]);
@@ -342,14 +342,14 @@ describe("applyParams", () => {
 
 	it("preserves an existing explicit operator when raw values change", () => {
 		const initial = applyParams(defaultQueryState(schema), schema, {
-			filters: { author: { value: [1], operator: "notIn" } },
+			filters: { author: { value: [1], operator: "not-in" } },
 		});
 		const next = applyParams(initial, schema, {
 			filters: { author: [2] },
 		});
 		expect(next.filters.author).toMatchObject({
 			value: [2],
-			operator: "notIn",
+			operator: "not-in",
 			operatorExplicit: true,
 		});
 	});

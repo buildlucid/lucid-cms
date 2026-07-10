@@ -391,6 +391,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 						page: props.query.page,
 						perPage: props.query.perPage,
 					},
+					database: this.dbAdapter.config,
 					meta: {
 						tableKeys: {
 							filters: {

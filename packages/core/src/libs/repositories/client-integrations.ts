@@ -72,8 +72,8 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 			},
 		},
 		operators: {
-			name: this.dbAdapter.config.fuzzOperator,
-			description: this.dbAdapter.config.fuzzOperator,
+			name: "contains",
+			description: "contains",
 		},
 	} as const;
 
@@ -252,6 +252,7 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						meta: {
 							...this.queryConfig,
 							customFilters: {

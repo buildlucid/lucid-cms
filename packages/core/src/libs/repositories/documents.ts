@@ -1,9 +1,4 @@
-import type {
-	ComparisonOperatorExpression,
-	ExpressionBuilder,
-	OperandExpression,
-	SqlBool,
-} from "kysely";
+import type { ExpressionBuilder, OperandExpression, SqlBool } from "kysely";
 import { type SelectQueryBuilder, sql } from "kysely";
 import z from "zod";
 import constants from "../../constants/constants.js";
@@ -30,6 +25,7 @@ import type CollectionBuilder from "../collection/builders/collection-builder/in
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import queryBuilder from "../db/query-builder/index.js";
+import compileFilterExpression from "../db/query-builder/utils/compile-filter-expression.js";
 import type {
 	DocumentVersionType,
 	Insert,
@@ -942,6 +938,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						page: props.query.page,
 						perPage: props.query.perPage,
 					},
+					database: this.dbAdapter.config,
 					meta: {
 						tableKeys: {
 							filters: {
@@ -1210,6 +1207,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					queryParams: {
 						filter: props.documentFilters,
 					},
+					database: this.dbAdapter.config,
 					meta: {
 						tableKeys: {
 							filters: {
@@ -1477,17 +1475,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 		return values.filter((value): value is string | number => value !== null);
 	}
-	/** Mirrors shared default-operator behavior for document OR filters. */
-	getDocumentFilterOperator(
-		filter: QueryParamFilterCondition,
-	): ComparisonOperatorExpression {
-		if (filter.operator !== undefined) {
-			return filter.operator as ComparisonOperatorExpression;
-		}
-		if (Array.isArray(filter.value)) return "in";
-		if (filter.value === null) return "is";
-		return "=";
-	}
 	/** Builds a document-column or workflow expression for one OR condition. */
 	buildDocumentFilterExpression<DB, Table extends keyof DB>(
 		eb: ExpressionBuilder<DB, Table>,
@@ -1530,11 +1517,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 		const { ref } = this.db.dynamic;
 
-		return eb(
-			ref(filterRef),
-			this.getDocumentFilterOperator(filter),
-			filter.value,
-		);
+		return compileFilterExpression({
+			eb,
+			reference: ref(filterRef),
+			filter,
+			caseInsensitiveLikeOperator:
+				this.dbAdapter.config.caseInsensitiveLikeOperator,
+		});
 	}
 	/** Builds exists expressions for brick/custom-field filter groups. */
 	buildBrickFilterExpressions<DB, Table extends keyof DB>(
@@ -1558,10 +1547,14 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			}
 
 			for (const filter of brickFilter.filters) {
-				subQuery = subQuery.where(
-					ref(`bf.${filter.column}`),
-					filter.operator as ComparisonOperatorExpression,
-					filter.value,
+				subQuery = subQuery.where((eb) =>
+					compileFilterExpression({
+						eb,
+						reference: ref(`bf.${filter.column}`),
+						filter,
+						caseInsensitiveLikeOperator:
+							this.dbAdapter.config.caseInsensitiveLikeOperator,
+					}),
 				);
 			}
 

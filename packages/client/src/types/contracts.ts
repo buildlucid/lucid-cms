@@ -1,6 +1,29 @@
-export type FilterValue = string | string[] | number | number[] | null;
+export type FilterValue =
+	| string
+	| string[]
+	| number
+	| number[]
+	| boolean
+	| boolean[]
+	| null;
 
-export type FilterOperator = string;
+export type FilterOperator =
+	| "="
+	| "!="
+	| ">"
+	| ">="
+	| "<"
+	| "<="
+	| "in"
+	| "not-in"
+	| "is"
+	| "is-not"
+	| "contains"
+	| "not-contains"
+	| "starts-with"
+	| "not-starts-with"
+	| "ends-with"
+	| "not-ends-with";
 
 export type FilterObject = {
 	value: FilterValue;

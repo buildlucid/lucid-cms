@@ -209,6 +209,7 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						meta: this.queryConfig,
 					},
 				);

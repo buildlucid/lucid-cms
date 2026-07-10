@@ -315,147 +315,149 @@ export const MediaList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<DynamicContent
-			state={{
-				isError: isError(),
-				isSuccess: isSuccess(),
-				isEmpty: containerEmpty(),
-				searchParams: props.state.searchParams,
-			}}
-			slot={{
-				footer: (
-					<Paginated
-						state={{
-							searchParams: props.state.searchParams,
-							meta: media.data?.meta,
-						}}
-						options={{
-							padding: "24",
-						}}
-					/>
-				),
-			}}
-			copy={{
-				noEntries: noEntriesCopy(),
-			}}
-			callback={{
-				createEntry: createEntryCallback(),
-			}}
-			options={{
-				padding: "24",
-			}}
-		>
-			<DragDropProvider onDragEnd={onDragEnd} onDragStart={onDragStart}>
-				<DragDropSensors />
-				{/* Folders */}
-				<Show when={showFoldersSection()}>
-					<Breadcrumbs
-						state={{
-							parentFolderId: props.state.parentFolderId,
-							breadcrumbs: folders.data?.data.breadcrumbs ?? [],
-						}}
-					/>
+		<>
+			<DynamicContent
+				state={{
+					isError: isError(),
+					isSuccess: isSuccess(),
+					isEmpty: containerEmpty(),
+					searchParams: props.state.searchParams,
+				}}
+				slot={{
+					footer: (
+						<Paginated
+							state={{
+								searchParams: props.state.searchParams,
+								meta: media.data?.meta,
+							}}
+							options={{
+								padding: "24",
+							}}
+						/>
+					),
+				}}
+				copy={{
+					noEntries: noEntriesCopy(),
+				}}
+				callback={{
+					createEntry: createEntryCallback(),
+				}}
+				options={{
+					padding: "24",
+				}}
+			>
+				<DragDropProvider onDragEnd={onDragEnd} onDragStart={onDragStart}>
+					<DragDropSensors />
+					{/* Folders */}
+					<Show when={showFoldersSection()}>
+						<Breadcrumbs
+							state={{
+								parentFolderId: props.state.parentFolderId,
+								breadcrumbs: folders.data?.data.breadcrumbs ?? [],
+							}}
+						/>
+						<Grid
+							state={{
+								isLoading: folders.isLoading,
+								totalItems: foldersCount(),
+							}}
+							options={{
+								disableEmpty: true,
+							}}
+							slots={{
+								loadingCard: <MediaFolderCardLoading />,
+							}}
+							class={classNames(
+								"border-b border-border pb-4 md:pb-6 mb-4 md:mb-6",
+								{
+									"mt-4": foldersCount() > 0,
+								},
+							)}
+						>
+							<For each={folders.data?.data.folders}>
+								{(folder) => (
+									<MediaFolderCard
+										folder={folder}
+										isDragging={isDragging}
+										rowTarget={rowTarget}
+									/>
+								)}
+							</For>
+						</Grid>
+					</Show>
+
+					{/* Media */}
 					<Grid
 						state={{
-							isLoading: folders.isLoading,
-							totalItems: foldersCount(),
-						}}
-						options={{
-							disableEmpty: true,
+							isLoading: media.isLoading,
+							totalItems: mediaCount(),
+							searchParams: props.state.searchParams,
 						}}
 						slots={{
-							loadingCard: <MediaFolderCardLoading />,
+							loadingCard: <MediaCardLoading />,
 						}}
-						class={classNames(
-							"border-b border-border pb-4 md:pb-6 mb-4 md:mb-6",
-							{
-								"mt-4": foldersCount() > 0,
-							},
-						)}
+						copy={{
+							empty: mediaGridNoEntriesCopy(),
+						}}
+						callback={{
+							createEntry: createEntryCallback(),
+						}}
+						options={{
+							growWhenEmpty: true,
+						}}
 					>
-						<For each={folders.data?.data.folders}>
-							{(folder) => (
-								<MediaFolderCard
-									folder={folder}
-									isDragging={isDragging}
+						<For each={media.data?.data}>
+							{(item) => (
+								<MediaCard
+									media={item}
 									rowTarget={rowTarget}
+									contentLocale={contentLocale()}
+									showingDeleted={props.state.showingDeleted}
+									isDragging={isDragging}
+									onGenerateAlt={openAltGeneration}
+									onCrop={openQuickCrop}
+									aiAltAccessState={mediaAltGeneration.accessState()}
+									aiAltFeatureEnabled={mediaAltGeneration.isFeatureEnabled()}
+									previewCacheKey={
+										quickCropPreviewKeys()[item.id] ?? item.updatedAt
+									}
 								/>
 							)}
 						</For>
 					</Grid>
-				</Show>
+				</DragDropProvider>
 
-				{/* Media */}
-				<Grid
+				<SelectedActionPill
 					state={{
-						isLoading: media.isFetching,
-						totalItems: mediaCount(),
-						searchParams: props.state.searchParams,
+						selectedFolders: mediaStore.get.selectedFolders,
+						selectedMedia: mediaStore.get.selectedMedia,
 					}}
-					slots={{
-						loadingCard: <MediaCardLoading />,
-					}}
-					copy={{
-						empty: mediaGridNoEntriesCopy(),
-					}}
-					callback={{
-						createEntry: createEntryCallback(),
+					actions={{
+						addSelectedFolder: mediaStore.get.addSelectedFolder,
+						addSelectedMedia: mediaStore.get.addSelectedMedia,
+						resetSelectedFolders: mediaStore.get.resetSelectedFolders,
+						resetSelectedMedia: mediaStore.get.resetSelectedMedia,
+						deleteAction: () => {
+							rowTarget.setTrigger("deleteBatch", true);
+						},
+						restoreAction: () => {
+							rowTarget.setTrigger("restoreBatch", true);
+						},
+						deletePermanentlyAction: () => {
+							rowTarget.setTrigger("deleteBatchPermanently", true);
+						},
 					}}
 					options={{
-						growWhenEmpty: true,
+						showingDeleted: props.state.showingDeleted(),
+						allowDelete: !props.state.showingDeleted(),
+						allowRestore: props.state.showingDeleted() && canRestoreMedia(),
+						allowDeletePermanently:
+							props.state.showingDeleted() && canDeleteMedia(),
 					}}
-				>
-					<For each={media.data?.data}>
-						{(item) => (
-							<MediaCard
-								media={item}
-								rowTarget={rowTarget}
-								contentLocale={contentLocale()}
-								showingDeleted={props.state.showingDeleted}
-								isDragging={isDragging}
-								onGenerateAlt={openAltGeneration}
-								onCrop={openQuickCrop}
-								aiAltAccessState={mediaAltGeneration.accessState()}
-								aiAltFeatureEnabled={mediaAltGeneration.isFeatureEnabled()}
-								previewCacheKey={
-									quickCropPreviewKeys()[item.id] ?? item.updatedAt
-								}
-							/>
-						)}
-					</For>
-				</Grid>
-			</DragDropProvider>
+				/>
+			</DynamicContent>
 
-			<SelectedActionPill
-				state={{
-					selectedFolders: mediaStore.get.selectedFolders,
-					selectedMedia: mediaStore.get.selectedMedia,
-				}}
-				actions={{
-					addSelectedFolder: mediaStore.get.addSelectedFolder,
-					addSelectedMedia: mediaStore.get.addSelectedMedia,
-					resetSelectedFolders: mediaStore.get.resetSelectedFolders,
-					resetSelectedMedia: mediaStore.get.resetSelectedMedia,
-					deleteAction: () => {
-						rowTarget.setTrigger("deleteBatch", true);
-					},
-					restoreAction: () => {
-						rowTarget.setTrigger("restoreBatch", true);
-					},
-					deletePermanentlyAction: () => {
-						rowTarget.setTrigger("deleteBatchPermanently", true);
-					},
-				}}
-				options={{
-					showingDeleted: props.state.showingDeleted(),
-					allowDelete: !props.state.showingDeleted(),
-					allowRestore: props.state.showingDeleted() && canRestoreMedia(),
-					allowDeletePermanently:
-						props.state.showingDeleted() && canDeleteMedia(),
-				}}
-			/>
-
-			{/* Modals */}
+			{/* Keep dialog focus scopes mounted across empty/result transitions. */}
 			<MoveToFolder
 				state={{
 					open: rowTarget.getTriggers().moveToFolder,
@@ -620,6 +622,6 @@ export const MediaList: Component<{
 				source={activeQuickCropSource()}
 				onApply={applyQuickCrop}
 			/>
-		</DynamicContent>
+		</>
 	);
 };

@@ -774,6 +774,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						meta: {
 							tableKeys: {
 								filters: {
@@ -787,7 +788,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								},
 							},
 							operators: {
-								title: this.dbAdapter.config.fuzzOperator,
+								title: "contains",
 							},
 						},
 					},

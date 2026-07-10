@@ -1,5 +1,9 @@
 # @lucidcms/client
 
+## 0.2.1 (unreleased)
+
+- Filter operator types added.
+
 ## 0.2.0
 
 - Structured sort descriptors now use `direction` instead of `value`, for example `{ key: "updatedAt", direction: "desc" }`.

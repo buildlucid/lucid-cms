@@ -716,7 +716,7 @@
 							"path": ["api", "v1", "users"],
 							"query": [
 								{
-									"key": "filter[firstName:like]",
+									"key": "filter[firstName:contains]",
 									"value": "lucid",
 									"disabled": true
 								},

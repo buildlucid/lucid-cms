@@ -57,7 +57,7 @@ export default class UserAuthProvidersRepository extends StaticRepository<"lucid
 			},
 		},
 		operators: {
-			providerKey: this.dbAdapter.config.fuzzOperator,
+			providerKey: "contains",
 		},
 	} as const;
 

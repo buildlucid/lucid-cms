@@ -58,12 +58,16 @@ export interface DocumentFilterField {
 export type DocumentFilterOperator =
 	| "="
 	| "!="
-	| "like"
-	| "not like"
 	| ">"
 	| ">="
 	| "<"
-	| "<=";
+	| "<="
+	| "contains"
+	| "not-contains"
+	| "starts-with"
+	| "not-starts-with"
+	| "ends-with"
+	| "not-ends-with";
 
 const STRUCTURAL_FIELD_TYPES = new Set(["tab", "section", "collapsible"]);
 
@@ -310,9 +314,27 @@ const OPERATORS_BY_FIELD_TYPE: Record<
 	DocumentFilterFieldType,
 	DocumentFilterOperator[]
 > = {
-	text: ["=", "!=", "like", "not like"],
-	textarea: ["=", "!=", "like", "not like"],
-	color: ["=", "!=", "like", "not like"],
+	text: [
+		"=",
+		"!=",
+		"contains",
+		"not-contains",
+		"starts-with",
+		"not-starts-with",
+		"ends-with",
+		"not-ends-with",
+	],
+	textarea: [
+		"=",
+		"!=",
+		"contains",
+		"not-contains",
+		"starts-with",
+		"not-starts-with",
+		"ends-with",
+		"not-ends-with",
+	],
+	color: ["=", "!="],
 	number: ["=", "!=", ">", ">=", "<", "<="],
 	datetime: ["=", "!=", ">", ">=", "<", "<="],
 	checkbox: ["="],
@@ -325,8 +347,12 @@ const OPERATORS_BY_FIELD_TYPE: Record<
 const OPERATOR_LABEL_KEYS: Record<DocumentFilterOperator, string> = {
 	"=": "filter.operators.equals",
 	"!=": "filter.operators.not.equals",
-	like: "filter.operators.like",
-	"not like": "filter.operators.not.like",
+	contains: "filter.operators.contains",
+	"not-contains": "filter.operators.not.contains",
+	"starts-with": "filter.operators.starts.with",
+	"not-starts-with": "filter.operators.not.starts.with",
+	"ends-with": "filter.operators.ends.with",
+	"not-ends-with": "filter.operators.not.ends.with",
 	">": "filter.operators.greater.than",
 	">=": "filter.operators.greater.than.or.equal",
 	"<": "filter.operators.less.than",

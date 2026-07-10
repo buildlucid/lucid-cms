@@ -128,10 +128,8 @@ export type DatabaseConfig = {
 			false: false | 0;
 		};
 	};
-	/**
-	 * The operator used for fuzzy text matching.
-	 */
-	fuzzOperator: "like" | "ilike" | "%";
+	/** The adapter's native case-insensitive SQL pattern operator. */
+	caseInsensitiveLikeOperator: "like" | "ilike";
 };
 
 export interface InferredColumn {

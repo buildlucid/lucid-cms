@@ -41,7 +41,7 @@ describe("toolkit document query normalization", () => {
 						banner: {
 							_title: {
 								value: "About",
-								operator: "ilike",
+								operator: "contains",
 							},
 						},
 					},
@@ -63,7 +63,7 @@ describe("toolkit document query normalization", () => {
 					{
 						key: "banner._title",
 						value: "About",
-						operator: "ilike",
+						operator: "contains",
 					},
 				],
 			],

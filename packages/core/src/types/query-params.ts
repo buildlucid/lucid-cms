@@ -1,4 +1,3 @@
-import type { ComparisonOperatorExpression } from "kysely";
 import type { DocumentVersionType } from "../libs/db/types.js";
 
 // -----------------------------------------------
@@ -11,7 +10,23 @@ export type FilterValue =
 	| number
 	| Array<number>
 	| null;
-export type FilterOperator = ComparisonOperatorExpression | "%";
+export type FilterOperator =
+	| "="
+	| "!="
+	| ">"
+	| ">="
+	| "<"
+	| "<="
+	| "in"
+	| "not-in"
+	| "is"
+	| "is-not"
+	| "contains"
+	| "not-contains"
+	| "starts-with"
+	| "not-starts-with"
+	| "ends-with"
+	| "not-ends-with";
 export type FilterObject = {
 	value: FilterValue;
 	operator?: FilterOperator;

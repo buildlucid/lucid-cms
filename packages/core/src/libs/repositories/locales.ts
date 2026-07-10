@@ -39,7 +39,7 @@ export default class LocalesRepository extends StaticRepository<"lucid_locales">
 			},
 		},
 		operators: {
-			code: this.dbAdapter.config.fuzzOperator,
+			code: "contains",
 		},
 	} as const;
 }

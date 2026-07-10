@@ -39,7 +39,7 @@ export default class TenantsRepository extends StaticRepository<"lucid_tenants">
 			},
 		},
 		operators: {
-			key: this.dbAdapter.config.fuzzOperator,
+			key: "contains",
 		},
 	} as const;
 }

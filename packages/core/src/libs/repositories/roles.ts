@@ -64,8 +64,8 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			},
 		},
 		operators: {
-			name: this.dbAdapter.config.fuzzOperator,
-			description: this.dbAdapter.config.fuzzOperator,
+			name: "contains",
+			description: "contains",
 		},
 	} as const;
 
@@ -322,6 +322,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						meta: {
 							tableKeys: {
 								filters: {

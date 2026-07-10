@@ -58,6 +58,7 @@ describe("@lucidcms/client", () => {
 				filter: {
 					_fullSlug: {
 						value: "/about",
+						operator: "starts-with",
 					},
 					banner: {
 						_title: {
@@ -85,7 +86,7 @@ describe("@lucidcms/client", () => {
 
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toContain(
-			"/document/page/latest?filter%5B_fullSlug%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks%2Crefs.relation%2Cmeta",
+			"/document/page/latest?filter%5B_fullSlug%3Astarts-with%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks%2Crefs.relation%2Cmeta",
 		);
 		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
 	});

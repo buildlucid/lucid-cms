@@ -138,7 +138,7 @@ describe("createQueryState - memory mode", () => {
 
 			query.setOrFilterGroups([
 				[
-					{ key: "title", value: "home", operator: "ilike" },
+					{ key: "title", value: "home", operator: "contains" },
 					{ key: "author", value: [1, 2], operator: "in" },
 				],
 				[{ key: "isDeleted", value: false }],
@@ -146,13 +146,15 @@ describe("createQueryState - memory mode", () => {
 
 			expect(query.orFilterGroups()).toEqual([
 				[
-					{ key: "title", value: "home", operator: "ilike" },
+					{ key: "title", value: "home", operator: "contains" },
 					{ key: "author", value: [1, 2], operator: "in" },
 				],
 				[{ key: "isDeleted", value: false }],
 			]);
 			expect(
-				new URLSearchParams(adapter.search()).get("filter[or][0][title:ilike]"),
+				new URLSearchParams(adapter.search()).get(
+					"filter[or][0][title:contains]",
+				),
 			).toBe("home");
 			expect(
 				new URLSearchParams(query.queryString()).get(
@@ -172,7 +174,7 @@ describe("createQueryState - memory mode", () => {
 			});
 
 			query.setOrFilterGroups([
-				[{ key: "title", value: "home", operator: "ilike" }],
+				[{ key: "title", value: "home", operator: "contains" }],
 				[{ key: "isDeleted", value: false }],
 			]);
 			//* drop the first group - the remaining group must move to index 0
@@ -181,8 +183,8 @@ describe("createQueryState - memory mode", () => {
 			const params = new URLSearchParams(adapter.search());
 			expect(params.get("filter[or][0][isDeleted]")).toBe("0");
 			expect(params.get("filter[or][1][isDeleted]")).toBeNull();
-			expect(params.get("filter[or][0][title:ilike]")).toBeNull();
-			expect(params.get("filter[or][1][title:ilike]")).toBeNull();
+			expect(params.get("filter[or][0][title:contains]")).toBeNull();
+			expect(params.get("filter[or][1][title:contains]")).toBeNull();
 			dispose();
 		});
 	});
@@ -196,16 +198,16 @@ describe("createQueryState - memory mode", () => {
 			});
 
 			query.setOrFilterGroups([
-				[{ key: "title", value: "", operator: "like" }],
-				[{ key: "title", value: "home", operator: "like" }],
+				[{ key: "title", value: "", operator: "contains" }],
+				[{ key: "title", value: "home", operator: "contains" }],
 			]);
 
 			expect(query.orFilterGroups()).toEqual([
-				[{ key: "title", value: "home", operator: "like" }],
+				[{ key: "title", value: "home", operator: "contains" }],
 			]);
 			const params = new URLSearchParams(adapter.search());
-			expect(params.get("filter[or][0][title:like]")).toBe("home");
-			expect(params.get("filter[or][1][title:like]")).toBeNull();
+			expect(params.get("filter[or][0][title:contains]")).toBe("home");
+			expect(params.get("filter[or][1][title:contains]")).toBeNull();
 			dispose();
 		});
 	});
@@ -236,14 +238,14 @@ describe("createQueryState - memory mode", () => {
 			});
 
 			query.setParams({
-				filters: { author: { value: [3, 4], operator: "notIn" } },
+				filters: { author: { value: [3, 4], operator: "not-in" } },
 			});
 			expect(query.filterStates().get("author")).toEqual({
 				value: [3, 4],
-				operator: "notIn",
+				operator: "not-in",
 			});
 			expect(
-				new URLSearchParams(adapter.search()).get("filter[author:notIn]"),
+				new URLSearchParams(adapter.search()).get("filter[author:not-in]"),
 			).toBe("3,4");
 			dispose();
 		});
@@ -262,14 +264,14 @@ describe("createQueryState - memory mode", () => {
 				"1,2",
 			);
 
-			query.setFilterOperator("author", "notIn");
+			query.setFilterOperator("author", "not-in");
 			expect(query.getFilter("author")).toEqual({
 				value: [1, 2],
-				operator: "notIn",
+				operator: "not-in",
 			});
 			const params = new URLSearchParams(adapter.search());
 			expect(params.get("filter[author]")).toBeNull();
-			expect(params.get("filter[author:notIn]")).toBe("1,2");
+			expect(params.get("filter[author:not-in]")).toBe("1,2");
 			dispose();
 		});
 	});
@@ -351,12 +353,12 @@ describe("createQueryState - storage sync", () => {
 			const query = createQueryState({
 				schema: buildSchema(),
 				adapter: createTestUrlAdapter(
-					"filter[or][0][title:like]=home&filter[or][1][isDeleted]=0",
+					"filter[or][0][title:contains]=home&filter[or][1][isDeleted]=0",
 				),
 			});
 
 			expect(query.orFilterGroups()).toEqual([
-				[{ key: "title", value: "home", operator: "like" }],
+				[{ key: "title", value: "home", operator: "contains" }],
 				[{ key: "isDeleted", value: false }],
 			]);
 			expect(query.hasFiltersApplied()).toBe(true);
@@ -374,7 +376,7 @@ describe("createQueryState - storage sync", () => {
 		});
 
 		query.setOrFilterGroups([
-			[{ key: "title", value: "home", operator: "like" }],
+			[{ key: "title", value: "home", operator: "contains" }],
 		]);
 		await tick();
 		expect(query.orFilterGroups()).toHaveLength(1);

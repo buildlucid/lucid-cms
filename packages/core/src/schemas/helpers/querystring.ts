@@ -3,20 +3,21 @@ import z from "zod";
 export const filterOperators = z
 	.enum([
 		"=",
-		"%",
-		"like",
-		"not like",
-		"ilike",
-		"in",
-		"not in",
-		"<>",
-		"is not",
-		"is",
 		"!=",
 		">",
 		">=",
 		"<",
 		"<=",
+		"in",
+		"not-in",
+		"is",
+		"is-not",
+		"contains",
+		"not-contains",
+		"starts-with",
+		"not-starts-with",
+		"ends-with",
+		"not-ends-with",
 	])
 	.optional();
 
@@ -99,7 +100,7 @@ export const queryString = {
 			"^filter\\[([^\\]:]+):?([^\\]]*)\\]$": {
 				type: ["string", "null"],
 				description:
-					"Dynamic filter parameter in format filter[fieldName:operator]. Supported operators include: '=', '%', 'like', 'not like', 'ilike', 'in', 'not in', '<>', 'is not', 'is', '!=', '>', '>=', '<' and '<='.",
+					"Dynamic filter parameter in format filter[fieldName:operator]. Supported operators include: '=', '!=', '>', '>=', '<', '<=', 'in', 'not-in', 'is', 'is-not', 'contains', 'not-contains', 'starts-with', 'not-starts-with', 'ends-with' and 'not-ends-with'. Text-filter values are literal, including '%', '_' and backslashes. Text matching is case-insensitive according to the database adapter and collation.",
 			},
 			"^filter\\[or\\]\\[[0-9]+\\]\\[([^\\]:]+):?([^\\]]*)\\]$": {
 				type: ["string", "null"],

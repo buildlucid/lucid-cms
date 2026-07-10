@@ -60,8 +60,8 @@ export default class EmailChangeRequestsRepository extends StaticRepository<"luc
 			},
 		},
 		operators: {
-			oldEmail: this.dbAdapter.config.fuzzOperator,
-			newEmail: this.dbAdapter.config.fuzzOperator,
+			oldEmail: "contains",
+			newEmail: "contains",
 		},
 	} as const;
 

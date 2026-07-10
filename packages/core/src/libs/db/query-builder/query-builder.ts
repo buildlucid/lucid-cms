@@ -1,5 +1,4 @@
 import type {
-	ComparisonOperatorExpression,
 	ExpressionBuilder,
 	OperandExpression,
 	ReferenceExpression,
@@ -8,9 +7,12 @@ import type {
 } from "kysely";
 import type {
 	FilterObject,
+	FilterOperator,
 	QueryParamFilterCondition,
 	QueryParams,
 } from "../../../types/query-params.js";
+import type { DatabaseConfig } from "../types.js";
+import compileFilterExpression from "./utils/compile-filter-expression.js";
 import getFilterOperator from "./utils/get-filter-operator.js";
 import getTableKeyValue from "./utils/get-table-key-value.js";
 
@@ -24,7 +26,7 @@ type QueryBuilderMeta<DB, Table extends keyof DB> = {
 		filters?: Record<string, ReferenceExpression<DB, Table>>;
 		sorts?: Record<string, ReferenceExpression<DB, Table>>;
 	};
-	operators?: Record<string, ComparisonOperatorExpression | "%">;
+	operators?: Record<string, FilterOperator>;
 	customFilters?: Record<string, CustomFilterHandler<DB, Table>>;
 };
 
@@ -47,8 +49,7 @@ const conditionFromFilter = <DB, Table extends keyof DB>(
 ):
 	| {
 			key: ReferenceExpression<DB, Table>;
-			operator: ComparisonOperatorExpression;
-			value: FilterObject["value"];
+			filter: FilterObject & { operator: FilterOperator };
 	  }
 	| undefined => {
 	const tableKey = getTableKeyValue<DB, Table>(key, meta?.tableKeys?.filters);
@@ -56,12 +57,10 @@ const conditionFromFilter = <DB, Table extends keyof DB>(
 
 	return {
 		key: tableKey,
-		operator: getFilterOperator(
-			key,
-			filter,
-			meta?.operators,
-		) as ComparisonOperatorExpression,
-		value: filter.value,
+		filter: {
+			...filter,
+			operator: getFilterOperator(key, filter, meta?.operators),
+		},
 	};
 };
 
@@ -78,6 +77,7 @@ const queryBuilder = <DB, Table extends keyof DB, O>(
 	},
 	config: {
 		queryParams: Partial<QueryParams>;
+		database: Pick<DatabaseConfig, "caseInsensitiveLikeOperator">;
 		meta?: QueryBuilderMeta<DB, Table>;
 	},
 ) => {
@@ -113,16 +113,24 @@ const queryBuilder = <DB, Table extends keyof DB, O>(
 		const condition = conditionFromFilter<DB, Table>(key, f, config.meta);
 		if (!condition) continue;
 
-		mainQuery = mainQuery.where(
-			condition.key,
-			condition.operator,
-			condition.value,
+		mainQuery = mainQuery.where((eb) =>
+			compileFilterExpression({
+				eb,
+				reference: condition.key,
+				filter: condition.filter,
+				caseInsensitiveLikeOperator:
+					config.database.caseInsensitiveLikeOperator,
+			}),
 		);
 		if (countQuery) {
-			countQuery = countQuery.where(
-				condition.key,
-				condition.operator,
-				condition.value,
+			countQuery = countQuery.where((eb) =>
+				compileFilterExpression({
+					eb,
+					reference: condition.key,
+					filter: condition.filter,
+					caseInsensitiveLikeOperator:
+						config.database.caseInsensitiveLikeOperator,
+				}),
 			);
 		}
 	}
@@ -179,11 +187,13 @@ const queryBuilder = <DB, Table extends keyof DB, O>(
 						}
 
 						expressions.push(
-							eb(
-								filter.condition.key,
-								filter.condition.operator,
-								filter.condition.value,
-							),
+							compileFilterExpression({
+								eb,
+								reference: filter.condition.key,
+								filter: filter.condition.filter,
+								caseInsensitiveLikeOperator:
+									config.database.caseInsensitiveLikeOperator,
+							}),
 						);
 					}
 

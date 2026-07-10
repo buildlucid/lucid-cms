@@ -80,10 +80,10 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			},
 		},
 		operators: {
-			requestId: this.dbAdapter.config.fuzzOperator,
-			providerRequestId: this.dbAdapter.config.fuzzOperator,
-			model: this.dbAdapter.config.fuzzOperator,
-			targetType: this.dbAdapter.config.fuzzOperator,
+			requestId: "contains",
+			providerRequestId: "contains",
+			model: "contains",
+			targetType: "contains",
 		},
 	} as const;
 
@@ -308,6 +308,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						meta: this.queryConfig,
 					},
 				);

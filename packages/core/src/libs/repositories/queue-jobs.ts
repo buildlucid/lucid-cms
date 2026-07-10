@@ -94,9 +94,9 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 			},
 		},
 		operators: {
-			eventType: this.dbAdapter.config.fuzzOperator,
-			queueAdapterKey: this.dbAdapter.config.fuzzOperator,
-			errorMessage: this.dbAdapter.config.fuzzOperator,
+			eventType: "contains",
+			queueAdapterKey: "contains",
+			errorMessage: "contains",
 		},
 	} as const;
 
@@ -172,6 +172,7 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						meta: this.queryConfig,
 					},
 				);

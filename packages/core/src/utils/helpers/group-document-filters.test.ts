@@ -830,7 +830,10 @@ describe("groupDocumentFilters", () => {
 
 	it('should handle repeater fields with "brickKey.repeaterKey._fieldKey" syntax', () => {
 		const filters: QueryParamFilters = {
-			"simple.items._itemTitle": { value: "Item Title", operator: "like" },
+			"simple.items._itemTitle": {
+				value: "Item Title",
+				operator: "contains",
+			},
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -844,7 +847,7 @@ describe("groupDocumentFilters", () => {
 			{
 				key: "itemTitle",
 				value: "Item Title",
-				operator: "like",
+				operator: "contains",
 				column: "_itemTitle",
 			},
 		]);
@@ -881,7 +884,10 @@ describe("groupDocumentFilters", () => {
 
 	it('should handle document field repeaters with "fields.repeaterKey._fieldKey" syntax', () => {
 		const filters: QueryParamFilters = {
-			"fields.people._firstName": { value: "John", operator: "like" },
+			"fields.people._firstName": {
+				value: "John",
+				operator: "starts-with",
+			},
 		};
 
 		const result = groupDocumentFilters(sampleSchema, filters);
@@ -895,7 +901,7 @@ describe("groupDocumentFilters", () => {
 			{
 				key: "firstName",
 				value: "John",
-				operator: "like",
+				operator: "starts-with",
 				column: "_firstName",
 			},
 		]);
@@ -989,7 +995,11 @@ describe("groupDocumentFilters", () => {
 	it("groups condition arrays for OR document filtering", () => {
 		const filters: QueryParamFilterCondition[] = [
 			{ key: "id", value: 1 },
-			{ key: "_simpleHeading", value: "Document Heading", operator: "ilike" },
+			{
+				key: "_simpleHeading",
+				value: "Document Heading",
+				operator: "contains",
+			},
 			{ key: "simple._heading", value: "Brick Heading" },
 		];
 
@@ -1003,7 +1013,7 @@ describe("groupDocumentFilters", () => {
 					{
 						key: "simpleHeading",
 						value: "Document Heading",
-						operator: "ilike",
+						operator: "contains",
 						column: "_simpleHeading",
 					},
 				],

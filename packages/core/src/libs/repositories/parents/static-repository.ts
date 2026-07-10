@@ -177,6 +177,7 @@ abstract class StaticRepository<
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						// @ts-expect-error
 						meta: this.queryConfig,
 					},

@@ -69,7 +69,7 @@ export class SQLiteAdapter extends DatabaseAdapter {
 					false: 0,
 				},
 			},
-			fuzzOperator: "like" as const,
+			caseInsensitiveLikeOperator: "like" as const,
 		};
 	}
 	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {

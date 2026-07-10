@@ -23,6 +23,7 @@ import type {
 	DocumentsGetMultipleResponse,
 	DocumentsGetSingleQuery,
 	DocumentsGetSingleResponse,
+	FilterOperator,
 	LucidClient,
 	LucidClientResponse,
 	RelationFieldValue,
@@ -275,6 +276,24 @@ test("root client export returns the public LucidClient contract", () => {
 });
 
 test("document client queries narrow filters, includes, and sorts from the collection key", () => {
+	expectTypeOf<FilterOperator>().toEqualTypeOf<
+		| "="
+		| "!="
+		| ">"
+		| ">="
+		| "<"
+		| "<="
+		| "in"
+		| "not-in"
+		| "is"
+		| "is-not"
+		| "contains"
+		| "not-contains"
+		| "starts-with"
+		| "not-starts-with"
+		| "ends-with"
+		| "not-ends-with"
+	>();
 	expectTypeOf<CollectionDocumentKey>().toMatchTypeOf<string>();
 	expectTypeOf<CollectionDocumentLocaleCode>().toMatchTypeOf<string>();
 	expectTypeOf<CollectionDocumentFilters<"page">>().toEqualTypeOf<{

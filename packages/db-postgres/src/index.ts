@@ -49,7 +49,6 @@ export class PostgresAdapter extends DatabaseAdapter {
 		});
 	}
 	async initialize() {
-		await sql`CREATE EXTENSION IF NOT EXISTS pg_trgm`.execute(this.client);
 		await sql`SET timezone = 'UTC'`.execute(this.client);
 	}
 	get jsonArrayFrom() {
@@ -85,7 +84,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 					false: false,
 				},
 			},
-			fuzzOperator: "%",
+			caseInsensitiveLikeOperator: "ilike",
 		};
 	}
 	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {

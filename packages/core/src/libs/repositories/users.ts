@@ -191,10 +191,10 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			},
 		},
 		operators: {
-			firstName: this.dbAdapter.config.fuzzOperator,
-			lastName: this.dbAdapter.config.fuzzOperator,
-			email: this.dbAdapter.config.fuzzOperator,
-			username: this.dbAdapter.config.fuzzOperator,
+			firstName: "contains",
+			lastName: "contains",
+			email: "contains",
+			username: "contains",
 		},
 	} as const;
 
@@ -839,6 +839,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 					},
 					{
 						queryParams: props.queryParams,
+						database: this.dbAdapter.config,
 						meta: this.queryConfig,
 					},
 				);

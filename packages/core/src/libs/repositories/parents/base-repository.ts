@@ -1,11 +1,7 @@
-import type {
-	ColumnDataType,
-	ComparisonOperatorExpression,
-	InsertObject,
-	UpdateObject,
-} from "kysely";
+import type { ColumnDataType, InsertObject, UpdateObject } from "kysely";
 import z, { type ZodObject, type ZodType } from "zod";
 import constants from "../../../constants/constants.js";
+import type { FilterOperator } from "../../../types/query-params.js";
 import type { LucidErrorData } from "../../../types.js";
 import { tidyZodError } from "../../../utils/errors/index.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
@@ -45,7 +41,7 @@ abstract class BaseRepository<
 			filters?: Record<string, string>;
 			sorts?: Record<string, string>;
 		};
-		operators?: Record<string, ComparisonOperatorExpression | "%">;
+		operators?: Record<string, FilterOperator>;
 	};
 
 	/**

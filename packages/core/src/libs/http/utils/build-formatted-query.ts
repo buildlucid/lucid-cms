@@ -28,6 +28,13 @@ const buildSort = (query: unknown) => {
 	});
 };
 
+/** Splits set values while preserving commas in semantic text filters. */
+const parseFilterValue = (value: string, operator?: string): FilterValue => {
+	if (operator === "in" || operator === "not-in") return value.split(",");
+	if (operator !== undefined && operator !== "") return value;
+	return value.includes(",") ? value.split(",") : value;
+};
+
 const buildFilter = (query: unknown, nullableFields?: string[]) => {
 	return Object.entries(
 		query as Record<string, string>,
@@ -38,9 +45,7 @@ const buildFilter = (query: unknown, nullableFields?: string[]) => {
 			const [, name, operator] = match;
 			if (!name) return acc;
 
-			let processedValue: FilterValue = value.includes(",")
-				? value.split(",")
-				: value;
+			let processedValue = parseFilterValue(value, operator);
 
 			if (nullableFields?.includes(name) && processedValue === "") {
 				processedValue = null;
@@ -72,9 +77,7 @@ const buildFilterOr = (query: unknown, nullableFields?: string[]) => {
 		const groupIndex = Number.parseInt(groupIndexRaw, 10);
 		if (Number.isNaN(groupIndex)) continue;
 
-		let processedValue: FilterValue = value.includes(",")
-			? value.split(",")
-			: value;
+		let processedValue = parseFilterValue(value, operator);
 
 		if (nullableFields?.includes(name) && processedValue === "") {
 			processedValue = null;

@@ -66,7 +66,7 @@ export class D1Adapter extends DatabaseAdapter {
 					false: 0,
 				},
 			},
-			fuzzOperator: "like",
+			caseInsensitiveLikeOperator: "like",
 		};
 	}
 	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {
