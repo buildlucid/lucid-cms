@@ -33,7 +33,7 @@ export type DocumentFilterFieldType = (typeof FILTERABLE_FIELD_TYPES)[number];
 export interface DocumentFilterField {
 	/** Backend filter path - `_fieldKey`, `brickKey._fieldKey` or `brickKey.repeaterKey._fieldKey` */
 	key: string;
-	/** `[brick label > ][parent container label > ]field label` */
+	/** `[brick label > ][ancestor container labels > ]field label` */
 	label: string;
 	type: DocumentFilterFieldType;
 	/** select field options */
@@ -144,8 +144,8 @@ interface CollectContext {
 	repeaterKey?: string;
 	/** brick display name - always leads the label when present */
 	brickLabel?: string;
-	/** nearest container (tab/section/collapsible/repeater) display name */
-	containerLabel?: string;
+	/** ordered container (tab/section/collapsible/repeater) display names */
+	containerLabels?: string[];
 }
 
 /**
@@ -166,9 +166,8 @@ const buildFilterKey = (context: CollectContext, fieldKey: string): string => {
 
 /**
  * Collects supported filterable leaf fields. Field labels are not unique, so
- * the display name carries the brick label plus the field's nearest container
- * (tab/section/collapsible/repeater) label - deeper ancestors are dropped to
- * keep names short: `[brick > ][parent container > ]field label`.
+ * the display name carries the brick label plus the field's full container
+ * ancestry: `[brick > ][ancestor containers > ]field label`.
  */
 const collectFilterFields = (
 	fields: CollectionFieldConfig[] | undefined,
@@ -180,7 +179,13 @@ const collectFilterFields = (
 		if (STRUCTURAL_FIELD_TYPES.has(field.type)) {
 			collectFilterFields(
 				(field as { fields?: CollectionFieldConfig[] }).fields,
-				{ ...context, containerLabel: fieldLabel(field) },
+				{
+					...context,
+					containerLabels: [
+						...(context.containerLabels ?? []),
+						fieldLabel(field),
+					],
+				},
 				result,
 			);
 			continue;
@@ -191,7 +196,10 @@ const collectFilterFields = (
 				{
 					...context,
 					repeaterKey: field.key,
-					containerLabel: fieldLabel(field),
+					containerLabels: [
+						...(context.containerLabels ?? []),
+						fieldLabel(field),
+					],
 				},
 				result,
 			);
@@ -200,7 +208,7 @@ const collectFilterFields = (
 
 		const label = [
 			context.brickLabel,
-			context.containerLabel,
+			...(context.containerLabels ?? []),
 			fieldLabel(field),
 		]
 			.filter((part): part is string => part !== undefined)

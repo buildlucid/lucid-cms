@@ -57,7 +57,7 @@ describe("documentFilterFields", () => {
 		expect(fields).toEqual([]);
 	});
 
-	it("includes only the nearest container label in the display name", () => {
+	it("includes the full container path in the display name", () => {
 		const fields = documentFilterFields(
 			buildCollection([
 				{
@@ -87,10 +87,8 @@ describe("documentFilterFields", () => {
 			]),
 		);
 
-		//* the nearest container disambiguates duplicate field labels without
-		//* the full ancestor chain bloating the name
 		expect(fields).toEqual([
-			{ key: "_metaTitle", label: "SEO > Meta title", type: "text" },
+			{ key: "_metaTitle", label: "Main > SEO > Meta title", type: "text" },
 			{ key: "_tabField", label: "Main > Tab field", type: "text" },
 		]);
 	});
@@ -135,7 +133,6 @@ describe("documentFilterFields", () => {
 			),
 		);
 
-		//* the repeater is the nearest container - brick labels always lead
 		expect(fields).toEqual([
 			{ key: "fields.people._name", label: "People > Name", type: "text" },
 			{
@@ -165,12 +162,10 @@ describe("documentFilterFields", () => {
 			]),
 		);
 
-		//* only the innermost repeater names the field - key fallback when
-		//* unlabelled
 		expect(fields).toEqual([
 			{
 				key: "fields.inner._note",
-				label: "inner > note",
+				label: "outer > inner > note",
 				type: "text",
 			},
 		]);
