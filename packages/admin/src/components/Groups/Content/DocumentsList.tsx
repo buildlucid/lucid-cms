@@ -19,6 +19,7 @@ import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import DeleteDocumentPermanently from "@/components/Modals/Documents/DeleteDocumentPermanently";
 import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
+import { useDocumentOrderSave } from "@/hooks/document/useDocumentOrderSave";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
 import api from "@/services/api";
@@ -234,6 +235,7 @@ export const DocumentsList: Component<{
 	const restoreDocuments = api.documents.useRestore();
 	const updateDocumentOrder = api.documents.useUpdateOrder({
 		silent: true,
+		invalidates: [],
 		onError: () => {
 			//* restore server order after failed reorder
 			queryClient.invalidateQueries({
@@ -246,10 +248,17 @@ export const DocumentsList: Component<{
 			});
 		},
 	});
+	const documentOrderSave = useDocumentOrderSave({
+		save: (update) => updateDocumentOrder.action.mutateAsync(update),
+		onSaved: () =>
+			queryClient.invalidateQueries({
+				queryKey: ["documents.getMultiple"],
+			}),
+	});
 
 	// ----------------------------------
 	// Functions
-	const reorderRows = async (dragIndex: number, targetIndex: number) => {
+	const reorderRows = (dragIndex: number, targetIndex: number) => {
 		const rows = documents.data?.data ?? [];
 		const dragged = rows[dragIndex];
 		if (!dragged) return;
@@ -275,18 +284,14 @@ export const DocumentsList: Component<{
 			},
 		);
 
-		try {
-			await updateDocumentOrder.action.mutateAsync({
-				collectionKey: collectionKey(),
-				id: dragged.id,
-				body: {
-					previousDocumentId,
-					nextDocumentId,
-				},
-			});
-		} catch {
-			//* onError handles feedback and cache rollback
-		}
+		documentOrderSave.queue({
+			collectionKey: collectionKey(),
+			id: dragged.id,
+			body: {
+				previousDocumentId,
+				nextDocumentId,
+			},
+		});
 	};
 
 	// ----------------------------------------

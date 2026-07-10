@@ -27,6 +27,7 @@ interface UseUpdateOrderProps {
 	onSuccess?: () => void;
 	onError?: (_errors: ErrorResponse | undefined) => void;
 	silent?: boolean;
+	invalidates?: string[];
 }
 
 const useUpdateOrder = (props?: UseUpdateOrderProps) => {
@@ -38,7 +39,7 @@ const useUpdateOrder = (props?: UseUpdateOrderProps) => {
 					title: T()("toasts.documents.order.updated.title"),
 					message: T()("toasts.documents.order.updated.message"),
 				}),
-		invalidates: ["documents.getMultiple"],
+		invalidates: props?.invalidates ?? ["documents.getMultiple"],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});
