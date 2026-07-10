@@ -28,13 +28,19 @@ const ReleaseRequestsListRoute: Component = () => {
 		schema: {
 			filters: {
 				collectionKey: textFilter(),
+				documentId: numberFilter(),
 				target: textFilter(),
 				status: textFilter(),
 				executionStatus: textFilter(),
 				requestedBy: numberFilter(),
 				reviewers: numberFilter(),
 				assignedToMe: booleanFilter(),
-				requestedByMe: textFilter(),
+				requestedByMe: booleanFilter(),
+				createdAt: textFilter(),
+				updatedAt: textFilter(),
+				scheduledAt: textFilter(),
+				executedAt: textFilter(),
+				failedAt: textFilter(),
 			},
 			sorts: {
 				createdAt: sort({ defaultValue: "desc" }),
@@ -87,6 +93,11 @@ const ReleaseRequestsListRoute: Component = () => {
 				]),
 			),
 	);
+	const documentFilterCollections = createMemo(() => {
+		const selected = searchParams.filters().get("collectionKey");
+		if (typeof selected === "string" && selected) return [selected];
+		return Array.from(reviewCollectionKeys());
+	});
 	const targetOptions = createMemo(() => {
 		const keys = new Set<string>();
 		const selectedCollectionKey = searchParams.filters().get("collectionKey");
@@ -160,6 +171,13 @@ const ReleaseRequestsListRoute: Component = () => {
 												options: targetOptions(),
 											},
 											{
+												label: T()("common.document"),
+												key: "documentId",
+												type: "relation",
+												collections: documentFilterCollections(),
+												relationValue: "id",
+											},
+											{
 												label: T()("common.status"),
 												key: "status",
 												type: "select",
@@ -179,6 +197,11 @@ const ReleaseRequestsListRoute: Component = () => {
 													{
 														label: T()("common.status.cancelled"),
 														value: "cancelled" satisfies PublishOperationStatus,
+													},
+													{
+														label: T()("common.status.superseded"),
+														value:
+															"superseded" satisfies PublishOperationStatus,
 													},
 												],
 											},
@@ -234,6 +257,36 @@ const ReleaseRequestsListRoute: Component = () => {
 												label: T()("common.assigned.to.me"),
 												key: "assignedToMe",
 												type: "checkbox",
+											},
+											{
+												label: T()("common.requested.by.me"),
+												key: "requestedByMe",
+												type: "checkbox",
+											},
+											{
+												label: T()("common.requested.at"),
+												key: "createdAt",
+												type: "datetime",
+											},
+											{
+												label: T()("common.updated.at"),
+												key: "updatedAt",
+												type: "datetime",
+											},
+											{
+												label: T()("common.scheduled.for"),
+												key: "scheduledAt",
+												type: "datetime",
+											},
+											{
+												label: T()("common.executed.at"),
+												key: "executedAt",
+												type: "datetime",
+											},
+											{
+												label: T()("common.failed.at"),
+												key: "failedAt",
+												type: "datetime",
 											},
 										],
 									}}

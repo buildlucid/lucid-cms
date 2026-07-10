@@ -45,6 +45,12 @@ export const controllerSchemas = {
 					"filter[ipAddress]": queryString.schema.filter(false, {
 						example: "192.168.1.1",
 					}),
+					"filter[userAgent]": queryString.schema.filter(false, {
+						example: "Mozilla/5.0",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
 					sort: queryString.schema.sort("createdAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -55,6 +61,8 @@ export const controllerSchemas = {
 					.object({
 						authMethod: queryFormatted.schema.filters.union.optional(),
 						ipAddress: queryFormatted.schema.filters.single.optional(),
+						userAgent: queryFormatted.schema.filters.single.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

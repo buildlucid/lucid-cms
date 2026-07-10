@@ -87,6 +87,8 @@ const ViewUserLoginsPanelContent: Component<{
 			filters: {
 				authMethod: textFilter(),
 				ipAddress: textFilter(),
+				userAgent: textFilter(),
+				createdAt: textFilter(),
 			},
 			sorts: {
 				createdAt: sort({ defaultValue: "desc" }),
@@ -157,6 +159,16 @@ const ViewUserLoginsPanelContent: Component<{
 							label: T()("common.ip.address"),
 							key: "ipAddress",
 							type: "text",
+						},
+						{
+							label: T()("users.agent"),
+							key: "userAgent",
+							type: "text",
+						},
+						{
+							label: T()("common.created.at"),
+							key: "createdAt",
+							type: "datetime",
 						},
 					]}
 					searchParams={loginsSearchParams}

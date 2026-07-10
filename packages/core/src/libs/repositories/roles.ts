@@ -52,7 +52,11 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 		tableKeys: {
 			filters: {
 				name: "translation.name",
+				description: "translation.description",
 				roleIds: "lucid_roles.id",
+				locked: "lucid_roles.locked",
+				createdAt: "lucid_roles.created_at",
+				updatedAt: "lucid_roles.updated_at",
 			},
 			sorts: {
 				name: "translation.name",
@@ -61,6 +65,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 		},
 		operators: {
 			name: this.dbAdapter.config.fuzzOperator,
+			description: this.dbAdapter.config.fuzzOperator,
 		},
 	} as const;
 

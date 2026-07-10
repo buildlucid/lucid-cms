@@ -11,6 +11,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState";
+import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -22,8 +23,15 @@ const SystemClientIntegrationsRoute: Component = () => {
 		mode: "url",
 		schema: {
 			filters: {
+				key: textFilter(),
 				name: textFilter(),
+				description: textFilter(),
 				enabled: booleanFilter(),
+				scope: textFilter(),
+				lastUsedAt: textFilter(),
+				lastUsedIp: textFilter(),
+				createdAt: textFilter(),
+				updatedAt: textFilter(),
 			},
 			sorts: {
 				name: sort(),
@@ -45,6 +53,13 @@ const SystemClientIntegrationsRoute: Component = () => {
 	// Memos
 	const hasCreatePermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.IntegrationsCreate]).all;
+	});
+	const scopes = api.clientIntegrations.useGetScopes({ queryParams: {} });
+	const scopeOptions = createMemo(() => {
+		const values = new Set(
+			(scopes.data?.data ?? []).flatMap((group) => group.scopes),
+		);
+		return Array.from(values).map((scope) => ({ value: scope, label: scope }));
 	});
 
 	// ----------------------------------------
@@ -91,11 +106,48 @@ const SystemClientIntegrationsRoute: Component = () => {
 											type: "text",
 										},
 										{
+											label: T()("common.key"),
+											key: "key",
+											type: "text",
+										},
+										{
+											label: T()("common.description"),
+											key: "description",
+											type: "text",
+										},
+										{
 											label: T()("common.status.active"),
 											key: "enabled",
 											type: "checkbox",
 											trueLabel: T()("common.status.active"),
 											falseLabel: T()("common.status.inactive"),
+										},
+										{
+											label: T()("common.scopes"),
+											key: "scope",
+											type: "select",
+											options: scopeOptions(),
+											operators: ["="],
+										},
+										{
+											label: T()("common.last.used.at"),
+											key: "lastUsedAt",
+											type: "datetime",
+										},
+										{
+											label: T()("client.integrations.last.used.ip"),
+											key: "lastUsedIp",
+											type: "text",
+										},
+										{
+											label: T()("common.created.at"),
+											key: "createdAt",
+											type: "datetime",
+										},
+										{
+											label: T()("common.updated.at"),
+											key: "updatedAt",
+											type: "datetime",
 										},
 									],
 								}}

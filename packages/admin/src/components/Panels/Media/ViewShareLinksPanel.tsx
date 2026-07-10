@@ -28,6 +28,7 @@ import UpsertShareLinkPanel from "@/components/Panels/Media/UpsertShareLinkPanel
 import ShareLinkRow from "@/components/Tables/Rows/ShareLinkRow";
 import { Permissions } from "@/constants/permissions";
 import useQueryState, {
+	numberFilter,
 	pagination,
 	sort,
 	textFilter,
@@ -100,6 +101,11 @@ const ViewShareLinksPanelContent: Component<{
 			filters: {
 				name: textFilter(),
 				token: textFilter(),
+				createdBy: numberFilter(),
+				updatedBy: numberFilter(),
+				expiresAt: textFilter(),
+				createdAt: textFilter(),
+				updatedAt: textFilter(),
 			},
 			sorts: {
 				name: sort(),
@@ -198,6 +204,31 @@ const ViewShareLinksPanelContent: Component<{
 							label: T()("common.token"),
 							key: "token",
 							type: "text",
+						},
+						{
+							label: T()("common.created.by"),
+							key: "createdBy",
+							type: "user",
+						},
+						{
+							label: T()("common.updated.by"),
+							key: "updatedBy",
+							type: "user",
+						},
+						{
+							label: T()("common.expires.at"),
+							key: "expiresAt",
+							type: "datetime",
+						},
+						{
+							label: T()("common.created.at"),
+							key: "createdAt",
+							type: "datetime",
+						},
+						{
+							label: T()("common.updated.at"),
+							key: "updatedAt",
+							type: "datetime",
 						},
 					]}
 					searchParams={shareLinksSearchParams}

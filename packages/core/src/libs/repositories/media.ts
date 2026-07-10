@@ -166,6 +166,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				public: "public",
 				isHidden: "is_hidden",
 				origin: "origin",
+				fileSize: "file_size",
+				width: "width",
+				height: "height",
+				createdAt: "created_at",
+				updatedAt: "updated_at",
 			},
 			sorts: {
 				createdAt: "created_at",

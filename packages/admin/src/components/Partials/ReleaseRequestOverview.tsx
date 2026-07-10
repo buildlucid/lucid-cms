@@ -25,7 +25,7 @@ type ReleaseRequestPreset = {
 		status?: PublishOperationStatus;
 		executionStatus?: PublishOperationExecutionStatus;
 		assignedToMe?: boolean;
-		requestedByMe?: string;
+		requestedByMe?: boolean;
 	};
 };
 

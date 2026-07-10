@@ -204,6 +204,25 @@ describe("stateToStorageSearch", () => {
 		expect(params.get("filter[or][0][author:in]")).toBe("1,2");
 		expect(params.get("filter[or][1][isDeleted]")).toBe("0");
 	});
+
+	it("round-trips repeated fields when their operators differ", () => {
+		const state = applyParams(defaultQueryState(schema), schema, {
+			orFilterGroups: [
+				[
+					{ key: "title", value: "home", operator: "like" },
+					{ key: "title", value: "archive", operator: "not like" },
+				],
+			],
+		});
+		const search = stateToStorageSearch(state, schema, "");
+		const params = new URLSearchParams(search);
+
+		expect(params.get("filter[or][0][title:like]")).toBe("home");
+		expect(params.get("filter[or][0][title:not like]")).toBe("archive");
+		expect(parseSearchIntoState(search, schema).orFilterGroups).toEqual(
+			state.orFilterGroups,
+		);
+	});
 });
 
 describe("buildQueryString", () => {

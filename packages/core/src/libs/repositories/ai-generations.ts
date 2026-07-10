@@ -62,10 +62,16 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 	queryConfig = {
 		tableKeys: {
 			filters: {
+				requestId: "lucid_ai_generations.request_id",
+				providerRequestId: "lucid_ai_generations.provider_request_id",
 				featureKey: "lucid_ai_generations.feature_key",
+				featureVersion: "lucid_ai_generations.feature_version",
 				status: "lucid_ai_generations.status",
 				model: "lucid_ai_generations.model",
 				userId: "lucid_ai_generations.user_id",
+				targetType: "lucid_ai_generations.target_type",
+				durationMs: "lucid_ai_generations.duration_ms",
+				createdAt: "lucid_ai_generations.created_at",
 			},
 			sorts: {
 				createdAt: "lucid_ai_generations.created_at",
@@ -74,7 +80,10 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			},
 		},
 		operators: {
+			requestId: this.dbAdapter.config.fuzzOperator,
+			providerRequestId: this.dbAdapter.config.fuzzOperator,
 			model: this.dbAdapter.config.fuzzOperator,
+			targetType: this.dbAdapter.config.fuzzOperator,
 		},
 	} as const;
 

@@ -320,6 +320,12 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
+					"filter[requestId]": queryString.schema.filter(false, {
+						example: "req_123",
+					}),
+					"filter[providerRequestId]": queryString.schema.filter(false, {
+						example: "provider_req_123",
+					}),
 					"filter[featureKey]": queryString.schema.filter(false, {
 						example: "media.image.generate",
 					}),
@@ -332,6 +338,18 @@ export const controllerSchemas = {
 					"filter[userId]": queryString.schema.filter(true, {
 						example: "1",
 					}),
+					"filter[featureVersion]": queryString.schema.filter(false, {
+						example: "1",
+					}),
+					"filter[targetType]": queryString.schema.filter(false, {
+						example: "media",
+					}),
+					"filter[durationMs]": queryString.schema.filter(false, {
+						example: "1000",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
 					sort: queryString.schema.sort("createdAt,cost,durationMs"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -340,10 +358,16 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
+						requestId: queryFormatted.schema.filters.single.optional(),
+						providerRequestId: queryFormatted.schema.filters.single.optional(),
 						featureKey: queryFormatted.schema.filters.single.optional(),
+						featureVersion: queryFormatted.schema.filters.single.optional(),
 						status: queryFormatted.schema.filters.union.optional(),
 						model: queryFormatted.schema.filters.single.optional(),
 						userId: queryFormatted.schema.filters.union.optional(),
+						targetType: queryFormatted.schema.filters.single.optional(),
+						durationMs: queryFormatted.schema.filters.single.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

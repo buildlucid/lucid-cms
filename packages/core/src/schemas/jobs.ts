@@ -106,6 +106,39 @@ export const controllerSchemas = {
 					"filter[queueAdapterKey]": queryString.schema.filter(false, {
 						example: "passthrough",
 					}),
+					"filter[priority]": queryString.schema.filter(false, {
+						example: "5",
+					}),
+					"filter[attempts]": queryString.schema.filter(false, {
+						example: "1",
+					}),
+					"filter[maxAttempts]": queryString.schema.filter(false, {
+						example: "3",
+					}),
+					"filter[errorMessage]": queryString.schema.filter(false, {
+						example: "Connection refused",
+					}),
+					"filter[createdByUserId]": queryString.schema.filter(false, {
+						example: "1",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[scheduledFor]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[startedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[completedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[failedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[nextRetryAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
 					sort: queryString.schema.sort(
 						"createdAt,scheduledFor,startedAt,completedAt,failedAt,priority,attempts",
 					),
@@ -120,6 +153,17 @@ export const controllerSchemas = {
 						eventType: queryFormatted.schema.filters.single.optional(),
 						status: queryFormatted.schema.filters.union.optional(),
 						queueAdapterKey: queryFormatted.schema.filters.single.optional(),
+						priority: queryFormatted.schema.filters.single.optional(),
+						attempts: queryFormatted.schema.filters.single.optional(),
+						maxAttempts: queryFormatted.schema.filters.single.optional(),
+						errorMessage: queryFormatted.schema.filters.single.optional(),
+						createdByUserId: queryFormatted.schema.filters.single.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
+						scheduledFor: queryFormatted.schema.filters.single.optional(),
+						startedAt: queryFormatted.schema.filters.single.optional(),
+						completedAt: queryFormatted.schema.filters.single.optional(),
+						failedAt: queryFormatted.schema.filters.single.optional(),
+						nextRetryAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

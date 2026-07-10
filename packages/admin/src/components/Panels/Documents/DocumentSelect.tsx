@@ -37,7 +37,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import {
 	buildDocumentFilterSchema,
-	documentFilterFields,
+	documentFilterSectionFields,
 } from "@/utils/document-filter-fields";
 import {
 	collectionFieldIncludes,
@@ -201,7 +201,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			filterSchemaCollectionKey() === collectionKey(),
 	});
 	const getFilterFields = createMemo(() =>
-		documentFilterFields(collection.data?.data),
+		documentFilterSectionFields(collection.data?.data),
 	);
 	const relationCollectionData = createMemo(() => {
 		const map = new Map(

@@ -15,18 +15,13 @@ import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import Button from "@/components/Partials/Button";
-import useQueryState, {
-	arrayFilter,
-	type QueryFilterSchema,
-	sort,
-	textFilter,
-} from "@/hooks/useQueryState";
+import useQueryState, { sort } from "@/hooks/useQueryState";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import {
 	buildDocumentFilterSchema,
-	documentFilterFields,
+	documentFilterSectionFields,
 } from "@/utils/document-filter-fields";
 import {
 	collectionFieldIncludes,
@@ -104,7 +99,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 		collectionFieldIncludes(collectionData()),
 	);
 	const getFilterFields = createMemo(() =>
-		documentFilterFields(collectionData()),
+		documentFilterSectionFields(collectionData()),
 	);
 	const getCollectionFieldSorts = createMemo(() =>
 		collectionFieldSorts(collectionData()),
@@ -205,15 +200,9 @@ const CollectionsDocumentsListRoute: Component = () => {
 		if (filterSchemaKey === nextFilterSchemaKey) return;
 		filterSchemaKey = nextFilterSchemaKey;
 
-		const filterConfig: QueryFilterSchema =
-			buildDocumentFilterSchema(filterFields);
-		//* not offered by the filter section yet, but existing URLs and API
-		//* consumers still rely on these parsing
-		if (activeCollection.workflow) {
-			filterConfig.workflowStage = textFilter();
-			filterConfig.workflowAssignee = arrayFilter();
-		}
-		searchParams.setSchema({ filters: filterConfig });
+		searchParams.setSchema({
+			filters: buildDocumentFilterSchema(filterFields),
+		});
 	});
 
 	// ----------------------------------

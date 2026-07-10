@@ -4,7 +4,11 @@ import { EmailsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
-import useQueryState, { sort, textFilter } from "@/hooks/useQueryState";
+import useQueryState, {
+	numberFilter,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import T from "@/translations";
 
 const EmailListRoute: Component = () => {
@@ -15,12 +19,17 @@ const EmailListRoute: Component = () => {
 		mode: "url",
 		schema: {
 			filters: {
+				fromAddress: textFilter(),
 				toAddress: textFilter(),
 				subject: textFilter(),
 				template: textFilter(),
 				currentStatus: textFilter(),
 				type: textFilter(),
 				priority: textFilter(),
+				attemptCount: numberFilter(),
+				lastAttemptedAt: textFilter(),
+				createdAt: textFilter(),
+				updatedAt: textFilter(),
 			},
 			sorts: {
 				createdAt: sort({ defaultValue: "desc" }),
@@ -56,6 +65,11 @@ const EmailListRoute: Component = () => {
 									filterSection={{
 										subject: T()("routes.email.title"),
 										fields: [
+											{
+												label: T()("common.from"),
+												key: "fromAddress",
+												type: "text",
+											},
 											{
 												label: T()("common.to"),
 												key: "toAddress",
@@ -147,6 +161,26 @@ const EmailListRoute: Component = () => {
 														value: "high",
 													},
 												],
+											},
+											{
+												label: T()("common.attempt.count"),
+												key: "attemptCount",
+												type: "number",
+											},
+											{
+												label: T()("common.last.attempt.at"),
+												key: "lastAttemptedAt",
+												type: "datetime",
+											},
+											{
+												label: T()("common.created.at"),
+												key: "createdAt",
+												type: "datetime",
+											},
+											{
+												label: T()("common.updated.at"),
+												key: "updatedAt",
+												type: "datetime",
 											},
 										],
 									}}

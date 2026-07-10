@@ -139,11 +139,32 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
+					"filter[key]": queryString.schema.filter(false, {
+						example: "bd61bb",
+					}),
 					"filter[name]": queryString.schema.filter(false, {
 						example: "Marketing Website",
 					}),
 					"filter[enabled]": queryString.schema.filter(false, {
 						example: "1",
+					}),
+					"filter[description]": queryString.schema.filter(false, {
+						example: "Marketing website",
+					}),
+					"filter[scope]": queryString.schema.filter(true, {
+						example: "documents:read",
+					}),
+					"filter[lastUsedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[lastUsedIp]": queryString.schema.filter(false, {
+						example: "203.0.113.42",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[updatedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
 					}),
 					sort: queryString.schema.sort("name,description,enabled,createdAt"),
 					page: queryString.schema.page,
@@ -153,8 +174,15 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
+						key: queryFormatted.schema.filters.single.optional(),
 						name: queryFormatted.schema.filters.single.optional(),
+						description: queryFormatted.schema.filters.single.optional(),
 						enabled: queryFormatted.schema.filters.single.optional(),
+						scope: queryFormatted.schema.filters.union.optional(),
+						lastUsedAt: queryFormatted.schema.filters.single.optional(),
+						lastUsedIp: queryFormatted.schema.filters.single.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
+						updatedAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

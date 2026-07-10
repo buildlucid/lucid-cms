@@ -259,6 +259,21 @@ const mediaGetMultipleQueryStringSchema = z
 		"filter[origin]": queryString.schema.filter(true, {
 			example: "human,ai_generated",
 		}),
+		"filter[fileSize]": queryString.schema.filter(false, {
+			example: "1048576",
+		}),
+		"filter[width]": queryString.schema.filter(false, {
+			example: "1920",
+		}),
+		"filter[height]": queryString.schema.filter(false, {
+			example: "1080",
+		}),
+		"filter[createdAt]": queryString.schema.filter(false, {
+			example: "2026-01-01T00:00:00Z",
+		}),
+		"filter[updatedAt]": queryString.schema.filter(false, {
+			example: "2026-01-01T00:00:00Z",
+		}),
 		sort: queryString.schema.sort(
 			"createdAt,updatedAt,title,mimeType,extension",
 		),
@@ -280,6 +295,11 @@ const mediaGetMultipleQueryFormattedSchema = z.object({
 			deletedBy: queryFormatted.schema.filters.union.optional(),
 			public: queryFormatted.schema.filters.single.optional(),
 			origin: queryFormatted.schema.filters.union.optional(),
+			fileSize: queryFormatted.schema.filters.single.optional(),
+			width: queryFormatted.schema.filters.single.optional(),
+			height: queryFormatted.schema.filters.single.optional(),
+			createdAt: queryFormatted.schema.filters.single.optional(),
+			updatedAt: queryFormatted.schema.filters.single.optional(),
 		})
 		.optional(),
 	filterOr: queryFormatted.schema.filterOr,

@@ -223,10 +223,12 @@ export const EntityValue: Component<{
 		);
 		if (ref) setPickedRef({ type: "relation", ref });
 		props.onCommit(
-			formatRelationFilterValue({
-				collectionKey: value.collectionKey,
-				id: value.id,
-			}),
+			props.field.relationValue === "id"
+				? value.id
+				: formatRelationFilterValue({
+						collectionKey: value.collectionKey,
+						id: value.id,
+					}),
 		);
 	};
 

@@ -132,6 +132,11 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 				documentId: "lucid_document_publish_operations.document_id",
 				target: "lucid_document_publish_operations.target",
 				requestedBy: "lucid_document_publish_operations.requested_by",
+				createdAt: "lucid_document_publish_operations.created_at",
+				updatedAt: "lucid_document_publish_operations.updated_at",
+				scheduledAt: "lucid_document_publish_operations.scheduled_at",
+				executedAt: "lucid_document_publish_operations.executed_at",
+				failedAt: "lucid_document_publish_operations.failed_at",
 			},
 			sorts: {
 				createdAt: "lucid_document_publish_operations.created_at",
@@ -400,32 +405,19 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 							...this.queryConfig,
 							customFilters: {
 								requestedByMe: ({ eb, filter }) => {
-									if (
-										filter.value !== true &&
-										filter.value !== "true" &&
-										filter.value !== "1" &&
-										filter.value !== 1
-									) {
-										return undefined;
-									}
-
 									return eb(
 										"lucid_document_publish_operations.requested_by",
-										"=",
+										filter.value === true ||
+											filter.value === "true" ||
+											filter.value === "1" ||
+											filter.value === 1
+											? "="
+											: "!=",
 										props.currentUserId,
 									);
 								},
 								assignedToMe: ({ eb, filter }) => {
-									if (
-										filter.value !== true &&
-										filter.value !== "true" &&
-										filter.value !== "1" &&
-										filter.value !== 1
-									) {
-										return undefined;
-									}
-
-									return eb.exists(
+									const assigned = eb.exists(
 										eb
 											.selectFrom("lucid_document_publish_operation_assignees")
 											.select(sql.lit(1).as("one"))
@@ -440,6 +432,12 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 												props.currentUserId,
 											),
 									);
+									return filter.value === true ||
+										filter.value === "true" ||
+										filter.value === "1" ||
+										filter.value === 1
+										? assigned
+										: eb.not(assigned);
 								},
 								reviewers: ({ eb, filter }) => {
 									const values = Array.isArray(filter.value)

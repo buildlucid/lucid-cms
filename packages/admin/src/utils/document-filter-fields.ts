@@ -45,6 +45,9 @@ export interface DocumentFilterField {
 	falseLabel?: string;
 	/** relation fields - collection keys the document picker can select from */
 	collections?: string[];
+	/** relation fields normally commit `collectionKey:id`; resource filters that
+	 * target a plain document ID can opt into an ID-only value. */
+	relationValue?: "collection-id" | "id";
 	/** media fields - picker constraints from the field's validation */
 	mediaType?: string;
 	mediaExtensions?: string;
@@ -246,6 +249,61 @@ export const documentFilterFields = (
 		seen.add(field.key);
 		return true;
 	});
+};
+
+/** Collection fields plus management metadata used by document listings. */
+export const documentFilterSectionFields = (
+	collection?: Collection,
+): DocumentFilterField[] => {
+	const result = documentFilterFields(collection);
+
+	if (collection?.workflow) {
+		result.push(
+			{
+				key: "workflowStage",
+				label: T()("documents.workflow.stage"),
+				type: "select",
+				options: collection.workflow.stages.map((stage) => ({
+					value: stage.key,
+					label:
+						helpers.getLocaleValue({
+							value: stage.name,
+							fallback: stage.key,
+						}) || stage.key,
+				})),
+			},
+			{
+				key: "workflowAssignee",
+				label: T()("documents.workflow.assigned.to"),
+				type: "user",
+			},
+		);
+	}
+
+	result.push(
+		{
+			key: "createdBy",
+			label: T()("common.created.by"),
+			type: "user",
+		},
+		{
+			key: "updatedBy",
+			label: T()("common.updated.by"),
+			type: "user",
+		},
+		{
+			key: "createdAt",
+			label: T()("common.created.at"),
+			type: "datetime",
+		},
+		{
+			key: "updatedAt",
+			label: T()("common.updated.at"),
+			type: "datetime",
+		},
+	);
+
+	return result;
 };
 
 const OPERATORS_BY_FIELD_TYPE: Record<

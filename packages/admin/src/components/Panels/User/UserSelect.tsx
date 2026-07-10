@@ -22,12 +22,16 @@ import UserDisplay from "@/components/Partials/UserDisplay";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import useQueryState, {
+	booleanFilter,
+	numberFilter,
 	pagination,
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState";
 import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
+import helpers from "@/utils/helpers";
 import type { UserRelationRef } from "@/utils/relation-field-helpers";
 import { userResponseToRef } from "@/utils/relation-field-helpers";
 
@@ -104,6 +108,8 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 				firstName: textFilter(),
 				lastName: textFilter(),
 				email: textFilter(),
+				roleIds: numberFilter(),
+				isLocked: booleanFilter(),
 			},
 			sorts: {
 				createdAt: sort({ defaultValue: "desc" }),
@@ -121,8 +127,26 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 		},
 		enabled: () => searchParams.ready(),
 	});
+	const roles = api.roles.useGetMultiple({
+		queryParams: {
+			include: { permissions: false },
+			perPage: -1,
+		},
+	});
 
 	const isLoading = createMemo(() => users.isLoading);
+	const roleOptions = createMemo(() =>
+		(roles.data?.data ?? []).map((role) => ({
+			value: String(role.id),
+			label:
+				helpers.getTranslation(
+					role.name,
+					contentLocaleStore.get.contentLocale,
+				) ??
+				role.name[0]?.value ??
+				String(role.id),
+		})),
+	);
 
 	createEffect(() => {
 		const refs = props.selectedRefs ?? [];
@@ -192,6 +216,19 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 						label: T()("common.email"),
 						key: "email",
 						type: "text",
+					},
+					{
+						label: T()("common.role"),
+						key: "roleIds",
+						type: "select",
+						options: roleOptions(),
+					},
+					{
+						label: T()("users.status.locked.label"),
+						key: "isLocked",
+						type: "checkbox",
+						trueLabel: T()("common.status.locked"),
+						falseLabel: T()("common.status.unlocked"),
 					},
 				]}
 				searchParams={searchParams}

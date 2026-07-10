@@ -120,6 +120,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 				type: textFilter({ defaultValue: props.type || "" }),
 				mimeType: textFilter(),
 				key: textFilter(),
+				origin: textFilter(),
 			},
 			sorts: {
 				fileSize: sort(),
@@ -270,7 +271,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 				subject={T()("common.media")}
 				fields={[
 					{
-						label: T()("common.title"),
+						label: T()("common.name"),
 						key: "title",
 						type: "text",
 					},
@@ -319,6 +320,22 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						label: T()("common.file.extension"),
 						key: "extension",
 						type: "text",
+					},
+					{
+						label: T()("common.origin"),
+						key: "origin",
+						type: "select",
+						options: [
+							{ label: T()("common.human"), value: "human" },
+							{
+								label: T()("media.origin.ai.generated"),
+								value: "ai_generated",
+							},
+							{
+								label: T()("media.origin.ai.modified"),
+								value: "ai_modified",
+							},
+						],
 					},
 				]}
 				searchParams={searchParams}

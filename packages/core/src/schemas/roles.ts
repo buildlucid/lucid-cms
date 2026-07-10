@@ -155,6 +155,18 @@ export const controllerSchemas = {
 					"filter[roleIds]": queryString.schema.filter(true, {
 						example: "1,2",
 					}),
+					"filter[description]": queryString.schema.filter(false, {
+						example: "Can manage content",
+					}),
+					"filter[locked]": queryString.schema.filter(false, {
+						example: "true",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[updatedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
 					sort: queryString.schema.sort("createdAt,name"),
 					include: queryString.schema.include("permissions"),
 					page: queryString.schema.page,
@@ -165,7 +177,11 @@ export const controllerSchemas = {
 				filter: z
 					.object({
 						name: queryFormatted.schema.filters.single.optional(),
+						description: queryFormatted.schema.filters.single.optional(),
 						roleIds: queryFormatted.schema.filters.union.optional(),
+						locked: queryFormatted.schema.filters.single.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
+						updatedAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

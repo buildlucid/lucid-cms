@@ -73,6 +73,15 @@ export const controllerSchemas = {
 					"filter[updatedBy]": queryString.schema.filter(true, {
 						example: "1",
 					}),
+					"filter[expiresAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[updatedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
 					sort: queryString.schema.sort("name,expiresAt,createdAt,updatedAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -85,6 +94,9 @@ export const controllerSchemas = {
 						name: queryFormatted.schema.filters.single.optional(),
 						createdBy: queryFormatted.schema.filters.union.optional(),
 						updatedBy: queryFormatted.schema.filters.union.optional(),
+						expiresAt: queryFormatted.schema.filters.single.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
+						updatedAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

@@ -172,9 +172,13 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				roleIds: "lucid_user_roles.role_id",
 				id: "lucid_users.id",
 				invitationAccepted: "lucid_users.invitation_accepted",
+				superAdmin: "lucid_users.super_admin",
+				triggerPasswordReset: "lucid_users.triggered_password_reset",
 				isLocked: "lucid_users.is_locked",
 				isDeleted: "lucid_users.is_deleted",
 				deletedBy: "lucid_users.deleted_by",
+				createdAt: "lucid_users.created_at",
+				updatedAt: "lucid_users.updated_at",
 			},
 			sorts: {
 				createdAt: "lucid_users.created_at",

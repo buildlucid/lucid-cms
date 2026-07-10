@@ -139,6 +139,21 @@ export const controllerSchemas = {
 					"filter[requestedByMe]": queryString.schema.filter(false, {
 						example: "true",
 					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[updatedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[scheduledAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[executedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[failedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,scheduledAt,executedAt,failedAt",
 					),
@@ -159,6 +174,11 @@ export const controllerSchemas = {
 						reviewers: queryFormatted.schema.filters.union.optional(),
 						assignedToMe: queryFormatted.schema.filters.single.optional(),
 						requestedByMe: queryFormatted.schema.filters.single.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
+						updatedAt: queryFormatted.schema.filters.single.optional(),
+						scheduledAt: queryFormatted.schema.filters.single.optional(),
+						executedAt: queryFormatted.schema.filters.single.optional(),
+						failedAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

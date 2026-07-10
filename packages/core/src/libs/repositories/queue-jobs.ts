@@ -67,7 +67,9 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 				priority: "priority",
 				attempts: "attempts",
 				maxAttempts: "max_attempts",
+				errorMessage: "error_message",
 				createdByUserId: "created_by_user_id",
+				createdAt: "created_at",
 				scheduledFor: "scheduled_for",
 				startedAt: "started_at",
 				completedAt: "completed_at",
@@ -92,9 +94,9 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 			},
 		},
 		operators: {
-			event_type: this.dbAdapter.config.fuzzOperator,
-			queue_adapter_key: this.dbAdapter.config.fuzzOperator,
-			error_message: this.dbAdapter.config.fuzzOperator,
+			eventType: this.dbAdapter.config.fuzzOperator,
+			queueAdapterKey: this.dbAdapter.config.fuzzOperator,
+			errorMessage: this.dbAdapter.config.fuzzOperator,
 		},
 	} as const;
 

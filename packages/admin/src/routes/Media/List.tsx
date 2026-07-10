@@ -21,6 +21,7 @@ import { Permissions } from "@/constants/permissions";
 import useMediaImageGeneration from "@/hooks/ai/useMediaImageGeneration";
 import useQueryState, {
 	booleanFilter,
+	numberFilter,
 	pagination,
 	sort,
 	textFilter,
@@ -45,6 +46,12 @@ const MediaListRoute: Component = () => {
 				mimeType: textFilter(),
 				key: textFilter(),
 				public: booleanFilter(),
+				origin: textFilter(),
+				deletedBy: numberFilter(),
+				width: numberFilter(),
+				height: numberFilter(),
+				createdAt: textFilter(),
+				updatedAt: textFilter(),
 			},
 			sorts: {
 				fileSize: sort(),
@@ -131,7 +138,9 @@ const MediaListRoute: Component = () => {
 	createEffect(() => {
 		if (showingDeleted()) {
 			mediaStore.get.reset();
+			return;
 		}
+		searchParams.clearFilter("deletedBy");
 	});
 
 	// ----------------------------------------
@@ -297,7 +306,7 @@ const MediaListRoute: Component = () => {
 											subject: T()("routes.media.title"),
 											fields: [
 												{
-													label: T()("common.title"),
+													label: T()("common.name"),
 													key: "title",
 													type: "text",
 												},
@@ -354,6 +363,51 @@ const MediaListRoute: Component = () => {
 													key: "extension",
 													type: "text",
 												},
+												{
+													label: T()("common.origin"),
+													key: "origin",
+													type: "select",
+													options: [
+														{ label: T()("common.human"), value: "human" },
+														{
+															label: T()("media.origin.ai.generated"),
+															value: "ai_generated",
+														},
+														{
+															label: T()("media.origin.ai.modified"),
+															value: "ai_modified",
+														},
+													],
+												},
+												{
+													label: T()("common.width"),
+													key: "width",
+													type: "number",
+												},
+												{
+													label: T()("common.height"),
+													key: "height",
+													type: "number",
+												},
+												{
+													label: T()("common.created.at"),
+													key: "createdAt",
+													type: "datetime",
+												},
+												{
+													label: T()("common.updated.at"),
+													key: "updatedAt",
+													type: "datetime",
+												},
+												...(showingDeleted()
+													? [
+															{
+																label: T()("common.deleted.by"),
+																key: "deletedBy",
+																type: "user" as const,
+															},
+														]
+													: []),
 											],
 										}}
 										sorts={[

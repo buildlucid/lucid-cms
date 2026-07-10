@@ -30,6 +30,8 @@ export default class UserLoginsRepository extends StaticRepository<"lucid_user_l
 			filters: {
 				authMethod: "auth_method",
 				ipAddress: "ip_address",
+				userAgent: "user_agent",
+				createdAt: "created_at",
 			},
 			sorts: {
 				createdAt: "created_at",

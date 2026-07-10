@@ -199,6 +199,9 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
+					"filter[fromAddress]": queryString.schema.filter(false, {
+						example: "noreply@lucidcms.io",
+					}),
 					"filter[toAddress]": queryString.schema.filter(false, {
 						example: "admin@lucidcms.io",
 					}),
@@ -217,6 +220,18 @@ export const controllerSchemas = {
 					"filter[priority]": queryString.schema.filter(true, {
 						example: "high",
 					}),
+					"filter[attemptCount]": queryString.schema.filter(false, {
+						example: "2",
+					}),
+					"filter[lastAttemptedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[updatedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
 					sort: queryString.schema.sort(
 						"lastAttemptedAt,attemptCount,createdAt,updatedAt",
 					),
@@ -227,12 +242,17 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
+						fromAddress: queryFormatted.schema.filters.single.optional(),
 						toAddress: queryFormatted.schema.filters.single.optional(),
 						subject: queryFormatted.schema.filters.single.optional(),
 						currentStatus: queryFormatted.schema.filters.union.optional(),
 						type: queryFormatted.schema.filters.union.optional(), // internal | external
 						template: queryFormatted.schema.filters.single.optional(),
 						priority: queryFormatted.schema.filters.union.optional(),
+						attemptCount: queryFormatted.schema.filters.single.optional(),
+						lastAttemptedAt: queryFormatted.schema.filters.single.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
+						updatedAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

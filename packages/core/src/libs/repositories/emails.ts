@@ -99,12 +99,17 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 	queryConfig = {
 		tableKeys: {
 			filters: {
+				fromAddress: "from_address",
 				toAddress: "to_address",
 				subject: "subject",
 				type: "type",
 				template: "template",
 				priority: "priority",
 				currentStatus: "current_status",
+				attemptCount: "attempt_count",
+				lastAttemptedAt: "last_attempted_at",
+				createdAt: "created_at",
+				updatedAt: "updated_at",
 			},
 			sorts: {
 				attemptCount: "attempt_count",

@@ -5,7 +5,11 @@ import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
 import { JobsList } from "@/components/Groups/Content";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
-import useQueryState, { sort, textFilter } from "@/hooks/useQueryState";
+import useQueryState, {
+	numberFilter,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import T from "@/translations";
 
 const SystemQueueObservabilityRoute: Component = () => {
@@ -20,6 +24,17 @@ const SystemQueueObservabilityRoute: Component = () => {
 				eventType: textFilter(),
 				status: textFilter(),
 				queueAdapterKey: textFilter(),
+				priority: numberFilter(),
+				attempts: numberFilter(),
+				maxAttempts: numberFilter(),
+				errorMessage: textFilter(),
+				createdByUserId: numberFilter(),
+				createdAt: textFilter(),
+				scheduledFor: textFilter(),
+				startedAt: textFilter(),
+				completedAt: textFilter(),
+				failedAt: textFilter(),
+				nextRetryAt: textFilter(),
 			},
 			sorts: {
 				createdAt: sort({ defaultValue: "desc" }),
@@ -102,6 +117,61 @@ const SystemQueueObservabilityRoute: Component = () => {
 											label: T()("queue.adapter"),
 											key: "queueAdapterKey",
 											type: "text",
+										},
+										{
+											label: T()("common.priority"),
+											key: "priority",
+											type: "number",
+										},
+										{
+											label: T()("common.attempts"),
+											key: "attempts",
+											type: "number",
+										},
+										{
+											label: T()("common.max.attempts"),
+											key: "maxAttempts",
+											type: "number",
+										},
+										{
+											label: T()("common.error.message"),
+											key: "errorMessage",
+											type: "text",
+										},
+										{
+											label: T()("common.created.by"),
+											key: "createdByUserId",
+											type: "user",
+										},
+										{
+											label: T()("common.created.at"),
+											key: "createdAt",
+											type: "datetime",
+										},
+										{
+											label: T()("common.scheduled.for"),
+											key: "scheduledFor",
+											type: "datetime",
+										},
+										{
+											label: T()("common.started.at"),
+											key: "startedAt",
+											type: "datetime",
+										},
+										{
+											label: T()("common.completed.at"),
+											key: "completedAt",
+											type: "datetime",
+										},
+										{
+											label: T()("common.failed.at"),
+											key: "failedAt",
+											type: "datetime",
+										},
+										{
+											label: T()("common.next.retry.at"),
+											key: "nextRetryAt",
+											type: "datetime",
 										},
 									],
 								}}

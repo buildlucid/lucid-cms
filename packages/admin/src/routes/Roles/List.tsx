@@ -6,7 +6,11 @@ import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
 import { Permissions } from "@/constants/permissions";
-import useQueryState, { sort, textFilter } from "@/hooks/useQueryState";
+import useQueryState, {
+	booleanFilter,
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
@@ -19,6 +23,10 @@ const RolesListRoute: Component = () => {
 		schema: {
 			filters: {
 				name: textFilter(),
+				description: textFilter(),
+				locked: booleanFilter(),
+				createdAt: textFilter(),
+				updatedAt: textFilter(),
 			},
 			sorts: {
 				name: sort(),
@@ -71,6 +79,28 @@ const RolesListRoute: Component = () => {
 												label: T()("common.name"),
 												key: "name",
 												type: "text",
+											},
+											{
+												label: T()("common.description"),
+												key: "description",
+												type: "text",
+											},
+											{
+												label: T()("common.status"),
+												key: "locked",
+												type: "checkbox",
+												trueLabel: T()("common.status.locked"),
+												falseLabel: T()("common.status.unlocked"),
+											},
+											{
+												label: T()("common.created.at"),
+												key: "createdAt",
+												type: "datetime",
+											},
+											{
+												label: T()("common.updated.at"),
+												key: "updatedAt",
+												type: "datetime",
 											},
 										],
 									}}

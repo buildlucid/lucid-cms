@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	buildDocumentFilterSchema,
 	documentFilterFields,
+	documentFilterSectionFields,
 	filterValueInputType,
 	formatRelationFilterValue,
 	isEntityPickerFieldType,
@@ -330,6 +331,49 @@ describe("documentFilterFields", () => {
 		);
 
 		expect(fields).toEqual([{ key: "_owner", label: "owner", type: "user" }]);
+	});
+});
+
+describe("documentFilterSectionFields", () => {
+	it("adds management and configured workflow filters", () => {
+		const collection = {
+			...buildCollection([
+				{ key: "title", type: "text", details: { label: literal("Title") } },
+			]),
+			workflow: {
+				initial: "draft",
+				stages: [
+					{
+						key: "draft",
+						name: literal("Draft"),
+						color: "grey",
+						publishTargets: [],
+						permissions: {},
+					},
+				],
+			},
+		} as Collection;
+
+		expect(documentFilterSectionFields(collection)).toEqual(
+			expect.arrayContaining([
+				{ key: "_title", label: "Title", type: "text" },
+				{
+					key: "workflowStage",
+					label: "Workflow Stage",
+					type: "select",
+					options: [{ value: "draft", label: "Draft" }],
+				},
+				{
+					key: "workflowAssignee",
+					label: "Assigned To",
+					type: "user",
+				},
+				{ key: "createdBy", label: "Created By", type: "user" },
+				{ key: "updatedBy", label: "Updated By", type: "user" },
+				{ key: "createdAt", label: "Created At", type: "datetime" },
+				{ key: "updatedAt", label: "Updated At", type: "datetime" },
+			]),
+		);
 	});
 });
 

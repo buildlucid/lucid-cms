@@ -54,9 +54,14 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 	queryConfig = {
 		tableKeys: {
 			filters: {
+				key: "key",
 				name: "name",
 				description: "description",
 				enabled: "enabled",
+				lastUsedAt: "last_used_at",
+				lastUsedIp: "last_used_ip",
+				createdAt: "created_at",
+				updatedAt: "updated_at",
 			},
 			sorts: {
 				name: "name",
@@ -247,7 +252,31 @@ export default class ClientIntegrationsRepository extends StaticRepository<"luci
 					},
 					{
 						queryParams: props.queryParams,
-						meta: this.queryConfig,
+						meta: {
+							...this.queryConfig,
+							customFilters: {
+								scope: ({ eb, filter }) => {
+									const values = Array.isArray(filter.value)
+										? filter.value
+										: [filter.value];
+									return eb.exists(
+										eb
+											.selectFrom("lucid_client_integration_scopes")
+											.select("lucid_client_integration_scopes.id")
+											.whereRef(
+												"lucid_client_integration_scopes.client_integration_id",
+												"=",
+												"lucid_client_integrations.id",
+											)
+											.where(
+												"lucid_client_integration_scopes.scope",
+												"in",
+												values.map(String),
+											),
+									);
+								},
+							},
+						},
 					},
 				);
 

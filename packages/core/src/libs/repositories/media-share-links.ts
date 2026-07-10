@@ -58,6 +58,9 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 				createdBy: "created_by",
 				token: "token",
 				name: "name",
+				expiresAt: "expires_at",
+				createdAt: "created_at",
+				updatedAt: "updated_at",
 			},
 			sorts: {
 				name: "name",

@@ -24,10 +24,16 @@ const SystemAiUsageRoute: Component = () => {
 		mode: "memory",
 		schema: {
 			filters: {
+				requestId: textFilter(),
+				providerRequestId: textFilter(),
 				featureKey: textFilter(),
+				featureVersion: textFilter(),
 				status: textFilter(),
 				model: textFilter(),
 				userId: numberFilter(),
+				targetType: textFilter(),
+				durationMs: numberFilter(),
+				createdAt: textFilter(),
 			},
 			sorts: {
 				createdAt: sort({ defaultValue: "desc" }),
@@ -97,6 +103,10 @@ const SystemAiUsageRoute: Component = () => {
 													label: T()("common.status.success"),
 													value: "success" satisfies AiUsageStatus,
 												},
+												{
+													label: T()("common.status.failed"),
+													value: "failed" satisfies AiUsageStatus,
+												},
 											],
 										},
 										{
@@ -108,6 +118,36 @@ const SystemAiUsageRoute: Component = () => {
 											label: T()("common.user"),
 											key: "userId",
 											type: "user",
+										},
+										{
+											label: T()("common.request.id"),
+											key: "requestId",
+											type: "text",
+										},
+										{
+											label: T()("ai.usage.provider.request.id"),
+											key: "providerRequestId",
+											type: "text",
+										},
+										{
+											label: T()("ai.usage.feature.version"),
+											key: "featureVersion",
+											type: "text",
+										},
+										{
+											label: T()("ai.usage.target.type"),
+											key: "targetType",
+											type: "text",
+										},
+										{
+											label: T()("ai.usage.elapsed"),
+											key: "durationMs",
+											type: "number",
+										},
+										{
+											label: T()("ai.usage.initiated"),
+											key: "createdAt",
+											type: "datetime",
 										},
 									],
 								}}

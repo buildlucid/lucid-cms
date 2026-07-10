@@ -481,8 +481,23 @@ export const controllerSchemas = {
 					"filter[isLocked]": queryString.schema.filter(false, {
 						example: "true",
 					}),
+					"filter[invitationAccepted]": queryString.schema.filter(false, {
+						example: "true",
+					}),
+					"filter[superAdmin]": queryString.schema.filter(false, {
+						example: "true",
+					}),
+					"filter[triggerPasswordReset]": queryString.schema.filter(false, {
+						example: "true",
+					}),
 					"filter[deletedBy]": queryString.schema.filter(true, {
 						example: "1",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
+					}),
+					"filter[updatedAt]": queryString.schema.filter(false, {
+						example: "2026-01-01T00:00:00Z",
 					}),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,firstName,lastName,email,username,isLocked",
@@ -503,7 +518,13 @@ export const controllerSchemas = {
 						id: queryFormatted.schema.filters.union.optional(),
 						isDeleted: queryFormatted.schema.filters.single.optional(),
 						isLocked: queryFormatted.schema.filters.single.optional(),
+						invitationAccepted: queryFormatted.schema.filters.single.optional(),
+						superAdmin: queryFormatted.schema.filters.single.optional(),
+						triggerPasswordReset:
+							queryFormatted.schema.filters.single.optional(),
 						deletedBy: queryFormatted.schema.filters.union.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
+						updatedAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,

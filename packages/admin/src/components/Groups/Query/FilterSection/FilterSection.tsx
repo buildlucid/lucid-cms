@@ -172,14 +172,15 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 			.map((entry) => entry.row);
 	});
 
-	//* where keys are unique inside a group, but reusable across OR groups
-	const usedKeysByGroup = createMemo(() => {
+	//* key/operator pairs are unique inside a group. Reusing a numeric or date
+	//* field with a different operator enables bounded ranges.
+	const usedPredicatesByGroup = createMemo(() => {
 		const groups = new Map<string, Set<string>>();
 		for (const row of rows()) {
-			if (!row.fieldKey) continue;
-			const keys = groups.get(row.groupTag) ?? new Set<string>();
-			keys.add(row.fieldKey);
-			groups.set(row.groupTag, keys);
+			if (!row.fieldKey || !row.operator) continue;
+			const predicates = groups.get(row.groupTag) ?? new Set<string>();
+			predicates.add(`${row.fieldKey}:${row.operator}`);
+			groups.set(row.groupTag, predicates);
 		}
 		return groups;
 	});
@@ -194,26 +195,59 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 		).toLowerCase();
 
 	const fieldOptionsForRow = (row: RowModel) => {
-		const groupKeys = usedKeysByGroup().get(row.groupTag);
+		const usedPredicates = usedPredicatesByGroup().get(row.groupTag);
 		return props.fields
-			.filter(
-				(field) =>
-					field.key === row.fieldKey ||
-					groupKeys === undefined ||
-					!groupKeys.has(field.key),
-			)
+			.filter((field) => {
+				if (field.key === row.fieldKey) return true;
+				const operators = field.operators ?? operatorsForFieldType(field.type);
+				return operators.some(
+					(operator) => !usedPredicates?.has(`${field.key}:${operator}`),
+				);
+			})
 			.map((field) => ({ value: field.key, label: field.label }));
 	};
 	const canAddRowAfter = (row: RowModel) => {
-		const groupKeys = usedKeysByGroup().get(row.groupTag);
-		return props.fields.some((field) => !groupKeys?.has(field.key));
+		const usedPredicates = usedPredicatesByGroup().get(row.groupTag);
+		return props.fields.some((field) => {
+			const operators = field.operators ?? operatorsForFieldType(field.type);
+			return operators.some(
+				(operator) => !usedPredicates?.has(`${field.key}:${operator}`),
+			);
+		});
 	};
 
-	const defaultOperator = (fieldKey: string): DocumentFilterOperator => {
+	const availableFieldForRow = (row: RowModel) => {
+		if (!row.fieldKey) return undefined;
+		const field = fieldsByKey().get(row.fieldKey);
+		if (!field) return undefined;
+		const usedPredicates = usedPredicatesByGroup().get(row.groupTag);
+		const operators = (
+			field.operators ?? operatorsForFieldType(field.type)
+		).filter(
+			(operator) =>
+				operator === row.operator ||
+				!usedPredicates?.has(`${field.key}:${operator}`),
+		);
+		return { ...field, operators };
+	};
+
+	const defaultOperator = (
+		fieldKey: string,
+		groupTag?: string,
+	): DocumentFilterOperator => {
 		const field = fieldsByKey().get(fieldKey);
-		return field
-			? (field.operators?.[0] ?? operatorsForFieldType(field.type)[0] ?? "=")
-			: "=";
+		if (!field) return "=";
+		const operators = field.operators ?? operatorsForFieldType(field.type);
+		const usedPredicates = groupTag
+			? usedPredicatesByGroup().get(groupTag)
+			: undefined;
+		return (
+			operators.find(
+				(operator) => !usedPredicates?.has(`${fieldKey}:${operator}`),
+			) ??
+			operators[0] ??
+			"="
+		);
 	};
 
 	const replaceIdentity = (oldId: string, newId: string) => {
@@ -488,7 +522,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 	};
 
 	const handleFieldChange = (row: RowModel, nextKey: string) => {
-		const operator = defaultOperator(nextKey);
+		const operator = defaultOperator(nextKey, row.groupTag);
 		if (row.ref.source === "draft") {
 			updateDraft(row.ref.draftId, { key: nextKey, operator, value: "" });
 			return;
@@ -546,6 +580,25 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 		if (singleMode()) {
 			if (draft.target === "new" && topConditions().length > 0) {
 				promoteWithNewGroup(condition, draft);
+				return;
+			}
+			if (topConditions().some((existing) => existing.key === condition.key)) {
+				const group = [...topConditions(), condition];
+				const identityMap = new Map<string, string | null>();
+				topConditions().forEach((existing, index) => {
+					identityMap.set(`top:${existing.key}`, `or:0:${index}`);
+				});
+				identityMap.set(`draft:${draftId}`, `or:0:${group.length - 1}`);
+				batch(() => {
+					applyIdentityMap(identityMap);
+					setDrafts((current) =>
+						current.filter((draft) => draft.draftId !== draftId),
+					);
+					props.searchParams.setParams({
+						filters: clearedTopFilters(),
+						orFilterGroups: [group],
+					});
+				});
 				return;
 			}
 			//* base group condition (or first row entirely) - top-level param
@@ -750,11 +803,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 								</Show>
 								<FilterRow
 									id={`filter-row-${index}`}
-									field={
-										row().fieldKey
-											? fieldsByKey().get(row().fieldKey as string)
-											: undefined
-									}
+									field={availableFieldForRow(row())}
 									operator={row().operator}
 									value={row().value}
 									fieldOptions={fieldOptionsForRow(row())}
