@@ -116,10 +116,12 @@ const devCommand = async (options?: {
 				prepareEmailTemplates({
 					config: configResult.config,
 					silent: false,
+					verbose: false,
 				}),
 				copyPublicAssets({
 					config: configResult.config,
 					silent: false,
+					verbose: false,
 				}),
 			]);
 			if (emailTemplatesRes.error) {
@@ -140,8 +142,11 @@ const devCommand = async (options?: {
 				rebuilding = false;
 				return;
 			}
-
 			process.stdout.write("\x1B[2J\x1B[3J\x1B[H");
+			cliLogger.success(
+				"Email templates and public assets prepared",
+				cliLogger.color.green("successfully"),
+			);
 
 			const serverRes = await adapterCLI.serve({
 				config: configResult.config,

@@ -97,10 +97,12 @@ const buildCommand = async (options?: {
 			prepareEmailTemplates({
 				config: configRes.config,
 				silent,
+				verbose: true,
 			}),
 			copyPublicAssets({
 				config: configRes.config,
 				silent,
+				verbose: true,
 			}),
 		]);
 		if (emailTemplatesRes.error) {

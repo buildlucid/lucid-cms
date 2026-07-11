@@ -9,6 +9,7 @@ import prepareLucidPublicAssets from "../../compile/prepare-lucid-public-assets.
 const copyPublicAssets = async (props: {
 	config: Config;
 	silent?: boolean;
+	verbose?: boolean;
 }): ServiceResponse<undefined> => {
 	const outDir = path.join(
 		props.config.build.paths.outDir,
@@ -21,6 +22,7 @@ const copyPublicAssets = async (props: {
 		projectRoot: process.cwd(),
 		includeProjectPublic: true,
 		silent: props.silent,
+		verbose: props.verbose,
 	});
 };
 

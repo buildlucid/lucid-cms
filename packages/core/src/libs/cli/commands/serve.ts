@@ -107,10 +107,12 @@ const serveCommand = async () => {
 			prepareEmailTemplates({
 				config: configRes.config,
 				silent: false,
+				verbose: false,
 			}),
 			copyPublicAssets({
 				config: configRes.config,
 				silent: false,
+				verbose: false,
 			}),
 		]);
 		if (emailTemplatesRes.error) {
@@ -127,6 +129,10 @@ const serveCommand = async () => {
 			);
 			process.exit(1);
 		}
+		cliLogger.success(
+			"Email templates and public assets prepared",
+			cliLogger.color.green("successfully"),
+		);
 
 		const serverRes = await adapterCLI.serve({
 			config: configRes.config,

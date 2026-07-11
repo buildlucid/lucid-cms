@@ -12,6 +12,7 @@ import loadEmailTemplates from "./load-email-templates.js";
 const prepareEmailTemplates = async (props: {
 	config: Config;
 	silent?: boolean;
+	verbose?: boolean;
 }): ServiceResponse<undefined> => {
 	try {
 		const renderedTemplates = await loadEmailTemplates(props);

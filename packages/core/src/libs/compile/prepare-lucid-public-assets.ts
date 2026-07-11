@@ -30,6 +30,7 @@ const copyFileTo = async (
 	srcFile: string,
 	destFile: string,
 	silent: boolean,
+	verbose: boolean,
 	projectRoot: string,
 ) => {
 	await ensureDir(path.dirname(destFile));
@@ -41,15 +42,18 @@ const copyFileTo = async (
 			? relativeOutPath || "."
 			: `./${relativeOutPath}`;
 
-	cliLogger.info("Copied public asset:", cliLogger.color.green(displayPath), {
-		silent,
-	});
+	if (verbose) {
+		cliLogger.info("Copied public asset:", cliLogger.color.green(displayPath), {
+			silent,
+		});
+	}
 };
 
 const copyDirectoryContentsInto = async (
 	srcDir: string,
 	destDir: string,
 	silent: boolean,
+	verbose: boolean,
 	projectRoot: string,
 ) => {
 	await ensureDir(destDir);
@@ -61,9 +65,15 @@ const copyDirectoryContentsInto = async (
 			const destPath = path.join(destDir, entry.name);
 
 			if (entry.isDirectory()) {
-				await copyDirectoryContentsInto(srcPath, destPath, silent, projectRoot);
+				await copyDirectoryContentsInto(
+					srcPath,
+					destPath,
+					silent,
+					verbose,
+					projectRoot,
+				);
 			} else if (entry.isFile()) {
-				await copyFileTo(srcPath, destPath, silent, projectRoot);
+				await copyFileTo(srcPath, destPath, silent, verbose, projectRoot);
 			}
 		}),
 	);
@@ -75,10 +85,12 @@ const prepareLucidPublicAssets = async (props: {
 	projectRoot?: string;
 	includeProjectPublic?: boolean;
 	silent?: boolean;
+	verbose?: boolean;
 }): ServiceResponse<undefined> => {
 	try {
 		const projectRoot = props.projectRoot ?? process.cwd();
 		const silent = props.silent ?? false;
+		const verbose = props.verbose ?? false;
 		const corePublicPath = path.join(
 			currentDir,
 			"../../../",
@@ -92,6 +104,7 @@ const prepareLucidPublicAssets = async (props: {
 				corePublicPath,
 				props.outDir,
 				silent,
+				verbose,
 				projectRoot,
 			);
 		}
@@ -116,13 +129,14 @@ const prepareLucidPublicAssets = async (props: {
 						absSource,
 						destDir,
 						silent,
+						verbose,
 						projectRoot,
 					);
 				} else {
 					const destFile = output
 						? path.join(props.outDir, output)
 						: path.join(props.outDir, path.basename(absSource));
-					await copyFileTo(absSource, destFile, silent, projectRoot);
+					await copyFileTo(absSource, destFile, silent, verbose, projectRoot);
 				}
 			}),
 		);
@@ -134,6 +148,7 @@ const prepareLucidPublicAssets = async (props: {
 					cwdPublic,
 					props.outDir,
 					silent,
+					verbose,
 					projectRoot,
 				);
 			}

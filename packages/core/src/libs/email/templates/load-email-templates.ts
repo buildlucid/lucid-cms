@@ -29,6 +29,7 @@ const processTemplatesInDirectory = async (
 	renderedTemplates: RenderedTemplates,
 	overwrite = true,
 	silent = false,
+	verbose = false,
 ): Promise<void> => {
 	if (!(await pathExists(directory))) return;
 
@@ -56,17 +57,21 @@ const processTemplatesInDirectory = async (
 			lastModified: fileStat.mtime.toISOString(),
 		};
 
-		cliLogger.info("Prepared email template:", cliLogger.color.green(file), {
-			silent,
-		});
+		if (verbose) {
+			cliLogger.info("Prepared email template:", cliLogger.color.green(file), {
+				silent,
+			});
+		}
 	}
 };
 
 const loadEmailTemplates = async (props: {
 	config: Config;
 	silent?: boolean;
+	verbose?: boolean;
 }): Promise<RenderedTemplates> => {
 	const silent = props.silent ?? false;
+	const verbose = props.verbose ?? false;
 	const renderedTemplates: RenderedTemplates = {};
 
 	const projectTemplatePath = props.config.email.templates.directory;
@@ -77,12 +82,14 @@ const loadEmailTemplates = async (props: {
 		renderedTemplates,
 		true,
 		silent,
+		verbose,
 	);
 	await processTemplatesInDirectory(
 		packageTemplatePath,
 		renderedTemplates,
 		false,
 		silent,
+		verbose,
 	);
 
 	return renderedTemplates;
