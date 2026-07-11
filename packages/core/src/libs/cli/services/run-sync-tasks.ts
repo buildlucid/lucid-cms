@@ -1,10 +1,7 @@
 import constants from "../../../constants/constants.js";
 import { syncServices } from "../../../services/index.js";
 import type { Config, EnvironmentVariables } from "../../../types.js";
-import {
-	destroyEmailAdapter,
-	getInitializedEmailAdapter,
-} from "../../email/lifecycle.js";
+import { passthroughEmailAdapterInstance } from "../../email/adapters/passthrough.js";
 import { createTranslator } from "../../i18n/index.js";
 import type { TranslationStore } from "../../i18n/types.js";
 import {
@@ -13,10 +10,6 @@ import {
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
 import logger from "../../logger/index.js";
-import {
-	destroyMediaAdapter,
-	getInitializedMediaAdapter,
-} from "../../media/lifecycle.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
@@ -35,10 +28,8 @@ const runSyncTasks = async (
 		kvInstance ??
 		(await getInitializedKVAdapter(config, { env, runtimeContext }));
 	const shouldDestroyKV = kvInstance === undefined;
-	const [media, email] = await Promise.all([
-		getInitializedMediaAdapter(config, { env, runtimeContext }),
-		getInitializedEmailAdapter(config, { env, runtimeContext }),
-	]);
+	const media = null;
+	const email = passthroughEmailAdapterInstance;
 	const queue = passthroughQueueAdapter();
 	const translate = createTranslator({ store: translationStore, locale: "en" });
 	let cleanedUp = false;
@@ -49,8 +40,6 @@ const runSyncTasks = async (
 			shouldDestroyKV
 				? destroyKVAdapter(kv, { config, env, runtimeContext })
 				: Promise.resolve(),
-			destroyMediaAdapter(media, { config, env, runtimeContext }),
-			destroyEmailAdapter(email, { config, env, runtimeContext }),
 		]);
 	};
 

@@ -151,10 +151,15 @@ export type InferEnvironmentVariables<
 	? z.infer<TEnvSchema>
 	: EnvironmentVariables;
 
+/** Identifies which execution context owns an adapter lifecycle invocation. */
+export type AdapterLifecyclePurpose = "runtime" | "tooling" | "queue-consumer";
+
 export type AdapterLifecycleContext = {
 	config: Config;
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
+	/** Defaults to `runtime` when the caller does not specify a purpose. */
+	purpose?: AdapterLifecyclePurpose;
 };
 
 export type GetEnvVarsLogger = {

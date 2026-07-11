@@ -19,16 +19,23 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			draft.i18n.sources.push("@lucidcms/plugin-nodemailer/translations");
 
 			const simulate = draft.email.simulate;
+			let verification: Promise<void> | undefined;
+			const verifyOnce = () => {
+				verification ??= verifyTransporter(pluginOptions.transporter);
+				return verification;
+			};
 
 			draft.email.adapter = {
 				type: "email-adapter",
 				key: PLUGIN_IDENTIFIER,
 				lifecycle: {
-					init: async () => {
-						await verifyTransporter(pluginOptions.transporter);
+					init: async (context) => {
+						if (simulate || context.purpose === "queue-consumer") return;
+						await verifyOnce();
 					},
 					destroy: async () => {
 						pluginOptions.transporter.close();
+						verification = undefined;
 					},
 				},
 				send: async (_context, email) => {
@@ -41,8 +48,6 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 								data: null,
 							};
 						}
-						await verifyTransporter(pluginOptions.transporter);
-
 						const attachmentsRes = await resolveNodemailerAttachments(
 							email.attachments,
 							pluginOptions.remoteAttachments,

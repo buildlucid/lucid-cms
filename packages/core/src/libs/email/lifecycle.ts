@@ -1,6 +1,7 @@
 import type { Config } from "../../types/config.js";
 import { createAdapterLifecycleContext } from "../runtime/adapter-lifecycle.js";
 import type {
+	AdapterLifecyclePurpose,
 	AdapterRuntimeContext,
 	EnvironmentVariables,
 } from "../runtime/types.js";
@@ -13,6 +14,7 @@ export const getInitializedEmailAdapter = async (
 	options: {
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
+		purpose?: AdapterLifecyclePurpose;
 	} = {},
 ): Promise<EmailAdapterInstance> => {
 	const adapter = await getEmailAdapter(config);
@@ -21,6 +23,7 @@ export const getInitializedEmailAdapter = async (
 			config,
 			env: options.env,
 			runtimeContext: options.runtimeContext,
+			purpose: options.purpose,
 		}),
 	);
 
@@ -34,6 +37,7 @@ export const destroyEmailAdapter = async (
 		config: Config;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
+		purpose?: AdapterLifecyclePurpose;
 	},
 ): Promise<void> => {
 	if (!adapter) return;
@@ -43,6 +47,7 @@ export const destroyEmailAdapter = async (
 			config: options.config,
 			env: options.env,
 			runtimeContext: options.runtimeContext,
+			purpose: options.purpose,
 		}),
 	);
 };

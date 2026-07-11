@@ -173,6 +173,7 @@ try {
     email = await getInitializedEmailAdapter(resolved, {
         env,
         runtimeContext,
+        purpose: "queue-consumer",
     });
 
     const internalQueueAdapter = passthroughQueueAdapter({
@@ -264,7 +265,12 @@ try {
             ? destroyMediaAdapter(media, { config: resolved, env, runtimeContext })
             : undefined,
         email
-            ? destroyEmailAdapter(email, { config: resolved, env, runtimeContext })
+            ? destroyEmailAdapter(email, {
+                config: resolved,
+                env,
+                runtimeContext,
+                purpose: "queue-consumer",
+            })
             : undefined,
         resolved.db.client.destroy(),
     ]);

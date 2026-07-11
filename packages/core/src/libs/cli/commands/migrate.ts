@@ -5,11 +5,7 @@ import type { Config, EnvironmentVariables } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
-import {
-	destroyEmailAdapter,
-	getInitializedEmailAdapter,
-} from "../../email/lifecycle.js";
-import type { EmailAdapterInstance } from "../../email/types.js";
+import { passthroughEmailAdapterInstance } from "../../email/adapters/passthrough.js";
 import { createTranslator } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
@@ -20,11 +16,6 @@ import {
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
 import logger from "../../logger/index.js";
-import {
-	destroyMediaAdapter,
-	getInitializedMediaAdapter,
-} from "../../media/lifecycle.js";
-import type { MediaAdapterInstance } from "../../media/types.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import { createToolkitServiceContext } from "../../toolkit/config.js";
@@ -52,8 +43,6 @@ const migrateCommand = (props?: {
 			props?.runtimeContext;
 		let translationStore: TranslationStore | undefined;
 		let kvInstance: KVAdapterInstance | undefined;
-		let mediaInstance: MediaAdapterInstance | null | undefined;
-		let emailInstance: EmailAdapterInstance | undefined;
 
 		const cleanupAdapters = async () => {
 			if (config && translationStore) {
@@ -63,21 +52,9 @@ const migrateCommand = (props?: {
 						env,
 						runtimeContext,
 					}),
-					destroyMediaAdapter(mediaInstance, {
-						config,
-						env,
-						runtimeContext,
-					}),
-					destroyEmailAdapter(emailInstance, {
-						config,
-						env,
-						runtimeContext,
-					}),
 				]);
 			}
 			kvInstance = undefined;
-			mediaInstance = undefined;
-			emailInstance = undefined;
 		};
 
 		try {
@@ -130,12 +107,8 @@ const migrateCommand = (props?: {
 				store: translationStore,
 				locale: "en",
 			});
-			[mediaInstance, emailInstance] = await Promise.all([
-				getInitializedMediaAdapter(config, { env, runtimeContext }),
-				getInitializedEmailAdapter(config, { env, runtimeContext }),
-			]);
-			const media = mediaInstance;
-			const email = emailInstance;
+			const media = null;
+			const email = passthroughEmailAdapterInstance;
 
 			cliLogger.info("Checking the migration status");
 

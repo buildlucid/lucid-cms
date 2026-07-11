@@ -4,20 +4,11 @@ import type { Config, EnvironmentVariables } from "../../../types.js";
 import migrateCollections from "../../collection/migrate-collections.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
-import {
-	destroyEmailAdapter,
-	getInitializedEmailAdapter,
-} from "../../email/lifecycle.js";
-import type { EmailAdapterInstance } from "../../email/types.js";
+import { passthroughEmailAdapterInstance } from "../../email/adapters/passthrough.js";
 import { createTranslator } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import passthroughKVAdapter from "../../kv/adapters/passthrough.js";
 import logger from "../../logger/index.js";
-import {
-	destroyMediaAdapter,
-	getInitializedMediaAdapter,
-} from "../../media/lifecycle.js";
-import type { MediaAdapterInstance } from "../../media/types.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
@@ -36,19 +27,6 @@ const migrateStatusCommand = async (options?: {
 	let config: Config | undefined;
 	let env: EnvironmentVariables | undefined;
 	let runtimeContext: AdapterRuntimeContext | undefined;
-	let mediaInstance: MediaAdapterInstance | null | undefined;
-	let emailInstance: EmailAdapterInstance | undefined;
-
-	const cleanupAdapters = async () => {
-		if (config) {
-			await Promise.allSettled([
-				destroyMediaAdapter(mediaInstance, { config, env, runtimeContext }),
-				destroyEmailAdapter(emailInstance, { config, env, runtimeContext }),
-			]);
-		}
-		mediaInstance = undefined;
-		emailInstance = undefined;
-	};
 
 	try {
 		logger.setBuffering(true);
@@ -103,11 +81,6 @@ const migrateStatusCommand = async (options?: {
 			store: translationStore,
 			locale: "en",
 		});
-		[mediaInstance, emailInstance] = await Promise.all([
-			getInitializedMediaAdapter(config, { env, runtimeContext }),
-			getInitializedEmailAdapter(config, { env, runtimeContext }),
-		]);
-
 		const collectionResult = await migrateCollections(
 			{
 				db: { client: config.db.client },
@@ -116,8 +89,8 @@ const migrateStatusCommand = async (options?: {
 				env: env ?? null,
 				runtimeContext,
 				kv: passthroughKVAdapter(),
-				media: mediaInstance,
-				email: emailInstance,
+				media: null,
+				email: passthroughEmailAdapterInstance,
 				translate,
 				request: {
 					url: config.host ?? constants.urls.localhost,
@@ -137,8 +110,6 @@ const migrateStatusCommand = async (options?: {
 				.filter((plan) => plan.tables.length > 0)
 				.map((plan) => plan.collectionKey);
 		}
-
-		await cleanupAdapters();
 
 		//* report
 		cliLogger.info(`Found ${executedMigrations.length} applied migration(s)`);
@@ -207,7 +178,6 @@ const migrateStatusCommand = async (options?: {
 		logger.setBuffering(false);
 		process.exit(options?.check && (hasPendingWork || unhealthy) ? 1 : 0);
 	} catch (error) {
-		await cleanupAdapters();
 		cliLogger.error(
 			"Migration status failed",
 			error instanceof Error ? error.message : "Unknown error",

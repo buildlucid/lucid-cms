@@ -25,6 +25,7 @@ import {
 } from "@lucidcms/core/queue";
 import { prepareTranslations } from "@lucidcms/core/runtime";
 import type {
+	AdapterLifecycleContext,
 	AdapterRuntimeContext,
 	Config,
 	EmailAdapterInstance,
@@ -123,13 +124,7 @@ const startConsumer = async () => {
 	let kvInstance: KVAdapterInstance | undefined;
 	let mediaInstance: MediaAdapterInstance | null | undefined;
 	let emailInstance: EmailAdapterInstance | undefined;
-	let adapterLifecycleContext:
-		| {
-				config: Config;
-				env?: EnvironmentVariables;
-				runtimeContext?: AdapterRuntimeContext;
-		  }
-		| undefined;
+	let adapterLifecycleContext: AdapterLifecycleContext | undefined;
 	try {
 		const { config, translationStore, env, runtimeContext } = await getConfig();
 		const translate = createTranslator({
@@ -137,7 +132,12 @@ const startConsumer = async () => {
 			locale: "en",
 		});
 
-		adapterLifecycleContext = { config, env, runtimeContext };
+		adapterLifecycleContext = {
+			config,
+			env,
+			runtimeContext,
+			purpose: "queue-consumer",
+		};
 
 		kvInstance = await getInitializedKVAdapter(config, {
 			env,
@@ -150,6 +150,7 @@ const startConsumer = async () => {
 		emailInstance = await getInitializedEmailAdapter(config, {
 			env,
 			runtimeContext,
+			purpose: "queue-consumer",
 		});
 		const kv = kvInstance;
 		const media = mediaInstance;
