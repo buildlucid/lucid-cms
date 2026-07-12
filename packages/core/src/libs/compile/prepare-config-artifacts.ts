@@ -16,7 +16,6 @@ const runtimeSafeImportPaths = new Map([
 const artifactProperties = {
 	config: "config",
 	db: "db",
-	env: "env",
 	runtime: "runtime",
 } as const;
 
@@ -194,24 +193,6 @@ const getObjectPropertyExpression = (
 	object: ts.ObjectLiteralExpression,
 	propertyName: string,
 ): ts.Expression => {
-	const expression = getOptionalObjectPropertyExpression(object, propertyName);
-
-	if (expression) {
-		return expression;
-	}
-
-	throw new LucidError({
-		message: `Lucid config is missing the top-level \`${propertyName}\` property.`,
-	});
-};
-
-/**
- * Gets an optional top-level config artifact expression, including shorthand properties.
- */
-const getOptionalObjectPropertyExpression = (
-	object: ts.ObjectLiteralExpression,
-	propertyName: string,
-): ts.Expression | undefined => {
 	for (const property of object.properties) {
 		if (
 			ts.isShorthandPropertyAssignment(property) &&
@@ -227,6 +208,10 @@ const getOptionalObjectPropertyExpression = (
 			return property.initializer;
 		}
 	}
+
+	throw new LucidError({
+		message: `Lucid config is missing the top-level \`${propertyName}\` property.`,
+	});
 };
 
 /**
@@ -461,16 +446,9 @@ const renderArtifactSource = (props: {
 
 	if (props.target === "env") {
 		if (props.expression) {
-			if (
-				ts.isIdentifier(props.expression) &&
-				props.expression.text === artifactProperties.env
-			) {
-				sections.push("export { env };");
-			} else {
-				sections.push(
-					`export const env = ${props.expression.getText(props.sourceFile)};`,
-				);
-			}
+			sections.push(
+				`export const env = ${props.expression.getText(props.sourceFile)};`,
+			);
 		} else {
 			sections.push("export {};");
 		}
@@ -511,9 +489,7 @@ const prepareConfigArtifacts = async (props: {
 			definition,
 			artifactProperties.runtime,
 		),
-		env:
-			getOptionalObjectPropertyExpression(definition, artifactProperties.env) ??
-			getExportedEnvExpression(sourceFile),
+		env: getExportedEnvExpression(sourceFile),
 	};
 	const artifacts = Object.fromEntries(
 		Object.entries(configArtifactEntries).map(([key, entry]) => [

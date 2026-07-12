@@ -115,7 +115,6 @@ const prepareMainWorkerEntry = (
 	            const definition = {
 	                runtime: runtimeAdapter,
 	                db,
-	                env: envSchema,
 	                config: configFactory,
 	            };
 	            const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {
@@ -227,7 +226,6 @@ const prepareMainWorkerEntry = (
     const definition = {
         runtime: runtimeAdapter,
         db,
-        env: envSchema,
         config: configFactory,
     };
     const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {

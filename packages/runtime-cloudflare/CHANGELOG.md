@@ -1,5 +1,9 @@
 # @lucidcms/runtime-cloudflare
 
+## 1.0.3 (unreleased)
+
+- Updated generated Worker config handling for the optional named environment schema export used by `@lucidcms/core`.
+
 ## 1.0.2
 
 - Bumped `@lucidcms/core` to `0.15.0-alpha.0`.

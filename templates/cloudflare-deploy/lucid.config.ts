@@ -6,14 +6,15 @@ import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import PageCollection from "./src/collections/pages.js";
 
+export const env = z.object({
+	LUCID_SECRET: z.string().length(64),
+});
+
 export default configureLucid({
 	runtime: cloudflare({
 		wrangler: "./wrangler.jsonc",
 	}),
 	db: d1,
-	env: z.object({
-		LUCID_SECRET: z.string().length(64),
-	}),
 	config: (env) => ({
 		secrets: env.LUCID_SECRET,
 		collections: [PageCollection],

@@ -7,7 +7,6 @@
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
-		"noImplicitAny": false,
 		"skipLibCheck": true,
 		"types": ["@cloudflare/workers-types"],
 		"outDir": "dist"

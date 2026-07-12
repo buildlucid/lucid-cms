@@ -1,24 +1,30 @@
 import { expect, test } from "vitest";
 import generateEnvTypes from "./env-type.js";
 
-test("generates environment types from the config definition export", async () => {
+test("generates environment types from the named env export", async () => {
 	const result = await generateEnvTypes({
 		schema: {} as never,
 		configRelativePath: "../lucid.config.ts",
 	});
 
 	expect(result.imports).toContain(
-		'import type * as lucidConfig from "../lucid.config.ts";',
+		'import type { env } from "../lucid.config.ts";',
 	);
-	expect(result.declarations).toContain(
-		`type LucidGeneratedEnvSchema =
-	typeof lucidConfig.default extends { env: infer TEnv }
-		? TEnv
-		: typeof lucidConfig extends { env: infer TEnv }
-			? TEnv
-			: never;`,
-	);
+	expect(result.declarations).toBeUndefined();
 	expect(result.moduleAugmentations[0]?.declarations).toContain(
-		"interface EnvironmentVariables extends z.infer<LucidGeneratedEnvSchema> {}",
+		"interface EnvironmentVariables extends z.infer<typeof env> {}",
+	);
+});
+
+test("generates fallback environment types without a named env export", async () => {
+	const result = await generateEnvTypes({
+		schema: undefined,
+		configRelativePath: "../lucid.config.ts",
+	});
+
+	expect(result.imports).toBeUndefined();
+	expect(result.declarations).toBeUndefined();
+	expect(result.moduleAugmentations[0]?.declarations).toContain(
+		"interface EnvironmentVariables extends Record<string, unknown> {}",
 	);
 });

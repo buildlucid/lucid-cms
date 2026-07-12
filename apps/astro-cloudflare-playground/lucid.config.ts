@@ -6,15 +6,16 @@ import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import PageCollection from "./src/lucid/collections/pages.js";
 
+export const env = z.object({
+	ENCRYPTION_SECRET: z.string(),
+	COOKIE_SECRET: z.string(),
+	REFRESH_TOKEN_SECRET: z.string(),
+	ACCESS_TOKEN_SECRET: z.string(),
+});
+
 export default configureLucid({
 	runtime: cloudflare,
 	db: d1,
-	env: z.object({
-		ENCRYPTION_SECRET: z.string(),
-		COOKIE_SECRET: z.string(),
-		REFRESH_TOKEN_SECRET: z.string(),
-		ACCESS_TOKEN_SECRET: z.string(),
-	}),
 	config: (env) => ({
 		secrets: {
 			encryption: env.ENCRYPTION_SECRET,

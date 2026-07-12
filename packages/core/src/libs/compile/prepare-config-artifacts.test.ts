@@ -30,13 +30,13 @@ const config = (env) => ({
 	plugins: makePlugins(),
 });
 
-const env = z.object({
+export const env = z.object({
 	LIBSQL_URL: z.string(),
 	LIBSQL_AUTH_TOKEN: z.string().optional(),
 	SECRET: z.string(),
 });
 
-export default configureLucid({ runtime, db, env, config });
+export default configureLucid({ runtime, db, config });
 `,
 	);
 	const outputPath = path.join(tempDir, "dist");
@@ -73,8 +73,7 @@ export default configureLucid({ runtime, db, env, config });
 		expect(runtime).not.toContain("@lucidcms/db-libsql");
 
 		expect(envArtifact).toContain('import { z } from "@lucidcms/core";');
-		expect(envArtifact).toContain("const env = z.object");
-		expect(envArtifact).toContain("export { env };");
+		expect(envArtifact).toContain("export const env = z.object");
 		expect(envArtifact).toContain("LIBSQL_URL");
 		expect(envArtifact).toContain("LIBSQL_AUTH_TOKEN");
 		expect(envArtifact).not.toContain("configureLucid");
@@ -84,7 +83,7 @@ export default configureLucid({ runtime, db, env, config });
 	}
 });
 
-test("splits legacy named env export when config has no inline env", async () => {
+test("splits a named env export", async () => {
 	const tempDir = await mkdtemp(path.join(tmpdir(), "lucid-config-artifacts-"));
 	const configPath = path.join(tempDir, "lucid.config.ts");
 
@@ -128,29 +127,20 @@ export default configureLucid({ runtime: node, db: libsql, config });
 	}
 });
 
-test("splits inline env object expression from config definition", async () => {
+test("generates an empty env artifact when the named export is omitted", async () => {
 	const tempDir = await mkdtemp(path.join(tmpdir(), "lucid-config-artifacts-"));
 	const configPath = path.join(tempDir, "lucid.config.ts");
 
 	await writeFile(
 		configPath,
-		`import { configureLucid, z } from "@lucidcms/core";
+		`import { configureLucid } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { libsql } from "@lucidcms/db-libsql";
 
 export default configureLucid({
 	runtime: node,
 	db: libsql,
-	env: z.object({
-		SECRET: z.string(),
-	}),
-	config: (env) => ({
-		secrets: {
-			encryption: env.SECRET,
-			cookie: env.SECRET,
-			refreshToken: env.SECRET,
-			accessToken: env.SECRET,
-		},
+	config: () => ({
 		collections: [],
 		plugins: [],
 	}),
@@ -166,8 +156,7 @@ export default configureLucid({
 		});
 		const envArtifact = await readFile(artifacts.env, "utf-8");
 
-		expect(envArtifact).toContain("export const env = z.object");
-		expect(envArtifact).toContain("SECRET");
+		expect(envArtifact).toBe("export {};\n");
 	} finally {
 		await rm(tempDir, { recursive: true, force: true });
 	}

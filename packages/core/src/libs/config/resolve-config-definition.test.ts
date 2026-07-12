@@ -1,4 +1,4 @@
-import { expect, expectTypeOf, test, vi } from "vitest";
+import { expect, test, vi } from "vitest";
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import {
@@ -64,8 +64,8 @@ test("resolves no-call runtime and database adapter creators", async () => {
 	expect(db.resolve).toHaveBeenCalledOnce();
 });
 
-test("resolves env schema from the config definition", async () => {
-	const adapter = createAdapter("inline-env");
+test("resolves a named env schema supplied separately from the config definition", async () => {
+	const adapter = createAdapter("named-env");
 	const env = z.object({
 		SECRET: z.string(),
 	});
@@ -75,16 +75,14 @@ test("resolves env schema from the config definition", async () => {
 			lucid: "0.0.0",
 		},
 		db: adapter,
-		env,
 		config: (env) => {
-			expectTypeOf(env.SECRET).toEqualTypeOf<string>();
-
+			const secret = env.SECRET as string;
 			return {
 				secrets: {
-					encryption: env.SECRET,
-					cookie: env.SECRET,
-					refreshToken: env.SECRET,
-					accessToken: env.SECRET,
+					encryption: secret,
+					cookie: secret,
+					refreshToken: secret,
+					accessToken: secret,
 				},
 				collections: [],
 				plugins: [],
@@ -94,6 +92,7 @@ test("resolves env schema from the config definition", async () => {
 
 	const result = await resolveConfigDefinition({
 		definition,
+		envSchema: env,
 		env: {
 			SECRET: "a".repeat(64),
 		},
@@ -118,9 +117,8 @@ test("skips env schema validation and fills missing secrets during build resolut
 			lucid: "0.0.0",
 		},
 		db: adapter,
-		env,
 		config: (env) => ({
-			secrets: env.SECRET,
+			secrets: env.SECRET as string,
 			collections: [],
 			plugins: [],
 		}),
@@ -129,6 +127,7 @@ test("skips env schema validation and fills missing secrets during build resolut
 	await expect(
 		resolveConfigDefinition({
 			definition,
+			envSchema: env,
 			env: {},
 			processConfigOptions: {
 				bypassCache: true,
@@ -139,6 +138,7 @@ test("skips env schema validation and fills missing secrets during build resolut
 
 	const result = await resolveConfigDefinition({
 		definition,
+		envSchema: env,
 		env: {},
 		validateEnvSchema: false,
 		processConfigOptions: {

@@ -164,7 +164,8 @@ export const resolveConfigDefinition = async (props: {
 				})
 			: undefined);
 
-	const envSchema = wrappedDefinition.env ?? props.envSchema;
+	const envSchema = props.envSchema;
+
 	// Builds do not need runtime env validation; runtime commands validate env
 	// before using it.
 	const shouldValidateEnvSchema = props.validateEnvSchema ?? true;

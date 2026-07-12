@@ -9,6 +9,7 @@ test("should return lucid config object", async () => {
 
 	expect(typeof res.config).toBe("object");
 	expect(res.config).toBeDefined();
+	expect(res.envSchema).toBeUndefined();
 });
 
 test("should return lucid adapter object", async () => {

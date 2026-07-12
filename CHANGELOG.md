@@ -17,6 +17,7 @@
 
 - Renamed the collection field listing option from `listing` to `showInList` for clarity. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
 - Replaced raw SQL-like filter operators with semantic text operators (`contains`, `not-contains`, `starts-with`, `not-starts-with`, `ends-with`, and `not-ends-with`) and standardised multi-word operators as hyphenated tokens (`not-in` and `is-not`). Existing filter query strings and toolkit calls using `like`, `not like`, `not in`, or `is not` must be updated; `%` and `_` in filter values are now treated as literal text. ([2c1a6b4](https://github.com/buildlucid/lucid-cms/commit/2c1a6b4422fbb7366af152c12e826b96fc41985c))
+- Environment schemas are no longer accepted through the `env` property of `configureLucid`. To enable environment validation and generated typing, optionally export a named `env` schema from `lucid.config.ts`, for example `export const env = z.object({ ... })`; omit the export when no schema is needed.
 
 ### Bug Fixes:
 

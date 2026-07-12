@@ -1,15 +1,11 @@
 import { produce } from "immer";
-import type { EnvironmentSchema, LucidConfigDefinition } from "./types.js";
-
-type LucidConfigDefinitionWithEnv<TEnvSchema extends EnvironmentSchema> =
-	LucidConfigDefinition<TEnvSchema> & {
-		env: TEnvSchema;
-	};
+import type { LucidConfigDefinition } from "./types.js";
 
 /**
  * Wraps your Lucid CMS config and gives it the right shape for `lucid.config.*`.
  * Use it to pass the runtime/database adapters and return the rest of your
- * config from the `config(env)` callback.
+ * config from the `config(env)` callback. Optionally export a named `env`
+ * schema to validate and type environment variables.
  *
  * @example
  * ```ts
@@ -17,12 +13,13 @@ type LucidConfigDefinitionWithEnv<TEnvSchema extends EnvironmentSchema> =
  * import { node } from "@lucidcms/runtime-node";
  * import { sqlite } from "@lucidcms/db-sqlite";
  *
+ * export const env = z.object({
+ *   SECRET: z.string().length(64),
+ * });
+ *
  * export default configureLucid({
  *   runtime: node,
  *   db: sqlite,
- *   env: z.object({
- *     SECRET: z.string().length(64),
- *   }),
  *   config: (env) => ({
  *     secrets: env.SECRET,
  *     collections: [],
@@ -31,16 +28,10 @@ type LucidConfigDefinitionWithEnv<TEnvSchema extends EnvironmentSchema> =
  * });
  * ```
  */
-function configureLucid<TEnvSchema extends EnvironmentSchema>(
-	definition: LucidConfigDefinitionWithEnv<TEnvSchema>,
-): LucidConfigDefinitionWithEnv<TEnvSchema>;
-function configureLucid(
-	definition: LucidConfigDefinition<undefined>,
-): LucidConfigDefinition<undefined>;
-function configureLucid(
+const configureLucid = (
 	definition: LucidConfigDefinition,
-): LucidConfigDefinition {
+): LucidConfigDefinition => {
 	return produce(definition, () => {});
-}
+};
 
 export default configureLucid;

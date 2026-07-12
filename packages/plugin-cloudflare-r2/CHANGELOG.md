@@ -1,5 +1,9 @@
 # @lucidcms/plugin-cloudflare-r2
 
+## 1.0.3 (unreleased)
+
+- Updated the setup example to use the optional named environment schema export supported by `@lucidcms/core`.
+
 ## 1.0.2
 
 - Bumped `@lucidcms/core` to `0.15.0-alpha.0`.
