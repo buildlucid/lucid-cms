@@ -1,4 +1,4 @@
-import type { Media } from "@types";
+import type { Media, MediaCropState } from "@types";
 
 const SUPPORTED_CROP_MIME_TYPES = [
 	"image/jpeg",
@@ -39,6 +39,7 @@ export type ImageCropSource = {
 	name: string;
 	mimeType?: string | null;
 	provenance?: ImageCropProvenance;
+	crop?: MediaCropState;
 };
 
 export const isSupportedCropMimeType = (

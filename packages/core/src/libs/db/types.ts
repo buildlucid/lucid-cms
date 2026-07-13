@@ -643,7 +643,8 @@ export interface LucidMedia {
 	id: Generated<number>;
 	key: string;
 	folder_id: number | null;
-	poster_id: number | null;
+	parent_media_id: number | null;
+	relation_type: "crop" | "poster" | null;
 	e_tag: string | null;
 	origin: MediaOrigin;
 	ai_generation_id: number | null;
@@ -657,6 +658,13 @@ export interface LucidMedia {
 	height: number | null;
 	focal_x: number | null;
 	focal_y: number | null;
+	crop_x: number | null;
+	crop_y: number | null;
+	crop_width: number | null;
+	crop_height: number | null;
+	crop_rotation: number | null;
+	crop_skew_x: number | null;
+	crop_skew_y: number | null;
 	blur_hash: string | null;
 	average_color: string | null;
 	base64: string | null;

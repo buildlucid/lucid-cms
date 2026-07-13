@@ -1,8 +1,11 @@
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
+import cacheKeys from "../../libs/kv/cache-keys.js";
+import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
+import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 
 const deleteMultiplePermanently: ServiceFn<
@@ -66,10 +69,15 @@ const deleteMultiplePermanently: ServiceFn<
 	for (const id of data.ids) {
 		const deleteRes = await permanentlyDeleteMedia(context, {
 			id,
-			deletePoster: true,
+			invalidateCache: false,
 		});
 		if (deleteRes.error) return deleteRes;
 	}
+
+	await Promise.all([
+		...data.ids.map((id) => clearClientMediaSingleCache(context, id)),
+		invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
+	]);
 
 	const hookRes = await executeHooks(
 		context,

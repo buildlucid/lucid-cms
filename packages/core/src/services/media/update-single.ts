@@ -10,7 +10,11 @@ import {
 	MediaRepository,
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
-import type { MediaOrigin, MediaType } from "../../types/response.js";
+import type {
+	MediaCropInput,
+	MediaOrigin,
+	MediaType,
+} from "../../types/response.js";
 import changeKeyVisibility from "../../utils/media/change-key-visibility.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -18,10 +22,13 @@ import { mediaServices, processedImageServices } from "../index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compatibility.js";
 import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
+import deactivateCrop from "./helpers/deactivate-crop.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
+import syncOwnedVisibility from "./helpers/sync-owned-visibility.js";
+import upsertCrop from "./helpers/upsert-crop.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -60,6 +67,7 @@ const updateSingle: ServiceFn<
 			isLight?: boolean | null;
 			isDeleted?: boolean;
 			posterId?: number | null;
+			crop?: MediaCropInput | null;
 			origin?: MediaOrigin;
 			aiGenerationRequestId?: string;
 			allowedType?: MediaType;
@@ -86,6 +94,7 @@ const updateSingle: ServiceFn<
 	const mediaRes = await Media.selectSingleById({
 		id: data.id,
 		tenantKey: context.request.tenantKey,
+		includeOwned: true,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -95,6 +104,26 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (mediaRes.error) return mediaRes;
+	if (mediaRes.data.relation_type === "crop") {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				message: copy("server:core.media.not.found.message"),
+			},
+			data: undefined,
+		};
+	}
+	if (data.crop && mediaRes.data.type !== "image") {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:core.media.errors.image.only"),
+			},
+			data: undefined,
+		};
+	}
 
 	const folderTenantRes = checkFolderTenantCompatibility({
 		folderId: data.folderId,
@@ -199,6 +228,16 @@ const updateSingle: ServiceFn<
 	}
 
 	const finalType = updateObjectRes?.type ?? mediaRes.data.type;
+	if (data.posterId != null && finalType !== "video") {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:core.media.poster.video.only"),
+			},
+			data: undefined,
+		};
+	}
 	if (data.focalPoint !== undefined && finalType !== "image") {
 		return {
 			error: {
@@ -255,9 +294,18 @@ const updateSingle: ServiceFn<
 	//* clear processed images if:
 	//* - a new file was uploaded (variants of old image are invalid)
 	//* - visibility changed (variants need to be in new public/private path)
+	const activeCrop = mediaRes.data.crop?.[0];
+
 	const shouldClearProcessed =
-		(updateObjectRes !== undefined || renamedKey !== undefined) &&
-		mediaRes.data.type === "image";
+		mediaRes.data.type === "image" &&
+		(updateObjectRes !== undefined ||
+			renamedKey !== undefined ||
+			(data.focalPoint !== undefined && activeCrop === undefined));
+	const shouldClearActiveCropProcessed =
+		activeCrop !== undefined &&
+		data.focalPoint !== undefined &&
+		data.crop === undefined &&
+		updateObjectRes === undefined;
 
 	const aiGenerationRes = await resolveAiGeneration(context, {
 		origin: data.origin,
@@ -280,26 +328,29 @@ const updateSingle: ServiceFn<
 		focal_x:
 			finalType !== "image"
 				? null
-				: data.focalPoint === undefined
+				: activeCrop !== undefined && updateObjectRes === undefined
 					? undefined
-					: data.focalPoint === null
-						? null
-						: Math.round(data.focalPoint.x * 10000),
+					: data.focalPoint === undefined
+						? undefined
+						: data.focalPoint === null
+							? null
+							: Math.round(data.focalPoint.x * 10000),
 		focal_y:
 			finalType !== "image"
 				? null
-				: data.focalPoint === undefined
+				: activeCrop !== undefined && updateObjectRes === undefined
 					? undefined
-					: data.focalPoint === null
-						? null
-						: Math.round(data.focalPoint.y * 10000),
+					: data.focalPoint === undefined
+						? undefined
+						: data.focalPoint === null
+							? null
+							: Math.round(data.focalPoint.y * 10000),
 		blur_hash: data.blurHash,
 		average_color: data.averageColor,
 		base64: finalType !== "image" ? null : data.base64,
 		is_dark: data.isDark,
 		is_light: data.isLight,
 		folder_id: data.folderId,
-		poster_id: data.posterId,
 		public: isPublic ?? data.public,
 		is_deleted: data.isDeleted,
 		is_deleted_at: data.isDeleted
@@ -316,52 +367,94 @@ const updateSingle: ServiceFn<
 		updated_by: data.userId,
 	};
 
-	const [mediaUpdateRes, mediaTranslationsRes, clearProcessedRes] =
-		await Promise.all([
-			Media.updateSingle({
-				where: [
-					{
-						key: "id",
-						operator: "=",
-						value: data.id,
-					},
-				],
-				data: updateData,
-				returning: ["id"],
-				validation: {
-					enabled: true,
+	const [
+		mediaUpdateRes,
+		mediaTranslationsRes,
+		clearProcessedRes,
+		clearActiveCropProcessedRes,
+		cropFocalRes,
+	] = await Promise.all([
+		Media.updateSingle({
+			where: [
+				{
+					key: "id",
+					operator: "=",
+					value: data.id,
 				},
-			}),
-			translations.length > 0
-				? MediaTranslations.upsertMultiple({
-						data: translations,
-						returning: ["id"],
-						validation: {
-							enabled: true,
-						},
-					})
-				: Promise.resolve({ error: undefined, data: undefined }),
-			shouldClearProcessed
-				? processedImageServices.clearSingle(context, {
-						id: mediaRes.data.id,
-						key: mediaRes.data.key,
-					})
-				: Promise.resolve({ error: undefined, data: undefined }),
-		]);
+			],
+			data: updateData,
+			returning: ["id"],
+			validation: {
+				enabled: true,
+			},
+		}),
+		translations.length > 0
+			? MediaTranslations.upsertMultiple({
+					data: translations,
+					returning: ["id"],
+					validation: {
+						enabled: true,
+					},
+				})
+			: Promise.resolve({ error: undefined, data: undefined }),
+		shouldClearProcessed
+			? processedImageServices.clearSingle(context, {
+					id: mediaRes.data.id,
+					key: mediaRes.data.key,
+				})
+			: Promise.resolve({ error: undefined, data: undefined }),
+		shouldClearActiveCropProcessed
+			? processedImageServices.clearSingle(context, {
+					key: activeCrop.key,
+				})
+			: Promise.resolve({ error: undefined, data: undefined }),
+		shouldClearActiveCropProcessed
+			? Media.updateSingle({
+					where: [{ key: "id", operator: "=", value: activeCrop.id }],
+					data: {
+						focal_x:
+							data.focalPoint === null
+								? null
+								: Math.round((data.focalPoint?.x ?? 0) * 10000),
+						focal_y:
+							data.focalPoint === null
+								? null
+								: Math.round((data.focalPoint?.y ?? 0) * 10000),
+						updated_at: new Date().toISOString(),
+						updated_by: data.userId,
+					},
+					returning: ["id"],
+				})
+			: Promise.resolve({ error: undefined, data: undefined }),
+	]);
 	if (mediaUpdateRes.error) return mediaUpdateRes;
 	if (mediaTranslationsRes.error) return mediaTranslationsRes;
 	if (clearProcessedRes.error) return clearProcessedRes;
+	if (clearActiveCropProcessedRes.error) return clearActiveCropProcessedRes;
+	if (cropFocalRes.error) return cropFocalRes;
 
+	const currentPosterId = mediaRes.data.poster?.[0]?.id ?? null;
 	const posterWasRemoved =
 		data.posterId !== undefined &&
-		mediaRes.data.poster_id !== null &&
-		data.posterId !== mediaRes.data.poster_id;
+		currentPosterId !== null &&
+		data.posterId !== currentPosterId;
+
+	if (posterWasRemoved && currentPosterId !== null) {
+		const deletePosterRes = await permanentlyDeleteMedia(context, {
+			id: currentPosterId,
+			invalidateCache: false,
+		});
+		if (deletePosterRes.error) return deletePosterRes;
+	}
 
 	if (data.posterId !== undefined && data.posterId !== null) {
 		const hidePosterRes = await Media.updateSingle({
 			where: [{ key: "id", operator: "=", value: data.posterId }],
 			data: {
 				is_hidden: true,
+				folder_id: null,
+				parent_media_id: mediaRes.data.id,
+				relation_type: "poster",
 				updated_at: new Date().toISOString(),
 				updated_by: data.userId,
 			},
@@ -372,13 +465,40 @@ const updateSingle: ServiceFn<
 		if (hidePosterRes.error) return hidePosterRes;
 	}
 
-	if (posterWasRemoved) {
-		const deletePosterRes = await permanentlyDeleteMedia(context, {
-			id: mediaRes.data.poster_id as number,
-			deletePoster: false,
+	const shouldDeactivateCrop =
+		data.crop === null ||
+		(updateObjectRes !== undefined && data.crop === undefined);
+	if (shouldDeactivateCrop) {
+		const deactivateRes = await deactivateCrop(context, {
+			parentId: mediaRes.data.id,
+			userId: data.userId,
 		});
-		if (deletePosterRes.error) return deletePosterRes;
+		if (deactivateRes.error) return deactivateRes;
 	}
+
+	if (data.crop) {
+		const cropRes = await upsertCrop(context, {
+			parent: {
+				id: mediaRes.data.id,
+				key: updateObjectRes?.key ?? renamedKey ?? mediaRes.data.key,
+				type: finalType,
+				origin: data.origin ?? mediaRes.data.origin,
+				public: isPublic ?? data.public ?? mediaRes.data.public,
+				tenant_key: mediaRes.data.tenant_key,
+				relation_type: mediaRes.data.relation_type,
+			},
+			crop: data.crop,
+			userId: data.userId,
+		});
+		if (cropRes.error) return cropRes;
+	}
+
+	const visibilityRes = await syncOwnedVisibility(context, {
+		parentId: mediaRes.data.id,
+		public: isPublic ?? data.public ?? currentPublic,
+		userId: data.userId,
+	});
+	if (visibilityRes.error) return visibilityRes;
 
 	if (
 		updateObjectRes !== undefined &&

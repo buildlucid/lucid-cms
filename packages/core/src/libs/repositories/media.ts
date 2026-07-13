@@ -4,6 +4,7 @@ import type { GetMultipleQueryParams } from "../../schemas/media.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import queryBuilder from "../db/query-builder/index.js";
 import type { KyselyDB } from "../db/types.js";
+import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
@@ -15,7 +16,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		id: z.number(),
 		key: z.string(),
 		folder_id: z.number().nullable(),
-		poster_id: z.number().nullable(),
+		parent_media_id: z.number().nullable(),
+		relation_type: z.enum(["crop", "poster"]).nullable(),
 		e_tag: z.string().nullable(),
 		origin: z.enum(["human", "ai_generated", "ai_modified"]),
 		ai_generation_id: z.number().nullable(),
@@ -32,6 +34,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		height: z.number().nullable(),
 		focal_x: z.number().nullable(),
 		focal_y: z.number().nullable(),
+		crop_x: z.number().nullable(),
+		crop_y: z.number().nullable(),
+		crop_width: z.number().nullable(),
+		crop_height: z.number().nullable(),
+		crop_rotation: z.number().nullable(),
+		crop_skew_x: z.number().nullable(),
+		crop_skew_y: z.number().nullable(),
 		blur_hash: z.string().nullable(),
 		average_color: z.string().nullable(),
 		base64: z.string().nullable().optional(),
@@ -77,6 +86,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					height: z.number().nullable(),
 					focal_x: z.number().nullable(),
 					focal_y: z.number().nullable(),
+					crop_x: z.number().nullable().optional(),
+					crop_y: z.number().nullable().optional(),
+					crop_width: z.number().nullable().optional(),
+					crop_height: z.number().nullable().optional(),
+					crop_rotation: z.number().nullable().optional(),
+					crop_skew_x: z.number().nullable().optional(),
+					crop_skew_y: z.number().nullable().optional(),
 					blur_hash: z.string().nullable(),
 					average_color: z.string().nullable(),
 					base64: z.string().nullable().optional(),
@@ -92,6 +108,46 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							z.literal(this.dbAdapter.config.defaults.boolean.false),
 						])
 						.nullable(),
+					crop: z
+						.array(
+							z.object({
+								id: z.number(),
+								key: z.string(),
+								origin: z.enum(["human", "ai_generated", "ai_modified"]),
+								type: z.string(),
+								mime_type: z.string(),
+								file_extension: z.string(),
+								file_name: z.string().nullable(),
+								file_size: z.number(),
+								width: z.number().nullable(),
+								height: z.number().nullable(),
+								focal_x: z.number().nullable(),
+								focal_y: z.number().nullable(),
+								crop_x: z.number(),
+								crop_y: z.number(),
+								crop_width: z.number(),
+								crop_height: z.number(),
+								crop_rotation: z.number(),
+								crop_skew_x: z.number(),
+								crop_skew_y: z.number(),
+								blur_hash: z.string().nullable(),
+								average_color: z.string().nullable(),
+								base64: z.string().nullable().optional(),
+								is_dark: z
+									.union([
+										z.literal(this.dbAdapter.config.defaults.boolean.true),
+										z.literal(this.dbAdapter.config.defaults.boolean.false),
+									])
+									.nullable(),
+								is_light: z
+									.union([
+										z.literal(this.dbAdapter.config.defaults.boolean.true),
+										z.literal(this.dbAdapter.config.defaults.boolean.false),
+									])
+									.nullable(),
+							}),
+						)
+						.optional(),
 					translations: z
 						.array(
 							z.object({
@@ -103,6 +159,46 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							}),
 						)
 						.optional(),
+				}),
+			)
+			.optional(),
+		crop: z
+			.array(
+				z.object({
+					id: z.number(),
+					key: z.string(),
+					origin: z.enum(["human", "ai_generated", "ai_modified"]),
+					type: z.string(),
+					mime_type: z.string(),
+					file_extension: z.string(),
+					file_name: z.string().nullable(),
+					file_size: z.number(),
+					width: z.number().nullable(),
+					height: z.number().nullable(),
+					focal_x: z.number().nullable(),
+					focal_y: z.number().nullable(),
+					crop_x: z.number(),
+					crop_y: z.number(),
+					crop_width: z.number(),
+					crop_height: z.number(),
+					crop_rotation: z.number(),
+					crop_skew_x: z.number(),
+					crop_skew_y: z.number(),
+					blur_hash: z.string().nullable(),
+					average_color: z.string().nullable(),
+					base64: z.string().nullable().optional(),
+					is_dark: z
+						.union([
+							z.literal(this.dbAdapter.config.defaults.boolean.true),
+							z.literal(this.dbAdapter.config.defaults.boolean.false),
+						])
+						.nullable(),
+					is_light: z
+						.union([
+							z.literal(this.dbAdapter.config.defaults.boolean.true),
+							z.literal(this.dbAdapter.config.defaults.boolean.false),
+						])
+						.nullable(),
 				}),
 			)
 			.optional(),
@@ -123,7 +219,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		id: this.dbAdapter.getDataType("primary"),
 		key: this.dbAdapter.getDataType("text"),
 		folder_id: this.dbAdapter.getDataType("integer"),
-		poster_id: this.dbAdapter.getDataType("integer"),
+		parent_media_id: this.dbAdapter.getDataType("integer"),
+		relation_type: this.dbAdapter.getDataType("text"),
 		e_tag: this.dbAdapter.getDataType("text"),
 		origin: this.dbAdapter.getDataType("text"),
 		ai_generation_id: this.dbAdapter.getDataType("integer"),
@@ -137,6 +234,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		height: this.dbAdapter.getDataType("integer"),
 		focal_x: this.dbAdapter.getDataType("integer"),
 		focal_y: this.dbAdapter.getDataType("integer"),
+		crop_x: this.dbAdapter.getDataType("real"),
+		crop_y: this.dbAdapter.getDataType("real"),
+		crop_width: this.dbAdapter.getDataType("real"),
+		crop_height: this.dbAdapter.getDataType("real"),
+		crop_rotation: this.dbAdapter.getDataType("real"),
+		crop_skew_x: this.dbAdapter.getDataType("real"),
+		crop_skew_y: this.dbAdapter.getDataType("real"),
 		blur_hash: this.dbAdapter.getDataType("text"),
 		average_color: this.dbAdapter.getDataType("text"),
 		base64: this.dbAdapter.getDataType("text"),
@@ -266,12 +370,85 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		};
 	}
 
+	/** Resolves a requested source or crop key to its current active presentation. */
+	async selectSingleActivePresentationByKey(props: { key: string }) {
+		const query = this.db
+			.selectFrom("lucid_media as requested")
+			.innerJoin("lucid_media as source", (join) =>
+				join.on((eb) =>
+					eb.or([
+						eb.and([
+							eb("requested.relation_type", "=", "crop"),
+							eb("source.id", "=", eb.ref("requested.parent_media_id")),
+						]),
+						eb.and([
+							eb.or([
+								eb("requested.relation_type", "is", null),
+								eb("requested.relation_type", "=", "poster"),
+							]),
+							eb("source.id", "=", eb.ref("requested.id")),
+						]),
+					]),
+				),
+			)
+			.leftJoin("lucid_media as active_crop", (join) =>
+				join
+					.onRef("active_crop.parent_media_id", "=", "source.id")
+					.on("active_crop.relation_type", "=", "crop")
+					.on(
+						"active_crop.is_deleted",
+						"=",
+						this.dbAdapter.getDefault("boolean", "false"),
+					),
+			)
+			.select([
+				"source.type as source_type",
+				"source.key as source_key",
+				"source.file_name as source_file_name",
+				"source.file_extension as source_file_extension",
+				"source.tenant_key as source_tenant_key",
+				"active_crop.id as active_crop_id",
+				"active_crop.type as active_crop_type",
+				"active_crop.key as active_crop_key",
+				"active_crop.file_name as active_crop_file_name",
+				"active_crop.file_extension as active_crop_file_extension",
+			])
+			.where("requested.key", "=", props.key)
+			.limit(1);
+
+		const exec = await this.executeQuery(
+			async () => {
+				const result = await query.executeTakeFirst();
+				if (!result) return undefined;
+
+				return {
+					type: result.active_crop_type ?? result.source_type,
+					key: result.active_crop_key ?? result.source_key,
+					file_name:
+						result.active_crop_id !== null
+							? result.active_crop_file_name
+							: result.source_file_name,
+					file_extension:
+						result.active_crop_file_extension ?? result.source_file_extension,
+					tenant_key: result.source_tenant_key,
+				};
+			},
+			{
+				method: "selectSingleActivePresentationByKey",
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return exec.response;
+	}
+
 	async selectSingleById<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
 				id: number;
 				tenantKey?: string | null;
+				includeOwned?: boolean;
 			}
 		>,
 	) {
@@ -281,7 +458,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
-				"poster_id",
+				"parent_media_id",
+				"relation_type",
 				"e_tag",
 				"origin",
 				"type",
@@ -293,6 +471,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"height",
 				"focal_x",
 				"focal_y",
+				"crop_x",
+				"crop_y",
+				"crop_width",
+				"crop_height",
+				"crop_rotation",
+				"crop_skew_x",
+				"crop_skew_y",
 				"created_at",
 				"updated_at",
 				"blur_hash",
@@ -322,6 +507,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								"poster.height",
 								"poster.focal_x",
 								"poster.focal_y",
+								"poster.crop_x",
+								"poster.crop_y",
+								"poster.crop_width",
+								"poster.crop_height",
+								"poster.crop_rotation",
+								"poster.crop_skew_x",
+								"poster.crop_skew_y",
 								"poster.blur_hash",
 								"poster.average_color",
 								"poster.base64",
@@ -341,14 +533,102 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 											.whereRef(
 												"lucid_media_translations.media_id",
 												"=",
-												"lucid_media.poster_id",
+												sql.ref("poster.id"),
 											),
 									)
 									.as("translations"),
+								this.dbAdapter
+									.jsonArrayFrom(
+										eb
+											.selectFrom("lucid_media as poster_crop")
+											.select([
+												"poster_crop.id",
+												"poster_crop.key",
+												"poster_crop.origin",
+												"poster_crop.type",
+												"poster_crop.mime_type",
+												"poster_crop.file_extension",
+												"poster_crop.file_name",
+												"poster_crop.file_size",
+												"poster_crop.width",
+												"poster_crop.height",
+												"poster_crop.focal_x",
+												"poster_crop.focal_y",
+												"poster_crop.crop_x",
+												"poster_crop.crop_y",
+												"poster_crop.crop_width",
+												"poster_crop.crop_height",
+												"poster_crop.crop_rotation",
+												"poster_crop.crop_skew_x",
+												"poster_crop.crop_skew_y",
+												"poster_crop.blur_hash",
+												"poster_crop.average_color",
+												"poster_crop.base64",
+												"poster_crop.is_dark",
+												"poster_crop.is_light",
+											])
+											.where(
+												"poster_crop.parent_media_id",
+												"=",
+												sql.ref<number>("poster.id"),
+											)
+											.where("poster_crop.relation_type", "=", "crop")
+											.where(
+												"poster_crop.is_deleted",
+												"=",
+												this.dbAdapter.getDefault("boolean", "false"),
+											),
+									)
+									.as("crop"),
 							])
-							.whereRef("poster.id", "=", "lucid_media.poster_id"),
+							.whereRef("poster.parent_media_id", "=", "lucid_media.id")
+							.where("poster.relation_type", "=", "poster")
+							.where(
+								"poster.is_deleted",
+								"=",
+								this.dbAdapter.getDefault("boolean", "false"),
+							),
 					)
 					.as("poster"),
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_media as crop")
+							.select([
+								"crop.id",
+								"crop.key",
+								"crop.origin",
+								"crop.type",
+								"crop.mime_type",
+								"crop.file_extension",
+								"crop.file_name",
+								"crop.file_size",
+								"crop.width",
+								"crop.height",
+								"crop.focal_x",
+								"crop.focal_y",
+								"crop.crop_x",
+								"crop.crop_y",
+								"crop.crop_width",
+								"crop.crop_height",
+								"crop.crop_rotation",
+								"crop.crop_skew_x",
+								"crop.crop_skew_y",
+								"crop.blur_hash",
+								"crop.average_color",
+								"crop.base64",
+								"crop.is_dark",
+								"crop.is_light",
+							])
+							.whereRef("crop.parent_media_id", "=", "lucid_media.id")
+							.where("crop.relation_type", "=", "crop")
+							.where(
+								"crop.is_deleted",
+								"=",
+								this.dbAdapter.getDefault("boolean", "false"),
+							),
+					)
+					.as("crop"),
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -369,6 +649,9 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					.as("translations"),
 			])
 			.where("id", "=", props.id)
+			.$if(props.includeOwned !== true, (qb) =>
+				qb.where("parent_media_id", "is", null),
+			)
 			.$call((qb) =>
 				queryBuilder.tenantScope(qb, {
 					tenantKey: props.tenantKey,
@@ -388,7 +671,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
-				"poster_id",
+				"parent_media_id",
+				"relation_type",
 				"e_tag",
 				"origin",
 				"type",
@@ -400,6 +684,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"height",
 				"focal_x",
 				"focal_y",
+				"crop_x",
+				"crop_y",
+				"crop_width",
+				"crop_height",
+				"crop_rotation",
+				"crop_skew_x",
+				"crop_skew_y",
 				"created_at",
 				"updated_at",
 				"blur_hash",
@@ -413,9 +704,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"translations",
 				"public",
 				"poster",
+				"crop",
 			],
 		});
 	}
+	/** Fetches top-level media and their active owned derivatives in one query. */
 	async selectMultipleByIds<V extends boolean = false>(
 		props: QueryProps<
 			V,
@@ -430,7 +723,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
-				"poster_id",
+				"parent_media_id",
+				"relation_type",
 				"e_tag",
 				"origin",
 				"type",
@@ -442,6 +736,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"height",
 				"focal_x",
 				"focal_y",
+				"crop_x",
+				"crop_y",
+				"crop_width",
+				"crop_height",
+				"crop_rotation",
+				"crop_skew_x",
+				"crop_skew_y",
 				"created_at",
 				"updated_at",
 				"blur_hash",
@@ -471,6 +772,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								"poster.height",
 								"poster.focal_x",
 								"poster.focal_y",
+								"poster.crop_x",
+								"poster.crop_y",
+								"poster.crop_width",
+								"poster.crop_height",
+								"poster.crop_rotation",
+								"poster.crop_skew_x",
+								"poster.crop_skew_y",
 								"poster.blur_hash",
 								"poster.average_color",
 								"poster.base64",
@@ -490,14 +798,102 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 											.whereRef(
 												"lucid_media_translations.media_id",
 												"=",
-												"lucid_media.poster_id",
+												sql.ref("poster.id"),
 											),
 									)
 									.as("translations"),
+								this.dbAdapter
+									.jsonArrayFrom(
+										eb
+											.selectFrom("lucid_media as poster_crop")
+											.select([
+												"poster_crop.id",
+												"poster_crop.key",
+												"poster_crop.origin",
+												"poster_crop.type",
+												"poster_crop.mime_type",
+												"poster_crop.file_extension",
+												"poster_crop.file_name",
+												"poster_crop.file_size",
+												"poster_crop.width",
+												"poster_crop.height",
+												"poster_crop.focal_x",
+												"poster_crop.focal_y",
+												"poster_crop.crop_x",
+												"poster_crop.crop_y",
+												"poster_crop.crop_width",
+												"poster_crop.crop_height",
+												"poster_crop.crop_rotation",
+												"poster_crop.crop_skew_x",
+												"poster_crop.crop_skew_y",
+												"poster_crop.blur_hash",
+												"poster_crop.average_color",
+												"poster_crop.base64",
+												"poster_crop.is_dark",
+												"poster_crop.is_light",
+											])
+											.where(
+												"poster_crop.parent_media_id",
+												"=",
+												sql.ref<number>("poster.id"),
+											)
+											.where("poster_crop.relation_type", "=", "crop")
+											.where(
+												"poster_crop.is_deleted",
+												"=",
+												this.dbAdapter.getDefault("boolean", "false"),
+											),
+									)
+									.as("crop"),
 							])
-							.whereRef("poster.id", "=", "lucid_media.poster_id"),
+							.whereRef("poster.parent_media_id", "=", "lucid_media.id")
+							.where("poster.relation_type", "=", "poster")
+							.where(
+								"poster.is_deleted",
+								"=",
+								this.dbAdapter.getDefault("boolean", "false"),
+							),
 					)
 					.as("poster"),
+				this.dbAdapter
+					.jsonArrayFrom(
+						eb
+							.selectFrom("lucid_media as crop")
+							.select([
+								"crop.id",
+								"crop.key",
+								"crop.origin",
+								"crop.type",
+								"crop.mime_type",
+								"crop.file_extension",
+								"crop.file_name",
+								"crop.file_size",
+								"crop.width",
+								"crop.height",
+								"crop.focal_x",
+								"crop.focal_y",
+								"crop.crop_x",
+								"crop.crop_y",
+								"crop.crop_width",
+								"crop.crop_height",
+								"crop.crop_rotation",
+								"crop.crop_skew_x",
+								"crop.crop_skew_y",
+								"crop.blur_hash",
+								"crop.average_color",
+								"crop.base64",
+								"crop.is_dark",
+								"crop.is_light",
+							])
+							.whereRef("crop.parent_media_id", "=", "lucid_media.id")
+							.where("crop.relation_type", "=", "crop")
+							.where(
+								"crop.is_deleted",
+								"=",
+								this.dbAdapter.getDefault("boolean", "false"),
+							),
+					)
+					.as("crop"),
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -517,7 +913,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					)
 					.as("translations"),
 			])
-			.where("id", "in", props.ids);
+			.where("id", "in", props.ids)
+			.where("parent_media_id", "is", null);
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleByIds",
@@ -531,7 +928,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
-				"poster_id",
+				"parent_media_id",
+				"relation_type",
 				"e_tag",
 				"origin",
 				"type",
@@ -543,6 +941,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"height",
 				"focal_x",
 				"focal_y",
+				"crop_x",
+				"crop_y",
+				"crop_width",
+				"crop_height",
+				"crop_rotation",
+				"crop_skew_x",
+				"crop_skew_y",
 				"created_at",
 				"updated_at",
 				"blur_hash",
@@ -556,6 +961,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"translations",
 				"public",
 				"poster",
+				"crop",
 			],
 		});
 	}
@@ -575,7 +981,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		let query = this.db
 			.selectFrom("lucid_media")
 			.select(["id", "file_extension", "width", "height", "type"])
-			.where("id", "in", props.ids);
+			.where("id", "in", props.ids)
+			.where("parent_media_id", "is", null);
 
 		query = queryBuilder.tenantScope(query, {
 			tenantKey: props.tenantKey,
@@ -651,7 +1058,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.id",
 						"lucid_media.key",
 						"lucid_media.folder_id",
-						"lucid_media.poster_id",
+						"lucid_media.parent_media_id",
+						"lucid_media.relation_type",
 						"lucid_media.e_tag",
 						"lucid_media.origin",
 						"lucid_media.type",
@@ -663,8 +1071,16 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.height",
 						"lucid_media.focal_x",
 						"lucid_media.focal_y",
+						"lucid_media.crop_x",
+						"lucid_media.crop_y",
+						"lucid_media.crop_width",
+						"lucid_media.crop_height",
+						"lucid_media.crop_rotation",
+						"lucid_media.crop_skew_x",
+						"lucid_media.crop_skew_y",
 						"lucid_media.blur_hash",
 						"lucid_media.average_color",
+						"lucid_media.base64",
 						"lucid_media.is_dark",
 						"lucid_media.is_light",
 						"lucid_media.created_at",
@@ -673,49 +1089,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.is_deleted_at",
 						"lucid_media.deleted_by",
 						"lucid_media.public",
-						this.dbAdapter
-							.jsonArrayFrom(
-								eb
-									.selectFrom("lucid_media as poster")
-									.select([
-										"poster.id",
-										"poster.key",
-										"poster.origin",
-										"poster.type",
-										"poster.mime_type",
-										"poster.file_extension",
-										"poster.file_name",
-										"poster.file_size",
-										"poster.width",
-										"poster.height",
-										"poster.focal_x",
-										"poster.focal_y",
-										"poster.blur_hash",
-										"poster.average_color",
-										"poster.is_dark",
-										"poster.is_light",
-										this.dbAdapter
-											.jsonArrayFrom(
-												eb
-													.selectFrom("lucid_media_translations")
-													.select([
-														"lucid_media_translations.title",
-														"lucid_media_translations.alt",
-														"lucid_media_translations.description",
-														"lucid_media_translations.summary",
-														"lucid_media_translations.locale_code",
-													])
-													.whereRef(
-														"lucid_media_translations.media_id",
-														"=",
-														"lucid_media.poster_id",
-													),
-											)
-											.as("translations"),
-									])
-									.whereRef("poster.id", "=", "lucid_media.poster_id"),
-							)
-							.as("poster"),
+						"lucid_media.tenant_key",
 						eb.fn.min<string>("translation.title").as("title_sort"),
 						this.dbAdapter
 							.jsonArrayFrom(
@@ -735,12 +1109,72 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 									),
 							)
 							.as("translations"),
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_media as poster")
+									.select([
+										"poster.id",
+										"poster.key",
+										"poster.origin",
+										"poster.type",
+										"poster.mime_type",
+										"poster.file_extension",
+										"poster.file_name",
+										"poster.file_size",
+										"poster.width",
+										"poster.height",
+										"poster.focal_x",
+										"poster.focal_y",
+										"poster.crop_x",
+										"poster.crop_y",
+										"poster.crop_width",
+										"poster.crop_height",
+										"poster.crop_rotation",
+										"poster.crop_skew_x",
+										"poster.crop_skew_y",
+										"poster.blur_hash",
+										"poster.average_color",
+										"poster.base64",
+										"poster.is_dark",
+										"poster.is_light",
+										this.dbAdapter
+											.jsonArrayFrom(
+												eb
+													.selectFrom("lucid_media_translations")
+													.select([
+														"lucid_media_translations.title",
+														"lucid_media_translations.alt",
+														"lucid_media_translations.description",
+														"lucid_media_translations.summary",
+														"lucid_media_translations.locale_code",
+													])
+													.whereRef(
+														"lucid_media_translations.media_id",
+														"=",
+														sql.ref("poster.id"),
+													),
+											)
+											.as("translations"),
+										activeMediaCropSelect(this.db, this.dbAdapter, "poster.id"),
+									])
+									.whereRef("poster.parent_media_id", "=", "lucid_media.id")
+									.where("poster.relation_type", "=", "poster")
+									.where(
+										"poster.is_deleted",
+										"=",
+										this.dbAdapter.getDefault("boolean", "false"),
+									),
+							)
+							.as("poster"),
+						activeMediaCropSelect(this.db, this.dbAdapter, "lucid_media.id"),
 					])
 					.where(
 						"lucid_media.is_hidden",
 						"=",
 						this.dbAdapter.getDefault("boolean", "false"),
 					)
+					.where("lucid_media.parent_media_id", "is", null)
 					.groupBy("lucid_media.id")
 					.$call((qb) =>
 						queryBuilder.tenantScope(qb, {
@@ -760,6 +1194,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"=",
 						this.dbAdapter.getDefault("boolean", "false"),
 					)
+					.where("lucid_media.parent_media_id", "is", null)
 					.$call((qb) =>
 						queryBuilder.tenantScope(qb, {
 							tenantKey: props.tenantKey,
@@ -814,7 +1249,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"id",
 				"key",
 				"folder_id",
-				"poster_id",
+				"parent_media_id",
+				"relation_type",
 				"e_tag",
 				"origin",
 				"type",
@@ -826,18 +1262,28 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"height",
 				"focal_x",
 				"focal_y",
-				"translations",
-				"poster",
-				"created_at",
-				"updated_at",
+				"crop_x",
+				"crop_y",
+				"crop_width",
+				"crop_height",
+				"crop_rotation",
+				"crop_skew_x",
+				"crop_skew_y",
 				"blur_hash",
 				"average_color",
+				"base64",
 				"is_dark",
 				"is_light",
+				"created_at",
+				"updated_at",
 				"is_deleted",
 				"is_deleted_at",
 				"deleted_by",
 				"public",
+				"tenant_key",
+				"translations",
+				"poster",
+				"crop",
 			],
 		});
 	}

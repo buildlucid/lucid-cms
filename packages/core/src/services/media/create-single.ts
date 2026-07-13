@@ -9,7 +9,11 @@ import {
 	MediaRepository,
 	MediaTranslationsRepository,
 } from "../../libs/repositories/index.js";
-import type { MediaOrigin, MediaType } from "../../types/response.js";
+import type {
+	MediaCropInput,
+	MediaOrigin,
+	MediaType,
+} from "../../types/response.js";
 import type { Media } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
@@ -21,6 +25,8 @@ import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compat
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
+import syncOwnedVisibility from "./helpers/sync-owned-visibility.js";
+import upsertCrop from "./helpers/upsert-crop.js";
 
 const createSingle: ServiceFn<
 	[
@@ -57,6 +63,7 @@ const createSingle: ServiceFn<
 			folderId?: number | null;
 			isHidden?: boolean;
 			posterId?: number | null;
+			crop?: MediaCropInput;
 			origin: MediaOrigin;
 			aiGenerationRequestId?: string;
 			allowedType?: MediaType;
@@ -131,12 +138,39 @@ const createSingle: ServiceFn<
 			data: undefined,
 		};
 	}
+	if (data.crop !== undefined && syncMediaRes.data.type !== "image") {
+		await mediaServices.strategies.deleteObject(context, {
+			key: mediaKey,
+			size: syncMediaRes.data.size,
+			processedSize: 0,
+			tenantKey: mediaTenantKey,
+		});
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:core.media.errors.image.only"),
+			},
+			data: undefined,
+		};
+	}
 
 	const keyVisibility = getKeyVisibility(mediaKey);
 
 	//* we infer the public value based on the key so there cannot be drift between the media uploaded via the
 	//* upload endpoint and this media update endpoint which the SPA calls afterwards
 	const isPublic = keyVisibility === constants.media.visibilityKeys.public;
+
+	if (data.posterId != null && syncMediaRes.data.type !== "video") {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:core.media.poster.video.only"),
+			},
+			data: undefined,
+		};
+	}
 
 	//* verify the poster exists
 	if (data.posterId !== undefined && data.posterId !== null) {
@@ -156,7 +190,8 @@ const createSingle: ServiceFn<
 		Media.createSingle({
 			data: {
 				key: mediaKey,
-				poster_id: data.posterId ?? null,
+				parent_media_id: null,
+				relation_type: null,
 				e_tag: syncMediaRes.data.etag ?? undefined,
 				origin: data.origin,
 				ai_generation_id: aiGenerationRes.data,
@@ -230,6 +265,9 @@ const createSingle: ServiceFn<
 			where: [{ key: "id", operator: "=", value: data.posterId }],
 			data: {
 				is_hidden: true,
+				folder_id: null,
+				parent_media_id: mediaRes.data.id,
+				relation_type: "poster",
 				updated_at: new Date().toISOString(),
 				updated_by: data.userId,
 			},
@@ -239,6 +277,30 @@ const createSingle: ServiceFn<
 		});
 		if (hidePosterRes.error) return hidePosterRes;
 	}
+
+	if (data.crop) {
+		const cropRes = await upsertCrop(context, {
+			parent: {
+				id: mediaRes.data.id,
+				key: mediaKey,
+				type: syncMediaRes.data.type,
+				origin: data.origin,
+				public: isPublic,
+				tenant_key: mediaTenantKey,
+				relation_type: null,
+			},
+			crop: data.crop,
+			userId: data.userId,
+		});
+		if (cropRes.error) return cropRes;
+	}
+
+	const visibilityRes = await syncOwnedVisibility(context, {
+		parentId: mediaRes.data.id,
+		public: isPublic,
+		userId: data.userId,
+	});
+	if (visibilityRes.error) return visibilityRes;
 
 	const translations = prepareMediaTranslations({
 		title: data.title || [],

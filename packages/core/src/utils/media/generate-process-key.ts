@@ -29,6 +29,9 @@ const generateProcessKey = (data: {
 	if (data.options.width) suffixes.push(`w${data.options.width}`);
 	if (data.options.height) suffixes.push(`h${data.options.height}`);
 	if (data.options.quality) suffixes.push(`q${data.options.quality}`);
+	if (data.options.fit && data.options.fit !== "cover") {
+		suffixes.push(`fit${data.options.fit}`);
+	}
 
 	const suffix = suffixes.length > 0 ? `-${suffixes.join("-")}` : "";
 	const finalFormat = data.options.format ?? data.extension ?? "bin";

@@ -1,4 +1,4 @@
-import type { ErrorResponse, Media, User } from "@types";
+import type { ErrorResponse, Media, MediaCropState, User } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -142,7 +142,12 @@ const CreateUpdateProfilePicturePanel: Component<
 		);
 
 		return {
-			changed: MediaFile.getFile() ? true : changed,
+			changed:
+				MediaFile.getFile() ||
+				MediaFile.getCropFile() ||
+				MediaFile.getCropRemoved()
+					? true
+					: changed,
 			data,
 		};
 	});
@@ -284,12 +289,16 @@ const CreateUpdateProfilePicturePanel: Component<
 	async function updateProfilePicture(
 		file: File | null,
 		imageMeta: Awaited<ReturnType<typeof MediaFile.getImageMeta>>,
+		cropImageMeta: Awaited<ReturnType<typeof MediaFile.getCropImageMeta>>,
 	) {
 		let key: string | null = null;
 		if (file) {
 			key = await uploadProfilePictureFile(file);
 			if (!key) return false;
 		}
+		const cropFile = MediaFile.getCropFile();
+		const cropKey = cropFile ? await uploadProfilePictureFile(cropFile) : null;
+		if (cropFile && !cropKey) return false;
 
 		const body = {
 			key: key ?? undefined,
@@ -309,6 +318,24 @@ const CreateUpdateProfilePicturePanel: Component<
 				MediaFile.getFileProvenance()?.aiGenerationRequestId,
 			title: toProfileTranslations(createMedia.state.title()),
 			alt: toProfileTranslations(createMedia.state.alt()),
+			crop:
+				cropFile && cropKey
+					? {
+							key: cropKey,
+							fileName: cropFile.name,
+							width: cropImageMeta?.width ?? 1,
+							height: cropImageMeta?.height ?? 1,
+							focalPoint: MediaFile.getFocalPoint(),
+							blurHash: cropImageMeta?.blurHash,
+							averageColor: cropImageMeta?.averageColor,
+							base64: cropImageMeta?.base64,
+							isDark: cropImageMeta?.isDark,
+							isLight: cropImageMeta?.isLight,
+							state: MediaFile.getCropState() as MediaCropState,
+						}
+					: MediaFile.getCropRemoved()
+						? null
+						: undefined,
 		};
 
 		if (props.state.userId !== undefined) {
@@ -335,13 +362,27 @@ const CreateUpdateProfilePicturePanel: Component<
 				name: profilePicture.fileName ?? profilePicture.key,
 				url: `${profilePicture.url}?preset=thumbnail-medium&format=webp`,
 				focalPointUrl: `${profilePicture.url}?preset=thumbnail-large&format=webp`,
-				cropUrl: profilePicture.url,
+				originalUrl: profilePicture.original?.url ?? profilePicture.url,
+				originalPreviewUrl: profilePicture.original?.url
+					? `${profilePicture.original.url}?preset=thumbnail-medium&format=webp`
+					: undefined,
+				originalFocalPointUrl: profilePicture.original?.url
+					? `${profilePicture.original.url}?preset=thumbnail-large&format=webp`
+					: undefined,
 				type: profilePicture.type,
-				mimeType: profilePicture.meta.mimeType,
+				mimeType:
+					profilePicture.original?.meta.mimeType ??
+					profilePicture.meta.mimeType,
 				origin: profilePicture.origin,
-				width: profilePicture.meta.width,
-				height: profilePicture.meta.height,
+				width: profilePicture.original?.meta.width ?? profilePicture.meta.width,
+				height:
+					profilePicture.original?.meta.height ?? profilePicture.meta.height,
 				focalPoint: profilePicture.meta.focalPoint ?? null,
+				originalFocalPoint:
+					profilePicture.original?.meta.focalPoint ??
+					profilePicture.meta.focalPoint ??
+					null,
+				crop: profilePicture.crop,
 			});
 		}
 	}
@@ -350,7 +391,12 @@ const CreateUpdateProfilePicturePanel: Component<
 	// Handlers
 	const onSubmit = async () => {
 		const imageMeta = await MediaFile.getImageMeta();
-		const success = await updateProfilePicture(MediaFile.getFile(), imageMeta);
+		const cropImageMeta = await MediaFile.getCropImageMeta();
+		const success = await updateProfilePicture(
+			MediaFile.getFile(),
+			imageMeta,
+			cropImageMeta,
+		);
 		if (!success) return;
 		props.state.setOpen(false);
 	};

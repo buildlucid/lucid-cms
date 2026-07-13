@@ -78,6 +78,46 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 							z.literal(this.dbAdapter.config.defaults.boolean.false),
 						])
 						.nullable(),
+					crop: z
+						.array(
+							z.object({
+								id: z.number(),
+								key: z.string(),
+								origin: z.enum(["human", "ai_generated", "ai_modified"]),
+								type: z.string(),
+								mime_type: z.string(),
+								file_extension: z.string(),
+								file_name: z.string().nullable(),
+								file_size: z.number(),
+								width: z.number().nullable(),
+								height: z.number().nullable(),
+								focal_x: z.number().nullable(),
+								focal_y: z.number().nullable(),
+								crop_x: z.number(),
+								crop_y: z.number(),
+								crop_width: z.number(),
+								crop_height: z.number(),
+								crop_rotation: z.number(),
+								crop_skew_x: z.number(),
+								crop_skew_y: z.number(),
+								blur_hash: z.string().nullable(),
+								average_color: z.string().nullable(),
+								base64: z.string().nullable().optional(),
+								is_dark: z
+									.union([
+										z.literal(this.dbAdapter.config.defaults.boolean.true),
+										z.literal(this.dbAdapter.config.defaults.boolean.false),
+									])
+									.nullable(),
+								is_light: z
+									.union([
+										z.literal(this.dbAdapter.config.defaults.boolean.true),
+										z.literal(this.dbAdapter.config.defaults.boolean.false),
+									])
+									.nullable(),
+							}),
+						)
+						.optional(),
 					is_deleted: z.union([
 						z.literal(this.dbAdapter.config.defaults.boolean.true),
 						z.literal(this.dbAdapter.config.defaults.boolean.false),
@@ -446,6 +486,49 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 							this.dbAdapter
 								.jsonArrayFrom(
 									mediaEb
+										.selectFrom("lucid_media as profile_crop")
+										.select([
+											"profile_crop.id",
+											"profile_crop.key",
+											"profile_crop.origin",
+											"profile_crop.type",
+											"profile_crop.mime_type",
+											"profile_crop.file_extension",
+											"profile_crop.file_name",
+											"profile_crop.file_size",
+											"profile_crop.width",
+											"profile_crop.height",
+											"profile_crop.focal_x",
+											"profile_crop.focal_y",
+											"profile_crop.crop_x",
+											"profile_crop.crop_y",
+											"profile_crop.crop_width",
+											"profile_crop.crop_height",
+											"profile_crop.crop_rotation",
+											"profile_crop.crop_skew_x",
+											"profile_crop.crop_skew_y",
+											"profile_crop.blur_hash",
+											"profile_crop.average_color",
+											"profile_crop.base64",
+											"profile_crop.is_dark",
+											"profile_crop.is_light",
+										])
+										.where(
+											"profile_crop.parent_media_id",
+											"=",
+											sql.ref<number>("lucid_media.id"),
+										)
+										.where("profile_crop.relation_type", "=", "crop")
+										.where(
+											"profile_crop.is_deleted",
+											"=",
+											this.dbAdapter.getDefault("boolean", "false"),
+										),
+								)
+								.as("crop"),
+							this.dbAdapter
+								.jsonArrayFrom(
+									mediaEb
 										.selectFrom("lucid_media_translations")
 										.select([
 											"lucid_media_translations.title",
@@ -570,6 +653,49 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 								"lucid_media.is_deleted_at",
 								"lucid_media.deleted_by",
 								"lucid_media.public",
+								this.dbAdapter
+									.jsonArrayFrom(
+										mediaEb
+											.selectFrom("lucid_media as profile_crop")
+											.select([
+												"profile_crop.id",
+												"profile_crop.key",
+												"profile_crop.origin",
+												"profile_crop.type",
+												"profile_crop.mime_type",
+												"profile_crop.file_extension",
+												"profile_crop.file_name",
+												"profile_crop.file_size",
+												"profile_crop.width",
+												"profile_crop.height",
+												"profile_crop.focal_x",
+												"profile_crop.focal_y",
+												"profile_crop.crop_x",
+												"profile_crop.crop_y",
+												"profile_crop.crop_width",
+												"profile_crop.crop_height",
+												"profile_crop.crop_rotation",
+												"profile_crop.crop_skew_x",
+												"profile_crop.crop_skew_y",
+												"profile_crop.blur_hash",
+												"profile_crop.average_color",
+												"profile_crop.base64",
+												"profile_crop.is_dark",
+												"profile_crop.is_light",
+											])
+											.where(
+												"profile_crop.parent_media_id",
+												"=",
+												sql.ref<number>("lucid_media.id"),
+											)
+											.where("profile_crop.relation_type", "=", "crop")
+											.where(
+												"profile_crop.is_deleted",
+												"=",
+												this.dbAdapter.getDefault("boolean", "false"),
+											),
+									)
+									.as("crop"),
 								this.dbAdapter
 									.jsonArrayFrom(
 										mediaEb
@@ -773,6 +899,49 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										this.dbAdapter
 											.jsonArrayFrom(
 												mediaEb
+													.selectFrom("lucid_media as profile_crop")
+													.select([
+														"profile_crop.id",
+														"profile_crop.key",
+														"profile_crop.origin",
+														"profile_crop.type",
+														"profile_crop.mime_type",
+														"profile_crop.file_extension",
+														"profile_crop.file_name",
+														"profile_crop.file_size",
+														"profile_crop.width",
+														"profile_crop.height",
+														"profile_crop.focal_x",
+														"profile_crop.focal_y",
+														"profile_crop.crop_x",
+														"profile_crop.crop_y",
+														"profile_crop.crop_width",
+														"profile_crop.crop_height",
+														"profile_crop.crop_rotation",
+														"profile_crop.crop_skew_x",
+														"profile_crop.crop_skew_y",
+														"profile_crop.blur_hash",
+														"profile_crop.average_color",
+														"profile_crop.base64",
+														"profile_crop.is_dark",
+														"profile_crop.is_light",
+													])
+													.where(
+														"profile_crop.parent_media_id",
+														"=",
+														sql.ref<number>("lucid_media.id"),
+													)
+													.where("profile_crop.relation_type", "=", "crop")
+													.where(
+														"profile_crop.is_deleted",
+														"=",
+														this.dbAdapter.getDefault("boolean", "false"),
+													),
+											)
+											.as("crop"),
+										this.dbAdapter
+											.jsonArrayFrom(
+												mediaEb
 													.selectFrom("lucid_media_translations")
 													.select([
 														"lucid_media_translations.title",
@@ -929,6 +1098,49 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 											this.dbAdapter
 												.jsonArrayFrom(
 													mediaEb
+														.selectFrom("lucid_media as profile_crop")
+														.select([
+															"profile_crop.id",
+															"profile_crop.key",
+															"profile_crop.origin",
+															"profile_crop.type",
+															"profile_crop.mime_type",
+															"profile_crop.file_extension",
+															"profile_crop.file_name",
+															"profile_crop.file_size",
+															"profile_crop.width",
+															"profile_crop.height",
+															"profile_crop.focal_x",
+															"profile_crop.focal_y",
+															"profile_crop.crop_x",
+															"profile_crop.crop_y",
+															"profile_crop.crop_width",
+															"profile_crop.crop_height",
+															"profile_crop.crop_rotation",
+															"profile_crop.crop_skew_x",
+															"profile_crop.crop_skew_y",
+															"profile_crop.blur_hash",
+															"profile_crop.average_color",
+															"profile_crop.base64",
+															"profile_crop.is_dark",
+															"profile_crop.is_light",
+														])
+														.where(
+															"profile_crop.parent_media_id",
+															"=",
+															sql.ref<number>("lucid_media.id"),
+														)
+														.where("profile_crop.relation_type", "=", "crop")
+														.where(
+															"profile_crop.is_deleted",
+															"=",
+															this.dbAdapter.getDefault("boolean", "false"),
+														),
+												)
+												.as("crop"),
+											this.dbAdapter
+												.jsonArrayFrom(
+													mediaEb
 														.selectFrom("lucid_media_translations")
 														.select([
 															"lucid_media_translations.title",
@@ -1057,6 +1269,49 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 											"lucid_media.base64",
 											"lucid_media.is_dark",
 											"lucid_media.is_light",
+											this.dbAdapter
+												.jsonArrayFrom(
+													mediaEb
+														.selectFrom("lucid_media as profile_crop")
+														.select([
+															"profile_crop.id",
+															"profile_crop.key",
+															"profile_crop.origin",
+															"profile_crop.type",
+															"profile_crop.mime_type",
+															"profile_crop.file_extension",
+															"profile_crop.file_name",
+															"profile_crop.file_size",
+															"profile_crop.width",
+															"profile_crop.height",
+															"profile_crop.focal_x",
+															"profile_crop.focal_y",
+															"profile_crop.crop_x",
+															"profile_crop.crop_y",
+															"profile_crop.crop_width",
+															"profile_crop.crop_height",
+															"profile_crop.crop_rotation",
+															"profile_crop.crop_skew_x",
+															"profile_crop.crop_skew_y",
+															"profile_crop.blur_hash",
+															"profile_crop.average_color",
+															"profile_crop.base64",
+															"profile_crop.is_dark",
+															"profile_crop.is_light",
+														])
+														.where(
+															"profile_crop.parent_media_id",
+															"=",
+															sql.ref<number>("lucid_media.id"),
+														)
+														.where("profile_crop.relation_type", "=", "crop")
+														.where(
+															"profile_crop.is_deleted",
+															"=",
+															this.dbAdapter.getDefault("boolean", "false"),
+														),
+												)
+												.as("crop"),
 											this.dbAdapter
 												.jsonArrayFrom(
 													mediaEb

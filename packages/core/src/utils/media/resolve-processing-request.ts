@@ -6,6 +6,7 @@ type MediaFormat = "webp" | "avif" | "jpeg" | "png";
 type ProcessingPreset = {
 	width?: number;
 	height?: number;
+	fit?: "cover" | "contain" | "fill" | "inside" | "outside";
 	format?: MediaFormat;
 	quality?: number;
 };
@@ -35,6 +36,7 @@ const resolveProcessingRequest = (props: {
 		quality: selectedPreset?.quality ?? constants.media.imagePresetQuality,
 		width: selectedPreset?.width,
 		height: selectedPreset?.height,
+		fit: selectedPreset?.fit ?? "cover",
 		hasProcessing: Boolean(selectedPreset || format),
 		publicQuery: {
 			preset: selectedPreset ? props.query.preset : undefined,

@@ -74,6 +74,7 @@ const updateProfilePictureController = factory.createHandlers(
 			aiGenerationRequestId: body.aiGenerationRequestId,
 			title: body.title,
 			alt: body.alt,
+			crop: body.crop,
 		});
 		if (updateProfilePicture.error) {
 			throw new LucidAPIError(updateProfilePicture.error);

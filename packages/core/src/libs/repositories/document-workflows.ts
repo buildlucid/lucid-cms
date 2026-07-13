@@ -7,6 +7,7 @@ import type {
 	Select,
 } from "../db/types.js";
 import type { MediaPosterPropsT } from "../formatters/media.js";
+import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
@@ -105,6 +106,11 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 												"lucid_media.base64",
 												"lucid_media.is_dark",
 												"lucid_media.is_light",
+												activeMediaCropSelect(
+													this.db,
+													this.dbAdapter,
+													"lucid_media.id",
+												),
 												this.dbAdapter
 													.jsonArrayFrom(
 														mediaEb
@@ -227,6 +233,11 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 												"lucid_media.base64",
 												"lucid_media.is_dark",
 												"lucid_media.is_light",
+												activeMediaCropSelect(
+													this.db,
+													this.dbAdapter,
+													"lucid_media.id",
+												),
 												this.dbAdapter
 													.jsonArrayFrom(
 														mediaEb

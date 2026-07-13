@@ -8,11 +8,46 @@ export type MediaType =
 
 export type MediaOrigin = "human" | "ai_generated" | "ai_modified";
 
+export type MediaSourceType = "original" | "crop";
+
+export interface MediaCropState {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	rotation: number;
+	skewX: number;
+	skewY: number;
+}
+
+export interface MediaCropInput {
+	key: string;
+	fileName: string;
+	width: number;
+	height: number;
+	focalPoint?: MediaMeta["focalPoint"];
+	blurHash?: string | null;
+	averageColor?: string | null;
+	base64?: string | null;
+	isDark?: boolean | null;
+	isLight?: boolean | null;
+	state: MediaCropState;
+}
+
+export interface MediaOriginal {
+	key: string;
+	url: string;
+	meta: MediaMeta;
+}
+
 export interface Media {
 	id: number;
 	key: string;
 	url: string;
 	fileName: string | null;
+	sourceType: MediaSourceType;
+	original?: MediaOriginal;
+	crop?: MediaCropState;
 	folderId: number | null;
 	poster?: MediaPoster | null;
 	origin: MediaOrigin;
@@ -58,6 +93,9 @@ export type MediaEmbed = Pick<
 	| "key"
 	| "url"
 	| "fileName"
+	| "sourceType"
+	| "original"
+	| "crop"
 	| "origin"
 	| "type"
 	| "title"
@@ -136,6 +174,7 @@ export interface ShareLinkAccessGranted {
 	passwordRequired: false;
 	media: {
 		key: string;
+		sourceType: MediaSourceType;
 		origin: MediaOrigin;
 		type: MediaType;
 		mimeType: string;

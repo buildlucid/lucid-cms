@@ -37,6 +37,7 @@ import type {
 } from "../db/types.js";
 import type { MediaPosterPropsT } from "../formatters/media.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "./document-workflows.js";
+import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
 
@@ -420,6 +421,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								"lucid_media.base64",
 								"lucid_media.is_dark",
 								"lucid_media.is_light",
+								activeMediaCropSelect(
+									this.db,
+									this.dbAdapter,
+									"lucid_media.id",
+								),
 							])
 							.whereRef(
 								"lucid_media.id",
@@ -455,6 +461,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								"lucid_media.base64",
 								"lucid_media.is_dark",
 								"lucid_media.is_light",
+								activeMediaCropSelect(
+									this.db,
+									this.dbAdapter,
+									"lucid_media.id",
+								),
 							])
 							.whereRef(
 								"lucid_media.id",
@@ -685,6 +696,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 															"lucid_media.base64",
 															"lucid_media.is_dark",
 															"lucid_media.is_light",
+															activeMediaCropSelect(
+																this.db,
+																this.dbAdapter,
+																"lucid_media.id",
+															),
 															this.dbAdapter
 																.jsonArrayFrom(
 																	mediaEb
@@ -775,6 +791,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"lucid_media.base64",
 									"lucid_media.is_dark",
 									"lucid_media.is_light",
+									activeMediaCropSelect(
+										this.db,
+										this.dbAdapter,
+										"lucid_media.id",
+									),
 								])
 								.whereRef(
 									"lucid_media.id",
@@ -810,6 +831,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"lucid_media.base64",
 									"lucid_media.is_dark",
 									"lucid_media.is_light",
+									activeMediaCropSelect(
+										this.db,
+										this.dbAdapter,
+										"lucid_media.id",
+									),
 								])
 								.whereRef(
 									"lucid_media.id",
@@ -1128,6 +1154,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"lucid_media.base64",
 									"lucid_media.is_dark",
 									"lucid_media.is_light",
+									activeMediaCropSelect(
+										this.db,
+										this.dbAdapter,
+										"lucid_media.id",
+									),
 								])
 								.whereRef(
 									"lucid_media.id",
@@ -1163,6 +1194,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"lucid_media.base64",
 									"lucid_media.is_dark",
 									"lucid_media.is_light",
+									activeMediaCropSelect(
+										this.db,
+										this.dbAdapter,
+										"lucid_media.id",
+									),
 								])
 								.whereRef(
 									"lucid_media.id",

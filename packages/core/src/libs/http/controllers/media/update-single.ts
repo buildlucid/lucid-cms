@@ -69,6 +69,7 @@ const updateSingleController = factory.createHandlers(
 			isLight: body.isLight,
 			isDeleted: body.isDeleted,
 			posterId: body.posterId,
+			crop: body.crop,
 			origin: body.origin,
 			aiGenerationRequestId: body.aiGenerationRequestId,
 			userId: c.get("auth").id,

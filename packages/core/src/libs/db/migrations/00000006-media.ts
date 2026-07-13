@@ -1,4 +1,4 @@
-import type { Kysely } from "kysely";
+import { type Kysely, sql } from "kysely";
 import type DatabaseAdapter from "../adapter-base.js";
 import type { MigrationFn } from "../types.js";
 
@@ -57,9 +57,10 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("folder_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_media_folders.id").onDelete("set null"),
 				)
-				.addColumn("poster_id", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_media.id").onDelete("set null"),
+				.addColumn("parent_media_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_media.id").onDelete("restrict"),
 				)
+				.addColumn("relation_type", adapter.getDataType("text"))
 				.addColumn("e_tag", adapter.getDataType("text"))
 				.addColumn("origin", adapter.getDataType("text"), (col) =>
 					col.notNull(),
@@ -89,6 +90,13 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("height", adapter.getDataType("integer"))
 				.addColumn("focal_x", adapter.getDataType("integer"))
 				.addColumn("focal_y", adapter.getDataType("integer"))
+				.addColumn("crop_x", adapter.getDataType("real"))
+				.addColumn("crop_y", adapter.getDataType("real"))
+				.addColumn("crop_width", adapter.getDataType("real"))
+				.addColumn("crop_height", adapter.getDataType("real"))
+				.addColumn("crop_rotation", adapter.getDataType("real"))
+				.addColumn("crop_skew_x", adapter.getDataType("real"))
+				.addColumn("crop_skew_y", adapter.getDataType("real"))
 				.addColumn("blur_hash", adapter.getDataType("text"))
 				.addColumn("average_color", adapter.getDataType("text"))
 				.addColumn("base64", adapter.getDataType("text"))
@@ -139,6 +147,49 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
+				.addUniqueConstraint(
+					"lucid_media_parent_media_id_relation_type_unique",
+					["parent_media_id", "relation_type"],
+				)
+				.addCheckConstraint(
+					"lucid_media_owned_relation_complete",
+					sql`(
+						(parent_media_id IS NULL AND relation_type IS NULL) OR
+						(parent_media_id IS NOT NULL AND relation_type IN ('crop', 'poster'))
+					)`,
+				)
+				.addCheckConstraint(
+					"lucid_media_owned_relation_not_self",
+					sql`parent_media_id IS NULL OR parent_media_id <> id`,
+				)
+				.addCheckConstraint(
+					"lucid_media_owned_relation_no_folder",
+					sql`parent_media_id IS NULL OR folder_id IS NULL`,
+				)
+				.addCheckConstraint(
+					"lucid_media_owned_relation_image_only",
+					sql`relation_type IS NULL OR type = 'image'`,
+				)
+				.addCheckConstraint(
+					"lucid_media_crop_state_valid",
+					sql`(
+						relation_type = 'crop' AND
+						crop_x IS NOT NULL AND crop_x >= 0 AND crop_x <= 1 AND
+						crop_y IS NOT NULL AND crop_y >= 0 AND crop_y <= 1 AND
+						crop_width IS NOT NULL AND crop_width > 0 AND crop_width <= 1 AND
+						crop_height IS NOT NULL AND crop_height > 0 AND crop_height <= 1 AND
+						crop_x + crop_width <= 1.000001 AND
+						crop_y + crop_height <= 1.000001 AND
+						crop_rotation IS NOT NULL AND crop_rotation >= -180 AND crop_rotation <= 180 AND
+						crop_skew_x IS NOT NULL AND crop_skew_x >= -45 AND crop_skew_x <= 45 AND
+						crop_skew_y IS NOT NULL AND crop_skew_y >= -45 AND crop_skew_y <= 45
+					) OR (
+						(relation_type IS NULL OR relation_type <> 'crop') AND
+						crop_x IS NULL AND crop_y IS NULL AND
+						crop_width IS NULL AND crop_height IS NULL AND
+						crop_rotation IS NULL AND crop_skew_x IS NULL AND crop_skew_y IS NULL
+					)`,
+				)
 				.execute();
 
 			await db.schema
@@ -154,9 +205,9 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_media_poster_id")
+				.createIndex("idx_lucid_media_parent_media_id")
 				.on("lucid_media")
-				.column("poster_id")
+				.column("parent_media_id")
 				.execute();
 
 			await db.schema

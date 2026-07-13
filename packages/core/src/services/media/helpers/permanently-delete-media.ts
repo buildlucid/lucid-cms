@@ -10,11 +10,12 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
 import clearClientMediaSingleCache from "./clear-client-media-cache.js";
 
+/** Permanently deletes owned descendants before their parent and stored objects. */
 const permanentlyDeleteMedia: ServiceFn<
 	[
 		{
 			id: number;
-			deletePoster?: boolean;
+			invalidateCache?: boolean;
 		},
 	],
 	undefined
@@ -32,6 +33,7 @@ const permanentlyDeleteMedia: ServiceFn<
 	const getMediaRes = await Media.selectSingleById({
 		id: data.id,
 		tenantKey: context.request.tenantKey,
+		includeOwned: true,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -41,6 +43,26 @@ const permanentlyDeleteMedia: ServiceFn<
 		},
 	});
 	if (getMediaRes.error) return getMediaRes;
+
+	const childrenRes = await Media.selectMultiple({
+		select: ["id"],
+		where: [
+			{ key: "parent_media_id", operator: "=", value: getMediaRes.data.id },
+		],
+		validation: { enabled: true },
+	});
+	if (childrenRes.error) return childrenRes;
+
+	const childDeleteResults = await Promise.all(
+		childrenRes.data.map((child) =>
+			permanentlyDeleteMedia(context, {
+				id: child.id,
+				invalidateCache: false,
+			}),
+		),
+	);
+	const failedChildDelete = childDeleteResults.find((result) => result.error);
+	if (failedChildDelete) return failedChildDelete;
 
 	const [processedImagesRes, deleteMediaRes] = await Promise.all([
 		ProcessedImages.selectMultiple({
@@ -91,18 +113,12 @@ const permanentlyDeleteMedia: ServiceFn<
 	]);
 	if (deleteObjectRes.error) return deleteObjectRes;
 
-	if (data.deletePoster === true && getMediaRes.data.poster_id !== null) {
-		const posterDeleteRes = await permanentlyDeleteMedia(context, {
-			id: getMediaRes.data.poster_id,
-			deletePoster: false,
-		});
-		if (posterDeleteRes.error) return posterDeleteRes;
+	if (data.invalidateCache !== false) {
+		await Promise.all([
+			clearClientMediaSingleCache(context, data.id),
+			invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
+		]);
 	}
-
-	await Promise.all([
-		clearClientMediaSingleCache(context, data.id),
-		invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
-	]);
 
 	return {
 		error: undefined,

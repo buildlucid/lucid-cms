@@ -15,6 +15,11 @@ const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 		select: ["id", "tenant_key"],
 		where: [
 			{
+				key: "parent_media_id",
+				operator: "is",
+				value: null,
+			},
+			{
 				key: "is_deleted",
 				operator: "=",
 				value: context.config.db.getDefault("boolean", "true"),

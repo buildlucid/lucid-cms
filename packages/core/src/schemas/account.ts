@@ -1,7 +1,7 @@
 import z from "zod";
 import { translate } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
-import { mediaOriginSchema } from "./media.js";
+import { mediaCropInputSchema, mediaOriginSchema } from "./media.js";
 import { userResponseSchema } from "./users.js";
 
 const profilePictureTranslationSchema = z.object({
@@ -278,6 +278,7 @@ export const controllerSchemas = {
 	updateProfilePicture: {
 		body: z
 			.object({
+				crop: mediaCropInputSchema.nullable().optional(),
 				key: z.string().trim().optional().meta({
 					description: "The uploaded media key",
 					example: "public/123e4567e89b12d3a456426614174000",

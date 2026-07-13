@@ -35,6 +35,7 @@ const resolvePoster: ServiceFn<
 	const posterRes = await Media.selectSingleById({
 		id: data.posterId,
 		tenantKey: context.request.tenantKey,
+		includeOwned: data.parentId !== undefined,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -44,6 +45,22 @@ const resolvePoster: ServiceFn<
 		},
 	});
 	if (posterRes.error) return posterRes;
+	if (
+		posterRes.data.parent_media_id !== null &&
+		!(
+			posterRes.data.relation_type === "poster" &&
+			posterRes.data.parent_media_id === data.parentId
+		)
+	) {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				message: copy("server:core.media.poster.not.found"),
+			},
+			data: undefined,
+		};
+	}
 
 	if (posterRes.data.type !== "image") {
 		return {

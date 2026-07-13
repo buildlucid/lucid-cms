@@ -1,6 +1,6 @@
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
-import type { MediaOrigin } from "../../types/response.js";
+import type { MediaCropInput, MediaOrigin } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 
@@ -33,6 +33,7 @@ const updateProfilePicture: ServiceFn<
 				localeCode: string;
 				value: string | null;
 			}[];
+			crop?: MediaCropInput | null;
 		},
 	],
 	undefined
@@ -97,6 +98,7 @@ const updateProfilePicture: ServiceFn<
 			isLight: data.isLight,
 			origin: data.origin ?? (data.key !== undefined ? "human" : undefined),
 			aiGenerationRequestId: data.aiGenerationRequestId,
+			crop: data.crop,
 			allowedType: "image",
 			userId: data.actorUserId,
 		});
@@ -159,6 +161,7 @@ const updateProfilePicture: ServiceFn<
 		alt: data.alt || [],
 		folderId: null,
 		isHidden: true,
+		crop: data.crop ?? undefined,
 		allowedType: "image",
 		userId: data.actorUserId,
 	});

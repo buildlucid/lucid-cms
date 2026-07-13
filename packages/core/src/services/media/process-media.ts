@@ -42,18 +42,12 @@ const processMedia: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	//* fetches the media item, if its not an image return the original url
-	const mediaRes = await Media.selectSingle({
-		select: ["type", "key", "file_name", "file_extension", "tenant_key"],
-		where: [
-			{
-				key: "key",
-				operator: "=",
-				value: normalizedKey,
-			},
-		],
+	//* resolves the source and its active crop in a single lookup
+	const mediaRes = await Media.selectSingleActivePresentationByKey({
+		key: normalizedKey,
 	});
 	if (mediaRes.error) return mediaRes;
+
 	if (!mediaRes.data) {
 		return {
 			error: {
@@ -64,6 +58,7 @@ const processMedia: ServiceFn<
 			data: undefined,
 		};
 	}
+
 	if (
 		mediaRes.data.tenant_key &&
 		context.request.tenantKey &&
@@ -78,7 +73,8 @@ const processMedia: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (mediaRes.data?.type !== "image") {
+
+	if (mediaRes.data.type !== "image") {
 		return {
 			error: undefined,
 			data: {

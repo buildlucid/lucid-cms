@@ -1,4 +1,4 @@
-import type { ErrorResponse, Media } from "@types";
+import type { ErrorResponse, Media, MediaCropState } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
@@ -36,7 +36,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 
 	// -------------------------
 	// Functions
-	const uploadFile = async (file: File) => {
+	const uploadFile = async (file: File, trackAsPrimary = true) => {
 		try {
 			setUploadLoading(true);
 			setUploadProgress(0);
@@ -59,7 +59,7 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				setUploadErrors(uploadRes.error);
 				return null;
 			}
-			setKey(uploadRes.data);
+			if (trackAsPrimary) setKey(uploadRes.data);
 			return uploadRes.data;
 		} catch (error) {
 			setUploadErrors({
@@ -81,6 +81,12 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		options?: {
 			origin?: Media["origin"];
 			aiGenerationRequestId?: string;
+			crop?: {
+				file: File;
+				state: MediaCropState;
+				imageMeta: ImageMeta | null;
+				focalPoint?: Media["meta"]["focalPoint"];
+			} | null;
 		},
 	): Promise<boolean> => {
 		if (!id()) return false;
@@ -91,6 +97,10 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			if (!uploadFileRes) return false;
 			fileKey = uploadFileRes;
 		}
+		const cropKey = options?.crop
+			? await uploadFile(options.crop.file, false)
+			: undefined;
+		if (options?.crop && !cropKey) return false;
 
 		await updateSingle.action.mutateAsync({
 			id: id() as number,
@@ -114,6 +124,24 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				isLight: imageMeta?.isLight,
 				public: getPublic(),
 				posterId: getPosterId(),
+				crop:
+					options?.crop === null
+						? null
+						: options?.crop && cropKey
+							? {
+									key: cropKey,
+									fileName: options.crop.file.name,
+									width: options.crop.imageMeta?.width ?? 1,
+									height: options.crop.imageMeta?.height ?? 1,
+									focalPoint: options.crop.focalPoint,
+									blurHash: options.crop.imageMeta?.blurHash,
+									averageColor: options.crop.imageMeta?.averageColor,
+									base64: options.crop.imageMeta?.base64,
+									isDark: options.crop.imageMeta?.isDark,
+									isLight: options.crop.imageMeta?.isLight,
+									state: options.crop.state,
+								}
+							: undefined,
 			},
 		});
 

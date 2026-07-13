@@ -8,6 +8,8 @@ import type { AdapterLifecycleContext } from "../runtime/types.js";
 export type ImageProcessorOptions = {
 	width?: number;
 	height?: number;
+	fit?: "cover" | "contain" | "fill" | "inside" | "outside";
+	focalPoint?: { x: number; y: number };
 	format?: "webp" | "avif" | "jpeg" | "png";
 	quality?: number;
 };

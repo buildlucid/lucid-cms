@@ -5,7 +5,10 @@ import {
 	toNodeReadable,
 } from "../../libs/media/index.js";
 import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
-import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
+import {
+	MediaRepository,
+	ProcessedImagesRepository,
+} from "../../libs/repositories/index.js";
 import { createBufferETag, matchesETag } from "../../utils/http/etag.js";
 import {
 	getMediaKeyTenantKey,
@@ -68,12 +71,27 @@ const processImage: ServiceFn<
 	const { processingBody, fallbackBody } = splitBodyForProcessing(
 		mediaRes.data.body,
 	);
+	const Media = new MediaRepository(context.db.client, context.config.db);
+
+	const focalRes = await Media.selectSingle({
+		select: ["focal_x", "focal_y"],
+		where: [{ key: "key", operator: "=", value: data.key }],
+	});
+	if (focalRes.error) return focalRes;
+
+	const focalPoint =
+		focalRes.data?.focal_x != null && focalRes.data.focal_y != null
+			? {
+					x: focalRes.data.focal_x / 10000,
+					y: focalRes.data.focal_y / 10000,
+				}
+			: undefined;
 
 	// Optimize image
 	const [imageRes, processedCountRes] = await Promise.all([
 		processedImageServices.optimizeImage(context, {
 			stream: toNodeReadable(processingBody),
-			options: data.options,
+			options: { ...data.options, focalPoint },
 		}),
 		processedImageServices.getSingleCount(context, {
 			key: data.key,

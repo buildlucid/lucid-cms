@@ -1,13 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	selectSingle: vi.fn(),
+	selectSingleActivePresentationByKey: vi.fn(),
 	checkHasMediaStrategy: vi.fn(),
 }));
 
 vi.mock("../../libs/repositories/index.js", () => ({
 	MediaRepository: class {
-		selectSingle = mocks.selectSingle;
+		selectSingleActivePresentationByKey =
+			mocks.selectSingleActivePresentationByKey;
 	},
 }));
 
@@ -31,16 +32,16 @@ describe("media process service", () => {
 			error: undefined,
 			data: {},
 		});
-		mocks.selectSingle.mockResolvedValueOnce({
+		mocks.selectSingleActivePresentationByKey.mockResolvedValueOnce({
 			error: undefined,
 			data: {
 				type: "image",
 				key: "public/123e4567e89b12d3a456426614174000",
 				file_name: "Screenshot 2026-03-26 at 15.png",
 				file_extension: "png",
+				tenant_key: null,
 			},
 		});
-
 		const response = await processMedia(
 			{
 				db: {
@@ -51,7 +52,9 @@ describe("media process service", () => {
 				},
 				config: {
 					host: "https://example.com",
-					db: {},
+					db: {
+						getDefault: vi.fn().mockReturnValue(0),
+					},
 					media: {
 						images: {
 							presets: {
@@ -97,6 +100,6 @@ describe("media process service", () => {
 
 		expect(response.error?.status).toBe(404);
 		expect(mocks.checkHasMediaStrategy).not.toHaveBeenCalled();
-		expect(mocks.selectSingle).not.toHaveBeenCalled();
+		expect(mocks.selectSingleActivePresentationByKey).not.toHaveBeenCalled();
 	});
 });

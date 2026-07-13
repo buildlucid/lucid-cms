@@ -26,6 +26,7 @@ const shareAccessResponseSchema = z.discriminatedUnion("passwordRequired", [
 		passwordRequired: z.literal(false),
 		media: z.object({
 			key: z.string(),
+			sourceType: z.enum(["original", "crop"]),
 			origin: shareMediaOriginSchema,
 			type: shareMediaTypeSchema,
 			mimeType: z.string(),

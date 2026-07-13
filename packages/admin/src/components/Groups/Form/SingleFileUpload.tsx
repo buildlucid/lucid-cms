@@ -1,4 +1,4 @@
-import type { ErrorResult, Media } from "@types";
+import type { ErrorResult, Media, MediaCropState } from "@types";
 import classNames from "classnames";
 import {
 	FaSolidArrowRotateLeft,
@@ -48,9 +48,11 @@ export type SingleFileUploadImageCrop = {
 	state: {
 		disabled: boolean;
 		tooltip: string;
+		hasCrop: boolean;
 	};
 	callbacks: {
 		open: () => void;
+		remove: () => void;
 	};
 };
 
@@ -67,13 +69,17 @@ export interface SingleFileUploadProps {
 		type?: Media["type"];
 		url?: string;
 		focalPointUrl?: string;
-		cropUrl?: string;
+		originalUrl?: string;
+		originalPreviewUrl?: string;
+		originalFocalPointUrl?: string;
 		name?: string;
 		mimeType?: string | null;
 		origin?: Media["origin"];
 		width?: number | null;
 		height?: number | null;
 		focalPoint?: FocalPoint | null;
+		originalFocalPoint?: FocalPoint | null;
+		crop?: MediaCropState;
 	};
 	focalPoint?: {
 		value: FocalPoint | null;
@@ -431,6 +437,13 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				hide: props.actions.imageCrop === undefined,
 				disabled: props.actions.imageCrop?.state.disabled,
 				onClick: () => props.actions.imageCrop?.callbacks.open(),
+			},
+			{
+				label: T()("media.crop.remove"),
+				icon: "trash" as const,
+				hide: props.actions.imageCrop?.state.hasCrop !== true,
+				disabled: props.actions.imageCrop?.state.disabled,
+				onClick: () => props.actions.imageCrop?.callbacks.remove(),
 			},
 			{
 				label: T()("ai.media.image.generate.action"),

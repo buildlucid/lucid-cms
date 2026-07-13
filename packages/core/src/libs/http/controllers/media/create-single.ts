@@ -64,6 +64,7 @@ const createSingleController = factory.createHandlers(
 			isLight: body.isLight,
 			folderId: body.folderId,
 			posterId: body.posterId,
+			crop: body.crop,
 			isHidden: body.isHidden,
 			origin: body.origin,
 			aiGenerationRequestId: body.aiGenerationRequestId,

@@ -1,3 +1,4 @@
+import type { MediaCropState } from "@types";
 import classNames from "classnames";
 import type Cropper from "cropperjs";
 import {
@@ -77,6 +78,7 @@ const ImageCropEditor: Component<{
 	onApply: (
 		_file: File,
 		_provenance: ImageCropProvenance,
+		_state: MediaCropState,
 	) => boolean | undefined | Promise<boolean | undefined>;
 }> = (props) => {
 	// ------------------------------
@@ -153,24 +155,58 @@ const ImageCropEditor: Component<{
 		setRotationDegrees(nextRotation);
 	}
 
-	function getInitialViewportLayout() {
-		if (!stageRef) return null;
+	function getCanvasLocalRect(element: Element) {
+		const canvas = cropper?.getCropperCanvas();
+		if (!canvas || canvas.offsetWidth <= 0 || canvas.offsetHeight <= 0) {
+			return null;
+		}
 
-		const stageRect = stageRef.getBoundingClientRect();
-		if (stageRect.width <= 0 || stageRect.height <= 0) return null;
+		const canvasRect = canvas.getBoundingClientRect();
+		// DOM rectangles include the modal's opening scale animation, while
+		// Cropper.js selection coordinates use the canvas's local layout space.
+		const scaleX = canvasRect.width / canvas.offsetWidth;
+		const scaleY = canvasRect.height / canvas.offsetHeight;
+		if (
+			!Number.isFinite(scaleX) ||
+			!Number.isFinite(scaleY) ||
+			scaleX <= 0 ||
+			scaleY <= 0
+		) {
+			return null;
+		}
+
+		const rect = element.getBoundingClientRect();
+		return {
+			x: (rect.left - canvasRect.left) / scaleX,
+			y: (rect.top - canvasRect.top) / scaleY,
+			width: rect.width / scaleX,
+			height: rect.height / scaleY,
+		};
+	}
+
+	function getInitialViewportLayout() {
+		const canvas = cropper?.getCropperCanvas();
+		if (!canvas || canvas.offsetWidth <= 0 || canvas.offsetHeight <= 0) {
+			return null;
+		}
+
+		const canvasRect = canvas.getBoundingClientRect();
+		const scaleX = canvasRect.width / canvas.offsetWidth;
+		if (!Number.isFinite(scaleX) || scaleX <= 0) return null;
 
 		const drawerWidth =
 			controlsRef && window.matchMedia(DESKTOP_DRAWER_MEDIA_QUERY).matches
 				? Math.max(
 						0,
-						controlsRef.getBoundingClientRect().right - stageRect.left,
+						(controlsRef.getBoundingClientRect().right - canvasRect.left) /
+							scaleX,
 					)
 				: 0;
 
 		return {
-			offsetX: drawerWidth / 2,
-			visibleHeight: stageRect.height,
-			visibleWidth: Math.max(1, stageRect.width - drawerWidth),
+			drawerWidth,
+			visibleHeight: canvas.offsetHeight,
+			visibleWidth: Math.max(1, canvas.offsetWidth - drawerWidth),
 		};
 	}
 
@@ -179,7 +215,8 @@ const ImageCropEditor: Component<{
 		const layout = getInitialViewportLayout();
 		if (!cropperImage || !layout) return INITIAL_VIEW_SCALE;
 
-		const imageRect = cropperImage.getBoundingClientRect();
+		const imageRect = getCanvasLocalRect(cropperImage);
+		if (!imageRect) return INITIAL_VIEW_SCALE;
 		if (imageRect.width <= 0 || imageRect.height <= 0) {
 			return INITIAL_VIEW_SCALE;
 		}
@@ -187,7 +224,6 @@ const ImageCropEditor: Component<{
 		return Math.max(
 			0.05,
 			Math.min(
-				INITIAL_VIEW_SCALE,
 				(layout.visibleWidth * INITIAL_VIEW_SCALE) / imageRect.width,
 				(layout.visibleHeight * INITIAL_VIEW_SCALE) / imageRect.height,
 			),
@@ -200,10 +236,18 @@ const ImageCropEditor: Component<{
 		if (!layout || !cropperImage) return;
 
 		cropperImage.$scale(getInitialImageScale());
-		if (layout.offsetX <= 0) return;
+		const imageRect = getCanvasLocalRect(cropperImage);
+		if (!imageRect) return;
 
-		cropperImage.$move(layout.offsetX, 0);
-		cropper?.getCropperSelection()?.$move(layout.offsetX, 0);
+		const moveX =
+			layout.drawerWidth +
+			(layout.visibleWidth - imageRect.width) / 2 -
+			imageRect.x;
+		const moveY = (layout.visibleHeight - imageRect.height) / 2 - imageRect.y;
+		if (moveX === 0 && moveY === 0) return;
+
+		cropperImage.$move(moveX, moveY);
+		cropper?.getCropperSelection()?.$move(moveX, moveY);
 	}
 
 	function normalizeSkew(degrees: number, fallback: number) {
@@ -279,7 +323,8 @@ const ImageCropEditor: Component<{
 
 	async function applyCrop() {
 		const selection = cropper?.getCropperSelection();
-		if (!selection || !props.source) return;
+		const cropperImage = cropper?.getCropperImage();
+		if (!selection || !cropperImage || !props.source) return;
 
 		try {
 			setIsApplying(true);
@@ -292,7 +337,37 @@ const ImageCropEditor: Component<{
 				quality: 0.92,
 			});
 
-			const applied = await props.onApply(file, sourceProvenance());
+			const imageRect = cropperImage.getBoundingClientRect();
+			const selectionRect = selection.getBoundingClientRect();
+			if (imageRect.width <= 0 || imageRect.height <= 0) {
+				throw new Error(T()("media.crop.export.failed"));
+			}
+			const x = Math.max(
+				0,
+				Math.min(1, (selectionRect.left - imageRect.left) / imageRect.width),
+			);
+			const y = Math.max(
+				0,
+				Math.min(1, (selectionRect.top - imageRect.top) / imageRect.height),
+			);
+			const width = Math.max(
+				0.000001,
+				Math.min(1 - x, selectionRect.width / imageRect.width),
+			);
+			const height = Math.max(
+				0.000001,
+				Math.min(1 - y, selectionRect.height / imageRect.height),
+			);
+
+			const applied = await props.onApply(file, sourceProvenance(), {
+				x,
+				y,
+				width,
+				height,
+				rotation: rotationDegrees(),
+				skewX: skewXDegrees(),
+				skewY: skewYDegrees(),
+			});
 			if (applied !== false) {
 				props.state.setOpen(false);
 			}
@@ -409,7 +484,34 @@ const ImageCropEditor: Component<{
 			await waitForAnimationFrame();
 			if (disposed) return;
 
+			const existingCrop = props.source?.crop;
+			if (existingCrop) {
+				setRotation(existingCrop.rotation);
+				setSkew("x", existingCrop.skewX);
+				setSkew("y", existingCrop.skewY);
+				await waitForAnimationFrame();
+				if (disposed) return;
+			}
+
 			applyInitialViewportTransform();
+			if (existingCrop) {
+				await waitForAnimationFrame();
+				if (disposed) return;
+				const selection = cropper.getCropperSelection();
+				const imageRect = cropperImage
+					? getCanvasLocalRect(cropperImage)
+					: null;
+				if (selection && imageRect) {
+					selection.$change(
+						imageRect.x + existingCrop.x * imageRect.width,
+						imageRect.y + existingCrop.y * imageRect.height,
+						existingCrop.width * imageRect.width,
+						existingCrop.height * imageRect.height,
+						Number.NaN,
+						true,
+					);
+				}
+			}
 			setIsReady(true);
 		})();
 
@@ -459,10 +561,14 @@ const ImageCropEditor: Component<{
 				>
 					<div class="mb-4">
 						<h2 class="text-title text-base font-semibold">
-							{T()("media.crop.title")}
+							{props.source?.crop
+								? T()("media.crop.edit.title")
+								: T()("media.crop.title")}
 						</h2>
 						<p class="text-body text-sm mt-1">
-							{T()("media.crop.description")}
+							{props.source?.crop
+								? T()("media.crop.edit.description")
+								: T()("media.crop.description")}
 						</p>
 					</div>
 					<div class="space-y-4">

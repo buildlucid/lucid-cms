@@ -5,6 +5,14 @@ const mocks = vi.hoisted(() => ({
 	checkHasMediaStrategy: vi.fn(),
 	optimizeImage: vi.fn(),
 	getSingleCount: vi.fn(),
+	selectSingle: vi.fn(),
+}));
+
+vi.mock("../../libs/repositories/index.js", () => ({
+	MediaRepository: class {
+		selectSingle = mocks.selectSingle;
+	},
+	ProcessedImagesRepository: class {},
 }));
 
 vi.mock("../index.js", () => ({
@@ -42,6 +50,10 @@ const readStream = async (body: ReadableStream<Uint8Array>) => {
 
 describe("processImage", () => {
 	test("keeps a readable fallback body when processing fails for web streams", async () => {
+		mocks.selectSingle.mockResolvedValueOnce({
+			error: undefined,
+			data: { focal_x: null, focal_y: null },
+		});
 		const sourceBody = new ReadableStream<Uint8Array>({
 			start(controller) {
 				controller.enqueue(new TextEncoder().encode("fallback-image"));
@@ -79,7 +91,9 @@ describe("processImage", () => {
 
 		const response = await processImage(
 			{
+				db: { client: {} },
 				config: {
+					db: {},
 					media: {
 						limits: {
 							processedImagesPerFile: 10,
@@ -107,6 +121,10 @@ describe("processImage", () => {
 	});
 
 	test("returns a stable etag for generated processed images and short-circuits matching revalidation requests", async () => {
+		mocks.selectSingle.mockResolvedValueOnce({
+			error: undefined,
+			data: { focal_x: null, focal_y: null },
+		});
 		const sourceBody = new ReadableStream<Uint8Array>({
 			start(controller) {
 				controller.enqueue(new TextEncoder().encode("source-image"));
@@ -153,7 +171,9 @@ describe("processImage", () => {
 
 		const response = await processImage(
 			{
+				db: { client: {} },
 				config: {
+					db: {},
 					media: {
 						limits: {
 							processedImagesPerFile: 10,

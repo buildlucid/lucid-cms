@@ -1,4 +1,4 @@
-import type { Media, ResponseBody } from "@types";
+import type { Media, MediaCropInput, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -26,6 +26,7 @@ interface Params {
 			localeCode: string;
 			value: string | null;
 		}[];
+		crop?: MediaCropInput | null;
 	};
 }
 

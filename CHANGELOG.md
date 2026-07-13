@@ -12,12 +12,15 @@
 - Added new filter builder UI for documents with OR support and full collection/brick custom field filtering. ([bc9bccc](https://github.com/buildlucid/lucid-cms/commit/bc9bccc40d360b6861b231836d5151312669f15f))
 - Migrated all filters to use the new filter builder UI instead and widened what fields are supported across all resources. ([1062d8f](https://github.com/buildlucid/lucid-cms/commit/1062d8f585f15be9fdac3f1834f6f72127d5e5a8))
 - Added a new range custom field with single or dual-thumb sliders, decimal step support, validation, filtering, document listing support and typed output. ([79896d4](https://github.com/buildlucid/lucid-cms/commit/79896d45a8260a678592d4bd96d485b582012f52))
+- Added focal-point-aware image processing with configurable `fit` modes on image presets. The Sharp adapter now positions cover crops using the media's normalized focal point.
+- Added the ability to remove crops from images and video posters, restoring the original presentation while retaining the previous crop object for stable stale URLs.
 
 ### Breaking Changes:
 
 - Renamed the collection field listing option from `listing` to `showInList` for clarity. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
 - Replaced raw SQL-like filter operators with semantic text operators (`contains`, `not-contains`, `starts-with`, `not-starts-with`, `ends-with`, and `not-ends-with`) and standardised multi-word operators as hyphenated tokens (`not-in` and `is-not`). Existing filter query strings and toolkit calls using `like`, `not like`, `not in`, or `is not` must be updated; `%` and `_` in filter values are now treated as literal text. ([2c1a6b4](https://github.com/buildlucid/lucid-cms/commit/2c1a6b4422fbb7366af152c12e826b96fc41985c))
 - Environment schemas are no longer accepted through the `env` property of `configureLucid`. To enable environment validation and generated typing, optionally export a named `env` schema from `lucid.config.ts`, for example `export const env = z.object({ ... })`; omit the export when no schema is needed.
+- Reworked media crops around owned derivative rows and updated public media responses to expose the active presentation through `sourceType`, optional `original` metadata and persisted `crop` state.
 
 ### Bug Fixes:
 

@@ -1,4 +1,4 @@
-import type { Media, ResponseBody } from "@types";
+import type { Media, MediaCropInput, ResponseBody } from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -34,6 +34,7 @@ interface Params {
 	base64?: string | null;
 	isDark?: boolean;
 	isLight?: boolean;
+	crop?: MediaCropInput;
 }
 
 export const createSingleReq = (params: Params) => {

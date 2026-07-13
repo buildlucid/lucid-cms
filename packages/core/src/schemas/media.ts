@@ -75,6 +75,42 @@ const mediaMetaResponseSchema = z
 		description: "Media metadata",
 	});
 
+const mediaCropStateSchema = z.object({
+	x: z.number().min(0).max(1),
+	y: z.number().min(0).max(1),
+	width: z.number().positive().max(1),
+	height: z.number().positive().max(1),
+	rotation: z.number().min(-180).max(180),
+	skewX: z.number().min(-45).max(45),
+	skewY: z.number().min(-45).max(45),
+});
+
+const mediaOriginalResponseSchema = z.object({
+	key: z.string(),
+	url: z.string(),
+	meta: mediaMetaResponseSchema,
+});
+
+export const mediaCropInputSchema = z.object({
+	key: z.string().trim(),
+	fileName: z.string().trim(),
+	width: z.number().positive(),
+	height: z.number().positive(),
+	focalPoint: focalPointSchema.nullable().optional(),
+	blurHash: z.string().trim().nullable().optional(),
+	averageColor: z.string().trim().nullable().optional(),
+	base64: z.string().trim().nullable().optional(),
+	isDark: z.boolean().nullable().optional(),
+	isLight: z.boolean().nullable().optional(),
+	state: mediaCropStateSchema
+		.refine((state) => state.x + state.width <= 1.000001, {
+			message: "Crop width must remain within the source image.",
+		})
+		.refine((state) => state.y + state.height <= 1.000001, {
+			message: "Crop height must remain within the source image.",
+		}),
+});
+
 const uploadPartSchema = z.object({
 	partNumber: z.number().int().positive(),
 	etag: z.string().trim(),
@@ -136,6 +172,9 @@ export const mediaEmbedResponseSchema = z.object({
 		description: "Original file name",
 		example: "placeholder-image.png",
 	}),
+	sourceType: z.enum(["original", "crop"]),
+	original: mediaOriginalResponseSchema.optional(),
+	crop: mediaCropStateSchema.optional(),
 	origin: mediaOriginSchema.meta({
 		description: "The provenance origin of the media item",
 		example: "human",
@@ -166,6 +205,9 @@ const mediaResponseSchema = z.object({
 		description: "Original file name",
 		example: "placeholder-image.png",
 	}),
+	sourceType: z.enum(["original", "crop"]),
+	original: mediaOriginalResponseSchema.optional(),
+	crop: mediaCropStateSchema.optional(),
 	folderId: z.number().nullable().meta({
 		description: "Media folder ID",
 		example: 1,
@@ -450,6 +492,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	updateSingle: {
 		body: z.object({
+			crop: mediaCropInputSchema.nullable().optional(),
 			key: z
 				.string()
 				.trim()
@@ -737,6 +780,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	createSingle: {
 		body: z.object({
+			crop: mediaCropInputSchema.optional(),
 			key: z.string().trim().meta({
 				description: "The media key",
 				example: "public/123e4567e89b12d3a456426614174000",

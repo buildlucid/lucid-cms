@@ -268,6 +268,9 @@ const ConfigSchema = z.object({
 				z.object({
 					width: z.number().optional(),
 					height: z.number().optional(),
+					fit: z
+						.enum(["cover", "contain", "fill", "inside", "outside"])
+						.optional(),
 					format: z
 						.union([
 							z.literal("webp"),

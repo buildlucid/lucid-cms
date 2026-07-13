@@ -11,7 +11,6 @@ const hardDeleteSingleMedia: ServiceFn<
 > = async (context, data) => {
 	const deleteRes = await permanentlyDeleteMedia(context, {
 		id: data.mediaId,
-		deletePoster: true,
 	});
 	if (deleteRes.error) return deleteRes;
 

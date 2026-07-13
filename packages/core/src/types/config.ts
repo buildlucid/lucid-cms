@@ -485,6 +485,7 @@ export interface LucidConfig {
 				{
 					width?: number;
 					height?: number;
+					fit?: "cover" | "contain" | "fill" | "inside" | "outside";
 					format?: "webp" | "avif" | "jpeg" | "png";
 					quality?: number;
 				}
@@ -673,6 +674,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 				{
 					width?: number;
 					height?: number;
+					fit?: "cover" | "contain" | "fill" | "inside" | "outside";
 					format?: "webp" | "avif" | "jpeg" | "png";
 					quality?: number;
 				}

@@ -2,7 +2,11 @@ import z from "zod";
 import { resolvedAdminCopySchema, translate } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { mediaEmbedResponseSchema, mediaOriginSchema } from "./media.js";
+import {
+	mediaCropInputSchema,
+	mediaEmbedResponseSchema,
+	mediaOriginSchema,
+} from "./media.js";
 
 const userIdParamSchema = z.object({
 	id: z.string().trim().meta({
@@ -57,6 +61,7 @@ const profilePictureUploadSessionResponseSchema = z.discriminatedUnion("mode", [
 ]);
 const updateProfilePictureBodySchema = z
 	.object({
+		crop: mediaCropInputSchema.nullable().optional(),
 		key: z.string().trim().optional().meta({
 			description: "The uploaded media key",
 			example: "public/123e4567e89b12d3a456426614174000",

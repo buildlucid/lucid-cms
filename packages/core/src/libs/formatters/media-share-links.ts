@@ -29,6 +29,7 @@ export interface ShareLinkAccessPropsT {
 	description: string | null;
 	expires_at: Date | string | null;
 	media_key: string | null;
+	media_source_type: "original" | "crop";
 	media_origin?: MediaOrigin | null;
 	media_type: string | null;
 	media_mime_type: string | null;
@@ -71,6 +72,7 @@ const formatShareAccess = (props: {
 		passwordRequired: false,
 		media: {
 			key: link.media_key ?? "",
+			sourceType: link.media_source_type,
 			origin: link.media_origin ?? "human",
 			type: mediaType,
 			mimeType: link.media_mime_type ?? "",

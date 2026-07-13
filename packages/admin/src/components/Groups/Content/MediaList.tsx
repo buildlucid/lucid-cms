@@ -3,7 +3,7 @@ import {
 	DragDropSensors,
 	type DragEventHandler,
 } from "@thisbeyond/solid-dnd";
-import type { Media } from "@types";
+import type { Media, MediaCropState } from "@types";
 import classNames from "classnames";
 import {
 	type Accessor,
@@ -196,18 +196,20 @@ export const MediaList: Component<{
 	const openQuickCrop = (item: Media) => {
 		rowTarget.setTargetId(item.id);
 		setActiveQuickCropSource({
-			url: item.url,
+			url: item.original?.url ?? item.url,
 			name: item.fileName ?? item.key,
-			mimeType: item.meta.mimeType,
+			mimeType: item.original?.meta.mimeType ?? item.meta.mimeType,
 			provenance: {
 				origin: item.origin,
 			},
+			crop: item.crop,
 		});
 		rowTarget.setTrigger("quickCrop", true);
 	};
 	const applyQuickCrop = async (
 		file: File,
 		provenance: ImageCropProvenance,
+		state: MediaCropState,
 	) => {
 		const item = quickCropMedia();
 		if (!item) throw new Error(T()("media.crop.source.missing"));
@@ -222,11 +224,15 @@ export const MediaList: Component<{
 		quickCropUpdateMedia.setPosterId(item.poster?.id);
 		quickCropUpdateMedia.setFocalPoint(null);
 
-		const success = await quickCropUpdateMedia.updateMedia(
-			file,
-			imageMeta,
-			provenance,
-		);
+		const success = await quickCropUpdateMedia.updateMedia(null, null, {
+			...provenance,
+			crop: {
+				file,
+				state,
+				imageMeta,
+				focalPoint: null,
+			},
+		});
 		if (!success) return false;
 
 		setQuickCropPreviewKeys((keys) => ({

@@ -217,7 +217,10 @@ export default configureLucid({
 		// },
 		// media: {
 		// 	images: {
-
+		// 		presets: {
+		// 			card: { width: 800, height: 450, fit: "cover" },
+		// 			contained: { width: 800, height: 450, fit: "contain" },
+		// 		},
 		// 	}
 		// },
 		access: {
