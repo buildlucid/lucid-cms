@@ -1,4 +1,8 @@
-import type { Locale, Media, MediaAltGenerateResponse } from "@types";
+import type {
+	Locale,
+	MediaAltGenerateResponse,
+	MediaTranslation,
+} from "@types";
 import {
 	FaSolidArrowRotateLeft,
 	FaSolidMagicWandSparkles,
@@ -584,7 +588,7 @@ const MediaAltGenerationModal: Component = () => {
 					? (output[localeCode] ?? existing?.value ?? null)
 					: (existing?.value ?? null),
 			};
-		}) as Media["alt"];
+		}) as MediaTranslation[];
 	}
 	const abortRequest = () => {
 		abortController?.abort();

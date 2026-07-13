@@ -101,7 +101,7 @@ const [get, set] = createStore<PageBuilderModalsStoreState>({
  * @example
  * pageBuilderModalsStore.open("mediaSelect", {
  *   data: { extensions: "jpg,png", selected: 123 },
- *   onCallback: (media) => console.log(media.url), // media is Media
+ *   onCallback: (media) => console.log(media.file.url), // media is Media
  * });
  */
 function open<K extends ModalType>(

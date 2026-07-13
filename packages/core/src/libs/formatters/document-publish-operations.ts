@@ -19,7 +19,7 @@ const formatUser = (params: {
 		username: params.username ?? null,
 		firstName: params.firstName ?? null,
 		lastName: params.lastName ?? null,
-		profilePicture: mediaFormatter.formatEmbed({
+		profilePicture: mediaFormatter.formatProfilePicture({
 			poster: params.profilePicture?.[0],
 			host: params.host,
 		}),
@@ -95,7 +95,7 @@ const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 			username: assignee.username ?? null,
 			firstName: assignee.first_name ?? null,
 			lastName: assignee.last_name ?? null,
-			profilePicture: mediaFormatter.formatEmbed({
+			profilePicture: mediaFormatter.formatProfilePicture({
 				poster: assignee.profile_picture?.[0],
 				host: props.host,
 			}),

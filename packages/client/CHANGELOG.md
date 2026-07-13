@@ -3,6 +3,7 @@
 ## 0.2.1 (unreleased)
 
 - Filter operator types added.
+- Updated media types and document media refs for the new media response contract.
 
 ## 0.2.0
 

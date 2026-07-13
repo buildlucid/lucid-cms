@@ -104,9 +104,10 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
 	const displayTitle = createMemo(() => {
-		return title() || helpers.formatFileNameTitle(props.media.fileName);
+		return title() || helpers.formatFileNameTitle(props.media.file.fileName);
 	});
 	const alt = createMemo(() => {
+		if (props.media.type !== "image") return null;
 		return helpers.getTranslation(props.media.alt, props.contentLocale);
 	});
 	const isSelected = createMemo(() => {
@@ -135,7 +136,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	const showCropAction = createMemo(() => {
 		return (
 			props.media.type === "image" &&
-			isSupportedCropMimeType(props.media.meta.mimeType) &&
+			isSupportedCropMimeType(props.media.file.meta.mimeType) &&
 			!props.showingDeleted?.() &&
 			props.onCrop !== undefined
 		);
@@ -307,15 +308,23 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 				ratio="16:9"
 				innerClass={classNames("overflow-hidden z-0 bg-card-hover", {
 					"rectangle-background":
-						props.media.type === "image" || props.media.poster,
+						props.media.type === "image" ||
+						(props.media.type === "video" && props.media.poster),
 				})}
 			>
 				<MediaPreview
-					media={props.media}
+					media={{
+						type: props.media.type,
+						url: props.media.file.url,
+						poster:
+							props.media.type === "video" ? props.media.poster : undefined,
+						updatedAt: props.media.updatedAt,
+					}}
 					alt={alt() || displayTitle() || ""}
 					cacheKey={props.previewCacheKey ?? props.media.updatedAt}
 					imageFit={
-						props.media.type === "image" || props.media.poster
+						props.media.type === "image" ||
+						(props.media.type === "video" && props.media.poster)
 							? "contain"
 							: undefined
 					}
@@ -347,8 +356,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 						<h3 class="mb-0.5 line-clamp-1 text-sm">{displayTitle() || "-"}</h3>
 						<ClickToCopy
 							type="simple"
-							text={props.media.key}
-							value={props.media.url}
+							text={props.media.file.key}
+							value={props.media.file.url}
 							class="text-xs"
 						/>
 					</div>

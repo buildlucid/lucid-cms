@@ -2,6 +2,7 @@ import type { ProfilePicture } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import helpers from "@/utils/helpers";
+import { getProcessedImageUrl } from "@/utils/media-url";
 
 interface UserDisplayProps {
 	user: {
@@ -18,7 +19,9 @@ interface UserDisplayProps {
 const UserDisplay: Component<UserDisplayProps> = (props) => {
 	// ----------------------------------
 	// Memos
-	const hasProfilePicture = createMemo(() => !!props.user.profilePicture?.url);
+	const hasProfilePicture = createMemo(
+		() => !!props.user.profilePicture?.file.url,
+	);
 
 	if (!props.user.username) {
 		return null;
@@ -61,7 +64,7 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 				)}
 			>
 				<Show
-					when={props.user.profilePicture?.url}
+					when={props.user.profilePicture?.file.url}
 					fallback={helpers.formatUserInitials({
 						firstName: props.user.firstName,
 						lastName: props.user.lastName,
@@ -70,7 +73,10 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 				>
 					{(url) => (
 						<img
-							src={`${url()}?preset=thumbnail-small&format=webp`}
+							src={getProcessedImageUrl(url(), {
+								preset: "thumbnail-small",
+								format: "webp",
+							})}
 							alt=""
 							class="h-full w-full rounded-full object-cover"
 							loading="lazy"

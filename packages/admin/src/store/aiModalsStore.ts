@@ -1,4 +1,9 @@
-import type { InternalDocumentField, Locale, Media } from "@types";
+import type {
+	InternalDocumentField,
+	Locale,
+	Media,
+	MediaTranslation,
+} from "@types";
 import type { Accessor } from "solid-js";
 import { createStore } from "solid-js/store";
 
@@ -12,11 +17,13 @@ export type AiImageSource = {
 type MediaContext = {
 	id?: string | number;
 	name?: Media["title"];
-	alt?: Media["alt"];
+	alt?: MediaTranslation[];
 };
 
 type AltSetter = (
-	value: Media["alt"] | ((_previous: Media["alt"]) => Media["alt"]),
+	value:
+		| MediaTranslation[]
+		| ((_previous: MediaTranslation[]) => MediaTranslation[]),
 ) => void | Promise<void>;
 
 export type MediaImageGenerationFileMeta = {

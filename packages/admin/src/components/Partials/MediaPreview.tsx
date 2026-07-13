@@ -1,4 +1,4 @@
-import type { Media } from "@types";
+import type { MediaPoster, MediaType } from "@types";
 import {
 	FaSolidFile,
 	FaSolidFileAudio,
@@ -17,18 +17,19 @@ import {
 	Switch,
 } from "solid-js";
 import Image from "@/components/Partials/Image";
+import { getProcessedImageUrl, type MediaImagePreset } from "@/utils/media-url";
 
 interface MediaPreviewProps {
 	media: {
-		type: Media["type"];
+		type: MediaType;
 		url: string;
-		poster?: Media["poster"];
+		poster?: MediaPoster | null;
 		updatedAt?: string | null;
 	};
 	richPreview?: boolean;
 	alt: string | null;
 	imageFit?: "cover" | "contain";
-	preset?: "thumbnail-small" | "thumbnail-medium" | "thumbnail-large";
+	preset?: MediaImagePreset;
 	cacheKey?: string | number | null;
 }
 
@@ -78,7 +79,10 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 					classes={"rounded-t-md backface-hidden z-10 relative"}
 					fit={props.imageFit}
 					src={withCacheKey(
-						`${props.media.url}?preset=${preset()}&format=webp`,
+						getProcessedImageUrl(props.media.url, {
+							preset: preset(),
+							format: "webp",
+						}),
 					)}
 					alt={props.alt || ""}
 					loading="lazy"
@@ -123,7 +127,10 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 										classes={"z-10 relative backface-hidden"}
 										fit={props.imageFit}
 										src={withCacheKey(
-											`${poster().url}?preset=${preset()}&format=webp`,
+											getProcessedImageUrl(poster().file.url, {
+												preset: preset(),
+												format: "webp",
+											}),
 										)}
 										alt={props.alt || ""}
 										loading="lazy"

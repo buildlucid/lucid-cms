@@ -1,4 +1,9 @@
-import type { Media, MediaCropInput, ResponseBody } from "@types";
+import type {
+	Media,
+	MediaCropInput,
+	MediaImageMeta,
+	ResponseBody,
+} from "@types";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -28,7 +33,7 @@ interface Params {
 	isHidden?: boolean;
 	width?: number;
 	height?: number;
-	focalPoint?: Media["meta"]["focalPoint"];
+	focalPoint?: MediaImageMeta["focalPoint"];
 	blurHash?: string;
 	averageColor?: string;
 	base64?: string | null;

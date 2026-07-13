@@ -7,7 +7,7 @@ import {
 	versionTypesSchema,
 } from "./document-versions.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { mediaEmbedResponseSchema } from "./media.js";
+import { profilePictureResponseSchema } from "./media.js";
 
 const documentResponseUserSchema = z.object({
 	id: z.number().meta({
@@ -30,7 +30,7 @@ const documentResponseUserSchema = z.object({
 		description: "The username of the user",
 		example: "admin",
 	}),
-	profilePicture: mediaEmbedResponseSchema.nullable(),
+	profilePicture: profilePictureResponseSchema.nullable(),
 });
 
 const documentResponseVersionSchema = z.object({
@@ -62,7 +62,7 @@ const documentWorkflowUserSchema = z.object({
 	username: z.string().nullable(),
 	firstName: z.string().nullable(),
 	lastName: z.string().nullable(),
-	profilePicture: mediaEmbedResponseSchema.nullable(),
+	profilePicture: profilePictureResponseSchema.nullable(),
 });
 
 const documentWorkflowSchema = z.object({

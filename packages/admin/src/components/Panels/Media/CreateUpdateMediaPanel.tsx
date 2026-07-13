@@ -1,4 +1,9 @@
-import type { ErrorResponse, Media, MediaCropState } from "@types";
+import type {
+	ErrorResponse,
+	Media,
+	MediaCropState,
+	MediaTranslation,
+} from "@types";
 import {
 	FaSolidArrowRotateLeft,
 	FaSolidArrowUpFromBracket,
@@ -46,6 +51,7 @@ import {
 	type ImageCropSource,
 	isSupportedCropMimeType,
 } from "@/utils/image-crop";
+import { getProcessedImageUrl } from "@/utils/media-url";
 import {
 	getTranslation,
 	recordToTranslations,
@@ -81,7 +87,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		  }
 		| undefined;
 	const [uploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
-	const [posterAlt, setPosterAlt] = createSignal<Media["alt"]>([]);
+	const [posterAlt, setPosterAlt] = createSignal<MediaTranslation[]>([]);
 	const [posterSnapshotLoading, setPosterSnapshotLoading] = createSignal(false);
 	const [posterFocalEditorOpen, setPosterFocalEditorOpen] = createSignal(false);
 	const [posterCropEditorOpen, setPosterCropEditorOpen] = createSignal(false);
@@ -161,8 +167,12 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		},
 		enabled: () => panelMode() === "update" && props.state.open,
 	});
+	const existingPoster = createMemo(() => {
+		const item = media.data?.data;
+		return item?.type === "video" ? item.poster : null;
+	});
 	const updatePosterMedia = props.id
-		? useUpdateMedia(() => media.data?.data.poster?.id)
+		? useUpdateMedia(() => existingPoster()?.id)
 		: null;
 	const updatePosterAlt = api.media.useUpdateSingle();
 	const foldersHierarchy = api.mediaFolders.useGetHierarchy({
@@ -202,7 +212,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		return (
 			showPosterInput() &&
 			PosterFile.getRemovedCurrent() !== true &&
-			(PosterFile.getFile() !== null || media.data?.data.poster != null)
+			(PosterFile.getFile() !== null || existingPoster() != null)
 		);
 	});
 	const posterPreview = createMemo(() => {
@@ -217,10 +227,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			};
 		}
 
-		if (
-			PosterFile.getRemovedCurrent() !== true &&
-			media.data?.data.poster != null
-		) {
+		if (PosterFile.getRemovedCurrent() !== true && existingPoster() != null) {
+			const poster = existingPoster();
+			if (!poster) return null;
+			const original =
+				poster.file.sourceType === "crop" ? poster.file.original : undefined;
 			const currentFile = PosterFile.getCurrentFile();
 			const cropRemoved = PosterFile.getCropRemoved();
 			return {
@@ -228,17 +239,23 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				url: cropRemoved
 					? (currentFile?.originalPreviewUrl ??
 						currentFile?.originalUrl ??
-						media.data.data.poster.original?.url ??
-						media.data.data.poster.url)
+						original?.url ??
+						poster.file.url)
 					: (currentFile?.url ??
-						`${media.data.data.poster.url}?preset=thumbnail-medium&format=webp`),
+						getProcessedImageUrl(poster.file.url, {
+							preset: "thumbnail-medium",
+							format: "webp",
+						})),
 				focalPointUrl: cropRemoved
 					? (currentFile?.originalFocalPointUrl ??
 						currentFile?.originalUrl ??
-						media.data.data.poster.original?.url ??
-						media.data.data.poster.url)
+						original?.url ??
+						poster.file.url)
 					: (currentFile?.focalPointUrl ??
-						`${media.data.data.poster.url}?preset=thumbnail-large&format=webp`),
+						getProcessedImageUrl(poster.file.url, {
+							preset: "thumbnail-large",
+							format: "webp",
+						})),
 				isNew: false,
 			};
 		}
@@ -259,10 +276,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		const file = MediaFile.getFile();
 		if (file) return { file, filename: file.name };
 
-		if (media.data?.data.type === "image" && media.data.data.url) {
+		if (media.data?.data.type === "image" && media.data.data.file.url) {
 			return {
-				url: media.data.data.url,
-				filename: media.data.data.fileName ?? media.data.data.key,
+				url: media.data.data.file.url,
+				filename: media.data.data.file.fileName ?? media.data.data.file.key,
 			};
 		}
 
@@ -274,11 +291,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		const file = PosterFile.getFile();
 		if (file) return { file, filename: file.name };
 
-		const poster = media.data?.data.poster;
-		if (poster?.url) {
+		const poster = existingPoster();
+		if (poster?.file.url) {
 			return {
-				url: poster.url,
-				filename: poster.fileName ?? poster.key,
+				url: poster.file.url,
+				filename: poster.file.fileName ?? poster.file.key,
 			};
 		}
 
@@ -293,15 +310,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			};
 		}
 
-		const poster = media.data?.data.poster;
+		const poster = existingPoster();
 		if (
 			PosterFile.getRemovedCurrent() !== true &&
 			poster?.type === "image" &&
-			poster.url
+			poster.file.url
 		) {
 			return {
-				url: poster.url,
-				filename: poster.fileName ?? poster.key,
+				url: poster.file.url,
+				filename: poster.file.fileName ?? poster.file.key,
 			};
 		}
 
@@ -321,19 +338,21 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			};
 		}
 
-		const poster = media.data?.data.poster;
+		const poster = existingPoster();
+		const original =
+			poster?.file.sourceType === "crop" ? poster.file.original : undefined;
 		if (
 			PosterFile.getRemovedCurrent() !== true &&
 			poster?.type === "image" &&
-			(poster.original?.url || poster.url) &&
+			(original?.url || poster.file.url) &&
 			isSupportedCropMimeType(
-				poster.original?.meta.mimeType ?? poster.meta.mimeType,
+				original?.meta.mimeType ?? poster.file.meta.mimeType,
 			)
 		) {
 			return {
-				url: poster.original?.url ?? poster.url,
-				name: poster.fileName ?? poster.key,
-				mimeType: poster.original?.meta.mimeType ?? poster.meta.mimeType,
+				url: original?.url ?? poster.file.url,
+				name: poster.file.fileName ?? poster.file.key,
+				mimeType: original?.meta.mimeType ?? poster.file.meta.mimeType,
 				provenance: {
 					origin: poster.origin,
 				},
@@ -357,13 +376,14 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			};
 		}
 
-		if (
-			PosterFile.getRemovedCurrent() !== true &&
-			media.data?.data.poster != null
-		) {
+		if (PosterFile.getRemovedCurrent() !== true && existingPoster() != null) {
+			const poster = existingPoster();
+			if (!poster) return null;
+			const original =
+				poster.file.sourceType === "crop" ? poster.file.original : undefined;
 			const meta = PosterFile.getCropRemoved()
-				? (media.data.data.poster.original?.meta ?? media.data.data.poster.meta)
-				: media.data.data.poster.meta;
+				? (original?.meta ?? poster.file.meta)
+				: poster.file.meta;
 			return {
 				fileSize: meta.fileSize,
 				mimeType: meta.mimeType,
@@ -389,7 +409,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		return pills.filter(Boolean) as string[];
 	});
 	const posterEmptyDescription = createMemo(() => {
-		if (PosterFile.getRemovedCurrent() && media.data?.data.poster) {
+		if (PosterFile.getRemovedCurrent() && existingPoster()) {
 			return T()("media.poster.pending.removed");
 		}
 		return T()("media.poster.empty.description");
@@ -402,10 +422,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 			return file;
 		}
 
-		if (media.data?.data.type === "video" && media.data.data.url) {
+		if (media.data?.data.type === "video" && media.data.data.file.url) {
 			return {
-				url: media.data.data.url,
-				fileName: media.data.data.fileName ?? media.data.data.key,
+				url: media.data.data.file.url,
+				fileName: media.data.data.file.fileName ?? media.data.data.file.key,
 			};
 		}
 
@@ -413,7 +433,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 	const fileSizeMeta = createMemo(() => {
 		const values = [
-			helpers.bytesToSize(media.data?.data.meta.fileSize ?? 0),
+			helpers.bytesToSize(media.data?.data.file.meta.fileSize ?? 0),
 			posterMeta()?.fileSize !== undefined
 				? helpers.bytesToSize(posterMeta()?.fileSize)
 				: undefined,
@@ -422,7 +442,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	});
 	const extensionMeta = createMemo(() => {
 		const values = [
-			media.data?.data.meta.extension,
+			media.data?.data.file.meta.extension,
 			posterMeta()?.extension,
 		].filter(Boolean);
 		return values.join(", ");
@@ -548,8 +568,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	const PosterAltGenerationButton = mediaAltGeneration.createActionButton({
 		image: posterAltImage,
 		media: () => ({
-			id: media.data?.data.poster?.id,
-			name: media.data?.data.poster?.title,
+			id: existingPoster()?.id,
+			name: [],
 			alt: posterAlt(),
 		}),
 		locales,
@@ -575,37 +595,39 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 	const updateData = createMemo(() => {
 		const state = targetState();
+		const item = media.data?.data;
+		const poster = existingPoster();
 		const { changed, data } = helpers.updateData(
 			{
 				key: undefined,
-				title: media.data?.data.title || [],
-				alt: media.data?.data.alt || [],
+				title: item?.title || [],
+				alt: item?.type === "image" ? item.alt : undefined,
 				description: showDescriptionInput()
-					? (media.data?.data.description ?? [])
+					? item?.type === "video" || item?.type === "audio"
+						? item.description
+						: []
 					: undefined,
 				summary: showSummaryInput()
-					? (media.data?.data.summary ?? [])
+					? item?.type === "document"
+						? item.summary
+						: []
 					: undefined,
-				folderId: media.data?.data.folderId ?? null,
-				public: media.data?.data.public ?? true,
-				posterId: showPosterInput()
-					? (media.data?.data.poster?.id ?? null)
-					: undefined,
+				folderId: item?.folderId ?? null,
+				public: item?.public ?? true,
+				posterId: showPosterInput() ? (poster?.id ?? null) : undefined,
 				focalPoint:
-					media.data?.data.type === "image"
-						? (media.data.data.meta.focalPoint ?? null)
+					item?.type === "image"
+						? (item.file.meta.focalPoint ?? null)
 						: undefined,
-				posterAlt: showPosterAltInput()
-					? (media.data?.data.poster?.alt ?? [])
-					: undefined,
+				posterAlt: showPosterAltInput() ? (poster?.alt ?? []) : undefined,
 				posterFocalPoint: showPosterAltInput()
-					? (media.data?.data.poster?.meta.focalPoint ?? null)
+					? (poster?.file.meta.focalPoint ?? null)
 					: undefined,
 			},
 			{
 				key: state?.key(),
 				title: state?.title(),
-				alt: state?.alt(),
+				alt: showAltInput() ? state?.alt() : undefined,
 				description: showDescriptionInput() ? state?.description() : undefined,
 				summary: showSummaryInput() ? state?.summary() : undefined,
 				folderId: state?.folderId(),
@@ -755,10 +777,8 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	function undoPosterFile() {
 		PosterFile.setGetFile(null);
 		PosterFile.setGetRemovedCurrent(false);
-		PosterFile.setFocalPoint(media.data?.data.poster?.meta.focalPoint ?? null);
-		setPosterAlt(
-			media.data?.data.poster?.alt ?? recordToTranslations(locales()),
-		);
+		PosterFile.setFocalPoint(existingPoster()?.file.meta.focalPoint ?? null);
+		setPosterAlt(existingPoster()?.alt ?? recordToTranslations(locales()));
 	}
 	async function createPosterSnapshot() {
 		const source = posterSnapshotSource();
@@ -798,17 +818,16 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 
 		const imageMeta = await PosterFile.getImageMeta();
 		const cropImageMeta = await PosterFile.getCropImageMeta();
-		const existingPoster = media.data?.data.poster;
-		if (existingPoster && updatePosterMedia) {
-			updatePosterMedia.setTitle(existingPoster.title ?? []);
+		const poster = existingPoster();
+		if (poster && updatePosterMedia) {
+			updatePosterMedia.setTitle([]);
 			updatePosterMedia.setAlt(posterAlt());
-			updatePosterMedia.setDescription(existingPoster.description ?? []);
-			updatePosterMedia.setSummary(existingPoster.summary ?? []);
 			updatePosterMedia.setFolderId(null);
 			updatePosterMedia.setPublic(targetState()?.public() ?? true);
 			updatePosterMedia.setFocalPoint(PosterFile.getFocalPoint() ?? undefined);
 
 			const success = await updatePosterMedia.updateMedia(file, imageMeta, {
+				type: "image",
 				...PosterFile.getFileProvenance(),
 				crop: cropFile
 					? {
@@ -821,11 +840,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						? null
 						: undefined,
 			});
-			return success ? existingPoster.id : null;
+			return success ? poster.id : null;
 		}
 
 		if (!file) return null;
-		const poster = await createPosterMedia.createMedia(file, imageMeta, {
+		const createdPoster = await createPosterMedia.createMedia(file, imageMeta, {
 			title: [],
 			alt: posterAlt(),
 			folderId: null,
@@ -845,19 +864,19 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				: undefined,
 		});
 
-		return poster?.id ?? null;
+		return createdPoster?.id ?? null;
 	}
 
 	// ---------------------------------
 	// Handlers
 	const updateExistingPosterAlt = async () => {
-		const poster = media.data?.data.poster;
+		const poster = existingPoster();
 		if (!poster || PosterFile.getFile() || PosterFile.getRemovedCurrent()) {
 			return true;
 		}
 
 		const { changed } = helpers.updateData(
-			{ alt: poster.alt, focalPoint: poster.meta.focalPoint ?? null },
+			{ alt: poster.alt, focalPoint: poster.file.meta.focalPoint ?? null },
 			{ alt: posterAlt(), focalPoint: PosterFile.getFocalPoint() },
 		);
 		if (!changed) return true;
@@ -926,6 +945,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				MediaFile.getFile(),
 				imageMeta,
 				{
+					type: currentMediaType() ?? "unknown",
 					...MediaFile.getFileProvenance(),
 					crop: MediaFile.getCropFile()
 						? {
@@ -1027,76 +1047,123 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				if (!mediaData) return;
 
 				updateMedia?.setTitle(mediaData.title || []);
-				updateMedia?.setAlt(mediaData.alt || []);
-				updateMedia?.setDescription(mediaData.description || []);
-				updateMedia?.setSummary(mediaData.summary || []);
+				updateMedia?.setAlt(mediaData.type === "image" ? mediaData.alt : []);
+				updateMedia?.setDescription(
+					mediaData.type === "video" || mediaData.type === "audio"
+						? mediaData.description
+						: [],
+				);
+				updateMedia?.setSummary(
+					mediaData.type === "document" ? mediaData.summary : [],
+				);
 				updateMedia?.setFolderId(mediaData.folderId ?? null);
 				updateMedia?.setPublic(mediaData.public ?? true);
-				updateMedia?.setPosterId(mediaData.poster?.id ?? null);
-				setPosterAlt(mediaData.poster?.alt ?? recordToTranslations(locales()));
+				const poster = mediaData.type === "video" ? mediaData.poster : null;
+				updateMedia?.setPosterId(poster?.id ?? null);
+				setPosterAlt(poster?.alt ?? recordToTranslations(locales()));
 				setPosterCropEditorOpen(false);
 				setActivePosterCropSource(null);
 				MediaFile.reset();
+				const imageOriginal =
+					mediaData.type === "image" && mediaData.file.sourceType === "crop"
+						? mediaData.file.original
+						: undefined;
 				MediaFile.setCurrentFile({
-					name: mediaData.fileName ?? mediaData.key,
-					url: mediaData.url
+					name: mediaData.file.fileName ?? mediaData.file.key,
+					url: mediaData.file.url
 						? mediaData.type === "image"
-							? `${mediaData.url}?preset=thumbnail-medium&format=webp`
-							: mediaData.url
+							? getProcessedImageUrl(mediaData.file.url, {
+									preset: "thumbnail-medium",
+									format: "webp",
+								})
+							: mediaData.file.url
 						: undefined,
-					focalPointUrl: mediaData.url
-						? `${mediaData.url}?preset=thumbnail-large&format=webp`
+					focalPointUrl: mediaData.file.url
+						? getProcessedImageUrl(mediaData.file.url, {
+								preset: "thumbnail-large",
+								format: "webp",
+							})
 						: undefined,
-					originalUrl: mediaData.original?.url ?? mediaData.url,
+					originalUrl: imageOriginal?.url ?? mediaData.file.url,
 					type: mediaData.type || undefined,
 					mimeType:
-						mediaData.original?.meta.mimeType ?? mediaData.meta.mimeType,
+						imageOriginal?.meta.mimeType ?? mediaData.file.meta.mimeType,
 					origin: mediaData.origin,
-					width: mediaData.original?.meta.width ?? mediaData.meta.width,
-					height: mediaData.original?.meta.height ?? mediaData.meta.height,
-					focalPoint: mediaData.meta.focalPoint ?? null,
+					width:
+						imageOriginal?.meta.width ??
+						(mediaData.type === "image" ? mediaData.file.meta.width : null),
+					height:
+						imageOriginal?.meta.height ??
+						(mediaData.type === "image" ? mediaData.file.meta.height : null),
+					focalPoint:
+						mediaData.type === "image"
+							? (mediaData.file.meta.focalPoint ?? null)
+							: null,
 					originalFocalPoint:
-						mediaData.original?.meta.focalPoint ??
-						mediaData.meta.focalPoint ??
+						imageOriginal?.meta.focalPoint ??
+						(mediaData.type === "image"
+							? mediaData.file.meta.focalPoint
+							: null) ??
 						null,
-					crop: mediaData.crop,
-					originalPreviewUrl: mediaData.original?.url
-						? `${mediaData.original.url}?preset=thumbnail-medium&format=webp`
+					crop:
+						mediaData.type === "image" && mediaData.file.sourceType === "crop"
+							? mediaData.file.crop
+							: undefined,
+					originalPreviewUrl: imageOriginal?.url
+						? getProcessedImageUrl(imageOriginal.url, {
+								preset: "thumbnail-medium",
+								format: "webp",
+							})
 						: undefined,
-					originalFocalPointUrl: mediaData.original?.url
-						? `${mediaData.original.url}?preset=thumbnail-large&format=webp`
+					originalFocalPointUrl: imageOriginal?.url
+						? getProcessedImageUrl(imageOriginal.url, {
+								preset: "thumbnail-large",
+								format: "webp",
+							})
 						: undefined,
 				});
 				PosterFile.reset();
-				if (mediaData.poster) {
+				if (poster) {
+					const posterOriginal =
+						poster.file.sourceType === "crop"
+							? poster.file.original
+							: undefined;
 					PosterFile.setCurrentFile({
-						name: mediaData.poster.fileName ?? T()("media.poster.label"),
-						url: `${mediaData.poster.url}?preset=thumbnail-medium&format=webp`,
-						focalPointUrl: `${mediaData.poster.url}?preset=thumbnail-large&format=webp`,
-						originalUrl: mediaData.poster.original?.url ?? mediaData.poster.url,
-						originalPreviewUrl: mediaData.poster.original?.url
-							? `${mediaData.poster.original.url}?preset=thumbnail-medium&format=webp`
+						name: poster.file.fileName ?? T()("media.poster.label"),
+						url: getProcessedImageUrl(poster.file.url, {
+							preset: "thumbnail-medium",
+							format: "webp",
+						}),
+						focalPointUrl: getProcessedImageUrl(poster.file.url, {
+							preset: "thumbnail-large",
+							format: "webp",
+						}),
+						originalUrl: posterOriginal?.url ?? poster.file.url,
+						originalPreviewUrl: posterOriginal?.url
+							? getProcessedImageUrl(posterOriginal.url, {
+									preset: "thumbnail-medium",
+									format: "webp",
+								})
 							: undefined,
-						originalFocalPointUrl: mediaData.poster.original?.url
-							? `${mediaData.poster.original.url}?preset=thumbnail-large&format=webp`
+						originalFocalPointUrl: posterOriginal?.url
+							? getProcessedImageUrl(posterOriginal.url, {
+									preset: "thumbnail-large",
+									format: "webp",
+								})
 							: undefined,
 						type: "image",
 						mimeType:
-							mediaData.poster.original?.meta.mimeType ??
-							mediaData.poster.meta.mimeType,
-						origin: mediaData.poster.origin,
-						width:
-							mediaData.poster.original?.meta.width ??
-							mediaData.poster.meta.width,
-						height:
-							mediaData.poster.original?.meta.height ??
-							mediaData.poster.meta.height,
-						focalPoint: mediaData.poster.meta.focalPoint ?? null,
+							posterOriginal?.meta.mimeType ?? poster.file.meta.mimeType,
+						origin: poster.origin,
+						width: posterOriginal?.meta.width ?? poster.file.meta.width,
+						height: posterOriginal?.meta.height ?? poster.file.meta.height,
+						focalPoint: poster.file.meta.focalPoint ?? null,
 						originalFocalPoint:
-							mediaData.poster.original?.meta.focalPoint ??
-							mediaData.poster.meta.focalPoint ??
+							posterOriginal?.meta.focalPoint ??
+							poster.file.meta.focalPoint ??
 							null,
-						crop: mediaData.poster.crop,
+						crop:
+							poster.file.sourceType === "crop" ? poster.file.crop : undefined,
 					});
 				}
 				setHydratedMediaId(mediaData.id);
@@ -1529,9 +1596,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										</Button>
 									</Show>
 									<Show
-										when={
-											PosterFile.getRemovedCurrent() && media.data?.data.poster
-										}
+										when={PosterFile.getRemovedCurrent() && existingPoster()}
 									>
 										<Button
 											type="button"
@@ -1619,7 +1684,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 								},
 								{
 									label: T()("common.dimensions"),
-									value: `${media.data?.data.meta.width} x ${media.data?.data.meta.height}`,
+									value:
+										media.data?.data.type === "image"
+											? `${media.data.data.file.meta.width} x ${media.data.data.file.meta.height}`
+											: undefined,
 									show: media.data?.data.type === "image",
 								},
 								{
@@ -1628,7 +1696,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 								},
 								{
 									label: T()("common.mime.type"),
-									value: media.data?.data.meta.mimeType,
+									value: media.data?.data.file.meta.mimeType,
 								},
 								{
 									label: T()("common.created.at"),

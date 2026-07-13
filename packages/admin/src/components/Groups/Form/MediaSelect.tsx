@@ -73,21 +73,24 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	const getMediaTitle = (media?: MediaRelationRef) => {
 		return (
 			helpers.getTranslation(media?.title, contentLocale()) ||
-			helpers.getTranslation(media?.alt, contentLocale()) ||
-			helpers.formatFileNameTitle(media?.fileName) ||
-			media?.key ||
+			(media?.type === "image"
+				? helpers.getTranslation(media.alt, contentLocale())
+				: null) ||
+			helpers.formatFileNameTitle(media?.file.fileName) ||
+			media?.file.key ||
 			""
 		);
 	};
 	const getMediaAlt = (media?: MediaRelationRef) => {
 		return (
-			helpers.getTranslation(media?.alt, contentLocale()) ||
-			getMediaTitle(media)
+			(media?.type === "image"
+				? helpers.getTranslation(media.alt, contentLocale())
+				: null) || getMediaTitle(media)
 		);
 	};
 	const getMediaDimensions = (media?: MediaRelationRef) => {
-		const width = media?.meta.width ?? null;
-		const height = media?.meta.height ?? null;
+		const width = media?.type === "image" ? media.file.meta.width : null;
+		const height = media?.type === "image" ? media.file.meta.height : null;
 		if (!width || !height) return null;
 		return `${width}x${height}`;
 	};
@@ -191,6 +194,14 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	const mediaDimensions = createMemo(() =>
 		getMediaDimensions(primarySelectedMedia()),
 	);
+	const primaryMediaPreview = createMemo(() => {
+		const media = primarySelectedMedia();
+		return {
+			url: media?.file.url ?? "",
+			type: media?.type ?? "image",
+			poster: media?.type === "video" ? media.poster : undefined,
+		};
+	});
 	const fieldErrors = createMemo(() => normalizeFieldErrors(props.errors));
 	const getItemErrors = (itemIndex: number) =>
 		fieldErrors().filter((error) => error.itemIndex === itemIndex);
@@ -290,35 +301,31 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										</div>
 									</Show>
 									<div class="flex flex-wrap items-center gap-2 ">
-										<Show when={primarySelectedMedia()?.meta.fileSize}>
+										<Show when={primarySelectedMedia()?.file.meta.fileSize}>
 											<Pill theme="outline">
 												{helpers.bytesToSize(
-													primarySelectedMedia()?.meta.fileSize,
+													primarySelectedMedia()?.file.meta.fileSize,
 												)}
 											</Pill>
 										</Show>
 										<Show when={mediaDimensions()}>
 											<Pill theme="outline">{mediaDimensions()}</Pill>
 										</Show>
-										<Show when={primarySelectedMedia()?.meta.mimeType}>
+										<Show when={primarySelectedMedia()?.file.meta.mimeType}>
 											<Pill theme="outline">
-												{primarySelectedMedia()?.meta.mimeType}
+												{primarySelectedMedia()?.file.meta.mimeType}
 											</Pill>
 										</Show>
-										<Show when={primarySelectedMedia()?.meta.extension}>
+										<Show when={primarySelectedMedia()?.file.meta.extension}>
 											<Pill theme="outline">
-												{primarySelectedMedia()?.meta.extension.toUpperCase()}
+												{primarySelectedMedia()?.file.meta.extension.toUpperCase()}
 											</Pill>
 										</Show>
 									</div>
 								</div>
 								<div class="w-full max-w-120 h-full max-h-96 mx-auto z-10 flex items-center justify-center :flex *:items-center *:justify-center [&_img]:max-h-96 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-96 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full">
 									<MediaPreview
-										media={{
-											url: primarySelectedMedia()?.url || "",
-											type: primarySelectedMedia()?.type || "image",
-											poster: primarySelectedMedia()?.poster,
-										}}
+										media={primaryMediaPreview()}
 										alt={mediaAlt() || ""}
 										richPreview={true}
 										imageFit="contain"
@@ -335,8 +342,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										<div class=" border-t-0flex items-center gap-2 min-w-0">
 											<ClickToCopy
 												type="simple"
-												text={primarySelectedMedia()?.key || ""}
-												value={primarySelectedMedia()?.url || ""}
+												text={primarySelectedMedia()?.file.key || ""}
+												value={primarySelectedMedia()?.file.url || ""}
 												class="text-xs text-unfocused max-w-full"
 											/>
 										</div>
@@ -545,12 +552,12 @@ const MediaSortableItem: Component<{
 						<Show when={props.dimensions}>
 							<Pill theme="outline">{props.dimensions}</Pill>
 						</Show>
-						<Show when={props.media.meta.mimeType}>
-							<Pill theme="outline">{props.media.meta.mimeType}</Pill>
+						<Show when={props.media.file.meta.mimeType}>
+							<Pill theme="outline">{props.media.file.meta.mimeType}</Pill>
 						</Show>
-						<Show when={props.media.meta.extension}>
+						<Show when={props.media.file.meta.extension}>
 							<Pill theme="outline">
-								{props.media.meta.extension.toUpperCase()}
+								{props.media.file.meta.extension.toUpperCase()}
 							</Pill>
 						</Show>
 					</div>
@@ -558,9 +565,10 @@ const MediaSortableItem: Component<{
 				<div class="pointer-events-none flex h-40 items-center justify-center [&_img]:max-h-40 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-40 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full">
 					<MediaPreview
 						media={{
-							url: props.media.url,
+							url: props.media.file.url,
 							type: props.media.type,
-							poster: props.media.poster,
+							poster:
+								props.media.type === "video" ? props.media.poster : undefined,
 						}}
 						alt={props.alt}
 						richPreview={true}
@@ -577,8 +585,8 @@ const MediaSortableItem: Component<{
 					<div class="mt-1">
 						<ClickToCopy
 							type="simple"
-							text={props.media.key || ""}
-							value={props.media.url || ""}
+							text={props.media.file.key}
+							value={props.media.file.url}
 							class="text-xs text-unfocused max-w-full"
 						/>
 					</div>

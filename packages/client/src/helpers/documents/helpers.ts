@@ -33,7 +33,12 @@ const isDocumentRef = (value: unknown): value is DocumentRef => {
 };
 
 const isMediaRef = (value: unknown): value is NonNullable<MediaRef> => {
-	return isObjectRecord(value) && "url" in value && "id" in value;
+	return (
+		isObjectRecord(value) &&
+		typeof value.id === "number" &&
+		isObjectRecord(value.file) &&
+		typeof value.file.url === "string"
+	);
 };
 
 const isUserRef = (value: unknown): value is NonNullable<UserRef> => {

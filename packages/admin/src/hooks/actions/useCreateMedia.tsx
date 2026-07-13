@@ -1,19 +1,22 @@
-import type { ErrorResponse, Media, MediaCropState } from "@types";
+import type {
+	ErrorResponse,
+	Media,
+	MediaCropState,
+	MediaImageMeta,
+	MediaTranslation,
+} from "@types";
 import { createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
+import helpers from "@/utils/helpers";
 import type { ImageMeta } from "@/utils/media-meta";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 export const useCreateMedia = () => {
 	const [getTitle, setTitle] = createSignal<Media["title"]>([]);
-	const [getAlt, setAlt] = createSignal<Media["alt"]>([]);
-	const [getDescription, setDescription] = createSignal<
-		NonNullable<Media["description"]>
-	>([]);
-	const [getSummary, setSummary] = createSignal<NonNullable<Media["summary"]>>(
-		[],
-	);
+	const [getAlt, setAlt] = createSignal<MediaTranslation[]>([]);
+	const [getDescription, setDescription] = createSignal<MediaTranslation[]>([]);
+	const [getSummary, setSummary] = createSignal<MediaTranslation[]>([]);
 	const [getKey, setKey] = createSignal<string>();
 	const [getFolderId, setFolderId] = createSignal<number | null | undefined>(
 		undefined,
@@ -77,21 +80,21 @@ export const useCreateMedia = () => {
 		imageMeta: ImageMeta | null,
 		options?: {
 			title?: Media["title"];
-			alt?: Media["alt"];
-			description?: NonNullable<Media["description"]>;
-			summary?: NonNullable<Media["summary"]>;
+			alt?: MediaTranslation[];
+			description?: MediaTranslation[];
+			summary?: MediaTranslation[];
 			folderId?: number | null;
 			public?: boolean;
 			isHidden?: boolean;
 			posterId?: number | null;
-			focalPoint?: Media["meta"]["focalPoint"];
+			focalPoint?: MediaImageMeta["focalPoint"];
 			origin?: Media["origin"];
 			aiGenerationRequestId?: string;
 			crop?: {
 				file: File;
 				state: MediaCropState;
 				imageMeta: ImageMeta | null;
-				focalPoint?: Media["meta"]["focalPoint"];
+				focalPoint?: MediaImageMeta["focalPoint"];
 			};
 		},
 	): Promise<Media | null> => {
@@ -113,29 +116,37 @@ export const useCreateMedia = () => {
 				)
 			: undefined;
 		if (options?.crop && !cropKey) return null;
+		const mediaType = helpers.getMediaType(file?.type);
 
 		const result = await createSingle.action.mutateAsync({
 			key: fileKey,
 			fileName: file?.name,
 			title: options?.title ?? getTitle(),
-			alt: options?.alt ?? getAlt(),
-			description: options?.description ?? getDescription(),
-			summary: options?.summary ?? getSummary(),
+			alt: mediaType === "image" ? (options?.alt ?? getAlt()) : undefined,
+			description:
+				mediaType === "video" || mediaType === "audio"
+					? (options?.description ?? getDescription())
+					: undefined,
+			summary:
+				mediaType === "document"
+					? (options?.summary ?? getSummary())
+					: undefined,
 			origin: options?.origin ?? "human",
 			aiGenerationRequestId: options?.aiGenerationRequestId,
 			folderId: options?.folderId ?? getFolderId() ?? null,
-			posterId: options?.posterId,
+			posterId: mediaType === "video" ? options?.posterId : undefined,
 			isHidden: options?.isHidden,
-			width: imageMeta?.width,
-			height: imageMeta?.height,
-			focalPoint: options?.focalPoint ?? undefined,
-			blurHash: imageMeta?.blurHash,
-			averageColor: imageMeta?.averageColor,
-			base64: imageMeta?.base64,
-			isDark: imageMeta?.isDark,
-			isLight: imageMeta?.isLight,
+			width: mediaType === "image" ? imageMeta?.width : undefined,
+			height: mediaType === "image" ? imageMeta?.height : undefined,
+			focalPoint:
+				mediaType === "image" ? (options?.focalPoint ?? undefined) : undefined,
+			blurHash: mediaType === "image" ? imageMeta?.blurHash : undefined,
+			averageColor: mediaType === "image" ? imageMeta?.averageColor : undefined,
+			base64: mediaType === "image" ? imageMeta?.base64 : undefined,
+			isDark: mediaType === "image" ? imageMeta?.isDark : undefined,
+			isLight: mediaType === "image" ? imageMeta?.isLight : undefined,
 			crop:
-				options?.crop && cropKey
+				mediaType === "image" && options?.crop && cropKey
 					? {
 							key: cropKey,
 							fileName: options.crop.file.name,

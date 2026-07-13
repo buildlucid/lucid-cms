@@ -19,6 +19,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
+import { getProcessedImageUrl } from "@/utils/media-url";
 import {
 	getTranslation,
 	mergeTranslations,
@@ -131,7 +132,7 @@ const CreateUpdateProfilePicturePanel: Component<
 				key: undefined,
 				title: hydrateTranslations(profilePictureMedia()?.title),
 				alt: hydrateTranslations(profilePictureMedia()?.alt),
-				focalPoint: profilePictureMedia()?.meta.focalPoint ?? null,
+				focalPoint: profilePictureMedia()?.file.meta.focalPoint ?? null,
 			},
 			{
 				key: createMedia.state.key(),
@@ -162,10 +163,10 @@ const CreateUpdateProfilePicturePanel: Component<
 		if (file) return { file, filename: file.name };
 
 		const profilePicture = profilePictureMedia();
-		if (profilePicture?.url) {
+		if (profilePicture?.file.url) {
 			return {
-				url: profilePicture.url,
-				filename: profilePicture.fileName ?? profilePicture.key,
+				url: profilePicture.file.url,
+				filename: profilePicture.file.fileName ?? profilePicture.file.key,
 			};
 		}
 
@@ -358,31 +359,40 @@ const CreateUpdateProfilePicturePanel: Component<
 		createMedia.setPublic(true);
 		MediaFile.reset();
 		if (profilePicture) {
+			const file = profilePicture.file;
+			const original = file.sourceType === "crop" ? file.original : undefined;
 			MediaFile.setCurrentFile({
-				name: profilePicture.fileName ?? profilePicture.key,
-				url: `${profilePicture.url}?preset=thumbnail-medium&format=webp`,
-				focalPointUrl: `${profilePicture.url}?preset=thumbnail-large&format=webp`,
-				originalUrl: profilePicture.original?.url ?? profilePicture.url,
-				originalPreviewUrl: profilePicture.original?.url
-					? `${profilePicture.original.url}?preset=thumbnail-medium&format=webp`
+				name: file.fileName ?? file.key,
+				url: getProcessedImageUrl(file.url, {
+					preset: "thumbnail-medium",
+					format: "webp",
+				}),
+				focalPointUrl: getProcessedImageUrl(file.url, {
+					preset: "thumbnail-large",
+					format: "webp",
+				}),
+				originalUrl: original?.url ?? file.url,
+				originalPreviewUrl: original?.url
+					? getProcessedImageUrl(original.url, {
+							preset: "thumbnail-medium",
+							format: "webp",
+						})
 					: undefined,
-				originalFocalPointUrl: profilePicture.original?.url
-					? `${profilePicture.original.url}?preset=thumbnail-large&format=webp`
+				originalFocalPointUrl: original?.url
+					? getProcessedImageUrl(original.url, {
+							preset: "thumbnail-large",
+							format: "webp",
+						})
 					: undefined,
 				type: profilePicture.type,
-				mimeType:
-					profilePicture.original?.meta.mimeType ??
-					profilePicture.meta.mimeType,
+				mimeType: original?.meta.mimeType ?? file.meta.mimeType,
 				origin: profilePicture.origin,
-				width: profilePicture.original?.meta.width ?? profilePicture.meta.width,
-				height:
-					profilePicture.original?.meta.height ?? profilePicture.meta.height,
-				focalPoint: profilePicture.meta.focalPoint ?? null,
+				width: original?.meta.width ?? file.meta.width,
+				height: original?.meta.height ?? file.meta.height,
+				focalPoint: file.meta.focalPoint ?? null,
 				originalFocalPoint:
-					profilePicture.original?.meta.focalPoint ??
-					profilePicture.meta.focalPoint ??
-					null,
-				crop: profilePicture.crop,
+					original?.meta.focalPoint ?? file.meta.focalPoint ?? null,
+				crop: file.sourceType === "crop" ? file.crop : undefined,
 			});
 		}
 	}

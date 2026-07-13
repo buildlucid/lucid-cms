@@ -52,6 +52,10 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 	const showAltInput = createMemo(() => {
 		return media.data?.data.type === "image";
 	});
+	const imageMeta = createMemo(() => {
+		const item = media.data?.data;
+		return item?.type === "image" ? item.file.meta : null;
+	});
 	const folderOptions = createMemo(() => {
 		const folders = foldersHierarchy.data?.data || [];
 		const sorted = folders
@@ -121,11 +125,13 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 							<ReadonlyMediaPreview
 								media={{
 									type: item.type,
-									url: item.url,
+									url: item.file.url,
 									updatedAt: item.updatedAt,
 								}}
 								alt={
-									helpers.getTranslation(item.alt, lang?.contentLocale()) ||
+									(item.type === "image"
+										? helpers.getTranslation(item.alt, lang?.contentLocale())
+										: null) ||
 									helpers.getTranslation(item.title, lang?.contentLocale()) ||
 									""
 								}
@@ -168,7 +174,9 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 											id={`alt-${locale.code}`}
 											value={
 												helpers.getTranslation(
-													media.data?.data.alt,
+													media.data?.data.type === "image"
+														? media.data.data.alt
+														: undefined,
 													locale.code,
 												) || ""
 											}
@@ -216,21 +224,21 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 								{
 									label: T()("common.file.size"),
 									value: helpers.bytesToSize(
-										media.data?.data.meta.fileSize ?? 0,
+										media.data?.data.file.meta.fileSize ?? 0,
 									),
 								},
 								{
 									label: T()("common.dimensions"),
-									value: `${media.data?.data.meta.width} x ${media.data?.data.meta.height}`,
+									value: `${imageMeta()?.width} x ${imageMeta()?.height}`,
 									show: media.data?.data.type === "image",
 								},
 								{
 									label: T()("common.extension"),
-									value: media.data?.data.meta.extension,
+									value: media.data?.data.file.meta.extension,
 								},
 								{
 									label: T()("common.mime.type"),
-									value: media.data?.data.meta.mimeType,
+									value: media.data?.data.file.meta.mimeType,
 								},
 								{
 									label: T()("common.created.at"),

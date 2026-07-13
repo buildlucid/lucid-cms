@@ -49,9 +49,10 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
 	const displayTitle = createMemo(() => {
-		return title() || helpers.formatFileNameTitle(props.media.fileName);
+		return title() || helpers.formatFileNameTitle(props.media.file.fileName);
 	});
 	const alt = createMemo(() => {
+		if (props.media.type !== "image") return null;
 		return helpers.getTranslation(props.media.alt, props.contentLocale);
 	});
 	const showRestore = createMemo(() => props.showingDeleted?.() === true);
@@ -112,14 +113,21 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 				ratio="16:9"
 				innerClass={classNames("overflow-hidden", {
 					"rectangle-background":
-						props.media.type === "image" || props.media.poster,
+						props.media.type === "image" ||
+						(props.media.type === "video" && props.media.poster),
 				})}
 			>
 				<MediaPreview
-					media={props.media}
+					media={{
+						type: props.media.type,
+						url: props.media.file.url,
+						poster:
+							props.media.type === "video" ? props.media.poster : undefined,
+					}}
 					alt={alt() || displayTitle() || ""}
 					imageFit={
-						props.media.type === "image" || props.media.poster
+						props.media.type === "image" ||
+						(props.media.type === "video" && props.media.poster)
 							? "contain"
 							: undefined
 					}

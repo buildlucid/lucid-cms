@@ -311,7 +311,7 @@ function getFieldRefs(props: {
 			(acc, relationId) => {
 				const match = refs.find((ref): ref is NonNullable<MediaRef> => {
 					if (!ref || "collectionKey" in ref) return false;
-					return "url" in ref && ref.id === relationId;
+					return "file" in ref && ref.id === relationId;
 				});
 
 				if (match) acc.push(match);

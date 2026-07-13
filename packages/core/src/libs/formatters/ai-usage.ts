@@ -116,7 +116,7 @@ const formatSingle = (props: {
 					email: props.aiUsage.email,
 					firstName: props.aiUsage.first_name,
 					lastName: props.aiUsage.last_name,
-					profilePicture: mediaFormatter.formatEmbed({
+					profilePicture: mediaFormatter.formatProfilePicture({
 						poster: props.aiUsage.profile_picture?.[0],
 						host: props.host,
 					}),

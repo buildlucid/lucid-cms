@@ -30,6 +30,7 @@ import {
 } from "@/utils/document-filter-fields";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
+import { getProcessedImageUrl } from "@/utils/media-url";
 import type {
 	MediaRelationRef,
 	UserRelationRef,
@@ -328,8 +329,8 @@ export const EntityValue: Component<{
 const mediaLabel = (media: MediaRelationRef, contentLocale: string): string => {
 	return (
 		helpers.getTranslation(media.title, contentLocale) ||
-		helpers.formatFileNameTitle(media.fileName) ||
-		media.key ||
+		helpers.formatFileNameTitle(media.file.fileName) ||
+		media.file.key ||
 		""
 	);
 };
@@ -343,7 +344,10 @@ const MediaThumb: Component<{ media: MediaRelationRef }> = (props) => {
 			>
 				<Match when={props.media.type === "image"}>
 					<img
-						src={`${props.media.url}?preset=thumbnail-small&format=webp`}
+						src={getProcessedImageUrl(props.media.file.url, {
+							preset: "thumbnail-small",
+							format: "webp",
+						})}
 						alt=""
 						class="h-full w-full object-cover"
 						loading="lazy"

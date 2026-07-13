@@ -25,7 +25,7 @@ export interface MediaCropInput {
 	fileName: string;
 	width: number;
 	height: number;
-	focalPoint?: MediaMeta["focalPoint"];
+	focalPoint?: MediaImageMeta["focalPoint"];
 	blurHash?: string | null;
 	averageColor?: string | null;
 	base64?: string | null;
@@ -34,46 +34,13 @@ export interface MediaCropInput {
 	state: MediaCropState;
 }
 
-export interface MediaOriginal {
-	key: string;
-	url: string;
-	meta: MediaMeta;
-}
-
-export interface Media {
-	id: number;
-	key: string;
-	url: string;
-	fileName: string | null;
-	sourceType: MediaSourceType;
-	original?: MediaOriginal;
-	crop?: MediaCropState;
-	folderId: number | null;
-	poster?: MediaPoster | null;
-	origin: MediaOrigin;
-	title: MediaTranslation[];
-	alt: MediaTranslation[];
-	description: MediaTranslation[];
-	summary: MediaTranslation[];
-	type: MediaType;
-	meta: MediaMeta;
-	public: boolean;
-	isDeleted: boolean | null;
-	isDeletedAt: string | null;
-	deletedBy: number | null;
-	createdAt: string | null;
-	updatedAt: string | null;
-}
-
-export interface MediaTranslation {
-	localeCode: string | null;
-	value: string | null;
-}
-
-export interface MediaMeta {
+export interface MediaFileMeta {
 	mimeType: string;
 	extension: string;
 	fileSize: number;
+}
+
+export interface MediaImageMeta extends MediaFileMeta {
 	width: number | null;
 	height: number | null;
 	focalPoint: {
@@ -87,27 +54,113 @@ export interface MediaMeta {
 	isLight: boolean | null;
 }
 
-export type MediaEmbed = Pick<
-	Media,
-	| "id"
-	| "key"
-	| "url"
-	| "fileName"
-	| "sourceType"
-	| "original"
-	| "crop"
-	| "origin"
-	| "type"
-	| "title"
-	| "alt"
-	| "description"
-	| "summary"
-	| "meta"
->;
+export interface MediaFile<Meta extends MediaFileMeta = MediaFileMeta> {
+	key: string;
+	url: string;
+	fileName: string | null;
+	meta: Meta;
+}
 
-export type MediaPoster = MediaEmbed;
+export interface MediaOriginalFile {
+	key: string;
+	url: string;
+	meta: MediaImageMeta;
+}
+
+export type MediaImageFile =
+	| {
+			key: string;
+			url: string;
+			fileName: string | null;
+			sourceType: "original";
+			meta: MediaImageMeta;
+			original?: never;
+			crop?: never;
+	  }
+	| {
+			key: string;
+			url: string;
+			fileName: string | null;
+			sourceType: "crop";
+			crop: MediaCropState;
+			meta: MediaImageMeta;
+			original: MediaOriginalFile;
+	  };
+
+interface MediaBase<Type extends MediaType> {
+	id: number;
+	type: Type;
+	folderId: number | null;
+	origin: MediaOrigin;
+	title: MediaTranslation[];
+	public: boolean;
+	isDeleted: boolean | null;
+	isDeletedAt: string | null;
+	deletedBy: number | null;
+	createdAt: string | null;
+	updatedAt: string | null;
+}
+
+export interface MediaImage extends MediaBase<"image"> {
+	alt: MediaTranslation[];
+	file: MediaImageFile;
+}
+
+export interface MediaVideo extends MediaBase<"video"> {
+	description: MediaTranslation[];
+	file: MediaFile;
+	poster: MediaPoster | null;
+}
+
+export interface MediaAudio extends MediaBase<"audio"> {
+	description: MediaTranslation[];
+	file: MediaFile;
+}
+
+export interface MediaDocument extends MediaBase<"document"> {
+	summary: MediaTranslation[];
+	file: MediaFile;
+}
+
+export interface MediaArchive extends MediaBase<"archive"> {
+	file: MediaFile;
+}
+
+export interface MediaUnknown extends MediaBase<"unknown"> {
+	file: MediaFile;
+}
+
+export type Media =
+	| MediaImage
+	| MediaVideo
+	| MediaAudio
+	| MediaDocument
+	| MediaArchive
+	| MediaUnknown;
+
+export interface MediaTranslation {
+	localeCode: string | null;
+	value: string | null;
+}
+
+export interface MediaPoster {
+	id: number;
+	type: "image";
+	origin: MediaOrigin;
+	alt: MediaTranslation[];
+	file: MediaImageFile;
+}
+
 export type MediaRef = Media;
-export type ProfilePicture = MediaEmbed;
+
+export interface ProfilePicture {
+	id: number;
+	type: "image";
+	origin: MediaOrigin;
+	title: MediaTranslation[];
+	alt: MediaTranslation[];
+	file: MediaImageFile;
+}
 
 export interface MediaUrl {
 	url: string;

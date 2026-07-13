@@ -58,19 +58,20 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 	);
 	const mediaDimensions = createMemo(() => {
 		const profilePicture = media();
-		if (!profilePicture?.meta.width || !profilePicture.meta.height) return null;
+		if (!profilePicture?.file.meta.width || !profilePicture.file.meta.height)
+			return null;
 
-		return `${profilePicture.meta.width} x ${profilePicture.meta.height}`;
+		return `${profilePicture.file.meta.width} x ${profilePicture.file.meta.height}`;
 	});
 	const hasMediaMeta = createMemo(() => {
 		const profilePicture = media();
 		if (!profilePicture) return false;
 
 		return (
-			Boolean(profilePicture.meta.fileSize) ||
+			Boolean(profilePicture.file.meta.fileSize) ||
 			Boolean(mediaDimensions()) ||
-			Boolean(profilePicture.meta.mimeType) ||
-			Boolean(profilePicture.meta.extension)
+			Boolean(profilePicture.file.meta.mimeType) ||
+			Boolean(profilePicture.file.meta.extension)
 		);
 	});
 	const title = createMemo(() => {
@@ -87,8 +88,8 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 				profilePicture.alt,
 				contentLocaleStore.get.contentLocale,
 			) ||
-			helpers.formatFileNameTitle(profilePicture.fileName) ||
-			profilePicture.key
+			helpers.formatFileNameTitle(profilePicture.file.fileName) ||
+			profilePicture.file.key
 		);
 	});
 	const alt = createMemo(() => {
@@ -156,22 +157,24 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 							<Show when={hasMediaMeta()}>
 								<div class="pointer-events-none absolute top-0 right-0 left-0 z-20 flex flex-wrap items-center gap-2 bg-linear-to-b from-card-base via-card-base/80 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 									<div class="flex flex-wrap items-center gap-2">
-										<Show when={profilePicture().meta.fileSize}>
+										<Show when={profilePicture().file.meta.fileSize}>
 											<Pill theme="outline">
-												{helpers.bytesToSize(profilePicture().meta.fileSize)}
+												{helpers.bytesToSize(
+													profilePicture().file.meta.fileSize,
+												)}
 											</Pill>
 										</Show>
 										<Show when={mediaDimensions()}>
 											<Pill theme="outline">{mediaDimensions()}</Pill>
 										</Show>
-										<Show when={profilePicture().meta.mimeType}>
+										<Show when={profilePicture().file.meta.mimeType}>
 											<Pill theme="outline">
-												{profilePicture().meta.mimeType}
+												{profilePicture().file.meta.mimeType}
 											</Pill>
 										</Show>
-										<Show when={profilePicture().meta.extension}>
+										<Show when={profilePicture().file.meta.extension}>
 											<Pill theme="outline">
-												{profilePicture().meta.extension.toUpperCase()}
+												{profilePicture().file.meta.extension.toUpperCase()}
 											</Pill>
 										</Show>
 									</div>
@@ -208,7 +211,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 							<div class="flex h-full w-full items-center justify-center [&_img]:max-h-full [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full">
 								<MediaPreview
 									media={{
-										url: profilePicture().url,
+										url: profilePicture().file.url,
 										type: profilePicture().type,
 									}}
 									alt={alt()}
@@ -236,8 +239,8 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 								<div class="mt-1">
 									<ClickToCopy
 										type="simple"
-										text={profilePicture().key}
-										value={profilePicture().url}
+										text={profilePicture().file.key}
+										value={profilePicture().file.url}
 										class="text-xs text-unfocused max-w-full"
 									/>
 								</div>

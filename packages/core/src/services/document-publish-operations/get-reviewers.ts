@@ -25,7 +25,7 @@ const getReviewers: ServiceFn<
 		username: string;
 		firstName: string | null;
 		lastName: string | null;
-		profilePicture: ReturnType<typeof mediaFormatter.formatEmbed>;
+		profilePicture: ReturnType<typeof mediaFormatter.formatProfilePicture>;
 	}>
 > = async (context, data) => {
 	const collectionRes = collectionServices.getSingleInstance(context, {
@@ -108,7 +108,7 @@ const getReviewers: ServiceFn<
 			username: reviewer.username,
 			firstName: reviewer.firstName,
 			lastName: reviewer.lastName,
-			profilePicture: mediaFormatter.formatEmbed({
+			profilePicture: mediaFormatter.formatProfilePicture({
 				poster: reviewer.profile_picture?.[0],
 				host: getBaseUrl(context),
 			}),

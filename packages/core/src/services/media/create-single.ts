@@ -185,6 +185,7 @@ const createSingle: ServiceFn<
 		aiGenerationRequestId: data.aiGenerationRequestId,
 	});
 	if (aiGenerationRes.error) return aiGenerationRes;
+	const isImage = syncMediaRes.data.type === "image";
 
 	const [mediaRes, deleteMediaSyncRes] = await Promise.all([
 		Media.createSingle({
@@ -201,8 +202,8 @@ const createSingle: ServiceFn<
 				file_extension: syncMediaRes.data.extension,
 				file_name: data.fileName,
 				file_size: syncMediaRes.data.size,
-				width: data.width ?? null,
-				height: data.height ?? null,
+				width: isImage ? (data.width ?? null) : null,
+				height: isImage ? (data.height ?? null) : null,
 				focal_x:
 					syncMediaRes.data.type === "image" && data.focalPoint
 						? Math.round(data.focalPoint.x * 10000)
@@ -211,12 +212,11 @@ const createSingle: ServiceFn<
 					syncMediaRes.data.type === "image" && data.focalPoint
 						? Math.round(data.focalPoint.y * 10000)
 						: null,
-				blur_hash: data.blurHash ?? null,
-				average_color: data.averageColor ?? null,
-				base64:
-					syncMediaRes.data.type === "image" ? (data.base64 ?? null) : null,
-				is_dark: data.isDark ?? null,
-				is_light: data.isLight ?? null,
+				blur_hash: isImage ? (data.blurHash ?? null) : null,
+				average_color: isImage ? (data.averageColor ?? null) : null,
+				base64: isImage ? (data.base64 ?? null) : null,
+				is_dark: isImage ? (data.isDark ?? null) : null,
+				is_light: isImage ? (data.isLight ?? null) : null,
 				folder_id: data.folderId ?? null,
 				is_hidden: data.isHidden ?? false,
 				tenant_key: mediaTenantKey,
@@ -304,9 +304,12 @@ const createSingle: ServiceFn<
 
 	const translations = prepareMediaTranslations({
 		title: data.title || [],
-		alt: data.alt || [],
-		description: data.description || [],
-		summary: data.summary || [],
+		alt: isImage ? (data.alt ?? []) : [],
+		description:
+			syncMediaRes.data.type === "video" || syncMediaRes.data.type === "audio"
+				? (data.description ?? [])
+				: [],
+		summary: syncMediaRes.data.type === "document" ? (data.summary ?? []) : [],
 		mediaId: mediaRes.data.id,
 	});
 	if (translations.length > 0) {

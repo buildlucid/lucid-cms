@@ -1,10 +1,14 @@
 import type { BooleanInt } from "../../libs/db/types.js";
 import type {
 	Media,
-	MediaEmbed,
+	MediaCropState,
+	MediaFile,
+	MediaFileMeta,
+	MediaImageFile,
+	MediaImageMeta,
 	MediaOrigin,
 	MediaPoster,
-	MediaType,
+	ProfilePicture,
 } from "../../types/response.js";
 import { createMediaUrl } from "../../utils/media/index.js";
 import type { MediaRef } from "../collection/custom-fields/fields/media/types.js";
@@ -81,7 +85,7 @@ export const objectifyTranslations = (
 export const formatFocalPoint = (
 	x: number | null | undefined,
 	y: number | null | undefined,
-): Media["meta"]["focalPoint"] => {
+): MediaImageMeta["focalPoint"] => {
 	if (x === null || y === null || x === undefined || y === undefined) {
 		return null;
 	}
@@ -92,11 +96,16 @@ export const formatFocalPoint = (
 	};
 };
 
-/** Formats stored media metadata for the public response contract. */
-const formatMeta = (media: MediaPosterPropsT) => ({
+/** Formats metadata shared by every stored file. */
+const formatFileMeta = (media: MediaPosterPropsT): MediaFileMeta => ({
 	mimeType: media.mime_type,
 	extension: media.file_extension,
 	fileSize: media.file_size,
+});
+
+/** Formats metadata that is only meaningful for image files. */
+const formatImageMeta = (media: MediaPosterPropsT): MediaImageMeta => ({
+	...formatFileMeta(media),
 	width: media.width,
 	height: media.height,
 	focalPoint: formatFocalPoint(media.focal_x, media.focal_y),
@@ -117,9 +126,7 @@ const createFileUrl = (media: MediaPosterPropsT, host: string) =>
 	});
 
 /** Formats and asserts the complete editor state stored on a crop row. */
-const formatCropState = (
-	media: MediaPosterPropsT,
-): NonNullable<Media["crop"]> => {
+const formatCropState = (media: MediaPosterPropsT): MediaCropState => {
 	const values = [
 		media.crop_x,
 		media.crop_y,
@@ -144,23 +151,46 @@ const formatCropState = (
 	};
 };
 
-/** Resolves the active crop presentation while retaining original source details. */
-const formatActiveSource = (media: MediaPosterPropsT, host: string) => {
+/** Formats the identifying fields shared by every file response. */
+const formatFileIdentity = (
+	media: MediaPosterPropsT,
+	host: string,
+): Pick<MediaFile, "key" | "url" | "fileName"> => ({
+	key: media.key,
+	url: createFileUrl(media, host),
+	fileName: media.file_name,
+});
+
+/** Formats a non-image file without image-only presentation state. */
+const formatFile = (media: MediaPosterPropsT, host: string): MediaFile => ({
+	...formatFileIdentity(media, host),
+	meta: formatFileMeta(media),
+});
+
+/** Resolves an image's active crop and nests its original source when cropped. */
+const formatImageFile = (
+	media: MediaPosterPropsT,
+	host: string,
+): MediaImageFile => {
 	const activeCrop = media.crop?.[0];
-	const active = activeCrop ?? media;
-	const isCropped = activeCrop !== undefined;
+	if (!activeCrop) {
+		return {
+			...formatFileIdentity(media, host),
+			sourceType: "original",
+			meta: formatImageMeta(media),
+		};
+	}
 
 	return {
-		active,
-		sourceType: isCropped ? ("crop" as const) : ("original" as const),
-		original: isCropped
-			? {
-					key: media.key,
-					url: createFileUrl(media, host),
-					meta: formatMeta(media),
-				}
-			: undefined,
-		crop: activeCrop ? formatCropState(activeCrop) : undefined,
+		...formatFileIdentity(activeCrop, host),
+		sourceType: "crop",
+		crop: formatCropState(activeCrop),
+		meta: formatImageMeta(activeCrop),
+		original: {
+			key: media.key,
+			url: createFileUrl(media, host),
+			meta: formatImageMeta(media),
+		},
 	};
 };
 
@@ -174,57 +204,46 @@ const translationsFor = (
 		localeCode: translation.locale_code,
 	})) ?? [];
 
-/** Formats embedded media, including poster sources, with active crop resolution. */
-const formatEmbed = (props: {
+/** Formats an image used as a user's profile picture. */
+const formatProfilePicture = (props: {
 	poster?: MediaPosterPropsT | null;
 	host: string;
-}): MediaEmbed | null => {
+}): ProfilePicture | null => {
 	if (!props.poster) return null;
-
-	const source = formatActiveSource(props.poster, props.host);
 
 	return {
 		id: props.poster.id,
-		key: source.active.key,
-		url: createFileUrl(source.active, props.host),
-		fileName: source.active.file_name,
-		sourceType: source.sourceType,
-		original: source.original,
-		crop: source.crop,
+		type: "image",
 		origin: props.poster.origin,
-		type: props.poster.type as MediaType,
 		title: translationsFor(props.poster, "title"),
 		alt: translationsFor(props.poster, "alt"),
-		description: translationsFor(props.poster, "description"),
-		summary: translationsFor(props.poster, "summary"),
-		meta: formatMeta(source.active),
+		file: formatImageFile(props.poster, props.host),
 	};
 };
 
-/** Formats an owned video poster using the embedded media contract. */
+/** Formats an owned video poster with image-only fields. */
 const formatPoster = (props: {
 	poster?: MediaPosterPropsT | null;
 	host: string;
-}): MediaPoster | null => formatEmbed(props);
+}): MediaPoster | null => {
+	if (!props.poster) return null;
+
+	return {
+		id: props.poster.id,
+		type: "image",
+		origin: props.poster.origin,
+		alt: translationsFor(props.poster, "alt"),
+		file: formatImageFile(props.poster, props.host),
+	};
+};
 
 const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
-	const source = formatActiveSource(props.media, props.host);
-	const formatted: Media = {
-		id: props.media.id,
-		key: source.active.key,
-		url: createFileUrl(source.active, props.host),
-		fileName: source.active.file_name,
-		sourceType: source.sourceType,
-		original: source.original,
-		crop: source.crop,
+	const common = {
 		folderId: props.media.folder_id,
 		origin: props.media.origin,
 		title: translationsFor(props.media, "title"),
-		alt: translationsFor(props.media, "alt"),
-		description: translationsFor(props.media, "description"),
-		summary: translationsFor(props.media, "summary"),
-		type: props.media.type as MediaType,
-		meta: formatMeta(source.active),
+	};
+	const state = {
 		public: formatter.formatBoolean(props.media.public),
 		isDeleted: formatter.formatBoolean(props.media.is_deleted),
 		isDeletedAt: formatter.formatDate(props.media.is_deleted_at),
@@ -233,14 +252,64 @@ const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
 		updatedAt: formatter.formatDate(props.media.updated_at),
 	};
 
-	if (props.media.poster !== undefined) {
-		formatted.poster = formatPoster({
-			poster: props.media.poster[0],
-			host: props.host,
-		});
+	switch (props.media.type) {
+		case "image":
+			return {
+				id: props.media.id,
+				type: "image",
+				...common,
+				alt: translationsFor(props.media, "alt"),
+				file: formatImageFile(props.media, props.host),
+				...state,
+			};
+		case "video":
+			return {
+				id: props.media.id,
+				type: "video",
+				...common,
+				description: translationsFor(props.media, "description"),
+				file: formatFile(props.media, props.host),
+				poster: formatPoster({
+					poster: props.media.poster?.[0],
+					host: props.host,
+				}),
+				...state,
+			};
+		case "audio":
+			return {
+				id: props.media.id,
+				type: "audio",
+				...common,
+				description: translationsFor(props.media, "description"),
+				file: formatFile(props.media, props.host),
+				...state,
+			};
+		case "document":
+			return {
+				id: props.media.id,
+				type: "document",
+				...common,
+				summary: translationsFor(props.media, "summary"),
+				file: formatFile(props.media, props.host),
+				...state,
+			};
+		case "archive":
+			return {
+				id: props.media.id,
+				type: "archive",
+				...common,
+				file: formatFile(props.media, props.host),
+				...state,
+			};
+		default:
+			return {
+				id: props.media.id,
+				type: "unknown",
+				...common,
+				file: formatFile(props.media, props.host),
+				...state,
+			};
 	}
-
-	return formatted;
 };
 
 /** Formats a collection of media rows. */
@@ -259,7 +328,7 @@ const formatRef = (props: {
 export default {
 	formatMultiple,
 	formatSingle,
-	formatEmbed,
+	formatProfilePicture,
 	formatPoster,
 	formatRef,
 	formatFocalPoint,

@@ -169,10 +169,11 @@ export const MediaList: Component<{
 		props.state.setOpenCreateMediaPanel(true);
 	};
 	const openAltGeneration = (item: Media) => {
+		if (item.type !== "image") return;
 		mediaAltGeneration.open({
 			image: () => ({
-				url: item.url,
-				filename: item.fileName ?? item.key,
+				url: item.file.url,
+				filename: item.file.fileName ?? item.file.key,
 			}),
 			media: () => ({
 				id: item.id,
@@ -194,15 +195,18 @@ export const MediaList: Component<{
 		});
 	};
 	const openQuickCrop = (item: Media) => {
+		if (item.type !== "image") return;
+		const original =
+			item.file.sourceType === "crop" ? item.file.original : undefined;
 		rowTarget.setTargetId(item.id);
 		setActiveQuickCropSource({
-			url: item.original?.url ?? item.url,
-			name: item.fileName ?? item.key,
-			mimeType: item.original?.meta.mimeType ?? item.meta.mimeType,
+			url: original?.url ?? item.file.url,
+			name: item.file.fileName ?? item.file.key,
+			mimeType: original?.meta.mimeType ?? item.file.meta.mimeType,
 			provenance: {
 				origin: item.origin,
 			},
-			crop: item.crop,
+			crop: item.file.sourceType === "crop" ? item.file.crop : undefined,
 		});
 		rowTarget.setTrigger("quickCrop", true);
 	};
@@ -212,19 +216,19 @@ export const MediaList: Component<{
 		state: MediaCropState,
 	) => {
 		const item = quickCropMedia();
-		if (!item) throw new Error(T()("media.crop.source.missing"));
+		if (item?.type !== "image") {
+			throw new Error(T()("media.crop.source.missing"));
+		}
 
 		const imageMeta = await getFileImageMeta(file);
 		quickCropUpdateMedia.setTitle(item.title ?? []);
 		quickCropUpdateMedia.setAlt(item.alt ?? []);
-		quickCropUpdateMedia.setDescription(item.description ?? []);
-		quickCropUpdateMedia.setSummary(item.summary ?? []);
 		quickCropUpdateMedia.setFolderId(item.folderId ?? null);
 		quickCropUpdateMedia.setPublic(item.public);
-		quickCropUpdateMedia.setPosterId(item.poster?.id);
 		quickCropUpdateMedia.setFocalPoint(null);
 
 		const success = await quickCropUpdateMedia.updateMedia(null, null, {
+			type: "image",
 			...provenance,
 			crop: {
 				file,

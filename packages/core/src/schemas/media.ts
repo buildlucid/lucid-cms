@@ -27,17 +27,20 @@ export const mediaOriginSchema = z.enum([
 	"ai_modified",
 ]);
 
-const mediaMetaResponseSchema = z
-	.object({
-		mimeType: z
-			.string()
-			.meta({ description: "MIME type", example: "image/jpeg" }),
-		extension: z
-			.string()
-			.meta({ description: "File extension", example: "jpeg" }),
-		fileSize: z
-			.number()
-			.meta({ description: "File size in bytes", example: 100 }),
+const mediaFileMetaResponseSchema = z.object({
+	mimeType: z
+		.string()
+		.meta({ description: "MIME type", example: "image/jpeg" }),
+	extension: z
+		.string()
+		.meta({ description: "File extension", example: "jpeg" }),
+	fileSize: z
+		.number()
+		.meta({ description: "File size in bytes", example: 100 }),
+});
+
+const mediaImageMetaResponseSchema = mediaFileMetaResponseSchema
+	.extend({
 		width: z
 			.number()
 			.nullable()
@@ -72,7 +75,7 @@ const mediaMetaResponseSchema = z
 		}),
 	})
 	.meta({
-		description: "Media metadata",
+		description: "Image file metadata",
 	});
 
 const mediaCropStateSchema = z.object({
@@ -85,11 +88,40 @@ const mediaCropStateSchema = z.object({
 	skewY: z.number().min(-45).max(45),
 });
 
-const mediaOriginalResponseSchema = z.object({
+const mediaOriginalFileResponseSchema = z.object({
 	key: z.string(),
 	url: z.string(),
-	meta: mediaMetaResponseSchema,
+	meta: mediaImageMetaResponseSchema,
 });
+
+const mediaFileIdentityResponseSchema = z.object({
+	key: z.string().meta({
+		description: "Storage key",
+		example: "public/123e4567e89b12d3a456426614174000",
+	}),
+	url: z.string().meta({ description: "Public file URL" }),
+	fileName: z.string().nullable().meta({
+		description: "Original file name",
+		example: "placeholder-image.png",
+	}),
+});
+
+const mediaFileResponseSchema = mediaFileIdentityResponseSchema.extend({
+	meta: mediaFileMetaResponseSchema,
+});
+
+const mediaImageFileResponseSchema = z.discriminatedUnion("sourceType", [
+	mediaFileIdentityResponseSchema.extend({
+		sourceType: z.literal("original"),
+		meta: mediaImageMetaResponseSchema,
+	}),
+	mediaFileIdentityResponseSchema.extend({
+		sourceType: z.literal("crop"),
+		crop: mediaCropStateSchema,
+		meta: mediaImageMetaResponseSchema,
+		original: mediaOriginalFileResponseSchema,
+	}),
+]);
 
 export const mediaCropInputSchema = z.object({
 	key: z.string().trim(),
@@ -157,57 +189,40 @@ const uploadSessionParamsSchema = z.object({
 	}),
 });
 
-export const mediaEmbedResponseSchema = z.object({
+export const profilePictureResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 2 }),
-	key: z.string().meta({
-		description: "Media key",
-		example: "public/123e4567e89b12d3a456426614174000",
-	}),
-	url: z.string().meta({
-		description: "Media URL",
-		example:
-			"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/poster",
-	}),
-	fileName: z.string().nullable().meta({
-		description: "Original file name",
-		example: "placeholder-image.png",
-	}),
-	sourceType: z.enum(["original", "crop"]),
-	original: mediaOriginalResponseSchema.optional(),
-	crop: mediaCropStateSchema.optional(),
+	type: z.literal("image"),
 	origin: mediaOriginSchema.meta({
 		description: "The provenance origin of the media item",
 		example: "human",
 	}),
-	type: z.string().meta({ description: "Media type", example: "image" }),
 	title: z.array(mediaTranslationResponseSchema).meta({
 		description: "Translated titles",
 	}),
 	alt: z.array(mediaTranslationResponseSchema).meta({
 		description: "Translated alt texts",
 	}),
-	description: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated descriptions",
-	}),
-	summary: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated summaries",
-	}),
-	meta: mediaMetaResponseSchema,
+	file: mediaImageFileResponseSchema,
 });
 
-const mediaResponseSchema = z.object({
-	id: z.number().meta({ description: "Media ID", example: 1 }),
-	key: z.string().meta({
-		description: "Media key",
-		example: "public/123e4567e89b12d3a456426614174000",
+const mediaPosterResponseSchema = z.object({
+	id: z.number().meta({ description: "Media ID", example: 2 }),
+	type: z.literal("image"),
+	origin: mediaOriginSchema.meta({
+		description: "The provenance origin of the media item",
+		example: "human",
 	}),
-	fileName: z.string().nullable().meta({
-		description: "Original file name",
-		example: "placeholder-image.png",
+	alt: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated alt texts",
 	}),
-	sourceType: z.enum(["original", "crop"]),
-	original: mediaOriginalResponseSchema.optional(),
-	crop: mediaCropStateSchema.optional(),
+	file: mediaImageFileResponseSchema,
+});
+
+const mediaIdResponseSchema = z
+	.number()
+	.meta({ description: "Media ID", example: 1 });
+
+const mediaBaseResponseShape = {
 	folderId: z.number().nullable().meta({
 		description: "Media folder ID",
 		example: 1,
@@ -216,36 +231,17 @@ const mediaResponseSchema = z.object({
 		description: "The provenance origin of the media item",
 		example: "human",
 	}),
-	poster: mediaEmbedResponseSchema
-		.nullable()
-		.meta({
-			description: "Poster media data",
-		})
-		.optional(),
-	url: z.string().meta({
-		description: "Media URL",
-		example:
-			"https://example.com/cdn/public/123e4567e89b12d3a456426614174000/placeholder-image",
+	title: z.array(mediaTranslationResponseSchema).meta({
+		description: "Translated titles",
 	}),
+};
+
+const mediaStateResponseShape = {
 	public: z.boolean().meta({
 		description:
 			"Media visibility. Private media can only be accessed by authorized users and when shared",
 		example: true,
 	}),
-	title: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated titles",
-	}),
-	alt: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated alt texts",
-	}),
-	description: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated descriptions",
-	}),
-	summary: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated summaries",
-	}),
-	type: z.string().meta({ description: "Media type", example: "image" }),
-	meta: mediaMetaResponseSchema,
 	isDeleted: z.boolean().nullable().meta({
 		description: "Whether the media is deleted",
 		example: true,
@@ -258,15 +254,75 @@ const mediaResponseSchema = z.object({
 		description: "The user who deleted the media",
 		example: 1,
 	}),
-	createdAt: z.string().meta({
+	createdAt: z.string().nullable().meta({
 		description: "Creation timestamp",
 		example: "2022-01-01T00:00:00Z",
 	}),
-	updatedAt: z.string().meta({
+	updatedAt: z.string().nullable().meta({
 		description: "Last update timestamp",
 		example: "2022-01-01T00:00:00Z",
 	}),
-});
+};
+
+const mediaResponseSchema = z.discriminatedUnion("type", [
+	z.object({
+		id: mediaIdResponseSchema,
+		type: z.literal("image"),
+		...mediaBaseResponseShape,
+		alt: z.array(mediaTranslationResponseSchema).meta({
+			description: "Translated alt texts",
+		}),
+		file: mediaImageFileResponseSchema,
+		...mediaStateResponseShape,
+	}),
+	z.object({
+		id: mediaIdResponseSchema,
+		type: z.literal("video"),
+		...mediaBaseResponseShape,
+		description: z.array(mediaTranslationResponseSchema).meta({
+			description: "Translated descriptions",
+		}),
+		file: mediaFileResponseSchema,
+		poster: mediaPosterResponseSchema.nullable().meta({
+			description: "Poster image data",
+		}),
+		...mediaStateResponseShape,
+	}),
+	z.object({
+		id: mediaIdResponseSchema,
+		type: z.literal("audio"),
+		...mediaBaseResponseShape,
+		description: z.array(mediaTranslationResponseSchema).meta({
+			description: "Translated descriptions",
+		}),
+		file: mediaFileResponseSchema,
+		...mediaStateResponseShape,
+	}),
+	z.object({
+		id: mediaIdResponseSchema,
+		type: z.literal("document"),
+		...mediaBaseResponseShape,
+		summary: z.array(mediaTranslationResponseSchema).meta({
+			description: "Translated summaries",
+		}),
+		file: mediaFileResponseSchema,
+		...mediaStateResponseShape,
+	}),
+	z.object({
+		id: mediaIdResponseSchema,
+		type: z.literal("archive"),
+		...mediaBaseResponseShape,
+		file: mediaFileResponseSchema,
+		...mediaStateResponseShape,
+	}),
+	z.object({
+		id: mediaIdResponseSchema,
+		type: z.literal("unknown"),
+		...mediaBaseResponseShape,
+		file: mediaFileResponseSchema,
+		...mediaStateResponseShape,
+	}),
+]);
 
 const mediaGetMultipleQueryStringSchema = z
 	.object({

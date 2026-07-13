@@ -1,4 +1,4 @@
-import type { Media } from "@types";
+import type { MediaType } from "@types";
 import { FaSolidFile } from "solid-icons/fa";
 import {
 	type Component,
@@ -12,7 +12,7 @@ import {
 
 const ReadonlyMediaPreview: Component<{
 	media: {
-		type: Media["type"];
+		type: MediaType;
 		url: string;
 		updatedAt?: string | null;
 	};

@@ -3,7 +3,7 @@
 ## 0.3.0 (unreleased)
 
 - Added public range custom field types.
-- Added public media crop types.
+- Updated public media response types.
 
 ## 0.2.0
 

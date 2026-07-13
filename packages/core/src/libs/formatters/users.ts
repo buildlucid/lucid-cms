@@ -110,7 +110,7 @@ const formatSingle = (props: {
 		firstName: props.user.first_name,
 		lastName: props.user.last_name,
 		isDeleted: formatter.formatBoolean(props.user.is_deleted ?? false),
-		profilePicture: mediaFormatter.formatEmbed({
+		profilePicture: mediaFormatter.formatProfilePicture({
 			poster: props.user.profile_picture?.[0],
 			host: props.host,
 		}),

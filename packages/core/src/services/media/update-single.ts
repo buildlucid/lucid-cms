@@ -148,14 +148,6 @@ const updateSingle: ServiceFn<
 		};
 	}
 
-	const translations = prepareMediaTranslations({
-		title: data.title || [],
-		alt: data.alt || [],
-		description: data.description || [],
-		summary: data.summary || [],
-		mediaId: mediaRes.data.id,
-	});
-
 	if (data.posterId !== undefined && data.posterId !== null) {
 		const posterRes = await resolvePoster(context, {
 			posterId: data.posterId,
@@ -228,6 +220,16 @@ const updateSingle: ServiceFn<
 	}
 
 	const finalType = updateObjectRes?.type ?? mediaRes.data.type;
+	const translations = prepareMediaTranslations({
+		title: data.title || [],
+		alt: finalType === "image" ? (data.alt ?? []) : [],
+		description:
+			finalType === "video" || finalType === "audio"
+				? (data.description ?? [])
+				: [],
+		summary: finalType === "document" ? (data.summary ?? []) : [],
+		mediaId: mediaRes.data.id,
+	});
 	if (data.posterId != null && finalType !== "video") {
 		return {
 			error: {
