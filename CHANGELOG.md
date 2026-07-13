@@ -26,6 +26,7 @@
 
 - Fixed checkbox custom field filters for true and false values. ([5710346](https://github.com/buildlucid/lucid-cms/commit/571034652c041bbdcb7d3b64795b7ed523117213))
 - Fixed relation custom field filters with non-numeric values crashing generated relation table queries. ([5948ba5](https://github.com/buildlucid/lucid-cms/commit/5948ba5b6643e940ebfa043787cad2dea3e4bc63))
+- Fixed profile pictures stretching across admin preview cards.
 
 ## v0.15.0-alpha.0
 

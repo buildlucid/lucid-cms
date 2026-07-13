@@ -208,7 +208,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						}
 					>
 						{(profilePicture) => (
-							<div class="flex h-full w-full items-center justify-center [&_img]:max-h-full [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full">
+							<div class="relative z-10 h-full w-full min-w-0 overflow-hidden">
 								<MediaPreview
 									media={{
 										url: profilePicture().file.url,
