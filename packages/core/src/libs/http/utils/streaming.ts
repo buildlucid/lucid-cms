@@ -1,6 +1,9 @@
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { formatETag } from "../../../utils/http/etag.js";
 
+const SVG_CONTENT_SECURITY_POLICY =
+	"sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:";
+
 export const applyStreamingHeaders = (
 	c: LucidHonoContext,
 	opts: {
@@ -12,6 +15,11 @@ export const applyStreamingHeaders = (
 ) => {
 	c.header("Accept-Ranges", "bytes");
 	c.header("X-Content-Type-Options", "nosniff");
+	if (
+		opts.contentType?.split(";", 1)[0]?.trim().toLowerCase() === "image/svg+xml"
+	) {
+		c.header("Content-Security-Policy", SVG_CONTENT_SECURITY_POLICY);
+	}
 	if (opts.key)
 		c.header("Content-Disposition", `inline; filename="${opts.key}"`);
 	if (opts.contentLength !== undefined)

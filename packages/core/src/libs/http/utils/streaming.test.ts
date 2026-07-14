@@ -21,4 +21,23 @@ describe("streaming headers", () => {
 			'inline; filename="public/file.png"',
 		);
 	});
+
+	it("sandboxes streamed SVG responses", () => {
+		const headers = new Map<string, string>();
+		const context = {
+			header: vi.fn((key: string, value: string) => {
+				headers.set(key, value);
+			}),
+		};
+
+		applyStreamingHeaders(context as never, {
+			key: "public/file.svg",
+			contentType: "image/svg+xml; charset=utf-8",
+			contentLength: 42,
+		});
+
+		expect(headers.get("Content-Security-Policy")).toBe(
+			"sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:",
+		);
+	});
 });

@@ -3,6 +3,7 @@
 ## 1.2.0 (unreleased)
 
 - Added configurable image fit modes and focal-point-aware cover resizing using normalized focal coordinates.
+- Updated image processor results to report successful processing explicitly.
 
 ## 1.1.1
 

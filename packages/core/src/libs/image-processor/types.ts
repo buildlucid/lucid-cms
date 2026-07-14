@@ -14,13 +14,18 @@ export type ImageProcessorOptions = {
 	quality?: number;
 };
 
-export type ImageProcessorResult = {
-	buffer: Buffer;
-	mimeType: string;
-	size: number;
-	extension: string;
-	shouldStore: boolean;
-};
+export type ImageProcessorResult =
+	| {
+			processed: false;
+	  }
+	| {
+			processed: true;
+			buffer: Buffer;
+			mimeType: string;
+			size: number;
+			extension: string;
+			shouldStore: boolean;
+	  };
 
 export type ImageProcessorProcessParams = {
 	stream: Readable;

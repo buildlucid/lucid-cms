@@ -98,7 +98,12 @@ const processImage: ServiceFn<
 		}),
 	]);
 
-	if (imageRes.error || processedCountRes.error || !imageRes.data) {
+	if (
+		imageRes.error ||
+		processedCountRes.error ||
+		!imageRes.data ||
+		!imageRes.data.processed
+	) {
 		return {
 			error: undefined,
 			data: {

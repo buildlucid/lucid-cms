@@ -87,6 +87,7 @@ const sharpImageProcessor = (): ImageProcessorInstance => ({
 			return {
 				error: undefined,
 				data: {
+					processed: true,
 					buffer: outputBuffer,
 					mimeType: mimeType,
 					size: outputBuffer.length,
