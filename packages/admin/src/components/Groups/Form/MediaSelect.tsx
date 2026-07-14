@@ -511,7 +511,7 @@ const MediaSortableItem: Component<{
 				"view-transition-name": `media-select-item-${props.media.id}`,
 			}}
 			class={classNames(
-				"group overflow-hidden rounded-md border bg-card-base ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
+				"group overflow-hidden rounded-md border bg-card-base ring-inset transition-colors duration-200 transform-gpu",
 				{
 					"border-border": !props.hasError,
 					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
