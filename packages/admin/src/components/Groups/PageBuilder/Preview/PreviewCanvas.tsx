@@ -321,7 +321,7 @@ export const PreviewCanvas: Component<{
 			</div>
 			<div
 				ref={setCanvasRef}
-				class="relative min-h-0 min-w-0 grow overflow-hidden bg-card-base"
+				class="relative min-h-0 min-w-0 grow overflow-hidden bg-card-base dotted-background"
 			>
 				<Show when={props.resolverState() === "unavailable"}>
 					<div class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 p-6 text-center">
