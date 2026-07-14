@@ -4,6 +4,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import {
+	documentPreviewServices,
 	documentPublishOperationServices,
 	documentServices,
 	documentWorkflowServices,
@@ -96,6 +97,7 @@ const deleteSinglePermanently: ServiceFn<
 	const [
 		deleteDocumentRes,
 		deleteRelationsRes,
+		deletePreviewsRes,
 		cancelRequestsRes,
 		workflowDeleteRes,
 	] = await Promise.all([
@@ -121,6 +123,10 @@ const deleteSinglePermanently: ServiceFn<
 			collectionKey: collectionRes.data.key,
 			documentId: data.id,
 		}),
+		documentPreviewServices.deleteForDocuments(context, {
+			collectionKey: data.collectionKey,
+			documentIds: [data.id],
+		}),
 		documentPublishOperationServices.cancelForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.id],
@@ -135,6 +141,7 @@ const deleteSinglePermanently: ServiceFn<
 	]);
 	if (deleteDocumentRes.error) return deleteDocumentRes;
 	if (deleteRelationsRes.error) return deleteRelationsRes;
+	if (deletePreviewsRes.error) return deletePreviewsRes;
 	if (cancelRequestsRes.error) return cancelRequestsRes;
 	if (workflowDeleteRes.error) return workflowDeleteRes;
 

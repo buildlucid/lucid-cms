@@ -4,6 +4,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import {
+	documentPreviewServices,
 	documentPublishOperationServices,
 	documentServices,
 } from "../index.js";
@@ -136,34 +137,39 @@ const deleteMultiple: ServiceFn<
 		}),
 	);
 
-	const [deleteDocUpdateRes, ...nullifyResults] = await Promise.all([
-		Documents.updateSingle(
-			{
-				returning: ["id"],
-				where: [
-					{
-						key: "id",
-						operator: "in",
-						value: data.ids,
+	const [deleteDocUpdateRes, deletePreviewsRes, ...nullifyResults] =
+		await Promise.all([
+			Documents.updateSingle(
+				{
+					returning: ["id"],
+					where: [
+						{
+							key: "id",
+							operator: "in",
+							value: data.ids,
+						},
+					],
+					data: {
+						is_deleted: true,
+						is_deleted_at: new Date().toISOString(),
+						deleted_by: data.userId,
 					},
-				],
-				data: {
-					is_deleted: true,
-					is_deleted_at: new Date().toISOString(),
-					deleted_by: data.userId,
+					validation: {
+						enabled: true,
+					},
 				},
-				validation: {
-					enabled: true,
+				{
+					tableName: tableNamesRes.data.document,
 				},
-			},
-			{
-				tableName: tableNamesRes.data.document,
-			},
-		),
-		...nullifyPromises,
-	]);
-
+			),
+			documentPreviewServices.deleteForDocuments(context, {
+				collectionKey: data.collectionKey,
+				documentIds: data.ids,
+			}),
+			...nullifyPromises,
+		]);
 	if (deleteDocUpdateRes.error) return deleteDocUpdateRes;
+	if (deletePreviewsRes.error) return deletePreviewsRes;
 
 	const nullifyError = nullifyResults.find((result) => result.error);
 	if (nullifyError) return nullifyError;

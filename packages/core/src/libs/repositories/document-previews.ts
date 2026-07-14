@@ -22,7 +22,7 @@ export default class DocumentPreviewsRepository extends StaticRepository<"lucid_
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
 		token_hash: this.dbAdapter.getDataType("char", 64),
-		collection_key: this.dbAdapter.getDataType("varchar", 255),
+		collection_key: this.dbAdapter.getDataType("text"),
 		document_id: this.dbAdapter.getDataType("integer"),
 		version_type: this.dbAdapter.getDataType("varchar", 255),
 		version_id: this.dbAdapter.getDataType("integer"),

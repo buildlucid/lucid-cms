@@ -4,6 +4,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import {
+	documentPreviewServices,
 	documentPublishOperationServices,
 	documentServices,
 } from "../index.js";
@@ -109,37 +110,43 @@ const deleteSingle: ServiceFn<
 	);
 	if (hookBeforeRes.error) return hookBeforeRes;
 
-	const [deletePageRes, deleteRelationsRes] = await Promise.all([
-		Documents.updateSingle(
-			{
-				where: [
-					{
-						key: "id",
-						operator: "=",
-						value: data.id,
+	const [deletePageRes, deleteRelationsRes, deletePreviewsRes] =
+		await Promise.all([
+			Documents.updateSingle(
+				{
+					where: [
+						{
+							key: "id",
+							operator: "=",
+							value: data.id,
+						},
+					],
+					data: {
+						is_deleted: true,
+						is_deleted_at: new Date().toISOString(),
+						deleted_by: data.userId,
 					},
-				],
-				data: {
-					is_deleted: true,
-					is_deleted_at: new Date().toISOString(),
-					deleted_by: data.userId,
+					returning: ["id"],
+					validation: {
+						enabled: true,
+					},
 				},
-				returning: ["id"],
-				validation: {
-					enabled: true,
+				{
+					tableName: tableNamesRes.data.document,
 				},
-			},
-			{
-				tableName: tableNamesRes.data.document,
-			},
-		),
-		documentServices.nullifyDocumentReferences(context, {
-			collectionKey: collectionRes.data.key,
-			documentId: data.id,
-		}),
-	]);
+			),
+			documentServices.nullifyDocumentReferences(context, {
+				collectionKey: collectionRes.data.key,
+				documentId: data.id,
+			}),
+			documentPreviewServices.deleteForDocuments(context, {
+				collectionKey: data.collectionKey,
+				documentIds: [data.id],
+			}),
+		]);
 	if (deletePageRes.error) return deletePageRes;
 	if (deleteRelationsRes.error) return deleteRelationsRes;
+	if (deletePreviewsRes.error) return deletePreviewsRes;
 
 	const cancelRequestsRes =
 		await documentPublishOperationServices.cancelForDocuments(context, {

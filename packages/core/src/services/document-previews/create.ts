@@ -102,39 +102,26 @@ const create: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const [deleteExpiredRes, createRes] = await Promise.all([
-		DocumentPreviews.deleteMultiple({
-			where: [
-				{
-					key: "expires_at",
-					operator: "<=",
-					value: new Date().toISOString(),
-				},
-			],
-			validation: { enabled: false },
-		}),
-		DocumentPreviews.createSingle({
-			data: {
-				token_hash: hashPreviewToken(token),
-				collection_key: data.collectionKey,
-				document_id: data.documentId,
-				version_type: data.versionType,
-				version_id:
-					data.versionType === "revision" ||
-					data.versionType ===
-						constants.collectionBuilder.publishing.snapshotVersionType
-						? (data.versionId ?? null)
-						: null,
-				tenant_key: context.request.tenantKey ?? null,
-				expires_at: expiresAt,
-				created_by: data.userId,
-				created_at: new Date().toISOString(),
-			},
-			returning: ["id"],
-			validation: { enabled: true },
-		}),
-	]);
-	if (deleteExpiredRes.error) return deleteExpiredRes;
+	const createRes = await DocumentPreviews.createSingle({
+		data: {
+			token_hash: hashPreviewToken(token),
+			collection_key: data.collectionKey,
+			document_id: data.documentId,
+			version_type: data.versionType,
+			version_id:
+				data.versionType === "revision" ||
+				data.versionType ===
+					constants.collectionBuilder.publishing.snapshotVersionType
+					? (data.versionId ?? null)
+					: null,
+			tenant_key: context.request.tenantKey ?? null,
+			expires_at: expiresAt,
+			created_by: data.userId,
+			created_at: new Date().toISOString(),
+		},
+		returning: ["id"],
+		validation: { enabled: true },
+	});
 	if (createRes.error) return createRes;
 
 	return { error: undefined, data: { url, expiresAt } };

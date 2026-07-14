@@ -4,6 +4,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import {
+	documentPreviewServices,
 	documentPublishOperationServices,
 	documentServices,
 	documentWorkflowServices,
@@ -123,6 +124,7 @@ const deleteMultiplePermanently: ServiceFn<
 
 	const [
 		deleteDocumentsRes,
+		deletePreviewsRes,
 		cancelRequestsRes,
 		workflowDeleteRes,
 		...nullifyResults
@@ -145,6 +147,10 @@ const deleteMultiplePermanently: ServiceFn<
 				tableName: tableNamesRes.data.document,
 			},
 		),
+		documentPreviewServices.deleteForDocuments(context, {
+			collectionKey: data.collectionKey,
+			documentIds: data.ids,
+		}),
 		documentPublishOperationServices.cancelForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: data.ids,
@@ -159,6 +165,7 @@ const deleteMultiplePermanently: ServiceFn<
 		...nullifyPromises,
 	]);
 	if (deleteDocumentsRes.error) return deleteDocumentsRes;
+	if (deletePreviewsRes.error) return deletePreviewsRes;
 	if (cancelRequestsRes.error) return cancelRequestsRes;
 	if (workflowDeleteRes.error) return workflowDeleteRes;
 	const nullifyError = nullifyResults.find((result) => result.error);

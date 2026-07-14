@@ -15,6 +15,7 @@
 	"core.maintenance.auth.states.expired.clear.failed": "An error occurred while clearing expired auth states.",
 	"core.maintenance.locales.expired.clear.failed": "An error occurred while clearing expired locales.",
 	"core.maintenance.collections.expired.clear.failed": "An error occurred while clearing expired collections.",
+	"core.maintenance.document.previews.expired.clear.failed": "An error occurred while clearing expired document previews.",
 	"core.openapi.response.200": "Successful response",
 	"core.openapi.response.204": "No content response",
 	"core.openapi.response.default": "Catch all error response",

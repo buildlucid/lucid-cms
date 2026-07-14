@@ -13,10 +13,8 @@ const Migration00000012: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("token_hash", adapter.getDataType("char", 64), (col) =>
 					col.unique().notNull(),
 				)
-				.addColumn(
-					"collection_key",
-					adapter.getDataType("varchar", 255),
-					(col) => col.notNull(),
+				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
+					col.notNull().references("lucid_collections.key").onDelete("cascade"),
 				)
 				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
@@ -64,7 +62,7 @@ const Migration00000012: MigrationFn = (adapter: DatabaseAdapter) => {
 				.column("expires_at")
 				.execute();
 		},
-		async down(db: Kysely<unknown>) {},
+		async down(_db: Kysely<unknown>) {},
 	};
 };
 

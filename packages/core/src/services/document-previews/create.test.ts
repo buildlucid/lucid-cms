@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
 	getCollection: vi.fn(),
 	getDocument: vi.fn(),
-	deleteMultiple: vi.fn(),
 	createSingle: vi.fn(),
 }));
 
@@ -15,7 +14,6 @@ vi.mock("../documents/client/get-single.js", () => ({
 }));
 vi.mock("../../libs/repositories/index.js", () => ({
 	DocumentPreviewsRepository: class {
-		deleteMultiple = mocks.deleteMultiple;
 		createSingle = mocks.createSingle;
 	},
 }));
@@ -48,7 +46,6 @@ describe("document preview creation", () => {
 			error: undefined,
 			data: { id: 8, collectionKey: "page", status: "latest", fields: {} },
 		});
-		mocks.deleteMultiple.mockResolvedValue({ error: undefined, data: [] });
 		mocks.createSingle.mockResolvedValue({ error: undefined, data: { id: 1 } });
 
 		const before = Date.now();
@@ -126,7 +123,6 @@ describe("document preview creation", () => {
 			error: undefined,
 			data: { id: 8, collectionKey: "page", status: "revision", fields: {} },
 		});
-		mocks.deleteMultiple.mockResolvedValue({ error: undefined, data: [] });
 		mocks.createSingle.mockResolvedValue({ error: undefined, data: { id: 1 } });
 
 		await create(buildContext(), {

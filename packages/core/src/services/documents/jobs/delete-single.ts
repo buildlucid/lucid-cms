@@ -3,7 +3,7 @@ import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { documentServices } from "../../index.js";
+import { documentPreviewServices, documentServices } from "../../index.js";
 import invalidateClientDocumentCache from "../helpers/invalidate-client-cache.js";
 
 /**
@@ -98,32 +98,38 @@ const deleteDocument: ServiceFn<
 	);
 	if (hookBeforeRes.error) return hookBeforeRes;
 
-	const [deleteDocumentRes, deleteRelationsRes] = await Promise.all([
-		Documents.deleteSingle(
-			{
-				where: [
-					{
-						key: "id",
-						operator: "=",
-						value: data.id,
+	const [deleteDocumentRes, deleteRelationsRes, deletePreviewsRes] =
+		await Promise.all([
+			Documents.deleteSingle(
+				{
+					where: [
+						{
+							key: "id",
+							operator: "=",
+							value: data.id,
+						},
+					],
+					returning: ["id"],
+					validation: {
+						enabled: true,
 					},
-				],
-				returning: ["id"],
-				validation: {
-					enabled: true,
 				},
-			},
-			{
-				tableName: tableNamesRes.data.document,
-			},
-		),
-		documentServices.nullifyDocumentReferences(context, {
-			collectionKey: collectionRes.data.key,
-			documentId: data.id,
-		}),
-	]);
+				{
+					tableName: tableNamesRes.data.document,
+				},
+			),
+			documentServices.nullifyDocumentReferences(context, {
+				collectionKey: collectionRes.data.key,
+				documentId: data.id,
+			}),
+			documentPreviewServices.deleteForDocuments(context, {
+				collectionKey: data.collectionKey,
+				documentIds: [data.id],
+			}),
+		]);
 	if (deleteDocumentRes.error) return deleteDocumentRes;
 	if (deleteRelationsRes.error) return deleteRelationsRes;
+	if (deletePreviewsRes.error) return deletePreviewsRes;
 
 	const hookAfterRes = await executeHooks(
 		context,
