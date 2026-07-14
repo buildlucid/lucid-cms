@@ -9,6 +9,13 @@ import {
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { profilePictureResponseSchema } from "./media.js";
 
+const previewTokenSchema = z
+	.string()
+	.regex(/^[A-Za-z0-9_-]{43}$/)
+	.meta({
+		description: "An expiring document preview token",
+	});
+
 const documentResponseUserSchema = z.object({
 	id: z.number().meta({
 		description: "The user ID",
@@ -332,6 +339,25 @@ export const controllerSchemas = {
 		response: z.object({
 			bricks: z.array(brickInputSchema),
 			fields: z.array(fieldInputSchema),
+		}),
+	} satisfies ControllerSchema,
+	createPreview: {
+		body: z.object({
+			locale: z.string().trim().min(1).optional(),
+			versionType: versionTypesSchema,
+			versionId: z.number().int().positive().optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim(),
+			id: z.string().trim(),
+		}),
+		response: z.object({
+			url: z.url().nullable(),
+			expiresAt: z.iso.datetime().nullable(),
 		}),
 	} satisfies ControllerSchema,
 	deleteMultiple: {
@@ -746,10 +772,29 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	client: {
+		resolvePreview: {
+			body: undefined,
+			query: {
+				string: undefined,
+				formatted: undefined,
+			},
+			params: z.object({
+				token: previewTokenSchema,
+			}),
+			response: z.object({
+				collectionKey: z.string(),
+				documentId: z.number(),
+				versionType: versionTypesSchema,
+				versionId: z.number().nullable(),
+				expiresAt: z.iso.datetime(),
+			}),
+		} satisfies ControllerSchema,
 		getSingle: {
 			query: {
 				string: z
 					.object({
+						preview: previewTokenSchema.optional(),
+						versionId: z.coerce.number().int().positive().optional(),
 						"filter[id]": queryString.schema.filter(true, {
 							example: "1",
 						}),
@@ -840,6 +885,8 @@ export const controllerSchemas = {
 			query: {
 				string: z
 					.object({
+						preview: previewTokenSchema.optional(),
+						versionId: z.coerce.number().int().positive().optional(),
 						"filter[id]": queryString.schema.filter(true, {
 							example: "1",
 						}),

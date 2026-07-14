@@ -31,6 +31,8 @@ type CacheOptions = {
 	 * Return an empty object to leave the key unchanged. Not supported alongside staticKey.
 	 */
 	keyContext?: (c: LucidHonoContext) => Record<string, unknown>;
+	/** Skip both cache reads and writes for request-specific responses. */
+	bypass?: (c: LucidHonoContext) => boolean;
 };
 
 /**
@@ -121,6 +123,12 @@ const shouldBypassCache = (c: LucidHonoContext): boolean => {
  */
 const cache = (options: CacheOptions) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
+		if (options.bypass?.(c)) {
+			await next();
+			c.header("Cache-Control", "private, no-store");
+			c.header("Pragma", "no-cache");
+			return;
+		}
 		if (shouldBypassCache(c)) {
 			return await next();
 		}

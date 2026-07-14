@@ -184,6 +184,17 @@ const CollectionConfigSchema = z
 			.union([z.number().int().positive(), z.literal(false)])
 			.default(constants.collectionBuilder.revisionRetentionDays)
 			.optional(),
+		preview: z
+			.object({
+				url: z.function(),
+				expiresIn: z
+					.number()
+					.int()
+					.positive()
+					.max(constants.collectionBuilder.previewMaxExpirationSeconds)
+					.optional(),
+			})
+			.optional(),
 		hooks: z
 			.array(
 				z.object({

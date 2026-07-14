@@ -7,6 +7,10 @@ import {
 	type LucidLocalesClient,
 } from "./resources/locales.js";
 import { createMediaClient, type LucidMediaClient } from "./resources/media.js";
+import {
+	createPreviewsClient,
+	type LucidPreviewsClient,
+} from "./resources/previews.js";
 import { createTransport } from "./transport/fetcher.js";
 import type { CreateClientOptions } from "./types/transport.js";
 
@@ -17,6 +21,8 @@ export interface LucidClient {
 	locales: LucidLocalesClient;
 	/** Public media endpoints. */
 	media: LucidMediaClient;
+	/** Document preview token endpoints. */
+	previews: LucidPreviewsClient;
 }
 
 /**
@@ -51,5 +57,6 @@ export const createClient = (options: CreateClientOptions): LucidClient => {
 		documents: createDocumentsClient(transport),
 		locales: createLocalesClient(transport),
 		media: createMediaClient(transport),
+		previews: createPreviewsClient(transport),
 	};
 };

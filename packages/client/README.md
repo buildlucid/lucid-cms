@@ -62,6 +62,28 @@ const pages = await client.documents.getMultiple({
 });
 ```
 
+### Preview routes
+
+Resolve the preview token first, then use its document target in the document request.
+
+```typescript
+const token = "PREVIEW_TOKEN";
+const preview = await client.previews.resolve({ token });
+if (preview.error) throw new Error(preview.error.message);
+
+const page = await client.documents.getSingle({
+    collectionKey: "page",
+    status: preview.data.data.versionType ?? "production",
+    versionId: preview.data.data.versionId ?? undefined,
+    preview: token,
+    query: {
+        filter: { id: { value: preview.data.data.documentId } },
+    },
+});
+```
+
+Preview tokens are temporary bearer credentials and should be resolved server-side.
+
 ## Media
 
 Use the media client to fetch media items or generate processed media URLs.

@@ -12,6 +12,25 @@ const PageCollection = new CollectionBuilder("page", {
 		fixed: [SeoBrick],
 		builder: [ContentBrick],
 	},
+	autoSave: true,
+	environments: [
+		{
+			key: "production",
+			name: "Production",
+		},
+	],
+	preview: {
+		url: ({ document, env }) => {
+			const fullSlug = document.fields.fullSlug;
+			const previewOrigin = env?.PREVIEW_ORIGIN;
+
+			return typeof fullSlug === "string" &&
+				fullSlug.length > 0 &&
+				typeof previewOrigin === "string"
+				? new URL(fullSlug, previewOrigin)
+				: null;
+		},
+	},
 })
 	.addText("title", {
 		details: {

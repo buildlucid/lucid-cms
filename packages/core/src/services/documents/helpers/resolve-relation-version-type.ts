@@ -143,7 +143,7 @@ const resolveRelationVersionType: ServiceFn<
 		};
 	}
 
-	if (data.documentId === undefined || data.versionId === undefined) {
+	if (data.versionId === undefined) {
 		return {
 			error: undefined,
 			data: {
@@ -165,7 +165,15 @@ const resolveRelationVersionType: ServiceFn<
 		select: ["target"],
 		where: [
 			{ key: "collection_key", operator: "=", value: data.collectionKey },
-			{ key: "document_id", operator: "=", value: data.documentId },
+			...(data.documentId === undefined
+				? []
+				: [
+						{
+							key: "document_id" as const,
+							operator: "=" as const,
+							value: data.documentId,
+						},
+					]),
 			{ key: "snapshot_version_id", operator: "=", value: data.versionId },
 		],
 	});

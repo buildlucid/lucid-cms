@@ -154,6 +154,11 @@ export type {
 	MediaProcessResponse,
 } from "./resources/media.js";
 export type {
+	LucidPreviewsClient,
+	PreviewsResolveInput,
+	PreviewsResolveResponse,
+} from "./resources/previews.js";
+export type {
 	CollectionDocumentFilters,
 	CollectionDocumentFiltersByCollection,
 	CollectionDocumentSortKey,

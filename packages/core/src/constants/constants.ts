@@ -38,6 +38,8 @@ export default Object.freeze({
 		orderable: false,
 		protectedEnvironments: ["latest", "revision", "snapshot"],
 		revisionRetentionDays: 30,
+		previewExpirationSeconds: 3600,
+		previewMaxExpirationSeconds: 604_800,
 		publishing: {
 			allowSelfApproval: false,
 			comments: {

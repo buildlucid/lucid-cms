@@ -11,6 +11,7 @@ export function useHistoryUIState(props: {
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
 		createSignal<number | null>(null);
+	const [getPreviewOpen, setPreviewOpen] = createSignal(false);
 
 	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
 		createSignal(false);
@@ -136,6 +137,7 @@ export function useHistoryUIState(props: {
 	 * Determines if the restore revision button should be visible - always false for history
 	 */
 	const showRestoreRevisionButton = createMemo(() => false);
+	const showPreview = createMemo(() => false);
 
 	/**
 	 * Determines if the user has permission to restore documents - always false for history
@@ -156,6 +158,8 @@ export function useHistoryUIState(props: {
 		setRestoreRevisionOpen,
 		getRestoreRevisionVersionId,
 		setRestoreRevisionVersionId,
+		getPreviewOpen,
+		setPreviewOpen,
 		getReleaseEnvironmentOpen,
 		setReleaseEnvironmentOpen,
 		getReleaseEnvironmentTarget,
@@ -184,6 +188,7 @@ export function useHistoryUIState(props: {
 		isCreatingPublishOperation,
 		isAutoSaveActive,
 		showRestoreRevisionButton,
+		showPreview,
 		hasRestorePermission,
 		autoSaveUserEnabled,
 	};

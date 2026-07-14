@@ -91,7 +91,7 @@ declare module "./types.js" {
 	}
 
 	interface CollectionDocumentStatusesByCollection {
-		page: "latest" | "revision" | "published";
+		page: "latest" | "revision" | "snapshot" | "published";
 	}
 
 	interface CollectionDocumentVersionKeysByCollection {
@@ -134,7 +134,7 @@ declare module "@lucidcms/core/types" {
 	}
 
 	interface CollectionDocumentStatusesByCollection {
-		page: "latest" | "revision" | "published";
+		page: "latest" | "revision" | "snapshot" | "published";
 	}
 
 	interface CollectionDocumentVersionKeysByCollection {
@@ -180,7 +180,7 @@ test("collection documents narrow to generated plain field and brick types", () 
 		| undefined
 	>();
 	expectTypeOf<CollectionDocument<"page">["status"]>().toEqualTypeOf<
-		"latest" | "revision" | "published" | null
+		"latest" | "revision" | "snapshot" | "published" | null
 	>();
 	expectTypeOf<
 		CollectionDocument<"page">["collectionKey"]
@@ -324,7 +324,7 @@ test("document client queries narrow filters, includes, and sorts from the colle
 		"createdAt" | "updatedAt" | "_pageTitle"
 	>();
 	expectTypeOf<CollectionDocumentStatus<"page">>().toEqualTypeOf<
-		"latest" | "revision" | "published"
+		"latest" | "revision" | "snapshot" | "published"
 	>();
 	expectTypeOf<CollectionDocumentVersionKey<"page">>().toEqualTypeOf<
 		"latest" | "published"

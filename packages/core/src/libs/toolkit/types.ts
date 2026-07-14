@@ -13,6 +13,7 @@ import type { ToolkitDocuments } from "./documents/index.js";
 import type { ToolkitEmail } from "./email/index.js";
 import type { ToolkitLocales } from "./locales/index.js";
 import type { ToolkitMedia } from "./media/index.js";
+import type { ToolkitPreviews } from "./previews/index.js";
 
 /** Lucid service context used by `createToolkit()`. */
 export type ToolkitContext = ServiceContext;
@@ -60,6 +61,8 @@ export type Toolkit = {
 	locales: ToolkitLocales;
 	/** Helpers for reading and processing media. */
 	media: ToolkitMedia;
+	/** Helpers for resolving document preview tokens. */
+	previews: ToolkitPreviews;
 };
 
 export type * from "./documents/get-multiple.js";
@@ -73,3 +76,5 @@ export type * from "./media/get-multiple.js";
 export type * from "./media/get-single.js";
 export type * from "./media/index.js";
 export type * from "./media/process-media.js";
+export type * from "./previews/index.js";
+export type * from "./previews/resolve.js";

@@ -1,4 +1,6 @@
 import type {
+	CollectionDocument,
+	EnvironmentVariables,
 	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTableName,
@@ -42,6 +44,19 @@ export type CollectionGroupConfig = {
 	key: string;
 	name: ResolvedAdminCopy | null;
 	order: number | null;
+};
+
+export type CollectionPreviewURLResolver = (props: {
+	document: CollectionDocument;
+	env: EnvironmentVariables | null;
+	locale: string;
+	tenantKey: string | null;
+}) => string | URL | null | Promise<string | URL | null>;
+
+export type CollectionPreviewConfig = {
+	url: CollectionPreviewURLResolver;
+	/** How long generated preview links remain valid, in seconds. Defaults to one hour. */
+	expiresIn?: number;
 };
 
 export type PublishingReviewCommentRequirement = "required" | "optional";
@@ -123,6 +138,7 @@ export type CollectionConfigSchemaType = {
 		relations?: CollectionEnvironmentRelations;
 	}>;
 	revisionRetentionDays?: number | false;
+	preview?: CollectionPreviewConfig;
 	hooks?: CollectionBuilderHooks[];
 	bricks?: {
 		fixed?: Array<BrickBuilder>;
@@ -157,6 +173,7 @@ export type CollectionData = {
 		relations: CollectionEnvironmentRelations;
 	}[];
 	revisionRetentionDays: number | false;
+	preview: boolean;
 	tenants: string[];
 	permissions: CollectionPermissions;
 };

@@ -1,0 +1,193 @@
+import type { DocumentVersionType } from "@types";
+import {
+	type Accessor,
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	on,
+	onCleanup,
+} from "solid-js";
+import api from "@/services/api";
+import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
+import {
+	PreviewCanvas,
+	type PreviewWidthSelection,
+	type PreviewZoom,
+	type ResolverState,
+} from "./PreviewCanvas";
+
+export const DocumentPreview: Component<{
+	open: Accessor<boolean>;
+	collectionKey: Accessor<string>;
+	documentId: Accessor<number | undefined>;
+	versionType: Accessor<DocumentVersionType>;
+	versionId: Accessor<number | undefined>;
+	locale: Accessor<string>;
+	dirty: Accessor<boolean>;
+	saveStamp: Accessor<string>;
+}> = (props) => {
+	// ----------------------------------
+	// State / Hooks
+	let resolveSequence = 0;
+	const [url, setUrl] = createSignal<string | null>(null);
+	const [resolverState, setResolverState] = createSignal<ResolverState>("idle");
+	const [frameLoading, setFrameLoading] = createSignal(false);
+	const [selectedWidth, setSelectedWidth] =
+		createSignal<PreviewWidthSelection>("fit");
+	const [customWidth, setCustomWidth] = createSignal(768);
+	const [zoom, setZoom] = createSignal<PreviewZoom>(100);
+	const createPreview = api.documents.useCreatePreview();
+
+	// ----------------------------------
+	// Memos
+	const frameSrc = createMemo(() => url() ?? undefined);
+
+	// ----------------------------------
+	// Functions
+	const createPersistedPreviewUrl = async () => {
+		const documentId = props.documentId();
+		if (documentId === undefined) return null;
+
+		const response = await createPreview.action.mutateAsync({
+			collectionKey: props.collectionKey(),
+			documentId,
+			versionType: props.versionType(),
+			versionId: props.versionId(),
+			locale: props.locale(),
+		});
+		return response.data.url;
+	};
+	const resolvePersistedPreview = async () => {
+		const currentResolve = ++resolveSequence;
+		setResolverState("loading");
+		try {
+			const nextUrl = await createPersistedPreviewUrl();
+			if (currentResolve !== resolveSequence) return;
+			if (!nextUrl) {
+				setUrl(null);
+				setFrameLoading(false);
+				setResolverState("unavailable");
+				return;
+			}
+
+			setFrameLoading(true);
+			setUrl(nextUrl);
+			setResolverState("ready");
+		} catch {
+			if (currentResolve !== resolveSequence) return;
+			setFrameLoading(false);
+			setResolverState("error");
+		}
+	};
+	const warnWhenDirty = () => {
+		if (!props.dirty()) return;
+		spawnToast({
+			title: T()("preview.saved.url.title"),
+			message: T()("preview.saved.url.message"),
+			status: "warning",
+		});
+	};
+	const copyPersistedUrl = async () => {
+		try {
+			warnWhenDirty();
+			const persistedUrl = await createPersistedPreviewUrl();
+			if (!persistedUrl) {
+				spawnToast({
+					title: T()("preview.unavailable.title"),
+					message: T()("preview.unavailable.message"),
+					status: "warning",
+				});
+				return;
+			}
+			await navigator.clipboard.writeText(persistedUrl);
+			spawnToast({
+				title: T()("toasts.common.copy.to.clipboard.title"),
+				status: "success",
+			});
+		} catch {
+			return;
+		}
+	};
+	const openPersistedUrl = async () => {
+		const previewWindow = window.open("about:blank", "_blank");
+		if (previewWindow) previewWindow.opener = null;
+		warnWhenDirty();
+		try {
+			const persistedUrl = await createPersistedPreviewUrl();
+			if (!persistedUrl) {
+				previewWindow?.close();
+				spawnToast({
+					title: T()("preview.unavailable.title"),
+					message: T()("preview.unavailable.message"),
+					status: "warning",
+				});
+				return;
+			}
+			if (previewWindow) {
+				previewWindow.location.replace(persistedUrl);
+				return;
+			}
+			window.open(persistedUrl, "_blank", "noopener,noreferrer");
+		} catch {
+			previewWindow?.close();
+		}
+	};
+
+	// ----------------------------------
+	// Effects
+	createEffect(
+		on(
+			() =>
+				[
+					props.open(),
+					props.collectionKey(),
+					props.documentId(),
+					props.versionType(),
+					props.versionId(),
+					props.locale(),
+				] as const,
+			([open]) => {
+				if (!open) return;
+				void resolvePersistedPreview();
+			},
+		),
+	);
+	createEffect(
+		on(props.saveStamp, (next, previous) => {
+			if (previous === undefined || next === previous || !props.open()) return;
+			void resolvePersistedPreview();
+		}),
+	);
+
+	// ----------------------------------
+	// Lifecycle
+	onCleanup(() => {
+		resolveSequence += 1;
+	});
+
+	// ----------------------------------
+	// Render
+	return (
+		<section class="h-full min-h-0 min-w-0 overflow-hidden rounded-t-xl border-t border-border bg-card-base xl:rounded-tl-none xl:border-l xl:border-t-0">
+			<PreviewCanvas
+				frameSrc={frameSrc}
+				resolverState={resolverState}
+				frameLoading={frameLoading}
+				setFrameLoading={setFrameLoading}
+				selectedWidth={selectedWidth}
+				setSelectedWidth={setSelectedWidth}
+				customWidth={customWidth}
+				setCustomWidth={setCustomWidth}
+				zoom={zoom}
+				setZoom={setZoom}
+				actionLoading={() => createPreview.action.isPending}
+				onRefresh={() => void resolvePersistedPreview()}
+				onCopy={() => void copyPersistedUrl()}
+				onOpen={() => void openPersistedUrl()}
+				onRetry={() => void resolvePersistedPreview()}
+			/>
+		</section>
+	);
+};

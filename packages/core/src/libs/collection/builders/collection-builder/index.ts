@@ -217,6 +217,7 @@ class CollectionBuilder extends FieldBuilder {
 			revisionRetentionDays:
 				this.config.revisionRetentionDays ??
 				constants.collectionBuilder.revisionRetentionDays,
+			preview: this.config.preview !== undefined,
 			tenants: this.config.tenants ?? [],
 			permissions: this.config.permissions ?? {},
 		};

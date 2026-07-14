@@ -248,6 +248,8 @@ export const DocumentsList: Component<{
 			});
 		},
 	});
+	const createPreview = api.documents.useCreatePreview();
+
 	const documentOrderSave = useDocumentOrderSave({
 		save: (update) => updateDocumentOrder.action.mutateAsync(update),
 		onSaved: () =>
@@ -292,6 +294,31 @@ export const DocumentsList: Component<{
 				nextDocumentId,
 			},
 		});
+	};
+	const copyPreviewUrl = async (documentId: number) => {
+		try {
+			const response = await createPreview.action.mutateAsync({
+				collectionKey: collectionKey(),
+				documentId,
+				versionType: "latest",
+				locale: contentLocale() || undefined,
+			});
+			if (!response.data.url) {
+				spawnToast({
+					title: T()("preview.unavailable.title"),
+					message: T()("preview.unavailable.message"),
+					status: "warning",
+				});
+				return;
+			}
+			await navigator.clipboard.writeText(response.data.url);
+			spawnToast({
+				title: T()("toasts.common.copy.to.clipboard.title"),
+				status: "success",
+			});
+		} catch {
+			return;
+		}
 	};
 
 	// ----------------------------------------
@@ -435,6 +462,22 @@ export const DocumentsList: Component<{
 									setSelected: setSelected,
 								}}
 								actions={[
+									{
+										label: T()("preview.copy.url"),
+										type: "button",
+										icon: "link",
+										onClick: () => void copyPreviewUrl(doc().id),
+										isLoading: createPreview.action.isPending,
+										actionExclude: true,
+										permission: collectionPermissions()?.read
+											? userStore.get.hasPermission([
+													collectionPermissions()?.read as string,
+												]).some
+											: false,
+										hide:
+											props.state.showingDeleted() ||
+											props.state.collection?.capabilities.preview !== true,
+									},
 									{
 										label: T()("common.edit"),
 										type: "button",

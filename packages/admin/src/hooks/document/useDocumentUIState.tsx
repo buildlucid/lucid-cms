@@ -5,7 +5,12 @@ import type {
 	FieldError,
 	InternalCollectionDocument,
 } from "@types";
-import { type Accessor, createMemo, createSignal } from "solid-js";
+import {
+	type Accessor,
+	createEffect,
+	createMemo,
+	createSignal,
+} from "solid-js";
 import type api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -38,6 +43,7 @@ export function useDocumentUIState(props: {
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
 		createSignal<number | null>(null);
+	const [getPreviewOpen, setPreviewOpen] = createSignal(false);
 
 	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
 		createSignal(false);
@@ -317,6 +323,22 @@ export function useDocumentUIState(props: {
 	});
 
 	/**
+	 * Determines if the document preview is available for the current view
+	 */
+	const showPreview = createMemo(() => {
+		const version = props.version();
+		const requiresVersionId = version === "revision" || version === "snapshot";
+
+		return (
+			props.mode === "edit" &&
+			props.document()?.id !== undefined &&
+			(!requiresVersionId || props.versionId() !== undefined) &&
+			props.document()?.isDeleted !== true &&
+			props.collection()?.capabilities.preview === true
+		);
+	});
+
+	/**
 	 * Determines if the user has permission to restore documents
 	 */
 	const hasRestorePermission = createMemo(() => {
@@ -324,6 +346,10 @@ export function useDocumentUIState(props: {
 		if (!permission) return false;
 
 		return userStore.get.hasPermission([permission]).all;
+	});
+
+	createEffect(() => {
+		if (!showPreview()) setPreviewOpen(false);
 	});
 
 	// ------------------------------------------
@@ -335,6 +361,8 @@ export function useDocumentUIState(props: {
 		setRestoreRevisionOpen,
 		getRestoreRevisionVersionId,
 		setRestoreRevisionVersionId,
+		getPreviewOpen,
+		setPreviewOpen,
 		getReleaseEnvironmentOpen,
 		setReleaseEnvironmentOpen,
 		getReleaseEnvironmentTarget,
@@ -363,6 +391,7 @@ export function useDocumentUIState(props: {
 		isCreatingPublishOperation,
 		isAutoSaveActive,
 		showRestoreRevisionButton,
+		showPreview,
 		hasRestorePermission,
 		autoSaveUserEnabled,
 	};

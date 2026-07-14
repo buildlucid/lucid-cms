@@ -501,6 +501,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 	async selectMultipleFiltered(
 		props: {
 			status: DocumentVersionType;
+			versionId?: number;
 			/** The status used to determine which version of the relation custom field refs to fetch */
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
@@ -595,6 +596,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									sql.ref(`${dynamicConfig.tableName}.id`),
 								)
 								.where(`${props.tables.versions}.type`, "=", props.status)
+								.$if(props.versionId !== undefined, (qb) =>
+									qb.where(
+										`${props.tables.versions}.id`,
+										"=",
+										props.versionId as number,
+									),
+								)
 								.select(
 									props.documentFieldsTableSchema?.columns.map(
 										(c) => `${props.tables.documentFields}.${c.name}`,
@@ -619,6 +627,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 										sql.ref(`${dynamicConfig.tableName}.id`),
 									)
 									.where(`${props.tables.versions}.type`, "=", props.status)
+									.$if(props.versionId !== undefined, (qb) =>
+										qb.where(
+											`${props.tables.versions}.id`,
+											"=",
+											props.versionId as number,
+										),
+									)
 									.select(
 										schema.columns.map((c) => `${schema.name}.${c.name}`),
 									),
@@ -851,7 +866,14 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						.as("ub_user_profile_picture"),
 				])
 				// @ts-expect-error
-				.where(`${props.tables.versions}.type`, "=", props.status);
+				.where(`${props.tables.versions}.type`, "=", props.status)
+				.$if(props.versionId !== undefined, (qb) =>
+					qb.where(
+						`${props.tables.versions}.id`,
+						"=",
+						props.versionId as number,
+					),
+				);
 
 			let queryCount = this.db
 				.selectFrom(dynamicConfig.tableName)
@@ -892,7 +914,14 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					),
 				)
 				// @ts-expect-error
-				.where(`${props.tables.versions}.type`, "=", props.status);
+				.where(`${props.tables.versions}.type`, "=", props.status)
+				.$if(props.versionId !== undefined, (qb) =>
+					qb.where(
+						`${props.tables.versions}.id`,
+						"=",
+						props.versionId as number,
+					),
+				);
 
 			if (
 				props.includeWorkflow &&
@@ -1032,6 +1061,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 	async selectSingleFiltered(
 		props: {
 			status: DocumentVersionType;
+			versionId?: number;
 			/** The status used to determine which version of the relation custom field refs to fetch */
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
@@ -1214,7 +1244,14 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						.as("ub_user_profile_picture"),
 				])
 				// @ts-expect-error
-				.where(`${props.tables.versions}.type`, "=", props.status);
+				.where(`${props.tables.versions}.type`, "=", props.status)
+				.$if(props.versionId !== undefined, (qb) =>
+					qb.where(
+						`${props.tables.versions}.id`,
+						"=",
+						props.versionId as number,
+					),
+				);
 
 			query = this.applyBrickFiltersToQuery(
 				query,

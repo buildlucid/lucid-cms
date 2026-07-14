@@ -11,6 +11,7 @@ export const env = z.object({
 	COOKIE_SECRET: z.string(),
 	REFRESH_TOKEN_SECRET: z.string(),
 	ACCESS_TOKEN_SECRET: z.string(),
+	PREVIEW_ORIGIN: z.url(),
 });
 
 export default configureLucid({

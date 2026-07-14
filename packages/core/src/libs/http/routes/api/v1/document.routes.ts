@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import checkVersion from "../../../controllers/documents/check-version.js";
+import createPreview from "../../../controllers/documents/create-preview.js";
 import createPublishOperation from "../../../controllers/documents/create-publish-operation.js";
 import createSingle from "../../../controllers/documents/create-single.js";
 import createVersion from "../../../controllers/documents/create-version.js";
@@ -31,6 +32,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.get("/:collectionKey/workflow/assignees", ...getWorkflowAssignees)
 	.patch("/:collectionKey/:id/workflow", ...updateWorkflow)
 	.patch("/:collectionKey/:id/order", ...updateOrder)
+	.post("/:collectionKey/:id/preview", ...createPreview)
 	.get("/:collectionKey/:status", ...getMultiple)
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)
 	.get("/:collectionKey/:id/:statusOrId", ...getSingle)

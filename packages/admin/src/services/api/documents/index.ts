@@ -1,4 +1,5 @@
 import useCheckSingleVersion from "./useCheckSingleVersion";
+import useCreatePreview from "./useCreatePreview";
 import useCreatePublishOperation from "./useCreatePublishOperation";
 import useCreateSingle from "./useCreateSingle";
 import useCreateSingleVersion from "./useCreateSingleVersion";
@@ -20,6 +21,7 @@ import useUpdateWorkflow from "./useUpdateWorkflow";
 
 const exportObject = {
 	useGetMultiple,
+	useCreatePreview,
 	useDeleteSingle,
 	useDeleteMultiple,
 	useDeleteMultiplePermanently,

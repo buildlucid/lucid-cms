@@ -25,6 +25,8 @@ export type {
 	DocumentFieldMap,
 	DocumentFieldPlainValue,
 	DocumentFieldValueMap,
+	DocumentPreviewResolveResponse,
+	DocumentPreviewURLResponse,
 	DocumentRef,
 	DocumentVersion,
 	DocumentVersionCheckBrick,

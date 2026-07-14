@@ -8,6 +8,7 @@ export { default as ClientIntegrationsRepository } from "./client-integrations.j
 export { default as CollectionMigrationsRepository } from "./collection-migrations.js";
 export { default as CollectionsRepository } from "./collections.js";
 export { default as DocumentBricksRepository } from "./document-bricks.js";
+export { default as DocumentPreviewsRepository } from "./document-previews.js";
 export { default as DocumentPublishOperationAssigneesRepository } from "./document-publish-operation-assignees.js";
 export { default as DocumentPublishOperationEventsRepository } from "./document-publish-operation-events.js";
 export { default as DocumentPublishOperationsRepository } from "./document-publish-operations.js";

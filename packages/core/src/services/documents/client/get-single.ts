@@ -1,4 +1,3 @@
-import constants from "../../../constants/constants.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -21,14 +20,19 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
+import authorizePreview from "../../document-previews/authorize.js";
+import scopePreviewDocumentFilters from "../../document-previews/helpers/scope-document-filters.js";
 import { collectionServices, documentBrickServices } from "../../index.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
+import validateClientVersionTarget from "../helpers/validate-client-version-target.js";
 
 type ClientDocumentsGetSingleInput<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
 	status: CollectionDocumentStatus<TCollectionKey>;
+	versionId?: number;
 	query: ClientGetSingleQueryParams;
+	previewToken?: string;
 };
 
 type ClientDocumentsGetSingleService = <TCollectionKey extends string>(
@@ -43,17 +47,21 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	context: ServiceContext,
 	data: ClientDocumentsGetSingleInput<TCollectionKey>,
 ): ServiceResponse<CollectionDocument<TCollectionKey>> => {
-	if (
-		data.status === constants.collectionBuilder.publishing.snapshotVersionType
-	) {
-		return {
-			error: {
-				message: copy("server:core.documents.not.found.message"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
+	const versionTargetRes = await validateClientVersionTarget({
+		versionType: data.status,
+		versionId: data.versionId,
+	});
+	if (versionTargetRes.error) return versionTargetRes;
+
+	const previewRes = data.previewToken
+		? await authorizePreview(context, {
+				token: data.previewToken,
+				collectionKey: data.collectionKey,
+				versionType: data.status,
+				versionId: versionTargetRes.data.versionId,
+			})
+		: undefined;
+	if (previewRes?.error) return previewRes;
 
 	const Documents = new DocumentsRepository(
 		context.db.client,
@@ -75,6 +83,8 @@ const getSingle: ClientDocumentsGetSingleService = async <
 		getTableNames(context, data.collectionKey),
 		resolveRelationVersionType(context, {
 			collectionKey: data.collectionKey,
+			documentId: previewRes?.data.documentId,
+			versionId: versionTargetRes.data.versionId,
 			versionType: data.status,
 		}),
 	]);
@@ -83,11 +93,18 @@ const getSingle: ClientDocumentsGetSingleService = async <
 
 	const query: ClientGetSingleQueryParams = {
 		...data.query,
-		filter: applyDefaultQueryFilters(data.query.filter, {
-			isDeleted: {
-				value: context.config.db.getDefault("boolean", "false"),
+		filter: applyDefaultQueryFilters(
+			scopePreviewDocumentFilters(
+				data.query.filter,
+				previewRes?.data.documentId,
+				context.config.db.getDefault("boolean", "false"),
+			),
+			{
+				isDeleted: {
+					value: context.config.db.getDefault("boolean", "false"),
+				},
 			},
-		}),
+		),
 	};
 	const include = resolveDocumentIncludes(query.include);
 
@@ -102,6 +119,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	const documentRes = await Documents.selectSingleFiltered(
 		{
 			status: data.status,
+			versionId: versionTargetRes.data.versionId,
 			query,
 			documentFilters,
 			filterOr,

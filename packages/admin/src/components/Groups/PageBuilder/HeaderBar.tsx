@@ -7,6 +7,8 @@ import classNames from "classnames";
 import {
 	FaSolidCalendarPlus,
 	FaSolidClock,
+	FaSolidEye,
+	FaSolidEyeSlash,
 	FaSolidLanguage,
 	FaSolidRotate,
 } from "solid-icons/fa";
@@ -54,12 +56,15 @@ export const HeaderBar: Component<{
 		autoSave?: UseDocumentAutoSave;
 		autoSaveUserEnabled?: Accessor<boolean>;
 		showRevisionNavigation: UseDocumentUIState["showRevisionNavigation"];
+		showPreview?: UseDocumentUIState["showPreview"];
+		previewOpen?: UseDocumentUIState["getPreviewOpen"];
 		isDocumentMutated?: Accessor<boolean>;
 	};
 	actions: {
 		upsertDocumentAction?: UseDocumentMutations["upsertDocumentAction"];
 		publishDocumentAction?: UseDocumentMutations["publishDocumentAction"];
 		restoreRevisionAction?: UseDocumentMutations["restoreRevisionAction"];
+		togglePreview?: () => void;
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -532,6 +537,30 @@ export const HeaderBar: Component<{
 							</div>
 						</Show>
 						<div class="flex items-center gap-2.5 w-auto ml-auto">
+							<Show when={props.state.showPreview?.()}>
+								<Button
+									type="button"
+									theme="secondary-toggle"
+									size="icon"
+									active={props.state.previewOpen?.()}
+									title={T()("common.preview")}
+									aria-label={T()("common.preview")}
+									aria-pressed={props.state.previewOpen?.()}
+									classes={
+										props.state.previewOpen?.()
+											? "border-secondary-base! bg-secondary-base! text-secondary-contrast! fill-secondary-contrast! hover:bg-secondary-hover!"
+											: undefined
+									}
+									onClick={() => props.actions.togglePreview?.()}
+								>
+									<Show
+										when={props.state.previewOpen?.()}
+										fallback={<FaSolidEye />}
+									>
+										<FaSolidEyeSlash />
+									</Show>
+								</Button>
+							</Show>
 							<Show when={props.state.ui.showUpsertButton?.()}>
 								<ReleaseTrigger
 									options={releaseOptions}

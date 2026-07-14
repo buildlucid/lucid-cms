@@ -25,6 +25,10 @@ export type ToolkitDocumentsGetSingleInput<
 > = ToolkitTenantOptions & {
 	collectionKey: TCollectionKey;
 	status?: ToolkitDocumentStatus<TCollectionKey>;
+	/** Required when fetching a specific revision or snapshot. */
+	versionId?: number;
+	/** Expiring token from a Lucid-generated preview URL. */
+	preview?: string;
 	query?: ToolkitDocumentsGetSingleQuery<TCollectionKey>;
 };
 
@@ -41,7 +45,9 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 			documentServices.client.getSingle(serviceContext, {
 				collectionKey: input.collectionKey,
 				status,
+				versionId: input.versionId,
 				query: normalizeDocumentQuery(input.query),
+				previewToken: input.preview,
 			}),
 		{
 			name: {

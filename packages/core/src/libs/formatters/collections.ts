@@ -121,6 +121,7 @@ const formatSingle = (props: {
 			scheduling:
 				collectionData.scheduling === true &&
 				props.queueSupportsScheduling === true,
+			preview: collectionData.preview,
 		},
 		permissions: resolvedPermissions,
 		migrationStatus: props.migrationStatus ?? null,

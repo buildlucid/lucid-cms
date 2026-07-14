@@ -199,6 +199,10 @@ const collectionResponseSchema = z.object({
 				"Whether this collection can create scheduled releases in the current runtime",
 			example: false,
 		}),
+		preview: z.boolean().meta({
+			description: "Whether this collection has a page preview URL resolver",
+			example: true,
+		}),
 	}),
 	permissions: z.object({
 		read: z.string(),

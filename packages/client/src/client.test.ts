@@ -54,10 +54,12 @@ describe("@lucidcms/client", () => {
 
 		const response = await client.documents.getSingle({
 			collectionKey: "page",
+			preview: "a".repeat(43),
 			query: {
 				filter: {
 					_fullSlug: {
 						value: "/about",
+						// @ts-expect-error
 						operator: "starts-with",
 					},
 					banner: {
@@ -67,6 +69,7 @@ describe("@lucidcms/client", () => {
 					},
 					fields: {
 						sections: {
+							// @ts-expect-error
 							_section_title: {
 								value: "Hero",
 							},
@@ -88,7 +91,60 @@ describe("@lucidcms/client", () => {
 		expect(String(url)).toContain(
 			"/document/page/latest?filter%5B_fullSlug%3Astarts-with%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks%2Crefs.relation%2Cmeta",
 		);
+		expect(new URL(String(url)).searchParams.get("preview")).toBe(
+			"a".repeat(43),
+		);
 		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
+	});
+
+	test("resolves preview targets and serializes exact document versions", async () => {
+		const fetchMock = vi
+			.fn<typeof fetch>()
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						data: {
+							collectionKey: "page",
+							documentId: 7,
+							versionType: "snapshot",
+							versionId: 42,
+							expiresAt: "2099-01-01T00:00:00.000Z",
+						},
+						meta: {},
+					}),
+					{ status: 200, headers: { "content-type": "application/json" } },
+				),
+			)
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({ data: {}, meta: {} }), {
+					status: 200,
+					headers: { "content-type": "application/json" },
+				}),
+			);
+		const client = createClient({
+			baseUrl: "https://example.com",
+			apiKey: "client-key",
+			fetch: fetchMock,
+		});
+		const token = "b".repeat(43);
+
+		const resolved = await client.previews.resolve({ token });
+		await client.documents.getSingle({
+			collectionKey: "page",
+			status: "snapshot",
+			versionId: resolved.data?.data.versionId ?? undefined,
+			preview: token,
+		});
+
+		expect(new URL(String(fetchMock.mock.calls[0]?.[0])).pathname).toBe(
+			`/lucid/api/v1/client/preview/${token}`,
+		);
+		const documentUrl = new URL(String(fetchMock.mock.calls[1]?.[0]));
+		expect(documentUrl.pathname).toBe(
+			"/lucid/api/v1/client/document/page/snapshot",
+		);
+		expect(documentUrl.searchParams.get("versionId")).toBe("42");
+		expect(documentUrl.searchParams.get("preview")).toBe(token);
 	});
 
 	test("retries idempotent GET requests and returns paginated response bodies", async () => {
@@ -259,7 +315,6 @@ describe("@lucidcms/client", () => {
 							},
 						};
 					},
-					// @ts-expect-error
 					onResponse: () => {
 						requestOrder.push("response");
 					},

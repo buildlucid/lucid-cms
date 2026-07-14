@@ -385,6 +385,7 @@ const getCollectionStatusKeys = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
 		"latest",
 		"revision",
+		constants.collectionBuilder.publishing.snapshotVersionType,
 		...collection.getData.environments.map((environment) => environment.key),
 	]);
 };

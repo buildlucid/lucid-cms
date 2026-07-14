@@ -31,6 +31,10 @@ export type ToolkitDocumentsGetMultipleInput<
 > = ToolkitTenantOptions & {
 	collectionKey: TCollectionKey;
 	status?: ToolkitDocumentStatus<TCollectionKey>;
+	/** Required when fetching a specific revision or snapshot. */
+	versionId?: number;
+	/** Expiring token from a Lucid-generated preview URL. */
+	preview?: string;
 	query?: ToolkitDocumentsGetMultipleQuery<TCollectionKey>;
 };
 
@@ -54,7 +58,9 @@ const getMultiple = async <TCollectionKey extends CollectionDocumentKey>(
 			documentServices.client.getMultiple(serviceContext, {
 				collectionKey: input.collectionKey,
 				status,
+				versionId: input.versionId,
 				query: normalizePaginatedDocumentQuery(input.query),
+				previewToken: input.preview,
 			}),
 		{
 			name: {

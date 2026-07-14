@@ -318,6 +318,19 @@ export interface CollectionDocument<
 	>;
 }
 
+export type DocumentPreviewURLResponse = {
+	url: string | null;
+	expiresAt: string | null;
+};
+
+export type DocumentPreviewResolveResponse = {
+	collectionKey: string;
+	documentId: number;
+	versionType: DocumentVersionType;
+	versionId: number | null;
+	expiresAt: string;
+};
+
 export type CollectionMode = "single" | "multiple";
 export type MigrationStatus = {
 	requiresMigration: boolean;
@@ -668,6 +681,7 @@ export interface Collection {
 	}[];
 	capabilities: {
 		scheduling: boolean;
+		preview: boolean;
 	};
 	permissions: {
 		read: string;

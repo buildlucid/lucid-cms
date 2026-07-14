@@ -1,26 +1,26 @@
 ---
 import { setAdminBar } from "@lucidcms/astro/admin-bar";
-import getToolkit from "@lucidcms/astro/toolkit";
 import { asDocument } from "@lucidcms/client";
 import "../index.css";
+import getPage from "../helpers/get-page";
 
 export const prerender = false;
-const toolkit = await getToolkit();
+const previewToken = Astro.url.searchParams.get("preview") ?? undefined;
+const fullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
 
-const response = await toolkit.documents.getSingle({
-	collectionKey: "page",
-	status: "latest",
-	query: {
-		filter: {
-			_fullSlug: {
-				value: Astro.params.slug ? `/${Astro.params.slug}` : "/",
-			},
-		},
-		include: ["bricks"],
-	},
-});
+if (previewToken) {
+	//* preview tokens are bearer credentials: do not cache or forward this URL.
+	Astro.response.headers.set("Cache-Control", "private, no-store");
+	Astro.response.headers.set("Referrer-Policy", "no-referrer");
+}
 
-const page = asDocument(response.data);
+const pageResponse = await getPage({ fullSlug, previewToken });
+
+if (previewToken && pageResponse.error) {
+	Astro.response.status = pageResponse.error.status ?? 401;
+}
+
+const page = asDocument(pageResponse.data);
 
 if (page) {
 	setAdminBar(Astro, {
@@ -33,8 +33,10 @@ if (page) {
 
 const title = page?.field("title").value();
 const summary = page?.field("summary").value();
-const fullSlug = page?.field("fullSlug").value();
+const pageFullSlug = page?.field("fullSlug").value();
 const slug = page?.field("slug").value();
+
+const previewError = previewToken ? pageResponse.error : undefined;
 ---
 
 <html lang="en">
@@ -47,6 +49,7 @@ const slug = page?.field("slug").value();
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
 			rel="stylesheet"
 		/>
+		{previewToken && <meta name="referrer" content="no-referrer" />}
 		<title>
 			{title
 				? `${title} | Lucid CMS`
@@ -80,13 +83,19 @@ const slug = page?.field("slug").value();
 					<section class="welcome-card">
 						<p class="eyebrow">Astro + Node</p>
 						<h1 class="welcome-title">
-							{page ? "Your Lucid page is live." : "Create your first Lucid page."}
+							{previewError
+								? "This preview link is unavailable."
+								: page
+									? "Your Lucid page is live."
+									: "Create your first Lucid page."}
 						</h1>
 						<p class="welcome-copy">
-							{page ? (
+							{previewError ? (
+								<>The preview link is invalid or has expired. Create a new one in Lucid.</>
+							) : page ? (
 								<>
 									This route is rendering your <code>page</code> document from
-									<code>{fullSlug || "/"}</code>. Update it in Lucid and refresh
+									<code>{pageFullSlug || "/"}</code>. Update it in Lucid and refresh
 									to see the latest content here.
 								</>
 							) : (
@@ -136,7 +145,7 @@ const slug = page?.field("slug").value();
 								<div class="document-row">
 									<span class="document-label">Full slug</span>
 									<p class="document-value">
-										{fullSlug || "Not set"}
+										{pageFullSlug || "Not set"}
 									</p>
 								</div>
 

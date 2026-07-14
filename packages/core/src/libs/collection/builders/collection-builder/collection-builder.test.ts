@@ -1,4 +1,5 @@
 import { expect, test } from "vitest";
+import collectionsFormatter from "../../../formatters/collections.js";
 import { copy } from "../../../i18n/index.js";
 import CollectionBuilder from "./index.js";
 
@@ -144,8 +145,28 @@ test("collection options are correct along with field includes and filters", asy
 		labelFields: ["text_test"],
 		environments: [],
 		revisionRetentionDays: 30,
+		preview: false,
 		tenants: [],
 	});
+});
+
+test("collection preview configuration is retained privately and exposed as a capability", () => {
+	const preview = async () => new URL("https://example.com/page");
+	const collection = new CollectionBuilder("pages", {
+		mode: "multiple",
+		details: {
+			name: "Pages",
+			singularName: "Page",
+		},
+		preview: { url: preview, expiresIn: 120 },
+	});
+
+	expect(collection.getData.preview).toBe(true);
+	expect(collection.config.preview?.url).toBe(preview);
+	expect(collection.config.preview?.expiresIn).toBe(120);
+	const adminCollection = collectionsFormatter.formatSingle({ collection });
+	expect(adminCollection.capabilities.preview).toBe(true);
+	expect(JSON.stringify(adminCollection)).not.toContain(preview.toString());
 });
 
 test("collection workflow features normalizes defaults", async () => {

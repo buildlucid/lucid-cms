@@ -43,6 +43,7 @@ const getSingleController = factory.createHandlers(
 	cache({
 		ttl: hoursToSeconds(24),
 		mode: "include-query",
+		bypass: (c) => c.req.query("preview") !== undefined,
 		tags: (c) => {
 			const collectionKey = c.req.param("collectionKey");
 			const tags: string[] = [cacheKeys.http.tags.clientDocuments];
@@ -58,6 +59,7 @@ const getSingleController = factory.createHandlers(
 	}),
 	async (c) => {
 		const { collectionKey, status } = c.req.valid("param");
+		const { preview: previewToken, versionId } = c.req.valid("query");
 		const context = createServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
 			c,
@@ -74,7 +76,9 @@ const getSingleController = factory.createHandlers(
 		})(context, {
 			collectionKey,
 			status,
+			versionId,
 			query: formattedQuery,
+			previewToken,
 		});
 		if (document.error) throw new LucidAPIError(document.error);
 

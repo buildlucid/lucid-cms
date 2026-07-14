@@ -237,6 +237,28 @@ describe("resolve relation version type", () => {
 		});
 	});
 
+	it("resolves snapshot relation targets from a version ID without a document ID", async () => {
+		mocks.selectSingle.mockResolvedValueOnce({
+			error: undefined,
+			data: { target: "staging" },
+		});
+
+		const response = await resolveRelationVersionType(buildContext(), {
+			collectionKey: "pages",
+			versionId: 10,
+			versionType: constants.collectionBuilder.publishing.snapshotVersionType,
+		});
+
+		expect(response.data?.versionType).toBe("staging");
+		expect(mocks.selectSingle).toHaveBeenCalledWith({
+			select: ["target"],
+			where: [
+				{ key: "collection_key", operator: "=", value: "pages" },
+				{ key: "snapshot_version_id", operator: "=", value: 10 },
+			],
+		});
+	});
+
 	it("applies explicit relation mappings to operation-backed snapshots", async () => {
 		mocks.selectSingle.mockResolvedValueOnce({
 			error: undefined,

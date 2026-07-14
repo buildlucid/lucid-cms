@@ -195,7 +195,7 @@ test("generates collection-aware client document types that lean on the public L
 			`export type PageCollectionDocumentSortKey = "createdAt" | "updatedAt" | "_page_title";`,
 		);
 		expect(clientContent).toContain(
-			`export type PageCollectionDocumentStatus = "latest" | "revision" | "published";`,
+			`export type PageCollectionDocumentStatus = "latest" | "revision" | "snapshot" | "published";`,
 		);
 		expect(clientContent).toContain(
 			`export type PageCollectionDocumentVersionKey = "latest" | "published";`,

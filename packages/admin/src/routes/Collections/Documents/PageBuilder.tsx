@@ -10,12 +10,14 @@ import {
 	Match,
 	on,
 	onCleanup,
+	Show,
 	Switch,
 } from "solid-js";
 import Alert from "@/components/Blocks/Alert";
 import {
 	BuilderBricks,
 	CollectionPseudoBrick,
+	DocumentPreview,
 	FixedBricks,
 	HeaderBar,
 	Modals,
@@ -32,6 +34,7 @@ import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
 import { PageBuilderStateProvider } from "@/hooks/document/usePageBuilderState";
 import brickStore from "@/store/brickStore";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 
@@ -271,6 +274,20 @@ const CollectionsDocumentsEditRoute: Component<{
 	const builderBrickConfig = createMemo(
 		() => docState.collection()?.builderBricks ?? [],
 	);
+	const previewLocale = createMemo(
+		() =>
+			contentLocaleStore.get.contentLocale ??
+			contentLocaleStore.get.locales.find((locale) => locale.isDefault)?.code ??
+			"",
+	);
+	const previewSaveStamp = createMemo(() => {
+		const autoSaveMetadata = mutations.autoSaveMetadata();
+		return [
+			docState.document()?.updatedAt ?? "",
+			autoSaveMetadata?.updatedAt ?? "",
+			autoSaveMetadata?.contentId ?? "",
+		].join(":");
+	});
 
 	// ----------------------------------
 	// Render
@@ -319,12 +336,17 @@ const CollectionsDocumentsEditRoute: Component<{
 							autoSave: autoSave,
 							autoSaveUserEnabled: uiState.autoSaveUserEnabled,
 							showRevisionNavigation: uiState.showRevisionNavigation,
+							showPreview: uiState.showPreview,
+							previewOpen: uiState.getPreviewOpen,
 							isDocumentMutated: docState.isDocumentMutated,
 						}}
 						actions={{
 							upsertDocumentAction: mutations.upsertDocumentAction,
 							publishDocumentAction: mutations.publishDocumentAction,
 							restoreRevisionAction: mutations.restoreRevisionAction,
+							togglePreview: () => {
+								uiState.setPreviewOpen(!uiState.getPreviewOpen());
+							},
 						}}
 					/>
 					<Alert
@@ -343,9 +365,9 @@ const CollectionsDocumentsEditRoute: Component<{
 							},
 						]}
 					/>
-					<div class="mt-2 grow overflow-hidden">
-						<div class="w-full flex flex-col xl:flex-row grow h-full  bg-background-base rounded-t-xl border border-border">
-							<div class={"w-full min-w-0 flex flex-col"}>
+					<div class="mt-2 flex min-h-0 grow flex-col overflow-visible">
+						<div class="w-full min-h-0 flex flex-col xl:flex-row grow items-stretch xl:items-start bg-background-base rounded-t-xl border border-border">
+							<div class="w-full min-w-0 grow flex flex-col">
 								<CollectionPseudoBrick
 									fields={collectionFields()}
 									collectionMigrationStatus={
@@ -371,22 +393,37 @@ const CollectionsDocumentsEditRoute: Component<{
 									documentId={docState.documentId()}
 								/>
 							</div>
-							{props.releaseRequest ? (
-								<ReleaseRequestSidebar
-									collection={docState.collection}
-									releaseRequest={props.releaseRequest}
-								/>
-							) : (
-								<Sidebar
-									collection={docState.collection}
-									collectionKey={docState.collectionKey}
-									document={docState.document}
-									autoSaveMetadata={mutations.autoSaveMetadata}
-									documentId={docState.documentId}
-									disabled={disableWorkflow}
-									mutations={mutations}
-								/>
-							)}
+							<Show when={uiState.getPreviewOpen()}>
+								<div class="relative w-full min-h-[70vh] xl:w-[55%] xl:min-h-0 xl:flex-none xl:sticky xl:top-(--document-header-bar-height) xl:self-start xl:h-[calc(100vh-var(--document-header-bar-height))]">
+									<DocumentPreview
+										open={uiState.getPreviewOpen}
+										collectionKey={docState.collectionKey}
+										documentId={docState.documentId}
+										versionType={versionType}
+										versionId={versionId}
+										locale={previewLocale}
+										dirty={docState.isDocumentMutated}
+										saveStamp={previewSaveStamp}
+									/>
+								</div>
+							</Show>
+							{!uiState.getPreviewOpen() &&
+								(props.releaseRequest ? (
+									<ReleaseRequestSidebar
+										collection={docState.collection}
+										releaseRequest={props.releaseRequest}
+									/>
+								) : (
+									<Sidebar
+										collection={docState.collection}
+										collectionKey={docState.collectionKey}
+										document={docState.document}
+										autoSaveMetadata={mutations.autoSaveMetadata}
+										documentId={docState.documentId}
+										disabled={disableWorkflow}
+										mutations={mutations}
+									/>
+								))}
 						</div>
 					</div>
 					<Modals

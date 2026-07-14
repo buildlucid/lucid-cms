@@ -5,6 +5,7 @@ export { default as clientIntegrationsFormatter } from "./client-integrations.js
 export { default as collectionsFormatter } from "./collections.js";
 export { default as documentBricksFormatter } from "./document-bricks.js";
 export { default as documentFieldsFormatter } from "./document-fields.js";
+export { default as documentPreviewsFormatter } from "./document-previews.js";
 export { default as documentPublishOperationsFormatter } from "./document-publish-operations.js";
 export { default as documentVersionsFormatter } from "./document-versions.js";
 export { default as documentWorkflowsFormatter } from "./document-workflows.js";

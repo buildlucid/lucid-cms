@@ -49,7 +49,7 @@ declare module "../../types.js" {
 	}
 
 	interface CollectionDocumentStatusesByCollection {
-		page: "latest" | "revision" | "published";
+		page: "latest" | "revision" | "snapshot" | "published";
 	}
 
 	interface CollectionDocumentVersionKeysByCollection {

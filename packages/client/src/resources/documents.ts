@@ -19,6 +19,10 @@ export type DocumentsGetSingleInput<
 > = {
 	collectionKey: TCollectionKey;
 	status?: CollectionDocumentStatus<TCollectionKey>;
+	/** Required when fetching a specific revision or snapshot. */
+	versionId?: number;
+	/** Expiring token from a Lucid-generated preview URL. */
+	preview?: string;
 	query?: DocumentsGetSingleQuery<TCollectionKey>;
 	request?: LucidRequestOptions;
 };
@@ -29,6 +33,10 @@ export type DocumentsGetMultipleInput<
 > = {
 	collectionKey: TCollectionKey;
 	status?: CollectionDocumentStatus<TCollectionKey>;
+	/** Required when fetching a specific revision or snapshot. */
+	versionId?: number;
+	/** Expiring token from a Lucid-generated preview URL. */
+	preview?: string;
 	query?: DocumentsGetMultipleQuery<TCollectionKey>;
 	request?: LucidRequestOptions;
 };
@@ -68,7 +76,11 @@ export const createDocumentsClient = (
 			path: `/document/${encodePathSegment(input.collectionKey)}/${encodePathSegment(
 				input.status ?? DEFAULT_DOCUMENT_STATUS,
 			)}`,
-			query: input.query,
+			query: {
+				...input.query,
+				versionId: input.versionId,
+				preview: input.preview,
+			},
 			request: input.request,
 		}),
 	getMultiple: async <TCollectionKey extends CollectionDocumentKey>(
@@ -80,7 +92,11 @@ export const createDocumentsClient = (
 			path: `/documents/${encodePathSegment(input.collectionKey)}/${encodePathSegment(
 				input.status ?? DEFAULT_DOCUMENT_STATUS,
 			)}`,
-			query: input.query,
+			query: {
+				...input.query,
+				versionId: input.versionId,
+				preview: input.preview,
+			},
 			request: input.request,
 		}),
 });
