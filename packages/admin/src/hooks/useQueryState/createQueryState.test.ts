@@ -488,6 +488,30 @@ describe("createQueryState - sorts and pagination", () => {
 });
 
 describe("createQueryState - reset", () => {
+	it("clearFilters removes active filters instead of restoring defaults", () => {
+		createRoot((dispose) => {
+			const adapter = createTestUrlAdapter();
+			const query = createQueryState({
+				schema: buildSchema(),
+				adapter,
+			});
+
+			query.setParams({
+				filters: { title: "x", author: [1] },
+				orFilterGroups: [[{ key: "isDeleted", value: false }]],
+			});
+			query.clearFilters();
+
+			expect(query.hasFiltersApplied()).toBe(false);
+			expect(query.filterStates().get("author")).toEqual({ value: [] });
+			expect(query.orFilterGroups()).toEqual([]);
+			expect(new URLSearchParams(adapter.search()).has("filter[clear]")).toBe(
+				true,
+			);
+			dispose();
+		});
+	});
+
 	it("resetFilters returns filters to schema defaults and clears storage", () => {
 		createRoot((dispose) => {
 			const adapter = createTestUrlAdapter();

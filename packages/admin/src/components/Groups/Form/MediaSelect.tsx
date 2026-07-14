@@ -19,7 +19,9 @@ import Pill from "@/components/Partials/Pill";
 import RelationCount from "@/components/Partials/RelationCount";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
+import pageBuilderModalsStore, {
+	type MediaDimensionValidation,
+} from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 import { moveArrayItem } from "@/utils/array-helpers";
 import { normalizeFieldErrors } from "@/utils/error-helpers";
@@ -34,6 +36,8 @@ interface MediaSelectProps {
 	onChange: (_value: number[], _refs: MediaRelationRef[]) => void;
 	extensions?: string[];
 	type?: string;
+	width?: MediaDimensionValidation;
+	height?: MediaDimensionValidation;
 	multiple?: boolean;
 	minItems?: number;
 	maxItems?: number;
@@ -101,6 +105,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 			data: {
 				extensions: parseExtensions(props.extensions),
 				type: props.type,
+				width: props.width,
+				height: props.height,
 				multiple: isMultiple(),
 				selected: props.value,
 				selectedRefs: selectedMediaRefs(),

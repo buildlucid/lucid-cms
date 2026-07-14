@@ -48,6 +48,10 @@ const UsersListRoute: Component = () => {
 			},
 			sorts: {
 				createdAt: sort(),
+				firstName: sort(),
+				lastName: sort(),
+				email: sort(),
+				username: sort(),
 				isLocked: sort(),
 			},
 		},
@@ -211,12 +215,28 @@ const UsersListRoute: Component = () => {
 									}}
 									sorts={[
 										{
-											label: T()("common.created.at"),
-											key: "createdAt",
+											label: T()("common.username"),
+											key: "username",
+										},
+										{
+											label: T()("common.first.name"),
+											key: "firstName",
+										},
+										{
+											label: T()("common.last.name"),
+											key: "lastName",
+										},
+										{
+											label: T()("common.email"),
+											key: "email",
 										},
 										{
 											label: T()("users.status.locked.label"),
 											key: "isLocked",
+										},
+										{
+											label: T()("common.created.at"),
+											key: "createdAt",
 										},
 									]}
 									perPage={[]}

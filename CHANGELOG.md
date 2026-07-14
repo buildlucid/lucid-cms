@@ -12,21 +12,23 @@
 - Added new filter builder UI for documents with OR support and full collection/brick custom field filtering. ([bc9bccc](https://github.com/buildlucid/lucid-cms/commit/bc9bccc40d360b6861b231836d5151312669f15f))
 - Migrated all filters to use the new filter builder UI instead and widened what fields are supported across all resources. ([1062d8f](https://github.com/buildlucid/lucid-cms/commit/1062d8f585f15be9fdac3f1834f6f72127d5e5a8))
 - Added a new range custom field with single or dual-thumb sliders, decimal step support, validation, filtering, document listing support and typed output. ([79896d4](https://github.com/buildlucid/lucid-cms/commit/79896d45a8260a678592d4bd96d485b582012f52))
-- Added focal-point-aware image processing with configurable `fit` modes on image presets. The Sharp adapter now positions cover crops using the media's normalized focal point.
-- Added the ability to remove crops from images and video posters, restoring the original presentation while retaining the previous crop object for stable stale URLs.
+- Added focal-point-aware image processing with configurable `fit` modes on image presets. The Sharp adapter now positions cover crops using the media's normalized focal point. ([f686896](https://github.com/buildlucid/lucid-cms/commit/f686896265ef6f155e27f8af34059f4f2ad172e6))
+- Added the ability to remove crops from images and video posters, restoring the original presentation while retaining the previous crop object for stable stale URLs.([f686896](https://github.com/buildlucid/lucid-cms/commit/f686896265ef6f155e27f8af34059f4f2ad172e6))
 
 ### Breaking Changes:
 
 - Renamed the collection field listing option from `listing` to `showInList` for clarity. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
 - Replaced raw SQL-like filter operators with semantic text operators (`contains`, `not-contains`, `starts-with`, `not-starts-with`, `ends-with`, and `not-ends-with`) and standardised multi-word operators as hyphenated tokens (`not-in` and `is-not`). Existing filter query strings and toolkit calls using `like`, `not like`, `not in`, or `is not` must be updated; `%` and `_` in filter values are now treated as literal text. ([2c1a6b4](https://github.com/buildlucid/lucid-cms/commit/2c1a6b4422fbb7366af152c12e826b96fc41985c))
-- Environment schemas are no longer accepted through the `env` property of `configureLucid`. To enable environment validation and generated typing, optionally export a named `env` schema from `lucid.config.ts`, for example `export const env = z.object({ ... })`; omit the export when no schema is needed.
-- Reworked media crops as owned derivatives and simplified media responses with type-specific fields and file data under `file`.
+- Environment schemas are no longer accepted through the `env` property of `configureLucid`. To enable environment validation and generated typing, optionally export a named `env` schema from `lucid.config.ts`, for example `export const env = z.object({ ... })`; omit the export when no schema is needed. ([8d51eba](https://github.com/buildlucid/lucid-cms/commit/8d51ebafedc77b2450786f5d6827e870e532d2de))
+- Reworked media crops as owned derivatives and simplified media responses with type-specific fields and file data under `file`. ([de1c61e](https://github.com/buildlucid/lucid-cms/commit/de1c61e801d1812310c467f291650ef6f8deb5f5))
+- Image processor results now require a `processed` discriminator to distinguish passthrough and transformed output.
 
 ### Bug Fixes:
 
 - Fixed checkbox custom field filters for true and false values. ([5710346](https://github.com/buildlucid/lucid-cms/commit/571034652c041bbdcb7d3b64795b7ed523117213))
 - Fixed relation custom field filters with non-numeric values crashing generated relation table queries. ([5948ba5](https://github.com/buildlucid/lucid-cms/commit/5948ba5b6643e940ebfa043787cad2dea3e4bc63))
-- Fixed profile pictures stretching across admin preview cards.
+- Fixed profile pictures stretching across admin preview cards. ([ff1586c](https://github.com/buildlucid/lucid-cms/commit/ff1586cd35df7cd09e73690e853df99e2274bbba))
+- Fixed passthrough images being served with transformed MIME types, restoring SVG streaming and previews. ([ee630e6](https://github.com/buildlucid/lucid-cms/commit/ee630e6a9d7a05e924d6a19aead5b03518faffc0))
 
 ## v0.15.0-alpha.0
 

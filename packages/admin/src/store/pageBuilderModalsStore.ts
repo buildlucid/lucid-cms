@@ -2,11 +2,16 @@ import type {
 	DocumentRef,
 	LinkResValue,
 	Media,
+	MediaFieldConfig,
 	MediaRef,
 	RelationFieldValue,
 	UserRef,
 } from "@types";
 import { createStore } from "solid-js/store";
+
+type MediaDimensionValidation = NonNullable<
+	NonNullable<MediaFieldConfig["validation"]>["width"]
+>;
 
 // ------------------------------------
 // Modal Configuration Registry
@@ -18,6 +23,8 @@ type ModalRegistry = {
 		data: {
 			extensions?: string;
 			type?: string;
+			width?: MediaDimensionValidation;
+			height?: MediaDimensionValidation;
 			multiple?: boolean;
 			selected?: number[];
 			selectedRefs?: Array<NonNullable<MediaRef>>;
@@ -189,4 +196,4 @@ export default pageBuilderModalsStore;
 // Type Exports for Component Props
 // ------------------------------------
 
-export type { ModalRegistry, ModalState, ModalType };
+export type { MediaDimensionValidation, ModalRegistry, ModalState, ModalType };

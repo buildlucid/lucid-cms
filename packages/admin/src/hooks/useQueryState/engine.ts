@@ -21,6 +21,8 @@ import type {
 const FILTER_PARAM_REGEX = /^filter\[([^\]:]+)(?::([^\]]+))?\]$/;
 const OR_FILTER_PARAM_REGEX =
 	/^filter\[or\]\[(\d+)\]\[([^\]:]+)(?::([^\]]+))?\]$/;
+const FILTER_DEFAULTS_CLEAR_PARAM = "filter[clear]";
+const OR_FILTER_CLEAR_PARAM = "filter[or]";
 const OWNED_PARAM_REGEX = /^(filter\[.*\]|sort|page|perPage)$/;
 
 //* filters set programmatically for keys outside the schema fall back to an inferred codec
@@ -58,6 +60,44 @@ const createFilterState = (
 	...(operatorExplicit ? { operatorExplicit } : {}),
 });
 
+/** Returns the canonical empty value for a filter codec. */
+const emptyFilterValue = (codec: FilterCodec): FilterValue => {
+	if (codec.type === "array") return codec.normalize([]);
+	if (codec.type === "text") return codec.normalize("");
+	return codec.normalize(undefined);
+};
+
+/** Clears top-level defaults while retaining sort and pagination defaults. */
+const clearDefaultFilterState = (
+	state: QueryStateModel,
+	schema: QueryStateSchema,
+): QueryStateModel => ({
+	...state,
+	filters: Object.fromEntries(
+		Object.entries(schema.filters ?? {}).map(([key, codec]) => [
+			key,
+			createFilterState(emptyFilterValue(codec), undefined),
+		]),
+	),
+});
+
+/** Whether at least one non-empty schema default has been explicitly cleared. */
+const hasClearedFilterDefaults = (
+	state: QueryStateModel,
+	schema: QueryStateSchema,
+): boolean =>
+	Object.entries(schema.filters ?? {}).some(([key, codec]) => {
+		const defaultValue = codec.normalize(codec.defaultValue);
+		const current = state.filters[key];
+		if (!codec.isEmpty(defaultValue) && codec.isEmpty(current?.value))
+			return true;
+		return (
+			codec.defaultOperator !== undefined &&
+			current?.operator !== codec.defaultOperator &&
+			codec.isEmpty(current?.value)
+		);
+	});
+
 /** Keeps OR group normalization readable when empty groups are discarded. */
 const isOrFilterGroupEmpty = (group: OrFilterGroup): boolean =>
 	group.length === 0;
@@ -91,12 +131,46 @@ const normalizeOrFilterGroups = (
 		.filter((group) => !isOrFilterGroupEmpty(group));
 };
 
+const filterValuesEqual = (a: FilterValue, b: FilterValue): boolean => {
+	if (Array.isArray(a) && Array.isArray(b)) {
+		if (a.length !== b.length) return false;
+		return a.every((item, index) => String(item) === String(b[index]));
+	}
+	return a === b;
+};
+
+/** Compares grouped OR filters without treating object identity as state changes. */
+const orFilterGroupsEqual = (
+	a: OrFilterGroup[],
+	b: OrFilterGroup[],
+): boolean => {
+	if (a.length !== b.length) return false;
+
+	return a.every((leftGroup, groupIndex) => {
+		const rightGroup = b[groupIndex];
+		if (!rightGroup || leftGroup.length !== rightGroup.length) return false;
+
+		return leftGroup.every((leftCondition, conditionIndex) => {
+			const rightCondition = rightGroup[conditionIndex];
+			if (!rightCondition) return false;
+			return (
+				leftCondition.key === rightCondition.key &&
+				leftCondition.operator === rightCondition.operator &&
+				filterValuesEqual(leftCondition.value, rightCondition.value)
+			);
+		});
+	});
+};
+
 export const defaultQueryState = (
 	schema: QueryStateSchema,
 ): QueryStateModel => {
 	const state: QueryStateModel = {
 		filters: {},
-		orFilterGroups: [],
+		orFilterGroups: normalizeOrFilterGroups(
+			schema.defaultOrFilterGroups,
+			schema,
+		),
 		sorts: {},
 		pagination: {
 			page: schema.pagination?.defaultPage ?? DEFAULT_PAGE,
@@ -120,12 +194,17 @@ export const parseSearchIntoState = (
 	schema: QueryStateSchema,
 ): QueryStateModel => {
 	const params = new URLSearchParams(search);
-	const state = defaultQueryState(schema);
+	const defaults = defaultQueryState(schema);
+	const state = params.has(FILTER_DEFAULTS_CLEAR_PARAM)
+		? clearDefaultFilterState(defaults, schema)
+		: defaults;
 	const orFilterGroups = new Map<number, OrFilterGroup>();
+	let hasOrFilterParams = params.has(OR_FILTER_CLEAR_PARAM);
 
 	for (const [param, raw] of params.entries()) {
 		const orMatch = param.match(OR_FILTER_PARAM_REGEX);
 		if (orMatch) {
+			hasOrFilterParams = true;
 			const groupIndex = Number.parseInt(orMatch[1] ?? "", 10);
 			const key = orMatch[2];
 			if (Number.isNaN(groupIndex) || !key) continue;
@@ -153,10 +232,12 @@ export const parseSearchIntoState = (
 			match[2] !== undefined,
 		);
 	}
-	state.orFilterGroups = Array.from(orFilterGroups.entries())
-		.sort(([left], [right]) => left - right)
-		.map(([, group]) => group)
-		.filter((group) => group.length > 0);
+	if (hasOrFilterParams) {
+		state.orFilterGroups = Array.from(orFilterGroups.entries())
+			.sort(([left], [right]) => left - right)
+			.map(([, group]) => group)
+			.filter((group) => group.length > 0);
+	}
 
 	//* a present sort param fully defines the sorts - absence means schema defaults
 	if (params.has("sort")) {
@@ -214,12 +295,17 @@ export const stateToStorageSearch = (
 	for (const key of Array.from(new Set(params.keys()))) {
 		if (OWNED_PARAM_REGEX.test(key)) params.delete(key);
 	}
+	const clearedFilterDefaults = hasClearedFilterDefaults(state, schema);
+	if (clearedFilterDefaults) params.set(FILTER_DEFAULTS_CLEAR_PARAM, "");
 
 	for (const [key, filter] of Object.entries(state.filters)) {
 		const codec = codecForKey(schema, key, filter.value);
-		const defaultValue = schema.filters?.[key]
-			? codec.normalize(codec.defaultValue)
-			: undefined;
+		const defaultValue =
+			clearedFilterDefaults && schema.filters?.[key]
+				? emptyFilterValue(codec)
+				: schema.filters?.[key]
+					? codec.normalize(codec.defaultValue)
+					: undefined;
 
 		const withOperator =
 			filter.operator !== undefined &&
@@ -232,15 +318,21 @@ export const stateToStorageSearch = (
 		);
 	}
 
-	for (const [groupIndex, group] of (state.orFilterGroups ?? []).entries()) {
-		for (const condition of group) {
-			const codec = codecForKey(schema, condition.key, condition.value);
-			const serialized = codec.serialize(condition.value);
-			if (serialized === undefined) continue;
-			params.set(
-				orFilterParamKey(groupIndex, condition.key, condition.operator),
-				serialized,
-			);
+	const defaultOrFilterGroups = defaultQueryState(schema).orFilterGroups;
+	if (!orFilterGroupsEqual(state.orFilterGroups, defaultOrFilterGroups)) {
+		if (state.orFilterGroups.length === 0) {
+			params.set(OR_FILTER_CLEAR_PARAM, "");
+		}
+		for (const [groupIndex, group] of (state.orFilterGroups ?? []).entries()) {
+			for (const condition of group) {
+				const codec = codecForKey(schema, condition.key, condition.value);
+				const serialized = codec.serialize(condition.value);
+				if (serialized === undefined) continue;
+				params.set(
+					orFilterParamKey(groupIndex, condition.key, condition.operator),
+					serialized,
+				);
+			}
 		}
 	}
 
@@ -291,37 +383,6 @@ export const buildQueryString = (
 	params.set("perPage", String(state.pagination.perPage));
 
 	return params.toString();
-};
-
-const filterValuesEqual = (a: FilterValue, b: FilterValue): boolean => {
-	if (Array.isArray(a) && Array.isArray(b)) {
-		if (a.length !== b.length) return false;
-		return a.every((item, index) => String(item) === String(b[index]));
-	}
-	return a === b;
-};
-
-/** Compares grouped OR filters without treating object identity as state changes. */
-const orFilterGroupsEqual = (
-	a: OrFilterGroup[],
-	b: OrFilterGroup[],
-): boolean => {
-	if (a.length !== b.length) return false;
-
-	return a.every((leftGroup, groupIndex) => {
-		const rightGroup = b[groupIndex];
-		if (!rightGroup || leftGroup.length !== rightGroup.length) return false;
-
-		return leftGroup.every((leftCondition, conditionIndex) => {
-			const rightCondition = rightGroup[conditionIndex];
-			if (!rightCondition) return false;
-			return (
-				leftCondition.key === rightCondition.key &&
-				leftCondition.operator === rightCondition.operator &&
-				filterValuesEqual(leftCondition.value, rightCondition.value)
-			);
-		});
-	});
 };
 
 export const statesEqual = (
@@ -447,9 +508,20 @@ export const applyParams = (
 export const resetFiltersState = (
 	state: QueryStateModel,
 	schema: QueryStateSchema,
+): QueryStateModel => {
+	const defaults = defaultQueryState(schema);
+	return {
+		...state,
+		filters: defaults.filters,
+		orFilterGroups: defaults.orFilterGroups,
+	};
+};
+
+export const clearFiltersState = (
+	state: QueryStateModel,
+	schema: QueryStateSchema,
 ): QueryStateModel => ({
-	...state,
-	filters: defaultQueryState(schema).filters,
+	...clearDefaultFilterState(state, schema),
 	orFilterGroups: [],
 });
 
@@ -487,7 +559,9 @@ export const hasDefaultFiltersApplied = (
 	state: QueryStateModel,
 	schema: QueryStateSchema,
 ): boolean => {
-	if ((state.orFilterGroups ?? []).length > 0) return false;
+	const defaults = defaultQueryState(schema);
+	if (!orFilterGroupsEqual(state.orFilterGroups, defaults.orFilterGroups))
+		return false;
 
 	for (const [key, filter] of Object.entries(state.filters)) {
 		const codec = codecForKey(schema, key, filter.value);

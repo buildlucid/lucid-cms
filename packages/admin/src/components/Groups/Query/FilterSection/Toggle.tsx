@@ -9,8 +9,12 @@ export const FilterSectionToggle: Component<{
 	open: boolean;
 	onToggle: () => void;
 	searchParams: QueryStateResponse;
+	active?: boolean;
 	disabled?: boolean;
 }> = (props) => {
+	const active = () =>
+		props.active ?? !props.searchParams.hasDefaultFiltersApplied();
+
 	// -----------------------------
 	// Render
 	return (
@@ -20,9 +24,9 @@ export const FilterSectionToggle: Component<{
 				"dropdown-trigger gap-2 pl-2 pr-3 h-9 text-sm border border-transparent rounded-md flex items-center disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused duration-200 transition-colors",
 				{
 					"bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast":
-						props.open || !props.searchParams.hasDefaultFiltersApplied(),
+						props.open || active(),
 					"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast":
-						!props.open && props.searchParams.hasDefaultFiltersApplied(),
+						!props.open && !active(),
 				},
 			)}
 			aria-expanded={props.open}

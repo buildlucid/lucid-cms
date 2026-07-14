@@ -90,6 +90,8 @@ export const Modals: Component<{
 					setOpen: () => pageBuilderModalsStore.close(),
 					extensions: mediaSelectModal()?.data.extensions,
 					type: mediaSelectModal()?.data.type,
+					width: mediaSelectModal()?.data.width,
+					height: mediaSelectModal()?.data.height,
 					multiple: mediaSelectModal()?.data.multiple,
 					selected: mediaSelectModal()?.data.selected,
 					selectedRefs: mediaSelectModal()?.data.selectedRefs,

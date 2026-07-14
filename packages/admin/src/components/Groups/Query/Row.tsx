@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidArrowsRotate, FaSolidXmark } from "solid-icons/fa";
+import { FaSolidArrowsRotate } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
@@ -19,6 +19,7 @@ import Button from "@/components/Partials/Button";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
 import T from "@/translations";
 import { PerPage } from "./PerPage";
+import { ResetFilters } from "./ResetFilters";
 import { Sort } from "./Sort";
 
 interface QueryRowProps {
@@ -129,22 +130,12 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 							!props.searchParams.hasDefaultFiltersApplied()
 						}
 					>
-						<button
-							type="button"
-							class={classNames(
-								"z-20 relative text-sm flex items-center gap-1.5 hover:text-error-hover duration-200 transition-colors group",
-								"md:ml-2",
-							)}
-							onClick={(e) => {
-								e.stopPropagation();
-								e.preventDefault();
+						<ResetFilters
+							onReset={() => {
 								if (props.onResetFilters) props.onResetFilters();
 								else props.searchParams.resetFilters();
 							}}
-						>
-							<FaSolidXmark class="text-error-base group-hover:text-error-hover" />
-							<span>{T()("actions.reset.filters")}</span>
-						</button>
+						/>
 					</Show>
 				</div>
 				<div class="flex flex-wrap gap-2.5 items-center md:justify-end">

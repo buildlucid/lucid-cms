@@ -128,6 +128,8 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 			disabled={disabled()}
 			extensions={props.state.fieldConfig.validation?.extensions}
 			type={props.state.fieldConfig.validation?.type}
+			width={props.state.fieldConfig.validation?.width}
+			height={props.state.fieldConfig.validation?.height}
 			errors={isMultiple() ? props.state.fieldErrors : props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}

@@ -51,6 +51,13 @@ const SEOBrick = new BrickBuilder("seo", {
 		},
 		validation: {
 			type: "image",
+			extensions: ["jpg", "jpeg", "png", "webp"],
+			width: {
+				max: 1000,
+			},
+			height: {
+				max: 1000,
+			},
 		},
 		multiple: true,
 	})

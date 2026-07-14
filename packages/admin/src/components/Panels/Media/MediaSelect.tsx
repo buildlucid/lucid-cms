@@ -1,9 +1,11 @@
+import classNames from "classnames";
 import {
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
 	For,
+	Show,
 } from "solid-js";
 import MediaBasicCard, {
 	MediaBasicCardLoading,
@@ -19,6 +21,7 @@ import {
 	FilterSectionToggle,
 } from "@/components/Groups/Query/FilterSection";
 import { PerPage } from "@/components/Groups/Query/PerPage";
+import { ResetFilters } from "@/components/Groups/Query/ResetFilters";
 import { Sort } from "@/components/Groups/Query/Sort";
 import ClearProcessedImages from "@/components/Modals/Media/ClearProcessedImages";
 import RestoreMedia from "@/components/Modals/Media/RestoreMedia";
@@ -30,7 +33,9 @@ import useQueryState, {
 import useRowTarget from "@/hooks/useRowTarget";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import type { MediaDimensionValidation } from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
+import buildMediaSelectorFilterSchema from "@/utils/build-media-selector-filter-schema";
 import type { MediaRelationRef } from "@/utils/relation-field-helpers";
 import { mediaResponseToRef } from "@/utils/relation-field-helpers";
 
@@ -40,6 +45,8 @@ interface MediaSelectPanelProps {
 		setOpen: (state: boolean) => void;
 		extensions?: string;
 		type?: string;
+		width?: MediaDimensionValidation;
+		height?: MediaDimensionValidation;
 		multiple?: boolean;
 		selected?: number[];
 		selectedRefs?: MediaRelationRef[];
@@ -78,6 +85,8 @@ const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 				<SelectMediaContent
 					extensions={props.state.extensions}
 					type={props.state.type}
+					width={props.state.width}
+					height={props.state.height}
 					multiple={props.state.multiple}
 					selected={props.state.selected}
 					selectedRefs={props.state.selectedRefs}
@@ -95,6 +104,8 @@ const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 interface SelectMediaContentProps {
 	extensions?: string;
 	type?: string;
+	width?: MediaDimensionValidation;
+	height?: MediaDimensionValidation;
 	multiple?: boolean;
 	selected?: number[];
 	selectedRefs?: MediaRelationRef[];
@@ -105,6 +116,12 @@ interface SelectMediaContentProps {
 const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	// ------------------------------
 	// Hooks
+	const validationFilterSchema = buildMediaSelectorFilterSchema({
+		extensions: props.extensions,
+		type: props.type,
+		width: props.width,
+		height: props.height,
+	});
 	const rowTarget = useRowTarget({
 		triggers: {
 			restore: false,
@@ -116,12 +133,12 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 		schema: {
 			filters: {
 				title: textFilter(),
-				extension: textFilter({ defaultValue: props.extensions || "" }),
-				type: textFilter({ defaultValue: props.type || "" }),
+				...validationFilterSchema.filters,
 				mimeType: textFilter(),
 				key: textFilter(),
 				origin: textFilter(),
 			},
+			defaultOrFilterGroups: validationFilterSchema.defaultOrFilterGroups,
 			sorts: {
 				fileSize: sort(),
 				title: sort(),
@@ -206,11 +223,12 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	return (
 		<div class="flex h-full flex-col">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
-				<div class="flex gap-2.5 flex-wrap">
+				<div class="flex gap-2.5 flex-wrap items-center">
 					<FilterSectionToggle
 						open={filterSectionOpen()}
 						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
 						searchParams={searchParams}
+						active={searchParams.hasFiltersApplied()}
 					/>
 					<Sort
 						sorts={[
@@ -261,6 +279,9 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 							label: T()("media.deleted.show"),
 						}}
 					/>
+					<Show when={searchParams.hasFiltersApplied()}>
+						<ResetFilters onReset={searchParams.clearFilters} />
+					</Show>
 				</div>
 				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 			</div>
@@ -322,6 +343,16 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						type: "text",
 					},
 					{
+						label: T()("common.width"),
+						key: "width",
+						type: "number",
+					},
+					{
+						label: T()("common.height"),
+						key: "height",
+						type: "number",
+					},
+					{
 						label: T()("common.origin"),
 						key: "origin",
 						type: "select",
@@ -343,7 +374,10 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			/>
 
 			<DynamicContent
-				class="grow"
+				class={classNames("grow", {
+					"bg-card-base border border-border rounded-md":
+						media.data?.data.length === 0,
+				})}
 				state={{
 					isError: media.isError,
 					isSuccess: media.isSuccess,
@@ -368,6 +402,9 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						title: T()("empty.states.media.title"),
 						description: T()("empty.states.media.description"),
 					},
+				}}
+				callback={{
+					resetFilters: searchParams.clearFilters,
 				}}
 			>
 				<Grid

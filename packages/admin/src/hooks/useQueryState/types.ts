@@ -37,6 +37,7 @@ export type QuerySortSchema = Record<string, SortCodec>;
 
 export interface QueryStateSchema {
 	filters?: QueryFilterSchema;
+	defaultOrFilterGroups?: OrFilterGroup[];
 	sorts?: QuerySortSchema;
 	pagination?: PaginationCodec;
 }

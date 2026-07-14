@@ -5,6 +5,7 @@ import {
 	createMemo,
 	createSignal,
 	Index,
+	Show,
 } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
@@ -15,6 +16,8 @@ import {
 	FilterSectionToggle,
 } from "@/components/Groups/Query/FilterSection";
 import { PerPage } from "@/components/Groups/Query/PerPage";
+import { ResetFilters } from "@/components/Groups/Query/ResetFilters";
+import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
 import { Td } from "@/components/Groups/Table/Td";
 import { Tr } from "@/components/Groups/Table/Tr";
@@ -113,6 +116,11 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 			},
 			sorts: {
 				createdAt: sort({ defaultValue: "desc" }),
+				firstName: sort(),
+				lastName: sort(),
+				email: sort(),
+				username: sort(),
+				isLocked: sort(),
 			},
 			pagination: pagination({ defaultPerPage: 20 }),
 		},
@@ -182,12 +190,45 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 	return (
 		<div class="flex h-full flex-col">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
-				<div class="flex gap-2.5 flex-wrap">
+				<div class="flex gap-2.5 flex-wrap items-center">
 					<FilterSectionToggle
 						open={filterSectionOpen()}
 						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
 						searchParams={searchParams}
+						active={searchParams.hasFiltersApplied()}
 					/>
+					<Sort
+						sorts={[
+							{
+								label: T()("common.username"),
+								key: "username",
+							},
+							{
+								label: T()("common.first.name"),
+								key: "firstName",
+							},
+							{
+								label: T()("common.last.name"),
+								key: "lastName",
+							},
+							{
+								label: T()("common.email"),
+								key: "email",
+							},
+							{
+								label: T()("users.status.locked.label"),
+								key: "isLocked",
+							},
+							{
+								label: T()("common.created.at"),
+								key: "createdAt",
+							},
+						]}
+						searchParams={searchParams}
+					/>
+					<Show when={searchParams.hasFiltersApplied()}>
+						<ResetFilters onReset={searchParams.clearFilters} />
+					</Show>
 				</div>
 				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
 			</div>
@@ -261,6 +302,9 @@ const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 						title: T()("empty.states.users.title"),
 						description: T()("empty.states.users.description"),
 					},
+				}}
+				callback={{
+					resetFilters: searchParams.clearFilters,
 				}}
 			>
 				<Table

@@ -28,6 +28,7 @@ import {
 	FilterSectionToggle,
 } from "@/components/Groups/Query/FilterSection";
 import { PerPage } from "@/components/Groups/Query/PerPage";
+import { ResetFilters } from "@/components/Groups/Query/ResetFilters";
 import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
@@ -372,11 +373,12 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	return (
 		<div class="flex flex-col h-full">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
-				<div class="flex gap-2.5 flex-wrap">
+				<div class="flex gap-2.5 flex-wrap items-center">
 					<FilterSectionToggle
 						open={filterSectionOpen()}
 						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
 						searchParams={searchParams}
+						active={searchParams.hasFiltersApplied()}
 						disabled={getFilterFields().length === 0}
 					/>
 					<Sort sorts={documentSortOptions()} searchParams={searchParams} />
@@ -397,6 +399,9 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 								small={true}
 							/>
 						</div>
+					</Show>
+					<Show when={searchParams.hasFiltersApplied()}>
+						<ResetFilters onReset={searchParams.clearFilters} />
 					</Show>
 				</div>
 				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
@@ -448,6 +453,9 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 							collectionSingle: collectionSingularName(),
 						}),
 					},
+				}}
+				callback={{
+					resetFilters: searchParams.clearFilters,
 				}}
 			>
 				<Table

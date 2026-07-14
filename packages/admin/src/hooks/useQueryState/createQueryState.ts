@@ -11,6 +11,7 @@ import {
 	applyParams,
 	buildQueryString,
 	clearFilterState,
+	clearFiltersState,
 	codecForKey,
 	hasDefaultFiltersApplied,
 	hasFiltersApplied,
@@ -200,6 +201,9 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 		},
 		clearFilter: (key: string) => {
 			commit(clearFilterState(untrack(getState), untrack(getSchema), key));
+		},
+		clearFilters: () => {
+			commit(clearFiltersState(untrack(getState), untrack(getSchema)));
 		},
 		resetFilters: () => {
 			commit(resetFiltersState(untrack(getState), untrack(getSchema)));

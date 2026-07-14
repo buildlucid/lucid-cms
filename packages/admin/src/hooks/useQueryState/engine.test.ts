@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	arrayFilter,
 	booleanFilter,
+	numberFilter,
 	pagination,
 	sort,
 	textFilter,
@@ -9,6 +10,7 @@ import {
 import {
 	applyParams,
 	buildQueryString,
+	clearFiltersState,
 	defaultQueryState,
 	hasDefaultFiltersApplied,
 	hasFiltersApplied,
@@ -32,6 +34,27 @@ const schema: QueryStateSchema = {
 	pagination: pagination({ defaultPage: 1, defaultPerPage: 10 }),
 };
 
+const rangeDefaultSchema: QueryStateSchema = {
+	filters: {
+		type: textFilter(),
+		width: numberFilter(),
+	},
+	defaultOrFilterGroups: [
+		[
+			{ key: "type", value: "image" },
+			{ key: "width", value: 800, operator: ">=" },
+			{ key: "width", value: 1600, operator: "<=" },
+		],
+	],
+};
+
+const topLevelDefaultSchema: QueryStateSchema = {
+	filters: {
+		type: textFilter({ defaultValue: "image" }),
+		width: numberFilter({ defaultValue: 800, defaultOperator: ">=" }),
+	},
+};
+
 describe("defaultQueryState", () => {
 	it("builds canonical state from schema defaults", () => {
 		const state = defaultQueryState(schema);
@@ -44,6 +67,12 @@ describe("defaultQueryState", () => {
 		expect(state.orFilterGroups).toEqual([]);
 		expect(state.sorts).toEqual({ updatedAt: "desc", createdAt: undefined });
 		expect(state.pagination).toEqual({ page: 1, perPage: 10 });
+	});
+
+	it("includes normalized grouped filter defaults", () => {
+		expect(defaultQueryState(rangeDefaultSchema).orFilterGroups).toEqual(
+			rangeDefaultSchema.defaultOrFilterGroups,
+		);
 	});
 });
 
@@ -77,6 +106,22 @@ describe("parseSearchIntoState", () => {
 		const state = parseSearchIntoState("", schema);
 		expect(state.sorts.updatedAt).toBe("desc");
 		expect(state.pagination).toEqual({ page: 1, perPage: 10 });
+	});
+
+	it("applies grouped filter defaults when params are absent", () => {
+		expect(parseSearchIntoState("", rangeDefaultSchema).orFilterGroups).toEqual(
+			rangeDefaultSchema.defaultOrFilterGroups,
+		);
+	});
+
+	it("replaces grouped defaults when grouped params are present", () => {
+		const state = parseSearchIntoState(
+			new URLSearchParams([["filter[or][0][width:>=]", "1200"]]).toString(),
+			rangeDefaultSchema,
+		);
+		expect(state.orFilterGroups).toEqual([
+			[{ key: "width", value: 1200, operator: ">=" }],
+		]);
 	});
 
 	it("parses descending sorts and clears defaults when sort param present", () => {
@@ -114,6 +159,24 @@ describe("stateToStorageSearch", () => {
 	it("omits values equal to schema defaults", () => {
 		const state = defaultQueryState(schema);
 		expect(stateToStorageSearch(state, schema, "")).toBe("");
+	});
+
+	it("omits grouped filters equal to schema defaults", () => {
+		const state = defaultQueryState(rangeDefaultSchema);
+		expect(stateToStorageSearch(state, rangeDefaultSchema, "")).toBe("");
+	});
+
+	it("round-trips an explicit clear of grouped defaults", () => {
+		const state = {
+			...defaultQueryState(rangeDefaultSchema),
+			orFilterGroups: [],
+		};
+		const search = stateToStorageSearch(state, rangeDefaultSchema, "");
+
+		expect(new URLSearchParams(search).has("filter[or]")).toBe(true);
+		expect(
+			statesEqual(parseSearchIntoState(search, rangeDefaultSchema), state),
+		).toBe(true);
 	});
 
 	it("writes non-default values", () => {
@@ -273,6 +336,19 @@ describe("buildQueryString", () => {
 		expect(params.get("page")).toBe("1");
 		expect(params.get("perPage")).toBe("10");
 	});
+
+	it("serialises grouped defaults to the API query string", () => {
+		const params = new URLSearchParams(
+			buildQueryString(
+				defaultQueryState(rangeDefaultSchema),
+				rangeDefaultSchema,
+			),
+		);
+
+		expect(params.get("filter[or][0][type]")).toBe("image");
+		expect(params.get("filter[or][0][width:>=]")).toBe("800");
+		expect(params.get("filter[or][0][width:<=]")).toBe("1600");
+	});
 });
 
 describe("applyParams", () => {
@@ -364,6 +440,45 @@ describe("reset and default comparison", () => {
 		expect(statesEqual(reset, defaultQueryState(schema))).toBe(true);
 	});
 
+	it("clearFiltersState removes schema and grouped defaults", () => {
+		const schemaWithDefaults: QueryStateSchema = {
+			...topLevelDefaultSchema,
+			defaultOrFilterGroups: rangeDefaultSchema.defaultOrFilterGroups,
+		};
+		const cleared = clearFiltersState(
+			defaultQueryState(schemaWithDefaults),
+			schemaWithDefaults,
+		);
+
+		expect(hasFiltersApplied(cleared, schemaWithDefaults)).toBe(false);
+		expect(hasDefaultFiltersApplied(cleared, schemaWithDefaults)).toBe(false);
+		expect(cleared.filters.type).toEqual({ value: "" });
+		expect(cleared.filters.width).toEqual({ value: undefined });
+		expect(cleared.orFilterGroups).toEqual([]);
+		expect(buildQueryString(cleared, schemaWithDefaults)).not.toContain(
+			"filter%5B",
+		);
+	});
+
+	it("round-trips explicitly cleared top-level defaults through storage", () => {
+		const cleared = clearFiltersState(
+			defaultQueryState(topLevelDefaultSchema),
+			topLevelDefaultSchema,
+		);
+		const stored = stateToStorageSearch(
+			cleared,
+			topLevelDefaultSchema,
+			"tab=details",
+		);
+		const params = new URLSearchParams(stored);
+
+		expect(params.has("filter[clear]")).toBe(true);
+		expect(params.get("tab")).toBe("details");
+		expect(
+			statesEqual(parseSearchIntoState(stored, topLevelDefaultSchema), cleared),
+		).toBe(true);
+	});
+
 	it("hasFiltersApplied reflects non-empty filters", () => {
 		const state = defaultQueryState(schema);
 		expect(hasFiltersApplied(state, schema)).toBe(false);
@@ -383,6 +498,23 @@ describe("reset and default comparison", () => {
 			filters: { title: "other" },
 		});
 		expect(hasDefaultFiltersApplied(changed, withDefault)).toBe(false);
+	});
+
+	it("resets and compares grouped filter defaults", () => {
+		const changed = applyParams(
+			defaultQueryState(rangeDefaultSchema),
+			rangeDefaultSchema,
+			{
+				orFilterGroups: [[{ key: "width", value: 1200, operator: ">=" }]],
+			},
+		);
+		expect(hasDefaultFiltersApplied(changed, rangeDefaultSchema)).toBe(false);
+
+		const reset = resetFiltersState(changed, rangeDefaultSchema);
+		expect(reset.orFilterGroups).toEqual(
+			rangeDefaultSchema.defaultOrFilterGroups,
+		);
+		expect(hasDefaultFiltersApplied(reset, rangeDefaultSchema)).toBe(true);
 	});
 
 	it("hasDefaultFiltersApplied treats explicit operator state as non-default", () => {

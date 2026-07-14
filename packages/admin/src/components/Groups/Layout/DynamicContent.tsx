@@ -39,6 +39,7 @@ export const DynamicContent: Component<{
 	};
 	callback?: {
 		createEntry?: () => void;
+		resetFilters?: () => void;
 	};
 	options?: {
 		inline?: boolean;
@@ -101,7 +102,11 @@ export const DynamicContent: Component<{
 										theme="primary"
 										size="medium"
 										onClick={() => {
-											props.state?.searchParams?.resetFilters();
+											if (props.callback?.resetFilters) {
+												props.callback.resetFilters();
+											} else {
+												props.state?.searchParams?.resetFilters();
+											}
 										}}
 									>
 										{T()("actions.reset.filters")}
