@@ -78,3 +78,4 @@ export type * from "./media/index.js";
 export type * from "./media/process-media.js";
 export type * from "./previews/handle-request.js";
 export type * from "./previews/index.js";
+export type * from "./previews/resolve.js";
