@@ -8,7 +8,6 @@ export { default as ClientIntegrationsRepository } from "./client-integrations.j
 export { default as CollectionMigrationsRepository } from "./collection-migrations.js";
 export { default as CollectionsRepository } from "./collections.js";
 export { default as DocumentBricksRepository } from "./document-bricks.js";
-export { default as DocumentPreviewsRepository } from "./document-previews.js";
 export { default as DocumentPublishOperationAssigneesRepository } from "./document-publish-operation-assignees.js";
 export { default as DocumentPublishOperationEventsRepository } from "./document-publish-operation-events.js";
 export { default as DocumentPublishOperationsRepository } from "./document-publish-operations.js";
@@ -29,6 +28,7 @@ export { default as MediaShareLinksRepository } from "./media-share-links.js";
 export { default as MediaTranslationsRepository } from "./media-translations.js";
 export { default as MediaUploadSessionsRepository } from "./media-upload-sessions.js";
 export { default as OptionsRepository } from "./options.js";
+export { default as PreviewSessionsRepository } from "./preview-sessions.js";
 export { default as ProcessedImagesRepository } from "./processed-images.js";
 export { default as QueueJobTenantsRepository } from "./queue-job-tenants.js";
 export { default as QueueJobsRepository } from "./queue-jobs.js";

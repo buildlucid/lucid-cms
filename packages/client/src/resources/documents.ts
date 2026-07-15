@@ -18,28 +18,44 @@ export type DocumentsGetSingleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = {
 	collectionKey: TCollectionKey;
-	status?: CollectionDocumentStatus<TCollectionKey>;
-	/** Required when fetching a specific revision or snapshot. */
-	versionId?: number;
-	/** Expiring token from a Lucid-generated preview URL. */
-	preview?: string;
 	query?: DocumentsGetSingleQuery<TCollectionKey>;
 	request?: LucidRequestOptions;
-};
+} & (
+	| {
+			status?: CollectionDocumentStatus<TCollectionKey>;
+			/** Required when fetching a specific revision or snapshot. */
+			versionId?: number;
+			preview?: never;
+	  }
+	| {
+			/** Opaque token from a Lucid-generated preview URL. */
+			preview: string;
+			status?: never;
+			versionId?: never;
+	  }
+);
 
 /** Input for fetching multiple documents from a collection. */
 export type DocumentsGetMultipleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = {
 	collectionKey: TCollectionKey;
-	status?: CollectionDocumentStatus<TCollectionKey>;
-	/** Required when fetching a specific revision or snapshot. */
-	versionId?: number;
-	/** Expiring token from a Lucid-generated preview URL. */
-	preview?: string;
 	query?: DocumentsGetMultipleQuery<TCollectionKey>;
 	request?: LucidRequestOptions;
-};
+} & (
+	| {
+			status?: CollectionDocumentStatus<TCollectionKey>;
+			/** Required when fetching a specific revision or snapshot. */
+			versionId?: number;
+			preview?: never;
+	  }
+	| {
+			/** Opaque token from a Lucid-generated preview URL. */
+			preview: string;
+			status?: never;
+			versionId?: never;
+	  }
+);
 
 /** The response body returned when requesting one document from a collection. */
 export type DocumentsGetSingleResponse<
@@ -73,11 +89,13 @@ export const createDocumentsClient = (
 		await transport.request<DocumentsGetSingleResponse<TCollectionKey>>({
 			operation: "documents.getSingle",
 			method: "GET",
-			path: `/document/${encodePathSegment(input.collectionKey)}/${encodePathSegment(
-				input.status ?? DEFAULT_DOCUMENT_STATUS,
-			)}`,
+			path: `/document/${encodePathSegment(input.collectionKey)}`,
 			query: {
 				...input.query,
+				status:
+					input.preview === undefined
+						? (input.status ?? DEFAULT_DOCUMENT_STATUS)
+						: undefined,
 				versionId: input.versionId,
 				preview: input.preview,
 			},
@@ -89,11 +107,13 @@ export const createDocumentsClient = (
 		await transport.request<DocumentsGetMultipleResponse<TCollectionKey>>({
 			operation: "documents.getMultiple",
 			method: "GET",
-			path: `/documents/${encodePathSegment(input.collectionKey)}/${encodePathSegment(
-				input.status ?? DEFAULT_DOCUMENT_STATUS,
-			)}`,
+			path: `/documents/${encodePathSegment(input.collectionKey)}`,
 			query: {
 				...input.query,
+				status:
+					input.preview === undefined
+						? (input.status ?? DEFAULT_DOCUMENT_STATUS)
+						: undefined,
 				versionId: input.versionId,
 				preview: input.preview,
 			},

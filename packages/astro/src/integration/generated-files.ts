@@ -7,11 +7,6 @@ import {
 } from "@lucidcms/core/build";
 import astroConstants from "../constants.js";
 import {
-	buildCloudflareAdminBarMiddlewareSource,
-	buildLucidAdminBarDevToolbarAppSource,
-	buildNodeAdminBarMiddlewareSource,
-} from "../internal/admin-bar/generated-sources.js";
-import {
 	buildCloudflareRouteSource,
 	buildCloudflareToolkitSource,
 	buildNodeRouteSource,
@@ -19,7 +14,6 @@ import {
 } from "../internal/generated-sources.js";
 import { toPosixPath } from "../internal/paths.js";
 import { buildCloudflareMainWorkerSource } from "../internal/worker-module.js";
-import type { LucidAstroAdminBarOptions } from "../types.js";
 import { ensureDirectory } from "./filesystem.js";
 import type { ResolvedLucidProject } from "./project.js";
 
@@ -30,7 +24,6 @@ import type { ResolvedLucidProject } from "./project.js";
 export const writeGeneratedRouteFiles = async (props: {
 	project: ResolvedLucidProject;
 	codegenDir: string;
-	adminBar: Required<LucidAstroAdminBarOptions>;
 }) => {
 	await ensureDirectory(props.codegenDir);
 
@@ -49,14 +42,6 @@ export const writeGeneratedRouteFiles = async (props: {
 	const toolkitModulePath = path.join(
 		props.codegenDir,
 		astroConstants.files.toolkitModule,
-	);
-	const middlewareModulePath = path.join(
-		props.codegenDir,
-		astroConstants.files.middlewareModule,
-	);
-	const devToolbarAppModulePath = path.join(
-		props.codegenDir,
-		astroConstants.files.devToolbarAppModule,
 	);
 	const spaHtmlPath = path.join(
 		props.codegenDir,
@@ -84,14 +69,6 @@ export const writeGeneratedRouteFiles = async (props: {
 		props.project.runtime === "node"
 			? buildNodeToolkitSource(configArtifactImports)
 			: buildCloudflareToolkitSource(configArtifactImports);
-	const middlewareSource =
-		props.project.runtime === "node"
-			? buildNodeAdminBarMiddlewareSource(configArtifactImports, props.adminBar)
-			: buildCloudflareAdminBarMiddlewareSource(
-					configArtifactImports,
-					props.adminBar,
-				);
-	const devToolbarAppSource = buildLucidAdminBarDevToolbarAppSource();
 
 	await Promise.all([
 		fs.writeFile(
@@ -113,15 +90,11 @@ export default spaHtml;
 `,
 		),
 		fs.writeFile(toolkitModulePath, toolkitSource),
-		fs.writeFile(middlewareModulePath, middlewareSource),
-		fs.writeFile(devToolbarAppModulePath, devToolbarAppSource),
 		fs.writeFile(routePath, routeSource),
 	]);
 
 	return {
 		routePath,
-		middlewarePath: middlewareModulePath,
-		devToolbarAppPath: devToolbarAppModulePath,
 	};
 };
 

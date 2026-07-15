@@ -128,6 +128,7 @@ const fetchRelationRefs: ServiceFn<
 	const documentsRes = await DocumentVersions.selectMultipleUnion({
 		unions: unionDataRes,
 		versionType: data.versionType,
+		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

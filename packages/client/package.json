@@ -14,6 +14,10 @@
 		"./types": {
 			"types": "./dist/types.d.ts",
 			"import": "./dist/types.js"
+		},
+		"./toolbar": {
+			"types": "./dist/toolbar.d.ts",
+			"import": "./dist/toolbar.js"
 		}
 	},
 	"scripts": {

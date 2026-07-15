@@ -10,7 +10,15 @@ export interface PublicErrorData {
 	name?: string;
 	message?: string;
 	status?: number;
-	code?: "csrf" | "login" | "authorisation" | "rate_limit" | "not_found";
+	code?:
+		| "csrf"
+		| "login"
+		| "authorisation"
+		| "rate_limit"
+		| "not_found"
+		| "preview_invalid"
+		| "preview_expired"
+		| "preview_scope";
 	key?: string;
 	errors?: ErrorResult;
 }

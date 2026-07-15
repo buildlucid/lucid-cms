@@ -1,8 +1,8 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, describe, expect, test } from "vitest";
-import DocumentPreviewsRepository from "./document-previews";
+import PreviewSessionsRepository from "./preview-sessions";
 
-describe("Tests for the document previews repository", async () => {
+describe("Tests for the preview sessions repository", async () => {
 	const db = new SQLiteAdapter({
 		database: ":memory:",
 	});
@@ -12,16 +12,16 @@ describe("Tests for the document previews repository", async () => {
 	});
 
 	await db.migrateToLatest();
-	const DocumentPreviews = new DocumentPreviewsRepository(db.client, db);
+	const PreviewSessions = new PreviewSessionsRepository(db.client, db);
 	const tables = await db.client.introspection.getTables();
 
 	test("checks the columnFormats matches the latest state of the DB", async () => {
-		const table = tables.find((t) => t.name === DocumentPreviews.tableName);
+		const table = tables.find((t) => t.name === PreviewSessions.tableName);
 		expect(table).toBeDefined();
 
 		for (const column of table?.columns || []) {
 			// @ts-expect-error
-			expect(DocumentPreviews.columnFormats[column.name]).toEqual(
+			expect(PreviewSessions.columnFormats[column.name]).toEqual(
 				column.dataType.toLowerCase(),
 			);
 		}

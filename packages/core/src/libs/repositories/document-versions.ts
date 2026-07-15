@@ -91,6 +91,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 				}>;
 				/** The status used to determine which version of the relation custom field refs to fetch */
 				versionType: Exclude<DocumentVersionType, "revision">;
+				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -106,61 +107,66 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 				const { table, ref } = this.db.dynamic;
 				const targetVersionType = versionType ?? props.versionType;
 
-				return (
-					this.db
-						.selectFrom(tables.version)
-						.innerJoin(tables.document, (join) =>
-							join.onRef(
-								`${tables.document}.id`,
-								"=",
-								// @ts-expect-error
-								`${tables.version}.document_id`,
-							),
-						)
-						// @ts-expect-error
-						.select([
-							`${tables.version}.id`,
-							`${tables.version}.collection_key`,
-							`${tables.version}.document_id`,
-							`${tables.version}.type`,
-							`${tables.version}.created_by`,
-							`${tables.version}.updated_by`,
-							`${tables.version}.created_at`,
-							`${tables.version}.updated_at`,
-						])
-						.select(() => [
-							this.dbAdapter
-								.jsonArrayFrom(
-									this.db
-										.selectFrom(table(tables.documentFields).as("df"))
-										.whereRef(
-											ref("df.document_id"),
-											"=",
-											`${tables.version}.document_id`,
-										)
-										.whereRef(
-											ref("df.document_version_id"),
-											"=",
-											`${tables.version}.id`,
-										)
-										.select(
-											documentFieldSchema.columns.map((column) =>
-												ref(`df.${column.name}`),
-											),
-										),
-								)
-								.as(this.documentFieldsUnionAlias),
-						])
-						// @ts-expect-error
-						.where(`${tables.version}.type`, "=", targetVersionType)
-						// @ts-expect-error
-						.where(`${tables.version}.document_id`, "in", ids)
-						.where(
-							`${tables.document}.is_deleted`,
+				let query = this.db
+					.selectFrom(tables.version)
+					.innerJoin(tables.document, (join) =>
+						join.onRef(
+							`${tables.document}.id`,
 							"=",
-							this.dbAdapter.getDefault("boolean", "false"),
-						)
-				);
+							// @ts-expect-error
+							`${tables.version}.document_id`,
+						),
+					)
+					// @ts-expect-error
+					.select([
+						`${tables.version}.id`,
+						`${tables.version}.collection_key`,
+						`${tables.version}.document_id`,
+						`${tables.version}.type`,
+						`${tables.version}.created_by`,
+						`${tables.version}.updated_by`,
+						`${tables.version}.created_at`,
+						`${tables.version}.updated_at`,
+					])
+					.select(() => [
+						this.dbAdapter
+							.jsonArrayFrom(
+								this.db
+									.selectFrom(table(tables.documentFields).as("df"))
+									.whereRef(
+										ref("df.document_id"),
+										"=",
+										`${tables.version}.document_id`,
+									)
+									.whereRef(
+										ref("df.document_version_id"),
+										"=",
+										`${tables.version}.id`,
+									)
+									.select(
+										documentFieldSchema.columns.map((column) =>
+											ref(`df.${column.name}`),
+										),
+									),
+							)
+							.as(this.documentFieldsUnionAlias),
+					])
+					// @ts-expect-error
+					.where(`${tables.version}.type`, "=", targetVersionType)
+					// @ts-expect-error
+					.where(`${tables.version}.document_id`, "in", ids)
+					.where(
+						`${tables.document}.is_deleted`,
+						"=",
+						this.dbAdapter.getDefault("boolean", "false"),
+					);
+
+				query = queryBuilder.tenantScope(query, {
+					tenantKey: props.tenantKey,
+					column: `${tables.document}.tenant_key`,
+				});
+
+				return query;
 			},
 		);
 

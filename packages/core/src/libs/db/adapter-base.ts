@@ -24,7 +24,7 @@ import Migration00000008 from "./migrations/00000008-integrations.js";
 import Migration00000009 from "./migrations/00000009-share-links.js";
 import Migration00000010 from "./migrations/00000010-alerts.js";
 import Migration00000011 from "./migrations/00000011-ai-generations.js";
-import Migration00000012 from "./migrations/00000012-document-previews.js";
+import Migration00000012 from "./migrations/00000012-preview-sessions.js";
 import type {
 	DatabaseConfig,
 	ExternalMigrationFn,
@@ -68,7 +68,7 @@ export default abstract class DatabaseAdapter {
 		"00000009-share-link",
 		"00000010-alerts",
 		"00000011-ai-generations",
-		"00000012-document-previews",
+		"00000012-preview-sessions",
 	];
 	abstract initialize(): Promise<void>;
 	/**
@@ -301,7 +301,7 @@ export default abstract class DatabaseAdapter {
 			"00000009-share-link": Migration00000009(this),
 			"00000010-alerts": Migration00000010(this),
 			"00000011-ai-generations": Migration00000011(this),
-			"00000012-document-previews": Migration00000012(this),
+			"00000012-preview-sessions": Migration00000012(this),
 		};
 
 		for (const [name, migrationFn] of Object.entries(this.externalMigrations)) {

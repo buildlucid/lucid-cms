@@ -5,7 +5,6 @@ export { default as clientIntegrationsFormatter } from "./client-integrations.js
 export { default as collectionsFormatter } from "./collections.js";
 export { default as documentBricksFormatter } from "./document-bricks.js";
 export { default as documentFieldsFormatter } from "./document-fields.js";
-export { default as documentPreviewsFormatter } from "./document-previews.js";
 export { default as documentPublishOperationsFormatter } from "./document-publish-operations.js";
 export { default as documentVersionsFormatter } from "./document-versions.js";
 export { default as documentWorkflowsFormatter } from "./document-workflows.js";
@@ -19,6 +18,7 @@ export { default as mediaFoldersFormatter } from "./media-folders.js";
 export { default as mediaShareLinksFormatter } from "./media-share-links.js";
 export { default as optionsFormatter } from "./options.js";
 export { default as permissionsFormatter } from "./permissions.js";
+export { default as previewSessionsFormatter } from "./preview-sessions.js";
 export { default as rolesFormatter } from "./roles.js";
 export { default as settingsFormatter } from "./settings.js";
 export { default as userLoginsFormatter } from "./user-logins.js";

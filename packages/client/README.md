@@ -62,28 +62,6 @@ const pages = await client.documents.getMultiple({
 });
 ```
 
-### Preview routes
-
-Resolve the preview token first, then use its document target in the document request.
-
-```typescript
-const token = "PREVIEW_TOKEN";
-const preview = await client.previews.resolve({ token });
-if (preview.error) throw new Error(preview.error.message);
-
-const page = await client.documents.getSingle({
-    collectionKey: "page",
-    status: preview.data.data.versionType ?? "production",
-    versionId: preview.data.data.versionId ?? undefined,
-    preview: token,
-    query: {
-        filter: { id: { value: preview.data.data.documentId } },
-    },
-});
-```
-
-Preview tokens are temporary bearer credentials and should be resolved server-side.
-
 ## Media
 
 Use the media client to fetch media items or generate processed media URLs.
@@ -186,4 +164,42 @@ if (response.error) {
 } else {
     console.log(response.data.data);
 }
+```
+
+## Previews
+
+Browser applications can resolve a Lucid-generated preview token to obtain its mode and expiry, then pass the token instead of `status` or `versionId` when fetching documents. Treat preview tokens as bearer credentials and never forward them to another origin.
+
+```typescript
+const token = "PREVIEW_TOKEN";
+const preview = await client.previews.resolve({ token });
+
+const page = await client.documents.getSingle({
+    collectionKey: "page",
+    preview: token,
+    query: {
+        filter: { _fullSlug: { value: "/about" } },
+    },
+});
+```
+
+## Frontend Toolbar
+
+The browser-safe `@lucidcms/client/toolbar` entrypoint provides Lucid's edit-page and preview controls. Set it up explicitly and clean it up with your application's page lifecycle.
+
+```typescript
+import { setupToolbar } from "@lucidcms/client/toolbar";
+
+const toolbar = setupToolbar({
+    edit: {
+        collectionKey: "page",
+        documentId: 42,
+    },
+    preview: {
+        token: "PREVIEW_TOKEN",
+        mode: "perspective",
+    },
+});
+
+window.addEventListener("pagehide", toolbar.cleanup, { once: true });
 ```

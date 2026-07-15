@@ -58,8 +58,9 @@ const getSingleController = factory.createHandlers(
 		},
 	}),
 	async (c) => {
-		const { collectionKey, status } = c.req.valid("param");
-		const { preview: previewToken, versionId } = c.req.valid("query");
+		const { collectionKey } = c.req.valid("param");
+		const { preview, status = "latest", versionId } = c.req.valid("query");
+
 		const context = createServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
 			c,
@@ -75,12 +76,19 @@ const getSingleController = factory.createHandlers(
 			},
 		})(context, {
 			collectionKey,
-			status,
-			versionId,
+			target:
+				preview !== undefined
+					? { type: "preview", token: preview }
+					: { type: "version", versionType: status, versionId },
 			query: formattedQuery,
-			previewToken,
 		});
 		if (document.error) throw new LucidAPIError(document.error);
+
+		if (preview !== undefined) {
+			c.header("Cache-Control", "private, no-store");
+			c.header("Pragma", "no-cache");
+			c.header("Referrer-Policy", "no-referrer");
+		}
 
 		c.status(200);
 		return c.json(

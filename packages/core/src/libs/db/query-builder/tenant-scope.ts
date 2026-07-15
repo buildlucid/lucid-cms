@@ -2,8 +2,7 @@ import type { ReferenceExpression, SelectQueryBuilder } from "kysely";
 
 /**
  * Scopes a select query to a tenant. Rows with a NULL tenant are treated as global
- * and are always included. When no tenant is resolved this is a no-op, the generic
- * where array is AND-only so the OR condition has to be applied here instead.
+ * and are included with tenant-scoped reads. Global reads remain unscoped.
  */
 const applyTenantScope = <DB, TB extends keyof DB, O>(
 	query: SelectQueryBuilder<DB, TB, O>,

@@ -9,12 +9,24 @@ import {
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { profilePictureResponseSchema } from "./media.js";
 
-const previewTokenSchema = z
-	.string()
-	.regex(/^[A-Za-z0-9_-]{43}$/)
-	.meta({
-		description: "An expiring document preview token",
-	});
+const validateClientDocumentTarget = <T extends z.ZodRawShape>(shape: T) =>
+	z
+		.object(shape)
+		.refine(
+			(data) =>
+				Reflect.get(data, "preview") === undefined ||
+				(Reflect.get(data, "status") === undefined &&
+					Reflect.get(data, "versionId") === undefined),
+			{
+				message:
+					"Preview sessions cannot be combined with an explicit status or version ID",
+				path: ["preview"],
+			},
+		);
+
+const previewTokenSchema = z.string().meta({
+	description: "An opaque preview token",
+});
 
 const documentResponseUserSchema = z.object({
 	id: z.number().meta({
@@ -772,70 +784,47 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	client: {
-		resolvePreview: {
-			body: undefined,
-			query: {
-				string: undefined,
-				formatted: undefined,
-			},
-			params: z.object({
-				token: previewTokenSchema,
-			}),
-			response: z.object({
-				collectionKey: z.string(),
-				documentId: z.number(),
-				versionType: versionTypesSchema,
-				versionId: z.number().nullable(),
-				expiresAt: z.iso.datetime(),
-			}),
-		} satisfies ControllerSchema,
 		getSingle: {
 			query: {
-				string: z
-					.object({
-						preview: previewTokenSchema.optional(),
-						versionId: z.coerce.number().int().positive().optional(),
-						"filter[id]": queryString.schema.filter(true, {
-							example: "1",
-						}),
-						"filter[createdBy]": queryString.schema.filter(true, {
-							example: "1",
-						}),
-						"filter[updatedBy]": queryString.schema.filter(true, {
-							example: "1",
-						}),
-						"filter[createdAt]": queryString.schema.filter(false, {
-							example: "2025-03-15T09:22:10Z",
-						}),
-						"filter[updatedAt]": queryString.schema.filter(false, {
-							example: "2025-03-15T09:22:10Z",
-						}),
-						"filter[isDeleted]": queryString.schema.filter(false, {
-							example: "true",
-						}),
-						"filter[_customFieldKey]": queryString.schema.filter(true, {
+				string: validateClientDocumentTarget({
+					preview: previewTokenSchema.optional(),
+					status: z.string().trim().min(1).optional(),
+					versionId: z.coerce.number().int().positive().optional(),
+					"filter[id]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					"filter[createdBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					"filter[updatedBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2025-03-15T09:22:10Z",
+					}),
+					"filter[updatedAt]": queryString.schema.filter(false, {
+						example: "2025-03-15T09:22:10Z",
+					}),
+					"filter[isDeleted]": queryString.schema.filter(false, {
+						example: "true",
+					}),
+					"filter[_customFieldKey]": queryString.schema.filter(true, {
+						description:
+							"Prefix custom field keys with an underscore to filter by them",
+					}),
+					"filter[brickKey._customFieldKey]": queryString.schema.filter(true, {
+						description:
+							"Add a brick key before the custom field key to filter against the brick",
+					}),
+					"filter[brickKey.repeaterKey._customFieldKey]":
+						queryString.schema.filter(true, {
 							description:
-								"Prefix custom field keys with an underscore to filter by them",
+								"Target a repeater field by adding a repeater key after the brick key",
 						}),
-						"filter[brickKey._customFieldKey]": queryString.schema.filter(
-							true,
-							{
-								description:
-									"Add a brick key before the custom field key to filter against the brick",
-							},
-						),
-						"filter[brickKey.repeaterKey._customFieldKey]":
-							queryString.schema.filter(true, {
-								description:
-									"Target a repeater field by adding a repeater key after the brick key",
-							}),
-						include: queryString.schema.include(
-							"bricks,refs,refs.relation,meta",
-						),
-						page: queryString.schema.page,
-						perPage: queryString.schema.perPage,
-					})
-					.meta(queryString.meta),
+					include: queryString.schema.include("bricks,refs,refs.relation,meta"),
+					page: queryString.schema.page,
+					perPage: queryString.schema.perPage,
+				}).meta(queryString.meta),
 				formatted: z.object({
 					filter: z
 						.union([
@@ -873,62 +862,54 @@ export const controllerSchemas = {
 					description: "The collection key",
 					example: "page",
 				}),
-				status: z.string().trim().meta({
-					description: "The status version type",
-					example: "latest",
-				}),
 			}),
 			body: undefined,
 			response: documentClientResponseSchema,
 		} satisfies ControllerSchema,
 		getMultiple: {
 			query: {
-				string: z
-					.object({
-						preview: previewTokenSchema.optional(),
-						versionId: z.coerce.number().int().positive().optional(),
-						"filter[id]": queryString.schema.filter(true, {
-							example: "1",
-						}),
-						"filter[createdBy]": queryString.schema.filter(true, {
-							example: "1",
-						}),
-						"filter[updatedBy]": queryString.schema.filter(true, {
-							example: "1",
-						}),
-						"filter[createdAt]": queryString.schema.filter(false, {
-							example: "2025-03-15T09:22:10Z",
-						}),
-						"filter[updatedAt]": queryString.schema.filter(false, {
-							example: "2025-03-15T09:22:10Z",
-						}),
-						"filter[isDeleted]": queryString.schema.filter(false, {
-							example: "true",
-						}),
-						"filter[_customFieldKey]": queryString.schema.filter(true, {
+				string: validateClientDocumentTarget({
+					preview: previewTokenSchema.optional(),
+					status: z.string().trim().min(1).optional(),
+					versionId: z.coerce.number().int().positive().optional(),
+					"filter[id]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					"filter[createdBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					"filter[updatedBy]": queryString.schema.filter(true, {
+						example: "1",
+					}),
+					"filter[createdAt]": queryString.schema.filter(false, {
+						example: "2025-03-15T09:22:10Z",
+					}),
+					"filter[updatedAt]": queryString.schema.filter(false, {
+						example: "2025-03-15T09:22:10Z",
+					}),
+					"filter[isDeleted]": queryString.schema.filter(false, {
+						example: "true",
+					}),
+					"filter[_customFieldKey]": queryString.schema.filter(true, {
+						description:
+							"Prefix custom field keys with an underscore to filter by them",
+					}),
+					"filter[brickKey._customFieldKey]": queryString.schema.filter(true, {
+						description:
+							"Add a brick key before the custom field key to filter against the brick",
+					}),
+					"filter[brickKey.repeaterKey._customFieldKey]":
+						queryString.schema.filter(true, {
 							description:
-								"Prefix custom field keys with an underscore to filter by them",
+								"Target a repeater field by adding a repeater key after the brick key",
 						}),
-						"filter[brickKey._customFieldKey]": queryString.schema.filter(
-							true,
-							{
-								description:
-									"Add a brick key before the custom field key to filter against the brick",
-							},
-						),
-						"filter[brickKey.repeaterKey._customFieldKey]":
-							queryString.schema.filter(true, {
-								description:
-									"Target a repeater field by adding a repeater key after the brick key",
-							}),
-						include: queryString.schema.include("refs,refs.relation,meta"),
-						sort: queryString.schema.sort(
-							"createdAt,updatedAt,order,_customFieldKey",
-						),
-						page: queryString.schema.page,
-						perPage: queryString.schema.perPage,
-					})
-					.meta(queryString.meta),
+					include: queryString.schema.include("refs,refs.relation,meta"),
+					sort: queryString.schema.sort(
+						"createdAt,updatedAt,order,_customFieldKey",
+					),
+					page: queryString.schema.page,
+					perPage: queryString.schema.perPage,
+				}).meta(queryString.meta),
 				formatted: z.object({
 					filter: z
 						.union([
@@ -977,10 +958,6 @@ export const controllerSchemas = {
 				collectionKey: z.string().trim().meta({
 					description: "The collection key",
 					example: "page",
-				}),
-				status: z.string().trim().meta({
-					description: "The status version type",
-					example: "latest",
 				}),
 			}),
 			body: undefined,

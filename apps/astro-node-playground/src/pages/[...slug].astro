@@ -1,42 +1,31 @@
 ---
-import { setAdminBar } from "@lucidcms/astro/admin-bar";
 import { asDocument } from "@lucidcms/client";
 import "../index.css";
-import getPage from "../helpers/get-page";
+import getPage from "../services/pages";
 
 export const prerender = false;
-const previewToken = Astro.url.searchParams.get("preview") ?? undefined;
-const fullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
 
-if (previewToken) {
-	//* preview tokens are bearer credentials: do not cache or forward this URL.
-	Astro.response.headers.set("Cache-Control", "private, no-store");
-	Astro.response.headers.set("Referrer-Policy", "no-referrer");
+const result = await getPage({
+	fullSlug: Astro.params.slug ? `/${Astro.params.slug}` : "/",
+	astro: Astro,
+});
+
+if (result.preview.error) {
+	Astro.response.status = result.preview.error.status ?? 401;
+} else if (result.page.error) {
+	Astro.response.status = result.page.error.status ?? 404;
 }
 
-const pageResponse = await getPage({ fullSlug, previewToken });
-
-if (previewToken && pageResponse.error) {
-	Astro.response.status = pageResponse.error.status ?? 401;
-}
-
-const page = asDocument(pageResponse.data);
-
-if (page) {
-	setAdminBar(Astro, {
-		edit: {
-			collectionKey: page.collectionKey,
-			documentId: page.id,
-		},
-	});
-}
+const page = asDocument(result.page.data);
+const preview = result.preview.data;
 
 const title = page?.field("title").value();
 const summary = page?.field("summary").value();
 const pageFullSlug = page?.field("fullSlug").value();
 const slug = page?.field("slug").value();
 
-const previewError = previewToken ? pageResponse.error : undefined;
+const previewError =
+	result.preview.error ?? (preview?.active ? result.page.error : undefined);
 ---
 
 <html lang="en">
@@ -49,14 +38,23 @@ const previewError = previewToken ? pageResponse.error : undefined;
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
 			rel="stylesheet"
 		/>
-		{previewToken && <meta name="referrer" content="no-referrer" />}
+		{(preview?.active || previewError) && (
+			<meta name="referrer" content="no-referrer" />
+		)}
+		{preview?.active && preview.token && <meta name="lucid-preview" content={preview.token} />}
+		{preview?.preview && <meta name="lucid-preview-mode" content={preview.preview.mode} />}
 		<title>
 			{title
 				? `${title} | Lucid CMS`
 				: "Lucid CMS"}
 		</title>
 	</head>
-	<body>
+	<body
+		data-lucid-edit-collection={page?.collectionKey}
+		data-lucid-edit-document={page?.id}
+		data-lucid-edit-status={page?.status}
+		data-lucid-edit-version={page?.meta?.versionId}
+	>
 		<main class="page-shell">
 			<div class="page-backdrop">
 				<div class="page-frame">
@@ -70,6 +68,8 @@ const previewError = previewToken ? pageResponse.error : undefined;
 						</a>
 
 						<nav class="page-nav" aria-label="Primary">
+							<a class="nav-link" href="/">Home</a>
+							<a class="nav-link" href="/about">About</a>
 							<a
 								class="nav-link"
 								href="https://lucidcms.io/en/cms/docs/getting-started/what-is-lucid-cms/"
@@ -177,5 +177,6 @@ const previewError = previewToken ? pageResponse.error : undefined;
 				</div>
 			</div>
 		</main>
+		<script src="../scripts/toolbar.ts"></script>
 	</body>
 </html>

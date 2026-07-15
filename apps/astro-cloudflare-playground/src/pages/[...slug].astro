@@ -1,5 +1,4 @@
 ---
-import { setAdminBar } from "@lucidcms/astro/admin-bar";
 import getToolkit from "@lucidcms/astro/toolkit";
 import { asDocument } from "@lucidcms/client";
 import "../index.css";
@@ -26,15 +25,6 @@ const response = await toolkit.documents.getSingle({
 
 const page = asDocument(response.data);
 
-if (page) {
-	setAdminBar(Astro, {
-		edit: {
-			collectionKey: page.collectionKey,
-			documentId: page.id,
-		},
-	});
-}
-
 const title = page?.field("title").value();
 const summary = page?.field("summary").value();
 const fullSlug = page?.field("fullSlug").value();
@@ -57,7 +47,12 @@ const slug = page?.field("slug").value();
 				: "Lucid CMS"}
 		</title>
 	</head>
-	<body>
+	<body
+		data-lucid-edit-collection={page?.collectionKey}
+		data-lucid-edit-document={page?.id}
+		data-lucid-edit-status={page?.status}
+		data-lucid-edit-version={page?.meta?.versionId}
+	>
 		<main class="page-shell">
 			<div class="page-backdrop">
 				<div class="page-frame">
@@ -172,5 +167,6 @@ const slug = page?.field("slug").value();
 				</div>
 			</div>
 		</main>
+		<script src="../scripts/toolbar.ts"></script>
 	</body>
 </html>

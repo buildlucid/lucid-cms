@@ -30,7 +30,7 @@ describe("@lucidcms/client", () => {
 					},
 					meta: {
 						links: [],
-						path: "https://example.com/lucid/api/v1/client/document/page/latest",
+						path: "https://example.com/lucid/api/v1/client/document/page",
 						currentPage: null,
 						lastPage: null,
 						perPage: null,
@@ -59,7 +59,6 @@ describe("@lucidcms/client", () => {
 				filter: {
 					_fullSlug: {
 						value: "/about",
-						// @ts-expect-error
 						operator: "starts-with",
 					},
 					banner: {
@@ -69,7 +68,6 @@ describe("@lucidcms/client", () => {
 					},
 					fields: {
 						sections: {
-							// @ts-expect-error
 							_section_title: {
 								value: "Hero",
 							},
@@ -83,68 +81,75 @@ describe("@lucidcms/client", () => {
 		expect(response.error).toBeUndefined();
 		expect(response.data?.data.id).toBe(1);
 		expect(response.data?.meta.path).toBe(
-			"https://example.com/lucid/api/v1/client/document/page/latest",
+			"https://example.com/lucid/api/v1/client/document/page",
 		);
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toContain(
-			"/document/page/latest?filter%5B_fullSlug%3Astarts-with%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks%2Crefs.relation%2Cmeta",
+			"/document/page?filter%5B_fullSlug%3Astarts-with%5D=%2Fabout&filter%5Bbanner._title%5D=About+us&filter%5Bfields.sections._section_title%5D=Hero&include=bricks%2Crefs.relation%2Cmeta",
 		);
 		expect(new URL(String(url)).searchParams.get("preview")).toBe(
 			"a".repeat(43),
 		);
+		expect(new URL(String(url)).searchParams.has("status")).toBe(false);
+		expect(new URL(String(url)).searchParams.has("versionId")).toBe(false);
 		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
 	});
 
-	test("resolves preview targets and serializes exact document versions", async () => {
-		const fetchMock = vi
-			.fn<typeof fetch>()
-			.mockResolvedValueOnce(
-				new Response(
-					JSON.stringify({
-						data: {
+	test("resolves preview metadata for browser applications", async () => {
+		const token = "a".repeat(43);
+		const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					data: {
+						mode: "exact",
+						entry: {
 							collectionKey: "page",
-							documentId: 7,
-							versionType: "snapshot",
-							versionId: 42,
-							expiresAt: "2099-01-01T00:00:00.000Z",
+							documentId: 42,
+							versionType: "revision",
+							versionId: 7,
 						},
-						meta: {},
-					}),
-					{ status: 200, headers: { "content-type": "application/json" } },
-				),
-			)
-			.mockResolvedValueOnce(
-				new Response(JSON.stringify({ data: {}, meta: {} }), {
+						expiresAt: "2099-01-01T00:00:00.000Z",
+					},
+					meta: {
+						links: [],
+						path: `https://example.com/lucid/api/v1/client/preview/${token}`,
+						currentPage: null,
+						lastPage: null,
+						perPage: null,
+						total: null,
+					},
+				}),
+				{
 					status: 200,
 					headers: { "content-type": "application/json" },
-				}),
-			);
+				},
+			),
+		);
 		const client = createClient({
 			baseUrl: "https://example.com",
 			apiKey: "client-key",
 			fetch: fetchMock,
 		});
-		const token = "b".repeat(43);
 
-		const resolved = await client.previews.resolve({ token });
-		await client.documents.getSingle({
-			collectionKey: "page",
-			status: "snapshot",
-			versionId: resolved.data?.data.versionId ?? undefined,
-			preview: token,
+		const response = await client.previews.resolve({ token });
+
+		expect(response.error).toBeUndefined();
+		expect(response.data?.data).toMatchObject({
+			mode: "exact",
+			entry: {
+				collectionKey: "page",
+				documentId: 42,
+				versionType: "revision",
+				versionId: 7,
+			},
 		});
-
-		expect(new URL(String(fetchMock.mock.calls[0]?.[0])).pathname).toBe(
-			`/lucid/api/v1/client/preview/${token}`,
+		const [url, init] = fetchMock.mock.calls[0] ?? [];
+		expect(String(url)).toBe(
+			`https://example.com/lucid/api/v1/client/preview/${token}`,
 		);
-		const documentUrl = new URL(String(fetchMock.mock.calls[1]?.[0]));
-		expect(documentUrl.pathname).toBe(
-			"/lucid/api/v1/client/document/page/snapshot",
-		);
-		expect(documentUrl.searchParams.get("versionId")).toBe("42");
-		expect(documentUrl.searchParams.get("preview")).toBe(token);
+		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
 	});
 
 	test("retries idempotent GET requests and returns paginated response bodies", async () => {
@@ -171,7 +176,7 @@ describe("@lucidcms/client", () => {
 						data: [],
 						meta: {
 							links: [],
-							path: "https://example.com/lucid/api/v1/client/documents/page/latest",
+							path: "https://example.com/lucid/api/v1/client/documents/page",
 							currentPage: 1,
 							lastPage: 1,
 							perPage: 10,
@@ -216,7 +221,7 @@ describe("@lucidcms/client", () => {
 			data: [],
 			meta: {
 				links: [],
-				path: "https://example.com/lucid/api/v1/client/documents/page/latest",
+				path: "https://example.com/lucid/api/v1/client/documents/page",
 				currentPage: 1,
 				lastPage: 1,
 				perPage: 10,
@@ -227,8 +232,9 @@ describe("@lucidcms/client", () => {
 		const firstRequestUrl = new URL(String(fetchMock.mock.calls[0]?.[0]));
 		const secondRequestUrl = new URL(String(fetchMock.mock.calls[1]?.[0]));
 		expect(firstRequestUrl.pathname).toBe(
-			"/lucid/api/v1/client/documents/page/latest",
+			"/lucid/api/v1/client/documents/page",
 		);
+		expect(firstRequestUrl.searchParams.get("status")).toBe("latest");
 		expect(firstRequestUrl.searchParams.get("include")).toBe(
 			"refs.relation,meta",
 		);

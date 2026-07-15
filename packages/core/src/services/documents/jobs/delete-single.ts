@@ -3,7 +3,7 @@ import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { documentPreviewServices, documentServices } from "../../index.js";
+import { documentServices, previewSessionServices } from "../../index.js";
 import invalidateClientDocumentCache from "../helpers/invalidate-client-cache.js";
 
 /**
@@ -122,7 +122,7 @@ const deleteDocument: ServiceFn<
 				collectionKey: collectionRes.data.key,
 				documentId: data.id,
 			}),
-			documentPreviewServices.deleteForDocuments(context, {
+			previewSessionServices.deleteForDocuments(context, {
 				collectionKey: data.collectionKey,
 				documentIds: [data.id],
 			}),

@@ -21,7 +21,7 @@ export interface LucidClient {
 	locales: LucidLocalesClient;
 	/** Public media endpoints. */
 	media: LucidMediaClient;
-	/** Document preview token endpoints. */
+	/** Public preview endpoints. */
 	previews: LucidPreviewsClient;
 }
 

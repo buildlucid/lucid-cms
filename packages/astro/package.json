@@ -19,17 +19,9 @@
 			"types": "./toolkit.d.mts",
 			"default": "./dist/toolkit.mjs"
 		},
-		"./admin-bar": {
-			"types": "./dist/admin-bar.d.mts",
-			"default": "./dist/admin-bar.mjs"
-		},
 		"./internal/runtime": {
 			"types": "./dist/internal/runtime.d.mts",
 			"default": "./dist/internal/runtime.mjs"
-		},
-		"./internal/admin-bar": {
-			"types": "./dist/internal/admin-bar.d.mts",
-			"default": "./dist/internal/admin-bar.mjs"
 		},
 		"./types": {
 			"types": "./dist/types.d.mts",

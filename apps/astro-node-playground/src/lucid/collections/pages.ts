@@ -13,6 +13,7 @@ const PageCollection = new CollectionBuilder("page", {
 		builder: [ContentBrick],
 	},
 	autoSave: true,
+	revisions: true,
 	environments: [
 		{
 			key: "production",

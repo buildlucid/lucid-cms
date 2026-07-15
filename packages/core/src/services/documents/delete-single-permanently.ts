@@ -4,10 +4,10 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import {
-	documentPreviewServices,
 	documentPublishOperationServices,
 	documentServices,
 	documentWorkflowServices,
+	previewSessionServices,
 } from "../index.js";
 import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
 
@@ -123,7 +123,7 @@ const deleteSinglePermanently: ServiceFn<
 			collectionKey: collectionRes.data.key,
 			documentId: data.id,
 		}),
-		documentPreviewServices.deleteForDocuments(context, {
+		previewSessionServices.deleteForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.id],
 		}),

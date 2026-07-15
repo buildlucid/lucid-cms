@@ -1,7 +1,4 @@
-import type {
-	DocumentPreviewResolveResponse,
-	ResponseBody,
-} from "@lucidcms/types";
+import type { PreviewSession, ResponseBody } from "@lucidcms/types";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {
 	LucidRequestOptions,
@@ -14,11 +11,10 @@ export type PreviewsResolveInput = {
 	request?: LucidRequestOptions;
 };
 
-export type PreviewsResolveResponse =
-	ResponseBody<DocumentPreviewResolveResponse>;
+export type PreviewsResolveResponse = ResponseBody<PreviewSession>;
 
 export interface LucidPreviewsClient {
-	/** Resolves a Lucid preview token to its authorized document version target. */
+	/** Validates a preview token and returns its browser runtime metadata. */
 	resolve(
 		input: PreviewsResolveInput,
 	): Promise<LucidClientResponse<PreviewsResolveResponse>>;

@@ -1,7 +1,7 @@
 import type {
-	DocumentPreviewURLResponse,
 	DocumentVersionType,
 	ErrorResponse,
+	PreviewSessionURLResponse,
 	ResponseBody,
 } from "@types";
 import request from "@/utils/request";
@@ -16,7 +16,7 @@ export interface CreatePreviewParams {
 }
 
 export const createPreviewReq = (params: CreatePreviewParams) => {
-	return request<ResponseBody<DocumentPreviewURLResponse>>({
+	return request<ResponseBody<PreviewSessionURLResponse>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/preview`,
 		csrf: true,
 		config: {
@@ -35,7 +35,7 @@ const useCreatePreview = (props?: {
 }) => {
 	return serviceHelpers.useMutationWrapper<
 		CreatePreviewParams,
-		ResponseBody<DocumentPreviewURLResponse>
+		ResponseBody<PreviewSessionURLResponse>
 	>({
 		mutationFn: createPreviewReq,
 		onError: props?.onError,

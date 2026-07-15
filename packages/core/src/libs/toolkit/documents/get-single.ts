@@ -24,13 +24,21 @@ export type ToolkitDocumentsGetSingleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = ToolkitTenantOptions & {
 	collectionKey: TCollectionKey;
-	status?: ToolkitDocumentStatus<TCollectionKey>;
-	/** Required when fetching a specific revision or snapshot. */
-	versionId?: number;
-	/** Expiring token from a Lucid-generated preview URL. */
-	preview?: string;
 	query?: ToolkitDocumentsGetSingleQuery<TCollectionKey>;
-};
+} & (
+		| {
+				status?: ToolkitDocumentStatus<TCollectionKey>;
+				/** Required when fetching a specific revision or snapshot. */
+				versionId?: number;
+				preview?: never;
+		  }
+		| {
+				/** Opaque token from a Lucid-generated preview URL. */
+				preview: string;
+				status?: never;
+				versionId?: never;
+		  }
+	);
 
 const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 	context: ServiceContext,
@@ -44,10 +52,15 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 		() =>
 			documentServices.client.getSingle(serviceContext, {
 				collectionKey: input.collectionKey,
-				status,
-				versionId: input.versionId,
+				target:
+					input.preview !== undefined
+						? { type: "preview", token: input.preview }
+						: {
+								type: "version",
+								versionType: status,
+								versionId: input.versionId,
+							},
 				query: normalizeDocumentQuery(input.query),
-				previewToken: input.preview,
 			}),
 		{
 			name: {

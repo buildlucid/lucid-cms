@@ -30,11 +30,11 @@ const cronJobsMap = () =>
 			transaction: true,
 			schedule: "maintenance",
 		},
-		"clear-expired-document-previews": {
-			fn: cronServices.clearExpiredDocumentPreviews,
-			label: "Clear expired document previews",
+		"clear-expired-preview-sessions": {
+			fn: cronServices.clearExpiredPreviewSessions,
+			label: "Clear expired preview sessions",
 			error: copy(
-				"server:core.maintenance.document.previews.expired.clear.failed",
+				"server:core.maintenance.preview.sessions.expired.clear.failed",
 			),
 			transaction: true,
 			schedule: "maintenance",

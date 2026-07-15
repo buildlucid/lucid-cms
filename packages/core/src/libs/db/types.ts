@@ -696,14 +696,13 @@ export interface LucidMediaShareLinks {
 	updated_by: number | null;
 }
 
-export interface LucidDocumentPreviews {
+export interface LucidPreviewSessions {
 	id: Generated<number>;
 	token_hash: string;
-	collection_key: string;
-	document_id: number;
-	version_type: DocumentVersionType;
-	version_id: number | null;
-	tenant_key: string | null;
+	entry_collection_key: string;
+	entry_document_id: number;
+	entry_version_type: DocumentVersionType;
+	entry_version_id: number | null;
 	expires_at: TimestampImmutable;
 	created_by: number | null;
 	created_at: TimestampImmutable;
@@ -901,7 +900,7 @@ export interface LucidDB {
 	lucid_document_publish_operation_events: LucidDocumentPublishOperationEvents;
 	lucid_document_workflows: LucidDocumentWorkflows;
 	lucid_document_workflow_assignees: LucidDocumentWorkflowAssignees;
-	lucid_document_previews: LucidDocumentPreviews;
+	lucid_preview_sessions: LucidPreviewSessions;
 	lucid_media_folders: LucidMediaFolders;
 	lucid_media: LucidMedia;
 	lucid_media_translations: LucidMediaTranslations;

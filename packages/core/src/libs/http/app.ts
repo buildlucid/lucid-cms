@@ -337,6 +337,11 @@ const createApp = async (props: {
 								"Client document endpoints for fetching single and multiple documents via the client integration authentication.",
 						},
 						{
+							name: "client-previews",
+							description:
+								"Client preview endpoints for resolving preview metadata in browser applications.",
+						},
+						{
 							name: "client-locales",
 							description:
 								"Client locale endpoints for fetching locale information.",

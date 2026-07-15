@@ -1,9 +1,11 @@
 # @lucidcms/client
 
-## 0.2.1 (unreleased)
+## 0.3.0 (unreleased)
 
 - Filter operator types added.
 - Updated media types and document media refs for the new media response contract.
+- Added new `previews.resolve` method.
+- Added a Lucid CMS toolbar.
 
 ## 0.2.0
 

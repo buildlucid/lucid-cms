@@ -1,10 +1,11 @@
 import { randomBytes } from "node:crypto";
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
-import { DocumentPreviewsRepository } from "../../libs/repositories/index.js";
+import { PreviewSessionsRepository } from "../../libs/repositories/index.js";
 import type {
-	DocumentPreviewURLResponse,
 	DocumentVersionType,
+	LucidAuth,
+	PreviewSessionURLResponse,
 } from "../../types.js";
 import {
 	hashPreviewToken,
@@ -13,6 +14,8 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import getCollection from "../collections/get-single-instance.js";
 import getClientDocument from "../documents/client/get-single.js";
+import validateClientVersionTarget from "../documents/helpers/validate-client-version-target.js";
+import isExactPreview from "./helpers/is-exact-preview.js";
 
 const create: ServiceFn<
 	[
@@ -22,11 +25,17 @@ const create: ServiceFn<
 			versionType: DocumentVersionType;
 			versionId?: number;
 			locale?: string;
-			userId: number;
+			creator: LucidAuth;
 		},
 	],
-	DocumentPreviewURLResponse
+	PreviewSessionURLResponse
 > = async (context, data) => {
+	const versionTargetRes = await validateClientVersionTarget({
+		versionType: data.versionType,
+		versionId: data.versionId,
+	});
+	if (versionTargetRes.error) return versionTargetRes;
+
 	const collectionRes = getCollection(context, { key: data.collectionKey });
 	if (collectionRes.error) return collectionRes;
 
@@ -44,14 +53,29 @@ const create: ServiceFn<
 
 	const documentRes = await getClientDocument(context, {
 		collectionKey: data.collectionKey,
-		status: data.versionType,
-		versionId: data.versionId,
+		target: {
+			type: "version",
+			versionType: data.versionType,
+			versionId: versionTargetRes.data.versionId,
+		},
 		query: {
 			filter: { id: { value: data.documentId } },
 			include: ["bricks", "refs", "meta"],
 		},
 	});
 	if (documentRes.error) return documentRes;
+
+	const entryVersionId = documentRes.data.meta?.versionId;
+	if (typeof entryVersionId !== "number" || !Number.isInteger(entryVersionId)) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.documents.version.not.found.message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
 
 	const canonicalDocument = {
 		...documentRes.data,
@@ -96,27 +120,22 @@ const create: ServiceFn<
 	if (normalizedUrlRes.data === null) {
 		return { error: undefined, data: { url: null, expiresAt: null } };
 	}
-	const url = normalizedUrlRes.data;
 
-	const DocumentPreviews = new DocumentPreviewsRepository(
+	const PreviewSessions = new PreviewSessionsRepository(
 		context.db.client,
 		context.config.db,
 	);
-	const createRes = await DocumentPreviews.createSingle({
+	const createRes = await PreviewSessions.createSingle({
 		data: {
 			token_hash: hashPreviewToken(token),
-			collection_key: data.collectionKey,
-			document_id: data.documentId,
-			version_type: data.versionType,
-			version_id:
-				data.versionType === "revision" ||
-				data.versionType ===
-					constants.collectionBuilder.publishing.snapshotVersionType
-					? (data.versionId ?? null)
-					: null,
-			tenant_key: context.request.tenantKey ?? null,
+			entry_collection_key: data.collectionKey,
+			entry_document_id: data.documentId,
+			entry_version_type: data.versionType,
+			entry_version_id: isExactPreview(data.versionType)
+				? entryVersionId
+				: null,
 			expires_at: expiresAt,
-			created_by: data.userId,
+			created_by: data.creator.id,
 			created_at: new Date().toISOString(),
 		},
 		returning: ["id"],
@@ -124,7 +143,10 @@ const create: ServiceFn<
 	});
 	if (createRes.error) return createRes;
 
-	return { error: undefined, data: { url, expiresAt } };
+	return {
+		error: undefined,
+		data: { url: normalizedUrlRes.data, expiresAt },
+	};
 };
 
 export default create;

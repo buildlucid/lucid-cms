@@ -318,16 +318,19 @@ export interface CollectionDocument<
 	>;
 }
 
-export type DocumentPreviewURLResponse = {
+export type PreviewSessionURLResponse = {
 	url: string | null;
 	expiresAt: string | null;
 };
 
-export type DocumentPreviewResolveResponse = {
-	collectionKey: string;
-	documentId: number;
-	versionType: DocumentVersionType;
-	versionId: number | null;
+export type PreviewSession = {
+	mode: "perspective" | "exact";
+	entry: {
+		collectionKey: string;
+		documentId: number;
+		versionType: DocumentVersionType;
+		versionId: number | null;
+	};
 	expiresAt: string;
 };
 

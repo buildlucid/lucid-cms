@@ -7,7 +7,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 
 type RelationVersionType = Exclude<DocumentVersionType, "revision">;
 
-type RelationVersionTypeResolution = {
+export type RelationVersionTypeResolution = {
 	versionType: RelationVersionType;
 	resolveVersionType?: FieldRefVersionTypeResolver;
 };
@@ -31,7 +31,7 @@ const findEnvironment = (
 	);
 };
 
-const resolveDocumentRelationVersionType = (props: {
+export const resolveRelatedDocumentVersionType = (props: {
 	config: Config;
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
@@ -80,7 +80,7 @@ const createRelationVersionTypeResolver = (props: {
 	return (input) => {
 		if (input.fieldType !== "relation") return props.sourceVersionType;
 
-		return resolveDocumentRelationVersionType({
+		return resolveRelatedDocumentVersionType({
 			config: props.config,
 			sourceCollectionKey: props.sourceCollectionKey,
 			sourceVersionType: props.sourceVersionType,

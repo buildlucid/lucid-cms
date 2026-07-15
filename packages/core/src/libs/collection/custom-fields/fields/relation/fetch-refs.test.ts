@@ -38,6 +38,9 @@ const context = {
 	config: {
 		db: {},
 	},
+	request: {
+		tenantKey: null,
+	},
 } as never;
 
 describe("relation field ref fetching", () => {
@@ -119,6 +122,7 @@ describe("relation field ref fetching", () => {
 				}),
 			]),
 			versionType: "latest",
+			tenantKey: null,
 			validation: {
 				enabled: true,
 			},
@@ -148,6 +152,7 @@ describe("relation field ref fetching", () => {
 				}),
 			],
 			versionType: "staging",
+			tenantKey: null,
 			validation: {
 				enabled: true,
 			},

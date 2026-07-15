@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
-import { documentPreviewServices } from "../../../../services/index.js";
+import { previewSessionServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
@@ -19,9 +19,9 @@ const factory = createFactory();
 const createPreviewController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Create an expiring preview URL for a persisted document version.",
+			"Create an expiring preview from a persisted document version.",
 		tags: ["documents"],
-		summary: "Create Document Preview URL",
+		summary: "Create Preview",
 		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.createPreview.response),
 		}),
@@ -41,7 +41,7 @@ const createPreviewController = factory.createHandlers(
 		const { locale, versionType, versionId } = c.req.valid("json");
 		const context = createServiceContext(c);
 
-		const previewRes = await serviceWrapper(documentPreviewServices.create, {
+		const previewRes = await serviceWrapper(previewSessionServices.create, {
 			transaction: true,
 			logError: true,
 			defaultError: {
@@ -55,12 +55,13 @@ const createPreviewController = factory.createHandlers(
 			versionType,
 			versionId,
 			locale,
-			userId: c.get("auth").id,
+			creator: c.get("auth"),
 		});
 		if (previewRes.error) throw new LucidAPIError(previewRes.error);
 
 		c.header("Cache-Control", "private, no-store");
 		c.header("Pragma", "no-cache");
+		c.header("Referrer-Policy", "no-referrer");
 
 		c.status(200);
 		return c.json(formatAPIResponse(c, { data: previewRes.data }));

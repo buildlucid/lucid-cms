@@ -61,7 +61,7 @@ export type Toolkit = {
 	locales: ToolkitLocales;
 	/** Helpers for reading and processing media. */
 	media: ToolkitMedia;
-	/** Helpers for resolving document preview tokens. */
+	/** Helpers for resolving and handling previews. */
 	previews: ToolkitPreviews;
 };
 
@@ -76,5 +76,5 @@ export type * from "./media/get-multiple.js";
 export type * from "./media/get-single.js";
 export type * from "./media/index.js";
 export type * from "./media/process-media.js";
+export type * from "./previews/handle-request.js";
 export type * from "./previews/index.js";
-export type * from "./previews/resolve.js";

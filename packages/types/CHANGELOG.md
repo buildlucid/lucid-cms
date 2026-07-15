@@ -4,6 +4,7 @@
 
 - Added public range custom field types.
 - Updated public media response types.
+- Added preview session types.
 
 ## 0.2.0
 
