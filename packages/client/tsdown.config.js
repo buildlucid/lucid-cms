@@ -33,4 +33,20 @@ export default defineConfig([
 		clean: false,
 		unbundle: false,
 	},
+	{
+		dts: true,
+		format: "esm",
+		deps: {
+			onlyBundle: false,
+		},
+		shims: false,
+		sourcemap: true,
+		metafile: true,
+		minify: true,
+		platform: "browser",
+		target: "es2022",
+		entry: ["src/preview.ts"],
+		clean: false,
+		unbundle: false,
+	},
 ]);

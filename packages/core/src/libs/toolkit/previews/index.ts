@@ -3,17 +3,17 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import handleRequest, {
-	type ToolkitPreviewRequestState,
-	type ToolkitPreviewsHandleRequestInput,
-} from "./handle-request.js";
 import resolve, { type ToolkitPreviewsResolveInput } from "./resolve.js";
+import state, {
+	type ToolkitPreviewState,
+	type ToolkitPreviewStateInput,
+} from "./state.js";
 
 export type ToolkitPreviews = {
-	/** Activates, resumes, or exits preview mode for a frontend request. */
-	handleRequest: (
-		input: ToolkitPreviewsHandleRequestInput,
-	) => ServiceResponse<ToolkitPreviewRequestState>;
+	/** Resolves preview state and synchronizes its session for a frontend request. */
+	state: (
+		input: ToolkitPreviewStateInput,
+	) => ServiceResponse<ToolkitPreviewState>;
 	/** Validates a preview token and returns its runtime metadata. */
 	resolve: (
 		input: ToolkitPreviewsResolveInput,
@@ -23,7 +23,7 @@ export type ToolkitPreviews = {
 export const createPreviewsToolkit = (
 	context: ServiceContext,
 ): ToolkitPreviews => ({
-	handleRequest: (input) => handleRequest(context, input),
+	state: (input) => state(context, input),
 	resolve: (input) => resolve(context, input),
 });
 

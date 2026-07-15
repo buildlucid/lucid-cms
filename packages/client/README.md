@@ -185,19 +185,20 @@ const page = await client.documents.getSingle({
 
 ## Frontend Toolbar
 
-The browser-safe `@lucidcms/client/toolbar` entrypoint provides Lucid's Admin, edit-page, and preview controls as an isolated Shadow DOM pill. Register the declarative element once in your browser entrypoint:
-
-```typescript
-import { defineToolbarElement } from "@lucidcms/client/toolbar";
-
-defineToolbarElement();
-```
-
-Then render the page state alongside the document. The element initializes when connected and cleans up when disconnected.
+The `@lucidcms/client/toolbar` browser entry exports an isolated `<lucid-toolbar>` with Admin, edit-page, preview-status, and exit actions. Register the element once, then provide the current document and preview state as attributes; set `host` when Lucid is served from another origin.
 
 ```html
+<script type="module">
+    import { LucidToolbarElement } from "@lucidcms/client/toolbar";
+
+    if (!customElements.get(LucidToolbarElement.tagName)) {
+        customElements.define(LucidToolbarElement.tagName, LucidToolbarElement);
+    }
+</script>
+
 <lucid-toolbar
     host="https://cms.example.com"
+    auth-status="authenticated"
     edit-collection="page"
     edit-document-id="42"
     edit-status="latest"
@@ -206,23 +207,7 @@ Then render the page state alongside the document. The element initializes when 
 ></lucid-toolbar>
 ```
 
-Use `preview="published"` when the server resolved published mode and stale preview state should be cleared. Omit `preview` to detect preview state from the current URL or browser session. The preview token attribute is consumed and removed after the element initializes.
-
-| Attribute | Purpose |
-| --- | --- |
-| `host` | Public host of the Lucid instance; defaults to the page origin. |
-| `edit-collection` | Collection key for the edit action. |
-| `edit-document-id` | Integer document ID for the edit action. |
-| `edit-status` | Document version type; defaults to `latest`. |
-| `edit-version-id` | Version ID required by the `revision` edit status. |
-| `edit-label` | Accessible label for the edit action. |
-| `preview` | `published`, `perspective`, or `exact`. |
-| `preview-token` | Lucid preview bearer token. |
-| `preview-exit-href` | Destination restored when preview ends. |
-
-Only set `host` when Lucid is served from a different origin. The toolbar derives the admin and API URLs from the fixed `/lucid` mount, sends the session-status request with credentials, and does not send a referrer. Add the frontend origin to Lucid's `http.security.cors.origin` configuration when it differs. Browser cookie rules still apply, so the authenticated actions only appear when the Lucid session cookies are eligible for the request.
-
-For advanced lifecycle, authentication, or exit callbacks, use the programmatic API instead:
+For JavaScript-controlled integrations, `setupToolbar()` provides the same runtime with an explicit lifecycle controller instead of a Web Component.
 
 ```typescript
 import { setupToolbar } from "@lucidcms/client/toolbar";
@@ -232,12 +217,46 @@ const toolbar = setupToolbar({
     edit: {
         collectionKey: "page",
         documentId: 42,
+        status: "latest",
     },
     preview: {
-        token: "PREVIEW_TOKEN",
         mode: "perspective",
+        token: "PREVIEW_TOKEN",
     },
 });
 
 window.addEventListener("pagehide", toolbar.cleanup, { once: true });
+```
+
+## Builder Preview Runtime
+
+The `@lucidcms/client/preview` browser entry lazily installs safe exact/session navigation and scroll restoration inside Lucid's builder iframe. `setupPreview()` reads the mode and token from the builder-controlled frame context; outside the recognized iframe it remains inactive and does not load the runtime.
+
+```typescript
+import { setupPreview } from "@lucidcms/client/preview";
+
+const preview = setupPreview();
+
+window.addEventListener("pagehide", preview.cleanup, { once: true });
+```
+
+## Toolkit Toolbar Helper
+
+Server-rendered frontends using the Lucid toolkit can pass the settled responses from `toolkit.auth.status()`, `toolkit.documents.getSingle()`, and `toolkit.previews.state()` to `resolveToolbarAttributes()`. It returns the complete `<lucid-toolbar>` attributes, or `null` when the toolbar should not be rendered.
+
+```typescript
+import { resolveToolbarAttributes } from "@lucidcms/client";
+
+const [authentication, preview] = await Promise.all([
+    toolkit.auth.status(authOptions),
+    toolkit.previews.state(previewOptions),
+]);
+const document = await toolkit.documents.getSingle(documentOptions);
+
+const toolbarAttributes = resolveToolbarAttributes({
+    authentication,
+    document,
+    preview,
+    host: "https://cms.example.com",
+});
 ```

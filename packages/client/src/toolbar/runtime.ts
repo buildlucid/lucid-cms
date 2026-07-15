@@ -1,99 +1,16 @@
-import {
-	defaultEditLabel,
-	lucidMountPath,
-	previewExitValue,
-	previewQueryParam,
-} from "./constants.js";
+import { previewQueryParam } from "../utils/preview.js";
+import type { ToolbarBootstrap } from "./bootstrap.js";
+import { defaultEditLabel } from "./constants.js";
 import {
 	cleanPreviewUrl,
 	clearStoredToken,
-	detectPreviewMode,
-	detectToolbarContext,
-	getWindow,
 	isCrossOriginEmbedded,
 	storeToken,
 	stripPreviewQuery,
 } from "./context.js";
 import { createToolbarElement } from "./element.js";
-import { installPreviewNavigation } from "./navigation.js";
-import type {
-	ToolbarController,
-	ToolbarEditLink,
-	ToolbarOptions,
-} from "./types.js";
-
-const activeToolbarCleanups = new WeakMap<Window, () => void>();
-
-const normalizeHost = (host: string | URL): URL => {
-	const value = String(host).trim();
-	const hasScheme = /^[a-z][a-z\d+.-]*:\/\//i.test(value);
-	const url = new URL(hasScheme ? value : `https://${value}`);
-	if (url.protocol !== "http:" && url.protocol !== "https:") {
-		throw new TypeError("Lucid toolbar host must use HTTP or HTTPS.");
-	}
-	return new URL(url.origin);
-};
-
-const resolveHost = (targetWindow: Window, host?: string | URL): URL =>
-	host === undefined
-		? new URL(targetWindow.location.origin)
-		: normalizeHost(host);
-
-const getAdminUrl = (host: URL): URL => new URL(lucidMountPath, host);
-
-const getAdminHref = (host?: string | URL): string =>
-	host === undefined
-		? lucidMountPath
-		: `${normalizeHost(host).origin}${lucidMountPath}`;
-
-/** Builds the Lucid admin URL for an editable document version. */
-export const buildToolbarEditHref = (
-	edit: ToolbarEditLink,
-	host?: string | URL,
-): string | null => {
-	if (!edit.collectionKey || !Number.isInteger(edit.documentId)) return null;
-
-	const adminHref = getAdminHref(host);
-	const collectionKey = encodeURIComponent(edit.collectionKey);
-	if (edit.status === "revision") {
-		if (!Number.isInteger(edit.versionId)) return null;
-		return `${adminHref}/collections/${collectionKey}/revision/${edit.documentId}/${edit.versionId}`;
-	}
-
-	const status = encodeURIComponent(edit.status ?? "latest");
-	return `${adminHref}/collections/${collectionKey}/${status}/${edit.documentId}`;
-};
-
-const checkLucidAuthentication = async (
-	targetWindow: Window,
-	host: URL,
-): Promise<boolean> => {
-	try {
-		const response = await targetWindow.fetch(
-			new URL(`${lucidMountPath}/api/v1/auth/status`, host),
-			{
-				credentials: "include",
-				headers: { Accept: "application/json" },
-				referrerPolicy: "no-referrer",
-			},
-		);
-		return response.status === 204;
-	} catch {
-		return false;
-	}
-};
-
-const resolveAuthentication = async (
-	targetWindow: Window,
-	host: URL,
-	authentication: ToolbarOptions["authentication"],
-): Promise<boolean> => {
-	if (typeof authentication === "boolean") return authentication;
-	if (typeof authentication === "function") {
-		return await authentication();
-	}
-	return checkLucidAuthentication(targetWindow, host);
-};
+import { installToolbarNavigation } from "./navigation.js";
+import type { ToolbarController, ToolbarOptions } from "./types.js";
 
 const navigateToExitUrl = (targetWindow: Window, exitUrl: URL): void => {
 	if (exitUrl.origin === targetWindow.location.origin) {
@@ -113,65 +30,14 @@ const navigateToExitUrl = (targetWindow: Window, exitUrl: URL): void => {
 	link.remove();
 };
 
-/** Clears the persisted preview session without navigating. */
-export const clearPreview = (): void => {
-	const targetWindow = getWindow();
-	if (!targetWindow) return;
-	clearStoredToken(targetWindow);
-};
-
-const inactiveController = (): ToolbarController => ({
-	active: false,
-	element: null,
-	preview: { active: false, token: null, source: null, mode: null },
-	context: { builder: false },
-	ready: Promise.resolve(),
-	exitPreview: async () => undefined,
-	cleanup: () => undefined,
-});
-
-/** Initializes the toolbar and returns its lifecycle controller. */
-export const setupToolbar = (
-	options: ToolbarOptions = {},
+/** Mounts the full toolbar UI after the lightweight entrypoint has gated it. */
+export const setupToolbarRuntime = (
+	options: ToolbarOptions,
+	bootstrap: ToolbarBootstrap,
+	editAuthentication: Promise<boolean>,
 ): ToolbarController => {
-	const targetWindow = getWindow();
-	if (!targetWindow) return inactiveController();
-
-	activeToolbarCleanups.get(targetWindow)?.();
-
-	const currentUrl = new URL(targetWindow.location.href);
-	const exitRequested =
-		currentUrl.searchParams.get(previewQueryParam) === previewExitValue;
-	if (exitRequested || options.preview === false) {
-		clearStoredToken(targetWindow);
-	}
-	if (
-		(exitRequested || options.preview === false) &&
-		currentUrl.searchParams.has(previewQueryParam)
-	) {
-		stripPreviewQuery(targetWindow);
-	}
-
-	const preview =
-		options.preview === false
-			? { active: false, token: null, source: null, mode: null }
-			: detectPreviewMode(options.preview?.token, options.preview?.mode);
-	const context = detectToolbarContext(targetWindow);
-	const previewOptions =
-		options.preview === false ? undefined : options.preview;
-	const host = resolveHost(targetWindow, options.host);
-	const adminUrl = getAdminUrl(host);
-	const editHref = options.edit
-		? buildToolbarEditHref(options.edit, host)
-		: null;
-
-	if (!preview.active && !editHref) {
-		return {
-			...inactiveController(),
-			preview,
-			context,
-		};
-	}
+	const { targetWindow, context, preview, previewOptions, adminUrl, editHref } =
+		bootstrap;
 
 	if (preview.active && preview.token) {
 		if (preview.mode === "perspective") {
@@ -190,17 +56,15 @@ export const setupToolbar = (
 	let cleanedUp = false;
 	let exiting = false;
 	let editAuthenticated = false;
-	let authenticationResolved = editHref === null || context.builder;
+	let authenticationResolved = editHref === null;
 
-	const cleanupNavigation = installPreviewNavigation({
+	const cleanupNavigation = installToolbarNavigation({
 		targetWindow,
-		toolbar: element,
 		preview,
-		builder: context.builder,
 		propagateInternalLinks:
 			options.preview !== false &&
 			preview.mode === "perspective" &&
-			(previewOptions?.propagateInternalLinks ?? context.builder),
+			(previewOptions?.propagateInternalLinks ?? true),
 	});
 
 	const cleanup = () => {
@@ -208,7 +72,6 @@ export const setupToolbar = (
 		cleanedUp = true;
 		cleanupNavigation();
 		element.remove();
-		activeToolbarCleanups.delete(targetWindow);
 	};
 
 	const exitPreview = async () => {
@@ -228,7 +91,7 @@ export const setupToolbar = (
 			: cleanPreviewUrl(targetWindow);
 		exitUrl.searchParams.delete(previewQueryParam);
 		if (exitUrl.origin === targetWindow.location.origin) {
-			exitUrl.searchParams.set(previewQueryParam, previewExitValue);
+			exitUrl.searchParams.set(previewQueryParam, "exit");
 		}
 		navigateToExitUrl(targetWindow, exitUrl);
 	};
@@ -238,7 +101,6 @@ export const setupToolbar = (
 		element.setModel({
 			adminHref: adminUrl.toString(),
 			previewMode: preview.active ? preview.mode : null,
-			builder: context.builder,
 			edit:
 				editAuthenticated && editHref
 					? {
@@ -254,29 +116,25 @@ export const setupToolbar = (
 		}
 	};
 
-	activeToolbarCleanups.set(targetWindow, cleanup);
 	render();
 
-	const ready =
-		editHref && !context.builder
-			? resolveAuthentication(targetWindow, host, options.authentication)
-					.then((authenticated) => {
-						authenticationResolved = true;
-						editAuthenticated = authenticated;
-						render();
-					})
-					.catch(() => {
-						authenticationResolved = true;
-						editAuthenticated = false;
-						render();
-					})
-			: Promise.resolve();
+	const ready = editHref
+		? editAuthentication
+				.then((authenticated) => {
+					authenticationResolved = true;
+					editAuthenticated = authenticated;
+					render();
+				})
+				.catch(() => {
+					authenticationResolved = true;
+					editAuthenticated = false;
+					render();
+				})
+		: Promise.resolve();
 
 	return {
 		get active() {
-			return (
-				!context.builder && !cleanedUp && element.isConnected && !element.hidden
-			);
+			return !cleanedUp && element.isConnected && !element.hidden;
 		},
 		get element() {
 			return cleanedUp ? null : element;

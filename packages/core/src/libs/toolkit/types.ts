@@ -9,6 +9,7 @@ import type {
 import type { Config } from "../../types/config.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { TranslationStore } from "../i18n/types.js";
+import type { ToolkitAuth } from "./auth/index.js";
 import type { ToolkitDocuments } from "./documents/index.js";
 import type { ToolkitEmail } from "./email/index.js";
 import type { ToolkitLocales } from "./locales/index.js";
@@ -53,6 +54,8 @@ export type ToolkitTenantOptions = {
 };
 
 export type Toolkit = {
+	/** Helpers for resolving request authentication state. */
+	auth: ToolkitAuth;
 	/** Helpers for reading collection documents. */
 	documents: ToolkitDocuments;
 	/** Helpers for sending external emails. */
@@ -65,6 +68,8 @@ export type Toolkit = {
 	previews: ToolkitPreviews;
 };
 
+export type * from "./auth/index.js";
+export type * from "./auth/status.js";
 export type * from "./documents/get-multiple.js";
 export type * from "./documents/get-single.js";
 export type * from "./documents/index.js";
@@ -76,6 +81,6 @@ export type * from "./media/get-multiple.js";
 export type * from "./media/get-single.js";
 export type * from "./media/index.js";
 export type * from "./media/process-media.js";
-export type * from "./previews/handle-request.js";
 export type * from "./previews/index.js";
 export type * from "./previews/resolve.js";
+export type * from "./previews/state.js";

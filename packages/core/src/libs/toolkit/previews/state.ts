@@ -24,7 +24,7 @@ export type ToolkitPreviewResponseHeaders = {
 	set: (name: string, value: string) => MaybePromise<void>;
 };
 
-export type ToolkitPreviewsHandleRequestInput = {
+export type ToolkitPreviewStateInput = {
 	/** The current frontend request URL. */
 	url: string | URL;
 	/** Framework adapter for perspective-preview persistence. */
@@ -33,7 +33,7 @@ export type ToolkitPreviewsHandleRequestInput = {
 	headers?: ToolkitPreviewResponseHeaders;
 };
 
-export type ToolkitPreviewRequestState = {
+export type ToolkitPreviewState = {
 	active: boolean;
 	token: string | null;
 	source: ToolkitPreviewSource;
@@ -55,11 +55,11 @@ const setPreviewResponseHeaders = async (
 	]);
 };
 
-const handleRequest = async (
+const state = async (
 	context: ServiceContext,
-	input: ToolkitPreviewsHandleRequestInput,
-): ServiceResponse<ToolkitPreviewRequestState> => {
-	return runToolkitService<ToolkitPreviewRequestState>(
+	input: ToolkitPreviewStateInput,
+): ServiceResponse<ToolkitPreviewState> => {
+	return runToolkitService<ToolkitPreviewState>(
 		async () => {
 			const url = new URL(input.url);
 			const hasQueryValue = url.searchParams.has(previewQueryParam);
@@ -137,4 +137,4 @@ const handleRequest = async (
 	);
 };
 
-export default handleRequest;
+export default state;

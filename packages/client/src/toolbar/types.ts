@@ -33,7 +33,7 @@ export type ToolbarPreviewOptions = {
 	exitUrl?: string | URL;
 	/** Optional additional cleanup before navigating with `preview=exit`. */
 	onExit?: () => void | Promise<void>;
-	/** Override same-origin token forwarding. It defaults to enabled in Lucid's builder preview. */
+	/** Override same-origin token forwarding. It defaults to enabled for perspective previews. */
 	propagateInternalLinks?: boolean;
 	/** Remove the bearer token from the visible URL after activation. Perspective previews default to true outside a cross-origin iframe. */
 	stripTokenFromUrl?: boolean;

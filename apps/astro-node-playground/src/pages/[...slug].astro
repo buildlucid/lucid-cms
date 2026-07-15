@@ -1,5 +1,5 @@
 ---
-import { asDocument } from "@lucidcms/client";
+import { resolveToolbarAttributes } from "@lucidcms/client";
 import "../index.css";
 import getPage from "../services/pages";
 
@@ -10,22 +10,16 @@ const result = await getPage({
 	astro: Astro,
 });
 
-if (result.preview.error) {
-	Astro.response.status = result.preview.error.status ?? 401;
-} else if (result.page.error) {
-	Astro.response.status = result.page.error.status ?? 404;
-}
+const title = result.document?.field("title").value();
+const summary = result.document?.field("summary").value();
+const pageFullSlug = result.document?.field("fullSlug").value();
+const slug = result.document?.field("slug").value();
 
-const page = asDocument(result.page.data);
-const preview = result.preview.data;
-
-const title = page?.field("title").value();
-const summary = page?.field("summary").value();
-const pageFullSlug = page?.field("fullSlug").value();
-const slug = page?.field("slug").value();
-
-const previewError =
-	result.preview.error ?? (preview?.active ? result.page.error : undefined);
+const toolbarAttributes = resolveToolbarAttributes({
+	authentication: result.raw.authentication,
+	document: result.raw.document,
+	preview: result.raw.preview,
+});
 ---
 
 <html lang="en">
@@ -38,7 +32,7 @@ const previewError =
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
 			rel="stylesheet"
 		/>
-		{(preview?.active || previewError) && (
+		{(result.raw.preview.data?.active || result.isPreviewError) && (
 			<meta name="referrer" content="no-referrer" />
 		)}
 		<title>
@@ -76,16 +70,16 @@ const previewError =
 					<section class="welcome-card">
 						<p class="eyebrow">Astro + Node</p>
 						<h1 class="welcome-title">
-							{previewError
+							{result.isPreviewError
 								? "This preview link is unavailable."
-								: page
+								: result.document
 									? "Your Lucid page is live."
 									: "Create your first Lucid page."}
 						</h1>
 						<p class="welcome-copy">
-							{previewError ? (
+							{result.isPreviewError ? (
 								<>The preview link is invalid or has expired. Create a new one in Lucid.</>
-							) : page ? (
+							) : result.document ? (
 								<>
 									This route is rendering your <code>page</code> document from
 									<code>{pageFullSlug || "/"}</code>. Update it in Lucid and refresh
@@ -111,7 +105,7 @@ const previewError =
 						</div>
 					</section>
 
-					{page && (
+					{result.document && (
 						<section class="content-card">
 							<div class="document-panel">
 								<div class="document-row">
@@ -145,7 +139,7 @@ const previewError =
 								<div class="document-row">
 									<span class="document-label">Brick fields</span>
 									<p class="document-value">
-										{page.bricks().reduce(
+										{result.document.bricks().reduce(
 											(count, brick) =>
 												count + Object.keys(brick.raw.fields ?? {}).length,
 											0,
@@ -156,8 +150,8 @@ const previewError =
 								<div class="document-row">
 									<span class="document-label">Created</span>
 									<p class="document-value">
-										{page.raw.createdAt
-											? new Date(page.raw.createdAt).toLocaleString("en-GB", {
+										{result.document.raw.createdAt
+											? new Date(result.document.raw.createdAt).toLocaleString("en-GB", {
 													dateStyle: "medium",
 													timeStyle: "short",
 												})
@@ -171,19 +165,18 @@ const previewError =
 			</div>
 		</main>
 
-		<lucid-toolbar
-			edit-collection={page?.collectionKey}
-			edit-document-id={page?.id}
-			edit-status={page?.status}
-			edit-version-id={page?.meta?.versionId}
-			preview={preview?.active ? preview.preview?.mode || "perspective" : "published"}
-			preview-token={preview?.active ? preview.token : undefined}
-		/>
+		{toolbarAttributes && <lucid-toolbar {...toolbarAttributes} />}
 
 		<script>
-			import { defineToolbarElement } from "@lucidcms/client/toolbar";
+			import { setupPreview } from "@lucidcms/client/preview";
+			import { LucidToolbarElement } from "@lucidcms/client/toolbar";
 
-			defineToolbarElement();
+			const preview = setupPreview();
+			window.addEventListener("pagehide", preview.cleanup, { once: true });
+
+			if (!customElements.get(LucidToolbarElement.tagName)) {
+				customElements.define(LucidToolbarElement.tagName, LucidToolbarElement);
+			}
 		</script>
 	</body>
 </html>

@@ -92,29 +92,9 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				<Route
-					path="/collections/:collectionKey/snapshot/:documentId/:versionId"
-					preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
-					component={() => (
-						<CollectionDocumentPageBuilderRoute
-							mode="edit"
-							version="snapshot"
-						/>
-					)}
-				/>
-				<Route
-					path="/collections/:collectionKey/:versionType/:documentId"
+					path="/collections/:collectionKey/:versionType/:documentId/:versionId?"
 					preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
 					component={() => <CollectionDocumentPageBuilderRoute mode="edit" />}
-				/>
-				<Route
-					path="/collections/:collectionKey/revision/:documentId/:versionId"
-					preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
-					component={() => (
-						<CollectionDocumentPageBuilderRoute
-							mode="edit"
-							version="revision"
-						/>
-					)}
 				/>
 				<Route
 					path="/collections/:collectionKey/:documentId/history"

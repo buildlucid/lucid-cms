@@ -1,3 +1,4 @@
+import createAuthToolkit from "./auth/index.js";
 import createDocumentsToolkit from "./documents/index.js";
 import createEmailToolkit from "./email/index.js";
 import createLocalesToolkit from "./locales/index.js";
@@ -31,6 +32,7 @@ import type { Toolkit, ToolkitContext } from "./types.js";
  * ```
  */
 const createToolkit = (context: ToolkitContext): Toolkit => ({
+	auth: createAuthToolkit(context),
 	documents: createDocumentsToolkit(context),
 	email: createEmailToolkit(context),
 	locales: createLocalesToolkit(context),

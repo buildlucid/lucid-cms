@@ -59,6 +59,7 @@ export const PreviewCanvas: Component<{
 	resolverState: Accessor<ResolverState>;
 	frameLoading: Accessor<boolean>;
 	setFrameLoading: Setter<boolean>;
+	setFrameRef: (element: HTMLIFrameElement) => void;
 	selectedWidth: Accessor<PreviewWidthSelection>;
 	setSelectedWidth: Setter<PreviewWidthSelection>;
 	customWidth: Accessor<number>;
@@ -106,6 +107,11 @@ export const PreviewCanvas: Component<{
 		return Math.min(maximumLayoutWidth(), requestedWidth());
 	});
 	const visualWidth = createMemo(() => layoutWidth() * zoomScale());
+	const frameName = createMemo(() =>
+		props.previewKind() === "exact"
+			? "lucid-builder-preview:exact"
+			: "lucid-builder-preview:perspective",
+	);
 
 	// ----------------------------------
 	// Functions
@@ -386,8 +392,9 @@ export const PreviewCanvas: Component<{
 								}}
 							>
 								<iframe
+									ref={props.setFrameRef}
+									name={frameName()}
 									src={props.frameSrc()}
-									name="lucid-builder-preview"
 									title={T()("preview.iframe.title")}
 									referrerpolicy="no-referrer"
 									class="block h-full w-full border-0 bg-white"

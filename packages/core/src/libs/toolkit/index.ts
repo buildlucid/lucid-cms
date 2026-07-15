@@ -1,3 +1,4 @@
+export { createAuthToolkit } from "./auth/index.js";
 export { createToolkitServiceContext } from "./config.js";
 export { default as createToolkit } from "./create-toolkit.js";
 export { createDocumentsToolkit } from "./documents/index.js";

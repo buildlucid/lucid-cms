@@ -18,6 +18,10 @@
 		"./toolbar": {
 			"types": "./dist/toolbar.d.ts",
 			"import": "./dist/toolbar.js"
+		},
+		"./preview": {
+			"types": "./dist/preview.d.ts",
+			"import": "./dist/preview.js"
 		}
 	},
 	"scripts": {
@@ -57,7 +61,6 @@
 	"dependencies": {
 		"@lucidcms/types": "^0.2.0"
 	},
-	"sideEffects": false,
 	"volta": {
 		"node": "24.11.1"
 	},

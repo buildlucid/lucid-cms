@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
+import { createPreviewBridge } from "@/utils/preview-bridge";
 import spawnToast from "@/utils/spawn-toast";
 import {
 	PreviewCanvas,
@@ -39,6 +40,7 @@ export const DocumentPreview: Component<{
 	const [customWidth, setCustomWidth] = createSignal(768);
 	const [zoom, setZoom] = createSignal<PreviewZoom>(100);
 	const createPreview = api.documents.useCreatePreview();
+	const previewBridge = createPreviewBridge();
 
 	// ----------------------------------
 	// Memos
@@ -65,13 +67,20 @@ export const DocumentPreview: Component<{
 		});
 		return response.data.url;
 	};
-	const resolvePersistedPreview = async () => {
+	const resolvePersistedPreview = async (preserveScroll = false) => {
 		const currentResolve = ++resolveSequence;
-		setResolverState("loading");
+		if (!preserveScroll) previewBridge.queueScrollRestore(null);
 		try {
+			const scrollState = preserveScroll
+				? await previewBridge.captureScroll()
+				: null;
+			if (currentResolve !== resolveSequence) return;
+
+			setResolverState("loading");
 			const nextUrl = await createPersistedPreviewUrl();
 			if (currentResolve !== resolveSequence) return;
 			if (!nextUrl) {
+				previewBridge.queueScrollRestore(null);
 				setUrl(null);
 				setFrameLoading(false);
 				setResolverState("unavailable");
@@ -79,10 +88,12 @@ export const DocumentPreview: Component<{
 			}
 
 			setFrameLoading(true);
+			previewBridge.queueScrollRestore(scrollState);
 			setUrl(nextUrl);
 			setResolverState("ready");
 		} catch {
 			if (currentResolve !== resolveSequence) return;
+			previewBridge.queueScrollRestore(null);
 			setFrameLoading(false);
 			setResolverState("error");
 		}
@@ -163,7 +174,7 @@ export const DocumentPreview: Component<{
 	createEffect(
 		on(props.saveStamp, (next, previous) => {
 			if (previous === undefined || next === previous || !props.open()) return;
-			void resolvePersistedPreview();
+			void resolvePersistedPreview(true);
 		}),
 	);
 
@@ -171,6 +182,7 @@ export const DocumentPreview: Component<{
 	// Lifecycle
 	onCleanup(() => {
 		resolveSequence += 1;
+		previewBridge.cleanup();
 	});
 
 	// ----------------------------------
@@ -182,6 +194,7 @@ export const DocumentPreview: Component<{
 				resolverState={resolverState}
 				frameLoading={frameLoading}
 				setFrameLoading={setFrameLoading}
+				setFrameRef={previewBridge.setFrame}
 				selectedWidth={selectedWidth}
 				setSelectedWidth={setSelectedWidth}
 				customWidth={customWidth}
@@ -190,7 +203,7 @@ export const DocumentPreview: Component<{
 				setZoom={setZoom}
 				previewKind={previewKind}
 				actionLoading={() => createPreview.action.isPending}
-				onRefresh={() => void resolvePersistedPreview()}
+				onRefresh={() => void resolvePersistedPreview(true)}
 				onCopy={() => void copyPersistedUrl()}
 				onOpen={() => void openPersistedUrl()}
 				onRetry={() => void resolvePersistedPreview()}

@@ -1,6 +1,7 @@
+import { normalizePreviewToken } from "../utils/preview.js";
+import { parseToolbarAuthentication } from "./authentication.js";
 import { declarativeToolbarTagName } from "./constants.js";
-import { getWindow, normalizePreviewToken } from "./context.js";
-import { setupToolbar } from "./runtime.js";
+import { setupToolbar } from "./loader.js";
 import type {
 	PreviewKind,
 	ToolbarController,
@@ -10,6 +11,7 @@ import type {
 } from "./types.js";
 
 const attributes = {
+	authStatus: "auth-status",
 	host: "host",
 	editCollection: "edit-collection",
 	editDocumentId: "edit-document-id",
@@ -22,6 +24,10 @@ const attributes = {
 } as const;
 
 const observedAttributes = Object.values(attributes);
+
+const HTMLElementBase = (
+	typeof HTMLElement === "undefined" ? class {} : HTMLElement
+) as typeof HTMLElement;
 
 type DeclarativePreviewState = PreviewKind | "published";
 
@@ -88,93 +94,85 @@ const readToolbarOptions = (
 	element: HTMLElement,
 	previewToken: string | null,
 ): ToolbarOptions => ({
+	authentication: parseToolbarAuthentication(
+		element.getAttribute(attributes.authStatus),
+	),
 	host: readString(element, attributes.host),
 	edit: readEditOptions(element),
 	preview: readPreviewOptions(element, previewToken),
 });
 
-/** Registers the declarative `<lucid-toolbar>` element in the browser. */
-export const defineToolbarElement = (): void => {
-	const targetWindow = getWindow();
-	if (!targetWindow) return;
-	const browserWindow = targetWindow;
-	if (browserWindow.customElements.get(declarativeToolbarTagName)) return;
+/** Declarative element for Lucid's isolated frontend toolbar. */
+export class LucidToolbarElement extends HTMLElementBase {
+	static observedAttributes = observedAttributes;
+	static tagName = declarativeToolbarTagName;
 
-	const WindowHTMLElement = (browserWindow as Window & typeof globalThis)
-		.HTMLElement;
+	#controller: ToolbarController | null = null;
+	#previewToken: string | null = null;
+	#removingPreviewToken = false;
+	#syncQueued = false;
 
-	class LucidDeclarativeToolbarElement extends WindowHTMLElement {
-		static observedAttributes = observedAttributes;
-
-		#controller: ToolbarController | null = null;
-		#previewToken: string | null = null;
-		#removingPreviewToken = false;
-		#syncQueued = false;
-
-		connectedCallback(): void {
-			const previewToken = this.getAttribute(attributes.previewToken);
-			if (previewToken !== null) this.#consumePreviewToken(previewToken);
-			if (readPreviewState(this) === "published") this.#previewToken = null;
-			this.#queueSync();
-		}
-
-		disconnectedCallback(): void {
-			this.#controller?.cleanup();
-			this.#controller = null;
-		}
-
-		attributeChangedCallback(
-			name: string,
-			oldValue: string | null,
-			newValue: string | null,
-		): void {
-			if (oldValue === newValue) return;
-
-			if (name === attributes.previewToken) {
-				if (this.#removingPreviewToken) return;
-				if (newValue === null) {
-					this.#previewToken = null;
-				} else {
-					this.#consumePreviewToken(newValue);
-				}
-			}
-
-			if (name === attributes.preview) {
-				const state = readPreviewState(this);
-				if (state === null || state === "published") {
-					this.#previewToken = null;
-				}
-			}
-
-			if (this.isConnected) this.#queueSync();
-		}
-
-		#consumePreviewToken(value: string): void {
-			this.#previewToken =
-				readPreviewState(this) === "published"
-					? null
-					: normalizePreviewToken(value);
-			this.#removingPreviewToken = true;
-			this.removeAttribute(attributes.previewToken);
-			this.#removingPreviewToken = false;
-		}
-
-		#queueSync(): void {
-			if (this.#syncQueued) return;
-			this.#syncQueued = true;
-			browserWindow.queueMicrotask(() => {
-				this.#syncQueued = false;
-				if (!this.isConnected) return;
-				this.#controller?.cleanup();
-				this.#controller = setupToolbar(
-					readToolbarOptions(this, this.#previewToken),
-				);
-			});
-		}
+	connectedCallback(): void {
+		const previewToken = this.getAttribute(attributes.previewToken);
+		if (previewToken !== null) this.#consumePreviewToken(previewToken);
+		if (readPreviewState(this) === "published") this.#previewToken = null;
+		this.#queueSync();
 	}
 
-	browserWindow.customElements.define(
-		declarativeToolbarTagName,
-		LucidDeclarativeToolbarElement,
-	);
-};
+	disconnectedCallback(): void {
+		this.#controller?.cleanup();
+		this.#controller = null;
+	}
+
+	attributeChangedCallback(
+		name: string,
+		oldValue: string | null,
+		newValue: string | null,
+	): void {
+		if (oldValue === newValue) return;
+
+		if (name === attributes.previewToken) {
+			if (this.#removingPreviewToken) return;
+			if (newValue === null) {
+				this.#previewToken = null;
+			} else {
+				this.#consumePreviewToken(newValue);
+			}
+		}
+
+		if (name === attributes.preview) {
+			const state = readPreviewState(this);
+			if (state === null || state === "published") {
+				this.#previewToken = null;
+			}
+		}
+
+		if (this.isConnected) this.#queueSync();
+	}
+
+	#consumePreviewToken(value: string): void {
+		this.#previewToken =
+			readPreviewState(this) === "published"
+				? null
+				: normalizePreviewToken(value);
+		this.#removingPreviewToken = true;
+		this.removeAttribute(attributes.previewToken);
+		this.#removingPreviewToken = false;
+	}
+
+	#queueSync(): void {
+		if (this.#syncQueued) return;
+		const targetWindow = this.ownerDocument.defaultView;
+		if (!targetWindow) return;
+
+		this.#syncQueued = true;
+		targetWindow.queueMicrotask(() => {
+			this.#syncQueued = false;
+			if (!this.isConnected) return;
+			this.#controller?.cleanup();
+			this.#controller = setupToolbar(
+				readToolbarOptions(this, this.#previewToken),
+			);
+		});
+	}
+}

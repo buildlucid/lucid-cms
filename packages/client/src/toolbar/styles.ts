@@ -17,7 +17,6 @@ export const toolbarStyles = `
 :host([hidden]), [hidden] { display: none !important; }
 
 .wrap {
-	position: relative;
 	display: flex;
 	justify-content: flex-end;
 	animation: enter 280ms cubic-bezier(.16, 1, .3, 1) both;
@@ -131,33 +130,9 @@ export const toolbarStyles = `
 
 .actions { display: inline-flex; gap: 1px; }
 
-.notice {
-	position: absolute;
-	right: 0;
-	bottom: calc(100% + 7px);
-	box-sizing: border-box;
-	width: max-content;
-	max-width: min(330px, calc(100vw - 1rem));
-	padding: 8px 10px;
-	border: 1px solid rgba(255,209,102,.25);
-	border-radius: 9px;
-	background: rgba(15,15,15,.97);
-	box-shadow: 0 8px 28px rgba(0,0,0,.36);
-	color: rgba(255,255,255,.86);
-	font-size: 11px;
-	line-height: 1.4;
-	text-align: left;
-	animation: notice 160ms ease-out both;
-}
-
 @keyframes enter {
 	from { opacity: 0; transform: translateY(7px) scale(.98); }
 	to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes notice {
-	from { opacity: 0; transform: translateY(3px); }
-	to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 480px) {
@@ -168,12 +143,12 @@ export const toolbarStyles = `
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.wrap, .notice { animation: none; }
+	.wrap { animation: none; }
 	.action { transition: none; }
 }
 
 @media (forced-colors: active) {
-	.pill, .notice { border: 1px solid CanvasText; background: Canvas; color: CanvasText; }
+	.pill { border: 1px solid CanvasText; background: Canvas; color: CanvasText; }
 	.action, .status { color: CanvasText; }
 }
 `;

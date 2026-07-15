@@ -1,25 +1,14 @@
 import {
-	lucidBuilderPreviewFrameName,
-	previewExitValue,
+	isLucidBuilderPreview,
+	normalizePreviewToken,
 	previewQueryParam,
-	previewStorageKey,
-} from "./constants.js";
+} from "../utils/preview.js";
+import { previewExitValue, previewStorageKey } from "./constants.js";
 import type {
 	PreviewKind,
 	PreviewModeState,
 	ToolbarContextState,
 } from "./types.js";
-
-const previewTokenPattern = /^[A-Za-z0-9_-]{43}$/;
-
-/** Returns the browser window, or `null` during SSR. */
-export const getWindow = (): Window | null =>
-	typeof window === "undefined" ? null : window;
-
-/** Returns a valid preview token, or `null`. */
-export const normalizePreviewToken = (
-	value: string | null | undefined,
-): string | null => (value && previewTokenPattern.test(value) ? value : null);
 
 /** Reads the active preview token from session storage. */
 export const readStoredToken = (targetWindow: Window): string | null => {
@@ -71,27 +60,20 @@ export const isCrossOriginEmbedded = (targetWindow: Window): boolean => {
 
 /** Detects Lucid's builder iframe without treating arbitrary embedding as builder context. */
 export const detectToolbarContext = (
-	targetWindow: Window | null = getWindow(),
+	targetWindow: Window,
 ): ToolbarContextState => ({
-	builder:
-		targetWindow !== null &&
-		isEmbedded(targetWindow) &&
-		targetWindow.name === lucidBuilderPreviewFrameName,
+	builder: isLucidBuilderPreview(targetWindow),
 });
 
-/** Detects preview mode without touching browser globals when rendered on the server. */
+/** Resolves preview mode from explicit, URL, or stored state. */
 export const detectPreviewMode = (
+	targetWindow: Window,
 	token?: string | null,
 	mode: PreviewKind = "perspective",
 ): PreviewModeState => {
 	const explicitToken = normalizePreviewToken(token);
 	if (explicitToken) {
 		return { active: true, token: explicitToken, source: "explicit", mode };
-	}
-
-	const targetWindow = getWindow();
-	if (!targetWindow) {
-		return { active: false, token: null, source: null, mode: null };
 	}
 
 	const urlValue = new URL(targetWindow.location.href).searchParams.get(
