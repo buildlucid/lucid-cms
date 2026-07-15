@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import getCSRFController from "../../../controllers/auth/get-csrf.js";
+import getStatusController from "../../../controllers/auth/get-status.js";
 import acceptInvitationController from "../../../controllers/auth/invitation/accept-invitation.js";
 import validateInvitationController from "../../../controllers/auth/invitation/validate-invitation.js";
 import loginController from "../../../controllers/auth/login.js";
@@ -16,6 +17,7 @@ import tokenController from "../../../controllers/auth/token.js";
 
 const authRoutes = new Hono<LucidHonoGeneric>()
 	.get("/csrf", ...getCSRFController)
+	.get("/status", ...getStatusController)
 	.get("/setup-required", ...setupRequiredController)
 	.get("/providers", ...getProvidersController)
 	.get("/invitation/validate/:token", ...validateInvitationController)

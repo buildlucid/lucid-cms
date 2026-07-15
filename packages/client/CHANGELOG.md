@@ -5,7 +5,7 @@
 - Filter operator types added.
 - Updated media types and document media refs for the new media response contract.
 - Added new `previews.resolve` method.
-- Added a Lucid CMS toolbar.
+- Added a Lucid CMS toolbar with declarative Web Component and programmatic setup, configurable Lucid host, isolated frontend controls, read-only session detection, explicit builder context, and safe exact/session preview navigation.
 
 ## 0.2.0
 

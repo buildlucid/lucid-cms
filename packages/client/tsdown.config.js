@@ -1,18 +1,36 @@
 import { defineConfig } from "tsdown";
 
-export default defineConfig({
-	entry: ["src/index.ts", "src/types.ts", "src/toolbar.ts"],
-	dts: true,
-	format: "esm",
-	deps: {
-		onlyBundle: false,
+export default defineConfig([
+	{
+		dts: true,
+		format: "esm",
+		deps: {
+			onlyBundle: false,
+		},
+		shims: false,
+		sourcemap: true,
+		metafile: true,
+		minify: true,
+		platform: "browser",
+		target: "es2022",
+		entry: ["src/index.ts", "src/types.ts"],
+		clean: true,
+		unbundle: true,
 	},
-	shims: false,
-	sourcemap: true,
-	clean: true,
-	metafile: true,
-	minify: true,
-	platform: "browser",
-	target: "es2022",
-	unbundle: true,
-});
+	{
+		dts: true,
+		format: "esm",
+		deps: {
+			onlyBundle: false,
+		},
+		shims: false,
+		sourcemap: true,
+		metafile: true,
+		minify: true,
+		platform: "browser",
+		target: "es2022",
+		entry: ["src/toolbar.ts"],
+		clean: false,
+		unbundle: false,
+	},
+]);

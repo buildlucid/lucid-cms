@@ -16,6 +16,7 @@ import {
 } from "solid-js";
 import Button from "@/components/Partials/Button";
 import T from "@/translations";
+import { PreviewStatus } from "./PreviewStatus";
 
 export type PreviewWidth = "fit" | 1440 | 768 | 390;
 export type PreviewWidthSelection = PreviewWidth | "custom";
@@ -64,6 +65,7 @@ export const PreviewCanvas: Component<{
 	setCustomWidth: Setter<number>;
 	zoom: Accessor<PreviewZoom>;
 	setZoom: Setter<PreviewZoom>;
+	previewKind: Accessor<"exact" | "session">;
 	actionLoading: Accessor<boolean>;
 	onRefresh: () => void;
 	onCopy: () => void;
@@ -284,39 +286,42 @@ export const PreviewCanvas: Component<{
 						/>
 					</div>
 				</div>
-				<div class="flex shrink-0 items-center gap-0.5">
-					<Button
-						type="button"
-						theme="secondary-subtle"
-						size="icon-subtle"
-						title={T()("common.refresh")}
-						aria-label={T()("common.refresh")}
-						onClick={props.onRefresh}
-					>
-						<FaSolidRotate size={12} />
-					</Button>
-					<Button
-						type="button"
-						theme="secondary-subtle"
-						size="icon-subtle"
-						title={T()("preview.copy.url")}
-						aria-label={T()("preview.copy.url")}
-						loading={props.actionLoading()}
-						onClick={props.onCopy}
-					>
-						<FaSolidCopy size={12} />
-					</Button>
-					<Button
-						type="button"
-						theme="secondary-subtle"
-						size="icon-subtle"
-						title={T()("preview.open")}
-						aria-label={T()("preview.open")}
-						loading={props.actionLoading()}
-						onClick={props.onOpen}
-					>
-						<FaSolidArrowUpRightFromSquare size={12} />
-					</Button>
+				<div class="flex shrink-0 items-center gap-1.5">
+					<PreviewStatus kind={props.previewKind()} />
+					<div class="flex items-center gap-0.5">
+						<Button
+							type="button"
+							theme="secondary-subtle"
+							size="icon-subtle"
+							title={T()("common.refresh")}
+							aria-label={T()("common.refresh")}
+							onClick={props.onRefresh}
+						>
+							<FaSolidRotate size={12} />
+						</Button>
+						<Button
+							type="button"
+							theme="secondary-subtle"
+							size="icon-subtle"
+							title={T()("preview.copy.url")}
+							aria-label={T()("preview.copy.url")}
+							loading={props.actionLoading()}
+							onClick={props.onCopy}
+						>
+							<FaSolidCopy size={12} />
+						</Button>
+						<Button
+							type="button"
+							theme="secondary-subtle"
+							size="icon-subtle"
+							title={T()("preview.open")}
+							aria-label={T()("preview.open")}
+							loading={props.actionLoading()}
+							onClick={props.onOpen}
+						>
+							<FaSolidArrowUpRightFromSquare size={12} />
+						</Button>
+					</div>
 				</div>
 			</div>
 			<div
@@ -382,6 +387,7 @@ export const PreviewCanvas: Component<{
 							>
 								<iframe
 									src={props.frameSrc()}
+									name="lucid-builder-preview"
 									title={T()("preview.iframe.title")}
 									referrerpolicy="no-referrer"
 									class="block h-full w-full border-0 bg-white"

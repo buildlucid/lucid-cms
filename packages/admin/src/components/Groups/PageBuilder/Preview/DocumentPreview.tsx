@@ -43,6 +43,12 @@ export const DocumentPreview: Component<{
 	// ----------------------------------
 	// Memos
 	const frameSrc = createMemo(() => url() ?? undefined);
+	const previewKind = createMemo(() => {
+		const versionType = props.versionType();
+		return versionType === "revision" || versionType === "snapshot"
+			? "exact"
+			: "session";
+	});
 
 	// ----------------------------------
 	// Functions
@@ -182,6 +188,7 @@ export const DocumentPreview: Component<{
 				setCustomWidth={setCustomWidth}
 				zoom={zoom}
 				setZoom={setZoom}
+				previewKind={previewKind}
 				actionLoading={() => createPreview.action.isPending}
 				onRefresh={() => void resolvePersistedPreview()}
 				onCopy={() => void copyPersistedUrl()}

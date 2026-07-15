@@ -185,12 +185,50 @@ const page = await client.documents.getSingle({
 
 ## Frontend Toolbar
 
-The browser-safe `@lucidcms/client/toolbar` entrypoint provides Lucid's edit-page and preview controls. Set it up explicitly and clean it up with your application's page lifecycle.
+The browser-safe `@lucidcms/client/toolbar` entrypoint provides Lucid's Admin, edit-page, and preview controls as an isolated Shadow DOM pill. Register the declarative element once in your browser entrypoint:
+
+```typescript
+import { defineToolbarElement } from "@lucidcms/client/toolbar";
+
+defineToolbarElement();
+```
+
+Then render the page state alongside the document. The element initializes when connected and cleans up when disconnected.
+
+```html
+<lucid-toolbar
+    host="https://cms.example.com"
+    edit-collection="page"
+    edit-document-id="42"
+    edit-status="latest"
+    preview="perspective"
+    preview-token="PREVIEW_TOKEN"
+></lucid-toolbar>
+```
+
+Use `preview="published"` when the server resolved published mode and stale preview state should be cleared. Omit `preview` to detect preview state from the current URL or browser session. The preview token attribute is consumed and removed after the element initializes.
+
+| Attribute | Purpose |
+| --- | --- |
+| `host` | Public host of the Lucid instance; defaults to the page origin. |
+| `edit-collection` | Collection key for the edit action. |
+| `edit-document-id` | Integer document ID for the edit action. |
+| `edit-status` | Document version type; defaults to `latest`. |
+| `edit-version-id` | Version ID required by the `revision` edit status. |
+| `edit-label` | Accessible label for the edit action. |
+| `preview` | `published`, `perspective`, or `exact`. |
+| `preview-token` | Lucid preview bearer token. |
+| `preview-exit-href` | Destination restored when preview ends. |
+
+Only set `host` when Lucid is served from a different origin. The toolbar derives the admin and API URLs from the fixed `/lucid` mount, sends the session-status request with credentials, and does not send a referrer. Add the frontend origin to Lucid's `http.security.cors.origin` configuration when it differs. Browser cookie rules still apply, so the authenticated actions only appear when the Lucid session cookies are eligible for the request.
+
+For advanced lifecycle, authentication, or exit callbacks, use the programmatic API instead:
 
 ```typescript
 import { setupToolbar } from "@lucidcms/client/toolbar";
 
 const toolbar = setupToolbar({
+    host: "https://cms.example.com",
     edit: {
         collectionKey: "page",
         documentId: 42,

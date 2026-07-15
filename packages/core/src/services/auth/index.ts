@@ -1,5 +1,6 @@
 export * as accessToken from "./access-token/index.js";
 export * as csrf from "./csrf/index.js";
+export { default as getStatus } from "./get-status.js";
 export * as invitation from "./invitation/index.js";
 export { default as login } from "./login.js";
 export * as providers from "./providers/index.js";

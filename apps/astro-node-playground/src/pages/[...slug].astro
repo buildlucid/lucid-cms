@@ -41,20 +41,13 @@ const previewError =
 		{(preview?.active || previewError) && (
 			<meta name="referrer" content="no-referrer" />
 		)}
-		{preview?.active && preview.token && <meta name="lucid-preview" content={preview.token} />}
-		{preview?.preview && <meta name="lucid-preview-mode" content={preview.preview.mode} />}
 		<title>
 			{title
 				? `${title} | Lucid CMS`
 				: "Lucid CMS"}
 		</title>
 	</head>
-	<body
-		data-lucid-edit-collection={page?.collectionKey}
-		data-lucid-edit-document={page?.id}
-		data-lucid-edit-status={page?.status}
-		data-lucid-edit-version={page?.meta?.versionId}
-	>
+	<body>
 		<main class="page-shell">
 			<div class="page-backdrop">
 				<div class="page-frame">
@@ -177,6 +170,20 @@ const previewError =
 				</div>
 			</div>
 		</main>
-		<script src="../scripts/toolbar.ts"></script>
+
+		<lucid-toolbar
+			edit-collection={page?.collectionKey}
+			edit-document-id={page?.id}
+			edit-status={page?.status}
+			edit-version-id={page?.meta?.versionId}
+			preview={preview?.active ? preview.preview?.mode || "perspective" : "published"}
+			preview-token={preview?.active ? preview.token : undefined}
+		/>
+
+		<script>
+			import { defineToolbarElement } from "@lucidcms/client/toolbar";
+
+			defineToolbarElement();
+		</script>
 	</body>
 </html>
