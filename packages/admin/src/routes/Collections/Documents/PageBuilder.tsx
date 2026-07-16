@@ -349,7 +349,11 @@ const CollectionsDocumentsEditRoute: Component<{
 					/>
 					<Alert
 						style="pill"
-						class="xl:right-80"
+						class={
+							uiState.getPreviewOpen()
+								? "xl:right-4 xl:translate-x-[-27.5%]"
+								: "xl:right-80"
+						}
 						alerts={[
 							{
 								type: "warning",
