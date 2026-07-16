@@ -43,6 +43,7 @@ export interface ActionMenubarProps {
 		border?: boolean;
 		placement?: "bottom-end" | "bottom-start";
 		raised?: boolean;
+		triggerSize?: "small" | "medium";
 	};
 }
 
@@ -133,9 +134,11 @@ const ActionMenubar: Component<ActionMenubarProps> = (props) => {
 						e.stopPropagation();
 					}}
 					class={classNames(
-						"dropdown-trigger pointer-events-auto min-w-7 w-7 h-7 bg-input-base border border-border outline-none ring-0 focus-visible:ring-1 focus:ring-primary-base rounded-md flex justify-center items-center hover:bg-background-hover",
+						"dropdown-trigger pointer-events-auto bg-input-base border border-border outline-none ring-0 focus-visible:ring-1 focus:ring-primary-base rounded-md flex justify-center items-center hover:bg-background-hover",
 						{
 							"border border-border": props.options?.border,
+							"min-w-7 w-7 h-7": props.options?.triggerSize !== "medium",
+							"min-w-9 w-9 h-9": props.options?.triggerSize === "medium",
 						},
 					)}
 				>

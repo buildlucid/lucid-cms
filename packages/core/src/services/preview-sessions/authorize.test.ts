@@ -2,11 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	selectPreview: vi.fn(),
+	selectPublishOperation: vi.fn(),
 }));
 
 vi.mock("../../libs/repositories/index.js", () => ({
 	PreviewSessionsRepository: class {
 		selectSingle = mocks.selectPreview;
+	},
+	DocumentPublishOperationsRepository: class {
+		selectSingle = mocks.selectPublishOperation;
 	},
 }));
 
@@ -21,6 +25,7 @@ const buildPreview = (overrides: Record<string, unknown> = {}) => ({
 	entry_collection_key: "page",
 	entry_document_id: 42,
 	entry_version_type: "revision",
+	mode: "scoped",
 	entry_version_id: 73,
 	expires_at: "2099-01-01T00:00:00.000Z",
 	...overrides,
@@ -30,7 +35,9 @@ const buildContext = (tenantKey: string | null = "acme") =>
 	({
 		db: { client: {} },
 		config: {
-			db: {},
+			db: {
+				getDefault: (_type: string, value: string) => value === "true",
+			},
 			collections: [
 				{
 					key: "page",
@@ -58,6 +65,10 @@ describe("preview session resolution and authorization", () => {
 			error: undefined,
 			data: buildPreview(),
 		});
+		mocks.selectPublishOperation.mockResolvedValue({
+			error: undefined,
+			data: { target: "staging" },
+		});
 	});
 
 	afterEach(() => {
@@ -70,7 +81,7 @@ describe("preview session resolution and authorization", () => {
 		expect(response).toEqual({
 			error: undefined,
 			data: {
-				mode: "exact",
+				mode: "scoped",
 				entry: {
 					collectionKey: "page",
 					documentId: 42,
@@ -103,6 +114,7 @@ describe("preview session resolution and authorization", () => {
 			error: undefined,
 			data: buildPreview({
 				entry_version_type: entryVersionType,
+				mode: "perspective",
 				entry_version_id: null,
 			}),
 		});
@@ -119,13 +131,16 @@ describe("preview session resolution and authorization", () => {
 	});
 
 	it.each([
-		["revision", 73],
-		["snapshot", 91],
-	] as const)("locks an exact %s preview to its entry document and version ID", async (entryVersionType, entryVersionId) => {
+		["revision", 73, "latest"],
+		["snapshot", 91, "review"],
+		["latest", null, "latest"],
+		["staging", null, "review"],
+	] as const)("locks a scoped %s preview to its entry document while resolving auxiliary collections to %s", async (entryVersionType, entryVersionId, auxiliaryVersionType) => {
 		mocks.selectPreview.mockResolvedValue({
 			error: undefined,
 			data: buildPreview({
 				entry_version_type: entryVersionType,
+				mode: "scoped",
 				entry_version_id: entryVersionId,
 			}),
 		});
@@ -140,17 +155,75 @@ describe("preview session resolution and authorization", () => {
 		});
 
 		expect(entry.data).toMatchObject({
-			mode: "exact",
+			mode: "scoped",
+			target: "entry",
 			entry: {
 				collectionKey: "page",
 				documentId: 42,
 				versionType: entryVersionType,
-				versionId: entryVersionId,
+				versionId: entryVersionId ?? undefined,
 			},
 		});
-		expect(related.error).toMatchObject({
-			status: 403,
-			code: "preview_scope",
+		expect(related).toEqual({
+			error: undefined,
+			data: {
+				mode: "scoped",
+				target: "auxiliary",
+				entry: {
+					collectionKey: "page",
+					documentId: 42,
+				},
+				versionType: auxiliaryVersionType,
+			},
+		});
+	});
+
+	it("uses the pinned snapshot's release target when resolving scoped auxiliary collections", async () => {
+		mocks.selectPreview.mockResolvedValue({
+			error: undefined,
+			data: buildPreview({
+				entry_version_type: "snapshot",
+				entry_version_id: 91,
+			}),
+		});
+
+		await authorize(buildContext(), {
+			token,
+			collectionKey: "article",
+		});
+
+		expect(mocks.selectPublishOperation).toHaveBeenCalledWith({
+			select: ["target"],
+			where: [
+				{ key: "collection_key", operator: "=", value: "page" },
+				{ key: "document_id", operator: "=", value: 42 },
+				{ key: "snapshot_version_id", operator: "=", value: 91 },
+			],
+		});
+	});
+
+	it.each([
+		["scoped", "latest", 73],
+		["scoped", "revision", null],
+		["perspective", "latest", 73],
+		["perspective", "revision", 73],
+		["perspective", "revision", null],
+		["perspective", "snapshot", null],
+	] as const)("rejects an invalid persisted %s %s session with version ID %s", async (mode, entryVersionType, entryVersionId) => {
+		mocks.selectPreview.mockResolvedValue({
+			error: undefined,
+			data: buildPreview({
+				mode,
+				entry_version_type: entryVersionType,
+				entry_version_id: entryVersionId,
+			}),
+		});
+
+		const response = await resolve(buildContext(), { token });
+
+		expect(response.error).toMatchObject({
+			status: 401,
+			code: "preview_invalid",
 		});
 	});
 
@@ -162,6 +235,7 @@ describe("preview session resolution and authorization", () => {
 			error: undefined,
 			data: buildPreview({
 				entry_version_type: "latest",
+				mode: "perspective",
 				entry_version_id: null,
 			}),
 		});

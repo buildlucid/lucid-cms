@@ -61,7 +61,6 @@ const openSanitizedDestination = (
 	if (opened) opened.opener = null;
 };
 
-/** Installs builder-only exact and session preview navigation. */
 export const installPreviewNavigation = (
 	options: PreviewNavigationOptions,
 ): (() => void) => {
@@ -71,7 +70,7 @@ export const installPreviewNavigation = (
 		const anchor = findAnchor(options.targetWindow, event.target);
 		if (!anchor || anchor.closest(previewNoticeTagName)) return;
 
-		if (options.mode === "exact") {
+		if (options.mode === "scoped") {
 			event.preventDefault();
 			event.stopImmediatePropagation();
 			if (isIntentionalNewTab(event)) {

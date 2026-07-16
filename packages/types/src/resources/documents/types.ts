@@ -323,8 +323,10 @@ export type PreviewSessionURLResponse = {
 	expiresAt: string | null;
 };
 
+export type PreviewMode = "perspective" | "scoped";
+
 export type PreviewSession = {
-	mode: "perspective" | "exact";
+	mode: PreviewMode;
 	entry: {
 		collectionKey: string;
 		documentId: number;

@@ -5,6 +5,7 @@ import { PreviewSessionsRepository } from "../../libs/repositories/index.js";
 import type {
 	DocumentVersionType,
 	LucidAuth,
+	PreviewMode,
 	PreviewSessionURLResponse,
 } from "../../types.js";
 import {
@@ -15,7 +16,9 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getCollection from "../collections/get-single-instance.js";
 import getClientDocument from "../documents/client/get-single.js";
 import validateClientVersionTarget from "../documents/helpers/validate-client-version-target.js";
-import isExactPreview from "./helpers/is-exact-preview.js";
+import resolvePreviewMode, {
+	requiresPinnedPreviewVersion,
+} from "./helpers/resolve-preview-mode.js";
 
 const create: ServiceFn<
 	[
@@ -24,6 +27,7 @@ const create: ServiceFn<
 			documentId: number;
 			versionType: DocumentVersionType;
 			versionId?: number;
+			mode?: PreviewMode;
 			locale?: string;
 			creator: LucidAuth;
 		},
@@ -35,6 +39,12 @@ const create: ServiceFn<
 		versionId: data.versionId,
 	});
 	if (versionTargetRes.error) return versionTargetRes;
+
+	const modeRes = await resolvePreviewMode({
+		versionType: data.versionType,
+		mode: data.mode,
+	});
+	if (modeRes.error) return modeRes;
 
 	const collectionRes = getCollection(context, { key: data.collectionKey });
 	if (collectionRes.error) return collectionRes;
@@ -65,8 +75,11 @@ const create: ServiceFn<
 	});
 	if (documentRes.error) return documentRes;
 
-	const entryVersionId = documentRes.data.meta?.versionId;
-	if (typeof entryVersionId !== "number" || !Number.isInteger(entryVersionId)) {
+	const sourceVersionId = documentRes.data.meta?.versionId;
+	if (
+		typeof sourceVersionId !== "number" ||
+		!Number.isInteger(sourceVersionId)
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -131,8 +144,9 @@ const create: ServiceFn<
 			entry_collection_key: data.collectionKey,
 			entry_document_id: data.documentId,
 			entry_version_type: data.versionType,
-			entry_version_id: isExactPreview(data.versionType)
-				? entryVersionId
+			mode: modeRes.data,
+			entry_version_id: requiresPinnedPreviewVersion(data.versionType)
+				? sourceVersionId
 				: null,
 			expires_at: expiresAt,
 			created_by: data.creator.id,

@@ -1,81 +1,70 @@
-import { DropdownMenu } from "@kobalte/core";
-import classNames from "classnames";
-import { FaSolidEllipsisVertical } from "solid-icons/fa";
-import { type Component, createMemo } from "solid-js";
-import DropdownContent from "@/components/Partials/DropdownContent";
+import type { PreviewMode } from "@types";
+import type { Component } from "solid-js";
+import ActionMenubar, {
+	type ActionMenubarItem,
+} from "@/components/Partials/ActionMenubar";
 import T from "@/translations";
-import spawnToast from "@/utils/spawn-toast";
 
 export const DocumentActions: Component<{
-	onDelete: () => void;
+	onDelete?: () => void;
 	deletePermission?: boolean;
-	disabled?: boolean;
-}> = (props) => {
-	// ----------------------------------------
-	// Memos
-	const isDisabled = createMemo(() => {
-		return props.disabled;
-	});
-
-	// ----------------------------------------
-	// Functions
-	const handleDeleteClick = () => {
-		if (props.deletePermission === false) {
-			spawnToast({
-				title: T()("toasts.common.no.permission.title"),
-				message: T()("toasts.common.no.permission.message"),
-				status: "warning",
-			});
-			return;
-		}
-		props.onDelete();
+	preview?: {
+		onCopy: (mode: PreviewMode) => void;
+		permission: boolean;
+		loading: boolean;
+		scopedOnly: boolean;
 	};
+}> = (props) => {
+	const actions = (): ActionMenubarItem[] => [
+		{
+			label: T()("preview.copy.group"),
+			type: "button",
+			icon: "link",
+			hide: props.preview === undefined || props.preview.scopedOnly !== true,
+			permission: props.preview?.permission,
+			isLoading: props.preview?.loading,
+			onClick: () => props.preview?.onCopy("scoped"),
+		},
+		{
+			label: T()("preview.copy.group"),
+			type: "group",
+			icon: "link",
+			hide: props.preview === undefined || props.preview.scopedOnly,
+			permission: props.preview?.permission,
+			actions: [
+				{
+					label: T()("preview.copy.scoped"),
+					type: "button",
+					icon: "lock",
+					permission: props.preview?.permission,
+					isLoading: props.preview?.loading,
+					onClick: () => props.preview?.onCopy("scoped"),
+				},
+				{
+					label: T()("preview.copy.navigable"),
+					type: "button",
+					icon: "share",
+					permission: props.preview?.permission,
+					isLoading: props.preview?.loading,
+					onClick: () => props.preview?.onCopy("perspective"),
+				},
+			],
+		},
+		{
+			label: T()("actions.delete.document"),
+			type: "button",
+			icon: "trash",
+			hide: props.onDelete === undefined,
+			permission: props.deletePermission,
+			theme: "error",
+			onClick: props.onDelete,
+		},
+	];
 
-	// ----------------------------------------
-	// Render
 	return (
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger
-				class={classNames(
-					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative font-base",
-					"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-subtitle hover:text-secondary-contrast ring-primary-base",
-					"w-9 h-9 p-0 min-w-[36px]!",
-					{
-						"opacity-80 cursor-not-allowed":
-							isDisabled() || props.deletePermission === false,
-					},
-				)}
-				disabled={isDisabled()}
-			>
-				<FaSolidEllipsisVertical />
-			</DropdownMenu.Trigger>
-			<DropdownContent
-				options={{
-					as: "div",
-					rounded: true,
-					class: "p-1.5! z-60",
-				}}
-			>
-				<ul class="flex flex-col gap-y-0.5">
-					<li>
-						<DropdownMenu.Item
-							class={classNames(
-								"flex items-center gap-3 justify-between px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors text-left hover:bg-dropdown-hover hover:text-dropdown-contrast",
-								{
-									"opacity-50 cursor-not-allowed":
-										props.deletePermission === false || isDisabled(),
-									"hover:text-error-contrast hover:bg-error-hover":
-										props.deletePermission !== false && !isDisabled(),
-								},
-							)}
-							disabled={props.deletePermission === false || isDisabled()}
-							onSelect={handleDeleteClick}
-						>
-							<span class="line-clamp-1">{T()("actions.delete.document")}</span>
-						</DropdownMenu.Item>
-					</li>
-				</ul>
-			</DropdownContent>
-		</DropdownMenu.Root>
+		<ActionMenubar
+			actions={actions()}
+			options={{ placement: "bottom-end", triggerSize: "medium" }}
+		/>
 	);
 };

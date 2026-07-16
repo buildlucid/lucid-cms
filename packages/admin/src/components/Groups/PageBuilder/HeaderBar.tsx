@@ -2,6 +2,7 @@ import type {
 	Collection,
 	DocumentVersionUpdateResponse,
 	InternalCollectionDocument,
+	PreviewMode,
 } from "@types";
 import classNames from "classnames";
 import {
@@ -21,12 +22,14 @@ import DateText from "@/components/Partials/DateText";
 import type { UseDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
+import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import userPreferencesStore from "@/store/userPreferencesStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
+import spawnToast from "@/utils/spawn-toast";
 import { AutoSaveStatusPill } from "./AutoSaveStatusPill";
 import { DocumentActions } from "./DocumentActions";
 import { ReleaseTrigger, type ReleaseTriggerOption } from "./ReleaseTrigger";
@@ -70,6 +73,10 @@ export const HeaderBar: Component<{
 	// ----------------------------------
 	// State / Hooks
 	let stickyBarRef: HTMLDivElement | undefined;
+
+	// -------------------------------
+	// Queries & Mutations
+	const createPreview = api.documents.useCreatePreview();
 
 	// ----------------------------------
 	// Memos
@@ -379,6 +386,74 @@ export const HeaderBar: Component<{
 				(collection.review?.requiredFor?.length ?? 0) > 0)
 		);
 	});
+	const showCopyPreview = createMemo(() => {
+		const version = props.version?.() ?? "latest";
+		const requiresVersionId = version === "revision" || version === "snapshot";
+
+		return (
+			props.mode === "edit" &&
+			props.state.documentID() !== undefined &&
+			(!requiresVersionId || props.versionId?.() !== undefined) &&
+			props.state.document()?.isDeleted !== true &&
+			props.state.collection()?.capabilities.preview === true
+		);
+	});
+	const scopedPreviewOnly = createMemo(() => {
+		const version = props.version?.() ?? "latest";
+		return version === "revision" || version === "snapshot";
+	});
+	const hasPreviewPermission = createMemo(() => {
+		const permission = props.state.collection()?.permissions.read;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).some;
+	});
+
+	// ----------------------------------
+	// Functions
+	const copyPreviewUrl = async (mode: PreviewMode) => {
+		const documentId = props.state.documentID();
+		if (documentId === undefined) return;
+
+		if (props.state.isDocumentMutated?.()) {
+			spawnToast({
+				title: T()("preview.saved.url.title"),
+				message: T()("preview.saved.url.message"),
+				status: "warning",
+			});
+		}
+
+		try {
+			const response = await createPreview.action.mutateAsync({
+				collectionKey: props.state.collectionKey(),
+				documentId,
+				versionType: props.version?.() ?? "latest",
+				versionId: props.versionId?.(),
+				mode,
+				locale:
+					contentLocaleStore.get.contentLocale ||
+					defaultLocale()?.code ||
+					undefined,
+			});
+			if (!response.data.url) {
+				spawnToast({
+					title: T()("preview.unavailable.title"),
+					message: T()("preview.unavailable.message"),
+					status: "warning",
+				});
+				return;
+			}
+
+			await navigator.clipboard.writeText(response.data.url);
+			spawnToast({
+				title: T()("toasts.common.copy.to.clipboard.title"),
+				status: "success",
+			});
+		} catch {
+			return;
+		}
+	};
+
 	// ----------------------------------
 	// Effects
 	onMount(() => {
@@ -601,10 +676,26 @@ export const HeaderBar: Component<{
 									{T()("documents.revisions.restore.action")}
 								</Button>
 							</Show>
-							<Show when={props.state.ui.showDeleteButton?.()}>
+							<Show
+								when={props.state.ui.showDeleteButton?.() || showCopyPreview()}
+							>
 								<DocumentActions
-									onDelete={() => props.state.ui?.setDeleteOpen?.(true)}
+									onDelete={
+										props.state.ui.showDeleteButton?.()
+											? () => props.state.ui?.setDeleteOpen?.(true)
+											: undefined
+									}
 									deletePermission={props.state.ui.hasDeletePermission?.()}
+									preview={
+										showCopyPreview()
+											? {
+													onCopy: (mode) => void copyPreviewUrl(mode),
+													permission: hasPreviewPermission(),
+													loading: createPreview.action.isPending,
+													scopedOnly: scopedPreviewOnly(),
+												}
+											: undefined
+									}
 								/>
 							</Show>
 						</div>

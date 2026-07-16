@@ -17,27 +17,30 @@ import spawnToast from "@/utils/spawn-toast";
 import ActionIcon, { type ActionIconName } from "./ActionIcon";
 import Spinner from "./Spinner";
 
+export interface ActionDropdownItem {
+	label: string;
+	type: "button" | "link" | "group";
+	icon?: ActionIconName;
+	onClick?: () => void;
+	href?: string;
+	actions?: ActionDropdownItem[];
+	permission?: boolean;
+	hide?: boolean;
+	disabled?: boolean;
+	disabledToast?: {
+		title: string;
+		message?: string;
+		status?: "success" | "error" | "warning" | "info";
+		duration?: number;
+	};
+	isLoading?: boolean;
+	actionExclude?: boolean;
+	theme?: "error" | "primary";
+	sortOrder?: number;
+}
+
 export interface ActionDropdownProps {
-	actions: Array<{
-		label: string;
-		type: "button" | "link";
-		icon?: ActionIconName;
-		onClick?: () => void;
-		href?: string;
-		permission?: boolean;
-		hide?: boolean;
-		disabled?: boolean;
-		disabledToast?: {
-			title: string;
-			message?: string;
-			status?: "success" | "error" | "warning" | "info";
-			duration?: number;
-		};
-		isLoading?: boolean;
-		actionExclude?: boolean;
-		theme?: "error" | "primary";
-		sortOrder?: number;
-	}>;
+	actions: ActionDropdownItem[];
 	options?: {
 		border?: boolean;
 		placement?: "bottom-end" | "bottom-start";
@@ -45,15 +48,15 @@ export interface ActionDropdownProps {
 	};
 }
 
-type ActionItem = ActionDropdownProps["actions"][number];
-
 const DANGEROUS_ACTION_LABEL_MATCHER =
 	/\b(delete|remove|clear|purge|revoke|disconnect)\b/i;
 const PRIMARY_ACTION_LABEL_MATCHER =
 	/\b(restore|publish|enable|approve|resend|activate)\b/i;
 const EDIT_ACTION_LABEL_MATCHER = /\b(edit|update)\b/i;
 
-const getActionTheme = (action: ActionItem): ActionItem["theme"] => {
+const getActionTheme = (
+	action: ActionDropdownItem,
+): ActionDropdownItem["theme"] => {
 	if (action.theme) return action.theme;
 
 	if (DANGEROUS_ACTION_LABEL_MATCHER.test(action.label)) return "error";
@@ -62,7 +65,7 @@ const getActionTheme = (action: ActionItem): ActionItem["theme"] => {
 	return undefined;
 };
 
-const getActionSortWeight = (action: ActionItem): number => {
+const getActionSortWeight = (action: ActionDropdownItem): number => {
 	if (action.sortOrder !== undefined) return action.sortOrder;
 
 	if (EDIT_ACTION_LABEL_MATCHER.test(action.label)) return 0;
@@ -75,6 +78,45 @@ const getActionSortWeight = (action: ActionItem): number => {
 	return 1;
 };
 
+const getVisibleActions = (
+	actions: ActionDropdownItem[],
+): ActionDropdownItem[] =>
+	actions
+		.map((action, index) => ({
+			action: {
+				...action,
+				actions: action.actions ? getVisibleActions(action.actions) : undefined,
+			},
+			index,
+		}))
+		.filter(
+			({ action }) =>
+				action.hide !== true &&
+				(action.actions === undefined || action.actions.length > 0),
+		)
+		.sort((a, b) => {
+			const weightDiff =
+				getActionSortWeight(a.action) - getActionSortWeight(b.action);
+
+			if (weightDiff !== 0) return weightDiff;
+
+			return a.index - b.index;
+		})
+		.map(({ action }) => action);
+
+const getActionItemClasses = (action: ActionDropdownItem) =>
+	classNames(
+		"flex items-center gap-2 px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 hover:text-dropdown-contrast fill-dropdown-contrast outline-none cursor-pointer",
+		{
+			"cursor-not-allowed": action.permission === false,
+			"opacity-50 cursor-not-allowed": action.disabled === true,
+			"hover:bg-error-hover hover:text-error-contrast":
+				getActionTheme(action) === "error" && action.disabled !== true,
+			"hover:bg-primary-base hover:text-primary-contrast":
+				getActionTheme(action) === "primary" && action.disabled !== true,
+		},
+	);
+
 const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 	// ----------------------------------------
 	// State
@@ -82,45 +124,31 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const visibleActions = createMemo(() =>
-		props.actions
-			.map((action, index) => ({ action, index }))
-			.filter(({ action }) => action.hide !== true)
-			.sort((a, b) => {
-				const weightDiff =
-					getActionSortWeight(a.action) - getActionSortWeight(b.action);
-
-				if (weightDiff !== 0) return weightDiff;
-
-				return a.index - b.index;
-			})
-			.map(({ action }) => action),
-	);
-
-	// ----------------------------------------
-	// Classes
-	const getActionItemClasses = (action: ActionItem) =>
-		classNames(
-			"flex items-center gap-2 px-2 rounded-md hover:bg-dropdown-hover w-full text-sm text-left py-1 hover:text-dropdown-contrast fill-dropdown-contrast",
-			{
-				"cursor-not-allowed": action.permission === false,
-				"opacity-50 cursor-not-allowed": action.disabled === true,
-				"hover:bg-error-hover hover:text-error-contrast":
-					getActionTheme(action) === "error" && action.disabled !== true,
-				"hover:bg-primary-base hover:text-primary-contrast":
-					getActionTheme(action) === "primary" && action.disabled !== true,
-			},
-		);
+	const visibleActions = createMemo(() => getVisibleActions(props.actions));
 
 	// ----------------------------------------
 	// Functions
-	const spawnDisabledToast = (action: ActionItem) => {
-		if (!action.disabledToast) return;
+	const handleSelect = (action: ActionDropdownItem) => {
+		if (action.permission === false) {
+			spawnToast({
+				title: T()("toasts.common.no.permission.title"),
+				message: T()("toasts.common.no.permission.message"),
+				status: "warning",
+			});
+			return;
+		}
+		if (action.disabled === true) {
+			if (action.disabledToast) {
+				spawnToast({
+					...action.disabledToast,
+					status: action.disabledToast.status ?? "warning",
+				});
+			}
+			return;
+		}
 
-		spawnToast({
-			...action.disabledToast,
-			status: action.disabledToast.status ?? "warning",
-		});
+		action.onClick?.();
+		setIsOpen(false);
 	};
 
 	// ----------------------------------------
@@ -134,9 +162,7 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 			onOpenChange={setIsOpen}
 		>
 			<DropdownMenu.Trigger
-				onClick={(e) => {
-					e.stopPropagation();
-				}}
+				onClick={(event) => event.stopPropagation()}
 				class={classNames(
 					"dropdown-trigger pointer-events-auto min-w-7 w-7 h-7 bg-input-base border border-border outline-none ring-0 focus-visible:ring-1 focus:ring-primary-base rounded-md flex justify-center items-center hover:bg-background-hover",
 					{
@@ -157,100 +183,111 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 					raised: props.options?.raised,
 				}}
 			>
-				<ul class="flex flex-col gap-y-1">
-					<For each={visibleActions()}>
-						{(action) => (
-							<Show when={action.hide !== true}>
-								<li
-									class={classNames(
-										"flex border-b border-border last:border-b-0 pb-1 last:pb-0",
-										{
-											"opacity-50": action.permission === false,
-										},
-									)}
-								>
-									<Switch>
-										<Match when={action.type === "link"}>
-											<A
-												href={action.href || "/"}
-												class={getActionItemClasses(action)}
-												onClick={(e) => {
-													e.stopPropagation();
-													if (action.permission === false) {
-														spawnToast({
-															title: T()("toasts.common.no.permission.title"),
-															message: T()(
-																"toasts.common.no.permission.message",
-															),
-															status: "warning",
-														});
-														e.preventDefault();
-														return;
-													}
-													if (action.disabled === true) {
-														e.preventDefault();
-														spawnDisabledToast(action);
-													}
-												}}
-											>
-												<ActionIcon icon={action.icon} />
-												<span class="line-clamp-1 mr-2.5 flex-1">
-													{action.label}
-												</span>
-												<Show when={action.icon === undefined}>
-													<FaSolidChevronRight size={14} />
-												</Show>
-											</A>
-										</Match>
-										<Match when={action.type === "button"}>
-											<button
-												type="button"
-												onClick={(e) => {
-													e.stopPropagation();
-													if (action.permission === false) {
-														spawnToast({
-															title: T()("toasts.common.no.permission.title"),
-															message: T()(
-																"toasts.common.no.permission.message",
-															),
-															status: "warning",
-														});
-														return;
-													}
-													if (action.disabled === true) {
-														spawnDisabledToast(action);
-														return;
-													}
-													action.onClick?.();
-													setIsOpen(false);
-												}}
-												class={getActionItemClasses(action)}
-											>
-												<ActionIcon icon={action.icon} />
-												<span class="line-clamp-1 mr-2.5 flex-1">
-													{action.label}
-												</span>
-												<Show
-													when={
-														action.isLoading !== true &&
-														action.icon === undefined
-													}
-												>
-													<FaSolidChevronRight size={14} />
-												</Show>
-												<Show when={action.isLoading}>
-													<Spinner size="sm" />
-												</Show>
-											</button>
-										</Match>
-									</Switch>
-								</li>
-							</Show>
-						)}
-					</For>
-				</ul>
+				<ActionList actions={visibleActions()} onSelect={handleSelect} />
 			</DropdownContent>
 		</DropdownMenu.Root>
+	);
+};
+
+const ActionList: Component<{
+	actions: ActionDropdownItem[];
+	onSelect: (action: ActionDropdownItem) => void;
+}> = (props) => (
+	<ul class="flex flex-col gap-y-1">
+		<For each={props.actions}>
+			{(action) => (
+				<li
+					class={classNames(
+						"flex border-b border-border last:border-b-0 pb-1 last:pb-0",
+						{
+							"opacity-50": action.permission === false,
+						},
+					)}
+				>
+					<Show
+						when={action.actions && action.actions.length > 0}
+						fallback={<ActionItem action={action} onSelect={props.onSelect} />}
+					>
+						<DropdownMenu.Sub>
+							<DropdownMenu.SubTrigger
+								textValue={action.label}
+								onClick={(event) => event.stopPropagation()}
+								class={getActionItemClasses(action)}
+							>
+								<ActionIcon icon={action.icon} />
+								<span class="line-clamp-1 mr-2.5 flex-1">{action.label}</span>
+								<FaSolidChevronRight size={14} />
+							</DropdownMenu.SubTrigger>
+							<DropdownMenu.Portal>
+								<DropdownMenu.SubContent class="bg-dropdown-base border border-border shadow-md animate-animate-dropdown focus:outline-hidden scrollbar rounded-md w-50 p-1.5 z-60 ml-1">
+									<ActionList
+										actions={action.actions ?? []}
+										onSelect={props.onSelect}
+									/>
+								</DropdownMenu.SubContent>
+							</DropdownMenu.Portal>
+						</DropdownMenu.Sub>
+					</Show>
+				</li>
+			)}
+		</For>
+	</ul>
+);
+
+const ActionItem: Component<{
+	action: ActionDropdownItem;
+	onSelect: (action: ActionDropdownItem) => void;
+}> = (props) => {
+	const closeOnSelect = createMemo(
+		() =>
+			props.action.permission !== false &&
+			props.action.disabled !== true &&
+			props.action.isLoading !== true,
+	);
+
+	return (
+		<Switch>
+			<Match when={props.action.type === "link"}>
+				<DropdownMenu.Item
+					as={A}
+					href={props.action.href || "/"}
+					textValue={props.action.label}
+					closeOnSelect={closeOnSelect()}
+					onSelect={() => props.onSelect(props.action)}
+					onClick={(event) => {
+						event.stopPropagation();
+						if (
+							props.action.permission === false ||
+							props.action.disabled === true
+						) {
+							event.preventDefault();
+						}
+					}}
+					class={getActionItemClasses(props.action)}
+				>
+					<ActionIcon icon={props.action.icon} />
+					<span class="line-clamp-1 mr-2.5 flex-1">{props.action.label}</span>
+					<Show when={props.action.isLoading}>
+						<Spinner size="sm" />
+					</Show>
+				</DropdownMenu.Item>
+			</Match>
+			<Match when={props.action.type !== "link"}>
+				<DropdownMenu.Item
+					textValue={props.action.label}
+					closeOnSelect={closeOnSelect()}
+					onSelect={() => props.onSelect(props.action)}
+					onClick={(event) => event.stopPropagation()}
+					class={getActionItemClasses(props.action)}
+				>
+					<ActionIcon icon={props.action.icon} />
+					<span class="line-clamp-1 mr-2.5 flex-1">{props.action.label}</span>
+					<Show when={props.action.isLoading}>
+						<Spinner size="sm" />
+					</Show>
+				</DropdownMenu.Item>
+			</Match>
+		</Switch>
 	);
 };
 

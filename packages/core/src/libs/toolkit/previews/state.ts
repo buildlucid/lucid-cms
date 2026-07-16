@@ -105,7 +105,7 @@ const state = async (
 				return previewRes;
 			}
 
-			if (previewRes.data.mode === "exact") {
+			if (previewRes.data.mode === "scoped") {
 				await input.session.clear();
 			} else if (hasQueryValue) {
 				await input.session.set({

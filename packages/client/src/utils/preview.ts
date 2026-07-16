@@ -1,10 +1,10 @@
 export const previewQueryParam = "preview";
 
-type BuilderPreviewMode = "perspective" | "exact";
+type BuilderPreviewMode = "perspective" | "scoped";
 
 const builderPreviewFrameNames = {
 	perspective: "lucid-builder-preview:perspective",
-	exact: "lucid-builder-preview:exact",
+	scoped: "lucid-builder-preview:scoped",
 } as const satisfies Record<BuilderPreviewMode, string>;
 
 const previewTokenPattern = /^[A-Za-z0-9_-]{43}$/;
@@ -35,8 +35,8 @@ export const getBuilderPreviewMode = (
 	switch (targetWindow.name) {
 		case builderPreviewFrameNames.perspective:
 			return "perspective";
-		case builderPreviewFrameNames.exact:
-			return "exact";
+		case builderPreviewFrameNames.scoped:
+			return "scoped";
 		default:
 			return null;
 	}

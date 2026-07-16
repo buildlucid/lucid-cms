@@ -21,6 +21,12 @@ interface ReleaseRequestRowProps extends TableRowProps {
 	request: PublishOperation;
 	collectionLabel: string;
 	include: boolean[];
+	preview: {
+		available: boolean;
+		permission: boolean;
+		loading: boolean;
+		onCopy: () => void;
+	};
 	callbacks: TableRowProps["callbacks"] & {
 		openDecision: (
 			_operation: PublishOperation,
@@ -53,6 +59,17 @@ const ReleaseRequestRow: Component<ReleaseRequestRowProps> = (props) => {
 					icon: "eye",
 					href: requestHref(),
 					sortOrder: 0,
+				},
+				{
+					type: "button",
+					label: T()("preview.copy.group"),
+					icon: "link",
+					onClick: props.preview.onCopy,
+					hide: !props.preview.available,
+					permission: props.preview.permission,
+					isLoading: props.preview.loading,
+					actionExclude: true,
+					sortOrder: 20,
 				},
 				{
 					type: "button",

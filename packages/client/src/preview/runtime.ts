@@ -23,7 +23,7 @@ export const setupPreviewRuntime = (mode: PreviewMode): PreviewController => {
 	activePreviewCleanups.get(targetWindow)?.();
 
 	const token = resolvePreviewToken(targetWindow);
-	const notice = mode === "exact" ? createPreviewNotice(targetWindow) : null;
+	const notice = mode === "scoped" ? createPreviewNotice(targetWindow) : null;
 	let cleanedUp = false;
 
 	const cleanupNavigation = installPreviewNavigation({

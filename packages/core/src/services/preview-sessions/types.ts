@@ -10,6 +10,7 @@ export type PreviewSessionRecord = Pick<
 	| "entry_collection_key"
 	| "entry_document_id"
 	| "entry_version_type"
+	| "mode"
 	| "entry_version_id"
 	| "expires_at"
 >;
@@ -28,16 +29,28 @@ export type PreviewSessionPerspectiveTarget = PreviewSessionDocumentEntry & {
 	versionType: Exclude<DocumentVersionType, "revision">;
 };
 
-export type PreviewSessionExactTarget = PreviewSessionDocumentEntry & {
-	mode: "exact";
+export type PreviewSessionScopedEntryTarget = PreviewSessionDocumentEntry & {
+	mode: "scoped";
+	target: "entry";
 	entry: {
 		collectionKey: string;
 		documentId: number;
 		versionType: DocumentVersionType;
-		versionId: number;
+		versionId?: number;
 	};
 };
 
-export type PreviewSessionDocumentTarget =
+export type PreviewSessionScopedAuxiliaryTarget =
+	PreviewSessionDocumentEntry & {
+		mode: "scoped";
+		target: "auxiliary";
+		versionType: Exclude<DocumentVersionType, "revision">;
+	};
+
+export type PreviewSessionCollectionTarget =
 	| PreviewSessionPerspectiveTarget
-	| PreviewSessionExactTarget;
+	| PreviewSessionScopedAuxiliaryTarget;
+
+export type PreviewSessionDocumentTarget =
+	| PreviewSessionCollectionTarget
+	| PreviewSessionScopedEntryTarget;

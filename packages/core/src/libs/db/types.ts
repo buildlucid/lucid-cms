@@ -9,7 +9,7 @@ import type {
 import type { Migration } from "kysely/migration";
 import type constants from "../../constants/constants.js";
 import type { OptionsName } from "../../schemas/options.js";
-import type { MediaOrigin } from "../../types/response.js";
+import type { MediaOrigin, PreviewMode } from "../../types/response.js";
 import type {
 	SecurityAuditAction,
 	SecurityAuditRoleSnapshot,
@@ -702,6 +702,7 @@ export interface LucidPreviewSessions {
 	entry_collection_key: string;
 	entry_document_id: number;
 	entry_version_type: DocumentVersionType;
+	mode: PreviewMode;
 	entry_version_id: number | null;
 	expires_at: TimestampImmutable;
 	created_by: number | null;

@@ -76,6 +76,7 @@ export type {
 	MediaVideo,
 	MultipleMediaFolder,
 	Option,
+	PreviewMode,
 	PreviewSession,
 	PreviewSessionURLResponse,
 	ProfilePicture,

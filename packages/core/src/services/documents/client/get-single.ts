@@ -50,7 +50,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	let versionId: number | undefined;
 	let preview: PreviewSessionDocumentTarget | undefined;
 
-	//* preview sessions resolve the effective version target
+	//* Preview tokens resolve the effective document target for this collection.
 	if (data.target.type === "preview") {
 		const previewRes = await authorizePreview(context, {
 			token: data.target.token,
@@ -58,12 +58,14 @@ const getSingle: ClientDocumentsGetSingleService = async <
 		});
 		if (previewRes.error) return previewRes;
 		preview = previewRes.data;
-		//* exact previews pin both the entry document and version
-		versionType =
-			preview.mode === "exact"
-				? preview.entry.versionType
-				: preview.versionType;
-		versionId = preview.mode === "exact" ? preview.entry.versionId : undefined;
+		//* Entry targets stay document-scoped; auxiliary targets use their mapped version.
+		if (preview.mode === "scoped" && preview.target === "entry") {
+			versionType = preview.entry.versionType;
+			versionId = preview.entry.versionId;
+		} else {
+			versionType = preview.versionType;
+			versionId = undefined;
+		}
 	} else {
 		const versionTargetRes = await validateClientVersionTarget({
 			versionType: data.target.versionType,
@@ -101,7 +103,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 					value: context.config.db.getDefault("boolean", "false"),
 				},
 			}),
-			...(preview?.mode === "exact"
+			...(preview?.mode === "scoped" && preview.target === "entry"
 				? { id: { value: preview.entry.documentId } }
 				: {}),
 		},
@@ -118,7 +120,9 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	const relationVersionTypeRes = await resolveRelationVersionType(context, {
 		collectionKey: data.collectionKey,
 		documentId:
-			preview?.mode === "exact" ? preview.entry.documentId : undefined,
+			preview?.mode === "scoped" && preview.target === "entry"
+				? preview.entry.documentId
+				: undefined,
 		versionId,
 		versionType: versionType ?? "latest",
 	});

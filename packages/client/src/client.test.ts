@@ -103,7 +103,7 @@ describe("@lucidcms/client", () => {
 			new Response(
 				JSON.stringify({
 					data: {
-						mode: "exact",
+						mode: "scoped",
 						entry: {
 							collectionKey: "page",
 							documentId: 42,
@@ -137,7 +137,7 @@ describe("@lucidcms/client", () => {
 
 		expect(response.error).toBeUndefined();
 		expect(response.data?.data).toMatchObject({
-			mode: "exact",
+			mode: "scoped",
 			entry: {
 				collectionKey: "page",
 				documentId: 42,

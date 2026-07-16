@@ -29,7 +29,7 @@ import fetchRefData, {
 } from "../../documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../../index.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
-import type { PreviewSessionPerspectiveTarget } from "../../preview-sessions/types.js";
+import type { PreviewSessionCollectionTarget } from "../../preview-sessions/types.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 import validateClientVersionTarget from "../helpers/validate-client-version-target.js";
@@ -61,22 +61,25 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 ): ServiceResponse<ClientDocumentsGetMultipleResult<TCollectionKey>> => {
 	let versionType: DocumentVersionType;
 	let versionId: number | undefined;
-	let preview: PreviewSessionPerspectiveTarget | undefined;
+	let preview: PreviewSessionCollectionTarget | undefined;
 
-	//* preview sessions resolve the effective version target
+	//* Preview tokens resolve the effective collection target.
 	if (data.target.type === "preview") {
 		const previewRes = await authorizePreview(context, {
 			token: data.target.token,
 			collectionKey: data.collectionKey,
 		});
 		if (previewRes.error) return previewRes;
-		//* exact previews only support single-document reads
-		if (previewRes.data.mode === "exact") {
+		//* Entry targets cannot enumerate the previewed collection; auxiliary targets can.
+		if (
+			previewRes.data.mode === "scoped" &&
+			previewRes.data.target === "entry"
+		) {
 			return {
 				error: {
 					type: "forbidden",
 					code: "preview_scope",
-					message: copy("server:core.documents.preview.exact.message"),
+					message: copy("server:core.documents.preview.scoped.message"),
 					status: 403,
 				},
 				data: undefined,

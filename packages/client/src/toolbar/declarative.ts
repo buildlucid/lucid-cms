@@ -53,7 +53,7 @@ const readPreviewState = (
 	element: HTMLElement,
 ): DeclarativePreviewState | null => {
 	const value = readString(element, attributes.preview)?.toLowerCase();
-	if (value === "exact" || value === "perspective" || value === "published") {
+	if (value === "scoped" || value === "perspective" || value === "published") {
 		return value;
 	}
 	return null;

@@ -72,14 +72,14 @@ const registerToolbarElement = (targetWindow: Window): void => {
 			this.#admin.setAttribute("aria-label", "Open Lucid admin");
 
 			const status = model.previewMode
-				? model.previewMode === "exact"
+				? model.previewMode === "scoped"
 					? {
-							label: "Exact preview",
-							description: "Exact preview of one saved version.",
+							label: "Scoped preview",
+							description: "Preview access is limited to this page.",
 						}
 					: {
-							label: "Session preview",
-							description: "Navigable preview session.",
+							label: "Navigable preview",
+							description: "Navigation stays inside this preview.",
 						}
 				: null;
 			this.#status.hidden = status === null;

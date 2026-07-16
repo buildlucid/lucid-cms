@@ -1,4 +1,4 @@
-import type { DocumentVersionType } from "@types";
+import type { DocumentVersionType, PreviewMode } from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -25,6 +25,7 @@ export const DocumentPreview: Component<{
 	documentId: Accessor<number | undefined>;
 	versionType: Accessor<DocumentVersionType>;
 	versionId: Accessor<number | undefined>;
+	mode: Accessor<PreviewMode>;
 	locale: Accessor<string>;
 	dirty: Accessor<boolean>;
 	saveStamp: Accessor<string>;
@@ -39,18 +40,15 @@ export const DocumentPreview: Component<{
 		createSignal<PreviewWidthSelection>("fit");
 	const [customWidth, setCustomWidth] = createSignal(768);
 	const [zoom, setZoom] = createSignal<PreviewZoom>(100);
-	const createPreview = api.documents.useCreatePreview();
 	const previewBridge = createPreviewBridge();
+
+	// -------------------------------
+	// Queries & Mutations
+	const createPreview = api.documents.useCreatePreview();
 
 	// ----------------------------------
 	// Memos
 	const frameSrc = createMemo(() => url() ?? undefined);
-	const previewKind = createMemo(() => {
-		const versionType = props.versionType();
-		return versionType === "revision" || versionType === "snapshot"
-			? "exact"
-			: "session";
-	});
 
 	// ----------------------------------
 	// Functions
@@ -63,6 +61,7 @@ export const DocumentPreview: Component<{
 			documentId,
 			versionType: props.versionType(),
 			versionId: props.versionId(),
+			mode: props.mode(),
 			locale: props.locale(),
 		});
 		return response.data.url;
@@ -163,6 +162,7 @@ export const DocumentPreview: Component<{
 					props.documentId(),
 					props.versionType(),
 					props.versionId(),
+					props.mode(),
 					props.locale(),
 				] as const,
 			([open]) => {
@@ -201,7 +201,7 @@ export const DocumentPreview: Component<{
 				setCustomWidth={setCustomWidth}
 				zoom={zoom}
 				setZoom={setZoom}
-				previewKind={previewKind}
+				previewMode={props.mode}
 				actionLoading={() => createPreview.action.isPending}
 				onRefresh={() => void resolvePersistedPreview(true)}
 				onCopy={() => void copyPersistedUrl()}

@@ -24,6 +24,9 @@ const Migration00000012: MigrationFn = (adapter: DatabaseAdapter) => {
 					adapter.getDataType("varchar", 255),
 					(col) => col.notNull(),
 				)
+				.addColumn("mode", adapter.getDataType("varchar", 255), (col) =>
+					col.notNull(),
+				)
 				.addColumn("entry_version_id", adapter.getDataType("integer"))
 				.addColumn("expires_at", adapter.getDataType("timestamp"), (col) =>
 					col.notNull(),

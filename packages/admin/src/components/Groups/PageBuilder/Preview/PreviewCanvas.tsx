@@ -1,3 +1,4 @@
+import type { PreviewMode } from "@types";
 import {
 	FaSolidArrowUpRightFromSquare,
 	FaSolidChevronDown,
@@ -66,7 +67,7 @@ export const PreviewCanvas: Component<{
 	setCustomWidth: Setter<number>;
 	zoom: Accessor<PreviewZoom>;
 	setZoom: Setter<PreviewZoom>;
-	previewKind: Accessor<"exact" | "session">;
+	previewMode: Accessor<PreviewMode>;
 	actionLoading: Accessor<boolean>;
 	onRefresh: () => void;
 	onCopy: () => void;
@@ -108,8 +109,8 @@ export const PreviewCanvas: Component<{
 	});
 	const visualWidth = createMemo(() => layoutWidth() * zoomScale());
 	const frameName = createMemo(() =>
-		props.previewKind() === "exact"
-			? "lucid-builder-preview:exact"
+		props.previewMode() === "scoped"
+			? "lucid-builder-preview:scoped"
 			: "lucid-builder-preview:perspective",
 	);
 
@@ -293,7 +294,7 @@ export const PreviewCanvas: Component<{
 					</div>
 				</div>
 				<div class="flex shrink-0 items-center gap-1.5">
-					<PreviewStatus kind={props.previewKind()} />
+					<PreviewStatus mode={props.previewMode()} />
 					<div class="flex items-center gap-0.5">
 						<Button
 							type="button"

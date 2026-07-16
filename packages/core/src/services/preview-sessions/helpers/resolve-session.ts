@@ -3,7 +3,7 @@ import { PreviewSessionsRepository } from "../../../libs/repositories/index.js";
 import { hashPreviewToken } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { ResolvedPreviewSession } from "../types.js";
-import isExactPreview from "./is-exact-preview.js";
+import { requiresPinnedPreviewVersion } from "./resolve-preview-mode.js";
 
 const previewTokenPattern = /^[A-Za-z0-9_-]{43}$/;
 
@@ -33,6 +33,7 @@ const resolveSession: ServiceFn<
 			"entry_collection_key",
 			"entry_document_id",
 			"entry_version_type",
+			"mode",
 			"entry_version_id",
 			"expires_at",
 		],
@@ -59,11 +60,13 @@ const resolveSession: ServiceFn<
 	}
 
 	const session = sessionRes.data;
+	const requiresPinnedVersion = requiresPinnedPreviewVersion(
+		session.entry_version_type,
+	);
 	if (
-		(isExactPreview(session.entry_version_type) &&
-			session.entry_version_id === null) ||
-		(!isExactPreview(session.entry_version_type) &&
-			session.entry_version_id !== null)
+		(requiresPinnedVersion &&
+			(session.mode !== "scoped" || session.entry_version_id === null)) ||
+		(!requiresPinnedVersion && session.entry_version_id !== null)
 	) {
 		return {
 			error: {

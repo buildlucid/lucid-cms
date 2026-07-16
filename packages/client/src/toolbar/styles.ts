@@ -119,7 +119,7 @@ export const toolbarStyles = `
 	box-shadow: 0 0 0 3px rgba(193,254,119,.1);
 }
 
-.status[data-mode="exact"] .status-dot {
+.status[data-mode="scoped"] .status-dot {
 	background: #ffd166;
 	box-shadow: 0 0 0 3px rgba(255,209,102,.1);
 }

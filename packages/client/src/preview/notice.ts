@@ -1,4 +1,4 @@
-import { exactLockMessage, previewNoticeTagName } from "./constants.js";
+import { previewNoticeTagName, scopedLockMessage } from "./constants.js";
 import { previewNoticeStyles } from "./styles.js";
 
 type LucidPreviewNoticeElement = HTMLElement & {
@@ -16,7 +16,7 @@ const registerPreviewNoticeElement = (targetWindow: Window): void => {
 		constructor() {
 			super();
 			const root = this.attachShadow({ mode: "open" });
-			root.innerHTML = `<style>${previewNoticeStyles}</style><div class="notice" role="status" aria-live="polite">${exactLockMessage}</div>`;
+			root.innerHTML = `<style>${previewNoticeStyles}</style><div class="notice" role="status" aria-live="polite">${scopedLockMessage}</div>`;
 		}
 
 		disconnectedCallback(): void {
@@ -43,7 +43,6 @@ const registerPreviewNoticeElement = (targetWindow: Window): void => {
 	);
 };
 
-/** Creates the isolated exact-preview navigation notice. */
 export const createPreviewNotice = (
 	targetWindow: Window,
 ): LucidPreviewNoticeElement => {

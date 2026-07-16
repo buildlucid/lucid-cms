@@ -14,6 +14,9 @@ const PageCollection = new CollectionBuilder("page", {
 	},
 	autoSave: true,
 	revisions: true,
+	review: {
+		requiredFor: ["production"],
+	},
 	environments: [
 		{
 			key: "production",

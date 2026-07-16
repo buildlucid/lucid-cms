@@ -29,12 +29,12 @@ import MediaAltGenerationModal from "@/components/Modals/AI/MediaAltGenerationMo
 import MediaImageGenerationModal from "@/components/Modals/AI/MediaImageGenerationModal";
 import { useDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
 import { useDocumentMutations } from "@/hooks/document/useDocumentMutations";
+import { useDocumentPreview } from "@/hooks/document/useDocumentPreview";
 import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
 import { PageBuilderStateProvider } from "@/hooks/document/usePageBuilderState";
 import brickStore from "@/store/brickStore";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 
@@ -98,6 +98,11 @@ const CollectionsDocumentsEditRoute: Component<{
 		hasDraftSyncPermission: () =>
 			uiState.hasSavePermission() && !uiState.isBuilderLocked(),
 		autoSaveActive: uiState.isAutoSaveActive,
+	});
+	const preview = useDocumentPreview({
+		version: versionType,
+		document: docState.document,
+		autoSaveMetadata: mutations.autoSaveMetadata,
 	});
 
 	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
@@ -274,21 +279,6 @@ const CollectionsDocumentsEditRoute: Component<{
 	const builderBrickConfig = createMemo(
 		() => docState.collection()?.builderBricks ?? [],
 	);
-	const previewLocale = createMemo(
-		() =>
-			contentLocaleStore.get.contentLocale ??
-			contentLocaleStore.get.locales.find((locale) => locale.isDefault)?.code ??
-			"",
-	);
-	const previewSaveStamp = createMemo(() => {
-		const autoSaveMetadata = mutations.autoSaveMetadata();
-		return [
-			docState.document()?.updatedAt ?? "",
-			autoSaveMetadata?.updatedAt ?? "",
-			autoSaveMetadata?.contentId ?? "",
-		].join(":");
-	});
-
 	// ----------------------------------
 	// Render
 	return (
@@ -401,9 +391,10 @@ const CollectionsDocumentsEditRoute: Component<{
 										documentId={docState.documentId}
 										versionType={versionType}
 										versionId={versionId}
-										locale={previewLocale}
+										mode={preview.mode}
+										locale={preview.locale}
 										dirty={docState.isDocumentMutated}
-										saveStamp={previewSaveStamp}
+										saveStamp={preview.saveStamp}
 									/>
 								</div>
 							</Show>

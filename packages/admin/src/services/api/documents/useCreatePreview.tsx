@@ -1,6 +1,7 @@
 import type {
 	DocumentVersionType,
 	ErrorResponse,
+	PreviewMode,
 	PreviewSessionURLResponse,
 	ResponseBody,
 } from "@types";
@@ -12,6 +13,7 @@ export interface CreatePreviewParams {
 	documentId: number;
 	versionType: DocumentVersionType;
 	versionId?: number;
+	mode?: PreviewMode;
 	locale?: string;
 }
 
@@ -23,6 +25,7 @@ export const createPreviewReq = (params: CreatePreviewParams) => {
 			method: "POST",
 			body: {
 				locale: params.locale,
+				mode: params.mode,
 				versionType: params.versionType,
 				versionId: params.versionId,
 			},

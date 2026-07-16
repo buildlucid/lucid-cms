@@ -25,7 +25,10 @@ import ReleaseRequestOverview from "@/components/Partials/ReleaseRequestOverview
 import ReleaseRequestRow from "@/components/Tables/Rows/ReleaseRequestRow";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
 import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
+import userStore from "@/store/userStore";
 import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
 
 export const ReleaseRequestsList: Component<{
 	state: {
@@ -54,7 +57,10 @@ export const ReleaseRequestsList: Component<{
 	const [scheduleOpen, setScheduleOpen] = createSignal(false);
 	const [reviewersOpen, setReviewersOpen] = createSignal(false);
 
+	// -------------------------------
+	// Queries & Mutations
 	const retry = api.publishOperations.useRetry();
+	const createPreview = api.documents.useCreatePreview();
 
 	// ----------------------------------
 	// Memos
@@ -142,6 +148,43 @@ export const ReleaseRequestsList: Component<{
 	const openReviewers = (operation: PublishOperation) => {
 		setSelectedOperation(operation);
 		setReviewersOpen(true);
+	};
+	const copyPreviewUrl = async (operation: PublishOperation) => {
+		try {
+			const response = await createPreview.action.mutateAsync({
+				collectionKey: operation.collectionKey,
+				documentId: operation.documentId,
+				versionType: "snapshot",
+				versionId: operation.snapshotVersionId,
+				mode: "scoped",
+				locale: contentLocaleStore.get.contentLocale || undefined,
+			});
+			if (!response.data.url) {
+				spawnToast({
+					title: T()("preview.unavailable.title"),
+					message: T()("preview.unavailable.message"),
+					status: "warning",
+				});
+				return;
+			}
+
+			await navigator.clipboard.writeText(response.data.url);
+			spawnToast({
+				title: T()("toasts.common.copy.to.clipboard.title"),
+				status: "success",
+			});
+		} catch {
+			return;
+		}
+	};
+	const previewAvailable = (operation: PublishOperation) =>
+		collectionMap().get(operation.collectionKey)?.capabilities.preview === true;
+	const previewPermission = (operation: PublishOperation) => {
+		const permission = collectionMap().get(operation.collectionKey)?.permissions
+			.read;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).some;
 	};
 
 	// ----------------------------------------
@@ -264,6 +307,12 @@ export const ReleaseRequestsList: Component<{
 									selected={selected[i]}
 									options={{
 										isSelectable,
+									}}
+									preview={{
+										available: previewAvailable(request()),
+										permission: previewPermission(request()),
+										loading: createPreview.action.isPending,
+										onCopy: () => void copyPreviewUrl(request()),
 									}}
 									callbacks={{
 										setSelected,

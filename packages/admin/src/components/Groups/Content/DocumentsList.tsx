@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/solid-query";
 import type {
 	Collection,
 	InternalCollectionDocument,
+	PreviewMode,
 	ResponseBody,
 } from "@types";
 import {
@@ -295,12 +296,13 @@ export const DocumentsList: Component<{
 			},
 		});
 	};
-	const copyPreviewUrl = async (documentId: number) => {
+	const copyPreviewUrl = async (documentId: number, mode: PreviewMode) => {
 		try {
 			const response = await createPreview.action.mutateAsync({
 				collectionKey: collectionKey(),
 				documentId,
 				versionType: "latest",
+				mode,
 				locale: contentLocale() || undefined,
 			});
 			if (!response.data.url) {
@@ -463,11 +465,9 @@ export const DocumentsList: Component<{
 								}}
 								actions={[
 									{
-										label: T()("preview.copy.url"),
-										type: "button",
+										label: T()("preview.copy.group"),
+										type: "group",
 										icon: "link",
-										onClick: () => void copyPreviewUrl(doc().id),
-										isLoading: createPreview.action.isPending,
 										actionExclude: true,
 										permission: collectionPermissions()?.read
 											? userStore.get.hasPermission([
@@ -477,6 +477,33 @@ export const DocumentsList: Component<{
 										hide:
 											props.state.showingDeleted() ||
 											props.state.collection?.capabilities.preview !== true,
+										actions: [
+											{
+												label: T()("preview.copy.scoped"),
+												type: "button",
+												icon: "lock",
+												onClick: () => void copyPreviewUrl(doc().id, "scoped"),
+												isLoading: createPreview.action.isPending,
+												permission: collectionPermissions()?.read
+													? userStore.get.hasPermission([
+															collectionPermissions()?.read as string,
+														]).some
+													: false,
+											},
+											{
+												label: T()("preview.copy.navigable"),
+												type: "button",
+												icon: "share",
+												onClick: () =>
+													void copyPreviewUrl(doc().id, "perspective"),
+												isLoading: createPreview.action.isPending,
+												permission: collectionPermissions()?.read
+													? userStore.get.hasPermission([
+															collectionPermissions()?.read as string,
+														]).some
+													: false,
+											},
+										],
 									},
 									{
 										label: T()("common.edit"),

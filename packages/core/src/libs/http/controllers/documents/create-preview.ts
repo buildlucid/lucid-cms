@@ -38,7 +38,7 @@ const createPreviewController = factory.createHandlers(
 	collectionPermissions("read"),
 	async (c) => {
 		const { collectionKey, id } = c.req.valid("param");
-		const { locale, versionType, versionId } = c.req.valid("json");
+		const { locale, mode, versionType, versionId } = c.req.valid("json");
 		const context = createServiceContext(c);
 
 		const previewRes = await serviceWrapper(previewSessionServices.create, {
@@ -54,6 +54,7 @@ const createPreviewController = factory.createHandlers(
 			documentId: Number.parseInt(id, 10),
 			versionType,
 			versionId,
+			mode,
 			locale,
 			creator: c.get("auth"),
 		});

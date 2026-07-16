@@ -1,4 +1,4 @@
-export type PreviewMode = "perspective" | "exact";
+export type { PreviewMode } from "@lucidcms/types";
 
 export type PreviewController = {
 	/** Whether the builder preview runtime is installed. */

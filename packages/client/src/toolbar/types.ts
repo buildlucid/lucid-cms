@@ -1,7 +1,7 @@
-import type { DocumentVersionType } from "@lucidcms/types";
+import type { DocumentVersionType, PreviewMode } from "@lucidcms/types";
 
 export type PreviewModeSource = "explicit" | "url" | "stored";
-export type PreviewKind = "perspective" | "exact";
+export type PreviewKind = PreviewMode;
 
 export type PreviewModeState = {
 	active: boolean;

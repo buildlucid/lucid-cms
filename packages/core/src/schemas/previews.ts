@@ -17,7 +17,7 @@ export const controllerSchemas = {
 			token: previewTokenSchema,
 		}),
 		response: z.object({
-			mode: z.enum(["perspective", "exact"]),
+			mode: z.enum(["perspective", "scoped"]),
 			entry: z.object({
 				collectionKey: z.string(),
 				documentId: z.number(),

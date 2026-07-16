@@ -356,6 +356,7 @@ export const controllerSchemas = {
 	createPreview: {
 		body: z.object({
 			locale: z.string().trim().min(1).optional(),
+			mode: z.enum(["perspective", "scoped"]).optional(),
 			versionType: versionTypesSchema,
 			versionId: z.number().int().positive().optional(),
 		}),
