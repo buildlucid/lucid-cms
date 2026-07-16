@@ -12,6 +12,7 @@ const PageCollection = new CollectionBuilder("page", {
 		fixed: [SeoBrick],
 		builder: [ContentBrick],
 	},
+	localized: true,
 	autoSave: true,
 	revisions: true,
 	review: {
@@ -29,8 +30,15 @@ const PageCollection = new CollectionBuilder("page", {
 			{ key: "tablet", label: "Tablet", width: 768 },
 			{ key: "mobile", label: "Mobile", width: 390 },
 		],
-		url: ({ document, env }) => {
-			const fullSlug = document.fields.fullSlug;
+		url: ({ document, env, locale }) => {
+			const fullSlugs = document.fields.fullSlug;
+			const fullSlug =
+				typeof fullSlugs === "object" &&
+				fullSlugs !== null &&
+				!Array.isArray(fullSlugs)
+					? Object.entries(fullSlugs).find(([key]) => key === locale)?.[1]
+					: null;
+
 			const previewOrigin = env?.PREVIEW_ORIGIN;
 
 			return typeof fullSlug === "string" &&

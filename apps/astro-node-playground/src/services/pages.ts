@@ -3,13 +3,23 @@ import { asDocument } from "@lucidcms/client";
 import type { AstroGlobal } from "astro";
 
 const previewCookieName = "lucid_preview";
+export const pageLocales = ["en", "fr"] as const;
+export type PageLocale = (typeof pageLocales)[number];
+
+/** Resolves the supported locale from the first full-slug segment. */
+export const resolvePageLocale = (fullSlug: string): PageLocale | undefined => {
+	const locale = fullSlug.split("/")[1];
+
+	return pageLocales.find((supportedLocale) => supportedLocale === locale);
+};
 
 type GetPageOptions = {
 	fullSlug: string;
+	locale: PageLocale;
 	astro: Pick<AstroGlobal, "cookies" | "response" | "url">;
 };
 
-const getPage = async ({ fullSlug, astro }: GetPageOptions) => {
+const getPage = async ({ fullSlug, locale, astro }: GetPageOptions) => {
 	const toolkit = await getToolkit();
 
 	const [authentication, preview] = await Promise.all([
@@ -82,6 +92,7 @@ const getPage = async ({ fullSlug, astro }: GetPageOptions) => {
 			authentication,
 		},
 		document: asDocument(documentResponse.data, {
+			locale,
 			preview: preview.data?.active === true,
 		}),
 		isPreviewError,

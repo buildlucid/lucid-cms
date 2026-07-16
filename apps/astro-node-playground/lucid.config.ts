@@ -24,6 +24,21 @@ export default configureLucid({
 			refreshToken: env.REFRESH_TOKEN_SECRET,
 			accessToken: env.ACCESS_TOKEN_SECRET,
 		},
+		localization: {
+			locales: [
+				{
+					label: "English",
+					code: "en",
+					direction: "ltr",
+				},
+				{
+					label: "French",
+					code: "fr",
+					direction: "ltr",
+				},
+			],
+			defaultLocale: "en",
+		},
 		collections: [PageCollection],
 		plugins: [
 			sqliteKVPlugin(),
@@ -32,7 +47,12 @@ export default configureLucid({
 				collections: [
 					{
 						collectionKey: PageCollection.key,
+						localized: true,
 						displayFullSlug: true,
+						prefix: {
+							en: "en",
+							fr: "fr",
+						},
 					},
 				],
 			}),

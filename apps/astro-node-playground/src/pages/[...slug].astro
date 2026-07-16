@@ -1,25 +1,42 @@
 ---
 import { resolveToolbarAttributes } from "@lucidcms/client";
 import "../index.css";
-import getPage from "../services/pages";
+import getPage, { resolvePageLocale } from "../services/pages";
 
 export const prerender = false;
 
+const requestedFullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
+const locale = resolvePageLocale(requestedFullSlug);
+
+if (!locale) {
+	return Astro.redirect(
+		`/en${requestedFullSlug === "/" ? "" : requestedFullSlug}`,
+	);
+}
+
 const result = await getPage({
-	fullSlug: Astro.params.slug ? `/${Astro.params.slug}` : "/",
+	fullSlug: requestedFullSlug,
+	locale,
 	astro: Astro,
 });
 
 const titleField = result.document?.field("title");
 const summaryField = result.document?.field("summary");
-const pageFullSlug = result.document?.field("fullSlug").value();
-const slug = result.document?.field("slug").value();
+const fullSlugField = result.document?.field("fullSlug");
+const slugField = result.document?.field("slug");
 const contentBrick = result.document?.brick("content");
 const brickHeadingField = contentBrick?.field("heading");
 const sectionHeadingField = contentBrick
 	?.field("sections")
 	.groups()[0]
 	?.field("sectionHeading");
+
+const pageFullSlug = fullSlugField?.value();
+const alternateLocale = locale === "en" ? "fr" : "en";
+const alternateFullSlug = fullSlugField?.value({ locale: alternateLocale });
+const alternateLocaleHref = alternateFullSlug || `/${alternateLocale}`;
+const alternateLocaleLabel = alternateLocale === "en" ? "English" : "Français";
+const localeRoot = `/${locale}`;
 
 const toolbarAttributes = resolveToolbarAttributes({
 	authentication: result.raw.authentication,
@@ -28,7 +45,7 @@ const toolbarAttributes = resolveToolbarAttributes({
 });
 ---
 
-<html lang="en">
+<html lang={locale}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
@@ -52,7 +69,7 @@ const toolbarAttributes = resolveToolbarAttributes({
 			<div class="page-backdrop">
 				<div class="page-frame">
 					<header class="page-header">
-						<a class="brand" href="/" aria-label="Lucid CMS">
+						<a class="brand" href={localeRoot} aria-label="Lucid CMS">
 							<img
 								class="brand-logo"
 								src="/text-logo-dark.svg"
@@ -60,17 +77,28 @@ const toolbarAttributes = resolveToolbarAttributes({
 							/>
 						</a>
 
-						<nav class="page-nav" aria-label="Primary">
-							<a class="nav-link" href="/">Home</a>
-							<a class="nav-link" href="/about">About</a>
+						<div class="page-header-actions">
+							<nav class="page-nav" aria-label="Primary">
+								<a class="nav-link" href={localeRoot}>Home</a>
+								<a class="nav-link" href={`${localeRoot}/about`}>About</a>
+								<a
+									class="nav-link"
+									href="https://lucidcms.io/en/cms/docs/getting-started/what-is-lucid-cms/"
+								>
+									Docs
+								</a>
+								<a class="nav-link" href="/lucid">Admin</a>
+							</nav>
+
 							<a
-								class="nav-link"
-								href="https://lucidcms.io/en/cms/docs/getting-started/what-is-lucid-cms/"
+								class="locale-link"
+								href={alternateLocaleHref}
+								hreflang={alternateLocale}
+								lang={alternateLocale}
 							>
-								Docs
+								{alternateLocaleLabel}
 							</a>
-							<a class="nav-link" href="/lucid">Admin</a>
-						</nav>
+						</div>
 					</header>
 
 					<section class="welcome-card">
@@ -94,8 +122,8 @@ const toolbarAttributes = resolveToolbarAttributes({
 							) : (
 								<>
 									Open the Lucid admin, create a <code>page</code> document with
-									the full slug <code>/</code>, then refresh this route to see
-									your content appear here.
+									the slug <code>/</code> for the <code>{localeRoot}</code> locale
+									route, then refresh to see your content appear here.
 								</>
 							)}
 						</p>
@@ -131,7 +159,7 @@ const toolbarAttributes = resolveToolbarAttributes({
 								<div class="document-row">
 									<span class="document-label">Slug</span>
 									<p class="document-value">
-										{slug || "Not set"}
+										{slugField?.value() || "Not set"}
 									</p>
 								</div>
 
@@ -166,10 +194,13 @@ const toolbarAttributes = resolveToolbarAttributes({
 									<span class="document-label">Created</span>
 									<p class="document-value">
 										{result.document.raw.createdAt
-											? new Date(result.document.raw.createdAt).toLocaleString("en-GB", {
-													dateStyle: "medium",
-													timeStyle: "short",
-												})
+											? new Date(result.document.raw.createdAt).toLocaleString(
+													locale === "fr" ? "fr-FR" : "en-GB",
+													{
+														dateStyle: "medium",
+														timeStyle: "short",
+													},
+												)
 											: "Not available"}
 									</p>
 								</div>

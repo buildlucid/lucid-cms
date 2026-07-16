@@ -96,7 +96,7 @@ export const DocumentPreview: Component<{
 			}
 
 			setFrameLoading(true);
-			previewBridge.queueScrollRestore(scrollState);
+			previewBridge.queueScrollRestore(scrollState, nextUrl);
 			setUrl(nextUrl);
 			setResolverState("ready");
 		} catch {
@@ -174,9 +174,20 @@ export const DocumentPreview: Component<{
 					props.mode(),
 					props.locale(),
 				] as const,
-			([open]) => {
+			(
+				[open, collectionKey, documentId, versionType, versionId, mode, locale],
+				previous,
+			) => {
 				if (!open) return;
-				void resolvePersistedPreview();
+				const localeChanged =
+					previous?.[0] === true &&
+					previous[1] === collectionKey &&
+					previous[2] === documentId &&
+					previous[3] === versionType &&
+					previous[4] === versionId &&
+					previous[5] === mode &&
+					previous[6] !== locale;
+				void resolvePersistedPreview(localeChanged);
 			},
 		),
 	);

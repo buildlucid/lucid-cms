@@ -8,6 +8,7 @@ import {
 
 const CAPTURE_TIMEOUT_MS = 150;
 const RESTORE_TIMEOUT_MS = 5000;
+const previewQueryParam = "preview";
 
 type PendingCapture = {
 	requestId: string;
@@ -50,11 +51,25 @@ export const createPreviewBridge = (options?: {
 			restoreTimeout = undefined;
 		}
 	};
+	/** Creates the page key expected by the destination preview runtime. */
+	const getPageKey = (url: string): string | null => {
+		try {
+			const pageUrl = new URL(url);
+			pageUrl.searchParams.delete(previewQueryParam);
+			return pageUrl.toString();
+		} catch {
+			return null;
+		}
+	};
 
 	/** Queues a scroll position for the next preview load. */
-	const queueScrollRestore = (state: PreviewScrollState | null) => {
+	const queueScrollRestore = (
+		state: PreviewScrollState | null,
+		targetUrl?: string,
+	) => {
 		clearRestoreTimeout();
-		pendingRestore = state;
+		const pageKey = targetUrl ? getPageKey(targetUrl) : null;
+		pendingRestore = state && pageKey ? { ...state, pageKey } : state;
 		if (state) {
 			restoreTimeout = window.setTimeout(() => {
 				pendingRestore = null;

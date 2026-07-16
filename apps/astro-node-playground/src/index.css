@@ -96,6 +96,25 @@ a {
 	gap: 12px;
 }
 
+.page-header-actions {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.locale-link {
+	color: rgba(255, 255, 255, 0.56);
+	font-size: 13px;
+	font-weight: 500;
+	text-underline-offset: 4px;
+	transition: color 0.2s ease;
+}
+
+.locale-link:hover,
+.locale-link:focus-visible {
+	color: var(--title);
+}
+
 .nav-link,
 .button {
 	display: inline-flex;
@@ -241,6 +260,21 @@ code {
 @media (max-width: 720px) {
 	.page-frame {
 		padding: 24px 20px 48px;
+	}
+
+	.page-header {
+		align-items: flex-start;
+	}
+
+	.page-header-actions {
+		align-items: flex-end;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.page-nav {
+		flex-wrap: wrap;
+		justify-content: flex-end;
 	}
 
 	.welcome-card {
