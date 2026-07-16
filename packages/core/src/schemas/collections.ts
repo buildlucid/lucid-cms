@@ -193,6 +193,33 @@ const collectionResponseSchema = z.object({
 			}),
 		}),
 	),
+	preview: z
+		.object({
+			breakpoints: z.array(
+				z.object({
+					key: z.string().meta({
+						description: "The preview breakpoint key",
+						example: "mobile",
+					}),
+					label: resolvedAdminCopySchema.meta({
+						description: "Display label for the preview breakpoint",
+						example: {
+							type: "lucid.literal",
+							value: "Mobile",
+						},
+					}),
+					width: z.number().int().min(280).max(2560).meta({
+						description: "Preview viewport width in pixels",
+						example: 390,
+					}),
+				}),
+			),
+		})
+		.nullable()
+		.meta({
+			description:
+				"Builder preview configuration exposed to the admin interface",
+		}),
 	capabilities: z.object({
 		scheduling: z.boolean().meta({
 			description:

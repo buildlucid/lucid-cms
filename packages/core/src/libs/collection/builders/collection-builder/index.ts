@@ -217,7 +217,15 @@ class CollectionBuilder extends FieldBuilder {
 			revisionRetentionDays:
 				this.config.revisionRetentionDays ??
 				constants.collectionBuilder.revisionRetentionDays,
-			preview: this.config.preview !== undefined,
+			preview: this.config.preview
+				? {
+						breakpoints:
+							this.config.preview.breakpoints?.map((breakpoint) => ({
+								...breakpoint,
+								label: normalizeCopy(breakpoint.label),
+							})) ?? [],
+					}
+				: null,
 			tenants: this.config.tenants ?? [],
 			permissions: this.config.permissions ?? {},
 		};

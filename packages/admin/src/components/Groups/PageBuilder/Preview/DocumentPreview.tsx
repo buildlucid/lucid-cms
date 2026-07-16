@@ -1,4 +1,8 @@
-import type { DocumentVersionType, PreviewMode } from "@types";
+import type {
+	CollectionPreviewBreakpoint,
+	DocumentVersionType,
+	PreviewMode,
+} from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -27,6 +31,7 @@ export const DocumentPreview: Component<{
 	versionId: Accessor<number | undefined>;
 	mode: Accessor<PreviewMode>;
 	locale: Accessor<string>;
+	breakpoints: Accessor<CollectionPreviewBreakpoint[]>;
 	dirty: Accessor<boolean>;
 	saveStamp: Accessor<string>;
 }> = (props) => {
@@ -195,6 +200,7 @@ export const DocumentPreview: Component<{
 				frameLoading={frameLoading}
 				setFrameLoading={setFrameLoading}
 				setFrameRef={previewBridge.setFrame}
+				breakpoints={props.breakpoints}
 				selectedWidth={selectedWidth}
 				setSelectedWidth={setSelectedWidth}
 				customWidth={customWidth}

@@ -53,10 +53,24 @@ export type CollectionPreviewURLResolver = (props: {
 	tenantKey: string | null;
 }) => string | URL | null | Promise<string | URL | null>;
 
+export type CollectionPreviewBreakpointConfig = {
+	key: string;
+	label: AdminCopyInput;
+	width: number;
+};
+
+export type CollectionPreviewBreakpoint = {
+	key: string;
+	label: ResolvedAdminCopy;
+	width: number;
+};
+
 export type CollectionPreviewConfig = {
 	url: CollectionPreviewURLResolver;
 	/** How long generated preview links remain valid, in seconds. Defaults to one hour. */
 	expiresIn?: number;
+	/** Named viewport widths shown in the builder preview. */
+	breakpoints?: CollectionPreviewBreakpointConfig[];
 };
 
 export type PublishingReviewCommentRequirement = "required" | "optional";
@@ -173,7 +187,9 @@ export type CollectionData = {
 		relations: CollectionEnvironmentRelations;
 	}[];
 	revisionRetentionDays: number | false;
-	preview: boolean;
+	preview: {
+		breakpoints: CollectionPreviewBreakpoint[];
+	} | null;
 	tenants: string[];
 	permissions: CollectionPermissions;
 };

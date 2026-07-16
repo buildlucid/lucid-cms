@@ -393,6 +393,9 @@ const CollectionsDocumentsEditRoute: Component<{
 										versionId={versionId}
 										mode={preview.mode}
 										locale={preview.locale}
+										breakpoints={() =>
+											docState.collection()?.preview?.breakpoints ?? []
+										}
 										dirty={docState.isDocumentMutated}
 										saveStamp={preview.saveStamp}
 									/>

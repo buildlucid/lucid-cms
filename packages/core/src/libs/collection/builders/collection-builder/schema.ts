@@ -20,6 +20,15 @@ const groupKeySchema = z
 			"Collection group key must contain only lowercase letters, numbers, hyphens and underscores",
 	});
 
+const previewBreakpointKeySchema = z
+	.string()
+	.min(1)
+	.max(50)
+	.regex(/^[a-z0-9-_]+$/, {
+		message:
+			"Preview breakpoint key must contain only lowercase letters, numbers, hyphens and underscores",
+	});
+
 const relationCollectionKeySchema = z
 	.string()
 	.min(1)
@@ -193,6 +202,15 @@ const CollectionConfigSchema = z
 					.positive()
 					.max(constants.collectionBuilder.previewMaxExpirationSeconds)
 					.optional(),
+				breakpoints: z
+					.array(
+						z.object({
+							key: previewBreakpointKeySchema,
+							label: adminCopyInputSchema,
+							width: z.number().int().min(280).max(2560),
+						}),
+					)
+					.optional(),
 			})
 			.optional(),
 		hooks: z
@@ -248,6 +266,19 @@ const CollectionConfigSchema = z
 				code: "custom",
 				path: ["review", "requiredFor", targetIndex],
 				message: `Review requiredFor target "${target}" must reference a configured environment`,
+			});
+		}
+
+		const breakpointKeys =
+			data.preview?.breakpoints?.map((breakpoint) => breakpoint.key) ?? [];
+		const duplicateBreakpointKeys = breakpointKeys.filter(
+			(key, index) => breakpointKeys.indexOf(key) !== index,
+		);
+		if (duplicateBreakpointKeys.length > 0) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["preview", "breakpoints"],
+				message: `Preview breakpoint keys must be unique: ${Array.from(new Set(duplicateBreakpointKeys)).join(", ")}`,
 			});
 		}
 

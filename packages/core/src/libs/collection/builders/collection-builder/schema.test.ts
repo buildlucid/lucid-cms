@@ -74,6 +74,75 @@ test("collection builder options passes schema validation", async () => {
 	expect(res.success).toBe(true);
 });
 
+test("collection preview breakpoints validate labels, keys and widths", async () => {
+	const config = {
+		key: "pages",
+		mode: "multiple",
+		details: {
+			name: "Pages",
+			singularName: "Page",
+		},
+		preview: {
+			url: () => "https://example.com",
+			breakpoints: [
+				{
+					key: "mobile",
+					label: "Mobile",
+					width: 390,
+				},
+				{
+					key: "large-screen",
+					label: copy("admin:tests.preview.largeScreen", {
+						defaultMessage: "Large screen",
+					}),
+					width: 1440,
+				},
+			],
+		},
+	};
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync(config),
+	).resolves.toMatchObject({
+		success: true,
+	});
+
+	for (const width of [279, 2561, 390.5]) {
+		await expect(
+			CollectionConfigSchema.safeParseAsync({
+				...config,
+				preview: {
+					...config.preview,
+					breakpoints: [{ key: "mobile", label: "Mobile", width }],
+				},
+			}),
+		).resolves.toMatchObject({ success: false });
+	}
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...config,
+			preview: {
+				...config.preview,
+				breakpoints: [{ key: "Mobile", label: "Mobile", width: 390 }],
+			},
+		}),
+	).resolves.toMatchObject({ success: false });
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...config,
+			preview: {
+				...config.preview,
+				breakpoints: [
+					{ key: "mobile", label: "Mobile", width: 390 },
+					{ key: "mobile", label: "Compact", width: 480 },
+				],
+			},
+		}),
+	).resolves.toMatchObject({ success: false });
+});
+
 test("collection workflow features validates stages, targets and palette", async () => {
 	const validConfig = {
 		key: "pages",

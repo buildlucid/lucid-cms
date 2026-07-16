@@ -1,4 +1,4 @@
-import type { PreviewMode } from "@types";
+import type { CollectionPreviewBreakpoint, PreviewMode } from "@types";
 import {
 	FaSolidArrowUpRightFromSquare,
 	FaSolidChevronDown,
@@ -8,6 +8,7 @@ import {
 import {
 	type Accessor,
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
 	onCleanup,
@@ -16,11 +17,16 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Partials/Button";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import { PreviewStatus } from "./PreviewStatus";
 
-export type PreviewWidth = "fit" | 1440 | 768 | 390;
-export type PreviewWidthSelection = PreviewWidth | "custom";
+export type PreviewWidthSelection =
+	| "fit"
+	| "custom"
+	| {
+			type: "breakpoint";
+			key: string;
+	  };
 export type PreviewZoom = 25 | 50 | 75 | 100;
 export type ResolverState =
 	| "idle"
@@ -32,24 +38,24 @@ export type ResolverState =
 const MIN_PREVIEW_WIDTH = 280;
 const MAX_PREVIEW_WIDTH = 2560;
 
-const widthOptions: Array<{
-	value: PreviewWidth;
+const defaultBreakpoints: Array<{
+	key: string;
+	width: number;
 	label: () => string;
 }> = [
 	{
-		value: "fit",
-		label: () => T()("preview.width.fit"),
-	},
-	{
-		value: 1440,
+		key: "desktop",
+		width: 1440,
 		label: () => T()("preview.width.desktop"),
 	},
 	{
-		value: 768,
+		key: "tablet",
+		width: 768,
 		label: () => T()("preview.width.tablet"),
 	},
 	{
-		value: 390,
+		key: "mobile",
+		width: 390,
 		label: () => T()("preview.width.mobile"),
 	},
 ];
@@ -61,6 +67,7 @@ export const PreviewCanvas: Component<{
 	frameLoading: Accessor<boolean>;
 	setFrameLoading: Setter<boolean>;
 	setFrameRef: (element: HTMLIFrameElement) => void;
+	breakpoints: Accessor<CollectionPreviewBreakpoint[]>;
 	selectedWidth: Accessor<PreviewWidthSelection>;
 	setSelectedWidth: Setter<PreviewWidthSelection>;
 	customWidth: Accessor<number>;
@@ -98,11 +105,36 @@ export const PreviewCanvas: Component<{
 	const maximumLayoutWidth = createMemo(() =>
 		Math.max(availableCanvasWidth() / zoomScale(), 0),
 	);
+	const widthOptions = createMemo(() => {
+		const breakpoints = props.breakpoints();
+		if (breakpoints.length === 0) {
+			return defaultBreakpoints.map((breakpoint) => ({
+				key: breakpoint.key,
+				width: breakpoint.width,
+				label: breakpoint.label(),
+			}));
+		}
+
+		return breakpoints.map((breakpoint) => ({
+			key: breakpoint.key,
+			width: breakpoint.width,
+			label: translateAdminCopy(breakpoint.label),
+		}));
+	});
+	const selectedWidthValue = createMemo(() => {
+		const selection = props.selectedWidth();
+		return typeof selection === "object"
+			? `breakpoint:${selection.key}`
+			: selection;
+	});
 	const requestedWidth = createMemo(() => {
-		const width = props.selectedWidth();
-		if (width === "fit") return maximumLayoutWidth();
-		if (width === "custom") return props.customWidth();
-		return width;
+		const selection = props.selectedWidth();
+		if (selection === "fit") return maximumLayoutWidth();
+		if (selection === "custom") return props.customWidth();
+		return (
+			widthOptions().find((option) => option.key === selection.key)?.width ??
+			maximumLayoutWidth()
+		);
 	});
 	const layoutWidth = createMemo(() => {
 		return Math.min(maximumLayoutWidth(), requestedWidth());
@@ -179,24 +211,21 @@ export const PreviewCanvas: Component<{
 		window.addEventListener("blur", stopViewportResize);
 	};
 	const selectWidth = (value: string) => {
-		switch (value) {
-			case "fit":
-				props.setSelectedWidth(value);
-				break;
-			case "custom":
-				props.setCustomWidth(Math.round(layoutWidth()));
-				props.setSelectedWidth(value);
-				break;
-			case "1440":
-				props.setSelectedWidth(1440);
-				break;
-			case "768":
-				props.setSelectedWidth(768);
-				break;
-			case "390":
-				props.setSelectedWidth(390);
-				break;
+		if (value === "fit") {
+			props.setSelectedWidth(value);
+			return;
 		}
+		if (value === "custom") {
+			props.setCustomWidth(Math.round(layoutWidth()));
+			props.setSelectedWidth(value);
+			return;
+		}
+
+		const key = value.startsWith("breakpoint:")
+			? value.slice("breakpoint:".length)
+			: null;
+		if (!key || !widthOptions().some((option) => option.key === key)) return;
+		props.setSelectedWidth({ type: "breakpoint", key });
 	};
 	const setWidth = (value: string, clamp: boolean) => {
 		const width = Number.parseInt(value, 10);
@@ -229,6 +258,18 @@ export const PreviewCanvas: Component<{
 	};
 
 	// ----------------------------------
+	// Effects
+	createEffect(() => {
+		const selection = props.selectedWidth();
+		if (
+			typeof selection === "object" &&
+			!widthOptions().some((option) => option.key === selection.key)
+		) {
+			props.setSelectedWidth("fit");
+		}
+	});
+
+	// ----------------------------------
 	// Lifecycle
 	onMount(() => {
 		resizeObserver = new ResizeObserver(updateCanvasSize);
@@ -248,13 +289,16 @@ export const PreviewCanvas: Component<{
 				<div class="flex shrink-0 items-center gap-2">
 					<div class="relative">
 						<select
-							value={String(props.selectedWidth())}
+							value={selectedWidthValue()}
 							aria-label={T()("preview.width.mode")}
 							class="h-8 min-w-30 appearance-none rounded-md border border-border bg-input-base py-0 pr-7 pl-2 text-sm font-medium text-subtitle outline-none transition-colors focus:border-primary-base"
 							onChange={(event) => selectWidth(event.currentTarget.value)}
 						>
-							{widthOptions.map((option) => (
-								<option value={String(option.value)}>{option.label()}</option>
+							<option value="fit">{T()("preview.width.fit")}</option>
+							{widthOptions().map((option) => (
+								<option value={`breakpoint:${option.key}`}>
+									{option.label}
+								</option>
 							))}
 							<option value="custom">{T()("preview.width.custom")}</option>
 						</select>

@@ -117,11 +117,12 @@ const formatSingle = (props: {
 				}),
 			},
 		})),
+		preview: collectionData.preview,
 		capabilities: {
 			scheduling:
 				collectionData.scheduling === true &&
 				props.queueSupportsScheduling === true,
-			preview: collectionData.preview,
+			preview: collectionData.preview !== null,
 		},
 		permissions: resolvedPermissions,
 		migrationStatus: props.migrationStatus ?? null,

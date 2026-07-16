@@ -24,6 +24,11 @@ const PageCollection = new CollectionBuilder("page", {
 		},
 	],
 	preview: {
+		breakpoints: [
+			{ key: "laptop", label: "Laptop", width: 1280 },
+			{ key: "tablet", label: "Tablet", width: 768 },
+			{ key: "mobile", label: "Mobile", width: 390 },
+		],
 		url: ({ document, env }) => {
 			const fullSlug = document.fields.fullSlug;
 			const previewOrigin = env?.PREVIEW_ORIGIN;

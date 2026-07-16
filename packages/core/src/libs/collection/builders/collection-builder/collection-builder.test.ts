@@ -145,12 +145,12 @@ test("collection options are correct along with field includes and filters", asy
 		labelFields: ["text_test"],
 		environments: [],
 		revisionRetentionDays: 30,
-		preview: false,
+		preview: null,
 		tenants: [],
 	});
 });
 
-test("collection preview configuration is retained privately and exposed as a capability", () => {
+test("collection preview configuration exposes normalized breakpoints without private resolver data", () => {
 	const preview = async () => new URL("https://example.com/page");
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
@@ -158,15 +158,86 @@ test("collection preview configuration is retained privately and exposed as a ca
 			name: "Pages",
 			singularName: "Page",
 		},
-		preview: { url: preview, expiresIn: 120 },
+		preview: {
+			url: preview,
+			expiresIn: 120,
+			breakpoints: [
+				{
+					key: "mobile",
+					label: "Mobile",
+					width: 390,
+				},
+				{
+					key: "desktop",
+					label: copy("admin:tests.preview.desktop"),
+					width: 1440,
+				},
+			],
+		},
 	});
 
-	expect(collection.getData.preview).toBe(true);
+	expect(collection.getData.preview).toEqual({
+		breakpoints: [
+			{
+				key: "mobile",
+				label: {
+					type: "lucid.literal",
+					value: "Mobile",
+				},
+				width: 390,
+			},
+			{
+				key: "desktop",
+				label: copy("admin:tests.preview.desktop"),
+				width: 1440,
+			},
+		],
+	});
 	expect(collection.config.preview?.url).toBe(preview);
 	expect(collection.config.preview?.expiresIn).toBe(120);
-	const adminCollection = collectionsFormatter.formatSingle({ collection });
+	const adminCollection = collectionsFormatter.formatSingle({
+		collection,
+		adminTranslations: {
+			"tests.preview.desktop": "Desktop",
+		},
+	});
 	expect(adminCollection.capabilities.preview).toBe(true);
-	expect(JSON.stringify(adminCollection)).not.toContain(preview.toString());
+	expect(adminCollection.preview).toEqual({
+		breakpoints: [
+			{
+				key: "mobile",
+				label: {
+					type: "lucid.literal",
+					value: "Mobile",
+				},
+				width: 390,
+			},
+			{
+				key: "desktop",
+				label: copy("admin:tests.preview.desktop", {
+					defaultMessage: "Desktop",
+				}),
+				width: 1440,
+			},
+		],
+	});
+	const serializedCollection = JSON.stringify(adminCollection);
+	expect(serializedCollection).not.toContain(preview.toString());
+	expect(serializedCollection).not.toContain("expiresIn");
+
+	const collectionWithoutBreakpoints = new CollectionBuilder("posts", {
+		mode: "multiple",
+		details: {
+			name: "Posts",
+			singularName: "Post",
+		},
+		preview: { url: preview },
+	});
+	expect(
+		collectionsFormatter.formatSingle({
+			collection: collectionWithoutBreakpoints,
+		}).preview,
+	).toEqual({ breakpoints: [] });
 });
 
 test("collection workflow features normalizes defaults", async () => {

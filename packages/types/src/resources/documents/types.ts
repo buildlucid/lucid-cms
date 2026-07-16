@@ -630,6 +630,12 @@ export type CollectionFieldConfig =
 	| CollectionNonTabFieldConfig
 	| TabFieldConfig;
 
+export interface CollectionPreviewBreakpoint {
+	key: string;
+	label: ResolvedAdminCopy;
+	width: number;
+}
+
 export interface Collection {
 	key: string;
 	documentId?: number | null;
@@ -684,6 +690,9 @@ export interface Collection {
 			review: string;
 		};
 	}[];
+	preview: {
+		breakpoints: CollectionPreviewBreakpoint[];
+	} | null;
 	capabilities: {
 		scheduling: boolean;
 		preview: boolean;
