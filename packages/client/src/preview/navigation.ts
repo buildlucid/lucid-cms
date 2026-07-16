@@ -22,11 +22,7 @@ const isSupportedNavigationUrl = (url: URL): boolean =>
 	url.protocol === "http:" || url.protocol === "https:";
 
 const isIntentionalNewTab = (event: MouseEvent): boolean =>
-	event.button === 1 ||
-	event.metaKey ||
-	event.ctrlKey ||
-	event.shiftKey ||
-	event.altKey;
+	event.button === 1 || event.metaKey || event.ctrlKey;
 
 /** Removes preview credentials from a destination. */
 const sanitizePreviewDestination = (

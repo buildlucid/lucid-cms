@@ -230,7 +230,7 @@ window.addEventListener("pagehide", toolbar.cleanup, { once: true });
 
 ## Builder Preview Runtime
 
-The `@lucidcms/client/preview` browser entry lazily installs safe exact/session navigation and scroll restoration inside Lucid's builder iframe. `setupPreview()` reads the mode and token from the builder-controlled frame context; outside the recognized iframe it remains inactive and does not load the runtime.
+The `@lucidcms/client/preview` browser entry lazily installs safe exact/session navigation, scroll restoration, and click-to-field targeting inside Lucid's builder iframe. `setupPreview()` reads the mode and token from the builder-controlled frame context; outside the recognized iframe it remains inactive and does not load the runtime.
 
 ```typescript
 import { setupPreview } from "@lucidcms/client/preview";
@@ -239,6 +239,8 @@ const preview = setupPreview();
 
 window.addEventListener("pagehide", preview.cleanup, { once: true });
 ```
+
+For click-to-field targeting, pass the active preview state to `asDocument(..., { preview: true })` and spread `field.preview()` onto the element rendering that field. It returns an empty object outside preview mode; consumers should not construct preview attributes or messages directly.
 
 ## Toolkit Toolbar Helper
 

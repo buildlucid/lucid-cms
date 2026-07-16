@@ -25,6 +25,7 @@ import T from "@/translations";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import { builderUiStateHelpers } from "@/utils/builder-ui-state-helpers";
 import helpers from "@/utils/helpers";
+import { getPreviewStructureId } from "@/utils/preview-focus-dom";
 
 interface BuilderBricksProps {
 	brickConfig: CollectionBrickConfig[];
@@ -159,10 +160,6 @@ interface BuilderBrickRowProps {
 const DRAG_DROP_KEY = "builder-bricks-zone";
 
 const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
-	// -------------------------------
-	// State
-	const [getBrickOpen, setBrickOpen] = createSignal(!!props.brick.open);
-
 	// ------------------------------
 	// Memos
 	const config = createMemo(() => {
@@ -171,6 +168,10 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 	const brickIndex = createMemo(() => {
 		return props.brickIndexByRef().get(props.brick.ref) ?? -1;
 	});
+	const brickOpen = createMemo(() => props.brick.open === true);
+	const previewTriggerId = createMemo(() =>
+		getPreviewStructureId({ brickIndex: brickIndex(), type: "brick" }),
+	);
 	const isDisabled = createMemo(() => {
 		return brickStore.get.locked;
 	});
@@ -190,7 +191,6 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 	// -------------------------------
 	// Functions
 	const toggleDropdown = () => {
-		setBrickOpen(!getBrickOpen());
 		brickStore.get.toggleBrickOpen(brickIndex());
 	};
 
@@ -228,6 +228,8 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			{/* Header */}
 			{/** biome-ignore lint/a11y/useSemanticElements: explanation */}
 			<div
+				id={previewTriggerId()}
+				data-preview-focus-open={brickOpen()}
 				class={classNames(
 					"flex items-center justify-between cursor-pointer px-4 py-3 rounded-md focus:outline-hidden",
 				)}
@@ -237,7 +239,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						toggleDropdown();
 					}
 				}}
-				aria-expanded={getBrickOpen()}
+				aria-expanded={brickOpen()}
 				aria-controls={`bulder-brick-content-${props.brick.key}`}
 				role="button"
 				tabIndex="0"
@@ -288,7 +290,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						classes={classNames(
 							"text-icon-faded hover:text-icon-hover transition-all duration-200",
 							{
-								"transform rotate-180": getBrickOpen(),
+								"transform rotate-180": brickOpen(),
 							},
 						)}
 					>
@@ -299,7 +301,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			{/* Body */}
 			<BrickBody
 				state={{
-					open: getBrickOpen(),
+					open: brickOpen(),
 					brick: props.brick,
 					brickIndex: brickIndex(),
 					configFields: config()?.fields || [],

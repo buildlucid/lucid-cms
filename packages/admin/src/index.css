@@ -534,4 +534,48 @@
 			)
 			border-box;
 	}
+
+	@keyframes preview-field-target-pulse {
+		0%,
+		100% {
+			opacity: 0.55;
+			transform: scale(0.78);
+			box-shadow: 0 0 0 0 rgb(193 254 119 / 0.28);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1);
+			box-shadow: 0 0 0 4px rgb(193 254 119 / 0);
+		}
+	}
+
+	.preview-field-target-highlight::after {
+		content: "";
+		display: inline-block;
+		flex: none;
+		width: 0.5rem;
+		height: 0.5rem;
+		margin-inline-start: 0.25rem;
+		border-radius: 9999px;
+		background: #c1fe77;
+		box-shadow: 0 0 0 1px rgb(193 254 119 / 0.18);
+		animation: preview-field-target-pulse 1.5s ease-out;
+		vertical-align: middle;
+	}
+
+	[data-preview-focus-field].preview-field-target-highlight::after {
+		position: absolute;
+		top: 0.45rem;
+		right: 0.5rem;
+		z-index: 1;
+		margin-inline-start: 0;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.preview-field-target-highlight::after {
+			animation: none;
+			opacity: 1;
+			box-shadow: 0 0 0 2px rgb(193 254 119 / 0.22);
+		}
+	}
 }

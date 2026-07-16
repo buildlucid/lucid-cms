@@ -1,15 +1,11 @@
-import { getPreviewPageKey } from "./context.js";
 import {
-	isPreviewBridgeMessage,
+	createPreviewMessage,
+	isPreviewParentMessage,
 	type PreviewScrollState,
-	previewBridgeProtocol,
-} from "./messages.js";
-
-const createMessage = <TMessage extends object>(message: TMessage) => ({
-	scope: previewBridgeProtocol.scope,
-	version: previewBridgeProtocol.version,
-	...message,
-});
+	previewProtocol,
+} from "@lucidcms/preview-protocol";
+import { getPreviewPageKey } from "./context.js";
+import { installPreviewFieldInteraction } from "./field-target.js";
 
 const installScrollRestoration = (targetWindow: Window) => {
 	let frameId: number | undefined;
@@ -57,24 +53,32 @@ const installScrollRestoration = (targetWindow: Window) => {
 /** Installs the child side of Lucid's builder preview bridge. */
 export const installPreviewBridge = (targetWindow: Window): (() => void) => {
 	const scrollRestoration = installScrollRestoration(targetWindow);
+	let parentOrigin: string | null = null;
 
 	const onMessage = (event: MessageEvent<unknown>) => {
 		if (
 			event.source !== targetWindow.parent ||
-			!isPreviewBridgeMessage(event.data)
+			!isPreviewParentMessage(event.data)
 		) {
 			return;
 		}
 
-		if (event.data.type === previewBridgeProtocol.messages.captureScroll) {
+		if (event.data.type === previewProtocol.messages.connect) {
+			if (parentOrigin === null) parentOrigin = event.origin;
+			return;
+		}
+
+		if (event.origin !== parentOrigin) return;
+
+		if (event.data.type === previewProtocol.messages.captureScroll) {
 			const state: PreviewScrollState = {
 				pageKey: getPreviewPageKey(targetWindow),
 				x: targetWindow.scrollX,
 				y: targetWindow.scrollY,
 			};
 			targetWindow.parent.postMessage(
-				createMessage({
-					type: previewBridgeProtocol.messages.scrollState,
+				createPreviewMessage({
+					type: previewProtocol.messages.scrollState,
 					requestId: event.data.requestId,
 					state,
 				}),
@@ -84,21 +88,38 @@ export const installPreviewBridge = (targetWindow: Window): (() => void) => {
 		}
 
 		if (
-			event.data.type === previewBridgeProtocol.messages.restoreScroll &&
+			event.data.type === previewProtocol.messages.restoreScroll &&
 			event.data.state.pageKey === getPreviewPageKey(targetWindow)
 		) {
 			scrollRestoration.restore(event.data.state);
 		}
 	};
+	const cleanupFieldInteraction = installPreviewFieldInteraction({
+		targetWindow,
+		isConnected: () => parentOrigin !== null,
+		sendTarget: (target) => {
+			if (parentOrigin === null) return false;
+			targetWindow.parent.postMessage(
+				createPreviewMessage({
+					type: previewProtocol.messages.focusField,
+					target,
+				}),
+				parentOrigin,
+			);
+			return true;
+		},
+	});
 
 	targetWindow.addEventListener("message", onMessage);
 	targetWindow.parent.postMessage(
-		createMessage({ type: previewBridgeProtocol.messages.ready }),
+		createPreviewMessage({ type: previewProtocol.messages.ready }),
 		"*",
 	);
 
 	return () => {
 		targetWindow.removeEventListener("message", onMessage);
+		cleanupFieldInteraction();
 		scrollRestoration.cancel();
+		parentOrigin = null;
 	};
 };

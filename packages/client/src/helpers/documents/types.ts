@@ -77,11 +77,15 @@ export type FieldKeyOf<TFields extends DocumentFieldValueMap> = Extract<
 
 export type DocumentViewOptions = {
 	locale?: LocaleCode;
+	/** Enables builder field annotations without relying on browser-only context. */
+	preview?: boolean;
 };
 
-export type DocumentViewOptionsWithLocale = {
+export type DocumentViewOptionsWithLocale = DocumentViewOptions & {
 	locale: LocaleCode;
 };
+
+export type PreviewFieldAttributes = Readonly<Record<string, string>>;
 
 export type DocumentRefType = "relation" | "media" | "user" | (string & {});
 
@@ -159,6 +163,8 @@ export type DocumentFieldView<
 	groups: () => Array<
 		DocumentFieldGroupView<TDocument, GroupFieldsOf<TValue>, THasLocale>
 	>;
+	/** Returns the supported builder preview annotation, or an empty object. */
+	preview: () => PreviewFieldAttributes;
 };
 
 export type FieldAccessorMethods<

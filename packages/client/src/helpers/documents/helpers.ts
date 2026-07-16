@@ -56,6 +56,7 @@ export const buildViewOptions = (
 ): DocumentViewOptions => {
 	return {
 		locale: options?.locale ?? context.locale,
+		preview: options?.preview ?? context.preview,
 	};
 };
 

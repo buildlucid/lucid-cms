@@ -131,6 +131,7 @@ export type {
 	DocumentFieldView,
 	DocumentView,
 	DocumentViewOptions,
+	PreviewFieldAttributes,
 } from "./helpers/documents/types.js";
 export type {
 	DocumentsGetMultipleInput,

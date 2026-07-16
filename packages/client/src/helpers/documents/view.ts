@@ -1,3 +1,8 @@
+import {
+	encodePreviewFieldTarget,
+	type PreviewFieldBrick,
+	previewFieldAttribute,
+} from "@lucidcms/preview-protocol";
 import type {
 	CollectionDocument,
 	DocumentBrick,
@@ -29,6 +34,7 @@ import type {
 	FieldKeyOf,
 	GroupFieldsOf,
 	LocaleCode,
+	PreviewFieldAttributes,
 } from "./types.js";
 
 const createFieldView = <
@@ -40,6 +46,8 @@ const createFieldView = <
 	key: string;
 	value: TValue;
 	context: DocumentViewOptions;
+	brick?: PreviewFieldBrick;
+	path: Array<string | number>;
 }): DocumentFieldView<TDocument, TValue, THasLocale> => {
 	return {
 		raw: props.value,
@@ -50,8 +58,11 @@ const createFieldView = <
 				key: props.key,
 				value: props.value,
 				context: {
+					...props.context,
 					locale,
 				},
+				brick: props.brick,
+				path: props.path,
 			}) as DocumentFieldView<TDocument, TValue, true>,
 		value: (options?: DocumentViewOptions) =>
 			readFieldValue(
@@ -81,13 +92,27 @@ const createFieldView = <
 				buildViewOptions(props.context, options),
 			),
 		groups: () =>
-			getFieldGroups<GroupFieldsOf<TValue>>(props.value).map((group) =>
+			getFieldGroups<GroupFieldsOf<TValue>>(props.value).map((group, index) =>
 				createFieldGroupView<TDocument, GroupFieldsOf<TValue>, THasLocale>({
 					document: props.document,
 					group,
 					context: props.context,
+					brick: props.brick,
+					path: [...props.path, index],
 				}),
 			),
+		preview: (): PreviewFieldAttributes => {
+			if (props.context.preview !== true) return {};
+
+			const encoded = encodePreviewFieldTarget({
+				collectionKey: props.document.collectionKey,
+				documentId: props.document.id,
+				...(props.brick ? { brick: props.brick } : {}),
+				path: props.path,
+				...(props.context.locale ? { locale: props.context.locale } : {}),
+			});
+			return encoded ? { [previewFieldAttribute]: encoded } : {};
+		},
 	} as DocumentFieldView<TDocument, TValue, THasLocale>;
 };
 
@@ -99,6 +124,8 @@ const createFieldAccessorMethods = <
 	document: TDocument;
 	fields: TFields;
 	context: DocumentViewOptions;
+	brick?: PreviewFieldBrick;
+	path: Array<string | number>;
 }): FieldAccessorMethods<TDocument, TFields, THasLocale> => {
 	const field = <TKey extends FieldKeyOf<TFields>>(
 		key: TKey,
@@ -110,6 +137,8 @@ const createFieldAccessorMethods = <
 			key,
 			value,
 			context: props.context,
+			brick: props.brick,
+			path: [...props.path, key],
 		});
 	};
 
@@ -126,6 +155,8 @@ const createFieldGroupView = <
 	document: TDocument;
 	group: TFields;
 	context: DocumentViewOptions;
+	brick?: PreviewFieldBrick;
+	path: Array<string | number>;
 }): DocumentFieldGroupView<TDocument, TFields, THasLocale> => {
 	return {
 		raw: props.group,
@@ -134,13 +165,18 @@ const createFieldGroupView = <
 				document: props.document,
 				group: props.group,
 				context: {
+					...props.context,
 					locale,
 				},
+				brick: props.brick,
+				path: props.path,
 			}) as DocumentFieldGroupView<TDocument, TFields, true>,
 		...createFieldAccessorMethods<TDocument, TFields, THasLocale>({
 			document: props.document,
 			fields: props.group,
 			context: props.context,
+			brick: props.brick,
+			path: props.path,
 		}),
 	};
 };
@@ -166,6 +202,7 @@ const createBrickView = <
 				document: props.document,
 				brick: props.brick,
 				context: {
+					...props.context,
 					locale,
 				},
 			}) as DocumentBrickView<TDocument, TBrick, true>,
@@ -173,6 +210,12 @@ const createBrickView = <
 			document: props.document,
 			fields: props.brick.fields,
 			context: props.context,
+			brick: {
+				type: props.brick.type,
+				key: props.brick.key,
+				order: props.brick.order,
+			},
+			path: [],
 		}),
 	} as unknown as DocumentBrickView<TDocument, TBrick, THasLocale>;
 };
@@ -252,6 +295,7 @@ export function asDocument<TDocument extends CollectionDocument>(
 		collectionKey: document.collectionKey,
 		withLocale: (locale: LocaleCode) =>
 			asDocument(document, {
+				...options,
 				locale,
 			}) as DocumentView<TDocument, true>,
 		brick,
@@ -268,6 +312,7 @@ export function asDocument<TDocument extends CollectionDocument>(
 			document,
 			fields: document.fields,
 			context: options,
+			path: [],
 		}),
 	} as unknown as DocumentView<TDocument, boolean>;
 }

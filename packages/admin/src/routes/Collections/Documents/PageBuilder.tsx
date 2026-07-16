@@ -34,6 +34,7 @@ import { useDocumentState } from "@/hooks/document/useDocumentState";
 import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
 import { PageBuilderStateProvider } from "@/hooks/document/usePageBuilderState";
+import { usePreviewFocus } from "@/hooks/document/usePreviewFocus";
 import brickStore from "@/store/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
@@ -103,6 +104,13 @@ const CollectionsDocumentsEditRoute: Component<{
 		version: versionType,
 		document: docState.document,
 		autoSaveMetadata: mutations.autoSaveMetadata,
+	});
+	const previewFocus = usePreviewFocus({
+		collection: docState.collection,
+		collectionKey: docState.collectionKey,
+		documentId: docState.documentId,
+		hasUnsavedContent: brickStore.getDocumentContentMutated,
+		hasUnsavedBuilderStructure: brickStore.getBuilderBrickStructureMutated,
 	});
 
 	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
@@ -398,6 +406,7 @@ const CollectionsDocumentsEditRoute: Component<{
 										}
 										dirty={docState.isDocumentMutated}
 										saveStamp={preview.saveStamp}
+										onFocusField={previewFocus.requestTarget}
 									/>
 								</div>
 							</Show>

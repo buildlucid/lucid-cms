@@ -28,6 +28,7 @@ interface RepeaterFieldProps {
 		groupPath?: string;
 		parentRepeaterKey?: string;
 		repeaterDepth: number;
+		fieldPath: Array<string | number>;
 		fieldError: FieldError | undefined;
 		conditionScopes?: Accessor<FieldConditionScope[]>;
 	};
@@ -88,7 +89,10 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 		<div class={"mb-2.5 last:mb-0 w-full"}>
 			<div class={"w-full"}>
 				<div class="w-full flex items-center justify-between gap-3 mb-1.5">
-					<p class="block text-sm transition-colors duration-200 ease-in-out text-body">
+					<p
+						data-preview-focus-label
+						class="block text-sm transition-colors duration-200 ease-in-out text-body"
+					>
 						{helpers.getLocaleValue({
 							value: fieldConfig().details?.label,
 						})}
@@ -128,6 +132,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 													dragDropKey: dragDropKey(),
 													groupRef: groupRef,
 													groupPath: buildGroupPath(i()),
+													pathPrefix: [...props.state.fieldPath, i()],
 													group: () => groupsByRef().get(groupRef),
 													dragDrop: dragDrop,
 													repeaterKey: fieldConfig().key,

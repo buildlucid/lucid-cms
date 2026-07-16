@@ -1,11 +1,13 @@
 import type { FieldError } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo } from "solid-js";
+import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import type {
 	CollectionFieldConfig,
 	CollectionFieldConfigByType,
 } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
+import { getPreviewStructureId } from "@/utils/preview-focus-dom";
 
 export const TabField: Component<{
 	tab: CollectionFieldConfigByType<"tab">;
@@ -13,6 +15,10 @@ export const TabField: Component<{
 	getActiveTab: () => string | undefined;
 	fieldErrors: FieldError[];
 }> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const fieldRenderState = useFieldRenderState();
+
 	// ----------------------------------------
 	// Memos
 	const childrenKeys = createMemo(() => {
@@ -41,11 +47,21 @@ export const TabField: Component<{
 			childrenKeySet().has(fieldError.key),
 		);
 	});
+	const triggerId = createMemo(() =>
+		getPreviewStructureId({
+			brickIndex: fieldRenderState.brickIndex(),
+			type: "tab",
+			key: props.tab.key,
+			pathPrefix: [],
+		}),
+	);
 
 	// ----------------------------------------
 	// Render
 	return (
 		<button
+			id={triggerId()}
+			data-preview-focus-open={props.getActiveTab() === props.tab.key}
 			class={classNames(
 				"border-b border-border -mb-px text-sm font-medium py-1 px-2 first:pl-0 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary-base",
 				{

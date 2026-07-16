@@ -81,7 +81,9 @@ const getPage = async ({ fullSlug, astro }: GetPageOptions) => {
 			preview,
 			authentication,
 		},
-		document: asDocument(documentResponse.data),
+		document: asDocument(documentResponse.data, {
+			preview: preview.data?.active === true,
+		}),
 		isPreviewError,
 		isDocumentError,
 		isAuthenticationError: authentication.error !== undefined,

@@ -1,0 +1,35 @@
+{
+	"name": "@lucidcms/preview-protocol",
+	"version": "0.0.0",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"module": "./dist/index.js",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc && tsdown",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run --root ../.. packages/preview-protocol/src",
+		"format": "biome format ./src",
+		"format:fix": "biome format --write ./src",
+		"lint": "biome lint ./src",
+		"lint:fix": "biome lint --write ./src",
+		"check": "biome check ./src",
+		"check:fix": "biome check --write ./src"
+	},
+	"files": [
+		"dist"
+	],
+	"sideEffects": false,
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.1",
+		"tsdown": "^0.22.3",
+		"typescript": "^6.0.3"
+	}
+}

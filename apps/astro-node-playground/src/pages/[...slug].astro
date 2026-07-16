@@ -10,10 +10,16 @@ const result = await getPage({
 	astro: Astro,
 });
 
-const title = result.document?.field("title").value();
-const summary = result.document?.field("summary").value();
+const titleField = result.document?.field("title");
+const summaryField = result.document?.field("summary");
 const pageFullSlug = result.document?.field("fullSlug").value();
 const slug = result.document?.field("slug").value();
+const contentBrick = result.document?.brick("content");
+const brickHeadingField = contentBrick?.field("heading");
+const sectionHeadingField = contentBrick
+	?.field("sections")
+	.groups()[0]
+	?.field("sectionHeading");
 
 const toolbarAttributes = resolveToolbarAttributes({
 	authentication: result.raw.authentication,
@@ -36,8 +42,8 @@ const toolbarAttributes = resolveToolbarAttributes({
 			<meta name="referrer" content="no-referrer" />
 		)}
 		<title>
-			{title
-				? `${title} | Lucid CMS`
+			{titleField?.value()
+				? `${titleField.value()} | Lucid CMS`
 				: "Lucid CMS"}
 		</title>
 	</head>
@@ -110,15 +116,15 @@ const toolbarAttributes = resolveToolbarAttributes({
 							<div class="document-panel">
 								<div class="document-row">
 									<span class="document-label">Title</span>
-									<p class="document-value">
-										{title || "Not set"}
+									<p class="document-value" {...(titleField?.preview() ?? {})}>
+										{titleField?.value() || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
 									<span class="document-label">Summary</span>
-									<p class="document-value">
-										{summary || "Not set"}
+									<p class="document-value" {...(summaryField?.preview() ?? {})}>
+										{summaryField?.value() || "Not set"}
 									</p>
 								</div>
 
@@ -137,13 +143,22 @@ const toolbarAttributes = resolveToolbarAttributes({
 								</div>
 
 								<div class="document-row">
-									<span class="document-label">Brick fields</span>
-									<p class="document-value">
-										{result.document.bricks().reduce(
-											(count, brick) =>
-												count + Object.keys(brick.raw.fields ?? {}).length,
-											0,
-										)}
+									<span class="document-label">Brick heading</span>
+									<p
+										class="document-value"
+										{...(brickHeadingField?.preview() ?? {})}
+									>
+										{brickHeadingField?.value() || "Not set"}
+									</p>
+								</div>
+
+								<div class="document-row">
+									<span class="document-label">Repeater heading</span>
+									<p
+										class="document-value"
+										{...(sectionHeadingField?.preview() ?? {})}
+									>
+										{sectionHeadingField?.value() || "Not set"}
 									</p>
 								</div>
 

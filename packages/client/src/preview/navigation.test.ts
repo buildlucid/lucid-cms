@@ -1,0 +1,74 @@
+// @vitest-environment happy-dom
+
+import { afterEach, describe, expect, test, vi } from "vitest";
+import { installPreviewNavigation } from "./navigation.js";
+
+const setupScopedNavigation = () => {
+	const anchor = document.createElement("a");
+	anchor.href = "https://example.com/destination";
+	anchor.textContent = "Destination";
+	document.body.append(anchor);
+
+	const openedWindow = { opener: window } as unknown as Window;
+	const open = vi.spyOn(window, "open").mockReturnValue(openedWindow);
+	const showNavigationLocked = vi.fn();
+	const cleanup = installPreviewNavigation({
+		targetWindow: window,
+		mode: "scoped",
+		token: "preview-token",
+		showNavigationLocked,
+	});
+
+	return { anchor, cleanup, open, showNavigationLocked };
+};
+
+afterEach(() => {
+	document.body.innerHTML = "";
+	vi.restoreAllMocks();
+});
+
+describe("scoped preview link navigation", () => {
+	test.each([
+		{ name: "Command-click", event: "click", init: { metaKey: true } },
+		{ name: "Ctrl-click", event: "click", init: { ctrlKey: true } },
+		{ name: "middle-click", event: "auxclick", init: { button: 1 } },
+	])("opens a published link for $name", ({ event, init }) => {
+		const state = setupScopedNavigation();
+		const mouseEvent = new MouseEvent(event, {
+			bubbles: true,
+			cancelable: true,
+			...init,
+		});
+
+		state.anchor.dispatchEvent(mouseEvent);
+
+		expect(mouseEvent.defaultPrevented).toBe(true);
+		expect(state.open).toHaveBeenCalledWith(
+			"https://example.com/destination",
+			"_blank",
+			"noopener,noreferrer",
+		);
+		expect(state.showNavigationLocked).not.toHaveBeenCalled();
+		state.cleanup();
+	});
+
+	test.each([
+		{ name: "a normal click", init: {} },
+		{ name: "Option/Alt-click", init: { altKey: true } },
+		{ name: "Shift-click", init: { shiftKey: true } },
+	])("keeps $name inside the scoped preview", ({ init }) => {
+		const state = setupScopedNavigation();
+		const mouseEvent = new MouseEvent("click", {
+			bubbles: true,
+			cancelable: true,
+			...init,
+		});
+
+		state.anchor.dispatchEvent(mouseEvent);
+
+		expect(mouseEvent.defaultPrevented).toBe(true);
+		expect(state.open).not.toHaveBeenCalled();
+		expect(state.showNavigationLocked).toHaveBeenCalledOnce();
+		state.cleanup();
+	});
+});

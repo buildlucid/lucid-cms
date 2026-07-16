@@ -17,6 +17,7 @@ import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import { builderUiStateHelpers } from "@/utils/builder-ui-state-helpers";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
+import { getPreviewStructureId } from "@/utils/preview-focus-dom";
 
 interface CollapsibleFieldProps {
 	state: {
@@ -30,6 +31,7 @@ interface CollapsibleFieldProps {
 		groupPath?: string;
 		repeaterKey?: string;
 		repeaterDepth?: number;
+		pathPrefix?: Array<string | number>;
 	};
 }
 
@@ -83,13 +85,20 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 			repeaterKey: props.state.repeaterKey,
 		};
 	});
+	const triggerId = createMemo(() =>
+		getPreviewStructureId({
+			brickIndex: fieldRenderState.brickIndex(),
+			type: "collapsible",
+			key: fieldConfig().key,
+			pathPrefix: props.state.pathPrefix ?? [],
+		}),
+	);
 
 	// -------------------------------
 	// Effects
 	createEffect(() => {
 		if (getOpen()) setChildrenMounted(true);
 	});
-
 	onMount(() => {
 		const target = uiStateTarget();
 		if (!target) return;
@@ -131,9 +140,10 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 				type="button"
 				class="w-full bg-card-base hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center gap-3 transition-colors duration-200 text-left"
 				onClick={toggleOpen}
-				id={`collapsible-header-${fieldConfig().key}`}
+				id={triggerId()}
+				data-preview-focus-open={getOpen()}
 				aria-expanded={getOpen()}
-				aria-controls={`collapsible-content-${fieldConfig().key}`}
+				aria-controls={`${triggerId()}-content`}
 			>
 				<span class="min-w-0">
 					<span class="block text-sm text-subtitle font-medium truncate">
@@ -152,7 +162,7 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 				</span>
 			</button>
 			<div
-				id={`collapsible-content-${fieldConfig().key}`}
+				id={`${triggerId()}-content`}
 				class={classNames(
 					"bg-background-base transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
 					{
@@ -175,6 +185,7 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 									groupPath: props.state.groupPath,
 									repeaterKey: props.state.repeaterKey,
 									repeaterDepth: props.state.repeaterDepth,
+									pathPrefix: props.state.pathPrefix,
 								}}
 							/>
 						)}

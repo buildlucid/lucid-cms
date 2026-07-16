@@ -20,6 +20,7 @@ import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
+import { getPreviewStructureId } from "@/utils/preview-focus-dom";
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
 
 interface GroupBodyProps {
@@ -27,6 +28,7 @@ interface GroupBodyProps {
 		fieldConfig: CollectionFieldConfigByType<"repeater">;
 		groupRef: string;
 		groupPath: string;
+		pathPrefix: Array<string | number>;
 		group: Accessor<InternalDocumentFieldGroup | undefined>;
 		dragDrop: DragDropCBT;
 		repeaterKey: string;
@@ -72,6 +74,13 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		...(props.state.conditionScopes?.() ?? []),
 	]);
 	const groupOpen = createMemo(() => group()?.open === true);
+	const previewTriggerId = createMemo(() =>
+		getPreviewStructureId({
+			brickIndex: fieldRenderState.brickIndex(),
+			type: "group",
+			path: props.state.pathPrefix,
+		}),
+	);
 	const disabled = createMemo(
 		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
@@ -155,6 +164,8 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			{/* Group Header */}
 			{/** biome-ignore lint/a11y/useSemanticElements: explanation */}
 			<div
+				id={previewTriggerId()}
+				data-preview-focus-open={groupOpen()}
 				class={classNames(
 					"w-full bg-card-base hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
 					{
@@ -168,7 +179,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						toggleDropdown();
 					}
 				}}
-				id={`accordion-header-${ref()}`}
 				aria-expanded={groupOpen()}
 				aria-controls={`accordion-content-${ref()}`}
 				role="button"
@@ -263,6 +273,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 									groupPath: groupPath(),
 									repeaterKey: repeaterKey(),
 									repeaterDepth: nextRepeaterDepth(),
+									pathPrefix: props.state.pathPrefix,
 									fieldErrors: fieldErrors() || [],
 									conditionScopes: conditionScopes,
 								}}

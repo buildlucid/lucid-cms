@@ -40,6 +40,7 @@ import {
 	evaluateFieldVisibility,
 	type FieldConditionScope,
 } from "@/utils/field-condition-helpers";
+import { getPreviewFieldId } from "@/utils/preview-focus-dom";
 
 /** Maps `ui.width` onto the 12-column grid. Mobile always spans the full row. */
 const fieldWidthClasses: Record<number, string> = {
@@ -63,6 +64,7 @@ interface DynamicFieldProps {
 		groupPath?: string;
 		repeaterKey?: string;
 		repeaterDepth?: number;
+		pathPrefix?: Array<string | number>;
 	};
 }
 
@@ -75,6 +77,10 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	// -------------------------------
 	// Memos
 	const fieldConfig = createMemo(() => props.state.fieldConfig);
+	const fieldPath = createMemo(() => [
+		...(props.state.pathPrefix ?? []),
+		fieldConfig().key,
+	]);
 	const fieldsByKey = createMemo(() => props.state.fieldsByKey?.());
 	const conditionVisible = createMemo(() => {
 		const config = fieldConfig();
@@ -179,6 +185,24 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 
 		return "";
 	});
+	const previewFieldId = createMemo(() => {
+		const config = fieldConfig();
+		if (
+			config.type === "tab" ||
+			config.type === "section" ||
+			config.type === "collapsible"
+		) {
+			return undefined;
+		}
+		const ui = config.ui;
+		if (ui !== undefined && "hidden" in ui && ui.hidden === true) {
+			return undefined;
+		}
+		return getPreviewFieldId({
+			brickIndex: fieldRenderState.brickIndex(),
+			path: fieldPath(),
+		});
+	});
 
 	// -------------------------------
 	// Effects
@@ -187,12 +211,15 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			setTabHasMounted(true);
 		}
 	});
-
 	// -------------------------------
 	// Render
 	return (
 		<Show when={conditionVisible()}>
 			<div
+				data-preview-focus-field={
+					previewFieldId() === undefined ? undefined : ""
+				}
+				id={previewFieldId()}
 				class={classNames(
 					"w-full relative",
 					widthClass(),
@@ -239,6 +266,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 												groupPath: props.state.groupPath,
 												repeaterKey: props.state.repeaterKey,
 												repeaterDepth: props.state.repeaterDepth,
+												pathPrefix: props.state.pathPrefix,
 												fieldErrors: props.state.fieldErrors,
 											}}
 										/>
@@ -259,6 +287,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									groupPath: props.state.groupPath,
 									repeaterKey: props.state.repeaterKey,
 									repeaterDepth: props.state.repeaterDepth,
+									pathPrefix: props.state.pathPrefix,
 								}}
 							/>
 						</Match>
@@ -275,6 +304,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									groupPath: props.state.groupPath,
 									repeaterKey: props.state.repeaterKey,
 									repeaterDepth: props.state.repeaterDepth,
+									pathPrefix: props.state.pathPrefix,
 								}}
 							/>
 						</Match>
@@ -288,6 +318,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									groupPath: props.state.groupPath,
 									parentRepeaterKey: props.state.repeaterKey,
 									repeaterDepth: props.state.repeaterDepth ?? 0,
+									fieldPath: fieldPath(),
 									fieldError: fieldError(),
 									conditionScopes: props.state.conditionScopes,
 								}}

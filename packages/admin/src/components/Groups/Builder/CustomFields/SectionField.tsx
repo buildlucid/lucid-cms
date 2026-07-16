@@ -23,6 +23,7 @@ interface SectionFieldProps {
 		groupPath?: string;
 		repeaterKey?: string;
 		repeaterDepth?: number;
+		pathPrefix?: Array<string | number>;
 	};
 }
 
@@ -69,6 +70,7 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 								groupPath: props.state.groupPath,
 								repeaterKey: props.state.repeaterKey,
 								repeaterDepth: props.state.repeaterDepth,
+								pathPrefix: props.state.pathPrefix,
 							}}
 						/>
 					)}

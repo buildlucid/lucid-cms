@@ -5,7 +5,7 @@ export default defineConfig([
 		dts: true,
 		format: "esm",
 		deps: {
-			onlyBundle: false,
+			alwaysBundle: ["@lucidcms/preview-protocol"],
 		},
 		shims: false,
 		sourcemap: true,
@@ -37,7 +37,7 @@ export default defineConfig([
 		dts: true,
 		format: "esm",
 		deps: {
-			onlyBundle: false,
+			alwaysBundle: ["@lucidcms/preview-protocol"],
 		},
 		shims: false,
 		sourcemap: true,

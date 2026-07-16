@@ -18,6 +18,7 @@ import {
 } from "solid-js";
 import Button from "@/components/Partials/Button";
 import T, { translateAdminCopy } from "@/translations";
+import { PreviewHelp } from "./PreviewHelp";
 import { PreviewStatus } from "./PreviewStatus";
 
 export type PreviewWidthSelection =
@@ -340,6 +341,7 @@ export const PreviewCanvas: Component<{
 				<div class="flex shrink-0 items-center gap-1.5">
 					<PreviewStatus mode={props.previewMode()} />
 					<div class="flex items-center gap-0.5">
+						<PreviewHelp mode={props.previewMode()} />
 						<Button
 							type="button"
 							theme="secondary-subtle"

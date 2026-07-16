@@ -1,3 +1,4 @@
+import { decodePreviewFieldTarget } from "@lucidcms/preview-protocol";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { asDocument } from "../../index.js";
 import type {
@@ -21,6 +22,9 @@ declare module "../../types.js" {
 			custom_owner: number[];
 			sections: Array<{
 				heading: string | null;
+				links: Array<{
+					label: string | null;
+				}>;
 			}>;
 		};
 	}
@@ -82,9 +86,11 @@ const page = {
 		sections: [
 			{
 				heading: "Hero",
+				links: [{ label: "Start" }],
 			},
 			{
 				heading: "Features",
+				links: [{ label: "Explore" }],
 			},
 		],
 	},
@@ -346,6 +352,90 @@ describe("@lucidcms/client document helpers", () => {
 		expect(pageView.field("page_title").withLocale("en").value()).toBe(
 			"Homepage",
 		);
+	});
+
+	test("emits preview targets only when explicitly enabled", () => {
+		expect(asDocument(page).field("page_title").preview()).toEqual({});
+		expect(
+			asDocument(page, { preview: false }).field("page_title").preview(),
+		).toEqual({});
+
+		const pageView = asDocument(page, { preview: true }).withLocale("fr");
+		const rootAttributes = pageView.field("page_title").preview();
+		const brickAttributes = pageView
+			.brick({ type: "fixed" })
+			?.field("canonical_url")
+			.preview();
+		const builderBrickAttributes = pageView
+			.brick({ type: "builder", key: "banner" })
+			?.field("title")
+			.preview();
+		const groupAttributes = pageView
+			.field("sections")
+			.groups()[1]
+			?.field("heading")
+			.preview();
+		const nestedGroupAttributes = asDocument(page, { preview: true })
+			.field("sections")
+			.groups()[1]
+			?.field("links")
+			.groups()[0]
+			?.field("label")
+			.withLocale("en")
+			.preview();
+
+		expect(
+			decodePreviewFieldTarget(
+				rootAttributes["data-lucid-preview-field"] ?? "",
+			),
+		).toEqual({
+			collectionKey: "page",
+			documentId: 1,
+			path: ["page_title"],
+			locale: "fr",
+		});
+		expect(
+			decodePreviewFieldTarget(
+				brickAttributes?.["data-lucid-preview-field"] ?? "",
+			),
+		).toEqual({
+			collectionKey: "page",
+			documentId: 1,
+			brick: { type: "fixed", key: "seo", order: 1 },
+			path: ["canonical_url"],
+			locale: "fr",
+		});
+		expect(
+			decodePreviewFieldTarget(
+				builderBrickAttributes?.["data-lucid-preview-field"] ?? "",
+			),
+		).toEqual({
+			collectionKey: "page",
+			documentId: 1,
+			brick: { type: "builder", key: "banner", order: 1 },
+			path: ["title"],
+			locale: "fr",
+		});
+		expect(
+			decodePreviewFieldTarget(
+				groupAttributes?.["data-lucid-preview-field"] ?? "",
+			),
+		).toEqual({
+			collectionKey: "page",
+			documentId: 1,
+			path: ["sections", 1, "heading"],
+			locale: "fr",
+		});
+		expect(
+			decodePreviewFieldTarget(
+				nestedGroupAttributes?.["data-lucid-preview-field"] ?? "",
+			),
+		).toEqual({
+			collectionKey: "page",
+			documentId: 1,
+			path: ["sections", 1, "links", 0, "label"],
+			locale: "en",
+		});
 	});
 
 	test("returns undefined for nullish documents and keeps optional chaining ergonomic", () => {

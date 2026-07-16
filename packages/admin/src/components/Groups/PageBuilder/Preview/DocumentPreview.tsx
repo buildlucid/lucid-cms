@@ -1,3 +1,4 @@
+import type { PreviewFieldTarget } from "@lucidcms/preview-protocol";
 import type {
 	CollectionPreviewBreakpoint,
 	DocumentVersionType,
@@ -34,6 +35,7 @@ export const DocumentPreview: Component<{
 	breakpoints: Accessor<CollectionPreviewBreakpoint[]>;
 	dirty: Accessor<boolean>;
 	saveStamp: Accessor<string>;
+	onFocusField: (target: PreviewFieldTarget) => void;
 }> = (props) => {
 	// ----------------------------------
 	// State / Hooks
@@ -45,7 +47,9 @@ export const DocumentPreview: Component<{
 		createSignal<PreviewWidthSelection>("fit");
 	const [customWidth, setCustomWidth] = createSignal(768);
 	const [zoom, setZoom] = createSignal<PreviewZoom>(100);
-	const previewBridge = createPreviewBridge();
+	const previewBridge = createPreviewBridge({
+		onFocusField: props.onFocusField,
+	});
 
 	// -------------------------------
 	// Queries & Mutations

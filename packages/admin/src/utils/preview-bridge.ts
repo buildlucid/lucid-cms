@@ -1,72 +1,13 @@
+import {
+	createPreviewMessage,
+	isPreviewChildMessage,
+	type PreviewFieldTarget,
+	type PreviewScrollState,
+	previewProtocol,
+} from "@lucidcms/preview-protocol";
+
 const CAPTURE_TIMEOUT_MS = 150;
 const RESTORE_TIMEOUT_MS = 5000;
-
-const previewBridgeProtocol = {
-	scope: "lucid:builder-preview",
-	version: 1,
-	messages: {
-		ready: "ready",
-		captureScroll: "capture-scroll",
-		scrollState: "scroll-state",
-		restoreScroll: "restore-scroll",
-	},
-} as const;
-
-type PreviewScrollState = {
-	pageKey: string;
-	x: number;
-	y: number;
-};
-
-type IncomingPreviewBridgeMessage =
-	| {
-			scope: typeof previewBridgeProtocol.scope;
-			version: typeof previewBridgeProtocol.version;
-			type: typeof previewBridgeProtocol.messages.ready;
-	  }
-	| {
-			scope: typeof previewBridgeProtocol.scope;
-			version: typeof previewBridgeProtocol.version;
-			type: typeof previewBridgeProtocol.messages.scrollState;
-			requestId: string;
-			state: PreviewScrollState;
-	  };
-
-/** Checks whether a value is a non-null record. */
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-	typeof value === "object" && value !== null;
-
-/** Validates a scroll position received from the preview iframe. */
-const isScrollState = (value: unknown): value is PreviewScrollState =>
-	isRecord(value) &&
-	typeof value.pageKey === "string" &&
-	value.pageKey.length > 0 &&
-	typeof value.x === "number" &&
-	Number.isFinite(value.x) &&
-	typeof value.y === "number" &&
-	Number.isFinite(value.y);
-
-/** Validates messages accepted by the admin preview bridge. */
-const isPreviewBridgeMessage = (
-	value: unknown,
-): value is IncomingPreviewBridgeMessage => {
-	if (
-		!isRecord(value) ||
-		value.scope !== previewBridgeProtocol.scope ||
-		value.version !== previewBridgeProtocol.version
-	) {
-		return false;
-	}
-
-	if (value.type === previewBridgeProtocol.messages.ready) return true;
-
-	return (
-		value.type === previewBridgeProtocol.messages.scrollState &&
-		typeof value.requestId === "string" &&
-		value.requestId.length > 0 &&
-		isScrollState(value.state)
-	);
-};
 
 type PendingCapture = {
 	requestId: string;
@@ -74,15 +15,10 @@ type PendingCapture = {
 	timeout: number;
 };
 
-/** Adds the preview bridge protocol envelope to a message. */
-const createMessage = <TMessage extends object>(message: TMessage) => ({
-	scope: previewBridgeProtocol.scope,
-	version: previewBridgeProtocol.version,
-	...message,
-});
-
 /** Creates the admin-side bridge for preview scroll restoration. */
-export const createPreviewBridge = () => {
+export const createPreviewBridge = (options?: {
+	onFocusField?: (target: PreviewFieldTarget) => void;
+}) => {
 	let frame: HTMLIFrameElement | null = null;
 	let requestSequence = 0;
 	let pendingCapture: PendingCapture | null = null;
@@ -134,31 +70,39 @@ export const createPreviewBridge = () => {
 			!frameOrigin ||
 			event.source !== frame?.contentWindow ||
 			event.origin !== frameOrigin ||
-			!isPreviewBridgeMessage(event.data)
+			!isPreviewChildMessage(event.data)
 		) {
 			return;
 		}
 
 		if (
-			event.data.type === previewBridgeProtocol.messages.scrollState &&
+			event.data.type === previewProtocol.messages.scrollState &&
 			event.data.requestId === pendingCapture?.requestId
 		) {
 			clearCapture(event.data.state);
 			return;
 		}
 
-		if (
-			event.data.type === previewBridgeProtocol.messages.ready &&
-			pendingRestore
-		) {
+		if (event.data.type === previewProtocol.messages.focusField) {
+			options?.onFocusField?.(event.data.target);
+			return;
+		}
+
+		if (event.data.type === previewProtocol.messages.ready) {
 			frame?.contentWindow?.postMessage(
-				createMessage({
-					type: previewBridgeProtocol.messages.restoreScroll,
-					state: pendingRestore,
-				}),
+				createPreviewMessage({ type: previewProtocol.messages.connect }),
 				event.origin,
 			);
-			queueScrollRestore(null);
+			if (pendingRestore) {
+				frame?.contentWindow?.postMessage(
+					createPreviewMessage({
+						type: previewProtocol.messages.restoreScroll,
+						state: pendingRestore,
+					}),
+					event.origin,
+				);
+				queueScrollRestore(null);
+			}
 		}
 	};
 
@@ -185,8 +129,8 @@ export const createPreviewBridge = () => {
 					timeout: window.setTimeout(() => clearCapture(), CAPTURE_TIMEOUT_MS),
 				};
 				frameWindow.postMessage(
-					createMessage({
-						type: previewBridgeProtocol.messages.captureScroll,
+					createPreviewMessage({
+						type: previewProtocol.messages.captureScroll,
 						requestId,
 					}),
 					frameOrigin,

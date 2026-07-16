@@ -26,13 +26,13 @@ export const setupPreviewRuntime = (mode: PreviewMode): PreviewController => {
 	const notice = mode === "scoped" ? createPreviewNotice(targetWindow) : null;
 	let cleanedUp = false;
 
+	const cleanupBridge = installPreviewBridge(targetWindow);
 	const cleanupNavigation = installPreviewNavigation({
 		targetWindow,
 		mode,
 		token,
 		showNavigationLocked: () => notice?.show(),
 	});
-	const cleanupBridge = installPreviewBridge(targetWindow);
 
 	const cleanup = () => {
 		if (cleanedUp) return;

@@ -790,6 +790,38 @@ const createBrickSnapshot = (brick: BrickData): BrickSnapshot => ({
 const createBricksSnapshot = (bricks: BrickData[]): BrickSnapshot[] =>
 	bricks.map(createBrickSnapshot);
 
+/** Normalizes UI-only repeater state before comparing document content. */
+const normalizeGroupOpenState = (
+	fields: InternalDocumentField[],
+): InternalDocumentField[] =>
+	fields.map((field) => ({
+		...field,
+		...(field.groups
+			? {
+					groups: field.groups.map((group) => ({
+						...group,
+						open: false,
+						fields: normalizeGroupOpenState(group.fields),
+					})),
+				}
+			: {}),
+	}));
+
+/** Creates a content comparison that ignores whether groups are expanded. */
+const createContentComparisonSnapshot = (snapshots: BrickSnapshot[]) =>
+	snapshots.map((snapshot) => ({
+		...snapshot,
+		fields: normalizeGroupOpenState(snapshot.fields),
+	}));
+
+/** Captures the persisted builder identity used by preview field targets. */
+const createBuilderBrickStructureSnapshot = (
+	bricks: Array<Pick<BrickSnapshot, "key" | "order" | "type">>,
+) =>
+	bricks
+		.filter((brick) => brick.type === "builder")
+		.map((brick) => ({ key: brick.key, order: brick.order }));
+
 const getDocumentMutated = (): boolean => {
 	if (get.initialSnapshot === null) {
 		return get.bricks.some((b) => b.type === "builder" || b.fields.length > 0);
@@ -798,10 +830,31 @@ const getDocumentMutated = (): boolean => {
 	return !safeDeepEqual(currentSnapshot, get.initialSnapshot);
 };
 
+/** Detects unsaved content while ignoring UI-only repeater state. */
+const getDocumentContentMutated = (): boolean => {
+	if (get.initialSnapshot === null) return getDocumentMutated();
+	return !safeDeepEqual(
+		createContentComparisonSnapshot(createBricksSnapshot(get.bricks)),
+		createContentComparisonSnapshot(get.initialSnapshot),
+	);
+};
+
+/** Detects unsaved builder additions, removals, or order changes. */
+const getBuilderBrickStructureMutated = (): boolean => {
+	const current = createBuilderBrickStructureSnapshot(get.bricks);
+	if (get.initialSnapshot === null) return current.length > 0;
+	return !safeDeepEqual(
+		current,
+		createBuilderBrickStructureSnapshot(get.initialSnapshot),
+	);
+};
+
 const brickStore = {
 	get,
 	set,
 	getDocumentMutated,
+	getDocumentContentMutated,
+	getBuilderBrickStructureMutated,
 };
 
 export default brickStore;
