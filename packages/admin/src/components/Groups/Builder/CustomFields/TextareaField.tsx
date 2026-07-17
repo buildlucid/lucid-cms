@@ -3,7 +3,7 @@ import { type Component, createMemo } from "solid-js";
 import { Textarea } from "@/components/Groups/Form";
 import useCustomFieldGeneration from "@/hooks/ai/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";

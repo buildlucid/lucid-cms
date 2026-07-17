@@ -1,7 +1,7 @@
 import type { Collection, InternalDocumentField } from "@types";
 import { createRoot } from "solid-js";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import brickStore, { type BrickData } from "@/store/brickStore";
+import brickStore, { type BrickData } from "@/store/brick-store";
 import {
 	getPreviewFieldId,
 	getPreviewStructureId,

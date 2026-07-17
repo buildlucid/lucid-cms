@@ -14,9 +14,9 @@ import {
 	TabField,
 } from "@/components/Groups/Builder/CustomFields";
 import { FieldRenderStateProvider } from "@/hooks/document/useFieldRenderState";
-import brickStore, { type BrickData } from "@/store/brickStore";
+import brickStore, { type BrickData } from "@/store/brick-store";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import userPreferencesStore from "@/store/userPreferences";
+import userPreferencesStore from "@/store/user-preferences";
 import type {
 	CollectionFieldConfig,
 	CollectionFieldConfigByType,
@@ -48,6 +48,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	// -------------------------------
 	// State
 	const [getActiveTab, setActiveTab] = createSignal<string>();
+	const [contentMounted, setContentMounted] = createSignal(props.open);
 
 	// ----------------------------------
 	// Memos
@@ -114,6 +115,10 @@ export const BrickBody: Component<BrickProps> = (props) => {
 
 	// ----------------------------------
 	// Effects
+	createEffect(() => {
+		if (props.open) setContentMounted(true);
+	});
+
 	createEffect(() => {
 		if (configFields().length === 0) return;
 
@@ -185,47 +190,49 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					"grid grid-cols-12 gap-4": allTabs().length === 0,
 				})}
 			>
-				<FieldRenderStateProvider
-					brickOrder={brickOrder}
-					brickIndex={brickIndex}
-					collectionKey={collectionKey}
-					brickKey={brickKey}
-					documentId={documentId}
-					contentLocale={contentLocale}
-					defaultLocale={defaultLocale}
-					contentLocales={contentLocales}
-					missingFieldColumns={missingFieldColumns}
-					brickRef={brickRef}
-				>
-					{/* Tabs */}
-					<Show when={allTabs().length > 0}>
-						<div class="border-b border-border mb-6 flex flex-wrap">
-							<Index each={allTabs()}>
-								{(tab) => (
-									<TabField
-										tab={tab()}
-										setActiveTab={setActiveTab}
-										getActiveTab={getActiveTab}
-										fieldErrors={props.fieldErrors}
-									/>
-								)}
-							</Index>
-						</div>
-					</Show>
-					{/* Body */}
-					<Index each={configFields()}>
-						{(config) => (
-							<DynamicField
-								fields={props.brick.fields}
-								fieldsByKey={fieldsByKey}
-								fieldConfig={config()}
-								activeTab={getActiveTab}
-								fieldErrors={props.fieldErrors}
-								conditionScopes={conditionScopes}
-							/>
-						)}
-					</Index>
-				</FieldRenderStateProvider>
+				<Show when={contentMounted()}>
+					<FieldRenderStateProvider
+						brickOrder={brickOrder}
+						brickIndex={brickIndex}
+						collectionKey={collectionKey}
+						brickKey={brickKey}
+						documentId={documentId}
+						contentLocale={contentLocale}
+						defaultLocale={defaultLocale}
+						contentLocales={contentLocales}
+						missingFieldColumns={missingFieldColumns}
+						brickRef={brickRef}
+					>
+						{/* Tabs */}
+						<Show when={allTabs().length > 0}>
+							<div class="border-b border-border mb-6 flex flex-wrap">
+								<Index each={allTabs()}>
+									{(tab) => (
+										<TabField
+											tab={tab()}
+											setActiveTab={setActiveTab}
+											getActiveTab={getActiveTab}
+											fieldErrors={props.fieldErrors}
+										/>
+									)}
+								</Index>
+							</div>
+						</Show>
+						{/* Body */}
+						<Index each={configFields()}>
+							{(config) => (
+								<DynamicField
+									fields={props.brick.fields}
+									fieldsByKey={fieldsByKey}
+									fieldConfig={config()}
+									activeTab={getActiveTab}
+									fieldErrors={props.fieldErrors}
+									conditionScopes={conditionScopes}
+								/>
+							)}
+						</Index>
+					</FieldRenderStateProvider>
+				</Show>
 			</div>
 		</div>
 	);

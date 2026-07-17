@@ -15,7 +15,7 @@ import Button from "@/components/Partials/Button";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import RelationCount from "@/components/Partials/RelationCount";
 import UserDisplay from "@/components/Partials/UserDisplay";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 import { moveArrayItem } from "@/utils/array-helpers";

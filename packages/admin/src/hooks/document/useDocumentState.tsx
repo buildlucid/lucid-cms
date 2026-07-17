@@ -4,7 +4,7 @@ import type { DocumentVersionType } from "@types";
 import objectHash from "object-hash";
 import { type Accessor, createMemo } from "solid-js";
 import api from "@/services/api";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { isInaccessibleError } from "@/utils/error-handling";

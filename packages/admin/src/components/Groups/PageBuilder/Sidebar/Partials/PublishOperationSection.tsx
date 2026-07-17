@@ -1,7 +1,7 @@
 import type { Collection, PublishOperation } from "@types";
 import type { JSXElement } from "solid-js";
 import { type Accessor, type Component, For, Match, Switch } from "solid-js";
-import type { SectionPreferenceKey } from "@/store/userPreferences";
+import type { SectionPreferenceKey } from "@/store/user-preferences";
 import PublishRequestRow from "./PublishRequestRow";
 import SidebarSection from "./SidebarSection";
 

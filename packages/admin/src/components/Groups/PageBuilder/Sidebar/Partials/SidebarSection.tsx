@@ -5,7 +5,7 @@ import { type Component, type JSXElement, Show } from "solid-js";
 import useUserPreference from "@/hooks/useUserPreference";
 import userPreferencesStore, {
 	type SectionPreferenceKey,
-} from "@/store/userPreferences";
+} from "@/store/user-preferences";
 
 const SidebarSection: Component<{
 	title: string;

@@ -1,7 +1,7 @@
 import type { Collection } from "@types";
 import { type Component, createMemo, Show } from "solid-js";
 import { BrickBody } from "@/components/Groups/Builder";
-import brickStore, { type BrickData } from "@/store/brickStore";
+import brickStore, { type BrickData } from "@/store/brick-store";
 import type { CollectionFieldConfig } from "@/types/collection-config";
 
 interface CollectionPseudoBrickProps {

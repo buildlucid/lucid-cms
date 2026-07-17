@@ -4,7 +4,9 @@ import { FaSolidChevronUp, FaSolidGripLines } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
+	createEffect,
 	createMemo,
+	createSignal,
 	Index,
 	Show,
 } from "solid-js";
@@ -14,7 +16,7 @@ import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
 import Pill from "@/components/Partials/Pill";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
@@ -44,6 +46,9 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
 	const fieldRenderState = useFieldRenderState();
+	const [childrenMounted, setChildrenMounted] = createSignal(
+		props.group()?.open === true,
+	);
 
 	// -------------------------------
 	// Memos
@@ -118,6 +123,12 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 
 		// keep headers tidy (especially when nested)
 		return trimmed.length > 60 ? `${trimmed.slice(0, 60)}…` : trimmed;
+	});
+
+	// -------------------------------
+	// Effects
+	createEffect(() => {
+		if (groupOpen()) setChildrenMounted(true);
 	});
 
 	// -------------------------------
@@ -260,7 +271,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				)}
 			>
 				<div class="border-t border-border p-3 md:p-4 grid grid-cols-12 gap-4">
-					<Index each={configChildrenFields()}>
+					<Index each={childrenMounted() ? configChildrenFields() : []}>
 						{(config) => (
 							<DynamicField
 								fieldConfig={config()}

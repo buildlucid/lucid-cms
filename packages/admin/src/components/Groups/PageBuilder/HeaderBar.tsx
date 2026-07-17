@@ -24,7 +24,7 @@ import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import userPreferencesStore from "@/store/userPreferences";
+import userPreferencesStore from "@/store/user-preferences";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";

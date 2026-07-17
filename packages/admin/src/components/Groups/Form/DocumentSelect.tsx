@@ -26,7 +26,7 @@ import Pill from "@/components/Partials/Pill";
 import RelationCount from "@/components/Partials/RelationCount";
 import { usePageBuilderState } from "@/hooks/document/usePageBuilderState";
 import api from "@/services/api";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";

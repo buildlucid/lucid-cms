@@ -20,7 +20,7 @@ import AddBrick from "@/components/Modals/Bricks/AddBrick";
 import Button from "@/components/Partials/Button";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
-import brickStore, { type BrickData } from "@/store/brickStore";
+import brickStore, { type BrickData } from "@/store/brick-store";
 import T from "@/translations";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";

@@ -7,9 +7,9 @@ import type {
 } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import type api from "@/services/api";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import userPreferencesStore from "@/store/userPreferences";
+import userPreferencesStore from "@/store/user-preferences";
 import userStore from "@/store/userStore";
 import brickHelpers from "@/utils/brick-helpers";
 import { getBodyError } from "@/utils/error-helpers";

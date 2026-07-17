@@ -11,7 +11,7 @@ import type {
 	UserRef,
 } from "@types";
 import { nanoid } from "nanoid";
-import brickStore, { type BrickData } from "@/store/brickStore";
+import brickStore, { type BrickData } from "@/store/brick-store";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 
 type UpsertBrickData = Omit<BrickData, "type"> & {

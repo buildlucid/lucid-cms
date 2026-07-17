@@ -13,7 +13,7 @@ import {
 } from "solid-js";
 import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
-import userPreferencesStore from "@/store/userPreferences";
+import userPreferencesStore from "@/store/user-preferences";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";

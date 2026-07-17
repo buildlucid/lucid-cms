@@ -44,7 +44,7 @@ import useUserPreference from "@/hooks/useUserPreference";
 import api from "@/services/api";
 import userPreferencesStore, {
 	type SectionPreferenceKey,
-} from "@/store/userPreferences";
+} from "@/store/user-preferences";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";

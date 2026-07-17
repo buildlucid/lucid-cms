@@ -14,7 +14,7 @@ import SelectCol from "@/components/Tables/Columns/SelectCol";
 import LoadingRow from "@/components/Tables/Rows/LoadingRow";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useUserPreference from "@/hooks/useUserPreference";
-import userPreferencesStore from "@/store/userPreferences";
+import userPreferencesStore from "@/store/user-preferences";
 import { ColumnToggle } from "./ColumnToggle";
 import { SelectAction } from "./SelectAction";
 import { Th } from "./Th";

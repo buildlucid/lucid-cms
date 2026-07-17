@@ -14,7 +14,7 @@ import { GroupBody } from "@/components/Groups/Builder";
 import DragDrop from "@/components/Partials/DragDrop";
 import RelationCount from "@/components/Partials/RelationCount";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";

@@ -17,7 +17,7 @@ import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
 import MediaPreview from "@/components/Partials/MediaPreview";
 import Pill from "@/components/Partials/Pill";
 import RelationCount from "@/components/Partials/RelationCount";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import pageBuilderModalsStore, {
 	type MediaDimensionValidation,

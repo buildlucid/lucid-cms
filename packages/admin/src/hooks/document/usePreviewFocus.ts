@@ -1,7 +1,7 @@
 import type { PreviewFieldTarget } from "@lucidcms/preview-protocol";
 import type { Collection } from "@types";
 import { type Accessor, onCleanup } from "solid-js";
-import brickStore, { type BrickData } from "@/store/brickStore";
+import brickStore, { type BrickData } from "@/store/brick-store";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import type {

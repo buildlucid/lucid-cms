@@ -2,7 +2,7 @@ import { debounce } from "@solid-primitives/scheduled";
 import type { Collection, InternalCollectionDocument } from "@types";
 import { type Accessor, createEffect, createSignal, onCleanup } from "solid-js";
 import type api from "@/services/api";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import brickHelpers from "@/utils/brick-helpers";
 
 const AUTO_SAVE_DEBOUNCE_MS = 800;

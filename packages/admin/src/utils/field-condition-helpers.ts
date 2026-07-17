@@ -5,7 +5,7 @@ import {
 	type FieldConditionTranslationScope,
 } from "@field-conditions";
 import type { InternalDocumentField } from "@types";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import type {
 	CollectionFieldConfig,
 	CollectionLeafFieldConfig,

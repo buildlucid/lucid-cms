@@ -30,7 +30,7 @@ import {
 	UserField,
 } from "@/components/Groups/Builder/CustomFields";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import type {
 	CollectionDataFieldConfig,
 	CollectionFieldConfig,

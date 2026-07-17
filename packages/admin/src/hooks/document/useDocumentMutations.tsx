@@ -10,7 +10,7 @@ import type {
 } from "@types";
 import { type Accessor, createEffect, createSignal, on } from "solid-js";
 import api from "@/services/api";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import brickHelpers from "@/utils/brick-helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";

@@ -36,7 +36,7 @@ import { useDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import { useNavigationGuard } from "@/hooks/document/useNavigationGuard";
 import { PageBuilderStateProvider } from "@/hooks/document/usePageBuilderState";
 import { usePreviewFocus } from "@/hooks/document/usePreviewFocus";
-import brickStore from "@/store/brickStore";
+import brickStore from "@/store/brick-store";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 
