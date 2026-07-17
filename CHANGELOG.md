@@ -4,16 +4,18 @@
 
 ### Features:
 
-- Improved document builder rendering performance for tabbed layouts by memoizing field lookups, condition scopes and structural field config across tabs, sections and collapsibles. Inactive tab and collapsible content now mounts lazily while field defaults are still hydrated up front, making initial load and tab switching smoother. ([4c73b6d](https://github.com/buildlucid/lucid-cms/commit/4c73b6d474937fb6c4425fe8b45fc3029720963c))
+- Added live document previews to the page builder, with configurable preview URLs and controls for resizing and zooming the embedded page. The client preview runtime restores scroll position and lets clicks in the preview reveal and highlight the matching builder field. ([fa5be68](https://github.com/buildlucid/lucid-cms/commit/fa5be68ded3d83e91f180ae698553df26ab6e016))
+- Improved document builder performance for large pages with many bricks and nested repeaters by indexing field lookups and reducing unnecessary reactive work during editing, reordering and auto-save. ([8870de6](https://github.com/buildlucid/lucid-cms/commit/8870de6536ef26bd50fd7172f48deeec6629a585))
+- Added the ability to remove crops from images and video posters, restoring the original presentation while retaining the previous crop object for stable stale URLs.([f686896](https://github.com/buildlucid/lucid-cms/commit/f686896265ef6f155e27f8af34059f4f2ad172e6))
 - Added field-level `useAsLabel` support for configuring document labels. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
 - Added relation custom field support in document listing columns. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
 - Added color custom field support in document listing columns. ([2f0e8e9](https://github.com/buildlucid/lucid-cms/commit/2f0e8e99287ae54d9b08041edaa499d749a30f87))
+- Improved document builder performance for tabbed layouts by reducing repeated work and loading inactive tabs and collapsible content only when needed. ([4c73b6d](https://github.com/buildlucid/lucid-cms/commit/4c73b6d474937fb6c4425fe8b45fc3029720963c))
 - Added grouped OR filter support with `filter[or][groupIndex][key:operator]` query params, shared backend query-builder handling, document custom-field filtering, admin query-state support, and toolkit filter array shorthand. ([536a957](https://github.com/buildlucid/lucid-cms/commit/536a9571ae7c8bf32d546059afa00a0a03798315))
 - Added new filter builder UI for documents with OR support and full collection/brick custom field filtering. ([bc9bccc](https://github.com/buildlucid/lucid-cms/commit/bc9bccc40d360b6861b231836d5151312669f15f))
 - Migrated all filters to use the new filter builder UI instead and widened what fields are supported across all resources. ([1062d8f](https://github.com/buildlucid/lucid-cms/commit/1062d8f585f15be9fdac3f1834f6f72127d5e5a8))
 - Added a new range custom field with single or dual-thumb sliders, decimal step support, validation, filtering, document listing support and typed output. ([79896d4](https://github.com/buildlucid/lucid-cms/commit/79896d45a8260a678592d4bd96d485b582012f52))
 - Added focal-point-aware image processing with configurable `fit` modes on image presets. The Sharp adapter now positions cover crops using the media's normalized focal point. ([f686896](https://github.com/buildlucid/lucid-cms/commit/f686896265ef6f155e27f8af34059f4f2ad172e6))
-- Added the ability to remove crops from images and video posters, restoring the original presentation while retaining the previous crop object for stable stale URLs.([f686896](https://github.com/buildlucid/lucid-cms/commit/f686896265ef6f155e27f8af34059f4f2ad172e6))
 
 ### Breaking Changes:
 
