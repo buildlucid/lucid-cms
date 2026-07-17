@@ -28,13 +28,21 @@ const LinkSelectModal: Component<LinkSelectModalProps> = (props) => {
 	const closeModal = () => {
 		props.state.setOpen(false);
 	};
-
+	const linkIsEmpty = (link: LinkResValue) =>
+		!link?.url?.trim() && !link?.label?.trim();
 	const updateLink = () => {
-		props.callbacks.onSelect({
+		const updatedLink: NonNullable<LinkResValue> = {
 			url: getUrl(),
 			target: getOpenInNewTab() ? "_blank" : "_self",
 			label: getLabel(),
-		});
+		};
+
+		if (linkIsEmpty(updatedLink) && linkIsEmpty(props.state.selectedLink)) {
+			closeModal();
+			return;
+		}
+
+		props.callbacks.onSelect(updatedLink);
 		closeModal();
 	};
 

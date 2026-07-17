@@ -1,4 +1,5 @@
 import { CollectionBuilder, copy, z } from "@lucidcms/core";
+import AllFieldsBrick from "../bricks/all-fields.js";
 import BannerBrick from "../bricks/banner.js";
 import IntroBrick from "../bricks/intro.js";
 import SEOBrick from "../bricks/seo.js";
@@ -129,7 +130,7 @@ const PageCollection = new CollectionBuilder("page", {
 	],
 	bricks: {
 		fixed: [SEOBrick],
-		builder: [BannerBrick, IntroBrick, TestingBrick],
+		builder: [BannerBrick, IntroBrick, TestingBrick, AllFieldsBrick],
 	},
 })
 	.addText("page_title", {

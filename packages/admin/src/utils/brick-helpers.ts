@@ -388,7 +388,7 @@ const hasErrorsOnOtherLocale = (props: {
 }) => {
 	const hasFieldErrors = (field: FieldError): boolean => {
 		if (
-			field.localeCode !== undefined &&
+			typeof field.localeCode === "string" &&
 			field.localeCode !== props.currentLocale
 		) {
 			return true;

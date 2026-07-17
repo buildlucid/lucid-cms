@@ -26,6 +26,10 @@ export const TabField: Component<{
 
 		const recursiveFieldSearch = (fields: CollectionFieldConfig[]) => {
 			for (const field of fields) {
+				if (field.type === "repeater") {
+					fieldKeys.push(field.key);
+				}
+
 				if (
 					field.type === "tab" ||
 					field.type === "repeater" ||

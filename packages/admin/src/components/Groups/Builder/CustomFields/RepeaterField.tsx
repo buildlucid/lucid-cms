@@ -11,12 +11,14 @@ import {
 	Switch,
 } from "solid-js";
 import { GroupBody } from "@/components/Groups/Builder";
+import { ErrorMessage } from "@/components/Groups/Form";
 import DragDrop from "@/components/Partials/DragDrop";
 import RelationCount from "@/components/Partials/RelationCount";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brick-store";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
+import brickHelpers from "@/utils/brick-helpers";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
 
@@ -62,6 +64,13 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	const groupsByRef = createMemo(() => {
 		return new Map(groups().map((group) => [group.ref, group]));
 	});
+	const fieldId = createMemo(() =>
+		brickHelpers.customFieldId({
+			key: fieldConfig().key,
+			brickIndex: fieldRenderState.brickIndex(),
+			groupRef: props.groupRef,
+		}),
+	);
 	const buildGroupPath = (index: number) => {
 		if (props.groupPath) return `${props.groupPath}.${index}`;
 		return `${index}`;
@@ -84,10 +93,17 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<div class={"mb-2.5 last:mb-0 w-full"}>
+		<fieldset
+			id={fieldId()}
+			class={"m-0 mb-2.5 min-w-0 w-full border-0 p-0 last:mb-0"}
+			aria-labelledby={`${fieldId()}-label`}
+			aria-describedby={props.fieldError ? `${fieldId()}-error` : undefined}
+			aria-invalid={props.fieldError !== undefined}
+		>
 			<div class={"w-full"}>
 				<div class="w-full flex items-center justify-between gap-3 mb-1.5">
 					<p
+						id={`${fieldId()}-label`}
 						data-preview-focus-label
 						class="block text-sm transition-colors duration-200 ease-in-out text-body"
 					>
@@ -186,6 +202,11 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 					</Match>
 				</Switch>
 			</div>
-		</div>
+			<Show when={props.fieldError}>
+				<div id={`${fieldId()}-error`} role="alert">
+					<ErrorMessage id={fieldId()} errors={props.fieldError} />
+				</div>
+			</Show>
+		</fieldset>
 	);
 };

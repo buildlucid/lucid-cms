@@ -1,8 +1,6 @@
 import type {
-	BrickError,
 	Collection,
 	DocumentVersionType,
-	FieldError,
 	InternalCollectionDocument,
 } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
@@ -12,7 +10,6 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import userPreferencesStore from "@/store/user-preferences";
 import userStore from "@/store/userStore";
 import brickHelpers from "@/utils/brick-helpers";
-import { getBodyError } from "@/utils/error-helpers";
 import useUserPreference from "../useUserPreference";
 
 export function useDocumentUIState(props: {
@@ -125,8 +122,8 @@ export function useDocumentUIState(props: {
 	 */
 	const brickTranslationErrors = createMemo(() => {
 		return brickHelpers.hasErrorsOnOtherLocale({
-			fieldErrors: getBodyError<FieldError[]>("fields", mutateErrors()) || [],
-			brickErrors: getBodyError<BrickError[]>("bricks", mutateErrors()) || [],
+			fieldErrors: brickStore.get.fieldsErrors,
+			brickErrors: brickStore.get.brickErrors,
 			currentLocale: contentLocale() || "",
 		});
 	});

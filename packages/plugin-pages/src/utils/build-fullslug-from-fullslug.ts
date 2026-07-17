@@ -7,7 +7,13 @@ const buildFullSlug = (data: {
 	slug: string | null | undefined;
 	prefix?: string;
 }): string | null => {
-	if (data.slug === null || data.slug === undefined) return null;
+	if (
+		data.slug === null ||
+		data.slug === undefined ||
+		data.slug.trim() === ""
+	) {
+		return null;
+	}
 
 	const targetParentFullSlugField = data.parentFields.find((field) => {
 		return field.locale === data.targetLocale;
