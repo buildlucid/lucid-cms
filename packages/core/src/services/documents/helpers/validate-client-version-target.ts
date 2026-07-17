@@ -7,7 +7,7 @@ const validateClientVersionTarget = async (data: {
 	versionType: DocumentVersionType;
 	versionId?: number;
 }): ServiceResponse<{ versionId?: number }> => {
-	const supportsMultiple =
+	const isPinnedVersion =
 		data.versionType === "revision" ||
 		data.versionType ===
 			constants.collectionBuilder.publishing.snapshotVersionType;
@@ -17,7 +17,7 @@ const validateClientVersionTarget = async (data: {
 		Number.isInteger(data.versionId) &&
 		data.versionId > 0;
 
-	if (supportsMultiple && !validVersionId) {
+	if (isPinnedVersion && !validVersionId) {
 		return {
 			error: {
 				type: "basic",
@@ -28,7 +28,7 @@ const validateClientVersionTarget = async (data: {
 		};
 	}
 
-	if (!supportsMultiple && data.versionId !== undefined) {
+	if (!isPinnedVersion && data.versionId !== undefined) {
 		return {
 			error: {
 				type: "basic",

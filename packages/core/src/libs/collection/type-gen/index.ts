@@ -380,7 +380,7 @@ const getCollectionBricks = (
 	];
 };
 
-/** Returns the full set of document versions a collection can be addressed by. */
+/** Returns every version type that a resolved document can report. */
 const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
 		"latest",
@@ -390,7 +390,7 @@ const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 	]);
 };
 
-/** Returns the version slots exposed on the formatted document response. */
+/** Returns the moving version targets exposed to client integrations. */
 const getCollectionVersionKeys = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
 		"latest",

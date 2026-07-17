@@ -1,7 +1,7 @@
 import type {
 	CollectionDocument,
 	CollectionDocumentKey,
-	CollectionDocumentVersion,
+	CollectionDocumentVersionKey,
 } from "../../../types.js";
 import type {
 	ServiceContext,
@@ -17,7 +17,7 @@ import getSingle from "./get-single.js";
 
 export type ToolkitDocumentVersion<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = CollectionDocumentVersion<TCollectionKey>;
+> = CollectionDocumentVersionKey<TCollectionKey>;
 
 /**
  * Document helpers for reading collection content.

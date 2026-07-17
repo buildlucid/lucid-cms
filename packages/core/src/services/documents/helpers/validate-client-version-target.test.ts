@@ -5,7 +5,7 @@ describe("client document version targets", () => {
 	it.each([
 		"revision",
 		"snapshot",
-	])("requires a version ID for %s", async (versionType) => {
+	])("requires a version ID for %s targets", async (versionType) => {
 		const response = await validateClientVersionTarget({ versionType });
 
 		expect(response.error?.status).toBe(400);

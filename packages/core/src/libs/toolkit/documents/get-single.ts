@@ -25,8 +25,6 @@ export type ToolkitDocumentsGetSingleInput<
 > = ToolkitTenantOptions & {
 	collectionKey: TCollectionKey;
 	version: ToolkitDocumentVersion<TCollectionKey>;
-	/** Required when fetching a specific revision or snapshot. */
-	versionId?: number;
 	/** Optional preview context that may override the requested version. */
 	preview?: string | null;
 	query?: ToolkitDocumentsGetSingleQuery<TCollectionKey>;
@@ -43,7 +41,6 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 			documentServices.client.getSingle(serviceContext, {
 				collectionKey: input.collectionKey,
 				versionType: input.version,
-				versionId: input.versionId,
 				preview: input.preview ?? undefined,
 				query: normalizeDocumentQuery(input.query),
 			}),

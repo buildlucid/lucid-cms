@@ -13,6 +13,18 @@ const previewTokenSchema = z.string().meta({
 	description: "An opaque preview token",
 });
 
+const clientDocumentVersionSchema = z
+	.string()
+	.trim()
+	.min(1)
+	.refine((version) => version !== "revision" && version !== "snapshot", {
+		message: "Revisions and snapshots can only be accessed through a preview.",
+	})
+	.meta({
+		description: "Latest or a configured collection environment",
+		example: "production",
+	});
+
 const documentResponseUserSchema = z.object({
 	id: z.number().meta({
 		description: "The user ID",
@@ -775,8 +787,7 @@ export const controllerSchemas = {
 				string: z
 					.object({
 						preview: previewTokenSchema.optional(),
-						version: z.string().trim().min(1),
-						versionId: z.coerce.number().int().positive().optional(),
+						version: clientDocumentVersionSchema,
 						"filter[id]": queryString.schema.filter(true, {
 							example: "1",
 						}),
@@ -864,8 +875,7 @@ export const controllerSchemas = {
 				string: z
 					.object({
 						preview: previewTokenSchema.optional(),
-						version: z.string().trim().min(1),
-						versionId: z.coerce.number().int().positive().optional(),
+						version: clientDocumentVersionSchema,
 						"filter[id]": queryString.schema.filter(true, {
 							example: "1",
 						}),

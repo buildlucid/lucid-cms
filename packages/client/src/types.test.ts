@@ -367,7 +367,7 @@ test("document client methods narrow version from the collection key", () => {
 	expectTypeOf(
 		client.getMultiple({
 			collectionKey: "page",
-			version: "revision",
+			version: "latest",
 		}),
 	).toEqualTypeOf<
 		Promise<LucidClientResponse<DocumentsGetMultipleResponse<"page">>>

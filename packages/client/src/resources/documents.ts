@@ -1,6 +1,6 @@
 import type { ResponseBody } from "@lucidcms/types";
 import type {
-	CollectionDocumentVersion,
+	CollectionDocumentVersionKey,
 	DocumentsGetMultipleQuery,
 	DocumentsGetSingleQuery,
 } from "../types/contracts.js";
@@ -17,9 +17,7 @@ export type DocumentsGetSingleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = {
 	collectionKey: TCollectionKey;
-	version: CollectionDocumentVersion<TCollectionKey>;
-	/** Required when fetching a specific revision or snapshot. */
-	versionId?: number;
+	version: CollectionDocumentVersionKey<TCollectionKey>;
 	/** Optional preview context that may override the requested version. */
 	preview?: string;
 	query?: DocumentsGetSingleQuery<TCollectionKey>;
@@ -31,9 +29,7 @@ export type DocumentsGetMultipleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = {
 	collectionKey: TCollectionKey;
-	version: CollectionDocumentVersion<TCollectionKey>;
-	/** Required when fetching a specific revision or snapshot. */
-	versionId?: number;
+	version: CollectionDocumentVersionKey<TCollectionKey>;
 	/** Optional preview context that may override the requested version. */
 	preview?: string;
 	query?: DocumentsGetMultipleQuery<TCollectionKey>;
@@ -76,7 +72,6 @@ export const createDocumentsClient = (
 			query: {
 				...input.query,
 				version: input.version,
-				versionId: input.versionId,
 				preview: input.preview,
 			},
 			request: input.request,
@@ -91,7 +86,6 @@ export const createDocumentsClient = (
 			query: {
 				...input.query,
 				version: input.version,
-				versionId: input.versionId,
 				preview: input.preview,
 			},
 			request: input.request,
