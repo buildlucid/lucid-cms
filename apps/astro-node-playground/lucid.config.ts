@@ -4,6 +4,7 @@ import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
 import { node } from "@lucidcms/runtime-node";
+import BlogCollection from "./src/lucid/collections/blogs.js";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export const env = z.object({
@@ -39,7 +40,7 @@ export default configureLucid({
 			],
 			defaultLocale: "en",
 		},
-		collections: [PageCollection],
+		collections: [PageCollection, BlogCollection],
 		plugins: [
 			sqliteKVPlugin(),
 			filesystemPlugin(),

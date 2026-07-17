@@ -44,6 +44,7 @@ Use the documents client to fetch a single document or a paginated list of docum
 ```typescript
 const page = await client.documents.getSingle({
     collectionKey: "page",
+    version: "published",
     query: {
         filter: {
             _fullSlug: {
@@ -55,6 +56,7 @@ const page = await client.documents.getSingle({
 
 const pages = await client.documents.getMultiple({
     collectionKey: "page",
+    version: "published",
     query: {
         page: 1,
         perPage: 10,
@@ -108,6 +110,7 @@ const client = createClient({
 
 const response = await client.documents.getSingle({
     collectionKey: "page",
+    version: "published",
     query: {
         include: ["bricks", "refs"],
     },
@@ -157,6 +160,7 @@ The client never throws request or response errors. Instead, every method resolv
 ```typescript
 const response = await client.documents.getSingle({
     collectionKey: "page",
+    version: "published",
 });
 
 if (response.error) {
@@ -168,7 +172,7 @@ if (response.error) {
 
 ## Previews
 
-Browser applications can resolve a Lucid-generated preview token to obtain its mode and expiry, then pass the token instead of `status` or `versionId` when fetching documents. Treat preview tokens as bearer credentials and never forward them to another origin.
+Browser applications can resolve a Lucid-generated preview token to obtain its mode and expiry. Every document fetch still declares its baseline `version`; the preview token can override that version where the preview perspective maps to the requested collection. Treat preview tokens as bearer credentials and never forward them to another origin.
 
 ```typescript
 const token = "PREVIEW_TOKEN";
@@ -176,6 +180,7 @@ const preview = await client.previews.resolve({ token });
 
 const page = await client.documents.getSingle({
     collectionKey: "page",
+    version: "published",
     preview: token,
     query: {
         filter: { _fullSlug: { value: "/about" } },
@@ -201,7 +206,7 @@ The `@lucidcms/client/toolbar` browser entry exports an isolated `<lucid-toolbar
     auth-status="authenticated"
     edit-collection="page"
     edit-document-id="42"
-    edit-status="latest"
+    edit-version="latest"
     preview="perspective"
     preview-token="PREVIEW_TOKEN"
 ></lucid-toolbar>
@@ -217,7 +222,7 @@ const toolbar = setupToolbar({
     edit: {
         collectionKey: "page",
         documentId: 42,
-        status: "latest",
+        version: "latest",
     },
     preview: {
         mode: "perspective",

@@ -1,4 +1,6 @@
 export const previewQueryParam = "preview";
+export const previewContextQueryParam = "previewContext";
+export const builderPreviewContext = "builder";
 
 type BuilderPreviewMode = "perspective" | "scoped";
 

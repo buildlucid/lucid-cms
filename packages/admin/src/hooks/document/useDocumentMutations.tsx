@@ -50,7 +50,7 @@ export function useDocumentMutations(props: {
 				getDocumentRoute("edit", {
 					collectionKey: props.collectionKey(),
 					documentId: data.data.id,
-					status: props.version(),
+					version: props.version(),
 				}),
 			);
 			queryClient.invalidateQueries({
@@ -210,7 +210,7 @@ export function useDocumentMutations(props: {
 				getDocumentRoute("edit", {
 					collectionKey: props.collectionKey(),
 					documentId: props.documentId(),
-					status: "latest",
+					version: "latest",
 				}),
 			);
 		},
@@ -324,7 +324,7 @@ export function useDocumentMutations(props: {
 			getDocumentRoute("edit", {
 				collectionKey: props.collectionKey(),
 				documentId,
-				status: "latest",
+				version: "latest",
 			}),
 		);
 

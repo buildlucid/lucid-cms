@@ -154,9 +154,9 @@ const formatSingle = (props: {
 	return {
 		id: props.document.id,
 		collectionKey: props.document.collection_key,
-		status: props.document.version_type ?? null,
+		version: props.document.version_type ?? null,
 		versionId: props.document.version_id ?? null,
-		version: formatVersion({
+		versions: formatVersions({
 			document: props.document,
 			collection: props.collection,
 		}),
@@ -195,11 +195,11 @@ const formatSingle = (props: {
 	} satisfies InternalCollectionDocument;
 };
 
-const formatVersion = (props: {
+const formatVersions = (props: {
 	document: DocumentQueryResponse;
 	collection: CollectionBuilder;
-}): InternalCollectionDocument["version"] => {
-	const versions: InternalCollectionDocument["version"] = {
+}): InternalCollectionDocument["versions"] => {
+	const versions: InternalCollectionDocument["versions"] = {
 		latest: null,
 	};
 
@@ -299,7 +299,7 @@ const formatClientMeta = (props: {
 }) => {
 	return {
 		versionId: props.document.version_id ?? null,
-		version: formatVersion({
+		versions: formatVersions({
 			document: props.document,
 			collection: props.collection,
 		}),
@@ -354,7 +354,7 @@ const formatClientSingle = <TCollectionKey extends string = string>(props: {
 	const clientRes: Record<string, unknown> = {
 		id: props.document.id,
 		collectionKey: props.document.collection_key,
-		status: props.document.version_type ?? null,
+		version: props.document.version_type ?? null,
 		fields: documentFieldsFormatter.flattenFields(
 			props.fields ?? [],
 			props.collection.clientFieldTree,

@@ -61,7 +61,7 @@ const getMultipleController = factory.createHandlers(
 	}),
 	async (c) => {
 		const { collectionKey } = c.req.valid("param");
-		const { preview, status = "latest", versionId } = c.req.valid("query");
+		const { preview, version, versionId } = c.req.valid("query");
 
 		const context = createServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
@@ -81,10 +81,9 @@ const getMultipleController = factory.createHandlers(
 			},
 		)(context, {
 			collectionKey,
-			target:
-				preview !== undefined
-					? { type: "preview", token: preview }
-					: { type: "version", versionType: status, versionId },
+			versionType: version,
+			versionId,
+			preview,
 			query: formattedQuery,
 		});
 		if (documents.error) throw new LucidAPIError(documents.error);

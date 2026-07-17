@@ -8,7 +8,7 @@ const toolkit = await getToolkit();
 
 const response = await toolkit.documents.getSingle({
 	collectionKey: "page",
-	status: "latest",
+	version: "latest",
 	query: {
 		filter: {
 			_fullSlug: {
@@ -50,8 +50,8 @@ const slug = page?.field("slug").value();
 	<body
 		data-lucid-edit-collection={page?.collectionKey}
 		data-lucid-edit-document={page?.id}
-		data-lucid-edit-status={page?.status}
-		data-lucid-edit-version={page?.meta?.versionId}
+		data-lucid-edit-version={page?.version}
+		data-lucid-edit-version-id={page?.meta?.versionId}
 	>
 		<main class="page-shell">
 			<div class="page-backdrop">

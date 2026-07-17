@@ -309,7 +309,7 @@ test("collection workflow features normalizes defaults", async () => {
 	});
 });
 
-test("collection environment relation features normalizes defaults", async () => {
+test("collection environment version mappings normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
@@ -326,7 +326,7 @@ test("collection environment relation features normalizes defaults", async () =>
 				name: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
-				relations: {
+				collectionVersions: {
 					blog: "signed-off",
 				},
 			},
@@ -348,7 +348,7 @@ test("collection environment relation features normalizes defaults", async () =>
 			}),
 			requires: [],
 			permissions: {},
-			relations: {
+			collectionVersions: {
 				blog: "signed-off",
 			},
 		},
@@ -359,7 +359,7 @@ test("collection environment relation features normalizes defaults", async () =>
 			}),
 			requires: ["staging"],
 			permissions: {},
-			relations: {},
+			collectionVersions: {},
 		},
 	]);
 });

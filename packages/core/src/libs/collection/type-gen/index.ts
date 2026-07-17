@@ -281,9 +281,9 @@ const buildCollectionSortKeyTypeName = (collectionKey: string): string => {
 	return `${toPascalCaseIdentifier(collectionKey, "Collection")}CollectionDocumentSortKey`;
 };
 
-/** Builds the exported type name for one collection's supported document statuses. */
-const buildCollectionStatusTypeName = (collectionKey: string): string => {
-	return `${toPascalCaseIdentifier(collectionKey, "Collection")}CollectionDocumentStatus`;
+/** Builds the exported type name for one collection's supported document versions. */
+const buildCollectionVersionTypeName = (collectionKey: string): string => {
+	return `${toPascalCaseIdentifier(collectionKey, "Collection")}CollectionDocumentVersion`;
 };
 
 /** Builds the exported type name for one collection's available version record keys. */
@@ -380,8 +380,8 @@ const getCollectionBricks = (
 	];
 };
 
-/** Returns the full set of document statuses a collection can be addressed by. */
-const getCollectionStatusKeys = (collection: CollectionBuilder): string[] => {
+/** Returns the full set of document versions a collection can be addressed by. */
+const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
 		"latest",
 		"revision",
@@ -419,7 +419,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 	const collectionSortKeyTypeName = buildCollectionSortKeyTypeName(
 		collection.key,
 	);
-	const collectionStatusTypeName = buildCollectionStatusTypeName(
+	const collectionVersionTypeName = buildCollectionVersionTypeName(
 		collection.key,
 	);
 	const collectionVersionKeyTypeName = buildCollectionVersionKeyTypeName(
@@ -489,15 +489,15 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 		)
 			.map((sortKey) => stringLiteral(sortKey))
 			.join(" | ")};`,
-		`export type ${collectionStatusTypeName} = ${getCollectionStatusKeys(
+		`export type ${collectionVersionTypeName} = ${getCollectionVersions(
 			collection,
 		)
-			.map((statusKey) => stringLiteral(statusKey))
+			.map((version) => stringLiteral(version))
 			.join(" | ")};`,
 		`export type ${collectionVersionKeyTypeName} = ${getCollectionVersionKeys(
 			collection,
 		)
-			.map((statusKey) => stringLiteral(statusKey))
+			.map((versionKey) => stringLiteral(versionKey))
 			.join(" | ")};`,
 	);
 
@@ -506,7 +506,7 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 		collectionBricksTypeName,
 		collectionFiltersTypeName,
 		collectionSortKeyTypeName,
-		collectionStatusTypeName,
+		collectionVersionTypeName,
 		collectionVersionKeyTypeName,
 		declarations: dedupeStrings(collectionDeclarations),
 	};
@@ -524,7 +524,7 @@ const buildGeneratedMapsDeclaration = (props: {
 	const brickEntries: string[] = [];
 	const filterEntries: string[] = [];
 	const sortEntries: string[] = [];
-	const statusEntries: string[] = [];
+	const versionEntries: string[] = [];
 	const versionKeyEntries: string[] = [];
 	const declarations: string[] = [];
 
@@ -544,8 +544,8 @@ const buildGeneratedMapsDeclaration = (props: {
 		sortEntries.push(
 			`${stringLiteral(collection.key)}: ${generatedCollection.collectionSortKeyTypeName};`,
 		);
-		statusEntries.push(
-			`${stringLiteral(collection.key)}: ${generatedCollection.collectionStatusTypeName};`,
+		versionEntries.push(
+			`${stringLiteral(collection.key)}: ${generatedCollection.collectionVersionTypeName};`,
 		);
 		versionKeyEntries.push(
 			`${stringLiteral(collection.key)}: ${generatedCollection.collectionVersionKeyTypeName};`,
@@ -560,7 +560,7 @@ const buildGeneratedMapsDeclaration = (props: {
 		`export interface GeneratedCollectionDocumentBricksByCollection {\n${brickEntries.length > 0 ? indentBlock(brickEntries.join("\n")) : ""}\n}`,
 		`export interface GeneratedCollectionDocumentFiltersByCollection {\n${filterEntries.length > 0 ? indentBlock(filterEntries.join("\n")) : ""}\n}`,
 		`export interface GeneratedCollectionDocumentSortsByCollection {\n${sortEntries.length > 0 ? indentBlock(sortEntries.join("\n")) : ""}\n}`,
-		`export interface GeneratedCollectionDocumentStatusesByCollection {\n${statusEntries.length > 0 ? indentBlock(statusEntries.join("\n")) : ""}\n}`,
+		`export interface GeneratedCollectionDocumentVersionsByCollection {\n${versionEntries.length > 0 ? indentBlock(versionEntries.join("\n")) : ""}\n}`,
 		`export interface GeneratedCollectionDocumentVersionKeysByCollection {\n${versionKeyEntries.length > 0 ? indentBlock(versionKeyEntries.join("\n")) : ""}\n}`,
 		`export type GeneratedCollectionDocumentKey = Extract<keyof GeneratedCollectionDocumentFieldsByCollection, string>;`,
 		`export type CollectionDocumentKey = GeneratedCollectionDocumentKey | (string & {});`,
@@ -568,7 +568,7 @@ const buildGeneratedMapsDeclaration = (props: {
 		`export type Document<TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey> = CoreCollectionDocument<TCollectionKey>;`,
 		`export type CollectionDocumentFilters<TCollectionKey extends string = string> = CoreCollectionDocumentFilters<TCollectionKey>;`,
 		`export type CollectionDocumentFilterInput<TCollectionKey extends string = string> = CoreCollectionDocumentFilterInput<TCollectionKey>;`,
-		`export type CollectionDocumentStatus<TCollectionKey extends string = string> = CoreCollectionDocumentStatus<TCollectionKey>;`,
+		`export type CollectionDocumentVersion<TCollectionKey extends string = string> = CoreCollectionDocumentVersion<TCollectionKey>;`,
 		`export type CollectionDocumentSortKey<TCollectionKey extends string = string> = CoreCollectionDocumentSortKey<TCollectionKey>;`,
 		`export type CollectionDocumentSorts<TCollectionKey extends string = string> = CoreCollectionDocumentSorts<TCollectionKey>;`,
 		`export type CollectionDocumentVersionKey<TCollectionKey extends string = string> = CoreCollectionDocumentVersionKey<TCollectionKey>;`,
@@ -591,7 +591,7 @@ const generateCollectionClientTypes = (props: {
 \tCollectionDocument as CoreCollectionDocument,
 \tCollectionDocumentFilterInput as CoreCollectionDocumentFilterInput,
 \tCollectionDocumentFilters as CoreCollectionDocumentFilters,
-\tCollectionDocumentStatus as CoreCollectionDocumentStatus,
+\tCollectionDocumentVersion as CoreCollectionDocumentVersion,
 \tCollectionDocumentSortKey as CoreCollectionDocumentSortKey,
 \tCollectionDocumentSorts as CoreCollectionDocumentSorts,
 \tCollectionDocumentTranslations,
@@ -610,7 +610,7 @@ const generateCollectionClientTypes = (props: {
 					"interface CollectionDocumentFieldsByCollection extends GeneratedCollectionDocumentFieldsByCollection {}",
 					"interface CollectionDocumentBricksByCollection extends GeneratedCollectionDocumentBricksByCollection {}",
 					"interface CollectionDocumentFiltersByCollection extends GeneratedCollectionDocumentFiltersByCollection {}",
-					"interface CollectionDocumentStatusesByCollection extends GeneratedCollectionDocumentStatusesByCollection {}",
+					"interface CollectionDocumentVersionsByCollection extends GeneratedCollectionDocumentVersionsByCollection {}",
 					"interface CollectionDocumentSortsByCollection extends GeneratedCollectionDocumentSortsByCollection {}",
 					"interface CollectionDocumentVersionKeysByCollection extends GeneratedCollectionDocumentVersionKeysByCollection {}",
 				],
@@ -622,7 +622,7 @@ const generateCollectionClientTypes = (props: {
 					"interface CollectionDocumentFieldsByCollection extends GeneratedCollectionDocumentFieldsByCollection {}",
 					"interface CollectionDocumentBricksByCollection extends GeneratedCollectionDocumentBricksByCollection {}",
 					"interface CollectionDocumentFiltersByCollection extends GeneratedCollectionDocumentFiltersByCollection {}",
-					"interface CollectionDocumentStatusesByCollection extends GeneratedCollectionDocumentStatusesByCollection {}",
+					"interface CollectionDocumentVersionsByCollection extends GeneratedCollectionDocumentVersionsByCollection {}",
 					"interface CollectionDocumentSortsByCollection extends GeneratedCollectionDocumentSortsByCollection {}",
 					"interface CollectionDocumentVersionKeysByCollection extends GeneratedCollectionDocumentVersionKeysByCollection {}",
 				],

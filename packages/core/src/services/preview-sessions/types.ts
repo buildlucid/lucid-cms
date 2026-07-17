@@ -26,7 +26,8 @@ type PreviewSessionDocumentEntry = {
 
 export type PreviewSessionPerspectiveTarget = PreviewSessionDocumentEntry & {
 	mode: "perspective";
-	versionType: Exclude<DocumentVersionType, "revision">;
+	versionType: DocumentVersionType;
+	versionId?: number;
 };
 
 export type PreviewSessionScopedEntryTarget = PreviewSessionDocumentEntry & {
@@ -44,7 +45,8 @@ export type PreviewSessionScopedAuxiliaryTarget =
 	PreviewSessionDocumentEntry & {
 		mode: "scoped";
 		target: "auxiliary";
-		versionType: Exclude<DocumentVersionType, "revision">;
+		versionType: DocumentVersionType;
+		versionId?: number;
 	};
 
 export type PreviewSessionCollectionTarget =

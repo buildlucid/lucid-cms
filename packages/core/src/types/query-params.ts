@@ -94,18 +94,18 @@ export type CollectionDocumentSorts<TCollectionKey extends string = string> =
 	}>;
 
 // -----------------------------------------------
-// Statuses
-export type DefaultCollectionDocumentStatus = DocumentVersionType;
+// Versions
+export type DefaultCollectionDocumentVersion = DocumentVersionType;
 export type DefaultCollectionDocumentVersionKey = string;
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
-export interface CollectionDocumentStatusesByCollection {}
+export interface CollectionDocumentVersionsByCollection {}
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
 export interface CollectionDocumentVersionKeysByCollection {}
 
-type CollectionDocumentStatusCollectionKey = Extract<
-	keyof CollectionDocumentStatusesByCollection,
+type CollectionDocumentVersionCollectionKey = Extract<
+	keyof CollectionDocumentVersionsByCollection,
 	string
 >;
 
@@ -114,10 +114,10 @@ type CollectionDocumentVersionKeyCollectionKey = Extract<
 	string
 >;
 
-export type CollectionDocumentStatus<TCollectionKey extends string = string> =
-	TCollectionKey extends CollectionDocumentStatusCollectionKey
-		? CollectionDocumentStatusesByCollection[TCollectionKey]
-		: DefaultCollectionDocumentStatus;
+export type CollectionDocumentVersion<TCollectionKey extends string = string> =
+	TCollectionKey extends CollectionDocumentVersionCollectionKey
+		? CollectionDocumentVersionsByCollection[TCollectionKey]
+		: DefaultCollectionDocumentVersion;
 
 export type CollectionDocumentVersionKey<
 	TCollectionKey extends string = string,

@@ -32,7 +32,7 @@ export type CollectionPermissions = Partial<
 export type CollectionEnvironmentPermissions = Partial<
 	Pick<Record<CollectionPermissionAction, string>, "publish" | "review">
 >;
-export type CollectionEnvironmentRelations = Record<string, string>;
+export type CollectionEnvironmentVersionMap = Record<string, string>;
 export type CollectionGroupConfigInput =
 	| string
 	| {
@@ -149,7 +149,7 @@ export type CollectionConfigSchemaType = {
 		name: AdminCopyInput;
 		requires?: string[];
 		permissions?: CollectionEnvironmentPermissions;
-		relations?: CollectionEnvironmentRelations;
+		collectionVersions?: CollectionEnvironmentVersionMap;
 	}>;
 	revisionRetentionDays?: number | false;
 	preview?: CollectionPreviewConfig;
@@ -184,7 +184,7 @@ export type CollectionData = {
 		name: ResolvedAdminCopy;
 		requires: string[];
 		permissions: CollectionEnvironmentPermissions;
-		relations: CollectionEnvironmentRelations;
+		collectionVersions: CollectionEnvironmentVersionMap;
 	}[];
 	revisionRetentionDays: number | false;
 	preview: {

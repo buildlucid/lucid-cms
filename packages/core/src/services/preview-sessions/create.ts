@@ -63,11 +63,8 @@ const create: ServiceFn<
 
 	const documentRes = await getClientDocument(context, {
 		collectionKey: data.collectionKey,
-		target: {
-			type: "version",
-			versionType: data.versionType,
-			versionId: versionTargetRes.data.versionId,
-		},
+		versionType: data.versionType,
+		versionId: versionTargetRes.data.versionId,
 		query: {
 			filter: { id: { value: data.documentId } },
 			include: ["bricks", "refs", "meta"],
@@ -94,7 +91,7 @@ const create: ServiceFn<
 		...documentRes.data,
 		id: data.documentId,
 		collectionKey: data.collectionKey,
-		status: data.versionType,
+		version: data.versionType,
 	};
 	const locale =
 		data.locale?.trim() || context.config.localization.defaultLocale;

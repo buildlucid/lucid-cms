@@ -9,6 +9,7 @@ import {
 const CAPTURE_TIMEOUT_MS = 150;
 const RESTORE_TIMEOUT_MS = 5000;
 const previewQueryParam = "preview";
+const previewContextQueryParam = "previewContext";
 
 type PendingCapture = {
 	requestId: string;
@@ -56,6 +57,7 @@ export const createPreviewBridge = (options?: {
 		try {
 			const pageUrl = new URL(url);
 			pageUrl.searchParams.delete(previewQueryParam);
+			pageUrl.searchParams.delete(previewContextQueryParam);
 			return pageUrl.toString();
 		} catch {
 			return null;

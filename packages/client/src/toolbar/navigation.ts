@@ -1,4 +1,8 @@
-import { previewQueryParam } from "../utils/preview.js";
+import {
+	builderPreviewContext,
+	previewContextQueryParam,
+	previewQueryParam,
+} from "../utils/preview.js";
 import { toolbarTagName } from "./constants.js";
 import type { PreviewModeState } from "./types.js";
 
@@ -6,6 +10,7 @@ type PreviewNavigationOptions = {
 	targetWindow: Window;
 	preview: PreviewModeState;
 	propagateInternalLinks: boolean;
+	builder: boolean;
 };
 
 const findAnchor = (
@@ -43,6 +48,7 @@ export const installToolbarNavigation = (
 
 		if (url.origin !== targetWindow.location.origin) {
 			url.searchParams.delete(previewQueryParam);
+			url.searchParams.delete(previewContextQueryParam);
 			anchor.href = url.toString();
 			anchor.referrerPolicy = "no-referrer";
 			return;
@@ -55,8 +61,14 @@ export const installToolbarNavigation = (
 			!anchor.hasAttribute("download")
 		) {
 			url.searchParams.set(previewQueryParam, preview.token);
+			if (options.builder) {
+				url.searchParams.set(previewContextQueryParam, builderPreviewContext);
+			} else {
+				url.searchParams.delete(previewContextQueryParam);
+			}
 		} else {
 			url.searchParams.delete(previewQueryParam);
+			url.searchParams.delete(previewContextQueryParam);
 		}
 		anchor.href = url.toString();
 	};

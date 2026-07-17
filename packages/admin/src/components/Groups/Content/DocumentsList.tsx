@@ -646,7 +646,7 @@ export const DocumentsList: Component<{
 							getDocumentRoute("edit", {
 								collectionKey: props.state.collection?.key as string,
 								documentId: getDocumentId(),
-								status: "latest",
+								version: "latest",
 							}),
 						);
 					},

@@ -61,6 +61,7 @@ export const setupToolbarRuntime = (
 	const cleanupNavigation = installToolbarNavigation({
 		targetWindow,
 		preview,
+		builder: context.builder,
 		propagateInternalLinks:
 			options.preview !== false &&
 			preview.mode === "perspective" &&

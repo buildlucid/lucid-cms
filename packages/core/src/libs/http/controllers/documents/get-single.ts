@@ -35,14 +35,14 @@ const getSingleController = factory.createHandlers(
 	validate("query", controllerSchemas.getSingle.query.string),
 	collectionPermissions("read"),
 	async (c) => {
-		const { collectionKey, id, statusOrId } = c.req.valid("param");
+		const { collectionKey, id, versionOrId } = c.req.valid("param");
 		const context = createServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
 			c,
 			controllerSchemas.getSingle.query.formatted,
 		);
 
-		const isVersionId = !Number.isNaN(Number(statusOrId));
+		const isVersionId = !Number.isNaN(Number(versionOrId));
 
 		const document = await serviceWrapper(documentServices.getSingle, {
 			transaction: false,
@@ -53,8 +53,8 @@ const getSingleController = factory.createHandlers(
 			},
 		})(context, {
 			id: Number.parseInt(id, 10),
-			status: !isVersionId ? (statusOrId as DocumentVersionType) : undefined,
-			versionId: isVersionId ? Number.parseInt(statusOrId, 10) : undefined,
+			version: !isVersionId ? (versionOrId as DocumentVersionType) : undefined,
+			versionId: isVersionId ? Number.parseInt(versionOrId, 10) : undefined,
 			collectionKey,
 			query: formattedQuery,
 		});

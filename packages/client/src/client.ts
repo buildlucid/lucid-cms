@@ -39,6 +39,7 @@ export interface LucidClient {
  *
  * const page = await client.documents.getSingle({
  * 	collectionKey: "page",
+ * 	version: "published",
  * 	query: {
  * 		filter: {
  * 			_fullSlug: {

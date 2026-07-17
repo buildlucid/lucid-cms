@@ -26,13 +26,12 @@ import type { PreviewSessionDocumentTarget } from "../../preview-sessions/types.
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 import validateClientVersionTarget from "../helpers/validate-client-version-target.js";
-import type { ClientDocumentTarget } from "./types.js";
+import type { ClientDocumentVersionInput } from "./types.js";
 
 type ClientDocumentsGetSingleInput<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
-	target: ClientDocumentTarget<TCollectionKey>;
 	query: ClientGetSingleQueryParams;
-};
+} & ClientDocumentVersionInput<TCollectionKey>;
 
 type ClientDocumentsGetSingleService = <TCollectionKey extends string>(
 	context: ServiceContext,
@@ -46,15 +45,23 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	context: ServiceContext,
 	data: ClientDocumentsGetSingleInput<TCollectionKey>,
 ): ServiceResponse<CollectionDocument<TCollectionKey>> => {
-	let versionType: DocumentVersionType | undefined;
-	let versionId: number | undefined;
+	const versionTargetRes = await validateClientVersionTarget({
+		versionType: data.versionType,
+		versionId: data.versionId,
+	});
+	if (versionTargetRes.error) return versionTargetRes;
+
+	let versionType: DocumentVersionType = data.versionType;
+	let versionId = versionTargetRes.data.versionId;
 	let preview: PreviewSessionDocumentTarget | undefined;
 
-	//* Preview tokens resolve the effective document target for this collection.
-	if (data.target.type === "preview") {
+	//* Preview tokens may override the explicit version for this collection.
+	if (data.preview !== undefined) {
 		const previewRes = await authorizePreview(context, {
-			token: data.target.token,
+			token: data.preview,
 			collectionKey: data.collectionKey,
+			versionType,
+			versionId,
 		});
 		if (previewRes.error) return previewRes;
 		preview = previewRes.data;
@@ -64,16 +71,8 @@ const getSingle: ClientDocumentsGetSingleService = async <
 			versionId = preview.entry.versionId;
 		} else {
 			versionType = preview.versionType;
-			versionId = undefined;
+			versionId = preview.versionId;
 		}
-	} else {
-		const versionTargetRes = await validateClientVersionTarget({
-			versionType: data.target.versionType,
-			versionId: data.target.versionId,
-		});
-		if (versionTargetRes.error) return versionTargetRes;
-		versionType = data.target.versionType;
-		versionId = versionTargetRes.data.versionId;
 	}
 
 	const Documents = new DocumentsRepository(
@@ -124,13 +123,13 @@ const getSingle: ClientDocumentsGetSingleService = async <
 				? preview.entry.documentId
 				: undefined,
 		versionId,
-		versionType: versionType ?? "latest",
+		versionType,
 	});
 	if (relationVersionTypeRes.error) return relationVersionTypeRes;
 
 	const documentRes = await Documents.selectSingleFiltered(
 		{
-			status: versionType ?? "latest",
+			version: versionType,
 			versionId,
 			query,
 			documentFilters,

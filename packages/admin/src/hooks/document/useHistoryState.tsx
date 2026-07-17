@@ -248,7 +248,7 @@ export function useHistoryState() {
 		const isInSyncWithPromotedFrom = (
 			item:
 				| DocumentVersion
-				| NonNullable<InternalCollectionDocument["version"]["latest"]>,
+				| NonNullable<InternalCollectionDocument["versions"]["latest"]>,
 		): boolean => {
 			const promotedFromItem = allItems.find((i) => i.id === item.promotedFrom);
 			if (!promotedFromItem) return false;
@@ -256,8 +256,8 @@ export function useHistoryState() {
 		};
 
 		//* add latest version
-		if (documentData?.version?.latest) {
-			const latest = documentData.version.latest;
+		if (documentData?.versions?.latest) {
+			const latest = documentData.versions.latest;
 			latestItem = {
 				type: "latest",
 				id: latest.id,
@@ -289,16 +289,16 @@ export function useHistoryState() {
 				bricks: revision.bricks,
 				isReleased: false,
 				promotedFromLatest:
-					documentData?.version?.latest?.id === revision.promotedFrom,
+					documentData?.versions?.latest?.id === revision.promotedFrom,
 				inSyncWithPromotedFrom: isInSyncWithPromotedFrom(revision),
 			});
 		}
 
 		//* collect environment versions
 		const environmentVersions: TimelineItem[] = [];
-		if (documentData?.version) {
+		if (documentData?.versions) {
 			let unreleasedEnvCounter = 0;
-			for (const [key, version] of Object.entries(documentData.version)) {
+			for (const [key, version] of Object.entries(documentData.versions)) {
 				if (key === "latest") continue;
 
 				if (version) {
@@ -312,7 +312,7 @@ export function useHistoryState() {
 						contentId: version.contentId,
 						isReleased: true,
 						promotedFromLatest:
-							documentData?.version?.latest?.id === version.promotedFrom,
+							documentData?.versions?.latest?.id === version.promotedFrom,
 						inSyncWithPromotedFrom: isInSyncWithPromotedFrom(version),
 					});
 				}
@@ -431,7 +431,7 @@ export function useHistoryState() {
 			};
 		}
 
-		const referencedBy = Object.entries(document()?.version ?? {})
+		const referencedBy = Object.entries(document()?.versions ?? {})
 			.filter(
 				([key, version]) =>
 					key !== "revision" && version?.promotedFrom === item.id,
@@ -595,7 +595,7 @@ export function useHistoryState() {
 			getDocumentRoute("edit", {
 				collectionKey: collectionKey(),
 				documentId: id,
-				status: "latest",
+				version: "latest",
 			}),
 		);
 	};

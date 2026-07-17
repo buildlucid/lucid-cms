@@ -33,13 +33,12 @@ import type { PreviewSessionCollectionTarget } from "../../preview-sessions/type
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 import validateClientVersionTarget from "../helpers/validate-client-version-target.js";
-import type { ClientDocumentTarget } from "./types.js";
+import type { ClientDocumentVersionInput } from "./types.js";
 
 type ClientDocumentsGetMultipleInput<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
-	target: ClientDocumentTarget<TCollectionKey>;
 	query: ClientGetMultipleQueryParams;
-};
+} & ClientDocumentVersionInput<TCollectionKey>;
 
 type ClientDocumentsGetMultipleResult<TCollectionKey extends string = string> =
 	{
@@ -59,15 +58,23 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	context: ServiceContext,
 	data: ClientDocumentsGetMultipleInput<TCollectionKey>,
 ): ServiceResponse<ClientDocumentsGetMultipleResult<TCollectionKey>> => {
-	let versionType: DocumentVersionType;
-	let versionId: number | undefined;
+	const versionTargetRes = await validateClientVersionTarget({
+		versionType: data.versionType,
+		versionId: data.versionId,
+	});
+	if (versionTargetRes.error) return versionTargetRes;
+
+	let versionType: DocumentVersionType = data.versionType;
+	let versionId = versionTargetRes.data.versionId;
 	let preview: PreviewSessionCollectionTarget | undefined;
 
-	//* Preview tokens resolve the effective collection target.
-	if (data.target.type === "preview") {
+	//* Preview tokens may override the explicit version for this collection.
+	if (data.preview !== undefined) {
 		const previewRes = await authorizePreview(context, {
-			token: data.target.token,
+			token: data.preview,
 			collectionKey: data.collectionKey,
+			versionType,
+			versionId,
 		});
 		if (previewRes.error) return previewRes;
 		//* Entry targets cannot enumerate the previewed collection; auxiliary targets can.
@@ -87,15 +94,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 		}
 		preview = previewRes.data;
 		versionType = preview.versionType;
-		versionId = undefined;
-	} else {
-		const versionTargetRes = await validateClientVersionTarget({
-			versionType: data.target.versionType,
-			versionId: data.target.versionId,
-		});
-		if (versionTargetRes.error) return versionTargetRes;
-		versionType = data.target.versionType;
-		versionId = versionTargetRes.data.versionId;
+		versionId = preview.versionId;
 	}
 
 	const collectionRes = collectionServices.getSingleInstance(context, {
@@ -160,7 +159,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
-			status: versionType,
+			version: versionType,
 			versionId,
 			query,
 			documentFilters,

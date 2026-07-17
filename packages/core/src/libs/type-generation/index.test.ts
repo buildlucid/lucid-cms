@@ -195,7 +195,7 @@ test("generates collection-aware client document types that lean on the public L
 			`export type PageCollectionDocumentSortKey = "createdAt" | "updatedAt" | "_page_title";`,
 		);
 		expect(clientContent).toContain(
-			`export type PageCollectionDocumentStatus = "latest" | "revision" | "snapshot" | "published";`,
+			`export type PageCollectionDocumentVersion = "latest" | "revision" | "snapshot" | "published";`,
 		);
 		expect(clientContent).toContain(
 			`export type PageCollectionDocumentVersionKey = "latest" | "published";`,
@@ -227,7 +227,7 @@ test("generates collection-aware client document types that lean on the public L
 			"interface CollectionDocumentFiltersByCollection extends GeneratedCollectionDocumentFiltersByCollection {}",
 		);
 		expect(clientContent).toContain(
-			"interface CollectionDocumentStatusesByCollection extends GeneratedCollectionDocumentStatusesByCollection {}",
+			"interface CollectionDocumentVersionsByCollection extends GeneratedCollectionDocumentVersionsByCollection {}",
 		);
 		expect(clientContent).toContain(
 			"interface CollectionDocumentSortsByCollection extends GeneratedCollectionDocumentSortsByCollection {}",

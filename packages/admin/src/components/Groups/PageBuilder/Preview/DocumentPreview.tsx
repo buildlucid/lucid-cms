@@ -24,6 +24,9 @@ import {
 	type ResolverState,
 } from "./PreviewCanvas";
 
+const previewContextQueryParam = "previewContext";
+const builderPreviewContext = "builder";
+
 export const DocumentPreview: Component<{
 	open: Accessor<boolean>;
 	collectionKey: Accessor<string>;
@@ -61,7 +64,9 @@ export const DocumentPreview: Component<{
 
 	// ----------------------------------
 	// Functions
-	const createPersistedPreviewUrl = async () => {
+	const createPersistedPreviewUrl = async (
+		context: "builder" | "standalone" = "standalone",
+	) => {
 		const documentId = props.documentId();
 		if (documentId === undefined) return null;
 
@@ -73,7 +78,12 @@ export const DocumentPreview: Component<{
 			mode: props.mode(),
 			locale: props.locale(),
 		});
-		return response.data.url;
+		const previewUrl = response.data.url;
+		if (!previewUrl || context !== "builder") return previewUrl;
+
+		const url = new URL(previewUrl);
+		url.searchParams.set(previewContextQueryParam, builderPreviewContext);
+		return url.toString();
 	};
 	const resolvePersistedPreview = async (preserveScroll = false) => {
 		const currentResolve = ++resolveSequence;
@@ -85,7 +95,7 @@ export const DocumentPreview: Component<{
 			if (currentResolve !== resolveSequence) return;
 
 			setResolverState("loading");
-			const nextUrl = await createPersistedPreviewUrl();
+			const nextUrl = await createPersistedPreviewUrl("builder");
 			if (currentResolve !== resolveSequence) return;
 			if (!nextUrl) {
 				previewBridge.queueScrollRestore(null);

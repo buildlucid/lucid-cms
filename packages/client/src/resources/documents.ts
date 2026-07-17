@@ -1,7 +1,6 @@
 import type { ResponseBody } from "@lucidcms/types";
-import { DEFAULT_DOCUMENT_STATUS } from "../constants.js";
 import type {
-	CollectionDocumentStatus,
+	CollectionDocumentVersion,
 	DocumentsGetMultipleQuery,
 	DocumentsGetSingleQuery,
 } from "../types/contracts.js";
@@ -18,44 +17,28 @@ export type DocumentsGetSingleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = {
 	collectionKey: TCollectionKey;
+	version: CollectionDocumentVersion<TCollectionKey>;
+	/** Required when fetching a specific revision or snapshot. */
+	versionId?: number;
+	/** Optional preview context that may override the requested version. */
+	preview?: string;
 	query?: DocumentsGetSingleQuery<TCollectionKey>;
 	request?: LucidRequestOptions;
-} & (
-	| {
-			status?: CollectionDocumentStatus<TCollectionKey>;
-			/** Required when fetching a specific revision or snapshot. */
-			versionId?: number;
-			preview?: never;
-	  }
-	| {
-			/** Opaque token from a Lucid-generated preview URL. */
-			preview: string;
-			status?: never;
-			versionId?: never;
-	  }
-);
+};
 
 /** Input for fetching multiple documents from a collection. */
 export type DocumentsGetMultipleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = {
 	collectionKey: TCollectionKey;
+	version: CollectionDocumentVersion<TCollectionKey>;
+	/** Required when fetching a specific revision or snapshot. */
+	versionId?: number;
+	/** Optional preview context that may override the requested version. */
+	preview?: string;
 	query?: DocumentsGetMultipleQuery<TCollectionKey>;
 	request?: LucidRequestOptions;
-} & (
-	| {
-			status?: CollectionDocumentStatus<TCollectionKey>;
-			/** Required when fetching a specific revision or snapshot. */
-			versionId?: number;
-			preview?: never;
-	  }
-	| {
-			/** Opaque token from a Lucid-generated preview URL. */
-			preview: string;
-			status?: never;
-			versionId?: never;
-	  }
-);
+};
 
 /** The response body returned when requesting one document from a collection. */
 export type DocumentsGetSingleResponse<
@@ -92,10 +75,7 @@ export const createDocumentsClient = (
 			path: `/document/${encodePathSegment(input.collectionKey)}`,
 			query: {
 				...input.query,
-				status:
-					input.preview === undefined
-						? (input.status ?? DEFAULT_DOCUMENT_STATUS)
-						: undefined,
+				version: input.version,
 				versionId: input.versionId,
 				preview: input.preview,
 			},
@@ -110,10 +90,7 @@ export const createDocumentsClient = (
 			path: `/documents/${encodePathSegment(input.collectionKey)}`,
 			query: {
 				...input.query,
-				status:
-					input.preview === undefined
-						? (input.status ?? DEFAULT_DOCUMENT_STATUS)
-						: undefined,
+				version: input.version,
 				versionId: input.versionId,
 				preview: input.preview,
 			},

@@ -147,7 +147,7 @@ const PublishRequestRow: Component<{
 						href={getDocumentRoute("edit", {
 							collectionKey: props.request.collectionKey,
 							documentId: props.request.documentId,
-							status: "snapshot",
+							version: "snapshot",
 							versionId: props.request.snapshotVersionId,
 						})}
 						title={T()("actions.view.snapshot")}

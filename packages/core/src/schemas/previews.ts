@@ -21,7 +21,7 @@ export const controllerSchemas = {
 			entry: z.object({
 				collectionKey: z.string(),
 				documentId: z.number(),
-				versionType: versionTypesSchema,
+				version: versionTypesSchema,
 				versionId: z.number().nullable(),
 			}),
 			expiresAt: z.iso.datetime(),

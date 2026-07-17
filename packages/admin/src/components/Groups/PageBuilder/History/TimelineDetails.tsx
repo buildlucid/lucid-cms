@@ -161,7 +161,7 @@ const TimelineDetails: Component<{
 		getDocumentRoute("edit", {
 			collectionKey: props.collection()?.key ?? "",
 			documentId: props.document()?.id,
-			status: props.item.version,
+			version: props.item.version,
 			versionId: props.item.id,
 		}),
 	);

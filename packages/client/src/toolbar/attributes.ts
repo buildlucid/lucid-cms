@@ -16,7 +16,7 @@ type AuthenticationStatus = "authenticated" | "unauthenticated" | "unknown";
 
 type DocumentState = Pick<
 	CollectionDocument,
-	"collectionKey" | "id" | "status"
+	"collectionKey" | "id" | "version"
 > & {
 	meta?: Pick<NonNullable<CollectionDocument["meta"]>, "versionId">;
 };
@@ -40,7 +40,7 @@ type ToolbarAttributes = {
 	host?: string;
 	"edit-collection"?: string;
 	"edit-document-id"?: number;
-	"edit-status"?: DocumentVersionType;
+	"edit-version"?: DocumentVersionType;
 	"edit-version-id"?: number;
 	preview: PreviewSession["mode"] | "published";
 	"preview-token"?: string;
@@ -84,8 +84,8 @@ export const resolveToolbarAttributes = ({
 			? {
 					"edit-collection": editableDocument.collectionKey,
 					"edit-document-id": editableDocument.id,
-					...(editableDocument.status
-						? { "edit-status": editableDocument.status }
+					...(editableDocument.version
+						? { "edit-version": editableDocument.version }
 						: {}),
 					...(typeof editVersionId === "number" &&
 					Number.isInteger(editVersionId)

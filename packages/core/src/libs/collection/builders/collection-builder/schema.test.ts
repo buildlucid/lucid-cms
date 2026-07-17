@@ -346,7 +346,7 @@ test("collection group config validates shorthand and named groups", async () =>
 	});
 });
 
-test("collection environment relation features passes schema validation", async () => {
+test("collection environment version mappings passes schema validation", async () => {
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			key: "pages",
@@ -365,7 +365,7 @@ test("collection environment relation features passes schema validation", async 
 					name: copy("admin:tests.environments.staging.name", {
 						defaultMessage: "Staging",
 					}),
-					relations: {
+					collectionVersions: {
 						blog: "signed-off",
 						settings: "latest",
 					},

@@ -1,7 +1,6 @@
 import type { LucidRetryConfig } from "./types/transport.js";
 
 export const CLIENT_BASE_PATH = "/lucid/api/v1/client";
-export const DEFAULT_DOCUMENT_STATUS = "latest";
 
 export const ACCEPT_HEADER = "accept";
 export const AUTHORIZATION_HEADER = "authorization";

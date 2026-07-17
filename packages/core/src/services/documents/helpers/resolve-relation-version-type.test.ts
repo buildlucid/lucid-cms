@@ -90,14 +90,14 @@ describe("resolve relation version type", () => {
 		expect(mocks.selectSingle).not.toHaveBeenCalled();
 	});
 
-	it("uses explicit relation mappings for target collections", async () => {
+	it("uses explicit collection version mappings for target collections", async () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
 				name: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
-				relations: {
+				collectionVersions: {
 					blog: "signed-off",
 				},
 			},
@@ -259,7 +259,7 @@ describe("resolve relation version type", () => {
 		});
 	});
 
-	it("applies explicit relation mappings to operation-backed snapshots", async () => {
+	it("applies explicit collection version mappings to operation-backed snapshots", async () => {
 		mocks.selectSingle.mockResolvedValueOnce({
 			error: undefined,
 			data: {
@@ -272,7 +272,7 @@ describe("resolve relation version type", () => {
 				name: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
-				relations: {
+				collectionVersions: {
 					blog: "signed-off",
 				},
 			},

@@ -266,7 +266,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			V,
 			{
 				id: number;
-				status?: DocumentVersionType;
+				version?: DocumentVersionType;
 				versionId?: number;
 				tables: {
 					versions: LucidVersionTableName;
@@ -325,7 +325,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						)
 						.as("versions"),
 			])
-			.$if(props.status !== undefined, (qb) =>
+			.$if(props.version !== undefined, (qb) =>
 				qb
 					.leftJoin(props.tables.versions, (join) =>
 						join
@@ -336,7 +336,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								`${dynamicConfig.tableName}.id`,
 							)
 							// @ts-expect-error
-							.on(`${props.tables.versions}.type`, "=", props.status),
+							.on(`${props.tables.versions}.type`, "=", props.version),
 					)
 					// @ts-expect-error
 					.select([
@@ -500,9 +500,9 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 	}
 	async selectMultipleFiltered(
 		props: {
-			status: DocumentVersionType;
+			version: DocumentVersionType;
 			versionId?: number;
-			/** The status used to determine which version of the relation custom field refs to fetch */
+			/** The version used to determine which version of the relation custom field refs to fetch */
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];
@@ -595,7 +595,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									// @ts-expect-error
 									sql.ref(`${dynamicConfig.tableName}.id`),
 								)
-								.where(`${props.tables.versions}.type`, "=", props.status)
+								.where(`${props.tables.versions}.type`, "=", props.version)
 								.$if(props.versionId !== undefined, (qb) =>
 									qb.where(
 										`${props.tables.versions}.id`,
@@ -626,7 +626,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 										// @ts-expect-error
 										sql.ref(`${dynamicConfig.tableName}.id`),
 									)
-									.where(`${props.tables.versions}.type`, "=", props.status)
+									.where(`${props.tables.versions}.type`, "=", props.version)
 									.$if(props.versionId !== undefined, (qb) =>
 										qb.where(
 											`${props.tables.versions}.id`,
@@ -866,7 +866,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						.as("ub_user_profile_picture"),
 				])
 				// @ts-expect-error
-				.where(`${props.tables.versions}.type`, "=", props.status)
+				.where(`${props.tables.versions}.type`, "=", props.version)
 				.$if(props.versionId !== undefined, (qb) =>
 					qb.where(
 						`${props.tables.versions}.id`,
@@ -914,7 +914,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					),
 				)
 				// @ts-expect-error
-				.where(`${props.tables.versions}.type`, "=", props.status)
+				.where(`${props.tables.versions}.type`, "=", props.version)
 				.$if(props.versionId !== undefined, (qb) =>
 					qb.where(
 						`${props.tables.versions}.id`,
@@ -1060,9 +1060,9 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 	}
 	async selectSingleFiltered(
 		props: {
-			status: DocumentVersionType;
+			version: DocumentVersionType;
 			versionId?: number;
-			/** The status used to determine which version of the relation custom field refs to fetch */
+			/** The version used to determine which version of the relation custom field refs to fetch */
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];
@@ -1244,7 +1244,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						.as("ub_user_profile_picture"),
 				])
 				// @ts-expect-error
-				.where(`${props.tables.versions}.type`, "=", props.status)
+				.where(`${props.tables.versions}.type`, "=", props.version)
 				.$if(props.versionId !== undefined, (qb) =>
 					qb.where(
 						`${props.tables.versions}.id`,

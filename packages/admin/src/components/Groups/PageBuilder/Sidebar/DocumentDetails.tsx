@@ -87,7 +87,7 @@ export const DocumentDetails: Component<{
 				label: T()("common.status"),
 				value: document?.isDeleted
 					? T()("common.status.deleted")
-					: (document?.status ?? T()("common.unsaved")),
+					: (document?.version ?? T()("common.unsaved")),
 				show: true,
 			},
 		].filter((detail) => detail.show);

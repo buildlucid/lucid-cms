@@ -14,7 +14,7 @@ import {
 	runToolkitService,
 	withToolkitTenant,
 } from "../utils.js";
-import type { ToolkitDocumentStatus } from "./index.js";
+import type { ToolkitDocumentVersion } from "./index.js";
 
 export type ToolkitDocumentsGetMultipleQuery<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
@@ -30,21 +30,13 @@ export type ToolkitDocumentsGetMultipleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = ToolkitTenantOptions & {
 	collectionKey: TCollectionKey;
+	version: ToolkitDocumentVersion<TCollectionKey>;
+	/** Required when fetching a specific revision or snapshot. */
+	versionId?: number;
+	/** Optional preview context that may override the requested version. */
+	preview?: string | null;
 	query?: ToolkitDocumentsGetMultipleQuery<TCollectionKey>;
-} & (
-		| {
-				status?: ToolkitDocumentStatus<TCollectionKey>;
-				/** Required when fetching a specific revision or snapshot. */
-				versionId?: number;
-				preview?: never;
-		  }
-		| {
-				/** Opaque token from a Lucid-generated preview URL. */
-				preview: string;
-				status?: never;
-				versionId?: never;
-		  }
-	);
+};
 
 export type ToolkitDocumentsGetMultipleResult<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
@@ -57,22 +49,15 @@ const getMultiple = async <TCollectionKey extends CollectionDocumentKey>(
 	context: ServiceContext,
 	input: ToolkitDocumentsGetMultipleInput<TCollectionKey>,
 ): ServiceResponse<ToolkitDocumentsGetMultipleResult<TCollectionKey>> => {
-	const status = (input.status ??
-		"latest") as ToolkitDocumentStatus<TCollectionKey>;
 	const serviceContext = withToolkitTenant(context, input);
 
 	return runToolkitService(
 		() =>
 			documentServices.client.getMultiple(serviceContext, {
 				collectionKey: input.collectionKey,
-				target:
-					input.preview !== undefined
-						? { type: "preview", token: input.preview }
-						: {
-								type: "version",
-								versionType: status,
-								versionId: input.versionId,
-							},
+				versionType: input.version,
+				versionId: input.versionId,
+				preview: input.preview ?? undefined,
 				query: normalizePaginatedDocumentQuery(input.query),
 			}),
 		{

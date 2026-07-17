@@ -19,7 +19,7 @@ const factory = createFactory();
 const getMultipleController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Get a multiple document entries for a given collection and status (version type).",
+			"Get multiple document entries for a given collection and version.",
 		tags: ["documents"],
 		summary: "Get Multiple Documents",
 		responses: openAPI.responses({
@@ -36,7 +36,7 @@ const getMultipleController = factory.createHandlers(
 	validate("query", controllerSchemas.getMultiple.query.string),
 	collectionPermissions("read"),
 	async (c) => {
-		const { collectionKey, status } = c.req.valid("param");
+		const { collectionKey, version } = c.req.valid("param");
 		const context = createServiceContext(c);
 		const formattedQuery = await buildFormattedQuery(
 			c,
@@ -52,7 +52,7 @@ const getMultipleController = factory.createHandlers(
 			},
 		})(context, {
 			collectionKey,
-			status,
+			version,
 			query: formattedQuery,
 		});
 		if (documents.error) throw new LucidAPIError(documents.error);

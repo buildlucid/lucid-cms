@@ -10,11 +10,11 @@ export const buildToolbarEditHref = (
 
 	const adminHref = getToolbarAdminHref(host);
 	const collectionKey = encodeURIComponent(edit.collectionKey);
-	if (edit.status === "revision") {
+	if (edit.version === "revision") {
 		if (!Number.isInteger(edit.versionId)) return null;
 		return `${adminHref}/collections/${collectionKey}/revision/${edit.documentId}/${edit.versionId}`;
 	}
 
-	const status = encodeURIComponent(edit.status ?? "latest");
-	return `${adminHref}/collections/${collectionKey}/${status}/${edit.documentId}`;
+	const version = encodeURIComponent(edit.version ?? "latest");
+	return `${adminHref}/collections/${collectionKey}/${version}/${edit.documentId}`;
 };

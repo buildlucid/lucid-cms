@@ -45,7 +45,7 @@ const buildContext = (tenantKey: string | null = "acme") =>
 						environments: [
 							{
 								key: "staging",
-								relations: { article: "review" },
+								collectionVersions: { article: "review" },
 							},
 						],
 					},
@@ -85,7 +85,7 @@ describe("preview session resolution and authorization", () => {
 				entry: {
 					collectionKey: "page",
 					documentId: 42,
-					versionType: "revision",
+					version: "revision",
 					versionId: 73,
 				},
 				expiresAt: "2099-01-01T00:00:00.000Z",
@@ -122,6 +122,7 @@ describe("preview session resolution and authorization", () => {
 		const response = await authorize(buildContext(), {
 			token,
 			collectionKey,
+			versionType: "production",
 		});
 
 		expect(response.data).toMatchObject({
@@ -131,7 +132,7 @@ describe("preview session resolution and authorization", () => {
 	});
 
 	it.each([
-		["revision", 73, "latest"],
+		["revision", 73, "production"],
 		["snapshot", 91, "review"],
 		["latest", null, "latest"],
 		["staging", null, "review"],
@@ -148,10 +149,12 @@ describe("preview session resolution and authorization", () => {
 		const entry = await authorize(buildContext(), {
 			token,
 			collectionKey: "page",
+			versionType: "production",
 		});
 		const related = await authorize(buildContext(), {
 			token,
 			collectionKey: "article",
+			versionType: "production",
 		});
 
 		expect(entry.data).toMatchObject({
@@ -190,6 +193,7 @@ describe("preview session resolution and authorization", () => {
 		await authorize(buildContext(), {
 			token,
 			collectionKey: "article",
+			versionType: "production",
 		});
 
 		expect(mocks.selectPublishOperation).toHaveBeenCalledWith({
@@ -243,6 +247,7 @@ describe("preview session resolution and authorization", () => {
 		const response = await authorize(buildContext(tenantKey), {
 			token,
 			collectionKey: "secret",
+			versionType: "production",
 		});
 
 		expect(response.error).toBeUndefined();
@@ -253,6 +258,37 @@ describe("preview session resolution and authorization", () => {
 				documentId: 42,
 			},
 			versionType: "latest",
+		});
+	});
+
+	it("keeps the requested version when a preview has no target collection mapping", async () => {
+		mocks.selectPreview.mockResolvedValue({
+			error: undefined,
+			data: buildPreview({
+				entry_version_type: "staging",
+				mode: "perspective",
+				entry_version_id: null,
+			}),
+		});
+
+		const response = await authorize(buildContext(), {
+			token,
+			collectionKey: "secret",
+			versionType: "revision",
+			versionId: 55,
+		});
+
+		expect(response).toEqual({
+			error: undefined,
+			data: {
+				mode: "perspective",
+				entry: {
+					collectionKey: "page",
+					documentId: 42,
+				},
+				versionType: "revision",
+				versionId: 55,
+			},
 		});
 	});
 

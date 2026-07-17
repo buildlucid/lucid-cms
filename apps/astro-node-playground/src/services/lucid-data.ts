@@ -13,13 +13,17 @@ export const resolvePageLocale = (fullSlug: string): PageLocale | undefined => {
 	return pageLocales.find((supportedLocale) => supportedLocale === locale);
 };
 
-type GetPageOptions = {
+type GetLucidDataOptions = {
 	fullSlug: string;
 	locale: PageLocale;
 	astro: Pick<AstroGlobal, "cookies" | "response" | "url">;
 };
 
-const getPage = async ({ fullSlug, locale, astro }: GetPageOptions) => {
+const getLucidData = async ({
+	fullSlug,
+	locale,
+	astro,
+}: GetLucidDataOptions) => {
 	const toolkit = await getToolkit();
 
 	const [authentication, preview] = await Promise.all([
@@ -59,18 +63,33 @@ const getPage = async ({ fullSlug, locale, astro }: GetPageOptions) => {
 		}),
 	]);
 
-	const documentResponse = preview.error
-		? { error: preview.error, data: undefined }
-		: await toolkit.documents.getSingle({
-				collectionKey: "page",
-				...(preview.data.active && preview.data.token
-					? { preview: preview.data.token }
-					: { status: "production" as const }),
-				query: {
-					filter: { _fullSlug: { value: fullSlug } },
-					include: ["bricks"],
-				},
-			});
+	const [documentResponse, blogsResponse] = preview.error
+		? [
+				{ error: preview.error, data: undefined },
+				{ error: preview.error, data: undefined },
+			]
+		: await Promise.all([
+				toolkit.documents.getSingle({
+					collectionKey: "page",
+					version: "production",
+					preview: preview.data.token,
+					query: {
+						filter: { _fullSlug: { value: fullSlug } },
+						include: ["bricks"],
+					},
+				}),
+				toolkit.documents.getMultiple({
+					collectionKey: "blog",
+					version: "production",
+					preview: preview.data.token,
+					query: {
+						include: ["refs.media"],
+						page: 1,
+						perPage: 3,
+						sort: [{ key: "createdAt", direction: "desc" }],
+					},
+				}),
+			]);
 
 	if (preview.error) {
 		astro.response.status = preview.error.status ?? 401;
@@ -80,6 +99,8 @@ const getPage = async ({ fullSlug, locale, astro }: GetPageOptions) => {
 
 	const isDocumentError =
 		preview.error === undefined && documentResponse.error !== undefined;
+	const isBlogError =
+		preview.error === undefined && blogsResponse.error !== undefined;
 
 	const isPreviewError = preview.error
 		? true
@@ -88,6 +109,7 @@ const getPage = async ({ fullSlug, locale, astro }: GetPageOptions) => {
 	return {
 		raw: {
 			document: documentResponse,
+			blogs: blogsResponse,
 			preview,
 			authentication,
 		},
@@ -95,10 +117,18 @@ const getPage = async ({ fullSlug, locale, astro }: GetPageOptions) => {
 			locale,
 			preview: preview.data?.active === true,
 		}),
+		blogs:
+			blogsResponse.data?.data.map((blog) =>
+				asDocument(blog, {
+					locale,
+					preview: preview.data?.active === true,
+				}),
+			) ?? [],
 		isPreviewError,
 		isDocumentError,
+		isBlogError,
 		isAuthenticationError: authentication.error !== undefined,
 	};
 };
 
-export default getPage;
+export default getLucidData;

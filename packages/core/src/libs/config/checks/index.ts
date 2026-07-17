@@ -1,4 +1,4 @@
-import checkCollectionEnvironmentRelations from "./check-collection-environment-relations.js";
+import checkCollectionEnvironmentVersionMap from "./check-collection-environment-version-map.js";
 import checkDuplicateBuilderKeys from "./check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./check-duplicate-field-keys.js";
 import checkField from "./check-field.js";
@@ -11,7 +11,7 @@ import checkTenants from "./check-tenants.js";
 export default {
 	checkDuplicateBuilderKeys,
 	checkDuplicateFieldKeys,
-	checkCollectionEnvironmentRelations,
+	checkCollectionEnvironmentVersionMap,
 	checkRepeaterDepth,
 	checkPluginVersion,
 	checkLocales,

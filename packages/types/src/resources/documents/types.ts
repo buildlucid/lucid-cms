@@ -86,7 +86,7 @@ export interface CollectionDocumentBricksByCollection {}
 export interface CollectionDocumentLocaleCodes {}
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
-export interface CollectionDocumentStatusesByCollection {}
+export interface CollectionDocumentVersionsByCollection {}
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
 export interface CollectionDocumentVersionKeysByCollection {}
@@ -101,8 +101,8 @@ type CollectionDocumentFieldKey = Extract<
 	string
 >;
 
-type CollectionDocumentStatusKey = Extract<
-	keyof CollectionDocumentStatusesByCollection,
+type CollectionDocumentVersionCollectionKey = Extract<
+	keyof CollectionDocumentVersionsByCollection,
 	string
 >;
 
@@ -161,7 +161,7 @@ export type CollectionDocumentMeta<
 	TCollectionKey extends string = CollectionDocumentKey,
 > = {
 	versionId: number | null;
-	version: Record<
+	versions: Record<
 		CollectionDocumentVersionKey<TCollectionKey>,
 		DocumentVersionSummary | null
 	>;
@@ -171,9 +171,9 @@ export type CollectionDocumentMeta<
 	updatedBy: number | null;
 };
 
-export type CollectionDocumentStatus<TCollectionKey extends string = string> =
-	TCollectionKey extends CollectionDocumentStatusKey
-		? CollectionDocumentStatusesByCollection[TCollectionKey]
+export type CollectionDocumentVersion<TCollectionKey extends string = string> =
+	TCollectionKey extends CollectionDocumentVersionCollectionKey
+		? CollectionDocumentVersionsByCollection[TCollectionKey]
 		: DocumentVersionType;
 
 export type CollectionDocumentVersionKey<
@@ -195,8 +195,8 @@ type ResolveCollectionDocumentBricks<TCollectionKey extends string> =
 type ResolveCollectionDocumentKey<TCollectionKey extends string> =
 	TCollectionKey;
 
-type ResolveCollectionDocumentStatus<TCollectionKey extends string> =
-	CollectionDocumentStatus<
+type ResolveCollectionDocumentVersion<TCollectionKey extends string> =
+	CollectionDocumentVersion<
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
 
@@ -283,7 +283,7 @@ export interface DocumentBrick<
 
 export interface DocumentVersion {
 	id: number;
-	versionType: CollectionDocumentStatus;
+	versionType: CollectionDocumentVersion;
 	promotedFrom: number | null;
 	contentId: string;
 	createdAt: string | null;
@@ -309,7 +309,7 @@ export interface CollectionDocument<
 > {
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
-	status: ResolveCollectionDocumentStatus<TCollectionKey> | null;
+	version: ResolveCollectionDocumentVersion<TCollectionKey> | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
 	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
 	refs?: Partial<Record<FieldType | string, DocumentFieldRef[]>>;
@@ -330,7 +330,7 @@ export type PreviewSession = {
 	entry: {
 		collectionKey: string;
 		documentId: number;
-		versionType: DocumentVersionType;
+		version: DocumentVersionType;
 		versionId: number | null;
 	};
 	expiresAt: string;
@@ -765,9 +765,9 @@ export interface InternalDocumentFieldGroup {
 export interface InternalCollectionDocument {
 	id: number;
 	collectionKey: string;
-	status: DocumentVersionType | null;
+	version: DocumentVersionType | null;
 	versionId: number | null;
-	version: Record<string, DocumentVersionSummary | null>;
+	versions: Record<string, DocumentVersionSummary | null>;
 	isDeleted: boolean;
 	createdBy: DocumentAuthor;
 	createdAt: string | null;

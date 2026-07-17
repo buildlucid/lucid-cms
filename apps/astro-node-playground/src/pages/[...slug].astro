@@ -1,7 +1,7 @@
 ---
 import { resolveToolbarAttributes } from "@lucidcms/client";
 import "../index.css";
-import getPage, { resolvePageLocale } from "../services/pages";
+import getLucidData, { resolvePageLocale } from "../services/lucid-data";
 
 export const prerender = false;
 
@@ -9,12 +9,11 @@ const requestedFullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
 const locale = resolvePageLocale(requestedFullSlug);
 
 if (!locale) {
-	return Astro.redirect(
-		`/en${requestedFullSlug === "/" ? "" : requestedFullSlug}`,
-	);
+	const redirectPath = `/en${requestedFullSlug === "/" ? "" : requestedFullSlug}`;
+	return Astro.redirect(`${redirectPath}${Astro.url.search}`);
 }
 
-const result = await getPage({
+const result = await getLucidData({
 	fullSlug: requestedFullSlug,
 	locale,
 	astro: Astro,
@@ -37,6 +36,18 @@ const alternateFullSlug = fullSlugField?.value({ locale: alternateLocale });
 const alternateLocaleHref = alternateFullSlug || `/${alternateLocale}`;
 const alternateLocaleLabel = alternateLocale === "en" ? "English" : "Français";
 const localeRoot = `/${locale}`;
+
+const blogCards = result.blogs.map((blog) => {
+	const title = blog.field("title");
+	const image = blog.field("image").ref("media");
+
+	return {
+		id: blog.id,
+		title: title.value() || "Untitled blog",
+		titleAttributes: title.preview(),
+		imageUrl: image?.file.url,
+	};
+});
 
 const toolbarAttributes = resolveToolbarAttributes({
 	authentication: result.raw.authentication,
@@ -207,6 +218,36 @@ const toolbarAttributes = resolveToolbarAttributes({
 							</div>
 						</section>
 					)}
+
+					<section class="blogs-section" aria-labelledby="blogs-heading">
+						<div class="blogs-heading">
+							<p class="eyebrow">From the blog collection</p>
+							<h2 id="blogs-heading">Latest blogs</h2>
+						</div>
+
+						{result.isBlogError ? (
+							<p class="blogs-empty">The blogs could not be loaded.</p>
+						) : blogCards.length > 0 ? (
+							<div class="blogs-grid">
+								{blogCards.map((blog) => (
+									<article class="blog-card" data-document-id={blog.id}>
+										{blog.imageUrl ? (
+											<img src={blog.imageUrl} alt="" loading="lazy" />
+										) : (
+											<div class="blog-card-placeholder" aria-hidden="true" />
+										)}
+										<div class="blog-card-overlay">
+											<h3 {...blog.titleAttributes}>{blog.title}</h3>
+										</div>
+									</article>
+								))}
+							</div>
+						) : (
+							<p class="blogs-empty">
+								Create and publish up to three blog documents to see them here.
+							</p>
+						)}
+					</section>
 				</div>
 			</div>
 		</main>

@@ -14,7 +14,7 @@ import {
 	runToolkitService,
 	withToolkitTenant,
 } from "../utils.js";
-import type { ToolkitDocumentStatus } from "./index.js";
+import type { ToolkitDocumentVersion } from "./index.js";
 
 export type ToolkitDocumentsGetSingleQuery<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
@@ -24,42 +24,27 @@ export type ToolkitDocumentsGetSingleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = ToolkitTenantOptions & {
 	collectionKey: TCollectionKey;
+	version: ToolkitDocumentVersion<TCollectionKey>;
+	/** Required when fetching a specific revision or snapshot. */
+	versionId?: number;
+	/** Optional preview context that may override the requested version. */
+	preview?: string | null;
 	query?: ToolkitDocumentsGetSingleQuery<TCollectionKey>;
-} & (
-		| {
-				status?: ToolkitDocumentStatus<TCollectionKey>;
-				/** Required when fetching a specific revision or snapshot. */
-				versionId?: number;
-				preview?: never;
-		  }
-		| {
-				/** Opaque token from a Lucid-generated preview URL. */
-				preview: string;
-				status?: never;
-				versionId?: never;
-		  }
-	);
+};
 
 const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 	context: ServiceContext,
 	input: ToolkitDocumentsGetSingleInput<TCollectionKey>,
 ): ServiceResponse<CollectionDocument<TCollectionKey>> => {
-	const status = (input.status ??
-		"latest") as ToolkitDocumentStatus<TCollectionKey>;
 	const serviceContext = withToolkitTenant(context, input);
 
 	return runToolkitService(
 		() =>
 			documentServices.client.getSingle(serviceContext, {
 				collectionKey: input.collectionKey,
-				target:
-					input.preview !== undefined
-						? { type: "preview", token: input.preview }
-						: {
-								type: "version",
-								versionType: status,
-								versionId: input.versionId,
-							},
+				versionType: input.version,
+				versionId: input.versionId,
+				preview: input.preview ?? undefined,
 				query: normalizeDocumentQuery(input.query),
 			}),
 		{

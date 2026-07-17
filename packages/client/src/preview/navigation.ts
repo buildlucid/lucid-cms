@@ -1,4 +1,8 @@
-import { previewQueryParam } from "../utils/preview.js";
+import {
+	builderPreviewContext,
+	previewContextQueryParam,
+	previewQueryParam,
+} from "../utils/preview.js";
 import { previewNoticeTagName } from "./constants.js";
 import type { PreviewMode } from "./types.js";
 
@@ -37,6 +41,7 @@ const sanitizePreviewDestination = (
 	}
 	if (!isSupportedNavigationUrl(url)) return null;
 	url.searchParams.delete(previewQueryParam);
+	url.searchParams.delete(previewContextQueryParam);
 	return url;
 };
 
@@ -87,6 +92,7 @@ export const installPreviewNavigation = (
 
 		if (url.origin !== options.targetWindow.location.origin) {
 			url.searchParams.delete(previewQueryParam);
+			url.searchParams.delete(previewContextQueryParam);
 			anchor.href = url.toString();
 			anchor.referrerPolicy = "no-referrer";
 			return;
@@ -94,8 +100,10 @@ export const installPreviewNavigation = (
 
 		if (options.token && !anchor.hasAttribute("download")) {
 			url.searchParams.set(previewQueryParam, options.token);
+			url.searchParams.set(previewContextQueryParam, builderPreviewContext);
 		} else {
 			url.searchParams.delete(previewQueryParam);
+			url.searchParams.delete(previewContextQueryParam);
 		}
 		anchor.href = url.toString();
 	};

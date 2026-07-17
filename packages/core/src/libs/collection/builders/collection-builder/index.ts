@@ -212,7 +212,7 @@ class CollectionBuilder extends FieldBuilder {
 					name: normalizeCopy(environment.name),
 					requires: environment.requires ?? [],
 					permissions: environment.permissions ?? {},
-					relations: environment.relations ?? {},
+					collectionVersions: environment.collectionVersions ?? {},
 				})) ?? [],
 			revisionRetentionDays:
 				this.config.revisionRetentionDays ??

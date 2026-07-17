@@ -1,6 +1,7 @@
 import {
 	isLucidBuilderPreview,
 	normalizePreviewToken,
+	previewContextQueryParam,
 	previewQueryParam,
 } from "../utils/preview.js";
 import { previewExitValue, previewStorageKey } from "./constants.js";
@@ -99,14 +100,15 @@ export const detectPreviewMode = (
 		: { active: false, token: null, source: null, mode: null };
 };
 
-/** Returns the current URL without the preview query parameter. */
+/** Returns the current URL without preview query parameters. */
 export const cleanPreviewUrl = (targetWindow: Window): URL => {
 	const url = new URL(targetWindow.location.href);
 	url.searchParams.delete(previewQueryParam);
+	url.searchParams.delete(previewContextQueryParam);
 	return url;
 };
 
-/** Removes the preview query parameter without navigating. */
+/** Removes preview query parameters without navigating. */
 export const stripPreviewQuery = (targetWindow: Window): void => {
 	const cleanUrl = cleanPreviewUrl(targetWindow);
 	targetWindow.history.replaceState(

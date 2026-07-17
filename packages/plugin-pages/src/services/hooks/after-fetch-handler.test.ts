@@ -40,7 +40,7 @@ const createDocument = (props: {
 	({
 		id: props.id,
 		collectionKey: "pages",
-		status: "snapshot",
+		version: "snapshot",
 		versionId: props.id + 20,
 		fields: [
 			{

@@ -30,7 +30,7 @@ import type {
 } from "@lucidcms/types";
 import type { LucidClient } from "./client.js";
 import type {
-	CollectionDocumentStatus,
+	CollectionDocumentVersion,
 	CollectionDocumentVersionKey,
 } from "./types/contracts.js";
 
@@ -91,8 +91,8 @@ type ResolveCollectionDocumentBricks<TCollectionKey extends string> =
 type ResolveCollectionDocumentKey<TCollectionKey extends string> =
 	TCollectionKey;
 
-type ResolveCollectionDocumentStatus<TCollectionKey extends string> =
-	CollectionDocumentStatus<
+type ResolveCollectionDocumentVersion<TCollectionKey extends string> =
+	CollectionDocumentVersion<
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
 
@@ -100,7 +100,7 @@ export type CollectionDocumentMeta<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = {
 	versionId: number | null;
-	version: Record<
+	versions: Record<
 		CollectionDocumentVersionKey<TCollectionKey>,
 		DocumentVersionSummary | null
 	>;
@@ -115,7 +115,7 @@ export interface CollectionDocument<
 > {
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
-	status: ResolveCollectionDocumentStatus<TCollectionKey> | null;
+	version: ResolveCollectionDocumentVersion<TCollectionKey> | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
 	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
 	refs?: Partial<Record<FieldType | string, unknown[]>>;
@@ -165,10 +165,10 @@ export type {
 	CollectionDocumentSortKey,
 	CollectionDocumentSorts,
 	CollectionDocumentSortsByCollection,
-	CollectionDocumentStatus,
-	CollectionDocumentStatusesByCollection,
+	CollectionDocumentVersion,
 	CollectionDocumentVersionKey,
 	CollectionDocumentVersionKeysByCollection,
+	CollectionDocumentVersionsByCollection,
 	DocumentMultipleInclude,
 	DocumentRefInclude,
 	DocumentSingleInclude,

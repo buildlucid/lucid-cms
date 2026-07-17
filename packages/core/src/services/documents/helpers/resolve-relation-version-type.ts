@@ -31,12 +31,12 @@ const findEnvironment = (
 	);
 };
 
-export const resolveRelatedDocumentVersionType = (props: {
+const resolveMappedDocumentVersionType = (props: {
 	config: Config;
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
 	targetCollectionKey?: string;
-}) => {
+}): RelationVersionType | undefined => {
 	if (
 		props.targetCollectionKey === undefined ||
 		props.sourceVersionType === latestRelationVersionType
@@ -55,7 +55,7 @@ export const resolveRelatedDocumentVersionType = (props: {
 	if (!sourceEnvironment) return props.sourceVersionType;
 
 	const mappedVersionType =
-		sourceEnvironment.relations?.[props.targetCollectionKey];
+		sourceEnvironment.collectionVersions?.[props.targetCollectionKey];
 	if (mappedVersionType) return mappedVersionType;
 
 	const targetCollection = findCollection(
@@ -67,9 +67,30 @@ export const resolveRelatedDocumentVersionType = (props: {
 		props.sourceVersionType,
 	);
 
-	return targetEnvironment
-		? props.sourceVersionType
-		: latestRelationVersionType;
+	return targetEnvironment ? props.sourceVersionType : undefined;
+};
+
+export const resolveRelatedDocumentVersionType = (props: {
+	config: Config;
+	sourceCollectionKey: string;
+	sourceVersionType: RelationVersionType;
+	targetCollectionKey?: string;
+}) => {
+	return resolveMappedDocumentVersionType(props) ?? latestRelationVersionType;
+};
+
+/**
+ * Projects a preview perspective onto another collection, using that request's
+ * explicit version when no configured or same-named mapping exists.
+ */
+export const resolvePreviewCollectionVersionType = (props: {
+	config: Config;
+	sourceCollectionKey: string;
+	sourceVersionType: RelationVersionType;
+	targetCollectionKey: string;
+	fallbackVersionType: DocumentVersionType;
+}): DocumentVersionType => {
+	return resolveMappedDocumentVersionType(props) ?? props.fallbackVersionType;
 };
 
 const createRelationVersionTypeResolver = (props: {

@@ -21,7 +21,7 @@ const getSingle: ServiceFn<
 	[
 		{
 			id: number;
-			status?: DocumentVersionType;
+			version?: DocumentVersionType;
 			versionId?: number;
 			collectionKey: string;
 			query: GetSingleQueryParams;
@@ -35,7 +35,7 @@ const getSingle: ServiceFn<
 	);
 
 	if (
-		data.status === constants.collectionBuilder.publishing.snapshotVersionType
+		data.version === constants.collectionBuilder.publishing.snapshotVersionType
 	) {
 		return {
 			error: {
@@ -62,7 +62,7 @@ const getSingle: ServiceFn<
 				tables: {
 					versions: tableNamesRes.data.version,
 				},
-				status: data.status,
+				version: data.version,
 				versionId: data.versionId,
 				validation: {
 					enabled: true,
@@ -100,9 +100,9 @@ const getSingle: ServiceFn<
 	}
 
 	const versionId =
-		data.status !== undefined ? documentRes.data.version_id : data.versionId;
+		data.version !== undefined ? documentRes.data.version_id : data.versionId;
 	const versionType =
-		data.status !== undefined ? data.status : documentRes.data.version_type;
+		data.version !== undefined ? data.version : documentRes.data.version_type;
 
 	if (!versionId || !versionType) {
 		return {

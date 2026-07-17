@@ -4,10 +4,10 @@ import { translate } from "../../i18n/index.js";
 const latestVersionType = "latest";
 
 /**
- * Ensures configured relation target mappings point at known collections and
- * versions before document refs try to resolve against them at runtime.
+ * Ensures configured collection version mappings point at known collections and
+ * versions before cross-collection reads resolve against them at runtime.
  */
-const checkCollectionEnvironmentRelations = (config: Config) => {
+const checkCollectionEnvironmentVersionMap = (config: Config) => {
 	const collectionsByKey = new Map(
 		config.collections.map((collection) => [collection.key, collection]),
 	);
@@ -15,14 +15,14 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 	for (const collection of config.collections) {
 		for (const environment of collection.getData.environments) {
 			for (const [targetCollectionKey, targetVersionType] of Object.entries(
-				environment.relations ?? {},
+				environment.collectionVersions ?? {},
 			)) {
 				const targetCollection = collectionsByKey.get(targetCollectionKey);
 
 				if (!targetCollection) {
 					throw new Error(
 						translate(
-							"server:core.config.collection.environment.relation.collection.not.found",
+							"server:core.config.collection.environment.version.map.collection.not.found",
 							{
 								data: {
 									collection: collection.key,
@@ -44,7 +44,7 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 				if (!targetEnvironmentExists) {
 					throw new Error(
 						translate(
-							"server:core.config.collection.environment.relation.version.not.found",
+							"server:core.config.collection.environment.version.map.target.not.found",
 							{
 								data: {
 									collection: collection.key,
@@ -61,4 +61,4 @@ const checkCollectionEnvironmentRelations = (config: Config) => {
 	}
 };
 
-export default checkCollectionEnvironmentRelations;
+export default checkCollectionEnvironmentVersionMap;

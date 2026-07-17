@@ -17,6 +17,7 @@ const PageCollection = new CollectionBuilder("page", {
 	revisions: true,
 	review: {
 		requiredFor: ["production"],
+		allowSelfApproval: true,
 	},
 	environments: [
 		{

@@ -19,7 +19,7 @@ const formatSingle = (props: {
 		entry: {
 			collectionKey: props.session.entry_collection_key,
 			documentId: props.session.entry_document_id,
-			versionType: props.session.entry_version_type,
+			version: props.session.entry_version_type,
 			versionId: props.session.entry_version_id,
 		},
 		expiresAt: new Date(props.session.expires_at).toISOString(),

@@ -202,8 +202,8 @@ export function useDocumentUIState(props: {
 	 */
 	const isPublished = createMemo(() => {
 		return (
-			props.document()?.version?.published?.id !== null &&
-			props.document()?.version?.published?.id !== undefined
+			props.document()?.versions?.published?.id !== null &&
+			props.document()?.versions?.published?.id !== undefined
 		);
 	});
 

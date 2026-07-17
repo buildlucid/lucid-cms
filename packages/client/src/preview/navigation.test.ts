@@ -72,3 +72,49 @@ describe("scoped preview link navigation", () => {
 		state.cleanup();
 	});
 });
+
+describe("perspective preview link navigation", () => {
+	test("carries the preview token and builder context to same-origin links", () => {
+		const anchor = document.createElement("a");
+		anchor.href = "/destination?existing=value";
+		document.body.append(anchor);
+		const cleanup = installPreviewNavigation({
+			targetWindow: window,
+			mode: "perspective",
+			token: "preview-token",
+			showNavigationLocked: vi.fn(),
+		});
+
+		anchor.dispatchEvent(
+			new MouseEvent("click", { bubbles: true, cancelable: true }),
+		);
+
+		const destination = new URL(anchor.href);
+		expect(destination.searchParams.get("existing")).toBe("value");
+		expect(destination.searchParams.get("preview")).toBe("preview-token");
+		expect(destination.searchParams.get("previewContext")).toBe("builder");
+		cleanup();
+	});
+
+	test("removes preview credentials from external links", () => {
+		const anchor = document.createElement("a");
+		anchor.href =
+			"https://external.example/destination?preview=token&previewContext=builder";
+		document.body.append(anchor);
+		const cleanup = installPreviewNavigation({
+			targetWindow: window,
+			mode: "perspective",
+			token: "preview-token",
+			showNavigationLocked: vi.fn(),
+		});
+
+		anchor.dispatchEvent(
+			new MouseEvent("click", { bubbles: true, cancelable: true }),
+		);
+
+		const destination = new URL(anchor.href);
+		expect(destination.searchParams.has("preview")).toBe(false);
+		expect(destination.searchParams.has("previewContext")).toBe(false);
+		cleanup();
+	});
+});

@@ -34,7 +34,7 @@ const getMultiple: ServiceFn<
 	[
 		{
 			collectionKey: string;
-			status: DocumentVersionType;
+			version: DocumentVersionType;
 			query: GetMultipleQueryParams;
 		},
 	],
@@ -44,7 +44,7 @@ const getMultiple: ServiceFn<
 	}
 > = async (context, data) => {
 	if (
-		data.status === constants.collectionBuilder.publishing.snapshotVersionType
+		data.version === constants.collectionBuilder.publishing.snapshotVersionType
 	) {
 		return {
 			error: {
@@ -112,7 +112,7 @@ const getMultiple: ServiceFn<
 	const [relationVersionTypeRes, tableNameRes] = await Promise.all([
 		resolveRelationVersionType(context, {
 			collectionKey: data.collectionKey,
-			versionType: data.status,
+			versionType: data.version,
 		}),
 		getTableNames(context, data.collectionKey),
 	]);
@@ -126,7 +126,7 @@ const getMultiple: ServiceFn<
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
-			status: data.status,
+			version: data.version,
 			query: data.query,
 			documentFilters,
 			filterOr,
@@ -198,7 +198,7 @@ const getMultiple: ServiceFn<
 				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
-				versionType: data.status,
+				versionType: data.version,
 				relationVersionType,
 				documents,
 			},

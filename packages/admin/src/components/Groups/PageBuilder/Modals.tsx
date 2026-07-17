@@ -214,7 +214,7 @@ export const Modals: Component<{
 								getDocumentRoute("edit", {
 									collectionKey: props.hooks.state.collectionKey(),
 									documentId: props.hooks.state.documentId(),
-									status: target,
+									version: target,
 								}),
 							);
 						}
@@ -263,7 +263,7 @@ export const Modals: Component<{
 								getDocumentRoute("edit", {
 									collectionKey: props.hooks.state.collectionKey(),
 									documentId: props.hooks.state.documentId(),
-									status: target,
+									version: target,
 								}),
 							);
 						}

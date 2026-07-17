@@ -25,6 +25,7 @@ import type { Toolkit, ToolkitContext } from "./types.js";
  *
  * await toolkit.documents.getMultiple({
  *   collectionKey: "page",
+ *   version: "published",
  *   query: {
  *     perPage: 20,
  *   },

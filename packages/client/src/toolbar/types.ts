@@ -18,7 +18,7 @@ export type ToolbarContextState = {
 export type ToolbarEditLink = {
 	collectionKey: string;
 	documentId: number;
-	status?: DocumentVersionType | null;
+	version?: DocumentVersionType | null;
 	versionId?: number | null;
 	/** Defaults to `Edit page`. */
 	label?: string;

@@ -3,11 +3,11 @@ import { setupToolbar } from "@lucidcms/client/toolbar";
 const {
 	lucidEditCollection,
 	lucidEditDocument,
-	lucidEditStatus,
 	lucidEditVersion,
+	lucidEditVersionId,
 } = document.body.dataset;
 const documentId = Number(lucidEditDocument);
-const versionId = Number(lucidEditVersion);
+const versionId = Number(lucidEditVersionId);
 
 const toolbar = setupToolbar({
 	edit:
@@ -15,7 +15,7 @@ const toolbar = setupToolbar({
 			? {
 					collectionKey: lucidEditCollection,
 					documentId,
-					status: lucidEditStatus || undefined,
+					version: lucidEditVersion || undefined,
 					versionId: Number.isInteger(versionId) ? versionId : undefined,
 				}
 			: undefined,

@@ -16,7 +16,7 @@ const attributes = {
 	editCollection: "edit-collection",
 	editDocumentId: "edit-document-id",
 	editLabel: "edit-label",
-	editStatus: "edit-status",
+	editVersion: "edit-version",
 	editVersionId: "edit-version-id",
 	preview: "preview",
 	previewExitHref: "preview-exit-href",
@@ -67,7 +67,7 @@ const readEditOptions = (element: HTMLElement): ToolbarEditLink | undefined => {
 	return {
 		collectionKey,
 		documentId,
-		status: readString(element, attributes.editStatus),
+		version: readString(element, attributes.editVersion),
 		versionId: readInteger(element, attributes.editVersionId),
 		label: readString(element, attributes.editLabel),
 	};

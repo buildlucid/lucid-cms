@@ -13,13 +13,13 @@ describe("@lucidcms/client", () => {
 					data: {
 						id: 1,
 						collectionKey: "page",
-						status: "latest",
+						version: "latest",
 						fields: {},
 						bricks: [],
 						refs: {},
 						meta: {
 							versionId: 1,
-							version: {
+							versions: {
 								latest: null,
 							},
 							createdBy: null,
@@ -54,6 +54,7 @@ describe("@lucidcms/client", () => {
 
 		const response = await client.documents.getSingle({
 			collectionKey: "page",
+			version: "latest",
 			preview: "a".repeat(43),
 			query: {
 				filter: {
@@ -92,7 +93,7 @@ describe("@lucidcms/client", () => {
 		expect(new URL(String(url)).searchParams.get("preview")).toBe(
 			"a".repeat(43),
 		);
-		expect(new URL(String(url)).searchParams.has("status")).toBe(false);
+		expect(new URL(String(url)).searchParams.get("version")).toBe("latest");
 		expect(new URL(String(url)).searchParams.has("versionId")).toBe(false);
 		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
 	});
@@ -107,7 +108,7 @@ describe("@lucidcms/client", () => {
 						entry: {
 							collectionKey: "page",
 							documentId: 42,
-							versionType: "revision",
+							version: "revision",
 							versionId: 7,
 						},
 						expiresAt: "2099-01-01T00:00:00.000Z",
@@ -141,7 +142,7 @@ describe("@lucidcms/client", () => {
 			entry: {
 				collectionKey: "page",
 				documentId: 42,
-				versionType: "revision",
+				version: "revision",
 				versionId: 7,
 			},
 		});
@@ -205,6 +206,7 @@ describe("@lucidcms/client", () => {
 
 		const response = await client.documents.getMultiple({
 			collectionKey: "page",
+			version: "latest",
 			query: {
 				include: ["refs.relation", "meta"],
 				sort: [
@@ -234,7 +236,7 @@ describe("@lucidcms/client", () => {
 		expect(firstRequestUrl.pathname).toBe(
 			"/lucid/api/v1/client/documents/page",
 		);
-		expect(firstRequestUrl.searchParams.get("status")).toBe("latest");
+		expect(firstRequestUrl.searchParams.get("version")).toBe("latest");
 		expect(firstRequestUrl.searchParams.get("include")).toBe(
 			"refs.relation,meta",
 		);

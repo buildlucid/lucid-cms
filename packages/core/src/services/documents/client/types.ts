@@ -1,12 +1,8 @@
-import type { CollectionDocumentStatus } from "../../../types.js";
+import type { CollectionDocumentVersion } from "../../../types.js";
 
-export type ClientDocumentTarget<TCollectionKey extends string = string> =
-	| {
-			type: "version";
-			versionType: CollectionDocumentStatus<TCollectionKey>;
-			versionId?: number;
-	  }
-	| {
-			type: "preview";
-			token: string;
-	  };
+export type ClientDocumentVersionInput<TCollectionKey extends string = string> =
+	{
+		versionType: CollectionDocumentVersion<TCollectionKey>;
+		versionId?: number;
+		preview?: string;
+	};

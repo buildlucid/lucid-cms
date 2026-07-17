@@ -5,7 +5,7 @@ export const getDocumentRoute = (
 	data: {
 		collectionKey: string;
 		documentId?: number;
-		status?: DocumentVersionType;
+		version?: DocumentVersionType;
 		versionId?: number;
 	},
 ) => {
@@ -13,13 +13,13 @@ export const getDocumentRoute = (
 		return `/lucid/collections/${data.collectionKey}/latest/create`;
 	}
 
-	if (data.status === "revision") {
+	if (data.version === "revision") {
 		return `/lucid/collections/${data.collectionKey}/revision/${data.documentId}/${data.versionId}`;
 	}
 
-	if (data.status === "snapshot") {
+	if (data.version === "snapshot") {
 		return `/lucid/collections/${data.collectionKey}/snapshot/${data.documentId}/${data.versionId}`;
 	}
 
-	return `/lucid/collections/${data.collectionKey}/${data.status ?? "latest"}/${data.documentId}`;
+	return `/lucid/collections/${data.collectionKey}/${data.version ?? "latest"}/${data.documentId}`;
 };

@@ -52,7 +52,7 @@ declare module "../../types.js" {
 		fr: true;
 	}
 
-	interface CollectionDocumentStatusesByCollection {
+	interface CollectionDocumentVersionsByCollection {
 		page: "latest" | "revision" | "snapshot" | "published";
 	}
 
@@ -64,7 +64,7 @@ declare module "../../types.js" {
 const page = {
 	id: 1,
 	collectionKey: "page",
-	status: "published",
+	version: "published",
 	fields: {
 		page_title: {
 			en: "Homepage",
@@ -244,7 +244,7 @@ const page = {
 	},
 	meta: {
 		versionId: 9,
-		version: {
+		versions: {
 			latest: {
 				id: 11,
 				promotedFrom: null,

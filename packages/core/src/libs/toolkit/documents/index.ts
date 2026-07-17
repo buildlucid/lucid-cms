@@ -1,7 +1,7 @@
 import type {
 	CollectionDocument,
 	CollectionDocumentKey,
-	CollectionDocumentStatus,
+	CollectionDocumentVersion,
 } from "../../../types.js";
 import type {
 	ServiceContext,
@@ -15,9 +15,9 @@ import getMultiple from "./get-multiple.js";
 import type { ToolkitDocumentsGetSingleInput } from "./get-single.js";
 import getSingle from "./get-single.js";
 
-export type ToolkitDocumentStatus<
+export type ToolkitDocumentVersion<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = CollectionDocumentStatus<TCollectionKey>;
+> = CollectionDocumentVersion<TCollectionKey>;
 
 /**
  * Document helpers for reading collection content.
@@ -34,7 +34,7 @@ export type ToolkitDocuments = {
 	 * await toolkit.documents.getMultiple({
 	 *   collectionKey: "page",
 	 *   tenantKey: "marketing",
-	 *   status: "published",
+	 *   version: "published",
 	 *   query: {
 	 *     perPage: 50,
 	 *   },
@@ -55,6 +55,7 @@ export type ToolkitDocuments = {
 	 * await toolkit.documents.getSingle({
 	 *   collectionKey: "page",
 	 *   tenantKey: "marketing",
+	 *   version: "published",
 	 *   query: {
 	 *     filter: {
 	 *       _fullSlug: {

@@ -42,6 +42,8 @@ export type ToolkitPreviewState = {
 
 const previewQueryParam = "preview";
 const previewExitValue = "exit";
+const previewContextQueryParam = "previewContext";
+const builderPreviewContext = "builder";
 
 const setPreviewResponseHeaders = async (
 	headers?: ToolkitPreviewResponseHeaders,
@@ -63,6 +65,9 @@ const state = async (
 		async () => {
 			const url = new URL(input.url);
 			const hasQueryValue = url.searchParams.has(previewQueryParam);
+			const isBuilderPreview =
+				url.searchParams.get(previewContextQueryParam) ===
+				builderPreviewContext;
 			const queryValue = hasQueryValue
 				? (url.searchParams.get(previewQueryParam) ?? "")
 				: undefined;
@@ -107,7 +112,7 @@ const state = async (
 
 			if (previewRes.data.mode === "scoped") {
 				await input.session.clear();
-			} else if (hasQueryValue) {
+			} else if (hasQueryValue && !isBuilderPreview) {
 				await input.session.set({
 					token,
 					expiresAt: previewRes.data.expiresAt,

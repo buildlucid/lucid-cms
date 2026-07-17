@@ -107,7 +107,7 @@ export const HeaderBar: Component<{
 		const metadata = matchingAutoSaveMetadata();
 		if (metadata?.versionType === versionType) return metadata.contentId;
 
-		return props.state.document()?.version[versionType]?.contentId;
+		return props.state.document()?.versions[versionType]?.contentId;
 	};
 	const breadcrumbs = createMemo(() => {
 		const documentRoute = getDocumentRoute("edit", {
@@ -117,7 +117,7 @@ export const HeaderBar: Component<{
 		const currentDocumentRoute = getDocumentRoute("edit", {
 			collectionKey: props.state.collectionKey(),
 			documentId: props.state.documentID(),
-			status: props.version?.(),
+			version: props.version?.(),
 			versionId: props.versionId?.(),
 		});
 		const trailing = props.trailingBreadcrumbs?.() ?? [];
@@ -166,7 +166,7 @@ export const HeaderBar: Component<{
 				location: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
 					documentId: props.state.documentID(),
-					status: "revision",
+					version: "revision",
 					versionId: props.versionId?.(),
 				}),
 			});
@@ -185,14 +185,14 @@ export const HeaderBar: Component<{
 				location: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
 					documentId: props.state.documentID(),
-					status: "snapshot",
+					version: "snapshot",
 					versionId: props.versionId?.(),
 				}),
 			});
 		}
 
 		for (const environment of props.state.collection()?.environments ?? []) {
-			const isPublished = !!props.state.document()?.version[environment.key];
+			const isPublished = !!props.state.document()?.versions[environment.key];
 
 			options.push({
 				label: helpers.getLocaleValue({ value: environment.name }),
@@ -201,7 +201,7 @@ export const HeaderBar: Component<{
 				location: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
 					documentId: props.state.documentID(),
-					status: environment.key,
+					version: environment.key,
 				}),
 				status: {
 					isPublished: isPublished,
@@ -362,12 +362,12 @@ export const HeaderBar: Component<{
 				route: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
 					documentId: props.state.documentID(),
-					status: environment.key,
+					version: environment.key,
 				}),
 				disabled: disabledToast !== undefined,
 				...(disabledToast ? { disabledToast } : {}),
 				status: {
-					isReleased: !!document.version?.[environment.key],
+					isReleased: !!document.versions?.[environment.key],
 					upToDate: isPromoted,
 				},
 			};

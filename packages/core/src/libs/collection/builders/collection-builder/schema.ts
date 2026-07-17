@@ -29,7 +29,7 @@ const previewBreakpointKeySchema = z
 			"Preview breakpoint key must contain only lowercase letters, numbers, hyphens and underscores",
 	});
 
-const relationCollectionKeySchema = z
+const versionMapCollectionKeySchema = z
 	.string()
 	.min(1)
 	.max(constants.db.maxBuilderKeyLength)
@@ -183,8 +183,8 @@ const CollectionConfigSchema = z
 							review: z.string().optional(),
 						})
 						.optional(),
-					relations: z
-						.record(relationCollectionKeySchema, environmentKeySchema)
+					collectionVersions: z
+						.record(versionMapCollectionKeySchema, environmentKeySchema)
 						.optional(),
 				}),
 			)

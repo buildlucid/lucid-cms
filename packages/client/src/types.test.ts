@@ -13,8 +13,8 @@ import type {
 	CollectionDocumentKey,
 	CollectionDocumentLocaleCode,
 	CollectionDocumentSortKey,
-	CollectionDocumentStatus,
 	CollectionDocumentTranslations,
+	CollectionDocumentVersion,
 	CollectionDocumentVersionKey,
 	DocumentBrick,
 	DocumentMultipleInclude,
@@ -90,7 +90,7 @@ declare module "./types.js" {
 		page: "createdAt" | "updatedAt" | "_pageTitle";
 	}
 
-	interface CollectionDocumentStatusesByCollection {
+	interface CollectionDocumentVersionsByCollection {
 		page: "latest" | "revision" | "snapshot" | "published";
 	}
 
@@ -133,7 +133,7 @@ declare module "@lucidcms/core/types" {
 		fr: true;
 	}
 
-	interface CollectionDocumentStatusesByCollection {
+	interface CollectionDocumentVersionsByCollection {
 		page: "latest" | "revision" | "snapshot" | "published";
 	}
 
@@ -179,7 +179,7 @@ test("collection documents narrow to generated plain field and brick types", () 
 		  >
 		| undefined
 	>();
-	expectTypeOf<CollectionDocument<"page">["status"]>().toEqualTypeOf<
+	expectTypeOf<CollectionDocument<"page">["version"]>().toEqualTypeOf<
 		"latest" | "revision" | "snapshot" | "published" | null
 	>();
 	expectTypeOf<
@@ -253,9 +253,11 @@ test("document client methods infer the collection key through the response type
 
 	const singleResponse = client.getSingle({
 		collectionKey: "page",
+		version: "latest",
 	});
 	const multipleResponse = client.getMultiple({
 		collectionKey: "page",
+		version: "latest",
 	});
 
 	expectTypeOf(singleResponse).toEqualTypeOf<
@@ -323,7 +325,7 @@ test("document client queries narrow filters, includes, and sorts from the colle
 	expectTypeOf<CollectionDocumentSortKey<"page">>().toEqualTypeOf<
 		"createdAt" | "updatedAt" | "_pageTitle"
 	>();
-	expectTypeOf<CollectionDocumentStatus<"page">>().toEqualTypeOf<
+	expectTypeOf<CollectionDocumentVersion<"page">>().toEqualTypeOf<
 		"latest" | "revision" | "snapshot" | "published"
 	>();
 	expectTypeOf<CollectionDocumentVersionKey<"page">>().toEqualTypeOf<
@@ -348,7 +350,7 @@ test("document client queries narrow filters, includes, and sorts from the colle
 	>();
 });
 
-test("document client methods narrow status from the collection key", () => {
+test("document client methods narrow version from the collection key", () => {
 	const client = createDocumentsClient({
 		request: async () => ({}) as never,
 	});
@@ -356,7 +358,7 @@ test("document client methods narrow status from the collection key", () => {
 	expectTypeOf(
 		client.getSingle({
 			collectionKey: "page",
-			status: "published",
+			version: "published",
 		}),
 	).toEqualTypeOf<
 		Promise<LucidClientResponse<DocumentsGetSingleResponse<"page">>>
@@ -365,7 +367,7 @@ test("document client methods narrow status from the collection key", () => {
 	expectTypeOf(
 		client.getMultiple({
 			collectionKey: "page",
-			status: "revision",
+			version: "revision",
 		}),
 	).toEqualTypeOf<
 		Promise<LucidClientResponse<DocumentsGetMultipleResponse<"page">>>
@@ -373,6 +375,7 @@ test("document client methods narrow status from the collection key", () => {
 
 	client.getMultiple({
 		collectionKey: "page",
+		version: "latest",
 		query: {
 			// @ts-expect-error client list responses do not support brick hydration
 			include: ["bricks"],
