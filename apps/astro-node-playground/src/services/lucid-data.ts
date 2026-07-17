@@ -62,6 +62,11 @@ const getLucidData = async ({
 			},
 		}),
 	]);
+	const scopedPageEntry =
+		preview.data?.preview?.mode === "scoped" &&
+		preview.data.preview.entry.collectionKey === "page"
+			? preview.data.preview.entry
+			: null;
 
 	const [documentResponse, blogsResponse] = preview.error
 		? [
@@ -74,7 +79,9 @@ const getLucidData = async ({
 					version: "production",
 					preview: preview.data.token,
 					query: {
-						filter: { _fullSlug: { value: fullSlug } },
+						filter: scopedPageEntry
+							? { id: { value: scopedPageEntry.documentId } }
+							: { _fullSlug: { value: fullSlug } },
 						include: ["bricks"],
 					},
 				}),
