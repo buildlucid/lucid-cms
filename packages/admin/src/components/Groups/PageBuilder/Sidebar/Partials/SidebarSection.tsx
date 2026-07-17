@@ -1,43 +1,26 @@
 import { Collapsible } from "@kobalte/core";
 import classNames from "classnames";
 import { FaSolidChevronRight } from "solid-icons/fa";
-import {
-	type Component,
-	createEffect,
-	createSignal,
-	type JSXElement,
-	Show,
-} from "solid-js";
-
-const getStoredOpen = (storageKey: string) => {
-	try {
-		const stored = localStorage.getItem(storageKey);
-		if (stored === null) return true;
-		return stored === "true";
-	} catch {
-		return true;
-	}
-};
+import { type Component, type JSXElement, Show } from "solid-js";
+import useUserPreference from "@/hooks/useUserPreference";
+import userPreferencesStore, {
+	type SectionPreferenceKey,
+} from "@/store/userPreferences";
 
 const SidebarSection: Component<{
 	title: string;
 	icon: JSXElement;
-	storageKey: string;
+	preferenceKey: SectionPreferenceKey;
 	meta?: string | number;
 	children: JSXElement;
 }> = (props) => {
 	// ----------------------------------
 	// State
-	const [open, setOpen] = createSignal(getStoredOpen(props.storageKey));
-
-	// ----------------------------------
-	// Effects
-	createEffect(() => {
-		try {
-			localStorage.setItem(props.storageKey, String(open()));
-		} catch {
-			// Ignore unavailable storage; the section still works for this session.
-		}
+	const [open, setOpen] = useUserPreference({
+		value: () => userPreferencesStore.getSectionOpen(props.preferenceKey),
+		setValue: (value) =>
+			userPreferencesStore.setSectionOpen(props.preferenceKey, value),
+		defaultValue: true,
 	});
 
 	// ----------------------------------

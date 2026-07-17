@@ -170,7 +170,7 @@ export const PublishRequests: Component<{
 				<PublishOperationSection
 					title={T()("publish.requests.list.title")}
 					icon={<FaSolidPaperPlane size={14} />}
-					storageKey="lucid:page-builder-sidebar:release-requests-open"
+					preferenceKey="pageBuilder.sidebar.releaseRequests"
 					emptyCopy={T()("empty.states.pending.publish.requests")}
 					collection={props.collection}
 					rows={releaseRequestRows()}
@@ -182,7 +182,7 @@ export const PublishRequests: Component<{
 				<PublishOperationSection
 					title={T()("common.scheduled.releases")}
 					icon={<FaSolidCalendar size={14} />}
-					storageKey="lucid:page-builder-sidebar:scheduled-releases-open"
+					preferenceKey="pageBuilder.sidebar.scheduledReleases"
 					emptyCopy={T()("empty.states.scheduled.releases")}
 					collection={props.collection}
 					rows={scheduledReleaseRows()}

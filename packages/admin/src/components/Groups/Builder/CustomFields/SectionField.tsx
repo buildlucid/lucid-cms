@@ -12,25 +12,22 @@ import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
 
 interface SectionFieldProps {
-	state: {
-		fieldConfig: CollectionFieldConfigByType<"section">;
-		fields: InternalDocumentField[];
-		fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
-		fieldErrors: FieldError[];
-		conditionScopes?: Accessor<FieldConditionScope[]>;
-
-		groupRef?: string;
-		groupPath?: string;
-		repeaterKey?: string;
-		repeaterDepth?: number;
-		pathPrefix?: Array<string | number>;
-	};
+	fieldConfig: CollectionFieldConfigByType<"section">;
+	fields: InternalDocumentField[];
+	fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
+	fieldErrors: FieldError[];
+	conditionScopes?: Accessor<FieldConditionScope[]>;
+	groupRef?: string;
+	groupPath?: string;
+	repeaterKey?: string;
+	repeaterDepth?: number;
+	pathPrefix?: Array<string | number>;
 }
 
 export const SectionField: Component<SectionFieldProps> = (props) => {
 	// -------------------------------
 	// Memos
-	const fieldConfig = createMemo(() => props.state.fieldConfig);
+	const fieldConfig = createMemo(() => props.fieldConfig);
 	const label = createMemo(() =>
 		helpers.getLocaleValue({
 			value: fieldConfig().details?.label,
@@ -60,18 +57,16 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 				<Index each={fieldConfig().fields}>
 					{(config) => (
 						<DynamicField
-							state={{
-								fieldConfig: config(),
-								fields: props.state.fields,
-								fieldsByKey: props.state.fieldsByKey,
-								fieldErrors: props.state.fieldErrors,
-								conditionScopes: props.state.conditionScopes,
-								groupRef: props.state.groupRef,
-								groupPath: props.state.groupPath,
-								repeaterKey: props.state.repeaterKey,
-								repeaterDepth: props.state.repeaterDepth,
-								pathPrefix: props.state.pathPrefix,
-							}}
+							fieldConfig={config()}
+							fields={props.fields}
+							fieldsByKey={props.fieldsByKey}
+							fieldErrors={props.fieldErrors}
+							conditionScopes={props.conditionScopes}
+							groupRef={props.groupRef}
+							groupPath={props.groupPath}
+							repeaterKey={props.repeaterKey}
+							repeaterDepth={props.repeaterDepth}
+							pathPrefix={props.pathPrefix}
 						/>
 					)}
 				</Index>

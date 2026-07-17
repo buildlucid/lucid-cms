@@ -5,23 +5,20 @@ import type {
 	FieldError,
 	InternalCollectionDocument,
 } from "@types";
-import {
-	type Accessor,
-	createEffect,
-	createMemo,
-	createSignal,
-} from "solid-js";
+import { type Accessor, createMemo, createSignal } from "solid-js";
 import type api from "@/services/api";
 import brickStore from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import userPreferencesStore from "@/store/userPreferencesStore";
+import userPreferencesStore from "@/store/userPreferences";
 import userStore from "@/store/userStore";
 import brickHelpers from "@/utils/brick-helpers";
 import { getBodyError } from "@/utils/error-helpers";
+import useUserPreference from "../useUserPreference";
 
 export function useDocumentUIState(props: {
 	collectionQuery: ReturnType<typeof api.collections.useGetSingle>;
 	collection: Accessor<Collection | undefined>;
+	collectionKey: Accessor<string>;
 	documentQuery: ReturnType<typeof api.documents.useGetSingle>;
 	document: Accessor<InternalCollectionDocument | undefined>;
 	mode: "create" | "edit" | "history";
@@ -43,7 +40,26 @@ export function useDocumentUIState(props: {
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
 		createSignal<number | null>(null);
-	const [getPreviewOpen, setPreviewOpen] = createSignal(false);
+	const [autoSaveUserEnabled] = useUserPreference({
+		value: userPreferencesStore.getAutoSaveEnabled,
+		setValue: userPreferencesStore.setAutoSaveEnabled,
+		defaultValue: true,
+	});
+	const [getPreferredPreviewOpen, setPreviewOpen] = useUserPreference({
+		value: () =>
+			props.collectionKey()
+				? userPreferencesStore.getCollectionPreviewOpen(props.collectionKey())
+				: undefined,
+		setValue: (open) => {
+			if (props.collectionKey()) {
+				userPreferencesStore.setCollectionPreviewOpen(
+					props.collectionKey(),
+					open,
+				);
+			}
+		},
+		defaultValue: false,
+	});
 
 	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
 		createSignal(false);
@@ -128,13 +144,6 @@ export function useDocumentUIState(props: {
 	const autoSave = createMemo(() => {
 		return props.collection()?.autoSave;
 	});
-
-	/**
-	 * Determines if the auto save is enabled on the user
-	 */
-	const autoSaveUserEnabled = createMemo(
-		() => userPreferencesStore.get.autoSaveEnabled,
-	);
 
 	/**
 	 * Determines if auto-save is actively running (both collection config AND user preference enabled)
@@ -337,6 +346,9 @@ export function useDocumentUIState(props: {
 			props.collection()?.capabilities.preview === true
 		);
 	});
+	const getPreviewOpen = createMemo(
+		() => showPreview() && getPreferredPreviewOpen(),
+	);
 
 	/**
 	 * Determines if the user has permission to restore documents
@@ -346,10 +358,6 @@ export function useDocumentUIState(props: {
 		if (!permission) return false;
 
 		return userStore.get.hasPermission([permission]).all;
-	});
-
-	createEffect(() => {
-		if (!showPreview()) setPreviewOpen(false);
 	});
 
 	// ------------------------------------------

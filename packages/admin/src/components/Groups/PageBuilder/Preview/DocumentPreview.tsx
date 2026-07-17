@@ -1,4 +1,7 @@
-import type { PreviewFieldTarget } from "@lucidcms/preview-protocol";
+import type {
+	PreviewFieldTarget,
+	PreviewScrollState,
+} from "@lucidcms/preview-protocol";
 import type {
 	CollectionPreviewBreakpoint,
 	DocumentVersionType,
@@ -39,6 +42,10 @@ export const DocumentPreview: Component<{
 	dirty: Accessor<boolean>;
 	saveStamp: Accessor<string>;
 	onFocusField: (target: PreviewFieldTarget) => void;
+	registerScrollCapture?: (
+		capture: () => Promise<PreviewScrollState | null>,
+	) => () => void;
+	consumeScrollRestore?: () => PreviewScrollState | null;
 }> = (props) => {
 	// ----------------------------------
 	// State / Hooks
@@ -53,6 +60,10 @@ export const DocumentPreview: Component<{
 	const previewBridge = createPreviewBridge({
 		onFocusField: props.onFocusField,
 	});
+	const unregisterScrollCapture = props.registerScrollCapture?.(
+		previewBridge.captureScroll,
+	);
+	let initialScrollRestore = props.consumeScrollRestore?.() ?? null;
 
 	// -------------------------------
 	// Queries & Mutations
@@ -87,11 +98,15 @@ export const DocumentPreview: Component<{
 	};
 	const resolvePersistedPreview = async (preserveScroll = false) => {
 		const currentResolve = ++resolveSequence;
-		if (!preserveScroll) previewBridge.queueScrollRestore(null);
+		const handedOffScroll = initialScrollRestore;
+		initialScrollRestore = null;
+		if (!preserveScroll && !handedOffScroll) {
+			previewBridge.queueScrollRestore(null);
+		}
 		try {
-			const scrollState = preserveScroll
-				? await previewBridge.captureScroll()
-				: null;
+			const scrollState =
+				handedOffScroll ??
+				(preserveScroll ? await previewBridge.captureScroll() : null);
 			if (currentResolve !== resolveSequence) return;
 
 			setResolverState("loading");
@@ -184,20 +199,13 @@ export const DocumentPreview: Component<{
 					props.mode(),
 					props.locale(),
 				] as const,
-			(
-				[open, collectionKey, documentId, versionType, versionId, mode, locale],
-				previous,
-			) => {
+			([open, collectionKey, documentId], previous) => {
 				if (!open) return;
-				const localeChanged =
+				const sameDocument =
 					previous?.[0] === true &&
 					previous[1] === collectionKey &&
-					previous[2] === documentId &&
-					previous[3] === versionType &&
-					previous[4] === versionId &&
-					previous[5] === mode &&
-					previous[6] !== locale;
-				void resolvePersistedPreview(localeChanged);
+					previous[2] === documentId;
+				void resolvePersistedPreview(sameDocument);
 			},
 		),
 	);
@@ -212,6 +220,7 @@ export const DocumentPreview: Component<{
 	// Lifecycle
 	onCleanup(() => {
 		resolveSequence += 1;
+		unregisterScrollCapture?.();
 		previewBridge.cleanup();
 	});
 

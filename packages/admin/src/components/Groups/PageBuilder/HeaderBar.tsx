@@ -24,7 +24,7 @@ import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import userPreferencesStore from "@/store/userPreferencesStore";
+import userPreferencesStore from "@/store/userPreferences";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -68,6 +68,7 @@ export const HeaderBar: Component<{
 		publishDocumentAction?: UseDocumentMutations["publishDocumentAction"];
 		restoreRevisionAction?: UseDocumentMutations["restoreRevisionAction"];
 		togglePreview?: () => void;
+		beforeVersionChange?: () => Promise<void>;
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -511,7 +512,7 @@ export const HeaderBar: Component<{
 							<Show when={props.state.ui.hasAutoSavePermission?.()}>
 								<button
 									type="button"
-									onClick={() => userPreferencesStore.get.toggleAutoSave()}
+									onClick={userPreferencesStore.toggleAutoSaveEnabled}
 									class={classNames(
 										"flex items-center justify-center w-6 h-6 rounded transition-colors",
 										{
@@ -560,6 +561,7 @@ export const HeaderBar: Component<{
 									collectionSingularName={props.state.collectionSingularName}
 									isDocumentMutated={props.state.isDocumentMutated}
 									currentViewLabel={props.currentViewLabel}
+									onBeforeVersionChange={props.actions.beforeVersionChange}
 								/>
 							</Show>
 						</div>

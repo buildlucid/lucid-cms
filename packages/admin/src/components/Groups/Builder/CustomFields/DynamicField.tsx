@@ -52,20 +52,17 @@ const fieldWidthClasses: Record<number, string> = {
 };
 
 interface DynamicFieldProps {
-	state: {
-		fieldConfig: CollectionFieldConfig;
-		fields: InternalDocumentField[];
-		fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
-		fieldErrors: FieldError[];
-		activeTab?: Accessor<string | undefined>;
-		conditionScopes?: Accessor<FieldConditionScope[]>;
-
-		groupRef?: string;
-		groupPath?: string;
-		repeaterKey?: string;
-		repeaterDepth?: number;
-		pathPrefix?: Array<string | number>;
-	};
+	fieldConfig: CollectionFieldConfig;
+	fields: InternalDocumentField[];
+	fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
+	fieldErrors: FieldError[];
+	activeTab?: Accessor<string | undefined>;
+	conditionScopes?: Accessor<FieldConditionScope[]>;
+	groupRef?: string;
+	groupPath?: string;
+	repeaterKey?: string;
+	repeaterDepth?: number;
+	pathPrefix?: Array<string | number>;
 }
 
 export const DynamicField: Component<DynamicFieldProps> = (props) => {
@@ -76,19 +73,19 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 
 	// -------------------------------
 	// Memos
-	const fieldConfig = createMemo(() => props.state.fieldConfig);
+	const fieldConfig = createMemo(() => props.fieldConfig);
 	const fieldPath = createMemo(() => [
-		...(props.state.pathPrefix ?? []),
+		...(props.pathPrefix ?? []),
 		fieldConfig().key,
 	]);
-	const fieldsByKey = createMemo(() => props.state.fieldsByKey?.());
+	const fieldsByKey = createMemo(() => props.fieldsByKey?.());
 	const conditionVisible = createMemo(() => {
 		const config = fieldConfig();
 		if (!config.ui?.condition) return true;
 
 		return evaluateFieldVisibility({
 			fieldConfig: config,
-			scopes: props.state.conditionScopes?.() ?? [],
+			scopes: props.conditionScopes?.() ?? [],
 			contentLocale: fieldRenderState.contentLocale(),
 			defaultLocale: fieldRenderState.defaultLocale(),
 		});
@@ -98,23 +95,23 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	);
 	const fieldData = createMemo(() => {
 		if (
-			props.state.fieldConfig.type === "tab" ||
-			props.state.fieldConfig.type === "section" ||
-			props.state.fieldConfig.type === "collapsible"
+			props.fieldConfig.type === "tab" ||
+			props.fieldConfig.type === "section" ||
+			props.fieldConfig.type === "collapsible"
 		) {
 			return;
 		}
 
 		const field =
-			fieldsByKey()?.get(props.state.fieldConfig.key) ??
-			props.state.fields?.find((f) => f.key === props.state.fieldConfig.key);
+			fieldsByKey()?.get(props.fieldConfig.key) ??
+			props.fields?.find((f) => f.key === props.fieldConfig.key);
 
 		if (!field) {
 			return brickStore.get.addField({
 				brickIndex: fieldRenderState.brickIndex(),
-				fieldConfig: props.state.fieldConfig as CollectionDataFieldConfig,
-				ref: props.state.groupRef,
-				repeaterKey: props.state.repeaterKey,
+				fieldConfig: props.fieldConfig as CollectionDataFieldConfig,
+				ref: props.groupRef,
+				repeaterKey: props.repeaterKey,
 				locales: fieldRenderState.contentLocales(),
 			});
 		}
@@ -124,19 +121,17 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		//* repeaters dont incldue a localeCode
 		//* if the field or collection doesnt support localization
 		if (
-			props.state.fieldConfig.type === "repeater" ||
+			props.fieldConfig.type === "repeater" ||
 			// @ts-expect-error
 			fieldConfig()?.localized !== true ||
 			brickStore.get.collectionLocalized !== true
 		) {
-			return props.state.fieldErrors.filter(
-				(f) => f.key === props.state.fieldConfig.key,
-			);
+			return props.fieldErrors.filter((f) => f.key === props.fieldConfig.key);
 		}
 
-		return props.state.fieldErrors.filter(
+		return props.fieldErrors.filter(
 			(f) =>
-				f.key === props.state.fieldConfig.key &&
+				f.key === props.fieldConfig.key &&
 				f.localeCode === fieldRenderState.contentLocale(),
 		);
 	});
@@ -145,21 +140,21 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		return (
 			hasMultipleLocales() &&
 			// @ts-expect-error
-			props.state.fieldConfig?.localized &&
+			props.fieldConfig?.localized &&
 			brickStore.get.collectionLocalized
 		);
 	});
 	const altLocaleError = createMemo(() => {
-		return props.state.fieldErrors.some(
+		return props.fieldErrors.some(
 			(f) =>
-				f.key === props.state.fieldConfig.key &&
+				f.key === props.fieldConfig.key &&
 				f.localeCode &&
 				f.localeCode !== fieldRenderState.contentLocale(),
 		);
 	});
 	const activeTab = createMemo(() => {
 		if (fieldConfig().type !== "tab") return true;
-		return props.state.activeTab?.() === fieldConfig().key;
+		return props.activeTab?.() === fieldConfig().key;
 	});
 	const tabBodyMounted = createMemo(() => {
 		if (fieldConfig().type !== "tab") return false;
@@ -256,19 +251,17 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 								>
 									{(config) => (
 										<DynamicField
-											state={{
-												fieldConfig: config(),
-												fields: props.state.fields,
-												fieldsByKey: props.state.fieldsByKey,
-												activeTab: props.state.activeTab,
-												conditionScopes: props.state.conditionScopes,
-												groupRef: props.state.groupRef,
-												groupPath: props.state.groupPath,
-												repeaterKey: props.state.repeaterKey,
-												repeaterDepth: props.state.repeaterDepth,
-												pathPrefix: props.state.pathPrefix,
-												fieldErrors: props.state.fieldErrors,
-											}}
+											fieldConfig={config()}
+											fields={props.fields}
+											fieldsByKey={props.fieldsByKey}
+											activeTab={props.activeTab}
+											conditionScopes={props.conditionScopes}
+											groupRef={props.groupRef}
+											groupPath={props.groupPath}
+											repeaterKey={props.repeaterKey}
+											repeaterDepth={props.repeaterDepth}
+											pathPrefix={props.pathPrefix}
+											fieldErrors={props.fieldErrors}
 										/>
 									)}
 								</Index>
@@ -276,52 +269,49 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						</Match>
 						<Match when={fieldConfig().type === "section"}>
 							<SectionField
-								state={{
-									fieldConfig:
-										fieldConfig() as CollectionFieldConfigByType<"section">,
-									fields: props.state.fields,
-									fieldsByKey: props.state.fieldsByKey,
-									fieldErrors: props.state.fieldErrors,
-									conditionScopes: props.state.conditionScopes,
-									groupRef: props.state.groupRef,
-									groupPath: props.state.groupPath,
-									repeaterKey: props.state.repeaterKey,
-									repeaterDepth: props.state.repeaterDepth,
-									pathPrefix: props.state.pathPrefix,
-								}}
+								fieldConfig={
+									fieldConfig() as CollectionFieldConfigByType<"section">
+								}
+								fields={props.fields}
+								fieldsByKey={props.fieldsByKey}
+								fieldErrors={props.fieldErrors}
+								conditionScopes={props.conditionScopes}
+								groupRef={props.groupRef}
+								groupPath={props.groupPath}
+								repeaterKey={props.repeaterKey}
+								repeaterDepth={props.repeaterDepth}
+								pathPrefix={props.pathPrefix}
 							/>
 						</Match>
 						<Match when={fieldConfig().type === "collapsible"}>
 							<CollapsibleField
-								state={{
-									fieldConfig:
-										fieldConfig() as CollectionFieldConfigByType<"collapsible">,
-									fields: props.state.fields,
-									fieldsByKey: props.state.fieldsByKey,
-									fieldErrors: props.state.fieldErrors,
-									conditionScopes: props.state.conditionScopes,
-									groupRef: props.state.groupRef,
-									groupPath: props.state.groupPath,
-									repeaterKey: props.state.repeaterKey,
-									repeaterDepth: props.state.repeaterDepth,
-									pathPrefix: props.state.pathPrefix,
-								}}
+								fieldConfig={
+									fieldConfig() as CollectionFieldConfigByType<"collapsible">
+								}
+								fields={props.fields}
+								fieldsByKey={props.fieldsByKey}
+								fieldErrors={props.fieldErrors}
+								conditionScopes={props.conditionScopes}
+								groupRef={props.groupRef}
+								groupPath={props.groupPath}
+								repeaterKey={props.repeaterKey}
+								repeaterDepth={props.repeaterDepth}
+								pathPrefix={props.pathPrefix}
 							/>
 						</Match>
 						<Match when={fieldConfig().type === "repeater"}>
 							<RepeaterField
-								state={{
-									fieldConfig:
-										fieldConfig() as CollectionFieldConfigByType<"repeater">,
-									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									groupPath: props.state.groupPath,
-									parentRepeaterKey: props.state.repeaterKey,
-									repeaterDepth: props.state.repeaterDepth ?? 0,
-									fieldPath: fieldPath(),
-									fieldError: fieldError(),
-									conditionScopes: props.state.conditionScopes,
-								}}
+								fieldConfig={
+									fieldConfig() as CollectionFieldConfigByType<"repeater">
+								}
+								fieldData={fieldData()}
+								groupRef={props.groupRef}
+								groupPath={props.groupPath}
+								parentRepeaterKey={props.repeaterKey}
+								repeaterDepth={props.repeaterDepth ?? 0}
+								fieldPath={fieldPath()}
+								fieldError={fieldError()}
+								conditionScopes={props.conditionScopes}
 							/>
 						</Match>
 						<Match when={fieldConfig().type === "text"}>
@@ -331,8 +321,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"text">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -346,8 +336,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"user">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									fieldErrors: fieldErrors(),
 									altLocaleError: altLocaleError(),
@@ -362,8 +352,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"relation">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									fieldErrors: fieldErrors(),
 									altLocaleError: altLocaleError(),
@@ -379,8 +369,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"number">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -394,8 +384,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"range">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -415,8 +405,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"datetime">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -430,8 +420,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"checkbox">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -445,8 +435,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"color">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -460,8 +450,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"json">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -475,8 +465,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"code">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -490,8 +480,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"link">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -505,8 +495,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"media">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									fieldErrors: fieldErrors(),
 									altLocaleError: altLocaleError(),
@@ -521,8 +511,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"select">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -536,8 +526,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"textarea">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
@@ -551,8 +541,8 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldConfig:
 										fieldConfig() as CollectionFieldConfigByType<"rich-text">,
 									fieldData: fieldData(),
-									groupRef: props.state.groupRef,
-									repeaterKey: props.state.repeaterKey,
+									groupRef: props.groupRef,
+									repeaterKey: props.repeaterKey,
 									fieldError: fieldError(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),

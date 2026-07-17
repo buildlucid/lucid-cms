@@ -105,16 +105,14 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 			</div>
 			{/* Body */}
 			<BrickBody
-				state={{
-					open: true,
-					brick: props.brick,
-					brickIndex: brickIndex(),
-					configFields: config()?.fields || [],
-					fieldErrors: fieldErrors(),
-					missingFieldColumns: missingFieldColumns(),
-					collectionKey: props.collectionKey,
-					documentId: props.documentId,
-				}}
+				open={true}
+				brick={props.brick}
+				brickIndex={brickIndex()}
+				configFields={config()?.fields || []}
+				fieldErrors={fieldErrors()}
+				missingFieldColumns={missingFieldColumns()}
+				collectionKey={props.collectionKey}
+				documentId={props.documentId}
 				options={{
 					padding: "24",
 					bleedTop: true,

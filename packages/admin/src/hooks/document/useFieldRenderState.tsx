@@ -9,6 +9,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 type FieldRenderStateContextValue = {
 	brickOrder: Accessor<number | undefined>;
 	brickIndex: Accessor<number>;
+	brickRef: Accessor<string | undefined>;
 	collectionKey: Accessor<string | undefined>;
 	brickKey: Accessor<string | undefined>;
 	documentId: Accessor<number | undefined>;
@@ -16,12 +17,12 @@ type FieldRenderStateContextValue = {
 	defaultLocale: Accessor<string>;
 	contentLocales: Accessor<string[]>;
 	missingFieldColumns: Accessor<string[]>;
-	uiStateBrickKey: Accessor<string | undefined>;
 };
 
 const FieldRenderStateContext = createContext<FieldRenderStateContextValue>({
 	brickOrder: () => undefined,
 	brickIndex: () => -1,
+	brickRef: () => undefined,
 	collectionKey: () => undefined,
 	brickKey: () => undefined,
 	documentId: () => undefined,
@@ -33,27 +34,26 @@ const FieldRenderStateContext = createContext<FieldRenderStateContextValue>({
 	contentLocales: () =>
 		contentLocaleStore.get.locales.map((locale) => locale.code) || [],
 	missingFieldColumns: () => [],
-	uiStateBrickKey: () => undefined,
 });
 
 export const FieldRenderStateProvider: ParentComponent<
 	FieldRenderStateContextValue
 > = (props) => {
+	const value: FieldRenderStateContextValue = {
+		brickOrder: props.brickOrder,
+		brickIndex: props.brickIndex,
+		brickRef: props.brickRef,
+		collectionKey: props.collectionKey,
+		brickKey: props.brickKey,
+		documentId: props.documentId,
+		contentLocale: props.contentLocale,
+		defaultLocale: props.defaultLocale,
+		contentLocales: props.contentLocales,
+		missingFieldColumns: props.missingFieldColumns,
+	};
+
 	return (
-		<FieldRenderStateContext.Provider
-			value={{
-				brickOrder: props.brickOrder,
-				brickIndex: props.brickIndex,
-				collectionKey: props.collectionKey,
-				brickKey: props.brickKey,
-				documentId: props.documentId,
-				contentLocale: props.contentLocale,
-				defaultLocale: props.defaultLocale,
-				contentLocales: props.contentLocales,
-				missingFieldColumns: props.missingFieldColumns,
-				uiStateBrickKey: props.uiStateBrickKey,
-			}}
-		>
+		<FieldRenderStateContext.Provider value={value}>
 			{props.children}
 		</FieldRenderStateContext.Provider>
 	);

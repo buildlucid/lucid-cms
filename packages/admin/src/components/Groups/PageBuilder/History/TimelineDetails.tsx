@@ -18,7 +18,6 @@ import {
 import {
 	type Accessor,
 	type Component,
-	createEffect,
 	createMemo,
 	createSignal,
 	For,
@@ -41,7 +40,11 @@ import type {
 	RetentionInfo,
 	TimelineItem,
 } from "@/hooks/document/useHistoryState";
+import useUserPreference from "@/hooks/useUserPreference";
 import api from "@/services/api";
+import userPreferencesStore, {
+	type SectionPreferenceKey,
+} from "@/store/userPreferences";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";
@@ -49,16 +52,6 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 import PublishRequestRow from "../Sidebar/Partials/PublishRequestRow";
 
 const JSONPreview = lazy(() => import("@/components/Partials/JSONPreview"));
-
-const getStoredOpen = (storageKey: string) => {
-	try {
-		const stored = localStorage.getItem(storageKey);
-		if (stored === null) return true;
-		return stored === "true";
-	} catch {
-		return true;
-	}
-};
 
 const getRetentionTheme = (
 	state: RetentionInfo["state"],
@@ -314,7 +307,7 @@ const TimelineDetails: Component<{
 				<InspectorSection
 					title={T()("common.version.details")}
 					icon={<FaSolidCircleInfo size={14} />}
-					storageKey="lucid:history-inspector:version-details-open"
+					preferenceKey="history.inspector.versionDetails"
 				>
 					<div class="grid gap-3">
 						<div class="grid gap-2 text-sm">
@@ -366,7 +359,7 @@ const TimelineDetails: Component<{
 				<InspectorSection
 					title={T()("common.content.summary")}
 					icon={<FaSolidLayerGroup size={14} />}
-					storageKey="lucid:history-inspector:content-summary-open"
+					preferenceKey="history.inspector.contentSummary"
 				>
 					<Switch>
 						<Match when={props.selectedVersionDocumentLoading()}>
@@ -396,7 +389,7 @@ const TimelineDetails: Component<{
 					<InspectorSection
 						title={T()("documents.revisions.retention.title")}
 						icon={<FaSolidClockRotateLeft size={14} />}
-						storageKey="lucid:history-inspector:revision-retention-open"
+						preferenceKey="history.inspector.revisionRetention"
 					>
 						<div class="min-w-0">
 							<div class="flex flex-wrap items-center gap-2">
@@ -424,7 +417,7 @@ const TimelineDetails: Component<{
 						title={T()("documents.release.activity")}
 						icon={<FaSolidPaperPlane size={14} />}
 						meta={releaseOperations().length}
-						storageKey="lucid:history-inspector:release-activity-open"
+						preferenceKey="history.inspector.releaseActivity"
 					>
 						<div class="mb-3 grid grid-cols-3 gap-2">
 							<Metric
@@ -474,7 +467,7 @@ const TimelineDetails: Component<{
 				<InspectorSection
 					title={T()("common.document.payload")}
 					icon={<FaSolidFileLines size={14} />}
-					storageKey="lucid:history-inspector:document-payload-open"
+					preferenceKey="history.inspector.documentPayload"
 				>
 					<Switch>
 						<Match when={props.selectedVersionDocumentLoading()}>
@@ -585,22 +578,17 @@ const TimelineDetails: Component<{
 const InspectorSection: Component<{
 	title: string;
 	icon: JSXElement;
-	storageKey: string;
+	preferenceKey: SectionPreferenceKey;
 	children: JSXElement;
 	meta?: number;
 }> = (props) => {
 	// ----------------------------------
 	// State
-	const [open, setOpen] = createSignal(getStoredOpen(props.storageKey));
-
-	// ----------------------------------
-	// Effects
-	createEffect(() => {
-		try {
-			localStorage.setItem(props.storageKey, String(open()));
-		} catch {
-			// Ignore unavailable storage; the section still works for this session.
-		}
+	const [open, setOpen] = useUserPreference({
+		value: () => userPreferencesStore.getSectionOpen(props.preferenceKey),
+		setValue: (value) =>
+			userPreferencesStore.setSectionOpen(props.preferenceKey, value),
+		defaultValue: true,
 	});
 
 	// ----------------------------------

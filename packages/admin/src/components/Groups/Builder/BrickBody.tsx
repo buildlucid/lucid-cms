@@ -16,11 +16,11 @@ import {
 import { FieldRenderStateProvider } from "@/hooks/document/useFieldRenderState";
 import brickStore, { type BrickData } from "@/store/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore";
+import userPreferencesStore from "@/store/userPreferences";
 import type {
 	CollectionFieldConfig,
 	CollectionFieldConfigByType,
 } from "@/types/collection-config";
-import { builderUiStateHelpers } from "@/utils/builder-ui-state-helpers";
 import {
 	evaluateFieldVisibility,
 	type FieldConditionScope,
@@ -29,17 +29,15 @@ import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers"
 import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
 
 interface BrickProps {
-	state: {
-		open: boolean;
-		brick: BrickData;
-		brickIndex: number;
-		configFields: CollectionFieldConfig[];
-		labelledby?: string;
-		fieldErrors: FieldError[];
-		missingFieldColumns: string[];
-		collectionKey?: string;
-		documentId?: number;
-	};
+	open: boolean;
+	brick: BrickData;
+	brickIndex: number;
+	configFields: CollectionFieldConfig[];
+	labelledby?: string;
+	fieldErrors: FieldError[];
+	missingFieldColumns: string[];
+	collectionKey?: string;
+	documentId?: number;
 	options: {
 		padding?: "16" | "24";
 		bleedTop?: boolean;
@@ -53,7 +51,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 
 	// ----------------------------------
 	// Memos
-	const configFields = createMemo(() => props.state.configFields || []);
+	const configFields = createMemo(() => props.configFields || []);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
 	);
@@ -66,7 +64,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	const conditionScopes = createMemo<FieldConditionScope[]>(() => [
 		{
 			configFields: flattenedConfigFields(),
-			fields: props.state.brick.fields,
+			fields: props.brick.fields,
 		},
 	]);
 	const allTabs = createMemo(() =>
@@ -89,18 +87,29 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	const contentLocales = createMemo(
 		() => contentLocaleStore.get.locales.map((locale) => locale.code) || [],
 	);
-	const brickIndex = createMemo(() => props.state.brickIndex);
-	const collectionKey = createMemo(() => props.state.collectionKey);
+	const brickIndex = createMemo(() => props.brickIndex);
+	const collectionKey = createMemo(() => props.collectionKey);
 	const brickKey = createMemo(() => {
-		if (props.state.brick.type === "collection-fields") return undefined;
-		return props.state.brick.key;
+		if (props.brick.type === "collection-fields") return undefined;
+		return props.brick.key;
 	});
-	const uiStateBrickKey = createMemo(() => props.state.brick.key);
-	const brickOrder = createMemo(() => props.state.brick.order);
-	const documentId = createMemo(() => props.state.documentId);
-	const missingFieldColumns = createMemo(() => props.state.missingFieldColumns);
+	const brickRef = createMemo(() => props.brick.ref);
+	const brickOrder = createMemo(() => props.brick.order);
+	const documentId = createMemo(() => props.documentId);
+	const uiPreferenceScope = createMemo(() => {
+		const currentCollectionKey = collectionKey();
+		const currentDocumentId = documentId();
+		if (!currentCollectionKey || currentDocumentId === undefined) return null;
+
+		return {
+			brickRef: brickRef(),
+			collectionKey: currentCollectionKey,
+			documentId: currentDocumentId,
+		};
+	});
+	const missingFieldColumns = createMemo(() => props.missingFieldColumns);
 	const fieldsByKey = createMemo(() => {
-		return new Map(props.state.brick.fields.map((field) => [field.key, field]));
+		return new Map(props.brick.fields.map((field) => [field.key, field]));
 	});
 
 	// ----------------------------------
@@ -116,19 +125,12 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	});
 
 	onMount(() => {
-		builderUiStateHelpers.cleanupOldEntries();
+		userPreferencesStore.cleanupBuilderEntries();
 
-		if (
-			props.state.collectionKey &&
-			props.state.documentId &&
-			allTabs().length > 0
-		) {
-			const savedTab = builderUiStateHelpers.getActiveTab(
-				props.state.collectionKey,
-				props.state.documentId,
-				props.state.brick.key,
-				props.state.brick.order,
-			);
+		const preferenceScope = uiPreferenceScope();
+		if (preferenceScope && allTabs().length > 0) {
+			const savedTab =
+				userPreferencesStore.getBuilderActiveTab(preferenceScope);
 			const tabExists = allTabs().some((tab) => tab.key === savedTab);
 
 			if (savedTab && tabExists) {
@@ -155,14 +157,9 @@ export const BrickBody: Component<BrickProps> = (props) => {
 
 	createEffect(() => {
 		const activeTab = getActiveTab();
-		if (activeTab && props.state.collectionKey && props.state.documentId) {
-			builderUiStateHelpers.setActiveTab(
-				props.state.collectionKey,
-				props.state.documentId,
-				props.state.brick.key,
-				props.state.brick.order,
-				activeTab,
-			);
+		const preferenceScope = uiPreferenceScope();
+		if (activeTab && preferenceScope) {
+			userPreferencesStore.setBuilderActiveTab(preferenceScope, activeTab);
 		}
 	});
 
@@ -174,12 +171,11 @@ export const BrickBody: Component<BrickProps> = (props) => {
 			class={classNames(
 				"transform-gpu origin-top duration-200 transition-all",
 				{
-					"scale-y-100 h-auto opacity-100 visible": props.state.open,
-					"scale-y-0 h-0 opacity-0 invisible overflow-hidden":
-						!props.state.open,
+					"scale-y-100 h-auto opacity-100 visible": props.open,
+					"scale-y-0 h-0 opacity-0 invisible overflow-hidden": !props.open,
 				},
 			)}
-			aria-labelledby={props.state.labelledby}
+			aria-labelledby={props.labelledby}
 		>
 			<div
 				class={classNames({
@@ -199,7 +195,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					defaultLocale={defaultLocale}
 					contentLocales={contentLocales}
 					missingFieldColumns={missingFieldColumns}
-					uiStateBrickKey={uiStateBrickKey}
+					brickRef={brickRef}
 				>
 					{/* Tabs */}
 					<Show when={allTabs().length > 0}>
@@ -210,7 +206,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 										tab={tab()}
 										setActiveTab={setActiveTab}
 										getActiveTab={getActiveTab}
-										fieldErrors={props.state.fieldErrors}
+										fieldErrors={props.fieldErrors}
 									/>
 								)}
 							</Index>
@@ -220,14 +216,12 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					<Index each={configFields()}>
 						{(config) => (
 							<DynamicField
-								state={{
-									fields: props.state.brick.fields,
-									fieldsByKey: fieldsByKey,
-									fieldConfig: config(),
-									activeTab: getActiveTab,
-									fieldErrors: props.state.fieldErrors,
-									conditionScopes: conditionScopes,
-								}}
+								fields={props.brick.fields}
+								fieldsByKey={fieldsByKey}
+								fieldConfig={config()}
+								activeTab={getActiveTab}
+								fieldErrors={props.fieldErrors}
+								conditionScopes={conditionScopes}
 							/>
 						)}
 					</Index>

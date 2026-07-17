@@ -13,6 +13,8 @@ import {
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import LoadingRow from "@/components/Tables/Rows/LoadingRow";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
+import useUserPreference from "@/hooks/useUserPreference";
+import userPreferencesStore from "@/store/userPreferences";
 import { ColumnToggle } from "./ColumnToggle";
 import { SelectAction } from "./SelectAction";
 import { Th } from "./Th";
@@ -91,12 +93,21 @@ const tableScrollPositions = new Map<string, number>();
 export const Table: Component<TableRootProps> = (props) => {
 	let overflowRef: HTMLDivElement | undefined;
 
-	const [include, setInclude] = createSignal<boolean[]>([]);
 	const [selected, setSelected] = createSignal<boolean[]>([]);
 	const [dragIndex, setDragIndex] = createSignal<number | null>(null);
 	const [dropTargetIndex, setDropTargetIndex] = createSignal<number | null>(
 		null,
 	);
+	const [hiddenColumns, setHiddenColumns] = useUserPreference({
+		value: () => userPreferencesStore.getHiddenTableColumns(props.key),
+		setValue: (value) =>
+			userPreferencesStore.setHiddenTableColumns(props.key, value),
+		defaultValue: () => [],
+	});
+	const include = createMemo(() => {
+		const hidden = new Set(hiddenColumns());
+		return props.head.map((column) => !hidden.has(column.key));
+	});
 
 	// ----------------------------------------
 	// Functions
@@ -106,13 +117,13 @@ export const Table: Component<TableRootProps> = (props) => {
 			return;
 		}
 
-		setInclude((prev) => {
-			const newInclude = [...prev];
-			newInclude[index] = !newInclude[index];
-			return newInclude;
-		});
+		const columnKey = props.head[index]?.key;
+		if (!columnKey) return;
 
-		setIncludeLS(include());
+		const nextHidden = new Set(hiddenColumns());
+		if (nextHidden.has(columnKey)) nextHidden.delete(columnKey);
+		else nextHidden.add(columnKey);
+		setHiddenColumns(Array.from(nextHidden));
 	};
 	const setSelectedIndex = (index: number) => {
 		setSelected((prev) => {
@@ -138,19 +149,6 @@ export const Table: Component<TableRootProps> = (props) => {
 			overflowRef.scrollLeft = scrollLeft;
 			setOverflowState();
 		});
-	};
-
-	// ----------------------------------------
-	// Local Storage
-	const getIncludeLS = () => {
-		const include = localStorage.getItem(`${props.key}-include`);
-		if (include) {
-			return JSON.parse(include);
-		}
-		return props.head.map(() => true);
-	};
-	const setIncludeLS = (include: boolean[]) => {
-		localStorage.setItem(`${props.key}-include`, JSON.stringify(include));
 	};
 
 	// ----------------------------------------
@@ -268,8 +266,6 @@ export const Table: Component<TableRootProps> = (props) => {
 		};
 
 		handleResize();
-		setInclude(getIncludeLS());
-
 		const selectedValues = [];
 		for (let i = 0; i < props.rows; i++) {
 			selectedValues.push(false);

@@ -1,13 +1,14 @@
 import type { Collection, PublishOperation } from "@types";
 import type { JSXElement } from "solid-js";
 import { type Accessor, type Component, For, Match, Switch } from "solid-js";
+import type { SectionPreferenceKey } from "@/store/userPreferences";
 import PublishRequestRow from "./PublishRequestRow";
 import SidebarSection from "./SidebarSection";
 
 const PublishOperationSection: Component<{
 	title: string;
 	icon: JSXElement;
-	storageKey: string;
+	preferenceKey: SectionPreferenceKey;
 	emptyCopy: string;
 	collection: Accessor<Collection | undefined>;
 	rows: Array<PublishOperation>;
@@ -20,7 +21,7 @@ const PublishOperationSection: Component<{
 		<SidebarSection
 			title={props.title}
 			icon={props.icon}
-			storageKey={props.storageKey}
+			preferenceKey={props.preferenceKey}
 			meta={props.rows.length > 0 ? props.rows.length : undefined}
 		>
 			<Switch>

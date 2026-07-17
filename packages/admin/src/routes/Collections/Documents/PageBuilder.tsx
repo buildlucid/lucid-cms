@@ -1,3 +1,4 @@
+import type { PreviewScrollState } from "@lucidcms/preview-protocol";
 import { useNavigate, useParams } from "@solidjs/router";
 import type { PublishOperation } from "@types";
 import type { Accessor } from "solid-js";
@@ -59,6 +60,10 @@ const CollectionsDocumentsEditRoute: Component<{
 	const versionId = createMemo(() => props.versionId?.() ?? routeVersionId());
 	let snapshotTimeout: ReturnType<typeof setTimeout> | undefined;
 	let hydratedViewKey: string | null = null;
+	let capturePreviewScroll:
+		| (() => Promise<PreviewScrollState | null>)
+		| undefined;
+	let pendingPreviewScroll: PreviewScrollState | null = null;
 
 	const docState = useDocumentState({
 		mode: props.mode,
@@ -80,6 +85,7 @@ const CollectionsDocumentsEditRoute: Component<{
 	const uiState = useDocumentUIState({
 		collectionQuery: docState.collectionQuery,
 		collection: docState.collection,
+		collectionKey: docState.collectionKey,
 		document: docState.document,
 		documentQuery: docState.documentQuery,
 		mode: props.mode,
@@ -114,6 +120,22 @@ const CollectionsDocumentsEditRoute: Component<{
 	});
 
 	const navigationGuard = useNavigationGuard(docState.shouldBlockNavigation);
+	const registerPreviewScrollCapture = (
+		capture: () => Promise<PreviewScrollState | null>,
+	) => {
+		capturePreviewScroll = capture;
+		return () => {
+			if (capturePreviewScroll === capture) capturePreviewScroll = undefined;
+		};
+	};
+	const preparePreviewVersionChange = async () => {
+		pendingPreviewScroll = (await capturePreviewScroll?.()) ?? null;
+	};
+	const consumePreviewScrollRestore = () => {
+		const scrollState = pendingPreviewScroll;
+		pendingPreviewScroll = null;
+		return scrollState;
+	};
 
 	// ------------------------------------------
 	// Setup document state
@@ -223,6 +245,8 @@ const CollectionsDocumentsEditRoute: Component<{
 	onCleanup(() => {
 		if (snapshotTimeout !== undefined) clearTimeout(snapshotTimeout);
 		hydratedViewKey = null;
+		capturePreviewScroll = undefined;
+		pendingPreviewScroll = null;
 		brickStore.get.reset();
 		pageBuilderModalsStore.reset();
 	});
@@ -345,6 +369,7 @@ const CollectionsDocumentsEditRoute: Component<{
 							togglePreview: () => {
 								uiState.setPreviewOpen(!uiState.getPreviewOpen());
 							},
+							beforeVersionChange: preparePreviewVersionChange,
 						}}
 					/>
 					<Alert
@@ -411,6 +436,8 @@ const CollectionsDocumentsEditRoute: Component<{
 										dirty={docState.isDocumentMutated}
 										saveStamp={preview.saveStamp}
 										onFocusField={previewFocus.requestTarget}
+										registerScrollCapture={registerPreviewScrollCapture}
+										consumeScrollRestore={consumePreviewScrollRestore}
 									/>
 								</div>
 							</Show>

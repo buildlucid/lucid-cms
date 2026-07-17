@@ -207,7 +207,7 @@ export const Workflow: Component<{
 			<SidebarSection
 				title={T()("common.workflow")}
 				icon={<FaSolidChartDiagram size={14} />}
-				storageKey="lucid:page-builder-sidebar:workflow-open"
+				preferenceKey="pageBuilder.sidebar.workflow"
 			>
 				<div class="relative space-y-3">
 					<Show when={updatePending()}>

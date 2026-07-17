@@ -108,7 +108,7 @@ export const DocumentDetails: Component<{
 		<SidebarSection
 			title={T()("common.document.details")}
 			icon={<FaSolidInfo size={14} />}
-			storageKey="lucid:page-builder-sidebar:document-details-open"
+			preferenceKey="pageBuilder.sidebar.documentDetails"
 		>
 			<div class="rounded-md border border-border bg-card-base p-3">
 				<dl class="grid gap-2 text-xs">

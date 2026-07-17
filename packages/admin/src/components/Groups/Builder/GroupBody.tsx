@@ -24,22 +24,20 @@ import { getPreviewStructureId } from "@/utils/preview-focus-dom";
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
 
 interface GroupBodyProps {
-	state: {
-		fieldConfig: CollectionFieldConfigByType<"repeater">;
-		groupRef: string;
-		groupPath: string;
-		pathPrefix: Array<string | number>;
-		group: Accessor<InternalDocumentFieldGroup | undefined>;
-		dragDrop: DragDropCBT;
-		repeaterKey: string;
-		dragDropKey: string;
-		groupIndex: Accessor<number>;
-		repeaterDepth: number;
-		parentRepeaterKey: string | undefined;
-		parentRef: string | undefined;
-		groupErrors: GroupError[];
-		conditionScopes?: Accessor<FieldConditionScope[]>;
-	};
+	fieldConfig: CollectionFieldConfigByType<"repeater">;
+	groupRef: string;
+	groupPath: string;
+	pathPrefix: Array<string | number>;
+	group: Accessor<InternalDocumentFieldGroup | undefined>;
+	dragDrop: DragDropCBT;
+	repeaterKey: string;
+	dragDropKey: string;
+	groupIndex: Accessor<number>;
+	repeaterDepth: number;
+	parentRepeaterKey: string | undefined;
+	parentRef: string | undefined;
+	groupErrors: GroupError[];
+	conditionScopes?: Accessor<FieldConditionScope[]>;
 }
 
 export const GroupBody: Component<GroupBodyProps> = (props) => {
@@ -49,14 +47,14 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 
 	// -------------------------------
 	// Memos
-	const group = createMemo(() => props.state.group());
-	const ref = createMemo(() => props.state.groupRef);
-	const groupPath = createMemo(() => props.state.groupPath);
-	const parentRef = createMemo(() => props.state.parentRef);
-	const parentRepeaterKey = createMemo(() => props.state.parentRepeaterKey);
-	const repeaterKey = createMemo(() => props.state.repeaterKey);
-	const configChildrenFields = createMemo(() => props.state.fieldConfig.fields);
-	const nextRepeaterDepth = createMemo(() => props.state.repeaterDepth + 1);
+	const group = createMemo(() => props.group());
+	const ref = createMemo(() => props.groupRef);
+	const groupPath = createMemo(() => props.groupPath);
+	const parentRef = createMemo(() => props.parentRef);
+	const parentRepeaterKey = createMemo(() => props.parentRepeaterKey);
+	const repeaterKey = createMemo(() => props.repeaterKey);
+	const configChildrenFields = createMemo(() => props.fieldConfig.fields);
+	const nextRepeaterDepth = createMemo(() => props.repeaterDepth + 1);
 	const groupFields = createMemo(() => {
 		return group()?.fields || [];
 	});
@@ -71,21 +69,21 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			configFields: flattenedConfigChildrenFields(),
 			fields: groupFields(),
 		},
-		...(props.state.conditionScopes?.() ?? []),
+		...(props.conditionScopes?.() ?? []),
 	]);
 	const groupOpen = createMemo(() => group()?.open === true);
 	const previewTriggerId = createMemo(() =>
 		getPreviewStructureId({
 			brickIndex: fieldRenderState.brickIndex(),
 			type: "group",
-			path: props.state.pathPrefix,
+			path: props.pathPrefix,
 		}),
 	);
 	const disabled = createMemo(
-		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
+		() => props.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
 	const groupError = createMemo(() => {
-		return props.state.groupErrors.find((g) => {
+		return props.groupErrors.find((g) => {
 			return g.ref === ref();
 		});
 	});
@@ -142,24 +140,24 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			style={{
 				"view-transition-name": `group-item-${ref()}`,
 			}}
-			data-dragkey={props.state.dragDropKey}
+			data-dragkey={props.dragDropKey}
 			class={classNames("w-full", {
-				"opacity-60": props.state.dragDrop.getDragging()?.ref === ref(),
+				"opacity-60": props.dragDrop.getDragging()?.ref === ref(),
 			})}
 			onDragStart={(e) =>
-				props.state.dragDrop.onDragStart(e, {
+				props.dragDrop.onDragStart(e, {
 					ref: ref(),
-					key: props.state.dragDropKey,
+					key: props.dragDropKey,
 				})
 			}
-			onDragEnd={(e) => props.state.dragDrop.onDragEnd(e)}
+			onDragEnd={(e) => props.dragDrop.onDragEnd(e)}
 			onDragEnter={(e) =>
-				props.state.dragDrop.onDragEnter(e, {
+				props.dragDrop.onDragEnter(e, {
 					ref: ref(),
-					key: props.state.dragDropKey,
+					key: props.dragDropKey,
 				})
 			}
-			onDragOver={(e) => props.state.dragDrop.onDragOver(e)}
+			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
 			{/* Group Header */}
 			{/** biome-ignore lint/a11y/useSemanticElements: explanation */}
@@ -170,7 +168,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					"w-full bg-card-base hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
 					{
 						"ring-1 ring-inset ring-primary-base":
-							props.state.dragDrop.getDraggingTarget()?.ref === ref(),
+							props.dragDrop.getDraggingTarget()?.ref === ref(),
 					},
 				)}
 				onClick={toggleDropdown}
@@ -189,19 +187,19 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						type="button"
 						class="text-icon-faded hover:text-primary-hover transition-colors duration-200 cursor-grab active:cursor-grabbing focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
-							props.state.dragDrop.onDragStart(e, {
+							props.dragDrop.onDragStart(e, {
 								ref: ref(),
-								key: props.state.dragDropKey,
+								key: props.dragDropKey,
 							})
 						}
-						onDragEnd={(e) => props.state.dragDrop.onDragEnd(e)}
+						onDragEnd={(e) => props.dragDrop.onDragEnd(e)}
 						onDragEnter={(e) =>
-							props.state.dragDrop.onDragEnter(e, {
+							props.dragDrop.onDragEnter(e, {
 								ref: ref(),
-								key: props.state.dragDropKey,
+								key: props.dragDropKey,
 							})
 						}
-						onDragOver={(e) => props.state.dragDrop.onDragOver(e)}
+						onDragOver={(e) => props.dragDrop.onDragOver(e)}
 						aria-label={T()("common.change.order")}
 						draggable={disabled() === false}
 						disabled={disabled()}
@@ -210,13 +208,13 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					</button>
 					<div class="min-w-0 flex items-center gap-2">
 						<Pill theme="outline" class="shrink-0">
-							#{props.state.groupIndex() + 1}
+							#{props.groupIndex() + 1}
 						</Pill>
 						<h3 class="text-sm text-subtitle font-medium truncate">
 							<Show when={titlePreview()}>{titlePreview()}</Show>
 							<Show when={!titlePreview()}>
 								{helpers.getLocaleValue({
-									value: props.state.fieldConfig.details?.label,
+									value: props.fieldConfig.details?.label,
 								})}
 							</Show>
 						</h3>
@@ -265,18 +263,16 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					<Index each={configChildrenFields()}>
 						{(config) => (
 							<DynamicField
-								state={{
-									fieldConfig: config(),
-									fields: groupFields(),
-									fieldsByKey: groupFieldsByKey,
-									groupRef: ref(),
-									groupPath: groupPath(),
-									repeaterKey: repeaterKey(),
-									repeaterDepth: nextRepeaterDepth(),
-									pathPrefix: props.state.pathPrefix,
-									fieldErrors: fieldErrors() || [],
-									conditionScopes: conditionScopes,
-								}}
+								fieldConfig={config()}
+								fields={groupFields()}
+								fieldsByKey={groupFieldsByKey}
+								groupRef={ref()}
+								groupPath={groupPath()}
+								repeaterKey={repeaterKey()}
+								repeaterDepth={nextRepeaterDepth()}
+								pathPrefix={props.pathPrefix}
+								fieldErrors={fieldErrors() || []}
+								conditionScopes={conditionScopes}
 							/>
 						)}
 					</Index>

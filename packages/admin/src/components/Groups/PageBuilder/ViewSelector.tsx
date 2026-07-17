@@ -24,6 +24,7 @@ export const ViewSelector: Component<{
 	collectionSingularName: Accessor<string>;
 	isDocumentMutated?: Accessor<boolean>;
 	currentViewLabel?: Accessor<string | undefined>;
+	onBeforeVersionChange?: () => Promise<void>;
 }> = (props) => {
 	// ----------------------------------
 	// Hooks & State
@@ -144,8 +145,9 @@ export const ViewSelector: Component<{
 										},
 									)}
 									disabled={item.disabled}
-									onSelect={() => {
+									onSelect={async () => {
 										if (item.location && !item.disabled) {
+											await props.onBeforeVersionChange?.();
 											navigate(item.location);
 										}
 									}}

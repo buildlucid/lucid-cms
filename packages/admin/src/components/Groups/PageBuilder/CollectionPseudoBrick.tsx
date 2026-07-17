@@ -46,16 +46,14 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 		<Show when={collectionPseudoBrick() !== undefined}>
 			<div class="p-4 md:p-6 border-b border-border">
 				<BrickBody
-					state={{
-						open: true,
-						brick: collectionPseudoBrick() as BrickData,
-						brickIndex: brickIndex(),
-						configFields: props.fields,
-						fieldErrors: fieldErrors(),
-						missingFieldColumns: missingFieldColumns(),
-						collectionKey: props.collectionKey,
-						documentId: props.documentId,
-					}}
+					open={true}
+					brick={collectionPseudoBrick() as BrickData}
+					brickIndex={brickIndex()}
+					configFields={props.fields}
+					fieldErrors={fieldErrors()}
+					missingFieldColumns={missingFieldColumns()}
+					collectionKey={props.collectionKey}
+					documentId={props.documentId}
 					options={{}}
 				/>
 			</div>

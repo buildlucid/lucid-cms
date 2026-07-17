@@ -21,17 +21,15 @@ import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
 
 interface RepeaterFieldProps {
-	state: {
-		fieldConfig: CollectionFieldConfigByType<"repeater">;
-		fieldData?: InternalDocumentField;
-		groupRef?: string;
-		groupPath?: string;
-		parentRepeaterKey?: string;
-		repeaterDepth: number;
-		fieldPath: Array<string | number>;
-		fieldError: FieldError | undefined;
-		conditionScopes?: Accessor<FieldConditionScope[]>;
-	};
+	fieldConfig: CollectionFieldConfigByType<"repeater">;
+	fieldData?: InternalDocumentField;
+	groupRef?: string;
+	groupPath?: string;
+	parentRepeaterKey?: string;
+	repeaterDepth: number;
+	fieldPath: Array<string | number>;
+	fieldError: FieldError | undefined;
+	conditionScopes?: Accessor<FieldConditionScope[]>;
 }
 
 export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
@@ -41,8 +39,8 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 
 	// -------------------------------
 	// Memos
-	const fieldConfig = createMemo(() => props.state.fieldConfig);
-	const groups = createMemo(() => props.state.fieldData?.groups || []);
+	const fieldConfig = createMemo(() => props.fieldConfig);
+	const groups = createMemo(() => props.fieldData?.groups || []);
 	const groupRefs = createMemo(() => groups().map((group) => group.ref));
 	const minGroups = createMemo(() => fieldConfig().validation?.minGroups);
 	const maxGroups = createMemo(() => fieldConfig().validation?.maxGroups);
@@ -51,21 +49,21 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 		return groups().length < (maxGroups() || 0);
 	});
 	const dragDropKey = createMemo(() => {
-		return `${fieldConfig().key}-${props.state.parentRepeaterKey || ""}-${
-			props.state.groupRef || ""
+		return `${fieldConfig().key}-${props.parentRepeaterKey || ""}-${
+			props.groupRef || ""
 		}`;
 	});
 	const disabled = createMemo(
 		() => !canAddGroup() || fieldConfig().ui?.disabled || brickStore.get.locked,
 	);
 	const groupErrors = createMemo(() => {
-		return props.state.fieldError?.groupErrors || [];
+		return props.fieldError?.groupErrors || [];
 	});
 	const groupsByRef = createMemo(() => {
 		return new Map(groups().map((group) => [group.ref, group]));
 	});
 	const buildGroupPath = (index: number) => {
-		if (props.state.groupPath) return `${props.state.groupPath}.${index}`;
+		if (props.groupPath) return `${props.groupPath}.${index}`;
 		return `${index}`;
 	};
 
@@ -77,8 +75,8 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 			brickIndex: fieldRenderState.brickIndex(),
 			fieldConfig: fieldConfig().fields || [],
 			key: fieldConfig().key,
-			ref: props.state.groupRef,
-			parentRepeaterKey: props.state.parentRepeaterKey,
+			ref: props.groupRef,
+			parentRepeaterKey: props.parentRepeaterKey,
 			locales: fieldRenderState.contentLocales(),
 		});
 	};
@@ -117,8 +115,8 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 									selectedRef: ref,
 									targetRef: targetRef,
 
-									ref: props.state.groupRef,
-									parentRepeaterKey: props.state.parentRepeaterKey,
+									ref: props.groupRef,
+									parentRepeaterKey: props.parentRepeaterKey,
 								});
 							}}
 						>
@@ -127,22 +125,20 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 									<For each={groupRefs()}>
 										{(groupRef, i) => (
 											<GroupBody
-												state={{
-													fieldConfig: fieldConfig(),
-													dragDropKey: dragDropKey(),
-													groupRef: groupRef,
-													groupPath: buildGroupPath(i()),
-													pathPrefix: [...props.state.fieldPath, i()],
-													group: () => groupsByRef().get(groupRef),
-													dragDrop: dragDrop,
-													repeaterKey: fieldConfig().key,
-													groupIndex: i,
-													repeaterDepth: props.state.repeaterDepth,
-													parentRepeaterKey: props.state.parentRepeaterKey,
-													parentRef: props.state.groupRef,
-													groupErrors: groupErrors(),
-													conditionScopes: props.state.conditionScopes,
-												}}
+												fieldConfig={fieldConfig()}
+												dragDropKey={dragDropKey()}
+												groupRef={groupRef}
+												groupPath={buildGroupPath(i())}
+												pathPrefix={[...props.fieldPath, i()]}
+												group={() => groupsByRef().get(groupRef)}
+												dragDrop={dragDrop}
+												repeaterKey={fieldConfig().key}
+												groupIndex={i}
+												repeaterDepth={props.repeaterDepth}
+												parentRepeaterKey={props.parentRepeaterKey}
+												parentRef={props.groupRef}
+												groupErrors={groupErrors()}
+												conditionScopes={props.conditionScopes}
 											/>
 										)}
 									</For>

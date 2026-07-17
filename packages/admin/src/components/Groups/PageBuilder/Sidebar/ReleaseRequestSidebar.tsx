@@ -491,7 +491,7 @@ export const ReleaseRequestSidebar: Component<{
 				<SidebarSection
 					title={T()("publish.requests.detail.request.details")}
 					icon={<FaSolidCircleInfo size={14} />}
-					storageKey="lucid:release-request-sidebar:details-open"
+					preferenceKey="releaseRequest.sidebar.details"
 				>
 					<div class="rounded-md border border-border bg-card-base p-3">
 						<dl class="grid gap-2 text-xs">
@@ -532,7 +532,7 @@ export const ReleaseRequestSidebar: Component<{
 					<SidebarSection
 						title={T()("common.execution.status")}
 						icon={<FaSolidClock size={14} />}
-						storageKey="lucid:release-request-sidebar:execution-open"
+						preferenceKey="releaseRequest.sidebar.execution"
 					>
 						<div class="rounded-md border border-border bg-card-base p-3">
 							<dl class="grid gap-2 text-xs">
@@ -577,7 +577,7 @@ export const ReleaseRequestSidebar: Component<{
 					<SidebarSection
 						title={T()("common.reviewers")}
 						icon={<FaSolidUserCheck size={14} />}
-						storageKey="lucid:release-request-sidebar:reviewers-open"
+						preferenceKey="releaseRequest.sidebar.reviewers"
 						meta={request()?.assignees.length}
 					>
 						<div class="grid gap-2">
@@ -633,7 +633,7 @@ export const ReleaseRequestSidebar: Component<{
 					<SidebarSection
 						title={T()("common.comment")}
 						icon={<FaSolidPaperPlane size={14} />}
-						storageKey="lucid:release-request-sidebar:comments-open"
+						preferenceKey="releaseRequest.sidebar.comments"
 					>
 						<div class="grid gap-2">
 							<ReleaseRequestCommentBlock

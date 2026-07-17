@@ -13,26 +13,23 @@ import {
 } from "solid-js";
 import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
+import userPreferencesStore from "@/store/userPreferences";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
-import { builderUiStateHelpers } from "@/utils/builder-ui-state-helpers";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
 import { getPreviewStructureId } from "@/utils/preview-focus-dom";
 
 interface CollapsibleFieldProps {
-	state: {
-		fieldConfig: CollectionFieldConfigByType<"collapsible">;
-		fields: InternalDocumentField[];
-		fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
-		fieldErrors: FieldError[];
-		conditionScopes?: Accessor<FieldConditionScope[]>;
-
-		groupRef?: string;
-		groupPath?: string;
-		repeaterKey?: string;
-		repeaterDepth?: number;
-		pathPrefix?: Array<string | number>;
-	};
+	fieldConfig: CollectionFieldConfigByType<"collapsible">;
+	fields: InternalDocumentField[];
+	fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
+	fieldErrors: FieldError[];
+	conditionScopes?: Accessor<FieldConditionScope[]>;
+	groupRef?: string;
+	groupPath?: string;
+	repeaterKey?: string;
+	repeaterDepth?: number;
+	pathPrefix?: Array<string | number>;
 }
 
 export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
@@ -40,15 +37,15 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 	// State & Hooks
 	const fieldRenderState = useFieldRenderState();
 	const [getOpen, setOpen] = createSignal<boolean>(
-		props.state.fieldConfig.defaultOpen === true,
+		props.fieldConfig.defaultOpen === true,
 	);
 	const [childrenMounted, setChildrenMounted] = createSignal<boolean>(
-		props.state.fieldConfig.defaultOpen === true,
+		props.fieldConfig.defaultOpen === true,
 	);
 
 	// -------------------------------
 	// Memos
-	const fieldConfig = createMemo(() => props.state.fieldConfig);
+	const fieldConfig = createMemo(() => props.fieldConfig);
 	const label = createMemo(() =>
 		helpers.getLocaleValue({
 			value: fieldConfig().details?.label,
@@ -62,35 +59,43 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 	const uiStateTarget = createMemo(() => {
 		const collectionKey = fieldRenderState.collectionKey();
 		const documentId = fieldRenderState.documentId();
-		const brickKey = fieldRenderState.uiStateBrickKey();
-		const brickOrder = fieldRenderState.brickOrder();
+		const brickRef = fieldRenderState.brickRef();
 
 		if (
 			collectionKey === undefined ||
 			documentId === undefined ||
-			brickKey === undefined ||
-			brickOrder === undefined
+			brickRef === undefined
 		) {
 			return null;
 		}
 
 		return {
-			brickKey,
-			brickOrder,
+			brickRef,
 			collectionKey,
 			documentId,
 			fieldKey: fieldConfig().key,
-			groupPath: props.state.groupPath,
-			groupRef: props.state.groupRef,
-			repeaterKey: props.state.repeaterKey,
+			groupPath: props.groupPath,
+			groupRef: props.groupRef,
+			repeaterKey: props.repeaterKey,
 		};
+	});
+	const uiStateCollapsibleKey = createMemo(() => {
+		const scope = props.groupRef
+			? `group:${props.groupRef}`
+			: props.groupPath
+				? `path:${props.groupPath}`
+				: "root";
+
+		return [scope, props.repeaterKey, fieldConfig().key]
+			.filter(Boolean)
+			.join(":");
 	});
 	const triggerId = createMemo(() =>
 		getPreviewStructureId({
 			brickIndex: fieldRenderState.brickIndex(),
 			type: "collapsible",
 			key: fieldConfig().key,
-			pathPrefix: props.state.pathPrefix ?? [],
+			pathPrefix: props.pathPrefix ?? [],
 		}),
 	);
 
@@ -103,14 +108,11 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 		const target = uiStateTarget();
 		if (!target) return;
 
-		const savedOpen = builderUiStateHelpers.getCollapsibleOpen(
-			target.collectionKey,
-			target.documentId,
-			target.brickKey,
-			target.brickOrder,
+		const savedOpen = userPreferencesStore.getBuilderCollapsibleOpen(
 			target,
+			uiStateCollapsibleKey(),
 		);
-		if (savedOpen !== null) setOpen(savedOpen);
+		if (savedOpen !== undefined) setOpen(savedOpen);
 	});
 
 	// -------------------------------
@@ -122,12 +124,9 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 		const target = uiStateTarget();
 		if (!target) return;
 
-		builderUiStateHelpers.setCollapsibleOpen(
-			target.collectionKey,
-			target.documentId,
-			target.brickKey,
-			target.brickOrder,
+		userPreferencesStore.setBuilderCollapsibleOpen(
 			target,
+			uiStateCollapsibleKey(),
 			nextOpen,
 		);
 	};
@@ -175,18 +174,16 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 					<Index each={childrenMounted() ? fieldConfig().fields : []}>
 						{(config) => (
 							<DynamicField
-								state={{
-									fieldConfig: config(),
-									fields: props.state.fields,
-									fieldsByKey: props.state.fieldsByKey,
-									fieldErrors: props.state.fieldErrors,
-									conditionScopes: props.state.conditionScopes,
-									groupRef: props.state.groupRef,
-									groupPath: props.state.groupPath,
-									repeaterKey: props.state.repeaterKey,
-									repeaterDepth: props.state.repeaterDepth,
-									pathPrefix: props.state.pathPrefix,
-								}}
+								fieldConfig={config()}
+								fields={props.fields}
+								fieldsByKey={props.fieldsByKey}
+								fieldErrors={props.fieldErrors}
+								conditionScopes={props.conditionScopes}
+								groupRef={props.groupRef}
+								groupPath={props.groupPath}
+								repeaterKey={props.repeaterKey}
+								repeaterDepth={props.repeaterDepth}
+								pathPrefix={props.pathPrefix}
 							/>
 						)}
 					</Index>
