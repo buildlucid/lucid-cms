@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { ErrorResponse, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
@@ -8,7 +9,7 @@ export interface Params {
 	collectionKey: string;
 	body: {
 		target: string;
-		comment?: string;
+		comment?: RichTextJSON;
 		assigneeIds?: number[];
 		autoAccept?: boolean;
 		scheduledAt?: string;

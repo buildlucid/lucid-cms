@@ -2,6 +2,7 @@ import z from "zod";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { profilePictureResponseSchema } from "./media.js";
+import { richTextJSONSchema } from "./shared/rich-text.js";
 
 const publishOperationStatusSchema = z.enum([
 	"pending",
@@ -45,9 +46,9 @@ export const publishOperationResponseSchema = z.object({
 	snapshotVersionId: z.number(),
 	isOutdated: z.boolean(),
 	requestedBy: publishOperationUserSchema,
-	requestComment: z.string().nullable(),
+	requestComment: richTextJSONSchema.nullable(),
 	decidedBy: publishOperationUserSchema,
-	decisionComment: z.string().nullable(),
+	decisionComment: richTextJSONSchema.nullable(),
 	decidedAt: z.string().nullable(),
 	scheduledAt: z.string().nullable(),
 	scheduledTimezone: z.string().nullable(),
@@ -242,7 +243,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	decision: {
 		body: z.object({
-			comment: z.string().trim().optional(),
+			comment: richTextJSONSchema.optional(),
 			scheduledAt: z.string().trim().nullable().optional(),
 			scheduledTimezone: z.string().trim().nullable().optional(),
 		}),

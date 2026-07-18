@@ -14,6 +14,7 @@ import T from "@/translations";
 import type { HeadingOption } from "./HeadingMenu";
 import LinkModal from "./LinkModal";
 import ToolbarControls from "./ToolbarControls";
+import type { RichTextOptions } from "./types";
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 768px)";
 const PILL_OFFSET = 10;
@@ -31,6 +32,7 @@ type SelectionRect = {
 const Toolbar: Component<{
 	editor: Editor;
 	disabled?: boolean;
+	options?: RichTextOptions;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -383,6 +385,7 @@ const Toolbar: Component<{
 				<ToolbarControls
 					mode="mobile"
 					disabled={props.disabled}
+					options={props.options}
 					activeHeading={activeHeading()}
 					headingOptions={headingOptions()}
 					onSetHeading={setHeading}
@@ -419,6 +422,7 @@ const Toolbar: Component<{
 			<Show when={isDesktop()}>
 				<Portal>
 					<div
+						data-kb-top-layer
 						ref={pillRef}
 						class={classNames(
 							"fixed z-60 flex items-center gap-1 rounded-xl border border-border bg-card-base px-1.5 py-1 shadow-md backdrop-blur-sm transition-opacity duration-150",
@@ -435,6 +439,7 @@ const Toolbar: Component<{
 						<ToolbarControls
 							mode="pill"
 							disabled={props.disabled}
+							options={props.options}
 							activeHeading={activeHeading()}
 							headingOptions={headingOptions()}
 							headingMenuOpen={headingMenuOpen()}

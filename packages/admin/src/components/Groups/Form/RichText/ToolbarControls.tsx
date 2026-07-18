@@ -8,14 +8,16 @@ import {
 	FaSolidStrikethrough,
 	FaSolidUnderline,
 } from "solid-icons/fa";
-import type { Component } from "solid-js";
+import { type Component, Show } from "solid-js";
 import T from "@/translations";
 import HeadingMenu, { type HeadingOption } from "./HeadingMenu";
 import ToolbarButton from "./ToolbarButton";
+import type { RichTextOptions } from "./types";
 
 const ToolbarControls: Component<{
 	mode: "mobile" | "pill";
 	disabled?: boolean;
+	options?: RichTextOptions;
 	activeHeading: number;
 	headingOptions: HeadingOption[];
 	headingMenuOpen?: boolean;
@@ -45,17 +47,19 @@ const ToolbarControls: Component<{
 	// Render
 	return (
 		<>
-			<HeadingMenu
-				mode={props.mode}
-				disabled={props.disabled}
-				activeHeading={props.activeHeading}
-				options={props.headingOptions}
-				open={props.headingMenuOpen}
-				onOpenChange={props.onHeadingOpenChange}
-				onSetHeading={props.onSetHeading}
-			/>
+			<Show when={props.options?.headings !== false}>
+				<HeadingMenu
+					mode={props.mode}
+					disabled={props.disabled}
+					activeHeading={props.activeHeading}
+					options={props.headingOptions}
+					open={props.headingMenuOpen}
+					onOpenChange={props.onHeadingOpenChange}
+					onSetHeading={props.onSetHeading}
+				/>
 
-			<div class="h-5 w-px bg-border" />
+				<div class="h-5 w-px bg-border" />
+			</Show>
 
 			<ToolbarButton
 				mode={toolbarButtonMode()}
@@ -75,24 +79,28 @@ const ToolbarControls: Component<{
 			>
 				<FaSolidItalic size={12} />
 			</ToolbarButton>
-			<ToolbarButton
-				mode={toolbarButtonMode()}
-				isActive={props.isUnderline}
-				onClick={props.onToggleUnderline}
-				disabled={props.disabled}
-				title={T()("editor.rich.text.marks.underline")}
-			>
-				<FaSolidUnderline size={12} />
-			</ToolbarButton>
-			<ToolbarButton
-				mode={toolbarButtonMode()}
-				isActive={props.isStrike}
-				onClick={props.onToggleStrike}
-				disabled={props.disabled}
-				title={T()("editor.rich.text.marks.strikethrough")}
-			>
-				<FaSolidStrikethrough size={12} />
-			</ToolbarButton>
+			<Show when={props.options?.underline !== false}>
+				<ToolbarButton
+					mode={toolbarButtonMode()}
+					isActive={props.isUnderline}
+					onClick={props.onToggleUnderline}
+					disabled={props.disabled}
+					title={T()("editor.rich.text.marks.underline")}
+				>
+					<FaSolidUnderline size={12} />
+				</ToolbarButton>
+			</Show>
+			<Show when={props.options?.strikethrough !== false}>
+				<ToolbarButton
+					mode={toolbarButtonMode()}
+					isActive={props.isStrike}
+					onClick={props.onToggleStrike}
+					disabled={props.disabled}
+					title={T()("editor.rich.text.marks.strikethrough")}
+				>
+					<FaSolidStrikethrough size={12} />
+				</ToolbarButton>
+			</Show>
 
 			<div class="h-5 w-px bg-border" />
 

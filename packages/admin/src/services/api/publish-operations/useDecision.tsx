@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { ErrorResponse, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
@@ -7,7 +8,7 @@ export interface Params {
 	id: number;
 	action: "approve" | "reject" | "cancel";
 	body: {
-		comment?: string;
+		comment?: RichTextJSON;
 		scheduledAt?: string | null;
 		scheduledTimezone?: string | null;
 	};

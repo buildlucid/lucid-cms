@@ -93,11 +93,11 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("requested_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
-				.addColumn("request_comment", adapter.getDataType("text"))
+				.addColumn("request_comment", adapter.getDataType("json"))
 				.addColumn("decided_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
-				.addColumn("decision_comment", adapter.getDataType("text"))
+				.addColumn("decision_comment", adapter.getDataType("json"))
 				.addColumn("decided_at", adapter.getDataType("timestamp"))
 				.addColumn("scheduled_at", adapter.getDataType("timestamp"))
 				.addColumn("scheduled_timezone", adapter.getDataType("text"))

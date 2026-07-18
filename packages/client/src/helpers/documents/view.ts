@@ -316,3 +316,23 @@ export function asDocument<TDocument extends CollectionDocument>(
 		}),
 	} as unknown as DocumentView<TDocument, boolean>;
 }
+
+/** Wraps multiple documents and reads translated fields using the supplied locale. */
+export function asDocuments<TDocument extends CollectionDocument>(
+	documents: readonly TDocument[],
+	options: DocumentViewOptionsWithLocale,
+): Array<DocumentView<TDocument, true>>;
+/** Wraps multiple documents with typed helpers for fields, bricks, refs, and locales. */
+export function asDocuments<TDocument extends CollectionDocument>(
+	documents: readonly TDocument[],
+	options?: DocumentViewOptions,
+): Array<DocumentView<TDocument, false>>;
+export function asDocuments<TDocument extends CollectionDocument>(
+	documents: readonly TDocument[],
+	options: DocumentViewOptions = {},
+): Array<DocumentView<TDocument, boolean>> {
+	return documents.map(
+		(document) =>
+			asDocument(document, options) as DocumentView<TDocument, boolean>,
+	);
+}

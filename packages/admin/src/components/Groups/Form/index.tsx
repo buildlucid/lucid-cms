@@ -14,7 +14,7 @@ export { Label } from "./Label";
 export { LinkSelect } from "./LinkSelect";
 export { MediaSelect } from "./MediaSelect";
 export { Range } from "./Range";
-export { RichText } from "./RichText";
+export { RichText, type RichTextOptions } from "./RichText";
 export { Search } from "./Search";
 export { Select } from "./Select";
 export { SelectMultiple } from "./SelectMultiple";

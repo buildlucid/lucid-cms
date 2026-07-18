@@ -148,7 +148,6 @@ const ActionDropdown: Component<ActionDropdownProps> = (props) => {
 		}
 
 		action.onClick?.();
-		setIsOpen(false);
 	};
 
 	// ----------------------------------------

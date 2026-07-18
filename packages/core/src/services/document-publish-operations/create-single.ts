@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
@@ -28,6 +29,7 @@ import {
 	snapshotVersionType,
 	unresolvedPublishOperationExecutionStatuses,
 } from "./helpers/index.js";
+import normalizeComment from "./helpers/normalize-comment.js";
 import notifyPublishOperationUsers from "./notifications.js";
 
 const createSingle: ServiceFn<
@@ -36,7 +38,7 @@ const createSingle: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			target: string;
-			comment?: string;
+			comment?: RichTextJSON;
 			assigneeIds?: number[];
 			autoAccept?: boolean;
 			scheduledAt?: string | null;
@@ -62,7 +64,7 @@ const createSingle: ServiceFn<
 		target: data.target,
 	});
 	const operationType = requiresApproval ? "request" : "direct";
-	const comment = data.comment?.trim() || null;
+	const comment = normalizeComment(data.comment);
 	const autoAccept = data.autoAccept === true;
 	const approveImmediately = !requiresApproval || autoAccept;
 	const scheduleInput = parseScheduleInput({
@@ -134,7 +136,7 @@ const createSingle: ServiceFn<
 	if (
 		requiresApproval &&
 		publishReview?.comments.request === "required" &&
-		!comment
+		!comment.text
 	) {
 		return {
 			error: {
@@ -191,7 +193,7 @@ const createSingle: ServiceFn<
 		requiresApproval &&
 		autoAccept &&
 		publishReview?.comments.decision === "required" &&
-		!comment
+		!comment.text
 	) {
 		return {
 			error: {
@@ -456,7 +458,7 @@ const createSingle: ServiceFn<
 			event: {
 				type: "superseded",
 				userId: data.user.id,
-				comment,
+				comment: comment.text,
 				metadata: {
 					sourceContentId: latestVersionRes.data.content_id,
 				},
@@ -534,7 +536,7 @@ const createSingle: ServiceFn<
 			source_content_id: latestVersionRes.data.content_id,
 			snapshot_version_id: snapshotRes.data.versionId,
 			requested_by: data.user.id,
-			request_comment: comment,
+			request_comment: comment.value,
 			scheduled_at: schedule?.scheduledAt ?? undefined,
 			scheduled_timezone: schedule?.scheduledTimezone ?? null,
 			execution_status: "awaiting_approval",
@@ -568,7 +570,7 @@ const createSingle: ServiceFn<
 		event: {
 			type: "created",
 			userId: data.user.id,
-			comment,
+			comment: comment.text,
 			metadata: {},
 		},
 	});
@@ -578,7 +580,7 @@ const createSingle: ServiceFn<
 	if (approveImmediately) {
 		const approveRes = await approve(context, {
 			id: operationRes.data.id,
-			comment: comment ?? undefined,
+			comment: comment.value ?? undefined,
 			user: data.user,
 			bypassReviewChecks: !requiresApproval,
 			suppressRequesterNotification: !requiresApproval,
@@ -612,7 +614,8 @@ const createSingle: ServiceFn<
 		dedupeAction: "created",
 		comment: {
 			label: copy("server:core.publish.requests.email.request.comment"),
-			value: comment,
+			value: comment.text,
+			html: comment.html,
 		},
 		details: [
 			{

@@ -112,7 +112,6 @@ const ActionMenubar: Component<ActionMenubarProps> = (props) => {
 		}
 
 		action.onClick?.();
-		setOpenMenu(null);
 	};
 
 	// ----------------------------------------

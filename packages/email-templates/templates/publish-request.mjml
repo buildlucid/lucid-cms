@@ -35,6 +35,40 @@
       .detail-row td {
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       }
+
+      .review-comment p,
+      .review-comment ul,
+      .review-comment ol,
+      .review-comment blockquote,
+      .review-comment pre {
+        margin: 0 0 8px;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      .review-comment > :last-child,
+      .review-comment li > :last-child {
+        margin-bottom: 0;
+      }
+
+      .review-comment ul,
+      .review-comment ol {
+        padding-left: 20px;
+      }
+
+      .review-comment li {
+        margin-bottom: 4px;
+      }
+
+      .review-comment a {
+        color: #C1FE77;
+      }
+
+      .review-comment blockquote {
+        border-left: 3px solid rgba(255, 255, 255, 0.2);
+        padding-left: 12px;
+      }
     </mj-style>
   </mj-head>
   <mj-body background-color="#0A0A0A">
@@ -75,8 +109,8 @@
         </mj-text>
         <mj-table padding="0 0 24px 0">
           <tr>
-            <td style="background-color: #171717; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #F1F1F1; font-size: 14px; line-height: 22px; padding: 14px 16px; text-align: left;">
-              {{comment}}
+            <td class="review-comment" style="background-color: #171717; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #F1F1F1; font-size: 14px; line-height: 22px; padding: 14px 16px; text-align: left;">
+              {{{commentHtml}}}
             </td>
           </tr>
         </mj-table>

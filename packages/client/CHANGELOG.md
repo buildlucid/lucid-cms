@@ -6,6 +6,7 @@
 - Updated media types and document media refs for the new media response contract.
 - Added new `previews.resolve` method.
 - Added optional frontend toolbar and page builder preview integrations with explicit browser setup.
+- `asDocuments` support for multiple documents.
 
 ## 0.2.0
 

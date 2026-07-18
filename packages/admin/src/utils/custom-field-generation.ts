@@ -1,16 +1,8 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
 import type {
 	CustomFieldGenerationFieldType,
 	CustomFieldGenerationTarget,
 } from "@/store/aiModalsStore";
-
-/**
- * Provides the smallest valid rich-text document when AI returns an unusable value.
- */
-export const createEmptyRichTextValue = (): RichTextJSON => ({
-	type: "doc",
-	content: [{ type: "paragraph" }],
-});
+import { createEmptyRichTextValue } from "@/utils/rich-text";
 
 /**
  * Keeps JSON field checks consistent across generation, editing, and validation state.

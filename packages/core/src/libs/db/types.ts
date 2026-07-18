@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import type {
 	ColumnDataType,
 	ColumnType,
@@ -567,9 +568,17 @@ export interface LucidDocumentPublishOperations {
 	source_content_id: string;
 	snapshot_version_id: number;
 	requested_by: number | null;
-	request_comment: string | null;
+	request_comment: JSONColumnType<
+		RichTextJSON | null,
+		RichTextJSON | null,
+		RichTextJSON | null
+	>;
 	decided_by: number | null;
-	decision_comment: string | null;
+	decision_comment: JSONColumnType<
+		RichTextJSON | null,
+		RichTextJSON | null,
+		RichTextJSON | null
+	>;
 	decided_at: TimestampMutateable;
 	scheduled_at: TimestampMutateable;
 	scheduled_timezone: string | null;

@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import { useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
@@ -277,7 +278,7 @@ export function useDocumentMutations(props: {
 
 	const createPublishOperationAction = async (
 		targetVersionType: Exclude<DocumentVersionType, "revision">,
-		comment?: string,
+		comment?: RichTextJSON,
 		assigneeIds?: number[],
 		autoAccept?: boolean,
 		scheduledAt?: string,

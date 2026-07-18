@@ -10,11 +10,24 @@ import {
 } from "solid-js";
 import { createTiptapEditor } from "solid-tiptap";
 import safeDeepEqual from "@/utils/safe-deep-equal";
+import type { RichTextOptions } from "./types";
+
+const getExtensions = (options?: RichTextOptions) =>
+	extensions.filter((extension) => {
+		if (extension.name === "heading" && options?.headings === false)
+			return false;
+		if (extension.name === "underline" && options?.underline === false)
+			return false;
+		if (extension.name === "strike" && options?.strikethrough === false)
+			return false;
+		return true;
+	});
 
 const useEditor = (config: {
 	value: RichTextJSON | null;
 	onChange: (value: RichTextJSON) => void;
 	disabled?: boolean;
+	options?: RichTextOptions;
 }): {
 	editor: Accessor<Editor | undefined>;
 	focused: Accessor<boolean>;
@@ -28,7 +41,7 @@ const useEditor = (config: {
 	const editor = createTiptapEditor(() => ({
 		// biome-ignore lint/style/noNonNullAssertion: container is guaranteed to exist
 		element: container()!,
-		extensions,
+		extensions: getExtensions(config.options),
 		editorProps: {
 			attributes: {
 				class:

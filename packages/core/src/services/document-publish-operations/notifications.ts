@@ -37,6 +37,7 @@ const notifyPublishOperationUsers: ServiceFn<
 			comment?: {
 				label: ErrorCopy;
 				value: string | null | undefined;
+				html: string | null | undefined;
 			};
 			details?: PublishOperationNotificationDetail[];
 		},
@@ -69,6 +70,7 @@ const notifyPublishOperationUsers: ServiceFn<
 			value: formatNotificationDetailValue(detail.value),
 		}));
 	const comment = data.comment?.value?.trim() || null;
+	const commentHtml = data.comment?.html?.trim() || null;
 	const commentLabel = data.comment
 		? context.translate(data.comment.label)
 		: undefined;
@@ -109,7 +111,7 @@ const notifyPublishOperationUsers: ServiceFn<
 		recipient.email ? [recipient.email] : [],
 	);
 	if (emailRecipients.length > 0) {
-		const actionUrl = `/lucid/collections/${data.collectionKey}/${data.documentId}/publish-operations/${data.operationId}`;
+		const actionUrl = `/lucid/collections/${data.collectionKey}/${data.documentId}/release-requests/${data.operationId}`;
 		const emailRes = await sendEmail(context, {
 			type: "internal",
 			to: emailRecipients,
@@ -122,6 +124,7 @@ const notifyPublishOperationUsers: ServiceFn<
 				details,
 				hasDetails: details.length > 0,
 				comment,
+				commentHtml,
 				commentLabel,
 			},
 			storage: constants.email.templates.publishRequest.storage ?? undefined,

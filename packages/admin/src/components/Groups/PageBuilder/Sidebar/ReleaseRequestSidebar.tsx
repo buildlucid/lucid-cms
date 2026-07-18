@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { Collection, PublishOperation } from "@types";
 import {
 	FaSolidCircleInfo,
@@ -15,7 +16,7 @@ import {
 	For,
 	Show,
 } from "solid-js";
-import { Select, Textarea } from "@/components/Groups/Form";
+import { RichText, Select } from "@/components/Groups/Form";
 import { Confirmation } from "@/components/Groups/Modal";
 import PublishOperationReviewers from "@/components/Modals/Documents/PublishOperationReviewers";
 import ReleaseScheduleFields from "@/components/Modals/Documents/ReleaseScheduleFields";
@@ -36,6 +37,11 @@ import {
 	getScheduledAt,
 	type ReleaseTiming,
 } from "@/utils/release-schedule";
+import {
+	createEmptyRichTextValue,
+	getRichTextPlainText,
+	reviewCommentRichTextOptions,
+} from "@/utils/rich-text";
 import { formatTargetName } from "./helpers";
 import ReleaseRequestCommentBlock from "./Partials/ReleaseRequestCommentBlock";
 import ReleaseRequestDetailRow from "./Partials/ReleaseRequestDetailRow";
@@ -112,7 +118,9 @@ export const ReleaseRequestSidebar: Component<{
 	// State
 	const [decisionOpen, setDecisionOpen] = createSignal(false);
 	const [decisionAction, setDecisionAction] = createSignal<DecisionAction>();
-	const [decisionComment, setDecisionComment] = createSignal("");
+	const [decisionComment, setDecisionComment] = createSignal<RichTextJSON>(
+		createEmptyRichTextValue(),
+	);
 	const [rescheduleOpen, setRescheduleOpen] = createSignal(false);
 	const [reviewersOpen, setReviewersOpen] = createSignal(false);
 	const [scheduleEnabled, setScheduleEnabled] = createSignal(false);
@@ -127,7 +135,7 @@ export const ReleaseRequestSidebar: Component<{
 		onSuccess: () => {
 			setDecisionOpen(false);
 			setDecisionAction(undefined);
-			setDecisionComment("");
+			setDecisionComment(createEmptyRichTextValue());
 			resetSchedule();
 			setValidationError(undefined);
 		},
@@ -151,6 +159,9 @@ export const ReleaseRequestSidebar: Component<{
 		() =>
 			props.collection()?.review?.comments.decision === "required" &&
 			decisionAction() !== "cancel",
+	);
+	const decisionCommentText = createMemo(() =>
+		getRichTextPlainText(decisionComment()),
 	);
 	const canReviewRequest = createMemo(
 		() => request()?.permissions.review === true,
@@ -277,7 +288,7 @@ export const ReleaseRequestSidebar: Component<{
 	};
 	const openDecision = (action: DecisionAction) => {
 		setDecisionAction(action);
-		setDecisionComment("");
+		setDecisionComment(createEmptyRichTextValue());
 		setValidationError(undefined);
 		prefillSchedule();
 		setDecisionOpen(true);
@@ -296,7 +307,7 @@ export const ReleaseRequestSidebar: Component<{
 		const action = decisionAction();
 		const publishRequest = request();
 		if (!action || !publishRequest) return;
-		if (requireDecisionComment() && decisionComment().trim().length === 0) {
+		if (requireDecisionComment() && decisionCommentText().length === 0) {
 			setValidationError(T()("publish.requests.validation.comment.required"));
 			return;
 		}
@@ -318,7 +329,7 @@ export const ReleaseRequestSidebar: Component<{
 			id: publishRequest.id,
 			action,
 			body: {
-				comment: decisionComment().trim() || undefined,
+				comment: decisionCommentText() ? decisionComment() : undefined,
 				...(action === "approve" && schedulingSupported()
 					? {
 							scheduledAt,
@@ -668,7 +679,7 @@ export const ReleaseRequestSidebar: Component<{
 					onCancel: () => {
 						setDecisionOpen(false);
 						setDecisionAction(undefined);
-						setDecisionComment("");
+						setDecisionComment(createEmptyRichTextValue());
 						resetSchedule();
 						setValidationError(undefined);
 						decision.reset();
@@ -676,20 +687,19 @@ export const ReleaseRequestSidebar: Component<{
 				}}
 			>
 				<div class="grid gap-4 pb-4 md:pb-6">
-					<Textarea
+					<RichText
 						id="document-publish-request-decision-comment"
-						name="document-publish-request-decision-comment"
 						value={decisionComment()}
 						onChange={(value) => {
 							setDecisionComment(value);
 							setValidationError(undefined);
 						}}
 						required={requireDecisionComment()}
-						rows={4}
 						copy={{
 							label: T()("common.comment"),
 							placeholder: T()("publish.requests.decision.comment.placeholder"),
 						}}
+						options={reviewCommentRichTextOptions}
 						noMargin={true}
 					/>
 					<Show when={decisionAction() === "approve" && schedulingSupported()}>

@@ -1,11 +1,12 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
+import { richTextJSONSchema } from "./shared/rich-text.js";
 
 export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
 			target: z.string().trim(),
-			comment: z.string().trim().optional(),
+			comment: richTextJSONSchema.optional(),
 			assigneeIds: z.array(z.number()).optional(),
 			autoAccept: z.boolean().optional(),
 			scheduledAt: z.string().trim().nullable().optional(),

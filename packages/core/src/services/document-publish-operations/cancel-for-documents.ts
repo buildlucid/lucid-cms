@@ -94,7 +94,7 @@ const cancelForDocuments: ServiceFn<
 			status: "cancelled",
 			execution_status: "cancelled",
 			scheduled_job_id: null,
-			decision_comment: data.comment,
+			decision_comment: null,
 			decided_at: now,
 			updated_at: now,
 		},

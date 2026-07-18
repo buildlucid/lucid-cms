@@ -56,6 +56,7 @@ const LinkModal: Component<{
 			}}
 			options={{
 				noPadding: true,
+				nested: true,
 			}}
 		>
 			<div class="flex flex-col gap-0 p-4 md:p-6">

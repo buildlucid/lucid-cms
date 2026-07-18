@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import type {
 	Collection,
 	DocumentVersionType,
@@ -14,9 +15,9 @@ import {
 import {
 	CheckboxButton,
 	Label,
+	RichText,
 	Select,
 	SelectMultiple,
-	Textarea,
 } from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Confirmation } from "@/components/Groups/Modal";
@@ -31,6 +32,11 @@ import {
 	getScheduledAt,
 	type ReleaseTiming,
 } from "@/utils/release-schedule";
+import {
+	createEmptyRichTextValue,
+	getRichTextPlainText,
+	reviewCommentRichTextOptions,
+} from "@/utils/rich-text";
 import ReleaseScheduleFields from "./ReleaseScheduleFields";
 
 type ReviewerOption = SelectMultipleValueT & {
@@ -51,7 +57,7 @@ const CreatePublishRequest: Component<{
 	callbacks: {
 		onConfirm: (
 			target: Exclude<DocumentVersionType, "revision">,
-			comment?: string,
+			comment?: RichTextJSON,
 			assigneeIds?: number[],
 			autoAccept?: boolean,
 			scheduledAt?: string,
@@ -62,7 +68,9 @@ const CreatePublishRequest: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// State / Hooks
-	const [comment, setComment] = createSignal("");
+	const [comment, setComment] = createSignal<RichTextJSON>(
+		createEmptyRichTextValue(),
+	);
 	const [assignees, setAssignees] = createSignal<ReviewerOption[]>([]);
 	const [autoAccept, setAutoAccept] = createSignal(false);
 	const [releaseTiming, setReleaseTiming] = createSignal<ReleaseTiming>("now");
@@ -108,6 +116,7 @@ const CreatePublishRequest: Component<{
 	const requireDecisionComment = createMemo(
 		() => props.collection()?.review?.comments.decision === "required",
 	);
+	const commentText = createMemo(() => getRichTextPlainText(comment()));
 	const targetEnvironment = createMemo(() =>
 		props
 			.collection()
@@ -144,15 +153,11 @@ const CreatePublishRequest: Component<{
 			setValidationError(T()("publish.requests.validation.target.required"));
 			return;
 		}
-		if (requireComment() && comment().trim().length === 0) {
+		if (requireComment() && commentText().length === 0) {
 			setValidationError(T()("publish.requests.validation.comment.required"));
 			return;
 		}
-		if (
-			autoAccept &&
-			requireDecisionComment() &&
-			comment().trim().length === 0
-		) {
+		if (autoAccept && requireDecisionComment() && commentText().length === 0) {
 			setValidationError(T()("publish.requests.validation.comment.required"));
 			return;
 		}
@@ -171,7 +176,7 @@ const CreatePublishRequest: Component<{
 
 		await props.callbacks.onConfirm(
 			target,
-			comment().trim() || undefined,
+			commentText() ? comment() : undefined,
 			autoAccept ? [] : assignees().map((assignee) => Number(assignee.value)),
 			autoAccept,
 			scheduledAt ?? undefined,
@@ -189,7 +194,7 @@ const CreatePublishRequest: Component<{
 	createEffect(() => {
 		if (!props.state.open) return;
 		props.target();
-		setComment("");
+		setComment(createEmptyRichTextValue());
 		setAssignees([]);
 		setAutoAccept(false);
 		setReleaseTiming("now");
@@ -261,9 +266,8 @@ const CreatePublishRequest: Component<{
 			}}
 		>
 			<div class="flex flex-col gap-5 pb-4 md:pb-6">
-				<Textarea
+				<RichText
 					id="publish-request-comment"
-					name="publish-request-comment"
 					value={comment()}
 					onChange={(value) => {
 						setComment(value);
@@ -272,11 +276,11 @@ const CreatePublishRequest: Component<{
 					required={
 						requireComment() || (autoAccept() && requireDecisionComment())
 					}
-					rows={4}
 					copy={{
 						label: T()("common.comment"),
 						placeholder: T()("publish.requests.comment.placeholder"),
 					}}
+					options={reviewCommentRichTextOptions}
 					noMargin={true}
 				/>
 				<Show when={!autoAccept()}>

@@ -37,6 +37,18 @@ export type CodeValue = {
 	value: string;
 } | null;
 
+export interface RichTextJSON {
+	type?: string;
+	attrs?: Record<string, unknown>;
+	content?: RichTextJSON[];
+	marks?: Array<{
+		type: string;
+		attrs?: Record<string, unknown>;
+	}>;
+	text?: string;
+	[key: string]: unknown;
+}
+
 export type RelationFieldValue<TCollectionKey extends string = string> = {
 	id: number;
 	collectionKey: TCollectionKey;
@@ -872,9 +884,9 @@ export type PublishOperation = {
 	snapshotVersionId: number;
 	isOutdated: boolean;
 	requestedBy: PublishOperationUser;
-	requestComment: string | null;
+	requestComment: RichTextJSON | null;
 	decidedBy: PublishOperationUser;
-	decisionComment: string | null;
+	decisionComment: RichTextJSON | null;
 	decidedAt: string | null;
 	scheduledAt: string | null;
 	scheduledTimezone: string | null;

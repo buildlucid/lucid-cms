@@ -1,6 +1,6 @@
 import { decodePreviewFieldTarget } from "@lucidcms/preview-protocol";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { asDocument } from "../../index.js";
+import { asDocument, asDocuments } from "../../index.js";
 import type {
 	CollectionDocument,
 	CollectionDocumentTranslations,
@@ -454,6 +454,25 @@ describe("@lucidcms/client document helpers", () => {
 		>();
 		expectTypeOf(missingPage?.field("page_title").value()).toEqualTypeOf<
 			string | null | undefined
+		>();
+	});
+
+	test("wraps multiple documents with the same locale-aware helpers", () => {
+		const pages = asDocuments([page, { ...page, id: 2 }], {
+			locale: "fr",
+		});
+		const rawPages = asDocuments([page]);
+
+		expect(pages.map((pageView) => pageView.id)).toEqual([1, 2]);
+		expect(
+			pages.map((pageView) => pageView.field("page_title").value()),
+		).toEqual(["Accueil", "Accueil"]);
+		expect(asDocuments([], { locale: "en" })).toEqual([]);
+		expectTypeOf(pages).toEqualTypeOf<
+			Array<DocumentView<CollectionDocument<"page">, true>>
+		>();
+		expectTypeOf(rawPages).toEqualTypeOf<
+			Array<DocumentView<CollectionDocument<"page">, false>>
 		>();
 	});
 

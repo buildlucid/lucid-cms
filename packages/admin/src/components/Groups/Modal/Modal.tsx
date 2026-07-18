@@ -11,6 +11,7 @@ interface ModalProps {
 		noPadding?: boolean;
 		preventDismiss?: boolean;
 		size?: "large";
+		nested?: boolean;
 	};
 	children: JSXElement;
 }
@@ -31,13 +32,20 @@ export const Modal: Component<ModalProps> = (props) => {
 			<Dialog.Portal>
 				<Dialog.Overlay
 					class={classNames(
-						"fixed inset-0 z-40 bg-overlay-base animate-animate-overlay-hide duration-200 transition-colors data-expanded:animate-animate-overlay-show",
+						"fixed inset-0 bg-overlay-base animate-animate-overlay-hide duration-200 transition-colors data-expanded:animate-animate-overlay-show",
 						{
 							"cursor-pointer": !preventDismiss(),
+							"z-40": props.options?.nested !== true,
+							"z-60": props.options?.nested === true,
 						},
 					)}
 				/>
-				<div class="fixed inset-0 z-50">
+				<div
+					class={classNames("fixed inset-0", {
+						"z-50": props.options?.nested !== true,
+						"z-70": props.options?.nested === true,
+					})}
+				>
 					<Dialog.Content
 						class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center animate-animate-modal-hide data-expanded:animate-animate-modal-show"
 						onEscapeKeyDown={(event) => {

@@ -115,12 +115,12 @@ const getUpdateContext: ServiceFn<
 	);
 	if (versionExistsRes.error) return versionExistsRes;
 
-	if (versionExistsRes.data.type === "revision") {
+	if (versionExistsRes.data.type !== "latest") {
 		return {
 			error: {
 				type: "basic" as const,
-				name: copy("server:core.error.update.revision.version.name"),
-				message: copy("server:core.error.update.revision.version.message"),
+				name: copy("server:core.error.update.non.latest.version.name"),
+				message: copy("server:core.error.update.non.latest.version.message"),
 				status: 400,
 			},
 			data: undefined,

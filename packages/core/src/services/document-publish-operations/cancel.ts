@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationsRepository,
@@ -11,13 +12,14 @@ import {
 	hasCollectionTargetPermission,
 	unresolvedPublishOperationExecutionStatuses,
 } from "./helpers/index.js";
+import normalizeComment from "./helpers/normalize-comment.js";
 import notifyPublishOperationUsers from "./notifications.js";
 
 const cancel: ServiceFn<
 	[
 		{
 			id: number;
-			comment?: string;
+			comment?: RichTextJSON;
 			user: LucidAuth;
 			system?: boolean;
 		},
@@ -95,7 +97,7 @@ const cancel: ServiceFn<
 		};
 	}
 
-	const comment = data.comment?.trim() || null;
+	const comment = normalizeComment(data.comment);
 	const now = new Date().toISOString();
 	if (operationRes.data.scheduled_job_id) {
 		const cancelJobRes = await QueueJobs.updateSingle({
@@ -121,7 +123,7 @@ const cancel: ServiceFn<
 			execution_status: "cancelled",
 			scheduled_job_id: null,
 			decided_by: data.system ? null : data.user.id,
-			decision_comment: comment,
+			decision_comment: comment.value,
 			decided_at: now,
 			updated_at: now,
 		},
@@ -134,7 +136,7 @@ const cancel: ServiceFn<
 		event: {
 			type: "cancelled",
 			userId: data.system ? null : data.user.id,
-			comment,
+			comment: comment.text,
 			metadata: {
 				system: data.system === true,
 			},
@@ -168,6 +170,11 @@ const cancel: ServiceFn<
 			},
 		}),
 		dedupeAction: "cancelled",
+		comment: {
+			label: copy("server:core.publish.requests.email.decision.comment"),
+			value: comment.text,
+			html: comment.html,
+		},
 	});
 	if (notifyRes.error) return notifyRes;
 

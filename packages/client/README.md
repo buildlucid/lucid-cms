@@ -101,7 +101,7 @@ const locales = await client.locales.getAll();
 You can also wrap a document response with `asDocument` to get locale-aware field and brick helpers without changing the raw client response shape.
 
 ```typescript
-import { asDocument, createClient } from "@lucidcms/client";
+import { asDocument, asDocuments, createClient } from "@lucidcms/client";
 
 const client = createClient({
     baseUrl: "https://example.com",
@@ -135,6 +135,23 @@ if (!response.error) {
 
     for (const brick of builderBricks) {
         console.log(brick.key, brick.order);
+    }
+}
+```
+
+For a multiple-document response, use `asDocuments` to apply the same options to every document:
+
+```typescript
+const response = await client.documents.getMultiple({
+    collectionKey: "page",
+    version: "published",
+});
+
+if (!response.error) {
+    const pages = asDocuments(response.data.data, { locale: "en" });
+
+    for (const page of pages) {
+        console.log(page.field("page_title").value());
     }
 }
 ```

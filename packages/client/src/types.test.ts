@@ -5,7 +5,7 @@ import type {
 	RelationFieldValue as CoreRelationFieldValue,
 } from "@lucidcms/core/types";
 import { expectTypeOf, test } from "vitest";
-import { asDocument, createClient } from "./index.js";
+import { asDocument, asDocuments, createClient } from "./index.js";
 import { createDocumentsClient } from "./resources/documents.js";
 import type {
 	CollectionDocument,
@@ -243,6 +243,21 @@ test("asDocument accepts optional toolkit documents for direct response wrapping
 	>();
 	expectTypeOf(page?.field("page_title").value()).toEqualTypeOf<
 		string | null | undefined
+	>();
+});
+
+test("asDocuments preserves toolkit document and locale types", () => {
+	const pages = asDocuments([] as Array<CoreCollectionDocument<"page">>, {
+		locale: "en",
+	});
+
+	expectTypeOf(pages).toMatchTypeOf<
+		Array<{
+			collectionKey: "page";
+			field: (key: "page_title") => {
+				value: () => string | null | undefined;
+			};
+		}>
 	>();
 });
 

@@ -1,6 +1,7 @@
 import { sql } from "kysely";
 import z from "zod";
 import type { GetMultipleQueryParams } from "../../schemas/publish-operation-management.js";
+import { richTextJSONSchema } from "../../schemas/shared/rich-text.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
@@ -74,9 +75,9 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 		source_content_id: z.string(),
 		snapshot_version_id: z.number(),
 		requested_by: z.number().nullable(),
-		request_comment: z.string().nullable(),
+		request_comment: richTextJSONSchema.nullable(),
 		decided_by: z.number().nullable(),
-		decision_comment: z.string().nullable(),
+		decision_comment: richTextJSONSchema.nullable(),
 		decided_at: z.union([z.string(), z.date()]).nullable(),
 		scheduled_at: z.union([z.string(), z.date()]).nullable(),
 		scheduled_timezone: z.string().nullable(),
@@ -108,9 +109,9 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 		source_content_id: this.dbAdapter.getDataType("text"),
 		snapshot_version_id: this.dbAdapter.getDataType("integer"),
 		requested_by: this.dbAdapter.getDataType("integer"),
-		request_comment: this.dbAdapter.getDataType("text"),
+		request_comment: this.dbAdapter.getDataType("json"),
 		decided_by: this.dbAdapter.getDataType("integer"),
-		decision_comment: this.dbAdapter.getDataType("text"),
+		decision_comment: this.dbAdapter.getDataType("json"),
 		decided_at: this.dbAdapter.getDataType("timestamp"),
 		scheduled_at: this.dbAdapter.getDataType("timestamp"),
 		scheduled_timezone: this.dbAdapter.getDataType("text"),

@@ -1,7 +1,8 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { Collection, PublishOperation } from "@types";
 import type { Accessor, Component } from "solid-js";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
-import { Select, Textarea } from "@/components/Groups/Form";
+import { RichText, Select } from "@/components/Groups/Form";
 import { Confirmation } from "@/components/Groups/Modal";
 import api from "@/services/api";
 import T from "@/translations";
@@ -10,6 +11,11 @@ import {
 	getScheduledAt,
 	type ReleaseTiming,
 } from "@/utils/release-schedule";
+import {
+	createEmptyRichTextValue,
+	getRichTextPlainText,
+	reviewCommentRichTextOptions,
+} from "@/utils/rich-text";
 import ReleaseScheduleFields from "./ReleaseScheduleFields";
 
 export type PublishOperationDecisionAction = "approve" | "reject" | "cancel";
@@ -68,7 +74,9 @@ const PublishOperationDecision: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// State / Hooks
-	const [decisionComment, setDecisionComment] = createSignal("");
+	const [decisionComment, setDecisionComment] = createSignal<RichTextJSON>(
+		createEmptyRichTextValue(),
+	);
 	const [scheduleEnabled, setScheduleEnabled] = createSignal(false);
 	const [scheduleDate, setScheduleDate] = createSignal("");
 	const [scheduleTime, setScheduleTime] = createSignal("");
@@ -97,6 +105,9 @@ const PublishOperationDecision: Component<{
 			props.collection()?.review?.comments.decision === "required" &&
 			props.action() !== "cancel",
 	);
+	const decisionCommentText = createMemo(() =>
+		getRichTextPlainText(decisionComment()),
+	);
 	const releaseTimingOptions = createMemo(() => [
 		{
 			value: "now",
@@ -120,7 +131,7 @@ const PublishOperationDecision: Component<{
 		setScheduleTimezone(getDefaultTimezone());
 	};
 	const resetState = () => {
-		setDecisionComment("");
+		setDecisionComment(createEmptyRichTextValue());
 		resetSchedule();
 		setValidationError(undefined);
 		decision.reset();
@@ -151,7 +162,7 @@ const PublishOperationDecision: Component<{
 		const action = props.action();
 		const operation = props.operation();
 		if (!action || !operation) return;
-		if (requireDecisionComment() && decisionComment().trim().length === 0) {
+		if (requireDecisionComment() && decisionCommentText().length === 0) {
 			setValidationError(T()("publish.requests.validation.comment.required"));
 			return;
 		}
@@ -173,7 +184,7 @@ const PublishOperationDecision: Component<{
 			id: operation.id,
 			action,
 			body: {
-				comment: decisionComment().trim() || undefined,
+				comment: decisionCommentText() ? decisionComment() : undefined,
 				...(action === "approve" && schedulingSupported()
 					? {
 							scheduledAt,
@@ -188,7 +199,7 @@ const PublishOperationDecision: Component<{
 	// Effects
 	createEffect(() => {
 		if (!props.state.open) return;
-		setDecisionComment("");
+		setDecisionComment(createEmptyRichTextValue());
 		setValidationError(undefined);
 		prefillSchedule();
 	});
@@ -216,20 +227,19 @@ const PublishOperationDecision: Component<{
 			}}
 		>
 			<div class="grid gap-4 pb-4 md:pb-6">
-				<Textarea
+				<RichText
 					id="document-publish-request-decision-comment"
-					name="document-publish-request-decision-comment"
 					value={decisionComment()}
 					onChange={(value) => {
 						setDecisionComment(value);
 						setValidationError(undefined);
 					}}
 					required={requireDecisionComment()}
-					rows={4}
 					copy={{
 						label: T()("common.comment"),
 						placeholder: T()("publish.requests.decision.comment.placeholder"),
 					}}
+					options={reviewCommentRichTextOptions}
 					noMargin={true}
 				/>
 				<Show when={props.action() === "approve" && schedulingSupported()}>

@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
@@ -5,13 +6,14 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import createEvent from "./helpers/create-event.js";
 import { hasCollectionTargetPermission } from "./helpers/index.js";
+import normalizeComment from "./helpers/normalize-comment.js";
 import notifyPublishOperationUsers from "./notifications.js";
 
 const reject: ServiceFn<
 	[
 		{
 			id: number;
-			comment?: string;
+			comment?: RichTextJSON;
 			user: LucidAuth;
 		},
 	],
@@ -72,10 +74,10 @@ const reject: ServiceFn<
 		};
 	}
 
-	const comment = data.comment?.trim() || null;
+	const comment = normalizeComment(data.comment);
 	if (
 		collectionRes.data.getData.review?.comments.decision === "required" &&
-		!comment
+		!comment.text
 	) {
 		return {
 			error: {
@@ -94,7 +96,7 @@ const reject: ServiceFn<
 			status: "rejected",
 			execution_status: "cancelled",
 			decided_by: data.user.id,
-			decision_comment: comment,
+			decision_comment: comment.value,
 			decided_at: now,
 			updated_at: now,
 		},
@@ -107,7 +109,7 @@ const reject: ServiceFn<
 		event: {
 			type: "rejected",
 			userId: data.user.id,
-			comment,
+			comment: comment.text,
 			metadata: {},
 		},
 	});
@@ -139,7 +141,8 @@ const reject: ServiceFn<
 		dedupeAction: "rejected",
 		comment: {
 			label: copy("server:core.publish.requests.email.decision.comment"),
-			value: comment,
+			value: comment.text,
+			html: comment.html,
 		},
 		details: [
 			{

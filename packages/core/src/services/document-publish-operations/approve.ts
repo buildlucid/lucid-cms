@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
@@ -10,6 +11,7 @@ import {
 	hasCollectionTargetPermission,
 	parseScheduleInput,
 } from "./helpers/index.js";
+import normalizeComment from "./helpers/normalize-comment.js";
 import notifyPublishOperationUsers from "./notifications.js";
 import scheduleApproved from "./schedule-approved.js";
 
@@ -17,7 +19,7 @@ const approve: ServiceFn<
 	[
 		{
 			id: number;
-			comment?: string;
+			comment?: RichTextJSON;
 			user: LucidAuth;
 			bypassReviewChecks?: boolean;
 			suppressRequesterNotification?: boolean;
@@ -128,11 +130,11 @@ const approve: ServiceFn<
 		};
 	}
 
-	const comment = data.comment?.trim() || null;
+	const comment = normalizeComment(data.comment);
 	if (
 		!bypassReviewChecks &&
 		collectionRes.data.getData.review?.comments.decision === "required" &&
-		!comment
+		!comment.text
 	) {
 		return {
 			error: {
@@ -175,7 +177,7 @@ const approve: ServiceFn<
 		data: {
 			status: "approved",
 			decided_by: data.user.id,
-			decision_comment: comment,
+			decision_comment: comment.value,
 			decided_at: now,
 			...scheduleUpdate,
 			updated_at: now,
@@ -189,7 +191,7 @@ const approve: ServiceFn<
 		event: {
 			type: "approved",
 			userId: data.user.id,
-			comment,
+			comment: comment.text,
 			metadata: {
 				target: operationRes.data.target,
 			},
@@ -229,6 +231,11 @@ const approve: ServiceFn<
 			},
 		}),
 		dedupeAction: "approved",
+		comment: {
+			label: copy("server:core.publish.requests.email.decision.comment"),
+			value: comment.text,
+			html: comment.html,
+		},
 	});
 	if (notifyRes.error) return notifyRes;
 

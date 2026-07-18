@@ -4,7 +4,10 @@ import classnames from "classnames";
 import { type Component, type JSXElement, Show } from "solid-js";
 import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Toolbar from "./Toolbar";
+import type { RichTextOptions } from "./types";
 import useEditor from "./useEditor";
+
+export type { RichTextOptions } from "./types";
 
 interface RichTextProps {
 	id: string;
@@ -24,6 +27,7 @@ interface RichTextProps {
 	fieldColumnIsMissing?: boolean;
 	hideOptionalText?: boolean;
 	labelRightSlot?: JSXElement;
+	options?: RichTextOptions;
 }
 
 export const RichText: Component<RichTextProps> = (props) => {
@@ -36,6 +40,9 @@ export const RichText: Component<RichTextProps> = (props) => {
 		onChange: props.onChange,
 		get disabled() {
 			return props.disabled;
+		},
+		get options() {
+			return props.options;
 		},
 	});
 
@@ -71,7 +78,11 @@ export const RichText: Component<RichTextProps> = (props) => {
 			>
 				<Show when={editor()}>
 					{(instance) => (
-						<Toolbar editor={instance()} disabled={props.disabled} />
+						<Toolbar
+							editor={instance()}
+							disabled={props.disabled}
+							options={props.options}
+						/>
 					)}
 				</Show>
 				<div ref={setContainer} />

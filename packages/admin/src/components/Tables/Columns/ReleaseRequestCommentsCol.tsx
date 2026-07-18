@@ -1,8 +1,9 @@
 import type { PublishOperation } from "@types";
 import { FaSolidCircleCheck, FaSolidComment } from "solid-icons/fa";
-import { type Component, Show } from "solid-js";
+import { type Component, createMemo, Show } from "solid-js";
 import { Td } from "@/components/Groups/Table/Td";
 import T from "@/translations";
+import { getRichTextSummary } from "@/utils/rich-text";
 
 const ReleaseRequestCommentsCol: Component<{
 	request: PublishOperation;
@@ -12,6 +13,13 @@ const ReleaseRequestCommentsCol: Component<{
 		padding?: "16" | "24";
 	};
 }> = (props) => {
+	const requestComment = createMemo(() =>
+		getRichTextSummary(props.request.requestComment),
+	);
+	const decisionComment = createMemo(() =>
+		getRichTextSummary(props.request.decisionComment),
+	);
+
 	// ----------------------------------
 	// Render
 	return (
@@ -23,7 +31,7 @@ const ReleaseRequestCommentsCol: Component<{
 			}}
 		>
 			<div class="grid w-full min-w-0 gap-1">
-				<Show when={props.request.requestComment}>
+				<Show when={requestComment()}>
 					{(comment) => (
 						<p
 							class="flex min-w-0 items-center gap-1.5 text-sm leading-5 text-subtitle"
@@ -40,7 +48,7 @@ const ReleaseRequestCommentsCol: Component<{
 						</p>
 					)}
 				</Show>
-				<Show when={props.request.decisionComment}>
+				<Show when={decisionComment()}>
 					{(comment) => (
 						<p
 							class="flex min-w-0 items-center gap-1.5 text-sm leading-5 text-subtitle"
@@ -57,9 +65,7 @@ const ReleaseRequestCommentsCol: Component<{
 						</p>
 					)}
 				</Show>
-				<Show
-					when={!props.request.requestComment && !props.request.decisionComment}
-				>
+				<Show when={!requestComment() && !decisionComment()}>
 					<span class="text-sm text-body">-</span>
 				</Show>
 			</div>
