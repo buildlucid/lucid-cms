@@ -1,9 +1,10 @@
 # @lucidcms/db-sqlite
 
-## 1.0.3 (unreleased)
+## 1.1.0
 
 - Set `caseInsensitiveLikeOperator` configuration for core.
 - Added `real` data type support.
+- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
 
 ## 1.0.2
 

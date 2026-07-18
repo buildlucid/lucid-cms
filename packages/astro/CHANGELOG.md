@@ -1,9 +1,10 @@
 # @lucidcms/astro
 
-## 0.1.3 (unreleased)
+## 0.2.0
 
-- Updated generated Astro runtime modules for the optional named environment schema export used by `@lucidcms/core`.
+- Added support for the optional named environment schema export from `@lucidcms/core` when generating Astro runtime modules.
 - Dropped custom dev toolbar entry and Lucid toolbar.
+- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
 
 ## 0.1.2
 

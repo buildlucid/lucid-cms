@@ -1,5 +1,9 @@
 # @lucidcms/plugin-resend
 
+## 1.1.3
+
+- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
+
 ## 1.1.2
 
 - Bumped `@lucidcms/core` to `0.15.0-alpha.0`.

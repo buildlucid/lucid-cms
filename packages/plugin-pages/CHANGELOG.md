@@ -1,5 +1,9 @@
 # @lucidcms/plugin-pages
 
+## 0.5.1
+
+- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
+
 ## 0.5.0
 
 - Bumped `@lucidcms/core` to `0.15.0-alpha.0`.

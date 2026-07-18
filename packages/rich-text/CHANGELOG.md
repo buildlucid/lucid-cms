@@ -1,6 +1,6 @@
 # @lucidcms/rich-text
 
-## 1.1.0 (unreleased)
+## 1.1.0
 
 - Added a `generateText` helper to the browser and server exports for converting rich text JSON to plain text.
 

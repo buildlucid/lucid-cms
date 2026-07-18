@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/astro",
-	"version": "0.1.2",
+	"version": "0.2.0",
 	"private": false,
 	"description": "The official Astro integration for Lucid CMS",
 	"type": "module",
@@ -58,9 +58,9 @@
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.1",
-		"@lucidcms/runtime-cloudflare": "1.0.2",
-		"@lucidcms/core": "0.15.0-alpha.0",
-		"@lucidcms/runtime-node": "1.0.2",
+		"@lucidcms/runtime-cloudflare": "1.1.0",
+		"@lucidcms/core": "0.16.0-alpha.0",
+		"@lucidcms/runtime-node": "1.1.0",
 		"@types/mime-types": "^3.0.1",
 		"@types/node": "^24.13.2",
 		"astro": "^7.0.2",
@@ -72,7 +72,7 @@
 	},
 	"peerDependencies": {
 		"@lucidcms/runtime-cloudflare": "^1.0.0",
-		"@lucidcms/core": "^0.15.0-alpha.0",
+		"@lucidcms/core": "^0.16.0-alpha.0",
 		"@lucidcms/runtime-node": "^1.0.0",
 		"astro": "^7.0.2"
 	},

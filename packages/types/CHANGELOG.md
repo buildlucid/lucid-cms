@@ -1,6 +1,6 @@
 # @lucidcms/types
 
-## 0.3.0 (unreleased)
+## 0.3.0
 
 - Added public range custom field types.
 - Updated public media response types.

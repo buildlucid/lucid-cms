@@ -1,8 +1,9 @@
 # @lucidcms/plugin-cloudflare-queues
 
-## 1.0.3 (unreleased)
+## 1.0.3
 
-- Marked email adapter lifecycle calls from queue consumers so runtime-only readiness checks are not repeated.
+- Prevented queued emails from repeating email adapter readiness checks that only need to run when the runtime starts.
+- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
 
 ## 1.0.2
 

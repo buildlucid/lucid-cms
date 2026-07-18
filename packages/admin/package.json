@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/admin",
-	"version": "0.15.0-alpha.0",
+	"version": "0.16.0-alpha.0",
 	"description": "The admin SolidJS SPA for Lucid CMS.",
 	"private": true,
 	"type": "module",
@@ -58,7 +58,7 @@
 		"@codemirror/state": "^6.7.0",
 		"@codemirror/view": "^6.43.2",
 		"@kobalte/core": "^0.13.11",
-		"@lucidcms/rich-text": "1.0.0",
+		"@lucidcms/rich-text": "1.1.0",
 		"@solid-primitives/scheduled": "^1.5.3",
 		"@solidjs/router": "^0.16.1",
 		"@tailwindcss/vite": "^4.3.1",

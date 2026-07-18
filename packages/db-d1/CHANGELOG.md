@@ -1,9 +1,10 @@
 # @lucidcms/db-d1
 
-## 0.1.3 (unreleased)
+## 0.2.0
 
 - Set `caseInsensitiveLikeOperator` configuration for core.
 - Added `real` data type support.
+- Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
 
 ## 0.1.2
 

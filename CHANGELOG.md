@@ -1,6 +1,6 @@
 # @lucidcms/core
 
-## v0.16.0-alpha.0 (unreleased)
+## v0.16.0-alpha.0
 
 ### Features:
 

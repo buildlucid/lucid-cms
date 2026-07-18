@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/rich-text",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"private": false,
 	"description": "Shared Tiptap extensions and rich text conversion utilities for Lucid CMS.",
 	"type": "module",

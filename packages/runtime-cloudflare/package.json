@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/runtime-cloudflare",
-	"version": "1.0.2",
+	"version": "1.1.0",
 	"private": false,
 	"description": "The official Cloudflare runtime for Lucid CMS",
 	"type": "module",
@@ -49,7 +49,7 @@
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.1",
-		"@lucidcms/core": "0.15.0-alpha.0",
+		"@lucidcms/core": "0.16.0-alpha.0",
 		"@types/node": "^24.13.2",
 		"tsdown": "^0.22.3",
 		"typescript": "^6.0.3"
@@ -61,7 +61,7 @@
 		"wrangler": "^4.104.0"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.15.0-alpha.0",
+		"@lucidcms/core": "^0.16.0-alpha.0",
 		"hono": "^4.12.27",
 		"hono-openapi": "^1.3.0"
 	},

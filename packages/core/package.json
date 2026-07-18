@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/core",
-	"version": "0.15.0-alpha.0",
+	"version": "0.16.0-alpha.0",
 	"description": "The core of the Lucid CMS. It's responsible for spinning up the API and serving the CMS.",
 	"type": "module",
 	"types": "./dist/index.d.mts",
@@ -106,8 +106,8 @@
 	"dependencies": {
 		"@hono/standard-validator": "^0.2.2",
 		"@inquirer/prompts": "^8.5.2",
-		"@lucidcms/rich-text": "1.0.0",
-		"@lucidcms/types": "^0.2.0",
+		"@lucidcms/rich-text": "1.1.0",
+		"@lucidcms/types": "^0.3.0",
 		"@noble/hashes": "^2.2.0",
 		"@scalar/hono-api-reference": "^0.11.5",
 		"boxen": "^8.0.1",

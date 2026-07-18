@@ -1,6 +1,6 @@
 # @lucidcms/client
 
-## 0.3.0 (unreleased)
+## 0.3.0
 
 - Filter operator types added.
 - Updated media types and document media refs for the new media response contract.
