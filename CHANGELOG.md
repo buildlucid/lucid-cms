@@ -24,6 +24,7 @@
 - Environment schemas are no longer accepted through the `env` property of `configureLucid`. To enable environment validation and generated typing, optionally export a named `env` schema from `lucid.config.ts`, for example `export const env = z.object({ ... })`; omit the export when no schema is needed. ([8d51eba](https://github.com/buildlucid/lucid-cms/commit/8d51ebafedc77b2450786f5d6827e870e532d2de))
 - Reworked media crops as owned derivatives and simplified media responses with type-specific fields and file data under `file`. ([de1c61e](https://github.com/buildlucid/lucid-cms/commit/de1c61e801d1812310c467f291650ef6f8deb5f5))
 - Image processor results now require a `processed` discriminator to distinguish passthrough and transformed output.
+- Release request comments now use structured rich text values instead of plain text strings. ([2df1281](https://github.com/buildlucid/lucid-cms/commit/2df1281babe458d8c50586d630c4a619f21a9cd5))
 
 ### Bug Fixes:
 
@@ -31,6 +32,7 @@
 - Fixed relation custom field filters with non-numeric values crashing generated relation table queries. ([5948ba5](https://github.com/buildlucid/lucid-cms/commit/5948ba5b6643e940ebfa043787cad2dea3e4bc63))
 - Fixed profile pictures stretching across admin preview cards. ([ff1586c](https://github.com/buildlucid/lucid-cms/commit/ff1586cd35df7cd09e73690e853df99e2274bbba))
 - Fixed passthrough images being served with transformed MIME types, restoring SVG streaming and previews. ([ee630e6](https://github.com/buildlucid/lucid-cms/commit/ee630e6a9d7a05e924d6a19aead5b03518faffc0))
+- Fixed release request notification emails linking to the outdated publish operation route. ([2df1281](https://github.com/buildlucid/lucid-cms/commit/2df1281babe458d8c50586d630c4a619f21a9cd5))
 
 ## v0.15.0-alpha.0
 
