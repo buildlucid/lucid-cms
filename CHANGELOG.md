@@ -6,6 +6,11 @@
 
 - Added support for filtering documents by custom fields on related documents, with generated types for implicit and collection scoped relation filters. ([5bfea68](https://github.com/buildlucid/lucid-cms/commit/5bfea68d80e1436ac2ac481d4be1cc057d3480f3))
 
+### Bug Fixes:
+
+- Fixed datetime fields without defaults repeatedly requiring collection migrations. ([2b8faf6](https://github.com/buildlucid/lucid-cms/commit/2b8faf64517b17880ddc80a7f5726e11c738e5cc))
+- Fixed translation and custom migration package sources failing to resolve in monorepo apps. ([872609c](https://github.com/buildlucid/lucid-cms/commit/872609c16645d7611919df54db1452cd7f9543e4))
+
 ## v0.16.0-alpha.0
 
 ### Features:
