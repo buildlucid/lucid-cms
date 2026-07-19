@@ -99,6 +99,41 @@ test("loads translation sources from package subpath specifiers", async () => {
 	);
 });
 
+test("loads package sources from the project node_modules tree", async () => {
+	const packageRoot = path.join(
+		projectRoot,
+		"node_modules",
+		"@example",
+		"translations",
+	);
+	const sourceDirectory = path.join(packageRoot, "translations");
+	await mkdir(sourceDirectory, { recursive: true });
+	await writeFile(
+		path.join(packageRoot, "package.json"),
+		JSON.stringify({
+			name: "@example/translations",
+			type: "module",
+			exports: {
+				"./translations": "./translations",
+			},
+		}),
+	);
+	await writeFile(
+		path.join(sourceDirectory, "en.server.json"),
+		JSON.stringify({
+			"test.project-package": "Project package",
+		}),
+	);
+
+	const bundles = await loadTranslationSources({
+		projectRoot,
+		sources: ["@example/translations/translations"],
+		includeProjectDirectory: false,
+	});
+
+	expect(bundles.en.server["test.project-package"]).toBe("Project package");
+});
+
 test("prepares a translation store and writes the build artifact", async () => {
 	const source = path.join(projectRoot, "translations");
 	const outputPath = path.join(projectRoot, ".lucid");

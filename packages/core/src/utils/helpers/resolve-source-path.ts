@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
+import { findPackageJSON } from "node:module";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { LucidError } from "../errors/index.js";
 
 /**
@@ -14,6 +15,37 @@ export const pathExists = async (targetPath: string) => {
 	} catch {
 		return false;
 	}
+};
+
+/**
+ * Resolves a package source from the project that owns the Lucid config. Node's
+ * `import.meta.resolve` is relative to this core module, which can point at a
+ * different `node_modules` tree in nested workspace installs.
+ */
+const resolveProjectPackagePath = async (
+	source: string,
+	projectRoot: string,
+) => {
+	const sourceParts = source.split("/");
+	const packageNamePartCount = source.startsWith("@") ? 2 : 1;
+	if (sourceParts.length <= packageNamePartCount) return undefined;
+
+	let packageJsonPath: string | undefined;
+	try {
+		packageJsonPath = findPackageJSON(
+			source,
+			pathToFileURL(path.join(projectRoot, "package.json")),
+		);
+	} catch {
+		return undefined;
+	}
+	if (!packageJsonPath) return undefined;
+
+	const sourcePath = path.join(
+		path.dirname(packageJsonPath),
+		...sourceParts.slice(packageNamePartCount),
+	);
+	return (await pathExists(sourcePath)) ? sourcePath : undefined;
 };
 
 /**
@@ -34,7 +66,8 @@ export const resolveSourcePath = async (
 	if (source instanceof URL) return fileURLToPath(source);
 	if (path.isAbsolute(source)) return source;
 
-	const projectPath = path.join(options?.projectRoot ?? process.cwd(), source);
+	const projectRoot = options?.projectRoot ?? process.cwd();
+	const projectPath = path.join(projectRoot, source);
 	if (await pathExists(projectPath)) return projectPath;
 	if (
 		source.startsWith(".") ||
@@ -44,6 +77,12 @@ export const resolveSourcePath = async (
 	}
 
 	try {
+		const projectPackagePath = await resolveProjectPackagePath(
+			source,
+			projectRoot,
+		);
+		if (projectPackagePath) return projectPackagePath;
+
 		const resolved = import.meta.resolve(source);
 		const resolvedUrl = new URL(resolved);
 
