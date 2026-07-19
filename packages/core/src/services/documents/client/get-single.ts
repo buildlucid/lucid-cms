@@ -24,6 +24,7 @@ import { collectionServices, documentBrickServices } from "../../index.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
 import type { PreviewSessionDocumentTarget } from "../../preview-sessions/types.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
+import resolveRelationDocumentFilters from "../helpers/resolve-relation-document-filters.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 import validateClientVersionTarget from "../helpers/validate-client-version-target.js";
 import type { ClientDocumentVersionInput } from "./types.js";
@@ -108,14 +109,6 @@ const getSingle: ClientDocumentsGetSingleService = async <
 		},
 	};
 	const include = resolveDocumentIncludes(query.include);
-	const { documentFilters, brickFilters } = groupDocumentFilters(
-		bricksTableSchemaRes.data,
-		query.filter,
-	);
-	const filterOr = query.filterOr?.map((group) =>
-		groupDocumentFilterConditions(bricksTableSchemaRes.data, group),
-	);
-
 	const relationVersionTypeRes = await resolveRelationVersionType(context, {
 		collectionKey: data.collectionKey,
 		documentId:
@@ -127,6 +120,32 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	});
 	if (relationVersionTypeRes.error) return relationVersionTypeRes;
 
+	const relationFiltersRes = await resolveRelationDocumentFilters(context, {
+		collection: collectionRes.data,
+		bricksTableSchema: bricksTableSchemaRes.data,
+		filter: query.filter,
+		filterOr: query.filterOr,
+		relationVersionType: relationVersionTypeRes.data.versionType,
+		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+	});
+	if (relationFiltersRes.error) return relationFiltersRes;
+	const { documentFilters, brickFilters } = groupDocumentFilters(
+		bricksTableSchemaRes.data,
+		query.filter,
+		{
+			relationCollectionDefaults:
+				relationFiltersRes.data.relationCollectionDefaults,
+		},
+	);
+
+	const filterOr = query.filterOr?.map((group, index) => ({
+		...groupDocumentFilterConditions(bricksTableSchemaRes.data, group, {
+			relationCollectionDefaults:
+				relationFiltersRes.data.relationCollectionDefaults,
+		}),
+		relationDocumentFilters: relationFiltersRes.data.filterOr[index] ?? [],
+	}));
+
 	const documentRes = await Documents.selectSingleFiltered(
 		{
 			version: versionType,
@@ -135,6 +154,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 			documentFilters,
 			filterOr,
 			brickFilters,
+			relationDocumentFilters: relationFiltersRes.data.filters,
 			collection: collectionRes.data,
 			config: context.config,
 			relationVersionType: relationVersionTypeRes.data.versionType,

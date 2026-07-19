@@ -25,6 +25,26 @@ describe("toolkit document query normalization", () => {
 		});
 	});
 
+	test("flattens implicit and explicit relation document filters", () => {
+		expect(
+			normalizeDocumentQuery({
+				filter: {
+					_author: {
+						_firstName: { value: "Will" },
+						people: {
+							_surname: { value: "Yallop" },
+						},
+					},
+				},
+			}),
+		).toEqual({
+			filter: {
+				"_author._firstName": { value: "Will" },
+				"_author.people._surname": { value: "Yallop" },
+			},
+		});
+	});
+
 	test("converts filter arrays into grouped OR filters", () => {
 		expect(
 			normalizeDocumentQuery({

@@ -17,7 +17,11 @@ import type {
 	LucidBrickTableName,
 	LucidVersionTable,
 } from "../../types.js";
-import type { BrickFilters } from "../../utils/helpers/group-document-filters.js";
+import type {
+	BrickFilters,
+	DocumentFilterGroup,
+	RelationDocumentFilter,
+} from "../../utils/helpers/group-document-filters.js";
 import resolveCustomFieldSorts, {
 	type CustomFieldSort,
 } from "../../utils/helpers/resolve-custom-field-sorts.js";
@@ -40,11 +44,6 @@ import type { DocumentWorkflowDetailedQueryResponse } from "./document-workflows
 import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
-
-type DocumentFilterOrGroup = {
-	documentFilters: QueryParamFilterCondition[];
-	brickFilters: BrickFilters[];
-};
 
 export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	// Created by user join
@@ -506,6 +505,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];
+			relationDocumentFilters: RelationDocumentFilter[];
 			query: GetMultipleQueryParams;
 			collection: CollectionBuilder;
 			documentFieldsTableSchema:
@@ -516,7 +516,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			includeWorkflow: boolean;
 			workflowAssigneeFilterValues?: Array<string | number>;
 			tenantKey?: string | null;
-			filterOr?: DocumentFilterOrGroup[];
+			filterOr?: DocumentFilterGroup[];
 			tables: {
 				versions: LucidVersionTableName;
 				documentFields: LucidBrickTableName;
@@ -952,12 +952,27 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 			);
+			query = this.applyRelationDocumentFiltersToQuery(
+				query,
+				props.relationDocumentFilters,
+				dynamicConfig.tableName,
+				props.tables.versions,
+				props.tenantKey,
+			);
+			queryCount = this.applyRelationDocumentFiltersToQuery(
+				queryCount,
+				props.relationDocumentFilters,
+				dynamicConfig.tableName,
+				props.tables.versions,
+				props.tenantKey,
+			);
 			query = this.applyDocumentFilterOrToQuery(
 				query,
 				props.filterOr,
 				dynamicConfig.tableName,
 				props.tables.versions,
 				props.includeWorkflow,
+				props.tenantKey,
 			);
 			queryCount = this.applyDocumentFilterOrToQuery(
 				queryCount,
@@ -965,6 +980,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 				props.includeWorkflow,
+				props.tenantKey,
 			);
 
 			query = queryBuilder.tenantScope(query, {
@@ -1066,11 +1082,12 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];
+			relationDocumentFilters: RelationDocumentFilter[];
 			query: ClientGetSingleQueryParams;
 			collection: CollectionBuilder;
 			config: Config;
 			tenantKey?: string | null;
-			filterOr?: DocumentFilterOrGroup[];
+			filterOr?: DocumentFilterGroup[];
 			tables: {
 				versions: LucidVersionTableName;
 			};
@@ -1259,12 +1276,20 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 			);
+			query = this.applyRelationDocumentFiltersToQuery(
+				query,
+				props.relationDocumentFilters,
+				dynamicConfig.tableName,
+				props.tables.versions,
+				props.tenantKey,
+			);
 			query = this.applyDocumentFilterOrToQuery(
 				query,
 				props.filterOr,
 				dynamicConfig.tableName,
 				props.tables.versions,
 				false,
+				props.tenantKey,
 			);
 
 			query = queryBuilder.tenantScope(query, {
@@ -1634,13 +1659,112 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			return eb.exists(subQuery.select(sql.lit(1).as("exists")));
 		});
 	}
+	/** Builds one semi-join per relation path, keeping all target filters on one related document. */
+	buildRelationDocumentFilterExpressions<DB, Table extends keyof DB>(
+		eb: ExpressionBuilder<DB, Table>,
+		relationDocumentFilters: RelationDocumentFilter[],
+		documentTableName: string,
+		versionTableName: string,
+		tenantKey?: string | null,
+	): OperandExpression<SqlBool>[] {
+		const { ref } = this.db.dynamic;
+
+		return relationDocumentFilters.map((relationFilter) => {
+			let subQuery = this.db
+				.selectFrom(
+					sql
+						.table<LucidBricksTable>(relationFilter.relation.table)
+						.as("rdf_relation"),
+				)
+				.innerJoin(
+					sql
+						.table<LucidDocumentTable>(relationFilter.target.tables.document)
+						.as("rdf_document"),
+					(join) =>
+						join.onRef(
+							ref("rdf_document.id"),
+							"=",
+							ref(`rdf_relation.${relationFilter.relation.documentIdColumn}`),
+						),
+				)
+				.innerJoin(
+					sql
+						.table<LucidVersionTable>(relationFilter.target.tables.versions)
+						.as("rdf_version"),
+					(join) =>
+						join.onRef(
+							ref("rdf_version.document_id"),
+							"=",
+							ref("rdf_document.id"),
+						),
+				)
+				.whereRef(
+					ref("rdf_relation.document_id"),
+					"=",
+					ref(`${documentTableName}.id`),
+				)
+				.whereRef(
+					ref("rdf_relation.document_version_id"),
+					"=",
+					ref(`${versionTableName}.id`),
+				)
+				.where(
+					ref(`rdf_relation.${relationFilter.relation.collectionKeyColumn}`),
+					"=",
+					relationFilter.target.collectionKey,
+				)
+				.where(ref("rdf_version.type"), "=", relationFilter.target.versionType)
+				.where(
+					ref("rdf_document.is_deleted"),
+					"=",
+					this.dbAdapter.getDefault("boolean", "false"),
+				);
+
+			if (tenantKey != null) {
+				subQuery = subQuery.where((targetEb) =>
+					targetEb.or([
+						targetEb(ref("rdf_document.tenant_key"), "=", tenantKey),
+						targetEb(ref("rdf_document.tenant_key"), "is", null),
+					]),
+				);
+			}
+
+			for (const filter of relationFilter.target.documentFilters) {
+				subQuery = subQuery.where(
+					(targetEb) =>
+						this.buildDocumentFilterExpression(
+							targetEb,
+							filter,
+							"rdf_document",
+							false,
+						) ?? targetEb.val(true),
+				);
+			}
+
+			if (relationFilter.target.brickFilters.length > 0) {
+				subQuery = subQuery.where((targetEb) =>
+					targetEb.and(
+						this.buildBrickFilterExpressions(
+							targetEb,
+							relationFilter.target.brickFilters,
+							"rdf_document",
+							"rdf_version",
+						),
+					),
+				);
+			}
+
+			return eb.exists(subQuery.select(sql.lit(1).as("exists")));
+		});
+	}
 	/** Applies document OR groups while keeping global filters outside the OR. */
 	applyDocumentFilterOrToQuery<DB, Table extends keyof DB, O>(
 		query: SelectQueryBuilder<DB, Table, O>,
-		filterOr: DocumentFilterOrGroup[] | undefined,
+		filterOr: DocumentFilterGroup[] | undefined,
 		documentTableName: string,
 		versionTableName: string | undefined,
 		includeWorkflow: boolean,
+		tenantKey?: string | null,
 	): SelectQueryBuilder<DB, Table, O> {
 		if (!filterOr || filterOr.length === 0) {
 			return query;
@@ -1670,6 +1794,17 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						versionTableName,
 					),
 				);
+				if (versionTableName !== undefined) {
+					expressions.push(
+						...this.buildRelationDocumentFilterExpressions(
+							eb,
+							group.relationDocumentFilters,
+							documentTableName,
+							versionTableName,
+							tenantKey,
+						),
+					);
+				}
 
 				if (expressions.length > 0) {
 					groupConditions.push(eb.and(expressions));
@@ -1678,6 +1813,27 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 			return groupConditions.length > 0 ? eb.or(groupConditions) : eb.val(true);
 		});
+	}
+	applyRelationDocumentFiltersToQuery<DB, Table extends keyof DB, O>(
+		query: SelectQueryBuilder<DB, Table, O>,
+		relationDocumentFilters: RelationDocumentFilter[],
+		documentTableName: string,
+		versionTableName: string,
+		tenantKey?: string | null,
+	): SelectQueryBuilder<DB, Table, O> {
+		if (relationDocumentFilters.length === 0) return query;
+
+		return query.where((eb) =>
+			eb.and(
+				this.buildRelationDocumentFilterExpressions(
+					eb,
+					relationDocumentFilters,
+					documentTableName,
+					versionTableName,
+					tenantKey,
+				),
+			),
+		);
 	}
 	applyBrickFiltersToQuery<DB, Table extends keyof DB, O>(
 		query: SelectQueryBuilder<DB, Table, O>,

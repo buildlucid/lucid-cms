@@ -611,6 +611,18 @@ export const controllerSchemas = {
 						description:
 							"Prefix custom field keys with an underscore to filter by them",
 					}),
+					"filter[_relationFieldKey.targetCollectionKey._customFieldKey]":
+						queryString.schema.filter(true, {
+							description:
+								"Follow a relation field through its target collection to filter by a related document custom field",
+							example: "Author surname",
+						}),
+					"filter[_relationFieldKey._customFieldKey]":
+						queryString.schema.filter(true, {
+							description:
+								"Omit the target collection to use the relation field's first configured collection",
+							example: "Author surname",
+						}),
 					"filter[brickKey._customFieldKey]": queryString.schema.filter(true, {
 						description:
 							"Add a brick key before the custom field key to filter against the brick",
@@ -810,6 +822,18 @@ export const controllerSchemas = {
 							description:
 								"Prefix custom field keys with an underscore to filter by them",
 						}),
+						"filter[_relationFieldKey.targetCollectionKey._customFieldKey]":
+							queryString.schema.filter(true, {
+								description:
+									"Follow a relation field through its target collection to filter by a related document custom field",
+								example: "Author surname",
+							}),
+						"filter[_relationFieldKey._customFieldKey]":
+							queryString.schema.filter(true, {
+								description:
+									"Omit the target collection to use the relation field's first configured collection",
+								example: "Author surname",
+							}),
 						"filter[brickKey._customFieldKey]": queryString.schema.filter(
 							true,
 							{
@@ -898,6 +922,18 @@ export const controllerSchemas = {
 							description:
 								"Prefix custom field keys with an underscore to filter by them",
 						}),
+						"filter[_relationFieldKey.targetCollectionKey._customFieldKey]":
+							queryString.schema.filter(true, {
+								description:
+									"Follow a relation field through its target collection to filter by a related document custom field",
+								example: "Author surname",
+							}),
+						"filter[_relationFieldKey._customFieldKey]":
+							queryString.schema.filter(true, {
+								description:
+									"Omit the target collection to use the relation field's first configured collection",
+								example: "Author surname",
+							}),
 						"filter[brickKey._customFieldKey]": queryString.schema.filter(
 							true,
 							{

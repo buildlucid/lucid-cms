@@ -31,6 +31,7 @@ import { collectionServices } from "../../index.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
 import type { PreviewSessionCollectionTarget } from "../../preview-sessions/types.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
+import resolveRelationDocumentFilters from "../helpers/resolve-relation-document-filters.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 import validateClientVersionTarget from "../helpers/validate-client-version-target.js";
 import type { ClientDocumentVersionInput } from "./types.js";
@@ -128,15 +129,6 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 		}),
 	};
 	const include = resolveDocumentIncludes(query.include);
-
-	const { documentFilters, brickFilters } = groupDocumentFilters(
-		bricksTableSchemaRes.data,
-		query.filter,
-	);
-	const filterOr = query.filterOr?.map((group) =>
-		groupDocumentFilterConditions(bricksTableSchemaRes.data, group),
-	);
-
 	const [tableNameRes, relationVersionTypeRes] = await Promise.all([
 		getTableNames(context, data.collectionKey),
 		resolveRelationVersionType(context, {
@@ -148,7 +140,32 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	if (tableNameRes.error) return tableNameRes;
 	if (relationVersionTypeRes.error) return relationVersionTypeRes;
 
-	const relationVersionType = relationVersionTypeRes.data.versionType;
+	const relationFiltersRes = await resolveRelationDocumentFilters(context, {
+		collection: collectionRes.data,
+		bricksTableSchema: bricksTableSchemaRes.data,
+		filter: query.filter,
+		filterOr: query.filterOr,
+		relationVersionType: relationVersionTypeRes.data.versionType,
+		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+	});
+	if (relationFiltersRes.error) return relationFiltersRes;
+	const { documentFilters, brickFilters } = groupDocumentFilters(
+		bricksTableSchemaRes.data,
+		query.filter,
+		{
+			relationCollectionDefaults:
+				relationFiltersRes.data.relationCollectionDefaults,
+		},
+	);
+
+	const filterOr = query.filterOr?.map((group, index) => ({
+		...groupDocumentFilterConditions(bricksTableSchemaRes.data, group, {
+			relationCollectionDefaults:
+				relationFiltersRes.data.relationCollectionDefaults,
+		}),
+		relationDocumentFilters: relationFiltersRes.data.filterOr[index] ?? [],
+	}));
+
 	const collectionFieldsTableSchemas = bricksTableSchemaRes.data.filter(
 		(schema) => schema.key.brick === undefined,
 	);
@@ -165,9 +182,10 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 			documentFilters,
 			filterOr,
 			brickFilters: brickFilters,
+			relationDocumentFilters: relationFiltersRes.data.filters,
 			collection: collectionRes.data,
 			config: context.config,
-			relationVersionType,
+			relationVersionType: relationVersionTypeRes.data.versionType,
 			tables: {
 				versions: tableNameRes.data.version,
 				documentFields: tableNameRes.data.documentFields,
@@ -198,7 +216,7 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 
 		const refDataRes = await fetchRefData(context, {
 			values: relationIdRes.data,
-			versionType: relationVersionType,
+			versionType: relationVersionTypeRes.data.versionType,
 			resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 		});
 		if (refDataRes.error) return refDataRes;

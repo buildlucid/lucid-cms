@@ -12,7 +12,13 @@ import type {
 	QueryParamFilterCondition,
 	QueryParamFilters,
 } from "../../types/query-params.js";
-import type { FieldDatabaseMode, LucidBrickTableName } from "../../types.js";
+import type {
+	DocumentVersionType,
+	FieldDatabaseMode,
+	LucidBrickTableName,
+	LucidDocumentTableName,
+	LucidVersionTableName,
+} from "../../types.js";
 
 const CUSTOMFIELD_FILTER_PREFIX = "_";
 const DOCUMENT_FIELDS_KEY = "fields";
@@ -32,10 +38,40 @@ export type BrickFilters = {
 	filters: BrickFieldFilters[];
 };
 
+/** Pre-resolved tables and conditions for filtering through one relation field. */
+export type RelationDocumentFilter = {
+	relation: {
+		table: LucidBrickTableName;
+		collectionKeyColumn: `_${string}`;
+		documentIdColumn: `_${string}`;
+	};
+	target: {
+		collectionKey: string;
+		versionType: Exclude<DocumentVersionType, "revision">;
+		tables: {
+			document: LucidDocumentTableName;
+			versions: LucidVersionTableName;
+		};
+		documentFilters: QueryParamFilterCondition[];
+		brickFilters: BrickFilters[];
+	};
+};
+
+export type DocumentFilterGroup = {
+	documentFilters: QueryParamFilterCondition[];
+	brickFilters: BrickFilters[];
+	relationDocumentFilters: RelationDocumentFilter[];
+};
+
 type DocumentFilterEntry = {
 	key: string;
 	value: QueryParamFilterCondition["value"];
 	operator?: QueryParamFilterCondition["operator"];
+};
+
+type DocumentFilterGroupingOptions = {
+	includeWorkflow?: boolean;
+	relationCollectionDefaults?: ReadonlyMap<string, string>;
 };
 
 const getFieldColumn = (
@@ -129,9 +165,9 @@ const parseCompoundRelationValue = (
 };
 
 /**
- * Pushes relation-table filters, splitting `collectionKey:id` values into
- * collection-key and document-id conditions. Filters for one table share a
- * single EXISTS subquery, so both conditions apply to the same relation row.
+ * Pushes relation-table filters, using an explicit `collectionKey:id` value or
+ * the relation field's configured default collection. Filters for one table
+ * share a single EXISTS subquery, so both conditions apply to the same row.
  * The filter's operator applies to the document id - the collection key is
  * always matched with `=`, so `!=` means "related to another document of
  * that collection".
@@ -144,37 +180,32 @@ const pushRelationTableFilter = (params: {
 	fieldKey: string;
 	value: FilterValue;
 	operator?: FilterOperator;
+	defaultCollectionKey?: string;
 }): void => {
 	const { relationTableFilter } = params;
 	const compound = parseCompoundRelationValue(params.value);
+	const collectionKey = compound?.collectionKey ?? params.defaultCollectionKey;
+	const documentId = relationTableFilter.collectionKeyColumn
+		? (compound?.documentId ?? params.value)
+		: params.value;
 
-	if (compound && relationTableFilter.collectionKeyColumn) {
+	if (collectionKey && relationTableFilter.collectionKeyColumn) {
 		pushBrickFilter({
 			brickFiltersMap: params.brickFiltersMap,
 			table: relationTableFilter.table,
 			fieldKey: params.fieldKey,
-			value: compound.collectionKey,
+			value: collectionKey,
 			operator: "=",
 			column: relationTableFilter.collectionKeyColumn.name,
 			schemaColumn: relationTableFilter.collectionKeyColumn,
 		});
-		pushBrickFilter({
-			brickFiltersMap: params.brickFiltersMap,
-			table: relationTableFilter.table,
-			fieldKey: params.fieldKey,
-			value: compound.documentId,
-			operator: params.operator,
-			column: relationTableFilter.column,
-			schemaColumn: relationTableFilter.schemaColumn,
-		});
-		return;
 	}
 
 	pushBrickFilter({
 		brickFiltersMap: params.brickFiltersMap,
 		table: relationTableFilter.table,
 		fieldKey: params.fieldKey,
-		value: params.value,
+		value: documentId,
 		operator: params.operator,
 		column: relationTableFilter.column,
 		schemaColumn: relationTableFilter.schemaColumn,
@@ -249,9 +280,7 @@ const matchesStorageMode = (
 const groupDocumentFilterEntries = (
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
 	filters: DocumentFilterEntry[],
-	options?: {
-		includeWorkflow?: boolean;
-	},
+	options?: DocumentFilterGroupingOptions,
 ): {
 	documentFilters: QueryParamFilterCondition[];
 	brickFilters: BrickFilters[];
@@ -319,6 +348,7 @@ const groupDocumentFilterEntries = (
 					fieldKey,
 					value,
 					operator,
+					defaultCollectionKey: options?.relationCollectionDefaults?.get(key),
 				});
 			}
 			continue;
@@ -408,6 +438,7 @@ const groupDocumentFilterEntries = (
 						fieldKey,
 						value,
 						operator,
+						defaultCollectionKey: options?.relationCollectionDefaults?.get(key),
 					});
 				}
 			}
@@ -425,9 +456,7 @@ const groupDocumentFilterEntries = (
 const groupDocumentFilters = (
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
 	filters?: QueryParamFilters,
-	options?: {
-		includeWorkflow?: boolean;
-	},
+	options?: DocumentFilterGroupingOptions,
 ): {
 	documentFilters: QueryParamFilters;
 	brickFilters: BrickFilters[];
@@ -456,9 +485,7 @@ const groupDocumentFilters = (
 export const groupDocumentFilterConditions = (
 	bricksTableSchema: CollectionSchemaTable<LucidBrickTableName>[],
 	filters?: QueryParamFilterCondition[],
-	options?: {
-		includeWorkflow?: boolean;
-	},
+	options?: DocumentFilterGroupingOptions,
 ): {
 	documentFilters: QueryParamFilterCondition[];
 	brickFilters: BrickFilters[];

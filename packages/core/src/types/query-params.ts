@@ -27,8 +27,8 @@ export type FilterOperator =
 	| "not-starts-with"
 	| "ends-with"
 	| "not-ends-with";
-export type FilterObject = {
-	value: FilterValue;
+export type FilterObject<TValue extends FilterValue = FilterValue> = {
+	value: TValue;
 	operator?: FilterOperator;
 };
 export type QueryParamFilters = Record<string, FilterObject>;

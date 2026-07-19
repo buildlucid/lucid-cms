@@ -727,9 +727,41 @@ describe("groupDocumentFilters", () => {
 			_relatedDocument: { value: "pages:7" },
 		};
 
-		const result = groupDocumentFilters(sampleSchema, filters);
+		const result = groupDocumentFilters(sampleSchema, filters, {
+			relationCollectionDefaults: new Map([["_relatedDocument", "articles"]]),
+		});
 
 		expect(result.documentFilters).toEqual({});
+		expect(result.brickFilters).toEqual([
+			{
+				table: "lucid_document__simple__fld__rel__relatedDocument",
+				filters: [
+					{
+						key: "relatedDocument",
+						value: "pages",
+						operator: "=",
+						column: "_collection_key",
+					},
+					{
+						key: "relatedDocument",
+						value: 7,
+						operator: "=",
+						column: "_document_id",
+					},
+				],
+			},
+		]);
+	});
+
+	it("should scope unqualified relation ids to the configured default collection", () => {
+		const filters: QueryParamFilters = {
+			_relatedDocument: { value: 7 },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters, {
+			relationCollectionDefaults: new Map([["_relatedDocument", "pages"]]),
+		});
+
 		expect(result.brickFilters).toEqual([
 			{
 				table: "lucid_document__simple__fld__rel__relatedDocument",

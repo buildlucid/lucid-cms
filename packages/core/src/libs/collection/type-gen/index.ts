@@ -41,7 +41,10 @@ type RenderedField = {
 	declarations: string[];
 };
 
-type FilterTreeNode = Map<string, FilterTreeNode | null>;
+type FilterTreeNode = {
+	filterType?: string;
+	children: Map<string, FilterTreeNode>;
+};
 
 type FilterScope =
 	| {
@@ -98,39 +101,62 @@ const getCollectionSortKeys = (collection: CollectionBuilder): string[] => {
 };
 
 /** Creates a mutable tree that mirrors the nested DX filter object shape. */
-const createFilterTreeNode = (): FilterTreeNode => new Map();
+const createFilterTreeNode = (): FilterTreeNode => ({
+	children: new Map(),
+});
 
 /** Adds one dotted filter path into the nested filter tree. */
-const addFilterPath = (tree: FilterTreeNode, path: string[]) => {
+const addFilterPath = (
+	tree: FilterTreeNode,
+	path: string[],
+	filterType = "FilterObject",
+) => {
 	if (path.length === 0) return;
 
 	const [segment, ...rest] = path;
 	if (!segment) return;
 
+	const child = tree.children.get(segment) ?? createFilterTreeNode();
+	tree.children.set(segment, child);
+
 	if (rest.length === 0) {
-		tree.set(segment, null);
+		child.filterType = filterType;
 		return;
 	}
 
-	const current = tree.get(segment);
-	const child = current instanceof Map ? current : createFilterTreeNode();
+	addFilterPath(child, rest, filterType);
+};
 
-	tree.set(segment, child);
-	addFilterPath(child, rest);
+/** Merges filter branches without losing paths that are both a value and a traversal root. */
+const mergeFilterTree = (
+	target: FilterTreeNode,
+	source: FilterTreeNode,
+): void => {
+	target.filterType ??= source.filterType;
+
+	for (const [key, sourceChild] of source.children) {
+		const targetChild = target.children.get(key) ?? createFilterTreeNode();
+		target.children.set(key, targetChild);
+		mergeFilterTree(targetChild, sourceChild);
+	}
 };
 
 /** Renders a nested filter tree into a TypeScript object type string. */
 const renderFilterTree = (tree: FilterTreeNode): string => {
-	if (tree.size === 0) {
+	if (tree.children.size === 0) {
 		return "Record<string, never>";
 	}
 
-	const properties = Array.from(tree.entries()).map(([key, value]) => {
-		if (value === null) {
-			return `${stringLiteral(key)}?: FilterObject;`;
-		}
+	const properties = Array.from(tree.children.entries()).map(([key, value]) => {
+		const branch = renderFilterTree(value);
+		const type =
+			value.filterType && value.children.size > 0
+				? `${value.filterType} | ${branch}`
+				: value.filterType
+					? value.filterType
+					: branch;
 
-		return `${stringLiteral(key)}?: ${renderFilterTree(value)};`;
+		return `${stringLiteral(key)}?: ${type};`;
 	});
 
 	return `{\n${indentBlock(properties.join("\n"))}\n}`;
@@ -339,10 +365,16 @@ const collectFieldFilterPaths = (
 			return [[fieldSegment]];
 		}
 
-		return [["fields", ...path, fieldSegment]];
+		return [["fields", path[path.length - 1] as string, fieldSegment]];
 	}
 
-	return [[scope.brickKey, ...path, fieldSegment]];
+	return [
+		[
+			scope.brickKey,
+			...(path.length > 0 ? [path[path.length - 1] as string] : []),
+			fieldSegment,
+		],
+	];
 };
 
 /** Builds the nested DX filter tree for a collection field tree or brick field tree. */
@@ -380,6 +412,166 @@ const getCollectionBricks = (
 	];
 };
 
+const mergeFilterTreeAtPath = (
+	tree: FilterTreeNode,
+	path: string[],
+	branch: FilterTreeNode,
+): void => {
+	let node = tree;
+	for (const segment of path) {
+		const child = node.children.get(segment) ?? createFilterTreeNode();
+		node.children.set(segment, child);
+		node = child;
+	}
+	mergeFilterTree(node, branch);
+};
+
+const setFilterTypeAtPath = (
+	tree: FilterTreeNode,
+	path: string[],
+	filterType: string,
+): void => {
+	let node = tree;
+	for (const segment of path) {
+		const child = node.children.get(segment) ?? createFilterTreeNode();
+		node.children.set(segment, child);
+		node = child;
+	}
+	node.filterType = filterType;
+};
+
+const relationIdFilterType = (collection: string | string[]): string => {
+	const collectionKeys = Array.isArray(collection) ? collection : [collection];
+	const explicitIds = collectionKeys.map(
+		(collectionKey) => `\`${collectionKey}:\${number}\``,
+	);
+
+	return `FilterObject<${["number", "number[]", ...explicitIds].join(" | ")}>`;
+};
+
+/** Narrows relation ID leaves without adding another traversal level. */
+const applyRelationIdFilterTypes = (props: {
+	tree: FilterTreeNode;
+	fields: CFConfig<FieldTypes>[];
+	scope: FilterScope;
+	path?: string[];
+}): void => {
+	for (const field of props.fields) {
+		const fieldDefinition = registeredFields[field.type];
+		const storageMode = storageModes[fieldDefinition.config.database.mode];
+
+		if (storageMode.mode === "tree-table") {
+			applyRelationIdFilterTypes({
+				...props,
+				fields: storageMode.getChildFieldConfigs(field) ?? [],
+				path: [...(props.path ?? []), field.key],
+			});
+			continue;
+		}
+		if (field.type !== "relation") continue;
+
+		const relationPath = collectFieldFilterPaths(
+			field,
+			props.scope,
+			props.path,
+		)[0];
+		if (!relationPath) continue;
+
+		setFilterTypeAtPath(
+			props.tree,
+			relationPath,
+			relationIdFilterType(field.collection),
+		);
+	}
+};
+
+/** Builds the target collection's existing custom-field filter tree without recursive traversals. */
+const collectCollectionCustomFilterTree = (
+	collection: CollectionBuilder,
+): FilterTreeNode => {
+	const tree = collectFilterTree(collection.persistedFieldTree, {
+		kind: "collection",
+	});
+	applyRelationIdFilterTypes({
+		tree,
+		fields: collection.persistedFieldTree,
+		scope: { kind: "collection" },
+	});
+
+	for (const { brick } of getCollectionBricks(collection)) {
+		const brickTree = collectFilterTree(brick.persistedFieldTree, {
+			kind: "brick",
+			brickKey: brick.key,
+		});
+		applyRelationIdFilterTypes({
+			tree: brickTree,
+			fields: brick.persistedFieldTree,
+			scope: { kind: "brick", brickKey: brick.key },
+		});
+		mergeFilterTree(tree, brickTree);
+	}
+
+	return tree;
+};
+
+/** Adds an implicit first-target branch plus explicit one-hop collection branches. */
+const addRelationDocumentFilterBranches = (props: {
+	tree: FilterTreeNode;
+	fields: CFConfig<FieldTypes>[];
+	scope: FilterScope;
+	collectionsByKey: Map<string, CollectionBuilder>;
+	path?: string[];
+}): void => {
+	for (const field of props.fields) {
+		const fieldDefinition = registeredFields[field.type];
+		const storageMode = storageModes[fieldDefinition.config.database.mode];
+
+		if (storageMode.mode === "tree-table") {
+			addRelationDocumentFilterBranches({
+				...props,
+				fields: storageMode.getChildFieldConfigs(field) ?? [],
+				path: [...(props.path ?? []), field.key],
+			});
+			continue;
+		}
+		if (field.type !== "relation") continue;
+
+		const relationPath = collectFieldFilterPaths(
+			field,
+			props.scope,
+			props.path,
+		)[0];
+		if (!relationPath) continue;
+		setFilterTypeAtPath(
+			props.tree,
+			relationPath,
+			relationIdFilterType(field.collection),
+		);
+
+		const targetCollectionKeys = Array.isArray(field.collection)
+			? field.collection
+			: [field.collection];
+		for (const [
+			targetIndex,
+			targetCollectionKey,
+		] of targetCollectionKeys.entries()) {
+			const targetCollection = props.collectionsByKey.get(targetCollectionKey);
+			if (!targetCollection) continue;
+			const targetFilterTree =
+				collectCollectionCustomFilterTree(targetCollection);
+
+			mergeFilterTreeAtPath(
+				props.tree,
+				[...relationPath, targetCollectionKey],
+				targetFilterTree,
+			);
+			if (targetIndex === 0) {
+				mergeFilterTreeAtPath(props.tree, relationPath, targetFilterTree);
+			}
+		}
+	}
+};
+
 /** Returns every version type that a resolved document can report. */
 const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
@@ -406,7 +598,10 @@ const getGeneratedLocaleCodes = (
 };
 
 /** Builds all generated declarations for a single collection. */
-const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
+const buildCollectionTypeDeclarations = (
+	collection: CollectionBuilder,
+	collectionsByKey: Map<string, CollectionBuilder>,
+) => {
 	const collectionFieldsTypeName = buildCollectionFieldsTypeName(
 		collection.key,
 	);
@@ -441,11 +636,18 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 		addFilterPath(filterTree, ["workflowStage"]);
 	}
 
-	for (const [key, value] of collectFilterTree(collection.persistedFieldTree, {
-		kind: "collection",
-	})) {
-		filterTree.set(key, value);
-	}
+	mergeFilterTree(
+		filterTree,
+		collectFilterTree(collection.persistedFieldTree, {
+			kind: "collection",
+		}),
+	);
+	addRelationDocumentFilterBranches({
+		tree: filterTree,
+		fields: collection.persistedFieldTree,
+		scope: { kind: "collection" },
+		collectionsByKey,
+	});
 
 	for (const { brick, brickType } of getCollectionBricks(collection)) {
 		const brickTypeName = buildBrickTypeName({
@@ -466,12 +668,19 @@ const buildCollectionTypeDeclarations = (collection: CollectionBuilder) => {
 
 		collectionDeclarations.push(...brickFields.declarations);
 
-		for (const [key, value] of collectFilterTree(brick.persistedFieldTree, {
-			kind: "brick",
-			brickKey: brick.key,
-		})) {
-			filterTree.set(key, value);
-		}
+		mergeFilterTree(
+			filterTree,
+			collectFilterTree(brick.persistedFieldTree, {
+				kind: "brick",
+				brickKey: brick.key,
+			}),
+		);
+		addRelationDocumentFilterBranches({
+			tree: filterTree,
+			fields: brick.persistedFieldTree,
+			scope: { kind: "brick", brickKey: brick.key },
+			collectionsByKey,
+		});
 
 		collectionDeclarations.push(
 			`export type ${brickFieldsTypeName} = ${brickFields.typeText};`,
@@ -527,9 +736,15 @@ const buildGeneratedMapsDeclaration = (props: {
 	const versionEntries: string[] = [];
 	const versionKeyEntries: string[] = [];
 	const declarations: string[] = [];
+	const collectionsByKey = new Map(
+		props.collections.map((collection) => [collection.key, collection]),
+	);
 
 	for (const collection of props.collections) {
-		const generatedCollection = buildCollectionTypeDeclarations(collection);
+		const generatedCollection = buildCollectionTypeDeclarations(
+			collection,
+			collectionsByKey,
+		);
 
 		declarations.push(...generatedCollection.declarations);
 		fieldEntries.push(

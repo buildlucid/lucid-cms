@@ -176,8 +176,70 @@ test("generates collection-aware client document types that lean on the public L
 	"isDeleted"?: FilterObject;
 	"deletedBy"?: FilterObject;
 	"_page_title"?: FilterObject;
-	"_related_page"?: FilterObject;
-	"_related_content"?: FilterObject;
+	"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`> | {
+		"page"?: {
+			"_page_title"?: FilterObject;
+			"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`>;
+			"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
+			"fields"?: {
+				"sections"?: {
+					"_section_title"?: FilterObject;
+				};
+			};
+			"banner"?: {
+				"_title"?: FilterObject;
+				"call_to_actions"?: {
+					"_label"?: FilterObject;
+				};
+			};
+		};
+		"_page_title"?: FilterObject;
+		"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`>;
+		"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
+		"fields"?: {
+			"sections"?: {
+				"_section_title"?: FilterObject;
+			};
+		};
+		"banner"?: {
+			"_title"?: FilterObject;
+			"call_to_actions"?: {
+				"_label"?: FilterObject;
+			};
+		};
+	};
+	"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`> | {
+		"page"?: {
+			"_page_title"?: FilterObject;
+			"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`>;
+			"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
+			"fields"?: {
+				"sections"?: {
+					"_section_title"?: FilterObject;
+				};
+			};
+			"banner"?: {
+				"_title"?: FilterObject;
+				"call_to_actions"?: {
+					"_label"?: FilterObject;
+				};
+			};
+		};
+		"_page_title"?: FilterObject;
+		"_related_page"?: FilterObject<number | number[] | \`page:\${number}\`>;
+		"_related_content"?: FilterObject<number | number[] | \`page:\${number}\` | \`blog:\${number}\`>;
+		"fields"?: {
+			"sections"?: {
+				"_section_title"?: FilterObject;
+			};
+		};
+		"banner"?: {
+			"_title"?: FilterObject;
+			"call_to_actions"?: {
+				"_label"?: FilterObject;
+			};
+		};
+	};
 	"fields"?: {
 		"sections"?: {
 			"_section_title"?: FilterObject;

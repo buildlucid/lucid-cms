@@ -23,11 +23,21 @@ import type {
 	DocumentsGetMultipleResponse,
 	DocumentsGetSingleQuery,
 	DocumentsGetSingleResponse,
+	FilterObject,
 	FilterOperator,
 	LucidClient,
 	LucidClientResponse,
 	RelationFieldValue,
 } from "./types.js";
+
+test("filter objects can narrow their accepted values", () => {
+	expectTypeOf<
+		FilterObject<`page:${number}` | `blog:${number}`>
+	>().toEqualTypeOf<{
+		value: `page:${number}` | `blog:${number}`;
+		operator?: FilterOperator;
+	}>();
+});
 
 declare module "./types.js" {
 	interface CollectionDocumentFieldsByCollection {

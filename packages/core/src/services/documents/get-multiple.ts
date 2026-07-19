@@ -28,6 +28,7 @@ import fetchRefData, {
 } from "../documents-bricks/helpers/fetch-ref-data.js";
 import { collectionServices } from "../index.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
+import resolveRelationDocumentFilters from "./helpers/resolve-relation-document-filters.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
 
 const getMultiple: ServiceFn<
@@ -93,22 +94,6 @@ const getMultiple: ServiceFn<
 		},
 	);
 
-	const { documentFilters, brickFilters } = groupDocumentFilters(
-		bricksTableSchemaRes.data,
-		data.query.filter,
-		{
-			includeWorkflow,
-		},
-	);
-	const filterOr = data.query.filterOr?.map((group) =>
-		groupDocumentFilterConditions(bricksTableSchemaRes.data, group, {
-			includeWorkflow,
-		}),
-	);
-	const workflowAssigneeFilterValues = getFilterValues(
-		documentFilters.workflowAssignee,
-	);
-
 	const [relationVersionTypeRes, tableNameRes] = await Promise.all([
 		resolveRelationVersionType(context, {
 			collectionKey: data.collectionKey,
@@ -119,10 +104,37 @@ const getMultiple: ServiceFn<
 	if (relationVersionTypeRes.error) return relationVersionTypeRes;
 	if (tableNameRes.error) return tableNameRes;
 
-	const relationVersionType = relationVersionTypeRes.data.versionType;
+	const relationFiltersRes = await resolveRelationDocumentFilters(context, {
+		collection: collectionRes.data,
+		bricksTableSchema: bricksTableSchemaRes.data,
+		filter: data.query.filter,
+		filterOr: data.query.filterOr,
+		relationVersionType: relationVersionTypeRes.data.versionType,
+		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+	});
+	if (relationFiltersRes.error) return relationFiltersRes;
+	const { documentFilters, brickFilters } = groupDocumentFilters(
+		bricksTableSchemaRes.data,
+		data.query.filter,
+		{
+			includeWorkflow,
+			relationCollectionDefaults:
+				relationFiltersRes.data.relationCollectionDefaults,
+		},
+	);
+	const workflowAssigneeFilterValues = getFilterValues(
+		documentFilters.workflowAssignee,
+	);
+
+	const filterOr = data.query.filterOr?.map((group, index) => ({
+		...groupDocumentFilterConditions(bricksTableSchemaRes.data, group, {
+			includeWorkflow,
+			relationCollectionDefaults:
+				relationFiltersRes.data.relationCollectionDefaults,
+		}),
+		relationDocumentFilters: relationFiltersRes.data.filterOr[index] ?? [],
+	}));
 	const include = resolveDocumentIncludes(data.query.include);
-	const includeRefs = include.refs;
-	const refTypes = include.refTypes;
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
@@ -131,9 +143,10 @@ const getMultiple: ServiceFn<
 			documentFilters,
 			filterOr,
 			brickFilters: brickFilters,
+			relationDocumentFilters: relationFiltersRes.data.filters,
 			collection: collectionRes.data,
 			config: context.config,
-			relationVersionType,
+			relationVersionType: relationVersionTypeRes.data.versionType,
 			tables: {
 				versions: tableNameRes.data.version,
 				documentFields: tableNameRes.data.documentFields,
@@ -151,18 +164,18 @@ const getMultiple: ServiceFn<
 	if (documentsRes.error) return documentsRes;
 
 	let refData: FieldRefResponse | undefined;
-	if (includeRefs) {
+	if (include.refs) {
 		const relationIdRes = await extractRelatedEntityIds(context, {
 			collection: collectionRes.data,
 			brickSchema: bricksTableSchemaRes.data,
 			responses: documentsRes.data?.[0] ?? [],
-			includeTypes: refTypes,
+			includeTypes: include.refTypes,
 		});
 		if (relationIdRes.error) return relationIdRes;
 
 		const refDataRes = await fetchRefData(context, {
 			values: relationIdRes.data,
-			versionType: relationVersionType,
+			versionType: relationVersionTypeRes.data.versionType,
 			resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 		});
 		if (refDataRes.error) return refDataRes;
@@ -176,7 +189,7 @@ const getMultiple: ServiceFn<
 		config: context.config,
 		host: getBaseUrl(context),
 		refData,
-		refTypes,
+		refTypes: include.refTypes,
 		hasFields: true,
 		hasBricks: false,
 		bricksTableSchema: bricksTableSchemaRes.data,
@@ -199,7 +212,7 @@ const getMultiple: ServiceFn<
 			},
 			data: {
 				versionType: data.version,
-				relationVersionType,
+				relationVersionType: relationVersionTypeRes.data.versionType,
 				documents,
 			},
 		},
