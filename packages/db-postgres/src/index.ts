@@ -276,7 +276,12 @@ export class PostgresAdapter extends DatabaseAdapter {
 			return sql.raw(`'${value}'`);
 		}
 		if (type === "timestamp" && typeof value === "string") {
-			return sql.raw(value);
+			const normalizedValue = value.trim();
+			if (normalizedValue.length === 0) return null;
+			if (/^(now\(\)|current_timestamp(?:\(\d+\))?)$/i.test(normalizedValue)) {
+				return sql.raw(normalizedValue);
+			}
+			return value;
 		}
 
 		if (

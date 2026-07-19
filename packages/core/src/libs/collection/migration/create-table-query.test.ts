@@ -2,6 +2,7 @@ import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import { translate } from "../../i18n/index.js";
 import createTableQuery from "./create-table-query.js";
 
 describe("createTableQuery", () => {
@@ -14,6 +15,7 @@ describe("createTableQuery", () => {
 	});
 
 	test("creates generated indexes after creating the table", async () => {
+		// @ts-expect-error
 		const context = {
 			db: {
 				client: db.client,
@@ -73,5 +75,38 @@ describe("createTableQuery", () => {
 				unique: false,
 			}),
 		);
+	});
+
+	test("includes the table name and database error in failures", async () => {
+		const tableName = "lucid_existing_collection_table";
+		await db.client.schema
+			.createTable(tableName)
+			.addColumn("id", "integer")
+			.execute();
+
+		// @ts-expect-error
+		const context = {
+			db: {
+				client: db.client,
+			},
+			config: {
+				db,
+			},
+		} as ServiceContext;
+		const res = await createTableQuery(context, {
+			migration: {
+				type: "create",
+				tableName,
+				priority: 0,
+				columnOperations: [],
+				indexOperations: [],
+			},
+		});
+
+		expect(res.error?.message).not.toHaveProperty("defaultMessage");
+		expect(translate(res.error?.message)).toContain(
+			`Failed to create collection table "${tableName}":`,
+		);
+		expect(translate(res.error?.message)).toContain("already exists");
 	});
 });

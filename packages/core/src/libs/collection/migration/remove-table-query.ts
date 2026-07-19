@@ -31,12 +31,15 @@ const removeTableQuery: ServiceFn<
 		return {
 			data: undefined,
 			error: {
-				message: copy("server:core.errors.default.message", {
-					defaultMessage:
-						err instanceof Error
-							? err.message
-							: "An error occurred while removing a collection table",
-				}),
+				message: copy(
+					"server:core.collections.migration.table.remove.failed.message",
+					{
+						data: {
+							tableName: data.migration.tableName,
+							errorMessage: err instanceof Error ? err.message : String(err),
+						},
+					},
+				),
 			},
 		};
 	}

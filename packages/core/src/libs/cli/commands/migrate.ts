@@ -336,10 +336,16 @@ const migrateCommand = (props?: {
 					);
 
 					if (result.error) {
+						const translatedMessage = translate.english(result.error.message);
+						const underlyingMessage =
+							result.error.message?.type === "lucid.copy"
+								? result.error.message.defaultMessage
+								: undefined;
+
 						cliLogger.error(
 							"Migration failed on step collection migrations",
-							translate.english(result.error.message) ? "with error:" : "",
-							translate.english(result.error.message) || "",
+							underlyingMessage || translatedMessage ? "with error:" : "",
+							underlyingMessage || translatedMessage || "",
 						);
 						if (mode === "process") {
 							await cleanupAdapters();

@@ -34,30 +34,27 @@ const buildMigrations: ServiceFn<
 
 		//* build batches based on prio and process them
 		for (const priority of priorities) {
-			const batch = sortedPlans
-				.filter((plan) => plan.priority === priority)
-				.map((plan) => {
-					switch (plan.type) {
-						case "create": {
-							return createTableQuery(context, { migration: plan });
-						}
-						case "modify": {
-							return modifyTableQuery(context, { migration: plan });
-						}
-						case "remove": {
-							return removeTableQuery(context, { migration: plan });
-						}
-						default: {
-							return null;
-						}
-					}
-				})
-				.filter((result) => result !== null);
-			if (batch.length === 0) continue;
+			const batch = sortedPlans.filter((plan) => plan.priority === priority);
 
-			const batchRes = await Promise.all(batch);
-			const firstError = batchRes.find((result) => result.error !== undefined);
-			if (firstError) return firstError;
+			for (const plan of batch) {
+				let result: Awaited<ReturnType<typeof createTableQuery>> | undefined;
+				switch (plan.type) {
+					case "create": {
+						result = await createTableQuery(context, { migration: plan });
+						break;
+					}
+					case "modify": {
+						result = await modifyTableQuery(context, { migration: plan });
+						break;
+					}
+					case "remove": {
+						result = await removeTableQuery(context, { migration: plan });
+						break;
+					}
+				}
+
+				if (result?.error) return result;
+			}
 		}
 
 		return {

@@ -141,12 +141,15 @@ const modifyTableQuery: ServiceFn<
 		return {
 			data: undefined,
 			error: {
-				message: copy("server:core.errors.default.message", {
-					defaultMessage:
-						err instanceof Error
-							? err.message
-							: "An error occurred while modifying a collection table",
-				}),
+				message: copy(
+					"server:core.collections.migration.table.modify.failed.message",
+					{
+						data: {
+							tableName: data.migration.tableName,
+							errorMessage: err instanceof Error ? err.message : String(err),
+						},
+					},
+				),
 			},
 		};
 	}

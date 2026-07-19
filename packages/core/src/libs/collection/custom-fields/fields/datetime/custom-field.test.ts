@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
+import type DatabaseAdapter from "../../../../db/adapter-base.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
@@ -279,4 +280,44 @@ test("custom field config passes schema validation", async () => {
 test("datetime config defaults to date-only mode", () => {
 	const field = new DatetimeCustomField("field");
 	expect(field.config.time).toBe(false);
+});
+
+test("datetime schema omits an empty default", () => {
+	// @ts-expect-error
+	const db = {
+		getDataType: () => "timestamp",
+	} as DatabaseAdapter;
+	const field = new DatetimeCustomField("field");
+
+	const res = field.getSchemaDefinition({
+		db,
+		tables: {
+			document: "lucid_document__test",
+			version: "lucid_document__test__ver",
+		},
+	});
+
+	expect(res.error).toBeUndefined();
+	expect(res.data?.columns[0]?.default).toBeUndefined();
+});
+
+test("datetime schema preserves an explicitly configured default", () => {
+	// @ts-expect-error
+	const db = {
+		getDataType: () => "timestamp",
+	} as DatabaseAdapter;
+	const field = new DatetimeCustomField("field", {
+		default: "2024-06-15T14:14:21.704Z",
+	});
+
+	const res = field.getSchemaDefinition({
+		db,
+		tables: {
+			document: "lucid_document__test",
+			version: "lucid_document__test__ver",
+		},
+	});
+
+	expect(res.error).toBeUndefined();
+	expect(res.data?.columns[0]?.default).toBe("2024-06-15T14:14:21.704Z");
 });

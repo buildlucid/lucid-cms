@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/db-postgres",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"private": false,
 	"description": "The official Postgres database adapter for Lucid CMS",
 	"type": "module",

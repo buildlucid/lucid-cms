@@ -58,7 +58,8 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 						name: this.key,
 						type: props.db.getDataType("timestamp"),
 						nullable: true,
-						default: this.config.default,
+						default:
+							this.config.default === "" ? undefined : this.config.default,
 					},
 				],
 			},

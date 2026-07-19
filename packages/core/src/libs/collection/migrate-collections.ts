@@ -2,10 +2,54 @@ import inferSchema from "../../libs/collection/schema/infer-schema.js";
 import type { CollectionSchema } from "../../libs/collection/schema/types.js";
 import { CollectionMigrationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
+import serviceWrapper from "../../utils/services/service-wrapper.js";
 import buildTableName from "./helpers/build-table-name.js";
 import buildMigrations from "./migration/build-migrations.js";
 import generateMigrationPlan from "./migration/generate-migration-plan.js";
 import type { MigrationPlan } from "./migration/types.js";
+
+type CollectionMigrationBatch = {
+	migrationPlan: MigrationPlan;
+	migrationEntry: {
+		collection_key: string;
+		table_name_map: string;
+		migration_plans: MigrationPlan;
+		collection_schema: CollectionSchema;
+	};
+};
+
+/**
+ * Runs one collection's table changes and history insert atomically when the
+ * configured database supports transactions.
+ */
+const migrateCollectionBatch = serviceWrapper<
+	[CollectionMigrationBatch],
+	undefined
+>(
+	async (context, data) => {
+		const migrationRes = await buildMigrations(context, {
+			migrationPlan: [data.migrationPlan],
+		});
+		if (migrationRes.error) return migrationRes;
+
+		const CollectionMigrations = new CollectionMigrationsRepository(
+			context.db.client,
+			context.config.db,
+		);
+		const migrationEntryRes = await CollectionMigrations.createSingle({
+			data: data.migrationEntry,
+		});
+		if (migrationEntryRes.error) return migrationEntryRes;
+
+		return {
+			data: undefined,
+			error: undefined,
+		};
+	},
+	{
+		transaction: true,
+	},
+);
 
 /**
  * Infers collection schemas, works out the difference between the current collection schema and then migrates collections tables and data
@@ -27,10 +71,6 @@ const migrateCollections: ServiceFn<
 		inferedSchemas: CollectionSchema[];
 	}
 > = async (context, data) => {
-	const CollectionMigrations = new CollectionMigrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
 	const dbSchema = await context.config.db.inferSchema(context.db.client);
 
 	//* infer schema for each collection
@@ -79,37 +119,32 @@ const migrateCollections: ServiceFn<
 		};
 	}
 
-	//* build and run migrations
-	const migrationRes = await buildMigrations(context, {
-		migrationPlan: migrationPlans,
-	});
-	if (migrationRes.error) return migrationRes;
-
-	//* save migration plans to db
-	const migrationPlanEntries = inferedSchemas.map((schema) => {
+	//* build each collection migration batch and its history entry
+	const migrationBatches = inferedSchemas.map((schema) => {
 		const migrationPlan = migrationPlans.find(
 			(plan) => plan.collectionKey === schema.key,
-		);
+		) ?? {
+			collectionKey: schema.key,
+			tables: [],
+		};
 		const tableNameMap = Object.fromEntries(
 			schema.tables.map((table) => [table.name, table.rawName ?? table.name]),
 		);
 
 		return {
-			collection_key: schema.key,
-			table_name_map: JSON.stringify(tableNameMap),
-			migration_plans: migrationPlan ?? {
-				collectionKey: schema.key,
-				tables: [],
+			migrationPlan,
+			migrationEntry: {
+				collection_key: schema.key,
+				table_name_map: JSON.stringify(tableNameMap),
+				migration_plans: migrationPlan,
+				collection_schema: schema,
 			},
-			collection_schema: schema,
-		};
+		} satisfies CollectionMigrationBatch;
 	});
 
-	if (migrationPlanEntries.length > 0) {
-		const migrationsRes = await CollectionMigrations.createMultiple({
-			data: migrationPlanEntries,
-		});
-		if (migrationsRes.error) return migrationsRes;
+	for (const batch of migrationBatches) {
+		const migrationRes = await migrateCollectionBatch(context, batch);
+		if (migrationRes.error) return migrationRes;
 	}
 
 	return {

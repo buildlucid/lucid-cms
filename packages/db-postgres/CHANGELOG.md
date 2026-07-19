@@ -1,5 +1,9 @@
 # @lucidcms/db-postgres
 
+## 1.1.1
+
+- Fixed PostgreSQL migrations for datetime fields without defaults.
+
 ## 1.1.0
 
 - Set `caseInsensitiveLikeOperator` configuration for core.
