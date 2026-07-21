@@ -5,6 +5,7 @@
 ### Features:
 
 - Added support for filtering documents by custom fields on related documents, with generated types for implicit and collection scoped relation filters. ([5bfea68](https://github.com/buildlucid/lucid-cms/commit/5bfea68d80e1436ac2ac481d4be1cc057d3480f3))
+- Added shared host bootstrapping, runtime-defined host entrypoints and config dependency tracking for framework integrations such as Astro.
 
 ### Bug Fixes:
 

@@ -33,6 +33,12 @@ export const cloudflare = (
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
+		hosts: {
+			astro: {
+				entrypoint: "@lucidcms/runtime-cloudflare/astro",
+				integrationEntrypoint: "@lucidcms/runtime-cloudflare/astro-integration",
+			},
+		},
 		config: {
 			customBuildArtifacts: [constants.WORKER_EXPORT_ARTIFACT_TYPE],
 			customPrepareArtifacts: [constants.WRANGLER_CONFIG_ARTIFACT_TYPE],

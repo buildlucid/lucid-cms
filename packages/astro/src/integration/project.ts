@@ -1,276 +1,125 @@
-import fs from "node:fs/promises";
 import path from "node:path";
 import { LucidError } from "@lucidcms/core";
 import {
 	checkAllPluginsCompatibility,
 	loadBuildProject,
 	migrateCommand,
-	prepareLucidPublicAssets,
-	prepareLucidSPA,
 } from "@lucidcms/core/build";
-import { createTranslator } from "@lucidcms/core/plugin";
-import type { AdapterRuntimeContext } from "@lucidcms/core/types";
-import astroConstants from "../constants.js";
-import { detectLucidRuntime } from "../internal/compatibility.js";
-
-import type { LucidAstroRuntime } from "../types.js";
-import collectConfigDependencies from "./config-dependencies.js";
-import { collectFiles, ensureDirectory, pathExists } from "./filesystem.js";
+import type {
+	LucidAstroBridge,
+	LucidAstroIntegrationBridge,
+} from "../types.js";
 
 type BuildProject = Awaited<ReturnType<typeof loadBuildProject>>;
-type LoadConfigResult = BuildProject["loaded"];
-type RenderedTemplates = NonNullable<BuildProject["emailTemplates"]>;
 
-export type ResolvedLucidProject = {
-	configPath: string;
-	configDependencies: string[];
-	runtime: LucidAstroRuntime;
-	loaded: LoadConfigResult;
-	emailTemplates: RenderedTemplates;
+/** Fully resolved Lucid project state used by the Astro integration hooks. */
+export type ResolvedLucidProject = BuildProject & {
+	bridge: LucidAstroBridge;
+	integrationBridge: LucidAstroIntegrationBridge;
+	bridgeEntrypoint: string;
+	hostId: string;
 };
 
-export const getHostedConfigureLucidPath = (): string =>
-	import.meta.resolve(astroConstants.integration.configureLucidModuleId);
+const loadBridge = async (entrypoint: string): Promise<LucidAstroBridge> => {
+	const module = (await import(entrypoint)) as {
+		default?: LucidAstroBridge;
+	};
+	const bridge = module.default;
 
-/**
- * Astro config setup is where we establish Lucid's hosted view of the world so
- * every later hook can reuse the same resolved project snapshot.
- */
-export const loadLucidProject = async (
+	if (
+		!bridge ||
+		typeof bridge.resolveRuntime !== "function" ||
+		typeof bridge.handle !== "function"
+	) {
+		throw new LucidError({
+			message: `The runtime Astro bridge at ${entrypoint} is invalid.`,
+		});
+	}
+
+	return bridge;
+};
+
+/** Loads the Lucid project and the configured runtime's Astro bridges. */
+export const loadProject = async (
 	configPath: string,
 ): Promise<ResolvedLucidProject> => {
-	const configureLucidPath = getHostedConfigureLucidPath();
-	const [project, configDependencies] = await Promise.all([
-		loadBuildProject({
-			configPath,
-			silent: true,
-			validateEnv: true,
-			prepareRuntime: true,
-			loadEmailTemplates: true,
-			configureLucidPath,
-		}),
-		collectConfigDependencies(configPath),
-	]);
+	const project = await loadBuildProject({
+		configPath,
+		silent: true,
+		collectConfigDependencies: true,
+		validateEnv: true,
+		prepareRuntime: true,
+		loadEmailTemplates: true,
+	});
+	const bridgeEntrypoint = project.loaded.adapter.hosts?.astro?.entrypoint;
+	const integrationEntrypoint =
+		project.loaded.adapter.hosts?.astro?.integrationEntrypoint;
+
+	if (!bridgeEntrypoint) {
+		throw new LucidError({
+			message: `The ${project.loaded.adapter.key} runtime does not expose an Astro bridge.`,
+		});
+	}
 
 	if (!project.emailTemplates) {
 		throw new LucidError({
-			message:
-				"Lucid Astro integration could not prepare email templates for build.",
+			message: "Lucid could not prepare the Astro email templates.",
 		});
 	}
 
-	return {
-		configPath,
-		configDependencies,
-		runtime: detectLucidRuntime(project.loaded.adapter),
-		emailTemplates: project.emailTemplates,
-		loaded: project.loaded,
-	};
-};
+	const bridge = await loadBridge(bridgeEntrypoint);
+	const integrationModule = integrationEntrypoint
+		? ((await import(integrationEntrypoint)) as {
+				default?: LucidAstroIntegrationBridge;
+			})
+		: undefined;
+	const integrationBridge =
+		integrationModule?.default ??
+		(bridge as unknown as LucidAstroIntegrationBridge);
 
-/**
- * Astro dev re-runs config resolution right before migrate/sync so Lucid sees
- * the same wrapper semantics during bootstrap as it does during route startup.
- */
-export const reloadLucidProjectForDevBootstrap = async (
-	project: ResolvedLucidProject,
-): Promise<ResolvedLucidProject> => {
-	if (project.runtime !== "cloudflare") {
-		return project;
+	if (typeof integrationBridge.validateAdapter !== "function") {
+		throw new LucidError({
+			message: `The runtime Astro integration bridge for ${project.loaded.adapter.key} is invalid.`,
+		});
 	}
-
-	const configureLucidPath = getHostedConfigureLucidPath();
-	const reloaded = await loadBuildProject({
-		configPath: project.configPath,
-		silent: true,
-		validateEnv: true,
-		prepareRuntime: true,
-		generateTypes: false,
-		loadEmailTemplates: false,
-		configureLucidPath,
-	});
 
 	return {
 		...project,
-		loaded: reloaded.loaded,
-	};
+		bridge,
+		integrationBridge,
+		bridgeEntrypoint,
+		hostId: `${path.resolve(configPath)}:${project.loaded.adapter.key}`,
+	} satisfies ResolvedLucidProject;
 };
 
-/**
- * Astro still relies on the real Lucid runtime adapters underneath, so hosted
- * compatibility checks should use the same runtime contexts the CLI would
- * expose for the matching Node or Cloudflare host.
- */
-export const getAstroRuntimeContext = async (props: {
-	project: ResolvedLucidProject;
-	compiled: boolean;
-}): Promise<AdapterRuntimeContext> => {
-	if (props.project.runtime === "cloudflare") {
-		const { getRuntimeContext } = await import(
-			"@lucidcms/runtime-cloudflare/runtime"
-		);
-
-		return getRuntimeContext({
-			server: "cloudflare",
-			compiled: props.compiled,
-		});
-	}
-
-	const { getRuntimeContext } = await import("@lucidcms/runtime-node/runtime");
-	return getRuntimeContext({
-		compiled: props.compiled,
+/** Checks Lucid plugin compatibility against the hosted runtime context. */
+export const checkProjectCompatibility = async (
+	project: ResolvedLucidProject,
+	compiled: boolean,
+) => {
+	const state = await project.bridge.resolveRuntime({
+		adapter: project.loaded.adapter,
+		fallbackEnv: project.loaded.env,
+		compiled,
 	});
-};
-
-/**
- * Plugin compatibility should fail during Astro setup, not after Lucid starts,
- * so hosted projects stay aligned with the standalone build/serve commands.
- */
-export const assertLucidPluginCompatibility = async (props: {
-	project: ResolvedLucidProject;
-	compiled: boolean;
-}) => {
-	const runtimeContext = await getAstroRuntimeContext(props);
-
 	await checkAllPluginsCompatibility({
-		runtimeContext,
-		config: props.project.loaded.config,
-	});
-};
-
-/**
- * Lucid keeps its admin assets in its own prepared tree so Astro can mount them
- * regardless of whether the host app builds statically or as a server output.
- */
-export const prepareAssetSourceTree = async (
-	project: ResolvedLucidProject,
-	assetRoot: string,
-) => {
-	const translate = createTranslator({
-		store: project.loaded.translationStore,
-		locale: "en",
-	});
-
-	await fs.rm(assetRoot, { recursive: true, force: true });
-	await ensureDirectory(assetRoot);
-
-	const publicResult = await prepareLucidPublicAssets({
 		config: project.loaded.config,
-		outDir: assetRoot,
-		projectRoot: process.cwd(),
-		includeProjectPublic: false,
-		silent: true,
+		runtimeContext: state.runtimeContext,
 	});
+};
 
-	if (publicResult.error) {
-		throw new LucidError({
-			message:
-				translate.english(publicResult.error.message) ??
-				"Lucid Astro integration could not prepare the Lucid public assets.",
-		});
-	}
-
-	const spaResult = await prepareLucidSPA({
-		outDir: path.join(
-			assetRoot,
-			astroConstants.paths.mountPath.replace(/^\//, ""),
-		),
+/** Runs Lucid migrations and sync tasks before the Astro development server starts. */
+export const bootstrapDevProject = async (project: ResolvedLucidProject) => {
+	const state = await project.bridge.resolveRuntime({
+		adapter: project.loaded.adapter,
+		fallbackEnv: project.loaded.env,
+		compiled: false,
 	});
-
-	if (spaResult.error) {
-		throw new LucidError({
-			message:
-				translate.english(spaResult.error.message) ??
-				"Lucid Astro integration could not prepare the Lucid SPA assets.",
-		});
-	}
-};
-
-/**
- * Astro's final output directory differs between static and server builds, so
- * this post-build copy keeps Lucid assets visible in both layouts.
- */
-export const copyBuiltAssets = async (assetRoot: string, buildDir: string) => {
-	if (!(await pathExists(assetRoot))) {
-		return;
-	}
-
-	const clientDir = path.join(buildDir, astroConstants.paths.clientDirname);
-	const outputDir = (await pathExists(clientDir)) ? clientDir : buildDir;
-	const files = await collectFiles(assetRoot);
-
-	await Promise.all(
-		files.map(async (filePath) => {
-			const relativePath = path.relative(assetRoot, filePath);
-			const targetPath = path.join(outputDir, relativePath);
-
-			await ensureDirectory(path.dirname(targetPath));
-			await fs.copyFile(filePath, targetPath);
-		}),
-	);
-};
-
-/**
- * Lucid owns additional inputs outside Astro's src tree, so we register them
- * explicitly to keep the integration responsive during config and asset edits.
- */
-export const addLucidWatchFiles = async (
-	project: ResolvedLucidProject,
-	addWatchFile: (path: string | URL) => void,
-) => {
-	const watchedPaths = new Set<string>();
-	const registerWatchPath = (watchPath: string) => {
-		const resolvedPath = path.resolve(watchPath);
-		if (watchedPaths.has(resolvedPath)) {
-			return;
-		}
-
-		watchedPaths.add(resolvedPath);
-		addWatchFile(resolvedPath);
-	};
-
-	registerWatchPath(project.configPath);
-	for (const dependencyPath of project.configDependencies) {
-		registerWatchPath(path.dirname(dependencyPath));
-	}
-	registerWatchPath(
-		path.isAbsolute(project.loaded.config.email.templates.directory)
-			? project.loaded.config.email.templates.directory
-			: path.join(
-					process.cwd(),
-					project.loaded.config.email.templates.directory,
-				),
-	);
-
-	for (const entry of project.loaded.config.build.paths.copyPublic) {
-		const inputPath = typeof entry === "string" ? entry : entry.input;
-		const resolvedPath = path.isAbsolute(inputPath)
-			? inputPath
-			: path.join(process.cwd(), inputPath);
-		registerWatchPath(resolvedPath);
-	}
-};
-
-/**
- * Astro dev should feel like the Lucid CLI from a schema perspective, so we
- * run migrate/sync here instead of requiring a separate preflight command.
- */
-export const runDevBootstrap = async (
-	project: ResolvedLucidProject,
-): Promise<void> => {
-	const bootstrapProject = await reloadLucidProjectForDevBootstrap(project);
-
-	if (bootstrapProject.runtime === "cloudflare") {
-		(globalThis as Record<string, unknown>)[
-			astroConstants.cloudflare.devEnvGlobal
-		] = bootstrapProject.loaded.env;
-	}
-
-	const migrationResult = await migrateCommand({
-		config: bootstrapProject.loaded.config,
-		env: bootstrapProject.loaded.env,
-		runtimeContext: bootstrapProject.loaded.runtimeContext,
-		translationStore: bootstrapProject.loaded.translationStore,
+	const result = await migrateCommand({
+		config: project.loaded.config,
+		env: state.env ?? project.loaded.env,
+		runtimeContext: state.runtimeContext,
+		translationStore: project.loaded.translationStore,
 		mode: "return",
 	})({
 		force: false,
@@ -278,10 +127,9 @@ export const runDevBootstrap = async (
 		skipSyncSteps: false,
 	});
 
-	if (!migrationResult) {
+	if (!result) {
 		throw new LucidError({
-			message:
-				"Lucid Astro integration could not prepare the Lucid schema for astro dev.",
+			message: "Lucid could not prepare the schema for Astro dev.",
 		});
 	}
 };

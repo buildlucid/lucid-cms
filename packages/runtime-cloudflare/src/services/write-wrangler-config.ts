@@ -1,9 +1,9 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import type { RuntimePrepareArtifacts } from "@lucidcms/core/types";
-import constants from "../constants.js";
+import constants, { DEFAULT_COMPATIBILITY_DATE } from "../constants.js";
 import type {
 	AdapterOptions,
 	CloudflareBindingsOptions,
@@ -13,6 +13,7 @@ import {
 	mergeCloudflareBindings,
 	normalizeCloudflareBindings,
 } from "../utils/bindings.js";
+import writeFileIfChanged from "../utils/write-file.js";
 
 type WranglerConfig = Record<string, unknown>;
 type WranglerConfigTarget = "build" | "prepare";
@@ -225,7 +226,7 @@ const resolveSchemaPath = (props: {
 
 const resolveCompatibilityDate = (options?: AdapterOptions["worker"]) => {
 	if (options?.compatibilityDate) return options.compatibilityDate;
-	return new Date().toISOString().slice(0, 10);
+	return DEFAULT_COMPATIBILITY_DATE;
 };
 
 const defaultResourceName = (workerName: string, binding: string) =>
@@ -535,7 +536,10 @@ const writeWranglerConfig = async (props: {
 		target: props.target,
 	});
 	await mkdir(outputPath, { recursive: true });
-	await writeFile(generatedConfigPath, getGeneratedConfigContent(config));
+	await writeFileIfChanged(
+		generatedConfigPath,
+		getGeneratedConfigContent(config),
+	);
 
 	if (props.target !== "build") {
 		return {
@@ -557,7 +561,7 @@ const writeWranglerConfig = async (props: {
 	};
 
 	await mkdir(deployConfigDirectory, { recursive: true });
-	await writeFile(
+	await writeFileIfChanged(
 		deployConfigPath,
 		`${JSON.stringify(deployConfig, null, "\t")}\n`,
 	);

@@ -15,6 +15,10 @@
 			"types": "./dist/runtime.d.mts",
 			"default": "./dist/runtime.mjs"
 		},
+		"./astro": {
+			"types": "./dist/astro.d.mts",
+			"default": "./dist/astro.mjs"
+		},
 		"./types": {
 			"types": "./dist/types.d.mts",
 			"default": "./dist/types.mjs"

@@ -1,37 +1,62 @@
 ---
-import getToolkit from "@lucidcms/astro/toolkit";
-import { asDocument } from "@lucidcms/client";
+import { resolveToolbarAttributes } from "@lucidcms/client";
 import "../index.css";
+import getLucidData, { resolvePageLocale } from "../services/lucid-data";
 
 export const prerender = false;
-const toolkit = await getToolkit();
 
-const response = await toolkit.documents.getSingle({
-	collectionKey: "page",
-	version: "latest",
-	query: {
-		filter: {
-			_fullSlug: {
-				value: Astro.params.slug ? `/${Astro.params.slug}` : "/",
-			},
-		},
-		include: ["bricks", "refs"],
-	},
+const requestedFullSlug = Astro.params.slug ? `/${Astro.params.slug}` : "/";
+const locale = resolvePageLocale(requestedFullSlug);
+
+if (!locale) {
+	const redirectPath = `/en${requestedFullSlug === "/" ? "" : requestedFullSlug}`;
+	return Astro.redirect(`${redirectPath}${Astro.url.search}`);
+}
+
+const result = await getLucidData({
+	fullSlug: requestedFullSlug,
+	locale,
+	astro: Astro,
 });
 
-// if (response.error) {
-// 	return Astro.redirect("/404");
-// }
+const titleField = result.document?.field("title");
+const summaryField = result.document?.field("summary");
+const fullSlugField = result.document?.field("fullSlug");
+const slugField = result.document?.field("slug");
+const contentBrick = result.document?.brick("content");
+const brickHeadingField = contentBrick?.field("heading");
+const sectionHeadingField = contentBrick
+	?.field("sections")
+	.groups()[0]
+	?.field("sectionHeading");
 
-const page = asDocument(response.data);
+const pageFullSlug = fullSlugField?.value();
+const alternateLocale = locale === "en" ? "fr" : "en";
+const alternateFullSlug = fullSlugField?.value({ locale: alternateLocale });
+const alternateLocaleHref = alternateFullSlug || `/${alternateLocale}`;
+const alternateLocaleLabel = alternateLocale === "en" ? "English" : "Français";
+const localeRoot = `/${locale}`;
 
-const title = page?.field("title").value();
-const summary = page?.field("summary").value();
-const fullSlug = page?.field("fullSlug").value();
-const slug = page?.field("slug").value();
+const blogCards = result.blogs.map((blog) => {
+	const title = blog.field("title");
+	const image = blog.field("image").ref("media");
+
+	return {
+		id: blog.id,
+		title: title.value() || "Untitled blog",
+		titleAttributes: title.preview(),
+		imageUrl: image?.file.url,
+	};
+});
+
+const toolbarAttributes = resolveToolbarAttributes({
+	authentication: result.raw.authentication,
+	document: result.raw.document,
+	preview: result.raw.preview,
+});
 ---
 
-<html lang="en">
+<html lang={locale}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
@@ -41,23 +66,21 @@ const slug = page?.field("slug").value();
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
 			rel="stylesheet"
 		/>
+		{(result.raw.preview.data?.active || result.isPreviewError) && (
+			<meta name="referrer" content="no-referrer" />
+		)}
 		<title>
-			{title
-				? `${title} | Lucid CMS`
+			{titleField?.value()
+				? `${titleField.value()} | Lucid CMS`
 				: "Lucid CMS"}
 		</title>
 	</head>
-	<body
-		data-lucid-edit-collection={page?.collectionKey}
-		data-lucid-edit-document={page?.id}
-		data-lucid-edit-version={page?.version}
-		data-lucid-edit-version-id={page?.meta?.versionId}
-	>
+	<body>
 		<main class="page-shell">
 			<div class="page-backdrop">
 				<div class="page-frame">
 					<header class="page-header">
-						<a class="brand" href="/" aria-label="Lucid CMS">
+						<a class="brand" href={localeRoot} aria-label="Lucid CMS">
 							<img
 								class="brand-logo"
 								src="/text-logo-dark.svg"
@@ -65,34 +88,53 @@ const slug = page?.field("slug").value();
 							/>
 						</a>
 
-						<nav class="page-nav" aria-label="Primary">
+						<div class="page-header-actions">
+							<nav class="page-nav" aria-label="Primary">
+								<a class="nav-link" href={localeRoot}>Home</a>
+								<a class="nav-link" href={`${localeRoot}/about`}>About</a>
+								<a
+									class="nav-link"
+									href="https://lucidcms.io/en/cms/docs/getting-started/what-is-lucid-cms/"
+								>
+									Docs
+								</a>
+								<a class="nav-link" href="/lucid">Admin</a>
+							</nav>
+
 							<a
-								class="nav-link"
-								href="https://lucidcms.io/en/cms/docs/getting-started/what-is-lucid-cms/"
+								class="locale-link"
+								href={alternateLocaleHref}
+								hreflang={alternateLocale}
+								lang={alternateLocale}
 							>
-								Docs
+								{alternateLocaleLabel}
 							</a>
-							<a class="nav-link" href="/lucid">Admin</a>
-						</nav>
+						</div>
 					</header>
 
 					<section class="welcome-card">
 						<p class="eyebrow">Astro + Cloudflare</p>
 						<h1 class="welcome-title">
-							{page ? "Your Lucid page is live." : "Create your first Lucid page."}
+							{result.isPreviewError
+								? "This preview link is unavailable."
+								: result.document
+									? "Your Lucid page is live."
+									: "Create your first Lucid page."}
 						</h1>
 						<p class="welcome-copy">
-							{page ? (
+							{result.isPreviewError ? (
+								<>The preview link is invalid or has expired. Create a new one in Lucid.</>
+							) : result.document ? (
 								<>
 									This route is rendering your <code>page</code> document from
-									<code>{fullSlug || "/"}</code>. Update it in
-									Lucid and refresh to see the latest content here.
+									<code>{pageFullSlug || "/"}</code>. Update it in Lucid and refresh
+									to see the latest content here.
 								</>
 							) : (
 								<>
 									Open the Lucid admin, create a <code>page</code> document with
-									the full slug <code>/</code>, then refresh this route to see
-									your content appear here.
+									the slug <code>/</code> for the <code>{localeRoot}</code> locale
+									route, then refresh to see your content appear here.
 								</>
 							)}
 						</p>
@@ -108,65 +150,120 @@ const slug = page?.field("slug").value();
 						</div>
 					</section>
 
-					{page && (
+					{result.document && (
 						<section class="content-card">
 							<div class="document-panel">
 								<div class="document-row">
 									<span class="document-label">Title</span>
-									<p class="document-value">
-										{title || "Not set"}
+									<p class="document-value" {...(titleField?.preview() ?? {})}>
+										{titleField?.value() || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
 									<span class="document-label">Summary</span>
-									<p class="document-value">
-										{summary || "Not set"}
+									<p class="document-value" {...(summaryField?.preview() ?? {})}>
+										{summaryField?.value() || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
 									<span class="document-label">Slug</span>
 									<p class="document-value">
-										{slug || "Not set"}
+										{slugField?.value() || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
 									<span class="document-label">Full slug</span>
 									<p class="document-value">
-										{fullSlug || "Not set"}
+										{pageFullSlug || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
-									<span class="document-label">Brick fields</span>
-									<p class="document-value">
-										{page.bricks().reduce(
-											(count, brick) =>
-												count + Object.keys(brick.raw.fields ?? {}).length,
-											0,
-										) ?? 0}
+									<span class="document-label">Brick heading</span>
+									<p
+										class="document-value"
+										{...(brickHeadingField?.preview() ?? {})}
+									>
+										{brickHeadingField?.value() || "Not set"}
+									</p>
+								</div>
+
+								<div class="document-row">
+									<span class="document-label">Repeater heading</span>
+									<p
+										class="document-value"
+										{...(sectionHeadingField?.preview() ?? {})}
+									>
+										{sectionHeadingField?.value() || "Not set"}
 									</p>
 								</div>
 
 								<div class="document-row">
 									<span class="document-label">Created</span>
 									<p class="document-value">
-										{page?.raw.createdAt
-											? new Date(page.raw.createdAt).toLocaleString("en-GB", {
-													dateStyle: "medium",
-													timeStyle: "short",
-												})
+										{result.document.raw.createdAt
+											? new Date(result.document.raw.createdAt).toLocaleString(
+													locale === "fr" ? "fr-FR" : "en-GB",
+													{
+														dateStyle: "medium",
+														timeStyle: "short",
+													},
+												)
 											: "Not available"}
 									</p>
 								</div>
 							</div>
 						</section>
 					)}
+
+					<section class="blogs-section" aria-labelledby="blogs-heading">
+						<div class="blogs-heading">
+							<p class="eyebrow">From the blog collection</p>
+							<h2 id="blogs-heading">Latest blogs</h2>
+						</div>
+
+						{result.isBlogError ? (
+							<p class="blogs-empty">The blogs could not be loaded.</p>
+						) : blogCards.length > 0 ? (
+							<div class="blogs-grid">
+								{blogCards.map((blog) => (
+									<article class="blog-card" data-document-id={blog.id}>
+										{blog.imageUrl ? (
+											<img src={blog.imageUrl} alt="" loading="lazy" />
+										) : (
+											<div class="blog-card-placeholder" aria-hidden="true" />
+										)}
+										<div class="blog-card-overlay">
+											<h3 {...blog.titleAttributes}>{blog.title}</h3>
+										</div>
+									</article>
+								))}
+							</div>
+						) : (
+							<p class="blogs-empty">
+								Create and publish up to three blog documents to see them here.
+							</p>
+						)}
+					</section>
 				</div>
 			</div>
 		</main>
-		<script src="../scripts/toolbar.ts"></script>
+
+		{toolbarAttributes && <lucid-toolbar {...toolbarAttributes} />}
+
+		<script>
+			import { setupPreview } from "@lucidcms/client/preview";
+			import { LucidToolbarElement } from "@lucidcms/client/toolbar";
+
+			const preview = setupPreview();
+			window.addEventListener("pagehide", preview.cleanup, { once: true });
+
+			if (!customElements.get(LucidToolbarElement.tagName)) {
+				customElements.define(LucidToolbarElement.tagName, LucidToolbarElement);
+			}
+		</script>
 	</body>
 </html>

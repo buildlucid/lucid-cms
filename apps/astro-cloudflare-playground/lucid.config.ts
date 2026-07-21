@@ -4,6 +4,7 @@ import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import BlogCollection from "./src/lucid/collections/blogs.js";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export const env = z.object({
@@ -11,6 +12,7 @@ export const env = z.object({
 	COOKIE_SECRET: z.string(),
 	REFRESH_TOKEN_SECRET: z.string(),
 	ACCESS_TOKEN_SECRET: z.string(),
+	PREVIEW_ORIGIN: z.url(),
 });
 
 export default configureLucid({
@@ -23,13 +25,33 @@ export default configureLucid({
 			refreshToken: env.REFRESH_TOKEN_SECRET,
 			accessToken: env.ACCESS_TOKEN_SECRET,
 		},
-		collections: [PageCollection],
+		localization: {
+			locales: [
+				{
+					label: "English",
+					code: "en",
+					direction: "ltr",
+				},
+				{
+					label: "French",
+					code: "fr",
+					direction: "ltr",
+				},
+			],
+			defaultLocale: "en",
+		},
+		collections: [PageCollection, BlogCollection],
 		plugins: [
 			pagesPlugin({
 				collections: [
 					{
 						collectionKey: PageCollection.key,
+						localized: true,
 						displayFullSlug: true,
+						prefix: {
+							en: "en",
+							fr: "fr",
+						},
 					},
 				],
 			}),

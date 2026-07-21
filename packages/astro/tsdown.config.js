@@ -4,7 +4,6 @@ export default defineConfig({
 	entry: [
 		"src/index.ts",
 		"src/internal/runtime.ts",
-		"src/configure-lucid.ts",
 		"src/toolkit.ts",
 		"src/types.ts",
 	],

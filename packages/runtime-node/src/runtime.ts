@@ -28,6 +28,11 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 	return {
 		key: ADAPTER_KEY,
 		lucid: LUCID_VERSION,
+		hosts: {
+			astro: {
+				entrypoint: "@lucidcms/runtime-node/astro",
+			},
+		},
 		configureLucid,
 		getEnvVars: async ({ logger }) => {
 			const { default: getEnvVars } = await import(

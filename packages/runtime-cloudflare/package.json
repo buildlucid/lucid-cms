@@ -15,6 +15,14 @@
 			"types": "./dist/runtime.d.mts",
 			"default": "./dist/runtime.mjs"
 		},
+		"./astro": {
+			"types": "./dist/astro.d.mts",
+			"default": "./dist/astro.mjs"
+		},
+		"./astro-integration": {
+			"types": "./dist/astro-integration.d.mts",
+			"default": "./dist/astro-integration.mjs"
+		},
 		"./types": {
 			"types": "./dist/types.d.mts",
 			"default": "./dist/types.mjs"
@@ -58,7 +66,7 @@
 		"@hono/node-server": "^2.0.6",
 		"jsonc-parser": "^3.3.1",
 		"rolldown": "^1.1.2",
-		"wrangler": "^4.104.0"
+		"wrangler": "^4.112.0"
 	},
 	"peerDependencies": {
 		"@lucidcms/core": "^0.16.0-alpha.0",

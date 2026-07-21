@@ -1,176 +1,138 @@
+import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getConfigPath } from "@lucidcms/core/build";
 import type { AstroIntegration } from "astro";
-import astroConstants from "./constants.js";
+import constants from "./constants.js";
 import {
-	createLucidBuildAssetPlugin,
-	createLucidDevAssetPlugin,
-} from "./integration/asset-plugins.js";
+	copyAssets,
+	createDevAssetPlugin,
+	prepareAssets,
+} from "./integration/assets.js";
+import { writeGeneratedModules } from "./integration/generated.js";
 import {
-	writeCloudflareWorkerFiles,
-	writeGeneratedRouteFiles,
-} from "./integration/generated-files.js";
-import {
-	addLucidWatchFiles,
-	assertLucidPluginCompatibility,
-	copyBuiltAssets,
-	loadLucidProject,
-	prepareAssetSourceTree,
+	bootstrapDevProject,
+	checkProjectCompatibility,
+	loadProject,
 	type ResolvedLucidProject,
-	runDevBootstrap,
 } from "./integration/project.js";
-import { assertAstroCompatibility } from "./internal/compatibility.js";
+import collectWatchFiles from "./integration/watch.js";
+import {
+	destroyRuntimeHosts,
+	registerBuildContext,
+} from "./internal/runtime.js";
+import type { LucidAstroOptions } from "./types.js";
 
-/**
- * Add Lucid CMS to your Astro project.
- *
- * @example
- * ```ts
- * import { defineConfig } from "astro/config";
- * import lucidCMS from "@lucidcms/astro";
- *
- * export default defineConfig({
- * 	integrations: [lucidCMS()],
- * });
- * ```
- */
-const lucidCMS = (): AstroIntegration => {
+/** Creates the Lucid CMS integration for Astro. */
+const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 	let project: ResolvedLucidProject | undefined;
+	let generatedDirectory = "";
 	let assetRoot = "";
-	let codegenDir = "";
-	let routeEntrypoint = "";
-	let devBootstrapPromise: Promise<void> | undefined;
-	const registeredWatchPaths = new Set<string>();
+	let devBootstrap: Promise<void> | undefined;
 
 	return {
-		name: astroConstants.integration.name,
+		name: constants.integrationName,
 		hooks: {
 			"astro:config:setup": async ({
 				addWatchFile,
 				command,
-				createCodegenDir,
 				injectRoute,
 				updateConfig,
 			}) => {
-				// Preview serves Astro's built output, so reloading lucid.config.ts from
-				// source here would make preview depend on files that are no longer part
-				// of the deployable artifact.
 				if (command === "preview") return;
 
-				const configPath = getConfigPath(process.cwd());
-				project = await loadLucidProject(configPath);
-				await assertLucidPluginCompatibility({
+				const configPath = options.configPath ?? getConfigPath(process.cwd());
+				project = await loadProject(configPath);
+				await checkProjectCompatibility(project, command === "build");
+				const projectRoot = project.loaded.projectRoot;
+				generatedDirectory = path.join(
+					projectRoot,
+					constants.generatedDirectory,
+				);
+				assetRoot = path.join(generatedDirectory, constants.assetDirectory);
+				await fs.rm(generatedDirectory, { recursive: true, force: true });
+				await prepareAssets(project, assetRoot);
+
+				const buildContextId = `${project.hostId}:${command}`;
+				registerBuildContext(buildContextId, project.loaded.env);
+				const generated = await writeGeneratedModules({
 					project,
+					directory: generatedDirectory,
+					buildContextId,
 					compiled: command === "build",
 				});
-				devBootstrapPromise = undefined;
-				const lucidSsrExternal = [
-					"@lucidcms/core",
-					"@lucidcms/astro",
-					project.runtime === "cloudflare"
-						? "@lucidcms/runtime-cloudflare"
-						: "@lucidcms/runtime-node",
+				const prepared = await project.integrationBridge.prepare?.({
+					command,
+					adapter: project.loaded.adapter,
+					configPath: project.configPath,
+					projectRoot: project.loaded.projectRoot,
+					generatedDirectory,
+					runtimeModulePath: generated.runtimePath,
+					config: project.loaded.config,
+					translationStore: project.loaded.translationStore,
+					definition: project.loaded.definition,
+				});
+				const ignoredWatchFiles = [
+					`${generatedDirectory.split(path.sep).join("/")}/**`,
+					...(prepared?.ignoredWatchFiles ?? []).map((filePath) =>
+						path.resolve(projectRoot, filePath).split(path.sep).join("/"),
+					),
 				];
 
-				if (project.runtime === "cloudflare") {
-					(globalThis as Record<string, unknown>)[
-						astroConstants.cloudflare.prerenderContextGlobal
-					] = {
-						config: project.loaded.config,
-						translationStore: project.loaded.translationStore,
-						env: project.loaded.env,
-					};
+				for (const filePath of await collectWatchFiles(project)) {
+					addWatchFile(filePath);
 				}
 
-				codegenDir = fileURLToPath(createCodegenDir());
-				assetRoot = path.join(codegenDir, astroConstants.paths.assetDirname);
-				await prepareAssetSourceTree(project, assetRoot);
-				const generatedFiles = await writeGeneratedRouteFiles({
-					project,
-					codegenDir,
-				});
-				routeEntrypoint = generatedFiles.routePath;
-				await addLucidWatchFiles(project, (watchPath) => {
-					const normalizedPath =
-						typeof watchPath === "string"
-							? path.resolve(watchPath)
-							: fileURLToPath(watchPath);
-
-					if (registeredWatchPaths.has(normalizedPath)) {
-						return;
-					}
-
-					registeredWatchPaths.add(normalizedPath);
-					addWatchFile(watchPath);
-				});
-
 				injectRoute({
-					pattern: astroConstants.paths.mountPath,
-					entrypoint: routeEntrypoint,
+					pattern: constants.mountPath,
+					entrypoint: generated.routePath,
 				});
 				injectRoute({
-					pattern: `${astroConstants.paths.mountPath}/[...path]`,
-					entrypoint: routeEntrypoint,
+					pattern: `${constants.mountPath}/[...path]`,
+					entrypoint: generated.routePath,
 				});
 				updateConfig({
 					vite: {
-						...(command === "dev" && project.runtime !== "cloudflare"
+						server: {
+							watch: {
+								ignored: ignoredWatchFiles,
+							},
+						},
+						...(project.integrationBridge.vite?.ssrExternal
 							? {
 									ssr: {
-										external: lucidSsrExternal,
+										external: project.integrationBridge.vite.ssrExternal,
 									},
 								}
 							: {}),
 						resolve: {
 							alias: {
-								[astroConstants.integration.toolkitModuleId]: path.join(
-									codegenDir,
-									astroConstants.files.toolkitModule,
-								),
-								...(project.runtime === "cloudflare"
-									? {
-											[astroConstants.cloudflare.crossFetchAliasKey]:
-												astroConstants.cloudflare.crossFetchBrowserEntry,
-										}
-									: {}),
+								...(project.integrationBridge.vite?.aliases ?? {}),
+								[constants.toolkitModuleId]: generated.runtimePath,
 							},
 						},
-						plugins: [createLucidDevAssetPlugin(assetRoot)],
+						plugins: [createDevAssetPlugin(assetRoot)],
 					},
 				});
 			},
-			"astro:config:done": async ({ config }) => {
-				if (!project) return;
-
-				assertAstroCompatibility(project.runtime, config.adapter as never);
-
-				if (project.runtime === "cloudflare") {
-					await writeCloudflareWorkerFiles(project);
-				}
+			"astro:config:done": ({ config }) => {
+				project?.integrationBridge.validateAdapter(config.adapter);
 			},
 			"astro:server:setup": async () => {
 				if (!project) return;
-
-				if (!devBootstrapPromise) {
-					devBootstrapPromise = runDevBootstrap(project);
-				}
-
-				await devBootstrapPromise;
+				devBootstrap ??= bootstrapDevProject(project);
+				await devBootstrap;
 			},
-			"astro:build:setup": async ({ target, updateConfig }) => {
-				if (!project || target !== "client") {
-					return;
-				}
-
-				updateConfig({
-					plugins: [createLucidBuildAssetPlugin(assetRoot)],
-				});
+			"astro:server:done": async () => {
+				if (project) await destroyRuntimeHosts(project.hostId);
 			},
 			"astro:build:done": async ({ dir }) => {
 				if (!project) return;
-
-				await copyBuiltAssets(assetRoot, fileURLToPath(dir));
+				const directory = fileURLToPath(dir);
+				await Promise.all([
+					copyAssets(assetRoot, directory),
+					project.integrationBridge.buildDone?.({ directory }),
+				]);
 			},
 		},
 	};

@@ -180,6 +180,8 @@ export type LucidConfigRecipe = (draft: Config) => void;
 
 export type LucidConfigDefinitionMeta = {
 	emailTemplates?: RenderedTemplates;
+	/** Identifies the framework or host resolving this definition. */
+	host?: string;
 };
 
 export type RuntimeAdapterValue =
@@ -208,7 +210,20 @@ export type RuntimeConfigureLucid = (
 	meta?: LucidConfigDefinitionMeta,
 ) => WrappedLucidConfigDefinition;
 
-export type RuntimeAdapter = z.infer<typeof RuntimeAdapterSchema> & {
+/** Module entrypoints exposed by a runtime for a supported host. */
+export type RuntimeHostDefinition = {
+	/** Request-time module used by the host to resolve and handle the runtime. */
+	entrypoint: string;
+	/** Optional build-time module for host-specific setup. */
+	integrationEntrypoint?: string;
+};
+
+export type RuntimeAdapter = Omit<
+	z.infer<typeof RuntimeAdapterSchema>,
+	"hosts"
+> & {
+	/** Host integrations supported by this runtime, keyed by host name. */
+	hosts?: Record<string, RuntimeHostDefinition>;
 	getEnvVars?: RuntimeAdapterEnvLoader;
 	resolveOptions?: RuntimeAdapterOptionsResolver;
 	cli?: RuntimeAdapterCLI;

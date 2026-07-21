@@ -58,9 +58,7 @@ export type AdapterOptions = {
 		 * directory name.
 		 */
 		name?: string;
-		/**
-		 * Defaults to today's date.
-		 */
+		/** Defaults to Lucid's tested Cloudflare compatibility date. */
 		compatibilityDate?: string;
 		/**
 		 * Additional compatibility flags to merge into the generated config.

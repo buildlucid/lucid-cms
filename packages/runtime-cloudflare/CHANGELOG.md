@@ -1,5 +1,10 @@
 # @lucidcms/runtime-cloudflare
 
+## 1.2.0 (unreleased)
+
+- Added Astro bridge support through the Astro Cloudflare adapter and its public Worker handler.
+- Stabilized generated Wrangler configuration with a tested default compatibility date.
+
 ## 1.1.0
 
 - Updated generated Worker config handling for the optional named environment schema export used by `@lucidcms/core`.

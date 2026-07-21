@@ -1,5 +1,11 @@
 # @lucidcms/astro
 
+## 0.3.0 (unreleased)
+
+- Reworked the Astro integration around runtime-provided bridges, lifecycle-aware hosts and config dependency reloads.
+- Added server and static output support with on-demand Lucid routes and a generated server toolkit.
+- Fixed generated files causing overlapping Vite restarts during config reloads.
+
 ## 0.2.0
 
 - Added support for the optional named environment schema export from `@lucidcms/core` when generating Astro runtime modules.

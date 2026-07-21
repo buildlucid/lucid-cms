@@ -1,14 +1,13 @@
 import type { Toolkit } from "@lucidcms/core/toolkit";
 
 /**
- * Returns the server-side Lucid toolkit generated for the current Astro project.
+ * Returns the toolkit associated with the current Astro runtime.
  *
- * The Astro integration aliases this placeholder to a generated runtime module
- * inside projects that use `lucidCMS()`.
+ * This placeholder is replaced with a generated project module by the integration.
  */
 const getToolkit = async (): Promise<Toolkit> => {
 	throw new Error(
-		"`@lucidcms/astro/toolkit` is only available inside an Astro project using the Lucid integration.",
+		"@lucidcms/astro/toolkit is only available in an Astro project using the Lucid integration.",
 	);
 };
 

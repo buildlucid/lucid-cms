@@ -3,17 +3,22 @@ import { relative } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { getBuildPaths } from "@lucidcms/core/build";
 import type {
+	LucidConfigDefinitionMeta,
 	RuntimeConfigureLucid,
 	WrappedLucidConfigDefinition,
 } from "@lucidcms/core/types";
 
 const configureLucid: RuntimeConfigureLucid = (
 	definition: WrappedLucidConfigDefinition,
+	meta?: LucidConfigDefinitionMeta,
 ) => {
 	return {
 		...definition,
 		recipe: (draft) => {
 			definition.recipe?.(draft);
+			// Astro owns and serves the hosted public asset pipeline.
+			if (meta?.host === "astro") return;
+
 			draft.http.extensions.push({
 				name: "runtime-node:static-assets",
 				priority: 2,

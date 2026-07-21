@@ -14,6 +14,17 @@ const ContentBrick = new BrickBuilder("content", {
 		details: {
 			label: "Body",
 		},
-	});
+	})
+	.addRepeater("sections", {
+		details: {
+			label: "Sections",
+		},
+	})
+	.addText("sectionHeading", {
+		details: {
+			label: "Section heading",
+		},
+	})
+	.endRepeater();
 
 export default ContentBrick;

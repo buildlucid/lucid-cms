@@ -1,1 +1,2 @@
-export { default, default as lucidCMS } from "./integration.js";
+export { default } from "./integration.js";
+export type { LucidAstroOptions } from "./types.js";

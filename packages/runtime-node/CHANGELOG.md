@@ -1,5 +1,9 @@
 # @lucidcms/runtime-node
 
+## 1.2.0 (unreleased)
+
+- Added Astro bridge support for hosting Lucid through the Astro Node adapter.
+
 ## 1.1.0
 
 - Updated compiled server config generation for the optional named environment schema export used by `@lucidcms/core`.

@@ -17,6 +17,10 @@ export * from "./libs/permission/scopes.js";
 export * from "./libs/permission/types.js";
 export * from "./libs/plugins/types.js";
 export * from "./libs/queue/types.js";
+export type {
+	CreateLucidHostOptions,
+	LucidHost,
+} from "./libs/runtime/create-lucid-host.js";
 export * from "./libs/runtime/types.js";
 export * from "./libs/toolkit/types.js";
 export * from "./types/config.js";

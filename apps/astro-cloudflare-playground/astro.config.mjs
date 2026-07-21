@@ -8,7 +8,6 @@ export default defineConfig({
 	adapter: cloudflare({
 		configPath: "./wrangler.lucid.jsonc",
 		imageService: "passthrough",
-		prerenderEnvironment: "node",
 		sessionKVBindingName: "LUCID_KV",
 	}),
 	integrations: [lucidCMS()],

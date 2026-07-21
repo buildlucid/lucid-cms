@@ -1,7 +1,6 @@
 import type z from "zod";
 import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
-import { getConfigureLucidModule } from "../runtime/loaders.js";
 import {
 	collectRuntimePrepareArtifacts,
 	createRuntimePrepareArtifacts,
@@ -14,6 +13,7 @@ import type {
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
 	RuntimeAdapter,
+	RuntimeConfigureLucid,
 	WrappedLucidConfigDefinition,
 } from "../runtime/types.js";
 import processConfig from "./process-config.js";
@@ -99,7 +99,7 @@ export const resolveConfigDefinition = async (props: {
 	envSchema?: z.ZodType;
 	meta?: LucidConfigDefinitionMeta;
 	env?: EnvironmentVariables;
-	configureLucidPath?: string;
+	configureLucid?: RuntimeConfigureLucid;
 	configPath?: string;
 	projectRoot?: string;
 	prepareRuntime?: boolean;
@@ -122,9 +122,8 @@ export const resolveConfigDefinition = async (props: {
 
 	// Hosted integrations can supply their own configureLucid wrapper so the
 	// runtime adapter identity stays separate from host-specific config shaping.
-	const configureLucid = props.configureLucidPath
-		? await getConfigureLucidModule(props.configureLucidPath)
-		: (adapter.configureLucid ?? ((value) => value));
+	const configureLucid =
+		props.configureLucid ?? adapter.configureLucid ?? ((value) => value);
 
 	const wrappedDefinition = configureLucid(
 		{

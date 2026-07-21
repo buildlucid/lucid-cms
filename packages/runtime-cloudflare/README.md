@@ -45,7 +45,7 @@ The `cloudflare` function accepts a single parameter, `options`, which is either
 | `dev` | `{ port?: number; hostname?: string }` | Local Lucid dev server listen options |
 | `wrangler` | `string` | Path to a user-owned Wrangler config. Omit this to let Lucid generate `wrangler.lucid.jsonc` |
 | `bindings` | `object` | Explicit Cloudflare bindings to generate or override. Passing `true` for a binding uses Lucid's default binding name |
-| `worker` | `{ name?: string; compatibilityDate?: string; compatibilityFlags?: string[]; crons?: string[] }` | Worker config that Lucid writes into the generated Wrangler config |
+| `worker` | `{ name?: string; compatibilityDate?: string; compatibilityFlags?: string[]; crons?: string[] }` | Worker config that Lucid writes into the generated Wrangler config. The compatibility date defaults to Lucid's tested `2026-06-30`; update it explicitly after testing newer runtime behavior |
 
 ```typescript
 export default configureLucid({

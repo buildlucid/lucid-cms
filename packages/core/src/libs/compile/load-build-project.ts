@@ -30,6 +30,8 @@ const loadBuildProject = async (props?: {
 	validateEnv?: boolean;
 	generateTypes?: boolean;
 	loadEmailTemplates?: boolean;
+	/** Collects local config imports for development watchers. */
+	collectConfigDependencies?: boolean;
 	envSchema?: ZodType;
 	configureLucidPath?: string;
 	prepareRuntime?: boolean;
@@ -38,6 +40,7 @@ const loadBuildProject = async (props?: {
 	const loaded = await loadConfigFile({
 		path: configPath,
 		silent: props?.silent,
+		collectConfigDependencies: props?.collectConfigDependencies,
 		configureLucidPath: props?.configureLucidPath,
 		prepareRuntime: props?.prepareRuntime,
 		validateEnvSchema: false,
