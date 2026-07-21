@@ -1,7 +1,12 @@
 import { sql } from "kysely";
 import constants from "../../../constants/constants.js";
 import type { Config, EnvironmentVariables } from "../../../types.js";
-import migrateCollections from "../../collection/migrate-collections.js";
+import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
+import type {
+	MigrationAssessment,
+	MigrationRisk,
+} from "../../collection/migration/types.js";
+import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
 import { passthroughEmailAdapterInstance } from "../../email/adapters/passthrough.js";
@@ -12,6 +17,7 @@ import logger from "../../logger/index.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
+import { describeMigrationRiskReason } from "../services/migration-report.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
 /**
@@ -76,39 +82,42 @@ const migrateStatusCommand = async (options?: {
 			(name) => !registeredMigrations.includes(name),
 		);
 
-		//* collection migration status (dry run)
+		//* collection migration status
 		const translate = createTranslator({
 			store: translationStore,
 			locale: "en",
 		});
-		const collectionResult = await migrateCollections(
-			{
-				db: { client: config.db.client },
-				config: config,
-				queue: passthroughQueueAdapter(),
-				env: env ?? null,
-				runtimeContext,
-				kv: passthroughKVAdapter(),
-				media: null,
-				email: passthroughEmailAdapterInstance,
-				translate,
-				request: {
-					url: config.host ?? constants.urls.localhost,
-					locale: "en",
-				},
+		const collectionResult = await planCollectionMigrations({
+			db: { client: config.db.client },
+			config: config,
+			queue: passthroughQueueAdapter(),
+			env: env ?? null,
+			runtimeContext,
+			kv: passthroughKVAdapter(),
+			media: null,
+			email: passthroughEmailAdapterInstance,
+			translate,
+			request: {
+				url: config.host ?? constants.urls.localhost,
+				locale: "en",
 			},
-			{ dryRun: true },
-		);
+		});
 
-		let pendingCollections: string[] = [];
+		let pendingCollections: Array<{
+			collectionKey: string;
+			assessment: MigrationAssessment;
+		}> = [];
 		let collectionCheckError: string | undefined;
 		if (collectionResult.error) {
 			collectionCheckError =
 				translate.english(collectionResult.error.message) || "Unknown error";
 		} else {
-			pendingCollections = collectionResult.data.migrationPlans
-				.filter((plan) => plan.tables.length > 0)
-				.map((plan) => plan.collectionKey);
+			pendingCollections = collectionResult.data.collections
+				.map(({ migrationPlan }) => ({
+					collectionKey: migrationPlan.collectionKey,
+					assessment: assessMigrationPlans([migrationPlan]),
+				}))
+				.filter(({ assessment }) => assessment.reasons.length > 0);
 		}
 
 		//* report
@@ -135,8 +144,26 @@ const migrateStatusCommand = async (options?: {
 			cliLogger.warn(
 				`${pendingCollections.length} collection(s) need table migrations`,
 			);
-			for (const key of pendingCollections) {
-				cliLogger.log(cliLogger.color.yellow(key), { indent: 2 });
+			for (const risk of [
+				"safe",
+				"warning",
+				"destructive",
+			] satisfies MigrationRisk[]) {
+				const grouped = pendingCollections.filter(
+					(item) => item.assessment.risk === risk,
+				);
+				if (grouped.length === 0) continue;
+				cliLogger.log(`${risk.toUpperCase()} (${grouped.length})`, {
+					indent: 2,
+				});
+				for (const item of grouped) {
+					cliLogger.log(cliLogger.color.yellow(item.collectionKey), {
+						indent: 4,
+					});
+					for (const reason of item.assessment.reasons) {
+						cliLogger.log(describeMigrationRiskReason(reason), { indent: 6 });
+					}
+				}
 			}
 		}
 

@@ -9,6 +9,7 @@ const symbols = {
 	warning: { icon: "!", color: picocolors.yellow },
 	info: { icon: "i", color: picocolors.blue },
 	bullet: { icon: "•", color: picocolors.gray },
+	child: { icon: "↳", color: picocolors.gray },
 	line: { icon: "┃", color: picocolors.gray },
 	halfCircle: { icon: "◐", color: picocolors.yellow },
 } as const;

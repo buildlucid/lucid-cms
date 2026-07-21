@@ -4,7 +4,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { CollectionMigrationsRepository } from "../repositories/index.js";
 import stripColumnPrefix from "./helpers/strip-column-prefix.js";
 import inferSchema from "./schema/infer-schema.js";
-import diffSnapshotVsConfigAdditions from "./schema/runtime/diff-snapshot-vs-config-additions.js";
+import diffSnapshotVsConfig from "./schema/runtime/diff-snapshot-vs-config.js";
 
 export type MigrationStatus = {
 	requiresMigration: boolean;
@@ -46,7 +46,7 @@ const getMigrationStatus: ServiceFn<
 		};
 	}
 
-	const diff = diffSnapshotVsConfigAdditions(
+	const diff = diffSnapshotVsConfig(
 		latestMigrationRes.data.collection_schema,
 		localSchemaRes.data,
 	);
@@ -88,7 +88,9 @@ const getMigrationStatus: ServiceFn<
 	const requiresMigration =
 		diff.missingTableNames.size > 0 ||
 		diff.missingColumnsByTable.size > 0 ||
-		diff.missingIndexesByTable.size > 0;
+		diff.missingIndexesByTable.size > 0 ||
+		diff.modifiedColumnsByTable.size > 0 ||
+		diff.modifiedIndexesByTable.size > 0;
 
 	return {
 		data: {

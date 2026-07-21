@@ -1,8 +1,14 @@
 import { confirm } from "@inquirer/prompts";
 import constants from "../../../constants/constants.js";
 import { syncServices } from "../../../services/index.js";
-import type { Config, EnvironmentVariables } from "../../../types.js";
-import migrateCollections from "../../collection/migrate-collections.js";
+import type {
+	Config,
+	EnvironmentVariables,
+	ServiceContext,
+} from "../../../types.js";
+import applyCollectionMigrations from "../../collection/apply-collection-migrations.js";
+import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
+import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
 import { passthroughEmailAdapterInstance } from "../../email/adapters/passthrough.js";
@@ -20,9 +26,51 @@ import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
+import {
+	type MigrationApprovalAction,
+	requiresPostMigrationApproval,
+	resolveMigrationApproval,
+} from "../services/migration-approval.js";
+import { reportMigrationAssessment } from "../services/migration-report.js";
 import runSyncTasks from "../services/run-sync-tasks.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
+type MigrateCommandOptions = {
+	skipSyncSteps?: boolean;
+	skipEnvValidation?: boolean;
+	yes?: boolean;
+	allowDestructive?: boolean;
+	remote?: boolean;
+};
+
+/** Runs an interactive approval gate and reports non-interactive policy errors. */
+const requestMigrationApproval = async (
+	action: MigrationApprovalAction,
+): Promise<boolean> => {
+	if (action === "proceed") return true;
+	if (action === "reject-destructive") {
+		cliLogger.error(
+			"--yes does not authorize destructive collection migrations. Re-run with --allow-destructive if you accept the risk of permanent data loss.",
+		);
+		return false;
+	}
+
+	const destructive = action === "prompt-destructive";
+	try {
+		return await confirm({
+			message: destructive
+				? "These collection migrations may permanently delete stored data. Do you want to continue?"
+				: "These migrations require review. Do you want to continue?",
+			default: false,
+		});
+	} catch (error) {
+		if (error instanceof Error && error.name === "ExitPromptError")
+			return false;
+		throw error;
+	}
+};
+
+/** Runs database and risk-aware collection migrations for CLI/runtime callers. */
 const migrateCommand = (props?: {
 	config?: Config;
 	env?: EnvironmentVariables;
@@ -31,21 +79,18 @@ const migrateCommand = (props?: {
 	projectRoot?: string;
 	mode: "process" | "return";
 }) => {
-	return async (options?: {
-		skipSyncSteps?: boolean;
-		skipEnvValidation?: boolean;
-		force?: boolean;
-		remote?: boolean;
-	}) => {
+	return async (options?: MigrateCommandOptions) => {
 		let config: Config | undefined;
 		let env: EnvironmentVariables | undefined = props?.env;
 		let runtimeContext: AdapterRuntimeContext | undefined =
 			props?.runtimeContext;
 		let translationStore: TranslationStore | undefined;
 		let kvInstance: KVAdapterInstance | undefined;
+		const mode = props?.mode ?? "process";
 
-		const cleanupAdapters = async () => {
-			if (config && translationStore) {
+		/** Destroys adapters initialized during this migration command. */
+		const cleanupAdapters = async (): Promise<void> => {
+			if (config) {
 				await Promise.allSettled([
 					destroyKVAdapter(kvInstance, {
 						config,
@@ -57,22 +102,30 @@ const migrateCommand = (props?: {
 			kvInstance = undefined;
 		};
 
+		/** Stops the command with the requested process status or a false result. */
+		const stopCommand = async (exitCode: number): Promise<false> => {
+			await cleanupAdapters();
+			if (mode === "process") {
+				logger.setBuffering(false);
+				process.exit(exitCode);
+			}
+			return false;
+		};
+
 		try {
 			logger.setBuffering(true);
 			const startTime = cliLogger.startTimer();
-			const mode = props?.mode ?? "process";
 			const skipSyncSteps = options?.skipSyncSteps ?? false;
-			const force = options?.force ?? false;
+			const yes = options?.yes ?? false;
+			const allowDestructive = options?.allowDestructive ?? false;
+			let projectRoot = props?.projectRoot;
 
-			let projectRoot: string | undefined = props?.projectRoot;
-
+			//* preflight: load and validate the project, then prepare all migrations
 			if (props?.config) {
 				config = props.config;
 				translationStore = props.translationStore;
 			} else {
-				const res = await loadConfigFile({
-					prepareRuntime: true,
-				});
+				const res = await loadConfigFile({ prepareRuntime: true });
 				config = res.config;
 				env = res.env;
 				runtimeContext = res.runtimeContext;
@@ -89,81 +142,67 @@ const migrateCommand = (props?: {
 						envSchema: res.envSchema,
 						env: res.env,
 					});
-
-					if (!envValid) {
-						logger.setBuffering(false);
-						process.exit(1);
-					}
+					if (!envValid) return await stopCommand(1);
 				}
 			}
-			if (!translationStore) {
-				throw new Error("Lucid could not resolve the translation store.");
+			if (!config || !translationStore) {
+				throw new Error("Lucid could not resolve its migration configuration.");
 			}
 
 			await prepareExternalMigrations(config, projectRoot);
 
-			const queue = passthroughQueueAdapter();
-			const translate = createTranslator({
-				store: translationStore,
-				locale: "en",
-			});
-			const media = null;
-			const email = passthroughEmailAdapterInstance;
+			const preflightContext: ServiceContext = {
+				db: { client: config.db.client },
+				config,
+				queue: passthroughQueueAdapter(),
+				env: env ?? null,
+				runtimeContext,
+				kv: passthroughKVAdapter(),
+				media: null,
+				email: passthroughEmailAdapterInstance,
+				translate: createTranslator({
+					store: translationStore,
+					locale: "en",
+				}),
+				request: {
+					url: config.host ?? constants.urls.localhost,
+					locale: "en",
+				},
+			};
 
 			cliLogger.info("Checking the migration status");
-
-			//* check if collections need migrating
-			const collectionMigrationResult = await migrateCollections(
-				{
-					db: { client: config.db.client },
-					config: config,
-					queue: queue,
-					env: env ?? null,
-					runtimeContext,
-					kv: passthroughKVAdapter(),
-					media,
-					email,
-					translate,
-					request: {
-						url: config.host ?? constants.urls.localhost,
-						locale: "en",
-					},
-				},
-				{
-					dryRun: true,
-				},
-			);
-
-			let needsCollectionMigrations = false;
-			if (collectionMigrationResult.error) {
-				cliLogger.warn(
-					`Could not check collection migration status: ${translate.english(collectionMigrationResult.error.message) || "Unknown error"}`,
+			const initialPlanResult =
+				await planCollectionMigrations(preflightContext);
+			if (initialPlanResult.error) {
+				cliLogger.error(
+					"Could not plan collection migrations:",
+					preflightContext.translate.english(initialPlanResult.error.message) ||
+						"Unknown error",
 				);
-				needsCollectionMigrations = true;
-			} else {
-				needsCollectionMigrations =
-					collectionMigrationResult.data.migrationPlans.some(
-						(plan) => plan.tables.length > 0,
-					);
+				return await stopCommand(1);
 			}
-
-			//* check if the database needs migrating
-			const needsDbMigrations = await config.db.needsMigration(
+			const initialAssessment = assessMigrationPlans(
+				initialPlanResult.data.collections.map(
+					({ migrationPlan }) => migrationPlan,
+				),
+			);
+			const needsCollectionMigrations = initialAssessment.reasons.length > 0;
+			const needsDatabaseMigrations = await config.db.needsMigration(
 				config.db.client,
 			);
 
-			if (needsDbMigrations) {
-				cliLogger.info("Database schema migrations are pending");
+			if (needsDatabaseMigrations) {
+				cliLogger.warn(
+					"Database schema migrations are pending and require approval because their migration bodies cannot be classified.",
+				);
 			}
 			if (needsCollectionMigrations) {
-				cliLogger.info("Collection/brick table migrations are needed");
-			}
-			if (!needsDbMigrations && !needsCollectionMigrations) {
-				cliLogger.success("No migrations are required");
+				reportMigrationAssessment(initialAssessment);
 			}
 
-			//* if no migrations are needed, just run seeds and exit
-			if (!needsCollectionMigrations && !needsDbMigrations) {
+			//* no-op path: keep sync behavior but avoid initializing migration adapters
+			if (!needsDatabaseMigrations && !needsCollectionMigrations) {
+				cliLogger.success("No migrations are required");
 				if (!skipSyncSteps) {
 					const syncResult = await runSyncTasks(
 						config,
@@ -173,211 +212,138 @@ const migrateCommand = (props?: {
 						env,
 						runtimeContext,
 					);
-					if (!syncResult && mode === "return") {
-						await cleanupAdapters();
-						return false;
-					}
+					if (!syncResult && mode === "return") return await stopCommand(1);
 				}
+
 				const endTime = startTime();
+				cliLogger.success(
+					"Migrations completed",
+					cliLogger.color.green("successfully"),
+					"in",
+					cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
+				);
+				await cleanupAdapters();
 				if (mode === "process") {
-					cliLogger.log(
-						cliLogger.createBadge("LUCID CMS"),
-						"Migrations completed",
-						cliLogger.color.green("successfully"),
-						"in",
-						cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
-						{
-							spaceAfter: true,
-							spaceBefore: true,
-						},
-					);
 					logger.setBuffering(false);
-					await cleanupAdapters();
 					process.exit(0);
-				} else {
-					cliLogger.success(
-						"Migrations completed",
-						cliLogger.color.green("successfully"),
-						"in",
-						cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
-					);
-					await cleanupAdapters();
-					return true; //* dont clear logger buffer here as it was called by the serve command
 				}
+				return true;
 			}
 
-			//* migrations are needed - prompt the user
-			if (!force) {
-				let shouldProceed: boolean;
-				try {
-					shouldProceed = await confirm({
-						message:
-							"Migrations are needed to continue. Do you want to run them now?",
-						default: true,
-					});
-				} catch (error) {
-					if (error instanceof Error && error.name === "ExitPromptError") {
-						if (mode === "process") {
-							await cleanupAdapters();
-							logger.setBuffering(false);
-							process.exit(0);
-						}
-						//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
-						else {
-							await cleanupAdapters();
-							return false;
-						}
-					}
-					throw error;
+			//* approval: safe collection-only plans bypass this gate
+			const initialApproval = resolveMigrationApproval({
+				assessment: initialAssessment,
+				hasPendingDatabaseMigrations: needsDatabaseMigrations,
+				yes,
+				allowDestructive,
+			});
+			const initiallyApproved = await requestMigrationApproval(initialApproval);
+			if (!initiallyApproved) {
+				if (initialApproval === "reject-destructive") {
+					return await stopCommand(1);
 				}
-				if (!shouldProceed) {
-					cliLogger.info(
-						"Exiting without running migrations. Run this command again when you're ready",
-					);
-					if (mode === "process") {
-						await cleanupAdapters();
-						logger.setBuffering(false);
-						process.exit(0);
-					}
-					//* in the case we're returning, we want to exit the process. This is because this is used within the serve command
-					else {
-						await cleanupAdapters();
-						return false;
-					}
-				}
+				cliLogger.info("Exiting without running migrations.");
+				return await stopCommand(0);
 			}
 
 			kvInstance = await getInitializedKVAdapter(config, {
 				env,
 				runtimeContext,
 			});
+			const executionContext: ServiceContext = {
+				...preflightContext,
+				kv: kvInstance,
+			};
 
-			//* run database migrations if needed
-			if (needsDbMigrations) {
+			//* execution: arbitrary database migrations run before collection re-planning
+			if (needsDatabaseMigrations) {
 				cliLogger.info("Running database schema migrations...");
-				try {
-					await config.db.migrateToLatest();
-					cliLogger.success(
-						"Schema migrations completed",
-						cliLogger.color.green("successfully"),
+				await config.db.migrateToLatest();
+				cliLogger.success(
+					"Schema migrations completed",
+					cliLogger.color.green("successfully"),
+				);
+			}
+
+			const exactPlanResult = needsDatabaseMigrations
+				? await planCollectionMigrations(executionContext)
+				: initialPlanResult;
+			if (exactPlanResult.error) {
+				cliLogger.error(
+					"Could not re-plan collection migrations after database migrations:",
+					executionContext.translate.english(exactPlanResult.error.message) ||
+						"Unknown error",
+				);
+				return await stopCommand(1);
+			}
+			const exactAssessment = assessMigrationPlans(
+				exactPlanResult.data.collections.map(
+					({ migrationPlan }) => migrationPlan,
+				),
+			);
+
+			if (needsDatabaseMigrations && exactAssessment.reasons.length > 0) {
+				cliLogger.info("Post-migration collection plan:");
+				reportMigrationAssessment(exactAssessment);
+			}
+
+			if (
+				needsDatabaseMigrations &&
+				requiresPostMigrationApproval(initialAssessment, exactAssessment)
+			) {
+				cliLogger.warn(
+					"The collection migration risk increased after database migrations ran.",
+				);
+				const increasedRiskApproval = resolveMigrationApproval({
+					assessment: exactAssessment,
+					hasPendingDatabaseMigrations: false,
+					yes,
+					allowDestructive,
+				});
+				const increasedRiskApproved = await requestMigrationApproval(
+					increasedRiskApproval,
+				);
+				if (!increasedRiskApproved) {
+					return await stopCommand(
+						increasedRiskApproval === "reject-destructive" ? 1 : 0,
 					);
-				} catch (error) {
-					cliLogger.error(
-						"Migration failed",
-						error instanceof Error ? error.message : "Unknown error",
-					);
-					if (error instanceof Error) cliLogger.errorInstance(error);
-					if (mode === "process") {
-						await cleanupAdapters();
-						logger.setBuffering(false);
-						process.exit(1);
-					} else {
-						await cleanupAdapters();
-						return false;
-					}
 				}
 			}
 
-			//* run collections sync before collection migrations
-			if (needsCollectionMigrations) {
-				const preCollectionSyncResult = await syncServices.syncCollections({
-					db: { client: config.db.client },
-					config: config,
-					queue: queue,
-					env: env ?? null,
-					runtimeContext,
-					kv: kvInstance,
-					media,
-					email,
-					translate,
-					request: {
-						url: config.host ?? constants.urls.localhost,
-						locale: "en",
-					},
-				});
+			const exactCollectionMigrations = exactAssessment.reasons.length > 0;
+			if (exactCollectionMigrations) {
+				const preCollectionSyncResult =
+					await syncServices.syncCollections(executionContext);
 				if (preCollectionSyncResult.error) {
 					cliLogger.error(
-						"Sync failed during pre-migration collection sync, with error:",
-						translate.english(preCollectionSyncResult.error.message) ||
-							"unknown",
+						"Sync failed during pre-migration collection sync:",
+						executionContext.translate.english(
+							preCollectionSyncResult.error.message,
+						) || "Unknown error",
 					);
-					if (mode === "process") {
-						await cleanupAdapters();
-						logger.setBuffering(false);
-						process.exit(1);
-					} else {
-						await cleanupAdapters();
-						return false;
-					}
+					return await stopCommand(1);
 				}
-			}
 
-			//* run collection migrations if needed
-			if (needsCollectionMigrations) {
 				cliLogger.info("Running collection migrations...");
-				try {
-					const result = await migrateCollections(
-						{
-							db: { client: config.db.client },
-							config: config,
-							queue: queue,
-							env: env ?? null,
-							runtimeContext,
-							kv: kvInstance,
-							media,
-							email,
-							translate,
-							request: {
-								url: config.host ?? constants.urls.localhost,
-								locale: "en",
-							},
-						},
-						{ dryRun: false },
-					);
-
-					if (result.error) {
-						const translatedMessage = translate.english(result.error.message);
-						const underlyingMessage =
-							result.error.message?.type === "lucid.copy"
-								? result.error.message.defaultMessage
-								: undefined;
-
-						cliLogger.error(
-							"Migration failed on step collection migrations",
-							underlyingMessage || translatedMessage ? "with error:" : "",
-							underlyingMessage || translatedMessage || "",
-						);
-						if (mode === "process") {
-							await cleanupAdapters();
-							logger.setBuffering(false);
-							process.exit(1);
-						} else {
-							await cleanupAdapters();
-							return false;
-						}
-					}
-					cliLogger.success(
-						"Collection migrations completed",
-						cliLogger.color.green("successfully"),
-					);
-				} catch (error) {
+				const migrationResult = await applyCollectionMigrations(
+					executionContext,
+					exactPlanResult.data,
+				);
+				if (migrationResult.error) {
 					cliLogger.error(
-						"Migration failed",
-						error instanceof Error ? error.message : "Unknown error",
+						"Collection migrations failed:",
+						executionContext.translate.english(migrationResult.error.message) ||
+							"Unknown error",
 					);
-					if (error instanceof Error) cliLogger.errorInstance(error);
-					if (mode === "process") {
-						await cleanupAdapters();
-						logger.setBuffering(false);
-						process.exit(1);
-					} else {
-						await cleanupAdapters();
-						return false;
-					}
+					return await stopCommand(1);
 				}
+				cliLogger.success(
+					"Collection migrations completed",
+					cliLogger.color.green("successfully"),
+				);
 			}
 
-			//* run sync tasks after migrations so sync can rely on latest schema changes
+			//* sync and cache clearing run only after the exact plan has succeeded
 			if (!skipSyncSteps) {
 				const syncResult = await runSyncTasks(
 					config,
@@ -387,10 +353,7 @@ const migrateCommand = (props?: {
 					env,
 					runtimeContext,
 				);
-				if (!syncResult && mode === "return") {
-					await cleanupAdapters();
-					return false;
-				}
+				if (!syncResult && mode === "return") return await stopCommand(1);
 			}
 
 			cliLogger.info("Clearing KV cache...");
@@ -400,15 +363,15 @@ const migrateCommand = (props?: {
 					translationStore,
 					env,
 					runtimeContext,
-					queue,
+					queue: executionContext.queue,
 					kv: kvInstance,
-					media,
-					email,
+					media: executionContext.media,
+					email: executionContext.email,
 				}),
 			);
-			await cleanupAdapters();
 
 			const endTime = startTime();
+			await cleanupAdapters();
 			if (mode === "process") {
 				cliLogger.log(
 					cliLogger.createBadge("LUCID CMS"),
@@ -416,30 +379,26 @@ const migrateCommand = (props?: {
 					cliLogger.color.green("successfully"),
 					"in",
 					cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
-					{
-						spaceAfter: true,
-						spaceBefore: true,
-					},
+					{ spaceAfter: true, spaceBefore: true },
 				);
+				logger.setBuffering(false);
 				process.exit(0);
-			} else {
-				cliLogger.success(
-					"Migrations completed",
-					cliLogger.color.green("successfully"),
-					"in",
-					cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
-				);
-				return true;
 			}
+
+			cliLogger.success(
+				"Migrations completed",
+				cliLogger.color.green("successfully"),
+				"in",
+				cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
+			);
+			return true;
 		} catch (error) {
-			await cleanupAdapters();
 			cliLogger.error(
 				"Migration failed",
 				error instanceof Error ? error.message : "Unknown error",
 			);
 			if (error instanceof Error) cliLogger.errorInstance(error);
-			if (props?.mode === "process" || !props?.mode) process.exit(1);
-			else return false;
+			return await stopCommand(1);
 		}
 	};
 };

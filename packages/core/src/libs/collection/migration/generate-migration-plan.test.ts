@@ -1,7 +1,8 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
-import { afterAll, describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import type { CollectionSchema } from "../../../libs/collection/schema/types.js";
 import type { InferredTable } from "../../../types.js";
+import assessMigrationPlans from "./assess-migration-plan.js";
 import generateMigrationPlan from "./generate-migration-plan.js";
 
 describe("Generate migration plan", () => {
@@ -175,6 +176,7 @@ describe("Generate migration plan", () => {
 					{
 						name: "lucid_idx__lucid_document__pages__fld___title",
 						columns: ["_title"],
+						unique: true,
 					},
 				],
 			},
@@ -204,8 +206,15 @@ describe("Generate migration plan", () => {
 		expect(res.error).toBeUndefined();
 		expect(res.data?.tables[0]?.indexOperations).toContainEqual({
 			type: "remove",
-			indexName: "lucid_idx__lucid_document__pages__fld___title",
+			index: {
+				name: "lucid_idx__lucid_document__pages__fld___title",
+				columns: ["_title"],
+				unique: true,
+			},
 		});
+		expect(assessMigrationPlans(res.data ? [res.data] : []).risk).toBe(
+			"warning",
+		);
 	});
 
 	test("does not remove manual indexes", () => {
@@ -248,5 +257,66 @@ describe("Generate migration plan", () => {
 
 		expect(res.error).toBeUndefined();
 		expect(res.data?.tables).toHaveLength(0);
+	});
+
+	test("classifies unsupported drop-and-add and supported alterations correctly", () => {
+		const existing: InferredTable[] = [
+			{
+				name: "lucid_document__pages__fld",
+				columns: [
+					{ name: "_title", type: "text", nullable: false, default: null },
+				],
+			},
+		];
+		const current: CollectionSchema = {
+			key: "pages",
+			tables: [
+				{
+					name: "lucid_document__pages__fld",
+					rawName: "lucid_document__pages__fld",
+					type: "document-fields",
+					key: { collection: "pages" },
+					columns: [
+						{
+							name: "_title",
+							source: "field",
+							type: "text",
+							nullable: true,
+						},
+					],
+				},
+			],
+		};
+
+		const unsupportedResult = generateMigrationPlan({
+			schemas: { existing, current },
+			db,
+		});
+		expect(unsupportedResult.error).toBeUndefined();
+		expect(
+			assessMigrationPlans(
+				unsupportedResult.data ? [unsupportedResult.data] : [],
+			).risk,
+		).toBe("destructive");
+
+		const supportSpy = vi
+			.spyOn(db, "supports")
+			.mockImplementation((key) =>
+				key === "alterColumn" ? true : db.config.support[key],
+			);
+		const supportedResult = generateMigrationPlan({
+			schemas: { existing, current },
+			db,
+		});
+		supportSpy.mockRestore();
+
+		expect(supportedResult.error).toBeUndefined();
+		expect(
+			assessMigrationPlans(supportedResult.data ? [supportedResult.data] : [])
+				.risk,
+		).toBe("safe");
+		expect(supportedResult.data?.tables[0]?.columnOperations[0]?.type).toBe(
+			"modify",
+		);
 	});
 });

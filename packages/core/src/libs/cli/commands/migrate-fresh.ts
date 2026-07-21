@@ -51,7 +51,7 @@ const migrateFreshCommand = async (options?: {
 		const migrateResult = await migrateCommand({ mode: "return" })({
 			skipSyncSteps: false,
 			skipEnvValidation: true,
-			force: true,
+			allowDestructive: true,
 		});
 		if (!migrateResult) {
 			logger.setBuffering(false);

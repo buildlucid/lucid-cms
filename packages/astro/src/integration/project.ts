@@ -122,7 +122,6 @@ export const bootstrapDevProject = async (project: ResolvedLucidProject) => {
 		translationStore: project.loaded.translationStore,
 		mode: "return",
 	})({
-		force: false,
 		skipEnvValidation: true,
 		skipSyncSteps: false,
 	});

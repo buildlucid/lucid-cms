@@ -3,7 +3,7 @@ import { copy } from "../../../i18n/index.js";
 import { CollectionMigrationsRepository } from "../../../repositories/index.js";
 import inferSchema from "../infer-schema.js";
 import buildRuntimeSchema from "./build-runtime-schema.js";
-import diffSnapshotVsConfigAdditions from "./diff-snapshot-vs-config-additions.js";
+import diffSnapshotVsConfig from "./diff-snapshot-vs-config.js";
 import { hasRuntimeSchema, setRuntimeSchema } from "./runtime-schema-cache.js";
 
 /**
@@ -85,7 +85,7 @@ const primeRuntimeSchemas: ServiceFn<
 			};
 		}
 
-		const diff = diffSnapshotVsConfigAdditions(
+		const diff = diffSnapshotVsConfig(
 			latestMigration.collection_schema,
 			localSchemaRes.data,
 		);

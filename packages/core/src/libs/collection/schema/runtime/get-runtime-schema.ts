@@ -4,7 +4,7 @@ import { CollectionMigrationsRepository } from "../../../repositories/index.js";
 import inferSchema from "../infer-schema.js";
 import type { CollectionSchema } from "../types.js";
 import buildRuntimeSchema from "./build-runtime-schema.js";
-import diffSnapshotVsConfigAdditions from "./diff-snapshot-vs-config-additions.js";
+import diffSnapshotVsConfig from "./diff-snapshot-vs-config.js";
 import { resolveRuntimeSchema } from "./runtime-schema-cache.js";
 
 /**
@@ -56,7 +56,7 @@ const getRuntimeSchema: ServiceFn<
 			};
 		}
 
-		const diff = diffSnapshotVsConfigAdditions(
+		const diff = diffSnapshotVsConfig(
 			latestMigrationRes.data.collection_schema,
 			localSchemaRes.data,
 		);

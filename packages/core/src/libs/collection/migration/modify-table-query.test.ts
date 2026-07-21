@@ -69,7 +69,11 @@ describe("modifyTableQuery", () => {
 				indexOperations: [
 					{
 						type: "remove",
-						indexName,
+						index: {
+							name: indexName,
+							columns: ["_title"],
+							unique: false,
+						},
 					},
 				],
 			},

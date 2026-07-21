@@ -27,7 +27,7 @@ const modifyTableQuery: ServiceFn<
 			data.migration.indexOperations
 				.filter((operation) => operation.type === "remove")
 				.map((operation) =>
-					dropIndex(context, data.migration.tableName, operation.indexName),
+					dropIndex(context, data.migration.tableName, operation.index.name),
 				),
 		);
 

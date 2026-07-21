@@ -59,7 +59,11 @@ program
 program
 	.command("migrate")
 	.description("Run database migrations (also runs sync as a side effect)")
-	.option("-f, --force", "Skip confirmation prompt")
+	.option("-y, --yes", "Accept warning-level migrations without prompting")
+	.option(
+		"--allow-destructive",
+		"Run destructive collection migrations without prompting. Existing data may be permanently lost.",
+	)
 	.option("--remote", remoteOptionDescription)
 	.action(
 		// @ts-expect-error

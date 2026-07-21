@@ -5,6 +5,7 @@ import logger from "../../../libs/logger/index.js";
 import type { InferredTable, ServiceResponse } from "../../../types.js";
 import determineColumnModType from "../helpers/column-mod-type.js";
 import getTablePriority from "../helpers/get-table-priority.js";
+import indexesMatch from "../helpers/indexes-match.js";
 import normaliseColumn from "../helpers/normalise-column.js";
 import determineColumnMods from "./determine-column-mods.js";
 import type {
@@ -16,19 +17,6 @@ import type {
 
 const DISABLE_REMOVE_TABLES = true;
 const PROTECT_NON_REMOVABLE_COLUMNS = true;
-
-const indexesMatch = (
-	current: { columns: string[]; unique?: boolean },
-	existing: { columns: string[]; unique?: boolean },
-) => {
-	return (
-		current.columns.length === existing.columns.length &&
-		current.columns.every(
-			(column, index) => existing.columns[index] === column,
-		) &&
-		(current.unique ?? false) === (existing.unique ?? false)
-	);
-};
 
 /**
  * Diffs configured schema indexes against DB-inferred indexes, only removing
@@ -56,7 +44,11 @@ const createIndexOperations = (
 			if (targetIndex.name.startsWith(constants.db.generatedIndexPrefix)) {
 				operations.push({
 					type: "remove",
-					indexName: targetIndex.name,
+					index: {
+						name: targetIndex.name,
+						columns: targetIndex.columns,
+						unique: targetIndex.unique,
+					},
 				});
 			}
 			operations.push({
@@ -75,7 +67,11 @@ const createIndexOperations = (
 
 		operations.push({
 			type: "remove",
-			indexName: index.name,
+			index: {
+				name: index.name,
+				columns: index.columns,
+				unique: index.unique,
+			},
 		});
 	}
 

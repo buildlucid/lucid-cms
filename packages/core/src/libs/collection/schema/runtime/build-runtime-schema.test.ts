@@ -73,6 +73,8 @@ describe("buildRuntimeSchema", () => {
 					new Set(["lucid_idx__lucid_document__pages__fld___summary"]),
 				],
 			]),
+			modifiedColumnsByTable: new Map(),
+			modifiedIndexesByTable: new Map(),
 		});
 
 		expect(filtered.tables).toHaveLength(1);

@@ -9,7 +9,6 @@ const cacheKeys = {
 	 */
 	collection: {
 		schema: (collectionKey: string) => `collection:schema:${collectionKey}`,
-		migrationResult: "collection:migration:result",
 	},
 	/**
 	 * Generate cache keys for rate limiting (used by rate limiter middleware)

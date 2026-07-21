@@ -93,8 +93,10 @@ wrangler deploy
 For CLI commands that need to use remote Cloudflare resources, pass `--remote`:
 
 ```bash
-lucidcms migrate --force --remote
+lucidcms migrate --yes --remote
 ```
+
+`--yes` accepts warning-level work such as core or plugin migrations. Destructive collection changes still fail unless you deliberately rerun with `--allow-destructive`, which also implies `--yes`.
 
 The `--remote` flag tells the Cloudflare runtime to load remote bindings through Wrangler's platform proxy while that command runs.
 

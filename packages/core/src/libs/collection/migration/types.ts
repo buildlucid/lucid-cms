@@ -1,5 +1,6 @@
 import type { ColumnDataType } from "kysely";
 import type {
+	CollectionSchema,
 	CollectionSchemaColumn,
 	CollectionSchemaIndex,
 	TableType,
@@ -54,7 +55,7 @@ export type AddIndexOperation = {
 
 export type RemoveIndexOperation = {
 	type: "remove";
-	indexName: string;
+	index: Pick<CollectionSchemaIndex, "name" | "columns" | "unique">;
 };
 
 export type IndexOperation = AddIndexOperation | RemoveIndexOperation;
@@ -76,4 +77,52 @@ export type TableMigration = {
 export type MigrationPlan = {
 	collectionKey: string;
 	tables: TableMigration[];
+};
+
+/** One config-inferred collection schema paired with its exact database operations. */
+export type PlannedCollectionMigration = {
+	migrationPlan: MigrationPlan;
+	inferredSchema: CollectionSchema;
+};
+
+/** Exact collection migrations derived from the current config and database state. */
+export type CollectionMigrationPlan = {
+	collections: PlannedCollectionMigration[];
+};
+
+/** The highest potential impact associated with a collection migration operation. */
+export type MigrationRisk = "safe" | "warning" | "destructive";
+
+/** Stable identifiers describing why a collection migration received its risk level. */
+export type MigrationRiskReasonCode =
+	| "create_table"
+	| "remove_table"
+	| "add_nullable_column"
+	| "add_constrained_column"
+	| "change_column_default"
+	| "relax_column_nullability"
+	| "tighten_column_nullability"
+	| "modify_column_type"
+	| "modify_column_constraint"
+	| "recreate_column"
+	| "remove_column"
+	| "add_index"
+	| "add_unique_index"
+	| "remove_index"
+	| "remove_unique_index";
+
+/** A structured risk finding tied to a specific collection schema operation. */
+export type MigrationRiskReason = {
+	risk: MigrationRisk;
+	code: MigrationRiskReasonCode;
+	collectionKey: string;
+	tableName: string;
+	columnName?: string;
+	indexName?: string;
+};
+
+/** The aggregate risk and operation-level reasons for one or more migration plans. */
+export type MigrationAssessment = {
+	risk: MigrationRisk;
+	reasons: MigrationRiskReason[];
 };

@@ -1,5 +1,5 @@
 import type { CollectionSchema, CollectionSchemaTable } from "../types.js";
-import type { SchemaAdditionsDiff } from "./diff-snapshot-vs-config-additions.js";
+import type { SchemaConfigDiff } from "./diff-snapshot-vs-config.js";
 
 /**
  * Builds a runtime-safe schema by removing additive config changes that are not
@@ -7,7 +7,7 @@ import type { SchemaAdditionsDiff } from "./diff-snapshot-vs-config-additions.js
  */
 const buildRuntimeSchema = (
 	localSchema: CollectionSchema,
-	diff: SchemaAdditionsDiff,
+	diff: SchemaConfigDiff,
 ): CollectionSchema => {
 	const filteredTables: CollectionSchemaTable[] = [];
 
