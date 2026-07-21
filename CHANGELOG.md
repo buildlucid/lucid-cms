@@ -5,8 +5,8 @@
 ### Features:
 
 - Added support for filtering documents by custom fields on related documents, with generated types for implicit and collection scoped relation filters. ([5bfea68](https://github.com/buildlucid/lucid-cms/commit/5bfea68d80e1436ac2ac481d4be1cc057d3480f3))
-- Added shared host bootstrapping, runtime-defined host entrypoints and config dependency tracking for framework integrations such as Astro.
-- Added risk-aware automatic collection migrations, with safe schema changes applied automatically, approval gates for warning and destructive operations, grouped migration status reporting, and runtime schema checks for changed column definitions. The `migrate` command now uses `--yes` and `--allow-destructive` for non-interactive approval.
+- Added shared host bootstrapping, runtime-defined host entrypoints and config dependency tracking for framework integrations such as Astro. ([32c13e9](https://github.com/buildlucid/lucid-cms/commit/32c13e966c6bcd4c019951c213c22fefe0d9deef))
+- Added risk-aware automatic collection migrations, with safe schema changes applied automatically, approval gates for warning and destructive operations, grouped migration status reporting, and runtime schema checks for changed column definitions. The `migrate` command now uses `--yes` and `--allow-destructive` for non-interactive approval. ([e822ff5](https://github.com/buildlucid/lucid-cms/commit/e822ff507c1759ec2230415b4dbd182a2c6f633e))
 
 ### Bug Fixes:
 
