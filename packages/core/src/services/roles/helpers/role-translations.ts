@@ -1,6 +1,6 @@
 import type { Insert, LucidRoleTranslations } from "../../../libs/db/types.js";
-import type { Translator } from "../../../libs/i18n/types.js";
-import type { Config, ConfiguredLocaleValue } from "../../../types/config.js";
+import type { AdminCopyInput, Translator } from "../../../libs/i18n/types.js";
+import type { Config } from "../../../types/config.js";
 import type { TranslationsObj } from "../../../types/shared.js";
 
 export type RoleTranslationInput = TranslationsObj[];
@@ -21,7 +21,7 @@ export const getTranslationValue = (
  * Converts config role copy into the same translation array shape used by the role APIs.
  */
 export const normalizeTranslationArray = (
-	value: ConfiguredLocaleValue | undefined,
+	value: AdminCopyInput | undefined,
 	config: Pick<Config, "i18n">,
 	translate: Translator,
 ): RoleTranslationInput => {

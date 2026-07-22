@@ -8,7 +8,7 @@ import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
-import { ClientScopes } from "../../../../permission/client-scopes.js";
+import { getCollectionClientScope } from "../../../../permission/client-scopes.js";
 import cache from "../../../middleware/cache.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
 import clientScopes from "../../../middleware/client-scopes.js";
@@ -37,8 +37,10 @@ const getSingleController = factory.createHandlers(
 		}),
 	}),
 	clientAuthentication,
-	clientScopes([ClientScopes.DocumentsRead]),
 	validate("param", controllerSchemas.client.getSingle.params),
+	clientScopes((c) => [
+		getCollectionClientScope(c.req.param("collectionKey") ?? ""),
+	]),
 	validate("query", controllerSchemas.client.getSingle.query.string),
 	cache({
 		ttl: hoursToSeconds(24),
@@ -79,6 +81,7 @@ const getSingleController = factory.createHandlers(
 			versionType: version,
 			preview,
 			query: formattedQuery,
+			clientScopes: c.get("clientIntegrationAuth").scopes,
 		});
 		if (document.error) throw new LucidAPIError(document.error);
 

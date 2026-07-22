@@ -28,14 +28,8 @@ export const Permissions = {
 	// Job permissions
 	JobsRead: "jobs:read",
 
-	// Content permissions
-	DocumentsRead: "documents:read",
-	DocumentsCreate: "documents:create",
-	DocumentsUpdate: "documents:update",
-	DocumentsDelete: "documents:delete",
-	DocumentsRestore: "documents:restore",
-	DocumentsPublish: "documents:publish",
-	DocumentsReview: "documents:review",
+	// Publish operation permissions
+	PublishOperationsRead: "publish-operations:read",
 
 	// AI permissions
 	AiCustomFieldValue: "ai:custom-field-value",
@@ -54,60 +48,6 @@ export const Permissions = {
 	SettingsUpdate: "settings:update",
 	LicenseUpdate: "license:update",
 	CacheClear: "cache:clear",
-} as const;
-
-export const PermissionSets = {
-	Users: [
-		Permissions.UsersRead,
-		Permissions.UsersCreate,
-		Permissions.UsersUpdate,
-		Permissions.UsersDelete,
-	],
-	Roles: [
-		Permissions.RolesRead,
-		Permissions.RolesCreate,
-		Permissions.RolesUpdate,
-		Permissions.RolesDelete,
-	],
-	Media: [
-		Permissions.MediaRead,
-		Permissions.MediaCreate,
-		Permissions.MediaUpdate,
-		Permissions.MediaDelete,
-	],
-	Ai: [
-		Permissions.AiCustomFieldValue,
-		Permissions.AiImageGenerate,
-		Permissions.AiAltGenerate,
-	],
-	Email: [
-		Permissions.EmailRead,
-		Permissions.EmailDelete,
-		Permissions.EmailSend,
-	],
-	Jobs: [Permissions.JobsRead],
-	Documents: [
-		Permissions.DocumentsRead,
-		Permissions.DocumentsCreate,
-		Permissions.DocumentsUpdate,
-		Permissions.DocumentsDelete,
-		Permissions.DocumentsRestore,
-		Permissions.DocumentsPublish,
-		Permissions.DocumentsReview,
-	],
-	Integrations: [
-		Permissions.IntegrationRead,
-		Permissions.IntegrationCreate,
-		Permissions.IntegrationUpdate,
-		Permissions.IntegrationDelete,
-		Permissions.IntegrationRegenerate,
-	],
-	Settings: [
-		Permissions.SettingsRead,
-		Permissions.SettingsUpdate,
-		Permissions.LicenseUpdate,
-		Permissions.CacheClear,
-	],
 } as const;
 
 export const PermissionGroups = Object.freeze({
@@ -348,75 +288,17 @@ export const PermissionGroups = Object.freeze({
 			},
 		],
 	},
-	content: {
-		key: "content_permissions",
+	"publish-operations": {
+		key: "publish_operations_permissions",
 		details: {
-			name: copy("admin:core.permissions.content.permissions", {
-				defaultMessage: "Content Permissions",
-			}),
+			name: copy("admin:permissions.groups.publish.operations"),
 		},
 		core: true,
 		permissions: [
 			{
-				key: Permissions.DocumentsRead,
+				key: Permissions.PublishOperationsRead,
 				details: {
-					name: copy("admin:core.permissions.read.documents", {
-						defaultMessage: "Read Documents",
-					}),
-				},
-				core: true,
-			},
-			{
-				key: Permissions.DocumentsCreate,
-				details: {
-					name: copy("admin:core.permissions.create.documents", {
-						defaultMessage: "Create Documents",
-					}),
-				},
-				core: true,
-			},
-			{
-				key: Permissions.DocumentsUpdate,
-				details: {
-					name: copy("admin:core.permissions.update.documents", {
-						defaultMessage: "Update Documents",
-					}),
-				},
-				core: true,
-			},
-			{
-				key: Permissions.DocumentsDelete,
-				details: {
-					name: copy("admin:core.permissions.delete.documents", {
-						defaultMessage: "Delete Documents",
-					}),
-				},
-				core: true,
-			},
-			{
-				key: Permissions.DocumentsRestore,
-				details: {
-					name: copy("admin:core.permissions.restore.revisions", {
-						defaultMessage: "Restore Revisions",
-					}),
-				},
-				core: true,
-			},
-			{
-				key: Permissions.DocumentsPublish,
-				details: {
-					name: copy("admin:core.permissions.publish.documents", {
-						defaultMessage: "Publish Documents",
-					}),
-				},
-				core: true,
-			},
-			{
-				key: Permissions.DocumentsReview,
-				details: {
-					name: copy("admin:core.permissions.review.document.releases", {
-						defaultMessage: "Review Document Releases",
-					}),
+					name: copy("admin:permissions.publish.operations.read"),
 				},
 				core: true,
 			},

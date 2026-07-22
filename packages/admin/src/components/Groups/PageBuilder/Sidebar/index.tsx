@@ -4,7 +4,9 @@ import type {
 	InternalCollectionDocument,
 } from "@types";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
+import { Permissions } from "@/constants/permissions";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
+import userStore from "@/store/userStore";
 import { DocumentDetails } from "./DocumentDetails";
 import { PublishRequests } from "./PublishRequests";
 import { Workflow } from "./Workflow";
@@ -28,8 +30,9 @@ export const Sidebar: Component<{
 	);
 	const hasPendingReleases = createMemo(
 		() =>
-			(props.collection()?.review?.requiredFor?.length ?? 0) > 0 ||
-			props.collection()?.capabilities.scheduling === true,
+			userStore.get.hasPermission([Permissions.PublishOperationsRead]).all &&
+			((props.collection()?.review?.requiredFor?.length ?? 0) > 0 ||
+				props.collection()?.capabilities.scheduling === true),
 	);
 
 	// ----------------------------------

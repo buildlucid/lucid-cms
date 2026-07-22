@@ -34,7 +34,6 @@ import type {
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../libs/queue/types.js";
-import type { CorePermission } from "../types.js";
 
 export type CopyPublicEntry =
 	| string
@@ -42,77 +41,6 @@ export type CopyPublicEntry =
 			input: string;
 			output?: string;
 	  };
-
-export type AccessPermissionDetails = {
-	/**
-	 * The permission or group label shown in the admin UI.
-	 */
-	name: AdminCopyInput;
-	/**
-	 * Optional helper text for the permission or group shown in the admin UI.
-	 */
-	description?: AdminCopyInput | null;
-};
-
-export type AccessPermissionDefinition = {
-	/**
-	 * The custom permission label shown in the admin UI.
-	 */
-	name: AccessPermissionDetails["name"];
-	/**
-	 * Optional helper text for the custom permission shown in the admin UI.
-	 */
-	description?: AccessPermissionDetails["description"];
-};
-
-export type ConfiguredLocaleValue = AdminCopyInput;
-
-export type AccessRoleDefinition = {
-	/**
-	 * Stable key used to sync and lock this config-managed role.
-	 */
-	key: string;
-	/**
-	 * Role name shown in the admin UI.
-	 */
-	name: ConfiguredLocaleValue;
-	/**
-	 * Optional role description shown in the admin UI.
-	 */
-	description?: ConfiguredLocaleValue;
-	/**
-	 * Permission keys granted to this config-managed role.
-	 */
-	permissions: Array<CorePermission | (string & {})>;
-};
-
-export type AccessPermissionDefinitions = Record<
-	string,
-	AccessPermissionDefinition
->;
-
-export type AccessPermissionGroupDefinition = AccessPermissionDetails & {
-	/**
-	 * Custom permissions available within this group.
-	 */
-	permissions: AccessPermissionDefinitions;
-};
-
-export type AccessPermissionGroupDefinitions = Record<
-	string,
-	AccessPermissionGroupDefinition
->;
-
-export type AccessConfig = {
-	/**
-	 * Custom permission groups and permissions available in the admin role editor.
-	 */
-	groups?: AccessPermissionGroupDefinitions;
-	/**
-	 * Config-managed roles that are synced into the database and locked in the admin UI.
-	 */
-	roles?: AccessRoleDefinition[];
-};
 
 export type LocalizationConfig = {
 	/**
@@ -523,10 +451,6 @@ export interface LucidConfig {
 			| Promise<QueueAdapterInstance>;
 	};
 	/**
-	 * Access control policy for custom permissions and config-managed roles.
-	 */
-	access?: AccessConfig;
-	/**
 	 * Configure the purge behavior for retained deleted data.
 	 */
 	retention?: {
@@ -692,10 +616,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| QueueAdapter
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
-	};
-	access: {
-		groups: AccessPermissionGroupDefinitions;
-		roles: AccessRoleDefinition[];
 	};
 	retention: {
 		defaultPurgeAfterDays: number;

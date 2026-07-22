@@ -108,12 +108,10 @@ const formatSingle = (props: {
 				publish: resolveCollectionPermission({
 					collection: props.collection,
 					action: "publish",
-					target: environment.key,
 				}),
 				review: resolveCollectionPermission({
 					collection: props.collection,
 					action: "review",
-					target: environment.key,
 				}),
 			},
 		})),

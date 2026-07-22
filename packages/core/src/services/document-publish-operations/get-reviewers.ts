@@ -8,7 +8,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import {
 	canUsePublishOperationsForTarget,
-	hasCollectionTargetPermission,
+	hasCollectionPermission,
 } from "./helpers/index.js";
 
 const getReviewers: ServiceFn<
@@ -56,19 +56,17 @@ const getReviewers: ServiceFn<
 
 	const canPublish =
 		data.user === undefined ||
-		hasCollectionTargetPermission({
+		hasCollectionPermission({
 			user: data.user,
 			collection: collectionRes.data,
 			action: "publish",
-			target: data.target,
 		});
 	const canReview =
 		data.user === undefined ||
-		hasCollectionTargetPermission({
+		hasCollectionPermission({
 			user: data.user,
 			collection: collectionRes.data,
 			action: "review",
-			target: data.target,
 		});
 	if (data.user !== undefined && !canPublish && !canReview) {
 		return {
@@ -90,7 +88,6 @@ const getReviewers: ServiceFn<
 	const permission = resolveCollectionPermission({
 		collection: collectionRes.data,
 		action: "review",
-		target: data.target,
 	});
 
 	const Users = new UsersRepository(context.db.client, context.config.db);

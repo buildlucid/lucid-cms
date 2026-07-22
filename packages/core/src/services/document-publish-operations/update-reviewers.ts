@@ -8,7 +8,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import getReviewers from "./get-reviewers.js";
 import createEvent from "./helpers/create-event.js";
-import { hasCollectionTargetPermission } from "./helpers/index.js";
+import { hasCollectionPermission } from "./helpers/index.js";
 
 const updateReviewers: ServiceFn<
 	[
@@ -60,11 +60,10 @@ const updateReviewers: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	const isRequester = operation.requested_by === data.user.id;
-	const canReview = hasCollectionTargetPermission({
+	const canReview = hasCollectionPermission({
 		user: data.user,
 		collection: collectionRes.data,
 		action: "review",
-		target: operation.target,
 	});
 	if (!isRequester && !canReview && !data.user.superAdmin) {
 		return {

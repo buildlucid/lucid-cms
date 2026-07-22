@@ -18,20 +18,6 @@ export type CollectionListFieldOptions = {
 export type CollectionLabelFieldOptions = CollectionListFieldOptions & {
 	useAsLabel?: UseAsLabel;
 };
-export type CollectionPermissionAction =
-	| "read"
-	| "create"
-	| "update"
-	| "delete"
-	| "restore"
-	| "publish"
-	| "review";
-export type CollectionPermissions = Partial<
-	Record<CollectionPermissionAction, string>
->;
-export type CollectionEnvironmentPermissions = Partial<
-	Pick<Record<CollectionPermissionAction, string>, "publish" | "review">
->;
 export type CollectionEnvironmentVersionMap = Record<string, string>;
 export type CollectionGroupConfigInput =
 	| string
@@ -95,10 +81,6 @@ export type PublishingWorkflowStageConfig = {
 	name: ResolvedAdminCopy;
 	color: PublishingWorkflowStageColor;
 	publishTargets: string[];
-	permissions: {
-		moveTo?: string;
-		moveFrom?: string;
-	};
 };
 
 export type PublishingWorkflowConfig = {
@@ -116,7 +98,6 @@ export type CollectionConfigSchemaType = {
 		singularName: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
-	permissions?: CollectionPermissions;
 	locked?: boolean;
 	localized?: boolean;
 	revisions?: boolean;
@@ -138,17 +119,12 @@ export type CollectionConfigSchemaType = {
 			name: AdminCopyInput;
 			color?: PublishingWorkflowStageColor;
 			publishTargets?: string[];
-			permissions?: {
-				moveTo?: string;
-				moveFrom?: string;
-			};
 		}>;
 	};
 	environments?: Array<{
 		key: string;
 		name: AdminCopyInput;
 		requires?: string[];
-		permissions?: CollectionEnvironmentPermissions;
 		collectionVersions?: CollectionEnvironmentVersionMap;
 	}>;
 	revisionRetentionDays?: number | false;
@@ -183,7 +159,6 @@ export type CollectionData = {
 		key: string;
 		name: ResolvedAdminCopy;
 		requires: string[];
-		permissions: CollectionEnvironmentPermissions;
 		collectionVersions: CollectionEnvironmentVersionMap;
 	}[];
 	revisionRetentionDays: number | false;
@@ -191,7 +166,6 @@ export type CollectionData = {
 		breakpoints: CollectionPreviewBreakpoint[];
 	} | null;
 	tenants: string[];
-	permissions: CollectionPermissions;
 };
 
 export type FieldFilters = Array<{

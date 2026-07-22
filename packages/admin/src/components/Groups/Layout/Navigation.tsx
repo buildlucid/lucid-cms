@@ -50,6 +50,9 @@ export const NavigationChrome: Component = () => {
 	const canReadJobs = createMemo(
 		() => userStore.get.hasPermission([Permissions.JobsRead]).all,
 	);
+	const canReadPublishOperations = createMemo(
+		() => userStore.get.hasPermission([Permissions.PublishOperationsRead]).all,
+	);
 	const canManageLicense = createMemo(
 		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
 	);
@@ -113,9 +116,11 @@ export const NavigationChrome: Component = () => {
 	});
 	const showPublishRequests = createMemo(
 		() =>
-			userStore.get.hasPermission([Permissions.DocumentsReview]).all &&
+			canReadPublishOperations() &&
 			(collections.data?.data ?? []).some(
-				(collection) => (collection.review?.requiredFor?.length ?? 0) > 0,
+				(collection) =>
+					(collection.review?.requiredFor?.length ?? 0) > 0 &&
+					userStore.get.hasPermission([collection.permissions.review]).all,
 			),
 	);
 

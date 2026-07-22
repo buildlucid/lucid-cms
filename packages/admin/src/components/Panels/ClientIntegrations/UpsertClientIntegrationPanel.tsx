@@ -17,7 +17,6 @@ import {
 import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
 import T from "@/translations";
-import { clientScopeKeyToTranslation } from "@/translations/helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 
@@ -241,32 +240,38 @@ const UpsertClientIntegrationPanel: Component<
 									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card-base">
 										<div class="flex justify-between items-start gap-3">
 											<h4 class="text-sm font-medium text-body">
-												{T()(clientScopeKeyToTranslation(group.key))}
+												{helpers.getLocaleValue({ value: group.details.name })}
 											</h4>
 											<button
 												type="button"
 												class="text-xs text-unfocused hover:text-body transition-colors"
 												onClick={() => {
 													const groupIsSelected = group.scopes.every((scope) =>
-														getScopes().includes(scope),
+														getScopes().includes(scope.key),
 													);
 
 													if (groupIsSelected) {
 														setScopes((prev) =>
 															prev.filter(
-																(scope) => !group.scopes.includes(scope),
+																(scope) =>
+																	!group.scopes.some(
+																		(item) => item.key === scope,
+																	),
 															),
 														);
 														return;
 													}
 
 													setScopes((prev) => [
-														...new Set([...prev, ...group.scopes]),
+														...new Set([
+															...prev,
+															...group.scopes.map((scope) => scope.key),
+														]),
 													]);
 												}}
 											>
 												{group.scopes.every((scope) =>
-													getScopes().includes(scope),
+													getScopes().includes(scope.key),
 												)
 													? T()("common.clear")
 													: T()("selectors.all")}
@@ -276,17 +281,19 @@ const UpsertClientIntegrationPanel: Component<
 											<For each={group.scopes}>
 												{(scope) => (
 													<CheckboxButton
-														id={`scope-${group.key}-${scope}`}
-														value={getScopes().includes(scope)}
+														id={`scope-${group.key}-${scope.key}`}
+														value={getScopes().includes(scope.key)}
 														onChange={() => {
 															setScopes((prev) => {
-																if (prev.includes(scope))
-																	return prev.filter((s) => s !== scope);
-																return [...prev, scope];
+																if (prev.includes(scope.key))
+																	return prev.filter((s) => s !== scope.key);
+																return [...prev, scope.key];
 															});
 														}}
 														copy={{
-															label: T()(clientScopeKeyToTranslation(scope)),
+															label: helpers.getLocaleValue({
+																value: scope.details.name,
+															}),
 														}}
 														theme="secondary"
 													/>

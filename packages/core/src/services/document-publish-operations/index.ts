@@ -11,7 +11,7 @@ export {
 	canUsePublishOperationsForTarget,
 	collectionTargetSupportsScheduling,
 	getPublishOperationTargets,
-	hasCollectionTargetPermission,
+	hasCollectionPermission,
 	isInSchedulingDispatchWindow,
 	parseScheduleInput,
 	publishOperationExecuteEvent,

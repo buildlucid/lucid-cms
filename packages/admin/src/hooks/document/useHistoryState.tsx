@@ -100,10 +100,6 @@ export function useHistoryState() {
 		const item = selectedItem();
 		return item?.type === "environment" ? item.version : undefined;
 	});
-	const canReadPublishOperations = createMemo(
-		() => userStore.get.hasPermission([Permissions.DocumentsReview]).all,
-	);
-
 	// ------------------------------------------
 	// Queries
 	const collectionQuery = api.collections.useGetSingle({
@@ -169,7 +165,11 @@ export function useHistoryState() {
 		enabled: () =>
 			canFetchRevisions() &&
 			selectedReleaseTarget() !== undefined &&
-			canReadPublishOperations(),
+			collectionQuery.data?.data !== undefined &&
+			userStore.get.hasPermission([
+				Permissions.PublishOperationsRead,
+				collectionQuery.data.data.permissions.review,
+			]).all,
 	});
 
 	// ------------------------------------------

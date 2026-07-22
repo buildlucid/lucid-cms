@@ -1,4 +1,5 @@
 import { copy } from "../../libs/i18n/index.js";
+import { getValidClientScopes } from "../../libs/permission/scopes.js";
 import {
 	ClientIntegrationScopesRepository,
 	ClientIntegrationsRepository,
@@ -20,6 +21,28 @@ const createSingle: ServiceFn<
 		apiKey: string;
 	}
 > = async (context, data) => {
+	const scopes = [...new Set(data.scopes)];
+	const validScopes = new Set<string>(
+		getValidClientScopes(context.config, {
+			tenantKey: context.request.tenantKey,
+		}),
+	);
+	const invalidScopes = scopes.filter((scope) => !validScopes.has(scope));
+	if (invalidScopes.length > 0) {
+		return {
+			error: {
+				type: "basic",
+				name: copy("server:core.client.integrations.scopes.error.name"),
+				message: copy(
+					"server:core.client.integrations.scopes.invalid.message",
+					{ data: { invalidScopes: invalidScopes.join(", ") } },
+				),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
 	const ClientIntegrations = new ClientIntegrationsRepository(
 		context.db.client,
 		context.config.db,
@@ -75,9 +98,9 @@ const createSingle: ServiceFn<
 	});
 	if (newIntegrationRes.error) return newIntegrationRes;
 
-	if (data.scopes.length > 0) {
+	if (scopes.length > 0) {
 		const scopeInsertRes = await ClientIntegrationScopes.createMultiple({
-			data: data.scopes.map((scope) => ({
+			data: scopes.map((scope) => ({
 				client_integration_id: newIntegrationRes.data.id,
 				scope,
 				core: true,

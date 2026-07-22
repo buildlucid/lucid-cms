@@ -4,8 +4,10 @@ import { copy } from "../../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
 import type { QueueEvent } from "../../../libs/queue/types.js";
+import type { Config } from "../../../types/config.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { LucidAuth } from "../../../types/hono.js";
+import { tenantAccessAllowed } from "../../../utils/helpers/index.js";
 
 /** Approval states that still represent an unresolved release for a document target. */
 export const activePublishOperationStatuses = ["pending", "approved"] as const;
@@ -204,21 +206,39 @@ export const parseScheduleInput = (params: {
 	};
 };
 
-/** Resolves and checks the collection permission required for the action and environment target. */
-export const hasCollectionTargetPermission = (params: {
+/** Resolves and checks the collection permission required for the action. */
+export const hasCollectionPermission = (params: {
 	user: LucidAuth;
 	collection: CollectionBuilder;
 	action: "publish" | "review";
-	target: string;
 }) => {
 	const permission = resolveCollectionPermission({
 		collection: params.collection,
 		action: params.action,
-		target: params.target,
 	});
 
 	return hasAccess({
 		user: params.user,
 		requiredPermissions: [permission],
 	});
+};
+
+/** Lists tenant-visible collections whose release requests the user may review. */
+export const getReviewableCollectionKeys = (params: {
+	config: Config;
+	user: LucidAuth;
+	tenantKey?: string | null;
+}) => {
+	return params.config.collections
+		.filter((collection) =>
+			tenantAccessAllowed(collection.getData.tenants, params.tenantKey),
+		)
+		.filter((collection) =>
+			hasCollectionPermission({
+				user: params.user,
+				collection,
+				action: "review",
+			}),
+		)
+		.map((collection) => collection.key);
 };

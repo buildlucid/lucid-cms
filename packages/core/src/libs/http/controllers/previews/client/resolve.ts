@@ -6,9 +6,9 @@ import { previewSessionServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
-import { ClientScopes } from "../../../../permission/client-scopes.js";
+import { getCollectionClientScope } from "../../../../permission/client-scopes.js";
 import clientAuthentication from "../../../middleware/client-authenticate.js";
-import clientScopes from "../../../middleware/client-scopes.js";
+import { clientScopeCheck } from "../../../middleware/client-scopes.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -30,7 +30,6 @@ const resolvePreviewController = factory.createHandlers(
 		}),
 	}),
 	clientAuthentication,
-	clientScopes([ClientScopes.DocumentsRead]),
 	validate("param", controllerSchemas.resolve.params),
 	async (c) => {
 		const { token } = c.req.valid("param");
@@ -45,6 +44,10 @@ const resolvePreviewController = factory.createHandlers(
 			},
 		})(context, { token });
 		if (preview.error) throw new LucidAPIError(preview.error);
+
+		clientScopeCheck(c, [
+			getCollectionClientScope(preview.data.entry.collectionKey),
+		]);
 
 		c.header("Cache-Control", "private, no-store");
 		c.header("Pragma", "no-cache");

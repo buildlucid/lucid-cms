@@ -34,14 +34,7 @@ const promoteVersionController = factory.createHandlers(
 	authenticate(),
 	validate("json", controllerSchemas.promoteVersion.body),
 	validate("param", controllerSchemas.promoteVersion.params),
-	collectionPermissions("publish", {
-		getTarget: (c) =>
-			(
-				c.req.valid as (target: "json") => {
-					versionType: string;
-				}
-			)("json").versionType,
-	}),
+	collectionPermissions("publish"),
 	async (c) => {
 		const { versionType, bypassRevision } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");

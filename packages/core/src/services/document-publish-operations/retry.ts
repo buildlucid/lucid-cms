@@ -3,7 +3,7 @@ import { DocumentPublishOperationsRepository } from "../../libs/repositories/ind
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
-import { hasCollectionTargetPermission } from "./helpers/index.js";
+import { hasCollectionPermission } from "./helpers/index.js";
 import scheduleApproved from "./schedule-approved.js";
 
 const retry: ServiceFn<
@@ -52,11 +52,10 @@ const retry: ServiceFn<
 
 	const requiredAction =
 		operationRes.data.operation_type === "direct" ? "publish" : "review";
-	const canAct = hasCollectionTargetPermission({
+	const canAct = hasCollectionPermission({
 		user: data.user,
 		collection: collectionRes.data,
 		action: requiredAction,
-		target: operationRes.data.target,
 	});
 	if (!canAct) {
 		return {

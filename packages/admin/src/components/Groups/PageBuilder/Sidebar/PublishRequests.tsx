@@ -10,7 +10,9 @@ import {
 import { Confirmation } from "@/components/Groups/Modal";
 import ReleaseScheduleFields from "@/components/Modals/Documents/ReleaseScheduleFields";
 import Button from "@/components/Partials/Button";
+import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
+import userStore from "@/store/userStore";
 import T from "@/translations";
 import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";
 import PublishOperationSection from "./Partials/PublishOperationSection";
@@ -36,6 +38,9 @@ export const PublishRequests: Component<{
 	const environmentCount = createMemo(() =>
 		Math.max(props.collection()?.environments.length ?? 1, 1),
 	);
+	const canReadPublishOperations = createMemo(
+		() => userStore.get.hasPermission([Permissions.PublishOperationsRead]).all,
+	);
 
 	// ----------------------------------
 	// Queries
@@ -50,6 +55,7 @@ export const PublishRequests: Component<{
 			perPage: () => environmentCount(),
 		},
 		enabled: () =>
+			canReadPublishOperations() &&
 			(props.collection()?.review?.requiredFor?.length ?? 0) > 0 &&
 			props.documentId() !== undefined,
 	});
@@ -64,6 +70,7 @@ export const PublishRequests: Component<{
 			perPage: () => environmentCount(),
 		},
 		enabled: () =>
+			canReadPublishOperations() &&
 			props.collection()?.capabilities.scheduling === true &&
 			props.documentId() !== undefined,
 	});
@@ -84,7 +91,8 @@ export const PublishRequests: Component<{
 		() => props.collection()?.capabilities.scheduling === true,
 	);
 	const sectionEnabled = createMemo(
-		() => reviewEnabled() || schedulingEnabled(),
+		() =>
+			canReadPublishOperations() && (reviewEnabled() || schedulingEnabled()),
 	);
 	const releaseRequestRows = createMemo(() =>
 		[...(pendingRequests.data?.data ?? [])].sort((a, b) =>

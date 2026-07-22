@@ -27,7 +27,9 @@ const getAllController = factory.createHandlers(
 		return c.json(
 			formatAPIResponse(c, {
 				data: permissionsFormatter.formatMultiple({
-					permissions: getGrantablePermissionRegistry(context.config),
+					permissions: getGrantablePermissionRegistry(context.config, {
+						tenantKey: context.request.tenantKey,
+					}),
 				}),
 			}),
 		);

@@ -4,6 +4,7 @@ import {
 } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentsFormatter } from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
+import { getCollectionClientScope } from "../../../libs/permission/client-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetSingleQueryParams } from "../../../schemas/documents.js";
 import type {
@@ -32,6 +33,7 @@ import type { ClientDocumentVersionInput } from "./types.js";
 type ClientDocumentsGetSingleInput<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
 	query: ClientGetSingleQueryParams;
+	clientScopes?: string[];
 } & ClientDocumentVersionInput<TCollectionKey>;
 
 type ClientDocumentsGetSingleService = <TCollectionKey extends string>(
@@ -86,6 +88,15 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	});
 	if (collectionRes.error) return collectionRes;
 
+	//* work out allowed collection keys based on client scopes
+	const allowedCollectionKeys = data.clientScopes
+		? context.config.collections
+				.filter((collection) =>
+					data.clientScopes?.includes(getCollectionClientScope(collection.key)),
+				)
+				.map((collection) => collection.key)
+		: undefined;
+
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,
 		data.collectionKey,
@@ -127,6 +138,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 		filterOr: query.filterOr,
 		relationVersionType: relationVersionTypeRes.data.versionType,
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+		allowedCollectionKeys,
 	});
 	if (relationFiltersRes.error) return relationFiltersRes;
 	const { documentFilters, brickFilters } = groupDocumentFilters(
@@ -183,6 +195,7 @@ const getSingle: ClientDocumentsGetSingleService = async <
 		includeRefs: include.refs,
 		refTypes: include.refTypes,
 		flattenRelationRefFields: true,
+		allowedDocumentCollectionKeys: allowedCollectionKeys,
 	});
 	if (bricksRes.error) return bricksRes;
 

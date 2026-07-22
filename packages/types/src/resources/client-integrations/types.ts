@@ -1,5 +1,5 @@
 export type ClientScope =
-	| "documents:read"
+	| `documents:${string}:read`
 	| "media:read"
 	| "media:process"
 	| "locales:read";
@@ -20,7 +20,17 @@ export interface ClientIntegration {
 
 export interface ClientIntegrationScopeGroup {
 	key: string;
-	scopes: ClientScope[];
+	details: {
+		name: ResolvedAdminCopy;
+		description?: ResolvedAdminCopy | null;
+	};
+	scopes: Array<{
+		key: ClientScope;
+		details: {
+			name: ResolvedAdminCopy;
+			description?: ResolvedAdminCopy | null;
+		};
+	}>;
 }
 
 export interface ClientIntegrationCreateResponse {
@@ -29,3 +39,5 @@ export interface ClientIntegrationCreateResponse {
 
 export type ClientIntegrationRegenerateKeysResponse =
 	ClientIntegrationCreateResponse;
+
+import type { ResolvedAdminCopy } from "../locales/types.js";

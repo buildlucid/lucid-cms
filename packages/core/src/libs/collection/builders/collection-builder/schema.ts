@@ -33,6 +33,10 @@ const versionMapCollectionKeySchema = z
 	.string()
 	.min(1)
 	.max(constants.db.maxBuilderKeyLength)
+	.regex(/^[a-z0-9-_]+$/, {
+		message:
+			"Collection key must contain only lowercase letters, numbers, hyphens and underscores",
+	})
 	.refine((val) => !val.includes(constants.db.nameSeparator), {
 		message: `Collection key cannot contain '${constants.db.nameSeparator}'`,
 	});
@@ -41,7 +45,12 @@ const CollectionConfigSchema = z
 	.object({
 		key: z
 			.string()
+			.min(1)
 			.max(constants.db.maxBuilderKeyLength)
+			.regex(/^[a-z0-9-_]+$/, {
+				message:
+					"Collection key must contain only lowercase letters, numbers, hyphens and underscores",
+			})
 			.refine((val) => !val.includes(constants.db.nameSeparator), {
 				message: `Collection key cannot contain '${constants.db.nameSeparator}'`,
 			}),
@@ -62,17 +71,6 @@ const CollectionConfigSchema = z
 			singularName: adminCopyInputSchema,
 			summary: adminCopyInputSchema.optional(),
 		}),
-		permissions: z
-			.object({
-				read: z.string().optional(),
-				create: z.string().optional(),
-				update: z.string().optional(),
-				delete: z.string().optional(),
-				restore: z.string().optional(),
-				publish: z.string().optional(),
-				review: z.string().optional(),
-			})
-			.optional(),
 		locked: z.boolean().default(constants.collectionBuilder.locked).optional(),
 		localized: z
 			.boolean()
@@ -154,12 +152,6 @@ const CollectionConfigSchema = z
 										.regex(/^[a-z0-9-_]+$/),
 								)
 								.optional(),
-							permissions: z
-								.object({
-									moveTo: z.string().optional(),
-									moveFrom: z.string().optional(),
-								})
-								.optional(),
 						}),
 					)
 					.min(1),
@@ -177,12 +169,6 @@ const CollectionConfigSchema = z
 					),
 					name: adminCopyInputSchema,
 					requires: z.array(environmentKeySchema).optional(),
-					permissions: z
-						.object({
-							publish: z.string().optional(),
-							review: z.string().optional(),
-						})
-						.optional(),
 					collectionVersions: z
 						.record(versionMapCollectionKeySchema, environmentKeySchema)
 						.optional(),

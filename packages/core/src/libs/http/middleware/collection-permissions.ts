@@ -1,20 +1,19 @@
 import { createMiddleware } from "hono/factory";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
-import type { CollectionPermissionAction } from "../../collection/builders/collection-builder/types.js";
 import { copy } from "../../i18n/index.js";
 import { resolveCollectionPermission } from "../../permission/collection-permissions.js";
 import hasAccess from "../../permission/has-access.js";
+import type { CollectionPermissionAction } from "../../permission/types.js";
 
 /**
- * Guards collection document routes with the effective permission for the
- * requested collection, including custom collection and environment mappings.
+ * Guards collection document routes with the generated permission for the
+ * requested collection.
  */
 const collectionPermissions = (
 	action: CollectionPermissionAction,
 	options?: {
 		getCollectionKey?: (c: LucidHonoContext) => string | undefined;
-		getTarget?: (c: LucidHonoContext) => string | undefined;
 	},
 ) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
@@ -38,7 +37,6 @@ const collectionPermissions = (
 		const permission = resolveCollectionPermission({
 			collection,
 			action,
-			target: options?.getTarget?.(c),
 		});
 
 		const access = hasAccess({

@@ -8,7 +8,7 @@ import createEvent from "./helpers/create-event.js";
 import {
 	canUsePublishOperationsForTarget,
 	collectionTargetSupportsScheduling,
-	hasCollectionTargetPermission,
+	hasCollectionPermission,
 	parseScheduleInput,
 } from "./helpers/index.js";
 import normalizeComment from "./helpers/normalize-comment.js";
@@ -92,11 +92,10 @@ const approve: ServiceFn<
 
 	if (
 		!bypassReviewChecks &&
-		!hasCollectionTargetPermission({
+		!hasCollectionPermission({
 			user: data.user,
 			collection: collectionRes.data,
 			action: "review",
-			target: operationRes.data.target,
 		})
 	) {
 		return {

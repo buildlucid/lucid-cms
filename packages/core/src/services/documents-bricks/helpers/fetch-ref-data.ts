@@ -9,9 +9,12 @@ import {
 	type FieldRefRelation,
 	type FieldRefVersionTypeResolver,
 } from "../../../libs/collection/custom-fields/utils/ref-fetch.js";
+import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
 import type { MediaPropsT } from "../../../libs/formatters/media.js";
 import type { UserPropT } from "../../../libs/formatters/users.js";
+import { copy } from "../../../libs/i18n/index.js";
+import { getCollectionClientScope } from "../../../libs/permission/client-scopes.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type {
 	DocumentVersionType,
@@ -105,10 +108,56 @@ const fetchRefData: ServiceFn<
 			values: FieldRelationValues;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			resolveVersionType?: FieldRefVersionTypeResolver;
+			allowedDocumentCollectionKeys?: string[];
 		},
 	],
 	FieldRefResponse
 > = async (context, data) => {
+	if (data.allowedDocumentCollectionKeys !== undefined) {
+		const tableToCollection = new Map<string, string>();
+		for (const collection of context.config.collections) {
+			const tableNameRes = buildTableName(
+				"document",
+				{ collection: collection.key },
+				context.config.db.config.tableNameByteLimit,
+			);
+			if (tableNameRes.error) return tableNameRes;
+			tableToCollection.set(tableNameRes.data.name, collection.key);
+		}
+
+		const allowedCollectionKeys = new Set(data.allowedDocumentCollectionKeys);
+		const missingCollectionKeys = Array.from(
+			new Set(
+				(data.values.relation ?? []).flatMap((relation) => {
+					const collectionKey = tableToCollection.get(relation.table);
+					return collectionKey && !allowedCollectionKeys.has(collectionKey)
+						? [collectionKey]
+						: [];
+				}),
+			),
+		);
+		if (missingCollectionKeys.length > 0) {
+			const missingScopes = missingCollectionKeys.map(getCollectionClientScope);
+			return {
+				error: {
+					type: "authorisation",
+					name: copy("server:core.client.integrations.scopes.error.name"),
+					message: copy(
+						"server:core.client.integrations.scopes.missing.message",
+						{
+							data: {
+								requiredScopes: missingScopes.join(", "),
+								missingScopes: missingScopes.join(", "),
+							},
+						},
+					),
+					status: 403,
+				},
+				data: undefined,
+			};
+		}
+	}
+
 	const response: FieldRefResponse = {
 		data: {},
 	};

@@ -49,14 +49,14 @@ export const Dashboard: Component = () => {
 	const canCreateMedia = createMemo(
 		() => userStore.get.hasPermission([Permissions.MediaCreate]).all,
 	);
-	const canReviewDocuments = createMemo(
-		() => userStore.get.hasPermission([Permissions.DocumentsReview]).all,
-	);
 	const canCreateUsers = createMemo(
 		() => userStore.get.hasPermission([Permissions.UsersCreate]).all,
 	);
 	const canManageLicense = createMemo(
 		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
+	);
+	const canReadPublishOperations = createMemo(
+		() => userStore.get.hasPermission([Permissions.PublishOperationsRead]).all,
 	);
 
 	// ----------------------------------------
@@ -79,9 +79,11 @@ export const Dashboard: Component = () => {
 
 	const releaseRequestsAvailable = createMemo(
 		() =>
-			canReviewDocuments() &&
+			canReadPublishOperations() &&
 			collectionsData().some(
-				(collection) => (collection.review?.requiredFor?.length ?? 0) > 0,
+				(collection) =>
+					(collection.review?.requiredFor?.length ?? 0) > 0 &&
+					userStore.get.hasPermission([collection.permissions.review]).all,
 			),
 	);
 

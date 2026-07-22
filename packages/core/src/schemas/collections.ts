@@ -143,10 +143,6 @@ const collectionResponseSchema = z.object({
 					name: resolvedAdminCopySchema,
 					color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
 					publishTargets: z.array(z.string()),
-					permissions: z.object({
-						moveTo: z.string().optional(),
-						moveFrom: z.string().optional(),
-					}),
 				}),
 			),
 		})
@@ -183,12 +179,12 @@ const collectionResponseSchema = z.object({
 			permissions: z.object({
 				publish: z.string().meta({
 					description: "Permission required to publish to this environment",
-					example: "documents:publish",
+					example: "documents:pages:publish",
 				}),
-				review: z.string().optional().meta({
+				review: z.string().meta({
 					description:
 						"Permission required to review releases for this environment",
-					example: "documents:review",
+					example: "documents:pages:review",
 				}),
 			}),
 		}),

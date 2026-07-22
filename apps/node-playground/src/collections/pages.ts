@@ -12,15 +12,6 @@ const PageCollection = new CollectionBuilder("page", {
 		singularName: copy("admin:collections.page.singularName"),
 		summary: copy("admin:collections.page.summary"),
 	},
-	permissions: {
-		read: "page:read",
-		create: "page:create",
-		update: "page:update",
-		delete: "page:delete",
-		restore: "page:restore",
-		publish: "page:publish",
-		review: "page:review",
-	},
 	group: {
 		key: "content",
 		order: 0,
@@ -56,10 +47,6 @@ const PageCollection = new CollectionBuilder("page", {
 				name: copy("admin:collections.page.workflow.done.name"),
 				publishTargets: ["production", "staging"],
 				color: "green",
-				permissions: {
-					moveTo: "page:workflow:done",
-					moveFrom: "page:workflow:todo",
-				},
 			},
 		],
 	},
@@ -67,19 +54,11 @@ const PageCollection = new CollectionBuilder("page", {
 		{
 			key: "staging",
 			name: copy("admin:collections.page.environments.staging.name"),
-			permissions: {
-				publish: "page:publish:staging",
-				review: "page:review:staging",
-			},
 		},
 		{
 			key: "production",
 			name: copy("admin:collections.page.environments.production.name"),
 			requires: ["staging"],
-			permissions: {
-				publish: "page:publish:production",
-				review: "page:review:production",
-			},
 		},
 	],
 	hooks: [

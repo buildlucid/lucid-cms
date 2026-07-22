@@ -5,7 +5,7 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import createEvent from "./helpers/create-event.js";
-import { hasCollectionTargetPermission } from "./helpers/index.js";
+import { hasCollectionPermission } from "./helpers/index.js";
 import normalizeComment from "./helpers/normalize-comment.js";
 import notifyPublishOperationUsers from "./notifications.js";
 
@@ -51,11 +51,10 @@ const reject: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	if (
-		!hasCollectionTargetPermission({
+		!hasCollectionPermission({
 			user: data.user,
 			collection: collectionRes.data,
 			action: "review",
-			target: operationRes.data.target,
 		})
 	) {
 		return {

@@ -105,7 +105,7 @@ const AppRouter: Component = () => {
 					path="/collections/:collectionKey/:documentId/release-requests/:releaseRequestId"
 					preload={preloadRoutes(CollectionsDocumentsReleaseRequestDetailRoute)}
 					component={() => (
-						<PermissionGuard permission={Permissions.DocumentsReview}>
+						<PermissionGuard permission={Permissions.PublishOperationsRead}>
 							<CollectionsDocumentsReleaseRequestDetailRoute />
 						</PermissionGuard>
 					)}
@@ -163,7 +163,7 @@ const AppRouter: Component = () => {
 					path="/release-requests"
 					preload={preloadRoutes(ReleaseRequestsListRoute)}
 					component={() => (
-						<PermissionGuard permission={Permissions.DocumentsReview}>
+						<PermissionGuard permission={Permissions.PublishOperationsRead}>
 							<ReleaseRequestsListRoute />
 						</PermissionGuard>
 					)}

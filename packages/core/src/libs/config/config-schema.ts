@@ -303,36 +303,6 @@ const ConfigSchema = z.object({
 			adapter: QueueAdapterSchema.optional(),
 		})
 		.optional(),
-	access: z
-		.object({
-			groups: z
-				.record(
-					z.string(),
-					z.object({
-						name: adminCopyInputSchema,
-						description: adminCopyInputSchema.nullable().optional(),
-						permissions: z.record(
-							z.string(),
-							z.object({
-								name: adminCopyInputSchema,
-								description: adminCopyInputSchema.nullable().optional(),
-							}),
-						),
-					}),
-				)
-				.optional(),
-			roles: z
-				.array(
-					z.object({
-						key: z.string(),
-						name: adminCopyInputSchema,
-						description: adminCopyInputSchema.optional(),
-						permissions: z.array(z.string()),
-					}),
-				)
-				.optional(),
-		})
-		.optional(),
 	kv: z
 		.object({
 			adapter: KVAdapterSchema.optional(),

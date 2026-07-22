@@ -1,8 +1,10 @@
 import formatter from "../../libs/formatters/index.js";
+import type { AdminCopyInput } from "../../libs/i18n/types.js";
 import {
 	getValidPermissions,
 	isCorePermission,
 } from "../../libs/permission/registry.js";
+import type { CorePermission } from "../../libs/permission/types.js";
 import {
 	RolePermissionsRepository,
 	RolesRepository,
@@ -16,8 +18,15 @@ import {
 	prepareRoleTranslations,
 } from "../roles/helpers/role-translations.js";
 
+type ManagedRoleDefinition = {
+	key: string;
+	name: AdminCopyInput;
+	description?: AdminCopyInput;
+	permissions: CorePermission[];
+};
+
 /**
- * Synchronizes config-managed roles and prunes role grants for removed custom permissions.
+ * Synchronizes internally managed roles and prunes grants that are no longer registered.
  */
 const syncRoles: ServiceFn<[], undefined> = async (context) => {
 	const Roles = new RolesRepository(context.db.client, context.config.db);
@@ -38,7 +47,7 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 	});
 	if (rolesRes.error) return rolesRes;
 
-	const managedRoles = context.config.access.roles;
+	const managedRoles: ManagedRoleDefinition[] = [];
 	const managedRoleKeys = managedRoles.map((role) => role.key);
 	const managedRoleIdsToDelete = rolesRes.data
 		.filter(

@@ -199,7 +199,6 @@ class CollectionBuilder extends FieldBuilder {
 									stage.color ??
 									constants.collectionBuilder.publishing.workflow.color,
 								publishTargets: stage.publishTargets ?? [],
-								permissions: stage.permissions ?? {},
 							})),
 						},
 					}
@@ -211,7 +210,6 @@ class CollectionBuilder extends FieldBuilder {
 					...environment,
 					name: normalizeCopy(environment.name),
 					requires: environment.requires ?? [],
-					permissions: environment.permissions ?? {},
 					collectionVersions: environment.collectionVersions ?? {},
 				})) ?? [],
 			revisionRetentionDays:
@@ -227,7 +225,6 @@ class CollectionBuilder extends FieldBuilder {
 					}
 				: null,
 			tenants: this.config.tenants ?? [],
-			permissions: this.config.permissions ?? {},
 		};
 	}
 	get fixedBricks(): CollectionBrickConfig[] {

@@ -13,7 +13,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import getDocumentLabel from "./helpers/get-document-label.js";
 import {
-	hasCollectionTargetPermission,
+	hasCollectionPermission,
 	unresolvedPublishOperationExecutionStatuses,
 } from "./helpers/index.js";
 
@@ -56,17 +56,31 @@ const getSingle: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const canReview = hasCollectionTargetPermission({
+	const canReview = hasCollectionPermission({
 		user: data.user,
 		collection: collectionRes.data,
 		action: "review",
-		target: operationRes.data.target,
 	});
-	const canPublish = hasCollectionTargetPermission({
+	if (!canReview) {
+		return {
+			error: {
+				type: "basic",
+				name: copy("server:core.collections.permission.error.name"),
+				message: copy("server:core.collections.permission.error.message", {
+					data: {
+						collection: collectionRes.data.key,
+						action: "review",
+					},
+				}),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+	const canPublish = hasCollectionPermission({
 		user: data.user,
 		collection: collectionRes.data,
 		action: "publish",
-		target: operationRes.data.target,
 	});
 	const isRequester = operationRes.data.requested_by === data.user.id;
 	const unresolved = unresolvedPublishOperationExecutionStatuses.some(

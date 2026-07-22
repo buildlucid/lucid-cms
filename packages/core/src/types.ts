@@ -12,8 +12,14 @@ export * from "./libs/image-processor/types.js";
 export * from "./libs/kv/types.js";
 export * from "./libs/logger/types.js";
 export * from "./libs/media/types.js";
-export * from "./libs/permission/client-scopes.js";
-export * from "./libs/permission/scopes.js";
+export type {
+	ClientScope,
+	CollectionClientScope,
+} from "./libs/permission/client-scopes.js";
+export type {
+	ClientScopeDefinition,
+	ClientScopeGroup,
+} from "./libs/permission/scopes.js";
 export * from "./libs/permission/types.js";
 export * from "./libs/plugins/types.js";
 export * from "./libs/queue/types.js";

@@ -9,7 +9,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import createEvent from "./helpers/create-event.js";
 import {
-	hasCollectionTargetPermission,
+	hasCollectionPermission,
 	unresolvedPublishOperationExecutionStatuses,
 } from "./helpers/index.js";
 import normalizeComment from "./helpers/normalize-comment.js";
@@ -74,11 +74,10 @@ const cancel: ServiceFn<
 		operationRes.data.operation_type === "direct"
 			? "publish"
 			: "review";
-	const canAct = hasCollectionTargetPermission({
+	const canAct = hasCollectionPermission({
 		user: data.user,
 		collection: collectionRes.data,
 		action: requiredAction,
-		target: operationRes.data.target,
 	});
 	if (!data.system && !isRequester && !canAct) {
 		return {

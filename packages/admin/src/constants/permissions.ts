@@ -15,13 +15,7 @@ export const Permissions = {
 	EmailSend: "email:send",
 	EmailDelete: "email:delete",
 	JobsRead: "jobs:read",
-	DocumentsRead: "documents:read",
-	DocumentsCreate: "documents:create",
-	DocumentsUpdate: "documents:update",
-	DocumentsDelete: "documents:delete",
-	DocumentsRestore: "documents:restore",
-	DocumentsPublish: "documents:publish",
-	DocumentsReview: "documents:review",
+	PublishOperationsRead: "publish-operations:read",
 	AiCustomFieldValue: "ai:custom-field-value",
 	AiImageGenerate: "ai:image-generate",
 	AiAltGenerate: "ai:alt-generate",
@@ -37,4 +31,7 @@ export const Permissions = {
 } as const;
 
 export type CorePermission = (typeof Permissions)[keyof typeof Permissions];
-export type Permission = CorePermission | string;
+
+export type Permission =
+	| CorePermission
+	| `documents:${string}:${"read" | "create" | "update" | "delete" | "restore" | "publish" | "review"}`;

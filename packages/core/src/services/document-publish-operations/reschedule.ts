@@ -6,7 +6,7 @@ import { collectionServices } from "../index.js";
 import createEvent from "./helpers/create-event.js";
 import {
 	collectionTargetSupportsScheduling,
-	hasCollectionTargetPermission,
+	hasCollectionPermission,
 	parseScheduleInput,
 	unresolvedPublishOperationExecutionStatuses,
 } from "./helpers/index.js";
@@ -78,11 +78,10 @@ const reschedule: ServiceFn<
 		operationRes.data.operation_type === "direct"
 			? "publish"
 			: "review";
-	const canAct = hasCollectionTargetPermission({
+	const canAct = hasCollectionPermission({
 		user: data.user,
 		collection: collectionRes.data,
 		action: requiredAction,
-		target: operationRes.data.target,
 	});
 	if (operationRes.data.status === "pending" && !isRequester && !canAct) {
 		return {

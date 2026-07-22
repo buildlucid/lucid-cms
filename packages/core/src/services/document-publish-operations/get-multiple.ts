@@ -16,7 +16,8 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { collectionServices } from "../index.js";
 import getDocumentLabel from "./helpers/get-document-label.js";
 import {
-	hasCollectionTargetPermission,
+	getReviewableCollectionKeys,
+	hasCollectionPermission,
 	unresolvedPublishOperationExecutionStatuses,
 } from "./helpers/index.js";
 
@@ -32,12 +33,31 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
+	const collectionKeys = getReviewableCollectionKeys({
+		config: context.config,
+		user: data.user,
+		tenantKey: context.request.tenantKey,
+	});
+	if (collectionKeys.length === 0) {
+		return {
+			error: undefined,
+			data: { data: [], count: 0 },
+		};
+	}
+
 	const Operations = new DocumentPublishOperationsRepository(
 		context.db.client,
 		context.config.db,
 	);
 
 	const operationsRes = await Operations.selectMultipleDetailed({
+		where: [
+			{
+				key: "collection_key",
+				operator: "in",
+				value: collectionKeys,
+			},
+		],
 		queryParams: data.query,
 		currentUserId: data.user.id,
 		tenantKey: context.request.tenantKey,
@@ -103,17 +123,15 @@ const getMultiple: ServiceFn<
 		});
 		if (documentLabelRes.error) return documentLabelRes;
 
-		const canReviewTarget = hasCollectionTargetPermission({
+		const canReviewTarget = hasCollectionPermission({
 			user: data.user,
 			collection: collectionRes.data,
 			action: "review",
-			target: operation.target,
 		});
-		const canPublishTarget = hasCollectionTargetPermission({
+		const canPublishTarget = hasCollectionPermission({
 			user: data.user,
 			collection: collectionRes.data,
 			action: "publish",
-			target: operation.target,
 		});
 		const isRequester = operation.requested_by === data.user.id;
 		const unresolved = unresolvedPublishOperationExecutionStatuses.some(

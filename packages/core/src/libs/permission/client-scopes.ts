@@ -1,8 +1,15 @@
 export const ClientScopes = {
-	DocumentsRead: "documents:read",
 	MediaRead: "media:read",
 	MediaProcess: "media:process",
 	LocalesRead: "locales:read",
 } as const;
 
-export type ClientScope = (typeof ClientScopes)[keyof typeof ClientScopes];
+export type CollectionClientScope = `documents:${string}:read`;
+
+export type ClientScope =
+	| (typeof ClientScopes)[keyof typeof ClientScopes]
+	| CollectionClientScope;
+
+export const getCollectionClientScope = (
+	collectionKey: string,
+): CollectionClientScope => `documents:${collectionKey}:read`;

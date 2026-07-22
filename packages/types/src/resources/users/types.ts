@@ -19,13 +19,8 @@ export type CorePermission =
 	| "email:delete"
 	| "email:send"
 	| "jobs:read"
-	| "documents:read"
-	| "documents:create"
-	| "documents:update"
-	| "documents:delete"
-	| "documents:restore"
-	| "documents:publish"
-	| "documents:review"
+	| "publish-operations:read"
+	| `documents:${string}:${"read" | "create" | "update" | "delete" | "restore" | "publish" | "review"}`
 	| "ai:custom-field-value"
 	| "ai:image-generate"
 	| "ai:alt-generate"
@@ -39,7 +34,7 @@ export type CorePermission =
 	| "license:update"
 	| "cache:clear";
 
-export type Permission = CorePermission | (string & {});
+export type Permission = CorePermission;
 
 export type PermissionDetails = {
 	name: ResolvedAdminCopy;

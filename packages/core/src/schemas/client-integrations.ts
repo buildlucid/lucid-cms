@@ -1,15 +1,9 @@
 import z from "zod";
-import { ClientScopes } from "../libs/permission/client-scopes.js";
-import { ClientScopeGroups } from "../libs/permission/scopes.js";
+import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
-const clientScopeSchema = z.enum([
-	ClientScopes.DocumentsRead,
-	ClientScopes.MediaRead,
-	ClientScopes.MediaProcess,
-	ClientScopes.LocalesRead,
-] as const);
+const clientScopeSchema = z.string().min(1);
 
 export const clientIntegrationResponseSchema = z.object({
 	id: z.number().meta({
@@ -36,7 +30,7 @@ export const clientIntegrationResponseSchema = z.object({
 	}),
 	scopes: z.array(clientScopeSchema).meta({
 		description: "The scopes this client integration has access to.",
-		example: ["documents:read", "media:read"],
+		example: ["documents:pages:read", "media:read"],
 	}),
 	lastUsedAt: z.string().nullable().meta({
 		description: "The time the client integration was last used",
@@ -61,21 +55,27 @@ export const clientIntegrationResponseSchema = z.object({
 });
 
 const clientIntegrationScopeGroupResponseSchema = z.object({
-	key: z
-		.enum(
-			Object.values(ClientScopeGroups).map((group) => group.key) as [
-				string,
-				...string[],
-			],
+	key: z.string().meta({
+		description: "The scope group key",
+		example: "documents:pages",
+	}),
+	details: z.object({
+		name: resolvedAdminCopySchema,
+		description: resolvedAdminCopySchema.nullable().optional(),
+	}),
+	scopes: z
+		.array(
+			z.object({
+				key: clientScopeSchema,
+				details: z.object({
+					name: resolvedAdminCopySchema,
+					description: resolvedAdminCopySchema.nullable().optional(),
+				}),
+			}),
 		)
 		.meta({
-			description: "The scope group key",
-			example: "media:label",
+			description: "The scopes for this scope group",
 		}),
-	scopes: z.array(clientScopeSchema).meta({
-		description: "The scopes for this scope group",
-		example: ["media:read", "media:process"],
-	}),
 });
 
 export const controllerSchemas = {
@@ -103,7 +103,7 @@ export const controllerSchemas = {
 				.optional(),
 			scopes: z.array(clientScopeSchema).meta({
 				description: "Scopes granted to this client integration.",
-				example: ["documents:read"],
+				example: ["documents:pages:read"],
 			}),
 		}),
 		query: {
@@ -152,7 +152,7 @@ export const controllerSchemas = {
 						example: "Marketing website",
 					}),
 					"filter[scope]": queryString.schema.filter(true, {
-						example: "documents:read",
+						example: "documents:pages:read",
 					}),
 					"filter[lastUsedAt]": queryString.schema.filter(false, {
 						example: "2026-01-01T00:00:00Z",

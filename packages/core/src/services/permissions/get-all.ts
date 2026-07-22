@@ -5,7 +5,9 @@ import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAll: ServiceFn<[], PermissionGroup[]> = async (context) => {
 	const formattedPermissions = permissionsFormatter.formatMultiple({
-		permissions: getGrantablePermissionRegistry(context.config),
+		permissions: getGrantablePermissionRegistry(context.config, {
+			tenantKey: context.request.tenantKey,
+		}),
 		adminTranslations: context.translate
 			.forLocale(context.config.i18n.defaultLocale)
 			.adminBundle(),

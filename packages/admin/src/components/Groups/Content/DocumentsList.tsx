@@ -471,7 +471,7 @@ export const DocumentsList: Component<{
 										actionExclude: true,
 										permission: collectionPermissions()?.read
 											? userStore.get.hasPermission([
-													collectionPermissions()?.read as string,
+													collectionPermissions()?.read,
 												]).some
 											: false,
 										hide:
@@ -486,7 +486,7 @@ export const DocumentsList: Component<{
 												isLoading: createPreview.action.isPending,
 												permission: collectionPermissions()?.read
 													? userStore.get.hasPermission([
-															collectionPermissions()?.read as string,
+															collectionPermissions()?.read,
 														]).some
 													: false,
 											},
@@ -499,7 +499,7 @@ export const DocumentsList: Component<{
 												isLoading: createPreview.action.isPending,
 												permission: collectionPermissions()?.read
 													? userStore.get.hasPermission([
-															collectionPermissions()?.read as string,
+															collectionPermissions()?.read,
 														]).some
 													: false,
 											},
@@ -519,7 +519,7 @@ export const DocumentsList: Component<{
 										},
 										permission: collectionPermissions()?.update
 											? userStore.get.hasPermission([
-													collectionPermissions()?.update as string,
+													collectionPermissions()?.update,
 												]).some
 											: false,
 										hide: props.state.showingDeleted(),
@@ -538,7 +538,7 @@ export const DocumentsList: Component<{
 										},
 										permission: collectionPermissions()?.read
 											? userStore.get.hasPermission([
-													collectionPermissions()?.read as string,
+													collectionPermissions()?.read,
 												]).some
 											: false,
 										hide: props.state.showingDeleted() === false,
@@ -553,7 +553,7 @@ export const DocumentsList: Component<{
 										},
 										permission: collectionPermissions()?.restore
 											? userStore.get.hasPermission([
-													collectionPermissions()?.restore as string,
+													collectionPermissions()?.restore,
 												]).all
 											: false,
 										hide: props.state.showingDeleted() === false,
@@ -569,7 +569,7 @@ export const DocumentsList: Component<{
 										},
 										permission: collectionPermissions()?.delete
 											? userStore.get.hasPermission([
-													collectionPermissions()?.delete as string,
+													collectionPermissions()?.delete,
 												]).all
 											: false,
 										actionExclude: true,
@@ -586,7 +586,7 @@ export const DocumentsList: Component<{
 										},
 										permission: collectionPermissions()?.delete
 											? userStore.get.hasPermission([
-													collectionPermissions()?.delete as string,
+													collectionPermissions()?.delete,
 												]).all
 											: false,
 										hide: props.state.showingDeleted?.() === false,

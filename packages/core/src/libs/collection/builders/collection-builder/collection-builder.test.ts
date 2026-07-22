@@ -122,7 +122,6 @@ test("collection options are correct along with field includes and filters", asy
 					"Pages are used to create static content on your website.",
 			}),
 		},
-		permissions: {},
 		locked: false,
 		revisions: false,
 		localized: true,
@@ -274,9 +273,6 @@ test("collection workflow features normalizes defaults", async () => {
 					}),
 					color: "green",
 					publishTargets: ["production"],
-					permissions: {
-						moveTo: "page:workflow:done",
-					},
 				},
 			],
 		},
@@ -292,7 +288,6 @@ test("collection workflow features normalizes defaults", async () => {
 				}),
 				color: "grey",
 				publishTargets: [],
-				permissions: {},
 			},
 			{
 				key: "done",
@@ -301,9 +296,6 @@ test("collection workflow features normalizes defaults", async () => {
 				}),
 				color: "green",
 				publishTargets: ["production"],
-				permissions: {
-					moveTo: "page:workflow:done",
-				},
 			},
 		],
 	});
@@ -347,7 +339,6 @@ test("collection environment version mappings normalizes defaults", async () => 
 				defaultMessage: "Staging",
 			}),
 			requires: [],
-			permissions: {},
 			collectionVersions: {
 				blog: "signed-off",
 			},
@@ -358,7 +349,6 @@ test("collection environment version mappings normalizes defaults", async () => 
 				defaultMessage: "Production",
 			}),
 			requires: ["staging"],
-			permissions: {},
 			collectionVersions: {},
 		},
 	]);

@@ -1,9 +1,24 @@
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import type { PermissionGroups, Permissions } from "./definitions.js";
 
-export type CorePermission = (typeof Permissions)[keyof typeof Permissions];
+export type StaticPermission = (typeof Permissions)[keyof typeof Permissions];
 
-export type Permission = CorePermission | (string & {});
+export type CollectionPermissionAction =
+	| "read"
+	| "create"
+	| "update"
+	| "delete"
+	| "restore"
+	| "publish"
+	| "review";
+
+export type CollectionPermission<
+	TAction extends CollectionPermissionAction = CollectionPermissionAction,
+> = `documents:${string}:${TAction}`;
+
+export type CorePermission = StaticPermission | CollectionPermission;
+
+export type Permission = CorePermission;
 
 export type PermissionGroupKey = keyof typeof PermissionGroups;
 

@@ -345,7 +345,6 @@ describe("documentFilterSectionFields", () => {
 						name: literal("Draft"),
 						color: "grey",
 						publishTargets: [],
-						permissions: {},
 					},
 				],
 			},

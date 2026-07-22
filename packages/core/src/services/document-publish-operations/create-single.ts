@@ -24,7 +24,7 @@ import {
 	collectionTargetSupportsScheduling,
 	getReleaseRequirementTargets,
 	getUnmetReleaseRequirementTargets,
-	hasCollectionTargetPermission,
+	hasCollectionPermission,
 	parseScheduleInput,
 	snapshotVersionType,
 	unresolvedPublishOperationExecutionStatuses,
@@ -92,11 +92,10 @@ const createSingle: ServiceFn<
 	}
 
 	if (
-		!hasCollectionTargetPermission({
+		!hasCollectionPermission({
 			user: data.user,
 			collection,
 			action: "publish",
-			target: data.target,
 		})
 	) {
 		return {
@@ -166,11 +165,10 @@ const createSingle: ServiceFn<
 	if (
 		requiresApproval &&
 		autoAccept &&
-		!hasCollectionTargetPermission({
+		!hasCollectionPermission({
 			user: data.user,
 			collection,
 			action: "review",
-			target: data.target,
 		})
 	) {
 		return {

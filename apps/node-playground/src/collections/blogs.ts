@@ -7,14 +7,6 @@ const BlogCollection = new CollectionBuilder("blog", {
 		singularName: copy("admin:collections.blog.singularName"),
 		summary: copy("admin:collections.blog.summary"),
 	},
-	permissions: {
-		read: "blog:full",
-		create: "blog:full",
-		update: "blog:full",
-		delete: "blog:full",
-		restore: "blog:full",
-		publish: "blog:full",
-	},
 	group: {
 		key: "content",
 	},

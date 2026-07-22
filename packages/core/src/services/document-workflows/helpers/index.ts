@@ -3,8 +3,6 @@ import type {
 	PublishingWorkflowConfig,
 	PublishingWorkflowStageConfig,
 } from "../../../libs/collection/builders/collection-builder/types.js";
-import hasAccess from "../../../libs/permission/has-access.js";
-import type { LucidAuth } from "../../../types/hono.js";
 
 /**
  * Reads the configured workflow from a collection, if document workflows are enabled.
@@ -59,25 +57,4 @@ export const workflowStageAllowsTarget = (props: {
 	if (!stage) return true;
 
 	return stage.publishTargets.includes(props.target);
-};
-
-/**
- * Applies optional workflow transition permissions for leaving and entering stages.
- */
-export const canMoveWorkflowStage = (props: {
-	user: LucidAuth;
-	fromStage?: PublishingWorkflowStageConfig;
-	toStage?: PublishingWorkflowStageConfig;
-}): boolean => {
-	const permissions = [
-		props.fromStage?.permissions.moveFrom,
-		props.toStage?.permissions.moveTo,
-	].filter((permission): permission is string => Boolean(permission));
-
-	if (permissions.length === 0) return true;
-
-	return hasAccess({
-		user: props.user,
-		requiredPermissions: permissions,
-	});
 };

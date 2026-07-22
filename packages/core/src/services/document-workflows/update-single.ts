@@ -13,7 +13,6 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getCollectionInstance from "../collections/get-single-instance.js";
 import { documentServices } from "../index.js";
 import {
-	canMoveWorkflowStage,
 	getWorkflowConfig,
 	resolveEffectiveWorkflowStage,
 } from "./helpers/index.js";
@@ -108,31 +107,6 @@ const updateSingle: ServiceFn<
 	const nextStage = targetStage ?? currentStage;
 	const stageChanged =
 		data.stage !== undefined && nextStage.key !== currentStage.key;
-
-	// Optional stage permissions constrain the transition direction.
-	if (
-		stageChanged &&
-		!canMoveWorkflowStage({
-			user: data.user,
-			fromStage: currentStage,
-			toStage: nextStage,
-		})
-	) {
-		return {
-			error: {
-				type: "basic",
-				name: copy("server:core.collections.permission.error.name"),
-				message: copy("server:core.collections.permission.error.message", {
-					data: {
-						collection: data.collectionKey,
-						action: "update",
-					},
-				}),
-				status: 403,
-			},
-			data: undefined,
-		};
-	}
 
 	const currentAssigneeIds =
 		workflowRes.data?.assignees.map((assignee) => assignee.user_id) ?? [];

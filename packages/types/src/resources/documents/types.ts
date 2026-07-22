@@ -648,6 +648,19 @@ export interface CollectionPreviewBreakpoint {
 	width: number;
 }
 
+export type CollectionPermissionAction =
+	| "read"
+	| "create"
+	| "update"
+	| "delete"
+	| "restore"
+	| "publish"
+	| "review";
+
+export type CollectionPermission<
+	TAction extends CollectionPermissionAction = CollectionPermissionAction,
+> = `documents:${string}:${TAction}`;
+
 export interface Collection {
 	key: string;
 	documentId?: number | null;
@@ -687,10 +700,6 @@ export interface Collection {
 			name: ResolvedAdminCopy;
 			color: WorkflowStageColor;
 			publishTargets: string[];
-			permissions: {
-				moveTo?: string;
-				moveFrom?: string;
-			};
 		}>;
 	};
 	environments: {
@@ -698,8 +707,8 @@ export interface Collection {
 		name: ResolvedAdminCopy;
 		requires: string[];
 		permissions: {
-			publish: string;
-			review: string;
+			publish: CollectionPermission<"publish">;
+			review: CollectionPermission<"review">;
 		};
 	}[];
 	preview: {
@@ -710,13 +719,13 @@ export interface Collection {
 		preview: boolean;
 	};
 	permissions: {
-		read: string;
-		create: string;
-		update: string;
-		delete: string;
-		restore: string;
-		publish: string;
-		review: string;
+		read: CollectionPermission<"read">;
+		create: CollectionPermission<"create">;
+		update: CollectionPermission<"update">;
+		delete: CollectionPermission<"delete">;
+		restore: CollectionPermission<"restore">;
+		publish: CollectionPermission<"publish">;
+		review: CollectionPermission<"review">;
 	};
 	migrationStatus?: MigrationStatus | null;
 	fixedBricks: Array<CollectionBrickConfig>;

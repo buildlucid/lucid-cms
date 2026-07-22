@@ -43,6 +43,8 @@ const getMultiple: ServiceFn<
 			refTypes?: FieldTypes[];
 			/** Client responses flatten nested relation ref fields; internal responses keep field wrappers. */
 			flattenRelationRefFields?: boolean;
+			/** Restricts hydrated document relation refs for client integrations. */
+			allowedDocumentCollectionKeys?: string[];
 		},
 	],
 	{
@@ -115,6 +117,7 @@ const getMultiple: ServiceFn<
 			values: relationIdRes.data,
 			versionType: data.versionType,
 			resolveVersionType: data.resolveVersionType,
+			allowedDocumentCollectionKeys: data.allowedDocumentCollectionKeys,
 		});
 		if (refDataRes.error) return refDataRes;
 

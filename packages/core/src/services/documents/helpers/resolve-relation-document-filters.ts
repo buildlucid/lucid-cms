@@ -11,6 +11,8 @@ import type {
 	CollectionSchemaColumn,
 	CollectionSchemaTable,
 } from "../../../libs/collection/schema/types.js";
+import { copy } from "../../../libs/i18n/index.js";
+import { getCollectionClientScope } from "../../../libs/permission/client-scopes.js";
 import type {
 	QueryParamFilterCondition,
 	QueryParamFilterGroups,
@@ -264,6 +266,7 @@ const resolveRelationDocumentFilters: ServiceFn<
 			filterOr?: QueryParamFilterGroups;
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			resolveVersionType?: FieldRefVersionTypeResolver;
+			allowedCollectionKeys?: string[];
 		},
 	],
 	RelationDocumentFilterPlan
@@ -282,6 +285,32 @@ const resolveRelationDocumentFilters: ServiceFn<
 	const targetCollectionKeys = Array.from(
 		new Set(pending.map((filter) => filter.targetCollectionKey)),
 	);
+	if (data.allowedCollectionKeys !== undefined) {
+		const allowedCollectionKeys = new Set(data.allowedCollectionKeys);
+		const missingScopes = targetCollectionKeys
+			.filter((collectionKey) => !allowedCollectionKeys.has(collectionKey))
+			.map(getCollectionClientScope);
+
+		if (missingScopes.length > 0) {
+			return {
+				error: {
+					type: "authorisation",
+					name: copy("server:core.client.integrations.scopes.error.name"),
+					message: copy(
+						"server:core.client.integrations.scopes.missing.message",
+						{
+							data: {
+								requiredScopes: missingScopes.join(", "),
+								missingScopes: missingScopes.join(", "),
+							},
+						},
+					),
+					status: 403,
+				},
+				data: undefined,
+			};
+		}
+	}
 
 	if (targetCollectionKeys.length === 0) {
 		return {

@@ -715,6 +715,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 
 	async selectOverview(props: {
 		userId: number;
+		collectionKeys: string[];
 		collectionKey?: string;
 		target?: string;
 		tenantKey?: string | null;
@@ -733,6 +734,11 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 				tenantKey: props.tenantKey,
 				column: "lucid_document_publish_operations.tenant_key",
 			});
+			query = query.where(
+				"lucid_document_publish_operations.collection_key",
+				"in",
+				props.collectionKeys,
+			);
 
 			if (props.collectionKey) {
 				query = query.where(

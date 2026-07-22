@@ -22,7 +22,6 @@ export {
 	isTranslatableCopy,
 	translate,
 } from "./libs/i18n/index.js";
-export { PermissionSets, Permissions } from "./libs/permission/definitions.js";
 export { LucidAPIError } from "./utils/errors/index.js";
 export { ensureLucidDirectoryExists } from "./utils/helpers/lucid-directory.js";
 export {

@@ -3,7 +3,7 @@
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 
 import { configureLucid, z } from "@lucidcms/core";
-import { createRoute, PermissionSets } from "@lucidcms/core/plugin";
+import { createRoute } from "@lucidcms/core/plugin";
 // import { passthroughQueueAdapter } from "@lucidcms/core/queue";
 import { createToolkit } from "@lucidcms/core/toolkit";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
@@ -223,91 +223,6 @@ export default configureLucid({
 		// 		},
 		// 	}
 		// },
-		access: {
-			groups: {
-				pages: {
-					name: "Page Permissions",
-					permissions: {
-						"page:full": {
-							name: "Full Page Access",
-							description: "Grants full access to pages.",
-						},
-						"page:read": {
-							name: "Read Pages",
-						},
-						"page:create": {
-							name: "Create Pages",
-						},
-						"page:update": {
-							name: "Update Pages",
-						},
-						"page:delete": {
-							name: "Delete Pages",
-						},
-						"page:restore": {
-							name: "Restore Pages",
-						},
-						"page:publish": {
-							name: "Publish Pages",
-						},
-						"page:review": {
-							name: "Review Page Publish Requests",
-						},
-						"page:publish:staging": {
-							name: "Publish Pages To Staging",
-						},
-						"page:review:staging": {
-							name: "Review Page Publish Requests To Staging",
-						},
-						"page:publish:production": {
-							name: "Publish Pages To Production",
-						},
-						"page:review:production": {
-							name: "Review Page Publish Requests To Production",
-						},
-					},
-				},
-				blogs: {
-					name: "Blog Permissions",
-					permissions: {
-						"blog:full": {
-							name: "Full Blog Access",
-						},
-					},
-				},
-			},
-			roles: [
-				{
-					key: "admin",
-					name: "Admin",
-					description: "Full admin access for the playground.",
-					permissions: [
-						...PermissionSets.Users,
-						...PermissionSets.Roles,
-						...PermissionSets.Media,
-						...PermissionSets.Email,
-						...PermissionSets.Jobs,
-						...PermissionSets.Documents,
-						...PermissionSets.Integrations,
-						...PermissionSets.Settings,
-						...PermissionSets.Ai,
-						"page:full",
-						"page:read",
-						"page:create",
-						"page:update",
-						"page:delete",
-						"page:restore",
-						"page:publish",
-						"page:review",
-						"page:publish:staging",
-						"page:review:staging",
-						"page:publish:production",
-						"page:review:production",
-						"blog:full",
-					],
-				},
-			],
-		},
 		collections: [
 			PageCollection,
 			BlogCollection,

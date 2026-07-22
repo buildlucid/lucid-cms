@@ -9,7 +9,6 @@ import type DatabaseAdapter from "../db/adapter-base.js";
 import { translate } from "../i18n/index.js";
 import { initializeLogger } from "../logger/index.js";
 import type { LucidConfigRecipe } from "../runtime/types.js";
-import checkAccess from "./checks/check-access.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
 import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
@@ -190,7 +189,6 @@ const processConfig = async (
 		}
 
 		checkCollectionEnvironmentVersionMap(configRes);
-		checkAccess(configRes);
 	}
 
 	initializeLogger({

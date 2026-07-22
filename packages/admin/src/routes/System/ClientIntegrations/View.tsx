@@ -14,6 +14,7 @@ import useQueryState, {
 import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import helpers from "@/utils/helpers";
 
 const SystemClientIntegrationsRoute: Component = () => {
 	// ----------------------------------------
@@ -56,10 +57,24 @@ const SystemClientIntegrationsRoute: Component = () => {
 	});
 	const scopes = api.clientIntegrations.useGetScopes({ queryParams: {} });
 	const scopeOptions = createMemo(() => {
-		const values = new Set(
-			(scopes.data?.data ?? []).flatMap((group) => group.scopes),
+		return (scopes.data?.data ?? []).flatMap((group) =>
+			group.scopes.map((scope) => {
+				const groupLabel = helpers.getLocaleValue({
+					value: group.details.name,
+				});
+				const scopeLabel = helpers.getLocaleValue({
+					value: scope.details.name,
+				});
+
+				return {
+					value: scope.key,
+					label: T()("client.scopes.option.label", {
+						group: groupLabel,
+						scope: scopeLabel,
+					}),
+				};
+			}),
 		);
-		return Array.from(values).map((scope) => ({ value: scope, label: scope }));
 	});
 
 	// ----------------------------------------
