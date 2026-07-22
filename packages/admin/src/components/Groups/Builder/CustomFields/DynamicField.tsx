@@ -237,7 +237,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									"transition-opacity duration-200 ease-in-out grid grid-cols-12 gap-4",
 									{
 										"visible h-full opacity-100": activeTab(),
-										"invisible h-0 opacity-0": !activeTab(),
+										"invisible h-0 overflow-hidden opacity-0": !activeTab(),
 									},
 								)}
 							>
