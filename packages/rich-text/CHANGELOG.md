@@ -1,5 +1,9 @@
 # @lucidcms/rich-text
 
+## 1.1.1 (unreleased)
+
+- Fixed server-side rich text HTML generation in Cloudflare runtimes by using a DOM-free renderer.
+
 ## 1.1.0
 
 - Added a `generateText` helper to the browser and server exports for converting rich text JSON to plain text.

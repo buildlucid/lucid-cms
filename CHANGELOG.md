@@ -12,6 +12,8 @@
 
 - Fixed datetime fields without defaults repeatedly requiring collection migrations. ([2b8faf6](https://github.com/buildlucid/lucid-cms/commit/2b8faf64517b17880ddc80a7f5726e11c738e5cc))
 - Fixed translation and custom migration package sources failing to resolve in monorepo apps. ([872609c](https://github.com/buildlucid/lucid-cms/commit/872609c16645d7611919df54db1452cd7f9543e4))
+- Fixed required rich text custom fields accepting empty editor content. ([2a27252](https://github.com/buildlucid/lucid-cms/commit/2a272527692ccc7922c8624d89ffe5750ad2365c))
+- Fixed extra space appearing below the document builder after switching tabs. ([385c551](https://github.com/buildlucid/lucid-cms/commit/385c5515dcd36af1b2d59547cb153d35f5074a69))
 
 ## v0.16.0-alpha.0
 

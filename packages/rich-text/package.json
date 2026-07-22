@@ -54,7 +54,8 @@
 	"dependencies": {
 		"@tiptap/core": "^3.27.1",
 		"@tiptap/html": "^3.27.1",
-		"@tiptap/starter-kit": "^3.27.1"
+		"@tiptap/starter-kit": "^3.27.1",
+		"@tiptap/static-renderer": "^3.27.1"
 	},
 	"volta": {
 		"node": "24.11.1"
