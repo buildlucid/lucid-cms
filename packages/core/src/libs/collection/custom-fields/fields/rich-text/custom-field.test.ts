@@ -66,7 +66,12 @@ test("successfully validate field - rich text", async () => {
 			type: "rich-text",
 			value: {
 				type: "doc",
-				content: [{ type: "paragraph" }],
+				content: [
+					{
+						type: "paragraph",
+						content: [{ type: "text", text: "Required content" }],
+					},
+				],
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
@@ -138,6 +143,58 @@ test("fail to validate field - rich text", async () => {
 
 	// Required
 	const requiredValidate = {
+		empty: validateField({
+			field: {
+				key: "required_rich_text",
+				type: "rich-text",
+				value: {
+					type: "doc",
+					content: [{ type: "paragraph" }],
+				},
+			},
+			// biome-ignore lint/style/noNonNullAssertion: explanation
+			instance: RichTextCollection.fields.get("required_rich_text")!,
+			validationData: {
+				media: [],
+				user: [],
+				relation: [],
+			},
+			meta: {
+				localized: RichTextCollection.getData.localized,
+				defaultLocale: "en",
+			},
+		}),
+		emptyNestedNodes: validateField({
+			field: {
+				key: "required_rich_text",
+				type: "rich-text",
+				value: {
+					type: "doc",
+					content: [
+						{
+							type: "bulletList",
+							content: [
+								{
+									type: "listItem",
+									content: [{ type: "paragraph" }],
+								},
+							],
+						},
+					],
+				},
+			},
+			// biome-ignore lint/style/noNonNullAssertion: explanation
+			instance: RichTextCollection.fields.get("required_rich_text")!,
+			validationData: {
+				media: [],
+				user: [],
+				relation: [],
+			},
+			meta: {
+				localized: RichTextCollection.getData.localized,
+				defaultLocale: "en",
+			},
+		}),
 		exists: validateField({
 			field: {
 				key: "required_rich_text",
@@ -176,6 +233,20 @@ test("fail to validate field - rich text", async () => {
 		}),
 	};
 	expect(requiredValidate).toEqual({
+		empty: [
+			{
+				key: "required_rich_text",
+				localeCode: "en",
+				message: copy("server:core.fields.validation.required"),
+			},
+		],
+		emptyNestedNodes: [
+			{
+				key: "required_rich_text",
+				localeCode: "en",
+				message: copy("server:core.fields.validation.required"),
+			},
+		],
 		exists: [
 			{
 				key: "required_rich_text",

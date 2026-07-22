@@ -13,7 +13,11 @@ const IntroBrick = new BrickBuilder("intro", {
 	.addText("title", {
 		localized: true,
 	})
-	.addRichText("intro")
+	.addRichText("intro", {
+		validation: {
+			required: true,
+		},
+	})
 	.addTab("advanced_tab", {
 		details: {
 			label: copy("admin:bricks.intro.tabs.advanced_tab.label"),

@@ -1,5 +1,9 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
+import {
+	getObject,
+	richTextHasContent,
+} from "../../../../../utils/helpers/index.js";
 import { copy } from "../../../../i18n/index.js";
 import { defaultTextFieldAiGuidance } from "../../ai-guidance.js";
 import CustomField from "../../custom-field.js";
@@ -8,6 +12,7 @@ import type {
 	CFProps,
 	CFResponse,
 	CustomFieldAiFormatResponse,
+	CustomFieldErrorItem,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -57,6 +62,23 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 	}
 	protected override get defaultAiGuidance() {
 		return defaultTextFieldAiGuidance;
+	}
+	override get errors(): {
+		fieldType: CustomFieldErrorItem;
+		required: CustomFieldErrorItem;
+		zod: CustomFieldErrorItem;
+	} {
+		const errors = super.errors;
+
+		return {
+			...errors,
+			required: {
+				condition: (value: unknown) =>
+					errors.required.condition?.(value) === true ||
+					(getObject(value) !== null && !richTextHasContent(value)),
+				message: errors.required.message,
+			},
+		};
 	}
 	override get jsonSchema() {
 		const textNodeSchema = {
