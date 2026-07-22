@@ -39,19 +39,6 @@ const updateSingle: ServiceFn<
 	});
 	if (updateContextRes.error) return updateContextRes;
 
-	// ----------------------------------------------
-	// Update document
-
-	//* delete all bricks that belong to the document and version
-	const deleteBricksRes = await documentBrickServices.deleteMultiple(context, {
-		versionId: data.versionId,
-		documentId: data.documentId,
-		collectionKey: data.collectionKey,
-	});
-	if (deleteBricksRes.error) return deleteBricksRes;
-
-	//* create new bricks based on the given data
-
 	// Fire beforeUpsert transform hooks
 	const hookResponse = await executeHooks(
 		context,
@@ -85,6 +72,30 @@ const updateSingle: ServiceFn<
 	);
 	if (hookResponse.error) return hookResponse;
 
+	const checkBrickOrderRes = documentBrickServices.checks.checkDuplicateOrder(
+		hookResponse.data.bricks ?? [],
+	);
+	if (checkBrickOrderRes.error) return checkBrickOrderRes;
+
+	const checkValidateRes =
+		await documentBrickServices.checks.checkValidateBricksFields(context, {
+			collection: updateContextRes.data.collection,
+			bricks: hookResponse.data.bricks ?? [],
+			fields: hookResponse.data.fields ?? [],
+		});
+	if (checkValidateRes.error) return checkValidateRes;
+
+	// ----------------------------------------------
+	// Update document
+
+	//* delete all bricks that belong to the document and version
+	const deleteBricksRes = await documentBrickServices.deleteMultiple(context, {
+		versionId: data.versionId,
+		documentId: data.documentId,
+		collectionKey: data.collectionKey,
+	});
+	if (deleteBricksRes.error) return deleteBricksRes;
+
 	// Save bricks for the new version
 	const createMultipleBricks = await documentBrickServices.createMultiple(
 		context,
@@ -94,6 +105,7 @@ const updateSingle: ServiceFn<
 			bricks: hookResponse.data.bricks,
 			fields: hookResponse.data.fields,
 			collection: updateContextRes.data.collection,
+			skipValidation: true,
 		},
 	);
 	if (createMultipleBricks.error) return createMultipleBricks;

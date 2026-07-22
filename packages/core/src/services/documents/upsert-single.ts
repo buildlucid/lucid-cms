@@ -15,6 +15,7 @@ import {
 	documentVersionServices,
 	documentWorkflowServices,
 } from "../index.js";
+import cleanupFailedCreate from "./helpers/cleanup-failed-create.js";
 import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
 
 const upsertSingle: ServiceFn<
@@ -176,8 +177,27 @@ const upsertSingle: ServiceFn<
 				})
 			: undefined,
 	]);
-	if (createVersionRes.error) return createVersionRes;
-	if (workflowRes?.error) return workflowRes;
+
+	if (createVersionRes.error) {
+		if (data.documentId === undefined) {
+			await cleanupFailedCreate(context, {
+				collectionKey: data.collectionKey,
+				documentId: upsertDocRes.data.id,
+				tableName: tableNamesRes.data.document,
+			});
+		}
+		return createVersionRes;
+	}
+	if (workflowRes?.error) {
+		if (data.documentId === undefined) {
+			await cleanupFailedCreate(context, {
+				collectionKey: data.collectionKey,
+				documentId: upsertDocRes.data.id,
+				tableName: tableNamesRes.data.document,
+			});
+		}
+		return workflowRes;
+	}
 
 	await invalidateClientDocumentCache(context, data.collectionKey);
 

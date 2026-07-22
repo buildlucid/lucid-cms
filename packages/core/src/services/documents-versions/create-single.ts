@@ -8,6 +8,7 @@ import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { documentBrickServices } from "../index.js";
+import rollbackVersionCreate from "./helpers/rollback-version-create.js";
 
 /**
  * Creates a new version. This is always for the "latest" version type
@@ -39,55 +40,50 @@ const createSingle: ServiceFn<
 
 	const versionType = "latest";
 
-	if (data.collection.getData.revisions) {
-		//* make the current latest version a revision
-		const updateRes = await DocumentVersions.updateSingle(
+	const currentLatestRes = await DocumentVersions.selectSingle(
+		{
+			select: ["id"],
+			where: [
+				{
+					key: "document_id",
+					operator: "=",
+					value: data.documentId,
+				},
+				{
+					key: "type",
+					operator: "=",
+					value: versionType,
+				},
+			],
+		},
+		{
+			tableName: tableNamesRes.data.version,
+		},
+	);
+	if (currentLatestRes.error) return currentLatestRes;
+
+	const previousLatestId = currentLatestRes.data?.id;
+
+	if (previousLatestId !== undefined) {
+		//* retain the current latest as a rollback point until the new version is complete
+		const stagePreviousRes = await DocumentVersions.updateSingle(
 			{
 				where: [
 					{
-						key: "document_id",
+						key: "id",
 						operator: "=",
-						value: data.documentId,
-					},
-					{
-						key: "type",
-						operator: "=",
-						value: versionType,
+						value: previousLatestId,
 					},
 				],
 				data: {
 					type: "revision",
-					collection_migration_id: migrationIdRes.data,
-					created_by: data.userId,
 				},
 			},
 			{
 				tableName: tableNamesRes.data.version,
 			},
 		);
-		if (updateRes.error) return updateRes;
-	} else {
-		//* delete the current latest version
-		const deleteRes = await DocumentVersions.deleteSingle(
-			{
-				where: [
-					{
-						key: "document_id",
-						operator: "=",
-						value: data.documentId,
-					},
-					{
-						key: "type",
-						operator: "=",
-						value: versionType,
-					},
-				],
-			},
-			{
-				tableName: tableNamesRes.data.version,
-			},
-		);
-		if (deleteRes.error) return deleteRes;
+		if (stagePreviousRes.error) return stagePreviousRes;
 	}
 
 	// Create new latest version
@@ -111,7 +107,16 @@ const createSingle: ServiceFn<
 			tableName: tableNamesRes.data.version,
 		},
 	);
-	if (newVersionRes.error) return newVersionRes;
+	if (newVersionRes.error) {
+		await rollbackVersionCreate(context, {
+			collectionKey: data.collection.key,
+			documentId: data.documentId,
+			previousLatestId,
+			tableName: tableNamesRes.data.version,
+			versions: DocumentVersions,
+		});
+		return newVersionRes;
+	}
 
 	// ----------------------------------------------
 	// Fire beforeUpsert transform hooks
@@ -145,7 +150,17 @@ const createSingle: ServiceFn<
 			},
 		},
 	);
-	if (hookResponse.error) return hookResponse;
+	if (hookResponse.error) {
+		await rollbackVersionCreate(context, {
+			collectionKey: data.collection.key,
+			documentId: data.documentId,
+			newVersionId: newVersionRes.data.id,
+			previousLatestId,
+			tableName: tableNamesRes.data.version,
+			versions: DocumentVersions,
+		});
+		return hookResponse;
+	}
 
 	// Save bricks for the new version
 	const createMultipleBricks = await documentBrickServices.createMultiple(
@@ -158,7 +173,17 @@ const createSingle: ServiceFn<
 			collection: data.collection,
 		},
 	);
-	if (createMultipleBricks.error) return createMultipleBricks;
+	if (createMultipleBricks.error) {
+		await rollbackVersionCreate(context, {
+			collectionKey: data.collection.key,
+			documentId: data.documentId,
+			newVersionId: newVersionRes.data.id,
+			previousLatestId,
+			tableName: tableNamesRes.data.version,
+			versions: DocumentVersions,
+		});
+		return createMultipleBricks;
+	}
 
 	// ----------------------------------------------
 	// Fire afterUpsert hook
@@ -187,7 +212,65 @@ const createSingle: ServiceFn<
 			},
 		},
 	);
-	if (hookAfterRes.error) return hookAfterRes;
+	if (hookAfterRes.error) {
+		await rollbackVersionCreate(context, {
+			collectionKey: data.collection.key,
+			documentId: data.documentId,
+			newVersionId: newVersionRes.data.id,
+			previousLatestId,
+			tableName: tableNamesRes.data.version,
+			versions: DocumentVersions,
+		});
+		return hookAfterRes;
+	}
+
+	if (previousLatestId !== undefined) {
+		const finalizePreviousRes = data.collection.getData.revisions
+			? await DocumentVersions.updateSingle(
+					{
+						where: [
+							{
+								key: "id",
+								operator: "=",
+								value: previousLatestId,
+							},
+						],
+						data: {
+							collection_migration_id: migrationIdRes.data,
+							created_by: data.userId,
+						},
+					},
+					{
+						tableName: tableNamesRes.data.version,
+					},
+				)
+			: await DocumentVersions.deleteSingle(
+					{
+						where: [
+							{
+								key: "id",
+								operator: "=",
+								value: previousLatestId,
+							},
+						],
+					},
+					{
+						tableName: tableNamesRes.data.version,
+					},
+				);
+
+		if (finalizePreviousRes.error) {
+			await rollbackVersionCreate(context, {
+				collectionKey: data.collection.key,
+				documentId: data.documentId,
+				newVersionId: newVersionRes.data.id,
+				previousLatestId,
+				tableName: tableNamesRes.data.version,
+				versions: DocumentVersions,
+			});
+			return finalizePreviousRes;
+		}
+	}
 
 	return {
 		error: undefined,
