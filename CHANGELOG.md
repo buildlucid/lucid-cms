@@ -7,6 +7,11 @@
 - Added support for filtering documents by custom fields on related documents, with generated types for implicit and collection scoped relation filters. ([5bfea68](https://github.com/buildlucid/lucid-cms/commit/5bfea68d80e1436ac2ac481d4be1cc057d3480f3))
 - Added shared host bootstrapping, runtime-defined host entrypoints and config dependency tracking for framework integrations such as Astro. ([32c13e9](https://github.com/buildlucid/lucid-cms/commit/32c13e966c6bcd4c019951c213c22fefe0d9deef))
 - Added risk-aware automatic collection migrations, with safe schema changes applied automatically, approval gates for warning and destructive operations, grouped migration status reporting, and runtime schema checks for changed column definitions. The `migrate` command now uses `--yes` and `--allow-destructive` for non-interactive approval. ([e822ff5](https://github.com/buildlucid/lucid-cms/commit/e822ff507c1759ec2230415b4dbd182a2c6f633e))
+- Added collection-specific document permissions and client integration read scopes, generated automatically for every registered collection. ([ff60146](https://github.com/buildlucid/lucid-cms/commit/ff60146a2c6f6505162f28cdf560b9716f005048))
+
+### Breaking Changes:
+
+- Simplified access configuration by removing `access` from `lucid.config` and custom permission overrides from collections, environments and workflows. Lucid now uses internal permissions and collection-generated document permissions. ([ff60146](https://github.com/buildlucid/lucid-cms/commit/ff60146a2c6f6505162f28cdf560b9716f005048))
 
 ### Bug Fixes:
 
@@ -14,6 +19,7 @@
 - Fixed translation and custom migration package sources failing to resolve in monorepo apps. ([872609c](https://github.com/buildlucid/lucid-cms/commit/872609c16645d7611919df54db1452cd7f9543e4))
 - Fixed required rich text custom fields accepting empty editor content. ([2a27252](https://github.com/buildlucid/lucid-cms/commit/2a272527692ccc7922c8624d89ffe5750ad2365c))
 - Fixed extra space appearing below the document builder after switching tabs. ([385c551](https://github.com/buildlucid/lucid-cms/commit/385c5515dcd36af1b2d59547cb153d35f5074a69))
+- Fixed failed document creates and updates leaving orphaned or empty documents when using database adapters without transaction support. ([8e9c911](https://github.com/buildlucid/lucid-cms/commit/8e9c911f4ced55856b9d5bbdca1e1c00f2c8e3e6))
 
 ## v0.16.0-alpha.0
 
