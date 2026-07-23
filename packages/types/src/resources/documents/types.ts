@@ -317,7 +317,7 @@ export interface DocumentVersion {
 }
 
 export interface CollectionDocument<
-	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
+	TCollectionKey extends string = CollectionDocumentKey,
 > {
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;

@@ -250,18 +250,22 @@ export default configureLucid({
 			pagesPlugin({
 				collections: [
 					{
-						collectionKey: "page",
+						collection: "page",
 						localized: true,
-						displayFullSlug: true,
 						prefix: {
 							en: "en",
 							fr: "fr",
 						},
+						ui: {
+							fullSlug: true,
+						},
 					},
 					{
-						collectionKey: "test",
+						collection: "test",
 						localized: true,
-						displayFullSlug: true,
+						ui: {
+							fullSlug: true,
+						},
 					},
 				],
 			}),

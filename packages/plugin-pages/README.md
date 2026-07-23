@@ -37,12 +37,14 @@ export default configureLucid({
 		plugins: [
 			pagesPlugin({
 				collections: [{
-					collectionKey: "page",
+					collection: "page",
 					localized: true,
-					displayFullSlug: true,
 					prefix: {
 						en: "en",
 						fr: "fr",
+					},
+					ui: {
+						fullSlug: true,
 					},
 				}],
 			}),
@@ -53,23 +55,29 @@ export default configureLucid({
 
 ## Configuration
 
-This plugin offers several configuration options to control its behavior. Aside from the `collectionKey`, all of these options are optional and have default values.
+This plugin offers several configuration options to control its behavior. Aside from `collection`, all of these options are optional and have default values.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `collectionKey` | `string` | - | The key of the collection that you wish to enable the plugin on |
+| `collection` | `string` | - | The key of the collection that you wish to enable the plugin on |
 | `localized` | `boolean` | `false` | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields |
-| `displayFullSlug` | `boolean` | `false` | If set to `true`, the plugin will make the `fullSlug` field visible in the documents page builder |
 | `prefix` | `string \| Record<string, string>` | - | Optional prefix prepended to the start of the computed `fullSlug` for the collection |
+| `ui.fullSlug` | `boolean` | `false` | Shows the computed `fullSlug` field in the document builder and listing |
+| `ui.tab` | `string` | - | Places the plugin fields in an existing matching tab |
+| `ui.widths` | `Partial<Record<"fullSlug" \| "slug" \| "parentPage", FieldWidth>>` | - | Overrides the admin grid width of individual plugin fields |
 | `unique` | `boolean \| { fields?: string[] }` | `true` | Controls route uniqueness validation for computed `fullSlug` values |
 
 ### localized
 
 If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields. This means that in the documents page builder, the `slug` and `fullSlug` fields will require translations for each locale that you have registered in your Lucid CMS config file.
 
-### displayFullSlug
+### UI
 
-If set to `true`, the plugin will make the `fullSlug` field visible in the documents page builder, along with making it filterable and shown in the document listing. This is mostly intended for testing and development purposes, though there is no reason it can't be used in production. Please note, however, that the `fullSlug` field is always calculated, meaning it is not possible to edit this via the document page builder, and even if this option is set to `true`, the field will be disabled.
+Set `ui.fullSlug` to `true` to show the computed `fullSlug` in the document builder and listing. The field remains disabled because its value is always calculated by the plugin.
+
+Set `ui.tab` to an existing tab key to place all three plugin fields in that tab, regardless of its position. When the tab does not exist, the option is ignored and the fields retain their normal positional placement.
+
+Fields use Lucid's 12-column admin grid. When `fullSlug` is visible, it and `slug` each use half a row and `parentPage` uses a full row. Otherwise, all fields use a full row. Override individual values through `ui.widths` using `12`, `8`, `6`, `4`, or `3`.
 
 ### prefix
 

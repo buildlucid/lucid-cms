@@ -47,12 +47,14 @@ export default configureLucid({
 			pagesPlugin({
 				collections: [
 					{
-						collectionKey: PageCollection.key,
+						collection: PageCollection.key,
 						localized: true,
-						displayFullSlug: true,
 						prefix: {
 							en: "en",
 							fr: "fr",
+						},
+						ui: {
+							fullSlug: true,
 						},
 					},
 				],

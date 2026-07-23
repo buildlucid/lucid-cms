@@ -12,6 +12,8 @@ const registerFields = (
 	collection: WritableDraft<CollectionBuilder>,
 	config: CollectionConfig,
 ) => {
+	if (config.ui.tab) collection.addToTab(config.ui.tab);
+
 	collection
 		.addText(constants.fields.fullSlug.key, {
 			details: {
@@ -21,13 +23,14 @@ const registerFields = (
 			},
 			localized: config.localized,
 			ui: {
-				hidden: !config.displayFullSlug,
+				hidden: !config.ui.fullSlug,
 				disabled: true,
+				width: config.ui.widths.fullSlug,
 			},
 			ai: {
 				enabled: false,
 			},
-			showInList: config.displayFullSlug,
+			showInList: config.ui.fullSlug,
 		})
 		.addText(constants.fields.slug.key, {
 			details: {
@@ -39,6 +42,7 @@ const registerFields = (
 			ui: {
 				hidden: false,
 				disabled: false,
+				width: config.ui.widths.slug,
 			},
 			ai: {
 				enabled: false,
@@ -83,6 +87,7 @@ const registerFields = (
 			ui: {
 				hidden: false,
 				disabled: false,
+				width: config.ui.widths.parentPage,
 			},
 			showInList: true,
 		});

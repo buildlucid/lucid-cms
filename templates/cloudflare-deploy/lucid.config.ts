@@ -22,8 +22,7 @@ export default configureLucid({
 			pagesPlugin({
 				collections: [
 					{
-						collectionKey: PageCollection.key,
-						displayFullSlug: false,
+						collection: PageCollection.key,
 					},
 				],
 			}),

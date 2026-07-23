@@ -145,9 +145,16 @@ describe("fullSlug route uniqueness", () => {
 
 	test("uses a custom duplicate message when supplied", async () => {
 		const collection = {
-			collectionKey: "pages",
+			collection: "pages",
 			localized: false,
-			displayFullSlug: false,
+			ui: {
+				fullSlug: false,
+				widths: {
+					fullSlug: 12,
+					slug: 12,
+					parentPage: 12,
+				},
+			},
 			unique: true,
 		} satisfies CollectionConfig;
 		const duplicateMessage = copy(
@@ -225,9 +232,16 @@ describe("fullSlug route uniqueness", () => {
 				},
 			});
 		const collection = {
-			collectionKey: "docs",
+			collection: "docs",
 			localized: false,
-			displayFullSlug: false,
+			ui: {
+				fullSlug: false,
+				widths: {
+					fullSlug: 12,
+					slug: 12,
+					parentPage: 12,
+				},
+			},
 			unique: {
 				fields: ["product", "version"],
 			},
@@ -301,9 +315,16 @@ describe("fullSlug route uniqueness", () => {
 
 	test("unique false disables route uniqueness validation", async () => {
 		const collection = {
-			collectionKey: "pages",
+			collection: "pages",
 			localized: false,
-			displayFullSlug: false,
+			ui: {
+				fullSlug: false,
+				widths: {
+					fullSlug: 12,
+					slug: 12,
+					parentPage: 12,
+				},
+			},
 			unique: false,
 		} satisfies CollectionConfig;
 
@@ -398,9 +419,16 @@ describe("fullSlug route uniqueness", () => {
 				multiple: true,
 			});
 		const collection = {
-			collectionKey: "pages",
+			collection: "pages",
 			localized: true,
-			displayFullSlug: false,
+			ui: {
+				fullSlug: false,
+				widths: {
+					fullSlug: 12,
+					slug: 12,
+					parentPage: 12,
+				},
+			},
 			unique: {
 				fields: ["product", "media", "owner", "related"],
 			},

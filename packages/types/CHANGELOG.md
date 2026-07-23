@@ -1,5 +1,9 @@
 # @lucidcms/types
 
+## 0.4.0 (unreleased)
+
+- Updated collection document generics to support collection-specific callback types.
+
 ## 0.3.0
 
 - Added public range custom field types.

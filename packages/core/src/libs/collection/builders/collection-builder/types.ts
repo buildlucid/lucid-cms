@@ -1,5 +1,6 @@
 import type {
 	CollectionDocument,
+	CollectionDocumentKey,
 	EnvironmentVariables,
 	LucidBrickTableName,
 	LucidDocumentTableName,
@@ -32,12 +33,20 @@ export type CollectionGroupConfig = {
 	order: number | null;
 };
 
-export type CollectionPreviewURLResolver = (props: {
-	document: CollectionDocument;
+export type CollectionPreviewURLResolverProps<
+	TCollectionKey extends string = CollectionDocumentKey,
+> = {
+	document: CollectionDocument<TCollectionKey>;
 	env: EnvironmentVariables | null;
 	locale: string;
 	tenantKey: string | null;
-}) => string | URL | null | Promise<string | URL | null>;
+};
+
+export type CollectionPreviewURLResolver<
+	TCollectionKey extends string = CollectionDocumentKey,
+> = (
+	props: CollectionPreviewURLResolverProps<TCollectionKey>,
+) => string | URL | null | Promise<string | URL | null>;
 
 export type CollectionPreviewBreakpointConfig = {
 	key: string;
@@ -51,8 +60,12 @@ export type CollectionPreviewBreakpoint = {
 	width: number;
 };
 
-export type CollectionPreviewConfig = {
-	url: CollectionPreviewURLResolver;
+export type CollectionPreviewConfig<
+	TCollectionKey extends string = CollectionDocumentKey,
+> = {
+	url(
+		props: CollectionPreviewURLResolverProps<TCollectionKey>,
+	): string | URL | null | Promise<string | URL | null>;
 	/** How long generated preview links remain valid, in seconds. Defaults to one hour. */
 	expiresIn?: number;
 	/** Named viewport widths shown in the builder preview. */
@@ -88,8 +101,10 @@ export type PublishingWorkflowConfig = {
 	stages: PublishingWorkflowStageConfig[];
 };
 
-export type CollectionConfigSchemaType = {
-	key: string;
+export type CollectionConfigSchemaType<
+	TCollectionKey extends string = CollectionDocumentKey,
+> = {
+	key: TCollectionKey;
 	mode: "single" | "multiple";
 	group?: CollectionGroupConfigInput;
 	tenants?: string[];
@@ -128,7 +143,7 @@ export type CollectionConfigSchemaType = {
 		collectionVersions?: CollectionEnvironmentVersionMap;
 	}>;
 	revisionRetentionDays?: number | false;
-	preview?: CollectionPreviewConfig;
+	preview?: CollectionPreviewConfig<TCollectionKey>;
 	hooks?: CollectionBuilderHooks[];
 	bricks?: {
 		fixed?: Array<BrickBuilder>;

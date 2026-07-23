@@ -11,12 +11,17 @@ import type {
 	CollectionListFieldOptions,
 } from "./types.js";
 
-class CollectionBuilder extends FieldBuilder {
-	key: string;
-	config: CollectionConfigSchemaType;
+class CollectionBuilder<
+	const TCollectionKey extends string = string,
+> extends FieldBuilder {
+	key: TCollectionKey;
+	config: CollectionConfigSchemaType<TCollectionKey>;
 	listing: string[] = [];
 	labelFields: string[] = [];
-	constructor(key: string, config: Omit<CollectionConfigSchemaType, "key">) {
+	constructor(
+		key: TCollectionKey,
+		config: Omit<CollectionConfigSchemaType<TCollectionKey>, "key">,
+	) {
 		super();
 		this.key = key;
 		this.config = {

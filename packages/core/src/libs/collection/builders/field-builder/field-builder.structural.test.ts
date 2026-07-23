@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import LucidError from "../../../../utils/errors/lucid-error.js";
 import type { CFConfig } from "../../custom-fields/types.js";
 import BrickBuilder from "../brick-builder/index.js";
 import FieldBuilder from "./index.js";
@@ -168,5 +169,47 @@ describe("section and collapsible builder support", () => {
 		const section = instance.fieldTree[0] as CFConfig<"section">;
 		expect(section.ui?.width).toBe(6);
 		expect(section.fields[0]?.ui?.width).toBe(4);
+	});
+});
+
+describe("tab targeting", () => {
+	test("fields can be added to an existing tab", () => {
+		const instance = new FieldBuilder()
+			.addTab("content")
+			.addText("title")
+			.addTab("settings")
+			.addText("theme")
+			.addToTab("content")
+			.addText("summary");
+
+		const contentTab = instance.fieldTree[0] as CFConfig<"tab">;
+		const settingsTab = instance.fieldTree[1] as CFConfig<"tab">;
+
+		expect(contentTab.fields.map((field) => field.key)).toEqual([
+			"title",
+			"summary",
+		]);
+		expect(settingsTab.fields.map((field) => field.key)).toEqual(["theme"]);
+	});
+
+	test("targeting a missing tab preserves the current field position", () => {
+		const instance = new FieldBuilder()
+			.addText("title")
+			.addToTab("routing")
+			.addText("slug");
+
+		expect(instance.fieldTree.map((field) => field.key)).toEqual([
+			"title",
+			"slug",
+		]);
+	});
+
+	test("targeting a key owned by another field type throws", () => {
+		const instance = new FieldBuilder().addText("routing");
+
+		expect(() => instance.addToTab("routing")).toThrow(LucidError);
+		expect(() => instance.addToTab("routing")).toThrow(
+			"Cannot add fields to tab 'routing' because that key belongs to a text field.",
+		);
 	});
 });

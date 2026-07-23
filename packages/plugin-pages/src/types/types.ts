@@ -1,4 +1,7 @@
+import type { FieldWidth } from "@lucidcms/core/types";
+
 export type CollectionPrefix = string | Record<string, string>;
+export type PagesFieldKey = "fullSlug" | "slug" | "parentPage";
 export type CollectionUnique =
 	| boolean
 	| {
@@ -11,26 +14,36 @@ export type CollectionUnique =
 			fields?: string[];
 	  };
 
+export interface CollectionUI {
+	fullSlug?: boolean;
+	tab?: string;
+	widths?: Partial<Record<PagesFieldKey, FieldWidth>>;
+}
+
 export interface PluginOptions {
 	collections: Array<{
-		collectionKey: string;
+		collection: string;
 		localized?: boolean;
-		displayFullSlug?: boolean;
 		prefix?: CollectionPrefix;
+		ui?: CollectionUI;
 		unique?: CollectionUnique;
 		// fallbackSlugSource?: string;
 	}>;
 }
 
-export interface PluginOptionsInternal extends PluginOptions {
+export interface PluginOptionsInternal {
 	collections: Array<CollectionConfig>;
 }
 
 export interface CollectionConfig {
-	collectionKey: string;
+	collection: string;
 	localized: boolean;
-	displayFullSlug: boolean;
 	prefix?: CollectionPrefix;
+	ui: {
+		fullSlug: boolean;
+		tab?: string;
+		widths: Record<PagesFieldKey, FieldWidth>;
+	};
 	unique: CollectionUnique;
 	// fallbackSlugSource: string | undefined;
 }

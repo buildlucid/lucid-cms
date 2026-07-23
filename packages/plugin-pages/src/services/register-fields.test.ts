@@ -1,4 +1,5 @@
 import { CollectionBuilder, copy } from "@lucidcms/core";
+import type { CFConfig } from "@lucidcms/core/types";
 import { expect, test } from "vitest";
 import type { ZodType } from "zod";
 import registerFields from "./register-fields.js";
@@ -22,9 +23,16 @@ test("slug validation returns specific English zod messages", () => {
 	});
 
 	registerFields(collection as never, {
-		collectionKey: "pages",
+		collection: "pages",
 		localized: false,
-		displayFullSlug: true,
+		ui: {
+			fullSlug: true,
+			widths: {
+				fullSlug: 6,
+				slug: 6,
+				parentPage: 12,
+			},
+		},
 		unique: true,
 	});
 
@@ -65,4 +73,81 @@ test("slug validation returns specific English zod messages", () => {
 		code: "custom",
 		message: slugFormatMessage,
 	});
+});
+
+test("registers fields in an existing named tab with configured widths", () => {
+	const collection = new CollectionBuilder("pages", {
+		mode: "multiple",
+		details: {
+			name: "Pages",
+			singularName: "Page",
+		},
+	})
+		.addTab("content")
+		.addText("title")
+		.addTab("settings")
+		.addText("theme");
+
+	registerFields(collection as never, {
+		collection: "pages",
+		localized: false,
+		ui: {
+			fullSlug: true,
+			tab: "content",
+			widths: {
+				fullSlug: 6,
+				slug: 6,
+				parentPage: 12,
+			},
+		},
+		unique: true,
+	});
+
+	const contentTab = collection.fieldTree[0] as CFConfig<"tab">;
+	const settingsTab = collection.fieldTree[1] as CFConfig<"tab">;
+	expect(contentTab.fields.map((field) => field.key)).toEqual([
+		"title",
+		"fullSlug",
+		"slug",
+		"parentPage",
+	]);
+	expect(settingsTab.fields.map((field) => field.key)).toEqual(["theme"]);
+	expect(contentTab.fields.map((field) => field.ui?.width)).toEqual([
+		undefined,
+		6,
+		6,
+		12,
+	]);
+});
+
+test("preserves normal field placement when the configured tab is missing", () => {
+	const collection = new CollectionBuilder("pages", {
+		mode: "multiple",
+		details: {
+			name: "Pages",
+			singularName: "Page",
+		},
+	}).addText("title");
+
+	registerFields(collection as never, {
+		collection: "pages",
+		localized: false,
+		ui: {
+			fullSlug: false,
+			tab: "routing",
+			widths: {
+				fullSlug: 12,
+				slug: 12,
+				parentPage: 12,
+			},
+		},
+		unique: true,
+	});
+
+	expect(collection.fieldTree.map((field) => field.key)).toEqual([
+		"title",
+		"fullSlug",
+		"slug",
+		"parentPage",
+	]);
 });

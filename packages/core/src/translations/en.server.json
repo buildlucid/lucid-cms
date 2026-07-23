@@ -90,6 +90,8 @@
 	"core.database.migrations.failed": "Database migration failed.",
 	"core.collections.fields.duplicates": "Duplicate field keys found ({{keys}}) in {{type}}: {{typeKey}}.",
 	"core.fields.repeater.validation.depth.message": "Repeater depth is too high in {{type}}: {{typeKey}} with key: {{repeaterKey}}. Please reduce the depth from {{depth}} to {{maxRepeaterDepth}}.",
+	"core.fields.repeater.validation.unclosed": "Unclosed repeaters found ({{keys}}) in {{type}}: {{typeKey}}. Call .endRepeater() for each repeater.",
+	"core.fields.tab.target.invalid": "Cannot add fields to tab '{{key}}' because that key belongs to a {{type}} field.",
 	"core.fields.condition.target.not.found": "The condition on field '{{field}}' references '{{target}}' which does not exist in {{type}}: {{typeKey}}.",
 	"core.fields.condition.target.self": "The condition on field '{{field}}' cannot reference itself in {{type}}: {{typeKey}}.",
 	"core.fields.condition.target.invalid.type": "The condition on field '{{field}}' references '{{target}}' which is a {{targetType}} field and cannot be used as a condition target in {{type}}: {{typeKey}}.",

@@ -1,5 +1,6 @@
 import type { InternalCollectionDocument } from "@lucidcms/core/types";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { PluginOptionsInternal } from "../../types/types.js";
 
 const mocks = vi.hoisted(() => ({
 	getParentFields: vi.fn(),
@@ -23,13 +24,20 @@ const context = {
 const options = {
 	collections: [
 		{
-			collectionKey: "pages",
+			collection: "pages",
 			localized: false,
-			displayFullSlug: true,
+			ui: {
+				fullSlug: true,
+				widths: {
+					fullSlug: 6,
+					slug: 6,
+					parentPage: 12,
+				},
+			},
 			unique: true,
 		},
 	],
-};
+} satisfies PluginOptionsInternal;
 
 const createDocument = (props: {
 	id: number;

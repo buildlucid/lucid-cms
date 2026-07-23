@@ -1,5 +1,13 @@
 # @lucidcms/plugin-pages
 
+## 0.6.0 (unreleased)
+
+- Replaced `collectionKey` with `collection` in collection options.
+- Moved full slug visibility to `ui.fullSlug`.
+- Added `ui.tab` for placing plugin fields in an existing named collection tab.
+- Added `ui.widths` for overriding individual plugin field widths.
+- Added responsive field width defaults, including a 50/50 `fullSlug` and `slug` row when the full slug is visible.
+
 ## 0.5.1
 
 - Bumped `@lucidcms/core` to `0.16.0-alpha.0`.

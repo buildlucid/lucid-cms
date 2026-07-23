@@ -105,4 +105,27 @@ test("field tree cache invalidates when adding tabs and external fields", async 
 	brick.addFields(childFieldBuilder);
 	const afterAddFieldsTree = brick.fieldTree;
 	expect(afterAddFieldsTree).not.toBe(afterTabTree);
+	const contentTab = afterAddFieldsTree[1];
+	if (contentTab?.type === "tab") {
+		expect(contentTab.fields.map((field) => field.key)).toEqual(["child_text"]);
+	}
+});
+
+test("external fields preserve and continue their tab context", () => {
+	const childFields = new FieldBuilder().addTab("settings").addText("theme");
+	const brick = new BrickBuilder("brick")
+		.addTab("content")
+		.addText("title")
+		.addFields(childFields)
+		.addText("description");
+
+	const contentTab = brick.fieldTree[0];
+	const settingsTab = brick.fieldTree[1];
+	if (contentTab?.type === "tab" && settingsTab?.type === "tab") {
+		expect(contentTab.fields.map((field) => field.key)).toEqual(["title"]);
+		expect(settingsTab.fields.map((field) => field.key)).toEqual([
+			"theme",
+			"description",
+		]);
+	}
 });

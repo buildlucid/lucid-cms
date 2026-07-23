@@ -1,3 +1,5 @@
+import LucidError from "../../../../utils/errors/lucid-error.js";
+import { translate } from "../../../i18n/index.js";
 import type CustomField from "../../custom-fields/custom-field.js";
 import CheckboxCustomField from "../../custom-fields/fields/checkbox/custom-field.js";
 import CodeCustomField from "../../custom-fields/fields/code/custom-field.js";
@@ -60,6 +62,7 @@ class FieldBuilder {
 		fieldKeys: [],
 		repeaterDepth: {},
 	};
+	activeTabKey: string | null = null;
 	private cachedFieldTree: CFConfig<FieldTypes>[] | null = null;
 	private cachedPersistedFieldTree: CFConfig<FieldTypes>[] | null = null;
 	private cachedClientFieldTree: CFConfig<FieldTypes>[] | null = null;
@@ -72,6 +75,10 @@ class FieldBuilder {
 
 	private registerField(key: string, field: CustomField<FieldTypes>) {
 		normalizeFieldCopy(field.config);
+
+		if (field.type !== "tab") {
+			field.tabParent = this.activeTabKey;
+		}
 
 		const container = this.containerStack[this.containerStack.length - 1];
 		if (container && container.kind !== "repeater" && field.type !== "tab") {
@@ -105,7 +112,27 @@ class FieldBuilder {
 	public addTab(key: string, props?: CFProps<"tab">) {
 		//* tabs restart the root grouping, so any dangling structural containers close
 		this.containerStack = [];
+		this.activeTabKey = key;
 		return this.registerField(key, new TabCustomField(key, props));
+	}
+	public addToTab(key: string) {
+		const field = this.fields.get(key);
+		if (!field) return this;
+
+		if (field.type !== "tab") {
+			throw new LucidError({
+				message: translate("server:core.fields.tab.target.invalid", {
+					data: {
+						key,
+						type: field.type,
+					},
+				}),
+			});
+		}
+
+		this.containerStack = [];
+		this.activeTabKey = key;
+		return this;
 	}
 	public addText(key: string, props?: CFProps<"text">) {
 		return this.registerField(key, new TextCustomField(key, props));
@@ -210,7 +237,7 @@ class FieldBuilder {
 		});
 
 		const result: CFConfig<FieldTypes>[] = [];
-		let currentTab: CFConfig<"tab"> | null = null;
+		const tabMap: Map<string, CFConfig<"tab">> = new Map();
 		const repeaterMap: Map<string, CFConfig<"repeater">> = new Map();
 		const structuralMap: Map<string, StructuralFieldConfig> = new Map();
 
@@ -218,8 +245,9 @@ class FieldBuilder {
 			const config = JSON.parse(JSON.stringify(field.config));
 
 			if (field.type === "tab") {
-				if (currentTab) result.push(currentTab);
-				currentTab = config as CFConfig<"tab">;
+				const tab = config as CFConfig<"tab">;
+				tabMap.set(field.key, tab);
+				result.push(tab);
 				continue;
 			}
 
@@ -248,11 +276,18 @@ class FieldBuilder {
 				continue;
 			}
 
-			const targetPush = currentTab ? currentTab.fields : result;
-			targetPush.push(config);
-		}
+			if (mode === "full" && field.tabParent) {
+				const tab = tabMap.get(field.tabParent);
+				if (tab) {
+					tab.fields.push(
+						config as Exclude<CFConfig<FieldTypes>, TabFieldConfig>,
+					);
+					continue;
+				}
+			}
 
-		if (currentTab) result.push(currentTab);
+			result.push(config);
+		}
 
 		return result;
 	}

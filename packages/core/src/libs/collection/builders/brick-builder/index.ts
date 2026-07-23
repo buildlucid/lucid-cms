@@ -26,9 +26,13 @@ class BrickBuilder extends FieldBuilder {
 	public addFields(Builder: BrickBuilder | FieldBuilder) {
 		const fields = Array.from(Builder.fields.values());
 		for (const field of fields) {
+			if (field.type !== "tab" && field.tabParent === null) {
+				field.tabParent = this.activeTabKey;
+			}
 			this.fields.set(field.key, field);
 			this.meta.fieldKeys.push(field.key);
 		}
+		this.activeTabKey = Builder.activeTabKey ?? this.activeTabKey;
 		this.invalidateFieldTreeCache();
 		return this;
 	}

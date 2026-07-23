@@ -48,7 +48,7 @@ const versionPromoteHandler =
 			documentId: data.data.documentId,
 			versionId: data.data.versionId,
 			versionType: data.data.versionType,
-			collectionKey: targetCollectionRes.data.collectionKey,
+			collectionKey: targetCollectionRes.data.collection,
 			tenantKey: data.meta.tenantKey,
 			tables: data.meta.collectionTableNames,
 		});
@@ -69,7 +69,7 @@ const versionPromoteHandler =
 					false,
 					context.config.localization.defaultLocale,
 					docVersionFieldRes.data || [],
-					targetCollectionRes.data.collectionKey,
+					targetCollectionRes.data.collection,
 				),
 				fullSlug: fieldResToSchema(
 					constants.fields.fullSlug.key,
@@ -94,7 +94,7 @@ const versionPromoteHandler =
 					documentId: data.data.documentId,
 					versionType: data.data.versionType,
 					defaultLocale: context.config.localization.defaultLocale,
-					collectionKey: targetCollectionRes.data.collectionKey,
+					collectionKey: targetCollectionRes.data.collection,
 					tenantKey: data.meta.tenantKey,
 					fields: {
 						parentPage: parentPage,
@@ -106,7 +106,7 @@ const versionPromoteHandler =
 				const parentFieldsRes = await getParentFields(context, {
 					defaultLocale: context.config.localization.defaultLocale,
 					versionType: data.data.versionType,
-					collectionKey: targetCollectionRes.data.collectionKey,
+					collectionKey: targetCollectionRes.data.collection,
 					tenantKey: data.meta.tenantKey,
 					fields: {
 						parentPage: parentPage,
@@ -150,7 +150,7 @@ const versionPromoteHandler =
 			const descendantsRes = await getDescendantFields(context, {
 				ids: [data.data.documentId],
 				versionType: data.data.versionType,
-				collectionKey: targetCollectionRes.data.collectionKey,
+				collectionKey: targetCollectionRes.data.collection,
 				tables: data.meta.collectionTableNames,
 			});
 			if (descendantsRes.error) return descendantsRes;
@@ -174,7 +174,7 @@ const versionPromoteHandler =
 					collectionInstance: data.meta.collection,
 					projectedFullSlugs,
 					versionType: data.data.versionType,
-					collectionKey: targetCollectionRes.data.collectionKey,
+					collectionKey: targetCollectionRes.data.collection,
 					tenantKey: data.meta.tenantKey,
 					tables: data.meta.collectionTableNames,
 					excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),

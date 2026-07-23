@@ -10,9 +10,16 @@ const localization = {
 } as Config["localization"];
 
 const baseCollection = {
-	collectionKey: "pages",
+	collection: "pages",
 	localized: false,
-	displayFullSlug: false,
+	ui: {
+		fullSlug: false,
+		widths: {
+			fullSlug: 12,
+			slug: 12,
+			parentPage: 12,
+		},
+	},
 	unique: true,
 } satisfies CollectionConfig;
 

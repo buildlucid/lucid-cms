@@ -15,6 +15,7 @@ import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
 import checkField from "./checks/check-field.js";
 import checkFieldConditions from "./checks/check-field-conditions.js";
 import checkLocales from "./checks/check-locales.js";
+import checkOpenRepeaters from "./checks/check-open-repeaters.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import checkTenants from "./checks/check-tenants.js";
 import ConfigSchema from "./config-schema.js";
@@ -174,6 +175,11 @@ const processConfig = async (
 				collection.key,
 				collection.meta.repeaterDepth,
 			);
+			checkOpenRepeaters(
+				"collection",
+				collection.key,
+				collection.repeaterStack,
+			);
 
 			for (const brick of collection.brickInstances) {
 				BrickConfigSchema.parse(brick.config);
@@ -185,6 +191,7 @@ const processConfig = async (
 				checkDuplicateFieldKeys("brick", brick.key, brick.meta.fieldKeys);
 				checkFieldConditions("brick", brick.key, brick);
 				checkRepeaterDepth("brick", brick.key, brick.meta.repeaterDepth);
+				checkOpenRepeaters("brick", brick.key, brick.repeaterStack);
 			}
 		}
 

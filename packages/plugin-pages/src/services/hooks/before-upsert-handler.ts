@@ -87,7 +87,7 @@ const beforeUpsertHandler =
 				documentId: data.data.documentId,
 				versionType: data.data.versionType,
 				defaultLocale: context.config.localization.defaultLocale,
-				collectionKey: targetCollectionRes.data.collectionKey,
+				collectionKey: targetCollectionRes.data.collection,
 				tenantKey: data.meta.tenantKey,
 				fields: {
 					parentPage: parentPage,
@@ -99,7 +99,7 @@ const beforeUpsertHandler =
 			const parentFieldsRes = await getParentFields(context, {
 				defaultLocale: context.config.localization.defaultLocale,
 				versionType: data.data.versionType,
-				collectionKey: targetCollectionRes.data.collectionKey,
+				collectionKey: targetCollectionRes.data.collection,
 				tenantKey: data.meta.tenantKey,
 				fields: {
 					parentPage: parentPage,
@@ -143,7 +143,7 @@ const beforeUpsertHandler =
 		const descendantsRes = await getDescendantFields(context, {
 			ids: [data.data.documentId],
 			versionType: data.data.versionType,
-			collectionKey: targetCollectionRes.data.collectionKey,
+			collectionKey: targetCollectionRes.data.collection,
 			tables: data.meta.collectionTableNames,
 		});
 		if (descendantsRes.error) return descendantsRes;
@@ -165,7 +165,7 @@ const beforeUpsertHandler =
 			collectionInstance: data.meta.collection,
 			projectedFullSlugs,
 			versionType: data.data.versionType,
-			collectionKey: targetCollectionRes.data.collectionKey,
+			collectionKey: targetCollectionRes.data.collection,
 			tenantKey: data.meta.tenantKey,
 			tables: data.meta.collectionTableNames,
 			excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
