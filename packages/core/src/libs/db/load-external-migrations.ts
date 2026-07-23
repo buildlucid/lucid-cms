@@ -135,6 +135,7 @@ const loadExternalMigrations = async (props: {
 
 		//* cache-busted so edits are picked up across config reloads (eg. dev watch mode)
 		const migrationModule: { default?: unknown } = await import(
+			/*! @vite-ignore */
 			`${pathToFileURL(filePath).href}?t=${Date.now()}`
 		);
 		if (typeof migrationModule.default !== "function") {

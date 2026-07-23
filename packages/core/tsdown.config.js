@@ -27,7 +27,11 @@ export default defineConfig({
 	sourcemap: true,
 	clean: true,
 	metafile: true,
-	minify: true,
+	minify: {
+		codegen: {
+			legalComments: "inline",
+		},
+	},
 	platform: "node",
 	unbundle: true,
 });

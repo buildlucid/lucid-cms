@@ -21,7 +21,10 @@ export type ResolvedLucidProject = BuildProject & {
 };
 
 const loadBridge = async (entrypoint: string): Promise<LucidAstroBridge> => {
-	const module = (await import(entrypoint)) as {
+	const module = (await import(
+		/* @vite-ignore */
+		entrypoint
+	)) as {
 		default?: LucidAstroBridge;
 	};
 	const bridge = module.default;
@@ -69,7 +72,10 @@ export const loadProject = async (
 
 	const bridge = await loadBridge(bridgeEntrypoint);
 	const integrationModule = integrationEntrypoint
-		? ((await import(integrationEntrypoint)) as {
+		? ((await import(
+				/* @vite-ignore */
+				integrationEntrypoint
+			)) as {
 				default?: LucidAstroIntegrationBridge;
 			})
 		: undefined;
