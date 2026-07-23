@@ -263,6 +263,8 @@ export function useHistoryState() {
 				id: latest.id,
 				version: "latest",
 				createdAt: latest.createdAt,
+				updatedAt: latest.updatedAt,
+				timelineAt: latest.updatedAt ?? latest.createdAt,
 				createdBy: latest.createdBy,
 				promotedFrom: latest.promotedFrom,
 				contentId: latest.contentId,
@@ -283,6 +285,8 @@ export function useHistoryState() {
 				version: versionType,
 				id: revision.id,
 				createdAt: revision.createdAt,
+				updatedAt: null,
+				timelineAt: revision.createdAt,
 				createdBy: revision.createdBy,
 				promotedFrom: revision.promotedFrom,
 				contentId: revision.contentId,
@@ -307,6 +311,8 @@ export function useHistoryState() {
 						id: version.id,
 						version: key,
 						createdAt: version.createdAt,
+						updatedAt: version.updatedAt,
+						timelineAt: version.createdAt,
 						createdBy: version.createdBy,
 						promotedFrom: version.promotedFrom,
 						contentId: version.contentId,
@@ -326,6 +332,8 @@ export function useHistoryState() {
 							id: -1 * (1000 + unreleasedEnvCounter++),
 							version: key,
 							createdAt: null,
+							updatedAt: null,
+							timelineAt: null,
 							createdBy: null,
 							promotedFrom: null,
 							contentId: null,
@@ -391,20 +399,20 @@ export function useHistoryState() {
 			item.environmentVersions = decorated.map((d) => d.v);
 		}
 
-		//* sort all items, keeping latest pinned as the current version anchor
+		//* sort all items by their effective timeline date
 		allItems.sort((a, b) => {
-			if (a.type === "latest") return -1;
-			if (b.type === "latest") return 1;
-			if (!a.createdAt) return 1;
-			if (!b.createdAt) return -1;
-			return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+			if (!a.timelineAt) return 1;
+			if (!b.timelineAt) return -1;
+			return (
+				new Date(b.timelineAt).getTime() - new Date(a.timelineAt).getTime()
+			);
 		});
 
 		//* group by date
 		const groups: Map<string, TimelineItem[]> = new Map();
 
 		for (const item of allItems) {
-			const dateKey = getDateGroupKey(item.createdAt);
+			const dateKey = getDateGroupKey(item.timelineAt);
 			const existing = groups.get(dateKey) || [];
 			groups.set(dateKey, [...existing, item]);
 		}
@@ -662,6 +670,8 @@ export type TimelineItem = {
 	id: number;
 	version: string;
 	createdAt: string | null;
+	updatedAt: string | null;
+	timelineAt: string | null;
 	createdBy: number | null;
 	promotedFrom: number | null;
 	contentId: string | null;

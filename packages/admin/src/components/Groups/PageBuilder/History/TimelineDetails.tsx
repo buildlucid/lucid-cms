@@ -320,6 +320,13 @@ const TimelineDetails: Component<{
 								value={<DateText date={props.item.createdAt} />}
 							/>
 							<DetailRow
+								label={T()("common.updated.at")}
+								value={<DateText date={props.item.updatedAt} />}
+								show={
+									props.item.type === "latest" && props.item.updatedAt !== null
+								}
+							/>
+							<DetailRow
 								label={T()("common.created.by")}
 								value={
 									<AuthorDisplay

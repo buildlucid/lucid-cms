@@ -83,6 +83,7 @@ export type DocumentVersionSummary = {
 	promotedFrom: number | null;
 	contentId: string;
 	createdAt: string | null;
+	updatedAt: string | null;
 	createdBy: number | null;
 };
 

@@ -196,7 +196,7 @@ const TimelineCard: Component<{
 								</h3>
 							</div>
 							<div class="mt-1 flex items-center gap-2 text-sm text-body">
-								<DateText date={props.item.createdAt} class="text-body" />
+								<DateText date={props.item.timelineAt} class="text-body" />
 							</div>
 						</div>
 					</div>

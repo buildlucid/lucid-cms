@@ -66,6 +66,10 @@ const documentResponseVersionSchema = z.object({
 		description: "The timestamp when this version was created",
 		example: "2025-04-10T14:30:00Z",
 	}),
+	updatedAt: z.string().nullable().meta({
+		description: "The timestamp when this version was last updated",
+		example: "2025-04-10T15:45:00Z",
+	}),
 	createdBy: z.number().nullable().meta({
 		description: "The ID of the user who created this version",
 		example: 42,

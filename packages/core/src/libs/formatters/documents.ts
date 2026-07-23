@@ -216,6 +216,7 @@ const formatVersions = (props: {
 				promotedFrom: version.promoted_from,
 				contentId: version.content_id,
 				createdAt: formatter.formatDate(version.created_at),
+				updatedAt: formatter.formatDate(version.updated_at),
 				createdBy: version.created_by,
 			};
 		}
