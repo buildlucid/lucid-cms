@@ -28,7 +28,7 @@ describe("field type capabilities", () => {
 			isFieldTypeSortable(fieldType),
 		);
 		expect(sortable.sort()).toEqual(
-			["text", "textarea", "number", "datetime", "select"].sort(),
+			["checkbox", "text", "textarea", "number", "datetime", "select"].sort(),
 		);
 	});
 

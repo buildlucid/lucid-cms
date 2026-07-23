@@ -60,6 +60,13 @@ describe("resolveCustomFieldSorts", () => {
 					nullable: true,
 					customField: { type: "checkbox" },
 				},
+				{
+					name: "_accent",
+					source: "field",
+					type: "text",
+					nullable: true,
+					customField: { type: "color" },
+				},
 			],
 		};
 
@@ -70,6 +77,7 @@ describe("resolveCustomFieldSorts", () => {
 			{ key: "_views", direction: "asc" },
 			{ key: "_publishedAt", direction: "desc" },
 			{ key: "_category", direction: "asc" },
+			{ key: "_featured", direction: "desc" },
 		]);
 
 		expect(result).toEqual([
@@ -78,6 +86,7 @@ describe("resolveCustomFieldSorts", () => {
 			{ key: "_views", column: "_views" },
 			{ key: "_publishedAt", column: "_publishedAt" },
 			{ key: "_category", column: "_category" },
+			{ key: "_featured", column: "_featured" },
 		]);
 	});
 
@@ -101,7 +110,7 @@ describe("resolveCustomFieldSorts", () => {
 
 	it("ignores custom fields whose type does not support sorting", () => {
 		const result = resolveCustomFieldSorts(documentFieldsTableSchema, [
-			{ key: "_featured", direction: "asc" },
+			{ key: "_accent", direction: "asc" },
 		]);
 
 		expect(result).toEqual([]);

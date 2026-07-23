@@ -116,8 +116,8 @@ test("sort key types include sortable top-level custom fields regardless of list
 	expect(sortDeclaration).toContain('"_views"');
 	expect(sortDeclaration).toContain('"_publishedAt"');
 	expect(sortDeclaration).toContain('"_category"');
+	expect(sortDeclaration).toContain('"_featured"');
 	//* unsupported types are excluded
-	expect(sortDeclaration).not.toContain('"_featured"');
 	expect(sortDeclaration).not.toContain('"_hero"');
 	expect(sortDeclaration).not.toContain('"_items"');
 	expect(sortDeclaration).not.toContain('"_itemLabel"');

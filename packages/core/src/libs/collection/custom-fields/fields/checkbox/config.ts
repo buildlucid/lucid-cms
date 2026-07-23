@@ -7,7 +7,7 @@ export const checkboxFieldConfig = {
 	},
 	capabilities: {
 		filterable: true,
-		sortable: false,
+		sortable: true,
 	},
 } as const satisfies FieldStaticConfig<"checkbox">;
 
