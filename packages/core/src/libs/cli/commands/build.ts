@@ -246,9 +246,10 @@ const buildCommand = async (options?: {
 		process.exit(0);
 	} catch (error) {
 		if (error instanceof Error) {
-			cliLogger.errorInstance(error);
+			cliLogger.errorInstance(error, "Failed to build the application");
+		} else {
+			cliLogger.error("Failed to build the application", "Unknown error");
 		}
-		cliLogger.error("Failed to build the application");
 		await stopLoggerBuffering();
 		process.exit(1);
 	}

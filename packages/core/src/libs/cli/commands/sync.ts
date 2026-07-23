@@ -106,11 +106,11 @@ const syncCommand = async (options?: {
 		if (config && translationStore) {
 			await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
 		}
-		cliLogger.error(
-			"Sync failed",
-			error instanceof Error ? error.message : "Unknown error",
-		);
-		if (error instanceof Error) cliLogger.errorInstance(error);
+		if (error instanceof Error) {
+			cliLogger.errorInstance(error, "Sync failed");
+		} else {
+			cliLogger.error("Sync failed", "Unknown error");
+		}
 		await stopLoggerBuffering();
 		process.exit(1);
 	}

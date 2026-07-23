@@ -215,9 +215,10 @@ const cronCommand = async (jobName?: string) => {
 	} catch (error) {
 		await cleanupAdapters();
 		if (error instanceof Error) {
-			cliLogger.errorInstance(error);
+			cliLogger.errorInstance(error, "Failed to run cron job");
+		} else {
+			cliLogger.error("Failed to run cron job", "Unknown error");
 		}
-		cliLogger.error("Failed to run cron job");
 		await stopLoggerBuffering();
 		process.exit(1);
 	}

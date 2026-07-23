@@ -204,11 +204,11 @@ const migrateRollbackCommand = async (options?: {
 			}
 
 			if (error) {
-				cliLogger.error(
-					"Rollback failed",
-					error instanceof Error ? error.message : "Unknown error",
-				);
-				if (error instanceof Error) cliLogger.errorInstance(error);
+				if (error instanceof Error) {
+					cliLogger.errorInstance(error, "Rollback failed");
+				} else {
+					cliLogger.error("Rollback failed", "Unknown error");
+				}
 				await stopLoggerBuffering();
 				process.exit(1);
 			}
@@ -259,11 +259,11 @@ const migrateRollbackCommand = async (options?: {
 		if (config && translationStore) {
 			await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
 		}
-		cliLogger.error(
-			"Rollback failed",
-			error instanceof Error ? error.message : "Unknown error",
-		);
-		if (error instanceof Error) cliLogger.errorInstance(error);
+		if (error instanceof Error) {
+			cliLogger.errorInstance(error, "Rollback failed");
+		} else {
+			cliLogger.error("Rollback failed", "Unknown error");
+		}
 		await stopLoggerBuffering();
 		process.exit(1);
 	}

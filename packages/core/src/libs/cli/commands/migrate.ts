@@ -396,11 +396,11 @@ const migrateCommand = (props?: {
 			);
 			return true;
 		} catch (error) {
-			cliLogger.error(
-				"Migration failed",
-				error instanceof Error ? error.message : "Unknown error",
-			);
-			if (error instanceof Error) cliLogger.errorInstance(error);
+			if (error instanceof Error) {
+				cliLogger.errorInstance(error, "Migration failed");
+			} else {
+				cliLogger.error("Migration failed", "Unknown error");
+			}
 			return await stopCommand(1);
 		}
 	};

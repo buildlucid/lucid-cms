@@ -1,7 +1,5 @@
-import boxen from "boxen";
 import picocolors from "picocolors";
 import { ZodError } from "zod";
-import tidyZodError from "../../utils/errors/tidy-zod-errors.js";
 
 const symbols = {
 	tick: { icon: "✓", color: picocolors.green },
@@ -26,6 +24,7 @@ interface LogConfig {
 
 interface PrintConfig extends LogConfig {
 	defaultSymbol?: SymbolKey;
+	output?: "stdout" | "stderr";
 }
 
 const printMessage = (parts: string[], config: PrintConfig) => {
@@ -36,9 +35,15 @@ const printMessage = (parts: string[], config: PrintConfig) => {
 		spaceAfter = false,
 		defaultSymbol,
 		silent = false,
+		output = "stdout",
 	} = config;
 
-	if (spaceBefore && silent !== true) console.log();
+	const print = (message?: string) => {
+		if (output === "stderr") console.error(message ?? "");
+		else console.log(message ?? "");
+	};
+
+	if (spaceBefore && silent !== true) print();
 
 	const indentStr = " ".repeat(indent);
 
@@ -57,9 +62,9 @@ const printMessage = (parts: string[], config: PrintConfig) => {
 
 	const message = parts.join(" ");
 
-	if (silent !== true) console.log(`${indentStr}${prefix}${message}`);
+	if (silent !== true) print(`${indentStr}${prefix}${message}`);
 
-	if (spaceAfter && silent !== true) console.log();
+	if (spaceAfter && silent !== true) print();
 };
 
 const isConfig = (arg: unknown): arg is LogConfig => {
@@ -86,11 +91,14 @@ const info = (...args: Array<string | LogConfig>) => {
 
 const error = (...args: Array<string | LogConfig>) => {
 	const config = args.find(isConfig) ?? {};
-	const parts = args.filter((arg): arg is string => typeof arg === "string");
+	const parts = args
+		.filter((arg): arg is string => typeof arg === "string")
+		.map((part) => picocolors.red(part));
 
 	printMessage(parts, {
 		...config,
 		defaultSymbol: "cross",
+		output: "stderr",
 	});
 };
 
@@ -161,39 +169,59 @@ const formatBytes = (bytes: number): string => {
 	return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
 };
 
-const formatZodError = (error: ZodError) => {
-	const message = tidyZodError(error).trim();
-	return boxen(message, {
-		padding: 1,
-		margin: 1,
-		borderColor: "red",
-		borderStyle: "round",
-		title: "Validation Error",
+const printErrorLine = (
+	message: string,
+	config: Pick<PrintConfig, "indent" | "symbol">,
+) => {
+	printMessage([message], {
+		...config,
+		output: "stderr",
 	});
 };
 
-const errorInstance = (error: Error) => {
+const printErrorDetail = (message: string) => {
+	const [firstLine = "", ...remainingLines] = message.split("\n");
+	printErrorLine(firstLine, { indent: 2, symbol: "child" });
+
+	for (const line of remainingLines) {
+		printErrorLine(line, { indent: 4 });
+	}
+};
+
+const formatZodIssuePath = (path: PropertyKey[]) => {
+	return path.reduce<string>((formattedPath, segment) => {
+		const value = String(segment);
+
+		if (typeof segment === "number") {
+			return `${formattedPath}[${value}]`;
+		}
+		if (formattedPath.length === 0) {
+			return value;
+		}
+		return `${formattedPath}.${value}`;
+	}, "");
+};
+
+const errorInstance = (error: Error, heading?: string) => {
 	if (error instanceof ZodError) {
-		console.log(formatZodError(error));
+		logger.error(heading ?? "Validation Error");
+
+		for (const issue of error.issues) {
+			const path = formatZodIssuePath(issue.path);
+			printErrorDetail(path ? `${path}: ${issue.message}` : issue.message);
+		}
 		return;
 	}
 
-	const lines = [error.message];
+	logger.error(heading ?? error.name);
+	printErrorDetail(error.message);
 
-	if (error.stack) {
-		const stackLines = error.stack.split("\n").slice(1, 3);
-		lines.push("", ...stackLines.map((line) => logger.color.gray(line.trim())));
+	if (!error.stack) return;
+
+	const stackLines = error.stack.split("\n").slice(1, 3);
+	for (const line of stackLines) {
+		printErrorLine(logger.color.gray(line.trim()), { indent: 4 });
 	}
-
-	console.log(
-		boxen(lines.join("\n"), {
-			padding: 1,
-			margin: 1,
-			borderColor: "red",
-			borderStyle: "round",
-			title: error.name,
-		}),
-	);
 };
 
 const logger = {
@@ -208,7 +236,6 @@ const logger = {
 	startTimer,
 	createBadge,
 	formatBytes,
-	formatZodError,
 	errorInstance,
 };
 

@@ -30,9 +30,10 @@ const serveCommand = async () => {
 		try {
 			await destroy?.();
 		} catch (error) {
-			cliLogger.error("Error during shutdown");
 			if (error instanceof Error) {
-				cliLogger.errorInstance(error);
+				cliLogger.errorInstance(error, "Error during shutdown");
+			} else {
+				cliLogger.error("Error during shutdown", "Unknown error");
 			}
 		}
 		await stopLoggerBuffering();
@@ -195,9 +196,10 @@ const serveCommand = async () => {
 	} catch (error) {
 		await destroy?.();
 		if (error instanceof Error) {
-			cliLogger.errorInstance(error);
+			cliLogger.errorInstance(error, "Failed to start the server");
+		} else {
+			cliLogger.error("Failed to start the server", "Unknown error");
 		}
-		cliLogger.error("Failed to start the server");
 		await stopLoggerBuffering();
 		process.exit(1);
 	}

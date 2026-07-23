@@ -109,11 +109,11 @@ const migrateResetCommand = (props?: {
 					cliLogger.color.green("successfully"),
 				);
 			} catch (error) {
-				cliLogger.error(
-					"Failed to drop tables",
-					error instanceof Error ? error.message : "Unknown error",
-				);
-				if (error instanceof Error) cliLogger.errorInstance(error);
+				if (error instanceof Error) {
+					cliLogger.errorInstance(error, "Failed to drop tables");
+				} else {
+					cliLogger.error("Failed to drop tables", "Unknown error");
+				}
 				if (mode === "process") {
 					await stopLoggerBuffering();
 					process.exit(1);
@@ -165,11 +165,11 @@ const migrateResetCommand = (props?: {
 			if (config && translationStore) {
 				await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
 			}
-			cliLogger.error(
-				"Database reset failed",
-				error instanceof Error ? error.message : "Unknown error",
-			);
-			if (error instanceof Error) cliLogger.errorInstance(error);
+			if (error instanceof Error) {
+				cliLogger.errorInstance(error, "Database reset failed");
+			} else {
+				cliLogger.error("Database reset failed", "Unknown error");
+			}
 			if (props?.mode === "process" || !props?.mode) {
 				await stopLoggerBuffering();
 				process.exit(1);

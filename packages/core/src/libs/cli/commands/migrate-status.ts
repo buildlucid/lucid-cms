@@ -208,11 +208,11 @@ const migrateStatusCommand = async (options?: {
 		await stopLoggerBuffering();
 		process.exit(options?.check && (hasPendingWork || unhealthy) ? 1 : 0);
 	} catch (error) {
-		cliLogger.error(
-			"Migration status failed",
-			error instanceof Error ? error.message : "Unknown error",
-		);
-		if (error instanceof Error) cliLogger.errorInstance(error);
+		if (error instanceof Error) {
+			cliLogger.errorInstance(error, "Migration status failed");
+		} else {
+			cliLogger.error("Migration status failed", "Unknown error");
+		}
 		await stopLoggerBuffering();
 		process.exit(1);
 	}

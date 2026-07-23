@@ -77,11 +77,11 @@ const migrateFreshCommand = async (options?: {
 		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
-		cliLogger.error(
-			"Fresh migration failed",
-			error instanceof Error ? error.message : "Unknown error",
-		);
-		if (error instanceof Error) cliLogger.errorInstance(error);
+		if (error instanceof Error) {
+			cliLogger.errorInstance(error, "Fresh migration failed");
+		} else {
+			cliLogger.error("Fresh migration failed", "Unknown error");
+		}
 		await stopLoggerBuffering();
 		process.exit(1);
 	}

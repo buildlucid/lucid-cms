@@ -212,9 +212,10 @@ const devCommand = async (options?: {
 		} catch (error) {
 			await serverDestroy?.();
 			if (error instanceof Error) {
-				cliLogger.errorInstance(error);
+				cliLogger.errorInstance(error, "Failed to start the server");
+			} else {
+				cliLogger.error("Failed to start the server", "Unknown error");
 			}
-			cliLogger.error("Failed to start the server");
 			await stopLoggerBuffering();
 			process.exit(1);
 		} finally {

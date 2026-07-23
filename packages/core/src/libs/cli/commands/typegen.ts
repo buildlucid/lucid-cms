@@ -47,9 +47,10 @@ const typegenCommand = async () => {
 		process.exit(0);
 	} catch (error) {
 		if (error instanceof Error) {
-			cliLogger.errorInstance(error);
+			cliLogger.errorInstance(error, "Failed to generate types");
+		} else {
+			cliLogger.error("Failed to generate types", "Unknown error");
 		}
-		cliLogger.error("Failed to generate types");
 		await stopLoggerBuffering();
 		process.exit(1);
 	}
