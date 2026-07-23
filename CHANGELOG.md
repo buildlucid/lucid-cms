@@ -15,6 +15,7 @@
 
 - Simplified access configuration by removing `access` from `lucid.config` and custom permission overrides from collections, environments and workflows. Lucid now uses internal permissions and collection-generated document permissions. ([ff60146](https://github.com/buildlucid/lucid-cms/commit/ff60146a2c6f6505162f28cdf560b9716f005048))
 - Reworked logging around one process-level logger and managed transport objects. Custom logger transports must now implement `write(entry)` instead of accepting `(level, log)`, may implement `flush` and `destroy`, and no longer expose public CLI buffering controls. ([e4aa467](https://github.com/buildlucid/lucid-cms/commit/e4aa46752153955fc1853aec6eeb16a79bcb5a3d))
+- CLI errors now render inline on stderr, and the CLI logger no longer exposes `formatZodError`. ([d066c74](https://github.com/buildlucid/lucid-cms/commit/d066c74268a55f193d11f75e3acbb37b72484aa2))
 
 ### Bug Fixes:
 
