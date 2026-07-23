@@ -169,6 +169,7 @@ abstract class BaseRepository<
 		if (!validationResult.success) {
 			const validationError = tidyZodError(validationResult.error);
 			logger.error({
+				event: "query.response.validation.failed",
 				message: "Query response validation failed",
 				scope: constants.logScopes.query,
 				data: {
@@ -223,6 +224,7 @@ abstract class BaseRepository<
 			);
 
 			logger.debug({
+				event: "query.execution.completed",
 				message: "Query execution completed",
 				scope: constants.logScopes.query,
 				data: {
@@ -250,6 +252,8 @@ abstract class BaseRepository<
 			);
 
 			logger.error({
+				error,
+				event: "query.execution.failed",
 				message: "Query execution failed",
 				scope: constants.logScopes.query,
 				data: {

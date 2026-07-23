@@ -12,7 +12,10 @@ import {
 	getInitializedKVAdapter,
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
-import logger from "../../logger/index.js";
+import logger, {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
@@ -29,7 +32,7 @@ const migrateRollbackCommand = async (options?: {
 	let runtimeContext: AdapterRuntimeContext | undefined;
 	let translationStore: TranslationStore | undefined;
 	try {
-		logger.setBuffering(true);
+		startLoggerBuffering();
 		const startTime = cliLogger.startTimer();
 		const steps = options?.steps ?? 1;
 		const force = options?.force ?? false;
@@ -53,7 +56,7 @@ const migrateRollbackCommand = async (options?: {
 		});
 
 		if (!envValid) {
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -96,7 +99,7 @@ const migrateRollbackCommand = async (options?: {
 			cliLogger.info(
 				"If you removed a plugin or migration file, restore it so its migrations can be rolled back.",
 			);
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -113,7 +116,7 @@ const migrateRollbackCommand = async (options?: {
 
 		if (executedMigrations.length === 0) {
 			cliLogger.info("No migrations to rollback");
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(0);
 		}
 
@@ -141,7 +144,7 @@ const migrateRollbackCommand = async (options?: {
 					"or",
 					cliLogger.color.cyan("migrate:fresh"),
 				);
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			}
 
@@ -162,7 +165,7 @@ const migrateRollbackCommand = async (options?: {
 				});
 			} catch (error) {
 				if (error instanceof Error && error.name === "ExitPromptError") {
-					logger.setBuffering(false);
+					await stopLoggerBuffering();
 					process.exit(0);
 				}
 				throw error;
@@ -170,7 +173,7 @@ const migrateRollbackCommand = async (options?: {
 
 			if (!shouldProceed) {
 				cliLogger.info("Rollback cancelled");
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(0);
 			}
 		}
@@ -206,7 +209,7 @@ const migrateRollbackCommand = async (options?: {
 					error instanceof Error ? error.message : "Unknown error",
 				);
 				if (error instanceof Error) cliLogger.errorInstance(error);
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			}
 		}
@@ -250,7 +253,7 @@ const migrateRollbackCommand = async (options?: {
 			},
 		);
 
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
 		if (config && translationStore) {
@@ -261,7 +264,7 @@ const migrateRollbackCommand = async (options?: {
 			error instanceof Error ? error.message : "Unknown error",
 		);
 		if (error instanceof Error) cliLogger.errorInstance(error);
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(1);
 	}
 };

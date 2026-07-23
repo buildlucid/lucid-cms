@@ -131,13 +131,13 @@ const cloudflareQueuesAdapter = (
 				};
 			} catch (error) {
 				logger.error({
+					error,
+					event: "cloudflare-queue.job.add.failed",
 					message: "Error adding job to Cloudflare queue",
 					scope: logScope,
 					data: {
 						errorMessage:
 							error instanceof Error ? error.message : String(error),
-						errorStack: error instanceof Error ? error.stack : undefined,
-						error,
 					},
 				});
 
@@ -246,6 +246,8 @@ const cloudflareQueuesAdapter = (
 								: "Unknown error";
 
 						logger.error({
+							error: firstError,
+							event: "cloudflare-queue.batch.partial-failure",
 							message: "Some batch jobs failed",
 							scope: logScope,
 							data: {
@@ -285,13 +287,13 @@ const cloudflareQueuesAdapter = (
 				};
 			} catch (error) {
 				logger.error({
+					error,
+					event: "cloudflare-queue.batch.add.failed",
 					message: "Error adding batch jobs to Cloudflare queue",
 					scope: logScope,
 					data: {
 						errorMessage:
 							error instanceof Error ? error.message : String(error),
-						errorStack: error instanceof Error ? error.stack : undefined,
-						error,
 					},
 				});
 

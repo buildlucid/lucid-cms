@@ -22,7 +22,11 @@ const serveCommand =
 			compiled: false,
 		});
 
-		const { app, destroy, issues } = await createApp({
+		const {
+			app,
+			destroy: destroyApp,
+			issues,
+		} = await createApp({
 			config,
 			translationStore,
 			runtimeContext: runtimeContext,
@@ -62,25 +66,30 @@ const serveCommand =
 			});
 		});
 
-		server.on("close", async () => {
+		let destroyPromise: Promise<void> | undefined;
+
+		server.on("close", () => {
 			logger.instance.info("Shutting down Node Adapter development server...", {
 				silent: logger.silent,
 				spaceBefore: true,
 			});
-			await destroy?.();
+			destroyPromise ??= destroyApp();
+			void destroyPromise;
 		});
 
 		return {
 			destroy: async () => {
-				return new Promise<void>((resolve, reject) => {
-					server.close((error) => {
-						if (error) {
-							reject(error);
-						} else {
-							resolve();
-						}
+				try {
+					await new Promise<void>((resolve, reject) => {
+						server.close((error) => {
+							if (error) reject(error);
+							else resolve();
+						});
 					});
-				});
+				} finally {
+					destroyPromise ??= destroyApp();
+					await destroyPromise;
+				}
 			},
 			runtimeContext: runtimeContext,
 		};

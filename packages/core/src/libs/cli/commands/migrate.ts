@@ -21,7 +21,10 @@ import {
 	getInitializedKVAdapter,
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import { createToolkitServiceContext } from "../../toolkit/config.js";
@@ -106,14 +109,14 @@ const migrateCommand = (props?: {
 		const stopCommand = async (exitCode: number): Promise<false> => {
 			await cleanupAdapters();
 			if (mode === "process") {
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(exitCode);
 			}
 			return false;
 		};
 
 		try {
-			logger.setBuffering(true);
+			startLoggerBuffering();
 			const startTime = cliLogger.startTimer();
 			const skipSyncSteps = options?.skipSyncSteps ?? false;
 			const yes = options?.yes ?? false;
@@ -224,7 +227,7 @@ const migrateCommand = (props?: {
 				);
 				await cleanupAdapters();
 				if (mode === "process") {
-					logger.setBuffering(false);
+					await stopLoggerBuffering();
 					process.exit(0);
 				}
 				return true;
@@ -381,7 +384,7 @@ const migrateCommand = (props?: {
 					cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
 					{ spaceAfter: true, spaceBefore: true },
 				);
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(0);
 			}
 

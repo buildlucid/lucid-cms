@@ -256,7 +256,7 @@ export interface LucidConfig {
 	 */
 	secrets: string | SecretConfig;
 	/**
-	 * The logger configuration
+	 * Process-level logger configuration.
 	 */
 	logger?: {
 		/**
@@ -264,7 +264,7 @@ export interface LucidConfig {
 		 */
 		level?: LogLevel;
 		/**
-		 * Custom log transport. If not provided, logs will default to console output.
+		 * Custom log transport. If not provided, logs default to console output.
 		 */
 		transport?: LogTransport;
 	};

@@ -186,6 +186,8 @@ const customFieldInputGenerate: ServiceFn<
 			});
 		} catch (err) {
 			logger.error({
+				error: err,
+				event: "ai.field-context.failed",
 				scope: constants.logScopes.ai,
 				message: "Failed to resolve AI field context",
 				data: {

@@ -1,5 +1,9 @@
 # @lucidcms/plugin-nodemailer
 
+## v1.1.6 (unreleased)
+
+- Added structured event and error details to transporter readiness warnings.
+
 ## v1.1.5
 
 - Fixed repeated transporter readiness warnings by verifying once per runtime lifecycle and skipping checks for queue consumers and simulated email.

@@ -1,13 +1,14 @@
 import type { PublicErrorData } from "@lucidcms/types";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
+import { contextStorage } from "hono/context-storage";
 import { cors } from "hono/cors";
+import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import type { StatusCode } from "hono/utils/http-status";
 import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
-import { logger } from "../../index.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { Config, EnvironmentVariables } from "../../types.js";
 import { LucidAPIError, translateErrorData } from "../../utils/errors/index.js";
@@ -23,6 +24,7 @@ import {
 	getInitializedImageProcessor,
 } from "../image-processor/lifecycle.js";
 import { destroyKVAdapter, getInitializedKVAdapter } from "../kv/lifecycle.js";
+import logger, { destroyLogger } from "../logger/index.js";
 import {
 	destroyMediaAdapter,
 	getInitializedMediaAdapter,
@@ -56,6 +58,14 @@ const createApp = async (props: {
 	const configuredHost = props.config.host?.trim()
 		? normalizeHost(props.config.host)
 		: undefined;
+
+	app
+		.use(
+			requestId({
+				headerName: constants.headers.requestId,
+			}),
+		)
+		.use(contextStorage());
 
 	await runHttpExtensions({
 		app,
@@ -109,6 +119,7 @@ const createApp = async (props: {
 					...Object.values(constants.headers),
 					...(props.config.http.security.cors?.allowHeaders || []),
 				],
+				exposeHeaders: [constants.headers.requestId],
 				credentials: true,
 			}),
 		)
@@ -159,7 +170,12 @@ const createApp = async (props: {
 				} satisfies PublicErrorData);
 			}
 
-			logger.error({ message: err.message });
+			logger.error({
+				error: err,
+				event: "http.unhandled.error",
+				message: err.message,
+				scope: constants.logScopes.http,
+			});
 
 			// @ts-expect-error
 			if (err?.statusCode === 429) {
@@ -394,6 +410,8 @@ const createApp = async (props: {
 		props.runtimeContext.support,
 	);
 
+	let destroyPromise: Promise<void> | undefined;
+
 	return {
 		app,
 		queue: queueInstance,
@@ -401,35 +419,40 @@ const createApp = async (props: {
 		media: mediaInstance,
 		email: emailInstance,
 		issues: supportChecksRes.issues,
-		destroy: async () => {
-			await Promise.allSettled([
-				destroyQueueAdapter(queueInstance, {
-					config: props.config,
-					env: props.env,
-					runtimeContext: props.runtimeContext,
-				}),
-				destroyKVAdapter(kvInstance, {
-					config: props.config,
-					env: props.env,
-					runtimeContext: props.runtimeContext,
-				}),
-				destroyMediaAdapter(mediaInstance, {
-					config: props.config,
-					env: props.env,
-					runtimeContext: props.runtimeContext,
-				}),
-				destroyEmailAdapter(emailInstance, {
-					config: props.config,
-					env: props.env,
-					runtimeContext: props.runtimeContext,
-				}),
-				destroyImageProcessor(imageProcessorInstance, {
-					config: props.config,
-					env: props.env,
-					runtimeContext: props.runtimeContext,
-				}),
-				props.config.db.client.destroy(),
-			]);
+		destroy: () => {
+			destroyPromise ??= (async () => {
+				await Promise.allSettled([
+					destroyQueueAdapter(queueInstance, {
+						config: props.config,
+						env: props.env,
+						runtimeContext: props.runtimeContext,
+					}),
+					destroyKVAdapter(kvInstance, {
+						config: props.config,
+						env: props.env,
+						runtimeContext: props.runtimeContext,
+					}),
+					destroyMediaAdapter(mediaInstance, {
+						config: props.config,
+						env: props.env,
+						runtimeContext: props.runtimeContext,
+					}),
+					destroyEmailAdapter(emailInstance, {
+						config: props.config,
+						env: props.env,
+						runtimeContext: props.runtimeContext,
+					}),
+					destroyImageProcessor(imageProcessorInstance, {
+						config: props.config,
+						env: props.env,
+						runtimeContext: props.runtimeContext,
+					}),
+					props.config.db.client.destroy(),
+				]);
+				await destroyLogger();
+			})();
+
+			return destroyPromise;
 		},
 	};
 };

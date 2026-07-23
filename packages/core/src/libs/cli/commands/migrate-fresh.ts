@@ -1,5 +1,8 @@
 import { confirm } from "@inquirer/prompts";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import cliLogger from "../logger.js";
 import migrateCommand from "./migrate.js";
 import migrateResetCommand from "./migrate-reset.js";
@@ -9,7 +12,7 @@ const migrateFreshCommand = async (options?: {
 	remote?: boolean;
 }) => {
 	try {
-		logger.setBuffering(true);
+		startLoggerBuffering();
 		const startTime = cliLogger.startTimer();
 		const force = options?.force ?? false;
 
@@ -27,7 +30,7 @@ const migrateFreshCommand = async (options?: {
 				});
 			} catch (error) {
 				if (error instanceof Error && error.name === "ExitPromptError") {
-					logger.setBuffering(false);
+					await stopLoggerBuffering();
 					process.exit(0);
 				}
 				throw error;
@@ -35,7 +38,7 @@ const migrateFreshCommand = async (options?: {
 
 			if (!shouldProceed) {
 				cliLogger.info("Fresh migration cancelled");
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(0);
 			}
 		}
@@ -44,7 +47,7 @@ const migrateFreshCommand = async (options?: {
 			force: true,
 		});
 		if (!resetResult) {
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -54,7 +57,7 @@ const migrateFreshCommand = async (options?: {
 			allowDestructive: true,
 		});
 		if (!migrateResult) {
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -71,7 +74,7 @@ const migrateFreshCommand = async (options?: {
 			},
 		);
 
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
 		cliLogger.error(
@@ -79,7 +82,7 @@ const migrateFreshCommand = async (options?: {
 			error instanceof Error ? error.message : "Unknown error",
 		);
 		if (error instanceof Error) cliLogger.errorInstance(error);
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(1);
 	}
 };

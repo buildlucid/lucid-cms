@@ -56,6 +56,7 @@ import { env as envSchema } from "${configArtifactImports.env}";
 import db from "${configArtifactImports.db}";
 import runtime from "${configArtifactImports.runtime}";
 import i18nTranslations from "./i18n-translations.json" with { type: "json" };
+import { logger } from "@lucidcms/core";
 import { createApp, prepareTranslations, processConfig, resolveDatabaseAdapter, setupCronJobs } from "@lucidcms/core/runtime";
 import { createTranslator } from "@lucidcms/core/plugin";
 import { serve } from "@hono/node-server";
@@ -187,12 +188,13 @@ const startServer = async () => {
 				else console.log("http://" + address.address + ":" + address.port);
 			}
 		});
-		server.on("close", async () => {
-			await destroy?.();
+		server.on("close", () => {
+			void destroy?.();
 		});
 
 		const gracefulShutdown = (signal) => {
-			server.close((error) => {
+			server.close(async (error) => {
+				await destroy?.();
 				if (error) {
 					console.error(error);
 					process.exit(1);
@@ -205,7 +207,13 @@ const startServer = async () => {
 		process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 		process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 	} catch (error) {
-		console.error(error);
+		logger.error({
+			error,
+			event: "runtime-node.startup.failed",
+			message: "Failed to start the Node runtime",
+			scope: "runtime-node",
+		});
+		await logger.flush();
 		process.exit(1);
 	}
 };

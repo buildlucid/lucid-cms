@@ -198,10 +198,9 @@ const processConfig = async (
 		checkCollectionEnvironmentVersionMap(configRes);
 	}
 
-	initializeLogger({
+	await initializeLogger({
 		transport: configRes.logger.transport,
 		level: configRes.logger.level,
-		force: true,
 	});
 
 	if (options?.mode === "build") {

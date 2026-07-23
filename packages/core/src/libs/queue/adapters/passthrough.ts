@@ -126,13 +126,13 @@ function passthroughQueueAdapter(
 				};
 			} catch (error) {
 				logger.error({
+					error,
+					event: "queue.event.add.failed",
 					message: "Error adding event to the queue",
 					scope: constants.logScopes.queueAdapter,
 					data: {
 						errorMessage:
 							error instanceof Error ? error.message : String(error),
-						errorStack: error instanceof Error ? error.stack : undefined,
-						error,
 					},
 				});
 
@@ -240,6 +240,8 @@ function passthroughQueueAdapter(
 						firstError instanceof Error ? firstError.message : "Unknown error";
 
 					logger.error({
+						error: firstError,
+						event: "queue.batch.partial-failure",
 						message: "Some batch jobs failed",
 						scope: constants.logScopes.queueAdapter,
 						data: {
@@ -275,13 +277,13 @@ function passthroughQueueAdapter(
 				};
 			} catch (error) {
 				logger.error({
+					error,
+					event: "queue.batch.add.failed",
 					message: "Error adding batch events to the queue",
 					scope: constants.logScopes.queueAdapter,
 					data: {
 						errorMessage:
 							error instanceof Error ? error.message : String(error),
-						errorStack: error instanceof Error ? error.stack : undefined,
-						error,
 					},
 				});
 

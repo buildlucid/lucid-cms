@@ -22,6 +22,8 @@ const getQueueAdapter = async (
 		return passthroughQueueAdapter();
 	} catch (error) {
 		logger.error({
+			error,
+			event: "queue-adapter.initialization.failed",
 			scope: constants.logScopes.queueAdapter,
 			message: "Failed to initialize queue adapter",
 			data: {

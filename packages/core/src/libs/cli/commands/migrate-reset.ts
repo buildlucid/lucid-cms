@@ -8,7 +8,10 @@ import {
 	getInitializedKVAdapter,
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
@@ -30,7 +33,7 @@ const migrateResetCommand = (props?: {
 		let translationStore: TranslationStore | undefined;
 
 		try {
-			logger.setBuffering(true);
+			startLoggerBuffering();
 			const startTime = cliLogger.startTimer();
 			const mode = props?.mode ?? "process";
 			const force = options?.force ?? false;
@@ -59,7 +62,7 @@ const migrateResetCommand = (props?: {
 
 				if (!envValid) {
 					if (mode === "process") {
-						logger.setBuffering(false);
+						await stopLoggerBuffering();
 						process.exit(1);
 					} else return false;
 				}
@@ -81,7 +84,7 @@ const migrateResetCommand = (props?: {
 				} catch (error) {
 					if (error instanceof Error && error.name === "ExitPromptError") {
 						if (mode === "process") {
-							logger.setBuffering(false);
+							await stopLoggerBuffering();
 							process.exit(0);
 						} else return false;
 					}
@@ -91,7 +94,7 @@ const migrateResetCommand = (props?: {
 				if (!shouldProceed) {
 					cliLogger.info("Reset cancelled");
 					if (mode === "process") {
-						logger.setBuffering(false);
+						await stopLoggerBuffering();
 						process.exit(0);
 					} else return false;
 				}
@@ -112,7 +115,7 @@ const migrateResetCommand = (props?: {
 				);
 				if (error instanceof Error) cliLogger.errorInstance(error);
 				if (mode === "process") {
-					logger.setBuffering(false);
+					await stopLoggerBuffering();
 					process.exit(1);
 				} else return false;
 			}
@@ -147,7 +150,7 @@ const migrateResetCommand = (props?: {
 						spaceBefore: true,
 					},
 				);
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(0);
 			} else {
 				cliLogger.success(
@@ -168,7 +171,7 @@ const migrateResetCommand = (props?: {
 			);
 			if (error instanceof Error) cliLogger.errorInstance(error);
 			if (props?.mode === "process" || !props?.mode) {
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			} else return false;
 		}

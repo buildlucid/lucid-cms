@@ -1,13 +1,16 @@
 import path from "node:path";
 import loadBuildProject from "../../compile/load-build-project.js";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import cliLogger from "../logger.js";
 
 /**
  * The CLI typegen command. Resolves the Lucid project and writes the generated type files only.
  */
 const typegenCommand = async () => {
-	logger.setBuffering(true);
+	startLoggerBuffering();
 	const startTime = cliLogger.startTimer();
 
 	try {
@@ -40,14 +43,14 @@ const typegenCommand = async () => {
 			},
 		);
 
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error);
 		}
 		cliLogger.error("Failed to generate types");
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(1);
 	}
 };

@@ -7,7 +7,10 @@ import {
 	getInitializedKVAdapter,
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
@@ -24,7 +27,7 @@ const syncCommand = async (options?: {
 	let runtimeContext: AdapterRuntimeContext | undefined;
 	let translationStore: TranslationStore | undefined;
 	try {
-		logger.setBuffering(true);
+		startLoggerBuffering();
 		const startTime = cliLogger.startTimer();
 
 		const res = await loadConfigFile({
@@ -47,7 +50,7 @@ const syncCommand = async (options?: {
 			});
 
 			if (!envValid) {
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			}
 		}
@@ -67,7 +70,7 @@ const syncCommand = async (options?: {
 		);
 		if (!syncResult) {
 			await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -97,7 +100,7 @@ const syncCommand = async (options?: {
 			},
 		);
 
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
 		if (config && translationStore) {
@@ -108,7 +111,7 @@ const syncCommand = async (options?: {
 			error instanceof Error ? error.message : "Unknown error",
 		);
 		if (error instanceof Error) cliLogger.errorInstance(error);
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(1);
 	}
 };

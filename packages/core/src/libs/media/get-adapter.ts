@@ -22,6 +22,8 @@ const getMediaAdapter = async (
 		return null;
 	} catch (error) {
 		logger.error({
+			error,
+			event: "media-adapter.initialization.failed",
 			scope: constants.logScopes.mediaAdapter,
 			message: "Failed to initialize media adapter",
 			data: {

@@ -54,6 +54,7 @@ export type LucidHonoVariables = {
 	kv: KVAdapterInstance;
 	media: MediaAdapterInstance | null;
 	email: EmailAdapterInstance;
+	requestId: string;
 	auth: LucidAuth;
 	clientIntegrationAuth: LucidClientIntegrationAuth;
 	locale: LucidLocale;

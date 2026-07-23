@@ -29,6 +29,8 @@ const getImageProcessor = async (
 		return passthroughImageProcessor();
 	} catch (error) {
 		logger.error({
+			error,
+			event: "image-processor.initialization.failed",
 			scope: constants.logScopes.imageProcessor,
 			message: "Failed to initialize image processor",
 			data: {

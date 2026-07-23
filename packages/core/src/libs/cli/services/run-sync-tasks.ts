@@ -9,7 +9,7 @@ import {
 	getInitializedKVAdapter,
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
-import logger from "../../logger/index.js";
+import { stopLoggerBuffering } from "../../logger/index.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
@@ -115,7 +115,7 @@ const runSyncTasks = async (
 			);
 			if (mode === "process") {
 				await cleanupAdapters();
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			} else return false;
 		}
@@ -126,7 +126,7 @@ const runSyncTasks = async (
 			);
 			if (mode === "process") {
 				await cleanupAdapters();
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			} else return false;
 		}
@@ -137,7 +137,7 @@ const runSyncTasks = async (
 			);
 			if (mode === "process") {
 				await cleanupAdapters();
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			} else return false;
 		}
@@ -148,7 +148,7 @@ const runSyncTasks = async (
 			);
 			if (mode === "process") {
 				await cleanupAdapters();
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			} else return false;
 		}

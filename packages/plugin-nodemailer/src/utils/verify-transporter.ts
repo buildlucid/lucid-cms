@@ -8,6 +8,8 @@ const verifyTransporter = async (transporter: Transporter) => {
 	} catch (error) {
 		if (error instanceof Error) {
 			logger.warn({
+				error,
+				event: "nodemailer.transport.not-ready",
 				message: "Nodemailer transporter is not ready",
 				scope: PLUGIN_KEY,
 				data: {

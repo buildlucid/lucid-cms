@@ -4,7 +4,10 @@ import loadConfigFile from "../../config/load-config-file.js";
 import prepareEmailTemplates from "../../email/templates/prepare-email-templates.js";
 import { createTranslator } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
@@ -18,7 +21,7 @@ import migrateCommand from "./migrate.js";
  * The CLI serve command. Directly starts the dev server
  */
 const serveCommand = async () => {
-	logger.setBuffering(true);
+	startLoggerBuffering();
 	const configPath = getConfigPath(process.cwd());
 	let destroy: (() => Promise<void>) | undefined;
 	const coreUpdateAvailable = updateAvailable();
@@ -32,7 +35,7 @@ const serveCommand = async () => {
 				cliLogger.errorInstance(error);
 			}
 		}
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(0);
 	};
 
@@ -57,7 +60,7 @@ const serveCommand = async () => {
 			cliLogger.error(
 				`Lucid could not load CLI handlers from the "${configRes.adapter.key}" runtime adapter.`,
 			);
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -75,7 +78,7 @@ const serveCommand = async () => {
 		});
 
 		if (!envValid) {
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -91,7 +94,7 @@ const serveCommand = async () => {
 			skipEnvValidation: true,
 		});
 		if (!migrateResult) {
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(2);
 		}
 
@@ -178,7 +181,7 @@ const serveCommand = async () => {
 					spaceAfter: true,
 				});
 
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 			},
 		});
 		destroy = serverRes?.destroy;
@@ -195,7 +198,7 @@ const serveCommand = async () => {
 			cliLogger.errorInstance(error);
 		}
 		cliLogger.error("Failed to start the server");
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(1);
 	}
 

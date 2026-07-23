@@ -8,7 +8,10 @@ import {
 	createTranslator,
 	writeTranslationArtifact,
 } from "../../i18n/index.js";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
@@ -23,7 +26,7 @@ const buildCommand = async (options?: {
 	silent?: boolean;
 	remote?: boolean;
 }) => {
-	logger.setBuffering(true);
+	startLoggerBuffering();
 	const startTime = cliLogger.startTimer();
 	const silent = options?.silent ?? false;
 
@@ -49,7 +52,7 @@ const buildCommand = async (options?: {
 					silent,
 				},
 			);
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -113,7 +116,7 @@ const buildCommand = async (options?: {
 					silent,
 				},
 			);
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 		if (publicAssetsRes.error) {
@@ -124,7 +127,7 @@ const buildCommand = async (options?: {
 					silent,
 				},
 			);
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 		const translationStore = configRes.translationStore;
@@ -162,7 +165,7 @@ const buildCommand = async (options?: {
 					silent,
 				},
 			);
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -239,14 +242,14 @@ const buildCommand = async (options?: {
 			},
 		);
 
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error);
 		}
 		cliLogger.error("Failed to build the application");
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(1);
 	}
 };

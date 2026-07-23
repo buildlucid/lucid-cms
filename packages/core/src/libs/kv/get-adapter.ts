@@ -21,6 +21,8 @@ const getKVAdapter = async (config: Config): Promise<KVAdapterInstance> => {
 		return passthroughKVAdapter();
 	} catch (error) {
 		logger.error({
+			error,
+			event: "kv-adapter.initialization.failed",
 			scope: constants.logScopes.kvAdapter,
 			message: "Failed to initialize KV adapter",
 			data: {

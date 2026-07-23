@@ -10,8 +10,19 @@ export const LogLevelSchema = z.union([
 ]);
 
 export const LogTransportSchema = z.custom<LogTransport>(
-	(data) => typeof data === "object" && data !== null,
+	(data) => {
+		if (typeof data !== "object" || data === null || !("write" in data)) {
+			return false;
+		}
+
+		if (typeof data.write !== "function") return false;
+		if ("flush" in data && typeof data.flush !== "function") return false;
+		if ("destroy" in data && typeof data.destroy !== "function") return false;
+
+		return true;
+	},
 	{
-		message: "Expected a LogTransport object",
+		message:
+			"Expected a LogTransport object with a write function and optional flush and destroy functions",
 	},
 );

@@ -51,7 +51,11 @@ const serveCommand =
 			compiled: false,
 		});
 
-		const { app, destroy, issues } = await createApp({
+		const {
+			app,
+			destroy: destroyApp,
+			issues,
+		} = await createApp({
 			config,
 			translationStore,
 			runtimeContext: runtimeContext,
@@ -121,7 +125,9 @@ const serveCommand =
 				address: address,
 			});
 		});
-		server.on("close", async () => {
+		let destroyPromise: Promise<void> | undefined;
+
+		server.on("close", () => {
 			logger.instance.info(
 				"Shutting down Cloudflare Worker Adapter development server...",
 				{
@@ -129,21 +135,29 @@ const serveCommand =
 					silent: logger.silent,
 				},
 			);
-			await destroy?.();
-			await platformProxy?.dispose();
+			destroyPromise ??= Promise.all([
+				destroyApp(),
+				platformProxy?.dispose(),
+			]).then(() => undefined);
+			void destroyPromise;
 		});
 
 		return {
 			destroy: async () => {
-				return new Promise<void>((resolve, reject) => {
-					server.close((error) => {
-						if (error) {
-							reject(error);
-						} else {
-							resolve();
-						}
+				try {
+					await new Promise<void>((resolve, reject) => {
+						server.close((error) => {
+							if (error) reject(error);
+							else resolve();
+						});
 					});
-				});
+				} finally {
+					destroyPromise ??= Promise.all([
+						destroyApp(),
+						platformProxy?.dispose(),
+					]).then(() => undefined);
+					await destroyPromise;
+				}
 			},
 			runtimeContext: runtimeContext,
 		};

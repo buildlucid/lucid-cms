@@ -6,7 +6,10 @@ import loadConfigFile from "../../config/load-config-file.js";
 import prepareEmailTemplates from "../../email/templates/prepare-email-templates.js";
 import { createTranslator } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
@@ -34,7 +37,7 @@ const devCommand = async (options?: {
 		if (rebuilding) return;
 		rebuilding = true;
 
-		logger.setBuffering(true);
+		startLoggerBuffering();
 
 		try {
 			await serverDestroy?.();
@@ -62,7 +65,7 @@ const devCommand = async (options?: {
 				cliLogger.error(
 					`Lucid could not load CLI handlers from the "${configResult.adapter.key}" runtime adapter.`,
 				);
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			}
 
@@ -80,7 +83,7 @@ const devCommand = async (options?: {
 			});
 
 			if (!envValid) {
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			}
 
@@ -97,7 +100,7 @@ const devCommand = async (options?: {
 			});
 
 			if (!migrateResult) {
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(2);
 			}
 
@@ -107,7 +110,7 @@ const devCommand = async (options?: {
 					translate.english(viteBuildRes.error.message) ??
 						"Failed to build app",
 				);
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				rebuilding = false;
 				return;
 			}
@@ -129,7 +132,7 @@ const devCommand = async (options?: {
 					translate.english(emailTemplatesRes.error.message) ??
 						"Failed to prepare email templates",
 				);
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				rebuilding = false;
 				return;
 			}
@@ -138,7 +141,7 @@ const devCommand = async (options?: {
 					translate.english(publicAssetsRes.error.message) ??
 						"Failed to copy public assets",
 				);
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				rebuilding = false;
 				return;
 			}
@@ -192,7 +195,7 @@ const devCommand = async (options?: {
 						{ spaceBefore: true, spaceAfter: true },
 					);
 
-					logger.setBuffering(false);
+					await stopLoggerBuffering();
 				},
 			});
 			serverDestroy = serverRes?.destroy;
@@ -212,7 +215,7 @@ const devCommand = async (options?: {
 				cliLogger.errorInstance(error);
 			}
 			cliLogger.error("Failed to start the server");
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		} finally {
 			rebuilding = false;
@@ -292,7 +295,7 @@ const devCommand = async (options?: {
 				cliLogger.error(error.message);
 			}
 		} finally {
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(0);
 		}
 	};

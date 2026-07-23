@@ -183,6 +183,7 @@ const startConsumer = async () => {
 			}
 
 			await config.db.client.destroy();
+			await logger.flush();
 			process.exit(exitCode);
 		};
 
@@ -215,9 +216,10 @@ const startConsumer = async () => {
 				});
 				if (jobsResult.error) {
 					logger.error({
+						error: jobsResult.error,
+						event: "worker-queue.poll.query.failed",
 						message: "Error getting ready jobs",
 						scope: logScope,
-						data: { error: jobsResult.error },
 					});
 					return;
 				}
@@ -279,9 +281,10 @@ const startConsumer = async () => {
 				}
 			} catch (error) {
 				logger.error({
+					error,
+					event: "worker-queue.poll.failed",
 					message: "Polling error",
 					scope: logScope,
-					data: { error },
 				});
 			} finally {
 				isPolling = false;
@@ -331,10 +334,12 @@ const startConsumer = async () => {
 			]);
 		}
 		logger.error({
+			error,
+			event: "worker-queue.consumer.startup.failed",
 			message: "Consumer startup error",
 			scope: logScope,
-			data: { error },
 		});
+		await logger.flush();
 		process.exit(1);
 	}
 };

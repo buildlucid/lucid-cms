@@ -13,7 +13,10 @@ import { passthroughEmailAdapterInstance } from "../../email/adapters/passthroug
 import { createTranslator } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import passthroughKVAdapter from "../../kv/adapters/passthrough.js";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
@@ -35,7 +38,7 @@ const migrateStatusCommand = async (options?: {
 	let runtimeContext: AdapterRuntimeContext | undefined;
 
 	try {
-		logger.setBuffering(true);
+		startLoggerBuffering();
 		const startTime = cliLogger.startTimer();
 
 		const res = await loadConfigFile({
@@ -54,7 +57,7 @@ const migrateStatusCommand = async (options?: {
 			env: res.env,
 		});
 		if (!envValid) {
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -202,7 +205,7 @@ const migrateStatusCommand = async (options?: {
 			},
 		);
 
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(options?.check && (hasPendingWork || unhealthy) ? 1 : 0);
 	} catch (error) {
 		cliLogger.error(
@@ -210,7 +213,7 @@ const migrateStatusCommand = async (options?: {
 			error instanceof Error ? error.message : "Unknown error",
 		);
 		if (error instanceof Error) cliLogger.errorInstance(error);
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(1);
 	}
 };

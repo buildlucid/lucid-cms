@@ -10,6 +10,7 @@ export default Object.freeze({
 		csrf: "X-CSRF-Token",
 		idempotencyKey: "idempotency-key",
 		interfaceLocale: "Lucid-Locale",
+		requestId: "X-Request-Id",
 		tenant: "X-Lucid-Tenant",
 	},
 	cookies: {

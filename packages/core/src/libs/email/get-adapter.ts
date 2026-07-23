@@ -23,6 +23,8 @@ const getEmailAdapter = async (
 		return await passthroughEmailAdapter();
 	} catch (error) {
 		logger.error({
+			error,
+			event: "email-adapter.initialization.failed",
 			scope: constants.logScopes.emailAdapter,
 			message: "Failed to initialize email adapter",
 			data: {

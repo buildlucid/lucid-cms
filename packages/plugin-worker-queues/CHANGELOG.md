@@ -1,5 +1,9 @@
 # @lucidcms/plugin-worker-queues
 
+## v1.0.4 (unreleased)
+
+- Flushed pending logger transport work before worker queue consumers exit and added structured queue error details.
+
 ## v1.0.3
 
 - Prevented queued emails from repeating email adapter readiness checks that only need to run when the runtime starts.

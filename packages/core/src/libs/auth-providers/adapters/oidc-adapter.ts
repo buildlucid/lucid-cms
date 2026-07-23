@@ -30,12 +30,12 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 
 				logger.debug({
 					scope: constants.logScopes.oidcAuth,
+					event: "oidc.authorization-url.generated",
 					message: `Generating OIDC auth URL for ${config.clientId}`,
 					data: {
 						authEndpoint: config.authorizationEndpoint,
 						scopes,
 						redirectUri: params.redirectUri,
-						state: params.state,
 					},
 				});
 
@@ -45,11 +45,12 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 				};
 			} catch (err) {
 				logger.error({
+					error: err,
+					event: "oidc.authorization-url.failed",
 					scope: constants.logScopes.oidcAuth,
 					message: `Failed to generate OIDC auth URL for ${config.clientId}`,
 					data: {
 						redirectUri: params.redirectUri,
-						state: params.state,
 					},
 				});
 				return {
@@ -156,12 +157,6 @@ const createOIDCAdapter = (config: OIDCAuthConfig): OIDCAdapter => {
 				}
 
 				const rawUserInfo = await userInfoResponse.json();
-
-				logger.debug({
-					scope: constants.logScopes.oidcAuth,
-					message: "OIDC raw user info",
-					data: rawUserInfo,
-				});
 
 				const userInfoRes = await (config.mappers?.userInfo
 					? config.mappers.userInfo(rawUserInfo)

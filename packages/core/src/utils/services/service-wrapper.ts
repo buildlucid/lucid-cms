@@ -72,6 +72,8 @@ const serviceWrapper =
 		} catch (error) {
 			if (wrapperConfig.logError) {
 				logger.error({
+					error,
+					event: "service.execution.failed",
 					message: "Service execution failed",
 					data: {
 						errorMessage:

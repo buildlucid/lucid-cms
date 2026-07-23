@@ -4,6 +4,7 @@ import createApp from "../http/app.js";
 import type { HttpExtension } from "../http/types.js";
 import prepareTranslations from "../i18n/prepare-translations.js";
 import type { TranslationBundles } from "../i18n/types.js";
+import { destroyLogger } from "../logger/index.js";
 import { createToolkitServiceContext } from "../toolkit/config.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 import type {
@@ -105,7 +106,8 @@ const createLucidHost = async (options: CreateLucidHostOptions) => {
 			if (destroyed) return;
 			destroyed = true;
 			const app = appPromise ? await appPromise : undefined;
-			await app?.destroy();
+			if (app) await app.destroy();
+			else await destroyLogger();
 		},
 	};
 };

@@ -17,7 +17,10 @@ import {
 	getInitializedKVAdapter,
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
-import logger from "../../logger/index.js";
+import {
+	startLoggerBuffering,
+	stopLoggerBuffering,
+} from "../../logger/index.js";
 import {
 	destroyMediaAdapter,
 	getInitializedMediaAdapter,
@@ -55,7 +58,7 @@ const cronCommand = async (jobName?: string) => {
 	};
 
 	try {
-		logger.setBuffering(true);
+		startLoggerBuffering();
 		const startTime = cliLogger.startTimer();
 		const cronJobs = getCronJobs();
 
@@ -68,7 +71,7 @@ const cronCommand = async (jobName?: string) => {
 				for (const key of Object.keys(cronJobs)) {
 					cliLogger.log(`  ${key}`, { symbol: "bullet" });
 				}
-				logger.setBuffering(false);
+				await stopLoggerBuffering();
 				process.exit(1);
 			}
 			selectedJob = jobName as CronJobKey;
@@ -83,7 +86,7 @@ const cronCommand = async (jobName?: string) => {
 				});
 			} catch (error) {
 				if (error instanceof Error && error.name === "ExitPromptError") {
-					logger.setBuffering(false);
+					await stopLoggerBuffering();
 					process.exit(0);
 				}
 				throw error;
@@ -119,7 +122,7 @@ const cronCommand = async (jobName?: string) => {
 			env: configRes.env,
 		});
 		if (!envValid) {
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -189,7 +192,7 @@ const cronCommand = async (jobName?: string) => {
 				lastError ?? "Unknown error",
 			);
 			await cleanupAdapters();
-			logger.setBuffering(false);
+			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
@@ -207,7 +210,7 @@ const cronCommand = async (jobName?: string) => {
 		);
 
 		await cleanupAdapters();
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
 		await cleanupAdapters();
@@ -215,7 +218,7 @@ const cronCommand = async (jobName?: string) => {
 			cliLogger.errorInstance(error);
 		}
 		cliLogger.error("Failed to run cron job");
-		logger.setBuffering(false);
+		await stopLoggerBuffering();
 		process.exit(1);
 	}
 };

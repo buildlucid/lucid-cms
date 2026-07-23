@@ -1,5 +1,9 @@
 # @lucidcms/plugin-cloudflare-queues
 
+## v1.0.4 (unreleased)
+
+- Added structured event and error details to Cloudflare queue failure logs.
+
 ## v1.0.3
 
 - Prevented queued emails from repeating email adapter readiness checks that only need to run when the runtime starts.
