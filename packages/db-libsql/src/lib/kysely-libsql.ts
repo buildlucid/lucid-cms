@@ -29,9 +29,28 @@ export type LibsqlDialectConfig =
 
 export class LibsqlDialect implements Dialect {
 	#config: LibsqlDialectConfig;
+	#client: Client | undefined;
+	#closeClient = false;
 
 	constructor(config: LibsqlDialectConfig) {
 		this.#config = config;
+	}
+
+	get client(): Client {
+		if (this.#client) return this.#client;
+
+		if ("client" in this.#config) {
+			this.#client = this.#config.client;
+		} else if (this.#config.url !== undefined) {
+			this.#client = createClient(this.#config);
+			this.#closeClient = true;
+		} else {
+			throw new Error(
+				"Please specify either `client` or `url` in the LibsqlDialect config",
+			);
+		}
+
+		return this.#client;
 	}
 
 	createAdapter(): DialectAdapter {
@@ -39,21 +58,7 @@ export class LibsqlDialect implements Dialect {
 	}
 
 	createDriver(): Driver {
-		let client: Client;
-		let closeClient: boolean;
-		if ("client" in this.#config) {
-			client = this.#config.client;
-			closeClient = false;
-		} else if (this.#config.url !== undefined) {
-			client = createClient(this.#config);
-			closeClient = true;
-		} else {
-			throw new Error(
-				"Please specify either `client` or `url` in the LibsqlDialect config",
-			);
-		}
-
-		return new LibsqlDriver(client, closeClient);
+		return new LibsqlDriver(this.client, this.#closeClient);
 	}
 	// biome-ignore lint/suspicious/noExplicitAny: explanation
 	createIntrospector(db: Kysely<any>): DatabaseIntrospector {

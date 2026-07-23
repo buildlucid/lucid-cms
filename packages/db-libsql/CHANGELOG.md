@@ -1,5 +1,9 @@
 # @lucidcms/db-libsql
 
+## v1.1.1 (unreleased)
+
+- Fixed `dropAllTables` for remote databases with circular foreign-key relationships.
+
 ## v1.1.0
 
 - Set `caseInsensitiveLikeOperator` configuration for core.

@@ -1,3 +1,4 @@
+import type { Client } from "@libsql/client/web";
 import {
 	createDatabaseAdapterCreator,
 	DatabaseAdapter,
@@ -27,12 +28,16 @@ import formatType from "./utils/format-type.js";
 import getDefaultLibSQLConfig from "./utils/get-default-config.js";
 
 export class LibSQLAdapter extends DatabaseAdapter {
+	#database: Client;
+
 	constructor(config: LibsqlDialectConfig) {
+		const dialect = new LibsqlDialect(config);
 		super({
 			adapter: "libsql",
-			dialect: new LibsqlDialect(config),
+			dialect,
 			plugins: [createJSONResultsPlugin()],
 		});
+		this.#database = dialect.client;
 	}
 	async initialize() {
 		await sql`PRAGMA foreign_keys = ON`.execute(this.client);
@@ -232,18 +237,16 @@ export class LibSQLAdapter extends DatabaseAdapter {
 	async dropAllTables(): Promise<void> {
 		const schema = await this.inferSchema();
 
-		//* fk enforcement is disabled while dropping - core tables contain circular
-		//* references (eg. users <-> media) that no drop order can satisfy
-		await sql`PRAGMA foreign_keys = OFF`.execute(this.client);
-		try {
-			for (const table of schema) {
-				await sql`DROP TABLE IF EXISTS ${sql.table(table.name)}`.execute(
-					this.client,
-				);
-			}
-		} finally {
-			await sql`PRAGMA foreign_keys = ON`.execute(this.client);
-		}
+		if (schema.length === 0) return;
+
+		//* migrate runs the statements atomically on one logical connection with
+		//* foreign keys disabled, including for remote libSQL clients.
+		const statements = schema.map(
+			(table) =>
+				sql`DROP TABLE IF EXISTS ${sql.table(table.name)}`.compile(this.client)
+					.sql,
+		);
+		await this.#database.migrate(statements);
 	}
 	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {
 		if (type === "timestamp" && typeof value === "string") {

@@ -14,7 +14,11 @@ import type {
 import { type ColumnDataType, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import { DEFAULT_D1_BINDING } from "./constants.js";
-import { D1Dialect, type D1DialectConfig } from "./lib/kysely-d1.js";
+import {
+	D1Dialect,
+	type D1DialectConfig,
+	type D1DialectDatabase,
+} from "./lib/kysely-d1.js";
 import type { D1AdapterCreator } from "./types.js";
 import createD1Adapter from "./utils/create-adapter.js";
 import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
@@ -26,12 +30,14 @@ import getDefaultD1Config from "./utils/get-default-config.js";
 import { createD1WranglerArtifact } from "./utils/wrangler-artifact.js";
 
 export class D1Adapter extends DatabaseAdapter {
+	#database: D1DialectDatabase;
 	constructor(config: D1DialectConfig) {
 		super({
 			adapter: "d1",
 			dialect: new D1Dialect(config),
 			plugins: [createJSONResultsPlugin()],
 		});
+		this.#database = config.database;
 	}
 	async initialize() {}
 	get jsonArrayFrom() {
@@ -285,22 +291,62 @@ export class D1Adapter extends DatabaseAdapter {
 		}
 
 		if (dropOrder.length < allTableNames.size) {
-			for (const table of allTableNames) {
-				if (!dropOrder.includes(table)) {
-					dropOrder.push(table);
+			const remaining = new Set(
+				Array.from(allTableNames).filter((table) => !dropOrder.includes(table)),
+			);
+			const visitDependencies = (table: string) => {
+				if (!remaining.has(table)) return;
+
+				remaining.delete(table);
+				dropOrder.push(table);
+				for (const dependency of dependencies.get(table) ?? []) {
+					visitDependencies(dependency);
 				}
+			};
+
+			while (remaining.size > 0) {
+				let next: string | undefined;
+				for (const table of remaining) {
+					if (
+						next === undefined ||
+						(inDegree.get(table) ?? 0) < (inDegree.get(next) ?? 0)
+					) {
+						next = table;
+					}
+				}
+				if (next) visitDependencies(next);
 			}
 		}
 
-		for (const tableName of dropOrder) {
-			//* d1 doesnt support disabling fk enforcement - defer it per statement instead,
-			//* as core tables contain circular references (eg. users <-> media) that no
-			//* drop order can satisfy
-			await sql`PRAGMA defer_foreign_keys = true`.execute(this.client);
-			await sql`DROP TABLE IF EXISTS ${sql.table(tableName)}`.execute(
-				this.client,
+		if (dropOrder.length === 0) return;
+
+		if (!("exec" in this.#database)) {
+			throw new Error(
+				"D1 table resets require a D1Database binding rather than a D1DatabaseSession.",
 			);
 		}
+
+		//* D1 executes each prepared statement in a batch in its own implicit
+		//* transaction, so a defer pragma does not carry across the subsequent
+		//* drops. exec keeps this maintenance script together. Emptying every table
+		//* while the full schema still exists also prevents SQLite from resolving a
+		//* table that an earlier drop removed from a circular reference
+		//* (eg. users <-> media).
+		const statements = [
+			"PRAGMA defer_foreign_keys = ON",
+			...dropOrder.map(
+				(tableName) =>
+					sql`DELETE FROM ${sql.table(tableName)}`.compile(this.client).sql,
+			),
+			...dropOrder.map(
+				(tableName) =>
+					sql`DROP TABLE IF EXISTS ${sql.table(tableName)}`.compile(this.client)
+						.sql,
+			),
+			"PRAGMA defer_foreign_keys = OFF",
+		];
+
+		await this.#database.exec(`${statements.join(";\n")};`);
 	}
 	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {
 		if (type === "timestamp" && typeof value === "string") {

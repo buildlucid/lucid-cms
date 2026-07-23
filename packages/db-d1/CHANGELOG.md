@@ -1,5 +1,9 @@
 # @lucidcms/db-d1
 
+## v0.2.1 (unreleased)
+
+- Fixed `dropAllTables` for circular foreign-key relationships.
+
 ## v0.2.0
 
 - Set `caseInsensitiveLikeOperator` configuration for core.
