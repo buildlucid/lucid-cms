@@ -8,10 +8,13 @@
 - Added shared host bootstrapping, runtime-defined host entrypoints and config dependency tracking for framework integrations such as Astro. ([32c13e9](https://github.com/buildlucid/lucid-cms/commit/32c13e966c6bcd4c019951c213c22fefe0d9deef))
 - Added risk-aware automatic collection migrations, with safe schema changes applied automatically, approval gates for warning and destructive operations, grouped migration status reporting, and runtime schema checks for changed column definitions. The `migrate` command now uses `--yes` and `--allow-destructive` for non-interactive approval. ([e822ff5](https://github.com/buildlucid/lucid-cms/commit/e822ff507c1759ec2230415b4dbd182a2c6f633e))
 - Added collection-specific document permissions and client integration read scopes, generated automatically for every registered collection. ([ff60146](https://github.com/buildlucid/lucid-cms/commit/ff60146a2c6f6505162f28cdf560b9716f005048))
+- Added checkbox custom field support to document sorting, including admin sort options and generated client sort types. ([00d8788](https://github.com/buildlucid/lucid-cms/commit/00d87888e50ab5815b5769f38ca09c05ea25fbf8))
+- Added per-request IDs to API responses and structured log entries, with incoming `X-Request-Id` propagation. ([e4aa467](https://github.com/buildlucid/lucid-cms/commit/e4aa46752153955fc1853aec6eeb16a79bcb5a3d))
 
 ### Breaking Changes:
 
 - Simplified access configuration by removing `access` from `lucid.config` and custom permission overrides from collections, environments and workflows. Lucid now uses internal permissions and collection-generated document permissions. ([ff60146](https://github.com/buildlucid/lucid-cms/commit/ff60146a2c6f6505162f28cdf560b9716f005048))
+- Reworked logging around one process-level logger and managed transport objects. Custom logger transports must now implement `write(entry)` instead of accepting `(level, log)`, may implement `flush` and `destroy`, and no longer expose public CLI buffering controls. ([e4aa467](https://github.com/buildlucid/lucid-cms/commit/e4aa46752153955fc1853aec6eeb16a79bcb5a3d))
 
 ### Bug Fixes:
 
@@ -22,6 +25,8 @@
 - Fixed failed document creates and updates leaving orphaned or empty documents when using database adapters without transaction support. ([8e9c911](https://github.com/buildlucid/lucid-cms/commit/8e9c911f4ced55856b9d5bbdca1e1c00f2c8e3e6))
 - Fixed unclosed collection and brick repeaters not being reported during config validation. ([9e47890](https://github.com/buildlucid/lucid-cms/commit/9e47890a15984c99cc4952ca2493856f559cccdb))
 - Fixed collection preview URL callbacks including fields from every registered collection. ([9e47890](https://github.com/buildlucid/lucid-cms/commit/9e47890a15984c99cc4952ca2493856f559cccdb))
+- Fixed Vite dynamic import analysis warnings for intentionally runtime-resolved migration and Astro bridge modules during development startup. ([971e993](https://github.com/buildlucid/lucid-cms/commit/971e993aa2d0a86f86e8a593d47cf11e2c284a3f))
+- Fixed the document revision history pinning the latest version above newer entries and ignoring auto-save updates when ordering the timeline. ([43975e2](https://github.com/buildlucid/lucid-cms/commit/43975e2b31c01f6d77b4a752c4c2baabb57e4565))
 
 ## v0.16.0-alpha.0
 
