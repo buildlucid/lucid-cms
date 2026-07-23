@@ -20,6 +20,8 @@
 - Fixed required rich text custom fields accepting empty editor content. ([2a27252](https://github.com/buildlucid/lucid-cms/commit/2a272527692ccc7922c8624d89ffe5750ad2365c))
 - Fixed extra space appearing below the document builder after switching tabs. ([385c551](https://github.com/buildlucid/lucid-cms/commit/385c5515dcd36af1b2d59547cb153d35f5074a69))
 - Fixed failed document creates and updates leaving orphaned or empty documents when using database adapters without transaction support. ([8e9c911](https://github.com/buildlucid/lucid-cms/commit/8e9c911f4ced55856b9d5bbdca1e1c00f2c8e3e6))
+- Fixed unclosed collection and brick repeaters not being reported during config validation. ([9e47890](https://github.com/buildlucid/lucid-cms/commit/9e47890a15984c99cc4952ca2493856f559cccdb))
+- Fixed collection preview URL callbacks including fields from every registered collection. ([9e47890](https://github.com/buildlucid/lucid-cms/commit/9e47890a15984c99cc4952ca2493856f559cccdb))
 
 ## v0.16.0-alpha.0
 
