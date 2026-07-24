@@ -13,9 +13,15 @@ const runtimeContext = {
 
 const createFixture = () => {
 	const connections: DatabaseConnection[] = [];
+	const healthCheck = vi.fn(async () => ({ health: 1 }));
+	const selectNoFrom = vi.fn(() => ({
+		executeTakeFirstOrThrow: healthCheck,
+	}));
 	const connect = vi.fn(async (_env?: Record<string, unknown>) => {
 		const connection = {
-			client: {} as DatabaseConnection["client"],
+			client: {
+				selectNoFrom,
+			} as unknown as DatabaseConnection["client"],
 			destroy: vi.fn(async () => undefined),
 		};
 		connections.push(connection);
@@ -54,7 +60,9 @@ const createFixture = () => {
 				],
 			}),
 		},
+		healthCheck,
 		pluginInit,
+		selectNoFrom,
 	};
 };
 
@@ -176,6 +184,49 @@ describe("createLucidHost database ownership", () => {
 		});
 
 		expect(await response.text()).toBe("node-socket");
+		await host.destroy();
+	});
+
+	test("reports healthy when the database is reachable", async () => {
+		const fixture = createFixture();
+		const host = await createLucidHost({
+			definition: fixture.definition,
+			runtimeContext,
+			databaseScope: "runtime",
+		});
+		const invocation = host.createInvocation();
+
+		const response = await invocation.handle({
+			request: new Request("http://localhost/lucid/health"),
+		});
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Cache-Control")).toBe("no-store");
+		expect(await response.json()).toEqual({ status: "ok" });
+		expect(fixture.selectNoFrom).toHaveBeenCalledOnce();
+		expect(fixture.healthCheck).toHaveBeenCalledOnce();
+		await host.destroy();
+	});
+
+	test("reports unhealthy when the database cannot be queried", async () => {
+		const fixture = createFixture();
+		fixture.healthCheck.mockRejectedValueOnce(
+			new Error("Database unavailable"),
+		);
+		const host = await createLucidHost({
+			definition: fixture.definition,
+			runtimeContext,
+			databaseScope: "runtime",
+		});
+		const invocation = host.createInvocation();
+
+		const response = await invocation.handle({
+			request: new Request("http://localhost/lucid/health"),
+		});
+
+		expect(response.status).toBe(503);
+		expect(response.headers.get("Cache-Control")).toBe("no-store");
+		expect(await response.json()).toEqual({ status: "unhealthy" });
 		await host.destroy();
 	});
 

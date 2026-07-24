@@ -1,0 +1,33 @@
+{
+	"name": "lucid-railway",
+	"private": true,
+	"description": "Lucid CMS Railway starter",
+	"type": "module",
+	"scripts": {
+		"dev": "lucidcms dev",
+		"build": "lucidcms build",
+		"start": "node dist/server.js",
+		"typegen": "lucidcms typegen",
+		"sync": "lucidcms sync",
+		"migrate": "lucidcms migrate",
+		"migrate:deploy": "lucidcms migrate --yes",
+		"migrate:status": "lucidcms migrate:status",
+		"migrate:new": "lucidcms migrate:new",
+		"migrate:rollback": "lucidcms migrate:rollback"
+	},
+	"dependencies": {
+		"@lucidcms/core": "0.16.0-alpha.0",
+		"@lucidcms/db-postgres": "1.1.1",
+		"@lucidcms/plugin-filesystem": "1.0.3",
+		"@lucidcms/plugin-pages": "0.5.1",
+		"@lucidcms/runtime-node": "1.1.0"
+	},
+	"devDependencies": {
+		"@types/node": "^24.13.2",
+		"typescript": "^6.0.3"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	},
+	"author": "Build Lucid Ltd"
+}

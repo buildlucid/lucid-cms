@@ -5,6 +5,10 @@ The Lucid CMS Node runtime allows you to run your CMS on any Node.js environment
 
 Using this runtime is the most flexible way to run Lucid CMS. Out of the box, it supports the most features without additional configuration, and it can be extended with any of the current plugins.
 
+## One-click Deploy
+
+Use the [Railway deploy template](https://github.com/buildlucid/lucid-cms/tree/master/templates/railway-deploy) to deploy Lucid CMS with PostgreSQL, persistent filesystem media storage, and the Pages plugin.
+
 ## Installation
 
 ```bash

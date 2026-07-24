@@ -1,0 +1,17 @@
+{
+	"$schema": "https://railway.com/railway.schema.json",
+	"build": {
+		"builder": "RAILPACK",
+		"buildCommand": "npm run build"
+	},
+	"deploy": {
+		"preDeployCommand": "npm run migrate:deploy",
+		"startCommand": "npm start",
+		"numReplicas": 1,
+		"healthcheckPath": "/lucid/health",
+		"healthcheckTimeout": 300,
+		"restartPolicyType": "ON_FAILURE",
+		"restartPolicyMaxRetries": 10,
+		"requiredMountPath": "/data"
+	}
+}

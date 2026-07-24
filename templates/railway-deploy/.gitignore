@@ -1,0 +1,10 @@
+node_modules
+.lucid
+dist
+.env
+uploads
+.DS_Store
+._*
+.idea/
+.vscode/
+*.swp

@@ -80,6 +80,9 @@ Or deploy our Cloudflare template by clicking the button below.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/buildlucid/lucid-cms/tree/master/templates/cloudflare-deploy)
 
+For a Node.js and PostgreSQL deployment, use the
+[Railway starter](https://github.com/buildlucid/lucid-cms/tree/master/templates/railway-deploy).
+
 ## 📄 Licensing
 
 Lucid CMS uses a mixed-license model:
