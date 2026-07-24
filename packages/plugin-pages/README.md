@@ -37,7 +37,7 @@ export default configureLucid({
 		plugins: [
 			pagesPlugin({
 				collections: [{
-					collection: "page",
+					key: "page",
 					localized: true,
 					prefix: {
 						en: "en",
@@ -55,11 +55,11 @@ export default configureLucid({
 
 ## Configuration
 
-This plugin offers several configuration options to control its behavior. Aside from `collection`, all of these options are optional and have default values.
+This plugin offers several configuration options to control its behavior. Aside from `key`, all of these options are optional and have default values.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `collection` | `string` | - | The key of the collection that you wish to enable the plugin on |
+| `key` | `string` | - | The key of the collection that you wish to enable the plugin on |
 | `localized` | `boolean` | `false` | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields |
 | `prefix` | `string \| Record<string, string>` | - | Optional prefix prepended to the start of the computed `fullSlug` for the collection |
 | `ui.fullSlug` | `boolean` | `false` | Shows the computed `fullSlug` field in the document builder and listing |

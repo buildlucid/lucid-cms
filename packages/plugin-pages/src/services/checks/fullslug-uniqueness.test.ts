@@ -145,7 +145,7 @@ describe("fullSlug route uniqueness", () => {
 
 	test("uses a custom duplicate message when supplied", async () => {
 		const collection = {
-			collection: "pages",
+			key: "pages",
 			localized: false,
 			ui: {
 				fullSlug: false,
@@ -232,7 +232,7 @@ describe("fullSlug route uniqueness", () => {
 				},
 			});
 		const collection = {
-			collection: "docs",
+			key: "docs",
 			localized: false,
 			ui: {
 				fullSlug: false,
@@ -315,7 +315,7 @@ describe("fullSlug route uniqueness", () => {
 
 	test("unique false disables route uniqueness validation", async () => {
 		const collection = {
-			collection: "pages",
+			key: "pages",
 			localized: false,
 			ui: {
 				fullSlug: false,
@@ -419,7 +419,7 @@ describe("fullSlug route uniqueness", () => {
 				multiple: true,
 			});
 		const collection = {
-			collection: "pages",
+			key: "pages",
 			localized: true,
 			ui: {
 				fullSlug: false,

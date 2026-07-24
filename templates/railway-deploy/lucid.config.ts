@@ -35,7 +35,7 @@ export default configureLucid({
 			pagesPlugin({
 				collections: [
 					{
-						collection: "page",
+						key: "page",
 					},
 				],
 			}),

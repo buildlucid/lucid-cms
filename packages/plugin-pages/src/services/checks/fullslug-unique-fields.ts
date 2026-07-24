@@ -160,7 +160,7 @@ export const getUniqueFields = (
 
 		if (isRelationBackedFieldType(field.type)) {
 			const relationTableRes = buildRelationFieldTable({
-				collectionKey: collectionConfig.collection,
+				collectionKey: collectionConfig.key,
 				fieldKey,
 				fieldType: field.type,
 				tableNameByteLimit,

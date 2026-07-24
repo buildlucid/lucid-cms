@@ -6,7 +6,7 @@ const pluginOptions = (given: PluginOptions): PluginOptionsInternal => {
 			const fullSlug = c.ui?.fullSlug ?? false;
 
 			return {
-				collection: c.collection,
+				key: c.key,
 				localized: c.localized ?? false,
 				prefix: c.prefix,
 				ui: {

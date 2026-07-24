@@ -23,7 +23,7 @@ test("slug validation returns specific English zod messages", () => {
 	});
 
 	registerFields(collection as never, {
-		collection: "pages",
+		key: "pages",
 		localized: false,
 		ui: {
 			fullSlug: true,
@@ -89,7 +89,7 @@ test("registers fields in an existing named tab with configured widths", () => {
 		.addText("theme");
 
 	registerFields(collection as never, {
-		collection: "pages",
+		key: "pages",
 		localized: false,
 		ui: {
 			fullSlug: true,
@@ -130,7 +130,7 @@ test("preserves normal field placement when the configured tab is missing", () =
 	}).addText("title");
 
 	registerFields(collection as never, {
-		collection: "pages",
+		key: "pages",
 		localized: false,
 		ui: {
 			fullSlug: false,

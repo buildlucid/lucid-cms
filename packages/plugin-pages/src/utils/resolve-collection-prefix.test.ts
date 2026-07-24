@@ -5,7 +5,7 @@ import resolveCollectionPrefix from "./resolve-collection-prefix.js";
 test("should resolve a shared string prefix", async () => {
 	const prefix = resolveCollectionPrefix({
 		collection: {
-			collection: "pages",
+			key: "pages",
 			localized: true,
 			ui: {
 				fullSlug: false,
@@ -27,7 +27,7 @@ test("should resolve a shared string prefix", async () => {
 test("should resolve a locale specific prefix", async () => {
 	const prefix = resolveCollectionPrefix({
 		collection: {
-			collection: "pages",
+			key: "pages",
 			localized: true,
 			ui: {
 				fullSlug: false,

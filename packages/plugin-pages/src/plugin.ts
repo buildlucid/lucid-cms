@@ -22,14 +22,14 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 
 			for (const collectionConfig of options.collections) {
 				const collectionInstance = draft.collections.find(
-					(c) => c.key === collectionConfig.collection,
+					(c) => c.key === collectionConfig.key,
 				);
 				if (!collectionInstance) {
 					logger.warn({
 						message: "Pages collection was not found",
 						scope: PLUGIN_KEY,
 						data: {
-							collection: collectionConfig.collection,
+							collection: collectionConfig.key,
 						},
 					});
 					continue;

@@ -24,7 +24,7 @@ const context = {
 const options = {
 	collections: [
 		{
-			collection: "pages",
+			key: "pages",
 			localized: false,
 			ui: {
 				fullSlug: true,

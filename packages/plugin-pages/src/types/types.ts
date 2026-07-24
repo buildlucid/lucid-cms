@@ -22,7 +22,7 @@ export interface CollectionUI {
 
 export interface PluginOptions {
 	collections: Array<{
-		collection: string;
+		key: string;
 		localized?: boolean;
 		prefix?: CollectionPrefix;
 		ui?: CollectionUI;
@@ -36,7 +36,7 @@ export interface PluginOptionsInternal {
 }
 
 export interface CollectionConfig {
-	collection: string;
+	key: string;
 	localized: boolean;
 	prefix?: CollectionPrefix;
 	ui: {

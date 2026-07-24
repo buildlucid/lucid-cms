@@ -43,7 +43,7 @@ const beforeDeleteHandler =
 			const descendantsRes = await getDescendantFields(context, {
 				ids: data.data.ids,
 				versionType,
-				collectionKey: targetCollectionRes.data.collection,
+				collectionKey: targetCollectionRes.data.key,
 				tables: data.meta.collectionTableNames,
 			});
 			if (descendantsRes.error) return descendantsRes;
@@ -70,7 +70,7 @@ const beforeDeleteHandler =
 					collectionInstance: data.meta.collection,
 					projectedFullSlugs: docFullSlugsRes.data,
 					versionType,
-					collectionKey: targetCollectionRes.data.collection,
+					collectionKey: targetCollectionRes.data.key,
 					tenantKey: data.meta.tenantKey,
 					tables: data.meta.collectionTableNames,
 					excludeDocumentIds: [...data.data.ids, ...projectedDocumentIds],

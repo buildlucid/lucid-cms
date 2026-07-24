@@ -142,7 +142,7 @@ const afterFetchHandler =
 				const parentFieldsRes = await getParentFields(context, {
 					defaultLocale: context.config.localization.defaultLocale,
 					versionType: data.data.relationVersionType,
-					collectionKey: targetCollectionRes.data.collection,
+					collectionKey: targetCollectionRes.data.key,
 					tenantKey: data.meta.tenantKey,
 					fields: {
 						parentPage,

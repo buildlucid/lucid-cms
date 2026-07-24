@@ -47,7 +47,7 @@ export default configureLucid({
 			pagesPlugin({
 				collections: [
 					{
-						collection: PageCollection.key,
+						key: PageCollection.key,
 						localized: true,
 						prefix: {
 							en: "en",

@@ -32,7 +32,7 @@ const afterUpsertHandler =
 		const descendantsRes = await getDescendantFields(context, {
 			ids: [data.data.documentId],
 			versionType: data.data.versionType,
-			collectionKey: targetCollectionRes.data.collection,
+			collectionKey: targetCollectionRes.data.key,
 			tables: data.meta.collectionTableNames,
 		});
 		if (descendantsRes.error) return descendantsRes;

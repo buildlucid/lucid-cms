@@ -10,7 +10,7 @@ const localization = {
 } as Config["localization"];
 
 const baseCollection = {
-	collection: "pages",
+	key: "pages",
 	localized: false,
 	ui: {
 		fullSlug: false,

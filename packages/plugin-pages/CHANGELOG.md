@@ -2,7 +2,7 @@
 
 ## v0.6.0 (unreleased)
 
-- Replaced `collectionKey` with `collection` in collection options.
+- Replaced `collectionKey` with `key` in collection options.
 - Moved full slug visibility to `ui.fullSlug`.
 - Added `ui.tab` for placing plugin fields in an existing named collection tab.
 - Added `ui.widths` for overriding individual plugin field widths.
