@@ -1,6 +1,6 @@
 # @lucidcms/core
 
-## v0.17.0 (unreleased)
+## v0.17.0-alpha.0 (unreleased)
 
 ### Features:
 
@@ -16,6 +16,7 @@
 - Simplified access configuration by removing `access` from `lucid.config` and custom permission overrides from collections, environments and workflows. Lucid now uses internal permissions and collection-generated document permissions. ([ff60146](https://github.com/buildlucid/lucid-cms/commit/ff60146a2c6f6505162f28cdf560b9716f005048))
 - Reworked logging around one process-level logger and managed transport objects. Custom logger transports must now implement `write(entry)` instead of accepting `(level, log)`, may implement `flush` and `destroy`, and no longer expose public CLI buffering controls. ([e4aa467](https://github.com/buildlucid/lucid-cms/commit/e4aa46752153955fc1853aec6eeb16a79bcb5a3d))
 - CLI errors now render inline on stderr, and the CLI logger no longer exposes `formatZodError`. ([d066c74](https://github.com/buildlucid/lucid-cms/commit/d066c74268a55f193d11f75e3acbb37b72484aa2))
+- Reworked database and runtime lifecycles around explicit connections and invocations. Database adapters now use `connect()`, `createApp` is internal, and runtimes use `createLucidHost` and `createInvocation()` to manage connections, startup and shutdown. ([6cc8443](https://github.com/buildlucid/lucid-cms/commit/6cc844309b8403c756d0f213ce39ebe68a2865cf))
 
 ### Bug Fixes:
 
@@ -28,6 +29,7 @@
 - Fixed collection preview URL callbacks including fields from every registered collection. ([9e47890](https://github.com/buildlucid/lucid-cms/commit/9e47890a15984c99cc4952ca2493856f559cccdb))
 - Fixed Vite dynamic import analysis warnings for intentionally runtime-resolved migration and Astro bridge modules during development startup. ([971e993](https://github.com/buildlucid/lucid-cms/commit/971e993aa2d0a86f86e8a593d47cf11e2c284a3f))
 - Fixed the document revision history pinning the latest version above newer entries and ignoring auto-save updates when ordering the timeline. ([43975e2](https://github.com/buildlucid/lucid-cms/commit/43975e2b31c01f6d77b4a752c4c2baabb57e4565))
+- Fixed non-HTTP services always using English instead of the configured interface locale. ([6cc8443](https://github.com/buildlucid/lucid-cms/commit/6cc844309b8403c756d0f213ce39ebe68a2865cf))
 
 ## v0.16.0-alpha.0
 
