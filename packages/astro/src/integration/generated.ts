@@ -36,7 +36,7 @@ import db from ${JSON.stringify(imports.db)};
 import runtime from ${JSON.stringify(imports.runtime)};
 import bridge from ${JSON.stringify(props.project.bridgeEntrypoint)};
 import { createLucidHost } from "@lucidcms/core/runtime";
-import { createLucidSpaResponse, destroyRuntimeHostRevision, getBuildContext, getRuntimeHostState, shouldServeLucidSpaShell } from "@lucidcms/astro/internal/runtime";
+import { createLucidSpaResponse, destroyRuntimeHostRevision, getBuildContext, getOrCreateInvocation, getOrCreateRuntimeHost, getRuntimeHostState, shouldServeLucidSpaShell } from "@lucidcms/astro/internal/runtime";
 import emailTemplates from "./${constants.files.emailTemplates}";
 import translationBundles from "./${constants.files.translations}";
 import spaHtml from "./${constants.files.spa}";
@@ -54,6 +54,17 @@ const resolveAdapter = async () => {
 	return adapter;
 };
 
+const createHost = (adapter, state) => createLucidHost({
+	definition: { runtime: adapter, db, config: configFactory },
+	envSchema,
+	env: state.env,
+	runtimeContext: state.runtimeContext,
+	translationBundles,
+	meta: { emailTemplates, host: "astro" },
+	http: state.http,
+	databaseScope: state.databaseScope,
+});
+
 export const getLucidHost = async (context) => {
 	await projectState.ready;
 	if (projectState.invalidated) {
@@ -66,29 +77,48 @@ export const getLucidHost = async (context) => {
 		fallbackEnv: getBuildContext(${JSON.stringify(props.buildContextId)}),
 		compiled: ${JSON.stringify(props.compiled)},
 	});
-	const runtimeKey = state.cacheKey ?? "default";
-	let hostPromise = projectState.hosts.get(runtimeKey);
-	if (!hostPromise) {
-		hostPromise = createLucidHost({
-			definition: { runtime: adapter, db, config: configFactory },
-			envSchema,
-			env: state.env,
-			runtimeContext: state.runtimeContext,
-			translationBundles,
-			meta: { emailTemplates, host: "astro" },
-			http: state.http,
-		}).catch((error) => {
-			projectState.hosts.delete(runtimeKey);
-			throw error;
-		});
-		projectState.hosts.set(runtimeKey, hostPromise);
+	if (state.databaseScope !== "runtime" && state.databaseScope !== "invocation") {
+		throw new Error("The Lucid Astro runtime returned an invalid database scope.");
 	}
-	const host = await hostPromise;
+	const runtimeKey = state.cacheKey ?? "default";
+	const executionContext = state.executionContext;
+	const anchor = executionContext && typeof executionContext.waitUntil === "function"
+		? (promise) => executionContext.waitUntil(promise)
+		: undefined;
+	const host = await getOrCreateRuntimeHost(
+		projectState,
+		runtimeKey,
+		() => createHost(adapter, state),
+		anchor,
+	);
 	if (projectState.invalidated) {
 		await host.destroy();
 		throw new Error("The Lucid Astro host was invalidated during reload.");
 	}
-	return { host, state };
+	return { host, state, runtimeKey };
+};
+
+export const createLucidInvocation = async (context) => {
+	const { host, state } = await getLucidHost(context);
+	return {
+		invocation: host.createInvocation({ env: state.env }),
+		state,
+	};
+};
+
+export const getLucidInvocation = async (context) => {
+	if (!context?.locals || typeof context.locals !== "object") {
+		throw new Error("Lucid Astro request APIs require the current Astro context.");
+	}
+	const { host, state, runtimeKey } = await getLucidHost(context);
+	const invocation = await getOrCreateInvocation(
+		context.locals,
+		hostKey,
+		revision,
+		runtimeKey,
+		() => host.createInvocation({ env: state.env }),
+	);
+	return { invocation, state };
 };
 
 export const destroyLucidHosts = async () => {
@@ -98,22 +128,40 @@ export const destroyLucidHosts = async () => {
 if (import.meta.hot) import.meta.hot.dispose(destroyLucidHosts);
 
 export const handle = async (context) => {
-	const { host, state } = await getLucidHost(context);
-	const response = await bridge.handle({ host, context, state });
+	const { invocation, state } = await getLucidInvocation(context);
+	const response = await bridge.handle({ invocation, context, state });
 	const pathname = new URL(context.request.url).pathname;
 	return response.status === 404 && shouldServeLucidSpaShell(pathname, context.request.method)
 		? createLucidSpaResponse(spaHtml, context.request.method)
 		: response;
 };
 
-export const getToolkit = async (options = {}) => {
-	const { host } = await getLucidHost(options.context);
-	return host.getToolkit(options.request);
+export const getToolkit = async (context) => {
+	const { invocation } = await getLucidInvocation(context);
+	return invocation.getToolkit(context.request);
 };
 
 export default getToolkit;
 `;
 };
+
+const buildMiddlewareSource =
+	() => `import { defineMiddleware } from "astro:middleware";
+import { destroyInvocationScopes, hasInvocationScopes, withResponseCleanup } from "@lucidcms/astro/internal/runtime";
+
+export const onRequest = defineMiddleware(async (context, next) => {
+	try {
+		const response = await next();
+		if (!hasInvocationScopes(context.locals)) return response;
+		return withResponseCleanup(response, () =>
+			destroyInvocationScopes(context.locals),
+		);
+	} catch (error) {
+		await destroyInvocationScopes(context.locals);
+		throw error;
+	}
+});
+`;
 
 /** Writes the generated Astro route, runtime and serialized Lucid modules. */
 export const writeGeneratedModules = async (props: {
@@ -155,6 +203,7 @@ export const writeGeneratedModules = async (props: {
 	);
 	const routePath = path.join(props.directory, constants.files.route);
 	const runtimePath = path.join(props.directory, constants.files.runtime);
+	const middlewarePath = path.join(props.directory, constants.files.middleware);
 
 	await Promise.all([
 		fs.writeFile(
@@ -179,7 +228,8 @@ export const writeGeneratedModules = async (props: {
 				revision,
 			}),
 		),
+		fs.writeFile(middlewarePath, buildMiddlewareSource()),
 	]);
 
-	return { routePath, runtimePath };
+	return { middlewarePath, routePath, runtimePath };
 };

@@ -5,14 +5,13 @@ import type { InferredTable } from "../../../types.js";
 import assessMigrationPlans from "./assess-migration-plan.js";
 import generateMigrationPlan from "./generate-migration-plan.js";
 
-describe("Generate migration plan", () => {
+describe("Generate migration plan", async () => {
 	const db = new SQLiteAdapter({
 		database: ":memory:",
 	});
+	const connection = await db.connect();
 
-	afterAll(() => {
-		db.client.destroy();
-	});
+	afterAll(() => connection.destroy());
 
 	test("does not remove generated custom field columns", () => {
 		const existing: InferredTable[] = [

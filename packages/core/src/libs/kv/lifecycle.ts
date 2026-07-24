@@ -16,13 +16,18 @@ export const getInitializedKVAdapter = async (
 	} = {},
 ): Promise<KVAdapterInstance> => {
 	const adapter = await getKVAdapter(config);
-	await adapter.lifecycle?.init?.(
-		createAdapterLifecycleContext({
-			config,
-			env: options.env,
-			runtimeContext: options.runtimeContext,
-		}),
-	);
+	const context = createAdapterLifecycleContext({
+		config,
+		env: options.env,
+		runtimeContext: options.runtimeContext,
+	});
+
+	try {
+		await adapter.lifecycle?.init?.(context);
+	} catch (error) {
+		await Promise.allSettled([adapter.lifecycle?.destroy?.(context)]);
+		throw error;
+	}
 
 	return adapter;
 };

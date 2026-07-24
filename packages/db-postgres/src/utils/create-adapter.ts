@@ -7,7 +7,6 @@ import type {
 	PostgresAdapterOptions,
 	PostgresAdapterOptionsFactory,
 } from "../types.js";
-import getDefaultPostgresConfig from "./get-default-config.js";
 
 const createPostgresAdapter = (
 	config?: PostgresAdapterOptions | PostgresAdapterOptionsFactory,
@@ -15,14 +14,14 @@ const createPostgresAdapter = (
 	if (config === undefined) {
 		return createDatabaseAdapterFactory({
 			adapter: "postgres",
-			resolve: (env) => new PostgresAdapter(getDefaultPostgresConfig(env)),
+			resolve: () => new PostgresAdapter(),
 		});
 	}
 
 	if (typeof config === "function") {
 		return createDatabaseAdapterFactory({
 			adapter: "postgres",
-			resolve: async (env) => new PostgresAdapter(await config(env)),
+			resolve: () => new PostgresAdapter(config),
 		});
 	}
 

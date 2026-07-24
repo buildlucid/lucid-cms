@@ -57,25 +57,10 @@ import db from "${configArtifactImports.db}";
 import runtime from "${configArtifactImports.runtime}";
 import i18nTranslations from "./i18n-translations.json" with { type: "json" };
 import { logger } from "@lucidcms/core";
-import { createApp, prepareTranslations, processConfig, resolveDatabaseAdapter, setupCronJobs } from "@lucidcms/core/runtime";
-import { createTranslator } from "@lucidcms/core/plugin";
+import { createLucidHost, setupCronJobs, withResponseCleanup } from "@lucidcms/core/runtime";
 import { serve } from "@hono/node-server";
 import cron from "node-cron";
 import { getRuntimeContext } from "@lucidcms/runtime-node/runtime";
-
-const silentLogger = {
-	instance: {
-		info: () => {},
-		warn: () => {},
-		error: () => {},
-		log: () => {},
-		success: () => {},
-		color: {
-			blue: (value) => String(value),
-		},
-	},
-	silent: true,
-};
 
 const resolveRuntime = async () => {
 	const runtimeValue = typeof runtime === "function" ? runtime() : runtime;
@@ -91,51 +76,37 @@ const resolveRuntime = async () => {
 };
 
 const startServer = async () => {
+	let destroyRuntime = async () => undefined;
 	try {
 		const runtimeAdapter = await resolveRuntime();
-		const env = runtimeAdapter.getEnvVars
-			? await runtimeAdapter.getEnvVars({
-					logger: silentLogger,
-				})
-			: undefined;
-
-		if (envSchema && env) {
-			envSchema.parse(env);
-		}
-		await runtimeAdapter.resolveOptions?.(env || {});
-
 		const definition = {
 			runtime: runtimeAdapter,
 			db,
 			config: configFactory,
 		};
-		const wrappedDefinition = runtimeAdapter.configureLucid
-			? runtimeAdapter.configureLucid(definition)
-			: definition;
-		const databaseAdapter = await resolveDatabaseAdapter(
-			wrappedDefinition.db,
-			env,
-		);
-		const resolved = await processConfig(wrappedDefinition.config(env || {}), {
-			recipe: wrappedDefinition.recipe,
-			resolvedDb: databaseAdapter,
-			skipValidation: true,
-		});
-		const { translationStore } = await prepareTranslations({
-			config: resolved,
-			bundles: i18nTranslations,
-		});
-		const translate = createTranslator({ store: translationStore, locale: "en" });
 		const runtimeContext = getRuntimeContext({
 			compiled: true,
 		});
-
-		const { app, destroy, queue, kv, media, email } = await createApp({
-			config: resolved,
-			translationStore,
-			env: env,
+		const host = await createLucidHost({
+			definition,
+			envSchema,
 			runtimeContext,
+			translationBundles: i18nTranslations,
+			databaseScope: "runtime",
 		});
+		const env = host.env;
+		const resolved = host.config;
+		let destroyPromise;
+		const cronTasks = [];
+		const activeCronJobs = new Set();
+		destroyRuntime = () => {
+			destroyPromise ||= (async () => {
+				await Promise.allSettled(cronTasks.map((task) => task.destroy()));
+				await Promise.allSettled(activeCronJobs);
+				await host.destroy();
+			})();
+			return destroyPromise;
+		};
 
 		const cronJobSetup = await setupCronJobs({
 			createQueue: false,
@@ -149,34 +120,48 @@ const startServer = async () => {
 			runtimeOptions?.server?.hostname ?? process.env.HOST ?? process.env.HOSTNAME;
 
 		const server = serve({
-			fetch: app.fetch,
+			fetch: async (request, requestBindings) => {
+				const invocation = host.createInvocation({ env });
+				try {
+					const response = await invocation.handle({
+						request,
+						requestBindings,
+					});
+					return withResponseCleanup(response, () => invocation.destroy());
+				} catch (error) {
+					await invocation.destroy();
+					throw error;
+				}
+			},
 			port,
 			hostname,
 		});
-
 		for (const schedule of cronJobSetup.schedules) {
-			cron.schedule(schedule, async () => {
-				await cronJobSetup.register({
-					config: resolved,
-					translationStore,
-					db: { client: resolved.db.client },
-					queue: queue,
-					env: env,
-					runtimeContext,
-					kv: kv,
-					media,
-					email,
-					request: {
-						url: resolved.host ?? "http://localhost:" + port,
-						locale: resolved.i18n.defaultLocale,
-					},
-					translate,
+			cronTasks.push(
+				cron.schedule(schedule, async () => {
+					const invocation = host.createInvocation({ env });
+					const task = (async () => {
+						try {
+							await cronJobSetup.register(
+								await invocation.getServiceContext({
+									url: resolved.host ?? "http://localhost:" + port,
+								}),
+								{ schedule },
+							);
+						} finally {
+							await invocation.destroy();
+						}
+					})();
+					activeCronJobs.add(task);
+					try {
+						await task;
+					} finally {
+						activeCronJobs.delete(task);
+					}
 				}, {
-					schedule,
-				});
-			}, {
-				noOverlap: true,
-			});
+					noOverlap: true,
+				}),
+			);
 		}
 
 		server.on("listening", () => {
@@ -189,23 +174,32 @@ const startServer = async () => {
 			}
 		});
 		server.on("close", () => {
-			void destroy?.();
+			void destroyRuntime();
 		});
 
-		const gracefulShutdown = (signal) => {
-			server.close(async (error) => {
-				await destroy?.();
-				if (error) {
-					console.error(error);
-					process.exit(1);
-				} else {
-					process.exit(0);
+		let shutdownPromise;
+		const gracefulShutdown = () => {
+			shutdownPromise ??= (async () => {
+				let exitCode = 0;
+				if (server.listening) {
+					await new Promise((resolve) => {
+						server.close((error) => {
+							if (error) {
+								console.error(error);
+								exitCode = 1;
+							}
+							resolve();
+						});
+					});
 				}
-			});
+				await destroyRuntime();
+				process.exit(exitCode);
+			})();
+			return shutdownPromise;
 		};
 
-		process.on("SIGINT", () => gracefulShutdown("SIGINT"));
-		process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+		process.on("SIGINT", gracefulShutdown);
+		process.on("SIGTERM", gracefulShutdown);
 	} catch (error) {
 		logger.error({
 			error,
@@ -214,6 +208,7 @@ const startServer = async () => {
 			scope: "runtime-node",
 		});
 		await logger.flush();
+		await destroyRuntime();
 		process.exit(1);
 	}
 };

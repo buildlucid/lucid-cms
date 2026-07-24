@@ -145,11 +145,19 @@ export type AdapterRuntimeContext = {
 
 export interface EnvironmentVariables extends Record<string, unknown> {}
 
+/** Controls whether a live database connection belongs to a runtime or invocation. */
+export type DatabaseConnectionScope = "runtime" | "invocation";
+
 /** Identifies which execution context owns an adapter lifecycle invocation. */
 export type AdapterLifecyclePurpose = "runtime" | "tooling" | "queue-consumer";
 
 export type AdapterLifecycleContext = {
 	config: Config;
+	/**
+	 * Host environment available during adapter setup. Request-isolated runtimes
+	 * must resolve live I/O bindings from each service context instead of retaining
+	 * them from this host-scoped lifecycle context.
+	 */
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
 	/** Defaults to `runtime` when the caller does not specify a purpose. */

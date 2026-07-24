@@ -18,13 +18,18 @@ export const getInitializedMediaAdapter = async (
 	const adapter = await getMediaAdapter(config);
 	if (!adapter) return null;
 
-	await adapter.lifecycle?.init?.(
-		createAdapterLifecycleContext({
-			config,
-			env: options.env,
-			runtimeContext: options.runtimeContext,
-		}),
-	);
+	const context = createAdapterLifecycleContext({
+		config,
+		env: options.env,
+		runtimeContext: options.runtimeContext,
+	});
+
+	try {
+		await adapter.lifecycle?.init?.(context);
+	} catch (error) {
+		await Promise.allSettled([adapter.lifecycle?.destroy?.(context)]);
+		throw error;
+	}
 
 	return adapter;
 };

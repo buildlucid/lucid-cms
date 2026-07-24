@@ -7,3 +7,4 @@ export {
 	type DatabaseAdapterFactory,
 	type DatabaseAdapterOptionsFactory,
 } from "./adapter-factory.js";
+export type { DatabaseConnection } from "./types.js";

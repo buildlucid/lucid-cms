@@ -1,14 +1,7 @@
-import type { EmailAdapterInstance } from "../../libs/email/types.js";
-import type { KVAdapterInstance } from "../../libs/kv/types.js";
-import type { MediaAdapterInstance } from "../../libs/media/types.js";
-import type { QueueAdapterInstance } from "../../libs/queue/types.js";
 import type {
-	AdapterRuntimeContext,
-	EnvironmentVariables,
-} from "../../libs/runtime/types.js";
-import type { Config } from "../../types/config.js";
-import type { ServiceContext } from "../../utils/services/types.js";
-import type { TranslationStore } from "../i18n/types.js";
+	CreateServiceContextOptions,
+	ServiceContext,
+} from "../../utils/services/types.js";
 import type { ToolkitAuth } from "./auth/index.js";
 import type { ToolkitDocuments } from "./documents/index.js";
 import type { ToolkitEmail } from "./email/index.js";
@@ -20,33 +13,7 @@ import type { ToolkitPreviews } from "./previews/index.js";
 export type ToolkitContext = ServiceContext;
 
 /** Inputs for building a toolkit service context from resolved Lucid config. */
-export type CreateToolkitServiceContextOptions = {
-	/** Resolved Lucid config to build the toolkit from. */
-	config: Config;
-	/** Translation store resolved alongside the config. */
-	translationStore: TranslationStore;
-	/** Optional runtime env bindings associated with the config. */
-	env?: EnvironmentVariables | null;
-	/** Optional runtime context associated with the config. */
-	runtimeContext?: AdapterRuntimeContext;
-	/** Optional queue adapter instance to use for toolkit-backed services. */
-	queue?: QueueAdapterInstance;
-	/** Optional KV adapter instance to use for toolkit-backed services. */
-	kv?: KVAdapterInstance;
-	/** Optional initialized media adapter instance to use for toolkit-backed services. */
-	media?: MediaAdapterInstance | null;
-	/** Optional initialized email adapter instance to use for toolkit-backed services. */
-	email?: EmailAdapterInstance;
-	/**
-	 * Request URL to use when Lucid needs to build absolute URLs.
-	 * If omitted, Lucid uses `config.host`, then falls back to the local Lucid URL.
-	 */
-	request?: {
-		url?: string;
-		ipAddress?: string | null;
-		tenantKey?: string | null;
-	};
-};
+export type CreateToolkitServiceContextOptions = CreateServiceContextOptions;
 
 export type ToolkitTenantOptions = {
 	/** Overrides tenant scope for this toolkit call. A string scopes to that tenant plus global rows; null clears tenant scope. */

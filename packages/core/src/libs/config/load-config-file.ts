@@ -100,10 +100,7 @@ export const loadConfigFile = async (props?: {
 			instance: cliLogger,
 			silent: props?.silent ?? false,
 		},
-		processConfigOptions: {
-			bypassCache: true,
-			...(props?.processConfigOptions ?? {}),
-		},
+		processConfigOptions: props?.processConfigOptions,
 	});
 
 	return {

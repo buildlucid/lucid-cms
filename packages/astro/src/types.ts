@@ -1,10 +1,11 @@
 import type {
 	AdapterRuntimeContext,
 	Config,
+	DatabaseConnectionScope,
 	EnvironmentVariables,
 	HttpExtension,
 	LucidConfigDefinition,
-	LucidHost,
+	LucidInvocation,
 	RuntimeAdapter,
 	TranslationStore,
 } from "@lucidcms/core/types";
@@ -13,13 +14,22 @@ import type {
 export type LucidAstroRuntimeState = {
 	env?: EnvironmentVariables;
 	runtimeContext: AdapterRuntimeContext;
+	/** Controls whether the live database connection belongs to the runtime or invocation. */
+	databaseScope: DatabaseConnectionScope;
 	/** Platform execution context forwarded to the runtime bridge. */
 	executionContext?: unknown;
-	/** Separates host instances when a runtime serves multiple environments. */
+	/** Separates runtime hosts when one generated module serves multiple environments. */
 	cacheKey?: string | object;
 	http?: {
 		extensions?: HttpExtension[];
 	};
+};
+
+/** Request context required to resolve an invocation-safe Lucid toolkit. */
+export type LucidAstroContext = {
+	request: Request;
+	url: URL;
+	locals: object;
 };
 
 /** Request-time contract implemented by runtime adapters that support Astro. */
@@ -34,7 +44,7 @@ export type LucidAstroBridge = {
 	}): LucidAstroRuntimeState | Promise<LucidAstroRuntimeState>;
 	/** Passes an Astro request through the hosted Lucid application. */
 	handle(props: {
-		host: LucidHost;
+		invocation: LucidInvocation;
 		context: {
 			request: Request;
 		};
@@ -42,7 +52,7 @@ export type LucidAstroBridge = {
 	}): Response | Promise<Response>;
 	/** Handles an optional platform scheduled event. */
 	scheduled?(props: {
-		host: LucidHost;
+		invocation: LucidInvocation;
 		controller: { cron: string };
 		state: LucidAstroRuntimeState;
 	}): void | Promise<void>;

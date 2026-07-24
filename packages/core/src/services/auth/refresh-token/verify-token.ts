@@ -32,7 +32,10 @@ const verifyToken = async (
 			};
 		}
 
-		const UserTokens = new UserTokensRepository(config.db.client, config.db);
+		const UserTokens = new UserTokensRepository(
+			c.get("database").client,
+			config.db,
+		);
 
 		const decode = (await verify(
 			_refresh,

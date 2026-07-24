@@ -1,17 +1,11 @@
-import {
-	type ColumnDataType,
-	type ColumnDefinitionBuilder,
-	type Dialect,
-	Kysely,
-	type KyselyPlugin,
-	sql,
-} from "kysely";
+import { type ColumnDataType, type ColumnDefinitionBuilder, sql } from "kysely";
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
 import { type Migration, Migrator } from "kysely/migration";
 import constants from "../../constants/constants.js";
 import { LucidError } from "../../utils/errors/index.js";
 import { translate } from "../i18n/index.js";
 import logger from "../logger/index.js";
+import type { EnvironmentVariables } from "../runtime/types.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
 import Migration00000002 from "./migrations/00000002-options.js";
@@ -27,26 +21,17 @@ import Migration00000011 from "./migrations/00000011-ai-generations.js";
 import Migration00000012 from "./migrations/00000012-preview-sessions.js";
 import type {
 	DatabaseConfig,
+	DatabaseConnection,
 	ExternalMigrationFn,
 	InferredTable,
 	KyselyDB,
-	LucidDB,
 } from "./types.js";
 
 export default abstract class DatabaseAdapter {
-	db: Kysely<LucidDB> | undefined;
 	adapter: string;
 	private externalMigrations: Record<string, ExternalMigrationFn> = {};
-	constructor(config: {
-		adapter: string;
-		dialect: Dialect;
-		plugins?: Array<KyselyPlugin>;
-	}) {
-		this.adapter = config.adapter;
-		this.db = new Kysely<LucidDB>({
-			dialect: config.dialect,
-			plugins: config.plugins,
-		});
+	constructor(adapter: string) {
+		this.adapter = adapter;
 	}
 	/**
 	 * Returns the list of migration names that cannot be rolled back.
@@ -70,7 +55,12 @@ export default abstract class DatabaseAdapter {
 		"00000011-ai-generations",
 		"00000012-preview-sessions",
 	];
-	abstract initialize(): Promise<void>;
+	/**
+	 * Creates an initialized live connection for the supplied runtime environment.
+	 */
+	abstract connect(
+		env?: EnvironmentVariables,
+	): DatabaseConnection | Promise<DatabaseConnection>;
 	/**
 	 * Return your Kysely DB's adapters jsonArrayFrom helper that aggregates a subquery into a JSON array
 	 */
@@ -80,14 +70,13 @@ export default abstract class DatabaseAdapter {
 	 */
 	abstract get config(): DatabaseConfig;
 	/**
-	 * Infers the database schema. Uses the provided client if given, otherwise falls back to the base client.
-	 * Pass the transaction client when calling from within a transaction to avoid deadlocks on single-connection databases.
+	 * Infers the database schema using the supplied connection or transaction.
 	 */
-	abstract inferSchema(db?: KyselyDB): Promise<InferredTable[]>;
+	abstract inferSchema(db: KyselyDB): Promise<InferredTable[]>;
 	/**
 	 * Drops all tables in the database
 	 */
-	abstract dropAllTables(): Promise<void>;
+	abstract dropAllTables(connection: DatabaseConnection): Promise<void>;
 	/**
 	 * Handles formatting of certain values based on the columns data type. This is used specifically for default values
 	 */
@@ -186,11 +175,11 @@ export default abstract class DatabaseAdapter {
 	/**
 	 * Runs all migrations that have not been ran yet. This doesnt include the generated migrations for collections
 	 */
-	async migrateToLatest() {
+	async migrateToLatest(connection: DatabaseConnection) {
 		const migrations = this.migrations;
 
 		const migrator = new Migrator({
-			db: this.client,
+			db: connection.client,
 			provider: {
 				async getMigrations() {
 					return migrations;
@@ -200,7 +189,6 @@ export default abstract class DatabaseAdapter {
 			allowUnorderedMigrations: true,
 		});
 
-		await this.initialize();
 		const { error, results } = await migrator.migrateToLatest();
 
 		if (results) {
@@ -271,17 +259,6 @@ export default abstract class DatabaseAdapter {
 		} catch (_) {
 			return true;
 		}
-	}
-	/**
-	 * Returns the database client instance
-	 */
-	get client() {
-		if (!this.db) {
-			throw new LucidError({
-				message: translate("server:core.database.connection.error"),
-			});
-		}
-		return this.db;
 	}
 	/**
 	 * Returns the migrations for the database, including any registered external migrations.

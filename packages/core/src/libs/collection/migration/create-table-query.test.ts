@@ -5,20 +5,19 @@ import type { ServiceContext } from "../../../utils/services/types.js";
 import { translate } from "../../i18n/index.js";
 import createTableQuery from "./create-table-query.js";
 
-describe("createTableQuery", () => {
+describe("createTableQuery", async () => {
 	const db = new SQLiteAdapter({
 		database: ":memory:",
 	});
+	const connection = await db.connect();
 
-	afterAll(() => {
-		db.client.destroy();
-	});
+	afterAll(() => connection.destroy());
 
 	test("creates generated indexes after creating the table", async () => {
 		// @ts-expect-error
 		const context = {
 			db: {
-				client: db.client,
+				client: connection.client,
 			},
 			config: {
 				db,
@@ -64,7 +63,7 @@ describe("createTableQuery", () => {
 			},
 		});
 
-		const inferred = await db.inferSchema(db.client);
+		const inferred = await db.inferSchema(connection.client);
 		const table = inferred.find((item) => item.name === "lucid_test_indexes");
 
 		expect(res.error).toBeUndefined();
@@ -79,7 +78,7 @@ describe("createTableQuery", () => {
 
 	test("includes the table name and database error in failures", async () => {
 		const tableName = "lucid_existing_collection_table";
-		await db.client.schema
+		await connection.client.schema
 			.createTable(tableName)
 			.addColumn("id", "integer")
 			.execute();
@@ -87,7 +86,7 @@ describe("createTableQuery", () => {
 		// @ts-expect-error
 		const context = {
 			db: {
-				client: db.client,
+				client: connection.client,
 			},
 			config: {
 				db,

@@ -39,6 +39,7 @@ afterAll(async () => {
 
 test("basic - one level deep service wrapper success and error", async () => {
 	const config = await testConfig.getConfig();
+	const database = await testConfig.getDatabase();
 
 	// Setup
 	const testService: ServiceFn<
@@ -73,7 +74,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -91,7 +92,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -115,6 +116,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 	//* requires service to handle returning errors
 
 	const config = await testConfig.getConfig();
+	const database = await testConfig.getDatabase();
 
 	// Setup
 	const testServiceOne: ServiceFn<
@@ -174,7 +176,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -192,7 +194,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -214,6 +216,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 
 test("transaction - one level deep service wrapper success and error", async () => {
 	const config = await testConfig.getConfig();
+	const database = await testConfig.getDatabase();
 	const successCollectionKey = "transaction_test_success_1";
 	const errorCollectionKey = "transaction_test_error_1";
 
@@ -263,7 +266,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -279,7 +282,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -296,7 +299,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 	expect(success.data).toBeDefined();
 	expect(error.error).toEqual(CONSTANTS.error.level1);
 	expect(
-		await config.db.client
+		await database.client
 			.selectFrom("lucid_collections")
 			.select("key")
 			.where("key", "=", errorCollectionKey)
@@ -306,6 +309,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 
 test("transaction - two level deep service wrapper success and error", async () => {
 	const config = await testConfig.getConfig();
+	const database = await testConfig.getDatabase();
 	const successCollectionKey = "transaction_test_success_2";
 	const successCollectionKeyLevel2 = "transaction_test_success_2_level2";
 	const errorCollectionKey = "transaction_test_error_2";
@@ -377,7 +381,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -398,7 +402,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -421,12 +425,12 @@ test("transaction - two level deep service wrapper success and error", async () 
 	expect(error.error).toEqual(CONSTANTS.error.level2);
 
 	const [successDocuments, errorDocuments] = await Promise.all([
-		config.db.client
+		database.client
 			.selectFrom("lucid_collections")
 			.select("key")
 			.where("key", "in", [successCollectionKey, successCollectionKeyLevel2])
 			.execute(),
-		config.db.client
+		database.client
 			.selectFrom("lucid_collections")
 			.select("key")
 			.where("key", "in", [errorCollectionKey, errorCollectionKeyLevel2])
@@ -439,6 +443,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 
 test("service wrapper schema validation", async () => {
 	const config = await testConfig.getConfig();
+	const database = await testConfig.getDatabase();
 
 	const schema = z.object({
 		key: z.string(),
@@ -466,7 +471,7 @@ test("service wrapper schema validation", async () => {
 			schema: schema,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -483,7 +488,7 @@ test("service wrapper schema validation", async () => {
 			schema: schema,
 		})(
 			{
-				db: { client: config.db.client },
+				db: { client: database.client },
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,

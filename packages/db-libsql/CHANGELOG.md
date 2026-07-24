@@ -1,7 +1,8 @@
 # @lucidcms/db-libsql
 
-## v1.1.1 (unreleased)
+## v1.2.0 (unreleased)
 
+- Updated the adapter to use explicit database connections.
 - Fixed `dropAllTables` for remote databases with circular foreign-key relationships.
 
 ## v1.1.0

@@ -29,6 +29,14 @@ import type { QueueEvent, QueueJobStatus } from "../queue/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
+export type DatabaseConnection = {
+	/** Live Kysely client owned by one runtime or invocation scope. */
+	client: Kysely<LucidDB>;
+	/** Optional driver-native resource used by adapter-specific maintenance tasks. */
+	native?: unknown;
+	/** Releases every resource owned by this connection. */
+	destroy: () => Promise<void>;
+};
 export type MigrationFn = (adapter: DatabaseAdapter) => Migration;
 export type ExternalMigrationFn = (ctx: {
 	adapter: DatabaseAdapter;

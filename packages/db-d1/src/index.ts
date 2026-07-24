@@ -4,22 +4,26 @@ import {
 } from "@lucidcms/core/db";
 import type {
 	DatabaseConfig,
+	DatabaseConnection,
+	EnvironmentVariables,
 	InferredColumn,
 	InferredIndex,
 	InferredTable,
 	KyselyDB,
+	LucidDB,
 	OnDelete,
 	OnUpdate,
 } from "@lucidcms/core/types";
-import { type ColumnDataType, sql } from "kysely";
+import { type ColumnDataType, Kysely, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import { DEFAULT_D1_BINDING } from "./constants.js";
-import {
-	D1Dialect,
-	type D1DialectConfig,
-	type D1DialectDatabase,
-} from "./lib/kysely-d1.js";
-import type { D1AdapterCreator } from "./types.js";
+import { D1Dialect, type D1DialectDatabase } from "./lib/kysely-d1.js";
+import type {
+	D1AdapterBindingOptions,
+	D1AdapterCreator,
+	D1AdapterOptions,
+	D1AdapterOptionsFactory,
+} from "./types.js";
 import createD1Adapter from "./utils/create-adapter.js";
 import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
 import formatDefaultValue from "./utils/format-default-value.js";
@@ -30,16 +34,36 @@ import getDefaultD1Config from "./utils/get-default-config.js";
 import { createD1WranglerArtifact } from "./utils/wrangler-artifact.js";
 
 export class D1Adapter extends DatabaseAdapter {
-	#database: D1DialectDatabase;
-	constructor(config: D1DialectConfig) {
-		super({
-			adapter: "d1",
+	readonly #options:
+		| D1AdapterBindingOptions
+		| D1AdapterOptionsFactory
+		| undefined;
+
+	constructor(options?: D1AdapterBindingOptions | D1AdapterOptionsFactory) {
+		super("d1");
+		this.#options = options;
+	}
+
+	async connect(env: EnvironmentVariables = {}): Promise<DatabaseConnection> {
+		const options =
+			typeof this.#options === "function"
+				? await this.#options(env)
+				: this.#options;
+		const config: D1AdapterOptions =
+			options && "database" in options
+				? options
+				: getDefaultD1Config(env, options?.binding);
+		const client = new Kysely<LucidDB>({
 			dialect: new D1Dialect(config),
 			plugins: [createJSONResultsPlugin()],
 		});
-		this.#database = config.database;
+
+		return {
+			client,
+			native: config.database,
+			destroy: () => client.destroy(),
+		};
 	}
-	async initialize() {}
 	get jsonArrayFrom() {
 		return jsonArrayFrom;
 	}
@@ -76,8 +100,7 @@ export class D1Adapter extends DatabaseAdapter {
 			caseInsensitiveLikeOperator: "like",
 		};
 	}
-	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {
-		const client = db ?? this.client;
+	async inferSchema(client: KyselyDB): Promise<InferredTable[]> {
 		const [res, indexRes] = await Promise.all([
 			sql<{
 				table_name: string;
@@ -235,8 +258,13 @@ export class D1Adapter extends DatabaseAdapter {
 
 		return Array.from(tableMap.values());
 	}
-	async dropAllTables(): Promise<void> {
-		const schema = await this.inferSchema();
+	async dropAllTables(connection: DatabaseConnection): Promise<void> {
+		const database = connection.native as D1DialectDatabase | undefined;
+		if (!database) {
+			throw new Error("D1 connection is missing its native database binding.");
+		}
+		const { client } = connection;
+		const schema = await this.inferSchema(client);
 		const allTableNames = new Set(schema.map((t) => t.name));
 
 		const dependencies = new Map<string, Set<string>>();
@@ -320,7 +348,7 @@ export class D1Adapter extends DatabaseAdapter {
 
 		if (dropOrder.length === 0) return;
 
-		if (!("exec" in this.#database)) {
+		if (!("exec" in database)) {
 			throw new Error(
 				"D1 table resets require a D1Database binding rather than a D1DatabaseSession.",
 			);
@@ -336,17 +364,16 @@ export class D1Adapter extends DatabaseAdapter {
 			"PRAGMA defer_foreign_keys = ON",
 			...dropOrder.map(
 				(tableName) =>
-					sql`DELETE FROM ${sql.table(tableName)}`.compile(this.client).sql,
+					sql`DELETE FROM ${sql.table(tableName)}`.compile(client).sql,
 			),
 			...dropOrder.map(
 				(tableName) =>
-					sql`DROP TABLE IF EXISTS ${sql.table(tableName)}`.compile(this.client)
-						.sql,
+					sql`DROP TABLE IF EXISTS ${sql.table(tableName)}`.compile(client).sql,
 			),
 			"PRAGMA defer_foreign_keys = OFF",
 		];
 
-		await this.#database.exec(`${statements.join(";\n")};`);
+		await database.exec(`${statements.join(";\n")};`);
 	}
 	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {
 		if (type === "timestamp" && typeof value === "string") {
@@ -363,7 +390,7 @@ export { DEFAULT_D1_BINDING };
 
 export const d1 = createDatabaseAdapterCreator(createD1Adapter, {
 	adapter: "d1",
-	resolve: (env) => new D1Adapter(getDefaultD1Config(env)),
+	resolve: () => new D1Adapter(),
 	hooks: {
 		runtime: [createD1WranglerArtifact()],
 	},

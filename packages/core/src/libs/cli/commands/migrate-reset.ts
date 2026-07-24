@@ -1,6 +1,8 @@
 import { confirm } from "@inquirer/prompts";
 import type { Config, EnvironmentVariables } from "../../../types.js";
+import createServiceContext from "../../../utils/services/create-service-context.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import type { DatabaseConnection } from "../../db/types.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
 import {
@@ -13,7 +15,6 @@ import {
 	stopLoggerBuffering,
 } from "../../logger/index.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
-import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
@@ -31,6 +32,17 @@ const migrateResetCommand = (props?: {
 		let runtimeContext: AdapterRuntimeContext | undefined =
 			props?.runtimeContext;
 		let translationStore: TranslationStore | undefined;
+		let database: DatabaseConnection | undefined;
+
+		const cleanup = async () => {
+			if (!config) return;
+			await Promise.allSettled([
+				database?.destroy(),
+				destroyKVAdapter(kvInstance, { config, env, runtimeContext }),
+			]);
+			database = undefined;
+			kvInstance = undefined;
+		};
 
 		try {
 			startLoggerBuffering();
@@ -103,7 +115,8 @@ const migrateResetCommand = (props?: {
 			cliLogger.info("Dropping all database tables...");
 
 			try {
-				await config.db.dropAllTables();
+				database = await config.db.connect(env);
+				await config.db.dropAllTables(database);
 				cliLogger.success(
 					"All tables dropped",
 					cliLogger.color.green("successfully"),
@@ -114,6 +127,7 @@ const migrateResetCommand = (props?: {
 				} else {
 					cliLogger.error("Failed to drop tables", "Unknown error");
 				}
+				await cleanup();
 				if (mode === "process") {
 					await stopLoggerBuffering();
 					process.exit(1);
@@ -126,16 +140,16 @@ const migrateResetCommand = (props?: {
 				runtimeContext,
 			});
 			await kvInstance.clear(
-				createToolkitServiceContext({
+				createServiceContext({
 					config,
+					database,
 					translationStore,
 					env,
 					runtimeContext,
 					kv: kvInstance,
 				}),
 			);
-			await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
-			kvInstance = undefined;
+			await cleanup();
 
 			const endTime = startTime();
 			if (mode === "process") {
@@ -162,9 +176,7 @@ const migrateResetCommand = (props?: {
 				return true;
 			}
 		} catch (error) {
-			if (config && translationStore) {
-				await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
-			}
+			await cleanup();
 			if (error instanceof Error) {
 				cliLogger.errorInstance(error, "Database reset failed");
 			} else {

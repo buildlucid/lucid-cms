@@ -1,5 +1,9 @@
 # @lucidcms/db-sqlite
 
+## v1.2.0 (unreleased)
+
+- Updated the adapter to use explicit database connections through `connect()`.
+
 ## v1.1.0
 
 - Set `caseInsensitiveLikeOperator` configuration for core.

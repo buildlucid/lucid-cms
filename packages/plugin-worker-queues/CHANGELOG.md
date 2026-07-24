@@ -1,8 +1,9 @@
 # @lucidcms/plugin-worker-queues
 
-## v1.0.4 (unreleased)
+## v1.1.0 (unreleased)
 
-- Flushed pending logger transport work before worker queue consumers exit and added structured queue error details.
+- Updated queue consumers to use explicit database connections and finish active batches before shutting down.
+- Added structured event and error details to queue failure logs.
 
 ## v1.0.3
 

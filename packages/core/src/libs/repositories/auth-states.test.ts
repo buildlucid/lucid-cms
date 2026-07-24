@@ -6,14 +6,13 @@ describe("Tests for the auth states repository", async () => {
 	const db = new SQLiteAdapter({
 		database: ":memory:",
 	});
+	const connection = await db.connect();
 
-	afterAll(() => {
-		db.client.destroy();
-	});
+	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest();
-	const AuthStates = new AuthStatesRepository(db.client, db);
-	const tables = await db.client.introspection.getTables();
+	await db.migrateToLatest(connection);
+	const AuthStates = new AuthStatesRepository(connection.client, db);
+	const tables = await connection.client.introspection.getTables();
 
 	test("checks the columnFormats matches the latest state of the DB", async () => {
 		const table = tables.find((t) => t.name === AuthStates.tableName);

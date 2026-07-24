@@ -8,10 +8,11 @@ import { copy } from "../../../libs/i18n/index.js";
 import type { LucidBrickTableName } from "../../../types.js";
 import { groupRelationDocumentFilterConditions } from "./resolve-relation-document-filters.js";
 
-describe("relation document filter grouping", () => {
+describe("relation document filter grouping", async () => {
 	const db = new SQLiteAdapter({ database: ":memory:" });
+	const connection = await db.connect();
 
-	afterAll(() => db.client.destroy());
+	afterAll(() => connection.destroy());
 
 	const HeroBrick = new BrickBuilder("hero").addRelation("featured", {
 		collection: "pages",

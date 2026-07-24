@@ -1,5 +1,7 @@
 import type { Config, EnvironmentVariables } from "../../../types.js";
+import createServiceContext from "../../../utils/services/create-service-context.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import type { DatabaseConnection } from "../../db/types.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
 import {
@@ -12,7 +14,6 @@ import {
 	stopLoggerBuffering,
 } from "../../logger/index.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
-import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
 import runSyncTasks from "../services/run-sync-tasks.js";
 import validateEnvVars from "../services/validate-env-vars.js";
@@ -26,6 +27,18 @@ const syncCommand = async (options?: {
 	let env: EnvironmentVariables | undefined;
 	let runtimeContext: AdapterRuntimeContext | undefined;
 	let translationStore: TranslationStore | undefined;
+	let database: DatabaseConnection | undefined;
+
+	const cleanup = async () => {
+		if (!config) return;
+		await Promise.allSettled([
+			database?.destroy(),
+			destroyKVAdapter(kvInstance, { config, env, runtimeContext }),
+		]);
+		database = undefined;
+		kvInstance = undefined;
+	};
+
 	try {
 		startLoggerBuffering();
 		const startTime = cliLogger.startTimer();
@@ -59,33 +72,34 @@ const syncCommand = async (options?: {
 			env,
 			runtimeContext,
 		});
+		database = await config.db.connect(env);
 
-		const syncResult = await runSyncTasks(
+		const syncResult = await runSyncTasks({
 			config,
+			database,
 			translationStore,
-			"process",
-			kvInstance,
+			kv: kvInstance,
 			env,
 			runtimeContext,
-		);
+		});
 		if (!syncResult) {
-			await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
+			await cleanup();
 			await stopLoggerBuffering();
 			process.exit(1);
 		}
 
 		cliLogger.info("Clearing KV cache...");
 		await kvInstance.clear(
-			createToolkitServiceContext({
+			createServiceContext({
 				config,
+				database,
 				translationStore,
 				env,
 				runtimeContext,
 				kv: kvInstance,
 			}),
 		);
-		await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
-		kvInstance = undefined;
+		await cleanup();
 
 		const endTime = startTime();
 		cliLogger.log(
@@ -103,9 +117,7 @@ const syncCommand = async (options?: {
 		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
-		if (config && translationStore) {
-			await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
-		}
+		await cleanup();
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error, "Sync failed");
 		} else {

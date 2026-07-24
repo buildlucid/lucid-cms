@@ -6,14 +6,13 @@ describe("Tests for the media folders repository", async () => {
 	const db = new SQLiteAdapter({
 		database: ":memory:",
 	});
+	const connection = await db.connect();
 
-	afterAll(() => {
-		db.client.destroy();
-	});
+	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest();
-	const MediaFolders = new MediaFoldersRepository(db.client, db);
-	const tables = await db.client.introspection.getTables();
+	await db.migrateToLatest(connection);
+	const MediaFolders = new MediaFoldersRepository(connection.client, db);
+	const tables = await connection.client.introspection.getTables();
 
 	test("checks the columnFormats matches the latest state of the DB", async () => {
 		const table = tables.find((t) => t.name === MediaFolders.tableName);

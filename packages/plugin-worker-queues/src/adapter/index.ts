@@ -8,6 +8,7 @@ import { insertJobs, logScope } from "@lucidcms/core/queue";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
 
 const ADAPTER_KEY = "worker";
+const SHUTDOWN_TIMEOUT = 5000;
 
 export type WorkerQueueAdapterOptions = {
 	concurrentLimit?: number;
@@ -41,6 +42,7 @@ function workerQueueAdapter(
 	options: WorkerQueueAdapterOptions = {},
 ): QueueAdapterInstance {
 	let worker: Worker | null = null;
+	let destroyPromise: Promise<void> | undefined;
 	const checkNow = () => worker?.postMessage({ type: "CHECK_NOW" });
 
 	return {
@@ -51,6 +53,7 @@ function workerQueueAdapter(
 		},
 		lifecycle: {
 			init: async (params) => {
+				destroyPromise = undefined;
 				logger.debug({
 					message: "The worker queue has started",
 					scope: logScope,
@@ -80,10 +83,50 @@ function workerQueueAdapter(
 					},
 				});
 			},
-			destroy: async () => {
-				if (worker) {
-					worker.terminate();
-				}
+			destroy: () => {
+				destroyPromise ??= (async () => {
+					const activeWorker = worker;
+					worker = null;
+					if (!activeWorker) return;
+
+					await new Promise<void>((resolve) => {
+						let settled = false;
+						const cleanup = () => {
+							clearTimeout(timeout);
+							activeWorker.off("exit", handleExit);
+							activeWorker.off("message", handleMessage);
+						};
+						const finish = () => {
+							if (settled) return;
+							settled = true;
+							cleanup();
+							resolve();
+						};
+						const terminate = () => {
+							if (settled) return;
+							settled = true;
+							cleanup();
+							void activeWorker.terminate().then(
+								() => resolve(),
+								() => resolve(),
+							);
+						};
+						const handleExit = () => finish();
+						const handleMessage = (message: { type?: string }) => {
+							if (message.type === "SHUTDOWN_COMPLETE") terminate();
+						};
+						const timeout = setTimeout(terminate, SHUTDOWN_TIMEOUT);
+
+						activeWorker.once("exit", handleExit);
+						activeWorker.on("message", handleMessage);
+						try {
+							activeWorker.postMessage({ type: "SHUTDOWN" });
+						} catch {
+							terminate();
+						}
+					});
+				})();
+				return destroyPromise;
 			},
 		},
 		add: async (context, params) => {

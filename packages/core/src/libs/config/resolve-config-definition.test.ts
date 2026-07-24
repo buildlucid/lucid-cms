@@ -12,7 +12,7 @@ import resolveConfigDefinition from "./resolve-config-definition.js";
 const createAdapter = (adapter = "test") =>
 	({
 		adapter,
-		initialize: vi.fn(),
+		connect: vi.fn(),
 		inferSchema: vi.fn(),
 		dropAllTables: vi.fn(),
 	}) as unknown as DatabaseAdapter;
@@ -54,7 +54,6 @@ test("resolves no-call runtime and database adapter creators", async () => {
 			SECRET: "a".repeat(64),
 		},
 		processConfigOptions: {
-			bypassCache: true,
 			skipValidation: true,
 		},
 	});
@@ -97,7 +96,6 @@ test("resolves a named env schema supplied separately from the config definition
 			SECRET: "a".repeat(64),
 		},
 		processConfigOptions: {
-			bypassCache: true,
 			skipValidation: true,
 		},
 	});
@@ -130,7 +128,6 @@ test("skips env schema validation and fills missing secrets during build resolut
 			envSchema: env,
 			env: {},
 			processConfigOptions: {
-				bypassCache: true,
 				mode: "build",
 			},
 		}),
@@ -142,7 +139,6 @@ test("skips env schema validation and fills missing secrets during build resolut
 		env: {},
 		validateEnvSchema: false,
 		processConfigOptions: {
-			bypassCache: true,
 			mode: "build",
 		},
 	});
@@ -241,7 +237,6 @@ test("passes supported prepare artifacts from db factories and plugins to the ru
 		projectRoot: "/tmp",
 		prepareRuntime: true,
 		processConfigOptions: {
-			bypassCache: true,
 			skipValidation: true,
 		},
 	});

@@ -7,6 +7,7 @@ const constants = {
 	assetDirectory: "public",
 	mountPath,
 	files: {
+		middleware: "middleware.ts",
 		route: "route.ts",
 		runtime: "runtime.ts",
 		emailTemplates: "email-templates.ts",

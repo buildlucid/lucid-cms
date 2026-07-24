@@ -4,20 +4,24 @@ import {
 } from "@lucidcms/core/db";
 import type {
 	DatabaseConfig,
+	DatabaseConnection,
+	EnvironmentVariables,
 	InferredColumn,
 	InferredIndex,
 	InferredTable,
 	KyselyDB,
+	LucidDB,
 	OnDelete,
 	OnUpdate,
 } from "@lucidcms/core/types";
-import { type ColumnDataType, sql } from "kysely";
+import { type ColumnDataType, Kysely, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/postgres";
 import { PostgresJSDialect } from "kysely-postgres-js";
 import postgresClient from "postgres";
 import type {
 	PostgresAdapterCreator,
 	PostgresAdapterOptions,
+	PostgresAdapterOptionsFactory,
 } from "./types.js";
 import createPostgresAdapter from "./utils/create-adapter.js";
 import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
@@ -28,7 +32,23 @@ import formatType from "./utils/format-type.js";
 import getDefaultPostgresConfig from "./utils/get-default-config.js";
 
 export class PostgresAdapter extends DatabaseAdapter {
-	constructor(config?: PostgresAdapterOptions) {
+	readonly #options:
+		| PostgresAdapterOptions
+		| PostgresAdapterOptionsFactory
+		| undefined;
+
+	constructor(
+		options?: PostgresAdapterOptions | PostgresAdapterOptionsFactory,
+	) {
+		super("postgres");
+		this.#options = options;
+	}
+
+	async connect(env: EnvironmentVariables = {}): Promise<DatabaseConnection> {
+		const config =
+			typeof this.#options === "function"
+				? await this.#options(env)
+				: (this.#options ?? getDefaultPostgresConfig(env));
 		if (!config?.url) {
 			throw new Error(
 				'PostgresAdapter requires a "url" option. Example: { url: env.DATABASE_URL }',
@@ -36,9 +56,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 		}
 
 		const { url, ...postgresOptions } = config;
-
-		super({
-			adapter: "postgres",
+		const client = new Kysely<LucidDB>({
 			dialect: new PostgresJSDialect({
 				postgres: postgresClient(url, {
 					...postgresOptions,
@@ -47,9 +65,18 @@ export class PostgresAdapter extends DatabaseAdapter {
 			}),
 			plugins: [createJSONResultsPlugin()],
 		});
-	}
-	async initialize() {
-		await sql`SET timezone = 'UTC'`.execute(this.client);
+
+		try {
+			await sql`SET timezone = 'UTC'`.execute(client);
+		} catch (error) {
+			await client.destroy();
+			throw error;
+		}
+
+		return {
+			client,
+			destroy: () => client.destroy(),
+		};
 	}
 	get jsonArrayFrom() {
 		return jsonArrayFrom;
@@ -88,8 +115,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 			caseInsensitiveLikeOperator: "ilike",
 		};
 	}
-	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {
-		const client = db ?? this.client;
+	async inferSchema(client: KyselyDB): Promise<InferredTable[]> {
 		const [res, indexRes] = await Promise.all([
 			sql<{
 				table_name: string;
@@ -258,16 +284,17 @@ export class PostgresAdapter extends DatabaseAdapter {
 
 		return Array.from(tableMap.values());
 	}
-	async dropAllTables(): Promise<void> {
+	async dropAllTables(connection: DatabaseConnection): Promise<void> {
+		const { client } = connection;
 		const tables = await sql<{ tablename: string }>`
                 SELECT tablename
                 FROM pg_tables
                 WHERE schemaname = 'public'
-            `.execute(this.client);
+            `.execute(client);
 
 		for (const table of tables.rows) {
 			await sql`DROP TABLE IF EXISTS ${sql.table(table.tablename)} CASCADE`.execute(
-				this.client,
+				client,
 			);
 		}
 	}
@@ -307,7 +334,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 
 export const postgres = createDatabaseAdapterCreator(createPostgresAdapter, {
 	adapter: "postgres",
-	resolve: (env) => new PostgresAdapter(getDefaultPostgresConfig(env)),
+	resolve: () => new PostgresAdapter(),
 }) as PostgresAdapterCreator;
 
 export default postgres;

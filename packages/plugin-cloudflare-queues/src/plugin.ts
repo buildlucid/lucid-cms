@@ -62,28 +62,8 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 						],
 					},
 					{
-						path: "@lucidcms/core/kv",
-						exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
-					},
-					{
-						path: "@lucidcms/core/media",
-						exports: ["destroyMediaAdapter", "getInitializedMediaAdapter"],
-					},
-					{
-						path: "@lucidcms/core/email",
-						exports: ["destroyEmailAdapter", "getInitializedEmailAdapter"],
-					},
-					{
 						path: "@lucidcms/core/runtime",
-						exports: [
-							"prepareTranslations",
-							"processConfig",
-							"resolveDatabaseAdapter",
-						],
-					},
-					{
-						path: "@lucidcms/core/plugin",
-						exports: ["createTranslator"],
+						exports: ["createLucidHost"],
 					},
 					{
 						path: "@lucidcms/core",
@@ -91,7 +71,11 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 					},
 					{
 						path: "@lucidcms/runtime-cloudflare/runtime",
-						exports: ["getRuntimeContext"],
+						exports: [
+							"getOrCreateRuntimeHost",
+							"getRuntimeContext",
+							"runtimeHostKeys",
+						],
 					},
 					{
 						path: "./email-templates.json",
@@ -106,79 +90,30 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 					{
 						name: "queue",
 						async: true,
-						params: ["batch", "env"],
-						content: /** ts */ `const resolveRuntime = async () => {
-    const runtimeValue = typeof runtime === "function" ? runtime() : runtime;
-    const runtimeAdapter = await runtimeValue;
-
-    if (!runtimeAdapter || typeof runtimeAdapter !== "object") {
-        throw new Error(
-            "Lucid Cloudflare runtime could not resolve the configured runtime adapter.",
-        );
-    }
-
-    return runtimeAdapter;
-};
-
-const runtimeAdapter = await resolveRuntime();
-
-if (envSchema) {
-    envSchema.parse(env);
-}
-await runtimeAdapter.resolveOptions?.(env);
-
-const lucidConfig = configFactory(env);
-lucidConfig.email = lucidConfig.email ?? {};
-lucidConfig.email.templates = lucidConfig.email.templates ?? {};
-lucidConfig.email.templates.rendered = {
-    ...(lucidConfig.email.templates.rendered ?? {}),
-    ...Object.fromEntries(
-        Object.entries(emailTemplates).map(([key, value]) => [key, value.html]),
-    ),
-};
-const databaseAdapter = await resolveDatabaseAdapter(
-    db,
-    env,
-);
-const resolved = await processConfig(
-    lucidConfig,
-    {
-        resolvedDb: databaseAdapter,
-        skipValidation: true,
-    },
-);
-const { translationStore } = await prepareTranslations({
-    config: resolved,
-    bundles: i18nTranslations,
-});
-const translate = createTranslator({ store: translationStore, locale: "en" });
-const runtimeContext = getRuntimeContext({
+						params: ["batch", "env", "ctx"],
+						content: /** ts */ `const runtimeContext = getRuntimeContext({
     server: "cloudflare",
     compiled: true,
 });
-
-let kvInstance;
-let media;
-let email;
-
+const host = await getOrCreateRuntimeHost(
+    runtimeHostKeys.background,
+    () => createLucidHost({
+        definition: { runtime, db, config: configFactory },
+        envSchema,
+        env,
+        runtimeContext,
+        translationBundles: i18nTranslations,
+        meta: { emailTemplates },
+        databaseScope: "invocation",
+    }),
+    (promise) => ctx.waitUntil(promise),
+);
+const invocation = host.createInvocation({ env });
 try {
-    kvInstance = await getInitializedKVAdapter(resolved, {
-        env,
-        runtimeContext,
-    });
-    media = await getInitializedMediaAdapter(resolved, {
-        env,
-        runtimeContext,
-    });
-    email = await getInitializedEmailAdapter(resolved, {
-        env,
-        runtimeContext,
-        purpose: "queue-consumer",
-    });
-
+    const serviceContext = await invocation.getServiceContext();
     const internalQueueAdapter = passthroughQueueAdapter({
         bypassImmediateExecution: true,
-});
+    });
 
     for (const message of batch.messages) {
         try {
@@ -196,19 +131,8 @@ try {
 
             const result = await executeSingleJob(
                 {
-                    config: resolved,
-                    db: { client: resolved.db.client },
-                    env: env || null,
-                    runtimeContext,
+                    ...serviceContext,
                     queue: internalQueueAdapter,
-                    kv: kvInstance,
-                    media,
-                    email,
-                    translate,
-                    request: {
-                        url: resolved.host || "http://localhost",
-                        locale: resolved.i18n.defaultLocale,
-                    },
                 },
                 {
                     jobId,
@@ -257,23 +181,7 @@ try {
         }
     }
 } finally {
-    await Promise.allSettled([
-        kvInstance
-            ? destroyKVAdapter(kvInstance, { config: resolved, env, runtimeContext })
-            : undefined,
-        media
-            ? destroyMediaAdapter(media, { config: resolved, env, runtimeContext })
-            : undefined,
-        email
-            ? destroyEmailAdapter(email, {
-                config: resolved,
-                env,
-                runtimeContext,
-                purpose: "queue-consumer",
-            })
-            : undefined,
-        resolved.db.client.destroy(),
-    ]);
+    await invocation.destroy();
 }`,
 					},
 				];

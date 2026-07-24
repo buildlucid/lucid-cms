@@ -3,9 +3,8 @@ import { relative } from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { getBuildPaths } from "@lucidcms/core/build";
-import { createApp } from "@lucidcms/core/runtime";
-import type { LucidHonoGeneric, ServeHandler } from "@lucidcms/core/types";
-import { Hono } from "hono";
+import { createLucidHost, withResponseCleanup } from "@lucidcms/core/runtime";
+import type { LucidHonoVariables, ServeHandler } from "@lucidcms/core/types";
 import type { PlatformProxy } from "wrangler";
 import getRuntimeContext from "../services/get-runtime-context.js";
 import type { AdapterOptions } from "../types.js";
@@ -27,42 +26,48 @@ const serveCommand =
 			silent: logger.silent,
 		});
 
-		const cloudflareApp = new Hono<LucidHonoGeneric>();
-
-		cloudflareApp.use("*", async (c, next) => {
-			// @ts-expect-error
-			c.env = Object.assign(c.env, platformProxy.env);
-
-			// TODO: get these typed
-			// @ts-expect-error
-			c.set("cf", platformProxy.cf);
-			// @ts-expect-error
-			c.set("caches", platformProxy.caches);
-			// @ts-expect-error
-			c.set("ctx", {
-				waitUntil: platformProxy?.ctx.waitUntil,
-				passThroughOnException: platformProxy?.ctx.passThroughOnException,
-			});
-			await next();
-		});
-
 		const runtimeContext = getRuntimeContext({
 			server: "cloudflare",
 			compiled: false,
 		});
 
-		const {
-			app,
-			destroy: destroyApp,
-			issues,
-		} = await createApp({
+		const host = await createLucidHost({
 			config,
 			translationStore,
 			runtimeContext: runtimeContext,
 			env: platformProxy?.env,
-			app: cloudflareApp,
+			databaseScope: "runtime",
 			http: {
 				extensions: [
+					{
+						name: "runtime-cloudflare:platform-context",
+						priority: 0,
+						register: async (app) => {
+							app.use("*", async (context, next) => {
+								context.set("cf", platformProxy?.cf ?? null);
+								context.set(
+									"caches",
+									(platformProxy?.caches ??
+										null) as LucidHonoVariables["caches"],
+								);
+								context.set(
+									"ctx",
+									platformProxy?.ctx
+										? {
+												waitUntil: platformProxy.ctx.waitUntil.bind(
+													platformProxy.ctx,
+												),
+												passThroughOnException:
+													platformProxy.ctx.passThroughOnException.bind(
+														platformProxy.ctx,
+													),
+											}
+										: null,
+								);
+								await next();
+							});
+						},
+					},
 					{
 						name: "runtime-cloudflare:static-assets",
 						priority: 2,
@@ -92,9 +97,12 @@ const serveCommand =
 					},
 				],
 			},
+		}).catch(async (error) => {
+			await Promise.allSettled([platformProxy?.dispose()]);
+			throw error;
 		});
 
-		for (const issue of issues) {
+		for (const issue of host.issues) {
 			if (issue.level === "unsupported") {
 				logger.instance.error(
 					issue.type,
@@ -113,11 +121,41 @@ const serveCommand =
 				});
 			}
 		}
-		const server = serve({
-			fetch: app.fetch,
-			port: options?.dev?.port ?? 6543,
-			hostname: options?.dev?.hostname,
-		});
+		let destroyPromise: Promise<void> | undefined;
+		const destroyRuntime = () => {
+			destroyPromise ??= Promise.allSettled([
+				host.destroy(),
+				platformProxy?.dispose(),
+			]).then(() => undefined);
+			return destroyPromise;
+		};
+
+		let server: ReturnType<typeof serve>;
+		try {
+			server = serve({
+				fetch: async (request, requestBindings) => {
+					const invocation = host.createInvocation({
+						env: platformProxy?.env,
+					});
+					try {
+						const response = await invocation.handle({
+							request,
+							executionContext: platformProxy?.ctx,
+							requestBindings,
+						});
+						return withResponseCleanup(response, () => invocation.destroy());
+					} catch (error) {
+						await invocation.destroy();
+						throw error;
+					}
+				},
+				port: options?.dev?.port ?? 6543,
+				hostname: options?.dev?.hostname,
+			});
+		} catch (error) {
+			await destroyRuntime();
+			throw error;
+		}
 
 		server.on("listening", () => {
 			const address = server.address();
@@ -125,8 +163,6 @@ const serveCommand =
 				address: address,
 			});
 		});
-		let destroyPromise: Promise<void> | undefined;
-
 		server.on("close", () => {
 			logger.instance.info(
 				"Shutting down Cloudflare Worker Adapter development server...",
@@ -135,29 +171,27 @@ const serveCommand =
 					silent: logger.silent,
 				},
 			);
-			destroyPromise ??= Promise.all([
-				destroyApp(),
-				platformProxy?.dispose(),
-			]).then(() => undefined);
-			void destroyPromise;
+			void destroyRuntime();
 		});
 
+		let serverDestroyPromise: Promise<void> | undefined;
 		return {
-			destroy: async () => {
-				try {
-					await new Promise<void>((resolve, reject) => {
-						server.close((error) => {
-							if (error) reject(error);
-							else resolve();
-						});
-					});
-				} finally {
-					destroyPromise ??= Promise.all([
-						destroyApp(),
-						platformProxy?.dispose(),
-					]).then(() => undefined);
-					await destroyPromise;
-				}
+			destroy: () => {
+				serverDestroyPromise ??= (async () => {
+					try {
+						if (server.listening) {
+							await new Promise<void>((resolve, reject) => {
+								server.close((error) => {
+									if (error) reject(error);
+									else resolve();
+								});
+							});
+						}
+					} finally {
+						await destroyRuntime();
+					}
+				})();
+				return serverDestroyPromise;
 			},
 			runtimeContext: runtimeContext,
 		};

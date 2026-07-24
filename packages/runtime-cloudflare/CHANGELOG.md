@@ -3,8 +3,9 @@
 ## v1.2.0 (unreleased)
 
 - Added Astro bridge support through the Astro Cloudflare adapter and its public Worker handler.
-- Stabilized generated Wrangler configuration with a tested default compatibility date.
-- Ensured development server shutdown awaits Lucid application and platform cleanup so logger transports can flush.
+- Updated Worker requests, scheduled events and local development to use managed Lucid hosts with invocation-scoped database connections and clean shutdown.
+- Added a tested default compatibility date to generated Wrangler configuration.
+- Preserved Node request connection details when serving the Cloudflare runtime locally.
 
 ## v1.1.0
 

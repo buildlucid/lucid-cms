@@ -16,13 +16,18 @@ export const getInitializedImageProcessor = async (
 	} = {},
 ): Promise<ImageProcessorInstance> => {
 	const processor = await getImageProcessor(config);
-	await processor.lifecycle?.init?.(
-		createAdapterLifecycleContext({
-			config,
-			env: options.env,
-			runtimeContext: options.runtimeContext,
-		}),
-	);
+	const context = createAdapterLifecycleContext({
+		config,
+		env: options.env,
+		runtimeContext: options.runtimeContext,
+	});
+
+	try {
+		await processor.lifecycle?.init?.(context);
+	} catch (error) {
+		await Promise.allSettled([processor.lifecycle?.destroy?.(context)]);
+		throw error;
+	}
 
 	return processor;
 };

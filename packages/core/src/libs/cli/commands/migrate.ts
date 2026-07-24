@@ -1,21 +1,19 @@
 import { confirm } from "@inquirer/prompts";
-import constants from "../../../constants/constants.js";
 import { syncServices } from "../../../services/index.js";
 import type {
 	Config,
 	EnvironmentVariables,
 	ServiceContext,
 } from "../../../types.js";
+import createServiceContext from "../../../utils/services/create-service-context.js";
 import applyCollectionMigrations from "../../collection/apply-collection-migrations.js";
 import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
 import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
-import { passthroughEmailAdapterInstance } from "../../email/adapters/passthrough.js";
-import { createTranslator } from "../../i18n/index.js";
+import type { DatabaseConnection } from "../../db/types.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
-import passthroughKVAdapter from "../../kv/adapters/passthrough.js";
 import {
 	destroyKVAdapter,
 	getInitializedKVAdapter,
@@ -25,9 +23,7 @@ import {
 	startLoggerBuffering,
 	stopLoggerBuffering,
 } from "../../logger/index.js";
-import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
-import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
 import {
 	type MigrationApprovalAction,
@@ -89,12 +85,14 @@ const migrateCommand = (props?: {
 			props?.runtimeContext;
 		let translationStore: TranslationStore | undefined;
 		let kvInstance: KVAdapterInstance | undefined;
+		let database: DatabaseConnection | undefined;
 		const mode = props?.mode ?? "process";
 
 		/** Destroys adapters initialized during this migration command. */
 		const cleanupAdapters = async (): Promise<void> => {
 			if (config) {
 				await Promise.allSettled([
+					database?.destroy(),
 					destroyKVAdapter(kvInstance, {
 						config,
 						env,
@@ -102,6 +100,7 @@ const migrateCommand = (props?: {
 					}),
 				]);
 			}
+			database = undefined;
 			kvInstance = undefined;
 		};
 
@@ -151,27 +150,17 @@ const migrateCommand = (props?: {
 			if (!config || !translationStore) {
 				throw new Error("Lucid could not resolve its migration configuration.");
 			}
+			database = await config.db.connect(env);
 
 			await prepareExternalMigrations(config, projectRoot);
 
-			const preflightContext: ServiceContext = {
-				db: { client: config.db.client },
+			const preflightContext = createServiceContext({
 				config,
-				queue: passthroughQueueAdapter(),
-				env: env ?? null,
+				database,
+				translationStore,
+				env,
 				runtimeContext,
-				kv: passthroughKVAdapter(),
-				media: null,
-				email: passthroughEmailAdapterInstance,
-				translate: createTranslator({
-					store: translationStore,
-					locale: "en",
-				}),
-				request: {
-					url: config.host ?? constants.urls.localhost,
-					locale: "en",
-				},
-			};
+			});
 
 			cliLogger.info("Checking the migration status");
 			const initialPlanResult =
@@ -191,7 +180,7 @@ const migrateCommand = (props?: {
 			);
 			const needsCollectionMigrations = initialAssessment.reasons.length > 0;
 			const needsDatabaseMigrations = await config.db.needsMigration(
-				config.db.client,
+				database.client,
 			);
 
 			if (needsDatabaseMigrations) {
@@ -207,15 +196,14 @@ const migrateCommand = (props?: {
 			if (!needsDatabaseMigrations && !needsCollectionMigrations) {
 				cliLogger.success("No migrations are required");
 				if (!skipSyncSteps) {
-					const syncResult = await runSyncTasks(
+					const syncResult = await runSyncTasks({
 						config,
+						database,
 						translationStore,
-						mode,
-						undefined,
 						env,
 						runtimeContext,
-					);
-					if (!syncResult && mode === "return") return await stopCommand(1);
+					});
+					if (!syncResult) return await stopCommand(1);
 				}
 
 				const endTime = startTime();
@@ -261,7 +249,7 @@ const migrateCommand = (props?: {
 			//* execution: arbitrary database migrations run before collection re-planning
 			if (needsDatabaseMigrations) {
 				cliLogger.info("Running database schema migrations...");
-				await config.db.migrateToLatest();
+				await config.db.migrateToLatest(database);
 				cliLogger.success(
 					"Schema migrations completed",
 					cliLogger.color.green("successfully"),
@@ -348,21 +336,22 @@ const migrateCommand = (props?: {
 
 			//* sync and cache clearing run only after the exact plan has succeeded
 			if (!skipSyncSteps) {
-				const syncResult = await runSyncTasks(
+				const syncResult = await runSyncTasks({
 					config,
+					database,
 					translationStore,
-					mode,
-					kvInstance,
+					kv: kvInstance,
 					env,
 					runtimeContext,
-				);
-				if (!syncResult && mode === "return") return await stopCommand(1);
+				});
+				if (!syncResult) return await stopCommand(1);
 			}
 
 			cliLogger.info("Clearing KV cache...");
 			await kvInstance.clear(
-				createToolkitServiceContext({
+				createServiceContext({
 					config,
+					database,
 					translationStore,
 					env,
 					runtimeContext,

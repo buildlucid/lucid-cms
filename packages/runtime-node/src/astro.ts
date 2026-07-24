@@ -1,7 +1,7 @@
 import { LucidError } from "@lucidcms/core";
 import type {
 	LucidHonoContext,
-	LucidHost,
+	LucidInvocation,
 	RuntimeAdapter,
 } from "@lucidcms/core/types";
 import getRuntimeContext from "./services/runtime-context.js";
@@ -39,6 +39,8 @@ const nodeAstroBridge = {
 		const runtimeContext = getRuntimeContext({ compiled: props.compiled });
 
 		return {
+			cacheKey: "node",
+			databaseScope: "runtime" as const,
 			runtimeContext: {
 				...runtimeContext,
 				configEntryPoint: null,
@@ -52,9 +54,8 @@ const nodeAstroBridge = {
 			},
 		};
 	},
-	async handle(props: { host: LucidHost; context: AstroRequestContext }) {
-		const { app } = await props.host.getApp();
-		return app.fetch(props.context.request);
+	handle(props: { invocation: LucidInvocation; context: AstroRequestContext }) {
+		return props.invocation.handle({ request: props.context.request });
 	},
 };
 

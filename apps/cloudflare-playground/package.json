@@ -24,6 +24,7 @@
 		"@lucidcms/core": "*",
 		"@lucidcms/db-d1": "*",
 		"@lucidcms/plugin-cloudflare-kv": "*",
+		"@lucidcms/plugin-cloudflare-queues": "*",
 		"@lucidcms/plugin-cloudflare-r2": "*",
 		"@lucidcms/plugin-pages": "*"
 	},

@@ -285,20 +285,24 @@ const devCommand = async (options?: {
 			startServer();
 		});
 
-	const shutdown = async () => {
-		try {
-			if (restartTimer) clearTimeout(restartTimer);
-			await watcher?.close();
-			await serverDestroy?.();
-		} catch (error) {
-			cliLogger.error("Error during shutdown");
-			if (error instanceof Error) {
-				cliLogger.error(error.message);
+	let shutdownPromise: Promise<void> | undefined;
+	const shutdown = () => {
+		shutdownPromise ??= (async () => {
+			try {
+				if (restartTimer) clearTimeout(restartTimer);
+				await watcher?.close();
+				await serverDestroy?.();
+			} catch (error) {
+				cliLogger.error("Error during shutdown");
+				if (error instanceof Error) {
+					cliLogger.error(error.message);
+				}
+			} finally {
+				await stopLoggerBuffering();
+				process.exit(0);
 			}
-		} finally {
-			await stopLoggerBuffering();
-			process.exit(0);
-		}
+		})();
+		return shutdownPromise;
 	};
 
 	process.on("SIGINT", shutdown);

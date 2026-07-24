@@ -58,3 +58,7 @@ export const cloudflare = (
 };
 
 export { default as getRuntimeContext } from "./services/get-runtime-context.js";
+export {
+	default as getOrCreateRuntimeHost,
+	runtimeHostKeys,
+} from "./services/runtime-host.js";

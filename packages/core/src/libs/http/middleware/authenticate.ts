@@ -60,7 +60,7 @@ const fetchAuthState = async (
 	tenantKey?: string | null,
 ): Promise<CachedAuthState> => {
 	const config = c.get("config");
-	const Users = new UsersRepository(config.db.client, config.db);
+	const Users = new UsersRepository(c.get("database").client, config.db);
 
 	const userRes = await Users.selectAccessTokenUser({
 		where: [

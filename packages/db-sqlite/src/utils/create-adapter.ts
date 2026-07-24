@@ -14,7 +14,7 @@ const createSQLiteAdapter = (
 	if (typeof config === "function") {
 		return createDatabaseAdapterFactory({
 			adapter: "sqlite",
-			resolve: async (env) => new SQLiteAdapter(await config(env)),
+			resolve: () => new SQLiteAdapter(config),
 		});
 	}
 

@@ -1,6 +1,6 @@
 import { sql } from "kysely";
-import constants from "../../../constants/constants.js";
 import type { Config, EnvironmentVariables } from "../../../types.js";
+import createServiceContext from "../../../utils/services/create-service-context.js";
 import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
 import type {
 	MigrationAssessment,
@@ -9,15 +9,12 @@ import type {
 import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
-import { passthroughEmailAdapterInstance } from "../../email/adapters/passthrough.js";
-import { createTranslator } from "../../i18n/index.js";
+import type { DatabaseConnection } from "../../db/types.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
-import passthroughKVAdapter from "../../kv/adapters/passthrough.js";
 import {
 	startLoggerBuffering,
 	stopLoggerBuffering,
 } from "../../logger/index.js";
-import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 import { describeMigrationRiskReason } from "../services/migration-report.js";
@@ -36,6 +33,7 @@ const migrateStatusCommand = async (options?: {
 	let config: Config | undefined;
 	let env: EnvironmentVariables | undefined;
 	let runtimeContext: AdapterRuntimeContext | undefined;
+	let database: DatabaseConnection | undefined;
 
 	try {
 		startLoggerBuffering();
@@ -64,7 +62,7 @@ const migrateStatusCommand = async (options?: {
 		cliLogger.info("Checking the migration status");
 
 		await prepareExternalMigrations(config, res.projectRoot);
-		await config.db.initialize();
+		database = await config.db.connect(env);
 
 		//* database migration status
 		const registeredMigrations = Object.keys(config.db.migrations).sort();
@@ -72,7 +70,7 @@ const migrateStatusCommand = async (options?: {
 		try {
 			const executedRows = await sql<{ name: string }>`
 				SELECT name FROM kysely_migration
-			`.execute(config.db.client);
+			`.execute(database.client);
 			executedMigrations = executedRows.rows.map((row) => row.name);
 		} catch (_) {
 			//* the migration table doesnt exist yet - no migrations have run
@@ -86,25 +84,14 @@ const migrateStatusCommand = async (options?: {
 		);
 
 		//* collection migration status
-		const translate = createTranslator({
-			store: translationStore,
-			locale: "en",
-		});
-		const collectionResult = await planCollectionMigrations({
-			db: { client: config.db.client },
-			config: config,
-			queue: passthroughQueueAdapter(),
-			env: env ?? null,
+		const serviceContext = createServiceContext({
+			config,
+			database,
+			translationStore,
+			env,
 			runtimeContext,
-			kv: passthroughKVAdapter(),
-			media: null,
-			email: passthroughEmailAdapterInstance,
-			translate,
-			request: {
-				url: config.host ?? constants.urls.localhost,
-				locale: "en",
-			},
 		});
+		const collectionResult = await planCollectionMigrations(serviceContext);
 
 		let pendingCollections: Array<{
 			collectionKey: string;
@@ -113,7 +100,8 @@ const migrateStatusCommand = async (options?: {
 		let collectionCheckError: string | undefined;
 		if (collectionResult.error) {
 			collectionCheckError =
-				translate.english(collectionResult.error.message) || "Unknown error";
+				serviceContext.translate.english(collectionResult.error.message) ||
+				"Unknown error";
 		} else {
 			pendingCollections = collectionResult.data.collections
 				.map(({ migrationPlan }) => ({
@@ -205,9 +193,13 @@ const migrateStatusCommand = async (options?: {
 			},
 		);
 
+		await database.destroy();
+		database = undefined;
+
 		await stopLoggerBuffering();
 		process.exit(options?.check && (hasPendingWork || unhealthy) ? 1 : 0);
 	} catch (error) {
+		await database?.destroy();
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error, "Migration status failed");
 		} else {

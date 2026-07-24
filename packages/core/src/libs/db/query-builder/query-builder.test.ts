@@ -2,10 +2,11 @@ import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, describe, expect, test } from "vitest";
 import queryBuilder from "./query-builder.js";
 
-describe("queryBuilder semantic filters", () => {
+describe("queryBuilder semantic filters", async () => {
 	const db = new SQLiteAdapter({ database: ":memory:" });
+	const connection = await db.connect();
 
-	afterAll(() => db.client.destroy());
+	afterAll(() => connection.destroy());
 
 	const compile = (
 		filter: {
@@ -16,7 +17,9 @@ describe("queryBuilder semantic filters", () => {
 	) => {
 		const { main } = queryBuilder(
 			{
-				main: db.client.selectFrom("lucid_media_folders").select("title"),
+				main: connection.client
+					.selectFrom("lucid_media_folders")
+					.select("title"),
 			},
 			{
 				queryParams: {

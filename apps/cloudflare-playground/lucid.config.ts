@@ -1,6 +1,7 @@
 import { configureLucid, z } from "@lucidcms/core";
 import { d1 } from "@lucidcms/db-d1";
 import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
+import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
@@ -33,6 +34,7 @@ export default configureLucid({
 				],
 			}),
 			cloudflareKVPlugin(),
+			cloudflareQueuesPlugin(),
 			cloudflareR2Plugin(),
 		],
 	}),

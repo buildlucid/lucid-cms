@@ -16,7 +16,10 @@ export const resolvePageLocale = (fullSlug: string): PageLocale | undefined => {
 type GetLucidDataOptions = {
 	fullSlug: string;
 	locale: PageLocale;
-	astro: Pick<AstroGlobal, "cookies" | "response" | "url">;
+	astro: Pick<
+		AstroGlobal,
+		"cookies" | "locals" | "request" | "response" | "url"
+	>;
 };
 
 const getLucidData = async ({
@@ -24,7 +27,7 @@ const getLucidData = async ({
 	locale,
 	astro,
 }: GetLucidDataOptions) => {
-	const toolkit = await getToolkit();
+	const toolkit = await getToolkit(astro);
 
 	const [authentication, preview] = await Promise.all([
 		toolkit.auth.status({

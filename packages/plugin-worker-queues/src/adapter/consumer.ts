@@ -16,18 +16,21 @@ import {
 	destroyMediaAdapter,
 	getInitializedMediaAdapter,
 } from "@lucidcms/core/media";
-import { createTranslator } from "@lucidcms/core/plugin";
 import {
 	executeSingleJob,
 	logScope,
 	passthroughQueueAdapter,
 	QueueJobsRepository,
 } from "@lucidcms/core/queue";
-import { prepareTranslations } from "@lucidcms/core/runtime";
+import {
+	createServiceContext,
+	prepareTranslations,
+} from "@lucidcms/core/runtime";
 import type {
 	AdapterLifecycleContext,
 	AdapterRuntimeContext,
 	Config,
+	DatabaseConnection,
 	EmailAdapterInstance,
 	EnvironmentVariables,
 	KVAdapterInstance,
@@ -96,7 +99,6 @@ const getConfig = async (): Promise<{
 			envSchema: envModule.env,
 			env: runtime.env,
 			processConfigOptions: {
-				bypassCache: true,
 				skipValidation: true,
 			},
 		});
@@ -125,12 +127,10 @@ const startConsumer = async () => {
 	let mediaInstance: MediaAdapterInstance | null | undefined;
 	let emailInstance: EmailAdapterInstance | undefined;
 	let adapterLifecycleContext: AdapterLifecycleContext | undefined;
+	let database: DatabaseConnection | undefined;
+
 	try {
 		const { config, translationStore, env, runtimeContext } = await getConfig();
-		const translate = createTranslator({
-			store: translationStore,
-			locale: "en",
-		});
 
 		adapterLifecycleContext = {
 			config,
@@ -159,145 +159,156 @@ const startConsumer = async () => {
 		const internalQueueAdapter = passthroughQueueAdapter({
 			bypassImmediateExecution: true,
 		});
+		database = await config.db.connect(env);
 
-		const QueueJobs = new QueueJobsRepository(config.db.client, config.db);
+		const serviceContext = createServiceContext({
+			config,
+			database: database,
+			translationStore,
+			env,
+			runtimeContext,
+			queue: internalQueueAdapter,
+			kv,
+			media,
+			email,
+		});
+
+		const QueueJobs = new QueueJobsRepository(database.client, config.db);
 
 		// -----------------------------------------
 		// Polling
 		let pollInterval = MIN_POLL_INTERVAL;
 		let pollTimeout: ReturnType<typeof setTimeout> | undefined;
-		let isPolling = false;
+		let pollPromise: Promise<void> | undefined;
 		let pollRequested = false;
 		let shuttingDown = false;
+		let shutdownPromise: Promise<void> | undefined;
 
-		const shutdown = async (exitCode: number) => {
-			if (shuttingDown) return;
-			shuttingDown = true;
-			if (pollTimeout) clearTimeout(pollTimeout);
-			if (adapterLifecycleContext) {
-				await Promise.allSettled([
-					destroyKVAdapter(kvInstance, adapterLifecycleContext),
-					destroyMediaAdapter(mediaInstance, adapterLifecycleContext),
-					destroyEmailAdapter(emailInstance, adapterLifecycleContext),
-				]);
-			}
+		const shutdown = (options: {
+			exitCode?: number;
+			notifyParent?: boolean;
+		}) => {
+			shutdownPromise ??= (async () => {
+				shuttingDown = true;
+				if (pollTimeout) {
+					clearTimeout(pollTimeout);
+					pollTimeout = undefined;
+				}
+				if (pollPromise) await Promise.allSettled([pollPromise]);
+				if (adapterLifecycleContext) {
+					await Promise.allSettled([
+						database?.destroy(),
+						destroyKVAdapter(kvInstance, adapterLifecycleContext),
+						destroyMediaAdapter(mediaInstance, adapterLifecycleContext),
+						destroyEmailAdapter(emailInstance, adapterLifecycleContext),
+					]);
+				}
 
-			await config.db.client.destroy();
-			await logger.flush();
-			process.exit(exitCode);
+				await logger.flush();
+				if (options.notifyParent) {
+					parentPort?.postMessage({ type: "SHUTDOWN_COMPLETE" });
+					parentPort?.close();
+				}
+				if (options.exitCode !== undefined) process.exit(options.exitCode);
+			})();
+			return shutdownPromise;
 		};
 
 		process.once("SIGINT", () => {
-			void shutdown(0);
+			void shutdown({ exitCode: 0 });
 		});
 		process.once("SIGTERM", () => {
-			void shutdown(0);
+			void shutdown({ exitCode: 0 });
 		});
 
 		/**
 		 * Polls for jobs and processes them
 		 */
-		const poll = async (): Promise<void> => {
-			if (isPolling) {
+		const poll = (): Promise<void> => {
+			if (pollPromise) {
 				pollRequested = true;
-				return;
+				return pollPromise;
 			}
 
-			isPolling = true;
-			try {
-				const jobsResult = await QueueJobs.selectJobsForProcessing({
-					data: {
-						limit: BATCH_SIZE,
-						currentTime: new Date(),
-					},
-					validation: {
-						enabled: true,
-					},
-				});
-				if (jobsResult.error) {
-					logger.error({
-						error: jobsResult.error,
-						event: "worker-queue.poll.query.failed",
-						message: "Error getting ready jobs",
-						scope: logScope,
+			pollPromise = (async () => {
+				try {
+					const jobsResult = await QueueJobs.selectJobsForProcessing({
+						data: {
+							limit: BATCH_SIZE,
+							currentTime: new Date(),
+						},
+						validation: {
+							enabled: true,
+						},
 					});
-					return;
-				}
-
-				logger.debug({
-					message: "Jobs found",
-					scope: logScope,
-					data: { jobs: jobsResult.data.length },
-				});
-
-				//* we slow the polling down if no jobs are found
-				if (jobsResult.data.length === 0) {
-					pollInterval = Math.min(
-						pollInterval + POLL_INTERVAL_INC,
-						MAX_POLL_INTERVAL,
-					);
-				} else {
-					//* jobs found, reset to fast polling
-					pollInterval = MIN_POLL_INTERVAL;
-
-					const chunks = [];
-					for (let i = 0; i < jobsResult.data.length; i += CONCURRENT_LIMIT) {
-						chunks.push(jobsResult.data.slice(i, i + CONCURRENT_LIMIT));
+					if (jobsResult.error) {
+						logger.error({
+							error: jobsResult.error,
+							event: "worker-queue.poll.query.failed",
+							message: "Error getting ready jobs",
+							scope: logScope,
+						});
+						return;
 					}
 
-					for (const chunk of chunks) {
-						await Promise.allSettled(
-							chunk.map((job) =>
-								executeSingleJob(
-									{
-										config: config,
-										db: { client: config.db.client },
-										env: env ?? null,
-										runtimeContext,
-										// TODO: should handlers be able to push jobs to the queue??
-										//* we use the passthrough queue adapter so that any services called within the handler can still push events to the queue.
-										//* with bypassImmediateExecution set to true so that the events are not executed immediately like they would by default with this adapter
-										queue: internalQueueAdapter,
-										kv,
-										media,
-										email,
-										translate,
-										request: {
-											url: config.host ?? "http://localhost",
-											locale: "en",
-										},
-									},
-									{
+					logger.debug({
+						message: "Jobs found",
+						scope: logScope,
+						data: { jobs: jobsResult.data.length },
+					});
+
+					//* we slow the polling down if no jobs are found
+					if (jobsResult.data.length === 0) {
+						pollInterval = Math.min(
+							pollInterval + POLL_INTERVAL_INC,
+							MAX_POLL_INTERVAL,
+						);
+					} else {
+						//* jobs found, reset to fast polling
+						pollInterval = MIN_POLL_INTERVAL;
+
+						const chunks = [];
+						for (let i = 0; i < jobsResult.data.length; i += CONCURRENT_LIMIT) {
+							chunks.push(jobsResult.data.slice(i, i + CONCURRENT_LIMIT));
+						}
+
+						for (const chunk of chunks) {
+							await Promise.allSettled(
+								chunk.map((job) =>
+									executeSingleJob(serviceContext, {
 										jobId: job.job_id,
 										event: job.event_type,
 										payload: job.event_data,
 										attempts: job.attempts,
 										maxAttempts: job.max_attempts,
-									},
+									}),
 								),
-							),
-						);
+							);
+						}
 					}
+				} catch (error) {
+					logger.error({
+						error,
+						event: "worker-queue.poll.failed",
+						message: "Polling error",
+						scope: logScope,
+					});
 				}
-			} catch (error) {
-				logger.error({
-					error,
-					event: "worker-queue.poll.failed",
-					message: "Polling error",
-					scope: logScope,
-				});
-			} finally {
-				isPolling = false;
-
+			})().finally(() => {
+				pollPromise = undefined;
 				if (!shuttingDown) {
 					if (pollRequested) {
 						pollRequested = false;
 						void poll();
 					} else {
-						pollTimeout = setTimeout(poll, pollInterval);
+						pollTimeout = setTimeout(() => {
+							pollTimeout = undefined;
+							void poll();
+						}, pollInterval);
 					}
 				}
-			}
+			});
+			return pollPromise;
 		};
 
 		const checkNow = () => {
@@ -308,7 +319,7 @@ const startConsumer = async () => {
 				pollTimeout = undefined;
 			}
 
-			if (isPolling) {
+			if (pollPromise) {
 				pollRequested = true;
 				return;
 			}
@@ -318,6 +329,9 @@ const startConsumer = async () => {
 
 		parentPort?.on("message", ({ type }) => {
 			if (type === "CHECK_NOW") checkNow();
+			if (type === "SHUTDOWN") {
+				void shutdown({ notifyParent: true });
+			}
 		});
 
 		logger.debug({
@@ -328,6 +342,7 @@ const startConsumer = async () => {
 	} catch (error) {
 		if (adapterLifecycleContext) {
 			await Promise.allSettled([
+				database?.destroy(),
 				destroyKVAdapter(kvInstance, adapterLifecycleContext),
 				destroyMediaAdapter(mediaInstance, adapterLifecycleContext),
 				destroyEmailAdapter(emailInstance, adapterLifecycleContext),

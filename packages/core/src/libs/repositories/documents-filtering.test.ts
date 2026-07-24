@@ -3,40 +3,41 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { RelationDocumentFilter } from "../../utils/helpers/group-document-filters.js";
 import DocumentsRepository from "./documents.js";
 
-describe("related document repository filters", () => {
+describe("related document repository filters", async () => {
 	const db = new SQLiteAdapter({ database: ":memory:" });
-	const Documents = new DocumentsRepository(db.client, db);
+	const connection = await db.connect();
+	const Documents = new DocumentsRepository(connection.client, db);
 
 	beforeAll(async () => {
-		await db.client.schema
+		await connection.client.schema
 			.createTable("lucid_document__articles")
 			.addColumn("id", "integer", (column) => column.primaryKey())
 			.execute();
-		await db.client.schema
+		await connection.client.schema
 			.createTable("lucid_document__articles__ver")
 			.addColumn("id", "integer", (column) => column.primaryKey())
 			.addColumn("document_id", "integer", (column) => column.notNull())
 			.execute();
-		await db.client.schema
+		await connection.client.schema
 			.createTable("lucid_document__articles__fld__rel__author")
 			.addColumn("document_id", "integer", (column) => column.notNull())
 			.addColumn("document_version_id", "integer", (column) => column.notNull())
 			.addColumn("_collection_key", "text", (column) => column.notNull())
 			.addColumn("_document_id", "integer", (column) => column.notNull())
 			.execute();
-		await db.client.schema
+		await connection.client.schema
 			.createTable("lucid_document__people")
 			.addColumn("id", "integer", (column) => column.primaryKey())
 			.addColumn("is_deleted", "integer", (column) => column.notNull())
 			.addColumn("tenant_key", "text")
 			.execute();
-		await db.client.schema
+		await connection.client.schema
 			.createTable("lucid_document__people__ver")
 			.addColumn("id", "integer", (column) => column.primaryKey())
 			.addColumn("document_id", "integer", (column) => column.notNull())
 			.addColumn("type", "text", (column) => column.notNull())
 			.execute();
-		await db.client.schema
+		await connection.client.schema
 			.createTable("lucid_document__people__fld")
 			.addColumn("document_id", "integer", (column) => column.notNull())
 			.addColumn("document_version_id", "integer", (column) => column.notNull())
@@ -44,18 +45,18 @@ describe("related document repository filters", () => {
 			.addColumn("_last_name", "text")
 			.execute();
 
-		await db.client
+		await connection.client
 			.insertInto("lucid_document__articles")
 			.values([{ id: 1 }, { id: 2 }])
 			.execute();
-		await db.client
+		await connection.client
 			.insertInto("lucid_document__articles__ver")
 			.values([
 				{ id: 101, document_id: 1 },
 				{ id: 102, document_id: 2 },
 			])
 			.execute();
-		await db.client
+		await connection.client
 			.insertInto("lucid_document__articles__fld__rel__author")
 			.values([
 				{
@@ -78,7 +79,7 @@ describe("related document repository filters", () => {
 				},
 			])
 			.execute();
-		await db.client
+		await connection.client
 			.insertInto("lucid_document__people")
 			.values([
 				{ id: 10, is_deleted: 0, tenant_key: null },
@@ -86,7 +87,7 @@ describe("related document repository filters", () => {
 				{ id: 12, is_deleted: 0, tenant_key: null },
 			])
 			.execute();
-		await db.client
+		await connection.client
 			.insertInto("lucid_document__people__ver")
 			.values([
 				{ id: 201, document_id: 10, type: "latest" },
@@ -94,7 +95,7 @@ describe("related document repository filters", () => {
 				{ id: 203, document_id: 12, type: "latest" },
 			])
 			.execute();
-		await db.client
+		await connection.client
 			.insertInto("lucid_document__people__fld")
 			.values([
 				{
@@ -119,7 +120,7 @@ describe("related document repository filters", () => {
 			.execute();
 	});
 
-	afterAll(() => db.client.destroy());
+	afterAll(() => connection.destroy());
 
 	test("compiles one version-aware semi-join for conditions on the same related document", () => {
 		const relationFilter: RelationDocumentFilter = {
@@ -157,7 +158,7 @@ describe("related document repository filters", () => {
 				],
 			},
 		};
-		const baseQuery = db.client
+		const baseQuery = connection.client
 			.selectFrom("lucid_document__articles")
 			.innerJoin(
 				"lucid_document__articles__ver",
@@ -238,7 +239,7 @@ describe("related document repository filters", () => {
 				],
 			},
 		};
-		const baseQuery = db.client
+		const baseQuery = connection.client
 			.selectFrom("lucid_document__articles")
 			.innerJoin(
 				"lucid_document__articles__ver",

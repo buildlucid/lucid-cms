@@ -2,9 +2,9 @@
 
 ## v0.3.0 (unreleased)
 
-- Reworked the Astro integration around runtime-provided bridges, lifecycle-aware hosts and config dependency reloads.
+- Reworked the Astro integration to use runtime bridges and a shared Lucid host, with request-scoped database connections and config reloads.
 - Added server and static output support with on-demand Lucid routes and a generated server toolkit.
-- Fixed generated files causing overlapping Vite restarts during config reloads.
+- Changed `getToolkit` to require the current Astro context.
 
 ## v0.2.0
 

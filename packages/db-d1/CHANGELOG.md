@@ -1,7 +1,8 @@
 # @lucidcms/db-d1
 
-## v0.2.1 (unreleased)
+## v0.3.0 (unreleased)
 
+- Updated the adapter to resolve a fresh D1 binding for each invocation.
 - Fixed `dropAllTables` for circular foreign-key relationships.
 
 ## v0.2.0

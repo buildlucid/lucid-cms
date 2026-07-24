@@ -6,7 +6,7 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
 	output: "server",
 	adapter: cloudflare({
-		configPath: "./wrangler.lucid.jsonc",
+		configPath: "./wrangler.jsonc",
 		imageService: "passthrough",
 		sessionKVBindingName: "LUCID_KV",
 	}),

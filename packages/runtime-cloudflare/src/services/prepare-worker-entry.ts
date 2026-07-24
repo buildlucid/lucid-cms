@@ -6,19 +6,6 @@ import type {
 	CloudflareWorkerImport,
 } from "../types.js";
 
-const resolveRuntimeSource = /** ts */ `const resolveRuntime = async () => {
-    const runtimeValue = typeof runtime === "function" ? runtime() : runtime;
-    const runtimeAdapter = await runtimeValue;
-
-    if (!runtimeAdapter || typeof runtimeAdapter !== "object") {
-        throw new Error(
-            "Lucid Cloudflare runtime could not resolve the configured runtime adapter.",
-        );
-    }
-
-    return runtimeAdapter;
-};`;
-
 /**
  * Prepares the main worker entry file and add additional imports/exports from custom artifacts
  */
@@ -53,25 +40,7 @@ const prepareMainWorkerEntry = (
 		},
 		{
 			path: "@lucidcms/core/runtime",
-			exports: [
-				"createApp",
-				"prepareTranslations",
-				"processConfig",
-				"resolveDatabaseAdapter",
-				"setupCronJobs",
-			],
-		},
-		{
-			path: "@lucidcms/core/kv",
-			exports: ["destroyKVAdapter", "getInitializedKVAdapter"],
-		},
-		{
-			path: "@lucidcms/core/media",
-			exports: ["destroyMediaAdapter", "getInitializedMediaAdapter"],
-		},
-		{
-			path: "@lucidcms/core/email",
-			exports: ["destroyEmailAdapter", "getInitializedEmailAdapter"],
+			exports: ["createLucidHost", "setupCronJobs", "withResponseCleanup"],
 		},
 		{
 			path: "./email-templates.json",
@@ -82,12 +51,12 @@ const prepareMainWorkerEntry = (
 			default: "i18nTranslations",
 		},
 		{
-			path: "@lucidcms/core/plugin",
-			exports: ["createTranslator"],
-		},
-		{
 			path: "@lucidcms/runtime-cloudflare/runtime",
-			exports: ["getRuntimeContext"],
+			exports: [
+				"getOrCreateRuntimeHost",
+				"getRuntimeContext",
+				"runtimeHostKeys",
+			],
 		},
 	];
 
@@ -96,216 +65,114 @@ const prepareMainWorkerEntry = (
 			name: "fetch",
 			async: true,
 			params: ["request", "env", "ctx"],
-			content: /** ts */ `const lucidGlobal = globalThis as typeof globalThis & {
-    __lucidCloudflareAppPromise?: Promise<Awaited<ReturnType<typeof createApp>>>;
-};
-
-	const ensureApp = async () => {
-	    if (!lucidGlobal.__lucidCloudflareAppPromise) {
-	        lucidGlobal.__lucidCloudflareAppPromise = (async () => {
-	            ${resolveRuntimeSource}
-
-	            const runtimeAdapter = await resolveRuntime();
-
-	            if (envSchema) {
-	                envSchema.parse(env);
-	            }
-	            await runtimeAdapter.resolveOptions?.(env);
-
-	            const definition = {
-	                runtime: runtimeAdapter,
-	                db,
-	                config: configFactory,
-	            };
-	            const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {
-	                emailTemplates: emailTemplates,
-	            }) : definition;
-	            const databaseAdapter = await resolveDatabaseAdapter(
-	                wrappedDefinition.db,
-	                env,
-	            );
-	            const resolved = await processConfig(
-	                wrappedDefinition.config(env),
-	                {
-	                    recipe: wrappedDefinition.recipe,
-	                    resolvedDb: databaseAdapter,
-	                    skipValidation: true,
-	                },
-	            );
-	            const { translationStore } = await prepareTranslations({
-	                config: resolved,
-	                bundles: i18nTranslations,
-	            });
-
-	            return createApp({
-	                config: resolved,
-	                translationStore: translationStore,
-	                env: env,
-	                runtimeContext: getRuntimeContext({
-	                    server: "cloudflare",
-	                    compiled: true,
-	                }),
-	                http: {
-	                    extensions: [
-	                        {
-	                            name: "runtime-cloudflare:platform-context",
-	                            priority: 0,
-	                            register: async (app, config) => {
-	                                app.use("*", async (c, next) => {
-	                                    c.set("env", c.env ?? env ?? null);
-	                                    c.set("cf", c.req.raw.cf ?? null);
-	                                    c.set("caches", globalThis.caches ?? null);
-	                                    let executionContext = null;
-	                                    try {
-	                                        executionContext = c.executionCtx ?? null;
-	                                    } catch {}
-	                                    c.set(
-	                                        "ctx",
-	                                        executionContext
-	                                            ? {
-	                                                    waitUntil: executionContext.waitUntil.bind(executionContext),
-	                                                    ...(typeof executionContext.passThroughOnException === "function"
-	                                                        ? {
-	                                                                passThroughOnException:
-	                                                                    executionContext.passThroughOnException.bind(executionContext),
-	                                                            }
-	                                                        : {}),
-	                                                }
-	                                            : null,
-	                                    );
-	                                    await next();
-	                                });
-	                            },
-	                        },
-	                        {
-	                            name: "runtime-cloudflare:spa-shell",
-	                            priority: 2,
-	                            register: async (app, config) => {
-	                                app.get("/lucid/*", async (c) => {
-	                                    const url = new URL(c.req.url);
-
-	                                    const indexRequestUrl = url.origin + "/lucid/index.html";
-	                                    const indexRequest = new Request(indexRequestUrl);
-	                                    const indexAsset = await c.env.ASSETS.fetch(indexRequest);
-	                                    return new Response(indexAsset.body, {
-	                                        status: indexAsset.status,
-	                                        headers: indexAsset.headers,
-	                                    });
-	                                });
-	                            },
-	                        },
-	                    ],
-	                },
-	            });
-	        })().catch((error) => {
-	            delete lucidGlobal.__lucidCloudflareAppPromise;
-	            throw error;
-	        });
-	    }
-
-	    return lucidGlobal.__lucidCloudflareAppPromise;
-	};
-
-	const { app } = await ensureApp();
-	return app.fetch(request, env, ctx);`,
+			content: /** ts */ `const runtimeContext = getRuntimeContext({
+    server: "cloudflare",
+    compiled: true,
+});
+const host = await getOrCreateRuntimeHost(
+    runtimeHostKeys.http,
+    () => createLucidHost({
+        definition: { runtime, db, config: configFactory },
+        envSchema,
+        env,
+        runtimeContext,
+        translationBundles: i18nTranslations,
+        meta: { emailTemplates },
+        databaseScope: "invocation",
+        http: {
+            extensions: [
+                {
+                    name: "runtime-cloudflare:platform-context",
+                    priority: 0,
+                    register: async (app) => {
+                        app.use("*", async (c, next) => {
+                            c.set("cf", c.req.raw.cf ?? null);
+                            c.set("caches", globalThis.caches ?? null);
+                            let executionContext = null;
+                            try {
+                                executionContext = c.executionCtx ?? null;
+                            } catch {}
+                            c.set(
+                                "ctx",
+                                executionContext
+                                    ? {
+                                            waitUntil: executionContext.waitUntil.bind(executionContext),
+                                            ...(typeof executionContext.passThroughOnException === "function"
+                                                ? {
+                                                        passThroughOnException:
+                                                            executionContext.passThroughOnException.bind(executionContext),
+                                                    }
+                                                : {}),
+                                        }
+                                    : null,
+                            );
+                            await next();
+                        });
+                    },
+                },
+                {
+                    name: "runtime-cloudflare:spa-shell",
+                    priority: 2,
+                    register: async (app) => {
+                        app.get("/lucid/*", async (c) => {
+                            const url = new URL(c.req.url);
+                            const indexRequest = new Request(url.origin + "/lucid/index.html");
+                            const indexAsset = await c.env.ASSETS.fetch(indexRequest);
+                            return new Response(indexAsset.body, {
+                                status: indexAsset.status,
+                                headers: indexAsset.headers,
+                            });
+                        });
+                    },
+                },
+            ],
+        },
+    }),
+    (promise) => ctx.waitUntil(promise),
+);
+const invocation = host.createInvocation({ env });
+try {
+    const response = await invocation.handle({ request, executionContext: ctx });
+    return withResponseCleanup(response, () => invocation.destroy());
+} catch (error) {
+    await invocation.destroy();
+    throw error;
+}`,
 		},
 		{
 			name: "scheduled",
 			async: true,
 			params: ["controller", "env", "ctx"],
 			content: /** ts */ `const runCronService = async () => {
-    ${resolveRuntimeSource}
-
-    const runtimeAdapter = await resolveRuntime();
-
-    if (envSchema) {
-        envSchema.parse(env);
-    }
-    await runtimeAdapter.resolveOptions?.(env);
-
-    const definition = {
-        runtime: runtimeAdapter,
-        db,
-        config: configFactory,
-    };
-    const wrappedDefinition = runtimeAdapter.configureLucid ? runtimeAdapter.configureLucid(definition, {
-        emailTemplates: emailTemplates,
-    }) : definition;
-    const databaseAdapter = await resolveDatabaseAdapter(
-        wrappedDefinition.db,
-        env,
-    );
-    const resolved = await processConfig(
-        wrappedDefinition.config(env),
-        {
-            recipe: wrappedDefinition.recipe,
-            resolvedDb: databaseAdapter,
-            skipValidation: true,
-        },
-    );
-    const { translationStore } = await prepareTranslations({
-        config: resolved,
-        bundles: i18nTranslations,
-    });
     const runtimeContext = getRuntimeContext({
         server: "cloudflare",
         compiled: true,
     });
-    const translate = createTranslator({ store: translationStore, locale: "en" });
-    let kv;
-    let media;
-    let email;
-
+    const host = await getOrCreateRuntimeHost(
+        runtimeHostKeys.background,
+        () => createLucidHost({
+            definition: { runtime, db, config: configFactory },
+            envSchema,
+            env,
+            runtimeContext,
+            translationBundles: i18nTranslations,
+            meta: { emailTemplates },
+            databaseScope: "invocation",
+        }),
+        (promise) => ctx.waitUntil(promise),
+    );
+    const invocation = host.createInvocation({ env });
     try {
-        kv = await getInitializedKVAdapter(resolved, {
-            env,
-            runtimeContext,
-        });
-        media = await getInitializedMediaAdapter(resolved, {
-            env,
-            runtimeContext,
-        });
-        email = await getInitializedEmailAdapter(resolved, {
-            env,
-            runtimeContext,
-        });
-
         const cronJobSetup = await setupCronJobs({
-            createQueue: true,
+            createQueue: false,
             runtimeContext,
             env,
         });
-        await cronJobSetup.register({
-            config: resolved,
-            translationStore,
-            db: { client: resolved.db.client },
-            queue: cronJobSetup.queue,
-            env: env,
-            runtimeContext,
-            kv: kv,
-            media,
-            email,
-            request: {
-                url: resolved.host || "http://localhost",
-                locale: resolved.i18n.defaultLocale,
-            },
-            translate,
-        }, {
+        await cronJobSetup.register(await invocation.getServiceContext(), {
             schedule: controller.cron,
         });
     } finally {
-        await Promise.allSettled([
-            kv
-                ? destroyKVAdapter(kv, { config: resolved, env, runtimeContext })
-                : undefined,
-            media
-                ? destroyMediaAdapter(media, { config: resolved, env, runtimeContext })
-                : undefined,
-            email
-                ? destroyEmailAdapter(email, { config: resolved, env, runtimeContext })
-                : undefined,
-            resolved.db.client.destroy(),
-        ]);
+        await invocation.destroy();
     }
 };
 

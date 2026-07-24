@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import { createApp } from "@lucidcms/core/runtime";
+import { createLucidHost, withResponseCleanup } from "@lucidcms/core/runtime";
 import type { ServeHandler } from "@lucidcms/core/types";
 import getRuntimeContext from "../services/runtime-context.js";
 import type { NodeAdapterOptions } from "../types.js";
@@ -22,18 +22,15 @@ const serveCommand =
 			compiled: false,
 		});
 
-		const {
-			app,
-			destroy: destroyApp,
-			issues,
-		} = await createApp({
+		const host = await createLucidHost({
 			config,
 			translationStore,
 			runtimeContext: runtimeContext,
 			env: process.env,
+			databaseScope: "runtime",
 		});
 
-		for (const issue of issues) {
+		for (const issue of host.issues) {
 			if (issue.level === "unsupported") {
 				logger.instance.error(
 					issue.type,
@@ -53,11 +50,29 @@ const serveCommand =
 			}
 		}
 
-		const server = serve({
-			fetch: app.fetch,
-			port: options?.server?.port ?? 6543,
-			hostname: options?.server?.hostname,
-		});
+		let server: ReturnType<typeof serve>;
+		try {
+			server = serve({
+				fetch: async (request, requestBindings) => {
+					const invocation = host.createInvocation({ env: process.env });
+					try {
+						const response = await invocation.handle({
+							request,
+							requestBindings,
+						});
+						return withResponseCleanup(response, () => invocation.destroy());
+					} catch (error) {
+						await invocation.destroy();
+						throw error;
+					}
+				},
+				port: options?.server?.port ?? 6543,
+				hostname: options?.server?.hostname,
+			});
+		} catch (error) {
+			await host.destroy();
+			throw error;
+		}
 
 		server.on("listening", () => {
 			const address = server.address();
@@ -66,30 +81,32 @@ const serveCommand =
 			});
 		});
 
-		let destroyPromise: Promise<void> | undefined;
-
 		server.on("close", () => {
 			logger.instance.info("Shutting down Node Adapter development server...", {
 				silent: logger.silent,
 				spaceBefore: true,
 			});
-			destroyPromise ??= destroyApp();
-			void destroyPromise;
+			void host.destroy();
 		});
 
+		let destroyPromise: Promise<void> | undefined;
 		return {
-			destroy: async () => {
-				try {
-					await new Promise<void>((resolve, reject) => {
-						server.close((error) => {
-							if (error) reject(error);
-							else resolve();
-						});
-					});
-				} finally {
-					destroyPromise ??= destroyApp();
-					await destroyPromise;
-				}
+			destroy: () => {
+				destroyPromise ??= (async () => {
+					try {
+						if (server.listening) {
+							await new Promise<void>((resolve, reject) => {
+								server.close((error) => {
+									if (error) reject(error);
+									else resolve();
+								});
+							});
+						}
+					} finally {
+						await host.destroy();
+					}
+				})();
+				return destroyPromise;
 			},
 			runtimeContext: runtimeContext,
 		};

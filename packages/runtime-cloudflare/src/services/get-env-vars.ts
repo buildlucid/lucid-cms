@@ -8,6 +8,29 @@ import {
 	type PlatformProxy,
 } from "wrangler";
 
+const platformProxySignals = ["SIGINT", "SIGTERM", "SIGHUP"] as const;
+
+const captureSignalListeners = () =>
+	new Map(
+		platformProxySignals.map((signal) => [
+			signal,
+			new Set(process.listeners(signal)),
+		]),
+	);
+
+const removeAddedSignalListeners = (
+	previousListeners: ReturnType<typeof captureSignalListeners>,
+) => {
+	for (const signal of platformProxySignals) {
+		const previous = previousListeners.get(signal);
+		for (const listener of process.listeners(signal)) {
+			if (!previous?.has(listener)) {
+				process.removeListener(signal, listener);
+			}
+		}
+	}
+};
+
 const getEnvVars = async (props: {
 	logger: GetEnvVarsLogger;
 	platformProxy?: GetPlatformProxyOptions;
@@ -33,7 +56,15 @@ const getEnvVars = async (props: {
 		);
 	}
 
-	const platformProxy = await getPlatformProxy(props.platformProxy);
+	const signalListeners = captureSignalListeners();
+	let platformProxy: PlatformProxy;
+	try {
+		platformProxy = await getPlatformProxy(props.platformProxy);
+	} finally {
+		// Lucid owns this proxy and disposes it during runtime shutdown. Wrangler's
+		// signal handlers exit first and would otherwise skip Lucid's async cleanup.
+		removeAddedSignalListeners(signalListeners);
+	}
 
 	return {
 		env: platformProxy.env as EnvironmentVariables,

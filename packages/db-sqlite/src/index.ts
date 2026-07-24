@@ -4,16 +4,23 @@ import {
 } from "@lucidcms/core/db";
 import type {
 	DatabaseConfig,
+	DatabaseConnection,
+	EnvironmentVariables,
 	InferredColumn,
 	InferredIndex,
 	InferredTable,
 	KyselyDB,
+	LucidDB,
 	OnDelete,
 	OnUpdate,
 } from "@lucidcms/core/types";
-import { type ColumnDataType, SqliteDialect, sql } from "kysely";
+import { type ColumnDataType, Kysely, SqliteDialect, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
-import type { SQLiteAdapterCreator, SQLiteAdapterOptions } from "./types.js";
+import type {
+	SQLiteAdapterCreator,
+	SQLiteAdapterOptions,
+	SQLiteAdapterOptionsFactory,
+} from "./types.js";
 import createSQLiteAdapter from "./utils/create-adapter.js";
 import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
 import formatDefaultValue from "./utils/format-default-value.js";
@@ -23,19 +30,40 @@ import formatType from "./utils/format-type.js";
 import normalizeSQLiteConfig from "./utils/normalize-config.js";
 
 export class SQLiteAdapter extends DatabaseAdapter {
-	constructor(config: SQLiteAdapterOptions = {}) {
-		super({
-			adapter: "sqlite",
-			dialect: new SqliteDialect(normalizeSQLiteConfig(config)),
+	readonly #options: SQLiteAdapterOptions | SQLiteAdapterOptionsFactory;
+
+	constructor(
+		options: SQLiteAdapterOptions | SQLiteAdapterOptionsFactory = {},
+	) {
+		super("sqlite");
+		this.#options = options;
+	}
+
+	async connect(env: EnvironmentVariables = {}): Promise<DatabaseConnection> {
+		const options =
+			typeof this.#options === "function"
+				? await this.#options(env)
+				: this.#options;
+		const client = new Kysely<LucidDB>({
+			dialect: new SqliteDialect(normalizeSQLiteConfig(options)),
 			plugins: [createJSONResultsPlugin()],
 		});
-	}
-	async initialize() {
-		await sql`PRAGMA journal_mode = WAL`.execute(this.client);
-		await sql`PRAGMA foreign_keys = ON`.execute(this.client);
-		await sql`PRAGMA synchronous = NORMAL`.execute(this.client);
-		await sql`PRAGMA cache_size = -2000`.execute(this.client);
-		await sql`PRAGMA temp_store = MEMORY`.execute(this.client);
+
+		try {
+			await sql`PRAGMA journal_mode = WAL`.execute(client);
+			await sql`PRAGMA foreign_keys = ON`.execute(client);
+			await sql`PRAGMA synchronous = NORMAL`.execute(client);
+			await sql`PRAGMA cache_size = -2000`.execute(client);
+			await sql`PRAGMA temp_store = MEMORY`.execute(client);
+		} catch (error) {
+			await client.destroy();
+			throw error;
+		}
+
+		return {
+			client,
+			destroy: () => client.destroy(),
+		};
 	}
 	get jsonArrayFrom() {
 		return jsonArrayFrom;
@@ -73,8 +101,7 @@ export class SQLiteAdapter extends DatabaseAdapter {
 			caseInsensitiveLikeOperator: "like" as const,
 		};
 	}
-	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {
-		const client = db ?? this.client;
+	async inferSchema(client: KyselyDB): Promise<InferredTable[]> {
 		const [res, indexRes] = await Promise.all([
 			sql<{
 				table_name: string;
@@ -229,20 +256,21 @@ export class SQLiteAdapter extends DatabaseAdapter {
 
 		return Array.from(tableMap.values());
 	}
-	async dropAllTables(): Promise<void> {
-		const schema = await this.inferSchema();
+	async dropAllTables(connection: DatabaseConnection): Promise<void> {
+		const { client } = connection;
+		const schema = await this.inferSchema(client);
 
 		//* fk enforcement is disabled while dropping - core tables contain circular
 		//* references (eg. users <-> media) that no drop order can satisfy
-		await sql`PRAGMA foreign_keys = OFF`.execute(this.client);
+		await sql`PRAGMA foreign_keys = OFF`.execute(client);
 		try {
 			for (const table of schema) {
 				await sql`DROP TABLE IF EXISTS ${sql.table(table.name)}`.execute(
-					this.client,
+					client,
 				);
 			}
 		} finally {
-			await sql`PRAGMA foreign_keys = ON`.execute(this.client);
+			await sql`PRAGMA foreign_keys = ON`.execute(client);
 		}
 	}
 	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {

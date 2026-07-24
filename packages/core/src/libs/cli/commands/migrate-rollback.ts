@@ -3,8 +3,10 @@ import { sql } from "kysely";
 import { Migrator } from "kysely/migration";
 import constants from "../../../constants/constants.js";
 import type { Config, EnvironmentVariables } from "../../../types.js";
+import createServiceContext from "../../../utils/services/create-service-context.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
+import type { DatabaseConnection } from "../../db/types.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
 import {
@@ -17,7 +19,6 @@ import logger, {
 	stopLoggerBuffering,
 } from "../../logger/index.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
-import { createToolkitServiceContext } from "../../toolkit/config.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
@@ -31,6 +32,17 @@ const migrateRollbackCommand = async (options?: {
 	let env: EnvironmentVariables | undefined;
 	let runtimeContext: AdapterRuntimeContext | undefined;
 	let translationStore: TranslationStore | undefined;
+	let database: DatabaseConnection | undefined;
+
+	const cleanup = async () => {
+		if (!config) return;
+		await Promise.allSettled([
+			database?.destroy(),
+			destroyKVAdapter(kvInstance, { config, env, runtimeContext }),
+		]);
+		database = undefined;
+		kvInstance = undefined;
+	};
 	try {
 		startLoggerBuffering();
 		const startTime = cliLogger.startTimer();
@@ -56,6 +68,7 @@ const migrateRollbackCommand = async (options?: {
 		});
 
 		if (!envValid) {
+			await cleanup();
 			await stopLoggerBuffering();
 			process.exit(1);
 		}
@@ -63,9 +76,10 @@ const migrateRollbackCommand = async (options?: {
 		cliLogger.info("Checking rollback status");
 
 		await prepareExternalMigrations(config, res.projectRoot);
+		database = await config.db.connect(env);
 
 		const migrator = new Migrator({
-			db: config.db.client,
+			db: database.client,
 			provider: {
 				async getMigrations() {
 					return res.config.db.migrations;
@@ -75,15 +89,13 @@ const migrateRollbackCommand = async (options?: {
 			allowUnorderedMigrations: true,
 		});
 
-		await config.db.initialize();
-
 		//* executed migrations that are no longer registered would fail the rollback midway, so surface them upfront
 		const availableMigrationNames = Object.keys(res.config.db.migrations);
 		let executedMigrationNames: string[] = [];
 		try {
 			const executedRows = await sql<{ name: string }>`
 				SELECT name FROM kysely_migration
-			`.execute(config.db.client);
+			`.execute(database.client);
 			executedMigrationNames = executedRows.rows.map((row) => row.name);
 		} catch (_) {
 			//* the migration table doesnt exist yet - no migrations to rollback
@@ -99,6 +111,7 @@ const migrateRollbackCommand = async (options?: {
 			cliLogger.info(
 				"If you removed a plugin or migration file, restore it so its migrations can be rolled back.",
 			);
+			await cleanup();
 			await stopLoggerBuffering();
 			process.exit(1);
 		}
@@ -116,6 +129,7 @@ const migrateRollbackCommand = async (options?: {
 
 		if (executedMigrations.length === 0) {
 			cliLogger.info("No migrations to rollback");
+			await cleanup();
 			await stopLoggerBuffering();
 			process.exit(0);
 		}
@@ -144,6 +158,7 @@ const migrateRollbackCommand = async (options?: {
 					"or",
 					cliLogger.color.cyan("migrate:fresh"),
 				);
+				await cleanup();
 				await stopLoggerBuffering();
 				process.exit(1);
 			}
@@ -165,6 +180,7 @@ const migrateRollbackCommand = async (options?: {
 				});
 			} catch (error) {
 				if (error instanceof Error && error.name === "ExitPromptError") {
+					await cleanup();
 					await stopLoggerBuffering();
 					process.exit(0);
 				}
@@ -173,6 +189,7 @@ const migrateRollbackCommand = async (options?: {
 
 			if (!shouldProceed) {
 				cliLogger.info("Rollback cancelled");
+				await cleanup();
 				await stopLoggerBuffering();
 				process.exit(0);
 			}
@@ -209,6 +226,7 @@ const migrateRollbackCommand = async (options?: {
 				} else {
 					cliLogger.error("Rollback failed", "Unknown error");
 				}
+				await cleanup();
 				await stopLoggerBuffering();
 				process.exit(1);
 			}
@@ -229,16 +247,16 @@ const migrateRollbackCommand = async (options?: {
 			runtimeContext,
 		});
 		await kvInstance.clear(
-			createToolkitServiceContext({
+			createServiceContext({
 				config,
+				database,
 				translationStore,
 				env,
 				runtimeContext,
 				kv: kvInstance,
 			}),
 		);
-		await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
-		kvInstance = undefined;
+		await cleanup();
 
 		const endTime = startTime();
 		cliLogger.log(
@@ -256,9 +274,7 @@ const migrateRollbackCommand = async (options?: {
 		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
-		if (config && translationStore) {
-			await destroyKVAdapter(kvInstance, { config, env, runtimeContext });
-		}
+		await cleanup();
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error, "Rollback failed");
 		} else {

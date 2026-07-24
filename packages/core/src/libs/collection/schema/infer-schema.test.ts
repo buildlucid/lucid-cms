@@ -14,6 +14,7 @@ describe("Schema inference", async () => {
 	const db = new SQLiteAdapter({
 		database: ":memory:",
 	});
+	const connection = await db.connect();
 
 	beforeEach(() => {
 		pagesCollection = new CollectionBuilder("pages", {
@@ -33,9 +34,7 @@ describe("Schema inference", async () => {
 			},
 		});
 	});
-	afterAll(() => {
-		db.client.destroy();
-	});
+	afterAll(() => connection.destroy());
 
 	test("infers basic document table structure", () => {
 		const res = inferSchema(pagesCollection, db);

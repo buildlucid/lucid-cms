@@ -1,15 +1,16 @@
 import { select } from "@inquirer/prompts";
-import constants from "../../../constants/constants.js";
 import type { Config } from "../../../types.js";
+import createServiceContext from "../../../utils/services/create-service-context.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
+import type { DatabaseConnection } from "../../db/types.js";
 import {
 	destroyEmailAdapter,
 	getInitializedEmailAdapter,
 } from "../../email/lifecycle.js";
 import type { EmailAdapterInstance } from "../../email/types.js";
-import { copy, createTranslator } from "../../i18n/index.js";
+import { copy } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
 import type { TranslationStore } from "../../i18n/types.js";
 import {
@@ -43,15 +44,18 @@ const cronCommand = async (jobName?: string) => {
 	let kv: KVAdapterInstance | undefined;
 	let media: MediaAdapterInstance | null | undefined;
 	let email: EmailAdapterInstance | undefined;
+	let database: DatabaseConnection | undefined;
 
 	const cleanupAdapters = async () => {
 		if (config && translationStore) {
 			await Promise.allSettled([
+				database?.destroy(),
 				destroyKVAdapter(kv, { config, env, runtimeContext }),
 				destroyMediaAdapter(media, { config, env, runtimeContext }),
 				destroyEmailAdapter(email, { config, env, runtimeContext }),
 			]);
 		}
+		database = undefined;
 		kv = undefined;
 		media = undefined;
 		email = undefined;
@@ -112,11 +116,6 @@ const cronCommand = async (jobName?: string) => {
 			})
 		).translationStore;
 		env = configRes.env;
-		const translate = createTranslator({
-			store: translationStore,
-			locale: "en",
-		});
-
 		const envValid = await validateEnvVars({
 			envSchema: configRes.envSchema,
 			env: configRes.env,
@@ -129,6 +128,7 @@ const cronCommand = async (jobName?: string) => {
 		//* create a passthrough queue adapter with immediate execution enabled so
 		//* any jobs pushed to the queue by the cron are executed straight away
 		const queue = passthroughQueueAdapter();
+		database = await configRes.config.db.connect(env);
 		kv = await getInitializedKVAdapter(configRes.config, {
 			env,
 			runtimeContext,
@@ -140,6 +140,18 @@ const cronCommand = async (jobName?: string) => {
 		email = await getInitializedEmailAdapter(configRes.config, {
 			env,
 			runtimeContext,
+		});
+
+		const serviceContext = createServiceContext({
+			config: configRes.config,
+			database,
+			translationStore,
+			env,
+			runtimeContext,
+			queue,
+			kv,
+			media,
+			email,
 		});
 
 		//* run the selected cron job with retry support
@@ -156,28 +168,16 @@ const cronCommand = async (jobName?: string) => {
 					name: copy("server:core.cron.job.error.name"),
 					message: job.error,
 				},
-			})({
-				db: { client: configRes.config.db.client },
-				config: configRes.config,
-				env: env ?? null,
-				runtimeContext,
-				queue: queue,
-				kv,
-				media,
-				email,
-				translate,
-				request: {
-					url: configRes.config.host ?? constants.urls.localhost,
-					locale: "en",
-				},
-			});
+			})(serviceContext);
 
 			if (!result.error) {
 				success = true;
 				break;
 			}
 
-			lastError = translate.english(result.error.message) ?? "Unknown error";
+			lastError =
+				serviceContext.translate.english(result.error.message) ??
+				"Unknown error";
 
 			if (attempt < maxRetries) {
 				cliLogger.warn(

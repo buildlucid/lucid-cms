@@ -34,6 +34,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 		name: constants.integrationName,
 		hooks: {
 			"astro:config:setup": async ({
+				addMiddleware,
 				addWatchFile,
 				command,
 				injectRoute,
@@ -83,6 +84,10 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					addWatchFile(filePath);
 				}
 
+				addMiddleware({
+					entrypoint: generated.middlewarePath,
+					order: "pre",
+				});
 				injectRoute({
 					pattern: constants.mountPath,
 					entrypoint: generated.routePath,

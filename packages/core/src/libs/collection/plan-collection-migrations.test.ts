@@ -5,11 +5,12 @@ import { copy } from "../i18n/index.js";
 import CollectionBuilder from "./builders/collection-builder/index.js";
 import planCollectionMigrations from "./plan-collection-migrations.js";
 
-describe("planCollectionMigrations", () => {
+describe("planCollectionMigrations", async () => {
 	const db = new SQLiteAdapter({ database: ":memory:" });
+	const connection = await db.connect();
 
 	afterAll(async () => {
-		await db.client.destroy();
+		await connection.destroy();
 	});
 
 	test("returns inferred schemas and exact plans without mutating the database", async () => {
@@ -23,12 +24,12 @@ describe("planCollectionMigrations", () => {
 
 		// @ts-expect-error
 		const context = {
-			db: { client: db.client },
+			db: { client: connection.client },
 			config: { db, collections: [pages] },
 		} as ServiceContext;
 
 		const result = await planCollectionMigrations(context);
-		const inferredAfterPlanning = await db.inferSchema(db.client);
+		const inferredAfterPlanning = await db.inferSchema(connection.client);
 
 		expect(result.error).toBeUndefined();
 		expect(result.data?.collections).toHaveLength(1);

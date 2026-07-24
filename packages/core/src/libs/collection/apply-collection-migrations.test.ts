@@ -1,30 +1,33 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import type { ServiceContext } from "../../types.js";
+import type { DatabaseConnection } from "../db/types.js";
 import applyCollectionMigrations from "./apply-collection-migrations.js";
 import type { CollectionMigrationPlan } from "./migration/types.js";
 
 describe("applyCollectionMigrations", () => {
 	let db: SQLiteAdapter;
+	let connection: DatabaseConnection;
 	let context: ServiceContext;
 
 	beforeEach(async () => {
 		db = new SQLiteAdapter({ database: ":memory:" });
-		await db.migrateToLatest();
-		await db.client
+		connection = await db.connect();
+		await db.migrateToLatest(connection);
+		await connection.client
 			.insertInto("lucid_collections")
 			.values({ key: "pages" })
 			.execute();
 
 		// @ts-expect-error
 		context = {
-			db: { client: db.client },
+			db: { client: connection.client },
 			config: { db },
 		} as ServiceContext;
 	});
 
 	afterEach(async () => {
-		await db.client.destroy();
+		await connection.destroy();
 	});
 
 	/** Builds an exact plan that creates one standalone test table. */
@@ -73,8 +76,8 @@ describe("applyCollectionMigrations", () => {
 		const plan = createExactPlan();
 
 		const result = await applyCollectionMigrations(context, plan);
-		const inferred = await db.inferSchema(db.client);
-		const snapshots = await db.client
+		const inferred = await db.inferSchema(connection.client);
+		const snapshots = await connection.client
 			.selectFrom("lucid_collection_migrations")
 			.selectAll()
 			.execute();
@@ -94,13 +97,13 @@ describe("applyCollectionMigrations", () => {
 	});
 
 	test("rolls back table changes when snapshot insertion fails", async () => {
-		await db.client.schema
+		await connection.client.schema
 			.dropTable("lucid_collection_migrations")
 			.ifExists()
 			.execute();
 
 		const result = await applyCollectionMigrations(context, createExactPlan());
-		const inferred = await db.inferSchema(db.client);
+		const inferred = await db.inferSchema(connection.client);
 
 		expect(result.error).toBeDefined();
 		expect(inferred.map((table) => table.name)).not.toContain(
@@ -119,7 +122,7 @@ describe("applyCollectionMigrations", () => {
 		};
 
 		const result = await applyCollectionMigrations(context, plan);
-		const snapshots = await db.client
+		const snapshots = await connection.client
 			.selectFrom("lucid_collection_migrations")
 			.selectAll()
 			.execute();

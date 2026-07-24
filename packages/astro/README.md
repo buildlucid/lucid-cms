@@ -2,6 +2,9 @@
 
 The official Astro integration for Lucid CMS.
 
+
+## Setup
+
 ```js
 import node from "@astrojs/node";
 import lucidCMS from "@lucidcms/astro";
@@ -14,27 +17,10 @@ export default defineConfig({
 });
 ```
 
-Server-side pages can access Lucid through the generated toolkit module:
+## Toolkit
 
 ```ts
 import getToolkit from "@lucidcms/astro/toolkit";
 
-const toolkit = await getToolkit();
+const toolkit = await getToolkit(Astro);
 ```
-
-`output: "static"` is supported when an Astro adapter is configured. Astro can prerender ordinary pages while Lucid's injected admin and API routes remain on demand.
-
-Runtime adapters opt in without changes to this package by exposing an Astro bridge:
-
-```ts
-{
-	hosts: {
-		astro: {
-			entrypoint: "@scope/runtime/astro",
-			integrationEntrypoint: "@scope/runtime/astro-integration",
-		},
-	},
-}
-```
-
-The request-time entrypoint implements `LucidAstroBridge`. The optional integration entrypoint contains build-only adapter validation and platform preparation, and can report generated files that Vite should ignore through `ignoredWatchFiles`.

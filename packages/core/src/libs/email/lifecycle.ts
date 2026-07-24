@@ -18,14 +18,19 @@ export const getInitializedEmailAdapter = async (
 	} = {},
 ): Promise<EmailAdapterInstance> => {
 	const adapter = await getEmailAdapter(config);
-	await adapter.lifecycle?.init?.(
-		createAdapterLifecycleContext({
-			config,
-			env: options.env,
-			runtimeContext: options.runtimeContext,
-			purpose: options.purpose,
-		}),
-	);
+	const context = createAdapterLifecycleContext({
+		config,
+		env: options.env,
+		runtimeContext: options.runtimeContext,
+		purpose: options.purpose,
+	});
+
+	try {
+		await adapter.lifecycle?.init?.(context);
+	} catch (error) {
+		await Promise.allSettled([adapter.lifecycle?.destroy?.(context)]);
+		throw error;
+	}
 
 	return adapter;
 };

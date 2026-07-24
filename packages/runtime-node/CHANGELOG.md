@@ -3,7 +3,8 @@
 ## v1.2.0 (unreleased)
 
 - Added Astro bridge support for hosting Lucid through the Astro Node adapter.
-- Ensured server shutdown awaits Lucid application cleanup so logger transports can flush before exit.
+- Updated Node and Astro requests, cron jobs and generated servers to use managed Lucid hosts with invocation-scoped database connections and clean shutdown.
+- Preserved request connection details when handling Node requests.
 
 ## v1.1.0
 

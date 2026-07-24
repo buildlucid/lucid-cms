@@ -6,17 +6,16 @@ describe("Tests for the document publish operations repository", async () => {
 	const db = new SQLiteAdapter({
 		database: ":memory:",
 	});
+	const connection = await db.connect();
 
-	afterAll(() => {
-		db.client.destroy();
-	});
+	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest();
+	await db.migrateToLatest(connection);
 	const DocumentPublishOperations = new DocumentPublishOperationsRepository(
-		db.client,
+		connection.client,
 		db,
 	);
-	const tables = await db.client.introspection.getTables();
+	const tables = await connection.client.introspection.getTables();
 
 	test("checks the columnFormats matches the latest state of the DB", async () => {
 		const table = tables.find(

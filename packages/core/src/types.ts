@@ -26,6 +26,7 @@ export * from "./libs/queue/types.js";
 export type {
 	CreateLucidHostOptions,
 	LucidHost,
+	LucidInvocation,
 } from "./libs/runtime/create-lucid-host.js";
 export * from "./libs/runtime/types.js";
 export * from "./libs/toolkit/types.js";

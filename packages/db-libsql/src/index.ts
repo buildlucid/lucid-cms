@@ -5,20 +5,26 @@ import {
 } from "@lucidcms/core/db";
 import type {
 	DatabaseConfig,
+	DatabaseConnection,
+	EnvironmentVariables,
 	InferredColumn,
 	InferredIndex,
 	InferredTable,
 	KyselyDB,
+	LucidDB,
 	OnDelete,
 	OnUpdate,
 } from "@lucidcms/core/types";
-import { type ColumnDataType, sql } from "kysely";
+import { type ColumnDataType, Kysely, sql } from "kysely";
 import { jsonArrayFrom } from "kysely/helpers/sqlite";
 import {
 	LibsqlDialect,
 	type LibsqlDialectConfig,
 } from "./lib/kysely-libsql.js";
-import type { LibSQLAdapterCreator } from "./types.js";
+import type {
+	LibSQLAdapterCreator,
+	LibSQLAdapterOptionsFactory,
+} from "./types.js";
 import createLibSQLAdapter from "./utils/create-adapter.js";
 import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
 import formatDefaultValue from "./utils/format-default-value.js";
@@ -28,19 +34,40 @@ import formatType from "./utils/format-type.js";
 import getDefaultLibSQLConfig from "./utils/get-default-config.js";
 
 export class LibSQLAdapter extends DatabaseAdapter {
-	#database: Client;
+	readonly #options:
+		| LibsqlDialectConfig
+		| LibSQLAdapterOptionsFactory
+		| undefined;
 
-	constructor(config: LibsqlDialectConfig) {
-		const dialect = new LibsqlDialect(config);
-		super({
-			adapter: "libsql",
+	constructor(options?: LibsqlDialectConfig | LibSQLAdapterOptionsFactory) {
+		super("libsql");
+		this.#options = options;
+	}
+
+	async connect(env: EnvironmentVariables = {}): Promise<DatabaseConnection> {
+		const options =
+			typeof this.#options === "function"
+				? await this.#options(env)
+				: (this.#options ?? getDefaultLibSQLConfig(env));
+		const dialect = new LibsqlDialect(options);
+		const database = dialect.client;
+		const client = new Kysely<LucidDB>({
 			dialect,
 			plugins: [createJSONResultsPlugin()],
 		});
-		this.#database = dialect.client;
-	}
-	async initialize() {
-		await sql`PRAGMA foreign_keys = ON`.execute(this.client);
+
+		try {
+			await sql`PRAGMA foreign_keys = ON`.execute(client);
+		} catch (error) {
+			await client.destroy();
+			throw error;
+		}
+
+		return {
+			client,
+			native: database,
+			destroy: () => client.destroy(),
+		};
 	}
 	get jsonArrayFrom() {
 		return jsonArrayFrom;
@@ -78,8 +105,7 @@ export class LibSQLAdapter extends DatabaseAdapter {
 			caseInsensitiveLikeOperator: "like",
 		};
 	}
-	async inferSchema(db?: KyselyDB): Promise<InferredTable[]> {
-		const client = db ?? this.client;
+	async inferSchema(client: KyselyDB): Promise<InferredTable[]> {
 		const [res, indexRes] = await Promise.all([
 			sql<{
 				table_name: string;
@@ -234,8 +260,12 @@ export class LibSQLAdapter extends DatabaseAdapter {
 
 		return Array.from(tableMap.values());
 	}
-	async dropAllTables(): Promise<void> {
-		const schema = await this.inferSchema();
+	async dropAllTables(connection: DatabaseConnection): Promise<void> {
+		const database = connection.native as Client | undefined;
+		if (!database) {
+			throw new Error("LibSQL connection is missing its native client.");
+		}
+		const schema = await this.inferSchema(connection.client);
 
 		if (schema.length === 0) return;
 
@@ -243,10 +273,11 @@ export class LibSQLAdapter extends DatabaseAdapter {
 		//* foreign keys disabled, including for remote libSQL clients.
 		const statements = schema.map(
 			(table) =>
-				sql`DROP TABLE IF EXISTS ${sql.table(table.name)}`.compile(this.client)
-					.sql,
+				sql`DROP TABLE IF EXISTS ${sql.table(table.name)}`.compile(
+					connection.client,
+				).sql,
 		);
-		await this.#database.migrate(statements);
+		await database.migrate(statements);
 	}
 	formatDefaultValue(type: ColumnDataType, value: unknown): unknown {
 		if (type === "timestamp" && typeof value === "string") {
@@ -261,7 +292,7 @@ export class LibSQLAdapter extends DatabaseAdapter {
 
 export const libsql = createDatabaseAdapterCreator(createLibSQLAdapter, {
 	adapter: "libsql",
-	resolve: (env) => new LibSQLAdapter(getDefaultLibSQLConfig(env)),
+	resolve: () => new LibSQLAdapter(),
 }) as LibSQLAdapterCreator;
 
 export default libsql;

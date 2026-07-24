@@ -25,7 +25,10 @@ const generateToken = async (
 
 	const config = c.get("config");
 
-	const UserTokens = new UserTokensRepository(config.db.client, config.db);
+	const UserTokens = new UserTokensRepository(
+		c.get("database").client,
+		config.db,
+	);
 
 	const now = Date.now();
 	const nonce = randomBytes(8).toString("hex");

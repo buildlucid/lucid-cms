@@ -30,7 +30,10 @@ const clearToken = async (
 	const now = new Date().toISOString();
 	const hashedRefreshToken = hashUserToken(_refresh);
 
-	const UserTokens = new UserTokensRepository(config.db.client, config.db);
+	const UserTokens = new UserTokensRepository(
+		c.get("database").client,
+		config.db,
+	);
 	const context = createServiceContext(c);
 
 	await context.kv.delete(context, {

@@ -1,0 +1,32 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "lucidcms-astro-cloudflare-playground",
+	"main": ".lucid/astro/worker.ts",
+	"compatibility_date": "2026-06-30",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"directory": "./dist/client",
+		"binding": "ASSETS"
+	},
+	"triggers": {
+		"crons": ["0 0 * * *", "0 */4 * * *"]
+	},
+	"hyperdrive": [
+		{
+			"binding": "BUILDLUCID_CMS_DB",
+			"id": "HYPERDRIVE_ID",
+			"localConnectionString": "postgres://postgres:postgres@localhost:5432/lucid_astro_cloudflare_playground"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "LUCID_KV"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "LUCID_MEDIA_BUCKET",
+			"bucket_name": "lucid-astro-cloudflare-example-media"
+		}
+	]
+}

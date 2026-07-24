@@ -22,8 +22,6 @@ import ConfigSchema from "./config-schema.js";
 import mergeConfig from "./merge-config.js";
 import normalizeConfigSecrets from "./utils/normalize-config-secrets.js";
 
-let cachedConfig: Config | undefined;
-
 /**
  * Responsible for:
  * - merging the default config with the config
@@ -33,21 +31,12 @@ let cachedConfig: Config | undefined;
 const processConfig = async (
 	config: LucidConfig,
 	options?: {
-		bypassCache?: boolean;
 		skipValidation?: boolean;
 		mode?: "runtime" | "build";
 		resolvedDb?: DatabaseAdapter;
 		recipe?: LucidConfigRecipe;
 	},
 ): Promise<Config> => {
-	if (
-		cachedConfig !== undefined &&
-		options?.mode !== "build" &&
-		!options?.bypassCache
-	) {
-		return cachedConfig;
-	}
-
 	if (Object.hasOwn(config, "db")) {
 		throw new LucidError({
 			message:
@@ -203,12 +192,7 @@ const processConfig = async (
 		level: configRes.logger.level,
 	});
 
-	if (options?.mode === "build") {
-		return configRes;
-	}
-
-	cachedConfig = configRes;
-	return cachedConfig;
+	return configRes;
 };
 
 export default processConfig;

@@ -23,7 +23,7 @@ const isDatabaseAdapter = (value: unknown): value is DatabaseAdapter => {
 
 	return (
 		typeof adapter.adapter === "string" &&
-		typeof adapter.initialize === "function" &&
+		typeof adapter.connect === "function" &&
 		typeof adapter.inferSchema === "function" &&
 		typeof adapter.dropAllTables === "function"
 	);

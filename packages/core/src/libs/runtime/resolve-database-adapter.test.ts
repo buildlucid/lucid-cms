@@ -9,7 +9,7 @@ import resolveDatabaseAdapter from "./resolve-database-adapter.js";
 const createAdapter = (adapter = "test") =>
 	({
 		adapter,
-		initialize: vi.fn(),
+		connect: vi.fn(),
 		inferSchema: vi.fn(),
 		dropAllTables: vi.fn(),
 	}) as unknown as DatabaseAdapter;

@@ -5,7 +5,6 @@ import {
 import { LibSQLAdapter } from "../index.js";
 import type { LibsqlDialectConfig } from "../lib/kysely-libsql.js";
 import type { LibSQLAdapterOptionsFactory } from "../types.js";
-import getDefaultLibSQLConfig from "../utils/get-default-config.js";
 
 const createLibSQLAdapter = (
 	config?: LibsqlDialectConfig | LibSQLAdapterOptionsFactory,
@@ -13,14 +12,14 @@ const createLibSQLAdapter = (
 	if (config === undefined) {
 		return createDatabaseAdapterFactory({
 			adapter: "libsql",
-			resolve: (env) => new LibSQLAdapter(getDefaultLibSQLConfig(env)),
+			resolve: () => new LibSQLAdapter(),
 		});
 	}
 
 	if (typeof config === "function") {
 		return createDatabaseAdapterFactory({
 			adapter: "libsql",
-			resolve: async (env) => new LibSQLAdapter(await config(env)),
+			resolve: () => new LibSQLAdapter(config),
 		});
 	}
 

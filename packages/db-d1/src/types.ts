@@ -44,7 +44,6 @@ export type AdapterOptionsType = D1AdapterOptions | D1AdapterBindingOptions;
 
 export type D1AdapterCreator = {
 	(): DatabaseAdapterFactory<D1Adapter>;
-	(config: D1AdapterOptions): D1Adapter;
 	(config: D1AdapterBindingOptions): DatabaseAdapterFactory<D1Adapter>;
 	(config: D1AdapterOptionsFactory): DatabaseAdapterFactory<D1Adapter>;
 } & DatabaseAdapterCreator<D1Adapter>;

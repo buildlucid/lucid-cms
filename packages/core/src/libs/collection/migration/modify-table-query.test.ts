@@ -4,14 +4,15 @@ import constants from "../../../constants/constants.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import modifyTableQuery from "./modify-table-query.js";
 
-describe("modifyTableQuery", () => {
+describe("modifyTableQuery", async () => {
 	const db = new SQLiteAdapter({
 		database: ":memory:",
 	});
+	const connection = await db.connect();
 	const indexName = `${constants.db.generatedIndexPrefix}lucid_modify_indexes___title`;
 	const context = {
 		db: {
-			client: db.client,
+			client: connection.client,
 		},
 		config: {
 			db,
@@ -19,20 +20,18 @@ describe("modifyTableQuery", () => {
 	} as ServiceContext;
 
 	beforeEach(async () => {
-		await db.client.schema
+		await connection.client.schema
 			.dropTable("lucid_modify_indexes")
 			.ifExists()
 			.execute();
-		await db.client.schema
+		await connection.client.schema
 			.createTable("lucid_modify_indexes")
 			.addColumn("id", db.getDataType("integer"))
 			.addColumn("_title", db.getDataType("text"))
 			.execute();
 	});
 
-	afterAll(() => {
-		db.client.destroy();
-	});
+	afterAll(() => connection.destroy());
 
 	test("adds and removes generated indexes on table modification", async () => {
 		const addRes = await modifyTableQuery(context, {
@@ -53,7 +52,7 @@ describe("modifyTableQuery", () => {
 				],
 			},
 		});
-		let table = (await db.inferSchema(db.client)).find(
+		let table = (await db.inferSchema(connection.client)).find(
 			(item) => item.name === "lucid_modify_indexes",
 		);
 
@@ -78,7 +77,7 @@ describe("modifyTableQuery", () => {
 				],
 			},
 		});
-		table = (await db.inferSchema(db.client)).find(
+		table = (await db.inferSchema(connection.client)).find(
 			(item) => item.name === "lucid_modify_indexes",
 		);
 

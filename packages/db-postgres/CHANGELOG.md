@@ -1,5 +1,9 @@
 # @lucidcms/db-postgres
 
+## v1.2.0 (unreleased)
+
+- Updated the adapter to create explicit PostgreSQL connections through `connect()` and resolve environment options for each connection.
+
 ## v1.1.1
 
 - Fixed PostgreSQL migrations for datetime fields without defaults.

@@ -1,11 +1,10 @@
 import { LucidError } from "@lucidcms/core";
 import { setupCronJobs } from "@lucidcms/core/runtime";
-import { createToolkitServiceContext } from "@lucidcms/core/toolkit";
 import type {
 	EnvironmentVariables,
 	HttpExtension,
 	LucidHonoContext,
-	LucidHost,
+	LucidInvocation,
 	RuntimeAdapter,
 } from "@lucidcms/core/types";
 import getRuntimeContext from "./services/get-runtime-context.js";
@@ -102,11 +101,18 @@ const cloudflareAstroBridge = {
 			});
 		}
 
+		const server = (runtime?.env ?? workersEnv) ? "cloudflare" : "node";
+
 		return {
+			cacheKey: server,
+			databaseScope:
+				server === "cloudflare"
+					? ("invocation" as const)
+					: ("runtime" as const),
 			env,
 			executionContext: runtime?.ctx ?? props.context?.locals?.cfContext,
 			runtimeContext: getRuntimeContext({
-				server: (runtime?.env ?? workersEnv) ? "cloudflare" : "node",
+				server,
 				compiled: props.compiled,
 			}),
 			http: {
@@ -115,46 +121,34 @@ const cloudflareAstroBridge = {
 		};
 	},
 	async handle(props: {
-		host: LucidHost;
+		invocation: LucidInvocation;
 		context: AstroRequestContext;
 		state: {
 			env: EnvironmentVariables;
 			executionContext?: CloudflareExecutionContext;
 		};
 	}) {
-		const { app } = await props.host.getApp();
-		return app.fetch(
-			props.context.request,
-			props.state.env,
-			props.state.executionContext as Parameters<typeof app.fetch>[2],
-		);
+		return props.invocation.handle({
+			request: props.context.request,
+			executionContext: props.state.executionContext,
+		});
 	},
 	async scheduled(props: {
-		host: LucidHost;
+		invocation: LucidInvocation;
 		controller: { cron: string };
 		state: {
 			env: EnvironmentVariables;
+			runtimeContext: ReturnType<typeof getRuntimeContext>;
 		};
 	}) {
-		const app = await props.host.getApp();
 		const cron = await setupCronJobs({
 			createQueue: false,
 			env: props.state.env,
-			runtimeContext: props.host.runtimeContext,
+			runtimeContext: props.state.runtimeContext,
 		});
-		await cron.register(
-			createToolkitServiceContext({
-				config: props.host.config,
-				translationStore: props.host.translationStore,
-				env: props.state.env,
-				runtimeContext: props.host.runtimeContext,
-				queue: app.queue,
-				kv: app.kv,
-				media: app.media,
-				email: app.email,
-			}),
-			{ schedule: props.controller.cron },
-		);
+		await cron.register(await props.invocation.getServiceContext(), {
+			schedule: props.controller.cron,
+		});
 	},
 };
 

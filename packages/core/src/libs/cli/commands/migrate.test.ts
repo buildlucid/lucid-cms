@@ -80,17 +80,27 @@ const collectionPlan = (
 /** Creates the minimal configured command dependencies used by migration tests. */
 const commandFixture = (needsMigration: boolean) => {
 	const kv = { clear: vi.fn() };
-	const db = {
+	const database = {
 		client: {},
+		destroy: vi.fn(),
+	};
+	const db = {
+		connect: vi.fn().mockResolvedValue(database),
 		needsMigration: vi.fn().mockResolvedValue(needsMigration),
 		migrateToLatest: vi.fn(),
 	};
-	const config = { db, collections: [] } as unknown as Config;
+	const config = {
+		db,
+		collections: [],
+		i18n: {
+			defaultLocale: "en",
+		},
+	} as unknown as Config;
 	const translationStore = createTranslationStore({
 		defaultLocale: "en",
 		bundles: {},
 	});
-	return { config, db, kv, translationStore };
+	return { config, database, db, kv, translationStore };
 };
 
 describe("migrateCommand collection policy", () => {
@@ -238,7 +248,7 @@ describe("migrateCommand collection policy", () => {
 		})({ yes: true, skipSyncSteps: true });
 
 		expect(result).toBe(false);
-		expect(fixture.db.migrateToLatest).toHaveBeenCalledOnce();
+		expect(fixture.db.migrateToLatest).toHaveBeenCalledWith(fixture.database);
 		expect(planCollectionMigrations).toHaveBeenCalledTimes(2);
 		expect(confirm).not.toHaveBeenCalled();
 		expect(applyCollectionMigrations).not.toHaveBeenCalled();

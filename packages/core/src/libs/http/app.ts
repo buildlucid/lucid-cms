@@ -13,26 +13,32 @@ import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { Config, EnvironmentVariables } from "../../types.js";
 import { LucidAPIError, translateErrorData } from "../../utils/errors/index.js";
 import { normalizeHost } from "../../utils/helpers/index.js";
+import type { DatabaseConnection } from "../db/types.js";
 import {
 	destroyEmailAdapter,
 	getInitializedEmailAdapter,
 } from "../email/lifecycle.js";
+import type { EmailAdapterInstance } from "../email/types.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
 import {
 	destroyImageProcessor,
 	getInitializedImageProcessor,
 } from "../image-processor/lifecycle.js";
+import type { ImageProcessorInstance } from "../image-processor/types.js";
 import { destroyKVAdapter, getInitializedKVAdapter } from "../kv/lifecycle.js";
+import type { KVAdapterInstance } from "../kv/types.js";
 import logger, { destroyLogger } from "../logger/index.js";
 import {
 	destroyMediaAdapter,
 	getInitializedMediaAdapter,
 } from "../media/lifecycle.js";
+import type { MediaAdapterInstance } from "../media/types.js";
 import {
 	destroyQueueAdapter,
 	getInitializedQueueAdapter,
 } from "../queue/lifecycle.js";
+import type { QueueAdapterInstance } from "../queue/types.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/index.js";
@@ -40,6 +46,38 @@ import type { HttpExtension } from "./types.js";
 import featureSupportChecks from "./utils/feature-support-checks.js";
 import registerCustomRoutes from "./utils/register-custom-routes.js";
 import runHttpExtensions from "./utils/run-http-extensions.js";
+
+const invocationSymbol = Symbol("@lucidcms/core:http-invocation");
+
+type HttpInvocation = {
+	database: DatabaseConnection;
+	env?: EnvironmentVariables;
+};
+
+type HttpInvocationBindings = EnvironmentVariables & {
+	[invocationSymbol]: HttpInvocation;
+};
+
+const createInvocationBindings = (
+	invocation: HttpInvocation,
+	requestBindings?: object,
+): HttpInvocationBindings => {
+	const bindings = Object.create(
+		invocation.env ?? null,
+	) as HttpInvocationBindings;
+	if (requestBindings) {
+		// Node bindings expose request state such as `socket` through descriptors,
+		// so preserve them rather than flattening values with object spread.
+		Object.defineProperties(
+			bindings,
+			Object.getOwnPropertyDescriptors(requestBindings),
+		);
+	}
+	Object.defineProperty(bindings, invocationSymbol, {
+		value: invocation,
+	});
+	return bindings;
+};
 
 /**
  * The entry point for creating the Hono app.
@@ -49,12 +87,11 @@ const createApp = async (props: {
 	translationStore: TranslationStore;
 	runtimeContext: AdapterRuntimeContext;
 	env?: EnvironmentVariables;
-	app?: Hono<LucidHonoGeneric>;
 	http?: {
 		extensions?: HttpExtension[];
 	};
 }) => {
-	const app = props.app || new Hono<LucidHonoGeneric>();
+	const app = new Hono<LucidHonoGeneric>();
 	const configuredHost = props.config.host?.trim()
 		? normalizeHost(props.config.host)
 		: undefined;
@@ -77,30 +114,74 @@ const createApp = async (props: {
 		],
 	});
 
-	const kvInstance = await getInitializedKVAdapter(props.config, {
-		env: props.env,
-		runtimeContext: props.runtimeContext,
-	});
-
-	const [queueInstance, mediaInstance, emailInstance, imageProcessorInstance] =
-		await Promise.all([
-			getInitializedQueueAdapter(props.config, {
+	let kvInstance: KVAdapterInstance | undefined;
+	let queueInstance: QueueAdapterInstance | undefined;
+	let mediaInstance: MediaAdapterInstance | null | undefined;
+	let emailInstance: EmailAdapterInstance | undefined;
+	let imageProcessorInstance: ImageProcessorInstance | undefined;
+	const destroyAdapterInstances = () =>
+		Promise.allSettled([
+			destroyQueueAdapter(queueInstance, {
+				config: props.config,
 				env: props.env,
 				runtimeContext: props.runtimeContext,
 			}),
-			getInitializedMediaAdapter(props.config, {
+			destroyKVAdapter(kvInstance, {
+				config: props.config,
 				env: props.env,
 				runtimeContext: props.runtimeContext,
 			}),
-			getInitializedEmailAdapter(props.config, {
+			destroyMediaAdapter(mediaInstance, {
+				config: props.config,
 				env: props.env,
 				runtimeContext: props.runtimeContext,
 			}),
-			getInitializedImageProcessor(props.config, {
+			destroyEmailAdapter(emailInstance, {
+				config: props.config,
+				env: props.env,
+				runtimeContext: props.runtimeContext,
+			}),
+			destroyImageProcessor(imageProcessorInstance, {
+				config: props.config,
 				env: props.env,
 				runtimeContext: props.runtimeContext,
 			}),
 		]);
+
+	try {
+		kvInstance = await getInitializedKVAdapter(props.config, {
+			env: props.env,
+			runtimeContext: props.runtimeContext,
+		});
+		queueInstance = await getInitializedQueueAdapter(props.config, {
+			env: props.env,
+			runtimeContext: props.runtimeContext,
+		});
+		mediaInstance = await getInitializedMediaAdapter(props.config, {
+			env: props.env,
+			runtimeContext: props.runtimeContext,
+		});
+		emailInstance = await getInitializedEmailAdapter(props.config, {
+			env: props.env,
+			runtimeContext: props.runtimeContext,
+		});
+		imageProcessorInstance = await getInitializedImageProcessor(props.config, {
+			env: props.env,
+			runtimeContext: props.runtimeContext,
+		});
+	} catch (error) {
+		await destroyAdapterInstances();
+		await destroyLogger();
+		throw error;
+	}
+	if (
+		!kvInstance ||
+		!queueInstance ||
+		!emailInstance ||
+		!imageProcessorInstance
+	) {
+		throw new Error("Lucid could not initialize its application adapters.");
+	}
 
 	app
 		.use(logRoute)
@@ -131,14 +212,24 @@ const createApp = async (props: {
 			),
 		)
 		.use(async (c, next) => {
+			const invocation = (c.env as HttpInvocationBindings | undefined)?.[
+				invocationSymbol
+			];
+			if (!invocation) {
+				throw new Error(
+					"Lucid HTTP requests must be handled with an active runtime invocation.",
+				);
+			}
+
 			c.set("config", props.config);
+			c.set("database", invocation.database);
 			c.set("translationStore", props.translationStore);
 			c.set("runtimeContext", props.runtimeContext);
 			c.set("queue", queueInstance);
 			c.set("kv", kvInstance);
 			c.set("media", mediaInstance);
 			c.set("email", emailInstance);
-			c.set("env", c.get("env") ?? props.env ?? null);
+			c.set("env", invocation.env ?? null);
 			c.set("cf", c.get("cf") ?? null);
 			c.set("caches", c.get("caches") ?? null);
 			c.set("ctx", c.get("ctx") ?? null);
@@ -228,176 +319,183 @@ const createApp = async (props: {
 		});
 
 	//* HTTP extensions
-	registerCustomRoutes(app, props.config.http.routes);
+	try {
+		registerCustomRoutes(app, props.config.http.routes);
 
-	await runHttpExtensions({
-		app,
-		config: props.config,
-		priority: 1,
-		extensions: [
-			...props.config.http.extensions,
-			...(props.http?.extensions ?? []),
-		],
-	});
+		await runHttpExtensions({
+			app,
+			config: props.config,
+			priority: 1,
+			extensions: [
+				...props.config.http.extensions,
+				...(props.http?.extensions ?? []),
+			],
+		});
 
-	if (props.config.http.openAPI?.enabled) {
-		app.get(
-			`/${constants.directories.base}/openapi`,
-			openAPIRouteHandler(app, {
-				documentation: {
-					openapi: "3.0.0",
-					info: {
-						title: "Lucid CMS",
-						description:
-							"A modern headless CMS offering a delightful developer experience. Tailor Lucid CMS seamlessly to your client and frontend requirements with our expressive brick and collection builders and extensive configuration.",
-						version: packageJson.version,
+		if (props.config.http.openAPI?.enabled) {
+			app.get(
+				`/${constants.directories.base}/openapi`,
+				openAPIRouteHandler(app, {
+					documentation: {
+						openapi: "3.0.0",
+						info: {
+							title: "Lucid CMS",
+							description:
+								"A modern headless CMS offering a delightful developer experience. Tailor Lucid CMS seamlessly to your client and frontend requirements with our expressive brick and collection builders and extensive configuration.",
+							version: packageJson.version,
+						},
+						tags: [
+							{
+								name: "auth",
+								description:
+									"Authentication endpoints including login, token management, CSRF protection and logout functionality.",
+							},
+							{
+								name: "account",
+								description:
+									"User account management endpoints for user details, password resets and updating personal settings.",
+							},
+							{
+								name: "collections",
+								description:
+									"Collection endpoints for returning all of the collection configuration, such as their details, config and supported bricks and fields.",
+							},
+							{
+								name: "documents",
+								description:
+									"Document endpoints for creating, deleting, updating and promoting/restoring versions.",
+							},
+							{
+								name: "media",
+								description:
+									"Media endpoints for creating, updating, deleting, creating upload sessions and clearing processed images.",
+							},
+							{
+								name: "media-folders",
+								description:
+									"Media folder endpoints for creating, updating, deleting and fetching media folders.",
+							},
+							{
+								name: "media-share-links",
+								description:
+									"Media share link endpoints for creating, updating, deleting and fetching media share links.",
+							},
+							{
+								name: "emails",
+								description:
+									"Email endpoints for fetching, deleting and resending emails.",
+							},
+							{
+								name: "users",
+								description:
+									"User endpoints for inviting, deleting and updating.",
+							},
+							{
+								name: "roles",
+								description:
+									"Role endpoints for fetching, creating, updating and deleting.",
+							},
+							{
+								name: "permissions",
+								description:
+									"Permission endpoints for fetching all available permissions.",
+							},
+							{
+								name: "locales",
+								description:
+									"Locale endpoints for fetching active locales. These are the locales available for your content to be written in.",
+							},
+							{
+								name: "jobs",
+								description:
+									"Job endpoints for fetching existing jobs so you can monitor them and their status.",
+							},
+							{
+								name: "cdn",
+								description:
+									"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
+							},
+							{
+								name: "share",
+								description:
+									"Share endpoints for accessing shared media files.",
+							},
+							{
+								name: "settings",
+								description:
+									"Setting endpoints to recieve current settings and meta data on Lucid.",
+							},
+							{
+								name: "license",
+								description:
+									"License endpoints for managing the license key and verifying its validity.",
+							},
+							{
+								name: "ai",
+								description:
+									"AI endpoints for generating CMS content with Lucid AI features.",
+							},
+							{
+								name: "client-integrations",
+								description:
+									"Endpoints for managing client integration credentials used to authenticate external applications accessing CMS content via client endpoints.",
+							},
+							{
+								name: "client-documents",
+								description:
+									"Client document endpoints for fetching single and multiple documents via the client integration authentication.",
+							},
+							{
+								name: "client-previews",
+								description:
+									"Client preview endpoints for resolving preview metadata in browser applications.",
+							},
+							{
+								name: "client-locales",
+								description:
+									"Client locale endpoints for fetching locale information.",
+							},
+						],
+						servers: configuredHost
+							? [
+									{
+										url: configuredHost.includes("[::1]")
+											? configuredHost.replace("[::1]", "localhost")
+											: configuredHost,
+										description: "Development server",
+									},
+								]
+							: [],
 					},
-					tags: [
-						{
-							name: "auth",
-							description:
-								"Authentication endpoints including login, token management, CSRF protection and logout functionality.",
-						},
-						{
-							name: "account",
-							description:
-								"User account management endpoints for user details, password resets and updating personal settings.",
-						},
-						{
-							name: "collections",
-							description:
-								"Collection endpoints for returning all of the collection configuration, such as their details, config and supported bricks and fields.",
-						},
-						{
-							name: "documents",
-							description:
-								"Document endpoints for creating, deleting, updating and promoting/restoring versions.",
-						},
-						{
-							name: "media",
-							description:
-								"Media endpoints for creating, updating, deleting, creating upload sessions and clearing processed images.",
-						},
-						{
-							name: "media-folders",
-							description:
-								"Media folder endpoints for creating, updating, deleting and fetching media folders.",
-						},
-						{
-							name: "media-share-links",
-							description:
-								"Media share link endpoints for creating, updating, deleting and fetching media share links.",
-						},
-						{
-							name: "emails",
-							description:
-								"Email endpoints for fetching, deleting and resending emails.",
-						},
-						{
-							name: "users",
-							description:
-								"User endpoints for inviting, deleting and updating.",
-						},
-						{
-							name: "roles",
-							description:
-								"Role endpoints for fetching, creating, updating and deleting.",
-						},
-						{
-							name: "permissions",
-							description:
-								"Permission endpoints for fetching all available permissions.",
-						},
-						{
-							name: "locales",
-							description:
-								"Locale endpoints for fetching active locales. These are the locales available for your content to be written in.",
-						},
-						{
-							name: "jobs",
-							description:
-								"Job endpoints for fetching existing jobs so you can monitor them and their status.",
-						},
-						{
-							name: "cdn",
-							description:
-								"CDN endpoints for streaming media files. This handles media retrieval and optional on-request image processing.",
-						},
-						{
-							name: "share",
-							description: "Share endpoints for accessing shared media files.",
-						},
-						{
-							name: "settings",
-							description:
-								"Setting endpoints to recieve current settings and meta data on Lucid.",
-						},
-						{
-							name: "license",
-							description:
-								"License endpoints for managing the license key and verifying its validity.",
-						},
-						{
-							name: "ai",
-							description:
-								"AI endpoints for generating CMS content with Lucid AI features.",
-						},
-						{
-							name: "client-integrations",
-							description:
-								"Endpoints for managing client integration credentials used to authenticate external applications accessing CMS content via client endpoints.",
-						},
-						{
-							name: "client-documents",
-							description:
-								"Client document endpoints for fetching single and multiple documents via the client integration authentication.",
-						},
-						{
-							name: "client-previews",
-							description:
-								"Client preview endpoints for resolving preview metadata in browser applications.",
-						},
-						{
-							name: "client-locales",
-							description:
-								"Client locale endpoints for fetching locale information.",
-						},
-					],
-					servers: configuredHost
-						? [
-								{
-									url: configuredHost.includes("[::1]")
-										? configuredHost.replace("[::1]", "localhost")
-										: configuredHost,
-									description: "Development server",
-								},
-							]
-						: [],
-				},
-			}),
-		);
-		app.get(
-			constants.openAPIDocsRoute,
-			Scalar({
-				url: `/${constants.directories.base}/openapi`,
-				theme: "saturn",
-				defaultHttpClient: {
-					targetKey: "node",
-					clientKey: "fetch",
-				},
-			}),
-		);
-	}
+				}),
+			);
+			app.get(
+				constants.openAPIDocsRoute,
+				Scalar({
+					url: `/${constants.directories.base}/openapi`,
+					theme: "saturn",
+					defaultHttpClient: {
+						targetKey: "node",
+						clientKey: "fetch",
+					},
+				}),
+			);
+		}
 
-	await runHttpExtensions({
-		app,
-		config: props.config,
-		priority: 2,
-		extensions: [
-			...props.config.http.extensions,
-			...(props.http?.extensions ?? []),
-		],
-	});
+		await runHttpExtensions({
+			app,
+			config: props.config,
+			priority: 2,
+			extensions: [
+				...props.config.http.extensions,
+				...(props.http?.extensions ?? []),
+			],
+		});
+	} catch (error) {
+		await destroyAdapterInstances();
+		await destroyLogger();
+		throw error;
+	}
 
 	const supportChecksRes = featureSupportChecks(
 		{
@@ -413,7 +511,24 @@ const createApp = async (props: {
 	let destroyPromise: Promise<void> | undefined;
 
 	return {
-		app,
+		handle: (options: {
+			request: Request;
+			database: DatabaseConnection;
+			env?: EnvironmentVariables;
+			executionContext?: unknown;
+			requestBindings?: object;
+		}) =>
+			app.fetch(
+				options.request,
+				createInvocationBindings(
+					{
+						database: options.database,
+						env: options.env,
+					},
+					options.requestBindings,
+				),
+				options.executionContext as Parameters<typeof app.fetch>[2],
+			),
 		queue: queueInstance,
 		kv: kvInstance,
 		media: mediaInstance,
@@ -421,34 +536,7 @@ const createApp = async (props: {
 		issues: supportChecksRes.issues,
 		destroy: () => {
 			destroyPromise ??= (async () => {
-				await Promise.allSettled([
-					destroyQueueAdapter(queueInstance, {
-						config: props.config,
-						env: props.env,
-						runtimeContext: props.runtimeContext,
-					}),
-					destroyKVAdapter(kvInstance, {
-						config: props.config,
-						env: props.env,
-						runtimeContext: props.runtimeContext,
-					}),
-					destroyMediaAdapter(mediaInstance, {
-						config: props.config,
-						env: props.env,
-						runtimeContext: props.runtimeContext,
-					}),
-					destroyEmailAdapter(emailInstance, {
-						config: props.config,
-						env: props.env,
-						runtimeContext: props.runtimeContext,
-					}),
-					destroyImageProcessor(imageProcessorInstance, {
-						config: props.config,
-						env: props.env,
-						runtimeContext: props.runtimeContext,
-					}),
-					props.config.db.client.destroy(),
-				]);
+				await destroyAdapterInstances();
 				await destroyLogger();
 			})();
 

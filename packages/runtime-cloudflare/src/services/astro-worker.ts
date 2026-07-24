@@ -60,7 +60,7 @@ export const createAstroWorkerSource = (props: {
 		},
 		{
 			path: props.runtimeModulePath,
-			exports: ["getLucidHost"],
+			exports: ["createLucidInvocation"],
 		},
 	];
 	const handlers: CloudflareWorkerExport[] = [
@@ -75,8 +75,12 @@ export const createAstroWorkerSource = (props: {
 			async: true,
 			params: ["controller", "env", "ctx"],
 			content: `const task = (async () => {
-	const { host, state } = await getLucidHost({ runtime: { env, ctx } });
-	await lucidBridge.scheduled({ host, controller, state });
+	const { invocation, state } = await createLucidInvocation({ runtime: { env, ctx } });
+	try {
+		await lucidBridge.scheduled({ invocation, controller, state });
+	} finally {
+		await invocation.destroy();
+	}
 })();
 ctx.waitUntil(task);`,
 		},

@@ -72,7 +72,7 @@ const setupCronJobs = async (config: {
 }) => {
 	let queueInstance: QueueAdapterInstance | undefined;
 
-	//* depending on the runtime adapter, they may already be able to access the main queue adapter instance via the createApp function.
+	//* depending on the runtime adapter, they may already have access to the host's queue adapter.
 	if (config.createQueue) {
 		//* we dont pass additionalJobHandlers as at least currently, we dont expose a way for devs to register their own CRON jobs,
 		//* meaning we dont need crons to be able to access job handlers that are not core.
@@ -103,13 +103,14 @@ const setupCronJobs = async (config: {
 					cronQueue = createdQueue;
 				}
 
+				const locale = context.config.i18n.defaultLocale;
 				const cronContext: ServiceContext = {
 					...context,
 					queue: cronQueue,
-					translate: context.translate.forLocale("en"),
+					translate: context.translate.forLocale(locale),
 					request: {
 						...context.request,
-						locale: "en",
+						locale,
 					},
 				};
 

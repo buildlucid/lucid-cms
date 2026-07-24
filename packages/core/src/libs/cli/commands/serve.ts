@@ -26,18 +26,22 @@ const serveCommand = async () => {
 	let destroy: (() => Promise<void>) | undefined;
 	const coreUpdateAvailable = updateAvailable();
 
-	const shutdown = async () => {
-		try {
-			await destroy?.();
-		} catch (error) {
-			if (error instanceof Error) {
-				cliLogger.errorInstance(error, "Error during shutdown");
-			} else {
-				cliLogger.error("Error during shutdown", "Unknown error");
+	let shutdownPromise: Promise<void> | undefined;
+	const shutdown = () => {
+		shutdownPromise ??= (async () => {
+			try {
+				await destroy?.();
+			} catch (error) {
+				if (error instanceof Error) {
+					cliLogger.errorInstance(error, "Error during shutdown");
+				} else {
+					cliLogger.error("Error during shutdown", "Unknown error");
+				}
 			}
-		}
-		await stopLoggerBuffering();
-		process.exit(0);
+			await stopLoggerBuffering();
+			process.exit(0);
+		})();
+		return shutdownPromise;
 	};
 
 	try {

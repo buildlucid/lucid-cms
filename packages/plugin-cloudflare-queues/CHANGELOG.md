@@ -1,8 +1,9 @@
 # @lucidcms/plugin-cloudflare-queues
 
-## v1.0.4 (unreleased)
+## v1.1.0 (unreleased)
 
-- Added structured event and error details to Cloudflare queue failure logs.
+- Updated queue consumers to use the background Lucid host and one database connection for each batch.
+- Added structured event and error details to queue failure logs.
 
 ## v1.0.3
 
