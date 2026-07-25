@@ -1,7 +1,8 @@
 # @lucidcms/plugin-nodemailer
 
-## v1.1.6 (unreleased)
+## v1.1.6
 
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
 - Added structured event and error details to transporter readiness warnings.
 
 ## v1.1.5

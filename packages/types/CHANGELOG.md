@@ -1,6 +1,6 @@
 # @lucidcms/types
 
-## v0.4.0 (unreleased)
+## v0.4.0
 
 - Updated collection document generics to support collection-specific callback types.
 - Added `updatedAt` on `DocumentVersionSummary`.

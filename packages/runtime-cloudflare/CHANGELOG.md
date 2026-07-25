@@ -1,7 +1,8 @@
 # @lucidcms/runtime-cloudflare
 
-## v1.2.0 (unreleased)
+## v1.2.0
 
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
 - Added Astro bridge support through the Astro Cloudflare adapter and its public Worker handler.
 - Updated Worker requests, scheduled events and local development to use managed Lucid hosts with invocation-scoped database connections and clean shutdown.
 - Added a tested default compatibility date to generated Wrangler configuration.

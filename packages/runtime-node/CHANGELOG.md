@@ -1,7 +1,8 @@
 # @lucidcms/runtime-node
 
-## v1.2.0 (unreleased)
+## v1.2.0
 
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
 - Added Astro bridge support for hosting Lucid through the Astro Node adapter.
 - Updated Node and Astro requests, cron jobs and generated servers to use managed Lucid hosts with invocation-scoped database connections and clean shutdown.
 - Preserved request connection details when handling Node requests.

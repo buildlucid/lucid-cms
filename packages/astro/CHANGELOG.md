@@ -1,7 +1,8 @@
 # @lucidcms/astro
 
-## v0.3.0 (unreleased)
+## v0.3.0
 
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
 - Reworked the Astro integration to use runtime bridges and a shared Lucid host, with request-scoped database connections and config reloads.
 - Added server and static output support with on-demand Lucid routes and a generated server toolkit.
 - Changed `getToolkit` to require the current Astro context.

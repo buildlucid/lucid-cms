@@ -1,7 +1,8 @@
 # @lucidcms/db-postgres
 
-## v1.2.0 (unreleased)
+## v1.2.0
 
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
 - Updated the adapter to create explicit PostgreSQL connections through `connect()` and resolve environment options for each connection.
 
 ## v1.1.1

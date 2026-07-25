@@ -1,5 +1,9 @@
 # @lucidcms/plugin-sharp
 
+## v1.2.1
+
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
+
 ## v1.2.0
 
 - Added configurable image fit modes and focal-point-aware cover resizing using normalized focal coordinates.

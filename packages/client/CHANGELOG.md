@@ -1,5 +1,9 @@
 # @lucidcms/client
 
+## v0.3.1
+
+- Bumped `@lucidcms/types` to `0.4.0`.
+
 ## v0.3.0
 
 - Filter operator types added.

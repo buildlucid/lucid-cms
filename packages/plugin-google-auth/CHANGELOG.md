@@ -1,5 +1,9 @@
 # @lucidcms/plugin-google-auth
 
+## v1.0.4
+
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
+
 ## v1.0.3
 
 - Bumped `@lucidcms/core` to `0.16.0-alpha.0`.

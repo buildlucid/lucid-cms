@@ -1,7 +1,8 @@
 # @lucidcms/plugin-cloudflare-queues
 
-## v1.1.0 (unreleased)
+## v1.1.0
 
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
 - Updated queue consumers to use the background Lucid host and one database connection for each batch.
 - Added structured event and error details to queue failure logs.
 

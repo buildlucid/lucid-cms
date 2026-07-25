@@ -1,7 +1,8 @@
 # @lucidcms/db-sqlite
 
-## v1.2.0 (unreleased)
+## v1.2.0
 
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
 - Updated the adapter to use explicit database connections through `connect()`.
 
 ## v1.1.0

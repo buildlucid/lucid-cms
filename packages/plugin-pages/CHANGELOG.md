@@ -1,7 +1,8 @@
 # @lucidcms/plugin-pages
 
-## v0.6.0 (unreleased)
+## v0.6.0
 
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
 - Replaced `collectionKey` with `key` in collection options.
 - Moved full slug visibility to `ui.fullSlug`.
 - Added `ui.tab` for placing plugin fields in an existing named collection tab.

@@ -1,5 +1,9 @@
 # @lucidcms/plugin-s3
 
+## v2.2.4
+
+- Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
+
 ## v2.2.3
 
 - Bumped `@lucidcms/core` to `0.16.0-alpha.0`.
