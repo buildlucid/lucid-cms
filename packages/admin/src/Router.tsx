@@ -8,6 +8,7 @@ import MainLayout from "@/layouts/Main";
 import PublicRoutes from "@/layouts/PublicRoutes";
 import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
+import PermissionSomeGuard from "./guards/PermissionSome";
 
 type LazyRoute = {
 	preload: () => Promise<unknown>;
@@ -38,7 +39,6 @@ const SystemAiUsageRoute = lazy(() => import("@/routes/System/AiUsage/View"));
 const SystemClientIntegrationsRoute = lazy(
 	() => import("@/routes/System/ClientIntegrations/View"),
 );
-const SystemLicenseRoute = lazy(() => import("@/routes/System/License/View"));
 const SystemQueueObservabilityRoute = lazy(
 	() => import("@/routes/System/QueueObservability/View"),
 );
@@ -223,18 +223,14 @@ const AppRouter: Component = () => {
 					path="/system/integrations"
 					preload={preloadRoutes(SystemClientIntegrationsRoute)}
 					component={() => (
-						<PermissionGuard permission={Permissions.IntegrationsRead}>
+						<PermissionSomeGuard
+							permission={[
+								Permissions.IntegrationsRead,
+								Permissions.ConnectionUpdate,
+							]}
+						>
 							<SystemClientIntegrationsRoute />
-						</PermissionGuard>
-					)}
-				/>
-				<Route
-					path="/system/license"
-					preload={preloadRoutes(SystemLicenseRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.LicenseUpdate}>
-							<SystemLicenseRoute />
-						</PermissionGuard>
+						</PermissionSomeGuard>
 					)}
 				/>
 			</Route>

@@ -1,16 +1,15 @@
 import type { MediaAltGenerateResponse } from "@lucidcms/types";
 import z from "zod";
 import { copy } from "../../../libs/i18n/index.js";
-import type { MediaAltGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
+import type { MediaAltGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
 import {
-	getCmsAiGenerateFailedMessage,
 	isCmsAiGenerateAcceptedData,
 	isCmsAiGenerateCompletedData,
-	isCmsAiGenerateFailedData,
 } from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getLicenseKey from "../../options/get-license-key.js";
+import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import getAccessToken from "../../connection/token-manager.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import storeFailedGeneration from "../storage/store-failed-generation.js";
 import storeGeneration from "../storage/store-generation.js";
@@ -51,8 +50,8 @@ const mediaAltGenerate: ServiceFn<
 	if (featureEnabledRes.error) return featureEnabledRes;
 
 	const requestStartedAt = Date.now();
-	const licenseKeyRes = await getLicenseKey(context);
-	if (licenseKeyRes.error) return licenseKeyRes;
+	const accessTokenRes = await getAccessToken(context, {});
+	if (accessTokenRes.error) return accessTokenRes;
 
 	const input: MediaAltGenerateV1Request["input"] = [];
 
@@ -90,23 +89,24 @@ const mediaAltGenerate: ServiceFn<
 	};
 
 	const generateRes = await generateCmsAi(context, {
-		licenseKey: licenseKeyRes.data,
+		accessToken: accessTokenRes.data.accessToken,
 		request,
 	});
-	if (generateRes.error) return generateRes;
+	if (generateRes.error) {
+		if (generateRes.error.status === 401) {
+			await handleProtectedResourceUnauthorized(context);
+		}
+		return generateRes;
+	}
 	const responseData = generateRes.data.json.data;
 
 	//* This feature is sync-mode only; this guard is proofing against a remote contract mismatch and should never run.
-	const responseDataFailed = isCmsAiGenerateFailedData(responseData);
-	if (isCmsAiGenerateAcceptedData(responseData) || responseDataFailed) {
-		const errorMessage = responseDataFailed
-			? getCmsAiGenerateFailedMessage(
-					responseData,
-					context.translate("server:core.routes.ai.generate.error.message"),
-				)
-			: context.translate("server:core.routes.ai.generate.error.message");
-
+	if (isCmsAiGenerateAcceptedData(responseData)) {
+		const errorMessage = context.translate(
+			"server:core.routes.ai.generate.error.message",
+		);
 		const storeRes = await storeFailedGeneration(context, {
+			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 			userId: props.userId,
 			requestId: responseData.requestId,
 			feature: responseData.feature,
@@ -122,7 +122,6 @@ const mediaAltGenerate: ServiceFn<
 			},
 			requestStartedAt,
 			errorMessage,
-			usage: responseDataFailed ? responseData.usage : undefined,
 		});
 		if (storeRes.error) return storeRes;
 
@@ -130,9 +129,7 @@ const mediaAltGenerate: ServiceFn<
 			error: {
 				type: "basic",
 				status: 502,
-				message: responseDataFailed
-					? copy.literal(errorMessage)
-					: copy("server:core.routes.ai.generate.error.message"),
+				message: copy("server:core.routes.ai.generate.error.message"),
 			},
 			data: undefined,
 		};
@@ -152,6 +149,7 @@ const mediaAltGenerate: ServiceFn<
 	const outputParse = mediaAltOutputSchema.safeParse(responseData.output);
 	if (!outputParse.success) {
 		const storeRes = await storeGeneration(context, {
+			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 			userId: props.userId,
 			response: responseData,
 			targetType: "media-alt",
@@ -187,6 +185,7 @@ const mediaAltGenerate: ServiceFn<
 	);
 	if (missingLocale) {
 		const storeRes = await storeGeneration(context, {
+			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 			userId: props.userId,
 			response: responseData,
 			targetType: "media-alt",
@@ -218,6 +217,7 @@ const mediaAltGenerate: ServiceFn<
 	}
 
 	const storeRes = await storeGeneration(context, {
+		lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 		userId: props.userId,
 		response: responseData,
 		targetType: "media-alt",

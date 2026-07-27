@@ -1,7 +1,6 @@
 import { A } from "@solidjs/router";
 import type { Collection, User } from "@types";
 import classNames from "classnames";
-import { FaSolidKey } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import { IconLinkFull } from "@/components/Groups/Navigation";
 import CollectionNavLink from "@/components/Partials/CollectionNavLink";
@@ -19,7 +18,6 @@ export type NavigationMenuContentProps = {
 	logoutPending?: boolean;
 	onLogout?: () => void;
 	user?: Pick<User, "username" | "firstName" | "lastName" | "profilePicture">;
-	showLicenseAlert: boolean;
 	canReadDocuments: boolean;
 	canReadPublishRequests: boolean;
 	canReadMedia: boolean;
@@ -28,7 +26,7 @@ export type NavigationMenuContentProps = {
 	canReadRoles: boolean;
 	canReadJobs: boolean;
 	canReadAiUsage: boolean;
-	canManageLicense: boolean;
+	canManageConnection: boolean;
 	canReadClientIntegrations: boolean;
 	canReadSystemOverview: boolean;
 	showAccessAndPermissions: boolean;
@@ -60,7 +58,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 		() =>
 			props.canReadSystemOverview ||
 			props.canReadClientIntegrations ||
-			props.canManageLicense ||
+			props.canManageConnection ||
 			props.canReadJobs ||
 			props.canReadAiUsage,
 	);
@@ -266,7 +264,9 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						href="/lucid/system/integrations"
 						icon="client-integrations"
 						title={T()("routes.system.client.integrations.title")}
-						permission={props.canReadClientIntegrations}
+						permission={
+							props.canReadClientIntegrations || props.canManageConnection
+						}
 					/>
 					<IconLinkFull
 						type="link"
@@ -274,13 +274,6 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						icon="overview"
 						title={T()("common.ai.usage")}
 						permission={props.canReadAiUsage}
-					/>
-					<IconLinkFull
-						type="link"
-						href="/lucid/system/license"
-						icon="license"
-						title={T()("common.license")}
-						permission={props.canManageLicense}
 					/>
 					<IconLinkFull
 						type="link"
@@ -327,44 +320,6 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						"border-t border-border pt-4": props.showFooterActions === false,
 					})}
 				>
-					<Show when={props.showLicenseAlert}>
-						<Show
-							when={props.canManageLicense}
-							fallback={
-								<div class="flex w-full min-w-0 items-start gap-1 rounded-md border border-warning-base/20 bg-warning-base/10 px-2 py-1.5">
-									<span class="flex size-5 shrink-0 items-center justify-center rounded-md text-icon-base">
-										<FaSolidKey class="size-3" />
-									</span>
-									<span class="flex min-w-0 flex-col">
-										<span class="text-xs font-medium leading-4 text-title">
-											{T()("license.banner.nav.title")}
-										</span>
-										<span class="text-[11px] leading-4 text-body">
-											{T()("license.banner.nav.status")}
-										</span>
-									</span>
-								</div>
-							}
-						>
-							<A
-								href="/lucid/system/license"
-								class="flex w-full min-w-0 items-start gap-1 rounded-md border border-warning-base/20 bg-warning-base/10 px-2 py-1.5 text-left transition-colors hover:bg-warning-base/10 focus:outline-none focus-visible:ring-1 ring-primary-base"
-								onClick={handleNavigate}
-							>
-								<span class="flex size-5 shrink-0 items-center justify-center rounded-md text-icon-base">
-									<FaSolidKey class="size-3" />
-								</span>
-								<span class="flex min-w-0 flex-col">
-									<span class="text-xs font-medium leading-4 text-title">
-										{T()("license.banner.nav.title")}
-									</span>
-									<span class="text-[11px] leading-4 text-body">
-										{T()("license.banner.nav.status")}
-									</span>
-								</span>
-							</A>
-						</Show>
-					</Show>
 					<small class="text-xs leading-none bg-background-base rounded-md px-2 py-2 block text-center">
 						v{packageJson.version}
 					</small>

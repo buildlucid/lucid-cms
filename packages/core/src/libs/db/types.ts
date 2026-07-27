@@ -263,6 +263,7 @@ export interface LucidAiGenerations {
 	feature_version: string;
 	tenant_key: string | null;
 	user_id: number | null;
+	lucid_remote_connection_id: number | null;
 	target_type: string;
 	target: JSONColumnType<
 		Record<string, unknown>,
@@ -280,8 +281,7 @@ export interface LucidAiGenerations {
 		Record<string, unknown> | null
 	>;
 	model: string | null;
-	cost_currency: string | null;
-	cost_total_minor: number | null;
+	credits_charged: string | null;
 	duration_ms: number | null;
 	status: AiGenerationStatus;
 	error_message: string | null;
@@ -726,6 +726,33 @@ export interface LucidPreviewSessions {
 	created_at: TimestampImmutable;
 }
 
+export type LucidRemoteConnectionState =
+	| "connected"
+	| "disconnected"
+	| "revoked";
+
+export interface LucidRemoteConnections {
+	id: Generated<number>;
+	scope_key: string;
+	tenant_key: string | null;
+	status: LucidRemoteConnectionState;
+	registration_encrypted: string | null;
+	grant_encrypted: string | null;
+	pending_encrypted: string | null;
+	pending_state_hash: string | null;
+	pending_expires_at: number | null;
+	display: JSONColumnType<
+		Record<string, unknown> | null,
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
+	>;
+	last_attempt_at: number | null;
+	last_verified_at: number | null;
+	error_key: string | null;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
 export interface LucidMediaTranslations {
 	id: Generated<number>;
 	media_id: number;
@@ -919,6 +946,7 @@ export interface LucidDB {
 	lucid_document_workflows: LucidDocumentWorkflows;
 	lucid_document_workflow_assignees: LucidDocumentWorkflowAssignees;
 	lucid_preview_sessions: LucidPreviewSessions;
+	lucid_remote_connections: LucidRemoteConnections;
 	lucid_media_folders: LucidMediaFolders;
 	lucid_media: LucidMedia;
 	lucid_media_translations: LucidMediaTranslations;

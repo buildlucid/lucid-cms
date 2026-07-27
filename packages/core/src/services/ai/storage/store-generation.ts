@@ -1,5 +1,5 @@
 import type { AiGenerationStatus } from "../../../libs/db/types.js";
-import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
+import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getRequestDurationMs from "../helpers/get-request-duration-ms.js";
@@ -7,6 +7,7 @@ import getRequestDurationMs from "../helpers/get-request-duration-ms.js";
 const storeGeneration: ServiceFn<
 	[
 		{
+			lucidRemoteConnectionId: number;
 			userId: number;
 			response: CmsAiGenerateCompletedData;
 			targetType: string;
@@ -23,21 +24,7 @@ const storeGeneration: ServiceFn<
 		context.config.db,
 	);
 
-	const existingRes = await AiGenerations.selectSingleByRequestId({
-		requestId: props.response.requestId,
-		select: ["id"],
-		tenantKey: context.request.tenantKey,
-	});
-	if (existingRes.error) return existingRes;
-
-	if (existingRes.data) {
-		return {
-			error: undefined,
-			data: undefined,
-		};
-	}
-
-	const createRes = await AiGenerations.createSingle({
+	const createRes = await AiGenerations.createIfRequestAbsent({
 		data: {
 			request_id: props.response.requestId,
 			provider_request_id: props.response.usage.providerRequestId ?? null,
@@ -45,18 +32,17 @@ const storeGeneration: ServiceFn<
 			feature_version: props.response.feature.version,
 			tenant_key: context.request.tenantKey ?? null,
 			user_id: props.userId,
+			lucid_remote_connection_id: props.lucidRemoteConnectionId,
 			target_type: props.targetType,
 			target: props.target,
 			output: props.response.output as Record<string, unknown>,
 			usage: props.response.usage,
 			model: props.response.usage.model,
-			cost_currency: props.response.usage.cost.currency,
-			cost_total_minor: props.response.usage.cost.totalCostMinor,
+			credits_charged: props.response.usage.cost.creditsCharged,
 			duration_ms: getRequestDurationMs(props.requestStartedAt),
 			status: props.status ?? "success",
 			error_message: props.errorMessage ?? null,
 		},
-		returning: ["id"],
 	});
 	if (createRes.error) return createRes;
 

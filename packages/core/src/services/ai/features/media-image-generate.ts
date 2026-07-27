@@ -1,17 +1,15 @@
 import type { MediaImageGenerateResponse } from "@lucidcms/types";
 import { copy } from "../../../libs/i18n/index.js";
-import type { MediaImageGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
+import type { MediaImageGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
 import {
-	getCmsAiGenerateFailedMessage,
 	isCmsAiGenerateAcceptedData,
 	isCmsAiGenerateCompletedData,
-	isCmsAiGenerateFailedData,
 } from "../../../libs/lucid-remote/utils.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getLicenseKey from "../../options/get-license-key.js";
+import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import getAccessToken from "../../connection/token-manager.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
-import storeFailedGeneration from "../storage/store-failed-generation.js";
 import storeGeneration from "../storage/store-generation.js";
 import storePendingGeneration from "../storage/store-pending-generation.js";
 
@@ -51,8 +49,8 @@ const mediaImageGenerate: ServiceFn<
 	if (featureEnabledRes.error) return featureEnabledRes;
 
 	const requestStartedAt = Date.now();
-	const licenseKeyRes = await getLicenseKey(context);
-	if (licenseKeyRes.error) return licenseKeyRes;
+	const accessTokenRes = await getAccessToken(context, {});
+	if (accessTokenRes.error) return accessTokenRes;
 
 	const idempotencyKey = props.idempotencyKey?.trim();
 	if (!idempotencyKey) {
@@ -140,11 +138,16 @@ const mediaImageGenerate: ServiceFn<
 	};
 
 	const generateRes = await generateCmsAi(context, {
-		licenseKey: licenseKeyRes.data,
+		accessToken: accessTokenRes.data.accessToken,
 		request,
 		idempotencyKey,
 	});
-	if (generateRes.error) return generateRes;
+	if (generateRes.error) {
+		if (generateRes.error.status === 401) {
+			await handleProtectedResourceUnauthorized(context);
+		}
+		return generateRes;
+	}
 	const responseData = generateRes.data.json.data;
 
 	const target = {
@@ -163,6 +166,7 @@ const mediaImageGenerate: ServiceFn<
 
 	if (isCmsAiGenerateAcceptedData(responseData)) {
 		const storeRes = await storePendingGeneration(context, {
+			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 			userId: props.userId,
 			requestId: responseData.requestId,
 			feature: {
@@ -188,33 +192,6 @@ const mediaImageGenerate: ServiceFn<
 		};
 	}
 
-	if (isCmsAiGenerateFailedData(responseData)) {
-		const errorMessage = getCmsAiGenerateFailedMessage(
-			responseData,
-			context.translate("server:core.routes.ai.generate.error.message"),
-		);
-		const storeRes = await storeFailedGeneration(context, {
-			userId: props.userId,
-			requestId: responseData.requestId,
-			feature: responseData.feature,
-			targetType: "media-image",
-			target,
-			requestStartedAt,
-			errorMessage,
-			usage: responseData.usage,
-		});
-		if (storeRes.error) return storeRes;
-
-		return {
-			error: {
-				type: "basic",
-				status: 502,
-				message: copy.literal(errorMessage),
-			},
-			data: undefined,
-		};
-	}
-
 	if (!isCmsAiGenerateCompletedData(responseData)) {
 		return {
 			error: {
@@ -227,6 +204,7 @@ const mediaImageGenerate: ServiceFn<
 	}
 
 	const storeRes = await storeGeneration(context, {
+		lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 		userId: props.userId,
 		response: responseData,
 		targetType: "media-image",

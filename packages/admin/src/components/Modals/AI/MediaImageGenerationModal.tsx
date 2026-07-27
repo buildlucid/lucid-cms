@@ -46,7 +46,7 @@ import T from "@/translations";
 import { prepareAiImage } from "@/utils/ai-image";
 import { LucidError } from "@/utils/error-handling";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
-import formatAiCost from "@/utils/format-ai-cost";
+import formatAiCost, { sumAiCredits } from "@/utils/format-ai-cost";
 import helpers from "@/utils/helpers";
 import {
 	clearStoredPendingMediaImageGeneration,
@@ -260,12 +260,9 @@ const MediaImageGenerationModal: Component = () => {
 		const firstGeneration = generations()[0];
 		if (!firstGeneration) return undefined;
 
-		const currency = firstGeneration.cost.currency;
-		const totalCostMinor = generations()
-			.filter((generation) => generation.cost.currency === currency)
-			.reduce((total, generation) => total + generation.cost.totalCostMinor, 0);
-
-		return formatAiCost({ currency, totalCostMinor });
+		return formatAiCost(
+			sumAiCredits(generations().map((generation) => generation.cost)),
+		);
 	});
 
 	// -----------------------------

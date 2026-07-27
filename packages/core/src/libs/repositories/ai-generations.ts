@@ -3,7 +3,12 @@ import z from "zod";
 import type { GetUsageQueryParams } from "../../schemas/ai.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import queryBuilder from "../db/query-builder/index.js";
-import type { KyselyDB, LucidAiGenerations, Select } from "../db/types.js";
+import type {
+	Insert,
+	KyselyDB,
+	LucidAiGenerations,
+	Select,
+} from "../db/types.js";
 import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
@@ -12,8 +17,7 @@ export interface AiUsageChartRowPropT {
 	created_at: Date | string;
 	feature_key: string;
 	usage: Record<string, unknown> | null;
-	cost_currency: string | null;
-	cost_total_minor: number | null;
+	credits_charged: string | null;
 }
 
 export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_generations"> {
@@ -28,13 +32,13 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		feature_version: z.string(),
 		tenant_key: z.string().nullable(),
 		user_id: z.number().nullable(),
+		lucid_remote_connection_id: z.number().nullable(),
 		target_type: z.string(),
 		target: z.record(z.string(), z.unknown()),
 		output: z.unknown().nullable(),
 		usage: z.record(z.string(), z.unknown()).nullable(),
 		model: z.string().nullable(),
-		cost_currency: z.string().nullable(),
-		cost_total_minor: z.number().nullable(),
+		credits_charged: z.string().nullable(),
 		duration_ms: z.number().nullable(),
 		status: z.enum(["failed", "pending", "success"]),
 		error_message: z.string().nullable(),
@@ -48,13 +52,13 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		feature_version: this.dbAdapter.getDataType("text"),
 		tenant_key: this.dbAdapter.getDataType("text"),
 		user_id: this.dbAdapter.getDataType("integer"),
+		lucid_remote_connection_id: this.dbAdapter.getDataType("integer"),
 		target_type: this.dbAdapter.getDataType("text"),
 		target: this.dbAdapter.getDataType("json"),
 		output: this.dbAdapter.getDataType("json"),
 		usage: this.dbAdapter.getDataType("json"),
 		model: this.dbAdapter.getDataType("text"),
-		cost_currency: this.dbAdapter.getDataType("text"),
-		cost_total_minor: this.dbAdapter.getDataType("integer"),
+		credits_charged: this.dbAdapter.getDataType("text"),
 		duration_ms: this.dbAdapter.getDataType("integer"),
 		status: this.dbAdapter.getDataType("text"),
 		error_message: this.dbAdapter.getDataType("text"),
@@ -76,7 +80,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			},
 			sorts: {
 				createdAt: "lucid_ai_generations.created_at",
-				cost: "lucid_ai_generations.cost_total_minor",
+				cost: "lucid_ai_generations.credits_charged",
 				durationMs: "lucid_ai_generations.duration_ms",
 			},
 		},
@@ -87,6 +91,52 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			targetType: "contains",
 		},
 	} as const;
+
+	/**
+	 * Inserts a completed generation once using the remote request identity.
+	 * Concurrent duplicate responses are ignored by the database constraint.
+	 */
+	async createIfRequestAbsent<
+		K extends keyof Select<LucidAiGenerations>,
+		V extends boolean = false,
+	>(
+		props: QueryProps<
+			V,
+			{
+				data: Partial<Insert<LucidAiGenerations>>;
+				returning?: K[];
+				returnAll?: true;
+			}
+		>,
+	) {
+		const query = this.db
+			.insertInto("lucid_ai_generations")
+			.values(this.formatData(props.data, { type: "insert" }))
+			.onConflict((conflict) => conflict.column("request_id").doNothing())
+			.$if(
+				props.returnAll !== true &&
+					props.returning !== undefined &&
+					props.returning.length > 0,
+				(qb) => qb.returning(props.returning as K[]),
+			)
+			.$if(props.returnAll ?? false, (qb) => qb.returningAll());
+
+		const exec = await this.executeQuery(
+			() =>
+				query.executeTakeFirst() as Promise<
+					Pick<Select<LucidAiGenerations>, K> | undefined
+				>,
+			{ method: "createIfRequestAbsent" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: props.returning,
+			selectAll: props.returnAll,
+		});
+	}
 
 	async selectSingleByRequestId<
 		K extends keyof Select<LucidAiGenerations>,
@@ -144,13 +194,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			async () => {
 				let query = this.db
 					.selectFrom("lucid_ai_generations")
-					.select([
-						"created_at",
-						"feature_key",
-						"usage",
-						"cost_currency",
-						"cost_total_minor",
-					])
+					.select(["created_at", "feature_key", "usage", "credits_charged"])
 					.where("created_at", ">=", props.startDate)
 					.where("created_at", "<", props.endDate);
 
@@ -178,16 +222,9 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 				created_at: true,
 				feature_key: true,
 				usage: true,
-				cost_currency: true,
-				cost_total_minor: true,
+				credits_charged: true,
 			}),
-			select: [
-				"created_at",
-				"feature_key",
-				"usage",
-				"cost_currency",
-				"cost_total_minor",
-			],
+			select: ["created_at", "feature_key", "usage", "credits_charged"],
 		});
 	}
 
@@ -220,8 +257,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 						"lucid_ai_generations.target",
 						"lucid_ai_generations.usage",
 						"lucid_ai_generations.model",
-						"lucid_ai_generations.cost_currency",
-						"lucid_ai_generations.cost_total_minor",
+						"lucid_ai_generations.credits_charged",
 						"lucid_ai_generations.duration_ms",
 						"lucid_ai_generations.status",
 						"lucid_ai_generations.error_message",
@@ -353,8 +389,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 				"target",
 				"usage",
 				"model",
-				"cost_currency",
-				"cost_total_minor",
+				"credits_charged",
 				"duration_ms",
 				"status",
 				"error_message",

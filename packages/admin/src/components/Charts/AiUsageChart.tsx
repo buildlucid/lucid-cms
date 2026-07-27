@@ -153,7 +153,6 @@ export const AiUsageChart: Component = () => {
 							formatAiUsageChartValue({
 								metric,
 								value: context.parsed.y ?? 0,
-								currency: usageChart.data?.data.currency,
 							}) ?? "0";
 
 						return `${getAiUsageChartMetricLabel(metric)}: ${value}`;
@@ -184,7 +183,6 @@ export const AiUsageChart: Component = () => {
 						formatAiUsageChartValue({
 							metric: "totalTokens",
 							value: Number(value),
-							currency: usageChart.data?.data.currency,
 						}) ?? "0",
 				},
 			},
@@ -202,7 +200,6 @@ export const AiUsageChart: Component = () => {
 						formatAiUsageChartValue({
 							metric: "cost",
 							value: Number(value),
-							currency: usageChart.data?.data.currency,
 						}) ?? "0",
 				},
 			},

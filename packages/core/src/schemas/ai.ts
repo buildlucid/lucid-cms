@@ -1,4 +1,8 @@
 import z from "zod";
+import {
+	cmsAiGenerateAcceptedDataSchema,
+	cmsAiGenerateCompletedDataSchema,
+} from "../libs/lucid-remote/schema/ai.js";
 import type { ControllerSchema } from "../types.js";
 import { brickInputSchema } from "./collection-bricks.js";
 import { fieldInputSchema } from "./collection-fields.js";
@@ -115,79 +119,6 @@ const localeSchema = z
 	})
 	.strict();
 
-const aiGenerateResponseSchema = z
-	.object({
-		mode: z.enum(["sync", "async"]),
-		status: z.literal("complete").optional(),
-		requestId: z.string(),
-		feature: z
-			.object({
-				key: z.string(),
-				version: z.string(),
-			})
-			.strict(),
-		output: z.unknown(),
-		usage: z
-			.object({
-				model: z.string(),
-				providerRequestId: z.string().optional(),
-				tokens: z
-					.object({
-						input: z
-							.object({
-								text: z.number().int().nonnegative(),
-								image: z.number().int().nonnegative(),
-								audio: z.number().int().nonnegative(),
-								cached: z
-									.object({
-										total: z.number().int().nonnegative(),
-										text: z.number().int().nonnegative(),
-										image: z.number().int().nonnegative(),
-										audio: z.number().int().nonnegative(),
-									})
-									.strict(),
-								total: z.number().int().nonnegative(),
-							})
-							.strict(),
-						output: z
-							.object({
-								text: z.number().int().nonnegative(),
-								image: z.number().int().nonnegative(),
-								audio: z.number().int().nonnegative(),
-								reasoning: z.number().int().nonnegative(),
-								acceptedPrediction: z.number().int().nonnegative(),
-								rejectedPrediction: z.number().int().nonnegative(),
-								total: z.number().int().nonnegative(),
-							})
-							.strict(),
-						total: z.number().int().nonnegative(),
-					})
-					.strict(),
-				cost: z
-					.object({
-						currency: z.string(),
-						totalCostMinor: z.number().int().nonnegative(),
-					})
-					.strict(),
-			})
-			.strict(),
-	})
-	.strict();
-
-const aiGenerateAcceptedResponseSchema = z
-	.object({
-		mode: z.literal("async"),
-		requestId: z.string(),
-		feature: z
-			.object({
-				key: z.string(),
-				version: z.string(),
-			})
-			.strict(),
-		status: z.enum(["queued", "processing"]),
-	})
-	.strict();
-
 const mediaImageFeatureSchema = z
 	.object({
 		key: z.literal("media.image.generate"),
@@ -195,27 +126,29 @@ const mediaImageFeatureSchema = z
 	})
 	.strict();
 
-const mediaImageGenerateResponseSchema =
-	aiGenerateAcceptedResponseSchema.extend({
+const mediaImageGenerateResponseSchema = cmsAiGenerateAcceptedDataSchema.extend(
+	{
 		feature: mediaImageFeatureSchema,
-	});
+	},
+);
 
-const mediaImageCompletionResponseSchema = aiGenerateResponseSchema.extend({
-	feature: mediaImageFeatureSchema,
-	output: z
-		.object({
-			id: z.string(),
-			url: z.string(),
-			storageKey: z.string(),
-			byteSize: z.number().int().nonnegative(),
-			mimeType: z.string(),
-			extension: z.string(),
-			size: z.string(),
-			quality: z.string(),
-			outputFormat: z.string(),
-		})
-		.strict(),
-});
+const mediaImageCompletionResponseSchema =
+	cmsAiGenerateCompletedDataSchema.extend({
+		feature: mediaImageFeatureSchema,
+		output: z
+			.object({
+				id: z.string(),
+				url: z.string(),
+				storageKey: z.string(),
+				byteSize: z.number().int().nonnegative(),
+				mimeType: z.string(),
+				extension: z.string(),
+				size: z.string(),
+				quality: z.string(),
+				outputFormat: z.string(),
+			})
+			.strict(),
+	});
 
 const aiUsageChartDateSchema = z
 	.string()
@@ -289,7 +222,6 @@ export const controllerSchemas = {
 				metrics: z.array(aiUsageChartMetricSchema),
 				startDate: aiUsageChartDateSchema,
 				endDate: aiUsageChartDateSchema,
-				currency: z.string().nullable(),
 				feature: z
 					.object({
 						key: z.string(),
@@ -412,8 +344,7 @@ export const controllerSchemas = {
 						.nullable(),
 					cost: z
 						.object({
-							currency: z.string(),
-							totalCostMinor: z.number().int().nonnegative(),
+							creditsCharged: z.string().regex(/^(0|[1-9]\d*)(\.\d+)?$/),
 						})
 						.strict()
 						.nullable(),
@@ -466,7 +397,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: aiGenerateResponseSchema.extend({
+		response: cmsAiGenerateCompletedDataSchema.extend({
 			feature: z
 				.object({
 					key: z.literal("custom-field.input.generate"),
@@ -520,7 +451,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: aiGenerateResponseSchema.extend({
+		response: cmsAiGenerateCompletedDataSchema.extend({
 			feature: z
 				.object({
 					key: z.literal("media.alt.generate"),

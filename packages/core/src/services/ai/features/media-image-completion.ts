@@ -6,14 +6,13 @@ import z from "zod";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCmsAiRequest } from "../../../libs/lucid-remote/services/index.js";
 import {
-	getCmsAiGenerateFailedMessage,
 	isCmsAiGenerateAcceptedData,
 	isCmsAiGenerateCompletedData,
-	isCmsAiGenerateFailedData,
 } from "../../../libs/lucid-remote/utils.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getLicenseKey from "../../options/get-license-key.js";
+import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import getAccessToken from "../../connection/token-manager.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import completeStoredGeneration from "../storage/complete-stored-generation.js";
 import storeFailedGeneration from "../storage/store-failed-generation.js";
@@ -63,14 +62,17 @@ const mediaImageCompletion: ServiceFn<
 	});
 	if (storedGenerationRes.error) return storedGenerationRes;
 
-	const licenseKeyRes = await getLicenseKey(context);
-	if (licenseKeyRes.error) return licenseKeyRes;
+	const accessTokenRes = await getAccessToken(context, {});
+	if (accessTokenRes.error) return accessTokenRes;
 
 	const requestRes = await getCmsAiRequest(context, {
-		licenseKey: licenseKeyRes.data,
+		accessToken: accessTokenRes.data.accessToken,
 		requestId: props.requestId,
 	});
 	if (requestRes.error) {
+		if (requestRes.error.status === 401) {
+			await handleProtectedResourceUnauthorized(context);
+		}
 		if (
 			requestRes.error.key?.startsWith("ai_provider_") ||
 			requestRes.error.key === "cms_ai_generation_request_not_found" ||
@@ -98,28 +100,6 @@ const mediaImageCompletion: ServiceFn<
 				},
 				status: requestRes.data.json.data.status,
 			},
-		};
-	}
-
-	if (isCmsAiGenerateFailedData(requestRes.data.json.data)) {
-		const errorMessage = getCmsAiGenerateFailedMessage(
-			requestRes.data.json.data,
-			context.translate("server:core.routes.ai.generate.error.message"),
-		);
-		const storeRes = await storeFailedGeneration(context, {
-			requestId: requestRes.data.json.data.requestId,
-			errorMessage,
-			usage: requestRes.data.json.data.usage,
-		});
-		if (storeRes.error) return storeRes;
-
-		return {
-			error: {
-				type: "basic",
-				status: 502,
-				message: copy.literal(errorMessage),
-			},
-			data: undefined,
 		};
 	}
 

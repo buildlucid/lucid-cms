@@ -1,4 +1,4 @@
-import type { License, Settings } from "@types";
+import type { ConnectionStatus, Settings } from "@types";
 import { createStore } from "solid-js/store";
 
 type AiSettings = NonNullable<Settings["ai"]>;
@@ -6,7 +6,7 @@ type AiSettings = NonNullable<Settings["ai"]>;
 export type AiFeature = keyof AiSettings["features"];
 
 type SiteStoreT = {
-	license: License | null;
+	connection: ConnectionStatus | null;
 	ai: AiSettings;
 	reset: () => void;
 	isAiFeatureEnabled: (_feature: AiFeature) => boolean;
@@ -23,10 +23,10 @@ const defaultAiSettings = (): AiSettings => ({
 });
 
 const [get, set] = createStore<SiteStoreT>({
-	license: null,
+	connection: null,
 	ai: defaultAiSettings(),
 	reset() {
-		set("license", null);
+		set("connection", null);
 		set("ai", defaultAiSettings());
 	},
 	isAiFeatureEnabled(feature) {
@@ -40,8 +40,8 @@ const [get, set] = createStore<SiteStoreT>({
 const siteStore = {
 	get,
 	set,
-	setLicense(license: License | null) {
-		set("license", license);
+	setConnection(connection: ConnectionStatus | null) {
+		set("connection", connection);
 	},
 	setAi(ai: Settings["ai"] | undefined) {
 		set("ai", ai ?? defaultAiSettings());

@@ -15,8 +15,7 @@ export interface AiUsagePropT {
 	target: Record<string, unknown>;
 	usage: Record<string, unknown> | null;
 	model: string | null;
-	cost_currency: string | null;
-	cost_total_minor: number | null;
+	credits_charged: string | null;
 	duration_ms: number | null;
 	status: "failed" | "pending" | "success";
 	error_message: string | null;
@@ -141,13 +140,9 @@ const formatSingle = (props: {
 		durationMs: formatDurationMs(props.aiUsage),
 		errorMessage: props.aiUsage.error_message,
 		tokens: formatTokens(props.aiUsage.usage),
-		cost:
-			props.aiUsage.cost_currency && props.aiUsage.cost_total_minor !== null
-				? {
-						currency: props.aiUsage.cost_currency,
-						totalCostMinor: props.aiUsage.cost_total_minor,
-					}
-				: null,
+		cost: props.aiUsage.credits_charged
+			? { creditsCharged: props.aiUsage.credits_charged }
+			: null,
 		target: {
 			type: props.aiUsage.target_type,
 			data: getObject(props.aiUsage.target) ?? {},

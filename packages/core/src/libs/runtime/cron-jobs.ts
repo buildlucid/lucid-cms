@@ -111,11 +111,11 @@ const cronJobsMap = () =>
 			transaction: false,
 			schedule: "scheduledPublishing",
 		},
-		"verify-license": {
-			fn: cronServices.verifyLicense,
-			label: "Verify license",
-			error: copy("server:core.license.verification.failed"),
-			transaction: true,
+		"verify-connections": {
+			fn: cronServices.verifyConnections,
+			label: "Verify Lucid connections",
+			error: copy("server:core.connection.verification.failed"),
+			transaction: false,
 			schedule: "maintenance",
 		},
 	}) as const satisfies Record<string, CronJobDefinition>;

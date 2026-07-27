@@ -11,10 +11,6 @@ import {
 	optionServices,
 	processedImageServices,
 } from "../index.js";
-import {
-	getLicenseOptionBaseName,
-	getLicenseOptionName,
-} from "../license/helpers/option-names.js";
 
 const getSettings: ServiceFn<
 	[
@@ -30,10 +26,7 @@ const getSettings: ServiceFn<
 	const [optionsRes, processedImageCountRes, imageProcessor, mediaStorageUsed] =
 		await Promise.all([
 			optionServices.getMultiple(context, {
-				names: [
-					getLicenseOptionName(tenantKey, "license_key_display"),
-					"system_alert_email",
-				],
+				names: ["system_alert_email"],
 			}),
 			processedImageServices.getCount(context),
 			getImageProcessor(context.config),
@@ -46,9 +39,6 @@ const getSettings: ServiceFn<
 	if (optionsRes.error) return optionsRes;
 	if (mediaStorageUsed.error) return mediaStorageUsed;
 
-	const licenseKeyDisplayRes = optionsRes.data.find(
-		(o) => getLicenseOptionBaseName(o.name) === "license_key_display",
-	);
 	const systemAlertEmailRes = optionsRes.data.find(
 		(o) => o.name === "system_alert_email",
 	);
@@ -69,7 +59,6 @@ const getSettings: ServiceFn<
 			settings: {
 				mediaStorageUsed: mediaStorageUsed.data.total,
 				processedImageCount: processedImageCountRes.data,
-				licenseKey: licenseKeyDisplayRes?.valueText ?? null,
 				mediaAdapterEnabled: context.media !== null,
 				mediaAdapterKey: context.media?.key ?? null,
 				emailAdapterKey: context.email.key,

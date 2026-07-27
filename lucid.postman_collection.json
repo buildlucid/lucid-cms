@@ -3310,37 +3310,10 @@
 			]
 		},
 		{
-			"name": "License",
+			"name": "Connection",
 			"item": [
 				{
-					"name": "Update License",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "X-CSRF-Token",
-								"value": "{{CSRF}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"licenseKey\": \"607F60-JEAJMZDVQM1X5GG-L2MORW0FO57MTGC-91F2XFAK43JWN96G-MEPPS0JO\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{BASE_URL}}/api/v1/license",
-							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "license"]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Verify License",
+					"name": "Connect",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -3349,49 +3322,59 @@
 								"value": "{{CSRF}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"licenseKey\": \"607F60-JEAJMZDVQM1X5GG-L2MORW0FO57MTGC-91F2XFAK43JWN96G-MEPPS0JO\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/license/verify",
+							"raw": "{{BASE_URL}}/api/v1/connection/connect",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "license", "verify"]
+							"path": ["api", "v1", "connection", "connect"]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "License Status",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
+					"name": "Status",
 					"request": {
 						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/connection/status",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "connection", "status"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify",
+					"request": {
+						"method": "POST",
 						"header": [
 							{
-								"key": "_csrf",
+								"key": "X-CSRF-Token",
 								"value": "{{CSRF}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"licenseKey\": \"607F60-JEAJMZDVQM1X5GG-L2MORW0FO57MTGC-91F2XFAK43JWN96G-MEPPS0JO\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/license/status",
+							"raw": "{{BASE_URL}}/api/v1/connection/verify",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "license", "status"]
+							"path": ["api", "v1", "connection", "verify"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disconnect",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-CSRF-Token",
+								"value": "{{CSRF}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/connection",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "v1", "connection"]
 						}
 					},
 					"response": []

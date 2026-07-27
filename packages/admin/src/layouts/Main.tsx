@@ -38,7 +38,6 @@ const MainLayout: Component<{
 		if (!authenticatedUser.isSuccess) return false;
 
 		const user = authenticatedUser.data.data;
-		if (user.superAdmin === true) return true;
 		if ((user.tenants ?? []).length === 0) return true;
 
 		return tenantStore.get.tenant !== undefined;
@@ -46,7 +45,7 @@ const MainLayout: Component<{
 	const locales = api.locales.useGetMultiple({
 		queryParams: {},
 	});
-	const license = api.license.useGetStatus({
+	const connection = api.connection.useGetStatus({
 		queryParams: {},
 		enabled: tenantScopedQueriesEnabled,
 	});
@@ -65,7 +64,7 @@ const MainLayout: Component<{
 		return (
 			authenticatedUser.isLoading ||
 			locales.isLoading ||
-			license.isLoading ||
+			connection.isLoading ||
 			settings.isLoading ||
 			(authenticatedUser.isSuccess && translationsInitialized() === false)
 		);
@@ -74,7 +73,7 @@ const MainLayout: Component<{
 		return (
 			authenticatedUser.isSuccess &&
 			locales.isSuccess &&
-			license.isSuccess &&
+			connection.isSuccess &&
 			settings.isSuccess &&
 			translationsInitialized()
 		);
@@ -99,8 +98,8 @@ const MainLayout: Component<{
 	});
 
 	createEffect(() => {
-		if (license.isSuccess) {
-			siteStore.setLicense(license.data.data);
+		if (connection.isSuccess) {
+			siteStore.setConnection(connection.data.data);
 		}
 
 		if (settings.isSuccess) {

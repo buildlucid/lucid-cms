@@ -91,14 +91,6 @@ const settingsResponseSchema = z.object({
 			}),
 		})
 		.optional(),
-	license: z
-		.object({
-			key: z.string().nullable().meta({
-				description: "The stored display version of the license key",
-				example: "************************************************1A2B",
-			}),
-		})
-		.optional(),
 	system: z
 		.object({
 			runtime: z.string().meta({
@@ -143,13 +135,11 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					include: queryString.schema.include("email,media,license,system,ai"),
+					include: queryString.schema.include("email,media,system,ai"),
 				})
 				.meta(queryString.meta),
 			formatted: z.object({
-				include: z
-					.array(z.enum(["email", "media", "license", "system", "ai"]))
-					.optional(),
+				include: z.array(z.enum(["email", "media", "system", "ai"])).optional(),
 			}),
 		},
 		params: undefined,

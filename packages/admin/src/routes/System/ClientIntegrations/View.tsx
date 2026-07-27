@@ -1,25 +1,19 @@
-import { useQueryClient } from "@tanstack/solid-query";
 import { type Component, createMemo, createSignal } from "solid-js";
-import InfoRow from "@/components/Blocks/InfoRow";
 import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
 import { ClientIntegrationsList } from "@/components/Groups/Content";
-import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
-import { QueryRow } from "@/components/Groups/Query/Row";
+import { Wrapper } from "@/components/Groups/Layout";
 import { Permissions } from "@/constants/permissions";
 import useQueryState, {
 	booleanFilter,
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState";
-import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
-import helpers from "@/utils/helpers";
 
 const SystemClientIntegrationsRoute: Component = () => {
 	// ----------------------------------------
-	// State / Hooks
-	const queryClient = useQueryClient();
+	// State & Hooks
 	const searchParams = useQueryState({
 		mode: "url",
 		schema: {
@@ -52,28 +46,13 @@ const SystemClientIntegrationsRoute: Component = () => {
 
 	// ----------------------------------------
 	// Memos
+	const canReadClientIntegrations = createMemo(
+		() => userStore.get.hasPermission([Permissions.IntegrationsRead]).all,
+	);
 	const hasCreatePermission = createMemo(() => {
-		return userStore.get.hasPermission([Permissions.IntegrationsCreate]).all;
-	});
-	const scopes = api.clientIntegrations.useGetScopes({ queryParams: {} });
-	const scopeOptions = createMemo(() => {
-		return (scopes.data?.data ?? []).flatMap((group) =>
-			group.scopes.map((scope) => {
-				const groupLabel = helpers.getLocaleValue({
-					value: group.details.name,
-				});
-				const scopeLabel = helpers.getLocaleValue({
-					value: scope.details.name,
-				});
-
-				return {
-					value: scope.key,
-					label: T()("client.scopes.option.label", {
-						group: groupLabel,
-						scope: scopeLabel,
-					}),
-				};
-			}),
+		return (
+			canReadClientIntegrations() &&
+			userStore.get.hasPermission([Permissions.IntegrationsCreate]).all
 		);
 	});
 
@@ -98,110 +77,14 @@ const SystemClientIntegrationsRoute: Component = () => {
 				),
 			}}
 		>
-			<DynamicContent options={{ padding: "24" }}>
-				<InfoRow.Root
-					title={T()("client.integrations.manage.title")}
-					description={T()("routes.system.client.integrations.description")}
-				>
-					<InfoRow.Content>
-						<div class="-mx-4 overflow-hidden">
-							<QueryRow
-								searchParams={searchParams}
-								onRefresh={() => {
-									queryClient.invalidateQueries({
-										queryKey: ["clientIntegrations.getAll"],
-									});
-								}}
-								filterSection={{
-									subject: T()("client.integrations.manage.title"),
-									fields: [
-										{
-											label: T()("common.name"),
-											key: "name",
-											type: "text",
-										},
-										{
-											label: T()("common.key"),
-											key: "key",
-											type: "text",
-										},
-										{
-											label: T()("common.description"),
-											key: "description",
-											type: "text",
-										},
-										{
-											label: T()("common.status.active"),
-											key: "enabled",
-											type: "checkbox",
-											trueLabel: T()("common.status.active"),
-											falseLabel: T()("common.status.inactive"),
-										},
-										{
-											label: T()("common.scopes"),
-											key: "scope",
-											type: "select",
-											options: scopeOptions(),
-											operators: ["="],
-										},
-										{
-											label: T()("common.last.used.at"),
-											key: "lastUsedAt",
-											type: "datetime",
-										},
-										{
-											label: T()("client.integrations.last.used.ip"),
-											key: "lastUsedIp",
-											type: "text",
-										},
-										{
-											label: T()("common.created.at"),
-											key: "createdAt",
-											type: "datetime",
-										},
-										{
-											label: T()("common.updated.at"),
-											key: "updatedAt",
-											type: "datetime",
-										},
-									],
-								}}
-								sorts={[
-									{
-										label: T()("common.name"),
-										key: "name",
-									},
-									{
-										label: T()("common.description"),
-										key: "description",
-									},
-									{
-										label: T()("common.status.active"),
-										key: "enabled",
-									},
-									{
-										label: T()("common.created.at"),
-										key: "createdAt",
-									},
-								]}
-								perPage={[]}
-								options={{
-									padding: "16",
-								}}
-							/>
-							<ClientIntegrationsList
-								state={{
-									searchParams,
-									openCreateClientIntegrationPanel:
-										openCreateClientIntegrationPanel,
-									setOpenCreateClientIntegrationPanel:
-										setOpenCreateClientIntegrationPanel,
-								}}
-							/>
-						</div>
-					</InfoRow.Content>
-				</InfoRow.Root>
-			</DynamicContent>
+			<ClientIntegrationsList
+				state={{
+					searchParams,
+					openCreateClientIntegrationPanel: openCreateClientIntegrationPanel,
+					setOpenCreateClientIntegrationPanel:
+						setOpenCreateClientIntegrationPanel,
+				}}
+			/>
 		</Wrapper>
 	);
 };

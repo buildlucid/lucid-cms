@@ -1,8 +1,7 @@
 import type { UserRef } from "../users/types.js";
 
 export type AiGenerateCost = {
-	currency: string;
-	totalCostMinor: number;
+	creditsCharged: string;
 };
 
 export type AiGenerateMode = "sync" | "async";
@@ -135,7 +134,6 @@ export type AiUsageChart = {
 	metrics: AiUsageChartMetric[];
 	startDate: string;
 	endDate: string;
-	currency: string | null;
 	feature: {
 		key: string;
 		label: string;

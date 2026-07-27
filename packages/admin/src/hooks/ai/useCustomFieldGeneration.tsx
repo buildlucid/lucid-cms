@@ -67,7 +67,7 @@ const useCustomFieldGeneration = () => {
 	});
 	const accessState = createAiFeatureAccessState({
 		hasPermission,
-		license: () => siteStore.get.license ?? undefined,
+		connection: () => siteStore.get.connection ?? undefined,
 	});
 	const isBusy = createMemo(() => {
 		return aiModalsStore.get.isLoading || aiModalsStore.get.isApplying;

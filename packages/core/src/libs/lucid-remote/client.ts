@@ -1,5 +1,4 @@
 import packageJson from "../../../package.json" with { type: "json" };
-import constants from "../../constants/constants.js";
 import type { LucidErrorData } from "../../types/errors.js";
 import type { ErrorResponse } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
@@ -8,6 +7,7 @@ import type {
 	ServiceResponse,
 } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
+import { getLucidRemoteConfig } from "./origin.js";
 import type { LucidRemoteRequestData } from "./types.js";
 
 type LucidRemoteRequestProps = {
@@ -36,20 +36,6 @@ type LucidRemoteErrorResponse = {
 
 const clients = new Map<string, LucidRemoteClient>();
 
-/**
- * Allows internal tests to point Lucid remote requests at a local service.
- * Production requests use the default remote domain.
- */
-const getLucidRemoteApiDomain = (context: ServiceContext) => {
-	const override = context.env?.LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE;
-
-	return (
-		typeof override === "string" && override.trim()
-			? override.trim()
-			: constants.endpoints.lucidRemoteApiDomain
-	).replace(/\/+$/, "");
-};
-
 const isErrorResponse = (value: unknown): value is LucidRemoteErrorResponse => {
 	if (!value || typeof value !== "object") {
 		return false;
@@ -68,27 +54,6 @@ const isErrorResponse = (value: unknown): value is LucidRemoteErrorResponse => {
 
 const getErrorCopy = (errorKey?: string) => {
 	switch (errorKey) {
-		case "ai_invalid_license":
-			return {
-				name: copy("server:core.ai.remote.license.invalid.name"),
-				message: copy("server:core.ai.remote.license.invalid.message"),
-			};
-		case "ai_license_key_required":
-			return {
-				name: copy("server:core.ai.remote.license.key.required.name"),
-				message: copy("server:core.ai.remote.license.key.required.message"),
-			};
-		case "failed_to_load_cms_license":
-		case "failed_to_load_cms_licenses":
-			return {
-				name: copy("server:core.ai.remote.license.verify.failed.name"),
-				message: copy("server:core.ai.remote.license.verify.failed.message"),
-			};
-		case "license_not_found":
-			return {
-				name: copy("server:core.ai.remote.license.not.found.name"),
-				message: copy("server:core.ai.remote.license.not.found.message"),
-			};
 		case "organisation_ai_credit_exhausted":
 			return {
 				name: copy("server:core.ai.remote.credit.exhausted.name"),
@@ -116,25 +81,10 @@ const getErrorCopy = (errorKey?: string) => {
 				name: copy("server:core.ai.remote.top.up.failed.name"),
 				message: copy("server:core.ai.remote.top.up.failed.message"),
 			};
-		case "license_ai_period_cap_reached":
+		case "organisation_ai_period_cap_reached":
 			return {
 				name: copy("server:core.ai.remote.period.cap.reached.name"),
 				message: copy("server:core.ai.remote.period.cap.reached.message"),
-			};
-		case "license_ai_disabled_for_usage":
-			return {
-				name: copy("server:core.ai.remote.license.ai.disabled.name"),
-				message: copy("server:core.ai.remote.license.ai.disabled.message"),
-			};
-		case "license_deactivated_for_usage":
-			return {
-				name: copy("server:core.ai.remote.license.deactivated.name"),
-				message: copy("server:core.ai.remote.license.deactivated.message"),
-			};
-		case "license_not_found_for_usage":
-			return {
-				name: copy("server:core.ai.remote.license.not.found.name"),
-				message: copy("server:core.ai.remote.license.not.found.message"),
 			};
 		case "cms_ai_feature_not_supported":
 			return {
@@ -272,6 +222,7 @@ const createLucidRemoteClient = (props: {
 					method: requestProps.method ?? "GET",
 					headers,
 					body,
+					redirect: "error",
 				});
 
 				if (response.status >= 500 && attempt < retries) {
@@ -350,7 +301,7 @@ const createLucidRemoteClient = (props: {
  * and conversion of remote Lucid errors into core service errors.
  */
 export const getLucidRemoteClient = (context: ServiceContext) => {
-	const apiDomain = getLucidRemoteApiDomain(context);
+	const apiDomain = getLucidRemoteConfig(context).issuer;
 	const origin = getBaseUrl(context);
 	const cacheKey = `${apiDomain}:${origin}`;
 	const cachedClient = clients.get(cacheKey);

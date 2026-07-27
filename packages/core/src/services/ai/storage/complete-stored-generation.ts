@@ -1,4 +1,4 @@
-import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
+import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { parseStoredTimestamp } from "../helpers/date-helpers.js";
@@ -42,8 +42,7 @@ const completeStoredGeneration: ServiceFn<
 			output: props.response.output as Record<string, unknown>,
 			usage: props.response.usage,
 			model: props.response.usage.model,
-			cost_currency: props.response.usage.cost.currency,
-			cost_total_minor: props.response.usage.cost.totalCostMinor,
+			credits_charged: props.response.usage.cost.creditsCharged,
 			duration_ms: durationMs,
 			status: "success",
 			error_message: null,

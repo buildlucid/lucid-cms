@@ -426,9 +426,9 @@ const createApp = async (props: {
 									"Setting endpoints to recieve current settings and meta data on Lucid.",
 							},
 							{
-								name: "license",
+								name: "connection",
 								description:
-									"License endpoints for managing the license key and verifying its validity.",
+									"OAuth endpoints for connecting Lucid CMS to Lucid Website.",
 							},
 							{
 								name: "ai",

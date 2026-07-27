@@ -1,5 +1,5 @@
 import type { AiGenerateUsage } from "@lucidcms/types";
-import type { CmsAiGenerateRequestFeature } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
+import type { CmsAiGenerateRequestFeature } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { parseStoredTimestamp } from "../helpers/date-helpers.js";
@@ -9,12 +9,14 @@ const storeFailedGeneration: ServiceFn<
 	[
 		{
 			requestId: string;
+			lucidRemoteConnectionId?: number;
 			feature?: CmsAiGenerateRequestFeature;
 			userId?: number;
 			targetType?: string;
 			target?: Record<string, unknown>;
 			requestStartedAt?: number;
 			errorMessage?: string | null;
+			/** Authoritative usage from a completed remote response, if one exists. */
 			usage?: AiGenerateUsage | null;
 		},
 	],
@@ -52,8 +54,7 @@ const storeFailedGeneration: ServiceFn<
 							provider_request_id: props.usage.providerRequestId ?? null,
 							usage: props.usage,
 							model: props.usage.model,
-							cost_currency: props.usage.cost.currency,
-							cost_total_minor: props.usage.cost.totalCostMinor,
+							credits_charged: props.usage.cost.creditsCharged,
 						}
 					: {}),
 				duration_ms: durationMs,
@@ -92,13 +93,13 @@ const storeFailedGeneration: ServiceFn<
 			feature_version: props.feature.version,
 			tenant_key: context.request.tenantKey ?? null,
 			user_id: props.userId ?? null,
+			lucid_remote_connection_id: props.lucidRemoteConnectionId ?? null,
 			target_type: props.targetType,
 			target: props.target,
 			output: null,
 			usage: null,
 			model: null,
-			cost_currency: null,
-			cost_total_minor: null,
+			credits_charged: null,
 			duration_ms:
 				props.requestStartedAt === undefined
 					? null
@@ -110,8 +111,7 @@ const storeFailedGeneration: ServiceFn<
 						provider_request_id: props.usage.providerRequestId ?? null,
 						usage: props.usage,
 						model: props.usage.model,
-						cost_currency: props.usage.cost.currency,
-						cost_total_minor: props.usage.cost.totalCostMinor,
+						credits_charged: props.usage.cost.creditsCharged,
 					}
 				: {}),
 		},

@@ -58,6 +58,33 @@ describe("email storage data", () => {
 		).toEqual(data);
 	});
 
+	test("rejects authenticated ciphertext tampering", async () => {
+		const stored = unwrap(
+			createStoredEmailData({
+				data: { secret: "protected" },
+				storage: { secret: { encrypt: true } },
+				encryptionKey,
+			}),
+		) as {
+			secret: {
+				value: string;
+			};
+		};
+		const parts = stored.secret.value.split(".");
+		const encryptedPart = parts[2] as string;
+		parts[2] = `${encryptedPart.startsWith("A") ? "B" : "A"}${encryptedPart.slice(1)}`;
+		stored.secret.value = parts.join(".");
+
+		const resolved = resolveEmailData({
+			data: stored,
+			storage: { secret: { encrypt: true } },
+			encryptionKey,
+			mode: "send",
+		});
+		expect(resolved.error?.status).toBe(400);
+		expect(resolved.data).toBeUndefined();
+	});
+
 	test("supports dot paths, indexes, wildcards, missing paths, and preview redaction", async () => {
 		const data = {
 			payload: {

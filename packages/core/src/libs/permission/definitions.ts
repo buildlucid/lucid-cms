@@ -46,7 +46,7 @@ export const Permissions = {
 	// Settings permissions
 	SettingsRead: "settings:read",
 	SettingsUpdate: "settings:update",
-	LicenseUpdate: "license:update",
+	ConnectionUpdate: "connection:update",
 	CacheClear: "cache:clear",
 } as const;
 
@@ -388,10 +388,10 @@ export const PermissionGroups = Object.freeze({
 				core: true,
 			},
 			{
-				key: Permissions.LicenseUpdate,
+				key: Permissions.ConnectionUpdate,
 				details: {
-					name: copy("admin:core.permissions.update.license", {
-						defaultMessage: "Update License",
+					name: copy("admin:core.permissions.update.connection", {
+						defaultMessage: "Update Connection",
 					}),
 				},
 				core: true,

@@ -15,6 +15,23 @@ const buildInitialPoints = (start: Date, end: Date) => {
 	return points;
 };
 
+const creditPattern = /^(0|[1-9]\d*)(\.\d+)?$/;
+
+const addCreditDecimals = (left: string, right: string) => {
+	if (!creditPattern.test(left) || !creditPattern.test(right)) return left;
+	const [leftWhole = "0", leftFraction = ""] = left.split(".");
+	const [rightWhole = "0", rightFraction = ""] = right.split(".");
+	const scale = Math.max(leftFraction.length, rightFraction.length);
+	const leftValue = BigInt(`${leftWhole}${leftFraction.padEnd(scale, "0")}`);
+	const rightValue = BigInt(`${rightWhole}${rightFraction.padEnd(scale, "0")}`);
+	const total = (leftValue + rightValue).toString().padStart(scale + 1, "0");
+	if (scale === 0) return total;
+	return `${total.slice(0, -scale)}.${total.slice(-scale)}`.replace(
+		/\.?0+$/,
+		"",
+	);
+};
+
 const getMetricValue = (
 	row: AiUsageChartRowPropT,
 	metric: AiUsageChartMetric,
@@ -23,7 +40,7 @@ const getMetricValue = (
 		case "requests":
 			return 1;
 		case "cost":
-			return row.cost_total_minor ?? 0;
+			return 0;
 		default: {
 			const usage = getObject(row.usage);
 			const tokens = getObject(usage?.tokens);
@@ -48,9 +65,14 @@ const buildUsageChartSeries = (props: {
 			buildInitialPoints(props.start, props.end),
 		]),
 	);
+	const costPoints = props.metrics.includes("cost")
+		? new Map(
+				Array.from(buildInitialPoints(props.start, props.end).keys()).map(
+					(date) => [date, "0"],
+				),
+			)
+		: undefined;
 	const firstPointMap = pointMaps.get(props.metrics[0] ?? "totalTokens");
-	let currency: string | null = null;
-
 	for (const row of props.rows) {
 		const createdAt = parseStoredTimestamp(row.created_at);
 		if (Number.isNaN(createdAt.getTime())) continue;
@@ -58,11 +80,19 @@ const buildUsageChartSeries = (props: {
 		const dateKey = getDateKey(createdAt);
 		if (!firstPointMap?.has(dateKey)) continue;
 
-		if (!currency && row.cost_currency) {
-			currency = row.cost_currency;
-		}
-
 		for (const metric of props.metrics) {
+			if (metric === "cost") {
+				if (row.credits_charged !== null && costPoints?.has(dateKey)) {
+					costPoints.set(
+						dateKey,
+						addCreditDecimals(
+							costPoints.get(dateKey) ?? "0",
+							row.credits_charged,
+						),
+					);
+				}
+				continue;
+			}
 			const pointMap = pointMaps.get(metric);
 			if (!pointMap) continue;
 
@@ -74,18 +104,25 @@ const buildUsageChartSeries = (props: {
 	}
 
 	return {
-		currency,
-		series: props.metrics.map((metric) => ({
-			metric,
-			points: Array.from(
-				(
-					pointMaps.get(metric) ?? buildInitialPoints(props.start, props.end)
-				).entries(),
-			).map(([date, value]) => ({
-				date,
-				value,
-			})),
-		})),
+		series: props.metrics.map((metric) => {
+			const entries: [string, string | number][] =
+				metric === "cost"
+					? [...(costPoints ?? new Map<string, string>()).entries()]
+					: [
+							...(
+								pointMaps.get(metric) ??
+								buildInitialPoints(props.start, props.end)
+							).entries(),
+						];
+
+			return {
+				metric,
+				points: entries.map(([date, value]) => ({
+					date,
+					value: typeof value === "string" ? Number(value) : value,
+				})),
+			};
+		}),
 	};
 };
 

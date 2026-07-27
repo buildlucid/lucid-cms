@@ -2,7 +2,6 @@ import {
 	FaSolidDatabase,
 	FaSolidFolderPlus,
 	FaSolidImages,
-	FaSolidKey,
 	FaSolidPlus,
 	FaSolidTriangleExclamation,
 	FaSolidUpload,
@@ -27,7 +26,6 @@ import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaP
 import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
-import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -51,9 +49,6 @@ export const Dashboard: Component = () => {
 	);
 	const canCreateUsers = createMemo(
 		() => userStore.get.hasPermission([Permissions.UsersCreate]).all,
-	);
-	const canManageLicense = createMemo(
-		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
 	);
 	const canReadPublishOperations = createMemo(
 		() => userStore.get.hasPermission([Permissions.PublishOperationsRead]).all,
@@ -97,9 +92,6 @@ export const Dashboard: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const mediaInfo = createMemo(() => settings.data?.data?.media);
-	const showLicenseAttention = createMemo(
-		() => siteStore.get.license?.valid === false,
-	);
 	const readableCollections = createMemo(() =>
 		collectionsData().filter((collection) => {
 			if (collection.mode === "single") {
@@ -223,20 +215,6 @@ export const Dashboard: Component = () => {
 	const attentionItems = createMemo<DashboardAttentionItem[]>(() => {
 		const items: DashboardAttentionItem[] = [];
 		const overview = releaseOverview.data?.data;
-
-		if (showLicenseAttention() && canManageLicense()) {
-			items.push({
-				key: "license",
-				title: T()("license.dashboard.banner.title"),
-				description: T()("license.dashboard.banner.description"),
-				icon: <FaSolidKey size={14} />,
-				tone: "warning",
-				action: {
-					label: T()("license.dashboard.banner.action"),
-					href: "/lucid/system/license",
-				},
-			});
-		}
 
 		if (canReadSystemOverview() && mediaInfo()?.enabled === false) {
 			items.push({

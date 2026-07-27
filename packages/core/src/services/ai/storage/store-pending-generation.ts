@@ -4,6 +4,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 const storePendingGeneration: ServiceFn<
 	[
 		{
+			lucidRemoteConnectionId: number;
 			userId: number;
 			requestId: string;
 			feature: {
@@ -43,13 +44,13 @@ const storePendingGeneration: ServiceFn<
 			feature_version: props.feature.version,
 			tenant_key: context.request.tenantKey ?? null,
 			user_id: props.userId,
+			lucid_remote_connection_id: props.lucidRemoteConnectionId,
 			target_type: props.targetType,
 			target: props.target,
 			output: null,
 			usage: null,
 			model: null,
-			cost_currency: null,
-			cost_total_minor: null,
+			credits_charged: null,
 			duration_ms: null,
 			status: "pending",
 			error_message: null,

@@ -83,16 +83,9 @@ export const getDefaultAiUsageChartDates = () => {
 export const formatAiUsageChartValue = (props: {
 	metric: AiUsageChartMetric;
 	value: number;
-	currency?: string | null;
 }) => {
 	if (props.metric === "cost") {
-		if (props.currency) {
-			return formatAiCost({
-				currency: props.currency,
-				totalCostMinor: props.value,
-			});
-		}
-		return `${(props.value / 100).toFixed(2)}`;
+		return formatAiCost({ creditsCharged: props.value.toString() });
 	}
 
 	return formatAiUsageNumber(props.value);

@@ -86,6 +86,46 @@ export default class OptionsRepository extends StaticRepository<"lucid_options">
 		});
 	}
 
+	/**
+	 * Inserts an immutable text option if absent and returns the stored value.
+	 * A concurrent creator wins without allowing this caller to replace it.
+	 */
+	async ensureTextValue(props: {
+		name: Select<LucidOptions>["name"];
+		value: string;
+	}) {
+		const exec = await this.executeQuery(
+			async () => {
+				const inserted = await this.db
+					.insertInto("lucid_options")
+					.values({
+						name: props.name,
+						value_int: null,
+						value_text: props.value,
+						value_bool: null,
+					})
+					.onConflict((conflict) => conflict.column("name").doNothing())
+					.returning(["value_text"])
+					.executeTakeFirst();
+				if (inserted) return inserted;
+
+				return this.db
+					.selectFrom("lucid_options")
+					.select(["value_text"])
+					.where("name", "=", props.name)
+					.executeTakeFirst();
+			},
+			{ method: "ensureTextValue" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: true,
+			mode: "single",
+			select: ["value_text"],
+		});
+	}
+
 	// ----------------------------------------
 	// queries
 	async selectMediaStorageUsageOptions() {

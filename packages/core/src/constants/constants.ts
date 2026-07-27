@@ -17,6 +17,7 @@ export default Object.freeze({
 		csrf: "_csrf",
 		refreshToken: "_refresh",
 		accessToken: "_access",
+		connectionFlowPrefix: "_lucid_connection_flow_",
 	},
 	jwt: {
 		algorithm: "HS256" as const,
@@ -215,8 +216,12 @@ export default Object.freeze({
 		] as const,
 		previewableTypes: ["image", "video", "audio"] as const,
 	},
-	license: {
-		statusRecheckIntervalSeconds: 3600, // 1 hour
+	connection: {
+		scope: "cms:ai" as const,
+		pendingExpirationSeconds: 300,
+		accessTokenCacheThresholdSeconds: 60,
+		statusRecheckIntervalSeconds: 3600,
+		remoteRequestTimeoutMs: 10_000,
 	},
 	endpoints: {
 		lucidRemoteApiDomain: "https://api.lucidcms.io",

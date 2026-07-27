@@ -53,8 +53,8 @@ export const NavigationChrome: Component = () => {
 	const canReadPublishOperations = createMemo(
 		() => userStore.get.hasPermission([Permissions.PublishOperationsRead]).all,
 	);
-	const canManageLicense = createMemo(
-		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
+	const canManageConnection = createMemo(
+		() => userStore.get.hasPermission([Permissions.ConnectionUpdate]).all,
 	);
 	const canReadClientIntegrations = createMemo(
 		() => userStore.get.hasPermission([Permissions.IntegrationsRead]).all,
@@ -76,9 +76,6 @@ export const NavigationChrome: Component = () => {
 	});
 	// ----------------------------------
 	// Memos
-	const showLicenseAlert = createMemo(() => {
-		return siteStore.get.license?.valid === false;
-	});
 	const collectionsIsLoading = createMemo(() => {
 		return collections.isLoading;
 	});
@@ -233,7 +230,6 @@ export const NavigationChrome: Component = () => {
 					</div>
 					<NavigationMenuContent
 						class="w-55 flex-1"
-						showLicenseAlert={showLicenseAlert()}
 						logoutPending={logout.action.isPending}
 						onLogout={() => logout.action.mutate({})}
 						user={user() || undefined}
@@ -245,7 +241,7 @@ export const NavigationChrome: Component = () => {
 						canReadRoles={canReadRoles()}
 						canReadJobs={canReadJobs()}
 						canReadAiUsage={canReadAiUsage()}
-						canManageLicense={canManageLicense()}
+						canManageConnection={canManageConnection()}
 						canReadClientIntegrations={canReadClientIntegrations()}
 						canReadSystemOverview={canReadSystemOverview()}
 						showAccessAndPermissions={showAccessAndPermissions()}
@@ -325,7 +321,6 @@ export const NavigationChrome: Component = () => {
 								class="flex-1"
 								showFooterActions={false}
 								onNavigate={() => setMobileMenuOpen(false)}
-								showLicenseAlert={showLicenseAlert()}
 								canReadDocuments={showCollections()}
 								canReadPublishRequests={showPublishRequests()}
 								canReadMedia={canReadMedia()}
@@ -334,7 +329,7 @@ export const NavigationChrome: Component = () => {
 								canReadRoles={canReadRoles()}
 								canReadJobs={canReadJobs()}
 								canReadAiUsage={canReadAiUsage()}
-								canManageLicense={canManageLicense()}
+								canManageConnection={canManageConnection()}
 								canReadClientIntegrations={canReadClientIntegrations()}
 								canReadSystemOverview={canReadSystemOverview()}
 								showAccessAndPermissions={showAccessAndPermissions()}

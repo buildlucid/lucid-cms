@@ -3,10 +3,10 @@ import ai from "./ai";
 import auth from "./auth";
 import clientIntegrations from "./client-integrations";
 import collections from "./collections";
+import connection from "./connection";
 import documents from "./documents";
 import email from "./email";
 import jobs from "./jobs";
-import license from "./license";
 import locales from "./locales";
 import media from "./media";
 import mediaFolders from "./media-folders";
@@ -40,7 +40,7 @@ const exportObject = {
 	collections,
 	documents,
 	clientIntegrations,
-	license,
+	connection,
 	tenants,
 };
 

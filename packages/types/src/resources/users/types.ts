@@ -31,7 +31,7 @@ export type CorePermission =
 	| "integrations:regenerate"
 	| "settings:read"
 	| "settings:update"
-	| "license:update"
+	| "connection:update"
 	| "cache:clear";
 
 export type Permission = CorePermission;

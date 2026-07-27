@@ -17,8 +17,9 @@ import Migration00000007 from "./migrations/00000007-collections.js";
 import Migration00000008 from "./migrations/00000008-integrations.js";
 import Migration00000009 from "./migrations/00000009-share-links.js";
 import Migration00000010 from "./migrations/00000010-alerts.js";
-import Migration00000011 from "./migrations/00000011-ai-generations.js";
-import Migration00000012 from "./migrations/00000012-preview-sessions.js";
+import Migration00000011 from "./migrations/00000011-lucid-remote-connections.js";
+import Migration00000012 from "./migrations/00000012-ai-generations.js";
+import Migration00000013 from "./migrations/00000013-preview-sessions.js";
 import type {
 	DatabaseConfig,
 	DatabaseConnection,
@@ -52,8 +53,9 @@ export default abstract class DatabaseAdapter {
 		"00000008-integrations",
 		"00000009-share-link",
 		"00000010-alerts",
-		"00000011-ai-generations",
-		"00000012-preview-sessions",
+		"00000011-lucid-remote-connections",
+		"00000012-ai-generations",
+		"00000013-preview-sessions",
 	];
 	/**
 	 * Creates an initialized live connection for the supplied runtime environment.
@@ -277,8 +279,9 @@ export default abstract class DatabaseAdapter {
 			"00000008-integrations": Migration00000008(this),
 			"00000009-share-link": Migration00000009(this),
 			"00000010-alerts": Migration00000010(this),
-			"00000011-ai-generations": Migration00000011(this),
-			"00000012-preview-sessions": Migration00000012(this),
+			"00000011-lucid-remote-connections": Migration00000011(this),
+			"00000012-ai-generations": Migration00000012(this),
+			"00000013-preview-sessions": Migration00000013(this),
 		};
 
 		for (const [name, migrationFn] of Object.entries(this.externalMigrations)) {

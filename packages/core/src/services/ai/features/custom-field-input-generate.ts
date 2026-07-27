@@ -2,20 +2,19 @@ import type { CustomFieldInputGenerateResponse } from "@lucidcms/types";
 import constants from "../../../constants/constants.js";
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
-import type { CustomFieldInputV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai.js";
+import type { CustomFieldInputV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
 import {
-	getCmsAiGenerateFailedMessage,
 	isCmsAiGenerateAcceptedData,
 	isCmsAiGenerateCompletedData,
-	isCmsAiGenerateFailedData,
 } from "../../../libs/lucid-remote/utils.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type { CustomFieldAiContextItem } from "../../../types.js";
 import { tenantAccessAllowed } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getLicenseKey from "../../options/get-license-key.js";
+import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
+import getAccessToken from "../../connection/token-manager.js";
 import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import formatCustomFieldDocumentContext, {
 	formatCustomFieldCollectionDefinition,
@@ -58,8 +57,8 @@ const customFieldInputGenerate: ServiceFn<
 	if (featureEnabledRes.error) return featureEnabledRes;
 
 	const requestStartedAt = Date.now();
-	const licenseKeyRes = await getLicenseKey(context);
-	if (licenseKeyRes.error) return licenseKeyRes;
+	const accessTokenRes = await getAccessToken(context, {});
+	if (accessTokenRes.error) return accessTokenRes;
 
 	const collection = context.config.collections.find(
 		(item) => item.key === props.target.collectionKey,
@@ -251,23 +250,21 @@ const customFieldInputGenerate: ServiceFn<
 	};
 
 	const generateRes = await generateCmsAi(context, {
-		licenseKey: licenseKeyRes.data,
+		accessToken: accessTokenRes.data.accessToken,
 		request,
 	});
-	if (generateRes.error) return generateRes;
+	if (generateRes.error) {
+		if (generateRes.error.status === 401) {
+			await handleProtectedResourceUnauthorized(context);
+		}
+		return generateRes;
+	}
 	const responseData = generateRes.data.json.data;
 
 	//* This feature is sync-mode only; this guard is proofing against a remote contract mismatch and should never run.
-	const responseDataFailed = isCmsAiGenerateFailedData(responseData);
-	if (isCmsAiGenerateAcceptedData(responseData) || responseDataFailed) {
-		const errorMessage = responseDataFailed
-			? getCmsAiGenerateFailedMessage(
-					responseData,
-					context.translate("server:core.routes.ai.generate.error.message"),
-				)
-			: context.translate("server:core.routes.ai.generate.error.message");
-
+	if (isCmsAiGenerateAcceptedData(responseData)) {
 		const storeRes = await storeFailedGeneration(context, {
+			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 			userId: props.userId,
 			requestId: responseData.requestId,
 			feature: responseData.feature,
@@ -280,8 +277,9 @@ const customFieldInputGenerate: ServiceFn<
 				locale: props.locale,
 			},
 			requestStartedAt,
-			errorMessage,
-			usage: responseDataFailed ? responseData.usage : undefined,
+			errorMessage: context.translate(
+				"server:core.routes.ai.generate.error.message",
+			),
 		});
 		if (storeRes.error) return storeRes;
 
@@ -289,9 +287,7 @@ const customFieldInputGenerate: ServiceFn<
 			error: {
 				type: "basic",
 				status: 502,
-				message: responseDataFailed
-					? copy.literal(errorMessage)
-					: copy("server:core.routes.ai.generate.error.message"),
+				message: copy("server:core.routes.ai.generate.error.message"),
 			},
 			data: undefined,
 		};
@@ -328,6 +324,7 @@ const customFieldInputGenerate: ServiceFn<
 			: context.translate(formattedOutputRes.error.message);
 
 	const storeRes = await storeGeneration(context, {
+		lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 		userId: props.userId,
 		response: responseForStorage,
 		targetType: "custom-field",

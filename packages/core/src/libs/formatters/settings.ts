@@ -1,14 +1,12 @@
 import type { Config } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
-import { createLicenseKeyDisplay } from "../../utils/helpers/license-key-display.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
 
 interface SettingsPropsT {
 	mediaStorageUsed: number;
 	processedImageCount: number;
-	licenseKey: string | null;
 	mediaAdapterEnabled: boolean;
 	mediaAdapterKey: string | null;
 	emailAdapterKey: string;
@@ -72,12 +70,6 @@ const formatSingle = (props: {
 				imageLimit: props.config.media.limits.processedImagesPerFile,
 				total: props.settings.processedImageCount,
 			},
-		};
-	}
-
-	if (includeSet.has("license")) {
-		response.license = {
-			key: createLicenseKeyDisplay(props.settings.licenseKey),
 		};
 	}
 

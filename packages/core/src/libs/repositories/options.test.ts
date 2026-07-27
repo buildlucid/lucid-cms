@@ -25,4 +25,20 @@ describe("Tests for the options repository", async () => {
 			);
 		}
 	});
+
+	test("keeps the first immutable text option value", async () => {
+		const first = await Options.ensureTextValue({
+			name: "instance_id",
+			value: "c0a80121-9f7b-4f2e-8c3d-37af87ae36ea",
+		});
+		expect(first.error).toBeUndefined();
+		expect(first.data?.value_text).toBe("c0a80121-9f7b-4f2e-8c3d-37af87ae36ea");
+
+		const second = await Options.ensureTextValue({
+			name: "instance_id",
+			value: "1aa954b7-eb61-42cf-b7ca-835921186674",
+		});
+		expect(second.error).toBeUndefined();
+		expect(second.data?.value_text).toBe(first.data?.value_text);
+	});
 });

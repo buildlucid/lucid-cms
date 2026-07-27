@@ -8,7 +8,6 @@ import {
 	FaSolidEnvelope,
 	FaSolidGear,
 	FaSolidHouse,
-	FaSolidKey,
 	FaSolidMoneyCheck,
 	FaSolidPhotoFilm,
 	FaSolidRightFromBracket,
@@ -34,7 +33,6 @@ interface IconLinkFullProps {
 		| "logout"
 		| "queue"
 		| "client-integrations"
-		| "license"
 		| "settings"
 		| "release-requests";
 	active?: boolean;
@@ -83,9 +81,6 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 				</Match>
 				<Match when={props.icon === "client-integrations"}>
 					<FaSolidDesktop class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "license"}>
-					<FaSolidKey class={iconClasses} />
 				</Match>
 				<Match when={props.icon === "settings"}>
 					<FaSolidGear class={iconClasses} />

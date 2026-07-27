@@ -58,7 +58,6 @@ const getUsageChart: ServiceFn<
 			metrics: query.metrics,
 			startDate: getDateKey(query.start),
 			endDate: getDateKey(query.end),
-			currency: chart.currency,
 			feature: query.featureKey
 				? {
 						key: query.featureKey,

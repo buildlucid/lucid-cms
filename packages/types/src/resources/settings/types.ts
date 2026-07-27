@@ -1,4 +1,4 @@
-export type SettingsInclude = "email" | "media" | "license" | "system" | "ai";
+export type SettingsInclude = "email" | "media" | "system" | "ai";
 
 export interface Settings {
 	ai?: {
@@ -30,9 +30,6 @@ export interface Settings {
 			total: number | null;
 		};
 	};
-	license?: {
-		key: string | null;
-	};
 	system?: {
 		runtime: string;
 		database: string;
@@ -45,15 +42,6 @@ export interface Settings {
 	};
 }
 
-export type LicenseOptionName =
-	| "license_key"
-	| "license_key_display"
-	| "license_valid"
-	| "license_last_checked"
-	| "license_error_message"
-	| "license_ai_enabled";
-
-export type TenantScopedLicenseOptionName = `${LicenseOptionName}:t:${string}`;
 export type MediaStorageOptionName = "media_storage_used";
 export type TenantScopedMediaStorageOptionName =
 	`${MediaStorageOptionName}:t:${string}`;
@@ -61,9 +49,7 @@ export type TenantScopedMediaStorageOptionName =
 export type OptionsName =
 	| MediaStorageOptionName
 	| TenantScopedMediaStorageOptionName
-	| "system_alert_email"
-	| LicenseOptionName
-	| TenantScopedLicenseOptionName;
+	| "system_alert_email";
 
 export interface Option {
 	name: OptionsName;
@@ -72,12 +58,25 @@ export interface Option {
 	valueBool: boolean | null;
 }
 
-export interface License {
-	key: string | null;
-	valid: boolean;
-	lastChecked: number | null;
-	errorMessage: string | null;
-	ai: {
-		enabled: boolean;
-	};
+export type ConnectionState = "connected" | "disconnected" | "revoked";
+
+export interface ConnectionStatus {
+	status: ConnectionState;
+	connection: {
+		id: string;
+		name: string | null;
+		status: "active";
+		clientName: string;
+		clientOrigin: string | null;
+	} | null;
+	organisation: {
+		id: string;
+		name: string;
+	} | null;
+	scope: "cms:ai";
+	resource: string;
+	lastAttempt: number | null;
+	lastVerified: number | null;
+	errorKey: string | null;
+	warning: boolean;
 }

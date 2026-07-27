@@ -23,8 +23,8 @@ const SystemSettingsHeader: Component<{
 	const canReadJobs = createMemo(
 		() => userStore.get.hasPermission([Permissions.JobsRead]).all,
 	);
-	const canManageLicense = createMemo(
-		() => userStore.get.hasPermission([Permissions.LicenseUpdate]).all,
+	const canManageConnection = createMemo(
+		() => userStore.get.hasPermission([Permissions.ConnectionUpdate]).all,
 	);
 	const canReadAiUsage = createMemo(
 		() => canReadSettings() && siteStore.get.hasAnyAiFeatureEnabled(),
@@ -56,17 +56,13 @@ const SystemSettingsHeader: Component<{
 							{
 								label: T()("routes.system.client.integrations.title"),
 								href: "/lucid/system/integrations",
-								permission: canReadClientIntegrations(),
+								permission:
+									canReadClientIntegrations() || canManageConnection(),
 							},
 							{
 								label: T()("common.ai.usage"),
 								href: "/lucid/system/ai-usage",
 								permission: canReadAiUsage(),
-							},
-							{
-								label: T()("common.license"),
-								href: "/lucid/system/license",
-								permission: canManageLicense(),
 							},
 							{
 								label: T()("common.queue"),

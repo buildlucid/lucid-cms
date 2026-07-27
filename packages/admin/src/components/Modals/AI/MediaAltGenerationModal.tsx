@@ -31,7 +31,7 @@ import siteStore from "@/store/siteStore";
 import T from "@/translations";
 import { prepareAiImage } from "@/utils/ai-image";
 import { LucidError } from "@/utils/error-handling";
-import formatAiCost from "@/utils/format-ai-cost";
+import formatAiCost, { sumAiCredits } from "@/utils/format-ai-cost";
 import spawnToast from "@/utils/spawn-toast";
 import {
 	getDefaultTranslationLocale,
@@ -121,12 +121,9 @@ const MediaAltGenerationModalContent: Component<{
 		const firstGeneration = props.generations[0];
 		if (!firstGeneration) return undefined;
 
-		const currency = firstGeneration.cost.currency;
-		const totalCostMinor = props.generations
-			.filter((generation) => generation.cost.currency === currency)
-			.reduce((total, generation) => total + generation.cost.totalCostMinor, 0);
-
-		return formatAiCost({ currency, totalCostMinor });
+		return formatAiCost(
+			sumAiCredits(props.generations.map((generation) => generation.cost)),
+		);
 	});
 	const isEdited = (
 		generation: MediaAltGenerationCandidate,

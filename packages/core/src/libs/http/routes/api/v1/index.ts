@@ -6,11 +6,11 @@ import authRoutes from "./auth.routes.js";
 import clientRoutes from "./client/index.js";
 import clientIntegrationsRoutes from "./client-integrations.routes.js";
 import collectionRoutes from "./collections.routes.js";
+import connectionRoutes from "./connection.routes.js";
 import documentRoutes from "./document.routes.js";
 import emailRoutes from "./email.routes.js";
 import i18nRoutes from "./i18n.routes.js";
 import jobsRoutes from "./jobs.routes.js";
-import licenseRoutes from "./license.routes.js";
 import localeRoutes from "./locales.routes.js";
 import mediaRoutes from "./media.routes.js";
 import permissionRoutes from "./permissions.routes.js";
@@ -27,6 +27,7 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/account", accountRoutes)
 	.route("/client-integrations", clientIntegrationsRoutes)
 	.route("/collections", collectionRoutes)
+	.route("/connection", connectionRoutes)
 	.route("/documents", documentRoutes)
 	.route("/emails", emailRoutes)
 	.route("/i18n", i18nRoutes)
@@ -36,7 +37,6 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/publish-operations", publishOperationRoutes)
 	.route("/settings", settingsRoutes)
 	.route("/tenants", tenantRoutes)
-	.route("/license", licenseRoutes)
 	.route("/roles", roleRoutes)
 	.route("/users", userRoutes)
 	.route("/media", mediaRoutes)
