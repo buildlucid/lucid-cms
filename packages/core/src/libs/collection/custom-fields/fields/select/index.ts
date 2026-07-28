@@ -8,5 +8,5 @@ export default {
 	fetchRefs: null,
 	validateInput: null,
 	formatRef: null,
-	clientTypeGen: createValueFieldTypeGenerator("string | null"),
+	contentTypeGen: createValueFieldTypeGenerator("string | null"),
 };

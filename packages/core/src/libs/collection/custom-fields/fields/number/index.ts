@@ -10,5 +10,5 @@ export default {
 	validateInput: null,
 	formatRef: null,
 	formatFilterValue: formatIntegerFilterValue,
-	clientTypeGen: createValueFieldTypeGenerator("number | null"),
+	contentTypeGen: createValueFieldTypeGenerator("number | null"),
 };

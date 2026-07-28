@@ -42,12 +42,12 @@ export type StorageModeDefinition<M extends FieldDatabaseMode> = {
 	baseTablePriority: number;
 };
 
-export type ClientFieldMapTypeGenerationResult = {
+export type ContentFieldMapTypeGenerationResult = {
 	typeText: string;
 	declarations: string[];
 };
 
-export type StorageModeClientTypeGenerationHelpers = {
+export type StorageModeContentTypeGenerationHelpers = {
 	renderBaseFieldType: (props: {
 		field: StorageFieldConfig;
 		mode: "groups" | "translations" | "value";
@@ -64,10 +64,10 @@ export type StorageModeClientTypeGenerationHelpers = {
 			collectionUsesTranslations: boolean;
 			withinGroup: boolean;
 		},
-	) => ClientFieldMapTypeGenerationResult;
+	) => ContentFieldMapTypeGenerationResult;
 };
 
-export type StorageModeClientTypeGenerationProps = {
+export type StorageModeContentTypeGenerationProps = {
 	builder:
 		| import("../../builders/index.js").BrickBuilder
 		| import("../../builders/index.js").CollectionBuilder;
@@ -78,25 +78,25 @@ export type StorageModeClientTypeGenerationProps = {
 	fieldType?: string;
 	declarations?: string[];
 	hasGroupRef: boolean;
-	helpers: StorageModeClientTypeGenerationHelpers;
+	helpers: StorageModeContentTypeGenerationHelpers;
 };
 
-export type StorageModeClientTypeGenerationResult = {
+export type StorageModeContentTypeGenerationResult = {
 	omitted?: boolean;
 	fieldType?: string;
 	declarations: string[];
 };
 
 export type ColumnModeDefinition = StorageModeDefinition<"column"> & {
-	clientTypeGen: (
-		props: StorageModeClientTypeGenerationProps,
-	) => StorageModeClientTypeGenerationResult;
+	contentTypeGen: (
+		props: StorageModeContentTypeGenerationProps,
+	) => StorageModeContentTypeGenerationResult;
 };
 
 export type IgnoreModeDefinition = StorageModeDefinition<"ignore"> & {
-	clientTypeGen: (
-		props: StorageModeClientTypeGenerationProps,
-	) => StorageModeClientTypeGenerationResult;
+	contentTypeGen: (
+		props: StorageModeContentTypeGenerationProps,
+	) => StorageModeContentTypeGenerationResult;
 };
 
 export type TreeTableModeDefinition = StorageModeDefinition<"tree-table"> & {
@@ -109,9 +109,9 @@ export type TreeTableModeDefinition = StorageModeDefinition<"tree-table"> & {
 	isDatabaseConfig: (
 		config: FieldDatabaseConfig,
 	) => config is TreeTableFieldDatabaseConfig;
-	clientTypeGen: (
-		props: StorageModeClientTypeGenerationProps,
-	) => StorageModeClientTypeGenerationResult;
+	contentTypeGen: (
+		props: StorageModeContentTypeGenerationProps,
+	) => StorageModeContentTypeGenerationResult;
 };
 
 export type RelationTableModeDefinition =
@@ -121,7 +121,7 @@ export type RelationTableModeDefinition =
 			fieldKey: string;
 			fieldPath?: string[];
 		}) => string[];
-		clientTypeGen: (
-			props: StorageModeClientTypeGenerationProps,
-		) => StorageModeClientTypeGenerationResult;
+		contentTypeGen: (
+			props: StorageModeContentTypeGenerationProps,
+		) => StorageModeContentTypeGenerationResult;
 	};

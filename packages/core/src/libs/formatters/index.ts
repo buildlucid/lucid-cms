@@ -1,7 +1,6 @@
 import type { BooleanInt } from "../db/types.js";
 
 export { default as aiUsageFormatter } from "./ai-usage.js";
-export { default as apiIntegrationsFormatter } from "./api-integrations.js";
 export { default as collectionsFormatter } from "./collections.js";
 export { default as documentBricksFormatter } from "./document-bricks.js";
 export { default as documentFieldsFormatter } from "./document-fields.js";
@@ -10,6 +9,7 @@ export { default as documentVersionsFormatter } from "./document-versions.js";
 export { default as documentWorkflowsFormatter } from "./document-workflows.js";
 export { default as documentsFormatter } from "./documents.js";
 export { default as emailsFormatter } from "./emails.js";
+export { default as integrationsFormatter } from "./integrations.js";
 export { default as jobsFormatter } from "./jobs.js";
 export { default as localesFormatter } from "./locales.js";
 export { default as lucidRemoteConnectionsFormatter } from "./lucid-remote-connections.js";

@@ -16,7 +16,7 @@ import {
 	documentWorkflowServices,
 } from "../index.js";
 import cleanupFailedCreate from "./helpers/cleanup-failed-create.js";
-import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
+import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 
 const upsertSingle: ServiceFn<
 	[
@@ -199,7 +199,7 @@ const upsertSingle: ServiceFn<
 		return workflowRes;
 	}
 
-	await invalidateClientDocumentCache(context, data.collectionKey);
+	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	return {
 		error: undefined,

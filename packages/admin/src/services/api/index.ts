@@ -1,11 +1,11 @@
 import account from "./account";
 import ai from "./ai";
-import apiIntegrations from "./api-integrations";
 import auth from "./auth";
 import collections from "./collections";
 import connection from "./connection";
 import documents from "./documents";
 import email from "./email";
+import integrations from "./integrations";
 import jobs from "./jobs";
 import locales from "./locales";
 import media from "./media";
@@ -40,7 +40,7 @@ const exportObject = {
 	locales,
 	collections,
 	documents,
-	apiIntegrations,
+	integrations,
 	oauthConnections,
 	connection,
 	tenants,

@@ -3,7 +3,7 @@ import type { InternalDocumentField } from "../../types.js";
 import BrickBuilder from "../collection/builders/brick-builder/index.js";
 import documentFieldsFormatter from "./document-fields.js";
 
-describe("client response shaping for structural fields", () => {
+describe("content response shaping for structural fields", () => {
 	test("sections nest their children under the section key by default", () => {
 		const brick = new BrickBuilder("navItem")
 			.addText("title")
@@ -19,7 +19,7 @@ describe("client response shaping for structural fields", () => {
 		];
 
 		expect(
-			documentFieldsFormatter.flattenFields(fields, brick.clientFieldTree),
+			documentFieldsFormatter.flattenFields(fields, brick.contentFieldTree),
 		).toEqual({
 			title: "Home",
 			badge: {
@@ -40,7 +40,7 @@ describe("client response shaping for structural fields", () => {
 		];
 
 		expect(
-			documentFieldsFormatter.flattenFields(fields, brick.clientFieldTree),
+			documentFieldsFormatter.flattenFields(fields, brick.contentFieldTree),
 		).toEqual({
 			label: "New",
 		});
@@ -64,7 +64,7 @@ describe("client response shaping for structural fields", () => {
 		expect(
 			documentFieldsFormatter.flattenFields(
 				fields,
-				nestedBrick.clientFieldTree,
+				nestedBrick.contentFieldTree,
 			),
 		).toEqual({
 			advanced: { anchorLabel: "Jump to" },
@@ -73,14 +73,14 @@ describe("client response shaping for structural fields", () => {
 		expect(
 			documentFieldsFormatter.flattenFields(
 				fields,
-				inlineBrick.clientFieldTree,
+				inlineBrick.contentFieldTree,
 			),
 		).toEqual({
 			anchorLabel: "Jump to",
 		});
 	});
 
-	test("tabs stay transparent in client responses", () => {
+	test("tabs stay transparent in content responses", () => {
 		const brick = new BrickBuilder("navItem")
 			.addTab("contentTab")
 			.addText("title")
@@ -95,7 +95,7 @@ describe("client response shaping for structural fields", () => {
 		];
 
 		expect(
-			documentFieldsFormatter.flattenFields(fields, brick.clientFieldTree),
+			documentFieldsFormatter.flattenFields(fields, brick.contentFieldTree),
 		).toEqual({
 			title: "Home",
 			badge: { label: "New" },
@@ -139,7 +139,7 @@ describe("client response shaping for structural fields", () => {
 		];
 
 		expect(
-			documentFieldsFormatter.flattenFields(fields, brick.clientFieldTree),
+			documentFieldsFormatter.flattenFields(fields, brick.contentFieldTree),
 		).toEqual({
 			items: [
 				{ title: "First", meta: { caption: "Caption one" } },
@@ -163,7 +163,7 @@ describe("client response shaping for structural fields", () => {
 		];
 
 		expect(
-			documentFieldsFormatter.flattenFields(fields, brick.clientFieldTree),
+			documentFieldsFormatter.flattenFields(fields, brick.contentFieldTree),
 		).toEqual({
 			outer: {
 				outerText: "outer",
@@ -172,7 +172,7 @@ describe("client response shaping for structural fields", () => {
 		});
 	});
 
-	test("flattening without a client field tree keeps the legacy flat shape", () => {
+	test("flattening without a content field tree keeps the legacy flat shape", () => {
 		const fields: InternalDocumentField[] = [
 			{ key: "title", type: "text", value: "Home" },
 			{ key: "label", type: "text", value: "New" },

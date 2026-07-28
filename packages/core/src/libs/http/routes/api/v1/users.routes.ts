@@ -11,6 +11,13 @@ import deleteSingle from "../../../controllers/users/delete-single.js";
 import deleteSinglePermanently from "../../../controllers/users/delete-single-permanently.js";
 import getMultiple from "../../../controllers/users/get-multiple.js";
 import getSingle from "../../../controllers/users/get-single.js";
+import createUserIntegration from "../../../controllers/users/integrations/create-single.js";
+import deleteUserIntegration from "../../../controllers/users/integrations/delete-single.js";
+import getUserIntegrations from "../../../controllers/users/integrations/get-all.js";
+import getUserIntegrationScopes from "../../../controllers/users/integrations/get-scopes.js";
+import getUserIntegration from "../../../controllers/users/integrations/get-single.js";
+import regenerateUserIntegrationKey from "../../../controllers/users/integrations/regenerate-keys.js";
+import updateUserIntegration from "../../../controllers/users/integrations/update-single.js";
 import inviteSingle from "../../../controllers/users/invite-single.js";
 import resendInvitation from "../../../controllers/users/resend-invitation.js";
 import restoreMultiple from "../../../controllers/users/restore-multiple.js";
@@ -21,9 +28,19 @@ import updateSingle from "../../../controllers/users/update-single.js";
 
 const usersRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)
-	.get("/:id", ...getSingle)
 	.get("/logins/:id", ...getMultipleLogins)
 	.get("/:userId/oauth-connections", ...getUserOAuthConnections)
+	.get("/:userId/integrations/scopes", ...getUserIntegrationScopes)
+	.get("/:userId/integrations", ...getUserIntegrations)
+	.post("/:userId/integrations", ...createUserIntegration)
+	.post(
+		"/:userId/integrations/:id/regenerate-keys",
+		...regenerateUserIntegrationKey,
+	)
+	.get("/:userId/integrations/:id", ...getUserIntegration)
+	.patch("/:userId/integrations/:id", ...updateUserIntegration)
+	.delete("/:userId/integrations/:id", ...deleteUserIntegration)
+	.get("/:id", ...getSingle)
 	.post(
 		"/:id/profile-picture/upload-session",
 		...createProfilePictureUploadSession,

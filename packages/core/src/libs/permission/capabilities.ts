@@ -48,16 +48,16 @@ const externalPermissionDetails: Partial<
 	Record<StaticPermission, PermissionDetails>
 > = {
 	[Permissions.MediaRead]: {
-		name: copy("admin:client.scopes.media.read"),
+		name: copy("admin:integrations.scopes.media.read"),
 	},
 	[Permissions.MediaCreate]: {
-		name: copy("admin:client.scopes.media.create"),
+		name: copy("admin:integrations.scopes.media.create"),
 	},
 	[Permissions.MediaUpdate]: {
-		name: copy("admin:client.scopes.media.update"),
+		name: copy("admin:integrations.scopes.media.update"),
 	},
 	[Permissions.MediaDelete]: {
-		name: copy("admin:client.scopes.media.delete"),
+		name: copy("admin:integrations.scopes.media.delete"),
 	},
 };
 
@@ -107,7 +107,7 @@ const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 			capabilities.push({
 				key: ExternalScopes.MediaProcess,
 				details: {
-					name: copy("admin:client.scopes.media.process"),
+					name: copy("admin:integrations.scopes.media.process"),
 				},
 				core: true,
 				external: {
@@ -124,7 +124,7 @@ const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 			externalDetails:
 				group.key === "media_permissions"
 					? {
-							name: copy("admin:client.scopes.media.label"),
+							name: copy("admin:integrations.scopes.media.label"),
 						}
 					: undefined,
 			core: group.core,
@@ -164,7 +164,7 @@ const getCollectionCapabilityGroups = (
 							scope: getCollectionExternalScope(collection.key, action),
 							userPermission: permission,
 							details: {
-								name: copy(`admin:client.scopes.documents.${action}`),
+								name: copy(`admin:integrations.scopes.documents.${action}`),
 							},
 						},
 						availableToIntegrations: action === "read",
@@ -177,14 +177,14 @@ const getCollectionCapabilityGroups = (
 const localesCapabilityGroup: CapabilityGroup = {
 	key: "locales",
 	details: {
-		name: copy("admin:client.scopes.locales.label"),
+		name: copy("admin:integrations.scopes.locales.label"),
 	},
 	core: true,
 	capabilities: [
 		{
 			key: ExternalScopes.LocalesRead,
 			details: {
-				name: copy("admin:client.scopes.locales.read"),
+				name: copy("admin:integrations.scopes.locales.read"),
 			},
 			core: true,
 			external: {

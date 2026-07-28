@@ -3,9 +3,9 @@ import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import accountRoutes from "./account.routes.js";
 import aiRoutes from "./ai.routes.js";
 import authRoutes from "./auth.routes.js";
-import clientRoutes from "./client/index.js";
 import collectionRoutes from "./collections.routes.js";
 import connectionRoutes from "./connection.routes.js";
+import contentRoutes from "./content/index.js";
 import documentRoutes from "./document.routes.js";
 import emailRoutes from "./email.routes.js";
 import i18nRoutes from "./i18n.routes.js";
@@ -41,6 +41,6 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/users", userRoutes)
 	.route("/media", mediaRoutes)
 	.route("/share", shareRoutes)
-	.route("/client", clientRoutes);
+	.route("/content", contentRoutes);
 
 export default routes;

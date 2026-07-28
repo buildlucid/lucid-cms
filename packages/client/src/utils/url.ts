@@ -1,4 +1,4 @@
-import { CLIENT_BASE_PATH } from "../constants.js";
+import { CONTENT_BASE_PATH } from "../constants.js";
 import type {
 	FilterObject,
 	FilterValue,
@@ -196,19 +196,19 @@ export const normalizeBaseUrl = (baseUrl: string): string =>
 	baseUrl.replace(/\/+$/, "");
 
 /**
- * Accepts either a site URL or a full client API URL and resolves the final client base path.
+ * Accepts either a site URL or a full content API URL and resolves the final content base path.
  */
 export const resolveClientBaseUrl = (baseUrl: string): string => {
 	const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
 
 	if (
-		normalizedBaseUrl === CLIENT_BASE_PATH ||
-		normalizedBaseUrl.endsWith(CLIENT_BASE_PATH)
+		normalizedBaseUrl === CONTENT_BASE_PATH ||
+		normalizedBaseUrl.endsWith(CONTENT_BASE_PATH)
 	) {
 		return normalizedBaseUrl;
 	}
 
-	return `${normalizedBaseUrl}${CLIENT_BASE_PATH}`;
+	return `${normalizedBaseUrl}${CONTENT_BASE_PATH}`;
 };
 
 /**

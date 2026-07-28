@@ -17,7 +17,7 @@ const getSingle = async (
 ): ServiceResponse<Media> =>
 	runToolkitService(
 		() =>
-			mediaServices.client.getSingle(withToolkitTenant(context, input), {
+			mediaServices.content.getSingle(withToolkitTenant(context, input), {
 				id: input.id,
 			}),
 		{

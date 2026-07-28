@@ -14,8 +14,8 @@ import {
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getCollection from "../collections/get-single-instance.js";
-import getClientDocument from "../documents/client/get-single.js";
-import validateClientVersionTarget from "../documents/helpers/validate-client-version-target.js";
+import getContentDocument from "../documents/content/get-single.js";
+import validateContentVersionTarget from "../documents/helpers/validate-content-version-target.js";
 import resolvePreviewMode, {
 	requiresPinnedPreviewVersion,
 } from "./helpers/resolve-preview-mode.js";
@@ -34,7 +34,7 @@ const create: ServiceFn<
 	],
 	PreviewSessionURLResponse
 > = async (context, data) => {
-	const versionTargetRes = await validateClientVersionTarget({
+	const versionTargetRes = await validateContentVersionTarget({
 		versionType: data.versionType,
 		versionId: data.versionId,
 	});
@@ -61,7 +61,7 @@ const create: ServiceFn<
 		};
 	}
 
-	const documentRes = await getClientDocument(context, {
+	const documentRes = await getContentDocument(context, {
 		collectionKey: data.collectionKey,
 		versionType: data.versionType,
 		versionId: versionTargetRes.data.versionId,

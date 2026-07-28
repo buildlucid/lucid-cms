@@ -53,7 +53,7 @@ export const controllerSchemas = {
 		body: undefined,
 		response: z.array(localeResponseSchema),
 	} satisfies ControllerSchema,
-	client: {
+	content: {
 		getAll: {
 			query: {
 				string: undefined,

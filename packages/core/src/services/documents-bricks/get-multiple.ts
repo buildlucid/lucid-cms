@@ -41,7 +41,7 @@ const getMultiple: ServiceFn<
 			includeRefs?: boolean;
 			/** When provided, only these custom field ref types are hydrated. */
 			refTypes?: FieldTypes[];
-			/** Client responses flatten nested relation ref fields; internal responses keep field wrappers. */
+			/** Content responses flatten nested relation ref fields; internal responses keep field wrappers. */
 			flattenRelationRefFields?: boolean;
 			/** Restricts hydrated document relation refs for external integrations. */
 			allowedDocumentCollectionKeys?: string[];

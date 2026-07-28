@@ -1,8 +1,8 @@
 import z from "zod";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import {
-	fieldClientResponseSchema,
 	fieldConfigSchema,
+	fieldContentResponseSchema,
 	fieldInputSchema,
 	fieldResponseSchema,
 } from "./collection-fields.js";
@@ -97,8 +97,8 @@ export const brickResponseSchema = brickResponseBaseSchema.extend({
 		return z.array(fieldResponseSchema);
 	},
 });
-export const brickClientResponseSchema = brickResponseBaseSchema.extend({
+export const brickContentResponseSchema = brickResponseBaseSchema.extend({
 	get fields() {
-		return z.record(z.any(), z.array(fieldClientResponseSchema));
+		return z.record(z.any(), z.array(fieldContentResponseSchema));
 	},
 });

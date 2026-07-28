@@ -1,8 +1,5 @@
 import { createMiddleware } from "hono/factory";
-import {
-	apiIntegrationServices,
-	oauthServices,
-} from "../../../services/index.js";
+import { integrationServices, oauthServices } from "../../../services/index.js";
 import { getOAuthUrls } from "../../../services/oauth/helpers/urls.js";
 import type {
 	LucidExternalAuth,
@@ -45,7 +42,7 @@ const externalAuthentication = createMiddleware(
 			setOAuthBearerChallenge(c, context);
 			throw new LucidAPIError({
 				type: "authorisation",
-				message: copy("server:core.client.integrations.api.key.missing"),
+				message: copy("server:core.integrations.api.key.missing"),
 				status: 401,
 			});
 		}
@@ -56,7 +53,7 @@ const externalAuthentication = createMiddleware(
 			setOAuthBearerChallenge(c, context);
 			throw new LucidAPIError({
 				type: "authorisation",
-				message: copy("server:core.client.integrations.api.key.invalid"),
+				message: copy("server:core.integrations.api.key.invalid"),
 				status: 401,
 			});
 		}
@@ -64,12 +61,12 @@ const externalAuthentication = createMiddleware(
 		let externalAuth: LucidExternalAuth;
 		if (scheme.toLowerCase() === "apikey") {
 			const verifyApiKey = await serviceWrapper(
-				apiIntegrationServices.verifyApiKey,
+				integrationServices.verifyApiKey,
 				{
 					transaction: false,
 					defaultError: {
 						type: "authorisation",
-						message: copy("server:core.client.integrations.error"),
+						message: copy("server:core.integrations.error"),
 						status: 401,
 					},
 				},
@@ -79,7 +76,7 @@ const externalAuthentication = createMiddleware(
 			if (verifyApiKey.error) {
 				throw new LucidAPIError({
 					type: "authorisation",
-					message: copy("server:core.client.integrations.api.key.invalid"),
+					message: copy("server:core.integrations.api.key.invalid"),
 					status: 401,
 				});
 			}
@@ -105,7 +102,7 @@ const externalAuthentication = createMiddleware(
 			setOAuthBearerChallenge(c, context);
 			throw new LucidAPIError({
 				type: "authorisation",
-				message: copy("server:core.client.integrations.api.key.invalid"),
+				message: copy("server:core.integrations.api.key.invalid"),
 				status: 401,
 			});
 		}
@@ -118,7 +115,7 @@ const externalAuthentication = createMiddleware(
 		const response = await next();
 
 		if (externalAuth.credential.type === "api-key") {
-			void apiIntegrationServices
+			void integrationServices
 				.updateLastUsed(context, {
 					id: externalAuth.credential.integrationId,
 					ipAddress: connectionInfo.address ?? null,

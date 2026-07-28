@@ -27,7 +27,7 @@ export type NavigationMenuContentProps = {
 	canReadJobs: boolean;
 	canReadAiUsage: boolean;
 	canManageConnection: boolean;
-	canReadApiIntegrations: boolean;
+	canReadIntegrations: boolean;
 	canReadSystemOverview: boolean;
 	showAccessAndPermissions: boolean;
 	collectionsIsLoading: boolean;
@@ -57,7 +57,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 	const showSystemSection = createMemo(
 		() =>
 			props.canReadSystemOverview ||
-			props.canReadApiIntegrations ||
+			props.canReadIntegrations ||
 			props.canManageConnection ||
 			props.canReadJobs ||
 			props.canReadAiUsage,
@@ -262,11 +262,9 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					<IconLinkFull
 						type="link"
 						href="/lucid/system/integrations"
-						icon="api-integrations"
-						title={T()("routes.system.client.integrations.title")}
-						permission={
-							props.canReadApiIntegrations || props.canManageConnection
-						}
+						icon="integrations"
+						title={T()("routes.system.integrations.title")}
+						permission={props.canReadIntegrations || props.canManageConnection}
 					/>
 					<IconLinkFull
 						type="link"

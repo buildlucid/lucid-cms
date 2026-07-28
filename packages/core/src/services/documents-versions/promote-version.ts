@@ -14,7 +14,7 @@ import {
 } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import invalidateClientDocumentCache from "../documents/helpers/invalidate-client-cache.js";
+import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import {
 	collectionServices,
@@ -379,7 +379,7 @@ const promoteVersion: ServiceFn<
 	);
 	if (hookResponse.error) return hookResponse;
 
-	await invalidateClientDocumentCache(context, data.collectionKey);
+	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	// -------------------------------------------------------------------------------
 	// Success

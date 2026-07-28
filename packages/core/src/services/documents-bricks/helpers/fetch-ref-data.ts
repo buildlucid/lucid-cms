@@ -143,16 +143,13 @@ const fetchRefData: ServiceFn<
 			return {
 				error: {
 					type: "authorisation",
-					name: copy("server:core.client.integrations.scopes.error.name"),
-					message: copy(
-						"server:core.client.integrations.scopes.missing.message",
-						{
-							data: {
-								requiredScopes: missingScopes.join(", "),
-								missingScopes: missingScopes.join(", "),
-							},
+					name: copy("server:core.integrations.scopes.error.name"),
+					message: copy("server:core.integrations.scopes.missing.message", {
+						data: {
+							requiredScopes: missingScopes.join(", "),
+							missingScopes: missingScopes.join(", "),
 						},
-					),
+					}),
 					status: 403,
 				},
 				data: undefined,

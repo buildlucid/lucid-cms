@@ -304,8 +304,8 @@ export const PermissionGroups = Object.freeze({
 			},
 		],
 	},
-	"api-integrations": {
-		key: "api_integrations_permissions",
+	integrations: {
+		key: "integrations_permissions",
 		details: {
 			name: copy("admin:core.permissions.integrations.permissions", {
 				defaultMessage: "Integrations Permissions",

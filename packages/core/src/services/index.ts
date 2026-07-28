@@ -1,6 +1,5 @@
 export * as accountServices from "./account/index.js";
 export * as aiServices from "./ai/index.js";
-export * as apiIntegrationServices from "./api-integrations/index.js";
 export * as authServices from "./auth/index.js";
 export * as cdnServices from "./cdn/index.js";
 export * as collectionServices from "./collections/index.js";
@@ -13,6 +12,7 @@ export * as documentBrickServices from "./documents-bricks/index.js";
 export * as documentVersionServices from "./documents-versions/index.js";
 export * as emailServices from "./email/index.js";
 export * as i18nServices from "./i18n/index.js";
+export * as integrationServices from "./integrations/index.js";
 export * as jobServices from "./jobs/index.js";
 export * as localeServices from "./locales/index.js";
 export * as mediaServices from "./media/index.js";

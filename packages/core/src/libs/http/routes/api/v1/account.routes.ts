@@ -15,6 +15,13 @@ import updateProfilePictureController from "../../../controllers/account/update-
 import verifyEmailChangeConfirmController from "../../../controllers/account/verify-email-change-confirm.js";
 import verifyEmailChangeRevertController from "../../../controllers/account/verify-email-change-revert.js";
 import verifyResetPasswordController from "../../../controllers/account/verify-reset-password.js";
+import createIntegration from "../../../controllers/integrations/account/create-single.js";
+import deleteIntegration from "../../../controllers/integrations/account/delete-single.js";
+import getIntegrations from "../../../controllers/integrations/account/get-all.js";
+import getIntegrationScopes from "../../../controllers/integrations/account/get-scopes.js";
+import getIntegration from "../../../controllers/integrations/account/get-single.js";
+import regenerateIntegrationKey from "../../../controllers/integrations/account/regenerate-keys.js";
+import updateIntegration from "../../../controllers/integrations/account/update-single.js";
 import getAccountConnectionsController from "../../../controllers/oauth/get-account-connections.js";
 import revokeOAuthConnectionController from "../../../controllers/oauth/revoke-connection.js";
 import updateOAuthConnectionController from "../../../controllers/oauth/update-connection.js";
@@ -25,6 +32,13 @@ const accountRoutes = new Hono<LucidHonoGeneric>()
 	.get("/oauth-connections", ...getAccountConnectionsController)
 	.patch("/oauth-connections/:id", ...updateOAuthConnectionController)
 	.delete("/oauth-connections/:id", ...revokeOAuthConnectionController)
+	.get("/integrations/scopes", ...getIntegrationScopes)
+	.get("/integrations", ...getIntegrations)
+	.post("/integrations", ...createIntegration)
+	.post("/integrations/:id/regenerate-keys", ...regenerateIntegrationKey)
+	.get("/integrations/:id", ...getIntegration)
+	.patch("/integrations/:id", ...updateIntegration)
+	.delete("/integrations/:id", ...deleteIntegration)
 	.get("/email-change/confirm/:token", ...verifyEmailChangeConfirmController)
 	.patch("/email-change/confirm/:token", ...confirmEmailChangeController)
 	.get("/email-change/revert/:token", ...verifyEmailChangeRevertController)

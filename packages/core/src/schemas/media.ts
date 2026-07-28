@@ -993,7 +993,7 @@ export const controllerSchemas = {
 		params: undefined,
 		response: mediaResponseSchema,
 	} satisfies ControllerSchema,
-	client: {
+	content: {
 		processMedia: {
 			body: z
 				.object({
@@ -1048,6 +1048,6 @@ export const controllerSchemas = {
 export type GetMultipleQueryParams = z.infer<
 	typeof controllerSchemas.getMultiple.query.formatted
 >;
-export type ClientGetMultipleQueryParams = z.infer<
-	typeof controllerSchemas.client.getMultiple.query.formatted
+export type ContentGetMultipleQueryParams = z.infer<
+	typeof controllerSchemas.content.getMultiple.query.formatted
 >;

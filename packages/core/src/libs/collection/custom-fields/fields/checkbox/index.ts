@@ -10,5 +10,5 @@ export default {
 	validateInput: null,
 	formatRef: null,
 	formatFilterValue: formatBooleanFilterValue,
-	clientTypeGen: createValueFieldTypeGenerator("boolean | null"),
+	contentTypeGen: createValueFieldTypeGenerator("boolean | null"),
 };

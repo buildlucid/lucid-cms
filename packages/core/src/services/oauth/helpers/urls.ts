@@ -7,7 +7,7 @@ import type { ServiceContext } from "../../../utils/services/types.js";
 export const getOAuthUrls = (context: ServiceContext) => {
 	const origin = new URL(getBaseUrl(context)).origin;
 	const issuer = `${origin}/lucid`;
-	const resource = `${origin}/lucid/api/v1/client`;
+	const resource = `${origin}/lucid/api/v1/content`;
 
 	return {
 		issuer,
@@ -16,7 +16,7 @@ export const getOAuthUrls = (context: ServiceContext) => {
 		tokenEndpoint: `${origin}/lucid/oauth/token`,
 		revocationEndpoint: `${origin}/lucid/oauth/revoke`,
 		authorizationServerMetadata: `${origin}/.well-known/oauth-authorization-server/lucid`,
-		protectedResourceMetadata: `${origin}/.well-known/oauth-protected-resource/lucid/api/v1/client`,
+		protectedResourceMetadata: `${origin}/.well-known/oauth-protected-resource/lucid/api/v1/content`,
 		consentPage: `${origin}/lucid/oauth/consent`,
 	};
 };

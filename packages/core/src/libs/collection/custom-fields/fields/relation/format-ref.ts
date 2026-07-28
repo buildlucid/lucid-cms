@@ -49,7 +49,7 @@ const formatRelationRef = (
 	const documentFields = params.flattenRelationRefFields
 		? documentFieldsFormatter.flattenFields(
 				formattedFields,
-				collection.clientFieldTree,
+				collection.contentFieldTree,
 			)
 		: documentFieldsFormatter.objectifyFields(formattedFields);
 

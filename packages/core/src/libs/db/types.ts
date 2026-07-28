@@ -818,15 +818,17 @@ export interface LucidCollectionMigrations {
 	created_at: TimestampImmutable;
 }
 
-export interface LucidApiIntegrations {
+export interface LucidIntegrations {
 	id: Generated<number>;
 	name: string;
 	description: string | null;
 	enabled: BooleanInt;
+	user_id: number | null;
+	tenant_key: string | null;
+	expires_at: TimestampMutateable;
 	key: string;
 	api_key: string;
 	secret: string;
-	tenant_key: string | null;
 	last_used_at: TimestampMutateable;
 	last_used_ip: string | null;
 	last_used_user_agent: string | null;
@@ -834,9 +836,9 @@ export interface LucidApiIntegrations {
 	updated_at: TimestampMutateable;
 }
 
-export interface LucidApiIntegrationScopes {
+export interface LucidIntegrationScopes {
 	id: Generated<number>;
-	api_integration_id: number;
+	integration_id: number;
 	scope: string;
 	core: BooleanInt;
 	created_at: TimestampImmutable;
@@ -1026,8 +1028,8 @@ export interface LucidDB {
 	lucid_media_upload_sessions: LucidMediaUploadSessions;
 	lucid_media_share_links: LucidMediaShareLinks;
 	lucid_processed_images: HeadlessProcessedImages;
-	lucid_api_integrations: LucidApiIntegrations;
-	lucid_api_integration_scopes: LucidApiIntegrationScopes;
+	lucid_integrations: LucidIntegrations;
+	lucid_integration_scopes: LucidIntegrationScopes;
 	lucid_oauth_authorization_requests: LucidOAuthAuthorizationRequests;
 	lucid_oauth_grants: LucidOAuthGrants;
 	lucid_oauth_grant_scopes: LucidOAuthGrantScopes;

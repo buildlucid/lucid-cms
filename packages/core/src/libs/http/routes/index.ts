@@ -18,11 +18,11 @@ const routes = new Hono<LucidHonoGeneric>()
 		...authorizationServerMetadataController,
 	)
 	.get(
-		"/.well-known/oauth-protected-resource/lucid/api/v1/client",
+		"/.well-known/oauth-protected-resource/lucid/api/v1/content",
 		...protectedResourceMetadataController,
 	)
 	.get(
-		"/lucid/api/v1/client/.well-known/oauth-protected-resource",
+		"/lucid/api/v1/content/.well-known/oauth-protected-resource",
 		...protectedResourceMetadataController,
 	)
 	.route("/lucid/oauth", oauthRoutes)

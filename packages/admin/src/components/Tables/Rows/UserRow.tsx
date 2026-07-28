@@ -18,6 +18,7 @@ interface UserRowProps extends TableRowProps {
 	rowTarget: ReturnType<
 		typeof useRowTarget<
 			| "view"
+			| "createIntegration"
 			| "viewLogins"
 			| "update"
 			| "delete"
@@ -137,6 +138,18 @@ const UserRow: Component<UserRowProps> = (props) => {
 						props.showingDeleted?.() || props.user.invitationAccepted !== false,
 					actionExclude: true,
 					theme: "primary",
+				},
+				{
+					label: T()("integrations.create.action"),
+					type: "button",
+					icon: "key",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.user.id);
+						props.rowTarget.setTrigger("createIntegration", true);
+					},
+					permission: userStore.get.user?.superAdmin === true,
+					hide: props.showingDeleted?.(),
+					actionExclude: true,
 				},
 				{
 					label: T()("users.sessions.revoke.action"),

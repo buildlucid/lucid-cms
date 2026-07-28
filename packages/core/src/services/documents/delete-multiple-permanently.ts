@@ -9,7 +9,7 @@ import {
 	documentWorkflowServices,
 	previewSessionServices,
 } from "../index.js";
-import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
+import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 
 const deleteMultiplePermanently: ServiceFn<
 	[
@@ -195,7 +195,7 @@ const deleteMultiplePermanently: ServiceFn<
 	);
 	if (hookAfterRes.error) return hookAfterRes;
 
-	await invalidateClientDocumentCache(context, data.collectionKey);
+	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	return {
 		error: undefined,

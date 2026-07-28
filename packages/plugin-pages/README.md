@@ -8,10 +8,10 @@ When enabled on a collection, it registers three new fields: `fullSlug`, `slug` 
 
 The plugin achieves this by registering hooks that fire at different points in the document lifecycle. Depending on the hook, either its `fullSlug` is updated via its ancestors, or all of its descendants' `fullSlugs` are updated.
 
-The intended use case for this plugin is to enable easy document fetching for front-end applications, whereby you can use the URL location to filter a document via the `fullSlug`. Using the client endpoints that might look something like this:
+The intended use case for this plugin is to enable easy document fetching for front-end applications, whereby you can use the URL location to filter a document via the `fullSlug`. Using the content endpoints that might look something like this:
 
 ```text
-/api/v1/client/document/COLLECTION_KEY/published?filter[_fullSlug]=about
+/api/v1/content/document/COLLECTION_KEY/published?filter[_fullSlug]=about
 ```
 
 ## Installation

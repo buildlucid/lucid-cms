@@ -331,7 +331,7 @@ const createSingle: ServiceFn<
 		}
 	}
 
-	await invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]);
+	await invalidateHttpCacheTags(context, [cacheKeys.http.tags.contentMedia]);
 
 	const mediaFetchRes = await Media.selectSingleById({
 		id: mediaRes.data.id,

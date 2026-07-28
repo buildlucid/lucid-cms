@@ -5,16 +5,25 @@ import {
 	FaSolidLock,
 	FaSolidUserTie,
 } from "solid-icons/fa";
-import { type Accessor, type Component, createMemo, Index } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	createSignal,
+	Index,
+	Show,
+} from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Table } from "@/components/Groups/Table/Table";
+import CopyAPIKey from "@/components/Modals/Integrations/CopyAPIKey";
 import DeleteUser from "@/components/Modals/User/DeleteUser";
 import DeleteUserPermanently from "@/components/Modals/User/DeleteUserPermanently";
 import ResendInvitation from "@/components/Modals/User/ResendInvitation";
 import RestoreUsers from "@/components/Modals/User/RestoreUser";
 import RevokeRefreshTokens from "@/components/Modals/User/RevokeRefreshTokens";
 import TriggerPasswordReset from "@/components/Modals/User/TriggerPasswordReset";
+import UpsertIntegrationPanel from "@/components/Panels/Integrations/UpsertIntegrationPanel";
 import UpdateUserPanel from "@/components/Panels/User/UpdateUserPanel";
 import ViewUserLoginsPanel from "@/components/Panels/User/ViewUserLoginsPanel";
 import ViewUserPanel from "@/components/Panels/User/ViewUserPanel";
@@ -37,6 +46,7 @@ export const UserList: Component<{
 	// Hooks
 	const rowTarget = useRowTarget({
 		triggers: {
+			createIntegration: false,
 			view: false,
 			viewLogins: false,
 			update: false,
@@ -48,6 +58,8 @@ export const UserList: Component<{
 			resendInvitation: false,
 		},
 	});
+	const [apiKey, setAPIKey] = createSignal<string>();
+	const [copyAPIKeyOpen, setCopyAPIKeyOpen] = createSignal(false);
 
 	// ----------------------------------
 	// Functions
@@ -289,6 +301,34 @@ export const UserList: Component<{
 					open: rowTarget.getTriggers().update,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("update", state);
+					},
+				}}
+			/>
+			<Show when={rowTarget.getTargetId()}>
+				{(userId) => (
+					<UpsertIntegrationPanel
+						services={api.users.integrations(userId)}
+						state={{
+							open: rowTarget.getTriggers().createIntegration,
+							setOpen: (open) =>
+								rowTarget.setTrigger("createIntegration", open),
+						}}
+						callbacks={{
+							onCreateSuccess: (key) => {
+								setAPIKey(key);
+								setCopyAPIKeyOpen(true);
+							},
+						}}
+					/>
+				)}
+			</Show>
+			<CopyAPIKey
+				apiKey={apiKey()}
+				state={{
+					open: copyAPIKeyOpen(),
+					setOpen: (open) => {
+						setCopyAPIKeyOpen(open);
+						if (!open) setAPIKey(undefined);
 					},
 				}}
 			/>

@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import type {
-	ClientGetMultipleQueryParams,
-	ClientGetSingleQueryParams,
+	ContentGetMultipleQueryParams,
+	ContentGetSingleQueryParams,
 } from "../../schemas/documents.js";
 import type {
 	QueryFilters,
@@ -38,11 +38,12 @@ type ToolkitServiceErrorConfig = {
 };
 
 type ServiceDocumentFilter = NonNullable<
-	ClientGetSingleQueryParams["filter"] | ClientGetMultipleQueryParams["filter"]
+	| ContentGetSingleQueryParams["filter"]
+	| ContentGetMultipleQueryParams["filter"]
 >;
 type ServiceDocumentFilterOr = NonNullable<
-	| ClientGetSingleQueryParams["filterOr"]
-	| ClientGetMultipleQueryParams["filterOr"]
+	| ContentGetSingleQueryParams["filterOr"]
+	| ContentGetMultipleQueryParams["filterOr"]
 >;
 
 type NormalizedDocumentFilters = {

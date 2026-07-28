@@ -14,7 +14,7 @@ export interface CollapsibleFieldConfig extends SharedFieldConfig {
 		label?: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
-	/** Controls how child fields are shaped in client document responses. */
+	/** Controls how child fields are shaped in content API document responses. */
 	output: StructuralFieldOutput;
 	/** Whether the collapsible renders expanded by default in the admin. */
 	defaultOpen: boolean;

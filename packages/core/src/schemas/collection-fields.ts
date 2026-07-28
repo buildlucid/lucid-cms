@@ -217,7 +217,7 @@ export const fieldConfigSchema = z.object({
 		.enum(["nested", "inline"])
 		.meta({
 			description:
-				"How section/collapsible fields shape their children in client document responses",
+				"How section/collapsible fields shape their children in content API document responses",
 			example: "nested",
 		})
 		.nullable()
@@ -467,7 +467,7 @@ export const groupResponseSchema = groupResponseBaseSchema.extend({
 		return z.array(z.any());
 	},
 });
-export const groupClientResponseSchema = groupResponseBaseSchema.extend({
+export const groupContentResponseSchema = groupResponseBaseSchema.extend({
 	get fields() {
 		return z.record(z.any(), z.any());
 	},
@@ -513,8 +513,8 @@ export const fieldResponseSchema = fieldResponseBaseSchema.extend({
 		return z.array(groupResponseSchema);
 	},
 });
-export const fieldClientResponseSchema = fieldResponseBaseSchema.extend({
+export const fieldContentResponseSchema = fieldResponseBaseSchema.extend({
 	get groups() {
-		return z.array(groupClientResponseSchema);
+		return z.array(groupContentResponseSchema);
 	},
 });

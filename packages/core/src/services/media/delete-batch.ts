@@ -8,7 +8,7 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
-import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
+import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 
 const deleteBatch: ServiceFn<
 	[
@@ -131,7 +131,7 @@ const deleteBatch: ServiceFn<
 				for (const item of r.data) {
 					deletedMediaIds.add(item.id);
 					clearCachePromises.push(
-						clearClientMediaSingleCache(context, item.id),
+						clearContentMediaSingleCache(context, item.id),
 					);
 				}
 			}
@@ -155,7 +155,7 @@ const deleteBatch: ServiceFn<
 
 	await Promise.all([
 		...clearCachePromises,
-		invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
+		invalidateHttpCacheTags(context, [cacheKeys.http.tags.contentMedia]),
 	]);
 
 	if (deletedMediaIds.size > 0) {

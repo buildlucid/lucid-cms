@@ -532,7 +532,7 @@ const setRequestAuth = (mode: "oauth" | "api-key") => {
 	ui.apiKeyField.classList.toggle("is-hidden", oauthSelected);
 	ui.requestAuthCaption.textContent = oauthSelected
 		? "Uses the active OAuth access token."
-		: "Uses the API integration key held in this tab.";
+		: "Uses the integration key held in this tab.";
 };
 
 const formatResponse = async (response: Response) => {
@@ -577,7 +577,7 @@ const sendRequest = async () => {
 		target = new URL(ui.requestPath.value, baseUrl);
 		if (
 			target.origin !== baseUrl ||
-			!target.pathname.startsWith("/lucid/api/v1/client")
+			!target.pathname.startsWith("/lucid/api/v1/content")
 		) {
 			throw new Error(
 				"The request console only sends credentials to this Lucid instance’s external API.",
@@ -605,8 +605,8 @@ const sendRequest = async () => {
 		const apiKey = ui.apiKey.value.trim();
 		if (!apiKey) {
 			showNotice(
-				"No API integration key",
-				"Paste a generated API integration key before sending the request.",
+				"No integration key",
+				"Paste a generated integration key before sending the request.",
 			);
 			return;
 		}

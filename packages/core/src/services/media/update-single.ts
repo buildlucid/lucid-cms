@@ -21,7 +21,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compatibility.js";
-import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
+import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 import deactivateCrop from "./helpers/deactivate-crop.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
@@ -518,8 +518,8 @@ const updateSingle: ServiceFn<
 	}
 
 	await Promise.all([
-		clearClientMediaSingleCache(context, data.id),
-		invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
+		clearContentMediaSingleCache(context, data.id),
+		invalidateHttpCacheTags(context, [cacheKeys.http.tags.contentMedia]),
 	]);
 
 	const hookRes = await executeHooks(

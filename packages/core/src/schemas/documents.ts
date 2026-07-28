@@ -13,7 +13,7 @@ const previewTokenSchema = z.string().meta({
 	description: "An opaque preview token",
 });
 
-const clientDocumentVersionSchema = z
+const contentDocumentVersionSchema = z
 	.string()
 	.trim()
 	.min(1)
@@ -141,7 +141,7 @@ export const documentResponseSchema = documentResponseBaseSchema.extend({
 	workflow: documentWorkflowSchema.nullable().optional(),
 });
 
-const documentClientResponseSchema = z.object({
+const documentContentResponseSchema = z.object({
 	id: z.number(),
 	collectionKey: z.string(),
 	version: z.string().nullable(),
@@ -797,13 +797,13 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
-	client: {
+	content: {
 		getSingle: {
 			query: {
 				string: z
 					.object({
 						preview: previewTokenSchema.optional(),
-						version: clientDocumentVersionSchema,
+						version: contentDocumentVersionSchema,
 						"filter[id]": queryString.schema.filter(true, {
 							example: "1",
 						}),
@@ -896,14 +896,14 @@ export const controllerSchemas = {
 				}),
 			}),
 			body: undefined,
-			response: documentClientResponseSchema,
+			response: documentContentResponseSchema,
 		} satisfies ControllerSchema,
 		getMultiple: {
 			query: {
 				string: z
 					.object({
 						preview: previewTokenSchema.optional(),
-						version: clientDocumentVersionSchema,
+						version: contentDocumentVersionSchema,
 						"filter[id]": queryString.schema.filter(true, {
 							example: "1",
 						}),
@@ -1009,7 +1009,7 @@ export const controllerSchemas = {
 				}),
 			}),
 			body: undefined,
-			response: z.array(documentClientResponseSchema),
+			response: z.array(documentContentResponseSchema),
 		} satisfies ControllerSchema,
 	},
 };
@@ -1020,11 +1020,11 @@ export type GetMultipleQueryParams = z.infer<
 export type GetSingleQueryParams = z.infer<
 	typeof controllerSchemas.getSingle.query.formatted
 >;
-export type ClientGetSingleQueryParams = z.infer<
-	typeof controllerSchemas.client.getSingle.query.formatted
+export type ContentGetSingleQueryParams = z.infer<
+	typeof controllerSchemas.content.getSingle.query.formatted
 >;
-export type ClientGetMultipleQueryParams = z.infer<
-	typeof controllerSchemas.client.getMultiple.query.formatted
+export type ContentGetMultipleQueryParams = z.infer<
+	typeof controllerSchemas.content.getMultiple.query.formatted
 >;
 export type GetMultipleRevisionsQueryParams = z.infer<
 	typeof controllerSchemas.getMultipleRevisions.query.formatted

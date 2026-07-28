@@ -48,7 +48,7 @@ describe("media process service", () => {
 					client: {},
 				},
 				request: {
-					url: "https://example.com/lucid/api/v1/client/media/process/public/test",
+					url: "https://example.com/lucid/api/v1/content/media/process/public/test",
 				},
 				config: {
 					host: "https://example.com",

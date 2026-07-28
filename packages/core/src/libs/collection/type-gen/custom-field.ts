@@ -1,4 +1,4 @@
-import type { ClientFieldTypeGenerator } from "../custom-fields/types.js";
+import type { ContentFieldTypeGenerator } from "../custom-fields/types.js";
 import { stringLiteral } from "./helpers.js";
 
 /**
@@ -7,7 +7,7 @@ import { stringLiteral } from "./helpers.js";
 export const createValueFieldTypeGenerator =
 	<TFieldType extends import("../custom-fields/types.js").FieldTypes>(
 		valueType: string,
-	): ClientFieldTypeGenerator<TFieldType> =>
+	): ContentFieldTypeGenerator<TFieldType> =>
 	() => ({
 		valueType,
 	});
@@ -16,7 +16,7 @@ export const createValueFieldTypeGenerator =
  * Creates the collection-aware client value type for relation fields.
  */
 export const createRelationValueFieldTypeGenerator =
-	(): ClientFieldTypeGenerator<"relation"> =>
+	(): ContentFieldTypeGenerator<"relation"> =>
 	({ field }) => ({
 		valueType: `Array<RelationFieldValue<${renderDocumentCollectionKeys(
 			field.collection,

@@ -3,7 +3,7 @@ import type { ColumnModeDefinition } from "./types.js";
 export const columnMode: ColumnModeDefinition = {
 	mode: "column",
 	baseTablePriority: 0,
-	clientTypeGen: (props) => ({
+	contentTypeGen: (props) => ({
 		fieldType:
 			props.fieldType ??
 			props.helpers.renderBaseFieldType({

@@ -12,7 +12,7 @@ npm install @lucidcms/client
 
 ## Setup
 
-To use the client, create it with your site base URL and either a Lucid API integration key or an OAuth access token.
+To use the client, create it with your site base URL and either a Lucid integration key or an OAuth access token.
 
 ```typescript
 import { createClient } from "@lucidcms/client";
@@ -21,7 +21,7 @@ const client = createClient({
     baseUrl: "https://example.com",
     auth: {
         type: "apiKey",
-        apiKey: "<your-api-integration-key>",
+        apiKey: "<your-integration-key>",
     },
 });
 ```
@@ -46,8 +46,8 @@ The `createClient` function accepts the following options:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `baseUrl` | `string` | Your site or app base URL. The client appends Lucid's public client endpoint path internally |
-| `auth` | `LucidClientAuth` | An API integration key or OAuth access token configuration |
+| `baseUrl` | `string` | Your site or app base URL. The client appends Lucid's public content endpoint path internally |
+| `auth` | `LucidClientAuth` | An integration key or OAuth access token configuration |
 | `fetch` | `typeof fetch` | A custom fetch implementation |
 | `headers` | `HeadersInit \| () => HeadersInit \| Promise<HeadersInit>` | Additional headers to send with every request |
 | `timeoutMs` | `number` | A default request timeout in milliseconds |
@@ -124,7 +124,7 @@ const client = createClient({
     baseUrl: "https://example.com",
     auth: {
         type: "apiKey",
-        apiKey: "<your-api-integration-key>",
+        apiKey: "<your-integration-key>",
     },
 });
 

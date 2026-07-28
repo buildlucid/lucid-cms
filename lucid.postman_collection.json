@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "cb052863-04a6-42a6-a3d0-d92f2af1977d",
 		"name": "Lucid CMS",
-		"description": "The complete Lucid CMS API, including dashboard endpoints and external content routes authorized by API integrations.",
+		"description": "The complete Lucid CMS API, including dashboard endpoints and external content routes authorized by integrations.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "20656721"
 	},
@@ -2608,7 +2608,7 @@
 			]
 		},
 		{
-			"name": "API Integrations",
+			"name": "Integrations",
 			"item": [
 				{
 					"name": "Create Single",
@@ -2623,7 +2623,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Astro Site\",\r\n    \"description\": \"The Astro MPA marketing site\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Astro Site\",\r\n    \"description\": \"The Astro MPA marketing site\",\r\n    \"expiry\": \"never\",\r\n    \"scopes\": [\"documents:page:read\"]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2631,11 +2631,11 @@
 							}
 						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/integrations/api",
+							"raw": "{{BASE_URL}}/api/v1/integrations",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "integrations", "api"]
+							"path": ["api", "v1", "integrations"]
 						},
-						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
+						"description": "Creates a system API key integration."
 					},
 					"response": []
 				},
@@ -2660,11 +2660,11 @@
 							}
 						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/integrations/api/1",
+							"raw": "{{BASE_URL}}/api/v1/integrations/1",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "integrations", "api", "1"]
+							"path": ["api", "v1", "integrations", "1"]
 						},
-						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
+						"description": "Updates a system API key integration."
 					},
 					"response": []
 				},
@@ -2680,11 +2680,11 @@
 							}
 						],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/integrations/api/2",
+							"raw": "{{BASE_URL}}/api/v1/integrations/2",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "integrations", "api", "2"]
+							"path": ["api", "v1", "integrations", "2"]
 						},
-						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
+						"description": "Deletes a system API key integration."
 					},
 					"response": []
 				},
@@ -2694,11 +2694,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/integrations/api",
+							"raw": "{{BASE_URL}}/api/v1/integrations",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "integrations", "api"]
+							"path": ["api", "v1", "integrations"]
 						},
-						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
+						"description": "Lists system API key integrations."
 					},
 					"response": []
 				},
@@ -2708,11 +2708,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/integrations/api/2",
+							"raw": "{{BASE_URL}}/api/v1/integrations/2",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "integrations", "api", "2"]
+							"path": ["api", "v1", "integrations", "2"]
 						},
-						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
+						"description": "Returns a system API key integration."
 					},
 					"response": []
 				},
@@ -2731,25 +2731,24 @@
 							}
 						],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/integrations/api/1/regenerate-keys",
+							"raw": "{{BASE_URL}}/api/v1/integrations/1/regenerate-keys",
 							"host": ["{{BASE_URL}}"],
 							"path": [
 								"api",
 								"v1",
 								"integrations",
-								"api",
 								"1",
 								"regenerate-keys"
 							]
 						},
-						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
+						"description": "Regenerates a system integration API key."
 					},
 					"response": []
 				}
 			]
 		},
 		{
-			"name": "Client Routes",
+			"name": "Content Routes",
 			"item": [
 				{
 					"name": "Documents",
@@ -2761,14 +2760,14 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "ApiKey {{CLIENT_API_KEY}}",
+										"value": "ApiKey {{INTEGRATION_API_KEY}}",
 										"type": "text"
 									}
 								],
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/document/page/draft",
+									"raw": "{{BASE_URL}}/api/v1/content/document/page/draft",
 									"host": ["{{BASE_URL}}"],
-									"path": ["api", "v1", "client", "document", "page", "draft"],
+									"path": ["api", "v1", "content", "document", "page", "draft"],
 									"query": [
 										{
 											"key": "include",
@@ -2817,17 +2816,17 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "ApiKey {{CLIENT_API_KEY}}",
+										"value": "ApiKey {{INTEGRATION_API_KEY}}",
 										"type": "text"
 									}
 								],
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/documents/page/published",
+									"raw": "{{BASE_URL}}/api/v1/content/documents/page/published",
 									"host": ["{{BASE_URL}}"],
 									"path": [
 										"api",
 										"v1",
-										"client",
+										"content",
 										"documents",
 										"page",
 										"published"
@@ -2880,14 +2879,14 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "ApiKey {{CLIENT_API_KEY}}",
+										"value": "ApiKey {{INTEGRATION_API_KEY}}",
 										"type": "text"
 									}
 								],
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/locales",
+									"raw": "{{BASE_URL}}/api/v1/content/locales",
 									"host": ["{{BASE_URL}}"],
-									"path": ["api", "v1", "client", "locales"]
+									"path": ["api", "v1", "content", "locales"]
 								}
 							},
 							"response": []
@@ -2904,7 +2903,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "ApiKey {{CLIENT_API_KEY}}",
+										"value": "ApiKey {{INTEGRATION_API_KEY}}",
 										"type": "text"
 									}
 								],
@@ -2918,9 +2917,9 @@
 									}
 								},
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/media/process/key",
+									"raw": "{{BASE_URL}}/api/v1/content/media/process/key",
 									"host": ["{{BASE_URL}}"],
-									"path": ["api", "v1", "client", "media", "process", "key"]
+									"path": ["api", "v1", "content", "media", "process", "key"]
 								}
 							},
 							"response": []
@@ -2935,7 +2934,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "ApiKey {{CLIENT_API_KEY}}",
+										"value": "ApiKey {{INTEGRATION_API_KEY}}",
 										"type": "text"
 									}
 								],
@@ -2949,9 +2948,9 @@
 									}
 								},
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/media/1",
+									"raw": "{{BASE_URL}}/api/v1/content/media/1",
 									"host": ["{{BASE_URL}}"],
-									"path": ["api", "v1", "client", "media", "1"]
+									"path": ["api", "v1", "content", "media", "1"]
 								}
 							},
 							"response": []
@@ -2970,7 +2969,7 @@
 									},
 									{
 										"key": "Authorization",
-										"value": "ApiKey {{CLIENT_API_KEY}}",
+										"value": "ApiKey {{INTEGRATION_API_KEY}}",
 										"type": "text"
 									}
 								],
@@ -2984,9 +2983,9 @@
 									}
 								},
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/client/media?filter[mimeType]=image/jpeg,image/png",
+									"raw": "{{BASE_URL}}/api/v1/content/media?filter[mimeType]=image/jpeg,image/png",
 									"host": ["{{BASE_URL}}"],
-									"path": ["api", "v1", "client", "media"],
+									"path": ["api", "v1", "content", "media"],
 									"query": [
 										{
 											"key": "filter[key]",

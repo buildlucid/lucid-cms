@@ -26,7 +26,7 @@ export const relationTableMode: RelationTableModeDefinition = {
 	getTableFieldPath: (props) => {
 		return [props.fieldKey];
 	},
-	clientTypeGen: (props) => ({
+	contentTypeGen: (props) => ({
 		fieldType:
 			props.fieldType ??
 			props.helpers.renderBaseFieldType({

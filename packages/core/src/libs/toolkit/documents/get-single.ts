@@ -38,7 +38,7 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 
 	return runToolkitService(
 		() =>
-			documentServices.client.getSingle(serviceContext, {
+			documentServices.content.getSingle(serviceContext, {
 				collectionKey: input.collectionKey,
 				versionType: input.version,
 				preview: input.preview ?? undefined,

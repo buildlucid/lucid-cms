@@ -1,3 +1,4 @@
+import integrations from "./integrations";
 import useCreateProfilePictureUploadSession from "./useCreateProfilePictureUploadSession";
 import useCreateSingle from "./useCreateSingle";
 import useDeleteMultiplePermanently from "./useDeleteMultiplePermanently";
@@ -28,6 +29,7 @@ const exportObject = {
 	useResendInvitation,
 	useRevokeRefreshTokens,
 	useUnlinkAuthProvider,
+	integrations,
 };
 
 export default exportObject;

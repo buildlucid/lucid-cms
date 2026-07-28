@@ -36,7 +36,7 @@ export interface LucidClient {
  * 	baseUrl: "https://example.com",
  * 	auth: {
  * 		type: "apiKey",
- * 		apiKey: "<your-api-integration-key>",
+ * 		apiKey: "<your-integration-key>",
  * 	},
  * });
  *

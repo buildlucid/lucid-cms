@@ -6,13 +6,16 @@ import { FaSolidXmark } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
+	createContext,
 	createEffect,
 	createMemo,
 	createSignal,
 	type JSXElement,
 	Match,
+	onCleanup,
 	Show,
 	Switch,
+	useContext,
 } from "solid-js";
 import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
@@ -23,7 +26,16 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { PanelFooter } from "./PanelFooter";
 
+interface PanelNestingState {
+	level: Accessor<number>;
+	setChildOpen: (id: symbol, open: boolean) => void;
+}
+
+const PanelNestingContext = createContext<PanelNestingState>();
+
 export const Panel: Component<{
+	/** Visual stack depth. Nested panels infer this automatically. */
+	nestedLevel?: number;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -73,9 +85,24 @@ export const Panel: Component<{
 		undefined,
 	);
 	const interfaceDirection = useInterfaceDirection();
+	const parentPanel = useContext(PanelNestingContext);
+	const panelId = Symbol("panel");
+	const [openChildPanels, setOpenChildPanels] = createSignal<Set<symbol>>(
+		new Set(),
+	);
 
 	// ------------------------------
 	// Functions
+	const setChildOpen = (id: symbol, open: boolean) => {
+		setOpenChildPanels((current) => {
+			if (current.has(id) === open) return current;
+			const next = new Set(current);
+			if (open) next.add(id);
+			else next.delete(id);
+			return next;
+		});
+	};
+
 	const getDefaultContentLocale = () => {
 		if (!props.langauge?.useDefaultcontentLocale)
 			return contentLocaleStore.get.contentLocale;
@@ -94,9 +121,27 @@ export const Panel: Component<{
 			contentLocaleStore.get.locales.length > 1
 		);
 	});
+	const nestedLevel = createMemo(
+		() => props.nestedLevel ?? (parentPanel?.level() ?? -1) + 1,
+	);
+	const isCovered = createMemo(() => openChildPanels().size > 0);
+	const nestingState: PanelNestingState = {
+		level: nestedLevel,
+		setChildOpen,
+	};
+	const PanelChildren = () =>
+		props.children({
+			contentLocale: contentLocale,
+			setContentLocale: setContentLocale,
+		});
 
 	// ------------------------------
 	// Effects
+	createEffect(() => {
+		parentPanel?.setChildOpen(panelId, props.state.open);
+	});
+	onCleanup(() => parentPanel?.setChildOpen(panelId, false));
+
 	createEffect(() => {
 		if (props.state.open) {
 			setLastfocusedElement(document.activeElement);
@@ -121,8 +166,27 @@ export const Panel: Component<{
 			onOpenChange={() => props.state.setOpen(!props.state.open)}
 		>
 			<Dialog.Portal>
-				<Dialog.Overlay class="fixed inset-0 z-40 bg-overlay-base animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
-				<div class="fixed inset-4 z-40 flex justify-end">
+				<Dialog.Overlay
+					class={classNames(
+						"fixed inset-0 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show",
+						{
+							"bg-overlay-base": nestedLevel() === 0,
+							"bg-transparent": nestedLevel() > 0,
+						},
+					)}
+					style={{ "z-index": 40 + nestedLevel() * 2 }}
+				/>
+				<div
+					class="fixed inset-4 flex justify-end transition-transform duration-300 ease-out"
+					style={{
+						"z-index": 40 + nestedLevel() * 2,
+						transform: isCovered()
+							? `translateX(${interfaceDirection.isLTR() ? "-24px" : "24px"})`
+							: "translateX(0)",
+					}}
+					data-nested-level={nestedLevel()}
+					data-covered={isCovered() ? "" : undefined}
+				>
 					<Dialog.Content
 						class={classNames(
 							"w-full relative flex flex-col rounded-xl scrollbar border border-border max-w-200 bg-background-base outline-hidden overflow-y-auto",
@@ -232,10 +296,9 @@ export const Panel: Component<{
 													grow: props.options?.growContent,
 												})}
 											>
-												{props.children({
-													contentLocale: contentLocale,
-													setContentLocale: setContentLocale,
-												})}
+												<PanelNestingContext.Provider value={nestingState}>
+													<PanelChildren />
+												</PanelNestingContext.Provider>
 											</div>
 											<Show when={!props.options?.hideFooter}>
 												<div
@@ -296,10 +359,9 @@ export const Panel: Component<{
 												grow: props.options?.growContent,
 											})}
 										>
-											{props.children({
-												contentLocale: contentLocale,
-												setContentLocale: setContentLocale,
-											})}
+											<PanelNestingContext.Provider value={nestingState}>
+												<PanelChildren />
+											</PanelNestingContext.Provider>
 										</div>
 										<Show when={!props.options?.hideFooter}>
 											<div

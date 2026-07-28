@@ -4,7 +4,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { documentServices, previewSessionServices } from "../../index.js";
-import invalidateClientDocumentCache from "../helpers/invalidate-client-cache.js";
+import invalidateContentDocumentCache from "../helpers/invalidate-content-cache.js";
 
 /**
  * Deletes a single document
@@ -155,7 +155,7 @@ const deleteDocument: ServiceFn<
 	);
 	if (hookAfterRes.error) return hookAfterRes;
 
-	await invalidateClientDocumentCache(context, data.collectionKey);
+	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	return {
 		error: undefined,

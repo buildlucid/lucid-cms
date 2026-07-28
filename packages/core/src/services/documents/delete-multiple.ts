@@ -8,7 +8,7 @@ import {
 	documentServices,
 	previewSessionServices,
 } from "../index.js";
-import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
+import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 
 const deleteMultiple: ServiceFn<
 	[
@@ -208,7 +208,7 @@ const deleteMultiple: ServiceFn<
 	);
 	if (hookAfterRes.error) return hookAfterRes;
 
-	await invalidateClientDocumentCache(context, data.collectionKey);
+	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	return {
 		data: undefined,

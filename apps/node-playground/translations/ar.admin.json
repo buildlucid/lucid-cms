@@ -2,7 +2,7 @@
 	"account.preferences.description": "خصص تجربة إدارة المحتوى الخاصة بك.",
 	"account.preferences.title": "التفضيلات",
 	"actions.reset.password": "إعادة تعيين كلمة المرور",
-	"client.integrations.list.title": "تكاملات العميل",
+	"integrations.list.title": "التكاملات",
 	"collections.blog.name": "المدونات",
 	"collections.blog.singularName": "مدونة",
 	"collections.blog.summary": "إدارة المدونات.",

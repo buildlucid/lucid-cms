@@ -1,4 +1,4 @@
-import type { ClientGetMultipleQueryParams } from "../../../schemas/media.js";
+import type { ContentGetMultipleQueryParams } from "../../../schemas/media.js";
 import { mediaServices } from "../../../services/index.js";
 import type { Media } from "../../../types/response.js";
 import type {
@@ -13,7 +13,7 @@ import {
 } from "../utils.js";
 
 export type ToolkitMediaGetMultipleQuery = Omit<
-	ClientGetMultipleQueryParams,
+	ContentGetMultipleQueryParams,
 	"page" | "perPage"
 > & {
 	page?: number;
@@ -35,7 +35,7 @@ const getMultiple = async (
 ): ServiceResponse<ToolkitMediaGetMultipleResult> =>
 	runToolkitService(
 		() =>
-			mediaServices.client.getMultiple(withToolkitTenant(context, input), {
+			mediaServices.content.getMultiple(withToolkitTenant(context, input), {
 				query: normalizePaginatedQuery(input.query),
 			}),
 		{

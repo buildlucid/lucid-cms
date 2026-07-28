@@ -4,7 +4,7 @@ import z from "zod";
 import constants from "../../constants/constants.js";
 import { versionTypesSchema } from "../../schemas/document-versions.js";
 import type {
-	ClientGetSingleQueryParams,
+	ContentGetSingleQueryParams,
 	GetMultipleQueryParams,
 } from "../../schemas/documents.js";
 import type {
@@ -1083,7 +1083,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			documentFilters: QueryParamFilters;
 			brickFilters: BrickFilters[];
 			relationDocumentFilters: RelationDocumentFilter[];
-			query: ClientGetSingleQueryParams;
+			query: ContentGetSingleQueryParams;
 			collection: CollectionBuilder;
 			config: Config;
 			tenantKey?: string | null;

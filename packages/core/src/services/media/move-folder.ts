@@ -5,7 +5,7 @@ import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compatibility.js";
-import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
+import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 
 const moveFolder: ServiceFn<
 	[
@@ -74,8 +74,8 @@ const moveFolder: ServiceFn<
 	if (mediaUpdateRes.error) return mediaUpdateRes;
 
 	await Promise.all([
-		clearClientMediaSingleCache(context, data.id),
-		invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
+		clearContentMediaSingleCache(context, data.id),
+		invalidateHttpCacheTags(context, [cacheKeys.http.tags.contentMedia]),
 	]);
 
 	return {

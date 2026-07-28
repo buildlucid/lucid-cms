@@ -3,7 +3,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import { documentServices } from "../index.js";
-import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
+import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 
 const restoreMultiple: ServiceFn<
 	[
@@ -99,7 +99,7 @@ const restoreMultiple: ServiceFn<
 	);
 	if (updateRes.error) return updateRes;
 
-	await invalidateClientDocumentCache(context, data.collectionKey);
+	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	return { error: undefined, data: undefined };
 };

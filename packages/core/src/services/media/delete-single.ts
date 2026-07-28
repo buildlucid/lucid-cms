@@ -4,7 +4,7 @@ import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
-import clearClientMediaSingleCache from "./helpers/clear-client-media-cache.js";
+import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 
 const deleteSingle: ServiceFn<
 	[
@@ -47,8 +47,8 @@ const deleteSingle: ServiceFn<
 	if (deleteMediaRes.error) return deleteMediaRes;
 
 	await Promise.all([
-		clearClientMediaSingleCache(context, data.id),
-		invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
+		clearContentMediaSingleCache(context, data.id),
+		invalidateHttpCacheTags(context, [cacheKeys.http.tags.contentMedia]),
 	]);
 
 	if (deleteMediaRes.data) {

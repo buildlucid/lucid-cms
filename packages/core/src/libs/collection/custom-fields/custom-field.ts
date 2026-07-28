@@ -39,7 +39,7 @@ abstract class CustomField<T extends FieldTypes> {
 	tabParent: string | null = null;
 	/**
 	 * Structural parent key when this field sits directly inside a
-	 * section/collapsible. Structural parents only affect UI nesting and client
+	 * section/collapsible. Structural parents only affect UI nesting and content
 	 * response shaping - storage is unaffected.
 	 */
 	structuralParent: string | null = null;

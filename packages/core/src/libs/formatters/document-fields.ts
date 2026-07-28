@@ -395,27 +395,27 @@ const isStructuralFieldConfig = (
 };
 
 /**
- * Walks a client field tree level and collects flattened values into `target`.
+ * Walks a content field tree level and collects flattened values into `target`.
  * Tabs are transparent, sections/collapsibles shape their children based on
  * their `output` config and repeater groups recurse with their child configs.
  */
-const collectClientFieldValues = (
+const collectContentFieldValues = (
 	target: DocumentFieldValueMap,
 	fieldMap: Map<string, InternalDocumentField>,
 	configs: CFConfig<FieldTypes>[],
 ): void => {
 	for (const config of configs) {
 		if (config.type === "tab") {
-			collectClientFieldValues(target, fieldMap, config.fields);
+			collectContentFieldValues(target, fieldMap, config.fields);
 			continue;
 		}
 
 		if (isStructuralFieldConfig(config)) {
 			if (config.output === "inline") {
-				collectClientFieldValues(target, fieldMap, config.fields);
+				collectContentFieldValues(target, fieldMap, config.fields);
 			} else {
 				const nested: DocumentFieldValueMap = {};
-				collectClientFieldValues(nested, fieldMap, config.fields);
+				collectContentFieldValues(nested, fieldMap, config.fields);
 				target[config.key] = nested;
 			}
 			continue;
@@ -440,15 +440,15 @@ const collectClientFieldValues = (
 };
 
 /**
- * Flattens fields into the client value map. When a client field tree is
+ * Flattens fields into the content value map. When a content field tree is
  * provided, sections/collapsibles shape their children based on their
  * `output` config - nested under their key or inlined as if absent.
  */
 const flattenFields = (
 	fields: InternalDocumentField[],
-	clientFieldTree?: CFConfig<FieldTypes>[],
+	contentFieldTree?: CFConfig<FieldTypes>[],
 ): DocumentFieldValueMap => {
-	if (!clientFieldTree) {
+	if (!contentFieldTree) {
 		return fields.reduce((acc, field) => {
 			if (!field) return acc;
 
@@ -461,7 +461,7 @@ const flattenFields = (
 		fields.filter((field) => !!field).map((field) => [field.key, field]),
 	);
 	const result: DocumentFieldValueMap = {};
-	collectClientFieldValues(result, fieldMap, clientFieldTree);
+	collectContentFieldValues(result, fieldMap, contentFieldTree);
 	return result;
 };
 

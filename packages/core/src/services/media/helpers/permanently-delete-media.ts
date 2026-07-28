@@ -8,7 +8,7 @@ import {
 import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
-import clearClientMediaSingleCache from "./clear-client-media-cache.js";
+import clearContentMediaSingleCache from "./clear-content-media-cache.js";
 
 /** Permanently deletes owned descendants before their parent and stored objects. */
 const permanentlyDeleteMedia: ServiceFn<
@@ -115,8 +115,8 @@ const permanentlyDeleteMedia: ServiceFn<
 
 	if (data.invalidateCache !== false) {
 		await Promise.all([
-			clearClientMediaSingleCache(context, data.id),
-			invalidateHttpCacheTags(context, [cacheKeys.http.tags.clientMedia]),
+			clearContentMediaSingleCache(context, data.id),
+			invalidateHttpCacheTags(context, [cacheKeys.http.tags.contentMedia]),
 		]);
 	}
 

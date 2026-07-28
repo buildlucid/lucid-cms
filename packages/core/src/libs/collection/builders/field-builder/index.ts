@@ -36,10 +36,10 @@ import type { FieldBuilderMeta } from "./types.js";
  *   their children nested. Used for admin rendering.
  * - `persisted` only includes stored fields, nested by storage scope. Used for
  *   schema inference and value formatting.
- * - `client` includes stored fields plus sections/collapsibles with their
- *   children nested. Tabs are transparent. Used for client response shaping.
+ * - `content` includes stored fields plus sections/collapsibles with their
+ *   children nested. Tabs are transparent. Used for content response shaping.
  */
-type FieldTreeMode = "full" | "persisted" | "client";
+type FieldTreeMode = "full" | "persisted" | "content";
 
 type ContainerStackEntry = {
 	kind: "repeater" | "section" | "collapsible";
@@ -65,12 +65,12 @@ class FieldBuilder {
 	activeTabKey: string | null = null;
 	private cachedFieldTree: CFConfig<FieldTypes>[] | null = null;
 	private cachedPersistedFieldTree: CFConfig<FieldTypes>[] | null = null;
-	private cachedClientFieldTree: CFConfig<FieldTypes>[] | null = null;
+	private cachedContentFieldTree: CFConfig<FieldTypes>[] | null = null;
 
 	protected invalidateFieldTreeCache() {
 		this.cachedFieldTree = null;
 		this.cachedPersistedFieldTree = null;
-		this.cachedClientFieldTree = null;
+		this.cachedContentFieldTree = null;
 	}
 
 	private registerField(key: string, field: CustomField<FieldTypes>) {
@@ -231,7 +231,7 @@ class FieldBuilder {
 			if (
 				isStorageMode(registeredFields[field.type].config.database, "ignore")
 			) {
-				return mode === "client" && isStructuralFieldType(field.type);
+				return mode === "content" && isStructuralFieldType(field.type);
 			}
 			return true;
 		});
@@ -306,12 +306,12 @@ class FieldBuilder {
 
 		return this.cachedPersistedFieldTree;
 	}
-	get clientFieldTree(): CFConfig<FieldTypes>[] {
-		if (!this.cachedClientFieldTree) {
-			this.cachedClientFieldTree = this.nestFields("client");
+	get contentFieldTree(): CFConfig<FieldTypes>[] {
+		if (!this.cachedContentFieldTree) {
+			this.cachedContentFieldTree = this.nestFields("content");
 		}
 
-		return this.cachedClientFieldTree;
+		return this.cachedContentFieldTree;
 	}
 	get flatFields(): CFConfig<FieldTypes>[] {
 		const config: CFConfig<FieldTypes>[] = [];

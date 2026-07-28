@@ -38,9 +38,14 @@ export type LucidApiKeyExternalAuth = LucidExternalAuthBase & {
 		type: "api-key";
 		integrationId: number;
 	};
-	principal: {
-		type: "system";
-	};
+	principal:
+		| {
+				type: "system";
+		  }
+		| {
+				type: "user";
+				userId: number;
+		  };
 };
 
 export type LucidOAuthExternalAuth = LucidExternalAuthBase & {

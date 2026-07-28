@@ -7,7 +7,7 @@ import type {
 import { runToolkitService } from "../utils.js";
 
 const getAll = async (context: ServiceContext): ServiceResponse<Locale[]> =>
-	runToolkitService(() => localeServices.client.getAll(context), {
+	runToolkitService(() => localeServices.content.getAll(context), {
 		name: {
 			key: "core.toolkit.locales.get.all.error.name",
 			defaultMessage: "Locales Toolkit Error",

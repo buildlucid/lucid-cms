@@ -14,7 +14,7 @@ export interface SectionFieldConfig extends SharedFieldConfig {
 		label?: AdminCopyInput;
 		summary?: AdminCopyInput;
 	};
-	/** Controls how child fields are shaped in client document responses. */
+	/** Controls how child fields are shaped in content API document responses. */
 	output: StructuralFieldOutput;
 	ui?: Pick<FieldUIConfig, "condition" | "width">;
 	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];

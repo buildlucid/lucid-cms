@@ -11,6 +11,7 @@ import {
 import InfoRow from "@/components/Blocks/InfoRow";
 import UpdateAccountForm from "@/components/Forms/Account/UpdateAccountForm";
 import { OAuthConnectionsList } from "@/components/Groups/Content/OAuthConnectionsList";
+import { UserIntegrationsList } from "@/components/Groups/Content/UserIntegrationsList";
 import { Select } from "@/components/Groups/Form";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Confirmation } from "@/components/Groups/Modal";
@@ -353,6 +354,13 @@ export const Account: Component = () => {
 				owner={{ type: "account" }}
 				canUpdate={true}
 				canRevoke={true}
+			/>
+			<UserIntegrationsList
+				services={api.account.integrations}
+				canCreate={true}
+				canUpdate={true}
+				canDelete={true}
+				canRegenerate={true}
 			/>
 			{/* Configuration */}
 			<InfoRow.Root

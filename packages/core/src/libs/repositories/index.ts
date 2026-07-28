@@ -2,8 +2,6 @@ export type { AiUsageChartRowPropT } from "./ai-generations.js";
 export { default as AiGenerationsRepository } from "./ai-generations.js";
 export { default as AlertRecipientsRepository } from "./alert-recipients.js";
 export { default as AlertsRepository } from "./alerts.js";
-export { default as ApiIntegrationScopesRepository } from "./api-integration-scopes.js";
-export { default as ApiIntegrationsRepository } from "./api-integrations.js";
 export { default as AuthStatesRepository } from "./auth-states.js";
 export { default as CollectionMigrationsRepository } from "./collection-migrations.js";
 export { default as CollectionsRepository } from "./collections.js";
@@ -20,6 +18,8 @@ export { default as EmailChangeRequestsRepository } from "./email-change-request
 export { default as EmailTenantsRepository } from "./email-tenants.js";
 export { default as EmailTransactionsRepository } from "./email-transactions.js";
 export { default as EmailsRepository } from "./emails.js";
+export { default as IntegrationScopesRepository } from "./integration-scopes.js";
+export { default as IntegrationsRepository } from "./integrations.js";
 export { default as LocalesRepository } from "./locales.js";
 export {
 	default as LucidRemoteConnectionsRepository,

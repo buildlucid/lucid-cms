@@ -30,7 +30,7 @@ describe("@lucidcms/client", () => {
 					},
 					meta: {
 						links: [],
-						path: "https://example.com/lucid/api/v1/client/document/page",
+						path: "https://example.com/lucid/api/v1/content/document/page",
 						currentPage: null,
 						lastPage: null,
 						perPage: null,
@@ -96,7 +96,7 @@ describe("@lucidcms/client", () => {
 		expect(response.error).toBeUndefined();
 		expect(response.data?.data.id).toBe(1);
 		expect(response.data?.meta.path).toBe(
-			"https://example.com/lucid/api/v1/client/document/page",
+			"https://example.com/lucid/api/v1/content/document/page",
 		);
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 
@@ -131,7 +131,7 @@ describe("@lucidcms/client", () => {
 					},
 					meta: {
 						links: [],
-						path: `https://example.com/lucid/api/v1/client/preview/${token}`,
+						path: `https://example.com/lucid/api/v1/content/preview/${token}`,
 						currentPage: null,
 						lastPage: null,
 						perPage: null,
@@ -167,7 +167,7 @@ describe("@lucidcms/client", () => {
 		});
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toBe(
-			`https://example.com/lucid/api/v1/client/preview/${token}`,
+			`https://example.com/lucid/api/v1/content/preview/${token}`,
 		);
 		expect(new Headers(init?.headers).get("authorization")).toBe(
 			"Bearer access-token",
@@ -202,7 +202,7 @@ describe("@lucidcms/client", () => {
 						data: [],
 						meta: {
 							links: [],
-							path: "https://example.com/lucid/api/v1/client/documents/page",
+							path: "https://example.com/lucid/api/v1/content/documents/page",
 							currentPage: 1,
 							lastPage: 1,
 							perPage: 10,
@@ -251,7 +251,7 @@ describe("@lucidcms/client", () => {
 			data: [],
 			meta: {
 				links: [],
-				path: "https://example.com/lucid/api/v1/client/documents/page",
+				path: "https://example.com/lucid/api/v1/content/documents/page",
 				currentPage: 1,
 				lastPage: 1,
 				perPage: 10,
@@ -269,7 +269,7 @@ describe("@lucidcms/client", () => {
 		const firstRequestUrl = new URL(String(fetchMock.mock.calls[0]?.[0]));
 		const secondRequestUrl = new URL(String(fetchMock.mock.calls[1]?.[0]));
 		expect(firstRequestUrl.pathname).toBe(
-			"/lucid/api/v1/client/documents/page",
+			"/lucid/api/v1/content/documents/page",
 		);
 		expect(firstRequestUrl.searchParams.get("version")).toBe("latest");
 		expect(firstRequestUrl.searchParams.get("include")).toBe(
@@ -476,14 +476,14 @@ describe("@lucidcms/client", () => {
 		expect(response.data).toBeUndefined();
 	});
 
-	test("accepts a full client endpoint base URL without duplicating the client path", async () => {
+	test("accepts a full content endpoint base URL without duplicating the content path", async () => {
 		const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
 			new Response(
 				JSON.stringify({
 					data: [],
 					meta: {
 						links: [],
-						path: "https://example.com/lucid/api/v1/client/locales",
+						path: "https://example.com/lucid/api/v1/content/locales",
 						currentPage: null,
 						lastPage: null,
 						perPage: null,
@@ -500,7 +500,7 @@ describe("@lucidcms/client", () => {
 		);
 
 		const client = createClient({
-			baseUrl: "https://example.com/lucid/api/v1/client",
+			baseUrl: "https://example.com/lucid/api/v1/content",
 			auth: {
 				type: "apiKey",
 				apiKey: "client-key",
@@ -513,7 +513,7 @@ describe("@lucidcms/client", () => {
 		expect(response.error).toBeUndefined();
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
-			"https://example.com/lucid/api/v1/client/locales",
+			"https://example.com/lucid/api/v1/content/locales",
 		);
 	});
 });

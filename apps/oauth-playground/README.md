@@ -9,4 +9,4 @@ It supports:
 - Authorization Server and Protected Resource discovery
 - access-token refresh and refresh-token revocation
 - user and system grants selected in the Lucid consent screen
-- authenticated external API requests using OAuth or an API integration key
+- authenticated external API requests using OAuth or an integration key

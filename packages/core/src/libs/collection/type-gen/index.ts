@@ -6,7 +6,7 @@ import registeredFields from "../custom-fields/registered-fields.js";
 import { storageModes } from "../custom-fields/storage/index.js";
 import type {
 	CFConfig,
-	ClientFieldTypeGenerationResult,
+	ContentFieldTypeGenerationResult,
 	FieldTypes,
 } from "../custom-fields/types.js";
 import {
@@ -163,9 +163,9 @@ const renderFilterTree = (tree: FilterTreeNode): string => {
 };
 
 /**
- * Collects the rendered properties for one client field list. Tabs are
+ * Collects the rendered properties for one content field list. Tabs are
  * transparent, sections/collapsibles nest or inline their children based on
- * their `output` config to match the client response shape.
+ * their `output` config to match the content response shape.
  */
 const collectFieldMapProperties = (
 	fields: CFConfig<FieldTypes>[],
@@ -211,7 +211,7 @@ const collectFieldMapProperties = (
 	}
 };
 
-/** Renders one client field list into a reusable object field map type. */
+/** Renders one content field list into a reusable object field map type. */
 const renderFieldMap = (
 	fields: CFConfig<FieldTypes>[],
 	context: RenderFieldContext,
@@ -234,7 +234,7 @@ const renderFieldMap = (
 	};
 };
 
-/** Chooses the exact field helper type that matches the formatted client response shape. */
+/** Chooses the exact field helper type that matches the formatted content response shape. */
 const renderBaseFieldType = (props: {
 	field: CFConfig<FieldTypes>;
 	mode: "groups" | "translations" | "value";
@@ -264,14 +264,14 @@ const renderField = (
 		fieldInstance?.localizedEnabled === true
 			? "translations"
 			: "value";
-	const fieldTypeGen: ClientFieldTypeGenerationResult =
-		fieldDefinition.clientTypeGen?.({
+	const fieldTypeGen: ContentFieldTypeGenerationResult =
+		fieldDefinition.contentTypeGen?.({
 			field: field as never,
 		}) ?? {
 			valueType: "unknown",
 		};
 
-	return storageModes[fieldDefinition.config.database.mode].clientTypeGen({
+	return storageModes[fieldDefinition.config.database.mode].contentTypeGen({
 		builder: context.builder,
 		collectionUsesTranslations: context.collectionUsesTranslations,
 		field,
@@ -620,7 +620,7 @@ const buildCollectionTypeDeclarations = (
 	const collectionVersionKeyTypeName = buildCollectionVersionKeyTypeName(
 		collection.key,
 	);
-	const collectionFields = renderFieldMap(collection.clientFieldTree, {
+	const collectionFields = renderFieldMap(collection.contentFieldTree, {
 		builder: collection,
 		collectionUsesTranslations: collection.getData.localized,
 		withinGroup: false,
@@ -660,7 +660,7 @@ const buildCollectionTypeDeclarations = (
 			brickKey: brick.key,
 			brickType,
 		});
-		const brickFields = renderFieldMap(brick.clientFieldTree, {
+		const brickFields = renderFieldMap(brick.contentFieldTree, {
 			builder: brick,
 			collectionUsesTranslations: collection.getData.localized,
 			withinGroup: false,
@@ -792,7 +792,7 @@ const buildGeneratedMapsDeclaration = (props: {
 	return dedupeStrings(declarations);
 };
 
-/** Generates the `.lucid/client.d.ts` file for collection-aware client-facing types. */
+/** Generates the `.lucid/client.d.ts` file for collection-aware content-facing types. */
 const generateCollectionClientTypes = (props: {
 	collections: CollectionBuilder[];
 	localization: CollectionTypeGenLocalization;

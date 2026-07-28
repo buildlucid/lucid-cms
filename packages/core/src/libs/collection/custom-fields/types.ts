@@ -124,7 +124,7 @@ export const fieldWidths = [12, 8, 6, 4, 3] as const;
 /** Admin layout width on a fixed 12-column grid. */
 export type FieldWidth = (typeof fieldWidths)[number];
 
-/** Controls how structural fields shape their children in client responses. */
+/** Controls how structural fields shape their children in content responses. */
 export type StructuralFieldOutput = "nested" | "inline";
 
 export type FieldUIConfig = {
@@ -277,21 +277,21 @@ export type FieldRef =
 	| CustomFieldMap[FieldTypes]["response"]["ref"]
 	| undefined;
 
-export type ClientFieldTypeGenerationContext<
+export type ContentFieldTypeGenerationContext<
 	T extends FieldTypes = FieldTypes,
 > = {
 	field: CFConfig<T>;
 };
 
-export type ClientFieldTypeGenerationResult = {
+export type ContentFieldTypeGenerationResult = {
 	valueType: string;
 	fieldType?: string;
 	declarations?: string[];
 };
 
-export type ClientFieldTypeGenerator<T extends FieldTypes = FieldTypes> = (
-	context: ClientFieldTypeGenerationContext<T>,
-) => ClientFieldTypeGenerationResult;
+export type ContentFieldTypeGenerator<T extends FieldTypes = FieldTypes> = (
+	context: ContentFieldTypeGenerationContext<T>,
+) => ContentFieldTypeGenerationResult;
 
 /** Formats raw query filter values so they match a field's persisted column type. */
 export type CustomFieldFilterFormatter = (props: {
@@ -309,7 +309,7 @@ export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	formatRef?: unknown;
 	formatFilterValue?: CustomFieldFilterFormatter | null;
 	nullifyReferences?: unknown;
-	clientTypeGen?: ClientFieldTypeGenerator<T> | null;
+	contentTypeGen?: ContentFieldTypeGenerator<T> | null;
 };
 
 export type FieldRelationValidationInput = Record<string, number[]>;

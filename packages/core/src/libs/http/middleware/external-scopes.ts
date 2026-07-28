@@ -29,8 +29,8 @@ export const externalScopeCheck = (
 		}
 		throw new LucidAPIError({
 			type: "forbidden",
-			name: copy("server:core.client.integrations.scopes.error.name"),
-			message: copy("server:core.client.integrations.scopes.missing.message", {
+			name: copy("server:core.integrations.scopes.error.name"),
+			message: copy("server:core.integrations.scopes.missing.message", {
 				data: {
 					requiredScopes: requiredScopes.join(", "),
 					missingScopes: missingScopes.join(", "),

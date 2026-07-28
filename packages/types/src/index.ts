@@ -1,9 +1,9 @@
 export type * from "./common/errors.js";
 export type * from "./common/responses.js";
 export type * from "./resources/ai/index.js";
-export type * from "./resources/api-integrations/index.js";
 export type * from "./resources/documents/index.js";
 export type * from "./resources/emails/index.js";
+export type * from "./resources/integrations/index.js";
 export type * from "./resources/locales/index.js";
 export type * from "./resources/media/index.js";
 export type * from "./resources/queue/index.js";

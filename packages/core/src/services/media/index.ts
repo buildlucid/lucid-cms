@@ -1,8 +1,8 @@
 export { default as abortUploadSession } from "./abort-upload-session.js";
 export { default as adjustStorageUsage } from "./adjust-storage-usage.js";
 export * as checks from "./checks/index.js";
-export * as client from "./client/index.js";
 export { default as completeUploadSession } from "./complete-upload-session.js";
+export * as content from "./content/index.js";
 export { default as createSingle } from "./create-single.js";
 export { default as createUploadSession } from "./create-upload-session.js";
 export { default as deleteBatch } from "./delete-batch.js";

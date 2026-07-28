@@ -9,6 +9,7 @@ import {
 	Show,
 } from "solid-js";
 import { OAuthConnectionsList } from "@/components/Groups/Content/OAuthConnectionsList";
+import { UserIntegrationsList } from "@/components/Groups/Content/UserIntegrationsList";
 import { SelectMultiple, Switch } from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Panel } from "@/components/Groups/Panel";
@@ -53,7 +54,12 @@ const UpdateUserPanel: Component<{
 	const [profilePicturePanelOpen, setProfilePicturePanelOpen] =
 		createSignal(false);
 	const [activeTab, setActiveTab] = createSignal<
-		"options" | "details" | "auth_providers" | "oauth_connections" | "meta"
+		| "options"
+		| "details"
+		| "auth_providers"
+		| "oauth_connections"
+		| "integrations"
+		| "meta"
 	>("options");
 
 	// ---------------------------------
@@ -292,6 +298,10 @@ const UpdateUserPanel: Component<{
 									value: "oauth_connections",
 									label: T()("oauth.connections.manage.title"),
 								},
+								{
+									value: "integrations",
+									label: T()("integrations.manage.title"),
+								},
 								{ value: "meta", label: T()("common.meta") },
 							]}
 							active={activeTab()}
@@ -449,6 +459,24 @@ const UpdateUserPanel: Component<{
 										userStore.get.hasPermission([Permissions.UsersUpdate]).all
 									}
 									canRevoke={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									embedded={true}
+								/>
+							)}
+						</Show>
+						<Show when={activeTab() === "integrations" && props.id()}>
+							{(userId) => (
+								<UserIntegrationsList
+									services={api.users.integrations(userId)}
+									canCreate={userStore.get.user?.superAdmin === true}
+									canUpdate={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									canDelete={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									canRegenerate={
 										userStore.get.hasPermission([Permissions.UsersUpdate]).all
 									}
 									embedded={true}

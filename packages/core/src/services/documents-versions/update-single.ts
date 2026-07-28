@@ -6,7 +6,7 @@ import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { DocumentVersionUpdateResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import invalidateClientDocumentCache from "../documents/helpers/invalidate-client-cache.js";
+import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
 import { documentBrickServices } from "../index.js";
 import getUpdateContext from "./helpers/get-update-context.js";
 
@@ -159,7 +159,7 @@ const updateSingle: ServiceFn<
 	);
 	if (updateVersionRes.error) return updateVersionRes;
 
-	await invalidateClientDocumentCache(context, data.collectionKey);
+	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	return {
 		error: undefined,

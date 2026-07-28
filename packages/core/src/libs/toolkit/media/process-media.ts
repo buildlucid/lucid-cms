@@ -23,7 +23,7 @@ const processMedia = async (
 ): ServiceResponse<MediaUrl> =>
 	runToolkitService(
 		() =>
-			mediaServices.client.processMedia(withToolkitTenant(context, input), {
+			mediaServices.content.processMedia(withToolkitTenant(context, input), {
 				key: input.key,
 				body: normalizeQuery(input.body),
 			}),

@@ -1,6 +1,6 @@
 import { type Component, createMemo, createSignal } from "solid-js";
 import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
-import { ApiIntegrationsList } from "@/components/Groups/Content";
+import { IntegrationsList } from "@/components/Groups/Content";
 import { Wrapper } from "@/components/Groups/Layout";
 import { Permissions } from "@/constants/permissions";
 import useQueryState, {
@@ -11,7 +11,7 @@ import useQueryState, {
 import userStore from "@/store/userStore";
 import T from "@/translations";
 
-const SystemApiIntegrationsRoute: Component = () => {
+const SystemIntegrationsRoute: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	const searchParams = useQueryState({
@@ -24,6 +24,7 @@ const SystemApiIntegrationsRoute: Component = () => {
 				enabled: booleanFilter(),
 				scope: textFilter(),
 				lastUsedAt: textFilter(),
+				expiresAt: textFilter(),
 				lastUsedIp: textFilter(),
 				createdAt: textFilter(),
 				updatedAt: textFilter(),
@@ -39,17 +40,17 @@ const SystemApiIntegrationsRoute: Component = () => {
 			singleSort: true,
 		},
 	});
-	const [openCreateApiIntegrationPanel, setOpenCreateApiIntegrationPanel] =
+	const [openCreateIntegrationPanel, setOpenCreateIntegrationPanel] =
 		createSignal(false);
 
 	// ----------------------------------------
 	// Memos
-	const canReadApiIntegrations = createMemo(
+	const canReadIntegrations = createMemo(
 		() => userStore.get.hasPermission([Permissions.IntegrationsRead]).all,
 	);
 	const hasCreatePermission = createMemo(() => {
 		return (
-			canReadApiIntegrations() &&
+			canReadIntegrations() &&
 			userStore.get.hasPermission([Permissions.IntegrationsCreate]).all
 		);
 	});
@@ -64,10 +65,10 @@ const SystemApiIntegrationsRoute: Component = () => {
 						actions={{
 							create: [
 								{
-									open: openCreateApiIntegrationPanel(),
-									setOpen: setOpenCreateApiIntegrationPanel,
+									open: openCreateIntegrationPanel(),
+									setOpen: setOpenCreateIntegrationPanel,
 									permission: hasCreatePermission(),
-									label: T()("client.integrations.create.action"),
+									label: T()("integrations.create.action"),
 								},
 							],
 						}}
@@ -75,15 +76,15 @@ const SystemApiIntegrationsRoute: Component = () => {
 				),
 			}}
 		>
-			<ApiIntegrationsList
+			<IntegrationsList
 				state={{
 					searchParams,
-					openCreateApiIntegrationPanel: openCreateApiIntegrationPanel,
-					setOpenCreateApiIntegrationPanel: setOpenCreateApiIntegrationPanel,
+					openCreateIntegrationPanel: openCreateIntegrationPanel,
+					setOpenCreateIntegrationPanel: setOpenCreateIntegrationPanel,
 				}}
 			/>
 		</Wrapper>
 	);
 };
 
-export default SystemApiIntegrationsRoute;
+export default SystemIntegrationsRoute;

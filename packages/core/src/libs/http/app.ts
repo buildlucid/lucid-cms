@@ -440,24 +440,24 @@ const createApp = async (props: {
 									"AI endpoints for generating CMS content with Lucid AI features.",
 							},
 							{
-								name: "api-integrations",
+								name: "integrations",
 								description:
-									"Endpoints for managing API integration credentials used by external applications.",
+									"Endpoints for managing integration credentials used by external applications.",
 							},
 							{
-								name: "client-documents",
+								name: "content-documents",
 								description:
 									"External document endpoints authorized by API keys or OAuth access tokens.",
 							},
 							{
-								name: "client-previews",
+								name: "content-previews",
 								description:
-									"Client preview endpoints for resolving preview metadata in browser applications.",
+									"Content preview endpoints for resolving preview metadata in browser applications.",
 							},
 							{
-								name: "client-locales",
+								name: "content-locales",
 								description:
-									"Client locale endpoints for fetching locale information.",
+									"Content locale endpoints for fetching locale information.",
 							},
 						],
 						servers: configuredHost

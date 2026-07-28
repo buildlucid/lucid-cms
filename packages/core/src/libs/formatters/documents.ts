@@ -226,10 +226,10 @@ const formatVersions = (props: {
 };
 
 /**
- * Formats multiple documents into the client-facing document shape while
+ * Formats multiple documents into the content-facing document shape while
  * preserving the caller's collection-key generic at the formatter boundary.
  */
-const formatClientMultiple = <TCollectionKey extends string = string>(props: {
+const formatContentMultiple = <TCollectionKey extends string = string>(props: {
 	documents: DocumentQueryResponse[];
 	collection: CollectionBuilder;
 	config: Config;
@@ -281,7 +281,7 @@ const formatClientMultiple = <TCollectionKey extends string = string>(props: {
 				})
 			: null;
 
-		return formatClientSingle<TCollectionKey>({
+		return formatContentSingle<TCollectionKey>({
 			document: d,
 			collection: props.collection,
 			config: props.config,
@@ -294,7 +294,7 @@ const formatClientMultiple = <TCollectionKey extends string = string>(props: {
 	});
 };
 
-const formatClientMeta = (props: {
+const formatContentMeta = (props: {
 	document: DocumentQueryResponse;
 	collection: CollectionBuilder;
 }) => {
@@ -311,7 +311,7 @@ const formatClientMeta = (props: {
 	};
 };
 
-const formatClientBricks = (
+const formatContentBricks = (
 	bricks: InternalDocumentBrick[] | null | undefined,
 	collection: CollectionBuilder,
 ) => {
@@ -328,17 +328,17 @@ const formatClientBricks = (
 			order: brick.order,
 			fields: documentFieldsFormatter.flattenFields(
 				brick.fields,
-				brickInstance?.clientFieldTree,
+				brickInstance?.contentFieldTree,
 			),
 		};
 	});
 };
 
 /**
- * Formats one document into the client response shape used by the public
- * client and toolkit helpers.
+ * Formats one document into the content response shape used by the public
+ * client package and toolkit helpers.
  */
-const formatClientSingle = <TCollectionKey extends string = string>(props: {
+const formatContentSingle = <TCollectionKey extends string = string>(props: {
 	document: DocumentQueryResponse;
 	collection: CollectionBuilder;
 	bricks?: InternalDocumentBrick[];
@@ -352,32 +352,32 @@ const formatClientSingle = <TCollectionKey extends string = string>(props: {
 		meta: boolean;
 	};
 }): CollectionDocument<TCollectionKey> => {
-	const clientRes: Record<string, unknown> = {
+	const contentRes: Record<string, unknown> = {
 		id: props.document.id,
 		collectionKey: props.document.collection_key,
 		version: props.document.version_type ?? null,
 		fields: documentFieldsFormatter.flattenFields(
 			props.fields ?? [],
-			props.collection.clientFieldTree,
+			props.collection.contentFieldTree,
 		),
 	};
 
 	if (props.include.bricks) {
-		clientRes.bricks = formatClientBricks(props.bricks, props.collection);
+		contentRes.bricks = formatContentBricks(props.bricks, props.collection);
 	}
 
 	if (props.include.refs) {
-		clientRes.refs = props.refs ?? {};
+		contentRes.refs = props.refs ?? {};
 	}
 
 	if (props.include.meta) {
-		clientRes.meta = formatClientMeta({
+		contentRes.meta = formatContentMeta({
 			document: props.document,
 			collection: props.collection,
 		});
 	}
 
-	return clientRes as unknown as CollectionDocument<TCollectionKey>;
+	return contentRes as unknown as CollectionDocument<TCollectionKey>;
 };
 
 const formatRefs = (props: {
@@ -428,7 +428,7 @@ const formatRefs = (props: {
 export default {
 	formatMultiple,
 	formatSingle,
-	formatClientMultiple,
-	formatClientSingle,
+	formatContentMultiple,
+	formatContentSingle,
 	formatRefs,
 };

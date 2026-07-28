@@ -1,0 +1,16 @@
+import type { MediaProcessOptions } from "@lucidcms/types";
+import type { MediaUrl } from "../../../types/response.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+import processMedia from "../process-media.js";
+
+const processMediaContent: ServiceFn<
+	[
+		{
+			key: string;
+			body: MediaProcessOptions;
+		},
+	],
+	MediaUrl
+> = async (context, data) => processMedia(context, data);
+
+export default processMediaContent;

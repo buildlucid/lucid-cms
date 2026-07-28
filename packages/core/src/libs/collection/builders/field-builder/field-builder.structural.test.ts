@@ -119,7 +119,7 @@ describe("section and collapsible builder support", () => {
 		expect(instance.fields.get("image")?.treeParent).toBe("images");
 	});
 
-	test("client field tree keeps sections nested and tabs transparent", () => {
+	test("content field tree keeps sections nested and tabs transparent", () => {
 		const instance = new BrickBuilder("hero")
 			.addTab("contentTab")
 			.addText("title")
@@ -131,16 +131,16 @@ describe("section and collapsible builder support", () => {
 			.addText("anchorLabel")
 			.endCollapsible();
 
-		expect(instance.clientFieldTree.map((f) => f.key)).toEqual([
+		expect(instance.contentFieldTree.map((f) => f.key)).toEqual([
 			"title",
 			"badge",
 			"advanced",
 		]);
 
-		const section = instance.clientFieldTree[1] as CFConfig<"section">;
+		const section = instance.contentFieldTree[1] as CFConfig<"section">;
 		expect(section.fields.map((f) => f.key)).toEqual(["label"]);
 
-		const collapsible = instance.clientFieldTree[2] as CFConfig<"collapsible">;
+		const collapsible = instance.contentFieldTree[2] as CFConfig<"collapsible">;
 		expect(collapsible.output).toBe("inline");
 		expect(collapsible.fields.map((f) => f.key)).toEqual(["anchorLabel"]);
 	});

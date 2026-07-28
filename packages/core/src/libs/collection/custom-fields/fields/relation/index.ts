@@ -17,5 +17,5 @@ export default {
 	formatRef: formatRelationRef,
 	formatFilterValue: formatIntegerFilterValue,
 	nullifyReferences: nullifyRelationReferences,
-	clientTypeGen: createRelationValueFieldTypeGenerator(),
+	contentTypeGen: createRelationValueFieldTypeGenerator(),
 };

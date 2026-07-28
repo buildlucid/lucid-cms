@@ -6,7 +6,7 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 	return {
 		async up(db: Kysely<unknown>) {
 			await db.schema
-				.createTable("lucid_api_integrations")
+				.createTable("lucid_integrations")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
@@ -15,7 +15,11 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("enabled", adapter.getDataType("boolean"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("cascade"),
+				)
 				.addColumn("tenant_key", adapter.getDataType("text"))
+				.addColumn("expires_at", adapter.getDataType("timestamp"))
 				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.notNull().unique(),
 				)
@@ -47,42 +51,48 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_api_integrations_key")
-				.on("lucid_api_integrations")
+				.createIndex("idx_lucid_integrations_key")
+				.on("lucid_integrations")
 				.column("key")
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_api_integrations_tenant_key")
-				.on("lucid_api_integrations")
+				.createIndex("idx_lucid_integrations_tenant_key")
+				.on("lucid_integrations")
 				.column("tenant_key")
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_api_integrations_api_key")
-				.on("lucid_api_integrations")
+				.createIndex("idx_lucid_integrations_user_id")
+				.on("lucid_integrations")
+				.column("user_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_integrations_expires_at")
+				.on("lucid_integrations")
+				.column("expires_at")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_integrations_api_key")
+				.on("lucid_integrations")
 				.column("api_key")
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_api_integrations_secret")
-				.on("lucid_api_integrations")
+				.createIndex("idx_lucid_integrations_secret")
+				.on("lucid_integrations")
 				.column("secret")
 				.execute();
 
 			await db.schema
-				.createTable("lucid_api_integration_scopes")
+				.createTable("lucid_integration_scopes")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn(
-					"api_integration_id",
-					adapter.getDataType("integer"),
-					(col) =>
-						col
-							.references("lucid_api_integrations.id")
-							.onDelete("cascade")
-							.notNull(),
+				.addColumn("integration_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_integrations.id").onDelete("cascade").notNull(),
 				)
 				.addColumn("scope", adapter.getDataType("text"), (col) => col.notNull())
 				.addColumn("core", adapter.getDataType("boolean"), (col) =>
@@ -114,14 +124,14 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_api_integration_scopes_api_integration_id")
-				.on("lucid_api_integration_scopes")
-				.column("api_integration_id")
+				.createIndex("idx_lucid_integration_scopes_integration_id")
+				.on("lucid_integration_scopes")
+				.column("integration_id")
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_api_integration_scopes_scope")
-				.on("lucid_api_integration_scopes")
+				.createIndex("idx_lucid_integration_scopes_scope")
+				.on("lucid_integration_scopes")
 				.column("scope")
 				.execute();
 

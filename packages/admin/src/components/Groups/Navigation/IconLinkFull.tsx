@@ -32,7 +32,7 @@ interface IconLinkFullProps {
 		| "email"
 		| "logout"
 		| "queue"
-		| "api-integrations"
+		| "integrations"
 		| "settings"
 		| "release-requests";
 	active?: boolean;
@@ -79,7 +79,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 				<Match when={props.icon === "queue"}>
 					<FaSolidBarsProgress class={iconClasses} />
 				</Match>
-				<Match when={props.icon === "api-integrations"}>
+				<Match when={props.icon === "integrations"}>
 					<FaSolidDesktop class={iconClasses} />
 				</Match>
 				<Match when={props.icon === "settings"}>

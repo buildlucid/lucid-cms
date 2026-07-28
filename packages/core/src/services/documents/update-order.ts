@@ -7,7 +7,7 @@ import {
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { documentServices } from "../index.js";
-import invalidateClientDocumentCache from "./helpers/invalidate-client-cache.js";
+import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 
 /** Moves a document between two manual-order neighbours. */
 const updateOrder: ServiceFn<
@@ -143,7 +143,7 @@ const updateOrder: ServiceFn<
 	);
 	if (updateRes.error) return updateRes;
 
-	await invalidateClientDocumentCache(context, data.collectionKey);
+	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	return {
 		error: undefined,

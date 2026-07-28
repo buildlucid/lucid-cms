@@ -1,11 +1,7 @@
-import formatter, {
-	userPermissionsFormatter,
-} from "../../libs/formatters/index.js";
-import { getExternalCapability } from "../../libs/permission/capabilities.js";
 import type { ExternalScope } from "../../libs/permission/external-scopes.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
 import type { LucidOAuthExternalAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import resolveUserAuthority from "../integrations/resolve-user-authority.js";
 
 type AuthorityGrant = {
 	id: number;
@@ -51,45 +47,12 @@ const resolveGrantAuthority: ServiceFn<
 		return { error: { type: "authorisation", status: 401 }, data: undefined };
 	}
 
-	const Users = new UsersRepository(context.db.client, context.config.db);
-	const userRes = await Users.selectAccessTokenUser({
-		where: [
-			{ key: "id", operator: "=", value: grant.user_id },
-			{
-				key: "is_deleted",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "false"),
-			},
-			{
-				key: "is_locked",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "false"),
-			},
-		],
+	const authority = await resolveUserAuthority(context, {
+		userId: grant.user_id,
 		tenantKey: grant.tenant_key,
-		validation: {
-			enabled: true,
-			defaultError: {
-				type: "authorisation",
-				status: 401,
-			},
-		},
+		scopes: grantedScopes,
 	});
-	if (userRes.error) return userRes;
-
-	const superAdmin = formatter.formatBoolean(userRes.data.super_admin ?? false);
-	const { permissions } = userPermissionsFormatter.formatMultiple({
-		roles: userRes.data.roles ?? [],
-		defaultLocale: context.config.localization.defaultLocale,
-	});
-	const effectiveScopes = grantedScopes.filter((scope) => {
-		const capability = getExternalCapability(context.config, scope, {
-			tenantKey: grant.tenant_key,
-		});
-		if (!capability) return false;
-		if (capability.userPermission === null || superAdmin) return true;
-		return permissions?.includes(capability.userPermission) === true;
-	});
+	if (authority.error) return authority;
 
 	return {
 		error: undefined,
@@ -99,12 +62,9 @@ const resolveGrantAuthority: ServiceFn<
 				grantId: grant.id,
 				clientId: grant.client_id,
 			},
-			principal: {
-				type: "user",
-				userId: grant.user_id,
-			},
-			tenantKey: grant.tenant_key,
-			scopes: effectiveScopes,
+			principal: authority.data.principal,
+			tenantKey: authority.data.tenantKey,
+			scopes: authority.data.scopes,
 		},
 	};
 };

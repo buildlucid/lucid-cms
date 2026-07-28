@@ -1,3 +1,4 @@
+import integrations from "./integrations";
 import useCancelEmailChange from "./useCancelEmailChange";
 import useConfirmEmailChange from "./useConfirmEmailChange";
 import useCreateProfilePictureUploadSession from "./useCreateProfilePictureUploadSession";
@@ -30,6 +31,7 @@ const exportObject = {
 	useCreateProfilePictureUploadSession,
 	useUpdateProfilePicture,
 	useDeleteProfilePicture,
+	integrations,
 };
 
 export default exportObject;

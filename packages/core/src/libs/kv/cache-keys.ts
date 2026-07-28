@@ -46,16 +46,16 @@ const cacheKeys = {
 	http: {
 		response: (hash: string) => `http:${hash}`,
 		tags: {
-			clientLocales: "client-locales",
-			clientMedia: "client-media",
-			clientDocuments: "client-documents",
-			clientDocumentsCollection: (collectionKey: string) =>
-				`client-documents:${collectionKey}`,
+			contentLocales: "content-locales",
+			contentMedia: "content-media",
+			contentDocuments: "content-documents",
+			contentDocumentsCollection: (collectionKey: string) =>
+				`content-documents:${collectionKey}`,
 		},
 		static: {
-			clientLocales: `${HTTP_STATIC_PREFIX}client-locales`,
-			clientMediaSingle: (id: string | number, tenantKey?: string | null) =>
-				`${HTTP_STATIC_PREFIX}client-media:${tenantKey ?? "global"}:${id}` as `${typeof HTTP_STATIC_PREFIX}client-media:${string}`,
+			contentLocales: `${HTTP_STATIC_PREFIX}content-locales`,
+			contentMediaSingle: (id: string | number, tenantKey?: string | null) =>
+				`${HTTP_STATIC_PREFIX}content-media:${tenantKey ?? "global"}:${id}` as `${typeof HTTP_STATIC_PREFIX}content-media:${string}`,
 		},
 	},
 } as const;
