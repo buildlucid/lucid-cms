@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
-import { ClientScopes } from "../../../../permission/client-scopes.js";
+import { ExternalScopes } from "../../../../permission/external-scopes.js";
 import cache from "../../../middleware/cache.js";
-import clientAuthentication from "../../../middleware/client-authenticate.js";
-import clientScopes from "../../../middleware/client-scopes.js";
+import externalAuthentication from "../../../middleware/external-authenticate.js";
+import externalScopes from "../../../middleware/external-scopes.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
@@ -23,7 +23,7 @@ const factory = createFactory();
 const getMultipleController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Get multiple media items by filters via the client integration. Supports pagination and translated metadata.",
+			"Get multiple media items by filters via an external credential. Supports pagination and translated metadata.",
 		tags: ["client-media"],
 		summary: "Get Multiple Media",
 		responses: openAPI.responses({
@@ -37,8 +37,8 @@ const getMultipleController = factory.createHandlers(
 			},
 		}),
 	}),
-	clientAuthentication,
-	clientScopes([ClientScopes.MediaRead]),
+	externalAuthentication,
+	externalScopes([ExternalScopes.MediaRead]),
 	validate("query", controllerSchemas.client.getMultiple.query.string),
 	cache({
 		ttl: minutesToSeconds(5),

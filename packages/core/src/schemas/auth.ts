@@ -3,6 +3,32 @@ import { AuthProviderSchema } from "../libs/auth-providers/schema.js";
 import { translate } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 
+const providerCallbackStateSchema = z
+	.string()
+	.regex(/^[A-Za-z0-9_-]{43}$/)
+	.meta({
+		description: "The state token for CSRF protection",
+		example: "abc123def456abc123def456abc123def456abc1234",
+	});
+
+const providerCallbackQuerySchema = z.union([
+	z.object({
+		code: z.string().min(1).max(4096).meta({
+			description: "The authorization code returned by the OAuth provider",
+			example: "4/0AY0e-g7xQZ9...",
+		}),
+		state: providerCallbackStateSchema,
+	}),
+	z.object({
+		error: z
+			.string()
+			.regex(/^[A-Za-z0-9_]+$/)
+			.max(128),
+		error_description: z.string().max(2048).optional(),
+		state: providerCallbackStateSchema,
+	}),
+]);
+
 export const controllerSchemas = {
 	getCSRF: {
 		body: undefined,
@@ -222,6 +248,8 @@ export const controllerSchemas = {
 			redirectPath: z
 				.string()
 				.trim()
+				.max(2048)
+				.regex(/^\/lucid(?:\/|$)/)
 				.meta({
 					description: "The redirect path on a successful callback",
 					example: "/lucid",
@@ -245,29 +273,11 @@ export const controllerSchemas = {
 			}),
 		}),
 	} satisfies ControllerSchema,
-	providerOIDCCallback: {
+	providerCallback: {
 		body: undefined,
 		query: {
-			string: z.object({
-				code: z.string().meta({
-					description: "The authorization code returned by the OAuth provider",
-					example: "4/0AY0e-g7xQZ9...",
-				}),
-				state: z.string().meta({
-					description: "The state token for CSRF protection",
-					example: "abc123def456",
-				}),
-			}),
-			formatted: z.object({
-				code: z.string().meta({
-					description: "The authorization code returned by the OAuth provider",
-					example: "4/0AY0e-g7xQZ9...",
-				}),
-				state: z.string().meta({
-					description: "The state token for CSRF protection",
-					example: "abc123def456",
-				}),
-			}),
+			string: providerCallbackQuerySchema,
+			formatted: providerCallbackQuerySchema,
 		},
 		params: z.object({
 			providerKey: z.string().trim().meta({

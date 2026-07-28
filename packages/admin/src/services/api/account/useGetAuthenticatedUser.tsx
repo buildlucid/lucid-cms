@@ -16,6 +16,7 @@ const useGetAuthenticatedUser = (
 	params: QueryHook<QueryParams>,
 	options?: {
 		authLayout?: boolean;
+		tenant?: boolean;
 	},
 ) => {
 	const navigate = useNavigate();
@@ -25,7 +26,9 @@ const useGetAuthenticatedUser = (
 	);
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 	const tenantKey = createMemo(() =>
-		options?.authLayout ? undefined : tenantStore.get.tenant,
+		options?.authLayout || options?.tenant === false
+			? undefined
+			: tenantStore.get.tenant,
 	);
 
 	const query = useQuery(() => ({
@@ -35,7 +38,7 @@ const useGetAuthenticatedUser = (
 				url: "/lucid/api/v1/account",
 				config: {
 					method: "GET",
-					tenant: !options?.authLayout,
+					tenant: options?.tenant ?? !options?.authLayout,
 				},
 			}),
 		get enabled() {
@@ -52,9 +55,14 @@ const useGetAuthenticatedUser = (
 			if (options?.authLayout) {
 				return;
 			}
-			navigate(getLoginRedirectURL(location.search), {
-				replace: true,
-			});
+			navigate(
+				getLoginRedirectURL(
+					`${location.pathname}${location.search}${location.hash}`,
+				),
+				{
+					replace: true,
+				},
+			);
 		}
 	});
 

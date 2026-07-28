@@ -305,7 +305,7 @@ export interface LucidConfig {
 	localization?: LocalizationConfig;
 	/**
 	 * Tenants to enable multi-tenancy. When one or more tenants are configured, content
-	 * (documents, media, users, roles, client integrations) can be scoped to a tenant.
+	 * (documents, media, users, roles, integrations) can be scoped to a tenant.
 	 * Omit to keep the CMS single-tenant.
 	 */
 	tenants?: TenantConfig[];

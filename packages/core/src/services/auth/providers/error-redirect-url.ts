@@ -49,6 +49,8 @@ const authRedirectUrl: ServiceFn<
 	//* retrieve and validate auth state
 	const authStateRes = await AuthStates.selectSingleWithInvitation({
 		state: data.state,
+		providerKey: data.providerKey,
+		now: new Date().toISOString(),
 		validation: {
 			enabled: true,
 			defaultError: {

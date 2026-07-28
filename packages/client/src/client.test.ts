@@ -48,7 +48,10 @@ describe("@lucidcms/client", () => {
 
 		const client = createClient({
 			baseUrl: "https://example.com",
-			apiKey: "client-key",
+			auth: {
+				type: "apiKey",
+				apiKey: "client-key",
+			},
 			fetch: fetchMock,
 		});
 
@@ -106,7 +109,9 @@ describe("@lucidcms/client", () => {
 		);
 		expect(new URL(String(url)).searchParams.get("version")).toBe("latest");
 		expect(new URL(String(url)).searchParams.has("versionId")).toBe(false);
-		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
+		expect(new Headers(init?.headers).get("authorization")).toBe(
+			"ApiKey client-key",
+		);
 	});
 
 	test("resolves preview metadata for browser applications", async () => {
@@ -141,7 +146,10 @@ describe("@lucidcms/client", () => {
 		);
 		const client = createClient({
 			baseUrl: "https://example.com",
-			apiKey: "client-key",
+			auth: {
+				type: "oauth",
+				accessToken: "access-token",
+			},
 			fetch: fetchMock,
 		});
 
@@ -161,10 +169,16 @@ describe("@lucidcms/client", () => {
 		expect(String(url)).toBe(
 			`https://example.com/lucid/api/v1/client/preview/${token}`,
 		);
-		expect(new Headers(init?.headers).get("authorization")).toBe("client-key");
+		expect(new Headers(init?.headers).get("authorization")).toBe(
+			"Bearer access-token",
+		);
 	});
 
 	test("retries idempotent GET requests and returns paginated response bodies", async () => {
+		const accessToken = vi
+			.fn<() => Promise<string>>()
+			.mockResolvedValueOnce("first-access-token")
+			.mockResolvedValueOnce("second-access-token");
 		const fetchMock = vi
 			.fn<typeof fetch>()
 			.mockResolvedValueOnce(
@@ -206,7 +220,10 @@ describe("@lucidcms/client", () => {
 
 		const client = createClient({
 			baseUrl: "https://example.com",
-			apiKey: "client-key",
+			auth: {
+				type: "oauth",
+				accessToken,
+			},
 			fetch: fetchMock,
 			retry: {
 				attempts: 1,
@@ -241,7 +258,14 @@ describe("@lucidcms/client", () => {
 				total: 0,
 			},
 		});
+		expect(accessToken).toHaveBeenCalledTimes(2);
 		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(
+			new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get("authorization"),
+		).toBe("Bearer first-access-token");
+		expect(
+			new Headers(fetchMock.mock.calls[1]?.[1]?.headers).get("authorization"),
+		).toBe("Bearer second-access-token");
 		const firstRequestUrl = new URL(String(fetchMock.mock.calls[0]?.[0]));
 		const secondRequestUrl = new URL(String(fetchMock.mock.calls[1]?.[0]));
 		expect(firstRequestUrl.pathname).toBe(
@@ -281,7 +305,10 @@ describe("@lucidcms/client", () => {
 
 		const client = createClient({
 			baseUrl: "https://example.com",
-			apiKey: "client-key",
+			auth: {
+				type: "apiKey",
+				apiKey: "client-key",
+			},
 			fetch: fetchMock,
 			retry: {
 				attempts: 2,
@@ -296,6 +323,28 @@ describe("@lucidcms/client", () => {
 
 		expect(response.error?.kind).toBe("http");
 		expect(fetchMock).toHaveBeenCalledTimes(1);
+	});
+
+	test("returns OAuth access token provider failures as values", async () => {
+		const fetchMock = vi.fn<typeof fetch>();
+		const client = createClient({
+			baseUrl: "https://example.com",
+			auth: {
+				type: "oauth",
+				accessToken: async () => {
+					throw new Error("Unable to refresh");
+				},
+			},
+			fetch: fetchMock,
+		});
+
+		const response = await client.locales.getAll();
+
+		expect(response.error).toMatchObject({
+			kind: "configuration",
+			message: "The OAuth access token provider failed.",
+		});
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
 	test("runs middleware hooks for request, response, and errors", async () => {
@@ -318,7 +367,10 @@ describe("@lucidcms/client", () => {
 
 		const client = createClient({
 			baseUrl: "https://example.com",
-			apiKey: "client-key",
+			auth: {
+				type: "apiKey",
+				apiKey: "client-key",
+			},
 			fetch: fetchMock,
 			middleware: [
 				{
@@ -371,7 +423,10 @@ describe("@lucidcms/client", () => {
 
 		const client = createClient({
 			baseUrl: "https://example.com",
-			apiKey: "client-key",
+			auth: {
+				type: "apiKey",
+				apiKey: "client-key",
+			},
 			fetch: fetchMock,
 			timeoutMs: 5,
 		});
@@ -399,7 +454,10 @@ describe("@lucidcms/client", () => {
 
 		const client = createClient({
 			baseUrl: "https://example.com",
-			apiKey: "client-key",
+			auth: {
+				type: "apiKey",
+				apiKey: "client-key",
+			},
 			fetch: fetchMock,
 		});
 
@@ -443,7 +501,10 @@ describe("@lucidcms/client", () => {
 
 		const client = createClient({
 			baseUrl: "https://example.com/lucid/api/v1/client",
-			apiKey: "client-key",
+			auth: {
+				type: "apiKey",
+				apiKey: "client-key",
+			},
 			fetch: fetchMock,
 		});
 

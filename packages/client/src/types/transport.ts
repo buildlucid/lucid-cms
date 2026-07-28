@@ -2,6 +2,18 @@ import type { LucidClientError, LucidClientResponse } from "./errors.js";
 
 export type LucidHeaderFactory = () => HeadersInit | Promise<HeadersInit>;
 
+export type LucidAccessTokenFactory = () => string | Promise<string>;
+
+export type LucidClientAuth =
+	| {
+			type: "apiKey";
+			apiKey: string;
+	  }
+	| {
+			type: "oauth";
+			accessToken: string | LucidAccessTokenFactory;
+	  };
+
 export type LucidRetryConfig = {
 	attempts: number;
 	baseDelayMs: number;
@@ -72,7 +84,7 @@ export type LucidMiddleware = {
 
 export type CreateClientOptions = {
 	baseUrl: string;
-	apiKey: string;
+	auth: LucidClientAuth;
 	fetch?: typeof globalThis.fetch;
 	headers?: HeadersInit | LucidHeaderFactory;
 	timeoutMs?: number;

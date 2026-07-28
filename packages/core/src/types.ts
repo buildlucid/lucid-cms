@@ -13,12 +13,12 @@ export * from "./libs/kv/types.js";
 export * from "./libs/logger/types.js";
 export * from "./libs/media/types.js";
 export type {
-	ClientScope,
-	CollectionClientScope,
-} from "./libs/permission/client-scopes.js";
+	CollectionExternalScope,
+	ExternalScope,
+} from "./libs/permission/external-scopes.js";
 export type {
-	ClientScopeDefinition,
-	ClientScopeGroup,
+	ExternalScopeDefinition,
+	ExternalScopeGroup,
 } from "./libs/permission/scopes.js";
 export * from "./libs/permission/types.js";
 export * from "./libs/plugins/types.js";

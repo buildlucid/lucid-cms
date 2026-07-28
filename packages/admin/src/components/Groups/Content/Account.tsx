@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
 import UpdateAccountForm from "@/components/Forms/Account/UpdateAccountForm";
+import { OAuthConnectionsList } from "@/components/Groups/Content/OAuthConnectionsList";
 import { Select } from "@/components/Groups/Form";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Confirmation } from "@/components/Groups/Modal";
@@ -348,6 +349,11 @@ export const Account: Component = () => {
 					actionAlignment="center"
 				/>
 			</InfoRow.Root>
+			<OAuthConnectionsList
+				owner={{ type: "account" }}
+				canUpdate={true}
+				canRevoke={true}
+			/>
 			{/* Configuration */}
 			<InfoRow.Root
 				title={T()("account.preferences.title")}

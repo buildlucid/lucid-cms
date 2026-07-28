@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "cb052863-04a6-42a6-a3d0-d92f2af1977d",
 		"name": "Lucid CMS",
-		"description": "The complete Lucid CMS API - this contains endpoints for both internal use via the SPA along with client routes for applications and client integrations to fetch data from Lucid.",
+		"description": "The complete Lucid CMS API, including dashboard endpoints and external content routes authorized by API integrations.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "20656721"
 	},
@@ -2608,7 +2608,7 @@
 			]
 		},
 		{
-			"name": "Client Integrations",
+			"name": "API Integrations",
 			"item": [
 				{
 					"name": "Create Single",
@@ -2631,9 +2631,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/client-integrations",
+							"raw": "{{BASE_URL}}/api/v1/integrations/api",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "client-integrations"]
+							"path": ["api", "v1", "integrations", "api"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -2660,9 +2660,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/client-integrations/1",
+							"raw": "{{BASE_URL}}/api/v1/integrations/api/1",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "client-integrations", "1"]
+							"path": ["api", "v1", "integrations", "api", "1"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -2680,9 +2680,9 @@
 							}
 						],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/client-integrations/2",
+							"raw": "{{BASE_URL}}/api/v1/integrations/api/2",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "client-integrations", "2"]
+							"path": ["api", "v1", "integrations", "api", "2"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -2692,24 +2692,11 @@
 					"name": "Get All",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "lucid-client-key",
-								"value": "eb7236",
-								"type": "text",
-								"disabled": true
-							},
-							{
-								"key": "Authorization",
-								"value": "15274346b4d8057f15fd3b7efa9ba366a497f1e7e69b792cbfb024d20ba23e08",
-								"type": "text",
-								"disabled": true
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/client-integrations",
+							"raw": "{{BASE_URL}}/api/v1/integrations/api",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "client-integrations"]
+							"path": ["api", "v1", "integrations", "api"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -2721,9 +2708,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/client-integrations/2",
+							"raw": "{{BASE_URL}}/api/v1/integrations/api/2",
 							"host": ["{{BASE_URL}}"],
-							"path": ["api", "v1", "client-integrations", "2"]
+							"path": ["api", "v1", "integrations", "api", "2"]
 						},
 						"description": "## Description\n\nRecieves config for bricks. This is whats defined with the BrickBuilder class in the project setup."
 					},
@@ -2744,12 +2731,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{BASE_URL}}/api/v1/client-integrations/1/regenerate-keys",
+							"raw": "{{BASE_URL}}/api/v1/integrations/api/1/regenerate-keys",
 							"host": ["{{BASE_URL}}"],
 							"path": [
 								"api",
 								"v1",
-								"client-integrations",
+								"integrations",
+								"api",
 								"1",
 								"regenerate-keys"
 							]
@@ -2773,7 +2761,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "{{CLIENT_API_KEY}}",
+										"value": "ApiKey {{CLIENT_API_KEY}}",
 										"type": "text"
 									}
 								],
@@ -2829,7 +2817,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "{{CLIENT_API_KEY}}",
+										"value": "ApiKey {{CLIENT_API_KEY}}",
 										"type": "text"
 									}
 								],
@@ -2892,7 +2880,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "{{CLIENT_API_KEY}}",
+										"value": "ApiKey {{CLIENT_API_KEY}}",
 										"type": "text"
 									}
 								],
@@ -2916,7 +2904,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "{{CLIENT_API_KEY}}",
+										"value": "ApiKey {{CLIENT_API_KEY}}",
 										"type": "text"
 									}
 								],
@@ -2947,7 +2935,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "{{CLIENT_API_KEY}}",
+										"value": "ApiKey {{CLIENT_API_KEY}}",
 										"type": "text"
 									}
 								],
@@ -2982,7 +2970,7 @@
 									},
 									{
 										"key": "Authorization",
-										"value": "{{CLIENT_API_KEY}}",
+										"value": "ApiKey {{CLIENT_API_KEY}}",
 										"type": "text"
 									}
 								],

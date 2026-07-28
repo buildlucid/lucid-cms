@@ -17,7 +17,10 @@ import {
 	createHttpError,
 	createParseError,
 } from "../utils/transport/errors.js";
-import { buildRequestHeaders } from "../utils/transport/headers.js";
+import {
+	buildRequestHeaders,
+	resolveAuthorizationHeader,
+} from "../utils/transport/headers.js";
 import { parseJsonResponse } from "../utils/transport/response.js";
 import {
 	buildRetryDelay,
@@ -44,9 +47,9 @@ export const createTransport = (
 				);
 			}
 
-			if (!options.apiKey) {
+			if (!options.auth) {
 				return createConfigurationErrorResponse(
-					"`apiKey` is required to create a Lucid client.",
+					"`auth` is required to create a Lucid client.",
 				);
 			}
 
@@ -69,10 +72,15 @@ export const createTransport = (
 			while (true) {
 				attempt += 1;
 
+				const authorization = await resolveAuthorizationHeader(options.auth);
+				if (authorization.data === undefined) {
+					return createConfigurationErrorResponse(authorization.error);
+				}
+
 				const headers = await buildRequestHeaders({
 					baseHeaders: options.headers,
 					requestHeaders: descriptor.request?.headers,
-					apiKey: options.apiKey,
+					authorization: authorization.data,
 					hasBody: descriptor.body !== undefined,
 				});
 

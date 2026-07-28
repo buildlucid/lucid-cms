@@ -1,5 +1,9 @@
 # @lucidcms/plugin-google-auth
 
+## v1.1.0 (unreleased)
+
+- `jwksEndpoint` endpoint added to config.
+
 ## v1.0.4
 
 - Bumped `@lucidcms/core` to `0.17.0-alpha.0`.

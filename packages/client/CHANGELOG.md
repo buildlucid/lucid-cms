@@ -1,5 +1,9 @@
 # @lucidcms/client
 
+## v0.4.0 (unreleased)
+
+- Auth updated to support `ApiKey` and `Bearer` token authentication.
+
 ## v0.3.1
 
 - Bumped `@lucidcms/types` to `0.4.0`.

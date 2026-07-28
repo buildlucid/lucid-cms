@@ -18,6 +18,7 @@ import Spinner from "@/components/Partials/Spinner";
 import constants from "@/constants";
 import api from "@/services/api";
 import T from "@/translations";
+import { getLoginReturnPath } from "@/utils/login-route";
 import spawnToast from "@/utils/spawn-toast";
 
 const LoginRoute: Component = () => {
@@ -146,6 +147,7 @@ const LoginRoute: Component = () => {
 												providerKey: p.key,
 												body: {
 													actionType: "login",
+													redirectPath: getLoginReturnPath(location.search),
 												},
 											});
 										}}

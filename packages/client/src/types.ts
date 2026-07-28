@@ -190,6 +190,8 @@ export type {
 } from "./types/errors.js";
 export type {
 	CreateClientOptions,
+	LucidAccessTokenFactory,
+	LucidClientAuth,
 	LucidHeaderFactory,
 	LucidMiddleware,
 	LucidMiddlewareErrorContext,

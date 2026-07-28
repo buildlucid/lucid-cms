@@ -95,6 +95,11 @@ const createApp = async (props: {
 	const configuredHost = props.config.host?.trim()
 		? normalizeHost(props.config.host)
 		: undefined;
+	const allowedCorsOrigins = [
+		"http://localhost:3000",
+		...(configuredHost ? [configuredHost] : []),
+		...(props.config.http.security.cors?.origin || []),
+	];
 
 	app
 		.use(
@@ -187,11 +192,10 @@ const createApp = async (props: {
 		.use(logRoute)
 		.use(
 			cors({
-				origin: [
-					"http://localhost:3000",
-					...(configuredHost ? [configuredHost] : []),
-					...(props.config.http.security.cors?.origin || []),
-				],
+				origin: (origin, c) => {
+					if (c.req.path === "/lucid/oauth/authorize") return null;
+					return allowedCorsOrigins.includes(origin) ? origin : null;
+				},
 				allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
 				allowHeaders: [
 					"Content-Type",
@@ -436,14 +440,14 @@ const createApp = async (props: {
 									"AI endpoints for generating CMS content with Lucid AI features.",
 							},
 							{
-								name: "client-integrations",
+								name: "api-integrations",
 								description:
-									"Endpoints for managing client integration credentials used to authenticate external applications accessing CMS content via client endpoints.",
+									"Endpoints for managing API integration credentials used by external applications.",
 							},
 							{
 								name: "client-documents",
 								description:
-									"Client document endpoints for fetching single and multiple documents via the client integration authentication.",
+									"External document endpoints authorized by API keys or OAuth access tokens.",
 							},
 							{
 								name: "client-previews",

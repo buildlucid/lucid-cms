@@ -6,9 +6,9 @@ import { mediaServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
-import { ClientScopes } from "../../../../permission/client-scopes.js";
-import clientAuthentication from "../../../middleware/client-authenticate.js";
-import clientScopes from "../../../middleware/client-scopes.js";
+import { ExternalScopes } from "../../../../permission/external-scopes.js";
+import externalAuthentication from "../../../middleware/external-authenticate.js";
+import externalScopes from "../../../middleware/external-scopes.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -35,8 +35,8 @@ const processMediaController = factory.createHandlers(
 			controllerSchemas.client.processMedia.body,
 		),
 	}),
-	clientAuthentication,
-	clientScopes([ClientScopes.MediaProcess]),
+	externalAuthentication,
+	externalScopes([ExternalScopes.MediaProcess]),
 	validate("param", controllerSchemas.client.processMedia.params),
 	validate("json", controllerSchemas.client.processMedia.body),
 	async (c) => {

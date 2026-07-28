@@ -4,7 +4,7 @@ import {
 } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentsFormatter } from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getCollectionClientScope } from "../../../libs/permission/client-scopes.js";
+import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetSingleQueryParams } from "../../../schemas/documents.js";
 import type {
@@ -33,7 +33,7 @@ import type { ClientDocumentVersionInput } from "./types.js";
 type ClientDocumentsGetSingleInput<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
 	query: ClientGetSingleQueryParams;
-	clientScopes?: string[];
+	externalScopes?: string[];
 } & ClientDocumentVersionInput<TCollectionKey>;
 
 type ClientDocumentsGetSingleService = <TCollectionKey extends string>(
@@ -89,10 +89,12 @@ const getSingle: ClientDocumentsGetSingleService = async <
 	if (collectionRes.error) return collectionRes;
 
 	//* work out allowed collection keys based on client scopes
-	const allowedCollectionKeys = data.clientScopes
+	const allowedCollectionKeys = data.externalScopes
 		? context.config.collections
 				.filter((collection) =>
-					data.clientScopes?.includes(getCollectionClientScope(collection.key)),
+					data.externalScopes?.includes(
+						getCollectionExternalScope(collection.key),
+					),
 				)
 				.map((collection) => collection.key)
 		: undefined;

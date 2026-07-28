@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
-import { getCollectionClientScope } from "../../../../permission/client-scopes.js";
+import { getCollectionExternalScope } from "../../../../permission/external-scopes.js";
 import cache from "../../../middleware/cache.js";
-import clientAuthentication from "../../../middleware/client-authenticate.js";
-import clientScopes from "../../../middleware/client-scopes.js";
+import externalAuthentication from "../../../middleware/external-authenticate.js";
+import externalScopes from "../../../middleware/external-scopes.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
 import buildFormattedQuery from "../../../utils/build-formatted-query.js";
@@ -22,7 +22,7 @@ const factory = createFactory();
 
 const getSingleController = factory.createHandlers(
 	describeRoute({
-		description: "Get a single document by filters via the client integration.",
+		description: "Get a single document by filters via an external credential.",
 		tags: ["client-documents"],
 		summary: "Get Document",
 		responses: openAPI.responses({
@@ -36,10 +36,10 @@ const getSingleController = factory.createHandlers(
 			},
 		}),
 	}),
-	clientAuthentication,
+	externalAuthentication,
 	validate("param", controllerSchemas.client.getSingle.params),
-	clientScopes((c) => [
-		getCollectionClientScope(c.req.param("collectionKey") ?? ""),
+	externalScopes((c) => [
+		getCollectionExternalScope(c.req.param("collectionKey") ?? ""),
 	]),
 	validate("query", controllerSchemas.client.getSingle.query.string),
 	cache({
@@ -56,7 +56,15 @@ const getSingleController = factory.createHandlers(
 		},
 		keyContext: (c) => {
 			const tenantKey = c.get("tenant")?.key;
-			return tenantKey ? { tenant: tenantKey } : {};
+			const auth = c.get("externalAuth");
+			return {
+				...(tenantKey ? { tenant: tenantKey } : {}),
+				principal:
+					auth.principal.type === "user"
+						? `user:${auth.principal.userId}`
+						: "system",
+				scopes: [...auth.scopes].sort(),
+			};
 		},
 	}),
 	async (c) => {
@@ -81,7 +89,7 @@ const getSingleController = factory.createHandlers(
 			versionType: version,
 			preview,
 			query: formattedQuery,
-			clientScopes: c.get("clientIntegrationAuth").scopes,
+			externalScopes: c.get("externalAuth").scopes,
 		});
 		if (document.error) throw new LucidAPIError(document.error);
 

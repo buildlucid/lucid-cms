@@ -18,7 +18,15 @@ export interface PublicErrorData {
 		| "not_found"
 		| "preview_invalid"
 		| "preview_expired"
-		| "preview_scope";
+		| "preview_scope"
+		| "invalid_request"
+		| "invalid_client"
+		| "invalid_grant"
+		| "invalid_scope"
+		| "invalid_token"
+		| "access_denied"
+		| "unsupported_grant_type"
+		| "server_error";
 	key?: string;
 	errors?: ErrorResult;
 }

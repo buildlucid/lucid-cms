@@ -4,6 +4,7 @@ import type { EmailAdapterInstance } from "../libs/email/types.js";
 import type { TranslationStore } from "../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../libs/kv/types.js";
 import type { MediaAdapterInstance } from "../libs/media/types.js";
+import type { ExternalScope } from "../libs/permission/external-scopes.js";
 import type { QueueAdapterInstance } from "../libs/queue/types.js";
 import type { AdapterRuntimeContext } from "../libs/runtime/types.js";
 import type {
@@ -27,12 +28,40 @@ export type LucidAuth = {
 
 export type LucidAccessToken = Pick<LucidAuth, "id" | "exp" | "iat" | "nonce">;
 
-export type LucidClientIntegrationAuth = {
-	id: number;
-	key: string;
-	scopes: string[];
+type LucidExternalAuthBase = {
+	scopes: ExternalScope[];
 	tenantKey: string | null;
 };
+
+export type LucidApiKeyExternalAuth = LucidExternalAuthBase & {
+	credential: {
+		type: "api-key";
+		integrationId: number;
+	};
+	principal: {
+		type: "system";
+	};
+};
+
+export type LucidOAuthExternalAuth = LucidExternalAuthBase & {
+	credential: {
+		type: "oauth";
+		grantId: number;
+		clientId: string;
+	};
+	principal:
+		| {
+				type: "system";
+		  }
+		| {
+				type: "user";
+				userId: number;
+		  };
+};
+
+export type LucidExternalAuth =
+	| LucidApiKeyExternalAuth
+	| LucidOAuthExternalAuth;
 
 export type LucidLocale = {
 	code: Locale["code"];
@@ -58,7 +87,7 @@ export type LucidHonoVariables = {
 	email: EmailAdapterInstance;
 	requestId: string;
 	auth: LucidAuth;
-	clientIntegrationAuth: LucidClientIntegrationAuth;
+	externalAuth: LucidExternalAuth;
 	locale: LucidLocale;
 	tenant: LucidTenant | null;
 	env: EnvironmentVariables | null;

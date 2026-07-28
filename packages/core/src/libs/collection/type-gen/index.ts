@@ -582,7 +582,7 @@ const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 	]);
 };
 
-/** Returns the moving version targets exposed to client integrations. */
+/** Returns the moving version targets exposed to external integrations. */
 const getCollectionVersionKeys = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
 		"latest",

@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import crypto from "node:crypto";
 import { addMilliseconds } from "date-fns";
 import constants from "../../../constants/constants.js";
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
@@ -12,10 +12,12 @@ import {
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
 import type { AuthStateActionType, InitiateAuth } from "../../../types.js";
+import createPkce from "../../../utils/helpers/create-pkce.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
+/** Creates the state and redirect URL for an auth-provider flow. */
 const initiate: ServiceFn<
 	[
 		{
@@ -134,11 +136,19 @@ const initiate: ServiceFn<
 		invitationTokenId = invitationTokenRes.data.id;
 	}
 
-	const stateToken = randomUUID();
+	const stateToken = crypto.randomBytes(32).toString("base64url");
+	const nonce =
+		provider.type === "oidc"
+			? crypto.randomBytes(32).toString("base64url")
+			: undefined;
+	const { codeVerifier, codeChallenge } = createPkce();
+
 	const stateRes = await AuthStates.createSingle({
 		data: {
 			state: stateToken,
 			provider_key: data.providerKey,
+			code_verifier: codeVerifier,
+			nonce,
 			invitation_token_id: invitationTokenId,
 			invitation_token:
 				data.actionType === constants.authState.actionTypes.invitation
@@ -164,6 +174,8 @@ const initiate: ServiceFn<
 			data.providerKey,
 		),
 		state: stateToken,
+		codeChallenge,
+		nonce,
 	});
 	if (redirectUrl.error) return redirectUrl;
 

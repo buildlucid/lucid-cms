@@ -1,0 +1,30 @@
+{
+	"name": "@lucidcms/oauth-playground",
+	"version": "0.0.1",
+	"private": true,
+	"description": "A browser-based test bench for Lucid API key and OAuth integrations.",
+	"type": "module",
+	"scripts": {
+		"dev": "vite --host localhost",
+		"build": "tsc --noEmit && vite build",
+		"preview": "vite preview --host localhost",
+		"format": "biome format ./src ./vite.config.ts",
+		"format:fix": "biome format --write ./src ./vite.config.ts",
+		"lint": "biome lint ./src ./vite.config.ts",
+		"lint:fix": "biome lint --write ./src ./vite.config.ts",
+		"check": "biome check ./src ./vite.config.ts",
+		"check:fix": "biome check --write ./src ./vite.config.ts"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.1",
+		"@types/node": "^24.13.2",
+		"typescript": "^6.0.3",
+		"vite": "^8.1.0"
+	},
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	}
+}

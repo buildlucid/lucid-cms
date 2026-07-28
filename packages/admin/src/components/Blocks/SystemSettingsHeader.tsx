@@ -17,7 +17,7 @@ const SystemSettingsHeader: Component<{
 	const canReadSettings = createMemo(
 		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
 	);
-	const canReadClientIntegrations = createMemo(
+	const canReadApiIntegrations = createMemo(
 		() => userStore.get.hasPermission([Permissions.IntegrationsRead]).all,
 	);
 	const canReadJobs = createMemo(
@@ -56,8 +56,7 @@ const SystemSettingsHeader: Component<{
 							{
 								label: T()("routes.system.client.integrations.title"),
 								href: "/lucid/system/integrations",
-								permission:
-									canReadClientIntegrations() || canManageConnection(),
+								permission: canReadApiIntegrations() || canManageConnection(),
 							},
 							{
 								label: T()("common.ai.usage"),

@@ -1,5 +1,8 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
+import getUserOAuthConnections from "../../../controllers/oauth/get-user-connections.js";
+import revokeUserOAuthConnection from "../../../controllers/oauth/revoke-connection.js";
+import updateUserOAuthConnection from "../../../controllers/oauth/update-connection.js";
 import getMultipleLogins from "../../../controllers/user-logins/get-multiple.js";
 import createProfilePictureUploadSession from "../../../controllers/users/create-profile-picture-upload-session.js";
 import deleteMultiplePermanently from "../../../controllers/users/delete-multiple-permanently.js";
@@ -20,6 +23,7 @@ const usersRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)
 	.get("/:id", ...getSingle)
 	.get("/logins/:id", ...getMultipleLogins)
+	.get("/:userId/oauth-connections", ...getUserOAuthConnections)
 	.post(
 		"/:id/profile-picture/upload-session",
 		...createProfilePictureUploadSession,
@@ -30,10 +34,12 @@ const usersRoutes = new Hono<LucidHonoGeneric>()
 	.post("/", ...inviteSingle)
 	.post("/restore", ...restoreMultiple)
 	.delete("/:id/auth-providers/:providerId", ...unlinkAuthProvider)
+	.delete("/:userId/oauth-connections/:id", ...revokeUserOAuthConnection)
 	.delete("/:id/profile-picture", ...deleteProfilePicture)
 	.delete("/permanent", ...deleteMultiplePermanently)
 	.delete("/:id/permanent", ...deleteSinglePermanently)
 	.delete("/:id", ...deleteSingle)
-	.patch("/:id", ...updateSingle);
+	.patch("/:id", ...updateSingle)
+	.patch("/:userId/oauth-connections/:id", ...updateUserOAuthConnection);
 
 export default usersRoutes;

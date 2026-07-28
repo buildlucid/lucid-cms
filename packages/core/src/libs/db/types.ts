@@ -818,7 +818,7 @@ export interface LucidCollectionMigrations {
 	created_at: TimestampImmutable;
 }
 
-export interface LucidClientIntegrations {
+export interface LucidApiIntegrations {
 	id: Generated<number>;
 	name: string;
 	description: string | null;
@@ -834,13 +834,82 @@ export interface LucidClientIntegrations {
 	updated_at: TimestampMutateable;
 }
 
-export interface LucidClientIntegrationScopes {
+export interface LucidApiIntegrationScopes {
 	id: Generated<number>;
-	client_integration_id: number;
+	api_integration_id: number;
 	scope: string;
 	core: BooleanInt;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
+}
+
+export type OAuthPrincipalType = "system" | "user";
+
+export interface LucidOAuthAuthorizationRequests {
+	id: Generated<number>;
+	request_id: string;
+	client_id: string;
+	client_name: string;
+	client_uri: string | null;
+	redirect_uri: string;
+	resource: string;
+	scopes: string;
+	state: string;
+	code_challenge: string;
+	expires_at: TimestampImmutable;
+	consumed_at: TimestampMutateable;
+	created_at: TimestampImmutable;
+}
+
+export interface LucidOAuthGrants {
+	id: Generated<number>;
+	name: string;
+	client_id: string;
+	client_name: string;
+	client_uri: string | null;
+	principal_type: OAuthPrincipalType;
+	user_id: number | null;
+	tenant_key: string | null;
+	created_by: number | null;
+	revoked_at: TimestampMutateable;
+	last_used_at: TimestampMutateable;
+	last_used_ip: string | null;
+	last_used_user_agent: string | null;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
+export interface LucidOAuthGrantScopes {
+	id: Generated<number>;
+	grant_id: number;
+	scope: string;
+	created_at: TimestampImmutable;
+}
+
+export interface LucidOAuthAuthorizationCodes {
+	id: Generated<number>;
+	code_hash: string;
+	grant_id: number;
+	client_id: string;
+	redirect_uri: string;
+	resource: string;
+	code_challenge: string;
+	expires_at: TimestampImmutable;
+	consumed_at: TimestampMutateable;
+	created_at: TimestampImmutable;
+}
+
+export interface LucidOAuthRefreshTokens {
+	id: Generated<number>;
+	token_hash: string;
+	family_id: string;
+	grant_id: number;
+	client_id: string;
+	resource: string;
+	expires_at: TimestampImmutable;
+	consumed_at: TimestampMutateable;
+	revoked_at: TimestampMutateable;
+	created_at: TimestampImmutable;
 }
 
 export type LucidDocumentTableName = `lucid_document__${string}`;
@@ -908,9 +977,12 @@ export interface LucidAuthStates {
 	id: Generated<number>;
 	state: string;
 	provider_key: string;
+	code_verifier: string;
+	nonce: string | null;
 	authenticated_user_id: number | null;
 	action_type: AuthStateActionType;
 	expiry_date: TimestampImmutable;
+	consumed_at: TimestampMutateable;
 	redirect_path: string | null;
 	invitation_token_id: number | null;
 	invitation_token: string | null;
@@ -954,8 +1026,13 @@ export interface LucidDB {
 	lucid_media_upload_sessions: LucidMediaUploadSessions;
 	lucid_media_share_links: LucidMediaShareLinks;
 	lucid_processed_images: HeadlessProcessedImages;
-	lucid_client_integrations: LucidClientIntegrations;
-	lucid_client_integration_scopes: LucidClientIntegrationScopes;
+	lucid_api_integrations: LucidApiIntegrations;
+	lucid_api_integration_scopes: LucidApiIntegrationScopes;
+	lucid_oauth_authorization_requests: LucidOAuthAuthorizationRequests;
+	lucid_oauth_grants: LucidOAuthGrants;
+	lucid_oauth_grant_scopes: LucidOAuthGrantScopes;
+	lucid_oauth_authorization_codes: LucidOAuthAuthorizationCodes;
+	lucid_oauth_refresh_tokens: LucidOAuthRefreshTokens;
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
 	lucid_queue_jobs: LucidQueueJobs;

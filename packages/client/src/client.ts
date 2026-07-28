@@ -26,7 +26,7 @@ export interface LucidClient {
 }
 
 /**
- * Returns a client for Lucid's public client integration endpoints.
+ * Returns a client for Lucid's external content endpoints.
  *
  * @example
  * ```ts
@@ -34,7 +34,10 @@ export interface LucidClient {
  *
  * const client = createClient({
  * 	baseUrl: "https://example.com",
- * 	apiKey: "<your-client-api-key>",
+ * 	auth: {
+ * 		type: "apiKey",
+ * 		apiKey: "<your-api-integration-key>",
+ * 	},
  * });
  *
  * const page = await client.documents.getSingle({

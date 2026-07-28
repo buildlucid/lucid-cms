@@ -36,7 +36,7 @@ export const Permissions = {
 	AiImageGenerate: "ai:image-generate",
 	AiAltGenerate: "ai:alt-generate",
 
-	// Client integration permissions
+	// Integration permissions
 	IntegrationRead: "integrations:read",
 	IntegrationCreate: "integrations:create",
 	IntegrationUpdate: "integrations:update",
@@ -304,8 +304,8 @@ export const PermissionGroups = Object.freeze({
 			},
 		],
 	},
-	"client-integrations": {
-		key: "client_integrations_permissions",
+	"api-integrations": {
+		key: "api_integrations_permissions",
 		details: {
 			name: copy("admin:core.permissions.integrations.permissions", {
 				defaultMessage: "Integrations Permissions",

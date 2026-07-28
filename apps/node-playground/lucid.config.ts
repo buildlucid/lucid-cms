@@ -127,11 +127,11 @@ export default configureLucid({
 			openAPI: {
 				enabled: true,
 			},
-			// 	security: {
-			// 		cors: {
-			// 			origin: [],
-			// 		},
-			// 	},
+			security: {
+				cors: {
+					origin: ["http://localhost:5173"],
+				},
+			},
 			routes: [
 				createRoute({
 					method: "post",

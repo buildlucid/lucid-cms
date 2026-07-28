@@ -1,11 +1,18 @@
 import { minutesToMilliseconds } from "date-fns";
+import { setCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { z } from "zod";
 import constants from "../../../../../constants/constants.js";
+import buildCallbackRedirectUrl from "../../../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
 import { controllerSchemas } from "../../../../../schemas/auth.js";
+import {
+	getAuthProviderFlowCookieName,
+	getAuthProviderFlowCookieOptions,
+} from "../../../../../services/auth/providers/helpers/flow-security.js";
 import { authServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
+import { getBaseUrl } from "../../../../../utils/helpers/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import rateLimiter from "../../../middleware/rate-limiter.js";
@@ -69,6 +76,30 @@ const providerInitiateController = factory.createHandlers(
 		});
 		if (initiateAuthRes.error) throw new LucidAPIError(initiateAuthRes.error);
 
+		const state = new URL(initiateAuthRes.data.redirectUrl).searchParams.get(
+			"state",
+		);
+		if (!state) {
+			throw new LucidAPIError({
+				type: "basic",
+				status: 500,
+				message: copy("server:core.routes.initiate.auth.error.message"),
+			});
+		}
+
+		const callbackUrl = buildCallbackRedirectUrl(
+			getBaseUrl(context),
+			providerKey,
+		);
+		setCookie(
+			c,
+			getAuthProviderFlowCookieName(context, state),
+			state,
+			getAuthProviderFlowCookieOptions(callbackUrl),
+		);
+
+		c.header("Cache-Control", "private, no-store");
+		c.header("Pragma", "no-cache");
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {

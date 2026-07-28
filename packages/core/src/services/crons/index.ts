@@ -2,6 +2,7 @@ export { default as checkSystemAlerts } from "./check-system-alerts.js";
 export { default as clearExpiredAuthStates } from "./clear-expired-auth-states.js";
 export { default as clearExpiredCollections } from "./clear-expired-collections.js";
 export { default as clearExpiredLocales } from "./clear-expired-locales.js";
+export { default as clearExpiredOAuthData } from "./clear-expired-oauth-data.js";
 export { default as clearExpiredPreviewSessions } from "./clear-expired-preview-sessions.js";
 export { default as clearExpiredTokens } from "./clear-expired-tokens.js";
 export { default as deleteExpiredDeletedDocuments } from "./delete-expired-deleted-documents.js";

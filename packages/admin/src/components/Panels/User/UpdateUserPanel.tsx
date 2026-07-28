@@ -8,6 +8,7 @@ import {
 	For,
 	Show,
 } from "solid-js";
+import { OAuthConnectionsList } from "@/components/Groups/Content/OAuthConnectionsList";
 import { SelectMultiple, Switch } from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Panel } from "@/components/Groups/Panel";
@@ -16,6 +17,7 @@ import AuthProviderRow from "@/components/Partials/AuthProviderRow";
 import DetailsList from "@/components/Partials/DetailsList";
 import PanelTabs from "@/components/Partials/PanelTabs";
 import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePreviewCard";
+import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import tenantStore from "@/store/tenantStore";
@@ -51,7 +53,7 @@ const UpdateUserPanel: Component<{
 	const [profilePicturePanelOpen, setProfilePicturePanelOpen] =
 		createSignal(false);
 	const [activeTab, setActiveTab] = createSignal<
-		"options" | "details" | "auth_providers" | "meta"
+		"options" | "details" | "auth_providers" | "oauth_connections" | "meta"
 	>("options");
 
 	// ---------------------------------
@@ -286,6 +288,10 @@ const UpdateUserPanel: Component<{
 									label: T()("account.auth.providers.title"),
 									show: userStore.get.user?.superAdmin,
 								},
+								{
+									value: "oauth_connections",
+									label: T()("oauth.connections.manage.title"),
+								},
 								{ value: "meta", label: T()("common.meta") },
 							]}
 							active={activeTab()}
@@ -434,6 +440,20 @@ const UpdateUserPanel: Component<{
 									</div>
 								</Show>
 							</Show>
+						</Show>
+						<Show when={activeTab() === "oauth_connections" && props.id()}>
+							{(userId) => (
+								<OAuthConnectionsList
+									owner={{ type: "user", userId: userId() }}
+									canUpdate={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									canRevoke={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									embedded={true}
+								/>
+							)}
 						</Show>
 						<Show when={activeTab() === "meta"}>
 							<DetailsList

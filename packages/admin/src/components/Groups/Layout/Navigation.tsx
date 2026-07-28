@@ -56,7 +56,7 @@ export const NavigationChrome: Component = () => {
 	const canManageConnection = createMemo(
 		() => userStore.get.hasPermission([Permissions.ConnectionUpdate]).all,
 	);
-	const canReadClientIntegrations = createMemo(
+	const canReadApiIntegrations = createMemo(
 		() => userStore.get.hasPermission([Permissions.IntegrationsRead]).all,
 	);
 	const canReadSystemOverview = createMemo(
@@ -242,7 +242,7 @@ export const NavigationChrome: Component = () => {
 						canReadJobs={canReadJobs()}
 						canReadAiUsage={canReadAiUsage()}
 						canManageConnection={canManageConnection()}
-						canReadClientIntegrations={canReadClientIntegrations()}
+						canReadApiIntegrations={canReadApiIntegrations()}
 						canReadSystemOverview={canReadSystemOverview()}
 						showAccessAndPermissions={showAccessAndPermissions()}
 						collectionsIsLoading={collectionsIsLoading()}
@@ -330,7 +330,7 @@ export const NavigationChrome: Component = () => {
 								canReadJobs={canReadJobs()}
 								canReadAiUsage={canReadAiUsage()}
 								canManageConnection={canManageConnection()}
-								canReadClientIntegrations={canReadClientIntegrations()}
+								canReadApiIntegrations={canReadApiIntegrations()}
 								canReadSystemOverview={canReadSystemOverview()}
 								showAccessAndPermissions={showAccessAndPermissions()}
 								collectionsIsLoading={collectionsIsLoading()}

@@ -6,9 +6,9 @@ import { previewSessionServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
-import { getCollectionClientScope } from "../../../../permission/client-scopes.js";
-import clientAuthentication from "../../../middleware/client-authenticate.js";
-import { clientScopeCheck } from "../../../middleware/client-scopes.js";
+import { getCollectionExternalScope } from "../../../../permission/external-scopes.js";
+import externalAuthentication from "../../../middleware/external-authenticate.js";
+import { externalScopeCheck } from "../../../middleware/external-scopes.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -29,7 +29,7 @@ const resolvePreviewController = factory.createHandlers(
 			headers: { authorization: true },
 		}),
 	}),
-	clientAuthentication,
+	externalAuthentication,
 	validate("param", controllerSchemas.resolve.params),
 	async (c) => {
 		const { token } = c.req.valid("param");
@@ -45,8 +45,8 @@ const resolvePreviewController = factory.createHandlers(
 		})(context, { token });
 		if (preview.error) throw new LucidAPIError(preview.error);
 
-		clientScopeCheck(c, [
-			getCollectionClientScope(preview.data.entry.collectionKey),
+		externalScopeCheck(c, [
+			getCollectionExternalScope(preview.data.entry.collectionKey),
 		]);
 
 		c.header("Cache-Control", "private, no-store");

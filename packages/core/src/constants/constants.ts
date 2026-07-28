@@ -18,6 +18,7 @@ export default Object.freeze({
 		refreshToken: "_refresh",
 		accessToken: "_access",
 		connectionFlowPrefix: "_lucid_connection_flow_",
+		authProviderFlowPrefix: "_lucid_auth_provider_flow_",
 	},
 	jwt: {
 		algorithm: "HS256" as const,
@@ -178,7 +179,7 @@ export default Object.freeze({
 		imageProcessor: "image-processor",
 		mediaAdapter: "media-adapter",
 		emailAdapter: "email-adapter",
-		oidcAuth: "oidc-auth",
+		authProvider: "auth-provider",
 		ai: "ai",
 	} as const,
 	retention: 30,
@@ -223,6 +224,14 @@ export default Object.freeze({
 		statusRecheckIntervalSeconds: 3600,
 		remoteRequestTimeoutMs: 10_000,
 	},
+	oauth: {
+		accessTokenExpirationSeconds: 300,
+		authorizationCodeExpirationSeconds: 300,
+		authorizationRequestExpirationSeconds: 300,
+		refreshTokenExpirationSeconds: 2_592_000,
+		clientMetadataTimeoutMs: 5_000,
+		clientMetadataMaxBytes: 5_120,
+	} as const,
 	endpoints: {
 		lucidRemoteApiDomain: "https://api.lucidcms.io",
 	},

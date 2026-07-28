@@ -1,11 +1,12 @@
 export { Account } from "./Account";
 export { AiUsageList } from "./AiUsageList";
-export { ClientIntegrationsList } from "./ClientIntegrationsList";
+export { ApiIntegrationsList } from "./ApiIntegrationsList";
 export { Dashboard } from "./Dashboard";
 export { DocumentsList } from "./DocumentsList";
 export { EmailsList } from "./EmailsList";
 export { JobsList } from "./JobsList";
 export { MediaList } from "./MediaList";
+export { OAuthConnectionsList } from "./OAuthConnectionsList";
 export { ReleaseRequestsList } from "./ReleaseRequestsList";
 export { RolesList } from "./RolesList";
 export { UserList } from "./UserList";

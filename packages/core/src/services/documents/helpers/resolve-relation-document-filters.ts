@@ -12,7 +12,7 @@ import type {
 	CollectionSchemaTable,
 } from "../../../libs/collection/schema/types.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getCollectionClientScope } from "../../../libs/permission/client-scopes.js";
+import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import type {
 	QueryParamFilterCondition,
 	QueryParamFilterGroups,
@@ -289,7 +289,7 @@ const resolveRelationDocumentFilters: ServiceFn<
 		const allowedCollectionKeys = new Set(data.allowedCollectionKeys);
 		const missingScopes = targetCollectionKeys
 			.filter((collectionKey) => !allowedCollectionKeys.has(collectionKey))
-			.map(getCollectionClientScope);
+			.map((collectionKey) => getCollectionExternalScope(collectionKey));
 
 		if (missingScopes.length > 0) {
 			return {

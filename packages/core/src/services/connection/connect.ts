@@ -6,10 +6,10 @@ import {
 	registerConnectionClient,
 } from "../../libs/lucid-remote/services/connection/index.js";
 import type { ConnectionRegistration } from "../../libs/lucid-remote/types.js";
+import createPkce from "../../utils/helpers/create-pkce.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getConnectionErrorKey } from "./errors.js";
-import createPkce from "./helpers/create-pkce.js";
 import {
 	hashConnectionBrowserBinding,
 	hashLucidRemoteConnectionState,

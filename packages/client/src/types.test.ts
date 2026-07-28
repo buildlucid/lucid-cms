@@ -296,7 +296,10 @@ test("document client methods infer the collection key through the response type
 test("root client export returns the public LucidClient contract", () => {
 	const client = createClient({
 		baseUrl: "",
-		apiKey: "",
+		auth: {
+			type: "apiKey",
+			apiKey: "",
+		},
 	});
 
 	expectTypeOf(client).toEqualTypeOf<LucidClient>();

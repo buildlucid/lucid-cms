@@ -1,0 +1,81 @@
+import { minutesToMilliseconds } from "date-fns";
+import { createFactory } from "hono/factory";
+import { describeRoute } from "hono-openapi";
+import z from "zod";
+import constants from "../../../../constants/constants.js";
+import { controllerSchemas } from "../../../../schemas/api-integrations.js";
+import { apiIntegrationServices } from "../../../../services/index.js";
+import { LucidAPIError } from "../../../../utils/errors/index.js";
+import serviceWrapper from "../../../../utils/services/service-wrapper.js";
+import { copy } from "../../../i18n/index.js";
+import { Permissions } from "../../../permission/definitions.js";
+import authenticate from "../../middleware/authenticate.js";
+import permissions from "../../middleware/permissions.js";
+import rateLimiter from "../../middleware/rate-limiter.js";
+import validate from "../../middleware/validate.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
+import openAPI from "../../openapi/index.js";
+import formatAPIResponse from "../../utils/build-response.js";
+import createServiceContext from "../../utils/create-service-context.js";
+
+const factory = createFactory();
+
+const regenerateKeysController = factory.createHandlers(
+	describeRoute({
+		description: "Regenerates the API key for the given API integration.",
+		tags: ["api-integrations"],
+		summary: "Regenerate API Integration Key",
+		responses: openAPI.responses({
+			schema: z.toJSONSchema(controllerSchemas.regenerateKeys.response),
+		}),
+		parameters: openAPI.parameters({
+			headers: {
+				csrf: true,
+			},
+			params: controllerSchemas.regenerateKeys.params,
+		}),
+	}),
+	validateCSRF,
+	authenticate(),
+	rateLimiter({
+		mode: "user",
+		limit: constants.rateLimit.scopes.sensitive.limit,
+		scope: constants.rateLimit.scopes.sensitive.scopeKey,
+		windowMs: minutesToMilliseconds(1),
+	}),
+	permissions([Permissions.IntegrationRegenerate]),
+	validate("param", controllerSchemas.regenerateKeys.params),
+	async (c) => {
+		const { id } = c.req.valid("param");
+		const context = createServiceContext(c);
+
+		const regenerateKeysRes = await serviceWrapper(
+			apiIntegrationServices.regenerateKeys,
+			{
+				transaction: true,
+				defaultError: {
+					type: "basic",
+					name: copy(
+						"server:core.routes.client.integrations.update.error.message",
+					),
+					message: copy(
+						"server:core.routes.client.integrations.update.error.message",
+					),
+				},
+			},
+		)(context, {
+			id: Number.parseInt(id, 10),
+		});
+		if (regenerateKeysRes.error)
+			throw new LucidAPIError(regenerateKeysRes.error);
+
+		c.status(200);
+		return c.json(
+			formatAPIResponse(c, {
+				data: regenerateKeysRes.data,
+			}),
+		);
+	},
+);
+
+export default regenerateKeysController;

@@ -12,16 +12,33 @@ npm install @lucidcms/client
 
 ## Setup
 
-To use the client, create it with your site base URL and a Lucid client API key.
+To use the client, create it with your site base URL and either a Lucid API integration key or an OAuth access token.
 
 ```typescript
 import { createClient } from "@lucidcms/client";
 
 const client = createClient({
     baseUrl: "https://example.com",
-    apiKey: "<your-client-api-key>",
+    auth: {
+        type: "apiKey",
+        apiKey: "<your-api-integration-key>",
+    },
 });
 ```
+
+For OAuth connections, provide an access token or a function that resolves the current access token:
+
+```typescript
+const client = createClient({
+    baseUrl: "https://example.com",
+    auth: {
+        type: "oauth",
+        accessToken: () => tokenStore.getValidAccessToken(),
+    },
+});
+```
+
+The access-token function runs for every request attempt so it can return a refreshed token. The client does not perform the OAuth authorization flow, refresh tokens, or persist tokens.
 
 ## Configuration
 
@@ -30,7 +47,7 @@ The `createClient` function accepts the following options:
 | Property | Type | Description |
 |----------|------|-------------|
 | `baseUrl` | `string` | Your site or app base URL. The client appends Lucid's public client endpoint path internally |
-| `apiKey` | `string` | Your Lucid client integration API key |
+| `auth` | `LucidClientAuth` | An API integration key or OAuth access token configuration |
 | `fetch` | `typeof fetch` | A custom fetch implementation |
 | `headers` | `HeadersInit \| () => HeadersInit \| Promise<HeadersInit>` | Additional headers to send with every request |
 | `timeoutMs` | `number` | A default request timeout in milliseconds |
@@ -105,7 +122,10 @@ import { asDocument, asDocuments, createClient } from "@lucidcms/client";
 
 const client = createClient({
     baseUrl: "https://example.com",
-    apiKey: "<your-client-api-key>",
+    auth: {
+        type: "apiKey",
+        apiKey: "<your-api-integration-key>",
+    },
 });
 
 const response = await client.documents.getSingle({

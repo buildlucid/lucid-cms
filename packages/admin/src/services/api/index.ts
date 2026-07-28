@@ -1,7 +1,7 @@
 import account from "./account";
 import ai from "./ai";
+import apiIntegrations from "./api-integrations";
 import auth from "./auth";
-import clientIntegrations from "./client-integrations";
 import collections from "./collections";
 import connection from "./connection";
 import documents from "./documents";
@@ -11,6 +11,7 @@ import locales from "./locales";
 import media from "./media";
 import mediaFolders from "./media-folders";
 import mediaShareLinks from "./media-share-links";
+import oauthConnections from "./oauth-connections";
 import permissions from "./permissions";
 import publishOperations from "./publish-operations";
 import roles from "./roles";
@@ -39,7 +40,8 @@ const exportObject = {
 	locales,
 	collections,
 	documents,
-	clientIntegrations,
+	apiIntegrations,
+	oauthConnections,
 	connection,
 	tenants,
 };

@@ -3,24 +3,39 @@ import type { ServiceResponse } from "../../utils/services/types.js";
 import type {
 	AuthProviderConfigSchema,
 	AuthProviderSchema,
+	OAuth2ConfigSchema,
 	OIDCConfigSchema,
 } from "./schema.js";
 
-export type OIDCUserInfo = {
+export type AuthProviderUserInfo = {
 	userId: string | number;
 	firstName?: string;
 	lastName?: string;
 	// displayName?: string;
 };
 
-export interface OIDCAuthConfig<TUserInfoResponse = unknown>
-	extends z.infer<typeof OIDCConfigSchema> {
+type AuthProviderMapper<TUserInfoResponse> = {
 	mappers?: {
 		userInfo?: (
 			response: TUserInfoResponse,
-		) => Awaited<ServiceResponse<OIDCUserInfo>> | ServiceResponse<OIDCUserInfo>;
+		) =>
+			| Awaited<ServiceResponse<AuthProviderUserInfo>>
+			| ServiceResponse<AuthProviderUserInfo>;
 	};
-}
+};
+
+export type OIDCUserInfo = AuthProviderUserInfo;
+
+export type OAuth2AuthConfig<TUserInfoResponse = unknown> = z.infer<
+	typeof OAuth2ConfigSchema
+> &
+	AuthProviderMapper<TUserInfoResponse>;
+
+export type OIDCAuthConfig<TUserInfoResponse = unknown> = z.infer<
+	typeof OIDCConfigSchema
+> &
+	AuthProviderMapper<TUserInfoResponse>;
+
 export type AuthProviderConfig = z.infer<typeof AuthProviderConfigSchema>;
 export type AuthProvider = z.infer<typeof AuthProviderSchema>;
 export type AuthProviderTypes = AuthProviderConfig["type"];
@@ -36,12 +51,15 @@ export interface AuthProviderGeneric<
 export interface AuthAdapterGetAuthUrlParams {
 	redirectUri: string;
 	state: string;
+	codeChallenge: string;
+	nonce?: string;
 }
 
 export interface AuthAdapterHandleCallbackParams {
 	code: string;
-	state: string;
 	redirectUri: string;
+	codeVerifier: string;
+	nonce?: string;
 }
 
 export interface AuthAdapterCallbackResult {
@@ -60,4 +78,8 @@ export interface AuthAdapter {
 
 export interface OIDCAdapter extends AuthAdapter {
 	config: OIDCAuthConfig;
+}
+
+export interface OAuth2Adapter extends AuthAdapter {
+	config: OAuth2AuthConfig;
 }

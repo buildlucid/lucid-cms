@@ -2,6 +2,7 @@ import getAvailableProviders from "../../../libs/auth-providers/get-available-pr
 import type { AuthProviders } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
+/** Lists the authentication providers available to the admin. */
 const getProviders: ServiceFn<[], AuthProviders> = async (context) => {
 	const providersRes = getAvailableProviders(context.config);
 

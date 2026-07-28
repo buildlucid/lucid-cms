@@ -6,7 +6,7 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 	return {
 		async up(db: Kysely<unknown>) {
 			await db.schema
-				.createTable("lucid_client_integrations")
+				.createTable("lucid_api_integrations")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
@@ -47,40 +47,40 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_client_integrations_key")
-				.on("lucid_client_integrations")
+				.createIndex("idx_lucid_api_integrations_key")
+				.on("lucid_api_integrations")
 				.column("key")
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_client_integrations_tenant_key")
-				.on("lucid_client_integrations")
+				.createIndex("idx_lucid_api_integrations_tenant_key")
+				.on("lucid_api_integrations")
 				.column("tenant_key")
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_client_integrations_api_key")
-				.on("lucid_client_integrations")
+				.createIndex("idx_lucid_api_integrations_api_key")
+				.on("lucid_api_integrations")
 				.column("api_key")
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_client_integrations_secret")
-				.on("lucid_client_integrations")
+				.createIndex("idx_lucid_api_integrations_secret")
+				.on("lucid_api_integrations")
 				.column("secret")
 				.execute();
 
 			await db.schema
-				.createTable("lucid_client_integration_scopes")
+				.createTable("lucid_api_integration_scopes")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn(
-					"client_integration_id",
+					"api_integration_id",
 					adapter.getDataType("integer"),
 					(col) =>
 						col
-							.references("lucid_client_integrations.id")
+							.references("lucid_api_integrations.id")
 							.onDelete("cascade")
 							.notNull(),
 				)
@@ -114,17 +114,261 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createIndex(
-					"idx_lucid_client_integration_scopes_client_integration_id",
-				)
-				.on("lucid_client_integration_scopes")
-				.column("client_integration_id")
+				.createIndex("idx_lucid_api_integration_scopes_api_integration_id")
+				.on("lucid_api_integration_scopes")
+				.column("api_integration_id")
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_client_integration_scopes_scope")
-				.on("lucid_client_integration_scopes")
+				.createIndex("idx_lucid_api_integration_scopes_scope")
+				.on("lucid_api_integration_scopes")
 				.column("scope")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_oauth_authorization_requests")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("request_id", adapter.getDataType("text"), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("client_id", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("client_name", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("client_uri", adapter.getDataType("text"))
+				.addColumn("redirect_uri", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("resource", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("scopes", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("state", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn(
+					"code_challenge",
+					adapter.getDataType("varchar", 128),
+					(col) => col.notNull(),
+				)
+				.addColumn("expires_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("consumed_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_authorization_requests_expires_at")
+				.on("lucid_oauth_authorization_requests")
+				.column("expires_at")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_oauth_grants")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("name", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("client_id", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("client_name", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("client_uri", adapter.getDataType("text"))
+				.addColumn("principal_type", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("cascade"),
+				)
+				.addColumn("tenant_key", adapter.getDataType("text"))
+				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("revoked_at", adapter.getDataType("timestamp"))
+				.addColumn("last_used_at", adapter.getDataType("timestamp"))
+				.addColumn("last_used_ip", adapter.getDataType("varchar", 255))
+				.addColumn("last_used_user_agent", adapter.getDataType("text"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_grants_client_id")
+				.on("lucid_oauth_grants")
+				.column("client_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_grants_user_id")
+				.on("lucid_oauth_grants")
+				.column("user_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_grants_tenant_key")
+				.on("lucid_oauth_grants")
+				.column("tenant_key")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_oauth_grant_scopes")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("grant_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_oauth_grants.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("scope", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.addUniqueConstraint("lucid_oauth_grant_scopes_grant_scope_unique", [
+					"grant_id",
+					"scope",
+				])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_grant_scopes_grant_id")
+				.on("lucid_oauth_grant_scopes")
+				.column("grant_id")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_oauth_authorization_codes")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("code_hash", adapter.getDataType("varchar", 64), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("grant_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_oauth_grants.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("client_id", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("redirect_uri", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("resource", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn(
+					"code_challenge",
+					adapter.getDataType("varchar", 128),
+					(col) => col.notNull(),
+				)
+				.addColumn("expires_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("consumed_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_authorization_codes_grant_id")
+				.on("lucid_oauth_authorization_codes")
+				.column("grant_id")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_oauth_refresh_tokens")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("token_hash", adapter.getDataType("varchar", 64), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("family_id", adapter.getDataType("varchar", 64), (col) =>
+					col.notNull(),
+				)
+				.addColumn("grant_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_oauth_grants.id").onDelete("cascade").notNull(),
+				)
+				.addColumn("client_id", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("resource", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("expires_at", adapter.getDataType("timestamp"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("consumed_at", adapter.getDataType("timestamp"))
+				.addColumn("revoked_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_refresh_tokens_family_id")
+				.on("lucid_oauth_refresh_tokens")
+				.column("family_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_refresh_tokens_grant_id")
+				.on("lucid_oauth_refresh_tokens")
+				.column("grant_id")
 				.execute();
 		},
 		async down(_db: Kysely<unknown>) {},

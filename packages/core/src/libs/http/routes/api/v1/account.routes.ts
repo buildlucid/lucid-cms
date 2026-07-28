@@ -15,10 +15,16 @@ import updateProfilePictureController from "../../../controllers/account/update-
 import verifyEmailChangeConfirmController from "../../../controllers/account/verify-email-change-confirm.js";
 import verifyEmailChangeRevertController from "../../../controllers/account/verify-email-change-revert.js";
 import verifyResetPasswordController from "../../../controllers/account/verify-reset-password.js";
+import getAccountConnectionsController from "../../../controllers/oauth/get-account-connections.js";
+import revokeOAuthConnectionController from "../../../controllers/oauth/revoke-connection.js";
+import updateOAuthConnectionController from "../../../controllers/oauth/update-connection.js";
 
 const accountRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMeController)
 	.patch("/", ...updateMeController)
+	.get("/oauth-connections", ...getAccountConnectionsController)
+	.patch("/oauth-connections/:id", ...updateOAuthConnectionController)
+	.delete("/oauth-connections/:id", ...revokeOAuthConnectionController)
 	.get("/email-change/confirm/:token", ...verifyEmailChangeConfirmController)
 	.patch("/email-change/confirm/:token", ...confirmEmailChangeController)
 	.get("/email-change/revert/:token", ...verifyEmailChangeRevertController)

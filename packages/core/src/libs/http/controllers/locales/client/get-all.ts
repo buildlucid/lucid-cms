@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
-import { ClientScopes } from "../../../../permission/client-scopes.js";
+import { ExternalScopes } from "../../../../permission/external-scopes.js";
 import cache from "../../../middleware/cache.js";
-import clientAuthentication from "../../../middleware/client-authenticate.js";
-import clientScopes from "../../../middleware/client-scopes.js";
+import externalAuthentication from "../../../middleware/external-authenticate.js";
+import externalScopes from "../../../middleware/external-scopes.js";
 import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
 import createServiceContext from "../../../utils/create-service-context.js";
@@ -20,7 +20,7 @@ const factory = createFactory();
 
 const getAllController = factory.createHandlers(
 	describeRoute({
-		description: "Returns all enabled locales via the client integration.",
+		description: "Returns all enabled locales via an external credential.",
 		tags: ["client-locales"],
 		summary: "Get All Locales",
 		responses: openAPI.responses({
@@ -33,8 +33,8 @@ const getAllController = factory.createHandlers(
 			},
 		}),
 	}),
-	clientAuthentication,
-	clientScopes([ClientScopes.LocalesRead]),
+	externalAuthentication,
+	externalScopes([ExternalScopes.LocalesRead]),
 	cache({
 		ttl: hoursToSeconds(24),
 		mode: "static",

@@ -27,6 +27,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					clientId: pluginOptions.clientId,
 					clientSecret: pluginOptions.clientSecret,
 					issuer: "https://accounts.google.com",
+					jwksEndpoint: "https://www.googleapis.com/oauth2/v3/certs",
 					authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
 					tokenEndpoint: "https://oauth2.googleapis.com/token",
 					userinfoEndpoint: "https://openidconnect.googleapis.com/v1/userinfo",

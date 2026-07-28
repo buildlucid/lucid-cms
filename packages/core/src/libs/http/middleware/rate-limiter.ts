@@ -14,7 +14,7 @@ type RateLimitOptions = {
 	 * What to use as the rate limit key
 	 * - "ip": Client IP address (default)
 	 * - "user": Authenticated user ID
-	 * - "client": Client integration ID
+	 * - "client": External credential ID
 	 */
 	mode: RateLimitMode;
 	/** Time window in milliseconds */
@@ -81,15 +81,20 @@ const rateLimiter = (options: RateLimitOptions) =>
 					break;
 				}
 				case "client": {
-					const clientIntegration = c.get("clientIntegrationAuth");
-					if (!clientIntegration) {
+					const externalAuth = c.get("externalAuth");
+					if (!externalAuth) {
 						throw new LucidAPIError({
 							type: "authorisation",
 							message: copy("server:core.rate.limit.authentication.required"),
 							status: 401,
 						});
 					}
-					key = cacheKeys.rateLimit.client(clientIntegration.id);
+					const credentialId =
+						externalAuth.credential.type === "api-key"
+							? `api-key:${externalAuth.credential.integrationId}`
+							: `oauth:${externalAuth.credential.grantId}`;
+
+					key = cacheKeys.rateLimit.client(credentialId);
 					break;
 				}
 				default: {

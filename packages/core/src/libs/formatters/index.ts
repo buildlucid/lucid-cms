@@ -1,7 +1,7 @@
 import type { BooleanInt } from "../db/types.js";
 
 export { default as aiUsageFormatter } from "./ai-usage.js";
-export { default as clientIntegrationsFormatter } from "./client-integrations.js";
+export { default as apiIntegrationsFormatter } from "./api-integrations.js";
 export { default as collectionsFormatter } from "./collections.js";
 export { default as documentBricksFormatter } from "./document-bricks.js";
 export { default as documentFieldsFormatter } from "./document-fields.js";
@@ -16,6 +16,8 @@ export { default as lucidRemoteConnectionsFormatter } from "./lucid-remote-conne
 export { default as mediaFormatter } from "./media.js";
 export { default as mediaFoldersFormatter } from "./media-folders.js";
 export { default as mediaShareLinksFormatter } from "./media-share-links.js";
+export { default as oauthFormatter } from "./oauth.js";
+export { default as oauthConnectionsFormatter } from "./oauth-connections.js";
 export { default as optionsFormatter } from "./options.js";
 export { default as permissionsFormatter } from "./permissions.js";
 export { default as previewSessionsFormatter } from "./preview-sessions.js";

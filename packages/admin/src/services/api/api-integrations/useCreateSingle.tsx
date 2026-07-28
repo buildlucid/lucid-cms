@@ -1,0 +1,51 @@
+import type { ResponseBody } from "@types";
+import T from "@/translations";
+import request from "@/utils/request";
+import serviceHelpers from "@/utils/service-helpers";
+
+interface Params {
+	name: string;
+	description: string;
+	enabled: boolean;
+	scopes: string[];
+}
+
+interface CreateSingleResponse {
+	apiKey: string;
+}
+
+export const createSingleReq = (params: Params) => {
+	return request<ResponseBody<CreateSingleResponse>>({
+		url: "/lucid/api/v1/integrations/api",
+		csrf: true,
+		config: {
+			method: "POST",
+			body: params,
+		},
+	});
+};
+
+interface UseCreateSingleProps {
+	onSuccess?: (data: ResponseBody<CreateSingleResponse>) => void;
+	onError?: () => void;
+}
+
+const useCreateSingle = (props?: UseCreateSingleProps) => {
+	// -----------------------------
+	// Mutation
+	return serviceHelpers.useMutationWrapper<
+		Params,
+		ResponseBody<CreateSingleResponse>
+	>({
+		mutationFn: createSingleReq,
+		getSuccessToast: () => ({
+			title: T()("toasts.common.integration.created.title"),
+			message: T()("toasts.common.integration.created.message"),
+		}),
+		invalidates: ["apiIntegrations.getAll"],
+		onSuccess: props?.onSuccess,
+		onError: props?.onError,
+	});
+};
+
+export default useCreateSingle;

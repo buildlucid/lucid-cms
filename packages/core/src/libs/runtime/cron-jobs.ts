@@ -53,6 +53,13 @@ const cronJobsMap = () =>
 			transaction: true,
 			schedule: "maintenance",
 		},
+		"clear-expired-oauth-data": {
+			fn: cronServices.clearExpiredOAuthData,
+			label: "Clear expired OAuth data",
+			error: copy("server:core.maintenance.oauth.expired.clear.failed"),
+			transaction: true,
+			schedule: "maintenance",
+		},
 		"update-media-storage": {
 			fn: cronServices.updateMediaStorage,
 			label: "Update media storage",

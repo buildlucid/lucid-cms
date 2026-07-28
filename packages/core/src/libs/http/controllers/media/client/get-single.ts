@@ -8,10 +8,10 @@ import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
-import { ClientScopes } from "../../../../permission/client-scopes.js";
+import { ExternalScopes } from "../../../../permission/external-scopes.js";
 import cache from "../../../middleware/cache.js";
-import clientAuthentication from "../../../middleware/client-authenticate.js";
-import clientScopes from "../../../middleware/client-scopes.js";
+import externalAuthentication from "../../../middleware/external-authenticate.js";
+import externalScopes from "../../../middleware/external-scopes.js";
 import validate from "../../../middleware/validate.js";
 import openAPI from "../../../openapi/index.js";
 import formatAPIResponse from "../../../utils/build-response.js";
@@ -22,7 +22,7 @@ const factory = createFactory();
 const getSingleController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Get a single media item by ID via the client integration. Returns translated metadata.",
+			"Get a single media item by ID via an external credential. Returns translated metadata.",
 		tags: ["client-media"],
 		summary: "Get Media",
 		responses: openAPI.responses({
@@ -35,8 +35,8 @@ const getSingleController = factory.createHandlers(
 			},
 		}),
 	}),
-	clientAuthentication,
-	clientScopes([ClientScopes.MediaRead]),
+	externalAuthentication,
+	externalScopes([ExternalScopes.MediaRead]),
 	validate("param", controllerSchemas.client.getSingle.params),
 	cache({
 		ttl: minutesToSeconds(5),

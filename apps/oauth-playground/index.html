@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="referrer" content="no-referrer" />
+		<meta name="color-scheme" content="dark" />
+		<meta name="theme-color" content="#0a0a0a" />
+		<title>Lucid OAuth Playground</title>
+	</head>
+	<body>
+		<div class="page-shell">
+			<header class="topbar">
+				<a class="brand" href="/" aria-label="Lucid OAuth Playground home">
+					<span class="brand-mark"><img src="/lucid-mark.svg" alt="" /></span>
+					<span>
+						<strong>Lucid</strong>
+						<small>OAuth Playground</small>
+					</span>
+				</a>
+				<div class="server-state" id="server-state" data-state="idle">
+					<span class="status-dot"></span>
+					<span id="server-state-label">Not connected</span>
+				</div>
+			</header>
+
+			<main>
+				<section class="hero">
+					<div>
+						<p class="eyebrow">Integration test bench</p>
+						<h1>Test the complete Lucid auth flow.</h1>
+						<p class="hero-copy">
+							Discover the server, authorise a user or system connection, inspect
+							its grant, and call the external API from one focused workspace.
+						</p>
+					</div>
+					<nav class="flow-map" aria-label="OAuth flow">
+						<div class="flow-step is-current" id="flow-discover">
+							<span>1</span>
+							<div><strong>Discover</strong><small>Server metadata</small></div>
+						</div>
+						<i></i>
+						<div class="flow-step" id="flow-authorize">
+							<span>2</span>
+							<div><strong>Authorise</strong><small>Consent &amp; PKCE</small></div>
+						</div>
+						<i></i>
+						<div class="flow-step" id="flow-request">
+							<span>3</span>
+							<div><strong>Request</strong><small>Call the API</small></div>
+						</div>
+					</nav>
+				</section>
+
+				<div class="notice is-hidden" id="notice" role="status">
+					<span class="notice-icon" aria-hidden="true">!</span>
+					<div>
+						<strong id="notice-title"></strong>
+						<p id="notice-copy"></p>
+					</div>
+					<button class="icon-button" id="notice-close" type="button" aria-label="Dismiss">×</button>
+				</div>
+
+				<div class="workspace-grid">
+					<div class="stack">
+						<section class="panel">
+							<div class="panel-heading">
+								<div>
+									<p class="panel-kicker">OAuth client</p>
+									<h2>Connection setup</h2>
+								</div>
+								<span class="protocol-badge">Authorization Code + PKCE</span>
+							</div>
+
+							<label class="field">
+								<span>Lucid URL</span>
+								<span class="input-row">
+									<input id="lucid-url" type="url" spellcheck="false" autocomplete="url" />
+									<button class="button button-secondary" id="discover-button" type="button">
+										Discover
+									</button>
+								</span>
+								<small>The origin of the Lucid instance you want to test.</small>
+							</label>
+
+							<div class="metadata-grid">
+								<div>
+									<span>Issuer</span>
+									<strong id="issuer-value">—</strong>
+								</div>
+								<div>
+									<span>Resource</span>
+									<strong id="resource-value">—</strong>
+								</div>
+								<div>
+									<span>Client ID</span>
+									<strong id="client-id-value">—</strong>
+								</div>
+								<div>
+									<span>Redirect URI</span>
+									<strong id="redirect-value">—</strong>
+								</div>
+							</div>
+
+							<div class="section-divider"></div>
+
+							<div class="section-heading">
+								<div>
+									<h3>Requested access</h3>
+									<p>Choose the smallest set of capabilities needed for this test.</p>
+								</div>
+								<button class="text-button" id="read-scopes-button" type="button">
+									Select read scopes
+								</button>
+							</div>
+							<div class="scope-list" id="scope-list">
+								<div class="scope-placeholder">
+									<span class="mini-spinner"></span>
+									Discovering supported scopes…
+								</div>
+							</div>
+
+							<div class="panel-actions">
+								<div class="security-caption">
+									<span aria-hidden="true">⌁</span>
+									<p>State and verifier are generated per request and cleared after callback.</p>
+								</div>
+								<button class="button button-primary" id="connect-button" type="button" disabled>
+									<span>Continue to Lucid</span>
+									<span aria-hidden="true">→</span>
+								</button>
+							</div>
+						</section>
+
+						<section class="panel token-panel">
+							<div class="panel-heading">
+								<div>
+									<p class="panel-kicker">OAuth session</p>
+									<h2>Token lifecycle</h2>
+								</div>
+								<span class="status-pill" id="token-status">No active grant</span>
+							</div>
+
+							<div class="empty-state" id="token-empty">
+								<div class="empty-icon">◇</div>
+								<strong>No OAuth tokens in memory</strong>
+								<p>Complete the consent flow to inspect and exercise a grant.</p>
+							</div>
+
+							<div class="token-content is-hidden" id="token-content">
+								<div class="grant-summary">
+									<div class="principal-icon" id="principal-icon">U</div>
+									<div>
+										<span>Connected principal</span>
+										<strong id="principal-value">—</strong>
+										<small id="grant-value">—</small>
+									</div>
+									<div class="expires">
+										<span>Access token expires</span>
+										<strong id="expires-value">—</strong>
+									</div>
+								</div>
+
+								<div class="token-row">
+									<div>
+										<span>Access token</span>
+										<code id="access-token-value">—</code>
+									</div>
+									<button class="icon-button copy-token" data-token="access" type="button" aria-label="Copy access token">Copy</button>
+								</div>
+								<div class="token-row">
+									<div>
+										<span>Refresh token</span>
+										<code id="refresh-token-value">—</code>
+									</div>
+									<button class="icon-button copy-token" data-token="refresh" type="button" aria-label="Copy refresh token">Copy</button>
+								</div>
+								<button class="text-button token-reveal" id="reveal-token-button" type="button">Reveal tokens</button>
+
+								<div class="scope-chips" id="granted-scopes"></div>
+								<div class="token-actions">
+									<button class="button button-secondary" id="refresh-button" type="button">Refresh tokens</button>
+									<button class="button button-danger" id="revoke-button" type="button">Revoke connection</button>
+									<button class="button button-quiet" id="clear-button" type="button">Clear locally</button>
+								</div>
+							</div>
+						</section>
+					</div>
+
+					<div class="stack">
+						<section class="panel console-panel">
+							<div class="panel-heading">
+								<div>
+									<p class="panel-kicker">External API</p>
+									<h2>Request console</h2>
+								</div>
+								<div class="segmented" role="tablist" aria-label="Authentication method">
+									<button class="is-active" id="oauth-tab" type="button" role="tab" aria-selected="true">OAuth</button>
+									<button id="api-key-tab" type="button" role="tab" aria-selected="false">API key</button>
+								</div>
+							</div>
+
+							<div class="api-key-field is-hidden" id="api-key-field">
+								<label class="field">
+									<span>API integration key</span>
+									<input id="api-key-value" type="password" autocomplete="off" spellcheck="false" placeholder="Paste a generated integration key" />
+									<small>Held in memory only and sent as <code>Authorization: ApiKey …</code>.</small>
+								</label>
+							</div>
+
+							<div class="request-line">
+								<label>
+									<span>Method</span>
+									<select id="request-method">
+										<option>GET</option>
+										<option>POST</option>
+										<option>PATCH</option>
+										<option>DELETE</option>
+									</select>
+								</label>
+								<label class="request-path">
+									<span>Path</span>
+									<input id="request-path" type="text" spellcheck="false" value="/lucid/api/v1/client/locales" />
+								</label>
+							</div>
+
+							<label class="field body-field is-hidden" id="body-field">
+								<span>JSON body</span>
+								<textarea id="request-body" rows="5" spellcheck="false" placeholder='{ "example": true }'></textarea>
+							</label>
+
+							<div class="request-actions">
+								<span id="request-auth-caption">Uses the active OAuth access token.</span>
+								<button class="button button-primary" id="send-button" type="button">
+									Send request
+									<span aria-hidden="true">↗</span>
+								</button>
+							</div>
+
+							<div class="response-shell">
+								<div class="response-toolbar">
+									<div>
+										<span class="response-dot"></span>
+										<strong id="response-status">Ready</strong>
+									</div>
+									<span id="response-time">—</span>
+								</div>
+								<pre id="response-value"><code>Select an authentication method and send a request.</code></pre>
+							</div>
+						</section>
+
+						<section class="panel activity-panel">
+							<div class="panel-heading">
+								<div>
+									<p class="panel-kicker">Trace</p>
+									<h2>Flow activity</h2>
+								</div>
+								<button class="text-button" id="clear-activity-button" type="button">Clear</button>
+							</div>
+							<ol id="activity-list">
+								<li class="activity-empty">Protocol events will appear here.</li>
+							</ol>
+						</section>
+					</div>
+				</div>
+			</main>
+
+			<footer>
+				<span>Lucid OAuth Playground</span>
+				<span>Credentials stay in this browser tab.</span>
+			</footer>
+		</div>
+		<script type="module" src="/src/main.ts"></script>
+	</body>
+</html>

@@ -1,17 +1,7 @@
 import type { Config } from "../../types/config.js";
-import { tenantAccessAllowed } from "../../utils/helpers/index.js";
-import { copy } from "../i18n/index.js";
-import {
-	collectionPermissionActions,
-	getCollectionPermission,
-} from "./collection-permissions.js";
-import { PermissionGroups, Permissions } from "./definitions.js";
-import type {
-	Permission,
-	PermissionDefinition,
-	PermissionGroup,
-	StaticPermission,
-} from "./types.js";
+import { getCapabilityRegistry } from "./capabilities.js";
+import { Permissions } from "./definitions.js";
+import type { Permission, PermissionGroup, StaticPermission } from "./types.js";
 
 export const corePermissionKeys = Object.values(
 	Permissions,
@@ -30,60 +20,27 @@ export const isCorePermission = (
 	);
 };
 
-const collectionPermissionDetails = {
-	read: copy("admin:permissions.documents.read"),
-	create: copy("admin:permissions.documents.create"),
-	update: copy("admin:permissions.documents.update"),
-	delete: copy("admin:permissions.documents.delete"),
-	restore: copy("admin:permissions.documents.restore"),
-	publish: copy("admin:permissions.documents.publish"),
-	review: copy("admin:permissions.documents.review"),
-} as const;
-
-const getCollectionPermissionGroups = (
-	config?: Pick<Config, "collections">,
-	tenantKey?: string | null,
-): PermissionGroup[] => {
-	return (config?.collections ?? [])
-		.filter(
-			(collection) =>
-				tenantKey === undefined ||
-				tenantAccessAllowed(collection.getData.tenants, tenantKey),
-		)
-		.map((collection) => ({
-			key: `documents:${collection.key}`,
-			details: {
-				name: collection.getData.details.name,
-			},
-			core: true,
-			permissions: collectionPermissionActions.map(
-				(action): PermissionDefinition => ({
-					key: getCollectionPermission(collection.key, action),
-					details: {
-						name: collectionPermissionDetails[action],
-					},
-					core: true,
-				}),
-			),
-		}));
-};
-
 /** Builds the internal and collection-generated permission catalogue. */
 export const getPermissionRegistry = (
 	config?: Pick<Config, "collections">,
 	options?: { tenantKey?: string | null },
 ): PermissionGroup[] => {
-	const coreGroups = Object.values(PermissionGroups).map<PermissionGroup>(
-		(group) => ({
-			...group,
-			permissions: [...group.permissions],
-		}),
-	);
-
-	return [
-		...coreGroups,
-		...getCollectionPermissionGroups(config, options?.tenantKey),
-	];
+	return getCapabilityRegistry(config, options)
+		.map(
+			(group): PermissionGroup => ({
+				key: group.key,
+				details: group.details,
+				core: group.core,
+				permissions: group.capabilities
+					.filter((capability) => capability.permission !== undefined)
+					.map((capability) => ({
+						key: capability.permission as Permission,
+						details: capability.details,
+						core: capability.core,
+					})),
+			}),
+		)
+		.filter((group) => group.permissions.length > 0);
 };
 
 /** Builds the permission catalogue shown in role management. */

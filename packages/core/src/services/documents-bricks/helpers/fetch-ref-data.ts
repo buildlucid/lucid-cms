@@ -14,7 +14,7 @@ import type { CollectionSchemaTable } from "../../../libs/collection/schema/type
 import type { MediaPropsT } from "../../../libs/formatters/media.js";
 import type { UserPropT } from "../../../libs/formatters/users.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getCollectionClientScope } from "../../../libs/permission/client-scopes.js";
+import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type {
 	DocumentVersionType,
@@ -137,7 +137,9 @@ const fetchRefData: ServiceFn<
 			),
 		);
 		if (missingCollectionKeys.length > 0) {
-			const missingScopes = missingCollectionKeys.map(getCollectionClientScope);
+			const missingScopes = missingCollectionKeys.map((collectionKey) =>
+				getCollectionExternalScope(collectionKey),
+			);
 			return {
 				error: {
 					type: "authorisation",

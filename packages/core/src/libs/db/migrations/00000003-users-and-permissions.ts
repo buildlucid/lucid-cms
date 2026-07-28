@@ -511,6 +511,10 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("provider_key", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("code_verifier", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("nonce", adapter.getDataType("text"))
 				.addColumn("redirect_path", adapter.getDataType("text"))
 				.addColumn("action_type", adapter.getDataType("text"), (col) =>
 					col.notNull(),
@@ -539,6 +543,7 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("expiry_date", adapter.getDataType("timestamp"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("consumed_at", adapter.getDataType("timestamp"))
 				.execute();
 
 			await db.schema

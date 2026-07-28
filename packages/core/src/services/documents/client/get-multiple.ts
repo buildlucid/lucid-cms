@@ -7,7 +7,7 @@ import formatter, {
 	documentsFormatter,
 } from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getCollectionClientScope } from "../../../libs/permission/client-scopes.js";
+import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ClientGetMultipleQueryParams } from "../../../schemas/documents.js";
 import type {
@@ -40,7 +40,7 @@ import type { ClientDocumentVersionInput } from "./types.js";
 type ClientDocumentsGetMultipleInput<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
 	query: ClientGetMultipleQueryParams;
-	clientScopes?: string[];
+	externalScopes?: string[];
 } & ClientDocumentVersionInput<TCollectionKey>;
 
 type ClientDocumentsGetMultipleResult<TCollectionKey extends string = string> =
@@ -106,10 +106,12 @@ const getMultiple: ClientDocumentsGetMultipleService = async <
 	if (collectionRes.error) return collectionRes;
 
 	//* work out allowed collection keys based on client scopes
-	const allowedCollectionKeys = data.clientScopes
+	const allowedCollectionKeys = data.externalScopes
 		? context.config.collections
 				.filter((collection) =>
-					data.clientScopes?.includes(getCollectionClientScope(collection.key)),
+					data.externalScopes?.includes(
+						getCollectionExternalScope(collection.key),
+					),
 				)
 				.map((collection) => collection.key)
 		: undefined;

@@ -1,5 +1,9 @@
 # @lucidcms/types
 
+## v0.5.0 (unreleased)
+
+- Integration types updated and error type additions.
+
 ## v0.4.0
 
 - Updated collection document generics to support collection-specific callback types.

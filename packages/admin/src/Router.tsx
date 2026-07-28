@@ -5,6 +5,7 @@ import ConditionGuard from "@/guards/Condition";
 import PermissionGuard from "@/guards/Permission";
 import AuthRoutes from "@/layouts/AuthRoutes";
 import MainLayout from "@/layouts/Main";
+import OAuthRoutes from "@/layouts/OAuthRoutes";
 import PublicRoutes from "@/layouts/PublicRoutes";
 import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
@@ -36,8 +37,8 @@ const SystemOperationsRoute = lazy(
 	() => import("@/routes/System/Operations/View"),
 );
 const SystemAiUsageRoute = lazy(() => import("@/routes/System/AiUsage/View"));
-const SystemClientIntegrationsRoute = lazy(
-	() => import("@/routes/System/ClientIntegrations/View"),
+const SystemIntegrationsRoute = lazy(
+	() => import("@/routes/System/Integrations/View"),
 );
 const SystemQueueObservabilityRoute = lazy(
 	() => import("@/routes/System/QueueObservability/View"),
@@ -47,6 +48,7 @@ const ReleaseRequestsListRoute = lazy(
 	() => import("@/routes/ReleaseRequests/List"),
 );
 const AccountRoute = lazy(() => import("@/routes/Account"));
+const OAuthConsentRoute = lazy(() => import("@/routes/OAuthConsent"));
 const CollectionsDocumentsListRoute = lazy(
 	() => import("./routes/Collections/Documents/List"),
 );
@@ -221,7 +223,7 @@ const AppRouter: Component = () => {
 				/>
 				<Route
 					path="/system/integrations"
-					preload={preloadRoutes(SystemClientIntegrationsRoute)}
+					preload={preloadRoutes(SystemIntegrationsRoute)}
 					component={() => (
 						<PermissionSomeGuard
 							permission={[
@@ -229,9 +231,17 @@ const AppRouter: Component = () => {
 								Permissions.ConnectionUpdate,
 							]}
 						>
-							<SystemClientIntegrationsRoute />
+							<SystemIntegrationsRoute />
 						</PermissionSomeGuard>
 					)}
+				/>
+			</Route>
+			{/* Authenticated OAuth */}
+			<Route path="/lucid" component={OAuthRoutes}>
+				<Route
+					path="/oauth/consent/:requestId"
+					preload={preloadRoutes(OAuthConsentRoute)}
+					component={OAuthConsentRoute}
 				/>
 			</Route>
 			{/* Non authenticated */}

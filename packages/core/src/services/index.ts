@@ -1,8 +1,8 @@
 export * as accountServices from "./account/index.js";
 export * as aiServices from "./ai/index.js";
+export * as apiIntegrationServices from "./api-integrations/index.js";
 export * as authServices from "./auth/index.js";
 export * as cdnServices from "./cdn/index.js";
-export * as clientIntegrationServices from "./client-integrations/index.js";
 export * as collectionServices from "./collections/index.js";
 export * as connectionServices from "./connection/index.js";
 export * as cronServices from "./crons/index.js";
@@ -18,6 +18,7 @@ export * as localeServices from "./locales/index.js";
 export * as mediaServices from "./media/index.js";
 export * as mediaFolderServices from "./media-folders/index.js";
 export * as mediaShareLinkServices from "./media-share-links/index.js";
+export * as oauthServices from "./oauth/index.js";
 export * as optionServices from "./options/index.js";
 export * as permissionServices from "./permissions/index.js";
 export * as previewSessionServices from "./preview-sessions/index.js";
