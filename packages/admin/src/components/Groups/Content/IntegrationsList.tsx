@@ -96,34 +96,51 @@ export const IntegrationsList: Component<{
 	// Render
 	return (
 		<DynamicContent options={{ padding: "24" }}>
-			{/* OAuth Applications */}
+			{/* OAuth Access */}
 			<Show when={canReadIntegrations()}>
-				<OAuthClientsList
-					canCreate={hasCreatePermission()}
-					canUpdate={
-						userStore.get.hasPermission([Permissions.IntegrationsUpdate]).all
-					}
-					canDelete={
-						userStore.get.hasPermission([Permissions.IntegrationsDelete]).all
-					}
-					canRegenerate={
-						userStore.get.hasPermission([Permissions.IntegrationsRegenerate])
-							.all
-					}
-				/>
-			</Show>
-
-			{/* OAuth Connections */}
-			<Show when={canReadIntegrations()}>
-				<OAuthConnectionsList
-					owner={{ type: "system" }}
-					canUpdate={
-						userStore.get.hasPermission([Permissions.IntegrationsUpdate]).all
-					}
-					canRevoke={
-						userStore.get.hasPermission([Permissions.IntegrationsDelete]).all
-					}
-				/>
+				<InfoRow.Root
+					title={T()("oauth.access.manage.title")}
+					description={T()("oauth.access.manage.description")}
+				>
+					<InfoRow.Content
+						title={T()("oauth.connections.manage.title")}
+						description={T()("oauth.connections.manage.description")}
+						reducedMargin={true}
+					>
+						<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
+							<OAuthConnectionsList
+								owner={{ type: "system" }}
+								canUpdate={
+									userStore.get.hasPermission([Permissions.IntegrationsUpdate])
+										.all
+								}
+								canRevoke={
+									userStore.get.hasPermission([Permissions.IntegrationsDelete])
+										.all
+								}
+								embedded={true}
+								contained={false}
+							/>
+						</div>
+					</InfoRow.Content>
+					<OAuthClientsList
+						canCreate={hasCreatePermission()}
+						canUpdate={
+							userStore.get.hasPermission([Permissions.IntegrationsUpdate]).all
+						}
+						canDelete={
+							userStore.get.hasPermission([Permissions.IntegrationsDelete]).all
+						}
+						canRegenerate={
+							userStore.get.hasPermission([Permissions.IntegrationsRegenerate])
+								.all
+						}
+						contentRow={{
+							title: T()("oauth.clients.manage.title"),
+							description: T()("oauth.clients.manage.description"),
+						}}
+					/>
+				</InfoRow.Root>
 			</Show>
 
 			{/* Integrations */}

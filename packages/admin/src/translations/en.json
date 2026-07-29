@@ -920,6 +920,8 @@
 	"user.integrations.manage.description": "API keys that act with this user's current permissions.",
 	"oauth.clients.manage.title": "OAuth Applications",
 	"oauth.clients.manage.description": "Pre-register applications that can request OAuth access to this CMS.",
+	"oauth.access.manage.title": "OAuth Access",
+	"oauth.access.manage.description": "Manage applications and connections that access this CMS.",
 	"oauth.clients.empty.title": "No OAuth Applications",
 	"oauth.clients.empty.description": "Register an application to give it a stable client ID and approved callback URLs.",
 	"oauth.clients.create.action": "Register Application",
