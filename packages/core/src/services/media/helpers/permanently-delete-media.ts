@@ -5,7 +5,6 @@ import {
 	MediaRepository,
 	ProcessedImagesRepository,
 } from "../../../libs/repositories/index.js";
-import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
 import clearContentMediaSingleCache from "./clear-content-media-cache.js";
@@ -32,7 +31,6 @@ const permanentlyDeleteMedia: ServiceFn<
 
 	const getMediaRes = await Media.selectSingleById({
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		includeOwned: true,
 		validation: {
 			enabled: true,
@@ -86,7 +84,7 @@ const permanentlyDeleteMedia: ServiceFn<
 					value: data.id,
 				},
 			],
-			returning: ["file_size", "id", "key", "tenant_key"],
+			returning: ["file_size", "id", "key"],
 			validation: {
 				enabled: true,
 			},
@@ -94,12 +92,10 @@ const permanentlyDeleteMedia: ServiceFn<
 	]);
 	if (processedImagesRes.error) return processedImagesRes;
 	if (deleteMediaRes.error) return deleteMediaRes;
-	const tenant = resolveMediaKeyTenant(context.config, deleteMediaRes.data.key);
 
 	const [_, deleteObjectRes] = await Promise.all([
 		mediaStrategyRes.data.deleteMultiple(context, {
 			keys: processedImagesRes.data.map((i) => i.key),
-			tenant,
 		}),
 		mediaServices.strategies.deleteObject(context, {
 			key: deleteMediaRes.data.key,
@@ -108,7 +104,6 @@ const permanentlyDeleteMedia: ServiceFn<
 				(acc, i) => acc + i.file_size,
 				0,
 			),
-			tenantKey: deleteMediaRes.data.tenant_key,
 		}),
 	]);
 	if (deleteObjectRes.error) return deleteObjectRes;

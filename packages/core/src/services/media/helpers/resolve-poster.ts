@@ -34,7 +34,6 @@ const resolvePoster: ServiceFn<
 
 	const posterRes = await Media.selectSingleById({
 		id: data.posterId,
-		tenantKey: context.request.tenantKey,
 		includeOwned: data.parentId !== undefined,
 		validation: {
 			enabled: true,

@@ -60,7 +60,6 @@ const updateSingleController = factory.createHandlers(
 			triggerPasswordReset: body.triggerPasswordReset,
 			isDeleted: body.isDeleted,
 			isLocked: body.isLocked,
-			tenantKeys: body.tenantKeys,
 		});
 		if (updateUser.error) throw new LucidAPIError(updateUser.error);
 

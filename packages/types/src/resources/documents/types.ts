@@ -666,7 +666,6 @@ export interface Collection {
 	key: string;
 	documentId?: number | null;
 	mode: CollectionMode;
-	tenants: string[];
 	group: {
 		key: string;
 		name: ResolvedAdminCopy | null;

@@ -20,7 +20,6 @@ export type LucidAuth = {
 	email: string;
 	superAdmin: boolean;
 	permissions: UserPermission["permissions"] | undefined;
-	tenantKeys: string[];
 	exp: number;
 	iat: number;
 	nonce: string;
@@ -30,7 +29,6 @@ export type LucidAccessToken = Pick<LucidAuth, "id" | "exp" | "iat" | "nonce">;
 
 type LucidExternalAuthBase = {
 	scopes: ExternalScope[];
-	tenantKey: string | null;
 };
 
 export type LucidApiKeyExternalAuth = LucidExternalAuthBase & {
@@ -72,10 +70,6 @@ export type LucidLocale = {
 	code: Locale["code"];
 };
 
-export type LucidTenant = {
-	key: string;
-};
-
 export type LucidExecutionContext = {
 	waitUntil: (promise: Promise<unknown>) => void;
 	passThroughOnException?: () => void;
@@ -94,7 +88,6 @@ export type LucidHonoVariables = {
 	auth: LucidAuth;
 	externalAuth: LucidExternalAuth;
 	locale: LucidLocale;
-	tenant: LucidTenant | null;
 	env: EnvironmentVariables | null;
 	cf: unknown | null;
 	caches: CacheStorage | null;

@@ -24,7 +24,6 @@ import type {
 	FieldInputSchema,
 	GroupError,
 } from "../../../types.js";
-import { tenantAccessAllowed } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import fetchValidationData, {
 	type ValidationData,
@@ -260,7 +259,6 @@ const checkValidateBricksFields: ServiceFn<
 		validationData: refDataRes.data,
 		defaultLocale: context.config.localization.defaultLocale,
 		locales: context.config.localization.locales.map((locale) => locale.code),
-		tenantKey: context.request.tenantKey,
 	});
 	const fieldErrors = recursiveFieldValidate({
 		fields: data.fields,
@@ -304,7 +302,6 @@ const validateBricks = (props: {
 	validationData: ValidationData;
 	defaultLocale: string;
 	locales: string[];
-	tenantKey?: string | null;
 }): Array<BrickError> => {
 	const errors: BrickError[] = [];
 
@@ -326,10 +323,7 @@ const validateBricks = (props: {
 			}
 		}
 
-		if (
-			!instance ||
-			!tenantAccessAllowed(instance.config.tenants, props.tenantKey)
-		) {
+		if (!instance) {
 			logger.error({
 				scope: constants.logScopes.validation,
 				message: "Brick config was not found during document validation",

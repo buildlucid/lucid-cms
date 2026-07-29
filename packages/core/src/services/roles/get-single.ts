@@ -16,7 +16,6 @@ const getSingle: ServiceFn<
 
 	const roleRes = await Roles.selectSingleById({
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {

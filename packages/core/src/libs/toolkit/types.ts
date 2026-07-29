@@ -15,11 +15,6 @@ export type ToolkitContext = ServiceContext;
 /** Inputs for building a toolkit service context from resolved Lucid config. */
 export type CreateToolkitServiceContextOptions = CreateServiceContextOptions;
 
-export type ToolkitTenantOptions = {
-	/** Overrides tenant scope for this toolkit call. A string scopes to that tenant plus global rows; null clears tenant scope. */
-	tenantKey?: string | null;
-};
-
 export type Toolkit = {
 	/** Helpers for resolving request authentication state. */
 	auth: ToolkitAuth;

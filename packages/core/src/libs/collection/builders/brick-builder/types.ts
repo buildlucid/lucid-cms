@@ -9,7 +9,6 @@ export interface BrickConfigProps {
 	preview?: {
 		image?: string;
 	};
-	tenants?: string[];
 }
 export interface BrickConfig {
 	key: string;
@@ -20,7 +19,6 @@ export interface BrickConfig {
 	preview?: {
 		image?: string;
 	};
-	tenants: string[];
 }
 
 export type BrickTypes =

@@ -79,8 +79,7 @@ const verifyAccessToken: ServiceFn<
 		claims.sub !== expectedSubject ||
 		grantRes.data.client_id !== claims.client_id ||
 		grantRes.data.principal_type !== claims.principal_type ||
-		grantRes.data.user_id !== claims.user_id ||
-		grantRes.data.tenant_key !== claims.tenant_key
+		grantRes.data.user_id !== claims.user_id
 	) {
 		return {
 			error: {

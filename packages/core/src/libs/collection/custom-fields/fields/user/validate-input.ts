@@ -20,7 +20,6 @@ const validateUserInputData = async (
 
 		const usersRes = await Users.selectMultipleByIds({
 			ids: userIds,
-			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 			},

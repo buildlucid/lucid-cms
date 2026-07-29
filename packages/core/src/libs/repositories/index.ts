@@ -15,7 +15,6 @@ export { default as DocumentWorkflowsRepository } from "./document-workflows.js"
 export { default as DocumentsRepository } from "./documents.js";
 export { default as EmailAttachmentsRepository } from "./email-attachments.js";
 export { default as EmailChangeRequestsRepository } from "./email-change-requests.js";
-export { default as EmailTenantsRepository } from "./email-tenants.js";
 export { default as EmailTransactionsRepository } from "./email-transactions.js";
 export { default as EmailsRepository } from "./emails.js";
 export { default as IntegrationScopesRepository } from "./integration-scopes.js";
@@ -41,16 +40,13 @@ export { default as OAuthRefreshTokensRepository } from "./oauth-refresh-tokens.
 export { default as OptionsRepository } from "./options.js";
 export { default as PreviewSessionsRepository } from "./preview-sessions.js";
 export { default as ProcessedImagesRepository } from "./processed-images.js";
-export { default as QueueJobTenantsRepository } from "./queue-job-tenants.js";
 export { default as QueueJobsRepository } from "./queue-jobs.js";
 export { default as RolePermissionsRepository } from "./role-permissions.js";
 export { default as RoleTranslationsRepository } from "./role-translations.js";
 export { default as RolesRepository } from "./roles.js";
 export { default as SecurityAuditLogsRepository } from "./security-audit-logs.js";
-export { default as TenantsRepository } from "./tenants.js";
 export { default as UserAuthProvidersRepository } from "./user-auth-providers.js";
 export { default as UserLoginsRepository } from "./user-logins.js";
 export { default as UserRolesRepository } from "./user-roles.js";
-export { default as UserTenantsRepository } from "./user-tenants.js";
 export { default as UserTokensRepository } from "./user-tokens.js";
 export { default as UsersRepository } from "./users.js";

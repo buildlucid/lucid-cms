@@ -80,14 +80,12 @@ const executePublishOperationJob: ServiceFn<
 	[
 		{
 			operationId: number;
-			tenantKey?: string | null;
 		},
 	],
 	undefined
 > = async (context, data) => {
 	return execute(context, {
 		id: data.operationId,
-		tenantKey: data.tenantKey,
 		markFailedOnError: false,
 	});
 };

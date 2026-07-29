@@ -29,9 +29,7 @@ const createSingle: ServiceFn<
 	}
 > = async (context, data) => {
 	const scopes = [...new Set(data.scopes)];
-	const invalidScopes = getInvalidExternalScopes(context.config, scopes, {
-		tenantKey: context.request.tenantKey,
-	});
+	const invalidScopes = getInvalidExternalScopes(context.config, scopes);
 	if (invalidScopes.length > 0) {
 		return {
 			error: {
@@ -46,11 +44,9 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	const tenantKey = context.request.tenantKey ?? null;
 	if (data.userId !== null) {
 		const authority = await resolveUserAuthority(context, {
 			userId: data.userId,
-			tenantKey,
 			scopes: scopes as ExternalScope[],
 		});
 		if (authority.error) return authority;
@@ -116,7 +112,6 @@ const createSingle: ServiceFn<
 			description: data.description,
 			enabled: data.enabled !== undefined ? data.enabled : true,
 			user_id: data.userId,
-			tenant_key: tenantKey,
 			expires_at: getExpiryDate(data.expiry, now) ?? undefined,
 			key: key,
 			secret: secret,

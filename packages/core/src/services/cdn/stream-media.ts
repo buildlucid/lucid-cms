@@ -6,7 +6,6 @@ import {
 	generateProcessKey,
 	isProcessedImageKey,
 	normalizeMediaKey,
-	resolveMediaKeyTenant,
 	resolveProcessingRequest,
 } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -49,7 +48,6 @@ const streamMedia: ServiceFn<
 
 	const normalizedKey = normalizeMediaKey(data.key);
 	const isProcessedKey = isProcessedImageKey(normalizedKey);
-	const tenant = resolveMediaKeyTenant(context.config, normalizedKey);
 
 	if (isProcessedKey) {
 		return {
@@ -75,7 +73,6 @@ const streamMedia: ServiceFn<
 			key: normalizedKey,
 			ifNoneMatch: data.ifNoneMatch,
 			range: data.range,
-			tenant,
 		});
 		if (res.error) return res;
 		return {
@@ -100,7 +97,6 @@ const streamMedia: ServiceFn<
 	if (!sourceExtension) {
 		const metaRes = await mediaStrategyRes.data.getMeta(context, {
 			key: normalizedKey,
-			tenant,
 		});
 		if (metaRes.error) return metaRes;
 		sourceExtension = mime.extension(metaRes.data.mimeType || "") || null;
@@ -122,7 +118,6 @@ const streamMedia: ServiceFn<
 		key: processKey,
 		ifNoneMatch: data.ifNoneMatch,
 		range: data.range,
-		tenant: resolveMediaKeyTenant(context.config, processKey),
 	});
 	if (res.data) {
 		return {

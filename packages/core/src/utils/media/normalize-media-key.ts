@@ -1,4 +1,4 @@
-import { getMediaKeyParts } from "./media-key-tenant.js";
+import { getMediaKeyParts } from "./media-key-parts.js";
 
 /**
  * Converts a browser-facing media path back into the canonical storage key.

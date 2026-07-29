@@ -15,7 +15,6 @@ import getAccessToken from "./token-manager.js";
 const verify: ServiceFn<
 	[
 		{
-			tenantKey?: string | null;
 			connection?: LucidRemoteConnectionRow;
 		},
 	],
@@ -23,10 +22,7 @@ const verify: ServiceFn<
 > = async (context, data) => {
 	const resolved = data.connection
 		? { error: undefined, data: data.connection }
-		: await resolveEffectiveConnection(
-				context,
-				data.tenantKey ?? context.request.tenantKey ?? null,
-			);
+		: await resolveEffectiveConnection(context);
 	if (resolved.error) return resolved;
 	if (!resolved.data) {
 		return {

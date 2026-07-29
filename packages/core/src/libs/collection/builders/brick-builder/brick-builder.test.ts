@@ -87,7 +87,6 @@ test("brick config is correct", async () => {
 			}),
 		},
 		preview: { image: "https://placehold.co/600x400" },
-		tenants: [],
 	});
 });
 

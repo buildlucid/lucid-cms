@@ -6,7 +6,6 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../../constants.js";
-import { applyDocumentVersionTenantScope } from "../../utils/apply-tenant-scope.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../../utils/get-parent-page-relation-table.js";
 
@@ -20,7 +19,6 @@ const checkCircularParents: ServiceFn<
 			documentId: number;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
-			tenantKey: string | null;
 			fields: {
 				parentPage: FieldInputSchema;
 			};
@@ -39,7 +37,7 @@ const checkCircularParents: ServiceFn<
 			};
 		}
 
-		const { document: documentTable, version: versionTable } = data.tables;
+		const { version: versionTable } = data.tables;
 		const parentPageField = prefixGeneratedColName("document_id");
 		const parentPageTableRes = getParentPageRelationTable(
 			data.collectionKey,
@@ -50,28 +48,21 @@ const checkCircularParents: ServiceFn<
 
 		const result = await context.db.client
 			.withRecursive("ancestors", (db) =>
-				applyDocumentVersionTenantScope(
-					db
-						.selectFrom(parentPageTable)
-						.innerJoin(
-							versionTable,
-							`${versionTable}.id`,
-							`${parentPageTable}.document_version_id`,
-						)
-						.select([
-							`${versionTable}.document_id as current_id`,
-							`${parentPageTable}.${parentPageField} as parent_id`,
-						])
-						.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
-						.where(`${versionTable}.type`, "=", data.versionType)
-						.where(`${versionTable}.document_id`, "=", parentPageId),
-					{
-						tenantKey: data.tenantKey,
-						documentTable,
+				db
+					.selectFrom(parentPageTable)
+					.innerJoin(
 						versionTable,
-					},
-				).unionAll(
-					applyDocumentVersionTenantScope(
+						`${versionTable}.id`,
+						`${parentPageTable}.document_version_id`,
+					)
+					.select([
+						`${versionTable}.document_id as current_id`,
+						`${parentPageTable}.${parentPageField} as parent_id`,
+					])
+					.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
+					.where(`${versionTable}.type`, "=", data.versionType)
+					.where(`${versionTable}.document_id`, "=", parentPageId)
+					.unionAll(
 						db
 							.selectFrom(parentPageTable)
 							.innerJoin(
@@ -90,13 +81,7 @@ const checkCircularParents: ServiceFn<
 							])
 							.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
 							.where(`${versionTable}.type`, "=", data.versionType),
-						{
-							tenantKey: data.tenantKey,
-							documentTable,
-							versionTable,
-						},
 					),
-				),
 			)
 			.selectFrom("ancestors")
 			.select("parent_id")

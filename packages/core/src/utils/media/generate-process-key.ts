@@ -1,12 +1,12 @@
 import constants from "../../constants/constants.js";
 import type { ImageProcessorOptions } from "../../libs/image-processor/types.js";
 import getKeyVisibility from "./get-key-visibility.js";
-import { getMediaKeyParts } from "./media-key-tenant.js";
+import { getMediaKeyParts } from "./media-key-parts.js";
 import normalizeMediaKey from "./normalize-media-key.js";
 
 /**
  * Generates a unique key for processed images based on the media key, its options and visibility. Looks like:
- * private/tenant-key/processed/def456-image-w400-fwebp
+ * private/processed/def456-image-w400-fwebp
  */
 const generateProcessKey = (data: {
 	key: string;
@@ -21,9 +21,9 @@ const generateProcessKey = (data: {
 			? normalizedKey
 			: keyParts.parts.slice(keyParts.identityIndex).join("/");
 	const prefix =
-		keyParts.scopedPathStartIndex === -1
+		keyParts.contentIndex === -1
 			? visibility
-			: keyParts.parts.slice(0, keyParts.scopedPathStartIndex).join("/");
+			: keyParts.parts.slice(0, keyParts.contentIndex).join("/");
 
 	const suffixes: string[] = [];
 	if (data.options.width) suffixes.push(`w${data.options.width}`);

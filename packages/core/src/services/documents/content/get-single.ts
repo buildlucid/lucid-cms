@@ -172,7 +172,6 @@ const getSingle: ContentDocumentsGetSingleService = async <
 			collection: collectionRes.data,
 			config: context.config,
 			relationVersionType: relationVersionTypeRes.data.versionType,
-			tenantKey: context.request.tenantKey,
 			tables: { versions: tableNameRes.data.version },
 		},
 		{ tableName: tableNameRes.data.document },

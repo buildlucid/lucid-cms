@@ -15,7 +15,6 @@ import {
 	Show,
 } from "solid-js";
 import { NavigationMenuContent } from "@/components/Groups/Layout/NavigationMenuContent";
-import TenantSelect from "@/components/Partials/TenantSelect";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import { Permissions } from "@/constants/permissions";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
@@ -226,7 +225,6 @@ export const NavigationChrome: Component = () => {
 						<div class="flex items-center pl-2">
 							<img src={LogoIcon} alt="Lucid CMS Logo" class="h-5" />
 						</div>
-						<TenantSelect class="mt-5" />
 					</div>
 					<NavigationMenuContent
 						class="w-55 flex-1"
@@ -315,7 +313,6 @@ export const NavigationChrome: Component = () => {
 										<FaSolidXmark class="size-3.5" />
 									</button>
 								</div>
-								<TenantSelect class="mt-4" />
 							</div>
 							<NavigationMenuContent
 								class="flex-1"

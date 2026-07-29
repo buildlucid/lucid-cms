@@ -3,8 +3,7 @@ import { MediaRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Confirms media rows are visible in the current tenant scope before writes.
- * Tenant requests may act on their own media and global media.
+ * Confirms media rows exist before writes.
  */
 const checkMediaAccess: ServiceFn<
 	[
@@ -29,7 +28,6 @@ const checkMediaAccess: ServiceFn<
 	const Media = new MediaRepository(context.db.client, context.config.db);
 	const mediaRes = await Media.selectMultipleValidationData({
 		ids,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

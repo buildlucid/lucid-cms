@@ -11,7 +11,6 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("title", adapter.getDataType("text"), (col) => col.notNull())
-				.addColumn("tenant_key", adapter.getDataType("text"))
 				.addColumn("parent_folder_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_media_folders.id").onDelete("cascade"),
 				)
@@ -40,12 +39,6 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_media_folders_tenant_key")
-				.on("lucid_media_folders")
-				.column("tenant_key")
-				.execute();
-
-			await db.schema
 				.createTable("lucid_media")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
@@ -53,7 +46,6 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.unique().notNull(),
 				)
-				.addColumn("tenant_key", adapter.getDataType("text"))
 				.addColumn("folder_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_media_folders.id").onDelete("set null"),
 				)
@@ -196,12 +188,6 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_media_key")
 				.on("lucid_media")
 				.column("key")
-				.execute();
-
-			await db.schema
-				.createIndex("idx_lucid_media_tenant_key")
-				.on("lucid_media")
-				.column("tenant_key")
 				.execute();
 
 			await db.schema

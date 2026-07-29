@@ -23,7 +23,7 @@ const getMeController = factory.createHandlers(
 			schema: z.toJSONSchema(controllerSchemas.getMe.response),
 		}),
 	}),
-	authenticate({ tenantScope: "allow-global" }),
+	authenticate(),
 	async (c: LucidHonoContext) => {
 		const context = createServiceContext(c);
 

@@ -1,5 +1,4 @@
 import z from "zod";
-import constants from "../../constants/constants.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type { ExternalMigrationFn } from "../db/types.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
@@ -8,7 +7,6 @@ import type {
 	HttpExtensionRegister,
 	LucidRouteDefinition,
 } from "../http/types.js";
-import { adminCopyInputSchema } from "../i18n/index.js";
 import type {
 	ImageProcessor,
 	ImageProcessorInstance,
@@ -100,18 +98,6 @@ const ContentSecurityPolicySchema = z
 
 const OverridableHeaderSchema = z.union([z.boolean(), z.string()]);
 
-/**
- * Tenant keys share the media URL path, so they cannot use reserved media words.
- */
-const isReservedTenantKey = (key: string) =>
-	(constants.media.reservedTenantKeys as readonly string[]).includes(key);
-
-/**
- * Global media IDs are 32-char hex UUIDs; tenant keys matching that are ambiguous.
- */
-const isGeneratedMediaIdTenantKey = (key: string) =>
-	/^[a-f0-9]{32}$/i.test(key);
-
 const ConfigSchema = z.object({
 	db: z.unknown(),
 	host: z.string().trim().min(1).optional(),
@@ -185,23 +171,6 @@ const ConfigSchema = z.object({
 			),
 			defaultLocale: z.string(),
 		})
-		.optional(),
-	tenants: z
-		.array(
-			z.object({
-				key: z
-					.string()
-					.min(2)
-					.refine((key) => !isReservedTenantKey(key), {
-						message: `Tenant key cannot be one of: ${constants.media.reservedTenantKeys.join(", ")}`,
-					})
-					.refine((key) => !isGeneratedMediaIdTenantKey(key), {
-						message: "Tenant key cannot match a generated media ID.",
-					}),
-				name: adminCopyInputSchema,
-				default: z.boolean().optional(),
-			}),
-		)
 		.optional(),
 	i18n: z
 		.object({

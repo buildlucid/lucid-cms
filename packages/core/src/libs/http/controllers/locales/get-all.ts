@@ -23,7 +23,7 @@ const getAllController = factory.createHandlers(
 			paginated: true,
 		}),
 	}),
-	authenticate({ tenantScope: "allow-global" }),
+	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);
 

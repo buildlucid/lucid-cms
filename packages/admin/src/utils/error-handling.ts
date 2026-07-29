@@ -14,8 +14,7 @@ export class LucidError extends Error {
 
 /**
  * A resource is treated as inaccessible when the request fails with a
- * not-found or forbidden status - e.g. the document/collection does not
- * exist for the currently active tenant.
+ * not-found or forbidden status.
  */
 export const isInaccessibleError = (error: unknown) => {
 	if (error instanceof LucidError) {

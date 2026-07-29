@@ -1,6 +1,5 @@
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
-import queryBuilder from "../db/query-builder/index.js";
 import type { KyselyDB } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
@@ -25,40 +24,22 @@ export default class UserRolesRepository extends StaticRepository<"lucid_user_ro
 	};
 	queryConfig = undefined;
 
-	/**
-	 * Deletes role assignments for a user inside the selected tenant role scope.
-	 * A global request keeps the previous behaviour and clears every assignment.
-	 */
-	async deleteMultipleByUserTenantScope<V extends boolean = false>(
+	/** Deletes every role assignment for a user. */
+	async deleteMultipleByUser<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
 				userId: number;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
-		let query = this.db
+		const query = this.db
 			.deleteFrom("lucid_user_roles")
 			.where("user_id", "=", props.userId)
 			.returning(["id"]);
 
-		if (props.tenantKey != null) {
-			const roleIdsQuery = this.db
-				.selectFrom("lucid_roles")
-				.select("id")
-				.$call((qb) =>
-					queryBuilder.tenantScope(qb, {
-						tenantKey: props.tenantKey,
-						column: "lucid_roles.tenant_key",
-					}),
-				);
-
-			query = query.where("role_id", "in", roleIdsQuery);
-		}
-
 		const exec = await this.executeQuery(() => query.execute(), {
-			method: "deleteMultipleByUserTenantScope",
+			method: "deleteMultipleByUser",
 		});
 		if (exec.response.error) return exec.response;
 

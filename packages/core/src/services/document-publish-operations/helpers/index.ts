@@ -7,7 +7,6 @@ import type { QueueEvent } from "../../../libs/queue/types.js";
 import type { Config } from "../../../types/config.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { LucidAuth } from "../../../types/hono.js";
-import { tenantAccessAllowed } from "../../../utils/helpers/index.js";
 
 /** Approval states that still represent an unresolved release for a document target. */
 export const activePublishOperationStatuses = ["pending", "approved"] as const;
@@ -223,16 +222,12 @@ export const hasCollectionPermission = (params: {
 	});
 };
 
-/** Lists tenant-visible collections whose release requests the user may review. */
+/** Lists collections whose release requests the user may review. */
 export const getReviewableCollectionKeys = (params: {
 	config: Config;
 	user: LucidAuth;
-	tenantKey?: string | null;
 }) => {
 	return params.config.collections
-		.filter((collection) =>
-			tenantAccessAllowed(collection.getData.tenants, params.tenantKey),
-		)
 		.filter((collection) =>
 			hasCollectionPermission({
 				user: params.user,

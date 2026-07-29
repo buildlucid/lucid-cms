@@ -24,7 +24,6 @@ const useGetConnections = (
 				url: getOAuthConnectionsPath(params.queryParams.owner),
 				config: {
 					method: "GET",
-					tenant: params.queryParams.owner.type !== "account",
 				},
 			}),
 		get enabled() {

@@ -203,7 +203,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			)
 			.optional(),
 		custom_meta: z.string().nullable(),
-		tenant_key: z.string().nullable(),
 		is_deleted: z.union([
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
@@ -247,7 +246,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		is_dark: this.dbAdapter.getDataType("boolean"),
 		is_light: this.dbAdapter.getDataType("boolean"),
 		custom_meta: this.dbAdapter.getDataType("text"),
-		tenant_key: this.dbAdapter.getDataType("text"),
 		is_hidden: this.dbAdapter.getDataType("boolean"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
@@ -314,62 +312,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		};
 	}
 
-	async sumFileSizeByTenant(props: { tenantKey: string | null }) {
-		let query = this.db
-			.selectFrom("lucid_media")
-			.select(sql<string | number>`COALESCE(SUM(file_size), 0)`.as("total"));
-
-		query =
-			props.tenantKey === null
-				? query.where("tenant_key", "is", null)
-				: query.where("tenant_key", "=", props.tenantKey);
-
-		const exec = await this.executeQuery(
-			() =>
-				query.executeTakeFirst() as Promise<
-					{ total: string | number | null } | undefined
-				>,
-			{
-				method: "sumFileSizeByTenant",
-			},
-		);
-		if (exec.response.error) return exec.response;
-
-		return {
-			error: undefined,
-			data: Number(exec.response.data?.total ?? 0),
-		};
-	}
-
-	async sumFileSizeGroupedByTenant() {
-		const query = this.db
-			.selectFrom("lucid_media")
-			.select([
-				"tenant_key",
-				sql<string | number>`COALESCE(SUM(file_size), 0)`.as("total"),
-			])
-			.groupBy("tenant_key");
-
-		const exec = await this.executeQuery(
-			() =>
-				query.execute() as Promise<
-					{ tenant_key: string | null; total: string | number | null }[]
-				>,
-			{
-				method: "sumFileSizeGroupedByTenant",
-			},
-		);
-		if (exec.response.error) return exec.response;
-
-		return {
-			error: undefined,
-			data: exec.response.data.map((row) => ({
-				tenant_key: row.tenant_key,
-				total: Number(row.total ?? 0),
-			})),
-		};
-	}
-
 	/** Resolves a requested source or crop key to its current active presentation. */
 	async selectSingleActivePresentationByKey(props: { key: string }) {
 		const query = this.db
@@ -406,7 +348,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"source.key as source_key",
 				"source.file_name as source_file_name",
 				"source.file_extension as source_file_extension",
-				"source.tenant_key as source_tenant_key",
 				"active_crop.id as active_crop_id",
 				"active_crop.type as active_crop_type",
 				"active_crop.key as active_crop_key",
@@ -430,7 +371,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							: result.source_file_name,
 					file_extension:
 						result.active_crop_file_extension ?? result.source_file_extension,
-					tenant_key: result.source_tenant_key,
 				};
 			},
 			{
@@ -447,7 +387,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			V,
 			{
 				id: number;
-				tenantKey?: string | null;
 				includeOwned?: boolean;
 			}
 		>,
@@ -489,7 +428,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
-				"tenant_key",
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -651,12 +589,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			.where("id", "=", props.id)
 			.$if(props.includeOwned !== true, (qb) =>
 				qb.where("parent_media_id", "is", null),
-			)
-			.$call((qb) =>
-				queryBuilder.tenantScope(qb, {
-					tenantKey: props.tenantKey,
-					column: "lucid_media.tenant_key",
-				}),
 			);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
@@ -754,7 +686,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
-				"tenant_key",
 				this.dbAdapter
 					.jsonArrayFrom(
 						eb
@@ -965,29 +896,20 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			],
 		});
 	}
-	/**
-	 * Fetches media rows used by field validation, scoped to the request tenant while
-	 * keeping global media available to every tenant.
-	 */
+	/** Fetches media rows used by field validation. */
 	async selectMultipleValidationData<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
 				ids: number[];
-				tenantKey?: string | null;
 			}
 		>,
 	) {
-		let query = this.db
+		const query = this.db
 			.selectFrom("lucid_media")
 			.select(["id", "file_extension", "width", "height", "type"])
 			.where("id", "in", props.ids)
 			.where("parent_media_id", "is", null);
-
-		query = queryBuilder.tenantScope(query, {
-			tenantKey: props.tenantKey,
-			column: "lucid_media.tenant_key",
-		});
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleValidationData",
@@ -1001,28 +923,19 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		});
 	}
 
-	/**
-	 * Fetches media IDs inside folders using tenant visibility rules.
-	 * Delete flows use the returned IDs so updates cannot touch hidden tenant rows.
-	 */
+	/** Fetches media IDs inside folders. */
 	async selectMultipleIdsByFolderIds<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
 				folderIds: number[];
-				tenantKey?: string | null;
 			}
 		>,
 	) {
-		let query = this.db
+		const query = this.db
 			.selectFrom("lucid_media")
 			.select(["id"])
 			.where("folder_id", "in", props.folderIds);
-
-		query = queryBuilder.tenantScope(query, {
-			tenantKey: props.tenantKey,
-			column: "lucid_media.tenant_key",
-		});
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleIdsByFolderIds",
@@ -1043,7 +956,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			V,
 			{
 				queryParams: GetMultipleQueryParams;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -1089,7 +1001,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.is_deleted_at",
 						"lucid_media.deleted_by",
 						"lucid_media.public",
-						"lucid_media.tenant_key",
 						eb.fn.min<string>("translation.title").as("title_sort"),
 						this.dbAdapter
 							.jsonArrayFrom(
@@ -1175,13 +1086,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						this.dbAdapter.getDefault("boolean", "false"),
 					)
 					.where("lucid_media.parent_media_id", "is", null)
-					.groupBy("lucid_media.id")
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "lucid_media.tenant_key",
-						}),
-					);
+					.groupBy("lucid_media.id");
 
 				const countQuery = this.db
 					.selectFrom("lucid_media")
@@ -1194,13 +1099,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"=",
 						this.dbAdapter.getDefault("boolean", "false"),
 					)
-					.where("lucid_media.parent_media_id", "is", null)
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "lucid_media.tenant_key",
-						}),
-					);
+					.where("lucid_media.parent_media_id", "is", null);
 
 				const { main, count } = queryBuilder.main(
 					{
@@ -1280,7 +1179,6 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
-				"tenant_key",
 				"translations",
 				"poster",
 				"crop",

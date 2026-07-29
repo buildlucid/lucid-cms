@@ -8,7 +8,6 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { User } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { tenantServices } from "../index.js";
 
 const getAuthenticatedUser: ServiceFn<
 	[
@@ -25,9 +24,8 @@ const getAuthenticatedUser: ServiceFn<
 		context.config.db,
 	);
 
-	const [userRes, pendingEmailChangeRes, tenantsRes] = await Promise.all([
+	const [userRes, pendingEmailChangeRes] = await Promise.all([
 		Users.selectSinglePreset({
-			tenantKey: context.request.tenantKey,
 			where: [
 				{
 					key: "id",
@@ -51,13 +49,9 @@ const getAuthenticatedUser: ServiceFn<
 		EmailChangeRequests.selectActivePendingForUser({
 			userId: data.userId,
 		}),
-		tenantServices.getAll(context, {
-			authUser: data.authUser,
-		}),
 	]);
 	if (userRes.error) return userRes;
 	if (pendingEmailChangeRes.error) return pendingEmailChangeRes;
-	if (tenantsRes.error) return tenantsRes;
 
 	return {
 		error: undefined,
@@ -67,7 +61,6 @@ const getAuthenticatedUser: ServiceFn<
 			host: getBaseUrl(context),
 			locales: context.config.localization.locales.map((locale) => locale.code),
 			defaultLocale: context.config.localization.defaultLocale,
-			tenantOverride: tenantsRes.data,
 			pendingEmailChange: pendingEmailChangeRes.data
 				? {
 						email: pendingEmailChangeRes.data.new_email,

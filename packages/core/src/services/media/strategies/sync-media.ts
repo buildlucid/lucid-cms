@@ -1,7 +1,6 @@
 import { copy } from "../../../libs/i18n/index.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
-import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
 import adjustStorageUsage from "../adjust-storage-usage.js";
@@ -29,11 +28,8 @@ const syncMedia: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const tenant = resolveMediaKeyTenant(context.config, data.key);
-
 	const mediaMetaRes = await mediaStrategyRes.data.getMeta(context, {
 		key: data.key,
-		tenant,
 	});
 	if (mediaMetaRes.error) return mediaMetaRes;
 
@@ -46,7 +42,6 @@ const syncMedia: ServiceFn<
 	if (proposedSizeRes.error) {
 		await mediaStrategyRes.data.delete(context, {
 			key: data.key,
-			tenant,
 		});
 		return proposedSizeRes;
 	}
@@ -54,7 +49,6 @@ const syncMedia: ServiceFn<
 	const fileMetaData = await validateUploadedMedia({
 		context,
 		stream: mediaStrategyRes.data.stream,
-		tenant,
 		key: data.key,
 		mimeType: mediaMetaRes.data.mimeType,
 		fileName: data.fileName,
@@ -63,14 +57,12 @@ const syncMedia: ServiceFn<
 	if (fileMetaData.error) {
 		await mediaStrategyRes.data.delete(context, {
 			key: data.key,
-			tenant,
 		});
 		return fileMetaData;
 	}
 
 	const storageLimit = context.config.media.limits.storageBytes;
 	const adjustStorageRes = await adjustStorageUsage(context, {
-		tenantKey: context.request?.tenantKey ?? null,
 		delta: mediaMetaRes.data.size,
 		max: storageLimit === false ? undefined : storageLimit,
 		min: 0,
@@ -89,7 +81,6 @@ const syncMedia: ServiceFn<
 
 		await mediaStrategyRes.data.delete(context, {
 			key: data.key,
-			tenant,
 		});
 
 		return {

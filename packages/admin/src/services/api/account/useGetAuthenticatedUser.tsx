@@ -2,7 +2,6 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody, User } from "@types";
 import { createEffect, createMemo } from "solid-js";
-import tenantStore from "@/store/tenantStore";
 import userStore from "@/store/userStore";
 import type { QueryHook } from "@/types/utils";
 import getLoginRedirectURL from "@/utils/login-route";
@@ -16,7 +15,6 @@ const useGetAuthenticatedUser = (
 	params: QueryHook<QueryParams>,
 	options?: {
 		authLayout?: boolean;
-		tenant?: boolean;
 	},
 ) => {
 	const navigate = useNavigate();
@@ -25,20 +23,14 @@ const useGetAuthenticatedUser = (
 		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
 	);
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
-	const tenantKey = createMemo(() =>
-		options?.authLayout || options?.tenant === false
-			? undefined
-			: tenantStore.get.tenant,
-	);
 
 	const query = useQuery(() => ({
-		queryKey: ["users.getSingle", queryKey(), params.key?.(), tenantKey()],
+		queryKey: ["users.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<User>>({
 				url: "/lucid/api/v1/account",
 				config: {
 					method: "GET",
-					tenant: options?.tenant ?? !options?.authLayout,
 				},
 			}),
 		get enabled() {
@@ -49,7 +41,6 @@ const useGetAuthenticatedUser = (
 	createEffect(() => {
 		if (query.isSuccess) {
 			userStore.set("user", query.data.data);
-			tenantStore.get.syncTenants(query.data.data.tenants ?? []);
 		}
 		if (query.isError) {
 			if (options?.authLayout) {

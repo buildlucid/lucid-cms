@@ -22,7 +22,6 @@ const createServiceContext = (c: LucidHonoContext): ServiceContext => {
 		url: c.req.url,
 		ipAddress: connectionInfo.address ?? null,
 		locale,
-		tenantKey: c.get("tenant")?.key ?? null,
 	};
 
 	return {

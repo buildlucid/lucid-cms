@@ -49,7 +49,6 @@ const versionPromoteHandler =
 			versionId: data.data.versionId,
 			versionType: data.data.versionType,
 			collectionKey: targetCollectionRes.data.key,
-			tenantKey: data.meta.tenantKey,
 			tables: data.meta.collectionTableNames,
 		});
 		if (docVersionFieldRes.error) return docVersionFieldRes;
@@ -95,7 +94,6 @@ const versionPromoteHandler =
 					versionType: data.data.versionType,
 					defaultLocale: context.config.localization.defaultLocale,
 					collectionKey: targetCollectionRes.data.key,
-					tenantKey: data.meta.tenantKey,
 					fields: {
 						parentPage: parentPage,
 					},
@@ -107,7 +105,6 @@ const versionPromoteHandler =
 					defaultLocale: context.config.localization.defaultLocale,
 					versionType: data.data.versionType,
 					collectionKey: targetCollectionRes.data.key,
-					tenantKey: data.meta.tenantKey,
 					fields: {
 						parentPage: parentPage,
 					},
@@ -175,7 +172,6 @@ const versionPromoteHandler =
 					projectedFullSlugs,
 					versionType: data.data.versionType,
 					collectionKey: targetCollectionRes.data.key,
-					tenantKey: data.meta.tenantKey,
 					tables: data.meta.collectionTableNames,
 					excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
 				},
@@ -228,7 +224,6 @@ const versionPromoteHandler =
 				collectionKey: data.meta.collectionKey,
 				userId: data.meta.userId,
 				collectionTableNames: data.meta.collectionTableNames,
-				tenantKey: data.meta.tenantKey,
 			},
 			data: {
 				documentId: data.data.documentId,

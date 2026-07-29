@@ -1,6 +1,5 @@
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
-import queryBuilder from "../db/query-builder/index.js";
 import type { KyselyDB, OAuthPrincipalType } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
@@ -17,7 +16,6 @@ export default class OAuthGrantsRepository extends StaticRepository<"lucid_oauth
 		client_uri: z.string().nullable(),
 		principal_type: z.enum(["system", "user"]),
 		user_id: z.number().nullable(),
-		tenant_key: z.string().nullable(),
 		created_by: z.number().nullable(),
 		revoked_at: z.union([z.string(), z.date()]).nullable(),
 		last_used_at: z.union([z.string(), z.date()]).nullable(),
@@ -41,7 +39,6 @@ export default class OAuthGrantsRepository extends StaticRepository<"lucid_oauth
 		client_uri: this.dbAdapter.getDataType("text"),
 		principal_type: this.dbAdapter.getDataType("text"),
 		user_id: this.dbAdapter.getDataType("integer"),
-		tenant_key: this.dbAdapter.getDataType("text"),
 		created_by: this.dbAdapter.getDataType("integer"),
 		revoked_at: this.dbAdapter.getDataType("timestamp"),
 		last_used_at: this.dbAdapter.getDataType("timestamp"),
@@ -74,7 +71,6 @@ export default class OAuthGrantsRepository extends StaticRepository<"lucid_oauth
 				"client_uri",
 				"principal_type",
 				"user_id",
-				"tenant_key",
 				"created_by",
 				"revoked_at",
 				"last_used_at",
@@ -117,7 +113,6 @@ export default class OAuthGrantsRepository extends StaticRepository<"lucid_oauth
 				"client_uri",
 				"principal_type",
 				"user_id",
-				"tenant_key",
 				"created_by",
 				"revoked_at",
 				"last_used_at",
@@ -139,7 +134,6 @@ export default class OAuthGrantsRepository extends StaticRepository<"lucid_oauth
 			{
 				principalType: OAuthPrincipalType;
 				userId?: number;
-				tenantKey?: string | null;
 				includeRevoked?: boolean;
 			}
 		>,
@@ -154,7 +148,6 @@ export default class OAuthGrantsRepository extends StaticRepository<"lucid_oauth
 				"client_uri",
 				"principal_type",
 				"user_id",
-				"tenant_key",
 				"created_by",
 				"revoked_at",
 				"last_used_at",
@@ -176,13 +169,7 @@ export default class OAuthGrantsRepository extends StaticRepository<"lucid_oauth
 					.as("scopes"),
 			])
 			.where("principal_type", "=", props.principalType)
-			.orderBy("created_at", "desc")
-			.$call((qb) =>
-				queryBuilder.tenantScope(qb, {
-					tenantKey: props.tenantKey,
-					column: "lucid_oauth_grants.tenant_key",
-				}),
-			);
+			.orderBy("created_at", "desc");
 
 		if (props.userId !== undefined) {
 			query = query.where("user_id", "=", props.userId);
@@ -207,7 +194,6 @@ export default class OAuthGrantsRepository extends StaticRepository<"lucid_oauth
 				"client_uri",
 				"principal_type",
 				"user_id",
-				"tenant_key",
 				"created_by",
 				"revoked_at",
 				"last_used_at",

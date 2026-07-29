@@ -9,7 +9,6 @@ export interface IntegrationQueryRes {
 	description: string | null;
 	enabled: BooleanInt;
 	user_id: number | null;
-	tenant_key: string | null;
 	expires_at: Date | string | null;
 	scopes: Array<{
 		scope: string;
@@ -33,7 +32,6 @@ const formatSingle = (integration: IntegrationQueryRes): Integration => {
 		description: integration.description,
 		enabled: formatter.formatBoolean(integration.enabled),
 		userId: integration.user_id,
-		tenantKey: integration.tenant_key,
 		expiresAt: formatter.formatDate(integration.expires_at),
 		scopes: (integration.scopes || []).map(
 			(scope) => scope.scope as ExternalScope,

@@ -5,14 +5,9 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import type { ToolkitTenantOptions } from "../types.js";
-import {
-	normalizeQuery,
-	runToolkitService,
-	withToolkitTenant,
-} from "../utils.js";
+import { normalizeQuery, runToolkitService } from "../utils.js";
 
-export type ToolkitMediaProcessInput = ToolkitTenantOptions & {
+export type ToolkitMediaProcessInput = {
 	key: string;
 	body?: MediaProcessOptions;
 };
@@ -23,7 +18,7 @@ const processMedia = async (
 ): ServiceResponse<MediaUrl> =>
 	runToolkitService(
 		() =>
-			mediaServices.content.processMedia(withToolkitTenant(context, input), {
+			mediaServices.content.processMedia(context, {
 				key: input.key,
 				body: normalizeQuery(input.body),
 			}),

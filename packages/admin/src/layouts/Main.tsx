@@ -14,7 +14,6 @@ import FullPageLoading from "@/components/Partials/FullPageLoading";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import api from "@/services/api";
 import siteStore from "@/store/siteStore";
-import tenantStore from "@/store/tenantStore";
 import { getReady, initAdminTranslations } from "@/translations";
 
 const MainLayout: Component<{
@@ -34,20 +33,11 @@ const MainLayout: Component<{
 	const authenticatedUser = api.account.useGetAuthenticatedUser({
 		queryParams: {},
 	});
-	const tenantScopedQueriesEnabled = createMemo(() => {
-		if (!authenticatedUser.isSuccess) return false;
-
-		const user = authenticatedUser.data.data;
-		if ((user.tenants ?? []).length === 0) return true;
-
-		return tenantStore.get.tenant !== undefined;
-	});
 	const locales = api.locales.useGetMultiple({
 		queryParams: {},
 	});
 	const connection = api.connection.useGetStatus({
 		queryParams: {},
-		enabled: tenantScopedQueriesEnabled,
 	});
 	const settings = api.settings.useGetSettings({
 		queryParams: {
@@ -55,7 +45,6 @@ const MainLayout: Component<{
 				ai: true,
 			},
 		},
-		enabled: tenantScopedQueriesEnabled,
 	});
 
 	// ----------------------------------

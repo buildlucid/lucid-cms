@@ -97,7 +97,7 @@ export function useDocumentState(props: {
 		() => documentQuery.isError && isInaccessibleError(documentQuery.error),
 	);
 	const shouldBlockNavigation = createMemo(() => {
-		//* nothing to guard when the document can't be loaded for the active tenant
+		//* nothing to guard when the document can't be loaded
 		if (documentAccessError()) return false;
 		if (props.version() !== "latest") return false;
 		return isDocumentMutated();

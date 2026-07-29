@@ -1,4 +1,4 @@
-import { copy, resolveMediaKeyTenant } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterStreamBody, ServiceFn } from "@lucidcms/core/types";
 import { FILE_SYSTEM_DOWNLOAD_PATH } from "../constants.js";
 import {
@@ -47,7 +47,6 @@ const downloadSingle: ServiceFn<
 
 	const streamRes = await mediaAdapterRes.data.stream(context, {
 		key: data.key,
-		tenant: resolveMediaKeyTenant(context.config, data.key),
 	});
 	if (streamRes.error) return streamRes;
 

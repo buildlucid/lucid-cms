@@ -25,7 +25,6 @@ const resendSingle: ServiceFn<
 
 	const emailRes = await Emails.selectSingleById({
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -91,10 +90,6 @@ const resendSingle: ServiceFn<
 		payload: {
 			emailId: emailRes.data.id,
 			transactionId: transactionRes.data.id ?? 0,
-		},
-		options: {
-			tenantKeys:
-				emailRes.data.tenants?.map((tenant) => tenant.tenant_key) ?? [],
 		},
 	});
 	if (queueRes.error) {

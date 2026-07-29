@@ -39,7 +39,6 @@ export type CreateServiceContextOptions = {
 	request?: {
 		url?: string;
 		ipAddress?: string | null;
-		tenantKey?: string | null;
 	};
 };
 
@@ -63,8 +62,6 @@ export type ServiceContext = {
 		ipAddress?: string | null;
 		/** The resolved CMS interface locale for server-side display messages. */
 		locale: string;
-		/** The resolved tenant key for this request. null/undefined means no tenant scoping is applied. */
-		tenantKey?: string | null;
 	};
 };
 export type ServiceProps<T> = {

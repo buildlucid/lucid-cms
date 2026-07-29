@@ -15,7 +15,7 @@ export const getAuthCacheNamespaceToken = (context: ServiceContext) =>
 
 /**
  * Invalidates cached user auth state across the app.
- * Used after role, permission, tenant, or user status changes.
+ * Used after role, permission, or user status changes.
  */
 export const invalidateAuthCache = (context: ServiceContext) =>
 	invalidateNamespace(context, AUTH_NAMESPACE);

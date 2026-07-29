@@ -6,10 +6,7 @@ import {
 	UsersRepository,
 	UserTokensRepository,
 } from "../../libs/repositories/index.js";
-import {
-	formatEmailSubject,
-	multiTenancyEnabled,
-} from "../../utils/helpers/index.js";
+import { formatEmailSubject } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { emailServices, userTokenServices } from "../index.js";
 
@@ -31,7 +28,6 @@ const resendInvitation: ServiceFn<
 	);
 
 	const userRes = await Users.selectSinglePreset({
-		tenantKey: context.request.tenantKey,
 		where: [
 			{
 				key: "id",
@@ -62,10 +58,6 @@ const resendInvitation: ServiceFn<
 			data: undefined,
 		};
 	}
-
-	const tenantKeys = multiTenancyEnabled(context.config)
-		? (userRes.data.tenants ?? []).map((tenant) => tenant.tenant_key)
-		: [];
 
 	const now = new Date().toISOString();
 	const revokeExistingRes = await UserTokens.updateMultiple({
@@ -121,7 +113,6 @@ const resendInvitation: ServiceFn<
 			inviteLink: `${constants.email.locations.acceptInvitation}?token=${userTokenRes.data.token}`,
 		},
 		storage: constants.email.templates.userInvite.storage,
-		tenantKeys,
 	});
 	if (sendEmailRes.error) return sendEmailRes;
 

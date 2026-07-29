@@ -88,7 +88,6 @@ const beforeUpsertHandler =
 				versionType: data.data.versionType,
 				defaultLocale: context.config.localization.defaultLocale,
 				collectionKey: targetCollectionRes.data.key,
-				tenantKey: data.meta.tenantKey,
 				fields: {
 					parentPage: parentPage,
 				},
@@ -100,7 +99,6 @@ const beforeUpsertHandler =
 				defaultLocale: context.config.localization.defaultLocale,
 				versionType: data.data.versionType,
 				collectionKey: targetCollectionRes.data.key,
-				tenantKey: data.meta.tenantKey,
 				fields: {
 					parentPage: parentPage,
 				},
@@ -166,7 +164,6 @@ const beforeUpsertHandler =
 			projectedFullSlugs,
 			versionType: data.data.versionType,
 			collectionKey: targetCollectionRes.data.key,
-			tenantKey: data.meta.tenantKey,
 			tables: data.meta.collectionTableNames,
 			excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
 			inputFields: {

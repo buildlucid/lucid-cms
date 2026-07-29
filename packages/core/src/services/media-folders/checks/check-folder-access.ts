@@ -3,8 +3,7 @@ import { MediaFoldersRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Confirms a folder is visible in the current tenant scope before media is linked to it.
- * Global folders are visible to tenant requests, matching other tenant-scoped resources.
+ * Confirms a folder exists before media is linked to it.
  */
 const checkFolderAccess: ServiceFn<
 	[
@@ -12,7 +11,7 @@ const checkFolderAccess: ServiceFn<
 			folderId?: number | null;
 		},
 	],
-	{ id: number; tenant_key: string | null } | undefined
+	{ id: number } | undefined
 > = async (context, data) => {
 	if (data.folderId === undefined || data.folderId === null) {
 		return {
@@ -28,7 +27,6 @@ const checkFolderAccess: ServiceFn<
 
 	const folderRes = await MediaFolders.selectSingleById({
 		id: data.folderId,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {

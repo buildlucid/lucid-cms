@@ -36,7 +36,6 @@ const getMultiple: ServiceFn<
 	const collectionKeys = getReviewableCollectionKeys({
 		config: context.config,
 		user: data.user,
-		tenantKey: context.request.tenantKey,
 	});
 	if (collectionKeys.length === 0) {
 		return {
@@ -60,7 +59,6 @@ const getMultiple: ServiceFn<
 		],
 		queryParams: data.query,
 		currentUserId: data.user.id,
-		tenantKey: context.request.tenantKey,
 	});
 	if (operationsRes.error) return operationsRes;
 

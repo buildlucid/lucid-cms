@@ -268,7 +268,7 @@ const createSingle: ServiceFn<
 	const [documentRes, latestVersionRes, activeRes] = await Promise.all([
 		Documents.selectSingle(
 			{
-				select: ["id", "tenant_key"],
+				select: ["id"],
 				where: [
 					{ key: "id", operator: "=", value: data.documentId },
 					{ key: "collection_key", operator: "=", value: data.collectionKey },
@@ -339,21 +339,6 @@ const createSingle: ServiceFn<
 	if (documentRes.error) return documentRes;
 	if (latestVersionRes.error) return latestVersionRes;
 	if (activeRes.error) return activeRes;
-
-	if (
-		documentRes.data.tenant_key &&
-		context.request.tenantKey &&
-		documentRes.data.tenant_key !== context.request.tenantKey
-	) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.documents.not.found.message"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
 
 	// Checks the target environment's required environment list and that they are in sync with latest before allowing the publish
 	const releaseRequirementTargets = getReleaseRequirementTargets({
@@ -428,7 +413,6 @@ const createSingle: ServiceFn<
 
 		const [activeDetailedRes, supersedeRes] = await Promise.all([
 			Operations.selectSingleDetailed({
-				tenantKey: context.request.tenantKey,
 				where: [
 					{
 						key: "lucid_document_publish_operations.id",
@@ -525,7 +509,6 @@ const createSingle: ServiceFn<
 	const operationRes = await Operations.createSingle({
 		data: {
 			collection_key: data.collectionKey,
-			tenant_key: documentRes.data.tenant_key,
 			document_id: data.documentId,
 			target: data.target,
 			operation_type: operationType,

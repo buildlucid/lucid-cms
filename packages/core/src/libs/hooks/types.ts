@@ -52,7 +52,6 @@ type CollectionHookMeta = {
 
 type DocumentHookMeta = CollectionHookMeta & {
 	collectionTableNames: CollectionTableNames;
-	tenantKey: string | null;
 };
 
 type DocumentUserHookMeta = DocumentHookMeta & {
@@ -73,9 +72,7 @@ type DocumentDeleteHookMeta = DocumentUserHookMeta & {
 	hardDelete: boolean;
 };
 
-type MediaHookMeta = {
-	tenantKey: string | null;
-};
+type MediaHookMeta = Record<string, never>;
 
 export type DocumentBeforeUpsertHookData = {
 	documentId: number;

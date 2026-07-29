@@ -8,7 +8,7 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveUserAuthority from "./resolve-user-authority.js";
 
-/** Lists the external scope catalogue available to the current tenant. */
+/** Lists the external scope catalogue. */
 const getScopes: ServiceFn<
 	[
 		{
@@ -17,17 +17,12 @@ const getScopes: ServiceFn<
 	],
 	ExternalScopeGroup[]
 > = async (context, data) => {
-	let groups = getExternalScopeGroups(context.config, {
-		tenantKey: context.request.tenantKey,
-	});
+	let groups = getExternalScopeGroups(context.config);
 
 	if (data.userId !== undefined) {
 		const authority = await resolveUserAuthority(context, {
 			userId: data.userId,
-			tenantKey: context.request.tenantKey ?? null,
-			scopes: getValidExternalScopes(context.config, {
-				tenantKey: context.request.tenantKey,
-			}) as ExternalScope[],
+			scopes: getValidExternalScopes(context.config) as ExternalScope[],
 		});
 		if (authority.error) return authority;
 

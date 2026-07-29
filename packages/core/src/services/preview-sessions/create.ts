@@ -103,7 +103,6 @@ const create: ServiceFn<
 			document: canonicalDocument,
 			env: context.env,
 			locale,
-			tenantKey: context.request.tenantKey ?? null,
 		});
 	} catch {
 		return {

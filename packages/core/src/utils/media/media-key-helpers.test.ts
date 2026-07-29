@@ -1,13 +1,12 @@
 import crypto from "node:crypto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import buildDownloadContentDisposition from "./build-download-content-disposition.js";
-import changeKeyTenant from "./change-key-tenant.js";
 import createMediaUrl from "./create-media-url.js";
 import formatMediaBrowserKey from "./format-media-browser-key.js";
 import generateKey from "./generate-key.js";
 import generateProcessKey from "./generate-process-key.js";
 import getDownloadFileName from "./get-download-file-name.js";
-import { getMediaKeyParts, getMediaKeyTenantKey } from "./media-key-tenant.js";
+import { getMediaKeyParts } from "./media-key-parts.js";
 import normalizeMediaKey from "./normalize-media-key.js";
 
 describe("media key helpers", () => {
@@ -29,23 +28,6 @@ describe("media key helpers", () => {
 		expect(result.data).toBe("public/123e4567e89b12d3a456426614174000");
 	});
 
-	it("generates tenant-scoped media keys", () => {
-		vi.spyOn(crypto, "randomUUID").mockReturnValue(
-			"123e4567-e89b-12d3-a456-426614174000",
-		);
-
-		const result = generateKey({
-			name: "Screenshot 2026-02-13 at 10.png",
-			public: true,
-			tenantKey: "marketing",
-		});
-
-		expect(result.error).toBeUndefined();
-		expect(result.data).toBe(
-			"public/marketing/123e4567e89b12d3a456426614174000",
-		);
-	});
-
 	it("generates temporary awaiting-sync keys for replacement uploads", () => {
 		vi.spyOn(crypto, "randomUUID").mockReturnValue(
 			"123e4567-e89b-12d3-a456-426614174000",
@@ -59,24 +41,6 @@ describe("media key helpers", () => {
 
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBe("awaiting-sync/123e4567e89b12d3a456426614174000");
-	});
-
-	it("generates tenant-scoped temporary awaiting-sync keys", () => {
-		vi.spyOn(crypto, "randomUUID").mockReturnValue(
-			"123e4567-e89b-12d3-a456-426614174000",
-		);
-
-		const result = generateKey({
-			name: "replacement.png",
-			public: true,
-			temporary: true,
-			tenantKey: "marketing",
-		});
-
-		expect(result.error).toBeUndefined();
-		expect(result.data).toBe(
-			"awaiting-sync/marketing/123e4567e89b12d3a456426614174000",
-		);
 	});
 
 	it("formats originals with a visual filename segment", () => {
@@ -130,22 +94,7 @@ describe("media key helpers", () => {
 		).toBe("public/processed/123e4567e89b12d3a456426614174000-w400-fwebp");
 	});
 
-	it("normalizes tenant-scoped display keys back to their canonical storage key", () => {
-		expect(
-			normalizeMediaKey(
-				"public/marketing/123e4567e89b12d3a456426614174000/screenshot-2026-02-13-at-10",
-			),
-		).toBe("public/marketing/123e4567e89b12d3a456426614174000");
-		expect(
-			normalizeMediaKey(
-				"public/marketing/processed/123e4567e89b12d3a456426614174000-w400-fwebp/screenshot-2026-02-13-at-10",
-			),
-		).toBe(
-			"public/marketing/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
-		);
-	});
-
-	it("parses media key parts from global and tenant-scoped keys", () => {
+	it("parses media key parts", () => {
 		expect(
 			getMediaKeyParts(
 				"public/123e4567e89b12d3a456426614174000/screenshot-2026-02-13-at-10",
@@ -153,60 +102,32 @@ describe("media key helpers", () => {
 		).toMatchObject({
 			root: "public",
 			visibility: "public",
-			tenantKey: null,
 			identity: "123e4567e89b12d3a456426614174000",
 			isProcessed: false,
 		});
 		expect(
 			getMediaKeyParts(
-				"public/marketing/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
+				"public/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
 			),
 		).toMatchObject({
 			root: "public",
 			visibility: "public",
-			tenantKey: "marketing",
 			identity: "123e4567e89b12d3a456426614174000-w400-fwebp",
 			isProcessed: true,
 		});
 	});
 
-	it("extracts tenant keys from tenant-aware media keys", () => {
-		expect(
-			getMediaKeyTenantKey("public/marketing/123e4567e89b12d3a456426614174000"),
-		).toBe("marketing");
-		expect(
-			getMediaKeyTenantKey("public/123e4567e89b12d3a456426614174000"),
-		).toBeNull();
-	});
-
-	it("rewrites the tenant segment without changing the media identity", () => {
-		expect(
-			changeKeyTenant({
-				key: "public/123e4567e89b12d3a456426614174000",
-				tenantKey: "marketing",
-			}),
-		).toBe("public/marketing/123e4567e89b12d3a456426614174000");
-		expect(
-			changeKeyTenant({
-				key: "public/marketing/123e4567e89b12d3a456426614174000",
-				tenantKey: null,
-			}),
-		).toBe("public/123e4567e89b12d3a456426614174000");
-	});
-
-	it("generates processed image keys under the source tenant segment", () => {
+	it("generates processed image keys", () => {
 		expect(
 			generateProcessKey({
-				key: "public/marketing/123e4567e89b12d3a456426614174000",
+				key: "public/123e4567e89b12d3a456426614174000",
 				options: {
 					width: 400,
 					format: "webp",
 				},
 				extension: "png",
 			}),
-		).toBe(
-			"public/marketing/processed/123e4567e89b12d3a456426614174000-w400-fwebp",
-		);
+		).toBe("public/processed/123e4567e89b12d3a456426614174000-w400-fwebp");
 	});
 
 	it("creates browser-facing URLs for processed media without version params", () => {

@@ -1,8 +1,6 @@
-import type { Config } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
-import type { Tenant, User } from "../../types/response.js";
+import type { User } from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
-import { normalizeCopy } from "../i18n/index.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
 import formatter from "./index.js";
@@ -43,9 +41,6 @@ export interface UserPropT {
 			permission: string;
 		}[];
 	}[];
-	tenants?: {
-		tenant_key: string;
-	}[];
 }
 
 const formatMultiple = (props: {
@@ -54,7 +49,6 @@ const formatMultiple = (props: {
 	host: string;
 	locales: string[];
 	defaultLocale: string;
-	tenants?: Config["tenants"];
 }) => {
 	return props.users.map((u) =>
 		formatSingle({
@@ -63,7 +57,6 @@ const formatMultiple = (props: {
 			host: props.host,
 			locales: props.locales,
 			defaultLocale: props.defaultLocale,
-			tenants: props.tenants,
 		}),
 	);
 };
@@ -74,12 +67,6 @@ const formatSingle = (props: {
 	host: string;
 	locales: string[];
 	defaultLocale: string;
-	tenants?: Config["tenants"];
-	/**
-	 * Uses a pre-resolved tenant list when the response should show accessible tenants,
-	 * not only memberships loaded on the user row.
-	 */
-	tenantOverride?: Tenant[];
 	pendingEmailChange?: {
 		email: string;
 		requestedAt: Date | string | null;
@@ -144,29 +131,6 @@ const formatSingle = (props: {
 				linkedAt: formatter.formatDate(p.linked_at),
 			};
 		});
-
-		if (props.tenantOverride !== undefined) {
-			response.tenants = props.tenantOverride;
-		} else if (props.tenants !== undefined) {
-			/**
-			 * Filters out stored memberships for tenants that are no longer configured.
-			 */
-			response.tenants =
-				props.user.tenants?.flatMap((membership) => {
-					const tenant = props.tenants?.find(
-						(t) => t.key === membership.tenant_key,
-					);
-					if (tenant === undefined) return [];
-
-					return [
-						{
-							key: tenant.key,
-							name: normalizeCopy(tenant.name),
-							default: tenant.default ?? false,
-						},
-					];
-				}) ?? [];
-		}
 	}
 
 	if (props.pendingEmailChange !== undefined) {

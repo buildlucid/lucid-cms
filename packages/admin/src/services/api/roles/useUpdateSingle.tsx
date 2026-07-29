@@ -16,7 +16,6 @@ interface Params {
 			value: string | null;
 		}[];
 		permissions?: string[];
-		tenantKey?: string | null;
 	};
 }
 

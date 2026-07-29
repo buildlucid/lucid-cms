@@ -31,7 +31,7 @@ const buildPreview = (overrides: Record<string, unknown> = {}) => ({
 	...overrides,
 });
 
-const buildContext = (tenantKey: string | null = "acme") =>
+const buildContext = () =>
 	({
 		db: { client: {} },
 		config: {
@@ -56,7 +56,6 @@ const buildContext = (tenantKey: string | null = "acme") =>
 				},
 			],
 		},
-		request: { tenantKey },
 	}) as never;
 
 describe("preview session resolution and authorization", () => {
@@ -231,10 +230,7 @@ describe("preview session resolution and authorization", () => {
 		});
 	});
 
-	it.each([
-		null,
-		"other",
-	])("leaves collection and tenant authorization to request tenant %s", async (tenantKey) => {
+	it("leaves collection authorization to the request lifecycle", async () => {
 		mocks.selectPreview.mockResolvedValue({
 			error: undefined,
 			data: buildPreview({
@@ -244,7 +240,7 @@ describe("preview session resolution and authorization", () => {
 			}),
 		});
 
-		const response = await authorize(buildContext(tenantKey), {
+		const response = await authorize(buildContext(), {
 			token,
 			collectionKey: "secret",
 			versionType: "production",

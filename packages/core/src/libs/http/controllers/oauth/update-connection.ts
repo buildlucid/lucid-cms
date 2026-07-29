@@ -7,7 +7,6 @@ import {
 } from "../../../../schemas/oauth.js";
 import { oauthServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { multiTenancyEnabled } from "../../../../utils/helpers/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
 import { canManageOAuthConnection } from "../../../permission/oauth-connections.js";
@@ -35,7 +34,7 @@ const updateConnectionController = factory.createHandlers(
 		requestBody: openAPI.requestBody(oauthSchemas.updateConnection.body),
 	}),
 	validateCSRF,
-	authenticate({ tenantScope: "allow-global" }),
+	authenticate(),
 	validate("param", oauthSchemas.updateConnection.params),
 	validate("json", oauthSchemas.updateConnection.body),
 	async (c) => {
@@ -59,8 +58,6 @@ const updateConnectionController = factory.createHandlers(
 			!canManageOAuthConnection({
 				connection: current.data,
 				auth: c.get("auth"),
-				tenantKey: c.get("tenant")?.key ?? null,
-				multiTenant: multiTenancyEnabled(c.get("config")),
 				systemPermission: Permissions.IntegrationUpdate,
 			})
 		) {

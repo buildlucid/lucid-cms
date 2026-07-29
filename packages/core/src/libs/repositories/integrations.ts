@@ -20,7 +20,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
 		user_id: z.number().nullable(),
-		tenant_key: z.string().nullable(),
 		expires_at: z.union([z.string(), z.date()]).nullable(),
 		scopes: z
 			.array(
@@ -44,7 +43,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 		description: this.dbAdapter.getDataType("text"),
 		enabled: this.dbAdapter.getDataType("boolean"),
 		user_id: this.dbAdapter.getDataType("integer"),
-		tenant_key: this.dbAdapter.getDataType("text"),
 		expires_at: this.dbAdapter.getDataType("timestamp"),
 		key: this.dbAdapter.getDataType("text"),
 		api_key: this.dbAdapter.getDataType("text"),
@@ -90,7 +88,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 			V,
 			{
 				id: number;
-				tenantKey?: string | null;
 				userId?: number | null;
 			}
 		>,
@@ -104,7 +101,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 				"description",
 				"enabled",
 				"user_id",
-				"tenant_key",
 				"expires_at",
 				"last_used_at",
 				"last_used_ip",
@@ -124,13 +120,7 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 					)
 					.as("scopes"),
 			])
-			.where("id", "=", props.id)
-			.$call((qb) =>
-				queryBuilder.tenantScope(qb, {
-					tenantKey: props.tenantKey,
-					column: "lucid_integrations.tenant_key",
-				}),
-			);
+			.where("id", "=", props.id);
 
 		if (props.userId !== undefined) {
 			query =
@@ -154,7 +144,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 				"description",
 				"enabled",
 				"user_id",
-				"tenant_key",
 				"expires_at",
 				"last_used_at",
 				"last_used_ip",
@@ -186,7 +175,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 				"secret",
 				"enabled",
 				"user_id",
-				"tenant_key",
 				"expires_at",
 				this.dbAdapter
 					.jsonArrayFrom(
@@ -218,7 +206,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 				"secret",
 				"enabled",
 				"user_id",
-				"tenant_key",
 				"expires_at",
 				"scopes",
 			],
@@ -233,7 +220,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 			V,
 			{
 				queryParams: GetAllQueryParams;
-				tenantKey?: string | null;
 				userId?: number | null;
 			}
 		>,
@@ -249,7 +235,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 						"description",
 						"enabled",
 						"user_id",
-						"tenant_key",
 						"expires_at",
 						"last_used_at",
 						"last_used_ip",
@@ -268,23 +253,11 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 									),
 							)
 							.as("scopes"),
-					])
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "lucid_integrations.tenant_key",
-						}),
-					);
+					]);
 
 				let countQuery = this.db
 					.selectFrom("lucid_integrations")
-					.select(sql`count(*)`.as("count"))
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "lucid_integrations.tenant_key",
-						}),
-					);
+					.select(sql`count(*)`.as("count"));
 
 				if (props.userId !== undefined) {
 					mainQuery =
@@ -356,7 +329,6 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 				"description",
 				"enabled",
 				"user_id",
-				"tenant_key",
 				"expires_at",
 				"last_used_at",
 				"last_used_ip",

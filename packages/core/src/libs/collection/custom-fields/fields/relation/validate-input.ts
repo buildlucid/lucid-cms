@@ -75,7 +75,6 @@ const fetchDocumentsFromCollection = async (
 		const documentIdRes = await Document.selectMultipleValidationIds(
 			{
 				ids,
-				tenantKey: context.request.tenantKey,
 				validation: {
 					enabled: true,
 				},

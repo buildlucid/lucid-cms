@@ -112,13 +112,6 @@ const OAuthConnectionRow: Component<{
 										classList={{ "rotate-180": detailsOpen() }}
 									/>
 								</button>
-								<Show when={props.connection.tenantKey}>
-									{(tenantKey) => (
-										<span>
-											{T()("oauth.connections.tenant.label")}: {tenantKey()}
-										</span>
-									)}
-								</Show>
 								<span class="inline-flex items-center gap-1">
 									{T()("common.last.used.at")}:
 									<DateText

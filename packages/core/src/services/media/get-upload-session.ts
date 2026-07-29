@@ -2,9 +2,7 @@ import type { UploadSessionStateResponse } from "@lucidcms/types";
 import { copy } from "../../libs/i18n/index.js";
 import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
-import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import checkMediaKeyAccess from "./checks/check-media-key-access.js";
 
 const getUploadSession: ServiceFn<
 	[
@@ -40,11 +38,6 @@ const getUploadSession: ServiceFn<
 		},
 	});
 	if (sessionRes.error) return sessionRes;
-
-	const keyAccessRes = await checkMediaKeyAccess(context, {
-		key: sessionRes.data.key,
-	});
-	if (keyAccessRes.error) return keyAccessRes;
 
 	if (!context.media) {
 		return {
@@ -102,7 +95,6 @@ const getUploadSession: ServiceFn<
 	const partsRes = await context.media.listUploadParts(context, {
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
-		tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),
 	});
 	if (partsRes.error) return partsRes;
 

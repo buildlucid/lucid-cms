@@ -192,7 +192,6 @@ describe("fullSlug route uniqueness", () => {
 				],
 				versionType: "latest",
 				collectionKey: "pages",
-				tenantKey: null,
 				tables: {} as never,
 				duplicateMessage,
 			},
@@ -299,7 +298,6 @@ describe("fullSlug route uniqueness", () => {
 				],
 				versionType: "latest",
 				collectionKey: "docs",
-				tenantKey: null,
 				tables: {} as never,
 			},
 		);
@@ -340,7 +338,6 @@ describe("fullSlug route uniqueness", () => {
 			],
 			versionType: "latest",
 			collectionKey: "pages",
-			tenantKey: null,
 			tables: {} as never,
 		});
 

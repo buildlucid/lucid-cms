@@ -5,7 +5,6 @@ import {
 	RolesRepository,
 	RoleTranslationsRepository,
 } from "../../libs/repositories/index.js";
-import { getTenantConfig } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { roleServices } from "../index.js";
 import {
@@ -20,8 +19,6 @@ const createSingle: ServiceFn<
 			name: RoleTranslationInput;
 			description?: RoleTranslationInput;
 			permissions: string[];
-			tenantKey?: string | null;
-			authSuperAdmin: boolean;
 		},
 	],
 	number
@@ -38,24 +35,6 @@ const createSingle: ServiceFn<
 		data.description,
 		defaultRoleLocale,
 	);
-	const tenantKey =
-		data.tenantKey === undefined
-			? (context.request.tenantKey ?? null)
-			: data.tenantKey;
-
-	/**
-	 * Explicit tenant assignment can move a role across tenant boundaries, so it is super-admin only.
-	 */
-	if (data.tenantKey !== undefined && !data.authSuperAdmin) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.permissions.denied"),
-				status: 403,
-			},
-			data: undefined,
-		};
-	}
 
 	if (!defaultName || defaultName.length < 2) {
 		return {
@@ -74,22 +53,6 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	if (
-		tenantKey !== null &&
-		getTenantConfig(context.config, tenantKey) === undefined
-	) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.tenants.unknown", {
-					data: { key: tenantKey },
-				}),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
-
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		roleServices.validatePermissions(context, {
 			permissions: data.permissions,
@@ -97,7 +60,6 @@ const createSingle: ServiceFn<
 		Roles.selectRoleIdByTranslationName({
 			name: defaultName,
 			localeCode: defaultRoleLocale,
-			tenantKey,
 		}),
 	]);
 	if (validatePermsRes.error) return validatePermsRes;
@@ -121,9 +83,7 @@ const createSingle: ServiceFn<
 	}
 
 	const newRolesRes = await Roles.createSingle({
-		data: {
-			tenant_key: tenantKey,
-		},
+		data: {},
 		returning: ["id"],
 		validation: {
 			enabled: true,

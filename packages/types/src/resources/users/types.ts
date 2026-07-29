@@ -1,6 +1,5 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { ProfilePicture } from "../media/types.js";
-import type { Tenant } from "../tenants/types.js";
 
 export type CorePermission =
 	| "users:read"
@@ -84,7 +83,6 @@ export type User = {
 	invitationAccepted?: boolean;
 	roles?: UserPermission["roles"];
 	permissions?: UserPermission["permissions"];
-	tenants?: Tenant[];
 	hasPassword?: boolean;
 	authProviders?: Array<{
 		id: number;
@@ -124,7 +122,6 @@ export type InitiateAuth = {
 export interface Role {
 	id: number;
 	key: string | null;
-	tenantKey: string | null;
 	name: {
 		localeCode: string;
 		value: string | null;

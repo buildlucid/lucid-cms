@@ -34,7 +34,6 @@ const createServiceContext = (
 				options.request?.url ?? options.config.host ?? constants.urls.localhost,
 			ipAddress: options.request?.ipAddress ?? null,
 			locale,
-			tenantKey: options.request?.tenantKey ?? null,
 		},
 	};
 };

@@ -39,7 +39,6 @@ const getMultiple: ServiceFn<
 			"updated_at",
 		],
 		queryParams: data.query,
-		tenantKey: context.request.tenantKey,
 		includeSystem: data.authUser.superAdmin,
 		validation: {
 			enabled: true,

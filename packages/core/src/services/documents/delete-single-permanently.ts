@@ -84,7 +84,6 @@ const deleteSinglePermanently: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
-				tenantKey: context.request.tenantKey ?? null,
 				hardDelete: true,
 			},
 			data: {
@@ -159,7 +158,6 @@ const deleteSinglePermanently: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
-				tenantKey: context.request.tenantKey ?? null,
 				hardDelete: true,
 			},
 			data: {

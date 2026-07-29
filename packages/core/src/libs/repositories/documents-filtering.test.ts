@@ -29,7 +29,6 @@ describe("related document repository filters", async () => {
 			.createTable("lucid_document__people")
 			.addColumn("id", "integer", (column) => column.primaryKey())
 			.addColumn("is_deleted", "integer", (column) => column.notNull())
-			.addColumn("tenant_key", "text")
 			.execute();
 		await connection.client.schema
 			.createTable("lucid_document__people__ver")
@@ -82,9 +81,9 @@ describe("related document repository filters", async () => {
 		await connection.client
 			.insertInto("lucid_document__people")
 			.values([
-				{ id: 10, is_deleted: 0, tenant_key: null },
-				{ id: 11, is_deleted: 0, tenant_key: null },
-				{ id: 12, is_deleted: 0, tenant_key: null },
+				{ id: 10, is_deleted: 0 },
+				{ id: 11, is_deleted: 0 },
+				{ id: 12, is_deleted: 0 },
 			])
 			.execute();
 		await connection.client
@@ -171,7 +170,6 @@ describe("related document repository filters", async () => {
 			[relationFilter],
 			"lucid_document__articles",
 			"lucid_document__articles__ver",
-			"tenant-a",
 		).compile();
 
 		expect(query.sql).toContain(
@@ -193,13 +191,7 @@ describe("related document repository filters", async () => {
 			query.sql.match(/from "lucid_document__people__fld" as "bf"/g),
 		).toHaveLength(1);
 		expect(query.parameters).toEqual(
-			expect.arrayContaining([
-				"people",
-				"latest",
-				"tenant-a",
-				"Will",
-				"Yallop",
-			]),
+			expect.arrayContaining(["people", "latest", "Will", "Yallop"]),
 		);
 	});
 
@@ -252,7 +244,6 @@ describe("related document repository filters", async () => {
 			[relationFilter],
 			"lucid_document__articles",
 			"lucid_document__articles__ver",
-			"tenant-a",
 		).execute();
 
 		expect(rows).toEqual([{ id: 2 }]);

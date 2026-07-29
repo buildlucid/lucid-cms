@@ -26,7 +26,6 @@ const sendExternal: ServiceFn<
 				[key: string]: unknown;
 			};
 			storage?: EmailStorageConfig;
-			tenantKey?: string | null;
 			from?: {
 				email?: string;
 				name?: string;
@@ -67,7 +66,6 @@ const sendExternal: ServiceFn<
 		attachments: data.attachments,
 		data: data.data,
 		storage: data.storage,
-		tenantKey: data.tenantKey,
 		from: data.from,
 	});
 };

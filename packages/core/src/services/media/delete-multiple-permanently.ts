@@ -87,9 +87,7 @@ const deleteMultiplePermanently: ServiceFn<
 			config: context.config,
 		},
 		{
-			meta: {
-				tenantKey: context.request.tenantKey ?? null,
-			},
+			meta: {},
 			data: {
 				ids: data.ids,
 				userId: data.userId,

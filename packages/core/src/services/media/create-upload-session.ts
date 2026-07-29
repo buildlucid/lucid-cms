@@ -8,7 +8,7 @@ import {
 	MediaUploadSessionsRepository,
 } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
-import { generateKey, resolveMediaTenant } from "../../utils/media/index.js";
+import { generateKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkCanStoreMedia from "./checks/check-can-store-media.js";
 
@@ -50,15 +50,9 @@ const createUploadSession: ServiceFn<
 	const keyRes = generateKey({
 		name: data.fileName,
 		public: data.public,
-		tenantKey: context.request.tenantKey ?? null,
 		temporary: data.temporary,
 	});
 	if (keyRes.error) return keyRes;
-
-	const tenant = resolveMediaTenant(
-		context.config,
-		context.request.tenantKey ?? null,
-	);
 
 	const sessionRes = await context.media.createUploadSession(context, {
 		key: keyRes.data,
@@ -67,7 +61,6 @@ const createUploadSession: ServiceFn<
 		mimeType: data.mimeType,
 		extension: extension || undefined,
 		size: data.size,
-		tenant,
 	});
 	if (sessionRes.error) {
 		return {

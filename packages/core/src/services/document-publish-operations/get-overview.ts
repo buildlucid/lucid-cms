@@ -18,7 +18,6 @@ const getOverview: ServiceFn<
 	const collectionKeys = getReviewableCollectionKeys({
 		config: context.config,
 		user: data.user,
-		tenantKey: context.request.tenantKey,
 	});
 	const emptyOverview: PublishOperationOverview = {
 		total: 0,
@@ -44,7 +43,6 @@ const getOverview: ServiceFn<
 		collectionKeys,
 		collectionKey: data.query.filter?.collectionKey?.value?.toString(),
 		target: data.query.filter?.target?.value?.toString(),
-		tenantKey: context.request.tenantKey,
 	});
 	if (overviewRes.error) return overviewRes;
 

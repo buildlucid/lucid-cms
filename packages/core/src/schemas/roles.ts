@@ -33,10 +33,6 @@ const roleResponseSchema = z.object({
 		description: "Whether this role is managed by config and cannot be edited",
 		example: false,
 	}),
-	tenantKey: z.string().nullable().meta({
-		description: "The tenant this role is scoped to. Null roles are global.",
-		example: "alpha",
-	}),
 	permissions: z
 		.array(
 			z.object({
@@ -77,11 +73,6 @@ export const controllerSchemas = {
 				description: "A lit of permissions",
 				example: ["users:create", "users:update"],
 			}),
-			tenantKey: z.string().trim().nullable().optional().meta({
-				description:
-					"The tenant key this role is scoped to. Omit or set null to make the role global.",
-				example: "alpha",
-			}),
 		}),
 		query: {
 			string: undefined,
@@ -112,11 +103,6 @@ export const controllerSchemas = {
 					example: ["users:create", "users:update"],
 				})
 				.optional(),
-			tenantKey: z.string().trim().nullable().optional().meta({
-				description:
-					"The tenant key this role is scoped to. Set null to make the role global.",
-				example: "alpha",
-			}),
 		}),
 		query: {
 			string: undefined,

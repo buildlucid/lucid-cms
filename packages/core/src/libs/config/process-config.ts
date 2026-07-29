@@ -17,7 +17,6 @@ import checkFieldConditions from "./checks/check-field-conditions.js";
 import checkLocales from "./checks/check-locales.js";
 import checkOpenRepeaters from "./checks/check-open-repeaters.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
-import checkTenants from "./checks/check-tenants.js";
 import ConfigSchema from "./config-schema.js";
 import mergeConfig from "./merge-config.js";
 import normalizeConfigSecrets from "./utils/normalize-config-secrets.js";
@@ -128,9 +127,6 @@ const processConfig = async (
 		// i18n checks
 		checkLocales(configRes.localization);
 		checkLocales(configRes.i18n);
-
-		// tenant checks
-		checkTenants(configRes);
 
 		// collection checks
 		checkDuplicateBuilderKeys(

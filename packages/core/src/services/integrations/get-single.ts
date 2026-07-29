@@ -4,7 +4,7 @@ import { IntegrationsRepository } from "../../libs/repositories/index.js";
 import type { Integration } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-/** Loads an integration available to the current tenant. */
+/** Loads an integration. */
 const getSingle: ServiceFn<
 	[
 		{
@@ -21,7 +21,6 @@ const getSingle: ServiceFn<
 
 	const integrationsRes = await Integrations.selectSingleByIdWithScopes({
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		userId: data.userId,
 		validation: {
 			enabled: true,

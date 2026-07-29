@@ -28,7 +28,7 @@ const getAuthorizationRequestController = factory.createHandlers(
 			params: oauthSchemas.authorizationRequest.params,
 		}),
 	}),
-	authenticate({ tenantScope: "allow-global" }),
+	authenticate(),
 	validate("param", oauthSchemas.authorizationRequest.params),
 	async (c) => {
 		const context = createServiceContext(c);

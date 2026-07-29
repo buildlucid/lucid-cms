@@ -4,9 +4,7 @@ import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
 } from "../../libs/repositories/index.js";
-import { getMediaKeyTenantKey } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import groupQueuePayloadsByTenant from "./helpers/group-queue-payloads-by-tenant.js";
 
 /**
  * Finds all expired media keys that are still awaiting sync and queues them for deletion
@@ -72,43 +70,22 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 		};
 	}
 
-	const expiredMediaGroups = groupQueuePayloadsByTenant(
-		allExpiredMediaRes.data.map((media) => ({
-			payload: {
-				key: media.key,
-			},
-			tenantKeys: [getMediaKeyTenantKey(media.key)],
-		})),
-	);
-	const expiredSessionGroups = groupQueuePayloadsByTenant(
-		allExpiredSessionsRes.data.map((session) => ({
-			payload: {
-				sessionId: session.session_id,
-			},
-			tenantKeys: [getMediaKeyTenantKey(session.key)],
-		})),
-	);
-
-	for (const group of expiredMediaGroups) {
+	if (allExpiredMediaRes.data.length > 0) {
 		const queueRes = await context.queue.addBatch(context, {
 			event: "media:delete-unsynced",
-			payloads: group.payloads,
-			options:
-				group.tenantKeys.length > 0
-					? { tenantKeys: group.tenantKeys }
-					: undefined,
+			payloads: allExpiredMediaRes.data.map((media) => ({
+				key: media.key,
+			})),
 		});
 		if (queueRes.error) return queueRes;
 	}
 
-	for (const group of expiredSessionGroups) {
+	if (allExpiredSessionsRes.data.length > 0) {
 		const queueRes = await context.queue.addBatch(context, {
 			event: "media:abort-upload-session",
-			payloads: group.payloads,
-			options:
-				group.tenantKeys.length > 0
-					? { tenantKeys: group.tenantKeys }
-					: undefined,
+			payloads: allExpiredSessionsRes.data.map((session) => ({
+				sessionId: session.session_id,
+			})),
 		});
 		if (queueRes.error) return queueRes;
 	}

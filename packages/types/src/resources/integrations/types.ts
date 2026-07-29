@@ -26,7 +26,6 @@ export interface Integration {
 	description: string | null;
 	enabled: boolean;
 	userId: number | null;
-	tenantKey: string | null;
 	expiresAt: string | null;
 	scopes: ExternalScope[];
 	lastUsedAt: string | null;
@@ -92,7 +91,6 @@ export interface OAuthConnection {
 	clientUri: string | null;
 	principalType: OAuthPrincipalType;
 	userId: number | null;
-	tenantKey: string | null;
 	scopes: ExternalScope[];
 	lastUsedAt: string | null;
 	lastUsedIp: string | null;

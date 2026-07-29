@@ -22,7 +22,6 @@ const setupRequired: ServiceFn<[], { setupRequired: boolean }> = async (
 			const initialSeedRes = await Promise.all([
 				seedServices.defaultOptions(context),
 				syncServices.syncRoles(context),
-				syncServices.syncTenants(context),
 			]);
 			for (const res of initialSeedRes) {
 				if (res.error) return res;

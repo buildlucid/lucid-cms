@@ -251,9 +251,8 @@ const CollectionsDocumentsEditRoute: Component<{
 		pageBuilderModalsStore.reset();
 	});
 
-	//* Redirect out of the document view when the document/collection isn't
-	//* available for the active tenant (e.g. after switching tenant). Multiple
-	//* collections fall back to their document list, everything else to the dashboard.
+	//* Redirect out of the document view when the document/collection isn't available.
+	//* Multiple collections fall back to their document list, everything else to the dashboard.
 	createEffect(() => {
 		if (docState.collectionAccessError()) {
 			navigate("/lucid", { replace: true });

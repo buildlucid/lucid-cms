@@ -7,7 +7,6 @@ import checkLocales from "./check-locales.js";
 import checkOpenRepeaters from "./check-open-repeaters.js";
 import checkPluginVersion from "./check-plugin-version.js";
 import checkRepeaterDepth from "./check-repeater-depth.js";
-import checkTenants from "./check-tenants.js";
 
 export default {
 	checkDuplicateBuilderKeys,
@@ -19,5 +18,4 @@ export default {
 	checkLocales,
 	checkField,
 	checkFieldConditions,
-	checkTenants,
 };

@@ -77,7 +77,6 @@ const createHookPayload = (
 		collection: {} as never,
 		collectionKey: "pages",
 		collectionTableNames: {} as never,
-		tenantKey: null,
 	},
 	data: {
 		versionType,

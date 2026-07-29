@@ -36,10 +36,6 @@ type BuilderCollectionState = {
 	documents: Record<string, BuilderDocumentState>;
 };
 
-type BuilderTenantState = {
-	collections: Record<string, BuilderCollectionState>;
-};
-
 export type CollectionPreferenceState = {
 	previewOpen?: boolean;
 };
@@ -52,7 +48,7 @@ export type UserPreferenceState = {
 		tables: Record<string, string[]>;
 	};
 	workspace: {
-		tenants: Record<string, BuilderTenantState>;
+		collections: Record<string, BuilderCollectionState>;
 	};
 };
 
@@ -76,7 +72,7 @@ export const createEmptyPreferenceState = (): UserPreferenceState => ({
 		tables: {},
 	},
 	workspace: {
-		tenants: {},
+		collections: {},
 	},
 });
 
@@ -89,20 +85,13 @@ export const createEmptyStoredState = (): StoredUserPreferences => ({
 /** Returns a document's builder state, creating its scope when absent. */
 export const ensureBuilderDocumentState = (
 	preferenceState: UserPreferenceState,
-	tenantKey: string,
 	collectionKey: string,
 	documentId: number,
 ): BuilderDocumentState => {
-	let tenantState = preferenceState.workspace.tenants[tenantKey];
-	if (!tenantState) {
-		tenantState = { collections: {} };
-		preferenceState.workspace.tenants[tenantKey] = tenantState;
-	}
-
-	let collectionState = tenantState.collections[collectionKey];
+	let collectionState = preferenceState.workspace.collections[collectionKey];
 	if (!collectionState) {
 		collectionState = { documents: {} };
-		tenantState.collections[collectionKey] = collectionState;
+		preferenceState.workspace.collections[collectionKey] = collectionState;
 	}
 
 	const documentKey = String(documentId);
@@ -199,43 +188,35 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 	}
 
 	const workspace = value.workspace;
-	if (!isObjectRecord(workspace) || !isObjectRecord(workspace.tenants)) {
+	if (!isObjectRecord(workspace) || !isObjectRecord(workspace.collections)) {
 		return normalized;
 	}
 
-	for (const [tenantKey, tenantValue] of Object.entries(workspace.tenants)) {
-		if (!isObjectRecord(tenantValue)) continue;
-		const collections = tenantValue.collections;
-		if (!isObjectRecord(collections)) continue;
+	for (const [collectionKey, collectionValue] of Object.entries(
+		workspace.collections,
+	)) {
+		if (!isObjectRecord(collectionValue)) continue;
+		const documents = collectionValue.documents;
+		if (!isObjectRecord(documents)) continue;
 
-		const tenantState: BuilderTenantState = { collections: {} };
-		for (const [collectionKey, collectionValue] of Object.entries(
-			collections,
-		)) {
-			if (!isObjectRecord(collectionValue)) continue;
-			const documents = collectionValue.documents;
-			if (!isObjectRecord(documents)) continue;
-
-			const collectionState: BuilderCollectionState = { documents: {} };
-			for (const [documentId, documentValue] of Object.entries(documents)) {
-				if (
-					!isObjectRecord(documentValue) ||
-					!isObjectRecord(documentValue.bricks)
-				) {
-					continue;
-				}
-
-				const bricks: Record<string, BuilderStateItem> = {};
-				for (const [brickRef, brickState] of Object.entries(
-					documentValue.bricks,
-				)) {
-					if (isBuilderStateItem(brickState)) bricks[brickRef] = brickState;
-				}
-				collectionState.documents[documentId] = { bricks };
+		const collectionState: BuilderCollectionState = { documents: {} };
+		for (const [documentId, documentValue] of Object.entries(documents)) {
+			if (
+				!isObjectRecord(documentValue) ||
+				!isObjectRecord(documentValue.bricks)
+			) {
+				continue;
 			}
-			tenantState.collections[collectionKey] = collectionState;
+
+			const bricks: Record<string, BuilderStateItem> = {};
+			for (const [brickRef, brickState] of Object.entries(
+				documentValue.bricks,
+			)) {
+				if (isBuilderStateItem(brickState)) bricks[brickRef] = brickState;
+			}
+			collectionState.documents[documentId] = { bricks };
 		}
-		normalized.workspace.tenants[tenantKey] = tenantState;
+		normalized.workspace.collections[collectionKey] = collectionState;
 	}
 
 	return normalized;

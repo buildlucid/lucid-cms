@@ -26,7 +26,7 @@ const getSingleController = factory.createHandlers(
 			params: controllerSchemas.getSingle.params,
 		}),
 	}),
-	authenticate({ tenantScope: "allow-global" }),
+	authenticate(),
 	validate("param", controllerSchemas.getSingle.params),
 	async (c) => {
 		const { code } = c.req.valid("param");

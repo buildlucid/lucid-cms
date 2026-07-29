@@ -51,7 +51,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 		],
 		defaultLocale: "en",
 	},
-	tenants: [],
 	i18n: {
 		locales: [
 			{
@@ -106,6 +105,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 		watch: {
 			ignore: [],
 		},
+	},
+	brand: {
+		name: "Lucid CMS",
 	},
 	retention: {
 		defaultPurgeAfterDays: constants.retention,

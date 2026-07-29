@@ -1,9 +1,8 @@
-import type { SelectQueryBuilder } from "kysely";
 import z from "zod";
 import type { QueryParams } from "../../types/query-params.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import queryBuilder from "../db/query-builder/index.js";
-import type { KyselyDB, LucidDB, LucidQueueJobs, Select } from "../db/types.js";
+import type { KyselyDB, LucidQueueJobs, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
@@ -111,16 +110,13 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 			{
 				id: number;
 				select: K[];
-				tenantKey?: string | null;
 			}
 		>,
 	) {
-		let query = this.db
+		const query = this.db
 			.selectFrom("lucid_queue_jobs")
 			.select(props.select)
 			.where("id", "=", props.id);
-
-		query = this.applyTenantScope(query, props.tenantKey);
 
 		const exec = await this.executeQuery(
 			() =>
@@ -149,21 +145,17 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 			{
 				select: K[];
 				queryParams: Partial<QueryParams>;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
 		const exec = await this.executeQuery(
 			async () => {
-				let mainQuery = this.db
+				const mainQuery = this.db
 					.selectFrom("lucid_queue_jobs")
 					.select(props.select);
-				let countQuery = this.db
+				const countQuery = this.db
 					.selectFrom("lucid_queue_jobs")
 					.select((eb) => eb.fn.countAll().as("count"));
-
-				mainQuery = this.applyTenantScope(mainQuery, props.tenantKey);
-				countQuery = this.applyTenantScope(countQuery, props.tenantKey);
 
 				const { main, count } = queryBuilder.main(
 					{
@@ -240,42 +232,5 @@ export default class QueueJobsRepository extends StaticRepository<"lucid_queue_j
 			mode: "multiple",
 			selectAll: true,
 		});
-	}
-
-	// ----------------------------------------
-	// helpers
-	private applyTenantScope<O>(
-		query: SelectQueryBuilder<LucidDB, "lucid_queue_jobs", O>,
-		tenantKey?: string | null,
-	): SelectQueryBuilder<LucidDB, "lucid_queue_jobs", O> {
-		if (tenantKey == null) return query;
-
-		return query.where((eb) =>
-			eb.or([
-				eb.exists(
-					eb
-						.selectFrom("lucid_queue_job_tenants")
-						.select("lucid_queue_job_tenants.id")
-						.whereRef(
-							"lucid_queue_job_tenants.queue_job_id",
-							"=",
-							"lucid_queue_jobs.id",
-						)
-						.where("lucid_queue_job_tenants.tenant_key", "=", tenantKey),
-				),
-				eb.not(
-					eb.exists(
-						eb
-							.selectFrom("lucid_queue_job_tenants")
-							.select("lucid_queue_job_tenants.id")
-							.whereRef(
-								"lucid_queue_job_tenants.queue_job_id",
-								"=",
-								"lucid_queue_jobs.id",
-							),
-					),
-				),
-			]),
-		);
 	}
 }

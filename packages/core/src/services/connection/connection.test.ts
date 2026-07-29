@@ -74,7 +74,8 @@ const adapter = new SQLiteAdapter({ database: ":memory:" });
 const database = await adapter.connect();
 await adapter.migrateToLatest(database);
 
-const makeConfig = (tenantKeys: string[] = []): Config =>
+const makeConfig = (): Config =>
+	// @ts-ignore
 	({
 		db: adapter,
 		host: "https://cms.example.test",
@@ -84,24 +85,20 @@ const makeConfig = (tenantKeys: string[] = []): Config =>
 			accessToken: testingConstants.key,
 			refreshToken: testingConstants.key,
 		},
-		tenants: tenantKeys.map((key) => ({ key, name: key })),
 		brand: { name: "Example CMS" },
 	}) as Config;
 
-const makeContext = (
-	tenantKey: string | null,
-	tenantKeys: string[] = [],
-): ServiceContext =>
+const makeContext = (): ServiceContext =>
+	// @ts-ignore
 	({
 		db: { client: database.client },
-		config: makeConfig(tenantKeys),
+		config: makeConfig(),
 		env: {
 			LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE: issuer,
 		},
 		request: {
 			url: "https://cms.example.test/lucid/api/v1/connection/status",
 			locale: "en",
-			tenantKey,
 		},
 	}) as ServiceContext;
 
@@ -173,17 +170,6 @@ describe.sequential("Lucid remote connection", () => {
 		await database.client.deleteFrom("lucid_ai_generations").execute();
 		await database.client.deleteFrom("lucid_remote_connections").execute();
 		await database.client.deleteFrom("lucid_options").execute();
-		await database.client.deleteFrom("lucid_tenants").execute();
-		await database.client
-			.insertInto("lucid_tenants")
-			.values(
-				["alpha", "beta"].map((key) => ({
-					key,
-					is_deleted: 0,
-					is_deleted_at: null,
-				})),
-			)
-			.execute();
 	});
 
 	afterEach(() => {
@@ -195,66 +181,22 @@ describe.sequential("Lucid remote connection", () => {
 		await database.destroy();
 	});
 
-	test("follows the default global and tenant visibility rules", async () => {
-		const global = await resolveWritableConnection(
-			makeContext(null, ["alpha", "beta"]),
+	test("uses one shared connection row", async () => {
+		const context = makeContext();
+		const writable = await resolveWritableConnection(context);
+		expect(writable.error).toBeUndefined();
+		expect(writable.data).toBeDefined();
+		expect((await resolveEffectiveConnection(context)).data?.id).toBe(
+			writable.data?.id,
 		);
-		expect(global.error).toBeUndefined();
-		expect(global.data?.tenant_key).toBeNull();
-
-		const alphaContext = makeContext("alpha", ["alpha", "beta"]);
-		const inherited = await resolveEffectiveConnection(alphaContext);
-		expect(inherited.data?.id).toBe(global.data?.id);
-		expect((await resolveWritableConnection(alphaContext)).data?.id).toBe(
-			global.data?.id,
+		expect((await resolveWritableConnection(context)).data?.id).toBe(
+			writable.data?.id,
 		);
-		expect(
-			(await resolveEffectiveConnection(makeContext("beta", ["alpha", "beta"])))
-				.data?.id,
-		).toBe(global.data?.id);
-
-		await database.client
-			.deleteFrom("lucid_remote_connections")
-			.where("id", "=", global.data?.id ?? 0)
-			.execute();
-
-		const alpha = await resolveWritableConnection(alphaContext);
-		expect(alpha.data?.tenant_key).toBe("alpha");
-		expect((await resolveEffectiveConnection(alphaContext)).data?.id).toBe(
-			alpha.data?.id,
-		);
-		expect(
-			(await resolveEffectiveConnection(makeContext("beta", ["alpha", "beta"])))
-				.data,
-		).toBeUndefined();
-
-		const unscoped = await resolveEffectiveConnection(
-			makeContext(null, ["beta"]),
-		);
-		expect(unscoped.data?.id).toBe(alpha.data?.id);
-
-		await database.client
-			.deleteFrom("lucid_tenants")
-			.where("key", "=", "alpha")
-			.execute();
-		expect(
-			(
-				await database.client
-					.selectFrom("lucid_remote_connections")
-					.select("tenant_key")
-					.where("id", "=", alpha.data?.id ?? 0)
-					.executeTakeFirstOrThrow()
-			).tenant_key,
-		).toBeNull();
-		expect(
-			(await resolveEffectiveConnection(makeContext("beta", ["beta"]))).data
-				?.id,
-		).toBe(alpha.data?.id);
 	});
 
 	test("connects with PKCE and consumes the callback once", async () => {
 		installOAuthFetch();
-		const context = makeContext(null);
+		const context = makeContext();
 		const started = await connect(context, { browserBinding });
 		expect(started.error).toBeUndefined();
 		if (started.error) return;
@@ -309,7 +251,7 @@ describe.sequential("Lucid remote connection", () => {
 	});
 
 	test("returns the connection identity with cached and refreshed access tokens", async () => {
-		const context = makeContext(null);
+		const context = makeContext();
 		const row = await resolveWritableConnection(context);
 		expect(row.data).toBeDefined();
 		if (!row.data) return;
@@ -359,12 +301,13 @@ describe.sequential("Lucid remote connection", () => {
 	});
 
 	test("keeps AI usage when its remote connection is removed", async () => {
-		const connection = await resolveWritableConnection(makeContext(null));
+		const connection = await resolveWritableConnection(makeContext());
 		expect(connection.data).toBeDefined();
 		if (!connection.data) return;
 
 		const created = await new AiGenerationsRepository(
 			database.client,
+			// @ts-ignore
 			adapter,
 		).createSingle({
 			data: {
@@ -394,7 +337,7 @@ describe.sequential("Lucid remote connection", () => {
 	});
 
 	test("disconnect clears the grant but keeps reusable registration", async () => {
-		const context = makeContext(null);
+		const context = makeContext();
 		const row = await resolveWritableConnection(context);
 		expect(row.data).toBeDefined();
 		if (!row.data) return;

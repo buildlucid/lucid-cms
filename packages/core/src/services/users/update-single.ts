@@ -1,16 +1,12 @@
 import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
-import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailChangeRequestsRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
 import generateSecret from "../../utils/helpers/generate-secret.js";
-import {
-	formatEmailSubject,
-	multiTenancyEnabled,
-} from "../../utils/helpers/index.js";
+import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
@@ -20,7 +16,6 @@ import {
 	userServices,
 } from "../index.js";
 import prepareUpdateSingleAuditLogs from "./helpers/prepare-update-single-audit-logs.js";
-import validateUserTenantMemberships from "./helpers/validate-user-tenant-memberships.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -36,7 +31,6 @@ const updateSingle: ServiceFn<
 			triggerPasswordReset?: boolean;
 			isDeleted?: boolean;
 			isLocked?: boolean;
-			tenantKeys?: string[];
 			auth: {
 				id: number;
 				superAdmin: boolean;
@@ -65,7 +59,6 @@ const updateSingle: ServiceFn<
 	}
 
 	const userRes = await Users.selectSinglePreset({
-		tenantKey: context.request.tenantKey,
 		where: [
 			{
 				key: "id",
@@ -87,34 +80,6 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (userRes.error) return userRes;
-
-	const currentSuperAdmin = formatter.formatBoolean(
-		userRes.data.super_admin ?? false,
-	);
-	const existingTenantKeys = multiTenancyEnabled(context.config)
-		? userRes.data.tenants.map((tenant) => tenant.tenant_key)
-		: [];
-	const targetSuperAdmin =
-		data.auth.superAdmin && data.superAdmin !== undefined
-			? data.superAdmin
-			: currentSuperAdmin;
-
-	const targetTenantKeys =
-		data.auth.superAdmin && data.tenantKeys !== undefined
-			? Array.from(new Set(data.tenantKeys))
-			: existingTenantKeys;
-
-	const tenantMembershipsError = validateUserTenantMemberships({
-		config: context.config,
-		tenantKeys: targetTenantKeys,
-		targetSuperAdmin,
-	});
-	if (tenantMembershipsError !== undefined) {
-		return {
-			error: tenantMembershipsError,
-			data: undefined,
-		};
-	}
 
 	const [emailExists, reservedEmail, usernameExists] = await Promise.all([
 		normalizedEmail !== undefined && normalizedEmail !== userRes.data.email
@@ -230,7 +195,7 @@ const updateSingle: ServiceFn<
 	});
 	if (auditLogsRes.error) return auditLogsRes;
 
-	const [updateUserRes, updateRolesRes, updateTenantsRes] = await Promise.all([
+	const [updateUserRes, updateRolesRes] = await Promise.all([
 		Users.updateSingle({
 			data: {
 				first_name: data.firstName,
@@ -263,22 +228,12 @@ const updateSingle: ServiceFn<
 		userServices.updateMultipleRoles(context, {
 			userId: data.userId,
 			roleIds: data.roleIds,
-			tenantKey: context.request.tenantKey,
-		}),
-		userServices.updateMultipleTenants(context, {
-			userId: data.userId,
-			//* only super admins can manage tenant memberships
-			tenantKeys:
-				data.auth.superAdmin && data.tenantKeys !== undefined
-					? targetTenantKeys
-					: undefined,
 		}),
 	]);
 	await invalidateAuthCache(context);
 
 	if (updateRolesRes.error) return updateRolesRes;
 	if (updateUserRes.error) return updateUserRes;
-	if (updateTenantsRes.error) return updateTenantsRes;
 
 	const auditResults = await Promise.all(
 		auditLogsRes.data.logs.map((auditLog) =>
@@ -290,11 +245,6 @@ const updateSingle: ServiceFn<
 	}
 
 	if (auditLogsRes.data.emailChange) {
-		const emailTenantKeys =
-			data.auth.superAdmin && data.tenantKeys !== undefined
-				? targetTenantKeys
-				: existingTenantKeys;
-
 		const sendEmailRes = await emailServices.sendEmail(context, {
 			template: constants.email.templates.emailChanged.key,
 			type: "internal",
@@ -307,7 +257,6 @@ const updateSingle: ServiceFn<
 			data: {
 				firstName: data.firstName || userRes.data.first_name,
 			},
-			tenantKeys: emailTenantKeys,
 		});
 		if (sendEmailRes.error) return sendEmailRes;
 	}

@@ -27,7 +27,6 @@ export const oauthAccessTokenClaimsSchema = z.object({
 	client_id: z.string(),
 	principal_type: z.enum(["system", "user"]),
 	user_id: z.number().int().nullable(),
-	tenant_key: z.string().nullable(),
 	scope: z.string(),
 });
 
@@ -76,7 +75,6 @@ export const oauthConnectionResponseSchema = z.object({
 	clientUri: z.string().nullable(),
 	principalType: z.enum(["system", "user"]),
 	userId: z.number().nullable(),
-	tenantKey: z.string().nullable(),
 	scopes: z.array(z.string()),
 	lastUsedAt: z.string().nullable(),
 	lastUsedIp: z.string().nullable(),

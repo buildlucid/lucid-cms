@@ -14,7 +14,6 @@ type CropParent = {
 	type: string;
 	origin: MediaOrigin;
 	public: BooleanInt;
-	tenant_key: string | null;
 	relation_type?: "crop" | "poster" | null;
 };
 
@@ -46,18 +45,16 @@ const upsertCrop: ServiceFn<
 		context.config.db,
 	);
 
-	const [keyAccessRes, awaitingSyncRes, existingCropRes] = await Promise.all([
-		mediaServices.checks.checkMediaKeyAccess(context, { key: data.crop.key }),
+	const [awaitingSyncRes, existingCropRes] = await Promise.all([
 		mediaServices.checks.checkAwaitingSync(context, { key: data.crop.key }),
 		Media.selectSingle({
-			select: ["id", "key", "e_tag", "file_size", "type", "tenant_key"],
+			select: ["id", "key", "e_tag", "file_size", "type"],
 			where: [
 				{ key: "parent_media_id", operator: "=", value: data.parent.id },
 				{ key: "relation_type", operator: "=", value: "crop" },
 			],
 		}),
 	]);
-	if (keyAccessRes.error) return keyAccessRes;
 	if (awaitingSyncRes.error) return awaitingSyncRes;
 	if (existingCropRes.error) return existingCropRes;
 
@@ -84,7 +81,6 @@ const upsertCrop: ServiceFn<
 			previousKey: existingCropRes.data.key,
 			previousType: "image",
 			previousEtag: existingCropRes.data.e_tag,
-			tenantKey: existingCropRes.data.tenant_key,
 			updatedKey: data.crop.key,
 			targetKey: existingCropRes.data.key,
 			allowedType: "image",
@@ -147,7 +143,6 @@ const upsertCrop: ServiceFn<
 		folder_id: null,
 		parent_media_id: data.parent.id,
 		relation_type: "crop" as const,
-		tenant_key: data.parent.tenant_key,
 		updated_at: now,
 		updated_by: data.userId,
 	};
@@ -176,7 +171,6 @@ const upsertCrop: ServiceFn<
 				key: file.key,
 				size: file.size,
 				processedSize: 0,
-				tenantKey: data.parent.tenant_key,
 			});
 		}
 		return cropRes;

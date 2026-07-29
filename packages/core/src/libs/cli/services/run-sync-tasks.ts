@@ -57,17 +57,14 @@ const runSyncTasks = async (options: {
 	};
 
 	try {
-		const [localesResult, tenantsResult, collectionsResult, rolesResult] =
-			await Promise.all([
-				syncServices.syncLocales(context),
-				syncServices.syncTenants(context),
-				syncServices.syncCollections(context),
-				syncServices.syncRoles(context),
-			]);
+		const [localesResult, collectionsResult, rolesResult] = await Promise.all([
+			syncServices.syncLocales(context),
+			syncServices.syncCollections(context),
+			syncServices.syncRoles(context),
+		]);
 
 		for (const [label, result] of [
 			["locale", localesResult],
-			["tenants", tenantsResult],
 			["collection", collectionsResult],
 			["roles", rolesResult],
 		] as const) {

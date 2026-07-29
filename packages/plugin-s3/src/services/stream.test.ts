@@ -34,7 +34,6 @@ describe("stream", () => {
 		const response = await service({} as never, {
 			key: "public/uuid",
 			ifNoneMatch: '"etag"',
-			tenant: null,
 		});
 
 		expect(response.error).toBeUndefined();

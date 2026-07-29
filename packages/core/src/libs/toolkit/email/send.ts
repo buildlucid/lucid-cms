@@ -10,10 +10,9 @@ import type {
 	EmailPriority,
 	EmailSubject,
 } from "../../email/types.js";
-import type { ToolkitTenantOptions } from "../types.js";
 import { runToolkitService } from "../utils.js";
 
-export type ToolkitEmailSendInput = ToolkitTenantOptions & {
+export type ToolkitEmailSendInput = {
 	to: string;
 	subject: EmailSubject;
 	template: string;
@@ -52,7 +51,6 @@ const send = async (
 				attachments: input.attachments,
 				data: input.data,
 				storage: input.storage,
-				tenantKey: input.tenantKey,
 				from: input.from,
 			}),
 		{

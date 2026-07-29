@@ -50,7 +50,6 @@ const inviteSingleController = factory.createHandlers(
 			firstName: body.firstName,
 			lastName: body.lastName,
 			superAdmin: body.superAdmin,
-			tenantKeys: body.tenantKeys,
 			authSuperAdmin: auth.superAdmin,
 		});
 		if (userId.error) throw new LucidAPIError(userId.error);

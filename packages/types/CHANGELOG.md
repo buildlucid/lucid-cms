@@ -3,6 +3,7 @@
 ## v0.5.0 (unreleased)
 
 - Integration types updated and error type additions.
+- Dropped `tenant` experiment support.
 
 ## v0.4.0
 

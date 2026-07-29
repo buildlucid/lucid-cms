@@ -36,7 +36,6 @@ const unlinkAuthProvider: ServiceFn<
 
 	const [userRes, providerRes, providersCountRes] = await Promise.all([
 		Users.selectSinglePreset({
-			tenantKey: context.request.tenantKey,
 			where: [
 				{
 					key: "id",

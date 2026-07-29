@@ -19,7 +19,6 @@ const getSingle: ServiceFn<
 
 	const emailRes = await Emails.selectSingleById({
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {

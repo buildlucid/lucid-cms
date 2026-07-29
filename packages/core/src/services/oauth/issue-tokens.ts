@@ -19,7 +19,6 @@ type TokenGrant = {
 	client_id: string;
 	principal_type: OAuthPrincipalType;
 	user_id: number | null;
-	tenant_key: string | null;
 	scopes: Array<{ scope: string }>;
 };
 
@@ -56,7 +55,6 @@ const issueOAuthTokens: ServiceFn<
 		client_id: input.grant.client_id,
 		principal_type: input.grant.principal_type,
 		user_id: input.grant.user_id,
-		tenant_key: input.grant.tenant_key,
 		scope,
 	};
 	const accessToken = await sign(

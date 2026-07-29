@@ -10,7 +10,6 @@ const getConnections: ServiceFn<
 		{
 			principalType: OAuthPrincipalType;
 			userId?: number;
-			tenantKey?: string | null;
 		},
 	],
 	OAuthConnection[]
@@ -22,7 +21,6 @@ const getConnections: ServiceFn<
 	const grantsRes = await Grants.selectMultipleWithScopes({
 		principalType: input.principalType,
 		userId: input.userId,
-		tenantKey: input.tenantKey,
 		validation: { enabled: true },
 	});
 	if (grantsRes.error) return grantsRes;

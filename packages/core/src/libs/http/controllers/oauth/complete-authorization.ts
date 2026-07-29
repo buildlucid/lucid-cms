@@ -31,7 +31,7 @@ const completeAuthorizationController = factory.createHandlers(
 		requestBody: openAPI.requestBody(oauthSchemas.completeAuthorization.body),
 	}),
 	validateCSRF,
-	authenticate({ tenantScope: "allow-global" }),
+	authenticate(),
 	validate("param", oauthSchemas.completeAuthorization.params),
 	validate("json", oauthSchemas.completeAuthorization.body),
 	async (c) => {

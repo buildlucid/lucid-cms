@@ -2,12 +2,10 @@ import { copy, prefixGeneratedColName } from "@lucidcms/core/plugin";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
-	LucidDocumentTableName,
 	LucidVersionTableName,
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
-import { applyDocumentVersionTenantScope } from "../utils/apply-tenant-scope.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 
 export type VersionFieldsQueryResponse = {
@@ -28,9 +26,7 @@ const getDocumentVersionFields: ServiceFn<
 			versionId: number;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
-			tenantKey: string | null;
 			tables: {
-				document: LucidDocumentTableName;
 				version: LucidVersionTableName;
 				documentFields: LucidBrickTableName;
 			};
@@ -39,11 +35,7 @@ const getDocumentVersionFields: ServiceFn<
 	Array<VersionFieldsQueryResponse> | null
 > = async (context, data) => {
 	try {
-		const {
-			document: documentTable,
-			version: versionTable,
-			documentFields: fieldsTable,
-		} = data.tables;
+		const { version: versionTable, documentFields: fieldsTable } = data.tables;
 		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
 		const fullSlugColumn = prefixGeneratedColName(
 			constants.fields.fullSlug.key,
@@ -102,11 +94,7 @@ const getDocumentVersionFields: ServiceFn<
 			.where(`${versionTable}.id`, "=", data.versionId)
 			.where(`${versionTable}.type`, "=", data.versionType);
 
-		const fields = await applyDocumentVersionTenantScope(fieldsQuery, {
-			tenantKey: data.tenantKey,
-			documentTable,
-			versionTable,
-		}).execute();
+		const fields = await fieldsQuery.execute();
 
 		if (!fields || fields.length === 0) {
 			return {

@@ -18,7 +18,6 @@ import publishOperationRoutes from "./publish-operations.routes.js";
 import roleRoutes from "./roles.routes.js";
 import settingsRoutes from "./settings.routes.js";
 import shareRoutes from "./share.routes.js";
-import tenantRoutes from "./tenants.routes.js";
 import userRoutes from "./users.routes.js";
 
 const routes = new Hono<LucidHonoGeneric>()
@@ -36,7 +35,6 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/permissions", permissionRoutes)
 	.route("/publish-operations", publishOperationRoutes)
 	.route("/settings", settingsRoutes)
-	.route("/tenants", tenantRoutes)
 	.route("/roles", roleRoutes)
 	.route("/users", userRoutes)
 	.route("/media", mediaRoutes)

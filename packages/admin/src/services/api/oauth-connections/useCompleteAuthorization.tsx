@@ -4,7 +4,6 @@ import serviceHelpers from "@/utils/service-helpers";
 
 type Params = {
 	requestId: string;
-	tenantKey?: string;
 	body:
 		| { decision: "deny" }
 		| {
@@ -25,10 +24,6 @@ const useCompleteAuthorization = () =>
 				config: {
 					method: "POST",
 					body: params.body,
-					tenant: false,
-					headers: params.tenantKey
-						? { "X-Lucid-Tenant": params.tenantKey }
-						: undefined,
 				},
 			}),
 		onSuccess: (response) => {

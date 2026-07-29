@@ -139,7 +139,6 @@ const updateSingle: ServiceFn<
 		const Users = new UsersRepository(context.db.client, context.config.db);
 		const assignableUsersRes = await Users.selectMultipleWithPermission({
 			permission,
-			tenantKey: context.request.tenantKey,
 		});
 		if (assignableUsersRes.error) return assignableUsersRes;
 
@@ -226,7 +225,6 @@ const updateSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.user.id,
 				collectionTableNames: tableNamesRes.data,
-				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				collectionKey: data.collectionKey,

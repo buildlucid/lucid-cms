@@ -35,7 +35,6 @@ const checkSingleCollectionDocumentCount: ServiceFn<
 			{
 				collectionKey: data.collectionKey,
 				isDeleted: context.config.db.getDefault("boolean", "false"),
-				tenantKey: context.request.tenantKey,
 			},
 			{
 				tableName: data.documentTable,

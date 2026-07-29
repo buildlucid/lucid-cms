@@ -10,10 +10,6 @@ import {
 	ProcessedImagesRepository,
 } from "../../libs/repositories/index.js";
 import { createBufferETag, matchesETag } from "../../utils/http/etag.js";
-import {
-	getMediaKeyTenantKey,
-	resolveMediaKeyTenant,
-} from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
 import adjustStorageUsage from "../media/adjust-storage-usage.js";
@@ -40,17 +36,9 @@ const processImage: ServiceFn<
 		await mediaServices.checks.checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const sourceTenant = resolveMediaKeyTenant(context.config, data.key);
-	const processedTenant = resolveMediaKeyTenant(
-		context.config,
-		data.processKey,
-	);
-	const sourceTenantKey = getMediaKeyTenantKey(data.key);
-
 	// get og image
 	const mediaRes = await mediaStrategyRes.data.stream(context, {
 		key: data.key,
-		tenant: sourceTenant,
 	});
 	if (mediaRes.error) return mediaRes;
 
@@ -170,7 +158,6 @@ const processImage: ServiceFn<
 		context,
 		{
 			size: imageRes.data.size,
-			tenantKey: sourceTenantKey,
 		},
 	);
 	if (canStoreRes.error) {
@@ -194,7 +181,6 @@ const processImage: ServiceFn<
 	if (context.config.media.images.storeProcessed === true) {
 		const storageLimit = context.config.media.limits.storageBytes;
 		const adjustStorageRes = await adjustStorageUsage(context, {
-			tenantKey: sourceTenantKey,
 			delta: imageRes.data.size,
 			max: storageLimit === false ? undefined : storageLimit,
 			min: 0,
@@ -227,7 +213,6 @@ const processImage: ServiceFn<
 				extension: imageRes.data.extension,
 				size: imageRes.data.size,
 				type: "image",
-				tenant: processedTenant,
 			}),
 		]);
 
@@ -236,7 +221,6 @@ const processImage: ServiceFn<
 			uploadRes.error !== undefined
 		) {
 			await adjustStorageUsage(context, {
-				tenantKey: sourceTenantKey,
 				delta: imageRes.data.size * -1,
 				min: 0,
 			});
@@ -251,7 +235,6 @@ const processImage: ServiceFn<
 				uploadRes.error === undefined
 					? mediaStrategyRes.data.delete(context, {
 							key: data.processKey,
-							tenant: processedTenant,
 						})
 					: Promise.resolve(),
 			]);

@@ -6,7 +6,6 @@ const checkCanStore: ServiceFn<
 	[
 		{
 			size: number;
-			tenantKey?: string | null;
 		},
 	],
 	{
@@ -25,9 +24,7 @@ const checkCanStore: ServiceFn<
 		};
 	}
 
-	const storageUsageRes = await getStorageUsage(context, {
-		tenantKey: data.tenantKey ?? null,
-	});
+	const storageUsageRes = await getStorageUsage(context);
 	if (storageUsageRes.error) return storageUsageRes;
 
 	const proposedSize = storageUsageRes.data.total + data.size;

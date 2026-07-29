@@ -3,8 +3,7 @@ import { IntegrationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Loads an integration through the current tenant scope.
- * Global integrations remain visible to tenant requests.
+ * Loads an integration before a mutation.
  */
 const checkIntegrationAccess: ServiceFn<
 	[
@@ -17,7 +16,6 @@ const checkIntegrationAccess: ServiceFn<
 		id: number;
 		key: string;
 		user_id: number | null;
-		tenant_key: string | null;
 	}
 > = async (context, data) => {
 	const Integrations = new IntegrationsRepository(
@@ -27,7 +25,6 @@ const checkIntegrationAccess: ServiceFn<
 
 	const integrationRes = await Integrations.selectSingleByIdWithScopes({
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		userId: data.userId,
 		validation: {
 			enabled: true,
@@ -45,7 +42,6 @@ const checkIntegrationAccess: ServiceFn<
 			id: integrationRes.data.id,
 			key: integrationRes.data.key,
 			user_id: integrationRes.data.user_id,
-			tenant_key: integrationRes.data.tenant_key,
 		},
 	};
 };

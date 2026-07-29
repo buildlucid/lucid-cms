@@ -20,7 +20,6 @@ const validateMediaInputData = async (
 
 		const mediaRes = await Media.selectMultipleValidationData({
 			ids: mediaIds,
-			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 			},

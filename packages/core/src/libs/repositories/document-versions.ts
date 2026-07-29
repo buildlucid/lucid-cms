@@ -91,7 +91,6 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 				}>;
 				/** The status used to determine which version of the relation custom field refs to fetch */
 				versionType: Exclude<DocumentVersionType, "revision">;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -107,7 +106,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 				const { table, ref } = this.db.dynamic;
 				const targetVersionType = versionType ?? props.versionType;
 
-				let query = this.db
+				const query = this.db
 					.selectFrom(tables.version)
 					.innerJoin(tables.document, (join) =>
 						join.onRef(
@@ -160,11 +159,6 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 						"=",
 						this.dbAdapter.getDefault("boolean", "false"),
 					);
-
-				query = queryBuilder.tenantScope(query, {
-					tenantKey: props.tenantKey,
-					column: `${tables.document}.tenant_key`,
-				});
 
 				return query;
 			},

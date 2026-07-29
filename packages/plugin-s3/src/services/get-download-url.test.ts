@@ -23,7 +23,6 @@ describe("getDownloadUrl", () => {
 			host: "https://example.com",
 			secretKey: "secret",
 			fileName: "Screenshot 2026-02-13 at 10.png",
-			tenant: null,
 		});
 
 		expect(response.error).toBeUndefined();
@@ -56,7 +55,6 @@ describe("getDownloadUrl", () => {
 			host: "https://example.com",
 			secretKey: "secret",
 			extension: "png",
-			tenant: null,
 		});
 
 		expect(response.error).toBeUndefined();
@@ -88,7 +86,6 @@ describe("getDownloadUrl", () => {
 			host: "https://example.com",
 			secretKey: "secret",
 			fileName: '../"Quarterly\r\nReport".png',
-			tenant: null,
 		});
 
 		expect(response.error).toBeUndefined();

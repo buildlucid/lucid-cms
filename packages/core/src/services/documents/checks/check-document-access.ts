@@ -4,8 +4,7 @@ import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Confirms documents are visible in the current tenant scope before writes.
- * Global documents remain valid for tenant requests, matching read behaviour.
+ * Confirms documents exist before writes.
  */
 const checkDocumentAccess: ServiceFn<
 	[
@@ -39,7 +38,6 @@ const checkDocumentAccess: ServiceFn<
 	const documentsRes = await Documents.selectMultipleValidationIds(
 		{
 			ids,
-			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 			},

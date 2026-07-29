@@ -42,7 +42,6 @@ const getUserConnectionsController = factory.createHandlers(
 		})(context, {
 			principalType: "user",
 			userId,
-			tenantKey: c.get("tenant")?.key,
 		});
 		if (result.error) throw new LucidAPIError(result.error);
 

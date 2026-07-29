@@ -134,7 +134,6 @@ const createSingle: ServiceFn<
 				collectionKey: data.collection.key,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
-				tenantKey: context.request.tenantKey ?? null,
 				execution: {
 					mode: "upsert",
 					action: "create",
@@ -201,7 +200,6 @@ const createSingle: ServiceFn<
 				collectionKey: data.collection.key,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
-				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				documentId: data.documentId,

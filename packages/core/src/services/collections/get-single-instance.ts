@@ -1,6 +1,5 @@
 import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import { copy } from "../../libs/i18n/index.js";
-import { tenantAccessAllowed } from "../../utils/helpers/index.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -18,19 +17,6 @@ const getSingleInstance = (
 		context.config.collections?.find((c) => c.key === data.key);
 
 	if (collection === undefined) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.collections.not.found.message"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
-
-	if (
-		!tenantAccessAllowed(collection.getData.tenants, context.request.tenantKey)
-	) {
 		return {
 			error: {
 				type: "basic",

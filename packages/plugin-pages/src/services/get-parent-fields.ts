@@ -6,7 +6,6 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
-import { applyDocumentVersionTenantScope } from "../utils/apply-tenant-scope.js";
 import getParentPageId from "../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 
@@ -27,7 +26,6 @@ const getParentFields: ServiceFn<
 			defaultLocale: string;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
-			tenantKey: string | null;
 			fields: {
 				parentPage: FieldInputSchema;
 			};
@@ -46,11 +44,7 @@ const getParentFields: ServiceFn<
 			};
 		}
 
-		const {
-			document: documentTable,
-			version: versionTable,
-			documentFields: fieldsTable,
-		} = data.tables;
+		const { version: versionTable, documentFields: fieldsTable } = data.tables;
 
 		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
 		const parentPageColumn = prefixGeneratedColName("document_id");
@@ -101,14 +95,7 @@ const getParentFields: ServiceFn<
 			.where(`${versionTable}.document_id`, "=", parentPageId)
 			.where(`${versionTable}.type`, "=", data.versionType);
 
-		const parentFields = await applyDocumentVersionTenantScope(
-			parentFieldsQuery,
-			{
-				tenantKey: data.tenantKey,
-				documentTable,
-				versionTable,
-			},
-		).execute();
+		const parentFields = await parentFieldsQuery.execute();
 
 		if (!parentFields || parentFields.length === 0) {
 			if (data.missingParentIsEmpty) {

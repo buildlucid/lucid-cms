@@ -6,7 +6,6 @@ const checkRolesExist: ServiceFn<
 	[
 		{
 			roleIds: number[];
-			tenantKey?: string | null;
 		},
 	],
 	undefined
@@ -21,7 +20,6 @@ const checkRolesExist: ServiceFn<
 	const Roles = new RolesRepository(context.db.client, context.config.db);
 	const rolesRes = await Roles.selectMultipleIdsByIds({
 		ids: data.roleIds,
-		tenantKey: data.tenantKey,
 		validation: {
 			enabled: true,
 		},

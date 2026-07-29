@@ -8,7 +8,6 @@ type AuthorityGrant = {
 	client_id: string;
 	principal_type: "system" | "user";
 	user_id: number | null;
-	tenant_key: string | null;
 	scopes: Array<{ scope: string }>;
 };
 
@@ -37,7 +36,6 @@ const resolveGrantAuthority: ServiceFn<
 					clientId: grant.client_id,
 				},
 				principal: { type: "system" },
-				tenantKey: grant.tenant_key,
 				scopes: grantedScopes,
 			},
 		};
@@ -49,7 +47,6 @@ const resolveGrantAuthority: ServiceFn<
 
 	const authority = await resolveUserAuthority(context, {
 		userId: grant.user_id,
-		tenantKey: grant.tenant_key,
 		scopes: grantedScopes,
 	});
 	if (authority.error) return authority;
@@ -63,7 +60,6 @@ const resolveGrantAuthority: ServiceFn<
 				clientId: grant.client_id,
 			},
 			principal: authority.data.principal,
-			tenantKey: authority.data.tenantKey,
 			scopes: authority.data.scopes,
 		},
 	};

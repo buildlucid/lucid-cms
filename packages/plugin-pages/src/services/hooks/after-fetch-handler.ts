@@ -143,7 +143,6 @@ const afterFetchHandler =
 					defaultLocale: context.config.localization.defaultLocale,
 					versionType: data.data.relationVersionType,
 					collectionKey: targetCollectionRes.data.key,
-					tenantKey: data.meta.tenantKey,
 					fields: {
 						parentPage,
 					},

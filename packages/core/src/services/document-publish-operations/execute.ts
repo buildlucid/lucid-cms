@@ -15,21 +15,16 @@ const execute: ServiceFn<
 		{
 			id: number;
 			userId?: number | null;
-			tenantKey?: string | null;
 			markFailedOnError?: boolean;
 		},
 	],
 	undefined
 > = async (context, data) => {
-	const tenantKey =
-		data.tenantKey !== undefined ? data.tenantKey : context.request.tenantKey;
-
 	const Operations = new DocumentPublishOperationsRepository(
 		context.db.client,
 		context.config.db,
 	);
 	const operationRes = await Operations.selectSingleDetailed({
-		tenantKey,
 		where: [
 			{
 				key: "lucid_document_publish_operations.id",
@@ -162,7 +157,6 @@ const execute: ServiceFn<
 		documentId: operation.document_id,
 		userId: actorUserId,
 		createRevision: false,
-		tenantKey: operation.tenant_key,
 	});
 	if (promoteRes.error) {
 		if (data.markFailedOnError === true) {

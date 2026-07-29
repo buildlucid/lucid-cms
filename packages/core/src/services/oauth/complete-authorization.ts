@@ -86,11 +86,7 @@ const completeAuthorization: ServiceFn<
 	}
 
 	const requestedScopes = requestRes.data.scopes.split(" ").filter(Boolean);
-	const validScopes = new Set<string>(
-		getValidExternalScopes(context.config, {
-			tenantKey: context.request.tenantKey,
-		}),
-	);
+	const validScopes = new Set<string>(getValidExternalScopes(context.config));
 	if (requestedScopes.some((scope) => !validScopes.has(scope))) {
 		return {
 			error: {
@@ -105,9 +101,7 @@ const completeAuthorization: ServiceFn<
 		input.principalType === "system"
 			? requestedScopes
 			: requestedScopes.filter((scope) => {
-					const capability = getExternalCapability(context.config, scope, {
-						tenantKey: context.request.tenantKey,
-					});
+					const capability = getExternalCapability(context.config, scope);
 					if (!capability) return false;
 					if (capability.userPermission === null || input.actor.superAdmin) {
 						return true;
@@ -140,7 +134,6 @@ const completeAuthorization: ServiceFn<
 			client_uri: requestRes.data.client_uri,
 			principal_type: input.principalType,
 			user_id: input.principalType === "user" ? input.actor.userId : null,
-			tenant_key: context.request.tenantKey ?? null,
 			created_by: input.actor.userId,
 			created_at: now,
 			updated_at: now,

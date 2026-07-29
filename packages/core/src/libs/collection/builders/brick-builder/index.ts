@@ -19,7 +19,6 @@ class BrickBuilder extends FieldBuilder {
 				summary: normalizeCopy(config?.details?.summary),
 			},
 			preview: config?.preview || {},
-			tenants: config?.tenants ?? [],
 		};
 	}
 	// Builder methods

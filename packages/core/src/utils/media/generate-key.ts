@@ -9,7 +9,6 @@ import type { ServiceResponse } from "../services/types.js";
 const generateKey = (props: {
 	name: string;
 	public: boolean;
-	tenantKey?: string | null;
 	temporary?: boolean;
 }): Awaited<ServiceResponse<string>> => {
 	const name = props.name.trim();
@@ -32,11 +31,9 @@ const generateKey = (props: {
 		: props.public
 			? constants.media.visibilityKeys.public
 			: constants.media.visibilityKeys.private;
-	const prefix = props.tenantKey ? `${root}/${props.tenantKey}/` : `${root}/`;
-
 	return {
 		error: undefined,
-		data: `${prefix}${uuid}`,
+		data: `${root}/${uuid}`,
 	};
 };
 

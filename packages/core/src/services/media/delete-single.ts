@@ -60,9 +60,7 @@ const deleteSingle: ServiceFn<
 				config: context.config,
 			},
 			{
-				meta: {
-					tenantKey: context.request.tenantKey ?? null,
-				},
+				meta: {},
 				data: {
 					ids: [deleteMediaRes.data.id],
 					userId: data.userId,

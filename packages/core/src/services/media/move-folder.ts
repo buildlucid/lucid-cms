@@ -4,7 +4,6 @@ import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
-import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compatibility.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 
 const moveFolder: ServiceFn<
@@ -26,7 +25,6 @@ const moveFolder: ServiceFn<
 
 	const mediaRes = await Media.selectSingleById({
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -46,13 +44,6 @@ const moveFolder: ServiceFn<
 			},
 		};
 	}
-
-	const folderTenantRes = checkFolderTenantCompatibility({
-		folderId: data.folderId,
-		folderTenantKey: folderAccessRes.data?.tenant_key ?? null,
-		mediaTenantKey: mediaRes.data.tenant_key,
-	});
-	if (folderTenantRes.error) return folderTenantRes;
 
 	const mediaUpdateRes = await Media.updateSingle({
 		where: [

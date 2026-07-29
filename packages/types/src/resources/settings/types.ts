@@ -43,13 +43,8 @@ export interface Settings {
 }
 
 export type MediaStorageOptionName = "media_storage_used";
-export type TenantScopedMediaStorageOptionName =
-	`${MediaStorageOptionName}:t:${string}`;
 
-export type OptionsName =
-	| MediaStorageOptionName
-	| TenantScopedMediaStorageOptionName
-	| "system_alert_email";
+export type OptionsName = MediaStorageOptionName | "system_alert_email";
 
 export interface Option {
 	name: OptionsName;

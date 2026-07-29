@@ -47,36 +47,10 @@ const updateSingle: ServiceFn<
 	});
 	if (parentFolderAccessRes.error) return parentFolderAccessRes;
 
-	//* A global folder nested under a tenant folder would disappear for other tenants.
-	if (
-		folderAccessRes.data?.tenant_key === null &&
-		parentFolderAccessRes.data?.tenant_key !== undefined &&
-		parentFolderAccessRes.data.tenant_key !== null
-	) {
-		return {
-			error: {
-				message: copy("server:core.media.folders.parents.tenant.mismatch"),
-				status: 400,
-				errors: {
-					fields: [
-						{
-							key: "parentFolderId",
-							message: copy(
-								"server:core.media.folders.parents.tenant.mismatch",
-							),
-						},
-					],
-				},
-			},
-			data: undefined,
-		};
-	}
-
 	if (data.parentFolderId) {
 		const circularParentsRes = await MediaFolders.checkCircularParents({
 			folderId: data.id,
 			parentFolderId: data.parentFolderId,
-			tenantKey: context.request.tenantKey,
 		});
 		if (circularParentsRes.error) return circularParentsRes;
 

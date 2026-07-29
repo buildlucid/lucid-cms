@@ -105,7 +105,6 @@ const verifyApiKey: ServiceFn<
 	if (integrationRes.data.user_id !== null) {
 		const authority = await resolveUserAuthority(context, {
 			userId: integrationRes.data.user_id,
-			tenantKey: integrationRes.data.tenant_key,
 			scopes,
 		});
 		if (authority.error) return authority;
@@ -119,7 +118,6 @@ const verifyApiKey: ServiceFn<
 				},
 				principal: authority.data.principal,
 				scopes: authority.data.scopes,
-				tenantKey: authority.data.tenantKey,
 			},
 		};
 	}
@@ -135,7 +133,6 @@ const verifyApiKey: ServiceFn<
 				type: "system",
 			},
 			scopes,
-			tenantKey: integrationRes.data.tenant_key,
 		},
 	};
 };

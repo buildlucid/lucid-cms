@@ -197,22 +197,6 @@ export interface LucidLocales {
 	is_deleted_at: TimestampMutateable;
 }
 
-export interface LucidTenants {
-	key: string;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
-	is_deleted_at: TimestampMutateable;
-}
-
-export interface LucidUserTenants {
-	id: Generated<number>;
-	user_id: number;
-	tenant_key: string;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
 export interface LucidOptions {
 	name: OptionsName;
 	value_int: number | null;
@@ -245,14 +229,6 @@ export interface LucidQueueJobs {
 	updated_at: TimestampMutateable;
 }
 
-export interface LucidQueueJobTenants {
-	id: Generated<number>;
-	queue_job_id: number;
-	tenant_key: string;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
 export type AiGenerationStatus = "failed" | "pending" | "success";
 
 export interface LucidAiGenerations {
@@ -261,7 +237,6 @@ export interface LucidAiGenerations {
 	provider_request_id: string | null;
 	feature_key: string;
 	feature_version: string;
-	tenant_key: string | null;
 	user_id: number | null;
 	lucid_remote_connection_id: number | null;
 	target_type: string;
@@ -335,7 +310,6 @@ export interface LucidRoles {
 	id: Generated<number>;
 	key: string | null;
 	locked: BooleanInt;
-	tenant_key: string | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutateable;
 }
@@ -466,14 +440,6 @@ export interface LucidEmails {
 	updated_at: TimestampMutateable;
 }
 
-export interface LucidEmailTenants {
-	id: Generated<number>;
-	email_id: number;
-	tenant_key: string;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
 export interface LucidEmailAttachments {
 	id: Generated<number>;
 	email_id: number;
@@ -567,7 +533,6 @@ export type DocumentPublishOperationEventType =
 export interface LucidDocumentPublishOperations {
 	id: Generated<number>;
 	collection_key: string;
-	tenant_key: string | null;
 	document_id: number;
 	target: string;
 	operation_type: DocumentPublishOperationType;
@@ -648,7 +613,6 @@ export interface LucidDocumentWorkflowAssignees {
 export interface LucidMediaFolders {
 	id: Generated<number>;
 	title: string;
-	tenant_key: string | null;
 	parent_folder_id: number | null;
 	created_by: number | null;
 	updated_by: number | null;
@@ -688,7 +652,6 @@ export interface LucidMedia {
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
 	custom_meta: string | null;
-	tenant_key: string | null;
 	is_hidden: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted_at: TimestampMutateable;
@@ -733,8 +696,6 @@ export type LucidRemoteConnectionState =
 
 export interface LucidRemoteConnections {
 	id: Generated<number>;
-	scope_key: string;
-	tenant_key: string | null;
 	status: LucidRemoteConnectionState;
 	registration_encrypted: string | null;
 	grant_encrypted: string | null;
@@ -824,7 +785,6 @@ export interface LucidIntegrations {
 	description: string | null;
 	enabled: BooleanInt;
 	user_id: number | null;
-	tenant_key: string | null;
 	expires_at: TimestampMutateable;
 	key: string;
 	api_key: string;
@@ -895,7 +855,6 @@ export interface LucidOAuthGrants {
 	client_uri: string | null;
 	principal_type: OAuthPrincipalType;
 	user_id: number | null;
-	tenant_key: string | null;
 	created_by: number | null;
 	revoked_at: TimestampMutateable;
 	last_used_at: TimestampMutateable;
@@ -943,7 +902,6 @@ export interface LucidDocumentTable {
 	id: Generated<number>;
 	collection_key: string;
 	collection_migration_id: number;
-	tenant_key: string | null;
 	order: string | null;
 	is_deleted: BooleanInt;
 	is_deleted_at: TimestampMutateable;
@@ -1019,8 +977,6 @@ export interface LucidAuthStates {
 // Database
 export interface LucidDB {
 	lucid_locales: LucidLocales;
-	lucid_tenants: LucidTenants;
-	lucid_user_tenants: LucidUserTenants;
 	lucid_options: LucidOptions;
 	lucid_users: LucidUsers;
 	lucid_roles: LucidRoles;
@@ -1033,7 +989,6 @@ export interface LucidDB {
 	lucid_user_auth_providers: LucidUserAuthProviders;
 	lucid_security_audit_logs: LucidSecurityAuditLogs;
 	lucid_emails: LucidEmails;
-	lucid_email_tenants: LucidEmailTenants;
 	lucid_email_attachments: LucidEmailAttachments;
 	lucid_email_transactions: LucidEmailTransactions;
 	lucid_alerts: LucidAlerts;
@@ -1064,7 +1019,6 @@ export interface LucidDB {
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
 	lucid_queue_jobs: LucidQueueJobs;
-	lucid_queue_job_tenants: LucidQueueJobTenants;
 	lucid_ai_generations: LucidAiGenerations;
 	lucid_auth_states: LucidAuthStates;
 	[key: LucidDocumentTableName]: LucidDocumentTable;

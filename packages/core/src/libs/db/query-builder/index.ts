@@ -7,7 +7,6 @@ import type { LucidDB } from "../types.js";
 import deleteQueryBuilder from "./delete-query-builder.js";
 import queryBuilder from "./query-builder.js";
 import selectQueryBuilder from "./select-query-builder.js";
-import applyTenantScope from "./tenant-scope.js";
 import updateQueryBuilder from "./update-query-builder.js";
 
 export type QueryBuilderWhere<Table extends keyof LucidDB> = Array<{
@@ -23,5 +22,4 @@ export default {
 	delete: deleteQueryBuilder,
 	select: selectQueryBuilder,
 	update: updateQueryBuilder,
-	tenantScope: applyTenantScope,
 };

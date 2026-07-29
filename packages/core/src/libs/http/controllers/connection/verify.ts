@@ -41,7 +41,7 @@ const verifyController = factory.createHandlers(
 				name: copy("server:core.connection.error.name"),
 				message: copy("server:core.connection.failed"),
 			},
-		})(context, { tenantKey: context.request.tenantKey });
+		})(context, {});
 		if (result.error) throw new LucidAPIError(result.error);
 
 		c.header("Cache-Control", "private, no-store");

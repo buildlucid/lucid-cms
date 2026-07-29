@@ -1,5 +1,4 @@
 export { default as buildDownloadContentDisposition } from "./build-download-content-disposition.js";
-export { default as changeKeyTenant } from "./change-key-tenant.js";
 export { default as changeKeyVisibility } from "./change-key-visibility.js";
 export { default as chooseAcceptHeaderFormat } from "./choose-accept-header-format.js";
 export { default as createMediaUrl } from "./create-media-url.js";
@@ -17,11 +16,8 @@ export { default as isProcessedImageKey } from "./is-processed-image-key.js";
 export {
 	getMediaKeyParts,
 	getMediaKeyRootIndex,
-	getMediaKeyTenantKey,
 	getMediaKeyVisibilityIndex,
 	isGeneratedMediaIdSegment,
-	resolveMediaKeyTenant,
-	resolveMediaTenant,
-} from "./media-key-tenant.js";
+} from "./media-key-parts.js";
 export { default as normalizeMediaKey } from "./normalize-media-key.js";
 export { default as resolveProcessingRequest } from "./resolve-processing-request.js";

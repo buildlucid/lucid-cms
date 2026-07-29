@@ -4,7 +4,6 @@ import { settingsFormatter } from "../../libs/formatters/index.js";
 import getImageProcessor from "../../libs/image-processor/get-adapter.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
-import { multiTenancyEnabled } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
 	mediaServices,
@@ -22,7 +21,6 @@ const getSettings: ServiceFn<
 	],
 	Settings
 > = async (context, data) => {
-	const tenantKey = context.request.tenantKey ?? null;
 	const [optionsRes, processedImageCountRes, imageProcessor, mediaStorageUsed] =
 		await Promise.all([
 			optionServices.getMultiple(context, {
@@ -30,10 +28,7 @@ const getSettings: ServiceFn<
 			}),
 			processedImageServices.getCount(context),
 			getImageProcessor(context.config),
-			mediaServices.getStorageUsage(context, {
-				tenantKey,
-				includeAllBuckets: !multiTenancyEnabled(context.config),
-			}),
+			mediaServices.getStorageUsage(context),
 		]);
 	if (processedImageCountRes.error) return processedImageCountRes;
 	if (optionsRes.error) return optionsRes;

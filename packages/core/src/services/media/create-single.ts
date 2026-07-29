@@ -17,11 +17,9 @@ import type {
 import type { Media } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
-import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
-import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compatibility.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
@@ -87,20 +85,6 @@ const createSingle: ServiceFn<
 	});
 	if (folderAccessRes.error) return folderAccessRes;
 
-	const mediaTenantKey = context.request.tenantKey ?? null;
-
-	const folderTenantRes = checkFolderTenantCompatibility({
-		folderId: data.folderId,
-		folderTenantKey: folderAccessRes.data?.tenant_key ?? null,
-		mediaTenantKey,
-	});
-	if (folderTenantRes.error) return folderTenantRes;
-
-	const keyAccessRes = await mediaServices.checks.checkMediaKeyAccess(context, {
-		key: data.key,
-	});
-	if (keyAccessRes.error) return keyAccessRes;
-
 	const awaitingSyncRes = await mediaServices.checks.checkAwaitingSync(
 		context,
 		{
@@ -122,7 +106,6 @@ const createSingle: ServiceFn<
 			key: mediaKey,
 			size: syncMediaRes.data.size,
 			processedSize: 0,
-			tenantKey: mediaTenantKey,
 		});
 		return {
 			error: {
@@ -143,7 +126,6 @@ const createSingle: ServiceFn<
 			key: mediaKey,
 			size: syncMediaRes.data.size,
 			processedSize: 0,
-			tenantKey: mediaTenantKey,
 		});
 		return {
 			error: {
@@ -219,7 +201,6 @@ const createSingle: ServiceFn<
 				is_light: isImage ? (data.isLight ?? null) : null,
 				folder_id: data.folderId ?? null,
 				is_hidden: data.isHidden ?? false,
-				tenant_key: mediaTenantKey,
 				created_by: data.userId,
 				updated_by: data.userId,
 				updated_at: new Date().toISOString(),
@@ -248,7 +229,6 @@ const createSingle: ServiceFn<
 		if (context.media) {
 			await context.media.delete(context, {
 				key: mediaKey,
-				tenant: resolveMediaKeyTenant(context.config, mediaKey),
 			});
 		}
 		return {
@@ -286,7 +266,6 @@ const createSingle: ServiceFn<
 				type: syncMediaRes.data.type,
 				origin: data.origin,
 				public: isPublic,
-				tenant_key: mediaTenantKey,
 				relation_type: null,
 			},
 			crop: data.crop,
@@ -324,7 +303,6 @@ const createSingle: ServiceFn<
 			if (context.media) {
 				await context.media.delete(context, {
 					key: mediaKey,
-					tenant: resolveMediaKeyTenant(context.config, mediaKey),
 				});
 			}
 			return mediaTranslationsRes;
@@ -335,7 +313,6 @@ const createSingle: ServiceFn<
 
 	const mediaFetchRes = await Media.selectSingleById({
 		id: mediaRes.data.id,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -359,9 +336,7 @@ const createSingle: ServiceFn<
 			config: context.config,
 		},
 		{
-			meta: {
-				tenantKey: context.request.tenantKey ?? null,
-			},
+			meta: {},
 			data: {
 				id: mediaFetchRes.data.id,
 				userId: data.userId,

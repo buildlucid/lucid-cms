@@ -18,7 +18,6 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("cascade"),
 				)
-				.addColumn("tenant_key", adapter.getDataType("text"))
 				.addColumn("expires_at", adapter.getDataType("timestamp"))
 				.addColumn("key", adapter.getDataType("text"), (col) =>
 					col.notNull().unique(),
@@ -54,12 +53,6 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_integrations_key")
 				.on("lucid_integrations")
 				.column("key")
-				.execute();
-
-			await db.schema
-				.createIndex("idx_lucid_integrations_tenant_key")
-				.on("lucid_integrations")
-				.column("tenant_key")
 				.execute();
 
 			await db.schema
@@ -307,7 +300,6 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("cascade"),
 				)
-				.addColumn("tenant_key", adapter.getDataType("text"))
 				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
@@ -347,12 +339,6 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_oauth_grants_user_id")
 				.on("lucid_oauth_grants")
 				.column("user_id")
-				.execute();
-
-			await db.schema
-				.createIndex("idx_lucid_oauth_grants_tenant_key")
-				.on("lucid_oauth_grants")
-				.column("tenant_key")
 				.execute();
 
 			await db.schema

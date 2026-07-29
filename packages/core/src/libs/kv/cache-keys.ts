@@ -1,8 +1,5 @@
 const HTTP_STATIC_PREFIX = "http:static:";
 
-const authTenantCacheSegment = (tenantKey?: string | null) =>
-	tenantKey == null ? "no-tenant" : `tenant:${encodeURIComponent(tenantKey)}`;
-
 const cacheKeys = {
 	/**
 	 * Generate cache keys for collection schema + migration metadata.
@@ -23,12 +20,8 @@ const cacheKeys = {
 	 * Generate cache keys for authentication
 	 */
 	auth: {
-		user: (
-			userId: string | number,
-			namespaceToken: string,
-			tenantKey?: string | null,
-		) =>
-			`auth:user:${namespaceToken}:${userId}:${authTenantCacheSegment(tenantKey)}`,
+		user: (userId: string | number, namespaceToken: string) =>
+			`auth:user:${namespaceToken}:${userId}`,
 		/**
 		 * Cache key for refresh token existence
 		 */
@@ -54,8 +47,8 @@ const cacheKeys = {
 		},
 		static: {
 			contentLocales: `${HTTP_STATIC_PREFIX}content-locales`,
-			contentMediaSingle: (id: string | number, tenantKey?: string | null) =>
-				`${HTTP_STATIC_PREFIX}content-media:${tenantKey ?? "global"}:${id}` as `${typeof HTTP_STATIC_PREFIX}content-media:${string}`,
+			contentMediaSingle: (id: string | number) =>
+				`${HTTP_STATIC_PREFIX}content-media:${id}` as `${typeof HTTP_STATIC_PREFIX}content-media:${string}`,
 		},
 	},
 } as const;

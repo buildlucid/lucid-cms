@@ -1,5 +1,4 @@
 import type { Collection } from "../../types/response.js";
-import { tenantAccessAllowed } from "../../utils/helpers/index.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type CustomField from "../collection/custom-fields/custom-field.js";
@@ -17,7 +16,6 @@ import {
 const formatMultiple = (props: {
 	collections: CollectionBuilder[];
 	allCollections: CollectionBuilder[];
-	tenantKey?: string | null;
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
 	include?: {
@@ -32,14 +30,12 @@ const formatMultiple = (props: {
 }) => {
 	const documentTargetCollectionKeys = getDocumentTargetCollectionKeys({
 		collections: props.allCollections,
-		tenantKey: props.tenantKey,
 	});
 
 	return props.collections.map((c) =>
 		formatSingle({
 			collection: c,
 			documentTargetCollectionKeys,
-			tenantKey: props.tenantKey,
 			queueSupportsScheduling: props.queueSupportsScheduling,
 			adminTranslations: props.adminTranslations,
 			include: props.include,
@@ -52,7 +48,6 @@ const formatSingle = (props: {
 	collection: CollectionBuilder;
 	allCollections?: CollectionBuilder[];
 	documentTargetCollectionKeys?: Set<string>;
-	tenantKey?: string | null;
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
 	migrationStatus?: MigrationStatus;
@@ -73,13 +68,11 @@ const formatSingle = (props: {
 		props.documentTargetCollectionKeys ??
 		getDocumentTargetCollectionKeys({
 			collections: props.allCollections ?? [props.collection],
-			tenantKey: props.tenantKey,
 		});
 
 	const formattedCollection: Collection = {
 		key: key,
 		mode: collectionData.mode,
-		tenants: collectionData.tenants,
 		group: collectionData.group,
 		documentId: props.include?.documentId
 			? getDocumentId(key, props.documents)
@@ -125,28 +118,20 @@ const formatSingle = (props: {
 		permissions: resolvedPermissions,
 		migrationStatus: props.migrationStatus ?? null,
 		fixedBricks: props.include?.bricks
-			? (props.collection.config.bricks?.fixed
-					?.filter((brick) =>
-						tenantAccessAllowed(brick.config.tenants, props.tenantKey),
-					)
-					.map((brick) =>
-						formatBrick({
-							brick,
-							documentTargetCollectionKeys,
-						}),
-					) ?? [])
+			? (props.collection.config.bricks?.fixed?.map((brick) =>
+					formatBrick({
+						brick,
+						documentTargetCollectionKeys,
+					}),
+				) ?? [])
 			: [],
 		builderBricks: props.include?.bricks
-			? (props.collection.config.bricks?.builder
-					?.filter((brick) =>
-						tenantAccessAllowed(brick.config.tenants, props.tenantKey),
-					)
-					.map((brick) =>
-						formatBrick({
-							brick,
-							documentTargetCollectionKeys,
-						}),
-					) ?? [])
+			? (props.collection.config.bricks?.builder?.map((brick) =>
+					formatBrick({
+						brick,
+						documentTargetCollectionKeys,
+					}),
+				) ?? [])
 			: [],
 		fields: props.include?.fields
 			? formatFields(
@@ -238,16 +223,7 @@ const formatField = (
 
 const getDocumentTargetCollectionKeys = (props: {
 	collections: CollectionBuilder[];
-	tenantKey?: string | null;
-}) => {
-	return new Set(
-		props.collections
-			.filter((collection) =>
-				tenantAccessAllowed(collection.getData.tenants, props.tenantKey),
-			)
-			.map((collection) => collection.key),
-	);
-};
+}) => new Set(props.collections.map((collection) => collection.key));
 
 const getFieldAiConfig = (
 	field: CFConfig<FieldTypes>,

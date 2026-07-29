@@ -25,7 +25,6 @@ const createSingle: ServiceFn<
 	const newMediaFolderRes = await MediaFolders.createSingle({
 		data: {
 			title: data.title,
-			tenant_key: context.request.tenantKey ?? null,
 			parent_folder_id: data.parentFolderId ?? null,
 			created_by: data.userId,
 		},

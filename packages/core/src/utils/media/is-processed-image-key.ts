@@ -1,4 +1,4 @@
-import { getMediaKeyParts } from "./media-key-tenant.js";
+import { getMediaKeyParts } from "./media-key-parts.js";
 import normalizeMediaKey from "./normalize-media-key.js";
 
 /**

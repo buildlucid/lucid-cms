@@ -45,10 +45,7 @@ const getSingleController = factory.createHandlers(
 			const id = c.req.param("id");
 			if (!id) return null;
 
-			return cacheKeys.http.static.contentMediaSingle(
-				id,
-				c.get("tenant")?.key ?? null,
-			);
+			return cacheKeys.http.static.contentMediaSingle(id);
 		},
 	}),
 	async (c) => {

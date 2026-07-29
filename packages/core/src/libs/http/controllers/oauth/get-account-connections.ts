@@ -21,7 +21,7 @@ const getAccountConnectionsController = factory.createHandlers(
 			schema: z.toJSONSchema(z.array(oauthConnectionResponseSchema)),
 		}),
 	}),
-	authenticate({ tenantScope: "allow-global" }),
+	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);
 		const result = await serviceWrapper(oauthServices.getConnections, {

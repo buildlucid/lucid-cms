@@ -13,7 +13,6 @@ interface Params {
 		value: string | null;
 	}[];
 	permissions: string[];
-	tenantKey?: string | null;
 }
 
 export const createSingleReq = (params: Params) => {

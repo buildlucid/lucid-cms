@@ -1,4 +1,4 @@
-import { copy, resolveMediaKeyTenant } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { MediaAdapterStreamBody, ServiceFn } from "@lucidcms/core/types";
 import { STORAGE_DOWNLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";
@@ -60,7 +60,6 @@ const storageDownload =
 		const streamMedia = stream(pluginOptions);
 		const streamRes = await streamMedia(context, {
 			key: data.key,
-			tenant: resolveMediaKeyTenant(context.config, data.key),
 		});
 		if (streamRes.error) {
 			return streamRes;

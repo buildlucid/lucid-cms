@@ -1,4 +1,3 @@
-import { sql } from "kysely";
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import type {
@@ -11,8 +10,6 @@ import StaticRepository from "./parents/static-repository.js";
 
 const connectionColumns = [
 	"id",
-	"scope_key",
-	"tenant_key",
 	"status",
 	"registration_encrypted",
 	"grant_encrypted",
@@ -36,11 +33,8 @@ export default class LucidRemoteConnectionsRepository extends StaticRepository<"
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
 		super(db, dbAdapter, "lucid_remote_connections");
 	}
-
 	tableSchema = z.object({
 		id: z.number(),
-		scope_key: z.string(),
-		tenant_key: z.string().nullable(),
 		status: z.enum(["connected", "disconnected", "revoked"]),
 		registration_encrypted: z.string().nullable(),
 		grant_encrypted: z.string().nullable(),
@@ -54,11 +48,8 @@ export default class LucidRemoteConnectionsRepository extends StaticRepository<"
 		created_at: z.union([z.string(), z.date()]),
 		updated_at: z.union([z.string(), z.date()]),
 	});
-
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
-		scope_key: this.dbAdapter.getDataType("text"),
-		tenant_key: this.dbAdapter.getDataType("text"),
 		status: this.dbAdapter.getDataType("text"),
 		registration_encrypted: this.dbAdapter.getDataType("text"),
 		grant_encrypted: this.dbAdapter.getDataType("text"),
@@ -72,41 +63,23 @@ export default class LucidRemoteConnectionsRepository extends StaticRepository<"
 		created_at: this.dbAdapter.getDataType("timestamp"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
 	};
-
 	queryConfig = undefined;
 
-	/**
-	 * Resolves the row visible to a request using tenant override then global
-	 * fallback semantics. Unscoped requests can resolve any connection.
-	 */
-	async selectEffective(tenantKey: string | null) {
+	/** Resolves the active connection row. */
+	async selectEffective() {
 		const exec = await this.executeQuery(
-			async () => {
-				let query = this.db
+			() =>
+				this.db
 					.selectFrom("lucid_remote_connections")
-					.select(connectionColumns);
-
-				if (tenantKey) {
-					query = query
-						.where((eb) =>
-							eb.or([
-								eb("tenant_key", "=", tenantKey),
-								eb("tenant_key", "is", null),
-							]),
-						)
-						.orderBy(
-							sql<number>`case when tenant_key = ${tenantKey} then 0 else 1 end`,
-						);
-				}
-
-				return query.orderBy("id", "asc").executeTakeFirst();
-			},
+					.select(connectionColumns)
+					.orderBy("id", "asc")
+					.executeTakeFirst(),
 			{ method: "selectEffective" },
 		);
 		return exec.response;
 	}
 
-	/** Finds a pending flow by its keyed state digest without tenant input. */
+	/** Finds a pending flow by its keyed state digest. */
 	async selectByPendingStateHash(pendingStateHash: string) {
 		return this.selectSingle({
 			select: [...connectionColumns],
@@ -120,22 +93,18 @@ export default class LucidRemoteConnectionsRepository extends StaticRepository<"
 		});
 	}
 
-	/**
-	 * Creates a scope row if absent, then returns the canonical row. The unique
-	 * scope key makes this safe across concurrent connect requests.
-	 */
-	async ensureScope(props: { scopeKey: string; tenantKey: string | null }) {
+	/** Creates the singleton connection row if absent. */
+	async getOrCreate() {
 		const exec = await this.executeQuery(
 			async () => {
 				const inserted = await this.db
 					.insertInto("lucid_remote_connections")
 					.values({
-						scope_key: props.scopeKey,
-						tenant_key: props.tenantKey,
+						id: 1,
 						status: "disconnected",
 						display: null,
 					})
-					.onConflict((conflict) => conflict.column("scope_key").doNothing())
+					.onConflict((conflict) => conflict.column("id").doNothing())
 					.returning(connectionColumns)
 					.executeTakeFirst();
 				if (inserted) return inserted;
@@ -143,10 +112,10 @@ export default class LucidRemoteConnectionsRepository extends StaticRepository<"
 				return this.db
 					.selectFrom("lucid_remote_connections")
 					.select(connectionColumns)
-					.where("scope_key", "=", props.scopeKey)
+					.where("id", "=", 1)
 					.executeTakeFirst();
 			},
-			{ method: "ensureScope" },
+			{ method: "getOrCreate" },
 		);
 		return exec.response;
 	}
@@ -189,14 +158,6 @@ export default class LucidRemoteConnectionsRepository extends StaticRepository<"
 			data,
 			where: [{ key: "id", operator: "=", value: id }],
 			returning: ["id"],
-		});
-	}
-
-	/** Returns every row once for cron target resolution and deduplication. */
-	selectAll() {
-		return this.selectMultiple({
-			select: [...connectionColumns],
-			orderBy: [{ column: "id", direction: "asc" }],
 		});
 	}
 }

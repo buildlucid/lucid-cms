@@ -28,9 +28,7 @@ const updateSingle: ServiceFn<
 > = async (context, data) => {
 	const scopes = data.scopes ? [...new Set(data.scopes)] : undefined;
 	if (scopes !== undefined) {
-		const invalidScopes = getInvalidExternalScopes(context.config, scopes, {
-			tenantKey: context.request.tenantKey,
-		});
+		const invalidScopes = getInvalidExternalScopes(context.config, scopes);
 		if (invalidScopes.length > 0) {
 			return {
 				error: {
@@ -64,7 +62,6 @@ const updateSingle: ServiceFn<
 	if (scopes !== undefined && data.userId !== null) {
 		const authority = await resolveUserAuthority(context, {
 			userId: data.userId,
-			tenantKey: checkExistsRes.data.tenant_key,
 			scopes: scopes as ExternalScope[],
 		});
 		if (authority.error) return authority;

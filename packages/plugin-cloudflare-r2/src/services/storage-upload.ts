@@ -1,4 +1,4 @@
-import { copy, resolveMediaKeyTenant } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core/plugin";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { DEFAULT_MAX_UPLOAD_SIZE, STORAGE_UPLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";
@@ -100,7 +100,6 @@ const storageUpload =
 		);
 		let uploadError: unknown;
 		let streamError: unknown;
-		const tenant = resolveMediaKeyTenant(context.config, data.key);
 
 		try {
 			await Promise.all([
@@ -111,7 +110,6 @@ const storageUpload =
 					extension: data.extension ?? "",
 					size: data.contentLength,
 					type: "unknown",
-					tenant,
 				}),
 				fixedLengthBody.completed.catch((error) => {
 					streamError = error;

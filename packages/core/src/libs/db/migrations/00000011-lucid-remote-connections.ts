@@ -10,12 +10,6 @@ const Migration00000011: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("scope_key", adapter.getDataType("text"), (col) =>
-					col.notNull().unique(),
-				)
-				.addColumn("tenant_key", adapter.getDataType("text"), (col) =>
-					col.references("lucid_tenants.key").onDelete("set null"),
-				)
 				.addColumn("status", adapter.getDataType("text"), (col) =>
 					col.notNull().defaultTo("disconnected"),
 				)
@@ -70,12 +64,6 @@ const Migration00000011: MigrationFn = (adapter: DatabaseAdapter) => {
 							)
 						)`,
 				)
-				.execute();
-
-			await db.schema
-				.createIndex("idx_lucid_remote_connections_tenant")
-				.on("lucid_remote_connections")
-				.columns(["tenant_key", "id"])
 				.execute();
 
 			await db.schema

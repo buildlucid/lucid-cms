@@ -7,11 +7,7 @@ import constants from "../../../../constants/constants.js";
 import { controllerSchemas } from "../../../../schemas/cdn.js";
 import { cdnServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import { getTenantConfig } from "../../../../utils/helpers/index.js";
-import {
-	getMediaKeyTenantKey,
-	normalizeMediaKey,
-} from "../../../../utils/media/index.js";
+import { normalizeMediaKey } from "../../../../utils/media/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import authorizePrivateMedia from "../../middleware/authorize-private-media.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
@@ -147,13 +143,6 @@ const streamSingleController = factory.createHandlers(
 		const query = c.req.valid("query");
 
 		const normalizedKey = normalizeMediaKey(params.key);
-		const tenantKey = getMediaKeyTenantKey(normalizedKey);
-
-		const tenant = tenantKey
-			? getTenantConfig(c.get("config"), tenantKey)
-			: undefined;
-
-		c.set("tenant", tenant ? { key: tenant.key } : null);
 
 		const context = createServiceContext(c);
 

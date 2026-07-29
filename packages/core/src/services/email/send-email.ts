@@ -14,18 +14,15 @@ import type {
 	EmailSubject,
 } from "../../libs/email/types.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
-import { copy } from "../../libs/i18n/index.js";
 import {
 	EmailAttachmentsRepository,
 	EmailsRepository,
-	EmailTenantsRepository,
 	EmailTransactionsRepository,
 } from "../../libs/repositories/index.js";
 import type { Email } from "../../types/response.js";
 import {
 	getBaseUrl,
 	getEmailFrom,
-	getTenantConfig,
 	resolveEmailBrandName,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -46,8 +43,6 @@ const sendEmail: ServiceFn<
 			attachments?: EmailAttachment[];
 			data: Record<string, unknown>;
 			storage?: EmailStorageConfig;
-			tenantKey?: string | null;
-			tenantKeys?: string[];
 			isSystem?: boolean;
 			from?: {
 				email?: string;
@@ -69,24 +64,14 @@ const sendEmail: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const EmailTenants = new EmailTenantsRepository(
-		context.db.client,
-		context.config.db,
-	);
 
 	const baseUrl = getBaseUrl(context);
 	const emailFrom = getEmailFrom(context.config, baseUrl);
 	const fromAddress = data.from?.email ?? emailFrom.email;
 	const fromName = data.from?.name ?? emailFrom.name;
 	const toAddress = Array.isArray(data.to) ? data.to.join(",") : data.to;
-	const tenantKey =
-		data.tenantKey === undefined
-			? (context.request.tenantKey ?? null)
-			: data.tenantKey;
 	const brandName = resolveEmailBrandName({
 		config: context.config,
-		translate: context.translate,
-		tenantKey,
 	});
 	const emailData = mergeEmailContextData({
 		data: data.data,
@@ -100,26 +85,6 @@ const sendEmail: ServiceFn<
 	});
 	const subject =
 		typeof data.subject === "function" ? data.subject(emailData) : data.subject;
-
-	const tenantKeys = Array.from(
-		new Set(data.tenantKeys ?? (tenantKey ? [tenantKey] : [])),
-	);
-
-	const unknownTenant = tenantKeys.find(
-		(key) => getTenantConfig(context.config, key) === undefined,
-	);
-	if (unknownTenant !== undefined) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.tenants.unknown", {
-					data: { key: unknownTenant },
-				}),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
 
 	const attachmentsRes = normalizeEmailAttachments(data.attachments);
 	if (attachmentsRes.error) return attachmentsRes;
@@ -163,16 +128,6 @@ const sendEmail: ServiceFn<
 	});
 	if (newEmailRes.error) return newEmailRes;
 
-	if (tenantKeys.length > 0) {
-		const createTenantsRes = await EmailTenants.createMultiple({
-			data: tenantKeys.map((tenantKey) => ({
-				email_id: newEmailRes.data.id,
-				tenant_key: tenantKey,
-			})),
-		});
-		if (createTenantsRes.error) return createTenantsRes;
-	}
-
 	if (attachmentsRes.data.length > 0) {
 		const attachmentsCreateRes = await EmailAttachments.createMultiple({
 			data: attachmentsRes.data.map((attachment, index) => ({
@@ -215,9 +170,6 @@ const sendEmail: ServiceFn<
 		payload: {
 			emailId: newEmailRes.data.id,
 			transactionId: initialTransactionRes.data?.id ?? 0,
-		},
-		options: {
-			tenantKeys,
 		},
 	});
 	if (queueRes.error) {

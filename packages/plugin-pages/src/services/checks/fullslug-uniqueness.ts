@@ -17,7 +17,6 @@ import type {
 	RouteUniquenessItem,
 	RouteUniqueValues,
 } from "../../types/types.js";
-import applyTenantScope from "../../utils/apply-tenant-scope.js";
 import getDuplicateRouteMessage from "../../utils/duplicate-route-message.js";
 import normalizePathValue from "../../utils/normalize-path-value.js";
 import {
@@ -220,7 +219,6 @@ const getExistingRouteItems = async (
 		uniqueFields: UniqueField[];
 		versionType: Exclude<DocumentVersionType, "revision">;
 		collectionKey: string;
-		tenantKey: string | null;
 		tables: CollectionTableNames;
 		excludeDocumentIds: number[];
 		defaultLocale: string;
@@ -321,10 +319,7 @@ const getExistingRouteItems = async (
 			? query.where(`${documentTable}.id`, "not in", data.excludeDocumentIds)
 			: query;
 
-	const rows = (await applyTenantScope(filteredQuery, {
-		tenantKey: data.tenantKey,
-		column: `${documentTable}.tenant_key`,
-	}).execute()) as Array<
+	const rows = (await filteredQuery.execute()) as Array<
 		UniqueFieldQueryRow & {
 			_fullSlug: string | null;
 		}
@@ -367,7 +362,6 @@ const checkFullSlugUniqueness: ServiceFn<
 			projectedFullSlugs: ProjectedFullSlug[];
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
-			tenantKey: string | null;
 			tables: CollectionTableNames;
 			excludeDocumentIds?: number[];
 			inputFields?: {
@@ -462,7 +456,6 @@ const checkFullSlugUniqueness: ServiceFn<
 			uniqueFields: uniqueFieldsRes.data,
 			versionType: data.versionType,
 			collectionKey: data.collectionKey,
-			tenantKey: data.tenantKey,
 			tables: data.tables,
 			excludeDocumentIds: data.excludeDocumentIds ?? [],
 			defaultLocale: context.config.localization.defaultLocale,

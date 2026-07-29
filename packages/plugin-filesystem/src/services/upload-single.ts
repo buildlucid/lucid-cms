@@ -1,8 +1,4 @@
-import {
-	copy,
-	getFileMetadata,
-	resolveMediaKeyTenant,
-} from "@lucidcms/core/plugin";
+import { copy, getFileMetadata } from "@lucidcms/core/plugin";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { FILE_SYSTEM_UPLOAD_PATH } from "../constants.js";
 import {
@@ -65,7 +61,6 @@ const uploadSingle: ServiceFn<
 		extension: fileMetadataRes.data.extension,
 		size: data.buffer.length,
 		type: fileMetadataRes.data.type,
-		tenant: resolveMediaKeyTenant(context.config, data.key),
 	});
 	if (uploadRes.error) return uploadRes;
 

@@ -114,14 +114,9 @@ const upsertSingle: ServiceFn<
 		data.documentId === undefined &&
 		collectionRes.data.getData.orderable === true
 	) {
-		const highestOrderRes = await Document.selectHighestOrderKey(
-			{
-				tenantKey: context.request.tenantKey,
-			},
-			{
-				tableName: tableNamesRes.data.document,
-			},
-		);
+		const highestOrderRes = await Document.selectHighestOrderKey({
+			tableName: tableNamesRes.data.document,
+		});
 		if (highestOrderRes.error) return highestOrderRes;
 
 		const highestOrder = highestOrderRes.data?.order ?? null;
@@ -139,8 +134,6 @@ const upsertSingle: ServiceFn<
 				id: data.documentId,
 				collection_key: data.collectionKey,
 				collection_migration_id: migrationIdRes.data,
-				//* only applied on insert - the conflict update does not touch tenant_key, so existing documents are never re-stamped
-				tenant_key: context.request.tenantKey ?? null,
 				//* only applied on insert; reorders use documentServices.updateOrder
 				order: order ?? null,
 				created_by: data.userId,

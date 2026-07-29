@@ -32,7 +32,6 @@ const getSystemConnectionsController = factory.createHandlers(
 			defaultError: { type: "basic" },
 		})(context, {
 			principalType: "system",
-			tenantKey: c.get("tenant")?.key,
 		});
 		if (result.error) throw new LucidAPIError(result.error);
 

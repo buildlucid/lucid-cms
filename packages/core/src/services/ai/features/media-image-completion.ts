@@ -51,7 +51,6 @@ const mediaImageCompletion: ServiceFn<
 	const storedGenerationRes = await AiGenerations.selectSingleByRequestId({
 		requestId: props.requestId,
 		select: ["id"],
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {

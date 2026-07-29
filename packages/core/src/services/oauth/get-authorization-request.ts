@@ -46,9 +46,7 @@ const getAuthorizationRequest: ServiceFn<
 		.split(" ")
 		.filter(Boolean) as ExternalScope[];
 	const userScopes = scopes.filter((scope) => {
-		const capability = getExternalCapability(context.config, scope, {
-			tenantKey: context.request.tenantKey,
-		});
+		const capability = getExternalCapability(context.config, scope);
 		if (!capability) return false;
 		if (capability.userPermission === null || input.actor.superAdmin)
 			return true;
@@ -57,9 +55,7 @@ const getAuthorizationRequest: ServiceFn<
 		);
 	});
 	const requestedScopes = new Set(scopes);
-	const scopeGroups = getExternalScopeGroups(context.config, {
-		tenantKey: context.request.tenantKey,
-	})
+	const scopeGroups = getExternalScopeGroups(context.config)
 		.map((group) => ({
 			...group,
 			scopes: group.scopes.filter((scope) => requestedScopes.has(scope.key)),

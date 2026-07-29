@@ -15,7 +15,6 @@ const deleteDocument: ServiceFn<
 			id: number;
 			collectionKey: string;
 			userId: number;
-			tenantKey?: string | null;
 		},
 	],
 	undefined
@@ -41,7 +40,7 @@ const deleteDocument: ServiceFn<
 
 	const getDocumentRes = await Documents.selectSingle(
 		{
-			select: ["id", "tenant_key"],
+			select: ["id"],
 			where: [
 				{
 					key: "id",
@@ -69,11 +68,6 @@ const deleteDocument: ServiceFn<
 	);
 	if (getDocumentRes.error) return getDocumentRes;
 
-	const tenantKey =
-		data.tenantKey !== undefined
-			? data.tenantKey
-			: getDocumentRes.data.tenant_key;
-
 	const hookBeforeRes = await executeHooks(
 		context,
 		{
@@ -88,7 +82,6 @@ const deleteDocument: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
-				tenantKey,
 				hardDelete: true,
 			},
 			data: {
@@ -145,7 +138,6 @@ const deleteDocument: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
-				tenantKey,
 				hardDelete: true,
 			},
 			data: {

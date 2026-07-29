@@ -1,5 +1,9 @@
 # @lucidcms/plugin-pages
 
+## v0.6.1 (unreleased)
+
+- Dropped `tenant` experiment support.
+
 ## v0.6.0
 
 - Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
@@ -28,7 +32,6 @@
 ## v0.4.0
 
 - Bumped core peer dependency version to `0.13.0-alpha.0`.
-- Added multi-tenants support.
 - Added translations support.
 
 ## v0.3.3

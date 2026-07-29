@@ -2,7 +2,7 @@ import { MediaRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Ensures share-link operations only run for media visible in the current tenant scope.
+ * Ensures share-link operations only run for existing media.
  */
 const assertMediaAccess: ServiceFn<
 	[
@@ -16,7 +16,6 @@ const assertMediaAccess: ServiceFn<
 
 	const mediaRes = await Media.selectSingleById({
 		id: props.mediaId,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

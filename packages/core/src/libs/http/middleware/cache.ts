@@ -27,7 +27,7 @@ type CacheOptions = {
 		| HttpStaticValues
 		| ((c: LucidHonoContext) => HttpStaticValues | null);
 	/**
-	 * Extra request context to include in the cache key, ie. the resolved tenant.
+	 * Extra request context to include in the cache key.
 	 * Return an empty object to leave the key unchanged. Not supported alongside staticKey.
 	 */
 	keyContext?: (c: LucidHonoContext) => Record<string, unknown>;

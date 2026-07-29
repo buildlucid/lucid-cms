@@ -1,6 +1,5 @@
 import { MediaRepository } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
-import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 
@@ -37,7 +36,6 @@ const requestDownload: ServiceFn<
 		secretKey: context.config.secrets.cookie,
 		fileName: mediaRes.data?.file_name,
 		extension: mediaRes.data?.file_extension,
-		tenant: resolveMediaKeyTenant(context.config, data.mediaKey),
 	});
 	if (downloadUrlRes.error) return downloadUrlRes;
 

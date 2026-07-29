@@ -107,7 +107,6 @@ export type {
 	ShareLinkAccess,
 	ShareLinkAccessGranted,
 	ShareLinkAccessProtected,
-	Tenant,
 	TranslatedDocumentField,
 	UploadSessionPart,
 	UploadSessionResponse,

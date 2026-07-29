@@ -29,9 +29,8 @@ const CollectionsDocumentsHistoryRoute: Component = () => {
 	// ----------------------------------
 	// Effects
 
-	//* Redirect out of the history view when the document/collection isn't
-	//* available for the active tenant (e.g. after switching tenant). Multiple
-	//* collections fall back to their document list, everything else to the dashboard.
+	//* Redirect out of the history view when the document/collection isn't available.
+	//* Multiple collections fall back to their document list, everything else to the dashboard.
 	createEffect(() => {
 		if (state.collectionAccessError()) {
 			navigate("/lucid", { replace: true });

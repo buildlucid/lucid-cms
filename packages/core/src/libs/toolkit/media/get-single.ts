@@ -4,10 +4,9 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import type { ToolkitTenantOptions } from "../types.js";
-import { runToolkitService, withToolkitTenant } from "../utils.js";
+import { runToolkitService } from "../utils.js";
 
-export type ToolkitMediaGetSingleInput = ToolkitTenantOptions & {
+export type ToolkitMediaGetSingleInput = {
 	id: number;
 };
 
@@ -17,7 +16,7 @@ const getSingle = async (
 ): ServiceResponse<Media> =>
 	runToolkitService(
 		() =>
-			mediaServices.content.getSingle(withToolkitTenant(context, input), {
+			mediaServices.content.getSingle(context, {
 				id: input.id,
 			}),
 		{

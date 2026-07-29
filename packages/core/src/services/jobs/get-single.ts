@@ -36,7 +36,6 @@ const getSingle: ServiceFn<
 			"updated_at",
 		],
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {

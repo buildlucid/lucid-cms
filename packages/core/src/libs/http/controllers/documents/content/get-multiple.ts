@@ -59,10 +59,8 @@ const getMultipleController = factory.createHandlers(
 			return tags;
 		},
 		keyContext: (c) => {
-			const tenantKey = c.get("tenant")?.key;
 			const auth = c.get("externalAuth");
 			return {
-				...(tenantKey ? { tenant: tenantKey } : {}),
 				principal:
 					auth.principal.type === "user"
 						? `user:${auth.principal.userId}`

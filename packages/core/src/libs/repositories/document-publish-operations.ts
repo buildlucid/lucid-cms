@@ -60,7 +60,6 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 	tableSchema = z.object({
 		id: z.number(),
 		collection_key: z.string(),
-		tenant_key: z.string().nullable(),
 		document_id: z.number(),
 		target: z.string(),
 		operation_type: z.enum(["request", "direct"]),
@@ -100,7 +99,6 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
 		collection_key: this.dbAdapter.getDataType("text"),
-		tenant_key: this.dbAdapter.getDataType("text"),
 		document_id: this.dbAdapter.getDataType("integer"),
 		target: this.dbAdapter.getDataType("text"),
 		operation_type: this.dbAdapter.getDataType("text"),
@@ -155,17 +153,11 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 			V,
 			{
 				where: QueryBuilderWhere<"lucid_document_publish_operations">;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
 		let baseQuery = this.db.selectFrom("lucid_document_publish_operations");
 		baseQuery = queryBuilder.select(baseQuery, props.where);
-		baseQuery = queryBuilder.tenantScope(baseQuery, {
-			tenantKey: props.tenantKey,
-			column: "lucid_document_publish_operations.tenant_key",
-		});
-
 		const query = baseQuery
 			.leftJoin(
 				"lucid_users as requester",
@@ -386,7 +378,6 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 				where?: QueryBuilderWhere<"lucid_document_publish_operations">;
 				queryParams: GetMultipleQueryParams;
 				currentUserId: number;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -401,15 +392,6 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 					baseQuery = queryBuilder.select(baseQuery, props.where);
 					countQuery = queryBuilder.select(countQuery, props.where);
 				}
-
-				baseQuery = queryBuilder.tenantScope(baseQuery, {
-					tenantKey: props.tenantKey,
-					column: "lucid_document_publish_operations.tenant_key",
-				});
-				countQuery = queryBuilder.tenantScope(countQuery, {
-					tenantKey: props.tenantKey,
-					column: "lucid_document_publish_operations.tenant_key",
-				});
 
 				const queryBuilderRes = queryBuilder.main(
 					{
@@ -718,7 +700,6 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 		collectionKeys: string[];
 		collectionKey?: string;
 		target?: string;
-		tenantKey?: string | null;
 	}) {
 		const getBaseQuery = () => {
 			let query = this.db
@@ -730,10 +711,6 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 				)
 				.where("lucid_document_publish_operations.status", "!=", "superseded");
 
-			query = queryBuilder.tenantScope(query, {
-				tenantKey: props.tenantKey,
-				column: "lucid_document_publish_operations.tenant_key",
-			});
 			query = query.where(
 				"lucid_document_publish_operations.collection_key",
 				"in",

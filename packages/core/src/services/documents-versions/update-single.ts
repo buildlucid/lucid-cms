@@ -54,7 +54,6 @@ const updateSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: updateContextRes.data.tableNames,
-				tenantKey: context.request.tenantKey ?? null,
 				execution: {
 					mode: "upsert",
 					action: "update",
@@ -125,7 +124,6 @@ const updateSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: updateContextRes.data.tableNames,
-				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				documentId: data.documentId,

@@ -18,7 +18,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			z.literal(this.dbAdapter.config.defaults.boolean.true),
 			z.literal(this.dbAdapter.config.defaults.boolean.false),
 		]),
-		tenant_key: z.string().nullable(),
 		permissions: z
 			.array(
 				z.object({
@@ -44,7 +43,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 		id: this.dbAdapter.getDataType("primary"),
 		key: this.dbAdapter.getDataType("text"),
 		locked: this.dbAdapter.getDataType("boolean"),
-		tenant_key: this.dbAdapter.getDataType("text"),
 		updated_at: this.dbAdapter.getDataType("timestamp"),
 		created_at: this.dbAdapter.getDataType("timestamp"),
 	};
@@ -76,19 +74,13 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			V,
 			{
 				ids: number[];
-				tenantKey?: string | null;
 			}
 		>,
 	) {
-		let query = this.db
+		const query = this.db
 			.selectFrom("lucid_roles")
 			.select("id")
 			.where("id", "in", props.ids);
-
-		query = queryBuilder.tenantScope(query, {
-			tenantKey: props.tenantKey,
-			column: "lucid_roles.tenant_key",
-		});
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleIdsByIds",
@@ -111,7 +103,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			{
 				name: string;
 				localeCode: string;
-				tenantKey?: string | null;
 				excludeRoleId?: number;
 			}
 		>,
@@ -130,11 +121,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 		if (props.excludeRoleId !== undefined) {
 			query = query.where("lucid_roles.id", "!=", props.excludeRoleId);
 		}
-
-		query = queryBuilder.tenantScope(query, {
-			tenantKey: props.tenantKey,
-			column: "lucid_roles.tenant_key",
-		});
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectRoleIdByTranslationName",
@@ -156,7 +142,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			V,
 			{
 				id: number;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -166,7 +151,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 				"id",
 				"key",
 				"locked",
-				"tenant_key",
 				"created_at",
 				"updated_at",
 				this.dbAdapter
@@ -202,13 +186,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 					)
 					.as("permissions"),
 			])
-			.where("id", "=", props.id)
-			.$call((qb) =>
-				queryBuilder.tenantScope(qb, {
-					tenantKey: props.tenantKey,
-					column: "lucid_roles.tenant_key",
-				}),
-			);
+			.where("id", "=", props.id);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
@@ -222,7 +200,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 				"id",
 				"key",
 				"locked",
-				"tenant_key",
 				"created_at",
 				"updated_at",
 				"translations",
@@ -235,7 +212,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 			V,
 			{
 				queryParams: GetMultipleQueryParams;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -250,7 +226,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 						"lucid_roles.id",
 						"lucid_roles.key",
 						"lucid_roles.locked",
-						"lucid_roles.tenant_key",
 						"lucid_roles.created_at",
 						"lucid_roles.updated_at",
 					])
@@ -294,25 +269,13 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 									.as("permissions"),
 							]),
 					)
-					.groupBy("lucid_roles.id")
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "lucid_roles.tenant_key",
-						}),
-					);
+					.groupBy("lucid_roles.id");
 
 				const countQuery = this.db
 					.selectFrom("lucid_roles")
 					.select(sql`count(distinct lucid_roles.id)`.as("count"))
 					.leftJoin("lucid_role_translations as translation", (join) =>
 						join.onRef("translation.role_id", "=", "lucid_roles.id"),
-					)
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "lucid_roles.tenant_key",
-						}),
 					);
 
 				const { main, count } = queryBuilder.main(
@@ -356,7 +319,6 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 				"id",
 				"key",
 				"locked",
-				"tenant_key",
 				"created_at",
 				"updated_at",
 				"translations",

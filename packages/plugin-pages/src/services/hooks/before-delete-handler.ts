@@ -71,7 +71,6 @@ const beforeDeleteHandler =
 					projectedFullSlugs: docFullSlugsRes.data,
 					versionType,
 					collectionKey: targetCollectionRes.data.key,
-					tenantKey: data.meta.tenantKey,
 					tables: data.meta.collectionTableNames,
 					excludeDocumentIds: [...data.data.ids, ...projectedDocumentIds],
 					duplicateMessage: copy(

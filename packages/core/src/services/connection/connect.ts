@@ -44,8 +44,7 @@ const connect: ServiceFn<
 		};
 	}
 
-	const tenantKey = context.request.tenantKey ?? null;
-	const connection = await resolveWritableConnection(context, tenantKey);
+	const connection = await resolveWritableConnection(context);
 	if (connection.error) return connection;
 	if (!connection.data) {
 		return {
@@ -108,15 +107,13 @@ const connect: ServiceFn<
 				now + constants.connection.pendingExpirationSeconds);
 
 	if (!registrationReusable) {
-		const instanceId = await getOrCreateConnectionInstanceId(context, row);
+		const instanceId = await getOrCreateConnectionInstanceId(context);
 		if (instanceId.error) return instanceId;
 
-		const baseClientName = context.config.brand?.name?.trim() || "Lucid CMS";
+		const baseClientName = context.config.brand.name.trim();
 		const registrationResult = await registerConnectionClient(context, {
 			redirectUri: urls.callbackUrl,
-			clientName: tenantKey
-				? `${baseClientName} (${tenantKey})`
-				: baseClientName,
+			clientName: baseClientName,
 			instanceId: instanceId.data,
 		});
 		if (!registrationResult.ok) {

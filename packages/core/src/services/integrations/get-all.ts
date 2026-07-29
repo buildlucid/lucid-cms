@@ -6,7 +6,7 @@ import type { GetAllQueryParams } from "../../schemas/integrations.js";
 import type { Integration } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
-/** Lists filtered integrations available to the current tenant. */
+/** Lists filtered integrations. */
 const getAll: ServiceFn<
 	[
 		{
@@ -26,7 +26,6 @@ const getAll: ServiceFn<
 
 	const integrationsRes = await Integrations.selectMultipleFilteredWithScopes({
 		queryParams: data.query,
-		tenantKey: context.request.tenantKey,
 		userId: data.userId,
 		validation: {
 			enabled: true,

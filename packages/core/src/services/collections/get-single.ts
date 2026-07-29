@@ -4,7 +4,6 @@ import { collectionsFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { Collection } from "../../types/response.js";
-import { tenantAccessAllowed } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -23,19 +22,6 @@ const getSingle: ServiceFn<
 	);
 
 	if (collection === undefined) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.collections.not.found.message"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
-
-	if (
-		!tenantAccessAllowed(collection.getData.tenants, context.request.tenantKey)
-	) {
 		return {
 			error: {
 				type: "basic",
@@ -86,7 +72,6 @@ const getSingle: ServiceFn<
 			data: collectionsFormatter.formatSingle({
 				collection: collection,
 				allCollections: context.config.collections ?? [],
-				tenantKey: context.request.tenantKey,
 				queueSupportsScheduling: context.queue.support.scheduling,
 				adminTranslations,
 				include: {
@@ -111,7 +96,6 @@ const getSingle: ServiceFn<
 		data: collectionsFormatter.formatSingle({
 			collection: collection,
 			allCollections: context.config.collections ?? [],
-			tenantKey: context.request.tenantKey,
 			queueSupportsScheduling: context.queue.support.scheduling,
 			adminTranslations,
 			migrationStatus: migrationStatus.data,

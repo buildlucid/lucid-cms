@@ -1,6 +1,6 @@
 import type constants from "../../constants/constants.js";
 import getKeyVisibility from "./get-key-visibility.js";
-import { getMediaKeyParts } from "./media-key-tenant.js";
+import { getMediaKeyParts } from "./media-key-parts.js";
 import normalizeMediaKey from "./normalize-media-key.js";
 
 type MediaVisibility =

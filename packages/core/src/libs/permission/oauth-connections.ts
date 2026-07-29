@@ -10,31 +10,20 @@ import type { StaticPermission } from "./types.js";
 export const canManageOAuthConnection = (input: {
 	connection: OAuthConnection;
 	auth: LucidAuth;
-	tenantKey: string | null;
-	multiTenant: boolean;
 	systemPermission: StaticPermission;
 }) => {
-	const hasTenantAccess =
-		!input.multiTenant ||
-		input.auth.superAdmin ||
-		(input.connection.tenantKey !== null &&
-			input.connection.tenantKey === input.tenantKey);
-
 	if (input.connection.principalType === "user") {
 		return (
 			input.connection.userId === input.auth.id ||
-			(hasAccess({
+			hasAccess({
 				user: input.auth,
 				requiredPermissions: [Permissions.UsersUpdate],
-			}) &&
-				hasTenantAccess)
+			})
 		);
 	}
 
-	return (
-		hasAccess({
-			user: input.auth,
-			requiredPermissions: [input.systemPermission],
-		}) && hasTenantAccess
-	);
+	return hasAccess({
+		user: input.auth,
+		requiredPermissions: [input.systemPermission],
+	});
 };

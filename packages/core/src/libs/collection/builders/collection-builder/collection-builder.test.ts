@@ -145,7 +145,6 @@ test("collection options are correct along with field includes and filters", asy
 		environments: [],
 		revisionRetentionDays: 30,
 		preview: null,
-		tenants: [],
 	});
 });
 

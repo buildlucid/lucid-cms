@@ -2,7 +2,6 @@ import { getDocumentTableSchema } from "../../libs/collection/schema/runtime/run
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
-import groupQueuePayloadsByTenant from "./helpers/group-queue-payloads-by-tenant.js";
 
 /**
  * Finds all soft-deleted documents for all collections that are older than 30 days and queues them for permanent deletion
@@ -38,13 +37,7 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 		docTables.map(async (table) => {
 			const softDeletedDocsRes = await Documents.selectMultiple(
 				{
-					select: [
-						"id",
-						"collection_key",
-						"deleted_by",
-						"created_by",
-						"tenant_key",
-					],
+					select: ["id", "collection_key", "deleted_by", "created_by"],
 					where: [
 						{
 							key: "is_deleted",
@@ -69,29 +62,15 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 
 			if (softDeletedDocsRes.data.length === 0) return;
 
-			const groups = groupQueuePayloadsByTenant(
-				softDeletedDocsRes.data.map((d) => ({
-					payload: {
-						id: d.id,
-						collectionKey: d.collection_key,
-						userId: d.deleted_by ?? d.created_by,
-						tenantKey: d.tenant_key,
-					},
-					tenantKeys: [d.tenant_key],
+			const queueRes = await context.queue.addBatch(context, {
+				event: "documents:delete",
+				payloads: softDeletedDocsRes.data.map((document) => ({
+					id: document.id,
+					collectionKey: document.collection_key,
+					userId: document.deleted_by ?? document.created_by,
 				})),
-			);
-
-			for (const group of groups) {
-				const queueRes = await context.queue.addBatch(context, {
-					event: "documents:delete",
-					payloads: group.payloads,
-					options:
-						group.tenantKeys.length > 0
-							? { tenantKeys: group.tenantKeys }
-							: undefined,
-				});
-				if (queueRes.error) return queueRes;
-			}
+			});
+			if (queueRes.error) return queueRes;
 		}),
 	);
 	for (const result of expiredDocLookup) {

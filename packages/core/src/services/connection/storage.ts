@@ -11,7 +11,6 @@ import {
 	LucidRemoteConnectionsRepository,
 } from "../../libs/repositories/index.js";
 import { decrypt, encrypt } from "../../utils/helpers/encrypt-decrypt.js";
-import { multiTenancyEnabled } from "../../utils/helpers/index.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import { hashLucidRemoteConnectionState } from "./helpers/flow-security.js";
 import {
@@ -58,41 +57,23 @@ export const getConnectionPending = (
 	row: LucidRemoteConnectionRow,
 ) => readEncrypted(context, row.pending_encrypted, connectionPendingSchema);
 
-/** Resolves the effective row using the configured tenant/global fallback. */
-export const resolveEffectiveConnection = (
-	context: ServiceContext,
-	tenantKey = context.request.tenantKey ?? null,
-) =>
+/** Resolves the connection row. */
+export const resolveEffectiveConnection = (context: ServiceContext) =>
 	new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
-	).selectEffective(multiTenancyEnabled(context.config) ? tenantKey : null);
+	).selectEffective();
 
-/**
- * Resolves the row that connect may mutate using the normal tenant/global
- * visibility rules, creating a scoped row only when no connection is visible.
- */
-export const resolveWritableConnection = async (
-	context: ServiceContext,
-	tenantKey = context.request.tenantKey ?? null,
-) => {
+/** Resolves or creates the singleton connection row. */
+export const resolveWritableConnection = (context: ServiceContext) => {
 	const connections = new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
 	);
-	const scopedTenantKey = multiTenancyEnabled(context.config)
-		? tenantKey
-		: null;
-	const effective = await connections.selectEffective(scopedTenantKey);
-	if (effective.error || effective.data) return effective;
-
-	return connections.ensureScope({
-		scopeKey: scopedTenantKey ? `tenant:${scopedTenantKey}` : "global",
-		tenantKey: scopedTenantKey,
-	});
+	return connections.getOrCreate();
 };
 
-/** Finds a pending callback row without using tenant identity. */
+/** Finds a pending callback row by state digest. */
 export const findConnectionByState = (context: ServiceContext, state: string) =>
 	new LucidRemoteConnectionsRepository(
 		context.db.client,

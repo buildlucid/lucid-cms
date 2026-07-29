@@ -93,7 +93,6 @@ describe("Cloudflare R2 plugin", () => {
 										mimeType: string;
 										extension?: string;
 										size: number;
-										tenant: null;
 									},
 								) => Promise<{
 									error?: {
@@ -124,7 +123,6 @@ describe("Cloudflare R2 plugin", () => {
 			mimeType: "image/png",
 			extension: "png",
 			size: 1024,
-			tenant: null,
 		});
 
 		expect(result?.error).toBeUndefined();

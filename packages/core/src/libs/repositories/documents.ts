@@ -92,7 +92,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		id: z.number(),
 		collection_key: z.string(),
 		collection_migration_id: z.number(),
-		tenant_key: z.string().nullable(),
 		order: z.string().nullable(),
 		created_by: z.number().nullable(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
@@ -125,7 +124,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		id: this.dbAdapter.getDataType("primary"),
 		collection_key: this.dbAdapter.getDataType("text"),
 		collection_migration_id: this.dbAdapter.getDataType("integer"),
-		tenant_key: this.dbAdapter.getDataType("text"),
 		order: this.dbAdapter.getDataType("text"),
 		is_deleted: this.dbAdapter.getDataType("boolean"),
 		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
@@ -279,7 +277,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			.select([
 				`${dynamicConfig.tableName}.id`,
 				`${dynamicConfig.tableName}.collection_key`,
-				`${dynamicConfig.tableName}.tenant_key`,
 				`${dynamicConfig.tableName}.created_by`,
 				`${dynamicConfig.tableName}.created_at`,
 				`${dynamicConfig.tableName}.updated_at`,
@@ -515,7 +512,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			config: Config;
 			includeWorkflow: boolean;
 			workflowAssigneeFilterValues?: Array<string | number>;
-			tenantKey?: string | null;
 			filterOr?: DocumentFilterGroup[];
 			tables: {
 				versions: LucidVersionTableName;
@@ -957,14 +953,12 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				props.relationDocumentFilters,
 				dynamicConfig.tableName,
 				props.tables.versions,
-				props.tenantKey,
 			);
 			queryCount = this.applyRelationDocumentFiltersToQuery(
 				queryCount,
 				props.relationDocumentFilters,
 				dynamicConfig.tableName,
 				props.tables.versions,
-				props.tenantKey,
 			);
 			query = this.applyDocumentFilterOrToQuery(
 				query,
@@ -972,7 +966,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 				props.includeWorkflow,
-				props.tenantKey,
 			);
 			queryCount = this.applyDocumentFilterOrToQuery(
 				queryCount,
@@ -980,17 +973,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 				props.includeWorkflow,
-				props.tenantKey,
 			);
-
-			query = queryBuilder.tenantScope(query, {
-				tenantKey: props.tenantKey,
-				column: `${dynamicConfig.tableName}.tenant_key`,
-			});
-			queryCount = queryBuilder.tenantScope(queryCount, {
-				tenantKey: props.tenantKey,
-				column: `${dynamicConfig.tableName}.tenant_key`,
-			});
 
 			const customFieldSorts = resolveCustomFieldSorts(
 				props.documentFieldsTableSchema,
@@ -1086,7 +1069,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			query: ContentGetSingleQueryParams;
 			collection: CollectionBuilder;
 			config: Config;
-			tenantKey?: string | null;
 			filterOr?: DocumentFilterGroup[];
 			tables: {
 				versions: LucidVersionTableName;
@@ -1281,7 +1263,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				props.relationDocumentFilters,
 				dynamicConfig.tableName,
 				props.tables.versions,
-				props.tenantKey,
 			);
 			query = this.applyDocumentFilterOrToQuery(
 				query,
@@ -1289,13 +1270,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 				false,
-				props.tenantKey,
 			);
-
-			query = queryBuilder.tenantScope(query, {
-				tenantKey: props.tenantKey,
-				column: `${dynamicConfig.tableName}.tenant_key`,
-			});
 
 			const { main } = queryBuilder.main(
 				{
@@ -1342,29 +1317,20 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
-	/**
-	 * Fetches document IDs used by field validation, scoped to the request tenant
-	 * while keeping global documents available to every tenant.
-	 */
+	/** Fetches document IDs used by field validation. */
 	async selectMultipleValidationIds<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
 				ids: number[];
-				tenantKey?: string | null;
 			}
 		>,
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
-		let query = this.db
+		const query = this.db
 			.selectFrom(dynamicConfig.tableName)
 			.select("id")
 			.where("id", "in", props.ids);
-
-		query = queryBuilder.tenantScope(query, {
-			tenantKey: props.tenantKey,
-			column: `${dynamicConfig.tableName}.tenant_key`,
-		});
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleValidationIds",
@@ -1380,16 +1346,12 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
-	/**
-	 * Fetches document IDs for collection-level checks using tenant visibility.
-	 * Single collections use this so each tenant can have its own document.
-	 */
+	/** Fetches document IDs for collection-level checks. */
 	async selectMultipleCollectionDocumentIds<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
 				collectionKey: string;
-				tenantKey?: string | null;
 				isDeleted?: Select<LucidDocumentTable>["is_deleted"];
 			}
 		>,
@@ -1403,11 +1365,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		if (props.isDeleted !== undefined) {
 			query = query.where("is_deleted", "=", props.isDeleted);
 		}
-
-		query = queryBuilder.tenantScope(query, {
-			tenantKey: props.tenantKey,
-			column: `${dynamicConfig.tableName}.tenant_key`,
-		});
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleCollectionDocumentIds",
@@ -1423,25 +1380,17 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
-	/** Fetches the last tenant-scoped manual order key. */
+	/** Fetches the last manual order key. */
 	async selectHighestOrderKey(
-		props: {
-			tenantKey?: string | null;
-		},
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
-		let query = this.db
+		const query = this.db
 			.selectFrom(dynamicConfig.tableName)
 			.select("order")
 			.where("order", "is not", null)
 			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
 			.orderBy("order", "desc")
 			.limit(1);
-
-		query = queryBuilder.tenantScope(query, {
-			tenantKey: props.tenantKey,
-			column: `${dynamicConfig.tableName}.tenant_key`,
-		});
 
 		const exec = await this.executeQuery(
 			() =>
@@ -1665,7 +1614,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		relationDocumentFilters: RelationDocumentFilter[],
 		documentTableName: string,
 		versionTableName: string,
-		tenantKey?: string | null,
 	): OperandExpression<SqlBool>[] {
 		const { ref } = this.db.dynamic;
 
@@ -1720,15 +1668,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					this.dbAdapter.getDefault("boolean", "false"),
 				);
 
-			if (tenantKey != null) {
-				subQuery = subQuery.where((targetEb) =>
-					targetEb.or([
-						targetEb(ref("rdf_document.tenant_key"), "=", tenantKey),
-						targetEb(ref("rdf_document.tenant_key"), "is", null),
-					]),
-				);
-			}
-
 			for (const filter of relationFilter.target.documentFilters) {
 				subQuery = subQuery.where(
 					(targetEb) =>
@@ -1764,7 +1703,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		documentTableName: string,
 		versionTableName: string | undefined,
 		includeWorkflow: boolean,
-		tenantKey?: string | null,
 	): SelectQueryBuilder<DB, Table, O> {
 		if (!filterOr || filterOr.length === 0) {
 			return query;
@@ -1801,7 +1739,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 							group.relationDocumentFilters,
 							documentTableName,
 							versionTableName,
-							tenantKey,
 						),
 					);
 				}
@@ -1819,7 +1756,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		relationDocumentFilters: RelationDocumentFilter[],
 		documentTableName: string,
 		versionTableName: string,
-		tenantKey?: string | null,
 	): SelectQueryBuilder<DB, Table, O> {
 		if (relationDocumentFilters.length === 0) return query;
 
@@ -1830,7 +1766,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					relationDocumentFilters,
 					documentTableName,
 					versionTableName,
-					tenantKey,
 				),
 			),
 		);

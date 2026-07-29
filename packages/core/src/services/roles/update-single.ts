@@ -6,7 +6,6 @@ import {
 	RolesRepository,
 	RoleTranslationsRepository,
 } from "../../libs/repositories/index.js";
-import { getTenantConfig } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import { roleServices } from "../index.js";
@@ -24,8 +23,6 @@ const updateSingle: ServiceFn<
 			name?: RoleTranslationInput;
 			description?: RoleTranslationInput;
 			permissions?: string[];
-			tenantKey?: string | null;
-			authSuperAdmin: boolean;
 		},
 	],
 	undefined
@@ -70,39 +67,6 @@ const updateSingle: ServiceFn<
 		};
 	}
 
-	const tenantKey =
-		data.tenantKey === undefined ? roleRes.data.tenant_key : data.tenantKey;
-
-	/**
-	 * Explicit tenant assignment can move a role across tenant boundaries, so it is super-admin only.
-	 */
-	if (data.tenantKey !== undefined && !data.authSuperAdmin) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.permissions.denied"),
-				status: 403,
-			},
-			data: undefined,
-		};
-	}
-
-	if (
-		context.request.tenantKey != null &&
-		roleRes.data.tenant_key !== null &&
-		roleRes.data.tenant_key !== context.request.tenantKey &&
-		!data.authSuperAdmin
-	) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.permissions.denied"),
-				status: 403,
-			},
-			data: undefined,
-		};
-	}
-
 	if (data.name !== undefined && (!defaultName || defaultName.length < 2)) {
 		return {
 			error: {
@@ -120,28 +84,11 @@ const updateSingle: ServiceFn<
 		};
 	}
 
-	if (
-		tenantKey !== null &&
-		getTenantConfig(context.config, tenantKey) === undefined
-	) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.tenants.unknown", {
-					data: { key: tenantKey },
-				}),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
-
 	const checkNameIsUniqueRes =
 		defaultName != null
 			? await Roles.selectRoleIdByTranslationName({
 					name: defaultName,
 					localeCode: defaultRoleLocale,
-					tenantKey,
 					excludeRoleId: data.id,
 				})
 			: undefined;
@@ -163,17 +110,10 @@ const updateSingle: ServiceFn<
 			data: undefined,
 		};
 	}
-	const updateData: {
-		updated_at: string;
-		tenant_key?: string | null;
-	} = {
-		updated_at: new Date().toISOString(),
-	};
-	if (data.tenantKey !== undefined) {
-		updateData.tenant_key = data.tenantKey;
-	}
 	const updateRoleRes = await Roles.updateSingle({
-		data: updateData,
+		data: {
+			updated_at: new Date().toISOString(),
+		},
 		where: [
 			{
 				key: "id",

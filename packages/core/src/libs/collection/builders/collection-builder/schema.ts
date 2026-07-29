@@ -65,7 +65,6 @@ const CollectionConfigSchema = z
 				}),
 			])
 			.optional(),
-		tenants: z.array(z.string().min(1)).optional(),
 		details: z.object({
 			name: adminCopyInputSchema,
 			singularName: adminCopyInputSchema,

@@ -424,7 +424,7 @@ const renderTokens = () => {
 			: principalType === "user"
 				? `User ${claims.user_id ?? ""}`.trim()
 				: "Unknown principal";
-	ui.grantValue.textContent = `Grant ${claims.grant_id ?? "—"} · ${claims.tenant_key ?? "global"}`;
+	ui.grantValue.textContent = `Grant ${claims.grant_id ?? "—"}`;
 	ui.accessToken.textContent = revealTokens
 		? active.access_token
 		: maskToken(active.access_token);

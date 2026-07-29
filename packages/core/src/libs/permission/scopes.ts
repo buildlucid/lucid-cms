@@ -23,9 +23,8 @@ export type ExternalScopeGroup = {
 /** Builds the external scope view of the canonical capability catalogue. */
 export const getExternalScopeGroups = (
 	config: Pick<Config, "collections">,
-	options?: { tenantKey?: string | null },
 ): ExternalScopeGroup[] => {
-	return getCapabilityRegistry(config, options)
+	return getCapabilityRegistry(config)
 		.map(
 			(group): ExternalScopeGroup => ({
 				key: group.key,
@@ -48,9 +47,8 @@ export const getExternalScopeGroups = (
 /** Returns every external scope available for the current configuration. */
 export const getValidExternalScopes = (
 	config: Pick<Config, "collections">,
-	options?: { tenantKey?: string | null },
 ): ExternalScope[] =>
-	getExternalScopeGroups(config, options).flatMap((group) =>
+	getExternalScopeGroups(config).flatMap((group) =>
 		group.scopes.map((scope) => scope.key),
 	);
 
@@ -58,8 +56,7 @@ export const getValidExternalScopes = (
 export const getInvalidExternalScopes = (
 	config: Pick<Config, "collections">,
 	scopes: string[],
-	options?: { tenantKey?: string | null },
 ) => {
-	const validScopes = new Set<string>(getValidExternalScopes(config, options));
+	const validScopes = new Set<string>(getValidExternalScopes(config));
 	return scopes.filter((scope) => !validScopes.has(scope));
 };

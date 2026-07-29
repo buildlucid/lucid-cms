@@ -4,9 +4,7 @@ import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
 } from "../../libs/repositories/index.js";
-import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import checkMediaKeyAccess from "./checks/check-media-key-access.js";
 
 const completeUploadSession: ServiceFn<
 	[
@@ -46,11 +44,6 @@ const completeUploadSession: ServiceFn<
 		},
 	});
 	if (sessionRes.error) return sessionRes;
-
-	const keyAccessRes = await checkMediaKeyAccess(context, {
-		key: sessionRes.data.key,
-	});
-	if (keyAccessRes.error) return keyAccessRes;
 
 	if (!context.media) {
 		return {
@@ -101,7 +94,6 @@ const completeUploadSession: ServiceFn<
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
 		parts: data.parts,
-		tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),
 	});
 	if (completeRes.error) return completeRes;
 

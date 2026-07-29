@@ -39,7 +39,6 @@ describe("media process service", () => {
 				key: "public/123e4567e89b12d3a456426614174000",
 				file_name: "Screenshot 2026-03-26 at 15.png",
 				file_extension: "png",
-				tenant_key: null,
 			},
 		});
 		const response = await processMedia(

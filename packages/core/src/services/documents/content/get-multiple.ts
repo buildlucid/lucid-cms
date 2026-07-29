@@ -208,7 +208,6 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 			documentFieldsTableSchema: documentFieldsTableSchemaRes.data,
 			documentFieldRelationTableSchemas: collectionFieldRelationTableSchemas,
 			includeWorkflow: false,
-			tenantKey: context.request.tenantKey,
 		},
 		{
 			tableName: tableNameRes.data.document,

@@ -1,6 +1,5 @@
 import { untrack } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
-import tenantStore from "@/store/tenantStore";
 import {
 	BUILDER_STATE_MAX_AGE,
 	type BuilderDocumentState,
@@ -20,7 +19,6 @@ export type { BuilderPreferenceScope, SectionPreferenceKey };
 export { USER_PREFERENCES_STORAGE_KEY };
 
 type UserPreferencesStoreOptions = {
-	getTenantKey: () => string | undefined;
 	storage?: Storage;
 };
 
@@ -64,29 +62,23 @@ export const createUserPreferencesStore = (
 		commit(next);
 	};
 
-	/** Returns tenant-scoped builder state for a document. */
+	/** Returns builder state for a document. */
 	const getBuilderDocumentState = (
 		scope: Pick<BuilderPreferenceScope, "collectionKey" | "documentId">,
 	) => {
-		const tenantKey = options.getTenantKey();
-		if (!tenantKey) return undefined;
-
-		return state.workspace.tenants[tenantKey]?.collections[scope.collectionKey]
-			?.documents[String(scope.documentId)];
+		return state.workspace.collections[scope.collectionKey]?.documents[
+			String(scope.documentId)
+		];
 	};
 
-	/** Updates tenant-scoped builder state for a document. */
+	/** Updates builder state for a document. */
 	const updateBuilderDocumentState = (
 		scope: Pick<BuilderPreferenceScope, "collectionKey" | "documentId">,
 		update: (documentState: BuilderDocumentState) => void,
 	) => {
-		const tenantKey = options.getTenantKey();
-		if (!tenantKey) return;
-
 		updatePreferences((preferenceState) => {
 			const documentState = ensureBuilderDocumentState(
 				preferenceState,
-				tenantKey,
 				scope.collectionKey,
 				scope.documentId,
 			);
@@ -115,45 +107,36 @@ export const createUserPreferencesStore = (
 			builderEntriesCleaned = true;
 
 			const threshold = Date.now() - BUILDER_STATE_MAX_AGE;
-			const hasExpiredEntries = Object.values(state.workspace.tenants).some(
-				(tenantState) =>
-					Object.values(tenantState.collections).some((collectionState) =>
-						Object.values(collectionState.documents).some((documentState) =>
-							Object.values(documentState.bricks).some(
-								(item) => item.lastUpdated <= threshold,
-							),
+			const hasExpiredEntries = Object.values(state.workspace.collections).some(
+				(collectionState) =>
+					Object.values(collectionState.documents).some((documentState) =>
+						Object.values(documentState.bricks).some(
+							(item) => item.lastUpdated <= threshold,
 						),
 					),
 			);
 			if (!hasExpiredEntries) return;
 
 			updatePreferences((nextState) => {
-				for (const [tenantKey, tenantState] of Object.entries(
-					nextState.workspace.tenants,
+				for (const [collectionKey, collectionState] of Object.entries(
+					nextState.workspace.collections,
 				)) {
-					for (const [collectionKey, collectionState] of Object.entries(
-						tenantState.collections,
+					for (const [documentId, documentState] of Object.entries(
+						collectionState.documents,
 					)) {
-						for (const [documentId, documentState] of Object.entries(
-							collectionState.documents,
+						for (const [brickRef, item] of Object.entries(
+							documentState.bricks,
 						)) {
-							for (const [brickRef, item] of Object.entries(
-								documentState.bricks,
-							)) {
-								if (item.lastUpdated <= threshold) {
-									delete documentState.bricks[brickRef];
-								}
-							}
-							if (Object.keys(documentState.bricks).length === 0) {
-								delete collectionState.documents[documentId];
+							if (item.lastUpdated <= threshold) {
+								delete documentState.bricks[brickRef];
 							}
 						}
-						if (Object.keys(collectionState.documents).length === 0) {
-							delete tenantState.collections[collectionKey];
+						if (Object.keys(documentState.bricks).length === 0) {
+							delete collectionState.documents[documentId];
 						}
 					}
-					if (Object.keys(tenantState.collections).length === 0) {
-						delete nextState.workspace.tenants[tenantKey];
+					if (Object.keys(collectionState.documents).length === 0) {
+						delete nextState.workspace.collections[collectionKey];
 					}
 				}
 			});
@@ -308,7 +291,6 @@ export const createUserPreferencesStore = (
 };
 
 const userPreferencesStore = createUserPreferencesStore({
-	getTenantKey: () => tenantStore.get.tenant,
 	storage: typeof localStorage === "undefined" ? undefined : localStorage,
 });
 

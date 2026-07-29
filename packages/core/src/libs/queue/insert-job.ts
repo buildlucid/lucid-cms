@@ -1,12 +1,7 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../constants/constants.js";
-import { getTenantConfig } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { copy } from "../i18n/index.js";
-import {
-	QueueJobsRepository,
-	QueueJobTenantsRepository,
-} from "../repositories/index.js";
+import { QueueJobsRepository } from "../repositories/index.js";
 import type { QueueEvent, QueueJobOptions, QueueJobStatus } from "./types.js";
 
 /**
@@ -34,34 +29,6 @@ const insertJobs: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const QueueJobTenants = new QueueJobTenantsRepository(
-		context.db.client,
-		context.config.db,
-	);
-
-	const tenantKeys = Array.from(
-		new Set(
-			data.options?.tenantKeys ??
-				(context.request.tenantKey ? [context.request.tenantKey] : []),
-		),
-	);
-
-	const unknownTenant = tenantKeys.find(
-		(key) => getTenantConfig(context.config, key) === undefined,
-	);
-	if (unknownTenant !== undefined) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.tenants.unknown", {
-					data: { key: unknownTenant },
-				}),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
-
 	const jobsData = data.payloads.map((payload) => ({
 		jobId: randomUUID(),
 		payload,
@@ -88,20 +55,6 @@ const insertJobs: ServiceFn<
 		returning: ["id"],
 	});
 	if (createJobsRes.error) return createJobsRes;
-
-	const createdJobs = createJobsRes.data ?? [];
-
-	if (tenantKeys.length > 0 && createdJobs.length > 0) {
-		const createTenantsRes = await QueueJobTenants.createMultiple({
-			data: createdJobs.flatMap((job) =>
-				tenantKeys.map((tenantKey) => ({
-					queue_job_id: job.id,
-					tenant_key: tenantKey,
-				})),
-			),
-		});
-		if (createTenantsRes.error) return createTenantsRes;
-	}
 
 	return {
 		error: undefined,

@@ -1,5 +1,4 @@
 import { MediaAwaitingSyncRepository } from "../../../libs/repositories/index.js";
-import { resolveMediaKeyTenant } from "../../../utils/media/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import { mediaServices } from "../../index.js";
 
@@ -25,7 +24,6 @@ const deleteAwaitingSyncMedia: ServiceFn<
 
 	await mediaStrategyRes.data.delete(context, {
 		key: data.key,
-		tenant: resolveMediaKeyTenant(context.config, data.key),
 	});
 
 	const deleteRes = await MediaAwaitingSync.deleteSingle({

@@ -12,7 +12,6 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 	tableSchema = z.object({
 		id: z.number(),
 		title: z.string(),
-		tenant_key: z.string().nullable(),
 		parent_folder_id: z.number().nullable(),
 		folder_count: z.number().nullable().optional(),
 		media_count: z.number().nullable().optional(),
@@ -24,7 +23,6 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 	columnFormats = {
 		id: this.dbAdapter.getDataType("primary"),
 		title: this.dbAdapter.getDataType("text"),
-		tenant_key: this.dbAdapter.getDataType("text"),
 		parent_folder_id: this.dbAdapter.getDataType("integer"),
 		created_by: this.dbAdapter.getDataType("integer"),
 		updated_by: this.dbAdapter.getDataType("integer"),
@@ -53,20 +51,13 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 			V,
 			{
 				id: number;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
 		const query = this.db
 			.selectFrom("lucid_media_folders")
-			.select(["id", "tenant_key"])
-			.where("id", "=", props.id)
-			.$call((qb) =>
-				queryBuilder.tenantScope(qb, {
-					tenantKey: props.tenantKey,
-					column: "lucid_media_folders.tenant_key",
-				}),
-			);
+			.select(["id"])
+			.where("id", "=", props.id);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
@@ -76,17 +67,12 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "single",
-			select: ["id", "tenant_key"],
+			select: ["id"],
 		});
 	}
 
 	async selectMultipleForHierarchy<V extends boolean = false>(
-		props: QueryProps<
-			V,
-			{
-				tenantKey?: string | null;
-			}
-		>,
+		props: QueryProps<V, object>,
 	) {
 		const query = this.db
 			.selectFrom("lucid_media_folders")
@@ -98,13 +84,7 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 				"updated_by",
 				"created_at",
 				"updated_at",
-			])
-			.$call((qb) =>
-				queryBuilder.tenantScope(qb, {
-					tenantKey: props.tenantKey,
-					column: "lucid_media_folders.tenant_key",
-				}),
-			);
+			]);
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleForHierarchy",
@@ -131,7 +111,6 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 			V,
 			{
 				queryParams: Record<string, unknown>;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -157,12 +136,6 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 								"=",
 								"lucid_media_folders.id",
 							)
-							.$call((qb) =>
-								queryBuilder.tenantScope(qb, {
-									tenantKey: props.tenantKey,
-									column: "children.tenant_key",
-								}),
-							)
 							.as("folder_count"),
 						eb
 							.selectFrom("lucid_media")
@@ -170,36 +143,18 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 								fn.count<number>("lucid_media.id").as("media_count"),
 							)
 							.whereRef("lucid_media.folder_id", "=", "lucid_media_folders.id")
-							.$call((qb) =>
-								queryBuilder.tenantScope(qb, {
-									tenantKey: props.tenantKey,
-									column: "lucid_media.tenant_key",
-								}),
-							)
 							.where(
 								"lucid_media.is_hidden",
 								"=",
 								this.dbAdapter.getDefault("boolean", "false"),
 							)
 							.as("media_count"),
-					])
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "lucid_media_folders.tenant_key",
-						}),
-					);
+					]);
 
 				const countQuery = this.db
 					.selectFrom("lucid_media_folders")
 					.select(({ fn }) =>
 						fn.count<number>("lucid_media_folders.id").as("count"),
-					)
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "lucid_media_folders.tenant_key",
-						}),
 					);
 
 				const { main, count } = queryBuilder.main(
@@ -242,32 +197,14 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 			],
 		});
 	}
-	/**
-	 * Returns descendant folder IDs in the requested tenant context.
-	 * Destructive flows use owner scope so visible global folders are not treated as tenant-owned.
-	 */
-	async getDescendantIds(props: {
-		folderIds: number[];
-		tenantKey?: string | null;
-		scope?: "read" | "owner";
-	}) {
-		const tenantKey = props.tenantKey ?? null;
-		const scope = props.scope ?? "read";
+	/** Returns descendant folder IDs. */
+	async getDescendantIds(props: { folderIds: number[] }) {
 		const query = this.db
 			.withRecursive("desc_folders", (db) =>
 				db
 					.selectFrom("lucid_media_folders")
 					.select(["id", "parent_folder_id"])
 					.where("id", "in", props.folderIds)
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "tenant_key",
-						}),
-					)
-					.$if(scope === "owner" && tenantKey !== null, (qb) =>
-						qb.where("tenant_key", "=", tenantKey),
-					)
 					.unionAll(
 						db
 							.selectFrom("lucid_media_folders")
@@ -279,16 +216,7 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 							.select([
 								"lucid_media_folders.id",
 								"lucid_media_folders.parent_folder_id",
-							])
-							.$call((qb) =>
-								queryBuilder.tenantScope(qb, {
-									tenantKey: props.tenantKey,
-									column: "lucid_media_folders.tenant_key",
-								}),
-							)
-							.$if(scope === "owner" && tenantKey !== null, (qb) =>
-								qb.where("lucid_media_folders.tenant_key", "=", tenantKey),
-							),
+							]),
 					),
 			)
 			.selectFrom("desc_folders")
@@ -310,7 +238,6 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 	async checkCircularParents(props: {
 		folderId: number;
 		parentFolderId: number;
-		tenantKey?: string | null;
 	}) {
 		const query = this.db
 			.withRecursive("ancestors", (db) =>
@@ -318,12 +245,6 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 					.selectFrom("lucid_media_folders")
 					.select(["id as current_id", "parent_folder_id as parent_id"])
 					.where("id", "=", props.parentFolderId)
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "tenant_key",
-						}),
-					)
 					.unionAll(
 						db
 							.selectFrom("lucid_media_folders")
@@ -335,13 +256,7 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 							.select([
 								"lucid_media_folders.id as current_id",
 								"lucid_media_folders.parent_folder_id as parent_id",
-							])
-							.$call((qb) =>
-								queryBuilder.tenantScope(qb, {
-									tenantKey: props.tenantKey,
-									column: "lucid_media_folders.tenant_key",
-								}),
-							),
+							]),
 					),
 			)
 			.selectFrom("ancestors")
@@ -359,19 +274,13 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 			select: ["parent_id"],
 		});
 	}
-	async getBreadcrumb(props: { folderId: number; tenantKey?: string | null }) {
+	async getBreadcrumb(props: { folderId: number }) {
 		const query = this.db
 			.withRecursive("breadcrumb", (db) =>
 				db
 					.selectFrom("lucid_media_folders")
 					.select(["id", "title", "parent_folder_id"])
 					.where("id", "=", props.folderId)
-					.$call((qb) =>
-						queryBuilder.tenantScope(qb, {
-							tenantKey: props.tenantKey,
-							column: "tenant_key",
-						}),
-					)
 					.unionAll(
 						db
 							.selectFrom("lucid_media_folders")
@@ -384,13 +293,7 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 								"lucid_media_folders.id",
 								"lucid_media_folders.title",
 								"lucid_media_folders.parent_folder_id",
-							])
-							.$call((qb) =>
-								queryBuilder.tenantScope(qb, {
-									tenantKey: props.tenantKey,
-									column: "lucid_media_folders.tenant_key",
-								}),
-							),
+							]),
 					),
 			)
 			.selectFrom("breadcrumb")

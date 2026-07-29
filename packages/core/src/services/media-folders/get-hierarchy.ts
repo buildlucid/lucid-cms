@@ -11,7 +11,6 @@ const getHierarchy: ServiceFn<[], MediaFolder[]> = async (context) => {
 	);
 
 	const foldersRes = await MediaFolders.selectMultipleForHierarchy({
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 		},

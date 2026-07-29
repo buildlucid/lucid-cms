@@ -1,19 +1,12 @@
-import {
-	type Component,
-	createEffect,
-	createMemo,
-	createSignal,
-	Show,
-} from "solid-js";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 import InputGrid from "@/components/Containers/InputGrid";
 import { Checkbox, Input, SelectMultiple } from "@/components/Groups/Form";
 import type { SelectMultipleValueT } from "@/components/Groups/Form/SelectMultiple";
 import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import tenantStore from "@/store/tenantStore";
 import userStore from "@/store/userStore";
-import T, { translateAdminCopy } from "@/translations";
+import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 import {
 	getDefaultTranslationLocale,
@@ -31,9 +24,6 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 	// ------------------------------
 	// State
 	const [getSelectedRoles, setSelectedRoles] = createSignal<
-		SelectMultipleValueT[]
-	>([]);
-	const [getSelectedTenants, setSelectedTenants] = createSignal<
 		SelectMultipleValueT[]
 	>([]);
 	const [getUsername, setUsername] = createSignal<string>("");
@@ -87,40 +77,6 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 			})) ?? []
 		);
 	});
-	const tenantOptions = createMemo(() => {
-		return tenantStore.get.tenants.map((tenant) => ({
-			value: tenant.key,
-			label: translateAdminCopy(tenant.name),
-		}));
-	});
-	const defaultTenantOption = createMemo(() => {
-		const tenantKey =
-			tenantStore.get.tenant ??
-			tenantStore.get.tenants.find((tenant) => tenant.default)?.key ??
-			tenantStore.get.tenants[0]?.key;
-
-		return tenantOptions().find((tenant) => tenant.value === tenantKey);
-	});
-	const showTenantSelect = createMemo(() => {
-		return Boolean(
-			userStore.get.user?.superAdmin && tenantOptions().length > 0,
-		);
-	});
-
-	// ---------------------------------
-	// Effects
-	createEffect(() => {
-		if (!props.state.open) return;
-		if (!showTenantSelect()) return;
-		if (getIsSuperAdmin()) return;
-		if (getSelectedTenants().length > 0) return;
-
-		const defaultTenant = defaultTenantOption();
-		if (defaultTenant === undefined) return;
-
-		setSelectedTenants([defaultTenant]);
-	});
-
 	// ---------------------------------
 	// Render
 	return (
@@ -149,11 +105,6 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 								? getIsSuperAdmin()
 								: undefined,
 							roleIds: getSelectedRoles().map((role) => role.value) as number[],
-							tenantKeys: userStore.get.user?.superAdmin
-								? (getSelectedTenants().map(
-										(tenant) => tenant.value,
-									) as string[])
-								: undefined,
 						},
 					});
 				},
@@ -165,7 +116,6 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 					setEmail("");
 					setIsSuperAdmin(false);
 					setSelectedRoles([]);
-					setSelectedTenants([]);
 				},
 			}}
 			copy={{
@@ -243,20 +193,6 @@ const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
 						options={roleOptions()}
 						errors={getBodyError("roleIds", createUser.errors)}
 					/>
-					<Show when={showTenantSelect()}>
-						<SelectMultiple
-							id="tenantKeys"
-							values={getSelectedTenants()}
-							onChange={setSelectedTenants}
-							name={"tenantKeys"}
-							copy={{
-								label: T()("common.tenants"),
-							}}
-							required={!getIsSuperAdmin()}
-							options={tenantOptions()}
-							errors={getBodyError("tenantKeys", createUser.errors)}
-						/>
-					</Show>
 					<Show when={userStore.get.user?.superAdmin}>
 						<Checkbox
 							id="superAdmin"

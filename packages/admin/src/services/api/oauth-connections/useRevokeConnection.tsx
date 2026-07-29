@@ -17,7 +17,6 @@ const useRevokeConnection = (props?: { onSuccess?: () => void }) =>
 				csrf: true,
 				config: {
 					method: "DELETE",
-					tenant: params.owner.type !== "account",
 				},
 			}),
 		invalidates: ["oauthConnections.getAll"],

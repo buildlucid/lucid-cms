@@ -3,8 +3,7 @@ import { UsersRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Confirms users are visible in the current tenant scope before writes.
- * Users without tenant memberships remain global and visible to tenants.
+ * Confirms users exist before writes.
  */
 const checkUserAccess: ServiceFn<
 	[
@@ -30,7 +29,6 @@ const checkUserAccess: ServiceFn<
 	const Users = new UsersRepository(context.db.client, context.config.db);
 	const usersRes = await Users.selectMultipleByIds({
 		ids,
-		tenantKey: context.request.tenantKey,
 		where: data.where,
 		validation: {
 			enabled: true,

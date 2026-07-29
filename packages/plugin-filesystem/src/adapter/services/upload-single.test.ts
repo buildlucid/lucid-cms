@@ -38,14 +38,12 @@ describe("file-system upload metadata", () => {
 			extension: "svg",
 			size: 46,
 			type: "image",
-			tenant: null,
 		});
 
 		expect(uploadRes.error).toBeUndefined();
 
 		const metadataRes = await getMetadata(options)({} as never, {
 			key: "public/uuid",
-			tenant: null,
 		});
 		expect(metadataRes.error).toBeUndefined();
 		expect(metadataRes.data?.mimeType).toBe("image/svg+xml");
@@ -66,7 +64,6 @@ describe("file-system upload metadata", () => {
 
 		const streamRes = await stream(options)({} as never, {
 			key: "public/uuid",
-			tenant: null,
 		});
 		expect(streamRes.error).toBeUndefined();
 		expect(streamRes.data?.contentType).toBe("image/svg+xml");
@@ -75,7 +72,6 @@ describe("file-system upload metadata", () => {
 		const conditionalStreamRes = await stream(options)({} as never, {
 			key: "public/uuid",
 			ifNoneMatch: `"${streamRes.data?.etag}"`,
-			tenant: null,
 		});
 		expect(conditionalStreamRes.error).toBeUndefined();
 		expect(conditionalStreamRes.data?.notModified).toBe(true);
@@ -95,20 +91,17 @@ describe("file-system upload metadata", () => {
 			extension: "svg",
 			size: 46,
 			type: "image",
-			tenant: null,
 		});
 
 		const renameRes = await rename(options)({} as never, {
 			from: "public/source",
 			to: "private/source",
-			tenant: null,
 		});
 
 		expect(renameRes.error).toBeUndefined();
 
 		const streamRes = await stream(options)({} as never, {
 			key: "private/source",
-			tenant: null,
 		});
 		expect(streamRes.error).toBeUndefined();
 		expect(streamRes.data?.contentType).toBe("image/svg+xml");

@@ -1,4 +1,4 @@
-import { type SelectQueryBuilder, sql } from "kysely";
+import { sql } from "kysely";
 import z from "zod";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
@@ -173,13 +173,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				}),
 			)
 			.optional(),
-		tenants: z
-			.array(
-				z.object({
-					tenant_key: z.string(),
-				}),
-			)
-			.optional(),
 		created_at: z.union([z.string(), z.date()]).nullable(),
 		updated_at: z.union([z.string(), z.date()]).nullable(),
 	});
@@ -245,7 +238,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				where: QueryBuilderWhere<"lucid_users">;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -289,23 +281,9 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 								)
 								.as("permissions"),
 						])
-						.whereRef("user_id", "=", "lucid_users.id")
-						.$call((qb) =>
-							queryBuilder.tenantScope(qb, {
-								tenantKey: props.tenantKey,
-								column: "lucid_roles.tenant_key",
-							}),
-						),
+						.whereRef("user_id", "=", "lucid_users.id"),
 				)
 				.as("roles"),
-			this.dbAdapter
-				.jsonArrayFrom(
-					eb
-						.selectFrom("lucid_user_tenants")
-						.select(["lucid_user_tenants.tenant_key"])
-						.whereRef("lucid_user_tenants.user_id", "=", "lucid_users.id"),
-				)
-				.as("tenants"),
 		]);
 
 		query = queryBuilder.select(query, props.where);
@@ -318,7 +296,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "single",
-			select: ["id", "username", "email", "super_admin", "roles", "tenants"],
+			select: ["id", "username", "email", "super_admin", "roles"],
 		});
 	}
 	async selectAuditActorById<V extends boolean = false>(
@@ -373,7 +351,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				where: QueryBuilderWhere<"lucid_users">;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -427,13 +404,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 								)
 								.as("permissions"),
 						])
-						.whereRef("user_id", "=", "lucid_users.id")
-						.$call((qb) =>
-							queryBuilder.tenantScope(qb, {
-								tenantKey: props.tenantKey,
-								column: "lucid_roles.tenant_key",
-							}),
-						),
+						.whereRef("user_id", "=", "lucid_users.id"),
 				)
 				.as("roles"),
 			this.dbAdapter
@@ -557,18 +528,9 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						),
 				)
 				.as("profile_picture"),
-			this.dbAdapter
-				.jsonArrayFrom(
-					eb
-						.selectFrom("lucid_user_tenants")
-						.select(["lucid_user_tenants.tenant_key"])
-						.whereRef("lucid_user_tenants.user_id", "=", "lucid_users.id"),
-				)
-				.as("tenants"),
 		]);
 
 		query = queryBuilder.select(query, props.where);
-		query = this.applyUserTenantScope(query, props.tenantKey);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
@@ -594,7 +556,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"roles",
 				"auth_providers",
 				"profile_picture",
-				"tenants",
 			],
 		});
 	}
@@ -603,7 +564,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				ids: number[];
-				tenantKey?: string | null;
 				where?: QueryBuilderWhere<"lucid_users">;
 			}
 		>,
@@ -734,8 +694,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			query = queryBuilder.select(query, props.where);
 		}
 
-		query = this.applyUserTenantScope(query, props.tenantKey);
-
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleByIds",
 		});
@@ -806,8 +764,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				queryParams: GetMultipleQueryParams;
-				tenantKey?: string | null;
-				includeTenants?: boolean;
 			}
 		>,
 	) {
@@ -857,13 +813,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 											)
 											.as("translations"),
 									])
-									.whereRef("user_id", "=", "lucid_users.id")
-									.$call((qb) =>
-										queryBuilder.tenantScope(qb, {
-											tenantKey: props.tenantKey,
-											column: "lucid_roles.tenant_key",
-										}),
-									),
+									.whereRef("user_id", "=", "lucid_users.id"),
 							)
 							.as("roles"),
 						this.dbAdapter
@@ -971,35 +921,17 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 							)
 							.as("profile_picture"),
 					])
-					.$if(props.includeTenants === true, (qb) =>
-						qb.select((eb) => [
-							this.dbAdapter
-								.jsonArrayFrom(
-									eb
-										.selectFrom("lucid_user_tenants")
-										.select(["lucid_user_tenants.tenant_key"])
-										.whereRef(
-											"lucid_user_tenants.user_id",
-											"=",
-											"lucid_users.id",
-										),
-								)
-								.as("tenants"),
-						]),
-					)
 					.leftJoin("lucid_user_roles", (join) =>
 						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
 					)
-					.groupBy("lucid_users.id")
-					.$call((qb) => this.applyUserTenantScope(qb, props.tenantKey));
+					.groupBy("lucid_users.id");
 
 				const countQuery = this.db
 					.selectFrom("lucid_users")
 					.select(sql`count(distinct lucid_users.id)`.as("count"))
 					.leftJoin("lucid_user_roles", (join) =>
 						join.onRef("lucid_user_roles.user_id", "=", "lucid_users.id"),
-					)
-					.$call((qb) => this.applyUserTenantScope(qb, props.tenantKey));
+					);
 
 				const { main, count } = queryBuilder.main(
 					{
@@ -1044,7 +976,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"roles",
 				"invitation_accepted",
 				"profile_picture",
-				...(props.includeTenants === true ? ["tenants"] : []),
 			],
 		});
 	}
@@ -1054,7 +985,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				permission: string;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -1064,152 +994,140 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				const deletedValue = this.dbAdapter.getDefault("boolean", "false");
 				const lockedValue = this.dbAdapter.getDefault("boolean", "false");
 
-				return this.applyUserTenantScope(
-					this.db
-						.selectFrom("lucid_users")
-						.select((eb) => [
-							"id",
-							"email",
-							"username",
-							"first_name as firstName",
-							"last_name as lastName",
-							this.dbAdapter
-								.jsonArrayFrom(
-									eb
-										.selectFrom("lucid_media")
-										.select((mediaEb) => [
-											"lucid_media.id",
-											"lucid_media.key",
-											"lucid_media.origin",
-											"lucid_media.type",
-											"lucid_media.mime_type",
-											"lucid_media.file_extension",
-											"lucid_media.file_name",
-											"lucid_media.file_size",
-											"lucid_media.width",
-											"lucid_media.height",
-											"lucid_media.focal_x",
-											"lucid_media.focal_y",
-											"lucid_media.blur_hash",
-											"lucid_media.average_color",
-											"lucid_media.base64",
-											"lucid_media.is_dark",
-											"lucid_media.is_light",
-											this.dbAdapter
-												.jsonArrayFrom(
-													mediaEb
-														.selectFrom("lucid_media as profile_crop")
-														.select([
-															"profile_crop.id",
-															"profile_crop.key",
-															"profile_crop.origin",
-															"profile_crop.type",
-															"profile_crop.mime_type",
-															"profile_crop.file_extension",
-															"profile_crop.file_name",
-															"profile_crop.file_size",
-															"profile_crop.width",
-															"profile_crop.height",
-															"profile_crop.focal_x",
-															"profile_crop.focal_y",
-															"profile_crop.crop_x",
-															"profile_crop.crop_y",
-															"profile_crop.crop_width",
-															"profile_crop.crop_height",
-															"profile_crop.crop_rotation",
-															"profile_crop.crop_skew_x",
-															"profile_crop.crop_skew_y",
-															"profile_crop.blur_hash",
-															"profile_crop.average_color",
-															"profile_crop.base64",
-															"profile_crop.is_dark",
-															"profile_crop.is_light",
-														])
-														.where(
-															"profile_crop.parent_media_id",
-															"=",
-															sql.ref<number>("lucid_media.id"),
-														)
-														.where("profile_crop.relation_type", "=", "crop")
-														.where(
-															"profile_crop.is_deleted",
-															"=",
-															this.dbAdapter.getDefault("boolean", "false"),
-														),
-												)
-												.as("crop"),
-											this.dbAdapter
-												.jsonArrayFrom(
-													mediaEb
-														.selectFrom("lucid_media_translations")
-														.select([
-															"lucid_media_translations.title",
-															"lucid_media_translations.alt",
-															"lucid_media_translations.description",
-															"lucid_media_translations.summary",
-															"lucid_media_translations.locale_code",
-														])
-														.whereRef(
-															"lucid_media_translations.media_id",
-															"=",
-															"lucid_media.id",
-														),
-												)
-												.as("translations"),
-										])
-										.whereRef(
-											"lucid_media.id",
-											"=",
-											"lucid_users.profile_picture_media_id",
-										)
-										.where(
-											"lucid_media.is_deleted",
-											"=",
-											this.dbAdapter.getDefault("boolean", "false"),
-										),
-								)
-								.as("profile_picture"),
-						])
-						.where("is_deleted", "=", deletedValue)
-						.where("is_locked", "=", lockedValue)
-						.where(({ or, eb, exists, selectFrom }) =>
-							or([
-								eb("super_admin", "=", superAdminValue),
-								exists(
-									queryBuilder.tenantScope(
-										selectFrom("lucid_user_roles")
-											.innerJoin(
-												"lucid_roles",
-												"lucid_roles.id",
-												"lucid_user_roles.role_id",
+				return this.db
+					.selectFrom("lucid_users")
+					.select((eb) => [
+						"id",
+						"email",
+						"username",
+						"first_name as firstName",
+						"last_name as lastName",
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_media")
+									.select((mediaEb) => [
+										"lucid_media.id",
+										"lucid_media.key",
+										"lucid_media.origin",
+										"lucid_media.type",
+										"lucid_media.mime_type",
+										"lucid_media.file_extension",
+										"lucid_media.file_name",
+										"lucid_media.file_size",
+										"lucid_media.width",
+										"lucid_media.height",
+										"lucid_media.focal_x",
+										"lucid_media.focal_y",
+										"lucid_media.blur_hash",
+										"lucid_media.average_color",
+										"lucid_media.base64",
+										"lucid_media.is_dark",
+										"lucid_media.is_light",
+										this.dbAdapter
+											.jsonArrayFrom(
+												mediaEb
+													.selectFrom("lucid_media as profile_crop")
+													.select([
+														"profile_crop.id",
+														"profile_crop.key",
+														"profile_crop.origin",
+														"profile_crop.type",
+														"profile_crop.mime_type",
+														"profile_crop.file_extension",
+														"profile_crop.file_name",
+														"profile_crop.file_size",
+														"profile_crop.width",
+														"profile_crop.height",
+														"profile_crop.focal_x",
+														"profile_crop.focal_y",
+														"profile_crop.crop_x",
+														"profile_crop.crop_y",
+														"profile_crop.crop_width",
+														"profile_crop.crop_height",
+														"profile_crop.crop_rotation",
+														"profile_crop.crop_skew_x",
+														"profile_crop.crop_skew_y",
+														"profile_crop.blur_hash",
+														"profile_crop.average_color",
+														"profile_crop.base64",
+														"profile_crop.is_dark",
+														"profile_crop.is_light",
+													])
+													.where(
+														"profile_crop.parent_media_id",
+														"=",
+														sql.ref<number>("lucid_media.id"),
+													)
+													.where("profile_crop.relation_type", "=", "crop")
+													.where(
+														"profile_crop.is_deleted",
+														"=",
+														this.dbAdapter.getDefault("boolean", "false"),
+													),
 											)
-											.innerJoin(
-												"lucid_role_permissions",
-												"lucid_role_permissions.role_id",
-												"lucid_roles.id",
+											.as("crop"),
+										this.dbAdapter
+											.jsonArrayFrom(
+												mediaEb
+													.selectFrom("lucid_media_translations")
+													.select([
+														"lucid_media_translations.title",
+														"lucid_media_translations.alt",
+														"lucid_media_translations.description",
+														"lucid_media_translations.summary",
+														"lucid_media_translations.locale_code",
+													])
+													.whereRef(
+														"lucid_media_translations.media_id",
+														"=",
+														"lucid_media.id",
+													),
 											)
-											.select(sql.lit(1).as("one"))
-											.whereRef(
-												"lucid_user_roles.user_id",
-												"=",
-												"lucid_users.id",
-											)
-											.where(
-												"lucid_role_permissions.permission",
-												"=",
-												props.permission,
-											),
-										{
-											tenantKey: props.tenantKey,
-											column: "lucid_roles.tenant_key",
-										},
+											.as("translations"),
+									])
+									.whereRef(
+										"lucid_media.id",
+										"=",
+										"lucid_users.profile_picture_media_id",
+									)
+									.where(
+										"lucid_media.is_deleted",
+										"=",
+										this.dbAdapter.getDefault("boolean", "false"),
 									),
-								),
-							]),
-						)
-						.orderBy("email", "asc"),
-					props.tenantKey,
-				).execute();
+							)
+							.as("profile_picture"),
+					])
+					.where("is_deleted", "=", deletedValue)
+					.where("is_locked", "=", lockedValue)
+					.where(({ or, eb, exists, selectFrom }) =>
+						or([
+							eb("super_admin", "=", superAdminValue),
+							exists(
+								selectFrom("lucid_user_roles")
+									.innerJoin(
+										"lucid_roles",
+										"lucid_roles.id",
+										"lucid_user_roles.role_id",
+									)
+									.innerJoin(
+										"lucid_role_permissions",
+										"lucid_role_permissions.role_id",
+										"lucid_roles.id",
+									)
+									.select(sql.lit(1).as("one"))
+									.whereRef("lucid_user_roles.user_id", "=", "lucid_users.id")
+									.where(
+										"lucid_role_permissions.permission",
+										"=",
+										props.permission,
+									),
+							),
+						]),
+					)
+					.orderBy("email", "asc")
+					.execute();
 			},
 			{
 				method: "selectMultiplePublishReviewers",
@@ -1228,7 +1146,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				permission: string;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
@@ -1238,152 +1155,140 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				const deletedValue = this.dbAdapter.getDefault("boolean", "false");
 				const lockedValue = this.dbAdapter.getDefault("boolean", "false");
 
-				return this.applyUserTenantScope(
-					this.db
-						.selectFrom("lucid_users")
-						.select((eb) => [
-							"id",
-							"email",
-							"username",
-							"first_name as firstName",
-							"last_name as lastName",
-							this.dbAdapter
-								.jsonArrayFrom(
-									eb
-										.selectFrom("lucid_media")
-										.select((mediaEb) => [
-											"lucid_media.id",
-											"lucid_media.key",
-											"lucid_media.origin",
-											"lucid_media.type",
-											"lucid_media.mime_type",
-											"lucid_media.file_extension",
-											"lucid_media.file_name",
-											"lucid_media.file_size",
-											"lucid_media.width",
-											"lucid_media.height",
-											"lucid_media.focal_x",
-											"lucid_media.focal_y",
-											"lucid_media.blur_hash",
-											"lucid_media.average_color",
-											"lucid_media.base64",
-											"lucid_media.is_dark",
-											"lucid_media.is_light",
-											this.dbAdapter
-												.jsonArrayFrom(
-													mediaEb
-														.selectFrom("lucid_media as profile_crop")
-														.select([
-															"profile_crop.id",
-															"profile_crop.key",
-															"profile_crop.origin",
-															"profile_crop.type",
-															"profile_crop.mime_type",
-															"profile_crop.file_extension",
-															"profile_crop.file_name",
-															"profile_crop.file_size",
-															"profile_crop.width",
-															"profile_crop.height",
-															"profile_crop.focal_x",
-															"profile_crop.focal_y",
-															"profile_crop.crop_x",
-															"profile_crop.crop_y",
-															"profile_crop.crop_width",
-															"profile_crop.crop_height",
-															"profile_crop.crop_rotation",
-															"profile_crop.crop_skew_x",
-															"profile_crop.crop_skew_y",
-															"profile_crop.blur_hash",
-															"profile_crop.average_color",
-															"profile_crop.base64",
-															"profile_crop.is_dark",
-															"profile_crop.is_light",
-														])
-														.where(
-															"profile_crop.parent_media_id",
-															"=",
-															sql.ref<number>("lucid_media.id"),
-														)
-														.where("profile_crop.relation_type", "=", "crop")
-														.where(
-															"profile_crop.is_deleted",
-															"=",
-															this.dbAdapter.getDefault("boolean", "false"),
-														),
-												)
-												.as("crop"),
-											this.dbAdapter
-												.jsonArrayFrom(
-													mediaEb
-														.selectFrom("lucid_media_translations")
-														.select([
-															"lucid_media_translations.title",
-															"lucid_media_translations.alt",
-															"lucid_media_translations.description",
-															"lucid_media_translations.summary",
-															"lucid_media_translations.locale_code",
-														])
-														.whereRef(
-															"lucid_media_translations.media_id",
-															"=",
-															"lucid_media.id",
-														),
-												)
-												.as("translations"),
-										])
-										.whereRef(
-											"lucid_media.id",
-											"=",
-											"lucid_users.profile_picture_media_id",
-										)
-										.where(
-											"lucid_media.is_deleted",
-											"=",
-											this.dbAdapter.getDefault("boolean", "false"),
-										),
-								)
-								.as("profile_picture"),
-						])
-						.where("is_deleted", "=", deletedValue)
-						.where("is_locked", "=", lockedValue)
-						.where(({ or, eb, exists, selectFrom }) =>
-							or([
-								eb("super_admin", "=", superAdminValue),
-								exists(
-									queryBuilder.tenantScope(
-										selectFrom("lucid_user_roles")
-											.innerJoin(
-												"lucid_roles",
-												"lucid_roles.id",
-												"lucid_user_roles.role_id",
+				return this.db
+					.selectFrom("lucid_users")
+					.select((eb) => [
+						"id",
+						"email",
+						"username",
+						"first_name as firstName",
+						"last_name as lastName",
+						this.dbAdapter
+							.jsonArrayFrom(
+								eb
+									.selectFrom("lucid_media")
+									.select((mediaEb) => [
+										"lucid_media.id",
+										"lucid_media.key",
+										"lucid_media.origin",
+										"lucid_media.type",
+										"lucid_media.mime_type",
+										"lucid_media.file_extension",
+										"lucid_media.file_name",
+										"lucid_media.file_size",
+										"lucid_media.width",
+										"lucid_media.height",
+										"lucid_media.focal_x",
+										"lucid_media.focal_y",
+										"lucid_media.blur_hash",
+										"lucid_media.average_color",
+										"lucid_media.base64",
+										"lucid_media.is_dark",
+										"lucid_media.is_light",
+										this.dbAdapter
+											.jsonArrayFrom(
+												mediaEb
+													.selectFrom("lucid_media as profile_crop")
+													.select([
+														"profile_crop.id",
+														"profile_crop.key",
+														"profile_crop.origin",
+														"profile_crop.type",
+														"profile_crop.mime_type",
+														"profile_crop.file_extension",
+														"profile_crop.file_name",
+														"profile_crop.file_size",
+														"profile_crop.width",
+														"profile_crop.height",
+														"profile_crop.focal_x",
+														"profile_crop.focal_y",
+														"profile_crop.crop_x",
+														"profile_crop.crop_y",
+														"profile_crop.crop_width",
+														"profile_crop.crop_height",
+														"profile_crop.crop_rotation",
+														"profile_crop.crop_skew_x",
+														"profile_crop.crop_skew_y",
+														"profile_crop.blur_hash",
+														"profile_crop.average_color",
+														"profile_crop.base64",
+														"profile_crop.is_dark",
+														"profile_crop.is_light",
+													])
+													.where(
+														"profile_crop.parent_media_id",
+														"=",
+														sql.ref<number>("lucid_media.id"),
+													)
+													.where("profile_crop.relation_type", "=", "crop")
+													.where(
+														"profile_crop.is_deleted",
+														"=",
+														this.dbAdapter.getDefault("boolean", "false"),
+													),
 											)
-											.innerJoin(
-												"lucid_role_permissions",
-												"lucid_role_permissions.role_id",
-												"lucid_roles.id",
+											.as("crop"),
+										this.dbAdapter
+											.jsonArrayFrom(
+												mediaEb
+													.selectFrom("lucid_media_translations")
+													.select([
+														"lucid_media_translations.title",
+														"lucid_media_translations.alt",
+														"lucid_media_translations.description",
+														"lucid_media_translations.summary",
+														"lucid_media_translations.locale_code",
+													])
+													.whereRef(
+														"lucid_media_translations.media_id",
+														"=",
+														"lucid_media.id",
+													),
 											)
-											.select(sql.lit(1).as("one"))
-											.whereRef(
-												"lucid_user_roles.user_id",
-												"=",
-												"lucid_users.id",
-											)
-											.where(
-												"lucid_role_permissions.permission",
-												"=",
-												props.permission,
-											),
-										{
-											tenantKey: props.tenantKey,
-											column: "lucid_roles.tenant_key",
-										},
+											.as("translations"),
+									])
+									.whereRef(
+										"lucid_media.id",
+										"=",
+										"lucid_users.profile_picture_media_id",
+									)
+									.where(
+										"lucid_media.is_deleted",
+										"=",
+										this.dbAdapter.getDefault("boolean", "false"),
 									),
-								),
-							]),
-						)
-						.orderBy("email", "asc"),
-					props.tenantKey,
-				).execute();
+							)
+							.as("profile_picture"),
+					])
+					.where("is_deleted", "=", deletedValue)
+					.where("is_locked", "=", lockedValue)
+					.where(({ or, eb, exists, selectFrom }) =>
+						or([
+							eb("super_admin", "=", superAdminValue),
+							exists(
+								selectFrom("lucid_user_roles")
+									.innerJoin(
+										"lucid_roles",
+										"lucid_roles.id",
+										"lucid_user_roles.role_id",
+									)
+									.innerJoin(
+										"lucid_role_permissions",
+										"lucid_role_permissions.role_id",
+										"lucid_roles.id",
+									)
+									.select(sql.lit(1).as("one"))
+									.whereRef("lucid_user_roles.user_id", "=", "lucid_users.id")
+									.where(
+										"lucid_role_permissions.permission",
+										"=",
+										props.permission,
+									),
+							),
+						]),
+					)
+					.orderBy("email", "asc")
+					.execute();
 			},
 			{
 				method: "selectMultipleWithPermission",
@@ -1395,32 +1300,5 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			...props.validation,
 			mode: "multiple",
 		});
-	}
-
-	// ----------------------------------------
-	// helpers
-
-	/**
-	 * Scopes user reads to a tenant. Users with no tenant memberships are global
-	 * and remain visible to every tenant-scoped request.
-	 */
-	private applyUserTenantScope<DB, TB extends keyof DB, O>(
-		qb: SelectQueryBuilder<DB, TB, O>,
-		tenantKey: string | null | undefined,
-	) {
-		if (tenantKey == null) return qb;
-		return qb.where(
-			sql<boolean>`(
-				exists (
-					select 1 from lucid_user_tenants
-					where lucid_user_tenants.user_id = lucid_users.id
-					and lucid_user_tenants.tenant_key = ${tenantKey}
-				)
-				or not exists (
-					select 1 from lucid_user_tenants
-					where lucid_user_tenants.user_id = lucid_users.id
-				)
-			)`,
-		);
 	}
 }

@@ -23,9 +23,8 @@ export const isCorePermission = (
 /** Builds the internal and collection-generated permission catalogue. */
 export const getPermissionRegistry = (
 	config?: Pick<Config, "collections">,
-	options?: { tenantKey?: string | null },
 ): PermissionGroup[] => {
-	return getCapabilityRegistry(config, options)
+	return getCapabilityRegistry(config)
 		.map(
 			(group): PermissionGroup => ({
 				key: group.key,
@@ -46,8 +45,7 @@ export const getPermissionRegistry = (
 /** Builds the permission catalogue shown in role management. */
 export const getGrantablePermissionRegistry = (
 	config?: Pick<Config, "collections">,
-	options?: { tenantKey?: string | null },
-) => getPermissionRegistry(config, options);
+) => getPermissionRegistry(config);
 
 /** Flattens the permission registry into keys for role validation and sync. */
 export const getValidPermissions = (

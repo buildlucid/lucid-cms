@@ -6,7 +6,6 @@ import type {
 	LucidHonoContext,
 } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
-import { multiTenancyEnabled } from "../../../utils/helpers/index.js";
 import { integrationApiKeyPrefix } from "../../../utils/integrations/encode-api-key.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -32,7 +31,7 @@ const setOAuthBearerChallenge = (
 
 /**
  * Authenticates content API requests with an integration API key or OAuth access
- * token, then exposes the resolved principal, tenant, and scopes to downstream handlers.
+ * token, then exposes the resolved principal and scopes to downstream handlers.
  */
 const externalAuthentication = createMiddleware(
 	async (c: LucidHonoContext, next) => {
@@ -130,11 +129,7 @@ const externalAuthentication = createMiddleware(
 			});
 		}
 
-		const tenantKey = multiTenancyEnabled(c.get("config"))
-			? externalAuth.tenantKey
-			: null;
 		c.set("externalAuth", externalAuth);
-		c.set("tenant", tenantKey ? { key: tenantKey } : null);
 		const response = await next();
 
 		if (externalAuth.credential.type === "api-key") {

@@ -38,10 +38,6 @@ export const integrationResponseSchema = z.object({
 		description: "The user this integration acts as, or null for the system",
 		example: 1,
 	}),
-	tenantKey: z.string().nullable().meta({
-		description: "The tenant this integration is scoped to",
-		example: "marketing",
-	}),
 	expiresAt: z.string().nullable().meta({
 		description:
 			"The time the integration expires, or null when it never expires",

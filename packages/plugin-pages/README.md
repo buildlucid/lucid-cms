@@ -85,7 +85,7 @@ If set, the plugin prepends the given prefix to the start of the computed `fullS
 
 ### unique
 
-By default, each computed `fullSlug` must be unique within the same collection, version type, tenant visibility, and locale. This checks the computed route rather than the raw slug value.
+By default, each computed `fullSlug` must be unique within the same collection, version type, and locale. This checks the computed route rather than the raw slug value.
 
 Set `unique: false` to disable this route uniqueness validation for a collection.
 

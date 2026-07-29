@@ -69,8 +69,6 @@ const deleteBatch: ServiceFn<
 	if (data.recursiveMedia && data.folderIds && data.folderIds.length > 0) {
 		const execFolders = await MediaFolders.getDescendantIds({
 			folderIds: data.folderIds,
-			tenantKey: context.request.tenantKey,
-			scope: "read",
 		});
 		if (execFolders.error) return execFolders;
 
@@ -81,7 +79,6 @@ const deleteBatch: ServiceFn<
 		data.recursiveMedia && descendantFolderIds.length > 0
 			? await Media.selectMultipleIdsByFolderIds({
 					folderIds: descendantFolderIds,
-					tenantKey: context.request.tenantKey,
 					validation: { enabled: true },
 				})
 			: undefined;
@@ -167,9 +164,7 @@ const deleteBatch: ServiceFn<
 				config: context.config,
 			},
 			{
-				meta: {
-					tenantKey: context.request.tenantKey ?? null,
-				},
+				meta: {},
 				data: {
 					ids: Array.from(deletedMediaIds),
 					userId: data.userId,

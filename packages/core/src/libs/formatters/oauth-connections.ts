@@ -11,7 +11,6 @@ export type OAuthConnectionQueryRes = {
 	client_uri: string | null;
 	principal_type: OAuthPrincipalType;
 	user_id: number | null;
-	tenant_key: string | null;
 	scopes: Array<{ scope: string }>;
 	last_used_at: Date | string | null;
 	last_used_ip: string | null;
@@ -33,7 +32,6 @@ const formatSingle = (
 	clientUri: connection.client_uri,
 	principalType: connection.principal_type,
 	userId: connection.user_id,
-	tenantKey: connection.tenant_key,
 	scopes: connection.scopes.map((scope) => scope.scope as ExternalScope),
 	lastUsedAt: formatter.formatDate(connection.last_used_at),
 	lastUsedIp: connection.last_used_ip,

@@ -19,7 +19,6 @@ const useUpdateConnection = (props?: { onSuccess?: () => void }) =>
 				config: {
 					method: "PATCH",
 					body: { name: params.name },
-					tenant: params.owner.type !== "account",
 				},
 			}),
 		invalidates: ["oauthConnections.getAll"],

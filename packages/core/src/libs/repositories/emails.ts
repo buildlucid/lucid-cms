@@ -1,4 +1,3 @@
-import type { SelectQueryBuilder } from "kysely";
 import z from "zod";
 import {
 	emailDeliveryStatusSchema,
@@ -7,7 +6,7 @@ import {
 import type { QueryParams } from "../../types/query-params.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import queryBuilder from "../db/query-builder/index.js";
-import type { KyselyDB, LucidDB, LucidEmails, Select } from "../db/types.js";
+import type { KyselyDB, LucidEmails, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
@@ -64,13 +63,6 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 					external_message_id: z.string().nullable(),
 					created_at: z.union([z.string(), z.date()]).nullable(),
 					updated_at: z.union([z.string(), z.date()]).nullable(),
-				}),
-			)
-			.optional(),
-		tenants: z
-			.array(
-				z.object({
-					tenant_key: z.string(),
 				}),
 			)
 			.optional(),
@@ -131,11 +123,10 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 			V,
 			{
 				id: number;
-				tenantKey?: string | null;
 			}
 		>,
 	) {
-		let query = this.db
+		const query = this.db
 			.selectFrom("lucid_emails")
 			.select((eb) => [
 				"id",
@@ -199,18 +190,8 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 							.orderBy("lucid_email_transactions.created_at", "desc"),
 					)
 					.as("transactions"),
-				this.dbAdapter
-					.jsonArrayFrom(
-						eb
-							.selectFrom("lucid_email_tenants")
-							.select(["lucid_email_tenants.tenant_key"])
-							.whereRef("lucid_email_tenants.email_id", "=", "lucid_emails.id"),
-					)
-					.as("tenants"),
 			])
 			.where("id", "=", props.id);
-
-		query = this.applyTenantScope(query, props.tenantKey);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "selectSingleById",
@@ -241,7 +222,6 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"created_at",
 				"updated_at",
 				"transactions",
-				"tenants",
 			],
 		});
 	}
@@ -255,7 +235,6 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 			{
 				select: K[];
 				queryParams: Partial<QueryParams>;
-				tenantKey?: string | null;
 				includeSystem?: boolean;
 			}
 		>,
@@ -267,8 +246,6 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 					.selectFrom("lucid_emails")
 					.select((eb) => eb.fn.countAll().as("count"));
 
-				mainQuery = this.applyTenantScope(mainQuery, props.tenantKey);
-				countQuery = this.applyTenantScope(countQuery, props.tenantKey);
 				if (props.includeSystem !== true) {
 					const nonSystemValue = this.dbAdapter.getDefault("boolean", "false");
 					mainQuery = mainQuery.where("is_system", "=", nonSystemValue);
@@ -305,34 +282,5 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 			mode: "multiple-count",
 			select: props.select,
 		});
-	}
-
-	// ----------------------------------------
-	// helpers
-	private applyTenantScope<O>(
-		query: SelectQueryBuilder<LucidDB, "lucid_emails", O>,
-		tenantKey?: string | null,
-	): SelectQueryBuilder<LucidDB, "lucid_emails", O> {
-		if (tenantKey == null) return query;
-
-		return query.where((eb) =>
-			eb.or([
-				eb.exists(
-					eb
-						.selectFrom("lucid_email_tenants")
-						.select("lucid_email_tenants.id")
-						.whereRef("lucid_email_tenants.email_id", "=", "lucid_emails.id")
-						.where("lucid_email_tenants.tenant_key", "=", tenantKey),
-				),
-				eb.not(
-					eb.exists(
-						eb
-							.selectFrom("lucid_email_tenants")
-							.select("lucid_email_tenants.id")
-							.whereRef("lucid_email_tenants.email_id", "=", "lucid_emails.id"),
-					),
-				),
-			]),
-		);
 	}
 }

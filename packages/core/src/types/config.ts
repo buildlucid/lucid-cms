@@ -14,7 +14,6 @@ import type {
 	LucidRouteDefinition,
 } from "../libs/http/types.js";
 import type {
-	AdminCopyInput,
 	InterfaceDirection,
 	LocaleDirection,
 	TranslationSource,
@@ -64,22 +63,6 @@ export type LocalizationConfig = {
 	 * The default content locale code. Eg. `en`.
 	 */
 	defaultLocale: string;
-};
-
-export type TenantConfig = {
-	/**
-	 * Stable key used to sync this tenant into the database and scope content against it.
-	 */
-	key: string;
-	/**
-	 * The tenant name shown in the admin UI.
-	 */
-	name: AdminCopyInput;
-	/**
-	 * Marks this tenant as the default selection in the admin UI when a user has
-	 * access to multiple tenants and no valid tenant is already selected.
-	 */
-	default?: boolean;
 };
 
 export type I18nConfig = {
@@ -303,12 +286,6 @@ export interface LucidConfig {
 	 * Content localization settings.
 	 */
 	localization?: LocalizationConfig;
-	/**
-	 * Tenants to enable multi-tenancy. When one or more tenants are configured, content
-	 * (documents, media, users, roles, integrations) can be scoped to a tenant.
-	 * Omit to keep the CMS single-tenant.
-	 */
-	tenants?: TenantConfig[];
 	/**
 	 * Internationalisation settings for the admin UI and API messages.
 	 */
@@ -576,7 +553,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		features: Required<AiFeatureConfig>;
 	};
 	localization: LocalizationConfig;
-	tenants: TenantConfig[];
 	i18n: Required<I18nConfig>;
 	media: {
 		adapter?:
@@ -630,6 +606,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
 	plugins: Array<LucidPluginResponse>;
+	brand: {
+		name: string;
+	};
 	build: {
 		paths: {
 			outDir: string;

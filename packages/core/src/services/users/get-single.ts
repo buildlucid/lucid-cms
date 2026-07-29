@@ -36,7 +36,6 @@ const getSingle: ServiceFn<
 	}
 
 	const userRes = await Users.selectSinglePreset({
-		tenantKey: context.request.tenantKey,
 		where: userQueryWhere,
 		validation: {
 			enabled: true,
@@ -56,7 +55,6 @@ const getSingle: ServiceFn<
 			host: getBaseUrl(context),
 			locales: context.config.localization.locales.map((locale) => locale.code),
 			defaultLocale: context.config.localization.defaultLocale,
-			tenants: context.config.tenants,
 		}),
 	};
 };

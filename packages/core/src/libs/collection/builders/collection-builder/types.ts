@@ -39,7 +39,6 @@ export type CollectionPreviewURLResolverProps<
 	document: CollectionDocument<TCollectionKey>;
 	env: EnvironmentVariables | null;
 	locale: string;
-	tenantKey: string | null;
 };
 
 export type CollectionPreviewURLResolver<
@@ -107,7 +106,6 @@ export type CollectionConfigSchemaType<
 	key: TCollectionKey;
 	mode: "single" | "multiple";
 	group?: CollectionGroupConfigInput;
-	tenants?: string[];
 	details: {
 		name: AdminCopyInput;
 		singularName: AdminCopyInput;
@@ -180,7 +178,6 @@ export type CollectionData = {
 	preview: {
 		breakpoints: CollectionPreviewBreakpoint[];
 	} | null;
-	tenants: string[];
 };
 
 export type FieldFilters = Array<{
@@ -192,7 +189,6 @@ export interface CollectionBrickConfig {
 	key: BrickBuilder["key"];
 	details: BrickBuilder["config"]["details"];
 	preview: BrickBuilder["config"]["preview"];
-	tenants: BrickBuilder["config"]["tenants"];
 	fields: CFConfig<FieldTypes>[];
 }
 

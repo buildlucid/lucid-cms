@@ -74,7 +74,6 @@ const resolveAiGeneration: ServiceFn<
 	const aiGenerationRes = await AiGenerations.selectSingleByRequestId({
 		requestId: data.aiGenerationRequestId,
 		select: ["id", "feature_key", "status"],
-		tenantKey: context.request.tenantKey,
 	});
 	if (aiGenerationRes.error) return aiGenerationRes;
 	if (

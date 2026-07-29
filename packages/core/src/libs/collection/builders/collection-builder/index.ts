@@ -229,7 +229,6 @@ class CollectionBuilder<
 							})) ?? [],
 					}
 				: null,
-			tenants: this.config.tenants ?? [],
 		};
 	}
 	get fixedBricks(): CollectionBrickConfig[] {
@@ -238,7 +237,6 @@ class CollectionBuilder<
 				key: brick.key,
 				details: brick.config.details,
 				preview: brick.config.preview,
-				tenants: brick.config.tenants,
 				fields: brick.fieldTree,
 			})) ?? []
 		);
@@ -249,7 +247,6 @@ class CollectionBuilder<
 				key: brick.key,
 				details: brick.config.details,
 				preview: brick.config.preview,
-				tenants: brick.config.tenants,
 				fields: brick.fieldTree,
 			})) ?? []
 		);

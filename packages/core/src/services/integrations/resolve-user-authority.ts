@@ -13,7 +13,6 @@ const resolveUserAuthority: ServiceFn<
 	[
 		{
 			userId: number;
-			tenantKey: string | null;
 			scopes: ExternalScope[];
 		},
 	],
@@ -22,7 +21,6 @@ const resolveUserAuthority: ServiceFn<
 			type: "user";
 			userId: number;
 		};
-		tenantKey: string | null;
 		scopes: ExternalScope[];
 	}
 > = async (context, data) => {
@@ -41,7 +39,6 @@ const resolveUserAuthority: ServiceFn<
 				value: context.config.db.getDefault("boolean", "false"),
 			},
 		],
-		tenantKey: data.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -53,30 +50,12 @@ const resolveUserAuthority: ServiceFn<
 	if (userRes.error) return userRes;
 
 	const superAdmin = formatter.formatBoolean(userRes.data.super_admin ?? false);
-	if (
-		data.tenantKey !== null &&
-		!superAdmin &&
-		!(userRes.data.tenants ?? []).some(
-			(tenant) => tenant.tenant_key === data.tenantKey,
-		)
-	) {
-		return {
-			error: {
-				type: "authorisation",
-				status: 401,
-			},
-			data: undefined,
-		};
-	}
-
 	const { permissions } = userPermissionsFormatter.formatMultiple({
 		roles: userRes.data.roles ?? [],
 		defaultLocale: context.config.localization.defaultLocale,
 	});
 	const effectiveScopes = data.scopes.filter((scope) => {
-		const capability = getExternalCapability(context.config, scope, {
-			tenantKey: data.tenantKey,
-		});
+		const capability = getExternalCapability(context.config, scope);
 		if (!capability) return false;
 		if (capability.userPermission === null || superAdmin) return true;
 		return permissions?.includes(capability.userPermission) === true;
@@ -89,7 +68,6 @@ const resolveUserAuthority: ServiceFn<
 				type: "user",
 				userId: data.userId,
 			},
-			tenantKey: data.tenantKey,
 			scopes: effectiveScopes,
 		},
 	};

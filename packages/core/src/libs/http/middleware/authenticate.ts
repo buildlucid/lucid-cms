@@ -8,22 +8,11 @@ import type {
 	LucidHonoContext,
 } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
-import { multiTenancyEnabled } from "../../../utils/helpers/index.js";
 import formatter, { userPermissionsFormatter } from "../../formatters/index.js";
 import { copy } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
 import { UsersRepository } from "../../repositories/index.js";
 import createServiceContext from "../utils/create-service-context.js";
-
-type TenantScope = "required" | "allow-global";
-
-/**
- * Controls whether a route must be scoped to a tenant.
- * Use `allow-global` for routes that need to work before or outside tenant selection.
- */
-type AuthenticateOptions = {
-	tenantScope?: TenantScope;
-};
 
 type CachedAuthState = Omit<LucidAuth, "exp" | "iat" | "nonce">;
 
@@ -34,11 +23,10 @@ type CachedAuthState = Omit<LucidAuth, "exp" | "iat" | "nonce">;
 const getCachedAuthState = async (
 	c: LucidHonoContext,
 	token: LucidAccessToken,
-	tenantKey?: string | null,
 ) => {
 	const context = createServiceContext(c);
 	const namespaceToken = await getAuthCacheNamespaceToken(context);
-	const cacheKey = cacheKeys.auth.user(token.id, namespaceToken, tenantKey);
+	const cacheKey = cacheKeys.auth.user(token.id, namespaceToken);
 
 	return {
 		cacheKey,
@@ -52,12 +40,11 @@ const getCachedAuthState = async (
 
 /**
  * Loads the current user auth state from the database.
- * Access tokens only prove identity; permissions and tenants come from live user data.
+ * Access tokens only prove identity; permissions come from live user data.
  */
 const fetchAuthState = async (
 	c: LucidHonoContext,
 	token: LucidAccessToken,
-	tenantKey?: string | null,
 ): Promise<CachedAuthState> => {
 	const config = c.get("config");
 	const Users = new UsersRepository(c.get("database").client, config.db);
@@ -76,7 +63,6 @@ const fetchAuthState = async (
 				value: config.db.getDefault("boolean", "false"),
 			},
 		],
-		tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -102,9 +88,6 @@ const fetchAuthState = async (
 		email: userRes.data.email,
 		permissions,
 		superAdmin,
-		tenantKeys: superAdmin
-			? config.tenants.map((tenant) => tenant.key)
-			: (userRes.data.tenants ?? []).map((tenant) => tenant.tenant_key),
 	};
 };
 
@@ -115,10 +98,9 @@ const fetchAuthState = async (
 const resolveAuthState = async (
 	c: LucidHonoContext,
 	token: LucidAccessToken,
-	tenantKey?: string | null,
 ): Promise<LucidAuth> => {
-	const cached = await getCachedAuthState(c, token, tenantKey);
-	const authState = cached.data ?? (await fetchAuthState(c, token, tenantKey));
+	const cached = await getCachedAuthState(c, token);
+	const authState = cached.data ?? (await fetchAuthState(c, token));
 
 	if (cached.data == null) {
 		await cached.context.kv.set(cached.context, {
@@ -143,7 +125,7 @@ const resolveAuthState = async (
  */
 export const authenticationCheck = async (
 	c: LucidHonoContext,
-	options?: { soft?: boolean; tenantKey?: string | null },
+	options?: { soft?: boolean },
 ) => {
 	const accessTokenRes = await authServices.accessToken.verifyToken(c);
 	if (accessTokenRes.error) {
@@ -153,10 +135,7 @@ export const authenticationCheck = async (
 	if (!accessTokenRes.data) return;
 
 	try {
-		c.set(
-			"auth",
-			await resolveAuthState(c, accessTokenRes.data, options?.tenantKey),
-		);
+		c.set("auth", await resolveAuthState(c, accessTokenRes.data));
 	} catch (error) {
 		if (options?.soft === true) return;
 		throw error;
@@ -164,82 +143,11 @@ export const authenticationCheck = async (
 };
 
 /**
- * Determines the tenant key that should scope auth permissions.
- * Full tenant access validation still happens after auth is loaded.
+ * Authenticates an admin request.
  */
-const resolveAuthTenantKey = (c: LucidHonoContext) => {
-	const config = c.get("config");
-	if (!multiTenancyEnabled(config)) return null;
-
-	const tenantKey = c.req.header(constants.headers.tenant);
-	if (!tenantKey) return null;
-
-	return config.tenants.some((tenant) => tenant.key === tenantKey)
-		? tenantKey
-		: null;
-};
-
-/**
- * Resolves the request tenant after authentication.
- * Tenant membership is checked against the live auth state, not the access token.
- */
-const resolveTenantCheck = (
-	c: LucidHonoContext,
-	options?: AuthenticateOptions,
-) => {
-	const config = c.get("config");
-	if (!multiTenancyEnabled(config)) {
-		c.set("tenant", null);
-		return;
-	}
-
-	const tenantKey = c.req.header(constants.headers.tenant);
-	const auth = c.get("auth");
-	if (!tenantKey) {
-		if (options?.tenantScope === "allow-global" || auth.superAdmin) {
-			c.set("tenant", null);
-			return;
-		}
-
-		throw new LucidAPIError({
-			type: "authorisation",
-			message: copy("server:core.tenants.no.access"),
-			status: 403,
-		});
-	}
-
-	const tenantExists = config.tenants.some(
-		(tenant) => tenant.key === tenantKey,
-	);
-	if (!tenantExists) {
-		throw new LucidAPIError({
-			type: "basic",
-			message: copy("server:core.tenants.unknown", {
-				data: { key: tenantKey },
-			}),
-			status: 400,
-		});
-	}
-
-	if (!auth.superAdmin && !auth.tenantKeys.includes(tenantKey)) {
-		throw new LucidAPIError({
-			type: "authorisation",
-			message: copy("server:core.tenants.no.access"),
-			status: 403,
-		});
-	}
-
-	c.set("tenant", { key: tenantKey });
-};
-
-/**
- * Authenticates an admin request and, by default, requires a tenant when tenancy is enabled.
- * Pass `tenantScope: "allow-global"` for global routes such as account/bootstrap data.
- */
-const authenticate = (options?: AuthenticateOptions) =>
+const authenticate = () =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
-		await authenticationCheck(c, { tenantKey: resolveAuthTenantKey(c) });
-		resolveTenantCheck(c, options);
+		await authenticationCheck(c);
 		return await next();
 	});
 

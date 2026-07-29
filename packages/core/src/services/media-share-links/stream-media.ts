@@ -1,5 +1,4 @@
 import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
-import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 
@@ -39,7 +38,6 @@ const streamMedia: ServiceFn<
 	const res = await mediaStrategyRes.data.stream(context, {
 		key: data.mediaKey,
 		range: data.range,
-		tenant: resolveMediaKeyTenant(context.config, data.mediaKey),
 	});
 	if (res.error) return res;
 

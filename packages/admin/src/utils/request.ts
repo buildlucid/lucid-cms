@@ -1,7 +1,6 @@
 import type { ErrorResponse } from "@types";
 import { clearCsrfSession, csrfReq } from "@/services/api/auth/useCsrf";
 import useRefreshToken from "@/services/api/auth/useRefreshToken";
-import tenantStore from "@/store/tenantStore";
 import {
 	getRequestInterfaceLocale,
 	interfaceLocaleHeader,
@@ -21,7 +20,6 @@ interface RequestConfig<Data> {
 	body?: Data | FormData;
 	headers?: Record<string, string>;
 	signal?: AbortSignal;
-	tenant?: boolean;
 	displayErrorToast?: boolean;
 }
 
@@ -47,13 +45,10 @@ const prepareHeaders = async (
 	csrf?: boolean,
 	headers: Record<string, string> = {},
 	body?: string | FormData | undefined,
-	tenantEnabled = true,
 ): Promise<Record<string, string>> => {
 	const updatedHeaders = { ...headers };
 	const interfaceLocale = getRequestInterfaceLocale();
-	const tenant = tenantStore.get.tenant;
 	if (interfaceLocale) updatedHeaders[interfaceLocaleHeader] = interfaceLocale;
-	if (tenantEnabled && tenant) updatedHeaders["X-Lucid-Tenant"] = tenant;
 	if (csrf) {
 		const csrfToken = await csrfReq();
 		if (csrfToken) updatedHeaders["X-CSRF-Token"] = csrfToken;
@@ -119,7 +114,6 @@ const request = async <ResponseBody, Data = unknown>(
 		params.csrf,
 		params.config?.headers,
 		body,
-		params.config?.tenant !== false,
 	);
 
 	const fetchRes = await fetch(fetchURL, {

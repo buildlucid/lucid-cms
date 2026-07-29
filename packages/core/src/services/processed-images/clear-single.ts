@@ -2,10 +2,6 @@ import {
 	MediaRepository,
 	ProcessedImagesRepository,
 } from "../../libs/repositories/index.js";
-import {
-	getMediaKeyTenantKey,
-	resolveMediaKeyTenant,
-} from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices } from "../index.js";
 import adjustStorageUsage from "../media/adjust-storage-usage.js";
@@ -38,15 +34,12 @@ const clearSingle: ServiceFn<
 		context.config.db,
 	);
 	let mediaKey = data.key;
-	let mediaTenantKey =
-		mediaKey === undefined ? null : getMediaKeyTenantKey(mediaKey);
 
 	if (mediaKey === undefined && data.id !== undefined) {
 		const Media = new MediaRepository(context.db.client, context.config.db);
 
 		const mediaRes = await Media.selectSingleById({
 			id: data.id,
-			tenantKey: context.request.tenantKey,
 			validation: {
 				enabled: true,
 			},
@@ -54,7 +47,6 @@ const clearSingle: ServiceFn<
 		if (mediaRes.error) return mediaRes;
 
 		mediaKey = mediaRes.data.key;
-		mediaTenantKey = mediaRes.data.tenant_key;
 	}
 
 	const processedImagesRes = await ProcessedImages.selectMultiple({
@@ -83,12 +75,10 @@ const clearSingle: ServiceFn<
 		(acc, i) => acc + i.file_size,
 		0,
 	);
-	const tenant = resolveMediaKeyTenant(context.config, mediaKey as string);
 
 	const [_, clearProcessedRes, updateStorageRes] = await Promise.all([
 		mediaStrategyRes.data.deleteMultiple(context, {
 			keys: processedImagesRes.data.map((i) => i.key),
-			tenant,
 		}),
 		ProcessedImages.deleteMultiple({
 			where: [
@@ -100,7 +90,6 @@ const clearSingle: ServiceFn<
 			],
 		}),
 		adjustStorageUsage(context, {
-			tenantKey: mediaTenantKey,
 			delta: -totalSize,
 			min: 0,
 		}),

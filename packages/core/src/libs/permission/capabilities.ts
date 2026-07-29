@@ -1,5 +1,4 @@
 import type { Config } from "../../types/config.js";
-import { tenantAccessAllowed } from "../../utils/helpers/index.js";
 import { copy } from "../i18n/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import {
@@ -135,43 +134,36 @@ const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 
 const getCollectionCapabilityGroups = (
 	config?: Pick<Config, "collections">,
-	tenantKey?: string | null,
 ): CapabilityGroup[] => {
-	return (config?.collections ?? [])
-		.filter(
-			(collection) =>
-				tenantKey === undefined ||
-				tenantAccessAllowed(collection.getData.tenants, tenantKey),
-		)
-		.map((collection) => ({
-			key: `documents:${collection.key}`,
-			details: {
-				name: collection.getData.details.name,
-			},
-			core: true,
-			capabilities: collectionPermissionActions.map(
-				(action): CapabilityDefinition => {
-					const permission = getCollectionPermission(collection.key, action);
+	return (config?.collections ?? []).map((collection) => ({
+		key: `documents:${collection.key}`,
+		details: {
+			name: collection.getData.details.name,
+		},
+		core: true,
+		capabilities: collectionPermissionActions.map(
+			(action): CapabilityDefinition => {
+				const permission = getCollectionPermission(collection.key, action);
 
-					return {
-						key: permission,
+				return {
+					key: permission,
+					details: {
+						name: collectionPermissionDetails[action],
+					},
+					core: true,
+					permission,
+					external: {
+						scope: getCollectionExternalScope(collection.key, action),
+						userPermission: permission,
 						details: {
-							name: collectionPermissionDetails[action],
+							name: copy(`admin:integrations.scopes.documents.${action}`),
 						},
-						core: true,
-						permission,
-						external: {
-							scope: getCollectionExternalScope(collection.key, action),
-							userPermission: permission,
-							details: {
-								name: copy(`admin:integrations.scopes.documents.${action}`),
-							},
-						},
-						availableToIntegrations: action === "read",
-					};
-				},
-			),
-		}));
+					},
+					availableToIntegrations: action === "read",
+				};
+			},
+		),
+	}));
 };
 
 const localesCapabilityGroup: CapabilityGroup = {
@@ -199,11 +191,10 @@ const localesCapabilityGroup: CapabilityGroup = {
 /** Builds the canonical internal-permission and external-scope catalogue. */
 export const getCapabilityRegistry = (
 	config?: Pick<Config, "collections">,
-	options?: { tenantKey?: string | null },
 ): CapabilityGroup[] => {
 	return [
 		...getStaticCapabilityGroups(),
-		...getCollectionCapabilityGroups(config, options?.tenantKey),
+		...getCollectionCapabilityGroups(config),
 		localesCapabilityGroup,
 	];
 };
@@ -212,9 +203,8 @@ export const getCapabilityRegistry = (
 export const getExternalCapability = (
 	config: Pick<Config, "collections">,
 	scope: string,
-	options?: { tenantKey?: string | null },
 ): ExternalCapability | undefined => {
-	return getCapabilityRegistry(config, options)
+	return getCapabilityRegistry(config)
 		.flatMap((group) => group.capabilities)
 		.find(
 			(capability) =>

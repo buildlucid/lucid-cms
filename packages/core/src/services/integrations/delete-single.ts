@@ -2,7 +2,7 @@ import { IntegrationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkIntegrationAccess from "./checks/check-integration-access.js";
 
-/** Deletes an integration accessible to the current tenant. */
+/** Deletes an integration. */
 const deleteSingle: ServiceFn<
 	[
 		{

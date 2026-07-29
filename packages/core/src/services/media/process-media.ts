@@ -59,21 +59,6 @@ const processMedia: ServiceFn<
 		};
 	}
 
-	if (
-		mediaRes.data.tenant_key &&
-		context.request.tenantKey &&
-		mediaRes.data.tenant_key !== context.request.tenantKey
-	) {
-		return {
-			error: {
-				type: "basic",
-				status: 404,
-				message: copy("server:core.media.not.found.message"),
-			},
-			data: undefined,
-		};
-	}
-
 	if (mediaRes.data.type !== "image") {
 		return {
 			error: undefined,

@@ -43,7 +43,6 @@ const checkSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: updateContextRes.data.tableNames,
-				tenantKey: context.request.tenantKey ?? null,
 				execution: {
 					mode: "check",
 					action: "update",

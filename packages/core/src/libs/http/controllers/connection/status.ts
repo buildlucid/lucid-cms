@@ -15,8 +15,7 @@ const factory = createFactory();
 
 const statusController = factory.createHandlers(
 	describeRoute({
-		description:
-			"Returns the tenant's Lucid connection and revalidates stale state.",
+		description: "Returns the Lucid connection and revalidates stale state.",
 		tags: ["connection"],
 		summary: "Get Lucid Connection",
 		responses: openAPI.responses({

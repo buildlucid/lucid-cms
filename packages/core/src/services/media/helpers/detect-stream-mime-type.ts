@@ -1,8 +1,5 @@
 import type { Readable } from "node:stream";
-import type {
-	MediaAdapterInstance,
-	MediaAdapterTenant,
-} from "../../../libs/media/types.js";
+import type { MediaAdapterInstance } from "../../../libs/media/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
 const MIME_SNIFF_BYTES = 8192;
@@ -50,11 +47,9 @@ const detectStreamMimeType = async (
 	context: ServiceContext,
 	streamMedia: MediaAdapterInstance["stream"],
 	key: string,
-	tenant: MediaAdapterTenant,
 ) => {
 	const streamRes = await streamMedia(context, {
 		key,
-		tenant,
 		range: {
 			start: 0,
 			end: MIME_SNIFF_BYTES - 1,

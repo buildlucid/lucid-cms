@@ -28,9 +28,4 @@ export { default as resolveCustomFieldSorts } from "./resolve-custom-field-sorts
 export { default as resolveEmailBrandName } from "./resolve-email-brand-name.js";
 export { default as richTextHasContent } from "./rich-text-has-content.js";
 export { default as sameNumericSet } from "./same-numeric-set.js";
-export {
-	getTenantConfig,
-	multiTenancyEnabled,
-	tenantAccessAllowed,
-} from "./tenants.js";
 export { default as urlAddPath } from "./url-add-path.js";

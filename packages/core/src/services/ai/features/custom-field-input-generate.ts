@@ -11,7 +11,6 @@ import {
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type { CustomFieldAiContextItem } from "../../../types.js";
-import { tenantAccessAllowed } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
 import getAccessToken from "../../connection/token-manager.js";
@@ -63,10 +62,7 @@ const customFieldInputGenerate: ServiceFn<
 	const collection = context.config.collections.find(
 		(item) => item.key === props.target.collectionKey,
 	);
-	if (
-		!collection ||
-		!tenantAccessAllowed(collection.getData.tenants, context.request.tenantKey)
-	) {
+	if (!collection) {
 		return {
 			error: {
 				type: "basic",
@@ -82,14 +78,7 @@ const customFieldInputGenerate: ServiceFn<
 				(brick) => brick.key === props.target.brickKey,
 			)
 		: undefined;
-	if (
-		props.target.brickKey &&
-		(!targetBrick ||
-			!tenantAccessAllowed(
-				targetBrick.config.tenants,
-				context.request.tenantKey,
-			))
-	) {
+	if (props.target.brickKey && !targetBrick) {
 		return {
 			error: {
 				type: "basic",

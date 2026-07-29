@@ -2,9 +2,7 @@ import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
 } from "../../libs/repositories/index.js";
-import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import checkMediaKeyAccess from "./checks/check-media-key-access.js";
 
 const abortUploadSession: ServiceFn<
 	[
@@ -35,13 +33,6 @@ const abortUploadSession: ServiceFn<
 	});
 	if (sessionRes.error) return sessionRes;
 
-	const keyAccessRes = await checkMediaKeyAccess(context, {
-		key: sessionRes.data.key,
-	});
-	if (keyAccessRes.error) return keyAccessRes;
-
-	const tenant = resolveMediaKeyTenant(context.config, sessionRes.data.key);
-
 	if (
 		context.media &&
 		sessionRes.data.adapter_upload_id &&
@@ -50,7 +41,6 @@ const abortUploadSession: ServiceFn<
 		const abortRes = await context.media.abortUploadSession(context, {
 			key: sessionRes.data.key,
 			uploadId: sessionRes.data.adapter_upload_id,
-			tenant,
 		});
 		if (abortRes.error) return abortRes;
 	}
@@ -62,7 +52,6 @@ const abortUploadSession: ServiceFn<
 		context.media
 			? context.media.delete(context, {
 					key: sessionRes.data.key,
-					tenant,
 				})
 			: null,
 	]);

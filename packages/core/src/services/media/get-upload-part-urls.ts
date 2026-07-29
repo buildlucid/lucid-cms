@@ -1,9 +1,7 @@
 import { copy } from "../../libs/i18n/index.js";
 import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
-import { resolveMediaKeyTenant } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import checkMediaKeyAccess from "./checks/check-media-key-access.js";
 
 const getUploadPartUrls: ServiceFn<
 	[
@@ -38,11 +36,6 @@ const getUploadPartUrls: ServiceFn<
 		},
 	});
 	if (sessionRes.error) return sessionRes;
-
-	const keyAccessRes = await checkMediaKeyAccess(context, {
-		key: sessionRes.data.key,
-	});
-	if (keyAccessRes.error) return keyAccessRes;
 
 	if (!context.media) {
 		return {
@@ -96,7 +89,6 @@ const getUploadPartUrls: ServiceFn<
 		expiresAt: new Date(
 			sessionRes.data.expires_at as string | Date,
 		).toISOString(),
-		tenant: resolveMediaKeyTenant(context.config, sessionRes.data.key),
 	});
 	if (urlsRes.error) return urlsRes;
 

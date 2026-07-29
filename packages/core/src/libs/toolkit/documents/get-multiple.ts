@@ -8,11 +8,9 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import type { ToolkitTenantOptions } from "../types.js";
 import {
 	normalizePaginatedDocumentQuery,
 	runToolkitService,
-	withToolkitTenant,
 } from "../utils.js";
 import type { ToolkitDocumentVersion } from "./index.js";
 
@@ -28,7 +26,7 @@ export type ToolkitDocumentsGetMultipleQuery<
 
 export type ToolkitDocumentsGetMultipleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = ToolkitTenantOptions & {
+> = {
 	collectionKey: TCollectionKey;
 	version: ToolkitDocumentVersion<TCollectionKey>;
 	/** Optional preview context that may override the requested version. */
@@ -47,11 +45,9 @@ const getMultiple = async <TCollectionKey extends CollectionDocumentKey>(
 	context: ServiceContext,
 	input: ToolkitDocumentsGetMultipleInput<TCollectionKey>,
 ): ServiceResponse<ToolkitDocumentsGetMultipleResult<TCollectionKey>> => {
-	const serviceContext = withToolkitTenant(context, input);
-
 	return runToolkitService(
 		() =>
-			documentServices.content.getMultiple(serviceContext, {
+			documentServices.content.getMultiple(context, {
 				collectionKey: input.collectionKey,
 				versionType: input.version,
 				preview: input.preview ?? undefined,

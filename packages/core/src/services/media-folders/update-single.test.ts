@@ -27,13 +27,12 @@ describe("media folder update single", () => {
 		vi.clearAllMocks();
 	});
 
-	it("allows tenants to update global folders without assigning the tenant", async () => {
+	it("updates an accessible folder", async () => {
 		mocks.checkFolderAccess
 			.mockResolvedValueOnce({
 				error: undefined,
 				data: {
 					id: 1,
-					tenant_key: null,
 				},
 			})
 			.mockResolvedValueOnce({
@@ -56,9 +55,6 @@ describe("media folder update single", () => {
 				config: {
 					db: {},
 				},
-				request: {
-					tenantKey: "marketing",
-				},
 			} as never,
 			{
 				id: 1,
@@ -79,22 +75,24 @@ describe("media folder update single", () => {
 		]);
 	});
 
-	it("prevents global folders being moved under tenant folders", async () => {
+	it("prevents a folder being moved under one of its descendants", async () => {
 		mocks.checkFolderAccess
 			.mockResolvedValueOnce({
 				error: undefined,
 				data: {
 					id: 1,
-					tenant_key: null,
 				},
 			})
 			.mockResolvedValueOnce({
 				error: undefined,
 				data: {
 					id: 2,
-					tenant_key: "marketing",
 				},
 			});
+		mocks.checkCircularParents.mockResolvedValueOnce({
+			error: undefined,
+			data: true,
+		});
 
 		const updateSingle = await loadUpdateSingle();
 		const response = await updateSingle(
@@ -104,9 +102,6 @@ describe("media folder update single", () => {
 				},
 				config: {
 					db: {},
-				},
-				request: {
-					tenantKey: "marketing",
 				},
 			} as never,
 			{

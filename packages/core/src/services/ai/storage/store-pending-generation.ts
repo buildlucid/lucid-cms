@@ -25,7 +25,6 @@ const storePendingGeneration: ServiceFn<
 	const existingRes = await AiGenerations.selectSingleByRequestId({
 		requestId: props.requestId,
 		select: ["id"],
-		tenantKey: context.request.tenantKey,
 	});
 	if (existingRes.error) return existingRes;
 
@@ -42,7 +41,6 @@ const storePendingGeneration: ServiceFn<
 			provider_request_id: null,
 			feature_key: props.feature.key,
 			feature_version: props.feature.version,
-			tenant_key: context.request.tenantKey ?? null,
 			user_id: props.userId,
 			lucid_remote_connection_id: props.lucidRemoteConnectionId,
 			target_type: props.targetType,

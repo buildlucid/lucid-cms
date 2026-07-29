@@ -59,7 +59,6 @@ export type AccessTokenClaims = {
 	client_id?: string;
 	principal_type?: "system" | "user";
 	user_id?: number | null;
-	tenant_key?: string | null;
 	scope?: string;
 };
 

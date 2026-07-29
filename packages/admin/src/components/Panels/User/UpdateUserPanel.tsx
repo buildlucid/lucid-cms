@@ -21,9 +21,8 @@ import ProfilePicturePreviewCard from "@/components/Partials/ProfilePicturePrevi
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
-import tenantStore from "@/store/tenantStore";
 import userStore from "@/store/userStore";
-import T, { translateAdminCopy } from "@/translations";
+import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
@@ -42,9 +41,6 @@ const UpdateUserPanel: Component<{
 	// ------------------------------
 	// State & Hooks
 	const [getSelectedRoles, setSelectedRoles] = createSignal<
-		SelectMultipleValueT[]
-	>([]);
-	const [getSelectedTenants, setSelectedTenants] = createSignal<
 		SelectMultipleValueT[]
 	>([]);
 	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal(false);
@@ -122,25 +118,6 @@ const UpdateUserPanel: Component<{
 			})) ?? []
 		);
 	});
-	const tenantOptions = createMemo(() => {
-		return tenantStore.get.tenants.map((tenant) => ({
-			value: tenant.key,
-			label: translateAdminCopy(tenant.name),
-		}));
-	});
-	const defaultTenantOption = createMemo(() => {
-		const tenantKey =
-			tenantStore.get.tenant ??
-			tenantStore.get.tenants.find((tenant) => tenant.default)?.key ??
-			tenantStore.get.tenants[0]?.key;
-
-		return tenantOptions().find((tenant) => tenant.value === tenantKey);
-	});
-	const showTenantSelect = createMemo(() => {
-		return Boolean(
-			userStore.get.user?.superAdmin && tenantOptions().length > 0,
-		);
-	});
 	const linkedProvidersByKey = createMemo(() => {
 		const authProviders = user.data?.data.authProviders ?? [];
 		return authProviders.reduce(
@@ -157,29 +134,17 @@ const UpdateUserPanel: Component<{
 				roleIds: user.data?.data.roles?.map((role) => role.id),
 				superAdmin: user.data?.data.superAdmin,
 				isLocked: user.data?.data.isLocked,
-				tenantKeys: user.data?.data.tenants?.map((tenant) => tenant.key),
 			},
 			{
 				roleIds: getSelectedRoles().map((role) => role.value) as number[],
 				superAdmin: getIsSuperAdmin(),
 				isLocked: getIsLocked(),
-				tenantKeys: getSelectedTenants().map(
-					(tenant) => tenant.value,
-				) as string[],
 			},
 		);
 	});
 	const userRoles = createMemo(() => {
 		return user.data?.data.roles?.map((role) => role.name).join(", ") || "-";
 	});
-	const userTenants = createMemo(() => {
-		return (
-			user.data?.data.tenants
-				?.map((tenant) => translateAdminCopy(tenant.name))
-				.join(", ") || "-"
-		);
-	});
-
 	// ---------------------------------
 	// Handlers
 	const handleSubmit = () => {
@@ -215,27 +180,7 @@ const UpdateUserPanel: Component<{
 			);
 			setIsSuperAdmin(user.data?.data.superAdmin || false);
 			setIsLocked(user.data?.data.isLocked || false);
-			setSelectedTenants(
-				user.data?.data.tenants?.map((tenant) => {
-					return {
-						value: tenant.key,
-						label: translateAdminCopy(tenant.name),
-					};
-				}) || [],
-			);
 		}
-	});
-
-	createEffect(() => {
-		if (!props.state.open) return;
-		if (!showTenantSelect()) return;
-		if (getIsSuperAdmin()) return;
-		if (getSelectedTenants().length > 0) return;
-
-		const defaultTenant = defaultTenantOption();
-		if (defaultTenant === undefined) return;
-
-		setSelectedTenants([defaultTenant]);
 	});
 
 	// ---------------------------------
@@ -319,20 +264,6 @@ const UpdateUserPanel: Component<{
 								options={roleOptions()}
 								errors={getBodyError("roleIds", updateUser.errors)}
 							/>
-							<Show when={showTenantSelect()}>
-								<SelectMultiple
-									id="tenantKeys"
-									values={getSelectedTenants()}
-									onChange={setSelectedTenants}
-									name={"tenantKeys"}
-									copy={{
-										label: T()("common.tenants"),
-									}}
-									required={!getIsSuperAdmin()}
-									options={tenantOptions()}
-									errors={getBodyError("tenantKeys", updateUser.errors)}
-								/>
-							</Show>
 							<Show when={userStore.get.user?.superAdmin}>
 								<Switch
 									id="superAdmin"
@@ -397,13 +328,6 @@ const UpdateUserPanel: Component<{
 										show:
 											user.data?.data.roles !== undefined &&
 											user.data?.data.roles.length > 0,
-									},
-									{
-										label: T()("common.tenants"),
-										value: userTenants(),
-										show:
-											user.data?.data.tenants !== undefined &&
-											user.data?.data.tenants.length > 0,
 									},
 									{
 										label: T()("users.status.locked.label"),

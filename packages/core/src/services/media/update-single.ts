@@ -20,7 +20,6 @@ import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { mediaServices, processedImageServices } from "../index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
-import checkFolderTenantCompatibility from "./helpers/check-folder-tenant-compatibility.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 import deactivateCrop from "./helpers/deactivate-crop.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
@@ -93,7 +92,6 @@ const updateSingle: ServiceFn<
 
 	const mediaRes = await Media.selectSingleById({
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		includeOwned: true,
 		validation: {
 			enabled: true,
@@ -124,13 +122,6 @@ const updateSingle: ServiceFn<
 			data: undefined,
 		};
 	}
-
-	const folderTenantRes = checkFolderTenantCompatibility({
-		folderId: data.folderId,
-		folderTenantKey: folderAccessRes.data?.tenant_key ?? null,
-		mediaTenantKey: mediaRes.data.tenant_key,
-	});
-	if (folderTenantRes.error) return folderTenantRes;
 
 	if (data.focalPoint !== undefined && mediaRes.data.type !== "image") {
 		return {
@@ -181,14 +172,6 @@ const updateSingle: ServiceFn<
 	const targetPublic = data.public ?? currentPublic;
 
 	if (data.key !== undefined && data.fileName !== undefined) {
-		const keyAccessRes = await mediaServices.checks.checkMediaKeyAccess(
-			context,
-			{
-				key: data.key,
-			},
-		);
-		if (keyAccessRes.error) return keyAccessRes;
-
 		const awaitingSync = await mediaServices.checks.checkAwaitingSync(context, {
 			key: data.key,
 		});
@@ -197,13 +180,11 @@ const updateSingle: ServiceFn<
 		const updateRes = await mediaServices.strategies.update(context, {
 			previousSize: mediaRes.data.file_size,
 			previousKey: mediaRes.data.key,
-			tenantKey: mediaRes.data.tenant_key,
 			previousType: mediaRes.data.type as MediaType,
 			previousEtag: mediaRes.data.e_tag,
 			updatedKey: data.key,
 			allowedType: data.allowedType,
 			fileName: data.fileName,
-			//* The final media key remains the existing media key, so replacement uploads cannot reassign tenants.
 			targetKey:
 				targetPublic === currentPublic
 					? mediaRes.data.key
@@ -486,7 +467,6 @@ const updateSingle: ServiceFn<
 				type: finalType,
 				origin: data.origin ?? mediaRes.data.origin,
 				public: isPublic ?? data.public ?? mediaRes.data.public,
-				tenant_key: mediaRes.data.tenant_key,
 				relation_type: mediaRes.data.relation_type,
 			},
 			crop: data.crop,
@@ -530,9 +510,7 @@ const updateSingle: ServiceFn<
 			config: context.config,
 		},
 		{
-			meta: {
-				tenantKey: context.request.tenantKey ?? null,
-			},
+			meta: {},
 			data: {
 				id: mediaUpdateRes.data.id,
 				userId: data.userId,

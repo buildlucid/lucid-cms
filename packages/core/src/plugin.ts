@@ -27,6 +27,5 @@ export { ensureLucidDirectoryExists } from "./utils/helpers/lucid-directory.js";
 export {
 	buildDownloadContentDisposition,
 	getFileMetadata,
-	resolveMediaKeyTenant,
 } from "./utils/media/index.js";
 export { default as serviceWrapper } from "./utils/services/service-wrapper.js";

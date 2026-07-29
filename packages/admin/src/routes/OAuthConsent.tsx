@@ -17,12 +17,10 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { Select } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import IconContainer from "@/components/Partials/IconContainer";
 import Pill from "@/components/Partials/Pill";
 import api from "@/services/api";
-import tenantStore from "@/store/tenantStore";
 import T, { translateAdminCopy } from "@/translations";
 import { LucidError } from "@/utils/error-handling";
 import { getProcessedImageUrl } from "@/utils/media-url";
@@ -34,15 +32,11 @@ const OAuthConsentRoute: Component = () => {
 	const [principalType, setPrincipalType] = createSignal<"user" | "system">(
 		"user",
 	);
-	const [tenantKey, setTenantKey] = createSignal<string | undefined>(
-		tenantStore.get.tenant,
-	);
 
 	// ----------------------------------------
 	// Queries
 	const request = api.oauthConnections.useGetAuthorizationRequest({
 		requestId: () => params.requestId,
-		tenantKey,
 	});
 
 	// ----------------------------------------
@@ -95,16 +89,8 @@ const OAuthConsentRoute: Component = () => {
 	const canAllow = createMemo(
 		() =>
 			effectiveScopes().length > 0 &&
-			(tenantStore.get.tenants.length === 0 ||
-				tenantStore.get.tenants.some((tenant) => tenant.key === tenantKey())) &&
 			!request.isFetching &&
 			!complete.action.isPending,
-	);
-	const tenantOptions = createMemo(() =>
-		tenantStore.get.tenants.map((tenant) => ({
-			value: tenant.key,
-			label: translateAdminCopy(tenant.name),
-		})),
 	);
 	const requestErrorCode = createMemo(() =>
 		request.error instanceof LucidError
@@ -118,15 +104,6 @@ const OAuthConsentRoute: Component = () => {
 	// ----------------------------------------
 	// Effects
 	createEffect(() => {
-		const tenants = tenantStore.get.tenants;
-		if (tenants.length === 0) {
-			setTenantKey(undefined);
-		} else if (!tenants.some((tenant) => tenant.key === tenantKey())) {
-			setTenantKey(
-				tenants.find((tenant) => tenant.default)?.key ?? tenants[0]?.key,
-			);
-		}
-
 		if (
 			request.isSuccess &&
 			!request.data.data.canConnectAsSystem &&
@@ -147,7 +124,6 @@ const OAuthConsentRoute: Component = () => {
 	const allowAuthorization = () => {
 		complete.action.mutate({
 			requestId: params.requestId,
-			tenantKey: tenantKey(),
 			body: {
 				decision: "allow",
 				principalType: principalType(),
@@ -384,30 +360,6 @@ const OAuthConsentRoute: Component = () => {
 									</p>
 								</div>
 							</section>
-
-							{/* Tenant */}
-							<Show when={tenantOptions().length > 1}>
-								<section class="border-b border-border p-4">
-									<Select
-										id="oauth-connection-tenant"
-										name="tenant"
-										value={tenantKey()}
-										onChange={(value) =>
-											setTenantKey(
-												typeof value === "string" ? value : undefined,
-											)
-										}
-										options={tenantOptions()}
-										copy={{
-											label: T()("oauth.consent.tenant.label"),
-										}}
-										required={true}
-										noClear={true}
-										noMargin={true}
-										disabled={request.isFetching}
-									/>
-								</section>
-							</Show>
 
 							{/* Permissions */}
 							<section class="border-b border-border p-4">

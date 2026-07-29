@@ -11,7 +11,6 @@ import type {
 } from "../../../libs/collection/custom-fields/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
-import { tenantAccessAllowed } from "../../../utils/helpers/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import getTranslatedFieldDetails from "./get-translated-field-details.js";
 
@@ -323,14 +322,8 @@ const formatBrickDefinitions = (props: {
 	collection: CollectionBuilder;
 	bricks?: BrickBuilder[];
 }): Record<string, DefinitionBrick> => {
-	return (props.bricks ?? [])
-		.filter((brick) =>
-			tenantAccessAllowed(
-				brick.config.tenants,
-				props.context.request.tenantKey,
-			),
-		)
-		.reduce<Record<string, DefinitionBrick>>((acc, brick) => {
+	return (props.bricks ?? []).reduce<Record<string, DefinitionBrick>>(
+		(acc, brick) => {
 			const details = getTranslatedBrickDetails(props.context, brick);
 
 			acc[brick.key] = {
@@ -344,7 +337,9 @@ const formatBrickDefinitions = (props: {
 			};
 
 			return acc;
-		}, {});
+		},
+		{},
+	);
 };
 
 /**
@@ -386,14 +381,6 @@ const formatCustomFieldDocumentContext = (
 			props.document?.bricks?.flatMap((brick) => {
 				const brickInstance = getBrickInstance(props.collection, brick);
 				if (!brickInstance) return [];
-				if (
-					!tenantAccessAllowed(
-						brickInstance.config.tenants,
-						props.context.request.tenantKey,
-					)
-				) {
-					return [];
-				}
 
 				return [
 					{

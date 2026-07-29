@@ -1,5 +1,4 @@
 import type { Readable } from "node:stream";
-import type { TenantConfig } from "../../types/config.js";
 import type { MediaType, ServiceResponse } from "../../types.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
@@ -19,12 +18,6 @@ export type MediaAdapterUploadPart = {
 	etag: string;
 	size?: number;
 };
-
-/**
- * The tenant responsible for the media operation.
- * Adapters can use this to choose tenant-specific buckets, clients, or paths.
- */
-export type MediaAdapterTenant = TenantConfig | null;
 
 export type MediaAdapterCreateUploadSessionResponse =
 	| {
@@ -49,7 +42,6 @@ export type MediaAdapterCreateUploadSessionParams = {
 	mimeType: string;
 	extension?: string;
 	size: number;
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceCreateUploadSession = (
@@ -62,7 +54,6 @@ export type MediaAdapterGetUploadPartUrlsParams = {
 	uploadId: string;
 	partNumbers: number[];
 	expiresAt: string;
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceGetUploadPartUrls = (
@@ -79,7 +70,6 @@ export type MediaAdapterServiceGetUploadPartUrls = (
 export type MediaAdapterListUploadPartsParams = {
 	key: string;
 	uploadId: string;
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceListUploadParts = (
@@ -93,7 +83,6 @@ export type MediaAdapterCompleteUploadSessionParams = {
 	key: string;
 	uploadId: string;
 	parts: MediaAdapterUploadPart[];
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceCompleteUploadSession = (
@@ -106,7 +95,6 @@ export type MediaAdapterServiceCompleteUploadSession = (
 export type MediaAdapterAbortUploadSessionParams = {
 	key: string;
 	uploadId: string;
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceAbortUploadSession = (
@@ -120,7 +108,6 @@ export type MediaAdapterGetDownloadUrlParams = {
 	secretKey: string;
 	fileName?: string | null;
 	extension?: string | null;
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceGetDownloadUrl = (
@@ -132,7 +119,6 @@ export type MediaAdapterServiceGetDownloadUrl = (
 
 export type MediaAdapterGetMetaParams = {
 	key: string;
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceGetMeta = (
@@ -151,7 +137,6 @@ export type MediaAdapterStreamParams = {
 		start: number;
 		end?: number;
 	};
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceStream = (
@@ -178,7 +163,6 @@ export type MediaAdapterUploadSingleParams = {
 	extension: string;
 	size: number;
 	type: MediaType;
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceUploadSingle = (
@@ -190,7 +174,6 @@ export type MediaAdapterServiceUploadSingle = (
 
 export type MediaAdapterDeleteSingleParams = {
 	key: string;
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceDeleteSingle = (
@@ -200,7 +183,6 @@ export type MediaAdapterServiceDeleteSingle = (
 
 export type MediaAdapterDeleteMultipleParams = {
 	keys: string[];
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceDeleteMultiple = (
@@ -211,7 +193,6 @@ export type MediaAdapterServiceDeleteMultiple = (
 export type MediaAdapterRenameKeyParams = {
 	from: string;
 	to: string;
-	tenant: MediaAdapterTenant;
 };
 
 export type MediaAdapterServiceRenameKey = (

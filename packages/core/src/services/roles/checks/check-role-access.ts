@@ -3,8 +3,7 @@ import { RolesRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Loads a role through the current tenant scope before role mutations.
- * Global roles stay visible to tenant requests, matching role list reads.
+ * Loads a role before role mutations.
  */
 const checkRoleAccess: ServiceFn<
 	[
@@ -18,7 +17,6 @@ const checkRoleAccess: ServiceFn<
 
 	const roleRes = await Roles.selectSingleById({
 		id: data.id,
-		tenantKey: context.request.tenantKey,
 		validation: {
 			enabled: true,
 			defaultError: {

@@ -8,12 +8,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import type { ToolkitTenantOptions } from "../types.js";
-import {
-	normalizeDocumentQuery,
-	runToolkitService,
-	withToolkitTenant,
-} from "../utils.js";
+import { normalizeDocumentQuery, runToolkitService } from "../utils.js";
 import type { ToolkitDocumentVersion } from "./index.js";
 
 export type ToolkitDocumentsGetSingleQuery<
@@ -22,7 +17,7 @@ export type ToolkitDocumentsGetSingleQuery<
 
 export type ToolkitDocumentsGetSingleInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = ToolkitTenantOptions & {
+> = {
 	collectionKey: TCollectionKey;
 	version: ToolkitDocumentVersion<TCollectionKey>;
 	/** Optional preview context that may override the requested version. */
@@ -34,11 +29,9 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 	context: ServiceContext,
 	input: ToolkitDocumentsGetSingleInput<TCollectionKey>,
 ): ServiceResponse<CollectionDocument<TCollectionKey>> => {
-	const serviceContext = withToolkitTenant(context, input);
-
 	return runToolkitService(
 		() =>
-			documentServices.content.getSingle(serviceContext, {
+			documentServices.content.getSingle(context, {
 				collectionKey: input.collectionKey,
 				versionType: input.version,
 				preview: input.preview ?? undefined,

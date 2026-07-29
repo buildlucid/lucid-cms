@@ -1,27 +1,21 @@
 import { LucidRemoteConnectionsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import verifyConnection from "../connection/verify.js";
-import resolveConnectionVerificationTargets from "./helpers/resolve-connection-verification-targets.js";
 
-/**
- * Revalidates each effective tenant connection and verifies a shared global
- * fallback only once.
- */
+/** Revalidates the active connection. */
 const verifyConnections: ServiceFn<[], undefined> = async (context) => {
 	const Connections = new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
 	);
-	const rows = await Connections.selectAll();
-	if (rows.error) return rows;
-
-	const results = await Promise.all(
-		resolveConnectionVerificationTargets(context, rows.data ?? []).map(
-			(connection) => verifyConnection(context, { connection }),
-		),
-	);
-	const failed = results.find((result) => result.error);
-	if (failed?.error) return failed;
+	const connection = await Connections.selectEffective();
+	if (connection.error) return connection;
+	if (connection.data?.grant_encrypted) {
+		const result = await verifyConnection(context, {
+			connection: connection.data,
+		});
+		if (result.error) return result;
+	}
 
 	return {
 		error: undefined,

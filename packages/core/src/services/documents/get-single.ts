@@ -84,21 +84,6 @@ const getSingle: ServiceFn<
 	if (documentRes.error) return documentRes;
 	if (workflowRes.error) return workflowRes;
 
-	if (
-		documentRes.data.tenant_key &&
-		context.request.tenantKey &&
-		documentRes.data.tenant_key !== context.request.tenantKey
-	) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.documents.version.not.found.message"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
-
 	const versionId =
 		data.version !== undefined ? documentRes.data.version_id : data.versionId;
 	const versionType =
@@ -173,7 +158,6 @@ const getSingle: ServiceFn<
 				collection: collectionRes.data,
 				collectionKey: documentRes.data.collection_key,
 				collectionTableNames: tableNamesRes.data,
-				tenantKey: context.request.tenantKey ?? null,
 			},
 			data: {
 				versionType,

@@ -15,14 +15,9 @@ const OAuthRoutes: Component<{
 
 	// ----------------------------------------
 	// Queries
-	const authenticatedUser = api.account.useGetAuthenticatedUser(
-		{
-			queryParams: {},
-		},
-		{
-			tenant: false,
-		},
-	);
+	const authenticatedUser = api.account.useGetAuthenticatedUser({
+		queryParams: {},
+	});
 
 	// ----------------------------------------
 	// Effects

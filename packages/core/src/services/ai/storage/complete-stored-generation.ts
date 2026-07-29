@@ -20,7 +20,6 @@ const completeStoredGeneration: ServiceFn<
 	const existingRes = await AiGenerations.selectSingleByRequestId({
 		requestId: props.response.requestId,
 		select: ["id", "created_at"],
-		tenantKey: context.request.tenantKey,
 	});
 	if (existingRes.error) return existingRes;
 

@@ -26,7 +26,6 @@ describe("stream", () => {
 			{
 				key: "public/uuid",
 				ifNoneMatch: '"etag"',
-				tenant: null,
 			},
 		);
 
