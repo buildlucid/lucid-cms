@@ -1,15 +1,17 @@
 import type z from "zod";
-import type { LucidRemoteConnectionState } from "../../libs/db/types.js";
+import type {
+	LucidRemoteConnectionState,
+	LucidRemoteConnections,
+	Select,
+	Update,
+} from "../../libs/db/types.js";
 import {
 	type ConnectionGrant,
 	type ConnectionRegistration,
 	connectionGrantSchema,
 	connectionRegistrationSchema,
 } from "../../libs/lucid-remote/schema/connection.js";
-import {
-	type LucidRemoteConnectionRow,
-	LucidRemoteConnectionsRepository,
-} from "../../libs/repositories/index.js";
+import { LucidRemoteConnectionsRepository } from "../../libs/repositories/index.js";
 import { decrypt, encrypt } from "../../utils/helpers/encrypt-decrypt.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import { hashLucidRemoteConnectionState } from "./helpers/flow-security.js";
@@ -37,7 +39,7 @@ const writeEncrypted = (context: ServiceContext, value: unknown | null) =>
 /** Decrypts and validates a row's confidential OAuth client registration. */
 export const getConnectionRegistration = (
 	context: ServiceContext,
-	row: LucidRemoteConnectionRow,
+	row: Select<LucidRemoteConnections>,
 ) =>
 	readEncrypted(
 		context,
@@ -48,54 +50,110 @@ export const getConnectionRegistration = (
 /** Decrypts and validates a row's access and refresh grant. */
 export const getConnectionGrant = (
 	context: ServiceContext,
-	row: LucidRemoteConnectionRow,
+	row: Select<LucidRemoteConnections>,
 ) => readEncrypted(context, row.grant_encrypted, connectionGrantSchema);
 
 /** Decrypts and validates a row's outstanding authorization flow. */
 export const getConnectionPending = (
 	context: ServiceContext,
-	row: LucidRemoteConnectionRow,
+	row: Select<LucidRemoteConnections>,
 ) => readEncrypted(context, row.pending_encrypted, connectionPendingSchema);
 
 /** Resolves the connection row. */
-export const resolveEffectiveConnection = (context: ServiceContext) =>
-	new LucidRemoteConnectionsRepository(
-		context.db.client,
-		context.config.db,
-	).selectEffective();
-
-/** Resolves or creates the singleton connection row. */
-export const resolveWritableConnection = (context: ServiceContext) => {
-	const connections = new LucidRemoteConnectionsRepository(
+export const resolveEffectiveConnection = (context: ServiceContext) => {
+	const Connections = new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
 	);
-	return connections.getOrCreate();
+
+	return Connections.selectSingle({
+		select: [
+			"id",
+			"status",
+			"registration_encrypted",
+			"grant_encrypted",
+			"pending_encrypted",
+			"pending_state_hash",
+			"pending_expires_at",
+			"display",
+			"last_attempt_at",
+			"last_verified_at",
+			"error_key",
+			"created_at",
+			"updated_at",
+		],
+		where: [{ key: "id", operator: "=", value: 1 }],
+	});
+};
+
+/** Resolves or creates the singleton connection row. */
+export const resolveWritableConnection = (context: ServiceContext) => {
+	const Connections = new LucidRemoteConnectionsRepository(
+		context.db.client,
+		context.config.db,
+	);
+	return Connections.getOrCreate({});
 };
 
 /** Finds a pending callback row by state digest. */
-export const findConnectionByState = (context: ServiceContext, state: string) =>
-	new LucidRemoteConnectionsRepository(
+export const findConnectionByState = (
+	context: ServiceContext,
+	state: string,
+) => {
+	const Connections = new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
-	).selectByPendingStateHash(hashLucidRemoteConnectionState(context, state));
+	);
+
+	return Connections.selectSingle({
+		select: [
+			"id",
+			"status",
+			"registration_encrypted",
+			"grant_encrypted",
+			"pending_encrypted",
+			"pending_state_hash",
+			"pending_expires_at",
+			"display",
+			"last_attempt_at",
+			"last_verified_at",
+			"error_key",
+			"created_at",
+			"updated_at",
+		],
+		where: [
+			{
+				key: "pending_state_hash",
+				operator: "=",
+				value: hashLucidRemoteConnectionState(context, state),
+			},
+		],
+	});
+};
 
 /** Atomically clears pending state after all local callback checks pass. */
-export const consumeConnectionPending = (
+export const consumeConnectionPending = async (
 	context: ServiceContext,
-	row: LucidRemoteConnectionRow,
+	row: Select<LucidRemoteConnections>,
 ) => {
 	if (!row.pending_state_hash || !row.pending_encrypted) {
-		return Promise.resolve({ error: undefined, data: false });
+		return { error: undefined, data: false };
 	}
-	return new LucidRemoteConnectionsRepository(
+	const Connections = new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
-	).claimPending({
+	);
+	const claimed = await Connections.claimPending({
 		id: row.id,
 		pendingStateHash: row.pending_state_hash,
 		pendingEncrypted: row.pending_encrypted,
 	});
+	if (claimed.error) return claimed;
+
+	return {
+		error: undefined,
+		data: claimed.data !== undefined,
+	};
 };
 
 /**
@@ -106,18 +164,25 @@ export const replaceConnectionRegistration = (
 	context: ServiceContext,
 	rowId: number,
 	value: ConnectionRegistration,
-) =>
-	new LucidRemoteConnectionsRepository(
+) => {
+	const Connections = new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
-	).updateById(rowId, {
-		registration_encrypted: writeEncrypted(context, value),
-		grant_encrypted: null,
-		status: "disconnected",
-		display: null,
-		last_verified_at: null,
-		updated_at: new Date().toISOString(),
+	);
+
+	return Connections.updateSingle({
+		data: {
+			registration_encrypted: writeEncrypted(context, value),
+			grant_encrypted: null,
+			status: "disconnected",
+			display: null,
+			last_verified_at: null,
+			updated_at: new Date().toISOString(),
+		},
+		where: [{ key: "id", operator: "=", value: rowId }],
+		returning: ["id"],
 	});
+};
 
 /** Stores the encrypted pending flow and its indexed state digest together. */
 export const setConnectionPending = (
@@ -127,16 +192,23 @@ export const setConnectionPending = (
 		pending: ConnectionPending;
 		stateHash: string;
 	},
-) =>
-	new LucidRemoteConnectionsRepository(
+) => {
+	const Connections = new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
-	).updateById(rowId, {
-		pending_encrypted: writeEncrypted(context, value.pending),
-		pending_state_hash: value.stateHash,
-		pending_expires_at: value.pending.expiresAt,
-		updated_at: new Date().toISOString(),
+	);
+
+	return Connections.updateSingle({
+		data: {
+			pending_encrypted: writeEncrypted(context, value.pending),
+			pending_state_hash: value.stateHash,
+			pending_expires_at: value.pending.expiresAt,
+			updated_at: new Date().toISOString(),
+		},
+		where: [{ key: "id", operator: "=", value: rowId }],
+		returning: ["id"],
 	});
+};
 
 type PersistedLucidRemoteConnectionState = {
 	status?: LucidRemoteConnectionState;
@@ -152,7 +224,7 @@ export const persistLucidRemoteConnectionState = (
 	rowId: number,
 	state: PersistedLucidRemoteConnectionState,
 ) => {
-	const data: Parameters<LucidRemoteConnectionsRepository["updateById"]>[1] = {
+	const data: Partial<Update<LucidRemoteConnections>> = {
 		updated_at: new Date().toISOString(),
 	};
 	if (state.status !== undefined) data.status = state.status;
@@ -162,10 +234,16 @@ export const persistLucidRemoteConnectionState = (
 		data.last_verified_at = state.lastVerified;
 	if (state.errorKey !== undefined) data.error_key = state.errorKey;
 
-	return new LucidRemoteConnectionsRepository(
+	const Connections = new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
-	).updateById(rowId, data);
+	);
+
+	return Connections.updateSingle({
+		data,
+		where: [{ key: "id", operator: "=", value: rowId }],
+		returning: ["id"],
+	});
 };
 
 /** Persists an encrypted grant and related state atomically in one row update. */
@@ -175,7 +253,7 @@ export const persistConnectionGrantState = (
 	grant: ConnectionGrant | null,
 	state: PersistedLucidRemoteConnectionState = {},
 ) => {
-	const data: Parameters<LucidRemoteConnectionsRepository["updateById"]>[1] = {
+	const data: Partial<Update<LucidRemoteConnections>> = {
 		grant_encrypted: writeEncrypted(context, grant),
 		updated_at: new Date().toISOString(),
 	};
@@ -186,8 +264,14 @@ export const persistConnectionGrantState = (
 		data.last_verified_at = state.lastVerified;
 	if (state.errorKey !== undefined) data.error_key = state.errorKey;
 
-	return new LucidRemoteConnectionsRepository(
+	const Connections = new LucidRemoteConnectionsRepository(
 		context.db.client,
 		context.config.db,
-	).updateById(rowId, data);
+	);
+
+	return Connections.updateSingle({
+		data,
+		where: [{ key: "id", operator: "=", value: rowId }],
+		returning: ["id"],
+	});
 };

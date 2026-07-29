@@ -1,10 +1,10 @@
 import constants from "../../constants/constants.js";
+import type { LucidRemoteConnections, Select } from "../../libs/db/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	getLucidConnectionUrls,
 	refreshConnectionGrant,
 } from "../../libs/lucid-remote/services/connection/index.js";
-import type { LucidRemoteConnectionRow } from "../../libs/repositories/index.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getConnectionErrorKey } from "./errors.js";
@@ -20,7 +20,7 @@ import {
 const getAccessToken: ServiceFn<
 	[
 		{
-			connection?: LucidRemoteConnectionRow;
+			connection?: Select<LucidRemoteConnections>;
 		},
 	],
 	{ accessToken: string; lucidRemoteConnectionId: number }

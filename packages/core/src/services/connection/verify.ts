@@ -1,6 +1,6 @@
+import type { LucidRemoteConnections, Select } from "../../libs/db/types.js";
 import { lucidRemoteConnectionsFormatter } from "../../libs/formatters/index.js";
 import { fetchRemoteConnection } from "../../libs/lucid-remote/services/connection/index.js";
-import type { LucidRemoteConnectionRow } from "../../libs/repositories/index.js";
 import type { ConnectionStatus } from "../../types/response.js";
 import { getUnixTimeSeconds } from "../../utils/helpers/time.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -15,7 +15,7 @@ import getAccessToken from "./token-manager.js";
 const verify: ServiceFn<
 	[
 		{
-			connection?: LucidRemoteConnectionRow;
+			connection?: Select<LucidRemoteConnections>;
 		},
 	],
 	ConnectionStatus

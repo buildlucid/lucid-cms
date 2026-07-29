@@ -20,10 +20,7 @@ export { default as EmailsRepository } from "./emails.js";
 export { default as IntegrationScopesRepository } from "./integration-scopes.js";
 export { default as IntegrationsRepository } from "./integrations.js";
 export { default as LocalesRepository } from "./locales.js";
-export {
-	default as LucidRemoteConnectionsRepository,
-	type LucidRemoteConnectionRow,
-} from "./lucid-remote-connections.js";
+export { default as LucidRemoteConnectionsRepository } from "./lucid-remote-connections.js";
 export { default as MediaRepository } from "./media.js";
 export { default as MediaAwaitingSyncRepository } from "./media-awaiting-sync.js";
 export { default as MediaFoldersRepository } from "./media-folders.js";

@@ -2,9 +2,9 @@ import type { ConnectionStatus } from "@lucidcms/types";
 import z from "zod";
 import constants from "../../constants/constants.js";
 import type { ServiceContext } from "../../utils/services/types.js";
+import type { LucidRemoteConnections, Select } from "../db/types.js";
 import { getLucidRemoteConfig } from "../lucid-remote/origin.js";
 import { remoteConnectionDataSchema } from "../lucid-remote/schema/connection.js";
-import type { LucidRemoteConnectionRow } from "../repositories/index.js";
 
 const displaySchema = z
 	.object({
@@ -18,7 +18,7 @@ const displaySchema = z
 /** Formats a connection row into its public, secret-free status payload. */
 const formatStatus = (
 	context: ServiceContext,
-	row: LucidRemoteConnectionRow | undefined,
+	row: Select<LucidRemoteConnections> | undefined,
 ): ConnectionStatus => {
 	let display: z.infer<typeof displaySchema> | null = null;
 	if (row?.display) {

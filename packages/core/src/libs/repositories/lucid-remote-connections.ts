@@ -1,33 +1,8 @@
 import z from "zod";
 import type DatabaseAdapter from "../db/adapter-base.js";
-import type {
-	KyselyDB,
-	LucidRemoteConnections,
-	Select,
-	Update,
-} from "../db/types.js";
+import type { KyselyDB } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
-
-const connectionColumns = [
-	"id",
-	"status",
-	"registration_encrypted",
-	"grant_encrypted",
-	"pending_encrypted",
-	"pending_state_hash",
-	"pending_expires_at",
-	"display",
-	"last_attempt_at",
-	"last_verified_at",
-	"error_key",
-	"created_at",
-	"updated_at",
-] as const satisfies (keyof Select<LucidRemoteConnections>)[];
-
-export type LucidRemoteConnectionRow = Pick<
-	Select<LucidRemoteConnections>,
-	(typeof connectionColumns)[number]
->;
+import type { QueryProps } from "./types.js";
 
 export default class LucidRemoteConnectionsRepository extends StaticRepository<"lucid_remote_connections"> {
 	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
@@ -65,36 +40,11 @@ export default class LucidRemoteConnectionsRepository extends StaticRepository<"
 	};
 	queryConfig = undefined;
 
-	/** Resolves the active connection row. */
-	async selectEffective() {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.selectFrom("lucid_remote_connections")
-					.select(connectionColumns)
-					.orderBy("id", "asc")
-					.executeTakeFirst(),
-			{ method: "selectEffective" },
-		);
-		return exec.response;
-	}
-
-	/** Finds a pending flow by its keyed state digest. */
-	async selectByPendingStateHash(pendingStateHash: string) {
-		return this.selectSingle({
-			select: [...connectionColumns],
-			where: [
-				{
-					key: "pending_state_hash",
-					operator: "=",
-					value: pendingStateHash,
-				},
-			],
-		});
-	}
+	// ----------------------------------------
+	// queries
 
 	/** Creates the singleton connection row if absent. */
-	async getOrCreate() {
+	async getOrCreate<V extends boolean = false>(props: QueryProps<V, object>) {
 		const exec = await this.executeQuery(
 			async () => {
 				const inserted = await this.db
@@ -105,59 +55,63 @@ export default class LucidRemoteConnectionsRepository extends StaticRepository<"
 						display: null,
 					})
 					.onConflict((conflict) => conflict.column("id").doNothing())
-					.returning(connectionColumns)
+					.returningAll()
 					.executeTakeFirst();
 				if (inserted) return inserted;
 
 				return this.db
 					.selectFrom("lucid_remote_connections")
-					.select(connectionColumns)
+					.selectAll()
 					.where("id", "=", 1)
 					.executeTakeFirst();
 			},
 			{ method: "getOrCreate" },
 		);
-		return exec.response;
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			selectAll: true,
+		});
 	}
 
 	/**
 	 * Atomically consumes a pending flow. Comparing both digest and ciphertext
 	 * prevents concurrent callbacks from claiming the same authorization.
 	 */
-	async claimPending(props: {
-		id: number;
-		pendingStateHash: string;
-		pendingEncrypted: string;
-	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_remote_connections")
-					.set({
-						pending_encrypted: null,
-						pending_state_hash: null,
-						pending_expires_at: null,
-						updated_at: new Date().toISOString(),
-					})
-					.where("id", "=", props.id)
-					.where("pending_state_hash", "=", props.pendingStateHash)
-					.where("pending_encrypted", "=", props.pendingEncrypted)
-					.executeTakeFirst(),
-			{ method: "claimPending" },
-		);
-		if (exec.response.error) return exec.response;
-		return {
-			error: undefined,
-			data: Number(exec.response.data.numUpdatedRows ?? 0n) === 1,
-		};
-	}
+	async claimPending<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				id: number;
+				pendingStateHash: string;
+				pendingEncrypted: string;
+			}
+		>,
+	) {
+		const query = this.db
+			.updateTable("lucid_remote_connections")
+			.set({
+				pending_encrypted: null,
+				pending_state_hash: null,
+				pending_expires_at: null,
+				updated_at: new Date().toISOString(),
+			})
+			.where("id", "=", props.id)
+			.where("pending_state_hash", "=", props.pendingStateHash)
+			.where("pending_encrypted", "=", props.pendingEncrypted)
+			.returning(["id"]);
 
-	/** Updates a connection row by internal identity. */
-	updateById(id: number, data: Partial<Update<LucidRemoteConnections>>) {
-		return this.updateSingle({
-			data,
-			where: [{ key: "id", operator: "=", value: id }],
-			returning: ["id"],
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "claimPending",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: ["id"],
 		});
 	}
 }
