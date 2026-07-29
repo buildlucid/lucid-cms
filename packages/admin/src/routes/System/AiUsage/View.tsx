@@ -1,18 +1,25 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import type { AiUsageStatus } from "@types";
-import { type Component, createMemo } from "solid-js";
+import {
+	FaSolidArrowUpRightFromSquare,
+	FaSolidTriangleExclamation,
+} from "solid-icons/fa";
+import { type Component, createMemo, Show } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
 import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
 import { AiUsageChart } from "@/components/Charts";
 import { AiUsageList } from "@/components/Groups/Content";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
+import Link from "@/components/Partials/Link";
+import constants from "@/constants";
 import useQueryState, {
 	numberFilter,
 	pagination,
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState";
+import siteStore from "@/store/siteStore";
 import T from "@/translations";
 import { getAiUsageFeatureOptions } from "@/utils/ai-usage";
 
@@ -50,6 +57,9 @@ const SystemAiUsageRoute: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const featureOptions = createMemo(() => getAiUsageFeatureOptions());
+	const connectionActive = createMemo(
+		() => siteStore.get.connection?.status === "connected",
+	);
 
 	// ----------------------------------
 	// Render
@@ -60,6 +70,42 @@ const SystemAiUsageRoute: Component = () => {
 			}}
 		>
 			<DynamicContent options={{ padding: "24" }}>
+				<Show when={!connectionActive()}>
+					<section class="mb-5 flex flex-col gap-4 rounded-md border border-warning-base/25 bg-warning-base/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+						<div class="flex min-w-0 items-start gap-3">
+							<span class="grid size-8 shrink-0 place-items-center rounded-full bg-warning-base/10 text-warning-base">
+								<FaSolidTriangleExclamation class="size-3.5" />
+							</span>
+							<div class="min-w-0">
+								<h2 class="text-sm font-semibold text-title">
+									{T()("ai.usage.connection.warning.title")}
+								</h2>
+								<p class="mt-0.5 max-w-3xl text-xs">
+									{T()("ai.usage.connection.warning.description")}
+								</p>
+							</div>
+						</div>
+						<div class="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+							<Link
+								href="/lucid/system/operations"
+								theme="border-outline"
+								size="small"
+							>
+								{T()("ai.usage.connection.manage.action")}
+							</Link>
+							<Link
+								href={constants.lucidRemote.pricing}
+								target="_blank"
+								rel="noreferrer"
+								theme="primary"
+								size="small"
+							>
+								{T()("ai.usage.connection.pricing.action")}
+								<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />
+							</Link>
+						</div>
+					</section>
+				</Show>
 				<InfoRow.Root
 					title={T()("ai.usage.charts.title")}
 					description={T()("ai.usage.charts.description")}

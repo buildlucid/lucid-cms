@@ -1,0 +1,47 @@
+import type { UploadSessionResponse } from "@lucidcms/types";
+import { copy } from "../../libs/i18n/index.js";
+import { getMediaType } from "../../utils/media/index.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import { mediaServices } from "../index.js";
+
+const createLogoUploadSession: ServiceFn<
+	[
+		{
+			fileName: string;
+			mimeType: string;
+			size: number;
+			userId: number;
+		},
+	],
+	UploadSessionResponse
+> = async (context, data) => {
+	if (getMediaType(data.mimeType) !== "image") {
+		return {
+			error: {
+				type: "validation",
+				status: 400,
+				errors: {
+					mimeType: {
+						code: "media_error",
+						message: copy("server:core.media.errors.invalid.type", {
+							data: {
+								type: "image",
+							},
+						}),
+					},
+				},
+			},
+			data: undefined,
+		};
+	}
+
+	return mediaServices.createUploadSession(context, {
+		fileName: data.fileName,
+		mimeType: data.mimeType,
+		size: data.size,
+		public: true,
+		userId: data.userId,
+	});
+};
+
+export default createLogoUploadSession;

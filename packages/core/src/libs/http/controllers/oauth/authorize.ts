@@ -21,7 +21,7 @@ const factory = createFactory();
 const authorizeController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Starts an OAuth Authorization Code flow using a client metadata document and S256 PKCE.",
+			"Starts an OAuth Authorization Code flow for a registered client or client metadata document using S256 PKCE.",
 		tags: ["oauth"],
 		summary: "Authorize OAuth Client",
 		parameters: openAPI.parameters({

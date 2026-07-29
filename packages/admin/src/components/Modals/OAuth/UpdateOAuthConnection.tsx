@@ -127,7 +127,7 @@ const UpdateOAuthConnection: Component<{
 						<Button
 							type="button"
 							theme="border-outline"
-							size="small"
+							size="medium"
 							onClick={close}
 							disabled={updateConnection.action.isPending}
 						>
@@ -136,7 +136,7 @@ const UpdateOAuthConnection: Component<{
 						<Button
 							type="submit"
 							theme="primary"
-							size="small"
+							size="medium"
 							loading={updateConnection.action.isPending}
 							disabled={!canSubmit()}
 						>

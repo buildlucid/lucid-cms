@@ -846,6 +846,29 @@ export interface LucidIntegrationScopes {
 }
 
 export type OAuthPrincipalType = "system" | "user";
+export type OAuthClientAuthMethod = "none" | "client_secret_basic";
+
+export interface LucidOAuthClients {
+	id: Generated<number>;
+	client_id: string;
+	name: string;
+	client_uri: string | null;
+	token_endpoint_auth_method: OAuthClientAuthMethod;
+	client_secret_hash: string | null;
+	client_secret_salt: string | null;
+	logo_media_id: number | null;
+	enabled: BooleanInt;
+	created_by: number | null;
+	created_at: TimestampImmutable;
+	updated_at: TimestampMutateable;
+}
+
+export interface LucidOAuthClientRedirectUris {
+	id: Generated<number>;
+	oauth_client_id: number;
+	redirect_uri: string;
+	created_at: TimestampImmutable;
+}
 
 export interface LucidOAuthAuthorizationRequests {
 	id: Generated<number>;
@@ -853,6 +876,7 @@ export interface LucidOAuthAuthorizationRequests {
 	client_id: string;
 	client_name: string;
 	client_uri: string | null;
+	client_logo_media_id: number | null;
 	redirect_uri: string;
 	resource: string;
 	scopes: string;
@@ -1030,6 +1054,8 @@ export interface LucidDB {
 	lucid_processed_images: HeadlessProcessedImages;
 	lucid_integrations: LucidIntegrations;
 	lucid_integration_scopes: LucidIntegrationScopes;
+	lucid_oauth_clients: LucidOAuthClients;
+	lucid_oauth_client_redirect_uris: LucidOAuthClientRedirectUris;
 	lucid_oauth_authorization_requests: LucidOAuthAuthorizationRequests;
 	lucid_oauth_grants: LucidOAuthGrants;
 	lucid_oauth_grant_scopes: LucidOAuthGrantScopes;

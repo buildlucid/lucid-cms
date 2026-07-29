@@ -4,8 +4,8 @@ import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import {
 	mediaCropInputSchema,
+	mediaImagePreviewResponseSchema,
 	mediaOriginSchema,
-	profilePictureResponseSchema,
 } from "./media.js";
 
 const userIdParamSchema = z.object({
@@ -187,7 +187,7 @@ export const userResponseSchema = z.object({
 		})
 		.nullable()
 		.optional(),
-	profilePicture: profilePictureResponseSchema.nullable().meta({
+	profilePicture: mediaImagePreviewResponseSchema.nullable().meta({
 		description: "The user's profile picture media reference",
 	}),
 	username: z.string().meta({

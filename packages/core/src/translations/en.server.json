@@ -22,7 +22,7 @@
 	"core.openapi.response.default": "Catch all error response",
 	"core.openapi.csrf.header.description": "A token that is used to protect against CSRF attacks. CSRF middleware expects this value to be passed in the header so it can be compared to the httpOnly _csrf cookie.",
 	"core.openapi.idempotency.key.header.description": "A stable key used to safely retry or resume the same request without creating duplicate work.",
-	"core.openapi.authorization.header.description": "Use `Authorization: ApiKey <key>` for an integration or `Authorization: Bearer <token>` for an OAuth connection.",
+	"core.openapi.authorization.header.description": "Use `Authorization: ApiKey <lucid_int_key>` for an integration, `Authorization: Bearer <lucid_int_key>` for clients that only support Bearer credentials, or `Authorization: Bearer <token>` for an OAuth connection. Integration keys are also accepted through `X-API-Key`.",
 	"core.auth.login.suspended.error.message": "Your account has been suspended. Please contact an administrator.",
 	"core.auth.login.locked.error.message": "Your account has been locked. Please contact an administrator.",
 	"core.requests.query.validation.message": "Please check the query parameters and try again.",

@@ -390,6 +390,7 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 		getFileName,
 		getImageMeta,
 		getCropImageMeta,
+		getImageCrop: imageCrop,
 		openImageGeneration: () => {
 			imageGeneration()?.callbacks.open();
 		},
@@ -406,6 +407,16 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 			setCropEditorOpen(false);
 			setCropEditorSource(null);
 		},
+		RenderImageCropEditor: () => (
+			<ImageCropEditor
+				state={{
+					open: cropEditorOpen(),
+					setOpen: setCropEditorOpen,
+				}}
+				source={cropEditorSource()}
+				onApply={applyCrop}
+			/>
+		),
 		Render: () => (
 			<>
 				<ImageCropEditor

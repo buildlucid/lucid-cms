@@ -1,9 +1,11 @@
 import z from "zod";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
+import { mediaImagePreviewResponseSchema } from "./media.js";
 
 const opaqueToken = z.string().regex(/^[A-Za-z0-9_-]{32,128}$/);
 const pkceVerifier = z.string().regex(/^[A-Za-z0-9\-._~]{43,128}$/);
 const oauthUrl = z.url().max(2048);
+const oauthClientId = z.string().trim().min(1).max(2048);
 const oauthHttpsUrl = oauthUrl.refine((value) => {
 	const url = new URL(value);
 	return (
@@ -88,6 +90,7 @@ export const oauthAuthorizationRequestResponseSchema = z.object({
 	clientId: z.string(),
 	clientName: z.string(),
 	clientUri: z.string().nullable(),
+	clientLogo: mediaImagePreviewResponseSchema.nullable(),
 	scopes: z.array(z.string()),
 	userScopes: z.array(z.string()),
 	scopeGroups: z.array(
@@ -114,7 +117,7 @@ export const oauthAuthorizationRequestResponseSchema = z.object({
 export const oauthSchemas = {
 	authorize: {
 		query: z.object({
-			client_id: oauthUrl,
+			client_id: oauthClientId,
 			redirect_uri: oauthUrl,
 			response_type: z.string().trim().min(1).max(64),
 			resource: oauthUrl,
@@ -156,7 +159,7 @@ export const oauthSchemas = {
 			z.object({
 				grant_type: z.literal("authorization_code"),
 				code: opaqueToken,
-				client_id: oauthUrl,
+				client_id: oauthClientId.optional(),
 				redirect_uri: oauthUrl,
 				resource: oauthUrl,
 				code_verifier: pkceVerifier,
@@ -164,7 +167,7 @@ export const oauthSchemas = {
 			z.object({
 				grant_type: z.literal("refresh_token"),
 				refresh_token: opaqueToken,
-				client_id: oauthUrl,
+				client_id: oauthClientId.optional(),
 				resource: oauthUrl.optional(),
 			}),
 		]),
@@ -179,7 +182,7 @@ export const oauthSchemas = {
 	revoke: {
 		form: z.object({
 			token: opaqueToken,
-			client_id: oauthUrl,
+			client_id: oauthClientId.optional(),
 			token_type_hint: z.string().trim().min(1).max(128).optional(),
 		}),
 	},

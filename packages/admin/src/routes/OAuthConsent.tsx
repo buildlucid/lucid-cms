@@ -25,6 +25,7 @@ import api from "@/services/api";
 import tenantStore from "@/store/tenantStore";
 import T, { translateAdminCopy } from "@/translations";
 import { LucidError } from "@/utils/error-handling";
+import { getProcessedImageUrl } from "@/utils/media-url";
 
 const OAuthConsentRoute: Component = () => {
 	// ----------------------------------------
@@ -51,8 +52,19 @@ const OAuthConsentRoute: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const clientHostname = createMemo(() => {
+		const authorization = request.data?.data;
+		if (!authorization) return "";
+		if (authorization.clientUri && URL.canParse(authorization.clientUri)) {
+			return new URL(authorization.clientUri).hostname;
+		}
+		if (URL.canParse(authorization.clientId)) {
+			return new URL(authorization.clientId).hostname;
+		}
+		return authorization.clientName;
+	});
+	const usesMetadataClientId = createMemo(() => {
 		const clientId = request.data?.data.clientId;
-		return clientId ? new URL(clientId).hostname : "";
+		return clientId ? URL.canParse(clientId) : false;
 	});
 	const effectiveScopes = createMemo(() => {
 		const authorization = request.data?.data;
@@ -193,21 +205,39 @@ const OAuthConsentRoute: Component = () => {
 			<Match when={request.data?.data}>
 				{(authorization) => (
 					<div class="mx-auto w-full max-w-160">
-						<header class="mb-5 text-center">
-							<IconContainer theme="default" class="mx-auto mb-3">
-								<img src={LogoIcon} alt="" class="size-6" />
-							</IconContainer>
-							<p class="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary-base">
-								{T()("oauth.consent.eyebrow")}
-							</p>
+						<header class="mb-6 text-center">
+							<div class="mb-2.5 flex items-center justify-center">
+								<IconContainer theme="default">
+									<img src={LogoIcon} alt="" class="size-6" />
+								</IconContainer>
+								<Show when={authorization().clientLogo}>
+									{(logo) => (
+										<>
+											<span class="h-px w-7 bg-border" aria-hidden="true" />
+											<IconContainer
+												theme="default"
+												class="overflow-hidden bg-white!"
+											>
+												<img
+													src={getProcessedImageUrl(logo().file.url, {
+														preset: "thumbnail-small",
+														format: "webp",
+													})}
+													alt={T()("oauth.consent.client.logo.alt", {
+														name: authorization().clientName,
+													})}
+													class="size-full object-contain p-1"
+												/>
+											</IconContainer>
+										</>
+									)}
+								</Show>
+							</div>
 							<h1 class="mx-auto max-w-lg text-lg! tracking-normal! sm:text-xl!">
 								{T()("oauth.consent.application.request", {
 									name: authorization().clientName,
 								})}
 							</h1>
-							<p class="mx-auto mt-1.5 max-w-md text-xs">
-								{T()("oauth.consent.description")}
-							</p>
 						</header>
 
 						<div class="overflow-hidden rounded-xl border border-border bg-card-base shadow-[0_16px_60px_rgba(0,0,0,0.22)]">
@@ -219,9 +249,11 @@ const OAuthConsentRoute: Component = () => {
 											{authorization().clientName}
 										</h2>
 										<p class="mt-0.5 text-xs">
-											{T()("oauth.consent.verified.by", {
-												hostname: clientHostname(),
-											})}
+											{usesMetadataClientId()
+												? T()("oauth.consent.verified.by", {
+														hostname: clientHostname(),
+													})
+												: T()("oauth.consent.registered.application")}
 										</p>
 									</div>
 									<Pill theme="outline" class="shrink-0">

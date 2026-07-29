@@ -45,9 +45,18 @@ const OAuthConnectionRow: Component<{
 	const hasCustomName = createMemo(
 		() => props.connection.name !== props.connection.clientName,
 	);
-	const clientHostname = createMemo(
-		() => new URL(props.connection.clientId).hostname,
-	);
+	const clientHostname = createMemo(() => {
+		if (
+			props.connection.clientUri &&
+			URL.canParse(props.connection.clientUri)
+		) {
+			return new URL(props.connection.clientUri).hostname;
+		}
+		if (URL.canParse(props.connection.clientId)) {
+			return new URL(props.connection.clientId).hostname;
+		}
+		return props.connection.clientId;
+	});
 	const permissionCount = createMemo(() => props.connection.scopes.length);
 
 	// ----------------------------------------

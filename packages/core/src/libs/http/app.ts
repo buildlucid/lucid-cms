@@ -200,6 +200,7 @@ const createApp = async (props: {
 				allowHeaders: [
 					"Content-Type",
 					"Authorization",
+					"X-API-Key",
 					"Content-Length",
 					...Object.values(constants.headers),
 					...(props.config.http.security.cors?.allowHeaders || []),

@@ -10,7 +10,6 @@ interface InfoRowProps {
 	left?: JSXElement;
 	children?: JSXElement;
 	reducedMargin?: boolean;
-	theme?: "default" | "danger";
 }
 
 const InfoRow: Component<InfoRowProps> = (props) => {
@@ -39,13 +38,13 @@ const InfoRowContent: Component<InfoRowProps> = (props) => {
 	// Render
 	return (
 		<div
-			class={classNames("p-4 rounded-md border last:mb-0", {
-				"mb-2": props.reducedMargin,
-				"mb-4": props.reducedMargin !== true,
-				"bg-card-base border-border border-l-4 border-l-error-base rounded-l-none":
-					props.theme === "danger",
-				"bg-card-base border-border": props.theme !== "danger",
-			})}
+			class={classNames(
+				"rounded-md border border-border bg-card-base p-4 last:mb-0",
+				{
+					"mb-2": props.reducedMargin,
+					"mb-4": props.reducedMargin !== true,
+				},
+			)}
 		>
 			<Show when={props.title || props.description || props.actions}>
 				<div

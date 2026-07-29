@@ -6,6 +6,7 @@ export { EmailsList } from "./EmailsList";
 export { IntegrationsList } from "./IntegrationsList";
 export { JobsList } from "./JobsList";
 export { MediaList } from "./MediaList";
+export { OAuthClientsList } from "./OAuthClientsList";
 export { OAuthConnectionsList } from "./OAuthConnectionsList";
 export { ReleaseRequestsList } from "./ReleaseRequestsList";
 export { RolesList } from "./RolesList";

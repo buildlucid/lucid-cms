@@ -14,7 +14,10 @@ import { oauthFormatter } from "../../../formatters/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
-import { uniqueOAuthParameters } from "../../utils/oauth.js";
+import {
+	parseOAuthClientCredentials,
+	uniqueOAuthParameters,
+} from "../../utils/oauth.js";
 
 const factory = createFactory();
 
@@ -23,6 +26,18 @@ const revokeController = factory.createHandlers(
 		description: "Revokes an OAuth refresh token and its connection.",
 		tags: ["oauth"],
 		summary: "Revoke OAuth Token",
+		parameters: [
+			{
+				in: "header",
+				name: "Authorization",
+				required: false,
+				description:
+					"Confidential clients authenticate with HTTP Basic using their client ID and client secret. Public clients send client_id in the form body.",
+				schema: {
+					type: "string",
+				},
+			},
+		],
 		requestBody: {
 			required: true,
 			content: {
@@ -64,16 +79,51 @@ const revokeController = factory.createHandlers(
 				: undefined;
 		const parsed = oauthSchemas.revoke.form.safeParse(parameters);
 		if (!parsed.success) {
-			const error = {
-				type: "validation",
-				code: "invalid_request",
-				status: 400,
-			} as const;
 			c.header("Cache-Control", "no-store");
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
-			c.status(error.status);
-			return c.json(oauthFormatter.formatError(error));
+			c.status(400);
+			return c.json(
+				oauthFormatter.formatError({
+					type: "validation",
+					code: "invalid_request",
+					status: 400,
+				}),
+			);
+		}
+
+		const credentials = parseOAuthClientCredentials(
+			c.req.header("Authorization"),
+			parsed.data.client_id,
+		);
+		if (!credentials) {
+			c.header("Cache-Control", "no-store");
+			c.header("Pragma", "no-cache");
+			c.header("Referrer-Policy", "no-referrer");
+			c.header("WWW-Authenticate", 'Basic realm="oauth-revoke"');
+			c.status(401);
+			return c.json(
+				oauthFormatter.formatError({
+					type: "authorisation",
+					code: "invalid_client",
+					status: 401,
+				}),
+			);
+		}
+
+		const clientRes = await serviceWrapper(oauthServices.authenticateClient, {
+			transaction: false,
+			defaultError: { type: "authorisation" },
+		})(context, credentials);
+		if (clientRes.error) {
+			c.header("Cache-Control", "no-store");
+			c.header("Pragma", "no-cache");
+			c.header("Referrer-Policy", "no-referrer");
+			if (clientRes.error.code === "invalid_client") {
+				c.header("WWW-Authenticate", 'Basic realm="oauth-revoke"');
+			}
+			c.status((clientRes.error.status ?? 500) as StatusCode);
+			return c.json(oauthFormatter.formatError(clientRes.error));
 		}
 
 		const result = await serviceWrapper(oauthServices.revokeToken, {
@@ -81,7 +131,7 @@ const revokeController = factory.createHandlers(
 			defaultError: { type: "basic" },
 		})(context, {
 			token: parsed.data.token,
-			clientId: parsed.data.client_id,
+			clientId: clientRes.data.clientId,
 		});
 		if (result.error) {
 			c.header("Cache-Control", "no-store");

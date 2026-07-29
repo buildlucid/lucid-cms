@@ -18,6 +18,11 @@ export const UserIntegrationsList: Component<{
 	canDelete: boolean;
 	canRegenerate: boolean;
 	embedded?: boolean;
+	contained?: boolean;
+	contentRow?: {
+		title: string;
+		description?: string;
+	};
 	openCreate?: boolean;
 	setOpenCreate?: (open: boolean) => void;
 }> = (props) => {
@@ -50,75 +55,6 @@ export const UserIntegrationsList: Component<{
 		if (props.setOpenCreate === undefined) setInternalCreateOpen(open);
 	};
 
-	const content = () => (
-		<>
-			<DynamicContent
-				state={{
-					isLoading: integrations.isLoading,
-					isError: integrations.isError,
-					isSuccess: integrations.isSuccess,
-					isEmpty:
-						integrations.isSuccess && integrations.data.data.length === 0,
-				}}
-				copy={{
-					noEntries: {
-						title: T()("empty.states.integrations.title"),
-						description: T()("empty.states.user.integrations.description"),
-						button: T()("integrations.create.action"),
-					},
-				}}
-				callback={
-					props.canCreate
-						? {
-								createEntry: () => setCreateOpen(true),
-							}
-						: undefined
-				}
-				permissions={{
-					create: props.canCreate,
-				}}
-				options={{
-					inline: true,
-					contained: true,
-					noEntriesButtonTheme: "border-outline",
-				}}
-			>
-				<div class="flex flex-col">
-					<For each={integrations.data?.data ?? []}>
-						{(integration) => (
-							<IntegrationRow
-								integration={integration}
-								rowTarget={rowTarget}
-								canUpdate={props.canUpdate}
-								canDelete={props.canDelete}
-								canRegenerate={props.canRegenerate}
-							/>
-						)}
-					</For>
-				</div>
-			</DynamicContent>
-			<Show
-				when={
-					!props.embedded &&
-					props.canCreate &&
-					integrations.isSuccess &&
-					integrations.data.data.length > 0
-				}
-			>
-				<div class="mt-3 flex justify-end">
-					<Button
-						type="button"
-						size="small"
-						theme="border-outline"
-						onClick={() => setCreateOpen(true)}
-					>
-						{T()("integrations.create.action")}
-					</Button>
-				</div>
-			</Show>
-		</>
-	);
-
 	// ----------------------------------------
 	// Render
 	return (
@@ -130,11 +66,216 @@ export const UserIntegrationsList: Component<{
 						title={T()("user.integrations.manage.title")}
 						description={T()("user.integrations.manage.description")}
 					>
-						{content()}
+						<DynamicContent
+							state={{
+								isLoading: integrations.isLoading,
+								isError: integrations.isError,
+								isSuccess: integrations.isSuccess,
+								isEmpty:
+									integrations.isSuccess && integrations.data.data.length === 0,
+							}}
+							copy={{
+								noEntries: {
+									title: T()("empty.states.integrations.title"),
+									description: T()(
+										"empty.states.user.integrations.description",
+									),
+									button: T()("integrations.create.action"),
+								},
+							}}
+							callback={
+								props.canCreate
+									? {
+											createEntry: () => setCreateOpen(true),
+										}
+									: undefined
+							}
+							permissions={{ create: props.canCreate }}
+							options={{
+								inline: true,
+								contained: props.contained !== false,
+							}}
+						>
+							<div class="flex flex-col">
+								<For each={integrations.data?.data ?? []}>
+									{(integration) => (
+										<IntegrationRow
+											integration={integration}
+											rowTarget={rowTarget}
+											canUpdate={props.canUpdate}
+											canDelete={props.canDelete}
+											canRegenerate={props.canRegenerate}
+										/>
+									)}
+								</For>
+							</div>
+						</DynamicContent>
+						<Show
+							when={
+								props.canCreate &&
+								integrations.isSuccess &&
+								integrations.data.data.length > 0
+							}
+						>
+							<div class="mt-3 flex justify-start">
+								<Button
+									type="button"
+									size="small"
+									theme="primary"
+									onClick={() => setCreateOpen(true)}
+								>
+									{T()("integrations.create.action")}
+								</Button>
+							</div>
+						</Show>
 					</InfoRow.Root>
 				}
 			>
-				{content()}
+				<Show
+					when={props.contentRow}
+					fallback={
+						<>
+							<DynamicContent
+								state={{
+									isLoading: integrations.isLoading,
+									isError: integrations.isError,
+									isSuccess: integrations.isSuccess,
+									isEmpty:
+										integrations.isSuccess &&
+										integrations.data.data.length === 0,
+								}}
+								copy={{
+									noEntries: {
+										title: T()("empty.states.integrations.title"),
+										description: T()(
+											"empty.states.user.integrations.description",
+										),
+										button: T()("integrations.create.action"),
+									},
+								}}
+								callback={
+									props.canCreate
+										? {
+												createEntry: () => setCreateOpen(true),
+											}
+										: undefined
+								}
+								permissions={{ create: props.canCreate }}
+								options={{
+									inline: true,
+									contained: props.contained !== false,
+								}}
+							>
+								<div class="flex flex-col">
+									<For each={integrations.data?.data ?? []}>
+										{(integration) => (
+											<IntegrationRow
+												integration={integration}
+												rowTarget={rowTarget}
+												canUpdate={props.canUpdate}
+												canDelete={props.canDelete}
+												canRegenerate={props.canRegenerate}
+											/>
+										)}
+									</For>
+								</div>
+							</DynamicContent>
+							<Show
+								when={
+									props.canCreate &&
+									integrations.isSuccess &&
+									integrations.data.data.length > 0
+								}
+							>
+								<div class="mt-3 flex justify-start">
+									<Button
+										type="button"
+										size="small"
+										theme="primary"
+										onClick={() => setCreateOpen(true)}
+									>
+										{T()("integrations.create.action")}
+									</Button>
+								</div>
+							</Show>
+						</>
+					}
+				>
+					{(contentRow) => (
+						<>
+							<InfoRow.Content
+								title={contentRow().title}
+								description={contentRow().description}
+							>
+								<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
+									<DynamicContent
+										state={{
+											isLoading: integrations.isLoading,
+											isError: integrations.isError,
+											isSuccess: integrations.isSuccess,
+											isEmpty:
+												integrations.isSuccess &&
+												integrations.data.data.length === 0,
+										}}
+										copy={{
+											noEntries: {
+												title: T()("empty.states.integrations.title"),
+												description: T()(
+													"empty.states.user.integrations.description",
+												),
+												button: T()("integrations.create.action"),
+											},
+										}}
+										callback={
+											props.canCreate
+												? {
+														createEntry: () => setCreateOpen(true),
+													}
+												: undefined
+										}
+										permissions={{ create: props.canCreate }}
+										options={{
+											inline: true,
+											contained: props.contained !== false,
+										}}
+									>
+										<div class="flex flex-col">
+											<For each={integrations.data?.data ?? []}>
+												{(integration) => (
+													<IntegrationRow
+														integration={integration}
+														rowTarget={rowTarget}
+														canUpdate={props.canUpdate}
+														canDelete={props.canDelete}
+														canRegenerate={props.canRegenerate}
+													/>
+												)}
+											</For>
+										</div>
+									</DynamicContent>
+								</div>
+							</InfoRow.Content>
+							<Show
+								when={
+									props.canCreate &&
+									integrations.isSuccess &&
+									integrations.data.data.length > 0
+								}
+							>
+								<div class="-mt-1 flex justify-start">
+									<Button
+										type="button"
+										size="small"
+										theme="primary"
+										onClick={() => setCreateOpen(true)}
+									>
+										{T()("integrations.create.action")}
+									</Button>
+								</div>
+							</Show>
+						</>
+					)}
+				</Show>
 			</Show>
 			<UpsertIntegrationPanel
 				services={props.services}

@@ -69,7 +69,7 @@ export const isLoopbackHostname = (value: string) => {
 	);
 };
 
-const isSafeRedirectUri = (value: string) => {
+export const isSafeRedirectUri = (value: string) => {
 	if (!URL.canParse(value)) return false;
 
 	const url = new URL(value);

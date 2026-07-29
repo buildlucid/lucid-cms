@@ -1,12 +1,14 @@
 import { type Component, createMemo, createSignal } from "solid-js";
 import InfoRow from "@/components/Blocks/InfoRow";
 import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
-import UpdateSystemAlertsForm from "@/components/Forms/System/UpdateSystemAlertsForm";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import ClearAllProcessedImages from "@/components/Modals/Media/ClearAllProcessedImages";
 import DeleteAllShareLinksSystem from "@/components/Modals/Media/DeleteAllShareLinksSystem";
 import ClearCache from "@/components/Modals/System/ClearCache";
+import UpdateSystemAlerts from "@/components/Modals/System/UpdateSystemAlerts";
 import Button from "@/components/Partials/Button";
+import DetailsList from "@/components/Partials/DetailsList";
+import LucidConnection from "@/components/Partials/LucidConnection";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
@@ -19,6 +21,8 @@ const SystemOperationsRoute: Component = () => {
 		createSignal(false);
 	const [getOpenClearCache, setOpenClearCache] = createSignal(false);
 	const [getOpenDeleteAllShareLinks, setOpenDeleteAllShareLinks] =
+		createSignal(false);
+	const [updateSystemAlertsOpen, setUpdateSystemAlertsOpen] =
 		createSignal(false);
 
 	// ----------------------------------
@@ -38,6 +42,9 @@ const SystemOperationsRoute: Component = () => {
 	const canClearCache = createMemo(
 		() => userStore.get.hasPermission([Permissions.CacheClear]).all,
 	);
+	const canUpdateSettings = createMemo(
+		() => userStore.get.hasPermission([Permissions.SettingsUpdate]).all,
+	);
 	const canDeleteAllShareLinks = createMemo(
 		() => userStore.get.hasPermission([Permissions.MediaDelete]).all,
 	);
@@ -54,102 +61,142 @@ const SystemOperationsRoute: Component = () => {
 			}}
 		>
 			<DynamicContent
-				state={{
-					isError: settingsData.isError,
-					isSuccess: settingsData.isSuccess,
-					isLoading: settingsData.isLoading,
-				}}
 				options={{
 					padding: "24",
 				}}
 			>
+				{/* Lucid Connection */}
 				<InfoRow.Root
-					title={T()("system.alerts.title")}
-					description={T()("system.alerts.description")}
+					title={T()("connection.manage.title")}
+					description={T()("connection.manage.description")}
 				>
-					<InfoRow.Content
-						title={T()(Permissions.SettingsUpdate)}
-						description={T()("system.alerts.email.description")}
-						reducedMargin={true}
-					>
-						<UpdateSystemAlertsForm
-							alertEmail={systemInfo()?.alertEmail ?? null}
-						/>
-					</InfoRow.Content>
+					<LucidConnection />
 				</InfoRow.Root>
 
-				<InfoRow.Root
-					title={T()("system.maintenance.title")}
-					description={T()("system.maintenance.description")}
+				{/* Settings */}
+				<DynamicContent
+					state={{
+						isError: settingsData.isError,
+						isSuccess: settingsData.isSuccess,
+						isLoading: settingsData.isLoading,
+					}}
+					options={{
+						inline: true,
+					}}
 				>
-					<InfoRow.Content
-						title={T()("common.actions.clear.all")}
-						description={T()("media.processed.clear.all.settings.message")}
-						reducedMargin={true}
-						theme="danger"
-						actions={
-							<Button
-								size="medium"
-								type="button"
-								theme="danger-outline"
-								onClick={() => {
-									setOpenClearAllProcessedImages(true);
-								}}
-								permission={canClearAllProcessedImages()}
-							>
-								{T()("media.processed.clear.all.action", {
-									count: settingsData.data?.data?.media?.processed.total || 0,
-								})}
-							</Button>
-						}
-						actionAlignment="center"
-					/>
-					<InfoRow.Content
-						title={T()("media.share.links.system.delete.all.title")}
-						description={T()(
-							"media.share.links.system.delete.all.settings.message",
-						)}
-						reducedMargin={true}
-						theme="danger"
-						actions={
-							<Button
-								size="medium"
-								type="button"
-								theme="danger-outline"
-								onClick={() => {
-									setOpenDeleteAllShareLinks(true);
-								}}
-								permission={canDeleteAllShareLinks()}
-							>
-								{T()("media.share.links.system.delete.all.action")}
-							</Button>
-						}
-						actionAlignment="center"
-					/>
-					<InfoRow.Content
-						title={T()("system.cache.clear.title")}
-						description={T()("system.cache.setting.message")}
-						reducedMargin={true}
-						theme="danger"
-						actions={
-							<Button
-								size="medium"
-								type="button"
-								theme="danger-outline"
-								onClick={() => {
-									setOpenClearCache(true);
-								}}
-								permission={canClearCache()}
-							>
-								{T()("system.cache.button")}
-							</Button>
-						}
-						actionAlignment="center"
-					/>
-				</InfoRow.Root>
+					{/* System Alerts */}
+					<InfoRow.Root
+						title={T()("system.alerts.title")}
+						description={T()("system.alerts.description")}
+					>
+						<InfoRow.Content
+							title={T()("system.alerts.delivery.title")}
+							description={T()("system.alerts.email.description")}
+							actions={
+								<Button
+									size="small"
+									type="button"
+									theme="border-outline"
+									permission={canUpdateSettings()}
+									onClick={() => setUpdateSystemAlertsOpen(true)}
+								>
+									{T()("system.alerts.edit.action")}
+								</Button>
+							}
+							actionAlignment="center"
+						>
+							<DetailsList
+								type="text"
+								theme="contained"
+								items={[
+									{
+										label: T()("common.alert.email"),
+										value: systemInfo()?.alertEmail || T()("common.not.set"),
+										wrap: true,
+									},
+								]}
+							/>
+						</InfoRow.Content>
+					</InfoRow.Root>
+
+					{/* Maintenance */}
+					<InfoRow.Root
+						title={T()("system.maintenance.title")}
+						description={T()("system.maintenance.description")}
+					>
+						<InfoRow.Content
+							title={T()("common.actions.clear.all")}
+							description={T()("media.processed.clear.all.settings.message")}
+							reducedMargin={true}
+							actions={
+								<Button
+									size="medium"
+									type="button"
+									theme="danger"
+									onClick={() => {
+										setOpenClearAllProcessedImages(true);
+									}}
+									permission={canClearAllProcessedImages()}
+								>
+									{T()("media.processed.clear.all.action", {
+										count: settingsData.data?.data?.media?.processed.total || 0,
+									})}
+								</Button>
+							}
+							actionAlignment="center"
+						/>
+						<InfoRow.Content
+							title={T()("media.share.links.system.delete.all.title")}
+							description={T()(
+								"media.share.links.system.delete.all.settings.message",
+							)}
+							reducedMargin={true}
+							actions={
+								<Button
+									size="medium"
+									type="button"
+									theme="danger"
+									onClick={() => {
+										setOpenDeleteAllShareLinks(true);
+									}}
+									permission={canDeleteAllShareLinks()}
+								>
+									{T()("media.share.links.system.delete.all.action")}
+								</Button>
+							}
+							actionAlignment="center"
+						/>
+						<InfoRow.Content
+							title={T()("system.cache.clear.title")}
+							description={T()("system.cache.setting.message")}
+							reducedMargin={true}
+							actions={
+								<Button
+									size="medium"
+									type="button"
+									theme="danger"
+									onClick={() => {
+										setOpenClearCache(true);
+									}}
+									permission={canClearCache()}
+								>
+									{T()("system.cache.button")}
+								</Button>
+							}
+							actionAlignment="center"
+						/>
+					</InfoRow.Root>
+				</DynamicContent>
 			</DynamicContent>
 
 			{/* Modals */}
+			<UpdateSystemAlerts
+				state={{
+					open: updateSystemAlertsOpen(),
+					setOpen: setUpdateSystemAlertsOpen,
+				}}
+				alertEmail={systemInfo()?.alertEmail ?? null}
+			/>
 			<ClearAllProcessedImages
 				state={{
 					open: getOpenClearAllProcessedImages(),

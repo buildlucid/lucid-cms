@@ -1,19 +1,34 @@
-/**
- * Encodes the api key and key into a base64 string
- */
-export const encodeApiKey = (key: string, apiKey: string) =>
-	Buffer.from(`${key}:${apiKey}`).toString("base64");
+export const integrationApiKeyPrefix = "lucid_int_";
 
 /**
- * Decodes the api key and key from a base64 string
+ * Encodes an integration credential using a recognizable, header-safe prefix.
+ */
+export const encodeApiKey = (key: string, apiKey: string) =>
+	`${integrationApiKeyPrefix}${Buffer.from(`${key}:${apiKey}`).toString("base64url")}`;
+
+/**
+ * Decodes a prefixed integration credential.
  */
 export const decodeApiKey = (encodedKey: string) => {
-	const decoded = Buffer.from(encodedKey, "base64").toString("utf-8");
+	if (!encodedKey.startsWith(integrationApiKeyPrefix)) {
+		return { key: undefined, apiKey: undefined };
+	}
+
+	const payload = encodedKey.slice(integrationApiKeyPrefix.length);
+	if (!payload || !/^[A-Za-z0-9_-]+$/.test(payload)) {
+		return { key: undefined, apiKey: undefined };
+	}
+
+	const decoded = Buffer.from(payload, "base64url").toString("utf-8");
 	const parts = decoded.split(":");
 	if (parts.length !== 2) {
 		return { key: undefined, apiKey: undefined };
 	}
 
 	const [key, apiKey] = parts;
+	if (!key || !apiKey) {
+		return { key: undefined, apiKey: undefined };
+	}
+
 	return { key, apiKey };
 };

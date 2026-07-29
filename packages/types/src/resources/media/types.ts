@@ -153,7 +153,7 @@ export interface MediaPoster {
 
 export type MediaRef = Media;
 
-export interface ProfilePicture {
+export interface MediaImagePreview {
 	id: number;
 	type: "image";
 	origin: MediaOrigin;
@@ -161,6 +161,8 @@ export interface ProfilePicture {
 	alt: MediaTranslation[];
 	file: MediaImageFile;
 }
+
+export type ProfilePicture = MediaImagePreview;
 
 export interface MediaUrl {
 	url: string;

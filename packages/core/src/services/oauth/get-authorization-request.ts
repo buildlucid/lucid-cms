@@ -1,9 +1,11 @@
+import { mediaFormatter } from "../../libs/formatters/index.js";
 import { getExternalCapability } from "../../libs/permission/capabilities.js";
 import type { ExternalScope } from "../../libs/permission/external-scopes.js";
 import { getExternalScopeGroups } from "../../libs/permission/scopes.js";
 import type { Permission } from "../../libs/permission/types.js";
 import { OAuthAuthorizationRequestsRepository } from "../../libs/repositories/index.js";
 import type { OAuthAuthorizationRequest } from "../../types/response.js";
+import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /** Loads the authorization request displayed by the consent screen. */
@@ -24,25 +26,12 @@ const getAuthorizationRequest: ServiceFn<
 		context.db.client,
 		context.config.db,
 	);
-	const requestRes = await Requests.selectSingle({
-		select: [
-			"request_id",
-			"client_id",
-			"client_name",
-			"client_uri",
-			"scopes",
-			"expires_at",
-		],
-		where: [
-			{ key: "request_id", operator: "=", value: input.requestId },
-			{ key: "consumed_at", operator: "is", value: null },
-		],
+	const requestRes = await Requests.selectSingleActiveWithLogo({
+		requestId: input.requestId,
+		currentTime: new Date().toISOString(),
 	});
 	if (requestRes.error) return requestRes;
-	if (
-		!requestRes.data ||
-		new Date(requestRes.data.expires_at).getTime() <= Date.now()
-	) {
+	if (!requestRes.data) {
 		return {
 			error: {
 				type: "basic",
@@ -95,6 +84,10 @@ const getAuthorizationRequest: ServiceFn<
 			clientId: requestRes.data.client_id,
 			clientName: requestRes.data.client_name,
 			clientUri: requestRes.data.client_uri,
+			clientLogo: mediaFormatter.formatMediaImagePreview({
+				poster: requestRes.data.client_logo[0],
+				host: getBaseUrl(context),
+			}),
 			scopes,
 			userScopes,
 			scopeGroups,

@@ -51,3 +51,62 @@ export const activeMediaCropSelect = (
 				),
 		)
 		.as("crop");
+
+/** Builds a compact image selection with its translations and active crop. */
+export const mediaImageSelect = <Alias extends string>(
+	db: KyselyDB,
+	adapter: DatabaseAdapter,
+	mediaIdReference: string,
+	alias: Alias,
+) =>
+	adapter
+		.jsonArrayFrom(
+			db
+				.selectFrom("lucid_media as related_media_image")
+				.select((eb) => [
+					"related_media_image.id",
+					"related_media_image.key",
+					"related_media_image.origin",
+					"related_media_image.type",
+					"related_media_image.mime_type",
+					"related_media_image.file_extension",
+					"related_media_image.file_name",
+					"related_media_image.file_size",
+					"related_media_image.width",
+					"related_media_image.height",
+					"related_media_image.focal_x",
+					"related_media_image.focal_y",
+					"related_media_image.blur_hash",
+					"related_media_image.average_color",
+					"related_media_image.base64",
+					"related_media_image.is_dark",
+					"related_media_image.is_light",
+					activeMediaCropSelect(db, adapter, "related_media_image.id"),
+					adapter
+						.jsonArrayFrom(
+							eb
+								.selectFrom("lucid_media_translations")
+								.select([
+									"lucid_media_translations.title",
+									"lucid_media_translations.alt",
+									"lucid_media_translations.description",
+									"lucid_media_translations.summary",
+									"lucid_media_translations.locale_code",
+								])
+								.whereRef(
+									"lucid_media_translations.media_id",
+									"=",
+									"related_media_image.id",
+								),
+						)
+						.as("translations"),
+				])
+				.where("related_media_image.id", "=", sql.ref<number>(mediaIdReference))
+				.where("related_media_image.parent_media_id", "is", null)
+				.where(
+					"related_media_image.is_deleted",
+					"=",
+					adapter.getDefault("boolean", "false"),
+				),
+		)
+		.as(alias);

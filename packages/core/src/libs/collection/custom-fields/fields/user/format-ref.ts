@@ -20,7 +20,7 @@ const formatUserRef = (
 		username: value.username,
 		firstName: value.first_name,
 		lastName: value.last_name,
-		profilePicture: mediaFormatter.formatProfilePicture({
+		profilePicture: mediaFormatter.formatMediaImagePreview({
 			poster: value.profile_picture?.[0],
 			host: params.host,
 		}),

@@ -1,7 +1,7 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { profilePictureResponseSchema } from "./media.js";
+import { mediaImagePreviewResponseSchema } from "./media.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";
 
 const publishOperationStatusSchema = z.enum([
@@ -28,7 +28,7 @@ const publishOperationUserSchema = z
 		username: z.string().nullable(),
 		firstName: z.string().nullable(),
 		lastName: z.string().nullable(),
-		profilePicture: profilePictureResponseSchema.nullable(),
+		profilePicture: mediaImagePreviewResponseSchema.nullable(),
 	})
 	.nullable();
 
@@ -75,7 +75,7 @@ export const publishOperationResponseSchema = z.object({
 				username: z.string().nullable(),
 				firstName: z.string().nullable(),
 				lastName: z.string().nullable(),
-				profilePicture: profilePictureResponseSchema.nullable(),
+				profilePicture: mediaImagePreviewResponseSchema.nullable(),
 			}),
 			assignedBy: z.number().nullable(),
 			assignedAt: z.string().nullable(),
@@ -311,7 +311,7 @@ export const controllerSchemas = {
 				username: z.string(),
 				firstName: z.string().nullable(),
 				lastName: z.string().nullable(),
-				profilePicture: profilePictureResponseSchema.nullable(),
+				profilePicture: mediaImagePreviewResponseSchema.nullable(),
 			}),
 		),
 	} satisfies ControllerSchema,

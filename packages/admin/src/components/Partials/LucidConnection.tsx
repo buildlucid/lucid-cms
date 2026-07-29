@@ -1,3 +1,4 @@
+import { FaSolidArrowUpRightFromSquare } from "solid-icons/fa";
 import {
 	type Component,
 	createMemo,
@@ -11,7 +12,9 @@ import DisconnectConnection from "@/components/Modals/Connection/DisconnectConne
 import ActionDropdown from "@/components/Partials/ActionDropdown";
 import Button from "@/components/Partials/Button";
 import DateText from "@/components/Partials/DateText";
+import Link from "@/components/Partials/Link";
 import Pill from "@/components/Partials/Pill";
+import constants from "@/constants";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
@@ -147,7 +150,17 @@ const LucidConnection: Component = () => {
 										: T()("connection.disconnected.description")}
 							</p>
 						</div>
-						<div class="flex shrink-0">
+						<div class="flex shrink-0 items-center gap-2">
+							<Link
+								href={constants.lucidRemote.website}
+								target="_blank"
+								rel="noreferrer"
+								theme="border-outline"
+								size="small"
+							>
+								{T()("connection.remote.visit.action")}
+								<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />
+							</Link>
 							<Show when={isConnected()}>
 								<ActionDropdown
 									actions={[
@@ -192,49 +205,6 @@ const LucidConnection: Component = () => {
 							</Show>
 						</div>
 					</div>
-				</InfoRow.Content>
-				<InfoRow.Content reducedMargin={true}>
-					<dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-						<Show when={isConnected()}>
-							<div class="min-w-0">
-								<dt class="mb-1 text-xs font-medium text-body">
-									{T()("connection.organisation.label")}
-								</dt>
-								<dd class="truncate text-sm font-medium text-subtitle">
-									{connection()?.organisation?.name ?? T()("common.not.set")}
-								</dd>
-							</div>
-							<div class="min-w-0">
-								<dt class="mb-1 text-xs font-medium text-body">
-									{T()("connection.name.label")}
-								</dt>
-								<dd class="truncate text-sm font-medium text-subtitle">
-									{connection()?.connection?.name ??
-										connection()?.connection?.clientName ??
-										T()("common.not.set")}
-								</dd>
-							</div>
-						</Show>
-						<div class="min-w-0">
-							<dt class="mb-1 text-xs font-medium text-body">
-								{T()("connection.last.verified.label")}
-							</dt>
-							<dd class="text-sm font-medium text-subtitle">
-								<Show
-									when={lastVerifiedIso()}
-									fallback={T()("common.not.checked")}
-								>
-									{(verified) => (
-										<DateText
-											date={verified()}
-											includeTime={true}
-											class="text-sm!"
-										/>
-									)}
-								</Show>
-							</dd>
-						</div>
-					</dl>
 					<Show when={connection()?.errorKey}>
 						<div class="mt-4 border-t border-border pt-3">
 							<p class="text-xs text-error-base">
@@ -243,6 +213,47 @@ const LucidConnection: Component = () => {
 						</div>
 					</Show>
 				</InfoRow.Content>
+				<Show when={lastVerifiedIso()}>
+					{(verified) => (
+						<InfoRow.Content reducedMargin={true}>
+							<dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+								<Show when={isConnected()}>
+									<div class="min-w-0">
+										<dt class="mb-1 text-xs font-medium text-body">
+											{T()("connection.organisation.label")}
+										</dt>
+										<dd class="truncate text-sm font-medium text-subtitle">
+											{connection()?.organisation?.name ??
+												T()("common.not.set")}
+										</dd>
+									</div>
+									<div class="min-w-0">
+										<dt class="mb-1 text-xs font-medium text-body">
+											{T()("connection.name.label")}
+										</dt>
+										<dd class="truncate text-sm font-medium text-subtitle">
+											{connection()?.connection?.name ??
+												connection()?.connection?.clientName ??
+												T()("common.not.set")}
+										</dd>
+									</div>
+								</Show>
+								<div class="min-w-0">
+									<dt class="mb-1 text-xs font-medium text-body">
+										{T()("connection.last.verified.label")}
+									</dt>
+									<dd class="text-sm font-medium text-subtitle">
+										<DateText
+											date={verified()}
+											includeTime={true}
+											class="text-sm!"
+										/>
+									</dd>
+								</div>
+							</dl>
+						</InfoRow.Content>
+					)}
+				</Show>
 			</DynamicContent>
 			<DisconnectConnection
 				state={{ open: disconnectOpen(), setOpen: setDisconnectOpen }}

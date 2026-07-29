@@ -7,7 +7,7 @@ import {
 	versionTypesSchema,
 } from "./document-versions.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { profilePictureResponseSchema } from "./media.js";
+import { mediaImagePreviewResponseSchema } from "./media.js";
 
 const previewTokenSchema = z.string().meta({
 	description: "An opaque preview token",
@@ -46,7 +46,7 @@ const documentResponseUserSchema = z.object({
 		description: "The username of the user",
 		example: "admin",
 	}),
-	profilePicture: profilePictureResponseSchema.nullable(),
+	profilePicture: mediaImagePreviewResponseSchema.nullable(),
 });
 
 const documentResponseVersionSchema = z.object({
@@ -82,7 +82,7 @@ const documentWorkflowUserSchema = z.object({
 	username: z.string().nullable(),
 	firstName: z.string().nullable(),
 	lastName: z.string().nullable(),
-	profilePicture: profilePictureResponseSchema.nullable(),
+	profilePicture: mediaImagePreviewResponseSchema.nullable(),
 });
 
 const documentWorkflowSchema = z.object({

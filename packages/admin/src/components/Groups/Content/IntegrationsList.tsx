@@ -18,7 +18,6 @@ import DeleteIntegration from "@/components/Modals/Integrations/DeleteIntegratio
 import RegenerateAPIKey from "@/components/Modals/Integrations/RegenerateAPIKey";
 import UpsertIntegrationPanel from "@/components/Panels/Integrations/UpsertIntegrationPanel";
 import Button from "@/components/Partials/Button";
-import LucidConnection from "@/components/Partials/LucidConnection";
 import IntegrationTableRow from "@/components/Tables/Rows/IntegrationTableRow";
 import { Permissions } from "@/constants/permissions";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
@@ -27,6 +26,7 @@ import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { OAuthClientsList } from "./OAuthClientsList";
 import { OAuthConnectionsList } from "./OAuthConnectionsList";
 
 export const IntegrationsList: Component<{
@@ -96,13 +96,22 @@ export const IntegrationsList: Component<{
 	// Render
 	return (
 		<DynamicContent options={{ padding: "24" }}>
-			{/* Lucid Connection */}
-			<InfoRow.Root
-				title={T()("connection.manage.title")}
-				description={T()("connection.manage.description")}
-			>
-				<LucidConnection />
-			</InfoRow.Root>
+			{/* OAuth Applications */}
+			<Show when={canReadIntegrations()}>
+				<OAuthClientsList
+					canCreate={hasCreatePermission()}
+					canUpdate={
+						userStore.get.hasPermission([Permissions.IntegrationsUpdate]).all
+					}
+					canDelete={
+						userStore.get.hasPermission([Permissions.IntegrationsDelete]).all
+					}
+					canRegenerate={
+						userStore.get.hasPermission([Permissions.IntegrationsRegenerate])
+							.all
+					}
+				/>
+			</Show>
 
 			{/* OAuth Connections */}
 			<Show when={canReadIntegrations()}>
@@ -132,26 +141,6 @@ export const IntegrationsList: Component<{
 										queryKey: ["integrations.getAll"],
 									});
 								}}
-								custom={
-									<Show
-										when={
-											hasCreatePermission() &&
-											integrations.isSuccess &&
-											integrations.data.data.length > 0
-										}
-									>
-										<Button
-											type="button"
-											size="small"
-											theme="border-outline"
-											onClick={() =>
-												props.state.setOpenCreateIntegrationPanel(true)
-											}
-										>
-											{T()("integrations.create.action")}
-										</Button>
-									</Show>
-								}
 								filterSection={{
 									subject: T()("integrations.manage.title"),
 									fields: [
@@ -373,6 +362,24 @@ export const IntegrationsList: Component<{
 							</DynamicContent>
 						</div>
 					</InfoRow.Content>
+					<Show
+						when={
+							hasCreatePermission() &&
+							integrations.isSuccess &&
+							integrations.data.data.length > 0
+						}
+					>
+						<div class="-mt-1 flex justify-start">
+							<Button
+								type="button"
+								size="small"
+								theme="primary"
+								onClick={() => props.state.setOpenCreateIntegrationPanel(true)}
+							>
+								{T()("integrations.create.action")}
+							</Button>
+						</div>
+					</Show>
 				</InfoRow.Root>
 			</Show>
 

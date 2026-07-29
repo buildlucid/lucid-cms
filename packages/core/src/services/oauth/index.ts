@@ -1,3 +1,4 @@
+export { default as authenticateClient } from "./authenticate-client.js";
 export { default as completeAuthorization } from "./complete-authorization.js";
 export { default as exchangeAuthorizationCode } from "./exchange-authorization-code.js";
 export { default as getAuthorizationRequest } from "./get-authorization-request.js";

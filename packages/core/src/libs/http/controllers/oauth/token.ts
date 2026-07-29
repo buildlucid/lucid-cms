@@ -14,7 +14,10 @@ import { oauthFormatter } from "../../../formatters/index.js";
 import rateLimiter from "../../middleware/rate-limiter.js";
 import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
-import { uniqueOAuthParameters } from "../../utils/oauth.js";
+import {
+	parseOAuthClientCredentials,
+	uniqueOAuthParameters,
+} from "../../utils/oauth.js";
 
 const factory = createFactory();
 
@@ -24,6 +27,18 @@ const tokenController = factory.createHandlers(
 			"Exchanges an authorization code or rotating refresh token for OAuth tokens.",
 		tags: ["oauth"],
 		summary: "Exchange OAuth Token",
+		parameters: [
+			{
+				in: "header",
+				name: "Authorization",
+				required: false,
+				description:
+					"Confidential clients authenticate with HTTP Basic using their client ID and client secret. Public clients send client_id in the form body.",
+				schema: {
+					type: "string",
+				},
+			},
+		],
 		requestBody: {
 			required: true,
 			content: {
@@ -64,16 +79,17 @@ const tokenController = factory.createHandlers(
 			?.trim()
 			.toLowerCase();
 		if (contentType !== "application/x-www-form-urlencoded") {
-			const error = {
-				type: "validation",
-				code: "invalid_request",
-				status: 400,
-			} as const;
 			c.header("Cache-Control", "no-store");
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
-			c.status(error.status);
-			return c.json(oauthFormatter.formatError(error));
+			c.status(400);
+			return c.json(
+				oauthFormatter.formatError({
+					type: "validation",
+					code: "invalid_request",
+					status: 400,
+				}),
+			);
 		}
 
 		const parameters = uniqueOAuthParameters(
@@ -82,24 +98,59 @@ const tokenController = factory.createHandlers(
 		const parsed = oauthSchemas.token.form.safeParse(parameters);
 		if (!parsed.success) {
 			const grantType = parameters?.grant_type;
-			const error = {
-				type: "validation",
-				code:
-					grantType &&
-					grantType !== "authorization_code" &&
-					grantType !== "refresh_token"
-						? "unsupported_grant_type"
-						: "invalid_request",
-				status: 400,
-			} as const;
 			c.header("Cache-Control", "no-store");
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
-			c.status(error.status);
-			return c.json(oauthFormatter.formatError(error));
+			c.status(400);
+			return c.json(
+				oauthFormatter.formatError({
+					type: "validation",
+					code:
+						grantType &&
+						grantType !== "authorization_code" &&
+						grantType !== "refresh_token"
+							? "unsupported_grant_type"
+							: "invalid_request",
+					status: 400,
+				}),
+			);
+		}
+
+		const credentials = parseOAuthClientCredentials(
+			c.req.header("Authorization"),
+			parsed.data.client_id,
+		);
+		if (!credentials) {
+			c.header("Cache-Control", "no-store");
+			c.header("Pragma", "no-cache");
+			c.header("Referrer-Policy", "no-referrer");
+			c.header("WWW-Authenticate", 'Basic realm="oauth-token"');
+			c.status(401);
+			return c.json(
+				oauthFormatter.formatError({
+					type: "authorisation",
+					code: "invalid_client",
+					status: 401,
+				}),
+			);
 		}
 
 		const context = createServiceContext(c);
+		const clientRes = await serviceWrapper(oauthServices.authenticateClient, {
+			transaction: false,
+			defaultError: { type: "authorisation" },
+		})(context, credentials);
+		if (clientRes.error) {
+			c.header("Cache-Control", "no-store");
+			c.header("Pragma", "no-cache");
+			c.header("Referrer-Policy", "no-referrer");
+			if (clientRes.error.code === "invalid_client") {
+				c.header("WWW-Authenticate", 'Basic realm="oauth-token"');
+			}
+			c.status((clientRes.error.status ?? 500) as StatusCode);
+			return c.json(oauthFormatter.formatError(clientRes.error));
+		}
+
 		const result =
 			parsed.data.grant_type === "authorization_code"
 				? await serviceWrapper(oauthServices.exchangeAuthorizationCode, {
@@ -107,7 +158,7 @@ const tokenController = factory.createHandlers(
 						defaultError: { type: "authorisation" },
 					})(context, {
 						code: parsed.data.code,
-						clientId: parsed.data.client_id,
+						clientId: clientRes.data.clientId,
 						redirectUri: parsed.data.redirect_uri,
 						resource: parsed.data.resource,
 						codeVerifier: parsed.data.code_verifier,
@@ -117,7 +168,7 @@ const tokenController = factory.createHandlers(
 						defaultError: { type: "authorisation" },
 					})(context, {
 						refreshToken: parsed.data.refresh_token,
-						clientId: parsed.data.client_id,
+						clientId: clientRes.data.clientId,
 						resource: parsed.data.resource,
 					});
 		if (result.error) {

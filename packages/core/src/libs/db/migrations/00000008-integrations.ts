@@ -136,6 +136,102 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
+				.createTable("lucid_oauth_clients")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("client_id", adapter.getDataType("text"), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("name", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("client_uri", adapter.getDataType("text"))
+				.addColumn(
+					"token_endpoint_auth_method",
+					adapter.getDataType("text"),
+					(col) => col.notNull(),
+				)
+				.addColumn("client_secret_hash", adapter.getDataType("text"))
+				.addColumn("client_secret_salt", adapter.getDataType("text"))
+				.addColumn("logo_media_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_media.id").onDelete("set null"),
+				)
+				.addColumn("enabled", adapter.getDataType("boolean"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_clients_client_id")
+				.on("lucid_oauth_clients")
+				.column("client_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_clients_logo_media_id")
+				.on("lucid_oauth_clients")
+				.column("logo_media_id")
+				.execute();
+
+			await db.schema
+				.createTable("lucid_oauth_client_redirect_uris")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("oauth_client_id", adapter.getDataType("integer"), (col) =>
+					col
+						.references("lucid_oauth_clients.id")
+						.onDelete("cascade")
+						.notNull(),
+				)
+				.addColumn("redirect_uri", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						)
+						.notNull(),
+				)
+				.addUniqueConstraint("lucid_oauth_client_redirect_uris_unique", [
+					"oauth_client_id",
+					"redirect_uri",
+				])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_oauth_client_redirect_uris_client_id")
+				.on("lucid_oauth_client_redirect_uris")
+				.column("oauth_client_id")
+				.execute();
+
+			await db.schema
 				.createTable("lucid_oauth_authorization_requests")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
@@ -150,6 +246,11 @@ const Migration00000008: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addColumn("client_uri", adapter.getDataType("text"))
+				.addColumn(
+					"client_logo_media_id",
+					adapter.getDataType("integer"),
+					(col) => col.references("lucid_media.id").onDelete("set null"),
+				)
 				.addColumn("redirect_uri", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)

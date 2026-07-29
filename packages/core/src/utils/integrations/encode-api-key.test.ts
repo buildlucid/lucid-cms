@@ -8,12 +8,12 @@ describe("API Key Encoding/Decoding", () => {
 
 		const encoded = encodeApiKey(key, apiKey);
 
-		expect(encoded).toBe("Y2xpZW50X2FiYzEyMzpkZWY0NTZnaGk3ODk=");
+		expect(encoded).toBe("lucid_int_Y2xpZW50X2FiYzEyMzpkZWY0NTZnaGk3ODk");
 		expect(typeof encoded).toBe("string");
 	});
 
 	test("should correctly decode encoded api key", () => {
-		const encoded = "Y2xpZW50X2FiYzEyMzpkZWY0NTZnaGk3ODk=";
+		const encoded = "lucid_int_Y2xpZW50X2FiYzEyMzpkZWY0NTZnaGk3ODk";
 
 		const result = decodeApiKey(encoded);
 
@@ -30,5 +30,12 @@ describe("API Key Encoding/Decoding", () => {
 
 		expect(decoded.key).toBe(originalKey);
 		expect(decoded.apiKey).toBe(originalApiKey);
+	});
+
+	test("should reject credentials without the integration prefix", () => {
+		const decoded = decodeApiKey("Y2xpZW50X2FiYzEyMzpkZWY0NTZnaGk3ODk");
+
+		expect(decoded.key).toBeUndefined();
+		expect(decoded.apiKey).toBeUndefined();
 	});
 });

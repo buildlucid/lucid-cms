@@ -11,6 +11,7 @@ import locales from "./locales";
 import media from "./media";
 import mediaFolders from "./media-folders";
 import mediaShareLinks from "./media-share-links";
+import oauthClients from "./oauth-clients";
 import oauthConnections from "./oauth-connections";
 import permissions from "./permissions";
 import publishOperations from "./publish-operations";
@@ -42,6 +43,7 @@ const exportObject = {
 	documents,
 	integrations,
 	oauthConnections,
+	oauthClients,
 	connection,
 	tenants,
 };

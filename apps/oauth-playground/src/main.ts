@@ -77,10 +77,10 @@ let tokens: TokenState | undefined;
 let requestAuth: "oauth" | "api-key" = "oauth";
 let revealTokens = false;
 
-const clientId = new URL(
-	import.meta.env.VITE_OAUTH_CLIENT_ID ?? "/oauth-client.json",
-	window.location.origin,
-).toString();
+const configuredClientId = import.meta.env.VITE_OAUTH_CLIENT_ID?.trim();
+const clientId =
+	configuredClientId ||
+	new URL("/oauth-client.json", window.location.origin).toString();
 const redirectUri = new URL("/callback", window.location.origin).toString();
 
 const setButtonBusy = (

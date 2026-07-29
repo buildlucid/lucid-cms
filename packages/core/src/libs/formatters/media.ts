@@ -6,9 +6,9 @@ import type {
 	MediaFileMeta,
 	MediaImageFile,
 	MediaImageMeta,
+	MediaImagePreview,
 	MediaOrigin,
 	MediaPoster,
-	ProfilePicture,
 } from "../../types/response.js";
 import { createMediaUrl } from "../../utils/media/index.js";
 import type { MediaRef } from "../collection/custom-fields/fields/media/types.js";
@@ -204,11 +204,11 @@ const translationsFor = (
 		localeCode: translation.locale_code,
 	})) ?? [];
 
-/** Formats an image used as a user's profile picture. */
-const formatProfilePicture = (props: {
+/** Formats a compact image embedded within another resource. */
+const formatMediaImagePreview = (props: {
 	poster?: MediaPosterPropsT | null;
 	host: string;
-}): ProfilePicture | null => {
+}): MediaImagePreview | null => {
 	if (!props.poster) return null;
 
 	return {
@@ -328,7 +328,7 @@ const formatRef = (props: {
 export default {
 	formatMultiple,
 	formatSingle,
-	formatProfilePicture,
+	formatMediaImagePreview,
 	formatPoster,
 	formatRef,
 	formatFocalPoint,

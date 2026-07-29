@@ -1,4 +1,5 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
+import type { MediaImagePreview } from "../media/types.js";
 
 export type ExternalScope =
 	| `documents:${string}:${
@@ -57,6 +58,31 @@ export interface IntegrationCreateResponse {
 export type IntegrationRegenerateKeysResponse = IntegrationCreateResponse;
 
 export type OAuthPrincipalType = "system" | "user";
+export type OAuthClientAuthMethod = "none" | "client_secret_basic";
+export type OAuthClientLogo = MediaImagePreview;
+
+export interface OAuthClient {
+	id: number;
+	clientId: string;
+	name: string;
+	clientUri: string | null;
+	authMethod: OAuthClientAuthMethod;
+	redirectUris: string[];
+	logo: OAuthClientLogo | null;
+	enabled: boolean;
+	createdBy: number | null;
+	createdAt: string;
+	updatedAt: string | null;
+}
+
+export interface OAuthClientCreateResponse {
+	client: OAuthClient;
+	clientSecret: string | null;
+}
+
+export interface OAuthClientRegenerateSecretResponse {
+	clientSecret: string;
+}
 
 export interface OAuthConnection {
 	id: number;
@@ -80,6 +106,7 @@ export interface OAuthAuthorizationRequest {
 	clientId: string;
 	clientName: string;
 	clientUri: string | null;
+	clientLogo: OAuthClientLogo | null;
 	scopes: ExternalScope[];
 	userScopes: ExternalScope[];
 	scopeGroups: ExternalScopeGroup[];

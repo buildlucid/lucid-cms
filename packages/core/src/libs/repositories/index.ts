@@ -33,6 +33,8 @@ export { default as MediaTranslationsRepository } from "./media-translations.js"
 export { default as MediaUploadSessionsRepository } from "./media-upload-sessions.js";
 export { default as OAuthAuthorizationCodesRepository } from "./oauth-authorization-codes.js";
 export { default as OAuthAuthorizationRequestsRepository } from "./oauth-authorization-requests.js";
+export { default as OAuthClientRedirectUrisRepository } from "./oauth-client-redirect-uris.js";
+export { default as OAuthClientsRepository } from "./oauth-clients.js";
 export { default as OAuthGrantScopesRepository } from "./oauth-grant-scopes.js";
 export { default as OAuthGrantsRepository } from "./oauth-grants.js";
 export { default as OAuthRefreshTokensRepository } from "./oauth-refresh-tokens.js";

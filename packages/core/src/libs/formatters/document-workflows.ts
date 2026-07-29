@@ -58,7 +58,7 @@ const formatSingle = (props: {
 					username: assignee.username ?? null,
 					firstName: assignee.first_name ?? null,
 					lastName: assignee.last_name ?? null,
-					profilePicture: mediaFormatter.formatProfilePicture({
+					profilePicture: mediaFormatter.formatMediaImagePreview({
 						poster: assignee.profile_picture?.[0],
 						host: props.host,
 					}),
@@ -108,7 +108,7 @@ const formatAssigneeUsers = (props: {
 		username: user.username,
 		firstName: user.firstName,
 		lastName: user.lastName,
-		profilePicture: mediaFormatter.formatProfilePicture({
+		profilePicture: mediaFormatter.formatMediaImagePreview({
 			poster: user.profile_picture?.[0],
 			host: props.host,
 		}),

@@ -189,7 +189,7 @@ const uploadSessionParamsSchema = z.object({
 	}),
 });
 
-export const profilePictureResponseSchema = z.object({
+export const mediaImagePreviewResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 2 }),
 	type: z.literal("image"),
 	origin: mediaOriginSchema.meta({

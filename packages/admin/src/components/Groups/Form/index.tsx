@@ -2,6 +2,7 @@ export { CheckboxInput as Checkbox } from "./Checkbox";
 export { CheckboxButton } from "./CheckboxButton";
 export { CodeEditor } from "./CodeEditor";
 export { Color } from "./Color";
+export { default as CompactImageUpload } from "./CompactImageUpload";
 export { DegreeRangeControl } from "./DegreeRangeControl";
 export { DescribedBy } from "./DescribedBy";
 export { DocumentSelect } from "./DocumentSelect";

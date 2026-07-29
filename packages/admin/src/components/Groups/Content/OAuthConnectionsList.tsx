@@ -11,6 +11,7 @@ export const OAuthConnectionsList: Component<{
 	canUpdate: boolean;
 	canRevoke: boolean;
 	embedded?: boolean;
+	contained?: boolean;
 }> = (props) => {
 	// ----------------------------------------
 	// Queries
@@ -34,7 +35,10 @@ export const OAuthConnectionsList: Component<{
 					description: T()("oauth.connections.empty.description"),
 				},
 			}}
-			options={{ inline: true, contained: true }}
+			options={{
+				inline: true,
+				contained: props.contained !== false,
+			}}
 		>
 			<div class="flex flex-col">
 				<For each={connections.data?.data ?? []}>

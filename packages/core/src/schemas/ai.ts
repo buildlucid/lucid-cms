@@ -7,7 +7,7 @@ import type { ControllerSchema } from "../types.js";
 import { brickInputSchema } from "./collection-bricks.js";
 import { fieldInputSchema } from "./collection-fields.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { profilePictureResponseSchema } from "./media.js";
+import { mediaImagePreviewResponseSchema } from "./media.js";
 
 const aiMaxBase64ImageLength = 8_000_000;
 const aiImageDetailSchema = z.enum(["low", "high", "auto"]).default("low");
@@ -361,7 +361,7 @@ export const controllerSchemas = {
 							email: z.email(),
 							firstName: z.string().nullable(),
 							lastName: z.string().nullable(),
-							profilePicture: profilePictureResponseSchema.nullable(),
+							profilePicture: mediaImagePreviewResponseSchema.nullable(),
 						})
 						.strict()
 						.nullable(),

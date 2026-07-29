@@ -7,6 +7,7 @@ import type {
 } from "../../../types/hono.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import { multiTenancyEnabled } from "../../../utils/helpers/index.js";
+import { integrationApiKeyPrefix } from "../../../utils/integrations/encode-api-key.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import { copy } from "../../i18n/index.js";
@@ -29,16 +30,21 @@ const setOAuthBearerChallenge = (
 	);
 };
 
+/**
+ * Authenticates content API requests with an integration API key or OAuth access
+ * token, then exposes the resolved principal, tenant, and scopes to downstream handlers.
+ */
 const externalAuthentication = createMiddleware(
 	async (c: LucidHonoContext, next) => {
 		const authorization = c.req.header("Authorization");
+		const apiKeyHeader = c.req.header("X-API-Key");
 		const runtimeContext = c.get("runtimeContext");
 		const connectionInfo = runtimeContext.getConnectionInfo(c);
 		const userAgent = c.req.header("user-agent") || null;
 
 		const context = createServiceContext(c);
 
-		if (!authorization) {
+		if ((!authorization && !apiKeyHeader) || (authorization && apiKeyHeader)) {
 			setOAuthBearerChallenge(c, context);
 			throw new LucidAPIError({
 				type: "authorisation",
@@ -47,19 +53,36 @@ const externalAuthentication = createMiddleware(
 			});
 		}
 
-		const parts = authorization.trim().split(/\s+/);
-		const [scheme, credential] = parts;
-		if (parts.length !== 2 || !scheme || !credential) {
-			setOAuthBearerChallenge(c, context);
-			throw new LucidAPIError({
-				type: "authorisation",
-				message: copy("server:core.integrations.api.key.invalid"),
-				status: 401,
-			});
+		let integrationCredential: string | undefined;
+		let oauthCredential: string | undefined;
+
+		if (apiKeyHeader) {
+			integrationCredential = apiKeyHeader.trim();
+		} else {
+			const parts = authorization?.trim().split(/\s+/) ?? [];
+			const [scheme, credential] = parts;
+			if (parts.length !== 2 || !scheme || !credential) {
+				setOAuthBearerChallenge(c, context);
+				throw new LucidAPIError({
+					type: "authorisation",
+					message: copy("server:core.integrations.api.key.invalid"),
+					status: 401,
+				});
+			}
+
+			if (scheme.toLowerCase() === "apikey") {
+				integrationCredential = credential;
+			} else if (scheme.toLowerCase() === "bearer") {
+				if (credential.startsWith(integrationApiKeyPrefix)) {
+					integrationCredential = credential;
+				} else {
+					oauthCredential = credential;
+				}
+			}
 		}
 
 		let externalAuth: LucidExternalAuth;
-		if (scheme.toLowerCase() === "apikey") {
+		if (integrationCredential) {
 			const verifyApiKey = await serviceWrapper(
 				integrationServices.verifyApiKey,
 				{
@@ -71,7 +94,7 @@ const externalAuthentication = createMiddleware(
 					},
 				},
 			)(context, {
-				apiKey: credential,
+				apiKey: integrationCredential,
 			});
 			if (verifyApiKey.error) {
 				throw new LucidAPIError({
@@ -81,7 +104,7 @@ const externalAuthentication = createMiddleware(
 				});
 			}
 			externalAuth = verifyApiKey.data;
-		} else if (scheme.toLowerCase() === "bearer") {
+		} else if (oauthCredential) {
 			const verifyAccessToken = await serviceWrapper(
 				oauthServices.verifyAccessToken,
 				{
@@ -92,7 +115,7 @@ const externalAuthentication = createMiddleware(
 						status: 401,
 					},
 				},
-			)(context, { accessToken: credential });
+			)(context, { accessToken: oauthCredential });
 			if (verifyAccessToken.error) {
 				setOAuthBearerChallenge(c, context, "invalid_token");
 				throw new LucidAPIError(verifyAccessToken.error);

@@ -115,7 +115,7 @@ const formatDocumentAuthor = (props: {
 		firstName: props.firstName ?? null,
 		lastName: props.lastName ?? null,
 		username: props.username ?? null,
-		profilePicture: mediaFormatter.formatProfilePicture({
+		profilePicture: mediaFormatter.formatMediaImagePreview({
 			poster: props.profilePicture?.[0],
 			host: props.host,
 		}),

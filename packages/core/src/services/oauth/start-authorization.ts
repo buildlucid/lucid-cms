@@ -4,9 +4,9 @@ import { OAuthAuthorizationRequestsRepository } from "../../libs/repositories/in
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
-	fetchOAuthClientMetadata,
-	isLoopbackHostname,
-} from "./helpers/client-metadata.js";
+	getAllowedOAuthLoopbackHostname,
+	resolveOAuthAuthorizationClient,
+} from "./helpers/resolve-client.js";
 import { createOAuthOpaqueToken } from "./helpers/security.js";
 import {
 	getOAuthAuthorizationErrorUrl,
@@ -31,15 +31,13 @@ const startAuthorization: ServiceFn<
 	{ redirectUrl: string }
 > = async (context, input) => {
 	const baseUrl = new URL(getBaseUrl(context));
-	const metadataRes = await fetchOAuthClientMetadata(input.clientId, {
-		allowedLoopbackHostname: isLoopbackHostname(baseUrl.hostname)
-			? baseUrl.hostname
-			: undefined,
+	const clientRes = await resolveOAuthAuthorizationClient(context, {
+		clientId: input.clientId,
+		allowedLoopbackHostname: getAllowedOAuthLoopbackHostname(baseUrl),
 	});
-	if (metadataRes.error) return metadataRes;
-	const metadata = metadataRes.data;
+	if (clientRes.error) return clientRes;
 
-	if (!metadata.redirect_uris.includes(input.redirectUri)) {
+	if (!clientRes.data.redirectUris.includes(input.redirectUri)) {
 		return {
 			error: {
 				type: "basic",
@@ -109,8 +107,9 @@ const startAuthorization: ServiceFn<
 		data: {
 			request_id: requestId,
 			client_id: input.clientId,
-			client_name: metadata.client_name,
-			client_uri: metadata.client_uri ?? null,
+			client_name: clientRes.data.clientName,
+			client_uri: clientRes.data.clientUri,
+			client_logo_media_id: clientRes.data.logoMediaId,
 			redirect_uri: input.redirectUri,
 			resource: input.resource,
 			scopes: requestedScopes.join(" "),
