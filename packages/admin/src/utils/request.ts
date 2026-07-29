@@ -22,6 +22,7 @@ interface RequestConfig<Data> {
 	headers?: Record<string, string>;
 	signal?: AbortSignal;
 	tenant?: boolean;
+	displayErrorToast?: boolean;
 }
 
 export const getFetchURL = (url: string, query?: QueryBuilderProps): string => {
@@ -87,7 +88,9 @@ const handleResponse = async <ResponseBody, Data = unknown>(
 	}
 
 	if (fetchRes.status === 429) {
-		handleSiteErrors(data as ErrorResponse);
+		if (params.config?.displayErrorToast !== false) {
+			handleSiteErrors(data as ErrorResponse);
+		}
 		throw new LucidError(
 			(data as ErrorResponse).message,
 			data as ErrorResponse,
@@ -95,7 +98,9 @@ const handleResponse = async <ResponseBody, Data = unknown>(
 	}
 
 	if (!fetchRes.ok) {
-		handleSiteErrors(data as ErrorResponse);
+		if (params.config?.displayErrorToast !== false) {
+			handleSiteErrors(data as ErrorResponse);
+		}
 		throw new LucidError(
 			(data as ErrorResponse).message,
 			data as ErrorResponse,

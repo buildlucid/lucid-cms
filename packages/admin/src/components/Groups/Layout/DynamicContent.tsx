@@ -45,6 +45,9 @@ export const DynamicContent: Component<{
 		inline?: boolean;
 		padding?: "16" | "24";
 		hideNoEntries?: boolean;
+		contained?: boolean;
+		dividerTop?: boolean;
+		noEntriesButtonTheme?: "primary" | "border-outline";
 	};
 	children: JSXElement;
 }> = (props) => {
@@ -57,6 +60,9 @@ export const DynamicContent: Component<{
 					"p-4 md:p-6": props.options?.padding === "24",
 					"p-4": props.options?.padding === "16",
 					"flex-1 h-full": props.options?.inline !== true,
+					"overflow-hidden rounded-md border border-border bg-card-base":
+						props.options?.contained === true,
+					"border-t border-border": props.options?.dividerTop === true,
 				})}
 			>
 				<Switch fallback={props.children}>
@@ -88,6 +94,9 @@ export const DynamicContent: Component<{
 									permissions={{
 										create: props.permissions?.create,
 									}}
+									options={{
+										buttonTheme: props.options?.noEntriesButtonTheme,
+									}}
 								/>
 							</Show>
 							<Show when={props.state?.searchParams?.hasFiltersApplied()}>
@@ -100,7 +109,7 @@ export const DynamicContent: Component<{
 									<Button
 										type="submit"
 										theme="primary"
-										size="medium"
+										size="small"
 										onClick={() => {
 											if (props.callback?.resetFilters) {
 												props.callback.resetFilters();

@@ -1,15 +1,12 @@
-import { type Component, createMemo, createSignal } from "solid-js";
+import { type Component, createSignal } from "solid-js";
 import SystemSettingsHeader from "@/components/Blocks/SystemSettingsHeader";
 import { IntegrationsList } from "@/components/Groups/Content";
 import { Wrapper } from "@/components/Groups/Layout";
-import { Permissions } from "@/constants/permissions";
 import useQueryState, {
 	booleanFilter,
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState";
-import userStore from "@/store/userStore";
-import T from "@/translations";
 
 const SystemIntegrationsRoute: Component = () => {
 	// ----------------------------------------
@@ -44,36 +41,11 @@ const SystemIntegrationsRoute: Component = () => {
 		createSignal(false);
 
 	// ----------------------------------------
-	// Memos
-	const canReadIntegrations = createMemo(
-		() => userStore.get.hasPermission([Permissions.IntegrationsRead]).all,
-	);
-	const hasCreatePermission = createMemo(() => {
-		return (
-			canReadIntegrations() &&
-			userStore.get.hasPermission([Permissions.IntegrationsCreate]).all
-		);
-	});
-
-	// ----------------------------------------
 	// Render
 	return (
 		<Wrapper
 			slots={{
-				header: (
-					<SystemSettingsHeader
-						actions={{
-							create: [
-								{
-									open: openCreateIntegrationPanel(),
-									setOpen: setOpenCreateIntegrationPanel,
-									permission: hasCreatePermission(),
-									label: T()("integrations.create.action"),
-								},
-							],
-						}}
-					/>
-				),
+				header: <SystemSettingsHeader />,
 			}}
 		>
 			<IntegrationsList

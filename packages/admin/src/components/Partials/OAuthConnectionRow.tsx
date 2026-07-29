@@ -1,17 +1,15 @@
 import type { OAuthConnection } from "@types";
-import { FaSolidGlobe, FaSolidServer, FaSolidUser } from "solid-icons/fa";
 import {
-	type Component,
-	createEffect,
-	createMemo,
-	createSignal,
-	Show,
-} from "solid-js";
-import InfoRow from "@/components/Blocks/InfoRow";
-import { InputFull } from "@/components/Groups/Form";
+	FaSolidChevronDown,
+	FaSolidGlobe,
+	FaSolidShieldHalved,
+} from "solid-icons/fa";
+import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import { Confirmation } from "@/components/Groups/Modal";
-import Button from "@/components/Partials/Button";
+import UpdateOAuthConnection from "@/components/Modals/OAuth/UpdateOAuthConnection";
+import ActionDropdown from "@/components/Partials/ActionDropdown";
 import DateText from "@/components/Partials/DateText";
+import IconContainer from "@/components/Partials/IconContainer";
 import api from "@/services/api";
 import type { OAuthConnectionOwner } from "@/services/api/oauth-connections";
 import T from "@/translations";
@@ -25,20 +23,12 @@ const OAuthConnectionRow: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
-	const [name, setName] = createSignal(props.connection.name);
+	const [detailsOpen, setDetailsOpen] = createSignal(false);
+	const [updateOpen, setUpdateOpen] = createSignal(false);
 	const [revokeOpen, setRevokeOpen] = createSignal(false);
 
 	// ----------------------------------------
 	// Mutations
-	const updateConnection = api.oauthConnections.useUpdateConnection({
-		onSuccess: () => {
-			spawnToast({
-				title: T()("oauth.connections.updated.title"),
-				message: T()("oauth.connections.updated.message"),
-				status: "success",
-			});
-		},
-	});
 	const revokeConnection = api.oauthConnections.useRevokeConnection({
 		onSuccess: () => {
 			setRevokeOpen(false);
@@ -52,28 +42,16 @@ const OAuthConnectionRow: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const nameChanged = createMemo(
-		() => name().trim() !== props.connection.name && name().trim().length > 0,
+	const hasCustomName = createMemo(
+		() => props.connection.name !== props.connection.clientName,
 	);
 	const clientHostname = createMemo(
 		() => new URL(props.connection.clientId).hostname,
 	);
-
-	// ----------------------------------------
-	// Effects
-	createEffect(() => {
-		setName(props.connection.name);
-	});
+	const permissionCount = createMemo(() => props.connection.scopes.length);
 
 	// ----------------------------------------
 	// Functions
-	const updateName = () => {
-		updateConnection.action.mutate({
-			owner: props.owner,
-			id: props.connection.id,
-			name: name().trim(),
-		});
-	};
 	const revoke = () => {
 		revokeConnection.action.mutate({
 			owner: props.owner,
@@ -89,91 +67,100 @@ const OAuthConnectionRow: Component<{
 	// Render
 	return (
 		<>
-			<InfoRow.Content
-				title={props.connection.clientName}
-				description={clientHostname()}
-				reducedMargin={true}
-				actions={
-					<Show when={props.canRevoke}>
-						<Button
-							type="button"
-							theme="danger-outline"
-							size="small"
-							onClick={() => setRevokeOpen(true)}
-						>
-							{T()("oauth.connections.revoke.action")}
-						</Button>
-					</Show>
-				}
-			>
-				<div class="mb-4 flex flex-wrap items-center gap-2 border-b border-border pb-4">
-					<span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-input-base px-2 py-1 text-[10px] font-medium text-subtitle">
-						<FaSolidGlobe class="size-2.5 text-primary-base" />
-						{clientHostname()}
-					</span>
-					<span class="inline-flex items-center gap-1.5 rounded-full border border-border bg-input-base px-2 py-1 text-[10px] font-medium text-subtitle">
-						<Show
-							when={props.connection.principalType === "system"}
-							fallback={<FaSolidUser class="size-2.5 text-primary-base" />}
-						>
-							<FaSolidServer class="size-2.5 text-primary-base" />
-						</Show>
-						{props.connection.principalType === "system"
-							? T()("common.system")
-							: T()("common.user")}
-					</span>
-					<code
-						class="min-w-0 grow truncate text-right text-[9px] text-unfocused"
-						title={props.connection.clientId}
-					>
-						{props.connection.clientId}
-					</code>
-				</div>
-				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-					<InputFull
-						id={`oauth-connection-name-${props.connection.id}`}
-						name="name"
-						type="text"
-						value={name()}
-						onChange={setName}
-						copy={{ label: T()("common.name") }}
-						disabled={!props.canUpdate}
-						noMargin={true}
+			<article class="border-b border-border p-4 last:border-b-0">
+				<div class="flex min-w-0 items-start justify-between gap-3">
+					<div class="flex min-w-0 items-start gap-3">
+						<IconContainer>
+							<FaSolidGlobe class="size-3.5 text-primary-base" />
+						</IconContainer>
+						<div class="min-w-0">
+							<h3 class="truncate text-sm font-semibold text-title">
+								{props.connection.name}
+							</h3>
+							<p class="mt-0.5 truncate text-xs">
+								<Show when={hasCustomName()}>
+									<span>{props.connection.clientName}</span>
+									<span class="mx-1.5 text-unfocused">·</span>
+								</Show>
+								<span>{clientHostname()}</span>
+							</p>
+							<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-unfocused">
+								<button
+									type="button"
+									class="inline-flex items-center gap-1 rounded text-xs text-body hover:text-title"
+									aria-expanded={detailsOpen()}
+									onClick={() => setDetailsOpen(!detailsOpen())}
+								>
+									<FaSolidShieldHalved class="size-2.5" />
+									{T()(
+										permissionCount() === 1
+											? "oauth.connections.permission.count"
+											: "oauth.connections.permissions.count",
+										{ count: permissionCount() },
+									)}
+									<FaSolidChevronDown
+										class="size-2 transition-transform"
+										classList={{ "rotate-180": detailsOpen() }}
+									/>
+								</button>
+								<Show when={props.connection.tenantKey}>
+									{(tenantKey) => (
+										<span>
+											{T()("oauth.connections.tenant.label")}: {tenantKey()}
+										</span>
+									)}
+								</Show>
+								<span class="inline-flex items-center gap-1">
+									{T()("common.last.used.at")}:
+									<DateText
+										date={props.connection.lastUsedAt}
+										includeTime={true}
+										class="text-xs!"
+									/>
+								</span>
+							</div>
+						</div>
+					</div>
+					<ActionDropdown
+						actions={[
+							{
+								type: "button",
+								label: T()("oauth.connections.update.action"),
+								icon: "pen",
+								onClick: () => setUpdateOpen(true),
+								hide: !props.canUpdate,
+							},
+							{
+								type: "button",
+								label: T()("oauth.connections.revoke.action"),
+								icon: "trash",
+								onClick: () => setRevokeOpen(true),
+								hide: !props.canRevoke,
+							},
+						]}
+						options={{ raised: true }}
 					/>
-					<Show when={props.canUpdate}>
-						<Button
-							type="button"
-							theme="border-outline"
-							size="small"
-							disabled={!nameChanged()}
-							loading={updateConnection.action.isPending}
-							onClick={updateName}
-						>
-							{T()("common.save")}
-						</Button>
-					</Show>
 				</div>
-				<div class="mt-4 flex flex-wrap gap-1.5">
-					{props.connection.scopes.map((scope) => (
-						<span class="rounded-md bg-input-base border border-border px-2 py-1 font-mono text-[10px] text-subtitle">
-							{scope}
-						</span>
-					))}
-				</div>
-				<div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 border-t border-border pt-4 text-xs text-body">
-					<Show when={props.connection.tenantKey}>
-						{(tenantKey) => (
-							<span>
-								{T()("oauth.connections.tenant.label")}: {tenantKey()}
-							</span>
-						)}
-					</Show>
-					<span>
-						{T()("common.last.used.at")}:{" "}
-						<DateText date={props.connection.lastUsedAt} includeTime={true} />
-					</span>
-				</div>
-			</InfoRow.Content>
+				<Show when={detailsOpen()}>
+					<div class="mt-3 border-t border-border pt-3 sm:ml-12">
+						<p class="mb-2 text-xs font-medium text-subtitle">
+							{T()("common.permissions")}
+						</p>
+						<ul class="flex flex-wrap gap-x-4 gap-y-1">
+							<For each={props.connection.scopes}>
+								{(scope) => (
+									<li class="font-mono text-xs text-body">{scope}</li>
+								)}
+							</For>
+						</ul>
+					</div>
+				</Show>
+			</article>
+			<UpdateOAuthConnection
+				connection={props.connection}
+				owner={props.owner}
+				state={{ open: updateOpen(), setOpen: setUpdateOpen }}
+			/>
 			<Confirmation
 				theme="danger"
 				state={{

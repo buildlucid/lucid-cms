@@ -469,7 +469,7 @@ const UpdateUserPanel: Component<{
 							{(userId) => (
 								<UserIntegrationsList
 									services={api.users.integrations(userId)}
-									canCreate={userStore.get.user?.superAdmin === true}
+									canCreate={false}
 									canUpdate={
 										userStore.get.hasPermission([Permissions.UsersUpdate]).all
 									}

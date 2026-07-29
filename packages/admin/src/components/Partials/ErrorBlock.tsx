@@ -20,7 +20,7 @@ const ErrorBlock: Component<{
 }> = (props) => {
 	return (
 		<div class={"flex items-center justify-center"}>
-			<div class="text-center max-w-xl w-full flex flex-col items-center p-6">
+			<div class="w-full max-w-xl px-4 py-8 text-center flex flex-col items-center md:px-6 md:py-10">
 				<Show when={props.content.image}>
 					<img
 						src={props.content.image}
@@ -29,7 +29,7 @@ const ErrorBlock: Component<{
 					/>
 				</Show>
 
-				<h2 class="mb-2">
+				<h2 class="mb-1 text-sm font-semibold">
 					{props.content.title ?? T()("errors.generic.title")}
 				</h2>
 				<p
@@ -43,15 +43,15 @@ const ErrorBlock: Component<{
 				<Show when={props.link !== undefined}>
 					<Link
 						theme={"primary"}
-						size="medium"
-						classes="mt-6"
+						size="small"
+						classes="mt-4"
 						href={props.link?.href || ""}
 					>
 						{props.link?.text || ""}
 					</Link>
 				</Show>
 				<Show when={props.children}>
-					<div class="mt-6">{props.children}</div>
+					<div class="mt-4">{props.children}</div>
 				</Show>
 			</div>
 		</div>

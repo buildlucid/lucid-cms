@@ -36,6 +36,7 @@ export const JobsList: Component<{
 	// Render
 	return (
 		<DynamicContent
+			class={jobs.isError || jobs.data?.data.length === 0 ? "-mb-4" : undefined}
 			state={{
 				isError: jobs.isError,
 				isSuccess: jobs.isSuccess,
@@ -65,6 +66,7 @@ export const JobsList: Component<{
 			}}
 			options={{
 				inline: true,
+				dividerTop: true,
 			}}
 		>
 			<Table

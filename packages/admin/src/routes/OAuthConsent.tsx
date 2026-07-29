@@ -1,15 +1,11 @@
-import notifyIllustration from "@assets/illustrations/notify.svg";
 import LogoIcon from "@assets/svgs/logo-icon.svg";
 import { useParams } from "@solidjs/router";
 import classNames from "classnames";
 import {
 	FaSolidCheck,
-	FaSolidGlobe,
 	FaSolidLock,
-	FaSolidServer,
 	FaSolidShieldHalved,
 	FaSolidTriangleExclamation,
-	FaSolidUser,
 } from "solid-icons/fa";
 import {
 	type Component,
@@ -23,10 +19,12 @@ import {
 } from "solid-js";
 import { Select } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
-import ErrorBlock from "@/components/Partials/ErrorBlock";
+import IconContainer from "@/components/Partials/IconContainer";
+import Pill from "@/components/Partials/Pill";
 import api from "@/services/api";
 import tenantStore from "@/store/tenantStore";
 import T, { translateAdminCopy } from "@/translations";
+import { LucidError } from "@/utils/error-handling";
 
 const OAuthConsentRoute: Component = () => {
 	// ----------------------------------------
@@ -96,6 +94,14 @@ const OAuthConsentRoute: Component = () => {
 			label: translateAdminCopy(tenant.name),
 		})),
 	);
+	const requestErrorCode = createMemo(() =>
+		request.error instanceof LucidError
+			? request.error.errorRes.code
+			: undefined,
+	);
+	const invalidScopeRequest = createMemo(
+		() => requestErrorCode() === "invalid_scope",
+	);
 
 	// ----------------------------------------
 	// Effects
@@ -141,98 +147,105 @@ const OAuthConsentRoute: Component = () => {
 	// Render
 	return (
 		<Switch>
+			{/* Loading */}
 			<Match when={request.isLoading}>
-				<div class="mx-auto w-full max-w-180 animate-pulse">
-					<div class="mx-auto mb-7 size-11 rounded-xl bg-input-base" />
-					<div class="mx-auto mb-3 h-5 w-52 rounded bg-input-base" />
-					<div class="mx-auto mb-9 h-4 w-80 max-w-full rounded bg-input-base" />
-					<div class="space-y-5 rounded-xl border border-border bg-card-base p-5 sm:p-7">
-						<div class="h-20 rounded-lg bg-input-base" />
-						<div class="grid gap-3 sm:grid-cols-2">
-							<div class="h-28 rounded-lg bg-input-base" />
-							<div class="h-28 rounded-lg bg-input-base" />
+				<div class="mx-auto w-full max-w-160 animate-pulse">
+					<div class="mx-auto mb-2 h-5 w-48 rounded bg-input-base" />
+					<div class="mx-auto mb-5 h-3 w-72 max-w-full rounded bg-input-base" />
+					<div class="overflow-hidden rounded-xl border border-border bg-card-base">
+						<div class="h-20 border-b border-border p-4">
+							<div class="h-full rounded-md bg-input-base" />
 						</div>
-						<div class="h-40 rounded-lg bg-input-base" />
+						<div class="grid gap-3 border-b border-border p-4 sm:grid-cols-2">
+							<div class="h-24 rounded-md bg-input-base" />
+							<div class="h-24 rounded-md bg-input-base" />
+						</div>
+						<div class="h-32 border-b border-border p-4">
+							<div class="h-full rounded-md bg-input-base" />
+						</div>
+						<div class="h-16 bg-input-base/25" />
 					</div>
 				</div>
 			</Match>
+
+			{/* Invalid, expired or completed request */}
 			<Match when={request.isError}>
-				<div class="mx-auto max-w-lg rounded-xl border border-border bg-card-base p-8">
-					<ErrorBlock
-						content={{
-							image: notifyIllustration,
-							title: T()("oauth.consent.error.title"),
-							description: T()("oauth.consent.error.description"),
-						}}
-					/>
+				<div class="mx-auto w-full max-w-md">
+					<div class="rounded-xl border border-border bg-card-base p-6 text-center shadow-lg sm:p-8">
+						<h1 class="text-base! tracking-normal!">
+							{invalidScopeRequest()
+								? T()("oauth.consent.error.scopes.title")
+								: T()("oauth.consent.error.title")}
+						</h1>
+						<p class="mx-auto mt-1.5 max-w-sm text-sm">
+							{invalidScopeRequest()
+								? T()("oauth.consent.error.scopes.description")
+								: T()("oauth.consent.error.description")}
+						</p>
+						<p class="mx-auto mt-4 max-w-xs border-t border-border pt-4 text-xs text-unfocused">
+							{T()("oauth.consent.error.next.step")}
+						</p>
+					</div>
 				</div>
 			</Match>
+
+			{/* Consent request */}
 			<Match when={request.data?.data}>
 				{(authorization) => (
-					<div class="mx-auto w-full max-w-180">
-						<header class="mb-7 text-center">
-							<div class="mb-5 flex items-center justify-center">
-								<div class="grid size-11 place-items-center rounded-xl border border-primary-muted-border/40 bg-primary-muted-bg/30">
-									<img src={LogoIcon} alt="" class="size-7" />
-								</div>
-								<div class="mx-2 h-px w-8 bg-border" />
-								<div class="grid size-11 place-items-center rounded-xl border border-border bg-input-base text-lg font-semibold text-title">
-									{authorization().clientName.charAt(0).toUpperCase()}
-								</div>
-							</div>
-							<p class="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary-base">
+					<div class="mx-auto w-full max-w-160">
+						<header class="mb-5 text-center">
+							<IconContainer theme="default" class="mx-auto mb-3">
+								<img src={LogoIcon} alt="" class="size-6" />
+							</IconContainer>
+							<p class="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary-base">
 								{T()("oauth.consent.eyebrow")}
 							</p>
-							<h1 class="mx-auto mb-2 max-w-xl text-xl! tracking-normal! sm:text-2xl!">
+							<h1 class="mx-auto max-w-lg text-lg! tracking-normal! sm:text-xl!">
 								{T()("oauth.consent.application.request", {
 									name: authorization().clientName,
 								})}
 							</h1>
-							<p class="mx-auto max-w-lg text-sm">
+							<p class="mx-auto mt-1.5 max-w-md text-xs">
 								{T()("oauth.consent.description")}
 							</p>
 						</header>
 
-						<div class="overflow-hidden rounded-xl border border-border bg-card-base shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
-							<section class="border-b border-border p-5 sm:p-6">
-								<div class="flex items-start gap-3">
-									<div class="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg border border-border bg-input-base">
-										<FaSolidGlobe class="size-4 text-primary-base" />
-									</div>
-									<div class="min-w-0 grow">
-										<div class="flex flex-wrap items-center gap-2">
-											<h2 class="text-base font-semibold">
-												{authorization().clientName}
-											</h2>
-											<span class="inline-flex items-center rounded-full border border-primary-muted-border/40 bg-primary-muted-bg/30 px-2 py-0.5 text-[10px] font-medium text-primary-base">
-												{T()("oauth.consent.external.application")}
-											</span>
-										</div>
-										<p class="mt-1 text-sm">
+						<div class="overflow-hidden rounded-xl border border-border bg-card-base shadow-[0_16px_60px_rgba(0,0,0,0.22)]">
+							{/* Application identity */}
+							<section class="border-b border-border p-4">
+								<div class="flex items-start justify-between gap-3">
+									<div class="min-w-0">
+										<h2 class="truncate text-sm font-semibold">
+											{authorization().clientName}
+										</h2>
+										<p class="mt-0.5 text-xs">
 											{T()("oauth.consent.verified.by", {
 												hostname: clientHostname(),
 											})}
 										</p>
-										<code
-											class="mt-2 block max-w-full truncate text-[10px] text-unfocused"
-											title={authorization().clientId}
-										>
-											{authorization().clientId}
-										</code>
 									</div>
+									<Pill theme="outline" class="shrink-0">
+										{T()(
+											effectiveScopes().length === 1
+												? "oauth.connections.permission.count"
+												: "oauth.connections.permissions.count",
+											{ count: effectiveScopes().length },
+										)}
+									</Pill>
 								</div>
 							</section>
 
-							<section class="border-b border-border p-5 sm:p-6">
-								<div class="mb-4">
-									<h2 class="mb-1 text-sm font-semibold">
+							{/* Connection identity */}
+							<section class="border-b border-border p-4">
+								<div class="mb-3">
+									<h2 class="mb-0.5 text-sm font-semibold">
 										{T()("oauth.consent.principal.title")}
 									</h2>
 									<p class="text-xs">
 										{T()("oauth.consent.principal.description")}
 									</p>
 								</div>
-								<fieldset class="m-0 grid min-w-0 gap-3 border-0 p-0 sm:grid-cols-2">
+								<fieldset class="m-0 grid min-w-0 gap-2.5 border-0 p-0 sm:grid-cols-2">
 									<legend class="sr-only">
 										{T()("oauth.consent.principal.title")}
 									</legend>
@@ -240,40 +253,27 @@ const OAuthConsentRoute: Component = () => {
 										type="button"
 										aria-pressed={principalType() === "user"}
 										class={classNames(
-											"group relative flex min-h-28 items-start gap-3 rounded-lg border p-4 text-left transition-colors focus-visible:ring-1 focus-visible:ring-primary-base",
+											"group relative rounded-md border p-3 pr-8 text-left transition-colors focus-visible:ring-1 focus-visible:ring-primary-base",
 											{
 												"border-primary-muted-border bg-primary-muted-bg/25":
 													principalType() === "user",
-												"border-border bg-input-base/50 hover:border-border/80 hover:bg-input-base":
+												"border-border bg-input-base/40 hover:bg-input-base":
 													principalType() !== "user",
 											},
 										)}
 										onClick={() => setPrincipalType("user")}
 									>
-										<span
-											class={classNames(
-												"grid size-8 shrink-0 place-items-center rounded-lg border",
-												{
-													"border-primary-muted-border/50 bg-primary-muted-bg text-primary-base":
-														principalType() === "user",
-													"border-border bg-card-base text-body":
-														principalType() !== "user",
-												},
-											)}
-										>
-											<FaSolidUser class="size-3.5" />
-										</span>
-										<span class="min-w-0">
-											<strong class="mb-1 block text-sm font-semibold text-title">
+										<span class="block min-w-0">
+											<strong class="block text-xs font-semibold text-title">
 												{T()("oauth.consent.connect.as.me")}
 											</strong>
-											<span class="block text-xs leading-5 text-body">
+											<span class="mt-0.5 block text-[11px] leading-4 text-body">
 												{T()("oauth.consent.connect.as.me.description")}
 											</span>
 										</span>
 										<span
 											class={classNames(
-												"absolute right-3 top-3 grid size-4 place-items-center rounded-full border",
+												"absolute right-2.5 top-2.5 grid size-4 place-items-center rounded-full border",
 												{
 													"border-primary-base bg-primary-base text-primary-contrast":
 														principalType() === "user",
@@ -291,40 +291,27 @@ const OAuthConsentRoute: Component = () => {
 											type="button"
 											aria-pressed={principalType() === "system"}
 											class={classNames(
-												"group relative flex min-h-28 items-start gap-3 rounded-lg border p-4 text-left transition-colors focus-visible:ring-1 focus-visible:ring-primary-base",
+												"group relative rounded-md border p-3 pr-8 text-left transition-colors focus-visible:ring-1 focus-visible:ring-primary-base",
 												{
 													"border-primary-muted-border bg-primary-muted-bg/25":
 														principalType() === "system",
-													"border-border bg-input-base/50 hover:border-border/80 hover:bg-input-base":
+													"border-border bg-input-base/40 hover:bg-input-base":
 														principalType() !== "system",
 												},
 											)}
 											onClick={() => setPrincipalType("system")}
 										>
-											<span
-												class={classNames(
-													"grid size-8 shrink-0 place-items-center rounded-lg border",
-													{
-														"border-primary-muted-border/50 bg-primary-muted-bg text-primary-base":
-															principalType() === "system",
-														"border-border bg-card-base text-body":
-															principalType() !== "system",
-													},
-												)}
-											>
-												<FaSolidServer class="size-3.5" />
-											</span>
-											<span class="min-w-0">
-												<strong class="mb-1 block text-sm font-semibold text-title">
+											<span class="block min-w-0">
+												<strong class="block text-xs font-semibold text-title">
 													{T()("oauth.consent.connect.as.system")}
 												</strong>
-												<span class="block text-xs leading-5 text-body">
+												<span class="mt-0.5 block text-[11px] leading-4 text-body">
 													{T()("oauth.consent.connect.as.system.description")}
 												</span>
 											</span>
 											<span
 												class={classNames(
-													"absolute right-3 top-3 grid size-4 place-items-center rounded-full border",
+													"absolute right-2.5 top-2.5 grid size-4 place-items-center rounded-full border",
 													{
 														"border-primary-base bg-primary-base text-primary-contrast":
 															principalType() === "system",
@@ -341,9 +328,9 @@ const OAuthConsentRoute: Component = () => {
 
 								<div
 									class={classNames(
-										"mt-3 flex items-start gap-2 rounded-lg border px-3 py-2.5",
+										"mt-2.5 flex items-start gap-2 rounded-md border px-3 py-2",
 										{
-											"border-border bg-input-base/50":
+											"border-border bg-input-base/40":
 												principalType() === "user",
 											"border-warning-base/20 bg-warning-base/5":
 												principalType() === "system",
@@ -353,12 +340,12 @@ const OAuthConsentRoute: Component = () => {
 									<Show
 										when={principalType() === "system"}
 										fallback={
-											<FaSolidLock class="mt-0.5 size-3 shrink-0 text-primary-base" />
+											<FaSolidLock class="mt-0.75 size-2.5 shrink-0 text-primary-base" />
 										}
 									>
-										<FaSolidTriangleExclamation class="mt-0.5 size-3 shrink-0 text-warning-base" />
+										<FaSolidTriangleExclamation class="mt-0.75 size-2.5 shrink-0 text-warning-base" />
 									</Show>
-									<p class="m-0 text-[11px] leading-5">
+									<p class="m-0 text-[10px] leading-4">
 										{principalType() === "system"
 											? T()("oauth.consent.system.warning")
 											: T()("oauth.consent.user.notice")}
@@ -366,8 +353,9 @@ const OAuthConsentRoute: Component = () => {
 								</div>
 							</section>
 
+							{/* Tenant */}
 							<Show when={tenantOptions().length > 1}>
-								<section class="border-b border-border p-5 sm:p-6">
+								<section class="border-b border-border p-4">
 									<Select
 										id="oauth-connection-tenant"
 										name="tenant"
@@ -380,7 +368,6 @@ const OAuthConsentRoute: Component = () => {
 										options={tenantOptions()}
 										copy={{
 											label: T()("oauth.consent.tenant.label"),
-											describedBy: T()("oauth.consent.tenant.description"),
 										}}
 										required={true}
 										noClear={true}
@@ -390,27 +377,22 @@ const OAuthConsentRoute: Component = () => {
 								</section>
 							</Show>
 
-							<section class="border-b border-border p-5 sm:p-6">
-								<div class="mb-4 flex items-start gap-3">
-									<div class="grid size-8 shrink-0 place-items-center rounded-lg border border-border bg-input-base">
-										<FaSolidShieldHalved class="size-3.5 text-primary-base" />
-									</div>
-									<div>
-										<h2 class="mb-1 text-sm font-semibold">
-											{T()("oauth.consent.scopes.title")}
-										</h2>
-										<p class="text-xs">
-											{T()("oauth.consent.scopes.description", {
-												count: effectiveScopes().length,
-											})}
-										</p>
-									</div>
+							{/* Permissions */}
+							<section class="border-b border-border p-4">
+								<div class="mb-3">
+									<h2 class="text-sm font-semibold">
+										{T()("oauth.consent.scopes.title")}
+									</h2>
+									<p class="mt-0.5 text-xs">
+										{T()("oauth.consent.scopes.description", {
+											count: effectiveScopes().length,
+										})}
+									</p>
 								</div>
-
 								<Show when={unavailableUserScopes() > 0}>
-									<div class="mb-3 flex items-start gap-2 rounded-lg border border-warning-base/20 bg-warning-base/5 px-3 py-2.5">
-										<FaSolidTriangleExclamation class="mt-0.5 size-3 shrink-0 text-warning-base" />
-										<p class="m-0 text-[11px] leading-5">
+									<div class="mb-2.5 flex items-start gap-2 rounded-md border border-warning-base/20 bg-warning-base/5 px-3 py-2">
+										<FaSolidTriangleExclamation class="mt-0.5 size-2.5 shrink-0 text-warning-base" />
+										<p class="m-0 text-[10px] leading-4">
 											{T()("oauth.consent.scopes.reduced", {
 												count: unavailableUserScopes(),
 											})}
@@ -418,61 +400,62 @@ const OAuthConsentRoute: Component = () => {
 									</div>
 								</Show>
 
-								<div class="max-h-64 space-y-3 overflow-y-auto rounded-lg border border-border bg-input-base/30 p-3 scrollbar">
+								<div class="max-h-52 overflow-y-auto rounded-md border border-border scrollbar">
 									<For each={scopeGroups()}>
 										{(group) => (
-											<div>
-												<h3 class="mb-2 text-xs font-semibold text-title">
+											<div class="border-b border-border p-3 last:border-b-0">
+												<h3 class="mb-1.5 text-[11px] font-semibold text-title">
 													{translateAdminCopy(group.details.name)}
 												</h3>
-												<div class="space-y-1.5">
+												<ul class="space-y-1.5">
 													<For each={group.scopes}>
 														{(scope) => (
-															<div class="flex items-start gap-2 rounded-md border border-border bg-card-base px-3 py-2">
-																<span class="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-primary-muted-bg text-primary-base">
-																	<FaSolidCheck class="size-2" />
+															<li class="flex items-center gap-2">
+																<span class="grid size-3.5 shrink-0 place-items-center rounded-full bg-primary-muted-bg text-primary-base">
+																	<FaSolidCheck class="size-1.5" />
 																</span>
-																<div class="min-w-0">
-																	<strong class="block text-xs font-medium text-subtitle">
+																<span class="min-w-0">
+																	<strong class="block text-[11px] font-medium leading-4 text-subtitle">
 																		{translateAdminCopy(scope.details.name)}
 																	</strong>
 																	<Show when={scope.details.description}>
 																		{(description) => (
-																			<p class="mt-0.5 text-[10px] leading-4">
+																			<span class="block text-[10px] leading-4 text-body">
 																				{translateAdminCopy(description())}
-																			</p>
+																			</span>
 																		)}
 																	</Show>
-																</div>
-															</div>
+																</span>
+															</li>
 														)}
 													</For>
-												</div>
+												</ul>
 											</div>
 										)}
 									</For>
 									<Show when={effectiveScopes().length === 0}>
-										<p class="m-0 px-3 py-6 text-center text-xs">
+										<p class="m-0 px-3 py-5 text-center text-xs">
 											{T()("oauth.consent.scopes.none")}
 										</p>
 									</Show>
 								</div>
 							</section>
 
-							<footer class="flex flex-col-reverse gap-4 bg-input-base/25 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-								<div class="flex max-w-sm items-start gap-2">
-									<FaSolidShieldHalved class="mt-0.5 size-3 shrink-0 text-icon-faded" />
+							{/* Actions */}
+							<footer class="flex flex-col-reverse gap-3 bg-input-base/20 p-4 lg:flex-row lg:items-center lg:justify-between">
+								<div class="flex max-w-xs items-start gap-2">
+									<FaSolidShieldHalved class="mt-0.75 size-2.5 shrink-0 text-icon-faded" />
 									<p class="m-0 text-[10px] leading-4 text-unfocused">
 										{T()("oauth.consent.security.notice", {
 											hostname: clientHostname(),
 										})}
 									</p>
 								</div>
-								<div class="flex shrink-0 items-center justify-end gap-2">
+								<div class="flex shrink-0 items-center justify-start gap-2 lg:justify-end">
 									<Button
 										type="button"
 										theme="border-outline"
-										size="medium"
+										size="small"
 										disabled={complete.action.isPending}
 										onClick={denyAuthorization}
 									>
@@ -481,7 +464,7 @@ const OAuthConsentRoute: Component = () => {
 									<Button
 										type="button"
 										theme="primary"
-										size="medium"
+										size="small"
 										loading={complete.action.isPending}
 										disabled={!canAllow()}
 										onClick={allowAuthorization}
@@ -493,7 +476,7 @@ const OAuthConsentRoute: Component = () => {
 						</div>
 
 						<Show when={complete.action.isError}>
-							<div class="mt-3 rounded-lg border border-error-base/25 bg-error-base/5 px-4 py-3">
+							<div class="mt-2.5 rounded-md border border-error-base/25 bg-error-base/5 px-3 py-2">
 								<p class="m-0 text-xs text-error-base">
 									{complete.errors()?.message ??
 										T()("oauth.consent.error.description")}

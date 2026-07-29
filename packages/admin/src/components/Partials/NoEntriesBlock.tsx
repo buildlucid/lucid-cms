@@ -17,6 +17,7 @@ export interface NoEntriesBlockProps {
 	};
 	options?: {
 		grow?: boolean;
+		buttonTheme?: "primary" | "border-outline";
 	};
 	class?: string;
 }
@@ -27,7 +28,7 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 	return (
 		<div
 			class={classNames(
-				"flex items-center justify-center p-4 md:p-6",
+				"flex items-center justify-center px-4 py-8 md:px-6 md:py-10",
 				props.class,
 				{
 					grow: props.options?.grow,
@@ -35,7 +36,7 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 			)}
 		>
 			<div class="text-center flex flex-col items-center">
-				<h2 class="mb-2">
+				<h2 class="mb-1 text-sm font-semibold">
 					{props.copy?.title || T()("empty.states.entries.title")}
 				</h2>
 				<p class="max-w-96 text-sm">
@@ -43,9 +44,9 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 				</p>
 				<Show when={props.callbacks?.action !== undefined}>
 					<Button
-						theme={"primary"}
-						size="medium"
-						classes="mt-6"
+						theme={props.options?.buttonTheme ?? "primary"}
+						size="small"
+						classes="mt-4"
 						onClick={props.callbacks?.action}
 						permission={props.permissions?.create}
 					>

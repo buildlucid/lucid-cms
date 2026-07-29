@@ -1,4 +1,3 @@
-import { FaSolidArrowsRotate } from "solid-icons/fa";
 import {
 	type Component,
 	createMemo,
@@ -9,9 +8,9 @@ import {
 import InfoRow from "@/components/Blocks/InfoRow";
 import { DynamicContent } from "@/components/Groups/Layout";
 import DisconnectConnection from "@/components/Modals/Connection/DisconnectConnection";
+import ActionDropdown from "@/components/Partials/ActionDropdown";
 import Button from "@/components/Partials/Button";
 import DateText from "@/components/Partials/DateText";
-import DetailsList from "@/components/Partials/DetailsList";
 import Pill from "@/components/Partials/Pill";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
@@ -122,129 +121,127 @@ const LucidConnection: Component = () => {
 				}}
 				options={{ inline: true }}
 			>
-				<InfoRow.Content
-					title={
-						isConnected()
-							? T()("connection.connected.title")
-							: connection()?.status === "revoked"
-								? T()("connection.revoked.title")
-								: T()("connection.disconnected.title")
-					}
-					description={
-						isConnected()
-							? T()("connection.connected.description")
-							: connection()?.status === "revoked"
-								? T()("connection.revoked.description")
-								: T()("connection.disconnected.description")
-					}
-					actions={
-						<div class="flex flex-wrap gap-2">
+				<InfoRow.Content reducedMargin={true}>
+					<div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+						<div class="min-w-0">
+							<Pill
+								theme={
+									isConnected()
+										? "primary-opaque"
+										: connection()?.status === "revoked"
+											? "error-opaque"
+											: "outline"
+								}
+							>
+								{isConnected()
+									? T()("connection.status.connected")
+									: connection()?.status === "revoked"
+										? T()("connection.status.revoked")
+										: T()("connection.status.disconnected")}
+							</Pill>
+							<p class="mt-2 text-sm">
+								{isConnected()
+									? T()("connection.connected.description")
+									: connection()?.status === "revoked"
+										? T()("connection.revoked.description")
+										: T()("connection.disconnected.description")}
+							</p>
+						</div>
+						<div class="flex shrink-0">
 							<Show when={isConnected()}>
-								<Button
-									type="button"
-									size="medium"
-									theme="border-outline"
-									permission={canManage()}
-									loading={verify.action.isPending}
-									onClick={() => verify.action.mutate({})}
-								>
-									<FaSolidArrowsRotate size={12} class="mr-2" />
-									{T()("connection.verify.action")}
-								</Button>
-								<Button
-									type="button"
-									size="medium"
-									theme="border-outline"
-									permission={canManage()}
-									loading={connect.action.isPending}
-									onClick={() => connect.action.mutate({})}
-								>
-									{T()("connection.reconnect.action")}
-								</Button>
-								<Button
-									type="button"
-									size="medium"
-									theme="danger-outline"
-									permission={canManage()}
-									onClick={() => setDisconnectOpen(true)}
-								>
-									{T()("connection.disconnect.action")}
-								</Button>
+								<ActionDropdown
+									actions={[
+										{
+											type: "button",
+											label: T()("connection.verify.action"),
+											icon: "rotate",
+											onClick: () => verify.action.mutate({}),
+											permission: canManage(),
+											isLoading: verify.action.isPending,
+										},
+										{
+											type: "button",
+											label: T()("connection.reconnect.action"),
+											icon: "link",
+											onClick: () => connect.action.mutate({}),
+											permission: canManage(),
+											isLoading: connect.action.isPending,
+										},
+										{
+											type: "button",
+											label: T()("connection.disconnect.action"),
+											icon: "ban",
+											onClick: () => setDisconnectOpen(true),
+											permission: canManage(),
+										},
+									]}
+									options={{ raised: true }}
+								/>
 							</Show>
 							<Show when={!isConnected()}>
 								<Button
 									type="button"
-									size="medium"
+									size="small"
 									theme="primary"
 									permission={canManage()}
 									loading={connect.action.isPending}
 									onClick={() => connect.action.mutate({})}
 								>
-									{connection()?.status === "revoked"
-										? T()("connection.reconnect.action")
-										: T()("connection.connect.action")}
+									{T()("connection.connect.action")}
 								</Button>
 							</Show>
 						</div>
-					}
-					reducedMargin={true}
-				>
-					<DetailsList
-						type="text"
-						theme="contained"
-						items={[
-							{
-								label: T()("connection.status.label"),
-								value: (
-									<Pill
-										theme={
-											isConnected()
-												? "primary-opaque"
-												: connection()?.status === "revoked"
-													? "error-opaque"
-													: "outline"
-										}
-									>
-										{isConnected()
-											? T()("connection.status.connected")
-											: connection()?.status === "revoked"
-												? T()("connection.status.revoked")
-												: T()("connection.status.disconnected")}
-									</Pill>
-								),
-							},
-							{
-								label: T()("connection.organisation.label"),
-								value:
-									connection()?.organisation?.name ?? T()("common.not.set"),
-								show: isConnected(),
-							},
-							{
-								label: T()("connection.name.label"),
-								value:
-									connection()?.connection?.name ??
-									connection()?.connection?.clientName ??
-									T()("common.not.set"),
-								show: isConnected(),
-							},
-							{
-								label: T()("connection.last.verified.label"),
-								value: lastVerifiedIso() ? (
-									<DateText date={lastVerifiedIso()} includeTime={true} />
-								) : (
-									T()("common.not.checked")
-								),
-							},
-							{
-								label: T()("common.message"),
-								value: errorMessage(connection()?.errorKey),
-								show:
-									connection()?.errorKey !== null &&
-									connection()?.errorKey !== undefined,
-								stacked: true,
-							},
-						]}
-					/>
+					</div>
+				</InfoRow.Content>
+				<InfoRow.Content reducedMargin={true}>
+					<dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						<Show when={isConnected()}>
+							<div class="min-w-0">
+								<dt class="mb-1 text-xs font-medium text-body">
+									{T()("connection.organisation.label")}
+								</dt>
+								<dd class="truncate text-sm font-medium text-subtitle">
+									{connection()?.organisation?.name ?? T()("common.not.set")}
+								</dd>
+							</div>
+							<div class="min-w-0">
+								<dt class="mb-1 text-xs font-medium text-body">
+									{T()("connection.name.label")}
+								</dt>
+								<dd class="truncate text-sm font-medium text-subtitle">
+									{connection()?.connection?.name ??
+										connection()?.connection?.clientName ??
+										T()("common.not.set")}
+								</dd>
+							</div>
+						</Show>
+						<div class="min-w-0">
+							<dt class="mb-1 text-xs font-medium text-body">
+								{T()("connection.last.verified.label")}
+							</dt>
+							<dd class="text-sm font-medium text-subtitle">
+								<Show
+									when={lastVerifiedIso()}
+									fallback={T()("common.not.checked")}
+								>
+									{(verified) => (
+										<DateText
+											date={verified()}
+											includeTime={true}
+											class="text-sm!"
+										/>
+									)}
+								</Show>
+							</dd>
+						</div>
+					</dl>
+					<Show when={connection()?.errorKey}>
+						<div class="mt-4 border-t border-border pt-3">
+							<p class="text-xs text-error-base">
+								{errorMessage(connection()?.errorKey)}
+							</p>
+						</div>
+					</Show>
 				</InfoRow.Content>
 			</DynamicContent>
 			<DisconnectConnection

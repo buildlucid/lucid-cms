@@ -19,6 +19,7 @@ const useGetAuthorizationRequest = (params: {
 				config: {
 					method: "GET",
 					tenant: false,
+					displayErrorToast: false,
 					headers: tenantKey ? { "X-Lucid-Tenant": tenantKey } : undefined,
 				},
 			});

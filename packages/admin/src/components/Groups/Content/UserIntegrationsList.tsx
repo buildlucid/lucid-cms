@@ -52,24 +52,6 @@ export const UserIntegrationsList: Component<{
 
 	const content = () => (
 		<>
-			<Show
-				when={
-					props.canCreate &&
-					integrations.isSuccess &&
-					integrations.data.data.length > 0
-				}
-			>
-				<div class="mb-3 flex justify-end">
-					<Button
-						type="button"
-						size="small"
-						theme="border-outline"
-						onClick={() => setCreateOpen(true)}
-					>
-						{T()("integrations.create.action")}
-					</Button>
-				</div>
-			</Show>
 			<DynamicContent
 				state={{
 					isLoading: integrations.isLoading,
@@ -85,13 +67,21 @@ export const UserIntegrationsList: Component<{
 						button: T()("integrations.create.action"),
 					},
 				}}
-				callback={{
-					createEntry: () => setCreateOpen(true),
-				}}
+				callback={
+					props.canCreate
+						? {
+								createEntry: () => setCreateOpen(true),
+							}
+						: undefined
+				}
 				permissions={{
 					create: props.canCreate,
 				}}
-				options={{ inline: true }}
+				options={{
+					inline: true,
+					contained: true,
+					noEntriesButtonTheme: "border-outline",
+				}}
 			>
 				<div class="flex flex-col">
 					<For each={integrations.data?.data ?? []}>
@@ -107,6 +97,25 @@ export const UserIntegrationsList: Component<{
 					</For>
 				</div>
 			</DynamicContent>
+			<Show
+				when={
+					!props.embedded &&
+					props.canCreate &&
+					integrations.isSuccess &&
+					integrations.data.data.length > 0
+				}
+			>
+				<div class="mt-3 flex justify-end">
+					<Button
+						type="button"
+						size="small"
+						theme="border-outline"
+						onClick={() => setCreateOpen(true)}
+					>
+						{T()("integrations.create.action")}
+					</Button>
+				</div>
+			</Show>
 		</>
 	);
 

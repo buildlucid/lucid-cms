@@ -34,7 +34,7 @@ export const OAuthConnectionsList: Component<{
 					description: T()("oauth.connections.empty.description"),
 				},
 			}}
-			options={{ inline: true }}
+			options={{ inline: true, contained: true }}
 		>
 			<div class="flex flex-col">
 				<For each={connections.data?.data ?? []}>

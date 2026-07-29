@@ -32,6 +32,9 @@ export const AiUsageList: Component<{
 	// Render
 	return (
 		<DynamicContent
+			class={
+				aiUsage.isError || aiUsage.data?.data.length === 0 ? "-mb-4" : undefined
+			}
 			state={{
 				isError: aiUsage.isError,
 				isSuccess: aiUsage.isSuccess,
@@ -61,6 +64,7 @@ export const AiUsageList: Component<{
 			}}
 			options={{
 				inline: true,
+				dividerTop: true,
 			}}
 		>
 			<Table

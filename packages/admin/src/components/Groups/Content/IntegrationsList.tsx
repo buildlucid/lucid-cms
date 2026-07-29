@@ -17,6 +17,7 @@ import CopyAPIKey from "@/components/Modals/Integrations/CopyAPIKey";
 import DeleteIntegration from "@/components/Modals/Integrations/DeleteIntegration";
 import RegenerateAPIKey from "@/components/Modals/Integrations/RegenerateAPIKey";
 import UpsertIntegrationPanel from "@/components/Panels/Integrations/UpsertIntegrationPanel";
+import Button from "@/components/Partials/Button";
 import LucidConnection from "@/components/Partials/LucidConnection";
 import IntegrationTableRow from "@/components/Tables/Rows/IntegrationTableRow";
 import { Permissions } from "@/constants/permissions";
@@ -131,6 +132,26 @@ export const IntegrationsList: Component<{
 										queryKey: ["integrations.getAll"],
 									});
 								}}
+								custom={
+									<Show
+										when={
+											hasCreatePermission() &&
+											integrations.isSuccess &&
+											integrations.data.data.length > 0
+										}
+									>
+										<Button
+											type="button"
+											size="small"
+											theme="border-outline"
+											onClick={() =>
+												props.state.setOpenCreateIntegrationPanel(true)
+											}
+										>
+											{T()("integrations.create.action")}
+										</Button>
+									</Show>
+								}
 								filterSection={{
 									subject: T()("integrations.manage.title"),
 									fields: [
@@ -214,6 +235,11 @@ export const IntegrationsList: Component<{
 								}}
 							/>
 							<DynamicContent
+								class={
+									integrations.isError || integrations.data?.data.length === 0
+										? "-mb-4"
+										: undefined
+								}
 								state={{
 									isError: integrations.isError,
 									isSuccess: integrations.isSuccess,
@@ -252,6 +278,7 @@ export const IntegrationsList: Component<{
 								}}
 								options={{
 									inline: true,
+									dividerTop: true,
 								}}
 							>
 								<Table
