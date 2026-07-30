@@ -376,6 +376,7 @@ export type IndexDefinition = CollectionSchemaIndex;
 
 export type FieldRefParams = {
 	collection: CollectionBuilder;
+	collections: CollectionBuilder[];
 	localization: {
 		locales: string[];
 		default: string;

@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -21,7 +22,7 @@ const deleteSinglePermanently: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = await documentServices.checks.checkCollection(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

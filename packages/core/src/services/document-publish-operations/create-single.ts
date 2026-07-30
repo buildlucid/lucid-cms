@@ -1,4 +1,5 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
+import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
@@ -10,11 +11,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import {
-	collectionServices,
-	documentVersionServices,
-	documentWorkflowServices,
-} from "../index.js";
+import { documentVersionServices, documentWorkflowServices } from "../index.js";
 import approve from "./approve.js";
 import getReviewers from "./get-reviewers.js";
 import createEvent from "./helpers/create-event.js";
@@ -49,7 +46,7 @@ const createSingle: ServiceFn<
 	undefined
 > = async (context, data) => {
 	// Resolve collection and publish operation mode.
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

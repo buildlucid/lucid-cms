@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import formatter, {
 	documentPublishOperationsFormatter,
@@ -13,7 +14,6 @@ import type { PublishOperation } from "../../types/response.js";
 import type { CollectionTableNames } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices } from "../index.js";
 import getDocumentLabel from "./helpers/get-document-label.js";
 import {
 	getReviewableCollectionKeys,
@@ -33,8 +33,10 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
 	const collectionKeys = getReviewableCollectionKeys({
-		config: context.config,
+		collections: collectionsRes.data,
 		user: data.user,
 	});
 	if (collectionKeys.length === 0) {
@@ -75,7 +77,7 @@ const getMultiple: ServiceFn<
 	const formatData = [];
 
 	for (const operation of rows) {
-		const collectionRes = collectionServices.getSingleInstance(context, {
+		const collectionRes = await collections.getSingle(context, {
 			key: operation.collection_key,
 		});
 		if (collectionRes.error) continue;

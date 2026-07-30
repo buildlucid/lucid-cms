@@ -1,6 +1,7 @@
 import type { LucidErrorData } from "../../../../types/errors.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import cacheKeys from "../../../kv/cache-keys.js";
+import collections from "../../collections.js";
 import type { CollectionSchema } from "../types.js";
 import { getCollectionSignature } from "./cache-signature.js";
 
@@ -20,16 +21,16 @@ const inFlightSchemaLoads = new Map<string, Promise<CachedSchemaResponse>>();
 const getSchemaKey = (collectionKey: string, signature: string) =>
 	`${cacheKeys.collection.schema(collectionKey)}:${signature}`;
 
-const getCollectionSignatureByKey = (
+const getCollectionSignatureByKey = async (
 	context: ServiceContext,
 	collectionKey: string,
-): string | undefined => {
-	const collection = context.config.collections.find(
-		(c) => c.key === collectionKey,
-	);
-	if (!collection) return undefined;
+): Promise<string | undefined> => {
+	const collectionRes = await collections.getSingle(context, {
+		key: collectionKey,
+	});
+	if (collectionRes.error) return undefined;
 
-	return getCollectionSignature(collection);
+	return getCollectionSignature(collectionRes.data);
 };
 
 /**
@@ -40,7 +41,7 @@ export const getRuntimeSchemaFromCache = async (
 	context: ServiceContext,
 	collectionKey: string,
 ): Promise<CollectionSchema | undefined> => {
-	const signature = getCollectionSignatureByKey(context, collectionKey);
+	const signature = await getCollectionSignatureByKey(context, collectionKey);
 	if (!signature) return undefined;
 
 	const cacheKey = getSchemaKey(collectionKey, signature);
@@ -71,7 +72,7 @@ export const setRuntimeSchema = async (
 	collectionKey: string,
 	schema: CollectionSchema,
 ): Promise<void> => {
-	const signature = getCollectionSignatureByKey(context, collectionKey);
+	const signature = await getCollectionSignatureByKey(context, collectionKey);
 	if (!signature) return;
 
 	const cacheKey = getSchemaKey(collectionKey, signature);
@@ -88,7 +89,7 @@ export const resolveRuntimeSchema = async (
 	collectionKey: string,
 	resolver: () => Promise<CachedSchemaResponse>,
 ): Promise<CachedSchemaResponse> => {
-	const signature = getCollectionSignatureByKey(context, collectionKey);
+	const signature = await getCollectionSignatureByKey(context, collectionKey);
 	if (!signature) {
 		return await resolver();
 	}

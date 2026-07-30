@@ -1,6 +1,7 @@
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import { copy } from "../../../i18n/index.js";
 import { CollectionMigrationsRepository } from "../../../repositories/index.js";
+import collections from "../../collections.js";
 import inferSchema from "../infer-schema.js";
 import buildRuntimeSchema from "./build-runtime-schema.js";
 import diffSnapshotVsConfig from "./diff-snapshot-vs-config.js";
@@ -22,8 +23,13 @@ const primeRuntimeSchemas: ServiceFn<
 		context.config.db,
 	);
 
-	const keys =
-		data.collectionKeys ?? context.config.collections.map((c) => c.key);
+	let keys = data.collectionKeys;
+	if (keys === undefined) {
+		const collectionsRes = await collections.getAll(context, {});
+		if (collectionsRes.error) return collectionsRes;
+		keys = collectionsRes.data.map((collection) => collection.key);
+	}
+
 	const keyCacheStatus = await Promise.all(
 		keys.map(async (key) => {
 			return (await hasRuntimeSchema(context, key)) ? null : key;
@@ -57,19 +63,12 @@ const primeRuntimeSchemas: ServiceFn<
 	);
 
 	for (const collectionKey of nonCachedKeys) {
-		const collection = context.config.collections.find(
-			(c) => c.key === collectionKey,
-		);
-		if (!collection) {
-			return {
-				data: undefined,
-				error: {
-					message: copy("server:core.collections.not.found.message"),
-				},
-			};
-		}
+		const collectionRes = await collections.getSingle(context, {
+			key: collectionKey,
+		});
+		if (collectionRes.error) return collectionRes;
 
-		const localSchemaRes = inferSchema(collection, context.config.db);
+		const localSchemaRes = inferSchema(collectionRes.data, context.config.db);
 		if (localSchemaRes.error) return localSchemaRes;
 
 		const latestMigration = latestMigrationsByCollection.get(collectionKey);

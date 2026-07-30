@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import collections from "../../libs/collection/collections.js";
 import type { OAuthPrincipalType } from "../../libs/db/types.js";
 import { getExternalCapability } from "../../libs/permission/capabilities.js";
 import { getValidExternalScopes } from "../../libs/permission/scopes.js";
@@ -33,6 +34,9 @@ const completeAuthorization: ServiceFn<
 	],
 	{ redirectUrl: string }
 > = async (context, input) => {
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+
 	if (
 		input.decision === "allow" &&
 		(!input.principalType ||
@@ -86,7 +90,9 @@ const completeAuthorization: ServiceFn<
 	}
 
 	const requestedScopes = requestRes.data.scopes.split(" ").filter(Boolean);
-	const validScopes = new Set<string>(getValidExternalScopes(context.config));
+	const validScopes = new Set<string>(
+		getValidExternalScopes(collectionsRes.data),
+	);
 	if (requestedScopes.some((scope) => !validScopes.has(scope))) {
 		return {
 			error: {
@@ -101,7 +107,7 @@ const completeAuthorization: ServiceFn<
 		input.principalType === "system"
 			? requestedScopes
 			: requestedScopes.filter((scope) => {
-					const capability = getExternalCapability(context.config, scope);
+					const capability = getExternalCapability(collectionsRes.data, scope);
 					if (!capability) return false;
 					if (capability.userPermission === null || input.actor.superAdmin) {
 						return true;

@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { mediaFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
@@ -5,7 +6,6 @@ import { UsersRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices } from "../index.js";
 import {
 	canUsePublishOperationsForTarget,
 	hasCollectionPermission,
@@ -28,7 +28,7 @@ const getReviewers: ServiceFn<
 		profilePicture: ReturnType<typeof mediaFormatter.formatMediaImagePreview>;
 	}>
 > = async (context, data) => {
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

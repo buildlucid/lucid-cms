@@ -1,3 +1,4 @@
+import collections from "../../../libs/collection/collections.js";
 import {
 	getBricksTableSchema,
 	getDocumentFieldsTableSchema,
@@ -28,7 +29,6 @@ import extractRelatedEntityIds from "../../documents-bricks/helpers/extract-rela
 import fetchRefData, {
 	type FieldRefResponse,
 } from "../../documents-bricks/helpers/fetch-ref-data.js";
-import { collectionServices } from "../../index.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
 import type { PreviewSessionCollectionTarget } from "../../preview-sessions/types.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
@@ -101,21 +101,24 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 		versionId = preview.versionId;
 	}
 
-	const collectionRes = collectionServices.getSingleInstance(context, {
-		key: data.collectionKey,
-	});
+	const [collectionRes, collectionsRes] = await Promise.all([
+		collections.getSingle(context, { key: data.collectionKey }),
+		collections.getAll(context, {}),
+	]);
 	if (collectionRes.error) return collectionRes;
+	if (collectionsRes.error) return collectionsRes;
 
 	//* work out allowed collection keys based on integration scopes
-	const allowedCollectionKeys = data.externalScopes
-		? context.config.collections
-				.filter((collection) =>
-					data.externalScopes?.includes(
-						getCollectionExternalScope(collection.key),
-					),
-				)
-				.map((collection) => collection.key)
-		: undefined;
+	let allowedCollectionKeys: string[] | undefined;
+	if (data.externalScopes) {
+		allowedCollectionKeys = collectionsRes.data
+			.filter((collection) =>
+				data.externalScopes?.includes(
+					getCollectionExternalScope(collection.key),
+				),
+			)
+			.map((collection) => collection.key);
+	}
 
 	const Document = new DocumentsRepository(
 		context.db.client,
@@ -245,6 +248,7 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 			data: documentsFormatter.formatContentMultiple<TCollectionKey>({
 				documents,
 				collection: collectionRes.data,
+				collections: collectionsRes.data,
 				config: context.config,
 				host: baseUrl,
 				refData,

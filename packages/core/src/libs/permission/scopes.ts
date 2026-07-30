@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import { getCapabilityRegistry } from "./capabilities.js";
 import type { ExternalScope } from "./external-scopes.js";
@@ -22,9 +22,9 @@ export type ExternalScopeGroup = {
 
 /** Builds the external scope view of the canonical capability catalogue. */
 export const getExternalScopeGroups = (
-	config: Pick<Config, "collections">,
+	collections: CollectionBuilder[],
 ): ExternalScopeGroup[] => {
-	return getCapabilityRegistry(config)
+	return getCapabilityRegistry(collections)
 		.map(
 			(group): ExternalScopeGroup => ({
 				key: group.key,
@@ -46,17 +46,17 @@ export const getExternalScopeGroups = (
 
 /** Returns every external scope available for the current configuration. */
 export const getValidExternalScopes = (
-	config: Pick<Config, "collections">,
+	collections: CollectionBuilder[],
 ): ExternalScope[] =>
-	getExternalScopeGroups(config).flatMap((group) =>
+	getExternalScopeGroups(collections).flatMap((group) =>
 		group.scopes.map((scope) => scope.key),
 	);
 
 /** Returns requested scopes that are unavailable for the configuration. */
 export const getInvalidExternalScopes = (
-	config: Pick<Config, "collections">,
+	collections: CollectionBuilder[],
 	scopes: string[],
 ) => {
-	const validScopes = new Set<string>(getValidExternalScopes(config));
+	const validScopes = new Set<string>(getValidExternalScopes(collections));
 	return scopes.filter((scope) => !validScopes.has(scope));
 };

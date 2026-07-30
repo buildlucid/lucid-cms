@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { getCapabilityRegistry } from "./capabilities.js";
 import { Permissions } from "./definitions.js";
 import type { Permission, PermissionGroup, StaticPermission } from "./types.js";
@@ -22,9 +22,9 @@ export const isCorePermission = (
 
 /** Builds the internal and collection-generated permission catalogue. */
 export const getPermissionRegistry = (
-	config?: Pick<Config, "collections">,
+	collections: CollectionBuilder[] = [],
 ): PermissionGroup[] => {
-	return getCapabilityRegistry(config)
+	return getCapabilityRegistry(collections)
 		.map(
 			(group): PermissionGroup => ({
 				key: group.key,
@@ -44,22 +44,22 @@ export const getPermissionRegistry = (
 
 /** Builds the permission catalogue shown in role management. */
 export const getGrantablePermissionRegistry = (
-	config?: Pick<Config, "collections">,
-) => getPermissionRegistry(config);
+	collections: CollectionBuilder[] = [],
+) => getPermissionRegistry(collections);
 
 /** Flattens the permission registry into keys for role validation and sync. */
 export const getValidPermissions = (
-	config?: Pick<Config, "collections">,
+	collections: CollectionBuilder[] = [],
 ): Permission[] => {
-	return getPermissionRegistry(config).flatMap((group) =>
+	return getPermissionRegistry(collections).flatMap((group) =>
 		group.permissions.map((permission) => permission.key),
 	);
 };
 
 /** Verifies that a permission exists in the current internal catalogue. */
 export const isRegisteredPermission = (
-	config: Pick<Config, "collections">,
+	collections: CollectionBuilder[],
 	permission: string,
 ): permission is Permission => {
-	return getValidPermissions(config).includes(permission as Permission);
+	return getValidPermissions(collections).includes(permission as Permission);
 };

@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import formatter, {
 	userPermissionsFormatter,
 } from "../../libs/formatters/index.js";
@@ -24,6 +25,8 @@ const resolveUserAuthority: ServiceFn<
 		scopes: ExternalScope[];
 	}
 > = async (context, data) => {
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
 	const Users = new UsersRepository(context.db.client, context.config.db);
 	const userRes = await Users.selectAccessTokenUser({
 		where: [
@@ -55,7 +58,7 @@ const resolveUserAuthority: ServiceFn<
 		defaultLocale: context.config.localization.defaultLocale,
 	});
 	const effectiveScopes = data.scopes.filter((scope) => {
-		const capability = getExternalCapability(context.config, scope);
+		const capability = getExternalCapability(collectionsRes.data, scope);
 		if (!capability) return false;
 		if (capability.userPermission === null || superAdmin) return true;
 		return permissions?.includes(capability.userPermission) === true;

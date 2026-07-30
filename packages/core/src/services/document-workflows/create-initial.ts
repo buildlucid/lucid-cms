@@ -1,6 +1,6 @@
+import collections from "../../libs/collection/collections.js";
 import { DocumentWorkflowsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getCollectionInstance from "../collections/get-single-instance.js";
 import { getWorkflowConfig } from "./helpers/index.js";
 
 const createInitial: ServiceFn<
@@ -13,7 +13,7 @@ const createInitial: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = getCollectionInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

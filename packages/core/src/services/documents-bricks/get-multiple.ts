@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import type { FieldRefVersionTypeResolver } from "../../libs/collection/custom-fields/utils/ref-fetch.js";
 import {
 	getBricksTableSchema,
@@ -18,7 +19,6 @@ import type {
 import type { FieldTypes } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { getSingleInstance } from "../collections/index.js";
 import extractRelatedEntityIds from "./helpers/extract-related-entity-ids.js";
 import fetchRefData, {
 	type FieldRefResponse,
@@ -58,10 +58,12 @@ const getMultiple: ServiceFn<
 		context.config.db,
 	);
 
-	const collectionRes = getSingleInstance(context, {
-		key: data.collectionKey,
-	});
+	const [collectionRes, collectionsRes] = await Promise.all([
+		collections.getSingle(context, { key: data.collectionKey }),
+		collections.getAll(context, {}),
+	]);
 	if (collectionRes.error) return collectionRes;
+	if (collectionsRes.error) return collectionsRes;
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,
@@ -150,6 +152,7 @@ const getMultiple: ServiceFn<
 			refs: includeRefs
 				? documentsFormatter.formatRefs({
 						collection: collectionRes.data,
+						collections: collectionsRes.data,
 						config: context.config,
 						host: baseUrl,
 						bricksTableSchema: selectedBricksTableSchema,

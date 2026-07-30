@@ -1,10 +1,10 @@
+import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationsRepository,
 	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices } from "../index.js";
 import createEvent from "./helpers/create-event.js";
 import notifyPublishOperationUsers from "./notifications.js";
 
@@ -100,7 +100,7 @@ const cancelForDocuments: ServiceFn<
 	});
 	if (updateRes.error) return updateRes;
 
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

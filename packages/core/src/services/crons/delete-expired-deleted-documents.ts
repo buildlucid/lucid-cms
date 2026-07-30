@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { getDocumentTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -13,7 +14,10 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 		context.db.client,
 		context.config.db,
 	);
-	const collectionKeys = context.config.collections.map(
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+
+	const collectionKeys = collectionsRes.data.map(
 		(collection) => collection.key,
 	);
 

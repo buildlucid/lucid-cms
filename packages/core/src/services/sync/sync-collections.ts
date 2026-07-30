@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import collections from "../../libs/collection/collections.js";
 import formatter from "../../libs/formatters/index.js";
 import logger from "../../libs/logger/index.js";
 import { CollectionsRepository } from "../../libs/repositories/index.js";
@@ -14,7 +15,12 @@ const syncCollections: ServiceFn<[], undefined> = async (context) => {
 		context.db.client,
 		context.config.db,
 	);
-	const activeCollections = context.config.collections.map((c) => c.key);
+	const activeCollectionsRes = await collections.getAll(context, {});
+	if (activeCollectionsRes.error) return activeCollectionsRes;
+
+	const activeCollections = activeCollectionsRes.data.map(
+		(collection) => collection.key,
+	);
 
 	const collectionsRes = await Collections.selectMultiple({
 		select: ["key", "is_deleted"],

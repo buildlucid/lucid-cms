@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import type { ExternalScope } from "../../libs/permission/external-scopes.js";
 import { getInvalidExternalScopes } from "../../libs/permission/scopes.js";
@@ -29,7 +30,10 @@ const createSingle: ServiceFn<
 	}
 > = async (context, data) => {
 	const scopes = [...new Set(data.scopes)];
-	const invalidScopes = getInvalidExternalScopes(context.config, scopes);
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+
+	const invalidScopes = getInvalidExternalScopes(collectionsRes.data, scopes);
 	if (invalidScopes.length > 0) {
 		return {
 			error: {

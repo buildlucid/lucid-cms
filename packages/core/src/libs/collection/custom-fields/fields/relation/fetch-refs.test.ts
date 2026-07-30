@@ -1,17 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	getSingleInstance: vi.fn(),
 	getDocumentFieldsTableSchema: vi.fn(),
 	getDocumentVersionTableSchema: vi.fn(),
 	primeRuntimeSchemas: vi.fn(),
 	selectMultipleUnion: vi.fn(),
-}));
-
-vi.mock("../../../../../services/index.js", () => ({
-	collectionServices: {
-		getSingleInstance: mocks.getSingleInstance,
-	},
 }));
 
 vi.mock("../../../../repositories/index.js", () => ({
@@ -37,15 +30,12 @@ const context = {
 	},
 	config: {
 		db: {},
+		collections: [{ key: "pages" }, { key: "blog" }],
 	},
 } as never;
 
 describe("relation field ref fetching", () => {
 	beforeEach(() => {
-		mocks.getSingleInstance.mockReturnValue({
-			error: undefined,
-			data: {},
-		});
 		mocks.getDocumentVersionTableSchema.mockImplementation(
 			(_context, collectionKey: string) =>
 				Promise.resolve({

@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import { getValidPermissions } from "../../libs/permission/registry.js";
 import type { ErrorResult } from "../../types/errors.js";
@@ -21,7 +22,10 @@ const validatePermissions: ServiceFn<
 		};
 	}
 
-	const validPermissions = getValidPermissions(context.config);
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+
+	const validPermissions = getValidPermissions(collectionsRes.data);
 
 	const permErrors: Array<{
 		key: string;

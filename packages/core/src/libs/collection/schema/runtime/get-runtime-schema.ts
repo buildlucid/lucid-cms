@@ -1,6 +1,7 @@
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import { copy } from "../../../i18n/index.js";
 import { CollectionMigrationsRepository } from "../../../repositories/index.js";
+import collections from "../../collections.js";
 import inferSchema from "../infer-schema.js";
 import type { CollectionSchema } from "../types.js";
 import buildRuntimeSchema from "./build-runtime-schema.js";
@@ -25,19 +26,12 @@ const getRuntimeSchema: ServiceFn<
 	);
 
 	return await resolveRuntimeSchema(context, data.collectionKey, async () => {
-		const collection = context.config.collections.find(
-			(c) => c.key === data.collectionKey,
-		);
-		if (!collection) {
-			return {
-				data: undefined,
-				error: {
-					message: copy("server:core.collections.not.found.message"),
-				},
-			};
-		}
+		const collectionRes = await collections.getSingle(context, {
+			key: data.collectionKey,
+		});
+		if (collectionRes.error) return collectionRes;
 
-		const localSchemaRes = inferSchema(collection, context.config.db);
+		const localSchemaRes = inferSchema(collectionRes.data, context.config.db);
 		if (localSchemaRes.error) return localSchemaRes;
 		const latestMigrationRes =
 			await CollectionMigrations.selectLatestByCollectionKey({

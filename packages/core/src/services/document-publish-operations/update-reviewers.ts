@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	DocumentPublishOperationAssigneesRepository,
@@ -5,7 +6,6 @@ import {
 } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices } from "../index.js";
 import getReviewers from "./get-reviewers.js";
 import createEvent from "./helpers/create-event.js";
 import { hasCollectionPermission } from "./helpers/index.js";
@@ -53,7 +53,7 @@ const updateReviewers: ServiceFn<
 	}
 	const operation = operationRes.data;
 
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: operation.collection_key,
 	});
 	if (collectionRes.error) return collectionRes;

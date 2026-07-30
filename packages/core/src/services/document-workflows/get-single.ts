@@ -1,9 +1,9 @@
 import type { DocumentWorkflow } from "@lucidcms/types";
+import collections from "../../libs/collection/collections.js";
 import { documentWorkflowsFormatter } from "../../libs/formatters/index.js";
 import { DocumentWorkflowsRepository } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getCollectionInstance from "../collections/get-single-instance.js";
 import { getWorkflowConfig } from "./helpers/index.js";
 
 const getSingle: ServiceFn<
@@ -15,7 +15,7 @@ const getSingle: ServiceFn<
 	],
 	DocumentWorkflow | null
 > = async (context, data) => {
-	const collectionRes = getCollectionInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 /**
@@ -5,12 +6,13 @@ import type { ServiceFn } from "../../utils/services/types.js";
  * Each collection is processed independently based on its revisionRetentionDays config.
  */
 const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
-	const collectionsWithRevisions = context.config.collections.filter(
-		(collection) => {
-			const config = collection.getData;
-			return config.revisions && config.revisionRetentionDays !== false;
-		},
-	);
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+
+	const collectionsWithRevisions = collectionsRes.data.filter((collection) => {
+		const config = collection.getData;
+		return config.revisions && config.revisionRetentionDays !== false;
+	});
 
 	if (collectionsWithRevisions.length === 0) {
 		return {

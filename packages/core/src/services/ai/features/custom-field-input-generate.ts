@@ -1,5 +1,6 @@
 import type { CustomFieldInputGenerateResponse } from "@lucidcms/types";
 import constants from "../../../constants/constants.js";
+import collections from "../../../libs/collection/collections.js";
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { CustomFieldInputV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
@@ -59,25 +60,21 @@ const customFieldInputGenerate: ServiceFn<
 	const accessTokenRes = await getAccessToken(context, {});
 	if (accessTokenRes.error) return accessTokenRes;
 
-	const collection = context.config.collections.find(
-		(item) => item.key === props.target.collectionKey,
-	);
-	if (!collection) {
-		return {
-			error: {
-				type: "basic",
-				status: 404,
-				message: copy("server:core.collections.not.found.message"),
-			},
-			data: undefined,
-		};
-	}
+	const collectionRes = await collections.getSingle(context, {
+		key: props.target.collectionKey,
+	});
+	if (collectionRes.error) return collectionRes;
+	const collection = collectionRes.data;
 
-	const targetBrick = props.target.brickKey
-		? collection.brickInstances.find(
-				(brick) => brick.key === props.target.brickKey,
-			)
+	const targetBrickRes = props.target.brickKey
+		? await collections.getBrick(context, {
+				collection,
+				key: props.target.brickKey,
+			})
 		: undefined;
+	if (targetBrickRes?.error) return targetBrickRes;
+
+	const targetBrick = targetBrickRes?.data;
 	if (props.target.brickKey && !targetBrick) {
 		return {
 			error: {

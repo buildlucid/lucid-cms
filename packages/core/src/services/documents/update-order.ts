@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
@@ -32,7 +33,7 @@ const updateOrder: ServiceFn<
 	// Checks
 
 	//* check collection
-	const collectionRes = await documentServices.checks.checkCollection(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

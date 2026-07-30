@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -10,7 +11,6 @@ import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
 import type { DocumentVersion } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices } from "../index.js";
 
 const getMultipleRevisions: ServiceFn<
 	[
@@ -25,7 +25,7 @@ const getMultipleRevisions: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

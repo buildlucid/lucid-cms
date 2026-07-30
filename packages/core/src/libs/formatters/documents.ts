@@ -29,6 +29,7 @@ import type { MediaPosterPropsT } from "./media.js";
 const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];
 	collection: CollectionBuilder;
+	collections: CollectionBuilder[];
 	config: Config;
 	host: string;
 	hasFields: boolean;
@@ -72,6 +73,7 @@ const formatMultiple = (props: {
 		const refs = formatRefs({
 			data: props.refData,
 			collection: props.collection,
+			collections: props.collections,
 			config: props.config,
 			host: props.host,
 			bricksTableSchema: props.bricksTableSchema,
@@ -232,6 +234,7 @@ const formatVersions = (props: {
 const formatContentMultiple = <TCollectionKey extends string = string>(props: {
 	documents: DocumentQueryResponse[];
 	collection: CollectionBuilder;
+	collections: CollectionBuilder[];
 	config: Config;
 	host: string;
 	hasFields: boolean;
@@ -273,6 +276,7 @@ const formatContentMultiple = <TCollectionKey extends string = string>(props: {
 			? formatRefs({
 					data: props.refData,
 					collection: props.collection,
+					collections: props.collections,
 					config: props.config,
 					host: props.host,
 					bricksTableSchema: props.bricksTableSchema,
@@ -383,6 +387,7 @@ const formatContentSingle = <TCollectionKey extends string = string>(props: {
 const formatRefs = (props: {
 	data?: FieldRefResponse;
 	collection: CollectionBuilder;
+	collections: CollectionBuilder[];
 	config: Config;
 	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
@@ -408,6 +413,7 @@ const formatRefs = (props: {
 
 			const formattedRef = formatRef(item, {
 				collection: props.collection,
+				collections: props.collections,
 				config: props.config,
 				host: props.host,
 				bricksTableSchema: props.bricksTableSchema,

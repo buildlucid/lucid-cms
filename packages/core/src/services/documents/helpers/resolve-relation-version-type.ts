@@ -1,8 +1,9 @@
 import constants from "../../../constants/constants.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import collections from "../../../libs/collection/collections.js";
 import type { FieldRefVersionTypeResolver } from "../../../libs/collection/custom-fields/utils/ref-fetch.js";
 import { DocumentPublishOperationsRepository } from "../../../libs/repositories/index.js";
-import type { Config, DocumentVersionType } from "../../../types.js";
+import type { DocumentVersionType } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 type RelationVersionType = Exclude<DocumentVersionType, "revision">;
@@ -16,10 +17,11 @@ const latestRelationVersionType = "latest" satisfies RelationVersionType;
 const snapshotVersionType =
 	constants.collectionBuilder.publishing.snapshotVersionType;
 
-const findCollection = (config: Config, collectionKey: string) => {
-	return config.collections?.find(
-		(collection) => collection.key === collectionKey,
-	);
+const findCollection = (
+	collections: CollectionBuilder[],
+	collectionKey: string,
+) => {
+	return collections.find((collection) => collection.key === collectionKey);
 };
 
 const findEnvironment = (
@@ -32,7 +34,7 @@ const findEnvironment = (
 };
 
 const resolveMappedDocumentVersionType = (props: {
-	config: Config;
+	collections: CollectionBuilder[];
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
 	targetCollectionKey?: string;
@@ -45,7 +47,7 @@ const resolveMappedDocumentVersionType = (props: {
 	}
 
 	const sourceCollection = findCollection(
-		props.config,
+		props.collections,
 		props.sourceCollectionKey,
 	);
 	const sourceEnvironment = findEnvironment(
@@ -59,7 +61,7 @@ const resolveMappedDocumentVersionType = (props: {
 	if (mappedVersionType) return mappedVersionType;
 
 	const targetCollection = findCollection(
-		props.config,
+		props.collections,
 		props.targetCollectionKey,
 	);
 	const targetEnvironment = findEnvironment(
@@ -71,7 +73,7 @@ const resolveMappedDocumentVersionType = (props: {
 };
 
 export const resolveRelatedDocumentVersionType = (props: {
-	config: Config;
+	collections: CollectionBuilder[];
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
 	targetCollectionKey?: string;
@@ -84,7 +86,7 @@ export const resolveRelatedDocumentVersionType = (props: {
  * explicit version when no configured or same-named mapping exists.
  */
 export const resolvePreviewCollectionVersionType = (props: {
-	config: Config;
+	collections: CollectionBuilder[];
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
 	targetCollectionKey: string;
@@ -94,7 +96,7 @@ export const resolvePreviewCollectionVersionType = (props: {
 };
 
 const createRelationVersionTypeResolver = (props: {
-	config: Config;
+	collections: CollectionBuilder[];
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
 }): FieldRefVersionTypeResolver => {
@@ -102,7 +104,7 @@ const createRelationVersionTypeResolver = (props: {
 		if (input.fieldType !== "relation") return props.sourceVersionType;
 
 		return resolveRelatedDocumentVersionType({
-			config: props.config,
+			collections: props.collections,
 			sourceCollectionKey: props.sourceCollectionKey,
 			sourceVersionType: props.sourceVersionType,
 			targetCollectionKey: input.collectionKey,
@@ -136,13 +138,16 @@ const resolveRelationVersionType: ServiceFn<
 	],
 	RelationVersionTypeResolution
 > = async (context, data) => {
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+
 	if (data.versionType === "revision") {
 		return {
 			error: undefined,
 			data: {
 				versionType: latestRelationVersionType,
 				resolveVersionType: createRelationVersionTypeResolver({
-					config: context.config,
+					collections: collectionsRes.data,
 					sourceCollectionKey: data.collectionKey,
 					sourceVersionType: latestRelationVersionType,
 				}),
@@ -156,7 +161,7 @@ const resolveRelationVersionType: ServiceFn<
 			data: {
 				versionType: data.versionType,
 				resolveVersionType: createRelationVersionTypeResolver({
-					config: context.config,
+					collections: collectionsRes.data,
 					sourceCollectionKey: data.collectionKey,
 					sourceVersionType: data.versionType,
 				}),
@@ -170,7 +175,7 @@ const resolveRelationVersionType: ServiceFn<
 			data: {
 				versionType: latestRelationVersionType,
 				resolveVersionType: createRelationVersionTypeResolver({
-					config: context.config,
+					collections: collectionsRes.data,
 					sourceCollectionKey: data.collectionKey,
 					sourceVersionType: latestRelationVersionType,
 				}),
@@ -207,7 +212,7 @@ const resolveRelationVersionType: ServiceFn<
 		data: {
 			versionType: target,
 			resolveVersionType: createRelationVersionTypeResolver({
-				config: context.config,
+				collections: collectionsRes.data,
 				sourceCollectionKey: data.collectionKey,
 				sourceVersionType: target,
 			}),

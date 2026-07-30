@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import constants from "../../constants/constants.js";
+import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import { PreviewSessionsRepository } from "../../libs/repositories/index.js";
 import type {
@@ -13,7 +14,6 @@ import {
 	normalizePreviewUrl,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getCollection from "../collections/get-single-instance.js";
 import getContentDocument from "../documents/content/get-single.js";
 import validateContentVersionTarget from "../documents/helpers/validate-content-version-target.js";
 import resolvePreviewMode, {
@@ -46,7 +46,9 @@ const create: ServiceFn<
 	});
 	if (modeRes.error) return modeRes;
 
-	const collectionRes = getCollection(context, { key: data.collectionKey });
+	const collectionRes = await collections.getSingle(context, {
+		key: data.collectionKey,
+	});
 	if (collectionRes.error) return collectionRes;
 
 	const preview = collectionRes.data.config.preview;

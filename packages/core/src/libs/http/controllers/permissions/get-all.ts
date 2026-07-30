@@ -2,6 +2,8 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/permissions.js";
+import { LucidAPIError } from "../../../../utils/errors/index.js";
+import collections from "../../../collection/collections.js";
 import { permissionsFormatter } from "../../../formatters/index.js";
 import { getGrantablePermissionRegistry } from "../../../permission/registry.js";
 import authenticate from "../../middleware/authenticate.js";
@@ -23,11 +25,16 @@ const getAllController = factory.createHandlers(
 	authenticate(),
 	async (c) => {
 		const context = createServiceContext(c);
+		const collectionsRes = await collections.getAll(context, {});
+		if (collectionsRes.error) {
+			throw new LucidAPIError(collectionsRes.error);
+		}
+
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
 				data: permissionsFormatter.formatMultiple({
-					permissions: getGrantablePermissionRegistry(context.config),
+					permissions: getGrantablePermissionRegistry(collectionsRes.data),
 				}),
 			}),
 		);

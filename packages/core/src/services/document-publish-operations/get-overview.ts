@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import formatter from "../../libs/formatters/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { GetOverviewQueryParams } from "../../schemas/publish-operation-management.js";
@@ -15,8 +16,11 @@ const getOverview: ServiceFn<
 	],
 	PublishOperationOverview
 > = async (context, data) => {
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+
 	const collectionKeys = getReviewableCollectionKeys({
-		config: context.config,
+		collections: collectionsRes.data,
 		user: data.user,
 	});
 	const emptyOverview: PublishOperationOverview = {

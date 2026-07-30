@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { copy } from "../i18n/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import {
@@ -133,9 +133,9 @@ const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 };
 
 const getCollectionCapabilityGroups = (
-	config?: Pick<Config, "collections">,
+	collections: CollectionBuilder[] = [],
 ): CapabilityGroup[] => {
-	return (config?.collections ?? []).map((collection) => ({
+	return collections.map((collection) => ({
 		key: `documents:${collection.key}`,
 		details: {
 			name: collection.getData.details.name,
@@ -190,21 +190,21 @@ const localesCapabilityGroup: CapabilityGroup = {
 
 /** Builds the canonical internal-permission and external-scope catalogue. */
 export const getCapabilityRegistry = (
-	config?: Pick<Config, "collections">,
+	collections: CollectionBuilder[] = [],
 ): CapabilityGroup[] => {
 	return [
 		...getStaticCapabilityGroups(),
-		...getCollectionCapabilityGroups(config),
+		...getCollectionCapabilityGroups(collections),
 		localesCapabilityGroup,
 	];
 };
 
 /** Finds the external capability registered for a scope. */
 export const getExternalCapability = (
-	config: Pick<Config, "collections">,
+	collections: CollectionBuilder[],
 	scope: string,
 ): ExternalCapability | undefined => {
-	return getCapabilityRegistry(config)
+	return getCapabilityRegistry(collections)
 		.flatMap((group) => group.capabilities)
 		.find(
 			(capability) =>

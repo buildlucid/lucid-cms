@@ -18,7 +18,7 @@ const formatRelationRef = (
 	if (!isBrickQueryResponse(value)) return null;
 
 	const targetCollectionKey = value.collection_key;
-	const collection = params.config.collections.find(
+	const collection = params.collections.find(
 		(c) => c.key === targetCollectionKey,
 	);
 

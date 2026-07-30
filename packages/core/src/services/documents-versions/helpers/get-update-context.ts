@@ -1,4 +1,5 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import collections from "../../../libs/collection/collections.js";
 import getMigrationStatus from "../../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
@@ -29,7 +30,7 @@ const getUpdateContext: ServiceFn<
 		context.config.db,
 	);
 
-	const collectionRes = await documentServices.checks.checkCollection(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

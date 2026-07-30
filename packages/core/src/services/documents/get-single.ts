@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../libs/db/types.js";
 import { documentsFormatter } from "../../libs/formatters/index.js";
@@ -9,11 +10,7 @@ import type { GetSingleQueryParams } from "../../schemas/documents.js";
 import type { InternalCollectionDocument } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import {
-	collectionServices,
-	documentBrickServices,
-	documentWorkflowServices,
-} from "../index.js";
+import { documentBrickServices, documentWorkflowServices } from "../index.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
 
@@ -47,7 +44,7 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

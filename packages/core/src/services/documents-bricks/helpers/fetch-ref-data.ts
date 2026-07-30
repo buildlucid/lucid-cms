@@ -1,3 +1,4 @@
+import collections from "../../../libs/collection/collections.js";
 import registeredFields, {
 	registeredFieldTypes,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
@@ -115,7 +116,10 @@ const fetchRefData: ServiceFn<
 > = async (context, data) => {
 	if (data.allowedDocumentCollectionKeys !== undefined) {
 		const tableToCollection = new Map<string, string>();
-		for (const collection of context.config.collections) {
+		const collectionsRes = await collections.getAll(context, {});
+		if (collectionsRes.error) return collectionsRes;
+
+		for (const collection of collectionsRes.data) {
 			const tableNameRes = buildTableName(
 				"document",
 				{ collection: collection.key },

@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -10,7 +11,6 @@ import {
 import type { LucidAuth } from "../../types/hono.js";
 import { sameNumericSet } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getCollectionInstance from "../collections/get-single-instance.js";
 import { documentServices } from "../index.js";
 import {
 	getWorkflowConfig,
@@ -29,7 +29,7 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = getCollectionInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

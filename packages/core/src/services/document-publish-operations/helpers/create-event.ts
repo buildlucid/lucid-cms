@@ -1,4 +1,5 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import collections from "../../../libs/collection/collections.js";
 import type {
 	DocumentPublishOperationEventType,
 	LucidDocumentPublishOperationEvents,
@@ -8,7 +9,6 @@ import type {
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { DocumentPublishOperationEventsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { collectionServices } from "../../index.js";
 
 type PublishOperationEventData = {
 	operation: Pick<
@@ -68,7 +68,7 @@ const createEvent: ServiceFn<
 	const collectionRes =
 		data.collectionInstance !== undefined
 			? { error: undefined, data: data.collectionInstance }
-			: collectionServices.getSingleInstance(context, {
+			: await collections.getSingle(context, {
 					key: data.operation.collection_key,
 				});
 	if (collectionRes.error) return collectionRes;

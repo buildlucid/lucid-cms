@@ -1,7 +1,7 @@
+import collections from "../../libs/collection/collections.js";
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { collectionsFormatter } from "../../libs/formatters/index.js";
-import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { Collection } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -17,26 +17,18 @@ const getSingle: ServiceFn<
 	],
 	Collection
 > = async (context, data) => {
-	const collection = context.config.collections?.find(
-		(c) => c.key === data.key,
-	);
+	const [collectionRes, collectionsRes] = await Promise.all([
+		collections.getSingle(context, { key: data.key }),
+		collections.getAll(context, {}),
+	]);
+	if (collectionRes.error) return collectionRes;
+	if (collectionsRes.error) return collectionsRes;
 
-	if (collection === undefined) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.collections.not.found.message"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
-
-	const tablesRes = await getTableNames(context, collection.key);
+	const tablesRes = await getTableNames(context, collectionRes.data.key);
 	if (tablesRes.error) return tablesRes;
 
 	const migrationStatus = await getMigrationStatus(context, {
-		collection: collection,
+		collection: collectionRes.data,
 	});
 	if (migrationStatus.error) return migrationStatus;
 
@@ -44,7 +36,7 @@ const getSingle: ServiceFn<
 		.forLocale(context.config.i18n.defaultLocale)
 		.adminBundle();
 
-	if (collection.getData.mode === "single") {
+	if (collectionRes.data.getData.mode === "single") {
 		const Documents = new DocumentsRepository(
 			context.db.client,
 			context.config.db,
@@ -70,8 +62,8 @@ const getSingle: ServiceFn<
 		return {
 			error: undefined,
 			data: collectionsFormatter.formatSingle({
-				collection: collection,
-				allCollections: context.config.collections ?? [],
+				collection: collectionRes.data,
+				allCollections: collectionsRes.data,
 				queueSupportsScheduling: context.queue.support.scheduling,
 				adminTranslations,
 				include: {
@@ -83,7 +75,7 @@ const getSingle: ServiceFn<
 					? [
 							{
 								id: documentRes.data.id,
-								collection_key: collection.key,
+								collection_key: collectionRes.data.key,
 							},
 						]
 					: undefined,
@@ -94,8 +86,8 @@ const getSingle: ServiceFn<
 	return {
 		error: undefined,
 		data: collectionsFormatter.formatSingle({
-			collection: collection,
-			allCollections: context.config.collections ?? [],
+			collection: collectionRes.data,
+			allCollections: collectionsRes.data,
 			queueSupportsScheduling: context.queue.support.scheduling,
 			adminTranslations,
 			migrationStatus: migrationStatus.data,

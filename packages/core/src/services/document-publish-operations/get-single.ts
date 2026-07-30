@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { documentPublishOperationsFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -10,7 +11,6 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { PublishOperation } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices } from "../index.js";
 import getDocumentLabel from "./helpers/get-document-label.js";
 import {
 	hasCollectionPermission,
@@ -50,7 +50,7 @@ const getSingle: ServiceFn<
 			data: undefined,
 		};
 	}
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: operationRes.data.collection_key,
 	});
 	if (collectionRes.error) return collectionRes;

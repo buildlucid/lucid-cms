@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import collections from "../../libs/collection/collections.js";
 import {
 	getFieldDatabaseConfig,
 	isStorageMode,
@@ -26,7 +27,6 @@ import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related
 import fetchRefData, {
 	type FieldRefResponse,
 } from "../documents-bricks/helpers/fetch-ref-data.js";
-import { collectionServices } from "../index.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveRelationDocumentFilters from "./helpers/resolve-relation-document-filters.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
@@ -56,10 +56,12 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	const collectionRes = collectionServices.getSingleInstance(context, {
-		key: data.collectionKey,
-	});
+	const [collectionRes, collectionsRes] = await Promise.all([
+		collections.getSingle(context, { key: data.collectionKey }),
+		collections.getAll(context, {}),
+	]);
 	if (collectionRes.error) return collectionRes;
+	if (collectionsRes.error) return collectionsRes;
 
 	const Document = new DocumentsRepository(
 		context.db.client,
@@ -185,6 +187,7 @@ const getMultiple: ServiceFn<
 	const documents = documentsFormatter.formatMultiple({
 		documents: documentsRes.data?.[0] || [],
 		collection: collectionRes.data,
+		collections: collectionsRes.data,
 		config: context.config,
 		host: getBaseUrl(context),
 		refData,

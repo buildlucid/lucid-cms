@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import migrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import {
@@ -16,11 +17,7 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
-import {
-	collectionServices,
-	documentBrickServices,
-	documentServices,
-} from "../index.js";
+import { documentBrickServices, documentServices } from "../index.js";
 
 const promoteVersion: ServiceFn<
 	[
@@ -53,7 +50,7 @@ const promoteVersion: ServiceFn<
 
 	// -------------------------------------------------------------------------------
 	// Initial data fetch and error checking
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

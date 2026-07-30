@@ -1,3 +1,4 @@
+import collections from "../../../libs/collection/collections.js";
 import {
 	getBricksTableSchema,
 	getTableNames,
@@ -21,7 +22,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import { collectionServices, documentBrickServices } from "../../index.js";
+import { documentBrickServices } from "../../index.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
 import type { PreviewSessionDocumentTarget } from "../../preview-sessions/types.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
@@ -83,21 +84,24 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		context.config.db,
 	);
 
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
 
 	//* work out allowed collection keys based on integration scopes
-	const allowedCollectionKeys = data.externalScopes
-		? context.config.collections
-				.filter((collection) =>
-					data.externalScopes?.includes(
-						getCollectionExternalScope(collection.key),
-					),
-				)
-				.map((collection) => collection.key)
-		: undefined;
+	let allowedCollectionKeys: string[] | undefined;
+	if (data.externalScopes) {
+		const collectionsRes = await collections.getAll(context, {});
+		if (collectionsRes.error) return collectionsRes;
+		allowedCollectionKeys = collectionsRes.data
+			.filter((collection) =>
+				data.externalScopes?.includes(
+					getCollectionExternalScope(collection.key),
+				),
+			)
+			.map((collection) => collection.key);
+	}
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,

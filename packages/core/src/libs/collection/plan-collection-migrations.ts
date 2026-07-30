@@ -1,4 +1,5 @@
 import type { ServiceFn } from "../../types.js";
+import collections from "./collections.js";
 import generateMigrationPlan from "./migration/generate-migration-plan.js";
 import type {
 	CollectionMigrationPlan,
@@ -14,9 +15,12 @@ const planCollectionMigrations: ServiceFn<[], CollectionMigrationPlan> = async (
 	context,
 ) => {
 	const dbSchema = await context.config.db.inferSchema(context.db.client);
-	const collections: PlannedCollectionMigration[] = [];
 
-	for (const collection of context.config.collections) {
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+	const plannedCollections: PlannedCollectionMigration[] = [];
+
+	for (const collection of collectionsRes.data) {
 		const schemaRes = inferSchema(collection, context.config.db);
 		if (schemaRes.error) return schemaRes;
 		const configuredTableNames = new Set(
@@ -34,14 +38,14 @@ const planCollectionMigrations: ServiceFn<[], CollectionMigrationPlan> = async (
 		});
 		if (migrationPlanRes.error) return migrationPlanRes;
 
-		collections.push({
+		plannedCollections.push({
 			migrationPlan: migrationPlanRes.data,
 			inferredSchema: schemaRes.data,
 		});
 	}
 
 	return {
-		data: { collections },
+		data: { collections: plannedCollections },
 		error: undefined,
 	};
 };

@@ -1,7 +1,7 @@
+import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { documentServices } from "../../index.js";
 
 /**
  * Deletes expired revisions for a specific collection.
@@ -18,7 +18,7 @@ const deleteExpiredRevisions: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = await documentServices.checks.checkCollection(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;

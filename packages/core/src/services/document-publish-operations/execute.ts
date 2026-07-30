@@ -1,11 +1,8 @@
+import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import {
-	collectionServices,
-	documentVersionServices,
-	documentWorkflowServices,
-} from "../index.js";
+import { documentVersionServices, documentWorkflowServices } from "../index.js";
 import createEvent from "./helpers/create-event.js";
 
 const terminalExecutionStatuses = ["executed", "cancelled"] as const;
@@ -102,7 +99,7 @@ const execute: ServiceFn<
 	});
 	if (executingEventRes.error) return executingEventRes;
 
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: operation.collection_key,
 	});
 	if (collectionRes.error) return collectionRes;

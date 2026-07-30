@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import formatter from "../../libs/formatters/index.js";
 import type { AdminCopyInput } from "../../libs/i18n/types.js";
 import {
@@ -29,6 +30,9 @@ type ManagedRoleDefinition = {
  * Synchronizes internally managed roles and prunes grants that are no longer registered.
  */
 const syncRoles: ServiceFn<[], undefined> = async (context) => {
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+
 	const Roles = new RolesRepository(context.db.client, context.config.db);
 	const RolePermissions = new RolePermissionsRepository(
 		context.db.client,
@@ -193,7 +197,7 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 		}
 	}
 
-	const validPermissions = getValidPermissions(context.config);
+	const validPermissions = getValidPermissions(collectionsRes.data);
 	const prunePermissionsRes = await RolePermissions.deleteMultiple({
 		where: [
 			{

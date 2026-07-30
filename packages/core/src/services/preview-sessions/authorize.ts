@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveRelationVersionType, {
 	resolvePreviewCollectionVersionType,
@@ -34,6 +35,8 @@ const authorize: ServiceFn<
 > = async (context, data) => {
 	const sessionRes = await resolveSession(context, { token: data.token });
 	if (sessionRes.error) return sessionRes;
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
 
 	const session = sessionRes.data;
 	const fallbackTarget = {
@@ -44,7 +47,7 @@ const authorize: ServiceFn<
 		sourceVersionType: Exclude<typeof session.entry_version_type, "revision">,
 	) => {
 		const versionType = resolvePreviewCollectionVersionType({
-			config: context.config,
+			collections: collectionsRes.data,
 			sourceCollectionKey: session.entry_collection_key,
 			sourceVersionType,
 			targetCollectionKey: data.collectionKey,

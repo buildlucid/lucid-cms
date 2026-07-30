@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import { getValidExternalScopes } from "../../libs/permission/scopes.js";
 import type { OAuthProtectedResourceMetadataResponse } from "../../schemas/oauth.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -9,6 +10,8 @@ const getProtectedResourceMetadata: ServiceFn<
 	OAuthProtectedResourceMetadataResponse
 > = async (context) => {
 	const urls = getOAuthUrls(context);
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
 
 	return {
 		error: undefined,
@@ -16,7 +19,7 @@ const getProtectedResourceMetadata: ServiceFn<
 			resource: urls.resource,
 			authorization_servers: [urls.issuer],
 			bearer_methods_supported: ["header"],
-			scopes_supported: getValidExternalScopes(context.config),
+			scopes_supported: getValidExternalScopes(collectionsRes.data),
 		},
 	};
 };

@@ -4,6 +4,7 @@ import type {
 	LucidBrickTableName,
 	ServiceFn,
 } from "../../../../../types.js";
+import collections from "../../../collections.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import { getBricksTableSchema } from "../../../schema/runtime/runtime-schema-selectors.js";
 import type { CollectionSchemaTable } from "../../../schema/types.js";
@@ -96,8 +97,10 @@ const nullifyRelationReferences: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const referenceTargets = new Set<LucidBrickTableName>();
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
 
-	for (const collection of context.config.collections) {
+	for (const collection of collectionsRes.data) {
 		const bricksTableSchemaRes = await getBricksTableSchema(
 			context,
 			collection.key,
@@ -112,7 +115,10 @@ const nullifyRelationReferences: ServiceFn<
 			targets: referenceTargets,
 		});
 
-		for (const brick of collection.brickInstances) {
+		const bricksRes = await collections.getBricks(context, { collection });
+		if (bricksRes.error) return bricksRes;
+
+		for (const brick of bricksRes.data) {
 			collectReferenceTargets({
 				fields: brick.persistedFieldTree,
 				schemas: bricksTableSchemaRes.data,

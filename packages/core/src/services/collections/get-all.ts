@@ -1,3 +1,4 @@
+import collections from "../../libs/collection/collections.js";
 import primeRuntimeSchemas from "../../libs/collection/schema/runtime/prime-runtime-schemas.js";
 import { getDocumentTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { collectionsFormatter } from "../../libs/formatters/index.js";
@@ -14,14 +15,16 @@ const getAll: ServiceFn<
 	],
 	Collection[]
 > = async (context, data) => {
-	const collections = context.config.collections ?? [];
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+	const collectionDefinitions = collectionsRes.data;
 
 	const adminTranslations = context.translate
 		.forLocale(context.config.i18n.defaultLocale)
 		.adminBundle();
 
 	if (data.includeDocumentId === true) {
-		const singleCollections = collections.filter(
+		const singleCollections = collectionDefinitions.filter(
 			(collection) => collection.getData.mode === "single",
 		);
 
@@ -55,8 +58,8 @@ const getAll: ServiceFn<
 		return {
 			error: undefined,
 			data: collectionsFormatter.formatMultiple({
-				collections: collections,
-				allCollections: context.config.collections ?? [],
+				collections: collectionDefinitions,
+				allCollections: collectionDefinitions,
 				queueSupportsScheduling: context.queue.support.scheduling,
 				adminTranslations,
 				include: {
@@ -72,8 +75,8 @@ const getAll: ServiceFn<
 	return {
 		error: undefined,
 		data: collectionsFormatter.formatMultiple({
-			collections: collections,
-			allCollections: context.config.collections ?? [],
+			collections: collectionDefinitions,
+			allCollections: collectionDefinitions,
 			queueSupportsScheduling: context.queue.support.scheduling,
 			adminTranslations,
 			include: {

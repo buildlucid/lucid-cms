@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import collections from "../../libs/collection/collections.js";
 import { getValidExternalScopes } from "../../libs/permission/scopes.js";
 import { OAuthAuthorizationRequestsRepository } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
@@ -80,7 +81,12 @@ const startAuthorization: ServiceFn<
 	}
 
 	const requestedScopes = [...new Set(input.scope.split(" ").filter(Boolean))];
-	const validScopes = new Set<string>(getValidExternalScopes(context.config));
+	const collectionsRes = await collections.getAll(context, {});
+	if (collectionsRes.error) return collectionsRes;
+
+	const validScopes = new Set<string>(
+		getValidExternalScopes(collectionsRes.data),
+	);
 	if (
 		requestedScopes.length === 0 ||
 		requestedScopes.some((scope) => !validScopes.has(scope))

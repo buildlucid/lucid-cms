@@ -1,4 +1,3 @@
-import { collectionServices } from "../../../../../services/index.js";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
@@ -7,6 +6,7 @@ import type {
 import type { ServiceFn } from "../../../../../utils/services/types.js";
 import type { BrickQueryResponse } from "../../../../repositories/document-bricks.js";
 import { DocumentVersionsRepository } from "../../../../repositories/index.js";
+import collections from "../../../collections.js";
 import extractCollectionKey from "../../../helpers/extract-collection-key.js";
 import primeRuntimeSchemas from "../../../schema/runtime/prime-runtime-schemas.js";
 import {
@@ -96,7 +96,7 @@ const fetchRelationRefs: ServiceFn<
 	if (cacheSchemaRes.error) return cacheSchemaRes;
 
 	const unionData = values.map(async (v) => {
-		const collectionRes = collectionServices.getSingleInstance(context, {
+		const collectionRes = await collections.getSingle(context, {
 			key: v.collectionKey,
 		});
 		if (collectionRes.error) return null;

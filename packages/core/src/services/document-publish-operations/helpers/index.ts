@@ -4,7 +4,6 @@ import { copy } from "../../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
 import type { QueueEvent } from "../../../libs/queue/types.js";
-import type { Config } from "../../../types/config.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { LucidAuth } from "../../../types/hono.js";
 
@@ -224,10 +223,10 @@ export const hasCollectionPermission = (params: {
 
 /** Lists collections whose release requests the user may review. */
 export const getReviewableCollectionKeys = (params: {
-	config: Config;
+	collections: CollectionBuilder[];
 	user: LucidAuth;
 }) => {
-	return params.config.collections
+	return params.collections
 		.filter((collection) =>
 			hasCollectionPermission({
 				user: params.user,

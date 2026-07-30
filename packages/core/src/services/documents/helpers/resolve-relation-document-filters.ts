@@ -1,4 +1,5 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import collections from "../../../libs/collection/collections.js";
 import { normalizeRelationCollections } from "../../../libs/collection/custom-fields/fields/relation/utils/normalize-relation-collections.js";
 import type { FieldRefVersionTypeResolver } from "../../../libs/collection/custom-fields/utils/ref-fetch.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
@@ -333,23 +334,22 @@ const resolveRelationDocumentFilters: ServiceFn<
 			]);
 			if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
 			if (tableNamesRes.error) return tableNamesRes;
-			const targetCollection = context.config.collections.find(
-				(collection) => collection.key === collectionKey,
-			);
+			const targetCollectionRes = await collections.getSingle(context, {
+				key: collectionKey,
+			});
+			if (targetCollectionRes.error) return targetCollectionRes;
 
 			return {
 				error: undefined,
 				data: {
 					collectionKey,
 					bricksTableSchema: bricksTableSchemaRes.data,
-					relationCollectionDefaults: targetCollection
-						? collectionDefaultsFromDescriptors(
-								relationFilterDescriptors(
-									targetCollection,
-									bricksTableSchemaRes.data,
-								),
-							)
-						: new Map<string, string>(),
+					relationCollectionDefaults: collectionDefaultsFromDescriptors(
+						relationFilterDescriptors(
+							targetCollectionRes.data,
+							bricksTableSchemaRes.data,
+						),
+					),
 					tables: {
 						document: tableNamesRes.data.document,
 						versions: tableNamesRes.data.version,

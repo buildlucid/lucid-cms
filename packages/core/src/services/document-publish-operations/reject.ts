@@ -1,9 +1,9 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
+import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { collectionServices } from "../index.js";
 import createEvent from "./helpers/create-event.js";
 import { hasCollectionPermission } from "./helpers/index.js";
 import normalizeComment from "./helpers/normalize-comment.js";
@@ -44,7 +44,7 @@ const reject: ServiceFn<
 		};
 	}
 
-	const collectionRes = collectionServices.getSingleInstance(context, {
+	const collectionRes = await collections.getSingle(context, {
 		key: operationRes.data.collection_key,
 	});
 	if (collectionRes.error) return collectionRes;
