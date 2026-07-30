@@ -84,12 +84,22 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	const openDocuSelectModal = () => {
 		if (!canOpenSelectModal()) return;
 
+		const sourceCollectionKey = pageBuilderState.documentState?.collectionKey();
+		const sourceDocumentId = pageBuilderState.documentState?.documentId();
+
 		pageBuilderModalsStore.open("documentSelect", {
 			data: {
 				collectionKeys: props.collectionKeys,
 				multiple: isMultiple(),
 				selected: props.value,
 				selectedRefs: selectedDocuments(),
+				excludeDocument:
+					sourceCollectionKey !== undefined && sourceDocumentId !== undefined
+						? {
+								collectionKey: sourceCollectionKey,
+								id: sourceDocumentId,
+							}
+						: undefined,
 			},
 			onCallback: (selection) => {
 				props.onChange(selection.value, selection.refs);
@@ -280,7 +290,14 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 									</div>
 								)}
 							</DragDrop>
-							<div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+							<div
+								class={classNames(
+									"flex flex-wrap items-center justify-between gap-3",
+									{
+										"mt-3": selectedDocumentItems().length > 0,
+									},
+								)}
+							>
 								<Button
 									type="button"
 									theme="border-outline"

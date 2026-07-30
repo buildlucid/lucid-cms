@@ -1,4 +1,5 @@
 import type { Collection } from "@types";
+import classNames from "classnames";
 import { type Component, createMemo, Show } from "solid-js";
 import { BrickBody } from "@/components/Groups/Builder";
 import brickStore, { type BrickData } from "@/store/brick-store";
@@ -9,6 +10,7 @@ interface CollectionPseudoBrickProps {
 	collectionMigrationStatus: Collection["migrationStatus"];
 	collectionKey?: string;
 	documentId?: number;
+	hasFollowingSection: boolean;
 }
 
 export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
@@ -44,7 +46,11 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 	// Render
 	return (
 		<Show when={collectionPseudoBrick() !== undefined}>
-			<div class="p-4 md:p-6 border-b border-border">
+			<div
+				class={classNames("p-4 md:p-6", {
+					"border-b border-border": props.hasFollowingSection,
+				})}
+			>
 				<BrickBody
 					open={true}
 					brick={collectionPseudoBrick() as BrickData}

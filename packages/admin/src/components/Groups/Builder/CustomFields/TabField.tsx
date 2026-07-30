@@ -1,13 +1,15 @@
 import type { FieldError } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo } from "solid-js";
+import { FieldErrorBadge } from "@/components/Partials/FieldErrorBadge";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
-import type {
-	CollectionFieldConfig,
-	CollectionFieldConfigByType,
-} from "@/types/collection-config";
+import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 import { getPreviewStructureId } from "@/utils/preview-focus-dom";
+import {
+	countFieldErrorsForKeys,
+	getStructuralFieldKeys,
+} from "@/utils/structural-field-helpers";
 
 export const TabField: Component<{
 	tab: CollectionFieldConfigByType<"tab">;
@@ -21,36 +23,12 @@ export const TabField: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const childrenKeys = createMemo(() => {
-		const fieldKeys: string[] = [];
-
-		const recursiveFieldSearch = (fields: CollectionFieldConfig[]) => {
-			for (const field of fields) {
-				if (field.type === "repeater") {
-					fieldKeys.push(field.key);
-				}
-
-				if (
-					field.type === "tab" ||
-					field.type === "repeater" ||
-					field.type === "section" ||
-					field.type === "collapsible"
-				) {
-					recursiveFieldSearch(field.fields);
-				} else {
-					fieldKeys.push(field.key);
-				}
-			}
-		};
-		recursiveFieldSearch(props.tab.fields);
-		return fieldKeys;
-	});
-	const childrenKeySet = createMemo(() => new Set(childrenKeys()));
-	const hasChildrenError = createMemo(() => {
-		return props.fieldErrors.some((fieldError) =>
-			childrenKeySet().has(fieldError.key),
-		);
-	});
+	const structuralFieldKeys = createMemo(() =>
+		getStructuralFieldKeys(props.tab.fields),
+	);
+	const errorCount = createMemo(() =>
+		countFieldErrorsForKeys(props.fieldErrors, structuralFieldKeys()),
+	);
 	const triggerId = createMemo(() =>
 		getPreviewStructureId({
 			brickIndex: fieldRenderState.brickIndex(),
@@ -67,10 +45,14 @@ export const TabField: Component<{
 			id={triggerId()}
 			data-preview-focus-open={props.getActiveTab() === props.tab.key}
 			class={classNames(
-				"border-b border-border -mb-px text-sm font-medium py-1 px-2 first:pl-0 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary-base",
+				"inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1.5 text-sm font-medium text-body transition-colors duration-200 hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 ring-inset",
 				{
-					"border-primary-base": props.getActiveTab() === props.tab.key,
-					"border-error-base": hasChildrenError(),
+					"bg-input-base text-subtitle shadow-xs":
+						props.getActiveTab() === props.tab.key,
+					"border-transparent focus-visible:ring-primary-base":
+						errorCount() === 0,
+					"border-error-base/50 bg-error-base/5 focus-visible:ring-error-base!":
+						errorCount() > 0,
 				},
 			)}
 			onClick={() => props.setActiveTab(props.tab.key)}
@@ -79,6 +61,7 @@ export const TabField: Component<{
 			{helpers.getLocaleValue({
 				value: props.tab.details?.label,
 			})}
+			<FieldErrorBadge count={errorCount()} compact />
 		</button>
 	);
 };

@@ -208,7 +208,7 @@ export const CodeEditor: Component<CodeEditorProps> = (props) => {
 			/>
 			<div
 				class={classnames(
-					"overflow-hidden rounded-md border border-border bg-input-base transition-colors duration-200",
+					"code-editor-shell overflow-hidden rounded-md border border-border bg-input-base transition-colors duration-200",
 					{
 						"border-primary-base": inputFocus() || languageMenuOpen(),
 						"opacity-80 cursor-not-allowed": props.disabled,

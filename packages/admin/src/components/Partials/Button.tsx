@@ -14,7 +14,8 @@ interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
 		| "secondary-toggle"
 		| "danger-outline"
 		| "secondary-subtle"
-		| "danger-subtle";
+		| "danger-subtle"
+		| "circle";
 	size: "small" | "medium" | "icon" | "icon-subtle" | "large";
 	children: JSX.Element;
 
@@ -48,6 +49,8 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "secondary-subtle",
 				"text-icon-fade fill-icon-fade hover:text-error-base hover:fill-error-base hover:bg-error-base/10 ring-primary-base":
 					props.theme === "danger-subtle",
+				"rounded-full! border border-border bg-input-base text-body fill-body ring-primary-base hover:border-primary-muted-border hover:bg-card-hover hover:text-primary-base hover:fill-primary-base":
+					props.theme === "circle",
 				"text-subtitle": props.theme === "basic",
 
 				// Toggles

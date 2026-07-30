@@ -75,7 +75,7 @@ const database = await adapter.connect();
 await adapter.migrateToLatest(database);
 
 const makeConfig = (): Config =>
-	// @ts-ignore
+	// @ts-expect-error
 	({
 		db: adapter,
 		host: "https://cms.example.test",
@@ -89,7 +89,7 @@ const makeConfig = (): Config =>
 	}) as Config;
 
 const makeContext = (): ServiceContext =>
-	// @ts-ignore
+	// @ts-expect-error
 	({
 		db: { client: database.client },
 		config: makeConfig(),
@@ -307,7 +307,7 @@ describe.sequential("Lucid remote connection", () => {
 
 		const created = await new AiGenerationsRepository(
 			database.client,
-			// @ts-ignore
+			// @ts-expect-error
 			adapter,
 		).createSingle({
 			data: {

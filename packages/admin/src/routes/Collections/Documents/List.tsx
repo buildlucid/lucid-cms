@@ -136,11 +136,17 @@ const CollectionsDocumentsListRoute: Component = () => {
 			value: collectionData()?.details.singularName,
 		}),
 	);
-	const collectionSummary = createMemo(() =>
-		helpers.getLocaleValue({
+	const collectionSummary = createMemo(() => {
+		const fallback = T()("builder.header.summary.fallback", {
+			collectionSingle: collectionSingularName(),
+		});
+		const summary = helpers.getLocaleValue({
 			value: collectionData()?.details.summary,
-		}),
-	);
+			fallback,
+		});
+
+		return summary.trim() || fallback;
+	});
 	const canReorderDocuments = createMemo(
 		() =>
 			collectionData()?.orderable === true &&

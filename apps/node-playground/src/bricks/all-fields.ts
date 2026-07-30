@@ -88,6 +88,9 @@ const AllFieldsBrick = new BrickBuilder("all-fields", {
 	})
 	.addText("section_text", {
 		localized: true,
+		validation: {
+			required: true,
+		},
 	})
 	.endSection()
 	.addCollapsible("collapsible", {
@@ -98,6 +101,9 @@ const AllFieldsBrick = new BrickBuilder("all-fields", {
 	})
 	.addText("collapsible_text", {
 		localized: false,
+		validation: {
+			required: true,
+		},
 	})
 	.endCollapsible()
 	.addRepeater("items", {

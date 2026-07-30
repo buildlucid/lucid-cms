@@ -401,6 +401,10 @@ const CollectionsDocumentsEditRoute: Component<{
 									}
 									collectionKey={docState.collectionKey()}
 									documentId={docState.documentId()}
+									hasFollowingSection={
+										fixedBrickConfig().length > 0 ||
+										builderBrickConfig().length > 0
+									}
 								/>
 								<FixedBricks
 									brickConfig={fixedBrickConfig()}
@@ -409,6 +413,7 @@ const CollectionsDocumentsEditRoute: Component<{
 									}
 									collectionKey={docState.collectionKey()}
 									documentId={docState.documentId()}
+									hasFollowingSection={builderBrickConfig().length > 0}
 								/>
 								<BuilderBricks
 									brickConfig={builderBrickConfig()}

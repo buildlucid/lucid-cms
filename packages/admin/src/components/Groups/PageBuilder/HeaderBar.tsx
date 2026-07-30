@@ -90,6 +90,17 @@ export const HeaderBar: Component<{
 	const hasMultipleLocales = createMemo(() => {
 		return contentLocaleStore.get.locales.length > 1;
 	});
+	const collectionSummary = createMemo(() => {
+		const fallback = T()("builder.header.summary.fallback", {
+			collectionSingle: props.state.collectionSingularName(),
+		});
+		const summary = helpers.getLocaleValue({
+			value: props.state.collection()?.details.summary,
+			fallback,
+		});
+
+		return summary.trim() || fallback;
+	});
 	const matchingAutoSaveMetadata = createMemo(() => {
 		const document = props.state.document();
 		const metadata = props.state.autoSaveMetadata?.();
@@ -565,13 +576,7 @@ export const HeaderBar: Component<{
 								/>
 							</Show>
 						</div>
-						<Show when={props.state.collection()?.details.summary}>
-							<p class="text-sm text-body">
-								{helpers.getLocaleValue({
-									value: props.state.collection()?.details.summary,
-								})}
-							</p>
-						</Show>
+						<p class="text-sm text-body">{collectionSummary()}</p>
 					</div>
 				</div>
 				<Show

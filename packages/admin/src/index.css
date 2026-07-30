@@ -111,6 +111,7 @@
 	.dropdown-trigger {
 		@apply duration-200 transition-colors outline-primary-base focus:outline-1;
 	}
+
 	.skeleton {
 		@apply bg-input-base rounded-md animate-pulse;
 	}
@@ -578,4 +579,11 @@
 			box-shadow: 0 0 0 2px rgb(193 254 119 / 0.22);
 		}
 	}
+}
+
+/* Prevent CodeMirror's pre-theme focus outline from flashing inside its shell. */
+.code-editor-shell .cm-editor,
+.code-editor-shell .cm-editor.cm-focused {
+	border: 0;
+	outline: none;
 }

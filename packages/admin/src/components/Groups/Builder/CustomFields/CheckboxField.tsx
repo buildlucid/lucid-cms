@@ -82,6 +82,7 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 			disabled={disabled()}
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
+			theme="checkbox"
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 			hideOptionalText
 		/>

@@ -12,7 +12,9 @@ import {
 } from "solid-js";
 import { GroupBody } from "@/components/Groups/Builder";
 import { ErrorMessage } from "@/components/Groups/Form";
+import Button from "@/components/Partials/Button";
 import DragDrop from "@/components/Partials/DragDrop";
+import { FieldErrorBadge } from "@/components/Partials/FieldErrorBadge";
 import RelationCount from "@/components/Partials/RelationCount";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brick-store";
@@ -21,6 +23,7 @@ import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
+import { countFieldErrors } from "@/utils/structural-field-helpers";
 
 interface RepeaterFieldProps {
 	fieldConfig: CollectionFieldConfigByType<"repeater">;
@@ -61,6 +64,9 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	const groupErrors = createMemo(() => {
 		return props.fieldError?.groupErrors || [];
 	});
+	const errorCount = createMemo(() =>
+		countFieldErrors(props.fieldError ? [props.fieldError] : []),
+	);
 	const groupsByRef = createMemo(() => {
 		return new Map(groups().map((group) => [group.ref, group]));
 	});
@@ -71,13 +77,13 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 			groupRef: props.groupRef,
 		}),
 	);
+
+	// -------------------------------
+	// Functions
 	const buildGroupPath = (index: number) => {
 		if (props.groupPath) return `${props.groupPath}.${index}`;
 		return `${index}`;
 	};
-
-	// -------------------------------
-	// Functions
 	const addGroup = () => {
 		if (!fieldConfig().fields) return;
 		brickStore.get.addRepeaterGroup({
@@ -100,25 +106,43 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 			aria-describedby={props.fieldError ? `${fieldId()}-error` : undefined}
 			aria-invalid={props.fieldError !== undefined}
 		>
-			<div class={"w-full"}>
-				<div class="w-full flex items-center justify-between gap-3 mb-1.5">
+			<div
+				class={classNames(
+					"w-full overflow-hidden rounded-md border border-border bg-card-base",
+					{
+						"border-error-base/50": errorCount() > 0,
+					},
+				)}
+			>
+				<div
+					class={classNames(
+						"w-full flex items-center justify-between gap-3 bg-input-base px-3 py-2.5",
+						{
+							"bg-linear-to-r from-error-base/10 to-input-base":
+								errorCount() > 0,
+						},
+					)}
+				>
 					<p
 						id={`${fieldId()}-label`}
 						data-preview-focus-label
-						class="block text-sm transition-colors duration-200 ease-in-out text-body"
+						class="block min-w-0 text-sm font-medium text-subtitle transition-colors duration-200 ease-in-out"
 					>
 						{helpers.getLocaleValue({
 							value: fieldConfig().details?.label,
 						})}
 					</p>
-					<Show when={minGroups() !== undefined || maxGroups() !== undefined}>
-						<RelationCount
-							count={groups().length}
-							min={minGroups()}
-							max={maxGroups()}
-							class="text-body text-xs"
-						/>
-					</Show>
+					<div class="flex shrink-0 items-center gap-2">
+						<FieldErrorBadge count={errorCount()} />
+						<Show when={minGroups() !== undefined || maxGroups() !== undefined}>
+							<RelationCount
+								count={groups().length}
+								min={minGroups()}
+								max={maxGroups()}
+								class="text-body text-xs"
+							/>
+						</Show>
+					</div>
 				</div>
 				{/* Repeater Body */}
 				<Switch>
@@ -137,7 +161,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 							}}
 						>
 							{({ dragDrop }) => (
-								<div class="w-full border border-border rounded-md overflow-hidden divide-y divide-border">
+								<div class="w-full border-t border-border bg-card-base divide-y divide-border">
 									<For each={groupRefs()}>
 										{(groupRef, i) => (
 											<GroupBody
@@ -161,7 +185,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 									<button
 										type="button"
 										class={classNames(
-											"w-full bg-input-base hover:border-transparent hover:bg-secondary-hover transition-colors duration-200 px-3 py-3 flex items-center justify-center text-sm text-body hover:text-secondary-contrast ring-inset",
+											"w-full bg-input-base hover:bg-secondary-hover transition-colors duration-200 px-3 py-2.5 flex items-center justify-center gap-2 text-sm text-body hover:text-secondary-contrast ring-inset",
 											{
 												"cursor-not-allowed opacity-50 hover:bg-card-base":
 													disabled(),
@@ -171,34 +195,33 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 										disabled={disabled()}
 									>
 										<FaSolidPlus size={14} />
-										<span class="sr-only">{T()("actions.add.entry")}</span>
+										<span>{T()("actions.add.entry")}</span>
 									</button>
 								</div>
 							)}
 						</DragDrop>
 					</Match>
 					<Match when={groups().length === 0}>
-						<button
-							type="button"
+						<div
 							class={classNames(
-								"w-full dotted-background border border-dashed border-border p-4 md:p-6 min-h-32 rounded-md flex items-center justify-center text-center transition-colors duration-200",
+								"w-full min-h-24 border-t border-dashed border-border bg-card-base p-4 dotted-background flex items-center justify-center text-center",
 								{
-									group: !disabled(),
-									"cursor-not-allowed opacity-50": disabled(),
-									"hover:bg-card-hover/50": !disabled(),
+									"opacity-50": disabled(),
 								},
 							)}
-							onClick={addGroup}
-							disabled={disabled()}
 						>
-							<span class="text-sm text-unfocused group-hover:hidden">
-								{T()("empty.states.entries.inline")}
-							</span>
-							<span class="hidden text-sm text-body group-hover:inline-flex items-center gap-2">
-								<FaSolidPlus size={14} />
-								<span class="sr-only">{T()("actions.add.entry")}</span>
-							</span>
-						</button>
+							<Button
+								type="button"
+								theme="circle"
+								size="icon-subtle"
+								onClick={addGroup}
+								disabled={disabled()}
+								aria-label={T()("actions.add.entry")}
+								title={T()("actions.add.entry")}
+							>
+								<FaSolidPlus size={12} />
+							</Button>
+						</div>
 					</Match>
 				</Switch>
 			</div>

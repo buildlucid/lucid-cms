@@ -19,6 +19,9 @@ const SEOBrick = new BrickBuilder("seo", {
 			instructions:
 				"Generate a SEO friendly title based on the context of the document.",
 		},
+		validation: {
+			required: true,
+		},
 	})
 	.addTextarea("meta_description", {
 		details: {

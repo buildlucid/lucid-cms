@@ -7,7 +7,6 @@ import DeleteRole from "@/components/Modals/Role/DeleteRole";
 import UpsertRolePanel from "@/components/Panels/Role/UpsertRolePanel";
 import ViewRolePanel from "@/components/Panels/Role/ViewRolePanel";
 import RoleRow from "@/components/Tables/Rows/RoleRow";
-import { Permissions } from "@/constants/permissions";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
 import api from "@/services/api";
@@ -73,7 +72,7 @@ export const RolesList: Component<{
 				noEntries: {
 					title: T()("empty.states.roles.title"),
 					description: T()("empty.states.roles.description"),
-					button: T()(Permissions.RolesCreate),
+					button: T()("permissions.roles.create"),
 				},
 			}}
 			callback={{

@@ -47,6 +47,7 @@ type ModalRegistry = {
 			multiple?: boolean;
 			selected?: RelationFieldValue[];
 			selectedRefs?: Array<DocumentRef>;
+			excludeDocument?: RelationFieldValue;
 		};
 		result: {
 			value: RelationFieldValue[];

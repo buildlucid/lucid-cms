@@ -270,6 +270,12 @@ export const documentFilterSectionFields = (
 ): DocumentFilterField[] => {
 	const result = documentFilterFields(collection);
 
+	result.unshift({
+		key: "id",
+		label: T()("common.document.id"),
+		type: "number",
+	});
+
 	if (collection?.workflow) {
 		result.push(
 			{

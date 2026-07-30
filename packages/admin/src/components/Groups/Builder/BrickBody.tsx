@@ -29,6 +29,7 @@ import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers"
 import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
 
 interface BrickProps {
+	id?: string;
 	open: boolean;
 	brick: BrickData;
 	brickIndex: number;
@@ -173,6 +174,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	return (
 		// biome-ignore lint/a11y/useAriaPropsSupportedByRole: explanation
 		<div
+			id={props.id}
 			class={classNames(
 				"transform-gpu origin-top duration-200 transition-all",
 				{
@@ -187,6 +189,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					"p-4 pt-0": props.options.padding === "16",
 					"p-6": props.options.padding === "24",
 					"pt-4!": props.options.bleedTop && allTabs().length > 0,
+					"pt-0!": props.options.bleedTop && allTabs().length === 0,
 					"grid grid-cols-12 gap-4": allTabs().length === 0,
 				})}
 			>
@@ -205,7 +208,14 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					>
 						{/* Tabs */}
 						<Show when={allTabs().length > 0}>
-							<div class="border-b border-border mb-6 flex flex-wrap">
+							<div
+								class={classNames(
+									"mb-5 flex flex-wrap gap-1 rounded-md border border-border bg-background-base p-1 shadow-inner",
+									{
+										"-mt-4": props.options.bleedTop,
+									},
+								)}
+							>
 								<Index each={allTabs()}>
 									{(tab) => (
 										<TabField

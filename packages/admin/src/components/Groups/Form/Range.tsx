@@ -102,7 +102,7 @@ export const Range: Component<RangeProps> = (props) => {
 			aria-describedby={
 				props.copy?.describedBy ? `${props.id}-description` : undefined
 			}
-			class="h-8 w-14 shrink-0 appearance-none rounded-sm border border-transparent bg-transparent px-1.5 text-center text-sm font-medium tabular-nums text-title outline-hidden transition-colors duration-150 hover:border-border/50 hover:bg-input-base/30 focus:border-primary-base/60 focus:bg-input-base/40 focus:ring-1 focus:ring-primary-base/15 disabled:cursor-not-allowed disabled:opacity-60 sm:w-16"
+			class="h-8 w-12 shrink-0 appearance-none rounded-sm border border-transparent bg-transparent px-1 text-center text-sm font-medium tabular-nums text-title outline-hidden transition-colors duration-150 hover:border-border/50 hover:bg-input-base/30 focus:border-primary-base/60 focus:bg-input-base/40 focus:ring-1 focus:ring-primary-base/15 disabled:cursor-not-allowed disabled:opacity-60"
 			onFocus={() => setInputFocus(true)}
 			onBlur={() => setInputFocus(false)}
 			onChange={(event) => {
@@ -126,7 +126,7 @@ export const Range: Component<RangeProps> = (props) => {
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
 				hideOptionalText={props.hideOptionalText}
 			/>
-			<div class="flex w-full items-center gap-2.5 sm:gap-3">
+			<div class="flex w-full items-center gap-1.5 sm:gap-2">
 				{renderNumericInput(0)}
 				<Slider.Root
 					id={`${props.id}-slider`}
@@ -142,14 +142,14 @@ export const Range: Component<RangeProps> = (props) => {
 				>
 					<Slider.Track
 						class={classnames(
-							"relative h-2 w-full rounded-full border border-border bg-input-base shadow-inner",
+							"relative h-2.5 w-full rounded-full border border-border bg-input-base shadow-inner",
 							{
 								"cursor-not-allowed opacity-60": props.disabled,
 								"cursor-pointer": !props.disabled,
 							},
 						)}
 					>
-						<Slider.Fill class="absolute inset-y-0 rounded-full bg-primary-base" />
+						<Slider.Fill class="absolute inset-y-0 rounded-full bg-primary-muted-bg ring-1 ring-inset ring-primary-muted-border" />
 						<div
 							aria-hidden="true"
 							class="pointer-events-none absolute inset-0 z-10"

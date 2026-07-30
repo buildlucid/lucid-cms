@@ -32,7 +32,11 @@ import { ResetFilters } from "@/components/Groups/Query/ResetFilters";
 import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
-import useQueryState, { pagination, sort } from "@/hooks/useQueryState";
+import useQueryState, {
+	numberFilter,
+	pagination,
+	sort,
+} from "@/hooks/useQueryState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
@@ -57,6 +61,7 @@ interface DocumentSelectPanelProps {
 		multiple?: boolean;
 		selected?: RelationFieldValue[];
 		selectedRefs?: DocumentRef[];
+		excludeDocument?: RelationFieldValue;
 	};
 	callbacks: {
 		onSelect: (selection: {
@@ -93,6 +98,7 @@ const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
 					multiple={props.state.multiple}
 					selected={props.state.selected}
 					selectedRefs={props.state.selectedRefs}
+					excludeDocument={props.state.excludeDocument}
 					onClose={() => props.state.setOpen(false)}
 					onSelect={(selection) => {
 						props.callbacks.onSelect(selection);
@@ -109,6 +115,7 @@ interface DocumentSelectContentProps {
 	multiple?: boolean;
 	selected?: RelationFieldValue[];
 	selectedRefs?: DocumentRef[];
+	excludeDocument?: RelationFieldValue;
 	onClose: () => void;
 	onSelect: (selection: {
 		value: RelationFieldValue[];
@@ -126,7 +133,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
 	//* collection key the filter schema was last built for - documents only
 	//* query once this matches, so stale filters never hit a new collection
-	const [filterSchemaCollectionKey, setFilterSchemaCollectionKey] =
+	const [filterSchemaContextKey, setFilterSchemaContextKey] =
 		createSignal<string>();
 	const searchParams = useQueryState({
 		mode: "memory",
@@ -145,6 +152,19 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 
 	const allowedCollectionKeys = createMemo(() => props.collectionKeys ?? []);
 	const collectionKey = createMemo(() => activeCollectionKey());
+	const excludedDocumentId = createMemo(() => {
+		const excludeDocument = props.excludeDocument;
+		if (
+			excludeDocument === undefined ||
+			excludeDocument.collectionKey !== collectionKey()
+		) {
+			return undefined;
+		}
+		return excludeDocument.id;
+	});
+	const filterSchemaContext = createMemo(
+		() => `${collectionKey() ?? ""}:${excludedDocumentId() ?? ""}`,
+	);
 	const isMultiple = createMemo(() => props.multiple === true);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
@@ -189,6 +209,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			},
 			filters: {
 				isDeleted: 0,
+				"id:!=": excludedDocumentId,
 			},
 			include: {
 				"refs.media": () => getListingRefIncludes()["refs.media"],
@@ -199,7 +220,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		enabled: () =>
 			searchParams.ready() &&
 			collection.isSuccess &&
-			filterSchemaCollectionKey() === collectionKey(),
+			filterSchemaContextKey() === filterSchemaContext(),
 	});
 	const getFilterFields = createMemo(() =>
 		documentFilterSectionFields(collection.data?.data),
@@ -315,10 +336,18 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			collection.isSuccess &&
 			active &&
 			collection.data?.data.key === active &&
-			filterSchemaCollectionKey() !== active
+			filterSchemaContextKey() !== filterSchemaContext()
 		) {
+			const filterSchema = buildDocumentFilterSchema(getFilterFields());
+			const excludedId = excludedDocumentId();
+			if (excludedId !== undefined) {
+				filterSchema.id = numberFilter({
+					defaultValue: excludedId,
+					defaultOperator: "!=",
+				});
+			}
 			searchParams.setSchema({
-				filters: buildDocumentFilterSchema(getFilterFields()),
+				filters: filterSchema,
 			});
 			searchParams.resetFilters();
 			searchParams.setParams({
@@ -332,7 +361,7 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			});
 			setFilterSectionOpen(false);
 			//* opens the documents query gate last - filters are clean by now
-			setFilterSchemaCollectionKey(active);
+			setFilterSchemaContextKey(filterSchemaContext());
 		}
 	});
 	createEffect(() => {

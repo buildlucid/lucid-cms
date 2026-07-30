@@ -109,6 +109,7 @@ export const Modals: Component<{
 					multiple: documentSelectModal()?.data.multiple,
 					selected: documentSelectModal()?.data.selected,
 					selectedRefs: documentSelectModal()?.data.selectedRefs,
+					excludeDocument: documentSelectModal()?.data.excludeDocument,
 				}}
 				callbacks={{
 					onSelect: (selection) =>

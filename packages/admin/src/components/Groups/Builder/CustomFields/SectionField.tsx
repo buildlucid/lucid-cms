@@ -1,4 +1,5 @@
 import type { FieldError, InternalDocumentField } from "@types";
+import classNames from "classnames";
 import {
 	type Accessor,
 	type Component,
@@ -7,9 +8,14 @@ import {
 	Show,
 } from "solid-js";
 import { DynamicField } from "@/components/Groups/Builder/CustomFields";
+import { FieldErrorBadge } from "@/components/Partials/FieldErrorBadge";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
+import {
+	countFieldErrorsForKeys,
+	getStructuralFieldKeys,
+} from "@/utils/structural-field-helpers";
 
 interface SectionFieldProps {
 	fieldConfig: CollectionFieldConfigByType<"section">;
@@ -38,22 +44,57 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 			value: fieldConfig().details?.summary,
 		}),
 	);
+	const structuralFieldKeys = createMemo(() =>
+		getStructuralFieldKeys(fieldConfig().fields),
+	);
+	const errorCount = createMemo(() =>
+		countFieldErrorsForKeys(props.fieldErrors, structuralFieldKeys()),
+	);
+	const hasHeader = createMemo(
+		() => Boolean(label() || summary()) || errorCount() > 0,
+	);
 
 	// -------------------------------
 	// Render
 	return (
-		<div class="w-full">
-			<Show when={label() || summary()}>
-				<div class="mb-2">
-					<Show when={label()}>
-						<h3 class="text-sm font-medium text-title">{label()}</h3>
-					</Show>
-					<Show when={summary()}>
-						<p class="text-sm text-unfocused mt-0.5">{summary()}</p>
-					</Show>
+		<div
+			class={classNames(
+				"w-full overflow-hidden rounded-md border border-border bg-card-base",
+				{
+					"border-error-base/50": errorCount() > 0,
+				},
+			)}
+			aria-invalid={errorCount() > 0}
+		>
+			<Show when={hasHeader()}>
+				<div
+					class={classNames(
+						"flex items-start justify-between gap-3 bg-input-base px-3 py-2.5",
+						{
+							"bg-linear-to-r from-error-base/10 to-input-base":
+								errorCount() > 0,
+						},
+					)}
+				>
+					<div class="min-w-0">
+						<Show when={label()}>
+							<h3 class="text-sm font-medium text-subtitle">{label()}</h3>
+						</Show>
+						<Show when={summary()}>
+							<p class="text-sm text-unfocused mt-0.5">{summary()}</p>
+						</Show>
+					</div>
+					<FieldErrorBadge count={errorCount()} />
 				</div>
 			</Show>
-			<div class="w-full border border-border rounded-md p-3 md:p-4 grid grid-cols-12 gap-4">
+			<div
+				class={classNames(
+					"w-full bg-card-base p-3 md:p-4 grid grid-cols-12 gap-4",
+					{
+						"border-t border-border": hasHeader(),
+					},
+				)}
+			>
 				<Index each={fieldConfig().fields}>
 					{(config) => (
 						<DynamicField

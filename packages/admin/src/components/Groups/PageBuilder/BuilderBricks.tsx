@@ -20,11 +20,13 @@ import AddBrick from "@/components/Modals/Bricks/AddBrick";
 import Button from "@/components/Partials/Button";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
+import { FieldErrorBadge } from "@/components/Partials/FieldErrorBadge";
 import brickStore, { type BrickData } from "@/store/brick-store";
 import T from "@/translations";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 import { getPreviewStructureId } from "@/utils/preview-focus-dom";
+import { countFieldErrors } from "@/utils/structural-field-helpers";
 
 interface BuilderBricksProps {
 	brickConfig: CollectionBrickConfig[];
@@ -171,6 +173,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			)?.fields || []
 		);
 	});
+	const errorCount = createMemo(() => countFieldErrors(fieldErrors()));
 	const missingFieldColumns = createMemo(() => {
 		return (
 			props.collectionMigrationStatus?.missingColumns[props.brick.key] || []
@@ -194,6 +197,8 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			class={classNames(
 				"drag-item w-full bg-card-base border border-border rounded-md mb-4 last:mb-0 ring-inset ring-primary-base",
 				{
+					"border-error-base/50 bg-linear-to-b from-error-base/10 to-card-base to-30%":
+						errorCount() > 0,
 					"opacity-60": props.dragDrop.getDragging()?.ref === props.brick.ref,
 					"ring-1 ring-inset":
 						props.dragDrop.getDraggingTarget()?.ref === props.brick.ref,
@@ -213,6 +218,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				})
 			}
 			onDragOver={(e) => props.dragDrop.onDragOver(e)}
+			aria-invalid={errorCount() > 0}
 		>
 			{/* Header */}
 			{/** biome-ignore lint/a11y/useSemanticElements: explanation */}
@@ -220,16 +226,17 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				id={previewTriggerId()}
 				data-preview-focus-open={brickOpen()}
 				class={classNames(
-					"flex items-center justify-between cursor-pointer px-4 py-3 rounded-md focus:outline-hidden",
+					"flex items-center justify-between cursor-pointer px-4 py-3 rounded-md focus:outline-hidden transition-colors duration-200 hover:bg-card-hover/60",
 				)}
 				onClick={toggleDropdown}
 				onKeyDown={(e) => {
-					if (e.key === "Enter") {
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
 						toggleDropdown();
 					}
 				}}
 				aria-expanded={brickOpen()}
-				aria-controls={`bulder-brick-content-${props.brick.key}`}
+				aria-controls={`builder-brick-content-${props.brick.ref}`}
 				role="button"
 				tabIndex="0"
 			>
@@ -264,7 +271,8 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						})}
 					</h3>
 				</div>
-				<div class="flex gap-0.5">
+				<div class="flex items-center gap-1">
+					<FieldErrorBadge count={errorCount()} class="mr-1" />
 					<DeleteDebounceButton
 						callback={() => {
 							brickStore.get.removeBrick(brickIndex());
@@ -289,11 +297,12 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			</div>
 			{/* Body */}
 			<BrickBody
+				id={`builder-brick-content-${props.brick.ref}`}
 				open={brickOpen()}
 				brick={props.brick}
 				brickIndex={brickIndex()}
 				configFields={config()?.fields || []}
-				labelledby={`builder-brick-${props.brick.key}`}
+				labelledby={previewTriggerId()}
 				fieldErrors={fieldErrors()}
 				missingFieldColumns={missingFieldColumns()}
 				collectionKey={props.collectionKey}

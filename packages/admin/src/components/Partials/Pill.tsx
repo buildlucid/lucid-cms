@@ -25,6 +25,7 @@ type PillTheme =
 
 interface PillBaseProps {
 	theme: PillTheme;
+	size?: "default" | "small";
 	children: JSXElement;
 	class?: string;
 	tooltip?: string;
@@ -52,6 +53,7 @@ const Pill: Component<PillProps> = (props) => {
 	const [local, rest] = splitProps(props, [
 		"as",
 		"theme",
+		"size",
 		"children",
 		"class",
 		"tooltip",
@@ -61,11 +63,14 @@ const Pill: Component<PillProps> = (props) => {
 	// Memos
 	const classes = createMemo(() => {
 		return classNames(
-			"inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium leading-4 whitespace-nowrap",
+			"inline-flex items-center justify-center rounded-full font-medium whitespace-nowrap",
 			local.as === "button" &&
 				"transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
 			local.class,
 			{
+				"px-2.5 py-0.5 text-xs leading-4":
+					local.size === undefined || local.size === "default",
+				"px-1.5 py-0 text-[11px] leading-4": local.size === "small",
 				"bg-primary-base text-primary-contrast": local.theme === "primary",
 				"border border-primary-muted-border bg-primary-muted-bg text-primary-base":
 					local.theme === "primary-opaque",

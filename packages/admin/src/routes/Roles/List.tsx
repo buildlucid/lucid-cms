@@ -58,7 +58,7 @@ const RolesListRoute: Component = () => {
 									permission: userStore.get.hasPermission([
 										Permissions.RolesCreate,
 									]).all,
-									label: T()(Permissions.RolesCreate),
+									label: T()("permissions.roles.create"),
 								},
 							],
 							contentLocale: true,

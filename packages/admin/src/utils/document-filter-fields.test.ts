@@ -352,6 +352,7 @@ describe("documentFilterSectionFields", () => {
 
 		expect(documentFilterSectionFields(collection)).toEqual(
 			expect.arrayContaining([
+				{ key: "id", label: "Document ID", type: "number" },
 				{ key: "_title", label: "Title", type: "text" },
 				{
 					key: "workflowStage",
@@ -476,6 +477,7 @@ describe("buildDocumentFilterSchema", () => {
 			{ key: "_author", label: "Author", type: "user" },
 			{ key: "_price", label: "Price", type: "range" },
 			{ key: "_related", label: "Related", type: "relation" },
+			{ key: "id", label: "Document ID", type: "number" },
 		]);
 
 		expect(schema._title?.type).toBe("text");
@@ -484,6 +486,7 @@ describe("buildDocumentFilterSchema", () => {
 		expect(schema._price?.type).toBe("number");
 		//* relation values may be `collectionKey:id` strings
 		expect(schema._related?.type).toBe("text");
+		expect(schema.id?.type).toBe("number");
 	});
 });
 

@@ -170,16 +170,6 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		const width = fieldConfig()?.ui?.width as number | undefined;
 		return fieldWidthClasses[width ?? 12] ?? fieldWidthClasses[12];
 	});
-	const wrapperSpacingClass = createMemo(() => {
-		if (
-			fieldConfig().type === "section" ||
-			fieldConfig().type === "collapsible"
-		) {
-			return "my-2 last:mb-0";
-		}
-
-		return "";
-	});
 	const previewFieldId = createMemo(() => {
 		const config = fieldConfig();
 		if (
@@ -206,6 +196,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			setTabHasMounted(true);
 		}
 	});
+
 	// -------------------------------
 	// Render
 	return (
@@ -215,19 +206,14 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					previewFieldId() === undefined ? undefined : ""
 				}
 				id={previewFieldId()}
-				class={classNames(
-					"w-full relative",
-					widthClass(),
-					wrapperSpacingClass(),
-					{
-						"mb-0!": !activeTab(),
-						"invisible h-0 opacity-0 mb-0!":
-							fieldConfig().type !== "tab"
-								? // @ts-expect-error
-									fieldConfig()?.ui?.hidden === true
-								: false,
-					},
-				)}
+				class={classNames("w-full relative", widthClass(), {
+					"mb-0!": !activeTab(),
+					"invisible h-0 opacity-0 mb-0!":
+						fieldConfig().type !== "tab"
+							? // @ts-expect-error
+								fieldConfig()?.ui?.hidden === true
+							: false,
+				})}
 			>
 				<div class="w-full h-full">
 					<Switch>

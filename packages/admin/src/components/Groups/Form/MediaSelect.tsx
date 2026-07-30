@@ -417,27 +417,23 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 												)}
 											</For>
 											<Show when={selectedMediaRefs().length > 0}>
-												<button
-													type="button"
-													class={classNames(
-														"relative hidden h-full items-center justify-center overflow-hidden rounded-md border border-border text-unfocused transition-colors duration-200 before:absolute before:-inset-3 before:bg-secondary-base/5 before:blur-2xl lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2",
-														{
-															"hover:border-primary-muted-border hover:text-title":
-																!props.disabled && canAddMore(),
-															"cursor-not-allowed opacity-50":
-																props.disabled || !canAddMore(),
-														},
-													)}
-													onClick={openMediaSelectModal}
-													disabled={props.disabled || !canAddMore()}
-													aria-label={T()("media.select.action", {
-														type: props.type || "media",
-													})}
-												>
-													<span class="relative z-10">
-														<FaSolidPlus size={18} />
-													</span>
-												</button>
+												<div class="relative hidden h-full items-center justify-center lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2">
+													<Button
+														type="button"
+														theme="circle"
+														size="icon-subtle"
+														onClick={openMediaSelectModal}
+														disabled={props.disabled || !canAddMore()}
+														aria-label={T()("media.select.action", {
+															type: props.type || "media",
+														})}
+														title={T()("media.select.action", {
+															type: props.type || "media",
+														})}
+													>
+														<FaSolidPlus size={12} />
+													</Button>
+												</div>
 											</Show>
 										</div>
 									)}

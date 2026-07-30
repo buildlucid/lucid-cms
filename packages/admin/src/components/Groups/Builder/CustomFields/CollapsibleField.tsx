@@ -1,6 +1,6 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
-import { FaSolidChevronUp } from "solid-icons/fa";
+import { FaSolidChevronDown } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
@@ -12,12 +12,17 @@ import {
 	Show,
 } from "solid-js";
 import { DynamicField } from "@/components/Groups/Builder/CustomFields";
+import { FieldErrorBadge } from "@/components/Partials/FieldErrorBadge";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import userPreferencesStore from "@/store/user-preferences";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
 import { getPreviewStructureId } from "@/utils/preview-focus-dom";
+import {
+	countFieldErrorsForKeys,
+	getStructuralFieldKeys,
+} from "@/utils/structural-field-helpers";
 
 interface CollapsibleFieldProps {
 	fieldConfig: CollectionFieldConfigByType<"collapsible">;
@@ -55,6 +60,12 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 		helpers.getLocaleValue({
 			value: fieldConfig().details?.summary,
 		}),
+	);
+	const structuralFieldKeys = createMemo(() =>
+		getStructuralFieldKeys(fieldConfig().fields),
+	);
+	const errorCount = createMemo(() =>
+		countFieldErrorsForKeys(props.fieldErrors, structuralFieldKeys()),
 	);
 	const uiStateTarget = createMemo(() => {
 		const collectionKey = fieldRenderState.collectionKey();
@@ -134,10 +145,23 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<div class="w-full border border-border rounded-md overflow-hidden">
+		<div
+			class={classNames(
+				"w-full overflow-hidden rounded-md border border-border bg-card-base",
+				{
+					"border-error-base/50": errorCount() > 0,
+				},
+			)}
+			aria-invalid={errorCount() > 0}
+		>
 			<button
 				type="button"
-				class="w-full bg-card-base hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center gap-3 transition-colors duration-200 text-left"
+				class={classNames(
+					"w-full cursor-pointer bg-input-base px-3 py-2.5 text-left transition-colors duration-200 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base flex justify-between items-center gap-3",
+					{
+						"bg-linear-to-r from-error-base/10 to-input-base": errorCount() > 0,
+					},
+				)}
 				onClick={toggleOpen}
 				id={triggerId()}
 				data-preview-focus-open={getOpen()}
@@ -152,25 +176,30 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 						<span class="block text-sm text-unfocused mt-0.5">{summary()}</span>
 					</Show>
 				</span>
-				<span
-					class={classNames("transition-transform duration-200 shrink-0", {
-						"transform rotate-180": getOpen(),
-					})}
-				>
-					<FaSolidChevronUp size={14} class="text-icon-faded" />
+				<span class="flex shrink-0 items-center gap-2">
+					<FieldErrorBadge count={errorCount()} />
+					<FaSolidChevronDown
+						size={12}
+						class={classNames(
+							"shrink-0 text-icon-faded transition-transform duration-200",
+							{
+								"rotate-180": getOpen(),
+							},
+						)}
+					/>
 				</span>
 			</button>
 			<div
 				id={`${triggerId()}-content`}
 				class={classNames(
-					"bg-background-base transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
+					"bg-card-base transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
 					{
 						"scale-y-100 h-auto opacity-100 visible": getOpen(),
 						"scale-y-0 h-0 opacity-0 invisible": !getOpen(),
 					},
 				)}
 			>
-				<div class="border-t border-border p-3 md:p-4 grid grid-cols-12 gap-4">
+				<div class="border-t border-border bg-card-base p-3 md:p-4 grid grid-cols-12 gap-4">
 					<Index each={childrenMounted() ? fieldConfig().fields : []}>
 						{(config) => (
 							<DynamicField

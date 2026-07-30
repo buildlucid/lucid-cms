@@ -1,11 +1,13 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
+import { FaSolidCheck } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
 	onMount,
+	Show,
 } from "solid-js";
 import {
 	DescribedBy,
@@ -35,21 +37,30 @@ interface SwitchProps {
 	noMargin?: boolean;
 	inline?: boolean;
 	fieldColumnIsMissing?: boolean;
-	theme?: "default" | "relaxed";
+	theme?: "default" | "relaxed" | "checkbox";
 	hideOptionalText?: boolean;
 	labelLeft?: boolean;
 }
 
 export const Switch: Component<SwitchProps> = (props) => {
+	// ----------------------------------------
+	// State
 	let checkboxRef: HTMLInputElement | undefined;
 	let falseSpanRef: HTMLSpanElement | undefined;
 	let trueSpanRef: HTMLSpanElement | undefined;
 	let overlayRef: HTMLSpanElement | undefined;
 	const [inputFocus, setInputFocus] = createSignal(false);
 	const [overlayStyle, setOverlayStyle] = createSignal({});
+
+	// ----------------------------------------
+	// Memos
 	const theme = createMemo(() => props.theme ?? "default");
 
+	// ----------------------------------------
+	// Functions
 	const updateOverlayPosition = () => {
+		if (theme() === "checkbox") return;
+
 		if (falseSpanRef && trueSpanRef && overlayRef) {
 			const activeSpan = props.value ? trueSpanRef : falseSpanRef;
 			const relaxedTheme = theme() === "relaxed";
@@ -68,20 +79,6 @@ export const Switch: Component<SwitchProps> = (props) => {
 			setOverlayStyle(style);
 		}
 	};
-
-	onMount(() => {
-		updateOverlayPosition();
-	});
-
-	createEffect(() => {
-		props.value;
-		updateOverlayPosition();
-	});
-	createEffect(() => {
-		theme();
-		updateOverlayPosition();
-	});
-
 	const switchButton = () => (
 		<button
 			type="button"
@@ -137,13 +134,69 @@ export const Switch: Component<SwitchProps> = (props) => {
 			/>
 		</button>
 	);
+	const checkboxControl = () => (
+		<span
+			aria-hidden="true"
+			class={classnames(
+				"grid size-5 min-w-5 place-items-center rounded-md border bg-background-base text-secondary-contrast transition-colors duration-200",
+				{
+					"border-border group-hover:border-body/30": !props.value,
+					"border-secondary-hover bg-secondary-base": props.value,
+					"border-primary-base": inputFocus(),
+					"cursor-not-allowed opacity-50": props.disabled,
+				},
+			)}
+		>
+			<Show when={props.value}>
+				<FaSolidCheck size={10} aria-hidden="true" />
+			</Show>
+		</span>
+	);
+	const fieldLabel = (className?: string) => (
+		<Label
+			id={props.id}
+			label={props.copy?.label}
+			focused={inputFocus()}
+			required={props.required}
+			theme={"basic"}
+			altLocaleError={props.altLocaleError}
+			localised={props.localised}
+			fieldColumnIsMissing={props.fieldColumnIsMissing}
+			hideOptionalText={props.hideOptionalText}
+			class={className}
+			rightSlot={
+				theme() === "checkbox" ? (
+					<Tooltip copy={props.copy?.tooltip} theme="inline" />
+				) : undefined
+			}
+		/>
+	);
 
+	// ----------------------------------------
+	// Effects
+	onMount(() => {
+		updateOverlayPosition();
+	});
+
+	createEffect(() => {
+		props.value;
+		updateOverlayPosition();
+	});
+
+	createEffect(() => {
+		theme();
+		updateOverlayPosition();
+	});
+
+	// ----------------------------------------
+	// Render
 	return (
 		<div
 			class={classnames("relative", {
 				"mb-3 last:mb-0": props.noMargin !== true,
 				"w-full": props.inline !== true,
-				"mt-2": props.noMargin !== true && props.labelLeft,
+				"mt-2":
+					props.noMargin !== true && props.labelLeft && theme() !== "checkbox",
 			})}
 		>
 			<input
@@ -155,42 +208,61 @@ export const Switch: Component<SwitchProps> = (props) => {
 				onChange={(e) => {
 					props.onChange(e.currentTarget.checked);
 				}}
-				class="hidden"
+				onFocus={() => {
+					if (theme() === "checkbox") setInputFocus(true);
+				}}
+				onBlur={() => {
+					if (theme() === "checkbox") setInputFocus(false);
+				}}
+				class={theme() === "checkbox" ? "sr-only" : "hidden"}
 				disabled={props.disabled}
+				aria-describedby={
+					props.copy?.describedBy ? `${props.id}-description` : undefined
+				}
+				aria-invalid={props.errors !== undefined}
 			/>
-			{props.labelLeft ? (
-				<div class="flex items-center justify-between gap-3">
-					<Label
-						id={props.id}
-						label={props.copy?.label}
-						focused={inputFocus()}
-						required={props.required}
-						theme={"basic"}
-						altLocaleError={props.altLocaleError}
-						localised={props.localised}
-						fieldColumnIsMissing={props.fieldColumnIsMissing}
-						hideOptionalText={props.hideOptionalText}
-					/>
-					{switchButton()}
-				</div>
-			) : (
-				<>
-					<Label
-						id={props.id}
-						label={props.copy?.label}
-						focused={inputFocus()}
-						required={props.required}
-						theme={"basic"}
-						altLocaleError={props.altLocaleError}
-						localised={props.localised}
-						fieldColumnIsMissing={props.fieldColumnIsMissing}
-						hideOptionalText={props.hideOptionalText}
-					/>
-					{switchButton()}
-				</>
-			)}
-			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
-			<Tooltip copy={props.copy?.tooltip} theme={undefined} />
+			<Show
+				when={theme() === "checkbox"}
+				fallback={
+					<>
+						{props.labelLeft ? (
+							<div class="flex items-center justify-between gap-3">
+								{fieldLabel()}
+								{switchButton()}
+							</div>
+						) : (
+							<>
+								{fieldLabel()}
+								{switchButton()}
+							</>
+						)}
+						<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+						<Tooltip copy={props.copy?.tooltip} theme={undefined} />
+					</>
+				}
+			>
+				{fieldLabel()}
+				<label
+					for={props.id}
+					class={classnames(
+						"group inline-flex min-h-10 max-w-full cursor-pointer items-center gap-2.5 rounded-md border border-border bg-input-base px-3 py-2 text-sm text-body transition-colors duration-200 hover:border-body/25 hover:bg-card-hover",
+						{
+							"border-primary-base": inputFocus(),
+							"border-error-base/50 bg-error-base/5":
+								props.errors !== undefined && !inputFocus(),
+							"cursor-not-allowed opacity-60": props.disabled,
+						},
+					)}
+				>
+					{checkboxControl()}
+					<span class="min-w-0 truncate">
+						{props.value
+							? props.copy?.true || T()("common.true")
+							: props.copy?.false || T()("common.false")}
+					</span>
+				</label>
+				<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			</Show>
 			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
 	);

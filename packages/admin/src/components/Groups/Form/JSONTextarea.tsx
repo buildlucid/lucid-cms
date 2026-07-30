@@ -1,6 +1,7 @@
 import { indentWithTab } from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { linter, lintGutter } from "@codemirror/lint";
+import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
@@ -75,12 +76,6 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 	// Functions
 	const isEmptyJsonValue = (value: string) => value.trim() === "";
 
-	const toggleErrorBorder = (hasError: boolean) => {
-		const view = editorView();
-		if (!view) return;
-		view.dom.classList.toggle("cm-json-invalid", hasError);
-	};
-
 	// ----------------------------------------
 	// CodeMirror
 	const {
@@ -91,7 +86,6 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 		onValueChange: (value) => {
 			if (isEmptyJsonValue(value)) {
 				setJsonError(null);
-				toggleErrorBorder(false);
 				props.onChange(value);
 				return;
 			}
@@ -99,10 +93,8 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 			try {
 				JSON.parse(value);
 				setJsonError(null);
-				toggleErrorBorder(false);
 			} catch (e) {
 				setJsonError((e as SyntaxError).message);
-				toggleErrorBorder(true);
 			}
 			props.onChange(value);
 		},
@@ -126,24 +118,32 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 	createExtension(cmHighlighting);
 	createExtension(EditorView.lineWrapping);
 	createExtension(
-		EditorView.theme({
-			"&": {
-				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
-			},
-			".cm-scroller": {
-				alignItems: "stretch",
-				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
-			},
-			".cm-content": {
-				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
-			},
-			".cm-gutters": {
-				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
-			},
-			".cm-gutter": {
-				minHeight: JSON_TEXTAREA_MIN_HEIGHT,
-			},
-		}),
+		Prec.highest(
+			EditorView.theme({
+				"&": {
+					minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+					border: "0",
+					overflow: "hidden",
+				},
+				"&.cm-focused": {
+					border: "0",
+					outline: "none",
+				},
+				".cm-scroller": {
+					alignItems: "stretch",
+					minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+				},
+				".cm-content": {
+					minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+				},
+				".cm-gutters": {
+					minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+				},
+				".cm-gutter": {
+					minHeight: JSON_TEXTAREA_MIN_HEIGHT,
+				},
+			}),
+		),
 	);
 	createExtension(
 		EditorView.updateListener.of((update) => {
@@ -153,7 +153,6 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 					const doc = update.view.state.doc.toString();
 					if (isEmptyJsonValue(doc)) {
 						setJsonError(null);
-						toggleErrorBorder(false);
 						if (doc !== "") {
 							props.onChange("");
 						}
@@ -164,7 +163,6 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 					try {
 						const formatted = JSON.stringify(JSON.parse(doc), null, 2);
 						setJsonError(null);
-						toggleErrorBorder(false);
 						if (formatted !== doc) {
 							props.onChange(formatted);
 						}
@@ -205,12 +203,24 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 				rightSlot={props.labelRightSlot}
 			/>
 			<div
-				id={props.id}
-				ref={editorRef}
-				class={classnames("overflow-hidden rounded-md", {
-					"opacity-80 cursor-not-allowed pointer-events-none": props.disabled,
-				})}
-			/>
+				class={classnames(
+					"code-editor-shell overflow-hidden rounded-md border border-border bg-input-base transition-colors duration-200",
+					{
+						"border-primary-base":
+							inputFocus() && displayErrors() === undefined,
+						"border-error-base": displayErrors() !== undefined,
+						"opacity-80 cursor-not-allowed": props.disabled,
+					},
+				)}
+			>
+				<div
+					id={props.id}
+					ref={editorRef}
+					class={classnames("overflow-hidden", {
+						"pointer-events-none": props.disabled,
+					})}
+				/>
+			</div>
 			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
 			<ErrorMessage id={props.id} errors={displayErrors()} />
 		</div>

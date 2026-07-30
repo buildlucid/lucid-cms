@@ -10,6 +10,7 @@ interface LabelProps {
 	required?: boolean;
 	theme: "full" | "basic";
 	hideOptionalText?: boolean;
+	class?: string;
 
 	localised?: boolean;
 	altLocaleError?: boolean;
@@ -23,6 +24,7 @@ export const Label: Component<LabelProps> = (props) => {
 			<div
 				class={classnames(
 					"mb-1.5 flex min-w-0 items-center justify-between gap-3 text-sm text-body",
+					props.class,
 					{
 						"pt-2 px-2 mb-0!": props.theme === "full",
 					},

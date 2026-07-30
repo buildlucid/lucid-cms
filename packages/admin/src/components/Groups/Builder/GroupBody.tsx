@@ -14,6 +14,7 @@ import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import Button from "@/components/Partials/Button";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
+import { FieldErrorBadge } from "@/components/Partials/FieldErrorBadge";
 import Pill from "@/components/Partials/Pill";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brick-store";
@@ -23,7 +24,10 @@ import brickHelpers from "@/utils/brick-helpers";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
 import { getPreviewStructureId } from "@/utils/preview-focus-dom";
-import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
+import {
+	countFieldErrors,
+	flattenStructuralScopeConfigs,
+} from "@/utils/structural-field-helpers";
 
 interface GroupBodyProps {
 	fieldConfig: CollectionFieldConfigByType<"repeater">;
@@ -95,6 +99,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 	const fieldErrors = createMemo(() => {
 		return groupError()?.fields;
 	});
+	const errorCount = createMemo(() => countFieldErrors(fieldErrors() ?? []));
 	const titlePreview = createMemo(() => {
 		const firstTextConfig = flattenedConfigChildrenFields().find(
 			// include textarea as it's also "text input" content
@@ -178,18 +183,21 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				class={classNames(
 					"w-full bg-card-base hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
 					{
+						"bg-error-base/5": errorCount() > 0,
 						"ring-1 ring-inset ring-primary-base":
 							props.dragDrop.getDraggingTarget()?.ref === ref(),
 					},
 				)}
 				onClick={toggleDropdown}
 				onKeyDown={(e) => {
-					if (e.key === "Enter") {
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
 						toggleDropdown();
 					}
 				}}
 				aria-expanded={groupOpen()}
 				aria-controls={`accordion-content-${ref()}`}
+				aria-invalid={errorCount() > 0}
 				role="button"
 				tabIndex="0"
 			>
@@ -231,7 +239,8 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						</h3>
 					</div>
 				</div>
-				<div class="flex gap-0.5">
+				<div class="flex items-center gap-1">
+					<FieldErrorBadge count={errorCount()} compact class="mr-1" />
 					<DeleteDebounceButton
 						callback={() => {
 							brickStore.get.removeRepeaterGroup({
@@ -262,6 +271,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			</div>
 			{/* Group Body */}
 			<div
+				id={`accordion-content-${ref()}`}
 				class={classNames(
 					"bg-background-base transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
 					{
