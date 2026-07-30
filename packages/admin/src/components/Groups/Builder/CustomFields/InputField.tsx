@@ -139,7 +139,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 					key: props.state.fieldConfig.key,
 					ref: props.state.groupRef,
 					repeaterKey: props.state.repeaterKey,
-					value: props.type === "number" ? Number(value) : value,
+					value: props.type === "number" ? parseNumberInputValue(value) : value,
 					contentLocale: fieldRenderState.contentLocale(),
 				});
 			}}
@@ -168,6 +168,11 @@ export const InputField: Component<InputFieldProps> = (props) => {
 			hideOptionalText
 		/>
 	);
+};
+
+/** Converts a number input value while preserving an empty field as null. */
+const parseNumberInputValue = (value: string): number | null => {
+	return value === "" ? null : Number(value);
 };
 
 const toDateInputValue = (value: string) => {
