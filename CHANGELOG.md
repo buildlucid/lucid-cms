@@ -14,6 +14,12 @@
 - Renamed client integrations to integrations across the APIs, types, services and admin UI. ([4c25d6a](https://github.com/buildlucid/lucid-cms/commit/4c25d6a5681cb1e7bea7cfe03e52904f493095b8))
 - Dropped support for the multiple tenants experiment. ([9994698](https://github.com/buildlucid/lucid-cms/commit/999469889a146868fb50acab45d318fc7815ccfb))
 
+### Bug Fixes:
+
+- Fixed cleared number custom fields being coerced to zero, which allowed required fields to save empty. ([bf66941](https://github.com/buildlucid/lucid-cms/commit/bf669413ff2e734363ec2e7a80786ae2af79d60e))
+- Fixed optional datetime custom fields failing to save with PostgreSQL when left empty. ([c95302b](https://github.com/buildlucid/lucid-cms/commit/c95302b988ffe7944ee9f71ae1d49bbb7e9f39b8))
+- Fixed saved image crops reapplying rotation and skew to the cropped derivative when reopened instead of restoring the crop against the original image. ([27e42a0](https://github.com/buildlucid/lucid-cms/commit/27e42a01fe59c1a755d41968d7cd05d1f9dc7247))
+
 ## v0.17.0-alpha.0
 
 ### Features:
