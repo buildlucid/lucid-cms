@@ -1,3 +1,4 @@
+import noPermission from "@assets/illustrations/no-permission.svg";
 import {
 	FaSolidDatabase,
 	FaSolidFolderPlus,
@@ -24,6 +25,7 @@ import BulkUploadMediaModal from "@/components/Modals/Media/BulkUploadMedia";
 import CreateMediaFolderModal from "@/components/Modals/Media/CreateMediaFolder";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import CreateUserPanel from "@/components/Panels/User/CreateUserPanel";
+import ErrorBlock from "@/components/Partials/ErrorBlock";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore";
@@ -53,6 +55,12 @@ export const Dashboard: Component = () => {
 	const canReadPublishOperations = createMemo(
 		() => userStore.get.hasPermission([Permissions.PublishOperationsRead]).all,
 	);
+	const hasAnyPermissions = createMemo(() => {
+		const user = userStore.get.user;
+		if (!user) return true;
+
+		return user.superAdmin === true || (user.permissions?.length ?? 0) > 0;
+	});
 
 	// ----------------------------------------
 	// Queries
@@ -292,27 +300,46 @@ export const Dashboard: Component = () => {
 					padding: "24",
 				}}
 			>
-				<div class="flex min-w-0 flex-col gap-6">
-					<Show when={attentionItems().length > 0}>
-						<DashboardAttention items={attentionItems()} />
-					</Show>
-					<Show when={visibleQuickActions().length > 0}>
-						<DashboardQuickActions actions={visibleQuickActions()} />
-					</Show>
-					<Show when={releaseRequestsAvailable()}>
-						<DashboardReleaseOverview
-							overview={releaseOverview.data?.data}
-							loading={releaseOverview.isFetching}
-						/>
-					</Show>
-					<Show when={showContentShortcuts()}>
-						<DashboardContentShortcuts
-							collections={readableCollections()}
-							loading={collections.isLoading}
-							error={collections.isError}
-						/>
-					</Show>
-				</div>
+				<Show
+					when={hasAnyPermissions()}
+					fallback={
+						<div class="flex flex-1 items-center justify-center">
+							<ErrorBlock
+								content={{
+									image: noPermission,
+									title: T()("dashboard.no.access.title"),
+									description: T()("dashboard.no.access.description"),
+								}}
+								link={{
+									text: T()("dashboard.no.access.account"),
+									href: "/lucid/account",
+								}}
+							/>
+						</div>
+					}
+				>
+					<div class="flex min-w-0 flex-col gap-6">
+						<Show when={attentionItems().length > 0}>
+							<DashboardAttention items={attentionItems()} />
+						</Show>
+						<Show when={visibleQuickActions().length > 0}>
+							<DashboardQuickActions actions={visibleQuickActions()} />
+						</Show>
+						<Show when={releaseRequestsAvailable()}>
+							<DashboardReleaseOverview
+								overview={releaseOverview.data?.data}
+								loading={releaseOverview.isFetching}
+							/>
+						</Show>
+						<Show when={showContentShortcuts()}>
+							<DashboardContentShortcuts
+								collections={readableCollections()}
+								loading={collections.isLoading}
+								error={collections.isError}
+							/>
+						</Show>
+					</div>
+				</Show>
 			</DynamicContent>
 
 			<MediaAltGenerationModal />
