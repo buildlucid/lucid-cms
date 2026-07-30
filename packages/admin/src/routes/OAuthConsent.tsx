@@ -3,6 +3,7 @@ import { useParams } from "@solidjs/router";
 import classNames from "classnames";
 import {
 	FaSolidCheck,
+	FaSolidChevronDown,
 	FaSolidLock,
 	FaSolidShieldHalved,
 	FaSolidTriangleExclamation,
@@ -32,6 +33,7 @@ const OAuthConsentRoute: Component = () => {
 	const [principalType, setPrincipalType] = createSignal<"user" | "system">(
 		"user",
 	);
+	const [unavailableScopesOpen, setUnavailableScopesOpen] = createSignal(false);
 
 	// ----------------------------------------
 	// Queries
@@ -83,8 +85,10 @@ const OAuthConsentRoute: Component = () => {
 	);
 	const unavailableUserScopes = createMemo(() => {
 		const authorization = request.data?.data;
-		if (!authorization || principalType() !== "user") return 0;
-		return authorization.scopes.length - authorization.userScopes.length;
+		if (!authorization || principalType() !== "user") return [];
+
+		const userScopes = new Set<string>(authorization.userScopes);
+		return authorization.scopes.filter((scope) => !userScopes.has(scope));
 	});
 	const canAllow = createMemo(
 		() =>
@@ -253,7 +257,11 @@ const OAuthConsentRoute: Component = () => {
 										{T()("oauth.consent.principal.description")}
 									</p>
 								</div>
-								<fieldset class="m-0 grid min-w-0 gap-2.5 border-0 p-0 sm:grid-cols-2">
+								<fieldset
+									class={classNames("m-0 grid min-w-0 gap-2.5 border-0 p-0", {
+										"sm:grid-cols-2": authorization().canConnectAsSystem,
+									})}
+								>
 									<legend class="sr-only">
 										{T()("oauth.consent.principal.title")}
 									</legend>
@@ -373,14 +381,53 @@ const OAuthConsentRoute: Component = () => {
 										})}
 									</p>
 								</div>
-								<Show when={unavailableUserScopes() > 0}>
-									<div class="mb-2.5 flex items-start gap-2 rounded-md border border-warning-base/20 bg-warning-base/5 px-3 py-2">
-										<FaSolidTriangleExclamation class="mt-0.5 size-2.5 shrink-0 text-warning-base" />
-										<p class="m-0 text-[10px] leading-4">
-											{T()("oauth.consent.scopes.reduced", {
-												count: unavailableUserScopes(),
-											})}
-										</p>
+								<Show when={unavailableUserScopes().length > 0}>
+									<div class="mb-2.5 rounded-md border border-warning-base/20 bg-warning-base/5 px-3 py-2">
+										<div class="flex items-start gap-2">
+											<FaSolidTriangleExclamation class="mt-0.75 size-2.5 shrink-0 text-warning-base" />
+											<button
+												type="button"
+												class="flex min-w-0 flex-1 items-start justify-between gap-2 rounded text-left hover:text-title! focus:outline-hidden focus-visible:ring-1 focus-visible:ring-warning-base"
+												aria-expanded={unavailableScopesOpen()}
+												aria-controls="unavailable-oauth-scopes"
+												onClick={() =>
+													setUnavailableScopesOpen(!unavailableScopesOpen())
+												}
+											>
+												<span class="text-[10px] leading-4">
+													{T()(
+														unavailableUserScopes().length === 1
+															? "oauth.consent.scopes.reduced"
+															: "oauth.consent.scopes.reduced.multiple",
+														{
+															count: unavailableUserScopes().length,
+														},
+													)}
+												</span>
+												<FaSolidChevronDown
+													class="mt-1 size-2 shrink-0 text-warning-base transition-transform"
+													classList={{
+														"rotate-180": unavailableScopesOpen(),
+													}}
+												/>
+											</button>
+										</div>
+										<Show when={unavailableScopesOpen()}>
+											<ul
+												id="unavailable-oauth-scopes"
+												class="mt-1 ml-4.5 flex flex-wrap gap-x-1.5 gap-y-0 rounded-md border border-border bg-background-base px-2 py-1"
+											>
+												<For each={unavailableUserScopes()}>
+													{(scope) => (
+														<li class="font-mono! text-[9px]! leading-3! tracking-normal! text-body">
+															<code class="font-mono text-[9px] leading-3 text-body">
+																{scope}
+															</code>
+														</li>
+													)}
+												</For>
+											</ul>
+										</Show>
 									</div>
 								</Show>
 
