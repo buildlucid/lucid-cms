@@ -72,7 +72,10 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 			null) satisfies CFResponse<"datetime">["value"];
 	}
 	override normalizeInputValue(value: unknown) {
-		return typeof value === "string" ? value.trim() : value;
+		if (typeof value !== "string") return value;
+
+		const normalizedValue = value.trim();
+		return normalizedValue === "" ? null : normalizedValue;
 	}
 	uniqueValidation(value: unknown) {
 		const valueSchema = z.union([z.string(), z.number(), z.date()]);

@@ -282,6 +282,14 @@ test("datetime config defaults to date-only mode", () => {
 	expect(field.config.time).toBe(false);
 });
 
+test("datetime input normalization converts empty values to null", () => {
+	const field = new DatetimeCustomField("field");
+
+	expect(field.normalizeInputValue("")).toBeNull();
+	expect(field.normalizeInputValue("   ")).toBeNull();
+	expect(field.normalizeInputValue(" 2024-06-15 ")).toBe("2024-06-15");
+});
+
 test("datetime schema omits an empty default", () => {
 	// @ts-expect-error
 	const db = {

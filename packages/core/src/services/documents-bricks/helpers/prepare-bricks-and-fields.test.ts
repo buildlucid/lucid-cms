@@ -305,4 +305,39 @@ describe("testing prepareBricksAndFields", () => {
 
 		expect(preparedFields?.find((f) => f.key === "metadata")?.value).toBeNull();
 	});
+
+	test("should normalize empty datetime custom field values to null", () => {
+		const collection = new CollectionBuilder("datetime-empty-test", {
+			mode: "single",
+			details: {
+				name: copy("admin:tests.collections.datetime-empty-test.name", {
+					defaultMessage: "Datetime Empty Test",
+				}),
+				singularName: copy(
+					"admin:tests.collections.datetime-empty-test.singularName",
+					{
+						defaultMessage: "Datetime Empty Test",
+					},
+				),
+			},
+		}).addDateTime("publishDate");
+
+		const fields: Array<FieldInputSchema> = [
+			{
+				key: "publishDate",
+				type: "datetime",
+				value: "",
+			},
+		];
+
+		const { preparedFields } = prepareBricksAndFields({
+			collection,
+			fields,
+			localization: mockLocalization,
+		});
+
+		expect(
+			preparedFields?.find((f) => f.key === "publishDate")?.value,
+		).toBeNull();
+	});
 });
