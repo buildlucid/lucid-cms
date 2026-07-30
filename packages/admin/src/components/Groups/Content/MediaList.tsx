@@ -56,7 +56,11 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import mediaStore from "@/store/mediaStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
-import type { ImageCropProvenance, ImageCropSource } from "@/utils/image-crop";
+import {
+	type ImageCropProvenance,
+	type ImageCropSource,
+	resolveStoredImageCropSource,
+} from "@/utils/image-crop";
 import { getImageMeta as getFileImageMeta } from "@/utils/media-meta";
 
 export const MediaList: Component<{
@@ -196,17 +200,16 @@ export const MediaList: Component<{
 	};
 	const openQuickCrop = (item: Media) => {
 		if (item.type !== "image") return;
-		const original =
-			item.file.sourceType === "crop" ? item.file.original : undefined;
+		const source = resolveStoredImageCropSource(item.file);
 		rowTarget.setTargetId(item.id);
 		setActiveQuickCropSource({
-			url: original?.url ?? item.file.url,
+			url: source.file.url,
 			name: item.file.fileName ?? item.file.key,
-			mimeType: original?.meta.mimeType ?? item.file.meta.mimeType,
+			mimeType: source.file.meta.mimeType,
 			provenance: {
 				origin: item.origin,
 			},
-			crop: item.file.sourceType === "crop" ? item.file.crop : undefined,
+			crop: source.crop,
 		});
 		rowTarget.setTrigger("quickCrop", true);
 	};

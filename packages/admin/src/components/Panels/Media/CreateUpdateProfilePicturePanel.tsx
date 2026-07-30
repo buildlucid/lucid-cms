@@ -19,6 +19,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
+import { resolveStoredImageCropSource } from "@/utils/image-crop";
 import { getProcessedImageUrl } from "@/utils/media-url";
 import {
 	getTranslation,
@@ -360,7 +361,7 @@ const CreateUpdateProfilePicturePanel: Component<
 		MediaFile.reset();
 		if (profilePicture) {
 			const file = profilePicture.file;
-			const original = file.sourceType === "crop" ? file.original : undefined;
+			const source = resolveStoredImageCropSource(file);
 			MediaFile.setCurrentFile({
 				name: file.fileName ?? file.key,
 				url: getProcessedImageUrl(file.url, {
@@ -371,28 +372,28 @@ const CreateUpdateProfilePicturePanel: Component<
 					preset: "thumbnail-large",
 					format: "webp",
 				}),
-				originalUrl: original?.url ?? file.url,
-				originalPreviewUrl: original?.url
-					? getProcessedImageUrl(original.url, {
+				originalUrl: source.file.url,
+				originalPreviewUrl: source.crop
+					? getProcessedImageUrl(source.file.url, {
 							preset: "thumbnail-medium",
 							format: "webp",
 						})
 					: undefined,
-				originalFocalPointUrl: original?.url
-					? getProcessedImageUrl(original.url, {
+				originalFocalPointUrl: source.crop
+					? getProcessedImageUrl(source.file.url, {
 							preset: "thumbnail-large",
 							format: "webp",
 						})
 					: undefined,
 				type: profilePicture.type,
-				mimeType: original?.meta.mimeType ?? file.meta.mimeType,
+				mimeType: source.file.meta.mimeType,
 				origin: profilePicture.origin,
-				width: original?.meta.width ?? file.meta.width,
-				height: original?.meta.height ?? file.meta.height,
+				width: source.file.meta.width,
+				height: source.file.meta.height,
 				focalPoint: file.meta.focalPoint ?? null,
 				originalFocalPoint:
-					original?.meta.focalPoint ?? file.meta.focalPoint ?? null,
-				crop: file.sourceType === "crop" ? file.crop : undefined,
+					source.file.meta.focalPoint ?? file.meta.focalPoint ?? null,
+				crop: source.crop,
 			});
 		}
 	}

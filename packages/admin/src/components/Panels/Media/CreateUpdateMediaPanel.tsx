@@ -50,6 +50,7 @@ import {
 	type ImageCropProvenance,
 	type ImageCropSource,
 	isSupportedCropMimeType,
+	resolveStoredImageCropSource,
 } from "@/utils/image-crop";
 import { getProcessedImageUrl } from "@/utils/media-url";
 import {
@@ -230,8 +231,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		if (PosterFile.getRemovedCurrent() !== true && existingPoster() != null) {
 			const poster = existingPoster();
 			if (!poster) return null;
-			const original =
-				poster.file.sourceType === "crop" ? poster.file.original : undefined;
+			const source = resolveStoredImageCropSource(poster.file);
 			const currentFile = PosterFile.getCurrentFile();
 			const cropRemoved = PosterFile.getCropRemoved();
 			return {
@@ -239,8 +239,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				url: cropRemoved
 					? (currentFile?.originalPreviewUrl ??
 						currentFile?.originalUrl ??
-						original?.url ??
-						poster.file.url)
+						source.file.url)
 					: (currentFile?.url ??
 						getProcessedImageUrl(poster.file.url, {
 							preset: "thumbnail-medium",
@@ -249,8 +248,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				focalPointUrl: cropRemoved
 					? (currentFile?.originalFocalPointUrl ??
 						currentFile?.originalUrl ??
-						original?.url ??
-						poster.file.url)
+						source.file.url)
 					: (currentFile?.focalPointUrl ??
 						getProcessedImageUrl(poster.file.url, {
 							preset: "thumbnail-large",
@@ -339,20 +337,19 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		}
 
 		const poster = existingPoster();
-		const original =
-			poster?.file.sourceType === "crop" ? poster.file.original : undefined;
+		const source = poster
+			? resolveStoredImageCropSource(poster.file)
+			: undefined;
 		if (
 			PosterFile.getRemovedCurrent() !== true &&
 			poster?.type === "image" &&
-			(original?.url || poster.file.url) &&
-			isSupportedCropMimeType(
-				original?.meta.mimeType ?? poster.file.meta.mimeType,
-			)
+			source &&
+			isSupportedCropMimeType(source.file.meta.mimeType)
 		) {
 			return {
-				url: original?.url ?? poster.file.url,
+				url: source.file.url,
 				name: poster.file.fileName ?? poster.file.key,
-				mimeType: original?.meta.mimeType ?? poster.file.meta.mimeType,
+				mimeType: source.file.meta.mimeType,
 				provenance: {
 					origin: poster.origin,
 				},
@@ -379,10 +376,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		if (PosterFile.getRemovedCurrent() !== true && existingPoster() != null) {
 			const poster = existingPoster();
 			if (!poster) return null;
-			const original =
-				poster.file.sourceType === "crop" ? poster.file.original : undefined;
+			const source = resolveStoredImageCropSource(poster.file);
 			const meta = PosterFile.getCropRemoved()
-				? (original?.meta ?? poster.file.meta)
+				? source.file.meta
 				: poster.file.meta;
 			return {
 				fileSize: meta.fileSize,
@@ -1064,9 +1060,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				setPosterCropEditorOpen(false);
 				setActivePosterCropSource(null);
 				MediaFile.reset();
-				const imageOriginal =
-					mediaData.type === "image" && mediaData.file.sourceType === "crop"
-						? mediaData.file.original
+				const imageSource =
+					mediaData.type === "image"
+						? resolveStoredImageCropSource(mediaData.file)
 						: undefined;
 				MediaFile.setCurrentFile({
 					name: mediaData.file.fileName ?? mediaData.file.key,
@@ -1084,39 +1080,36 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 								format: "webp",
 							})
 						: undefined,
-					originalUrl: imageOriginal?.url ?? mediaData.file.url,
+					originalUrl: imageSource?.file.url ?? mediaData.file.url,
 					type: mediaData.type || undefined,
 					mimeType:
-						imageOriginal?.meta.mimeType ?? mediaData.file.meta.mimeType,
+						imageSource?.file.meta.mimeType ?? mediaData.file.meta.mimeType,
 					origin: mediaData.origin,
 					width:
-						imageOriginal?.meta.width ??
+						imageSource?.file.meta.width ??
 						(mediaData.type === "image" ? mediaData.file.meta.width : null),
 					height:
-						imageOriginal?.meta.height ??
+						imageSource?.file.meta.height ??
 						(mediaData.type === "image" ? mediaData.file.meta.height : null),
 					focalPoint:
 						mediaData.type === "image"
 							? (mediaData.file.meta.focalPoint ?? null)
 							: null,
 					originalFocalPoint:
-						imageOriginal?.meta.focalPoint ??
+						imageSource?.file.meta.focalPoint ??
 						(mediaData.type === "image"
 							? mediaData.file.meta.focalPoint
 							: null) ??
 						null,
-					crop:
-						mediaData.type === "image" && mediaData.file.sourceType === "crop"
-							? mediaData.file.crop
-							: undefined,
-					originalPreviewUrl: imageOriginal?.url
-						? getProcessedImageUrl(imageOriginal.url, {
+					crop: imageSource?.crop,
+					originalPreviewUrl: imageSource?.crop
+						? getProcessedImageUrl(imageSource.file.url, {
 								preset: "thumbnail-medium",
 								format: "webp",
 							})
 						: undefined,
-					originalFocalPointUrl: imageOriginal?.url
-						? getProcessedImageUrl(imageOriginal.url, {
+					originalFocalPointUrl: imageSource?.crop
+						? getProcessedImageUrl(imageSource.file.url, {
 								preset: "thumbnail-large",
 								format: "webp",
 							})
@@ -1124,10 +1117,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				});
 				PosterFile.reset();
 				if (poster) {
-					const posterOriginal =
-						poster.file.sourceType === "crop"
-							? poster.file.original
-							: undefined;
+					const posterSource = resolveStoredImageCropSource(poster.file);
 					PosterFile.setCurrentFile({
 						name: poster.file.fileName ?? T()("media.poster.label"),
 						url: getProcessedImageUrl(poster.file.url, {
@@ -1138,32 +1128,30 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							preset: "thumbnail-large",
 							format: "webp",
 						}),
-						originalUrl: posterOriginal?.url ?? poster.file.url,
-						originalPreviewUrl: posterOriginal?.url
-							? getProcessedImageUrl(posterOriginal.url, {
+						originalUrl: posterSource.file.url,
+						originalPreviewUrl: posterSource.crop
+							? getProcessedImageUrl(posterSource.file.url, {
 									preset: "thumbnail-medium",
 									format: "webp",
 								})
 							: undefined,
-						originalFocalPointUrl: posterOriginal?.url
-							? getProcessedImageUrl(posterOriginal.url, {
+						originalFocalPointUrl: posterSource.crop
+							? getProcessedImageUrl(posterSource.file.url, {
 									preset: "thumbnail-large",
 									format: "webp",
 								})
 							: undefined,
 						type: "image",
-						mimeType:
-							posterOriginal?.meta.mimeType ?? poster.file.meta.mimeType,
+						mimeType: posterSource.file.meta.mimeType,
 						origin: poster.origin,
-						width: posterOriginal?.meta.width ?? poster.file.meta.width,
-						height: posterOriginal?.meta.height ?? poster.file.meta.height,
+						width: posterSource.file.meta.width,
+						height: posterSource.file.meta.height,
 						focalPoint: poster.file.meta.focalPoint ?? null,
 						originalFocalPoint:
-							posterOriginal?.meta.focalPoint ??
+							posterSource.file.meta.focalPoint ??
 							poster.file.meta.focalPoint ??
 							null,
-						crop:
-							poster.file.sourceType === "crop" ? poster.file.crop : undefined,
+						crop: posterSource.crop,
 					});
 				}
 				setHydratedMediaId(mediaData.id);

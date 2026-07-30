@@ -1,4 +1,4 @@
-import type { Media, MediaCropState } from "@types";
+import type { Media, MediaCropState, MediaImageFile } from "@types";
 
 const SUPPORTED_CROP_MIME_TYPES = [
 	"image/jpeg",
@@ -40,6 +40,21 @@ export type ImageCropSource = {
 	mimeType?: string | null;
 	provenance?: ImageCropProvenance;
 	crop?: MediaCropState;
+};
+
+/** Resolves persisted crop state against its canonical, untransformed image. */
+export const resolveStoredImageCropSource = (file: MediaImageFile) => {
+	if (file.sourceType === "crop") {
+		return {
+			file: file.original,
+			crop: file.crop,
+		};
+	}
+
+	return {
+		file,
+		crop: undefined,
+	};
 };
 
 export const isSupportedCropMimeType = (
