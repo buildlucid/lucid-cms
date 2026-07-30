@@ -63,7 +63,7 @@ export const writeHttpEntry = (
 	const statusLabel = colorize(String(status), statusColor, options.colors);
 
 	console.info(
-		`${prefix}  ${method} ${path}  ${statusLabel}  ${formatDuration(durationMs)}`,
+		`${prefix} ${method} ${path} ${statusLabel} ${formatDuration(durationMs)}`,
 	);
 
 	if (options.verbose) {

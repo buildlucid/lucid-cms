@@ -86,7 +86,7 @@ export const colorize = (value: string, color: string, enabled: boolean) => {
 };
 
 /**
- * Builds an aligned prefix shared by standard and HTTP console entries.
+ * Builds a compact prefix shared by standard and HTTP console entries.
  */
 export const createPrefix = (props: {
 	color: string;
@@ -101,11 +101,11 @@ export const createPrefix = (props: {
 		parts.push(colorize(props.timestamp, consoleColors.dim, props.colors));
 	}
 
-	parts.push(colorize(props.label.padEnd(5), props.color, props.colors));
+	parts.push(colorize(props.label, props.color, props.colors));
 
 	if (props.scope) {
 		parts.push(colorize(props.scope, consoleColors.dim, props.colors));
 	}
 
-	return parts.join("  ");
+	return parts.join(" ");
 };

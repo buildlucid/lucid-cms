@@ -60,7 +60,7 @@ const writeDefaultEntry = (
 			? ` — ${errorMessage}`
 			: "";
 
-	getConsoleLogger(entry.level)(`${prefix}  ${entry.message}${errorSuffix}`);
+	getConsoleLogger(entry.level)(`${prefix} ${entry.message}${errorSuffix}`);
 	writeVerboseDetails(entry, options);
 };
 
