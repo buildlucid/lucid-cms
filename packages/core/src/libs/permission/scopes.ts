@@ -1,7 +1,10 @@
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import { getCapabilityRegistry } from "./capabilities.js";
-import type { ExternalScope } from "./external-scopes.js";
+import type {
+	ExternalPrincipalType,
+	ExternalScope,
+} from "./external-scopes.js";
 
 export type ExternalScopeDefinition = {
 	key: ExternalScope;
@@ -23,6 +26,9 @@ export type ExternalScopeGroup = {
 /** Builds the external scope view of the canonical capability catalogue. */
 export const getExternalScopeGroups = (
 	collections: CollectionBuilder[],
+	options: {
+		principalType?: ExternalPrincipalType;
+	} = {},
 ): ExternalScopeGroup[] => {
 	return getCapabilityRegistry(collections)
 		.map(
@@ -33,7 +39,12 @@ export const getExternalScopeGroups = (
 					.filter(
 						(capability) =>
 							capability.availableToIntegrations === true &&
-							capability.external !== undefined,
+							capability.external !== undefined &&
+							(options.principalType === undefined ||
+								capability.external.principalTypes === undefined ||
+								capability.external.principalTypes.includes(
+									options.principalType,
+								)),
 					)
 					.map((capability) => ({
 						key: capability.external?.scope as ExternalScope,
@@ -47,8 +58,11 @@ export const getExternalScopeGroups = (
 /** Returns every external scope available for the current configuration. */
 export const getValidExternalScopes = (
 	collections: CollectionBuilder[],
+	options: {
+		principalType?: ExternalPrincipalType;
+	} = {},
 ): ExternalScope[] =>
-	getExternalScopeGroups(collections).flatMap((group) =>
+	getExternalScopeGroups(collections, options).flatMap((group) =>
 		group.scopes.map((scope) => scope.key),
 	);
 
@@ -56,7 +70,12 @@ export const getValidExternalScopes = (
 export const getInvalidExternalScopes = (
 	collections: CollectionBuilder[],
 	scopes: string[],
+	options: {
+		principalType?: ExternalPrincipalType;
+	} = {},
 ) => {
-	const validScopes = new Set<string>(getValidExternalScopes(collections));
+	const validScopes = new Set<string>(
+		getValidExternalScopes(collections, options),
+	);
 	return scopes.filter((scope) => !validScopes.has(scope));
 };

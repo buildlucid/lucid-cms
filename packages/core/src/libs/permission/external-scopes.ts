@@ -1,4 +1,5 @@
 export const ExternalScopes = {
+	AccountRead: "account:read",
 	MediaRead: "media:read",
 	MediaCreate: "media:create",
 	MediaUpdate: "media:update",
@@ -22,6 +23,8 @@ export type CollectionExternalScope =
 export type ExternalScope =
 	| (typeof ExternalScopes)[keyof typeof ExternalScopes]
 	| CollectionExternalScope;
+
+export type ExternalPrincipalType = "system" | "user";
 
 /** Builds the external scope key for a collection action. */
 export const getCollectionExternalScope = (

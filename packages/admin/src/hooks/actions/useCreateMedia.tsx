@@ -13,7 +13,7 @@ import type { ImageMeta } from "@/utils/media-meta";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 export const useCreateMedia = () => {
-	const [getTitle, setTitle] = createSignal<Media["title"]>([]);
+	const [getTitle, setTitle] = createSignal<MediaTranslation[]>([]);
 	const [getAlt, setAlt] = createSignal<MediaTranslation[]>([]);
 	const [getDescription, setDescription] = createSignal<MediaTranslation[]>([]);
 	const [getSummary, setSummary] = createSignal<MediaTranslation[]>([]);
@@ -79,7 +79,7 @@ export const useCreateMedia = () => {
 		file: File | null,
 		imageMeta: ImageMeta | null,
 		options?: {
-			title?: Media["title"];
+			title?: MediaTranslation[];
 			alt?: MediaTranslation[];
 			description?: MediaTranslation[];
 			summary?: MediaTranslation[];

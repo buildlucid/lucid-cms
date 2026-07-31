@@ -183,7 +183,7 @@ const updateConnectButton = () => {
 const renderScopes = (scopes: string[]) => {
 	ui.scopeList.replaceChildren();
 
-	for (const [index, scope] of scopes.entries()) {
+	for (const scope of scopes) {
 		const details = scopeDetails(scope);
 		const label = document.createElement("label");
 		label.className = "scope-option";
@@ -191,10 +191,7 @@ const renderScopes = (scopes: string[]) => {
 		const input = document.createElement("input");
 		input.type = "checkbox";
 		input.value = scope;
-		input.checked =
-			scope === "locales:read" ||
-			(scope.endsWith(":read") &&
-				index === scopes.findIndex((candidate) => candidate.endsWith(":read")));
+		input.checked = scope === "locales:read";
 		input.addEventListener("change", updateConnectButton);
 
 		const check = document.createElement("span");

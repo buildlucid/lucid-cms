@@ -396,6 +396,7 @@
 	"core.integrations.scopes.error.name": "Integration Scope Error",
 	"core.integrations.scopes.missing.message": "The integration is missing required scopes. Required: {{requiredScopes}}. Missing: {{missingScopes}}.",
 	"core.integrations.scopes.invalid.message": "The following integration scopes are not available: {{invalidScopes}}.",
+	"core.integrations.principal.required.message": "This endpoint requires a {{principalType}}-scoped external credential.",
 	"core.rate.limit.error.name": "Rate Limit Error",
 	"core.routes.not.found": "Route Not Found",
 	"core.routes.not.found.message": "The route you are trying to access does not exist.",

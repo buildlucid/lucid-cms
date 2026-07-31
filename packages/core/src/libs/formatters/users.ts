@@ -1,5 +1,5 @@
 import type { LucidAuth } from "../../types/hono.js";
-import type { User } from "../../types/response.js";
+import type { Account, User } from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
@@ -42,6 +42,13 @@ export interface UserPropT {
 		}[];
 	}[];
 }
+
+type ContentAccountPropT = Pick<
+	UserPropT,
+	"id" | "username" | "email" | "first_name" | "last_name"
+> & {
+	content_profile_picture?: MediaPosterPropsT[];
+};
 
 const formatMultiple = (props: {
 	users: UserPropT[];
@@ -148,7 +155,23 @@ const formatSingle = (props: {
 	return response;
 };
 
+const formatContentAccount = (props: {
+	user: ContentAccountPropT;
+	host: string;
+}): Account => ({
+	id: props.user.id,
+	username: props.user.username,
+	email: props.user.email,
+	firstName: props.user.first_name,
+	lastName: props.user.last_name,
+	profilePicture: mediaFormatter.formatMediaImagePreview({
+		poster: props.user.content_profile_picture?.[0],
+		host: props.host,
+	}),
+});
+
 export default {
 	formatMultiple,
 	formatSingle,
+	formatContentAccount,
 };

@@ -1,4 +1,8 @@
 import {
+	createAccountClient,
+	type LucidAccountClient,
+} from "./resources/account.js";
+import {
 	createDocumentsClient,
 	type LucidDocumentsClient,
 } from "./resources/documents.js";
@@ -15,6 +19,8 @@ import { createTransport } from "./transport/fetcher.js";
 import type { CreateClientOptions } from "./types/transport.js";
 
 export interface LucidClient {
+	/** Account endpoint available to user-scoped credentials. */
+	account: LucidAccountClient;
 	/** Public document collection endpoints. */
 	documents: LucidDocumentsClient;
 	/** Public locale endpoints. */
@@ -58,6 +64,7 @@ export const createClient = (options: CreateClientOptions): LucidClient => {
 	const transport = createTransport(options, middleware);
 
 	return {
+		account: createAccountClient(transport),
 		documents: createDocumentsClient(transport),
 		locales: createLocalesClient(transport),
 		media: createMediaClient(transport),

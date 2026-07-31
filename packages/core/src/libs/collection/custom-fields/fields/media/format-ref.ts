@@ -17,7 +17,6 @@ const formatMediaRef = (
 	return mediaFormatter.formatRef({
 		media: value,
 		host: params.host,
-		locales: params.localization.locales,
 	}) satisfies CFResponse<"media">["ref"];
 };
 

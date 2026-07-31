@@ -1,4 +1,5 @@
 import type {
+	Account,
 	DocumentBrick,
 	DocumentFieldValueMap,
 	DocumentRef,
@@ -20,6 +21,7 @@ import type {
 	MediaProcessOptions,
 	MediaRef,
 	MediaTranslation,
+	MediaTranslationMap,
 	MediaType,
 	MediaUnknown,
 	MediaUrl,
@@ -134,6 +136,11 @@ export type {
 	PreviewFieldAttributes,
 } from "./helpers/documents/types.js";
 export type {
+	AccountGetInput,
+	AccountGetResponse,
+	LucidAccountClient,
+} from "./resources/account.js";
+export type {
 	DocumentsGetMultipleInput,
 	DocumentsGetMultipleResponse,
 	DocumentsGetSingleInput,
@@ -202,6 +209,7 @@ export type {
 	LucidRetryInput,
 } from "./types/transport.js";
 export type {
+	Account,
 	DocumentBrick,
 	DocumentFieldValueMap,
 	DocumentRef,
@@ -222,6 +230,7 @@ export type {
 	MediaProcessOptions,
 	MediaRef,
 	MediaTranslation,
+	MediaTranslationMap,
 	MediaType,
 	MediaUnknown,
 	MediaUrl,

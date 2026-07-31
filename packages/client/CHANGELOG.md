@@ -3,6 +3,7 @@
 ## v0.4.0 (unreleased)
 
 - Auth updated to support `ApiKey` and `Bearer` token authentication.
+- Added `account.get()` for fetching the account associated with a user-scoped credential.
 
 ## v0.3.1
 

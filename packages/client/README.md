@@ -54,6 +54,14 @@ The `createClient` function accepts the following options:
 | `retry` | `false \| Partial<LucidRetryConfig>` | Retry configuration for requests |
 | `middleware` | `LucidMiddleware[]` | Request, response, and error middleware |
 
+## Account
+
+User-scoped credentials with the `account:read` scope can fetch the account associated with the credential.
+
+```typescript
+const account = await client.account.get();
+```
+
 ## Documents
 
 Use the documents client to fetch a single document or a paginated list of documents from a collection.

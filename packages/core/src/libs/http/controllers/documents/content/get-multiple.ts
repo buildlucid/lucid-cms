@@ -38,7 +38,7 @@ const getMultipleController = factory.createHandlers(
 			},
 		}),
 	}),
-	externalAuthentication,
+	externalAuthentication(),
 	validate("param", controllerSchemas.content.getMultiple.params),
 	externalScopes((c) => [
 		getCollectionExternalScope(c.req.param("collectionKey") ?? ""),

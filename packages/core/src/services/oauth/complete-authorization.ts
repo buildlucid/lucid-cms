@@ -91,7 +91,9 @@ const completeAuthorization: ServiceFn<
 
 	const requestedScopes = requestRes.data.scopes.split(" ").filter(Boolean);
 	const validScopes = new Set<string>(
-		getValidExternalScopes(collectionsRes.data),
+		getValidExternalScopes(collectionsRes.data, {
+			principalType: input.principalType,
+		}),
 	);
 	if (requestedScopes.some((scope) => !validScopes.has(scope))) {
 		return {
@@ -107,7 +109,11 @@ const completeAuthorization: ServiceFn<
 		input.principalType === "system"
 			? requestedScopes
 			: requestedScopes.filter((scope) => {
-					const capability = getExternalCapability(collectionsRes.data, scope);
+					const capability = getExternalCapability(
+						collectionsRes.data,
+						scope,
+						"user",
+					);
 					if (!capability) return false;
 					if (capability.userPermission === null || input.actor.superAdmin) {
 						return true;

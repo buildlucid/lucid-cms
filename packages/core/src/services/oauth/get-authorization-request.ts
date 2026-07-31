@@ -49,7 +49,11 @@ const getAuthorizationRequest: ServiceFn<
 		.split(" ")
 		.filter(Boolean) as ExternalScope[];
 	const userScopes = scopes.filter((scope) => {
-		const capability = getExternalCapability(collectionsRes.data, scope);
+		const capability = getExternalCapability(
+			collectionsRes.data,
+			scope,
+			"user",
+		);
 		if (!capability) return false;
 		if (capability.userPermission === null || input.actor.superAdmin)
 			return true;
@@ -64,6 +68,10 @@ const getAuthorizationRequest: ServiceFn<
 			scopes: group.scopes.filter((scope) => requestedScopes.has(scope.key)),
 		}))
 		.filter((group) => group.scopes.length > 0);
+	const supportsSystemPrincipal = scopes.every(
+		(scope) =>
+			getExternalCapability(collectionsRes.data, scope, "system") !== undefined,
+	);
 
 	if (scopeGroups.flatMap((group) => group.scopes).length !== scopes.length) {
 		return {
@@ -90,7 +98,7 @@ const getAuthorizationRequest: ServiceFn<
 			scopes,
 			userScopes,
 			scopeGroups,
-			canConnectAsSystem: input.canConnectAsSystem,
+			canConnectAsSystem: input.canConnectAsSystem && supportsSystemPrincipal,
 		},
 	};
 };

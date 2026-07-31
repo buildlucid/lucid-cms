@@ -17,6 +17,7 @@ import InputGrid from "@/components/Containers/InputGrid";
 import {
 	CompactImageUpload,
 	Input,
+	Label,
 	Select,
 	Switch,
 } from "@/components/Groups/Form";
@@ -349,14 +350,18 @@ const UpsertOAuthClientPanel: Component<{
 							label: T()("oauth.clients.website"),
 							placeholder: "https://example.com",
 						}}
+						hideOptionalText={true}
 						errors={getBodyError("clientUri", mutateErrors)}
 					/>
 
 					{/* Redirect URIs */}
 					<div class="mb-5">
-						<h3 class="mb-1.5 text-sm text-body">
-							{T()("oauth.clients.redirect.uris")}
-						</h3>
+						<Label
+							id="oauth-client-redirect-0"
+							label={T()("oauth.clients.redirect.uris")}
+							required={true}
+							theme="basic"
+						/>
 						<div class="space-y-2.5">
 							<Index each={redirectUris()}>
 								{(uri, index) => (
@@ -425,6 +430,7 @@ const UpsertOAuthClientPanel: Component<{
 							active: uploadLoading(),
 							value: uploadProgress(),
 						}}
+						hideOptionalText={true}
 						imageCrop={LogoFile.getImageCrop()}
 						errors={getBodyError("logo", mutateErrors)}
 					/>

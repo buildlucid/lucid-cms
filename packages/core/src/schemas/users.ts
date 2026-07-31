@@ -289,6 +289,20 @@ export const userResponseSchema = z.object({
 		.optional(),
 });
 
+export const contentAccountResponseSchema = userResponseSchema
+	.pick({
+		id: true,
+		username: true,
+		email: true,
+		firstName: true,
+		lastName: true,
+	})
+	.extend({
+		profilePicture: mediaImagePreviewResponseSchema.nullable().meta({
+			description: "The user's profile picture media reference",
+		}),
+	});
+
 export const controllerSchemas = {
 	createSingle: {
 		body: z.object({

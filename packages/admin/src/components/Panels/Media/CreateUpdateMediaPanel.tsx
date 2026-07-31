@@ -596,16 +596,19 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		const { changed, data } = helpers.updateData(
 			{
 				key: undefined,
-				title: item?.title || [],
-				alt: item?.type === "image" ? item.alt : undefined,
+				title: recordToTranslations(locales(), item?.title),
+				alt:
+					item?.type === "image"
+						? recordToTranslations(locales(), item.alt)
+						: undefined,
 				description: showDescriptionInput()
 					? item?.type === "video" || item?.type === "audio"
-						? item.description
+						? recordToTranslations(locales(), item.description)
 						: []
 					: undefined,
 				summary: showSummaryInput()
 					? item?.type === "document"
-						? item.summary
+						? recordToTranslations(locales(), item.summary)
 						: []
 					: undefined,
 				folderId: item?.folderId ?? null,
@@ -615,7 +618,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 					item?.type === "image"
 						? (item.file.meta.focalPoint ?? null)
 						: undefined,
-				posterAlt: showPosterAltInput() ? (poster?.alt ?? []) : undefined,
+				posterAlt: showPosterAltInput()
+					? recordToTranslations(locales(), poster?.alt)
+					: undefined,
 				posterFocalPoint: showPosterAltInput()
 					? (poster?.file.meta.focalPoint ?? null)
 					: undefined,
@@ -774,7 +779,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		PosterFile.setGetFile(null);
 		PosterFile.setGetRemovedCurrent(false);
 		PosterFile.setFocalPoint(existingPoster()?.file.meta.focalPoint ?? null);
-		setPosterAlt(existingPoster()?.alt ?? recordToTranslations(locales()));
+		setPosterAlt(recordToTranslations(locales(), existingPoster()?.alt));
 	}
 	async function createPosterSnapshot() {
 		const source = posterSnapshotSource();
@@ -872,7 +877,10 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		}
 
 		const { changed } = helpers.updateData(
-			{ alt: poster.alt, focalPoint: poster.file.meta.focalPoint ?? null },
+			{
+				alt: recordToTranslations(locales(), poster.alt),
+				focalPoint: poster.file.meta.focalPoint ?? null,
+			},
 			{ alt: posterAlt(), focalPoint: PosterFile.getFocalPoint() },
 		);
 		if (!changed) return true;
@@ -1042,21 +1050,27 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 				const mediaData = media.data?.data;
 				if (!mediaData) return;
 
-				updateMedia?.setTitle(mediaData.title || []);
-				updateMedia?.setAlt(mediaData.type === "image" ? mediaData.alt : []);
+				updateMedia?.setTitle(recordToTranslations(locales(), mediaData.title));
+				updateMedia?.setAlt(
+					mediaData.type === "image"
+						? recordToTranslations(locales(), mediaData.alt)
+						: [],
+				);
 				updateMedia?.setDescription(
 					mediaData.type === "video" || mediaData.type === "audio"
-						? mediaData.description
+						? recordToTranslations(locales(), mediaData.description)
 						: [],
 				);
 				updateMedia?.setSummary(
-					mediaData.type === "document" ? mediaData.summary : [],
+					mediaData.type === "document"
+						? recordToTranslations(locales(), mediaData.summary)
+						: [],
 				);
 				updateMedia?.setFolderId(mediaData.folderId ?? null);
 				updateMedia?.setPublic(mediaData.public ?? true);
 				const poster = mediaData.type === "video" ? mediaData.poster : null;
 				updateMedia?.setPosterId(poster?.id ?? null);
-				setPosterAlt(poster?.alt ?? recordToTranslations(locales()));
+				setPosterAlt(recordToTranslations(locales(), poster?.alt));
 				setPosterCropEditorOpen(false);
 				setActivePosterCropSource(null);
 				MediaFile.reset();

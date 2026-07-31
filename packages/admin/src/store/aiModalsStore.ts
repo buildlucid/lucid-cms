@@ -16,7 +16,7 @@ export type AiImageSource = {
 
 type MediaContext = {
 	id?: string | number;
-	name?: Media["title"];
+	name?: MediaTranslation[];
 	alt?: MediaTranslation[];
 };
 

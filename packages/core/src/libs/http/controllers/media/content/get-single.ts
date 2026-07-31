@@ -35,7 +35,7 @@ const getSingleController = factory.createHandlers(
 			},
 		}),
 	}),
-	externalAuthentication,
+	externalAuthentication(),
 	externalScopes([ExternalScopes.MediaRead]),
 	validate("param", controllerSchemas.content.getSingle.params),
 	cache({

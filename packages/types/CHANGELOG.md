@@ -3,6 +3,8 @@
 ## v0.5.0 (unreleased)
 
 - Integration types updated and error type additions.
+- Added the public content account response type and `account:read` integration scope.
+- Changed media response translation types to locale-keyed records.
 - Dropped `tenant` experiment support.
 
 ## v0.4.0

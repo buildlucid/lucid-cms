@@ -1,4 +1,10 @@
-import type { ErrorResponse, Media, MediaCropState, User } from "@types";
+import type {
+	ErrorResponse,
+	Media,
+	MediaCropState,
+	MediaTranslation,
+	User,
+} from "@types";
 import {
 	type Component,
 	createEffect,
@@ -23,7 +29,7 @@ import { resolveStoredImageCropSource } from "@/utils/image-crop";
 import { getProcessedImageUrl } from "@/utils/media-url";
 import {
 	getTranslation,
-	mergeTranslations,
+	recordToTranslations,
 	updateTranslation,
 } from "@/utils/translation-helpers";
 import { uploadMediaFile } from "@/utils/upload-session";
@@ -210,12 +216,9 @@ const CreateUpdateProfilePicturePanel: Component<
 		return undefined;
 	}
 	function hydrateTranslations(translations?: Media["title"]) {
-		return mergeTranslations<Media["title"][number]>({
-			translations,
-			locales: locales(),
-		});
+		return recordToTranslations(locales(), translations);
 	}
-	function toProfileTranslations(translations?: Media["title"]) {
+	function toProfileTranslations(translations?: MediaTranslation[]) {
 		return (translations || [])
 			.filter((translation) => translation.localeCode !== null)
 			.map((translation) => ({

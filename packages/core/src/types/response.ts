@@ -1,4 +1,5 @@
 export type {
+	Account,
 	AiGenerateCost,
 	AiGenerateMode,
 	AiGenerateUsage,
@@ -74,6 +75,7 @@ export type {
 	MediaShareLink,
 	MediaSourceType,
 	MediaTranslation,
+	MediaTranslationMap,
 	MediaType,
 	MediaUnknown,
 	MediaUrl,

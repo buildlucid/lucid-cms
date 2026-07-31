@@ -1,15 +1,12 @@
-import { hoursToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import { controllerSchemas } from "../../../../../schemas/locales.js";
-import { localeServices } from "../../../../../services/index.js";
+import { controllerSchemas } from "../../../../../schemas/account.js";
+import { accountServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
-import cacheKeys from "../../../../kv/cache-keys.js";
 import { ExternalScopes } from "../../../../permission/external-scopes.js";
-import cache from "../../../middleware/cache.js";
 import externalAuthentication from "../../../middleware/external-authenticate.js";
 import externalScopes from "../../../middleware/external-scopes.js";
 import openAPI from "../../../openapi/index.js";
@@ -18,14 +15,14 @@ import createServiceContext from "../../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const getAllController = factory.createHandlers(
+const getController = factory.createHandlers(
 	describeRoute({
-		description: "Returns all enabled locales via an external credential.",
-		tags: ["content-locales"],
-		summary: "Get All Locales",
+		description:
+			"Returns the account associated with an external user credential.",
+		tags: ["content-account"],
+		summary: "Get Account",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.content.getAll.response),
-			paginated: true,
+			schema: z.toJSONSchema(controllerSchemas.content.get.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: {
@@ -33,33 +30,31 @@ const getAllController = factory.createHandlers(
 			},
 		}),
 	}),
-	externalAuthentication(),
-	externalScopes([ExternalScopes.LocalesRead]),
-	cache({
-		ttl: hoursToSeconds(24),
-		mode: "static",
-		staticKey: cacheKeys.http.static.contentLocales,
-	}),
+	externalAuthentication({ principalType: "user" }),
+	externalScopes([ExternalScopes.AccountRead]),
 	async (c) => {
 		const context = createServiceContext(c);
-
-		const locales = await serviceWrapper(localeServices.content.getAll, {
+		const accountRes = await serviceWrapper(accountServices.content.get, {
 			transaction: false,
 			defaultError: {
 				type: "basic",
-				name: copy("server:core.routes.locale.fetch.error.name"),
-				message: copy("server:core.routes.locale.fetch.error.message"),
+				name: copy("server:core.routes.user.fetch.error.name"),
+				message: copy("server:core.routes.user.fetch.error.message"),
 			},
-		})(context);
-		if (locales.error) throw new LucidAPIError(locales.error);
+		})(context, {
+			userId: c.get("externalUserId"),
+		});
+		if (accountRes.error) throw new LucidAPIError(accountRes.error);
 
+		c.header("Cache-Control", "private, no-store");
+		c.header("Pragma", "no-cache");
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: locales.data,
+				data: accountRes.data,
 			}),
 		);
 	},
 );
 
-export default getAllController;
+export default getController;

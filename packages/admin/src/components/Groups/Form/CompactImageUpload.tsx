@@ -41,6 +41,7 @@ export interface CompactImageUploadProps {
 	imageCrop?: SingleFileUploadImageCrop;
 	errors?: ErrorResult;
 	noMargin?: boolean;
+	hideOptionalText?: boolean;
 }
 
 const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
@@ -132,6 +133,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 				label={props.copy?.label}
 				required={props.required}
 				theme="basic"
+				hideOptionalText={props.hideOptionalText}
 			/>
 			<input
 				ref={inputRef}

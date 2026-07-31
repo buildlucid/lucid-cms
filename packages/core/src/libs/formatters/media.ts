@@ -9,6 +9,7 @@ import type {
 	MediaImagePreview,
 	MediaOrigin,
 	MediaPoster,
+	MediaTranslationMap,
 } from "../../types/response.js";
 import { createMediaUrl } from "../../utils/media/index.js";
 import type { MediaRef } from "../collection/custom-fields/fields/media/types.js";
@@ -64,23 +65,6 @@ export interface MediaPropsT extends MediaPosterPropsT {
 	deleted_by: number | null;
 	public: BooleanInt;
 }
-
-/** Converts translation rows into a locale-keyed field map. */
-export const objectifyTranslations = (
-	target: "title" | "alt" | "description" | "summary",
-	translations: MediaTranslationProps[],
-	locales: Array<string>,
-): Record<string, string> => {
-	return locales.reduce<Record<string, string>>(
-		(acc, locale) => ({
-			// biome-ignore lint/performance/noAccumulatingSpread: locale maps are small and this keeps the formatter readable
-			...acc,
-			[locale ?? ""]:
-				translations.find((t) => t.locale_code === locale)?.[target] ?? "",
-		}),
-		{},
-	);
-};
 
 export const formatFocalPoint = (
 	x: number | null | undefined,
@@ -198,11 +182,16 @@ const formatImageFile = (
 const translationsFor = (
 	media: MediaPosterPropsT,
 	field: "title" | "alt" | "description" | "summary",
-) =>
-	media.translations?.map((translation) => ({
-		value: translation[field] ?? null,
-		localeCode: translation.locale_code,
-	})) ?? [];
+): MediaTranslationMap =>
+	(media.translations ?? []).reduce<MediaTranslationMap>(
+		(translations, translation) => {
+			if (translation.locale_code !== null) {
+				translations[translation.locale_code] = translation[field] ?? null;
+			}
+			return translations;
+		},
+		{},
+	);
 
 /** Formats a compact image embedded within another resource. */
 const formatMediaImagePreview = (props: {
@@ -313,16 +302,26 @@ const formatSingle = (props: { media: MediaPropsT; host: string }): Media => {
 };
 
 /** Formats a collection of media rows. */
-const formatMultiple = (props: { media: MediaPropsT[]; host: string }) =>
-	props.media.map((media) => formatSingle({ media, host: props.host }));
+const formatMultiple = (props: {
+	media: MediaPropsT[];
+	host: string;
+}): Media[] =>
+	props.media.map((media) =>
+		formatSingle({
+			media,
+			host: props.host,
+		}),
+	);
 
 const formatRef = (props: {
 	media?: MediaPropsT | null;
 	host: string;
-	locales: string[];
 }): MediaRef | null => {
 	if (!props.media) return null;
-	return formatSingle({ media: props.media, host: props.host });
+	return formatSingle({
+		media: props.media,
+		host: props.host,
+	});
 };
 
 export default {
@@ -332,5 +331,4 @@ export default {
 	formatPoster,
 	formatRef,
 	formatFocalPoint,
-	objectifyTranslations,
 };

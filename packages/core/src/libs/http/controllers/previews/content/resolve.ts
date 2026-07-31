@@ -29,7 +29,7 @@ const resolvePreviewController = factory.createHandlers(
 			headers: { authorization: true },
 		}),
 	}),
-	externalAuthentication,
+	externalAuthentication(),
 	validate("param", controllerSchemas.resolve.params),
 	async (c) => {
 		const { token } = c.req.valid("param");

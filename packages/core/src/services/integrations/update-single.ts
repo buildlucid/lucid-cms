@@ -32,7 +32,13 @@ const updateSingle: ServiceFn<
 		const collectionsRes = await collections.getAll(context, {});
 		if (collectionsRes.error) return collectionsRes;
 
-		const invalidScopes = getInvalidExternalScopes(collectionsRes.data, scopes);
+		const invalidScopes = getInvalidExternalScopes(
+			collectionsRes.data,
+			scopes,
+			{
+				principalType: data.userId === null ? "system" : "user",
+			},
+		);
 		if (invalidScopes.length > 0) {
 			return {
 				error: {

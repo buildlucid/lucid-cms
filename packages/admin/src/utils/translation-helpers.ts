@@ -40,7 +40,7 @@ export const recordToTranslations = <
 	T extends TranslationValue = TranslationValue,
 >(
 	locales: LocaleConfig[],
-	record?: Record<string, string>,
+	record?: Record<string, string | null>,
 ): T[] =>
 	createDefaultTranslations<T>(locales).map((translation) => ({
 		...translation,
@@ -77,9 +77,13 @@ export const mergeTranslations = <
  * Reads a translation value for the active locale selector.
  */
 export const getTranslation = (
-	translations?: TranslationValue[],
+	translations?: TranslationValue[] | Record<string, string | null>,
 	contentLocale?: string,
 ) => {
+	if (!contentLocale) return null;
+	if (translations && !Array.isArray(translations)) {
+		return translations[contentLocale] ?? null;
+	}
 	const translation = translations?.find((t) => t.localeCode === contentLocale);
 	return translation?.value ?? null;
 };

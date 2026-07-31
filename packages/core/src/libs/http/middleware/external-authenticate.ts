@@ -1,4 +1,5 @@
 import { createMiddleware } from "hono/factory";
+import type { ExternalPrincipalType } from "../../../libs/permission/external-scopes.js";
 import { integrationServices, oauthServices } from "../../../services/index.js";
 import { getOAuthUrls } from "../../../services/oauth/helpers/urls.js";
 import type {
@@ -32,9 +33,12 @@ const setOAuthBearerChallenge = (
 /**
  * Authenticates content API requests with an integration API key or OAuth access
  * token, then exposes the resolved principal and scopes to downstream handlers.
+ * Pass a principal type to restrict the route to system- or user-scoped access.
  */
-const externalAuthentication = createMiddleware(
-	async (c: LucidHonoContext, next) => {
+const externalAuthentication = (options?: {
+	principalType?: ExternalPrincipalType;
+}) =>
+	createMiddleware(async (c: LucidHonoContext, next) => {
 		const authorization = c.req.header("Authorization");
 		const apiKeyHeader = c.req.header("X-API-Key");
 		const runtimeContext = c.get("runtimeContext");
@@ -129,6 +133,22 @@ const externalAuthentication = createMiddleware(
 			});
 		}
 
+		if (options?.principalType !== undefined) {
+			if (externalAuth.principal.type !== options.principalType) {
+				throw new LucidAPIError({
+					type: "forbidden",
+					message: copy("server:core.integrations.principal.required.message", {
+						data: {
+							principalType: options.principalType,
+						},
+					}),
+					status: 403,
+				});
+			}
+			if (externalAuth.principal.type === "user") {
+				c.set("externalUserId", externalAuth.principal.userId);
+			}
+		}
 		c.set("externalAuth", externalAuth);
 		const response = await next();
 
@@ -151,7 +171,6 @@ const externalAuthentication = createMiddleware(
 		}
 
 		return response;
-	},
-);
+	});
 
 export default externalAuthentication;

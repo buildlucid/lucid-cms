@@ -7,6 +7,7 @@ import {
 } from "./collection-permissions.js";
 import { PermissionGroups, Permissions } from "./definitions.js";
 import {
+	type ExternalPrincipalType,
 	type ExternalScope,
 	ExternalScopes,
 	getCollectionExternalScope,
@@ -20,6 +21,7 @@ import type {
 export type ExternalCapability = {
 	scope: ExternalScope;
 	userPermission: Permission | null;
+	principalTypes?: ExternalPrincipalType[];
 	details?: PermissionDetails;
 };
 
@@ -188,11 +190,46 @@ const localesCapabilityGroup: CapabilityGroup = {
 	],
 };
 
+const accountCapabilityGroup: CapabilityGroup = {
+	key: "account",
+	details: {
+		name: copy("admin:integrations.scopes.account.label", {
+			defaultMessage: "Account Scopes",
+		}),
+	},
+	core: true,
+	capabilities: [
+		{
+			key: ExternalScopes.AccountRead,
+			details: {
+				name: copy("admin:integrations.scopes.account.read", {
+					defaultMessage: "Read Your Account",
+				}),
+				description: copy(
+					"admin:integrations.scopes.account.read.description",
+					{
+						defaultMessage:
+							"View your account profile, including your email address.",
+					},
+				),
+			},
+			core: true,
+			external: {
+				scope: ExternalScopes.AccountRead,
+				userPermission: null,
+				principalTypes: ["user"],
+			},
+			availableToIntegrations: true,
+		},
+	],
+};
+
 /** Builds the canonical internal-permission and external-scope catalogue. */
 export const getCapabilityRegistry = (
 	collections: CollectionBuilder[] = [],
 ): CapabilityGroup[] => {
 	return [
+		accountCapabilityGroup,
 		...getStaticCapabilityGroups(),
 		...getCollectionCapabilityGroups(collections),
 		localesCapabilityGroup,
@@ -203,12 +240,23 @@ export const getCapabilityRegistry = (
 export const getExternalCapability = (
 	collections: CollectionBuilder[],
 	scope: string,
+	principalType?: ExternalPrincipalType,
 ): ExternalCapability | undefined => {
-	return getCapabilityRegistry(collections)
+	const capability = getCapabilityRegistry(collections)
 		.flatMap((group) => group.capabilities)
 		.find(
 			(capability) =>
 				capability.availableToIntegrations === true &&
 				capability.external?.scope === scope,
 		)?.external;
+
+	if (
+		principalType !== undefined &&
+		capability?.principalTypes !== undefined &&
+		!capability.principalTypes.includes(principalType)
+	) {
+		return undefined;
+	}
+
+	return capability;
 };

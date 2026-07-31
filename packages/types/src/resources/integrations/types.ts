@@ -10,6 +10,7 @@ export type ExternalScope =
 			| "restore"
 			| "publish"
 			| "review"}`
+	| "account:read"
 	| "media:read"
 	| "media:create"
 	| "media:update"

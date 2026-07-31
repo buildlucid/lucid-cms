@@ -6,6 +6,8 @@ import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../db/query-builder/index.js";
 import type { KyselyDB, LucidUsers, Select } from "../db/types.js";
+import type { MediaPosterPropsT } from "../formatters/media.js";
+import { mediaImageSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
@@ -140,6 +142,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				}),
 			)
 			.optional(),
+		content_profile_picture: z.array(z.custom<MediaPosterPropsT>()).optional(),
 		auth_providers: z
 			.array(
 				z.object({
@@ -233,6 +236,49 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 
 	// ----------------------------------------
 	// queries
+
+	async selectSingleContentAccount<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				userId: number;
+			}
+		>,
+	) {
+		const query = this.db
+			.selectFrom("lucid_users")
+			.select(["id", "username", "email", "first_name", "last_name"])
+			.select(() => [
+				mediaImageSelect(
+					this.db,
+					this.dbAdapter,
+					"lucid_users.profile_picture_media_id",
+					"content_profile_picture",
+				),
+			])
+			.where("id", "=", props.userId)
+			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
+			.where("is_locked", "=", this.dbAdapter.getDefault("boolean", "false"));
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectSingleContentAccount",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "single",
+			select: [
+				"id",
+				"username",
+				"email",
+				"first_name",
+				"last_name",
+				"content_profile_picture",
+			],
+		});
+	}
+
 	async selectAccessTokenUser<V extends boolean = false>(
 		props: QueryProps<
 			V,

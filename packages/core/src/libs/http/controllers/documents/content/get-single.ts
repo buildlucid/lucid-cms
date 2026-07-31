@@ -36,7 +36,7 @@ const getSingleController = factory.createHandlers(
 			},
 		}),
 	}),
-	externalAuthentication,
+	externalAuthentication(),
 	validate("param", controllerSchemas.content.getSingle.params),
 	externalScopes((c) => [
 		getCollectionExternalScope(c.req.param("collectionKey") ?? ""),

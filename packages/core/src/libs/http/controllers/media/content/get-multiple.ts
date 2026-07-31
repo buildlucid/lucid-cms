@@ -37,7 +37,7 @@ const getMultipleController = factory.createHandlers(
 			},
 		}),
 	}),
-	externalAuthentication,
+	externalAuthentication(),
 	externalScopes([ExternalScopes.MediaRead]),
 	validate("query", controllerSchemas.content.getMultiple.query.string),
 	cache({

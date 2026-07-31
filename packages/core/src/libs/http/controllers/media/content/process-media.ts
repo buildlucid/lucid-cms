@@ -35,7 +35,7 @@ const processMediaController = factory.createHandlers(
 			controllerSchemas.content.processMedia.body,
 		),
 	}),
-	externalAuthentication,
+	externalAuthentication(),
 	externalScopes([ExternalScopes.MediaProcess]),
 	validate("param", controllerSchemas.content.processMedia.params),
 	validate("json", controllerSchemas.content.processMedia.body),

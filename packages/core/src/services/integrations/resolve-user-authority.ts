@@ -58,7 +58,11 @@ const resolveUserAuthority: ServiceFn<
 		defaultLocale: context.config.localization.defaultLocale,
 	});
 	const effectiveScopes = data.scopes.filter((scope) => {
-		const capability = getExternalCapability(collectionsRes.data, scope);
+		const capability = getExternalCapability(
+			collectionsRes.data,
+			scope,
+			"user",
+		);
 		if (!capability) return false;
 		if (capability.userPermission === null || superAdmin) return true;
 		return permissions?.includes(capability.userPermission) === true;

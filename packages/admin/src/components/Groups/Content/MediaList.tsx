@@ -62,6 +62,7 @@ import {
 	resolveStoredImageCropSource,
 } from "@/utils/image-crop";
 import { getImageMeta as getFileImageMeta } from "@/utils/media-meta";
+import { recordToTranslations } from "@/utils/translation-helpers";
 
 export const MediaList: Component<{
 	state: {
@@ -174,6 +175,13 @@ export const MediaList: Component<{
 	};
 	const openAltGeneration = (item: Media) => {
 		if (item.type !== "image") return;
+
+		const title = recordToTranslations(
+			contentLocaleStore.get.locales,
+			item.title,
+		);
+		const alt = recordToTranslations(contentLocaleStore.get.locales, item.alt);
+
 		mediaAltGeneration.open({
 			image: () => ({
 				url: item.file.url,
@@ -181,17 +189,17 @@ export const MediaList: Component<{
 			}),
 			media: () => ({
 				id: item.id,
-				name: item.title,
-				alt: item.alt,
+				name: title,
+				alt,
 			}),
 			locales: () => contentLocaleStore.get.locales,
 			setAlt: async (value) => {
-				const alt = typeof value === "function" ? value(item.alt ?? []) : value;
+				const nextAlt = typeof value === "function" ? value(alt) : value;
 
 				await updateMediaAlt.action.mutateAsync({
 					id: item.id,
 					body: {
-						alt,
+						alt: nextAlt,
 					},
 				});
 			},
@@ -224,8 +232,12 @@ export const MediaList: Component<{
 		}
 
 		const imageMeta = await getFileImageMeta(file);
-		quickCropUpdateMedia.setTitle(item.title ?? []);
-		quickCropUpdateMedia.setAlt(item.alt ?? []);
+		quickCropUpdateMedia.setTitle(
+			recordToTranslations(contentLocaleStore.get.locales, item.title),
+		);
+		quickCropUpdateMedia.setAlt(
+			recordToTranslations(contentLocaleStore.get.locales, item.alt),
+		);
 		quickCropUpdateMedia.setFolderId(item.folderId ?? null);
 		quickCropUpdateMedia.setPublic(item.public);
 		quickCropUpdateMedia.setFocalPoint(null);

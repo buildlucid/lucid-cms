@@ -2,7 +2,7 @@ import z from "zod";
 import { translate } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
 import { mediaCropInputSchema, mediaOriginSchema } from "./media.js";
-import { userResponseSchema } from "./users.js";
+import { contentAccountResponseSchema, userResponseSchema } from "./users.js";
 
 const profilePictureTranslationSchema = z.object({
 	localeCode: z.string().trim().meta({
@@ -23,6 +23,17 @@ const emailChangeTokenParamsSchema = z.object({
 });
 
 export const controllerSchemas = {
+	content: {
+		get: {
+			body: undefined,
+			query: {
+				string: undefined,
+				formatted: undefined,
+			},
+			params: undefined,
+			response: contentAccountResponseSchema,
+		} satisfies ControllerSchema,
+	},
 	getMe: {
 		body: undefined,
 		query: {

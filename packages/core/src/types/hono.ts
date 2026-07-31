@@ -87,6 +87,7 @@ export type LucidHonoVariables = {
 	requestId: string;
 	auth: LucidAuth;
 	externalAuth: LucidExternalAuth;
+	externalUserId: number;
 	locale: LucidLocale;
 	env: EnvironmentVariables | null;
 	cf: unknown | null;

@@ -87,12 +87,14 @@ export type MediaImageFile =
 			original: MediaOriginalFile;
 	  };
 
+export type MediaTranslationMap = Record<string, string | null>;
+
 interface MediaBase<Type extends MediaType> {
 	id: number;
 	type: Type;
 	folderId: number | null;
 	origin: MediaOrigin;
-	title: MediaTranslation[];
+	title: MediaTranslationMap;
 	public: boolean;
 	isDeleted: boolean | null;
 	isDeletedAt: string | null;
@@ -102,23 +104,23 @@ interface MediaBase<Type extends MediaType> {
 }
 
 export interface MediaImage extends MediaBase<"image"> {
-	alt: MediaTranslation[];
+	alt: MediaTranslationMap;
 	file: MediaImageFile;
 }
 
 export interface MediaVideo extends MediaBase<"video"> {
-	description: MediaTranslation[];
+	description: MediaTranslationMap;
 	file: MediaFile;
 	poster: MediaPoster | null;
 }
 
 export interface MediaAudio extends MediaBase<"audio"> {
-	description: MediaTranslation[];
+	description: MediaTranslationMap;
 	file: MediaFile;
 }
 
 export interface MediaDocument extends MediaBase<"document"> {
-	summary: MediaTranslation[];
+	summary: MediaTranslationMap;
 	file: MediaFile;
 }
 
@@ -147,7 +149,7 @@ export interface MediaPoster {
 	id: number;
 	type: "image";
 	origin: MediaOrigin;
-	alt: MediaTranslation[];
+	alt: MediaTranslationMap;
 	file: MediaImageFile;
 }
 
@@ -157,8 +159,8 @@ export interface MediaImagePreview {
 	id: number;
 	type: "image";
 	origin: MediaOrigin;
-	title: MediaTranslation[];
-	alt: MediaTranslation[];
+	title: MediaTranslationMap;
+	alt: MediaTranslationMap;
 	file: MediaImageFile;
 }
 

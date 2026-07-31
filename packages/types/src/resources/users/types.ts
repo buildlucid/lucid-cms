@@ -92,6 +92,15 @@ export type User = {
 	}>;
 };
 
+export type Account = {
+	id: number;
+	username: string;
+	email: string;
+	firstName: string | null;
+	lastName: string | null;
+	profilePicture: ProfilePicture | null;
+};
+
 export type UserRef = {
 	id: number;
 	username: string;

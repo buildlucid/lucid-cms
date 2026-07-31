@@ -13,7 +13,7 @@ import type { ImageMeta } from "@/utils/media-meta";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 export const useUpdateMedia = (id: Accessor<number | undefined>) => {
-	const [getTitle, setTitle] = createSignal<Media["title"]>([]);
+	const [getTitle, setTitle] = createSignal<MediaTranslation[]>([]);
 	const [getAlt, setAlt] = createSignal<MediaTranslation[]>([]);
 	const [getDescription, setDescription] = createSignal<MediaTranslation[]>([]);
 	const [getSummary, setSummary] = createSignal<MediaTranslation[]>([]);

@@ -236,17 +236,23 @@ const updateTranslation = (
 };
 
 const getTranslation = (
-	translations?: {
-		value: string | null;
-		localeCode: string | null;
-	}[],
+	translations?:
+		| {
+				value: string | null;
+				localeCode: string | null;
+		  }[]
+		| Record<string, string | null>,
 	contentLocale?: string,
 ) => {
+	if (!contentLocale) return null;
+	if (translations && !Array.isArray(translations)) {
+		return translations[contentLocale] ?? null;
+	}
 	const translation = translations?.find((t) => t.localeCode === contentLocale);
 	return translation?.value ?? null;
 };
 const getRecordTranslation = (
-	translations?: Record<string, string>,
+	translations?: Record<string, string | null>,
 	contentLocale?: string,
 ) => {
 	if (!contentLocale) return null;

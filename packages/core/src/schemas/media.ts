@@ -2,13 +2,11 @@ import z from "zod";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
-const mediaTranslationResponseSchema = z.object({
-	localeCode: z
-		.string()
-		.meta({ description: "Locale code", example: "en" })
-		.nullable(),
-	value: z.string().meta({ description: "Translated value" }).nullable(),
-});
+const mediaTranslationsResponseSchema = z
+	.record(z.string(), z.string().nullable())
+	.meta({
+		description: "Translated values keyed by locale code",
+	});
 
 const focalPointSchema = z.object({
 	x: z.number().min(0).max(1).meta({
@@ -196,12 +194,8 @@ export const mediaImagePreviewResponseSchema = z.object({
 		description: "The provenance origin of the media item",
 		example: "human",
 	}),
-	title: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated titles",
-	}),
-	alt: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated alt texts",
-	}),
+	title: mediaTranslationsResponseSchema,
+	alt: mediaTranslationsResponseSchema,
 	file: mediaImageFileResponseSchema,
 });
 
@@ -212,9 +206,7 @@ const mediaPosterResponseSchema = z.object({
 		description: "The provenance origin of the media item",
 		example: "human",
 	}),
-	alt: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated alt texts",
-	}),
+	alt: mediaTranslationsResponseSchema,
 	file: mediaImageFileResponseSchema,
 });
 
@@ -231,9 +223,7 @@ const mediaBaseResponseShape = {
 		description: "The provenance origin of the media item",
 		example: "human",
 	}),
-	title: z.array(mediaTranslationResponseSchema).meta({
-		description: "Translated titles",
-	}),
+	title: mediaTranslationsResponseSchema,
 };
 
 const mediaStateResponseShape = {
@@ -269,9 +259,7 @@ const mediaResponseSchema = z.discriminatedUnion("type", [
 		id: mediaIdResponseSchema,
 		type: z.literal("image"),
 		...mediaBaseResponseShape,
-		alt: z.array(mediaTranslationResponseSchema).meta({
-			description: "Translated alt texts",
-		}),
+		alt: mediaTranslationsResponseSchema,
 		file: mediaImageFileResponseSchema,
 		...mediaStateResponseShape,
 	}),
@@ -279,9 +267,7 @@ const mediaResponseSchema = z.discriminatedUnion("type", [
 		id: mediaIdResponseSchema,
 		type: z.literal("video"),
 		...mediaBaseResponseShape,
-		description: z.array(mediaTranslationResponseSchema).meta({
-			description: "Translated descriptions",
-		}),
+		description: mediaTranslationsResponseSchema,
 		file: mediaFileResponseSchema,
 		poster: mediaPosterResponseSchema.nullable().meta({
 			description: "Poster image data",
@@ -292,9 +278,7 @@ const mediaResponseSchema = z.discriminatedUnion("type", [
 		id: mediaIdResponseSchema,
 		type: z.literal("audio"),
 		...mediaBaseResponseShape,
-		description: z.array(mediaTranslationResponseSchema).meta({
-			description: "Translated descriptions",
-		}),
+		description: mediaTranslationsResponseSchema,
 		file: mediaFileResponseSchema,
 		...mediaStateResponseShape,
 	}),
@@ -302,9 +286,7 @@ const mediaResponseSchema = z.discriminatedUnion("type", [
 		id: mediaIdResponseSchema,
 		type: z.literal("document"),
 		...mediaBaseResponseShape,
-		summary: z.array(mediaTranslationResponseSchema).meta({
-			description: "Translated summaries",
-		}),
+		summary: mediaTranslationsResponseSchema,
 		file: mediaFileResponseSchema,
 		...mediaStateResponseShape,
 	}),

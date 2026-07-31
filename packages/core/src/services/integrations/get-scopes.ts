@@ -21,12 +21,16 @@ const getScopes: ServiceFn<
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;
 
-	let groups = getExternalScopeGroups(collectionsRes.data);
+	let groups = getExternalScopeGroups(collectionsRes.data, {
+		principalType: data.userId === undefined ? "system" : "user",
+	});
 
 	if (data.userId !== undefined) {
 		const authority = await resolveUserAuthority(context, {
 			userId: data.userId,
-			scopes: getValidExternalScopes(collectionsRes.data) as ExternalScope[],
+			scopes: getValidExternalScopes(collectionsRes.data, {
+				principalType: "user",
+			}) as ExternalScope[],
 		});
 		if (authority.error) return authority;
 
