@@ -2,6 +2,7 @@
 	"name": "@lucidcms/oauth-playground",
 	"version": "0.0.1",
 	"private": true,
+	"license": "MIT",
 	"description": "A browser-based test bench for Lucid API key and OAuth integrations.",
 	"type": "module",
 	"scripts": {

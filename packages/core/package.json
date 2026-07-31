@@ -140,7 +140,7 @@
 		"lucidcms": "dist/libs/cli/index.mjs"
 	},
 	"sideEffects": false,
-	"license": "BUSL-1.1",
+	"license": "MIT",
 	"publishConfig": {
 		"access": "public"
 	}

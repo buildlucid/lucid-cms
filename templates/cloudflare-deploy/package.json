@@ -1,6 +1,7 @@
 {
 	"name": "lucid-cloudflare",
 	"private": true,
+	"license": "UNLICENSED",
 	"description": "Lucid CMS Cloudflare starter",
 	"main": "src/index.ts",
 	"type": "module",
@@ -32,7 +33,7 @@
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260623.1",
 		"typescript": "^6.0.3",
-		"wrangler": "^4.104.0"
+		"wrangler": "^4.112.0"
 	},
 	"cloudflare": {
 		"bindings": {

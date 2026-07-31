@@ -37,7 +37,7 @@
 		"Lucid CMS",
 		"Lucid"
 	],
-	"license": "BUSL-1.1",
+	"license": "MIT",
 	"devDependencies": {
 		"@lucidcms/preview-protocol": "*",
 		"@types/classnames": "^2.3.4",

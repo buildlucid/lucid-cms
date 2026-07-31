@@ -4,12 +4,12 @@
 [![Tests](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml/badge.svg)](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml)
 [![NPM Version](https://img.shields.io/npm/v/@lucidcms/core/latest.svg)](https://www.npmjs.com/package/@lucidcms/core)
 ![NPM Downloads](https://img.shields.io/npm/dw/@lucidcms/core)
-[![License](https://img.shields.io/badge/license-BSL%201.1%20%2F%20MIT-blue)](./LICENSE.md)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 ---
 
 > [!CAUTION]
-> Lucid CMS is currently in alpha. The core is licensed under BSL 1.1, with free use for non-commercial projects, education, and non-profits. Commercial licensing and AI access will launch alongside the beta release. Until then, expect breaking changes while APIs and product surfaces are finalized.
+> Lucid CMS is currently in alpha. AI access will launch alongside the beta release. Until then, expect breaking changes while APIs and product surfaces are finalized.
 
 ---
 
@@ -83,12 +83,4 @@ Or deploy our Cloudflare template by clicking the button below.
 
 ## 📄 Licensing
 
-Lucid CMS uses a mixed-license model:
-
-- The core CMS is licensed under BSL 1.1.
-- Each version promotes to MIT after 4 years.
-- Runtime adapters, database adapters, plugins, the client, shared types, and rich text utilities are MIT licensed.
-- Free use is intended for non-commercial projects, education, and non-profits.
-- Commercial use will require a license purchased through the Lucid website once beta launches.
-
-See [LICENSE.md](./LICENSE.md) for the repository licensing summary.
+The core package is licensed under the [MIT License](./LICENSE).

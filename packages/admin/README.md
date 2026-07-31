@@ -3,7 +3,7 @@
 [![Tests](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml/badge.svg)](https://github.com/buildlucid/lucid-cms/actions/workflows/tests.yml)
 [![NPM Version](https://img.shields.io/npm/v/@lucidcms/core/latest.svg)](https://www.npmjs.com/package/@lucidcms/core)
 ![NPM Downloads](https://img.shields.io/npm/dw/@lucidcms/core)
-![NPM License](https://img.shields.io/npm/l/@lucidcms/core)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 ---
 
