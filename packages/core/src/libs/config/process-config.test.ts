@@ -30,6 +30,7 @@ test("processes each config independently", async () => {
 	});
 
 	expect(cached.db).toBe(runtimeAdapter);
+	expect(cached.telemetry).toBe(true);
 });
 
 test("applies plugin recipes during fresh config processing", async () => {

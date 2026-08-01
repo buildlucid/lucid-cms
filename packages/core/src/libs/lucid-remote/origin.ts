@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import type { ServiceContext } from "../../utils/services/types.js";
+import type { EnvironmentVariables } from "../runtime/types.js";
 
 export const LUCID_REMOTE_API_OVERRIDE_ENV =
 	"LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE";
@@ -35,8 +35,10 @@ const parseApiOrigin = (value: string, label: string) => {
  * Production uses package-owned constants. The server-only override switches
  * both issuer and protected resource to a loopback Website API for local E2E.
  */
-export const getLucidRemoteConfig = (context: ServiceContext) => {
-	const override = context.env?.[LUCID_REMOTE_API_OVERRIDE_ENV];
+export const getLucidRemoteConfigFromEnv = (
+	env?: EnvironmentVariables | null,
+) => {
+	const override = env?.[LUCID_REMOTE_API_OVERRIDE_ENV];
 	if (typeof override === "string" && override.trim()) {
 		const issuer = parseApiOrigin(override.trim(), "Lucid remote API override");
 		return {

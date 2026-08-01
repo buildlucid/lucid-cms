@@ -141,6 +141,7 @@ const ConfigSchema = z.object({
 		accessToken: z.string().length(64),
 		refreshToken: z.string().length(64),
 	}),
+	telemetry: z.boolean(),
 	logger: z.object({
 		level: LogLevelSchema,
 		transport: LogTransportSchema.optional(),

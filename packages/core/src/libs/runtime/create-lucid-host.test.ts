@@ -76,6 +76,14 @@ describe("createLucidHost database ownership", () => {
 		});
 		expect(fixture.pluginInit).toHaveBeenCalledOnce();
 		expect(fixture.connect).not.toHaveBeenCalled();
+		expect(host.adapterKeys.database).toBe("test");
+		expect(Object.keys(host.adapterKeys).sort()).toEqual([
+			"database",
+			"email",
+			"kv",
+			"media",
+			"queue",
+		]);
 
 		const first = host.createInvocation();
 		const second = host.createInvocation();

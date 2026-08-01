@@ -13,6 +13,10 @@ import {
 	stopLoggerBuffering,
 } from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
+import createCommandTelemetryReporter, {
+	type CommandTelemetryReporter,
+} from "../../telemetry/command-reporter.js";
+import type { TelemetryStage } from "../../telemetry/types.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
@@ -28,7 +32,10 @@ const buildCommand = async (options?: {
 }) => {
 	startLoggerBuffering();
 	const startTime = cliLogger.startTimer();
+	const commandStartedAt = Date.now();
 	const silent = options?.silent ?? false;
+	let telemetryReporter: CommandTelemetryReporter | undefined;
+	let currentStage: TelemetryStage | undefined;
 
 	try {
 		const buildProject = await loadBuildProject({
@@ -37,6 +44,14 @@ const buildCommand = async (options?: {
 			prepareRuntime: true,
 		});
 		const { configPath, loaded: configRes } = buildProject;
+		telemetryReporter = createCommandTelemetryReporter({
+			config: configRes.config,
+			env: configRes.env,
+			runtimeContext: configRes.runtimeContext,
+			projectRoot: configRes.projectRoot,
+			command: "build",
+			startedAt: commandStartedAt,
+		});
 		const translate = createTranslator({
 			store: configRes.translationStore,
 			locale: "en",
@@ -53,6 +68,10 @@ const buildCommand = async (options?: {
 				},
 			);
 			await stopLoggerBuffering();
+			await telemetryReporter.report({
+				outcome: "failed",
+				stage: "runtime_initialization",
+			});
 			process.exit(1);
 		}
 
@@ -61,6 +80,7 @@ const buildCommand = async (options?: {
 			config: configRes.config,
 		});
 
+		currentStage = "artifacts";
 		if (options?.cacheSpa) {
 			await partialBuildDirClear(configRes.config.build.paths.outDir);
 		} else {
@@ -96,6 +116,7 @@ const buildCommand = async (options?: {
 			outputPath: configRes.config.build.paths.outDir,
 		});
 
+		currentStage = "email_templates";
 		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
 			prepareEmailTemplates({
 				config: configRes.config,
@@ -117,6 +138,10 @@ const buildCommand = async (options?: {
 				},
 			);
 			await stopLoggerBuffering();
+			await telemetryReporter.report({
+				outcome: "failed",
+				stage: "email_templates",
+			});
 			process.exit(1);
 		}
 		if (publicAssetsRes.error) {
@@ -128,9 +153,14 @@ const buildCommand = async (options?: {
 				},
 			);
 			await stopLoggerBuffering();
+			await telemetryReporter.report({
+				outcome: "failed",
+				stage: "public_assets",
+			});
 			process.exit(1);
 		}
 		const translationStore = configRes.translationStore;
+		currentStage = "artifacts";
 		const processedArtifacts = await prepareBuildArtifacts({
 			config: configRes.config,
 			translationStore,
@@ -141,6 +171,7 @@ const buildCommand = async (options?: {
 			outputRelativeConfigPath: normalisedOutputRelativePath,
 			customArtifactTypes: adapterRuntime.config?.customBuildArtifacts,
 		});
+		currentStage = "runtime_build";
 		const [viteBuildRes, runtimeBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config),
 			adapterCLI.build({
@@ -166,9 +197,14 @@ const buildCommand = async (options?: {
 				},
 			);
 			await stopLoggerBuffering();
+			await telemetryReporter.report({
+				outcome: "failed",
+				stage: "admin_build",
+			});
 			process.exit(1);
 		}
 
+		currentStage = undefined;
 		await checkAllPluginsCompatibility({
 			runtimeContext: runtimeBuildRes.runtimeContext,
 			config: configRes.config,
@@ -221,6 +257,7 @@ const buildCommand = async (options?: {
 			},
 		);
 
+		currentStage = "finalize";
 		await runtimeBuildRes?.onComplete?.();
 		const endTime = startTime();
 
@@ -243,6 +280,10 @@ const buildCommand = async (options?: {
 		);
 
 		await stopLoggerBuffering();
+		await telemetryReporter.report({
+			outcome: "succeeded",
+			stage: "finalize",
+		});
 		process.exit(0);
 	} catch (error) {
 		if (error instanceof Error) {
@@ -251,6 +292,12 @@ const buildCommand = async (options?: {
 			cliLogger.error("Failed to build the application", "Unknown error");
 		}
 		await stopLoggerBuffering();
+		if (currentStage) {
+			await telemetryReporter?.report({
+				outcome: "failed",
+				stage: currentStage,
+			});
+		}
 		process.exit(1);
 	}
 };

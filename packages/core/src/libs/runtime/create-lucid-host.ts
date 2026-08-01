@@ -14,6 +14,7 @@ import type {
 	Toolkit,
 } from "../toolkit/types.js";
 import type {
+	AdapterKeys,
 	AdapterRuntimeContext,
 	DatabaseConnectionScope,
 	EnvironmentVariables,
@@ -72,6 +73,7 @@ export type LucidHost = {
 	config: Config;
 	env?: EnvironmentVariables;
 	runtimeContext: AdapterRuntimeContext;
+	adapterKeys: AdapterKeys;
 	translationStore: TranslationStore;
 	issues: Awaited<ReturnType<typeof createApp>>["issues"];
 	createInvocation(options?: { env?: EnvironmentVariables }): LucidInvocation;
@@ -137,6 +139,13 @@ const createLucidHost = async (
 		config: resolved.config,
 		env: resolved.env,
 		runtimeContext: options.runtimeContext,
+		adapterKeys: {
+			queue: app.queue.key,
+			kv: app.kv.key,
+			media: app.media?.key ?? null,
+			email: app.email.key,
+			database: resolved.config.db.adapter,
+		},
 		translationStore,
 		issues: app.issues,
 		createInvocation: (invocationOptions?: {

@@ -3,7 +3,7 @@ import z from "zod";
 import constants from "../../constants/constants.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { LucidRemoteConnections, Select } from "../db/types.js";
-import { getLucidRemoteConfig } from "../lucid-remote/origin.js";
+import { getLucidRemoteConfigFromEnv } from "../lucid-remote/origin.js";
 import { remoteConnectionDataSchema } from "../lucid-remote/schema/connection.js";
 
 const displaySchema = z
@@ -40,7 +40,7 @@ const formatStatus = (
 		connection: display?.connection ?? null,
 		organisation: display?.organisation ?? null,
 		scope: constants.connection.scope,
-		resource: getLucidRemoteConfig(context).resource,
+		resource: getLucidRemoteConfigFromEnv(context.env).resource,
 		lastAttempt: row?.last_attempt_at ?? null,
 		lastVerified: row?.last_verified_at ?? null,
 		errorKey,

@@ -59,11 +59,13 @@ export type ServeHandler = (props: {
 	};
 	onListening: (props: {
 		address: AddressInfo | string | null;
+		adapterKeys: AdapterKeys;
 	}) => Promise<void>;
 }) => Promise<{
 	destroy: () => Promise<void>;
 	onComplete?: () => Promise<void> | void;
 	runtimeContext: AdapterRuntimeContext;
+	adapterKeys: AdapterKeys;
 }>;
 
 export type RuntimeBuildArtifacts = {

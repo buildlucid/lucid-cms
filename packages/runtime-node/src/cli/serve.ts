@@ -78,6 +78,7 @@ const serveCommand =
 			const address = server.address();
 			onListening({
 				address: address,
+				adapterKeys: host.adapterKeys,
 			});
 		});
 
@@ -109,6 +110,7 @@ const serveCommand =
 				return destroyPromise;
 			},
 			runtimeContext: runtimeContext,
+			adapterKeys: host.adapterKeys,
 		};
 	};
 

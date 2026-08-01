@@ -9,6 +9,7 @@
 - Improved SSO auth provider support with dedicated OAuth 2.0 and OpenID Connect adapters, PKCE and stricter callback validation. ([98f560f](https://github.com/buildlucid/lucid-cms/commit/98f560f96b53740face220dbf3894a604737c417))
 - Added a user-scoped content account endpoint with explicit integration consent.
 - Added project and plugin data seeds with `defineSeed`, configurable sources and new seed CLI commands. ([0eab83f](https://github.com/buildlucid/lucid-cms/commit/0eab83f36266e3cf09488de30fe2dd7c3a6fd9c5))
+- Added anonymous telemetry for setup and initial `dev`, `serve` and `build` outcomes, with config and environment opt-outs.
 
 ### Breaking Changes:
 

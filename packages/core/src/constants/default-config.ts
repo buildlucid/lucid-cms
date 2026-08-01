@@ -2,6 +2,7 @@ import type { Config, LucidConfig } from "../types/config.js";
 import constants from "./constants.js";
 
 export const defaultConfig: Partial<LucidConfig> = {
+	telemetry: true,
 	logger: {
 		level: "info",
 	},

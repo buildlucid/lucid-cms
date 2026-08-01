@@ -9,6 +9,11 @@ import {
 	stopLoggerBuffering,
 } from "../../logger/index.js";
 import checkAllPluginsCompatibility from "../../plugins/check-all-plugins-compatibility.js";
+import type { AdapterKeys } from "../../runtime/types.js";
+import createCommandTelemetryReporter, {
+	type CommandTelemetryReporter,
+} from "../../telemetry/command-reporter.js";
+import type { TelemetryStage } from "../../telemetry/types.js";
 import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
@@ -23,8 +28,24 @@ import migrateCommand from "./migrate.js";
 const serveCommand = async () => {
 	startLoggerBuffering();
 	const configPath = getConfigPath(process.cwd());
+	const commandStartedAt = Date.now();
 	let destroy: (() => Promise<void>) | undefined;
+	let telemetryReporter: CommandTelemetryReporter | undefined;
+	let currentStage: TelemetryStage | undefined;
+	let startupListening = false;
+	let startupCompleted = false;
+	let startupAdapterKeys: AdapterKeys | undefined;
 	const coreUpdateAvailable = updateAvailable();
+
+	const maybeReportStartup = () => {
+		if (!startupListening || !startupCompleted || !startupAdapterKeys) return;
+
+		void telemetryReporter?.report({
+			outcome: "succeeded",
+			stage: "server_listen",
+			adapterKeys: startupAdapterKeys,
+		});
+	};
 
 	let shutdownPromise: Promise<void> | undefined;
 	const shutdown = () => {
@@ -49,6 +70,14 @@ const serveCommand = async () => {
 			path: configPath,
 			prepareRuntime: true,
 		});
+		telemetryReporter = createCommandTelemetryReporter({
+			config: configRes.config,
+			env: configRes.env,
+			runtimeContext: configRes.runtimeContext,
+			projectRoot: configRes.projectRoot,
+			command: "serve",
+			startedAt: commandStartedAt,
+		});
 		const translations = await prepareTranslations({
 			config: configRes.config,
 			projectRoot: configRes.projectRoot,
@@ -66,6 +95,10 @@ const serveCommand = async () => {
 				`Lucid could not load CLI handlers from the "${configRes.adapter.key}" runtime adapter.`,
 			);
 			await stopLoggerBuffering();
+			await telemetryReporter.report({
+				outcome: "failed",
+				stage: "runtime_initialization",
+			});
 			process.exit(1);
 		}
 
@@ -87,6 +120,7 @@ const serveCommand = async () => {
 			process.exit(1);
 		}
 
+		currentStage = "migration";
 		const migrateResult = await migrateCommand({
 			config: configRes.config,
 			env: configRes.env,
@@ -103,14 +137,21 @@ const serveCommand = async () => {
 			process.exit(2);
 		}
 
+		currentStage = "admin_build";
 		const viteBuildRes = await vite.buildApp(configRes.config);
 		if (viteBuildRes.error) {
 			cliLogger.error(
 				translate.english(viteBuildRes.error.message) ?? "Failed to build app",
 			);
+			await stopLoggerBuffering();
+			await telemetryReporter.report({
+				outcome: "failed",
+				stage: "admin_build",
+			});
 			process.exit(1);
 		}
 
+		currentStage = "email_templates";
 		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
 			prepareEmailTemplates({
 				config: configRes.config,
@@ -128,6 +169,11 @@ const serveCommand = async () => {
 				translate.english(emailTemplatesRes.error.message) ??
 					"Failed to prepare email templates",
 			);
+			await stopLoggerBuffering();
+			await telemetryReporter.report({
+				outcome: "failed",
+				stage: "email_templates",
+			});
 			process.exit(1);
 		}
 		if (publicAssetsRes.error) {
@@ -135,6 +181,11 @@ const serveCommand = async () => {
 				translate.english(publicAssetsRes.error.message) ??
 					"Failed to copy public assets",
 			);
+			await stopLoggerBuffering();
+			await telemetryReporter.report({
+				outcome: "failed",
+				stage: "public_assets",
+			});
 			process.exit(1);
 		}
 		cliLogger.success(
@@ -142,6 +193,7 @@ const serveCommand = async () => {
 			cliLogger.color.green("successfully"),
 		);
 
+		currentStage = "runtime_initialization";
 		const serverRes = await adapterCLI.serve({
 			config: configRes.config,
 			translationStore,
@@ -150,6 +202,10 @@ const serveCommand = async () => {
 				silent: false,
 			},
 			onListening: async (props) => {
+				startupListening = true;
+				startupAdapterKeys = props.adapterKeys;
+				maybeReportStartup();
+
 				const serverUrl =
 					typeof props.address === "string"
 						? props.address
@@ -191,12 +247,17 @@ const serveCommand = async () => {
 		});
 		destroy = serverRes?.destroy;
 
+		currentStage = undefined;
 		await checkAllPluginsCompatibility({
 			runtimeContext: serverRes.runtimeContext,
 			config: configRes.config,
 		});
 
+		currentStage = "finalize";
 		await serverRes?.onComplete?.();
+		startupCompleted = true;
+		startupAdapterKeys = serverRes.adapterKeys;
+		maybeReportStartup();
 	} catch (error) {
 		await destroy?.();
 		if (error instanceof Error) {
@@ -205,6 +266,12 @@ const serveCommand = async () => {
 			cliLogger.error("Failed to start the server", "Unknown error");
 		}
 		await stopLoggerBuffering();
+		if (currentStage) {
+			await telemetryReporter?.report({
+				outcome: "failed",
+				stage: currentStage,
+			});
+		}
 		process.exit(1);
 	}
 

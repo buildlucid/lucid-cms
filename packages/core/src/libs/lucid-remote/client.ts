@@ -7,7 +7,7 @@ import type {
 	ServiceResponse,
 } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
-import { getLucidRemoteConfig } from "./origin.js";
+import { getLucidRemoteConfigFromEnv } from "./origin.js";
 import type { LucidRemoteRequestData } from "./types.js";
 
 type LucidRemoteRequestProps = {
@@ -301,7 +301,7 @@ const createLucidRemoteClient = (props: {
  * and conversion of remote Lucid errors into core service errors.
  */
 export const getLucidRemoteClient = (context: ServiceContext) => {
-	const apiDomain = getLucidRemoteConfig(context).issuer;
+	const apiDomain = getLucidRemoteConfigFromEnv(context.env).issuer;
 	const origin = getBaseUrl(context);
 	const cacheKey = `${apiDomain}:${origin}`;
 	const cachedClient = clients.get(cacheKey);

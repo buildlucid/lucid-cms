@@ -1,12 +1,12 @@
 import type { ServiceContext } from "../../../../utils/services/types.js";
-import { getLucidRemoteConfig } from "../../origin.js";
+import { getLucidRemoteConfigFromEnv } from "../../origin.js";
 
 /**
  * Returns the package-owned OAuth/API URLs, switching to the server-only
  * loopback override during coordinated local integration tests.
  */
 export const getLucidConnectionUrls = (context: ServiceContext) => {
-	const { issuer, resource } = getLucidRemoteConfig(context);
+	const { issuer, resource } = getLucidRemoteConfigFromEnv(context.env);
 	const resourceUrl = new URL(resource);
 	const metadataUrl = new URL(resourceUrl.origin);
 	const resourcePath = resourceUrl.pathname === "/" ? "" : resourceUrl.pathname;

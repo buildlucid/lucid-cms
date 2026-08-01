@@ -240,6 +240,11 @@ export interface LucidConfig {
 	 */
 	secrets: string | SecretConfig;
 	/**
+	 * Whether Lucid may send anonymous technical telemetry. Telemetry is enabled
+	 * by default and can also be disabled with `LUCID_TELEMETRY_DISABLED=1`.
+	 */
+	telemetry?: boolean;
+	/**
 	 * Process-level logger configuration.
 	 */
 	logger?: {
@@ -528,6 +533,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		sources: SeedSource[];
 	};
 	secrets: SecretConfig;
+	telemetry: boolean;
 	kv?: {
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
 		/**

@@ -161,6 +161,7 @@ const serveCommand =
 			const address = server.address();
 			onListening({
 				address: address,
+				adapterKeys: host.adapterKeys,
 			});
 		});
 		server.on("close", () => {
@@ -194,6 +195,7 @@ const serveCommand =
 				return serverDestroyPromise;
 			},
 			runtimeContext: runtimeContext,
+			adapterKeys: host.adapterKeys,
 		};
 	};
 

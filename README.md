@@ -80,6 +80,12 @@ Or deploy our Cloudflare template by clicking the button below.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/buildlucid/lucid-cms/tree/master/templates/cloudflare-deploy)
 
+## 📊 Anonymous Telemetry
+
+Telemetry is **enabled by default** and sends anonymised technical data about the Lucid version, setup, enabled features, coarse project size, and whether `dev`, `serve`, or `build` succeeds. Events use a random project identifier and never include content, names, paths, environment values, user data, secrets, error messages, or stack traces.
+
+Disable it with `telemetry: false` in your Lucid config, or set `LUCID_TELEMETRY_DISABLED=1` or `DO_NOT_TRACK=1`.
+
 ## 📄 Licensing
 
 Lucid CMS is licensed under the [MIT License](./LICENSE).
