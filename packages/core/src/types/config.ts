@@ -33,6 +33,7 @@ import type {
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../libs/queue/types.js";
+import type { SeedSource } from "../libs/seed/types.js";
 
 export type CopyPublicEntry =
 	| string
@@ -296,11 +297,23 @@ export interface LucidConfig {
 	migrations?: {
 		/**
 		 * Migration files, directories or inline `{ name, migration }` entries to
-		 * load alongside the core migrations. Migrations are created with the
-		 * `defineMigration` helper and names must start with a 13 digit timestamp,
-		 * eg. `1751400000000-example`.
+		 * run after Lucid's core migrations, generated collection migrations and
+		 * collection sync. Migrations are created with the `defineMigration` helper
+		 * and names must start with a 13 digit timestamp, eg.
+		 * `1751400000000-example`.
 		 */
 		sources?: MigrationSource[];
+	};
+	/**
+	 * Repeatable data seed settings.
+	 */
+	seeds?: {
+		/**
+		 * Seed files, directories, package subpaths, file URLs or inline
+		 * `{ name, seed }` entries. Plugin seed names should use a namespace such
+		 * as `pages:example` to avoid collisions without imposing one in code.
+		 */
+		sources?: SeedSource[];
 	};
 	/**
 	 * Email settings.
@@ -508,6 +521,12 @@ export interface LucidConfig {
 
 export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
+	migrations: {
+		sources: MigrationSource[];
+	};
+	seeds: {
+		sources: SeedSource[];
+	};
 	secrets: SecretConfig;
 	kv?: {
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;

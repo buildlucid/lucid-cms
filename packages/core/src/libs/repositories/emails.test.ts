@@ -10,7 +10,7 @@ describe("Tests for the emails repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const Emails = new EmailsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

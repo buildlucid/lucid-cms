@@ -10,7 +10,7 @@ describe("Tests for the preview sessions repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const PreviewSessions = new PreviewSessionsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

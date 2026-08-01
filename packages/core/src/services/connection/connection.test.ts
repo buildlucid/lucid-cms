@@ -72,7 +72,7 @@ const remoteConnection: RemoteConnectionData = {
 
 const adapter = new SQLiteAdapter({ database: ":memory:" });
 const database = await adapter.connect();
-await adapter.migrateToLatest(database);
+await adapter.migrateCoreToLatest(database);
 
 const makeConfig = (): Config =>
 	// @ts-expect-error

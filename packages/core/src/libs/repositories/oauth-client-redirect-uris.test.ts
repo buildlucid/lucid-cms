@@ -10,7 +10,7 @@ describe("Tests for the OAuth client redirect URIs repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const OAuthClientRedirectUris = new OAuthClientRedirectUrisRepository(
 		connection.client,
 		db,

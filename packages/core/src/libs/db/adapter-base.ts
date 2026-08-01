@@ -1,8 +1,13 @@
 import { type ColumnDataType, type ColumnDefinitionBuilder, sql } from "kysely";
 import type { jsonArrayFrom } from "kysely/helpers/sqlite";
-import { type Migration, Migrator } from "kysely/migration";
+import {
+	type Migration,
+	type MigrationResultSet,
+	Migrator,
+} from "kysely/migration";
 import constants from "../../constants/constants.js";
 import { LucidError } from "../../utils/errors/index.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import { translate } from "../i18n/index.js";
 import logger from "../logger/index.js";
 import type { EnvironmentVariables } from "../runtime/types.js";
@@ -23,14 +28,15 @@ import Migration00000013 from "./migrations/00000013-preview-sessions.js";
 import type {
 	DatabaseConfig,
 	DatabaseConnection,
-	ExternalMigrationFn,
+	DatabaseMigrationStatus,
+	ExternalMigration,
 	InferredTable,
 	KyselyDB,
 } from "./types.js";
 
 export default abstract class DatabaseAdapter {
 	adapter: string;
-	private externalMigrations: Record<string, ExternalMigrationFn> = {};
+	private externalMigrations: Record<string, ExternalMigration> = {};
 	constructor(adapter: string) {
 		this.adapter = adapter;
 	}
@@ -164,7 +170,7 @@ export default abstract class DatabaseAdapter {
 	 * Registers external (plugin/project) migrations, replacing any previously
 	 * registered set. These are merged with the core migrations.
 	 */
-	registerExternalMigrations(migrations: Record<string, ExternalMigrationFn>) {
+	registerExternalMigrations(migrations: Record<string, ExternalMigration>) {
 		for (const name of Object.keys(migrations)) {
 			if (!constants.db.externalMigrationNameRegex.test(name)) {
 				throw new LucidError({
@@ -175,34 +181,76 @@ export default abstract class DatabaseAdapter {
 		this.externalMigrations = migrations;
 	}
 	/**
-	 * Runs all migrations that have not been ran yet. This doesnt include the generated migrations for collections
+	 * Runs pending Lucid-owned migrations without crossing into the external
+	 * phase. Keeping the full provider registered preserves valid Kysely history
+	 * when a newer core migration is added after external migrations have run.
 	 */
-	async migrateToLatest(connection: DatabaseConnection) {
-		const migrations = this.migrations;
+	async migrateCoreToLatest(connection: DatabaseConnection) {
+		const status = await this.getMigrationStatus(connection.client);
+		this.assertMigrationHistory(status);
+		const targetMigration = status.pendingCore.at(-1);
+		if (!targetMigration) return;
 
-		const migrator = new Migrator({
+		this.handleMigrationResult(
+			await this.createMigrator(connection).migrateTo(targetMigration),
+		);
+	}
+
+	/** Runs pending plugin and project migrations after Lucid schema setup. */
+	async migrateExternalToLatest(
+		connection: DatabaseConnection,
+		context: ServiceContext,
+	) {
+		const status = await this.getMigrationStatus(connection.client);
+		this.assertMigrationHistory(status);
+		if (status.pendingCore.length > 0) {
+			throw new LucidError({
+				message:
+					"External migrations cannot run while Lucid schema migrations are pending.",
+			});
+		}
+		if (status.pendingExternal.length === 0) return;
+
+		this.handleMigrationResult(
+			await this.createMigrator(connection, context).migrateToLatest(),
+		);
+	}
+
+	/**
+	 * Creates the shared Kysely migrator used by forward migrations and rollback.
+	 * External definitions are bound to Kysely's migration-scoped client (a
+	 * transaction where the dialect supports transactional DDL), while retaining
+	 * all other service context state.
+	 */
+	createMigrator(
+		connection: DatabaseConnection,
+		context?: ServiceContext,
+	): Migrator {
+		const migrations = this.createMigrations(context);
+
+		return new Migrator({
 			db: connection.client,
 			provider: {
 				async getMigrations() {
 					return migrations;
 				},
 			},
-			//* required so new core migrations can run after external migrations have executed
+			//* a future core migration is allowed to sort before an already executed external migration
 			allowUnorderedMigrations: true,
 		});
+	}
 
-		const { error, results } = await migrator.migrateToLatest();
-
+	private handleMigrationResult({ error, results }: MigrationResultSet) {
 		if (results) {
-			for (const it of results) {
-				if (it.status === "Success") {
+			for (const result of results) {
+				if (result.status === "Success") {
 					logger.debug({
-						message: `"${it.migrationName}" was executed successfully`,
+						message: `"${result.migrationName}" was executed successfully`,
 						scope: constants.logScopes.migrations,
 					});
-				} else if (it.status === "Error") {
+				} else if (result.status === "Error") {
 					logger.error({
-						message: `failed to execute migration "${it.migrationName}"`,
+						message: `failed to execute migration "${result.migrationName}"`,
 						scope: constants.logScopes.migrations,
 					});
 				}
@@ -240,34 +288,89 @@ export default abstract class DatabaseAdapter {
 		}
 	}
 
-	/**
-	 * Checks if there are any pending migrations that need to be executed
-	 */
-	async needsMigration(db: KyselyDB): Promise<boolean> {
-		try {
-			const availableMigrations = Object.keys(this.migrations);
+	/** Prevents phase-specific no-op paths from bypassing history validation. */
+	private assertMigrationHistory(status: DatabaseMigrationStatus) {
+		if (status.missing.length === 0) return;
 
+		throw new LucidError({
+			message: `Previously executed migrations are no longer registered: ${status.missing.join(", ")}. If you removed a plugin or migration file, restore it or roll its migrations back before removing it.`,
+		});
+	}
+
+	/**
+	 * Reads migration history once and separates pending Lucid migrations from
+	 * pending external migrations so callers can enforce their execution phases.
+	 */
+	async getMigrationStatus(db: KyselyDB): Promise<DatabaseMigrationStatus> {
+		const core = Object.keys(this.coreMigrations).sort();
+		const external = Object.keys(this.externalMigrations).sort();
+		const registered = [...core, ...external].sort();
+		let executed: string[] = [];
+
+		try {
 			const executedMigrations = await sql<{ name: string }>`
 				SELECT name FROM kysely_migration
 			`.execute(db);
-
-			const executedMigrationNames = executedMigrations.rows.map(
-				(row) => row.name,
-			);
-
-			return availableMigrations.some(
-				(migrationName) => !executedMigrationNames.includes(migrationName),
-			);
+			executed = executedMigrations.rows.map((row) => row.name);
 		} catch (_) {
-			return true;
+			//* the migration table does not exist until Kysely first runs
 		}
+
+		const executedNames = new Set(executed);
+		const registeredNames = new Set(registered);
+		return {
+			registered,
+			executed,
+			pendingCore: core.filter((name) => !executedNames.has(name)),
+			pendingExternal: external.filter((name) => !executedNames.has(name)),
+			missing: executed.filter((name) => !registeredNames.has(name)),
+		};
 	}
+
 	/**
-	 * Returns the migrations for the database, including any registered external migrations.
-	 * Core names must always use a zero-padded numeric prefix - external names start with a
-	 * 13 digit timestamp so they can never clash and always sort (and run) after core migrations.
+	 * Builds Kysely migrations from core definitions and the context-aware
+	 * external definitions registered for this config.
 	 */
-	get migrations(): Record<string, Migration> {
+	private createMigrations(
+		context?: ServiceContext,
+	): Record<string, Migration> {
+		const migrations = this.coreMigrations;
+
+		for (const [name, migration] of Object.entries(this.externalMigrations)) {
+			const down = migration.down;
+			migrations[name] = {
+				up: async (db) => {
+					if (!context) {
+						throw new LucidError({
+							message: `A service context is required to execute external migration "${name}".`,
+						});
+					}
+					return migration.up({
+						...context,
+						db: { client: db as KyselyDB },
+					});
+				},
+				down: down
+					? async (db) => {
+							if (!context) {
+								throw new LucidError({
+									message: `A service context is required to execute external migration "${name}".`,
+								});
+							}
+							return down({
+								...context,
+								db: { client: db as KyselyDB },
+							});
+						}
+					: undefined,
+			};
+		}
+
+		return migrations;
+	}
+
+	/** Core migration definitions keyed in their fixed execution order. */
+	private get coreMigrations(): Record<string, Migration> {
 		const migrations: Record<string, Migration> = {
 			"00000001-locales": Migration00000001(this),
 			"00000002-options": Migration00000002(this),
@@ -283,10 +386,6 @@ export default abstract class DatabaseAdapter {
 			"00000012-ai-generations": Migration00000012(this),
 			"00000013-preview-sessions": Migration00000013(this),
 		};
-
-		for (const [name, migrationFn] of Object.entries(this.externalMigrations)) {
-			migrations[name] = migrationFn({ adapter: this });
-		}
 
 		return migrations;
 	}

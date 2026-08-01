@@ -78,7 +78,7 @@ const collectionPlan = (
 };
 
 /** Creates the minimal configured command dependencies used by migration tests. */
-const commandFixture = (needsMigration: boolean) => {
+const commandFixture = (pendingCore: boolean, pendingExternal = false) => {
 	const kv = { clear: vi.fn() };
 	const database = {
 		client: {},
@@ -86,8 +86,15 @@ const commandFixture = (needsMigration: boolean) => {
 	};
 	const db = {
 		connect: vi.fn().mockResolvedValue(database),
-		needsMigration: vi.fn().mockResolvedValue(needsMigration),
-		migrateToLatest: vi.fn(),
+		getMigrationStatus: vi.fn().mockResolvedValue({
+			registered: [],
+			executed: [],
+			pendingCore: pendingCore ? ["00000013-preview-sessions"] : [],
+			pendingExternal: pendingExternal ? ["1751400000000-example"] : [],
+			missing: [],
+		}),
+		migrateCoreToLatest: vi.fn(),
+		migrateExternalToLatest: vi.fn(),
 	};
 	const config = {
 		db,
@@ -248,9 +255,41 @@ describe("migrateCommand collection policy", () => {
 		})({ yes: true, skipSyncSteps: true });
 
 		expect(result).toBe(false);
-		expect(fixture.db.migrateToLatest).toHaveBeenCalledWith(fixture.database);
+		expect(fixture.db.migrateCoreToLatest).toHaveBeenCalledWith(
+			fixture.database,
+		);
 		expect(planCollectionMigrations).toHaveBeenCalledTimes(2);
 		expect(confirm).not.toHaveBeenCalled();
 		expect(applyCollectionMigrations).not.toHaveBeenCalled();
+	});
+
+	test("runs external migrations after collection migration and sync", async () => {
+		const fixture = commandFixture(false, true);
+		vi.mocked(planCollectionMigrations).mockResolvedValue({
+			data: collectionPlan("safe"),
+			error: undefined,
+		});
+		vi.mocked(getInitializedKVAdapter).mockResolvedValue(fixture.kv as never);
+
+		const result = await migrateCommand({
+			config: fixture.config,
+			translationStore: fixture.translationStore,
+			mode: "return",
+		})({ yes: true, skipSyncSteps: true });
+
+		expect(result).toBe(true);
+		expect(fixture.db.migrateCoreToLatest).not.toHaveBeenCalled();
+		expect(applyCollectionMigrations).toHaveBeenCalled();
+		expect(runSyncTasks).toHaveBeenCalled();
+		expect(fixture.db.migrateExternalToLatest).toHaveBeenCalledWith(
+			fixture.database,
+			expect.any(Object),
+		);
+		expect(
+			vi.mocked(applyCollectionMigrations).mock.invocationCallOrder[0],
+		).toBeLessThan(vi.mocked(runSyncTasks).mock.invocationCallOrder[0] ?? 0);
+		expect(vi.mocked(runSyncTasks).mock.invocationCallOrder[0]).toBeLessThan(
+			fixture.db.migrateExternalToLatest.mock.invocationCallOrder[0] ?? 0,
+		);
 	});
 });

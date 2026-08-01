@@ -10,7 +10,7 @@ describe("Tests for the collections repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const Collections = new CollectionsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

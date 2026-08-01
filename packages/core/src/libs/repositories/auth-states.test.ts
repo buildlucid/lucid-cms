@@ -10,7 +10,7 @@ describe("Tests for the auth states repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const AuthStates = new AuthStatesRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

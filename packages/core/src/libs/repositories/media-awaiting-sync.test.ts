@@ -10,7 +10,7 @@ describe("Tests for the media awaiting sync repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
 		connection.client,
 		db,

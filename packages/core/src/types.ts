@@ -29,6 +29,7 @@ export type {
 	LucidInvocation,
 } from "./libs/runtime/create-lucid-host.js";
 export * from "./libs/runtime/types.js";
+export * from "./libs/seed/types.js";
 export * from "./libs/toolkit/types.js";
 export * from "./types/config.js";
 export * from "./types/errors.js";

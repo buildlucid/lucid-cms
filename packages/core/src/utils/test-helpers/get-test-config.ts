@@ -29,7 +29,7 @@ export const getTestConfig = (configFileName = "lucid.config.ts") => {
 
 	const migrate = async (): Promise<void> => {
 		const cfg = await getConfig();
-		await cfg.db.migrateToLatest(await getDatabase());
+		await cfg.db.migrateCoreToLatest(await getDatabase());
 	};
 
 	const destroy = async (): Promise<void> => {

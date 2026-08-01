@@ -1,6 +1,4 @@
 import { confirm } from "@inquirer/prompts";
-import { sql } from "kysely";
-import { Migrator } from "kysely/migration";
 import constants from "../../../constants/constants.js";
 import type { Config, EnvironmentVariables } from "../../../types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
@@ -78,35 +76,11 @@ const migrateRollbackCommand = async (options?: {
 		await prepareExternalMigrations(config, res.projectRoot);
 		database = await config.db.connect(env);
 
-		const migrator = new Migrator({
-			db: database.client,
-			provider: {
-				async getMigrations() {
-					return res.config.db.migrations;
-				},
-			},
-			//* required so new core migrations can run after external migrations have executed
-			allowUnorderedMigrations: true,
-		});
-
 		//* executed migrations that are no longer registered would fail the rollback midway, so surface them upfront
-		const availableMigrationNames = Object.keys(res.config.db.migrations);
-		let executedMigrationNames: string[] = [];
-		try {
-			const executedRows = await sql<{ name: string }>`
-				SELECT name FROM kysely_migration
-			`.execute(database.client);
-			executedMigrationNames = executedRows.rows.map((row) => row.name);
-		} catch (_) {
-			//* the migration table doesnt exist yet - no migrations to rollback
-		}
-
-		const missingMigrations = executedMigrationNames.filter(
-			(name) => !availableMigrationNames.includes(name),
-		);
-		if (missingMigrations.length > 0) {
+		const migrationStatus = await config.db.getMigrationStatus(database.client);
+		if (migrationStatus.missing.length > 0) {
 			cliLogger.error(
-				`Cannot rollback: previously executed migration(s) are no longer registered: ${missingMigrations.join(", ")}`,
+				`Cannot rollback: previously executed migration(s) are no longer registered: ${migrationStatus.missing.join(", ")}`,
 			);
 			cliLogger.info(
 				"If you removed a plugin or migration file, restore it so its migrations can be rolled back.",
@@ -115,8 +89,14 @@ const migrateRollbackCommand = async (options?: {
 			await stopLoggerBuffering();
 			process.exit(1);
 		}
+		if (migrationStatus.executed.length === 0) {
+			cliLogger.info("No migrations to rollback");
+			await cleanup();
+			await stopLoggerBuffering();
+			process.exit(0);
+		}
 
-		const migrations = await migrator.getMigrations();
+		const migrations = await config.db.createMigrator(database).getMigrations();
 		//* rollbacks happen in execution order, which can diverge from name order with external migrations
 		const executedMigrations = migrations
 			.filter((m) => m.executedAt !== undefined)
@@ -126,13 +106,6 @@ const migrateRollbackCommand = async (options?: {
 				if (aTime === bTime) return a.name.localeCompare(b.name);
 				return aTime - bTime;
 			});
-
-		if (executedMigrations.length === 0) {
-			cliLogger.info("No migrations to rollback");
-			await cleanup();
-			await stopLoggerBuffering();
-			process.exit(0);
-		}
 
 		const protectedMigrations = config.db.protectedMigrations;
 		const migrationsToRollback: string[] = [];
@@ -195,6 +168,20 @@ const migrateRollbackCommand = async (options?: {
 			}
 		}
 
+		kvInstance = await getInitializedKVAdapter(config, {
+			env,
+			runtimeContext,
+		});
+		const serviceContext = createServiceContext({
+			config,
+			database,
+			translationStore,
+			env,
+			runtimeContext,
+			kv: kvInstance,
+		});
+		const migrator = config.db.createMigrator(database, serviceContext);
+
 		cliLogger.info(
 			`Rolling back ${migrationsToRollback.length} migration(s)...`,
 		);
@@ -242,20 +229,7 @@ const migrateRollbackCommand = async (options?: {
 		}
 
 		cliLogger.info("Clearing KV cache...");
-		kvInstance = await getInitializedKVAdapter(config, {
-			env,
-			runtimeContext,
-		});
-		await kvInstance.clear(
-			createServiceContext({
-				config,
-				database,
-				translationStore,
-				env,
-				runtimeContext,
-				kv: kvInstance,
-			}),
-		);
+		await kvInstance.clear(serviceContext);
 		await cleanup();
 
 		const endTime = startTime();

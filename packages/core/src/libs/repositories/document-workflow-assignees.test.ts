@@ -10,7 +10,7 @@ describe("Tests for the document workflow assignees repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const DocumentWorkflowAssignees = new DocumentWorkflowAssigneesRepository(
 		connection.client,
 		db,

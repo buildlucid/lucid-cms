@@ -10,7 +10,7 @@ describe("Tests for the user tokens repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const UserTokens = new UserTokensRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

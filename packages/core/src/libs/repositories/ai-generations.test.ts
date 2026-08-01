@@ -10,7 +10,7 @@ describe("Tests for the ai-generations repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const AiGenerations = new AiGenerationsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

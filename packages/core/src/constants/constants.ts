@@ -159,9 +159,13 @@ export default Object.freeze({
 		maxBuilderKeyLength: 16,
 		//* core migrations use a zero-padded numeric prefix which always sorts before a
 		//* 13 digit timestamp, so external migrations can never clash and always run after core
-		externalMigrationNameRegex: /^\d{13}-[a-z0-9][a-z0-9-_]*$/,
+		externalMigrationNameRegex: /^\d{13}-[a-z0-9][a-z0-9_-]*$/,
 		//* project relative directory external migrations are automatically loaded from
 		externalMigrationDirectory: "migrations" as const,
+	},
+	seeds: {
+		nameRegex: /^[a-z0-9][a-z0-9_-]*(?::[a-z0-9][a-z0-9_-]*)*$/,
+		projectDirectory: "seeds" as const,
 	},
 	logScopes: {
 		lucid: "lucid",

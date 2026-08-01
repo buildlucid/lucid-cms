@@ -10,7 +10,7 @@ describe("Tests for the roles repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const Roles = new RolesRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

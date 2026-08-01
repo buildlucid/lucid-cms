@@ -10,7 +10,7 @@ describe("Tests for the OAuth grant scopes repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const OAuthGrantScopes = new OAuthGrantScopesRepository(
 		connection.client,
 		db,

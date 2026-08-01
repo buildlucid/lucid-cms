@@ -10,7 +10,7 @@ describe("Tests for the Lucid remote connections repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const LucidRemoteConnections = new LucidRemoteConnectionsRepository(
 		connection.client,
 		db,

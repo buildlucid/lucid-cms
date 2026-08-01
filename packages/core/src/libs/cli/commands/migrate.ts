@@ -179,9 +179,26 @@ const migrateCommand = (props?: {
 				),
 			);
 			const needsCollectionMigrations = initialAssessment.reasons.length > 0;
-			const needsDatabaseMigrations = await config.db.needsMigration(
+			const migrationStatus = await config.db.getMigrationStatus(
 				database.client,
 			);
+			if (migrationStatus.missing.length > 0) {
+				cliLogger.error(
+					`${migrationStatus.missing.length} previously executed migration(s) are no longer registered`,
+				);
+				for (const name of migrationStatus.missing) {
+					cliLogger.log(cliLogger.color.red(name), { indent: 2 });
+				}
+				cliLogger.info(
+					"If you removed a plugin or migration file, restore it before running migrations.",
+				);
+				return await stopCommand(1);
+			}
+			const needsCoreMigrations = migrationStatus.pendingCore.length > 0;
+			const needsExternalMigrations =
+				migrationStatus.pendingExternal.length > 0;
+			const needsDatabaseMigrations =
+				needsCoreMigrations || needsExternalMigrations;
 
 			if (needsDatabaseMigrations) {
 				cliLogger.warn(
@@ -246,17 +263,17 @@ const migrateCommand = (props?: {
 				kv: kvInstance,
 			};
 
-			//* execution: arbitrary database migrations run before collection re-planning
-			if (needsDatabaseMigrations) {
-				cliLogger.info("Running database schema migrations...");
-				await config.db.migrateToLatest(database);
+			//* core schema must exist before collection migrations are planned and applied
+			if (needsCoreMigrations) {
+				cliLogger.info("Running Lucid schema migrations...");
+				await config.db.migrateCoreToLatest(database);
 				cliLogger.success(
-					"Schema migrations completed",
+					"Lucid schema migrations completed",
 					cliLogger.color.green("successfully"),
 				);
 			}
 
-			const exactPlanResult = needsDatabaseMigrations
+			const exactPlanResult = needsCoreMigrations
 				? await planCollectionMigrations(executionContext)
 				: initialPlanResult;
 			if (exactPlanResult.error) {
@@ -273,13 +290,13 @@ const migrateCommand = (props?: {
 				),
 			);
 
-			if (needsDatabaseMigrations && exactAssessment.reasons.length > 0) {
+			if (needsCoreMigrations && exactAssessment.reasons.length > 0) {
 				cliLogger.info("Post-migration collection plan:");
 				reportMigrationAssessment(exactAssessment);
 			}
 
 			if (
-				needsDatabaseMigrations &&
+				needsCoreMigrations &&
 				requiresPostMigrationApproval(initialAssessment, exactAssessment)
 			) {
 				cliLogger.warn(
@@ -334,8 +351,8 @@ const migrateCommand = (props?: {
 				);
 			}
 
-			//* sync and cache clearing run only after the exact plan has succeeded
-			if (!skipSyncSteps) {
+			//* external migrations can rely on synchronized collection state and data
+			if (!skipSyncSteps || needsExternalMigrations) {
 				const syncResult = await runSyncTasks({
 					config,
 					database,
@@ -347,20 +364,17 @@ const migrateCommand = (props?: {
 				if (!syncResult) return await stopCommand(1);
 			}
 
+			if (needsExternalMigrations) {
+				cliLogger.info("Running external schema migrations...");
+				await config.db.migrateExternalToLatest(database, executionContext);
+				cliLogger.success(
+					"External schema migrations completed",
+					cliLogger.color.green("successfully"),
+				);
+			}
+
 			cliLogger.info("Clearing KV cache...");
-			await kvInstance.clear(
-				createServiceContext({
-					config,
-					database,
-					translationStore,
-					env,
-					runtimeContext,
-					queue: executionContext.queue,
-					kv: kvInstance,
-					media: executionContext.media,
-					email: executionContext.email,
-				}),
-			);
+			await kvInstance.clear(executionContext);
 
 			const endTime = startTime();
 			await cleanupAdapters();

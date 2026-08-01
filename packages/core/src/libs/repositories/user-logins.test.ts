@@ -10,7 +10,7 @@ describe("Tests for the user logins repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const UserLogins = new UserLoginsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

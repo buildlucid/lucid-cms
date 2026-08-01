@@ -35,7 +35,7 @@ test("loads package sources from the project node_modules tree", async () => {
 	);
 	await writeFile(
 		path.join(sourceDirectory, "1751400000000-example.mjs"),
-		"export default () => ({ up: async () => {}, down: async () => {} });",
+		"export default { up: async () => {}, down: async () => {} };",
 	);
 
 	const migrations = await loadExternalMigrations({
@@ -44,5 +44,5 @@ test("loads package sources from the project node_modules tree", async () => {
 	});
 
 	expect(Object.keys(migrations)).toEqual(["1751400000000-example"]);
-	expect(typeof migrations["1751400000000-example"]).toBe("function");
+	expect(typeof migrations["1751400000000-example"]?.up).toBe("function");
 });

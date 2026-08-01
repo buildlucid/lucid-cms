@@ -10,7 +10,7 @@ describe("Tests for the queue jobs repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const QueueJobs = new QueueJobsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

@@ -10,7 +10,7 @@ describe("Tests for the media repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const Media = new MediaRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

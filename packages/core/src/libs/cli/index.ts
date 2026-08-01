@@ -10,6 +10,8 @@ import migrateNewCommand from "./commands/migrate-new.js";
 import migrateResetCommand from "./commands/migrate-reset.js";
 import migrateRollbackCommand from "./commands/migrate-rollback.js";
 import migrateStatusCommand from "./commands/migrate-status.js";
+import seedCommand, { seedListCommand } from "./commands/seed.js";
+import seedNewCommand from "./commands/seed-new.js";
 import serveCommand from "./commands/serve.js";
 import syncCommand from "./commands/sync.js";
 import typegenCommand from "./commands/typegen.js";
@@ -115,6 +117,24 @@ program
 	.option("-f, --force", "Skip confirmation prompt")
 	.option("--remote", remoteOptionDescription)
 	.action(migrateFreshCommand);
+
+program
+	.command("seed [name]")
+	.description("Run a registered data seed")
+	.option("--all", "Run all registered seeds")
+	.option("--remote", remoteOptionDescription)
+	.action(seedCommand);
+
+program
+	.command("seed:list")
+	.description("List registered data seeds")
+	.option("--remote", remoteOptionDescription)
+	.action(seedListCommand);
+
+program
+	.command("seed:new <name>")
+	.description("Create a new seed file")
+	.action(seedNewCommand);
 
 program
 	.command("cron [job]")

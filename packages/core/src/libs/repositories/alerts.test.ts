@@ -10,7 +10,7 @@ describe("Tests for the alerts repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const Alerts = new AlertsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

@@ -10,7 +10,7 @@ describe("Tests for the media folders repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const MediaFolders = new MediaFoldersRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

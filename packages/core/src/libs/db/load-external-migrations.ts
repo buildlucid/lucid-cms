@@ -1,21 +1,11 @@
-import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
-import {
-	pathExists,
-	resolveSourcePath,
-} from "../../utils/helpers/resolve-source-path.js";
-import type { ExternalMigrationFn, MigrationSource } from "./types.js";
-
-const migrationFileExtensions = [".ts", ".mts", ".js", ".mjs"];
-
-const isMigrationFile = (fileName: string) => {
-	if (fileName.endsWith(".d.ts") || fileName.endsWith(".d.mts")) return false;
-	return migrationFileExtensions.includes(path.extname(fileName));
-};
+import collectModuleFiles from "../../utils/helpers/collect-module-files.js";
+import { resolveSourcePath } from "../../utils/helpers/resolve-source-path.js";
+import type { ExternalMigration, MigrationSource } from "./types.js";
 
 //* a fixed width timestamp keeps lexicographic order in line with creation order
 const validateMigrationName = (name: string, origin: string) => {
@@ -28,44 +18,6 @@ const validateMigrationName = (name: string, origin: string) => {
 };
 
 /**
- * Collects migration file paths from a file or directory source.
- */
-const collectMigrationFiles = async (
-	sourcePath: string,
-	options?: {
-		optional?: boolean;
-	},
-): Promise<string[]> => {
-	if (!(await pathExists(sourcePath))) {
-		if (options?.optional) return [];
-		throw new LucidError({
-			message: `Migration source "${sourcePath}" does not exist.`,
-		});
-	}
-
-	const stats = await fs.stat(sourcePath);
-	if (stats.isFile()) {
-		if (!isMigrationFile(path.basename(sourcePath))) {
-			throw new LucidError({
-				message: `Migration source "${sourcePath}" must be a ${migrationFileExtensions.join(", ")} file.`,
-			});
-		}
-		return [sourcePath];
-	}
-	if (!stats.isDirectory()) {
-		throw new LucidError({
-			message: `Migration source "${sourcePath}" must be a file or directory.`,
-		});
-	}
-
-	const entries = await fs.readdir(sourcePath, { withFileTypes: true });
-	return entries
-		.filter((entry) => entry.isFile() && isMigrationFile(entry.name))
-		.map((entry) => path.join(sourcePath, entry.name))
-		.sort();
-};
-
-/**
  * Loads configured migration sources and the optional project `migrations/`
  * directory. Sources can be files, directories or inline `{ name, migration }`
  * entries. Timestamped migration names can never clash with core migration
@@ -74,9 +26,9 @@ const collectMigrationFiles = async (
 const loadExternalMigrations = async (props: {
 	sources?: MigrationSource[];
 	projectRoot?: string;
-}): Promise<Record<string, ExternalMigrationFn>> => {
+}): Promise<Record<string, ExternalMigration>> => {
 	const filePaths = new Set<string>();
-	const inlineSources: Array<{ name: string; migration: ExternalMigrationFn }> =
+	const inlineSources: Array<{ name: string; migration: ExternalMigration }> =
 		[];
 
 	for (const source of props.sources ?? []) {
@@ -89,27 +41,29 @@ const loadExternalMigrations = async (props: {
 			projectRoot: props.projectRoot,
 			label: "Migration source",
 		});
-		for (const filePath of await collectMigrationFiles(sourcePath)) {
+		for (const filePath of await collectModuleFiles(sourcePath, {
+			label: "Migration source",
+		})) {
 			filePaths.add(filePath);
 		}
 	}
 
 	if (props.projectRoot) {
-		const projectMigrations = await collectMigrationFiles(
+		const projectMigrations = await collectModuleFiles(
 			path.join(props.projectRoot, constants.db.externalMigrationDirectory),
-			{ optional: true },
+			{ label: "Migration source", optional: true },
 		);
 		for (const filePath of projectMigrations) {
 			filePaths.add(filePath);
 		}
 	}
 
-	const migrations: Record<string, ExternalMigrationFn> = {};
+	const migrations: Record<string, ExternalMigration> = {};
 	const migrationOrigins: Record<string, string> = {};
 
 	const addMigration = (
 		name: string,
-		migration: ExternalMigrationFn,
+		migration: ExternalMigration,
 		origin: string,
 	) => {
 		if (migrationOrigins[name]) {
@@ -138,18 +92,21 @@ const loadExternalMigrations = async (props: {
 			/*! @vite-ignore */
 			`${pathToFileURL(filePath).href}?t=${Date.now()}`
 		);
-		if (typeof migrationModule.default !== "function") {
+		if (
+			typeof migrationModule.default !== "object" ||
+			migrationModule.default === null ||
+			typeof (migrationModule.default as ExternalMigration).up !== "function" ||
+			((migrationModule.default as ExternalMigration).down !== undefined &&
+				typeof (migrationModule.default as ExternalMigration).down !==
+					"function")
+		) {
 			throw new LucidError({
 				message: `Invalid migration file "${fileName}". Migration files must default export a migration created with the "defineMigration" helper.`,
 				data: { filePath },
 			});
 		}
 
-		addMigration(
-			stem,
-			migrationModule.default as ExternalMigrationFn,
-			filePath,
-		);
+		addMigration(stem, migrationModule.default as ExternalMigration, filePath);
 	}
 
 	for (const source of inlineSources) {
@@ -171,7 +128,7 @@ export const prepareExternalMigrations = async (
 ) => {
 	config.db.registerExternalMigrations(
 		await loadExternalMigrations({
-			sources: config.migrations?.sources,
+			sources: config.migrations.sources,
 			projectRoot,
 		}),
 	);

@@ -10,7 +10,7 @@ describe("Tests for the integrations repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const Integrations = new IntegrationsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

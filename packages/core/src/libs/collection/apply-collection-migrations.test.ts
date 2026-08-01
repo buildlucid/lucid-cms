@@ -13,7 +13,7 @@ describe("applyCollectionMigrations", () => {
 	beforeEach(async () => {
 		db = new SQLiteAdapter({ database: ":memory:" });
 		connection = await db.connect();
-		await db.migrateToLatest(connection);
+		await db.migrateCoreToLatest(connection);
 		await connection.client
 			.insertInto("lucid_collections")
 			.values({ key: "pages" })

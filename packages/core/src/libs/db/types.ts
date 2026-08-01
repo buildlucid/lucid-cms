@@ -15,6 +15,7 @@ import type {
 	SecurityAuditAction,
 	SecurityAuditRoleSnapshot,
 } from "../../types/security-audit.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
 import type { MigrationPlan } from "../collection/migration/types.js";
 import type { CollectionSchema } from "../collection/schema/types.js";
@@ -38,13 +39,22 @@ export type DatabaseConnection = {
 	destroy: () => Promise<void>;
 };
 export type MigrationFn = (adapter: DatabaseAdapter) => Migration;
-export type ExternalMigrationFn = (ctx: {
-	adapter: DatabaseAdapter;
-}) => Migration;
+export type ExternalMigration = {
+	up: (context: ServiceContext) => Promise<void>;
+	down?: (context: ServiceContext) => Promise<void>;
+};
 export type MigrationSource =
 	| string
 	| URL
-	| { name: string; migration: ExternalMigrationFn };
+	| { name: string; migration: ExternalMigration };
+
+export type DatabaseMigrationStatus = {
+	registered: string[];
+	executed: string[];
+	pendingCore: string[];
+	pendingExternal: string[];
+	missing: string[];
+};
 
 export type Select<T> = {
 	[P in keyof T]: T[P] extends { __select__: infer S } ? S : T[P];

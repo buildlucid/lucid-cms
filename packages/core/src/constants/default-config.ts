@@ -65,6 +65,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 	migrations: {
 		sources: [],
 	},
+	seeds: {
+		sources: [],
+	},
 	media: {
 		limits: {
 			storageBytes: false,

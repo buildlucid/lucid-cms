@@ -10,7 +10,7 @@ describe("Tests for the user auth providers repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const UserAuthProviders = new UserAuthProvidersRepository(
 		connection.client,
 		db,

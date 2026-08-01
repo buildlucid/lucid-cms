@@ -10,7 +10,7 @@ describe("Tests for the media translations repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const MediaTranslations = new MediaTranslationsRepository(
 		connection.client,
 		db,

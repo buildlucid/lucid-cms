@@ -10,7 +10,7 @@ describe("Tests for the processed images repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const ProcessedImages = new ProcessedImagesRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

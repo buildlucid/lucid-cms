@@ -10,7 +10,7 @@ describe("Tests for the role permissions repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const RolePermissions = new RolePermissionsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

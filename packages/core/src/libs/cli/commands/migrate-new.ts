@@ -6,24 +6,24 @@ import cliLogger from "../logger.js";
 
 const migrationTemplate = `import { defineMigration } from "@lucidcms/core/plugin";
 
-export default defineMigration((ctx) => ({
-	async up(db) {
-		// await db.schema
+export default defineMigration({
+	async up(context) {
+		// await context.db.client.schema
 		// 	.createTable("example")
-		// 	.addColumn("id", ctx.adapter.getDataType("primary"), (col) =>
-		// 		ctx.adapter.primaryKeyColumnBuilder(col),
+		// 	.addColumn("id", context.config.db.getDataType("primary"), (col) =>
+		// 		context.config.db.primaryKeyColumnBuilder(col),
 		// 	)
 		// 	.execute();
 	},
-	async down(db) {
-		// await db.schema.dropTable("example").execute();
+	async down(context) {
+		// await context.db.client.schema.dropTable("example").execute();
 	},
-}));
+});
 `;
 
 const migrateNewCommand = async (name: string) => {
 	try {
-		if (!/^[a-z0-9][a-z0-9-_]*$/.test(name)) {
+		if (!/^[a-z0-9][a-z0-9_-]*$/.test(name)) {
 			cliLogger.error(
 				`Invalid migration name "${name}". Migration names must only contain lowercase letters, numbers, hyphens and underscores.`,
 			);

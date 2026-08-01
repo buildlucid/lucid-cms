@@ -1,6 +1,6 @@
 import z from "zod";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
-import type { ExternalMigrationFn } from "../db/types.js";
+import type { ExternalMigration } from "../db/types.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
 import type {
 	HttpExtension,
@@ -15,6 +15,7 @@ import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
+import type { Seed } from "../seed/types.js";
 
 const HttpExtensionRegisterSchema = z.custom<HttpExtensionRegister>(
 	(data) => typeof data === "function",
@@ -194,10 +195,33 @@ const ConfigSchema = z.object({
 						z.instanceof(URL),
 						z.object({
 							name: z.string(),
-							migration: z.custom<ExternalMigrationFn>(
-								(data) => typeof data === "function",
-								{ message: "Expected a migration function" },
+							migration: z.custom<ExternalMigration>(
+								(data) =>
+									typeof data === "object" &&
+									data !== null &&
+									typeof (data as ExternalMigration).up === "function" &&
+									((data as ExternalMigration).down === undefined ||
+										typeof (data as ExternalMigration).down === "function"),
+								{ message: "Expected a migration definition" },
 							),
+						}),
+					]),
+				)
+				.optional(),
+		})
+		.optional(),
+	seeds: z
+		.object({
+			sources: z
+				.array(
+					z.union([
+						z.string(),
+						z.instanceof(URL),
+						z.object({
+							name: z.string(),
+							seed: z.custom<Seed>((data) => typeof data === "function", {
+								message: "Expected a seed function",
+							}),
 						}),
 					]),
 				)

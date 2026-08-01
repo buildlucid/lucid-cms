@@ -1,4 +1,3 @@
-import { sql } from "kysely";
 import type { Config, EnvironmentVariables } from "../../../types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
@@ -65,23 +64,11 @@ const migrateStatusCommand = async (options?: {
 		database = await config.db.connect(env);
 
 		//* database migration status
-		const registeredMigrations = Object.keys(config.db.migrations).sort();
-		let executedMigrations: string[] = [];
-		try {
-			const executedRows = await sql<{ name: string }>`
-				SELECT name FROM kysely_migration
-			`.execute(database.client);
-			executedMigrations = executedRows.rows.map((row) => row.name);
-		} catch (_) {
-			//* the migration table doesnt exist yet - no migrations have run
-		}
-
-		const pendingMigrations = registeredMigrations.filter(
-			(name) => !executedMigrations.includes(name),
-		);
-		const missingMigrations = executedMigrations.filter(
-			(name) => !registeredMigrations.includes(name),
-		);
+		const migrationStatus = await config.db.getMigrationStatus(database.client);
+		const pendingMigrations = [
+			...migrationStatus.pendingCore,
+			...migrationStatus.pendingExternal,
+		];
 
 		//* collection migration status
 		const serviceContext = createServiceContext({
@@ -112,7 +99,9 @@ const migrateStatusCommand = async (options?: {
 		}
 
 		//* report
-		cliLogger.info(`Found ${executedMigrations.length} applied migration(s)`);
+		cliLogger.info(
+			`Found ${migrationStatus.executed.length} applied migration(s)`,
+		);
 
 		if (pendingMigrations.length === 0) {
 			cliLogger.success("No database schema migrations are pending");
@@ -158,11 +147,11 @@ const migrateStatusCommand = async (options?: {
 			}
 		}
 
-		if (missingMigrations.length > 0) {
+		if (migrationStatus.missing.length > 0) {
 			cliLogger.error(
-				`${missingMigrations.length} previously executed migration(s) are no longer registered`,
+				`${migrationStatus.missing.length} previously executed migration(s) are no longer registered`,
 			);
-			for (const name of missingMigrations) {
+			for (const name of migrationStatus.missing) {
 				cliLogger.log(cliLogger.color.red(name), { indent: 2 });
 			}
 			cliLogger.info(
@@ -174,7 +163,7 @@ const migrateStatusCommand = async (options?: {
 			pendingMigrations.length > 0 ||
 			pendingCollections.length > 0 ||
 			collectionCheckError !== undefined;
-		const unhealthy = missingMigrations.length > 0;
+		const unhealthy = migrationStatus.missing.length > 0;
 
 		const endTime = startTime();
 		cliLogger.log(

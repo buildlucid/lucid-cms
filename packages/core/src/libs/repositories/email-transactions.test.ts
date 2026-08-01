@@ -10,7 +10,7 @@ describe("Tests for the email-transactions repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const EmailTransactions = new EmailTransactionsRepository(
 		connection.client,
 		db,

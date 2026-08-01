@@ -10,7 +10,7 @@ describe("Tests for the email change requests repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const EmailChangeRequests = new EmailChangeRequestsRepository(
 		connection.client,
 		db,

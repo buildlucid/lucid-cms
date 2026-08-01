@@ -10,7 +10,7 @@ describe("Tests for the options repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const Options = new OptionsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

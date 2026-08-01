@@ -10,7 +10,7 @@ describe("Tests for the document publish operations repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const DocumentPublishOperations = new DocumentPublishOperationsRepository(
 		connection.client,
 		db,

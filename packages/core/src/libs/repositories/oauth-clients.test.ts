@@ -10,7 +10,7 @@ describe("Tests for the OAuth clients repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const OAuthClients = new OAuthClientsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();
 

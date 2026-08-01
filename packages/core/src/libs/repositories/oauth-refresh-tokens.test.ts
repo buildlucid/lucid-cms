@@ -10,7 +10,7 @@ describe("Tests for the OAuth refresh tokens repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const OAuthRefreshTokens = new OAuthRefreshTokensRepository(
 		connection.client,
 		db,

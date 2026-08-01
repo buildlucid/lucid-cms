@@ -23,6 +23,7 @@ export {
 	isTranslatableCopy,
 	translate,
 } from "./libs/i18n/index.js";
+export { default as defineSeed } from "./libs/seed/define-seed.js";
 export { LucidAPIError } from "./utils/errors/index.js";
 export { ensureLucidDirectoryExists } from "./utils/helpers/lucid-directory.js";
 export {

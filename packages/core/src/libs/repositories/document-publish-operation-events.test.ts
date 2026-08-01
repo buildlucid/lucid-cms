@@ -12,7 +12,7 @@ describe("Tests for the document publish operation events repository", async () 
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const DocumentPublishOperationEvents =
 		new DocumentPublishOperationEventsRepository(connection.client, db);
 	const tables = await connection.client.introspection.getTables();

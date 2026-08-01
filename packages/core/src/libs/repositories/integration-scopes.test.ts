@@ -10,7 +10,7 @@ describe("Tests for the integration scopes repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const IntegrationScopes = new IntegrationScopesRepository(
 		connection.client,
 		db,

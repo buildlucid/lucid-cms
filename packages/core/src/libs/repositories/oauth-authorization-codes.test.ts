@@ -10,7 +10,7 @@ describe("Tests for the OAuth authorization codes repository", async () => {
 
 	afterAll(() => connection.destroy());
 
-	await db.migrateToLatest(connection);
+	await db.migrateCoreToLatest(connection);
 	const OAuthAuthorizationCodes = new OAuthAuthorizationCodesRepository(
 		connection.client,
 		db,
