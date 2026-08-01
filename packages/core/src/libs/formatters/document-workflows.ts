@@ -4,8 +4,9 @@ import type {
 } from "@lucidcms/types";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
-import formatter, { mediaFormatter } from "./index.js";
+import formatter from "./helpers.js";
 import type { MediaPosterPropsT } from "./media.js";
+import mediaFormatter from "./media.js";
 
 type DocumentWorkflowFormatInput = {
 	id?: number | null;

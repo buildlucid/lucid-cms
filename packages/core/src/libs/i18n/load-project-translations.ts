@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import z from "zod";
-import { LucidError } from "../../utils/errors/index.js";
+import LucidError from "../../utils/errors/lucid-error.js";
 import {
 	pathExists,
 	resolveSourcePath,

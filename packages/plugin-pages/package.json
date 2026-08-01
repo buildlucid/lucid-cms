@@ -45,10 +45,14 @@
 		"@lucidcms/core": "0.17.0-alpha.0",
 		"@types/node": "^24.13.2",
 		"tsdown": "^0.22.3",
-		"typescript": "^6.0.3"
+		"typescript": "^6.0.3",
+		"zod": "^4.4.3"
 	},
 	"peerDependencies": {
 		"@lucidcms/core": "^0.17.0-alpha.0"
+	},
+	"dependencies": {
+		"immer": "^11.1.8"
 	},
 	"volta": {
 		"node": "24.11.1"

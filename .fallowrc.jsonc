@@ -1,0 +1,24 @@
+{
+	"$schema": "./node_modules/fallow/schema.json",
+	"entry": [
+		"packages/*/src/index.{ts,tsx,mts,cts}",
+		"packages/core/src/{build,plugin,runtime,toolkit,types}.{ts,mts,cts}",
+		// These are loaded by path in configuration tests, rather than imported.
+		"packages/core/src/libs/config/mock-config/*.ts",
+		"packages/core/src/utils/test-helpers/config/lucid.config.ts"
+	],
+	"ignoreDependencies": [
+		// hono-openapi imports this peer at runtime.
+		"@hono/standard-validator",
+		// The Node runtime emits this import into its generated server entry.
+		"node-cron"
+	],
+	"ignoreUnresolvedImports": [
+		// consumer.ts is compiled to consumer.mjs beside the generated adapter.
+		"./consumer.mjs"
+	],
+	"duplicates": {
+		// Pair-only matches are usually parallel implementations, not shared abstractions.
+		"minOccurrences": 3
+	}
+}

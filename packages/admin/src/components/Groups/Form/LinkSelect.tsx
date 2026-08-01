@@ -6,10 +6,12 @@ import {
 	FaSolidXmark,
 } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
-import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Label } from "./Label";
 
 interface LinkSelectProps {
 	id: string;

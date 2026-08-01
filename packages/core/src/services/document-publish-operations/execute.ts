@@ -2,7 +2,8 @@ import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { documentVersionServices, documentWorkflowServices } from "../index.js";
+import canPublishTarget from "../document-workflows/can-publish-target.js";
+import promoteVersion from "../documents-versions/promote-version.js";
 import createEvent from "./helpers/create-event.js";
 
 const terminalExecutionStatuses = ["executed", "cancelled"] as const;
@@ -118,14 +119,11 @@ const execute: ServiceFn<
 		};
 	}
 
-	const workflowPublishRes = await documentWorkflowServices.canPublishTarget(
-		context,
-		{
-			collectionKey: operation.collection_key,
-			documentId: operation.document_id,
-			target: operation.target,
-		},
-	);
+	const workflowPublishRes = await canPublishTarget(context, {
+		collectionKey: operation.collection_key,
+		documentId: operation.document_id,
+		target: operation.target,
+	});
 	if (workflowPublishRes.error) {
 		if (data.markFailedOnError === true) {
 			await Operations.updateSingle({
@@ -147,7 +145,7 @@ const execute: ServiceFn<
 		return workflowPublishRes;
 	}
 
-	const promoteRes = await documentVersionServices.promoteVersion(context, {
+	const promoteRes = await promoteVersion(context, {
 		fromVersionId: operation.snapshot_version_id,
 		toVersionType: operation.target,
 		collectionKey: operation.collection_key,

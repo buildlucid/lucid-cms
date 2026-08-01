@@ -10,11 +10,9 @@ import {
 	generateSecret,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import {
-	emailServices,
-	securityAuditServices,
-	userTokenServices,
-} from "../index.js";
+import sendEmail from "../email/send-email.js";
+import logSecurityAudit from "../security-audit/log-security-audit.js";
+import getUserToken from "../user-tokens/get-single.js";
 
 const resetPassword: ServiceFn<
 	[
@@ -44,7 +42,7 @@ const resetPassword: ServiceFn<
 	);
 	const Users = new UsersRepository(context.db.client, context.config.db);
 
-	const tokenRes = await userTokenServices.getSingle(context, {
+	const tokenRes = await getUserToken(context, {
 		token: data.token,
 		tokenType: constants.userTokens.passwordReset,
 	});
@@ -159,7 +157,7 @@ const resetPassword: ServiceFn<
 				},
 			},
 		}),
-		securityAuditServices.logSecurityAudit(context, {
+		logSecurityAudit(context, {
 			userId: tokenRes.data.user_id,
 			action: constants.securityAudit.actions.passwordChange,
 			performedBy: tokenRes.data.user_id,
@@ -170,7 +168,7 @@ const resetPassword: ServiceFn<
 	if (updatedUserRes.error) return updatedUserRes;
 	if (auditRes.error) return auditRes;
 
-	const sendEmail = await emailServices.sendEmail(context, {
+	const sendEmailRes = await sendEmail(context, {
 		template: constants.email.templates.passwordResetSuccess.key,
 		type: "internal",
 		to: updatedUserRes.data.email,
@@ -184,7 +182,7 @@ const resetPassword: ServiceFn<
 			lastName: updatedUserRes.data.last_name,
 		},
 	});
-	if (sendEmail.error) return sendEmail;
+	if (sendEmailRes.error) return sendEmailRes;
 
 	return {
 		error: undefined,

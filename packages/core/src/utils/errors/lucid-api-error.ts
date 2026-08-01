@@ -1,6 +1,7 @@
 import type z from "zod";
 import constants from "../../constants/constants.js";
-import { copy, translate } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/copy.js";
+import { translate } from "../../libs/i18n/translate.js";
 import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
 import errorTypeDefaults from "./error-type-defaults.js";
 

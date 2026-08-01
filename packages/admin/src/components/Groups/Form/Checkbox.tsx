@@ -3,7 +3,9 @@ import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import { FaSolidCheck } from "solid-icons/fa";
 import { type Component, createSignal } from "solid-js";
-import { DescribedBy, ErrorMessage, Tooltip } from "@/components/Groups/Form";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Tooltip } from "./Tooltip";
 
 interface CheckboxInputProps {
 	id?: string;

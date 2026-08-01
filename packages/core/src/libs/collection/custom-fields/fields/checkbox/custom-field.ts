@@ -2,7 +2,7 @@ import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
 import deepMerge from "../../../../../utils/helpers/deep-merge.js";
 import type { BooleanInt } from "../../../../db/types.js";
-import formatter from "../../../../formatters/index.js";
+import formatter from "../../../../formatters/helpers.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {

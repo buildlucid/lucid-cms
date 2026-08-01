@@ -1,5 +1,5 @@
 import type { PublicErrorData } from "@lucidcms/types";
-import { isTranslatableCopy } from "../../libs/i18n/index.js";
+import { isTranslatableCopy } from "../../libs/i18n/copy.js";
 import type { Translator } from "../../libs/i18n/types.js";
 import type { ErrorCopy, LucidErrorData } from "../../types/errors.js";
 

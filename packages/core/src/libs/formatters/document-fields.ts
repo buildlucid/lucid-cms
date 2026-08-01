@@ -23,7 +23,7 @@ import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import DocumentBricksFormatter from "./document-bricks.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 
 export interface FieldFormatMeta {
 	builder: BrickBuilder | CollectionBuilder;

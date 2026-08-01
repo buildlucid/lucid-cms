@@ -1,5 +1,5 @@
 import type { BooleanInt, OAuthClientAuthMethod } from "../db/types.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 import type { MediaPosterPropsT } from "./media.js";
 import mediaFormatter from "./media.js";
 

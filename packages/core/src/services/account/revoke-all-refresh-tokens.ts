@@ -1,6 +1,6 @@
 import constants from "../../constants/constants.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { authServices } from "../index.js";
+import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
 
 const revokeAllRefreshTokens: ServiceFn<
 	[
@@ -10,7 +10,7 @@ const revokeAllRefreshTokens: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const revokeRes = await authServices.refreshToken.revokeUserTokens(context, {
+	const revokeRes = await revokeUserTokens(context, {
 		userId: data.userId,
 		revokeReason: constants.refreshTokenRevokeReasons.accountRevokeAll,
 	});

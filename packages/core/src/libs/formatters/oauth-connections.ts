@@ -1,7 +1,7 @@
 import type { OAuthConnection } from "../../types/response.js";
 import type { OAuthPrincipalType } from "../db/types.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 
 export type OAuthConnectionQueryRes = {
 	id: number;

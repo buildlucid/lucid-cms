@@ -17,7 +17,8 @@ import {
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
-import formatter, { documentFieldsFormatter } from "./index.js";
+import documentFieldsFormatter from "./document-fields.js";
+import formatter from "./helpers.js";
 
 const formatMultiple = (props: {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;

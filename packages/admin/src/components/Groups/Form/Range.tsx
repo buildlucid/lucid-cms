@@ -9,8 +9,10 @@ import {
 	Index,
 	Show,
 } from "solid-js";
-import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import T from "@/translations";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Label } from "./Label";
 
 interface RangeProps {
 	id: string;

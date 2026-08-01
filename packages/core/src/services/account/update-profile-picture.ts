@@ -2,7 +2,8 @@ import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { MediaCropInput, MediaOrigin } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import createMedia from "../media/create-single.js";
+import updateMedia from "../media/update-single.js";
 
 const updateProfilePicture: ServiceFn<
 	[
@@ -80,7 +81,7 @@ const updateProfilePicture: ServiceFn<
 
 	const existingProfilePictureId = userRes.data.profile_picture_media_id;
 	if (existingProfilePictureId !== null) {
-		const updateMediaRes = await mediaServices.updateSingle(context, {
+		const updateMediaRes = await updateMedia(context, {
 			id: existingProfilePictureId,
 			key: data.key,
 			fileName: data.fileName,
@@ -144,7 +145,7 @@ const updateProfilePicture: ServiceFn<
 		};
 	}
 
-	const createMediaRes = await mediaServices.createSingle(context, {
+	const createMediaRes = await createMedia(context, {
 		key: data.key,
 		fileName: data.fileName,
 		width: data.width,

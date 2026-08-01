@@ -1,4 +1,4 @@
-import { copy } from "../../libs/i18n/index.js";
+import { copy } from "../../libs/i18n/copy.js";
 import type { LucidErrorData } from "../../types.js";
 
 const errorTypeDefaults = (error: LucidErrorData) => {

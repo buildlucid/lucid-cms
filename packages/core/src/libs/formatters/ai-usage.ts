@@ -1,7 +1,7 @@
 import type { AiUsage } from "../../types/response.js";
 import { getNumber, getObject } from "../../utils/helpers/index.js";
 import type { Translator } from "../i18n/types.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 import mediaFormatter, { type MediaPosterPropsT } from "./media.js";
 
 export interface AiUsagePropT {

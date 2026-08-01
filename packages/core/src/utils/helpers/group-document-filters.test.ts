@@ -12,7 +12,7 @@ import groupDocumentFilters, {
 
 // Mock the prefixGeneratedColName function
 vi.mock(
-	"../src/services/collection-migrator/helpers/prefix-generated-column-name",
+	"../../libs/collection/helpers/prefix-generated-column-name.js",
 	() => ({
 		default: (key: string) => `_${key}`,
 	}),

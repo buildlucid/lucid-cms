@@ -1,7 +1,7 @@
 import type { Role } from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
 import type { Permission } from "../permission/types.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 
 interface RolePropsT {
 	id: number;

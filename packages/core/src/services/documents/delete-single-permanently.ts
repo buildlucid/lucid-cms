@@ -4,13 +4,12 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
-import {
-	documentPublishOperationServices,
-	documentServices,
-	documentWorkflowServices,
-	previewSessionServices,
-} from "../index.js";
+import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
+import deleteWorkflowsForDocuments from "../document-workflows/delete-for-documents.js";
+import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
+import checkDocumentAccess from "./checks/check-document-access.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
+import nullifyDocumentReferences from "./nullify-document-references.js";
 
 const deleteSinglePermanently: ServiceFn<
 	[
@@ -35,7 +34,7 @@ const deleteSinglePermanently: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const accessRes = await documentServices.checks.checkDocumentAccess(context, {
+	const accessRes = await checkDocumentAccess(context, {
 		collectionKey: data.collectionKey,
 		id: data.id,
 	});
@@ -119,22 +118,22 @@ const deleteSinglePermanently: ServiceFn<
 				tableName: tableNamesRes.data.document,
 			},
 		),
-		documentServices.nullifyDocumentReferences(context, {
+		nullifyDocumentReferences(context, {
 			collectionKey: collectionRes.data.key,
 			documentId: data.id,
 		}),
-		previewSessionServices.deleteForDocuments(context, {
+		deletePreviewSessionsForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.id],
 		}),
-		documentPublishOperationServices.cancelForDocuments(context, {
+		cancelPublishOperationsForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.id],
 			comment: context.translate(
 				"server:core.documents.permanently.deleted.publish.request.comment",
 			),
 		}),
-		documentWorkflowServices.deleteForDocuments(context, {
+		deleteWorkflowsForDocuments(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.id],
 		}),

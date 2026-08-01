@@ -1,7 +1,8 @@
 import type { PublishOperation } from "../../types/response.js";
 import type { PublishOperationDetailedQueryResponse } from "../repositories/document-publish-operations.js";
-import formatter, { mediaFormatter } from "./index.js";
+import formatter from "./helpers.js";
 import type { MediaPosterPropsT } from "./media.js";
+import mediaFormatter from "./media.js";
 
 const formatUser = (params: {
 	id: number | null | undefined;

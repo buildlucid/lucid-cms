@@ -9,13 +9,11 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import {
-	DescribedBy,
-	ErrorMessage,
-	Label,
-	Tooltip,
-} from "@/components/Groups/Form";
 import T from "@/translations";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Label } from "./Label";
+import { Tooltip } from "./Tooltip";
 
 interface SwitchProps {
 	id: string;

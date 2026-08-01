@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
-import { LucidError } from "../../utils/errors/index.js";
+import LucidError from "../../utils/errors/lucid-error.js";
 import { loadTranslationSources } from "./load-project-translations.js";
 import { createTranslationStore } from "./store.js";
 import type { TranslationBundles, TranslationStore } from "./types.js";

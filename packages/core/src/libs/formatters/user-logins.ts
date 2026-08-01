@@ -1,5 +1,5 @@
 import type { UserLogin } from "../../types/response.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 
 interface UserLoginPropT {
 	id: number;

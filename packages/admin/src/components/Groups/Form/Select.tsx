@@ -17,10 +17,12 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import DropdownContent from "@/components/Partials/DropdownContent";
 import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Label } from "./Label";
 
 export type ValueT = string | number | undefined;
 export type SelectOptionT = { value: ValueT; label: string };

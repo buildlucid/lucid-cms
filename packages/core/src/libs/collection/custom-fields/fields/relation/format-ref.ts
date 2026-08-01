@@ -1,7 +1,5 @@
-import {
-	documentBricksFormatter,
-	documentFieldsFormatter,
-} from "../../../../formatters/index.js";
+import documentBricksFormatter from "../../../../formatters/document-bricks.js";
+import documentFieldsFormatter from "../../../../formatters/document-fields.js";
 import type { BrickQueryResponse } from "../../../../repositories/document-bricks.js";
 import type { CFResponse, FieldRefParams } from "../../types.js";
 

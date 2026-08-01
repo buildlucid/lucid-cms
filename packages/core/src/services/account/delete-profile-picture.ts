@@ -1,7 +1,7 @@
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import deleteMediaPermanently from "../media/delete-single-permanently.js";
 
 const deleteProfilePicture: ServiceFn<
 	[
@@ -79,7 +79,7 @@ const deleteProfilePicture: ServiceFn<
 	});
 	if (updateUserRes.error) return updateUserRes;
 
-	const deleteMediaRes = await mediaServices.deleteSinglePermanently(context, {
+	const deleteMediaRes = await deleteMediaPermanently(context, {
 		id: userRes.data.profile_picture_media_id,
 		userId: data.actorUserId,
 	});

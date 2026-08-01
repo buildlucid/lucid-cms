@@ -7,11 +7,9 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
-import {
-	authServices,
-	securityAuditServices,
-	userTokenServices,
-} from "../index.js";
+import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
+import logSecurityAudit from "../security-audit/log-security-audit.js";
+import getUserToken from "../user-tokens/get-single.js";
 
 const revertEmailChange: ServiceFn<
 	[
@@ -31,7 +29,7 @@ const revertEmailChange: ServiceFn<
 		context.config.db,
 	);
 
-	const tokenRes = await userTokenServices.getSingle(context, {
+	const tokenRes = await getUserToken(context, {
 		token: data.token,
 		tokenType: constants.userTokens.emailChangeRevert,
 	});
@@ -271,14 +269,14 @@ const revertEmailChange: ServiceFn<
 					},
 				},
 			}),
-			securityAuditServices.logSecurityAudit(context, {
+			logSecurityAudit(context, {
 				userId: requestRes.data.user_id,
 				action: constants.securityAudit.actions.emailChange,
 				performedBy: requestRes.data.user_id,
 				previousValue: requestRes.data.new_email,
 				newValue: requestRes.data.old_email,
 			}),
-			authServices.refreshToken.revokeUserTokens(context, {
+			revokeUserTokens(context, {
 				userId: requestRes.data.user_id,
 				revokeReason: constants.refreshTokenRevokeReasons.emailChangeReverted,
 			}),

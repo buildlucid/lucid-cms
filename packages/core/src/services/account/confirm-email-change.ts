@@ -7,7 +7,8 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
-import { securityAuditServices, userTokenServices } from "../index.js";
+import logSecurityAudit from "../security-audit/log-security-audit.js";
+import getUserToken from "../user-tokens/get-single.js";
 
 const confirmEmailChange: ServiceFn<
 	[
@@ -27,7 +28,7 @@ const confirmEmailChange: ServiceFn<
 		context.config.db,
 	);
 
-	const tokenRes = await userTokenServices.getSingle(context, {
+	const tokenRes = await getUserToken(context, {
 		token: data.token,
 		tokenType: constants.userTokens.emailChangeConfirm,
 	});
@@ -183,7 +184,7 @@ const confirmEmailChange: ServiceFn<
 				},
 			},
 		}),
-		securityAuditServices.logSecurityAudit(context, {
+		logSecurityAudit(context, {
 			userId: requestRes.data.user_id,
 			action: constants.securityAudit.actions.emailChange,
 			performedBy: requestRes.data.user_id,

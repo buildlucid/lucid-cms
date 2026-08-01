@@ -8,7 +8,7 @@ import type {
 	EmailType,
 } from "../../types.js";
 import { getEmailResendState } from "../email/storage/index.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 
 interface EmailPropT {
 	id: number;

@@ -11,24 +11,6 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import {
-	CheckboxField,
-	CodeField,
-	CollapsibleField,
-	ColorField,
-	InputField,
-	JSONField,
-	LinkField,
-	MediaField,
-	RangeField,
-	RelationField,
-	RepeaterField,
-	RichTextField,
-	SectionField,
-	SelectField,
-	TextareaField,
-	UserField,
-} from "@/components/Groups/Builder/CustomFields";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brick-store";
 import type {
@@ -41,6 +23,22 @@ import {
 	type FieldConditionScope,
 } from "@/utils/field-condition-helpers";
 import { getPreviewFieldId } from "@/utils/preview-focus-dom";
+import { CheckboxField } from "./CheckboxField";
+import { CodeField } from "./CodeField";
+import { CollapsibleField } from "./CollapsibleField";
+import { ColorField } from "./ColorField";
+import { InputField } from "./InputField";
+import { JSONField } from "./JSONField";
+import { LinkField } from "./LinkField";
+import { MediaField } from "./MediaField";
+import { RangeField } from "./RangeField";
+import { RelationField } from "./RelationField";
+import { RepeaterField } from "./RepeaterField";
+import { RichTextField } from "./RichTextField";
+import { SectionField } from "./SectionField";
+import { SelectField } from "./SelectField";
+import { TextareaField } from "./TextareaField";
+import { UserField } from "./UserField";
 
 /** Maps `ui.width` onto the 12-column grid. Mobile always spans the full row. */
 const fieldWidthClasses: Record<number, string> = {

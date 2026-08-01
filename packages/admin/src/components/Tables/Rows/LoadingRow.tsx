@@ -28,7 +28,7 @@ const LoadingRow: Component<LoadingRowProps> = (props) => {
 						width: 65,
 					}}
 				>
-					<div class="w-full h-5 skeletone" />
+					<div class="w-full h-5 skeleton" />
 				</Td>
 			</Show>
 			<Index each={Array.from({ length: props.columns })}>

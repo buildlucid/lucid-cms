@@ -1,7 +1,8 @@
 import constants from "../../constants/constants.js";
-import { isTranslatableCopy, translate } from "../../libs/i18n/index.js";
+import { isTranslatableCopy } from "../../libs/i18n/copy.js";
+import { translate } from "../../libs/i18n/translate.js";
 import type { PublicErrorData } from "../../types.js";
-import { LucidAPIError } from "./index.js";
+import LucidAPIError from "./lucid-api-error.js";
 
 const translateNestedErrorCopy = (value: unknown): unknown => {
 	if (isTranslatableCopy(value)) return translate(value);

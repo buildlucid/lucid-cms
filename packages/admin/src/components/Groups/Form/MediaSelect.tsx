@@ -10,7 +10,6 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import ClickToCopy from "@/components/Partials/ClickToCopy";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
@@ -28,6 +27,9 @@ import { normalizeFieldErrors } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import type { MediaRelationRef } from "@/utils/relation-field-helpers";
 import { mediaResponseToRef } from "@/utils/relation-field-helpers";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Label } from "./Label";
 
 interface MediaSelectProps {
 	id: string;

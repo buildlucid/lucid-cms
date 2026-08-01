@@ -11,7 +11,6 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import { FieldErrorBadge } from "@/components/Partials/FieldErrorBadge";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import userPreferencesStore from "@/store/user-preferences";
@@ -23,6 +22,7 @@ import {
 	countFieldErrorsForKeys,
 	getStructuralFieldKeys,
 } from "@/utils/structural-field-helpers";
+import { DynamicField } from "./DynamicField";
 
 interface CollapsibleFieldProps {
 	fieldConfig: CollectionFieldConfigByType<"collapsible">;

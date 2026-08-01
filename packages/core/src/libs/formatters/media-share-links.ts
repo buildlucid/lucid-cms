@@ -6,7 +6,7 @@ import type {
 	ShareLinkAccess,
 } from "../../types/response.js";
 import { createShareLinkUrl } from "../../utils/media/index.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 import { formatFocalPoint } from "./media.js";
 
 export interface MediaShareLinkPropsT {

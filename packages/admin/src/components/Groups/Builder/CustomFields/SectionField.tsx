@@ -7,7 +7,6 @@ import {
 	Index,
 	Show,
 } from "solid-js";
-import { DynamicField } from "@/components/Groups/Builder/CustomFields";
 import { FieldErrorBadge } from "@/components/Partials/FieldErrorBadge";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
@@ -16,6 +15,7 @@ import {
 	countFieldErrorsForKeys,
 	getStructuralFieldKeys,
 } from "@/utils/structural-field-helpers";
+import { DynamicField } from "./DynamicField";
 
 interface SectionFieldProps {
 	fieldConfig: CollectionFieldConfigByType<"section">;

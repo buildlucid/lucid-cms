@@ -1,6 +1,6 @@
 import type { Option } from "../../types/response.js";
 import type { LucidOptions, Select } from "../db/types.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 
 const formatMultiple = (props: {
 	options: Select<LucidOptions>[];

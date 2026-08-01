@@ -16,6 +16,7 @@ export type WorkerQueueAdapterOptions = {
 };
 
 const resolveWorkerConsumerUrl = (): URL => {
+	// fallow-ignore-next-line unresolved-import -- consumer.ts compiles to consumer.mjs beside this adapter
 	const localConsumerUrl = new URL("./consumer.mjs", import.meta.url);
 
 	try {

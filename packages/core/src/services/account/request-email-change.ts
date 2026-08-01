@@ -9,7 +9,8 @@ import {
 import type { LucidAuth } from "../../types/hono.js";
 import { formatEmailSubject } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { emailServices, userTokenServices } from "../index.js";
+import sendEmail from "../email/send-email.js";
+import createUserToken from "../user-tokens/create-single.js";
 
 const requestEmailChange: ServiceFn<
 	[
@@ -140,12 +141,12 @@ const requestEmailChange: ServiceFn<
 		minutes: constants.emailChangeTokenExpirationMinutes,
 	}).toISOString();
 	const [confirmTokenRes, revertTokenRes] = await Promise.all([
-		userTokenServices.createSingle(context, {
+		createUserToken(context, {
 			userId: data.auth.id,
 			tokenType: constants.userTokens.emailChangeConfirm,
 			expiryDate: expiresAt,
 		}),
-		userTokenServices.createSingle(context, {
+		createUserToken(context, {
 			userId: data.auth.id,
 			tokenType: constants.userTokens.emailChangeRevert,
 			expiryDate: expiresAt,
@@ -178,7 +179,7 @@ const requestEmailChange: ServiceFn<
 		newEmail: data.newEmail,
 	};
 
-	const confirmEmailRes = await emailServices.sendEmail(context, {
+	const confirmEmailRes = await sendEmail(context, {
 		type: "internal",
 		to: data.newEmail,
 		subject: (emailData) =>
@@ -195,7 +196,7 @@ const requestEmailChange: ServiceFn<
 	});
 	if (confirmEmailRes.error) return confirmEmailRes;
 
-	const revertEmailRes = await emailServices.sendEmail(context, {
+	const revertEmailRes = await sendEmail(context, {
 		type: "internal",
 		to: data.oldEmail,
 		subject: (emailData) =>

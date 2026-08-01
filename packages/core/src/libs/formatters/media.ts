@@ -13,7 +13,7 @@ import type {
 } from "../../types/response.js";
 import { createMediaUrl } from "../../utils/media/index.js";
 import type { MediaRef } from "../collection/custom-fields/fields/media/types.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 
 type MediaTranslationProps = {
 	title?: string | null;

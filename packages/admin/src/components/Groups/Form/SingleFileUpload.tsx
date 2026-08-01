@@ -17,7 +17,6 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import FocalPointEditor, {
 	type FocalPoint,
 } from "@/components/Modals/Media/FocalPointEditor";
@@ -31,6 +30,9 @@ import ProgressBar from "@/components/Partials/ProgressBar";
 import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Label } from "./Label";
 
 export type SingleFileUploadImageGeneration = {
 	state: {

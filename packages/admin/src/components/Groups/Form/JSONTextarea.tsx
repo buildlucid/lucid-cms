@@ -17,9 +17,11 @@ import {
 	createSignal,
 	type JSXElement,
 } from "solid-js";
-import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import T from "@/translations";
 import { cmHighlighting, cmTheme } from "@/utils/codemirror-theme";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Label } from "./Label";
 
 interface JSONTextareaProps {
 	id: string;

@@ -20,7 +20,6 @@ import {
 	type JSXElement,
 	Show,
 } from "solid-js";
-import { DescribedBy, ErrorMessage, Label } from "@/components/Groups/Form";
 import DropdownContent from "@/components/Partials/DropdownContent";
 import T from "@/translations";
 import {
@@ -28,6 +27,9 @@ import {
 	loadCodeLanguageExtension,
 } from "@/utils/code-field-languages";
 import { cmHighlighting, cmTheme } from "@/utils/codemirror-theme";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Label } from "./Label";
 
 interface CodeEditorProps {
 	id: string;

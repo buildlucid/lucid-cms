@@ -1,7 +1,7 @@
 import type { Integration } from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 
 export interface IntegrationQueryRes {
 	id: number;

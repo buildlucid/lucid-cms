@@ -3,7 +3,7 @@ import type { Account, User } from "../../types/response.js";
 import type { BooleanInt } from "../db/types.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 import type { MediaPosterPropsT } from "./media.js";
 import mediaFormatter from "./media.js";
 import userPermissionsFormatter from "./user-permissions.js";

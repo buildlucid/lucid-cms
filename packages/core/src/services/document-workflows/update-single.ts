@@ -11,7 +11,7 @@ import {
 import type { LucidAuth } from "../../types/hono.js";
 import { sameNumericSet } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { documentServices } from "../index.js";
+import checkDocumentAccess from "../documents/checks/check-document-access.js";
 import {
 	getWorkflowConfig,
 	resolveEffectiveWorkflowStage,
@@ -64,13 +64,10 @@ const updateSingle: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const documentAccessRes = await documentServices.checks.checkDocumentAccess(
-		context,
-		{
-			collectionKey: data.collectionKey,
-			id: data.documentId,
-		},
-	);
+	const documentAccessRes = await checkDocumentAccess(context, {
+		collectionKey: data.collectionKey,
+		id: data.documentId,
+	});
 	if (documentAccessRes.error) return documentAccessRes;
 
 	const Workflows = new DocumentWorkflowsRepository(

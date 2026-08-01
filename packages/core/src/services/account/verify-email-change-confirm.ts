@@ -2,7 +2,7 @@ import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import { EmailChangeRequestsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { userTokenServices } from "../index.js";
+import getUserToken from "../user-tokens/get-single.js";
 
 const verifyEmailChangeConfirm: ServiceFn<
 	[
@@ -17,7 +17,7 @@ const verifyEmailChangeConfirm: ServiceFn<
 		context.config.db,
 	);
 
-	const tokenRes = await userTokenServices.getSingle(context, {
+	const tokenRes = await getUserToken(context, {
 		token: data.token,
 		tokenType: constants.userTokens.emailChangeConfirm,
 	});

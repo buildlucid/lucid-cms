@@ -1,5 +1,5 @@
 import type { MediaFolder } from "../../types/response.js";
-import formatter from "./index.js";
+import formatter from "./helpers.js";
 
 export interface MediaFolderPropsT {
 	id: number;

@@ -5,7 +5,9 @@ import type { LucidAuth } from "../../types/hono.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
-import { accountServices, securityAuditServices } from "../index.js";
+import logSecurityAudit from "../security-audit/log-security-audit.js";
+import checkUpdatePassword from "./checks/check-update-password.js";
+import requestEmailChange from "./request-email-change.js";
 
 const updateMe: ServiceFn<
 	[
@@ -79,7 +81,7 @@ const updateMe: ServiceFn<
 					],
 				})
 			: undefined,
-		accountServices.checks.checkUpdatePassword(context, {
+		checkUpdatePassword(context, {
 			encryptedSecret: getUserRes.data.secret,
 			password: getUserRes.data.password,
 			currentPassword: data.currentPassword,
@@ -135,7 +137,7 @@ const updateMe: ServiceFn<
 			},
 		}),
 		updatePassword.data.newPassword !== undefined
-			? securityAuditServices.logSecurityAudit(context, {
+			? logSecurityAudit(context, {
 					userId: data.auth.id,
 					action: constants.securityAudit.actions.passwordChange,
 					performedBy: data.auth.id,
@@ -151,16 +153,13 @@ const updateMe: ServiceFn<
 	if (updatePasswordAuditRes?.error) return updatePasswordAuditRes;
 
 	if (emailChanged) {
-		const requestEmailChangeRes = await accountServices.requestEmailChange(
-			context,
-			{
-				auth: data.auth,
-				oldEmail: getUserRes.data.email,
-				newEmail: normalizedEmail as string,
-				firstName: updateMeRes.data.first_name,
-				lastName: updateMeRes.data.last_name,
-			},
-		);
+		const requestEmailChangeRes = await requestEmailChange(context, {
+			auth: data.auth,
+			oldEmail: getUserRes.data.email,
+			newEmail: normalizedEmail as string,
+			firstName: updateMeRes.data.first_name,
+			lastName: updateMeRes.data.last_name,
+		});
 		if (requestEmailChangeRes.error) return requestEmailChangeRes;
 	}
 

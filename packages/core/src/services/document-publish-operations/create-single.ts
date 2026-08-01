@@ -11,7 +11,8 @@ import {
 } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { documentVersionServices, documentWorkflowServices } from "../index.js";
+import canPublishTarget from "../document-workflows/can-publish-target.js";
+import cloneVersion from "../documents-versions/clone-version.js";
 import approve from "./approve.js";
 import getReviewers from "./get-reviewers.js";
 import createEvent from "./helpers/create-event.js";
@@ -200,14 +201,11 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	const workflowPublishRes = await documentWorkflowServices.canPublishTarget(
-		context,
-		{
-			collectionKey: data.collectionKey,
-			documentId: data.documentId,
-			target: data.target,
-		},
-	);
+	const workflowPublishRes = await canPublishTarget(context, {
+		collectionKey: data.collectionKey,
+		documentId: data.documentId,
+		target: data.target,
+	});
 	if (workflowPublishRes.error) return workflowPublishRes;
 
 	// Validate reviewer assignments only when this target requires approval.
@@ -483,7 +481,7 @@ const createSingle: ServiceFn<
 	}
 
 	// Snapshot the submitted latest version, then create the operation record.
-	const snapshotRes = await documentVersionServices.cloneVersion(context, {
+	const snapshotRes = await cloneVersion(context, {
 		fromVersionId: latestVersionRes.data.id,
 		toVersionType: snapshotVersionType,
 		collectionKey: data.collectionKey,

@@ -1,8 +1,9 @@
 import { type Component, createEffect, createSignal } from "solid-js";
-import { Input, Switch } from "@/components/Groups/Form";
 import { Modal, ModalFooter } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
 import T from "@/translations";
+import { Input } from "../Input";
+import { Switch } from "../Switch";
 
 const LinkModal: Component<{
 	state: {

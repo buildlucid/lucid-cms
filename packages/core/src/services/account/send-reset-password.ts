@@ -6,7 +6,8 @@ import type { ErrorCopy } from "../../types/errors.js";
 import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { emailServices, userTokenServices } from "../index.js";
+import sendEmail from "../email/send-email.js";
+import createUserToken from "../user-tokens/create-single.js";
 
 const sendResetPassword: ServiceFn<
 	[
@@ -58,14 +59,14 @@ const sendResetPassword: ServiceFn<
 		minutes: constants.passwordResetTokenExpirationMinutes,
 	}).toISOString();
 
-	const userToken = await userTokenServices.createSingle(context, {
+	const userToken = await createUserToken(context, {
 		userId: userExistsRes.data.id,
 		tokenType: constants.userTokens.passwordReset,
 		expiryDate: expiryDate,
 	});
 	if (userToken.error) return userToken;
 
-	const sendEmail = await emailServices.sendEmail(context, {
+	const sendEmailRes = await sendEmail(context, {
 		type: "internal",
 		to: userExistsRes.data.email,
 		subject: (emailData) =>
@@ -82,7 +83,7 @@ const sendResetPassword: ServiceFn<
 		},
 		storage: constants.email.templates.resetPassword.storage,
 	});
-	if (sendEmail.error) return sendEmail;
+	if (sendEmailRes.error) return sendEmailRes;
 
 	return {
 		error: undefined,

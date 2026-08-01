@@ -3,12 +3,10 @@ import classnames from "classnames";
 import classNames from "classnames";
 import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
-import {
-	DescribedBy,
-	ErrorMessage,
-	Label,
-	Tooltip,
-} from "@/components/Groups/Form";
+import { DescribedBy } from "./DescribedBy";
+import { ErrorMessage } from "./ErrorMessage";
+import { Label } from "./Label";
+import { Tooltip } from "./Tooltip";
 
 export const InputFull: Component<{
 	id: string;

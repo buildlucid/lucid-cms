@@ -2,7 +2,8 @@ import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
-import { seedServices, syncServices } from "../index.js";
+import defaultOptions from "../seed/default-options.js";
+import syncRoles from "../sync/sync-roles.js";
 
 const setupRequired: ServiceFn<[], { setupRequired: boolean }> = async (
 	context: ServiceContext,
@@ -20,8 +21,8 @@ const setupRequired: ServiceFn<[], { setupRequired: boolean }> = async (
 
 		if (setupRequired) {
 			const initialSeedRes = await Promise.all([
-				seedServices.defaultOptions(context),
-				syncServices.syncRoles(context),
+				defaultOptions(context),
+				syncRoles(context),
 			]);
 			for (const res of initialSeedRes) {
 				if (res.error) return res;

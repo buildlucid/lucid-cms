@@ -18,13 +18,12 @@ import registeredFields, {
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
-import formatter, {
-	documentBricksFormatter,
-	documentFieldsFormatter,
-	documentWorkflowsFormatter,
-	mediaFormatter,
-} from "./index.js";
+import documentBricksFormatter from "./document-bricks.js";
+import documentFieldsFormatter from "./document-fields.js";
+import documentWorkflowsFormatter from "./document-workflows.js";
+import formatter from "./helpers.js";
 import type { MediaPosterPropsT } from "./media.js";
+import mediaFormatter from "./media.js";
 
 const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];

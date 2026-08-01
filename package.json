@@ -14,9 +14,13 @@
 		"lint:fix": "turbo run lint:fix",
 		"check": "turbo run check",
 		"check:fix": "turbo run check:fix",
+		"fallow": "fallow --workspace \"@lucidcms/*,!@lucidcms/*playground\" --score",
+		"fallow:audit": "fallow audit --workspace \"@lucidcms/*,!@lucidcms/*playground\"",
+		"fallow:type-aware": "fallow dead-code --workspace \"@lucidcms/*,!@lucidcms/*playground\" --type-aware",
 		"prepare": "husky"
 	},
 	"devDependencies": {
+		"fallow": "^3.10.0",
 		"husky": "^9.1.7",
 		"turbo": "^2.9.18",
 		"vitest": "^4.1.9"
