@@ -12,7 +12,7 @@ import type {
 } from "./types.js";
 
 /** Reads the active preview token from session storage. */
-export const readStoredToken = (targetWindow: Window): string | null => {
+const readStoredToken = (targetWindow: Window): string | null => {
 	try {
 		return normalizePreviewToken(
 			targetWindow.sessionStorage.getItem(previewStorageKey),

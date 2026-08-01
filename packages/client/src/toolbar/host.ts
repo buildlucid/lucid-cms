@@ -1,7 +1,7 @@
 import { lucidMountPath } from "./constants.js";
 
 /** Normalizes the public Lucid host to an HTTP(S) origin. */
-export const normalizeToolbarHost = (host: string | URL): URL => {
+const normalizeToolbarHost = (host: string | URL): URL => {
 	const value = String(host).trim();
 	const hasScheme = /^[a-z][a-z\d+.-]*:\/\//i.test(value);
 	const url = new URL(hasScheme ? value : `https://${value}`);

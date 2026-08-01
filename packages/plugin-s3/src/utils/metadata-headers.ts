@@ -1,4 +1,4 @@
-export const METADATA_EXTENSION_HEADER = "x-amz-meta-extension";
+const METADATA_EXTENSION_HEADER = "x-amz-meta-extension";
 export const METADATA_SIZE_HEADER = "x-amz-meta-size";
 
 export const applyMetadataHeaders = (

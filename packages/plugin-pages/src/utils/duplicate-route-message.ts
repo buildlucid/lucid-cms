@@ -7,11 +7,11 @@ type UniqueFieldLabelSource = {
 	key: string;
 };
 
-export const formatUniqueFieldList = (fields: string[]) => {
+const formatUniqueFieldList = (fields: string[]) => {
 	return fields.filter((field) => field.length > 0).join(", ");
 };
 
-export const resolveUniqueFieldLabel = (data: {
+const resolveUniqueFieldLabel = (data: {
 	translate: Translate;
 	collection: CollectionBuilder;
 	field: UniqueFieldLabelSource;

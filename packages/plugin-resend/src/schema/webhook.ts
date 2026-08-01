@@ -74,5 +74,3 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 };
-
-export type WebhookBody = z.infer<typeof controllerSchemas.webhook.body>;

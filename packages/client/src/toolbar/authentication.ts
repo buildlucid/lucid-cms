@@ -16,7 +16,7 @@ export const parseToolbarAuthentication = (
 };
 
 /** Checks Lucid browser-session cookies without refreshing them. */
-export const checkToolbarAuthentication = async (
+const checkToolbarAuthentication = async (
 	targetWindow: Window,
 	host: URL,
 ): Promise<boolean> => {

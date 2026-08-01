@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 export const createBufferETag = (buffer: Uint8Array | Buffer) =>
 	crypto.createHash("md5").update(buffer).digest("hex");
 
-export const formatETag = (etag: string) => {
+const formatETag = (etag: string) => {
 	const normalized = etag.replace(/^W\//, "").replace(/^"+|"+$/g, "");
 	return `"${normalized}"`;
 };

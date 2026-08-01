@@ -1,5 +1,4 @@
 import type { Transporter } from "nodemailer";
-import type { priorityHeaders } from "../constants.js";
 
 export interface PluginOptions {
 	/** Your Nodemailer transporter instance */
@@ -18,10 +17,3 @@ export interface PluginOptions {
 		timeoutMs?: number;
 	};
 }
-
-export type EmailPriority = keyof typeof priorityHeaders;
-
-export type EmailWithPriority = {
-	priority?: EmailPriority;
-	headers?: Record<string, string> | null;
-};

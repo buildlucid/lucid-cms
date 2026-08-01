@@ -1,7 +1,7 @@
 import path, { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { LucidPlugin } from "@lucidcms/core/types";
-import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types/types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
@@ -18,7 +18,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			}
 
 			draft.auth.providers.push({
-				key: "microsoft",
+				key: PLUGIN_IDENTIFIER,
 				name: "Microsoft",
 				icon: "/lucid/assets/auth-provider-icons/microsoft-icon.svg",
 				enabled: pluginOptions.enabled ?? true,

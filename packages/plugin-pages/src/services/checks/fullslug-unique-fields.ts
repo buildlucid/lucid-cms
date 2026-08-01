@@ -307,7 +307,7 @@ export const getUniqueValuesFromFields = (data: {
 	return values;
 };
 
-export const relationUniqueValueKey = (data: {
+const relationUniqueValueKey = (data: {
 	versionId: number;
 	localeCode: string;
 	fieldKey: string;

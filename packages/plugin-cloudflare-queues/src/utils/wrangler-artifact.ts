@@ -19,7 +19,7 @@ type CloudflareWranglerConfigArtifact = {
 	};
 };
 
-export const createQueueBinding = (
+const createQueueBinding = (
 	options: PluginOptions,
 ): true | string | QueueWranglerBindingOptions => {
 	const binding = {

@@ -4,7 +4,7 @@ import { DEFAULT_QUEUE_BINDING, PLUGIN_KEY } from "../constants.js";
 import type { PluginOptions } from "../types.js";
 
 /** Resolves the binding name convention used by Lucid's Wrangler generation. */
-export const resolveBindingName = (options: PluginOptions) =>
+const resolveBindingName = (options: PluginOptions) =>
 	options.binding ?? DEFAULT_QUEUE_BINDING;
 
 /** Resolves the configured Cloudflare queue from the current service env. */

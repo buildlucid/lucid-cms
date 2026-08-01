@@ -15,7 +15,7 @@ type CloudflareWranglerConfigArtifact = {
 	};
 };
 
-export const createR2Binding = (
+const createR2Binding = (
 	options: PluginOptions,
 ): true | string | R2WranglerBindingOptions => {
 	const binding = {

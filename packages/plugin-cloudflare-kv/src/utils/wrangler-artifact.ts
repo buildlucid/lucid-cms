@@ -15,7 +15,7 @@ type CloudflareWranglerConfigArtifact = {
 	};
 };
 
-export const createKVBinding = (
+const createKVBinding = (
 	options: PluginOptions,
 ): true | string | KVWranglerBindingOptions => {
 	const binding = {

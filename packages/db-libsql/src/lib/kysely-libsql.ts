@@ -69,7 +69,7 @@ export class LibsqlDialect implements Dialect {
 	}
 }
 
-export class LibsqlDriver implements Driver {
+class LibsqlDriver implements Driver {
 	client: Client;
 	#closeClient: boolean;
 
@@ -108,7 +108,7 @@ export class LibsqlDriver implements Driver {
 	}
 }
 
-export class LibsqlConnection implements DatabaseConnection {
+class LibsqlConnection implements DatabaseConnection {
 	client: Client;
 	// @ts-expect-error
 	#transaction?: Transaction;

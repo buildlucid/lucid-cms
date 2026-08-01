@@ -4,7 +4,7 @@ import { DEFAULT_R2_BINDING, PLUGIN_KEY } from "../constants.js";
 import type { PluginOptions } from "../types.js";
 
 /** Resolves the binding name convention used by Lucid's Wrangler generation. */
-export const resolveBindingName = (options: PluginOptions) =>
+const resolveBindingName = (options: PluginOptions) =>
 	options.binding ?? DEFAULT_R2_BINDING;
 
 /** Resolves the configured Cloudflare R2 bucket from the current adapter env. */

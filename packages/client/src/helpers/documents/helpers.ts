@@ -85,13 +85,6 @@ export const requireField = <
 	return fields[key];
 };
 
-export function getFieldValue<TValue>(
-	value: TValue,
-	options?: DocumentViewOptions,
-): unknown {
-	return readFieldValue(value, options);
-}
-
 export const getFieldGroups = <TFields extends DocumentFieldValueMap>(
 	value: unknown,
 ): TFields[] => {
@@ -245,24 +238,6 @@ export const readRef = <TRefType extends DocumentRefType>(
 		options,
 	)[0] as DocumentRefResult<TRefType>;
 };
-
-export function getFieldRefs<TRefType extends DocumentRefType>(
-	document: CollectionDocument,
-	refType: TRefType,
-	value: unknown,
-	options?: DocumentViewOptions,
-): DocumentRefsResult<TRefType> {
-	return readRefs(document, refType, value, options);
-}
-
-export function getFieldRef<TRefType extends DocumentRefType>(
-	document: CollectionDocument,
-	refType: TRefType,
-	value: unknown,
-	options?: DocumentViewOptions,
-): DocumentRefResult<TRefType> {
-	return readRef(document, refType, value, options);
-}
 
 const getOrderedBricks = <TBrick extends DocumentBrick>(
 	bricks: TBrick[],

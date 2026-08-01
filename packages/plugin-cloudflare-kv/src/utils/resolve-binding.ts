@@ -4,7 +4,7 @@ import { DEFAULT_KV_BINDING, PLUGIN_KEY } from "../constants.js";
 import type { PluginOptions } from "../types.js";
 
 /** Resolves the binding name convention used by Lucid's Wrangler generation. */
-export const resolveBindingName = (options: PluginOptions) =>
+const resolveBindingName = (options: PluginOptions) =>
 	options.binding ?? DEFAULT_KV_BINDING;
 
 /** Resolves the configured Cloudflare KV namespace from the current adapter env. */

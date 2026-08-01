@@ -161,7 +161,7 @@ class D1Introspector implements DatabaseIntrospector {
 	}
 }
 
-export class D1Driver implements Driver {
+class D1Driver implements Driver {
 	#database: D1DialectDatabase;
 
 	constructor(database: D1DialectDatabase) {
@@ -194,7 +194,7 @@ export class D1Driver implements Driver {
 	async destroy(): Promise<void> {}
 }
 
-export class D1Connection implements DatabaseConnection {
+class D1Connection implements DatabaseConnection {
 	#database: D1DialectDatabase;
 
 	constructor(database: D1DialectDatabase) {

@@ -192,7 +192,7 @@ export const serializeQuery = (query?: Record<string, unknown>): string => {
 /**
  * Removes trailing slashes once so endpoint resolution stays consistent across requests.
  */
-export const normalizeBaseUrl = (baseUrl: string): string =>
+const normalizeBaseUrl = (baseUrl: string): string =>
 	baseUrl.replace(/\/+$/, "");
 
 /**
