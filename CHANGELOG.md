@@ -8,6 +8,7 @@
 - Added OAuth 2.0 support for external integrations, with user and system scoped connections, registered applications, consent, token refresh and revocation. ([98f560f](https://github.com/buildlucid/lucid-cms/commit/98f560f96b53740face220dbf3894a604737c417), [f1b41cf](https://github.com/buildlucid/lucid-cms/commit/f1b41cf9e331c7350dbd8bad68e893583acf37ca))
 - Improved SSO auth provider support with dedicated OAuth 2.0 and OpenID Connect adapters, PKCE and stricter callback validation. ([98f560f](https://github.com/buildlucid/lucid-cms/commit/98f560f96b53740face220dbf3894a604737c417))
 - Added a user-scoped content account endpoint with explicit integration consent.
+- Added project and plugin data seeds with `defineSeed`, configurable sources and new seed CLI commands. ([0eab83f](https://github.com/buildlucid/lucid-cms/commit/0eab83f36266e3cf09488de30fe2dd7c3a6fd9c5))
 
 ### Breaking Changes:
 
@@ -15,6 +16,7 @@
 - Renamed client integrations to integrations across the APIs, types, services and admin UI. ([4c25d6a](https://github.com/buildlucid/lucid-cms/commit/4c25d6a5681cb1e7bea7cfe03e52904f493095b8))
 - Dropped support for the multiple tenants experiment. ([9994698](https://github.com/buildlucid/lucid-cms/commit/999469889a146868fb50acab45d318fc7815ccfb))
 - Changed media translations in API responses from arrays to locale-keyed records.
+- Custom migrations now receive a full service context and run after core migrations, collection migrations and sync. ([0eab83f](https://github.com/buildlucid/lucid-cms/commit/0eab83f36266e3cf09488de30fe2dd7c3a6fd9c5))
 
 ### Bug Fixes:
 

@@ -50,6 +50,7 @@
 	"common.media": "Media",
 	"common.document": "Document",
 	"common.close": "Close",
+	"common.section": "Section",
 	"common.details": "Details",
 	"common.options": "Options",
 	"common.scopes": "Scopes",

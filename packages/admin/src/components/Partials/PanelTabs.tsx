@@ -1,5 +1,7 @@
 import classNames from "classnames";
-import { type Component, For } from "solid-js";
+import { type Component, createMemo, createUniqueId, For } from "solid-js";
+import { Select } from "@/components/Groups/Form/Select";
+import T from "@/translations";
 
 export interface PanelTabItem<T extends string = string> {
 	value: T;
@@ -17,11 +19,60 @@ interface PanelTabsProps<T extends string = string> {
 
 const PanelTabs: Component<PanelTabsProps> = (props) => {
 	// ----------------------------------
+	// State
+	const selectId = createUniqueId();
+
+	// ----------------------------------
+	// Memos
+	const visibleItems = createMemo(() =>
+		props.items.filter((item) => item.show ?? true),
+	);
+	const activeItem = createMemo(() =>
+		visibleItems().find((item) => item.value === props.active),
+	);
+
+	// ----------------------------------
 	// Render
 	return (
-		<div class={classNames("mt-6 border-b border-border mb-4", props.class)}>
-			<div class="flex flex-row flex-wrap items-center gap-4">
-				<For each={props.items.filter((item) => item.show ?? true)}>
+		<div
+			class={classNames("mt-6 mb-4 md:border-b md:border-border", props.class)}
+		>
+			<div class="md:hidden">
+				<Select
+					id={`panel-tabs-${selectId}`}
+					name={`panel-tabs-${selectId}`}
+					value={props.active}
+					onChange={(value) => {
+						if (typeof value === "string") props.onChange(value);
+					}}
+					options={visibleItems()}
+					noMargin
+					noClear
+					hideOptionalText
+					ariaLabel={T()("common.section")}
+					hasError={activeItem()?.hasError}
+					renderValue={({ option }) => (
+						<span
+							class={classNames("truncate", {
+								"text-error-base": option.hasError,
+							})}
+						>
+							{option.label}
+						</span>
+					)}
+					renderOption={({ option }) => (
+						<span
+							class={classNames({
+								"text-error-base": option.hasError,
+							})}
+						>
+							{option.label}
+						</span>
+					)}
+				/>
+			</div>
+			<div class="hidden flex-row flex-wrap items-center gap-4 md:flex">
+				<For each={visibleItems()}>
 					{(item) => (
 						<button
 							type="button"
