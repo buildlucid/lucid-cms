@@ -22,7 +22,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import { documentBrickServices } from "../../index.js";
+import getDocumentBricks from "../../documents-bricks/get-multiple.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
 import type { PreviewSessionDocumentTarget } from "../../preview-sessions/types.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
@@ -191,7 +191,7 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		};
 	}
 
-	const bricksRes = await documentBrickServices.getMultiple(context, {
+	const bricksRes = await getDocumentBricks(context, {
 		versionId: documentRes.data.version_id,
 		collectionKey: collectionRes.data.key,
 		versionType: relationVersionTypeRes.data.versionType,

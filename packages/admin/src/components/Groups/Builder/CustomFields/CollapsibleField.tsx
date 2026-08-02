@@ -22,9 +22,10 @@ import {
 	countFieldErrorsForKeys,
 	getStructuralFieldKeys,
 } from "@/utils/structural-field-helpers";
-import { DynamicField } from "./DynamicField";
+import type { DynamicFieldRenderer } from "./types";
 
 interface CollapsibleFieldProps {
+	renderField: DynamicFieldRenderer;
 	fieldConfig: CollectionFieldConfigByType<"collapsible">;
 	fields: InternalDocumentField[];
 	fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
@@ -202,7 +203,7 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 				<div class="border-t border-border bg-card-base p-3 md:p-4 grid grid-cols-12 gap-4">
 					<Index each={childrenMounted() ? fieldConfig().fields : []}>
 						{(config) => (
-							<DynamicField
+							<props.renderField
 								fieldConfig={config()}
 								fields={props.fields}
 								fieldsByKey={props.fieldsByKey}

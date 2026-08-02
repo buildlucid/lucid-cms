@@ -1,6 +1,6 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
-import { isJsonContainerValue } from "../../../../../utils/helpers/index.js";
+import { isJsonContainerValue } from "../../../../../utils/helpers/get-typed-value.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {

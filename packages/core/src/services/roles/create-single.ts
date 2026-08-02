@@ -6,12 +6,12 @@ import {
 	RoleTranslationsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { roleServices } from "../index.js";
 import {
 	getTranslationValue,
 	prepareRoleTranslations,
 	type RoleTranslationInput,
 } from "./helpers/role-translations.js";
+import validatePermissions from "./validate-permissions.js";
 
 const createSingle: ServiceFn<
 	[
@@ -54,7 +54,7 @@ const createSingle: ServiceFn<
 	}
 
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
-		roleServices.validatePermissions(context, {
+		validatePermissions(context, {
 			permissions: data.permissions,
 		}),
 		Roles.selectRoleIdByTranslationName({

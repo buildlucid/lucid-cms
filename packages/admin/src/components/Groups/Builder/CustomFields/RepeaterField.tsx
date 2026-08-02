@@ -10,7 +10,6 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import { GroupBody } from "@/components/Groups/Builder";
 import { ErrorMessage } from "@/components/Groups/Form";
 import Button from "@/components/Partials/Button";
 import DragDrop from "@/components/Partials/DragDrop";
@@ -24,8 +23,11 @@ import brickHelpers from "@/utils/brick-helpers";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import helpers from "@/utils/helpers";
 import { countFieldErrors } from "@/utils/structural-field-helpers";
+import { GroupBody } from "../GroupBody";
+import type { DynamicFieldRenderer } from "./types";
 
 interface RepeaterFieldProps {
+	renderField: DynamicFieldRenderer;
 	fieldConfig: CollectionFieldConfigByType<"repeater">;
 	fieldData?: InternalDocumentField;
 	groupRef?: string;
@@ -165,6 +167,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 									<For each={groupRefs()}>
 										{(groupRef, i) => (
 											<GroupBody
+												renderField={props.renderField}
 												fieldConfig={fieldConfig()}
 												dragDropKey={dragDropKey()}
 												groupRef={groupRef}

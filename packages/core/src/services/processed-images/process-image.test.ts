@@ -15,22 +15,16 @@ vi.mock("../../libs/repositories/index.js", () => ({
 	ProcessedImagesRepository: class {},
 }));
 
-vi.mock("../index.js", () => ({
-	mediaServices: {
-		checks: {
-			checkHasMediaStrategy: mocks.checkHasMediaStrategy,
-		},
-	},
-	optionServices: {
-		adjustInt: vi.fn(),
-	},
-	processedImageServices: {
-		optimizeImage: mocks.optimizeImage,
-		getSingleCount: mocks.getSingleCount,
-		checks: {
-			checkCanStore: vi.fn(),
-		},
-	},
+vi.mock("../media/checks/check-has-media-strategy.js", () => ({
+	default: mocks.checkHasMediaStrategy,
+}));
+
+vi.mock("./get-single-count.js", () => ({
+	default: mocks.getSingleCount,
+}));
+
+vi.mock("./optimize-image.js", () => ({
+	default: mocks.optimizeImage,
 }));
 
 import processImage from "./process-image.js";

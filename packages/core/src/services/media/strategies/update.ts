@@ -3,8 +3,9 @@ import type { ErrorCopy, LucidErrorData } from "../../../types/errors.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices } from "../../index.js";
 import adjustStorageUsage from "../adjust-storage-usage.js";
+import checkCanUpdateMedia from "../checks/check-can-update-media.js";
+import checkHasMediaStrategy from "../checks/check-has-media-strategy.js";
 import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
 const update: ServiceFn<
@@ -30,8 +31,7 @@ const update: ServiceFn<
 		sourceDeleted: boolean;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const cleanupUpdatedKey = async () => {
@@ -56,12 +56,9 @@ const update: ServiceFn<
 	if (mediaMetaRes.error) return mediaMetaRes;
 
 	// Ensure we available storage space
-	const proposedSizeRes = await mediaServices.checks.checkCanUpdateMedia(
-		context,
-		{
-			size: mediaMetaRes.data.size,
-		},
-	);
+	const proposedSizeRes = await checkCanUpdateMedia(context, {
+		size: mediaMetaRes.data.size,
+	});
 	if (proposedSizeRes.error) {
 		await cleanupUpdatedKey();
 		return proposedSizeRes;

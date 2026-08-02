@@ -9,7 +9,7 @@ import { copy } from "../../libs/i18n/index.js";
 import type { Email } from "../../types/response.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { emailServices } from "../index.js";
+import sendEmail from "./send-email.js";
 
 const sendExternal: ServiceFn<
 	[
@@ -52,7 +52,7 @@ const sendExternal: ServiceFn<
 		};
 	}
 
-	return serviceWrapper(emailServices.sendEmail, {
+	return serviceWrapper(sendEmail, {
 		transaction: true,
 	})(context, {
 		type: "external",

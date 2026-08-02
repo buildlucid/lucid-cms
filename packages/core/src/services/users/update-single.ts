@@ -10,12 +10,10 @@ import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
-import {
-	emailServices,
-	securityAuditServices,
-	userServices,
-} from "../index.js";
+import sendEmail from "../email/send-email.js";
+import logSecurityAudit from "../security-audit/log-security-audit.js";
 import prepareUpdateSingleAuditLogs from "./helpers/prepare-update-single-audit-logs.js";
+import updateMultipleRoles from "./update-multiple-roles.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -225,7 +223,7 @@ const updateSingle: ServiceFn<
 				},
 			},
 		}),
-		userServices.updateMultipleRoles(context, {
+		updateMultipleRoles(context, {
 			userId: data.userId,
 			roleIds: data.roleIds,
 		}),
@@ -237,7 +235,7 @@ const updateSingle: ServiceFn<
 
 	const auditResults = await Promise.all(
 		auditLogsRes.data.logs.map((auditLog) =>
-			securityAuditServices.logSecurityAudit(context, auditLog),
+			logSecurityAudit(context, auditLog),
 		),
 	);
 	for (const auditRes of auditResults) {
@@ -245,7 +243,7 @@ const updateSingle: ServiceFn<
 	}
 
 	if (auditLogsRes.data.emailChange) {
-		const sendEmailRes = await emailServices.sendEmail(context, {
+		const sendEmailRes = await sendEmail(context, {
 			template: constants.email.templates.emailChanged.key,
 			type: "internal",
 			to: auditLogsRes.data.emailChange.newValue,

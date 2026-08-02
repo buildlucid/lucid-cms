@@ -15,9 +15,10 @@ import {
 } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkDocumentAccess from "../documents/checks/check-document-access.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
-import { documentBrickServices, documentServices } from "../index.js";
+import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
 
 const promoteVersion: ServiceFn<
 	[
@@ -102,13 +103,10 @@ const promoteVersion: ServiceFn<
 	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
 
-	const documentAccessRes = await documentServices.checks.checkDocumentAccess(
-		context,
-		{
-			collectionKey: data.collectionKey,
-			id: data.documentId,
-		},
-	);
+	const documentAccessRes = await checkDocumentAccess(context, {
+		collectionKey: data.collectionKey,
+		id: data.documentId,
+	});
 	if (documentAccessRes.error) return documentAccessRes;
 
 	const [versionRes, bricksQueryRes] = await Promise.all([
@@ -339,7 +337,7 @@ const promoteVersion: ServiceFn<
 	});
 	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
 
-	const insertRes = await documentBrickServices.insertBrickTables(context, {
+	const insertRes = await insertBrickTables(context, {
 		tables: sortedTables,
 		collection: collectionRes.data,
 	});

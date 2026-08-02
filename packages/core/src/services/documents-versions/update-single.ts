@@ -7,7 +7,10 @@ import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { DocumentVersionUpdateResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
-import { documentBrickServices } from "../index.js";
+import checkDuplicateOrder from "../documents-bricks/checks/check-duplicate-order.js";
+import checkValidateBricksFields from "../documents-bricks/checks/check-validate-bricks-fields.js";
+import createDocumentBricks from "../documents-bricks/create-multiple.js";
+import deleteDocumentBricks from "../documents-bricks/delete-multiple.js";
 import getUpdateContext from "./helpers/get-update-context.js";
 
 const updateSingle: ServiceFn<
@@ -71,24 +74,23 @@ const updateSingle: ServiceFn<
 	);
 	if (hookResponse.error) return hookResponse;
 
-	const checkBrickOrderRes = documentBrickServices.checks.checkDuplicateOrder(
+	const checkBrickOrderRes = checkDuplicateOrder(
 		hookResponse.data.bricks ?? [],
 	);
 	if (checkBrickOrderRes.error) return checkBrickOrderRes;
 
-	const checkValidateRes =
-		await documentBrickServices.checks.checkValidateBricksFields(context, {
-			collection: updateContextRes.data.collection,
-			bricks: hookResponse.data.bricks ?? [],
-			fields: hookResponse.data.fields ?? [],
-		});
+	const checkValidateRes = await checkValidateBricksFields(context, {
+		collection: updateContextRes.data.collection,
+		bricks: hookResponse.data.bricks ?? [],
+		fields: hookResponse.data.fields ?? [],
+	});
 	if (checkValidateRes.error) return checkValidateRes;
 
 	// ----------------------------------------------
 	// Update document
 
 	//* delete all bricks that belong to the document and version
-	const deleteBricksRes = await documentBrickServices.deleteMultiple(context, {
+	const deleteBricksRes = await deleteDocumentBricks(context, {
 		versionId: data.versionId,
 		documentId: data.documentId,
 		collectionKey: data.collectionKey,
@@ -96,17 +98,14 @@ const updateSingle: ServiceFn<
 	if (deleteBricksRes.error) return deleteBricksRes;
 
 	// Save bricks for the new version
-	const createMultipleBricks = await documentBrickServices.createMultiple(
-		context,
-		{
-			versionId: data.versionId,
-			documentId: data.documentId,
-			bricks: hookResponse.data.bricks,
-			fields: hookResponse.data.fields,
-			collection: updateContextRes.data.collection,
-			skipValidation: true,
-		},
-	);
+	const createMultipleBricks = await createDocumentBricks(context, {
+		versionId: data.versionId,
+		documentId: data.documentId,
+		bricks: hookResponse.data.bricks,
+		fields: hookResponse.data.fields,
+		collection: updateContextRes.data.collection,
+		skipValidation: true,
+	});
 	if (createMultipleBricks.error) return createMultipleBricks;
 
 	// Fire afterUpsert hook

@@ -5,11 +5,9 @@ import getImageProcessor from "../../libs/image-processor/get-adapter.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import {
-	mediaServices,
-	optionServices,
-	processedImageServices,
-} from "../index.js";
+import getMediaStorageUsage from "../media/get-storage-usage.js";
+import getOptions from "../options/get-multiple.js";
+import getProcessedImageCount from "../processed-images/get-count.js";
 
 const getSettings: ServiceFn<
 	[
@@ -23,12 +21,12 @@ const getSettings: ServiceFn<
 > = async (context, data) => {
 	const [optionsRes, processedImageCountRes, imageProcessor, mediaStorageUsed] =
 		await Promise.all([
-			optionServices.getMultiple(context, {
+			getOptions(context, {
 				names: ["system_alert_email"],
 			}),
-			processedImageServices.getCount(context),
+			getProcessedImageCount(context),
 			getImageProcessor(context.config),
-			mediaServices.getStorageUsage(context),
+			getMediaStorageUsage(context),
 		]);
 	if (processedImageCountRes.error) return processedImageCountRes;
 	if (optionsRes.error) return optionsRes;

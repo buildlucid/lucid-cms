@@ -1,7 +1,7 @@
 import { MediaRepository } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import checkHasMediaStrategy from "../media/checks/check-has-media-strategy.js";
 
 const requestDownload: ServiceFn<
 	[
@@ -13,8 +13,7 @@ const requestDownload: ServiceFn<
 		url: string;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 	const Media = new MediaRepository(context.db.client, context.config.db);
 

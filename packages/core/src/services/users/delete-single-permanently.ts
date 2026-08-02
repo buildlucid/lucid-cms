@@ -3,7 +3,8 @@ import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
-import { userServices } from "../index.js";
+import checkNotLastUser from "./checks/check-not-last-user.js";
+import checkUserAccess from "./checks/check-user-access.js";
 
 const deleteSinglePermanently: ServiceFn<
 	[
@@ -27,7 +28,7 @@ const deleteSinglePermanently: ServiceFn<
 		};
 	}
 
-	const accessRes = await userServices.checks.checkUserAccess(context, {
+	const accessRes = await checkUserAccess(context, {
 		id: data.userId,
 	});
 	if (accessRes.error) return accessRes;
@@ -52,7 +53,7 @@ const deleteSinglePermanently: ServiceFn<
 	if (getUserRes.error) return getUserRes;
 
 	if (!formatter.formatBoolean(getUserRes.data.is_deleted)) {
-		const notLastUserRes = await userServices.checks.checkNotLastUser(context);
+		const notLastUserRes = await checkNotLastUser(context);
 		if (notLastUserRes.error) return notLastUserRes;
 	}
 

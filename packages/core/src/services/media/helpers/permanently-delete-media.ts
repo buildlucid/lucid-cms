@@ -6,7 +6,8 @@ import {
 	ProcessedImagesRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices } from "../../index.js";
+import checkHasMediaStrategy from "../checks/check-has-media-strategy.js";
+import deleteMediaObject from "../strategies/delete.js";
 import clearContentMediaSingleCache from "./clear-content-media-cache.js";
 
 /** Permanently deletes owned descendants before their parent and stored objects. */
@@ -19,8 +20,7 @@ const permanentlyDeleteMedia: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const Media = new MediaRepository(context.db.client, context.config.db);
@@ -97,7 +97,7 @@ const permanentlyDeleteMedia: ServiceFn<
 		mediaStrategyRes.data.deleteMultiple(context, {
 			keys: processedImagesRes.data.map((i) => i.key),
 		}),
-		mediaServices.strategies.deleteObject(context, {
+		deleteMediaObject(context, {
 			key: deleteMediaRes.data.key,
 			size: deleteMediaRes.data.file_size,
 			processedSize: processedImagesRes.data.reduce(

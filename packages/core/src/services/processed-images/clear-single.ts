@@ -3,8 +3,8 @@ import {
 	ProcessedImagesRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
 import adjustStorageUsage from "../media/adjust-storage-usage.js";
+import checkHasMediaStrategy from "../media/checks/check-has-media-strategy.js";
 
 // TODO: push this to a queue
 const clearSingle: ServiceFn<
@@ -16,8 +16,7 @@ const clearSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 	if (!data.key && data.id === undefined) {
 		return {

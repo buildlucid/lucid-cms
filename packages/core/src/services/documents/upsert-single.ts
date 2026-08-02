@@ -11,11 +11,10 @@ import {
 	isFractionalOrderKey,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import {
-	documentServices,
-	documentVersionServices,
-	documentWorkflowServices,
-} from "../index.js";
+import createInitialDocumentWorkflow from "../document-workflows/create-initial.js";
+import createDocumentVersion from "../documents-versions/create-single.js";
+import checkDocumentAccess from "./checks/check-document-access.js";
+import checkSingleCollectionDocumentCount from "./checks/check-single-collection-document-count.js";
 import cleanupFailedCreate from "./helpers/cleanup-failed-create.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 
@@ -88,22 +87,23 @@ const upsertSingle: ServiceFn<
 
 	//* check if document exists within the collection
 	if (data.documentId !== undefined) {
-		const existingDocumentRes =
-			await documentServices.checks.checkDocumentAccess(context, {
-				collectionKey: data.collectionKey,
-				id: data.documentId,
-			});
+		const existingDocumentRes = await checkDocumentAccess(context, {
+			collectionKey: data.collectionKey,
+			id: data.documentId,
+		});
 		if (existingDocumentRes.error) return existingDocumentRes;
 	}
 
 	//* for single collections types, check if a document already exists
-	const checkDocumentCountRes =
-		await documentServices.checks.checkSingleCollectionDocumentCount(context, {
+	const checkDocumentCountRes = await checkSingleCollectionDocumentCount(
+		context,
+		{
 			collectionKey: data.collectionKey,
 			collectionMode: collectionRes.data.getData.mode,
 			documentId: data.documentId,
 			documentTable: tableNamesRes.data.document,
-		});
+		},
+	);
 	if (checkDocumentCountRes.error) return checkDocumentCountRes;
 
 	// ----------------------------------------------
@@ -156,7 +156,7 @@ const upsertSingle: ServiceFn<
 	// ----------------------------------------------
 	// Create and manage document versions
 	const [createVersionRes, workflowRes] = await Promise.all([
-		documentVersionServices.createSingle(context, {
+		createDocumentVersion(context, {
 			documentId: upsertDocRes.data.id,
 			userId: data.userId,
 			bricks: data.bricks,
@@ -164,7 +164,7 @@ const upsertSingle: ServiceFn<
 			collection: collectionRes.data,
 		}),
 		data.documentId === undefined
-			? documentWorkflowServices.createInitial(context, {
+			? createInitialDocumentWorkflow(context, {
 					collectionKey: data.collectionKey,
 					documentId: upsertDocRes.data.id,
 					userId: data.userId,

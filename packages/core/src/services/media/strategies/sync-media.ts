@@ -2,8 +2,9 @@ import { copy } from "../../../libs/i18n/index.js";
 import type { MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices } from "../../index.js";
 import adjustStorageUsage from "../adjust-storage-usage.js";
+import checkCanStoreMedia from "../checks/check-can-store-media.js";
+import checkHasMediaStrategy from "../checks/check-has-media-strategy.js";
 import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
 const syncMedia: ServiceFn<
@@ -24,8 +25,7 @@ const syncMedia: ServiceFn<
 		etag: string | null;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const mediaMetaRes = await mediaStrategyRes.data.getMeta(context, {
@@ -33,12 +33,9 @@ const syncMedia: ServiceFn<
 	});
 	if (mediaMetaRes.error) return mediaMetaRes;
 
-	const proposedSizeRes = await mediaServices.checks.checkCanStoreMedia(
-		context,
-		{
-			size: mediaMetaRes.data.size,
-		},
-	);
+	const proposedSizeRes = await checkCanStoreMedia(context, {
+		size: mediaMetaRes.data.size,
+	});
 	if (proposedSizeRes.error) {
 		await mediaStrategyRes.data.delete(context, {
 			key: data.key,

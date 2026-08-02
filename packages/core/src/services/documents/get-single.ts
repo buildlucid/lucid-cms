@@ -10,7 +10,8 @@ import type { GetSingleQueryParams } from "../../schemas/documents.js";
 import type { InternalCollectionDocument } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { documentBrickServices, documentWorkflowServices } from "../index.js";
+import getDocumentWorkflow from "../document-workflows/get-single.js";
+import getDocumentBricks from "../documents-bricks/get-multiple.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
 
@@ -73,7 +74,7 @@ const getSingle: ServiceFn<
 				tableName: tableNamesRes.data.document,
 			},
 		),
-		documentWorkflowServices.getSingle(context, {
+		getDocumentWorkflow(context, {
 			collectionKey: data.collectionKey,
 			documentId: data.id,
 		}),
@@ -109,7 +110,7 @@ const getSingle: ServiceFn<
 	const include = resolveDocumentIncludes(data.query.include);
 
 	if (include.bricks || include.refs) {
-		const bricksRes = await documentBrickServices.getMultiple(context, {
+		const bricksRes = await getDocumentBricks(context, {
 			versionId: versionId,
 			collectionKey: documentRes.data.collection_key,
 			versionType: relationVersionTypeRes.data.versionType,

@@ -18,8 +18,9 @@ import type {
 import changeKeyVisibility from "../../utils/media/change-key-visibility.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices, processedImageServices } from "../index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
+import clearProcessedImage from "../processed-images/clear-single.js";
+import checkAwaitingSync from "./checks/check-awaiting-sync.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 import deactivateCrop from "./helpers/deactivate-crop.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
@@ -28,6 +29,8 @@ import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
 import syncOwnedVisibility from "./helpers/sync-owned-visibility.js";
 import upsertCrop from "./helpers/upsert-crop.js";
+import renameMedia from "./strategies/rename.js";
+import updateMedia from "./strategies/update.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -163,21 +166,19 @@ const updateSingle: ServiceFn<
 		};
 	}
 
-	let updateObjectRes: Awaited<
-		ReturnType<typeof mediaServices.strategies.update>
-	>["data"];
+	let updateObjectRes: Awaited<ReturnType<typeof updateMedia>>["data"];
 
 	let renamedKey: string | undefined;
 	const currentPublic = formatter.formatBoolean(mediaRes.data.public);
 	const targetPublic = data.public ?? currentPublic;
 
 	if (data.key !== undefined && data.fileName !== undefined) {
-		const awaitingSync = await mediaServices.checks.checkAwaitingSync(context, {
+		const awaitingSync = await checkAwaitingSync(context, {
 			key: data.key,
 		});
 		if (awaitingSync.error) return awaitingSync;
 
-		const updateRes = await mediaServices.strategies.update(context, {
+		const updateRes = await updateMedia(context, {
 			previousSize: mediaRes.data.file_size,
 			previousKey: mediaRes.data.key,
 			previousType: mediaRes.data.type as MediaType,
@@ -251,7 +252,7 @@ const updateSingle: ServiceFn<
 			visibility: targetVisibility,
 		});
 
-		const renameRes = await mediaServices.strategies.rename(context, {
+		const renameRes = await renameMedia(context, {
 			from: mediaRes.data.key,
 			to: newKey,
 		});
@@ -381,13 +382,13 @@ const updateSingle: ServiceFn<
 				})
 			: Promise.resolve({ error: undefined, data: undefined }),
 		shouldClearProcessed
-			? processedImageServices.clearSingle(context, {
+			? clearProcessedImage(context, {
 					id: mediaRes.data.id,
 					key: mediaRes.data.key,
 				})
 			: Promise.resolve({ error: undefined, data: undefined }),
 		shouldClearActiveCropProcessed
-			? processedImageServices.clearSingle(context, {
+			? clearProcessedImage(context, {
 					key: activeCrop.key,
 				})
 			: Promise.resolve({ error: undefined, data: undefined }),

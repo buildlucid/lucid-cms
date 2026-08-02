@@ -4,7 +4,7 @@ import {
 	OAuthGrantsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import deleteMediaPermanently from "../media/delete-single-permanently.js";
 
 const deleteSingle: ServiceFn<
 	[{ id: number; userId: number }],
@@ -68,7 +68,7 @@ const deleteSingle: ServiceFn<
 	if (deleteRes.error) return deleteRes;
 
 	if (existingRes.data.logo_media_id !== null) {
-		const deleteLogoRes = await mediaServices.deleteSinglePermanently(context, {
+		const deleteLogoRes = await deleteMediaPermanently(context, {
 			id: existingRes.data.logo_media_id,
 			userId: data.userId,
 		});

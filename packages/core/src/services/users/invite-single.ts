@@ -10,7 +10,9 @@ import generateSecret from "../../utils/helpers/generate-secret.js";
 import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { emailServices, userServices, userTokenServices } from "../index.js";
+import sendEmail from "../email/send-email.js";
+import createUserToken from "../user-tokens/create-single.js";
+import checkRolesExist from "./checks/check-roles-exist.js";
 
 const inviteSingle: ServiceFn<
 	[
@@ -44,7 +46,7 @@ const inviteSingle: ServiceFn<
 		EmailChangeRequests.selectReservedByEmail({
 			email,
 		}),
-		userServices.checks.checkRolesExist(context, {
+		checkRolesExist(context, {
 			roleIds: data.roleIds,
 		}),
 	]);
@@ -110,14 +112,14 @@ const inviteSingle: ServiceFn<
 		minutes: constants.userInviteTokenExpirationMinutes,
 	}).toISOString();
 
-	const userTokenRes = await userTokenServices.createSingle(context, {
+	const userTokenRes = await createUserToken(context, {
 		userId: newUserRes.data.id,
 		tokenType: constants.userTokens.invitation,
 		expiryDate: expiryDate,
 	});
 	if (userTokenRes.error) return userTokenRes;
 
-	const sendEmailRes = await emailServices.sendEmail(context, {
+	const sendEmailRes = await sendEmail(context, {
 		type: "internal",
 		to: email,
 		subject: (emailData) =>

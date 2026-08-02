@@ -1,7 +1,5 @@
-import type { FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
 import {
-	type Accessor,
 	type Component,
 	createEffect,
 	createMemo,
@@ -15,13 +13,9 @@ import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import brickStore from "@/store/brick-store";
 import type {
 	CollectionDataFieldConfig,
-	CollectionFieldConfig,
 	CollectionFieldConfigByType,
 } from "@/types/collection-config";
-import {
-	evaluateFieldVisibility,
-	type FieldConditionScope,
-} from "@/utils/field-condition-helpers";
+import { evaluateFieldVisibility } from "@/utils/field-condition-helpers";
 import { getPreviewFieldId } from "@/utils/preview-focus-dom";
 import { CheckboxField } from "./CheckboxField";
 import { CodeField } from "./CodeField";
@@ -38,6 +32,7 @@ import { RichTextField } from "./RichTextField";
 import { SectionField } from "./SectionField";
 import { SelectField } from "./SelectField";
 import { TextareaField } from "./TextareaField";
+import type { DynamicFieldProps } from "./types";
 import { UserField } from "./UserField";
 
 /** Maps `ui.width` onto the 12-column grid. Mobile always spans the full row. */
@@ -48,20 +43,6 @@ const fieldWidthClasses: Record<number, string> = {
 	4: "col-span-12 md:col-span-4",
 	3: "col-span-12 md:col-span-3",
 };
-
-interface DynamicFieldProps {
-	fieldConfig: CollectionFieldConfig;
-	fields: InternalDocumentField[];
-	fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
-	fieldErrors: FieldError[];
-	activeTab?: Accessor<string | undefined>;
-	conditionScopes?: Accessor<FieldConditionScope[]>;
-	groupRef?: string;
-	groupPath?: string;
-	repeaterKey?: string;
-	repeaterDepth?: number;
-	pathPrefix?: Array<string | number>;
-}
 
 export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	// -------------------------------
@@ -253,6 +234,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						</Match>
 						<Match when={fieldConfig().type === "section"}>
 							<SectionField
+								renderField={DynamicField}
 								fieldConfig={
 									fieldConfig() as CollectionFieldConfigByType<"section">
 								}
@@ -269,6 +251,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						</Match>
 						<Match when={fieldConfig().type === "collapsible"}>
 							<CollapsibleField
+								renderField={DynamicField}
 								fieldConfig={
 									fieldConfig() as CollectionFieldConfigByType<"collapsible">
 								}
@@ -285,6 +268,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						</Match>
 						<Match when={fieldConfig().type === "repeater"}>
 							<RepeaterField
+								renderField={DynamicField}
 								fieldConfig={
 									fieldConfig() as CollectionFieldConfigByType<"repeater">
 								}

@@ -8,13 +8,13 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
-import { roleServices } from "../index.js";
 import checkRoleAccess from "./checks/check-role-access.js";
 import {
 	getTranslationValue,
 	prepareRoleTranslations,
 	type RoleTranslationInput,
 } from "./helpers/role-translations.js";
+import validatePermissions from "./validate-permissions.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -48,7 +48,7 @@ const updateSingle: ServiceFn<
 			id: data.id,
 		}),
 		data.permissions !== undefined
-			? roleServices.validatePermissions(context, {
+			? validatePermissions(context, {
 					permissions: data.permissions,
 				})
 			: undefined,

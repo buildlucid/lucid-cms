@@ -8,7 +8,7 @@ import {
 import type { OAuthClientLogoInput } from "../../schemas/oauth-clients.js";
 import type { OAuthClient } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import deleteMediaPermanently from "../media/delete-single-permanently.js";
 import { isSafeRedirectUri } from "../oauth/helpers/client-metadata.js";
 import getSingle from "./get-single.js";
 import {
@@ -175,7 +175,7 @@ const updateSingle: ServiceFn<
 	}
 
 	if (data.removeLogo === true && existingRes.data.logo_media_id !== null) {
-		const deleteLogoRes = await mediaServices.deleteSinglePermanently(context, {
+		const deleteLogoRes = await deleteMediaPermanently(context, {
 			id: existingRes.data.logo_media_id,
 			userId: data.userId,
 		});

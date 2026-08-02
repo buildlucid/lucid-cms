@@ -15,9 +15,10 @@ import {
 	countFieldErrorsForKeys,
 	getStructuralFieldKeys,
 } from "@/utils/structural-field-helpers";
-import { DynamicField } from "./DynamicField";
+import type { DynamicFieldRenderer } from "./types";
 
 interface SectionFieldProps {
+	renderField: DynamicFieldRenderer;
 	fieldConfig: CollectionFieldConfigByType<"section">;
 	fields: InternalDocumentField[];
 	fieldsByKey?: Accessor<Map<string, InternalDocumentField>>;
@@ -97,7 +98,7 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 			>
 				<Index each={fieldConfig().fields}>
 					{(config) => (
-						<DynamicField
+						<props.renderField
 							fieldConfig={config()}
 							fields={props.fields}
 							fieldsByKey={props.fieldsByKey}

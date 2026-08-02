@@ -1,7 +1,7 @@
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
-import { userServices } from "../index.js";
+import checkUserAccess from "./checks/check-user-access.js";
 
 const restoreMultiple: ServiceFn<
 	[
@@ -20,7 +20,7 @@ const restoreMultiple: ServiceFn<
 
 	const Users = new UsersRepository(context.db.client, context.config.db);
 
-	const accessRes = await userServices.checks.checkUserAccess(context, {
+	const accessRes = await checkUserAccess(context, {
 		ids: data.ids,
 	});
 	if (accessRes.error) return accessRes;

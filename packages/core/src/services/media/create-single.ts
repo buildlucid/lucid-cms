@@ -18,13 +18,15 @@ import type { Media } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
+import checkAwaitingSync from "./checks/check-awaiting-sync.js";
 import prepareMediaTranslations from "./helpers/prepare-media-translations.js";
 import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
 import syncOwnedVisibility from "./helpers/sync-owned-visibility.js";
 import upsertCrop from "./helpers/upsert-crop.js";
+import deleteMediaObject from "./strategies/delete.js";
+import syncMedia from "./strategies/sync-media.js";
 
 const createSingle: ServiceFn<
 	[
@@ -85,15 +87,12 @@ const createSingle: ServiceFn<
 	});
 	if (folderAccessRes.error) return folderAccessRes;
 
-	const awaitingSyncRes = await mediaServices.checks.checkAwaitingSync(
-		context,
-		{
-			key: data.key,
-		},
-	);
+	const awaitingSyncRes = await checkAwaitingSync(context, {
+		key: data.key,
+	});
 	if (awaitingSyncRes.error) return awaitingSyncRes;
 
-	const syncMediaRes = await mediaServices.strategies.syncMedia(context, {
+	const syncMediaRes = await syncMedia(context, {
 		key: data.key,
 		fileName: data.fileName,
 		allowedType: data.allowedType,
@@ -102,7 +101,7 @@ const createSingle: ServiceFn<
 	const mediaKey = syncMediaRes.data.key;
 
 	if (data.focalPoint !== undefined && syncMediaRes.data.type !== "image") {
-		await mediaServices.strategies.deleteObject(context, {
+		await deleteMediaObject(context, {
 			key: mediaKey,
 			size: syncMediaRes.data.size,
 			processedSize: 0,
@@ -122,7 +121,7 @@ const createSingle: ServiceFn<
 		};
 	}
 	if (data.crop !== undefined && syncMediaRes.data.type !== "image") {
-		await mediaServices.strategies.deleteObject(context, {
+		await deleteMediaObject(context, {
 			key: mediaKey,
 			size: syncMediaRes.data.size,
 			processedSize: 0,

@@ -6,7 +6,11 @@ import {
 } from "../../../libs/repositories/index.js";
 import type { MediaCropInput, MediaOrigin } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices, processedImageServices } from "../../index.js";
+import clearProcessedImage from "../../processed-images/clear-single.js";
+import checkAwaitingSync from "../checks/check-awaiting-sync.js";
+import deleteMediaObject from "../strategies/delete.js";
+import syncMedia from "../strategies/sync-media.js";
+import updateMedia from "../strategies/update.js";
 
 type CropParent = {
 	id: number;
@@ -46,7 +50,7 @@ const upsertCrop: ServiceFn<
 	);
 
 	const [awaitingSyncRes, existingCropRes] = await Promise.all([
-		mediaServices.checks.checkAwaitingSync(context, { key: data.crop.key }),
+		checkAwaitingSync(context, { key: data.crop.key }),
 		Media.selectSingle({
 			select: ["id", "key", "e_tag", "file_size", "type"],
 			where: [
@@ -68,15 +72,12 @@ const upsertCrop: ServiceFn<
 	};
 
 	if (existingCropRes.data) {
-		const clearProcessedRes = await processedImageServices.clearSingle(
-			context,
-			{
-				key: existingCropRes.data.key,
-			},
-		);
+		const clearProcessedRes = await clearProcessedImage(context, {
+			key: existingCropRes.data.key,
+		});
 		if (clearProcessedRes.error) return clearProcessedRes;
 
-		const updateRes = await mediaServices.strategies.update(context, {
+		const updateRes = await updateMedia(context, {
 			previousSize: existingCropRes.data.file_size,
 			previousKey: existingCropRes.data.key,
 			previousType: "image",
@@ -89,7 +90,7 @@ const upsertCrop: ServiceFn<
 		if (updateRes.error) return updateRes;
 		file = { ...updateRes.data, type: "image" };
 	} else {
-		const syncRes = await mediaServices.strategies.syncMedia(context, {
+		const syncRes = await syncMedia(context, {
 			key: data.crop.key,
 			fileName: data.crop.fileName,
 			allowedType: "image",
@@ -167,7 +168,7 @@ const upsertCrop: ServiceFn<
 			});
 	if (cropRes.error) {
 		if (!existingCropRes.data) {
-			await mediaServices.strategies.deleteObject(context, {
+			await deleteMediaObject(context, {
 				key: file.key,
 				size: file.size,
 				processedSize: 0,

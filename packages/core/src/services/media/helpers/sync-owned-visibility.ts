@@ -3,7 +3,8 @@ import formatter from "../../../libs/formatters/index.js";
 import { MediaRepository } from "../../../libs/repositories/index.js";
 import changeKeyVisibility from "../../../utils/media/change-key-visibility.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices, processedImageServices } from "../../index.js";
+import clearProcessedImage from "../../processed-images/clear-single.js";
+import renameMedia from "../strategies/rename.js";
 
 /** Synchronizes visibility and storage keys across all owned descendants. */
 const syncOwnedVisibility: ServiceFn<
@@ -28,15 +29,12 @@ const syncOwnedVisibility: ServiceFn<
 			});
 
 			if (targetKey !== child.key) {
-				const clearProcessedRes = await processedImageServices.clearSingle(
-					context,
-					{
-						key: child.key,
-					},
-				);
+				const clearProcessedRes = await clearProcessedImage(context, {
+					key: child.key,
+				});
 				if (clearProcessedRes.error) return clearProcessedRes;
 
-				const renameRes = await mediaServices.strategies.rename(context, {
+				const renameRes = await renameMedia(context, {
 					from: child.key,
 					to: targetKey,
 				});

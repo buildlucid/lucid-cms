@@ -16,7 +16,7 @@ import type {
 } from "../../types.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import registeredFields from "../collection/custom-fields/registered-fields.js";
+import fieldConfigs from "../collection/custom-fields/field-configs.js";
 import { isStorageMode } from "../collection/custom-fields/storage/index.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
@@ -67,8 +67,7 @@ const getFieldValues = (
 	const fieldInstance = meta.builder.fields.get(meta.fieldConfig.key);
 	if (!fieldInstance) return [];
 
-	const databaseConfig =
-		registeredFields[meta.fieldConfig.type].config.database;
+	const databaseConfig = fieldConfigs[meta.fieldConfig.type].database;
 	if (!isStorageMode(databaseConfig, "relation-table")) {
 		const fieldKey = prefixGeneratedColName(meta.fieldConfig.key);
 
@@ -106,7 +105,7 @@ const getFieldValues = (
 };
 
 const isTreeTableFieldType = (type: FieldTypes): boolean => {
-	return isStorageMode(registeredFields[type].config.database, "tree-table");
+	return isStorageMode(fieldConfigs[type].database, "tree-table");
 };
 
 const getTreeTableChildFieldConfig = (

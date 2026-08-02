@@ -12,12 +12,8 @@ vi.mock("../../libs/repositories/index.js", () => ({
 	},
 }));
 
-vi.mock("../index.js", () => ({
-	mediaServices: {
-		checks: {
-			checkHasMediaStrategy: mocks.checkHasMediaStrategy,
-		},
-	},
+vi.mock("./checks/check-has-media-strategy.js", () => ({
+	default: mocks.checkHasMediaStrategy,
 }));
 
 import processMedia from "./process-media.js";

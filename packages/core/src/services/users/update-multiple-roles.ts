@@ -1,6 +1,6 @@
 import { UserRolesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { userServices } from "../index.js";
+import checkRolesExist from "./checks/check-roles-exist.js";
 
 const updateMultipleRoles: ServiceFn<
 	[
@@ -24,7 +24,7 @@ const updateMultipleRoles: ServiceFn<
 	);
 
 	const [roleExistsRes, deleteMultipleRes] = await Promise.all([
-		userServices.checks.checkRolesExist(context, {
+		checkRolesExist(context, {
 			roleIds: data.roleIds || [],
 		}),
 		UserRoles.deleteMultipleByUser({

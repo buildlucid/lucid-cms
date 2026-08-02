@@ -4,7 +4,7 @@ import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import checkMediaAccess from "./checks/check-media-access.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 
@@ -26,7 +26,7 @@ const deleteMultiplePermanently: ServiceFn<
 
 	const Media = new MediaRepository(context.db.client, context.config.db);
 
-	const accessRes = await mediaServices.checks.checkMediaAccess(context, {
+	const accessRes = await checkMediaAccess(context, {
 		ids: data.ids,
 	});
 	if (accessRes.error) return accessRes;

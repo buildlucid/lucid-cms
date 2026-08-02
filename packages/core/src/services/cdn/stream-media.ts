@@ -9,7 +9,8 @@ import {
 	resolveProcessingRequest,
 } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices, processedImageServices } from "../index.js";
+import checkHasMediaStrategy from "../media/checks/check-has-media-strategy.js";
+import processImage from "../processed-images/process-image.js";
 
 /**
  * Streams the canonical media key and applies presets or formats on demand.
@@ -42,8 +43,7 @@ const streamMedia: ServiceFn<
 		};
 	}
 > = async (context, data) => {
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const normalizedKey = normalizeMediaKey(data.key);
@@ -137,7 +137,7 @@ const streamMedia: ServiceFn<
 	}
 
 	// Process
-	return await processedImageServices.processImage(context, {
+	return await processImage(context, {
 		key: normalizedKey,
 		processKey: processKey,
 		ifNoneMatch: data.ifNoneMatch,

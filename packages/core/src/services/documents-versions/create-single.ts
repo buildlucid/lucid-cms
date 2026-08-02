@@ -7,7 +7,7 @@ import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { documentBrickServices } from "../index.js";
+import createDocumentBricks from "../documents-bricks/create-multiple.js";
 import rollbackVersionCreate from "./helpers/rollback-version-create.js";
 
 /**
@@ -162,16 +162,13 @@ const createSingle: ServiceFn<
 	}
 
 	// Save bricks for the new version
-	const createMultipleBricks = await documentBrickServices.createMultiple(
-		context,
-		{
-			versionId: newVersionRes.data.id,
-			documentId: data.documentId,
-			bricks: hookResponse.data.bricks,
-			fields: hookResponse.data.fields,
-			collection: data.collection,
-		},
-	);
+	const createMultipleBricks = await createDocumentBricks(context, {
+		versionId: newVersionRes.data.id,
+		documentId: data.documentId,
+		bricks: hookResponse.data.bricks,
+		fields: hookResponse.data.fields,
+		collection: data.collection,
+	});
 	if (createMultipleBricks.error) {
 		await rollbackVersionCreate(context, {
 			collectionKey: data.collection.key,

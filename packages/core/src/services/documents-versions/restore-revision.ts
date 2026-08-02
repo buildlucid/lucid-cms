@@ -4,7 +4,8 @@ import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { documentServices, documentVersionServices } from "../index.js";
+import checkDocumentAccess from "../documents/checks/check-document-access.js";
+import promoteVersion from "./promote-version.js";
 
 const restoreRevision: ServiceFn<
 	[
@@ -42,13 +43,10 @@ const restoreRevision: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const documentAccessRes = await documentServices.checks.checkDocumentAccess(
-		context,
-		{
-			collectionKey: data.collectionKey,
-			id: data.documentId,
-		},
-	);
+	const documentAccessRes = await checkDocumentAccess(context, {
+		collectionKey: data.collectionKey,
+		id: data.documentId,
+	});
 	if (documentAccessRes.error) return documentAccessRes;
 
 	const documentRes = await Documents.selectSingle(
@@ -88,7 +86,7 @@ const restoreRevision: ServiceFn<
 		};
 	}
 
-	const response = await documentVersionServices.promoteVersion(context, {
+	const response = await promoteVersion(context, {
 		documentId: data.documentId,
 		collectionKey: data.collectionKey,
 		fromVersionId: data.versionId,

@@ -4,8 +4,10 @@ import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { documentServices, previewSessionServices } from "../../index.js";
+import deletePreviewSessions from "../../preview-sessions/delete-for-documents.js";
+import checkDocumentAccess from "../checks/check-document-access.js";
 import invalidateContentDocumentCache from "../helpers/invalidate-content-cache.js";
+import nullifyDocumentReferences from "../nullify-document-references.js";
 
 /**
  * Deletes a single document
@@ -33,7 +35,7 @@ const deleteDocument: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const accessRes = await documentServices.checks.checkDocumentAccess(context, {
+	const accessRes = await checkDocumentAccess(context, {
 		collectionKey: data.collectionKey,
 		id: data.id,
 	});
@@ -112,11 +114,11 @@ const deleteDocument: ServiceFn<
 					tableName: tableNamesRes.data.document,
 				},
 			),
-			documentServices.nullifyDocumentReferences(context, {
+			nullifyDocumentReferences(context, {
 				collectionKey: collectionRes.data.key,
 				documentId: data.id,
 			}),
-			previewSessionServices.deleteForDocuments(context, {
+			deletePreviewSessions(context, {
 				collectionKey: data.collectionKey,
 				documentIds: [data.id],
 			}),

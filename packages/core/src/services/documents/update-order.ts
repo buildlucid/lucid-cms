@@ -7,7 +7,7 @@ import {
 	isFractionalOrderKey,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { documentServices } from "../index.js";
+import checkDocumentAccess from "./checks/check-document-access.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 
 /** Moves a document between two manual-order neighbours. */
@@ -72,17 +72,14 @@ const updateOrder: ServiceFn<
 	if (tableNamesRes.error) return tableNamesRes;
 
 	//* check moved and neighbour documents
-	const documentAccessRes = await documentServices.checks.checkDocumentAccess(
-		context,
-		{
-			collectionKey: data.collectionKey,
-			ids: [
-				data.documentId,
-				...(data.previousDocumentId !== null ? [data.previousDocumentId] : []),
-				...(data.nextDocumentId !== null ? [data.nextDocumentId] : []),
-			],
-		},
-	);
+	const documentAccessRes = await checkDocumentAccess(context, {
+		collectionKey: data.collectionKey,
+		ids: [
+			data.documentId,
+			...(data.previousDocumentId !== null ? [data.previousDocumentId] : []),
+			...(data.nextDocumentId !== null ? [data.nextDocumentId] : []),
+		],
+	});
 	if (documentAccessRes.error) return documentAccessRes;
 
 	// ----------------------------------------------

@@ -1,6 +1,6 @@
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import checkMediaAccess from "./checks/check-media-access.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
 
 const deleteSinglePermanently: ServiceFn<
@@ -12,7 +12,7 @@ const deleteSinglePermanently: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const accessRes = await mediaServices.checks.checkMediaAccess(context, {
+	const accessRes = await checkMediaAccess(context, {
 		id: data.id,
 	});
 	if (accessRes.error) return accessRes;

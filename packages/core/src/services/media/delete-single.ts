@@ -3,7 +3,8 @@ import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import checkHasMediaStrategy from "./checks/check-has-media-strategy.js";
+import checkMediaAccess from "./checks/check-media-access.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 
 const deleteSingle: ServiceFn<
@@ -15,13 +16,12 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const Media = new MediaRepository(context.db.client, context.config.db);
 
-	const accessRes = await mediaServices.checks.checkMediaAccess(context, {
+	const accessRes = await checkMediaAccess(context, {
 		id: data.id,
 	});
 	if (accessRes.error) return accessRes;

@@ -7,7 +7,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { securityAuditServices } from "../index.js";
+import logSecurityAudit from "../security-audit/log-security-audit.js";
 
 /**
  * Unlinks an auth provider from the target user.
@@ -163,7 +163,7 @@ const unlinkAuthProvider: ServiceFn<
 				},
 			},
 		}),
-		securityAuditServices.logSecurityAudit(context, {
+		logSecurityAudit(context, {
 			userId: data.targetUserId,
 			action: constants.securityAudit.actions.authProviderUnlink,
 			performedBy: data.auth.id,

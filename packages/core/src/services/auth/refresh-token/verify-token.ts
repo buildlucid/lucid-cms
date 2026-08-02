@@ -8,7 +8,8 @@ import { UserTokensRepository } from "../../../libs/repositories/index.js";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
-import { authServices } from "../../index.js";
+import clearAccessToken from "../access-token/clear-token.js";
+import clearRefreshToken from "./clear-token.js";
 import revokeUserTokens from "./revoke-user-tokens.js";
 
 const verifyToken = async (
@@ -88,10 +89,10 @@ const verifyToken = async (
 				});
 
 				const [refreshRes, accessRes] = await Promise.all([
-					authServices.refreshToken.clearToken(c, {
+					clearRefreshToken(c, {
 						revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
 					}),
-					authServices.accessToken.clearToken(c),
+					clearAccessToken(c),
 				]);
 				if (refreshRes.error) return refreshRes;
 				if (accessRes.error) return accessRes;
@@ -168,8 +169,8 @@ const verifyToken = async (
 		};
 	} catch (_err) {
 		const [refreshRes, accessRes] = await Promise.all([
-			authServices.refreshToken.clearToken(c),
-			authServices.accessToken.clearToken(c),
+			clearRefreshToken(c),
+			clearAccessToken(c),
 		]);
 		if (refreshRes.error) return refreshRes;
 		if (accessRes.error) return accessRes;

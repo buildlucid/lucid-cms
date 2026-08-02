@@ -3,7 +3,7 @@ import { getTableNames } from "../../libs/collection/schema/runtime/runtime-sche
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
-import { documentServices } from "../index.js";
+import checkDocumentAccess from "./checks/check-document-access.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 
 const restoreMultiple: ServiceFn<
@@ -47,7 +47,7 @@ const restoreMultiple: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const accessRes = await documentServices.checks.checkDocumentAccess(context, {
+	const accessRes = await checkDocumentAccess(context, {
 		collectionKey: data.collectionKey,
 		ids: data.ids,
 	});

@@ -11,8 +11,11 @@ import {
 } from "../../libs/repositories/index.js";
 import { createBufferETag, matchesETag } from "../../utils/http/etag.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices, processedImageServices } from "../index.js";
 import adjustStorageUsage from "../media/adjust-storage-usage.js";
+import checkHasMediaStrategy from "../media/checks/check-has-media-strategy.js";
+import checkCanStore from "./checks/check-can-store.js";
+import getSingleCount from "./get-single-count.js";
+import optimizeImage from "./optimize-image.js";
 
 const processImage: ServiceFn<
 	[
@@ -32,8 +35,7 @@ const processImage: ServiceFn<
 		notModified?: boolean;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	// get og image
@@ -77,11 +79,11 @@ const processImage: ServiceFn<
 
 	// Optimize image
 	const [imageRes, processedCountRes] = await Promise.all([
-		processedImageServices.optimizeImage(context, {
+		optimizeImage(context, {
 			stream: toNodeReadable(processingBody),
 			options: { ...data.options, focalPoint },
 		}),
-		processedImageServices.getSingleCount(context, {
+		getSingleCount(context, {
 			key: data.key,
 		}),
 	]);
@@ -154,12 +156,9 @@ const processImage: ServiceFn<
 	}
 
 	// Check if we can store it
-	const canStoreRes = await processedImageServices.checks.checkCanStore(
-		context,
-		{
-			size: imageRes.data.size,
-		},
-	);
+	const canStoreRes = await checkCanStore(context, {
+		size: imageRes.data.size,
+	});
 	if (canStoreRes.error) {
 		return {
 			error: undefined,

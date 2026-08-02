@@ -2,7 +2,8 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { documentBrickServices } from "../index.js";
+import checkDuplicateOrder from "../documents-bricks/checks/check-duplicate-order.js";
+import checkValidateBricksFields from "../documents-bricks/checks/check-validate-bricks-fields.js";
 import filterChangedDraftFields from "./helpers/filter-changed-fields.js";
 import getUpdateContext from "./helpers/get-update-context.js";
 
@@ -63,16 +64,14 @@ const checkSingle: ServiceFn<
 	const bricks = hookResponse.data.bricks ?? [];
 	const fields = hookResponse.data.fields ?? [];
 
-	const checkBrickOrderRes =
-		documentBrickServices.checks.checkDuplicateOrder(bricks);
+	const checkBrickOrderRes = checkDuplicateOrder(bricks);
 	if (checkBrickOrderRes.error) return checkBrickOrderRes;
 
-	const checkValidateRes =
-		await documentBrickServices.checks.checkValidateBricksFields(context, {
-			collection: updateContextRes.data.collection,
-			bricks,
-			fields,
-		});
+	const checkValidateRes = await checkValidateBricksFields(context, {
+		collection: updateContextRes.data.collection,
+		bricks,
+		fields,
+	});
 	if (checkValidateRes.error) return checkValidateRes;
 
 	return {

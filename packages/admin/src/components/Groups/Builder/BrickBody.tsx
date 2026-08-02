@@ -9,10 +9,8 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import {
-	DynamicField,
-	TabField,
-} from "@/components/Groups/Builder/CustomFields";
+import { DynamicField } from "@/components/Groups/Builder/CustomFields/DynamicField";
+import { TabField } from "@/components/Groups/Builder/CustomFields/TabField";
 import { FieldRenderStateProvider } from "@/hooks/document/useFieldRenderState";
 import brickStore, { type BrickData } from "@/store/brick-store";
 import contentLocaleStore from "@/store/contentLocaleStore";

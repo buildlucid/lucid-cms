@@ -14,7 +14,7 @@ import {
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
-import { documentBrickServices } from "../index.js";
+import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
 
 const cloneVersion: ServiceFn<
 	[
@@ -183,7 +183,7 @@ const cloneVersion: ServiceFn<
 	});
 	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
 
-	const insertRes = await documentBrickServices.insertBrickTables(context, {
+	const insertRes = await insertBrickTables(context, {
 		tables: sortedTables,
 		collection: collectionRes.data,
 	});

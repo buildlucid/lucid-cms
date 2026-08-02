@@ -8,7 +8,8 @@ import {
 } from "../../libs/repositories/index.js";
 import { formatEmailSubject } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { emailServices, userTokenServices } from "../index.js";
+import sendEmail from "../email/send-email.js";
+import createUserToken from "../user-tokens/create-single.js";
 
 /**
  * Resends an invitation email to a user who has not yet accepted their invitation.
@@ -90,14 +91,14 @@ const resendInvitation: ServiceFn<
 		minutes: constants.userInviteTokenExpirationMinutes,
 	}).toISOString();
 
-	const userTokenRes = await userTokenServices.createSingle(context, {
+	const userTokenRes = await createUserToken(context, {
 		userId: userRes.data.id,
 		tokenType: constants.userTokens.invitation,
 		expiryDate: expiryDate,
 	});
 	if (userTokenRes.error) return userTokenRes;
 
-	const sendEmailRes = await emailServices.sendEmail(context, {
+	const sendEmailRes = await sendEmail(context, {
 		type: "internal",
 		to: userRes.data.email,
 		subject: (emailData) =>

@@ -8,7 +8,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 import type { CollectionTableNames } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { documentServices } from "../../index.js";
+import checkDocumentAccess from "../../documents/checks/check-document-access.js";
 
 const getUpdateContext: ServiceFn<
 	[
@@ -38,13 +38,10 @@ const getUpdateContext: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const documentAccessRes = await documentServices.checks.checkDocumentAccess(
-		context,
-		{
-			collectionKey: data.collectionKey,
-			id: data.documentId,
-		},
-	);
+	const documentAccessRes = await checkDocumentAccess(context, {
+		collectionKey: data.collectionKey,
+		id: data.documentId,
+	});
 	if (documentAccessRes.error) return documentAccessRes;
 
 	if (collectionRes.data.getData.locked) {

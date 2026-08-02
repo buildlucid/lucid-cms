@@ -7,7 +7,7 @@ import type {
 	ServiceResponse,
 } from "../../../../types.js";
 import { copy } from "../../../i18n/index.js";
-import registeredFields from "../../custom-fields/registered-fields.js";
+import fieldConfigs from "../../custom-fields/field-configs.js";
 import {
 	getFieldDatabaseConfig,
 	isCustomFieldTableType,
@@ -233,7 +233,7 @@ const createFieldTables = (props: {
 
 	//* process field columns
 	for (const field of props.fields) {
-		const databaseConfig = registeredFields[field.type].config.database;
+		const databaseConfig = fieldConfigs[field.type].database;
 		const databaseMode = normalizeFieldDatabaseMode(databaseConfig.mode);
 
 		switch (databaseMode) {

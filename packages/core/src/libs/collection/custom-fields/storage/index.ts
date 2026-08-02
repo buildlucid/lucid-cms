@@ -1,9 +1,8 @@
 import constants from "../../../../constants/constants.js";
 import type { CustomFieldTableType, TableType } from "../../schema/types.js";
-import registeredFields, {
-	registeredFieldTypes,
-} from "../registered-fields.js";
+import fieldConfigs from "../field-configs.js";
 import type { FieldDatabaseConfig, FieldDatabaseMode } from "../types.js";
+import { fieldTypes } from "../types.js";
 import { columnMode } from "./column.js";
 import { ignoreMode } from "./ignore.js";
 import { relationTableMode } from "./relation-table.js";
@@ -41,8 +40,8 @@ export const getFieldDatabaseConfig = (
 ): TableBackedFieldDatabaseConfig | null => {
 	if (!isCustomFieldTableType(tableType)) return null;
 
-	for (const fieldType of registeredFieldTypes) {
-		const databaseConfig = registeredFields[fieldType].config.database;
+	for (const fieldType of fieldTypes) {
+		const databaseConfig = fieldConfigs[fieldType].database;
 		if (!isTableBackedFieldDatabaseConfig(databaseConfig)) continue;
 		if (databaseConfig.tableType !== tableType) continue;
 

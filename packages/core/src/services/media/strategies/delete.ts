@@ -1,6 +1,6 @@
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices } from "../../index.js";
 import adjustStorageUsage from "../adjust-storage-usage.js";
+import checkHasMediaStrategy from "../checks/check-has-media-strategy.js";
 
 const deleteObject: ServiceFn<
 	[
@@ -12,8 +12,7 @@ const deleteObject: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	const [_, updateStorageRes] = await Promise.all([

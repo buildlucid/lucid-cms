@@ -1,5 +1,5 @@
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { mediaServices } from "../../index.js";
+import abortUploadSession from "../abort-upload-session.js";
 
 const abortUploadSessionJob: ServiceFn<
 	[
@@ -9,7 +9,7 @@ const abortUploadSessionJob: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	return mediaServices.abortUploadSession(context, {
+	return abortUploadSession(context, {
 		sessionId: data.sessionId,
 	});
 };

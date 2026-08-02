@@ -3,14 +3,15 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import { mediaServices } from "../../index.js";
+import createMedia from "../../media/create-single.js";
+import updateMedia from "../../media/update-single.js";
 
 export const createOAuthClientLogo = async (
 	context: ServiceContext,
 	input: OAuthClientLogoInput,
 	userId: number,
 ): ServiceResponse<number> => {
-	const createRes = await mediaServices.createSingle(context, {
+	const createRes = await createMedia(context, {
 		key: input.key,
 		fileName: input.fileName,
 		width: input.width,
@@ -42,7 +43,7 @@ export const updateOAuthClientLogo = async (
 	input: OAuthClientLogoInput,
 	userId: number,
 ): ServiceResponse<undefined> => {
-	const updateRes = await mediaServices.updateSingle(context, {
+	const updateRes = await updateMedia(context, {
 		id,
 		key: input.key,
 		fileName: input.fileName,

@@ -2,7 +2,7 @@ import type { LucidDocumentTableName } from "../../../libs/db/types.js";
 import logger from "../../../libs/logger/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { documentWorkflowServices } from "../../index.js";
+import deleteDocumentWorkflows from "../../document-workflows/delete-for-documents.js";
 
 const cleanupFailedCreate: ServiceFn<
 	[
@@ -26,7 +26,7 @@ const cleanupFailedCreate: ServiceFn<
 		context.config.db,
 	);
 	const [deleteWorkflowRes, deleteDocumentRes] = await Promise.all([
-		documentWorkflowServices.deleteForDocuments(context, {
+		deleteDocumentWorkflows(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.documentId],
 		}),

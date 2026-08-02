@@ -4,15 +4,8 @@ const mocks = vi.hoisted(() => ({
 	checkHasMediaStrategy: vi.fn(),
 }));
 
-vi.mock("../index.js", () => ({
-	mediaServices: {
-		checks: {
-			checkHasMediaStrategy: mocks.checkHasMediaStrategy,
-		},
-	},
-	processedImageServices: {
-		processImage: vi.fn(),
-	},
+vi.mock("../media/checks/check-has-media-strategy.js", () => ({
+	default: mocks.checkHasMediaStrategy,
 }));
 
 import streamMedia from "./stream-media.js";

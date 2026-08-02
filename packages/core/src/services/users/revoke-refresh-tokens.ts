@@ -1,6 +1,7 @@
 import constants from "../../constants/constants.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { authServices, userServices } from "../index.js";
+import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
+import checkUserAccess from "./checks/check-user-access.js";
 
 const revokeRefreshTokens: ServiceFn<
 	[
@@ -10,12 +11,12 @@ const revokeRefreshTokens: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const userRes = await userServices.checks.checkUserAccess(context, {
+	const userRes = await checkUserAccess(context, {
 		id: data.userId,
 	});
 	if (userRes.error) return userRes;
 
-	const revokeRes = await authServices.refreshToken.revokeUserTokens(context, {
+	const revokeRes = await revokeUserTokens(context, {
 		userId: data.userId,
 		revokeReason: constants.refreshTokenRevokeReasons.adminRevokeAll,
 	});

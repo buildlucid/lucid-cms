@@ -10,7 +10,7 @@ import {
 	Index,
 	Show,
 } from "solid-js";
-import { DynamicField } from "@/components/Groups/Builder/CustomFields";
+import type { DynamicFieldRenderer } from "@/components/Groups/Builder/CustomFields/types";
 import Button from "@/components/Partials/Button";
 import DeleteDebounceButton from "@/components/Partials/DeleteDebounceButton";
 import type { DragDropCBT } from "@/components/Partials/DragDrop";
@@ -30,6 +30,7 @@ import {
 } from "@/utils/structural-field-helpers";
 
 interface GroupBodyProps {
+	renderField: DynamicFieldRenderer;
 	fieldConfig: CollectionFieldConfigByType<"repeater">;
 	groupRef: string;
 	groupPath: string;
@@ -283,7 +284,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				<div class="border-t border-border p-3 md:p-4 grid grid-cols-12 gap-4">
 					<Index each={childrenMounted() ? configChildrenFields() : []}>
 						{(config) => (
-							<DynamicField
+							<props.renderField
 								fieldConfig={config()}
 								fields={groupFields()}
 								fieldsByKey={groupFieldsByKey}

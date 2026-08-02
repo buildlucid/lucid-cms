@@ -1,5 +1,5 @@
 import type { ServiceFn } from "../../utils/services/types.js";
-import { optionServices } from "../index.js";
+import adjustIntOption from "../options/adjust-int.js";
 
 const adjustStorageUsage: ServiceFn<
 	[
@@ -13,7 +13,7 @@ const adjustStorageUsage: ServiceFn<
 		applied: boolean;
 	}
 > = async (context, data) => {
-	return optionServices.adjustInt(context, {
+	return adjustIntOption(context, {
 		name: "media_storage_used",
 		delta: data.delta,
 		max: data.max,

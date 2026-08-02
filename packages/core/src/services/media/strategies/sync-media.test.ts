@@ -7,16 +7,16 @@ const mocks = vi.hoisted(() => ({
 	detectStreamMimeType: vi.fn(),
 }));
 
-vi.mock("../../index.js", () => ({
-	mediaServices: {
-		checks: {
-			checkHasMediaStrategy: mocks.checkHasMediaStrategy,
-			checkCanStoreMedia: mocks.checkCanStoreMedia,
-		},
-	},
-	optionServices: {
-		adjustInt: mocks.adjustInt,
-	},
+vi.mock("../../options/adjust-int.js", () => ({
+	default: mocks.adjustInt,
+}));
+
+vi.mock("../checks/check-can-store-media.js", () => ({
+	default: mocks.checkCanStoreMedia,
+}));
+
+vi.mock("../checks/check-has-media-strategy.js", () => ({
+	default: mocks.checkHasMediaStrategy,
 }));
 
 vi.mock("../helpers/detect-stream-mime-type.js", () => ({

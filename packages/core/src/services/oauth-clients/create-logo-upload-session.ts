@@ -2,7 +2,7 @@ import type { UploadSessionResponse } from "@lucidcms/types";
 import { copy } from "../../libs/i18n/index.js";
 import { getMediaType } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import createMediaUploadSession from "../media/create-upload-session.js";
 
 const createLogoUploadSession: ServiceFn<
 	[
@@ -35,7 +35,7 @@ const createLogoUploadSession: ServiceFn<
 		};
 	}
 
-	return mediaServices.createUploadSession(context, {
+	return createMediaUploadSession(context, {
 		fileName: data.fileName,
 		mimeType: data.mimeType,
 		size: data.size,

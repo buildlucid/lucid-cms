@@ -10,7 +10,7 @@ import {
 	resolveProcessingRequest,
 } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { mediaServices } from "../index.js";
+import checkHasMediaStrategy from "./checks/check-has-media-strategy.js";
 
 const processMedia: ServiceFn<
 	[
@@ -38,8 +38,7 @@ const processMedia: ServiceFn<
 
 	const Media = new MediaRepository(context.db.client, context.config.db);
 
-	const mediaStrategyRes =
-		await mediaServices.checks.checkHasMediaStrategy(context);
+	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
 	//* resolves the source and its active crop in a single lookup

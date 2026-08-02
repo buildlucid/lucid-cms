@@ -1,9 +1,7 @@
 import z from "zod";
 import type { ServiceResponse } from "../../../../../types.js";
-import {
-	getObject,
-	richTextHasContent,
-} from "../../../../../utils/helpers/index.js";
+import { getObject } from "../../../../../utils/helpers/get-typed-value.js";
+import richTextHasContent from "../../../../../utils/helpers/rich-text-has-content.js";
 import { copy } from "../../../../i18n/index.js";
 import { defaultTextFieldAiGuidance } from "../../ai-guidance.js";
 import CustomField from "../../custom-field.js";
