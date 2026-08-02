@@ -8,19 +8,16 @@ import {
 	checkFieldsExist,
 	checkFullSlugUniqueness,
 } from "../checks/index.js";
-import type { ParentPageQueryResponse } from "../get-parent-fields.js";
 import {
-	constructChildFullSlug,
-	constructParentFullSlug,
-	getDescendantFields,
 	getDocumentVersionFields,
-	getParentFields,
 	getTargetCollection,
 	setFullSlug,
 	updateFullSlugFields,
 	updateSlugFields,
 } from "../index.js";
 import afterUpsertHandler from "./after-upsert-handler.js";
+import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
+import resolveParentFullSlug from "./helpers/resolve-parent-full-slug.js";
 
 const versionPromoteHandler =
 	(
@@ -84,7 +81,6 @@ const versionPromoteHandler =
 		// ----------------------------------------------------------------
 		// create fullSlug - close to the beforeUpsert hook
 		if (createFullSlug) {
-			let parentFieldsData: Array<ParentPageQueryResponse> = [];
 			const parentPageId = getParentPageId(parentPage);
 
 			// parent page checks and query
@@ -100,28 +96,17 @@ const versionPromoteHandler =
 					tables: data.meta.collectionTableNames,
 				});
 				if (circularParentsRes.error) return circularParentsRes;
-
-				const parentFieldsRes = await getParentFields(context, {
-					defaultLocale: context.config.localization.defaultLocale,
-					versionType: data.data.versionType,
-					collectionKey: targetCollectionRes.data.key,
-					fields: {
-						parentPage: parentPage,
-					},
-					tables: data.meta.collectionTableNames,
-				});
-				if (parentFieldsRes.error) return parentFieldsRes;
-
-				parentFieldsData = parentFieldsRes.data;
 			}
 
 			// fullSlug construction
-			const fullSlugRes = constructParentFullSlug({
-				parentFields: parentFieldsData,
-				localization: context.config.localization,
+			const fullSlugRes = await resolveParentFullSlug(context, {
 				collection: targetCollectionRes.data,
+				collectionKey: targetCollectionRes.data.key,
+				versionType: data.data.versionType,
+				tables: data.meta.collectionTableNames,
 				fields: {
 					slug: slug,
+					parentPage,
 				},
 			});
 			if (fullSlugRes.error) return fullSlugRes;
@@ -144,25 +129,16 @@ const versionPromoteHandler =
 				},
 			];
 
-			const descendantsRes = await getDescendantFields(context, {
-				ids: [data.data.documentId],
+			const descendantFullSlugsRes = await buildDescendantFullSlugs(context, {
+				documentIds: [data.data.documentId],
 				versionType: data.data.versionType,
 				collectionKey: targetCollectionRes.data.key,
 				tables: data.meta.collectionTableNames,
+				collection: targetCollectionRes.data,
+				parentFullSlugField: candidateFullSlugField,
 			});
-			if (descendantsRes.error) return descendantsRes;
-
-			if (descendantsRes.data.length > 0) {
-				const descendantFullSlugsRes = constructChildFullSlug({
-					descendants: descendantsRes.data,
-					localization: context.config.localization,
-					parentFullSlugField: candidateFullSlugField,
-					collection: targetCollectionRes.data,
-				});
-				if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
-
-				projectedFullSlugs.push(...descendantFullSlugsRes.data);
-			}
+			if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
+			projectedFullSlugs.push(...descendantFullSlugsRes.data);
 
 			const checkFullSlugUniquenessRes = await checkFullSlugUniqueness(
 				context,

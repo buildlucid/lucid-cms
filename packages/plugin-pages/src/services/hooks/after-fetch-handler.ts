@@ -6,12 +6,8 @@ import type {
 } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
-import getParentPageId from "../../utils/get-parent-page-id.js";
-import constructParentFullSlug from "../construct-parent-fullslug.js";
-import getParentFields, {
-	type ParentPageQueryResponse,
-} from "../get-parent-fields.js";
 import getTargetCollection from "../get-target-collection.js";
+import resolveParentFullSlug from "./helpers/resolve-parent-full-slug.js";
 
 const snapshotVersionType = "snapshot";
 
@@ -135,32 +131,16 @@ const afterFetchHandler =
 			const slug = cloneFieldAsInput(slugField);
 			const parentPage = cloneFieldAsInput(parentPageField);
 
-			let parentFieldsData: Array<ParentPageQueryResponse> = [];
-			const parentPageId = getParentPageId(parentPage);
-
-			if (parentPageId !== null) {
-				const parentFieldsRes = await getParentFields(context, {
-					defaultLocale: context.config.localization.defaultLocale,
-					versionType: data.data.relationVersionType,
-					collectionKey: targetCollectionRes.data.key,
-					fields: {
-						parentPage,
-					},
-					tables: data.meta.collectionTableNames,
-					missingParentIsEmpty: true,
-				});
-				if (parentFieldsRes.error) return parentFieldsRes;
-
-				parentFieldsData = parentFieldsRes.data;
-			}
-
-			const fullSlugRes = constructParentFullSlug({
-				parentFields: parentFieldsData,
-				localization: context.config.localization,
+			const fullSlugRes = await resolveParentFullSlug(context, {
 				collection: targetCollectionRes.data,
+				collectionKey: targetCollectionRes.data.key,
+				versionType: data.data.relationVersionType,
+				tables: data.meta.collectionTableNames,
 				fields: {
 					slug,
+					parentPage,
 				},
+				missingParentIsEmpty: true,
 			});
 			if (fullSlugRes.error) return fullSlugRes;
 

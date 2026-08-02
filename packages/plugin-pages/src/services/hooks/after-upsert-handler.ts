@@ -1,12 +1,8 @@
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
-import {
-	constructChildFullSlug,
-	getDescendantFields,
-	getTargetCollection,
-	updateFullSlugFields,
-} from "../index.js";
+import { getTargetCollection, updateFullSlugFields } from "../index.js";
+import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
 
 const afterUpsertHandler =
 	(
@@ -29,22 +25,6 @@ const afterUpsertHandler =
 
 		// ----------------------------------------------------------------
 		// Build and store fullSlugs
-		const descendantsRes = await getDescendantFields(context, {
-			ids: [data.data.documentId],
-			versionType: data.data.versionType,
-			collectionKey: targetCollectionRes.data.key,
-			tables: data.meta.collectionTableNames,
-		});
-		if (descendantsRes.error) return descendantsRes;
-
-		// exit early - nothing to do
-		if (descendantsRes.data.length === 0) {
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		}
-
 		const currentFullSlugField = data.data.fields.find((field) => {
 			return field.key === constants.fields.fullSlug.key;
 		});
@@ -55,13 +35,22 @@ const afterUpsertHandler =
 			};
 		}
 
-		const docFullSlugsRes = constructChildFullSlug({
-			descendants: descendantsRes.data,
-			localization: context.config.localization,
-			parentFullSlugField: currentFullSlugField,
+		const docFullSlugsRes = await buildDescendantFullSlugs(context, {
+			documentIds: [data.data.documentId],
+			versionType: data.data.versionType,
+			collectionKey: targetCollectionRes.data.key,
+			tables: data.meta.collectionTableNames,
 			collection: targetCollectionRes.data,
+			parentFullSlugField: currentFullSlugField,
 		});
 		if (docFullSlugsRes.error) return docFullSlugsRes;
+
+		if (docFullSlugsRes.data.length === 0) {
+			return {
+				error: undefined,
+				data: undefined,
+			};
+		}
 
 		const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
 			docFullSlugs: docFullSlugsRes.data,

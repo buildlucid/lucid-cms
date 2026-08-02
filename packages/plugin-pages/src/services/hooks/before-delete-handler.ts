@@ -2,12 +2,8 @@ import { copy } from "@lucidcms/core/plugin";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import { checkFullSlugUniqueness } from "../checks/index.js";
-import {
-	constructChildFullSlug,
-	getDescendantFields,
-	getTargetCollection,
-	updateFullSlugFields,
-} from "../index.js";
+import { getTargetCollection, updateFullSlugFields } from "../index.js";
+import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
 
 /**
  * Handles the before delete hook for documents. What this does is:
@@ -40,25 +36,19 @@ const beforeDeleteHandler =
 		];
 
 		for (const versionType of versionTypes) {
-			const descendantsRes = await getDescendantFields(context, {
-				ids: data.data.ids,
+			const docFullSlugsRes = await buildDescendantFullSlugs(context, {
+				documentIds: data.data.ids,
 				versionType,
 				collectionKey: targetCollectionRes.data.key,
 				tables: data.meta.collectionTableNames,
-			});
-			if (descendantsRes.error) return descendantsRes;
-
-			// Skip to next version type if no descendants found
-			if (descendantsRes.data.length === 0) {
-				continue;
-			}
-
-			const docFullSlugsRes = constructChildFullSlug({
-				descendants: descendantsRes.data,
-				localization: context.config.localization,
 				collection: targetCollectionRes.data,
 			});
 			if (docFullSlugsRes.error) return docFullSlugsRes;
+
+			// Skip to next version type if no descendants found
+			if (docFullSlugsRes.data.length === 0) {
+				continue;
+			}
 
 			const projectedDocumentIds = docFullSlugsRes.data.map(
 				(doc) => doc.documentId,

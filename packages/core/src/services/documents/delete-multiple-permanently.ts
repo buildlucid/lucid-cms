@@ -1,6 +1,5 @@
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
@@ -8,6 +7,7 @@ import cancelPublishOperationsForDocuments from "../document-publish-operations/
 import deleteWorkflowsForDocuments from "../document-workflows/delete-for-documents.js";
 import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
+import executeDeleteHook from "./helpers/execute-delete-hook.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 import nullifyDocumentReferences from "./nullify-document-references.js";
 
@@ -91,27 +91,15 @@ const deleteMultiplePermanently: ServiceFn<
 		};
 	}
 
-	const hookBeforeRes = await executeHooks(
-		context,
-		{
-			service: "documents",
-			event: "beforeDelete",
-			config: context.config,
-			collectionInstance: collectionRes.data,
-		},
-		{
-			meta: {
-				collection: collectionRes.data,
-				collectionKey: data.collectionKey,
-				userId: data.userId,
-				collectionTableNames: tableNamesRes.data,
-				hardDelete: true,
-			},
-			data: {
-				ids: data.ids,
-			},
-		},
-	);
+	const hookBeforeRes = await executeDeleteHook(context, {
+		event: "beforeDelete",
+		collection: collectionRes.data,
+		collectionKey: data.collectionKey,
+		tableNames: tableNamesRes.data,
+		userId: data.userId,
+		ids: data.ids,
+		hardDelete: true,
+	});
 	if (hookBeforeRes.error) return hookBeforeRes;
 
 	const nullifyPromises = data.ids.map((id) =>
@@ -170,27 +158,15 @@ const deleteMultiplePermanently: ServiceFn<
 	const nullifyError = nullifyResults.find((result) => result.error);
 	if (nullifyError) return nullifyError;
 
-	const hookAfterRes = await executeHooks(
-		context,
-		{
-			service: "documents",
-			event: "afterDelete",
-			config: context.config,
-			collectionInstance: collectionRes.data,
-		},
-		{
-			meta: {
-				collection: collectionRes.data,
-				collectionKey: data.collectionKey,
-				userId: data.userId,
-				collectionTableNames: tableNamesRes.data,
-				hardDelete: true,
-			},
-			data: {
-				ids: data.ids,
-			},
-		},
-	);
+	const hookAfterRes = await executeDeleteHook(context, {
+		event: "afterDelete",
+		collection: collectionRes.data,
+		collectionKey: data.collectionKey,
+		tableNames: tableNamesRes.data,
+		userId: data.userId,
+		ids: data.ids,
+		hardDelete: true,
+	});
 	if (hookAfterRes.error) return hookAfterRes;
 
 	await invalidateContentDocumentCache(context, data.collectionKey);

@@ -1,12 +1,8 @@
-import collections from "../../libs/collection/collections.js";
-import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import executeHooks from "../../libs/hooks/execute-hooks.js";
-import { copy } from "../../libs/i18n/index.js";
-import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../types.js";
 import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
 import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
-import checkDocumentAccess from "./checks/check-document-access.js";
+import beginSingleDeletion from "./helpers/begin-single-deletion.js";
+import executeDeleteHook from "./helpers/execute-delete-hook.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
 import nullifyDocumentReferences from "./nullify-document-references.js";
 
@@ -20,98 +16,20 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const collectionRes = await collections.getSingle(context, {
-		key: data.collectionKey,
-	});
-	if (collectionRes.error) return collectionRes;
-
-	if (collectionRes.data.getData.locked) {
-		return {
-			error: {
-				type: "basic",
-				name: copy("server:core.error.locked.collection.name"),
-				message: copy("server:core.error.locked.collection.message.delete"),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
-
-	const Documents = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
-
-	const tableNamesRes = await getTableNames(context, data.collectionKey);
-	if (tableNamesRes.error) return tableNamesRes;
-
-	const accessRes = await checkDocumentAccess(context, {
-		collectionKey: data.collectionKey,
+	const beginRes = await beginSingleDeletion(context, {
 		id: data.id,
+		collectionKey: data.collectionKey,
+		userId: data.userId,
+		hardDelete: false,
+		activeOnly: true,
+		rejectLocked: true,
 	});
-	if (accessRes.error) return accessRes;
-
-	const getDocumentRes = await Documents.selectSingle(
-		{
-			select: ["id"],
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.id,
-				},
-				{
-					key: "collection_key",
-					operator: "=",
-					value: data.collectionKey,
-				},
-				{
-					key: "is_deleted",
-					operator: "=",
-					value: context.config.db.getDefault("boolean", "false"),
-				},
-			],
-			validation: {
-				enabled: true,
-				defaultError: {
-					type: "basic",
-					message: copy("server:core.documents.not.found.message"),
-					status: 404,
-				},
-			},
-		},
-		{
-			tableName: tableNamesRes.data.document,
-		},
-	);
-	if (getDocumentRes.error) return getDocumentRes;
-
-	const hookBeforeRes = await executeHooks(
-		context,
-		{
-			service: "documents",
-			event: "beforeDelete",
-			config: context.config,
-			collectionInstance: collectionRes.data,
-		},
-		{
-			meta: {
-				collection: collectionRes.data,
-				collectionKey: data.collectionKey,
-				userId: data.userId,
-				collectionTableNames: tableNamesRes.data,
-				hardDelete: false,
-			},
-			data: {
-				ids: [data.id],
-			},
-		},
-	);
-	if (hookBeforeRes.error) return hookBeforeRes;
+	if (beginRes.error) return beginRes;
+	const { collection, documents, tableNames } = beginRes.data;
 
 	const [deletePageRes, deleteRelationsRes, deletePreviewsRes] =
 		await Promise.all([
-			Documents.updateSingle(
+			documents.updateSingle(
 				{
 					where: [
 						{
@@ -131,11 +49,11 @@ const deleteSingle: ServiceFn<
 					},
 				},
 				{
-					tableName: tableNamesRes.data.document,
+					tableName: tableNames.document,
 				},
 			),
 			nullifyDocumentReferences(context, {
-				collectionKey: collectionRes.data.key,
+				collectionKey: collection.key,
 				documentId: data.id,
 			}),
 			deletePreviewSessionsForDocuments(context, {
@@ -156,27 +74,15 @@ const deleteSingle: ServiceFn<
 	});
 	if (cancelRequestsRes.error) return cancelRequestsRes;
 
-	const hookAfterRes = await executeHooks(
-		context,
-		{
-			service: "documents",
-			event: "afterDelete",
-			config: context.config,
-			collectionInstance: collectionRes.data,
-		},
-		{
-			meta: {
-				collection: collectionRes.data,
-				collectionKey: data.collectionKey,
-				userId: data.userId,
-				collectionTableNames: tableNamesRes.data,
-				hardDelete: false,
-			},
-			data: {
-				ids: [data.id],
-			},
-		},
-	);
+	const hookAfterRes = await executeDeleteHook(context, {
+		event: "afterDelete",
+		collection,
+		collectionKey: data.collectionKey,
+		tableNames,
+		userId: data.userId,
+		ids: [data.id],
+		hardDelete: false,
+	});
 	if (hookAfterRes.error) return hookAfterRes;
 
 	await invalidateContentDocumentCache(context, data.collectionKey);
