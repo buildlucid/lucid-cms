@@ -9,6 +9,7 @@ type ProcessingPreset = {
 	fit?: "cover" | "contain" | "fill" | "inside" | "outside";
 	format?: MediaFormat;
 	quality?: number;
+	rotate?: 0 | 90 | 180 | 270;
 };
 
 type ProcessingQuery = {
@@ -37,6 +38,7 @@ const resolveProcessingRequest = (props: {
 		width: selectedPreset?.width,
 		height: selectedPreset?.height,
 		fit: selectedPreset?.fit ?? "cover",
+		rotate: selectedPreset?.rotate,
 		hasProcessing: Boolean(selectedPreset || format),
 		publicQuery: {
 			preset: selectedPreset ? props.query.preset : undefined,

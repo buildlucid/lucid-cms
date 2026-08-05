@@ -111,6 +111,7 @@ const streamMedia: ServiceFn<
 			width: processingRequest.width,
 			height: processingRequest.height,
 			fit: processingRequest.fit,
+			rotate: processingRequest.rotate,
 		},
 	});
 
@@ -147,6 +148,7 @@ const streamMedia: ServiceFn<
 			width: processingRequest.width,
 			height: processingRequest.height,
 			fit: processingRequest.fit,
+			rotate: processingRequest.rotate,
 		},
 	});
 };

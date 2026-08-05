@@ -130,6 +130,30 @@ describe("media key helpers", () => {
 		).toBe("public/processed/123e4567e89b12d3a456426614174000-w400-fwebp");
 	});
 
+	it("includes non-zero rotation in processed image keys", () => {
+		expect(
+			generateProcessKey({
+				key: "public/123e4567e89b12d3a456426614174000",
+				options: {
+					rotate: 90,
+					format: "webp",
+				},
+				extension: "png",
+			}),
+		).toBe("public/processed/123e4567e89b12d3a456426614174000-r90-fwebp");
+
+		expect(
+			generateProcessKey({
+				key: "public/123e4567e89b12d3a456426614174000",
+				options: {
+					rotate: 0,
+					format: "webp",
+				},
+				extension: "png",
+			}),
+		).toBe("public/processed/123e4567e89b12d3a456426614174000-fwebp");
+	});
+
 	it("creates browser-facing URLs for processed media without version params", () => {
 		expect(
 			createMediaUrl({

@@ -1,0 +1,15 @@
+{
+	"plugin.cloudflare.images.errors.binding.missing": "Cloudflare Images binding {{binding}} was not found in the runtime environment.",
+	"plugin.cloudflare.images.errors.input.too.large": "The source image exceeds the Cloudflare Images binding limit of {{max}} bytes.",
+	"plugin.cloudflare.images.errors.input.format.unsupported": "The source image format {{format}} is not supported. Use JPEG, PNG, or WebP.",
+	"plugin.cloudflare.images.errors.input.area.too.large": "The source image exceeds the maximum area of {{max}} pixels.",
+	"plugin.cloudflare.images.errors.input.dimension.too.large": "The source image exceeds the maximum JPEG/PNG edge length of {{max}} pixels.",
+	"plugin.cloudflare.images.errors.rotate.unsupported": "Rotation {{rotate}} is not supported. Use 0, 90, 180, or 270 degrees.",
+	"plugin.cloudflare.images.errors.output.format.unsupported": "Output format {{format}} is not supported. Use JPEG, PNG, WebP, or AVIF.",
+	"plugin.cloudflare.images.errors.quality.invalid": "Image quality {{quality}} is invalid. Use an integer from 1 to 100.",
+	"plugin.cloudflare.images.errors.response.invalid": "Cloudflare Images returned an invalid transformation response.",
+	"plugin.cloudflare.images.errors.cloudflare.validation": "Cloudflare Images rejected the image or transformation (error {{code}}).",
+	"plugin.cloudflare.images.errors.cloudflare.configuration": "Cloudflare Images is unavailable because of account configuration or usage limits (error {{code}}).",
+	"plugin.cloudflare.images.errors.cloudflare.transient": "Cloudflare Images could not complete the transformation because of a temporary processing error (error {{code}}).",
+	"plugin.cloudflare.images.errors.unknown": "An unknown error occurred while processing the image with Cloudflare Images."
+}

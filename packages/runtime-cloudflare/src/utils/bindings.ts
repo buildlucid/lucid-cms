@@ -1,5 +1,6 @@
 import {
 	DEFAULT_D1_BINDING,
+	DEFAULT_IMAGES_BINDING,
 	DEFAULT_KV_BINDING,
 	DEFAULT_QUEUE_BINDING,
 	DEFAULT_R2_BINDING,
@@ -7,6 +8,7 @@ import {
 import type {
 	CloudflareBindingsOptions,
 	CloudflareD1DatabaseBindingOptions,
+	CloudflareImagesBindingOptions,
 	CloudflareKVNamespaceBindingOptions,
 	CloudflareQueueBindingOptions,
 	CloudflareR2BucketBindingOptions,
@@ -22,6 +24,7 @@ const normalizeBinding = <
 	T extends
 		| CloudflareKVNamespaceBindingOptions
 		| CloudflareD1DatabaseBindingOptions
+		| CloudflareImagesBindingOptions
 		| CloudflareR2BucketBindingOptions
 		| CloudflareQueueBindingOptions,
 >(
@@ -62,6 +65,10 @@ export const normalizeCloudflareBindings = (
 		bindings?.d1,
 		DEFAULT_D1_BINDING,
 	),
+	images: normalizeBinding<CloudflareImagesBindingOptions>(
+		bindings?.images,
+		DEFAULT_IMAGES_BINDING,
+	),
 });
 
 const toObjectBinding = <T extends { binding?: string }>(
@@ -98,6 +105,7 @@ export const mergeCloudflareBindings = (
 		merged.r2 = mergeBinding(merged.r2, bindings?.r2);
 		merged.queues = mergeBinding(merged.queues, bindings?.queues);
 		merged.d1 = mergeBinding(merged.d1, bindings?.d1);
+		merged.images = mergeBinding(merged.images, bindings?.images);
 	}
 
 	return Object.values(merged).some((value) => value !== undefined)

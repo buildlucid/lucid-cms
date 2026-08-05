@@ -1,5 +1,6 @@
 import { configureLucid, z } from "@lucidcms/core";
 import { d1 } from "@lucidcms/db-d1";
+import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
 import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
@@ -26,6 +27,7 @@ export default configureLucid({
 					},
 				],
 			}),
+			cloudflareImagesPlugin(),
 			cloudflareKVPlugin(),
 			cloudflareR2Plugin(),
 		],

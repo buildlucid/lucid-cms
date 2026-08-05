@@ -2,6 +2,7 @@ import { copy } from "@lucidcms/core/plugin";
 import type { ImageProcessorInstance } from "@lucidcms/core/types";
 import mime from "mime-types";
 import sharp from "sharp";
+import rotateFocalPoint from "./rotate-focal-point.js";
 
 /**
  * The Sharp image processor
@@ -18,10 +19,34 @@ const sharpImageProcessor = (): ImageProcessorInstance => ({
 			const input = Buffer.concat(chunks);
 			const metadata = await sharp(input).metadata();
 			const orientation = metadata.orientation ?? 1;
-			const swapsDimensions = orientation >= 5 && orientation <= 8;
-			const sourceWidth = swapsDimensions ? metadata.height : metadata.width;
-			const sourceHeight = swapsDimensions ? metadata.width : metadata.height;
-			const transform = sharp(input).rotate();
+			const orientationSwapsDimensions = orientation >= 5 && orientation <= 8;
+
+			const orientedWidth = orientationSwapsDimensions
+				? metadata.height
+				: metadata.width;
+			const orientedHeight = orientationSwapsDimensions
+				? metadata.width
+				: metadata.height;
+
+			const rotationSwapsDimensions =
+				options.rotate === 90 || options.rotate === 270;
+
+			const sourceWidth = rotationSwapsDimensions
+				? orientedHeight
+				: orientedWidth;
+			const sourceHeight = rotationSwapsDimensions
+				? orientedWidth
+				: orientedHeight;
+
+			const focalPoint = options.focalPoint
+				? rotateFocalPoint(options.focalPoint, options.rotate)
+				: undefined;
+
+			const transform = sharp(input).autoOrient();
+
+			if (options.rotate) {
+				transform.rotate(options.rotate);
+			}
 
 			if (options.format) {
 				transform.toFormat(options.format, {
@@ -33,7 +58,7 @@ const sharpImageProcessor = (): ImageProcessorInstance => ({
 				options.width &&
 				options.height &&
 				(options.fit ?? "cover") === "cover" &&
-				options.focalPoint &&
+				focalPoint &&
 				sourceWidth &&
 				sourceHeight
 			) {
@@ -54,7 +79,7 @@ const sharpImageProcessor = (): ImageProcessorInstance => ({
 					0,
 					Math.min(
 						sourceWidth - cropWidth,
-						Math.round(options.focalPoint.x * sourceWidth - cropWidth / 2),
+						Math.round(focalPoint.x * sourceWidth - cropWidth / 2),
 					),
 				);
 
@@ -62,7 +87,7 @@ const sharpImageProcessor = (): ImageProcessorInstance => ({
 					0,
 					Math.min(
 						sourceHeight - cropHeight,
-						Math.round(options.focalPoint.y * sourceHeight - cropHeight / 2),
+						Math.round(focalPoint.y * sourceHeight - cropHeight / 2),
 					),
 				);
 

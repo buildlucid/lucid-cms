@@ -3,6 +3,7 @@
 ## v1.2.1 (unreleased)
 
 - Adapter keys passed from `createLucidHost` response to `onListening` for telemetry support.
+- Added generated Wrangler configuration support for the Cloudflare Images binding.
 
 ## v1.2.0
 

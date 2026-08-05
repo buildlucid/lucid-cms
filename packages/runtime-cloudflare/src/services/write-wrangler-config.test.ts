@@ -54,6 +54,7 @@ describe("writeWranglerConfig", () => {
 						custom: {
 							bindings: {
 								d1: true,
+								images: true,
 								kv: "CACHE",
 								r2: {
 									bucketName: "media",
@@ -87,6 +88,9 @@ describe("writeWranglerConfig", () => {
 				binding: "CACHE",
 			},
 		]);
+		expect(config.images).toEqual({
+			binding: "LUCID_IMAGES",
+		});
 		expect(config.r2_buckets).toEqual([
 			{
 				binding: "LUCID_MEDIA_BUCKET",
@@ -120,6 +124,7 @@ describe("writeWranglerConfig", () => {
 					name: "override-app",
 				},
 				bindings: {
+					images: "CUSTOM_IMAGES",
 					r2: {
 						binding: "MEDIA",
 						bucketName: "runtime-media",
@@ -132,6 +137,7 @@ describe("writeWranglerConfig", () => {
 						type: constants.WRANGLER_CONFIG_ARTIFACT_TYPE,
 						custom: {
 							bindings: {
+								images: true,
 								r2: true,
 							},
 						},
@@ -148,6 +154,9 @@ describe("writeWranglerConfig", () => {
 				bucket_name: "runtime-media",
 			},
 		]);
+		expect(config.images).toEqual({
+			binding: "CUSTOM_IMAGES",
+		});
 	});
 
 	test("uses manual Wrangler config paths without generating", async () => {
@@ -170,12 +179,21 @@ describe("writeWranglerConfig", () => {
 			options: {
 				wrangler: "./wrangler.jsonc",
 			},
+			prepareArtifacts: {
+				custom: [
+					{
+						type: constants.WRANGLER_CONFIG_ARTIFACT_TYPE,
+						custom: { bindings: { images: true } },
+					},
+				],
+			},
 		});
 
 		expect(result).toEqual({
 			configPath: manualConfigPath,
 			generated: false,
 		});
+		expect(await readFile(manualConfigPath, "utf-8")).toBe("{}");
 		await expect(readFile(generatedConfigPath, "utf-8")).rejects.toThrow();
 	});
 

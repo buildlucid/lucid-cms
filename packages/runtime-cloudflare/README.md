@@ -116,7 +116,7 @@ export default configureLucid({
 
 Manual Wrangler mode means you own the bindings and deploy config. Lucid removes its old `wrangler.lucid.jsonc` only when the file is marked as Lucid-generated.
 
-Cloudflare-aware Lucid packages can ask the runtime to generate their Wrangler bindings. For example, `db: d1`, `cloudflareKVPlugin()`, `cloudflareR2Plugin()`, and `cloudflareQueuesPlugin()` generate the matching D1, KV, R2, and Queue bindings with Lucid's convention names. Pass binding/resource details to the plugin or adapter that owns the feature:
+Cloudflare-aware Lucid packages can ask the runtime to generate their Wrangler bindings. For example, `db: d1`, `cloudflareKVPlugin()`, `cloudflareR2Plugin()`, `cloudflareQueuesPlugin()`, and `cloudflareImagesPlugin()` generate the matching D1, KV, R2, Queue, and Images bindings with Lucid's convention names. Pass binding/resource details to the plugin or adapter that owns the feature:
 
 ```typescript
 import { configureLucid } from "@lucidcms/core";
@@ -143,6 +143,7 @@ Use `bindings` when you want the runtime to force or override generated binding 
 export default configureLucid({
 	runtime: cloudflare({
 		bindings: {
+			images: true,
 			kv: true,
 			r2: {
 				binding: "MEDIA",
@@ -182,12 +183,18 @@ export default configureLucid({
 
 ## Media Streaming
 
-By default, media is streamed via the `cdn` endpoint. This supports image processing via presets and fallback images. However, as Sharp isn't supported on Workers, image processing won't work. If you request an image via the CDN endpoint now and try to pass a preset, it will stream the original image instead of trying to optimize it via Sharp.
+Media is streamed through Lucid's `cdn` endpoint, including preset-driven image processing and fallback images. Sharp cannot run inside a deployed Worker, so use the first-party [Cloudflare Images plugin](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-images) for on-demand processing:
 
-If you would like to still be able to process images on request, you can use the Cloudflare Images transforms feature like so:
+```typescript
+import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
 
-```text
-https://example.co.uk/cdn-cgi/image/width=800,quality=75,format=auto/${media_url}
+export default configureLucid({
+	runtime: cloudflare,
+	db: libsql,
+	config: () => ({
+		plugins: [cloudflareImagesPlugin()],
+	}),
+});
 ```
 
 ## Sending Emails

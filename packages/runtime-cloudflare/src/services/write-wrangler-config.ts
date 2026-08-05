@@ -384,6 +384,18 @@ const applyD1Database = (
 	);
 };
 
+/** Adds the singular Images binding entry used by Cloudflare Workers. */
+const applyImagesBinding = (
+	config: WranglerConfig,
+	binding: NonNullable<
+		ReturnType<typeof normalizeCloudflareBindings>["images"]
+	>,
+) => {
+	config.images = {
+		binding: binding.binding,
+	};
+};
+
 /**
  * Applies all binding types currently modelled by the Cloudflare runtime.
  */
@@ -410,6 +422,9 @@ const applyRuntimeBindings = (props: {
 	}
 	if (bindings.d1) {
 		applyD1Database(props.config, bindings.d1, props.workerName);
+	}
+	if (bindings.images) {
+		applyImagesBinding(props.config, bindings.images);
 	}
 };
 

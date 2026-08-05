@@ -23,6 +23,7 @@
 		"@lucidcms/runtime-cloudflare": "*",
 		"@lucidcms/core": "*",
 		"@lucidcms/db-d1": "*",
+		"@lucidcms/plugin-cloudflare-images": "*",
 		"@lucidcms/plugin-cloudflare-kv": "*",
 		"@lucidcms/plugin-cloudflare-queues": "*",
 		"@lucidcms/plugin-cloudflare-r2": "*",

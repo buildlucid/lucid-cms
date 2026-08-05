@@ -274,6 +274,14 @@ const ConfigSchema = z.object({
 						])
 						.optional(),
 					quality: z.number().optional(),
+					rotate: z
+						.union([
+							z.literal(0),
+							z.literal(90),
+							z.literal(180),
+							z.literal(270),
+						])
+						.optional(),
 				}),
 			),
 			storeProcessed: z.boolean(),

@@ -11,6 +11,9 @@
 	"triggers": {
 		"crons": ["0 0 * * *", "0 */4 * * *"]
 	},
+	"images": {
+		"binding": "LUCID_IMAGES"
+	},
 	"d1_databases": [
 		{
 			"binding": "LUCID_D1",

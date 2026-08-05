@@ -48,6 +48,7 @@ AI features require a subscription with Lucid. This is planned to become publicl
 - [S3](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-s3): stores media in AWS S3, Cloudflare R2, or another S3-compatible provider.
 - [Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2): uses a Cloudflare R2 binding with optional S3-compatible HTTP fallback.
 - [Sharp](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-sharp): uses Sharp for Lucid's on-demand image processing.
+- [Cloudflare Images](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-images): uses the Cloudflare Images binding for on-demand image processing in Workers.
 - [Nodemailer](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-nodemailer): sends email through a custom Nodemailer transport.
 - [Resend](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-resend): sends email through Resend and supports Resend webhooks for delivery tracking.
 - [GitHub Auth](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-github-auth): adds GitHub as an authentication provider.

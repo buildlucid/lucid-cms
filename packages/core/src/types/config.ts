@@ -411,6 +411,7 @@ export interface LucidConfig {
 					fit?: "cover" | "contain" | "fill" | "inside" | "outside";
 					format?: "webp" | "avif" | "jpeg" | "png";
 					quality?: number;
+					rotate?: 0 | 90 | 180 | 270;
 				}
 			>;
 			/**
@@ -602,6 +603,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 					fit?: "cover" | "contain" | "fill" | "inside" | "outside";
 					format?: "webp" | "avif" | "jpeg" | "png";
 					quality?: number;
+					rotate?: 0 | 90 | 180 | 270;
 				}
 			>;
 			storeProcessed: boolean;

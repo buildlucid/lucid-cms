@@ -12,6 +12,7 @@ export type ImageProcessorOptions = {
 	focalPoint?: { x: number; y: number };
 	format?: "webp" | "avif" | "jpeg" | "png";
 	quality?: number;
+	rotate?: 0 | 90 | 180 | 270;
 };
 
 export type ImageProcessorResult =

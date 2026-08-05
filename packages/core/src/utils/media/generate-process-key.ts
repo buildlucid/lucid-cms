@@ -32,6 +32,7 @@ const generateProcessKey = (data: {
 	if (data.options.fit && data.options.fit !== "cover") {
 		suffixes.push(`fit${data.options.fit}`);
 	}
+	if (data.options.rotate) suffixes.push(`r${data.options.rotate}`);
 
 	const suffix = suffixes.length > 0 ? `-${suffixes.join("-")}` : "";
 	const finalFormat = data.options.format ?? data.extension ?? "bin";

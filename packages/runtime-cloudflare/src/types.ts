@@ -102,11 +102,16 @@ export type CloudflareD1DatabaseBindingOptions = {
 	remote?: boolean;
 };
 
+export type CloudflareImagesBindingOptions = {
+	binding?: string;
+};
+
 export type CloudflareBindingsOptions = {
 	kv?: true | string | CloudflareKVNamespaceBindingOptions;
 	r2?: true | string | CloudflareR2BucketBindingOptions;
 	queues?: true | string | CloudflareQueueBindingOptions;
 	d1?: true | string | CloudflareD1DatabaseBindingOptions;
+	images?: true | string | CloudflareImagesBindingOptions;
 };
 
 export type CloudflareAdapterOptionsFactory = (

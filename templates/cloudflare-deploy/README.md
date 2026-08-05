@@ -2,7 +2,7 @@
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/buildlucid/lucid-cms/tree/master/templates/cloudflare-deploy)
 
-Lucid CMS starter for Cloudflare Workers, D1, KV, R2, and the Pages plugin.
+Lucid CMS starter for Cloudflare Workers, D1, KV, R2, Images, and the Pages plugin.
 
 ## Commands
 

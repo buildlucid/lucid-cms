@@ -4,6 +4,7 @@ export const DEFAULT_KV_BINDING = "LUCID_KV";
 export const DEFAULT_R2_BINDING = "LUCID_MEDIA_BUCKET";
 export const DEFAULT_QUEUE_BINDING = "LUCID_QUEUE";
 export const DEFAULT_D1_BINDING = "LUCID_D1";
+export const DEFAULT_IMAGES_BINDING = "LUCID_IMAGES";
 /** Latest Cloudflare compatibility date validated against this runtime. */
 export const DEFAULT_COMPATIBILITY_DATE = "2026-06-30";
 

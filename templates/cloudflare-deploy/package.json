@@ -25,6 +25,7 @@
 	"dependencies": {
 		"@lucidcms/core": "0.17.0-alpha.0",
 		"@lucidcms/db-d1": "0.3.0",
+		"@lucidcms/plugin-cloudflare-images": "1.0.0",
 		"@lucidcms/plugin-cloudflare-kv": "1.0.4",
 		"@lucidcms/plugin-cloudflare-r2": "1.0.4",
 		"@lucidcms/plugin-pages": "0.6.0",

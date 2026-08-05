@@ -1,5 +1,9 @@
 # @lucidcms/plugin-sharp
 
+## v1.3.0 (unreleased)
+
+- Added preset rotation after EXIF auto-orientation, including rotated focal-point crop handling.
+
 ## v1.2.1
 
 - Bumped `@lucidcms/core` to `0.17.0-alpha.0`.
