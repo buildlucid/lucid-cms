@@ -9,7 +9,9 @@
 - Improved SSO auth provider support with dedicated OAuth 2.0 and OpenID Connect adapters, PKCE and stricter callback validation. ([98f560f](https://github.com/buildlucid/lucid-cms/commit/98f560f96b53740face220dbf3894a604737c417))
 - Added a user-scoped content account endpoint with explicit integration consent.
 - Added project and plugin data seeds with `defineSeed`, configurable sources and new seed CLI commands. ([0eab83f](https://github.com/buildlucid/lucid-cms/commit/0eab83f36266e3cf09488de30fe2dd7c3a6fd9c5))
-- Added anonymous telemetry for setup and initial `dev`, `serve` and `build` outcomes, with config and environment opt-outs.
+- Added anonymous telemetry for setup and initial `dev`, `serve` and `build` outcomes, with config and environment opt-outs. ([35ccfbb](https://github.com/buildlucid/lucid-cms/commit/35ccfbbb4dea6751c66be3a06eed8e082e34a48c))
+- Added quarter-turn rotation support to image presets. ([9277119](https://github.com/buildlucid/lucid-cms/commit/92771192886ccd8d4a896eb3a5e5a7fdd8de0614))
+- Added a `tables` config option, plus plugin exports for `defineTable` and column codecs, so projects and plugins can describe custom tables and JSON columns consistently across database adapters. ([6079ade](https://github.com/buildlucid/lucid-cms/commit/6079adea633eb538d731af6191dcdc346ac9a024))
 
 ### Breaking Changes:
 
@@ -18,12 +20,14 @@
 - Dropped support for the multiple tenants experiment. ([9994698](https://github.com/buildlucid/lucid-cms/commit/999469889a146868fb50acab45d318fc7815ccfb))
 - Changed media translations in API responses from arrays to locale-keyed records.
 - Custom migrations now receive a full service context and run after core migrations, collection migrations and sync. ([0eab83f](https://github.com/buildlucid/lucid-cms/commit/0eab83f36266e3cf09488de30fe2dd7c3a6fd9c5))
+- Reworked database queries around the managed `context.db.query(...)` Kysely API. Custom queries must now use this API for Lucid's logging, validation and consistent value handling across database adapters. ([6079ade](https://github.com/buildlucid/lucid-cms/commit/6079adea633eb538d731af6191dcdc346ac9a024))
 
 ### Bug Fixes:
 
 - Fixed cleared number custom fields being coerced to zero, which allowed required fields to save empty. ([bf66941](https://github.com/buildlucid/lucid-cms/commit/bf669413ff2e734363ec2e7a80786ae2af79d60e))
 - Fixed optional datetime custom fields failing to save with PostgreSQL when left empty. ([c95302b](https://github.com/buildlucid/lucid-cms/commit/c95302b988ffe7944ee9f71ae1d49bbb7e9f39b8))
 - Fixed saved image crops reapplying rotation and skew to the cropped derivative when reopened instead of restoring the crop against the original image. ([27e42a0](https://github.com/buildlucid/lucid-cms/commit/27e42a01fe59c1a755d41968d7cd05d1f9dc7247))
+- Fixed JSON code fields being returned as objects or arrays instead of strings, which could cause the admin editor to hang. ([6079ade](https://github.com/buildlucid/lucid-cms/commit/6079adea633eb538d731af6191dcdc346ac9a024))
 
 ## v0.17.0-alpha.0
 
