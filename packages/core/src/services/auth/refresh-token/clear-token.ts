@@ -26,15 +26,11 @@ const clearToken = async (
 		};
 	}
 
-	const config = c.get("config");
 	const now = new Date().toISOString();
 	const hashedRefreshToken = hashUserToken(_refresh);
 
-	const UserTokens = new UserTokensRepository(
-		c.get("database").client,
-		config.db,
-	);
 	const context = createServiceContext(c);
+	const UserTokens = new UserTokensRepository(context.db);
 
 	await context.kv.delete(context, {
 		key: cacheKeys.auth.refresh(_refresh),

@@ -1,292 +1,16 @@
 import { sql } from "kysely";
-import z from "zod";
 import type { GetMultipleQueryParams } from "../../schemas/media.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
-import type { KyselyDB } from "../db/types.js";
+import { mediaTable } from "../db/tables/media.js";
 import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class MediaRepository extends StaticRepository<"lucid_media"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_media");
+	constructor(db: LucidDatabase) {
+		super(db, mediaTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		key: z.string(),
-		folder_id: z.number().nullable(),
-		parent_media_id: z.number().nullable(),
-		relation_type: z.enum(["crop", "poster"]).nullable(),
-		e_tag: z.string().nullable(),
-		origin: z.enum(["human", "ai_generated", "ai_modified"]),
-		ai_generation_id: z.number().nullable(),
-		public: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		type: z.string(),
-		mime_type: z.string(),
-		file_extension: z.string(),
-		file_name: z.string().nullable(),
-		file_size: z.number(),
-		width: z.number().nullable(),
-		height: z.number().nullable(),
-		focal_x: z.number().nullable(),
-		focal_y: z.number().nullable(),
-		crop_x: z.number().nullable(),
-		crop_y: z.number().nullable(),
-		crop_width: z.number().nullable(),
-		crop_height: z.number().nullable(),
-		crop_rotation: z.number().nullable(),
-		crop_skew_x: z.number().nullable(),
-		crop_skew_y: z.number().nullable(),
-		blur_hash: z.string().nullable(),
-		average_color: z.string().nullable(),
-		base64: z.string().nullable().optional(),
-		is_dark: z
-			.union([
-				z.literal(this.dbAdapter.config.defaults.boolean.true),
-				z.literal(this.dbAdapter.config.defaults.boolean.false),
-			])
-			.nullable(),
-		is_light: z
-			.union([
-				z.literal(this.dbAdapter.config.defaults.boolean.true),
-				z.literal(this.dbAdapter.config.defaults.boolean.false),
-			])
-			.nullable(),
-		is_hidden: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		translations: z
-			.array(
-				z.object({
-					title: z.string().nullable(),
-					alt: z.string().nullable(),
-					description: z.string().nullable(),
-					summary: z.string().nullable(),
-					locale_code: z.string().nullable(),
-				}),
-			)
-			.optional(),
-		poster: z
-			.array(
-				z.object({
-					id: z.number(),
-					key: z.string(),
-					origin: z.enum(["human", "ai_generated", "ai_modified"]),
-					type: z.string(),
-					mime_type: z.string(),
-					file_extension: z.string(),
-					file_name: z.string().nullable(),
-					file_size: z.number(),
-					width: z.number().nullable(),
-					height: z.number().nullable(),
-					focal_x: z.number().nullable(),
-					focal_y: z.number().nullable(),
-					crop_x: z.number().nullable().optional(),
-					crop_y: z.number().nullable().optional(),
-					crop_width: z.number().nullable().optional(),
-					crop_height: z.number().nullable().optional(),
-					crop_rotation: z.number().nullable().optional(),
-					crop_skew_x: z.number().nullable().optional(),
-					crop_skew_y: z.number().nullable().optional(),
-					blur_hash: z.string().nullable(),
-					average_color: z.string().nullable(),
-					base64: z.string().nullable().optional(),
-					is_dark: z
-						.union([
-							z.literal(this.dbAdapter.config.defaults.boolean.true),
-							z.literal(this.dbAdapter.config.defaults.boolean.false),
-						])
-						.nullable(),
-					is_light: z
-						.union([
-							z.literal(this.dbAdapter.config.defaults.boolean.true),
-							z.literal(this.dbAdapter.config.defaults.boolean.false),
-						])
-						.nullable(),
-					crop: z
-						.array(
-							z.object({
-								id: z.number(),
-								key: z.string(),
-								origin: z.enum(["human", "ai_generated", "ai_modified"]),
-								type: z.string(),
-								mime_type: z.string(),
-								file_extension: z.string(),
-								file_name: z.string().nullable(),
-								file_size: z.number(),
-								width: z.number().nullable(),
-								height: z.number().nullable(),
-								focal_x: z.number().nullable(),
-								focal_y: z.number().nullable(),
-								crop_x: z.number(),
-								crop_y: z.number(),
-								crop_width: z.number(),
-								crop_height: z.number(),
-								crop_rotation: z.number(),
-								crop_skew_x: z.number(),
-								crop_skew_y: z.number(),
-								blur_hash: z.string().nullable(),
-								average_color: z.string().nullable(),
-								base64: z.string().nullable().optional(),
-								is_dark: z
-									.union([
-										z.literal(this.dbAdapter.config.defaults.boolean.true),
-										z.literal(this.dbAdapter.config.defaults.boolean.false),
-									])
-									.nullable(),
-								is_light: z
-									.union([
-										z.literal(this.dbAdapter.config.defaults.boolean.true),
-										z.literal(this.dbAdapter.config.defaults.boolean.false),
-									])
-									.nullable(),
-							}),
-						)
-						.optional(),
-					translations: z
-						.array(
-							z.object({
-								title: z.string().nullable().optional(),
-								alt: z.string().nullable(),
-								description: z.string().nullable().optional(),
-								summary: z.string().nullable().optional(),
-								locale_code: z.string().nullable(),
-							}),
-						)
-						.optional(),
-				}),
-			)
-			.optional(),
-		crop: z
-			.array(
-				z.object({
-					id: z.number(),
-					key: z.string(),
-					origin: z.enum(["human", "ai_generated", "ai_modified"]),
-					type: z.string(),
-					mime_type: z.string(),
-					file_extension: z.string(),
-					file_name: z.string().nullable(),
-					file_size: z.number(),
-					width: z.number().nullable(),
-					height: z.number().nullable(),
-					focal_x: z.number().nullable(),
-					focal_y: z.number().nullable(),
-					crop_x: z.number(),
-					crop_y: z.number(),
-					crop_width: z.number(),
-					crop_height: z.number(),
-					crop_rotation: z.number(),
-					crop_skew_x: z.number(),
-					crop_skew_y: z.number(),
-					blur_hash: z.string().nullable(),
-					average_color: z.string().nullable(),
-					base64: z.string().nullable().optional(),
-					is_dark: z
-						.union([
-							z.literal(this.dbAdapter.config.defaults.boolean.true),
-							z.literal(this.dbAdapter.config.defaults.boolean.false),
-						])
-						.nullable(),
-					is_light: z
-						.union([
-							z.literal(this.dbAdapter.config.defaults.boolean.true),
-							z.literal(this.dbAdapter.config.defaults.boolean.false),
-						])
-						.nullable(),
-				}),
-			)
-			.optional(),
-		custom_meta: z.string().nullable(),
-		is_deleted: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		is_deleted_at: z.union([z.string(), z.date()]).nullable(),
-		deleted_by: z.number().nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-		updated_by: z.number().nullable(),
-		created_by: z.number().nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		key: this.dbAdapter.getDataType("text"),
-		folder_id: this.dbAdapter.getDataType("integer"),
-		parent_media_id: this.dbAdapter.getDataType("integer"),
-		relation_type: this.dbAdapter.getDataType("text"),
-		e_tag: this.dbAdapter.getDataType("text"),
-		origin: this.dbAdapter.getDataType("text"),
-		ai_generation_id: this.dbAdapter.getDataType("integer"),
-		public: this.dbAdapter.getDataType("boolean"),
-		type: this.dbAdapter.getDataType("text"),
-		mime_type: this.dbAdapter.getDataType("text"),
-		file_extension: this.dbAdapter.getDataType("text"),
-		file_name: this.dbAdapter.getDataType("text"),
-		file_size: this.dbAdapter.getDataType("integer"),
-		width: this.dbAdapter.getDataType("integer"),
-		height: this.dbAdapter.getDataType("integer"),
-		focal_x: this.dbAdapter.getDataType("integer"),
-		focal_y: this.dbAdapter.getDataType("integer"),
-		crop_x: this.dbAdapter.getDataType("real"),
-		crop_y: this.dbAdapter.getDataType("real"),
-		crop_width: this.dbAdapter.getDataType("real"),
-		crop_height: this.dbAdapter.getDataType("real"),
-		crop_rotation: this.dbAdapter.getDataType("real"),
-		crop_skew_x: this.dbAdapter.getDataType("real"),
-		crop_skew_y: this.dbAdapter.getDataType("real"),
-		blur_hash: this.dbAdapter.getDataType("text"),
-		average_color: this.dbAdapter.getDataType("text"),
-		base64: this.dbAdapter.getDataType("text"),
-		is_dark: this.dbAdapter.getDataType("boolean"),
-		is_light: this.dbAdapter.getDataType("boolean"),
-		custom_meta: this.dbAdapter.getDataType("text"),
-		is_hidden: this.dbAdapter.getDataType("boolean"),
-		is_deleted: this.dbAdapter.getDataType("boolean"),
-		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
-		deleted_by: this.dbAdapter.getDataType("integer"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-		updated_by: this.dbAdapter.getDataType("integer"),
-		created_by: this.dbAdapter.getDataType("integer"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				key: "key",
-				mimeType: "mime_type",
-				type: "type",
-				extension: "file_extension",
-				folderId: "folder_id",
-				isDeleted: "is_deleted",
-				deletedBy: "deleted_by",
-				public: "public",
-				isHidden: "is_hidden",
-				origin: "origin",
-				fileSize: "file_size",
-				width: "width",
-				height: "height",
-				createdAt: "created_at",
-				updatedAt: "updated_at",
-			},
-			sorts: {
-				createdAt: "created_at",
-				updatedAt: "updated_at",
-				fileSize: "file_size",
-				width: "width",
-				height: "height",
-				mimeType: "mime_type",
-				extension: "file_extension",
-				deletedBy: "deleted_by",
-				isDeletedAt: "is_deleted_at",
-			},
-		},
-	} as const;
 
 	// ----------------------------------------
 	// queries
@@ -428,7 +152,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media as poster")
@@ -457,7 +181,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								"poster.base64",
 								"poster.is_dark",
 								"poster.is_light",
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										eb
 											.selectFrom("lucid_media_translations")
@@ -475,7 +199,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 											),
 									)
 									.as("translations"),
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										eb
 											.selectFrom("lucid_media as poster_crop")
@@ -528,7 +252,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							),
 					)
 					.as("poster"),
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media as crop")
@@ -567,7 +291,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							),
 					)
 					.as("crop"),
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media_translations")
@@ -686,7 +410,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media as poster")
@@ -715,7 +439,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								"poster.base64",
 								"poster.is_dark",
 								"poster.is_light",
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										eb
 											.selectFrom("lucid_media_translations")
@@ -733,7 +457,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 											),
 									)
 									.as("translations"),
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										eb
 											.selectFrom("lucid_media as poster_crop")
@@ -786,7 +510,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							),
 					)
 					.as("poster"),
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media as crop")
@@ -825,7 +549,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							),
 					)
 					.as("crop"),
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media_translations")
@@ -945,7 +669,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "multiple",
-			schema: this.tableSchema.pick({
+			schema: this.config.schema.pick({
 				id: true,
 			}),
 			select: ["id"],
@@ -1002,7 +726,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.deleted_by",
 						"lucid_media.public",
 						eb.fn.min<string>("translation.title").as("title_sort"),
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_media_translations")
@@ -1020,7 +744,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 									),
 							)
 							.as("translations"),
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_media as poster")
@@ -1049,7 +773,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 										"poster.base64",
 										"poster.is_dark",
 										"poster.is_light",
-										this.dbAdapter
+										this.database.fn
 											.jsonArrayFrom(
 												eb
 													.selectFrom("lucid_media_translations")
@@ -1067,7 +791,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 													),
 											)
 											.as("translations"),
-										activeMediaCropSelect(this.db, this.dbAdapter, "poster.id"),
+										activeMediaCropSelect(this.database, "poster.id"),
 									])
 									.whereRef("poster.parent_media_id", "=", "lucid_media.id")
 									.where("poster.relation_type", "=", "poster")
@@ -1078,7 +802,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 									),
 							)
 							.as("poster"),
-						activeMediaCropSelect(this.db, this.dbAdapter, "lucid_media.id"),
+						activeMediaCropSelect(this.database, "lucid_media.id"),
 					])
 					.where(
 						"lucid_media.is_hidden",
@@ -1113,12 +837,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							tableKeys: {
 								filters: {
 									title: "translation.title",
-									...this.queryConfig.tableKeys.filters,
+									...this.config.queryConfig.tableKeys.filters,
 								},
 								sorts: {
-									// @ts-expect-error
 									title: "title_sort",
-									...this.queryConfig.tableKeys.sorts,
+									...this.config.queryConfig.tableKeys.sorts,
 								},
 							},
 							operators: {

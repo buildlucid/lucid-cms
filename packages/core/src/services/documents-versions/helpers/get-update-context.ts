@@ -3,7 +3,8 @@ import collections from "../../../libs/collection/collections.js";
 import getMigrationStatus from "../../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { LucidVersionTable, Select } from "../../../libs/db/types.js";
+import type { LucidVersionTable } from "../../../libs/db/tables/index.js";
+import type { Select } from "../../../libs/db/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 import type { CollectionTableNames } from "../../../types.js";
@@ -25,10 +26,7 @@ const getUpdateContext: ServiceFn<
 		versionType: Select<LucidVersionTable>["type"];
 	}
 > = async (context, data) => {
-	const Version = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Version = new DocumentVersionsRepository(context.db);
 
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,

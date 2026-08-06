@@ -10,10 +10,7 @@ const revokeConnection: ServiceFn<[{ id: number }], undefined> = async (
 	input,
 ) => {
 	const now = new Date().toISOString();
-	const Grants = new OAuthGrantsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Grants = new OAuthGrantsRepository(context.db);
 	const updateRes = await Grants.updateSingle({
 		data: {
 			revoked_at: now,
@@ -26,10 +23,7 @@ const revokeConnection: ServiceFn<[{ id: number }], undefined> = async (
 	});
 	if (updateRes.error) return updateRes;
 
-	const RefreshTokens = new OAuthRefreshTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const RefreshTokens = new OAuthRefreshTokensRepository(context.db);
 	const revokeRes = await RefreshTokens.revokeGrant({
 		grantId: input.id,
 		revokedAt: now,

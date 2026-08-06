@@ -66,7 +66,9 @@ export const CodeEditor: Component<CodeEditorProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const code = createMemo(() => props.value);
+	const code = createMemo(() =>
+		typeof props.value === "string" ? props.value : "",
+	);
 	const languageOptions = createMemo(() =>
 		props.languages.map((language) => ({
 			value: language,

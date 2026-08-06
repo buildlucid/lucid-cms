@@ -23,8 +23,8 @@ type CustomFilterHandler<DB, Table extends keyof DB> = (params: {
 
 type QueryBuilderMeta<DB, Table extends keyof DB> = {
 	tableKeys?: {
-		filters?: Record<string, ReferenceExpression<DB, Table>>;
-		sorts?: Record<string, ReferenceExpression<DB, Table>>;
+		filters?: Record<string, ReferenceExpression<DB, Table> | string>;
+		sorts?: Record<string, ReferenceExpression<DB, Table> | string>;
 	};
 	operators?: Record<string, FilterOperator>;
 	customFilters?: Record<string, CustomFilterHandler<DB, Table>>;
@@ -52,7 +52,12 @@ const conditionFromFilter = <DB, Table extends keyof DB>(
 			filter: FilterObject & { operator: FilterOperator };
 	  }
 	| undefined => {
-	const tableKey = getTableKeyValue<DB, Table>(key, meta?.tableKeys?.filters);
+	const tableKey = getTableKeyValue<DB, Table>(
+		key,
+		meta?.tableKeys?.filters as
+			| Record<string, ReferenceExpression<DB, Table>>
+			| undefined,
+	);
 	if (!tableKey) return undefined;
 
 	return {
@@ -217,7 +222,9 @@ const queryBuilder = <DB, Table extends keyof DB, O>(
 		for (const sort of config.queryParams.sort) {
 			const tableKey = getTableKeyValue<DB, Table>(
 				sort.key,
-				config.meta?.tableKeys?.sorts,
+				config.meta?.tableKeys?.sorts as
+					| Record<string, ReferenceExpression<DB, Table>>
+					| undefined,
 			);
 			if (!tableKey) continue;
 			mainQuery = mainQuery.orderBy(tableKey, sort.direction);

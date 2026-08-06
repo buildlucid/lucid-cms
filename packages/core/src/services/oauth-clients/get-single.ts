@@ -8,10 +8,7 @@ const getSingle: ServiceFn<[{ id: number }], OAuthClient> = async (
 	context,
 	data,
 ) => {
-	const OAuthClients = new OAuthClientsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const OAuthClients = new OAuthClientsRepository(context.db);
 
 	const clientRes = await OAuthClients.selectSingleDetailed({
 		id: data.id,

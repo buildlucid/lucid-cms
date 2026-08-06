@@ -5,10 +5,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 const clearExpiredPreviewSessions: ServiceFn<[], undefined> = async (
 	context,
 ) => {
-	const PreviewSessions = new PreviewSessionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const PreviewSessions = new PreviewSessionsRepository(context.db);
 
 	const clearRes = await PreviewSessions.deleteMultiple({
 		where: [

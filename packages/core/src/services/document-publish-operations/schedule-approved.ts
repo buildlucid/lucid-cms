@@ -21,14 +21,8 @@ const scheduleApproved: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const QueueJobs = new QueueJobsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
+	const QueueJobs = new QueueJobsRepository(context.db);
 
 	const operationRes = await Operations.selectSingle({
 		select: [

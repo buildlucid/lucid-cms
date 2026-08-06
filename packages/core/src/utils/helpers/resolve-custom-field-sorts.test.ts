@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
-import type { LucidBrickTableName } from "../../types.js";
+import type { LucidBrickTableName } from "../../libs/db/tables/index.js";
 import resolveCustomFieldSorts from "./resolve-custom-field-sorts.js";
 
 describe("resolveCustomFieldSorts", () => {

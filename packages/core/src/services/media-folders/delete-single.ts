@@ -10,10 +10,7 @@ const deleteSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const MediaFolders = new MediaFoldersRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaFolders = new MediaFoldersRepository(context.db);
 
 	const folderAccessRes = await checkFolderAccess(context, {
 		folderId: data.id,

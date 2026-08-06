@@ -16,7 +16,7 @@ const validateMediaInputData = async (
 	if (mediaIds.length === 0) return [];
 
 	try {
-		const Media = new MediaRepository(context.db.client, context.config.db);
+		const Media = new MediaRepository(context.db);
 
 		const mediaRes = await Media.selectMultipleValidationData({
 			ids: mediaIds,

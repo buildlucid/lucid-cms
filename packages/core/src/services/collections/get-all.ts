@@ -28,14 +28,12 @@ const getAll: ServiceFn<
 			(collection) => collection.getData.mode === "single",
 		);
 
-		const Documents = new DocumentsRepository(
-			context.db.client,
-			context.config.db,
-		);
+		const Documents = new DocumentsRepository(context.db);
 
-		await primeRuntimeSchemas(context, {
+		const primeSchemasRes = await primeRuntimeSchemas(context, {
 			collectionKeys: singleCollections.map((c) => c.key),
 		});
+		if (primeSchemasRes.error) return primeSchemasRes;
 
 		const documentsRes = await Documents.selectMultipleUnion({
 			tables: (

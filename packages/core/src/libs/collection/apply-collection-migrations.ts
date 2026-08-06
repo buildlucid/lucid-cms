@@ -32,10 +32,7 @@ const applyCollectionMigrationBatch = serviceWrapper<
 		});
 		if (migrationRes.error) return migrationRes;
 
-		const CollectionMigrations = new CollectionMigrationsRepository(
-			context.db.client,
-			context.config.db,
-		);
+		const CollectionMigrations = new CollectionMigrationsRepository(context.db);
 		const migrationEntryRes = await CollectionMigrations.createSingle({
 			data: data.migrationEntry,
 		});

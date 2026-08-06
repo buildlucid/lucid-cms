@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import constants from "../../constants/constants.js";
 import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
+import type { LucidBrickTableName } from "../../libs/db/tables/index.js";
 import type {
 	QueryParamFilterCondition,
 	QueryParamFilters,
 } from "../../types/query-params.js";
-import type { LucidBrickTableName } from "../../types.js";
 import groupDocumentFilters, {
 	groupDocumentFilterConditions,
 } from "./group-document-filters.js";

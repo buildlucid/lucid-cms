@@ -39,9 +39,7 @@ describe("media process service", () => {
 		});
 		const response = await processMedia(
 			{
-				db: {
-					client: {},
-				},
+				db: {},
 				request: {
 					url: "https://example.com/lucid/api/v1/content/media/process/public/test",
 				},

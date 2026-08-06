@@ -1,33 +1,74 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
-import type {
-	ColumnDataType,
-	ColumnType,
-	Generated,
-	JSONColumnType,
-	Kysely,
-	Transaction,
-} from "kysely";
+import type { ColumnDataType, ColumnType, Kysely, Transaction } from "kysely";
 import type { Migration } from "kysely/migration";
-import type constants from "../../constants/constants.js";
-import type { OptionsName } from "../../schemas/options.js";
-import type { MediaOrigin, PreviewMode } from "../../types/response.js";
-import type {
-	SecurityAuditAction,
-	SecurityAuditRoleSnapshot,
-} from "../../types/security-audit.js";
 import type { ServiceContext } from "../../utils/services/types.js";
-import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
-import type { MigrationPlan } from "../collection/migration/types.js";
-import type { CollectionSchema } from "../collection/schema/types.js";
-import type { EmailStorageConfig } from "../email/storage/types.js";
-import type {
-	EmailDeliveryStatus,
-	EmailHeaders,
-	EmailPriority,
-	EmailType,
-} from "../email/types.js";
-import type { QueueEvent, QueueJobStatus } from "../queue/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
+import type {
+	LucidAiGenerations,
+	LucidAlertRecipients,
+	LucidAlerts,
+	LucidAuthStates,
+	LucidBricksTable,
+	LucidBrickTableName,
+	LucidCollectionMigrations,
+	LucidCollections,
+	LucidDocumentPublishOperationAssignees,
+	LucidDocumentPublishOperationEvents,
+	LucidDocumentPublishOperations,
+	LucidDocumentTable,
+	LucidDocumentTableName,
+	LucidDocumentWorkflowAssignees,
+	LucidDocumentWorkflows,
+	LucidEmailAttachments,
+	LucidEmailChangeRequests,
+	LucidEmails,
+	LucidEmailTransactions,
+	LucidIntegrationScopes,
+	LucidIntegrations,
+	LucidLocales,
+	LucidMedia,
+	LucidMediaAwaitingSync,
+	LucidMediaFolders,
+	LucidMediaShareLinks,
+	LucidMediaTranslations,
+	LucidMediaUploadSessions,
+	LucidOAuthAuthorizationCodes,
+	LucidOAuthAuthorizationRequests,
+	LucidOAuthClientRedirectUris,
+	LucidOAuthClients,
+	LucidOAuthGrantScopes,
+	LucidOAuthGrants,
+	LucidOAuthRefreshTokens,
+	LucidOptions,
+	LucidPreviewSessions,
+	LucidProcessedImages,
+	LucidQueueJobs,
+	LucidRemoteConnections,
+	LucidRolePermissions,
+	LucidRoles,
+	LucidRoleTranslations,
+	LucidSecurityAuditLogs,
+	LucidUserAuthProviders,
+	LucidUserLogins,
+	LucidUserRoles,
+	LucidUsers,
+	LucidUserTokens,
+	LucidVersionTable,
+	LucidVersionTableName,
+} from "./tables/index.js";
+
+export type TimestampMutable = ColumnType<
+	string | Date | null,
+	string | undefined,
+	string | null
+>;
+
+export type TimestampImmutable = ColumnType<
+	string | Date,
+	string | undefined,
+	never
+>;
+
+export type BooleanInt = 0 | 1 | boolean;
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
 export type DatabaseConnection = {
@@ -73,8 +114,6 @@ export type DefaultValueType<T> = T extends object
 		? T
 		: { [K in keyof T]: T[K] }
 	: T;
-
-export type DocumentVersionType = "latest" | "revision" | string;
 
 export type OnDelete = "cascade" | "set null" | "restrict" | "no action";
 export type OnUpdate = "cascade" | "set null" | "no action" | "restrict";
@@ -180,810 +219,6 @@ export interface InferredTable {
 }
 
 // ------------------------------------------------------------------------------
-// Column types
-
-export type TimestampMutateable = ColumnType<
-	string | Date | null,
-	string | undefined,
-	string | null
->;
-export type TimestampImmutable = ColumnType<
-	string | Date,
-	string | undefined,
-	never
->;
-
-/** Should only be used for DB column insert/response values. Everything else should be using booleans and can be converted for response/insert with boolean helpers */
-export type BooleanInt = 0 | 1 | boolean;
-
-// ------------------------------------------------------------------------------
-// Tables
-
-export interface LucidLocales {
-	code: string;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
-	is_deleted_at: TimestampMutateable;
-}
-
-export interface LucidOptions {
-	name: OptionsName;
-	value_int: number | null;
-	value_text: string | null;
-	value_bool: BooleanInt | null;
-}
-
-export interface LucidQueueJobs {
-	id: Generated<number>;
-	job_id: string;
-	event_type: QueueEvent;
-	event_data: JSONColumnType<
-		Record<string, unknown>,
-		Record<string, unknown>,
-		Record<string, unknown>
-	>;
-	queue_adapter_key: string;
-	status: QueueJobStatus;
-	priority: number | null;
-	attempts: number;
-	max_attempts: number;
-	error_message: string | null;
-	created_at: TimestampImmutable;
-	scheduled_for: TimestampMutateable;
-	started_at: TimestampMutateable;
-	completed_at: TimestampMutateable;
-	failed_at: TimestampMutateable;
-	next_retry_at: TimestampMutateable;
-	created_by_user_id: number | null;
-	updated_at: TimestampMutateable;
-}
-
-export type AiGenerationStatus = "failed" | "pending" | "success";
-
-export interface LucidAiGenerations {
-	id: Generated<number>;
-	request_id: string;
-	provider_request_id: string | null;
-	feature_key: string;
-	feature_version: string;
-	user_id: number | null;
-	lucid_remote_connection_id: number | null;
-	target_type: string;
-	target: JSONColumnType<
-		Record<string, unknown>,
-		Record<string, unknown>,
-		Record<string, unknown>
-	>;
-	output: JSONColumnType<
-		Record<string, unknown> | null,
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
-	>;
-	usage: JSONColumnType<
-		Record<string, unknown> | null,
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
-	>;
-	model: string | null;
-	credits_charged: string | null;
-	duration_ms: number | null;
-	status: AiGenerationStatus;
-	error_message: string | null;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidUsers {
-	id: Generated<number>;
-	super_admin: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
-	email: string;
-	username: string;
-	first_name: string | null;
-	last_name: string | null;
-	password: ColumnType<string, string | undefined, string>;
-	secret: ColumnType<string, string, string>;
-	triggered_password_reset: ColumnType<
-		BooleanInt,
-		BooleanInt | undefined,
-		BooleanInt
-	>;
-	invitation_accepted: ColumnType<
-		BooleanInt,
-		BooleanInt | undefined,
-		BooleanInt
-	>;
-	is_locked: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
-	is_deleted: BooleanInt | null;
-	is_deleted_at: TimestampMutateable;
-	deleted_by: number | null;
-	profile_picture_media_id: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidUserAuthProviders {
-	id: Generated<number>;
-	user_id: number;
-	provider_key: string;
-	provider_user_id: string;
-	linked_at: TimestampImmutable;
-	metadata: JSONColumnType<
-		Record<string, unknown> | null,
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
-	>;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidRoles {
-	id: Generated<number>;
-	key: string | null;
-	locked: BooleanInt;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidRoleTranslations {
-	id: Generated<number>;
-	role_id: number;
-	locale_code: string;
-	name: string | null;
-	description: string | null;
-}
-
-export interface LucidRolePermissions {
-	id: Generated<number>;
-	role_id: number;
-	permission: string;
-	core: BooleanInt;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidUserRoles {
-	id: Generated<number>;
-	user_id: number | null;
-	role_id: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export type UserTokenType =
-	(typeof constants.userTokens)[keyof typeof constants.userTokens];
-
-export type EmailChangeRequestStatus =
-	(typeof constants.emailChangeRequestStatuses)[keyof typeof constants.emailChangeRequestStatuses];
-
-export interface LucidUserTokens {
-	id: Generated<number>;
-	user_id: number;
-	token_type: UserTokenType;
-	token: string;
-	revoked_at: TimestampMutateable;
-	revoke_reason: string | null;
-	consumed_at: TimestampMutateable;
-	replaced_by_token_id: number | null;
-	created_at: TimestampImmutable;
-	expiry_date: TimestampMutateable;
-}
-
-export interface LucidEmailChangeRequests {
-	id: Generated<number>;
-	user_id: number;
-	old_email: string;
-	new_email: string;
-	confirm_token_id: number;
-	revert_token_id: number;
-	status: EmailChangeRequestStatus;
-	confirmed_at: TimestampMutateable;
-	cancelled_at: TimestampMutateable;
-	reverted_at: TimestampMutateable;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-	expires_at: TimestampMutateable;
-}
-
-export interface LucidUserLogins {
-	id: Generated<number>;
-	user_id: number | null;
-	token_id: number | null;
-	auth_method: string;
-	ip_address: string | null;
-	user_agent: string | null;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidSecurityAuditLogs {
-	id: Generated<number>;
-	user_id: number | null;
-	action: SecurityAuditAction;
-	performed_by: number | null;
-	performed_by_roles: JSONColumnType<
-		SecurityAuditRoleSnapshot[],
-		SecurityAuditRoleSnapshot[],
-		SecurityAuditRoleSnapshot[]
-	>;
-	performed_by_super_admin: ColumnType<
-		BooleanInt,
-		BooleanInt | undefined,
-		BooleanInt
-	>;
-	ip_address: string;
-	previous_value: string;
-	new_value: string;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidEmails {
-	id: Generated<number>;
-	from_address: string;
-	from_name: string;
-	to_address: string;
-	subject: string;
-	cc: string | null;
-	bcc: string | null;
-	template: string;
-	priority: EmailPriority;
-	headers: JSONColumnType<
-		EmailHeaders,
-		EmailHeaders | null,
-		EmailHeaders | null
-	>;
-	data: JSONColumnType<
-		Record<string, unknown>,
-		//* __insert__ includes a Record as the base repository handles formatting via formatData method
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
-	>;
-	storage_strategy: JSONColumnType<
-		EmailStorageConfig,
-		EmailStorageConfig | null,
-		EmailStorageConfig | null
-	>;
-	type: EmailType;
-	is_system: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
-	current_status: EmailDeliveryStatus;
-	attempt_count: number;
-	last_attempted_at: TimestampMutateable;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidEmailAttachments {
-	id: Generated<number>;
-	email_id: number;
-	type: "url";
-	url: string;
-	filename: string;
-	content_type: string | null;
-	disposition: "attachment" | "inline";
-	content_id: string | null;
-	order: number;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidEmailTransactions {
-	id: Generated<number>;
-	email_id: number;
-	delivery_status: EmailDeliveryStatus;
-	message: string | null;
-	external_message_id: string | null;
-	strategy_identifier: string;
-	strategy_data: JSONColumnType<
-		Record<string, unknown>,
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
-	>;
-	simulate: BooleanInt;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export type AlertType = "storage" | "publish-request";
-export type AlertLevel = "info" | "warning" | "error" | "critical";
-
-export interface LucidAlerts {
-	id: Generated<number>;
-	type: AlertType;
-	level: AlertLevel;
-	dedupe_key: string;
-	title: string;
-	message: string;
-	metadata: JSONColumnType<
-		Record<string, unknown>,
-		Record<string, unknown>,
-		Record<string, unknown>
-	>;
-	email_id: number | null;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidAlertRecipients {
-	id: Generated<number>;
-	alert_id: number;
-	user_id: number;
-	read_at: TimestampMutateable;
-	dismissed_at: TimestampMutateable;
-	created_at: TimestampImmutable;
-}
-
-export type DocumentPublishOperationStatus =
-	| "pending"
-	| "approved"
-	| "rejected"
-	| "cancelled"
-	| "superseded";
-
-export type DocumentPublishOperationExecutionStatus =
-	| "awaiting_approval"
-	| "scheduled"
-	| "executing"
-	| "executed"
-	| "failed"
-	| "cancelled";
-
-export type DocumentPublishOperationType = "request" | "direct";
-
-export type DocumentPublishOperationEventType =
-	| "created"
-	| "superseded"
-	| "approved"
-	| "rejected"
-	| "cancelled"
-	| "scheduled"
-	| "executing"
-	| "executed"
-	| "failed"
-	| "rescheduled"
-	| "retried"
-	| "reviewers_updated";
-
-export interface LucidDocumentPublishOperations {
-	id: Generated<number>;
-	collection_key: string;
-	document_id: number;
-	target: string;
-	operation_type: DocumentPublishOperationType;
-	status: DocumentPublishOperationStatus;
-	source_version_id: number;
-	source_content_id: string;
-	snapshot_version_id: number;
-	requested_by: number | null;
-	request_comment: JSONColumnType<
-		RichTextJSON | null,
-		RichTextJSON | null,
-		RichTextJSON | null
-	>;
-	decided_by: number | null;
-	decision_comment: JSONColumnType<
-		RichTextJSON | null,
-		RichTextJSON | null,
-		RichTextJSON | null
-	>;
-	decided_at: TimestampMutateable;
-	scheduled_at: TimestampMutateable;
-	scheduled_timezone: string | null;
-	execution_status: DocumentPublishOperationExecutionStatus;
-	executed_at: TimestampMutateable;
-	failed_at: TimestampMutateable;
-	execution_error_message: string | null;
-	execution_error_data: JSONColumnType<
-		Record<string, unknown> | null,
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
-	>;
-	scheduled_job_id: string | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidDocumentPublishOperationAssignees {
-	id: Generated<number>;
-	operation_id: number;
-	user_id: number;
-	assigned_by: number | null;
-	assigned_at: TimestampImmutable;
-}
-
-export interface LucidDocumentPublishOperationEvents {
-	id: Generated<number>;
-	operation_id: number;
-	event_type: DocumentPublishOperationEventType;
-	user_id: number | null;
-	comment: string | null;
-	metadata: JSONColumnType<
-		Record<string, unknown>,
-		Record<string, unknown>,
-		Record<string, unknown>
-	>;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidDocumentWorkflows {
-	id: Generated<number>;
-	collection_key: string;
-	document_id: number;
-	stage_key: string;
-	created_by: number | null;
-	updated_by: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidDocumentWorkflowAssignees {
-	id: Generated<number>;
-	workflow_id: number;
-	user_id: number;
-	assigned_by: number | null;
-	assigned_at: TimestampImmutable;
-}
-
-export interface LucidMediaFolders {
-	id: Generated<number>;
-	title: string;
-	parent_folder_id: number | null;
-	created_by: number | null;
-	updated_by: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidMedia {
-	id: Generated<number>;
-	key: string;
-	folder_id: number | null;
-	parent_media_id: number | null;
-	relation_type: "crop" | "poster" | null;
-	e_tag: string | null;
-	origin: MediaOrigin;
-	ai_generation_id: number | null;
-	public: BooleanInt;
-	type: string;
-	mime_type: string;
-	file_extension: string;
-	file_name: string | null;
-	file_size: number;
-	width: number | null;
-	height: number | null;
-	focal_x: number | null;
-	focal_y: number | null;
-	crop_x: number | null;
-	crop_y: number | null;
-	crop_width: number | null;
-	crop_height: number | null;
-	crop_rotation: number | null;
-	crop_skew_x: number | null;
-	crop_skew_y: number | null;
-	blur_hash: string | null;
-	average_color: string | null;
-	base64: string | null;
-	is_dark: BooleanInt | null;
-	is_light: BooleanInt | null;
-	custom_meta: string | null;
-	is_hidden: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
-	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
-	is_deleted_at: TimestampMutateable;
-	deleted_by: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-	created_by: number | null;
-	updated_by: number | null;
-}
-
-export interface LucidMediaShareLinks {
-	id: Generated<number>;
-	media_id: number;
-	token: string;
-	password: string | null;
-	expires_at: TimestampMutateable;
-	name: string | null;
-	description: string | null;
-	created_by: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-	updated_by: number | null;
-}
-
-export interface LucidPreviewSessions {
-	id: Generated<number>;
-	token_hash: string;
-	entry_collection_key: string;
-	entry_document_id: number;
-	entry_version_type: DocumentVersionType;
-	mode: PreviewMode;
-	entry_version_id: number | null;
-	expires_at: TimestampImmutable;
-	created_by: number | null;
-	created_at: TimestampImmutable;
-}
-
-export type LucidRemoteConnectionState =
-	| "connected"
-	| "disconnected"
-	| "revoked";
-
-export interface LucidRemoteConnections {
-	id: Generated<number>;
-	status: LucidRemoteConnectionState;
-	registration_encrypted: string | null;
-	grant_encrypted: string | null;
-	pending_encrypted: string | null;
-	pending_state_hash: string | null;
-	pending_expires_at: number | null;
-	display: JSONColumnType<
-		Record<string, unknown> | null,
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
-	>;
-	last_attempt_at: number | null;
-	last_verified_at: number | null;
-	error_key: string | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidMediaTranslations {
-	id: Generated<number>;
-	media_id: number;
-	locale_code: string;
-	title: string | null;
-	alt: string | null;
-	description: string | null;
-	summary: string | null;
-}
-
-export interface LucidMediaAwaitingSync {
-	key: string;
-	timestamp: TimestampImmutable;
-}
-
-export interface LucidMediaUploadSessions {
-	session_id: string;
-	key: string;
-	adapter_key: string;
-	adapter_upload_id: string | null;
-	mode: "single" | "resumable";
-	status: "active" | "completed" | "aborted";
-	file_name: string;
-	mime_type: string;
-	file_extension: string | null;
-	file_size: number;
-	part_size: number | null;
-	created_by: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-	expires_at: TimestampMutateable;
-}
-
-export interface HeadlessProcessedImages {
-	key: string;
-	media_key: string | null;
-	file_size: number;
-}
-
-export interface LucidCollections {
-	key: string;
-	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
-	is_deleted_at: TimestampMutateable;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidCollectionMigrations {
-	id: Generated<number>;
-	collection_key: string;
-	table_name_map: string;
-	migration_plans: JSONColumnType<
-		MigrationPlan,
-		//* __insert__ includes a Record as the base repository handles formatting via formatData method
-		MigrationPlan,
-		MigrationPlan
-	>;
-	collection_schema: JSONColumnType<
-		CollectionSchema,
-		//* __insert__ includes a Record as the base repository handles formatting via formatData method
-		CollectionSchema,
-		CollectionSchema
-	>;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidIntegrations {
-	id: Generated<number>;
-	name: string;
-	description: string | null;
-	enabled: BooleanInt;
-	user_id: number | null;
-	expires_at: TimestampMutateable;
-	key: string;
-	api_key: string;
-	secret: string;
-	last_used_at: TimestampMutateable;
-	last_used_ip: string | null;
-	last_used_user_agent: string | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidIntegrationScopes {
-	id: Generated<number>;
-	integration_id: number;
-	scope: string;
-	core: BooleanInt;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export type OAuthPrincipalType = "system" | "user";
-export type OAuthClientAuthMethod = "none" | "client_secret_basic";
-
-export interface LucidOAuthClients {
-	id: Generated<number>;
-	client_id: string;
-	name: string;
-	client_uri: string | null;
-	token_endpoint_auth_method: OAuthClientAuthMethod;
-	client_secret_hash: string | null;
-	client_secret_salt: string | null;
-	logo_media_id: number | null;
-	enabled: BooleanInt;
-	created_by: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidOAuthClientRedirectUris {
-	id: Generated<number>;
-	oauth_client_id: number;
-	redirect_uri: string;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidOAuthAuthorizationRequests {
-	id: Generated<number>;
-	request_id: string;
-	client_id: string;
-	client_name: string;
-	client_uri: string | null;
-	client_logo_media_id: number | null;
-	redirect_uri: string;
-	resource: string;
-	scopes: string;
-	state: string;
-	code_challenge: string;
-	expires_at: TimestampImmutable;
-	consumed_at: TimestampMutateable;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidOAuthGrants {
-	id: Generated<number>;
-	name: string;
-	client_id: string;
-	client_name: string;
-	client_uri: string | null;
-	principal_type: OAuthPrincipalType;
-	user_id: number | null;
-	created_by: number | null;
-	revoked_at: TimestampMutateable;
-	last_used_at: TimestampMutateable;
-	last_used_ip: string | null;
-	last_used_user_agent: string | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export interface LucidOAuthGrantScopes {
-	id: Generated<number>;
-	grant_id: number;
-	scope: string;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidOAuthAuthorizationCodes {
-	id: Generated<number>;
-	code_hash: string;
-	grant_id: number;
-	client_id: string;
-	redirect_uri: string;
-	resource: string;
-	code_challenge: string;
-	expires_at: TimestampImmutable;
-	consumed_at: TimestampMutateable;
-	created_at: TimestampImmutable;
-}
-
-export interface LucidOAuthRefreshTokens {
-	id: Generated<number>;
-	token_hash: string;
-	family_id: string;
-	grant_id: number;
-	client_id: string;
-	resource: string;
-	expires_at: TimestampImmutable;
-	consumed_at: TimestampMutateable;
-	revoked_at: TimestampMutateable;
-	created_at: TimestampImmutable;
-}
-
-export type LucidDocumentTableName = `lucid_document__${string}`;
-export interface LucidDocumentTable {
-	id: Generated<number>;
-	collection_key: string;
-	collection_migration_id: number;
-	order: string | null;
-	is_deleted: BooleanInt;
-	is_deleted_at: TimestampMutateable;
-	deleted_by: number;
-	created_by: number;
-	created_at: TimestampImmutable;
-	updated_by: number;
-	updated_at: TimestampMutateable;
-}
-
-export type LucidVersionTableName = `lucid_document__${string}__ver`;
-export interface LucidVersionTable {
-	id: Generated<number>;
-	collection_key: string;
-	collection_migration_id: number;
-	document_id: number;
-	type: DocumentVersionType;
-	promoted_from: number | null;
-	content_id: string;
-	created_by: number | null;
-	updated_by: number | null;
-	created_at: TimestampImmutable;
-	updated_at: TimestampMutateable;
-}
-
-export type LucidBrickTableName =
-	| `lucid_document__${string}__fld`
-	| `lucid_document__${string}__${string}`
-	| `lucid_document__${string}__${string}__${string}`;
-
-type CustomFieldColumnName = string; // `_${string}`;
-export interface LucidBricksTable {
-	id: Generated<number>;
-	collection_key: string;
-	document_id: number;
-	document_version_id: number;
-	locale: string;
-	position: number;
-	is_open: BooleanInt;
-	// brick specific
-	brick_type?: BrickTypes;
-	brick_instance_id?: string;
-	// brick and document-field specific
-	brick_id_ref?: number;
-	// repeater specific
-	parent_id?: number | null;
-	parent_id_ref?: number | null;
-	brick_id?: number;
-	// dynamic
-	[key: CustomFieldColumnName]: unknown;
-}
-
-export type AuthStateActionType =
-	(typeof constants.authState.actionTypes)[keyof typeof constants.authState.actionTypes];
-
-export interface LucidAuthStates {
-	id: Generated<number>;
-	state: string;
-	provider_key: string;
-	code_verifier: string;
-	nonce: string | null;
-	authenticated_user_id: number | null;
-	action_type: AuthStateActionType;
-	expiry_date: TimestampImmutable;
-	consumed_at: TimestampMutateable;
-	redirect_path: string | null;
-	invitation_token_id: number | null;
-	invitation_token: string | null;
-	created_at: TimestampImmutable;
-}
-
-// ------------------------------------------------------------------------------
 // Database
 export interface LucidDB {
 	lucid_locales: LucidLocales;
@@ -1016,7 +251,7 @@ export interface LucidDB {
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
 	lucid_media_upload_sessions: LucidMediaUploadSessions;
 	lucid_media_share_links: LucidMediaShareLinks;
-	lucid_processed_images: HeadlessProcessedImages;
+	lucid_processed_images: LucidProcessedImages;
 	lucid_integrations: LucidIntegrations;
 	lucid_integration_scopes: LucidIntegrationScopes;
 	lucid_oauth_clients: LucidOAuthClients;

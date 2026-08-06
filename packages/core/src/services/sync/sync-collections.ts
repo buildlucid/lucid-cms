@@ -11,10 +11,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
  */
 
 const syncCollections: ServiceFn<[], undefined> = async (context) => {
-	const Collections = new CollectionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Collections = new CollectionsRepository(context.db);
 	const activeCollectionsRes = await collections.getAll(context, {});
 	if (activeCollectionsRes.error) return activeCollectionsRes;
 

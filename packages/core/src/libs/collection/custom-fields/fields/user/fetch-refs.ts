@@ -10,7 +10,7 @@ const fetchUserRefs: ServiceFn<
 	[FieldRefFetchInput],
 	FieldRefFetchOutput
 > = async (context, data) => {
-	const User = new UsersRepository(context.db.client, context.config.db);
+	const User = new UsersRepository(context.db);
 	const ids = Array.from(
 		new Set(
 			data.relations.flatMap((relation) =>

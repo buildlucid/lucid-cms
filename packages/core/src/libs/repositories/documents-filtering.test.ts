@@ -1,12 +1,17 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { RelationDocumentFilter } from "../../utils/helpers/group-document-filters.js";
+import createLucidDatabase from "../db/create-lucid-database.js";
 import DocumentsRepository from "./documents.js";
 
 describe("related document repository filters", async () => {
 	const db = new SQLiteAdapter({ database: ":memory:" });
 	const connection = await db.connect();
-	const Documents = new DocumentsRepository(connection.client, db);
+	const database = createLucidDatabase({
+		client: connection.client,
+		adapter: db,
+	});
+	const Documents = new DocumentsRepository(database);
 
 	beforeAll(async () => {
 		await connection.client.schema

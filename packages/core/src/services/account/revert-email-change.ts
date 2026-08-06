@@ -19,15 +19,9 @@ const revertEmailChange: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
-	const UserTokens = new UserTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const EmailChangeRequests = new EmailChangeRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Users = new UsersRepository(context.db);
+	const UserTokens = new UserTokensRepository(context.db);
+	const EmailChangeRequests = new EmailChangeRequestsRepository(context.db);
 
 	const tokenRes = await getUserToken(context, {
 		token: data.token,

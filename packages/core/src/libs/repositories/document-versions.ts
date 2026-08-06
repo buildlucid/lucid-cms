@@ -1,24 +1,22 @@
 import { sql } from "kysely";
-import z from "zod";
 import constants from "../../constants/constants.js";
-import { versionTypesSchema } from "../../schemas/document-versions.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
 import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
 import type {
 	CollectionSchemaColumn,
 	CollectionSchemaTable,
 } from "../collection/schema/types.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
+import { documentVersionsTable } from "../db/tables/document-versions.js";
 import type {
 	DocumentVersionType,
-	KyselyDB,
 	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTable,
 	LucidVersionTableName,
-	Select,
-} from "../db/types.js";
+} from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
 import type { BrickQueryResponse } from "./document-bricks.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig, QueryProps } from "./types.js";
@@ -39,37 +37,10 @@ export interface RevisionsQueryResponse extends Select<LucidVersionTable> {
 }
 
 export default class DocumentVersionsRepository extends DynamicRepository<LucidVersionTableName> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_document__collection-key__ver");
+	constructor(db: LucidDatabase) {
+		super(db, documentVersionsTable);
 	}
 	private readonly documentFieldsUnionAlias = "document_fields";
-	tableSchema = z.object({
-		id: z.number(),
-		collection_key: z.string(),
-		collection_migration_id: z.number(),
-		document_id: z.number(),
-		type: versionTypesSchema,
-		promoted_from: z.number().nullable(),
-		content_id: z.string(),
-		created_by: z.number(),
-		updated_by: z.number(),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		collection_key: this.dbAdapter.getDataType("text"),
-		collection_migration_id: this.dbAdapter.getDataType("integer"),
-		document_id: this.dbAdapter.getDataType("integer"),
-		type: this.dbAdapter.getDataType("text"),
-		promoted_from: this.dbAdapter.getDataType("integer"),
-		content_id: this.dbAdapter.getDataType("text"),
-		created_by: this.dbAdapter.getDataType("integer"),
-		updated_by: this.dbAdapter.getDataType("integer"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 
 	/**
 	 * Takes a group of document IDs and their tables, document-field table schema and fetches all document-field rows for that version
@@ -128,7 +99,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 						`${tables.version}.updated_at`,
 					])
 					.select(() => [
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								this.db
 									.selectFrom(table(tables.documentFields).as("df"))
@@ -194,8 +165,19 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 
 			// UNION results keep one column name for every branch, so select
 			// document fields under a neutral alias and remap them per collection.
-			exec.response.data = exec.response.data.map((row) => {
-				const union = unionByCollectionKey.get(row.collection_key);
+			exec.response.data = exec.response.data.map((rawRow) => {
+				const union = unionByCollectionKey.get(rawRow.collection_key);
+				const rawRecord = rawRow as BrickQueryResponse &
+					Record<string, unknown>;
+				const row: BrickQueryResponse & Record<string, unknown> = union
+					? {
+							...rawRecord,
+							[this.documentFieldsUnionAlias]: this.database.decodeTableRows(
+								union.tables.documentFields,
+								rawRecord[this.documentFieldsUnionAlias] as unknown[] | string,
+							),
+						}
+					: rawRecord;
 				const targetFieldsTable = union?.tables.documentFields;
 				if (!targetFieldsTable || row[targetFieldsTable] !== undefined) {
 					return row;
@@ -305,7 +287,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 
 			for (const brick of props.bricksSchema) {
 				query = query.select(() =>
-					this.dbAdapter
+					this.database.fn
 						.jsonArrayFrom(
 							this.db
 								.selectFrom(table(brick.name).as("b"))

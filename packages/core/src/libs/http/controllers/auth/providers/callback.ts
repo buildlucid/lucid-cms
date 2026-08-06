@@ -81,10 +81,7 @@ const providerCallbackController = factory.createHandlers(
 			);
 		}
 
-		const AuthStates = new AuthStatesRepository(
-			context.db.client,
-			context.config.db,
-		);
+		const AuthStates = new AuthStatesRepository(context.db);
 
 		const errorRedirectURLRes = await serviceWrapper(
 			authServices.providers.errorRedirectUrl,

@@ -1,4 +1,4 @@
-import type { UserTokenType } from "../../libs/db/types.js";
+import type { UserTokenType } from "../../libs/db/tables/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { UserTokensRepository } from "../../libs/repositories/index.js";
 import hashUserToken from "../../utils/helpers/hash-user-token.js";
@@ -16,10 +16,7 @@ const getSingle: ServiceFn<
 		user_id: number | null;
 	}
 > = async (context, data) => {
-	const UserTokens = new UserTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const UserTokens = new UserTokensRepository(context.db);
 	const hashedToken = hashUserToken(data.token);
 
 	const userTokenRes = await UserTokens.selectSingle({

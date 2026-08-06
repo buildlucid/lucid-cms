@@ -3,15 +3,13 @@ import {
 	getBricksTableSchema,
 	getTableNames,
 } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import { documentsFormatter } from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetSingleQueryParams } from "../../../schemas/documents.js";
-import type {
-	CollectionDocument,
-	DocumentVersionType,
-} from "../../../types.js";
+import type { CollectionDocument } from "../../../types.js";
 import {
 	applyDefaultQueryFilters,
 	getBaseUrl,
@@ -79,10 +77,7 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		}
 	}
 
-	const Documents = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Documents = new DocumentsRepository(context.db);
 
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,

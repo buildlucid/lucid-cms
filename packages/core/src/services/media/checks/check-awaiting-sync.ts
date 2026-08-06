@@ -17,10 +17,7 @@ const checkAwaitingSync: ServiceFn<
 	],
 	true
 > = async (context, data) => {
-	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
 
 	const awaitingSyncRes = await MediaAwaitingSync.selectSingle({
 		select: ["key"],

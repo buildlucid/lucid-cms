@@ -1,5 +1,9 @@
 # @lucidcms/plugin-worker-queues
 
+## v1.1.1 (unreleased)
+
+- Updated queue job loading to use Lucid's managed database API, including adapter-safe decoding and validation of job data.
+
 ## v1.1.0
 
 - Bumped `@lucidcms/core` to `0.17.0-alpha.0`.

@@ -1,11 +1,13 @@
 import type {
 	CollectionTableNames,
-	LucidBrickTableName,
-	LucidDocumentTableName,
-	LucidVersionTableName,
 	ServiceResponse,
 } from "../../../../types.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
+import type {
+	LucidBrickTableName,
+	LucidDocumentTableName,
+	LucidVersionTableName,
+} from "../../../db/tables/index.js";
 import { copy } from "../../../i18n/index.js";
 import type { CollectionSchemaTable } from "../types.js";
 import getRuntimeSchema from "./get-runtime-schema.js";

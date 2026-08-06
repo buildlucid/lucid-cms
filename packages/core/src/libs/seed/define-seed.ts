@@ -7,8 +7,13 @@ import type { Seed } from "./types.js";
  *
  * @example
  * export default defineSeed(async (context) => {
- * 	const db = context.db.client.withTables<{ my_table: { name: string } }>();
- * 	await db.insertInto("my_table").values({ name: "Example" }).execute();
+ * 	const result = await context.db.query("seed.example.insert", (db) =>
+ * 		db
+ * 			.$extendTables<{ my_table: { name: string } }>()
+ * 			.insertInto("my_table")
+ * 			.values({ name: "Example" }),
+ * 	).many();
+ * 	if (result.error) throw result.error;
  * });
  */
 const defineSeed = (seed: Seed): Seed => seed;

@@ -1,4 +1,3 @@
-import type { ColumnDataType } from "kysely";
 import type { ZodObject } from "zod";
 import type { LucidDB, LucidErrorData } from "../../types.js";
 
@@ -26,8 +25,7 @@ export type QueryResult<T, V extends boolean = false> = V extends true
 
 export type ValidationConfig<V extends boolean = false> = {
 	enabled?: V;
-	// biome-ignore lint/suspicious/noExplicitAny: explanation
-	schema?: ZodObject<any>;
+	schema?: ZodObject;
 	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errors">;
 };
 
@@ -50,7 +48,5 @@ export type ExecuteMeta = {
 
 export type DynamicConfig<Pattern extends keyof LucidDB> = {
 	tableName: Pattern;
-	// biome-ignore lint/suspicious/noExplicitAny: explanation
-	schema?: ZodObject<any>;
-	columns?: Record<string, ColumnDataType>;
+	schema?: ZodObject;
 };

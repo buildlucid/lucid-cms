@@ -85,7 +85,7 @@ describe("processImage", () => {
 
 		const response = await processImage(
 			{
-				db: { client: {} },
+				db: {},
 				config: {
 					db: {},
 					media: {
@@ -172,7 +172,7 @@ describe("processImage", () => {
 
 		const response = await processImage(
 			{
-				db: { client: {} },
+				db: {},
 				config: {
 					db: {},
 					media: {
@@ -258,7 +258,7 @@ describe("processImage", () => {
 
 		const response = await processImage(
 			{
-				db: { client: {} },
+				db: {},
 				config: {
 					db: {},
 					media: {

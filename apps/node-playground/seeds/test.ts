@@ -1,27 +1,23 @@
 import { defineSeed } from "@lucidcms/core/plugin";
-
-type TestOrganisationTable = {
-	name: string;
-	createdAt: string;
-	updatedAt: string;
-};
+import type { TestOrganisationTable } from "../src/tables/test-organisations.js";
 
 export default defineSeed(async (context) => {
 	const now = new Date().toISOString();
 
-	const db = context.db.client.withTables<{
-		"test-organisations": TestOrganisationTable;
-	}>();
-
-	await db
-		.insertInto("test-organisations")
-		.values({
-			name: "Lucid CMS",
-			createdAt: now,
-			updatedAt: now,
-		})
-		.onConflict((conflict) =>
-			conflict.column("name").doUpdateSet({ updatedAt: now }),
+	const result = await context.db
+		.query("seed.test-organisations.upsert", (db) =>
+			db
+				.$extendTables<{ "test-organisations": TestOrganisationTable }>()
+				.insertInto("test-organisations")
+				.values({
+					name: "Lucid CMS",
+					createdAt: now,
+					updatedAt: now,
+				})
+				.onConflict((conflict) =>
+					conflict.column("name").doUpdateSet({ updatedAt: now }),
+				),
 		)
-		.execute();
+		.many();
+	if (result.error) throw result.error;
 });

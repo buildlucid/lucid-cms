@@ -18,10 +18,7 @@ const restoreRevision: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Documents = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Documents = new DocumentsRepository(context.db);
 
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,

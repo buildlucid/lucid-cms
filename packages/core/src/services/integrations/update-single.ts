@@ -54,14 +54,8 @@ const updateSingle: ServiceFn<
 		}
 	}
 
-	const Integrations = new IntegrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const IntegrationScopes = new IntegrationScopesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Integrations = new IntegrationsRepository(context.db);
+	const IntegrationScopes = new IntegrationScopesRepository(context.db);
 
 	const checkExistsRes = await checkIntegrationAccess(context, {
 		id: data.id,

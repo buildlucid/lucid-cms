@@ -17,10 +17,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const MediaFolders = new MediaFoldersRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaFolders = new MediaFoldersRepository(context.db);
 
 	const parentFolderId = data.query.filter?.parentFolderId?.value;
 	const parsedId = parentFolderId ? Number(parentFolderId) : undefined;

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, expect, test } from "vitest";
 import z from "zod";
+import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import passthroughKVAdapter from "../../libs/kv/adapters/passthrough.js";
 import passthroughQueueAdapter from "../../libs/queue/adapters/passthrough.js";
 import getTestConfig from "../test-helpers/get-test-config.js";
@@ -40,6 +41,11 @@ afterAll(async () => {
 test("basic - one level deep service wrapper success and error", async () => {
 	const config = await testConfig.getConfig();
 	const database = await testConfig.getDatabase();
+	const lucidDatabase = createLucidDatabase({
+		client: database.client,
+		adapter: config.db,
+		collections: config.collections,
+	});
 
 	// Setup
 	const testService: ServiceFn<
@@ -74,7 +80,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -92,7 +98,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -117,6 +123,11 @@ test("basic - two level deep service wrapper success and error", async () => {
 
 	const config = await testConfig.getConfig();
 	const database = await testConfig.getDatabase();
+	const lucidDatabase = createLucidDatabase({
+		client: database.client,
+		adapter: config.db,
+		collections: config.collections,
+	});
 
 	// Setup
 	const testServiceOne: ServiceFn<
@@ -176,7 +187,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -194,7 +205,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 			transaction: false,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -217,6 +228,11 @@ test("basic - two level deep service wrapper success and error", async () => {
 test("transaction - one level deep service wrapper success and error", async () => {
 	const config = await testConfig.getConfig();
 	const database = await testConfig.getDatabase();
+	const lucidDatabase = createLucidDatabase({
+		client: database.client,
+		adapter: config.db,
+		collections: config.collections,
+	});
 	const successCollectionKey = "transaction_test_success_1";
 	const errorCollectionKey = "transaction_test_error_1";
 
@@ -230,7 +246,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 		],
 		{ key: string }
 	> = async (service, data) => {
-		const documentRes = await service.db.client
+		const documentRes = await service.db.kysely
 			.insertInto("lucid_collections")
 			.values({
 				key: data.collectionKey,
@@ -266,7 +282,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -282,7 +298,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -310,6 +326,11 @@ test("transaction - one level deep service wrapper success and error", async () 
 test("transaction - two level deep service wrapper success and error", async () => {
 	const config = await testConfig.getConfig();
 	const database = await testConfig.getDatabase();
+	const lucidDatabase = createLucidDatabase({
+		client: database.client,
+		adapter: config.db,
+		collections: config.collections,
+	});
 	const successCollectionKey = "transaction_test_success_2";
 	const successCollectionKeyLevel2 = "transaction_test_success_2_level2";
 	const errorCollectionKey = "transaction_test_error_2";
@@ -330,7 +351,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 		],
 		{ key: string }
 	> = async (service, data) => {
-		const documentRes = await service.db.client
+		const documentRes = await service.db.kysely
 			.insertInto("lucid_collections")
 			.values({
 				key: data.collectionKey,
@@ -381,7 +402,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -402,7 +423,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 			transaction: true,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -444,6 +465,11 @@ test("transaction - two level deep service wrapper success and error", async () 
 test("service wrapper schema validation", async () => {
 	const config = await testConfig.getConfig();
 	const database = await testConfig.getDatabase();
+	const lucidDatabase = createLucidDatabase({
+		client: database.client,
+		adapter: config.db,
+		collections: config.collections,
+	});
 
 	const schema = z.object({
 		key: z.string(),
@@ -471,7 +497,7 @@ test("service wrapper schema validation", async () => {
 			schema: schema,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,
@@ -488,7 +514,7 @@ test("service wrapper schema validation", async () => {
 			schema: schema,
 		})(
 			{
-				db: { client: database.client },
+				db: lucidDatabase,
 				config: config,
 				queue: queueAdapter,
 				kv: kvAdapter,

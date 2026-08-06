@@ -13,6 +13,10 @@ import {
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
+import type {
+	LucidBricksTable,
+	LucidBrickTableName,
+} from "../../../libs/db/tables/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type {
@@ -20,8 +24,6 @@ import type {
 	Insert,
 	InternalDocumentBrick,
 	InternalDocumentField,
-	LucidBricksTable,
-	LucidBrickTableName,
 } from "../../../types.js";
 import processFieldValues from "./process-field-values.js";
 

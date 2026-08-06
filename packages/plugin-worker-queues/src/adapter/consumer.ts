@@ -20,7 +20,6 @@ import {
 	executeSingleJob,
 	logScope,
 	passthroughQueueAdapter,
-	QueueJobsRepository,
 } from "@lucidcms/core/queue";
 import {
 	createServiceContext,
@@ -38,6 +37,7 @@ import type {
 	TranslationStore,
 } from "@lucidcms/core/types";
 import type { WorkerQueueAdapterOptions } from "./index.js";
+import selectJobsForProcessing from "./queries/select-jobs-for-processing.js";
 
 const MIN_POLL_INTERVAL = 1000;
 const MAX_POLL_INTERVAL = 30000;
@@ -173,8 +173,6 @@ const startConsumer = async () => {
 			email,
 		});
 
-		const QueueJobs = new QueueJobsRepository(database.client, config.db);
-
 		// -----------------------------------------
 		// Polling
 		let pollInterval = MIN_POLL_INTERVAL;
@@ -232,14 +230,9 @@ const startConsumer = async () => {
 
 			pollPromise = (async () => {
 				try {
-					const jobsResult = await QueueJobs.selectJobsForProcessing({
-						data: {
-							limit: BATCH_SIZE,
-							currentTime: new Date(),
-						},
-						validation: {
-							enabled: true,
-						},
+					const jobsResult = await selectJobsForProcessing(serviceContext.db, {
+						limit: BATCH_SIZE,
+						currentTime: new Date(),
 					});
 					if (jobsResult.error) {
 						logger.error({

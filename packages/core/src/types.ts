@@ -2,6 +2,7 @@ export * from "./libs/auth-providers/types.js";
 export * from "./libs/collection/builders/brick-builder/types.js";
 export * from "./libs/collection/builders/collection-builder/types.js";
 export * from "./libs/collection/custom-fields/types.js";
+export type * from "./libs/db/tables/index.js";
 export * from "./libs/db/types.js";
 export * from "./libs/email/storage/types.js";
 export * from "./libs/email/types.js";

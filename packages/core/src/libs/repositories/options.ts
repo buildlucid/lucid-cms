@@ -1,33 +1,15 @@
 import { sql } from "kysely";
-import z from "zod";
-import { optionsNameSchema } from "../../schemas/options.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { Insert, KyselyDB, LucidOptions, Select } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import type { LucidOptions } from "../db/tables/index.js";
+import { optionsTable } from "../db/tables/options.js";
+import type { Insert, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class OptionsRepository extends StaticRepository<"lucid_options"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_options");
+	constructor(db: LucidDatabase) {
+		super(db, optionsTable);
 	}
-	tableSchema = z.object({
-		name: optionsNameSchema,
-		value_int: z.number().nullable(),
-		value_text: z.string().nullable(),
-		value_bool: z
-			.union([
-				z.literal(this.dbAdapter.config.defaults.boolean.true),
-				z.literal(this.dbAdapter.config.defaults.boolean.false),
-			])
-			.nullable(),
-	});
-	columnFormats = {
-		name: this.dbAdapter.getDataType("text"),
-		value_int: this.dbAdapter.getDataType("integer"),
-		value_text: this.dbAdapter.getDataType("text"),
-		value_bool: this.dbAdapter.getDataType("boolean"),
-	};
-	queryConfig = undefined;
 
 	// ----------------------------------------
 	// upserts
@@ -46,11 +28,7 @@ export default class OptionsRepository extends StaticRepository<"lucid_options">
 	) {
 		const query = this.db
 			.insertInto("lucid_options")
-			.values(
-				this.formatData(props.data, {
-					type: "insert",
-				}),
-			)
+			.values(this.asInsertData(props.data))
 			.onConflict((oc) =>
 				oc.column("name").doUpdateSet((eb) => ({
 					value_int: eb.ref("excluded.value_int"),

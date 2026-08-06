@@ -81,10 +81,7 @@ const createUploadSession: ServiceFn<
 	const uploadKey = sessionRes.data.key;
 
 	if (sessionRes.data.mode === "single") {
-		const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-			context.db.client,
-			context.config.db,
-		);
+		const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
 		const awaitingSyncRes = await MediaAwaitingSync.createSingle({
 			data: {
 				key: uploadKey,
@@ -108,10 +105,7 @@ const createUploadSession: ServiceFn<
 		};
 	}
 
-	const MediaUploadSessions = new MediaUploadSessionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaUploadSessions = new MediaUploadSessionsRepository(context.db);
 	const sessionId = createSessionId();
 	const now = new Date().toISOString();
 	const expiresAt =

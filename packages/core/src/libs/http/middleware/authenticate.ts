@@ -46,8 +46,8 @@ const fetchAuthState = async (
 	c: LucidHonoContext,
 	token: LucidAccessToken,
 ): Promise<CachedAuthState> => {
-	const config = c.get("config");
-	const Users = new UsersRepository(c.get("database").client, config.db);
+	const context = createServiceContext(c);
+	const Users = new UsersRepository(context.db);
 
 	const userRes = await Users.selectAccessTokenUser({
 		where: [
@@ -55,12 +55,12 @@ const fetchAuthState = async (
 			{
 				key: "is_deleted",
 				operator: "=",
-				value: config.db.getDefault("boolean", "false"),
+				value: context.config.db.getDefault("boolean", "false"),
 			},
 			{
 				key: "is_locked",
 				operator: "=",
-				value: config.db.getDefault("boolean", "false"),
+				value: context.config.db.getDefault("boolean", "false"),
 			},
 		],
 		validation: {
@@ -79,7 +79,7 @@ const fetchAuthState = async (
 
 	const { permissions } = userPermissionsFormatter.formatMultiple({
 		roles: userRes.data.roles || [],
-		defaultLocale: config.localization.defaultLocale,
+		defaultLocale: context.config.localization.defaultLocale,
 	});
 
 	return {

@@ -37,7 +37,7 @@ const updateMe: ServiceFn<
 		};
 	}
 
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 	const normalizedEmail =
 		data.email !== undefined ? normalizeEmailInput(data.email) : undefined;
 

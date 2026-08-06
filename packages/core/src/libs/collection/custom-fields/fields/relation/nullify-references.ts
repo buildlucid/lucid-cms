@@ -1,9 +1,5 @@
-import type {
-	CFConfig,
-	FieldTypes,
-	LucidBrickTableName,
-	ServiceFn,
-} from "../../../../../types.js";
+import type { CFConfig, FieldTypes, ServiceFn } from "../../../../../types.js";
+import type { LucidBrickTableName } from "../../../../db/tables/index.js";
 import collections from "../../../collections.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import { getBricksTableSchema } from "../../../schema/runtime/runtime-schema-selectors.js";
@@ -134,11 +130,18 @@ const nullifyRelationReferences: ServiceFn<
 	const relationCollectionColumn = prefixGeneratedColName("collection_key");
 
 	for (const table of referenceTargets) {
-		await context.db.client
-			.deleteFrom(table)
-			.where(relationDocumentColumn, "=", data.documentId)
-			.where(relationCollectionColumn, "=", data.collectionKey)
-			.execute();
+		const result = await context.db
+			.query(
+				"relation.references.nullify",
+				(db) =>
+					db
+						.deleteFrom(table)
+						.where(relationDocumentColumn, "=", data.documentId)
+						.where(relationCollectionColumn, "=", data.collectionKey),
+				{ tableName: table },
+			)
+			.many();
+		if (result.error) return result;
 	}
 
 	return {

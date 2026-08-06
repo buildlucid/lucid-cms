@@ -23,11 +23,8 @@ const permanentlyDeleteMedia: ServiceFn<
 	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const Media = new MediaRepository(context.db.client, context.config.db);
-	const ProcessedImages = new ProcessedImagesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Media = new MediaRepository(context.db);
+	const ProcessedImages = new ProcessedImagesRepository(context.db);
 
 	const getMediaRes = await Media.selectSingleById({
 		id: data.id,

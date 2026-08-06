@@ -12,7 +12,7 @@ const getSingle: ServiceFn<
 	],
 	Job
 > = async (context, data) => {
-	const Jobs = new QueueJobsRepository(context.db.client, context.config.db);
+	const Jobs = new QueueJobsRepository(context.db);
 
 	const jobRes = await Jobs.selectSingleById({
 		select: [

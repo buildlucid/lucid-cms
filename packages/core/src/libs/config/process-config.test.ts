@@ -1,6 +1,8 @@
 import { expect, test, vi } from "vitest";
+import z from "zod";
 import type { LucidConfig } from "../../types/config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
+import { defineTable } from "../db/client/table/definition.js";
 import processConfig from "./process-config.js";
 
 const createAdapter = (adapter: string) =>
@@ -30,6 +32,7 @@ test("processes each config independently", async () => {
 	});
 
 	expect(cached.db).toBe(runtimeAdapter);
+	expect(cached.tables).toEqual([]);
 	expect(cached.telemetry).toBe(true);
 });
 
@@ -38,6 +41,14 @@ test("applies plugin recipes during fresh config processing", async () => {
 		data: undefined,
 		error: undefined,
 	}));
+	const pluginTable = defineTable<{ value: string }>("plugin_config", {
+		columns: {
+			value: {
+				schema: z.string(),
+				type: "text",
+			},
+		},
+	});
 	const processed = await processConfig(
 		{
 			...config,
@@ -47,6 +58,7 @@ test("applies plugin recipes during fresh config processing", async () => {
 					lucid: "*",
 					hooks: { init },
 					recipe: (draft) => {
+						draft.tables.push(pluginTable);
 						draft.brand = {
 							...draft.brand,
 							name: "Configured by plugin",
@@ -62,5 +74,6 @@ test("applies plugin recipes during fresh config processing", async () => {
 	);
 
 	expect(init).toHaveBeenCalledOnce();
+	expect(processed.tables).toEqual([pluginTable]);
 	expect(processed.brand.name).toBe("Configured by plugin");
 });

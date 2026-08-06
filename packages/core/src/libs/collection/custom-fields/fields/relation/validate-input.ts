@@ -1,8 +1,6 @@
 import constants from "../../../../../constants/constants.js";
-import type {
-	LucidDocumentTableName,
-	ServiceContext,
-} from "../../../../../types.js";
+import type { ServiceContext } from "../../../../../types.js";
+import type { LucidDocumentTableName } from "../../../../db/tables/index.js";
 import logger from "../../../../logger/index.js";
 import DocumentsRepository from "../../../../repositories/documents.js";
 import buildTableName from "../../../helpers/build-table-name.js";
@@ -67,10 +65,7 @@ const fetchDocumentsFromCollection = async (
 			return [];
 		}
 
-		const Document = new DocumentsRepository(
-			context.db.client,
-			context.config.db,
-		);
+		const Document = new DocumentsRepository(context.db);
 
 		const documentIdRes = await Document.selectMultipleValidationIds(
 			{

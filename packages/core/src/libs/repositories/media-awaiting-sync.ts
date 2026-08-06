@@ -1,19 +1,9 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { mediaAwaitingSyncTable } from "../db/tables/media-awaiting-sync.js";
 import StaticRepository from "./parents/static-repository.js";
 
 export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid_media_awaiting_sync"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_media_awaiting_sync");
+	constructor(db: LucidDatabase) {
+		super(db, mediaAwaitingSyncTable);
 	}
-	tableSchema = z.object({
-		key: z.string(),
-		timestamp: z.union([z.string(), z.date()]),
-	});
-	columnFormats = {
-		key: this.dbAdapter.getDataType("text"),
-		timestamp: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 }

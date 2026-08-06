@@ -22,7 +22,6 @@ import type {
 	SQLiteAdapterOptionsFactory,
 } from "./types.js";
 import createSQLiteAdapter from "./utils/create-adapter.js";
-import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
@@ -46,7 +45,6 @@ export class SQLiteAdapter extends DatabaseAdapter {
 				: this.#options;
 		const client = new Kysely<LucidDB>({
 			dialect: new SqliteDialect(normalizeSQLiteConfig(options)),
-			plugins: [createJSONResultsPlugin()],
 		});
 
 		try {

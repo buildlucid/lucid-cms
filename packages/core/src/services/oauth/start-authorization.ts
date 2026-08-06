@@ -105,10 +105,7 @@ const startAuthorization: ServiceFn<
 	}
 
 	const requestId = createOAuthOpaqueToken();
-	const Requests = new OAuthAuthorizationRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Requests = new OAuthAuthorizationRequestsRepository(context.db);
 	const createRes = await Requests.createSingle({
 		data: {
 			request_id: requestId,

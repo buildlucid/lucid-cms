@@ -1,4 +1,4 @@
-import type { AiGenerationStatus } from "../../../libs/db/types.js";
+import type { AiGenerationStatus } from "../../../libs/db/tables/index.js";
 import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -19,10 +19,7 @@ const storeGeneration: ServiceFn<
 	],
 	undefined
 > = async (context, props) => {
-	const AiGenerations = new AiGenerationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const AiGenerations = new AiGenerationsRepository(context.db);
 
 	const createRes = await AiGenerations.createIfRequestAbsent({
 		data: {

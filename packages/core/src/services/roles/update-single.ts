@@ -27,11 +27,8 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Roles = new RolesRepository(context.db.client, context.config.db);
-	const RoleTranslations = new RoleTranslationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Roles = new RolesRepository(context.db);
+	const RoleTranslations = new RoleTranslationsRepository(context.db);
 	const defaultRoleLocale = context.config.i18n.defaultLocale;
 	const roleLocaleCodes = new Set(
 		context.config.i18n.locales.map((locale) => locale.code),
@@ -209,10 +206,7 @@ const updateSingle: ServiceFn<
 	}
 
 	if (validatePermsRes?.data !== undefined) {
-		const RolePermissions = new RolePermissionsRepository(
-			context.db.client,
-			context.config.db,
-		);
+		const RolePermissions = new RolePermissionsRepository(context.db);
 
 		const deletePermsRes = await RolePermissions.deleteMultiple({
 			where: [

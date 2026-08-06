@@ -1,4 +1,5 @@
-import type { Insert, LucidRoleTranslations } from "../../../libs/db/types.js";
+import type { LucidRoleTranslations } from "../../../libs/db/tables/index.js";
+import type { Insert } from "../../../libs/db/types.js";
 import type { AdminCopyInput, Translator } from "../../../libs/i18n/types.js";
 import type { Config } from "../../../types/config.js";
 import type { TranslationsObj } from "../../../types/shared.js";

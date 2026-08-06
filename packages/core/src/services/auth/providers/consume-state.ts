@@ -1,6 +1,6 @@
+import type { AuthStateActionType } from "../../../libs/db/tables/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { AuthStatesRepository } from "../../../libs/repositories/index.js";
-import type { AuthStateActionType } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 export type ConsumedProviderState = {
@@ -20,10 +20,7 @@ const consumeState: ServiceFn<
 	[{ providerKey: string; state: string }],
 	ConsumedProviderState
 > = async (context, input) => {
-	const AuthStates = new AuthStatesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const AuthStates = new AuthStatesRepository(context.db);
 	const result = await AuthStates.consume({
 		state: input.state,
 		providerKey: input.providerKey,

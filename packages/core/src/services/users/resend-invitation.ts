@@ -22,11 +22,8 @@ const resendInvitation: ServiceFn<
 	],
 	null
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
-	const UserTokens = new UserTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Users = new UsersRepository(context.db);
+	const UserTokens = new UserTokensRepository(context.db);
 
 	const userRes = await Users.selectSinglePreset({
 		where: [

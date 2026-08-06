@@ -12,10 +12,7 @@ const deleteMultiple: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Bricks = new DocumentBricksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Bricks = new DocumentBricksRepository(context.db);
 
 	const brickTableSchema = await getBricksTableSchema(
 		context,

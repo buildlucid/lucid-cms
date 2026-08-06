@@ -37,11 +37,8 @@ const updateSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
-	const EmailChangeRequests = new EmailChangeRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Users = new UsersRepository(context.db);
+	const EmailChangeRequests = new EmailChangeRequestsRepository(context.db);
 	const normalizedEmail =
 		data.email !== undefined ? normalizeEmailInput(data.email) : undefined;
 

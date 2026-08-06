@@ -20,14 +20,8 @@ export const markPublishOperationJobFailed: QueueJobPermanentFailureHandlerFn<
 	if (operationId === undefined) return;
 	if (Number.isNaN(operationId)) return;
 
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Events = new DocumentPublishOperationEventsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
+	const Events = new DocumentPublishOperationEventsRepository(context.db);
 	const now = new Date().toISOString();
 
 	await Operations.updateSingle({

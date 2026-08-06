@@ -9,15 +9,13 @@ import type {
 	CollectionSchemaColumn,
 	TableType,
 } from "../../../libs/collection/schema/types.js";
-import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
-import type { DocumentQueryResponse } from "../../../libs/repositories/documents.js";
 import type {
-	FieldTypes,
 	LucidBricksTable,
 	LucidBrickTableName,
-	Select,
-	ServiceFn,
-} from "../../../types.js";
+} from "../../../libs/db/tables/index.js";
+import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
+import type { DocumentQueryResponse } from "../../../libs/repositories/documents.js";
+import type { FieldTypes, Select, ServiceFn } from "../../../types.js";
 
 export type FieldRelationValues = Partial<
 	Record<

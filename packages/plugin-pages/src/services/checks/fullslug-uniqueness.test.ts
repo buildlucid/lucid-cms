@@ -173,6 +173,7 @@ describe("fullSlug route uniqueness", () => {
 							tableNameByteLimit: null,
 						},
 					},
+					tables: [],
 				},
 			} as never,
 			{
@@ -266,6 +267,7 @@ describe("fullSlug route uniqueness", () => {
 							tableNameByteLimit: null,
 						},
 					},
+					tables: [],
 				},
 				translate: translateTestCopy,
 			} as never,

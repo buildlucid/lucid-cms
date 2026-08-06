@@ -17,6 +17,11 @@ import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { codeFieldConfig } from "./config.js";
 import type { CodeValue } from "./types.js";
 
+const codeValueSchema = z.object({
+	language: z.string(),
+	value: z.string(),
+});
+
 class CodeCustomField extends CustomField<"code"> {
 	type = codeFieldConfig.type;
 	config;
@@ -95,10 +100,14 @@ class CodeCustomField extends CustomField<"code"> {
 			error: undefined,
 		};
 	}
-	formatResponseValue(value?: CodeValue | null) {
-		return (value ??
-			this.config.default ??
-			null) satisfies CFResponse<"code">["value"];
+	formatResponseValue(value?: unknown) {
+		const responseValue = value ?? this.config.default ?? null;
+		if (responseValue === null) return null;
+
+		const parsed = codeValueSchema.safeParse(responseValue);
+		return parsed.success
+			? (parsed.data satisfies CFResponse<"code">["value"])
+			: null;
 	}
 	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
 		if (typeof value === "string") {
@@ -163,12 +172,7 @@ class CodeCustomField extends CustomField<"code"> {
 		return value;
 	}
 	uniqueValidation(value: unknown) {
-		const valueSchema = z.object({
-			language: z.string(),
-			value: z.string(),
-		});
-
-		const valueValidate = zodSafeParse(value, valueSchema);
+		const valueValidate = zodSafeParse(value, codeValueSchema);
 		if (!valueValidate.valid) return valueValidate;
 
 		const val = value as CodeValue;

@@ -11,9 +11,13 @@ import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import type { Config, EnvironmentVariables } from "../../types.js";
-import { LucidAPIError, translateErrorData } from "../../utils/errors/index.js";
+import {
+	LucidAPIError,
+	LucidError,
+	translateErrorData,
+} from "../../utils/errors/index.js";
 import { normalizeHost } from "../../utils/helpers/index.js";
-import type { DatabaseConnection } from "../db/types.js";
+import type LucidDatabase from "../db/client/lucid-database.js";
 import {
 	destroyEmailAdapter,
 	getInitializedEmailAdapter,
@@ -50,7 +54,7 @@ import runHttpExtensions from "./utils/run-http-extensions.js";
 const invocationSymbol = Symbol("@lucidcms/core:http-invocation");
 
 type HttpInvocation = {
-	database: DatabaseConnection;
+	db: LucidDatabase;
 	env?: EnvironmentVariables;
 };
 
@@ -185,7 +189,9 @@ const createApp = async (props: {
 		!emailInstance ||
 		!imageProcessorInstance
 	) {
-		throw new Error("Lucid could not initialize its application adapters.");
+		throw new LucidError({
+			message: "Lucid could not initialize its application adapters.",
+		});
 	}
 
 	app
@@ -221,13 +227,14 @@ const createApp = async (props: {
 				invocationSymbol
 			];
 			if (!invocation) {
-				throw new Error(
-					"Lucid HTTP requests must be handled with an active runtime invocation.",
-				);
+				throw new LucidError({
+					message:
+						"Lucid HTTP requests must be handled with an active runtime invocation.",
+				});
 			}
 
 			c.set("config", props.config);
-			c.set("database", invocation.database);
+			c.set("db", invocation.db);
 			c.set("translationStore", props.translationStore);
 			c.set("runtimeContext", props.runtimeContext);
 			c.set("queue", queueInstance);
@@ -518,7 +525,7 @@ const createApp = async (props: {
 	return {
 		handle: (options: {
 			request: Request;
-			database: DatabaseConnection;
+			db: LucidDatabase;
 			env?: EnvironmentVariables;
 			executionContext?: unknown;
 			requestBindings?: object;
@@ -527,7 +534,7 @@ const createApp = async (props: {
 				options.request,
 				createInvocationBindings(
 					{
-						database: options.database,
+						db: options.db,
 						env: options.env,
 					},
 					options.requestBindings,

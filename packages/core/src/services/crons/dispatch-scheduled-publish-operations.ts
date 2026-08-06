@@ -13,10 +13,7 @@ const dispatchScheduledPublishOperations: ServiceFn<[], undefined> = async (
 		};
 	}
 
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
 	const dispatchBefore = new Date(
 		Date.now() + schedulingDispatchWindowMs,
 	).toISOString();

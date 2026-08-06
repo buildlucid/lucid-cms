@@ -12,11 +12,8 @@ const getStorageUsage: ServiceFn<
 		total: number;
 	}
 > = async (context) => {
-	const Media = new MediaRepository(context.db.client, context.config.db);
-	const ProcessedImages = new ProcessedImagesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Media = new MediaRepository(context.db);
+	const ProcessedImages = new ProcessedImagesRepository(context.db);
 
 	const [mediaSizeRes, processedImagesSizeRes] = await Promise.all([
 		Media.sumFileSize(),

@@ -18,10 +18,7 @@ const checkIntegrationAccess: ServiceFn<
 		user_id: number | null;
 	}
 > = async (context, data) => {
-	const Integrations = new IntegrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Integrations = new IntegrationsRepository(context.db);
 
 	const integrationRes = await Integrations.selectSingleByIdWithScopes({
 		id: data.id,

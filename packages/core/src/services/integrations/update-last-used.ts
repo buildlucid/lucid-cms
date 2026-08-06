@@ -12,10 +12,7 @@ const updateLastUsed: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Integrations = new IntegrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Integrations = new IntegrationsRepository(context.db);
 
 	const updateRes = await Integrations.updateMultiple({
 		data: {

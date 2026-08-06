@@ -1,11 +1,10 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { documentWorkflowsTable } from "../db/tables/document-workflows.js";
 import type {
-	KyselyDB,
 	LucidDocumentWorkflowAssignees,
 	LucidDocumentWorkflows,
-	Select,
-} from "../db/types.js";
+} from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
 import type { MediaPosterPropsT } from "../formatters/media.js";
 import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
@@ -25,30 +24,9 @@ export interface DocumentWorkflowDetailedQueryResponse
 }
 
 export default class DocumentWorkflowsRepository extends StaticRepository<"lucid_document_workflows"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_document_workflows");
+	constructor(db: LucidDatabase) {
+		super(db, documentWorkflowsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		collection_key: z.string(),
-		document_id: z.number(),
-		stage_key: z.string(),
-		created_by: z.number().nullable(),
-		updated_by: z.number().nullable(),
-		created_at: z.union([z.string(), z.date()]),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		collection_key: this.dbAdapter.getDataType("text"),
-		document_id: this.dbAdapter.getDataType("integer"),
-		stage_key: this.dbAdapter.getDataType("text"),
-		created_by: this.dbAdapter.getDataType("integer"),
-		updated_by: this.dbAdapter.getDataType("integer"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 
 	async selectSingleDetailed<V extends boolean = false>(
 		props: QueryProps<
@@ -65,7 +43,7 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 			.where("document_id", "=", props.documentId)
 			.selectAll("lucid_document_workflows")
 			.select((eb) => [
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_document_workflow_assignees")
@@ -84,7 +62,7 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 								"lucid_users.username",
 								"lucid_users.first_name",
 								"lucid_users.last_name",
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										userEb
 											.selectFrom("lucid_media")
@@ -106,12 +84,8 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 												"lucid_media.base64",
 												"lucid_media.is_dark",
 												"lucid_media.is_light",
-												activeMediaCropSelect(
-													this.db,
-													this.dbAdapter,
-													"lucid_media.id",
-												),
-												this.dbAdapter
+												activeMediaCropSelect(this.database, "lucid_media.id"),
+												this.database.fn
 													.jsonArrayFrom(
 														mediaEb
 															.selectFrom("lucid_media_translations")
@@ -192,7 +166,7 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 			.where("document_id", "in", props.documentIds)
 			.selectAll("lucid_document_workflows")
 			.select((eb) => [
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_document_workflow_assignees")
@@ -211,7 +185,7 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 								"lucid_users.username",
 								"lucid_users.first_name",
 								"lucid_users.last_name",
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										userEb
 											.selectFrom("lucid_media")
@@ -233,12 +207,8 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 												"lucid_media.base64",
 												"lucid_media.is_dark",
 												"lucid_media.is_light",
-												activeMediaCropSelect(
-													this.db,
-													this.dbAdapter,
-													"lucid_media.id",
-												),
-												this.dbAdapter
+												activeMediaCropSelect(this.database, "lucid_media.id"),
+												this.database.fn
 													.jsonArrayFrom(
 														mediaEb
 															.selectFrom("lucid_media_translations")

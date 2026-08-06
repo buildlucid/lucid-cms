@@ -15,10 +15,7 @@ const retry: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
 
 	const operationRes = await Operations.selectSingleDetailed({
 		where: [

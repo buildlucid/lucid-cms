@@ -12,14 +12,8 @@ const abortUploadSession: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const MediaUploadSessions = new MediaUploadSessionsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaUploadSessions = new MediaUploadSessionsRepository(context.db);
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
 
 	const sessionRes = await MediaUploadSessions.selectSingle({
 		select: ["session_id", "key", "adapter_upload_id", "status"],

@@ -15,7 +15,7 @@ const deleteSinglePermanently: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 
 	if (data.currentUserId === data.userId) {
 		return {

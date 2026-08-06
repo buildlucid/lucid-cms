@@ -7,11 +7,8 @@ import type {
 	FilterValue,
 } from "../../../types/query-params.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
-import type {
-	LucidBrickTableName,
-	OnDelete,
-	OnUpdate,
-} from "../../db/types.js";
+import type { LucidBrickTableName } from "../../db/tables/index.js";
+import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { AdminCopyDescriptor, AdminCopyInput } from "../../i18n/types.js";
 import type { BrickBuilder, CollectionBuilder } from "../builders/index.js";
 import type {

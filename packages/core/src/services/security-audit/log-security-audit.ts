@@ -19,11 +19,8 @@ const logSecurityAudit: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
-	const SecurityAuditLogs = new SecurityAuditLogsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Users = new UsersRepository(context.db);
+	const SecurityAuditLogs = new SecurityAuditLogsRepository(context.db);
 
 	const actorRes = await Users.selectAuditActorById({
 		id: data.performedBy,

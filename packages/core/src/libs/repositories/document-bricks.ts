@@ -1,14 +1,13 @@
-import z from "zod";
 import type { CollectionSchemaColumn } from "../collection/schema/types.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { documentBricksTable } from "../db/tables/document-bricks.js";
 import type {
-	KyselyDB,
 	LucidBricksTable,
 	LucidBrickTableName,
 	LucidVersionTable,
 	LucidVersionTableName,
-	Select,
-} from "../db/types.js";
+} from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
 import DynamicRepository from "./parents/dynamic-repository.js";
 import type { DynamicConfig } from "./types.js";
 
@@ -17,49 +16,9 @@ export interface BrickQueryResponse extends Select<LucidVersionTable> {
 }
 
 export default class DocumentBricksRepository extends DynamicRepository<LucidBrickTableName> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_document__collection-key__fld");
+	constructor(db: LucidDatabase) {
+		super(db, documentBricksTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		collection_key: z.string(),
-		document_id: z.number(),
-		document_version_id: z.number(),
-		locale: z.string(),
-		position: z.number().optional(),
-		is_open: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		// brick specific
-		brick_type: z.union([z.literal("fixed"), z.literal("builder")]).optional(),
-		brick_instance_id: z.string().optional(),
-		// brick and document-field specific
-		brick_id_ref: z.number().optional(),
-		// repeater specific
-		brick_id: z.number().optional(),
-		parent_id: z.number().optional(),
-		parent_id_ref: z.number().optional(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		collection_key: this.dbAdapter.getDataType("text"),
-		document_id: this.dbAdapter.getDataType("integer"),
-		document_version_id: this.dbAdapter.getDataType("integer"),
-		locale: this.dbAdapter.getDataType("text"),
-		position: this.dbAdapter.getDataType("integer"),
-		is_open: this.dbAdapter.getDataType("boolean"),
-		// brick specific
-		brick_type: this.dbAdapter.getDataType("text"),
-		brick_instance_id: this.dbAdapter.getDataType("text"),
-		// brick and document-field specific
-		brick_id_ref: this.dbAdapter.getDataType("integer"),
-		// repeater specific
-		brick_id: this.dbAdapter.getDataType("integer"),
-		parent_id: this.dbAdapter.getDataType("integer"),
-		parent_id_ref: this.dbAdapter.getDataType("integer"),
-	};
-	queryConfig = undefined;
 
 	/**
 	 * Fetches all brick rows for a given document version ID
@@ -88,7 +47,7 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 
 		for (const brick of props.bricksSchema) {
 			query = query.select(() =>
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						this.db
 							.selectFrom(table(brick.name).as("b"))

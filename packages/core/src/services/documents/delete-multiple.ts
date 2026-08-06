@@ -44,10 +44,7 @@ const deleteMultiple: ServiceFn<
 		};
 	}
 
-	const Documents = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Documents = new DocumentsRepository(context.db);
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;

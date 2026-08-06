@@ -4,7 +4,7 @@ import {
 	getBricksTableSchema,
 	getTableNames,
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { DocumentVersionType } from "../../libs/db/types.js";
+import type { DocumentVersionType } from "../../libs/db/tables/index.js";
 import {
 	documentBricksFormatter,
 	documentsFormatter,
@@ -53,10 +53,7 @@ const getMultiple: ServiceFn<
 		refs: InternalCollectionDocument["refs"];
 	}
 > = async (context, data) => {
-	const DocumentBricks = new DocumentBricksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const DocumentBricks = new DocumentBricksRepository(context.db);
 
 	const [collectionRes, collectionsRes] = await Promise.all([
 		collections.getSingle(context, { key: data.collectionKey }),

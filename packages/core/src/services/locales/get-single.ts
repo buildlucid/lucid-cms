@@ -12,7 +12,7 @@ const getSingle: ServiceFn<
 	],
 	Locale
 > = async (context, data) => {
-	const Locales = new LocalesRepository(context.db.client, context.config.db);
+	const Locales = new LocalesRepository(context.db);
 
 	const configLocale = context.config.localization.locales.find(
 		(locale) => locale.code === data.code,

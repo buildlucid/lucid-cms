@@ -18,10 +18,7 @@ const getUploadPartUrls: ServiceFn<
 		}>;
 	}
 > = async (context, data) => {
-	const MediaUploadSessions = new MediaUploadSessionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaUploadSessions = new MediaUploadSessionsRepository(context.db);
 	const sessionRes = await MediaUploadSessions.selectSingle({
 		select: ["key", "adapter_key", "adapter_upload_id", "expires_at", "status"],
 		where: [

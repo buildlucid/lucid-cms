@@ -43,11 +43,8 @@ const upsertCrop: ServiceFn<
 		};
 	}
 
-	const Media = new MediaRepository(context.db.client, context.config.db);
-	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Media = new MediaRepository(context.db);
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
 
 	const [awaitingSyncRes, existingCropRes] = await Promise.all([
 		checkAwaitingSync(context, { key: data.crop.key }),

@@ -72,15 +72,9 @@ const createSingle: ServiceFn<
 	],
 	Media
 > = async (context, data) => {
-	const Media = new MediaRepository(context.db.client, context.config.db);
-	const MediaTranslations = new MediaTranslationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Media = new MediaRepository(context.db);
+	const MediaTranslations = new MediaTranslationsRepository(context.db);
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
 
 	const folderAccessRes = await checkFolderAccess(context, {
 		folderId: data.folderId,

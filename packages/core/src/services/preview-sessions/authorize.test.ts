@@ -33,11 +33,12 @@ const buildPreview = (overrides: Record<string, unknown> = {}) => ({
 
 const buildContext = () =>
 	({
-		db: { client: {} },
+		db: {},
 		config: {
 			db: {
 				getDefault: (_type: string, value: string) => value === "true",
 			},
+			tables: [],
 			collections: [
 				{
 					key: "page",

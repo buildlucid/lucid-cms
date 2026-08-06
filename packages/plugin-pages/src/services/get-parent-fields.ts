@@ -59,43 +59,47 @@ const getParentFields: ServiceFn<
 		const parentPageTable = parentPageTableRes.data;
 		const defaultFieldsAlias = "default_fields";
 
-		const parentFieldsQuery = context.db.client
-			.selectFrom(fieldsTable)
-			.innerJoin(
-				versionTable,
-				`${versionTable}.id`,
-				`${fieldsTable}.document_version_id`,
-			)
-			.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
-				join
-					.onRef(
-						`${defaultFieldsAlias}.document_version_id`,
-						"=",
+		const parentFieldsResult = await context.db
+			.query("pages.parent-fields.find", (db) =>
+				db
+					.selectFrom(fieldsTable)
+					.innerJoin(
+						versionTable,
+						`${versionTable}.id`,
 						`${fieldsTable}.document_version_id`,
 					)
-					.on(`${defaultFieldsAlias}.locale`, "=", data.defaultLocale),
-			)
-			.leftJoin(parentPageTable, (join) =>
-				join
-					.onRef(
-						`${parentPageTable}.parent_id`,
-						"=",
-						`${defaultFieldsAlias}.id`,
+					.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
+						join
+							.onRef(
+								`${defaultFieldsAlias}.document_version_id`,
+								"=",
+								`${fieldsTable}.document_version_id`,
+							)
+							.on(`${defaultFieldsAlias}.locale`, "=", data.defaultLocale),
 					)
-					.on(`${parentPageTable}.locale`, "=", data.defaultLocale),
+					.leftJoin(parentPageTable, (join) =>
+						join
+							.onRef(
+								`${parentPageTable}.parent_id`,
+								"=",
+								`${defaultFieldsAlias}.id`,
+							)
+							.on(`${parentPageTable}.locale`, "=", data.defaultLocale),
+					)
+					// @ts-expect-error
+					.select([
+						`${fieldsTable}.${slugColumn}`,
+						`${fieldsTable}.${fullSlugColumn}`,
+						`${parentPageTable}.${parentPageColumn}`,
+						`${versionTable}.document_id`,
+						`${fieldsTable}.locale`,
+					])
+					.where(`${versionTable}.document_id`, "=", parentPageId)
+					.where(`${versionTable}.type`, "=", data.versionType),
 			)
-			// @ts-expect-error
-			.select([
-				`${fieldsTable}.${slugColumn}`,
-				`${fieldsTable}.${fullSlugColumn}`,
-				`${parentPageTable}.${parentPageColumn}`,
-				`${versionTable}.document_id`,
-				`${fieldsTable}.locale`,
-			])
-			.where(`${versionTable}.document_id`, "=", parentPageId)
-			.where(`${versionTable}.type`, "=", data.versionType);
-
-		const parentFields = await parentFieldsQuery.execute();
+			.many();
+		if (parentFieldsResult.error) return parentFieldsResult;
+		const parentFields = parentFieldsResult.data;
 
 		if (!parentFields || parentFields.length === 0) {
 			if (data.missingParentIsEmpty) {

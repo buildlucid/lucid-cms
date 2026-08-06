@@ -4,6 +4,7 @@ import {
 	getDocumentFieldsTableSchema,
 	getTableNames,
 } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import formatter, {
 	documentsFormatter,
 } from "../../../libs/formatters/index.js";
@@ -11,10 +12,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetMultipleQueryParams } from "../../../schemas/documents.js";
-import type {
-	CollectionDocument,
-	DocumentVersionType,
-} from "../../../types.js";
+import type { CollectionDocument } from "../../../types.js";
 import {
 	applyDefaultQueryFilters,
 	getBaseUrl,
@@ -120,10 +118,7 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 			.map((collection) => collection.key);
 	}
 
-	const Document = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Document = new DocumentsRepository(context.db);
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,

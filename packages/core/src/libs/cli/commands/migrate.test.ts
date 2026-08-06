@@ -1,4 +1,5 @@
 import { confirm } from "@inquirer/prompts";
+import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { syncServices } from "../../../services/index.js";
 import type { Config } from "../../../types.js";
@@ -80,24 +81,26 @@ const collectionPlan = (
 /** Creates the minimal configured command dependencies used by migration tests. */
 const commandFixture = (pendingCore: boolean, pendingExternal = false) => {
 	const kv = { clear: vi.fn() };
+	const client = { withPlugin: vi.fn() };
+	client.withPlugin.mockReturnValue(client);
 	const database = {
-		client: {},
+		client,
 		destroy: vi.fn(),
 	};
-	const db = {
-		connect: vi.fn().mockResolvedValue(database),
-		getMigrationStatus: vi.fn().mockResolvedValue({
-			registered: [],
-			executed: [],
-			pendingCore: pendingCore ? ["00000013-preview-sessions"] : [],
-			pendingExternal: pendingExternal ? ["1751400000000-example"] : [],
-			missing: [],
-		}),
-		migrateCoreToLatest: vi.fn(),
-		migrateExternalToLatest: vi.fn(),
-	};
+	const db = new SQLiteAdapter({ database: ":memory:" });
+	db.connect = vi.fn().mockResolvedValue(database);
+	db.getMigrationStatus = vi.fn().mockResolvedValue({
+		registered: [],
+		executed: [],
+		pendingCore: pendingCore ? ["00000013-preview-sessions"] : [],
+		pendingExternal: pendingExternal ? ["1751400000000-example"] : [],
+		missing: [],
+	});
+	db.migrateCoreToLatest = vi.fn();
+	db.migrateExternalToLatest = vi.fn();
 	const config = {
 		db,
+		tables: [],
 		collections: [],
 		i18n: {
 			defaultLocale: "en",

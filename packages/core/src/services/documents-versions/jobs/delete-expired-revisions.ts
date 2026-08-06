@@ -26,10 +26,7 @@ const deleteExpiredRevisions: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const DocumentVersions = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const DocumentVersions = new DocumentVersionsRepository(context.db);
 	const cutoffDate = new Date();
 	cutoffDate.setDate(cutoffDate.getDate() - data.retentionDays);
 

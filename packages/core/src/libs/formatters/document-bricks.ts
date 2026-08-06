@@ -1,13 +1,7 @@
 import crypto from "node:crypto";
 import type { FieldRefResponse } from "../../services/documents-bricks/helpers/fetch-ref-data.js";
 import type { InternalDocumentBrick } from "../../types/response.js";
-import type {
-	Config,
-	InternalDocumentField,
-	LucidBricksTable,
-	LucidBrickTableName,
-	Select,
-} from "../../types.js";
+import type { Config, InternalDocumentField, Select } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import {
 	getFieldDatabaseConfig,
@@ -15,6 +9,10 @@ import {
 	isTreeTableType,
 } from "../collection/custom-fields/storage/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
+import type {
+	LucidBricksTable,
+	LucidBrickTableName,
+} from "../db/tables/index.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import documentFieldsFormatter from "./document-fields.js";

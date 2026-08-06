@@ -17,7 +17,7 @@ const adjustInt: ServiceFn<
 		applied: boolean;
 	}
 > = async (context, data) => {
-	const Options = new OptionsRepository(context.db.client, context.config.db);
+	const Options = new OptionsRepository(context.db);
 
 	const updateRes = await Options.adjustInt({
 		data: {

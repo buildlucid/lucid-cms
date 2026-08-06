@@ -15,10 +15,7 @@ const updateLogoUploadSession: ServiceFn<
 	],
 	UploadSessionResponse
 > = async (context, data) => {
-	const OAuthClients = new OAuthClientsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const OAuthClients = new OAuthClientsRepository(context.db);
 
 	const clientRes = await OAuthClients.selectSingle({
 		select: ["id"],

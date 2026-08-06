@@ -24,10 +24,7 @@ export const resolveOAuthAuthorizationClient = async (
 		allowedLoopbackHostname?: string;
 	},
 ): ServiceResponse<ResolvedOAuthAuthorizationClient> => {
-	const OAuthClients = new OAuthClientsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const OAuthClients = new OAuthClientsRepository(context.db);
 
 	const clientRes = await OAuthClients.selectSingleAuthorizationClient({
 		clientId: input.clientId,

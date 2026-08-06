@@ -12,10 +12,7 @@ const getUploadSession: ServiceFn<
 	],
 	UploadSessionStateResponse
 > = async (context, data) => {
-	const MediaUploadSessions = new MediaUploadSessionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaUploadSessions = new MediaUploadSessionsRepository(context.db);
 	const sessionRes = await MediaUploadSessions.selectSingle({
 		select: [
 			"session_id",

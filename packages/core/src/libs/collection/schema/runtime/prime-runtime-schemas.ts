@@ -18,10 +18,7 @@ const primeRuntimeSchemas: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const CollectionMigrations = new CollectionMigrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const CollectionMigrations = new CollectionMigrationsRepository(context.db);
 
 	let keys = data.collectionKeys;
 	if (keys === undefined) {

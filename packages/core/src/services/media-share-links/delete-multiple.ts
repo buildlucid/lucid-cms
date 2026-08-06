@@ -15,10 +15,7 @@ const deleteMultiple: ServiceFn<
 	});
 	if (mediaAccessRes.error) return mediaAccessRes;
 
-	const MediaShareLinks = new MediaShareLinksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaShareLinks = new MediaShareLinksRepository(context.db);
 
 	const deleteRes = await MediaShareLinks.deleteMultiple({
 		where: [{ key: "media_id", operator: "=", value: data.mediaId }],

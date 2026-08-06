@@ -5,10 +5,7 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAll: ServiceFn<[], OAuthClient[]> = async (context) => {
-	const OAuthClients = new OAuthClientsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const OAuthClients = new OAuthClientsRepository(context.db);
 
 	const clientsRes = await OAuthClients.selectMultipleDetailed({
 		validation: {

@@ -1,5 +1,9 @@
 # @lucidcms/plugin-resend
 
+## v1.1.5 (unreleased)
+
+- Updated webhook database queries to use Lucid's managed database API, with consistent query error handling.
+
 ## v1.1.4
 
 - Bumped `@lucidcms/core` to `0.17.0-alpha.0`.

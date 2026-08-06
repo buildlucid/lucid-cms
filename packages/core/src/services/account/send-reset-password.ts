@@ -32,7 +32,7 @@ const sendResetPassword: ServiceFn<
 		};
 	}
 
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 	const email = normalizeEmailInput(data.email);
 
 	const userExistsRes = await Users.selectSingle({

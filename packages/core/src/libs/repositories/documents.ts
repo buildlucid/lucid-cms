@@ -1,8 +1,6 @@
 import type { ExpressionBuilder, OperandExpression, SqlBool } from "kysely";
 import { type SelectQueryBuilder, sql } from "kysely";
-import z from "zod";
 import constants from "../../constants/constants.js";
-import { versionTypesSchema } from "../../schemas/document-versions.js";
 import type {
 	ContentGetSingleQueryParams,
 	GetMultipleQueryParams,
@@ -11,12 +9,7 @@ import type {
 	QueryParamFilterCondition,
 	QueryParamFilters,
 } from "../../types/query-params.js";
-import type {
-	Config,
-	LucidBricksTable,
-	LucidBrickTableName,
-	LucidVersionTable,
-} from "../../types.js";
+import type { Config } from "../../types.js";
 import type {
 	BrickFilters,
 	DocumentFilterGroup,
@@ -27,18 +20,20 @@ import resolveCustomFieldSorts, {
 } from "../../utils/helpers/resolve-custom-field-sorts.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
 import compileFilterExpression from "../db/query-builder/utils/compile-filter-expression.js";
+import { documentsTable } from "../db/tables/documents.js";
 import type {
 	DocumentVersionType,
-	Insert,
-	KyselyDB,
+	LucidBricksTable,
+	LucidBrickTableName,
 	LucidDocumentTable,
 	LucidDocumentTableName,
+	LucidVersionTable,
 	LucidVersionTableName,
-	Select,
-} from "../db/types.js";
+} from "../db/tables/index.js";
+import type { Insert, Select } from "../db/types.js";
 import type { MediaPosterPropsT } from "../formatters/media.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "./document-workflows.js";
 import { activeMediaCropSelect } from "./helpers/media-selects.js";
@@ -78,62 +73,9 @@ export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 }
 
 export default class DocumentsRepository extends DynamicRepository<LucidDocumentTableName> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_document__collection-key");
+	constructor(db: LucidDatabase) {
+		super(db, documentsTable);
 	}
-	tableSchema = z.object({
-		is_deleted: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		is_deleted_at: z.union([z.string(), z.date()]).optional(),
-		deleted_by: z.number().nullable(),
-
-		id: z.number(),
-		collection_key: z.string(),
-		collection_migration_id: z.number(),
-		order: z.string().nullable(),
-		created_by: z.number().nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-		updated_by: z.number().nullable(),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-		versions: z.array(
-			z.object({
-				id: z.number(),
-				type: versionTypesSchema,
-				created_by: z.number().nullable(),
-				created_at: z.union([z.string(), z.date()]),
-				updated_by: z.number().nullable(),
-				updated_at: z.union([z.string(), z.date()]).nullable(),
-			}),
-		),
-		cb_user_id: z.number().nullable(),
-		cb_user_email: z.email().nullable(),
-		cb_user_first_name: z.string().nullable(),
-		cb_user_last_name: z.string().nullable(),
-		cb_user_username: z.string().nullable(),
-		cb_user_profile_picture: z.array(z.any()).optional(),
-		ub_user_id: z.number().nullable(),
-		ub_user_email: z.email().nullable(),
-		ub_user_first_name: z.string().nullable(),
-		ub_user_last_name: z.string().nullable(),
-		ub_user_username: z.string().nullable(),
-		ub_user_profile_picture: z.array(z.any()).optional(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		collection_key: this.dbAdapter.getDataType("text"),
-		collection_migration_id: this.dbAdapter.getDataType("integer"),
-		order: this.dbAdapter.getDataType("text"),
-		is_deleted: this.dbAdapter.getDataType("boolean"),
-		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
-		deleted_by: this.dbAdapter.getDataType("integer"),
-		created_by: this.dbAdapter.getDataType("integer"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_by: this.dbAdapter.getDataType("integer"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 
 	// ----------------------------------------
 	// queries
@@ -153,12 +95,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 	) {
 		const query = this.db
 			.insertInto(dynamicConfig.tableName)
-			.values(
-				this.formatData(props.data, {
-					type: "insert",
-					dynamicColumns: dynamicConfig.columns,
-				}),
-			)
+			.values(this.asInsertData(props.data))
 			.onConflict((oc) =>
 				oc.column("id").doUpdateSet((eb) => ({
 					collection_migration_id: eb.ref("excluded.collection_migration_id"),
@@ -213,14 +150,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 	) {
 		const query = this.db
 			.insertInto(dynamicConfig.tableName)
-			.values(
-				props.data.map((d) =>
-					this.formatData(d, {
-						type: "insert",
-						dynamicColumns: dynamicConfig.columns,
-					}),
-				),
-			)
+			.values(props.data.map((data) => this.asInsertData(data)))
 			.onConflict((oc) =>
 				oc.column("id").doUpdateSet((eb) => ({
 					collection_migration_id: eb.ref("excluded.collection_migration_id"),
@@ -285,7 +215,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			])
 			.select([
 				(eb) =>
-					this.dbAdapter
+					this.database.fn
 						.jsonArrayFrom(
 							eb
 								.selectFrom(props.tables.versions)
@@ -395,7 +325,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				"ub_user.username as ub_user_username",
 			])
 			.select((eb) => [
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media")
@@ -417,11 +347,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								"lucid_media.base64",
 								"lucid_media.is_dark",
 								"lucid_media.is_light",
-								activeMediaCropSelect(
-									this.db,
-									this.dbAdapter,
-									"lucid_media.id",
-								),
+								activeMediaCropSelect(this.database, "lucid_media.id"),
 							])
 							.whereRef(
 								"lucid_media.id",
@@ -435,7 +361,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 							),
 					)
 					.as("cb_user_profile_picture"),
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media")
@@ -457,11 +383,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								"lucid_media.base64",
 								"lucid_media.is_dark",
 								"lucid_media.is_light",
-								activeMediaCropSelect(
-									this.db,
-									this.dbAdapter,
-									"lucid_media.id",
-								),
+								activeMediaCropSelect(this.database, "lucid_media.id"),
 							])
 							.whereRef(
 								"lucid_media.id",
@@ -540,7 +462,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				])
 				.select([
 					(eb) =>
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom(props.tables.versions)
@@ -576,7 +498,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									),
 							)
 							.as("versions"),
-					this.dbAdapter
+					this.database.fn
 						.jsonArrayFrom(
 							this.db
 								.selectFrom(props.tables.documentFields)
@@ -607,7 +529,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						)
 						.as(props.tables.documentFields),
 					...(props.documentFieldRelationTableSchemas ?? []).map((schema) =>
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								this.db
 									.selectFrom(schema.name)
@@ -666,7 +588,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 							"lucid_document_workflows.updated_at as workflow_updated_at",
 						])
 						.select((eb) => [
-							this.dbAdapter
+							this.database.fn
 								.jsonArrayFrom(
 									eb
 										.selectFrom("lucid_document_workflow_assignees")
@@ -685,7 +607,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 											"lucid_users.username",
 											"lucid_users.first_name",
 											"lucid_users.last_name",
-											this.dbAdapter
+											this.database.fn
 												.jsonArrayFrom(
 													userEb
 														.selectFrom("lucid_media")
@@ -708,11 +630,10 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 															"lucid_media.is_dark",
 															"lucid_media.is_light",
 															activeMediaCropSelect(
-																this.db,
-																this.dbAdapter,
+																this.database,
 																"lucid_media.id",
 															),
-															this.dbAdapter
+															this.database.fn
 																.jsonArrayFrom(
 																	mediaEb
 																		.selectFrom("lucid_media_translations")
@@ -780,7 +701,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					"ub_user.username as ub_user_username",
 				])
 				.select((eb) => [
-					this.dbAdapter
+					this.database.fn
 						.jsonArrayFrom(
 							eb
 								.selectFrom("lucid_media")
@@ -802,11 +723,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"lucid_media.base64",
 									"lucid_media.is_dark",
 									"lucid_media.is_light",
-									activeMediaCropSelect(
-										this.db,
-										this.dbAdapter,
-										"lucid_media.id",
-									),
+									activeMediaCropSelect(this.database, "lucid_media.id"),
 								])
 								.whereRef(
 									"lucid_media.id",
@@ -820,7 +737,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								),
 						)
 						.as("cb_user_profile_picture"),
-					this.dbAdapter
+					this.database.fn
 						.jsonArrayFrom(
 							eb
 								.selectFrom("lucid_media")
@@ -842,11 +759,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"lucid_media.base64",
 									"lucid_media.is_dark",
 									"lucid_media.is_light",
-									activeMediaCropSelect(
-										this.db,
-										this.dbAdapter,
-										"lucid_media.id",
-									),
+									activeMediaCropSelect(this.database, "lucid_media.id"),
 								])
 								.whereRef(
 									"lucid_media.id",
@@ -1096,7 +1009,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				])
 				.select([
 					(eb) =>
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom(props.tables.versions)
@@ -1161,7 +1074,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					"ub_user.username as ub_user_username",
 				])
 				.select((eb) => [
-					this.dbAdapter
+					this.database.fn
 						.jsonArrayFrom(
 							eb
 								.selectFrom("lucid_media")
@@ -1183,11 +1096,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"lucid_media.base64",
 									"lucid_media.is_dark",
 									"lucid_media.is_light",
-									activeMediaCropSelect(
-										this.db,
-										this.dbAdapter,
-										"lucid_media.id",
-									),
+									activeMediaCropSelect(this.database, "lucid_media.id"),
 								])
 								.whereRef(
 									"lucid_media.id",
@@ -1201,7 +1110,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								),
 						)
 						.as("cb_user_profile_picture"),
-					this.dbAdapter
+					this.database.fn
 						.jsonArrayFrom(
 							eb
 								.selectFrom("lucid_media")
@@ -1223,11 +1132,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"lucid_media.base64",
 									"lucid_media.is_dark",
 									"lucid_media.is_light",
-									activeMediaCropSelect(
-										this.db,
-										this.dbAdapter,
-										"lucid_media.id",
-									),
+									activeMediaCropSelect(this.database, "lucid_media.id"),
 								])
 								.whereRef(
 									"lucid_media.id",

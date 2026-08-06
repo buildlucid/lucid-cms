@@ -26,7 +26,6 @@ import type {
 	LibSQLAdapterOptionsFactory,
 } from "./types.js";
 import createLibSQLAdapter from "./utils/create-adapter.js";
-import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
@@ -53,7 +52,6 @@ export class LibSQLAdapter extends DatabaseAdapter {
 		const database = dialect.client;
 		const client = new Kysely<LucidDB>({
 			dialect,
-			plugins: [createJSONResultsPlugin()],
 		});
 
 		try {

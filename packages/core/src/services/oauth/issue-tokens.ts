@@ -1,6 +1,6 @@
 import { sign } from "hono/jwt";
 import constants from "../../constants/constants.js";
-import type { OAuthPrincipalType } from "../../libs/db/types.js";
+import type { OAuthPrincipalType } from "../../libs/db/tables/index.js";
 import { OAuthRefreshTokensRepository } from "../../libs/repositories/index.js";
 import type {
 	OAuthAccessTokenClaims,
@@ -63,10 +63,7 @@ const issueOAuthTokens: ServiceFn<
 		constants.jwt.algorithm,
 	);
 
-	const RefreshTokens = new OAuthRefreshTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const RefreshTokens = new OAuthRefreshTokensRepository(context.db);
 	const refreshRes = await RefreshTokens.createSingle({
 		data: {
 			token_hash: hashOAuthRefreshToken(context, refreshToken),

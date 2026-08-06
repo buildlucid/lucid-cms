@@ -25,7 +25,6 @@ import type {
 	D1AdapterOptionsFactory,
 } from "./types.js";
 import createD1Adapter from "./utils/create-adapter.js";
-import createJSONResultsPlugin from "./utils/create-json-results-plugin.js";
 import formatDefaultValue from "./utils/format-default-value.js";
 import formatOnDelete from "./utils/format-on-delete.js";
 import formatOnUpdate from "./utils/format-on-update.js";
@@ -55,7 +54,6 @@ export class D1Adapter extends DatabaseAdapter {
 				: getDefaultD1Config(env, options?.binding);
 		const client = new Kysely<LucidDB>({
 			dialect: new D1Dialect(config),
-			plugins: [createJSONResultsPlugin()],
 		});
 
 		return {

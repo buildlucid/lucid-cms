@@ -23,10 +23,7 @@ const resolveSession: ServiceFn<
 		};
 	}
 
-	const PreviewSessions = new PreviewSessionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const PreviewSessions = new PreviewSessionsRepository(context.db);
 	const sessionRes = await PreviewSessions.selectSingle({
 		select: [
 			"id",

@@ -18,7 +18,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 
 	const usersRes = await Users.selectMultipleFilteredFixed({
 		queryParams: data.query,

@@ -56,11 +56,8 @@ const notifyPublishOperationUsers: ServiceFn<
 		};
 	}
 
-	const Alerts = new AlertsRepository(context.db.client, context.config.db);
-	const AlertRecipients = new AlertRecipientsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Alerts = new AlertsRepository(context.db);
+	const AlertRecipients = new AlertRecipientsRepository(context.db);
 	const title = context.translate(data.title) ?? "";
 	const message = context.translate(data.message);
 	const details = (data.details ?? [])

@@ -1,4 +1,4 @@
-import type { OAuthClientAuthMethod } from "../../libs/db/types.js";
+import type { OAuthClientAuthMethod } from "../../libs/db/tables/index.js";
 import {
 	OAuthClientRedirectUrisRepository,
 	OAuthClientsRepository,
@@ -44,14 +44,8 @@ const createSingle: ServiceFn<
 		};
 	}
 
-	const OAuthClients = new OAuthClientsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const RedirectUris = new OAuthClientRedirectUrisRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const OAuthClients = new OAuthClientsRepository(context.db);
+	const RedirectUris = new OAuthClientRedirectUrisRepository(context.db);
 	const clientId = createOAuthClientId();
 	const credential =
 		data.authMethod === "client_secret_basic"

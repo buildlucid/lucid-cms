@@ -1,77 +1,12 @@
 import { sql } from "kysely";
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { mediaShareLinksTable } from "../db/tables/media-share-links.js";
 import StaticRepository from "./parents/static-repository.js";
 
 export default class MediaShareLinksRepository extends StaticRepository<"lucid_media_share_links"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_media_share_links");
+	constructor(db: LucidDatabase) {
+		super(db, mediaShareLinksTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		media_id: z.number(),
-		token: z.string(),
-		password: z.string().nullable(),
-		expires_at: z.union([z.string(), z.date()]).nullable(),
-		name: z.string().nullable(),
-		description: z.string().nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-		updated_by: z.number().nullable(),
-		created_by: z.number().nullable(),
-
-		media_is_deleted: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		media_key: z.string().nullable().optional(),
-		media_source_type: z.enum(["original", "crop"]),
-		media_origin: z.enum(["human", "ai_generated", "ai_modified"]).optional(),
-		media_type: z.string().nullable().optional(),
-		media_mime_type: z.string().nullable().optional(),
-		media_file_extension: z.string().nullable().optional(),
-		media_file_size: z.number().nullable().optional(),
-		media_width: z.number().nullable().optional(),
-		media_height: z.number().nullable().optional(),
-		media_focal_x: z.number().nullable().optional(),
-		media_focal_y: z.number().nullable().optional(),
-		media_poster_key: z.string().nullable().optional(),
-		media_poster_type: z.string().nullable().optional(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		media_id: this.dbAdapter.getDataType("integer"),
-		token: this.dbAdapter.getDataType("text"),
-		password: this.dbAdapter.getDataType("text"),
-		expires_at: this.dbAdapter.getDataType("timestamp"),
-		name: this.dbAdapter.getDataType("text"),
-		description: this.dbAdapter.getDataType("text"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-		updated_by: this.dbAdapter.getDataType("integer"),
-		created_by: this.dbAdapter.getDataType("integer"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				mediaId: "media_id",
-				updatedBy: "updated_by",
-				createdBy: "created_by",
-				token: "token",
-				name: "name",
-				expiresAt: "expires_at",
-				createdAt: "created_at",
-				updatedAt: "updated_at",
-			},
-			sorts: {
-				name: "name",
-				expiresAt: "expires_at",
-				createdAt: "created_at",
-				updatedAt: "updated_at",
-			},
-		},
-	} as const;
 
 	// ----------------------------------------
 	// queries

@@ -17,9 +17,7 @@ import resolveRelationVersionType from "./resolve-relation-version-type.js";
 
 const buildContext = (collections: CollectionBuilder[] = []) =>
 	({
-		db: {
-			client: {},
-		},
+		db: {},
 		config: {
 			db: {},
 			collections,

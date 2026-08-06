@@ -24,10 +24,7 @@ const updateOrder: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Document = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Document = new DocumentsRepository(context.db);
 
 	// ----------------------------------------------
 	// Checks

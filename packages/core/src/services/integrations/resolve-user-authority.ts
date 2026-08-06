@@ -27,7 +27,7 @@ const resolveUserAuthority: ServiceFn<
 > = async (context, data) => {
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 	const userRes = await Users.selectAccessTokenUser({
 		where: [
 			{ key: "id", operator: "=", value: data.userId },

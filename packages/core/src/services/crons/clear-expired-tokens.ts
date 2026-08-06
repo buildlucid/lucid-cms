@@ -6,10 +6,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
  * Marks expired tokens as revoked
  */
 const clearExpiredTokens: ServiceFn<[], undefined> = async (context) => {
-	const UserTokens = new UserTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const UserTokens = new UserTokensRepository(context.db);
 	const now = new Date().toISOString();
 
 	const revokeExpiredRes = await UserTokens.updateMultiple({

@@ -36,18 +36,9 @@ const promoteVersion: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Versions = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Documents = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const DocumentBricks = new DocumentBricksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Versions = new DocumentVersionsRepository(context.db);
+	const Documents = new DocumentsRepository(context.db);
+	const DocumentBricks = new DocumentBricksRepository(context.db);
 
 	// -------------------------------------------------------------------------------
 	// Initial data fetch and error checking

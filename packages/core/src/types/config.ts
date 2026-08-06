@@ -3,6 +3,7 @@ import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
 import type ConfigSchema from "../libs/config/config-schema.js";
 import type DatabaseAdapter from "../libs/db/adapter-base.js";
+import type { TableDefinition } from "../libs/db/client/table/definition.js";
 import type { MigrationSource } from "../libs/db/types.js";
 import type {
 	EmailAdapter,
@@ -212,6 +213,12 @@ export type SecretConfig = {
 
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
+	/**
+	 * Describes custom tables that already exist in the database, allowing
+	 * `context.db` to format and validate their queries. This does not create or
+	 * migrate the tables.
+	 */
+	tables?: readonly TableDefinition[];
 	/**
 	 * KV storage settings.
 	 */
@@ -527,6 +534,7 @@ export interface LucidConfig {
 
 export interface Config extends z.infer<typeof ConfigSchema> {
 	db: DatabaseAdapter;
+	tables: TableDefinition[];
 	migrations: {
 		sources: MigrationSource[];
 	};

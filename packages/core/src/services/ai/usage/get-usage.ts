@@ -16,10 +16,7 @@ const getUsage: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const AiGenerations = new AiGenerationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const AiGenerations = new AiGenerationsRepository(context.db);
 
 	const aiUsageRes = await AiGenerations.selectUsageMultiple({
 		queryParams: data.query,

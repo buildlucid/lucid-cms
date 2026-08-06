@@ -1,38 +1,12 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { oauthAuthorizationCodesTable } from "../db/tables/oauth-authorization-codes.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class OAuthAuthorizationCodesRepository extends StaticRepository<"lucid_oauth_authorization_codes"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_oauth_authorization_codes");
+	constructor(db: LucidDatabase) {
+		super(db, oauthAuthorizationCodesTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		code_hash: z.string(),
-		grant_id: z.number(),
-		client_id: z.string(),
-		redirect_uri: z.string(),
-		resource: z.string(),
-		code_challenge: z.string(),
-		expires_at: z.union([z.string(), z.date()]),
-		consumed_at: z.union([z.string(), z.date()]).nullable(),
-		created_at: z.union([z.string(), z.date()]),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		code_hash: this.dbAdapter.getDataType("varchar", 64),
-		grant_id: this.dbAdapter.getDataType("integer"),
-		client_id: this.dbAdapter.getDataType("text"),
-		redirect_uri: this.dbAdapter.getDataType("text"),
-		resource: this.dbAdapter.getDataType("text"),
-		code_challenge: this.dbAdapter.getDataType("varchar", 128),
-		expires_at: this.dbAdapter.getDataType("timestamp"),
-		consumed_at: this.dbAdapter.getDataType("timestamp"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 
 	/**
 	 * Atomically consumes an unexpired OAuth authorization code.

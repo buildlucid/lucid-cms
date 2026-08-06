@@ -7,10 +7,7 @@ const regenerateSecret: ServiceFn<
 	[{ id: number }],
 	OAuthClientRegenerateSecretResponse
 > = async (context, data) => {
-	const OAuthClients = new OAuthClientsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const OAuthClients = new OAuthClientsRepository(context.db);
 
 	const existingRes = await OAuthClients.selectSingle({
 		select: ["token_endpoint_auth_method"],

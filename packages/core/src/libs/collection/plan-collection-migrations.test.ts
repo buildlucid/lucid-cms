@@ -1,6 +1,7 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, describe, expect, test } from "vitest";
 import type { ServiceContext } from "../../types.js";
+import createLucidDatabase from "../db/create-lucid-database.js";
 import { copy } from "../i18n/index.js";
 import CollectionBuilder from "./builders/collection-builder/index.js";
 import planCollectionMigrations from "./plan-collection-migrations.js";
@@ -24,8 +25,16 @@ describe("planCollectionMigrations", async () => {
 
 		// @ts-expect-error
 		const context = {
-			db: { client: connection.client },
-			config: { db, collections: [pages] },
+			db: createLucidDatabase({
+				client: connection.client,
+				adapter: db,
+				collections: [pages],
+			}),
+			config: {
+				db,
+				tables: [],
+				collections: [pages],
+			},
 		} as ServiceContext;
 
 		const result = await planCollectionMigrations(context);

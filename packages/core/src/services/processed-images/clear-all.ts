@@ -8,10 +8,7 @@ const clearAll: ServiceFn<[], undefined> = async (context) => {
 	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const ProcessedImages = new ProcessedImagesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const ProcessedImages = new ProcessedImagesRepository(context.db);
 	const processedImagesRes = await ProcessedImages.selectMultiple({
 		select: ["key", "file_size"],
 		where: [],

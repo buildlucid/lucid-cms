@@ -1,5 +1,6 @@
 import constants from "../../constants/constants.js";
-import type { LucidRemoteConnections, Select } from "../../libs/db/types.js";
+import type { LucidRemoteConnections } from "../../libs/db/tables/index.js";
+import type { Select } from "../../libs/db/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	getLucidConnectionUrls,

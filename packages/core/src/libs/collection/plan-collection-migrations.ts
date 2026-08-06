@@ -14,7 +14,7 @@ import inferSchema from "./schema/infer-schema.js";
 const planCollectionMigrations: ServiceFn<[], CollectionMigrationPlan> = async (
 	context,
 ) => {
-	const dbSchema = await context.config.db.inferSchema(context.db.client);
+	const dbSchema = await context.config.db.inferSchema(context.db.kysely);
 
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;

@@ -9,7 +9,7 @@ const updateSystemAlerts: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Options = new OptionsRepository(context.db.client, context.config.db);
+	const Options = new OptionsRepository(context.db);
 
 	const alertEmail = data.alertEmail?.trim() || null;
 

@@ -4,8 +4,8 @@ import type {
 	DocumentPublishOperationEventType,
 	LucidDocumentPublishOperationEvents,
 	LucidDocumentPublishOperations,
-	Select,
-} from "../../../libs/db/types.js";
+} from "../../../libs/db/tables/index.js";
+import type { Select } from "../../../libs/db/types.js";
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { DocumentPublishOperationEventsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -37,10 +37,7 @@ const createEvent: ServiceFn<
 		| "created_at"
 	>
 > = async (context, data) => {
-	const Events = new DocumentPublishOperationEventsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Events = new DocumentPublishOperationEventsRepository(context.db);
 
 	const eventRes = await Events.createSingle({
 		data: {

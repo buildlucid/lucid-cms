@@ -47,13 +47,12 @@ const tableNames = {
 	document: "lucid_document__pages",
 };
 const context = {
-	db: {
-		client: {},
-	},
+	db: {},
 	config: {
 		db: {
 			getDefault: vi.fn().mockReturnValue(0),
 		},
+		tables: [],
 	},
 } as never;
 

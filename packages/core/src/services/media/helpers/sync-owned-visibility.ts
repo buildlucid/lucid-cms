@@ -11,7 +11,7 @@ const syncOwnedVisibility: ServiceFn<
 	[{ parentId: number; public: boolean; userId: number }],
 	undefined
 > = async (context, data) => {
-	const Media = new MediaRepository(context.db.client, context.config.db);
+	const Media = new MediaRepository(context.db);
 	const childrenRes = await Media.selectMultiple({
 		select: ["id", "key", "public"],
 		where: [{ key: "parent_media_id", operator: "=", value: data.parentId }],

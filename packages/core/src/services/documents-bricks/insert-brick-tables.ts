@@ -1,12 +1,11 @@
-import type { ColumnDataType } from "kysely";
 import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import {
 	getFieldDatabaseConfig,
 	isStorageMode,
 } from "../../libs/collection/custom-fields/storage/index.js";
 import { getBricksTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import type { LucidBricksTable } from "../../libs/db/tables/index.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
-import type { LucidBricksTable } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import type { InsertBrickTables } from "./helpers/construct-brick-table.js";
 
@@ -23,10 +22,7 @@ const insertBrickTables: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Bricks = new DocumentBricksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Bricks = new DocumentBricksRepository(context.db);
 
 	const idMapping: Record<number, number> = {};
 
@@ -113,14 +109,6 @@ const insertBrickTables: ServiceFn<
 			},
 			{
 				tableName: table.table,
-				columns:
-					schema?.columns.reduce<Record<string, ColumnDataType>>(
-						(record, column) => {
-							record[column.name] = column.type;
-							return record;
-						},
-						{},
-					) || {},
 			},
 		);
 		if (response.error) return response;

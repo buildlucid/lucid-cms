@@ -1,50 +1,9 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type {
-	DocumentPublishOperationEventType,
-	KyselyDB,
-} from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { documentPublishOperationEventsTable } from "../db/tables/document-publish-operation-events.js";
 import StaticRepository from "./parents/static-repository.js";
 
-export const documentPublishOperationEventTypes = [
-	"created",
-	"superseded",
-	"approved",
-	"rejected",
-	"cancelled",
-	"scheduled",
-	"executing",
-	"executed",
-	"failed",
-	"rescheduled",
-	"retried",
-	"reviewers_updated",
-] as const satisfies readonly [
-	DocumentPublishOperationEventType,
-	...DocumentPublishOperationEventType[],
-];
-
 export default class DocumentPublishOperationEventsRepository extends StaticRepository<"lucid_document_publish_operation_events"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_document_publish_operation_events");
+	constructor(db: LucidDatabase) {
+		super(db, documentPublishOperationEventsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		operation_id: z.number(),
-		event_type: z.enum(documentPublishOperationEventTypes),
-		user_id: z.number().nullable(),
-		comment: z.string().nullable(),
-		metadata: z.record(z.string(), z.unknown()),
-		created_at: z.union([z.string(), z.date()]),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		operation_id: this.dbAdapter.getDataType("integer"),
-		event_type: this.dbAdapter.getDataType("text"),
-		user_id: this.dbAdapter.getDataType("integer"),
-		comment: this.dbAdapter.getDataType("text"),
-		metadata: this.dbAdapter.getDataType("json"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 }

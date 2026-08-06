@@ -40,7 +40,7 @@ const serviceWrapper =
 			if (
 				!wrapperConfig.transaction ||
 				!service.config.db.supports("transaction") ||
-				service.db.client.isTransaction
+				service.db.isTransaction
 			) {
 				const result = await fn(service, ...args);
 				if (result.error)
@@ -52,13 +52,11 @@ const serviceWrapper =
 			}
 
 			//* If transactions are enabled
-			return await service.db.client.transaction().execute(async (tx) => {
+			return await service.db.kysely.transaction().execute(async (tx) => {
 				const result = await fn(
 					{
 						...service,
-						db: {
-							client: tx,
-						},
+						db: service.db.withTransaction(tx),
 					},
 					...args,
 				);

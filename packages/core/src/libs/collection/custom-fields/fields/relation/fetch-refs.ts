@@ -1,9 +1,9 @@
+import type { ServiceFn } from "../../../../../utils/services/types.js";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,
 	LucidDocumentTableName,
-} from "../../../../../types.js";
-import type { ServiceFn } from "../../../../../utils/services/types.js";
+} from "../../../../db/tables/index.js";
 import type { BrickQueryResponse } from "../../../../repositories/document-bricks.js";
 import { DocumentVersionsRepository } from "../../../../repositories/index.js";
 import collections from "../../../collections.js";
@@ -30,10 +30,7 @@ const fetchRelationRefs: ServiceFn<
 	[FieldRefFetchInput],
 	FieldRefFetchOutput
 > = async (context, data) => {
-	const DocumentVersions = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const DocumentVersions = new DocumentVersionsRepository(context.db);
 
 	const targetsByVersion = new Map<string, RelationRefFetchTarget>();
 	for (const relation of data.relations) {

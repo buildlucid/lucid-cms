@@ -113,12 +113,9 @@ abstract class DynamicRepository<
 		>,
 		dynamicConfig: DynamicConfig<Table>,
 	) {
-		let query = this.db.insertInto(dynamicConfig.tableName).values(
-			this.formatData(props.data, {
-				type: "insert",
-				dynamicColumns: dynamicConfig.columns,
-			}),
-		);
+		let query = this.db
+			.insertInto(dynamicConfig.tableName)
+			.values(this.asInsertData(props.data));
 
 		if (
 			props.returnAll !== true &&
@@ -163,14 +160,9 @@ abstract class DynamicRepository<
 		>,
 		dynamicConfig: DynamicConfig<Table>,
 	) {
-		let query = this.db.insertInto(dynamicConfig.tableName).values(
-			props.data.map((d) =>
-				this.formatData(d, {
-					type: "insert",
-					dynamicColumns: dynamicConfig.columns,
-				}),
-			),
-		);
+		let query = this.db
+			.insertInto(dynamicConfig.tableName)
+			.values(props.data.map((data) => this.asInsertData(data)));
 
 		if (
 			props.returnAll !== true &&
@@ -222,12 +214,7 @@ abstract class DynamicRepository<
 		let query = this.db
 			.updateTable(dynamicConfig.tableName)
 			// @ts-expect-error
-			.set(
-				this.formatData(props.data, {
-					type: "update",
-					dynamicColumns: dynamicConfig.columns,
-				}),
-			)
+			.set(this.asUpdateData(props.data))
 			.$if(
 				props.returnAll !== true &&
 					props.returning !== undefined &&
@@ -273,14 +260,7 @@ abstract class DynamicRepository<
 		let query = this.db
 			.updateTable(dynamicConfig.tableName)
 			// @ts-expect-error
-			.set(
-				props.data.map((data) => {
-					return this.formatData(data, {
-						type: "update",
-						dynamicColumns: dynamicConfig.columns,
-					});
-				}),
-			)
+			.set(props.data.map((data) => this.asUpdateData(data)))
 			.$if(
 				props.returnAll !== true &&
 					props.returning !== undefined &&

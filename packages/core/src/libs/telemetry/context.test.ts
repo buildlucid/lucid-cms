@@ -12,6 +12,7 @@ const runtimeContext = {
 
 const config = {
 	db: { adapter: "sqlite" },
+	tables: [],
 	localization: {
 		locales: [
 			{ label: "English", code: "en" },

@@ -32,14 +32,8 @@ const cloneVersion: ServiceFn<
 		sourceVersionType: string;
 	}
 > = async (context, data) => {
-	const Versions = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const DocumentBricks = new DocumentBricksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Versions = new DocumentVersionsRepository(context.db);
+	const DocumentBricks = new DocumentBricksRepository(context.db);
 
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,

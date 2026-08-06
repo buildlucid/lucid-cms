@@ -25,10 +25,7 @@ const getMultiple: ServiceFn<
 	});
 	if (mediaAccessRes.error) return mediaAccessRes;
 
-	const MediaShareLinks = new MediaShareLinksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaShareLinks = new MediaShareLinksRepository(context.db);
 
 	const linksRes = await MediaShareLinks.selectMultipleFiltered({
 		select: [

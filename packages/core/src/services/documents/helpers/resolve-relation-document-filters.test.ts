@@ -4,8 +4,8 @@ import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import inferSchema from "../../../libs/collection/schema/infer-schema.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
+import type { LucidBrickTableName } from "../../../libs/db/tables/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import type { LucidBrickTableName } from "../../../types.js";
 import { groupRelationDocumentFilterConditions } from "./resolve-relation-document-filters.js";
 
 describe("relation document filter grouping", async () => {

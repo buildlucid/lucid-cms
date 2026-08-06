@@ -1,48 +1,13 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
-import type { KyselyDB } from "../db/types.js";
+import { mediaFoldersTable } from "../db/tables/media-folders.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class MediaFoldersRepository extends StaticRepository<"lucid_media_folders"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_media_folders");
+	constructor(db: LucidDatabase) {
+		super(db, mediaFoldersTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		title: z.string(),
-		parent_folder_id: z.number().nullable(),
-		folder_count: z.number().nullable().optional(),
-		media_count: z.number().nullable().optional(),
-		created_by: z.number().nullable(),
-		updated_by: z.number().nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		title: this.dbAdapter.getDataType("text"),
-		parent_folder_id: this.dbAdapter.getDataType("integer"),
-		created_by: this.dbAdapter.getDataType("integer"),
-		updated_by: this.dbAdapter.getDataType("integer"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				title: "title",
-				parentFolderId: "parent_folder_id",
-				createdBy: "created_by",
-			},
-			sorts: {
-				title: "title",
-				createdAt: "created_at",
-				updatedAt: "updated_at",
-			},
-		},
-	} as const;
 
 	// ----------------------------------------
 	// queries
@@ -165,7 +130,7 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 					{
 						queryParams: props.queryParams,
 						database: this.dbAdapter.config,
-						meta: this.queryConfig,
+						meta: this.config.queryConfig,
 					},
 				);
 

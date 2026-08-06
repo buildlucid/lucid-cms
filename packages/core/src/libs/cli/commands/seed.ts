@@ -232,10 +232,10 @@ const seedCommand = async (
 			const seed = seeds[name] as Seed;
 			cliLogger.info(`Running seed "${name}"...`);
 			if (config.db.supports("transaction")) {
-				await database.client.transaction().execute((transaction) =>
+				await seedContext.db.kysely.transaction().execute((transaction) =>
 					seed({
 						...seedContext,
-						db: { client: transaction },
+						db: seedContext.db.withTransaction(transaction),
 					}),
 				);
 			} else {

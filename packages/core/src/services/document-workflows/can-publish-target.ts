@@ -29,10 +29,7 @@ const canPublishTarget: ServiceFn<
 		};
 	}
 
-	const Workflows = new DocumentWorkflowsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Workflows = new DocumentWorkflowsRepository(context.db);
 	const workflowRes = await Workflows.selectSingle({
 		select: ["stage_key"],
 		where: [

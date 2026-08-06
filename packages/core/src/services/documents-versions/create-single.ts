@@ -28,10 +28,7 @@ const createSingle: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collection.key);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const DocumentVersions = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const DocumentVersions = new DocumentVersionsRepository(context.db);
 	const migrationIdRes = await getCurrentCollectionMigrationId(
 		context,
 		data.collection.key,

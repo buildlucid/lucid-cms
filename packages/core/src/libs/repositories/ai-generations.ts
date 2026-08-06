@@ -1,14 +1,11 @@
 import { sql } from "kysely";
 import z from "zod";
 import type { GetUsageQueryParams } from "../../schemas/ai.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
-import type {
-	Insert,
-	KyselyDB,
-	LucidAiGenerations,
-	Select,
-} from "../db/types.js";
+import { aiGenerationsTable } from "../db/tables/ai-generations.js";
+import type { LucidAiGenerations } from "../db/tables/index.js";
+import type { Insert, Select } from "../db/types.js";
 import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
@@ -21,74 +18,9 @@ export interface AiUsageChartRowPropT {
 }
 
 export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_generations"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_ai_generations");
+	constructor(db: LucidDatabase) {
+		super(db, aiGenerationsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		request_id: z.string(),
-		provider_request_id: z.string().nullable(),
-		feature_key: z.string(),
-		feature_version: z.string(),
-		user_id: z.number().nullable(),
-		lucid_remote_connection_id: z.number().nullable(),
-		target_type: z.string(),
-		target: z.record(z.string(), z.unknown()),
-		output: z.unknown().nullable(),
-		usage: z.record(z.string(), z.unknown()).nullable(),
-		model: z.string().nullable(),
-		credits_charged: z.string().nullable(),
-		duration_ms: z.number().nullable(),
-		status: z.enum(["failed", "pending", "success"]),
-		error_message: z.string().nullable(),
-		created_at: z.union([z.string(), z.date()]),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		request_id: this.dbAdapter.getDataType("text"),
-		provider_request_id: this.dbAdapter.getDataType("text"),
-		feature_key: this.dbAdapter.getDataType("text"),
-		feature_version: this.dbAdapter.getDataType("text"),
-		user_id: this.dbAdapter.getDataType("integer"),
-		lucid_remote_connection_id: this.dbAdapter.getDataType("integer"),
-		target_type: this.dbAdapter.getDataType("text"),
-		target: this.dbAdapter.getDataType("json"),
-		output: this.dbAdapter.getDataType("json"),
-		usage: this.dbAdapter.getDataType("json"),
-		model: this.dbAdapter.getDataType("text"),
-		credits_charged: this.dbAdapter.getDataType("text"),
-		duration_ms: this.dbAdapter.getDataType("integer"),
-		status: this.dbAdapter.getDataType("text"),
-		error_message: this.dbAdapter.getDataType("text"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				requestId: "lucid_ai_generations.request_id",
-				providerRequestId: "lucid_ai_generations.provider_request_id",
-				featureKey: "lucid_ai_generations.feature_key",
-				featureVersion: "lucid_ai_generations.feature_version",
-				status: "lucid_ai_generations.status",
-				model: "lucid_ai_generations.model",
-				userId: "lucid_ai_generations.user_id",
-				targetType: "lucid_ai_generations.target_type",
-				durationMs: "lucid_ai_generations.duration_ms",
-				createdAt: "lucid_ai_generations.created_at",
-			},
-			sorts: {
-				createdAt: "lucid_ai_generations.created_at",
-				cost: "lucid_ai_generations.credits_charged",
-				durationMs: "lucid_ai_generations.duration_ms",
-			},
-		},
-		operators: {
-			requestId: "contains",
-			providerRequestId: "contains",
-			model: "contains",
-			targetType: "contains",
-		},
-	} as const;
 
 	/**
 	 * Inserts a completed generation once using the remote request identity.
@@ -109,7 +41,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 	) {
 		const query = this.db
 			.insertInto("lucid_ai_generations")
-			.values(this.formatData(props.data, { type: "insert" }))
+			.values(this.asInsertData(props.data))
 			.onConflict((conflict) => conflict.column("request_id").doNothing())
 			.$if(
 				props.returnAll !== true &&
@@ -204,7 +136,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "multiple",
-			schema: this.tableSchema.pick({
+			schema: this.config.schema.pick({
 				created_at: true,
 				feature_key: true,
 				usage: true,
@@ -251,7 +183,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 						"lucid_users.username",
 						"lucid_users.first_name",
 						"lucid_users.last_name",
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_media")
@@ -273,12 +205,8 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 										"lucid_media.base64",
 										"lucid_media.is_dark",
 										"lucid_media.is_light",
-										activeMediaCropSelect(
-											this.db,
-											this.dbAdapter,
-											"lucid_media.id",
-										),
-										this.dbAdapter
+										activeMediaCropSelect(this.database, "lucid_media.id"),
+										this.database.fn
 											.jsonArrayFrom(
 												mediaEb
 													.selectFrom("lucid_media_translations")
@@ -327,7 +255,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 					{
 						queryParams: props.queryParams,
 						database: this.dbAdapter.config,
-						meta: this.queryConfig,
+						meta: this.config.queryConfig,
 					},
 				);
 
@@ -347,7 +275,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "multiple-count",
-			schema: this.tableSchema.extend({
+			schema: this.config.schema.extend({
 				email: z.string().nullable(),
 				username: z.string().nullable(),
 				first_name: z.string().nullable(),

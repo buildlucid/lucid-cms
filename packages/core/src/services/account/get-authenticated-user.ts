@@ -18,11 +18,8 @@ const getAuthenticatedUser: ServiceFn<
 	],
 	User
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
-	const EmailChangeRequests = new EmailChangeRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Users = new UsersRepository(context.db);
+	const EmailChangeRequests = new EmailChangeRequestsRepository(context.db);
 
 	const [userRes, pendingEmailChangeRes] = await Promise.all([
 		Users.selectSinglePreset({

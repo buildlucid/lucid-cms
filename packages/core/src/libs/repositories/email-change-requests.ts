@@ -1,69 +1,13 @@
-import z from "zod";
 import constants from "../../constants/constants.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { emailChangeRequestsTable } from "../db/tables/email-change-requests.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class EmailChangeRequestsRepository extends StaticRepository<"lucid_email_change_requests"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_email_change_requests");
+	constructor(db: LucidDatabase) {
+		super(db, emailChangeRequestsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		user_id: z.number(),
-		old_email: z.email(),
-		new_email: z.email(),
-		confirm_token_id: z.number(),
-		revert_token_id: z.number(),
-		status: z.union([
-			z.literal(constants.emailChangeRequestStatuses.pending),
-			z.literal(constants.emailChangeRequestStatuses.confirmed),
-			z.literal(constants.emailChangeRequestStatuses.cancelled),
-			z.literal(constants.emailChangeRequestStatuses.reverted),
-			z.literal(constants.emailChangeRequestStatuses.superseded),
-		]),
-		confirmed_at: z.union([z.string(), z.date()]).nullable(),
-		cancelled_at: z.union([z.string(), z.date()]).nullable(),
-		reverted_at: z.union([z.string(), z.date()]).nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-		expires_at: z.union([z.string(), z.date()]),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		user_id: this.dbAdapter.getDataType("integer"),
-		old_email: this.dbAdapter.getDataType("text"),
-		new_email: this.dbAdapter.getDataType("text"),
-		confirm_token_id: this.dbAdapter.getDataType("integer"),
-		revert_token_id: this.dbAdapter.getDataType("integer"),
-		status: this.dbAdapter.getDataType("varchar", 255),
-		confirmed_at: this.dbAdapter.getDataType("timestamp"),
-		cancelled_at: this.dbAdapter.getDataType("timestamp"),
-		reverted_at: this.dbAdapter.getDataType("timestamp"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-		expires_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				userId: "user_id",
-				oldEmail: "old_email",
-				newEmail: "new_email",
-				status: "status",
-			},
-			sorts: {
-				createdAt: "created_at",
-				updatedAt: "updated_at",
-				expiresAt: "expires_at",
-			},
-		},
-		operators: {
-			oldEmail: "contains",
-			newEmail: "contains",
-		},
-	} as const;
 
 	// ----------------------------------------
 	// queries

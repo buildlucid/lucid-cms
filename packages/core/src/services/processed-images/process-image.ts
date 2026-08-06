@@ -61,7 +61,7 @@ const processImage: ServiceFn<
 	const { processingBody, fallbackBody } = splitBodyForProcessing(
 		mediaRes.data.body,
 	);
-	const Media = new MediaRepository(context.db.client, context.config.db);
+	const Media = new MediaRepository(context.db);
 
 	const focalRes = await Media.selectSingle({
 		select: ["focal_x", "focal_y"],
@@ -172,10 +172,7 @@ const processImage: ServiceFn<
 		};
 	}
 
-	const ProcessedImages = new ProcessedImagesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const ProcessedImages = new ProcessedImagesRepository(context.db);
 
 	if (context.config.media.images.storeProcessed === true) {
 		const storageLimit = context.config.media.limits.storageBytes;

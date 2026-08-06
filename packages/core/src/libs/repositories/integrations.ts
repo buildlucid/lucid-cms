@@ -1,84 +1,15 @@
 import { sql } from "kysely";
-import z from "zod";
 import type { GetAllQueryParams } from "../../schemas/integrations.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
-import type { KyselyDB } from "../db/types.js";
+import { integrationsTable } from "../db/tables/integrations.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class IntegrationsRepository extends StaticRepository<"lucid_integrations"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_integrations");
+	constructor(db: LucidDatabase) {
+		super(db, integrationsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		name: z.string(),
-		description: z.string().nullable(),
-		enabled: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		user_id: z.number().nullable(),
-		expires_at: z.union([z.string(), z.date()]).nullable(),
-		scopes: z
-			.array(
-				z.object({
-					scope: z.string(),
-				}),
-			)
-			.optional(),
-		key: z.string(),
-		api_key: z.string(),
-		secret: z.string(),
-		last_used_at: z.union([z.string(), z.date()]).nullable(),
-		last_used_ip: z.string().nullable(),
-		last_used_user_agent: z.string().nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		name: this.dbAdapter.getDataType("text"),
-		description: this.dbAdapter.getDataType("text"),
-		enabled: this.dbAdapter.getDataType("boolean"),
-		user_id: this.dbAdapter.getDataType("integer"),
-		expires_at: this.dbAdapter.getDataType("timestamp"),
-		key: this.dbAdapter.getDataType("text"),
-		api_key: this.dbAdapter.getDataType("text"),
-		secret: this.dbAdapter.getDataType("text"),
-		last_used_at: this.dbAdapter.getDataType("timestamp"),
-		last_used_ip: this.dbAdapter.getDataType("varchar", 255),
-		last_used_user_agent: this.dbAdapter.getDataType("text"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				key: "key",
-				name: "name",
-				description: "description",
-				enabled: "enabled",
-				expiresAt: "expires_at",
-				lastUsedAt: "last_used_at",
-				lastUsedIp: "last_used_ip",
-				createdAt: "created_at",
-				updatedAt: "updated_at",
-			},
-			sorts: {
-				name: "name",
-				description: "description",
-				enabled: "enabled",
-				createdAt: "created_at",
-				updatedAt: "updated_at",
-			},
-		},
-		operators: {
-			name: "contains",
-			description: "contains",
-		},
-	} as const;
 
 	/**
 	 * Selects an integration and its scopes by ID.
@@ -107,7 +38,7 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 				"last_used_user_agent",
 				"created_at",
 				"updated_at",
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_integration_scopes")
@@ -176,7 +107,7 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 				"enabled",
 				"user_id",
 				"expires_at",
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_integration_scopes")
@@ -241,7 +172,7 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 						"last_used_user_agent",
 						"created_at",
 						"updated_at",
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_integration_scopes")
@@ -279,7 +210,7 @@ export default class IntegrationsRepository extends StaticRepository<"lucid_inte
 						queryParams: props.queryParams,
 						database: this.dbAdapter.config,
 						meta: {
-							...this.queryConfig,
+							...this.config.queryConfig,
 							customFilters: {
 								scope: ({ eb, filter }) => {
 									const values = Array.isArray(filter.value)

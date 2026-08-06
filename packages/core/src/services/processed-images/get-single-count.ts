@@ -10,10 +10,7 @@ const getSingleCount: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const ProcessedImages = new ProcessedImagesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const ProcessedImages = new ProcessedImagesRepository(context.db);
 
 	const processedImageCountRes = await ProcessedImages.count({
 		where: [

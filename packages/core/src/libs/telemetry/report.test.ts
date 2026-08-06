@@ -15,6 +15,7 @@ vi.mock("./identity.js", () => ({
 const config = {
 	telemetry: true,
 	db: { adapter: "sqlite" },
+	tables: [],
 	localization: { locales: [{ label: "English", code: "en" }] },
 	ai: { enabled: false },
 	http: { openAPI: { enabled: false } },

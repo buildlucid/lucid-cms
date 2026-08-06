@@ -1,71 +1,16 @@
 import { sql } from "kysely";
 import z from "zod";
 import type { GetMultipleQueryParams } from "../../schemas/roles.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
-import type { KyselyDB } from "../db/types.js";
+import { rolesTable } from "../db/tables/roles.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class RolesRepository extends StaticRepository<"lucid_roles"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_roles");
+	constructor(db: LucidDatabase) {
+		super(db, rolesTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		key: z.string().nullable(),
-		locked: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		permissions: z
-			.array(
-				z.object({
-					id: z.number(),
-					role_id: z.number(),
-					permission: z.string(),
-				}),
-			)
-			.optional(),
-		translations: z
-			.array(
-				z.object({
-					name: z.string().nullable(),
-					description: z.string().nullable(),
-					locale_code: z.string(),
-				}),
-			)
-			.optional(),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		key: this.dbAdapter.getDataType("text"),
-		locked: this.dbAdapter.getDataType("boolean"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				name: "translation.name",
-				description: "translation.description",
-				roleIds: "lucid_roles.id",
-				locked: "lucid_roles.locked",
-				createdAt: "lucid_roles.created_at",
-				updatedAt: "lucid_roles.updated_at",
-			},
-			sorts: {
-				name: "translation.name",
-				createdAt: "lucid_roles.created_at",
-			},
-		},
-		operators: {
-			name: "contains",
-			description: "contains",
-		},
-	} as const;
 
 	// ----------------------------------------
 	// queries
@@ -90,7 +35,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "multiple",
-			schema: this.tableSchema.pick({
+			schema: this.config.schema.pick({
 				id: true,
 			}),
 			select: ["id"],
@@ -153,7 +98,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 				"locked",
 				"created_at",
 				"updated_at",
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_role_translations")
@@ -169,7 +114,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 							),
 					)
 					.as("translations"),
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_role_permissions")
@@ -230,7 +175,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 						"lucid_roles.updated_at",
 					])
 					.select((eb) => [
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_role_translations")
@@ -251,7 +196,7 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 						props.queryParams.include?.includes("permissions") || false,
 						(qb) =>
 							qb.select((eb) => [
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										eb
 											.selectFrom("lucid_role_permissions")
@@ -289,12 +234,12 @@ export default class RolesRepository extends StaticRepository<"lucid_roles"> {
 						meta: {
 							tableKeys: {
 								filters: {
-									...this.queryConfig.tableKeys.filters,
+									...this.config.queryConfig.tableKeys.filters,
 									name: "translation.name",
 								},
-								sorts: this.queryConfig.tableKeys.sorts,
+								sorts: this.config.queryConfig.tableKeys.sorts,
 							},
-							operators: this.queryConfig.operators,
+							operators: this.config.queryConfig.operators,
 						},
 					},
 				);

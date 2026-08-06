@@ -9,6 +9,7 @@ import {
 	vi,
 } from "vitest";
 import testingConstants from "../../constants/testing-constants.js";
+import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import type {
 	ConnectionGrant,
 	ConnectionRegistration,
@@ -73,11 +74,16 @@ const remoteConnection: RemoteConnectionData = {
 const adapter = new SQLiteAdapter({ database: ":memory:" });
 const database = await adapter.connect();
 await adapter.migrateCoreToLatest(database);
+const lucidDatabase = createLucidDatabase({
+	client: database.client,
+	adapter,
+});
 
 const makeConfig = (): Config =>
 	// @ts-expect-error
 	({
 		db: adapter,
+		tables: [],
 		host: "https://cms.example.test",
 		secrets: {
 			encryption: testingConstants.key,
@@ -91,7 +97,7 @@ const makeConfig = (): Config =>
 const makeContext = (): ServiceContext =>
 	// @ts-expect-error
 	({
-		db: { client: database.client },
+		db: lucidDatabase,
 		config: makeConfig(),
 		env: {
 			LUCID_CMS_INTERNAL_REMOTE_API_URL_OVERRIDE: issuer,
@@ -306,9 +312,7 @@ describe.sequential("Lucid remote connection", () => {
 		if (!connection.data) return;
 
 		const created = await new AiGenerationsRepository(
-			database.client,
-			// @ts-expect-error
-			adapter,
+			lucidDatabase,
 		).createSingle({
 			data: {
 				request_id: "request-1",

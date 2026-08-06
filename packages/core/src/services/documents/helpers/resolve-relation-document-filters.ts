@@ -12,6 +12,10 @@ import type {
 	CollectionSchemaColumn,
 	CollectionSchemaTable,
 } from "../../../libs/collection/schema/types.js";
+import type {
+	DocumentVersionType,
+	LucidBrickTableName,
+} from "../../../libs/db/tables/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import type {
@@ -19,10 +23,6 @@ import type {
 	QueryParamFilterGroups,
 	QueryParamFilters,
 } from "../../../types/query-params.js";
-import type {
-	DocumentVersionType,
-	LucidBrickTableName,
-} from "../../../types.js";
 import {
 	groupDocumentFilterConditions,
 	type RelationDocumentFilter,

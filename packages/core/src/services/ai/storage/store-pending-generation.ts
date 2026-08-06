@@ -17,10 +17,7 @@ const storePendingGeneration: ServiceFn<
 	],
 	undefined
 > = async (context, props) => {
-	const AiGenerations = new AiGenerationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const AiGenerations = new AiGenerationsRepository(context.db);
 
 	const existingRes = await AiGenerations.selectSingleByRequestId({
 		requestId: props.requestId,

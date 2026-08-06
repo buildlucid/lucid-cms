@@ -155,7 +155,8 @@ export const CodeField: Component<CodeFieldProps> = (props) => {
 		const currentValue = untrack(getValue);
 		const currentLanguage = untrack(getLanguage);
 
-		const storeText = storeVal?.value ?? "";
+		const storeText = typeof storeVal?.value === "string" ? storeVal.value : "";
+
 		if (storeText !== currentValue) {
 			setValue(storeText);
 		}

@@ -75,14 +75,8 @@ const createSingle: ServiceFn<
 		}
 	}
 
-	const Integrations = new IntegrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const IntegrationScopes = new IntegrationScopesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Integrations = new IntegrationsRepository(context.db);
+	const IntegrationScopes = new IntegrationScopesRepository(context.db);
 
 	const { key, apiKey, apiKeyHash, secret } = await generateKeys(
 		context.config.secrets.encryption,

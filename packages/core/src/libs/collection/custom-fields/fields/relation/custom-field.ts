@@ -1,9 +1,6 @@
 import z from "zod";
-import type {
-	LucidBricksTable,
-	Select,
-	ServiceResponse,
-} from "../../../../../types.js";
+import type { Select, ServiceResponse } from "../../../../../types.js";
+import type { LucidBricksTable } from "../../../../db/tables/index.js";
 import { copy } from "../../../../i18n/index.js";
 import buildSchemaIndex from "../../../helpers/build-schema-index.js";
 import buildTableName from "../../../helpers/build-table-name.js";

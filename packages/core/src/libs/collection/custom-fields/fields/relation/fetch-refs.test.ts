@@ -25,9 +25,7 @@ vi.mock("../../../schema/runtime/runtime-schema-selectors.js", () => ({
 import fetchRelationRefs from "./fetch-refs.js";
 
 const context = {
-	db: {
-		client: {},
-	},
+	db: {},
 	config: {
 		db: {},
 		collections: [{ key: "pages" }, { key: "blog" }],

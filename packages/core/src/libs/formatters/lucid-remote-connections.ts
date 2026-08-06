@@ -2,7 +2,8 @@ import type { ConnectionStatus } from "@lucidcms/types";
 import z from "zod";
 import constants from "../../constants/constants.js";
 import type { ServiceContext } from "../../utils/services/types.js";
-import type { LucidRemoteConnections, Select } from "../db/types.js";
+import type { LucidRemoteConnections } from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
 import { getLucidRemoteConfigFromEnv } from "../lucid-remote/origin.js";
 import { remoteConnectionDataSchema } from "../lucid-remote/schema/connection.js";
 

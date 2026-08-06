@@ -16,7 +16,7 @@ const validateUserInputData = async (
 	if (userIds.length === 0) return [];
 
 	try {
-		const Users = new UsersRepository(context.db.client, context.config.db);
+		const Users = new UsersRepository(context.db);
 
 		const usersRes = await Users.selectMultipleByIds({
 			ids: userIds,

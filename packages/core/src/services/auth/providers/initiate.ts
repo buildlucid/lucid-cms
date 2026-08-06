@@ -4,6 +4,7 @@ import constants from "../../../constants/constants.js";
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
+import type { AuthStateActionType } from "../../../libs/db/tables/index.js";
 import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
@@ -11,7 +12,7 @@ import {
 	UsersRepository,
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
-import type { AuthStateActionType, InitiateAuth } from "../../../types.js";
+import type { InitiateAuth } from "../../../types.js";
 import createPkce from "../../../utils/helpers/create-pkce.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
@@ -30,15 +31,9 @@ const initiate: ServiceFn<
 	],
 	InitiateAuth
 > = async (context, data) => {
-	const UserTokens = new UserTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const AuthStates = new AuthStatesRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const UserTokens = new UserTokensRepository(context.db);
+	const AuthStates = new AuthStatesRepository(context.db);
+	const Users = new UsersRepository(context.db);
 
 	//* check if the provider is enabled and exists
 	const availableProviders = getAvailableProviders(context.config);

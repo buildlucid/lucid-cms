@@ -42,10 +42,7 @@ const getMultipleRevisions: ServiceFn<
 		};
 	}
 
-	const VersionsRepo = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const VersionsRepo = new DocumentVersionsRepository(context.db);
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,

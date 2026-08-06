@@ -37,10 +37,7 @@ const getOverview: ServiceFn<
 		return { error: undefined, data: emptyOverview };
 	}
 
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
 
 	const overviewRes = await Operations.selectOverview({
 		userId: data.user.id,

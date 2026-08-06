@@ -1,33 +1,14 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type {
-	Insert,
-	KyselyDB,
-	LucidRoleTranslations,
-	Select,
-} from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import type { LucidRoleTranslations } from "../db/tables/index.js";
+import { roleTranslationsTable } from "../db/tables/role-translations.js";
+import type { Insert, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class RoleTranslationsRepository extends StaticRepository<"lucid_role_translations"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_role_translations");
+	constructor(db: LucidDatabase) {
+		super(db, roleTranslationsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		role_id: z.number(),
-		locale_code: z.string(),
-		name: z.string().nullable(),
-		description: z.string().nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		role_id: this.dbAdapter.getDataType("integer"),
-		locale_code: this.dbAdapter.getDataType("text"),
-		name: this.dbAdapter.getDataType("text"),
-		description: this.dbAdapter.getDataType("text"),
-	};
-	queryConfig = undefined;
 
 	/**
 	 * Upserts internal admin UI role translations using the supplied row as truth.
@@ -47,13 +28,7 @@ export default class RoleTranslationsRepository extends StaticRepository<"lucid_
 	) {
 		const query = this.db
 			.insertInto("lucid_role_translations")
-			.values(
-				props.data.map((d) =>
-					this.formatData(d, {
-						type: "insert",
-					}),
-				),
-			)
+			.values(props.data.map((data) => this.asInsertData(data)))
 			.onConflict((oc) =>
 				oc.columns(["role_id", "locale_code"]).doUpdateSet((eb) => ({
 					name: eb.ref("excluded.name"),

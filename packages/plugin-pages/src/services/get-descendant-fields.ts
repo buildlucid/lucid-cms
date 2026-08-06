@@ -1,4 +1,3 @@
-import { inspect } from "node:util";
 import { copy, prefixGeneratedColName } from "@lucidcms/core/plugin";
 import type {
 	DocumentVersionType,
@@ -59,112 +58,117 @@ const getDescendantFields: ServiceFn<
 		const parentPageTable = parentPageTableRes.data;
 		const defaultFieldsAlias = "default_fields";
 
-		const descendants = await context.db.client
-			.withRecursive("recursive_cte", (db) =>
+		const descendantsResult = await context.db
+			.query("pages.descendant-fields.find", (db) =>
 				db
-					.selectFrom(parentPageTable)
-					.innerJoin(
-						versionTable,
-						`${versionTable}.id`,
-						`${parentPageTable}.document_version_id`,
-					)
-					.select([
-						`${versionTable}.document_id as document_id`,
-						`${parentPageTable}.${parentPageColumn} as parent_id`,
-						`${parentPageTable}.document_version_id`,
-					])
-					.where(({ eb }) =>
-						eb(`${parentPageTable}.${parentPageColumn}`, "in", data.ids),
-					)
-					.where(
-						`${parentPageTable}.locale`,
-						"=",
-						context.config.localization.defaultLocale,
-					)
-					.where(`${versionTable}.type`, "=", data.versionType)
-					.unionAll(
-						db
+					.withRecursive("recursive_cte", (cte) =>
+						cte
 							.selectFrom(parentPageTable)
 							.innerJoin(
 								versionTable,
 								`${versionTable}.id`,
 								`${parentPageTable}.document_version_id`,
 							)
-							.innerJoin(
-								"recursive_cte as rc",
-								"rc.document_id",
-								`${parentPageTable}.${parentPageColumn}`,
-							)
 							.select([
 								`${versionTable}.document_id as document_id`,
 								`${parentPageTable}.${parentPageColumn} as parent_id`,
 								`${parentPageTable}.document_version_id`,
 							])
+							.where(({ eb }) =>
+								eb(`${parentPageTable}.${parentPageColumn}`, "in", data.ids),
+							)
 							.where(
 								`${parentPageTable}.locale`,
 								"=",
 								context.config.localization.defaultLocale,
 							)
-							.where(`${versionTable}.type`, "=", data.versionType),
-					),
-			)
-			.selectFrom("recursive_cte")
-			.select((eb) => [
-				"document_id",
-				"document_version_id",
-				context.config.db
-					.jsonArrayFrom(
-						eb
-							.selectFrom(fieldsTable)
-							.innerJoin(
-								versionTable,
-								`${versionTable}.id`,
-								`${fieldsTable}.document_version_id`,
-							)
-							.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
-								join
-									.onRef(
-										`${defaultFieldsAlias}.document_version_id`,
-										"=",
-										`${fieldsTable}.document_version_id`,
+							.where(`${versionTable}.type`, "=", data.versionType)
+							.unionAll(
+								cte
+									.selectFrom(parentPageTable)
+									.innerJoin(
+										versionTable,
+										`${versionTable}.id`,
+										`${parentPageTable}.document_version_id`,
 									)
-									.on(
-										`${defaultFieldsAlias}.locale`,
-										"=",
-										context.config.localization.defaultLocale,
-									),
-							)
-							.leftJoin(parentPageTable, (join) =>
-								join
-									.onRef(
-										`${parentPageTable}.parent_id`,
-										"=",
-										`${defaultFieldsAlias}.id`,
+									.innerJoin(
+										"recursive_cte as rc",
+										"rc.document_id",
+										`${parentPageTable}.${parentPageColumn}`,
 									)
-									.on(
+									.select([
+										`${versionTable}.document_id as document_id`,
+										`${parentPageTable}.${parentPageColumn} as parent_id`,
+										`${parentPageTable}.document_version_id`,
+									])
+									.where(
 										`${parentPageTable}.locale`,
 										"=",
 										context.config.localization.defaultLocale,
-									),
-							)
-							// @ts-expect-error
-							.select([
-								`${fieldsTable}.locale`,
-								`${fieldsTable}.${slugColumn} as _slug`,
-								`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
-								`${parentPageTable}.${parentPageColumn} as _parentPage`,
-							])
-							.whereRef(
-								`${versionTable}.document_id`,
-								"=",
-								"recursive_cte.document_id",
-							)
-							.where(`${versionTable}.type`, "=", data.versionType),
+									)
+									.where(`${versionTable}.type`, "=", data.versionType),
+							),
 					)
-					.as("rows"),
-			])
-			.where(({ eb }) => eb("document_id", "not in", data.ids))
-			.execute();
+					.selectFrom("recursive_cte")
+					.select((eb) => [
+						"document_id",
+						"document_version_id",
+						context.db.fn
+							.jsonArrayFrom(
+								eb
+									.selectFrom(fieldsTable)
+									.innerJoin(
+										versionTable,
+										`${versionTable}.id`,
+										`${fieldsTable}.document_version_id`,
+									)
+									.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
+										join
+											.onRef(
+												`${defaultFieldsAlias}.document_version_id`,
+												"=",
+												`${fieldsTable}.document_version_id`,
+											)
+											.on(
+												`${defaultFieldsAlias}.locale`,
+												"=",
+												context.config.localization.defaultLocale,
+											),
+									)
+									.leftJoin(parentPageTable, (join) =>
+										join
+											.onRef(
+												`${parentPageTable}.parent_id`,
+												"=",
+												`${defaultFieldsAlias}.id`,
+											)
+											.on(
+												`${parentPageTable}.locale`,
+												"=",
+												context.config.localization.defaultLocale,
+											),
+									)
+									// @ts-expect-error
+									.select([
+										`${fieldsTable}.locale`,
+										`${fieldsTable}.${slugColumn} as _slug`,
+										`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
+										`${parentPageTable}.${parentPageColumn} as _parentPage`,
+									])
+									.whereRef(
+										`${versionTable}.document_id`,
+										"=",
+										"recursive_cte.document_id",
+									)
+									.where(`${versionTable}.type`, "=", data.versionType),
+							)
+							.as("rows"),
+					])
+					.where(({ eb }) => eb("document_id", "not in", data.ids)),
+			)
+			.many();
+		if (descendantsResult.error) return descendantsResult;
+		const descendants = descendantsResult.data as DescendantFieldsResponse[];
 
 		return {
 			error: undefined,
@@ -176,15 +180,9 @@ const getDescendantFields: ServiceFn<
 							e.document_version_id === d.document_version_id,
 					) === i
 				);
-			}) as DescendantFieldsResponse[],
-		};
-	} catch (error) {
-		console.log(
-			inspect(error, {
-				depth: Number.POSITIVE_INFINITY,
-				colors: true,
 			}),
-		);
+		};
+	} catch (_error) {
 		return {
 			error: {
 				type: "basic",

@@ -3,6 +3,7 @@
 ## v0.6.1 (unreleased)
 
 - Dropped `tenant` experiment support.
+- Updated page hierarchy, slug and route uniqueness queries to use Lucid's managed database API.
 
 ## v0.6.0
 

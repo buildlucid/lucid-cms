@@ -135,10 +135,7 @@ const executeSingleJob: (
 	message: string;
 }> = async (context, data) => {
 	const handler = getJobHandler(data.event);
-	const QueueJobs = new QueueJobsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const QueueJobs = new QueueJobsRepository(context.db);
 	const setNextRetryAt = data.setNextRetryAt ?? true;
 
 	const jobRes = await QueueJobs.selectSingle({

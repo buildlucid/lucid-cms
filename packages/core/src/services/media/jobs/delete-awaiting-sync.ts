@@ -16,10 +16,7 @@ const deleteAwaitingSyncMedia: ServiceFn<
 	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
 
 	await mediaStrategyRes.data.delete(context, {
 		key: data.key,

@@ -70,14 +70,8 @@ const updateSingle: ServiceFn<
 	});
 	if (documentAccessRes.error) return documentAccessRes;
 
-	const Workflows = new DocumentWorkflowsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Assignees = new DocumentWorkflowAssigneesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Workflows = new DocumentWorkflowsRepository(context.db);
+	const Assignees = new DocumentWorkflowAssigneesRepository(context.db);
 
 	const workflowRes = await Workflows.selectSingleDetailed({
 		collectionKey: data.collectionKey,
@@ -133,7 +127,7 @@ const updateSingle: ServiceFn<
 			collection: collectionRes.data,
 			action: "update",
 		});
-		const Users = new UsersRepository(context.db.client, context.config.db);
+		const Users = new UsersRepository(context.db);
 		const assignableUsersRes = await Users.selectMultipleWithPermission({
 			permission,
 		});

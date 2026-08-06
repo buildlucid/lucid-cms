@@ -1,7 +1,7 @@
 import { isFieldTypeSortable } from "../../libs/collection/custom-fields/capabilities.js";
 import type { CollectionSchemaTable } from "../../libs/collection/schema/types.js";
+import type { LucidBrickTableName } from "../../libs/db/tables/index.js";
 import type { QueryParamSorts } from "../../types/query-params.js";
-import type { LucidBrickTableName } from "../../types.js";
 
 const CUSTOMFIELD_SORT_PREFIX = "_";
 

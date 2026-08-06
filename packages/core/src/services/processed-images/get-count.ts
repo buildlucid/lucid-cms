@@ -3,10 +3,7 @@ import { ProcessedImagesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getCount: ServiceFn<[], number> = async (context) => {
-	const ProcessedImages = new ProcessedImagesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const ProcessedImages = new ProcessedImagesRepository(context.db);
 
 	const processedImageCountRes = await ProcessedImages.count({
 		validation: { enabled: true },

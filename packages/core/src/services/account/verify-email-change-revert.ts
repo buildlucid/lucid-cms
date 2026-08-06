@@ -12,10 +12,7 @@ const verifyEmailChangeRevert: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const EmailChangeRequests = new EmailChangeRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const EmailChangeRequests = new EmailChangeRequestsRepository(context.db);
 
 	const tokenRes = await getUserToken(context, {
 		token: data.token,

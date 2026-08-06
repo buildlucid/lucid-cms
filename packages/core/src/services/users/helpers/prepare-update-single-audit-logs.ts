@@ -103,10 +103,7 @@ const resolveNextRoleSnapshot = async (
 		};
 	}
 
-	const RoleTranslations = new RoleTranslationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const RoleTranslations = new RoleTranslationsRepository(context.db);
 	const rolesRes = await RoleTranslations.selectMultiple({
 		select: ["role_id", "name"],
 		where: [

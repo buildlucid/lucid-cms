@@ -55,15 +55,9 @@ const sendEmail: ServiceFn<
 		email: Email;
 	}
 > = async (context, data) => {
-	const Emails = new EmailsRepository(context.db.client, context.config.db);
-	const EmailTransactions = new EmailTransactionsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const EmailAttachments = new EmailAttachmentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Emails = new EmailsRepository(context.db);
+	const EmailTransactions = new EmailTransactionsRepository(context.db);
+	const EmailAttachments = new EmailAttachmentsRepository(context.db);
 
 	const baseUrl = getBaseUrl(context);
 	const emailFrom = getEmailFrom(context.config, baseUrl);

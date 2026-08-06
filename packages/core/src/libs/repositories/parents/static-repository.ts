@@ -7,19 +7,7 @@ import type { Insert, LucidDB, Select, Update } from "../../db/types.js";
 import type { QueryProps } from "../types.js";
 import BaseRepository from "./base-repository.js";
 
-/**
- * The static repository class that all repositories should extend. This class provides basic CRUD operations for a single table.
- *
- * For tables that need more complex queries with joins or subqueries. Its expect you override the methods in this class while keeping the same paramaters if posible.
- *
- * @todo Any queryBuilder helper functions likley need to make use of the columnFormats config so they can correctly parse the data if needed. For ex if the where array includes an op on a boolean column, the value needs to be correctly formatted.
- * @todo Add callback support for the validation / tweak required. Sometimes instead of returning an error on required failing we want to handle it differently
- * @todo Improve validation error messages. Allow error overides for differnt types, required, validation etc.
- * @todo look into using $if for conditional query builder options
- * @todo try and get the retuning and select props correctly typed instead of typing it ourselved with the Select helper. Likley allows us to get rid of the 'as Promise<Pick<Select<T>, K> | undefined>' and lets Kysely handle the return type
- * @todo Support for DB Adapters overiding queries. Probs best as a method that repos can opt into?
- *
- */
+/** Shared CRUD operations for repositories backed by a fixed table. */
 abstract class StaticRepository<
 	Table extends keyof LucidDB,
 	T extends LucidDB[Table] = LucidDB[Table],
@@ -178,8 +166,7 @@ abstract class StaticRepository<
 					{
 						queryParams: props.queryParams,
 						database: this.dbAdapter.config,
-						// @ts-expect-error
-						meta: this.queryConfig,
+						meta: this.config.queryConfig,
 					},
 				);
 
@@ -307,9 +294,7 @@ abstract class StaticRepository<
 			}
 		>,
 	) {
-		const formattedData = this.formatData(props.data, {
-			type: "insert",
-		});
+		const formattedData = this.asInsertData(props.data);
 		let query =
 			Object.keys(formattedData).length > 0
 				? this.db.insertInto(this.tableName).values(formattedData)
@@ -354,13 +339,9 @@ abstract class StaticRepository<
 			}
 		>,
 	) {
-		let query = this.db.insertInto(this.tableName).values(
-			props.data.map((d) =>
-				this.formatData(d, {
-					type: "insert",
-				}),
-			),
-		);
+		let query = this.db
+			.insertInto(this.tableName)
+			.values(props.data.map((data) => this.asInsertData(data)));
 
 		if (
 			props.returnAll !== true &&
@@ -407,11 +388,7 @@ abstract class StaticRepository<
 	) {
 		let query = this.db
 			.updateTable(this.tableName)
-			.set(
-				this.formatData(props.data, {
-					type: "update",
-				}),
-			)
+			.set(this.asUpdateData(props.data))
 			.$if(
 				props.returnAll !== true &&
 					props.returning !== undefined &&
@@ -452,11 +429,7 @@ abstract class StaticRepository<
 	) {
 		let query = this.db
 			.updateTable(this.tableName)
-			.set(
-				this.formatData(props.data, {
-					type: "update",
-				}),
-			)
+			.set(this.asUpdateData(props.data))
 			.$if(
 				props.returnAll !== true &&
 					props.returning !== undefined &&

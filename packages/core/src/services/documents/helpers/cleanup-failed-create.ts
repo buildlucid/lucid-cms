@@ -1,4 +1,4 @@
-import type { LucidDocumentTableName } from "../../../libs/db/types.js";
+import type { LucidDocumentTableName } from "../../../libs/db/tables/index.js";
 import logger from "../../../libs/logger/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -14,17 +14,14 @@ const cleanupFailedCreate: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	if (context.db.client.isTransaction) {
+	if (context.db.isTransaction) {
 		return {
 			error: undefined,
 			data: undefined,
 		};
 	}
 
-	const Documents = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Documents = new DocumentsRepository(context.db);
 	const [deleteWorkflowRes, deleteDocumentRes] = await Promise.all([
 		deleteDocumentWorkflows(context, {
 			collectionKey: data.collectionKey,

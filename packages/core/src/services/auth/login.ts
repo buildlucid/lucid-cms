@@ -31,7 +31,7 @@ const login: ServiceFn<
 		};
 	}
 
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 	const usernameOrEmail = trimStringInput(data.usernameOrEmail);
 
 	const userRes = await Users.selectSingleByEmailUsername({

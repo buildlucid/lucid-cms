@@ -12,14 +12,8 @@ import type { ServiceFn } from "../../utils/services/types.js";
 const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 	context,
 ) => {
-	const MediaAwaitingSync = new MediaAwaitingSyncRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const MediaUploadSessions = new MediaUploadSessionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
+	const MediaUploadSessions = new MediaUploadSessionsRepository(context.db);
 
 	const [allExpiredMediaRes, allExpiredSessionsRes] = await Promise.all([
 		MediaAwaitingSync.selectMultiple({

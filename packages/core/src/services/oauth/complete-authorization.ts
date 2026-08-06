@@ -1,6 +1,6 @@
 import constants from "../../constants/constants.js";
 import collections from "../../libs/collection/collections.js";
-import type { OAuthPrincipalType } from "../../libs/db/types.js";
+import type { OAuthPrincipalType } from "../../libs/db/tables/index.js";
 import { getExternalCapability } from "../../libs/permission/capabilities.js";
 import { getValidExternalScopes } from "../../libs/permission/scopes.js";
 import type { Permission } from "../../libs/permission/types.js";
@@ -53,10 +53,7 @@ const completeAuthorization: ServiceFn<
 	}
 
 	const now = new Date().toISOString();
-	const Requests = new OAuthAuthorizationRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Requests = new OAuthAuthorizationRequestsRepository(context.db);
 	const requestRes = await Requests.consume({
 		requestId: input.requestId,
 		consumedAt: now,
@@ -134,10 +131,7 @@ const completeAuthorization: ServiceFn<
 		};
 	}
 
-	const Grants = new OAuthGrantsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Grants = new OAuthGrantsRepository(context.db);
 	const grantRes = await Grants.createSingle({
 		data: {
 			name: requestRes.data.client_name,
@@ -155,10 +149,7 @@ const completeAuthorization: ServiceFn<
 	});
 	if (grantRes.error) return grantRes;
 
-	const GrantScopes = new OAuthGrantScopesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const GrantScopes = new OAuthGrantScopesRepository(context.db);
 	const scopeRes = await GrantScopes.createMultiple({
 		data: scopes.map((scope) => ({
 			grant_id: grantRes.data.id,
@@ -169,10 +160,7 @@ const completeAuthorization: ServiceFn<
 	if (scopeRes.error) return scopeRes;
 
 	const code = createOAuthOpaqueToken();
-	const Codes = new OAuthAuthorizationCodesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Codes = new OAuthAuthorizationCodesRepository(context.db);
 	const codeRes = await Codes.createSingle({
 		data: {
 			code_hash: hashOAuthAuthorizationCode(context, code),

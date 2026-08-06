@@ -17,8 +17,6 @@ const verifyToken = async (
 ): ServiceResponse<{
 	user_id: number;
 }> => {
-	const config = c.get("config");
-
 	try {
 		const _refresh = getCookie(c, constants.cookies.refreshToken);
 
@@ -33,14 +31,12 @@ const verifyToken = async (
 			};
 		}
 
-		const UserTokens = new UserTokensRepository(
-			c.get("database").client,
-			config.db,
-		);
+		const context = createServiceContext(c);
+		const UserTokens = new UserTokensRepository(context.db);
 
 		const decode = (await verify(
 			_refresh,
-			config.secrets.refreshToken,
+			context.config.secrets.refreshToken,
 			constants.jwt.algorithm,
 		)) as {
 			id: number;
@@ -83,7 +79,7 @@ const verifyToken = async (
 
 		if (tokenRes.data.revoked_at !== null) {
 			if (tokenRes.data.replaced_by_token_id !== null) {
-				await revokeUserTokens(createServiceContext(c), {
+				await revokeUserTokens(context, {
 					userId: tokenRes.data.user_id,
 					revokeReason: constants.refreshTokenRevokeReasons.reuseDetected,
 				});
@@ -140,7 +136,6 @@ const verifyToken = async (
 			};
 		}
 
-		const context = createServiceContext(c);
 		const kv = context.kv;
 		const kvEntry = await kv.get<{ user_id: number }>(context, {
 			key: cacheKeys.auth.refresh(_refresh),

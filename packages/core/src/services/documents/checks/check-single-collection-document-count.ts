@@ -1,6 +1,6 @@
+import type { LucidDocumentTableName } from "../../../libs/db/tables/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
-import type { LucidDocumentTableName } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
@@ -25,10 +25,7 @@ const checkSingleCollectionDocumentCount: ServiceFn<
 		};
 	}
 
-	const Document = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Document = new DocumentsRepository(context.db);
 
 	const existingDocumentRes =
 		await Document.selectMultipleCollectionDocumentIds(

@@ -9,7 +9,7 @@ import {
 	getDocumentFieldsTableSchema,
 	getTableNames,
 } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { DocumentVersionType } from "../../libs/db/types.js";
+import type { DocumentVersionType } from "../../libs/db/tables/index.js";
 import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -63,10 +63,7 @@ const getMultiple: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 	if (collectionsRes.error) return collectionsRes;
 
-	const Document = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Document = new DocumentsRepository(context.db);
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,

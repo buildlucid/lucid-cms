@@ -26,10 +26,7 @@ const createInitial: ServiceFn<
 		};
 	}
 
-	const Workflows = new DocumentWorkflowsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Workflows = new DocumentWorkflowsRepository(context.db);
 
 	const existingRes = await Workflows.selectSingle({
 		select: ["id"],

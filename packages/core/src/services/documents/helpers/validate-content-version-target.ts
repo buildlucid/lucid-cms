@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
+import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import type { DocumentVersionType } from "../../../types.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
 const validateContentVersionTarget = async (data: {

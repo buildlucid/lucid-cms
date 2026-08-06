@@ -14,10 +14,7 @@ const updateSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const MediaFolders = new MediaFoldersRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaFolders = new MediaFoldersRepository(context.db);
 
 	if (data.parentFolderId === data.id) {
 		return {

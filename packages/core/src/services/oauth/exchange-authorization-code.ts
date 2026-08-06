@@ -20,10 +20,7 @@ const exchangeAuthorizationCode: ServiceFn<
 	],
 	OAuthTokenResponse
 > = async (context, input) => {
-	const Codes = new OAuthAuthorizationCodesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Codes = new OAuthAuthorizationCodesRepository(context.db);
 	const codeHash = hashOAuthAuthorizationCode(context, input.code);
 	const codeRes = await Codes.selectSingle({
 		select: [
@@ -75,10 +72,7 @@ const exchangeAuthorizationCode: ServiceFn<
 		};
 	}
 
-	const Grants = new OAuthGrantsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Grants = new OAuthGrantsRepository(context.db);
 	const grantRes = await Grants.selectSingleWithScopes({
 		id: consumeRes.data.grant_id,
 		validation: {

@@ -25,14 +25,8 @@ const cancelForDocuments: ServiceFn<
 		};
 	}
 
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const QueueJobs = new QueueJobsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
+	const QueueJobs = new QueueJobsRepository(context.db);
 
 	const activeRes = await Operations.selectMultiple({
 		select: ["id", "scheduled_job_id"],

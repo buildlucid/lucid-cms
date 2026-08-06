@@ -15,7 +15,7 @@ const getSingle: ServiceFn<
 	],
 	Email
 > = async (context, data) => {
-	const Emails = new EmailsRepository(context.db.client, context.config.db);
+	const Emails = new EmailsRepository(context.db);
 
 	const emailRes = await Emails.selectSingleById({
 		id: data.id,

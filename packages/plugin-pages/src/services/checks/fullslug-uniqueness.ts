@@ -50,39 +50,60 @@ const getStoredRelationUniqueValues = async (
 		localeValues: string[];
 		defaultLocale: string;
 	},
-): Promise<RelationUniqueValueMap> => {
+): ServiceResponse<RelationUniqueValueMap> => {
 	const relationFields = data.uniqueFields.filter(isRelationUniqueField);
 	if (relationFields.length === 0 || data.versionIds.length === 0) {
-		return new Map();
+		return { error: undefined, data: new Map() };
 	}
 
-	const relationValueMaps = await Promise.all(
+	const relationRows = await Promise.all(
 		relationFields.map(async (field) => {
 			const locales = field.localized
 				? data.localeValues
 				: [data.defaultLocale];
 
-			const rows = (await context.db.client
-				.selectFrom(field.table)
-				.select([
-					`${field.table}.document_version_id`,
-					`${field.table}.locale`,
-					`${field.table}.position`,
-					...field.valueColumns.map((column) => `${field.table}.${column}`),
-				])
-				.where(`${field.table}.document_version_id`, "in", data.versionIds)
-				.where(`${field.table}.locale`, "in", locales)
-				.orderBy(`${field.table}.position`)
-				.execute()) as RelationUniqueFieldQueryRow[];
-
-			return relationRowsToUniqueValueMap({
+			return {
 				field,
-				rows,
-			});
+				result: await context.db
+					.query("pages.unique.relation-values.find", (db) =>
+						db
+							.selectFrom(field.table)
+							.select([
+								`${field.table}.document_version_id`,
+								`${field.table}.locale`,
+								`${field.table}.position`,
+								...field.valueColumns.map(
+									(column) => `${field.table}.${column}`,
+								),
+							])
+							.where(
+								`${field.table}.document_version_id`,
+								"in",
+								data.versionIds,
+							)
+							.where(`${field.table}.locale`, "in", locales)
+							.orderBy(`${field.table}.position`),
+					)
+					.many(),
+			};
 		}),
 	);
+	const failedQuery = relationRows.find(({ result }) => result.error);
+	if (failedQuery?.result.error) {
+		return { error: failedQuery.result.error, data: undefined };
+	}
 
-	return mergeRelationUniqueValueMaps(relationValueMaps);
+	return {
+		error: undefined,
+		data: mergeRelationUniqueValueMaps(
+			relationRows.map(({ field, result }) =>
+				relationRowsToUniqueValueMap({
+					field,
+					rows: result.data as RelationUniqueFieldQueryRow[],
+				}),
+			),
+		),
+	};
 };
 
 /** Adds stored unique field values to projected routes before comparison. */
@@ -134,52 +155,58 @@ const ensureProjectedUniqueValues = async (
 		const hasDefaultLocalePartition = data.uniqueFields.some(
 			(field) => isColumnUniqueField(field) && !field.localized,
 		);
-		relationValues = await getStoredRelationUniqueValues(context, {
+		const relationValuesResult = await getStoredRelationUniqueValues(context, {
 			uniqueFields: data.uniqueFields,
 			versionIds,
 			localeValues,
 			defaultLocale: data.defaultLocale,
 		});
+		if (relationValuesResult.error) return relationValuesResult;
+		relationValues = relationValuesResult.data;
 
-		const query = context.db.client
-			.selectFrom(fieldsTable)
-			.innerJoin(
-				versionTable,
-				`${versionTable}.id`,
-				`${fieldsTable}.document_version_id`,
-			)
-			.$if(hasDefaultLocalePartition, (qb) =>
-				qb.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
-					join
-						.onRef(
-							`${defaultFieldsAlias}.document_version_id`,
-							"=",
-							`${fieldsTable}.document_version_id`,
-						)
-						.on(`${defaultFieldsAlias}.locale`, "=", data.defaultLocale),
-				),
-			)
-			.select([
-				`${versionTable}.document_id`,
-				`${fieldsTable}.document_version_id`,
-				`${fieldsTable}.locale`,
-			])
-			.select(
-				data.uniqueFields.flatMap((field, index) => {
-					if (!isColumnUniqueField(field)) return [];
+		const rowsResult = await context.db
+			.query("pages.unique.projected-values.find", (db) =>
+				db
+					.selectFrom(fieldsTable)
+					.innerJoin(
+						versionTable,
+						`${versionTable}.id`,
+						`${fieldsTable}.document_version_id`,
+					)
+					.$if(hasDefaultLocalePartition, (qb) =>
+						qb.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
+							join
+								.onRef(
+									`${defaultFieldsAlias}.document_version_id`,
+									"=",
+									`${fieldsTable}.document_version_id`,
+								)
+								.on(`${defaultFieldsAlias}.locale`, "=", data.defaultLocale),
+						),
+					)
+					.select([
+						`${versionTable}.document_id`,
+						`${fieldsTable}.document_version_id`,
+						`${fieldsTable}.locale`,
+					])
+					.select(
+						data.uniqueFields.flatMap((field, index) => {
+							if (!isColumnUniqueField(field)) return [];
 
-					return [
-						sql<unknown>`${sql.ref(
-							`${field.localized ? fieldsTable : defaultFieldsAlias}.${
-								field.column
-							}`,
-						)}`.as(uniqueFieldAlias(index)),
-					];
-				}),
+							return [
+								sql<unknown>`${sql.ref(
+									`${
+										field.localized ? fieldsTable : defaultFieldsAlias
+									}.${field.column}`,
+								)}`.as(uniqueFieldAlias(index)),
+							];
+						}),
+					)
+					.where(`${fieldsTable}.document_version_id`, "in", versionIds),
 			)
-			.where(`${fieldsTable}.document_version_id`, "in", versionIds);
-
-		const rows = (await query.execute()) as UniqueFieldQueryRow[];
+			.many();
+		if (rowsResult.error) return rowsResult;
+		const rows = rowsResult.data as UniqueFieldQueryRow[];
 		for (const row of rows) {
 			rowsByVersionLocale.set(`${row.document_version_id}:${row.locale}`, row);
 		}
@@ -249,77 +276,80 @@ const getExistingRouteItems = async (
 		(field) => isColumnUniqueField(field) && !field.localized,
 	);
 
-	const query = context.db.client
-		.selectFrom(documentTable)
-		.innerJoin(
-			versionTable,
-			// @ts-expect-error
-			`${versionTable}.document_id`,
-			`${documentTable}.id`,
-		)
-		.innerJoin(
-			fieldsTable,
-			// @ts-expect-error
-			`${fieldsTable}.document_version_id`,
-			`${versionTable}.id`,
-		)
-		.$if(hasDefaultLocalePartition, (qb) =>
-			// @ts-expect-error
-			qb.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
-				join
-					.onRef(
-						`${defaultFieldsAlias}.document_version_id`,
-						"=",
-						`${fieldsTable}.document_version_id`,
-					)
-					.on(`${defaultFieldsAlias}.locale`, "=", data.defaultLocale),
-			),
-		)
-		// @ts-expect-error
-		.select([
-			`${documentTable}.id as document_id`,
-			`${versionTable}.id as document_version_id`,
-			`${fieldsTable}.locale`,
-			`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
-		])
-		.select(
-			data.uniqueFields.flatMap((field, index) => {
-				if (!isColumnUniqueField(field)) return [];
+	const rowsResult = await context.db
+		.query("pages.unique.existing-routes.find", (db) => {
+			const query = db
+				.selectFrom(documentTable)
+				.innerJoin(
+					versionTable,
+					// @ts-expect-error
+					`${versionTable}.document_id`,
+					`${documentTable}.id`,
+				)
+				.innerJoin(
+					fieldsTable,
+					// @ts-expect-error
+					`${fieldsTable}.document_version_id`,
+					`${versionTable}.id`,
+				)
+				.$if(hasDefaultLocalePartition, (qb) =>
+					// @ts-expect-error
+					qb.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
+						join
+							.onRef(
+								`${defaultFieldsAlias}.document_version_id`,
+								"=",
+								`${fieldsTable}.document_version_id`,
+							)
+							.on(`${defaultFieldsAlias}.locale`, "=", data.defaultLocale),
+					),
+				)
+				// @ts-expect-error
+				.select([
+					`${documentTable}.id as document_id`,
+					`${versionTable}.id as document_version_id`,
+					`${fieldsTable}.locale`,
+					`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
+				])
+				.select(
+					data.uniqueFields.flatMap((field, index) => {
+						if (!isColumnUniqueField(field)) return [];
 
-				return [
-					sql<unknown>`${sql.ref(
-						`${field.localized ? fieldsTable : defaultFieldsAlias}.${
-							field.column
-						}`,
-					)}`.as(uniqueFieldAlias(index)),
-				];
-			}),
-		)
-		// @ts-expect-error
-		.where(({ eb, and }) =>
-			and([
-				eb(
-					sql<string>`lower(${sql.ref(`${fieldsTable}.${fullSlugColumn}`)})`,
-					"in",
-					fullSlugValues,
-				),
-				eb(`${fieldsTable}.locale`, "in", localeValues),
-				eb(`${versionTable}.type`, "=", data.versionType),
-			]),
-		)
-		.where(`${documentTable}.collection_key`, "=", data.collectionKey)
-		.where(
-			`${documentTable}.is_deleted`,
-			"=",
-			context.config.db.getDefault("boolean", "false"),
-		);
+						return [
+							sql<unknown>`${sql.ref(
+								`${field.localized ? fieldsTable : defaultFieldsAlias}.${
+									field.column
+								}`,
+							)}`.as(uniqueFieldAlias(index)),
+						];
+					}),
+				)
+				// @ts-expect-error
+				.where(({ eb, and }) =>
+					and([
+						eb(
+							sql<string>`lower(${sql.ref(`${fieldsTable}.${fullSlugColumn}`)})`,
+							"in",
+							fullSlugValues,
+						),
+						eb(`${fieldsTable}.locale`, "in", localeValues),
+						eb(`${versionTable}.type`, "=", data.versionType),
+					]),
+				)
+				.where(`${documentTable}.collection_key`, "=", data.collectionKey)
+				.where(
+					`${documentTable}.is_deleted`,
+					"=",
+					context.config.db.getDefault("boolean", "false"),
+				);
 
-	const filteredQuery =
-		data.excludeDocumentIds.length > 0
-			? query.where(`${documentTable}.id`, "not in", data.excludeDocumentIds)
-			: query;
-
-	const rows = (await filteredQuery.execute()) as Array<
+			return data.excludeDocumentIds.length > 0
+				? query.where(`${documentTable}.id`, "not in", data.excludeDocumentIds)
+				: query;
+		})
+		.many();
+	if (rowsResult.error) return rowsResult;
+	const rows = rowsResult.data as Array<
 		UniqueFieldQueryRow & {
 			_fullSlug: string | null;
 		}
@@ -327,12 +357,14 @@ const getExistingRouteItems = async (
 	const existingVersionIds = [
 		...new Set(rows.map((row) => row.document_version_id)),
 	];
-	const relationValues = await getStoredRelationUniqueValues(context, {
+	const relationValuesResult = await getStoredRelationUniqueValues(context, {
 		uniqueFields: data.uniqueFields,
 		versionIds: existingVersionIds,
 		localeValues: [...new Set([...localeValues, data.defaultLocale])],
 		defaultLocale: data.defaultLocale,
 	});
+	if (relationValuesResult.error) return relationValuesResult;
+	const relationValues = relationValuesResult.data;
 
 	return {
 		error: undefined,

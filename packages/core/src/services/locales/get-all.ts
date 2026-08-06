@@ -4,7 +4,7 @@ import type { Locale } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getAll: ServiceFn<[], Locale[]> = async (context) => {
-	const Locales = new LocalesRepository(context.db.client, context.config.db);
+	const Locales = new LocalesRepository(context.db);
 
 	const localesRes = await Locales.selectMultiple({
 		select: ["code", "created_at", "updated_at", "is_deleted", "is_deleted_at"],

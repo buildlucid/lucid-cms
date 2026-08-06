@@ -28,10 +28,7 @@ const getUsageChart: ServiceFn<
 		};
 	}
 
-	const AiGenerations = new AiGenerationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const AiGenerations = new AiGenerationsRepository(context.db);
 
 	const rowsRes = await AiGenerations.selectUsageChartRows({
 		startDate: formatDbTimestamp(query.start),

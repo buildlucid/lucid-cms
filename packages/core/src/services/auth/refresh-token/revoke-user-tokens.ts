@@ -14,10 +14,7 @@ const revokeUserTokens: ServiceFn<
 		revokedCount: number;
 	}
 > = async (context, data) => {
-	const UserTokens = new UserTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const UserTokens = new UserTokensRepository(context.db);
 	const now = new Date().toISOString();
 
 	const activeTokenRes = await UserTokens.selectMultiple({

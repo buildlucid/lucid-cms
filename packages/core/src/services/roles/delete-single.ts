@@ -13,7 +13,7 @@ const deleteSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Roles = new RolesRepository(context.db.client, context.config.db);
+	const Roles = new RolesRepository(context.db);
 
 	const roleRes = await checkRoleAccess(context, {
 		id: data.id,

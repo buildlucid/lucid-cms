@@ -1,4 +1,4 @@
-import type { LucidVersionTableName } from "../../../libs/db/types.js";
+import type { LucidVersionTableName } from "../../../libs/db/tables/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
@@ -17,7 +17,7 @@ const rollbackVersionCreate: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	if (context.db.client.isTransaction) {
+	if (context.db.isTransaction) {
 		return {
 			error: undefined,
 			data: undefined,

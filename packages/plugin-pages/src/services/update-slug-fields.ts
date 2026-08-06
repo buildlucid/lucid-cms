@@ -37,27 +37,34 @@ const updateSlugFields: ServiceFn<
 		for (const doc of data.docSlugs) {
 			for (const [locale, slug] of Object.entries(doc.slugs)) {
 				updateSlugsPromises.push(
-					context.db.client
-						.updateTable(fieldsTable)
-						.set({ [slugColumn]: normalizePathValue(slug) })
-						.where((eb) =>
-							eb.exists(
-								eb
-									.selectFrom(versionTable)
-									.selectAll()
-									.where(`${versionTable}.id`, "=", doc.versionId)
-									.where(`${versionTable}.document_id`, "=", doc.documentId)
-									.where(`${versionTable}.type`, "=", data.versionType),
-							),
+					context.db
+						.query("pages.slug.update", (db) =>
+							db
+								.updateTable(fieldsTable)
+								.set({ [slugColumn]: normalizePathValue(slug) })
+								.where((eb) =>
+									eb.exists(
+										eb
+											.selectFrom(versionTable)
+											.selectAll()
+											.where(`${versionTable}.id`, "=", doc.versionId)
+											.where(`${versionTable}.document_id`, "=", doc.documentId)
+											.where(`${versionTable}.type`, "=", data.versionType),
+									),
+								)
+								.where("document_version_id", "=", doc.versionId)
+								.where("locale", "=", locale),
 						)
-						.where("document_version_id", "=", doc.versionId)
-						.where("locale", "=", locale)
-						.execute(),
+						.many(),
 				);
 			}
 		}
 
-		await Promise.all(updateSlugsPromises);
+		const updateResults = await Promise.all(updateSlugsPromises);
+		const failedUpdate = updateResults.find((result) => result.error);
+		if (failedUpdate?.error) {
+			return { error: failedUpdate.error, data: undefined };
+		}
 
 		return {
 			error: undefined,

@@ -49,22 +49,12 @@ const updateSingle: ServiceFn<
 		};
 	}
 
-	const OAuthClients = new OAuthClientsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const RedirectUris = new OAuthClientRedirectUrisRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const OAuthClients = new OAuthClientsRepository(context.db);
+	const RedirectUris = new OAuthClientRedirectUrisRepository(context.db);
 	const AuthorizationRequests = new OAuthAuthorizationRequestsRepository(
-		context.db.client,
-		context.config.db,
+		context.db,
 	);
-	const Grants = new OAuthGrantsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Grants = new OAuthGrantsRepository(context.db);
 
 	const existingRes = await OAuthClients.selectSingle({
 		select: ["client_id", "logo_media_id", "enabled"],

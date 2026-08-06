@@ -2,6 +2,7 @@ import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import createLucidDatabase from "../../db/create-lucid-database.js";
 import modifyTableQuery from "./modify-table-query.js";
 
 describe("modifyTableQuery", async () => {
@@ -11,11 +12,10 @@ describe("modifyTableQuery", async () => {
 	const connection = await db.connect();
 	const indexName = `${constants.db.generatedIndexPrefix}lucid_modify_indexes___title`;
 	const context = {
-		db: {
-			client: connection.client,
-		},
+		db: createLucidDatabase({ client: connection.client, adapter: db }),
 		config: {
 			db,
+			tables: [],
 		},
 	} as ServiceContext;
 

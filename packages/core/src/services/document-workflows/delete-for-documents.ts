@@ -17,10 +17,7 @@ const deleteForDocuments: ServiceFn<
 		};
 	}
 
-	const Workflows = new DocumentWorkflowsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Workflows = new DocumentWorkflowsRepository(context.db);
 
 	const deleteRes = await Workflows.deleteMultiple({
 		where: [

@@ -49,52 +49,57 @@ const getDocumentVersionFields: ServiceFn<
 		const parentPageTable = parentPageTableRes.data;
 		const defaultFieldsAlias = "default_fields";
 
-		const fieldsQuery = context.db.client
-			.selectFrom(fieldsTable)
-			.innerJoin(
-				versionTable,
-				`${versionTable}.id`,
-				`${fieldsTable}.document_version_id`,
-			)
-			.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
-				join
-					.onRef(
-						`${defaultFieldsAlias}.document_version_id`,
-						"=",
+		const fieldsResult = await context.db
+			.query("pages.version-fields.find", (db) =>
+				db
+					.selectFrom(fieldsTable)
+					.innerJoin(
+						versionTable,
+						`${versionTable}.id`,
 						`${fieldsTable}.document_version_id`,
 					)
-					.on(
-						`${defaultFieldsAlias}.locale`,
-						"=",
-						context.config.localization.defaultLocale,
-					),
-			)
-			.leftJoin(parentPageTable, (join) =>
-				join
-					.onRef(
-						`${parentPageTable}.parent_id`,
-						"=",
-						`${defaultFieldsAlias}.id`,
+					.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
+						join
+							.onRef(
+								`${defaultFieldsAlias}.document_version_id`,
+								"=",
+								`${fieldsTable}.document_version_id`,
+							)
+							.on(
+								`${defaultFieldsAlias}.locale`,
+								"=",
+								context.config.localization.defaultLocale,
+							),
 					)
-					.on(
-						`${parentPageTable}.locale`,
-						"=",
-						context.config.localization.defaultLocale,
-					),
+					.leftJoin(parentPageTable, (join) =>
+						join
+							.onRef(
+								`${parentPageTable}.parent_id`,
+								"=",
+								`${defaultFieldsAlias}.id`,
+							)
+							.on(
+								`${parentPageTable}.locale`,
+								"=",
+								context.config.localization.defaultLocale,
+							),
+					)
+					// @ts-expect-error
+					.select([
+						`${fieldsTable}.locale`,
+						`${versionTable}.document_id`,
+						`${fieldsTable}.${slugColumn}`,
+						`${fieldsTable}.${fullSlugColumn}`,
+						`${parentPageTable}.${parentPageColumn}`,
+					])
+					.where(`${versionTable}.document_id`, "=", data.documentId)
+					.where(`${versionTable}.id`, "=", data.versionId)
+					.where(`${versionTable}.type`, "=", data.versionType),
 			)
-			// @ts-expect-error
-			.select([
-				`${fieldsTable}.locale`,
-				`${versionTable}.document_id`,
-				`${fieldsTable}.${slugColumn}`,
-				`${fieldsTable}.${fullSlugColumn}`,
-				`${parentPageTable}.${parentPageColumn}`,
-			])
-			.where(`${versionTable}.document_id`, "=", data.documentId)
-			.where(`${versionTable}.id`, "=", data.versionId)
-			.where(`${versionTable}.type`, "=", data.versionType);
+			.many();
+		if (fieldsResult.error) return fieldsResult;
 
-		const fields = await fieldsQuery.execute();
+		const fields = fieldsResult.data;
 
 		if (!fields || fields.length === 0) {
 			return {

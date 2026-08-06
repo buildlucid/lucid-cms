@@ -44,10 +44,7 @@ const mediaImageCompletion: ServiceFn<
 	});
 	if (featureEnabledRes.error) return featureEnabledRes;
 
-	const AiGenerations = new AiGenerationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const AiGenerations = new AiGenerationsRepository(context.db);
 	const storedGenerationRes = await AiGenerations.selectSingleByRequestId({
 		requestId: props.requestId,
 		select: ["id"],

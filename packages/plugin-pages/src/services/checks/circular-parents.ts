@@ -46,47 +46,52 @@ const checkCircularParents: ServiceFn<
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
 
-		const result = await context.db.client
-			.withRecursive("ancestors", (db) =>
+		const resultResponse = await context.db
+			.query("pages.circular-parent.check", (db) =>
 				db
-					.selectFrom(parentPageTable)
-					.innerJoin(
-						versionTable,
-						`${versionTable}.id`,
-						`${parentPageTable}.document_version_id`,
-					)
-					.select([
-						`${versionTable}.document_id as current_id`,
-						`${parentPageTable}.${parentPageField} as parent_id`,
-					])
-					.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
-					.where(`${versionTable}.type`, "=", data.versionType)
-					.where(`${versionTable}.document_id`, "=", parentPageId)
-					.unionAll(
-						db
+					.withRecursive("ancestors", (recursive) =>
+						recursive
 							.selectFrom(parentPageTable)
 							.innerJoin(
 								versionTable,
 								`${versionTable}.id`,
 								`${parentPageTable}.document_version_id`,
 							)
-							.innerJoin(
-								"ancestors",
-								"ancestors.parent_id",
-								`${versionTable}.document_id`,
-							)
 							.select([
 								`${versionTable}.document_id as current_id`,
 								`${parentPageTable}.${parentPageField} as parent_id`,
 							])
 							.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
-							.where(`${versionTable}.type`, "=", data.versionType),
-					),
+							.where(`${versionTable}.type`, "=", data.versionType)
+							.where(`${versionTable}.document_id`, "=", parentPageId)
+							.unionAll(
+								recursive
+									.selectFrom(parentPageTable)
+									.innerJoin(
+										versionTable,
+										`${versionTable}.id`,
+										`${parentPageTable}.document_version_id`,
+									)
+									.innerJoin(
+										"ancestors",
+										"ancestors.parent_id",
+										`${versionTable}.document_id`,
+									)
+									.select([
+										`${versionTable}.document_id as current_id`,
+										`${parentPageTable}.${parentPageField} as parent_id`,
+									])
+									.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
+									.where(`${versionTable}.type`, "=", data.versionType),
+							),
+					)
+					.selectFrom("ancestors")
+					.select("parent_id")
+					.where("parent_id", "=", data.documentId),
 			)
-			.selectFrom("ancestors")
-			.select("parent_id")
-			.where("parent_id", "=", data.documentId)
-			.executeTakeFirst();
+			.first();
+		if (resultResponse.error) return resultResponse;
+		const result = resultResponse.data;
 
 		if (result) {
 			return {

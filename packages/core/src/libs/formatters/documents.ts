@@ -9,13 +9,13 @@ import type {
 	InternalCollectionDocument,
 	InternalDocumentBrick,
 	InternalDocumentField,
-	LucidBrickTableName,
 } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import registeredFields, {
 	registeredFieldTypes,
 } from "../collection/custom-fields/registered-fields.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
+import type { LucidBrickTableName } from "../db/tables/index.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import documentBricksFormatter from "./document-bricks.js";

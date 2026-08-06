@@ -1,238 +1,20 @@
 import { sql } from "kysely";
-import z from "zod";
 import type { GetMultipleQueryParams } from "../../schemas/users.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../db/query-builder/index.js";
-import type { KyselyDB, LucidUsers, Select } from "../db/types.js";
-import type { MediaPosterPropsT } from "../formatters/media.js";
+import type { LucidUsers } from "../db/tables/index.js";
+import { usersTable } from "../db/tables/users.js";
+import type { Select } from "../db/types.js";
 import { mediaImageSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class UsersRepository extends StaticRepository<"lucid_users"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_users");
+	constructor(db: LucidDatabase) {
+		super(db, usersTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		super_admin: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		email: z.email(),
-		username: z.string(),
-		first_name: z.string().nullable(),
-		last_name: z.string().nullable(),
-		password: z.string().nullable(),
-		secret: z.string(),
-		triggered_password_reset: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		invitation_accepted: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		is_locked: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		is_deleted: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		is_deleted_at: z.union([z.string(), z.date()]).nullable(),
-		deleted_by: z.number().nullable(),
-		profile_picture_media_id: z.number().nullable().optional(),
-		profile_picture: z
-			.array(
-				z.object({
-					id: z.number(),
-					key: z.string(),
-					origin: z.enum(["human", "ai_generated", "ai_modified"]),
-					folder_id: z.number().nullable(),
-					e_tag: z.string().nullable(),
-					type: z.string(),
-					mime_type: z.string(),
-					file_extension: z.string(),
-					file_name: z.string().nullable(),
-					file_size: z.number(),
-					width: z.number().nullable(),
-					height: z.number().nullable(),
-					focal_x: z.number().nullable(),
-					focal_y: z.number().nullable(),
-					created_at: z.union([z.string(), z.date()]).nullable(),
-					updated_at: z.union([z.string(), z.date()]).nullable(),
-					blur_hash: z.string().nullable(),
-					average_color: z.string().nullable(),
-					base64: z.string().nullable().optional(),
-					is_dark: z
-						.union([
-							z.literal(this.dbAdapter.config.defaults.boolean.true),
-							z.literal(this.dbAdapter.config.defaults.boolean.false),
-						])
-						.nullable(),
-					is_light: z
-						.union([
-							z.literal(this.dbAdapter.config.defaults.boolean.true),
-							z.literal(this.dbAdapter.config.defaults.boolean.false),
-						])
-						.nullable(),
-					crop: z
-						.array(
-							z.object({
-								id: z.number(),
-								key: z.string(),
-								origin: z.enum(["human", "ai_generated", "ai_modified"]),
-								type: z.string(),
-								mime_type: z.string(),
-								file_extension: z.string(),
-								file_name: z.string().nullable(),
-								file_size: z.number(),
-								width: z.number().nullable(),
-								height: z.number().nullable(),
-								focal_x: z.number().nullable(),
-								focal_y: z.number().nullable(),
-								crop_x: z.number(),
-								crop_y: z.number(),
-								crop_width: z.number(),
-								crop_height: z.number(),
-								crop_rotation: z.number(),
-								crop_skew_x: z.number(),
-								crop_skew_y: z.number(),
-								blur_hash: z.string().nullable(),
-								average_color: z.string().nullable(),
-								base64: z.string().nullable().optional(),
-								is_dark: z
-									.union([
-										z.literal(this.dbAdapter.config.defaults.boolean.true),
-										z.literal(this.dbAdapter.config.defaults.boolean.false),
-									])
-									.nullable(),
-								is_light: z
-									.union([
-										z.literal(this.dbAdapter.config.defaults.boolean.true),
-										z.literal(this.dbAdapter.config.defaults.boolean.false),
-									])
-									.nullable(),
-							}),
-						)
-						.optional(),
-					is_deleted: z.union([
-						z.literal(this.dbAdapter.config.defaults.boolean.true),
-						z.literal(this.dbAdapter.config.defaults.boolean.false),
-					]),
-					is_deleted_at: z.union([z.string(), z.date()]).nullable(),
-					deleted_by: z.number().nullable(),
-					public: z.union([
-						z.literal(this.dbAdapter.config.defaults.boolean.true),
-						z.literal(this.dbAdapter.config.defaults.boolean.false),
-					]),
-					translations: z
-						.array(
-							z.object({
-								title: z.string().nullable(),
-								alt: z.string().nullable(),
-								locale_code: z.string().nullable(),
-							}),
-						)
-						.optional(),
-				}),
-			)
-			.optional(),
-		content_profile_picture: z.array(z.custom<MediaPosterPropsT>()).optional(),
-		auth_providers: z
-			.array(
-				z.object({
-					id: z.number(),
-					provider_key: z.string(),
-					provider_user_id: z.string(),
-					linked_at: z.union([z.string(), z.date()]).nullable(),
-				}),
-			)
-			.optional(),
-		roles: z
-			.array(
-				z.object({
-					id: z.number(),
-					name: z.string().nullable().optional(),
-					translations: z
-						.array(
-							z.object({
-								name: z.string().nullable(),
-								locale_code: z.string().nullable(),
-							}),
-						)
-						.optional(),
-					permissions: z
-						.array(
-							z.object({
-								permission: z.string(),
-							}),
-						)
-						.optional(),
-				}),
-			)
-			.optional(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		super_admin: this.dbAdapter.getDataType("boolean"),
-		email: this.dbAdapter.getDataType("text"),
-		username: this.dbAdapter.getDataType("text"),
-		first_name: this.dbAdapter.getDataType("text"),
-		last_name: this.dbAdapter.getDataType("text"),
-		password: this.dbAdapter.getDataType("text"),
-		secret: this.dbAdapter.getDataType("text"),
-		triggered_password_reset: this.dbAdapter.getDataType("boolean"),
-		invitation_accepted: this.dbAdapter.getDataType("boolean"),
-		is_locked: this.dbAdapter.getDataType("boolean"),
-		is_deleted: this.dbAdapter.getDataType("boolean"),
-		is_deleted_at: this.dbAdapter.getDataType("timestamp"),
-		deleted_by: this.dbAdapter.getDataType("integer"),
-		profile_picture_media_id: this.dbAdapter.getDataType("integer"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				firstName: "lucid_users.first_name",
-				lastName: "lucid_users.last_name",
-				email: "lucid_users.email",
-				username: "lucid_users.username",
-				roleIds: "lucid_user_roles.role_id",
-				id: "lucid_users.id",
-				invitationAccepted: "lucid_users.invitation_accepted",
-				superAdmin: "lucid_users.super_admin",
-				triggerPasswordReset: "lucid_users.triggered_password_reset",
-				isLocked: "lucid_users.is_locked",
-				isDeleted: "lucid_users.is_deleted",
-				deletedBy: "lucid_users.deleted_by",
-				createdAt: "lucid_users.created_at",
-				updatedAt: "lucid_users.updated_at",
-			},
-			sorts: {
-				createdAt: "lucid_users.created_at",
-				updatedAt: "lucid_users.updated_at",
-				firstName: "lucid_users.first_name",
-				lastName: "lucid_users.last_name",
-				email: "lucid_users.email",
-				username: "lucid_users.username",
-				isLocked: "lucid_users.is_locked",
-			},
-		},
-		operators: {
-			firstName: "contains",
-			lastName: "contains",
-			email: "contains",
-			username: "contains",
-		},
-	} as const;
 
 	// ----------------------------------------
 	// queries
@@ -250,8 +32,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			.select(["id", "username", "email", "first_name", "last_name"])
 			.select(() => [
 				mediaImageSelect(
-					this.db,
-					this.dbAdapter,
+					this.database,
 					"lucid_users.profile_picture_media_id",
 					"content_profile_picture",
 				),
@@ -292,7 +73,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			"username",
 			"email",
 			"super_admin",
-			this.dbAdapter
+			this.database.fn
 				.jsonArrayFrom(
 					eb
 						.selectFrom("lucid_user_roles")
@@ -303,7 +84,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						)
 						.select((eb) => [
 							"lucid_roles.id",
-							this.dbAdapter
+							this.database.fn
 								.jsonArrayFrom(
 									eb
 										.selectFrom("lucid_role_translations")
@@ -318,7 +99,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										),
 								)
 								.as("translations"),
-							this.dbAdapter
+							this.database.fn
 								.jsonArrayFrom(
 									eb
 										.selectFrom("lucid_role_permissions")
@@ -359,7 +140,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			.select((eb) => [
 				"id",
 				"super_admin",
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_user_roles")
@@ -415,7 +196,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			"is_deleted",
 			"is_deleted_at",
 			"password",
-			this.dbAdapter
+			this.database.fn
 				.jsonArrayFrom(
 					eb
 						.selectFrom("lucid_user_roles")
@@ -426,7 +207,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						)
 						.select((eb) => [
 							"lucid_roles.id",
-							this.dbAdapter
+							this.database.fn
 								.jsonArrayFrom(
 									eb
 										.selectFrom("lucid_role_translations")
@@ -441,7 +222,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										),
 								)
 								.as("translations"),
-							this.dbAdapter
+							this.database.fn
 								.jsonArrayFrom(
 									eb
 										.selectFrom("lucid_role_permissions")
@@ -453,7 +234,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						.whereRef("user_id", "=", "lucid_users.id"),
 				)
 				.as("roles"),
-			this.dbAdapter
+			this.database.fn
 				.jsonArrayFrom(
 					eb
 						.selectFrom("lucid_user_auth_providers")
@@ -470,7 +251,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						),
 				)
 				.as("auth_providers"),
-			this.dbAdapter
+			this.database.fn
 				.jsonArrayFrom(
 					eb
 						.selectFrom("lucid_media")
@@ -500,7 +281,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 							"lucid_media.is_deleted_at",
 							"lucid_media.deleted_by",
 							"lucid_media.public",
-							this.dbAdapter
+							this.database.fn
 								.jsonArrayFrom(
 									mediaEb
 										.selectFrom("lucid_media as profile_crop")
@@ -543,7 +324,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										),
 								)
 								.as("crop"),
-							this.dbAdapter
+							this.database.fn
 								.jsonArrayFrom(
 									mediaEb
 										.selectFrom("lucid_media_translations")
@@ -629,7 +410,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 				"is_deleted",
 				"is_deleted_at",
 				"invitation_accepted",
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media")
@@ -659,7 +440,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 								"lucid_media.is_deleted_at",
 								"lucid_media.deleted_by",
 								"lucid_media.public",
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										mediaEb
 											.selectFrom("lucid_media as profile_crop")
@@ -702,7 +483,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 											),
 									)
 									.as("crop"),
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										mediaEb
 											.selectFrom("lucid_media_translations")
@@ -832,7 +613,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						"lucid_users.is_deleted",
 						"lucid_users.is_deleted_at",
 						"lucid_users.invitation_accepted",
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_user_roles")
@@ -843,7 +624,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									)
 									.select((eb) => [
 										"lucid_roles.id",
-										this.dbAdapter
+										this.database.fn
 											.jsonArrayFrom(
 												eb
 													.selectFrom("lucid_role_translations")
@@ -862,7 +643,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									.whereRef("user_id", "=", "lucid_users.id"),
 							)
 							.as("roles"),
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_media")
@@ -892,7 +673,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										"lucid_media.is_deleted_at",
 										"lucid_media.deleted_by",
 										"lucid_media.public",
-										this.dbAdapter
+										this.database.fn
 											.jsonArrayFrom(
 												mediaEb
 													.selectFrom("lucid_media as profile_crop")
@@ -935,7 +716,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 													),
 											)
 											.as("crop"),
-										this.dbAdapter
+										this.database.fn
 											.jsonArrayFrom(
 												mediaEb
 													.selectFrom("lucid_media_translations")
@@ -987,7 +768,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 					{
 						queryParams: props.queryParams,
 						database: this.dbAdapter.config,
-						meta: this.queryConfig,
+						meta: this.config.queryConfig,
 					},
 				);
 
@@ -1048,7 +829,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						"username",
 						"first_name as firstName",
 						"last_name as lastName",
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_media")
@@ -1070,7 +851,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										"lucid_media.base64",
 										"lucid_media.is_dark",
 										"lucid_media.is_light",
-										this.dbAdapter
+										this.database.fn
 											.jsonArrayFrom(
 												mediaEb
 													.selectFrom("lucid_media as profile_crop")
@@ -1113,7 +894,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 													),
 											)
 											.as("crop"),
-										this.dbAdapter
+										this.database.fn
 											.jsonArrayFrom(
 												mediaEb
 													.selectFrom("lucid_media_translations")
@@ -1209,7 +990,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						"username",
 						"first_name as firstName",
 						"last_name as lastName",
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_media")
@@ -1231,7 +1012,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										"lucid_media.base64",
 										"lucid_media.is_dark",
 										"lucid_media.is_light",
-										this.dbAdapter
+										this.database.fn
 											.jsonArrayFrom(
 												mediaEb
 													.selectFrom("lucid_media as profile_crop")
@@ -1274,7 +1055,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 													),
 											)
 											.as("crop"),
-										this.dbAdapter
+										this.database.fn
 											.jsonArrayFrom(
 												mediaEb
 													.selectFrom("lucid_media_translations")

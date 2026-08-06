@@ -7,18 +7,18 @@ import type {
 	CollectionSchemaTable,
 } from "../../libs/collection/schema/types.js";
 import type {
+	DocumentVersionType,
+	LucidBrickTableName,
+	LucidDocumentTableName,
+	LucidVersionTableName,
+} from "../../libs/db/tables/index.js";
+import type {
 	FilterOperator,
 	FilterValue,
 	QueryParamFilterCondition,
 	QueryParamFilters,
 } from "../../types/query-params.js";
-import type {
-	DocumentVersionType,
-	FieldDatabaseMode,
-	LucidBrickTableName,
-	LucidDocumentTableName,
-	LucidVersionTableName,
-} from "../../types.js";
+import type { FieldDatabaseMode } from "../../types.js";
 
 const CUSTOMFIELD_FILTER_PREFIX = "_";
 const DOCUMENT_FIELDS_KEY = "fields";

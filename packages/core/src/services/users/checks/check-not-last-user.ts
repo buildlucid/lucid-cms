@@ -4,7 +4,7 @@ import { UsersRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const checkNotLastUser: ServiceFn<[], undefined> = async (context) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 
 	const activeUserCountRes = await Users.count({
 		where: [

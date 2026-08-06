@@ -97,6 +97,7 @@ const migrateRollbackCommand = async (options?: {
 		}
 
 		const migrations = await config.db.createMigrator(database).getMigrations();
+
 		//* rollbacks happen in execution order, which can diverge from name order with external migrations
 		const executedMigrations = migrations
 			.filter((m) => m.executedAt !== undefined)

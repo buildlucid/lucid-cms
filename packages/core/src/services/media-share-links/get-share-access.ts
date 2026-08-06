@@ -18,10 +18,7 @@ const getShareAccess: ServiceFn<
 	],
 	ShareLinkAccess
 > = async (context, data) => {
-	const MediaShareLinks = new MediaShareLinksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaShareLinks = new MediaShareLinksRepository(context.db);
 
 	const linkRes = await MediaShareLinks.selectSingleWithMediaByToken({
 		token: data.token,

@@ -23,12 +23,8 @@ const generateToken = async (
 	});
 	if (clearRes.error) return clearRes;
 
-	const config = c.get("config");
-
-	const UserTokens = new UserTokensRepository(
-		c.get("database").client,
-		config.db,
-	);
+	const context = createServiceContext(c);
+	const UserTokens = new UserTokensRepository(context.db);
 
 	const now = Date.now();
 	const nonce = randomBytes(8).toString("hex");
@@ -40,7 +36,7 @@ const generateToken = async (
 			iat: Math.floor(now / 1000),
 			nonce: nonce,
 		},
-		config.secrets.refreshToken,
+		context.config.secrets.refreshToken,
 		constants.jwt.algorithm,
 	);
 	const hashedToken = hashUserToken(token);
@@ -91,7 +87,6 @@ const generateToken = async (
 		path: "/",
 	});
 
-	const context = createServiceContext(c);
 	const kv = context.kv;
 
 	await kv.set(context, {

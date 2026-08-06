@@ -1,44 +1,12 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { authStatesTable } from "../db/tables/auth-states.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class AuthStatesRepository extends StaticRepository<"lucid_auth_states"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_auth_states");
+	constructor(db: LucidDatabase) {
+		super(db, authStatesTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		state: z.string(),
-		provider_key: z.string(),
-		code_verifier: z.string(),
-		nonce: z.string().nullable(),
-		authenticated_user_id: z.number().nullable(),
-		action_type: z.string(),
-		invitation_token_id: z.number().nullable(),
-		invitation_token: z.string().nullable(),
-		redirect_path: z.string().nullable(),
-		expiry_date: z.union([z.string(), z.date()]),
-		consumed_at: z.union([z.string(), z.date()]).nullable(),
-		created_at: z.union([z.string(), z.date()]),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		state: this.dbAdapter.getDataType("text"),
-		provider_key: this.dbAdapter.getDataType("text"),
-		code_verifier: this.dbAdapter.getDataType("text"),
-		nonce: this.dbAdapter.getDataType("text"),
-		authenticated_user_id: this.dbAdapter.getDataType("integer"),
-		action_type: this.dbAdapter.getDataType("text"),
-		invitation_token_id: this.dbAdapter.getDataType("integer"),
-		invitation_token: this.dbAdapter.getDataType("text"),
-		redirect_path: this.dbAdapter.getDataType("text"),
-		expiry_date: this.dbAdapter.getDataType("timestamp"),
-		consumed_at: this.dbAdapter.getDataType("timestamp"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 
 	/**
 	 * Atomically consumes an unexpired provider authentication state.

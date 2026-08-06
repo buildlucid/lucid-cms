@@ -1,41 +1,9 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { userLoginsTable } from "../db/tables/user-logins.js";
 import StaticRepository from "./parents/static-repository.js";
 
 export default class UserLoginsRepository extends StaticRepository<"lucid_user_logins"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_user_logins");
+	constructor(db: LucidDatabase) {
+		super(db, userLoginsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		user_id: z.number(),
-		token_id: z.number().nullable(),
-		auth_method: z.string(),
-		ip_address: z.string().nullable(),
-		user_agent: z.string().nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		user_id: this.dbAdapter.getDataType("integer"),
-		token_id: this.dbAdapter.getDataType("integer"),
-		auth_method: this.dbAdapter.getDataType("text"),
-		ip_address: this.dbAdapter.getDataType("varchar", 255),
-		user_agent: this.dbAdapter.getDataType("text"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				authMethod: "auth_method",
-				ipAddress: "ip_address",
-				userAgent: "user_agent",
-				createdAt: "created_at",
-			},
-			sorts: {
-				createdAt: "created_at",
-			},
-		},
-	} as const;
 }

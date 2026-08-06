@@ -10,10 +10,7 @@ import getRetentionDays from "./helpers/get-retention-days.js";
 const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 	context,
 ) => {
-	const Documents = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Documents = new DocumentsRepository(context.db);
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;
 

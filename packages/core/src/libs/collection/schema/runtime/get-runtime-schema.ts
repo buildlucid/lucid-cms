@@ -20,10 +20,7 @@ const getRuntimeSchema: ServiceFn<
 	],
 	CollectionSchema
 > = async (context, data) => {
-	const CollectionMigrations = new CollectionMigrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const CollectionMigrations = new CollectionMigrationsRepository(context.db);
 
 	return await resolveRuntimeSchema(context, data.collectionKey, async () => {
 		const collectionRes = await collections.getSingle(context, {

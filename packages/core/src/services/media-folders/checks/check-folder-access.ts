@@ -20,10 +20,7 @@ const checkFolderAccess: ServiceFn<
 		};
 	}
 
-	const MediaFolders = new MediaFoldersRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaFolders = new MediaFoldersRepository(context.db);
 
 	const folderRes = await MediaFolders.selectSingleById({
 		id: data.folderId,

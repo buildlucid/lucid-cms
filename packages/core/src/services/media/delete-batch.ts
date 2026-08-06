@@ -25,11 +25,8 @@ const deleteBatch: ServiceFn<
 	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
 
-	const Media = new MediaRepository(context.db.client, context.config.db);
-	const MediaFolders = new MediaFoldersRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Media = new MediaRepository(context.db);
+	const MediaFolders = new MediaFoldersRepository(context.db);
 
 	if (
 		(data.mediaIds?.length ?? 0) === 0 &&

@@ -14,10 +14,7 @@ const getSingle: ServiceFn<
 	],
 	Integration
 > = async (context, data) => {
-	const Integrations = new IntegrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Integrations = new IntegrationsRepository(context.db);
 
 	const integrationsRes = await Integrations.selectSingleByIdWithScopes({
 		id: data.id,

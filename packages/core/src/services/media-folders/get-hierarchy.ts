@@ -5,10 +5,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import buildHierarchy from "./helpers/build-hierachy.js";
 
 const getHierarchy: ServiceFn<[], MediaFolder[]> = async (context) => {
-	const MediaFolders = new MediaFoldersRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaFolders = new MediaFoldersRepository(context.db);
 
 	const foldersRes = await MediaFolders.selectMultipleForHierarchy({
 		validation: {

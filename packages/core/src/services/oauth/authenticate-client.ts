@@ -12,10 +12,7 @@ const authenticateClient: ServiceFn<
 	],
 	{ clientId: string }
 > = async (context, input) => {
-	const OAuthClients = new OAuthClientsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const OAuthClients = new OAuthClientsRepository(context.db);
 
 	const clientRes = await OAuthClients.selectSingle({
 		select: [

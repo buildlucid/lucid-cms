@@ -13,7 +13,7 @@ const checkRoleAccess: ServiceFn<
 	],
 	NonNullable<Awaited<ReturnType<RolesRepository["selectSingleById"]>>["data"]>
 > = async (context, data) => {
-	const Roles = new RolesRepository(context.db.client, context.config.db);
+	const Roles = new RolesRepository(context.db);
 
 	const roleRes = await Roles.selectSingleById({
 		id: data.id,

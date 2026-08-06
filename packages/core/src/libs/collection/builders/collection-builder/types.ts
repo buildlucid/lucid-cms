@@ -2,10 +2,12 @@ import type {
 	CollectionDocument,
 	CollectionDocumentKey,
 	EnvironmentVariables,
+} from "../../../../types.js";
+import type {
 	LucidBrickTableName,
 	LucidDocumentTableName,
 	LucidVersionTableName,
-} from "../../../../types.js";
+} from "../../../db/tables/index.js";
 import type { CollectionBuilderHooks } from "../../../hooks/types.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../../../i18n/types.js";
 import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";

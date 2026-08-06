@@ -27,10 +27,7 @@ const getSingle: ServiceFn<
 		};
 	}
 
-	const Workflows = new DocumentWorkflowsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Workflows = new DocumentWorkflowsRepository(context.db);
 
 	const workflowRes = await Workflows.selectSingleDetailed({
 		collectionKey: data.collectionKey,

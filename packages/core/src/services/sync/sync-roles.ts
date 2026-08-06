@@ -33,15 +33,9 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;
 
-	const Roles = new RolesRepository(context.db.client, context.config.db);
-	const RolePermissions = new RolePermissionsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const RoleTranslations = new RoleTranslationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Roles = new RolesRepository(context.db);
+	const RolePermissions = new RolePermissionsRepository(context.db);
+	const RoleTranslations = new RoleTranslationsRepository(context.db);
 
 	const rolesRes = await Roles.selectMultiple({
 		select: ["id", "key", "locked"],

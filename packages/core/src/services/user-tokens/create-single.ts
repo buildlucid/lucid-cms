@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { UserTokenType } from "../../libs/db/types.js";
+import type { UserTokenType } from "../../libs/db/tables/index.js";
 import { UserTokensRepository } from "../../libs/repositories/index.js";
 import hashUserToken from "../../utils/helpers/hash-user-token.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -17,10 +17,7 @@ const createSingle: ServiceFn<
 		tokenId: number;
 	}
 > = async (context, data) => {
-	const UserTokens = new UserTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const UserTokens = new UserTokensRepository(context.db);
 
 	const token = crypto.randomBytes(32).toString("hex");
 	const hashedToken = hashUserToken(token);

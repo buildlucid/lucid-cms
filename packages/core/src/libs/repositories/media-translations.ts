@@ -1,37 +1,14 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type {
-	Insert,
-	KyselyDB,
-	LucidMediaTranslations,
-	Select,
-} from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import type { LucidMediaTranslations } from "../db/tables/index.js";
+import { mediaTranslationsTable } from "../db/tables/media-translations.js";
+import type { Insert, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid_media_translations"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_media_translations");
+	constructor(db: LucidDatabase) {
+		super(db, mediaTranslationsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		media_id: z.number(),
-		locale_code: z.string(),
-		title: z.string().nullable(),
-		alt: z.string().nullable(),
-		description: z.string().nullable(),
-		summary: z.string().nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		media_id: this.dbAdapter.getDataType("integer"),
-		locale_code: this.dbAdapter.getDataType("text"),
-		title: this.dbAdapter.getDataType("text"),
-		alt: this.dbAdapter.getDataType("text"),
-		description: this.dbAdapter.getDataType("text"),
-		summary: this.dbAdapter.getDataType("text"),
-	};
-	queryConfig = undefined;
 
 	// ------------------------------------------
 	// queries
@@ -50,13 +27,7 @@ export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid
 	) {
 		const query = this.db
 			.insertInto("lucid_media_translations")
-			.values(
-				props.data.map((d) =>
-					this.formatData(d, {
-						type: "insert",
-					}),
-				),
-			)
+			.values(props.data.map((data) => this.asInsertData(data)))
 			.onConflict((oc) =>
 				oc.columns(["media_id", "locale_code"]).doUpdateSet((eb) => ({
 					title: eb.ref("excluded.title"),

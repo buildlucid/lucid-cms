@@ -33,7 +33,7 @@ const modifyTableQuery: ServiceFn<
 
 		//* for db that support multiple ALTER TABLE operations (postgres)
 		if (supportsMultipleAlter) {
-			let query = context.db.client.schema.alterTable(
+			let query = context.db.kysely.schema.alterTable(
 				data.migration.tableName,
 			) as unknown as AlterTableColumnAlteringBuilder;
 
@@ -87,7 +87,7 @@ const modifyTableQuery: ServiceFn<
 		//* for dbs that dont support multiple ALTER TABLE ops (sqlite)
 		const queries = [];
 		for (const operation of data.migration.columnOperations) {
-			let query = context.db.client.schema.alterTable(
+			let query = context.db.kysely.schema.alterTable(
 				data.migration.tableName,
 			) as unknown as AlterTableColumnAlteringBuilder;
 

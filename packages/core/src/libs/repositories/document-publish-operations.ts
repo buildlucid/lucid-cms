@@ -1,18 +1,16 @@
 import { sql } from "kysely";
-import z from "zod";
 import type { GetMultipleQueryParams } from "../../schemas/publish-operation-management.js";
-import { richTextJSONSchema } from "../../schemas/shared/rich-text.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
+import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder, {
 	type QueryBuilderWhere,
 } from "../db/query-builder/index.js";
+import { documentPublishOperationsTable } from "../db/tables/document-publish-operations.js";
 import type {
-	KyselyDB,
 	LucidDocumentPublishOperationAssignees,
 	LucidDocumentPublishOperationEvents,
 	LucidDocumentPublishOperations,
-	Select,
-} from "../db/types.js";
+} from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
 import type { MediaPosterPropsT } from "../formatters/media.js";
 import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
@@ -54,99 +52,9 @@ export type PublishOperationOverviewQueryResponse = {
 };
 
 export default class DocumentPublishOperationsRepository extends StaticRepository<"lucid_document_publish_operations"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_document_publish_operations");
+	constructor(db: LucidDatabase) {
+		super(db, documentPublishOperationsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		collection_key: z.string(),
-		document_id: z.number(),
-		target: z.string(),
-		operation_type: z.enum(["request", "direct"]),
-		status: z.enum([
-			"pending",
-			"approved",
-			"rejected",
-			"cancelled",
-			"superseded",
-		]),
-		source_version_id: z.number(),
-		source_content_id: z.string(),
-		snapshot_version_id: z.number(),
-		requested_by: z.number().nullable(),
-		request_comment: richTextJSONSchema.nullable(),
-		decided_by: z.number().nullable(),
-		decision_comment: richTextJSONSchema.nullable(),
-		decided_at: z.union([z.string(), z.date()]).nullable(),
-		scheduled_at: z.union([z.string(), z.date()]).nullable(),
-		scheduled_timezone: z.string().nullable(),
-		execution_status: z.enum([
-			"awaiting_approval",
-			"scheduled",
-			"executing",
-			"executed",
-			"failed",
-			"cancelled",
-		]),
-		executed_at: z.union([z.string(), z.date()]).nullable(),
-		failed_at: z.union([z.string(), z.date()]).nullable(),
-		execution_error_message: z.string().nullable(),
-		execution_error_data: z.record(z.string(), z.unknown()).nullable(),
-		scheduled_job_id: z.string().nullable(),
-		created_at: z.union([z.string(), z.date()]),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		collection_key: this.dbAdapter.getDataType("text"),
-		document_id: this.dbAdapter.getDataType("integer"),
-		target: this.dbAdapter.getDataType("text"),
-		operation_type: this.dbAdapter.getDataType("text"),
-		status: this.dbAdapter.getDataType("text"),
-		source_version_id: this.dbAdapter.getDataType("integer"),
-		source_content_id: this.dbAdapter.getDataType("text"),
-		snapshot_version_id: this.dbAdapter.getDataType("integer"),
-		requested_by: this.dbAdapter.getDataType("integer"),
-		request_comment: this.dbAdapter.getDataType("json"),
-		decided_by: this.dbAdapter.getDataType("integer"),
-		decision_comment: this.dbAdapter.getDataType("json"),
-		decided_at: this.dbAdapter.getDataType("timestamp"),
-		scheduled_at: this.dbAdapter.getDataType("timestamp"),
-		scheduled_timezone: this.dbAdapter.getDataType("text"),
-		execution_status: this.dbAdapter.getDataType("text"),
-		executed_at: this.dbAdapter.getDataType("timestamp"),
-		failed_at: this.dbAdapter.getDataType("timestamp"),
-		execution_error_message: this.dbAdapter.getDataType("text"),
-		execution_error_data: this.dbAdapter.getDataType("json"),
-		scheduled_job_id: this.dbAdapter.getDataType("text"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = {
-		tableKeys: {
-			filters: {
-				status: "lucid_document_publish_operations.status",
-				executionStatus: "lucid_document_publish_operations.execution_status",
-				operationType: "lucid_document_publish_operations.operation_type",
-				collectionKey: "lucid_document_publish_operations.collection_key",
-				documentId: "lucid_document_publish_operations.document_id",
-				target: "lucid_document_publish_operations.target",
-				requestedBy: "lucid_document_publish_operations.requested_by",
-				createdAt: "lucid_document_publish_operations.created_at",
-				updatedAt: "lucid_document_publish_operations.updated_at",
-				scheduledAt: "lucid_document_publish_operations.scheduled_at",
-				executedAt: "lucid_document_publish_operations.executed_at",
-				failedAt: "lucid_document_publish_operations.failed_at",
-			},
-			sorts: {
-				createdAt: "lucid_document_publish_operations.created_at",
-				updatedAt: "lucid_document_publish_operations.updated_at",
-				scheduledAt: "lucid_document_publish_operations.scheduled_at",
-				executedAt: "lucid_document_publish_operations.executed_at",
-				failedAt: "lucid_document_publish_operations.failed_at",
-			},
-		},
-	} as const;
 
 	async selectSingleDetailed<V extends boolean = false>(
 		props: QueryProps<
@@ -181,7 +89,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 				"decider.last_name as decided_by_last_name",
 			])
 			.select((eb) => [
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media")
@@ -203,11 +111,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 								"lucid_media.base64",
 								"lucid_media.is_dark",
 								"lucid_media.is_light",
-								activeMediaCropSelect(
-									this.db,
-									this.dbAdapter,
-									"lucid_media.id",
-								),
+								activeMediaCropSelect(this.database, "lucid_media.id"),
 							])
 							.whereRef(
 								"lucid_media.id",
@@ -221,7 +125,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 							),
 					)
 					.as("requested_by_profile_picture"),
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_media")
@@ -243,11 +147,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 								"lucid_media.base64",
 								"lucid_media.is_dark",
 								"lucid_media.is_light",
-								activeMediaCropSelect(
-									this.db,
-									this.dbAdapter,
-									"lucid_media.id",
-								),
+								activeMediaCropSelect(this.database, "lucid_media.id"),
 							])
 							.whereRef(
 								"lucid_media.id",
@@ -261,7 +161,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 							),
 					)
 					.as("decided_by_profile_picture"),
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_document_publish_operation_assignees")
@@ -280,7 +180,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 								"lucid_users.username",
 								"lucid_users.first_name",
 								"lucid_users.last_name",
-								this.dbAdapter
+								this.database.fn
 									.jsonArrayFrom(
 										userEb
 											.selectFrom("lucid_media")
@@ -302,11 +202,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 												"lucid_media.base64",
 												"lucid_media.is_dark",
 												"lucid_media.is_light",
-												activeMediaCropSelect(
-													this.db,
-													this.dbAdapter,
-													"lucid_media.id",
-												),
+												activeMediaCropSelect(this.database, "lucid_media.id"),
 											])
 											.whereRef(
 												"lucid_media.id",
@@ -328,7 +224,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 							),
 					)
 					.as("assignees"),
-				this.dbAdapter
+				this.database.fn
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_document_publish_operation_events")
@@ -402,7 +298,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 						queryParams: props.queryParams,
 						database: this.dbAdapter.config,
 						meta: {
-							...this.queryConfig,
+							...this.config.queryConfig,
 							customFilters: {
 								requestedByMe: ({ eb, filter }) => {
 									return eb(
@@ -492,7 +388,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 						"decider.last_name as decided_by_last_name",
 					])
 					.select((eb) => [
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_media")
@@ -514,11 +410,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 										"lucid_media.base64",
 										"lucid_media.is_dark",
 										"lucid_media.is_light",
-										activeMediaCropSelect(
-											this.db,
-											this.dbAdapter,
-											"lucid_media.id",
-										),
+										activeMediaCropSelect(this.database, "lucid_media.id"),
 									])
 									.whereRef(
 										"lucid_media.id",
@@ -532,7 +424,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 									),
 							)
 							.as("requested_by_profile_picture"),
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_media")
@@ -554,11 +446,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 										"lucid_media.base64",
 										"lucid_media.is_dark",
 										"lucid_media.is_light",
-										activeMediaCropSelect(
-											this.db,
-											this.dbAdapter,
-											"lucid_media.id",
-										),
+										activeMediaCropSelect(this.database, "lucid_media.id"),
 									])
 									.whereRef(
 										"lucid_media.id",
@@ -572,7 +460,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 									),
 							)
 							.as("decided_by_profile_picture"),
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_document_publish_operation_assignees")
@@ -591,7 +479,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 										"lucid_users.username",
 										"lucid_users.first_name",
 										"lucid_users.last_name",
-										this.dbAdapter
+										this.database.fn
 											.jsonArrayFrom(
 												userEb
 													.selectFrom("lucid_media")
@@ -614,8 +502,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 														"lucid_media.is_dark",
 														"lucid_media.is_light",
 														activeMediaCropSelect(
-															this.db,
-															this.dbAdapter,
+															this.database,
 															"lucid_media.id",
 														),
 													])
@@ -639,7 +526,7 @@ export default class DocumentPublishOperationsRepository extends StaticRepositor
 									),
 							)
 							.as("assignees"),
-						this.dbAdapter
+						this.database.fn
 							.jsonArrayFrom(
 								eb
 									.selectFrom("lucid_document_publish_operation_events")

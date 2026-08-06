@@ -12,7 +12,7 @@ import type CollectionBuilder from "../collection/builders/collection-builder/in
 import type {
 	DocumentPublishOperationEventType,
 	DocumentVersionType,
-} from "../db/types.js";
+} from "../db/tables/index.js";
 
 // --------------------------------------------------
 // types

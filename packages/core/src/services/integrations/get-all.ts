@@ -19,10 +19,7 @@ const getAll: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const Integrations = new IntegrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Integrations = new IntegrationsRepository(context.db);
 
 	const integrationsRes = await Integrations.selectMultipleFilteredWithScopes({
 		queryParams: data.query,

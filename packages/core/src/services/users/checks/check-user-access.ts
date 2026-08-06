@@ -26,7 +26,7 @@ const checkUserAccess: ServiceFn<
 		};
 	}
 
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 	const usersRes = await Users.selectMultipleByIds({
 		ids,
 		where: data.where,

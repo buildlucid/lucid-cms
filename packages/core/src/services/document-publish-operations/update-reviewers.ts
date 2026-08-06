@@ -20,14 +20,8 @@ const updateReviewers: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Assignees = new DocumentPublishOperationAssigneesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
+	const Assignees = new DocumentPublishOperationAssigneesRepository(context.db);
 	const operationRes = await Operations.selectSingleDetailed({
 		where: [
 			{

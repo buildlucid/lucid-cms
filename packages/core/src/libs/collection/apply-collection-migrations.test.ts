@@ -1,6 +1,7 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import type { ServiceContext } from "../../types.js";
+import createLucidDatabase from "../db/create-lucid-database.js";
 import type { DatabaseConnection } from "../db/types.js";
 import applyCollectionMigrations from "./apply-collection-migrations.js";
 import type { CollectionMigrationPlan } from "./migration/types.js";
@@ -21,8 +22,8 @@ describe("applyCollectionMigrations", () => {
 
 		// @ts-expect-error
 		context = {
-			db: { client: connection.client },
-			config: { db },
+			db: createLucidDatabase({ client: connection.client, adapter: db }),
+			config: { db, tables: [] },
 		} as ServiceContext;
 	});
 
@@ -77,15 +78,18 @@ describe("applyCollectionMigrations", () => {
 
 		const result = await applyCollectionMigrations(context, plan);
 		const inferred = await db.inferSchema(connection.client);
-		const snapshots = await connection.client
-			.selectFrom("lucid_collection_migrations")
-			.selectAll()
-			.execute();
+		const snapshotsResult = await context.db
+			.query("test.collection-migrations.find", (database) =>
+				database.selectFrom("lucid_collection_migrations").selectAll(),
+			)
+			.many();
 
 		expect(result.error).toBeUndefined();
+		expect(snapshotsResult.error).toBeUndefined();
 		expect(inferred.map((table) => table.name)).toContain(
 			"lucid_document__pages__planned",
 		);
+		const snapshots = snapshotsResult.data ?? [];
 		expect(snapshots).toHaveLength(1);
 		expect(snapshots[0]?.collection_key).toBe("pages");
 		expect(snapshots[0]?.migration_plans).toEqual(
@@ -122,12 +126,15 @@ describe("applyCollectionMigrations", () => {
 		};
 
 		const result = await applyCollectionMigrations(context, plan);
-		const snapshots = await connection.client
-			.selectFrom("lucid_collection_migrations")
-			.selectAll()
-			.execute();
+		const snapshotsResult = await context.db
+			.query("test.collection-migrations.no-op.find", (database) =>
+				database.selectFrom("lucid_collection_migrations").selectAll(),
+			)
+			.many();
 
 		expect(result.error).toBeUndefined();
+		expect(snapshotsResult.error).toBeUndefined();
+		const snapshots = snapshotsResult.data ?? [];
 		expect(snapshots).toHaveLength(1);
 		expect(snapshots[0]?.migration_plans).toEqual({
 			collectionKey: "pages",

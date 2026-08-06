@@ -7,7 +7,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 
 /** Returns the public account profile for a resolved user principal. */
 const get: ServiceFn<[{ userId: number }], Account> = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 
 	const userRes = await Users.selectSingleContentAccount({
 		userId: data.userId,

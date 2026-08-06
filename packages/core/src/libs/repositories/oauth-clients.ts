@@ -1,8 +1,6 @@
 import { sql } from "kysely";
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
-import type { MediaPosterPropsT } from "../formatters/media.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { oauthClientsTable } from "../db/tables/oauth-clients.js";
 import { mediaImageSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps, ValidationConfig } from "./types.js";
@@ -21,53 +19,13 @@ const detailedColumns = [
 ] as const;
 
 export default class OAuthClientsRepository extends StaticRepository<"lucid_oauth_clients"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_oauth_clients");
+	constructor(db: LucidDatabase) {
+		super(db, oauthClientsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		client_id: z.string(),
-		name: z.string(),
-		client_uri: z.string().nullable(),
-		token_endpoint_auth_method: z.enum(["none", "client_secret_basic"]),
-		client_secret_hash: z.string().nullable(),
-		client_secret_salt: z.string().nullable(),
-		logo_media_id: z.number().nullable(),
-		enabled: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		created_by: z.number().nullable(),
-		created_at: z.union([z.string(), z.date()]),
-		updated_at: z.union([z.string(), z.date()]).nullable(),
-		redirect_uris: z
-			.array(
-				z.object({
-					redirect_uri: z.string(),
-				}),
-			)
-			.optional(),
-		logo: z.array(z.custom<MediaPosterPropsT>()).optional(),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		client_id: this.dbAdapter.getDataType("text"),
-		name: this.dbAdapter.getDataType("text"),
-		client_uri: this.dbAdapter.getDataType("text"),
-		token_endpoint_auth_method: this.dbAdapter.getDataType("text"),
-		client_secret_hash: this.dbAdapter.getDataType("text"),
-		client_secret_salt: this.dbAdapter.getDataType("text"),
-		logo_media_id: this.dbAdapter.getDataType("integer"),
-		enabled: this.dbAdapter.getDataType("boolean"),
-		created_by: this.dbAdapter.getDataType("integer"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		updated_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 
 	/** Builds the ordered redirect URI selection shared by OAuth client reads. */
 	private selectRedirectUris() {
-		return this.dbAdapter
+		return this.database.fn
 			.jsonArrayFrom(
 				this.db
 					.selectFrom("lucid_oauth_client_redirect_uris")
@@ -90,8 +48,7 @@ export default class OAuthClientsRepository extends StaticRepository<"lucid_oaut
 			.select(() => [
 				this.selectRedirectUris(),
 				mediaImageSelect(
-					this.db,
-					this.dbAdapter,
+					this.database,
 					"lucid_oauth_clients.logo_media_id",
 					"logo",
 				),

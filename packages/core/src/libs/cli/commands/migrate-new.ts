@@ -8,7 +8,7 @@ const migrationTemplate = `import { defineMigration } from "@lucidcms/core/plugi
 
 export default defineMigration({
 	async up(context) {
-		// await context.db.client.schema
+		// await context.db.kysely.schema
 		// 	.createTable("example")
 		// 	.addColumn("id", context.config.db.getDataType("primary"), (col) =>
 		// 		context.config.db.primaryKeyColumnBuilder(col),
@@ -16,7 +16,7 @@ export default defineMigration({
 		// 	.execute();
 	},
 	async down(context) {
-		// await context.db.client.schema.dropTable("example").execute();
+		// await context.db.kysely.schema.dropTable("example").execute();
 	},
 });
 `;

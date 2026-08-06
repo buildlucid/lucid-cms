@@ -18,7 +18,7 @@ const restoreMultiple: ServiceFn<
 		};
 	}
 
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 
 	const accessRes = await checkUserAccess(context, {
 		ids: data.ids,

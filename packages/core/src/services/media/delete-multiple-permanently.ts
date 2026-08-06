@@ -24,7 +24,7 @@ const deleteMultiplePermanently: ServiceFn<
 		};
 	}
 
-	const Media = new MediaRepository(context.db.client, context.config.db);
+	const Media = new MediaRepository(context.db);
 
 	const accessRes = await checkMediaAccess(context, {
 		ids: data.ids,

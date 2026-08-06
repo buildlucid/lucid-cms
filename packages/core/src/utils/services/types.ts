@@ -1,5 +1,6 @@
 import type { ZodType } from "zod";
-import type { DatabaseConnection, KyselyDB } from "../../libs/db/types.js";
+import type LucidDatabase from "../../libs/db/client/lucid-database.js";
+import type { DatabaseConnection } from "../../libs/db/types.js";
 import type { EmailAdapterInstance } from "../../libs/email/types.js";
 import type { TranslationStore, Translator } from "../../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../../libs/kv/types.js";
@@ -18,6 +19,8 @@ export type CreateServiceContextOptions = {
 	config: Config;
 	/** Live database connection owned by the current runtime or invocation. */
 	database: DatabaseConnection;
+	/** Prebuilt managed database boundary for the current runtime or invocation. */
+	db?: LucidDatabase;
 	/** Translation store resolved alongside the config. */
 	translationStore: TranslationStore;
 	/** Optional runtime env bindings associated with the context. */
@@ -43,10 +46,7 @@ export type CreateServiceContextOptions = {
 };
 
 export type ServiceContext = {
-	db: {
-		// query: x, //* can be expanded to support some ORM like pattern later
-		client: KyselyDB;
-	};
+	db: LucidDatabase;
 	config: Config;
 	env: EnvironmentVariables | null;
 	runtimeContext?: AdapterRuntimeContext;

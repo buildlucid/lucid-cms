@@ -10,8 +10,6 @@ import type {
 	FieldValue,
 	InternalDocumentField,
 	InternalDocumentFieldGroup,
-	LucidBricksTable,
-	LucidBrickTableName,
 	Select,
 } from "../../types.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
@@ -20,6 +18,10 @@ import fieldConfigs from "../collection/custom-fields/field-configs.js";
 import { isStorageMode } from "../collection/custom-fields/storage/index.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
+import type {
+	LucidBricksTable,
+	LucidBrickTableName,
+} from "../db/tables/index.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import DocumentBricksFormatter from "./document-bricks.js";

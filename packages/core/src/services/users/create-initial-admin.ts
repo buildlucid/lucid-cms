@@ -22,8 +22,8 @@ const createInitialAdmin: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
-	const Options = new OptionsRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
+	const Options = new OptionsRepository(context.db);
 	const email = normalizeEmailInput(data.email);
 
 	const userCountRes = await Users.count({ where: [] });

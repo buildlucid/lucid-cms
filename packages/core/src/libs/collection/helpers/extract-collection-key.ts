@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants.js";
-import type { LucidDocumentTableName } from "../../../types.js";
+import type { LucidDocumentTableName } from "../../db/tables/index.js";
 import { collectionTableParts } from "./table-parts.js";
 
 /**

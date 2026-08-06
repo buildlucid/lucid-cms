@@ -87,11 +87,16 @@ const webhook: ServiceFn<
 		};
 	}
 
-	const transaction = await context.db.client
-		.selectFrom("lucid_email_transactions")
-		.select(["id", "email_id", "updated_at"])
-		.where("external_message_id", "=", body.data.data.email_id)
-		.executeTakeFirst();
+	const transactionResult = await context.db
+		.query("resend.webhook.transaction.find", (db) =>
+			db
+				.selectFrom("lucid_email_transactions")
+				.select(["id", "email_id", "updated_at"])
+				.where("external_message_id", "=", body.data.data.email_id),
+		)
+		.first();
+	if (transactionResult.error) return transactionResult;
+	const transaction = transactionResult.data;
 	if (!transaction) {
 		return {
 			error: {
@@ -147,24 +152,34 @@ const webhook: ServiceFn<
 			break;
 	}
 
-	await Promise.all([
-		context.db.client
-			.updateTable("lucid_email_transactions")
-			.set({
-				delivery_status: newDeliveryStatus,
-				updated_at: webhookTimestamp.toISOString(),
-			})
-			.where("id", "=", transaction.id)
-			.execute(),
-		context.db.client
-			.updateTable("lucid_emails")
-			.set({
-				current_status: newDeliveryStatus,
-				updated_at: new Date().toISOString(),
-			})
-			.where("id", "=", transaction.email_id)
-			.execute(),
+	const [transactionUpdate, emailUpdate] = await Promise.all([
+		context.db
+			.query("resend.webhook.transaction.update", (db) =>
+				db
+					.updateTable("lucid_email_transactions")
+					.set({
+						delivery_status: newDeliveryStatus,
+						updated_at: webhookTimestamp.toISOString(),
+					})
+					.where("id", "=", transaction.id),
+			)
+			.many(),
+		context.db
+			.query("resend.webhook.email.update", (db) =>
+				db
+					.updateTable("lucid_emails")
+					.set({
+						current_status: newDeliveryStatus,
+						updated_at: new Date().toISOString(),
+					})
+					.where("id", "=", transaction.email_id),
+			)
+			.many(),
 	]);
+	if (transactionUpdate.error) {
+		return { error: transactionUpdate.error, data: undefined };
+	}
+	if (emailUpdate.error) return { error: emailUpdate.error, data: undefined };
 
 	return {
 		error: undefined,

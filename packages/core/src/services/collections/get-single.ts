@@ -37,10 +37,7 @@ const getSingle: ServiceFn<
 		.adminBundle();
 
 	if (collectionRes.data.getData.mode === "single") {
-		const Documents = new DocumentsRepository(
-			context.db.client,
-			context.config.db,
-		);
+		const Documents = new DocumentsRepository(context.db);
 
 		const documentRes = await Documents.selectSingle(
 			{

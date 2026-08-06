@@ -14,7 +14,7 @@ import type { ExternalMigration } from "./types.js";
  * @example
  * export default defineMigration({
  * 	async up(context) {
- * 		await context.db.client.schema
+ * 		await context.db.kysely.schema
  * 			.createTable("my_table")
  * 			.addColumn("id", context.config.db.getDataType("primary"), (col) =>
  * 				context.config.db.primaryKeyColumnBuilder(col),
@@ -22,7 +22,7 @@ import type { ExternalMigration } from "./types.js";
  * 			.execute();
  * 	},
  * 	async down(context) {
- * 		await context.db.client.schema.dropTable("my_table").execute();
+ * 		await context.db.kysely.schema.dropTable("my_table").execute();
  * 	},
  * });
  */

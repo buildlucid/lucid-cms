@@ -23,11 +23,8 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Roles = new RolesRepository(context.db.client, context.config.db);
-	const RoleTranslations = new RoleTranslationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Roles = new RolesRepository(context.db);
+	const RoleTranslations = new RoleTranslationsRepository(context.db);
 	const defaultRoleLocale = context.config.i18n.defaultLocale;
 
 	const defaultName = getTranslationValue(data.name, defaultRoleLocale);
@@ -120,10 +117,7 @@ const createSingle: ServiceFn<
 	}
 
 	if (validatePermsRes.data.length > 0) {
-		const RolePermissions = new RolePermissionsRepository(
-			context.db.client,
-			context.config.db,
-		);
+		const RolePermissions = new RolePermissionsRepository(context.db);
 		const rolePermsRes = await RolePermissions.createMultiple({
 			data: validatePermsRes.data.map((p) => ({
 				role_id: newRolesRes.data.id,

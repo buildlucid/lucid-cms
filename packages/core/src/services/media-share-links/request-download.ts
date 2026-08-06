@@ -15,7 +15,7 @@ const requestDownload: ServiceFn<
 > = async (context, data) => {
 	const mediaStrategyRes = await checkHasMediaStrategy(context);
 	if (mediaStrategyRes.error) return mediaStrategyRes;
-	const Media = new MediaRepository(context.db.client, context.config.db);
+	const Media = new MediaRepository(context.db);
 
 	const mediaRes = await Media.selectSingle({
 		select: ["file_name", "file_extension"],

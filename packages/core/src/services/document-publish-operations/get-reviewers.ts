@@ -90,7 +90,7 @@ const getReviewers: ServiceFn<
 		action: "review",
 	});
 
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 	const reviewersRes = await Users.selectMultiplePublishReviewers({
 		permission,
 	});

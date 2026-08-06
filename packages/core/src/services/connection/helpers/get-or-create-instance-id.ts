@@ -7,10 +7,7 @@ const instanceIdSchema =
 
 /** Returns the stable DCR installation identifier. */
 const getOrCreateConnectionInstanceId = async (context: ServiceContext) => {
-	const option = await new OptionsRepository(
-		context.db.client,
-		context.config.db,
-	).ensureTextValue({
+	const option = await new OptionsRepository(context.db).ensureTextValue({
 		name: "instance_id",
 		value: crypto.randomUUID(),
 	});

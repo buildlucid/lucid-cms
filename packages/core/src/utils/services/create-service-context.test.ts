@@ -1,11 +1,12 @@
 import { expect, test } from "vitest";
-import type { DatabaseConnection } from "../../libs/db/types.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import getTestConfig from "../test-helpers/get-test-config.js";
 import createServiceContext from "./create-service-context.js";
 
 test("uses the configured interface locale outside the HTTP request pipeline", async () => {
-	const config = await getTestConfig().getConfig();
+	const testConfig = getTestConfig();
+	const config = await testConfig.getConfig();
+	const database = await testConfig.getDatabase();
 	const localizedConfig = {
 		...config,
 		i18n: {
@@ -27,13 +28,11 @@ test("uses the configured interface locale outside the HTTP request pipeline", a
 
 	const context = createServiceContext({
 		config: localizedConfig,
-		database: {
-			client: {} as DatabaseConnection["client"],
-			destroy: async () => undefined,
-		},
+		database,
 		translationStore,
 	});
 
 	expect(context.request.locale).toBe("fr");
 	expect(context.translate("server:test.message")).toBe("Message français");
+	await testConfig.destroy();
 });

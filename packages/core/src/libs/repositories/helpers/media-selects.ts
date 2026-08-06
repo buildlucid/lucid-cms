@@ -1,16 +1,14 @@
 import { sql } from "kysely";
-import type DatabaseAdapter from "../../db/adapter-base.js";
-import type { KyselyDB } from "../../db/types.js";
+import type LucidDatabase from "../../db/client/lucid-database.js";
 
 /** Builds the correlated selection for a source's active crop derivative. */
 export const activeMediaCropSelect = (
-	db: KyselyDB,
-	adapter: DatabaseAdapter,
+	database: LucidDatabase,
 	parentIdReference: string,
-) =>
-	adapter
+) => {
+	return database.fn
 		.jsonArrayFrom(
-			db
+			database.kysely
 				.selectFrom("lucid_media as active_media_crop")
 				.select([
 					"active_media_crop.id",
@@ -47,21 +45,21 @@ export const activeMediaCropSelect = (
 				.where(
 					"active_media_crop.is_deleted",
 					"=",
-					adapter.getDefault("boolean", "false"),
+					database.adapter.getDefault("boolean", "false"),
 				),
 		)
 		.as("crop");
+};
 
 /** Builds a compact image selection with its translations and active crop. */
 export const mediaImageSelect = <Alias extends string>(
-	db: KyselyDB,
-	adapter: DatabaseAdapter,
+	database: LucidDatabase,
 	mediaIdReference: string,
 	alias: Alias,
-) =>
-	adapter
+) => {
+	return database.fn
 		.jsonArrayFrom(
-			db
+			database.kysely
 				.selectFrom("lucid_media as related_media_image")
 				.select((eb) => [
 					"related_media_image.id",
@@ -81,8 +79,8 @@ export const mediaImageSelect = <Alias extends string>(
 					"related_media_image.base64",
 					"related_media_image.is_dark",
 					"related_media_image.is_light",
-					activeMediaCropSelect(db, adapter, "related_media_image.id"),
-					adapter
+					activeMediaCropSelect(database, "related_media_image.id"),
+					database.fn
 						.jsonArrayFrom(
 							eb
 								.selectFrom("lucid_media_translations")
@@ -106,7 +104,8 @@ export const mediaImageSelect = <Alias extends string>(
 				.where(
 					"related_media_image.is_deleted",
 					"=",
-					adapter.getDefault("boolean", "false"),
+					database.adapter.getDefault("boolean", "false"),
 				),
 		)
 		.as(alias);
+};

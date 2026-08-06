@@ -1,24 +1,12 @@
 import { sql } from "kysely";
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { processedImagesTable } from "../db/tables/processed-images.js";
 import StaticRepository from "./parents/static-repository.js";
 
 export default class ProcessedImagesRepository extends StaticRepository<"lucid_processed_images"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_processed_images");
+	constructor(db: LucidDatabase) {
+		super(db, processedImagesTable);
 	}
-	tableSchema = z.object({
-		key: z.string(),
-		media_key: z.string(),
-		file_size: z.number(),
-	});
-	columnFormats = {
-		key: this.dbAdapter.getDataType("text"),
-		media_key: this.dbAdapter.getDataType("text"),
-		file_size: this.dbAdapter.getDataType("integer"),
-	};
-	queryConfig = undefined;
 
 	// ----------------------------------------
 	// queries

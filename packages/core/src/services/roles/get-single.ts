@@ -12,7 +12,7 @@ const getSingle: ServiceFn<
 	],
 	Role
 > = async (context, data) => {
-	const Roles = new RolesRepository(context.db.client, context.config.db);
+	const Roles = new RolesRepository(context.db);
 
 	const roleRes = await Roles.selectSingleById({
 		id: data.id,

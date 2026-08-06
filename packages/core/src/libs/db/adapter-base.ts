@@ -119,6 +119,22 @@ export default abstract class DatabaseAdapter {
 		return value as T;
 	}
 	/**
+	 * Handles formatting values returned by the database.
+	 *
+	 * JSON values are decoded only when the caller identifies the source column
+	 * as JSON. Decoding is deliberately limited to one serialization layer so
+	 * JSON-looking strings nested inside a stored value remain strings.
+	 */
+	formatResultValue<T>(type: ColumnDataType, value: unknown): T {
+		if (value === null || value === undefined) return value as T;
+
+		if ((type === "jsonb" || type === "json") && typeof value === "string") {
+			return JSON.parse(value) as T;
+		}
+
+		return value as T;
+	}
+	/**
 	 * A helper for returning supported column data types
 	 */
 	getDataType(
@@ -347,7 +363,7 @@ export default abstract class DatabaseAdapter {
 					}
 					return migration.up({
 						...context,
-						db: { client: db as KyselyDB },
+						db: context.db.withKysely(db as KyselyDB),
 					});
 				},
 				down: down
@@ -359,7 +375,7 @@ export default abstract class DatabaseAdapter {
 							}
 							return down({
 								...context,
-								db: { client: db as KyselyDB },
+								db: context.db.withKysely(db as KyselyDB),
 							});
 						}
 					: undefined,

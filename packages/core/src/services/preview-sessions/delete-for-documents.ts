@@ -14,10 +14,7 @@ const deleteForDocuments: ServiceFn<
 		return { error: undefined, data: undefined };
 	}
 
-	const PreviewSessions = new PreviewSessionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const PreviewSessions = new PreviewSessionsRepository(context.db);
 	const deleteRes = await PreviewSessions.deleteMultiple({
 		where: [
 			{

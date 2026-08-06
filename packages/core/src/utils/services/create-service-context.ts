@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import { passthroughEmailAdapterInstance } from "../../libs/email/adapters/passthrough.js";
 import { createTranslator } from "../../libs/i18n/index.js";
 import { passthroughKVAdapter } from "../../libs/kv/index.js";
@@ -15,9 +16,14 @@ const createServiceContext = (
 	const locale = options.config.i18n.defaultLocale;
 
 	return {
-		db: {
-			client: options.database.client,
-		},
+		db:
+			options.db ??
+			createLucidDatabase({
+				client: options.database.client,
+				adapter: options.config.db,
+				collections: options.config.collections,
+				tables: options.config.tables,
+			}),
 		config: options.config,
 		env: options.env ?? null,
 		runtimeContext: options.runtimeContext,

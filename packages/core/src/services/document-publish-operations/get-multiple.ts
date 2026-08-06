@@ -46,10 +46,7 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
 
 	const operationsRes = await Operations.selectMultipleDetailed({
 		where: [
@@ -65,14 +62,8 @@ const getMultiple: ServiceFn<
 	if (operationsRes.error) return operationsRes;
 
 	const rows = operationsRes.data?.[0] ?? [];
-	const Versions = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Bricks = new DocumentBricksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Versions = new DocumentVersionsRepository(context.db);
+	const Bricks = new DocumentBricksRepository(context.db);
 	const tablesByCollection = new Map<string, CollectionTableNames>();
 	const formatData = [];
 

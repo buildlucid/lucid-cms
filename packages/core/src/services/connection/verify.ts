@@ -1,4 +1,5 @@
-import type { LucidRemoteConnections, Select } from "../../libs/db/types.js";
+import type { LucidRemoteConnections } from "../../libs/db/tables/index.js";
+import type { Select } from "../../libs/db/types.js";
 import { lucidRemoteConnectionsFormatter } from "../../libs/formatters/index.js";
 import { fetchRemoteConnection } from "../../libs/lucid-remote/services/connection/index.js";
 import type { ConnectionStatus } from "../../types/response.js";

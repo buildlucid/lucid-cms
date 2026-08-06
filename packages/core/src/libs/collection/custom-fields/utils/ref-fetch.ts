@@ -1,9 +1,8 @@
+import type { FieldTypes, ServiceFn } from "../../../../types.js";
 import type {
 	DocumentVersionType,
-	FieldTypes,
 	LucidBrickTableName,
-	ServiceFn,
-} from "../../../../types.js";
+} from "../../../db/tables/index.js";
 import type { MediaPropsT } from "../../../formatters/media.js";
 import type { UserPropT } from "../../../formatters/users.js";
 import type { BrickQueryResponse } from "../../../repositories/document-bricks.js";

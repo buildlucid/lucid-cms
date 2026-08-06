@@ -1,10 +1,13 @@
-import type { ColumnDataType, InsertObject, UpdateObject } from "kysely";
+import type { InsertObject, UpdateObject } from "kysely";
 import z, { type ZodObject, type ZodType } from "zod";
 import constants from "../../../constants/constants.js";
-import type { FilterOperator } from "../../../types/query-params.js";
 import type { LucidErrorData } from "../../../types.js";
-import { tidyZodError } from "../../../utils/errors/index.js";
-import type DatabaseAdapter from "../../db/adapter-base.js";
+import { LucidError, tidyZodError } from "../../../utils/errors/index.js";
+import type LucidDatabase from "../../db/client/lucid-database.js";
+import type {
+	ResolvedTableDefinition,
+	TableDefinition,
+} from "../../db/client/table/definition.js";
 import type { Insert, KyselyDB, LucidDB, Update } from "../../db/types.js";
 import { copy } from "../../i18n/index.js";
 import logger from "../../logger/index.js";
@@ -18,82 +21,57 @@ abstract class BaseRepository<
 	Table extends keyof LucidDB,
 	T extends LucidDB[Table] = LucidDB[Table],
 > {
-	constructor(
-		protected readonly db: KyselyDB,
-		protected readonly dbAdapter: DatabaseAdapter,
-		public tableName: keyof LucidDB,
-	) {}
-	/**
-	 * A Zod schema for the table.
-	 */
+	protected readonly database: LucidDatabase;
+	protected readonly db: KyselyDB;
+	protected readonly dbAdapter;
+	protected readonly config: ResolvedTableDefinition<Table>;
+	public readonly tableName: keyof LucidDB;
 
-	// biome-ignore lint/suspicious/noExplicitAny: explanation
-	protected abstract tableSchema: ZodObject<any>;
-	/**
-	 * The column data types for the table. Repositories need to keep these in sync with the migrations and the database.
-	 */
-	protected abstract columnFormats: Partial<Record<keyof T, ColumnDataType>>;
-	/**
-	 * The query configuration for the table. The main query builder fn uses this to map filter and sort query params to table columns, along with deciding which operators to use.
-	 */
-	protected abstract queryConfig?: {
-		tableKeys?: {
-			filters?: Record<string, string>;
-			sorts?: Record<string, string>;
-		};
-		operators?: Record<string, FilterOperator>;
-	};
-
-	/**
-	 * Formats values that need special handling (like JSON or booleans)
-	 * Leaves other values and column names unchanged
-	 */
-	protected formatData<Type extends "insert" | "update">(
-		data: Partial<Insert<T>> | Partial<Update<T>>,
-		config: {
-			type: Type;
-			dynamicColumns?: Record<string, ColumnDataType>;
-		},
-	): Type extends "insert"
-		? InsertObject<LucidDB, Table>
-		: UpdateObject<LucidDB, Table> {
-		const formatted: Record<string, unknown> = {};
-		const columnFormats =
-			config.dynamicColumns !== undefined
-				? {
-						...this.columnFormats,
-						...config.dynamicColumns,
-					}
-				: this.columnFormats;
-		for (const [key, value] of Object.entries(data)) {
-			const columnType = columnFormats[key as keyof T];
-			formatted[key] = columnType
-				? this.dbAdapter.formatInsertValue(columnType, value)
-				: value;
+	constructor(database: LucidDatabase, table: TableDefinition<Table>) {
+		this.database = database;
+		this.db = database.kysely;
+		this.dbAdapter = database.adapter;
+		let registered = database.tables.resolveDefinition(table);
+		if (!registered) {
+			database.registerTable(table);
+			registered = database.tables.resolveDefinition(table);
 		}
-
-		// biome-ignore lint/suspicious/noExplicitAny: explanation
-		return formatted as any;
+		if (!registered) {
+			throw new LucidError({
+				message: `Table metadata not found: ${String(table.name)}`,
+			});
+		}
+		this.config = registered;
+		this.tableName = table.name;
 	}
-	/**
-	 * Creates a validation schema based on selected columns
-	 *
-	 * - when selectAll is true, returns the full schema
-	 * - when the select array is passed, picks only those columns from the schema
-	 * - otherwise, makes all fields optional
-	 */
+
+	/** Narrows generic repository input; the database plugin owns all encoding. */
+	protected asInsertData(
+		data: Partial<Insert<T>>,
+	): InsertObject<LucidDB, Table> {
+		return data as InsertObject<LucidDB, Table>;
+	}
+
+	/** Narrows generic repository input; the database plugin owns all encoding. */
+	protected asUpdateData(
+		data: Partial<Update<T>>,
+	): UpdateObject<LucidDB, Table> {
+		return data as UpdateObject<LucidDB, Table>;
+	}
+
+	/** Builds the validation schema for the repository query's selected mode. */
 	protected createValidationSchema<V extends boolean = false>(
 		config: ValidationConfigExtend<V>,
 	): ZodType {
-		const baseSchema = config.schema || this.tableSchema;
-
+		const baseSchema = config.schema || this.config.schema;
 		let selectSchema: ZodType;
+
 		if (config.selectAll) {
 			selectSchema = baseSchema;
 		} else if (Array.isArray(config.select) && config.select.length > 0) {
 			selectSchema = baseSchema.pick(
 				config.select.reduce<Record<string, true>>((acc, key) => {
-					acc[key as string] = true;
+					acc[key] = true;
 					return acc;
 				}, {}),
 			);
@@ -103,19 +81,16 @@ abstract class BaseRepository<
 
 		return this.wrapSchemaForMode(selectSchema, config.mode);
 	}
-	/**
-	 * Responsible for creating schemas based on the mode
-	 */
+
 	private wrapSchemaForMode(
 		schema: ZodType,
 		mode: "single" | "multiple" | "multiple-count" | "count",
 	): ZodType {
 		switch (mode) {
-			case "count": {
+			case "count":
 				return z
 					.object({ count: z.union([z.number(), z.string()]) })
 					.optional();
-			}
 			case "multiple-count":
 				return z.tuple([
 					z.array(schema),
@@ -127,31 +102,24 @@ abstract class BaseRepository<
 				return schema;
 		}
 	}
-	/**
-	 * Merges the given schema with the tableSchema
-	 */
-	// biome-ignore lint/suspicious/noExplicitAny: explanation
+
+	// biome-ignore lint/suspicious/noExplicitAny: repository schemas are heterogeneous
 	protected mergeSchema(schema?: ZodObject<any>) {
-		if (!schema) return this.tableSchema;
-		return this.tableSchema.merge(schema.shape);
+		if (!schema) return this.config.schema;
+		return this.config.schema.extend(schema.shape);
 	}
-	/**
-	 * Checks if the response data exists and successfully validates against a schema.
-	 *
-	 * Type narrows the response to not be undefined when the validation is enabled.
-	 */
+
+	/** Validates a successful managed query response when explicitly enabled. */
 	protected async validateResponse<QueryData, V extends boolean = false>(
 		executeResponse: Awaited<
 			ReturnType<typeof this.executeQuery<QueryData | undefined>>
 		>,
 		config?: ValidationConfigExtend<V>,
 	): Promise<QueryResult<QueryData, V>> {
-		const res = executeResponse.response as QueryResult<QueryData, V>;
+		const response = executeResponse.response as QueryResult<QueryData, V>;
+		if (config?.enabled !== true) return response;
 
-		if (config?.enabled !== true) return res;
-
-		//* undefined and null checks
-		if (res.data === undefined || res.data === null) {
+		if (response.data === undefined || response.data === null) {
 			return {
 				error: {
 					...config.defaultError,
@@ -161,132 +129,55 @@ abstract class BaseRepository<
 			};
 		}
 
-		const schema = this.createValidationSchema(config);
-		if (!schema) return res;
-
-		const validationResult = await schema.safeParseAsync(res.data);
-
-		if (!validationResult.success) {
-			const validationError = tidyZodError(validationResult.error);
-			logger.error({
-				event: "query.response.validation.failed",
-				message: "Query response validation failed",
-				scope: constants.logScopes.query,
-				data: {
-					table: executeResponse.meta.tableName,
-					method: executeResponse.meta.method,
-					executionTime: executeResponse.meta.executionTime,
-					validationError,
-				},
-			});
+		const validationResult = await this.createValidationSchema(
+			config,
+		).safeParseAsync(response.data);
+		if (validationResult.success) {
 			return {
-				data: undefined,
-				error: {
-					...config?.defaultError,
-					message:
-						config?.defaultError?.message ??
-						copy("server:core.errors.validation.name"),
-					type: config?.defaultError?.type ?? "validation",
-					status: config?.defaultError?.status ?? 400,
-				},
+				data: response.data as NonNullable<QueryData>,
+				error: undefined,
 			};
 		}
 
+		const validationError = tidyZodError(validationResult.error);
+		logger.error({
+			event: "query.response.validation.failed",
+			message: "Query response validation failed",
+			scope: constants.logScopes.query,
+			data: {
+				table: executeResponse.meta.tableName,
+				method: executeResponse.meta.method,
+				executionTime: executeResponse.meta.executionTime,
+				validationError,
+			},
+		});
 		return {
-			data: res.data as NonNullable<QueryData>,
-			error: undefined,
+			data: undefined,
+			error: {
+				...config.defaultError,
+				message:
+					config.defaultError?.message ??
+					copy("server:core.errors.validation.name"),
+				type: config.defaultError?.type ?? "validation",
+				status: config.defaultError?.status ?? 400,
+			},
 		};
 	}
-	/**
-	 * Handles executing a query and logging
-	 * @todo add query data to debug log, add a sanitise data method that each repo can extend to mark certain columns to have data redacted, ie passwords, tokens, user data etc.
-	 */
-	protected async executeQuery<QueryData>(
+
+	/** Delegates repository execution to the shared Lucid database boundary. */
+	protected executeQuery<QueryData>(
 		executeFn: () => Promise<QueryData>,
-		config: {
-			method: string;
-			tableName?: string;
-		},
+		config: { method: string; tableName?: string },
 	): Promise<{
 		response:
 			| { error: LucidErrorData; data: undefined }
 			| { error: undefined; data: QueryData };
 		meta: ExecuteMeta;
 	}> {
-		const startTime = process.hrtime();
-
-		try {
-			const result = await executeFn();
-
-			const endTime = process.hrtime(startTime);
-			const executionTime = (endTime[0] * 1000 + endTime[1] / 1000000).toFixed(
-				2,
-			);
-
-			logger.debug({
-				event: "query.execution.completed",
-				message: "Query execution completed",
-				scope: constants.logScopes.query,
-				data: {
-					table: config?.tableName ?? this.tableName,
-					method: config.method,
-					executionTime: `${executionTime}ms`,
-				},
-			});
-
-			return {
-				response: {
-					data: result,
-					error: undefined,
-				},
-				meta: {
-					method: config.method,
-					executionTime: `${executionTime}ms`,
-					tableName: config?.tableName ?? this.tableName,
-				},
-			};
-		} catch (error) {
-			const endTime = process.hrtime(startTime);
-			const executionTime = (endTime[0] * 1000 + endTime[1] / 1000000).toFixed(
-				2,
-			);
-
-			logger.error({
-				error,
-				event: "query.execution.failed",
-				message: "Query execution failed",
-				scope: constants.logScopes.query,
-				data: {
-					table: config?.tableName ?? this.tableName,
-					method: config.method,
-					executionTime: `${executionTime}ms`,
-					errorMessage:
-						error instanceof Error
-							? error.message
-							: "An unknown error occurred",
-				},
-			});
-
-			return {
-				response: {
-					data: undefined,
-					error: {
-						message: copy(
-							"server:core.errors.unknown",
-							error instanceof Error
-								? { defaultMessage: error.message }
-								: undefined,
-						),
-						status: 500,
-					},
-				},
-				meta: {
-					method: config.method,
-					executionTime: `${executionTime}ms`,
-					tableName: config?.tableName ?? this.tableName,
-				},
-			};
-		}
+		return this.database.execute(executeFn, {
+			method: config.method,
+			tableName: config.tableName ?? String(this.tableName),
+		});
 	}
 }
 

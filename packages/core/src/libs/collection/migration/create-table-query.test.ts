@@ -2,6 +2,7 @@ import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import createLucidDatabase from "../../db/create-lucid-database.js";
 import { translate } from "../../i18n/index.js";
 import createTableQuery from "./create-table-query.js";
 
@@ -16,9 +17,7 @@ describe("createTableQuery", async () => {
 	test("creates generated indexes after creating the table", async () => {
 		// @ts-expect-error
 		const context = {
-			db: {
-				client: connection.client,
-			},
+			db: createLucidDatabase({ client: connection.client, adapter: db }),
 			config: {
 				db,
 			},
@@ -85,9 +84,7 @@ describe("createTableQuery", async () => {
 
 		// @ts-expect-error
 		const context = {
-			db: {
-				client: connection.client,
-			},
+			db: createLucidDatabase({ client: connection.client, adapter: db }),
 			config: {
 				db,
 			},

@@ -9,7 +9,7 @@ const setupRequired: ServiceFn<[], { setupRequired: boolean }> = async (
 	context: ServiceContext,
 ) => {
 	try {
-		const Users = new UsersRepository(context.db.client, context.config.db);
+		const Users = new UsersRepository(context.db);
 
 		const totalUserCountRes = await Users.count({
 			where: [],

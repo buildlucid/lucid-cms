@@ -1,5 +1,6 @@
 import type { PreviewSession } from "../../types/response.js";
-import type { LucidPreviewSessions, Select } from "../db/types.js";
+import type { LucidPreviewSessions } from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
 
 type PreviewSessionQueryResponse = Pick<
 	Select<LucidPreviewSessions>,

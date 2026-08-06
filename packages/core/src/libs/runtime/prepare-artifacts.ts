@@ -1,3 +1,4 @@
+import { LucidError } from "../../utils/errors/index.js";
 import type {
 	DatabaseAdapterCreator,
 	DatabaseAdapterFactory,
@@ -123,9 +124,10 @@ const collectPluginPrepareArtifacts = async (props: {
 			paths: props.paths,
 		});
 		if (res.error) {
-			throw new Error(
-				`Runtime prepare hook failed for the ${plugin.key} plugin.`,
-			);
+			throw new LucidError({
+				scope: plugin.key,
+				message: `Runtime prepare hook failed for the ${plugin.key} plugin.`,
+			});
 		}
 
 		addSupportedArtifacts({

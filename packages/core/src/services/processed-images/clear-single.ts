@@ -28,14 +28,11 @@ const clearSingle: ServiceFn<
 		};
 	}
 
-	const ProcessedImages = new ProcessedImagesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const ProcessedImages = new ProcessedImagesRepository(context.db);
 	let mediaKey = data.key;
 
 	if (mediaKey === undefined && data.id !== undefined) {
-		const Media = new MediaRepository(context.db.client, context.config.db);
+		const Media = new MediaRepository(context.db);
 
 		const mediaRes = await Media.selectSingleById({
 			id: data.id,

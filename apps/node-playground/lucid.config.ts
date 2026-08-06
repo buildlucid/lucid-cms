@@ -26,6 +26,7 @@ import SettingsCollection from "./src/collections/settings.js";
 import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
 import transporter from "./src/services/email-transporter.js";
+import { testOrganisationsTable } from "./src/tables/test-organisations.js";
 
 export const env = z.object({
 	DATABASE_URL: z.string(),
@@ -212,6 +213,7 @@ export default configureLucid({
 		// 		},
 		// 	}
 		// },
+		tables: [testOrganisationsTable],
 		collections: [
 			PageCollection,
 			BlogCollection,

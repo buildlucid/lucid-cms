@@ -1,4 +1,4 @@
-import type { OAuthPrincipalType } from "../../libs/db/types.js";
+import type { OAuthPrincipalType } from "../../libs/db/tables/index.js";
 import { oauthConnectionsFormatter } from "../../libs/formatters/index.js";
 import { OAuthGrantsRepository } from "../../libs/repositories/index.js";
 import type { OAuthConnection } from "../../types/response.js";
@@ -14,10 +14,7 @@ const getConnections: ServiceFn<
 	],
 	OAuthConnection[]
 > = async (context, input) => {
-	const Grants = new OAuthGrantsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Grants = new OAuthGrantsRepository(context.db);
 	const grantsRes = await Grants.selectMultipleWithScopes({
 		principalType: input.principalType,
 		userId: input.userId,

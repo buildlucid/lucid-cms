@@ -6,10 +6,7 @@ const getCurrentCollectionMigrationId: ServiceFn<[string], number> = async (
 	context,
 	collectionKey,
 ) => {
-	const CollectionMigrations = new CollectionMigrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const CollectionMigrations = new CollectionMigrationsRepository(context.db);
 	const latestMigrationRes =
 		await CollectionMigrations.selectLatestByCollectionKey({
 			collectionKey,

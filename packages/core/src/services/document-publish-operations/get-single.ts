@@ -26,10 +26,7 @@ const getSingle: ServiceFn<
 	],
 	PublishOperation
 > = async (context, data) => {
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
 
 	const operationRes = await Operations.selectSingleDetailed({
 		where: [
@@ -94,14 +91,8 @@ const getSingle: ServiceFn<
 	);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const Versions = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Bricks = new DocumentBricksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Versions = new DocumentVersionsRepository(context.db);
+	const Bricks = new DocumentBricksRepository(context.db);
 	const latestRes = await Versions.selectSingle(
 		{
 			select: ["content_id"],

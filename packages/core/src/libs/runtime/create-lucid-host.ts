@@ -1,8 +1,11 @@
 import type z from "zod";
 import type { Config } from "../../types/config.js";
+import { LucidError } from "../../utils/errors/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import { resolveConfigDefinition } from "../config/resolve-config-definition.js";
+import type LucidDatabase from "../db/client/lucid-database.js";
+import createLucidDatabase from "../db/create-lucid-database.js";
 import type { DatabaseConnection } from "../db/types.js";
 import createApp from "../http/app.js";
 import type { HttpExtension } from "../http/types.js";
@@ -116,6 +119,7 @@ const createLucidHost = async (
 		http: options.http,
 	});
 	let runtimeDatabasePromise: Promise<DatabaseConnection> | undefined;
+	let runtimeLucidDatabasePromise: Promise<LucidDatabase> | undefined;
 	let destroyed = false;
 	let destroyPromise: Promise<void> | undefined;
 	const activeInvocations = new Set<LucidInvocation>();
@@ -135,6 +139,25 @@ const createLucidHost = async (
 		return runtimeDatabasePromise;
 	};
 
+	const getRuntimeLucidDatabase = () => {
+		if (!runtimeLucidDatabasePromise) {
+			runtimeLucidDatabasePromise = getRuntimeDatabase()
+				.then((database) =>
+					createLucidDatabase({
+						client: database.client,
+						adapter: resolved.config.db,
+						collections: resolved.config.collections,
+						tables: resolved.config.tables,
+					}),
+				)
+				.catch((error) => {
+					runtimeLucidDatabasePromise = undefined;
+					throw error;
+				});
+		}
+		return runtimeLucidDatabasePromise;
+	};
+
 	const host: LucidHost = {
 		config: resolved.config,
 		env: resolved.env,
@@ -152,23 +175,27 @@ const createLucidHost = async (
 			env?: EnvironmentVariables;
 		}): LucidInvocation => {
 			if (destroyed) {
-				throw new Error("Cannot use a Lucid host after it has been destroyed.");
+				throw new LucidError({
+					message: "Cannot use a Lucid host after it has been destroyed.",
+				});
 			}
 			const env = invocationOptions?.env ?? resolved.env;
 			let invocationDatabasePromise: Promise<DatabaseConnection> | undefined;
+			let invocationLucidDatabasePromise: Promise<LucidDatabase> | undefined;
 			let invocationDestroyed = false;
 			let invocationDestroyPromise: Promise<void> | undefined;
 
 			const getDatabase = () => {
 				if (destroyed) {
-					throw new Error(
-						"Cannot use a Lucid host after it has been destroyed.",
-					);
+					throw new LucidError({
+						message: "Cannot use a Lucid host after it has been destroyed.",
+					});
 				}
 				if (invocationDestroyed) {
-					throw new Error(
-						"Cannot use a Lucid invocation after it has been destroyed.",
-					);
+					throw new LucidError({
+						message:
+							"Cannot use a Lucid invocation after it has been destroyed.",
+					});
 				}
 				if (options.databaseScope === "runtime") {
 					return getRuntimeDatabase();
@@ -184,13 +211,39 @@ const createLucidHost = async (
 				return invocationDatabasePromise;
 			};
 
+			const getLucidDatabase = () => {
+				if (options.databaseScope === "runtime") {
+					return getRuntimeLucidDatabase();
+				}
+				if (!invocationLucidDatabasePromise) {
+					invocationLucidDatabasePromise = getDatabase()
+						.then((database) =>
+							createLucidDatabase({
+								client: database.client,
+								adapter: resolved.config.db,
+								collections: resolved.config.collections,
+								tables: resolved.config.tables,
+							}),
+						)
+						.catch((error) => {
+							invocationLucidDatabasePromise = undefined;
+							throw error;
+						});
+				}
+				return invocationLucidDatabasePromise;
+			};
+
 			const getServiceContext = async (
 				request?: CreateToolkitServiceContextOptions["request"],
 			): Promise<ServiceContext> => {
-				const database = await getDatabase();
+				const [database, db] = await Promise.all([
+					getDatabase(),
+					getLucidDatabase(),
+				]);
 				return createServiceContext({
 					config: resolved.config,
 					database,
+					db,
 					translationStore,
 					env,
 					runtimeContext: options.runtimeContext,
@@ -207,10 +260,10 @@ const createLucidHost = async (
 				getToolkit: async (request) =>
 					createToolkit(await getServiceContext(request)),
 				handle: async (handleOptions): Promise<Response> => {
-					const database = await getDatabase();
+					const db = await getLucidDatabase();
 					return app.handle({
 						request: handleOptions.request,
-						database,
+						db,
 						env,
 						executionContext: handleOptions.executionContext,
 						requestBindings: handleOptions.requestBindings,

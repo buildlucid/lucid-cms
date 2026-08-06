@@ -1,11 +1,11 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type { LucidBrickTableName } from "../../../libs/db/tables/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type {
 	Config,
 	InternalDocumentBrick,
 	InternalDocumentField,
-	LucidBrickTableName,
 } from "../../../types.js";
 import constructBrickTable, {
 	type InsertBrickTables,

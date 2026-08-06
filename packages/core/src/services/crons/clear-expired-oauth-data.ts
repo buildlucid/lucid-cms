@@ -8,18 +8,9 @@ import type { ServiceFn } from "../../utils/services/types.js";
 /** Deletes expired OAuth protocol data that is no longer needed for replay checks. */
 const clearExpiredOAuthData: ServiceFn<[], undefined> = async (context) => {
 	const now = new Date().toISOString();
-	const Requests = new OAuthAuthorizationRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Codes = new OAuthAuthorizationCodesRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const RefreshTokens = new OAuthRefreshTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Requests = new OAuthAuthorizationRequestsRepository(context.db);
+	const Codes = new OAuthAuthorizationCodesRepository(context.db);
+	const RefreshTokens = new OAuthRefreshTokensRepository(context.db);
 
 	const requestsRes = await Requests.deleteMultiple({
 		where: [{ key: "expires_at", operator: "<", value: now }],

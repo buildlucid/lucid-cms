@@ -1,5 +1,5 @@
 import type { OAuthConnection } from "../../types/response.js";
-import type { OAuthPrincipalType } from "../db/types.js";
+import type { OAuthPrincipalType } from "../db/tables/index.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 import formatter from "./helpers.js";
 

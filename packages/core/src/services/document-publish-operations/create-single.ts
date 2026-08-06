@@ -236,26 +236,11 @@ const createSingle: ServiceFn<
 	}
 
 	// Load repositories and current document state.
-	const Versions = new DocumentVersionsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Documents = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const Assignees = new DocumentPublishOperationAssigneesRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const QueueJobs = new QueueJobsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Versions = new DocumentVersionsRepository(context.db);
+	const Documents = new DocumentsRepository(context.db);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
+	const Assignees = new DocumentPublishOperationAssigneesRepository(context.db);
+	const QueueJobs = new QueueJobsRepository(context.db);
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;

@@ -1,34 +1,14 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type {
-	KyselyDB,
-	LucidCollectionMigrations,
-	Select,
-} from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { collectionMigrationsTable } from "../db/tables/collection-migrations.js";
+import type { LucidCollectionMigrations } from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class CollectionMigrationsRepository extends StaticRepository<"lucid_collection_migrations"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_collection_migrations");
+	constructor(db: LucidDatabase) {
+		super(db, collectionMigrationsTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		collection_key: z.string(),
-		migration_plans: z.unknown(),
-		collection_schema: z.unknown(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-		table_name_map: z.record(z.string(), z.string()),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		collection_key: this.dbAdapter.getDataType("text"),
-		table_name_map: this.dbAdapter.getDataType("text"),
-		migration_plans: this.dbAdapter.getDataType("json"),
-		collection_schema: this.dbAdapter.getDataType("json"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 
 	/**
 	 * Returns the latest migration row for a collection.

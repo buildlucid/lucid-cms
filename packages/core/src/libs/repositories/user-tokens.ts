@@ -1,61 +1,12 @@
-import z from "zod";
-import constants from "../../constants/constants.js";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { userTokensTable } from "../db/tables/user-tokens.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class UserTokensRepository extends StaticRepository<"lucid_user_tokens"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_user_tokens");
+	constructor(db: LucidDatabase) {
+		super(db, userTokensTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		user_id: z.number(),
-		token_type: z.union([
-			z.literal(constants.userTokens.passwordReset),
-			z.literal(constants.userTokens.refresh),
-			z.literal(constants.userTokens.invitation),
-			z.literal(constants.userTokens.emailChangeConfirm),
-			z.literal(constants.userTokens.emailChangeRevert),
-		]),
-		token: z.string(),
-		revoked_at: z.union([z.string(), z.date()]).nullable(),
-		revoke_reason: z.string().nullable(),
-		consumed_at: z.union([z.string(), z.date()]).nullable(),
-		replaced_by_token_id: z.number().nullable(),
-		created_at: z.union([z.string(), z.date()]).nullable(),
-		expiry_date: z.union([z.string(), z.date()]),
-		// user
-		user_email: z.email(),
-		user_first_name: z.string().nullable(),
-		user_last_name: z.string().nullable(),
-		user_invitation_accepted: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		user_is_deleted: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-		user_is_locked: z.union([
-			z.literal(this.dbAdapter.config.defaults.boolean.true),
-			z.literal(this.dbAdapter.config.defaults.boolean.false),
-		]),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		user_id: this.dbAdapter.getDataType("integer"),
-		token_type: this.dbAdapter.getDataType("varchar", 255),
-		token: this.dbAdapter.getDataType("varchar", 255),
-		revoked_at: this.dbAdapter.getDataType("timestamp"),
-		revoke_reason: this.dbAdapter.getDataType("varchar", 255),
-		consumed_at: this.dbAdapter.getDataType("timestamp"),
-		replaced_by_token_id: this.dbAdapter.getDataType("integer"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-		expiry_date: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 
 	// ----------------------------------------
 	// queries

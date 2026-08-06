@@ -1,10 +1,10 @@
 import { randomBytes } from "node:crypto";
 import constants from "../../constants/constants.js";
 import collections from "../../libs/collection/collections.js";
+import type { DocumentVersionType } from "../../libs/db/tables/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { PreviewSessionsRepository } from "../../libs/repositories/index.js";
 import type {
-	DocumentVersionType,
 	LucidAuth,
 	PreviewMode,
 	PreviewSessionURLResponse,
@@ -132,10 +132,7 @@ const create: ServiceFn<
 		return { error: undefined, data: { url: null, expiresAt: null } };
 	}
 
-	const PreviewSessions = new PreviewSessionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const PreviewSessions = new PreviewSessionsRepository(context.db);
 	const createRes = await PreviewSessions.createSingle({
 		data: {
 			token_hash: hashPreviewToken(token),

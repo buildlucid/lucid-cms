@@ -28,10 +28,7 @@ const createSingle: ServiceFn<
 	});
 	if (mediaAccessRes.error) return mediaAccessRes;
 
-	const MediaShareLinks = new MediaShareLinksRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const MediaShareLinks = new MediaShareLinksRepository(context.db);
 
 	const token = generateShareToken();
 

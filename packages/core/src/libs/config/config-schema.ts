@@ -1,5 +1,6 @@
 import z from "zod";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
+import type { TableDefinition } from "../db/client/table/definition.js";
 import type { ExternalMigration } from "../db/types.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
 import type {
@@ -35,6 +36,18 @@ const LucidRouteDefinitionSchema = z.custom<LucidRouteDefinition>(
 	{
 		message: "Expected a Lucid route definition",
 	},
+);
+
+const TableDefinitionSchema = z.custom<TableDefinition>(
+	(data) =>
+		typeof data === "object" &&
+		data !== null &&
+		"name" in data &&
+		typeof data.name === "string" &&
+		data.name.trim().length > 0 &&
+		"resolve" in data &&
+		typeof data.resolve === "function",
+	{ message: "Expected a table definition created with defineTable" },
 );
 
 // TODO: improve all function custom schemas bellow
@@ -101,6 +114,7 @@ const OverridableHeaderSchema = z.union([z.boolean(), z.string()]);
 
 const ConfigSchema = z.object({
 	db: z.unknown(),
+	tables: z.array(TableDefinitionSchema),
 	host: z.string().trim().min(1).optional(),
 	http: z
 		.object({

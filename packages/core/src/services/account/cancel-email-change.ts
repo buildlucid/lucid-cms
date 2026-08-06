@@ -14,14 +14,8 @@ const cancelEmailChange: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const UserTokens = new UserTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
-	const EmailChangeRequests = new EmailChangeRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const UserTokens = new UserTokensRepository(context.db);
+	const EmailChangeRequests = new EmailChangeRequestsRepository(context.db);
 
 	const requestRes = await EmailChangeRequests.selectActivePendingForUser({
 		userId: data.userId,

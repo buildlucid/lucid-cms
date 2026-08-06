@@ -55,10 +55,7 @@ const verifyAccessToken: ServiceFn<
 		};
 	}
 
-	const Grants = new OAuthGrantsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Grants = new OAuthGrantsRepository(context.db);
 	const grantRes = await Grants.selectSingleWithScopes({
 		id: claims.grant_id,
 		validation: {

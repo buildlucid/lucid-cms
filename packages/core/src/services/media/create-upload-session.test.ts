@@ -68,9 +68,7 @@ describe("create upload session", () => {
 
 		const response = await createUploadSession(
 			{
-				db: {
-					client: {},
-				},
+				db: {},
 				media: {
 					key: "file-system",
 					createUploadSession: adapterCreateUploadSession,
@@ -129,9 +127,7 @@ describe("create upload session", () => {
 
 		const response = await createUploadSession(
 			{
-				db: {
-					client: {},
-				},
+				db: {},
 				media: {
 					key: "s3",
 					createUploadSession: adapterCreateUploadSession,

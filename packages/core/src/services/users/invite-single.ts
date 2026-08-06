@@ -28,11 +28,8 @@ const inviteSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
-	const EmailChangeRequests = new EmailChangeRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Users = new UsersRepository(context.db);
+	const EmailChangeRequests = new EmailChangeRequestsRepository(context.db);
 	const email = normalizeEmailInput(data.email);
 
 	const [userExistsRes, reservedEmailRes, roleExistsRes] = await Promise.all([
@@ -146,10 +143,7 @@ const inviteSingle: ServiceFn<
 		};
 	}
 
-	const UserRoles = new UserRolesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const UserRoles = new UserRolesRepository(context.db);
 
 	const createMultipleRes = await UserRoles.createMultiple({
 		data: data.roleIds.map((r) => ({

@@ -259,6 +259,21 @@ test("formats code response values", async () => {
 		language: "css",
 		value: "body {}",
 	});
+	expect(
+		field.formatResponseValue({
+			language: "json",
+			value: '{"scripts":{"dev":"lucidcms dev"}}',
+		}),
+	).toEqual({
+		language: "json",
+		value: '{"scripts":{"dev":"lucidcms dev"}}',
+	});
+	expect(
+		field.formatResponseValue({
+			language: "json",
+			value: { scripts: { dev: "lucidcms dev" } },
+		}),
+	).toBeNull();
 
 	const fieldWithDefault = new CodeCustomField("field", {
 		default: {

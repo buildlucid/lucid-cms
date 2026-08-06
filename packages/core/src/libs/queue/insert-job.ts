@@ -25,10 +25,7 @@ const insertJobs: ServiceFn<
 	const now = new Date();
 	const status: QueueJobStatus = "pending";
 
-	const QueueJobs = new QueueJobsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const QueueJobs = new QueueJobsRepository(context.db);
 	const jobsData = data.payloads.map((payload) => ({
 		jobId: randomUUID(),
 		payload,

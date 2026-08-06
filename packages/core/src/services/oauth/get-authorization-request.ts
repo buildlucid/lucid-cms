@@ -25,10 +25,7 @@ const getAuthorizationRequest: ServiceFn<
 > = async (context, input) => {
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;
-	const Requests = new OAuthAuthorizationRequestsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Requests = new OAuthAuthorizationRequestsRepository(context.db);
 	const requestRes = await Requests.selectSingleActiveWithLogo({
 		requestId: input.requestId,
 		currentTime: new Date().toISOString(),

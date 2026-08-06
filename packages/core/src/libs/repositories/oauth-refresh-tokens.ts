@@ -1,38 +1,12 @@
-import z from "zod";
-import type DatabaseAdapter from "../db/adapter-base.js";
-import type { KyselyDB } from "../db/types.js";
+import type { LucidDatabase } from "../db/client/index.js";
+import { oauthRefreshTokensTable } from "../db/tables/oauth-refresh-tokens.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
 export default class OAuthRefreshTokensRepository extends StaticRepository<"lucid_oauth_refresh_tokens"> {
-	constructor(db: KyselyDB, dbAdapter: DatabaseAdapter) {
-		super(db, dbAdapter, "lucid_oauth_refresh_tokens");
+	constructor(db: LucidDatabase) {
+		super(db, oauthRefreshTokensTable);
 	}
-	tableSchema = z.object({
-		id: z.number(),
-		token_hash: z.string(),
-		family_id: z.string(),
-		grant_id: z.number(),
-		client_id: z.string(),
-		resource: z.string(),
-		expires_at: z.union([z.string(), z.date()]),
-		consumed_at: z.union([z.string(), z.date()]).nullable(),
-		revoked_at: z.union([z.string(), z.date()]).nullable(),
-		created_at: z.union([z.string(), z.date()]),
-	});
-	columnFormats = {
-		id: this.dbAdapter.getDataType("primary"),
-		token_hash: this.dbAdapter.getDataType("varchar", 64),
-		family_id: this.dbAdapter.getDataType("varchar", 64),
-		grant_id: this.dbAdapter.getDataType("integer"),
-		client_id: this.dbAdapter.getDataType("text"),
-		resource: this.dbAdapter.getDataType("text"),
-		expires_at: this.dbAdapter.getDataType("timestamp"),
-		consumed_at: this.dbAdapter.getDataType("timestamp"),
-		revoked_at: this.dbAdapter.getDataType("timestamp"),
-		created_at: this.dbAdapter.getDataType("timestamp"),
-	};
-	queryConfig = undefined;
 
 	/**
 	 * Atomically consumes an active refresh token.

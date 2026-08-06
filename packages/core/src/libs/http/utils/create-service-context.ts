@@ -11,7 +11,7 @@ const createServiceContext = (c: LucidHonoContext): ServiceContext => {
 	const config = c.get("config");
 	const env = c.get("env");
 	const runtimeContext = c.get("runtimeContext");
-	const db = { client: c.get("database").client };
+	const db = c.get("db");
 
 	const locale = resolveInterfaceLocale({
 		config,

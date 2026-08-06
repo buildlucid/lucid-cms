@@ -8,7 +8,7 @@ export const addIndex = async (
 	tableName: string,
 	index: CollectionSchemaIndex,
 ) => {
-	let query = context.db.client.schema
+	let query = context.db.kysely.schema
 		.createIndex(index.name)
 		.on(tableName)
 		.columns(index.columns);
@@ -27,7 +27,7 @@ export const dropIndex = async (
 	tableName: string,
 	indexName: string,
 ) => {
-	await context.db.client.schema.dropIndex(indexName).ifExists().execute();
+	await context.db.kysely.schema.dropIndex(indexName).ifExists().execute();
 	logger.debug({
 		message: `Operation of type 'remove' ran on index '${indexName}' for table '${tableName}'`,
 		scope: constants.logScopes.migrations,

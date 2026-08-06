@@ -8,8 +8,8 @@ const healthController = factory.createHandlers(async (c: LucidHonoContext) => {
 
 	try {
 		await c
-			.get("database")
-			.client.selectNoFrom((eb) => eb.val(1).as("health"))
+			.get("db")
+			.kysely.selectNoFrom((eb) => eb.val(1).as("health"))
 			.executeTakeFirstOrThrow();
 
 		c.status(200);

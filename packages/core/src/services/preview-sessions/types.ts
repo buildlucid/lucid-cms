@@ -1,8 +1,8 @@
 import type {
 	DocumentVersionType,
 	LucidPreviewSessions,
-	Select,
-} from "../../libs/db/types.js";
+} from "../../libs/db/tables/index.js";
+import type { Select } from "../../libs/db/types.js";
 
 export type PreviewSessionRecord = Pick<
 	Select<LucidPreviewSessions>,

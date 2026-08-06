@@ -22,10 +22,7 @@ const getMigrationStatus: ServiceFn<
 	[{ collection: CollectionBuilder }],
 	MigrationStatus
 > = async (context, data) => {
-	const CollectionMigrations = new CollectionMigrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const CollectionMigrations = new CollectionMigrationsRepository(context.db);
 
 	const localSchemaRes = inferSchema(data.collection, context.config.db);
 	if (localSchemaRes.error) return localSchemaRes;

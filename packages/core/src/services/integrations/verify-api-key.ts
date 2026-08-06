@@ -20,10 +20,7 @@ const verifyApiKey: ServiceFn<
 	],
 	LucidApiKeyExternalAuth
 > = async (context, data) => {
-	const Integrations = new IntegrationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Integrations = new IntegrationsRepository(context.db);
 
 	const { key: decodedKey, apiKey: decodedApiKey } = decodeApiKey(data.apiKey);
 	if (!decodedApiKey) {

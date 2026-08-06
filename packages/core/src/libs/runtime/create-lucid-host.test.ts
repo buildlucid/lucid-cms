@@ -1,6 +1,9 @@
+import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { describe, expect, test, vi } from "vitest";
+import z from "zod";
 import type { Config } from "../../types/config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
+import { defineTable } from "../db/client/table/definition.js";
 import type { DatabaseConnection } from "../db/types.js";
 import createLucidHost from "./create-lucid-host.js";
 
@@ -11,6 +14,19 @@ const runtimeContext = {
 	getConnectionInfo: () => ({}),
 };
 
+type PluginMetadataRow = {
+	payload: Record<string, unknown>;
+};
+
+const pluginMetadataTable = defineTable<PluginMetadataRow>("plugin_metadata", {
+	columns: {
+		payload: {
+			schema: z.record(z.string(), z.unknown()),
+			type: "json",
+		},
+	},
+});
+
 const createFixture = () => {
 	const connections: DatabaseConnection[] = [];
 	const healthCheck = vi.fn(async () => ({ health: 1 }));
@@ -18,21 +34,23 @@ const createFixture = () => {
 		executeTakeFirstOrThrow: healthCheck,
 	}));
 	const connect = vi.fn(async (_env?: Record<string, unknown>) => {
+		const client = {
+			selectNoFrom,
+			withPlugin: vi.fn(),
+		};
+		client.withPlugin.mockReturnValue(client);
 		const connection = {
-			client: {
-				selectNoFrom,
-			} as unknown as DatabaseConnection["client"],
+			client: client as unknown as DatabaseConnection["client"],
 			destroy: vi.fn(async () => undefined),
 		};
 		connections.push(connection);
 		return connection;
 	});
-	const adapter = {
-		adapter: "test",
-		connect,
-		dropAllTables: vi.fn(),
-		inferSchema: vi.fn(),
-	} as unknown as DatabaseAdapter;
+	const adapter = new SQLiteAdapter({ database: ":memory:" });
+	adapter.adapter = "test";
+	adapter.connect = connect as DatabaseAdapter["connect"];
+	adapter.dropAllTables = vi.fn();
+	adapter.inferSchema = vi.fn();
 	const pluginInit = vi.fn(async () => ({
 		data: undefined,
 		error: undefined,
@@ -49,6 +67,7 @@ const createFixture = () => {
 			},
 			db: adapter,
 			config: () => ({
+				tables: [pluginMetadataTable],
 				collections: [],
 				plugins: [
 					{
@@ -88,9 +107,20 @@ describe("createLucidHost database ownership", () => {
 		const first = host.createInvocation();
 		const second = host.createInvocation();
 
-		await Promise.all([first.getToolkit(), second.getToolkit()]);
+		const [firstContext, repeatedFirstContext, secondContext] =
+			await Promise.all([
+				first.getServiceContext(),
+				first.getServiceContext(),
+				second.getServiceContext(),
+			]);
 
 		expect(fixture.connect).toHaveBeenCalledTimes(2);
+		expect(firstContext.db).toBe(repeatedFirstContext.db);
+		expect(firstContext.db).not.toBe(secondContext.db);
+		expect(
+			firstContext.db.tables.resolve("plugin_metadata")?.columns.payload?.codec
+				.name,
+		).toBe("json");
 
 		await Promise.all([first.destroy(), second.destroy()]);
 		expect(fixture.connections[0]?.destroy).toHaveBeenCalledOnce();
@@ -108,10 +138,14 @@ describe("createLucidHost database ownership", () => {
 		const first = host.createInvocation();
 		const second = host.createInvocation();
 
-		await Promise.all([first.getToolkit(), second.getToolkit()]);
+		const [firstContext, secondContext] = await Promise.all([
+			first.getServiceContext(),
+			second.getServiceContext(),
+		]);
 		await Promise.all([first.destroy(), second.destroy()]);
 
 		expect(fixture.connect).toHaveBeenCalledOnce();
+		expect(firstContext.db).toBe(secondContext.db);
 		expect(fixture.connections[0]?.destroy).not.toHaveBeenCalled();
 
 		await host.destroy();
@@ -268,6 +302,7 @@ describe("createLucidHost database ownership", () => {
 		});
 
 		expect((host.config as Config).db).toBe(fixture.adapter);
+		expect(host.config.tables).toEqual([pluginMetadataTable]);
 		expect("client" in host.config.db).toBe(false);
 		await host.destroy();
 	});

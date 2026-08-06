@@ -2,8 +2,8 @@ import constants from "../../../constants/constants.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
 import type { FieldRefVersionTypeResolver } from "../../../libs/collection/custom-fields/utils/ref-fetch.js";
+import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import { DocumentPublishOperationsRepository } from "../../../libs/repositories/index.js";
-import type { DocumentVersionType } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 type RelationVersionType = Exclude<DocumentVersionType, "revision">;
@@ -183,10 +183,7 @@ const resolveRelationVersionType: ServiceFn<
 		};
 	}
 
-	const Operations = new DocumentPublishOperationsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Operations = new DocumentPublishOperationsRepository(context.db);
 	const operationRes = await Operations.selectSingle({
 		select: ["target"],
 		where: [

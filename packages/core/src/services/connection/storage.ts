@@ -2,9 +2,8 @@ import type z from "zod";
 import type {
 	LucidRemoteConnectionState,
 	LucidRemoteConnections,
-	Select,
-	Update,
-} from "../../libs/db/types.js";
+} from "../../libs/db/tables/index.js";
+import type { Select, Update } from "../../libs/db/types.js";
 import {
 	type ConnectionGrant,
 	type ConnectionRegistration,
@@ -61,10 +60,7 @@ export const getConnectionPending = (
 
 /** Resolves the connection row. */
 export const resolveEffectiveConnection = (context: ServiceContext) => {
-	const Connections = new LucidRemoteConnectionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Connections = new LucidRemoteConnectionsRepository(context.db);
 
 	return Connections.selectSingle({
 		select: [
@@ -88,10 +84,7 @@ export const resolveEffectiveConnection = (context: ServiceContext) => {
 
 /** Resolves or creates the singleton connection row. */
 export const resolveWritableConnection = (context: ServiceContext) => {
-	const Connections = new LucidRemoteConnectionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Connections = new LucidRemoteConnectionsRepository(context.db);
 	return Connections.getOrCreate({});
 };
 
@@ -100,10 +93,7 @@ export const findConnectionByState = (
 	context: ServiceContext,
 	state: string,
 ) => {
-	const Connections = new LucidRemoteConnectionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Connections = new LucidRemoteConnectionsRepository(context.db);
 
 	return Connections.selectSingle({
 		select: [
@@ -139,10 +129,7 @@ export const consumeConnectionPending = async (
 	if (!row.pending_state_hash || !row.pending_encrypted) {
 		return { error: undefined, data: false };
 	}
-	const Connections = new LucidRemoteConnectionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Connections = new LucidRemoteConnectionsRepository(context.db);
 	const claimed = await Connections.claimPending({
 		id: row.id,
 		pendingStateHash: row.pending_state_hash,
@@ -165,10 +152,7 @@ export const replaceConnectionRegistration = (
 	rowId: number,
 	value: ConnectionRegistration,
 ) => {
-	const Connections = new LucidRemoteConnectionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Connections = new LucidRemoteConnectionsRepository(context.db);
 
 	return Connections.updateSingle({
 		data: {
@@ -193,10 +177,7 @@ export const setConnectionPending = (
 		stateHash: string;
 	},
 ) => {
-	const Connections = new LucidRemoteConnectionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Connections = new LucidRemoteConnectionsRepository(context.db);
 
 	return Connections.updateSingle({
 		data: {
@@ -234,10 +215,7 @@ export const persistLucidRemoteConnectionState = (
 		data.last_verified_at = state.lastVerified;
 	if (state.errorKey !== undefined) data.error_key = state.errorKey;
 
-	const Connections = new LucidRemoteConnectionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Connections = new LucidRemoteConnectionsRepository(context.db);
 
 	return Connections.updateSingle({
 		data,
@@ -264,10 +242,7 @@ export const persistConnectionGrantState = (
 		data.last_verified_at = state.lastVerified;
 	if (state.errorKey !== undefined) data.error_key = state.errorKey;
 
-	const Connections = new LucidRemoteConnectionsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Connections = new LucidRemoteConnectionsRepository(context.db);
 
 	return Connections.updateSingle({
 		data,

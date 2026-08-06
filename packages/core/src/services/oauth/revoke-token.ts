@@ -12,10 +12,7 @@ const revokeToken: ServiceFn<
 	],
 	undefined
 > = async (context, input) => {
-	const RefreshTokens = new OAuthRefreshTokensRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const RefreshTokens = new OAuthRefreshTokensRepository(context.db);
 	const tokenRes = await RefreshTokens.selectSingle({
 		select: ["family_id", "client_id"],
 		where: [

@@ -49,9 +49,7 @@ describe("media folder update single", () => {
 		const updateSingle = await loadUpdateSingle();
 		const response = await updateSingle(
 			{
-				db: {
-					client: {},
-				},
+				db: {},
 				config: {
 					db: {},
 				},
@@ -97,9 +95,7 @@ describe("media folder update single", () => {
 		const updateSingle = await loadUpdateSingle();
 		const response = await updateSingle(
 			{
-				db: {
-					client: {},
-				},
+				db: {},
 				config: {
 					db: {},
 				},

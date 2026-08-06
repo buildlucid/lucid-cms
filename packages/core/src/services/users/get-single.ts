@@ -18,7 +18,7 @@ const getSingle: ServiceFn<
 	],
 	User
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 
 	const userQueryWhere: QueryBuilderWhere<"lucid_users"> = [
 		{

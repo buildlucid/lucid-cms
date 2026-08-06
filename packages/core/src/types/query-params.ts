@@ -1,4 +1,4 @@
-import type { DocumentVersionType } from "../libs/db/types.js";
+import type { DocumentVersionType } from "../libs/db/tables/index.js";
 
 // -----------------------------------------------
 // Filters

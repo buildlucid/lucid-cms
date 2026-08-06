@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import type { DocumentVersionType } from "../../libs/db/types.js";
+import type { DocumentVersionType } from "../../libs/db/tables/index.js";
 import { documentsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -27,10 +27,7 @@ const getSingle: ServiceFn<
 	],
 	InternalCollectionDocument
 > = async (context, data) => {
-	const Document = new DocumentsRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const Document = new DocumentsRepository(context.db);
 
 	if (
 		data.version === constants.collectionBuilder.publishing.snapshotVersionType

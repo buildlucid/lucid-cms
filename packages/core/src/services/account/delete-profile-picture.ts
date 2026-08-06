@@ -13,7 +13,7 @@ const deleteProfilePicture: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db.client, context.config.db);
+	const Users = new UsersRepository(context.db);
 
 	if (data.allowSelf !== true && data.actorUserId === data.targetUserId) {
 		return {

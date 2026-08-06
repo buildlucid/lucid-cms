@@ -1,5 +1,5 @@
 import type { Context } from "hono";
-import type { DatabaseConnection } from "../libs/db/types.js";
+import type LucidDatabase from "../libs/db/client/lucid-database.js";
 import type { EmailAdapterInstance } from "../libs/email/types.js";
 import type { TranslationStore } from "../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../libs/kv/types.js";
@@ -77,7 +77,7 @@ export type LucidExecutionContext = {
 
 export type LucidHonoVariables = {
 	config: Config;
-	database: DatabaseConnection;
+	db: LucidDatabase;
 	translationStore: TranslationStore;
 	runtimeContext: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;

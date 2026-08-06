@@ -28,10 +28,7 @@ const callback: ServiceFn<
 		grantAuthentication: boolean;
 	}
 > = async (context, data) => {
-	const AuthStates = new AuthStatesRepository(
-		context.db.client,
-		context.config.db,
-	);
+	const AuthStates = new AuthStatesRepository(context.db);
 
 	//* get provider config
 	const availableProviders = getAvailableProviders(context.config);
