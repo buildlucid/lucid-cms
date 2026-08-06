@@ -86,6 +86,50 @@ export const colorize = (value: string, color: string, enabled: boolean) => {
 };
 
 /**
+ * Escapes line separators so one log entry always occupies one terminal line.
+ */
+export const formatSingleLine = (value: string) => {
+	return value
+		.replace(/\r\n|\r|\n/g, "\\n")
+		.replace(/\u2028/g, "\\u2028")
+		.replace(/\u2029/g, "\\u2029");
+};
+
+/**
+ * Serializes structured values without relying on the console's multiline inspector.
+ */
+export const formatStructuredValue = (value: unknown) => {
+	const seen = new WeakSet<object>();
+
+	try {
+		const serialized = JSON.stringify(value, (_key, nestedValue: unknown) => {
+			if (typeof nestedValue === "bigint") return `${nestedValue}n`;
+			if (typeof nestedValue === "function") {
+				return `[Function${nestedValue.name ? `: ${nestedValue.name}` : ""}]`;
+			}
+			if (typeof nestedValue === "symbol") return String(nestedValue);
+			if (nestedValue instanceof Error) {
+				return {
+					name: nestedValue.name,
+					message: nestedValue.message,
+					...(nestedValue.stack ? { stack: nestedValue.stack } : {}),
+				};
+			}
+			if (typeof nestedValue === "object" && nestedValue !== null) {
+				if (seen.has(nestedValue)) return "[Circular]";
+				seen.add(nestedValue);
+			}
+
+			return nestedValue;
+		});
+
+		return formatSingleLine(serialized ?? String(value));
+	} catch {
+		return "[Unserializable value]";
+	}
+};
+
+/**
  * Builds a compact prefix shared by standard and HTTP console entries.
  */
 export const createPrefix = (props: {

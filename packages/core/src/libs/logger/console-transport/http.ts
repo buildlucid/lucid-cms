@@ -4,6 +4,8 @@ import {
 	consoleColors,
 	createPrefix,
 	formatDuration,
+	formatSingleLine,
+	formatStructuredValue,
 	formatTimestamp,
 } from "./formatters.js";
 import type { ResolvedConsoleTransportOptions } from "./types.js";
@@ -62,16 +64,19 @@ export const writeHttpEntry = (
 	});
 	const statusLabel = colorize(String(status), statusColor, options.colors);
 
-	console.info(
-		`${prefix} ${method} ${path} ${statusLabel} ${formatDuration(durationMs)}`,
-	);
+	const verboseDetails = options.verbose
+		? colorize(
+				` — data: ${formatStructuredValue(entry.data)}`,
+				consoleColors.dim,
+				options.colors,
+			)
+		: "";
 
-	if (options.verbose) {
-		console.info(
-			colorize("  Data:", consoleColors.dim, options.colors),
-			entry.data,
-		);
-	}
+	console.info(
+		formatSingleLine(
+			`${prefix} ${method} ${path} ${statusLabel} ${formatDuration(durationMs)}${verboseDetails}`,
+		),
+	);
 
 	return true;
 };

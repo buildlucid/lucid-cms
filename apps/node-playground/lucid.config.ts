@@ -65,7 +65,7 @@ export default configureLucid({
 	// 	})),
 	config: (env) => ({
 		// logger: {
-		// 	level: "silent",
+		// 	level: "debug",
 		// },
 		auth: {
 			password: {

@@ -3,6 +3,8 @@ import {
 	colorize,
 	consoleColors,
 	createPrefix,
+	formatSingleLine,
+	formatStructuredValue,
 	formatTimestamp,
 	getConsoleLogger,
 	getErrorMessage,
@@ -17,27 +19,25 @@ import type {
 export type { ConsoleTransportOptions } from "./types.js";
 
 /**
- * Prints full errors and structured data only when verbose console output is enabled.
+ * Formats verbose error and data details for the entry's primary line.
  */
-const writeVerboseDetails = (
+const formatVerboseDetails = (
 	entry: LogEntry,
 	options: ResolvedConsoleTransportOptions,
 ) => {
-	if (!options.verbose) return;
+	if (!options.verbose) return "";
 
-	const consoleLogger = getConsoleLogger(entry.level);
-
+	const details = [];
 	if (entry.error instanceof Error && entry.error.stack) {
-		consoleLogger(
-			colorize(`  ${entry.error.stack}`, consoleColors.dim, options.colors),
-		);
+		details.push(`stack: ${formatStructuredValue(entry.error.stack)}`);
 	}
 	if (entry.data !== undefined) {
-		consoleLogger(
-			colorize("  Data:", consoleColors.dim, options.colors),
-			entry.data,
-		);
+		details.push(`data: ${formatStructuredValue(entry.data)}`);
 	}
+
+	return details.length > 0
+		? colorize(` — ${details.join(" — ")}`, consoleColors.dim, options.colors)
+		: "";
 };
 
 /**
@@ -60,8 +60,11 @@ const writeDefaultEntry = (
 			? ` — ${errorMessage}`
 			: "";
 
-	getConsoleLogger(entry.level)(`${prefix} ${entry.message}${errorSuffix}`);
-	writeVerboseDetails(entry, options);
+	getConsoleLogger(entry.level)(
+		formatSingleLine(
+			`${prefix} ${entry.message}${errorSuffix}${formatVerboseDetails(entry, options)}`,
+		),
+	);
 };
 
 /**
