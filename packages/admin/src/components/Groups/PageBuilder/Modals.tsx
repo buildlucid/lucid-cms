@@ -4,6 +4,7 @@ import { type Component, createMemo, createSignal, Show } from "solid-js";
 import LinkSelectModal from "@/components/Modals/CustomField/LinkSelect";
 import CreatePublishRequest from "@/components/Modals/Documents/CreatePublishRequest";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
+import DuplicateDocument from "@/components/Modals/Documents/DuplicateDocument";
 import ReleaseEnvironment from "@/components/Modals/Documents/ReleaseEnvironment";
 import RestoreRevision from "@/components/Modals/Documents/RestoreRevision";
 import NavigationGuard from "@/components/Modals/NavigationGuard";
@@ -162,6 +163,24 @@ export const Modals: Component<{
 					onSuccess: () => {
 						navigate(
 							`/lucid/collections/${props.hooks.state.collectionQuery.data?.data.key}`,
+						);
+					},
+				}}
+			/>
+			<DuplicateDocument
+				id={props.hooks.state.document()?.id}
+				state={{
+					open: props.hooks.uiState.getDuplicateOpen(),
+					setOpen: props.hooks.uiState.setDuplicateOpen,
+				}}
+				collection={props.hooks.state.collectionQuery?.data?.data as Collection}
+				callbacks={{
+					onSuccess: (documentId) => {
+						navigate(
+							getDocumentRoute("edit", {
+								collectionKey: props.hooks.state.collectionKey(),
+								documentId,
+							}),
 						);
 					},
 				}}

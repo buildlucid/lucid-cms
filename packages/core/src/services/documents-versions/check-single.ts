@@ -48,6 +48,7 @@ const checkSingle: ServiceFn<
 					mode: "check",
 					action: "update",
 					willPersist: false,
+					origin: { type: "standard" },
 				},
 			},
 			data: {

@@ -7,6 +7,7 @@ import {
 	FaSolidCheck,
 	FaSolidCircleInfo,
 	FaSolidClockRotateLeft,
+	FaSolidCopy,
 	FaSolidCrop,
 	FaSolidEnvelope,
 	FaSolidEye,
@@ -38,6 +39,7 @@ export type ActionIconName =
 	| "calendar"
 	| "check"
 	| "clock"
+	| "copy"
 	| "crop"
 	| "email"
 	| "eye"
@@ -86,6 +88,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return (
 					<FaSolidClockRotateLeft class={iconClasses()} size={iconSize()} />
 				);
+			case "copy":
+				return <FaSolidCopy class={iconClasses()} size={iconSize()} />;
 			case "crop":
 				return <FaSolidCrop class={iconClasses()} size={iconSize()} />;
 			case "email":

@@ -224,6 +224,29 @@ export const controllerSchemas = {
 			}),
 		}),
 	} satisfies ControllerSchema,
+	duplicateSingle: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().trim().meta({
+				description: "The source document ID",
+				example: 1,
+			}),
+		}),
+		response: z.object({
+			id: z.number().meta({
+				description: "The duplicated document's ID",
+				example: 2,
+			}),
+		}),
+	} satisfies ControllerSchema,
 	createVersion: {
 		body: z.object({
 			bricks: z

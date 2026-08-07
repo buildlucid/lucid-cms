@@ -11,7 +11,14 @@ import {
 } from "../checks/index.js";
 import { getTargetCollection, setFullSlug } from "../index.js";
 import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
+import {
+	applyDuplicateSlugCandidate,
+	getDuplicateSlugSource,
+	isFullSlugCollisionError,
+} from "./helpers/duplicate-slug.js";
 import resolveParentFullSlug from "./helpers/resolve-parent-full-slug.js";
+
+const MAX_DUPLICATE_SLUG_ATTEMPTS = 50;
 
 const beforeUpsertHandler =
 	(
@@ -73,6 +80,8 @@ const beforeUpsertHandler =
 		// Build, validate and set fullSlug
 
 		const parentPageId = getParentPageId(parentPage);
+		const isDuplicate = data.meta.execution.origin.type === "duplicate";
+		const duplicateSlugSource = getDuplicateSlugSource(slug);
 
 		// parent page checks and query
 		if (parentPageId !== null) {
@@ -89,77 +98,95 @@ const beforeUpsertHandler =
 			if (circularParentsRes.error) return circularParentsRes;
 		}
 
-		// fullSlug construction
-		const fullSlugRes = await resolveParentFullSlug(context, {
-			collection: targetCollectionRes.data,
-			collectionKey: targetCollectionRes.data.key,
-			versionType: data.data.versionType,
-			tables: data.meta.collectionTableNames,
-			fields: {
-				slug: slug,
-				parentPage,
-			},
-		});
-		if (fullSlugRes.error) return fullSlugRes;
+		for (let attempt = 0; ; attempt++) {
+			if (isDuplicate && attempt > 0) {
+				applyDuplicateSlugCandidate(slug, duplicateSlugSource, attempt);
+			}
 
-		const candidateFullSlugField = { ...fullSlug };
-		setFullSlug({
-			fullSlug: fullSlugRes.data,
-			defaultLocale: context.config.localization.defaultLocale,
-			collection: targetCollectionRes.data,
-			fields: {
-				fullSlug: candidateFullSlugField,
-			},
-		});
+			// fullSlug construction
+			const fullSlugRes = await resolveParentFullSlug(context, {
+				collection: targetCollectionRes.data,
+				collectionKey: targetCollectionRes.data.key,
+				versionType: data.data.versionType,
+				tables: data.meta.collectionTableNames,
+				fields: {
+					slug: slug,
+					parentPage,
+				},
+			});
+			if (fullSlugRes.error) return fullSlugRes;
 
-		const projectedFullSlugs = [
-			{
-				documentId: data.data.documentId,
-				versionId: data.data.versionId,
-				fullSlugs: fullSlugRes.data,
-			},
-		];
+			const candidateFullSlugField = { ...fullSlug };
+			setFullSlug({
+				fullSlug: fullSlugRes.data,
+				defaultLocale: context.config.localization.defaultLocale,
+				collection: targetCollectionRes.data,
+				fields: {
+					fullSlug: candidateFullSlugField,
+				},
+			});
 
-		const descendantFullSlugsRes = await buildDescendantFullSlugs(context, {
-			documentIds: [data.data.documentId],
-			versionType: data.data.versionType,
-			collectionKey: targetCollectionRes.data.key,
-			tables: data.meta.collectionTableNames,
-			collection: targetCollectionRes.data,
-			parentFullSlugField: candidateFullSlugField,
-		});
-		if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
-		projectedFullSlugs.push(...descendantFullSlugsRes.data);
+			const projectedFullSlugs = [
+				{
+					documentId: data.data.documentId,
+					versionId: data.data.versionId,
+					fullSlugs: fullSlugRes.data,
+				},
+			];
 
-		const checkFullSlugUniquenessRes = await checkFullSlugUniqueness(context, {
-			collection: targetCollectionRes.data,
-			collectionInstance: data.meta.collection,
-			projectedFullSlugs,
-			versionType: data.data.versionType,
-			collectionKey: targetCollectionRes.data.key,
-			tables: data.meta.collectionTableNames,
-			excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
-			inputFields: {
-				documentId: data.data.documentId,
-				versionId: data.data.versionId,
-				fields: data.data.fields ?? [],
-			},
-		});
-		if (checkFullSlugUniquenessRes.error) return checkFullSlugUniquenessRes;
+			const descendantFullSlugsRes = await buildDescendantFullSlugs(context, {
+				documentIds: [data.data.documentId],
+				versionType: data.data.versionType,
+				collectionKey: targetCollectionRes.data.key,
+				tables: data.meta.collectionTableNames,
+				collection: targetCollectionRes.data,
+				parentFullSlugField: candidateFullSlugField,
+			});
+			if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
+			projectedFullSlugs.push(...descendantFullSlugsRes.data);
 
-		setFullSlug({
-			fullSlug: fullSlugRes.data,
-			defaultLocale: context.config.localization.defaultLocale,
-			collection: targetCollectionRes.data,
-			fields: {
-				fullSlug: fullSlug,
-			},
-		});
+			const checkFullSlugUniquenessRes = await checkFullSlugUniqueness(
+				context,
+				{
+					collection: targetCollectionRes.data,
+					collectionInstance: data.meta.collection,
+					projectedFullSlugs,
+					versionType: data.data.versionType,
+					collectionKey: targetCollectionRes.data.key,
+					tables: data.meta.collectionTableNames,
+					excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
+					inputFields: {
+						documentId: data.data.documentId,
+						versionId: data.data.versionId,
+						fields: data.data.fields ?? [],
+					},
+				},
+			);
+			if (checkFullSlugUniquenessRes.error) {
+				if (
+					!isDuplicate ||
+					attempt === MAX_DUPLICATE_SLUG_ATTEMPTS ||
+					!isFullSlugCollisionError(checkFullSlugUniquenessRes.error)
+				) {
+					return checkFullSlugUniquenessRes;
+				}
+				continue;
+			}
 
-		return {
-			error: undefined,
-			data: undefined,
-		};
+			setFullSlug({
+				fullSlug: fullSlugRes.data,
+				defaultLocale: context.config.localization.defaultLocale,
+				collection: targetCollectionRes.data,
+				fields: {
+					fullSlug: fullSlug,
+				},
+			});
+
+			return {
+				error: undefined,
+				data: undefined,
+			};
+		}
 	};
 
 export default beforeUpsertHandler;

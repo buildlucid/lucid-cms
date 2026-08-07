@@ -34,6 +34,7 @@ export function useDocumentUIState(props: {
 }) {
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
+	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
 		createSignal<number | null>(null);
@@ -251,6 +252,24 @@ export function useDocumentUIState(props: {
 	});
 
 	/**
+	 * Determines if the duplicate document button should be visible
+	 */
+	const showDuplicateButton = createMemo(() => {
+		if (props.mode !== "edit") return false;
+		if (props.version() !== "latest") return false;
+		if (props.document()?.isDeleted) return false;
+		if (props.collection()?.locked) return false;
+		return props.collection()?.mode === "multiple";
+	});
+
+	/**
+	 * Prevents duplication until the latest local changes have been persisted
+	 */
+	const duplicateDisabled = createMemo(
+		() => brickStore.getDocumentMutated() || isSaving() || isAutoSaving(),
+	);
+
+	/**
 	 * Determines if the user should be able to save (update/create) documents
 	 */
 	const hasSavePermission = createMemo(() => {
@@ -316,6 +335,17 @@ export function useDocumentUIState(props: {
 	});
 
 	/**
+	 * Duplicating reads the source and creates a new document
+	 */
+	const hasDuplicatePermission = createMemo(() => {
+		const permissions = props.collection()?.permissions;
+		if (!permissions) return false;
+
+		return userStore.get.hasPermission([permissions.read, permissions.create])
+			.all;
+	});
+
+	/**
 	 * Determines if the restore reviision button should be visible
 	 */
 	const showRestoreRevisionButton = createMemo(() => {
@@ -362,6 +392,8 @@ export function useDocumentUIState(props: {
 	return {
 		getDeleteOpen,
 		setDeleteOpen,
+		getDuplicateOpen,
+		setDuplicateOpen,
 		getRestoreRevisionOpen,
 		setRestoreRevisionOpen,
 		getRestoreRevisionVersionId,
@@ -390,6 +422,9 @@ export function useDocumentUIState(props: {
 		showPublishButton,
 		showDeleteButton,
 		hasDeletePermission,
+		showDuplicateButton,
+		duplicateDisabled,
+		hasDuplicatePermission,
 		collectionNeedsMigrating,
 		autoSave,
 		hasAutoSavePermission,

@@ -58,10 +58,22 @@ type DocumentUserHookMeta = DocumentHookMeta & {
 	userId: number;
 };
 
+export type DocumentBeforeUpsertHookOrigin =
+	| {
+			type: "standard";
+	  }
+	| {
+			type: "duplicate";
+			sourceDocumentId: number;
+			sourceVersionId: number;
+			sourceVersionType: "latest";
+	  };
+
 export type DocumentBeforeUpsertHookExecution = {
 	mode: "upsert" | "check";
 	action: "create" | "update";
 	willPersist: boolean;
+	origin: DocumentBeforeUpsertHookOrigin;
 };
 
 type DocumentBeforeUpsertHookMeta = DocumentUserHookMeta & {

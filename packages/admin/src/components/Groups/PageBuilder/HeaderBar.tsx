@@ -101,6 +101,11 @@ export const HeaderBar: Component<{
 
 		return summary.trim() || fallback;
 	});
+	const actionCollectionSingularName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: props.state.collection()?.details.singularName,
+		}),
+	);
 	const matchingAutoSaveMetadata = createMemo(() => {
 		const document = props.state.document();
 		const metadata = props.state.autoSaveMetadata?.();
@@ -684,9 +689,24 @@ export const HeaderBar: Component<{
 								</Button>
 							</Show>
 							<Show
-								when={props.state.ui.showDeleteButton?.() || showCopyPreview()}
+								when={
+									props.state.ui.showDeleteButton?.() ||
+									props.state.ui.showDuplicateButton?.() ||
+									showCopyPreview()
+								}
 							>
 								<DocumentActions
+									collectionSingularName={actionCollectionSingularName()}
+									duplicate={
+										props.state.ui.showDuplicateButton?.()
+											? {
+													onDuplicate: () =>
+														props.state.ui.setDuplicateOpen(true),
+													permission: props.state.ui.hasDuplicatePermission(),
+													disabled: props.state.ui.duplicateDisabled(),
+												}
+											: undefined
+									}
 									onDelete={
 										props.state.ui.showDeleteButton?.()
 											? () => props.state.ui?.setDeleteOpen?.(true)

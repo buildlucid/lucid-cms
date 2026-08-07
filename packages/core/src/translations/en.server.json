@@ -197,6 +197,8 @@
 	"core.routes.document.update.error.message": "An error occurred while updating the document.",
 	"core.routes.document.create.error.name": "Document Create Error",
 	"core.routes.document.create.error.message": "An error occurred while creating the document.",
+	"core.routes.document.duplicate.error.name": "Document Duplicate Error",
+	"core.routes.document.duplicate.error.message": "An error occurred while duplicating the document.",
 	"core.routes.collection.fetch.error.name": "Collection(s) Fetch Error",
 	"core.routes.collection.fetch.error.message": "An error occurred while fetching the collection(s).",
 	"core.routes.email.delete.error.name": "Email Delete Error",

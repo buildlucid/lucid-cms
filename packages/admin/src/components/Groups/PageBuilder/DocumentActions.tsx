@@ -6,8 +6,14 @@ import ActionMenubar, {
 import T from "@/translations";
 
 export const DocumentActions: Component<{
+	collectionSingularName?: string;
 	onDelete?: () => void;
 	deletePermission?: boolean;
+	duplicate?: {
+		onDuplicate: () => void;
+		permission: boolean;
+		disabled: boolean;
+	};
 	preview?: {
 		onCopy: (mode: PreviewMode) => void;
 		permission: boolean;
@@ -15,9 +21,18 @@ export const DocumentActions: Component<{
 		scopedOnly: boolean;
 	};
 }> = (props) => {
+	const getActionLabel = (action: string) => {
+		if (!props.collectionSingularName) return action;
+
+		return T()("actions.with.collection", {
+			action,
+			collectionSingle: props.collectionSingularName,
+		});
+	};
+
 	const actions = (): ActionMenubarItem[] => [
 		{
-			label: T()("preview.copy.group"),
+			label: getActionLabel(T()("preview.copy.group")),
 			type: "button",
 			icon: "link",
 			hide: props.preview === undefined || props.preview.scopedOnly !== true,
@@ -26,14 +41,14 @@ export const DocumentActions: Component<{
 			onClick: () => props.preview?.onCopy("scoped"),
 		},
 		{
-			label: T()("preview.copy.group"),
+			label: getActionLabel(T()("preview.copy.group")),
 			type: "group",
 			icon: "link",
 			hide: props.preview === undefined || props.preview.scopedOnly,
 			permission: props.preview?.permission,
 			actions: [
 				{
-					label: T()("preview.copy.scoped"),
+					label: getActionLabel(T()("preview.copy.scoped")),
 					type: "button",
 					icon: "lock",
 					permission: props.preview?.permission,
@@ -41,7 +56,7 @@ export const DocumentActions: Component<{
 					onClick: () => props.preview?.onCopy("scoped"),
 				},
 				{
-					label: T()("preview.copy.navigable"),
+					label: getActionLabel(T()("preview.copy.navigable")),
 					type: "button",
 					icon: "share",
 					permission: props.preview?.permission,
@@ -51,7 +66,20 @@ export const DocumentActions: Component<{
 			],
 		},
 		{
-			label: T()("actions.delete.document"),
+			label: getActionLabel(T()("common.duplicate")),
+			type: "button",
+			icon: "copy",
+			hide: props.duplicate === undefined,
+			permission: props.duplicate?.permission,
+			disabled: props.duplicate?.disabled,
+			disabledToast: {
+				title: T()("toasts.documents.duplicate.disabled.title"),
+				message: T()("toasts.documents.duplicate.disabled.message"),
+			},
+			onClick: props.duplicate?.onDuplicate,
+		},
+		{
+			label: getActionLabel(T()("common.delete")),
 			type: "button",
 			icon: "trash",
 			hide: props.onDelete === undefined,

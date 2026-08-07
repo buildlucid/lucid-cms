@@ -2,6 +2,7 @@ import collections from "../../libs/collection/collections.js";
 import getMigrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
@@ -27,6 +28,7 @@ const upsertSingle: ServiceFn<
 			documentId?: number;
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
+			origin?: DocumentBeforeUpsertHookOrigin;
 		},
 	],
 	number
@@ -159,6 +161,7 @@ const upsertSingle: ServiceFn<
 			bricks: data.bricks,
 			fields: data.fields,
 			collection: collectionRes.data,
+			origin: data.origin,
 		}),
 		data.documentId === undefined
 			? createInitialDocumentWorkflow(context, {

@@ -3,6 +3,7 @@ import type CollectionBuilder from "../../libs/collection/builders/collection-bu
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
+import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
@@ -21,6 +22,7 @@ const createSingle: ServiceFn<
 			userId: number;
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
+			origin?: DocumentBeforeUpsertHookOrigin;
 		},
 	],
 	number
@@ -135,6 +137,7 @@ const createSingle: ServiceFn<
 					mode: "upsert",
 					action: "create",
 					willPersist: true,
+					origin: data.origin ?? { type: "standard" },
 				},
 			},
 			data: {
@@ -165,6 +168,9 @@ const createSingle: ServiceFn<
 		bricks: hookResponse.data.bricks,
 		fields: hookResponse.data.fields,
 		collection: data.collection,
+		//* the source content is already persisted and may predate current field
+		//* validation; duplication still runs transform hooks before cloning it
+		skipValidation: data.origin?.type === "duplicate",
 	});
 	if (createMultipleBricks.error) {
 		await rollbackVersionCreate(context, {

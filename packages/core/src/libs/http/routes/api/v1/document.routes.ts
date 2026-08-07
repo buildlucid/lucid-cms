@@ -9,6 +9,7 @@ import deleteMultiple from "../../../controllers/documents/delete-multiple.js";
 import deleteMultiplePermanently from "../../../controllers/documents/delete-multiple-permanently.js";
 import deleteSingle from "../../../controllers/documents/delete-single.js";
 import deleteSinglePermanently from "../../../controllers/documents/delete-single-permanently.js";
+import duplicateSingle from "../../../controllers/documents/duplicate-single.js";
 import getMultiple from "../../../controllers/documents/get-multiple.js";
 import getMultipleRevisions from "../../../controllers/documents/get-multiple-revisions.js";
 import getSingle from "../../../controllers/documents/get-single.js";
@@ -23,6 +24,7 @@ import updateWorkflow from "../../../controllers/documents/update-workflow.js";
 const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey", ...createSingle)
 	.post("/:collectionKey/restore", ...restoreMultiple)
+	.post("/:collectionKey/:id/duplicate", ...duplicateSingle)
 	.post("/:collectionKey/:id/publish", ...createPublishOperation)
 	.post("/:collectionKey/:id", ...createVersion)
 	.delete("/:collectionKey", ...deleteMultiple)

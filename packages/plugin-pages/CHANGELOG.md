@@ -4,6 +4,7 @@
 
 - Dropped `tenant` experiment support.
 - Updated page hierarchy, slug and route uniqueness queries to use Lucid's managed database API.
+- Added unique slug generation when duplicating pages.
 
 ## v0.6.0
 

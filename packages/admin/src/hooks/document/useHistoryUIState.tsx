@@ -8,6 +8,7 @@ export function useHistoryUIState(props: {
 	collection: Accessor<Collection | undefined>;
 }): UseDocumentUIState {
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
+	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
 		createSignal<number | null>(null);
@@ -112,6 +113,8 @@ export function useHistoryUIState(props: {
 	 * Determines if the delete document button should be visible - always false for history
 	 */
 	const showDeleteButton = createMemo(() => false);
+	const showDuplicateButton = createMemo(() => false);
+	const duplicateDisabled = createMemo(() => true);
 
 	/**
 	 * Determines if the user should be able to save - always false for history
@@ -132,6 +135,7 @@ export function useHistoryUIState(props: {
 	 * Determines if the user has delete permission - always false for history
 	 */
 	const hasDeletePermission = createMemo(() => false);
+	const hasDuplicatePermission = createMemo(() => false);
 
 	/**
 	 * Determines if the restore revision button should be visible - always false for history
@@ -154,6 +158,8 @@ export function useHistoryUIState(props: {
 	return {
 		getDeleteOpen,
 		setDeleteOpen,
+		getDuplicateOpen,
+		setDuplicateOpen,
 		getRestoreRevisionOpen,
 		setRestoreRevisionOpen,
 		getRestoreRevisionVersionId,
@@ -182,6 +188,9 @@ export function useHistoryUIState(props: {
 		showPublishButton,
 		showDeleteButton,
 		hasDeletePermission,
+		showDuplicateButton,
+		duplicateDisabled,
+		hasDuplicatePermission,
 		collectionNeedsMigrating,
 		autoSave,
 		hasAutoSavePermission,

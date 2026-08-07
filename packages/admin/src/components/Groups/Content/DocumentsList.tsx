@@ -18,6 +18,7 @@ import { DynamicContent } from "@/components/Groups/Layout";
 import { Table } from "@/components/Groups/Table/Table";
 import DeleteDocument from "@/components/Modals/Documents/DeleteDocument";
 import DeleteDocumentPermanently from "@/components/Modals/Documents/DeleteDocumentPermanently";
+import DuplicateDocument from "@/components/Modals/Documents/DuplicateDocument";
 import RestoreDocument from "@/components/Modals/Documents/RestoreDocument";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
 import { useDocumentOrderSave } from "@/hooks/document/useDocumentOrderSave";
@@ -55,6 +56,7 @@ export const DocumentsList: Component<{
 	const queryClient = useQueryClient();
 	const rowTarget = useRowTarget({
 		triggers: {
+			duplicate: false,
 			delete: false,
 			promote: false,
 			publish: false,
@@ -152,6 +154,13 @@ export const DocumentsList: Component<{
 
 		return userStore.get.hasPermission([permission]).some;
 	});
+	const canDuplicateDocuments = createMemo(() => {
+		const permissions = collectionPermissions();
+		if (!permissions) return false;
+
+		return userStore.get.hasPermission([permissions.read, permissions.create])
+			.all;
+	});
 	//* reorder only after order mode pins the list to manual order
 	const rowsAreReorderable = createMemo(
 		() =>
@@ -172,6 +181,17 @@ export const DocumentsList: Component<{
 				value: props.state.collection?.details.singularName,
 			}) || T()("common.collection"),
 	);
+	const actionCollectionSingularName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: props.state.collection?.details.singularName,
+		}),
+	);
+	const getActionLabel = (action: string) => {
+		const collectionSingle = actionCollectionSingularName();
+		if (!collectionSingle) return action;
+
+		return T()("actions.with.collection", { action, collectionSingle });
+	};
 	const isDeletedFilter = createMemo(() =>
 		props.state.showingDeleted() ? 1 : 0,
 	);
@@ -465,7 +485,7 @@ export const DocumentsList: Component<{
 								}}
 								actions={[
 									{
-										label: T()("preview.copy.group"),
+										label: getActionLabel(T()("preview.copy.group")),
 										type: "group",
 										icon: "link",
 										actionExclude: true,
@@ -479,7 +499,7 @@ export const DocumentsList: Component<{
 											props.state.collection?.capabilities.preview !== true,
 										actions: [
 											{
-												label: T()("preview.copy.scoped"),
+												label: getActionLabel(T()("preview.copy.scoped")),
 												type: "button",
 												icon: "lock",
 												onClick: () => void copyPreviewUrl(doc().id, "scoped"),
@@ -491,7 +511,7 @@ export const DocumentsList: Component<{
 													: false,
 											},
 											{
-												label: T()("preview.copy.navigable"),
+												label: getActionLabel(T()("preview.copy.navigable")),
 												type: "button",
 												icon: "share",
 												onClick: () =>
@@ -506,7 +526,7 @@ export const DocumentsList: Component<{
 										],
 									},
 									{
-										label: T()("common.edit"),
+										label: getActionLabel(T()("common.edit")),
 										type: "button",
 										icon: "pen",
 										onClick: () => {
@@ -525,7 +545,7 @@ export const DocumentsList: Component<{
 										hide: props.state.showingDeleted(),
 									},
 									{
-										label: T()("common.preview"),
+										label: getActionLabel(T()("common.preview")),
 										type: "button",
 										icon: "eye",
 										onClick: () => {
@@ -544,7 +564,21 @@ export const DocumentsList: Component<{
 										hide: props.state.showingDeleted() === false,
 									},
 									{
-										label: T()("common.restore"),
+										label: getActionLabel(T()("common.duplicate")),
+										type: "button",
+										icon: "copy",
+										onClick: () => {
+											rowTarget.setTargetId(doc().id);
+											rowTarget.setTrigger("duplicate", true);
+										},
+										permission: canDuplicateDocuments(),
+										hide:
+											props.state.showingDeleted() ||
+											props.state.collection?.locked === true ||
+											props.state.collection?.mode !== "multiple",
+									},
+									{
+										label: getActionLabel(T()("common.restore")),
 										type: "button",
 										icon: "restore",
 										onClick: () => {
@@ -560,7 +594,7 @@ export const DocumentsList: Component<{
 										theme: "primary",
 									},
 									{
-										label: T()("common.delete"),
+										label: getActionLabel(T()("common.delete")),
 										type: "button",
 										icon: "trash",
 										onClick: () => {
@@ -577,7 +611,7 @@ export const DocumentsList: Component<{
 										hide: props.state.showingDeleted(),
 									},
 									{
-										label: T()("actions.delete.permanently"),
+										label: getActionLabel(T()("actions.delete.permanently")),
 										type: "button",
 										icon: "trash",
 										onClick: () => {
@@ -607,6 +641,26 @@ export const DocumentsList: Component<{
 					},
 				}}
 				collection={props.state.collection as Collection}
+			/>
+			<DuplicateDocument
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().duplicate,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("duplicate", state);
+					},
+				}}
+				collection={props.state.collection as Collection}
+				callbacks={{
+					onSuccess: (documentId) => {
+						navigate(
+							getDocumentRoute("edit", {
+								collectionKey: collectionKey(),
+								documentId,
+							}),
+						);
+					},
+				}}
 			/>
 			{/* TODO: add support to selec the target environment */}
 			{/* <PromoteToDraft

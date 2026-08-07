@@ -7,6 +7,7 @@ import useDeleteMultiple from "./useDeleteMultiple";
 import useDeleteMultiplePermanently from "./useDeleteMultiplePermanently";
 import useDeleteSingle from "./useDeleteSingle";
 import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
+import useDuplicateSingle from "./useDuplicateSingle";
 import useGetMultiple from "./useGetMultiple";
 import useGetMultipleRevisions from "./useGetMultipleRevisions";
 import useGetSingle from "./useGetSingle";
@@ -39,6 +40,7 @@ const exportObject = {
 	useUpdateWorkflow,
 	useRestore,
 	useDeleteSinglePermanently,
+	useDuplicateSingle,
 	useGetWorkflowAssignees,
 };
 

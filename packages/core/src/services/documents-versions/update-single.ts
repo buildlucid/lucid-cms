@@ -58,6 +58,7 @@ const updateSingle: ServiceFn<
 					mode: "upsert",
 					action: "update",
 					willPersist: true,
+					origin: { type: "standard" },
 				},
 			},
 			data: {
