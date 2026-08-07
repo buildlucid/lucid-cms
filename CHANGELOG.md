@@ -12,6 +12,7 @@
 - Added anonymous telemetry for setup and initial `dev`, `serve` and `build` outcomes, with config and environment opt-outs. ([35ccfbb](https://github.com/buildlucid/lucid-cms/commit/35ccfbbb4dea6751c66be3a06eed8e082e34a48c))
 - Added quarter-turn rotation support to image presets. ([9277119](https://github.com/buildlucid/lucid-cms/commit/92771192886ccd8d4a896eb3a5e5a7fdd8de0614))
 - Added a `tables` config option, plus plugin exports for `defineTable` and column codecs, so projects and plugins can describe custom tables and JSON columns consistently across database adapters. ([6079ade](https://github.com/buildlucid/lucid-cms/commit/6079adea633eb538d731af6191dcdc346ac9a024))
+- Added document duplication support to the API and admin UI. ([51ff128](https://github.com/buildlucid/lucid-cms/commit/51ff128c39f53784398dba77749ba7fd6e379c39))
 
 ### Breaking Changes:
 

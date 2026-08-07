@@ -4,6 +4,7 @@
 
 - Adapter keys passed from `createLucidHost` response to `onListening` for telemetry support.
 - Added generated Wrangler configuration support for the Cloudflare Images binding.
+- Disposed the Wrangler platform proxy when Astro development and build lifecycles finish.
 
 ## v1.2.0
 

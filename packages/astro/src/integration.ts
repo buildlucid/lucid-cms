@@ -11,16 +11,17 @@ import {
 } from "./integration/assets.js";
 import { writeGeneratedModules } from "./integration/generated.js";
 import {
+	teardownDevProject,
+	teardownProject,
+} from "./integration/lifecycle.js";
+import {
 	bootstrapDevProject,
 	checkProjectCompatibility,
 	loadProject,
 	type ResolvedLucidProject,
 } from "./integration/project.js";
 import collectWatchFiles from "./integration/watch.js";
-import {
-	destroyRuntimeHosts,
-	registerBuildContext,
-} from "./internal/runtime.js";
+import { registerBuildContext } from "./internal/runtime.js";
 import type { LucidAstroOptions } from "./types.js";
 
 /** Creates the Lucid CMS integration for Astro. */
@@ -129,15 +130,19 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 				await devBootstrap;
 			},
 			"astro:server:done": async () => {
-				if (project) await destroyRuntimeHosts(project.hostId);
+				if (project) await teardownDevProject(project);
 			},
 			"astro:build:done": async ({ dir }) => {
 				if (!project) return;
 				const directory = fileURLToPath(dir);
-				await Promise.all([
-					copyAssets(assetRoot, directory),
-					project.integrationBridge.buildDone?.({ directory }),
-				]);
+				try {
+					await Promise.all([
+						copyAssets(assetRoot, directory),
+						project.integrationBridge.buildDone?.({ directory }),
+					]);
+				} finally {
+					await teardownProject(project, "build");
+				}
 			},
 		},
 	};

@@ -88,6 +88,11 @@ export type LucidAstroIntegrationBridge = {
 		| Promise<LucidAstroPrepareResult | undefined>;
 	/** Applies platform-specific changes to the completed Astro build. */
 	buildDone?(props: { directory: string }): void | Promise<void>;
+	/** Releases resources created by the runtime-specific Astro integration. */
+	teardown?(props: {
+		adapter: RuntimeAdapter;
+		command: "dev" | "build";
+	}): void | Promise<void>;
 };
 
 /** Options accepted by the Lucid Astro integration. */
