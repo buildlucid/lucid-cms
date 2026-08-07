@@ -351,7 +351,7 @@ const MediaAltGenerationModalContent: Component<{
 														<Show when={canRevert()}>
 															<button
 																type="button"
-																class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-icon-fade transition-colors duration-200 hover:bg-input-base hover:text-title focus-visible:ring-1 focus-visible:ring-primary-base"
+																class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-icon-faded transition-colors duration-200 hover:bg-input-base hover:text-title focus-visible:ring-1 focus-visible:ring-primary-base"
 																title={T()(
 																	"ai.media.alt.generate.response.revert",
 																)}

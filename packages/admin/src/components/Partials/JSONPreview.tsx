@@ -1,9 +1,11 @@
 import { json } from "@codemirror/lang-json";
+import { Compartment } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import { createCodeMirror, createEditorReadonly } from "solid-codemirror";
-import type { Component } from "solid-js";
-import { cmHighlighting, cmTheme } from "@/utils/codemirror-theme";
+import { type Component, createEffect } from "solid-js";
+import themeStore from "@/store/themeStore";
+import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
 
 interface JSONPreviewProps {
 	title: string;
@@ -22,17 +24,29 @@ const JSONPreview: Component<JSONPreviewProps> = (props) => {
 	});
 
 	createEditorReadonly(editorView, () => true);
+	const themeCompartment = new Compartment();
 
 	createExtension(basicSetup);
 	createExtension(json());
-	createExtension(cmTheme);
-	createExtension(cmHighlighting);
+	createExtension(
+		themeCompartment.of(getCodeMirrorTheme(themeStore.resolved())),
+	);
 	createExtension(EditorView.lineWrapping);
 	createExtension(
 		EditorView.theme({
 			".cm-cursor": { display: "none !important" },
 		}),
 	);
+
+	createEffect(() => {
+		const view = editorView();
+		const theme = themeStore.resolved();
+		if (!view) return;
+
+		view.dispatch({
+			effects: themeCompartment.reconfigure(getCodeMirrorTheme(theme)),
+		});
+	});
 
 	// ----------------------------------------
 	// Render

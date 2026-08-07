@@ -8,6 +8,7 @@ interface ModalProps {
 		setOpen: (_open: boolean) => void;
 	};
 	options?: {
+		noBorder?: boolean;
 		noPadding?: boolean;
 		preventDismiss?: boolean;
 		size?: "large";
@@ -57,8 +58,9 @@ export const Modal: Component<ModalProps> = (props) => {
 					>
 						<div
 							class={classNames(
-								"max-w-2xl w-full bg-background-base rounded-xl overflow-hidden border-border border m-auto pointer-events-auto",
+								"max-w-2xl w-full bg-background-base rounded-xl overflow-hidden m-auto pointer-events-auto",
 								{
+									"border border-border": props.options?.noBorder !== true,
 									"max-w-7xl": props.options?.size === "large",
 								},
 							)}

@@ -45,7 +45,7 @@ const ProgressBar: Component<ProgressBarProps> = (props) => {
 						"rounded-md": props.variant !== "edge",
 						// usage
 						"bg-error-base": props.type === "usage" && getProgress() > 90,
-						"bg-white": props.type === "usage" && getProgress() <= 90,
+						"bg-title": props.type === "usage" && getProgress() <= 90,
 						// target
 						"bg-primary-base":
 							props.type === "target" &&

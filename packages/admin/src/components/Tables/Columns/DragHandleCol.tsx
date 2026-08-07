@@ -26,7 +26,7 @@ const DragHandleCol: Component<DragHandleColProps> = (props) => {
 				onDragStart={props.onDragStart}
 				onDragEnd={props.onDragEnd}
 				onClick={(e) => e.stopPropagation()}
-				class="flex items-center justify-center size-6 rounded-md cursor-grab active:cursor-grabbing text-icon-fade hover:text-subtitle focus:outline-none focus-visible:ring-1 ring-primary-base"
+				class="flex items-center justify-center size-6 rounded-md cursor-grab active:cursor-grabbing text-icon-faded hover:text-subtitle focus:outline-none focus-visible:ring-1 ring-primary-base"
 				aria-label={T()("documents.order.drag.label")}
 			>
 				<FaSolidGripLines size={12} />

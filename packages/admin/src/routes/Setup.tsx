@@ -1,10 +1,10 @@
-import notifyIllustration from "@assets/illustrations/notify.svg";
-import LogoIcon from "@assets/svgs/logo-icon.svg";
+import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useNavigate } from "@solidjs/router";
 import { type Component, createEffect, Match, Switch } from "solid-js";
 import SetupForm from "@/components/Forms/Auth/SetupForm";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import Spinner from "@/components/Partials/Spinner";
+import ThemeLogoIcon from "@/components/Partials/ThemeLogoIcon";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -53,7 +53,7 @@ const SetupRoute: Component = () => {
 				when={setupRequired.isSuccess && setupRequired.data.data.setupRequired}
 			>
 				<div class="mb-10 text-center">
-					<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
+					<ThemeLogoIcon class="h-10 mx-auto mb-6" />
 					<h1 class="mb-1">{T()("routes.auth.setup.title")}</h1>
 					<p class="max-w-sm mx-auto">{T()("routes.auth.setup.description")}</p>
 				</div>

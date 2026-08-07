@@ -1,5 +1,4 @@
-import notifyIllustration from "@assets/illustrations/notify.svg";
-import LogoIcon from "@assets/svgs/logo-icon.svg";
+import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useLocation } from "@solidjs/router";
 import {
 	type Component,
@@ -12,6 +11,7 @@ import Button from "@/components/Partials/Button";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import Link from "@/components/Partials/Link";
 import Spinner from "@/components/Partials/Spinner";
+import ThemeLogoIcon from "@/components/Partials/ThemeLogoIcon";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -72,7 +72,7 @@ const EmailChangeConfirmRoute: Component = () => {
 			</Match>
 			<Match when={completed()}>
 				<div class="text-center max-w-sm mx-auto">
-					<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
+					<ThemeLogoIcon class="h-10 mx-auto mb-6" />
 					<h1 class="mb-1">
 						{T()("routes.auth.email.change.confirmed.title")}
 					</h1>
@@ -89,7 +89,7 @@ const EmailChangeConfirmRoute: Component = () => {
 			</Match>
 			<Match when={checkToken.isSuccess}>
 				<div class="text-center max-w-sm mx-auto">
-					<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
+					<ThemeLogoIcon class="h-10 mx-auto mb-6" />
 					<h1 class="mb-1">{T()("routes.auth.email.change.confirm.title")}</h1>
 					<p>{T()("routes.auth.email.change.confirm.description")}</p>
 					<div class="mt-8 flex justify-center">

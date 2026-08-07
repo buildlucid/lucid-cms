@@ -127,7 +127,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				aria-controls={`fixed-brick-content-${props.brick.key}`}
 			>
 				<div class="flex items-center gap-2.5">
-					<FaSolidShield class="text-white text-lg" />
+					<FaSolidShield class="text-icon-base text-lg" />
 					<span class="text-base font-medium text-title">
 						{helpers.getLocaleValue({
 							value: config()?.details.name,

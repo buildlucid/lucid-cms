@@ -151,19 +151,29 @@ const LucidConnection: Component = () => {
 							</p>
 						</div>
 						<div class="flex shrink-0 items-center gap-2">
-							<Link
-								href={constants.lucidRemote.website}
-								target="_blank"
-								rel="noreferrer"
-								theme="border-outline"
-								size="small"
-							>
-								{T()("connection.remote.visit.action")}
-								<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />
-							</Link>
+							<Show when={!isConnected()}>
+								<Link
+									href={constants.lucidRemote.website}
+									target="_blank"
+									rel="noreferrer"
+									theme="border-outline"
+									size="small"
+								>
+									{T()("connection.remote.visit.action")}
+									<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />
+								</Link>
+							</Show>
 							<Show when={isConnected()}>
 								<ActionDropdown
 									actions={[
+										{
+											type: "link",
+											label: T()("connection.remote.visit.action"),
+											icon: "link",
+											href: constants.lucidRemote.website,
+											target: "_blank",
+											rel: "noreferrer",
+										},
 										{
 											type: "button",
 											label: T()("connection.verify.action"),

@@ -542,6 +542,7 @@ const ImageCropEditor: Component<{
 		<Modal
 			state={props.state}
 			options={{
+				noBorder: true,
 				noPadding: true,
 				size: "large",
 			}}

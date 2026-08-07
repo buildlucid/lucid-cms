@@ -282,7 +282,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										primarySelectedMedia()?.type === "video",
 								})}
 							>
-								<div class="z-20 flex flex-wrap items-center gap-2 absolute top-0 left-0 right-0 p-3 bg-linear-to-b from-card-base via-card-base/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+								<div class="z-20 flex flex-wrap items-center gap-2 absolute top-0 left-0 right-0 p-3 bg-linear-to-b from-black/70 via-black/35 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
 									<Show
 										when={
 											primarySelectedMedia()?.isDeleted ||
@@ -548,7 +548,7 @@ const MediaSortableItem: Component<{
 						props.media.type === "image" || props.media.type === "video",
 				})}
 			>
-				<div class="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 bg-linear-to-b from-card-base via-card-base/80 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+				<div class="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 bg-linear-to-b from-black/70 via-black/35 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 					<div class="flex flex-wrap gap-1.5">
 						<Show when={props.media.isDeleted}>
 							<Pill theme="red">{T()("common.status.deleted")}</Pill>

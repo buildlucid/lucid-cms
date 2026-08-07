@@ -1,4 +1,4 @@
-import notifySvg from "@assets/illustrations/notify.svg";
+import notifySvg from "@assets/illustrations/notify.svg?url";
 import type { ErrorResponse } from "@types";
 import classNames from "classnames";
 import {

@@ -1,4 +1,5 @@
-import LogoIcon from "@assets/svgs/text-logo-dark.svg";
+import LogoDark from "@assets/svgs/text-logo-dark.svg?url";
+import LogoLight from "@assets/svgs/text-logo-light.svg?url";
 import { A, useLocation } from "@solidjs/router";
 import classNames from "classnames";
 import {
@@ -22,6 +23,17 @@ import api from "@/services/api";
 import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import {
+	isNavigationLinkActive,
+	setNavigationLinkActiveState,
+} from "@/utils/navigation";
+
+const NavigationLogo: Component = () => (
+	<>
+		<img src={LogoLight} alt="Lucid CMS Logo" class="h-5 dark:hidden" />
+		<img src={LogoDark} alt="Lucid CMS Logo" class="hidden h-5 dark:block" />
+	</>
+);
 
 export const NavigationChrome: Component = () => {
 	// ----------------------------------------
@@ -123,8 +135,26 @@ export const NavigationChrome: Component = () => {
 	// ----------------------------------
 	// Effects
 	createEffect(() => {
-		location.pathname;
+		const pathname = location.pathname;
 		setMobileMenuOpen(false);
+
+		if (typeof document === "undefined") return;
+		const synchronizeLinks = () => {
+			for (const link of document.querySelectorAll<HTMLAnchorElement>(
+				"a[data-navigation-href]",
+			)) {
+				const active =
+					link.dataset.navigationForceActive === "true" ||
+					isNavigationLinkActive(
+						pathname,
+						link.dataset.navigationHref || link.href,
+					);
+				setNavigationLinkActiveState(link, active);
+			}
+		};
+
+		synchronizeLinks();
+		queueMicrotask(synchronizeLinks);
 	});
 
 	createEffect(() => {
@@ -159,7 +189,7 @@ export const NavigationChrome: Component = () => {
 			<header class="md:hidden z-32 px-4">
 				<div class="px-2 py-4 bg-sidebar-base flex items-center justify-between gap-2">
 					<A href="/lucid" class="flex items-center min-w-0">
-						<img src={LogoIcon} alt="Lucid CMS Logo" class="h-5" />
+						<NavigationLogo />
 					</A>
 					<div class="flex items-center gap-4">
 						<Show when={user()}>
@@ -223,7 +253,7 @@ export const NavigationChrome: Component = () => {
 				<div class="w-55 h-full flex flex-col overflow-y-auto scrollbar">
 					<div class="pt-6 px-4">
 						<div class="flex items-center pl-2">
-							<img src={LogoIcon} alt="Lucid CMS Logo" class="h-5" />
+							<NavigationLogo />
 						</div>
 					</div>
 					<NavigationMenuContent
@@ -297,12 +327,7 @@ export const NavigationChrome: Component = () => {
 							<div class="px-6 pt-4">
 								<div class="flex items-center justify-between">
 									<div class="flex items-center gap-2">
-										<img
-											src={LogoIcon}
-											alt="Lucid CMS Logo"
-											class="h-5"
-											loading="lazy"
-										/>
+										<NavigationLogo />
 									</div>
 									<button
 										type="button"

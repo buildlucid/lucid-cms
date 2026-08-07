@@ -197,7 +197,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 						>
 							<button
 								type="button"
-								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-primary-contrast hover:bg-error-base hover:text-error-contrast duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
+								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-icon-faded hover:bg-error-base hover:text-error-contrast duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
 								onClick={(e) => {
 									e.stopPropagation();
 									props.onChange(undefined);

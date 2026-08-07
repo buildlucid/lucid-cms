@@ -70,8 +70,8 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 						{
 							"bg-primary-base text-primary-contrast":
 								props.type === "success" || props.type === "info",
-							"bg-error-base text-white": props.type === "error",
-							"bg-warning-base text-primary-contrast": props.type === "warning",
+							"bg-error-base text-error-contrast": props.type === "error",
+							"bg-warning-base text-warning-contrast": props.type === "warning",
 						},
 					)}
 				>

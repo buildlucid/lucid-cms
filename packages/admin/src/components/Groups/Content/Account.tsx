@@ -27,6 +27,7 @@ import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T, { getLocale, localesConfig, setLocale } from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
+import { AppearancePreference } from "./AppearancePreference";
 
 export const Account: Component = () => {
 	// ----------------------------------------
@@ -106,7 +107,6 @@ export const Account: Component = () => {
 			return map;
 		}, {});
 	});
-
 	// ----------------------------------------
 	// Handlers
 	const handleClearProfilePicture = () => {
@@ -431,6 +431,13 @@ export const Account: Component = () => {
 				title={T()("account.preferences.title")}
 				description={T()("account.preferences.description")}
 			>
+				<InfoRow.Content
+					title={T()("settings.interface.cms.appearance.title")}
+					description={T()("settings.interface.cms.appearance.description")}
+					reducedMargin={true}
+				>
+					<AppearancePreference />
+				</InfoRow.Content>
 				<InfoRow.Content
 					title={T()("settings.interface.cms.locale.title")}
 					description={T()("settings.interface.cms.locale.description")}

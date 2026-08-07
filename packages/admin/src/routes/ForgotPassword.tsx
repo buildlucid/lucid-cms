@@ -1,5 +1,4 @@
-import notifyIllustration from "@assets/illustrations/notify.svg";
-import LogoIcon from "@assets/svgs/logo-icon.svg";
+import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useNavigate } from "@solidjs/router";
 import {
 	type Component,
@@ -11,6 +10,7 @@ import {
 import ForgotPasswordForm from "@/components/Forms/Auth/ForgotPasswordForm";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import Spinner from "@/components/Partials/Spinner";
+import ThemeLogoIcon from "@/components/Partials/ThemeLogoIcon";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -60,7 +60,7 @@ const ForgotPasswordRoute: Component = () => {
 			<Match
 				when={isSuccess() && providers.data?.data.disablePassword === false}
 			>
-				<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
+				<ThemeLogoIcon class="h-10 mx-auto mb-6" />
 				<h1 class="mb-1 text-center">
 					{T()("routes.auth.forgot.password.title")}
 				</h1>

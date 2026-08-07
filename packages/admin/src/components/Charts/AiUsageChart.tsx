@@ -6,6 +6,7 @@ import { Input } from "@/components/Groups/Form/Input";
 import { Select } from "@/components/Groups/Form/Select";
 import Spinner from "@/components/Partials/Spinner";
 import api from "@/services/api";
+import themeStore from "@/store/themeStore";
 import T from "@/translations";
 import {
 	formatAiUsageChartValue,
@@ -20,33 +21,16 @@ import dateHelpers from "@/utils/date-helpers";
 const defaultMetric: AiUsageChartMetric = "totalTokens";
 const allFeaturesValue = "__all-features";
 
-const metricStyles: Record<
-	AiUsageChartMetric,
-	{
-		borderColor: string;
-		backgroundColor: string;
-		pointBackgroundColor: string;
-	}
-> = {
-	requests: {
-		borderColor: "#79A7FF",
-		backgroundColor: "rgba(121, 167, 255, 0.12)",
-		pointBackgroundColor: "#79A7FF",
-	},
-	totalTokens: {
-		borderColor: "#C1FE77",
-		backgroundColor: "rgba(193, 254, 119, 0.12)",
-		pointBackgroundColor: "#C1FE77",
-	},
-	cost: {
-		borderColor: "#F8C45A",
-		backgroundColor: "rgba(248, 196, 90, 0.12)",
-		pointBackgroundColor: "#F8C45A",
-	},
-};
-
 const getMetricAxis = (metric: AiUsageChartMetric) =>
 	metric === "cost" ? "cost" : "count";
+
+const readThemeVariable = (name: string, fallback: string) => {
+	if (typeof document === "undefined") return fallback;
+	return (
+		getComputedStyle(document.documentElement).getPropertyValue(name).trim() ||
+		fallback
+	);
+};
 
 export const AiUsageChart: Component = () => {
 	// ----------------------------------
@@ -92,8 +76,65 @@ export const AiUsageChart: Component = () => {
 	const hasCountMetric = createMemo(() =>
 		chartSeries().some((series) => series.metric !== "cost"),
 	);
+	const chartPalette = createMemo(() => {
+		themeStore.resolved();
+
+		const requests = readThemeVariable("--lucid-chart-requests", "#79A7FF");
+		const totalTokens = readThemeVariable(
+			"--lucid-primary-base",
+			"oklch(88.842% 0.20897 135.866)",
+		);
+		const cost = readThemeVariable("--lucid-chart-cost", "#F8C45A");
+
+		return {
+			border: readThemeVariable("--lucid-border", "rgba(255, 255, 255, 0.1)"),
+			body: readThemeVariable("--lucid-body", "#A1A1A1"),
+			grid: readThemeVariable(
+				"--lucid-chart-grid",
+				"rgba(255, 255, 255, 0.06)",
+			),
+			metrics: {
+				requests: {
+					backgroundColor: readThemeVariable(
+						"--lucid-chart-requests-fill",
+						"rgba(121, 167, 255, 0.12)",
+					),
+					borderColor: requests,
+					pointBackgroundColor: requests,
+				},
+				totalTokens: {
+					backgroundColor: readThemeVariable(
+						"--lucid-chart-total-fill",
+						"rgba(193, 254, 119, 0.12)",
+					),
+					borderColor: totalTokens,
+					pointBackgroundColor: totalTokens,
+				},
+				cost: {
+					backgroundColor: readThemeVariable(
+						"--lucid-chart-cost-fill",
+						"rgba(248, 196, 90, 0.12)",
+					),
+					borderColor: cost,
+					pointBackgroundColor: cost,
+				},
+			} satisfies Record<
+				AiUsageChartMetric,
+				{
+					backgroundColor: string;
+					borderColor: string;
+					pointBackgroundColor: string;
+				}
+			>,
+			pointBorder: readThemeVariable("--lucid-chart-point-border", "#0A0A0A"),
+			subtitle: readThemeVariable("--lucid-subtitle", "#C9C9C9"),
+			title: readThemeVariable("--lucid-title", "#F1F1F1"),
+			tooltip: readThemeVariable("--lucid-chart-tooltip", "#121212"),
+		};
+	});
 	const chartData = createMemo<ChartData<"line">>(() => {
 		const firstSeries = chartSeries()[0];
+		const palette = chartPalette();
 
 		return {
 			labels:
@@ -104,7 +145,7 @@ export const AiUsageChart: Component = () => {
 						}) ?? point.date,
 				) ?? [],
 			datasets: chartSeries().map((series) => {
-				const style = metricStyles[series.metric];
+				const style = palette.metrics[series.metric];
 
 				return {
 					label: getAiUsageChartMetricLabel(series.metric),
@@ -112,7 +153,7 @@ export const AiUsageChart: Component = () => {
 					borderColor: style.borderColor,
 					backgroundColor: style.backgroundColor,
 					pointBackgroundColor: style.pointBackgroundColor,
-					pointBorderColor: "#0A0A0A",
+					pointBorderColor: palette.pointBorder,
 					pointHoverRadius: 5,
 					pointRadius: 3,
 					borderWidth: 2,
@@ -139,11 +180,11 @@ export const AiUsageChart: Component = () => {
 				display: false,
 			},
 			tooltip: {
-				backgroundColor: "#121212",
-				borderColor: "rgba(255, 255, 255, 0.1)",
+				backgroundColor: chartPalette().tooltip,
+				borderColor: chartPalette().border,
 				borderWidth: 1,
-				titleColor: "#F1F1F1",
-				bodyColor: "#C9C9C9",
+				titleColor: chartPalette().title,
+				bodyColor: chartPalette().subtitle,
 				displayColors: true,
 				callbacks: {
 					label: (context) => {
@@ -163,10 +204,10 @@ export const AiUsageChart: Component = () => {
 		scales: {
 			x: {
 				grid: {
-					color: "rgba(255, 255, 255, 0.06)",
+					color: chartPalette().grid,
 				},
 				ticks: {
-					color: "#A1A1A1",
+					color: chartPalette().body,
 					maxRotation: 0,
 				},
 			},
@@ -175,10 +216,10 @@ export const AiUsageChart: Component = () => {
 				beginAtZero: true,
 				position: "left",
 				grid: {
-					color: "rgba(255, 255, 255, 0.06)",
+					color: chartPalette().grid,
 				},
 				ticks: {
-					color: "#A1A1A1",
+					color: chartPalette().body,
 					callback: (value) =>
 						formatAiUsageChartValue({
 							metric: "totalTokens",
@@ -191,11 +232,11 @@ export const AiUsageChart: Component = () => {
 				beginAtZero: true,
 				position: hasCountMetric() ? "right" : "left",
 				grid: {
-					color: "rgba(255, 255, 255, 0.06)",
+					color: chartPalette().grid,
 					drawOnChartArea: !hasCountMetric(),
 				},
 				ticks: {
-					color: "#A1A1A1",
+					color: chartPalette().body,
 					callback: (value) =>
 						formatAiUsageChartValue({
 							metric: "cost",

@@ -21,12 +21,13 @@ import {
 	Show,
 } from "solid-js";
 import DropdownContent from "@/components/Partials/DropdownContent";
+import themeStore from "@/store/themeStore";
 import T from "@/translations";
 import {
 	getCodeLanguageLabel,
 	loadCodeLanguageExtension,
 } from "@/utils/code-field-languages";
-import { cmHighlighting, cmTheme } from "@/utils/codemirror-theme";
+import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
 import { DescribedBy } from "./DescribedBy";
 import { ErrorMessage } from "./ErrorMessage";
 import { Label } from "./Label";
@@ -98,13 +99,15 @@ export const CodeEditor: Component<CodeEditorProps> = (props) => {
 
 	const languageCompartment = new Compartment();
 	const placeholderCompartment = new Compartment();
+	const themeCompartment = new Compartment();
 
 	createExtension(basicSetup);
 	createExtension(keymap.of([indentWithTab]));
 	createExtension(languageCompartment.of([]));
 	createExtension(placeholderCompartment.of([]));
-	createExtension(cmTheme);
-	createExtension(cmHighlighting);
+	createExtension(
+		themeCompartment.of(getCodeMirrorTheme(themeStore.resolved())),
+	);
 	createExtension(EditorView.lineWrapping);
 	createExtension(
 		Prec.highest(
@@ -180,6 +183,15 @@ export const CodeEditor: Component<CodeEditorProps> = (props) => {
 	});
 	createEffect(() => {
 		const view = editorView();
+		const theme = themeStore.resolved();
+		if (!view) return;
+
+		view.dispatch({
+			effects: themeCompartment.reconfigure(getCodeMirrorTheme(theme)),
+		});
+	});
+	createEffect(() => {
+		const view = editorView();
 		const placeholderValue = props.copy?.placeholder;
 		if (!view) return;
 
@@ -219,7 +231,7 @@ export const CodeEditor: Component<CodeEditorProps> = (props) => {
 					},
 				)}
 			>
-				<div class="flex h-9 items-center justify-start border-b border-border bg-[#141414] px-2">
+				<div class="flex h-9 items-center justify-start border-b border-border bg-[var(--lucid-code-toolbar)] px-2">
 					<DropdownMenu.Root
 						open={languageMenuOpen()}
 						onOpenChange={setLanguageMenuOpen}

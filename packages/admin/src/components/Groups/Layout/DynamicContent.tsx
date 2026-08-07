@@ -1,5 +1,5 @@
-import noPermission from "@assets/illustrations/no-permission.svg";
-import notifySvg from "@assets/illustrations/notify.svg";
+import noPermission from "@assets/illustrations/no-permission.svg?url";
+import notifySvg from "@assets/illustrations/notify.svg?url";
 import classNames from "classnames";
 import { type Component, type JSXElement, Match, Show, Switch } from "solid-js";
 import Button from "@/components/Partials/Button";

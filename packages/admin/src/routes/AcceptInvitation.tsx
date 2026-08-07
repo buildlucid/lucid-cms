@@ -1,5 +1,4 @@
-import notifyIllustration from "@assets/illustrations/notify.svg";
-import LogoIcon from "@assets/svgs/logo-icon.svg";
+import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useLocation, useNavigate } from "@solidjs/router";
 import {
 	type Component,
@@ -15,6 +14,7 @@ import AcceptInvitationForm from "@/components/Forms/Auth/AcceptInvitationForm";
 import ErrorBlock from "@/components/Partials/ErrorBlock";
 import ProviderButton from "@/components/Partials/ProviderButton";
 import Spinner from "@/components/Partials/Spinner";
+import ThemeLogoIcon from "@/components/Partials/ThemeLogoIcon";
 import constants from "@/constants";
 import api from "@/services/api";
 import T from "@/translations";
@@ -126,7 +126,7 @@ const AcceptInvitationRoute: Component = () => {
 				/>
 			</Match>
 			<Match when={isReady()}>
-				<img src={LogoIcon} alt="Lucid CMS Logo" class="h-10 mx-auto mb-6" />
+				<ThemeLogoIcon class="h-10 mx-auto mb-6" />
 				<h1 class="mb-1 text-center">
 					{T()("routes.auth.accept.invitation.title")}
 				</h1>

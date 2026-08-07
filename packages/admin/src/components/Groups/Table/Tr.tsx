@@ -83,10 +83,10 @@ export const Tr: Component<TrProps> = (props) => {
 				"cursor-pointer": firstPermittedAction() !== undefined || props.onClick,
 				"outline outline-primary-muted-border -outline-offset-1 [&>td]:bg-primary-muted-bg [&>td]:after:border-primary-muted-border":
 					props.current,
-				"bg-background-base hover:bg-background-hover":
+				"bg-background-base hover:bg-row-hover":
 					(props.theme === "primary" || props.theme === undefined) &&
 					!props.current,
-				"bg-card-base hover:bg-card-hover":
+				"bg-card-base hover:bg-row-hover":
 					(props.theme === "secondary" || props.theme === "contained") &&
 					!props.current,
 				"opacity-60": isDragging(),

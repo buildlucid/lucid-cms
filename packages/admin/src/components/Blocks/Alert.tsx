@@ -70,7 +70,7 @@ const Alert: Component<AlertProps> = (props) => {
 												props.style === "block",
 											"bg-error-base text-error-contrast":
 												type === "error" && props.style === "block",
-											"bg-warning-base text-primary-contrast":
+											"bg-warning-base text-warning-contrast":
 												type === "warning" && props.style === "block",
 
 											"bg-primary-contrast text-primary-base":

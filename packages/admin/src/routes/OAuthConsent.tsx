@@ -1,4 +1,3 @@
-import LogoIcon from "@assets/svgs/logo-icon.svg";
 import { useParams } from "@solidjs/router";
 import classNames from "classnames";
 import {
@@ -21,6 +20,7 @@ import {
 import Button from "@/components/Partials/Button";
 import IconContainer from "@/components/Partials/IconContainer";
 import Pill from "@/components/Partials/Pill";
+import ThemeLogoIcon from "@/components/Partials/ThemeLogoIcon";
 import api from "@/services/api";
 import T, { translateAdminCopy } from "@/translations";
 import { LucidError } from "@/utils/error-handling";
@@ -188,7 +188,7 @@ const OAuthConsentRoute: Component = () => {
 						<header class="mb-6 text-center">
 							<div class="mb-2.5 flex items-center justify-center">
 								<IconContainer theme="default">
-									<img src={LogoIcon} alt="" class="size-6" />
+									<ThemeLogoIcon alt="" class="size-6" />
 								</IconContainer>
 								<Show when={authorization().clientLogo}>
 									{(logo) => (
@@ -442,7 +442,7 @@ const OAuthConsentRoute: Component = () => {
 													<For each={group.scopes}>
 														{(scope) => (
 															<li class="flex items-center gap-2">
-																<span class="grid size-3.5 shrink-0 place-items-center rounded-full bg-primary-muted-bg text-primary-base">
+																<span class="grid size-3.5 shrink-0 place-items-center rounded-full bg-primary-muted-bg text-primary-muted-contrast">
 																	<FaSolidCheck class="size-1.5" />
 																</span>
 																<span class="min-w-0">

@@ -19,7 +19,7 @@ const AiIconButton: Component<{
 		<button
 			type="button"
 			class={classnames(
-				"ai-action-button group relative flex items-center justify-center rounded-md text-icon-fade fill-icon-fade transition-colors duration-200 hover:text-primary-base hover:fill-primary-base focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
+				"ai-action-button group relative flex items-center justify-center rounded-md text-icon-faded fill-icon-faded transition-colors duration-200 hover:text-primary-muted-contrast hover:fill-primary-muted-contrast focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
 				{
 					"h-7 w-7": props.variant !== "subtle",
 					"h-5 w-5 before:absolute before:-inset-1 before:rounded-md before:content-['']":

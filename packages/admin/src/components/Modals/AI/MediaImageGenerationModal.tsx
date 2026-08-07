@@ -1066,7 +1066,7 @@ const MediaImageGenerationModal: Component = () => {
 												when={sourcePreviewUrl()}
 												fallback={
 													<FaSolidImage
-														class="relative z-10 h-5 w-5 text-icon-fade"
+														class="relative z-10 h-5 w-5 text-icon-faded"
 														aria-hidden="true"
 													/>
 												}

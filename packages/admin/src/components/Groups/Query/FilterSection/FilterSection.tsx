@@ -795,7 +795,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 						{(row, index) => (
 							<>
 								<Show when={index > 0}>
-									<span class="text-xs font-medium text-icon-fade">
+									<span class="text-xs font-medium text-icon-faded">
 										{conjunctionLabel(
 											row().groupTag === rows()[index - 1]?.groupTag,
 										)}

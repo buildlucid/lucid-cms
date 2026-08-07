@@ -1418,7 +1418,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 								<div class="h-20 rounded-sm border border-border rectangle-background overflow-hidden flex items-center justify-center bg-background-base">
 									<Show
 										when={posterPreview()}
-										fallback={<FaSolidImage class="w-6 h-6 text-icon-fade" />}
+										fallback={<FaSolidImage class="w-6 h-6 text-icon-faded" />}
 									>
 										{(preview) => (
 											<img

@@ -1,4 +1,4 @@
-import type { Component } from "solid-js";
+import { type Component, createMemo } from "solid-js";
 import { Label } from "@/components/Groups/Form/Label";
 
 interface DegreeRangeControlProps {
@@ -14,6 +14,17 @@ interface DegreeRangeControlProps {
 export const DegreeRangeControl: Component<DegreeRangeControlProps> = (
 	props,
 ) => {
+	// ------------------------------------
+	// Memos
+	const progress = createMemo(() => {
+		const distance = props.max - props.min;
+		if (distance <= 0) return 0;
+		return Math.min(
+			100,
+			Math.max(0, ((props.value - props.min) / distance) * 100),
+		);
+	});
+
 	// ------------------------------------
 	// Render
 	return (
@@ -34,7 +45,8 @@ export const DegreeRangeControl: Component<DegreeRangeControlProps> = (
 					value={props.value}
 					disabled={props.disabled}
 					aria-label={props.label}
-					class="h-8 min-w-0 flex-1 accent-primary-base disabled:opacity-60"
+					class="degree-range-input min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-60"
+					style={{ "--degree-range-progress": `${progress()}%` }}
 					onInput={(event) => {
 						props.onChange(Number(event.currentTarget.value));
 					}}

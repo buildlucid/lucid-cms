@@ -92,7 +92,7 @@ export const GenerationHistory: Component<GenerationHistoryProps> = (props) => {
 													"h-1.5 w-1.5 rounded-full transition-colors duration-200",
 													{
 														"bg-primary-base": selected(),
-														"bg-icon-fade": !selected(),
+														"bg-icon-faded": !selected(),
 													},
 												)}
 											/>

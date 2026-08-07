@@ -1,4 +1,4 @@
-import notifyIllustration from "@assets/illustrations/notify.svg";
+import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useParams } from "@solidjs/router";
 import {
 	FaSolidCalendar,
@@ -209,7 +209,7 @@ const ShareRoute: Component = () => {
 													</div>
 												</Match>
 												<Match when={true}>
-													<div class="flex flex-col gap-2 items-center justify-center text-icon-fade p-4">
+													<div class="flex flex-col gap-2 items-center justify-center text-icon-faded p-4">
 														<Switch>
 															<Match
 																when={grantedAccess()?.media.type === "archive"}

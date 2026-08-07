@@ -11,7 +11,7 @@ const AiDraftReviewPill: Component<{
 	// -------------------------------------
 	// Render
 	return (
-		<div class="absolute top-0 right-full z-20 mr-1 flex h-5 items-center overflow-hidden rounded-md border border-primary-muted-border bg-primary-muted-bg/95 text-primary-base shadow-md backdrop-blur-sm">
+		<div class="absolute top-0 right-full z-20 mr-1 flex h-5 items-center overflow-hidden rounded-md border border-primary-muted-border bg-primary-muted-bg/95 text-primary-muted-contrast shadow-md backdrop-blur-sm">
 			<span class="border-r border-primary-muted-border px-1.5 text-xs font-medium leading-none whitespace-nowrap">
 				{props.label}
 			</span>

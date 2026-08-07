@@ -206,25 +206,15 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					>
 						{/* Tabs */}
 						<Show when={allTabs().length > 0}>
-							<div
-								class={classNames(
-									"mb-5 flex flex-wrap gap-1 rounded-md border border-border bg-background-base p-1 shadow-inner",
-									{
-										"-mt-4": props.options.bleedTop,
-									},
-								)}
-							>
-								<Index each={allTabs()}>
-									{(tab) => (
-										<TabField
-											tab={tab()}
-											setActiveTab={setActiveTab}
-											getActiveTab={getActiveTab}
-											fieldErrors={props.fieldErrors}
-										/>
-									)}
-								</Index>
-							</div>
+							<TabField
+								tabs={allTabs()}
+								setActiveTab={setActiveTab}
+								getActiveTab={getActiveTab}
+								fieldErrors={props.fieldErrors}
+								class={classNames("mb-5 shadow-inner", {
+									"-mt-4": props.options.bleedTop,
+								})}
+							/>
 						</Show>
 						{/* Body */}
 						<Index each={configFields()}>

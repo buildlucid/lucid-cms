@@ -21,7 +21,7 @@ const IconContainer: Component<IconContainerProps> = (props) => {
 					"size-9": props.size === undefined || props.size === "medium",
 					"border-border bg-input-base text-body":
 						props.theme === undefined || props.theme === "default",
-					"border-primary-muted-border bg-primary-muted-bg text-primary-base":
+					"border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
 						props.theme === "primary",
 					"border-error-base/20 bg-error-base/10 text-error-base":
 						props.theme === "error",

@@ -963,7 +963,7 @@ const CustomFieldGenerationModal: Component = () => {
 																class="flex min-w-0 items-center gap-2 text-sm font-medium text-body"
 															>
 																<FaSolidLanguage
-																	class="shrink-0 text-icon-fade"
+																	class="shrink-0 text-icon-faded"
 																	size={12}
 																	aria-hidden="true"
 																/>

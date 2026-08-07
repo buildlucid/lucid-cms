@@ -43,7 +43,7 @@ const Link: Component<LinkProps> = (props) => {
 					props.theme === "danger-outline",
 
 				// Sizes
-				"px-2 h-9 text-sm": props.size === "small",
+				"px-3 h-9 text-sm": props.size === "small",
 				"px-4 py-2 h-10 text-sm": props.size === "medium",
 				"w-9 h-9 p-0 min-w-[36px]!": props.size === "icon",
 				"opacity-80 cursor-not-allowed": props.permission === false,

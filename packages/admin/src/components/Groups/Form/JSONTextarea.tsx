@@ -1,7 +1,7 @@
 import { indentWithTab } from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { linter, lintGutter } from "@codemirror/lint";
-import { Prec } from "@codemirror/state";
+import { Compartment, Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
@@ -13,12 +13,14 @@ import {
 } from "solid-codemirror";
 import {
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
 	type JSXElement,
 } from "solid-js";
+import themeStore from "@/store/themeStore";
 import T from "@/translations";
-import { cmHighlighting, cmTheme } from "@/utils/codemirror-theme";
+import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
 import { DescribedBy } from "./DescribedBy";
 import { ErrorMessage } from "./ErrorMessage";
 import { Label } from "./Label";
@@ -104,6 +106,7 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 
 	createEditorControlledValue(editorView, code);
 	createEditorReadonly(editorView, () => props.disabled ?? false);
+	const themeCompartment = new Compartment();
 
 	createExtension(basicSetup);
 	createExtension(keymap.of([indentWithTab]));
@@ -116,8 +119,9 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 		}),
 	);
 	createExtension(lintGutter());
-	createExtension(cmTheme);
-	createExtension(cmHighlighting);
+	createExtension(
+		themeCompartment.of(getCodeMirrorTheme(themeStore.resolved())),
+	);
 	createExtension(EditorView.lineWrapping);
 	createExtension(
 		Prec.highest(
@@ -183,6 +187,16 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 			},
 		}),
 	);
+
+	createEffect(() => {
+		const view = editorView();
+		const theme = themeStore.resolved();
+		if (!view) return;
+
+		view.dispatch({
+			effects: themeCompartment.reconfigure(getCodeMirrorTheme(theme)),
+		});
+	});
 
 	// ----------------------------------------
 	// Render

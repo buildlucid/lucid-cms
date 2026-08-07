@@ -72,7 +72,7 @@ const Pill: Component<PillProps> = (props) => {
 					local.size === undefined || local.size === "default",
 				"px-1.5 py-0 text-[11px] leading-4": local.size === "small",
 				"bg-primary-base text-primary-contrast": local.theme === "primary",
-				"border border-primary-muted-border bg-primary-muted-bg text-primary-base":
+				"border border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
 					local.theme === "primary-opaque",
 				"bg-input-base text-title": local.theme === "grey",
 				"bg-error-base text-error-contrast": local.theme === "red",

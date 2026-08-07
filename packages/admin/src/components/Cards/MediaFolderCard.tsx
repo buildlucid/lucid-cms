@@ -82,7 +82,7 @@ export const MediaFolderCard: Component<{
 			use:droppable
 			use:draggable
 			class={classNames(
-				"group flex items-start gap-3 rounded-md cursor-pointer border border-border p-3 bg-card-base hover:bg-card-hover relative",
+				"group flex items-start gap-3 rounded-md cursor-pointer border border-border p-3 bg-card-base hover:bg-row-hover relative transition-colors duration-200",
 				{
 					"bg-card-hover": droppable.isActiveDroppable,
 				},

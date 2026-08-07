@@ -3,7 +3,36 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#F1F2F0" />
+    <script>
+      (() => {
+        const storageKey = "lucid_theme_preference";
+        let preference = "system";
+
+        try {
+          const stored = localStorage.getItem(storageKey);
+          if (stored === "light" || stored === "dark") preference = stored;
+        } catch {
+          // System mode remains available when storage is unavailable.
+        }
+
+        const systemPrefersDark =
+          window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false;
+        const theme =
+          preference === "light" || preference === "dark"
+            ? preference
+            : systemPrefersDark
+              ? "dark"
+              : "light";
+        const root = document.documentElement;
+        root.dataset.theme = theme;
+        root.style.colorScheme = theme;
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute("content", theme === "dark" ? "#171717" : "#F1F2F0");
+      })();
+    </script>
     <link rel="shortcut icon" type="image/ico" href="/src/assets/favicon.ico" />
     <meta name="robots" content="noindex, nofollow">
     <title>Lucid CMS</title>

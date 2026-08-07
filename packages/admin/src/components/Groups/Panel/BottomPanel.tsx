@@ -1,4 +1,4 @@
-import notifyIllustration from "@assets/illustrations/notify.svg";
+import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { Dialog } from "@kobalte/core";
 import type { ErrorResponse } from "@types";
 import classNames from "classnames";

@@ -1,4 +1,4 @@
-import noPermission from "@assets/illustrations/no-permission.svg";
+import noPermission from "@assets/illustrations/no-permission.svg?url";
 import {
 	FaSolidDatabase,
 	FaSolidFolderPlus,

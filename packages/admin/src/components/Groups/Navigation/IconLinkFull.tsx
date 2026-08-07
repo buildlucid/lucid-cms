@@ -1,4 +1,4 @@
-import { A } from "@solidjs/router";
+import { useLocation } from "@solidjs/router";
 import classNames from "classnames";
 import {
 	FaSolidBarsProgress,
@@ -15,7 +15,18 @@ import {
 	FaSolidUserLock,
 	FaSolidUsers,
 } from "solid-icons/fa";
-import { type Component, Match, Show, Switch } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
+import {
+	isNavigationLinkActive,
+	setNavigationLinkActiveState,
+} from "@/utils/navigation";
 
 interface IconLinkFullProps {
 	type: "link" | "button";
@@ -42,6 +53,28 @@ interface IconLinkFullProps {
 }
 
 export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
+	// ----------------------------------
+	// State & Hooks
+	const location = useLocation();
+	let linkElement: HTMLAnchorElement | undefined;
+
+	// ----------------------------------
+	// Memos
+	const routeIsActive = createMemo(
+		() =>
+			props.type === "link" &&
+			isNavigationLinkActive(location.pathname, props.href || "/"),
+	);
+
+	// ----------------------------------
+	// Effects
+	createEffect(() => {
+		const active = props.active || routeIsActive();
+		if (!linkElement) return;
+
+		setNavigationLinkActiveState(linkElement, active);
+	});
+
 	// ----------------------------------
 	// Classes
 	const iconClasses = classNames("size-3.5 text-current");
@@ -99,34 +132,33 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 			<li class="mb-1 last:mb-0">
 				<Switch>
 					<Match when={props.type === "link"}>
-						<A
+						<a
+							ref={(element) => {
+								linkElement = element;
+							}}
 							title={props.title}
 							href={props.href || "/"}
-							class={classNames(
-								"h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar-base fill-title hover:bg-card-hover transition-colors duration-200 ease-in-out",
-								{
-									"bg-secondary-base! text-secondary-contrast! fill-secondary-base-contrast!":
-										props.active,
-									"animate-pulse pointer-events-none": props.loading,
-								},
-							)}
-							activeClass={classNames(
-								"bg-secondary-base! text-secondary-contrast! fill-secondary-base-contrast!",
-							)}
-							end={props.href === "/lucid"}
+							data-navigation-href={props.href || "/"}
+							data-navigation-force-active={props.active ? "true" : undefined}
+							link
+							class="h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar-base fill-title hover:bg-navigation-hover transition-colors duration-200 ease-in-out"
+							classList={{
+								"animate-pulse": props.loading,
+								"pointer-events-none": props.loading,
+							}}
 						>
 							<Icons />
 							<span class="block text-sm font-medium">{props.title}</span>
-						</A>
+						</a>
 					</Match>
 					<Match when={props.type === "button"}>
 						<button
 							type="button"
 							tabIndex={0}
 							class={classNames(
-								"h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar-base fill-title hover:bg-card-hover transition-colors duration-200 ease-in-out",
+								"h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar-base fill-title hover:bg-navigation-hover transition-colors duration-200 ease-in-out",
 								{
-									"bg-secondary-base text-secondary-contrast fill-secondary-base-contrast":
+									"bg-navigation-active text-secondary-contrast fill-secondary-contrast":
 										props.active,
 									"animate-pulse pointer-events-none": props.loading,
 								},

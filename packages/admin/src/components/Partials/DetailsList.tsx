@@ -26,7 +26,8 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 	// Render
 	return (
 		<ul
-			class={classNames("w-full bg-card-base", {
+			class={classNames("w-full", {
+				"bg-card-base": props.theme !== "contained",
 				"mb-6 last:mb-0 border border-border rounded-md p-4":
 					props.theme !== "contained",
 			})}

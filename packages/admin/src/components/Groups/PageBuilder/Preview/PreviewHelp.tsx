@@ -13,7 +13,7 @@ export const PreviewHelp: Component<{ mode: PreviewMode }> = (props) => {
 				as="button"
 				type="button"
 				aria-label={T()("preview.help.label")}
-				class="flex h-7 w-7 min-w-7 cursor-help items-center justify-center rounded-md fill-icon-fade text-icon-fade transition-colors hover:bg-background-base/50 hover:fill-subtitle hover:text-subtitle focus:outline-none focus-visible:ring-1 focus-visible:ring-primary-base"
+				class="flex h-7 w-7 min-w-7 cursor-help items-center justify-center rounded-md fill-icon-faded text-icon-faded transition-colors hover:bg-background-base/50 hover:fill-subtitle hover:text-subtitle focus:outline-none focus-visible:ring-1 focus-visible:ring-primary-base"
 			>
 				<FaSolidCircleInfo size={12} />
 			</Tooltip.Trigger>

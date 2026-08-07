@@ -23,6 +23,8 @@ export interface ActionDropdownItem {
 	icon?: ActionIconName;
 	onClick?: () => void;
 	href?: string;
+	target?: "_blank" | "_self";
+	rel?: string;
 	actions?: ActionDropdownItem[];
 	permission?: boolean;
 	hide?: boolean;
@@ -250,6 +252,8 @@ const ActionItem: Component<{
 				<DropdownMenu.Item
 					as={A}
 					href={props.action.href || "/"}
+					target={props.action.target}
+					rel={props.action.rel}
 					textValue={props.action.label}
 					closeOnSelect={closeOnSelect()}
 					onSelect={() => props.onSelect(props.action)}

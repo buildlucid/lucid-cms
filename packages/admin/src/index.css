@@ -1,5 +1,212 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+	--color-primary: var(--lucid-primary-base);
+	--color-primary-base: var(--lucid-primary-base);
+	--color-primary-hover: var(--lucid-primary-hover);
+	--color-primary-contrast: var(--lucid-primary-contrast);
+	--color-primary-muted-bg: var(--lucid-primary-muted-bg);
+	--color-primary-muted-border: var(--lucid-primary-muted-border);
+	--color-primary-muted-contrast: var(--lucid-primary-muted-contrast);
+	--color-secondary-base: var(--lucid-secondary-base);
+	--color-secondary-hover: var(--lucid-secondary-hover);
+	--color-secondary-contrast: var(--lucid-secondary-contrast);
+	--color-sidebar-base: var(--lucid-sidebar-base);
+	--color-navigation-hover: var(--lucid-navigation-hover);
+	--color-navigation-active: var(--lucid-navigation-active);
+	--color-background-base: var(--lucid-background-base);
+	--color-background-hover: var(--lucid-background-hover);
+	--color-row-hover: var(--lucid-row-hover);
+	--color-card-base: var(--lucid-card-base);
+	--color-card-hover: var(--lucid-card-hover);
+	--color-card-contrast: var(--lucid-card-contrast);
+	--color-dropdown-base: var(--lucid-dropdown-base);
+	--color-dropdown-hover: var(--lucid-dropdown-hover);
+	--color-dropdown-contrast: var(--lucid-dropdown-contrast);
+	--color-input-base: var(--lucid-input-base);
+	--color-input-contrast: var(--lucid-input-contrast);
+	--color-icon-base: var(--lucid-icon-base);
+	--color-icon-hover: var(--lucid-icon-hover);
+	--color-icon-faded: var(--lucid-icon-faded);
+	--color-error-base: var(--lucid-error-base);
+	--color-error-hover: var(--lucid-error-hover);
+	--color-error-contrast: var(--lucid-error-contrast);
+	--color-warning-base: var(--lucid-warning-base);
+	--color-warning-contrast: var(--lucid-warning-contrast);
+	--color-workflow-yellow-bg: var(--lucid-workflow-yellow-bg);
+	--color-workflow-yellow-border: var(--lucid-workflow-yellow-border);
+	--color-workflow-yellow-text: var(--lucid-workflow-yellow-text);
+	--color-workflow-green-bg: var(--lucid-workflow-green-bg);
+	--color-workflow-green-border: var(--lucid-workflow-green-border);
+	--color-workflow-green-text: var(--lucid-workflow-green-text);
+	--color-workflow-blue-bg: var(--lucid-workflow-blue-bg);
+	--color-workflow-blue-border: var(--lucid-workflow-blue-border);
+	--color-workflow-blue-text: var(--lucid-workflow-blue-text);
+	--color-workflow-purple-bg: var(--lucid-workflow-purple-bg);
+	--color-workflow-purple-border: var(--lucid-workflow-purple-border);
+	--color-workflow-purple-text: var(--lucid-workflow-purple-text);
+	--color-info-faded: var(--lucid-info-faded);
+	--color-info-base: var(--lucid-info-base);
+	--color-info-contrast: var(--lucid-info-contrast);
+	--color-border: var(--lucid-border);
+	--color-overlay-base: var(--lucid-overlay-base);
+	--color-title: var(--lucid-title);
+	--color-subtitle: var(--lucid-subtitle);
+	--color-body: var(--lucid-body);
+	--color-unfocused: var(--lucid-unfocused);
+}
+
+:root {
+	color-scheme: light;
+	--lucid-primary-base: oklch(63.964% 0.14408 135.726);
+	--lucid-primary-hover: oklch(59.807% 0.13355 135.909);
+	--lucid-primary-contrast: oklch(100% 0 0);
+	--lucid-primary-muted-bg: oklch(92.184% 0.04924 134.056);
+	--lucid-primary-muted-border: oklch(63.964% 0.14408 135.726);
+	--lucid-primary-muted-contrast: oklch(43.734% 0.09872 137.524);
+	--lucid-secondary-base: oklch(92% 0 0);
+	--lucid-secondary-hover: oklch(89% 0 0);
+	--lucid-secondary-contrast: oklch(21.033% 0.00586 285.885);
+	--lucid-sidebar-base: oklch(94.45% 0.00413 121.563);
+	--lucid-navigation-hover: oklch(92.305% 0.00545 117.929);
+	--lucid-navigation-active: oklch(90.27% 0.00868 128.568);
+	--lucid-background-base: oklch(98.21% 0 0);
+	--lucid-background-hover: oklch(93.306% 0.00346 247.86);
+	--lucid-row-hover: oklch(93.544% 0.00414 121.564);
+	--lucid-card-base: oklch(100% 0 0);
+	--lucid-card-hover: oklch(95.767% 0.00172 247.84);
+	--lucid-card-contrast: oklch(44.186% 0.01462 285.786);
+	--lucid-dropdown-base: oklch(100% 0 0);
+	--lucid-dropdown-hover: oklch(95.767% 0.00172 247.84);
+	--lucid-dropdown-contrast: oklch(27.394% 0.00548 286.033);
+	--lucid-input-base: oklch(96.66% 0.00265 106.449);
+	--lucid-input-contrast: oklch(37.032% 0.01188 285.805);
+	--lucid-icon-base: oklch(37.032% 0.01188 285.805);
+	--lucid-icon-hover: oklch(21.033% 0.00586 285.885);
+	--lucid-icon-faded: oklch(55.102% 0.02336 264.364);
+	--lucid-error-base: oklch(57.583% 0.20883 29.482);
+	--lucid-error-hover: oklch(50.034% 0.18205 29.513);
+	--lucid-error-contrast: oklch(100% 0 0);
+	--lucid-warning-base: oklch(55.419% 0.11691 75.008);
+	--lucid-warning-contrast: oklch(100% 0 0);
+	--lucid-workflow-yellow-bg: oklch(68.064% 0.14228 75.834 / 0.1);
+	--lucid-workflow-yellow-border: oklch(68.064% 0.14228 75.834 / 0.28);
+	--lucid-workflow-yellow-text: oklch(47.619% 0.10337 61.907);
+	--lucid-workflow-green-bg: oklch(62.705% 0.16991 149.214 / 0.1);
+	--lucid-workflow-green-border: oklch(62.705% 0.16991 149.214 / 0.28);
+	--lucid-workflow-green-text: oklch(44.792% 0.10832 151.328);
+	--lucid-workflow-blue-bg: oklch(54.615% 0.21521 262.881 / 0.1);
+	--lucid-workflow-blue-border: oklch(54.615% 0.21521 262.881 / 0.25);
+	--lucid-workflow-blue-text: oklch(48.82% 0.21717 264.376);
+	--lucid-workflow-purple-bg: oklch(55.754% 0.25249 302.321 / 0.1);
+	--lucid-workflow-purple-border: oklch(55.754% 0.25249 302.321 / 0.25);
+	--lucid-workflow-purple-text: oklch(49.552% 0.23687 301.924);
+	--lucid-info-faded: oklch(55.439% 0.04072 257.417);
+	--lucid-info-base: oklch(48.82% 0.21717 264.376);
+	--lucid-info-contrast: oklch(100% 0 0);
+	--lucid-border: oklch(21.033% 0.00586 285.885 / 0.16);
+	--lucid-overlay-base: oklch(17.304% 0 0 / 0.68);
+	--lucid-title: oklch(21.033% 0.00586 285.885);
+	--lucid-subtitle: oklch(37.032% 0.01188 285.805);
+	--lucid-body: oklch(44.186% 0.01462 285.786);
+	--lucid-unfocused: oklch(55.102% 0.02336 264.364);
+	--lucid-scrollbar-thumb: oklch(71.366% 0.01918 261.325);
+	--lucid-scrollbar-track: oklch(94.45% 0.00413 121.563);
+	--lucid-skeleton-start: oklch(89.793% 0.00554 274.959 / 0.88);
+	--lucid-skeleton-mid: oklch(100% 0 0 / 0.98);
+	--lucid-pattern-base: oklch(96.367% 0.00172 247.839);
+	--lucid-pattern-mark: oklch(71.181% 0.01294 286.067);
+	--lucid-cropper-outline: oklch(21.033% 0.00586 285.885 / 0.75);
+	--lucid-code-toolbar: oklch(95.767% 0.00172 247.84);
+	--lucid-preview-resizer: oklch(83.659% 0.00699 277.144);
+	--lucid-preview-resizer-hover: oklch(71.181% 0.01294 286.067);
+	--lucid-ai-blue: oklch(58.762% 0.13887 241.966);
+	--lucid-chart-grid: oklch(21.033% 0.00586 285.885 / 0.08);
+	--lucid-chart-tooltip: oklch(100% 0 0);
+	--lucid-chart-point-border: oklch(100% 0 0);
+	--lucid-chart-requests: oklch(54.615% 0.21521 262.881);
+	--lucid-chart-requests-fill: oklch(54.615% 0.21521 262.881 / 0.12);
+	--lucid-chart-total-fill: oklch(63.964% 0.14408 135.726 / 0.12);
+	--lucid-chart-cost: oklch(55.378% 0.12068 66.442);
+	--lucid-chart-cost-fill: oklch(55.378% 0.12068 66.442 / 0.12);
+}
+
+[data-theme="dark"] {
+	color-scheme: dark;
+	--lucid-primary-base: oklch(88.842% 0.20897 135.866);
+	--lucid-primary-hover: oklch(90.774% 0.17423 135.206);
+	--lucid-primary-contrast: oklch(18.674% 0 0);
+	--lucid-primary-muted-bg: oklch(35.238% 0.06634 136.834);
+	--lucid-primary-muted-border: oklch(62.626% 0.13447 136.382);
+	--lucid-primary-muted-contrast: oklch(88.842% 0.20897 135.866);
+	--lucid-secondary-base: oklch(92.191% 0 0);
+	--lucid-secondary-hover: oklch(92.191% 0 0 / 0.9);
+	--lucid-secondary-contrast: oklch(20.463% 0 0);
+	--lucid-sidebar-base: oklch(20.463% 0 0);
+	--lucid-navigation-hover: oklch(20.463% 0 0);
+	--lucid-navigation-active: oklch(92.191% 0 0);
+	--lucid-background-base: oklch(14.479% 0 0);
+	--lucid-background-hover: oklch(20.463% 0 0);
+	--lucid-row-hover: oklch(20.463% 0 0);
+	--lucid-card-base: oklch(16.842% 0 0);
+	--lucid-card-hover: oklch(20.463% 0 0);
+	--lucid-card-contrast: oklch(70.9% 0 0);
+	--lucid-dropdown-base: oklch(18.22% 0 0);
+	--lucid-dropdown-hover: oklch(14.479% 0 0);
+	--lucid-dropdown-contrast: oklch(83.591% 0 0);
+	--lucid-input-base: oklch(20.904% 0 0);
+	--lucid-input-contrast: oklch(83.591% 0 0);
+	--lucid-icon-base: oklch(91.583% 0 0);
+	--lucid-icon-hover: oklch(93.1% 0 0);
+	--lucid-icon-faded: oklch(70.9% 0 0);
+	--lucid-error-base: oklch(66.955% 0.19822 24.203);
+	--lucid-error-hover: oklch(63.636% 0.22592 26.518);
+	--lucid-error-contrast: oklch(26.032% 0 0);
+	--lucid-warning-base: oklch(84.417% 0.17216 84.934);
+	--lucid-warning-contrast: oklch(0% 0 0);
+	--lucid-workflow-yellow-bg: oklch(84.417% 0.17216 84.934 / 0.14);
+	--lucid-workflow-yellow-border: oklch(84.417% 0.17216 84.934 / 0.28);
+	--lucid-workflow-yellow-text: oklch(89.47% 0.14859 92.384);
+	--lucid-workflow-green-bg: oklch(79.685% 0.16359 159.689 / 0.14);
+	--lucid-workflow-green-border: oklch(79.685% 0.16359 159.689 / 0.28);
+	--lucid-workflow-green-text: oklch(84.519% 0.12995 164.978);
+	--lucid-workflow-blue-bg: oklch(75.351% 0.13899 232.661 / 0.14);
+	--lucid-workflow-blue-border: oklch(75.351% 0.13899 232.661 / 0.28);
+	--lucid-workflow-blue-text: oklch(82.759% 0.10128 230.318);
+	--lucid-workflow-purple-bg: oklch(62.685% 0.23254 303.9 / 0.14);
+	--lucid-workflow-purple-border: oklch(62.685% 0.23254 303.9 / 0.28);
+	--lucid-workflow-purple-text: oklch(72.169% 0.17669 305.504);
+	--lucid-info-faded: oklch(74.123% 0 0);
+	--lucid-info-base: oklch(60.481% 0.21656 257.214);
+	--lucid-info-contrast: oklch(100% 0 0);
+	--lucid-border: oklch(100% 0 0 / 0.1);
+	--lucid-overlay-base: oklch(17.304% 0 0 / 0.9);
+	--lucid-title: oklch(95.815% 0 0);
+	--lucid-subtitle: oklch(83.591% 0 0);
+	--lucid-body: oklch(70.9% 0 0);
+	--lucid-unfocused: oklch(70.576% 0 0);
+	--lucid-scrollbar-thumb: oklch(42.024% 0 0);
+	--lucid-scrollbar-track: oklch(12.856% 0 0);
+	--lucid-skeleton-start: oklch(20.904% 0 0 / 0.88);
+	--lucid-skeleton-mid: oklch(30.919% 0 0 / 0.95);
+	--lucid-pattern-base: oklch(14.479% 0 0);
+	--lucid-pattern-mark: oklch(70.9% 0 0);
+	--lucid-cropper-outline: oklch(100% 0 0 / 0.85);
+	--lucid-code-toolbar: oklch(19.125% 0 0);
+	--lucid-preview-resizer: oklch(26.032% 0 0);
+	--lucid-preview-resizer-hover: oklch(30.919% 0 0);
+	--lucid-ai-blue: oklch(75.351% 0.13899 232.661);
+	--lucid-chart-grid: oklch(100% 0 0 / 0.06);
+	--lucid-chart-tooltip: oklch(18.22% 0 0);
+	--lucid-chart-point-border: oklch(14.479% 0 0);
+	--lucid-chart-requests: oklch(73.285% 0.13777 262.502);
+	--lucid-chart-requests-fill: oklch(73.285% 0.13777 262.502 / 0.12);
+	--lucid-chart-total-fill: oklch(88.842% 0.20897 135.866 / 0.12);
+	--lucid-chart-cost: oklch(84.706% 0.13582 82.767);
+	--lucid-chart-cost-fill: oklch(84.706% 0.13582 82.767 / 0.12);
+}
 
 @font-face {
 	font-family: "Inter";
@@ -47,7 +254,7 @@
 	}
 
 	* {
-		scrollbar-color: #4d4d4d #070707;
+		scrollbar-color: var(--lucid-scrollbar-thumb) var(--lucid-scrollbar-track);
 		scrollbar-width: thin;
 	}
 
@@ -79,6 +286,9 @@
 	button {
 		@apply hover:text-primary-hover duration-200 transition-colors ease-in-out focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base;
 	}
+	.navigation-link-active {
+		@apply bg-navigation-active! text-secondary-contrast! fill-secondary-contrast!;
+	}
 	button {
 		@apply cursor-pointer;
 	}
@@ -95,17 +305,24 @@
 	}
 
 	.scrollbar {
-		scrollbar-color: #4d4d4d #070707;
+		scrollbar-color: var(--lucid-scrollbar-thumb) var(--lucid-scrollbar-track);
 		scrollbar-width: thin;
 	}
 
 	[data-overflowing="true"] .row-actions-td {
-		filter: drop-shadow(-5px 0px 5px rgba(0, 0, 0, 0.1));
+		filter: drop-shadow(-5px 0px 5px oklch(0% 0 0 / 0.1));
 	}
 	input[type="date"]::-webkit-calendar-picker-indicator,
 	input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 	input[type="time"]::-webkit-calendar-picker-indicator {
-		@apply invert opacity-60;
+		@apply opacity-60;
+	}
+
+	[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+	[data-theme="dark"]
+		input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+	[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator {
+		@apply invert;
 	}
 
 	.dropdown-trigger {
@@ -120,9 +337,9 @@
 		display: block;
 		background: linear-gradient(
 			90deg,
-			rgba(24, 24, 24, 0.88) 0%,
-			rgba(48, 48, 48, 0.95) 50%,
-			rgba(24, 24, 24, 0.88) 100%
+			var(--lucid-skeleton-start) 0%,
+			var(--lucid-skeleton-mid) 50%,
+			var(--lucid-skeleton-start) 100%
 		);
 		background-size: 200% 100%;
 		animation: shimmer 3s ease-in-out infinite;
@@ -138,12 +355,12 @@
 		background:
 			radial-gradient(
 				900px 600px at 5% 0%,
-				rgba(193, 254, 119, 0.07),
+				color-mix(in srgb, var(--lucid-primary-base) 7%, transparent),
 				transparent 60%
 			),
 			radial-gradient(
 				800px 500px at 100% 100%,
-				rgba(208, 255, 150, 0.05),
+				color-mix(in srgb, var(--lucid-primary-hover) 5%, transparent),
 				transparent 60%
 			);
 	}
@@ -164,9 +381,12 @@
 			right: 0;
 			bottom: 0;
 			z-index: 0;
-			background-color: #0a0a0a;
+			background-color: var(--lucid-pattern-base);
 			opacity: 0.1;
-			background-image: radial-gradient(#a1a1a1 1px, #0a0a0a 1px);
+			background-image: radial-gradient(
+				var(--lucid-pattern-mark) 1px,
+				var(--lucid-pattern-base) 1px
+			);
 			background-size: 14px 14px;
 		}
 	}
@@ -180,30 +400,84 @@
 			right: 0;
 			bottom: 0;
 			z-index: 0;
-			background-color: #0a0a0a;
+			background-color: var(--lucid-pattern-base);
 			opacity: 0.15;
 			background-image:
 				repeating-linear-gradient(
 					45deg,
-					#a1a1a1 25%,
+					var(--lucid-pattern-mark) 25%,
 					transparent 25%,
 					transparent 75%,
-					#a1a1a1 75%,
-					#a1a1a1
+					var(--lucid-pattern-mark) 75%,
+					var(--lucid-pattern-mark)
 				),
 				repeating-linear-gradient(
 					45deg,
-					#a1a1a1 25%,
-					#0a0a0a 25%,
-					#0a0a0a 75%,
-					#a1a1a1 75%,
-					#a1a1a1
+					var(--lucid-pattern-mark) 25%,
+					var(--lucid-pattern-base) 25%,
+					var(--lucid-pattern-base) 75%,
+					var(--lucid-pattern-mark) 75%,
+					var(--lucid-pattern-mark)
 				);
 			background-position:
 				0 0,
 				10px 10px;
 			background-size: 20px 20px;
 		}
+	}
+
+	.degree-range-input {
+		appearance: none;
+		height: 0.5rem;
+		border: 1px solid var(--lucid-border);
+		border-radius: 9999px;
+		background: linear-gradient(
+			to right,
+			var(--lucid-primary-base) 0 var(--degree-range-progress),
+			var(--lucid-input-base) var(--degree-range-progress) 100%
+		);
+		outline: none;
+	}
+
+	.degree-range-input:focus-visible {
+		box-shadow: 0 0 0 2px var(--lucid-primary-muted-border);
+	}
+
+	.degree-range-input::-webkit-slider-runnable-track {
+		height: 0.5rem;
+		border-radius: 9999px;
+		background: transparent;
+	}
+
+	.degree-range-input::-webkit-slider-thumb {
+		appearance: none;
+		width: 1.125rem;
+		height: 1.125rem;
+		margin-top: -0.3125rem;
+		border: 2px solid var(--lucid-background-base);
+		border-radius: 9999px;
+		background: var(--lucid-primary-base);
+		box-shadow: 0 1px 3px var(--lucid-border);
+	}
+
+	.degree-range-input::-moz-range-track {
+		height: 0.5rem;
+		border: 0;
+		border-radius: 9999px;
+		background: transparent;
+	}
+
+	.degree-range-input::-moz-range-progress {
+		background: transparent;
+	}
+
+	.degree-range-input::-moz-range-thumb {
+		width: 1.125rem;
+		height: 1.125rem;
+		border: 2px solid var(--lucid-background-base);
+		border-radius: 9999px;
+		background: var(--lucid-primary-base);
+		box-shadow: 0 1px 3px var(--lucid-border);
 	}
 
 	.image-cropper-stage cropper-canvas {
@@ -227,7 +501,7 @@
 	}
 
 	.image-cropper-stage cropper-selection {
-		outline: 1px solid rgba(255, 255, 255, 0.85);
+		outline: 1px solid var(--lucid-cropper-outline);
 	}
 
 	@media (min-width: 769px) {
@@ -502,36 +776,38 @@
 	.ai-action-button__surface[data-quick-action-active="true"] {
 		border-color: transparent;
 		background:
-			linear-gradient(#181818, #181818) padding-box,
+			linear-gradient(var(--lucid-input-base), var(--lucid-input-base))
+			padding-box,
 			conic-gradient(
 				from var(--ai-border-angle),
 				transparent 0deg,
 				transparent 245deg,
-				#38bdf8 285deg,
-				#c1fe77 360deg
+				var(--lucid-ai-blue) 285deg,
+				var(--lucid-primary-base) 360deg
 			)
 			border-box;
 		animation: ai-border-spin 900ms linear infinite;
 	}
 
 	.ai-action-button__surface[data-quick-action-active="true"] {
-		color: #c1fe77;
-		fill: #c1fe77;
+		color: var(--lucid-primary-base);
+		fill: var(--lucid-primary-base);
 		box-shadow:
-			0 0 0 1px rgb(193 254 119 / 0.18),
-			0 0 16px rgb(193 254 119 / 0.22);
+			0 0 0 1px color-mix(in srgb, var(--lucid-primary-base) 18%, transparent),
+			0 0 16px color-mix(in srgb, var(--lucid-primary-base) 22%, transparent);
 	}
 
 	.ai-action-button__surface[data-variant="subtle"][data-loading="true"],
 	.ai-action-button__surface[data-variant="subtle"][data-quick-action-active="true"] {
 		background:
-			linear-gradient(#0f0f0f, #0f0f0f) padding-box,
+			linear-gradient(var(--lucid-card-base), var(--lucid-card-base))
+			padding-box,
 			conic-gradient(
 				from var(--ai-border-angle),
 				transparent 0deg,
 				transparent 245deg,
-				#38bdf8 285deg,
-				#c1fe77 360deg
+				var(--lucid-ai-blue) 285deg,
+				var(--lucid-primary-base) 360deg
 			)
 			border-box;
 	}
@@ -541,12 +817,13 @@
 		100% {
 			opacity: 0.55;
 			transform: scale(0.78);
-			box-shadow: 0 0 0 0 rgb(193 254 119 / 0.28);
+			box-shadow: 0 0 0 0
+				color-mix(in srgb, var(--lucid-primary-base) 28%, transparent);
 		}
 		50% {
 			opacity: 1;
 			transform: scale(1);
-			box-shadow: 0 0 0 4px rgb(193 254 119 / 0);
+			box-shadow: 0 0 0 4px transparent;
 		}
 	}
 
@@ -558,8 +835,9 @@
 		height: 0.5rem;
 		margin-inline-start: 0.25rem;
 		border-radius: 9999px;
-		background: #c1fe77;
-		box-shadow: 0 0 0 1px rgb(193 254 119 / 0.18);
+		background: var(--lucid-primary-base);
+		box-shadow: 0 0 0 1px
+			color-mix(in srgb, var(--lucid-primary-base) 18%, transparent);
 		animation: preview-field-target-pulse 1.5s ease-out;
 		vertical-align: middle;
 	}
@@ -576,7 +854,8 @@
 		.preview-field-target-highlight::after {
 			animation: none;
 			opacity: 1;
-			box-shadow: 0 0 0 2px rgb(193 254 119 / 0.22);
+			box-shadow: 0 0 0 2px
+				color-mix(in srgb, var(--lucid-primary-base) 22%, transparent);
 		}
 	}
 }

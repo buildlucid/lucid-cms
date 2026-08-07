@@ -1,4 +1,5 @@
-import brickIcon from "@assets/svgs/default-brick-icon-white.svg";
+import brickIconLight from "@assets/svgs/default-brick-icon-light.svg?url";
+import brickIconDark from "@assets/svgs/default-brick-icon-white.svg?url";
 import classNames from "classnames";
 import {
 	FaSolidImage,
@@ -124,9 +125,16 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 										type="button"
 									>
 										<img
-											src={brickIcon}
+											src={brickIconLight}
 											alt={brickConfig.key}
-											class="w-4 mr-2.5"
+											class="mr-2.5 w-4 dark:hidden"
+											loading="lazy"
+										/>
+										<img
+											src={brickIconDark}
+											alt=""
+											aria-hidden="true"
+											class="mr-2.5 hidden w-4 dark:block"
 											loading="lazy"
 										/>
 										{helpers.getLocaleValue({

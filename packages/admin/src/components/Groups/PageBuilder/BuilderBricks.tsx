@@ -68,7 +68,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 			<div class="p-6 h-full">
 				<div class="flex justify-between mb-4">
 					<div class="flex items-center gap-2.5">
-						<FaSolidLayerGroup class="text-white text-xl" />
+						<FaSolidLayerGroup class="text-icon-base text-xl" />
 						<h2>{T()("builder.area.label")}</h2>
 					</div>
 					<Button

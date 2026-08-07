@@ -268,7 +268,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			// @ts-expect-error
 			use:draggable
 			class={classNames(
-				"bg-card-base hover:bg-card-hover border-border border rounded-md group overflow-hidden relative transition-colors duration-200",
+				"bg-card-base hover:bg-row-hover border-border border rounded-md group overflow-hidden relative transition-colors duration-200",
 				{
 					"cursor-pointer": hasUpdatePermission() || props.showingDeleted?.(),
 				},

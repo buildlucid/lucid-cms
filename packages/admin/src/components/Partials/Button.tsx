@@ -45,9 +45,9 @@ const Button: Component<ButtonProps> = (props) => {
 					props.theme === "danger",
 				"bg-input-base border border-border hover:bg-error-hover ring-primary-base fill-input-contrast text-subtitle fill-error-contrast hover:text-error-contrast":
 					props.theme === "danger-outline",
-				"text-icon-fade fill-icon-fade hover:text-subtitle hover:fill-subtitle hover:bg-background-base/50 ring-primary-base":
+				"text-icon-faded fill-icon-faded hover:text-subtitle hover:fill-subtitle hover:bg-background-base/50 ring-primary-base":
 					props.theme === "secondary-subtle",
-				"text-icon-fade fill-icon-fade hover:text-error-base hover:fill-error-base hover:bg-error-base/10 ring-primary-base":
+				"text-icon-faded fill-icon-faded hover:text-error-base hover:fill-error-base hover:bg-error-base/10 ring-primary-base":
 					props.theme === "danger-subtle",
 				"rounded-full! border border-border bg-input-base text-body fill-body ring-primary-base hover:border-primary-muted-border hover:bg-card-hover hover:text-primary-base hover:fill-primary-base":
 					props.theme === "circle",
@@ -55,13 +55,13 @@ const Button: Component<ButtonProps> = (props) => {
 
 				// Toggles
 				"ring-primary-base": props.theme === "secondary-toggle",
-				"bg-input-base border border-border text-input-contrast fill-body hover:bg-secondary-base hover:text-secondary-contrast hover:fill-primary-contrast":
+				"bg-input-base border border-border text-input-contrast fill-body hover:bg-secondary-base hover:text-secondary-contrast hover:fill-secondary-contrast":
 					props.theme === "secondary-toggle" && !props.active,
 				"bg-primary-base text-primary-contrast fill-primary-contrast hover:bg-primary-hover border-primary-base border":
 					props.theme === "secondary-toggle" && props.active,
 
 				// Sizes
-				"px-2 h-9 text-sm": props.size === "small",
+				"px-3 h-9 text-sm": props.size === "small",
 				"px-4 py-2 h-10 text-sm": props.size === "medium",
 				"px-6 py-3 h-12 text-base": props.size === "large",
 				"w-9 h-9 p-0 min-w-[36px]!": props.size === "icon",
