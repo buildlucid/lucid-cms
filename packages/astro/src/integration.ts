@@ -11,6 +11,8 @@ import {
 } from "./integration/assets.js";
 import { writeGeneratedModules } from "./integration/generated.js";
 import {
+	type DevServerLifecycle,
+	getDevServerLifecycle,
 	teardownDevProject,
 	teardownProject,
 } from "./integration/lifecycle.js";
@@ -30,6 +32,8 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 	let generatedDirectory = "";
 	let assetRoot = "";
 	let devBootstrap: Promise<void> | undefined;
+	let devLifecycle: DevServerLifecycle | undefined;
+	let projectCommand: "dev" | "build" | "sync" | undefined;
 
 	return {
 		name: constants.integrationName,
@@ -39,98 +43,165 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 				addWatchFile,
 				command,
 				injectRoute,
+				isRestart,
+				logger,
 				updateConfig,
 			}) => {
 				if (command === "preview") return;
 
 				const configPath = options.configPath ?? getConfigPath(process.cwd());
-				project = await loadProject(configPath);
-				await checkProjectCompatibility(project, command === "build");
-				const projectRoot = project.loaded.projectRoot;
-				generatedDirectory = path.join(
-					projectRoot,
-					constants.generatedDirectory,
-				);
-				assetRoot = path.join(generatedDirectory, constants.assetDirectory);
-				await fs.rm(generatedDirectory, { recursive: true, force: true });
-				await prepareAssets(project, assetRoot);
-
-				const buildContextId = `${project.hostId}:${command}`;
-				registerBuildContext(buildContextId, project.loaded.env);
-				const generated = await writeGeneratedModules({
-					project,
-					directory: generatedDirectory,
-					buildContextId,
-					compiled: command === "build",
-				});
-				const prepared = await project.integrationBridge.prepare?.({
-					command,
-					adapter: project.loaded.adapter,
-					configPath: project.configPath,
-					projectRoot: project.loaded.projectRoot,
-					generatedDirectory,
-					runtimeModulePath: generated.runtimePath,
-					config: project.loaded.config,
-					translationStore: project.loaded.translationStore,
-					definition: project.loaded.definition,
-				});
-				const ignoredWatchFiles = [
-					`${generatedDirectory.split(path.sep).join("/")}/**`,
-					...(prepared?.ignoredWatchFiles ?? []).map((filePath) =>
-						path.resolve(projectRoot, filePath).split(path.sep).join("/"),
-					),
-				];
-
-				for (const filePath of await collectWatchFiles(project)) {
-					addWatchFile(filePath);
+				if (command === "dev") {
+					devLifecycle = getDevServerLifecycle(configPath, logger);
+					devLifecycle.register();
+					if (isRestart) devBootstrap = undefined;
 				}
 
-				addMiddleware({
-					entrypoint: generated.middlewarePath,
-					order: "pre",
-				});
-				injectRoute({
-					pattern: constants.mountPath,
-					entrypoint: generated.routePath,
-				});
-				injectRoute({
-					pattern: `${constants.mountPath}/[...path]`,
-					entrypoint: generated.routePath,
-				});
-				updateConfig({
-					vite: {
-						server: {
-							watch: {
-								ignored: ignoredWatchFiles,
+				let nextProject: ResolvedLucidProject | undefined;
+				try {
+					nextProject = await loadProject(configPath);
+					if (command === "dev") devLifecycle?.trackProject(nextProject);
+					await checkProjectCompatibility(nextProject, command === "build");
+					const projectRoot = nextProject.loaded.projectRoot;
+					generatedDirectory = path.join(
+						projectRoot,
+						constants.generatedDirectory,
+					);
+					assetRoot = path.join(generatedDirectory, constants.assetDirectory);
+					await fs.rm(generatedDirectory, { recursive: true, force: true });
+					await prepareAssets(nextProject, assetRoot);
+
+					const buildContextId = `${nextProject.hostId}:${command}`;
+					registerBuildContext(buildContextId, nextProject.loaded.env);
+					const generated = await writeGeneratedModules({
+						project: nextProject,
+						directory: generatedDirectory,
+						buildContextId,
+						compiled: command === "build",
+					});
+					const prepared = await nextProject.integrationBridge.prepare?.({
+						command,
+						adapter: nextProject.loaded.adapter,
+						configPath: nextProject.configPath,
+						projectRoot: nextProject.loaded.projectRoot,
+						generatedDirectory,
+						runtimeModulePath: generated.runtimePath,
+						config: nextProject.loaded.config,
+						translationStore: nextProject.loaded.translationStore,
+						definition: nextProject.loaded.definition,
+					});
+					const ignoredWatchFiles = [
+						`${generatedDirectory.split(path.sep).join("/")}/**`,
+						...(prepared?.ignoredWatchFiles ?? []).map((filePath) =>
+							path.resolve(projectRoot, filePath).split(path.sep).join("/"),
+						),
+					];
+
+					for (const filePath of await collectWatchFiles(nextProject)) {
+						addWatchFile(filePath);
+					}
+
+					addMiddleware({
+						entrypoint: generated.middlewarePath,
+						order: "pre",
+					});
+					injectRoute({
+						pattern: constants.mountPath,
+						entrypoint: generated.routePath,
+					});
+					injectRoute({
+						pattern: `${constants.mountPath}/[...path]`,
+						entrypoint: generated.routePath,
+					});
+					updateConfig({
+						vite: {
+							server: {
+								watch: {
+									ignored: ignoredWatchFiles,
+								},
 							},
-						},
-						...(project.integrationBridge.vite?.ssrExternal
-							? {
-									ssr: {
-										external: project.integrationBridge.vite.ssrExternal,
-									},
-								}
-							: {}),
-						resolve: {
-							alias: {
-								...(project.integrationBridge.vite?.aliases ?? {}),
-								[constants.toolkitModuleId]: generated.runtimePath,
+							...(nextProject.integrationBridge.vite?.ssrExternal
+								? {
+										ssr: {
+											external: nextProject.integrationBridge.vite.ssrExternal,
+										},
+									}
+								: {}),
+							resolve: {
+								alias: {
+									...(nextProject.integrationBridge.vite?.aliases ?? {}),
+									[constants.toolkitModuleId]: generated.runtimePath,
+								},
 							},
+							plugins: [createDevAssetPlugin(assetRoot)],
 						},
-						plugins: [createDevAssetPlugin(assetRoot)],
-					},
-				});
+					});
+
+					if (command === "dev" && isRestart) {
+						devBootstrap = bootstrapDevProject(nextProject);
+						await devBootstrap;
+					}
+					project = nextProject;
+					projectCommand = command;
+				} catch (error) {
+					if (nextProject) {
+						if (command === "dev") {
+							await devLifecycle?.releaseProject(nextProject).catch(() => {});
+						} else {
+							await teardownProject(nextProject, command).catch(() => {});
+						}
+					}
+					if (command === "dev" && !devLifecycle?.hasActiveProject()) {
+						await devLifecycle?.shutdown().catch(() => {});
+					}
+					throw error;
+				}
 			},
-			"astro:config:done": ({ config }) => {
-				project?.integrationBridge.validateAdapter(config.adapter);
+			"astro:config:done": async ({ config }) => {
+				const currentProject = project;
+				const currentCommand = projectCommand;
+				if (!currentProject || !currentCommand) return;
+				try {
+					currentProject.integrationBridge.validateAdapter(config.adapter);
+					if (currentCommand === "dev") {
+						await devLifecycle?.activateProject(currentProject);
+					} else if (currentCommand === "sync") {
+						await teardownProject(currentProject, "sync");
+						project = undefined;
+						projectCommand = undefined;
+					}
+				} catch (error) {
+					if (currentCommand === "dev") {
+						await devLifecycle?.releaseProject(currentProject).catch(() => {});
+						if (!devLifecycle?.hasActiveProject()) {
+							await devLifecycle?.shutdown().catch(() => {});
+						}
+					} else {
+						await teardownProject(currentProject, currentCommand).catch(
+							() => {},
+						);
+					}
+					project = undefined;
+					projectCommand = undefined;
+					throw error;
+				}
 			},
-			"astro:server:setup": async () => {
+			"astro:server:setup": async ({ server }) => {
 				if (!project) return;
-				devBootstrap ??= bootstrapDevProject(project);
-				await devBootstrap;
+				devLifecycle?.setServer(server);
+				try {
+					devBootstrap ??= bootstrapDevProject(project);
+					await devBootstrap;
+				} catch (error) {
+					await devLifecycle?.shutdown().catch(() => {});
+					throw error;
+				}
 			},
 			"astro:server:done": async () => {
-				if (project) await teardownDevProject(project);
+				if (devLifecycle) {
+					await devLifecycle.shutdown();
+				} else if (project) {
+					await teardownDevProject(project);
+				}
 			},
 			"astro:build:done": async ({ dir }) => {
 				if (!project) return;

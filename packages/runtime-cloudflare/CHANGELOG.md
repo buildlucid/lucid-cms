@@ -1,5 +1,9 @@
 # @lucidcms/runtime-cloudflare
 
+## v1.3.1 (unreleased)
+
+- Stopped removing Wrangler and Miniflare process listeners outside their supported disposal lifecycles, preventing shared `signal-exit` state from becoming inconsistent.
+
 ## v1.3.0
 
 - Adapter keys passed from `createLucidHost` response to `onListening` for telemetry support.

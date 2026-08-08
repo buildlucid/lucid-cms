@@ -91,7 +91,7 @@ export type LucidAstroIntegrationBridge = {
 	/** Releases resources created by the runtime-specific Astro integration. */
 	teardown?(props: {
 		adapter: RuntimeAdapter;
-		command: "dev" | "build";
+		command: "dev" | "build" | "sync";
 	}): void | Promise<void>;
 };
 

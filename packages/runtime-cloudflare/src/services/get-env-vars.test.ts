@@ -24,7 +24,7 @@ describe("getEnvVars", () => {
 		vi.clearAllMocks();
 	});
 
-	test("removes signal listeners added by the platform proxy", async () => {
+	test("does not alter signal listeners added by the platform proxy", async () => {
 		const existingSignalListener = vi.fn();
 		process.on("SIGINT", existingSignalListener);
 		vi.mocked(getPlatformProxy).mockImplementation(async () => {
@@ -39,7 +39,7 @@ describe("getEnvVars", () => {
 			await getEnvVars({ logger });
 
 			expect(process.listeners("SIGINT")).toContain(existingSignalListener);
-			expect(process.listeners("SIGINT")).not.toContain(
+			expect(process.listeners("SIGINT")).toContain(
 				platformProxySignalListener,
 			);
 		} finally {
@@ -47,7 +47,7 @@ describe("getEnvVars", () => {
 		}
 	});
 
-	test("removes signal listeners when platform proxy startup fails", async () => {
+	test("does not remove third-party listeners when platform proxy startup fails", async () => {
 		vi.mocked(getPlatformProxy).mockImplementation(async () => {
 			process.on("SIGINT", platformProxySignalListener);
 			throw new Error("Platform proxy failed");
@@ -56,8 +56,6 @@ describe("getEnvVars", () => {
 		await expect(getEnvVars({ logger })).rejects.toThrow(
 			"Platform proxy failed",
 		);
-		expect(process.listeners("SIGINT")).not.toContain(
-			platformProxySignalListener,
-		);
+		expect(process.listeners("SIGINT")).toContain(platformProxySignalListener);
 	});
 });
