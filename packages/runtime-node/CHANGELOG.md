@@ -1,8 +1,9 @@
 # @lucidcms/runtime-node
 
-## v1.2.1 (unreleased)
+## v1.2.1
 
 - Adapter keys passed from `createLucidHost` response to `onListening` for telemetry support.
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
 
 ## v1.2.0
 

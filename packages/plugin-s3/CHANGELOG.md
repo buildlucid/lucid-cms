@@ -3,6 +3,7 @@
 ## v2.2.5
 
 - Dropped `tenant` experiment support.
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
 
 ## v2.2.4
 

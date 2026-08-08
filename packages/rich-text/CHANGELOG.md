@@ -1,6 +1,6 @@
 # @lucidcms/rich-text
 
-## v1.1.1 (unreleased)
+## v1.1.1
 
 - Fixed server-side rich text HTML generation in Cloudflare runtimes by using a DOM-free renderer.
 

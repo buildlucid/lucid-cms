@@ -1,8 +1,9 @@
 # @lucidcms/plugin-github-auth
 
-## v1.1.0 (unreleased)
+## v1.0.5
 
 - `type` correctly swapped over to `oauth2`.
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
 
 ## v1.0.4
 

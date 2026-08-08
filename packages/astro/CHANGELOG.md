@@ -1,8 +1,9 @@
 # @lucidcms/astro
 
-## v0.3.1 (unreleased)
+## v0.3.1
 
 - Added runtime-specific teardown handling for Astro dev servers and builds.
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
 
 ## v0.3.0
 

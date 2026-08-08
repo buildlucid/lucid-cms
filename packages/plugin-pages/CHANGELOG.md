@@ -1,10 +1,11 @@
 # @lucidcms/plugin-pages
 
-## v0.6.1 (unreleased)
+## v0.7.0
 
 - Dropped `tenant` experiment support.
 - Updated page hierarchy, slug and route uniqueness queries to use Lucid's managed database API.
 - Added unique slug generation when duplicating pages.
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
 
 ## v0.6.0
 

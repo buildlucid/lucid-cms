@@ -1,5 +1,9 @@
 # @lucidcms/plugin-sqlite-kv
 
+## v1.0.5
+
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
+
 ## v1.0.4
 
 - Bumped `@lucidcms/core` to `0.17.0-alpha.0`.

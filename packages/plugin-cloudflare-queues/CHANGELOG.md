@@ -1,5 +1,9 @@
 # @lucidcms/plugin-cloudflare-queues
 
+## v1.1.1
+
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
+
 ## v1.1.0
 
 - Bumped `@lucidcms/core` to `0.17.0-alpha.0`.

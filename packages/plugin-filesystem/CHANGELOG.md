@@ -1,8 +1,9 @@
 # @lucidcms/plugin-filesystem
 
-## v1.0.5 (unreleased)
+## v1.0.5
 
 - Dropped `tenant` experiment support.
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
 
 ## v1.0.4
 

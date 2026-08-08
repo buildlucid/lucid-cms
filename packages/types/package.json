@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/types",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"private": false,
 	"description": "Shared public TypeScript types for Lucid CMS packages.",
 	"type": "module",

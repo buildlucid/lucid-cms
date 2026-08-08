@@ -1,8 +1,9 @@
 # @lucidcms/db-sqlite
 
-## v1.3.0 (unreleased)
+## v1.2.1
 
 - Updated JSON handling to use Lucid's managed query layer, avoiding adapter-wide parsing of values that only look like JSON.
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
 
 ## v1.2.0
 

@@ -1,6 +1,6 @@
 # @lucidcms/types
 
-## v0.5.0 (unreleased)
+## v0.5.0
 
 - Integration types updated and error type additions.
 - Added the public content account response type and `account:read` integration scope.

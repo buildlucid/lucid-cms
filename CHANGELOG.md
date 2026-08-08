@@ -1,25 +1,26 @@
 # @lucidcms/core
 
-## v0.18.0 (unreleased)
+## v0.18.0-alpha.0
 
 ### Features:
 
 - Added expiry options and user scoping to integrations, allowing API keys to use the owning user's permissions. ([4c25d6a](https://github.com/buildlucid/lucid-cms/commit/4c25d6a5681cb1e7bea7cfe03e52904f493095b8))
 - Added OAuth 2.0 support for external integrations, with user and system scoped connections, registered applications, consent, token refresh and revocation. ([98f560f](https://github.com/buildlucid/lucid-cms/commit/98f560f96b53740face220dbf3894a604737c417), [f1b41cf](https://github.com/buildlucid/lucid-cms/commit/f1b41cf9e331c7350dbd8bad68e893583acf37ca))
 - Improved SSO auth provider support with dedicated OAuth 2.0 and OpenID Connect adapters, PKCE and stricter callback validation. ([98f560f](https://github.com/buildlucid/lucid-cms/commit/98f560f96b53740face220dbf3894a604737c417))
-- Added a user-scoped content account endpoint with explicit integration consent.
+- Added a user-scoped content account endpoint with explicit integration consent. ([6a28947](https://github.com/buildlucid/lucid-cms/commit/6a28947e5c0a9bcfff4c508b0686ef19e182b389))
 - Added project and plugin data seeds with `defineSeed`, configurable sources and new seed CLI commands. ([0eab83f](https://github.com/buildlucid/lucid-cms/commit/0eab83f36266e3cf09488de30fe2dd7c3a6fd9c5))
 - Added anonymous telemetry for setup and initial `dev`, `serve` and `build` outcomes, with config and environment opt-outs. ([35ccfbb](https://github.com/buildlucid/lucid-cms/commit/35ccfbbb4dea6751c66be3a06eed8e082e34a48c))
 - Added quarter-turn rotation support to image presets. ([9277119](https://github.com/buildlucid/lucid-cms/commit/92771192886ccd8d4a896eb3a5e5a7fdd8de0614))
 - Added a `tables` config option, plus plugin exports for `defineTable` and column codecs, so projects and plugins can describe custom tables and JSON columns consistently across database adapters. ([6079ade](https://github.com/buildlucid/lucid-cms/commit/6079adea633eb538d731af6191dcdc346ac9a024))
 - Added document duplication support to the API and admin UI. ([51ff128](https://github.com/buildlucid/lucid-cms/commit/51ff128c39f53784398dba77749ba7fd6e379c39))
+- Added light mode support to the admin SPA, with automatic system preference detection and per-device controls for choosing System, Light or Dark appearance. ([e108c14](https://github.com/buildlucid/lucid-cms/commit/e108c141c1058e8eb3aa2ff0545f920f36490045))
 
 ### Breaking Changes:
 
 - Renamed client endpoints to content endpoints, moving routes from `/client` to `/content` and updating related APIs, types and internal terminology. ([4c25d6a](https://github.com/buildlucid/lucid-cms/commit/4c25d6a5681cb1e7bea7cfe03e52904f493095b8))
 - Renamed client integrations to integrations across the APIs, types, services and admin UI. ([4c25d6a](https://github.com/buildlucid/lucid-cms/commit/4c25d6a5681cb1e7bea7cfe03e52904f493095b8))
 - Dropped support for the multiple tenants experiment. ([9994698](https://github.com/buildlucid/lucid-cms/commit/999469889a146868fb50acab45d318fc7815ccfb))
-- Changed media translations in API responses from arrays to locale-keyed records.
+- Changed media translations in API responses from arrays to locale-keyed records. ([6a28947](https://github.com/buildlucid/lucid-cms/commit/6a28947e5c0a9bcfff4c508b0686ef19e182b389))
 - Custom migrations now receive a full service context and run after core migrations, collection migrations and sync. ([0eab83f](https://github.com/buildlucid/lucid-cms/commit/0eab83f36266e3cf09488de30fe2dd7c3a6fd9c5))
 - Reworked database queries around the managed `context.db.query(...)` Kysely API. Custom queries must now use this API for Lucid's logging, validation and consistent value handling across database adapters. ([6079ade](https://github.com/buildlucid/lucid-cms/commit/6079adea633eb538d731af6191dcdc346ac9a024))
 

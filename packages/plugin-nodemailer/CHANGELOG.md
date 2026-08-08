@@ -1,5 +1,9 @@
 # @lucidcms/plugin-nodemailer
 
+## v1.1.7
+
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
+
 ## v1.1.6
 
 - Bumped `@lucidcms/core` to `0.17.0-alpha.0`.

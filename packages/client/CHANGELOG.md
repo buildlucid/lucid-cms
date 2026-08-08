@@ -1,9 +1,10 @@
 # @lucidcms/client
 
-## v0.4.0 (unreleased)
+## v0.4.0
 
 - Auth updated to support `ApiKey` and `Bearer` token authentication.
 - Added `account.get()` for fetching the account associated with a user-scoped credential.
+- Bumped `@lucidcms/types` to `0.5.0`.
 
 ## v0.3.1
 

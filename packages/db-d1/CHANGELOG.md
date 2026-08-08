@@ -1,8 +1,9 @@
 # @lucidcms/db-d1
 
-## v0.4.0 (unreleased)
+## v0.3.1
 
 - Updated JSON handling to use Lucid's managed query layer, avoiding adapter-wide parsing of values that only look like JSON.
+- Bumped `@lucidcms/core` to `0.18.0-alpha.0`.
 
 ## v0.3.0
 
