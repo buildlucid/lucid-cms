@@ -4,6 +4,7 @@ import {
 	FaSolidExclamation,
 	FaSolidInfo,
 	FaSolidTriangleExclamation,
+	FaSolidXmark,
 } from "solid-icons/fa";
 import {
 	type Component,
@@ -16,6 +17,7 @@ import {
 	Switch,
 } from "solid-js";
 import { type Toast, toast } from "solid-toast";
+import T from "@/translations";
 
 interface CustomToastProps {
 	title: string;
@@ -28,7 +30,7 @@ interface CustomToastProps {
 const CustomToast: Component<CustomToastProps> = (props) => {
 	// ----------------------------------------
 	// State
-	const [life, setLife] = createSignal(100);
+	const [life, setLife] = createSignal(0);
 	const startTime = Date.now();
 
 	// ----------------------------------------
@@ -46,7 +48,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 
 			const percentage = (diff / duration()) * 100;
 			if (percentage <= 100) setLife(percentage);
-		});
+		}, 50);
 
 		onCleanup(() => clearInterval(interval));
 	});
@@ -56,60 +58,72 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 	return (
 		<div
 			class={classNames(
-				"bg-background-base rounded-md p-4 border border-border drop-shadow-md w-[400px] relative overflow-hidden",
+				"relative w-[min(400px,calc(100vw-2rem))] overflow-hidden rounded-md border border-border bg-card-base p-3.5 shadow-md",
 				{
 					"animate-enter": props.toast.visible,
 					"animate-leave": !props.toast.visible,
 				},
 			)}
 		>
-			<div class="z-10 relative flex pr-10">
+			<div class="relative z-10 flex items-start gap-3 pr-8">
 				<span
 					class={classNames(
-						"w-6 h-6 flex items-center justify-center rounded-full min-w-[24px]",
+						"mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border",
 						{
-							"bg-primary-base text-primary-contrast":
-								props.type === "success" || props.type === "info",
-							"bg-error-base text-error-contrast": props.type === "error",
-							"bg-warning-base text-warning-contrast": props.type === "warning",
+							"border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
+								props.type === "success",
+							"border-error-base/20 bg-error-base/10 text-error-base":
+								props.type === "error",
+							"border-warning-base/20 bg-warning-base/10 text-warning-base":
+								props.type === "warning",
+							"border-info-base/20 bg-info-base/10 text-info-base":
+								props.type === "info",
 						},
 					)}
 				>
 					<Switch>
 						<Match when={props.type === "success"}>
-							<FaSolidCheck class="w-3 h-3 m-auto" />
+							<FaSolidCheck class="m-auto size-2.5" />
 						</Match>
 						<Match when={props.type === "error"}>
-							<FaSolidExclamation class="w-3 h-3 m-auto" />
+							<FaSolidExclamation class="m-auto size-2.5" />
 						</Match>
 						<Match when={props.type === "warning"}>
-							<FaSolidTriangleExclamation class="w-3 h-3 m-auto" />
+							<FaSolidTriangleExclamation class="m-auto size-2.5" />
 						</Match>
 						<Match when={props.type === "info"}>
-							<FaSolidInfo class="w-3 h-3 m-auto" />
+							<FaSolidInfo class="m-auto size-2.5" />
 						</Match>
 					</Switch>
 				</span>
-				<div class="ml-4 gap-y-1 flex flex-col">
+				<div class="flex min-w-0 flex-col gap-y-0.5">
 					<Show when={props.title}>
-						<p class="text-sm font-bold capitalize text-title">{props.title}</p>
+						<p class="text-sm font-semibold leading-5 text-title">
+							{props.title}
+						</p>
 					</Show>
 					<Show when={props.message}>
-						<p class="text-sm">{props.message}</p>
+						<p class="text-sm leading-5 text-body">{props.message}</p>
 					</Show>
 				</div>
 			</div>
 			<button
 				data-panel-ignore
-				class="bg-input-base hover:bg-background-base flex justify-center top-1/2 -translate-y-1/2 items-center w-6 h-6 right-2.5 absolute rounded-full z-20 hover:text-error-base duration-200 transition-all shadow-md"
+				class="absolute right-2.5 top-2.5 z-20 flex size-7 items-center justify-center rounded-md text-icon-faded transition-colors duration-200 hover:bg-background-hover hover:text-icon-base focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
 				onClick={() => toast.dismiss(props.toast.id)}
 				type="button"
+				aria-label={T()("common.close")}
 			>
-				&times;
+				<FaSolidXmark class="size-3" />
 			</button>
-			{/* Bakground duration bar */}
+			{/* Duration bar */}
 			<span
-				class="inset-0 absolute bg-border opacity-50 z-0"
+				class={classNames("absolute bottom-0 left-0 z-20 h-0.5 opacity-80", {
+					"bg-primary-base": props.type === "success",
+					"bg-error-base": props.type === "error",
+					"bg-warning-base": props.type === "warning",
+					"bg-info-base": props.type === "info",
+				})}
 				style={{ width: `${life()}%` }}
 			/>
 		</div>
