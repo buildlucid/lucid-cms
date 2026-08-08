@@ -2,11 +2,7 @@ import LogoDark from "@assets/svgs/text-logo-dark.svg?url";
 import LogoLight from "@assets/svgs/text-logo-light.svg?url";
 import { A, useLocation } from "@solidjs/router";
 import classNames from "classnames";
-import {
-	FaSolidGripLines,
-	FaSolidRightFromBracket,
-	FaSolidXmark,
-} from "solid-icons/fa";
+import { FaSolidGripLines, FaSolidXmark } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -16,7 +12,6 @@ import {
 	Show,
 } from "solid-js";
 import { NavigationMenuContent } from "@/components/Groups/Layout/NavigationMenuContent";
-import UserDisplay from "@/components/Partials/UserDisplay";
 import { Permissions } from "@/constants/permissions";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import api from "@/services/api";
@@ -192,38 +187,6 @@ export const NavigationChrome: Component = () => {
 						<NavigationLogo />
 					</A>
 					<div class="flex items-center gap-4">
-						<Show when={user()}>
-							{(currentUser) => (
-								<A
-									href="/lucid/account"
-									class="h-8 px-0.5 rounded-lg flex items-center text-title/80 hover:text-title transition-colors"
-									aria-label="Account"
-								>
-									<UserDisplay
-										user={{
-											username: currentUser().username || "",
-											firstName: currentUser().firstName,
-											lastName: currentUser().lastName,
-											profilePicture: currentUser().profilePicture,
-										}}
-										mode="icon"
-										size="small"
-									/>
-								</A>
-							)}
-						</Show>
-						<button
-							type="button"
-							class="h-9 rounded-lg text-icon-base hover:text-icon-hover flex items-center justify-center transition-colors"
-							onClick={() => logout.action.mutate({})}
-							disabled={logout.action.isPending}
-							aria-label={T()("common.logout")}
-							title={T()("common.logout")}
-						>
-							<span class="h-4 flex items-center justify-center">
-								<FaSolidRightFromBracket class="size-3" />
-							</span>
-						</button>
 						<button
 							type="button"
 							class="h-9 rounded-lg text-icon-base hover:text-icon-hover flex items-center justify-center transition-colors"
@@ -341,8 +304,10 @@ export const NavigationChrome: Component = () => {
 							</div>
 							<NavigationMenuContent
 								class="flex-1"
-								showFooterActions={false}
 								onNavigate={() => setMobileMenuOpen(false)}
+								logoutPending={logout.action.isPending}
+								onLogout={() => logout.action.mutate({})}
+								user={user() || undefined}
 								canReadDocuments={showCollections()}
 								canReadPublishRequests={showPublishRequests()}
 								canReadMedia={canReadMedia()}

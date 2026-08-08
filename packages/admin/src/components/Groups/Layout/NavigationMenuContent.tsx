@@ -1,10 +1,9 @@
-import { A } from "@solidjs/router";
 import type { Collection, User } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
+import NavigationAccountMenu from "@/components/Groups/Layout/NavigationAccountMenu";
 import { IconLinkFull } from "@/components/Groups/Navigation";
 import CollectionNavLink from "@/components/Partials/CollectionNavLink";
-import UserDisplay from "@/components/Partials/UserDisplay";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import packageJson from "../../../../../../packages/core/package.json" with {
@@ -13,7 +12,6 @@ import packageJson from "../../../../../../packages/core/package.json" with {
 
 export type NavigationMenuContentProps = {
 	class?: string;
-	showFooterActions?: boolean;
 	onNavigate?: () => void;
 	logoutPending?: boolean;
 	onLogout?: () => void;
@@ -282,43 +280,24 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					/>
 				</ul>
 			</div>
-			<div class="pb-6 px-4">
-				<Show when={props.showFooterActions !== false}>
-					<ul class="flex flex-col border-t border-border pt-6">
-						<IconLinkFull
-							type="button"
-							icon="logout"
-							loading={props.logoutPending}
-							onClick={props.onLogout}
-							title={T()("common.logout")}
+			<div class="px-4 pb-6 pt-8">
+				<Show when={props.user?.username}>
+					{(username) => (
+						<NavigationAccountMenu
+							user={{
+								username: username(),
+								firstName: props.user?.firstName ?? null,
+								lastName: props.user?.lastName ?? null,
+								profilePicture: props.user?.profilePicture ?? null,
+							}}
+							logoutPending={props.logoutPending}
+							onLogout={props.onLogout}
+							onNavigate={handleNavigate}
 						/>
-						<Show when={props.user?.username}>
-							<li>
-								<A
-									href="/lucid/account"
-									class="flex items-center justify-center mt-6"
-									onClick={handleNavigate}
-								>
-									<UserDisplay
-										user={{
-											username: props.user?.username || "",
-											firstName: props.user?.firstName,
-											lastName: props.user?.lastName,
-											profilePicture: props.user?.profilePicture,
-										}}
-										mode="long"
-									/>
-								</A>
-							</li>
-						</Show>
-					</ul>
+					)}
 				</Show>
-				<div
-					class={classNames("mt-4 flex flex-col gap-2", {
-						"border-t border-border pt-4": props.showFooterActions === false,
-					})}
-				>
-					<small class="text-xs leading-none bg-background-base rounded-md px-2 py-2 block text-center">
+				<div class="mt-3 flex justify-center">
+					<small class="px-2 py-1 text-center text-[10px] leading-none text-unfocused">
 						v{packageJson.version}
 					</small>
 				</div>

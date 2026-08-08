@@ -14,6 +14,7 @@ interface UserDisplayProps {
 	mode: "short" | "long" | "icon";
 	size?: "x-small" | "small" | "medium" | "large";
 	nameFormat?: "username" | "username-only" | "simple";
+	compact?: boolean;
 }
 
 const UserDisplay: Component<UserDisplayProps> = (props) => {
@@ -91,10 +92,22 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 					</span>
 				</Match>
 				<Match when={props.mode === "long"}>
-					<div class="flex flex-col ml-2">
-						<p class="text-sm text-title">{props.user.username}</p>
+					<div class="ml-2 flex min-w-0 flex-col">
+						<p
+							class={classNames("truncate text-title", {
+								"text-xs leading-tight": props.compact,
+								"text-sm": !props.compact,
+							})}
+						>
+							{props.user.username}
+						</p>
 						<Show when={props.user.firstName}>
-							<p class="text-xs">
+							<p
+								class={classNames("truncate", {
+									"text-[11px] leading-tight": props.compact,
+									"text-xs": !props.compact,
+								})}
+							>
 								{props.user.firstName} {props.user.lastName}
 							</p>
 						</Show>
