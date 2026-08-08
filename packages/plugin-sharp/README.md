@@ -19,10 +19,10 @@ import { sharpPlugin } from "@lucidcms/plugin-sharp";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: () => ({
-		plugins: [sharpPlugin()],
-	}),
+  runtime: node,
+  db: sqlite,
+  config: () => ({
+    plugins: [sharpPlugin()],
+  }),
 });
 ```

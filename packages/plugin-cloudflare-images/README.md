@@ -19,25 +19,25 @@ import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { d1 } from "@lucidcms/db-d1";
 
 export default configureLucid({
-	runtime: cloudflare,
-	db: d1,
-	config: () => ({
-		media: {
-			images: {
-				presets: {
-					portrait: {
-						width: 600,
-						height: 800,
-						fit: "cover",
-						format: "webp",
-						quality: 80,
-						rotate: 90,
-					},
-				},
-			},
-		},
-		plugins: [cloudflareImagesPlugin()],
-	}),
+  runtime: cloudflare,
+  db: d1,
+  config: () => ({
+    media: {
+      images: {
+        presets: {
+          portrait: {
+            width: 600,
+            height: 800,
+            fit: "cover",
+            format: "webp",
+            quality: 80,
+            rotate: 90,
+          },
+        },
+      },
+    },
+    plugins: [cloudflareImagesPlugin()],
+  }),
 });
 ```
 
@@ -45,9 +45,9 @@ Generated Wrangler configs automatically include:
 
 ```json
 {
-	"images": {
-		"binding": "LUCID_IMAGES"
-	}
+  "images": {
+    "binding": "LUCID_IMAGES"
+  }
 }
 ```
 

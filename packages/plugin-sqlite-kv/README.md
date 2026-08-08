@@ -19,13 +19,13 @@ import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: () => ({
-		plugins: [
-			sqliteKVPlugin(),
-		],
-	}),
+  runtime: node,
+  db: sqlite,
+  config: () => ({
+    plugins: [
+      sqliteKVPlugin(),
+    ],
+  }),
 });
 ```
 

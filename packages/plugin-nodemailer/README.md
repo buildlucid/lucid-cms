@@ -21,15 +21,15 @@ import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: () => ({
-		plugins: [
-			nodemailerPlugin({
-				transporter,
-			}),
-		],
-	}),
+  runtime: node,
+  db: sqlite,
+  config: () => ({
+    plugins: [
+      nodemailerPlugin({
+        transporter,
+      }),
+    ],
+  }),
 });
 ```
 

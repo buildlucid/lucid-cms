@@ -20,11 +20,11 @@ import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { d1 } from "@lucidcms/db-d1";
 
 export default configureLucid({
-	runtime: cloudflare,
-	db: d1,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: cloudflare,
+  db: d1,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 

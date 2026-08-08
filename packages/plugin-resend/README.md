@@ -21,15 +21,15 @@ import { resendPlugin } from "@lucidcms/plugin-resend";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: (env) => ({
-		plugins: [
-			resendPlugin({
-				apiKey: env.RESEND_API_KEY,
-			}),
-		],
-	}),
+  runtime: node,
+  db: sqlite,
+  config: (env) => ({
+    plugins: [
+      resendPlugin({
+        apiKey: env.RESEND_API_KEY,
+      }),
+    ],
+  }),
 });
 ```
 

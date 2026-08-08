@@ -19,20 +19,20 @@ import { libsql } from "@lucidcms/db-libsql";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 
 export const env = z.object({
-	LIBSQL_URL: z.string(),
-	LIBSQL_AUTH_TOKEN: z.string().optional(),
+  LIBSQL_URL: z.string(),
+  LIBSQL_AUTH_TOKEN: z.string().optional(),
 });
 
 export default configureLucid({
-	runtime: cloudflare,
-	db: libsql,
-	config: (env) => ({
-		plugins: [
-			cloudflareR2Plugin({
-				bucketName: "lucid-media",
-			}),
-		],
-	}),
+  runtime: cloudflare,
+  db: libsql,
+  config: (env) => ({
+    plugins: [
+      cloudflareR2Plugin({
+        bucketName: "lucid-media",
+      }),
+    ],
+  }),
 });
 ```
 

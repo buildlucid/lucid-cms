@@ -20,11 +20,11 @@ import { node } from "@lucidcms/runtime-node";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: node,
+  db: sqlite,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 

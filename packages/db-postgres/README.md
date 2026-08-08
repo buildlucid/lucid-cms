@@ -19,11 +19,11 @@ import { node } from "@lucidcms/runtime-node";
 import { postgres } from "@lucidcms/db-postgres";
 
 export default configureLucid({
-	runtime: node,
-	db: postgres,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: node,
+  db: postgres,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 

@@ -19,16 +19,16 @@ import { workerQueuesPlugin } from "@lucidcms/plugin-worker-queues";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: () => ({
-		plugins: [
-			workerQueuesPlugin({
-				concurrentLimit: 5,
-				batchSize: 10,
-			}),
-		],
-	}),
+  runtime: node,
+  db: sqlite,
+  config: () => ({
+    plugins: [
+      workerQueuesPlugin({
+        concurrentLimit: 5,
+        batchSize: 10,
+      }),
+    ],
+  }),
 });
 ```
 

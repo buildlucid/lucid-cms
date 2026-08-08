@@ -43,24 +43,24 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import Heading from "@tiptap/extension-heading";
 
 const json: RichTextJSON = {
-	type: "doc",
-	content: [
-		{
-			type: "paragraph",
-			content: [{ type: "text", text: "Hello world" }],
-		},
-	],
+  type: "doc",
+  content: [
+    {
+      type: "paragraph",
+      content: [{ type: "text", text: "Hello world" }],
+    },
+  ],
 };
 
 const html = generateHTML(json);
 const customHtml = generateHTML(json, {
-	extensions: [
-		Heading.configure({
-			HTMLAttributes: {
-				class: "prose-heading",
-			},
-		}),
-	],
+  extensions: [
+    Heading.configure({
+      HTMLAttributes: {
+        class: "prose-heading",
+      },
+    }),
+  ],
 });
 const nextJson = generateJSON(html);
 ```
@@ -75,13 +75,13 @@ Use server-safe conversion helpers from `@lucidcms/rich-text/server`.
 import { generateHTML, generateJSON } from "@lucidcms/rich-text/server";
 
 const html = generateHTML({
-	type: "doc",
-	content: [
-		{
-			type: "paragraph",
-			content: [{ type: "text", text: "Server render" }],
-		},
-	],
+  type: "doc",
+  content: [
+    {
+      type: "paragraph",
+      content: [{ type: "text", text: "Server render" }],
+    },
+  ],
 });
 
 const json = generateJSON(html);

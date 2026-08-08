@@ -19,11 +19,11 @@ import { node } from "@lucidcms/runtime-node";
 import { libsql } from "@lucidcms/db-libsql";
 
 export default configureLucid({
-	runtime: node,
-	db: libsql,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: node,
+  db: libsql,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 

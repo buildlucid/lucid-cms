@@ -27,11 +27,11 @@ import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { libsql } from "@lucidcms/db-libsql";
 
 export default configureLucid({
-	runtime: cloudflare,
-	db: libsql,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: cloudflare,
+  db: libsql,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 
@@ -49,16 +49,16 @@ The `cloudflare` function accepts a single parameter, `options`, which is either
 
 ```typescript
 export default configureLucid({
-	runtime: cloudflare((env) => ({
-		environment: "staging",
-		dev: {
-			port: Number(env.PORT ?? 6543),
-		},
-	})),
-	db: libsql,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: cloudflare((env) => ({
+    environment: "staging",
+    dev: {
+      port: Number(env.PORT ?? 6543),
+    },
+  })),
+  db: libsql,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 
@@ -104,13 +104,13 @@ If you already own a Wrangler config, pass its path to `wrangler`. Lucid will us
 
 ```typescript
 export default configureLucid({
-	runtime: cloudflare({
-		wrangler: "./wrangler.jsonc",
-	}),
-	db: libsql,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: cloudflare({
+    wrangler: "./wrangler.jsonc",
+  }),
+  db: libsql,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 
@@ -125,15 +125,15 @@ import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 
 export default configureLucid({
-	runtime: cloudflare,
-	db: d1({ databaseName: "lucid-db" }),
-	config: () => ({
-		plugins: [
-			cloudflareR2Plugin({
-				bucketName: "lucid-media",
-			}),
-		],
-	}),
+  runtime: cloudflare,
+  db: d1({ databaseName: "lucid-db" }),
+  config: () => ({
+    plugins: [
+      cloudflareR2Plugin({
+        bucketName: "lucid-media",
+      }),
+    ],
+  }),
 });
 ```
 
@@ -141,20 +141,20 @@ Use `bindings` when you want the runtime to force or override generated binding 
 
 ```typescript
 export default configureLucid({
-	runtime: cloudflare({
-		bindings: {
-			images: true,
-			kv: true,
-			r2: {
-				binding: "MEDIA",
-				bucketName: "lucid-media",
-			},
-		},
-	}),
-	db: libsql,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: cloudflare({
+    bindings: {
+      images: true,
+      kv: true,
+      r2: {
+        binding: "MEDIA",
+        bucketName: "lucid-media",
+      },
+    },
+  }),
+  db: libsql,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 
@@ -169,15 +169,15 @@ import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 
 export default configureLucid({
-	runtime: cloudflare,
-	db: libsql,
-	config: () => ({
-		plugins: [
-			cloudflareR2Plugin({
-				bucketName: "lucid-media",
-			}),
-		],
-	}),
+  runtime: cloudflare,
+  db: libsql,
+  config: () => ({
+    plugins: [
+      cloudflareR2Plugin({
+        bucketName: "lucid-media",
+      }),
+    ],
+  }),
 });
 ```
 
@@ -189,11 +189,11 @@ Media is streamed through Lucid's `cdn` endpoint, including preset-driven image 
 import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
 
 export default configureLucid({
-	runtime: cloudflare,
-	db: libsql,
-	config: () => ({
-		plugins: [cloudflareImagesPlugin()],
-	}),
+  runtime: cloudflare,
+  db: libsql,
+  config: () => ({
+    plugins: [cloudflareImagesPlugin()],
+  }),
 });
 ```
 

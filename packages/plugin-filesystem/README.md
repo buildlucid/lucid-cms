@@ -19,15 +19,15 @@ import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: () => ({
-		plugins: [
-			filesystemPlugin({
-				uploadDir: "uploads",
-			}),
-		],
-	}),
+  runtime: node,
+  db: sqlite,
+  config: () => ({
+    plugins: [
+      filesystemPlugin({
+        uploadDir: "uploads",
+      }),
+    ],
+  }),
 });
 ```
 

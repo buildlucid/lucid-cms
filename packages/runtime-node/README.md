@@ -21,11 +21,11 @@ import { node } from "@lucidcms/runtime-node";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: node,
+  db: sqlite,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 
@@ -39,15 +39,15 @@ The `node` function accepts a single parameter, `options`, which is either an op
 
 ```typescript
 export default configureLucid({
-	runtime: node((env) => ({
-		server: {
-			port: Number(env.PORT ?? 6543),
-		},
-	})),
-	db: sqlite,
-	config: () => ({
-		// ...other config
-	}),
+  runtime: node((env) => ({
+    server: {
+      port: Number(env.PORT ?? 6543),
+    },
+  })),
+  db: sqlite,
+  config: () => ({
+    // ...other config
+  }),
 });
 ```
 

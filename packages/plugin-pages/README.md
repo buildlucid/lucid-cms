@@ -31,25 +31,25 @@ import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: () => ({
-		plugins: [
-			pagesPlugin({
-				collections: [{
-					key: "page",
-					localized: true,
-					prefix: {
-						en: "en",
-						fr: "fr",
-					},
-					ui: {
-						fullSlug: true,
-					},
-				}],
-			}),
-		],
-	}),
+  runtime: node,
+  db: sqlite,
+  config: () => ({
+    plugins: [
+      pagesPlugin({
+        collections: [{
+          key: "page",
+          localized: true,
+          prefix: {
+            en: "en",
+            fr: "fr",
+          },
+          ui: {
+            fullSlug: true,
+          },
+        }],
+      }),
+    ],
+  }),
 });
 ```
 

@@ -21,21 +21,21 @@ import { s3Plugin } from "@lucidcms/plugin-s3";
 import { sqlite } from "@lucidcms/db-sqlite";
 
 export default configureLucid({
-	runtime: node,
-	db: sqlite,
-	config: (env) => ({
-		plugins: [
-			s3Plugin({
-				endpoint: env.S3_ENDPOINT,
-				bucket: env.S3_BUCKET,
-				clientOptions: {
-					region: "auto",
-					accessKeyId: env.S3_ACCESS_KEY_ID,
-					secretAccessKey: env.S3_SECRET_ACCESS_KEY,
-				},
-			}),
-		],
-	}),
+  runtime: node,
+  db: sqlite,
+  config: (env) => ({
+    plugins: [
+      s3Plugin({
+        endpoint: env.S3_ENDPOINT,
+        bucket: env.S3_BUCKET,
+        clientOptions: {
+          region: "auto",
+          accessKeyId: env.S3_ACCESS_KEY_ID,
+          secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+        },
+      }),
+    ],
+  }),
 });
 ```
 
