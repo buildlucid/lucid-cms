@@ -1,4 +1,5 @@
 import type { ZodType } from "zod";
+import type { MediaType } from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
@@ -17,6 +18,17 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 	localized?: boolean;
 	default?: Record<string, unknown>;
 	index?: true;
+	editor?: {
+		links?: {
+			external?: boolean;
+			internal?: boolean | string[];
+		};
+		media?: boolean | Array<Extract<MediaType, "image" | "audio" | "video">>;
+		bricks?: boolean | string[];
+		variables?: boolean | string[];
+		appearance?: "default" | "seamless";
+		fullscreen?: boolean;
+	};
 	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;

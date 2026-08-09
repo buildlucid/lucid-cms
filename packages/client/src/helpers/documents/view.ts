@@ -190,6 +190,20 @@ const createBrickView = <
 	brick: TBrick;
 	context: DocumentViewOptions;
 }): DocumentBrickView<TDocument, TBrick, THasLocale> => {
+	const previewBrick: PreviewFieldBrick | undefined =
+		props.brick.type === "fixed" || props.brick.type === "builder"
+			? {
+					type: props.brick.type,
+					key: props.brick.key,
+					order: props.brick.order,
+				}
+			: undefined;
+
+	const fieldContext =
+		props.brick.type === "embedded" && props.context.preview === true
+			? { ...props.context, preview: false }
+			: props.context;
+
 	return {
 		raw: props.brick,
 		id: props.brick.id,
@@ -209,12 +223,8 @@ const createBrickView = <
 		...createFieldAccessorMethods<TDocument, TBrick["fields"], THasLocale>({
 			document: props.document,
 			fields: props.brick.fields,
-			context: props.context,
-			brick: {
-				type: props.brick.type,
-				key: props.brick.key,
-				order: props.brick.order,
-			},
+			context: fieldContext,
+			brick: previewBrick,
 			path: [],
 		}),
 	} as unknown as DocumentBrickView<TDocument, TBrick, THasLocale>;

@@ -12,7 +12,7 @@ import type {
 	CFResponse,
 	CustomFieldErrorItem,
 	CustomFieldValidationError,
-	FieldRelationRefTarget,
+	FieldRefTarget,
 	FieldRelationValidationInput,
 	GetIndexDefinitionProps,
 	GetSchemaDefinitionProps,
@@ -178,7 +178,7 @@ class RelationCustomField extends CustomField<"relation"> {
 	}
 	override getRelationFieldRefTargets(
 		row: Select<LucidBricksTable>,
-	): FieldRelationRefTarget[] {
+	): FieldRefTarget[] {
 		const relationValue = this.extractRelationFieldValue(row);
 		if (!relationValue) return [];
 

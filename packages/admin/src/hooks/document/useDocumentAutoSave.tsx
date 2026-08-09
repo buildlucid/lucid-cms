@@ -147,6 +147,10 @@ export function useDocumentAutoSave(props: {
 			debouncedAutoSave.clear();
 			return;
 		}
+		if (brickStore.get.autoSavePaused) {
+			debouncedAutoSave.clear();
+			return;
+		}
 
 		// Wait until initial snapshot is captured after store reset/refetch.
 		// Without this guard, mount-time editor sync events can bump autoSaveCounter

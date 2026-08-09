@@ -44,6 +44,13 @@ declare module "../../types.js" {
 					{
 						canonical_url: string | null;
 					}
+			  >
+			| DocumentBrick<
+					"callout",
+					"embedded",
+					{
+						text: string | null;
+					}
 			  >;
 	}
 
@@ -129,6 +136,16 @@ const page = {
 					en: "Still reading?",
 					fr: "Vous etes encore la ?",
 				},
+			},
+		},
+		{
+			id: 24,
+			ref: "embedded-callout",
+			key: "callout",
+			order: 0,
+			type: "embedded",
+			fields: {
+				text: "Inline callout",
 			},
 		},
 	],
@@ -370,6 +387,10 @@ describe("@lucidcms/client document helpers", () => {
 			.brick({ type: "builder", key: "banner" })
 			?.field("title")
 			.preview();
+		const embeddedBrickAttributes = pageView
+			.brick({ type: "embedded", key: "callout" })
+			?.field("text")
+			.preview();
 		const groupAttributes = pageView
 			.field("sections")
 			.groups()[1]
@@ -394,6 +415,7 @@ describe("@lucidcms/client document helpers", () => {
 			path: ["page_title"],
 			locale: "fr",
 		});
+		expect(embeddedBrickAttributes).toEqual({});
 		expect(
 			decodePreviewFieldTarget(
 				brickAttributes?.["data-lucid-preview-field"] ?? "",

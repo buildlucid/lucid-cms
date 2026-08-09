@@ -183,6 +183,23 @@ export type HttpConfig = {
 	extensions?: HttpExtension[];
 };
 
+/** Maps a Lucid document collection to a public website path. */
+export type ContentRouteDefinition = {
+	/** Stable key stored by document-link rich-text marks. */
+	key: string;
+	collectionKey: string;
+	path: {
+		/** Top-level text or number custom field containing the path or slug. */
+		field: string;
+		/** Optional static path prefix, such as `/blog`. */
+		prefix?: string;
+	};
+	label?: {
+		/** Ordered top-level scalar fields used to label documents in selectors. */
+		fields: string[];
+	};
+};
+
 export type AiFeatureConfig = {
 	/* Enables AI Image generation */
 	imageGeneration?: boolean;
@@ -236,6 +253,8 @@ export interface LucidConfig {
 	 * HTTP transport configuration.
 	 */
 	http?: HttpConfig;
+	/** Public website paths exposed by Lucid content. */
+	contentRoutes?: ContentRouteDefinition[];
 	/**
 	 * The public host of the Lucid instance. If not provided, the request URL will be used.
 	 * Values without a protocol are treated as HTTPS.

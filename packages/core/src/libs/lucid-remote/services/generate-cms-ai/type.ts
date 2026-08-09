@@ -64,7 +64,7 @@ export type CustomFieldInputDocumentContext = {
 	fields: CustomFieldInputDocumentContextFields;
 	bricks: Array<{
 		key: string;
-		type: "builder" | "fixed";
+		type: "builder" | "fixed" | "embedded";
 		fields: CustomFieldInputDocumentContextFields;
 	}>;
 };
@@ -97,6 +97,7 @@ export type CustomFieldInputCollectionContext = {
 	fields: Record<string, CustomFieldInputDefinitionField>;
 	fixedBricks: Record<string, CustomFieldInputDefinitionBrick>;
 	builderBricks: Record<string, CustomFieldInputDefinitionBrick>;
+	embeddedBricks: Record<string, CustomFieldInputDefinitionBrick>;
 };
 
 export type CustomFieldInputTargetCollectionContext = {

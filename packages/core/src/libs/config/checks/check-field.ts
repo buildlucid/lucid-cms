@@ -1,14 +1,21 @@
 import type { Config } from "../../../types.js";
+import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
 import { normalizeRelationCollections } from "../../collection/custom-fields/fields/relation/utils/normalize-relation-collections.js";
 import type {
 	CFConfig,
 	FieldTypes,
 } from "../../collection/custom-fields/types.js";
 import { translate } from "../../i18n/index.js";
+import checkRichTextField from "./check-rich-text-field.js";
 
 // TODO: Handle this within the custom field class
 
-const checkField = (field: CFConfig<FieldTypes>, config: Config) => {
+/** Validates custom-field config that depends on other registered resources. */
+const checkField = (
+	field: CFConfig<FieldTypes>,
+	config: Config,
+	collection: CollectionBuilder,
+) => {
 	switch (field.type) {
 		case "relation": {
 			const allMultipleCollections = config.collections
@@ -35,6 +42,10 @@ const checkField = (field: CFConfig<FieldTypes>, config: Config) => {
 				);
 			}
 
+			break;
+		}
+		case "rich-text": {
+			checkRichTextField(field, config, collection);
 			break;
 		}
 		default: {

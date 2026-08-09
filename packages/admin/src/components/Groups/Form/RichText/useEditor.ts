@@ -1,4 +1,4 @@
-import { extensions, type RichTextJSON } from "@lucidcms/rich-text";
+import { mergeExtensions, type RichTextJSON } from "@lucidcms/rich-text";
 import type { Editor } from "@tiptap/core";
 import {
 	type Accessor,
@@ -10,19 +10,24 @@ import {
 } from "solid-js";
 import { createTiptapEditor } from "solid-tiptap";
 import safeDeepEqual from "@/utils/safe-deep-equal";
+import { createRichTextNodeViewExtensions } from "./nodeViews";
 import type { RichTextOptions } from "./types";
 
+/** Builds the enabled Tiptap extension set for an editor instance. */
 const getExtensions = (options?: RichTextOptions) =>
-	extensions.filter((extension) => {
-		if (extension.name === "heading" && options?.headings === false)
-			return false;
-		if (extension.name === "underline" && options?.underline === false)
-			return false;
-		if (extension.name === "strike" && options?.strikethrough === false)
-			return false;
-		return true;
-	});
+	mergeExtensions(createRichTextNodeViewExtensions(options)).filter(
+		(extension) => {
+			if (extension.name === "heading" && options?.headings === false)
+				return false;
+			if (extension.name === "underline" && options?.underline === false)
+				return false;
+			if (extension.name === "strike" && options?.strikethrough === false)
+				return false;
+			return true;
+		},
+	);
 
+/** Creates and synchronizes the shared rich-text editor instance. */
 const useEditor = (config: {
 	value: RichTextJSON | null;
 	onChange: (value: RichTextJSON) => void;
@@ -39,20 +44,23 @@ const useEditor = (config: {
 	const [container, setContainer] = createSignal<HTMLElement>();
 
 	const editor = createTiptapEditor(() => ({
-		// biome-ignore lint/style/noNonNullAssertion: container is guaranteed to exist
+		// biome-ignore lint/style/noNonNullAssertion: Solid assigns the element ref before Tiptap's effect runs.
 		element: container()!,
 		extensions: getExtensions(config.options),
 		editorProps: {
 			attributes: {
 				class:
-					"rich-text-content min-h-48 p-3 text-sm text-title focus:outline-none",
+					config.options?.appearance === "seamless"
+						? "rich-text-content min-h-[60vh] py-3 text-sm text-title focus:outline-none"
+						: "rich-text-content min-h-48 p-3 text-sm text-title focus:outline-none",
 			},
 		},
 		editable: untrack(() => !config.disabled),
 		content: untrack(() => config.value),
 		onUpdate: ({ editor: instance }) => {
 			if (config.disabled) return;
-			config.onChange(instance.getJSON());
+			const value = instance.getJSON();
+			config.onChange(value);
 		},
 		onFocus: () => setFocused(true),
 		onBlur: () => setFocused(false),

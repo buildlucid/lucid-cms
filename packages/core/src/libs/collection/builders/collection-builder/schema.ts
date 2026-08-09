@@ -212,6 +212,7 @@ const CollectionConfigSchema = z
 			.object({
 				fixed: z.array(z.unknown()).optional(),
 				builder: z.array(z.unknown()).optional(),
+				embedded: z.array(z.unknown()).optional(),
 			})
 			.optional(),
 	})

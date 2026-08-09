@@ -1,30 +1,21 @@
-import type { Extensions, JSONContent } from "@tiptap/core";
-import {
-	generateHTML as tiptapGenerateHTML,
-	generateJSON as tiptapGenerateJSON,
-	generateText as tiptapGenerateText,
-} from "@tiptap/core";
-import { extensions, mergeExtensions } from "./extensions.js";
-import type { RichTextJSON } from "./types.js";
+import { generateJSON as tiptapGenerateJSON } from "@tiptap/core";
+import { extensions } from "./extensions.js";
+import { renderRichTextHTML } from "./render.js";
+import type { RichTextJSON, RichTextRenderOptions } from "./types.js";
 import { generatePlainText } from "./utils/text.js";
 
+/** Renders rich-text JSON to HTML in browser runtimes. */
 export const generateHTML = (
 	json: RichTextJSON,
-	props?: {
-		extensions?: Extensions;
-	},
-): string => {
-	return tiptapGenerateHTML(
-		json as JSONContent,
-		mergeExtensions(props?.extensions),
-	);
-};
+	options?: RichTextRenderOptions,
+): string => renderRichTextHTML(json, options);
 
+/** Parses HTML into Lucid rich-text JSON in browser runtimes. */
 export const generateJSON = (html: string): RichTextJSON => {
-	return tiptapGenerateJSON(html, extensions) as RichTextJSON;
+	return tiptapGenerateJSON(html, extensions);
 };
 
+/** Extracts readable plain text from rich-text JSON in browser runtimes. */
 export const generateText = (json: RichTextJSON): string => {
-	tiptapGenerateText(json as JSONContent, extensions);
 	return generatePlainText(json);
 };

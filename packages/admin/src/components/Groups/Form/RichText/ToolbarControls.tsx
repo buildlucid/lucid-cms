@@ -123,21 +123,30 @@ const ToolbarControls: Component<{
 				<FaSolidListUl size={12} />
 			</ToolbarButton>
 
-			<div class="h-5 w-px bg-border" />
-
-			<ToolbarButton
-				mode={toolbarButtonMode()}
-				isActive={props.isLink}
-				onClick={props.onOpenLinkModal}
-				disabled={props.disabled}
-				title={
-					props.isLink
-						? T()("editor.rich.text.link.edit")
-						: T()("editor.rich.text.link.add")
+			<Show
+				when={
+					props.options?.links?.external !== false ||
+					props.options?.links?.internal === true ||
+					(Array.isArray(props.options?.links?.internal) &&
+						props.options.links.internal.length > 0)
 				}
 			>
-				<FaSolidLink size={12} />
-			</ToolbarButton>
+				<div class="h-5 w-px bg-border" />
+
+				<ToolbarButton
+					mode={toolbarButtonMode()}
+					isActive={props.isLink}
+					onClick={props.onOpenLinkModal}
+					disabled={props.disabled}
+					title={
+						props.isLink
+							? T()("editor.rich.text.link.edit")
+							: T()("editor.rich.text.link.add")
+					}
+				>
+					<FaSolidLink size={12} />
+				</ToolbarButton>
+			</Show>
 
 			<div class="h-5 w-px bg-border" />
 

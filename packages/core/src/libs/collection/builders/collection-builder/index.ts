@@ -39,6 +39,11 @@ class CollectionBuilder<
 				config.bricks?.builder,
 			);
 		}
+		if (this.config.bricks?.embedded) {
+			this.config.bricks.embedded = this.#removeDuplicateBricks(
+				config.bricks?.embedded,
+			);
+		}
 	}
 	// ------------------------------------
 	// Builder Methods
@@ -251,10 +256,20 @@ class CollectionBuilder<
 			})) ?? []
 		);
 	}
-	get brickInstances(): Array<BrickBuilder> {
-		return (this.config.bricks?.builder || []).concat(
-			this.config.bricks?.fixed || [],
+	get embeddedBricks(): CollectionBrickConfig[] {
+		return (
+			this.config.bricks?.embedded?.map((brick) => ({
+				key: brick.key,
+				details: brick.config.details,
+				preview: brick.config.preview,
+				fields: brick.fieldTree,
+			})) ?? []
 		);
+	}
+	get brickInstances(): Array<BrickBuilder> {
+		return (this.config.bricks?.builder || [])
+			.concat(this.config.bricks?.fixed || [])
+			.concat(this.config.bricks?.embedded || []);
 	}
 }
 

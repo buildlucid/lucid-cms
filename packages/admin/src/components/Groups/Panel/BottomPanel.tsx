@@ -27,6 +27,7 @@ import { PanelFooter } from "./PanelFooter";
 
 interface BottomPanelNestingState {
 	level: Accessor<number>;
+	zIndex: Accessor<number>;
 	setChildOpen: (id: symbol, open: boolean) => void;
 }
 
@@ -35,6 +36,8 @@ const BottomPanelNestingContext = createContext<BottomPanelNestingState>();
 export const BottomPanel: Component<{
 	/** Visual stack depth. Nested bottom panels infer this automatically. */
 	nestedLevel?: number;
+	/** Base stack layer. Use a higher value when opening above a modal. */
+	zIndex?: number;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -59,6 +62,7 @@ export const BottomPanel: Component<{
 		description?: string;
 		fetchError?: string;
 		submit?: string;
+		cancel?: string;
 	};
 	callbacks?: {
 		onClose?: () => void;
@@ -69,6 +73,8 @@ export const BottomPanel: Component<{
 		hideFooter?: boolean;
 		padding?: "16" | "24";
 		growContent?: boolean;
+		/** Positions the panel close to the viewport top for workspace-style views. */
+		fullHeight?: boolean;
 	};
 	children: (_props?: {
 		contentLocale: Accessor<string | undefined>;
@@ -123,9 +129,13 @@ export const BottomPanel: Component<{
 	);
 	//* cap the visual offset so deeply nested panels remain usable
 	const visualLevel = createMemo(() => Math.min(Math.max(nestedLevel(), 0), 6));
+	const zIndex = createMemo(() =>
+		Math.max(props.zIndex ?? 40, (parentPanel?.zIndex() ?? 38) + 2),
+	);
 	const isCovered = createMemo(() => openChildPanels().size > 0);
 	const nestingState: BottomPanelNestingState = {
 		level: nestedLevel,
+		zIndex,
 		setChildOpen,
 	};
 	const PanelChildren = () =>
@@ -160,10 +170,7 @@ export const BottomPanel: Component<{
 	// ------------------------------
 	// Render
 	return (
-		<Dialog.Root
-			open={props.state.open}
-			onOpenChange={() => props.state.setOpen(!props.state.open)}
-		>
+		<Dialog.Root open={props.state.open} onOpenChange={props.state.setOpen}>
 			<Dialog.Portal>
 				<Dialog.Overlay
 					class={classNames(
@@ -173,12 +180,19 @@ export const BottomPanel: Component<{
 							"bg-transparent": nestedLevel() > 0,
 						},
 					)}
-					style={{ "z-index": 40 + nestedLevel() * 2 }}
+					style={{ "z-index": zIndex() }}
 				/>
 				<div
-					class="fixed inset-x-4 bottom-0 top-5 [@media(min-height:500px)]:top-20 [@media(min-height:953px)]:top-56 flex items-end justify-center origin-bottom transition-transform duration-300 ease-out"
+					class={classNames(
+						"fixed inset-x-4 bottom-0 flex items-end justify-center origin-bottom transition-transform duration-300 ease-out",
+						{
+							"top-5 [@media(min-height:500px)]:top-20 [@media(min-height:953px)]:top-56":
+								props.options?.fullHeight !== true,
+							"top-2 md:top-4": props.options?.fullHeight === true,
+						},
+					)}
 					style={{
-						"z-index": 40 + nestedLevel() * 2,
+						"z-index": zIndex(),
 						"padding-top": `${visualLevel() * 24}px`,
 						transform: isCovered()
 							? `rotate(${nestedLevel() % 2 === 0 ? -0.1 : 0.1}deg)`
@@ -188,7 +202,13 @@ export const BottomPanel: Component<{
 					data-covered={isCovered() ? "" : undefined}
 				>
 					<Dialog.Content
-						class="w-full h-full relative flex flex-col rounded-t-xl scrollbar border border-border bg-background-base animate-animate-slide-from-bottom-out data-expanded:animate-animate-slide-from-bottom-in outline-hidden overflow-y-auto"
+						class={classNames(
+							"w-full h-full relative flex flex-col rounded-t-xl scrollbar border border-border bg-background-base animate-animate-slide-from-bottom-out data-expanded:animate-animate-slide-from-bottom-in outline-hidden",
+							{
+								"overflow-y-auto": props.options?.fullHeight !== true,
+								"overflow-hidden": props.options?.fullHeight === true,
+							},
+						)}
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
 							if (target.hasAttribute("data-panel-ignore")) {
@@ -274,13 +294,18 @@ export const BottomPanel: Component<{
 								<Show
 									when={props.callbacks?.onSubmit}
 									fallback={
-										<div class="grow flex flex-col justify-between">
+										<div
+											class={classNames("grow flex flex-col justify-between", {
+												"min-h-0": props.options?.fullHeight,
+											})}
+										>
 											{/* content */}
 											<div
 												class={classNames({
 													"px-4": props.options?.padding === "16",
 													"px-4 md:px-6": props.options?.padding === "24",
 													grow: props.options?.growContent,
+													"overflow-y-auto": props.options?.fullHeight,
 												})}
 											>
 												<BottomPanelNestingContext.Provider
@@ -292,10 +317,14 @@ export const BottomPanel: Component<{
 											{/* footer */}
 											<Show when={!props.options?.hideFooter}>
 												<div
-													class={classNames({
-														"px-4": props.options?.padding === "16",
-														"px-4 md:px-6": props.options?.padding === "24",
-													})}
+													class={classNames(
+														{
+															"px-4": props.options?.padding === "16",
+															"px-4 md:px-6": props.options?.padding === "24",
+														},
+														props.options?.fullHeight &&
+															"shrink-0 bg-background-base",
+													)}
 												>
 													<PanelFooter padding={props.options?.padding}>
 														<div class="min-w-0">
@@ -313,7 +342,7 @@ export const BottomPanel: Component<{
 																type="button"
 																onClick={() => props.state.setOpen(false)}
 															>
-																{T()("common.close")}
+																{props.copy?.cancel ?? T()("common.close")}
 															</Button>
 															<Show when={props.copy?.submit}>
 																<Button
@@ -334,7 +363,9 @@ export const BottomPanel: Component<{
 									}
 								>
 									<form
-										class="grow flex flex-col justify-between"
+										class={classNames("grow flex flex-col justify-between", {
+											"min-h-0": props.options?.fullHeight,
+										})}
 										onSubmit={(e) => {
 											e.preventDefault();
 											if (props.callbacks?.onSubmit)
@@ -347,6 +378,7 @@ export const BottomPanel: Component<{
 												"px-4": props.options?.padding === "16",
 												"px-4 md:px-6": props.options?.padding === "24",
 												grow: props.options?.growContent,
+												"overflow-y-auto": props.options?.fullHeight,
 											})}
 										>
 											<BottomPanelNestingContext.Provider value={nestingState}>
@@ -356,10 +388,14 @@ export const BottomPanel: Component<{
 										{/* footer */}
 										<Show when={!props.options?.hideFooter}>
 											<div
-												class={classNames({
-													"px-4": props.options?.padding === "16",
-													"px-4 md:px-6": props.options?.padding === "24",
-												})}
+												class={classNames(
+													{
+														"px-4": props.options?.padding === "16",
+														"px-4 md:px-6": props.options?.padding === "24",
+													},
+													props.options?.fullHeight &&
+														"shrink-0 bg-background-base",
+												)}
 											>
 												<PanelFooter padding={props.options?.padding}>
 													<div class="min-w-0">
@@ -377,7 +413,7 @@ export const BottomPanel: Component<{
 															type="button"
 															onClick={() => props.state.setOpen(false)}
 														>
-															{T()("common.close")}
+															{props.copy?.cancel ?? T()("common.close")}
 														</Button>
 														<Show when={props.copy?.submit}>
 															<Button

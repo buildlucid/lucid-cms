@@ -661,6 +661,50 @@ describe("brick table construction", () => {
 		).toBe(true);
 	});
 
+	test("should preserve an embedded brick ref as its persisted instance id", () => {
+		const card = new BrickBuilder("card").addText("title");
+		const collection = new CollectionBuilder("article", {
+			mode: "multiple",
+			details: {
+				name: copy("admin:tests.collections.article.name", {
+					defaultMessage: "Articles",
+				}),
+				singularName: copy("admin:tests.collections.article.singularName", {
+					defaultMessage: "Article",
+				}),
+			},
+			bricks: { embedded: [card] },
+		});
+		const tables = aggregateBrickTables({
+			collection,
+			documentId: TEST_CONFIG.documentId,
+			versionId: TEST_CONFIG.versionId,
+			localization: TEST_CONFIG.localization,
+			bricks: [
+				{
+					ref: "stable-card-ref",
+					key: "card",
+					order: 0,
+					type: "embedded",
+					fields: [{ key: "title", type: "text", value: "Card" }],
+				},
+			],
+			tableNameByteLimit: null,
+		});
+		const table = tables.find(
+			(item) => item.table === "lucid_document__article__card",
+		);
+
+		expect(table?.data).toHaveLength(2);
+		expect(
+			table?.data.every(
+				(row) =>
+					row.brick_type === "embedded" &&
+					row.brick_instance_id === "stable-card-ref",
+			),
+		).toBe(true);
+	});
+
 	test("should not create relation tables when relation values are empty", () => {
 		const articleCollection = new CollectionBuilder("articles", {
 			mode: "multiple",

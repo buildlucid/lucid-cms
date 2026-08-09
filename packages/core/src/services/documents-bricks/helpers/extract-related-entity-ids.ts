@@ -5,6 +5,7 @@ import {
 	getFieldDatabaseConfig,
 	isStorageMode,
 } from "../../../libs/collection/custom-fields/storage/index.js";
+import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import type {
 	CollectionSchemaColumn,
 	TableType,
@@ -15,9 +16,14 @@ import type {
 } from "../../../libs/db/tables/index.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../../../libs/repositories/documents.js";
-import type { FieldTypes, Select, ServiceFn } from "../../../types.js";
+import {
+	type FieldTypes,
+	fieldTypes,
+	type Select,
+	type ServiceFn,
+} from "../../../types.js";
 
-export type FieldRelationValues = Partial<
+export type FieldRefValues = Partial<
 	Record<
 		FieldTypes,
 		Array<{
@@ -30,7 +36,7 @@ export type FieldRelationValues = Partial<
 /**
  * Resolves the custom field instance for a schema-backed field table.
  */
-const getSchemaFieldInstance = (
+const getRelationTableFieldInstance = (
 	collection: CollectionBuilder,
 	schema: {
 		name: LucidBrickTableName;
@@ -94,7 +100,7 @@ const shouldSkipRelationRow = (
 	},
 	row: Select<LucidBricksTable>,
 ): boolean => {
-	const fieldInstance = getSchemaFieldInstance(collection, schema);
+	const fieldInstance = getRelationTableFieldInstance(collection, schema);
 	if (!fieldInstance) return false;
 
 	if (row.position === 0) return false;
@@ -104,11 +110,41 @@ const shouldSkipRelationRow = (
 	return fieldInstance.config.multiple !== true;
 };
 
+/** Maps concrete field-table columns to their owning custom-field instance. */
+const getColumnFieldInstances = (
+	collection: CollectionBuilder,
+	schema: {
+		key: { brick?: string };
+		columns: CollectionSchemaColumn[];
+	},
+): Map<string, CustomField<FieldTypes>> => {
+	const owner: CollectionBuilder | BrickBuilder | undefined = schema.key.brick
+		? collection.brickInstances.find((brick) => brick.key === schema.key.brick)
+		: collection;
+	if (!owner) return new Map();
+
+	const fieldsByColumn = new Map<string, CustomField<FieldTypes>>(
+		Array.from(owner.fields.values()).map((field) => [
+			prefixGeneratedColName(field.key),
+			field,
+		]),
+	);
+	return new Map(
+		schema.columns.flatMap((column) => {
+			if (column.source !== "field" || !column.customField) return [];
+			const field = fieldsByColumn.get(column.name);
+			return field?.type === column.customField.type
+				? [[column.name, field] as const]
+				: [];
+		}),
+	);
+};
+
 /**
- * Adds a relation target to the deduped ref fetch map.
+ * Adds a target to the deduplicated ref fetch map.
  */
-const appendRelationTarget = (
-	refData: FieldRelationValues,
+const appendRefTarget = (
+	refData: FieldRefValues,
 	fieldType: FieldTypes,
 	target: {
 		table: string;
@@ -149,7 +185,7 @@ const shouldIncludeFieldType = (
 };
 
 /**
- * Extracts any custom field reference data based on the brick schema's foreign key information.
+ * Extracts custom field reference data from schemas and stored field values.
  * Works with arrays of BrickQueryResponse and/or DocumentQueryResponse types.
  * IDs can be used to fetch the data separately.
  */
@@ -174,9 +210,15 @@ const extractRelatedEntityIds: ServiceFn<
 			excludeTypes?: FieldTypes[];
 		},
 	],
-	FieldRelationValues
+	FieldRefValues
 > = async (_, data) => {
-	const refData: FieldRelationValues = {};
+	const refData: FieldRefValues = {};
+	const columnFieldInstances = new Map(
+		data.brickSchema.map((schema) => [
+			schema.name,
+			getColumnFieldInstances(data.collection, schema),
+		]),
+	);
 
 	for (const response of data.responses) {
 		for (const schema of data.brickSchema) {
@@ -184,39 +226,60 @@ const extractRelatedEntityIds: ServiceFn<
 			if (!brickRows || !Array.isArray(brickRows) || brickRows.length === 0)
 				continue;
 
-			const fieldInstance = getSchemaFieldInstance(data.collection, schema);
+			const fieldInstance = getRelationTableFieldInstance(
+				data.collection,
+				schema,
+			);
 
 			for (const row of brickRows) {
 				if (shouldSkipRelationRow(data.collection, schema, row)) continue;
 
 				for (const schemaColumn of schema.columns) {
-					if (
-						schemaColumn.source === "core" ||
-						schemaColumn.foreignKey === undefined ||
-						schemaColumn.customField === undefined
-					) {
-						continue;
-					}
-
 					const targetColumn = row[schemaColumn.name as keyof LucidBricksTable];
 					if (targetColumn === undefined || targetColumn === null) continue;
 
-					const fieldType = schemaColumn.customField.type;
-					const tableName = schemaColumn.foreignKey.table;
-
 					if (
-						!shouldIncludeFieldType(fieldType, {
-							includeTypes: data.includeTypes,
-							excludeTypes: data.excludeTypes,
-						})
+						schemaColumn.source === "field" &&
+						schemaColumn.foreignKey !== undefined &&
+						schemaColumn.customField !== undefined
 					) {
-						continue;
+						const fieldType = schemaColumn.customField.type;
+						if (
+							shouldIncludeFieldType(fieldType, {
+								includeTypes: data.includeTypes,
+								excludeTypes: data.excludeTypes,
+							})
+						) {
+							appendRefTarget(refData, fieldType, {
+								table: schemaColumn.foreignKey.table,
+								value: targetColumn,
+							});
+						}
 					}
 
-					appendRelationTarget(refData, fieldType, {
-						table: tableName,
-						value: targetColumn,
-					});
+					const columnFieldInstance = columnFieldInstances
+						.get(schema.name)
+						?.get(schemaColumn.name);
+					if (!columnFieldInstance) continue;
+
+					const fieldRefTargets =
+						columnFieldInstance.getFieldRefTargets(targetColumn);
+					for (const targetFieldType of fieldTypes) {
+						const targets = fieldRefTargets[targetFieldType];
+						if (!targets) continue;
+						if (
+							!shouldIncludeFieldType(targetFieldType, {
+								includeTypes: data.includeTypes,
+								excludeTypes: data.excludeTypes,
+							})
+						) {
+							continue;
+						}
+
+						for (const target of targets) {
+							appendRefTarget(refData, targetFieldType, target);
+						}
+					}
 				}
 
 				if (!fieldInstance) continue;
@@ -232,7 +295,7 @@ const extractRelatedEntityIds: ServiceFn<
 				for (const relationTarget of fieldInstance.getRelationFieldRefTargets(
 					row,
 				)) {
-					appendRelationTarget(refData, fieldInstance.type, relationTarget);
+					appendRefTarget(refData, fieldInstance.type, relationTarget);
 				}
 			}
 		}

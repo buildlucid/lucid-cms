@@ -22,6 +22,12 @@ interface AddBrickProps {
 	data: {
 		brickConfig: CollectionBrickConfig[];
 	};
+	options?: {
+		nested?: boolean;
+	};
+	callbacks?: {
+		onSelect?: (brickConfig: CollectionBrickConfig) => void;
+	};
 }
 
 const AddBrick: Component<AddBrickProps> = (props) => {
@@ -71,6 +77,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 			}}
 			options={{
 				noPadding: true,
+				nested: props.options?.nested,
 			}}
 		>
 			{/* Search */}
@@ -117,9 +124,13 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 										onMouseOver={() => setHighlightedBrick(brickConfig.key)}
 										onFocus={() => setHighlightedBrick(brickConfig.key)}
 										onClick={() => {
-											brickStore.get.addBrick({
-												brickConfig: brickConfig,
-											});
+											if (props.callbacks?.onSelect) {
+												props.callbacks.onSelect(brickConfig);
+											} else {
+												brickStore.get.addBrick({
+													brickConfig: brickConfig,
+												});
+											}
 											props.state.setOpen(false);
 										}}
 										type="button"

@@ -234,7 +234,7 @@ const brickLabel = (brick: CollectionBrickConfig): string => {
 
 /**
  * Builds the where options for the document filter section from the
- * collection's own fields and its fixed/builder brick fields. Options are
+ * collection's own fields and its configured brick fields. Options are
  * deduped by their backend filter path.
  */
 export const documentFilterFields = (
@@ -247,6 +247,7 @@ export const documentFilterFields = (
 	const bricks = [
 		...(collection?.fixedBricks ?? []),
 		...(collection?.builderBricks ?? []),
+		...(collection?.embeddedBricks ?? []),
 	];
 	for (const brick of bricks) {
 		collectFilterFields(

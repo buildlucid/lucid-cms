@@ -1,6 +1,7 @@
 import type { FieldError } from "@types";
 import classNames from "classnames";
 import {
+	type Accessor,
 	type Component,
 	createEffect,
 	createMemo,
@@ -37,6 +38,7 @@ interface BrickProps {
 	missingFieldColumns: string[];
 	collectionKey?: string;
 	documentId?: number;
+	contentLocale?: Accessor<string | undefined>;
 	options: {
 		padding?: "16" | "24";
 		bleedTop?: boolean;
@@ -53,7 +55,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	// Memos
 	const configFields = createMemo(() => props.configFields || []);
 	const contentLocale = createMemo(
-		() => contentLocaleStore.get.contentLocale ?? "",
+		() => props.contentLocale?.() ?? contentLocaleStore.get.contentLocale ?? "",
 	);
 	const defaultLocale = createMemo(() =>
 		getDefaultTranslationLocale(contentLocaleStore.get.locales),

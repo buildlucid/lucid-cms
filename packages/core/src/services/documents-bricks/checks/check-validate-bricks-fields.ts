@@ -28,6 +28,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import fetchValidationData, {
 	type ValidationData,
 } from "../helpers/fetch-validation-data.js";
+import { filterReachableEmbeddedBricks } from "../helpers/prepare-bricks-and-fields.js";
 
 const isRequiredFieldConfig = (
 	config: CustomField<FieldTypes>["config"],
@@ -250,11 +251,38 @@ const checkValidateBricksFields: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const refDataRes = await fetchValidationData(context, data);
+	const bricks = filterReachableEmbeddedBricks({
+		fields: data.fields,
+		bricks: data.bricks,
+	});
+	const embeddedRefs = new Set<string>();
+	const duplicateEmbeddedRefs = new Set<string>();
+	for (const brick of bricks) {
+		if (brick.type !== "embedded") continue;
+		if (embeddedRefs.has(brick.ref)) duplicateEmbeddedRefs.add(brick.ref);
+		embeddedRefs.add(brick.ref);
+	}
+	if (duplicateEmbeddedRefs.size > 0) {
+		return {
+			error: {
+				type: "basic",
+				name: copy("server:core.error.saving.bricks"),
+				message: copy("server:core.error.saving.page.duplicate.embedded.ref", {
+					data: { ref: Array.from(duplicateEmbeddedRefs).join(", ") },
+				}),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+	const refDataRes = await fetchValidationData(context, {
+		...data,
+		bricks,
+	});
 	if (refDataRes.error) return refDataRes;
 
 	const brickErrors = validateBricks({
-		bricks: data.bricks,
+		bricks,
 		collection: data.collection,
 		validationData: refDataRes.data,
 		defaultLocale: context.config.localization.defaultLocale,
@@ -317,6 +345,12 @@ const validateBricks = (props: {
 			}
 			case "fixed": {
 				instance = props.collection.config.bricks?.fixed?.find(
+					(b) => b.key === brick.key,
+				);
+				break;
+			}
+			case "embedded": {
+				instance = props.collection.config.bricks?.embedded?.find(
 					(b) => b.key === brick.key,
 				);
 				break;

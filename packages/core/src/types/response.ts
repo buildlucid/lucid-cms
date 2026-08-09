@@ -19,6 +19,7 @@ export type {
 	CollectionDocumentMeta,
 	CollectionDocumentTranslations,
 	ConnectionStatus,
+	ContentRoute,
 	CustomFieldInputGenerateResponse,
 	DocumentBrick,
 	DocumentField,

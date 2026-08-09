@@ -4,6 +4,7 @@ import type {
 	Media,
 	MediaFieldConfig,
 	MediaRef,
+	MediaType,
 	RelationFieldValue,
 	UserRef,
 } from "@types";
@@ -21,8 +22,10 @@ type MediaDimensionValidation = NonNullable<
 type ModalRegistry = {
 	mediaSelect: {
 		data: {
+			zIndex?: number;
 			extensions?: string;
 			type?: string;
+			types?: MediaType[];
 			width?: MediaDimensionValidation;
 			height?: MediaDimensionValidation;
 			multiple?: boolean;
@@ -36,8 +39,10 @@ type ModalRegistry = {
 	};
 	mediaUpload: {
 		data: {
+			zIndex?: number;
 			extensions?: string;
 			type?: string;
+			types?: MediaType[];
 		};
 		result: Media;
 	};
@@ -48,11 +53,39 @@ type ModalRegistry = {
 			selected?: RelationFieldValue[];
 			selectedRefs?: Array<DocumentRef>;
 			excludeDocument?: RelationFieldValue;
+			zIndex?: number;
 		};
 		result: {
 			value: RelationFieldValue[];
 			refs: DocumentRef[];
 		};
+	};
+	richTextVariableSelect: {
+		data: {
+			zIndex?: number;
+			localised?: boolean;
+			collectionKeys: string[];
+			selected?: {
+				collectionKey: string;
+				documentId: number;
+				fieldKey: string;
+			};
+			selectedRef?: DocumentRef;
+		};
+		result: {
+			collectionKey: string;
+			documentId: number;
+			fieldKey: string;
+			document: DocumentRef;
+		};
+	};
+	embeddedBrickEdit: {
+		data: {
+			brickRef: string;
+			zIndex?: number;
+			localised?: boolean;
+		};
+		result: undefined;
 	};
 	userSelect: {
 		data: {
@@ -92,6 +125,8 @@ type AnyModalState = {
 
 type PageBuilderModalsStoreState = {
 	current: AnyModalState | null;
+	/** Embedded-brick editing remains mounted while one of its fields opens a picker. */
+	parent: AnyModalState | null;
 };
 
 // ------------------------------------
@@ -100,6 +135,7 @@ type PageBuilderModalsStoreState = {
 
 const [get, set] = createStore<PageBuilderModalsStoreState>({
 	current: null,
+	parent: null,
 });
 
 /**
@@ -119,17 +155,28 @@ function open<K extends ModalType>(
 		onCallback: (result: ModalRegistry[K]["result"]) => void;
 	},
 ): void {
-	set("current", {
+	const next = {
 		type,
 		data: config.data,
 		onCallback: config.onCallback,
-	} as AnyModalState);
+	} as AnyModalState;
+	const embeddedParent =
+		get.current?.type === "embeddedBrickEdit" ? get.current : get.parent;
+	set({
+		current: next,
+		parent: embeddedParent ?? null,
+	});
 }
 
 /**
- * Closes the currently open modal.
+ * Closes the current modal when it still matches the optional caller type.
  */
-function close(): void {
+function close(type?: ModalType): void {
+	if (type && get.current?.type !== type) return;
+	if (get.parent) {
+		set({ current: get.parent, parent: null });
+		return;
+	}
 	set("current", null);
 }
 
@@ -138,7 +185,7 @@ function close(): void {
  * Should be called when navigating away from the page builder.
  */
 function reset(): void {
-	set("current", null);
+	set({ current: null, parent: null });
 }
 
 /**
@@ -151,7 +198,7 @@ function reset(): void {
  * }
  */
 function isOpen<K extends ModalType>(type: K): boolean {
-	return get.current?.type === type;
+	return get.current?.type === type || get.parent?.type === type;
 }
 
 /**
@@ -161,6 +208,9 @@ function isOpen<K extends ModalType>(type: K): boolean {
 function getModal<K extends ModalType>(type: K): ModalState<K> | undefined {
 	if (get.current?.type === type) {
 		return get.current as ModalState<K>;
+	}
+	if (get.parent?.type === type) {
+		return get.parent as ModalState<K>;
 	}
 	return undefined;
 }
@@ -173,10 +223,11 @@ function triggerAndClose<K extends ModalType>(
 	type: K,
 	result: ModalRegistry[K]["result"],
 ): void {
-	const modal = getModal(type);
+	const modal =
+		get.current?.type === type ? (get.current as ModalState<K>) : undefined;
 	if (modal) {
 		modal.onCallback(result);
-		close();
+		close(type);
 	}
 }
 
@@ -197,4 +248,4 @@ export default pageBuilderModalsStore;
 // Type Exports for Component Props
 // ------------------------------------
 
-export type { MediaDimensionValidation, ModalRegistry, ModalState, ModalType };
+export type { MediaDimensionValidation };

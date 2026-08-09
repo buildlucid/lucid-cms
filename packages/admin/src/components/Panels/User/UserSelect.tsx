@@ -42,6 +42,7 @@ interface UserSelectPanelProps {
 	state: {
 		open: boolean;
 		setOpen: (state: boolean) => void;
+		zIndex?: number;
 		multiple?: boolean;
 		selected?: number[];
 		selectedRefs?: UserRelationRef[];
@@ -51,9 +52,13 @@ interface UserSelectPanelProps {
 	};
 }
 
+/** Renders the reusable user selector in a bottom panel. */
 const UserSelectPanel: Component<UserSelectPanelProps> = (props) => {
+	// ----------------------------------------
+	// Render
 	return (
 		<BottomPanel
+			zIndex={props.state.zIndex}
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,

@@ -29,6 +29,7 @@ const formatSingle = (props: {
 	const formattedBricks: DocumentVersion["bricks"] = {
 		builder: [],
 		fixed: [],
+		embedded: [],
 	};
 
 	for (const schema of props.bricksSchema) {

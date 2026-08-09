@@ -68,6 +68,8 @@ interface CreateUpdateMediaPanelProps {
 		open: boolean;
 		setOpen: (_state: boolean) => void;
 		parentFolderId: Accessor<number | string | undefined>;
+		accept?: string;
+		zIndex?: number;
 	};
 	callbacks?: {
 		onSuccess?: (_media: Media) => void;
@@ -118,7 +120,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						: media.data?.data.type === "audio"
 							? "audio/*"
 							: undefined
-				: undefined,
+				: props.state.accept,
 		required: true,
 		errors: () => mutateErrors(),
 		progress: () => ({
@@ -1218,6 +1220,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 	// Render
 	return (
 		<Panel
+			zIndex={props.state.zIndex}
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,

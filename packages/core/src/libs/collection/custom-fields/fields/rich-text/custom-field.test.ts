@@ -88,6 +88,31 @@ test("successfully validate field - rich text", async () => {
 	});
 	expect(requiredValidate).length(0);
 
+	for (const type of ["lucidMedia", "lucidVariable", "lucidEmbeddedBrick"]) {
+		const atomValidate = validateField({
+			field: {
+				key: "required_rich_text",
+				type: "rich-text",
+				value: {
+					type: "doc",
+					content: [{ type }],
+				},
+			},
+			// biome-ignore lint/style/noNonNullAssertion: test collection always registers this field
+			instance: RichTextCollection.fields.get("required_rich_text")!,
+			validationData: {
+				media: [],
+				user: [],
+				relation: [],
+			},
+			meta: {
+				localized: RichTextCollection.getData.localized,
+				defaultLocale: "en",
+			},
+		});
+		expect(atomValidate).toHaveLength(0);
+	}
+
 	// Min length
 	const minLengthValidate = validateField({
 		field: {

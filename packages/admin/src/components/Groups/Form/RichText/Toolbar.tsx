@@ -1,4 +1,5 @@
 import type { Editor } from "@tiptap/core";
+import type { DocumentRef } from "@types";
 import classNames from "classnames";
 import {
 	type Component,
@@ -12,7 +13,8 @@ import { Portal } from "solid-js/web";
 import { createEditorTransaction } from "solid-tiptap";
 import T from "@/translations";
 import type { HeadingOption } from "./HeadingMenu";
-import LinkModal from "./LinkModal";
+import InsertControls from "./InsertControls";
+import LinkModal, { type RichTextLinkUpdate } from "./LinkModal";
 import ToolbarControls from "./ToolbarControls";
 import type { RichTextOptions } from "./types";
 
@@ -33,6 +35,8 @@ const Toolbar: Component<{
 	editor: Editor;
 	disabled?: boolean;
 	options?: RichTextOptions;
+	fullscreen: boolean;
+	onFullscreenChange: (fullscreen: boolean) => void;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -91,13 +95,24 @@ const Toolbar: Component<{
 	const [linkModalOpen, setLinkModalOpen] = createSignal(false);
 	const [linkModalLabel, setLinkModalLabel] = createSignal("");
 	const [linkModalUrl, setLinkModalUrl] = createSignal("");
+	const [linkModalKind, setLinkModalKind] = createSignal<
+		"external" | "document"
+	>("external");
+	const [linkModalRouteKey, setLinkModalRouteKey] = createSignal<string>();
+	const [linkModalDocument, setLinkModalDocument] = createSignal<DocumentRef>();
 	const [linkModalOpenInNewTab, setLinkModalOpenInNewTab] = createSignal(false);
+	const [linkModalCanRemove, setLinkModalCanRemove] = createSignal(false);
 	const [lastSelectionRect, setLastSelectionRect] =
 		createSignal<SelectionRect | null>(null);
 	const [selectionRange, setSelectionRange] = createSignal<{
 		from: number;
 		to: number;
 	} | null>(null);
+	let pillRef: HTMLDivElement | undefined;
+	let rafId: number | undefined;
+
+	// ----------------------------------------
+	// Memos
 	const headingOptions = createMemo<HeadingOption[]>(() => [
 		{ value: 0, label: T()("editor.rich.text.blocks.normal") },
 		{ value: 1, label: T()("editor.rich.text.headings.1") },
@@ -107,9 +122,6 @@ const Toolbar: Component<{
 		{ value: 5, label: T()("editor.rich.text.headings.5") },
 		{ value: 6, label: T()("editor.rich.text.headings.6") },
 	]);
-
-	let pillRef: HTMLDivElement | undefined;
-	let rafId: number | undefined;
 
 	// ----------------------------------------
 	// Functions
@@ -153,6 +165,7 @@ const Toolbar: Component<{
 			height: rect.height,
 		} satisfies SelectionRect;
 	};
+	/** Positions the floating toolbar beside the active selection. */
 	const updatePillPosition = () => {
 		if (typeof window === "undefined") return;
 		if (props.disabled || !isDesktop() || linkModalOpen()) {
@@ -219,13 +232,18 @@ const Toolbar: Component<{
 			.run();
 	};
 	const openLinkModal = () => {
-		if (props.editor.isActive("link")) {
+		const activeLink = props.editor.isActive("link");
+		if (activeLink) {
 			props.editor.chain().focus().extendMarkRange("link").run();
 		}
 		const currentSelection = props.editor.state.selection;
 		const attrs = props.editor.getAttributes("link") as {
 			href?: string;
 			target?: string | null;
+			kind?: "external" | "document";
+			routeKey?: string;
+			collectionKey?: string;
+			documentId?: number;
 		};
 		const selectedText = props.editor.state.doc.textBetween(
 			currentSelection.from,
@@ -238,14 +256,34 @@ const Toolbar: Component<{
 		});
 		setLinkModalLabel(selectedText);
 		setLinkModalUrl(attrs.href ?? "");
+		setLinkModalKind(attrs.kind === "document" ? "document" : "external");
+		setLinkModalRouteKey(attrs.routeKey);
+		setLinkModalDocument(
+			typeof attrs.collectionKey === "string" &&
+				typeof attrs.documentId === "number"
+				? props.options?.references?.document?.(
+						attrs.collectionKey,
+						attrs.documentId,
+					)
+				: undefined,
+		);
 		setLinkModalOpenInNewTab(attrs.target === "_blank");
+		setLinkModalCanRemove(activeLink);
 		setLinkModalOpen(true);
 	};
-	const updateLink = (values: {
-		label: string;
-		url: string;
-		openInNewTab: boolean;
-	}) => {
+	const removeLink = () => {
+		setLinkModalOpen(false);
+
+		requestAnimationFrame(() => {
+			let chain = props.editor.chain();
+			const capturedSelection = selectionRange();
+			if (capturedSelection) {
+				chain = chain.setTextSelection(capturedSelection);
+			}
+			chain.focus().extendMarkRange("link").unsetLink().run();
+		});
+	};
+	const updateLink = (values: RichTextLinkUpdate) => {
 		setLinkModalOpen(false);
 
 		requestAnimationFrame(() => {
@@ -256,17 +294,33 @@ const Toolbar: Component<{
 			}
 
 			chain = chain.focus().extendMarkRange("link");
-			const url = values.url.trim();
-			if (!url) {
+			const href = values.kind === "external" ? values.url.trim() : null;
+			if (values.kind === "external" && !href) {
 				chain.unsetLink().run();
 				return;
 			}
 
 			const label = values.label.trim();
-			const linkAttrs = {
-				href: url,
-				target: values.openInNewTab ? "_blank" : null,
-			};
+			const linkAttrs =
+				values.kind === "document"
+					? {
+							href: null,
+							kind: "document",
+							routeKey: values.routeKey,
+							collectionKey: values.collectionKey,
+							documentId: values.documentId,
+							target: values.openInNewTab ? "_blank" : null,
+							rel: values.openInNewTab ? "noopener noreferrer" : null,
+						}
+					: {
+							href,
+							kind: "external",
+							routeKey: null,
+							collectionKey: null,
+							documentId: null,
+							target: values.openInNewTab ? "_blank" : null,
+							rel: values.openInNewTab ? "noopener noreferrer" : null,
+						};
 
 			if (label) {
 				chain
@@ -284,7 +338,7 @@ const Toolbar: Component<{
 				return;
 			}
 
-			chain.setLink(linkAttrs).run();
+			chain.setMark("link", linkAttrs).run();
 		});
 	};
 	const handleHeadingMenuOpenChange = (open: boolean) => {
@@ -381,6 +435,13 @@ const Toolbar: Component<{
 	// Render
 	return (
 		<>
+			<InsertControls
+				editor={props.editor}
+				disabled={props.disabled}
+				options={props.options}
+				fullscreen={props.fullscreen}
+				onFullscreenChange={props.onFullscreenChange}
+			/>
 			<div class="md:hidden flex flex-wrap items-center gap-1.5 border-b border-border px-2 py-1.5">
 				<ToolbarControls
 					mode="mobile"
@@ -485,10 +546,16 @@ const Toolbar: Component<{
 					setOpen: closeLinkModal,
 					initialLabel: linkModalLabel(),
 					initialUrl: linkModalUrl(),
+					initialKind: linkModalKind(),
+					initialRouteKey: linkModalRouteKey(),
+					initialDocument: linkModalDocument(),
 					initialOpenInNewTab: linkModalOpenInNewTab(),
+					canRemove: linkModalCanRemove(),
 				}}
+				options={props.options}
 				callbacks={{
 					onUpdate: updateLink,
+					onRemove: removeLink,
 				}}
 			/>
 		</>

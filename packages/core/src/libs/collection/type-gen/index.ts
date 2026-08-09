@@ -321,7 +321,7 @@ const buildCollectionVersionKeyTypeName = (collectionKey: string): string => {
 const buildBrickTypeName = (props: {
 	collectionKey: string;
 	brickKey: string;
-	brickType: "builder" | "fixed";
+	brickType: "builder" | "fixed" | "embedded";
 }): string => {
 	return `${toPascalCaseIdentifier(props.collectionKey, "Collection")}${toPascalCaseIdentifier(props.brickKey, "Brick")}${toPascalCaseIdentifier(props.brickType, "Brick")}Brick`;
 };
@@ -330,7 +330,7 @@ const buildBrickTypeName = (props: {
 const buildBrickFieldsTypeName = (props: {
 	collectionKey: string;
 	brickKey: string;
-	brickType: "builder" | "fixed";
+	brickType: "builder" | "fixed" | "embedded";
 }): string => {
 	return `${buildBrickTypeName(props)}Fields`;
 };
@@ -393,12 +393,12 @@ const collectFilterTree = (
 	return tree;
 };
 
-/** Returns every fixed and builder brick so generation can treat them uniformly. */
+/** Returns every configured brick so generation can treat them uniformly. */
 const getCollectionBricks = (
 	collection: CollectionBuilder,
 ): Array<{
 	brick: BrickBuilder;
-	brickType: "builder" | "fixed";
+	brickType: "builder" | "fixed" | "embedded";
 }> => {
 	return [
 		...((collection.config.bricks?.builder ?? []).map((brick) => ({
@@ -408,6 +408,10 @@ const getCollectionBricks = (
 		...((collection.config.bricks?.fixed ?? []).map((brick) => ({
 			brick,
 			brickType: "fixed" as const,
+		})) ?? []),
+		...((collection.config.bricks?.embedded ?? []).map((brick) => ({
+			brick,
+			brickType: "embedded" as const,
 		})) ?? []),
 	];
 };

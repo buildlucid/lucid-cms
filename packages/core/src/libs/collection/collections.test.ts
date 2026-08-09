@@ -14,6 +14,7 @@ const pages = new CollectionBuilder("pages", {
 	bricks: {
 		builder: [new BrickBuilder("content")],
 		fixed: [new BrickBuilder("metadata")],
+		embedded: [new BrickBuilder("callout")],
 	},
 });
 
@@ -49,7 +50,7 @@ describe("collections", () => {
 		expect(result.data).toBeUndefined();
 	});
 
-	test("gets collection bricks in builder then fixed order", async () => {
+	test("gets collection bricks in builder, fixed, then embedded order", async () => {
 		const allBricks = await collections.getBricks(context, {
 			collection: pages,
 		});
@@ -61,13 +62,19 @@ describe("collections", () => {
 			collection: pages,
 			type: "fixed",
 		});
+		const embeddedBricks = await collections.getBricks(context, {
+			collection: pages,
+			type: "embedded",
+		});
 
 		expect(allBricks.data?.map((brick) => brick.key)).toEqual([
 			"content",
 			"metadata",
+			"callout",
 		]);
 		expect(builderBricks.data?.map((brick) => brick.key)).toEqual(["content"]);
 		expect(fixedBricks.data?.map((brick) => brick.key)).toEqual(["metadata"]);
+		expect(embeddedBricks.data?.map((brick) => brick.key)).toEqual(["callout"]);
 	});
 
 	test("gets a brick by key and optional type", async () => {

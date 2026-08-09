@@ -44,7 +44,7 @@ export interface BrickData {
 	ref: string;
 	key: string;
 	order: number;
-	type: "builder" | "fixed" | "collection-fields";
+	type: "builder" | "fixed" | "embedded" | "collection-fields";
 	open: boolean;
 	fields: Array<InternalDocumentField>;
 }
@@ -61,6 +61,7 @@ const [get, set] = createStore<{
 	initialSnapshot: BrickSnapshot[] | null;
 	autoSaveCounter: number;
 	skipAutoSave: boolean;
+	autoSavePaused: boolean;
 	relationFieldDragCount: number;
 	locked: boolean;
 	refs: Partial<Record<FieldTypes, FieldRef[]>>;
@@ -81,6 +82,11 @@ const [get, set] = createStore<{
 	captureInitialSnapshot: (snapshot?: BrickSnapshot[]) => void;
 	createSnapshotFromPayload: (payload: BrickSnapshotPayload) => BrickSnapshot[];
 	addBrick: (props: { brickConfig: CollectionBrickConfig }) => void;
+	addEmbeddedBrick: (props: { brickConfig: CollectionBrickConfig }) => string;
+	replaceBrickFields: (props: {
+		brickIndex: number;
+		fields: InternalDocumentField[];
+	}) => void;
 	removeBrick: (brickIndex: number) => void;
 	toggleBrickOpen: (brickIndex: number) => void;
 	swapBrickOrder: (props: { brickRef: string; targetBrickRef: string }) => void;
@@ -160,6 +166,7 @@ const [get, set] = createStore<{
 	locked: false,
 	autoSaveCounter: 0,
 	skipAutoSave: true,
+	autoSavePaused: false,
 	relationFieldDragCount: 0,
 	collectionLocalized: false,
 	documentRevision: 0,
@@ -178,6 +185,7 @@ const [get, set] = createStore<{
 			set("initialSnapshot", null);
 			set("autoSaveCounter", 0);
 			set("skipAutoSave", true);
+			set("autoSavePaused", false);
 			set("relationFieldDragCount", 0);
 			set("collectionLocalized", false);
 			set("refs", {});
@@ -251,7 +259,7 @@ const [get, set] = createStore<{
 						currentBrick.key = nextBrick.key;
 						currentBrick.order = nextBrick.order;
 						currentBrick.type = nextBrick.type;
-						if (nextBrick.type === "builder") {
+						if (nextBrick.type === "builder" || nextBrick.type === "embedded") {
 							currentBrick.ref = nextBrick.ref;
 						}
 						currentBrick.fields = brickHelpers.preserveRepeaterGroupOpenState(
@@ -291,6 +299,49 @@ const [get, set] = createStore<{
 			markDocumentChange({ content: true, structure: true });
 		});
 		rebuildBrickFieldIndex(get.bricks.length - 1);
+	},
+	/** Creates a brick owned by a rich-text embedded-brick node. */
+	addEmbeddedBrick(props) {
+		const ref = nanoid();
+		batch(() => {
+			set(
+				"bricks",
+				produce((draft) => {
+					draft.push({
+						ref,
+						key: props.brickConfig.key,
+						order: 0,
+						type: "embedded",
+						open: false,
+						fields: [],
+					});
+				}),
+			);
+			markDocumentChange({ content: true, structure: true });
+		});
+		rebuildBrickFieldIndex(get.bricks.length - 1);
+		return ref;
+	},
+	/** Replaces one brick's fields and refreshes the derived state used by editing and autosave. */
+	replaceBrickFields(props) {
+		if (
+			!get.bricks[props.brickIndex] ||
+			safeDeepEqual(get.bricks[props.brickIndex].fields, props.fields)
+		) {
+			return;
+		}
+
+		batch(() => {
+			set(
+				"bricks",
+				props.brickIndex,
+				"fields",
+				structuredClone(unwrap(props.fields)),
+			);
+			set("autoSaveCounter", (previous) => previous + 1);
+			markDocumentChange({ content: true });
+		});
+		rebuildBrickFieldIndex(props.brickIndex);
 	},
 	/** Removes a builder brick and its field index so autosave and dirty checks reflect the structural deletion. */
 	removeBrick(brickIndex) {
@@ -835,7 +886,9 @@ const [get, set] = createStore<{
 					if (brick.type === "collection-fields") return false;
 					if (brick.type !== responseBrick.type) return false;
 					if (brick.key !== responseBrick.key) return false;
-					if (brick.type === "builder") return brick.ref === responseBrick.ref;
+					if (brick.type === "builder" || brick.type === "embedded") {
+						return brick.ref === responseBrick.ref;
+					}
 					return true;
 				});
 

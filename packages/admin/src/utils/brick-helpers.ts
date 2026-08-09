@@ -15,7 +15,7 @@ import brickStore, { type BrickData } from "@/store/brick-store";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 
 type UpsertBrickData = Omit<BrickData, "type"> & {
-	type: "builder" | "fixed";
+	type: "builder" | "fixed" | "embedded";
 };
 
 const findFieldRecursive = (props: {
@@ -440,12 +440,14 @@ const objectifyFields = (
  * store bricks during same-view sync operations.
  */
 const getBrickSyncKey = (brick: {
-	type: "builder" | "fixed" | "collection-fields";
+	ref: string;
+	type: "builder" | "fixed" | "embedded" | "collection-fields";
 	key: string;
 	order: number;
 }): string => {
 	if (brick.type === "collection-fields") return "collection-pseudo-brick";
 	if (brick.type === "fixed") return `fixed:${brick.key}`;
+	if (brick.type === "embedded") return `embedded:${brick.ref}`;
 	return `builder:${brick.key}:${brick.order}`;
 };
 
@@ -498,7 +500,7 @@ const buildBricks = (props: {
 	ref: string;
 	key: string;
 	order: number;
-	type: "builder" | "fixed" | "collection-fields";
+	type: "builder" | "fixed" | "embedded" | "collection-fields";
 	open: boolean;
 	fields: InternalDocumentField[];
 }> => {

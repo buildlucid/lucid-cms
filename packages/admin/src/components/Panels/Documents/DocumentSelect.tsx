@@ -62,6 +62,7 @@ interface DocumentSelectPanelProps {
 		selected?: RelationFieldValue[];
 		selectedRefs?: DocumentRef[];
 		excludeDocument?: RelationFieldValue;
+		zIndex?: number;
 	};
 	callbacks: {
 		onSelect: (selection: {
@@ -71,9 +72,13 @@ interface DocumentSelectPanelProps {
 	};
 }
 
+/** Renders the reusable document selector in a bottom panel. */
 const DocumentSelectPanel: Component<DocumentSelectPanelProps> = (props) => {
+	// ----------------------------------------
+	// Render
 	return (
 		<BottomPanel
+			zIndex={props.state.zIndex}
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -123,9 +128,12 @@ interface DocumentSelectContentProps {
 	}) => void;
 }
 
-const DocumentSelectContent: Component<DocumentSelectContentProps> = (
+/** Renders document selection content for panels and nested workflows. */
+export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	props,
 ) => {
+	// ----------------------------------------
+	// State & Hooks
 	const [selectedDocuments, setSelectedDocuments] = createSignal<DocumentRef[]>(
 		[],
 	);
@@ -150,6 +158,8 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		},
 	});
 
+	// ----------------------------------------
+	// Memos
 	const allowedCollectionKeys = createMemo(() => props.collectionKeys ?? []);
 	const collectionKey = createMemo(() => activeCollectionKey());
 	const excludedDocumentId = createMemo(() => {
@@ -176,6 +186,8 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		})),
 	);
 
+	// ----------------------------------------
+	// Queries
 	const collection = api.collections.useGetSingle({
 		queryParams: {
 			location: {
@@ -184,12 +196,18 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		},
 		enabled: () => !!collectionKey(),
 	});
+
+	// ----------------------------------------
+	// Memos
 	const getCollectionFieldIncludes = createMemo(() =>
 		collectionFieldIncludes(collection.data?.data),
 	);
 	const getListingRefIncludes = createMemo(() =>
 		documentListingRefIncludes(getCollectionFieldIncludes()),
 	);
+
+	// ----------------------------------------
+	// Queries
 	const collections = api.collections.useGetAll({
 		queryParams: {
 			include: {
@@ -222,6 +240,9 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			collection.isSuccess &&
 			filterSchemaContextKey() === filterSchemaContext(),
 	});
+
+	// ----------------------------------------
+	// Memos
 	const getFilterFields = createMemo(() =>
 		documentFilterSectionFields(collection.data?.data),
 	);
@@ -315,6 +336,8 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		},
 	]);
 
+	// ----------------------------------------
+	// Effects
 	createEffect(() => {
 		const allowed = allowedCollectionKeys();
 		const active = activeCollectionKey();
@@ -368,6 +391,8 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		setSelectedDocuments(props.selectedRefs ?? []);
 	});
 
+	// ----------------------------------------
+	// Functions
 	const toggleSelectedDocument = (document: InternalCollectionDocument) => {
 		const nextRef = documentResponseToRef(document);
 
@@ -399,6 +424,8 @@ const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		});
 	};
 
+	// ----------------------------------------
+	// Render
 	return (
 		<div class="flex flex-col h-full">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">

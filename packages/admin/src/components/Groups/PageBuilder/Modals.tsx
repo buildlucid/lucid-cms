@@ -9,6 +9,8 @@ import ReleaseEnvironment from "@/components/Modals/Documents/ReleaseEnvironment
 import RestoreRevision from "@/components/Modals/Documents/RestoreRevision";
 import NavigationGuard from "@/components/Modals/NavigationGuard";
 import DocumentSelectPanel from "@/components/Panels/Documents/DocumentSelect";
+import EmbeddedBrickEditPanel from "@/components/Panels/Documents/EmbeddedBrickEdit";
+import RichTextVariableSelectPanel from "@/components/Panels/Documents/RichTextVariableSelect";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import MediaSelectPanel from "@/components/Panels/Media/MediaSelect";
 import UserSelectPanel from "@/components/Panels/User/UserSelect";
@@ -54,14 +56,6 @@ export const Modals: Component<{
 			props.hooks.uiState.getReleaseEnvironmentOpen() &&
 			props.hooks.uiState.getReleaseEnvironmentAction() === "request",
 	);
-	const resetReleaseState = () => {
-		props.hooks.uiState.setReleaseEnvironmentOpen(false);
-		props.hooks.uiState.setReleaseEnvironmentTarget(null);
-		props.hooks.uiState.setReleaseEnvironmentAction(null);
-	};
-
-	// ----------------------------------
-	// Modal State Helpers
 	const mediaSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("mediaSelect"),
 	);
@@ -71,12 +65,57 @@ export const Modals: Component<{
 	const documentSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("documentSelect"),
 	);
+	const richTextVariableSelectModal = createMemo(() =>
+		pageBuilderModalsStore.getModal("richTextVariableSelect"),
+	);
+	const embeddedBrickEditModal = createMemo(() =>
+		pageBuilderModalsStore.getModal("embeddedBrickEdit"),
+	);
+	const nestedPanelZIndex = createMemo(() =>
+		pageBuilderModalsStore.get.parent
+			? (() => {
+					const data = pageBuilderModalsStore.get.parent?.data;
+					return data && "zIndex" in data && typeof data.zIndex === "number"
+						? data.zIndex + 4
+						: 44;
+				})()
+			: undefined,
+	);
+	const mediaUploadAccept = createMemo(() => {
+		const data = mediaUploadModal()?.data;
+		if (!data) return undefined;
+		const extensions = data.extensions
+			?.split(",")
+			.map((extension) => extension.trim().replace(/^\./, ""))
+			.filter(Boolean);
+		if (extensions?.length) {
+			return extensions.map((extension) => `.${extension}`).join(",");
+		}
+		const types = data.types?.length
+			? data.types
+			: data.type
+				? [data.type]
+				: [];
+		return types.length
+			? Array.from(new Set(types))
+					.map((type) => `${type}/*`)
+					.join(",")
+			: undefined;
+	});
 	const userSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("userSelect"),
 	);
 	const linkSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("linkSelect"),
 	);
+
+	// ----------------------------------
+	// Functions
+	const resetReleaseState = () => {
+		props.hooks.uiState.setReleaseEnvironmentOpen(false);
+		props.hooks.uiState.setReleaseEnvironmentTarget(null);
+		props.hooks.uiState.setReleaseEnvironmentAction(null);
+	};
 
 	// ----------------------------------
 	// Render
@@ -88,9 +127,11 @@ export const Modals: Component<{
 			<MediaSelectPanel
 				state={{
 					open: mediaSelectModal() !== undefined,
-					setOpen: () => pageBuilderModalsStore.close(),
+					setOpen: () => pageBuilderModalsStore.close("mediaSelect"),
+					zIndex: mediaSelectModal()?.data.zIndex ?? nestedPanelZIndex(),
 					extensions: mediaSelectModal()?.data.extensions,
 					type: mediaSelectModal()?.data.type,
+					types: mediaSelectModal()?.data.types,
 					width: mediaSelectModal()?.data.width,
 					height: mediaSelectModal()?.data.height,
 					multiple: mediaSelectModal()?.data.multiple,
@@ -105,22 +146,55 @@ export const Modals: Component<{
 			<DocumentSelectPanel
 				state={{
 					open: documentSelectModal() !== undefined,
-					setOpen: () => pageBuilderModalsStore.close(),
+					setOpen: () => pageBuilderModalsStore.close("documentSelect"),
 					collectionKeys: documentSelectModal()?.data.collectionKeys,
 					multiple: documentSelectModal()?.data.multiple,
 					selected: documentSelectModal()?.data.selected,
 					selectedRefs: documentSelectModal()?.data.selectedRefs,
 					excludeDocument: documentSelectModal()?.data.excludeDocument,
+					zIndex: documentSelectModal()?.data.zIndex ?? nestedPanelZIndex(),
 				}}
 				callbacks={{
 					onSelect: (selection) =>
 						pageBuilderModalsStore.triggerAndClose("documentSelect", selection),
 				}}
 			/>
+			<RichTextVariableSelectPanel
+				state={{
+					open: richTextVariableSelectModal() !== undefined,
+					setOpen: () => pageBuilderModalsStore.close("richTextVariableSelect"),
+					zIndex:
+						richTextVariableSelectModal()?.data.zIndex ?? nestedPanelZIndex(),
+					localised: richTextVariableSelectModal()?.data.localised,
+					collectionKeys:
+						richTextVariableSelectModal()?.data.collectionKeys ?? [],
+					selected: richTextVariableSelectModal()?.data.selected,
+					selectedRef: richTextVariableSelectModal()?.data.selectedRef,
+				}}
+				callbacks={{
+					onSelect: (selection) =>
+						pageBuilderModalsStore.triggerAndClose(
+							"richTextVariableSelect",
+							selection,
+						),
+				}}
+			/>
+			<EmbeddedBrickEditPanel
+				state={{
+					open: embeddedBrickEditModal() !== undefined,
+					setOpen: () => pageBuilderModalsStore.close("embeddedBrickEdit"),
+					brickRef: embeddedBrickEditModal()?.data.brickRef,
+					zIndex: embeddedBrickEditModal()?.data.zIndex ?? nestedPanelZIndex(),
+					localised: embeddedBrickEditModal()?.data.localised,
+				}}
+				collection={props.hooks.state.collection()}
+				documentId={props.hooks.state.document()?.id}
+			/>
 			<UserSelectPanel
 				state={{
 					open: userSelectModal() !== undefined,
-					setOpen: () => pageBuilderModalsStore.close(),
+					setOpen: () => pageBuilderModalsStore.close("userSelect"),
+					zIndex: nestedPanelZIndex(),
 					multiple: userSelectModal()?.data.multiple,
 					selected: userSelectModal()?.data.selected,
 					selectedRefs: userSelectModal()?.data.selectedRefs,
@@ -133,7 +207,7 @@ export const Modals: Component<{
 			<LinkSelectModal
 				state={{
 					open: linkSelectModal() !== undefined,
-					setOpen: () => pageBuilderModalsStore.close(),
+					setOpen: () => pageBuilderModalsStore.close("linkSelect"),
 					selectedLink: linkSelectModal()?.data.selectedLink ?? null,
 				}}
 				callbacks={{
@@ -144,8 +218,10 @@ export const Modals: Component<{
 			<CreateUpdateMediaPanel
 				state={{
 					open: mediaUploadModal() !== undefined,
-					setOpen: () => pageBuilderModalsStore.close(),
+					setOpen: () => pageBuilderModalsStore.close("mediaUpload"),
 					parentFolderId: mediaUploadParentFolderId,
+					accept: mediaUploadAccept(),
+					zIndex: mediaUploadModal()?.data.zIndex ?? nestedPanelZIndex(),
 				}}
 				callbacks={{
 					onSuccess: (media) =>

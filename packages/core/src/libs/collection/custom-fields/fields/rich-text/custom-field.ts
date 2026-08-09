@@ -17,6 +17,7 @@ import type {
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { richTextFieldConfig } from "./config.js";
+import extractRichTextRefTargets from "./extract-ref-targets.js";
 
 class RichTextCustomField extends CustomField<"rich-text"> {
 	type = richTextFieldConfig.type;
@@ -46,6 +47,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				content: [{ type: "paragraph" }],
 			},
 			index: this.props?.index,
+			editor: this.props?.editor,
 			ui: {
 				hidden: this.props?.ui?.hidden,
 				disabled: this.props?.ui?.disabled,
@@ -146,6 +148,9 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 		return (value ??
 			this.config.default ??
 			null) satisfies CFResponse<"rich-text">["value"];
+	}
+	override getFieldRefTargets(value: unknown) {
+		return extractRichTextRefTargets(value);
 	}
 	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
 		if (value && typeof value === "object" && !Array.isArray(value)) {

@@ -68,7 +68,7 @@ export type CustomFieldGenerationDocument = {
 		ref: string;
 		key: string;
 		order: number;
-		type: "builder" | "fixed";
+		type: "builder" | "fixed" | "embedded";
 		open?: boolean;
 		fields?: InternalDocumentField[];
 		id?: number | null;

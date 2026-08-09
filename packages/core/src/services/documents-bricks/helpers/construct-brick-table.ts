@@ -415,7 +415,10 @@ const constructBrickTable = (
 		tableIndex = brickTables.length - 1;
 	}
 
-	const brickInstanceId = crypto.randomUUID();
+	const brickInstanceId =
+		params.brick?.type === "embedded" && params.brick.ref
+			? params.brick.ref
+			: crypto.randomUUID();
 	const rowsByLocale = new Map<string, Partial<Insert<LucidBricksTable>>>();
 	const brickIdRefByLocale = new Map<string, number>();
 

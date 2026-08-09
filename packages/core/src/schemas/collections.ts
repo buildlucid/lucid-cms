@@ -33,6 +33,27 @@ const collectionResponseSchema = z.object({
 			"Whether the collection has one document or multiple documents",
 		example: "multiple",
 	}),
+	contentRoutes: z
+		.array(
+			z.object({
+				key: z.string(),
+				collectionKey: z.string(),
+				path: z.object({
+					field: z.string(),
+					prefix: z.string().optional(),
+				}),
+				label: z
+					.object({
+						fields: z.array(z.string()),
+					})
+					.optional(),
+			}),
+		)
+		.meta({
+			description:
+				"Registered website routes that resolve documents in this collection",
+			example: [],
+		}),
 	group: z
 		.object({
 			key: z.string().meta({
@@ -253,6 +274,16 @@ const collectionResponseSchema = z.object({
 			.meta({
 				description:
 					"Builder bricks that can be added to documents in the collection",
+				example: [],
+			})
+			.optional();
+	},
+	get embeddedBricks() {
+		return z
+			.array(brickConfigSchema)
+			.meta({
+				description:
+					"Bricks that can be embedded inside supported rich-text fields",
 				example: [],
 			})
 			.optional();

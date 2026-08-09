@@ -1,3 +1,4 @@
+import type { MediaType } from "@types";
 import classNames from "classnames";
 import {
 	type Component,
@@ -43,8 +44,10 @@ interface MediaSelectPanelProps {
 	state: {
 		open: boolean;
 		setOpen: (state: boolean) => void;
+		zIndex?: number;
 		extensions?: string;
 		type?: string;
+		types?: MediaType[];
 		width?: MediaDimensionValidation;
 		height?: MediaDimensionValidation;
 		multiple?: boolean;
@@ -59,11 +62,13 @@ interface MediaSelectPanelProps {
 	};
 }
 
+/** Renders the reusable media selector in a bottom panel. */
 const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 	// ---------------------------------
 	// Render
 	return (
 		<BottomPanel
+			zIndex={props.state.zIndex}
 			state={{
 				open: props.state.open,
 				setOpen: props.state.setOpen,
@@ -85,6 +90,7 @@ const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 				<SelectMediaContent
 					extensions={props.state.extensions}
 					type={props.state.type}
+					types={props.state.types}
 					width={props.state.width}
 					height={props.state.height}
 					multiple={props.state.multiple}
@@ -104,6 +110,7 @@ const MediaSelectPanel: Component<MediaSelectPanelProps> = (props) => {
 interface SelectMediaContentProps {
 	extensions?: string;
 	type?: string;
+	types?: MediaType[];
 	width?: MediaDimensionValidation;
 	height?: MediaDimensionValidation;
 	multiple?: boolean;
@@ -119,6 +126,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 	const validationFilterSchema = buildMediaSelectorFilterSchema({
 		extensions: props.extensions,
 		type: props.type,
+		types: props.types,
 		width: props.width,
 		height: props.height,
 	});

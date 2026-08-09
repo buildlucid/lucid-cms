@@ -93,6 +93,29 @@ export default configureLucid({
 			],
 			defaultLocale: "en",
 		},
+		contentRoutes: [
+			{
+				key: "pages",
+				collectionKey: "page",
+				path: {
+					field: "fullSlug",
+				},
+				label: {
+					fields: ["page_title"],
+				},
+			},
+			{
+				key: "blog-posts",
+				collectionKey: "blog",
+				path: {
+					field: "slug",
+					prefix: "/blog",
+				},
+				label: {
+					fields: ["page_title"],
+				},
+			},
+		],
 		i18n: {
 			locales: [
 				{

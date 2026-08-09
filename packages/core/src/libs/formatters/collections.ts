@@ -1,3 +1,4 @@
+import type { Config } from "../../types/config.js";
 import type { Collection } from "../../types/response.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
@@ -18,6 +19,7 @@ const formatMultiple = (props: {
 	allCollections: CollectionBuilder[];
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
+	contentRoutes?: Config["contentRoutes"];
 	include?: {
 		bricks?: boolean;
 		fields?: boolean;
@@ -38,6 +40,7 @@ const formatMultiple = (props: {
 			documentTargetCollectionKeys,
 			queueSupportsScheduling: props.queueSupportsScheduling,
 			adminTranslations: props.adminTranslations,
+			contentRoutes: props.contentRoutes,
 			include: props.include,
 			documents: props.documents,
 		}),
@@ -50,6 +53,7 @@ const formatSingle = (props: {
 	documentTargetCollectionKeys?: Set<string>;
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
+	contentRoutes?: Config["contentRoutes"];
 	migrationStatus?: MigrationStatus;
 	include?: {
 		bricks?: boolean;
@@ -73,6 +77,9 @@ const formatSingle = (props: {
 	const formattedCollection: Collection = {
 		key: key,
 		mode: collectionData.mode,
+		contentRoutes: (props.contentRoutes ?? []).filter(
+			(route) => route.collectionKey === key,
+		),
 		group: collectionData.group,
 		documentId: props.include?.documentId
 			? getDocumentId(key, props.documents)
@@ -127,6 +134,14 @@ const formatSingle = (props: {
 			: [],
 		builderBricks: props.include?.bricks
 			? (props.collection.config.bricks?.builder?.map((brick) =>
+					formatBrick({
+						brick,
+						documentTargetCollectionKeys,
+					}),
+				) ?? [])
+			: [],
+		embeddedBricks: props.include?.bricks
+			? (props.collection.config.bricks?.embedded?.map((brick) =>
 					formatBrick({
 						brick,
 						documentTargetCollectionKeys,

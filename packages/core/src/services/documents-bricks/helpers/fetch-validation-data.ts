@@ -144,6 +144,10 @@ const getBrickInstance = (
 			);
 		case "fixed":
 			return collection.config.bricks?.fixed?.find((b) => b.key === brick.key);
+		case "embedded":
+			return collection.config.bricks?.embedded?.find(
+				(b) => b.key === brick.key,
+			);
 		default:
 			return undefined;
 	}

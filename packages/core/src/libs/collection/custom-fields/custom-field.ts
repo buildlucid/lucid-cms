@@ -11,9 +11,10 @@ import type {
 	CustomFieldAiFormatResponse,
 	CustomFieldErrorItem,
 	CustomFieldGuidanceConfig,
+	CustomFieldRefTargets,
 	CustomFieldUserAiConfig,
 	CustomFieldValidateResponse,
-	FieldRelationRefTarget,
+	FieldRefTarget,
 	FieldRelationValidationInput,
 	FieldTypes,
 	GetIndexDefinitionProps,
@@ -227,8 +228,12 @@ abstract class CustomField<T extends FieldTypes> {
 	 */
 	public getRelationFieldRefTargets(
 		_row: Select<LucidBricksTable>,
-	): FieldRelationRefTarget[] {
+	): FieldRefTarget[] {
 		return [];
+	}
+	/** Returns reference targets found in a column-backed field value. */
+	public getFieldRefTargets(_value: unknown): CustomFieldRefTargets {
+		return {};
 	}
 	/** Runs field-specific validation once shared checks have passed. */
 	abstract uniqueValidation(

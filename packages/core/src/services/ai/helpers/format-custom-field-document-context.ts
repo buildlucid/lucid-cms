@@ -33,7 +33,7 @@ type DocumentContext = {
 	fields: DocumentContextFields;
 	bricks: Array<{
 		key: string;
-		type: "builder" | "fixed";
+		type: "builder" | "fixed" | "embedded";
 		fields: DocumentContextFields;
 	}>;
 };
@@ -66,6 +66,7 @@ type CollectionDefinition = {
 	fields: Record<string, DefinitionField>;
 	fixedBricks: Record<string, DefinitionBrick>;
 	builderBricks: Record<string, DefinitionBrick>;
+	embeddedBricks: Record<string, DefinitionBrick>;
 };
 
 // TODO: should belong on the CF
@@ -365,6 +366,11 @@ export const formatCustomFieldCollectionDefinition = (props: {
 			context: props.context,
 			collection: props.collection,
 			bricks: props.collection.config.bricks?.builder,
+		}),
+		embeddedBricks: formatBrickDefinitions({
+			context: props.context,
+			collection: props.collection,
+			bricks: props.collection.config.bricks?.embedded,
 		}),
 	};
 };

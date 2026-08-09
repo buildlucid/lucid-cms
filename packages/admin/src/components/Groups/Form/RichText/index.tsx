@@ -1,10 +1,20 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { type Component, type JSXElement, Show } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	createSignal,
+	type JSXElement,
+	Show,
+} from "solid-js";
+import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
+import T from "@/translations";
 import { DescribedBy } from "../DescribedBy";
 import { ErrorMessage } from "../ErrorMessage";
 import { Label } from "../Label";
+import { richTextHasContent } from "./helpers";
 import Toolbar from "./Toolbar";
 import type { RichTextOptions } from "./types";
 import useEditor from "./useEditor";
@@ -30,9 +40,19 @@ interface RichTextProps {
 	hideOptionalText?: boolean;
 	labelRightSlot?: JSXElement;
 	options?: RichTextOptions;
+	translations?: {
+		value: (locale: string) => RichTextJSON | null | undefined;
+		onChange: (value: RichTextJSON, locale: string) => void;
+	};
+	onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
-export const RichText: Component<RichTextProps> = (props) => {
+interface EditorFieldProps extends Omit<RichTextProps, "translations"> {
+	fullscreen: boolean;
+	onFullscreenChange: (fullscreen: boolean) => void;
+}
+
+const EditorField: Component<EditorFieldProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const { editor, focused, setContainer } = useEditor({
@@ -49,6 +69,13 @@ export const RichText: Component<RichTextProps> = (props) => {
 	});
 
 	// ----------------------------------------
+	// Memos
+	const seamless = createMemo(() => props.options?.appearance === "seamless");
+	const showPlaceholder = createMemo(
+		() => seamless() && !richTextHasContent(props.value),
+	);
+
+	// ----------------------------------------
 	// Render
 	return (
 		<div
@@ -56,24 +83,29 @@ export const RichText: Component<RichTextProps> = (props) => {
 				"mb-3 last:mb-0": props.noMargin !== true,
 			})}
 		>
-			<div class="relative">
-				<Label
-					id={props.id}
-					label={props.copy?.label}
-					focused={focused()}
-					required={props.required}
-					theme={"basic"}
-					altLocaleError={props.altLocaleError}
-					localised={props.localised}
-					fieldColumnIsMissing={props.fieldColumnIsMissing}
-					hideOptionalText={props.hideOptionalText}
-					rightSlot={props.labelRightSlot}
-				/>
-			</div>
+			<Show when={!seamless()}>
+				<div class="relative">
+					<Label
+						id={props.id}
+						label={props.copy?.label}
+						focused={focused()}
+						required={props.required}
+						theme="basic"
+						altLocaleError={props.altLocaleError}
+						localised={props.localised}
+						fieldColumnIsMissing={props.fieldColumnIsMissing}
+						hideOptionalText={props.hideOptionalText}
+						rightSlot={props.labelRightSlot}
+					/>
+				</div>
+			</Show>
 			<div
 				class={classnames(
-					"rounded-md border border-border bg-input-base overflow-hidden focus-within:border-primary-base transition-colors duration-200",
+					"relative overflow-hidden transition-colors duration-200",
 					{
+						"rounded-md border border-border bg-input-base focus-within:border-primary-base":
+							!seamless(),
+						"bg-transparent": seamless(),
 						"cursor-not-allowed opacity-80 pointer-events-none": props.disabled,
 					},
 				)}
@@ -84,13 +116,133 @@ export const RichText: Component<RichTextProps> = (props) => {
 							editor={instance()}
 							disabled={props.disabled}
 							options={props.options}
+							fullscreen={props.fullscreen}
+							onFullscreenChange={props.onFullscreenChange}
 						/>
 					)}
 				</Show>
-				<div ref={setContainer} />
+				<div class="relative">
+					<Show when={showPlaceholder()}>
+						<div class="pointer-events-none absolute top-3 left-0 z-10 text-sm text-unfocused">
+							{props.copy?.placeholder || T()("editor.rich.text.placeholder")}
+						</div>
+					</Show>
+					<div ref={setContainer} />
+				</div>
 			</div>
-			<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			<Show when={!seamless()}>
+				<DescribedBy id={props.id} describedBy={props.copy?.describedBy} />
+			</Show>
 			<ErrorMessage id={props.id} errors={props.errors} />
 		</div>
+	);
+};
+
+const FullscreenEditor: Component<{
+	props: RichTextProps;
+	contentLocale: Accessor<string | undefined>;
+	onClose: () => void;
+}> = (fullscreenProps) => {
+	// ----------------------------------------
+	// Memos
+	const locale = createMemo(
+		() =>
+			fullscreenProps.contentLocale() ??
+			fullscreenProps.props.options?.locale ??
+			"",
+	);
+	const value = createMemo(() =>
+		fullscreenProps.props.translations
+			? fullscreenProps.props.translations.value(locale())
+			: fullscreenProps.props.value,
+	);
+	const options = createMemo<RichTextOptions>(() => ({
+		...fullscreenProps.props.options,
+		appearance: "seamless",
+		locale: locale(),
+	}));
+
+	// ----------------------------------------
+	// Render
+	return (
+		<Show when={locale() || "__default"} keyed>
+			{(localeKey) => (
+				<EditorField
+					{...fullscreenProps.props}
+					value={value()}
+					onChange={(nextValue) => {
+						if (fullscreenProps.props.translations) {
+							fullscreenProps.props.translations.onChange(
+								nextValue,
+								localeKey === "__default" ? "" : localeKey,
+							);
+							return;
+						}
+						fullscreenProps.props.onChange(nextValue);
+					}}
+					options={options()}
+					fullscreen={true}
+					onFullscreenChange={(open) => {
+						if (!open) fullscreenProps.onClose();
+					}}
+					noMargin={true}
+				/>
+			)}
+		</Show>
+	);
+};
+
+export const RichText: Component<RichTextProps> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const [fullscreen, setFullscreen] = createSignal(false);
+
+	// ----------------------------------------
+	// Functions
+	const setFullscreenState = (open: boolean) => {
+		setFullscreen(open);
+		props.onFullscreenChange?.(open);
+	};
+
+	// ----------------------------------------
+	// Render
+	return (
+		<>
+			<Show when={!fullscreen()}>
+				<Show when={props.options?.locale || "__default"} keyed>
+					{(_locale) => (
+						<EditorField
+							{...props}
+							fullscreen={false}
+							onFullscreenChange={setFullscreenState}
+						/>
+					)}
+				</Show>
+			</Show>
+			<BottomPanel
+				zIndex={60}
+				state={{ open: fullscreen(), setOpen: setFullscreenState }}
+				langauge={{
+					contentLocale:
+						props.localised === true && props.translations !== undefined,
+				}}
+				fetchState={{ isLoading: false, isError: false }}
+				copy={{
+					title: props.copy?.label,
+					cancel: T()("editor.rich.text.fullscreen.exit"),
+				}}
+				options={{ padding: "24", growContent: true, fullHeight: true }}
+			>
+				{(language) => (
+					<FullscreenEditor
+						props={props}
+						contentLocale={
+							language?.contentLocale ?? (() => props.options?.locale)
+						}
+						onClose={() => setFullscreenState(false)}
+					/>
+				)}
+			</BottomPanel>
+		</>
 	);
 };

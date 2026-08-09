@@ -1,4 +1,5 @@
 import { CollectionBuilder, copy } from "@lucidcms/core";
+import RichTextCalloutBrick from "../bricks/rich-text-callout.js";
 
 const BlogCollection = new CollectionBuilder("blog", {
 	mode: "multiple",
@@ -12,6 +13,9 @@ const BlogCollection = new CollectionBuilder("blog", {
 	},
 	localized: true,
 	scheduling: true,
+	bricks: {
+		embedded: [RichTextCalloutBrick],
+	},
 	environments: [
 		{
 			key: "staging",
@@ -19,6 +23,9 @@ const BlogCollection = new CollectionBuilder("blog", {
 		},
 	],
 })
+	.addText("slug", {
+		showInList: true,
+	})
 	.addText("page_title", {
 		ui: {
 			hidden: false,
@@ -33,6 +40,23 @@ const BlogCollection = new CollectionBuilder("blog", {
 		showInList: true,
 	})
 	.addCheckbox("enabled")
-	.addRichText("content");
+	.addRichText("content", {
+		editor: {
+			links: {
+				external: true,
+				internal: ["page", "blog"],
+			},
+			media: ["image", "audio", "video"],
+			variables: ["settings"],
+			bricks: ["rt-callout"],
+			fullscreen: true,
+		},
+	})
+	.addRichText("seamless_content", {
+		editor: {
+			appearance: "seamless",
+			fullscreen: true,
+		},
+	});
 
 export default BlogCollection;

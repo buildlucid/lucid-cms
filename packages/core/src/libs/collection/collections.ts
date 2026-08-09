@@ -74,11 +74,18 @@ const collections: Collections = {
 				data: params.collection.config.bricks?.fixed ?? [],
 			};
 		}
+		if (params.type === "embedded") {
+			return {
+				error: undefined,
+				data: params.collection.config.bricks?.embedded ?? [],
+			};
+		}
 		return {
 			error: undefined,
 			data: [
 				...(params.collection.config.bricks?.builder ?? []),
 				...(params.collection.config.bricks?.fixed ?? []),
+				...(params.collection.config.bricks?.embedded ?? []),
 			],
 		};
 	},

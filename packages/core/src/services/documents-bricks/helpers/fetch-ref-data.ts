@@ -22,7 +22,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type { FieldTypes, ServiceFn } from "../../../types.js";
-import type { FieldRelationValues } from "./extract-related-entity-ids.js";
+import type { FieldRefValues } from "./extract-related-entity-ids.js";
 
 type FieldRefData = Partial<
 	Record<
@@ -65,7 +65,7 @@ const hasRefFetcher = (
 /**
  * Returns the field types that are present in the extracted relation values.
  */
-const getRequestedFieldTypes = (values: FieldRelationValues): FieldTypes[] => {
+const getRequestedFieldTypes = (values: FieldRefValues): FieldTypes[] => {
 	return Object.keys(values).filter((key): key is FieldTypes =>
 		registeredFieldTypes.includes(key as FieldTypes),
 	);
@@ -105,7 +105,7 @@ const buildFieldRefFetchPlan = (props: {
 const fetchRefData: ServiceFn<
 	[
 		{
-			values: FieldRelationValues;
+			values: FieldRefValues;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			resolveVersionType?: FieldRefVersionTypeResolver;
 			allowedDocumentCollectionKeys?: string[];

@@ -9,10 +9,14 @@ import {
 
 export const brickInputSchema = z.object({
 	id: z.number().nullable().optional(),
-	ref: z.string(),
+	ref: z.string().trim().min(1).max(128),
 	key: z.string(),
 	order: z.number(),
-	type: z.union([z.literal("builder"), z.literal("fixed")]),
+	type: z.union([
+		z.literal("builder"),
+		z.literal("fixed"),
+		z.literal("embedded"),
+	]),
 	open: z.boolean().optional(),
 	fields: z.array(fieldInputSchema).optional(),
 });
@@ -83,7 +87,7 @@ export const brickResponseBaseSchema = z
 			description: "Whether this brick is expanded in the UI",
 			example: true,
 		}),
-		type: z.enum(["builder", "fixed"]).meta({
+		type: z.enum(["builder", "fixed", "embedded"]).meta({
 			description: "The type of brick",
 			example: "builder",
 		}),

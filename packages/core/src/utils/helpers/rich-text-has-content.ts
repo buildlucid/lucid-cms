@@ -1,4 +1,10 @@
+import { richTextNodeNames } from "@lucidcms/rich-text";
 import { getObject } from "./get-typed-value.js";
+
+const contentAtomTypes = new Set<string>([
+	"horizontalRule",
+	...Object.values(richTextNodeNames),
+]);
 
 const richTextHasContent = (node: unknown): boolean => {
 	const nodeObject = getObject(node);
@@ -6,7 +12,12 @@ const richTextHasContent = (node: unknown): boolean => {
 	if (nodeObject.type === "text") {
 		return typeof nodeObject.text === "string" && nodeObject.text.length > 0;
 	}
-	if (nodeObject.type === "horizontalRule") return true;
+	if (
+		typeof nodeObject.type === "string" &&
+		contentAtomTypes.has(nodeObject.type)
+	) {
+		return true;
+	}
 
 	return (
 		Array.isArray(nodeObject.content) &&

@@ -10,6 +10,7 @@ const createCollectionSnapshot = (collection: CollectionBuilder) => {
 		fieldTree: collection.fieldTree,
 		fixedBricks: collection.fixedBricks,
 		builderBricks: collection.builderBricks,
+		embeddedBricks: collection.embeddedBricks,
 	};
 };
 

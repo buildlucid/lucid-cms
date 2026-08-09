@@ -173,6 +173,13 @@ const TimelineDetails: Component<{
 			props.item.bricks?.fixed?.length ??
 			0,
 	);
+	const embeddedBrickCount = createMemo(
+		() =>
+			selectedDocument()?.bricks?.filter((brick) => brick.type === "embedded")
+				.length ??
+			props.item.bricks?.embedded?.length ??
+			0,
+	);
 	const fieldCount = createMemo(() => selectedDocument()?.fields?.length ?? 0);
 	const releaseOperations = createMemo(() => props.releaseOperations());
 	const pendingReleaseCount = createMemo(
@@ -370,14 +377,15 @@ const TimelineDetails: Component<{
 				>
 					<Switch>
 						<Match when={props.selectedVersionDocumentLoading()}>
-							<div class="grid grid-cols-3 gap-2">
+							<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+								<span class="h-16 rounded-md skeleton" />
 								<span class="h-16 rounded-md skeleton" />
 								<span class="h-16 rounded-md skeleton" />
 								<span class="h-16 rounded-md skeleton" />
 							</div>
 						</Match>
 						<Match when={true}>
-							<div class="grid grid-cols-3 gap-2">
+							<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
 								<Metric
 									label={T()("common.bricks")}
 									value={builderBrickCount()}
@@ -385,6 +393,10 @@ const TimelineDetails: Component<{
 								<Metric
 									label={T()("builder.bricks.fixed")}
 									value={fixedBrickCount()}
+								/>
+								<Metric
+									label={T()("builder.bricks.embedded")}
+									value={embeddedBrickCount()}
 								/>
 								<Metric label={T()("common.fields")} value={fieldCount()} />
 							</div>

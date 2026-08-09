@@ -41,7 +41,13 @@ export const documentBricksTable = defineTable(
 			},
 			// brick specific
 			brick_type: {
-				schema: z.union([z.literal("fixed"), z.literal("builder")]).optional(),
+				schema: z
+					.union([
+						z.literal("fixed"),
+						z.literal("builder"),
+						z.literal("embedded"),
+					])
+					.optional(),
 				type: "text",
 			},
 			brick_instance_id: {

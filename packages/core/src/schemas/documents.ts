@@ -152,7 +152,7 @@ const documentContentResponseSchema = z.object({
 				id: z.number(),
 				ref: z.string(),
 				key: z.string(),
-				type: z.enum(["builder", "fixed"]),
+				type: z.enum(["builder", "fixed", "embedded"]),
 				order: z.number(),
 				fields: z.record(z.string(), z.unknown()),
 			}),

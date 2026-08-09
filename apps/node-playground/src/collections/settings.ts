@@ -18,6 +18,11 @@ const SettingsCollection = new CollectionBuilder("settings", {
 			label: copy("admin:collections.settings.fields.site_title.label"),
 		},
 	})
+	.addText("support_email", {
+		details: {
+			label: "Support email",
+		},
+	})
 	.addMedia("site_logo", {
 		details: {
 			label: copy("admin:collections.settings.fields.site_logo.label"),

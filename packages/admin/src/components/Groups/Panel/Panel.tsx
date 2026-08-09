@@ -36,6 +36,8 @@ const PanelNestingContext = createContext<PanelNestingState>();
 export const Panel: Component<{
 	/** Visual stack depth. Nested panels infer this automatically. */
 	nestedLevel?: number;
+	/** Base stack layer. Use a higher value when opening above another panel. */
+	zIndex?: number;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -124,6 +126,7 @@ export const Panel: Component<{
 	const nestedLevel = createMemo(
 		() => props.nestedLevel ?? (parentPanel?.level() ?? -1) + 1,
 	);
+	const zIndex = createMemo(() => (props.zIndex ?? 40) + nestedLevel() * 2);
 	const isCovered = createMemo(() => openChildPanels().size > 0);
 	const nestingState: PanelNestingState = {
 		level: nestedLevel,
@@ -161,10 +164,7 @@ export const Panel: Component<{
 	// ------------------------------
 	// Render
 	return (
-		<Dialog.Root
-			open={props.state.open}
-			onOpenChange={() => props.state.setOpen(!props.state.open)}
-		>
+		<Dialog.Root open={props.state.open} onOpenChange={props.state.setOpen}>
 			<Dialog.Portal>
 				<Dialog.Overlay
 					class={classNames(
@@ -174,12 +174,12 @@ export const Panel: Component<{
 							"bg-transparent": nestedLevel() > 0,
 						},
 					)}
-					style={{ "z-index": 40 + nestedLevel() * 2 }}
+					style={{ "z-index": zIndex() }}
 				/>
 				<div
 					class="fixed inset-4 flex justify-end transition-transform duration-300 ease-out"
 					style={{
-						"z-index": 40 + nestedLevel() * 2,
+						"z-index": zIndex(),
 						transform: isCovered()
 							? `translateX(${interfaceDirection.isLTR() ? "-24px" : "24px"})`
 							: "translateX(0)",

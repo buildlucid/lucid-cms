@@ -198,6 +198,56 @@ describe("testing prepareBricksAndFields", () => {
 		expect(result.preparedFields).toBeUndefined();
 	});
 
+	test("should keep only embedded bricks reachable from rich text", () => {
+		const cardBrick = new BrickBuilder("card").addText("title");
+		const collection = new CollectionBuilder("rich-content", {
+			mode: "multiple",
+			details: {
+				name: copy("admin:tests.collections.rich-content.name", {
+					defaultMessage: "Rich Content",
+				}),
+				singularName: copy(
+					"admin:tests.collections.rich-content.singularName",
+					{ defaultMessage: "Rich Content" },
+				),
+			},
+			bricks: { embedded: [cardBrick] },
+		}).addRichText("body");
+		const richTextValue = {
+			type: "doc",
+			content: [
+				{
+					type: "lucidEmbeddedBrick",
+					attrs: { ref: "used-card" },
+				},
+			],
+		};
+
+		const { preparedBricks } = prepareBricksAndFields({
+			collection,
+			localization: mockLocalization,
+			fields: [{ key: "body", type: "rich-text", value: richTextValue }],
+			bricks: [
+				{
+					ref: "used-card",
+					key: "card",
+					order: 0,
+					type: "embedded",
+					fields: [{ key: "title", type: "text", value: "Used" }],
+				},
+				{
+					ref: "orphan-card",
+					key: "card",
+					order: 0,
+					type: "embedded",
+					fields: [{ key: "title", type: "text", value: "Orphan" }],
+				},
+			],
+		});
+
+		expect(preparedBricks?.map((brick) => brick.ref)).toEqual(["used-card"]);
+	});
+
 	test("should trim string custom field values and translations", () => {
 		const collection = new CollectionBuilder("trim-test", {
 			mode: "single",

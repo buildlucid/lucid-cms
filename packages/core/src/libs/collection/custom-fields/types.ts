@@ -311,10 +311,15 @@ export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 
 export type FieldRelationValidationInput = Record<string, number[]>;
 
-export type FieldRelationRefTarget = {
+export type FieldRefTarget = {
 	table: string;
 	value: unknown;
 };
+
+/** Reference targets extracted from a column-backed custom-field value. */
+export type CustomFieldRefTargets = Partial<
+	Record<FieldTypes, FieldRefTarget[]>
+>;
 
 // -----------------------------------------------
 // Validation/Errors

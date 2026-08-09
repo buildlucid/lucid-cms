@@ -58,8 +58,14 @@ const formatMultiple = (props: {
 			);
 			if (!brickBuilder) continue;
 
+			const ref =
+				firstRow.brick_type === "embedded"
+					? firstRow.brick_instance_id
+					: generateBrickRef(props.collection.key, brickKey, firstRow.id);
+			if (!ref) continue;
+
 			brickResponses.push({
-				ref: generateBrickRef(props.collection.key, brickKey, firstRow.id),
+				ref,
 				key: brickKey,
 				order: firstRow.position,
 				open: formatter.formatBoolean(firstRow.is_open),

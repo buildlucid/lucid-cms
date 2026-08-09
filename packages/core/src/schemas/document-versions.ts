@@ -76,5 +76,13 @@ export const documentVersionResponseSchema = z.object({
 				}),
 			}),
 		),
+		embedded: z.array(
+			z.object({
+				brickKey: z.string().nullable().meta({
+					description: "The identifier key for this embedded brick",
+					example: "callout",
+				}),
+			}),
+		),
 	}),
 });

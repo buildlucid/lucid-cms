@@ -3,7 +3,7 @@ import type { MediaRef, ProfilePicture } from "../media/types.js";
 import type { UserRef } from "../users/types.js";
 
 export type DocumentVersionType = "latest" | "revision" | string;
-export type BrickType = "builder" | "fixed";
+export type BrickType = "builder" | "fixed" | "embedded";
 
 export type FieldType =
 	| "checkbox"
@@ -575,6 +575,17 @@ export interface CollapsibleFieldConfig
 export interface RichTextFieldConfig
 	extends SharedCollectionFieldConfig<"rich-text">,
 		FieldConfigOptions<Record<string, unknown>> {
+	editor?: {
+		links?: {
+			external?: boolean;
+			internal?: boolean | string[];
+		};
+		media?: boolean | Array<"image" | "audio" | "video">;
+		bricks?: boolean | string[];
+		variables?: boolean | string[];
+		appearance?: "default" | "seamless";
+		fullscreen?: boolean;
+	};
 	validation?: ZodValidation;
 }
 
@@ -662,10 +673,23 @@ export type CollectionPermission<
 	TAction extends CollectionPermissionAction = CollectionPermissionAction,
 > = `documents:${string}:${TAction}`;
 
+export type ContentRoute = {
+	key: string;
+	collectionKey: string;
+	path: {
+		field: string;
+		prefix?: string;
+	};
+	label?: {
+		fields: string[];
+	};
+};
+
 export interface Collection {
 	key: string;
 	documentId?: number | null;
 	mode: CollectionMode;
+	contentRoutes: ContentRoute[];
 	group: {
 		key: string;
 		name: ResolvedAdminCopy | null;
@@ -730,6 +754,7 @@ export interface Collection {
 	migrationStatus?: MigrationStatus | null;
 	fixedBricks: Array<CollectionBrickConfig>;
 	builderBricks: Array<CollectionBrickConfig>;
+	embeddedBricks: Array<CollectionBrickConfig>;
 	fields: CollectionFieldConfig[];
 }
 

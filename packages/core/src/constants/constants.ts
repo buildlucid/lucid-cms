@@ -145,6 +145,7 @@ export default Object.freeze({
 	brickTypes: {
 		builder: "builder",
 		fixed: "fixed",
+		embedded: "embedded",
 	} as const,
 	db: {
 		prefix: "lucid_",

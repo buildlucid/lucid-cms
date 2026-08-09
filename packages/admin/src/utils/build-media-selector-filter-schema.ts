@@ -1,3 +1,4 @@
+import type { MediaType } from "@types";
 import {
 	numberFilter,
 	type OrFilterCondition,
@@ -13,12 +14,14 @@ interface MediaDimensionFilterBounds {
 interface MediaSelectorFilterConstraints {
 	extensions?: string;
 	type?: string;
+	types?: MediaType[];
 	width?: MediaDimensionFilterBounds;
 	height?: MediaDimensionFilterBounds;
 }
 
 type MediaSelectorFilterKey = "extension" | "type" | "width" | "height";
 
+/** Converts selector constraints into API filter conditions. */
 const buildConditions = (
 	constraints: MediaSelectorFilterConstraints,
 ): OrFilterCondition[] => {
@@ -69,9 +72,18 @@ const buildConditions = (
 const buildMediaSelectorFilterSchema = (
 	constraints: MediaSelectorFilterConstraints,
 ): Pick<QueryStateSchema, "filters" | "defaultOrFilterGroups"> => {
-	const conditions = buildConditions(constraints);
+	const types = Array.from(new Set(constraints.types ?? []));
+	const conditions = buildConditions({
+		...constraints,
+		type: types.length === 1 ? types[0] : constraints.type,
+	});
+	const commonConditions = conditions.filter(
+		(condition) => condition.key !== "type",
+	);
 	const keys = conditions.map((condition) => condition.key);
-	const requiresGroupedDefaults = new Set(keys).size !== keys.length;
+	const requiresGroupedDefaults =
+		types.length > 1 || new Set(keys).size !== keys.length;
+	/** Returns a direct filter default when grouped conditions are unnecessary. */
 	const conditionFor = (key: MediaSelectorFilterKey) =>
 		requiresGroupedDefaults
 			? undefined
@@ -104,7 +116,15 @@ const buildMediaSelectorFilterSchema = (
 						})
 					: numberFilter(),
 		},
-		defaultOrFilterGroups: requiresGroupedDefaults ? [conditions] : undefined,
+		defaultOrFilterGroups:
+			types.length > 1
+				? types.map((type) => [
+						{ key: "type", value: type },
+						...commonConditions,
+					])
+				: requiresGroupedDefaults
+					? [conditions]
+					: undefined,
 	};
 };
 

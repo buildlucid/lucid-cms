@@ -59,6 +59,11 @@ test("applies plugin recipes during fresh config processing", async () => {
 					hooks: { init },
 					recipe: (draft) => {
 						draft.tables.push(pluginTable);
+						draft.contentRoutes.push({
+							key: "pages",
+							collectionKey: "pages",
+							path: { field: "slug" },
+						});
 						draft.brand = {
 							...draft.brand,
 							name: "Configured by plugin",
@@ -75,5 +80,12 @@ test("applies plugin recipes during fresh config processing", async () => {
 
 	expect(init).toHaveBeenCalledOnce();
 	expect(processed.tables).toEqual([pluginTable]);
+	expect(processed.contentRoutes).toEqual([
+		{
+			key: "pages",
+			collectionKey: "pages",
+			path: { field: "slug" },
+		},
+	]);
 	expect(processed.brand.name).toBe("Configured by plugin");
 });

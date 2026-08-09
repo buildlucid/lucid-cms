@@ -4,7 +4,7 @@ type BrickSnapshotSource = {
 	ref: string;
 	key: string;
 	order: number;
-	type: "builder" | "fixed" | "collection-fields";
+	type: "builder" | "fixed" | "embedded" | "collection-fields";
 	fields: Array<InternalDocumentField>;
 };
 

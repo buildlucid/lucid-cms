@@ -7,10 +7,14 @@ interface PanelFooterActionsProps {
 	selectedCount: number;
 	onClose: () => void;
 	onConfirm: () => void;
+	confirmDisabled?: boolean;
+	cancelLabel?: string;
 	class?: string;
 }
 
 const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
+	// ----------------------------------------
+	// Render
 	return (
 		<PanelFooter padding="24" class={props.class}>
 			<p class="text-sm text-subtitle">
@@ -23,13 +27,14 @@ const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
 					size="medium"
 					onClick={props.onClose}
 				>
-					{T()("common.close")}
+					{props.cancelLabel ?? T()("common.close")}
 				</Button>
 				<Button
 					type="button"
 					theme="primary"
 					size="medium"
 					onClick={props.onConfirm}
+					disabled={props.confirmDisabled}
 				>
 					{T()("common.confirm")}
 				</Button>

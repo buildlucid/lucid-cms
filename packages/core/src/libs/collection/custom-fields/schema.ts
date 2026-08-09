@@ -95,6 +95,25 @@ const customFieldSchema = z.object({
 	max: z.number().optional(),
 	step: z.number().positive().optional(),
 	index: z.literal(true).optional(),
+	editor: z
+		.object({
+			links: z
+				.object({
+					external: z.boolean().optional(),
+					internal: z
+						.union([z.boolean(), z.array(z.string().min(1))])
+						.optional(),
+				})
+				.optional(),
+			media: z
+				.union([z.boolean(), z.array(z.enum(["image", "audio", "video"]))])
+				.optional(),
+			bricks: z.union([z.boolean(), z.array(z.string().min(1))]).optional(),
+			variables: z.union([z.boolean(), z.array(z.string().min(1))]).optional(),
+			appearance: z.enum(["default", "seamless"]).optional(),
+			fullscreen: z.boolean().optional(),
+		})
+		.optional(),
 	output: z.enum(["nested", "inline"]).optional(),
 	defaultOpen: z.boolean().optional(),
 	ui: z

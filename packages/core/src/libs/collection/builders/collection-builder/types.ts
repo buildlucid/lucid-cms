@@ -148,6 +148,7 @@ export type CollectionConfigSchemaType<
 	bricks?: {
 		fixed?: Array<BrickBuilder>;
 		builder?: Array<BrickBuilder>;
+		embedded?: Array<BrickBuilder>;
 	};
 };
 
