@@ -100,6 +100,13 @@ const documentWorkflowSchema = z.object({
 	updatedBy: z.number().nullable(),
 });
 
+const documentRouteSchema = z
+	.object({
+		path: z.union([z.string(), z.record(z.string(), z.string().nullable())]),
+		label: z.union([z.string(), z.record(z.string(), z.string())]),
+	})
+	.nullable();
+
 const documentResponseBaseSchema = z.object({
 	id: z.number().meta({
 		description: "The document ID",
@@ -116,6 +123,9 @@ const documentResponseBaseSchema = z.object({
 	versionId: z.number().nullable().meta({
 		description: "The current version ID",
 		example: 1,
+	}),
+	route: documentRouteSchema.meta({
+		description: "The resolved public route for this document",
 	}),
 	versions: z.record(z.string(), documentResponseVersionSchema.nullable()),
 	isDeleted: z.boolean().meta({
@@ -145,6 +155,7 @@ const documentContentResponseSchema = z.object({
 	id: z.number(),
 	collectionKey: z.string(),
 	version: z.string().nullable(),
+	route: documentRouteSchema,
 	fields: z.record(z.string(), z.unknown()),
 	bricks: z
 		.array(

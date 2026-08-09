@@ -10,7 +10,7 @@ import { translate } from "../i18n/index.js";
 import { initializeLogger } from "../logger/index.js";
 import type { LucidConfigRecipe } from "../runtime/types.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
-import checkContentRoutes from "./checks/check-content-routes.js";
+import checkCollectionRouting from "./checks/check-collection-routing.js";
 import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
 import checkField from "./checks/check-field.js";
@@ -137,6 +137,7 @@ const processConfig = async (
 
 		for (const collection of configRes.collections) {
 			CollectionConfigSchema.parse(collection.config);
+			checkCollectionRouting(collection);
 
 			for (const field of collection.flatFields) {
 				CustomFieldSchema.parse(field);
@@ -182,7 +183,6 @@ const processConfig = async (
 		}
 
 		checkCollectionEnvironmentVersionMap(configRes);
-		checkContentRoutes(configRes);
 	}
 
 	await initializeLogger({

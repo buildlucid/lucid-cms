@@ -1,6 +1,7 @@
 import { logger } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import { checkRouteSegments } from "./services/checks/index.js";
 import {
 	afterFetchHandler,
 	afterUpsertHandler,
@@ -19,6 +20,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
 			draft.i18n.sources.push("@lucidcms/plugin-pages/translations");
+			const configuredCollections = [];
 
 			for (const collectionConfig of options.collections) {
 				const collectionInstance = draft.collections.find(
@@ -36,10 +38,23 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				}
 
 				registerFields(collectionInstance, collectionConfig);
+				collectionInstance.config.routing = "fullSlug";
+				configuredCollections.push({ collectionConfig, collectionInstance });
 
 				if (!collectionInstance.config.hooks) {
 					collectionInstance.config.hooks = [];
 				}
+			}
+
+			for (const {
+				collectionConfig,
+				collectionInstance,
+			} of configuredCollections) {
+				checkRouteSegments({
+					collection: collectionInstance,
+					collections: draft.collections,
+					config: collectionConfig,
+				});
 			}
 
 			if (draft.hooks && Array.isArray(draft.hooks)) {

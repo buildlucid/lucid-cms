@@ -20,6 +20,7 @@ import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/docu
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import documentBricksFormatter from "./document-bricks.js";
 import documentFieldsFormatter from "./document-fields.js";
+import formatDocumentRoute from "./document-route.js";
 import documentWorkflowsFormatter from "./document-workflows.js";
 import formatter from "./helpers.js";
 import type { MediaPosterPropsT } from "./media.js";
@@ -157,6 +158,12 @@ const formatSingle = (props: {
 		collectionKey: props.document.collection_key,
 		version: props.document.version_type ?? null,
 		versionId: props.document.version_id ?? null,
+		route: formatDocumentRoute({
+			collection: props.collection,
+			documentId: props.document.id,
+			fields: props.fields,
+			locales: props.config.localization.locales.map((locale) => locale.code),
+		}),
 		versions: formatVersions({
 			document: props.document,
 			collection: props.collection,
@@ -359,6 +366,12 @@ const formatContentSingle = <TCollectionKey extends string = string>(props: {
 		id: props.document.id,
 		collectionKey: props.document.collection_key,
 		version: props.document.version_type ?? null,
+		route: formatDocumentRoute({
+			collection: props.collection,
+			documentId: props.document.id,
+			fields: props.fields,
+			locales: props.config.localization.locales.map((locale) => locale.code),
+		}),
 		fields: documentFieldsFormatter.flattenFields(
 			props.fields ?? [],
 			props.collection.contentFieldTree,

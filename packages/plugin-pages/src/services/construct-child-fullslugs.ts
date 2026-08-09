@@ -16,6 +16,7 @@ const constructChildFullSlug = (data: {
 	localization: Config["localization"];
 	parentFullSlugField?: FieldInputSchema;
 	collection: CollectionConfig;
+	routePrefixes?: Map<number, Record<string, string | null>>;
 }): Awaited<
 	ServiceResponse<
 		Array<{
@@ -33,6 +34,9 @@ const constructChildFullSlug = (data: {
 
 	for (const descendant of data.descendants) {
 		const fullSlug: Record<string, string | null> = {};
+		const routePrefixes = data.routePrefixes?.get(
+			descendant.document_version_id,
+		);
 
 		if (data.collection.localized) {
 			if (
@@ -55,6 +59,7 @@ const constructChildFullSlug = (data: {
 					descendants: data.descendants,
 					topLevelFullSlug:
 						currentFullSlugValue ??
+						routePrefixes?.[locale.code] ??
 						resolveCollectionPrefix({
 							collection: data.collection,
 							localeCode: locale.code,
@@ -74,6 +79,7 @@ const constructChildFullSlug = (data: {
 				descendants: data.descendants,
 				topLevelFullSlug:
 					data.parentFullSlugField?.value ??
+					routePrefixes?.[data.localization.defaultLocale] ??
 					resolveCollectionPrefix({
 						collection: data.collection,
 						localeCode: data.localization.defaultLocale,

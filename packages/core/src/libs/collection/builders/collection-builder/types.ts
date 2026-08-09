@@ -143,6 +143,8 @@ export type CollectionConfigSchemaType<
 		collectionVersions?: CollectionEnvironmentVersionMap;
 	}>;
 	revisionRetentionDays?: number | false;
+	/** Top-level field containing each document's complete public path. */
+	routing?: string;
 	preview?: CollectionPreviewConfig<TCollectionKey>;
 	hooks?: CollectionBuilderHooks[];
 	bricks?: {
@@ -178,6 +180,9 @@ export type CollectionData = {
 		collectionVersions: CollectionEnvironmentVersionMap;
 	}[];
 	revisionRetentionDays: number | false;
+	routing: {
+		field: string;
+	} | null;
 	preview: {
 		breakpoints: CollectionPreviewBreakpoint[];
 	} | null;

@@ -1,5 +1,5 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
-import type { ContentRoute, DocumentRef } from "@types";
+import type { DocumentRef } from "@types";
 import T from "@/translations";
 import type { RichTextMediaType, RichTextOptions } from "./types";
 
@@ -62,24 +62,4 @@ export const getRichTextDocumentFieldText = (
 	}
 
 	return "";
-};
-
-/** Builds a readable selector label from a content route's configured fields. */
-export const getRichTextDocumentLabel = (
-	document: DocumentRef,
-	route: ContentRoute,
-	locale?: string,
-): string => {
-	const label = (route.label?.fields ?? [])
-		.map((fieldKey) => getRichTextDocumentFieldText(document, fieldKey, locale))
-		.filter(Boolean)
-		.join(" · ");
-
-	return (
-		label ||
-		T()("editor.rich.text.document.fallback", {
-			collection: document.collectionKey,
-			id: document.id,
-		})
-	);
 };

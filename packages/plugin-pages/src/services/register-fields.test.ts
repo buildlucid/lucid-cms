@@ -25,12 +25,14 @@ test("slug validation returns specific English zod messages", () => {
 	registerFields(collection as never, {
 		key: "pages",
 		localized: false,
+		segments: [],
 		ui: {
 			fullSlug: true,
 			widths: {
 				fullSlug: 6,
 				slug: 6,
 				parentPage: 12,
+				segments: 12,
 			},
 		},
 		unique: true,
@@ -91,6 +93,7 @@ test("registers fields in an existing named tab with configured widths", () => {
 	registerFields(collection as never, {
 		key: "pages",
 		localized: false,
+		segments: [],
 		ui: {
 			fullSlug: true,
 			tab: "content",
@@ -98,6 +101,7 @@ test("registers fields in an existing named tab with configured widths", () => {
 				fullSlug: 6,
 				slug: 6,
 				parentPage: 12,
+				segments: 12,
 			},
 		},
 		unique: true,
@@ -132,6 +136,7 @@ test("preserves normal field placement when the configured tab is missing", () =
 	registerFields(collection as never, {
 		key: "pages",
 		localized: false,
+		segments: [],
 		ui: {
 			fullSlug: false,
 			tab: "routing",
@@ -139,6 +144,7 @@ test("preserves normal field placement when the configured tab is missing", () =
 				fullSlug: 12,
 				slug: 12,
 				parentPage: 12,
+				segments: 12,
 			},
 		},
 		unique: true,
@@ -150,4 +156,45 @@ test("preserves normal field placement when the configured tab is missing", () =
 		"slug",
 		"parentPage",
 	]);
+});
+
+test("registers route segment relations with responsive widths", () => {
+	const collection = new CollectionBuilder("docs", {
+		mode: "multiple",
+		details: {
+			name: "Docs",
+			singularName: "Doc",
+		},
+	});
+
+	registerFields(collection as never, {
+		key: "docs",
+		localized: false,
+		segments: [
+			{ relation: "product", collection: "products", field: "key" },
+			{ relation: "version", collection: "versions", field: "key" },
+		],
+		ui: {
+			fullSlug: false,
+			widths: {
+				fullSlug: 12,
+				slug: 12,
+				parentPage: 12,
+				segments: 6,
+			},
+		},
+		unique: true,
+	});
+
+	const segmentFields = collection.fieldTree.slice(-2);
+	expect(segmentFields.map((field) => field.key)).toEqual([
+		"product",
+		"version",
+	]);
+	expect(
+		segmentFields.map((field) => (field as CFConfig<"relation">).ui?.width),
+	).toEqual([6, 6]);
+	expect(
+		segmentFields.map((field) => (field as CFConfig<"relation">).collection),
+	).toEqual([["products"], ["versions"]]);
 });

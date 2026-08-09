@@ -144,6 +144,7 @@ test("collection options are correct along with field includes and filters", asy
 		labelFields: ["text_test"],
 		environments: [],
 		revisionRetentionDays: 30,
+		routing: null,
 		preview: null,
 	});
 });

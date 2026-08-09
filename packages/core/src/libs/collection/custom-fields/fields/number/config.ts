@@ -8,6 +8,7 @@ export const numberFieldConfig = {
 	capabilities: {
 		filterable: true,
 		sortable: true,
+		canBeLabel: true,
 	},
 } as const satisfies FieldStaticConfig<"number">;
 

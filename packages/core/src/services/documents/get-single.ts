@@ -105,8 +105,9 @@ const getSingle: ServiceFn<
 
 	let document: InternalCollectionDocument;
 	const include = resolveDocumentIncludes(data.query.include);
+	const fetchRouteFields = collectionRes.data.getData.routing !== null;
 
-	if (include.bricks || include.refs) {
+	if (include.bricks || include.refs || fetchRouteFields) {
 		const bricksRes = await getDocumentBricks(context, {
 			versionId: versionId,
 			collectionKey: documentRes.data.collection_key,
@@ -138,6 +139,11 @@ const getSingle: ServiceFn<
 			host: getBaseUrl(context),
 			workflow: workflowRes.data,
 		});
+	}
+	if (!include.bricks && !include.refs) {
+		document.bricks = [];
+		document.fields = [];
+		document.refs = null;
 	}
 
 	const afterFetchRes = await executeHooks(

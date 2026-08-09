@@ -42,6 +42,7 @@ const beforeDeleteHandler =
 				collectionKey: targetCollectionRes.data.key,
 				tables: data.meta.collectionTableNames,
 				collection: targetCollectionRes.data,
+				collectionInstance: data.meta.collection,
 			});
 			if (docFullSlugsRes.error) return docFullSlugsRes;
 
@@ -57,7 +58,6 @@ const beforeDeleteHandler =
 				context,
 				{
 					collection: targetCollectionRes.data,
-					collectionInstance: data.meta.collection,
 					projectedFullSlugs: docFullSlugsRes.data,
 					versionType,
 					collectionKey: targetCollectionRes.data.key,

@@ -106,12 +106,14 @@ const beforeUpsertHandler =
 			// fullSlug construction
 			const fullSlugRes = await resolveParentFullSlug(context, {
 				collection: targetCollectionRes.data,
+				collectionInstance: data.meta.collection,
 				collectionKey: targetCollectionRes.data.key,
 				versionType: data.data.versionType,
 				tables: data.meta.collectionTableNames,
 				fields: {
 					slug: slug,
 					parentPage,
+					all: data.data.fields ?? [],
 				},
 			});
 			if (fullSlugRes.error) return fullSlugRes;
@@ -140,6 +142,7 @@ const beforeUpsertHandler =
 				collectionKey: targetCollectionRes.data.key,
 				tables: data.meta.collectionTableNames,
 				collection: targetCollectionRes.data,
+				collectionInstance: data.meta.collection,
 				parentFullSlugField: candidateFullSlugField,
 			});
 			if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
@@ -149,17 +152,11 @@ const beforeUpsertHandler =
 				context,
 				{
 					collection: targetCollectionRes.data,
-					collectionInstance: data.meta.collection,
 					projectedFullSlugs,
 					versionType: data.data.versionType,
 					collectionKey: targetCollectionRes.data.key,
 					tables: data.meta.collectionTableNames,
 					excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
-					inputFields: {
-						documentId: data.data.documentId,
-						versionId: data.data.versionId,
-						fields: data.data.fields ?? [],
-					},
 				},
 			);
 			if (checkFullSlugUniquenessRes.error) {

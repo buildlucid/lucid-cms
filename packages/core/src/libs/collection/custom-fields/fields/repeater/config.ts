@@ -11,6 +11,7 @@ export const repeaterFieldConfig = {
 	capabilities: {
 		filterable: false,
 		sortable: false,
+		canBeLabel: false,
 	},
 } as const satisfies FieldStaticConfig<"repeater">;
 

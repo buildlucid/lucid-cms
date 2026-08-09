@@ -178,6 +178,7 @@ const CollectionConfigSchema = z
 			.union([z.number().int().positive(), z.literal(false)])
 			.default(constants.collectionBuilder.revisionRetentionDays)
 			.optional(),
+		routing: z.string().trim().min(1).optional(),
 		preview: z
 			.object({
 				url: z.function(),

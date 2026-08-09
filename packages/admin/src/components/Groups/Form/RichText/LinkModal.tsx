@@ -1,4 +1,3 @@
-import { resolveRichTextDocumentPath } from "@lucidcms/rich-text";
 import type { DocumentRef } from "@types";
 import {
 	type Component,
@@ -14,7 +13,6 @@ import T from "@/translations";
 import { Input } from "../Input";
 import { Label } from "../Label";
 import { Switch } from "../Switch";
-import { getRichTextDocumentLabel } from "./helpers";
 import type { RichTextOptions } from "./types";
 
 export type RichTextLinkUpdate =
@@ -27,7 +25,6 @@ export type RichTextLinkUpdate =
 	| {
 			kind: "document";
 			label: string;
-			routeKey: string;
 			collectionKey: string;
 			documentId: number;
 			openInNewTab: boolean;
@@ -40,7 +37,6 @@ const LinkModal: Component<{
 		initialLabel: string;
 		initialUrl: string;
 		initialKind: "external" | "document";
-		initialRouteKey?: string;
 		initialDocument?: DocumentRef;
 		initialOpenInNewTab: boolean;
 		canRemove: boolean;
@@ -56,82 +52,80 @@ const LinkModal: Component<{
 	const [label, setLabel] = createSignal("");
 	const [url, setUrl] = createSignal("");
 	const [kind, setKind] = createSignal<"external" | "document">("external");
-	const [routeKey, setRouteKey] = createSignal<string>();
 	const [documentRef, setDocumentRef] = createSignal<DocumentRef>();
 	const [openInNewTab, setOpenInNewTab] = createSignal(false);
 
 	// ----------------------------------------
 	// Memos
-	const routes = createMemo(() => props.options?.routes ?? []);
+	const documentCollectionKeys = createMemo(
+		() => props.options?.documentCollectionKeys ?? [],
+	);
 	const externalEnabled = createMemo(
 		() => props.options?.links?.external !== false,
 	);
-	const internalEnabled = createMemo(() => routes().length > 0);
-	const activeRoute = createMemo(
-		() =>
-			routes().find((route) => route.key === routeKey()) ??
-			routes().find(
-				(route) => route.collectionKey === documentRef()?.collectionKey,
-			) ??
-			routes()[0],
-	);
+	const internalEnabled = createMemo(() => documentCollectionKeys().length > 0);
 	const selectedDocumentLabel = createMemo(() => {
-		const route = activeRoute();
 		const document = documentRef();
-		return route && document
-			? getRichTextDocumentLabel(document, route, props.options?.locale)
-			: "";
+		if (!document) return "";
+
+		const routeLabel = document.route?.label;
+		const resolvedLabel =
+			typeof routeLabel === "string"
+				? routeLabel
+				: ((props.options?.locale
+						? routeLabel?.[props.options.locale]
+						: undefined) ??
+					Object.values(routeLabel ?? {}).find(
+						(value): value is string => typeof value === "string",
+					));
+
+		return (
+			resolvedLabel ||
+			T()("editor.rich.text.document.fallback", {
+				collection: document.collectionKey,
+				id: document.id,
+			})
+		);
 	});
 	const selectedDocumentPath = createMemo(() => {
-		const route = activeRoute();
 		const document = documentRef();
-		return route && document
-			? resolveRichTextDocumentPath({
-					route,
-					reference: document,
-					locale: props.options?.locale,
-				})
-			: "";
+		if (!document) return "";
+
+		const routePath = document.route?.path;
+		if (typeof routePath === "string") return routePath;
+		return (
+			(props.options?.locale ? routePath?.[props.options.locale] : undefined) ??
+			Object.values(routePath ?? {}).find(
+				(value): value is string => typeof value === "string",
+			) ??
+			""
+		);
 	});
 	// ----------------------------------------
 	// Functions
 	const closeModal = () => props.state.setOpen(false);
 	const changeKind = (nextKind: "external" | "document") => {
 		setKind(nextKind);
-		if (nextKind === "document" && !routeKey()) {
-			setRouteKey(routes()[0]?.key);
-		}
 	};
 	const selectDocument = () => {
-		const currentRoute = activeRoute();
 		props.options?.callbacks?.selectDocument?.({
-			routes: currentRoute
-				? [
-						currentRoute,
-						...routes().filter((route) => route.key !== currentRoute.key),
-					]
-				: routes(),
+			collectionKeys: documentCollectionKeys(),
 			current: documentRef(),
-			onSelect: (document, route) => {
-				setRouteKey(route.key);
+			onSelect: (document) => {
 				setDocumentRef(document);
 				if (!label().trim()) {
-					setLabel(
-						getRichTextDocumentLabel(document, route, props.options?.locale),
-					);
+					setLabel(selectedDocumentLabel());
 				}
 			},
 		});
 	};
 	const updateLink = () => {
 		if (kind() === "document") {
-			const route = activeRoute();
 			const document = documentRef();
-			if (!route || !document) return;
+			if (!document || !selectedDocumentPath()) return;
 			props.callbacks.onUpdate({
 				kind: "document",
 				label: label(),
-				routeKey: route.key,
 				collectionKey: document.collectionKey,
 				documentId: document.id,
 				openInNewTab: openInNewTab(),
@@ -165,22 +159,9 @@ const LinkModal: Component<{
 							? "external"
 							: "document";
 				setKind(initialKind);
-				setRouteKey(
-					routes().some((route) => route.key === props.state.initialRouteKey)
-						? props.state.initialRouteKey
-						: routes()[0]?.key,
-				);
 			},
 		),
 	);
-
-	createEffect(() => {
-		const route = activeRoute();
-		const selected = documentRef();
-		if (route && selected && selected.collectionKey !== route.collectionKey) {
-			setDocumentRef(undefined);
-		}
-	});
 
 	// ----------------------------------------
 	// Render
@@ -312,7 +293,7 @@ const LinkModal: Component<{
 						onClick={updateLink}
 						disabled={
 							kind() === "document"
-								? !activeRoute() || !documentRef()
+								? !documentRef() || !selectedDocumentPath()
 								: !url().trim()
 						}
 					>

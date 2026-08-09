@@ -4,7 +4,7 @@
 
 The Lucid CMS Pages plugin adds support for hierarchical documents and slugs to your collections. It's ideal if you're creating content for a website and want to manage pages through collections and documents.
 
-When enabled on a collection, it registers three new fields: `fullSlug`, `slug` and `parentPage`. These fields are used to construct the `fullSlug`, which is computed whenever a document is edited. The `fullSlug` is the combination of all the parent slugs and their slugs.
+When enabled on a collection, it registers `fullSlug`, `slug`, and `parentPage` fields. Configured route segments add their own relation fields. These fields are used to construct the `fullSlug`, which is computed whenever a document is edited. The plugin also configures the collection to expose `fullSlug` as its public document route.
 
 The plugin achieves this by registering hooks that fire at different points in the document lifecycle. Depending on the hook, either its `fullSlug` is updated via its ancestors, or all of its descendants' `fullSlugs` are updated.
 
@@ -62,10 +62,11 @@ This plugin offers several configuration options to control its behavior. Aside 
 | `key` | `string` | - | The key of the collection that you wish to enable the plugin on |
 | `localized` | `boolean` | `false` | If set to `true`, the plugin will enable translations for the `slug` and `fullSlug` fields |
 | `prefix` | `string \| Record<string, string>` | - | Optional prefix prepended to the start of the computed `fullSlug` for the collection |
+| `segments` | `Array<{ relation: string; collection: string; field: string }>` | `[]` | Related document values inserted between the prefix and page hierarchy |
 | `ui.fullSlug` | `boolean` | `false` | Shows the computed `fullSlug` field in the document builder and listing |
 | `ui.tab` | `string` | - | Places the plugin fields in an existing matching tab |
-| `ui.widths` | `Partial<Record<"fullSlug" \| "slug" \| "parentPage", FieldWidth>>` | - | Overrides the admin grid width of individual plugin fields |
-| `unique` | `boolean \| { fields?: string[] }` | `true` | Controls route uniqueness validation for computed `fullSlug` values |
+| `ui.widths` | `Partial<Record<"fullSlug" \| "slug" \| "parentPage" \| "segments", FieldWidth>>` | - | Overrides the admin grid width of individual plugin fields |
+| `unique` | `boolean` | `true` | Controls route uniqueness validation for computed `fullSlug` values |
 
 ### localized
 
@@ -77,16 +78,33 @@ Set `ui.fullSlug` to `true` to show the computed `fullSlug` in the document buil
 
 Set `ui.tab` to an existing tab key to place all three plugin fields in that tab, regardless of its position. When the tab does not exist, the option is ignored and the fields retain their normal positional placement.
 
-Fields use Lucid's 12-column admin grid. When `fullSlug` is visible, it and `slug` each use half a row and `parentPage` uses a full row. Otherwise, all fields use a full row. Override individual values through `ui.widths` using `12`, `8`, `6`, `4`, or `3`.
+Fields use Lucid's 12-column admin grid. When `fullSlug` is visible, it and `slug` each use half a row and `parentPage` uses a full row. Otherwise, all fields use a full row. A single route segment uses a full row; two or more use half a row each. Override individual values through `ui.widths` using `12`, `8`, `6`, `4`, or `3`.
 
 ### prefix
 
 If set, the plugin prepends the given prefix to the start of the computed `fullSlug`. This does not change the stored `slug` value itself. You can provide either a single string for all locales, or a locale map when translations are enabled.
+
+### segments
+
+Segments let a page route include values owned by other collections. The plugin registers each non-localized, required single relation on the page collection. The configured field must be a top-level text, textarea, select, or number field on its target collection.
+
+```typescript
+pagesPlugin({
+  collections: [{
+    key: "documentation",
+    prefix: "/docs",
+    segments: [
+      { relation: "product", collection: "products", field: "key" },
+      { relation: "release", collection: "releases", field: "key" },
+    ],
+  }],
+});
+```
+
+A page with product `lucid`, release `v1`, and slug `getting-started` resolves to `/docs/lucid/v1/getting-started`. Related target fields are fetched in batches, including when descendant routes need rebuilding. Updating a referenced segment field also rebuilds affected page routes and their descendants across mapped document environments.
 
 ### unique
 
 By default, each computed `fullSlug` must be unique within the same collection, version type, and locale. This checks the computed route rather than the raw slug value.
 
 Set `unique: false` to disable this route uniqueness validation for a collection.
-
-Use `unique: { fields: ["fieldKey"] }` to include selected top-level field values in the uniqueness check. Supported field types are `text`, `textarea`, `select`, `number`, `datetime`, `relation`, `media`, and `user`.

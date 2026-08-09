@@ -8,6 +8,7 @@ export const linkFieldConfig = {
 	capabilities: {
 		filterable: true,
 		sortable: false,
+		canBeLabel: false,
 	},
 } as const satisfies FieldStaticConfig<"link">;
 

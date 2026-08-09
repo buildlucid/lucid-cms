@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { CollectionConfig } from "../../../types/types.js";
 
 const mocks = vi.hoisted(() => ({
 	getParentFields: vi.fn(),
@@ -27,16 +28,18 @@ const context = {
 const collection = {
 	key: "pages",
 	localized: false,
+	segments: [],
 	ui: {
 		fullSlug: true,
 		widths: {
 			fullSlug: 6,
 			slug: 6,
 			parentPage: 12,
+			segments: 12,
 		},
 	},
 	unique: true,
-} as const;
+} satisfies CollectionConfig;
 
 describe("page full-slug helpers", () => {
 	afterEach(() => {
@@ -59,6 +62,7 @@ describe("page full-slug helpers", () => {
 
 		const response = await resolveParentFullSlug(context, {
 			collection,
+			collectionInstance: {} as never,
 			collectionKey: "pages",
 			versionType: "latest",
 			tables: {} as never,
@@ -69,6 +73,7 @@ describe("page full-slug helpers", () => {
 					type: "relation",
 					value: [{ id: 1, collectionKey: "pages" }],
 				},
+				all: [],
 			},
 		});
 
@@ -101,6 +106,7 @@ describe("page full-slug helpers", () => {
 			collectionKey: "pages",
 			tables: {} as never,
 			collection,
+			collectionInstance: {} as never,
 			parentFullSlugField: {
 				key: "fullSlug",
 				type: "text",

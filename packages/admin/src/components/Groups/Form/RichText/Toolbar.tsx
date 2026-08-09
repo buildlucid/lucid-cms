@@ -98,7 +98,6 @@ const Toolbar: Component<{
 	const [linkModalKind, setLinkModalKind] = createSignal<
 		"external" | "document"
 	>("external");
-	const [linkModalRouteKey, setLinkModalRouteKey] = createSignal<string>();
 	const [linkModalDocument, setLinkModalDocument] = createSignal<DocumentRef>();
 	const [linkModalOpenInNewTab, setLinkModalOpenInNewTab] = createSignal(false);
 	const [linkModalCanRemove, setLinkModalCanRemove] = createSignal(false);
@@ -241,7 +240,6 @@ const Toolbar: Component<{
 			href?: string;
 			target?: string | null;
 			kind?: "external" | "document";
-			routeKey?: string;
 			collectionKey?: string;
 			documentId?: number;
 		};
@@ -257,7 +255,6 @@ const Toolbar: Component<{
 		setLinkModalLabel(selectedText);
 		setLinkModalUrl(attrs.href ?? "");
 		setLinkModalKind(attrs.kind === "document" ? "document" : "external");
-		setLinkModalRouteKey(attrs.routeKey);
 		setLinkModalDocument(
 			typeof attrs.collectionKey === "string" &&
 				typeof attrs.documentId === "number"
@@ -306,7 +303,6 @@ const Toolbar: Component<{
 					? {
 							href: null,
 							kind: "document",
-							routeKey: values.routeKey,
 							collectionKey: values.collectionKey,
 							documentId: values.documentId,
 							target: values.openInNewTab ? "_blank" : null,
@@ -315,7 +311,6 @@ const Toolbar: Component<{
 					: {
 							href,
 							kind: "external",
-							routeKey: null,
 							collectionKey: null,
 							documentId: null,
 							target: values.openInNewTab ? "_blank" : null,
@@ -547,7 +542,6 @@ const Toolbar: Component<{
 					initialLabel: linkModalLabel(),
 					initialUrl: linkModalUrl(),
 					initialKind: linkModalKind(),
-					initialRouteKey: linkModalRouteKey(),
 					initialDocument: linkModalDocument(),
 					initialOpenInNewTab: linkModalOpenInNewTab(),
 					canRemove: linkModalCanRemove(),

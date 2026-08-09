@@ -7,12 +7,14 @@ test("should resolve a shared string prefix", async () => {
 		collection: {
 			key: "pages",
 			localized: true,
+			segments: [],
 			ui: {
 				fullSlug: false,
 				widths: {
 					fullSlug: 12,
 					slug: 12,
 					parentPage: 12,
+					segments: 12,
 				},
 			},
 			unique: true,
@@ -29,12 +31,14 @@ test("should resolve a locale specific prefix", async () => {
 		collection: {
 			key: "pages",
 			localized: true,
+			segments: [],
 			ui: {
 				fullSlug: false,
 				widths: {
 					fullSlug: 12,
 					slug: 12,
 					parentPage: 12,
+					segments: 12,
 				},
 			},
 			unique: true,

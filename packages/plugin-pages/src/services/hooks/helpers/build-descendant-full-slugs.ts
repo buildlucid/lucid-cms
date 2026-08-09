@@ -1,3 +1,4 @@
+import type { CollectionBuilder } from "@lucidcms/core";
 import type {
 	CollectionTableNames,
 	DocumentVersionType,
@@ -7,6 +8,7 @@ import type {
 import type { CollectionConfig } from "../../../types/types.js";
 import constructChildFullSlug from "../../construct-child-fullslugs.js";
 import getDescendantFields from "../../get-descendant-fields.js";
+import resolveStoredRoutePrefixes from "../../resolve-stored-route-prefixes.js";
 
 const buildDescendantFullSlugs: ServiceFn<
 	[
@@ -16,6 +18,7 @@ const buildDescendantFullSlugs: ServiceFn<
 			collectionKey: string;
 			tables: CollectionTableNames;
 			collection: CollectionConfig;
+			collectionInstance: CollectionBuilder;
 			parentFullSlugField?: FieldInputSchema;
 		},
 	],
@@ -32,12 +35,22 @@ const buildDescendantFullSlugs: ServiceFn<
 		tables: data.tables,
 	});
 	if (descendantsRes.error) return descendantsRes;
+	const routePrefixesRes = await resolveStoredRoutePrefixes(context, {
+		collection: data.collection,
+		collectionInstance: data.collectionInstance,
+		versionType: data.versionType,
+		versionIds: descendantsRes.data.map(
+			(descendant) => descendant.document_version_id,
+		),
+	});
+	if (routePrefixesRes.error) return routePrefixesRes;
 
 	return constructChildFullSlug({
 		descendants: descendantsRes.data,
 		localization: context.config.localization,
 		parentFullSlugField: data.parentFullSlugField,
 		collection: data.collection,
+		routePrefixes: routePrefixesRes.data,
 	});
 };
 

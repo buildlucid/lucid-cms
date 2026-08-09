@@ -79,19 +79,20 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	const currentCollection = createMemo(() =>
 		pageBuilderState.documentState?.collection?.(),
 	);
-	const contentRoutes = createMemo(() => {
+	const routedCollectionKeys = createMemo(() => {
 		const internal = editorConfig()?.links?.internal;
 		if (internal !== true && !Array.isArray(internal)) return [];
 		const allowedCollections = Array.isArray(internal)
 			? new Set(internal)
 			: null;
 		return (collections.data?.data ?? [])
-			.flatMap((collection) => collection.contentRoutes)
 			.filter(
-				(route) =>
-					allowedCollections === null ||
-					allowedCollections.has(route.collectionKey),
-			);
+				(collection) =>
+					collection.routing !== null &&
+					(allowedCollections === null ||
+						allowedCollections.has(collection.key)),
+			)
+			.map((collection) => collection.key);
 	});
 	const variableCollectionKeys = createMemo(() => {
 		const variables = editorConfig()?.variables;
@@ -135,12 +136,14 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		links: {
 			...editorConfig()?.links,
 			internal:
-				contentRoutes().length > 0 ? editorConfig()?.links?.internal : false,
+				routedCollectionKeys().length > 0
+					? editorConfig()?.links?.internal
+					: false,
 		},
 		bricks: embeddedBrickConfigs().length > 0 ? editorConfig()?.bricks : false,
 		variables:
 			variableCollectionKeys().length > 0 ? editorConfig()?.variables : false,
-		routes: contentRoutes(),
+		documentCollectionKeys: routedCollectionKeys(),
 		embeddedBrickConfigs: embeddedBrickConfigs(),
 		locale: fieldRenderState.contentLocale(),
 		references: {
@@ -187,13 +190,11 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					},
 				});
 			},
-			selectDocument: ({ routes, current, onSelect }) => {
+			selectDocument: ({ collectionKeys, current, onSelect }) => {
 				pageBuilderModalsStore.open("documentSelect", {
 					data: {
 						zIndex: 80,
-						collectionKeys: [
-							...new Set(routes.map((route) => route.collectionKey)),
-						],
+						collectionKeys,
 						multiple: false,
 						selected: current
 							? [
@@ -208,12 +209,8 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					onCallback: ({ refs }) => {
 						const document = refs[0];
 						if (!document) return;
-						const route = routes.find(
-							(route) => route.collectionKey === document.collectionKey,
-						);
-						if (!route) return;
 						brickStore.get.addRef("relation", document);
-						onSelect(document, route);
+						onSelect(document);
 					},
 				});
 			},

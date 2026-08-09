@@ -24,6 +24,7 @@ import ErrorMessage from "@/components/Partials/ErrorMessage";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { PanelFooter } from "./PanelFooter";
+import { PanelLayerContext } from "./PanelLayerContext";
 
 interface BottomPanelNestingState {
 	level: Accessor<number>;
@@ -211,7 +212,7 @@ export const BottomPanel: Component<{
 						)}
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
-							if (target.hasAttribute("data-panel-ignore")) {
+							if (target.closest("[data-panel-ignore]")) {
 								e.stopPropagation();
 								e.preventDefault();
 							}
@@ -311,7 +312,9 @@ export const BottomPanel: Component<{
 												<BottomPanelNestingContext.Provider
 													value={nestingState}
 												>
-													<PanelChildren />
+													<PanelLayerContext.Provider value={zIndex}>
+														<PanelChildren />
+													</PanelLayerContext.Provider>
 												</BottomPanelNestingContext.Provider>
 											</div>
 											{/* footer */}
@@ -382,7 +385,9 @@ export const BottomPanel: Component<{
 											})}
 										>
 											<BottomPanelNestingContext.Provider value={nestingState}>
-												<PanelChildren />
+												<PanelLayerContext.Provider value={zIndex}>
+													<PanelChildren />
+												</PanelLayerContext.Provider>
 											</BottomPanelNestingContext.Provider>
 										</div>
 										{/* footer */}

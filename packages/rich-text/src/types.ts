@@ -8,9 +8,15 @@ export const richTextNodeNames = {
 	embeddedBrick: "lucidEmbeddedBrick",
 } as const;
 
+export type RichTextDocumentRoute = {
+	path: string | Record<string, string | null>;
+	label: string | Record<string, string>;
+};
+
 export type RichTextDocumentReference = {
 	id: number;
 	collectionKey: string;
+	route: RichTextDocumentRoute | null;
 	/** Supports both internal field objects and flattened content API values. */
 	fields: Record<string, unknown> | null;
 };
@@ -47,27 +53,13 @@ export type RichTextEmbeddedBrick = {
 	fields?: unknown;
 };
 
-/** A route registered by Lucid config and exposed through collection metadata. */
-export type RichTextContentRoute = {
-	key: string;
-	collectionKey: string;
-	path: {
-		field: string;
-		prefix?: string;
-	};
-	label?: {
-		fields: string[];
-	};
-};
-
 export type RichTextRenderers = {
 	documentLink?: (props: {
 		children: string;
 		href: string;
 		collectionKey: string;
 		documentId: number;
-		routeKey: string;
-		route: RichTextContentRoute;
+		route: RichTextDocumentRoute;
 		reference: RichTextDocumentReference;
 		openInNewTab: boolean;
 	}) => string;
@@ -91,7 +83,6 @@ export type RichTextRenderers = {
 export type RichTextRenderOptions = {
 	refs?: RichTextReferences | null;
 	bricks?: readonly RichTextEmbeddedBrick[] | null;
-	routes?: readonly RichTextContentRoute[] | null;
 	locale?: string;
 	/** Additional or replacement Tiptap extensions used by the static renderer. */
 	extensions?: Extensions;

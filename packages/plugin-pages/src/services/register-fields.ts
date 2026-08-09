@@ -91,6 +91,19 @@ const registerFields = (
 			},
 			showInList: true,
 		});
+
+	for (const segment of config.segments) {
+		collection.addRelation(segment.relation, {
+			collection: segment.collection,
+			multiple: false,
+			ui: {
+				width: config.ui.widths.segments,
+			},
+			validation: {
+				required: true,
+			},
+		});
+	}
 };
 
 export default registerFields;

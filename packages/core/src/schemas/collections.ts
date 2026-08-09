@@ -33,26 +33,15 @@ const collectionResponseSchema = z.object({
 			"Whether the collection has one document or multiple documents",
 		example: "multiple",
 	}),
-	contentRoutes: z
-		.array(
-			z.object({
-				key: z.string(),
-				collectionKey: z.string(),
-				path: z.object({
-					field: z.string(),
-					prefix: z.string().optional(),
-				}),
-				label: z
-					.object({
-						fields: z.array(z.string()),
-					})
-					.optional(),
-			}),
-		)
+	routing: z
+		.object({
+			field: z.string(),
+		})
+		.nullable()
 		.meta({
 			description:
-				"Registered website routes that resolve documents in this collection",
-			example: [],
+				"The top-level field containing each document's complete public path",
+			example: { field: "fullSlug" },
 		}),
 	group: z
 		.object({

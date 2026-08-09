@@ -8,6 +8,7 @@ export const collapsibleFieldConfig = {
 	capabilities: {
 		filterable: false,
 		sortable: false,
+		canBeLabel: false,
 	},
 } as const satisfies FieldStaticConfig<"collapsible">;
 

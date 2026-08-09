@@ -3,6 +3,7 @@ import type {
 	DocumentBrick,
 	DocumentFieldValueMap,
 	DocumentRef,
+	DocumentRoute,
 	DocumentVersionSummary,
 	FieldType,
 	Locale,
@@ -118,6 +119,7 @@ export interface CollectionDocument<
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
 	version: ResolveCollectionDocumentVersion<TCollectionKey> | null;
+	route: DocumentRoute | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
 	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
 	refs?: Partial<Record<FieldType | string, unknown[]>>;
@@ -135,11 +137,13 @@ export type {
 	DocumentViewOptions,
 	PreviewFieldAttributes,
 } from "./helpers/documents/types.js";
+
 export type {
 	AccountGetInput,
 	AccountGetResponse,
 	LucidAccountClient,
 } from "./resources/account.js";
+
 export type {
 	DocumentsGetMultipleInput,
 	DocumentsGetMultipleResponse,
@@ -147,11 +151,13 @@ export type {
 	DocumentsGetSingleResponse,
 	LucidDocumentsClient,
 } from "./resources/documents.js";
+
 export type {
 	LocalesGetAllInput,
 	LocalesGetAllResponse,
 	LucidLocalesClient,
 } from "./resources/locales.js";
+
 export type {
 	LucidMediaClient,
 	MediaGetMultipleInput,
@@ -161,11 +167,13 @@ export type {
 	MediaProcessInput,
 	MediaProcessResponse,
 } from "./resources/media.js";
+
 export type {
 	LucidPreviewsClient,
 	PreviewsResolveInput,
 	PreviewsResolveResponse,
 } from "./resources/previews.js";
+
 export type {
 	CollectionDocumentFilters,
 	CollectionDocumentFiltersByCollection,
@@ -188,6 +196,7 @@ export type {
 	QueryFilters,
 	SortDirection,
 } from "./types/contracts.js";
+
 export type {
 	LucidClientError,
 	LucidClientErrorKind,
@@ -195,6 +204,7 @@ export type {
 	LucidClientResponse,
 	LucidClientSuccess,
 } from "./types/errors.js";
+
 export type {
 	CreateClientOptions,
 	LucidAccessTokenFactory,
@@ -208,11 +218,13 @@ export type {
 	LucidRetryConfig,
 	LucidRetryInput,
 } from "./types/transport.js";
+
 export type {
 	Account,
 	DocumentBrick,
 	DocumentFieldValueMap,
 	DocumentRef,
+	DocumentRoute,
 	Locale,
 	LucidClient,
 	Media,

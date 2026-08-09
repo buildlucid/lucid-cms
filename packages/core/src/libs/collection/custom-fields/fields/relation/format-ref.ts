@@ -1,5 +1,6 @@
 import documentBricksFormatter from "../../../../formatters/document-bricks.js";
 import documentFieldsFormatter from "../../../../formatters/document-fields.js";
+import formatDocumentRoute from "../../../../formatters/document-route.js";
 import type { BrickQueryResponse } from "../../../../repositories/document-bricks.js";
 import type { CFResponse, FieldRefParams } from "../../types.js";
 
@@ -32,6 +33,7 @@ const formatRelationRef = (
 			id: value.document_id,
 			versionId: value.id,
 			collectionKey: targetCollectionKey,
+			route: null,
 			fields: null,
 		};
 	}
@@ -55,6 +57,12 @@ const formatRelationRef = (
 		id: value.document_id,
 		versionId: value.id,
 		collectionKey: targetCollectionKey,
+		route: formatDocumentRoute({
+			collection,
+			documentId: value.document_id,
+			fields: formattedFields,
+			locales: params.localization.locales,
+		}),
 		fields: Object.keys(documentFields).length > 0 ? documentFields : null,
 	} satisfies CFResponse<"relation">["ref"];
 };

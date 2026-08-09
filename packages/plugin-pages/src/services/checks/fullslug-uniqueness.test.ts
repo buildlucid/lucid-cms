@@ -1,4 +1,3 @@
-import { CollectionBuilder } from "@lucidcms/core";
 import { copy } from "@lucidcms/core/plugin";
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig, ProjectedFullSlug } from "../../types/types.js";
@@ -7,330 +6,142 @@ import {
 	findExistingRouteCollisions,
 	findProjectedRouteDuplicates,
 } from "../../utils/route-uniqueness.js";
-import {
-	getUniqueFields,
-	getUniqueValuesFromFields,
-	mergeRelationUniqueValueMaps,
-	normalizeUniqueFieldValue,
-	type RelationUniqueField,
-	relationRowsToUniqueValueMap,
-	rowToUniqueValues,
-	type UniqueField,
-} from "./fullslug-unique-fields.js";
 import checkFullSlugUniqueness from "./fullslug-uniqueness.js";
 
 const buildItems = (projectedFullSlugs: ProjectedFullSlug[]) =>
 	buildRouteUniquenessItems({
 		projectedFullSlugs,
-		defaultLocale: "en",
 	});
 
-const uniqueMediaField = (overrides?: Partial<RelationUniqueField>) =>
-	({
-		key: "media",
-		storage: "relation-table",
-		fieldType: "media",
-		table: "lucid_document__pages__fields__med__media",
-		valueColumns: ["_media_id"],
-		localized: false,
-		...overrides,
-	}) satisfies RelationUniqueField;
-
-const uniqueUserField = (overrides?: Partial<RelationUniqueField>) =>
-	({
-		key: "owner",
-		storage: "relation-table",
-		fieldType: "user",
-		table: "lucid_document__pages__fields__usr__owner",
-		valueColumns: ["_user_id"],
-		localized: false,
-		...overrides,
-	}) satisfies RelationUniqueField;
-
-const uniqueRelationField = (overrides?: Partial<RelationUniqueField>) =>
-	({
-		key: "related",
-		storage: "relation-table",
-		fieldType: "relation",
-		table: "lucid_document__pages__fields__rel__related",
-		valueColumns: ["_collection_key", "_document_id"],
-		localized: false,
-		...overrides,
-	}) satisfies RelationUniqueField;
-
-const translateTestCopy = (value: unknown) => {
-	if (!value) return undefined;
-	if (typeof value === "string") return value;
-	if (typeof value !== "object" || !("type" in value)) return undefined;
-
-	if (
-		value.type === "lucid.literal" &&
-		"value" in value &&
-		typeof value.value === "string"
-	) {
-		return value.value;
-	}
-
-	const descriptor = value as {
-		defaultMessage?: string;
-		key?: string;
-	};
-	return descriptor.defaultMessage ?? descriptor.key;
-};
+const collection = {
+	key: "pages",
+	localized: false,
+	segments: [],
+	ui: {
+		fullSlug: false,
+		widths: { fullSlug: 12, slug: 12, parentPage: 12, segments: 12 },
+	},
+	unique: true,
+} satisfies CollectionConfig;
 
 describe("fullSlug route uniqueness", () => {
-	test("detects root-parent fullSlug collisions against top-level routes", () => {
+	test("detects projected collisions by complete route and locale", () => {
+		const items = buildItems([
+			{
+				documentId: 1,
+				versionId: 10,
+				fullSlugs: { en: "/docs/v1/about" },
+			},
+			{
+				documentId: 2,
+				versionId: 20,
+				fullSlugs: { en: "/docs/v1/about" },
+			},
+		]);
+
+		expect(findProjectedRouteDuplicates(items)).toEqual([
+			{ locale: "en", fullSlug: "/docs/v1/about" },
+		]);
+	});
+
+	test("keeps routes in different segments independent", () => {
 		const projectedItems = buildItems([
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: { en: "/about" },
+				fullSlugs: { en: "/docs/v2/about" },
 			},
 		]);
 		const existingItems = buildItems([
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: { en: "/about" },
+				fullSlugs: { en: "/docs/v1/about" },
 			},
 		]);
 
 		expect(
 			findExistingRouteCollisions({ projectedItems, existingItems }),
-		).toEqual([{ locale: "en", fullSlug: "/about" }]);
+		).toEqual([]);
 	});
 
-	test("checks localized fullSlugs without relying on localized parent rows", () => {
+	test("normalizes paths before comparison", () => {
 		const projectedItems = buildItems([
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: { en: "/about", fr: "/about" },
+				fullSlugs: { en: "/Docs/V1/About" },
 			},
 		]);
 		const existingItems = buildItems([
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: { en: "/about", fr: "/about" },
+				fullSlugs: { en: "/docs/v1/about" },
 			},
 		]);
 
 		expect(
 			findExistingRouteCollisions({ projectedItems, existingItems }),
-		).toEqual([
-			{ locale: "en", fullSlug: "/about" },
-			{ locale: "fr", fullSlug: "/about" },
-		]);
+		).toEqual([{ locale: "en", fullSlug: "/docs/v1/about" }]);
 	});
 
-	test("blocks duplicate routes inside a projected descendant set", () => {
+	test("keeps localized collisions scoped to their locale", () => {
 		const projectedItems = buildItems([
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: { en: "/about" },
+				fullSlugs: { en: "/about", fr: "/a-propos" },
 			},
+		]);
+		const existingItems = buildItems([
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: { en: "/about" },
+				fullSlugs: { en: "/different", fr: "/a-propos" },
 			},
 		]);
 
-		expect(findProjectedRouteDuplicates(projectedItems)).toEqual([
-			{ locale: "en", fullSlug: "/about" },
-		]);
+		expect(
+			findExistingRouteCollisions({ projectedItems, existingItems }),
+		).toEqual([{ locale: "fr", fullSlug: "/a-propos" }]);
 	});
 
-	test("uses a custom duplicate message when supplied", async () => {
-		const collection = {
-			key: "pages",
-			localized: false,
-			ui: {
-				fullSlug: false,
-				widths: {
-					fullSlug: 12,
-					slug: 12,
-					parentPage: 12,
-				},
-			},
-			unique: true,
-		} satisfies CollectionConfig;
+	test("uses the supplied message for projected collisions", async () => {
 		const duplicateMessage = copy(
 			"server:plugin.pages.full.slug.duplicate.on.delete",
 		);
-
-		const res = await checkFullSlugUniqueness(
-			{
-				config: {
-					localization: {
-						defaultLocale: "en",
-						locales: [{ code: "en" }],
-					},
-					db: {
-						config: {
-							tableNameByteLimit: null,
-						},
-					},
-					tables: [],
-				},
-			} as never,
-			{
-				collection,
-				collectionInstance: {} as never,
-				projectedFullSlugs: [
-					{
-						documentId: 1,
-						versionId: 10,
-						fullSlugs: { en: "/about" },
-					},
-					{
-						documentId: 2,
-						versionId: 20,
-						fullSlugs: { en: "/about" },
-					},
-				],
-				versionType: "latest",
-				collectionKey: "pages",
-				tables: {} as never,
-				duplicateMessage,
-			},
-		);
-
-		expect(res.error?.message).toEqual(duplicateMessage);
-		const fieldErrors = res.error?.errors?.fields;
-		if (!Array.isArray(fieldErrors)) {
-			throw new Error("Expected duplicate route field errors");
-		}
-		const [fieldError] = fieldErrors as Array<{ message: unknown }>;
-		expect(fieldError?.message).toEqual(duplicateMessage);
-	});
-
-	test("mentions configured unique fields in duplicate route errors", async () => {
-		const collectionInstance = new CollectionBuilder("docs", {
-			mode: "multiple",
-			details: {
-				name: copy("admin:tests.collections.docs.name", {
-					defaultMessage: "Docs",
-				}),
-				singularName: copy("admin:tests.collections.docs.singularName", {
-					defaultMessage: "Doc",
-				}),
-			},
-		})
-			.addRelation("product", {
-				collection: "products",
-				details: {
-					label: "Product",
-				},
-			})
-			.addRelation("version", {
-				collection: "versions",
-				details: {
-					label: "Version",
-				},
-			});
-		const collection = {
-			key: "docs",
-			localized: false,
-			ui: {
-				fullSlug: false,
-				widths: {
-					fullSlug: 12,
-					slug: 12,
-					parentPage: 12,
-				},
-			},
-			unique: {
-				fields: ["product", "version"],
-			},
-		} satisfies CollectionConfig;
-		const expectedMessage = copy(
-			"server:plugin.pages.full.slug.duplicate.with.fields",
-			{
-				data: {
-					fields: "Product, Version",
-				},
-			},
-		);
-
-		const res = await checkFullSlugUniqueness(
-			{
-				config: {
-					localization: {
-						defaultLocale: "en",
-						locales: [{ code: "en" }],
-					},
-					db: {
-						config: {
-							tableNameByteLimit: null,
-						},
-					},
-					tables: [],
-				},
-				translate: translateTestCopy,
-			} as never,
-			{
-				collection,
-				collectionInstance,
-				projectedFullSlugs: [
-					{
-						documentId: 1,
-						versionId: 10,
-						fullSlugs: { en: "/getting-started" },
-						uniqueValues: {
-							en: {
-								product: [{ collectionKey: "products", id: 1 }],
-								version: [{ collectionKey: "versions", id: 2 }],
-							},
-						},
-					},
-					{
-						documentId: 2,
-						versionId: 20,
-						fullSlugs: { en: "/getting-started" },
-						uniqueValues: {
-							en: {
-								product: [{ collectionKey: "products", id: 1 }],
-								version: [{ collectionKey: "versions", id: 2 }],
-							},
-						},
-					},
-				],
-				versionType: "latest",
-				collectionKey: "docs",
-				tables: {} as never,
-			},
-		);
-
-		expect(res.error?.message).toEqual(expectedMessage);
-		const fieldErrors = res.error?.errors?.fields;
-		if (!Array.isArray(fieldErrors)) {
-			throw new Error("Expected duplicate route field errors");
-		}
-		const [fieldError] = fieldErrors as Array<{ message: unknown }>;
-		expect(fieldError?.message).toEqual(expectedMessage);
-	});
-
-	test("unique false disables route uniqueness validation", async () => {
-		const collection = {
-			key: "pages",
-			localized: false,
-			ui: {
-				fullSlug: false,
-				widths: {
-					fullSlug: 12,
-					slug: 12,
-					parentPage: 12,
-				},
-			},
-			unique: false,
-		} satisfies CollectionConfig;
-
-		const res = await checkFullSlugUniqueness({} as never, {
+		const response = await checkFullSlugUniqueness({} as never, {
 			collection,
-			collectionInstance: {} as never,
+			projectedFullSlugs: [
+				{
+					documentId: 1,
+					versionId: 10,
+					fullSlugs: { en: "/about" },
+				},
+				{
+					documentId: 2,
+					versionId: 20,
+					fullSlugs: { en: "/about" },
+				},
+			],
+			versionType: "latest",
+			collectionKey: "pages",
+			tables: {} as never,
+			duplicateMessage,
+		});
+
+		expect(response.error).toMatchObject({
+			message: duplicateMessage,
+			errors: {
+				fields: [{ key: "slug", localeCode: "en", message: duplicateMessage }],
+			},
+		});
+	});
+
+	test("allows route collisions when uniqueness is disabled", async () => {
+		const response = await checkFullSlugUniqueness({} as never, {
+			collection: { ...collection, unique: false },
 			projectedFullSlugs: [
 				{
 					documentId: 1,
@@ -343,328 +154,6 @@ describe("fullSlug route uniqueness", () => {
 			tables: {} as never,
 		});
 
-		expect(res.error).toBeUndefined();
-	});
-
-	test("unique fields allow the same fullSlug for different field values", () => {
-		const projectedItems = buildItems([
-			{
-				documentId: 1,
-				versionId: 10,
-				fullSlugs: { en: "/about" },
-				uniqueValues: {
-					en: { product: "cms", version: "v1" },
-				},
-			},
-		]);
-
-		const differentPartitionItems = buildItems([
-			{
-				documentId: 2,
-				versionId: 20,
-				fullSlugs: { en: "/about" },
-				uniqueValues: {
-					en: { product: "commerce", version: "v1" },
-				},
-			},
-		]);
-		const samePartitionItems = buildItems([
-			{
-				documentId: 3,
-				versionId: 30,
-				fullSlugs: { en: "/about" },
-				uniqueValues: {
-					en: { version: "v1", product: "cms" },
-				},
-			},
-		]);
-
-		expect(
-			findExistingRouteCollisions({
-				projectedItems,
-				existingItems: differentPartitionItems,
-			}),
-		).toEqual([]);
-		expect(
-			findExistingRouteCollisions({
-				projectedItems,
-				existingItems: samePartitionItems,
-			}),
-		).toEqual([{ locale: "en", fullSlug: "/about" }]);
-	});
-
-	test("resolves relation-backed unique fields", () => {
-		const collectionInstance = new CollectionBuilder("pages", {
-			mode: "multiple",
-			details: {
-				name: copy("admin:tests.collections.pages.name", {
-					defaultMessage: "Pages",
-				}),
-				singularName: copy("admin:tests.collections.pages.singularName", {
-					defaultMessage: "Page",
-				}),
-			},
-			localized: true,
-		})
-			.addText("product")
-			.addMedia("media", {
-				localized: true,
-				multiple: true,
-			})
-			.addUser("owner")
-			.addRelation("related", {
-				collection: ["pages", "articles"],
-				localized: true,
-				multiple: true,
-			});
-		const collection = {
-			key: "pages",
-			localized: true,
-			ui: {
-				fullSlug: false,
-				widths: {
-					fullSlug: 12,
-					slug: 12,
-					parentPage: 12,
-				},
-			},
-			unique: {
-				fields: ["product", "media", "owner", "related"],
-			},
-		} satisfies CollectionConfig;
-
-		const res = getUniqueFields(collectionInstance, collection, null);
-
-		expect(res.error).toBeUndefined();
-		expect(res.data).toMatchObject([
-			{
-				key: "product",
-				storage: "column",
-				localized: true,
-			},
-			{
-				key: "media",
-				storage: "relation-table",
-				fieldType: "media",
-				localized: true,
-			},
-			{
-				key: "owner",
-				storage: "relation-table",
-				fieldType: "user",
-				localized: false,
-			},
-			{
-				key: "related",
-				storage: "relation-table",
-				fieldType: "relation",
-				localized: true,
-			},
-		]);
-	});
-
-	test("normalizes submitted relation-backed unique values by locale", () => {
-		const uniqueFields: UniqueField[] = [
-			uniqueMediaField(),
-			uniqueUserField({ localized: true }),
-			uniqueRelationField({ localized: true }),
-		];
-
-		const values = getUniqueValuesFromFields({
-			fields: [
-				{
-					key: "media",
-					type: "media",
-					value: [2, 1],
-				},
-				{
-					key: "owner",
-					type: "user",
-					translations: {
-						en: [7, 3],
-						fr: [5],
-					},
-				},
-				{
-					key: "related",
-					type: "relation",
-					translations: {
-						en: [
-							{ id: 2, collectionKey: "articles" },
-							{ id: 1, collectionKey: "pages" },
-						],
-						fr: [{ id: 4, collectionKey: "articles" }],
-					},
-				},
-			],
-			localization: {
-				defaultLocale: "en",
-				locales: [
-					{ code: "en", label: "English" },
-					{ code: "fr", label: "French" },
-				],
-			},
-			uniqueFields,
-		});
-
-		expect(values).toEqual({
-			en: {
-				media: [1, 2],
-				owner: [3, 7],
-				related: [
-					{ collectionKey: "articles", id: 2 },
-					{ collectionKey: "pages", id: 1 },
-				],
-			},
-			fr: {
-				media: [1, 2],
-				owner: [5],
-				related: [{ collectionKey: "articles", id: 4 }],
-			},
-		});
-	});
-
-	test("normalizes stored relation rows with localized and non-localized values", () => {
-		const media = uniqueMediaField();
-		const owner = uniqueUserField({ localized: true });
-		const related = uniqueRelationField({ localized: true });
-		const relationValues = mergeRelationUniqueValueMaps([
-			relationRowsToUniqueValueMap({
-				field: media,
-				rows: [
-					{
-						document_version_id: 20,
-						locale: "en",
-						position: 1,
-						_media_id: 2,
-					},
-					{
-						document_version_id: 20,
-						locale: "en",
-						position: 0,
-						_media_id: 1,
-					},
-				],
-			}),
-			relationRowsToUniqueValueMap({
-				field: owner,
-				rows: [
-					{
-						document_version_id: 20,
-						locale: "fr",
-						position: 0,
-						_user_id: 9,
-					},
-				],
-			}),
-			relationRowsToUniqueValueMap({
-				field: related,
-				rows: [
-					{
-						document_version_id: 20,
-						locale: "en",
-						position: 0,
-						_collection_key: "pages",
-						_document_id: 4,
-					},
-					{
-						document_version_id: 20,
-						locale: "fr",
-						position: 0,
-						_collection_key: "articles",
-						_document_id: 3,
-					},
-				],
-			}),
-		]);
-
-		expect(
-			rowToUniqueValues({
-				row: {
-					document_id: 2,
-					document_version_id: 20,
-					locale: "fr",
-				},
-				uniqueFields: [media, owner, related],
-				relationValues,
-				versionId: 20,
-				localeCode: "fr",
-				defaultLocale: "en",
-			}),
-		).toEqual({
-			media: [1, 2],
-			owner: [9],
-			related: [{ collectionKey: "articles", id: 3 }],
-		});
-	});
-
-	test("relation-backed unique values compare same and different route partitions", () => {
-		const media = uniqueMediaField();
-		const owner = uniqueUserField();
-		const related = uniqueRelationField();
-		const projectedItems = buildItems([
-			{
-				documentId: 1,
-				versionId: 10,
-				fullSlugs: { en: "/about" },
-				uniqueValues: {
-					en: {
-						media: normalizeUniqueFieldValue(media, [2, 1]),
-						owner: normalizeUniqueFieldValue(owner, [5]),
-						related: normalizeUniqueFieldValue(related, [
-							{ id: 2, collectionKey: "articles" },
-							{ id: 1, collectionKey: "pages" },
-						]),
-					},
-				},
-			},
-		]);
-		const samePartitionItems = buildItems([
-			{
-				documentId: 2,
-				versionId: 20,
-				fullSlugs: { en: "/about" },
-				uniqueValues: {
-					en: {
-						media: normalizeUniqueFieldValue(media, [1, 2]),
-						owner: normalizeUniqueFieldValue(owner, [5]),
-						related: normalizeUniqueFieldValue(related, [
-							{ id: 1, collectionKey: "pages" },
-							{ id: 2, collectionKey: "articles" },
-						]),
-					},
-				},
-			},
-		]);
-		const differentPartitionItems = buildItems([
-			{
-				documentId: 3,
-				versionId: 30,
-				fullSlugs: { en: "/about" },
-				uniqueValues: {
-					en: {
-						media: normalizeUniqueFieldValue(media, [1, 3]),
-						owner: normalizeUniqueFieldValue(owner, [5]),
-						related: normalizeUniqueFieldValue(related, [
-							{ id: 2, collectionKey: "articles" },
-							{ id: 1, collectionKey: "pages" },
-						]),
-					},
-				},
-			},
-		]);
-
-		expect(
-			findExistingRouteCollisions({
-				projectedItems,
-				existingItems: samePartitionItems,
-			}),
-		).toEqual([{ locale: "en", fullSlug: "/about" }]);
-		expect(
-			findExistingRouteCollisions({
-				projectedItems,
-				existingItems: differentPartitionItems,
-			}),
-		).toEqual([]);
+		expect(response.error).toBeUndefined();
 	});
 });

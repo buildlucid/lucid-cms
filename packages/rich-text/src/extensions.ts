@@ -29,14 +29,6 @@ export const LucidLink = Link.extend({
 					"data-lucid-link-kind": attributes.kind,
 				}),
 			},
-			routeKey: {
-				default: null,
-				parseHTML: (element) => element.getAttribute("data-lucid-route-key"),
-				renderHTML: (attributes) =>
-					attributes.routeKey
-						? { "data-lucid-route-key": attributes.routeKey }
-						: {},
-			},
 			collectionKey: {
 				default: null,
 				parseHTML: (element) =>

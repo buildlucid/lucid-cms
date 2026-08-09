@@ -348,7 +348,15 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		}
 
 		if (!active || !allowed.includes(active)) {
-			setActiveCollectionKey(allowed[0]);
+			const selectedCollectionKey =
+				props.selectedRefs?.[0]?.collectionKey ??
+				props.selected?.[0]?.collectionKey;
+
+			setActiveCollectionKey(
+				selectedCollectionKey && allowed.includes(selectedCollectionKey)
+					? selectedCollectionKey
+					: allowed[0],
+			);
 		}
 	});
 	createEffect(() => {

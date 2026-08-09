@@ -116,26 +116,6 @@ const ConfigSchema = z.object({
 	db: z.unknown(),
 	tables: z.array(TableDefinitionSchema),
 	host: z.string().trim().min(1).optional(),
-	contentRoutes: z.array(
-		z
-			.object({
-				key: z.string().trim().min(1),
-				collectionKey: z.string().trim().min(1),
-				path: z
-					.object({
-						field: z.string().trim().min(1),
-						prefix: z.string().optional(),
-					})
-					.strict(),
-				label: z
-					.object({
-						fields: z.array(z.string().trim().min(1)).min(1),
-					})
-					.strict()
-					.optional(),
-			})
-			.strict(),
-	),
 	http: z
 		.object({
 			security: z

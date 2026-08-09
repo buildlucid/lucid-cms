@@ -22,6 +22,8 @@ import { node } from "@lucidcms/runtime-node";
 import BlogCollection from "./src/collections/blogs.js";
 import MainMenuCollection from "./src/collections/main-menu.js";
 import PageCollection from "./src/collections/pages.js";
+import RouteGroupCollection from "./src/collections/route-groups.js";
+import RoutePageCollection from "./src/collections/route-pages.js";
 import SettingsCollection from "./src/collections/settings.js";
 import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
@@ -93,29 +95,6 @@ export default configureLucid({
 			],
 			defaultLocale: "en",
 		},
-		contentRoutes: [
-			{
-				key: "pages",
-				collectionKey: "page",
-				path: {
-					field: "fullSlug",
-				},
-				label: {
-					fields: ["page_title"],
-				},
-			},
-			{
-				key: "blog-posts",
-				collectionKey: "blog",
-				path: {
-					field: "slug",
-					prefix: "/blog",
-				},
-				label: {
-					fields: ["page_title"],
-				},
-			},
-		],
 		i18n: {
 			locales: [
 				{
@@ -244,6 +223,8 @@ export default configureLucid({
 			SettingsCollection,
 			TestCollection,
 			SimpleCollection,
+			RouteGroupCollection,
+			RoutePageCollection,
 		],
 		plugins: [
 			workerQueuePlugin(),
@@ -280,6 +261,25 @@ export default configureLucid({
 						ui: {
 							fullSlug: true,
 						},
+					},
+					{
+						key: "blog",
+						localized: true,
+						prefix: "/blog",
+						ui: { fullSlug: true },
+					},
+					{
+						key: "route-page",
+						prefix: "/docs",
+						localized: true,
+						segments: [
+							{
+								relation: "route_group",
+								collection: "route-group",
+								field: "route_key",
+							},
+						],
+						ui: { fullSlug: true },
 					},
 				],
 			}),

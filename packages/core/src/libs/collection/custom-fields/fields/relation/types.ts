@@ -1,6 +1,7 @@
 import type {
 	DocumentFieldMap,
 	DocumentFieldValueMap,
+	DocumentRoute,
 } from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
@@ -40,6 +41,7 @@ export type RelationRef = {
 	id: number;
 	versionId?: number;
 	collectionKey: string;
+	route: DocumentRoute | null;
 	fields: DocumentFieldMap | DocumentFieldValueMap | null;
 };
 

@@ -16,7 +16,6 @@ const documentLink = {
 							type: "link",
 							attrs: {
 								kind: "document",
-								routeKey: "pages",
 								collectionKey: "pages",
 								documentId: 7,
 							},
@@ -33,21 +32,32 @@ describe("renderRichTextHTML references", () => {
 		expect(renderRichTextHTML(documentLink)).toBe("<p>About</p>");
 	});
 
-	test("resolves document links from flattened content relation refs", () => {
+	test("renders an unsafe document route as plain text", () => {
 		expect(
 			renderRichTextHTML(documentLink, {
-				routes: [
-					{
-						key: "pages",
-						collectionKey: "pages",
-						path: { field: "slug", prefix: "pages" },
-					},
-				],
 				refs: {
 					relation: [
 						{
 							id: 7,
 							collectionKey: "pages",
+							route: { path: "javascript:alert(1)", label: "About" },
+							fields: null,
+						},
+					],
+				},
+			}),
+		).toBe("<p>About</p>");
+	});
+
+	test("resolves document links from the route on relation refs", () => {
+		expect(
+			renderRichTextHTML(documentLink, {
+				refs: {
+					relation: [
+						{
+							id: 7,
+							collectionKey: "pages",
+							route: { path: "/pages/about", label: "About" },
 							fields: { slug: "about" },
 						},
 					],
@@ -59,18 +69,12 @@ describe("renderRichTextHTML references", () => {
 	test("passes the resolved current path to a custom document-link renderer", () => {
 		expect(
 			renderRichTextHTML(documentLink, {
-				routes: [
-					{
-						key: "pages",
-						collectionKey: "pages",
-						path: { field: "slug" },
-					},
-				],
 				refs: {
 					relation: [
 						{
 							id: 7,
 							collectionKey: "pages",
+							route: { path: "/about", label: "About" },
 							fields: { slug: { value: "about" } },
 						},
 					],
@@ -139,6 +143,7 @@ describe("renderRichTextHTML references", () => {
 						{
 							id: 2,
 							collectionKey: "contacts",
+							route: null,
 							fields: { supportEmail: "support@example.com" },
 						},
 					],
@@ -148,16 +153,7 @@ describe("renderRichTextHTML references", () => {
 	});
 
 	test("resolves localized flattened and internal document fields", () => {
-		const options = {
-			routes: [
-				{
-					key: "pages",
-					collectionKey: "pages",
-					path: { field: "slug" },
-				},
-			],
-			locale: "fr",
-		} as const;
+		const options = { locale: "fr" } as const;
 
 		expect(
 			renderRichTextHTML(documentLink, {
@@ -167,6 +163,10 @@ describe("renderRichTextHTML references", () => {
 						{
 							id: 7,
 							collectionKey: "pages",
+							route: {
+								path: { en: "/about", fr: "/a-propos" },
+								label: { en: "About", fr: "À propos" },
+							},
 							fields: { slug: { en: "about", fr: "a-propos" } },
 						},
 					],
@@ -182,6 +182,10 @@ describe("renderRichTextHTML references", () => {
 						{
 							id: 7,
 							collectionKey: "pages",
+							route: {
+								path: { en: "/about", fr: "/a-propos" },
+								label: { en: "About", fr: "À propos" },
+							},
 							fields: {
 								slug: {
 									translations: { en: "about", fr: "a-propos" },

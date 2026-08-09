@@ -1,12 +1,14 @@
 export { default as collections } from "./libs/collection/collections.js";
 export { default as buildTableName } from "./libs/collection/helpers/build-table-name.js";
 export { default as prefixGeneratedColName } from "./libs/collection/helpers/prefix-generated-column-name.js";
+export { getTableNames as getCollectionTableNames } from "./libs/collection/schema/runtime/runtime-schema-selectors.js";
 export type {
 	DatabaseCodec,
 	TableDefinition,
 } from "./libs/db/client/index.js";
 export { codecs, defineTable } from "./libs/db/client/index.js";
 export { default as defineMigration } from "./libs/db/define-migration.js";
+export { default as formatDocumentRoute } from "./libs/formatters/document-route.js";
 export { default as createMiddleware } from "./libs/http/create-middleware.js";
 export { default as createRoute } from "./libs/http/create-route.js";
 export { default as authenticateMiddleware } from "./libs/http/middleware/authenticate.js";
@@ -29,6 +31,7 @@ export {
 	translate,
 } from "./libs/i18n/index.js";
 export { default as defineSeed } from "./libs/seed/define-seed.js";
+export { resolveRelatedDocumentVersionType } from "./services/documents/helpers/resolve-relation-version-type.js";
 export { LucidAPIError } from "./utils/errors/index.js";
 export { ensureLucidDirectoryExists } from "./utils/helpers/lucid-directory.js";
 export {

@@ -1,5 +1,11 @@
 # @lucidcms/plugin-pages
 
+## v0.8.0 (unreleased)
+
+- Added relation-derived route segments and automatic collection routing through `fullSlug`.
+- Added generated route-segment relation fields and propagation when referenced segment values change.
+- Simplified route uniqueness configuration to a boolean because segment values now form part of the complete route.
+
 ## v0.7.0
 
 - Dropped `tenant` experiment support.

@@ -225,6 +225,11 @@ class CollectionBuilder<
 			revisionRetentionDays:
 				this.config.revisionRetentionDays ??
 				constants.collectionBuilder.revisionRetentionDays,
+			routing: this.config.routing
+				? {
+						field: this.config.routing,
+					}
+				: null,
 			preview: this.config.preview
 				? {
 						breakpoints:

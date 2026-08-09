@@ -12,12 +12,14 @@ const localization = {
 const baseCollection = {
 	key: "pages",
 	localized: false,
+	segments: [],
 	ui: {
 		fullSlug: false,
 		widths: {
 			fullSlug: 12,
 			slug: 12,
 			parentPage: 12,
+			segments: 12,
 		},
 	},
 	unique: true,
@@ -123,6 +125,44 @@ describe("constructChildFullSlug", () => {
 					en: "/blog/child",
 					fr: "/actualites/enfant",
 				},
+			},
+		]);
+	});
+
+	test("uses each descendant's resolved relation-derived prefix", () => {
+		const descendants: DescendantFieldsResponse[] = [
+			{
+				document_id: 2,
+				document_version_id: 20,
+				rows: [
+					{
+						locale: "en",
+						_slug: "getting-started",
+						_fullSlug: "/old/getting-started",
+						_parentPage: null,
+					},
+				],
+			},
+		];
+
+		const res = constructChildFullSlug({
+			descendants,
+			localization,
+			collection: {
+				...baseCollection,
+				segments: [
+					{ relation: "product", collection: "products", field: "key" },
+				],
+			},
+			routePrefixes: new Map([[20, { en: "/docs/lucid/v1" }]]),
+		});
+
+		expect(res.error).toBeUndefined();
+		expect(res.data).toEqual([
+			{
+				documentId: 2,
+				versionId: 20,
+				fullSlugs: { en: "/docs/lucid/v1/getting-started" },
 			},
 		]);
 	});

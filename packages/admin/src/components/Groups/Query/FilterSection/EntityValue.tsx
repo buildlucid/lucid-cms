@@ -140,7 +140,12 @@ export const EntityValue: Component<{
 			const document: DocumentRef | undefined =
 				activeDocumentRef() ??
 				(parts.collectionKey !== undefined
-					? { id: parts.id, collectionKey: parts.collectionKey, fields: null }
+					? {
+							id: parts.id,
+							collectionKey: parts.collectionKey,
+							route: null,
+							fields: null,
+						}
 					: undefined);
 			if (!document) return `#${parts.id}`;
 			return getDocumentPreviewLabel({
@@ -171,7 +176,14 @@ export const EntityValue: Component<{
 		if (picked) return [picked];
 		const parts = valueParts();
 		if (parts?.collectionKey === undefined) return [];
-		return [{ id: parts.id, collectionKey: parts.collectionKey, fields: null }];
+		return [
+			{
+				id: parts.id,
+				collectionKey: parts.collectionKey,
+				route: null,
+				fields: null,
+			},
+		];
 	});
 
 	// ----------------------------------

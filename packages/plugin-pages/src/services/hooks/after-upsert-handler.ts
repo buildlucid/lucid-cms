@@ -1,8 +1,9 @@
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
-import { getTargetCollection, updateFullSlugFields } from "../index.js";
+import { updateFullSlugFields } from "../index.js";
 import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
+import propagateRouteSegmentUpdates from "./helpers/propagate-route-segment-updates.js";
 
 const afterUpsertHandler =
 	(
@@ -10,54 +11,44 @@ const afterUpsertHandler =
 	): LucidHookDocuments<"afterUpsert">["handler"] =>
 	async (context, data) => {
 		// ----------------------------------------------------------------
-		// Validation / Setup
-		const targetCollectionRes = getTargetCollection({
-			options,
-			collectionKey: data.meta.collectionKey,
-		});
-		if (targetCollectionRes.error) {
-			//* early return as doesnt apply to the current collection
-			return {
-				error: undefined,
-				data: undefined,
-			};
+		// Rebuild descendants when the changed document is itself a page.
+		const pageCollection = options.collections.find(
+			(collection) => collection.key === data.meta.collectionKey,
+		);
+		const currentFullSlugField = data.data.fields.find(
+			(field) => field.key === constants.fields.fullSlug.key,
+		);
+		if (pageCollection && currentFullSlugField) {
+			const docFullSlugsRes = await buildDescendantFullSlugs(context, {
+				documentIds: [data.data.documentId],
+				versionType: data.data.versionType,
+				collectionKey: pageCollection.key,
+				tables: data.meta.collectionTableNames,
+				collection: pageCollection,
+				collectionInstance: data.meta.collection,
+				parentFullSlugField: currentFullSlugField,
+			});
+			if (docFullSlugsRes.error) return docFullSlugsRes;
+
+			if (docFullSlugsRes.data.length > 0) {
+				const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
+					docFullSlugs: docFullSlugsRes.data,
+					versionType: data.data.versionType,
+					tables: data.meta.collectionTableNames,
+				});
+				if (updateFullSlugFieldsRes.error) return updateFullSlugFieldsRes;
+			}
 		}
 
 		// ----------------------------------------------------------------
-		// Build and store fullSlugs
-		const currentFullSlugField = data.data.fields.find((field) => {
-			return field.key === constants.fields.fullSlug.key;
+		// Rebuild pages that use this document as a route segment.
+		const propagationRes = await propagateRouteSegmentUpdates(context, {
+			options,
+			targetCollectionKey: data.meta.collectionKey,
+			targetDocumentId: data.data.documentId,
+			targetVersionType: data.data.versionType,
 		});
-		if (!currentFullSlugField) {
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		}
-
-		const docFullSlugsRes = await buildDescendantFullSlugs(context, {
-			documentIds: [data.data.documentId],
-			versionType: data.data.versionType,
-			collectionKey: targetCollectionRes.data.key,
-			tables: data.meta.collectionTableNames,
-			collection: targetCollectionRes.data,
-			parentFullSlugField: currentFullSlugField,
-		});
-		if (docFullSlugsRes.error) return docFullSlugsRes;
-
-		if (docFullSlugsRes.data.length === 0) {
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		}
-
-		const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
-			docFullSlugs: docFullSlugsRes.data,
-			versionType: data.data.versionType,
-			tables: data.meta.collectionTableNames,
-		});
-		if (updateFullSlugFieldsRes.error) return updateFullSlugFieldsRes;
+		if (propagationRes.error) return propagationRes;
 
 		return {
 			error: undefined,

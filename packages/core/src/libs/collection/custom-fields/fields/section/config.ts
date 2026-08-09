@@ -8,6 +8,7 @@ export const sectionFieldConfig = {
 	capabilities: {
 		filterable: false,
 		sortable: false,
+		canBeLabel: false,
 	},
 } as const satisfies FieldStaticConfig<"section">;
 

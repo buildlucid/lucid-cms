@@ -6,7 +6,6 @@ import {
 import { renderToHTMLString } from "@tiptap/static-renderer/pm/html-string";
 import { mergeExtensions } from "./extensions.js";
 import {
-	type RichTextContentRoute,
 	type RichTextDocumentReference,
 	type RichTextEmbeddedBrick,
 	type RichTextJSON,
@@ -58,31 +57,24 @@ const getDocumentFieldValue = (
 	return getLocalizedFieldValue(field, locale);
 };
 
-const joinRoutePath = (prefix: string | undefined, value: string): string => {
-	const path = value.trim();
-	if (!path) return "";
-
-	const segments = [prefix, path]
-		.filter((segment): segment is string => typeof segment === "string")
-		.map((segment) => segment.replace(/^\/+|\/+$/g, ""))
-		.filter(Boolean);
-
-	return segments.length === 0 ? "/" : `/${segments.join("/")}`;
-};
-
-/** Resolves a registered route against a hydrated document reference. */
+/** Resolves the path already attached to a hydrated document reference. */
 export const resolveRichTextDocumentPath = (props: {
-	route: RichTextContentRoute;
 	reference: RichTextDocumentReference;
 	locale?: string;
 }): string => {
-	const rawValue = getDocumentFieldValue(
-		props.reference,
-		props.route.path.field,
-		props.locale,
+	const path = props.reference.route?.path;
+	if (typeof path === "string") return path;
+	if (!path) return "";
+
+	if (props.locale && typeof path[props.locale] === "string") {
+		return path[props.locale] ?? "";
+	}
+
+	return (
+		Object.values(path).find(
+			(value): value is string => typeof value === "string",
+		) ?? ""
 	);
-	if (typeof rawValue !== "string" && typeof rawValue !== "number") return "";
-	return joinRoutePath(props.route.path.prefix, String(rawValue));
 };
 
 const defaultMediaRenderer = (
@@ -133,12 +125,7 @@ const renderDocumentLink = (props: {
 }) => {
 	const collectionKey = props.attrs.collectionKey;
 	const documentId = props.attrs.documentId;
-	const routeKey = props.attrs.routeKey;
-	if (
-		typeof collectionKey !== "string" ||
-		typeof documentId !== "number" ||
-		typeof routeKey !== "string"
-	) {
+	if (typeof collectionKey !== "string" || typeof documentId !== "number") {
 		return props.children;
 	}
 
@@ -147,17 +134,14 @@ const renderDocumentLink = (props: {
 	);
 	if (!reference) return props.children;
 
-	const route = props.options?.routes?.find(
-		(item) => item.key === routeKey && item.collectionKey === collectionKey,
-	);
+	const route = reference.route;
 	if (!route) return props.children;
 
 	const href = resolveRichTextDocumentPath({
-		route,
 		reference,
 		locale: props.options?.locale,
 	});
-	if (!href) return props.children;
+	if (!href || !isAllowedUri(href)) return props.children;
 
 	const openInNewTab = props.attrs.target === "_blank";
 	if (props.options?.renderers?.documentLink) {
@@ -166,7 +150,6 @@ const renderDocumentLink = (props: {
 			href,
 			collectionKey,
 			documentId,
-			routeKey,
 			route,
 			reference,
 			openInNewTab,

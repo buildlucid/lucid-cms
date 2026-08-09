@@ -1,18 +1,16 @@
 import type { FieldWidth } from "@lucidcms/core/types";
 
 export type CollectionPrefix = string | Record<string, string>;
-export type PagesFieldKey = "fullSlug" | "slug" | "parentPage";
-export type CollectionUnique =
-	| boolean
-	| {
-			/**
-			 * Top-level field keys to include in fullSlug uniqueness checks.
-			 * Documents only conflict when fullSlug and these field values match.
-			 * Supported field types: text, textarea, select, number, datetime,
-			 * relation, media, and user.
-			 */
-			fields?: string[];
-	  };
+export type PagesFieldKey = "fullSlug" | "slug" | "parentPage" | "segments";
+
+export type CollectionRouteSegment = {
+	/** Relation field key registered on the pages collection. */
+	relation: string;
+	/** Collection selected by the generated relation field. */
+	collection: string;
+	/** Top-level scalar field read from the related document. */
+	field: string;
+};
 
 export interface CollectionUI {
 	fullSlug?: boolean;
@@ -25,8 +23,9 @@ export interface PluginOptions {
 		key: string;
 		localized?: boolean;
 		prefix?: CollectionPrefix;
+		segments?: CollectionRouteSegment[];
 		ui?: CollectionUI;
-		unique?: CollectionUnique;
+		unique?: boolean;
 		// fallbackSlugSource?: string;
 	}>;
 }
@@ -39,22 +38,20 @@ export interface CollectionConfig {
 	key: string;
 	localized: boolean;
 	prefix?: CollectionPrefix;
+	segments: CollectionRouteSegment[];
 	ui: {
 		fullSlug: boolean;
 		tab?: string;
 		widths: Record<PagesFieldKey, FieldWidth>;
 	};
-	unique: CollectionUnique;
+	unique: boolean;
 	// fallbackSlugSource: string | undefined;
 }
-
-export type RouteUniqueValues = Record<string, Record<string, unknown>>;
 
 export type ProjectedFullSlug = {
 	documentId: number;
 	versionId: number;
 	fullSlugs: Record<string, string | null>;
-	uniqueValues?: RouteUniqueValues;
 };
 
 export type RouteUniquenessItem = {
@@ -62,10 +59,26 @@ export type RouteUniquenessItem = {
 	versionId: number;
 	locale: string;
 	fullSlug: string;
-	uniqueValues: Record<string, unknown>;
 };
 
 export type RouteUniquenessConflict = {
 	locale: string;
 	fullSlug: string;
+};
+
+export type RouteSegmentSelection = {
+	sourceKey: string;
+	index: number;
+	collectionKey?: string;
+	documentId?: number;
+};
+
+export type RouteSegmentTarget = {
+	sourceKey: string;
+	index: number;
+	relation: string;
+	field: string;
+	collectionKey: string;
+	documentId: number;
+	localized: boolean;
 };

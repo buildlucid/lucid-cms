@@ -25,6 +25,7 @@ import { useInterfaceDirection } from "@/hooks/useInterfaceDirection";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { PanelFooter } from "./PanelFooter";
+import { PanelLayerContext } from "./PanelLayerContext";
 
 interface PanelNestingState {
 	level: Accessor<number>;
@@ -199,7 +200,7 @@ export const Panel: Component<{
 						)}
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
-							if (target.hasAttribute("data-panel-ignore")) {
+							if (target.closest("[data-panel-ignore]")) {
 								e.stopPropagation();
 								e.preventDefault();
 							}
@@ -297,7 +298,9 @@ export const Panel: Component<{
 												})}
 											>
 												<PanelNestingContext.Provider value={nestingState}>
-													<PanelChildren />
+													<PanelLayerContext.Provider value={zIndex}>
+														<PanelChildren />
+													</PanelLayerContext.Provider>
 												</PanelNestingContext.Provider>
 											</div>
 											<Show when={!props.options?.hideFooter}>
@@ -360,7 +363,9 @@ export const Panel: Component<{
 											})}
 										>
 											<PanelNestingContext.Provider value={nestingState}>
-												<PanelChildren />
+												<PanelLayerContext.Provider value={zIndex}>
+													<PanelChildren />
+												</PanelLayerContext.Provider>
 											</PanelNestingContext.Provider>
 										</div>
 										<Show when={!props.options?.hideFooter}>

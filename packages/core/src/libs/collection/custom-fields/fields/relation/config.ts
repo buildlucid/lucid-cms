@@ -11,6 +11,7 @@ export const relationFieldConfig = {
 	capabilities: {
 		filterable: true,
 		sortable: false,
+		canBeLabel: false,
 	},
 } as const satisfies FieldStaticConfig<"relation">;
 

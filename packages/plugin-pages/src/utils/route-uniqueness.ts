@@ -5,31 +5,13 @@ import type {
 } from "../types/types.js";
 import normalizePathValue from "./normalize-path-value.js";
 
-/** Serializes unique values with stable object key ordering for route keys. */
-const stableStringify = (value: unknown): string => {
-	if (value === undefined || value === null) return "null";
-	if (value instanceof Date) return JSON.stringify(value.toISOString());
-	if (typeof value !== "object") return JSON.stringify(value);
-	if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
-
-	const object = value as Record<string, unknown>;
-	return `{${Object.keys(object)
-		.sort()
-		.map((key) => `${JSON.stringify(key)}:${stableStringify(object[key])}`)
-		.join(",")}}`;
-};
-
-/** Combines locale, fullSlug, and unique values into an exact collision key. */
 const routeKey = (item: RouteUniquenessItem) => {
-	return [item.locale, item.fullSlug, stableStringify(item.uniqueValues)].join(
-		"::",
-	);
+	return `${item.locale}::${item.fullSlug}`;
 };
 
 /** Flattens projected per-locale fullSlugs into comparable route items. */
 export const buildRouteUniquenessItems = (data: {
 	projectedFullSlugs: ProjectedFullSlug[];
-	defaultLocale: string;
 }): RouteUniquenessItem[] => {
 	const items: RouteUniquenessItem[] = [];
 
@@ -43,10 +25,6 @@ export const buildRouteUniquenessItems = (data: {
 				versionId: projected.versionId,
 				locale,
 				fullSlug: normalizedFullSlug,
-				uniqueValues:
-					projected.uniqueValues?.[locale] ??
-					projected.uniqueValues?.[data.defaultLocale] ??
-					{},
 			});
 		}
 	}

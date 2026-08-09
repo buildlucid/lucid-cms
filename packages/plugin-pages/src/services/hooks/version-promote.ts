@@ -26,17 +26,26 @@ const versionPromoteHandler =
 	async (context, data) => {
 		// ----------------------------------------------------------------
 		// Validation / Setup
+		if (
+			!options.collections.some(
+				(collection) => collection.key === data.meta.collectionKey,
+			)
+		) {
+			return afterUpsertHandler(options)(context, {
+				meta: data.meta,
+				data: {
+					...data.data,
+					bricks: [],
+					fields: [],
+				},
+			});
+		}
+
 		const targetCollectionRes = getTargetCollection({
 			options,
 			collectionKey: data.meta.collectionKey,
 		});
-		if (targetCollectionRes.error) {
-			//* early return as doesnt apply to the current collection
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		}
+		if (targetCollectionRes.error) return targetCollectionRes;
 
 		let createFullSlug = true;
 
@@ -101,13 +110,16 @@ const versionPromoteHandler =
 			// fullSlug construction
 			const fullSlugRes = await resolveParentFullSlug(context, {
 				collection: targetCollectionRes.data,
+				collectionInstance: data.meta.collection,
 				collectionKey: targetCollectionRes.data.key,
 				versionType: data.data.versionType,
 				tables: data.meta.collectionTableNames,
 				fields: {
 					slug: slug,
 					parentPage,
+					all: [slug, parentPage, fullSlug],
 				},
+				documentVersionId: data.data.versionId,
 			});
 			if (fullSlugRes.error) return fullSlugRes;
 
@@ -135,6 +147,7 @@ const versionPromoteHandler =
 				collectionKey: targetCollectionRes.data.key,
 				tables: data.meta.collectionTableNames,
 				collection: targetCollectionRes.data,
+				collectionInstance: data.meta.collection,
 				parentFullSlugField: candidateFullSlugField,
 			});
 			if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
@@ -144,7 +157,6 @@ const versionPromoteHandler =
 				context,
 				{
 					collection: targetCollectionRes.data,
-					collectionInstance: data.meta.collection,
 					projectedFullSlugs,
 					versionType: data.data.versionType,
 					collectionKey: targetCollectionRes.data.key,

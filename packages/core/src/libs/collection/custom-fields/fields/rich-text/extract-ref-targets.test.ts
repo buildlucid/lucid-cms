@@ -19,7 +19,6 @@ test("extracts and deduplicates rich text media and document references", () => 
 										kind: "document",
 										collectionKey: "pages",
 										documentId: 12,
-										routeKey: "pages",
 									},
 								},
 							],

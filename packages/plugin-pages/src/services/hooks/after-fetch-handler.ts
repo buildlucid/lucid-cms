@@ -1,3 +1,5 @@
+import type { CollectionBuilder } from "@lucidcms/core";
+import { formatDocumentRoute } from "@lucidcms/core/plugin";
 import type {
 	FieldInputSchema,
 	InternalCollectionDocument,
@@ -43,8 +45,10 @@ const updateFullSlugField = (data: {
 	document: InternalCollectionDocument;
 	fullSlug: Record<string, string | null>;
 	defaultLocale: string;
+	collection: CollectionBuilder;
+	locales: string[];
 }): InternalCollectionDocument => {
-	return {
+	const document = {
 		...data.document,
 		fields:
 			data.document.fields?.map((field) => {
@@ -70,6 +74,16 @@ const updateFullSlugField = (data: {
 					value: data.fullSlug[data.defaultLocale] ?? null,
 				};
 			}) ?? null,
+	};
+
+	return {
+		...document,
+		route: formatDocumentRoute({
+			collection: data.collection,
+			documentId: document.id,
+			fields: document.fields,
+			locales: data.locales,
+		}),
 	};
 };
 
@@ -102,58 +116,67 @@ const afterFetchHandler =
 			};
 		}
 
-		const documents: InternalCollectionDocument[] = [];
+		const documentResults = await Promise.all(
+			data.data.documents.map(async (document) => {
+				const fields = document.fields;
+				if (!fields || fields.length === 0) {
+					return { error: undefined, data: document };
+				}
 
-		for (const document of data.data.documents) {
-			const fields = document.fields;
-			if (!fields || fields.length === 0) {
-				documents.push(document);
-				continue;
-			}
+				const slugField = findField(fields, constants.fields.slug.key, "text");
+				const parentPageField = findField(
+					fields,
+					constants.fields.parentPage.key,
+					"relation",
+				);
+				const fullSlugField = findField(
+					fields,
+					constants.fields.fullSlug.key,
+					"text",
+				);
 
-			const slugField = findField(fields, constants.fields.slug.key, "text");
-			const parentPageField = findField(
-				fields,
-				constants.fields.parentPage.key,
-				"relation",
-			);
-			const fullSlugField = findField(
-				fields,
-				constants.fields.fullSlug.key,
-				"text",
-			);
+				if (!slugField || !parentPageField || !fullSlugField) {
+					return { error: undefined, data: document };
+				}
 
-			if (!slugField || !parentPageField || !fullSlugField) {
-				documents.push(document);
-				continue;
-			}
+				const slug = cloneFieldAsInput(slugField);
+				const parentPage = cloneFieldAsInput(parentPageField);
 
-			const slug = cloneFieldAsInput(slugField);
-			const parentPage = cloneFieldAsInput(parentPageField);
+				const fullSlugRes = await resolveParentFullSlug(context, {
+					collection: targetCollectionRes.data,
+					collectionInstance: data.meta.collection,
+					collectionKey: targetCollectionRes.data.key,
+					versionType: data.data.relationVersionType,
+					tables: data.meta.collectionTableNames,
+					fields: {
+						slug,
+						parentPage,
+						all: fields.map(cloneFieldAsInput),
+					},
+					missingParentIsEmpty: true,
+				});
+				if (fullSlugRes.error) return fullSlugRes;
 
-			const fullSlugRes = await resolveParentFullSlug(context, {
-				collection: targetCollectionRes.data,
-				collectionKey: targetCollectionRes.data.key,
-				versionType: data.data.relationVersionType,
-				tables: data.meta.collectionTableNames,
-				fields: {
-					slug,
-					parentPage,
-				},
-				missingParentIsEmpty: true,
-			});
-			if (fullSlugRes.error) return fullSlugRes;
+				return {
+					error: undefined,
+					data: updateFullSlugField({
+						document,
+						fullSlug: fullSlugRes.data,
+						defaultLocale: context.config.localization.defaultLocale,
+						collection: data.meta.collection,
+						locales: context.config.localization.locales.map(
+							(locale) => locale.code,
+						),
+					}),
+				};
+			}),
+		);
+		const failedDocument = documentResults.find((result) => result.error);
+		if (failedDocument?.error) return failedDocument;
 
-			documents.push(
-				updateFullSlugField({
-					document,
-					fullSlug: fullSlugRes.data,
-					defaultLocale: context.config.localization.defaultLocale,
-				}),
-			);
-		}
-
-		data.data.documents = documents;
+		data.data.documents = documentResults.flatMap((result) =>
+			result.data ? [result.data] : [],
+		);
 
 		return {
 			error: undefined,

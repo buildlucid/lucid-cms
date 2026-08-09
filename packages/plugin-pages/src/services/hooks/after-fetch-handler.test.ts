@@ -1,3 +1,4 @@
+import { CollectionBuilder } from "@lucidcms/core";
 import type { InternalCollectionDocument } from "@lucidcms/core/types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PluginOptionsInternal } from "../../types/types.js";
@@ -26,18 +27,28 @@ const options = {
 		{
 			key: "pages",
 			localized: false,
+			segments: [],
 			ui: {
 				fullSlug: true,
 				widths: {
 					fullSlug: 6,
 					slug: 6,
 					parentPage: 12,
+					segments: 12,
 				},
 			},
 			unique: true,
 		},
 	],
 } satisfies PluginOptionsInternal;
+
+const collection = new CollectionBuilder("pages", {
+	mode: "multiple",
+	details: { name: "Pages", singularName: "Page" },
+	routing: "fullSlug",
+})
+	.addText("slug", { useAsLabel: true })
+	.addText("fullSlug");
 
 const createDocument = (props: {
 	id: number;
@@ -74,7 +85,7 @@ const createHookPayload = (
 	versionType = "snapshot",
 ) => ({
 	meta: {
-		collection: {} as never,
+		collection,
 		collectionKey: "pages",
 		collectionTableNames: {} as never,
 	},

@@ -8,6 +8,7 @@ export const richTextFieldConfig = {
 	capabilities: {
 		filterable: true,
 		sortable: false,
+		canBeLabel: false,
 	},
 } as const satisfies FieldStaticConfig<"rich-text">;
 

@@ -53,5 +53,6 @@ export const documentResponseToRef = (
 ): DocumentRef => ({
 	id: doc.id,
 	collectionKey: doc.collectionKey,
+	route: doc.route,
 	fields: doc.fields ? brickHelpers.objectifyFields(doc.fields) : null,
 });

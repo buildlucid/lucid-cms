@@ -150,6 +150,11 @@ export type CollectionDocumentTranslations<TValue> = [
 	: ExactCollectionDocumentTranslations<TValue> &
 			Partial<Record<string, TValue>>;
 
+export type DocumentRoute = {
+	path: string | CollectionDocumentTranslations<string | null>;
+	label: string | CollectionDocumentTranslations<string>;
+};
+
 export type DocumentFieldPlainValue =
 	| DocumentFieldValueResponse
 	| CollectionDocumentTranslations<DocumentFieldValueResponse>
@@ -167,6 +172,7 @@ export interface DocumentRef<
 	id: number;
 	versionId?: number;
 	collectionKey: TCollectionKey;
+	route: DocumentRoute | null;
 	fields: TFields;
 }
 
@@ -323,6 +329,7 @@ export interface CollectionDocument<
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
 	version: ResolveCollectionDocumentVersion<TCollectionKey> | null;
+	route: DocumentRoute | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
 	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
 	refs?: Partial<Record<FieldType | string, DocumentFieldRef[]>>;
@@ -673,23 +680,13 @@ export type CollectionPermission<
 	TAction extends CollectionPermissionAction = CollectionPermissionAction,
 > = `documents:${string}:${TAction}`;
 
-export type ContentRoute = {
-	key: string;
-	collectionKey: string;
-	path: {
-		field: string;
-		prefix?: string;
-	};
-	label?: {
-		fields: string[];
-	};
-};
-
 export interface Collection {
 	key: string;
 	documentId?: number | null;
 	mode: CollectionMode;
-	contentRoutes: ContentRoute[];
+	routing: {
+		field: string;
+	} | null;
 	group: {
 		key: string;
 		name: ResolvedAdminCopy | null;
@@ -813,6 +810,7 @@ export interface InternalCollectionDocument {
 	collectionKey: string;
 	version: DocumentVersionType | null;
 	versionId: number | null;
+	route: DocumentRoute | null;
 	versions: Record<string, DocumentVersionSummary | null>;
 	isDeleted: boolean;
 	createdBy: DocumentAuthor;

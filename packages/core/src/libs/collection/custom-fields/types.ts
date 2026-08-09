@@ -172,6 +172,8 @@ export type FieldCapabilities = {
 	filterable: boolean;
 	/** Whether documents can be sorted by this field's stored value. */
 	sortable: boolean;
+	/** Whether this field can provide a document label. */
+	canBeLabel: boolean;
 };
 
 export type FieldStaticConfig<T extends string = string> = {

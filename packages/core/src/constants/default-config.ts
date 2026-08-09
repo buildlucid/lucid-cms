@@ -22,7 +22,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 		routes: [],
 		extensions: [],
 	},
-	contentRoutes: [],
 	auth: {
 		password: {
 			enabled: true,

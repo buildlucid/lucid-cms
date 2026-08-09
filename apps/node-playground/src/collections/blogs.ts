@@ -23,15 +23,13 @@ const BlogCollection = new CollectionBuilder("blog", {
 		},
 	],
 })
-	.addText("slug", {
-		showInList: true,
-	})
 	.addText("page_title", {
 		ui: {
 			hidden: false,
 			disabled: false,
 		},
 		showInList: true,
+		useAsLabel: true,
 	})
 	.addTextarea("page_excerpt", {
 		showInList: true,
@@ -44,7 +42,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 		editor: {
 			links: {
 				external: true,
-				internal: ["page", "blog"],
+				internal: ["page", "blog", "route-page"],
 			},
 			media: ["image", "audio", "video"],
 			variables: ["settings"],

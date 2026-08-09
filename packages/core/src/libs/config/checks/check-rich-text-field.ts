@@ -30,7 +30,7 @@ const checkCollectionKeys = (props: {
 const checkInternalLinks = (field: CFConfig<"rich-text">, config: Config) => {
 	if (
 		field.editor?.links?.internal === true &&
-		config.contentRoutes.length === 0
+		config.collections.every((collection) => !collection.getData.routing)
 	) {
 		throw new Error(
 			translate("server:core.fields.rich.text.routes.empty", {
@@ -51,8 +51,9 @@ const checkInternalLinks = (field: CFConfig<"rich-text">, config: Config) => {
 	});
 	for (const collectionKey of internalCollections) {
 		if (
-			config.contentRoutes.some(
-				(route) => route.collectionKey === collectionKey,
+			config.collections.some(
+				(collection) =>
+					collection.key === collectionKey && collection.getData.routing,
 			)
 		) {
 			continue;

@@ -1,4 +1,4 @@
-import type { ContentRoute, DocumentRef, MediaRef } from "@types";
+import type { DocumentRef, MediaRef } from "@types";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 
 export type RichTextMediaType = "image" | "audio" | "video";
@@ -23,7 +23,7 @@ export interface RichTextOptions {
 	variables?: boolean | string[];
 	appearance?: "default" | "seamless";
 	fullscreen?: boolean;
-	routes?: ContentRoute[];
+	documentCollectionKeys?: string[];
 	embeddedBrickConfigs?: CollectionBrickConfig[];
 	locale?: string;
 	references?: {
@@ -45,9 +45,9 @@ export interface RichTextOptions {
 			onUpload: (id: number) => void;
 		}) => void;
 		selectDocument?: (props: {
-			routes: ContentRoute[];
+			collectionKeys: string[];
 			current?: DocumentRef;
-			onSelect: (document: DocumentRef, route: ContentRoute) => void;
+			onSelect: (document: DocumentRef) => void;
 		}) => void;
 		selectVariable?: (props: {
 			current?: Omit<RichTextVariableSelection, "document">;

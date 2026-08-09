@@ -153,6 +153,7 @@ const DocumentDynamicColumns: Component<{
 						({
 							id: value.id,
 							collectionKey: value.collectionKey,
+							route: null,
 							fields: null,
 						} satisfies DocumentRef),
 					contentLocale: contentLocale(),

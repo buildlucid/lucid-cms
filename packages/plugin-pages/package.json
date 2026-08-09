@@ -52,7 +52,8 @@
 		"@lucidcms/core": "^0.18.0-alpha.0"
 	},
 	"dependencies": {
-		"immer": "^11.1.8"
+		"immer": "^11.1.8",
+		"kysely": "0.29.2"
 	},
 	"volta": {
 		"node": "24.11.1"

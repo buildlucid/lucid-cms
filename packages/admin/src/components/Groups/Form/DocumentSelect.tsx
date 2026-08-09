@@ -222,6 +222,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 					? {
 							id: documentValue.id,
 							collectionKey: documentValue.collectionKey,
+							route: null,
 							fields: null,
 						}
 					: undefined),
