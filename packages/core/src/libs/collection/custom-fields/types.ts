@@ -306,6 +306,9 @@ export type CustomFieldFilterFormatter = (props: {
 	column: CollectionSchemaColumn;
 }) => FilterValue;
 
+/** Extracts embedded-brick refs owned by a custom-field value. */
+export type EmbeddedBrickRefExtractor = (value: unknown) => string[];
+
 export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	config: FieldStaticConfig<T>;
 	class: abstract new (...args: never[]) => unknown;
@@ -316,6 +319,7 @@ export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	formatFilterValue?: CustomFieldFilterFormatter | null;
 	nullifyReferences?: unknown;
 	contentTypeGen?: ContentFieldTypeGenerator<T> | null;
+	extractEmbeddedBrickRefs?: EmbeddedBrickRefExtractor;
 };
 
 export type FieldRelationValidationInput = Record<string, number[]>;

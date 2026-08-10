@@ -1,3 +1,7 @@
+import {
+	extractEmbeddedBrickRefs,
+	type RichTextJSON,
+} from "@lucidcms/rich-text";
 import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
 import { richTextFieldConfig } from "./config.js";
 import RichTextCustomField from "./custom-field.js";
@@ -12,4 +16,6 @@ export default {
 	contentTypeGen: createValueFieldTypeGenerator(
 		"Record<string, unknown> | null",
 	),
+	extractEmbeddedBrickRefs: (value: unknown) =>
+		extractEmbeddedBrickRefs(value as RichTextJSON | null),
 };

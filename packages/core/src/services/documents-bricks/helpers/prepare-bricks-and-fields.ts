@@ -1,8 +1,8 @@
-import { extractEmbeddedBrickRefs } from "@lucidcms/rich-text";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
+import type { RegisteredFieldDefinition } from "../../../libs/collection/custom-fields/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { Config, FieldInputSchema, FieldTypes } from "../../../types.js";
 
@@ -75,22 +75,23 @@ const processFields = (props: {
 	});
 };
 
-/** Finds embedded-brick refs recursively in rich-text values and repeater groups. */
+/** Finds embedded-brick refs recursively in custom-field values and nested groups. */
 const getEmbeddedBrickRefsFromFields = (
 	fields: Array<FieldInputSchema>,
 ): Set<string> => {
 	const refs = new Set<string>();
 	const visit = (field: FieldInputSchema) => {
-		if (field.type === "rich-text") {
-			for (const ref of extractEmbeddedBrickRefs(
-				(field.value as Parameters<typeof extractEmbeddedBrickRefs>[0]) ?? null,
-			)) {
+		const fieldDefinition = registeredFields[field.type] as Pick<
+			RegisteredFieldDefinition,
+			"extractEmbeddedBrickRefs"
+		>;
+		const extractEmbeddedBrickRefs = fieldDefinition.extractEmbeddedBrickRefs;
+		if (extractEmbeddedBrickRefs) {
+			for (const ref of extractEmbeddedBrickRefs(field.value)) {
 				refs.add(ref);
 			}
 			for (const value of Object.values(field.translations ?? {})) {
-				for (const ref of extractEmbeddedBrickRefs(
-					(value as Parameters<typeof extractEmbeddedBrickRefs>[0]) ?? null,
-				)) {
+				for (const ref of extractEmbeddedBrickRefs(value)) {
 					refs.add(ref);
 				}
 			}
