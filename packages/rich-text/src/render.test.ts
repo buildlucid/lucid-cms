@@ -1,254 +1,128 @@
 import { Node } from "@tiptap/core";
 import { describe, expect, test } from "vitest";
-import { renderRichTextHTML } from "./render.js";
+import { generateHTML } from "./server.js";
 
-const documentLink = {
-	type: "doc",
-	content: [
-		{
-			type: "paragraph",
-			content: [
-				{
-					type: "text",
-					text: "About",
-					marks: [
-						{
-							type: "link",
-							attrs: {
-								kind: "document",
-								collectionKey: "pages",
-								documentId: 7,
-							},
-						},
-					],
-				},
-			],
-		},
-	],
-};
-
-describe("renderRichTextHTML references", () => {
-	test("renders a missing document reference as plain text", () => {
-		expect(renderRichTextHTML(documentLink)).toBe("<p>About</p>");
-	});
-
-	test("renders an unsafe document route as plain text", () => {
-		expect(
-			renderRichTextHTML(documentLink, {
-				refs: {
-					relation: [
-						{
-							id: 7,
-							collectionKey: "pages",
-							route: { path: "javascript:alert(1)", label: "About" },
-							fields: null,
-						},
-					],
-				},
-			}),
-		).toBe("<p>About</p>");
-	});
-
-	test("resolves document links from the route on relation refs", () => {
-		expect(
-			renderRichTextHTML(documentLink, {
-				refs: {
-					relation: [
-						{
-							id: 7,
-							collectionKey: "pages",
-							route: { path: "/pages/about", label: "About" },
-							fields: { slug: "about" },
-						},
-					],
-				},
-			}),
-		).toBe('<p><a href="/pages/about">About</a></p>');
-	});
-
-	test("passes the resolved current path to a custom document-link renderer", () => {
-		expect(
-			renderRichTextHTML(documentLink, {
-				refs: {
-					relation: [
-						{
-							id: 7,
-							collectionKey: "pages",
-							route: { path: "/about", label: "About" },
-							fields: { slug: { value: "about" } },
-						},
-					],
-				},
-				renderers: {
-					documentLink: ({ children, href }) =>
-						`<site-link to="${href}">${children}</site-link>`,
-				},
-			}),
-		).toBe('<p><site-link to="/about">About</site-link></p>');
-	});
-
-	test("gets image metadata from the media ref rather than the node", () => {
-		const value = {
-			type: "doc",
-			content: [
-				{
-					type: "lucidMedia",
-					attrs: { mediaId: 12 },
-				},
-			],
-		};
-
-		expect(
-			renderRichTextHTML(value, {
-				refs: {
-					media: [
-						{
-							id: 12,
-							type: "image",
-							title: { en: "Photo" },
-							alt: { en: "Current alt text" },
-							file: { url: "/media/photo.jpg" },
-						},
-					],
-				},
-				locale: "en",
-			}),
-		).toBe('<img src="/media/photo.jpg" alt="Current alt text">');
-	});
-
-	test("resolves an inline variable from a flattened content document ref", () => {
-		const value = {
+describe("generateHTML", () => {
+	test("renders hydrated internal links and drops unavailable ones", () => {
+		const value = (href: string | null) => ({
 			type: "doc",
 			content: [
 				{
 					type: "paragraph",
 					content: [
 						{
-							type: "lucidVariable",
-							attrs: {
-								collectionKey: "contacts",
-								documentId: 2,
-								fieldKey: "supportEmail",
-							},
-						},
-					],
-				},
-			],
-		};
-
-		expect(
-			renderRichTextHTML(value, {
-				refs: {
-					relation: [
-						{
-							id: 2,
-							collectionKey: "contacts",
-							route: null,
-							fields: { supportEmail: "support@example.com" },
-						},
-					],
-				},
-			}),
-		).toBe("<p>support@example.com</p>");
-	});
-
-	test("resolves localized flattened and internal document fields", () => {
-		const options = { locale: "fr" } as const;
-
-		expect(
-			renderRichTextHTML(documentLink, {
-				...options,
-				refs: {
-					relation: [
-						{
-							id: 7,
-							collectionKey: "pages",
-							route: {
-								path: { en: "/about", fr: "/a-propos" },
-								label: { en: "About", fr: "À propos" },
-							},
-							fields: { slug: { en: "about", fr: "a-propos" } },
-						},
-					],
-				},
-			}),
-		).toBe('<p><a href="/a-propos">About</a></p>');
-
-		expect(
-			renderRichTextHTML(documentLink, {
-				...options,
-				refs: {
-					relation: [
-						{
-							id: 7,
-							collectionKey: "pages",
-							route: {
-								path: { en: "/about", fr: "/a-propos" },
-								label: { en: "About", fr: "À propos" },
-							},
-							fields: {
-								slug: {
-									translations: { en: "about", fr: "a-propos" },
+							type: "text",
+							text: "About",
+							marks: [
+								{
+									type: "link",
+									attrs: {
+										kind: "document",
+										collectionKey: "pages",
+										documentId: 7,
+										href,
+									},
 								},
-							},
+							],
 						},
 					],
 				},
-			}),
-		).toBe('<p><a href="/a-propos">About</a></p>');
-	});
-
-	test("passes the hydrated embedded brick to a custom renderer", () => {
-		const value = {
-			type: "doc",
-			content: [
-				{
-					type: "lucidEmbeddedBrick",
-					attrs: { ref: "callout-ref" },
-				},
 			],
-		};
+		});
 
-		expect(
-			renderRichTextHTML(value, {
-				bricks: [
-					{
-						ref: "callout-ref",
-						key: "callout",
-						fields: { heading: { value: "Important" } },
-					},
-				],
-				renderers: {
-					embeddedBrick: ({ ref, brick }) =>
-						`<aside data-ref="${ref}">${brick.key}</aside>`,
-				},
-			}),
-		).toBe('<aside data-ref="callout-ref">callout</aside>');
+		expect(generateHTML(value("/about"))).toBe(
+			'<p><a href="/about">About</a></p>',
+		);
+		expect(generateHTML(value(null))).toBe("<p>About</p>");
+		expect(generateHTML(value("javascript:alert(1)"))).toBe("<p>About</p>");
 	});
 
-	test("drops unsafe external link destinations", () => {
+	test("renders hydrated variables as escaped scalar text", () => {
 		expect(
-			renderRichTextHTML({
+			generateHTML({
 				type: "doc",
 				content: [
 					{
 						type: "paragraph",
 						content: [
 							{
-								type: "text",
-								text: "Unsafe",
-								marks: [
-									{
-										type: "link",
-										attrs: { href: "javascript:alert(1)" },
-									},
-								],
+								type: "lucidVariable",
+								attrs: {
+									collectionKey: "contacts",
+									documentId: 2,
+									fieldKey: "supportEmail",
+									value: "support@example.com <help>",
+								},
 							},
 						],
 					},
 				],
 			}),
-		).toBe("<p>Unsafe</p>");
+		).toBe("<p>support@example.com &lt;help&gt;</p>");
+	});
+
+	test("renders hydrated image, audio and video nodes", () => {
+		expect(
+			generateHTML({
+				type: "doc",
+				content: [
+					{
+						type: "lucidMedia",
+						attrs: {
+							mediaId: 1,
+							media: {
+								type: "image",
+								src: "/photo.jpg",
+								alt: "Photo",
+							},
+						},
+					},
+					{
+						type: "lucidMedia",
+						attrs: {
+							mediaId: 2,
+							media: { type: "audio", src: "/audio.mp3" },
+						},
+					},
+					{
+						type: "lucidMedia",
+						attrs: {
+							mediaId: 3,
+							media: {
+								type: "video",
+								src: "/video.mp4",
+								poster: "/poster.jpg",
+							},
+						},
+					},
+				],
+			}),
+		).toBe(
+			'<img src="/photo.jpg" alt="Photo"><audio controls src="/audio.mp3"></audio><video controls src="/video.mp4" poster="/poster.jpg"></video>',
+		);
+	});
+
+	test("passes embedded bricks to the configured brick renderer", () => {
+		expect(
+			generateHTML(
+				{
+					type: "doc",
+					content: [
+						{
+							type: "lucidEmbeddedBrick",
+							attrs: { ref: "callout-ref" },
+						},
+					],
+				},
+				{
+					bricks: [{ ref: "callout-ref", key: "callout" }],
+					renderers: {
+						bricks: ({ node, brick }) =>
+							`<aside data-ref="${node.attrs?.ref}">${brick.key}</aside>`,
+					},
+				},
+			),
+		).toBe('<aside data-ref="callout-ref">callout</aside>');
 	});
 
 	test("keeps support for custom rendering extensions", () => {
@@ -260,7 +134,7 @@ describe("renderRichTextHTML references", () => {
 		});
 
 		expect(
-			renderRichTextHTML(
+			generateHTML(
 				{
 					type: "doc",
 					content: [

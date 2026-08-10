@@ -60,7 +60,10 @@ test("ignores malformed and external references", () => {
 							marks: [
 								{
 									type: "link",
-									attrs: { kind: "external", href: "https://example.com" },
+									attrs: {
+										kind: "external",
+										href: "https://example.com",
+									},
 								},
 							],
 						},

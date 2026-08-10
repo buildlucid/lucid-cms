@@ -96,29 +96,25 @@ This means consumers do not need to provide extension definitions when convertin
 
 ## Rendering References
 
-Reference nodes use the normal refs and bricks returned on a Lucid document. No rich-text-specific ref bucket is added.
-
-Request `refs.media` for media nodes, `refs.relation` for document links and variables, and `bricks` for embedded bricks when fetching the document.
-
 ```typescript
 import { generateHTML } from "@lucidcms/rich-text/server";
 
-const html = generateHTML(document.fields.body, {
-  refs: document.refs,
+const html = generateHTML(document.fields.body);
+
+const htmlWithBricks = generateHTML(document.fields.body, {
   bricks: document.bricks,
-  locale: "en",
   renderers: {
-    embeddedBrick: ({ brick }) => renderBrick(brick),
+    bricks: ({ brick }) => renderBrick(brick),
   },
 });
 ```
 
-- Document links store only a collection key and document ID. The current URL is read from the hydrated document ref's `route`. If either is unavailable, only the link text is rendered.
-- Media nodes store only a media ID. URLs, titles, descriptions, and image alt text are read from `refs.media` at render time.
-- Variable nodes identify a collection, document, and top-level scalar field. Their current value is read from the normal document relation ref.
-- Embedded-brick nodes store a stable brick ref. Supply `renderers.embeddedBrick` to render the matching item from `document.bricks`.
+- Document links retain their document identity and receive the current URL as a response-only `href`. Missing links render as plain text.
+- Media nodes retain their media ID and receive compact response-only render data.
+- Variable nodes retain their document and field identity and receive the current scalar value.
+- Embedded-brick nodes store a stable brick ref. Supply `renderers.bricks` to render the matching item from `document.bricks`.
 
-Custom renderers are also available for document links, media, and variables when an application needs framework-specific markup.
+Hydrated attributes are derived data. Lucid removes them before persisting an edited rich-text value.
 
 ## Editor configuration
 
@@ -156,4 +152,4 @@ const Posts = new CollectionBuilder("posts", {
 });
 ```
 
-A link does not store a fallback path, so a missing document, route, or path value renders as plain text. A custom document-link renderer receives the resolved current `href`.
+A link does not store a fallback path, so a missing document, route, or path value renders as plain text.

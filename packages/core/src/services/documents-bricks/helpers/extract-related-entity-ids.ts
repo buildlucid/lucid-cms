@@ -206,6 +206,8 @@ const extractRelatedEntityIds: ServiceFn<
 			responses: (BrickQueryResponse | DocumentQueryResponse)[];
 			/** Pass an array of custom field types that should have relation data extracted. */
 			includeTypes?: FieldTypes[];
+			/** Includes ref targets discovered inside column-backed custom-field values. */
+			includeFieldValueRefTargets?: boolean;
 			/** Pass a Array of custom field types that should have relation data extracted */
 			excludeTypes?: FieldTypes[];
 		},
@@ -269,7 +271,9 @@ const extractRelatedEntityIds: ServiceFn<
 						if (!targets) continue;
 						if (
 							!shouldIncludeFieldType(targetFieldType, {
-								includeTypes: data.includeTypes,
+								includeTypes: data.includeFieldValueRefTargets
+									? undefined
+									: data.includeTypes,
 								excludeTypes: data.excludeTypes,
 							})
 						) {

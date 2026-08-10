@@ -27,6 +27,8 @@ describe("extractRelatedEntityIds", () => {
 		const table = "lucid_document__pages__fld" as const;
 		const result = await extractRelatedEntityIds(context, {
 			collection,
+			includeTypes: [],
+			includeFieldValueRefTargets: true,
 			brickSchema: [
 				{
 					name: table,

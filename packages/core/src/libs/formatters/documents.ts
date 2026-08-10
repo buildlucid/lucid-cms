@@ -34,6 +34,7 @@ const formatMultiple = (props: {
 	host: string;
 	hasFields: boolean;
 	hasBricks: boolean;
+	includeRefs?: boolean;
 	refData?: FieldRefResponse;
 	refTypes?: FieldTypes[];
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
@@ -46,14 +47,26 @@ const formatMultiple = (props: {
 				)
 			: undefined;
 
+	const hydratedRefs = formatRefs({
+		data: props.refData,
+		collection: props.collection,
+		collections: props.collections,
+		config: props.config,
+		host: props.host,
+		bricksTableSchema: props.bricksTableSchema,
+	});
+	const refs = filterRefs(hydratedRefs, props.refTypes);
+
 	return props.documents.map((d) => {
 		let fields: InternalDocumentField[] | null = null;
 		let bricks: InternalDocumentBrick[] | null = null;
+
 		if (props.hasFields) {
 			fields = documentBricksFormatter.formatDocumentFields({
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
 				refData: props.refData || { data: {} },
+				refs: hydratedRefs,
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -64,21 +77,12 @@ const formatMultiple = (props: {
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
 				refData: props.refData || { data: {} },
+				refs: hydratedRefs,
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
 			});
 		}
-
-		const refs = formatRefs({
-			data: props.refData,
-			collection: props.collection,
-			collections: props.collections,
-			config: props.config,
-			host: props.host,
-			bricksTableSchema: props.bricksTableSchema,
-			fieldTypes: props.refTypes,
-		});
 
 		return formatSingle({
 			document: d,
@@ -86,7 +90,7 @@ const formatMultiple = (props: {
 			config: props.config,
 			fields: fields,
 			bricks: bricks || undefined,
-			refs: refs,
+			refs: props.includeRefs === false ? null : refs,
 			workflow:
 				workflowMap !== undefined
 					? documentWorkflowsFormatter.formatSingle({
@@ -254,6 +258,17 @@ const formatContentMultiple = <TCollectionKey extends string = string>(props: {
 		meta: boolean;
 	};
 }): CollectionDocument<TCollectionKey>[] => {
+	const hydratedRefs = formatRefs({
+		data: props.refData,
+		collection: props.collection,
+		collections: props.collections,
+		config: props.config,
+		host: props.host,
+		bricksTableSchema: props.bricksTableSchema,
+		flattenRelationRefFields: true,
+	});
+	const refs = filterRefs(hydratedRefs, props.refTypes);
+
 	return props.documents.map((d) => {
 		let fields: InternalDocumentField[] | null = null;
 		let bricks: InternalDocumentBrick[] | null = null;
@@ -262,6 +277,7 @@ const formatContentMultiple = <TCollectionKey extends string = string>(props: {
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
 				refData: props.refData || { data: {} },
+				refs: hydratedRefs,
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
@@ -272,24 +288,12 @@ const formatContentMultiple = <TCollectionKey extends string = string>(props: {
 				bricksQuery: d,
 				bricksSchema: props.bricksTableSchema,
 				refData: props.refData || { data: {} },
+				refs: hydratedRefs,
 				collection: props.collection,
 				config: props.config,
 				host: props.host,
 			});
 		}
-
-		const refs = props.include.refs
-			? formatRefs({
-					data: props.refData,
-					collection: props.collection,
-					collections: props.collections,
-					config: props.config,
-					host: props.host,
-					bricksTableSchema: props.bricksTableSchema,
-					fieldTypes: props.refTypes,
-					flattenRelationRefFields: true,
-				})
-			: null;
 
 		return formatContentSingle<TCollectionKey>({
 			document: d,
@@ -297,7 +301,7 @@ const formatContentMultiple = <TCollectionKey extends string = string>(props: {
 			config: props.config,
 			fields: fields,
 			bricks: bricks || undefined,
-			refs: refs,
+			refs: props.include.refs ? refs : null,
 			host: props.host,
 			include: props.include,
 		});
@@ -443,10 +447,26 @@ const formatRefs = (props: {
 	return refs;
 };
 
+/** Limits an already-formatted refs object to explicitly requested types. */
+const filterRefs = (
+	refs: InternalCollectionDocument["refs"],
+	fieldTypes?: FieldTypes[],
+): InternalCollectionDocument["refs"] => {
+	if (!refs || fieldTypes === undefined) return refs;
+
+	return Object.fromEntries(
+		fieldTypes.flatMap((fieldType) => {
+			const values = refs[fieldType];
+			return values ? [[fieldType, values]] : [];
+		}),
+	);
+};
+
 export default {
 	formatMultiple,
 	formatSingle,
 	formatContentMultiple,
 	formatContentSingle,
 	formatRefs,
+	filterRefs,
 };

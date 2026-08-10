@@ -101,29 +101,38 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	let refData: FieldRefResponse = { data: {} };
+	const relationIdRes = await extractRelatedEntityIds(context, {
+		collection: collectionRes.data,
+		brickSchema: selectedBricksTableSchema,
+		responses: [bricksQueryRes.data],
+		includeTypes: includeRefs ? data.refTypes : [],
+		includeFieldValueRefTargets: true,
+	});
+	if (relationIdRes.error) return relationIdRes;
 
-	if (includeRefs) {
-		const relationIdRes = await extractRelatedEntityIds(context, {
-			collection: collectionRes.data,
-			brickSchema: selectedBricksTableSchema,
-			responses: [bricksQueryRes.data],
-			includeTypes: data.refTypes,
-		});
-		if (relationIdRes.error) return relationIdRes;
+	const refDataRes = await fetchRefData(context, {
+		values: relationIdRes.data,
+		versionType: data.versionType,
+		resolveVersionType: data.resolveVersionType,
+		allowedDocumentCollectionKeys: data.allowedDocumentCollectionKeys,
+	});
+	if (refDataRes.error) return refDataRes;
 
-		const refDataRes = await fetchRefData(context, {
-			values: relationIdRes.data,
-			versionType: data.versionType,
-			resolveVersionType: data.resolveVersionType,
-			allowedDocumentCollectionKeys: data.allowedDocumentCollectionKeys,
-		});
-		if (refDataRes.error) return refDataRes;
-
-		refData = refDataRes.data;
-	}
+	const refData: FieldRefResponse = refDataRes.data;
 
 	const baseUrl = getBaseUrl(context);
+	const hydratedRefs = documentsFormatter.formatRefs({
+		collection: collectionRes.data,
+		collections: collectionsRes.data,
+		config: context.config,
+		host: baseUrl,
+		bricksTableSchema: selectedBricksTableSchema,
+		data: refData,
+		flattenRelationRefFields: data.flattenRelationRefFields,
+	});
+	const refs = includeRefs
+		? documentsFormatter.filterRefs(hydratedRefs, data.refTypes)
+		: null;
 
 	return {
 		error: undefined,
@@ -133,6 +142,7 @@ const getMultiple: ServiceFn<
 						bricksQuery: bricksQueryRes.data,
 						bricksSchema: selectedBricksTableSchema,
 						refData: refData,
+						refs: hydratedRefs,
 						collection: collectionRes.data,
 						config: context.config,
 						host: baseUrl,
@@ -142,22 +152,12 @@ const getMultiple: ServiceFn<
 				bricksQuery: bricksQueryRes.data,
 				bricksSchema: selectedBricksTableSchema,
 				refData: refData,
+				refs: hydratedRefs,
 				collection: collectionRes.data,
 				config: context.config,
 				host: baseUrl,
 			}),
-			refs: includeRefs
-				? documentsFormatter.formatRefs({
-						collection: collectionRes.data,
-						collections: collectionsRes.data,
-						config: context.config,
-						host: baseUrl,
-						bricksTableSchema: selectedBricksTableSchema,
-						data: refData,
-						fieldTypes: data.refTypes,
-						flattenRelationRefFields: data.flattenRelationRefFields,
-					})
-				: null,
+			refs,
 		},
 	};
 };

@@ -113,6 +113,14 @@ const fetchRefData: ServiceFn<
 	],
 	FieldRefResponse
 > = async (context, data) => {
+	const requestedFieldTypes = getRequestedFieldTypes(data.values);
+	if (requestedFieldTypes.length === 0) {
+		return {
+			data: { data: {} },
+			error: undefined,
+		};
+	}
+
 	if (data.allowedDocumentCollectionKeys !== undefined) {
 		const tableToCollection = new Map<string, string>();
 		const collectionsRes = await collections.getAll(context, {});
@@ -164,23 +172,21 @@ const fetchRefData: ServiceFn<
 		data: {},
 	};
 
-	const fetchPlans = getRequestedFieldTypes(data.values).flatMap(
-		(fieldType) => {
-			const relationValues = data.values[fieldType];
-			const fieldDefinition = registeredFields[fieldType];
-			if (!relationValues || relationValues.length === 0) return [];
-			if (!hasRefFetcher(fieldDefinition)) return [];
+	const fetchPlans = requestedFieldTypes.flatMap((fieldType) => {
+		const relationValues = data.values[fieldType];
+		const fieldDefinition = registeredFields[fieldType];
+		if (!relationValues || relationValues.length === 0) return [];
+		if (!hasRefFetcher(fieldDefinition)) return [];
 
-			const plan = buildFieldRefFetchPlan({
-				fieldType,
-				fieldDefinition,
-				relations: relationValues,
-				versionType: data.versionType,
-				resolveVersionType: data.resolveVersionType,
-			});
-			return plan ? [plan] : [];
-		},
-	);
+		const plan = buildFieldRefFetchPlan({
+			fieldType,
+			fieldDefinition,
+			relations: relationValues,
+			versionType: data.versionType,
+			resolveVersionType: data.resolveVersionType,
+		});
+		return plan ? [plan] : [];
+	});
 
 	const fetchResults = await Promise.all(
 		fetchPlans.map(async (plan) => ({

@@ -12,6 +12,7 @@ import type {
 	CustomFieldErrorItem,
 	CustomFieldGuidanceConfig,
 	CustomFieldRefTargets,
+	CustomFieldResponseFormatContext,
 	CustomFieldUserAiConfig,
 	CustomFieldValidateResponse,
 	FieldRefTarget,
@@ -186,7 +187,10 @@ abstract class CustomField<T extends FieldTypes> {
 		]);
 	}
 	/** Formats raw DB values into API response values for this field. */
-	abstract formatResponseValue(value: unknown): CFResponse<T>["value"];
+	abstract formatResponseValue(
+		value: unknown,
+		context?: CustomFieldResponseFormatContext,
+	): CFResponse<T>["value"];
 	/** Serializes field values into relation-table row payloads when needed. */
 	public serializeRelationFieldValue(
 		_value: unknown,

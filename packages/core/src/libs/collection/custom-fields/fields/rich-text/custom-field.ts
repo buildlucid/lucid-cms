@@ -11,13 +11,16 @@ import type {
 	CFResponse,
 	CustomFieldAiFormatResponse,
 	CustomFieldErrorItem,
+	CustomFieldResponseFormatContext,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
 import zodSafeParse from "../../utils/zod-safe-parse.js";
 import { richTextFieldConfig } from "./config.js";
-import extractRichTextRefTargets from "./extract-ref-targets.js";
+import extractRichTextRefTargets from "./utils/extract-ref-targets.js";
+import hydrateRichTextValue from "./utils/hydrate-value.js";
+import normalizeRichTextValue from "./utils/normalize-value.js";
 
 class RichTextCustomField extends CustomField<"rich-text"> {
 	type = richTextFieldConfig.type;
@@ -144,10 +147,23 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			error: undefined,
 		};
 	}
-	formatResponseValue(value?: Record<string, unknown> | null) {
-		return (value ??
+	formatResponseValue(
+		value?: Record<string, unknown> | null,
+		context?: CustomFieldResponseFormatContext,
+	) {
+		const responseValue = (value ??
 			this.config.default ??
 			null) satisfies CFResponse<"rich-text">["value"];
+		if (!responseValue || !context) return responseValue;
+
+		return hydrateRichTextValue(responseValue, context);
+	}
+	override normalizeInputValue(value: unknown) {
+		if (!value || typeof value !== "object" || Array.isArray(value)) {
+			return value;
+		}
+
+		return normalizeRichTextValue(value);
 	}
 	override getFieldRefTargets(value: unknown) {
 		return extractRichTextRefTargets(value);

@@ -216,26 +216,24 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 	const documents = documentsRes.data?.[0] ?? [];
 	const baseUrl = getBaseUrl(context);
 
-	let refData: FieldRefResponse | undefined;
-	if (include.refs) {
-		const relationIdRes = await extractRelatedEntityIds(context, {
-			collection: collectionRes.data,
-			brickSchema: collectionFieldsTableSchemas,
-			responses: documents,
-			includeTypes: include.refTypes,
-		});
-		if (relationIdRes.error) return relationIdRes;
+	const relationIdRes = await extractRelatedEntityIds(context, {
+		collection: collectionRes.data,
+		brickSchema: collectionFieldsTableSchemas,
+		responses: documents,
+		includeTypes: include.refs ? include.refTypes : [],
+		includeFieldValueRefTargets: true,
+	});
+	if (relationIdRes.error) return relationIdRes;
 
-		const refDataRes = await fetchRefData(context, {
-			values: relationIdRes.data,
-			versionType: relationVersionTypeRes.data.versionType,
-			resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
-			allowedDocumentCollectionKeys: allowedCollectionKeys,
-		});
-		if (refDataRes.error) return refDataRes;
+	const refDataRes = await fetchRefData(context, {
+		values: relationIdRes.data,
+		versionType: relationVersionTypeRes.data.versionType,
+		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+		allowedDocumentCollectionKeys: allowedCollectionKeys,
+	});
+	if (refDataRes.error) return refDataRes;
 
-		refData = refDataRes.data;
-	}
+	const refData: FieldRefResponse = refDataRes.data;
 
 	return {
 		error: undefined,

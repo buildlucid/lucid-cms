@@ -161,25 +161,23 @@ const getMultiple: ServiceFn<
 	);
 	if (documentsRes.error) return documentsRes;
 
-	let refData: FieldRefResponse | undefined;
-	if (include.refs) {
-		const relationIdRes = await extractRelatedEntityIds(context, {
-			collection: collectionRes.data,
-			brickSchema: bricksTableSchemaRes.data,
-			responses: documentsRes.data?.[0] ?? [],
-			includeTypes: include.refTypes,
-		});
-		if (relationIdRes.error) return relationIdRes;
+	const relationIdRes = await extractRelatedEntityIds(context, {
+		collection: collectionRes.data,
+		brickSchema: bricksTableSchemaRes.data,
+		responses: documentsRes.data?.[0] ?? [],
+		includeTypes: include.refs ? include.refTypes : [],
+		includeFieldValueRefTargets: true,
+	});
+	if (relationIdRes.error) return relationIdRes;
 
-		const refDataRes = await fetchRefData(context, {
-			values: relationIdRes.data,
-			versionType: relationVersionTypeRes.data.versionType,
-			resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
-		});
-		if (refDataRes.error) return refDataRes;
+	const refDataRes = await fetchRefData(context, {
+		values: relationIdRes.data,
+		versionType: relationVersionTypeRes.data.versionType,
+		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+	});
+	if (refDataRes.error) return refDataRes;
 
-		refData = refDataRes.data;
-	}
+	const refData: FieldRefResponse = refDataRes.data;
 
 	const documents = documentsFormatter.formatMultiple({
 		documents: documentsRes.data?.[0] || [],
@@ -189,6 +187,7 @@ const getMultiple: ServiceFn<
 		host: getBaseUrl(context),
 		refData,
 		refTypes: include.refTypes,
+		includeRefs: include.refs,
 		hasFields: true,
 		hasBricks: false,
 		bricksTableSchema: bricksTableSchemaRes.data,

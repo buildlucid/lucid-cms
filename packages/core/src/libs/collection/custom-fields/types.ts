@@ -276,6 +276,11 @@ export type FieldRef =
 	| CustomFieldMap[FieldTypes]["response"]["ref"]
 	| undefined;
 
+export type CustomFieldResponseFormatContext = {
+	locale: string;
+	refs: Partial<Record<string, unknown[]>> | null;
+};
+
 export type ContentFieldTypeGenerationContext<
 	T extends FieldTypes = FieldTypes,
 > = {

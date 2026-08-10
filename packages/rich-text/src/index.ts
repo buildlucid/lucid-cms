@@ -6,7 +6,6 @@ export {
 	LucidMedia,
 	LucidVariable,
 	mergeExtensions,
-} from "./extensions.js";
+} from "./extensions/index.js";
 export { extractEmbeddedBrickRefs } from "./references.js";
-export { renderRichTextHTML, resolveRichTextDocumentPath } from "./render.js";
 export * from "./types.js";

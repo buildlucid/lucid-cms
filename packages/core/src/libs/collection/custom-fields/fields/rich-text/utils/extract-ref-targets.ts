@@ -1,6 +1,6 @@
 import { type RichTextJSON, richTextNodeNames } from "@lucidcms/rich-text";
-import buildTableName from "../../../helpers/build-table-name.js";
-import type { CustomFieldRefTargets, FieldRefTarget } from "../../types.js";
+import buildTableName from "../../../../helpers/build-table-name.js";
+import type { CustomFieldRefTargets, FieldRefTarget } from "../../../types.js";
 
 const asRichTextJSON = (value: unknown): RichTextJSON | null => {
 	if (typeof value === "string") {

@@ -50,6 +50,8 @@ interface FieldFormatData {
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	/** All relation meta data, users, media, documents etc. Used to populate the field meta data based on the CF type and value */
 	refData: FieldRefResponse;
+	/** Formatted refs used by custom fields to derive response-only values. */
+	refs?: Partial<Record<string, unknown[]>> | null;
 }
 
 interface IntermediaryFieldValues {
@@ -194,6 +196,7 @@ const buildFieldTree = (
 			{
 				values: fieldValues,
 				refData: data.refData,
+				refs: data.refs,
 			},
 			{
 				builder: meta.builder,
@@ -222,6 +225,7 @@ const buildField = (
 	data: {
 		values: IntermediaryFieldValues[];
 		refData: FieldRefResponse;
+		refs?: Partial<Record<string, unknown[]>> | null;
 	},
 	meta: FieldFormatMeta & {
 		fieldConfig: CFConfig<FieldTypes>;
@@ -247,6 +251,10 @@ const buildField = (
 			if (localeValue) {
 				fieldTranslations[locale] = cfInstance.formatResponseValue(
 					localeValue.value,
+					{
+						locale,
+						refs: data.refs ?? null,
+					},
 				);
 			} else {
 				fieldTranslations[locale] = null;
@@ -270,7 +278,10 @@ const buildField = (
 	return {
 		key: meta.fieldConfig.key,
 		type: meta.fieldConfig.type,
-		value: cfInstance.formatResponseValue(defaultValue.value),
+		value: cfInstance.formatResponseValue(defaultValue.value, {
+			locale: meta.localization.default,
+			refs: data.refs ?? null,
+		}),
 		groupRef: meta.groupRef,
 	};
 };
@@ -326,6 +337,7 @@ const buildTreeGroups = (
 					bricksQuery: data.bricksQuery,
 					bricksSchema: data.bricksSchema,
 					refData: data.refData,
+					refs: data.refs,
 				},
 				{
 					builder: meta.builder,
