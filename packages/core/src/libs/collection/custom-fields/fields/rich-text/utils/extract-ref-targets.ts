@@ -1,4 +1,7 @@
-import { type RichTextJSON, richTextNodeNames } from "@lucidcms/rich-text";
+import {
+	extractRichTextReferences,
+	type RichTextJSON,
+} from "@lucidcms/rich-text";
 import buildTableName from "../../../../helpers/build-table-name.js";
 import type { CustomFieldRefTargets, FieldRefTarget } from "../../../types.js";
 
@@ -70,25 +73,17 @@ const extractRichTextRefTargets = (value: unknown): CustomFieldRefTargets => {
 	const mediaTargets = new Map<number, FieldRefTarget>();
 	const documentTargets = new Map<string, FieldRefTarget>();
 
-	const visit = (node: RichTextJSON) => {
-		if (node.type === richTextNodeNames.media) {
-			addMediaTarget(mediaTargets, node.attrs);
+	for (const reference of extractRichTextReferences(json)) {
+		if (reference.type === "media") {
+			addMediaTarget(mediaTargets, { mediaId: reference.mediaId });
 		}
-
-		if (node.type === richTextNodeNames.variable) {
-			addDocumentTarget(documentTargets, node.attrs);
+		if (reference.type === "variable" || reference.type === "document-link") {
+			addDocumentTarget(documentTargets, {
+				collectionKey: reference.collectionKey,
+				documentId: reference.documentId,
+			});
 		}
-
-		for (const mark of node.marks ?? []) {
-			if (mark.type === "link" && mark.attrs?.kind === "document") {
-				addDocumentTarget(documentTargets, mark.attrs);
-			}
-		}
-
-		for (const child of node.content ?? []) visit(child);
-	};
-
-	visit(json);
+	}
 	return {
 		media: Array.from(mediaTargets.values()),
 		relation: Array.from(documentTargets.values()),

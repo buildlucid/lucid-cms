@@ -105,37 +105,62 @@ const getEmbeddedBrickRefsFromFields = (
 	return refs;
 };
 
-/** Keeps only embedded bricks reachable from submitted document content. */
-export const filterReachableEmbeddedBricks = (props: {
+/** Resolves reachable embedded bricks and refs involved in a reference cycle. */
+export const analyzeEmbeddedBrickGraph = (props: {
 	fields: Array<FieldInputSchema>;
 	bricks: Array<BrickInputSchema>;
-}): Array<BrickInputSchema> => {
+}) => {
 	const embeddedByRef = new Map(
 		props.bricks
 			.filter((brick) => brick.type === "embedded")
 			.map((brick) => [brick.ref, brick]),
 	);
-	const reachable = getEmbeddedBrickRefsFromFields([
+	const rootRefs = getEmbeddedBrickRefsFromFields([
 		...props.fields,
 		...props.bricks
 			.filter((brick) => brick.type !== "embedded")
 			.flatMap((brick) => brick.fields ?? []),
 	]);
-	const pending = Array.from(reachable);
+	const reachable = new Set<string>();
+	const cyclic = new Set<string>();
+	const visited = new Set<string>();
+	const stack: string[] = [];
+	const visiting = new Set<string>();
 
-	for (let index = 0; index < pending.length; index++) {
-		const ref = pending[index];
-		if (!ref) continue;
+	const visit = (ref: string) => {
+		reachable.add(ref);
+		if (visited.has(ref)) return;
+		if (visiting.has(ref)) {
+			const cycleStart = stack.indexOf(ref);
+			for (const cycleRef of stack.slice(cycleStart)) cyclic.add(cycleRef);
+			return;
+		}
+
 		const brick = embeddedByRef.get(ref);
-		if (!brick) continue;
+		if (!brick) return;
+
+		visiting.add(ref);
+		stack.push(ref);
 		for (const nestedRef of getEmbeddedBrickRefsFromFields(
 			brick.fields ?? [],
 		)) {
-			if (reachable.has(nestedRef)) continue;
-			reachable.add(nestedRef);
-			pending.push(nestedRef);
+			visit(nestedRef);
 		}
-	}
+		stack.pop();
+		visiting.delete(ref);
+		visited.add(ref);
+	};
+
+	for (const ref of rootRefs) visit(ref);
+	return { reachable, cyclic };
+};
+
+/** Keeps only embedded bricks reachable from submitted document content. */
+export const filterReachableEmbeddedBricks = (props: {
+	fields: Array<FieldInputSchema>;
+	bricks: Array<BrickInputSchema>;
+}): Array<BrickInputSchema> => {
+	const { reachable } = analyzeEmbeddedBrickGraph(props);
 
 	return props.bricks.filter(
 		(brick) => brick.type !== "embedded" || reachable.has(brick.ref),

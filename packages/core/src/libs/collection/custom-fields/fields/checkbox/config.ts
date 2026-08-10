@@ -9,6 +9,7 @@ export const checkboxFieldConfig = {
 		filterable: true,
 		sortable: true,
 		canBeLabel: false,
+		canBeRichTextVariable: true,
 	},
 } as const satisfies FieldStaticConfig<"checkbox">;
 

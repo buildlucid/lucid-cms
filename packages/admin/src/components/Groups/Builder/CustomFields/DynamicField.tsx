@@ -511,7 +511,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 									fieldData: fieldData(),
 									groupRef: props.groupRef,
 									repeaterKey: props.repeaterKey,
-									fieldError: fieldError(),
+									fieldErrors: fieldErrors(),
 									altLocaleError: altLocaleError(),
 									localised: isLocalised(),
 									fieldColumnIsMissing: fieldColumnIsMissing(),

@@ -1,10 +1,14 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
+import {
+	extractEmbeddedBrickRefs,
+	type RichTextJSON,
+} from "@lucidcms/rich-text";
 import type {
 	DocumentRef,
 	FieldError,
 	InternalDocumentField,
 	MediaRef,
 	RelationFieldValue,
+	RichTextFieldErrorReference,
 } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import { RichText } from "@/components/Groups/Form";
@@ -16,9 +20,11 @@ import { usePageBuilderState } from "@/hooks/document/usePageBuilderState";
 import api from "@/services/api";
 import brickStore from "@/store/brick-store";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
+import T from "@/translations";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
+import { countFieldErrors } from "@/utils/structural-field-helpers";
 
 interface RichTextFieldProps {
 	state: {
@@ -26,7 +32,7 @@ interface RichTextFieldProps {
 		fieldData?: InternalDocumentField;
 		groupRef?: string;
 		repeaterKey?: string;
-		fieldError: FieldError | undefined;
+		fieldErrors: FieldError[];
 		altLocaleError: boolean;
 		localised: boolean;
 		fieldColumnIsMissing: boolean;
@@ -128,6 +134,33 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			fieldType: "relation",
 			fieldValue: [{ collectionKey, id: documentId }],
 		});
+	const getReferenceKey = (reference: RichTextFieldErrorReference) => {
+		switch (reference.type) {
+			case "rich-text-media":
+				return `media:${reference.mediaId}`;
+			case "rich-text-variable":
+				return `variable:${reference.collectionKey}:${reference.documentId}:${reference.fieldKey}`;
+			case "rich-text-document-link":
+				return `document-link:${reference.collectionKey}:${reference.documentId}`;
+			case "rich-text-embedded-brick":
+				return `embedded-brick:${reference.ref}`;
+		}
+	};
+	const getReferenceErrors = (reference: RichTextFieldErrorReference) => {
+		const referenceKey = getReferenceKey(reference);
+		const errors = props.state.fieldErrors.filter((error) => {
+			const errorReference = error.meta?.reference;
+			return errorReference
+				? getReferenceKey(errorReference) === referenceKey
+				: false;
+		});
+
+		if (reference.type !== "rich-text-embedded-brick") return errors;
+		const brickError = brickStore.get.brickErrors.find(
+			(error) => error.ref === reference.ref,
+		);
+		return brickError ? [...errors, ...brickError.fields] : errors;
+	};
 
 	// -------------------------------
 	// Memos
@@ -155,6 +188,9 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 				);
 				return brick ? { ref: brick.ref, key: brick.key } : undefined;
 			},
+		},
+		validation: {
+			getReferenceErrors,
 		},
 		callbacks: {
 			selectMedia: ({ currentId, allowedTypes, onSelect }) => {
@@ -246,6 +282,28 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 				}),
 		},
 	}));
+	const richTextErrors = createMemo(() => {
+		const errors = [...props.state.fieldErrors];
+		for (const ref of extractEmbeddedBrickRefs(fieldValue() ?? null)) {
+			const brickError = brickStore.get.brickErrors.find(
+				(error) => error.ref === ref,
+			);
+			if (!brickError) continue;
+
+			if (countFieldErrors(brickError.fields) === 0) continue;
+
+			errors.push({
+				key: props.state.fieldConfig.key,
+				localeCode: fieldRenderState.contentLocale() || null,
+				message: {
+					type: "lucid.literal",
+					value: T()("editor.rich.text.brick.has.errors"),
+				},
+				meta: { reference: { type: "rich-text-embedded-brick", ref } },
+			});
+		}
+		return errors;
+	});
 	const aiGuidance = createMemo(
 		() =>
 			props.state.fieldConfig.ai?.guidance?.map((item) => ({
@@ -342,7 +400,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 				altLocaleError={props.state.altLocaleError}
 				localised={props.state.localised}
 				disabled={disabled()}
-				errors={props.state.fieldError}
+				errors={richTextErrors()}
 				required={props.state.fieldConfig.validation?.required || false}
 				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
 				labelRightSlot={

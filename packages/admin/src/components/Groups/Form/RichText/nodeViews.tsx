@@ -69,6 +69,12 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 							);
 						}}
 						selectMedia={options?.callbacks?.selectMedia}
+						errors={() =>
+							options?.validation?.getReferenceErrors?.({
+								type: "rich-text-media",
+								mediaId,
+							}) ?? []
+						}
 					/>
 				));
 			};
@@ -78,6 +84,12 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 		addNodeView() {
 			return ({ node, editor, getPos }) => {
 				const { collectionKey, documentId, fieldKey, value } = node.attrs;
+				const reference =
+					typeof collectionKey === "string" && typeof documentId === "number"
+						? untrack(() =>
+								options?.references?.document?.(collectionKey, documentId),
+							)
+						: undefined;
 
 				return renderNodeView(() => (
 					<VariableNodeView
@@ -85,6 +97,7 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 						documentId={documentId}
 						fieldKey={fieldKey}
 						value={getHydratedVariableText(value)}
+						available={reference !== undefined}
 						isEditable={() => editor.isEditable}
 						getPos={getPos}
 						setSelection={(position, selection) => {
@@ -102,6 +115,18 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 							);
 						}}
 						selectVariable={options?.callbacks?.selectVariable}
+						errors={() =>
+							typeof collectionKey === "string" &&
+							typeof documentId === "number" &&
+							typeof fieldKey === "string"
+								? (options?.validation?.getReferenceErrors?.({
+										type: "rich-text-variable",
+										collectionKey,
+										documentId,
+										fieldKey,
+									}) ?? [])
+								: []
+						}
 					/>
 				));
 			};
@@ -137,6 +162,14 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 						description={description}
 						isEditable={() => editor.isEditable}
 						editEmbeddedBrick={options?.callbacks?.editEmbeddedBrick}
+						errors={() =>
+							typeof refValue === "string"
+								? (options?.validation?.getReferenceErrors?.({
+										type: "rich-text-embedded-brick",
+										ref: refValue,
+									}) ?? [])
+								: []
+						}
 					/>
 				));
 			};

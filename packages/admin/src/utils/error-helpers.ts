@@ -61,3 +61,19 @@ export const normalizeFieldErrors = (
 
 	return [];
 };
+
+/** Resolves API error copy into text suitable for compact validation UI. */
+export const resolveFieldErrorMessage = (
+	message: FieldError["message"] | string,
+) => {
+	if (typeof message === "string") return message;
+
+	const value =
+		message.type === "lucid.literal"
+			? message.value
+			: (message.defaultMessage ?? message.key);
+	return value.replace(
+		/\{\{(\w+)\}\}/g,
+		(_, key) => message.values?.[key]?.toString() ?? "",
+	);
+};

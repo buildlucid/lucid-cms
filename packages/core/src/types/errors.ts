@@ -7,7 +7,11 @@ import type {
 import type z from "zod";
 import type { LiteralCopy, ServerCopyDescriptor } from "../libs/i18n/types.js";
 
-export type { PublicErrorData };
+export type {
+	FieldErrorMeta,
+	PublicErrorData,
+	RichTextFieldErrorReference,
+} from "@lucidcms/types";
 
 export type ErrorCopy = ServerCopyDescriptor | LiteralCopy;
 

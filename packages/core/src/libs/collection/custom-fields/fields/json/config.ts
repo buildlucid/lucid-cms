@@ -9,6 +9,7 @@ export const jsonFieldConfig = {
 		filterable: true,
 		sortable: false,
 		canBeLabel: false,
+		canBeRichTextVariable: false,
 	},
 } as const satisfies FieldStaticConfig<"json">;
 

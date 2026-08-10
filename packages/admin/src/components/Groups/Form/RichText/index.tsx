@@ -32,7 +32,7 @@ interface RichTextProps {
 	};
 	required?: boolean;
 	disabled?: boolean;
-	errors?: ErrorResult | FieldError;
+	errors?: ErrorResult | FieldError | FieldError[];
 	localised?: boolean;
 	altLocaleError?: boolean;
 	noMargin?: boolean;

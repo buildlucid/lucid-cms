@@ -1,5 +1,6 @@
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type { RichTextValidationData } from "../../../libs/collection/custom-fields/fields/rich-text/types.js";
 import registeredFields, {
 	registeredFieldTypes,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
@@ -14,6 +15,7 @@ import type {
 	ServiceContext,
 	ServiceFn,
 } from "../../../utils/services/types.js";
+import { analyzeEmbeddedBrickGraph } from "./prepare-bricks-and-fields.js";
 
 export type ValidationData = Partial<Record<FieldTypes, unknown>>;
 
@@ -102,6 +104,18 @@ const fetchValidationData: ServiceFn<
 > = async (context, data) => {
 	const buckets = extractRelationIds(data.bricks, data.fields, data.collection);
 	const validationData = await buildValidationData(context, buckets);
+
+	const richTextValidationData = validationData[
+		"rich-text"
+	] as RichTextValidationData;
+	richTextValidationData.embeddedBricks = Object.fromEntries(
+		data.bricks.flatMap((brick) =>
+			brick.type === "embedded" ? [[brick.ref, brick.key]] : [],
+		),
+	);
+	richTextValidationData.cyclicEmbeddedBricks = Array.from(
+		analyzeEmbeddedBrickGraph(data).cyclic,
+	);
 
 	return {
 		data: validationData,

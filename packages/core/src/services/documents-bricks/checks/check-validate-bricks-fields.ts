@@ -661,6 +661,7 @@ export const validateField = (props: {
 				message:
 					error.message || copy("server:core.fields.validation.errors.unknown"),
 				itemIndex: error.itemIndex,
+				meta: error.meta,
 			}));
 		}
 

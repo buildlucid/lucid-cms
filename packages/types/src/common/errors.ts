@@ -49,11 +49,37 @@ export interface ErrorResultObj {
 
 export type ErrorResult = Record<string, ErrorResultValue>;
 
+export type RichTextFieldErrorReference =
+	| {
+			type: "rich-text-media";
+			mediaId: number;
+	  }
+	| {
+			type: "rich-text-variable";
+			collectionKey: string;
+			documentId: number;
+			fieldKey: string;
+	  }
+	| {
+			type: "rich-text-document-link";
+			collectionKey: string;
+			documentId: number;
+	  }
+	| {
+			type: "rich-text-embedded-brick";
+			ref: string;
+	  };
+
+export interface FieldErrorMeta {
+	reference?: RichTextFieldErrorReference;
+}
+
 export interface FieldError {
 	key: string;
 	localeCode: string | null;
 	message: string;
 	itemIndex?: number;
+	meta?: FieldErrorMeta;
 	groupErrors?: Array<GroupError>;
 }
 

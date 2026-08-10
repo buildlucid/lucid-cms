@@ -6,6 +6,8 @@ import type {
 	FieldUIConfig,
 	SharedFieldConfig,
 } from "../../types.js";
+import type { MediaValidationData } from "../media/types.js";
+import type { RelationValidationData } from "../relation/types.js";
 
 export interface RichTextFieldConfig extends SharedFieldConfig {
 	type: "rich-text";
@@ -40,6 +42,24 @@ export type RichTextFieldProps = Partial<Omit<RichTextFieldConfig, "type">>;
 
 export type RichTextResValue = Record<string, unknown> | null;
 export type RichTextRef = null;
+
+export type RichTextValidationData = {
+	media: MediaValidationData[];
+	documents: RelationValidationData[];
+	collections: Record<
+		string,
+		{
+			fields: Array<{
+				key: string;
+				type: string;
+				treeParent: string | null;
+				structuralParent: string | null;
+			}>;
+		}
+	>;
+	embeddedBricks: Record<string, string>;
+	cyclicEmbeddedBricks: string[];
+};
 
 export type RichTextCustomFieldMapItem = {
 	props: RichTextFieldProps;

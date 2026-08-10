@@ -1,4 +1,4 @@
-/** Shared field-type filter/sort capabilities for core and admin. */
+/** Shared field-type capabilities for core and admin. */
 
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import { codeFieldConfig } from "./fields/code/config.js";
@@ -19,11 +19,9 @@ import { tabFieldConfig } from "./fields/tab/config.js";
 import { textFieldConfig } from "./fields/text/config.js";
 import { textareaFieldConfig } from "./fields/textarea/config.js";
 import { userFieldConfig } from "./fields/user/config.js";
+import type { FieldCapabilities } from "./types.js";
 
-export type FieldTypeCapabilities = {
-	filterable: boolean;
-	sortable: boolean;
-};
+export type FieldTypeCapabilities = FieldCapabilities;
 
 export const fieldTypeCapabilities = {
 	[checkboxFieldConfig.type]: checkboxFieldConfig.capabilities,
@@ -57,6 +55,8 @@ export const getFieldTypeCapabilities = (
 		fieldTypeCapabilities[type as CapabilityFieldType] ?? {
 			filterable: false,
 			sortable: false,
+			canBeLabel: false,
+			canBeRichTextVariable: false,
 		}
 	);
 };
@@ -69,4 +69,9 @@ export const isFieldTypeFilterable = (type: string): boolean => {
 /** Whether documents can be sorted by this field type's stored value. */
 export const isFieldTypeSortable = (type: string): boolean => {
 	return getFieldTypeCapabilities(type).sortable;
+};
+
+/** Whether this field type can be inserted as a rich-text variable. */
+export const isFieldTypeRichTextVariable = (type: string): boolean => {
+	return getFieldTypeCapabilities(type).canBeRichTextVariable;
 };

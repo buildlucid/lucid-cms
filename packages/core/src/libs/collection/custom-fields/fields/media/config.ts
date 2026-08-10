@@ -12,6 +12,7 @@ export const mediaFieldConfig = {
 		filterable: true,
 		sortable: false,
 		canBeLabel: false,
+		canBeRichTextVariable: false,
 	},
 } as const satisfies FieldStaticConfig<"media">;
 

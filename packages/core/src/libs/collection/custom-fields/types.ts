@@ -1,7 +1,7 @@
 import type { ColumnDataType } from "kysely";
 import type constants from "../../../constants/constants.js";
 import type { Config } from "../../../types/config.js";
-import type { ErrorCopy } from "../../../types/errors.js";
+import type { ErrorCopy, FieldErrorMeta } from "../../../types/errors.js";
 import type {
 	FilterOperator,
 	FilterValue,
@@ -174,6 +174,8 @@ export type FieldCapabilities = {
 	sortable: boolean;
 	/** Whether this field can provide a document label. */
 	canBeLabel: boolean;
+	/** Whether this field can be inserted as a rich-text variable. */
+	canBeRichTextVariable: boolean;
 };
 
 export type FieldStaticConfig<T extends string = string> = {
@@ -337,6 +339,7 @@ export type CustomFieldErrorItem = {
 export type CustomFieldValidationError = {
 	message: ErrorCopy;
 	itemIndex?: number;
+	meta?: FieldErrorMeta;
 };
 export type CustomFieldValidateResponse = {
 	valid: boolean;

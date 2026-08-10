@@ -7,5 +7,9 @@ export {
 	LucidVariable,
 	mergeExtensions,
 } from "./extensions/index.js";
-export { extractEmbeddedBrickRefs } from "./references.js";
+export type { RichTextReference } from "./references.js";
+export {
+	extractEmbeddedBrickRefs,
+	extractRichTextReferences,
+} from "./references.js";
 export * from "./types.js";

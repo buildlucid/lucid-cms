@@ -9,6 +9,7 @@ export const textareaFieldConfig = {
 		filterable: true,
 		sortable: true,
 		canBeLabel: true,
+		canBeRichTextVariable: true,
 	},
 } as const satisfies FieldStaticConfig<"textarea">;
 

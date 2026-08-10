@@ -2,7 +2,10 @@ import type { ErrorResult, FieldError } from "@types";
 import { FaSolidTriangleExclamation } from "solid-icons/fa";
 import { type Component, For, Show } from "solid-js";
 import T from "@/translations";
-import { normalizeFieldErrors } from "@/utils/error-helpers";
+import {
+	normalizeFieldErrors,
+	resolveFieldErrorMessage,
+} from "@/utils/error-helpers";
 
 interface ErrorMessageProps {
 	id?: string;
@@ -20,17 +23,11 @@ export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 				(message as { type?: string }).type === "lucid.literal")
 		);
 	};
-	const renderErrorMessage = (message: FieldError["message"] | string) =>
-		typeof message === "string"
-			? message
-			: message.type === "lucid.literal"
-				? message.value
-				: (message.defaultMessage ?? message.key);
 	const genericMessage = () => {
 		if (!props.errors || Array.isArray(props.errors)) return undefined;
 		const message = props.errors.message;
 		if (typeof message === "string") return message;
-		if (isErrorCopy(message)) return renderErrorMessage(message);
+		if (isErrorCopy(message)) return resolveFieldErrorMessage(message);
 		return undefined;
 	};
 
@@ -49,7 +46,7 @@ export const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 									<Show when={typeof error.itemIndex === "number"}>
 										{`${T()("common.item")} ${Number(error.itemIndex) + 1}: `}
 									</Show>
-									{renderErrorMessage(error.message)}
+									{resolveFieldErrorMessage(error.message)}
 								</span>
 							</a>
 						)}

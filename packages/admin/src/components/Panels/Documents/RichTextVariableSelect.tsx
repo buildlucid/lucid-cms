@@ -1,3 +1,4 @@
+import { isFieldTypeRichTextVariable } from "@field-capabilities";
 import type { DocumentRef } from "@types";
 import {
 	FaSolidArrowLeft,
@@ -23,16 +24,6 @@ import helpers from "@/utils/helpers";
 import { documentResponseToRef } from "@/utils/relation-field-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import { DocumentSelectContent } from "./DocumentSelect";
-
-const scalarTypes = new Set([
-	"checkbox",
-	"color",
-	"datetime",
-	"number",
-	"select",
-	"text",
-	"textarea",
-]);
 
 const RichTextVariableSelectPanel: Component<{
 	state: {
@@ -112,7 +103,7 @@ const RichTextVariableSelectPanel: Component<{
 	const fields = createMemo(() =>
 		(collection.data?.data.fields ?? []).filter(
 			(field): field is CollectionLeafFieldConfig =>
-				scalarTypes.has(field.type),
+				isFieldTypeRichTextVariable(field.type),
 		),
 	);
 	const isSingleCollectionTarget = createMemo(

@@ -3,6 +3,7 @@ import {
 	fieldTypeCapabilities,
 	getFieldTypeCapabilities,
 	isFieldTypeFilterable,
+	isFieldTypeRichTextVariable,
 	isFieldTypeSortable,
 } from "./capabilities.js";
 import registeredFields from "./registered-fields.js";
@@ -41,12 +42,32 @@ describe("field type capabilities", () => {
 		);
 	});
 
+	it("marks supported scalar fields as rich-text variables", () => {
+		const variableTypes = fieldTypes.filter((fieldType) =>
+			isFieldTypeRichTextVariable(fieldType),
+		);
+		expect(variableTypes.sort()).toEqual(
+			[
+				"checkbox",
+				"color",
+				"datetime",
+				"number",
+				"select",
+				"text",
+				"textarea",
+			].sort(),
+		);
+	});
+
 	it("treats unknown field types as supporting nothing", () => {
 		expect(getFieldTypeCapabilities("unknown")).toEqual({
 			filterable: false,
 			sortable: false,
+			canBeLabel: false,
+			canBeRichTextVariable: false,
 		});
 		expect(isFieldTypeSortable("unknown")).toBe(false);
 		expect(isFieldTypeFilterable("unknown")).toBe(false);
+		expect(isFieldTypeRichTextVariable("unknown")).toBe(false);
 	});
 });

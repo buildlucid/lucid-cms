@@ -1,11 +1,19 @@
-import type { MediaRef } from "@types";
+import type { FieldError, MediaRef } from "@types";
 import classNames from "classnames";
 import { FaSolidPen } from "solid-icons/fa";
-import { type Component, Match, Show, Switch } from "solid-js";
+import {
+	type Accessor,
+	type Component,
+	createMemo,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import Button from "@/components/Partials/Button";
 import ClickToCopy from "@/components/Partials/ClickToCopy";
 import Pill from "@/components/Partials/Pill";
 import T from "@/translations";
+import { resolveFieldErrorMessage } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import type { RichTextOptions } from "../types";
 
@@ -18,6 +26,7 @@ export interface MediaNodeViewProps {
 	getPos: () => number | undefined;
 	setMediaId: (position: number, mediaId: number) => void;
 	selectMedia?: NonNullable<RichTextOptions["callbacks"]>["selectMedia"];
+	errors: Accessor<FieldError[]>;
 }
 
 const MediaNodePreview: Component<{
@@ -123,6 +132,11 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 	// -------------------------------
 	// Memos
 	const available = () => Boolean(props.reference?.file.url);
+	const hasErrors = createMemo(() => props.errors().length > 0);
+	const errorMessage = createMemo(() => {
+		const message = props.errors()[0]?.message;
+		return message ? resolveFieldErrorMessage(message) : undefined;
+	});
 	const title = () => {
 		const reference = props.reference;
 		if (!reference) return "";
@@ -167,9 +181,11 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 		<div
 			contentEditable={false}
 			class={classNames(
-				"group my-3 flex w-full select-none items-center gap-3 rounded-xl border border-border bg-card-base p-3",
+				"group my-3 flex w-full select-none items-center gap-3 rounded-xl border bg-card-base p-3",
 				{
-					"bg-linear-to-b from-error-base/10 to-card-base to-30%": !available(),
+					"border-border": available() && !hasErrors(),
+					"border-error-base/50 bg-linear-to-b from-error-base/10 to-card-base to-30%":
+						!available() || hasErrors(),
 				},
 			)}
 			data-lucid-rich-text-media=""
@@ -177,8 +193,10 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 			<Show
 				when={available() && props.reference ? props.reference : undefined}
 				fallback={
-					<div class="flex min-h-24 min-w-0 grow items-center justify-center rounded-xl border border-border bg-input-base px-5 py-8 text-sm text-unfocused">
-						{T()("editor.rich.text.media.unavailable")}
+					<div class="flex min-h-24 min-w-0 grow items-center gap-3 rounded-xl border border-error-base/30 bg-input-base px-5 py-8">
+						<span class="min-w-0 grow text-left text-xs font-medium text-error-base">
+							{errorMessage() ?? T()("editor.rich.text.media.unavailable")}
+						</span>
 					</div>
 				}
 			>
@@ -227,6 +245,15 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 								</div>
 							</div>
 						</div>
+						<Show when={errorMessage()}>
+							{(message) => (
+								<div class="flex items-center gap-3 border-error-base/20 border-t bg-error-base/10 px-3 py-2">
+									<span class="min-w-0 grow text-left text-xs font-medium text-error-base">
+										{message()}
+									</span>
+								</div>
+							)}
+						</Show>
 					</div>
 				)}
 			</Show>

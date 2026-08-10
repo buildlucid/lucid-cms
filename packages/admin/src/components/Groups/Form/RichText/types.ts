@@ -1,4 +1,9 @@
-import type { DocumentRef, MediaRef } from "@types";
+import type {
+	DocumentRef,
+	FieldError,
+	MediaRef,
+	RichTextFieldErrorReference,
+} from "@types";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 
 export type RichTextMediaType = "image" | "audio" | "video";
@@ -33,6 +38,11 @@ export interface RichTextOptions {
 			documentId: number,
 		) => DocumentRef | undefined;
 		embeddedBrick?: (ref: string) => { ref: string; key: string } | undefined;
+	};
+	validation?: {
+		getReferenceErrors?: (
+			reference: RichTextFieldErrorReference,
+		) => FieldError[];
 	};
 	callbacks?: {
 		selectMedia?: (props: {

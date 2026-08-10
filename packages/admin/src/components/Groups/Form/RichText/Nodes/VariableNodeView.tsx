@@ -1,6 +1,9 @@
+import type { FieldError } from "@types";
 import classNames from "classnames";
-import type { Component } from "solid-js";
+import { FaSolidTriangleExclamation } from "solid-icons/fa";
+import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import T from "@/translations";
+import { resolveFieldErrorMessage } from "@/utils/error-helpers";
 import type { RichTextOptions, RichTextVariableSelection } from "../types";
 
 export interface VariableNodeViewProps {
@@ -8,6 +11,8 @@ export interface VariableNodeViewProps {
 	documentId: unknown;
 	fieldKey: unknown;
 	value: string;
+	available: boolean;
+	errors: Accessor<FieldError[]>;
 	isEditable: () => boolean;
 	getPos: () => number | undefined;
 	setSelection: (
@@ -20,7 +25,11 @@ export interface VariableNodeViewProps {
 const VariableNodeView: Component<VariableNodeViewProps> = (props) => {
 	// -------------------------------
 	// Memos
-	const available = () => props.value.length > 0;
+	const hasErrors = createMemo(() => props.errors().length > 0);
+	const errorMessage = createMemo(() => {
+		const message = props.errors()[0]?.message;
+		return message ? resolveFieldErrorMessage(message) : undefined;
+	});
 
 	// -------------------------------
 	// Functions
@@ -57,12 +66,17 @@ const VariableNodeView: Component<VariableNodeViewProps> = (props) => {
 				"mx-0.5 inline-flex select-none items-center gap-1 rounded-full border py-0.5 pr-1 pl-2 align-baseline text-sm",
 				{
 					"border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
-						available(),
-					"border-error-base/30 bg-error-base/10 text-error-base": !available(),
+						props.available && !hasErrors(),
+					"border-error-base/30 bg-error-base/10 text-error-base":
+						!props.available || hasErrors(),
 				},
 			)}
 			data-lucid-rich-text-variable=""
+			title={errorMessage()}
 		>
+			<Show when={hasErrors()}>
+				<FaSolidTriangleExclamation size={10} class="shrink-0" />
+			</Show>
 			<span class="text-current">
 				{props.value ||
 					String(

@@ -4,7 +4,9 @@ import CollectionBuilder from "../../../libs/collection/builders/collection-buil
 import { copy } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../types.js";
-import prepareBricksAndFields from "./prepare-bricks-and-fields.js";
+import prepareBricksAndFields, {
+	analyzeEmbeddedBrickGraph,
+} from "./prepare-bricks-and-fields.js";
 
 describe("testing prepareBricksAndFields", () => {
 	// Mock localization config to pass to the functions
@@ -246,6 +248,54 @@ describe("testing prepareBricksAndFields", () => {
 		});
 
 		expect(preparedBricks?.map((brick) => brick.ref)).toEqual(["used-card"]);
+	});
+
+	test("should find reachable nested bricks and embedded reference cycles", () => {
+		const richText = (ref: string): FieldInputSchema => ({
+			key: "content",
+			type: "rich-text",
+			value: {
+				type: "doc",
+				content: [{ type: "lucidEmbeddedBrick", attrs: { ref } }],
+			},
+		});
+		const bricks: BrickInputSchema[] = [
+			{
+				ref: "card-a",
+				key: "card",
+				order: 0,
+				type: "embedded",
+				fields: [richText("card-b")],
+			},
+			{
+				ref: "card-b",
+				key: "card",
+				order: 0,
+				type: "embedded",
+				fields: [richText("card-a")],
+			},
+			{
+				ref: "orphan",
+				key: "card",
+				order: 0,
+				type: "embedded",
+				fields: [],
+			},
+		];
+
+		const result = analyzeEmbeddedBrickGraph({
+			fields: [
+				{
+					key: "body",
+					type: "rich-text",
+					value: richText("card-a").value,
+				},
+			],
+			bricks,
+		});
+
+		expect(Array.from(result.reachable)).toEqual(["card-a", "card-b"]);
+		expect(Array.from(result.cyclic)).toEqual(["card-a", "card-b"]);
 	});
 
 	test("should trim string custom field values and translations", () => {

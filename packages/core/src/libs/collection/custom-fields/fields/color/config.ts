@@ -9,6 +9,7 @@ export const colorFieldConfig = {
 		filterable: true,
 		sortable: false,
 		canBeLabel: true,
+		canBeRichTextVariable: true,
 	},
 } as const satisfies FieldStaticConfig<"color">;
 

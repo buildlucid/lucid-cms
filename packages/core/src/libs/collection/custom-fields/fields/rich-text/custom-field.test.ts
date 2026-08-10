@@ -5,6 +5,7 @@ import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import RichTextCustomField from "./custom-field.js";
+import type { RichTextValidationData } from "./types.js";
 
 // -----------------------------------------------
 // Validation
@@ -315,6 +316,235 @@ test("fail to validate field - rich text", async () => {
 			key: "min_length_rich_text",
 			localeCode: "en",
 			message: copy.literal('Invalid input: expected "doc" → at type'),
+		},
+	]);
+});
+
+const referenceField = new RichTextCustomField("references", {
+	localized: false,
+	editor: {
+		media: ["image"],
+		variables: ["settings"],
+		links: { internal: ["pages"] },
+		bricks: ["card"],
+	},
+});
+
+const referenceValue = {
+	type: "doc",
+	content: [
+		{ type: "lucidMedia", attrs: { mediaId: 11 } },
+		{
+			type: "lucidVariable",
+			attrs: {
+				collectionKey: "settings",
+				documentId: 22,
+				fieldKey: "siteName",
+			},
+		},
+		{
+			type: "paragraph",
+			content: [
+				{
+					type: "text",
+					text: "About",
+					marks: [
+						{
+							type: "link",
+							attrs: {
+								kind: "document",
+								collectionKey: "pages",
+								documentId: 33,
+							},
+						},
+					],
+				},
+			],
+		},
+		{ type: "lucidEmbeddedBrick", attrs: { ref: "card-ref" } },
+	],
+};
+
+const referenceValidationData: RichTextValidationData = {
+	media: [
+		{
+			id: 11,
+			type: "image",
+			file_extension: "jpg",
+			width: 1200,
+			height: 800,
+		},
+	],
+	documents: [
+		{ id: 22, collection_key: "settings" },
+		{ id: 33, collection_key: "pages" },
+	],
+	collections: {
+		settings: {
+			fields: [
+				{
+					key: "siteName",
+					type: "text",
+					treeParent: null,
+					structuralParent: null,
+				},
+			],
+		},
+		pages: { fields: [] },
+	},
+	embeddedBricks: { "card-ref": "card" },
+	cyclicEmbeddedBricks: [],
+};
+
+test("validates rich-text reference targets", () => {
+	expect(
+		referenceField.getRelationFieldValidationInput(referenceValue),
+	).toEqual({
+		media: [11],
+		"document:settings": [22],
+		"document:pages": [33],
+	});
+
+	const errors = validateField({
+		field: { key: "references", type: "rich-text", value: referenceValue },
+		instance: referenceField,
+		validationData: { "rich-text": referenceValidationData },
+		meta: { localized: false, defaultLocale: "en" },
+	});
+
+	expect(errors).toEqual([]);
+});
+
+test("enforces the reference types configured for the rich-text editor", () => {
+	const errors = validateField({
+		field: { key: "references", type: "rich-text", value: referenceValue },
+		instance: referenceField,
+		validationData: {
+			"rich-text": {
+				...referenceValidationData,
+				media: [{ ...referenceValidationData.media[0], type: "video" }],
+				collections: {
+					...referenceValidationData.collections,
+					settings: {
+						fields: [
+							{
+								key: "siteName",
+								type: "repeater",
+								treeParent: null,
+								structuralParent: null,
+							},
+						],
+					},
+				},
+				embeddedBricks: { "card-ref": "hero" },
+			},
+		},
+		meta: { localized: false, defaultLocale: "en" },
+	});
+
+	expect(errors.map((error) => error.message)).toEqual([
+		copy("server:core.fields.rich.text.media.not.allowed"),
+		copy("server:core.fields.rich.text.variable.field.not.found"),
+		copy("server:core.fields.rich.text.embedded.brick.not.allowed"),
+	]);
+});
+
+test("returns reference metadata for missing rich-text targets", () => {
+	const errors = validateField({
+		field: {
+			key: "references",
+			type: "rich-text",
+			value: {
+				...referenceValue,
+				content: [
+					...referenceValue.content,
+					{ type: "lucidMedia", attrs: { mediaId: 11 } },
+				],
+			},
+		},
+		instance: referenceField,
+		validationData: {
+			"rich-text": {
+				...referenceValidationData,
+				media: [],
+				documents: [],
+				embeddedBricks: {},
+			},
+		},
+		meta: { localized: false, defaultLocale: "en" },
+	});
+
+	expect(errors).toEqual([
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.media.validation.not.found"),
+			meta: { reference: { type: "rich-text-media", mediaId: 11 } },
+		},
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.relation.validation.not.found"),
+			meta: {
+				reference: {
+					type: "rich-text-variable",
+					collectionKey: "settings",
+					documentId: 22,
+					fieldKey: "siteName",
+				},
+			},
+		},
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.relation.validation.not.found"),
+			meta: {
+				reference: {
+					type: "rich-text-document-link",
+					collectionKey: "pages",
+					documentId: 33,
+				},
+			},
+		},
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.rich.text.embedded.brick.not.found"),
+			meta: {
+				reference: { type: "rich-text-embedded-brick", ref: "card-ref" },
+			},
+		},
+	]);
+});
+
+test("rejects cyclic embedded-brick references", () => {
+	const errors = validateField({
+		field: {
+			key: "references",
+			type: "rich-text",
+			value: {
+				type: "doc",
+				content: [{ type: "lucidEmbeddedBrick", attrs: { ref: "card-ref" } }],
+			},
+		},
+		instance: referenceField,
+		validationData: {
+			"rich-text": {
+				...referenceValidationData,
+				cyclicEmbeddedBricks: ["card-ref"],
+			},
+		},
+		meta: { localized: false, defaultLocale: "en" },
+	});
+
+	expect(errors).toEqual([
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.rich.text.embedded.brick.cyclic"),
+			meta: {
+				reference: { type: "rich-text-embedded-brick", ref: "card-ref" },
+			},
 		},
 	]);
 });
