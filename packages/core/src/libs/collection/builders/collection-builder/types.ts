@@ -41,6 +41,8 @@ export type CollectionPreviewURLResolverProps<
 	document: CollectionDocument<TCollectionKey>;
 	env: EnvironmentVariables | null;
 	locale: string;
+	/** Document route path resolved for the requested preview locale. */
+	path: string | null;
 };
 
 export type CollectionPreviewURLResolver<

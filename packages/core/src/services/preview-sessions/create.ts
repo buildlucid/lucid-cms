@@ -97,6 +97,9 @@ const create: ServiceFn<
 	};
 	const locale =
 		data.locale?.trim() || context.config.localization.defaultLocale;
+	const routePath = canonicalDocument.route?.path;
+	const path =
+		typeof routePath === "string" ? routePath : (routePath?.[locale] ?? null);
 	const token = randomBytes(32).toString("base64url");
 
 	let resolvedUrl: string | URL | null;
@@ -105,6 +108,7 @@ const create: ServiceFn<
 			document: canonicalDocument,
 			env: context.env,
 			locale,
+			path,
 		});
 	} catch {
 		return {
