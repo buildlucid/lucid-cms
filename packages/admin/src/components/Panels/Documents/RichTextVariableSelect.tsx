@@ -290,7 +290,12 @@ const RichTextVariableSelectPanel: Component<{
 					(step() === "field" && collection.isError),
 			}}
 			langauge={{ contentLocale: props.state.localised === true }}
-			options={{ padding: "24", hideFooter: true, growContent: true }}
+			options={{
+				padding: "24",
+				hideFooter: true,
+				growContent: true,
+				fullHeight: true,
+			}}
 			copy={{
 				title: T()("editor.rich.text.variable.select.title"),
 				description: T()("editor.rich.text.variable.select.description"),

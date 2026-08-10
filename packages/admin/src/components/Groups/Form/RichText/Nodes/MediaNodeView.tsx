@@ -38,7 +38,7 @@ const MediaNodePreview: Component<{
 				<img
 					src={props.reference.file.url}
 					alt={props.alt}
-					class="relative z-10 max-h-96 h-auto w-auto max-w-full object-contain"
+					class="relative z-10 max-h-64 h-auto w-auto max-w-full object-contain"
 					draggable={false}
 				/>
 			</Match>
@@ -47,7 +47,7 @@ const MediaNodePreview: Component<{
 				<audio
 					src={props.reference.file.url}
 					controls
-					class="relative z-10 m-5 w-[calc(100%-2.5rem)]"
+					class="relative z-10 m-5 max-h-64 w-[calc(100%-2.5rem)]"
 				/>
 			</Match>
 			<Match when={props.reference.type === "video"}>
@@ -60,7 +60,7 @@ const MediaNodePreview: Component<{
 							: undefined
 					}
 					controls
-					class="relative z-10 max-h-96 h-auto w-auto max-w-full bg-black object-contain"
+					class="relative z-10 max-h-64 h-auto w-auto max-w-full bg-black object-contain"
 				/>
 			</Match>
 		</Switch>
@@ -201,7 +201,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 								<MediaMetadata reference={reference()} />
 							</div>
 							<div
-								class="relative z-10 flex max-h-96 min-h-24 w-full items-center justify-center [&_img]:max-h-96 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-96 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full"
+								class="relative z-10 flex max-h-64 min-h-24 w-full items-center justify-center [&_audio]:max-h-64 [&_img]:max-h-64 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-64 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full"
 								data-lucid-rich-text-media-preview-content=""
 							>
 								<MediaNodePreview reference={reference()} alt={alt()} />

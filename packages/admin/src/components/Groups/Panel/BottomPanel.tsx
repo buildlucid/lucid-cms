@@ -203,13 +203,7 @@ export const BottomPanel: Component<{
 					data-covered={isCovered() ? "" : undefined}
 				>
 					<Dialog.Content
-						class={classNames(
-							"w-full h-full relative flex flex-col rounded-t-xl scrollbar border border-border bg-background-base animate-animate-slide-from-bottom-out data-expanded:animate-animate-slide-from-bottom-in outline-hidden",
-							{
-								"overflow-y-auto": props.options?.fullHeight !== true,
-								"overflow-hidden": props.options?.fullHeight === true,
-							},
-						)}
+						class="w-full h-full relative flex flex-col rounded-t-xl scrollbar border border-border bg-background-base animate-animate-slide-from-bottom-out data-expanded:animate-animate-slide-from-bottom-in outline-hidden overflow-y-auto"
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
 							if (target.closest("[data-panel-ignore]")) {
@@ -295,18 +289,13 @@ export const BottomPanel: Component<{
 								<Show
 									when={props.callbacks?.onSubmit}
 									fallback={
-										<div
-											class={classNames("grow flex flex-col justify-between", {
-												"min-h-0": props.options?.fullHeight,
-											})}
-										>
+										<div class="grow flex flex-col justify-between">
 											{/* content */}
 											<div
 												class={classNames({
 													"px-4": props.options?.padding === "16",
 													"px-4 md:px-6": props.options?.padding === "24",
 													grow: props.options?.growContent,
-													"overflow-y-auto": props.options?.fullHeight,
 												})}
 											>
 												<BottomPanelNestingContext.Provider
@@ -320,14 +309,10 @@ export const BottomPanel: Component<{
 											{/* footer */}
 											<Show when={!props.options?.hideFooter}>
 												<div
-													class={classNames(
-														{
-															"px-4": props.options?.padding === "16",
-															"px-4 md:px-6": props.options?.padding === "24",
-														},
-														props.options?.fullHeight &&
-															"shrink-0 bg-background-base",
-													)}
+													class={classNames({
+														"px-4": props.options?.padding === "16",
+														"px-4 md:px-6": props.options?.padding === "24",
+													})}
 												>
 													<PanelFooter padding={props.options?.padding}>
 														<div class="min-w-0">
@@ -366,9 +351,7 @@ export const BottomPanel: Component<{
 									}
 								>
 									<form
-										class={classNames("grow flex flex-col justify-between", {
-											"min-h-0": props.options?.fullHeight,
-										})}
+										class="grow flex flex-col justify-between"
 										onSubmit={(e) => {
 											e.preventDefault();
 											if (props.callbacks?.onSubmit)
@@ -381,7 +364,6 @@ export const BottomPanel: Component<{
 												"px-4": props.options?.padding === "16",
 												"px-4 md:px-6": props.options?.padding === "24",
 												grow: props.options?.growContent,
-												"overflow-y-auto": props.options?.fullHeight,
 											})}
 										>
 											<BottomPanelNestingContext.Provider value={nestingState}>
@@ -393,14 +375,10 @@ export const BottomPanel: Component<{
 										{/* footer */}
 										<Show when={!props.options?.hideFooter}>
 											<div
-												class={classNames(
-													{
-														"px-4": props.options?.padding === "16",
-														"px-4 md:px-6": props.options?.padding === "24",
-													},
-													props.options?.fullHeight &&
-														"shrink-0 bg-background-base",
-												)}
+												class={classNames({
+													"px-4": props.options?.padding === "16",
+													"px-4 md:px-6": props.options?.padding === "24",
+												})}
 											>
 												<PanelFooter padding={props.options?.padding}>
 													<div class="min-w-0">

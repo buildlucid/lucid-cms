@@ -114,7 +114,7 @@ const EmbeddedBrickEditPanel: Component<{
 			}}
 			fetchState={{ isLoading: false, isError: false }}
 			langauge={{ contentLocale: props.state.localised === true }}
-			options={{ padding: "24", growContent: true }}
+			options={{ padding: "24", growContent: true, fullHeight: true }}
 			copy={{
 				title: title(),
 				submit: T()("common.save"),
